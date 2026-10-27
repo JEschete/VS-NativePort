@@ -43,19 +43,19 @@ extern Audio_FadeTimer Audio_Seq_masterFade;
 extern int Audio_Seq_randomPitchPhase;
 void Audio_Seq_UpdateGlobalSlides(void);
 void Audio_Seq_AdvanceMusicTransition(void);
-int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* arg0, int arg1);
-void Audio_Seq_UpdateSavedMusicFade(Audio_MusicConfig* arg0, Audio_SeqChannel* arg1);
+int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* channels, int secondary_music);
+void Audio_Seq_UpdateSavedMusicFade(Audio_MusicConfig* music_config, Audio_SeqChannel* channels);
 long Audio_Seq_TickPlayback(void);
 char Audio_Seq_PeekNextNote(Audio_SeqChannel* channel);
-int Audio_Seq_ResolveSoundEffectInstrument(int arg0, int arg1);
-int Audio_Seq_ResolveMusicInstrument(int arg0, u_int arg1);
-void Audio_Seq_SelectNotePatch(Audio_SeqChannel* arg0, u_int arg1);
-int Audio_Seq_CalculateNotePitch(Audio_Instrument* arg0, int arg1, u_int arg2, int* arg3);
-int Audio_Seq_StartDrumNote(Audio_SeqChannel* arg0, int arg1, int arg2);
-void Audio_Seq_ExecuteChannelStep(Audio_SeqChannel* arg0, int arg1);
+int Audio_Seq_ResolveSoundEffectInstrument(int sample_bank_flags, int instrument_index);
+int Audio_Seq_ResolveMusicInstrument(int music_status_flags, u_int instrument_index);
+void Audio_Seq_SelectNotePatch(Audio_SeqChannel* channel, u_int note_key);
+int Audio_Seq_CalculateNotePitch(Audio_Instrument* instrument, int note_cursor, u_int fine_tune, int* output_fine_pitch_delta);
+int Audio_Seq_StartDrumNote(Audio_SeqChannel* channel, int channel_bit, int drum_key);
+void Audio_Seq_ExecuteChannelStep(Audio_SeqChannel* channel, int channel_bit);
 void Audio_Seq_ApplyInstrumentParameters(
-    Audio_SeqChannel* arg0, Audio_Instrument* arg1, int arg2);
-void Audio_Seq_SelectChannelInstrument(Audio_SeqChannel* arg0, int arg1);
-void Audio_Seq_ReleaseSoundEffectVoice(Audio_SeqChannel* arg0, int arg1);
+    Audio_SeqChannel* channel, Audio_Instrument* instrument, int sample_start_address);
+void Audio_Seq_SelectChannelInstrument(Audio_SeqChannel* channel, int instrument_index);
+void Audio_Seq_ReleaseSoundEffectVoice(Audio_SeqChannel* channel, int voice_bit);
 
 #endif // VS_AUDIO_SEQ_SEQUENCER_H_DECLS

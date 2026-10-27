@@ -28,18 +28,18 @@ void Audio_SoundEffects_ProgramCounters(
 void Audio_SoundEffects_InvalidateMusicChannelVolumes(
     Audio_MusicConfig* in_pChannelConfig, Audio_SeqChannel* in_pChannel);
 void Audio_SoundEffects_InvalidateSoundEffectVolumes(void);
-void Audio_SoundEffects_PlayInterfaceProgramPair(Audio_CommandParams* arg0);
-void Audio_SoundEffects_PlayInterfaceProgram(Audio_CommandParams* arg0);
-void Audio_SoundEffects_PlaySharedProgram(Audio_CommandParams* arg0);
+void Audio_SoundEffects_PlayInterfaceProgramPair(Audio_CommandParams* command);
+void Audio_SoundEffects_PlayInterfaceProgram(Audio_CommandParams* command);
+void Audio_SoundEffects_PlaySharedProgram(Audio_CommandParams* command);
 void Audio_SoundEffects_PlayBlobPrograms(Audio_CommandParams* in_Params);
-void Audio_SoundEffects_StopPrograms(Audio_CommandParams* arg0);
-void Audio_SoundEffects_SetProgramVolume(Audio_CommandParams* arg0);
-void Audio_SoundEffects_FadeProgramVolume(Audio_CommandParams* arg0);
-void Audio_SoundEffects_SetSceneVolume(Audio_CommandParams* arg0);
-void Audio_SoundEffects_FadeSceneVolume(Audio_CommandParams* arg0);
-void Audio_SoundEffects_SetProgramPan(Audio_CommandParams* arg0);
-void Audio_SoundEffects_FadeProgramPan(Audio_CommandParams* arg0);
-void Audio_SoundEffects_SetScenePan(Audio_CommandParams* arg0);
-void Audio_SoundEffects_FadeScenePan(Audio_CommandParams* arg0);
+void Audio_SoundEffects_StopPrograms(Audio_CommandParams* command);
+void Audio_SoundEffects_SetProgramVolume(Audio_CommandParams* command);
+void Audio_SoundEffects_FadeProgramVolume(Audio_CommandParams* command);
+void Audio_SoundEffects_SetSceneVolume(Audio_CommandParams* command);
+void Audio_SoundEffects_FadeSceneVolume(Audio_CommandParams* command);
+void Audio_SoundEffects_SetProgramPan(Audio_CommandParams* command);
+void Audio_SoundEffects_FadeProgramPan(Audio_CommandParams* command);
+void Audio_SoundEffects_SetScenePan(Audio_CommandParams* command);
+void Audio_SoundEffects_FadeScenePan(Audio_CommandParams* command);
 
 #endif // VS_AUDIO_SOUNDEFFECTS_SOUNDEFFECTS_H_DECLS

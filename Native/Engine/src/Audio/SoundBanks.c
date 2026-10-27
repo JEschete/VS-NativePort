@@ -156,10 +156,10 @@ int Audio_FreeSfxBankSlot(u_int id)
 }
 
 // decomp: SLUS_010.40 func_80046168 (src/SLUS_010.40/main.c:10161)
-int Audio_BindRoomSfxBank(uintptr_t arg0)
+int Audio_BindRoomSfxBank(uintptr_t bank_address)
 {
     if (Audio_soundState.sfxBankData[2] == 0) {
-        Audio_soundState.sfxBankData[2] = (void*)arg0;
+        Audio_soundState.sfxBankData[2] = (void*)bank_address;
         return 1;
     }
     return 0;
@@ -178,18 +178,18 @@ int Audio_UnbindRoomSfxBank(void)
 void Audio_LoadWaveBankFile(int file)
 {
     Content_DiscFile cdFile;
-    int new_var;
-    int temp_v1;
-    int var_a0;
+    int packed_ids_or_unused_one;
+    int packed_bank_ids;
+    int alternate_bank_id;
 
-    temp_v1 = Audio_Playback_PackedMusicSampleBankIds();
-    var_a0 = temp_v1 >> 0x10;
-    new_var = temp_v1;
+    packed_bank_ids = Audio_Playback_PackedMusicSampleBankIds();
+    alternate_bank_id = packed_bank_ids >> 0x10;
+    packed_ids_or_unused_one = packed_bank_ids;
 
-    if (temp_v1 < 0) {
-        var_a0 = (temp_v1 + 0xFFFF) >> 0x10;
+    if (packed_bank_ids < 0) {
+        alternate_bank_id = (packed_bank_ids + 0xFFFF) >> 0x10;
     }
-    if (((new_var - (var_a0 << 0x10)) == file) || (var_a0 == file)) {
+    if (((packed_ids_or_unused_one - (alternate_bank_id << 0x10)) == file) || (alternate_bank_id == file)) {
         return;
     }
     cdFile.lba = Audio_legacyWaveBankDiscOffsets[file];
@@ -204,7 +204,7 @@ void Audio_LoadWaveBankFile(int file)
     if (Audio_soundState.waveBankData != 0) {
         Core_IgnoreDiagnostic(0x94, 0);
     }
-    new_var = 1;
+    packed_ids_or_unused_one = 1;
     Audio_soundState.waveBankData = Core_Memory_AllocateFromHighEnd(cdFile.size);
     Audio_soundState.waveBankId = file;
     Content_EnqueueDiscRequest(Audio_soundState.waveBankRequest, Audio_soundState.waveBankData);
@@ -216,12 +216,12 @@ void Audio_LoadMappedWaveBank(int id) { Audio_LoadWaveBankFile(Audio_waveBankFil
 // decomp: SLUS_010.40 vs_main_processSoundQueue (src/SLUS_010.40/main.c:10396)
 int Audio_UpdateWaveBankLoad(void)
 {
-    int temp_v0;
+    int transfer_status;
 
     if (Audio_soundState.waveBankRequest != NULL) {
         if (Audio_soundState.waveBankRequest->state == Content_DiscRequestState_Dispatched) {
-            temp_v0 = Audio_Samples_TransferStatus();
-            if (temp_v0 == 0) {
+            transfer_status = Audio_Samples_TransferStatus();
+            if (transfer_status == 0) {
                 Content_ReleaseDiscRequest(Audio_soundState.waveBankRequest);
                 Audio_soundState.waveBankRequest = NULL;
                 Core_Memory_FreeFromHighEnd(Audio_soundState.waveBankData);
@@ -229,7 +229,7 @@ int Audio_UpdateWaveBankLoad(void)
                 Audio_soundState.waveBankId = 0;
                 return 0;
             }
-            if (temp_v0 == -1) {
+            if (transfer_status == -1) {
                 Content_ReleaseDiscRequest(Audio_soundState.waveBankRequest);
                 Audio_soundState.waveBankRequest = NULL;
                 Core_Memory_FreeFromHighEnd(Audio_soundState.waveBankData);

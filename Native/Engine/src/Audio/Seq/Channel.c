@@ -249,12 +249,12 @@ void Audio_Seq_LoadInstrument(
 {
     int pc = *in_pChannel->programCounter++;
 
-    int var_s0 = in_pChannel->type == 0
+    int instrument_index = in_pChannel->type == 0
                    ? Audio_Seq_ResolveMusicInstrument(Audio_Seq_activeMusicConfig->statusFlags, pc)
                    : Audio_Seq_ResolveSoundEffectInstrument(in_pChannel->effectVoiceMask, pc);
     Audio_Seq_ApplyInstrumentParameters(
-        in_pChannel, &Audio_Samples_instruments[var_s0], Audio_Samples_instruments[var_s0].sampleStart);
-    in_pChannel->instrumentIndex = var_s0;
+        in_pChannel, &Audio_Samples_instruments[instrument_index], Audio_Samples_instruments[instrument_index].sampleStart);
+    in_pChannel->instrumentIndex = instrument_index;
     in_pChannel->voice.volumeScale = 0;
     in_pChannel->updateFlags &= 0xE6FFEFF7;
 }

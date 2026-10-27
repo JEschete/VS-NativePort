@@ -131,7 +131,7 @@ void Audio_Mixer_UpdateChannelSlidesAndDelays(
     }
 
     if (in_pChannel->vibratoDepthSlideLength != 0) {
-        u_int var_lo;
+        u_int vibrato_amplitude;
         u_short VibratoDepth;
         int NewVibratoDepth;
 
@@ -140,12 +140,12 @@ void Audio_Mixer_UpdateChannelSlidesAndDelays(
         in_pChannel->vibratoDepth = VibratoDepth;
         NewVibratoDepth = (u_int)(VibratoDepth & 0x7F00) >> 8;
         if (VibratoDepth & 0x8000) {
-            var_lo = (u_int)(NewVibratoDepth * in_pChannel->pitchBase) >> 7;
+            vibrato_amplitude = (u_int)(NewVibratoDepth * in_pChannel->pitchBase) >> 7;
         } else {
-            var_lo = (NewVibratoDepth * ((u_int)(in_pChannel->pitchBase * 15) >> 8)) >> 7;
+            vibrato_amplitude = (NewVibratoDepth * ((u_int)(in_pChannel->pitchBase * 15) >> 8)) >> 7;
         }
 
-        in_pChannel->vibratoBase = var_lo;
+        in_pChannel->vibratoBase = vibrato_amplitude;
 
         if ((in_pChannel->vibratoDelayLeft == 0) && (in_pChannel->vibratoRateCounter != 1)) {
             Wave = in_pChannel->vibratoWave;
@@ -491,73 +491,73 @@ int Audio_Mixer_StealQuietestVoice(int in_bForceFullScan)
 }
 
 // decomp: SLUS_010.40 Sound_FindFreeVoice (src/SLUS_010.40/25AC.c:1832)
-int Audio_Mixer_FindFreeVoice(int arg0)
+int Audio_Mixer_FindFreeVoice(int search_control_or_voice_index)
 {
-    Audio_VoiceEnvelope* var_v1;
+    Audio_VoiceEnvelope* voice_envelope;
 
-    if (arg0 != 0) {
-        arg0 = 0;
+    if (search_control_or_voice_index != 0) {
+        search_control_or_voice_index = 0;
     } else {
-        arg0 = Audio_Seq_activeMusicConfig->voiceSearchStart;
+        search_control_or_voice_index = Audio_Seq_activeMusicConfig->voiceSearchStart;
     }
 
-    var_v1 = &Audio_Mixer_voiceEnvelopes[arg0];
+    voice_envelope = &Audio_Mixer_voiceEnvelopes[search_control_or_voice_index];
 
-    if (var_v1->envelopeLevel != 0) {
-        ++arg0;
+    if (voice_envelope->envelopeLevel != 0) {
+        ++search_control_or_voice_index;
         while (1) {
-            if (arg0 >= 0x18) {
+            if (search_control_or_voice_index >= 0x18) {
                 break;
             }
-            ++var_v1;
-            ++arg0;
-            if (var_v1->envelopeLevel == 0) {
-                --arg0;
+            ++voice_envelope;
+            ++search_control_or_voice_index;
+            if (voice_envelope->envelopeLevel == 0) {
+                --search_control_or_voice_index;
                 break;
             }
         }
     }
-    return arg0;
+    return search_control_or_voice_index;
 }
 
 // decomp: SLUS_010.40 func_80014D70 (src/SLUS_010.40/25AC.c:1863)
 void Audio_Mixer_ApplyMusicChannelVoices(
     Audio_SeqChannel* in_pChannel, u_int in_Flags1, u_int in_Flags2, u_int* out_KeyOnFlags)
 {
-    int var_s2 = 1;
-    int var_s5 = 0;
-    int sp10 = in_Flags1 & Audio_Seq_activeMusicConfig->pendingKeyOn;
+    int channel_bit = 1;
+    int channel_index = 0;
+    int channels_to_key_on = in_Flags1 & Audio_Seq_activeMusicConfig->pendingKeyOn;
 
     do {
-        if (in_Flags1 & var_s2) {
-            Audio_Mixer_UpdateMusicChannelModulation(in_pChannel, var_s2);
+        if (in_Flags1 & channel_bit) {
+            Audio_Mixer_UpdateMusicChannelModulation(in_pChannel, channel_bit);
             if (in_pChannel->voice.dirtyFlags != 0) {
-                if (Audio_Mixer_mutedMusicChannels & var_s2) {
+                if (Audio_Mixer_mutedMusicChannels & channel_bit) {
                     in_pChannel->voice.volume.right = 0;
                     in_pChannel->voice.volume.left = 0;
                 }
-                if (sp10 & var_s2) {
-                    if (in_Flags2 & var_s2) {
-                        *out_KeyOnFlags |= 1 << var_s5;
-                        in_pChannel->voice.assignedVoice = var_s5;
+                if (channels_to_key_on & channel_bit) {
+                    if (in_Flags2 & channel_bit) {
+                        *out_KeyOnFlags |= 1 << channel_index;
+                        in_pChannel->voice.assignedVoice = channel_index;
                     } else {
-                        int temp_s0 = Audio_Seq_activeMusicConfig->keyedVoices & var_s2;
-                        int var_a0 = Audio_Mixer_FindFreeVoice(temp_s0);
-                        if (var_a0 == 0x18) {
+                        int keyed_channel_mask = Audio_Seq_activeMusicConfig->keyedVoices & channel_bit;
+                        int voice_index = Audio_Mixer_FindFreeVoice(keyed_channel_mask);
+                        if (voice_index == 0x18) {
                             Audio_Seq_activeMusicConfig->statusFlags |= 2;
-                            var_a0 = Audio_Mixer_StealQuietestVoice(temp_s0);
-                            if (var_a0 == 0x18) {
-                                in_pChannel->voice.assignedVoice = var_a0;
+                            voice_index = Audio_Mixer_StealQuietestVoice(keyed_channel_mask);
+                            if (voice_index == 0x18) {
+                                in_pChannel->voice.assignedVoice = voice_index;
                                 Audio_Seq_activeMusicConfig->statusFlags |= 1;
                             } else {
-                                *out_KeyOnFlags |= 1 << var_a0;
-                                in_pChannel->voice.assignedVoice = var_a0;
-                                Audio_Mixer_voiceEnvelopes[var_a0].envelopeLevel = 0x7FFF;
+                                *out_KeyOnFlags |= 1 << voice_index;
+                                in_pChannel->voice.assignedVoice = voice_index;
+                                Audio_Mixer_voiceEnvelopes[voice_index].envelopeLevel = 0x7FFF;
                             }
                         } else {
-                            *out_KeyOnFlags |= 1 << var_a0;
-                            in_pChannel->voice.assignedVoice = var_a0;
-                            Audio_Mixer_voiceEnvelopes[var_a0].envelopeLevel = 0x7FFF;
+                            *out_KeyOnFlags |= 1 << voice_index;
+                            in_pChannel->voice.assignedVoice = voice_index;
+                            Audio_Mixer_voiceEnvelopes[voice_index].envelopeLevel = 0x7FFF;
                         }
                     }
                     if (in_pChannel->voice.assignedVoice < 0x18) {
@@ -572,16 +572,16 @@ void Audio_Mixer_ApplyMusicChannelVoices(
                     }
                 }
             }
-            in_Flags1 &= ~var_s2;
+            in_Flags1 &= ~channel_bit;
         }
-        var_s2 *= 2;
+        channel_bit *= 2;
         ++in_pChannel;
-        ++var_s5;
+        ++channel_index;
     } while (in_Flags1 != 0);
 }
 
 // decomp: SLUS_010.40 UnassignVoicesFromChannels (src/SLUS_010.40/25AC.c:1926)
-void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int arg1)
+void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int voice_index)
 {
     Audio_SeqChannel* pChannel;
     u_int Count;
@@ -590,7 +590,7 @@ void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int arg1)
     pChannel = in_pChannel;
 
     do {
-        if (arg1 == pChannel->voice.assignedVoice) {
+        if (voice_index == pChannel->voice.assignedVoice) {
             pChannel->voice.assignedVoice = VOICE_COUNT;
         }
         Count++;
@@ -602,7 +602,7 @@ void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int arg1)
     if (Audio_Seq_secondaryMusicConfig != NULL) {
         pChannel = Audio_Seq_secondaryMusicChannels;
         do {
-            if (arg1 == pChannel->voice.assignedVoice) {
+            if (voice_index == pChannel->voice.assignedVoice) {
                 pChannel->voice.assignedVoice = VOICE_COUNT;
             }
             Count++;
@@ -664,7 +664,7 @@ void Audio_Mixer_RefreshVoiceAvailability(u_int in_ReservedVoices)
 
 // decomp: SLUS_010.40 Sound_ApplyMasterFadeToChannelVolume (src/SLUS_010.40/25AC.c:2006)
 void Audio_Mixer_ApplySavedMusicMasterFade(
-    Audio_MusicConfig* in_Context, Audio_SeqChannel* arg1 __attribute__((unused)))
+    Audio_MusicConfig* in_Context, Audio_SeqChannel* unused_channels __attribute__((unused)))
 {
     int Volume;
 
@@ -679,7 +679,7 @@ void Audio_Mixer_ApplySavedMusicMasterFade(
 
 // decomp: SLUS_010.40 Sound_RestoreChannelVolumeFromMasterFade (src/SLUS_010.40/25AC.c:2020)
 void Audio_Mixer_RestoreSavedMusicVolume(
-    Audio_MusicConfig* in_Config, Audio_SeqChannel* arg1 __attribute__((unused)))
+    Audio_MusicConfig* in_Config, Audio_SeqChannel* unused_channels __attribute__((unused)))
 {
     in_Config->masterVolume = Audio_Seq_masterFade.savedValue;
 }

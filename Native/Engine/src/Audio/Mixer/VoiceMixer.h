@@ -131,16 +131,16 @@ void Audio_Mixer_UpdateChannelSlidesAndDelays(
 void Audio_Mixer_UpdateMusicChannelModulation(Audio_SeqChannel* in_pChannel, int in_VoiceFlags __attribute__((unused)));
 void Audio_Mixer_UpdateSoundEffectModulation(Audio_SeqChannel* in_pChannel, int in_VoiceFlags __attribute__((unused)));
 int Audio_Mixer_StealQuietestVoice(int in_bForceFullScan);
-int Audio_Mixer_FindFreeVoice(int arg0);
+int Audio_Mixer_FindFreeVoice(int search_control_or_voice_index);
 void Audio_Mixer_ApplyMusicChannelVoices(
     Audio_SeqChannel* in_pChannel, u_int in_Flags1, u_int in_Flags2, u_int* out_KeyOnFlags);
-void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int arg1);
+void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int voice_index);
 int Audio_Mixer_IsVoiceAssignedToChannels(Audio_SeqChannel* channels, int mask, int voiceNumber);
 void Audio_Mixer_RefreshVoiceAvailability(u_int in_ReservedVoices);
 void Audio_Mixer_ApplySavedMusicMasterFade(
-    Audio_MusicConfig* in_Context, Audio_SeqChannel* arg1 __attribute__((unused)));
+    Audio_MusicConfig* in_Context, Audio_SeqChannel* unused_channels __attribute__((unused)));
 void Audio_Mixer_RestoreSavedMusicVolume(
-    Audio_MusicConfig* in_Config, Audio_SeqChannel* arg1 __attribute__((unused)));
+    Audio_MusicConfig* in_Config, Audio_SeqChannel* unused_channels __attribute__((unused)));
 void Audio_Mixer_CommitPlaybackVoices(void);
 void Audio_Mixer_AccumulateFilteredVoiceMask(Audio_SeqChannel* in_Channel, int* io_VoiceMask,
     int in_ChannelMask, int in_VoiceMaskFilter);

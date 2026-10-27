@@ -9,6 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_AMBIENCE_H_DECLS)
 #define VS_AUDIO_AMBIENCE_H_DECLS
 
-void Audio_SetRoomAmbienceDucked(int arg0);
+void Audio_SetRoomAmbienceDucked(int duck_enabled);
 
 #endif // VS_AUDIO_AMBIENCE_H_DECLS

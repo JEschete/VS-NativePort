@@ -829,3 +829,33 @@ one-based shared banks, and special-model record cleanup. Copier tests pass
 All 742 manifest paths and 121 owned paths are checked; two generations differ
 only by the approved identifier changes across eight generated files and are
 stable on repeat. Evidence: `build\quality\issue148-content-*`.
+
+The content cohort is published in `56cc936f`, exact green `40566216538`.
+The complete audio-scope review covers 64 implementation/header files and all
+188 lexical candidate pairs/2,446 occurrences. Original bodies, callers,
+producers and reset/release paths establish 468 binding names in 175 copied
+definitions; 287 header parameters link to those same reviewed definitions.
+Compound names preserve decompiler-merged lifetimes instead of splitting
+variables or claiming one role for a variable reused for different purposes.
+Each mapping's original evidence is retained in the function ledger and
+function-scoped copier rules, applied after structural fixups.
+
+The sole retained audio match is `spec` in `AudioDevice::Open`
+(`Native\Engine\src\Audio\AudioDevice.cpp`): it is the concrete `SDL_AudioSpec`
+device/stream format specification, initialized from format/channels/rate and
+passed in all three format-address arguments. All four occurrences are reviewed.
+This is not a global exception for other `spec` bindings. No owned C++ source
+is renamed or promoted by this cohort.
+
+On dirty base `56cc936f`, the pre-change `[audio]` selection passes
+84 cases/171,666 assertions. After applying the mappings, Debug/Release each
+pass `[audio],[event] --reporter compact`, 105 cases/172,359 assertions.
+Dirty-tree copier tests are 131/131 and naming contracts 32/32; focused
+tooling quality reports zero findings/new findings with unchanged baselines.
+Original and native review fingerprints are checked before application.
+Exact code-token substitution is verified across all 742 manifest paths,
+including unchanged comments, literals, types and operators; only 34 audio
+source/header files change. All 121 owned paths are unchanged and the second
+generation is identical. Evidence: `build\quality\issue148-audio-*`.
+The refreshed whole-tree lexical count is 21,485 occurrences/1,868 pairs/
+315 files; the remaining source reviews continue independently of this checkpoint.

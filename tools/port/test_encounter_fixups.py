@@ -1819,6 +1819,33 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
             "Core_Memory_CopyAlignedWords(destination, source, 0x7800);",
         )
 
+    def test_audio_names_preserve_distinct_bank_and_output_bindings(self):
+        examples = {
+            "Audio::PlayRandomActorImpactSound": (
+                "Play(arg0, arg1, arg2);",
+                "Play(sound_bank, pan, volume);",
+            ),
+            "Audio::ActorSoundPanAndVolume": (
+                "temp_s0 = actors[arg0]; *arg1 = temp_v0 >> 16; "
+                "if (arg2) *arg2 = temp_v0 & 65535;",
+                "actor = actors[actor_index]; "
+                "*output_pan = packed_pan_volume >> 16; "
+                "if (output_volume) *output_volume = "
+                "packed_pan_volume & 65535;",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                unrelated = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                    if re.search(row, "Content::Unrelated"):
+                        unrelated = re.sub(pattern, replacement, unrelated)
+                self.assertEqual(source, expected)
+                self.assertEqual(unrelated, original)
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

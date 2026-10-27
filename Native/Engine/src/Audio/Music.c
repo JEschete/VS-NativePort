@@ -25,13 +25,13 @@
 #include "State/PlayTime.h"
 
 // decomp: BATTLE.PRG func_8007BE10 (src/BATTLE/BATTLE.PRG/146C.c:8579)
-int Audio_SetZoneMusicSwitchEnabled(int arg0) { return Audio_zoneMusicSwitchEnabled = arg0; }
+int Audio_SetZoneMusicSwitchEnabled(int enabled) { return Audio_zoneMusicSwitchEnabled = enabled; }
 
 // decomp: BATTLE.PRG func_8007C8A4 (src/BATTLE/BATTLE.PRG/146C.c:8917)
-void Audio_PlayActorScriptSound(int arg0, int arg1)
+void Audio_PlayActorScriptSound(int actor_index, int sound_index)
 {
-    if ((Battle_actors[arg0] != 0) && (arg0 < 16)) {
-        Audio_PlayActorModelSound(Battle_actors[arg0]->model, arg1);
+    if ((Battle_actors[actor_index] != 0) && (actor_index < 16)) {
+        Audio_PlayActorModelSound(Battle_actors[actor_index]->model, sound_index);
     }
 }
 
@@ -42,13 +42,13 @@ int Audio_MusicBeatPosition(void) { return Audio_Playback_MusicPosition(); }
 void Audio_SaveMusicPlaybackState(void) { Audio_Playback_SaveMusicState(); }
 
 // decomp: SLUS_010.40 func_80044DD4 (src/SLUS_010.40/main.c:9494)
-void Audio_SetMusicJumpThreshold(int arg0) { Audio_Control_SetMusicBranchThreshold((void*)arg0); }
+void Audio_SetMusicJumpThreshold(int jump_threshold) { Audio_Control_SetMusicBranchThreshold((void*)jump_threshold); }
 
 // decomp: SLUS_010.40 func_80044DF4 (src/SLUS_010.40/main.c:9496)
 int Audio_StopMusicSlotPlayback(int id)
 {
-    u_int new_var;
-    int var_a1;
+    u_int empty_music_handle;
+    int slot_index;
 
     if (id != 0) {
         if (Audio_soundState.musicHandles[id - 1] != 0xFFFF) {
@@ -67,9 +67,9 @@ int Audio_StopMusicSlotPlayback(int id)
     Audio_soundState.currentMusicData = NULL;
     Audio_soundState.playingMusicHandle = 0xFFFF;
 
-    new_var = 0xFFFF;
-    for (var_a1 = 3; var_a1 >= 0; --var_a1) {
-        Audio_soundState.musicHandles[var_a1] = new_var;
+    empty_music_handle = 0xFFFF;
+    for (slot_index = 3; slot_index >= 0; --slot_index) {
+        Audio_soundState.musicHandles[slot_index] = empty_music_handle;
     }
     return 1;
 }
@@ -77,16 +77,16 @@ int Audio_StopMusicSlotPlayback(int id)
 // decomp: SLUS_010.40 func_80044EC8 (src/SLUS_010.40/main.c:9525)
 int Audio_ResumeMusicSlot(int id)
 {
-    u_int temp_v0;
+    u_int music_handle;
 
     if (id != 0) {
         if (Audio_soundState.musicData[id - 1] != 0) {
             Audio_soundState.currentMusicSlot = id;
             Audio_soundState.currentMusicData = Audio_soundState.musicData[id - 1];
-            temp_v0 = Audio_Playback_QueueMusicTransition(Audio_soundState.currentMusicData);
-            if (temp_v0 != 0) {
-                Audio_soundState.musicHandles[id - 1] = temp_v0;
-                Audio_soundState.playingMusicHandle = temp_v0;
+            music_handle = Audio_Playback_QueueMusicTransition(Audio_soundState.currentMusicData);
+            if (music_handle != 0) {
+                Audio_soundState.musicHandles[id - 1] = music_handle;
+                Audio_soundState.playingMusicHandle = music_handle;
             }
             Audio_soundState.currentMusicId = Audio_soundState.musicIds[id - 1];
         }
@@ -96,18 +96,18 @@ int Audio_ResumeMusicSlot(int id)
 }
 
 // decomp: SLUS_010.40 func_80044F60 (src/SLUS_010.40/main.c:9545)
-int Audio_CrossfadeMusicSlot(int id, int arg1, u_int arg2)
+int Audio_CrossfadeMusicSlot(int id, int target_volume, u_int fade_ticks)
 {
-    u_int temp_v0;
+    u_int music_handle;
 
     if (id != 0) {
         if (Audio_soundState.musicData[id - 1] != 0) {
             Audio_soundState.currentMusicSlot = id;
             Audio_soundState.currentMusicData = Audio_soundState.musicData[id - 1];
-            temp_v0 = Audio_Playback_CrossfadeMusic(Audio_soundState.currentMusicData, arg2, arg1);
-            if (temp_v0 != 0) {
-                Audio_soundState.musicHandles[id - 1] = temp_v0;
-                Audio_soundState.playingMusicHandle = temp_v0;
+            music_handle = Audio_Playback_CrossfadeMusic(Audio_soundState.currentMusicData, fade_ticks, target_volume);
+            if (music_handle != 0) {
+                Audio_soundState.musicHandles[id - 1] = music_handle;
+                Audio_soundState.playingMusicHandle = music_handle;
             }
             Audio_soundState.currentMusicId = Audio_soundState.musicIds[id - 1];
         }
@@ -117,20 +117,20 @@ int Audio_CrossfadeMusicSlot(int id, int arg1, u_int arg2)
 }
 
 // decomp: SLUS_010.40 func_80045000 (src/SLUS_010.40/main.c:9565)
-int Audio_PlayMusicSlot(int id, int arg1, int arg2)
+int Audio_PlayMusicSlot(int id, int target_volume, int fade_ticks)
 {
-    u_int temp_v0;
+    u_int music_handle;
 
     if (id != 0) {
         if (Audio_soundState.musicData[id - 1] != 0) {
             Audio_soundState.currentMusicSlot = id;
             Audio_soundState.currentMusicData = Audio_soundState.musicData[id - 1];
-            Audio_Control_FadeMusicVolume(0, arg2, arg1);
-            temp_v0 = Audio_Playback_StartMusic(Audio_soundState.currentMusicData);
-            if (temp_v0 != 0) {
-                Audio_soundState.musicHandles[id - 1] = temp_v0;
-                Audio_soundState.playingMusicHandle = temp_v0;
-                Audio_Control_FadeMusicVolume(0, arg2, arg1);
+            Audio_Control_FadeMusicVolume(0, fade_ticks, target_volume);
+            music_handle = Audio_Playback_StartMusic(Audio_soundState.currentMusicData);
+            if (music_handle != 0) {
+                Audio_soundState.musicHandles[id - 1] = music_handle;
+                Audio_soundState.playingMusicHandle = music_handle;
+                Audio_Control_FadeMusicVolume(0, fade_ticks, target_volume);
             }
             Audio_soundState.currentMusicId = Audio_soundState.musicIds[id - 1];
         }
@@ -293,44 +293,44 @@ int Audio_FreeMusicSlot(int slotId)
 }
 
 // decomp: SLUS_010.40 func_800454B8 (src/SLUS_010.40/main.c:9733)
-int Audio_MusicSlotVolume(int arg0)
+int Audio_MusicSlotVolume(int slot_id)
 {
-    if (arg0 != 0) {
-        if (Audio_soundState.musicHandles[arg0 - 1] != 0xFFFF) {
-            return Audio_Playback_MusicVolume(Audio_soundState.musicHandles[arg0 - 1]);
+    if (slot_id != 0) {
+        if (Audio_soundState.musicHandles[slot_id - 1] != 0xFFFF) {
+            return Audio_Playback_MusicVolume(Audio_soundState.musicHandles[slot_id - 1]);
         }
     }
     return 0;
 }
 
 // decomp: SLUS_010.40 func_8004550C (src/SLUS_010.40/main.c:9743)
-int Audio_QueryMusicSlotVolume(int arg0) { return Audio_MusicSlotVolume(arg0); }
+int Audio_QueryMusicSlotVolume(int slot_id) { return Audio_MusicSlotVolume(slot_id); }
 
 // decomp: SLUS_010.40 func_8004552C (src/SLUS_010.40/main.c:9745)
-int Audio_FadeMusicSlotVolume(int id, int arg1, int arg2)
+int Audio_FadeMusicSlotVolume(int id, int target_volume, int fade_ticks)
 {
     if (Audio_soundState.currentMusicSlot == id) {
-        Audio_Control_FadeMusicVolume(Audio_soundState.playingMusicHandle, arg2, arg1);
+        Audio_Control_FadeMusicVolume(Audio_soundState.playingMusicHandle, fade_ticks, target_volume);
         return 1;
     }
     return 0;
 }
 
 // decomp: SLUS_010.40 func_80045574 (src/SLUS_010.40/main.c:9754)
-int Audio_FadeMusicSlotTempo(int id, int arg1, int arg2)
+int Audio_FadeMusicSlotTempo(int id, int target_tempo_scale, int fade_ticks)
 {
     if (Audio_soundState.currentMusicSlot == id) {
-        Audio_Control_FadeMusicTempoScale(arg2, arg1);
+        Audio_Control_FadeMusicTempoScale(fade_ticks, target_tempo_scale);
         return 1;
     }
     return 0;
 }
 
 // decomp: SLUS_010.40 func_800455AC (src/SLUS_010.40/main.c:9763)
-int Audio_FadeMusicSlotPitch(int id, int arg1, int arg2)
+int Audio_FadeMusicSlotPitch(int id, int target_pitch_scale, int fade_ticks)
 {
     if (Audio_soundState.currentMusicSlot == id) {
-        Audio_Control_FadeMusicPitchScale(arg2, arg1);
+        Audio_Control_FadeMusicPitchScale(fade_ticks, target_pitch_scale);
         return 1;
     }
     return 0;

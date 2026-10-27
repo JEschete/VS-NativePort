@@ -23,24 +23,24 @@ typedef void (*Audio_CommandHandler)(Audio_CommandParams*);
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_MIXER_MIXCONTROL_H_DECLS)
 #define VS_AUDIO_MIXER_MIXCONTROL_H_DECLS
 
-void Audio_Mixer_SetSoundEffectPitchScale(Audio_CommandParams* arg0);
-void Audio_Mixer_SlideSoundEffectPitchScale(Audio_CommandParams* arg0);
-void Audio_Mixer_SetWorldSoundEffectPitchScale(Audio_CommandParams* arg0);
-void Audio_Mixer_SlideWorldSoundEffectPitchScale(Audio_CommandParams* arg0);
-void Audio_Mixer_SetTempoScale(signed char* arg0);
-void Audio_Mixer_SlideTempoScale(Audio_CommandParams* arg0);
-void Audio_Mixer_SetTempoScaleRamp(Audio_CommandParams* arg0);
-void Audio_Mixer_SetMusicPitchScale(signed char* arg0);
-void Audio_Mixer_SlideMusicPitchScale(Audio_CommandParams* arg0);
-void Audio_Mixer_SetMusicPitchScaleRamp(Audio_CommandParams* arg0);
+void Audio_Mixer_SetSoundEffectPitchScale(Audio_CommandParams* command);
+void Audio_Mixer_SlideSoundEffectPitchScale(Audio_CommandParams* command);
+void Audio_Mixer_SetWorldSoundEffectPitchScale(Audio_CommandParams* command);
+void Audio_Mixer_SlideWorldSoundEffectPitchScale(Audio_CommandParams* command);
+void Audio_Mixer_SetTempoScale(signed char* tempo_scale_argument);
+void Audio_Mixer_SlideTempoScale(Audio_CommandParams* command);
+void Audio_Mixer_SetTempoScaleRamp(Audio_CommandParams* command);
+void Audio_Mixer_SetMusicPitchScale(signed char* pitch_scale_argument);
+void Audio_Mixer_SlideMusicPitchScale(Audio_CommandParams* command);
+void Audio_Mixer_SetMusicPitchScaleRamp(Audio_CommandParams* command);
 void Audio_Mixer_StopMusicAndCancelReplacement(void);
 void Audio_Mixer_StopMatchingMusic(Audio_CommandParams* in_Params);
 void Audio_Mixer_StopWorldSoundEffects(void);
 void Audio_Mixer_EnableStereoOutput(Audio_CommandParams* in_Params __attribute__((unused)));
 void Audio_Mixer_EnableMonoOutput(Audio_CommandParams* in_Params __attribute__((unused)));
-void Audio_Mixer_SetMusicMuteMask(Audio_CommandParams* arg0);
-void Audio_Mixer_SetMusicJumpThreshold(Audio_CommandParams* arg0);
-void Audio_Mixer_PauseMusic(Audio_CommandParams* arg0 __attribute__((unused)));
+void Audio_Mixer_SetMusicMuteMask(Audio_CommandParams* command);
+void Audio_Mixer_SetMusicJumpThreshold(Audio_CommandParams* command);
+void Audio_Mixer_PauseMusic(Audio_CommandParams* unused_command __attribute__((unused)));
 void Audio_Mixer_ResumeMusic(Audio_CommandParams* in_Params __attribute__((unused)));
 void Audio_Mixer_PauseWorldSoundEffects(Audio_CommandParams* in_Params __attribute__((unused)));
 void Audio_Mixer_ResumeWorldSoundEffects(Audio_CommandParams* in_Params __attribute__((unused)));

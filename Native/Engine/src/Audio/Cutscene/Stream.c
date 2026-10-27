@@ -47,10 +47,10 @@ int Audio_Cutscene_FindFreeVoicePair(void)
 // decomp: SLUS_010.40 func_8001CE60 (src/SLUS_010.40/25AC.c:6284)
 void Audio_Cutscene_UploadSecondMonoBuffer(void)
 {
-    u_char* temp_s0 = Audio_Cutscene_streamState.currentChunk + 0x800;
+    u_char* second_buffer_data = Audio_Cutscene_streamState.currentChunk + 0x800;
     SpuSetTransferStartAddr(0x2100);
     SpuSetTransferCallback(Audio_Cutscene_BeginMonoPlayback);
-    SpuWrite(temp_s0, 0x800);
+    SpuWrite(second_buffer_data, 0x800);
 }
 
 // decomp: src/SLUS_010.40/25AC.c:173
@@ -110,7 +110,7 @@ void Audio_Cutscene_InitializeStreamVoice(
 void Audio_Cutscene_BeginStreamPlayback(
     int in_SomeIndex, int in_SampleAddr, void (*in_Callback)())
 {
-    int var_s2 = in_SampleAddr;
+    int irq_sample_address = in_SampleAddr;
     if (Audio_Cutscene_streamState.voiceMask != 0) {
         SpuSetTransferCallback(NULL);
         Audio_Cutscene_legacySpuTransferBusy = 0;
@@ -118,7 +118,7 @@ void Audio_Cutscene_BeginStreamPlayback(
             Audio_Cutscene_streamState.totalPages -= 0x1000;
             Audio_Cutscene_streamState.currentChunk += in_SomeIndex;
         } else {
-            var_s2 = 0x1030;
+            irq_sample_address = 0x1030;
             Audio_Cutscene_streamState.totalPages = 0;
         }
         Audio_Driver_KeyOnVoices(Audio_Cutscene_streamState.voiceMask);

@@ -49,7 +49,7 @@ int Audio_PollSfxBankLoads(void);
 int Audio_LoadSfxBankBlocking(int id);
 int Audio_SelectSfxBankSlot(int id);
 int Audio_FreeSfxBankSlot(u_int id);
-int Audio_BindRoomSfxBank(uintptr_t arg0);
+int Audio_BindRoomSfxBank(uintptr_t bank_address);
 int Audio_UnbindRoomSfxBank(void);
 void Audio_LoadWaveBankFile(int file);
 void Audio_LoadMappedWaveBank(int id);

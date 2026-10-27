@@ -252,7 +252,7 @@ void Audio_Driver_WriteVoiceParameters(
 
 // decomp: SLUS_010.40 SetVoiceParamsByFlags (src/SLUS_010.40/25AC.c:1342)
 void Audio_Driver_WriteDirtyVoiceParameters(u_int in_VoiceIndex, Audio_VoiceParams* in_VoiceParams,
-    int arg2 __attribute__((unused)))
+    int unused_channel_flags __attribute__((unused)))
 {
     int flags;
 

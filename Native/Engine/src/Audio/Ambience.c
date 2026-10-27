@@ -5,9 +5,9 @@
 #include "Field/RoomEffects.h"
 
 // decomp: BATTLE.PRG func_8008E480 (src/BATTLE/BATTLE.PRG/146C.c:17323)
-void Audio_SetRoomAmbienceDucked(int arg0)
+void Audio_SetRoomAmbienceDucked(int duck_enabled)
 {
-    Field_DuckRoomEffectSound(arg0);
-    Field_DuckWeatherAmbientSound(arg0);
+    Field_DuckRoomEffectSound(duck_enabled);
+    Field_DuckWeatherAmbientSound(duck_enabled);
 }
 

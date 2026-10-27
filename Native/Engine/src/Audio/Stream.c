@@ -39,12 +39,12 @@ int Audio_RequestXaStreamStop(void)
 void Audio_StopCutsceneStream(void) { Audio_Control_StopCutsceneStream(); }
 
 // decomp: SLUS_010.40 func_800464FC (src/SLUS_010.40/main.c:10312)
-int Audio_PlayCutsceneStreamSlot(int arg0, int arg1, int arg2)
+int Audio_PlayCutsceneStreamSlot(int slot_id, int pan, int volume)
 {
-    if ((arg0 - 1u) < 3) {
-        if (Audio_soundState.sfxStreamData[arg0 - 1] != 0) {
-            Audio_Control_FadeCutsceneVolume(0, arg2);
-            Audio_Control_StartCutsceneStream(Audio_soundState.sfxStreamData[arg0 - 1], arg1, 1);
+    if ((slot_id - 1u) < 3) {
+        if (Audio_soundState.sfxStreamData[slot_id - 1] != 0) {
+            Audio_Control_FadeCutsceneVolume(0, volume);
+            Audio_Control_StartCutsceneStream(Audio_soundState.sfxStreamData[slot_id - 1], pan, 1);
             return 1;
         }
     }
@@ -52,16 +52,16 @@ int Audio_PlayCutsceneStreamSlot(int arg0, int arg1, int arg2)
 }
 
 // decomp: SLUS_010.40 func_80046578 (src/SLUS_010.40/main.c:10324)
-void Audio_PlayCutsceneStreamSlotCentered(int arg0) { Audio_PlayCutsceneStreamSlot(arg0, 0x80, 0x7F); }
+void Audio_PlayCutsceneStreamSlotCentered(int slot_id) { Audio_PlayCutsceneStreamSlot(slot_id, 0x80, 0x7F); }
 
 // decomp: SLUS_010.40 func_8004659C (src/SLUS_010.40/main.c:10326)
-int Audio_FreeCutsceneStreamSlot(int arg0)
+int Audio_FreeCutsceneStreamSlot(int slot_id)
 {
-    if ((arg0 - 1u) < 3) {
-        if (Audio_soundState.sfxStreamData[arg0 - 1] != 0) {
+    if ((slot_id - 1u) < 3) {
+        if (Audio_soundState.sfxStreamData[slot_id - 1] != 0) {
             Audio_Control_StopCutsceneStream();
-            Core_Memory_FreeFromHighEnd(Audio_soundState.sfxStreamData[arg0 - 1]);
-            Audio_soundState.sfxStreamData[arg0 - 1] = 0;
+            Core_Memory_FreeFromHighEnd(Audio_soundState.sfxStreamData[slot_id - 1]);
+            Audio_soundState.sfxStreamData[slot_id - 1] = 0;
             return 1;
         }
     }

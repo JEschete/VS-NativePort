@@ -56,36 +56,36 @@ int Audio_Playback_BindSoundEffectPrograms(void* in_Blob)
 // decomp: SLUS_010.40 func_80011E40 (src/SLUS_010.40/25AC.c:223)
 int Audio_Playback_ActivePlaybackFlags(void)
 {
-    int var_v1 = Audio_Seq_activeMusicConfig->activeChannels != 0;
+    int playback_flags = Audio_Seq_activeMusicConfig->activeChannels != 0;
     if (Audio_Seq_secondaryMusicConfig != NULL) {
         if (Audio_Seq_secondaryMusicConfig->activeChannels != 0) {
-            var_v1 |= 2;
+            playback_flags |= 2;
         }
     }
     if (Audio_Seq_pendingMusicData.param1 != 0) {
-        var_v1 |= 0x10;
+        playback_flags |= 0x10;
     }
     if (Audio_Mixer_voiceScheduler.activeVoices != 0) {
-        var_v1 |= 0x100;
+        playback_flags |= 0x100;
     }
     if (Audio_Cutscene_streamVoices != 0) {
-        var_v1 |= 0x10000;
+        playback_flags |= 0x10000;
     }
-    return var_v1;
+    return playback_flags;
 }
 
 // decomp: SLUS_010.40 func_80011EBC (src/SLUS_010.40/25AC.c:243)
-int Audio_Playback_MusicVolume(u_int arg0)
+int Audio_Playback_MusicVolume(u_int music_id)
 {
-    Audio_MusicConfig* var_v1 = Audio_Seq_activeMusicConfig;
-    int var_a1 = 0;
+    Audio_MusicConfig* music_config = Audio_Seq_activeMusicConfig;
+    int volume = 0;
 
-    if ((var_v1->musicId == arg0)
-        || ((var_v1 = Audio_Seq_secondaryMusicConfig, (var_v1 != NULL))
-            && (var_v1->musicId == arg0))) {
-        var_a1 = (var_v1->masterVolume >> 0x10);
+    if ((music_config->musicId == music_id)
+        || ((music_config = Audio_Seq_secondaryMusicConfig, (music_config != NULL))
+            && (music_config->musicId == music_id))) {
+        volume = (music_config->masterVolume >> 0x10);
     }
-    return var_a1;
+    return volume;
 }
 
 // decomp: SLUS_010.40 func_80011F08 (src/SLUS_010.40/25AC.c:256)
@@ -95,21 +95,21 @@ int Audio_Playback_PackedMusicSampleBankIds(void)
 }
 
 // decomp: SLUS_010.40 func_80011F24 (src/SLUS_010.40/25AC.c:261)
-int Audio_Playback_LongestMusicFade(int arg0)
+int Audio_Playback_LongestMusicFade(int fade_selector_mask)
 {
-    int var_a1 = 0;
-    if (arg0 & 1) {
-        var_a1 = Audio_Seq_activeMusicConfig->masterVolumeSlideLength;
+    int longest_fade_ticks = 0;
+    if (fade_selector_mask & 1) {
+        longest_fade_ticks = Audio_Seq_activeMusicConfig->masterVolumeSlideLength;
     }
-    if (arg0 & 2) {
-        if (var_a1 < Audio_Mixer_tempoScaleSlideLength) {
-            var_a1 = Audio_Mixer_tempoScaleSlideLength;
+    if (fade_selector_mask & 2) {
+        if (longest_fade_ticks < Audio_Mixer_tempoScaleSlideLength) {
+            longest_fade_ticks = Audio_Mixer_tempoScaleSlideLength;
         }
     }
-    if ((arg0 & 4) && (var_a1 < Audio_Mixer_musicPitchScaleSlideLength)) {
-        var_a1 = Audio_Mixer_musicPitchScaleSlideLength;
+    if ((fade_selector_mask & 4) && (longest_fade_ticks < Audio_Mixer_musicPitchScaleSlideLength)) {
+        longest_fade_ticks = Audio_Mixer_musicPitchScaleSlideLength;
     }
-    return var_a1;
+    return longest_fade_ticks;
 }
 
 // decomp: SLUS_010.40 func_80011F90 (src/SLUS_010.40/25AC.c:278)
@@ -122,16 +122,16 @@ int Audio_Playback_MusicPosition(void)
 }
 
 // decomp: SLUS_010.40 func_80011FB4 (src/SLUS_010.40/25AC.c:286)
-u_int Audio_Playback_StartMusic(void* arg0)
+u_int Audio_Playback_StartMusic(void* sequence_data)
 {
-    Audio_Driver_commandArguments.param1 = arg0;
+    Audio_Driver_commandArguments.param1 = sequence_data;
     return Audio_Mixer_DispatchCommand(0x10);
 }
 
 // decomp: SLUS_010.40 func_80011FDC (src/SLUS_010.40/25AC.c:292)
-void Audio_Playback_StopMusic(u_int arg0)
+void Audio_Playback_StopMusic(u_int music_id)
 {
-    Audio_Driver_commandArguments.param1 = (void*)arg0;
+    Audio_Driver_commandArguments.param1 = (void*)music_id;
     Audio_Mixer_DispatchCommand(0x11);
 }
 
@@ -146,142 +146,142 @@ int Audio_Playback_InvalidateSavedMusicId(void)
 }
 
 // decomp: SLUS_010.40 func_80012034 (src/SLUS_010.40/25AC.c:308)
-u_int Audio_Playback_StartLayeredMusic(void* arg0, int arg1)
+u_int Audio_Playback_StartLayeredMusic(void* sequence_data, int volume)
 {
-    u_int temp_v0;
+    u_int music_id;
 
-    Audio_Driver_commandArguments.param1 = arg0;
-    temp_v0 = Audio_Mixer_DispatchCommand(0x19);
-    Audio_Control_SetMusicVolume(temp_v0, arg1);
-    return temp_v0;
+    Audio_Driver_commandArguments.param1 = sequence_data;
+    music_id = Audio_Mixer_DispatchCommand(0x19);
+    Audio_Control_SetMusicVolume(music_id, volume);
+    return music_id;
 }
 
 // decomp: SLUS_010.40 func_80012080 (src/SLUS_010.40/25AC.c:318)
-u_int Audio_Playback_CrossfadeMusic(void* arg0, u_int arg1, int arg2)
+u_int Audio_Playback_CrossfadeMusic(void* sequence_data, u_int fade_ticks, int target_volume)
 {
-    Audio_Driver_commandArguments.param1 = arg0;
-    Audio_Driver_commandArguments.param2 = arg1;
-    Audio_Driver_commandArguments.param3 = arg2 & 0x7F;
+    Audio_Driver_commandArguments.param1 = sequence_data;
+    Audio_Driver_commandArguments.param2 = fade_ticks;
+    Audio_Driver_commandArguments.param3 = target_volume & 0x7F;
     return Audio_Mixer_DispatchCommand(0x1A);
 }
 
 // decomp: SLUS_010.40 func_800120B8 (src/SLUS_010.40/25AC.c:326)
-void Audio_Playback_StartMusicAtLoop(void* arg0, int arg1)
+void Audio_Playback_StartMusicAtLoop(void* sequence_data, int loop_count)
 {
-    Audio_Driver_commandArguments.param1 = arg0;
-    Audio_Driver_commandArguments.param2 = arg1;
+    Audio_Driver_commandArguments.param1 = sequence_data;
+    Audio_Driver_commandArguments.param2 = loop_count;
     Audio_Mixer_DispatchCommand(0x12);
 }
 
 // decomp: SLUS_010.40 func_800120E8 (src/SLUS_010.40/25AC.c:333)
-u_int Audio_Playback_QueueMusicTransition(void* arg0)
+u_int Audio_Playback_QueueMusicTransition(void* sequence_data)
 {
-    Audio_Driver_commandArguments.param1 = arg0;
+    Audio_Driver_commandArguments.param1 = sequence_data;
     return Audio_Mixer_DispatchCommand(0x14);
 }
 
 // decomp: SLUS_010.40 func_80012110 (src/SLUS_010.40/25AC.c:339)
-void* Audio_Playback_StartMusicPair(void* arg0, int arg1)
+void* Audio_Playback_StartMusicPair(void* primary_sequence, int secondary_sequence_address)
 {
-    uintptr_t v0;
-    Audio_Driver_commandArguments.param1 = arg0;
-    Audio_Driver_commandArguments.param2 = arg1;
+    uintptr_t packed_music_ids;
+    Audio_Driver_commandArguments.param1 = primary_sequence;
+    Audio_Driver_commandArguments.param2 = secondary_sequence_address;
     Audio_Mixer_DispatchCommand(0x16);
-    v0 = Audio_Driver_commandArguments.param2 << 0x10;
-    v0 += (uintptr_t)Audio_Driver_commandArguments.param1;
-    return (void*)v0;
+    packed_music_ids = Audio_Driver_commandArguments.param2 << 0x10;
+    packed_music_ids += (uintptr_t)Audio_Driver_commandArguments.param1;
+    return (void*)packed_music_ids;
 }
 
 // decomp: SLUS_010.40 func_8001215C (src/SLUS_010.40/25AC.c:350)
 void Audio_Playback_RequestMusicLayerSwap(void) { Audio_Mixer_DispatchCommand(0x17); }
 
 // decomp: SLUS_010.40 func_8001217C (src/SLUS_010.40/25AC.c:352)
-int Audio_Playback_PlaySoundEffect(u_long arg0, int arg1, int arg2, int arg3)
+int Audio_Playback_PlaySoundEffect(u_long effect_id, int effect_tag, int pan, int volume)
 {
-    int temp_s0 = Audio_Playback_soundEffectProgramOffsets[arg0 & 0x3FF];
-    if (temp_s0 != -1) {
-        Audio_Driver_commandArguments.param1 = (void*)(arg0 & 0x3FF);
-        Audio_Driver_commandArguments.param2 = arg1 & 0xFFFFFF;
-        Audio_Driver_commandArguments.param3 = arg2 & 0xFF;
-        Audio_Driver_commandArguments.param4 = arg3 & 0x7F;
+    int program_offset = Audio_Playback_soundEffectProgramOffsets[effect_id & 0x3FF];
+    if (program_offset != -1) {
+        Audio_Driver_commandArguments.param1 = (void*)(effect_id & 0x3FF);
+        Audio_Driver_commandArguments.param2 = effect_tag & 0xFFFFFF;
+        Audio_Driver_commandArguments.param3 = pan & 0xFF;
+        Audio_Driver_commandArguments.param4 = volume & 0x7F;
         Audio_Mixer_DispatchCommand(0x20);
     }
-    return temp_s0;
+    return program_offset;
 }
 
 // decomp: SLUS_010.40 func_800121F0 (src/SLUS_010.40/25AC.c:365)
-uintptr_t Audio_Playback_PlaySoundEffectBlob(void* arg0, int arg1, int arg2, int arg3)
+uintptr_t Audio_Playback_PlaySoundEffectBlob(void* program_blob, int effect_tag, int pan, int volume)
 {
-    void* var_v0;
+    void* program_or_failure;
 
-    var_v0 = (void*)-1;
-    if (Audio_Samples_SequenceMagicDifference(arg0) == 0) {
-        Audio_Driver_commandArguments.param1 = arg0;
-        Audio_Driver_commandArguments.param2 = (int)(arg1 & 0xFFFFFF);
-        Audio_Driver_commandArguments.param3 = (int)(arg2 & 0xFF);
-        Audio_Driver_commandArguments.param4 = (int)(arg3 & 0x7F);
+    program_or_failure = (void*)-1;
+    if (Audio_Samples_SequenceMagicDifference(program_blob) == 0) {
+        Audio_Driver_commandArguments.param1 = program_blob;
+        Audio_Driver_commandArguments.param2 = (int)(effect_tag & 0xFFFFFF);
+        Audio_Driver_commandArguments.param3 = (int)(pan & 0xFF);
+        Audio_Driver_commandArguments.param4 = (int)(volume & 0x7F);
         Audio_Mixer_DispatchCommand(0x24);
-        var_v0 = arg0;
+        program_or_failure = program_blob;
     }
-    return (uintptr_t)var_v0;
+    return (uintptr_t)program_or_failure;
 }
 
 // decomp: SLUS_010.40 func_80012288 (src/SLUS_010.40/25AC.c:381)
-void Audio_Playback_StopSoundEffects(intptr_t arg0, int arg1)
+void Audio_Playback_StopSoundEffects(intptr_t effect_selector, int effect_tag_mask)
 {
-    Audio_Driver_commandArguments.param1 = (void*)arg0;
-    Audio_Driver_commandArguments.param2 = arg1 & 0xFFFFFF;
+    Audio_Driver_commandArguments.param1 = (void*)effect_selector;
+    Audio_Driver_commandArguments.param2 = effect_tag_mask & 0xFFFFFF;
     Audio_Mixer_DispatchCommand(0x21);
 }
 
 // decomp: SLUS_010.40 func_800122C4 (src/SLUS_010.40/25AC.c:388)
-void Audio_Playback_PlayInterfaceSound(u_long arg0)
+void Audio_Playback_PlayInterfaceSound(u_long effect_id)
 {
-    Audio_Driver_commandArguments.param1 = (void*)(arg0 & 0x3FF);
+    Audio_Driver_commandArguments.param1 = (void*)(effect_id & 0x3FF);
     Audio_Mixer_DispatchCommand(0x30);
 }
 
 // decomp: SLUS_010.40 func_800122F0 (src/SLUS_010.40/25AC.c:394)
 int Audio_Playback_ActiveSoundEffectTags(void)
 {
-    Audio_SeqChannel* var_a1;
-    int var_a0;
-    int var_v1;
+    Audio_SeqChannel* channel;
+    int empty_or_effect_tags;
+    int voice_bit;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
 
-    var_a0 = mask == 0;
-    if (var_a0) {
+    empty_or_effect_tags = mask == 0;
+    if (empty_or_effect_tags) {
         return 0;
     }
 
-    var_a1 = Audio_SoundEffects_channels;
-    var_a0 = 0;
-    var_v1 = 0x1000;
+    channel = Audio_SoundEffects_channels;
+    empty_or_effect_tags = 0;
+    voice_bit = 0x1000;
 
     do {
-        if (mask & var_v1) {
-            var_a0 |= var_a1->effectTags;
+        if (mask & voice_bit) {
+            empty_or_effect_tags |= channel->effectTags;
         }
-        var_v1 *= 2;
-        ++var_a1;
-    } while (var_v1 & 0xFFFFFF);
+        voice_bit *= 2;
+        ++channel;
+    } while (voice_bit & 0xFFFFFF);
 
-    return var_a0 & 0xFFFFFF;
+    return empty_or_effect_tags & 0xFFFFFF;
 }
 
 // decomp: SLUS_010.40 func_80012358 (src/SLUS_010.40/25AC.c:421)
-int Audio_Playback_SoundEffectIdForTag(int arg0)
+int Audio_Playback_SoundEffectIdForTag(int effect_tag)
 {
-    Audio_SeqChannel* var_a1;
-    int var_v1;
-    int a2;
-    if ((arg0 == 0) || ((a2 = Audio_Mixer_voiceScheduler.activeVoices) == 0)) {
+    Audio_SeqChannel* channel;
+    int voice_bit;
+    int active_voice_mask;
+    if ((effect_tag == 0) || ((active_voice_mask = Audio_Mixer_voiceScheduler.activeVoices) == 0)) {
         return 0;
     }
-    for (var_a1 = Audio_SoundEffects_programPairChannels - 10, var_v1 = 0x1000; var_v1 & 0xFFFFFF;
-        var_v1 *= 2, ++var_a1) {
-        if ((a2 & var_v1) && (arg0 == var_a1->effectTags)) {
-            return var_a1->effectId;
+    for (channel = Audio_SoundEffects_programPairChannels - 10, voice_bit = 0x1000; voice_bit & 0xFFFFFF;
+        voice_bit *= 2, ++channel) {
+        if ((active_voice_mask & voice_bit) && (effect_tag == channel->effectTags)) {
+            return channel->effectId;
         }
     }
 
@@ -289,21 +289,21 @@ int Audio_Playback_SoundEffectIdForTag(int arg0)
 }
 
 // decomp: SLUS_010.40 func_800123C8 (src/SLUS_010.40/25AC.c:439)
-int Audio_Playback_UsesSoundEffectTags(Audio_SfxProgramHeader* arg0)
+int Audio_Playback_UsesSoundEffectTags(Audio_SfxProgramHeader* program_or_effect_id)
 {
     int ret = 0;
-    if ((intptr_t)arg0 >= 0x80000000) {
-        ret = arg0->flags >> 7;
-    } else if (Audio_Playback_soundEffectBankSelectors[(long)arg0] & 0x8000) {
+    if ((intptr_t)program_or_effect_id >= 0x80000000) {
+        ret = program_or_effect_id->flags >> 7;
+    } else if (Audio_Playback_soundEffectBankSelectors[(long)program_or_effect_id] & 0x8000) {
         ret = 1;
     }
     return ret;
 }
 
 // decomp: SLUS_010.40 vs_sound_setMonoSound (src/SLUS_010.40/25AC.c:450)
-void Audio_Playback_SetMonoOutput(int arg0)
+void Audio_Playback_SetMonoOutput(int mono_enabled)
 {
-    if (arg0 == 1) {
+    if (mono_enabled == 1) {
         Audio_Mixer_DispatchCommand(0x81);
     } else {
         Audio_Mixer_DispatchCommand(0x80);

@@ -321,34 +321,34 @@ void Audio_Seq_SetTimerCount(
 void Audio_Seq_PlayEmbeddedSoundEffect(
     Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
 {
-    int temp_v0;
+    int relative_program_offset;
     char* pc;
-    char* var_a1;
-    char* var_a2;
+    char* first_program;
+    char* second_program;
 
     pc = in_pChannel->programCounter;
-    temp_v0 = (pc[1] << 8) | pc[0];
+    relative_program_offset = (pc[1] << 8) | pc[0];
 
-    if (temp_v0 != 0) {
-        var_a1 = &pc[temp_v0] + 2;
+    if (relative_program_offset != 0) {
+        first_program = &pc[relative_program_offset] + 2;
     } else {
-        var_a1 = NULL;
+        first_program = NULL;
     }
 
     pc += 2;
-    temp_v0 = (pc[1] << 8) | pc[0];
+    relative_program_offset = (pc[1] << 8) | pc[0];
 
-    if (temp_v0 != 0) {
-        var_a2 = &pc[temp_v0] + 2;
+    if (relative_program_offset != 0) {
+        second_program = &pc[relative_program_offset] + 2;
     } else {
-        var_a2 = NULL;
+        second_program = NULL;
     }
 
     Audio_Seq_embeddedSoundEffectParams.param1 = 0;
     Audio_Seq_embeddedSoundEffectParams.param2 = 0;
     Audio_Seq_embeddedSoundEffectParams.param3 = in_pChannel->pan >> 8;
     Audio_Seq_embeddedSoundEffectParams.param4 = in_pChannel->volume >> 0x17;
-    Audio_SoundEffects_PlayProgramPair(&Audio_Seq_embeddedSoundEffectParams, var_a1, var_a2, 0);
+    Audio_SoundEffects_PlayProgramPair(&Audio_Seq_embeddedSoundEffectParams, first_program, second_program, 0);
     in_pChannel->programCounter += 4;
 }
 
@@ -356,8 +356,8 @@ void Audio_Seq_PlayEmbeddedSoundEffect(
 void Audio_Seq_SelectNoteRemapTable(
     Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)))
 {
-    int temp_v0 = *in_pChannel->programCounter++;
-    Audio_Seq_activeMusicConfig->noteRemapTable = (Audio_KeymapEntry*)&Audio_Seq_kNoteRemapTables[temp_v0];
+    int remap_byte_offset = *in_pChannel->programCounter++;
+    Audio_Seq_activeMusicConfig->noteRemapTable = (Audio_KeymapEntry*)&Audio_Seq_kNoteRemapTables[remap_byte_offset];
 }
 
 // decomp: SLUS_010.40 SoundVM_FE1D_MarkVoicesKeyed (src/SLUS_010.40/25AC.c:6209)

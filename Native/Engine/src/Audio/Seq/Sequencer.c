@@ -63,11 +63,11 @@ int Audio_Seq_randomPitchPhase;
 // decomp: SLUS_010.40 func_8001924C (src/SLUS_010.40/25AC.c:4024)
 void Audio_Seq_UpdateGlobalSlides(void)
 {
-    int temp_s1;
-    int var_a2;
-    Audio_SeqChannel* var_a1_2;
-    int var_a3;
-    Audio_SeqChannel* var_v1;
+    int next_slide_value;
+    int channel_count_or_voice_bit;
+    Audio_SeqChannel* effect_channel;
+    int effects_to_update;
+    Audio_SeqChannel* music_channel;
 
     Audio_Seq_randomPitchPhase = (Audio_Seq_randomPitchPhase + 1) & 0xFF;
     if (Audio_Seq_discVolumeFadeLength != 0) {
@@ -82,75 +82,75 @@ void Audio_Seq_UpdateGlobalSlides(void)
     }
     if (Audio_Mixer_musicPitchScaleSlideLength != 0) {
         --Audio_Mixer_musicPitchScaleSlideLength;
-        temp_s1 = Audio_Mixer_musicPitchScale + Audio_Mixer_musicPitchScaleStep;
+        next_slide_value = Audio_Mixer_musicPitchScale + Audio_Mixer_musicPitchScaleStep;
 
-        if ((temp_s1 & 0xFF0000) != (Audio_Mixer_musicPitchScale & 0xFF0000)) {
-            var_v1 = Audio_Seq_musicChannels;
-            for (var_a2 = 0x20; var_a2 != 0; --var_a2, ++var_v1) {
-                var_v1->voice.dirtyFlags |= 0x10;
+        if ((next_slide_value & 0xFF0000) != (Audio_Mixer_musicPitchScale & 0xFF0000)) {
+            music_channel = Audio_Seq_musicChannels;
+            for (channel_count_or_voice_bit = 0x20; channel_count_or_voice_bit != 0; --channel_count_or_voice_bit, ++music_channel) {
+                music_channel->voice.dirtyFlags |= 0x10;
             }
         }
-        Audio_Mixer_musicPitchScale = temp_s1;
+        Audio_Mixer_musicPitchScale = next_slide_value;
     }
     if ((Audio_Seq_activeMusicConfig->activeChannels != 0)
         && (Audio_Seq_activeMusicConfig->masterVolumeSlideLength != 0)) {
         --Audio_Seq_activeMusicConfig->masterVolumeSlideLength;
-        temp_s1 = Audio_Seq_activeMusicConfig->masterVolume + Audio_Seq_activeMusicConfig->masterVolumeStep;
-        if ((temp_s1 & 0x7F0000) != (Audio_Seq_activeMusicConfig->masterVolume & 0x7F0000)) {
+        next_slide_value = Audio_Seq_activeMusicConfig->masterVolume + Audio_Seq_activeMusicConfig->masterVolumeStep;
+        if ((next_slide_value & 0x7F0000) != (Audio_Seq_activeMusicConfig->masterVolume & 0x7F0000)) {
             Audio_SoundEffects_InvalidateMusicChannelVolumes(
                 Audio_Seq_activeMusicConfig, Audio_Seq_musicChannels);
         }
-        Audio_Seq_activeMusicConfig->masterVolume = temp_s1;
+        Audio_Seq_activeMusicConfig->masterVolume = next_slide_value;
     }
     if ((Audio_Seq_secondaryMusicConfig != NULL)
         && (Audio_Seq_secondaryMusicConfig->activeChannels != 0)) {
         if (Audio_Seq_secondaryMusicConfig->masterVolumeSlideLength != 0) {
             --Audio_Seq_secondaryMusicConfig->masterVolumeSlideLength;
-            temp_s1 = Audio_Seq_secondaryMusicConfig->masterVolume + Audio_Seq_secondaryMusicConfig->masterVolumeStep;
-            if ((temp_s1 & 0x7F0000) != (Audio_Seq_secondaryMusicConfig->masterVolume & 0x7F0000)) {
+            next_slide_value = Audio_Seq_secondaryMusicConfig->masterVolume + Audio_Seq_secondaryMusicConfig->masterVolumeStep;
+            if ((next_slide_value & 0x7F0000) != (Audio_Seq_secondaryMusicConfig->masterVolume & 0x7F0000)) {
                 Audio_SoundEffects_InvalidateMusicChannelVolumes(
                     Audio_Seq_secondaryMusicConfig, Audio_Seq_secondaryMusicChannels);
             }
-            Audio_Seq_secondaryMusicConfig->masterVolume = temp_s1;
+            Audio_Seq_secondaryMusicConfig->masterVolume = next_slide_value;
         }
     }
     if (Audio_Mixer_voiceScheduler.activeVoices != 0) {
-        var_a3 = Audio_Mixer_voiceScheduler.activeVoices;
-        var_a1_2 = Audio_SoundEffects_channels;
+        effects_to_update = Audio_Mixer_voiceScheduler.activeVoices;
+        effect_channel = Audio_SoundEffects_channels;
         do {
         } while (0);
-        for (var_a2 = 0x1000; var_a3 != 0; var_a2 <<= 1, ++var_a1_2) {
-            if (!(var_a3 & var_a2)) {
+        for (channel_count_or_voice_bit = 0x1000; effects_to_update != 0; channel_count_or_voice_bit <<= 1, ++effect_channel) {
+            if (!(effects_to_update & channel_count_or_voice_bit)) {
                 continue;
             }
 
-            if (var_a1_2->effectVolumeSlideLength != 0) {
-                --var_a1_2->effectVolumeSlideLength;
-                temp_s1 = var_a1_2->effectVolume + var_a1_2->effectVolumeSlideStep;
-                if ((temp_s1 & 0xFF00) != (var_a1_2->effectVolume & 0xFF00)) {
-                    var_a1_2->voice.dirtyFlags |= 3;
+            if (effect_channel->effectVolumeSlideLength != 0) {
+                --effect_channel->effectVolumeSlideLength;
+                next_slide_value = effect_channel->effectVolume + effect_channel->effectVolumeSlideStep;
+                if ((next_slide_value & 0xFF00) != (effect_channel->effectVolume & 0xFF00)) {
+                    effect_channel->voice.dirtyFlags |= 3;
                 }
-                var_a1_2->effectVolume = temp_s1;
+                effect_channel->effectVolume = next_slide_value;
             }
 
-            if (var_a1_2->effectPanSlideLength != 0) {
-                --var_a1_2->effectPanSlideLength;
-                temp_s1 = var_a1_2->effectPan + var_a1_2->effectPanSlideStep;
-                if ((temp_s1 & 0xFF00) != (var_a1_2->effectPan & 0xFF00)) {
-                    var_a1_2->voice.dirtyFlags |= 3;
+            if (effect_channel->effectPanSlideLength != 0) {
+                --effect_channel->effectPanSlideLength;
+                next_slide_value = effect_channel->effectPan + effect_channel->effectPanSlideStep;
+                if ((next_slide_value & 0xFF00) != (effect_channel->effectPan & 0xFF00)) {
+                    effect_channel->voice.dirtyFlags |= 3;
                 }
-                var_a1_2->effectPan = temp_s1;
+                effect_channel->effectPan = next_slide_value;
             }
 
-            if (var_a1_2->effectPitchScaleSlideLength != 0) {
-                --var_a1_2->effectPitchScaleSlideLength;
-                temp_s1 = var_a1_2->effectPitchScale + var_a1_2->effectPitchScaleSlideStep;
-                if ((temp_s1 & 0xFF00) != (var_a1_2->effectPitchScale & 0xFF00)) {
-                    var_a1_2->voice.dirtyFlags |= 0x10;
+            if (effect_channel->effectPitchScaleSlideLength != 0) {
+                --effect_channel->effectPitchScaleSlideLength;
+                next_slide_value = effect_channel->effectPitchScale + effect_channel->effectPitchScaleSlideStep;
+                if ((next_slide_value & 0xFF00) != (effect_channel->effectPitchScale & 0xFF00)) {
+                    effect_channel->voice.dirtyFlags |= 0x10;
                 }
-                var_a1_2->effectPitchScale = temp_s1;
+                effect_channel->effectPitchScale = next_slide_value;
             }
-            var_a3 ^= var_a2;
+            effects_to_update ^= channel_count_or_voice_bit;
         }
     }
 }
@@ -158,11 +158,11 @@ void Audio_Seq_UpdateGlobalSlides(void)
 // decomp: SLUS_010.40 func_80019614 (src/SLUS_010.40/25AC.c:4138)
 void Audio_Seq_AdvanceMusicTransition(void)
 {
-    int temp_v1;
+    int packed_music_timer;
     if (Audio_Driver_controlLatches.controlLatches & 0x6600) {
-        temp_v1 = Audio_Seq_activeMusicConfig->timerLowerCount
+        packed_music_timer = Audio_Seq_activeMusicConfig->timerLowerCount
                 + (Audio_Seq_activeMusicConfig->timerUpperCount << 0x10);
-        Audio_Seq_musicTransitionTimer = temp_v1;
+        Audio_Seq_musicTransitionTimer = packed_music_timer;
         if (Audio_Seq_musicTransitionTimer == 0) {
             if (Audio_Driver_controlLatches.controlLatches & 0x100) {
                 if (Audio_Driver_controlLatches.controlLatches & 0x4000) {
@@ -193,48 +193,48 @@ void Audio_Seq_AdvanceMusicTransition(void)
 }
 
 // decomp: SLUS_010.40 func_80019704 (src/SLUS_010.40/25AC.c:4174)
-int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* arg0, int arg1)
+int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* channels, int secondary_music)
 {
-    Audio_SeqChannel* var_s2;
-    int var_s3;
-    u_int var_s1;
+    Audio_SeqChannel* channel_cursor;
+    int channels_to_update;
+    u_int channel_bit;
 
-    int var_a0 = (u_short)(Audio_Seq_activeMusicConfig->tempo >> 16);
+    int tempo_increment = (u_short)(Audio_Seq_activeMusicConfig->tempo >> 16);
     u_int tempoScale = Audio_Mixer_tempoScaleLevel;
 
     if (tempoScale != 0) {
         if (tempoScale < 0x80) {
-            var_a0 += (var_a0 * tempoScale) >> 7;
+            tempo_increment += (tempo_increment * tempoScale) >> 7;
         } else {
-            var_a0 = (var_a0 * tempoScale) >> 8;
+            tempo_increment = (tempo_increment * tempoScale) >> 8;
         }
     }
 
-    Audio_Seq_activeMusicConfig->tickAccumulator += var_a0;
+    Audio_Seq_activeMusicConfig->tickAccumulator += tempo_increment;
 
     if ((Audio_Seq_activeMusicConfig->tickAccumulator & 0xFFFF0000) || (Audio_Cutscene_streamControlFlags & 4)) {
         Audio_Seq_activeMusicConfig->tickAccumulator = Audio_Seq_activeMusicConfig->tickAccumulator & 0xFFFF;
 
         do {
-            var_s2 = arg0;
-            var_s1 = 1;
-            var_s3 = Audio_Seq_activeMusicConfig->activeChannels;
+            channel_cursor = channels;
+            channel_bit = 1;
+            channels_to_update = Audio_Seq_activeMusicConfig->activeChannels;
 
             do {
-                if (var_s3 & var_s1) {
-                    --var_s2->noteLength;
-                    --var_s2->gateLength;
-                    if (var_s2->noteLength == 0) {
-                        Audio_Seq_ExecuteChannelStep(var_s2, var_s1);
-                    } else if (var_s2->gateLength == 0) {
-                        Audio_Seq_activeMusicConfig->pendingKeyOff |= var_s1;
+                if (channels_to_update & channel_bit) {
+                    --channel_cursor->noteLength;
+                    --channel_cursor->gateLength;
+                    if (channel_cursor->noteLength == 0) {
+                        Audio_Seq_ExecuteChannelStep(channel_cursor, channel_bit);
+                    } else if (channel_cursor->gateLength == 0) {
+                        Audio_Seq_activeMusicConfig->pendingKeyOff |= channel_bit;
                     }
-                    Audio_Mixer_UpdateChannelSlidesAndDelays(var_s2, var_s1, 0);
-                    var_s3 &= ~var_s1;
+                    Audio_Mixer_UpdateChannelSlidesAndDelays(channel_cursor, channel_bit, 0);
+                    channels_to_update &= ~channel_bit;
                 }
-                ++var_s2;
-                var_s1 *= 2;
-            } while (var_s3 != 0);
+                ++channel_cursor;
+                channel_bit *= 2;
+            } while (channels_to_update != 0);
 
             if (Audio_Seq_activeMusicConfig->tempoSlideLength != 0) {
                 --Audio_Seq_activeMusicConfig->tempoSlideLength;
@@ -244,7 +244,7 @@ int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* arg0, int arg1)
             if (Audio_Seq_activeMusicConfig->reverbDepthSlideLength != 0) {
                 --Audio_Seq_activeMusicConfig->reverbDepthSlideLength;
                 Audio_Seq_activeMusicConfig->reverbDepth += Audio_Seq_activeMusicConfig->reverbDepthSlideStep;
-                Audio_Driver_controlLatches.updateFlags |= (arg1 == 0) ? 0x80 : 0;
+                Audio_Driver_controlLatches.updateFlags |= (secondary_music == 0) ? 0x80 : 0;
             }
 
             if (Audio_Seq_activeMusicConfig->timerLower == 0) {
@@ -269,14 +269,14 @@ int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* arg0, int arg1)
             Audio_Seq_activeMusicConfig->timerUpperCount = 0;
             ++Audio_Seq_activeMusicConfig->timerTop;
 
-            if ((arg1 == 0) && (Audio_Seq_musicLoopsRemaining != 0)) {
+            if ((secondary_music == 0) && (Audio_Seq_musicLoopsRemaining != 0)) {
                 --Audio_Seq_musicLoopsRemaining;
             }
 
             if (Audio_Seq_activeMusicConfig == &Audio_Seq_primaryMusicConfig) {
                 Audio_Seq_AdvanceMusicTransition();
             }
-        } while (arg1 == 0 && Audio_Seq_musicLoopsRemaining != 0);
+        } while (secondary_music == 0 && Audio_Seq_musicLoopsRemaining != 0);
     }
     while (0)
         ;
@@ -284,41 +284,41 @@ int Audio_Seq_UpdateMusicSequence(Audio_SeqChannel* arg0, int arg1)
 }
 
 // decomp: SLUS_010.40 func_800199C4 (src/SLUS_010.40/25AC.c:4264)
-void Audio_Seq_UpdateSavedMusicFade(Audio_MusicConfig* arg0, Audio_SeqChannel* arg1)
+void Audio_Seq_UpdateSavedMusicFade(Audio_MusicConfig* music_config, Audio_SeqChannel* channels)
 {
-    int temp_s0;
+    int next_fade_value;
 
     if (Audio_Seq_masterFade.ticksRemaining != 0) {
         --Audio_Seq_masterFade.ticksRemaining;
         if (Audio_Seq_masterFade.ticksRemaining == 0) {
-            int temp_v0 = arg0->activeChannels;
-            arg0->musicId = 0;
-            arg0->activeChannels = 0;
-            arg0->pendingKeyOn = 0;
-            arg0->activeNotes = 0;
-            arg0->pendingKeyOff = temp_v0;
+            int channels_to_release = music_config->activeChannels;
+            music_config->musicId = 0;
+            music_config->activeChannels = 0;
+            music_config->pendingKeyOn = 0;
+            music_config->activeNotes = 0;
+            music_config->pendingKeyOff = channels_to_release;
             return;
         }
-        temp_s0 = Audio_Seq_masterFade.value + Audio_Seq_masterFade.step;
-        if ((temp_s0 & 0xFFFF0000) != (Audio_Seq_masterFade.value & 0xFFFF0000)) {
-            Audio_SoundEffects_InvalidateMusicChannelVolumes(arg0, arg1);
+        next_fade_value = Audio_Seq_masterFade.value + Audio_Seq_masterFade.step;
+        if ((next_fade_value & 0xFFFF0000) != (Audio_Seq_masterFade.value & 0xFFFF0000)) {
+            Audio_SoundEffects_InvalidateMusicChannelVolumes(music_config, channels);
         }
-        Audio_Seq_masterFade.value = temp_s0;
+        Audio_Seq_masterFade.value = next_fade_value;
     }
 }
 
 // decomp: SLUS_010.40 func_80019A58 (src/SLUS_010.40/25AC.c:4287)
 long Audio_Seq_TickPlayback(void)
 {
-    Audio_SeqChannel* var_s2_2;
-    Audio_MusicConfig* temp_v0;
-    Audio_MusicConfig* var_a0;
-    int var_s5;
-    int var_s1;
+    Audio_SeqChannel* channel_cursor;
+    Audio_MusicConfig* promoted_saved_config;
+    Audio_MusicConfig* transition_config;
+    int tick_counter_or_cost;
+    int effect_voice_bit;
     int i;
     u_short* p;
 
-    var_s5 = GetRCnt(RCntCNT2);
+    tick_counter_or_cost = GetRCnt(RCntCNT2);
     ++Audio_Seq_tickCounter;
     if (Audio_Driver_controlLatches.controlLatches & 0x1100) {
         if (Audio_Driver_controlLatches.controlLatches & 0x100) {
@@ -329,7 +329,7 @@ long Audio_Seq_TickPlayback(void)
                 Audio_Seq_secondaryMusicConfig->pendingKeyOn = 0;
                 Audio_Seq_secondaryMusicConfig->activeNotes = 0;
             }
-            var_a0 = Audio_Seq_activeMusicConfig;
+            transition_config = Audio_Seq_activeMusicConfig;
         } else {
             if (Audio_Driver_controlLatches.controlLatches & 0x600) {
                 Audio_Seq_activeMusicConfig->pendingKeyOn &=
@@ -340,10 +340,10 @@ long Audio_Seq_TickPlayback(void)
                 Audio_Seq_activeMusicConfig->pendingKeyOn &= Audio_Seq_activeMusicConfig->pushReleaseMask;
                 Audio_Seq_activeMusicConfig->activeNotes &= Audio_Seq_activeMusicConfig->pushReleaseMask;
             }
-            var_a0 = Audio_Seq_secondaryMusicConfig;
+            transition_config = Audio_Seq_secondaryMusicConfig;
         }
-        var_a0->pendingKeyOn &= ~var_a0->resumeKeyOnMask;
-        var_a0->activeNotes &= ~var_a0->resumeKeyOnMask;
+        transition_config->pendingKeyOn &= ~transition_config->resumeKeyOnMask;
+        transition_config->activeNotes &= ~transition_config->resumeKeyOnMask;
     }
     if ((Audio_Seq_activeMusicConfig->pendingKeyOff != 0) || (Audio_Mixer_pendingKeyOffVoices != 0)
         || (Audio_Seq_secondaryMusicConfig != NULL
@@ -358,10 +358,10 @@ long Audio_Seq_TickPlayback(void)
                    == 0) {
             Core_Memory_CopyWords(Audio_Seq_secondaryMusicConfig, Audio_Seq_activeMusicConfig, 0x80);
             Core_Memory_CopyWords(Audio_Seq_secondaryMusicChannels, Audio_Seq_musicChannels, 0x2200);
-            temp_v0 = Audio_Seq_secondaryMusicConfig;
+            promoted_saved_config = Audio_Seq_secondaryMusicConfig;
             Audio_Seq_secondaryMusicConfig = NULL;
-            temp_v0->musicId = 0;
-            temp_v0->activeChannels = 0;
+            promoted_saved_config->musicId = 0;
+            promoted_saved_config->activeChannels = 0;
         }
     }
     p = (u_short*)Audio_Seq_pendingMusicData.param1;
@@ -371,10 +371,10 @@ long Audio_Seq_TickPlayback(void)
             Audio_Seq_embeddedSoundEffectParams.param3 = p[2];
             Audio_Seq_StartOrResumeMusic(&Audio_Seq_embeddedSoundEffectParams);
 
-            var_s2_2 = Audio_Seq_musicChannels;
+            channel_cursor = Audio_Seq_musicChannels;
             for (i = 32; i != 0; --i) {
-                var_s2_2->noteLength = 1;
-                ++var_s2_2;
+                channel_cursor->noteLength = 1;
+                ++channel_cursor;
             }
 
             Audio_Seq_pendingMusicData.param1 = 0;
@@ -410,44 +410,44 @@ long Audio_Seq_TickPlayback(void)
         if ((Audio_Mixer_voiceScheduler.tempoAccumulator & 0xFFFF0000)
             || (Audio_Cutscene_streamControlFlags & 4)) {
             Audio_Mixer_voiceScheduler.tempoAccumulator &= 0xFFFF;
-            var_s1 = 0x1000;
-            var_s2_2 = Audio_SoundEffects_channels;
+            effect_voice_bit = 0x1000;
+            channel_cursor = Audio_SoundEffects_channels;
             do {
-                if (i & var_s1) {
-                    if (!(Audio_Cutscene_streamControlFlags & 2) || (var_s2_2->effectTags & 0x02000000)) {
-                        ++var_s2_2->priority;
-                        --var_s2_2->noteLength;
-                        --var_s2_2->gateLength;
-                        if (var_s2_2->noteLength == 0) {
-                            Audio_Seq_ExecuteChannelStep(var_s2_2, var_s1);
-                        } else if (var_s2_2->gateLength == 0) {
-                            Audio_Mixer_voiceScheduler.pendingKeyOff |= var_s1;
-                            Audio_Mixer_voiceScheduler.keyedVoices &= ~var_s1;
+                if (i & effect_voice_bit) {
+                    if (!(Audio_Cutscene_streamControlFlags & 2) || (channel_cursor->effectTags & 0x02000000)) {
+                        ++channel_cursor->priority;
+                        --channel_cursor->noteLength;
+                        --channel_cursor->gateLength;
+                        if (channel_cursor->noteLength == 0) {
+                            Audio_Seq_ExecuteChannelStep(channel_cursor, effect_voice_bit);
+                        } else if (channel_cursor->gateLength == 0) {
+                            Audio_Mixer_voiceScheduler.pendingKeyOff |= effect_voice_bit;
+                            Audio_Mixer_voiceScheduler.keyedVoices &= ~effect_voice_bit;
                         }
-                        Audio_Mixer_UpdateChannelSlidesAndDelays(var_s2_2, var_s1, 1);
+                        Audio_Mixer_UpdateChannelSlidesAndDelays(channel_cursor, effect_voice_bit, 1);
                     }
-                    i ^= var_s1;
+                    i ^= effect_voice_bit;
                 }
-                ++var_s2_2;
-                var_s1 *= 2;
+                ++channel_cursor;
+                effect_voice_bit *= 2;
             } while (i != 0);
         }
     }
     if (!(Audio_Seq_tickCounter & 3)) {
         Audio_Seq_UpdateGlobalSlides();
     }
-    var_s5 = GetRCnt(RCntCNT2) - var_s5;
-    if (var_s5 <= 0) {
-        var_s5 += 0x44E8;
+    tick_counter_or_cost = GetRCnt(RCntCNT2) - tick_counter_or_cost;
+    if (tick_counter_or_cost <= 0) {
+        tick_counter_or_cost += 0x44E8;
     }
 
     Audio_Driver_recentTickCosts[0] = Audio_Driver_recentTickCosts[1];
     Audio_Driver_recentTickCosts[1] = Audio_Driver_recentTickCosts[2];
     Audio_Driver_recentTickCosts[2] = Audio_Driver_recentTickCosts[3];
-    Audio_Driver_recentTickCosts[3] = var_s5;
+    Audio_Driver_recentTickCosts[3] = tick_counter_or_cost;
     Audio_Driver_recentTickCostTotal = Audio_Driver_recentTickCosts[0] + Audio_Driver_recentTickCosts[1] + Audio_Driver_recentTickCosts[2] + Audio_Driver_recentTickCosts[3];
     Audio_Native_Tick();
-    return var_s5;
+    return tick_counter_or_cost;
 }
 
 // decomp: SLUS_010.40 func_80019FC4 (src/SLUS_010.40/25AC.c:4430)
@@ -572,444 +572,444 @@ char Audio_Seq_PeekNextNote(Audio_SeqChannel* channel)
 }
 
 // decomp: SLUS_010.40 func_8001A1F4 (src/SLUS_010.40/25AC.c:4550)
-int Audio_Seq_ResolveSoundEffectInstrument(int arg0, int arg1)
+int Audio_Seq_ResolveSoundEffectInstrument(int sample_bank_flags, int instrument_index)
 {
-    if ((arg1 - 0x80u) < 0x20) {
-        if (arg0 & 2) {
-            return arg1 + 0x20;
+    if ((instrument_index - 0x80u) < 0x20) {
+        if (sample_bank_flags & 2) {
+            return instrument_index + 0x20;
         }
-        if (arg0 & 4) {
-            return arg1 + 0x40;
+        if (sample_bank_flags & 4) {
+            return instrument_index + 0x40;
         }
     }
-    return arg1;
+    return instrument_index;
 }
 
 // decomp: SLUS_010.40 func_8001A22C (src/SLUS_010.40/25AC.c:4563)
-int Audio_Seq_ResolveMusicInstrument(int arg0, u_int arg1)
+int Audio_Seq_ResolveMusicInstrument(int music_status_flags, u_int instrument_index)
 {
-    if ((arg0 & 0x40) && (arg1 >= 0x40) && (arg1 < 0x80)) {
-        return arg1 + 0x20;
+    if ((music_status_flags & 0x40) && (instrument_index >= 0x40) && (instrument_index < 0x80)) {
+        return instrument_index + 0x20;
     }
-    return arg1;
+    return instrument_index;
 }
 
 // decomp: SLUS_010.40 func_8001A258 (src/SLUS_010.40/25AC.c:4571)
-void Audio_Seq_SelectNotePatch(Audio_SeqChannel* arg0, u_int arg1)
+void Audio_Seq_SelectNotePatch(Audio_SeqChannel* channel, u_int note_key)
 {
-    Audio_Instrument* temp_a0;
-    char* var_s0;
-    int temp_v0;
-    int temp_s2;
+    Audio_Instrument* instrument;
+    char* patch_entry;
+    int instrument_index;
+    int update_flags;
 
-    if ((arg0->key < arg1) || (arg0->key == 0xFF)) {
-        var_s0 = arg0->keymap;
-        while (var_s0[13] != 0 && var_s0[2] < arg1) {
-            var_s0 += 8;
+    if ((channel->key < note_key) || (channel->key == 0xFF)) {
+        patch_entry = channel->keymap;
+        while (patch_entry[13] != 0 && patch_entry[2] < note_key) {
+            patch_entry += 8;
         }
     } else {
-        if (arg1 >= arg0->key) {
+        if (note_key >= channel->key) {
             return;
         }
-        var_s0 = arg0->keymap;
-        while (var_s0[13] != 0 && arg1 >= var_s0[9]) {
-            var_s0 += 8;
+        patch_entry = channel->keymap;
+        while (patch_entry[13] != 0 && note_key >= patch_entry[9]) {
+            patch_entry += 8;
         }
     }
 
-    temp_s2 = arg0->updateFlags;
+    update_flags = channel->updateFlags;
 
-    temp_v0 = Audio_Seq_ResolveMusicInstrument(Audio_Seq_activeMusicConfig->statusFlags, var_s0[0]);
-    arg0->instrumentIndex = temp_v0;
-    temp_a0 = &Audio_Samples_instruments[temp_v0];
-    arg0->voice.sampleStart = temp_a0->sampleStart;
-    arg0->voice.loopStart = temp_a0->loopStart;
+    instrument_index = Audio_Seq_ResolveMusicInstrument(Audio_Seq_activeMusicConfig->statusFlags, patch_entry[0]);
+    channel->instrumentIndex = instrument_index;
+    instrument = &Audio_Samples_instruments[instrument_index];
+    channel->voice.sampleStart = instrument->sampleStart;
+    channel->voice.loopStart = instrument->loopStart;
 
-    if (!(temp_s2 & 0x01000000)) {
-        arg0->voice.adsrLower = var_s0[3] << 8;
+    if (!(update_flags & 0x01000000)) {
+        channel->voice.adsrLower = patch_entry[3] << 8;
     } else {
-        arg0->voice.adsrLower &= 0x7F00;
+        channel->voice.adsrLower &= 0x7F00;
     }
 
-    arg0->voice.adsrLower |= temp_a0->adsrLower & 0x80FF;
+    channel->voice.adsrLower |= instrument->adsrLower & 0x80FF;
 
-    if (!(temp_s2 & 0x08000000)) {
-        arg0->voice.adsrUpper &= 0x201F;
-        arg0->voice.adsrUpper |= var_s0[4] << 6;
+    if (!(update_flags & 0x08000000)) {
+        channel->voice.adsrUpper &= 0x201F;
+        channel->voice.adsrUpper |= patch_entry[4] << 6;
     } else {
-        arg0->voice.adsrUpper &= 0x3FDF;
+        channel->voice.adsrUpper &= 0x3FDF;
     }
 
-    switch (var_s0[5]) {
+    switch (patch_entry[5]) {
     case 3:
-        arg0->voice.adsrUpper |= 0x4000;
+        channel->voice.adsrUpper |= 0x4000;
         break;
     case 5:
-        arg0->voice.adsrUpper |= 0x8000;
+        channel->voice.adsrUpper |= 0x8000;
         break;
     case 7:
-        arg0->voice.adsrUpper |= 0xC000;
+        channel->voice.adsrUpper |= 0xC000;
         break;
     }
 
-    if ((temp_s2 & 0x10000000) == 0) {
-        arg0->voice.adsrUpper &= 0xFFE0;
-        arg0->voice.adsrUpper |= var_s0[6];
+    if ((update_flags & 0x10000000) == 0) {
+        channel->voice.adsrUpper &= 0xFFE0;
+        channel->voice.adsrUpper |= patch_entry[6];
     }
 
-    arg0->voice.adsrUpper |= temp_a0->adsrUpper & 0x20;
-    arg0->voice.volumeScale = var_s0[7];
+    channel->voice.adsrUpper |= instrument->adsrUpper & 0x20;
+    channel->voice.volumeScale = patch_entry[7];
 }
 
 // decomp: SLUS_010.40 func_8001A4BC (src/SLUS_010.40/25AC.c:4637)
-int Audio_Seq_CalculateNotePitch(Audio_Instrument* arg0, int arg1, u_int arg2, int* arg3)
+int Audio_Seq_CalculateNotePitch(Audio_Instrument* instrument, int note_cursor, u_int fine_tune, int* output_fine_pitch_delta)
 {
-    int var_a0;
-    int var_t0;
+    int semitone_or_octave_offset;
+    int pitch_work;
 
-    var_a0 = arg1 - arg0->rootNote;
+    semitone_or_octave_offset = note_cursor - instrument->rootNote;
 
-    while (var_a0 < 0) {
-        var_a0 += 0xC;
+    while (semitone_or_octave_offset < 0) {
+        semitone_or_octave_offset += 0xC;
     }
 
-    var_a0 %= 12;
+    semitone_or_octave_offset %= 12;
 
-    if (arg0->fineTune == 0) {
-        var_t0 = Audio_Seq_kSemitonePitches[var_a0] << 8;
-    } else if (arg0->fineTune < 0) {
-        var_t0 = (Audio_Seq_kSemitonePitches[var_a0] * (u_short)arg0->fineTune) >> 8;
+    if (instrument->fineTune == 0) {
+        pitch_work = Audio_Seq_kSemitonePitches[semitone_or_octave_offset] << 8;
+    } else if (instrument->fineTune < 0) {
+        pitch_work = (Audio_Seq_kSemitonePitches[semitone_or_octave_offset] * (u_short)instrument->fineTune) >> 8;
     } else {
-        var_t0 = (Audio_Seq_kSemitonePitches[var_a0] * arg0->fineTune) >> 7;
-        var_t0 += Audio_Seq_kSemitonePitches[var_a0] << 8;
+        pitch_work = (Audio_Seq_kSemitonePitches[semitone_or_octave_offset] * instrument->fineTune) >> 7;
+        pitch_work += Audio_Seq_kSemitonePitches[semitone_or_octave_offset] << 8;
     }
 
-    arg2 &= 0xFF;
+    fine_tune &= 0xFF;
 
-    if (arg2 != 0) {
-        if (arg2 < 0x80) {
-            *arg3 = (var_t0 * arg2) >> 7;
+    if (fine_tune != 0) {
+        if (fine_tune < 0x80) {
+            *output_fine_pitch_delta = (pitch_work * fine_tune) >> 7;
         } else {
-            *arg3 = ((var_t0 * arg2) >> 8) - var_t0;
+            *output_fine_pitch_delta = ((pitch_work * fine_tune) >> 8) - pitch_work;
         }
     }
 
-    if (arg1 < arg0->rootNote) {
-        for (; arg1 < arg0->rootNote; arg1 += 0xC) {
-            *arg3 = *arg3 >> 1;
-            var_t0 = (var_t0 >> 1);
+    if (note_cursor < instrument->rootNote) {
+        for (; note_cursor < instrument->rootNote; note_cursor += 0xC) {
+            *output_fine_pitch_delta = *output_fine_pitch_delta >> 1;
+            pitch_work = (pitch_work >> 1);
         }
     } else {
-        var_a0 = (arg1 - arg0->rootNote) / 12;
-        if (var_a0 != 0) {
-            var_t0 <<= var_a0;
-            *arg3 <<= var_a0;
+        semitone_or_octave_offset = (note_cursor - instrument->rootNote) / 12;
+        if (semitone_or_octave_offset != 0) {
+            pitch_work <<= semitone_or_octave_offset;
+            *output_fine_pitch_delta <<= semitone_or_octave_offset;
         }
     }
-    var_t0 >>= 8;
-    *arg3 >>= 8;
-    return (u_short)var_t0;
+    pitch_work >>= 8;
+    *output_fine_pitch_delta >>= 8;
+    return (u_short)pitch_work;
 }
 
 // decomp: SLUS_010.40 func_8001A64C (src/SLUS_010.40/25AC.c:4686)
-int Audio_Seq_StartDrumNote(Audio_SeqChannel* arg0, int arg1, int arg2)
+int Audio_Seq_StartDrumNote(Audio_SeqChannel* channel, int channel_bit, int drum_key)
 {
-    Audio_Instrument* temp_a0;
-    int temp_v0;
-    int temp_v0_2;
-    int temp_s2;
-    char* temp_s1;
+    Audio_Instrument* instrument;
+    int note_pitch;
+    int instrument_index;
+    int update_flags;
+    char* drum_entry;
 
-    temp_s1 = (char*)Audio_Seq_activeMusicConfig->keymapTable;
-    temp_s1 += arg2 * 8;
-    Audio_Seq_activeMusicConfig->pendingKeyOn |= arg1;
+    drum_entry = (char*)Audio_Seq_activeMusicConfig->keymapTable;
+    drum_entry += drum_key * 8;
+    Audio_Seq_activeMusicConfig->pendingKeyOn |= channel_bit;
 
-    if (Audio_Seq_activeMusicConfig->activeNotes & arg1) {
-        Audio_Seq_activeMusicConfig->pendingKeyOff |= arg1;
+    if (Audio_Seq_activeMusicConfig->activeNotes & channel_bit) {
+        Audio_Seq_activeMusicConfig->pendingKeyOff |= channel_bit;
     }
 
-    temp_s2 = arg0->updateFlags;
-    temp_v0_2 = Audio_Seq_ResolveMusicInstrument(Audio_Seq_activeMusicConfig->statusFlags, (u_int)temp_s1[0]);
-    arg0->instrumentIndex = temp_v0_2;
-    temp_a0 = &Audio_Samples_instruments[temp_v0_2];
-    arg0->voice.sampleStart = temp_a0->sampleStart;
-    arg0->voice.loopStart = temp_a0->loopStart;
+    update_flags = channel->updateFlags;
+    instrument_index = Audio_Seq_ResolveMusicInstrument(Audio_Seq_activeMusicConfig->statusFlags, (u_int)drum_entry[0]);
+    channel->instrumentIndex = instrument_index;
+    instrument = &Audio_Samples_instruments[instrument_index];
+    channel->voice.sampleStart = instrument->sampleStart;
+    channel->voice.loopStart = instrument->loopStart;
 
-    if (!(temp_s2 & 0x01000000)) {
-        arg0->voice.adsrLower = temp_s1[2] << 8;
+    if (!(update_flags & 0x01000000)) {
+        channel->voice.adsrLower = drum_entry[2] << 8;
     } else {
-        arg0->voice.adsrLower &= 0x7F00;
+        channel->voice.adsrLower &= 0x7F00;
     }
 
-    arg0->voice.adsrLower |= temp_a0->adsrLower & 0x80FF;
+    channel->voice.adsrLower |= instrument->adsrLower & 0x80FF;
 
-    if (!(temp_s2 & 0x08000000)) {
-        arg0->voice.adsrUpper &= 0x201F;
-        arg0->voice.adsrUpper |= temp_s1[3] << 6;
+    if (!(update_flags & 0x08000000)) {
+        channel->voice.adsrUpper &= 0x201F;
+        channel->voice.adsrUpper |= drum_entry[3] << 6;
     } else {
-        arg0->voice.adsrUpper &= 0x3FDF;
+        channel->voice.adsrUpper &= 0x3FDF;
     }
 
-    switch (temp_s1[4]) {
+    switch (drum_entry[4]) {
     case 3:
-        arg0->voice.adsrUpper |= 0x4000;
+        channel->voice.adsrUpper |= 0x4000;
         break;
     case 5:
-        arg0->voice.adsrUpper |= 0x8000;
+        channel->voice.adsrUpper |= 0x8000;
         break;
     case 7:
-        arg0->voice.adsrUpper |= 0xC000;
+        channel->voice.adsrUpper |= 0xC000;
         break;
     }
 
-    if ((temp_s2 & 0x10000000) == 0) {
-        arg0->voice.adsrUpper &= 0xFFE0;
-        arg0->voice.adsrUpper |= temp_s1[5];
+    if ((update_flags & 0x10000000) == 0) {
+        channel->voice.adsrUpper &= 0xFFE0;
+        channel->voice.adsrUpper |= drum_entry[5];
     }
 
-    arg0->voice.adsrUpper |= temp_a0->adsrUpper & 0x20;
-    temp_v0 = Audio_Seq_CalculateNotePitch(temp_a0, temp_s1[1], arg0->fineTune, &arg0->finePitchDelta);
-    arg0->voice.volumeScale = temp_s1[6];
-    arg0->pan = ((temp_s1[7] & 0x7F) + 0x40) << 8;
+    channel->voice.adsrUpper |= instrument->adsrUpper & 0x20;
+    note_pitch = Audio_Seq_CalculateNotePitch(instrument, drum_entry[1], channel->fineTune, &channel->finePitchDelta);
+    channel->voice.volumeScale = drum_entry[6];
+    channel->pan = ((drum_entry[7] & 0x7F) + 0x40) << 8;
 
-    if (temp_s1[7] & 0x80) {
-        Audio_Seq_activeMusicConfig->reverbChannels |= arg1;
+    if (drum_entry[7] & 0x80) {
+        Audio_Seq_activeMusicConfig->reverbChannels |= channel_bit;
     } else {
-        Audio_Seq_activeMusicConfig->reverbChannels &= ~arg1;
+        Audio_Seq_activeMusicConfig->reverbChannels &= ~channel_bit;
     }
     Audio_Driver_controlLatches.updateFlags |= 0x100;
-    return temp_v0;
+    return note_pitch;
 }
 
 // decomp: SLUS_010.40 func_8001A8D8 (src/SLUS_010.40/25AC.c:4760)
-void Audio_Seq_ExecuteChannelStep(Audio_SeqChannel* arg0, int arg1)
+void Audio_Seq_ExecuteChannelStep(Audio_SeqChannel* channel, int channel_bit)
 {
-    u_int sp10;
-    u_int temp_a2_2;
-    u_int temp_s0;
-    u_int temp_v0;
-    u_char* temp_a1;
-    int var_v1;
-    u_int temp_a1_2;
-    u_int temp_v1;
-    u_int temp_v1_6;
-    u_int var_s0;
+    u_int pitch_delta_work;
+    u_int opcode_or_pitch_work;
+    u_int note_or_update_flags;
+    u_int octave_semitones;
+    u_char* program_cursor;
+    int gate_ticks;
+    u_int note_update_flags;
+    u_int explicit_note_opcode_index;
+    u_int vibrato_depth_magnitude;
+    u_int step_opcode;
 
     do {
-        temp_a1 = arg0->programCounter;
-        var_s0 = temp_a1[0];
-        arg0->programCounter = ++temp_a1;
+        program_cursor = channel->programCounter;
+        step_opcode = program_cursor[0];
+        channel->programCounter = ++program_cursor;
 
-        if (var_s0 >= 0xA0) {
-            temp_v1 = var_s0 - 0xF0;
-            if (var_s0 == 0xFE) {
-                temp_a2_2 = temp_a1[0];
-                arg0->programCounter = temp_a1 + 1;
-                Audio_Seq_kExtendedOpcodeHandlers[temp_a2_2](arg0, arg1);
+        if (step_opcode >= 0xA0) {
+            explicit_note_opcode_index = step_opcode - 0xF0;
+            if (step_opcode == 0xFE) {
+                opcode_or_pitch_work = program_cursor[0];
+                channel->programCounter = program_cursor + 1;
+                Audio_Seq_kExtendedOpcodeHandlers[opcode_or_pitch_work](channel, channel_bit);
             } else {
-                if (temp_v1 < 0xE) {
-                    var_s0 = temp_v1 * 0xB;
-                    arg0->noteLength = temp_a1[0];
-                    arg0->programCounter = temp_a1 + 1;
+                if (explicit_note_opcode_index < 0xE) {
+                    step_opcode = explicit_note_opcode_index * 0xB;
+                    channel->noteLength = program_cursor[0];
+                    channel->programCounter = program_cursor + 1;
                 } else {
-                    if (var_s0 == 0xFF) {
-                        var_s0 = 0xA0;
-                    } else if ((var_s0 == 0xCA) && (arg0->updateFlags & 0x200000)) {
-                        var_s0 = 0xA0;
-                        Audio_Mixer_voiceScheduler.pendingKeyOff |= arg1;
+                    if (step_opcode == 0xFF) {
+                        step_opcode = 0xA0;
+                    } else if ((step_opcode == 0xCA) && (channel->updateFlags & 0x200000)) {
+                        step_opcode = 0xA0;
+                        Audio_Mixer_voiceScheduler.pendingKeyOff |= channel_bit;
                     }
-                    Audio_Seq_kOpcodeHandlers[var_s0 - 0xA0](arg0, arg1);
+                    Audio_Seq_kOpcodeHandlers[step_opcode - 0xA0](channel, channel_bit);
                 }
             }
         }
-        ++arg0->opcodeStepCounter;
-    } while (var_s0 > 0xA0);
+        ++channel->opcodeStepCounter;
+    } while (step_opcode > 0xA0);
 
-    if (var_s0 == 0xA0) {
-        if (arg0->type == 0) {
-            Audio_Seq_activeMusicConfig->pendingKeyOff |= arg1;
+    if (step_opcode == 0xA0) {
+        if (channel->type == 0) {
+            Audio_Seq_activeMusicConfig->pendingKeyOff |= channel_bit;
         }
     } else {
-        temp_a2_2 = Audio_Seq_PeekNextNote(arg0);
-        if (arg0->fixedNoteLength != 0) {
-            arg0->noteLength = arg0->gateLength = arg0->fixedNoteLength;
+        opcode_or_pitch_work = Audio_Seq_PeekNextNote(channel);
+        if (channel->fixedNoteLength != 0) {
+            channel->noteLength = channel->gateLength = channel->fixedNoteLength;
         }
-        if (arg0->noteLength != 0) {
-            if ((temp_a2_2 >= 0x8F) || ((temp_a2_2 < 0x84) && !(arg0->playModes & 5))) {
-                arg0->gateLength -= 2;
+        if (channel->noteLength != 0) {
+            if ((opcode_or_pitch_work >= 0x8F) || ((opcode_or_pitch_work < 0x84) && !(channel->playModes & 5))) {
+                channel->gateLength -= 2;
             }
         } else {
-            int tmp = Audio_Seq_kNoteLengths[var_s0 % 11];
-            arg0->noteLength = tmp;
-            var_v1 = tmp;
-            if (((temp_a2_2 - 0x84) >= 0xB) && !(arg0->playModes & 5)) {
-                var_v1 -= 2;
+            int tmp = Audio_Seq_kNoteLengths[step_opcode % 11];
+            channel->noteLength = tmp;
+            gate_ticks = tmp;
+            if (((opcode_or_pitch_work - 0x84) >= 0xB) && !(channel->playModes & 5)) {
+                gate_ticks -= 2;
             }
-            arg0->gateLength = var_v1;
+            channel->gateLength = gate_ticks;
         }
-        if ((arg0->type == 0) && (arg0->updateFlags & 0x40)) {
-            arg0->gateLength = arg0->noteLength;
+        if ((channel->type == 0) && (channel->updateFlags & 0x40)) {
+            channel->gateLength = channel->noteLength;
         }
 
-        arg0->storedNoteLength = arg0->noteLength;
-        arg0->voice.dirtyFlags |= 0x4000;
+        channel->storedNoteLength = channel->noteLength;
+        channel->voice.dirtyFlags |= 0x4000;
 
-        if (var_s0 >= 0x8F) {
-            if (arg0->type == 0) {
-                Audio_Seq_activeMusicConfig->activeNotes &= ~arg1;
-                if (arg0->voice.assignedVoice < 0x18) {
-                    Audio_Seq_activeMusicConfig->pendingKeyOff |= arg1;
+        if (step_opcode >= 0x8F) {
+            if (channel->type == 0) {
+                Audio_Seq_activeMusicConfig->activeNotes &= ~channel_bit;
+                if (channel->voice.assignedVoice < 0x18) {
+                    Audio_Seq_activeMusicConfig->pendingKeyOff |= channel_bit;
                 }
             }
-            arg0->portamentoSteps = 0;
-            arg0->vibratoPitch = 0;
-            arg0->tremoloVolume = 0;
-            arg0->playModes &= 0xFFFD;
+            channel->portamentoSteps = 0;
+            channel->vibratoPitch = 0;
+            channel->tremoloVolume = 0;
+            channel->playModes &= 0xFFFD;
             return;
         }
-        if (var_s0 < 0x84) {
-            temp_a1_2 = arg0->updateFlags;
-            temp_v0 = arg0->octave * 0xC;
-            temp_s0 = var_s0 / 11;
-            temp_s0 += temp_v0;
-            if (temp_a1_2 & 8) {
-                temp_a2_2 = Audio_Seq_StartDrumNote(arg0, arg1, temp_s0);
+        if (step_opcode < 0x84) {
+            note_update_flags = channel->updateFlags;
+            octave_semitones = channel->octave * 0xC;
+            note_or_update_flags = step_opcode / 11;
+            note_or_update_flags += octave_semitones;
+            if (note_update_flags & 8) {
+                opcode_or_pitch_work = Audio_Seq_StartDrumNote(channel, channel_bit, note_or_update_flags);
             } else {
-                if (!(arg0->playModes & 2)) {
-                    if (arg0->type == 0) {
+                if (!(channel->playModes & 2)) {
+                    if (channel->type == 0) {
                         if (Audio_Driver_mixBehavior & 0x10) {
-                            temp_s0 += *((signed char*)Audio_Seq_activeMusicConfig->noteRemapTable
-                                         + ((temp_s0) % 12));
+                            note_or_update_flags += *((signed char*)Audio_Seq_activeMusicConfig->noteRemapTable
+                                         + ((note_or_update_flags) % 12));
                         }
-                        if (temp_a1_2 & 0x1000) {
-                            Audio_Seq_SelectNotePatch(arg0, temp_s0);
+                        if (note_update_flags & 0x1000) {
+                            Audio_Seq_SelectNotePatch(channel, note_or_update_flags);
                         }
-                        Audio_Seq_activeMusicConfig->pendingKeyOn |= arg1;
-                        if ((Audio_Seq_activeMusicConfig->activeNotes & arg1)
-                            && (arg0->voice.assignedVoice < 0x18)) {
-                            Audio_Seq_activeMusicConfig->pendingKeyOff |= arg1;
+                        Audio_Seq_activeMusicConfig->pendingKeyOn |= channel_bit;
+                        if ((Audio_Seq_activeMusicConfig->activeNotes & channel_bit)
+                            && (channel->voice.assignedVoice < 0x18)) {
+                            Audio_Seq_activeMusicConfig->pendingKeyOff |= channel_bit;
                         }
 
-                        if (arg0->keyOnVolumeSlideLength != 0) {
-                            arg0->volumeSlideLength = arg0->keyOnVolumeSlideLength;
-                            arg0->volume = arg0->keyOnVolume;
-                            arg0->volumeSlideStep = arg0->keyOnVolumeSlideStep;
+                        if (channel->keyOnVolumeSlideLength != 0) {
+                            channel->volumeSlideLength = channel->keyOnVolumeSlideLength;
+                            channel->volume = channel->keyOnVolume;
+                            channel->volumeSlideStep = channel->keyOnVolumeSlideStep;
                         }
                     } else {
-                        Audio_Mixer_voiceScheduler.pendingKeyOn |= arg1;
+                        Audio_Mixer_voiceScheduler.pendingKeyOn |= channel_bit;
                     }
-                    arg0->pitchSlideTicksLeft = 0;
+                    channel->pitchSlideTicksLeft = 0;
                 }
 
-                if ((arg0->portamentoSteps != 0) && (arg0->portamentoKey != 0)) {
-                    arg0->pitchBendSlideLength = arg0->portamentoSteps;
-                    arg0->pitchBendTarget =
-                        ((arg0->transpose + temp_s0) - arg0->portamentoKey)
-                        - arg0->portamentoTranspose;
-                    arg0->key =
-                        arg0->portamentoKey - (arg0->transpose - arg0->portamentoTranspose);
-                    temp_s0 = arg0->portamentoKey + arg0->portamentoTranspose;
+                if ((channel->portamentoSteps != 0) && (channel->portamentoKey != 0)) {
+                    channel->pitchBendSlideLength = channel->portamentoSteps;
+                    channel->pitchBendTarget =
+                        ((channel->transpose + note_or_update_flags) - channel->portamentoKey)
+                        - channel->portamentoTranspose;
+                    channel->key =
+                        channel->portamentoKey - (channel->transpose - channel->portamentoTranspose);
+                    note_or_update_flags = channel->portamentoKey + channel->portamentoTranspose;
                 } else {
-                    arg0->key = temp_s0;
-                    temp_s0 = temp_s0 + arg0->transpose;
+                    channel->key = note_or_update_flags;
+                    note_or_update_flags = note_or_update_flags + channel->transpose;
                 }
 
-                temp_a2_2 = Audio_Seq_CalculateNotePitch(&Audio_Samples_instruments[arg0->instrumentIndex],
-                    temp_s0, arg0->fineTune, &arg0->finePitchDelta);
-                if (arg0->randomPitchDepth != 0) {
-                    sp10 = (temp_a2_2 * arg0->randomPitchDepth) >> 8;
-                    sp10 *= Audio_Seq_kRandomPitchOffsets[Audio_Seq_randomPitchPhase];
+                opcode_or_pitch_work = Audio_Seq_CalculateNotePitch(&Audio_Samples_instruments[channel->instrumentIndex],
+                    note_or_update_flags, channel->fineTune, &channel->finePitchDelta);
+                if (channel->randomPitchDepth != 0) {
+                    pitch_delta_work = (opcode_or_pitch_work * channel->randomPitchDepth) >> 8;
+                    pitch_delta_work *= Audio_Seq_kRandomPitchOffsets[Audio_Seq_randomPitchPhase];
                     if (Audio_Seq_kRandomPitchOffsets[Audio_Seq_randomPitchPhase] & 0x80) {
-                        sp10 >>= 9;
-                        temp_a2_2 -= sp10;
+                        pitch_delta_work >>= 9;
+                        opcode_or_pitch_work -= pitch_delta_work;
                     } else {
-                        sp10 >>= 7;
-                        temp_a2_2 += sp10;
+                        pitch_delta_work >>= 7;
+                        opcode_or_pitch_work += pitch_delta_work;
                     }
                 }
             }
-            arg0->pitchBase = temp_a2_2;
-            if (arg0->type == 0) {
-                Audio_Seq_activeMusicConfig->activeNotes |= arg1;
+            channel->pitchBase = opcode_or_pitch_work;
+            if (channel->type == 0) {
+                Audio_Seq_activeMusicConfig->activeNotes |= channel_bit;
             } else {
-                Audio_Mixer_voiceScheduler.keyedVoices |= arg1;
+                Audio_Mixer_voiceScheduler.keyedVoices |= channel_bit;
             }
-            temp_s0 = arg0->updateFlags;
-            arg0->voice.dirtyFlags |= 0x13;
-            if (temp_s0 & 1) {
-                temp_v1_6 = ((arg0->vibratoDepth & 0x7F00) >> 8);
-                arg0->vibratoBase = (!(arg0->vibratoDepth & 0x8000)
-                                            ? (temp_v1_6 * ((temp_a2_2 * 0xF) >> 8))
-                                            : (temp_v1_6 * temp_a2_2))
+            note_or_update_flags = channel->updateFlags;
+            channel->voice.dirtyFlags |= 0x13;
+            if (note_or_update_flags & 1) {
+                vibrato_depth_magnitude = ((channel->vibratoDepth & 0x7F00) >> 8);
+                channel->vibratoBase = (!(channel->vibratoDepth & 0x8000)
+                                            ? (vibrato_depth_magnitude * ((opcode_or_pitch_work * 0xF) >> 8))
+                                            : (vibrato_depth_magnitude * opcode_or_pitch_work))
                                  >> 7;
-                if (!(arg0->playModes & 2)) {
-                    short* vibratoProgram = Audio_Seq_LfoWaveform(arg0->vibratoShape);
+                if (!(channel->playModes & 2)) {
+                    short* vibratoProgram = Audio_Seq_LfoWaveform(channel->vibratoShape);
                     if (vibratoProgram == NULL) return;
-                    arg0->vibratoWave = vibratoProgram;
-                    arg0->vibratoDelayLeft = arg0->vibratoDelay;
-                    arg0->vibratoRateCounter = 1;
+                    channel->vibratoWave = vibratoProgram;
+                    channel->vibratoDelayLeft = channel->vibratoDelay;
+                    channel->vibratoRateCounter = 1;
                 }
             }
-            if ((temp_s0 & 2) && !(arg0->playModes & 2)) {
-                short* tremoloProgram = Audio_Seq_LfoWaveform(arg0->tremoloShape);
+            if ((note_or_update_flags & 2) && !(channel->playModes & 2)) {
+                short* tremoloProgram = Audio_Seq_LfoWaveform(channel->tremoloShape);
                 if (tremoloProgram == NULL) return;
-                arg0->tremoloWave = tremoloProgram;
-                arg0->tremoloDelayLeft = arg0->tremoloDelay;
-                arg0->tremoloRateCounter = 1;
+                channel->tremoloWave = tremoloProgram;
+                channel->tremoloDelayLeft = channel->tremoloDelay;
+                channel->tremoloRateCounter = 1;
             }
-            arg0->vibratoPitch = 0;
-            arg0->tremoloVolume = 0;
-            arg0->pitchSlide = 0;
+            channel->vibratoPitch = 0;
+            channel->tremoloVolume = 0;
+            channel->pitchSlide = 0;
         }
 
-        arg0->playModes = (arg0->playModes & 0xFFFD) | ((arg0->playModes & 1) * 2);
-        if (arg0->pitchBendTarget != 0) {
-            arg0->key += arg0->pitchBendTarget;
-            temp_a2_2 = Audio_Seq_CalculateNotePitch(&Audio_Samples_instruments[arg0->instrumentIndex],
-                arg0->key + arg0->transpose, arg0->fineTune, (int*)&sp10);
-            temp_a2_2 <<= 0x10;
-            arg0->pitchSlideTicksLeft = arg0->pitchBendSlideLength;
-            arg0->pitchBendTarget = 0;
-            arg0->pitchSlideStep =
-                ((int)temp_a2_2 - ((arg0->pitchBase << 0x10) + arg0->pitchSlide))
-                / arg0->pitchSlideTicksLeft;
+        channel->playModes = (channel->playModes & 0xFFFD) | ((channel->playModes & 1) * 2);
+        if (channel->pitchBendTarget != 0) {
+            channel->key += channel->pitchBendTarget;
+            opcode_or_pitch_work = Audio_Seq_CalculateNotePitch(&Audio_Samples_instruments[channel->instrumentIndex],
+                channel->key + channel->transpose, channel->fineTune, (int*)&pitch_delta_work);
+            opcode_or_pitch_work <<= 0x10;
+            channel->pitchSlideTicksLeft = channel->pitchBendSlideLength;
+            channel->pitchBendTarget = 0;
+            channel->pitchSlideStep =
+                ((int)opcode_or_pitch_work - ((channel->pitchBase << 0x10) + channel->pitchSlide))
+                / channel->pitchSlideTicksLeft;
         }
-        arg0->portamentoKey = arg0->key;
-        arg0->portamentoTranspose = arg0->transpose;
+        channel->portamentoKey = channel->key;
+        channel->portamentoTranspose = channel->transpose;
     }
 }
 
 // decomp: SLUS_010.40 Sound_CopyInstrumentInfoToChannel (src/SLUS_010.40/25AC.c:4953)
 void Audio_Seq_ApplyInstrumentParameters(
-    Audio_SeqChannel* arg0, Audio_Instrument* arg1, int arg2)
+    Audio_SeqChannel* channel, Audio_Instrument* instrument, int sample_start_address)
 {
-    arg0->voice.sampleStart = arg2;
-    arg0->voice.loopStart = arg1->loopStart;
-    arg0->voice.adsrLower = arg1->adsrLower;
-    arg0->voice.adsrUpper = arg1->adsrUpper;
-    arg0->voice.dirtyFlags |= 0x1FF80;
+    channel->voice.sampleStart = sample_start_address;
+    channel->voice.loopStart = instrument->loopStart;
+    channel->voice.adsrLower = instrument->adsrLower;
+    channel->voice.adsrUpper = instrument->adsrUpper;
+    channel->voice.dirtyFlags |= 0x1FF80;
 }
 
 // decomp: SLUS_010.40 func_8001B094 (src/SLUS_010.40/25AC.c:4963)
-void Audio_Seq_SelectChannelInstrument(Audio_SeqChannel* arg0, int arg1)
+void Audio_Seq_SelectChannelInstrument(Audio_SeqChannel* channel, int instrument_index)
 {
-    arg0->instrumentIndex = arg1;
+    channel->instrumentIndex = instrument_index;
     Audio_Seq_ApplyInstrumentParameters(
-        arg0, &Audio_Samples_instruments[arg1], Audio_Samples_instruments[arg1].sampleStart);
+        channel, &Audio_Samples_instruments[instrument_index], Audio_Samples_instruments[instrument_index].sampleStart);
 }
 
 // decomp: SLUS_010.40 Sound_ClearVoiceFromSchedulerState (src/SLUS_010.40/25AC.c:4970)
-void Audio_Seq_ReleaseSoundEffectVoice(Audio_SeqChannel* arg0, int arg1)
+void Audio_Seq_ReleaseSoundEffectVoice(Audio_SeqChannel* channel, int voice_bit)
 {
-    int temp_a1 = ~arg1;
-    Audio_Mixer_voiceScheduler.activeVoices &= temp_a1;
-    Audio_Mixer_voiceScheduler.pausedEffectVoices &= temp_a1;
-    Audio_Mixer_voiceScheduler.noiseVoices &= temp_a1;
-    Audio_Mixer_voiceScheduler.reverbVoices &= temp_a1;
-    Audio_Mixer_voiceScheduler.fmVoices &= temp_a1;
-    Audio_Mixer_voiceScheduler.pendingKeyOn &= temp_a1;
-    Audio_Mixer_voiceScheduler.keyedVoices &= temp_a1;
-    arg0->effectTags = 0;
-    arg0->effectId = 0;
+    int keep_voice_mask = ~voice_bit;
+    Audio_Mixer_voiceScheduler.activeVoices &= keep_voice_mask;
+    Audio_Mixer_voiceScheduler.pausedEffectVoices &= keep_voice_mask;
+    Audio_Mixer_voiceScheduler.noiseVoices &= keep_voice_mask;
+    Audio_Mixer_voiceScheduler.reverbVoices &= keep_voice_mask;
+    Audio_Mixer_voiceScheduler.fmVoices &= keep_voice_mask;
+    Audio_Mixer_voiceScheduler.pendingKeyOn &= keep_voice_mask;
+    Audio_Mixer_voiceScheduler.keyedVoices &= keep_voice_mask;
+    channel->effectTags = 0;
+    channel->effectId = 0;
 }
 

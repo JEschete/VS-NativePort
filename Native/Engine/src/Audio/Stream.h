@@ -38,9 +38,9 @@ _Static_assert(sizeof(Audio_CutsceneStreamData) == 0xD4, "Audio_CutsceneStreamDa
 int Audio_BeginXaStream(int sector, int byteCount);
 int Audio_RequestXaStreamStop(void);
 void Audio_StopCutsceneStream(void);
-int Audio_PlayCutsceneStreamSlot(int arg0, int arg1, int arg2);
-void Audio_PlayCutsceneStreamSlotCentered(int arg0);
-int Audio_FreeCutsceneStreamSlot(int arg0);
+int Audio_PlayCutsceneStreamSlot(int slot_id, int pan, int volume);
+void Audio_PlayCutsceneStreamSlotCentered(int slot_id);
+int Audio_FreeCutsceneStreamSlot(int slot_id);
 void Audio_SetXaVolumeMaximum(void);
 
 #endif // VS_AUDIO_STREAM_H_DECLS

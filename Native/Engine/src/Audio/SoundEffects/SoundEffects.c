@@ -332,44 +332,44 @@ void Audio_SoundEffects_InvalidateSoundEffectVolumes(void)
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_34_unk (src/SLUS_010.40/25AC.c:3046)
-void Audio_SoundEffects_PlayInterfaceProgramPair(Audio_CommandParams* arg0)
+void Audio_SoundEffects_PlayInterfaceProgramPair(Audio_CommandParams* command)
 {
-    char* temp_a1;
-    char* temp_a2;
+    char* first_program;
+    char* second_program;
 
-    temp_a1 = (char*)arg0->param1;
-    temp_a2 = (char*)arg0->param2;
-    arg0->param1 = 0x400;
-    arg0->param2 = 0x01000000;
-    arg0->param3 = 0x80;
-    arg0->param4 = 0x7F;
-    arg0->extParam1 = 0;
-    Audio_SoundEffects_PlayProgramPair(arg0, temp_a1, temp_a2, 0);
+    first_program = (char*)command->param1;
+    second_program = (char*)command->param2;
+    command->param1 = 0x400;
+    command->param2 = 0x01000000;
+    command->param3 = 0x80;
+    command->param4 = 0x7F;
+    command->extParam1 = 0;
+    Audio_SoundEffects_PlayProgramPair(command, first_program, second_program, 0);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_30_unk (src/SLUS_010.40/25AC.c:3061)
-void Audio_SoundEffects_PlayInterfaceProgram(Audio_CommandParams* arg0)
+void Audio_SoundEffects_PlayInterfaceProgram(Audio_CommandParams* command)
 {
-    char* sp10;
-    char* sp14;
+    char* first_program;
+    char* second_program;
 
-    Audio_SoundEffects_ProgramCounters(&sp10, &sp14, arg0->param1);
-    arg0->param2 = 0x02000000;
-    arg0->param3 = 0x80;
-    arg0->param4 = 0x7F;
-    arg0->extParam1 = Audio_Samples_SoundEffectBankSlot(Audio_Playback_soundEffectBankSelectors[arg0->param1]);
-    Audio_SoundEffects_PlayProgramPair(arg0, sp10, sp14, 0);
+    Audio_SoundEffects_ProgramCounters(&first_program, &second_program, command->param1);
+    command->param2 = 0x02000000;
+    command->param3 = 0x80;
+    command->param4 = 0x7F;
+    command->extParam1 = Audio_Samples_SoundEffectBankSlot(Audio_Playback_soundEffectBankSelectors[command->param1]);
+    Audio_SoundEffects_PlayProgramPair(command, first_program, second_program, 0);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_20_unk (src/SLUS_010.40/25AC.c:3074)
-void Audio_SoundEffects_PlaySharedProgram(Audio_CommandParams* arg0)
+void Audio_SoundEffects_PlaySharedProgram(Audio_CommandParams* command)
 {
     char* akaoOffset;
     char* akaoData;
 
-    Audio_SoundEffects_ProgramCounters(&akaoOffset, &akaoData, arg0->param1);
-    arg0->extParam1 = Audio_Samples_SoundEffectBankSlot(Audio_Playback_soundEffectBankSelectors[arg0->param1]);
-    Audio_SoundEffects_PlayProgramPair(arg0, akaoOffset, akaoData, 0);
+    Audio_SoundEffects_ProgramCounters(&akaoOffset, &akaoData, command->param1);
+    command->extParam1 = Audio_Samples_SoundEffectBankSlot(Audio_Playback_soundEffectBankSelectors[command->param1]);
+    Audio_SoundEffects_PlayProgramPair(command, akaoOffset, akaoData, 0);
 }
 
 // decomp: SLUS_010.40 func_8001733C (src/SLUS_010.40/25AC.c:3085)
@@ -407,192 +407,192 @@ void Audio_SoundEffects_PlayBlobPrograms(Audio_CommandParams* in_Params)
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_21_unk (src/SLUS_010.40/25AC.c:3118)
-void Audio_SoundEffects_StopPrograms(Audio_CommandParams* arg0)
+void Audio_SoundEffects_StopPrograms(Audio_CommandParams* command)
 {
-    Audio_SoundEffects_ReleaseMatchingVoices(arg0->param1, arg0->param2);
+    Audio_SoundEffects_ReleaseMatchingVoices(command->param1, command->param2);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A0_unk (src/SLUS_010.40/25AC.c:3250)
-void Audio_SoundEffects_SetProgramVolume(Audio_CommandParams* arg0)
+void Audio_SoundEffects_SetProgramVolume(Audio_CommandParams* command)
 {
     u_int i;
-    Audio_SeqChannel* var_a1 = Audio_SoundEffects_channels;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
     u_int mask = Audio_Mixer_voiceScheduler.activeVoices;
-    int var_a3 = 0x1000;
+    int voice_bit = 0x1000;
 
-    if (arg0->param2 != 0) {
-        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-            if ((mask & var_a3) && (var_a1->effectTags & arg0->param2)) {
-                var_a1->effectVolume = (arg0->param3 & 0x7F) << 8;
-                var_a1->effectVolumeSlideLength = 0;
-                var_a1->voice.dirtyFlags |= 3;
+    if (command->param2 != 0) {
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectTags & command->param2)) {
+                channel->effectVolume = (command->param3 & 0x7F) << 8;
+                channel->effectVolumeSlideLength = 0;
+                channel->voice.dirtyFlags |= 3;
             }
         }
     } else {
-        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-            if ((mask & var_a3) && (var_a1->effectId == arg0->param1)) {
-                var_a1->effectVolume = (arg0->param3 & 0x7F) << 8;
-                var_a1->effectVolumeSlideLength = 0;
-                var_a1->voice.dirtyFlags |= 3;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectId == command->param1)) {
+                channel->effectVolume = (command->param3 & 0x7F) << 8;
+                channel->effectVolumeSlideLength = 0;
+                channel->voice.dirtyFlags |= 3;
             }
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A1_unk (src/SLUS_010.40/25AC.c:3276)
-void Audio_SoundEffects_FadeProgramVolume(Audio_CommandParams* arg0)
+void Audio_SoundEffects_FadeProgramVolume(Audio_CommandParams* command)
 {
     u_int i;
-    Audio_SeqChannel* var_a2 = Audio_SoundEffects_channels;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
-    int var_t0 = 0x1000;
+    int voice_bit = 0x1000;
 
-    if (arg0->param2 != 0) {
-        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-            if ((mask & var_t0) && (var_a2->effectTags & arg0->param2)) {
-                short v = arg0->param3 != 0 ? arg0->param3 : 1;
-                var_a2->effectVolumeSlideStep = (short)(((arg0->param4 & 0x7F) << 8) - var_a2->effectVolume) / v;
-                var_a2->effectVolumeSlideLength = v;
+    if (command->param2 != 0) {
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectTags & command->param2)) {
+                short v = command->param3 != 0 ? command->param3 : 1;
+                channel->effectVolumeSlideStep = (short)(((command->param4 & 0x7F) << 8) - channel->effectVolume) / v;
+                channel->effectVolumeSlideLength = v;
             }
         }
     } else {
-        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-            if ((mask & var_t0) && (var_a2->effectId == arg0->param1)) {
-                short v = arg0->param3 != 0 ? arg0->param3 : 1;
-                var_a2->effectVolumeSlideStep = (short)(((arg0->param4 & 0x7F) << 8) - var_a2->effectVolume) / v;
-                var_a2->effectVolumeSlideLength = v;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectId == command->param1)) {
+                short v = command->param3 != 0 ? command->param3 : 1;
+                channel->effectVolumeSlideStep = (short)(((command->param4 & 0x7F) << 8) - channel->effectVolume) / v;
+                channel->effectVolumeSlideLength = v;
             }
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A8_unk (src/SLUS_010.40/25AC.c:3302)
-void Audio_SoundEffects_SetSceneVolume(Audio_CommandParams* arg0)
+void Audio_SoundEffects_SetSceneVolume(Audio_CommandParams* command)
 {
-    int var_a3 = 0x1000;
+    int voice_bit = 0x1000;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
     u_int i;
-    Audio_SeqChannel* var_a1;
+    Audio_SeqChannel* channel;
 
-    for (i = 0, var_a1 = Audio_SoundEffects_channels; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-        if ((mask & var_a3) && !(var_a1->effectTags & 0x02000000)) {
-            var_a1->effectVolume = (arg0->param1 & 0x7F) << 8;
-            var_a1->effectVolumeSlideLength = 0;
-            var_a1->voice.dirtyFlags |= 3;
+    for (i = 0, channel = Audio_SoundEffects_channels; i < 12; ++i, ++channel, voice_bit *= 2) {
+        if ((mask & voice_bit) && !(channel->effectTags & 0x02000000)) {
+            channel->effectVolume = (command->param1 & 0x7F) << 8;
+            channel->effectVolumeSlideLength = 0;
+            channel->voice.dirtyFlags |= 3;
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A9_unk (src/SLUS_010.40/25AC.c:3318)
-void Audio_SoundEffects_FadeSceneVolume(Audio_CommandParams* arg0)
+void Audio_SoundEffects_FadeSceneVolume(Audio_CommandParams* command)
 {
-    short var_a1;
-    int var_t0 = 0x1000;
+    short fade_ticks;
+    int voice_bit = 0x1000;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
     u_int i;
-    Audio_SeqChannel* var_a2;
+    Audio_SeqChannel* channel;
 
-    for (i = 0, var_a2 = Audio_SoundEffects_channels; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-        if ((mask & var_t0) && !(var_a2->effectTags & 0x02000000)) {
-            var_a1 = 1;
-            if (arg0->param1 != 0) {
-                var_a1 = arg0->param1;
+    for (i = 0, channel = Audio_SoundEffects_channels; i < 12; ++i, ++channel, voice_bit *= 2) {
+        if ((mask & voice_bit) && !(channel->effectTags & 0x02000000)) {
+            fade_ticks = 1;
+            if (command->param1 != 0) {
+                fade_ticks = command->param1;
             }
-            var_a2->effectVolumeSlideStep =
-                ((short)(((arg0->param2 & 0x7F) << 8) - var_a2->effectVolume) / var_a1);
-            var_a2->effectVolumeSlideLength = var_a1;
+            channel->effectVolumeSlideStep =
+                ((short)(((command->param2 & 0x7F) << 8) - channel->effectVolume) / fade_ticks);
+            channel->effectVolumeSlideLength = fade_ticks;
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A2_unk (src/SLUS_010.40/25AC.c:3339)
-void Audio_SoundEffects_SetProgramPan(Audio_CommandParams* arg0)
+void Audio_SoundEffects_SetProgramPan(Audio_CommandParams* command)
 {
     u_int i;
-    Audio_SeqChannel* var_a1 = Audio_SoundEffects_channels;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
     u_int mask = Audio_Mixer_voiceScheduler.activeVoices;
-    int var_a3 = 0x1000;
+    int voice_bit = 0x1000;
 
-    if (arg0->param2 != 0) {
-        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-            if ((mask & var_a3) && (var_a1->effectTags & arg0->param2)) {
-                var_a1->effectPan = ((char)arg0->param3) << 8;
-                var_a1->effectPanSlideLength = 0;
-                var_a1->voice.dirtyFlags |= 3;
+    if (command->param2 != 0) {
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectTags & command->param2)) {
+                channel->effectPan = ((char)command->param3) << 8;
+                channel->effectPanSlideLength = 0;
+                channel->voice.dirtyFlags |= 3;
             }
         }
     } else {
-        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-            if ((mask & var_a3) && (var_a1->effectId == arg0->param1)) {
-                var_a1->effectPan = ((char)arg0->param3) << 8;
-                var_a1->effectPanSlideLength = 0;
-                var_a1->voice.dirtyFlags |= 3;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectId == command->param1)) {
+                channel->effectPan = ((char)command->param3) << 8;
+                channel->effectPanSlideLength = 0;
+                channel->voice.dirtyFlags |= 3;
             }
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A3_unk (src/SLUS_010.40/25AC.c:3365)
-void Audio_SoundEffects_FadeProgramPan(Audio_CommandParams* arg0)
+void Audio_SoundEffects_FadeProgramPan(Audio_CommandParams* command)
 {
     u_int i;
-    Audio_SeqChannel* var_a2 = Audio_SoundEffects_channels;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
-    int var_t0 = 0x1000;
+    int voice_bit = 0x1000;
 
-    if (arg0->param2 != 0) {
-        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-            if ((mask & var_t0) && (var_a2->effectTags & arg0->param2)) {
-                short v = arg0->param3 != 0 ? arg0->param3 : 1;
-                var_a2->effectPanSlideStep = (short)((((char)arg0->param4) << 8) - var_a2->effectPan) / v;
-                var_a2->effectPanSlideLength = v;
+    if (command->param2 != 0) {
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectTags & command->param2)) {
+                short v = command->param3 != 0 ? command->param3 : 1;
+                channel->effectPanSlideStep = (short)((((char)command->param4) << 8) - channel->effectPan) / v;
+                channel->effectPanSlideLength = v;
             }
         }
     } else {
-        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-            if ((mask & var_t0) && (var_a2->effectId == arg0->param1)) {
-                short v = arg0->param3 != 0 ? arg0->param3 : 1;
-                var_a2->effectPanSlideStep = (short)((((char)arg0->param4) << 8) - var_a2->effectPan) / v;
-                var_a2->effectPanSlideLength = v;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectId == command->param1)) {
+                short v = command->param3 != 0 ? command->param3 : 1;
+                channel->effectPanSlideStep = (short)((((char)command->param4) << 8) - channel->effectPan) / v;
+                channel->effectPanSlideLength = v;
             }
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AA_unk (src/SLUS_010.40/25AC.c:3391)
-void Audio_SoundEffects_SetScenePan(Audio_CommandParams* arg0)
+void Audio_SoundEffects_SetScenePan(Audio_CommandParams* command)
 {
-    int var_a3 = 0x1000;
+    int voice_bit = 0x1000;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
     u_int i;
-    Audio_SeqChannel* var_a1;
+    Audio_SeqChannel* channel;
 
-    for (i = 0, var_a1 = Audio_SoundEffects_channels; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-        if ((mask & var_a3) && !(var_a1->effectTags & 0x02000000)) {
-            var_a1->effectPan = ((char)arg0->param1) << 8;
-            var_a1->effectPanSlideLength = 0;
-            var_a1->voice.dirtyFlags |= 3;
+    for (i = 0, channel = Audio_SoundEffects_channels; i < 12; ++i, ++channel, voice_bit *= 2) {
+        if ((mask & voice_bit) && !(channel->effectTags & 0x02000000)) {
+            channel->effectPan = ((char)command->param1) << 8;
+            channel->effectPanSlideLength = 0;
+            channel->voice.dirtyFlags |= 3;
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AB_unk (src/SLUS_010.40/25AC.c:3407)
-void Audio_SoundEffects_FadeScenePan(Audio_CommandParams* arg0)
+void Audio_SoundEffects_FadeScenePan(Audio_CommandParams* command)
 {
-    short var_a1;
-    int var_t0 = 0x1000;
+    short fade_ticks;
+    int voice_bit = 0x1000;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
     u_int i;
-    Audio_SeqChannel* var_a2;
+    Audio_SeqChannel* channel;
 
-    for (i = 0, var_a2 = Audio_SoundEffects_channels; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-        if ((mask & var_t0) && !(var_a2->effectTags & 0x02000000)) {
-            var_a1 = 1;
-            if (arg0->param1 != 0) {
-                var_a1 = arg0->param1;
+    for (i = 0, channel = Audio_SoundEffects_channels; i < 12; ++i, ++channel, voice_bit *= 2) {
+        if ((mask & voice_bit) && !(channel->effectTags & 0x02000000)) {
+            fade_ticks = 1;
+            if (command->param1 != 0) {
+                fade_ticks = command->param1;
             }
-            var_a2->effectPanSlideStep = (short)((((char)arg0->param2) << 8) - var_a2->effectPan) / var_a1;
-            var_a2->effectPanSlideLength = var_a1;
+            channel->effectPanSlideStep = (short)((((char)command->param2) << 8) - channel->effectPan) / fade_ticks;
+            channel->effectPanSlideLength = fade_ticks;
         }
     }
 }

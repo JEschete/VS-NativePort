@@ -20,64 +20,64 @@
 u_char Audio_objectSurfaceSoundIds[2956]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_8006CD60 (src/BATTLE/BATTLE.PRG/146C.c:2144)
-void Audio_PlayRandomActorImpactSound(u_int* arg0, int arg1, int arg2)
+void Audio_PlayRandomActorImpactSound(u_int* sound_bank, int pan, int volume)
 {
-    Audio_PlayBankSfx(0x7E, arg0, Core_Random_NextBounded(3) + 8, arg1, arg2);
+    Audio_PlayBankSfx(0x7E, sound_bank, Core_Random_NextBounded(3) + 8, pan, volume);
 }
 
 // decomp: BATTLE.PRG func_800AD62C (src/BATTLE/BATTLE.PRG/40564.c:2789)
-void Audio_ActorSoundPanAndVolume(int arg0, int* arg1, int* arg2)
+void Audio_ActorSoundPanAndVolume(int actor_index, int* output_pan, int* output_volume)
 {
-    int temp_v0;
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    int packed_pan_volume;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_index];
 
-    if (temp_s0->soundEffect.kind == 2) {
-        *arg1 = 0x80;
-        if (arg2 != NULL) {
-            *arg2 = 0;
+    if (actor->soundEffect.kind == 2) {
+        *output_pan = 0x80;
+        if (output_volume != NULL) {
+            *output_volume = 0;
         }
     } else {
-        if (temp_s0->instance.actionAnimationState || temp_s0->instance.isPreviewModel || !temp_s0->instance.soundEnabled
-            || temp_s0->instance.movementMode || temp_s0->instance.locomotionState || temp_s0->instance.motionLocked) {
-            ((void (*)(int, int, SVECTOR*, int))Actors_ProjectActorTaggedBone)(arg0, 0xFF, &temp_s0->soundPosition, 0);
+        if (actor->instance.actionAnimationState || actor->instance.isPreviewModel || !actor->instance.soundEnabled
+            || actor->instance.movementMode || actor->instance.locomotionState || actor->instance.motionLocked) {
+            ((void (*)(int, int, SVECTOR*, int))Actors_ProjectActorTaggedBone)(actor_index, 0xFF, &actor->soundPosition, 0);
         }
 
-        temp_v0 = Audio_SfxPanAndVolume(*(int*)&temp_s0->soundPosition, temp_s0->soundPosition.vz);
-        *arg1 = temp_v0 >> 0x10;
+        packed_pan_volume = Audio_SfxPanAndVolume(*(int*)&actor->soundPosition, actor->soundPosition.vz);
+        *output_pan = packed_pan_volume >> 0x10;
 
-        if (temp_s0->soundEffect.level != 0) {
-            *arg1 = temp_s0->soundEffect.level;
+        if (actor->soundEffect.level != 0) {
+            *output_pan = actor->soundEffect.level;
         }
 
-        if (arg2 != NULL) {
-            *arg2 = temp_v0 & 0xFFFF;
-            if (temp_s0->soundEffect.flags != 0) {
-                *arg2 = temp_s0->soundEffect.flags;
+        if (output_volume != NULL) {
+            *output_volume = packed_pan_volume & 0xFFFF;
+            if (actor->soundEffect.flags != 0) {
+                *output_volume = actor->soundEffect.flags;
             }
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800AE4FC (src/BATTLE/BATTLE.PRG/44F14.c:637)
-void Audio_PlayActorModelSound(Actors_ModelInstance* arg0, int arg1)
+void Audio_PlayActorModelSound(Actors_ModelInstance* model_instance, int sound_index)
 {
     Actors_ActorRecord* actor;
     int temp;
     int sp[2];
-    int type = arg1;
+    int type = sound_index;
 
-    if (arg0->position.vy >= 0xBB8) {
+    if (model_instance->position.vy >= 0xBB8) {
         return;
     }
 
-    actor = Actors_actorRecords[arg0->slot];
+    actor = Actors_actorRecords[model_instance->slot];
 
     if (actor->soundEffect.kind == 2) {
         sp[0] = 0x80;
         sp[1] = 0;
     } else {
         if ((*((int*)&actor->instance.quadCount + 1) & 0x3F9F00) != 0x8000) {
-            Actors_ProjectActorTaggedBone(arg0->slot, 0xFF, &actor->soundPosition, 0);
+            Actors_ProjectActorTaggedBone(model_instance->slot, 0xFF, &actor->soundPosition, 0);
         }
 
         temp = Audio_SfxPanAndVolume(*(int*)&actor->soundPosition, actor->soundPosition.vz);
@@ -99,111 +99,111 @@ void Audio_PlayActorModelSound(Actors_ModelInstance* arg0, int arg1)
     }
 
     if (type == 8) {
-        Audio_PlayRandomActorImpactSound(VS_ONDISC(arg0->model, soundSection, void *), sp[0], sp[1]);
+        Audio_PlayRandomActorImpactSound(VS_ONDISC(model_instance->model, soundSection, void *), sp[0], sp[1]);
     } else if (type == 4) {
-        Audio_PlayBankSfx(0x7E, VS_ONDISC(arg0->model, soundSection, void *), Core_Random_Rand() % 4 + 4, sp[0], sp[1]);
+        Audio_PlayBankSfx(0x7E, VS_ONDISC(model_instance->model, soundSection, void *), Core_Random_Rand() % 4 + 4, sp[0], sp[1]);
     } else {
-        Audio_PlayBankSfx(0x180, VS_ONDISC(arg0->model, soundSection, void *), type, sp[0], sp[1]);
+        Audio_PlayBankSfx(0x180, VS_ONDISC(model_instance->model, soundSection, void *), type, sp[0], sp[1]);
     }
 }
 
 // decomp: BATTLE.PRG func_800AE68C (src/BATTLE/BATTLE.PRG/44F14.c:685)
-void Audio_PlayActorModelSoundVariant(int arg0, int arg1)
+void Audio_PlayActorModelSoundVariant(int actor_index, int variant_index)
 {
-    Audio_PlayActorModelSound(&Actors_actorRecords[arg0]->instance, arg1 + 4);
+    Audio_PlayActorModelSound(&Actors_actorRecords[actor_index]->instance, variant_index + 4);
 }
 
 // decomp: BATTLE.PRG func_800AE6C0 (src/BATTLE/BATTLE.PRG/44F14.c:690)
-void Audio_PlayActorSoundPair(Actors_ActorRecord* arg0, int arg1, int arg2)
+void Audio_PlayActorSoundPair(Actors_ActorRecord* source_actor, int first_effect_id, int second_effect_id)
 {
-    int sp10[2];
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0->instance.slot];
+    int pan_volume[2];
+    Actors_ActorRecord* actor = Actors_actorRecords[source_actor->instance.slot];
 
-    if (temp_s0->soundEffect.kind == 2) {
-        sp10[0] = 0x80;
-        sp10[1] = 0;
+    if (actor->soundEffect.kind == 2) {
+        pan_volume[0] = 0x80;
+        pan_volume[1] = 0;
     } else {
-        int temp_v0;
+        int packed_pan_volume;
 
-        if (temp_s0->instance.actionAnimationState || temp_s0->instance.isPreviewModel || !temp_s0->instance.soundEnabled
-            || temp_s0->instance.movementMode || temp_s0->instance.locomotionState || temp_s0->instance.motionLocked) {
-            Actors_ProjectActorTaggedBone(arg0->instance.slot, 0xFF, &temp_s0->soundPosition, 0);
+        if (actor->instance.actionAnimationState || actor->instance.isPreviewModel || !actor->instance.soundEnabled
+            || actor->instance.movementMode || actor->instance.locomotionState || actor->instance.motionLocked) {
+            Actors_ProjectActorTaggedBone(source_actor->instance.slot, 0xFF, &actor->soundPosition, 0);
         }
 
-        temp_v0 = Audio_SfxPanAndVolume(*(int*)&temp_s0->soundPosition, temp_s0->soundPosition.vz);
-        sp10[0] = temp_v0 >> 0x10;
+        packed_pan_volume = Audio_SfxPanAndVolume(*(int*)&actor->soundPosition, actor->soundPosition.vz);
+        pan_volume[0] = packed_pan_volume >> 0x10;
 
-        if (temp_s0->soundEffect.level != 0) {
-            sp10[0] = temp_s0->soundEffect.level;
+        if (actor->soundEffect.level != 0) {
+            pan_volume[0] = actor->soundEffect.level;
         }
 
-        sp10[1] = temp_v0 & 0xFFFF;
+        pan_volume[1] = packed_pan_volume & 0xFFFF;
 
-        if (temp_s0->soundEffect.flags != 0) {
-            sp10[1] = temp_s0->soundEffect.flags;
+        if (actor->soundEffect.flags != 0) {
+            pan_volume[1] = actor->soundEffect.flags;
         }
     }
 
-    if (sp10[1] != 0) {
-        Audio_PlaySfx(0x7E, arg1, sp10[0], sp10[1]);
-        if (arg2 != 0) {
-            Audio_PlaySfx(0x7E, arg2, sp10[0], sp10[1]);
+    if (pan_volume[1] != 0) {
+        Audio_PlaySfx(0x7E, first_effect_id, pan_volume[0], pan_volume[1]);
+        if (second_effect_id != 0) {
+            Audio_PlaySfx(0x7E, second_effect_id, pan_volume[0], pan_volume[1]);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800AE7D8 (src/BATTLE/BATTLE.PRG/44F14.c:728)
-void Audio_PlayGimmickSoundPair(void* arg0, int arg1, int arg2)
+void Audio_PlayGimmickSoundPair(void* gimmick, int first_effect_id, int second_effect_id)
 {
-    SVECTOR* temp_s0;
+    SVECTOR* sound_position;
 
-    temp_s0 = arg0 + 0x1C;
-    Audio_PlayWorldSfx(0x7E, arg1, temp_s0);
-    if (arg2 != 0) {
-        Audio_PlayWorldSfx(0x7E, arg2, temp_s0);
+    sound_position = gimmick + 0x1C;
+    Audio_PlayWorldSfx(0x7E, first_effect_id, sound_position);
+    if (second_effect_id != 0) {
+        Audio_PlayWorldSfx(0x7E, second_effect_id, sound_position);
     }
 }
 
 // decomp: BATTLE.PRG func_800AE828 (src/BATTLE/BATTLE.PRG/44F14.c:739)
-void Audio_PlayActorSurfaceContactSound(int arg0, Actors_ActorRecord* arg1, int arg2)
+void Audio_PlayActorSurfaceContactSound(int actor_index, Actors_ActorRecord* actor, int contact_sound_code)
 {
-    int sp10;
-    int sp14;
+    int weather_kind;
+    int weather_intensity;
     int id;
     int floor;
     Field_MpdTileCell* room;
 
-    if ((u_char)(arg1->animationId - 0xCA) < 18) {
+    if ((u_char)(actor->animationId - 0xCA) < 18) {
         return;
     }
-    if (arg0 == 1) {
+    if (actor_index == 1) {
         return;
     }
-    if (*((int*)&arg1->sequenceFlags - 2) & 0xF0000000) {
-        id = Audio_objectSurfaceSoundIds[Field_gimmickInstances[Field_FindTopGimmickAtTile(arg1->instance.currentTileX,
-                                       arg1->instance.currentTileZ, 1)]
+    if (*((int*)&actor->sequenceFlags - 2) & 0xF0000000) {
+        id = Audio_objectSurfaceSoundIds[Field_gimmickInstances[Field_FindTopGimmickAtTile(actor->instance.currentTileX,
+                                       actor->instance.currentTileZ, 1)]
                 ->objectInfo.objectId];
     } else {
-        floor = arg1->instance.currentTileLayer;
+        floor = actor->instance.currentTileLayer;
         id = 0xD;
-        if (arg1->contactKind != 0) {
-            floor = arg1->contactKind;
+        if (actor->contactKind != 0) {
+            floor = actor->contactKind;
         }
-        room = Field_CollisionCellAt(arg1->instance.currentTileX, arg1->instance.currentTileZ, floor);
+        room = Field_CollisionCellAt(actor->instance.currentTileX, actor->instance.currentTileZ, floor);
         if (room != NULL) {
             id = Field_kTileSurfaceIds[room->surfaceKind];
         }
     }
-    if (arg2 == 0x41) {
+    if (contact_sound_code == 0x41) {
         id += 0x10;
-    } else if (arg2 == 0x42) {
+    } else if (contact_sound_code == 0x42) {
         id += 0x18;
     } else {
-        Effects_RoomWeatherState(&sp10, &sp14);
-        if (sp14 >= 6 && sp10 > 0 && sp10 < 3) {
+        Effects_RoomWeatherState(&weather_kind, &weather_intensity);
+        if (weather_intensity >= 6 && weather_kind > 0 && weather_kind < 3) {
             id += 8;
         }
     }
-    Audio_PlayActorModelSound(&arg1->instance, id);
+    Audio_PlayActorModelSound(&actor->instance, id);
 }
 

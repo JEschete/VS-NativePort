@@ -12,15 +12,15 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_MUSIC_H_DECLS)
 #define VS_AUDIO_MUSIC_H_DECLS
 
-int Audio_SetZoneMusicSwitchEnabled(int arg0);
-void Audio_PlayActorScriptSound(int arg0, int arg1);
+int Audio_SetZoneMusicSwitchEnabled(int enabled);
+void Audio_PlayActorScriptSound(int actor_index, int sound_index);
 int Audio_MusicBeatPosition(void);
 void Audio_SaveMusicPlaybackState(void);
-void Audio_SetMusicJumpThreshold(int arg0);
+void Audio_SetMusicJumpThreshold(int jump_threshold);
 int Audio_StopMusicSlotPlayback(int id);
 int Audio_ResumeMusicSlot(int id);
-int Audio_CrossfadeMusicSlot(int id, int arg1, u_int arg2);
-int Audio_PlayMusicSlot(int id, int arg1, int arg2);
+int Audio_CrossfadeMusicSlot(int id, int target_volume, u_int fade_ticks);
+int Audio_PlayMusicSlot(int id, int target_volume, int fade_ticks);
 int Audio_CurrentMusicSlot(void);
 int Audio_CurrentMusicId(void);
 int Audio_LoadMusicSlot(int id, int targetSlot);
@@ -30,11 +30,11 @@ int Audio_PollMusicLoads(void);
 int Audio_LoadMusicSlotBlocking(int id, int targetSlot);
 int Audio_LoadFreeMusicSlotBlocking(int id);
 int Audio_FreeMusicSlot(int slotId);
-int Audio_MusicSlotVolume(int arg0);
-int Audio_QueryMusicSlotVolume(int arg0);
-int Audio_FadeMusicSlotVolume(int id, int arg1, int arg2);
-int Audio_FadeMusicSlotTempo(int id, int arg1, int arg2);
-int Audio_FadeMusicSlotPitch(int id, int arg1, int arg2);
+int Audio_MusicSlotVolume(int slot_id);
+int Audio_QueryMusicSlotVolume(int slot_id);
+int Audio_FadeMusicSlotVolume(int id, int target_volume, int fade_ticks);
+int Audio_FadeMusicSlotTempo(int id, int target_tempo_scale, int fade_ticks);
+int Audio_FadeMusicSlotPitch(int id, int target_pitch_scale, int fade_ticks);
 void Audio_StopAndFreeCurrentMusic(void);
 
 #endif // VS_AUDIO_MUSIC_H_DECLS

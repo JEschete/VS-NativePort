@@ -17,54 +17,54 @@
 #include "Audio/XaPlayback.h"
 
 // decomp: SLUS_010.40 func_80015C9C (src/SLUS_010.40/25AC.c:2330)
-void Audio_Seq_ResetSoundEffectChannel(Audio_SeqChannel* arg0, char* arg1)
+void Audio_Seq_ResetSoundEffectChannel(Audio_SeqChannel* channel, char* program_start)
 {
-    arg0->volumeBalance = 0x6E00;
-    arg0->volume = 0x32000000;
-    arg0->programCounter = arg1;
-    arg0->transpose = 0;
-    arg0->fineTune = 0;
-    arg0->portamentoSteps = 0;
-    arg0->pitchSlide = 0;
-    arg0->pitchBendTarget = 0;
-    arg0->pitchSlideTicksLeft = 0;
-    arg0->fixedNoteLength = 0;
-    arg0->storedNoteLength = 0;
-    arg0->volumeSlideLength = 0;
-    arg0->finePitchDelta = 0;
-    arg0->randomPitchDepth = 0;
-    arg0->loopDepth = 0;
-    arg0->updateFlags = 0;
-    arg0->autoPanOffset = 0;
-    arg0->playModes = 0;
-    arg0->opcodeStepCounter = 0xFFFF;
-    arg0->voice.volumeScale = 0;
-    arg0->autoPanDepth = 0;
-    arg0->tremoloDepth = 0;
-    arg0->vibratoDepth = 0;
-    arg0->autoPanDepthSlideLength = 0;
-    arg0->tremoloDepthSlideLength = 0;
-    arg0->vibratoDepthSlideLength = 0;
-    arg0->fmTimer = 0;
-    arg0->noiseTimer = 0;
-    Audio_Seq_SelectChannelInstrument(arg0, 0);
+    channel->volumeBalance = 0x6E00;
+    channel->volume = 0x32000000;
+    channel->programCounter = program_start;
+    channel->transpose = 0;
+    channel->fineTune = 0;
+    channel->portamentoSteps = 0;
+    channel->pitchSlide = 0;
+    channel->pitchBendTarget = 0;
+    channel->pitchSlideTicksLeft = 0;
+    channel->fixedNoteLength = 0;
+    channel->storedNoteLength = 0;
+    channel->volumeSlideLength = 0;
+    channel->finePitchDelta = 0;
+    channel->randomPitchDepth = 0;
+    channel->loopDepth = 0;
+    channel->updateFlags = 0;
+    channel->autoPanOffset = 0;
+    channel->playModes = 0;
+    channel->opcodeStepCounter = 0xFFFF;
+    channel->voice.volumeScale = 0;
+    channel->autoPanDepth = 0;
+    channel->tremoloDepth = 0;
+    channel->vibratoDepth = 0;
+    channel->autoPanDepthSlideLength = 0;
+    channel->tremoloDepthSlideLength = 0;
+    channel->vibratoDepthSlideLength = 0;
+    channel->fmTimer = 0;
+    channel->noiseTimer = 0;
+    Audio_Seq_SelectChannelInstrument(channel, 0);
 }
 
 // decomp: SLUS_010.40 func_80015D38 (src/SLUS_010.40/25AC.c:2363)
-u_int Audio_Seq_AssignedVoiceMask(Audio_SeqChannel* arg0, u_int arg1)
+u_int Audio_Seq_AssignedVoiceMask(Audio_SeqChannel* channel_cursor, u_int channel_mask)
 {
     u_int i;
-    u_int var_a3;
+    u_int assigned_voice_mask;
 
-    for (i = 0, var_a3 = 0; i < 32; ++i) {
-        if (arg1 & (1 << i)) {
-            if (arg0->voice.assignedVoice < 0x18) {
-                var_a3 |= 1 << arg0->voice.assignedVoice;
+    for (i = 0, assigned_voice_mask = 0; i < 32; ++i) {
+        if (channel_mask & (1 << i)) {
+            if (channel_cursor->voice.assignedVoice < 0x18) {
+                assigned_voice_mask |= 1 << channel_cursor->voice.assignedVoice;
             }
         }
-        ++arg0;
+        ++channel_cursor;
     }
-    return var_a3;
+    return assigned_voice_mask;
 }
 
 // decomp: SLUS_010.40 Sound_LoadAkaoSequence (src/SLUS_010.40/25AC.c:2380)
@@ -196,7 +196,7 @@ void Audio_Seq_LoadMusicSequence(Audio_AkaoSequenceFile* in_Sequence)
 
 // decomp: SLUS_010.40 Sound_KillMusicConfig (src/SLUS_010.40/25AC.c:2506)
 void Audio_Seq_ReleaseMusicConfiguration(
-    Audio_MusicConfig* in_Config, Audio_SeqChannel* in_pChannel, u_int arg2)
+    Audio_MusicConfig* in_Config, Audio_SeqChannel* in_pChannel, u_int music_id_filter)
 {
     Audio_SeqChannel* pChannel;
     Audio_MusicConfig** ppThisChannelConfig;
@@ -204,7 +204,7 @@ void Audio_Seq_ReleaseMusicConfiguration(
 
     pChannel = in_pChannel;
     if ((in_Config->activeChannels != 0)
-        && ((arg2 == 0) || (arg2 == in_Config->musicId))) {
+        && ((music_id_filter == 0) || (music_id_filter == in_Config->musicId))) {
         in_Config->pendingKeyOff = -1;
         for (Count = SOUND_CHANNEL_COUNT; Count != 0; Count--) {
             pChannel->noteLength = 3;
@@ -344,7 +344,7 @@ void Audio_Seq_SaveCurrentMusic(void)
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_19_Unk (src/SLUS_010.40/25AC.c:2983)
-void Audio_Seq_StartMusicLayer(Audio_CommandParams* arg0)
+void Audio_Seq_StartMusicLayer(Audio_CommandParams* command)
 {
     if ((Audio_Seq_activeMusicConfig->activeChannels != 0)
         && ((Audio_Seq_secondaryMusicConfig == NULL) || (Audio_Seq_secondaryMusicConfig->musicId == 0))) {
@@ -352,22 +352,22 @@ void Audio_Seq_StartMusicLayer(Audio_CommandParams* arg0)
         Audio_Seq_secondaryMusicChannels = Audio_Seq_savedMusicChannels;
         Audio_Native_SaveMusicSnapshot();
     }
-    Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)arg0->param1);
-    Audio_Seq_activeMusicConfig->masterVolume = (arg0->extParam1 & 0x7F) << 0x10;
+    Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)command->param1);
+    Audio_Seq_activeMusicConfig->masterVolume = (command->extParam1 & 0x7F) << 0x10;
     Audio_Seq_activeMusicConfig->masterVolumeSlideLength = 0;
-    Audio_Seq_activeMusicConfig->musicId = arg0->param3;
+    Audio_Seq_activeMusicConfig->musicId = command->param3;
     Audio_Seq_ReleaseSavedVoiceConflicts();
     Audio_Driver_controlLatches.mixBehavior &= ~0x100;
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_1A_Unk (src/SLUS_010.40/25AC.c:3001)
-void Audio_Seq_CrossfadeMusicLayers(Audio_CommandParams* arg0)
+void Audio_Seq_CrossfadeMusicLayers(Audio_CommandParams* command)
 {
     if ((Audio_Seq_savedMusicConfig.musicId != 0)
-        && (Audio_Seq_savedMusicConfig.musicId == arg0->param3)) {
+        && (Audio_Seq_savedMusicConfig.musicId == command->param3)) {
         Audio_Seq_secondaryMusicConfig = &Audio_Seq_savedMusicConfig;
         Audio_Seq_secondaryMusicChannels = Audio_Seq_savedMusicChannels;
-        Audio_Seq_RestoreMusicSequence((Audio_AkaoSequenceFile*)arg0->param1, 1);
+        Audio_Seq_RestoreMusicSequence((Audio_AkaoSequenceFile*)command->param1, 1);
     } else {
         if ((Audio_Seq_activeMusicConfig->activeChannels != 0)
             && ((Audio_Seq_secondaryMusicConfig == NULL) || (Audio_Seq_secondaryMusicConfig->musicId == 0))) {
@@ -375,20 +375,20 @@ void Audio_Seq_CrossfadeMusicLayers(Audio_CommandParams* arg0)
             Audio_Seq_secondaryMusicChannels = Audio_Seq_savedMusicChannels;
             Audio_Native_SaveMusicSnapshot();
         }
-        Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)arg0->param1);
-        Audio_Seq_activeMusicConfig->musicId = arg0->param3;
+        Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)command->param1);
+        Audio_Seq_activeMusicConfig->musicId = command->param3;
     }
     Audio_Driver_controlLatches.mixBehavior &= ~0x100;
     if (Audio_Seq_secondaryMusicConfig != NULL) {
-        int temp_a1 = arg0->extParam1;
+        int fade_ticks = command->extParam1;
         Audio_Seq_masterFade.value = 0x7F0000;
         Audio_Driver_controlLatches.mixBehavior |= 0x100;
-        Audio_Seq_masterFade.ticksRemaining = temp_a1;
-        Audio_Seq_masterFade.step = (int)0xFF810000 / temp_a1;
+        Audio_Seq_masterFade.ticksRemaining = fade_ticks;
+        Audio_Seq_masterFade.step = (int)0xFF810000 / fade_ticks;
     }
     Audio_Seq_activeMusicConfig->masterVolume = 0;
-    Audio_Seq_activeMusicConfig->masterVolumeSlideLength = arg0->extParam1;
-    Audio_Seq_activeMusicConfig->masterVolumeStep = ((arg0->extParam2 & 0x7F) << 0x10) / arg0->extParam1;
+    Audio_Seq_activeMusicConfig->masterVolumeSlideLength = command->extParam1;
+    Audio_Seq_activeMusicConfig->masterVolumeStep = ((command->extParam2 & 0x7F) << 0x10) / command->extParam1;
     Audio_Seq_ReleaseSavedVoiceConflicts();
 }
 
@@ -406,135 +406,135 @@ void Audio_Seq_StartMusicWithLoopCounter(Audio_CommandParams* in_Params)
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C0_unk (src/SLUS_010.40/25AC.c:3123)
-void Audio_Seq_SetMusicVolume(Audio_CommandParams* arg0)
+void Audio_Seq_SetMusicVolume(Audio_CommandParams* command)
 {
-    Audio_SeqChannel* var_a1;
-    Audio_MusicConfig* var_a0;
-    int temp_v1;
+    Audio_SeqChannel* channels;
+    Audio_MusicConfig* music_config;
+    int music_id;
 
-    temp_v1 = arg0->param1;
-    if ((temp_v1 == 0) || (temp_v1 == Audio_Seq_activeMusicConfig->musicId)) {
-        var_a0 = Audio_Seq_activeMusicConfig;
-        var_a1 = Audio_Seq_musicChannels;
-        var_a0->masterVolume = (arg0->param2 & 0x7F) << 0x10;
-        var_a0->masterVolumeSlideLength = 0;
-        Audio_SoundEffects_InvalidateMusicChannelVolumes(var_a0, var_a1);
+    music_id = command->param1;
+    if ((music_id == 0) || (music_id == Audio_Seq_activeMusicConfig->musicId)) {
+        music_config = Audio_Seq_activeMusicConfig;
+        channels = Audio_Seq_musicChannels;
+        music_config->masterVolume = (command->param2 & 0x7F) << 0x10;
+        music_config->masterVolumeSlideLength = 0;
+        Audio_SoundEffects_InvalidateMusicChannelVolumes(music_config, channels);
     } else {
-        var_a0 = Audio_Seq_secondaryMusicConfig;
-        if ((var_a0 != NULL) && (temp_v1 != 0) && (temp_v1 == var_a0->musicId)) {
-            var_a1 = Audio_Seq_secondaryMusicChannels;
-            var_a0->masterVolume = (arg0->param2 & 0x7F) << 0x10;
-            var_a0->masterVolumeSlideLength = 0;
-            Audio_SoundEffects_InvalidateMusicChannelVolumes(var_a0, var_a1);
+        music_config = Audio_Seq_secondaryMusicConfig;
+        if ((music_config != NULL) && (music_id != 0) && (music_id == music_config->musicId)) {
+            channels = Audio_Seq_secondaryMusicChannels;
+            music_config->masterVolume = (command->param2 & 0x7F) << 0x10;
+            music_config->masterVolumeSlideLength = 0;
+            Audio_SoundEffects_InvalidateMusicChannelVolumes(music_config, channels);
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C1_unk (src/SLUS_010.40/25AC.c:3147)
-void Audio_Seq_FadeMusicVolume(Audio_CommandParams* arg0)
+void Audio_Seq_FadeMusicVolume(Audio_CommandParams* command)
 {
-    Audio_SeqChannel* var_a1;
-    Audio_MusicConfig* var_a0;
-    int temp_a1;
-    int var_v1;
+    Audio_SeqChannel* channels;
+    Audio_MusicConfig* music_config;
+    int music_id;
+    int volume_step_work;
 
-    int var_a2 = 1;
+    int fade_ticks = 1;
 
-    if (arg0->param2 != 0) {
-        var_a2 = arg0->param2;
+    if (command->param2 != 0) {
+        fade_ticks = command->param2;
     }
 
-    temp_a1 = arg0->param1;
-    var_v1 = (arg0->param3 & 0x7F) << 0x10;
+    music_id = command->param1;
+    volume_step_work = (command->param3 & 0x7F) << 0x10;
 
-    if ((temp_a1 == 0) || (temp_a1 == Audio_Seq_activeMusicConfig->musicId)) {
-        var_a0 = Audio_Seq_activeMusicConfig;
-        var_v1 = (int)(var_v1 - var_a0->masterVolume);
-        var_v1 = var_v1 / var_a2;
-        var_a1 = Audio_Seq_musicChannels;
-        var_a0->masterVolumeSlideLength = var_a2;
-        var_a0->masterVolumeStep = var_v1;
-        Audio_SoundEffects_InvalidateMusicChannelVolumes(var_a0, var_a1);
+    if ((music_id == 0) || (music_id == Audio_Seq_activeMusicConfig->musicId)) {
+        music_config = Audio_Seq_activeMusicConfig;
+        volume_step_work = (int)(volume_step_work - music_config->masterVolume);
+        volume_step_work = volume_step_work / fade_ticks;
+        channels = Audio_Seq_musicChannels;
+        music_config->masterVolumeSlideLength = fade_ticks;
+        music_config->masterVolumeStep = volume_step_work;
+        Audio_SoundEffects_InvalidateMusicChannelVolumes(music_config, channels);
     } else {
-        var_a0 = Audio_Seq_secondaryMusicConfig;
-        if ((var_a0 != NULL) && (temp_a1 != 0) && (temp_a1 == var_a0->musicId)) {
-            var_v1 = (int)(var_v1 - var_a0->masterVolume);
-            var_v1 = var_v1 / var_a2;
-            var_a1 = Audio_Seq_secondaryMusicChannels;
-            var_a0->masterVolumeSlideLength = var_a2;
-            var_a0->masterVolumeStep = var_v1;
-            Audio_SoundEffects_InvalidateMusicChannelVolumes(var_a0, var_a1);
+        music_config = Audio_Seq_secondaryMusicConfig;
+        if ((music_config != NULL) && (music_id != 0) && (music_id == music_config->musicId)) {
+            volume_step_work = (int)(volume_step_work - music_config->masterVolume);
+            volume_step_work = volume_step_work / fade_ticks;
+            channels = Audio_Seq_secondaryMusicChannels;
+            music_config->masterVolumeSlideLength = fade_ticks;
+            music_config->masterVolumeStep = volume_step_work;
+            Audio_SoundEffects_InvalidateMusicChannelVolumes(music_config, channels);
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C2_unk (src/SLUS_010.40/25AC.c:3184)
-void Audio_Seq_FadeMusicVolumeFrom(Audio_CommandParams* arg0)
+void Audio_Seq_FadeMusicVolumeFrom(Audio_CommandParams* command)
 {
-    Audio_SeqChannel* var_a1;
-    Audio_MusicConfig* var_a0;
-    int temp_v0;
-    int temp_v1;
-    int var_a2;
-    u_int temp_v1_2;
+    Audio_SeqChannel* channels;
+    Audio_MusicConfig* music_config;
+    int requested_fade_ticks;
+    int music_id;
+    int fade_ticks;
+    u_int start_volume_q16;
 
-    temp_v0 = arg0->param2;
-    var_a2 = 1;
-    if (temp_v0 != 0) {
-        var_a2 = temp_v0;
+    requested_fade_ticks = command->param2;
+    fade_ticks = 1;
+    if (requested_fade_ticks != 0) {
+        fade_ticks = requested_fade_ticks;
     }
-    temp_v1 = arg0->param1;
-    if ((temp_v1 == 0) || (temp_v1 == Audio_Seq_activeMusicConfig->musicId)) {
-        var_a0 = Audio_Seq_activeMusicConfig;
-        var_a1 = Audio_Seq_musicChannels;
+    music_id = command->param1;
+    if ((music_id == 0) || (music_id == Audio_Seq_activeMusicConfig->musicId)) {
+        music_config = Audio_Seq_activeMusicConfig;
+        channels = Audio_Seq_musicChannels;
     } else {
-        var_a0 = Audio_Seq_secondaryMusicConfig;
-        if ((var_a0 == NULL) || (temp_v1 == 0) || (temp_v1 != var_a0->musicId)) {
+        music_config = Audio_Seq_secondaryMusicConfig;
+        if ((music_config == NULL) || (music_id == 0) || (music_id != music_config->musicId)) {
             return;
         }
-        var_a1 = Audio_Seq_secondaryMusicChannels;
+        channels = Audio_Seq_secondaryMusicChannels;
     }
-    temp_v1_2 = (arg0->param3 & 0x7F) << 0x10;
-    var_a0->masterVolume = temp_v1_2;
-    var_a0->masterVolumeStep = (int)(((arg0->param4 & 0x7F) << 0x10) - temp_v1_2) / var_a2;
-    var_a0->masterVolumeSlideLength = var_a2;
-    Audio_SoundEffects_InvalidateMusicChannelVolumes(var_a0, var_a1);
+    start_volume_q16 = (command->param3 & 0x7F) << 0x10;
+    music_config->masterVolume = start_volume_q16;
+    music_config->masterVolumeStep = (int)(((command->param4 & 0x7F) << 0x10) - start_volume_q16) / fade_ticks;
+    music_config->masterVolumeSlideLength = fade_ticks;
+    Audio_SoundEffects_InvalidateMusicChannelVolumes(music_config, channels);
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C8_unk (src/SLUS_010.40/25AC.c:3216)
-void Audio_Seq_SetDiscVolume(Audio_CommandParams* arg0)
+void Audio_Seq_SetDiscVolume(Audio_CommandParams* command)
 {
     Audio_Seq_discVolumeFadeLength = 0;
-    Audio_Seq_discVolume = (u_short)arg0->param1 << 0x10;
+    Audio_Seq_discVolume = (u_short)command->param1 << 0x10;
     Audio_Seq_WriteDiscVolume();
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C9_unk (src/SLUS_010.40/25AC.c:3223)
-void Audio_Seq_FadeDiscVolume(Audio_CommandParams* arg0)
+void Audio_Seq_FadeDiscVolume(Audio_CommandParams* command)
 {
-    int temp_v0;
-    int var_a1;
+    int requested_fade_ticks;
+    int fade_ticks;
 
-    temp_v0 = arg0->param1;
-    var_a1 = 1;
-    if (temp_v0 != 0) {
-        var_a1 = temp_v0;
+    requested_fade_ticks = command->param1;
+    fade_ticks = 1;
+    if (requested_fade_ticks != 0) {
+        fade_ticks = requested_fade_ticks;
     }
-    Audio_Seq_discVolumeFadeLength = var_a1;
-    Audio_Seq_discVolumeFadeStep = (((u_short)arg0->param2 << 0x10) - Audio_Seq_discVolume) / var_a1;
+    Audio_Seq_discVolumeFadeLength = fade_ticks;
+    Audio_Seq_discVolumeFadeStep = (((u_short)command->param2 << 0x10) - Audio_Seq_discVolume) / fade_ticks;
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_CA_unk (src/SLUS_010.40/25AC.c:3237)
-void Audio_Seq_FadeDiscVolumeFrom(Audio_CommandParams* arg0)
+void Audio_Seq_FadeDiscVolumeFrom(Audio_CommandParams* command)
 {
-    unsigned int new_var;
-    int var_a1 = 1;
-    if (arg0->param1 != 0) {
-        var_a1 = arg0->param1;
+    unsigned int target_volume_q16;
+    int fade_ticks = 1;
+    if (command->param1 != 0) {
+        fade_ticks = command->param1;
     }
-    Audio_Seq_discVolumeFadeLength = var_a1;
-    new_var = ((u_short)arg0->param3) << 0x10;
-    Audio_Seq_discVolume = (u_short)arg0->param2 << 0x10;
-    Audio_Seq_discVolumeFadeStep = (int)(new_var - Audio_Seq_discVolume) / var_a1;
+    Audio_Seq_discVolumeFadeLength = fade_ticks;
+    target_volume_q16 = ((u_short)command->param3) << 0x10;
+    Audio_Seq_discVolume = (u_short)command->param2 << 0x10;
+    Audio_Seq_discVolumeFadeStep = (int)(target_volume_q16 - Audio_Seq_discVolume) / fade_ticks;
 }
 

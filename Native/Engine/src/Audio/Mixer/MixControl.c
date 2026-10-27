@@ -16,168 +16,168 @@
 #include "Core/Memory/Copy.h"
 
 // decomp: SLUS_010.40 Sound_Cmd_A4_unk (src/SLUS_010.40/25AC.c:3427)
-void Audio_Mixer_SetSoundEffectPitchScale(Audio_CommandParams* arg0)
+void Audio_Mixer_SetSoundEffectPitchScale(Audio_CommandParams* command)
 {
     u_int i;
-    Audio_SeqChannel* var_a1 = Audio_SoundEffects_channels;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
     u_int mask = Audio_Mixer_voiceScheduler.activeVoices;
-    int var_a3 = 0x1000;
+    int voice_bit = 0x1000;
 
-    if (arg0->param2 != 0) {
-        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-            if ((mask & var_a3) && (var_a1->effectTags & arg0->param2)) {
-                var_a1->effectPitchScale = ((char)arg0->param3) << 8;
-                var_a1->effectPitchScaleSlideLength = 0;
-                var_a1->voice.dirtyFlags |= 16;
+    if (command->param2 != 0) {
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectTags & command->param2)) {
+                channel->effectPitchScale = ((char)command->param3) << 8;
+                channel->effectPitchScaleSlideLength = 0;
+                channel->voice.dirtyFlags |= 16;
             }
         }
     } else {
-        for (i = 0; i < 12; ++i, ++var_a1, var_a3 *= 2) {
-            if ((mask & var_a3) && (var_a1->effectId == arg0->param1)) {
-                var_a1->effectPitchScale = ((char)arg0->param3) << 8;
-                var_a1->effectPitchScaleSlideLength = 0;
-                var_a1->voice.dirtyFlags |= 16;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectId == command->param1)) {
+                channel->effectPitchScale = ((char)command->param3) << 8;
+                channel->effectPitchScaleSlideLength = 0;
+                channel->voice.dirtyFlags |= 16;
             }
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_A5_unk (src/SLUS_010.40/25AC.c:3453)
-void Audio_Mixer_SlideSoundEffectPitchScale(Audio_CommandParams* arg0)
+void Audio_Mixer_SlideSoundEffectPitchScale(Audio_CommandParams* command)
 {
     u_int i;
-    Audio_SeqChannel* var_a2 = Audio_SoundEffects_channels;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
-    int var_t0 = 0x1000;
+    int voice_bit = 0x1000;
 
-    if (arg0->param2 != 0) {
-        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-            if ((mask & var_t0) && (var_a2->effectTags & arg0->param2)) {
-                short v = arg0->param3 != 0 ? arg0->param3 : 1;
-                var_a2->effectPitchScaleSlideStep =
-                    (short)((short)((((char)arg0->param4) << 8) - var_a2->effectPitchScale) / v);
-                var_a2->effectPitchScaleSlideLength = v;
+    if (command->param2 != 0) {
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectTags & command->param2)) {
+                short v = command->param3 != 0 ? command->param3 : 1;
+                channel->effectPitchScaleSlideStep =
+                    (short)((short)((((char)command->param4) << 8) - channel->effectPitchScale) / v);
+                channel->effectPitchScaleSlideLength = v;
             }
         }
     } else {
-        for (i = 0; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-            if ((mask & var_t0) && (var_a2->effectId == arg0->param1)) {
-                short v = arg0->param3 != 0 ? arg0->param3 : 1;
-                var_a2->effectPitchScaleSlideStep =
-                    (short)((short)((((char)arg0->param4) << 8) - var_a2->effectPitchScale) / v);
-                var_a2->effectPitchScaleSlideLength = v;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((mask & voice_bit) && (channel->effectId == command->param1)) {
+                short v = command->param3 != 0 ? command->param3 : 1;
+                channel->effectPitchScaleSlideStep =
+                    (short)((short)((((char)command->param4) << 8) - channel->effectPitchScale) / v);
+                channel->effectPitchScaleSlideLength = v;
             }
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AC_unk (src/SLUS_010.40/25AC.c:3481)
-void Audio_Mixer_SetWorldSoundEffectPitchScale(Audio_CommandParams* arg0)
+void Audio_Mixer_SetWorldSoundEffectPitchScale(Audio_CommandParams* command)
 {
     int i;
-    Audio_SeqChannel* var_a1 = Audio_SoundEffects_channels;
-    for (i = 12; i != 0; --i, ++var_a1) {
-        if (!(var_a1->effectTags & 0x02000000)) {
-            var_a1->effectPitchScale = (char)arg0->param1 << 8;
-            var_a1->effectPitchScaleSlideLength = 0;
-            var_a1->voice.dirtyFlags |= 0x10;
+    Audio_SeqChannel* channel = Audio_SoundEffects_channels;
+    for (i = 12; i != 0; --i, ++channel) {
+        if (!(channel->effectTags & 0x02000000)) {
+            channel->effectPitchScale = (char)command->param1 << 8;
+            channel->effectPitchScaleSlideLength = 0;
+            channel->voice.dirtyFlags |= 0x10;
         }
     }
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_AD_unk (src/SLUS_010.40/25AC.c:3494)
-void Audio_Mixer_SlideWorldSoundEffectPitchScale(Audio_CommandParams* arg0)
+void Audio_Mixer_SlideWorldSoundEffectPitchScale(Audio_CommandParams* command)
 {
-    short var_a1;
-    int var_t0 = 0x1000;
+    short fade_ticks;
+    int voice_bit = 0x1000;
     int mask = Audio_Mixer_voiceScheduler.activeVoices;
     u_int i;
-    Audio_SeqChannel* var_a2;
+    Audio_SeqChannel* channel;
 
-    for (i = 0, var_a2 = Audio_SoundEffects_channels; i < 12; ++i, ++var_a2, var_t0 *= 2) {
-        if ((mask & var_t0) && !(var_a2->effectTags & 0x02000000)) {
-            var_a1 = 1;
-            if (arg0->param1 != 0) {
-                var_a1 = arg0->param1;
+    for (i = 0, channel = Audio_SoundEffects_channels; i < 12; ++i, ++channel, voice_bit *= 2) {
+        if ((mask & voice_bit) && !(channel->effectTags & 0x02000000)) {
+            fade_ticks = 1;
+            if (command->param1 != 0) {
+                fade_ticks = command->param1;
             }
-            var_a2->effectPitchScaleSlideStep =
-                (short)((short)((((char)arg0->param2) << 8) - var_a2->effectPitchScale) / var_a1);
-            var_a2->effectPitchScaleSlideLength = var_a1;
+            channel->effectPitchScaleSlideStep =
+                (short)((short)((((char)command->param2) << 8) - channel->effectPitchScale) / fade_ticks);
+            channel->effectPitchScaleSlideLength = fade_ticks;
         }
     }
 }
 
 // decomp: SLUS_010.40 func_8001833C (src/SLUS_010.40/25AC.c:3515)
-void Audio_Mixer_SetTempoScale(signed char* arg0)
+void Audio_Mixer_SetTempoScale(signed char* tempo_scale_argument)
 {
-    Audio_Mixer_tempoScale = *arg0 << 0x10;
+    Audio_Mixer_tempoScale = *tempo_scale_argument << 0x10;
     Audio_Mixer_tempoScaleSlideLength = 0;
 }
 
 // decomp: SLUS_010.40 func_80018358 (src/SLUS_010.40/25AC.c:3521)
-void Audio_Mixer_SlideTempoScale(Audio_CommandParams* arg0)
+void Audio_Mixer_SlideTempoScale(Audio_CommandParams* command)
 {
-    int temp_v0 = arg0->param1;
-    int var_a1 = 1;
-    if (temp_v0 != 0) {
-        var_a1 = temp_v0;
+    int requested_fade_ticks = command->param1;
+    int fade_ticks = 1;
+    if (requested_fade_ticks != 0) {
+        fade_ticks = requested_fade_ticks;
     }
-    Audio_Mixer_tempoScaleStep = (((signed char)arg0->param2 << 0x10) - Audio_Mixer_tempoScale) / var_a1;
-    Audio_Mixer_tempoScaleSlideLength = var_a1;
+    Audio_Mixer_tempoScaleStep = (((signed char)command->param2 << 0x10) - Audio_Mixer_tempoScale) / fade_ticks;
+    Audio_Mixer_tempoScaleSlideLength = fade_ticks;
 }
 
 // decomp: SLUS_010.40 func_800183C0 (src/SLUS_010.40/25AC.c:3532)
-void Audio_Mixer_SetTempoScaleRamp(Audio_CommandParams* arg0)
+void Audio_Mixer_SetTempoScaleRamp(Audio_CommandParams* command)
 {
-    int var_a1;
+    int fade_ticks;
 
-    var_a1 = 1;
-    if (arg0->param2 != 0) {
-        var_a1 = arg0->param1;
+    fade_ticks = 1;
+    if (command->param2 != 0) {
+        fade_ticks = command->param1;
     }
-    Audio_Mixer_tempoScale = (signed char)arg0->param2 << 0x10;
+    Audio_Mixer_tempoScale = (signed char)command->param2 << 0x10;
     Audio_Mixer_tempoScaleStep =
-        (int)(((signed char)arg0->param3 << 0x10) - Audio_Mixer_tempoScale) / var_a1;
-    Audio_Mixer_tempoScaleSlideLength = var_a1;
+        (int)(((signed char)command->param3 << 0x10) - Audio_Mixer_tempoScale) / fade_ticks;
+    Audio_Mixer_tempoScaleSlideLength = fade_ticks;
 }
 
 // decomp: SLUS_010.40 func_80018434 (src/SLUS_010.40/25AC.c:3546)
-void Audio_Mixer_SetMusicPitchScale(signed char* arg0)
+void Audio_Mixer_SetMusicPitchScale(signed char* pitch_scale_argument)
 {
-    Audio_Mixer_musicPitchScale = *arg0 << 0x10;
+    Audio_Mixer_musicPitchScale = *pitch_scale_argument << 0x10;
     Audio_Mixer_musicPitchScaleSlideLength = 0;
 }
 
 // decomp: SLUS_010.40 func_80018450 (src/SLUS_010.40/25AC.c:3552)
-void Audio_Mixer_SlideMusicPitchScale(Audio_CommandParams* arg0)
+void Audio_Mixer_SlideMusicPitchScale(Audio_CommandParams* command)
 {
-    int temp_v0;
-    int var_a1;
+    int requested_fade_ticks;
+    int fade_ticks;
 
-    temp_v0 = arg0->param1;
-    var_a1 = 1;
-    if (temp_v0 != 0) {
-        var_a1 = temp_v0;
+    requested_fade_ticks = command->param1;
+    fade_ticks = 1;
+    if (requested_fade_ticks != 0) {
+        fade_ticks = requested_fade_ticks;
     }
     Audio_Mixer_musicPitchScaleStep =
-        (int)(((signed char)arg0->param2 << 0x10) - Audio_Mixer_musicPitchScale)
-        / var_a1;
-    Audio_Mixer_musicPitchScaleSlideLength = (short)var_a1;
+        (int)(((signed char)command->param2 << 0x10) - Audio_Mixer_musicPitchScale)
+        / fade_ticks;
+    Audio_Mixer_musicPitchScaleSlideLength = (short)fade_ticks;
 }
 
 // decomp: SLUS_010.40 func_800184B8 (src/SLUS_010.40/25AC.c:3568)
-void Audio_Mixer_SetMusicPitchScaleRamp(Audio_CommandParams* arg0)
+void Audio_Mixer_SetMusicPitchScaleRamp(Audio_CommandParams* command)
 {
-    int var_a1;
+    int fade_ticks;
 
-    var_a1 = 1;
-    if (arg0->param2 != 0) {
-        var_a1 = arg0->param1;
+    fade_ticks = 1;
+    if (command->param2 != 0) {
+        fade_ticks = command->param1;
     }
-    Audio_Mixer_musicPitchScale = (signed char)arg0->param2 << 0x10;
+    Audio_Mixer_musicPitchScale = (signed char)command->param2 << 0x10;
     Audio_Mixer_musicPitchScaleStep =
-        (((signed char)arg0->param3 << 0x10) - Audio_Mixer_musicPitchScale) / var_a1;
-    Audio_Mixer_musicPitchScaleSlideLength = var_a1;
+        (((signed char)command->param3 << 0x10) - Audio_Mixer_musicPitchScale) / fade_ticks;
+    Audio_Mixer_musicPitchScaleSlideLength = fade_ticks;
 }
 
 // decomp: SLUS_010.40 func_8001852C (src/SLUS_010.40/25AC.c:3582)
@@ -208,18 +208,18 @@ void Audio_Mixer_StopMatchingMusic(Audio_CommandParams* in_Params)
 // decomp: SLUS_010.40 func_80018608 (src/SLUS_010.40/25AC.c:3607)
 void Audio_Mixer_StopWorldSoundEffects(void)
 {
-    Audio_SeqChannel* var_s2;
-    int var_s1;
+    Audio_SeqChannel* channel;
+    int voice_bit;
     u_int i;
 
-    var_s2 = Audio_SoundEffects_channels;
-    var_s1 = 0x1000;
-    for (i = 0; i < 12; ++i, ++var_s2, var_s1 *= 2) {
-        if ((Audio_Mixer_voiceScheduler.activeVoices & var_s1)
-            && !(var_s2->effectTags & 0x02000000)) {
-            Audio_Mixer_voiceScheduler.pendingKeyOff |= var_s1;
-            Audio_Seq_ReleaseSoundEffectVoice(var_s2, var_s1);
-            var_s2->updateFlags = 0;
+    channel = Audio_SoundEffects_channels;
+    voice_bit = 0x1000;
+    for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+        if ((Audio_Mixer_voiceScheduler.activeVoices & voice_bit)
+            && !(channel->effectTags & 0x02000000)) {
+            Audio_Mixer_voiceScheduler.pendingKeyOff |= voice_bit;
+            Audio_Seq_ReleaseSoundEffectVoice(channel, voice_bit);
+            channel->updateFlags = 0;
         }
     }
     Audio_Driver_controlLatches.updateFlags |= 0x110;
@@ -250,12 +250,12 @@ void Audio_Mixer_EnableMonoOutput(Audio_CommandParams* in_Params __attribute__((
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_90_unk (src/SLUS_010.40/25AC.c:3648)
-void Audio_Mixer_SetMusicMuteMask(Audio_CommandParams* arg0)
+void Audio_Mixer_SetMusicMuteMask(Audio_CommandParams* command)
 {
     u_int i;
     Audio_SeqChannel* c;
 
-    Audio_Mixer_mutedMusicChannels = arg0->param1;
+    Audio_Mixer_mutedMusicChannels = command->param1;
 
     for (i = 0, c = Audio_Seq_musicChannels; i < 32; ++i, ++c) {
         c->voice.dirtyFlags |= 3;
@@ -263,41 +263,41 @@ void Audio_Mixer_SetMusicMuteMask(Audio_CommandParams* arg0)
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_92_unk (src/SLUS_010.40/25AC.c:3660)
-void Audio_Mixer_SetMusicJumpThreshold(Audio_CommandParams* arg0)
+void Audio_Mixer_SetMusicJumpThreshold(Audio_CommandParams* command)
 {
-    Audio_Seq_activeMusicConfig->jumpThreshold = arg0->param1;
+    Audio_Seq_activeMusicConfig->jumpThreshold = command->param1;
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_9B_unk (src/SLUS_010.40/25AC.c:3665)
-void Audio_Mixer_PauseMusic(Audio_CommandParams* arg0 __attribute__((unused)))
+void Audio_Mixer_PauseMusic(Audio_CommandParams* unused_command __attribute__((unused)))
 {
-    int temp_v1;
-    int var_s0;
-    int var_s1;
-    int var_s2;
+    int paused_channel_mask;
+    int voice_index;
+    int voices_to_pause;
+    int voice_bit;
 
     if (Audio_Seq_activeMusicConfig->activeChannels != 0) {
-        int v0 = ~(Audio_Mixer_voiceScheduler.activeVoices | Audio_Cutscene_streamVoices);
-        var_s2 = 1;
-        var_s1 = v0 & 0xFFFFFF;
+        int non_effect_voice_mask = ~(Audio_Mixer_voiceScheduler.activeVoices | Audio_Cutscene_streamVoices);
+        voice_bit = 1;
+        voices_to_pause = non_effect_voice_mask & 0xFFFFFF;
 
-        if (var_s1 != 0) {
-            var_s0 = 0;
-            while (var_s1 != 0) {
-                if (var_s1 & var_s2) {
-                    Audio_Driver_SetVoiceVolume(var_s0, 0, 0, 0);
-                    Audio_Driver_SetVoiceSampleRate(var_s0, 0);
-                    Audio_Driver_SetVoiceAttackRateAndMode(var_s0, 0x7F, 1);
-                    Audio_Driver_SetVoiceSustainRateAndMode(var_s0, 0x7F, 3);
-                    var_s1 &= ~var_s2;
+        if (voices_to_pause != 0) {
+            voice_index = 0;
+            while (voices_to_pause != 0) {
+                if (voices_to_pause & voice_bit) {
+                    Audio_Driver_SetVoiceVolume(voice_index, 0, 0, 0);
+                    Audio_Driver_SetVoiceSampleRate(voice_index, 0);
+                    Audio_Driver_SetVoiceAttackRateAndMode(voice_index, 0x7F, 1);
+                    Audio_Driver_SetVoiceSustainRateAndMode(voice_index, 0x7F, 3);
+                    voices_to_pause &= ~voice_bit;
                 }
-                var_s2 *= 2;
-                var_s0 += 1;
+                voice_bit *= 2;
+                voice_index += 1;
             }
         }
-        temp_v1 = Audio_Seq_activeMusicConfig->activeChannels;
+        paused_channel_mask = Audio_Seq_activeMusicConfig->activeChannels;
         Audio_Seq_activeMusicConfig->activeChannels = 0;
-        Audio_Seq_activeMusicConfig->pausedChannels = temp_v1;
+        Audio_Seq_activeMusicConfig->pausedChannels = paused_channel_mask;
     }
     Audio_Cutscene_streamControlFlags |= 1;
 }
@@ -307,21 +307,21 @@ void Audio_Mixer_ResumeMusic(Audio_CommandParams* in_Params __attribute__((unuse
 {
     if (Audio_Seq_activeMusicConfig->pausedChannels != 0) {
         Audio_SeqChannel* c = Audio_Seq_musicChannels;
-        int var_a2 = Audio_Seq_activeMusicConfig->pausedChannels;
-        int var_a1 = 1;
-        u_int temp_v1;
+        int channels_to_resume = Audio_Seq_activeMusicConfig->pausedChannels;
+        int channel_bit = 1;
+        u_int resumed_channel_mask;
         do {
-            if (var_a2 & var_a1) {
-                var_a2 &= ~var_a1;
+            if (channels_to_resume & channel_bit) {
+                channels_to_resume &= ~channel_bit;
                 c->voice.dirtyFlags |= 0x2B13;
             }
-            var_a1 *= 2;
+            channel_bit *= 2;
             ++c;
-        } while (var_a2 != 0);
+        } while (channels_to_resume != 0);
 
-        temp_v1 = Audio_Seq_activeMusicConfig->pausedChannels;
+        resumed_channel_mask = Audio_Seq_activeMusicConfig->pausedChannels;
         Audio_Seq_activeMusicConfig->pausedChannels = 0;
-        Audio_Seq_activeMusicConfig->activeChannels = temp_v1;
+        Audio_Seq_activeMusicConfig->activeChannels = resumed_channel_mask;
         Audio_Driver_controlLatches.updateFlags |= 0x100;
     }
     Audio_Cutscene_streamControlFlags &= ~1;
@@ -330,38 +330,38 @@ void Audio_Mixer_ResumeMusic(Audio_CommandParams* in_Params __attribute__((unuse
 // decomp: SLUS_010.40 Sound_Cmd_9D_unk (src/SLUS_010.40/25AC.c:3722)
 void Audio_Mixer_PauseWorldSoundEffects(Audio_CommandParams* in_Params __attribute__((unused)))
 {
-    Audio_SeqChannel* var_a0;
-    int var_s0;
-    int var_s2;
-    int var_s1;
+    Audio_SeqChannel* channel;
+    int voice_bit;
+    int voice_index;
+    int voices_to_pause;
     u_int i;
 
     if (Audio_Mixer_voiceScheduler.activeVoices != 0) {
-        var_s1 = Audio_Mixer_voiceScheduler.activeVoices;
-        var_a0 = Audio_SoundEffects_channels;
-        var_s0 = 0x1000;
+        voices_to_pause = Audio_Mixer_voiceScheduler.activeVoices;
+        channel = Audio_SoundEffects_channels;
+        voice_bit = 0x1000;
 
-        for (i = 0; i < 12; ++i, ++var_a0, var_s0 *= 2) {
-            if ((var_s1 & var_s0) && (var_a0->effectTags & 0x02000000)) {
-                var_s1 &= ~var_s0;
+        for (i = 0; i < 12; ++i, ++channel, voice_bit *= 2) {
+            if ((voices_to_pause & voice_bit) && (channel->effectTags & 0x02000000)) {
+                voices_to_pause &= ~voice_bit;
             }
         }
 
-        var_s0 = 0x1000;
-        var_s2 = 0xC;
-        Audio_Mixer_voiceScheduler.pausedEffectVoices = var_s1;
-        Audio_Mixer_voiceScheduler.activeVoices &= ~var_s1;
+        voice_bit = 0x1000;
+        voice_index = 0xC;
+        Audio_Mixer_voiceScheduler.pausedEffectVoices = voices_to_pause;
+        Audio_Mixer_voiceScheduler.activeVoices &= ~voices_to_pause;
 
-        while (var_s1 != 0) {
-            if (var_s1 & var_s0) {
-                Audio_Driver_SetVoiceVolume(var_s2, 0, 0, 0);
-                Audio_Driver_SetVoiceSampleRate(var_s2, 0);
-                Audio_Driver_SetVoiceAttackRateAndMode(var_s2, 0x7F, 1);
-                Audio_Driver_SetVoiceSustainRateAndMode(var_s2, 0x7F, 3);
-                var_s1 &= ~var_s0;
+        while (voices_to_pause != 0) {
+            if (voices_to_pause & voice_bit) {
+                Audio_Driver_SetVoiceVolume(voice_index, 0, 0, 0);
+                Audio_Driver_SetVoiceSampleRate(voice_index, 0);
+                Audio_Driver_SetVoiceAttackRateAndMode(voice_index, 0x7F, 1);
+                Audio_Driver_SetVoiceSustainRateAndMode(voice_index, 0x7F, 3);
+                voices_to_pause &= ~voice_bit;
             }
-            var_s0 *= 2;
-            var_s2 += 1;
+            voice_bit *= 2;
+            voice_index += 1;
         }
     }
     Audio_Cutscene_streamControlFlags |= 2;
@@ -371,23 +371,23 @@ void Audio_Mixer_PauseWorldSoundEffects(Audio_CommandParams* in_Params __attribu
 void Audio_Mixer_ResumeWorldSoundEffects(Audio_CommandParams* in_Params __attribute__((unused)))
 {
     if (Audio_Mixer_pausedSoundEffectVoices != 0) {
-        u_int temp_a2;
+        u_int resumed_voice_mask;
         Audio_SeqChannel* c = Audio_SoundEffects_channels;
-        int var_a2 = Audio_Mixer_pausedSoundEffectVoices;
-        int var_a1 = 0x1000;
+        int voices_to_resume = Audio_Mixer_pausedSoundEffectVoices;
+        int voice_bit = 0x1000;
 
         do {
-            if (var_a2 & var_a1) {
-                var_a2 &= ~var_a1;
+            if (voices_to_resume & voice_bit) {
+                voices_to_resume &= ~voice_bit;
                 c->voice.dirtyFlags |= 0x2B13;
             }
-            var_a1 *= 2;
+            voice_bit *= 2;
             ++c;
-        } while (var_a2 != 0);
+        } while (voices_to_resume != 0);
 
-        temp_a2 = Audio_Mixer_voiceScheduler.pausedEffectVoices;
+        resumed_voice_mask = Audio_Mixer_voiceScheduler.pausedEffectVoices;
         Audio_Mixer_voiceScheduler.pausedEffectVoices = 0;
-        Audio_Mixer_voiceScheduler.activeVoices |= temp_a2;
+        Audio_Mixer_voiceScheduler.activeVoices |= resumed_voice_mask;
         Audio_Driver_controlLatches.updateFlags |= 0x100;
     }
     Audio_Cutscene_streamControlFlags &= ~2;

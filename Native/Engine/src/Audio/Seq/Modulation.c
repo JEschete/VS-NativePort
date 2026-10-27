@@ -16,7 +16,7 @@ void Audio_Seq_EnableVibrato(
     u_int VibratoBase;
     int VibratoDepth;
     int VibratoRatePhase;
-    int new_var;
+    int pitch_base_copy;
 
     short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);
     if (nativeWave == NULL) {
@@ -44,13 +44,13 @@ void Audio_Seq_EnableVibrato(
 
     in_pChannel->vibratoShape = (u_char)*in_pChannel->programCounter++;
     PitchBase = in_pChannel->pitchBase;
-    new_var = PitchBase;
+    pitch_base_copy = PitchBase;
     DepthHigh = (in_pChannel->vibratoDepth & 0x7F00) >> 8;
 
     if (!(in_pChannel->vibratoDepth & 0x8000)) {
-        VibratoBase = DepthHigh * ((new_var * 0xF) >> 8);
+        VibratoBase = DepthHigh * ((pitch_base_copy * 0xF) >> 8);
     } else {
-        VibratoBase = DepthHigh * new_var;
+        VibratoBase = DepthHigh * pitch_base_copy;
     }
     in_pChannel->vibratoBase = VibratoBase >> 7;
     in_pChannel->vibratoWave = nativeWave;

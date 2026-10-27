@@ -25,9 +25,9 @@ int Audio_Samples_bankChunkHeader[16];
 Audio_BankStreamState Audio_Samples_bankStream;
 
 // decomp: SLUS_010.40 func_80012BB8 (src/SLUS_010.40/25AC.c:719)
-void Audio_Samples_LoadBank(void* arg0, int arg1)
+void Audio_Samples_LoadBank(void* bank_data, int wait_for_transfer)
 {
-    while (Audio_Samples_LoadDeclaredBank(arg0, arg1) == 1)
+    while (Audio_Samples_LoadDeclaredBank(bank_data, wait_for_transfer) == 1)
         ;
 }
 
@@ -35,83 +35,83 @@ void Audio_Samples_LoadBank(void* arg0, int arg1)
 int Audio_Samples_TransferStatus(void) { return Audio_Cutscene_legacySpuTransferBusy; }
 
 // decomp: SLUS_010.40 func_80012C14 (src/SLUS_010.40/25AC.c:727)
-int Audio_Samples_ChooseMusicBankDestination(int* arg0, int* arg1, int* arg2)
+int Audio_Samples_ChooseMusicBankDestination(int* bank_header, int* output_first_instrument, int* output_sample_address)
 {
-    int var_a3;
+    int use_alternate_bank;
 
     if (Audio_Seq_activeMusicConfig->activeChannels == 0) {
         Audio_Seq_activeMusicConfig->statusFlags &= ~0x60;
     }
 
-    var_a3 = 0;
+    use_alternate_bank = 0;
 
-    if ((arg0[7] >= 0x21U) || (arg0[5] > 0x20000U)) {
+    if ((bank_header[7] >= 0x21U) || (bank_header[5] > 0x20000U)) {
         Audio_Driver_controlLatches.mixBehavior &= 0xFFFEFFFF;
         Audio_Samples_musicSampleBankIds.alternateBankId = 0;
         Audio_Samples_musicSampleBankIds.bankId = 0;
     } else {
         if ((Audio_Seq_activeMusicConfig->statusFlags & 0x20)
             || (!(Audio_Seq_activeMusicConfig->statusFlags & 0x40) && (Audio_Driver_mixBehavior & 0x10000))) {
-            var_a3 = 1;
+            use_alternate_bank = 1;
             Audio_Driver_controlLatches.mixBehavior &= 0xFFFEFFFF;
         } else {
             Audio_Driver_controlLatches.mixBehavior |= 0x10000;
         }
     }
-    if (var_a3 == 0) {
-        *arg1 = 0x40;
-        *arg2 = 0x35100;
-        Audio_Samples_musicSampleBankIds.bankId = arg0[1];
-        if (Audio_Samples_musicSampleBankIds.alternateBankId == arg0[1]) {
+    if (use_alternate_bank == 0) {
+        *output_first_instrument = 0x40;
+        *output_sample_address = 0x35100;
+        Audio_Samples_musicSampleBankIds.bankId = bank_header[1];
+        if (Audio_Samples_musicSampleBankIds.alternateBankId == bank_header[1]) {
             Audio_Samples_musicSampleBankIds.alternateBankId = 0;
         }
     } else {
-        *arg1 = 0x60;
-        *arg2 = 0x55100;
-        Audio_Samples_musicSampleBankIds.alternateBankId = arg0[1];
-        if (Audio_Samples_musicSampleBankIds.bankId == arg0[1]) {
+        *output_first_instrument = 0x60;
+        *output_sample_address = 0x55100;
+        Audio_Samples_musicSampleBankIds.alternateBankId = bank_header[1];
+        if (Audio_Samples_musicSampleBankIds.bankId == bank_header[1]) {
             Audio_Samples_musicSampleBankIds.bankId = 0;
         }
     }
-    return var_a3;
+    return use_alternate_bank;
 }
 
 // decomp: SLUS_010.40 func_80012D9C (src/SLUS_010.40/25AC.c:768)
-int Audio_Samples_ChooseSoundEffectBankDestination(int* arg0, int* arg1, int* arg2, int arg3)
+int Audio_Samples_ChooseSoundEffectBankDestination(int* bank_header, int* output_first_instrument, int* output_sample_address, int bank_slot)
 {
     u_int i;
 
     for (i = 0; i < 3; ++i) {
-        if (Audio_Samples_soundEffectBankIds[i] == arg0[1]) {
+        if (Audio_Samples_soundEffectBankIds[i] == bank_header[1]) {
             Audio_Samples_soundEffectBankIds[i] = 0;
         }
     }
-    switch (arg3) {
+    switch (bank_slot) {
     case 1:
-        *arg1 = 0xA0;
-        *arg2 = 0x13100;
-        Audio_Samples_soundEffectBankIds[1] = arg0[1];
+        *output_first_instrument = 0xA0;
+        *output_sample_address = 0x13100;
+        Audio_Samples_soundEffectBankIds[1] = bank_header[1];
         break;
     case 2:
-        *arg1 = 0xC0;
-        *arg2 = 0x1B100;
-        Audio_Samples_soundEffectBankIds[2] = arg0[1];
+        *output_first_instrument = 0xC0;
+        *output_sample_address = 0x1B100;
+        Audio_Samples_soundEffectBankIds[2] = bank_header[1];
         break;
     default:
-        *arg1 = 0x80;
-        *arg2 = 0xB100;
-        Audio_Samples_soundEffectBankIds[0] = arg0[1];
+        *output_first_instrument = 0x80;
+        *output_sample_address = 0xB100;
+        Audio_Samples_soundEffectBankIds[0] = bank_header[1];
         break;
     }
-    return arg3;
+    return bank_slot;
 }
 
 // decomp: SLUS_010.40 func_80012E50 (src/SLUS_010.40/25AC.c:797)
-int Audio_Samples_SelectMusicBank(int arg0)
+int Audio_Samples_SelectMusicBank(int bank_id)
 {
-    if (Audio_Samples_musicSampleBankIds.bankId == arg0) {
+    if (Audio_Samples_musicSampleBankIds.bankId == bank_id) {
         Audio_Driver_controlLatches.mixBehavior |= 0x10000;
-    } else if (Audio_Samples_musicSampleBankIds.alternateBankId == arg0) {
+    } else if (Audio_Samples_musicSampleBankIds.alternateBankId == bank_id) {
         Audio_Driver_controlLatches.mixBehavior &= 0xFFFEFFFF;
     }
     return Audio_Driver_mixBehavior & 0x10000;
@@ -208,23 +208,23 @@ int Audio_Samples_UploadBankChunk(int* in_Data, u_int in_Size, int in_Slot, int 
 }
 
 // decomp: SLUS_010.40 func_80013188 (src/SLUS_010.40/25AC.c:894)
-int Audio_Samples_LoadMusicBank(void* arg0, int arg1)
+int Audio_Samples_LoadMusicBank(void* bank_data, int wait_for_transfer)
 {
-    int sp10;
-    int sp14;
-    int temp_s0 = Audio_Samples_ChooseMusicBankDestination(arg0, &sp10, &sp14);
-    Audio_Samples_UploadBank(arg0, arg1, sp10, sp14);
-    return temp_s0;
+    int first_instrument;
+    int sample_address;
+    int alternate_bank_selected = Audio_Samples_ChooseMusicBankDestination(bank_data, &first_instrument, &sample_address);
+    Audio_Samples_UploadBank(bank_data, wait_for_transfer, first_instrument, sample_address);
+    return alternate_bank_selected;
 }
 
 // decomp: SLUS_010.40 func_800131DC (src/SLUS_010.40/25AC.c:903)
-int Audio_Samples_LoadSoundEffectBank(void* arg0, int arg1, int arg2)
+int Audio_Samples_LoadSoundEffectBank(void* bank_data, int bank_slot, int wait_for_transfer)
 {
-    int sp10;
-    int sp14;
+    int first_instrument;
+    int sample_address;
 
-    Audio_Samples_ChooseSoundEffectBankDestination((int*)arg0, &sp10, &sp14, arg1);
-    Audio_Samples_UploadBank(arg0, arg2, sp10, sp14);
+    Audio_Samples_ChooseSoundEffectBankDestination((int*)bank_data, &first_instrument, &sample_address, bank_slot);
+    Audio_Samples_UploadBank(bank_data, wait_for_transfer, first_instrument, sample_address);
     return 0;
 }
 
@@ -250,10 +250,10 @@ int Audio_Samples_SequenceMagicDifference(int* data)
 }
 
 // decomp: SLUS_010.40 func_80013588 (src/SLUS_010.40/25AC.c:1023)
-int Audio_Samples_LoadDeclaredBank(void* arg0, int arg1)
+int Audio_Samples_LoadDeclaredBank(void* bank_data, int wait_for_transfer)
 {
-    if (Audio_Samples_SequenceMagicDifference(arg0) == 0) {
-        Audio_Samples_UploadBank(arg0, arg1, ((int*)arg0)[6], ((int*)arg0)[4]);
+    if (Audio_Samples_SequenceMagicDifference(bank_data) == 0) {
+        Audio_Samples_UploadBank(bank_data, wait_for_transfer, ((int*)bank_data)[6], ((int*)bank_data)[4]);
         return 0;
     }
     return -1;
@@ -308,7 +308,7 @@ u_short Audio_Samples_MapInstrumentToBaseBank(u_int in_Flags, Audio_SeqChannel* 
 // decomp: SLUS_010.40 func_80016DA8 (src/SLUS_010.40/25AC.c:2941)
 int Audio_Samples_SoundEffectBankSlot(int flags)
 {
-    int var_v1 = 0;
+    int bank_slot = 0;
 
     flags &= 0x7FFF;
 
@@ -316,10 +316,10 @@ int Audio_Samples_SoundEffectBankSlot(int flags)
         return 0;
     }
     if (flags == Audio_Samples_soundEffectBankIds[1]) {
-        var_v1 = 1;
+        bank_slot = 1;
     } else if (flags == Audio_Samples_soundEffectBankIds[2]) {
-        var_v1 = 2;
+        bank_slot = 2;
     }
-    return var_v1;
+    return bank_slot;
 }
 
