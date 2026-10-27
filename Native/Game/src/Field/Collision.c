@@ -58,12 +58,12 @@ Field_ZoneBounds* Field_RoomCameraBounds(int arg0 __attribute__((unused)))
 }
 
 // decomp: BATTLE.PRG func_8008B764 (src/BATTLE/BATTLE.PRG/146C.c:16080)
-Field_MpdTileCell* Field_CollisionCellAt(u_int width, u_int height, int arg2)
+Field_MpdTileCell* Field_CollisionCellAt(u_int width, u_int height, int collision_layer)
 {
     if (Field_roomData.tileCells != NULL) {
-        if (arg2 >= 2) {
+        if (collision_layer >= 2) {
             if (Field_roomData.movingPlatforms != NULL) {
-                return &Field_roomData.movingPlatforms[arg2 - 2].tileCell;
+                return &Field_roomData.movingPlatforms[collision_layer - 2].tileCell;
             }
             return NULL;
         }
@@ -78,28 +78,28 @@ Field_MpdTileCell* Field_CollisionCellAt(u_int width, u_int height, int arg2)
 }
 
 // decomp: BATTLE.PRG func_8008B808 (src/BATTLE/BATTLE.PRG/146C.c:16099)
-int Field_SetCollisionCellBlocked(int arg0, int arg1, int arg2, int arg3)
+int Field_SetCollisionCellBlocked(int tile_x, int tile_z, int collision_layer, int blocked_passability)
 {
-    Field_MpdTileCell* temp_a0;
+    Field_MpdTileCell* collision_cell;
 
     if (Field_roomData.tileCells != NULL) {
-        if (arg3 != 0) {
-            arg3 = 5;
+        if (blocked_passability != 0) {
+            blocked_passability = 5;
         }
-        if (arg2 >= 2) {
+        if (collision_layer >= 2) {
             if (Field_roomData.movingPlatforms != NULL) {
-                temp_a0 = &Field_roomData.movingPlatforms[arg2 - 2].tileCell;
-                temp_a0->doorPassability = arg3;
+                collision_cell = &Field_roomData.movingPlatforms[collision_layer - 2].tileCell;
+                collision_cell->doorPassability = blocked_passability;
                 return 1;
             }
         } else {
-            temp_a0 =
+            collision_cell =
                 &Field_roomData
-                     .tileCells[(arg2 * Field_roomData.collisionMap->width
+                     .tileCells[(collision_layer * Field_roomData.collisionMap->width
                                    * Field_roomData.collisionMap->height)
-                               + (arg1 * Field_roomData.collisionMap->width)
-                               + arg0];
-            temp_a0->doorPassability = arg3;
+                               + (tile_z * Field_roomData.collisionMap->width)
+                               + tile_x];
+            collision_cell->doorPassability = blocked_passability;
             return 1;
         }
     }
@@ -107,176 +107,176 @@ int Field_SetCollisionCellBlocked(int arg0, int arg1, int arg2, int arg3)
 }
 
 // decomp: BATTLE.PRG func_8008DA24 (src/BATTLE/BATTLE.PRG/146C.c:17000)
-short Field_InterpolatedFloorHeight(int arg0, int arg1)
+short Field_InterpolatedFloorHeight(int world_x_or_sample_x, int world_z_or_sample_z)
 {
     Field_MpdCollisionHeader* collisionMap;
-    int temp_fp;
-    int temp_s0_2;
-    int temp_s0_3;
-    int temp_s7;
-    int temp_v0;
-    int temp_v0_2;
-    int var_s0;
-    int var_s1;
-    int var_s3;
-    int var_s5;
-    int var_v0;
-    int var_v0_3;
+    int sample_offset_z;
+    int packed_absolute_sample_offsets;
+    int neighbor_z_weight;
+    int sample_offset_x;
+    int neighbor_x_weight;
+    int center_weight_or_weighted_height;
+    int centered_sample_offset_x;
+    int neighbor_sample_z_or_height;
+    int neighbor_sample_x_or_height;
+    int base_or_interpolated_height;
+    int neighbor_height_delta;
+    int centered_sample_offset_z;
     int v;
-    int temp_s6 = 0x8000;
+    int height_code_or_packed_height = 0x8000;
 
     if (Field_roomData.collisionMap != NULL) {
-        temp_s7 = arg0;
-        temp_s7 = temp_s7 & 0x1F;
-        arg0 >>= 5;
-        temp_fp = arg1 & 0x1F;
-        arg1 >>= 5;
+        sample_offset_x = world_x_or_sample_x;
+        sample_offset_x = sample_offset_x & 0x1F;
+        world_x_or_sample_x >>= 5;
+        sample_offset_z = world_z_or_sample_z & 0x1F;
+        world_z_or_sample_z >>= 5;
         collisionMap = Field_roomData.collisionMap;
 
-        if (((arg0 >> 2) >= (u_int)collisionMap->width)
-            || ((arg1 >> 2) >= (u_int)collisionMap->height)) {
+        if (((world_x_or_sample_x >> 2) >= (u_int)collisionMap->width)
+            || ((world_z_or_sample_z >> 2) >= (u_int)collisionMap->height)) {
             return -0x8000;
         }
 
-        temp_s6 = Field_SampleCollisionHeightCode(arg0, arg1, 0);
-        var_s5 = (collisionMap->heightOrigin - ((temp_s6 & 0x7F) * 2)) * 8;
+        height_code_or_packed_height = Field_SampleCollisionHeightCode(world_x_or_sample_x, world_z_or_sample_z, 0);
+        base_or_interpolated_height = (collisionMap->heightOrigin - ((height_code_or_packed_height & 0x7F) * 2)) * 8;
 
-        var_s3 = temp_s7 < 0x10 ? arg0 - 1 : arg0 + 1;
-        var_s1 = arg1 - 1;
+        neighbor_sample_x_or_height = sample_offset_x < 0x10 ? world_x_or_sample_x - 1 : world_x_or_sample_x + 1;
+        neighbor_sample_z_or_height = world_z_or_sample_z - 1;
 
-        if (temp_fp >= 0x10) {
-            var_s1 = arg1 + 1;
+        if (sample_offset_z >= 0x10) {
+            neighbor_sample_z_or_height = world_z_or_sample_z + 1;
         }
 
-        if ((var_s3 >> 2) < (u_int)collisionMap->width) {
-            var_s3 =
-                (collisionMap->heightOrigin - ((Field_SampleCollisionHeightCode(var_s3, arg1, 0) & 0x7F) * 2)) * 8;
-            var_v0 = var_s3 - var_s5;
-            if (ABS(var_v0) >= 0x40) {
-                var_s3 = var_s5;
+        if ((neighbor_sample_x_or_height >> 2) < (u_int)collisionMap->width) {
+            neighbor_sample_x_or_height =
+                (collisionMap->heightOrigin - ((Field_SampleCollisionHeightCode(neighbor_sample_x_or_height, world_z_or_sample_z, 0) & 0x7F) * 2)) * 8;
+            neighbor_height_delta = neighbor_sample_x_or_height - base_or_interpolated_height;
+            if (ABS(neighbor_height_delta) >= 0x40) {
+                neighbor_sample_x_or_height = base_or_interpolated_height;
             }
         } else {
-            var_s3 = var_s5;
+            neighbor_sample_x_or_height = base_or_interpolated_height;
         }
 
-        if ((var_s1 >> 2) < (u_int)collisionMap->height) {
-            var_s1 =
-                (collisionMap->heightOrigin - ((Field_SampleCollisionHeightCode(arg0, var_s1, 0) & 0x7F) * 2)) * 8;
-            var_v0 = var_s1 - var_s5;
-            if (ABS(var_v0) >= 0x40) {
-                var_s1 = var_s5;
+        if ((neighbor_sample_z_or_height >> 2) < (u_int)collisionMap->height) {
+            neighbor_sample_z_or_height =
+                (collisionMap->heightOrigin - ((Field_SampleCollisionHeightCode(world_x_or_sample_x, neighbor_sample_z_or_height, 0) & 0x7F) * 2)) * 8;
+            neighbor_height_delta = neighbor_sample_z_or_height - base_or_interpolated_height;
+            if (ABS(neighbor_height_delta) >= 0x40) {
+                neighbor_sample_z_or_height = base_or_interpolated_height;
             }
         } else {
-            var_s1 = var_s5;
+            neighbor_sample_z_or_height = base_or_interpolated_height;
         }
 
-        var_s0 = temp_s7 - 0x10;
-        v = ABS(var_s0);
-        var_v0_3 = temp_fp - 0x10;
+        centered_sample_offset_x = sample_offset_x - 0x10;
+        v = ABS(centered_sample_offset_x);
+        centered_sample_offset_z = sample_offset_z - 0x10;
 
-        temp_s0_2 = v | (ABS(var_v0_3) << 0x10);
-        temp_s0_3 = Core_Gte_NormalClip(0, 0x20, temp_s0_2);
-        temp_v0 = Core_Gte_NormalClip(0, temp_s0_2, 0x200000);
+        packed_absolute_sample_offsets = v | (ABS(centered_sample_offset_z) << 0x10);
+        neighbor_z_weight = Core_Gte_NormalClip(0, 0x20, packed_absolute_sample_offsets);
+        neighbor_x_weight = Core_Gte_NormalClip(0, packed_absolute_sample_offsets, 0x200000);
 
-        temp_v0_2 = 0x400 - temp_v0;
-        temp_v0_2 -= temp_s0_3;
+        center_weight_or_weighted_height = 0x400 - neighbor_x_weight;
+        center_weight_or_weighted_height -= neighbor_z_weight;
 
-        if (temp_v0_2 >= 0) {
-            temp_v0_2 = (var_s1 * temp_s0_3) + (var_s3 * temp_v0) + (var_s5 * temp_v0_2);
-            var_s5 = temp_v0_2 / 1024;
+        if (center_weight_or_weighted_height >= 0) {
+            center_weight_or_weighted_height = (neighbor_sample_z_or_height * neighbor_z_weight) + (neighbor_sample_x_or_height * neighbor_x_weight) + (base_or_interpolated_height * center_weight_or_weighted_height);
+            base_or_interpolated_height = center_weight_or_weighted_height / 1024;
         }
-        temp_s6 = (var_s5 & 0x7FFF) | ((temp_s6 & 0x80) << 8);
+        height_code_or_packed_height = (base_or_interpolated_height & 0x7FFF) | ((height_code_or_packed_height & 0x80) << 8);
     }
-    return temp_s6;
+    return height_code_or_packed_height;
 }
 
 // decomp: BATTLE.PRG func_8008DC7C (src/BATTLE/BATTLE.PRG/146C.c:17083)
-short Field_FloorHeightAt(int arg0, int arg1)
+short Field_FloorHeightAt(int world_x, int world_z)
 {
     Field_MpdCollisionHeader* collisionMap = Field_roomData.collisionMap;
-    int var_a2 = 0x8000;
+    int height_code_or_packed_floor = 0x8000;
 
-    if ((collisionMap != NULL) && ((u_int)(arg0 >> 7) < collisionMap->width)
-        && ((u_int)(arg1 >> 7) < collisionMap->height)) {
-        var_a2 = Field_SampleCollisionHeightCode(arg0 >> 5, arg1 >> 5, 0);
-        var_a2 = (((collisionMap->heightOrigin - ((var_a2 & 0x7F) * 2)) * 8) & 0x7FFF)
-               | ((var_a2 & 0x80) << 8);
+    if ((collisionMap != NULL) && ((u_int)(world_x >> 7) < collisionMap->width)
+        && ((u_int)(world_z >> 7) < collisionMap->height)) {
+        height_code_or_packed_floor = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 0);
+        height_code_or_packed_floor = (((collisionMap->heightOrigin - ((height_code_or_packed_floor & 0x7F) * 2)) * 8) & 0x7FFF)
+               | ((height_code_or_packed_floor & 0x80) << 8);
     }
-    return var_a2;
+    return height_code_or_packed_floor;
 }
 
 // decomp: BATTLE.PRG func_8008DD0C (src/BATTLE/BATTLE.PRG/146C.c:17097)
-short Field_CeilingHeightAt(int arg0, int arg1)
+short Field_CeilingHeightAt(int world_x, int world_z)
 {
-    int temp_v1;
+    int decoded_ceiling_height;
     Field_MpdCollisionHeader* collisionMap = Field_roomData.collisionMap;
-    int var_a2 = 0;
+    int height_code_or_packed_ceiling = 0;
     int new_var = 8;
 
     if ((Field_roomData.collisionMap != NULL)
-        && ((arg0 >> 7) < (u_int)collisionMap->width)
-        && ((arg1 >> 7) < (u_int)collisionMap->height)) {
-        var_a2 = Field_SampleCollisionHeightCode(arg0 >> 5, arg1 >> 5, 1);
-        temp_v1 = (collisionMap->heightOrigin - ((var_a2 & 0x7F) * 2)) * new_var;
-        if (temp_v1 > 0) {
-            var_a2 = 0xF810;
+        && ((world_x >> 7) < (u_int)collisionMap->width)
+        && ((world_z >> 7) < (u_int)collisionMap->height)) {
+        height_code_or_packed_ceiling = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 1);
+        decoded_ceiling_height = (collisionMap->heightOrigin - ((height_code_or_packed_ceiling & 0x7F) * 2)) * new_var;
+        if (decoded_ceiling_height > 0) {
+            height_code_or_packed_ceiling = 0xF810;
         } else {
-            var_a2 = (temp_v1 & 0x7FFF) | ((var_a2 & 0x80) << new_var);
+            height_code_or_packed_ceiling = (decoded_ceiling_height & 0x7FFF) | ((height_code_or_packed_ceiling & 0x80) << new_var);
         }
     }
-    return var_a2;
+    return height_code_or_packed_ceiling;
 }
 
 // decomp: BATTLE.PRG func_8008DDA8 (src/BATTLE/BATTLE.PRG/146C.c:17118)
-int Field_FloorAndCeilingHeightsAt(int arg0, int arg1)
+int Field_FloorAndCeilingHeightsAt(int world_x, int world_z)
 {
-    int sp10 = 0x80008000;
-    short* new_var = (short*)&sp10;
+    int packed_floor_and_ceiling = 0x80008000;
+    short* height_halfwords = (short*)&packed_floor_and_ceiling;
 
     Field_MpdCollisionHeader* collisionMap = Field_roomData.collisionMap;
 
-    if ((collisionMap != NULL) && ((u_int)(arg0 >> 7) < collisionMap->width)) {
-        if ((u_int)(arg1 >> 7) < collisionMap->height) {
-            int temp_v1;
-            int temp_a3 = Field_SampleCollisionHeightCode(arg0 >> 5, arg1 >> 5, 0);
-            temp_a3 = (((collisionMap->heightOrigin - ((temp_a3 & 0x7F) * 2)) * 8) & 0x7FFF)
-                    | ((temp_a3 & 0x80) << 8);
-            new_var[0] = temp_a3;
-            temp_a3 = Field_SampleCollisionHeightCode(arg0 >> 5, arg1 >> 5, 1);
-            temp_v1 = collisionMap->heightOrigin - (temp_a3 & 0x7F) * 2;
-            temp_v1 *= 8;
-            if (temp_v1 > 0) {
-                temp_a3 = 0xF810;
+    if ((collisionMap != NULL) && ((u_int)(world_x >> 7) < collisionMap->width)) {
+        if ((u_int)(world_z >> 7) < collisionMap->height) {
+            int ceiling_height_work;
+            int height_code_or_packed_plane = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 0);
+            height_code_or_packed_plane = (((collisionMap->heightOrigin - ((height_code_or_packed_plane & 0x7F) * 2)) * 8) & 0x7FFF)
+                    | ((height_code_or_packed_plane & 0x80) << 8);
+            height_halfwords[0] = height_code_or_packed_plane;
+            height_code_or_packed_plane = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 1);
+            ceiling_height_work = collisionMap->heightOrigin - (height_code_or_packed_plane & 0x7F) * 2;
+            ceiling_height_work *= 8;
+            if (ceiling_height_work > 0) {
+                height_code_or_packed_plane = 0xF810;
             } else {
-                temp_v1 &= 0x7FFF;
-                temp_a3 = temp_v1 | ((temp_a3 & 0x80) << 8);
+                ceiling_height_work &= 0x7FFF;
+                height_code_or_packed_plane = ceiling_height_work | ((height_code_or_packed_plane & 0x80) << 8);
             }
-            new_var[1] = temp_a3;
+            height_halfwords[1] = height_code_or_packed_plane;
         }
     }
-    return sp10;
+    return packed_floor_and_ceiling;
 }
 
 // decomp: BATTLE.PRG func_800A0A1C (src/BATTLE/BATTLE.PRG/30DB0.c:3994)
-void Field_SetActorCollisionBypass(int arg0, int arg1)
+void Field_SetActorCollisionBypass(int actor_index, int collision_bypass_flags)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
-    if (Actors_actorRecords[arg0] != NULL) {
-        temp_a0->bypassActorCollision = arg1;
-        temp_a0->ignoredByCollision = arg1 >> 1;
+    Actors_ActorRecord* actor_record = Actors_actorRecords[actor_index];
+    if (Actors_actorRecords[actor_index] != NULL) {
+        actor_record->bypassActorCollision = collision_bypass_flags;
+        actor_record->ignoredByCollision = collision_bypass_flags >> 1;
     }
 }
 
 // decomp: BATTLE.PRG func_800A0A74 (src/BATTLE/BATTLE.PRG/30DB0.c:4003)
-int Field_ActorCollisionBypass(int arg0)
+int Field_ActorCollisionBypass(int actor_index)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
-    if (temp_a0 != NULL) {
-        int var_v1 = temp_a0->bypassActorCollision;
-        if ((temp_a0->ignoredByCollision << 11)) {
-            var_v1 |= 2;
+    Actors_ActorRecord* actor_record = Actors_actorRecords[actor_index];
+    if (actor_record != NULL) {
+        int collision_bypass_flags = actor_record->bypassActorCollision;
+        if ((actor_record->ignoredByCollision << 11)) {
+            collision_bypass_flags |= 2;
         }
-        return var_v1;
+        return collision_bypass_flags;
     }
 }
 
@@ -288,19 +288,19 @@ int Field_RelativeCollisionSampleHeight(
 }
 
 // decomp: BATTLE.PRG func_800A3500 (src/BATTLE/BATTLE.PRG/3A1A0.c:394)
-int Field_ActorSupportHeight(int arg0, int arg1)
+int Field_ActorSupportHeight(int world_x, int world_z)
 {
     int h;
     int i;
     Field_GimmickInstance* actor;
 
-    h = Field_InterpolatedFloorHeight(arg0, arg1);
+    h = Field_InterpolatedFloorHeight(world_x, world_z);
     h <<= 17;
     h >>= 17;
 
     for (i = 0; i < 16; ++i) {
         actor = Field_gimmickInstances[i];
-        if (actor != NULL && actor->positionX == arg0 && actor->positionZ == arg1
+        if (actor != NULL && actor->positionX == world_x && actor->positionZ == world_z
             && actor->positionY - 0x80 < h) {
             h = actor->positionY - 0x80;
         }
@@ -344,26 +344,26 @@ void Field_SnapRoomActorsToSupport(void)
 }
 
 // decomp: BATTLE.PRG func_800A3BC4 (src/BATTLE/BATTLE.PRG/3A1A0.c:652)
-int Field_RoomCeilingHeight(int arg0, int arg1)
+int Field_RoomCeilingHeight(int world_x, int world_z)
 {
-    short temp_v0 = Field_CeilingHeightAt(arg0, arg1);
-    if (temp_v0 == 0) {
+    short packed_ceiling_height = Field_CeilingHeightAt(world_x, world_z);
+    if (packed_ceiling_height == 0) {
         return 0;
     }
-    return (temp_v0 << 0x11) >> 0x11;
+    return (packed_ceiling_height << 0x11) >> 0x11;
 }
 
 // decomp: BATTLE.PRG func_800A3C34 (src/BATTLE/BATTLE.PRG/3A1A0.c:666)
-Actors_ActorRecord* Field_FindActorOccupyingTile(int arg0, int arg1, int arg2, int arg3)
+Actors_ActorRecord* Field_FindActorOccupyingTile(int query_tile_x, int query_tile_z, int minimum_actor_height, int occupancy_mode_or_first_actor)
 {
     int i;
 
-    arg2 -= 192;
+    minimum_actor_height -= 192;
 
-    if (arg3 < 2) {
+    if (occupancy_mode_or_first_actor < 2) {
         i = 0;
     } else {
-        i = arg3;
+        i = occupancy_mode_or_first_actor;
     }
 
     for (; i < 17; ++i) {
@@ -371,25 +371,25 @@ Actors_ActorRecord* Field_FindActorOccupyingTile(int arg0, int arg1, int arg2, i
         if ((actor == NULL) || actor->instance.isSkipped || (actor->modelId == 0x7F)) {
             continue;
         }
-        if ((arg3 == 1)
+        if ((occupancy_mode_or_first_actor == 1)
             && (((actor->instance.poseState != 0) && (actor->instance.poseState < 3))
                 || actor->instance.movementMode || actor->instance.reactionState)) {
             SVECTOR* pos = &actor->routeTarget;
-            if (((pos->vx & 0xFF) == arg0) && (arg1 == (pos->vy & 0xFF))) {
+            if (((pos->vx & 0xFF) == query_tile_x) && (query_tile_z == (pos->vy & 0xFF))) {
                 return actor;
             }
             continue;
         }
         if ((i == 0) && (*((int*)&actor->sequenceFlags - 2) & 0xF0000000)) {
-            Field_GimmickInstance* temp_v1 = Field_gimmickInstances[actor->supportGimmick];
-            if ((arg0 == temp_v1->tileX) && (arg1 == temp_v1->tileZ)) {
+            Field_GimmickInstance* support_gimmick_record = Field_gimmickInstances[actor->supportGimmick];
+            if ((query_tile_x == support_gimmick_record->tileX) && (query_tile_z == support_gimmick_record->tileZ)) {
                 return actor;
             }
             continue;
         }
-        if ((actor->instance.locomotionState != 2) && (actor->instance.currentTileX == arg0)
-            && (actor->instance.currentTileZ == arg1) && !actor->instance.motionLocked
-            && (actor->instance.position.vy >= arg2)) {
+        if ((actor->instance.locomotionState != 2) && (actor->instance.currentTileX == query_tile_x)
+            && (actor->instance.currentTileZ == query_tile_z) && !actor->instance.motionLocked
+            && (actor->instance.position.vy >= minimum_actor_height)) {
             return actor;
         }
     }
@@ -490,52 +490,52 @@ int Field_IsHangingActorObstructed(Actors_ActorRecord* actor)
 }
 
 // decomp: BATTLE.PRG func_800A4A24 (src/BATTLE/BATTLE.PRG/3A1A0.c:1089)
-Field_PlatformContactPoint* Field_FindMovingPlatformById(int arg0)
+Field_PlatformContactPoint* Field_FindMovingPlatformById(int platform_layer_or_index)
 {
-    Field_PlatformContactPoint sp10[4];
-    int temp_v0;
+    Field_PlatformContactPoint platform_contacts[4];
+    int platform_contact_count;
     int i;
-    arg0 -= 2;
+    platform_layer_or_index -= 2;
 
-    temp_v0 = Field_CollectMovingPlatformPositions(sp10);
+    platform_contact_count = Field_CollectMovingPlatformPositions(platform_contacts);
 
-    for (i = 0; i < temp_v0; ++i) {
-        if (sp10[i].platformIndex == arg0) {
+    for (i = 0; i < platform_contact_count; ++i) {
+        if (platform_contacts[i].platformIndex == platform_layer_or_index) {
             // BUG: returns stack variable
-            return &sp10[i];
+            return &platform_contacts[i];
         }
     }
     return NULL;
 }
 
 // decomp: BATTLE.PRG func_800A51A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:1307)
-int Field_IsPointOnMovingPlatform(int arg0, SVECTOR* arg1)
+int Field_IsPointOnMovingPlatform(int platform_layer_or_index, SVECTOR* world_position)
 {
-    Field_PlatformContactPoint sp10[4];
+    Field_PlatformContactPoint platform_contacts[4];
     Field_PlatformContactPoint* p;
     int n;
     int i;
 
-    arg0 -= 2;
-    n = Field_CollectMovingPlatformPositions(sp10);
+    platform_layer_or_index -= 2;
+    n = Field_CollectMovingPlatformPositions(platform_contacts);
     for (i = 0; i < n; i++) {
-        if (sp10[i].platformIndex == arg0) {
-            p = &sp10[i];
+        if (platform_contacts[i].platformIndex == platform_layer_or_index) {
+            p = &platform_contacts[i];
             goto found;
         }
     }
     p = NULL;
 found:
-    if (p->x + 0x40 < arg1->vx) {
+    if (p->x + 0x40 < world_position->vx) {
         return 0;
     }
-    if (arg1->vx < p->x - 0x40) {
+    if (world_position->vx < p->x - 0x40) {
         return 0;
     }
-    if (p->z + 0x40 < arg1->vz) {
+    if (p->z + 0x40 < world_position->vz) {
         return 0;
     }
-    return !(arg1->vz < p->z - 0x40);
+    return !(world_position->vz < p->z - 0x40);
 }
 
 // decomp: BATTLE.PRG func_800A6798 (src/BATTLE/BATTLE.PRG/3A1A0.c:1960)
@@ -589,11 +589,11 @@ int Field_CanActorHangFromLedge(Actors_ActorRecord* actor, SVECTOR* offset, SVEC
 }
 
 // decomp: BATTLE.PRG func_800A69B4 (src/BATTLE/BATTLE.PRG/3A1A0.c:2009)
-int Field_HasActorLedgeSideSupport(Actors_ActorRecord* arg0)
+int Field_HasActorLedgeSideSupport(Actors_ActorRecord* actor_record)
 {
     SVECTOR v;
     int ret = 0;
-    int h = Core_Gte_Sin(ONE / 8) * arg0->collisionRadius / ONE;
+    int h = Core_Gte_Sin(ONE / 8) * actor_record->collisionRadius / ONE;
 
     v.vx = 0;
     v.vz = 0;
@@ -613,7 +613,7 @@ int Field_HasActorLedgeSideSupport(Actors_ActorRecord* arg0)
 }
 
 // decomp: BATTLE.PRG func_800A6EE8 (src/BATTLE/BATTLE.PRG/3A1A0.c:2175)
-int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
+int Field_SampleActorSupportHeight(SVECTOR* origin_position, int offset_x, int offset_z, int support_probe_mode)
 {
     SVECTOR sp;
     u_int* ent;
@@ -621,8 +621,8 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
     int r;
     int los;
 
-    int x = arg1 + arg0->vx;
-    int z = arg2 + arg0->vz;
+    int x = offset_x + origin_position->vx;
+    int z = offset_z + origin_position->vz;
 
     sp.vx = x;
     sp.vz = z;
@@ -633,7 +633,7 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
 
         Field_collisionProbeTile = ent;
 
-        if (arg3 == 0) {
+        if (support_probe_mode == 0) {
             h = Field_FloorHeightAt(x, z);
         } else {
             h = Field_InterpolatedFloorHeight(x, z);
@@ -644,8 +644,8 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
             h <<= 17;
             h >>= 17;
 
-            if (arg3 == 2) {
-                r = Field_GimmickSupportHeightBelow(x / 128, z / 128, arg0->vy);
+            if (support_probe_mode == 2) {
+                r = Field_GimmickSupportHeightBelow(x / 128, z / 128, origin_position->vy);
             } else {
                 r = Field_GimmickSupportHeight(x / 128, z / 128);
             }
@@ -658,7 +658,7 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
 
                 h = 3000;
 
-                if (arg3 == 3) {
+                if (support_probe_mode == 3) {
 
                     los = Field_kTileSurfaceIds[*ent & 0x1F];
 
@@ -668,9 +668,9 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
                 }
             }
 
-            if (arg3 != 2 && arg3 != 4) {
+            if (support_probe_mode != 2 && support_probe_mode != 4) {
 
-                los = Field_MovingPlatformContactHeight(x, arg0->vy, z, 0);
+                los = Field_MovingPlatformContactHeight(x, origin_position->vy, z, 0);
 
                 r = h;
 
@@ -678,7 +678,7 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
                     h = los;
                 }
 
-                if (arg3 == 3 && h < arg0->vy - 64) {
+                if (support_probe_mode == 3 && h < origin_position->vy - 64) {
                     h = r;
                 }
             }
@@ -687,8 +687,8 @@ int Field_SampleActorSupportHeight(SVECTOR* arg0, int arg1, int arg2, int arg3)
         }
     }
 
-    if (arg3 == 3) {
-        return arg0->vy;
+    if (support_probe_mode == 3) {
+        return origin_position->vy;
     }
 
     return -3000;
@@ -1450,7 +1450,7 @@ slideZ:
 }
 
 // decomp: BATTLE.PRG func_800A8B34 (src/BATTLE/BATTLE.PRG/3A1A0.c:3008)
-int Field_ClassifyActorTerrainProbe(SVECTOR* arg0, int arg1)
+int Field_ClassifyActorTerrainProbe(SVECTOR* probe_position, int sample_sector)
 {
     u_int* ent;
     int h;
@@ -1463,15 +1463,15 @@ int Field_ClassifyActorTerrainProbe(SVECTOR* arg0, int arg1)
     int q;
     Field_CollisionSampleScratch* sb = (Field_CollisionSampleScratch*)((uintptr_t)Core_ScratchBase() + 0x3BC);
     Field_GimmickInstance* actor = sb->movingActor;
-    int limit = sb->sampleHeights[arg1 & 7];
+    int limit = sb->sampleHeights[sample_sector & 7];
 
     if (actor->bypassActorCollision << 9) {
         return 0;
     }
 
-    gx = arg0->vx / 128;
-    gz = arg0->vz / 128;
-    elev2 = Field_CeilingHeightAt(arg0->vx, arg0->vz);
+    gx = probe_position->vx / 128;
+    gz = probe_position->vz / 128;
+    elev2 = Field_CeilingHeightAt(probe_position->vx, probe_position->vz);
     elev2 <<= 17;
     elev2 >>= 17;
 
@@ -1479,13 +1479,13 @@ int Field_ClassifyActorTerrainProbe(SVECTOR* arg0, int arg1)
         return 0xFF;
     }
 
-    ent = ((u_int* (*)(SVECTOR*, int))Field_FindCollisionCellAtPosition)(arg0, 0);
+    ent = ((u_int* (*)(SVECTOR*, int))Field_FindCollisionCellAtPosition)(probe_position, 0);
 
     if (ent == NULL) {
         return 0xFF;
     }
 
-    h = Field_FloorHeightAt(arg0->vx, arg0->vz);
+    h = Field_FloorHeightAt(probe_position->vx, probe_position->vz);
 
     if (h < 0) {
         return 0xFF;
@@ -1510,16 +1510,16 @@ int Field_ClassifyActorTerrainProbe(SVECTOR* arg0, int arg1)
         return 0xFF;
     }
 
-    los = Field_MovingPlatformContactHeight(arg0->vx, limit, arg0->vz, 0);
+    los = Field_MovingPlatformContactHeight(probe_position->vx, limit, probe_position->vz, 0);
 
     if (los == 0) {
-        arg0->pad = 0;
+        probe_position->pad = 0;
     } else {
-        arg0->pad = Actors_supportingPlatformLayer;
+        probe_position->pad = Actors_supportingPlatformLayer;
         h = los;
     }
 
-    arg0->pad |= Actors_supportingGimmickIndex << 8;
+    probe_position->pad |= Actors_supportingGimmickIndex << 8;
 
     if (sb->searchFloor < elev2 - h) {
         return 0xFF;
@@ -1529,11 +1529,11 @@ int Field_ClassifyActorTerrainProbe(SVECTOR* arg0, int arg1)
         return 0xFF;
     }
 
-    if (((int (*)(Field_GimmickInstance*, SVECTOR*))Field_IsActorPositionUnoccupied)(actor, arg0) == 0) {
+    if (((int (*)(Field_GimmickInstance*, SVECTOR*))Field_IsActorPositionUnoccupied)(actor, probe_position) == 0) {
         return 0xFF;
     }
 
-    arg0->vy = h;
+    probe_position->vy = h;
     diff = h - limit;
     q = diff / 64;
 
@@ -1549,47 +1549,47 @@ int Field_ClassifyActorTerrainProbe(SVECTOR* arg0, int arg1)
 }
 
 // decomp: BATTLE.PRG func_800A8D64 (src/BATTLE/BATTLE.PRG/40564.c:139)
-Field_MpdTileCell* Field_FindCollisionCellAtPosition(SVECTOR* arg0, int arg1)
+Field_MpdTileCell* Field_FindCollisionCellAtPosition(SVECTOR* world_position, int collision_layer)
 {
-    int temp_s1 = arg0->vx / 128;
-    int temp_s0 = arg0->vz / 128;
-    Field_MpdTileCell* temp_v0 = Field_CollisionCellAt(temp_s1, temp_s0, arg1);
+    int tile_x_or_local_x = world_position->vx / 128;
+    int tile_z_or_local_z = world_position->vz / 128;
+    Field_MpdTileCell* collision_cell = Field_CollisionCellAt(tile_x_or_local_x, tile_z_or_local_z, collision_layer);
 
-    if (temp_v0 == NULL) {
+    if (collision_cell == NULL) {
         return NULL;
     }
 
-    temp_s1 = arg0->vx - (temp_s1 << 7);
-    temp_s0 = arg0->vz - (temp_s0 << 7);
+    tile_x_or_local_x = world_position->vx - (tile_x_or_local_x << 7);
+    tile_z_or_local_z = world_position->vz - (tile_z_or_local_z << 7);
 
     // BUG: potentially unhandled values
-    switch (temp_v0->doorPassability) {
+    switch (collision_cell->doorPassability) {
     case 0:
-        return temp_v0;
+        return collision_cell;
 
     case 1:
-        if ((temp_s1 + temp_s0) > 0x80) {
+        if ((tile_x_or_local_x + tile_z_or_local_z) > 0x80) {
             return NULL;
         }
-        return temp_v0;
+        return collision_cell;
 
     case 2:
-        if ((temp_s1 - temp_s0) > 0) {
+        if ((tile_x_or_local_x - tile_z_or_local_z) > 0) {
             return NULL;
         }
-        return temp_v0;
+        return collision_cell;
 
     case 3:
-        if ((temp_s1 + temp_s0) < 0x80) {
+        if ((tile_x_or_local_x + tile_z_or_local_z) < 0x80) {
             return NULL;
         }
-        return temp_v0;
+        return collision_cell;
 
     case 4:
-        if ((temp_s1 - temp_s0) < 0) {
+        if ((tile_x_or_local_x - tile_z_or_local_z) < 0) {
             return NULL;
         }
-        return temp_v0;
+        return collision_cell;
 
     case 5:
         return NULL;
@@ -1736,91 +1736,91 @@ int Field_CanActorSeparateFromOverlaps(Actors_ActorRecord* actor, SVECTOR* motio
 #undef getActorFlags
 
 // decomp: BATTLE.PRG func_800A92B8 (src/BATTLE/BATTLE.PRG/40564.c:343)
-int Field_GimmickSupportHeight(int arg0, int arg1)
+int Field_GimmickSupportHeight(int query_tile_x, int query_tile_z)
 {
-    int var_t0;
+    int minimum_gimmick_y_or_support_height;
     int i;
 
-    var_t0 = 0xBB8;
+    minimum_gimmick_y_or_support_height = 0xBB8;
     Actors_supportingGimmickIndex = 0;
 
     for (i = 0; i < 16; ++i) {
 
-        Field_GimmickInstance* temp_v1 = Field_gimmickInstances[i];
+        Field_GimmickInstance* gimmick_record = Field_gimmickInstances[i];
 
-        if (temp_v1 == NULL) {
+        if (gimmick_record == NULL) {
             continue;
         }
 
-        if (!temp_v1->isSkipped && (temp_v1->tileX == arg0) && (temp_v1->tileZ == arg1)
-            && !temp_v1->motionState && (temp_v1->mode != 0xFE)
-            && (temp_v1->positionY < var_t0)) {
+        if (!gimmick_record->isSkipped && (gimmick_record->tileX == query_tile_x) && (gimmick_record->tileZ == query_tile_z)
+            && !gimmick_record->motionState && (gimmick_record->mode != 0xFE)
+            && (gimmick_record->positionY < minimum_gimmick_y_or_support_height)) {
 
-            var_t0 = temp_v1->positionY;
+            minimum_gimmick_y_or_support_height = gimmick_record->positionY;
             Actors_supportingGimmickIndex = i;
         }
     }
 
-    var_t0 -= 128;
+    minimum_gimmick_y_or_support_height -= 128;
 
-    if (var_t0 > 0) {
-        var_t0 = 0;
+    if (minimum_gimmick_y_or_support_height > 0) {
+        minimum_gimmick_y_or_support_height = 0;
     }
 
-    return var_t0;
+    return minimum_gimmick_y_or_support_height;
 }
 
 // decomp: BATTLE.PRG func_800A9378 (src/BATTLE/BATTLE.PRG/40564.c:377)
-int Field_MovingPlatformContactHeight(int arg0, int arg1, int arg2, int arg3)
+int Field_MovingPlatformContactHeight(int world_x, int world_y, int world_z, int contact_search_mode)
 {
-    Field_PlatformContactPoint sp10[4];
+    Field_PlatformContactPoint platform_contacts[4];
     int count;
     int i;
 
     (*(int (*))&Actors_supportingPlatformLayer) = 0;
-    count = Field_CollectMovingPlatformPositions(sp10);
+    count = Field_CollectMovingPlatformPositions(platform_contacts);
 
     if (count == 0) {
         return 0;
     }
 
     for (i = 0; i < count; ++i) {
-        if ((arg0 >= sp10[i].x + 64) || (arg0 < sp10[i].x - 64)) {
+        if ((world_x >= platform_contacts[i].x + 64) || (world_x < platform_contacts[i].x - 64)) {
             continue;
         }
 
-        if ((arg2 >= sp10[i].z + 64) || (arg2 < sp10[i].z - 64)) {
+        if ((world_z >= platform_contacts[i].z + 64) || (world_z < platform_contacts[i].z - 64)) {
             continue;
         }
 
-        switch (arg3) {
+        switch (contact_search_mode) {
         case 0:
-            if (sp10[i].height < arg1 - 256) {
+            if (platform_contacts[i].height < world_y - 256) {
                 continue;
             }
             break;
 
         case 1:
-            if (sp10[i].height < arg1 - 256) {
-                return sp10[i].height + 96;
+            if (platform_contacts[i].height < world_y - 256) {
+                return platform_contacts[i].height + 96;
             }
             continue;
 
         case 2:
-            if ((sp10[i].height >= arg1) || (sp10[i].height < arg1 - 128)) {
+            if ((platform_contacts[i].height >= world_y) || (platform_contacts[i].height < world_y - 128)) {
                 continue;
             }
             break;
 
         case 3:
-            if ((sp10[i].height >= arg1) || (sp10[i].height < arg1 - Field_platformContactSearchDepth)) {
+            if ((platform_contacts[i].height >= world_y) || (platform_contacts[i].height < world_y - Field_platformContactSearchDepth)) {
                 continue;
             }
-            return sp10[i].height + 96;
+            return platform_contacts[i].height + 96;
         }
 
-        (*(int (*))&Actors_supportingPlatformLayer) = sp10[i].platformIndex + 2;
-        return sp10[i].height;
+        (*(int (*))&Actors_supportingPlatformLayer) = platform_contacts[i].platformIndex + 2;
+        return platform_contacts[i].height;
     }
 
     return 0;
@@ -1921,32 +1921,32 @@ int Field_CalcActorLedgeOffset(Actors_ActorRecord* actor, SVECTOR* offset)
 #undef getActorFlags
 
 // decomp: BATTLE.PRG func_800B13CC (src/BATTLE/BATTLE.PRG/44F14.c:2020)
-int Field_GimmickSupportHeightBelow(int arg0, int arg1, int arg2)
+int Field_GimmickSupportHeightBelow(int query_tile_x, int query_tile_z, int reference_height)
 {
     int i;
-    int var_a3 = 0xBB8;
+    int minimum_gimmick_y_or_support_height = 0xBB8;
 
     for (i = 0; i < 16; ++i) {
 
-        Field_GimmickInstance* temp_v1 = Field_gimmickInstances[i];
+        Field_GimmickInstance* gimmick_record = Field_gimmickInstances[i];
 
-        if ((temp_v1 != NULL) && !(temp_v1->isSkipped) && !(temp_v1->objectInfo.isFalling)
-            && (temp_v1->tileX == arg0) && (temp_v1->tileZ == arg1)) {
+        if ((gimmick_record != NULL) && !(gimmick_record->isSkipped) && !(gimmick_record->objectInfo.isFalling)
+            && (gimmick_record->tileX == query_tile_x) && (gimmick_record->tileZ == query_tile_z)) {
 
-            int temp_v1_2 = temp_v1->positionY;
+            int gimmick_height = gimmick_record->positionY;
 
-            if ((arg2 < temp_v1_2) && (temp_v1_2 < var_a3)) {
-                var_a3 = temp_v1_2;
+            if ((reference_height < gimmick_height) && (gimmick_height < minimum_gimmick_y_or_support_height)) {
+                minimum_gimmick_y_or_support_height = gimmick_height;
             }
         }
     }
 
-    var_a3 -= 128;
+    minimum_gimmick_y_or_support_height -= 128;
 
-    if (var_a3 > 0) {
-        var_a3 = 0;
+    if (minimum_gimmick_y_or_support_height > 0) {
+        minimum_gimmick_y_or_support_height = 0;
     }
 
-    return var_a3;
+    return minimum_gimmick_y_or_support_height;
 }
 

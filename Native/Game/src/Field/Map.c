@@ -7,7 +7,7 @@
 #include "State/Progress.h"
 
 // decomp: BATTLE.PRG func_8008B4C8 (src/BATTLE/BATTLE.PRG/146C.c:16012)
-int Field_SetMinimapVisible(char arg0) { return Field_isMinimapVisible = arg0; }
+int Field_SetMinimapVisible(char visible) { return Field_isMinimapVisible = visible; }
 
 // decomp: BATTLE.PRG vs_battle_setRoomsUnk0 (src/BATTLE/BATTLE.PRG/146C.c:16014)
 void Field_RestoreSceneRoomVisits(Field_MapScene* scene)
@@ -28,23 +28,23 @@ void Field_RestoreSceneRoomVisits(Field_MapScene* scene)
 }
 
 // decomp: BATTLE.PRG func_8008B590 (src/BATTLE/BATTLE.PRG/146C.c:16033)
-void Field_BuildMinimapRotation(MATRIX* arg0, int arg1)
+void Field_BuildMinimapRotation(MATRIX* output_rotation, int yaw_angle)
 {
-    int temp_s0 = Core_Gte_Sin(arg1);
-    int temp_v0 = Core_Gte_Cos(arg1);
-    int a2 = -temp_s0;
+    int yaw_sine = Core_Gte_Sin(yaw_angle);
+    int yaw_cosine = Core_Gte_Cos(yaw_angle);
+    int negative_yaw_sine = -yaw_sine;
 
-    arg0->m[0][0] = temp_v0;
-    arg0->m[0][1] = 0;
-    arg0->m[0][2] = temp_s0;
+    output_rotation->m[0][0] = yaw_cosine;
+    output_rotation->m[0][1] = 0;
+    output_rotation->m[0][2] = yaw_sine;
 
-    arg0->m[1][0] = ((a2 * -3138) / ONE);
-    arg0->m[1][1] = 2633;
-    arg0->m[1][2] = (-(temp_v0 * 3138) / ONE);
+    output_rotation->m[1][0] = ((negative_yaw_sine * -3138) / ONE);
+    output_rotation->m[1][1] = 2633;
+    output_rotation->m[1][2] = (-(yaw_cosine * 3138) / ONE);
 
-    arg0->m[2][0] = ((a2 * 2633) / ONE);
-    arg0->m[2][1] = 3138;
-    arg0->m[2][2] = ((temp_v0 * 2633) / ONE);
+    output_rotation->m[2][0] = ((negative_yaw_sine * 2633) / ONE);
+    output_rotation->m[2][1] = 3138;
+    output_rotation->m[2][2] = ((yaw_cosine * 2633) / ONE);
 }
 
 // decomp: BATTLE.PRG vs_battle_getMapCompletion (src/BATTLE/BATTLE.PRG/146C.c:17367)

@@ -121,13 +121,13 @@ void Field_BeginSceneActorTransition(void)
 }
 
 // decomp: BATTLE.PRG _loadMpdLbas (src/BATTLE/BATTLE.PRG/146C.c:14774)
-void Field_LoadZoneRoomFileTable(void* arg0, int size)
+void Field_LoadZoneRoomFileTable(void* room_file_table_data, int size)
 {
     if (size == 0) {
         Core_IgnoreDiagnostic(0x8B, 0);
     }
     Field_zoneContext.mpdFiles = Core_Memory_AllocateFromLowEnd(size);
-    Core_Memory_CopyAlignedWords(Field_zoneContext.mpdFiles, arg0, size);
+    Core_Memory_CopyAlignedWords(Field_zoneContext.mpdFiles, room_file_table_data, size);
 }
 
 // decomp: BATTLE.PRG _loadZndEnemies (src/BATTLE/BATTLE.PRG/146C.c:14783)
@@ -168,8 +168,8 @@ void Field_QueueZoneLoad(int id)
     Field_zoneContext.zndData = Core_Memory_AllocateFromHighEnd(cdFile.size);
     Content_EnqueuePriorityDiscRequest(Field_zoneContext.zndDiscRequest, Field_zoneContext.zndData);
     if (Field_zoneContext.isMusicFadeEnabled != 0) {
-        int temp_s0 = Field_zoneMusicIds[id];
-        if (Audio_CurrentMusicId() != temp_s0) {
+        int zone_music_id = Field_zoneMusicIds[id];
+        if (Audio_CurrentMusicId() != zone_music_id) {
             Audio_FadeMusicSlotVolume(Audio_soundState.currentMusicSlot, 0, 0x78);
         }
     }
@@ -500,44 +500,44 @@ void Field_SpawnRoomActors(void)
 // decomp: BATTLE.PRG func_80089888 (src/BATTLE/BATTLE.PRG/146C.c:15142)
 void Field_PlaceAshleyAtRoomEntrance(void)
 {
-    SVECTOR sp10;
+    SVECTOR entry_step_offset;
     Actors_ActorLocationQuery sp18;
-    Field_ActorPlacement sp28;
+    Field_ActorPlacement entrance_placement;
 
     Actors_FinishActorPlacement();
-    sp28.tileX = Field_pendingDestinationDoor.entryTileX;
-    sp28.tileZ = Field_pendingDestinationDoor.entryTileZ;
-    sp28.direction = Field_pendingDestinationDoor.tileLocation.entryDirection;
-    sp28.height = Field_pendingDestinationDoor.entryElevation * 64;
-    Actors_PlaceActorInRoom(0, &sp28, -0x800, 2);
+    entrance_placement.tileX = Field_pendingDestinationDoor.entryTileX;
+    entrance_placement.tileZ = Field_pendingDestinationDoor.entryTileZ;
+    entrance_placement.direction = Field_pendingDestinationDoor.tileLocation.entryDirection;
+    entrance_placement.height = Field_pendingDestinationDoor.entryElevation * 64;
+    Actors_PlaceActorInRoom(0, &entrance_placement, -0x800, 2);
 
     if (Field_pendingDestinationDoor.hasEntryStep) {
         switch (Field_pendingDestinationDoor.entryElevation) {
         case 0:
-            sp10.vx = 0x40;
-            sp10.vz = 0;
-            sp10.vy = 0;
+            entry_step_offset.vx = 0x40;
+            entry_step_offset.vz = 0;
+            entry_step_offset.vy = 0;
             break;
         case 1:
-            sp10.vx = 0;
-            sp10.vz = 0x40;
-            sp10.vy = 0;
+            entry_step_offset.vx = 0;
+            entry_step_offset.vz = 0x40;
+            entry_step_offset.vy = 0;
             break;
         case 2:
-            sp10.vx = 0x40;
-            sp10.vz = 0;
-            sp10.vy = 0;
+            entry_step_offset.vx = 0x40;
+            entry_step_offset.vz = 0;
+            entry_step_offset.vy = 0;
             break;
         case 3:
-            sp10.vx = 0;
-            sp10.vz = 0x40;
-            sp10.vy = 0;
+            entry_step_offset.vx = 0;
+            entry_step_offset.vz = 0x40;
+            entry_step_offset.vy = 0;
             break;
         default:
-            sp10.vy = 0;
+            entry_step_offset.vy = 0;
             break;
         }
-        Actors_TranslateActorByAtRate(0, &sp10, 0);
+        Actors_TranslateActorByAtRate(0, &entry_step_offset, 0);
     }
     Actors_ActorPlacement(0, &sp18);
     Actors_RestoreActorIdlePose(0);
@@ -551,29 +551,29 @@ void Field_RestoreRoomEnemyCache(void)
 {
     int j;
     int i;
-    int var_s4;
-    Field_MpdEnemySpawn* temp_s2;
-    u_char* temp_v0;
+    int found_cached_room;
+    Field_MpdEnemySpawn* enemy_spawn;
+    u_char* cached_actor_state;
 
-    var_s4 = 0;
+    found_cached_room = 0;
 
     for (j = 0; j < 4; ++j) {
         if ((State_recentRoomEnemyStates[j].recency != 0) && (State_recentRoomEnemyStates[j].zoneId == Field_zoneContext.zndId)
             && (State_recentRoomEnemyStates[j].mapId == Field_zoneContext.mapId)) {
-            var_s4 = 1;
+            found_cached_room = 1;
             State_currentRoomStateSlot = j;
             for (i = 0; i < Field_zoneContext.mpdEnemyCount; ++i) {
-                temp_s2 = &Field_zoneContext.mpdEnemies[i];
-                temp_v0 = Actors_FindCachedRoomActorState(i);
-                if (temp_v0 != NULL) {
-                    temp_s2->isHidden = temp_v0[1];
+                enemy_spawn = &Field_zoneContext.mpdEnemies[i];
+                cached_actor_state = Actors_FindCachedRoomActorState(i);
+                if (cached_actor_state != NULL) {
+                    enemy_spawn->isHidden = cached_actor_state[1];
                 }
             }
             break;
         }
     }
 
-    if (var_s4 == 0) {
+    if (found_cached_room == 0) {
         i = 0;
         for (j = 0; j < 4; ++j) {
             if (State_recentRoomEnemyStates[j].recency < State_recentRoomEnemyStates[i].recency) {
@@ -629,19 +629,19 @@ void Field_QueueRoomLoad(int id)
 }
 
 // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15272)
-void Field_FinishRoomLoad(int arg0)
+void Field_FinishRoomLoad(int requested_room_id)
 {
     Boot_ResetGameplayInspection();
-    VECTOR sp20;
+    VECTOR initial_camera_target_fixed12;
     VECTOR lookAt;
-    Actors_ActorLocationQuery sp40;
-    int temp_s4;
-    int var_a0;
+    Actors_ActorLocationQuery ashley_placement;
+    int room_event_load_result;
+    int scene_id_or_packed_dimensions;
     char* mpdHeader;
-    int v0;
+    int mpd_section_offset;
 
     if (Field_zoneContext.mpdDiscRequest == NULL) {
-        Field_QueueRoomLoad(arg0);
+        Field_QueueRoomLoad(requested_room_id);
     }
 
     while (Field_zoneContext.mpdDiscRequest->state != Content_DiscRequestState_Loaded) {
@@ -657,17 +657,17 @@ void Field_FinishRoomLoad(int arg0)
     Render_InitializeClutAnimation();
 
     mpdHeader = Field_zoneContext.mpdData;
-    v0 = ((Field_MpdHeader*)mpdHeader)->roomSectionOffset;
+    mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->roomSectionOffset;
 
-    Field_LoadRoomSections(0, (void*)(v0 + (intptr_t)mpdHeader));
+    Field_LoadRoomSections(0, (void*)(mpd_section_offset + (intptr_t)mpdHeader));
 
     Field_zoneContext.zndId = Field_pendingDestinationDoor.destinationZoneId;
     Field_zoneContext.mapId = Field_pendingDestinationDoor.destinationRoomId;
 
-    var_a0 = Field_CurrentSceneId();
+    scene_id_or_packed_dimensions = Field_CurrentSceneId();
 
-    if (var_a0 != Field_zoneContext.currentSceneId) {
-        Field_zoneContext.currentSceneId = var_a0;
+    if (scene_id_or_packed_dimensions != Field_zoneContext.currentSceneId) {
+        Field_zoneContext.currentSceneId = scene_id_or_packed_dimensions;
         Field_BeginSceneActorTransition();
     }
 
@@ -676,13 +676,13 @@ void Field_FinishRoomLoad(int arg0)
     }
 
     Field_isRoomVisitPending = 1;
-    var_a0 = Field_CollisionMapDimensions(0);
-    Field_zoneContext.tileColumns = (var_a0 & 0xFFFF) / 16;
+    scene_id_or_packed_dimensions = Field_CollisionMapDimensions(0);
+    Field_zoneContext.tileColumns = (scene_id_or_packed_dimensions & 0xFFFF) / 16;
 
-    if (var_a0 < 0) {
-        var_a0 += 0xFFFFF;
+    if (scene_id_or_packed_dimensions < 0) {
+        scene_id_or_packed_dimensions += 0xFFFFF;
     }
-    Field_zoneContext.tileRows = var_a0 >> 0x14;
+    Field_zoneContext.tileRows = scene_id_or_packed_dimensions >> 0x14;
 
     if (Field_RoomCameraBounds(0) != NULL) {
         Field_zoneContext.bounds = *Field_RoomCameraBounds(0);
@@ -694,43 +694,43 @@ void Field_FinishRoomLoad(int arg0)
     }
 
     {
-        short* v0;
+        short* reset_tail_words;
         Field_roomLoadResetBlock.reserved00 = 0;
-        v0 = &Field_roomLoadResetBlock.reserved08;
+        reset_tail_words = &Field_roomLoadResetBlock.reserved08;
         Field_roomLoadResetBlock.reserved02 = 0;
         Field_roomLoadResetBlock.reserved04 = 0;
         Field_roomLoadResetBlock.reserved08 = 0;
-        v0[1] = 0;
-        v0[2] = 0;
+        reset_tail_words[1] = 0;
+        reset_tail_words[2] = 0;
     }
 
     Render_CaptureRoomBackgroundColors();
 
     if (((Field_MpdHeader*)mpdHeader)->lootSectionSize != 0) {
-        v0 = ((Field_MpdHeader*)mpdHeader)->lootSectionOffset;
-        Items_LoadRoomChestLoot((void*)(v0 + (intptr_t)mpdHeader));
+        mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->lootSectionOffset;
+        Items_LoadRoomChestLoot((void*)(mpd_section_offset + (intptr_t)mpdHeader));
     }
 
     {
-        u_short arg5;
-        intptr_t arg2;
-        int new_var;
-        intptr_t arg4;
-        intptr_t arg0 = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;
-        arg0 += (intptr_t)mpdHeader;
-        arg2 = ((Field_MpdHeader*)mpdHeader)->scriptSectionOffset;
-        arg2 += ((intptr_t)mpdHeader);
-        arg4 = ((Field_MpdHeader*)mpdHeader)->doorSectionOffset;
-        arg4 += ((intptr_t)mpdHeader);
-        arg5 = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;
-        new_var = 1;
+        u_short door_section_bytes;
+        intptr_t script_section_address;
+        int initial_entry_mode;
+        intptr_t door_section_address;
+        intptr_t cleared_section_address = ((Field_MpdHeader*)mpdHeader)->clearedSectionOffset;
+        cleared_section_address += (intptr_t)mpdHeader;
+        script_section_address = ((Field_MpdHeader*)mpdHeader)->scriptSectionOffset;
+        script_section_address += ((intptr_t)mpdHeader);
+        door_section_address = ((Field_MpdHeader*)mpdHeader)->doorSectionOffset;
+        door_section_address += ((intptr_t)mpdHeader);
+        door_section_bytes = ((Field_MpdHeader*)mpdHeader)->doorSectionSize;
+        initial_entry_mode = 1;
         if (!Boot_EncounterUsesRoomEvents()) {
-            temp_s4 = Boot_EncounterLoadRoomEvents();
+            room_event_load_result = Boot_EncounterLoadRoomEvents();
         } else {
-        temp_s4 = Event_LoadRoomEventSections((void*)(arg0),
-            ((Field_MpdHeader*)mpdHeader)->clearedSectionSize, (void*)(arg2),
-            ((Field_MpdHeader*)mpdHeader)->scriptSectionSize, (void*)(arg4), arg5,
-            Boot_gameEntryMode == new_var);
+        room_event_load_result = Event_LoadRoomEventSections((void*)(cleared_section_address),
+            ((Field_MpdHeader*)mpdHeader)->clearedSectionSize, (void*)(script_section_address),
+            ((Field_MpdHeader*)mpdHeader)->scriptSectionSize, (void*)(door_section_address), door_section_bytes,
+            Boot_gameEntryMode == initial_entry_mode);
         }
     }
 
@@ -738,9 +738,9 @@ void Field_FinishRoomLoad(int arg0)
         Boot_gameEntryMode = 5;
     }
 
-    v0 = ((Field_MpdHeader*)mpdHeader)->enemySectionOffset;
+    mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->enemySectionOffset;
     Field_LoadRoomEnemyPlacements(
-        (void*)(v0 + (intptr_t)mpdHeader), ((Field_MpdHeader*)mpdHeader)->enemySectionSize);
+        (void*)(mpd_section_offset + (intptr_t)mpdHeader), ((Field_MpdHeader*)mpdHeader)->enemySectionSize);
 
     Core_Memory_FreeFromHighEnd(mpdHeader);
 
@@ -799,20 +799,20 @@ void Field_FinishRoomLoad(int arg0)
 
     Field_roomResetWord = 0;
 
-    Actors_ActorPlacement(0, &sp40);
+    Actors_ActorPlacement(0, &ashley_placement);
 
-    sp20.vx = sp40.location.position.vx * ONE;
-    sp20.vy = sp40.location.position.vy * ONE - 90 * ONE;
-    sp20.vz = sp40.location.position.vz * ONE;
+    initial_camera_target_fixed12.vx = ashley_placement.location.position.vx * ONE;
+    initial_camera_target_fixed12.vy = ashley_placement.location.position.vy * ONE - 90 * ONE;
+    initial_camera_target_fixed12.vz = ashley_placement.location.position.vz * ONE;
 
-    Field_ClampCameraLookAtToZone(&sp20, &lookAt);
+    Field_ClampCameraLookAtToZone(&initial_camera_target_fixed12, &lookAt);
 
     Render_frameScratch.camera.lookAt = lookAt;
     Render_frameScratch.camera.angles.vy = Field_sphericalCamera.values.yaw;
 
     Field_SetCameraPositionFromAngles(&Field_sphericalCamera.values);
-    Actors_ActorPlacement(0, &sp40);
-    Field_UpdateCameraTileConstraint(0, &sp40.location.packedTile.target);
+    Actors_ActorPlacement(0, &ashley_placement);
+    Field_UpdateCameraTileConstraint(0, &ashley_placement.location.packedTile.target);
     Render_ResetFramebufferEffect();
     Render_CommitClutBuffer();
     Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
@@ -822,7 +822,7 @@ void Field_FinishRoomLoad(int arg0)
         return;
     }
 
-    if ((temp_s4 << 0x10) != 0) {
+    if ((room_event_load_result << 0x10) != 0) {
         Effects_InitializeRoomWeather(1);
         Event_PrepareCutsceneActors();
     } else {
@@ -946,11 +946,11 @@ void Field_UploadZoneTextures(void* data)
 }
 
 // decomp: BATTLE.PRG _loadMpdRoomSection (src/BATTLE/BATTLE.PRG/146C.c:15663)
-int Field_LoadRoomSections(int arg0, void* data)
+int Field_LoadRoomSections(int owner_room_index, void* data)
 {
     int i;
-    void* temp_v0;
-    Field_RoomRecord* var_s0;
+    void* room_section_allocation;
+    Field_RoomRecord* room_record;
     Field_MpdSectionE* sectionE;
     u_int dataSz;
 
@@ -965,24 +965,24 @@ int Field_LoadRoomSections(int arg0, void* data)
     }
 
     Core_Memory_CopyAlignedWords(&Field_roomData.header, data, 0x60);
-    temp_v0 = Core_Memory_AllocateFromLowEnd(dataSz);
-    Core_Memory_CopyAlignedWords(temp_v0, data + 0x60, dataSz);
+    room_section_allocation = Core_Memory_AllocateFromLowEnd(dataSz);
+    Core_Memory_CopyAlignedWords(room_section_allocation, data + 0x60, dataSz);
 
     dataSz = 0;
-    var_s0 = &Field_roomData;
+    room_record = &Field_roomData;
 
     for (i = 0; i < 24; i++) {
         if (((int*)data)[i] > 0) {
-            (&var_s0->geometry)[i] = (void*)(temp_v0 + dataSz);
+            (&room_record->geometry)[i] = (void*)(room_section_allocation + dataSz);
         } else {
-            (&var_s0->geometry)[i] = NULL;
+            (&room_record->geometry)[i] = NULL;
         }
         dataSz += ((int*)data)[i];
     }
 
     Field_roomData.isLoaded = 1;
     Field_roomData.displayFlag = 0;
-    Field_roomData.roomIndex = arg0;
+    Field_roomData.roomIndex = owner_room_index;
 
     if (Field_roomData.geometry != NULL) {
         Field_OffsetRoomTextureIds(11, Field_roomData.geometry);
@@ -1035,10 +1035,10 @@ int Field_LoadRoomSections(int arg0, void* data)
 }
 
 // decomp: BATTLE.PRG func_8008ABF0 (src/BATTLE/BATTLE.PRG/146C.c:15774)
-int Field_ReleaseOwnedRoomSections(int arg0)
+int Field_ReleaseOwnedRoomSections(int owner_room_index)
 {
     if (Field_roomData.isLoaded == 1) {
-        if (Field_roomData.roomIndex == arg0) {
+        if (Field_roomData.roomIndex == owner_room_index) {
             Field_ReleaseTiledBackground();
             Field_ReleaseWeatherParticles();
             ((void (*)(void))Field_ReleaseRoomEffects)();
@@ -1059,10 +1059,10 @@ void Field_ZoneCleanupHook(int arg0 __attribute__((unused))) { }
 intptr_t Field_RoomAuxiliaryData(void) { return Field_roomData.section6; }
 
 // decomp: BATTLE.PRG func_8008C478 (src/BATTLE/BATTLE.PRG/146C.c:16467)
-intptr_t Field_RoomSupplementalRecord(int arg0)
+intptr_t Field_RoomSupplementalRecord(int supplemental_record_index)
 {
     if (Field_roomData.section7 != 0) {
-        return Field_roomData.section7 + (arg0 * 8);
+        return Field_roomData.section7 + (supplemental_record_index * 8);
     }
     return 0;
 }

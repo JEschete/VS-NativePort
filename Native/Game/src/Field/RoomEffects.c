@@ -134,33 +134,33 @@ void Field_UpdateRoomEffects(void)
 }
 
 // decomp: BATTLE.PRG func_80091C6C (src/BATTLE/BATTLE.PRG/2842C.c:640)
-int Field_AdvanceRoomTextureFrames(Field_TextureFrameEffect* arg0)
+int Field_AdvanceRoomTextureFrames(Field_TextureFrameEffect* texture_frame_effect)
 {
-    Field_TextureFrameEffect* quad = arg0;
+    Field_TextureFrameEffect* quad = texture_frame_effect;
     void* base = Field_roomData.geometry;
 
-    if (++arg0->tick > arg0->delay) {
+    if (++texture_frame_effect->tick > texture_frame_effect->delay) {
         int u;
         int v;
         Field_MpdPolygonUvView* polygon;
 
-        arg0->tick = 0;
+        texture_frame_effect->tick = 0;
 
-        if (++arg0->frame >= arg0->frameCount) {
-            arg0->frame = 0;
+        if (++texture_frame_effect->frame >= texture_frame_effect->frameCount) {
+            texture_frame_effect->frame = 0;
         }
 
-        u = arg0->baseU + arg0->frameWidth * (arg0->frame % arg0->columns);
-        v = arg0->baseV + arg0->frameHeight * (arg0->frame / arg0->columns);
-        polygon = base + arg0->geometryOffset;
+        u = texture_frame_effect->baseU + texture_frame_effect->frameWidth * (texture_frame_effect->frame % texture_frame_effect->columns);
+        v = texture_frame_effect->baseV + texture_frame_effect->frameHeight * (texture_frame_effect->frame / texture_frame_effect->columns);
+        polygon = base + texture_frame_effect->geometryOffset;
 
         if ((polygon->type & 0x3C) == 0x34) {
-            polygon->u0 = arg0->u[0] + u;
-            polygon->u1 = arg0->u[1] + u;
-            polygon->u2 = arg0->u[2] + u;
-            polygon->v0 = arg0->v[0] + v;
-            polygon->v1 = arg0->v[1] + v;
-            polygon->v2 = arg0->v[2] + v;
+            polygon->u0 = texture_frame_effect->u[0] + u;
+            polygon->u1 = texture_frame_effect->u[1] + u;
+            polygon->u2 = texture_frame_effect->u[2] + u;
+            polygon->v0 = texture_frame_effect->v[0] + v;
+            polygon->v1 = texture_frame_effect->v[1] + v;
+            polygon->v2 = texture_frame_effect->v[2] + v;
         } else {
             polygon->u0 = quad->u[0] + u;
             polygon->u1 = quad->u[1] + u;
@@ -177,47 +177,47 @@ int Field_AdvanceRoomTextureFrames(Field_TextureFrameEffect* arg0)
 }
 
 // decomp: BATTLE.PRG func_80091E10 (src/BATTLE/BATTLE.PRG/2842C.c:682)
-int Field_ScrollRoomTextureCoordinates(Field_TextureScrollEffect* arg0)
+int Field_ScrollRoomTextureCoordinates(Field_TextureScrollEffect* texture_scroll_effect)
 {
-    Field_TextureScrollEffect* quad = arg0;
+    Field_TextureScrollEffect* quad = texture_scroll_effect;
     void* base = Field_roomData.geometry;
 
-    if (++arg0->tick > arg0->delay) {
-        int u = arg0->currentU;
-        int v = arg0->currentV;
+    if (++texture_scroll_effect->tick > texture_scroll_effect->delay) {
+        int u = texture_scroll_effect->currentU;
+        int v = texture_scroll_effect->currentV;
         Field_MpdPolygonUvView* polygon;
 
-        u += arg0->stepU;
-        v += arg0->stepV;
-        arg0->tick = 0;
+        u += texture_scroll_effect->stepU;
+        v += texture_scroll_effect->stepV;
+        texture_scroll_effect->tick = 0;
 
-        if (u < arg0->baseU) {
-            u = arg0->baseU + arg0->width - arg0->windowWidth;
+        if (u < texture_scroll_effect->baseU) {
+            u = texture_scroll_effect->baseU + texture_scroll_effect->width - texture_scroll_effect->windowWidth;
         }
 
-        if (v < arg0->baseV) {
-            v = arg0->baseV + arg0->height - arg0->windowHeight;
+        if (v < texture_scroll_effect->baseV) {
+            v = texture_scroll_effect->baseV + texture_scroll_effect->height - texture_scroll_effect->windowHeight;
         }
 
-        if (arg0->baseU + arg0->width < u + arg0->windowWidth) {
-            u = arg0->baseU;
+        if (texture_scroll_effect->baseU + texture_scroll_effect->width < u + texture_scroll_effect->windowWidth) {
+            u = texture_scroll_effect->baseU;
         }
 
-        if (arg0->baseV + arg0->height < v + arg0->windowHeight) {
-            v = arg0->baseV;
+        if (texture_scroll_effect->baseV + texture_scroll_effect->height < v + texture_scroll_effect->windowHeight) {
+            v = texture_scroll_effect->baseV;
         }
 
-        arg0->currentU = u;
-        arg0->currentV = v;
-        polygon = base + arg0->geometryOffset;
+        texture_scroll_effect->currentU = u;
+        texture_scroll_effect->currentV = v;
+        polygon = base + texture_scroll_effect->geometryOffset;
 
         if ((polygon->type & 0x3C) == 0x34) {
-            polygon->u0 = arg0->u[0] + u;
-            polygon->u1 = arg0->u[1] + u;
-            polygon->u2 = arg0->u[2] + u;
-            polygon->v0 = arg0->v[0] + v;
-            polygon->v1 = arg0->v[1] + v;
-            polygon->v2 = arg0->v[2] + v;
+            polygon->u0 = texture_scroll_effect->u[0] + u;
+            polygon->u1 = texture_scroll_effect->u[1] + u;
+            polygon->u2 = texture_scroll_effect->u[2] + u;
+            polygon->v0 = texture_scroll_effect->v[0] + v;
+            polygon->v1 = texture_scroll_effect->v[1] + v;
+            polygon->v2 = texture_scroll_effect->v[2] + v;
         } else {
             polygon->u0 = quad->u[0] + u;
             polygon->u1 = quad->u[1] + u;
@@ -234,121 +234,121 @@ int Field_ScrollRoomTextureCoordinates(Field_TextureScrollEffect* arg0)
 }
 
 // decomp: BATTLE.PRG func_80091FE8 (src/BATTLE/BATTLE.PRG/2842C.c:738)
-int Field_AnimateRoomTextureImages(Field_TextureRegionScrollEffect* arg0)
+int Field_AnimateRoomTextureImages(Field_TextureRegionScrollEffect* texture_region_effect)
 {
     RECT source;
     RECT halfSource;
 
-    if (++arg0->tick > arg0->delay) {
+    if (++texture_region_effect->tick > texture_region_effect->delay) {
         int destX;
         int destY;
         int halfDestX;
         int halfSourceX;
 
-        arg0->rect.x -= 320;
-        arg0->rect.y += 256;
-        arg0->tick = 0;
+        texture_region_effect->rect.x -= 320;
+        texture_region_effect->rect.y += 256;
+        texture_region_effect->tick = 0;
 
-        if (arg0->scrollStep == 0) {
-            if (++arg0->frame > arg0->frameCount) {
-                arg0->frame = 1;
+        if (texture_region_effect->scrollStep == 0) {
+            if (++texture_region_effect->frame > texture_region_effect->frameCount) {
+                texture_region_effect->frame = 1;
             }
 
-            setRECT(&source, arg0->rect.x + arg0->rect.w * (arg0->frame % arg0->columns),
-                arg0->rect.y + arg0->rect.h * (arg0->frame / arg0->columns), arg0->rect.w,
-                arg0->rect.h);
+            setRECT(&source, texture_region_effect->rect.x + texture_region_effect->rect.w * (texture_region_effect->frame % texture_region_effect->columns),
+                texture_region_effect->rect.y + texture_region_effect->rect.h * (texture_region_effect->frame / texture_region_effect->columns), texture_region_effect->rect.w,
+                texture_region_effect->rect.h);
         } else {
-            arg0->frame += arg0->scrollStep;
+            texture_region_effect->frame += texture_region_effect->scrollStep;
 
-            if (arg0->frame >= arg0->rect.h) {
-                arg0->frame = 0;
+            if (texture_region_effect->frame >= texture_region_effect->rect.h) {
+                texture_region_effect->frame = 0;
             }
 
-            setRECT(&source, arg0->rect.x + arg0->rect.w / 2, arg0->rect.y + arg0->frame,
-                arg0->rect.w / 2, arg0->rect.h - arg0->frame);
+            setRECT(&source, texture_region_effect->rect.x + texture_region_effect->rect.w / 2, texture_region_effect->rect.y + texture_region_effect->frame,
+                texture_region_effect->rect.w / 2, texture_region_effect->rect.h - texture_region_effect->frame);
         }
 
-        halfDestX = (arg0->rect.x % 64) / 2 - 64;
-        destX = halfDestX + (arg0->rect.x & 0x3C0);
-        destY = (arg0->rect.y % 256) / 2 + (arg0->rect.y & 0x100);
+        halfDestX = (texture_region_effect->rect.x % 64) / 2 - 64;
+        destX = halfDestX + (texture_region_effect->rect.x & 0x3C0);
+        destY = (texture_region_effect->rect.y % 256) / 2 + (texture_region_effect->rect.y & 0x100);
         halfSourceX = (source.x % 64) / 2 - 64;
         setRECT(&halfSource, halfSourceX + (source.x & 0x3C0),
             (source.y % 256) / 2 + (source.y & 0x100), source.w / 2, source.h / 2);
-        MoveImage(&source, arg0->rect.x, arg0->rect.y);
+        MoveImage(&source, texture_region_effect->rect.x, texture_region_effect->rect.y);
         MoveImage(&halfSource, destX, destY);
 
-        if (arg0->scrollStep != 0 && arg0->frame != 0) {
+        if (texture_region_effect->scrollStep != 0 && texture_region_effect->frame != 0) {
             int wrapY;
 
-            source.y = arg0->rect.y;
-            source.h = arg0->frame;
-            wrapY = arg0->rect.y + arg0->rect.h - arg0->frame;
+            source.y = texture_region_effect->rect.y;
+            source.h = texture_region_effect->frame;
+            wrapY = texture_region_effect->rect.y + texture_region_effect->rect.h - texture_region_effect->frame;
             destY = (wrapY % 256) / 2 + (wrapY & 0x100);
             halfSource.y = (source.y % 256) / 2 + (source.y & 0x100);
             halfSource.h = source.h / 2;
-            MoveImage(&source, arg0->rect.x, wrapY);
+            MoveImage(&source, texture_region_effect->rect.x, wrapY);
             MoveImage(&halfSource, destX, destY);
         }
 
-        arg0->rect.x += 320;
-        arg0->rect.y -= 256;
+        texture_region_effect->rect.x += 320;
+        texture_region_effect->rect.y -= 256;
     }
 
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800923F8 (src/BATTLE/BATTLE.PRG/2842C.c:801)
-int Field_UpdateRoomRotationEffect(Field_SwingEffectRecord* arg0)
+int Field_UpdateRoomRotationEffect(Field_SwingEffectRecord* swing_effect)
 {
     int* base = Field_roomData.geometry;
     int* p;
     int delta;
     int ret = 1;
 
-    if (arg0->needsReset != 0) {
-        arg0->needsReset = 0;
-        arg0->angle = arg0->startAngle;
-        arg0->angularVelocity = arg0->initialVelocity;
+    if (swing_effect->needsReset != 0) {
+        swing_effect->needsReset = 0;
+        swing_effect->angle = swing_effect->startAngle;
+        swing_effect->angularVelocity = swing_effect->initialVelocity;
     }
 
-    arg0->angle += arg0->angularVelocity;
-    arg0->angularVelocity += arg0->acceleration * 8;
-    delta = (arg0->angle - arg0->restAngle) & 0xFFF;
+    swing_effect->angle += swing_effect->angularVelocity;
+    swing_effect->angularVelocity += swing_effect->acceleration * 8;
+    delta = (swing_effect->angle - swing_effect->restAngle) & 0xFFF;
 
     if (delta > ONE / 2) {
         delta = ONE - delta;
     }
 
-    if (delta < ABS(arg0->angularVelocity)) {
-        arg0->angularVelocity = -(arg0->angularVelocity >> arg0->dampingShift);
+    if (delta < ABS(swing_effect->angularVelocity)) {
+        swing_effect->angularVelocity = -(swing_effect->angularVelocity >> swing_effect->dampingShift);
 
-        if (ABS(arg0->angularVelocity) < 0x21) {
-            arg0->angle = arg0->restAngle;
+        if (ABS(swing_effect->angularVelocity) < 0x21) {
+            swing_effect->angle = swing_effect->restAngle;
             ret = 0;
         }
     }
 
-    p = (void*)base + arg0->geometryOffset;
+    p = (void*)base + swing_effect->geometryOffset;
 
-    if (arg0->axis == 1) {
-        p[5] = arg0->angle;
+    if (swing_effect->axis == 1) {
+        p[5] = swing_effect->angle;
         p[0] |= 0x6000;
-    } else if (arg0->axis == 2) {
-        p[4] = arg0->angle;
+    } else if (swing_effect->axis == 2) {
+        p[4] = swing_effect->angle;
     } else {
-        p[6] = arg0->angle;
+        p[6] = swing_effect->angle;
     }
 
     if (ret != 0) {
         return 1;
     }
 
-    delta = arg0->startAngle;
-    arg0->initialVelocity = -arg0->initialVelocity;
-    arg0->angularVelocity = arg0->initialVelocity;
-    arg0->startAngle = arg0->restAngle;
-    arg0->restAngle = delta;
-    arg0->acceleration = -arg0->acceleration;
+    delta = swing_effect->startAngle;
+    swing_effect->initialVelocity = -swing_effect->initialVelocity;
+    swing_effect->angularVelocity = swing_effect->initialVelocity;
+    swing_effect->startAngle = swing_effect->restAngle;
+    swing_effect->restAngle = delta;
+    swing_effect->acceleration = -swing_effect->acceleration;
     return 0;
 }
 
@@ -451,23 +451,23 @@ void Field_InitializeRoomEffects(void)
 }
 
 // decomp: BATTLE.PRG func_800927AC (src/BATTLE/BATTLE.PRG/2842C.c:951)
-void Field_CreateRoomEffectObjects(Field_RoomEffectInstance* arg0)
+void Field_CreateRoomEffectObjects(Field_RoomEffectInstance* effect_instance)
 {
     int _[32] __attribute__((unused));
     int i;
     signed char* script;
-    Field_RoomEffectObject* elem = Core_Memory_AllocateFromLowEnd(sizeof *elem * arg0->kindOrObjectCount);
-    signed char* ids = (signed char*)arg0->currentData;
+    Field_RoomEffectObject* elem = Core_Memory_AllocateFromLowEnd(sizeof *elem * effect_instance->kindOrObjectCount);
+    signed char* ids = (signed char*)effect_instance->currentData;
 
-    arg0->currentData = (Field_SwingEffectRecord*)elem;
+    effect_instance->currentData = (Field_SwingEffectRecord*)elem;
     ids += 4;
-    script = ids + arg0->kindOrObjectCount;
+    script = ids + effect_instance->kindOrObjectCount;
 
-    if (arg0->kindOrObjectCount % 4) {
-        script = &script[4 - arg0->kindOrObjectCount % 4];
+    if (effect_instance->kindOrObjectCount % 4) {
+        script = &script[4 - effect_instance->kindOrObjectCount % 4];
     }
 
-    for (i = 0; i < arg0->kindOrObjectCount; ++i, ++elem, ++ids) {
+    for (i = 0; i < effect_instance->kindOrObjectCount; ++i, ++elem, ++ids) {
         elem->objectId = *ids;
         elem->scriptCursor = script;
         if (elem->objectId >= 0) {
@@ -492,23 +492,23 @@ void Field_CreateRoomEffectObjects(Field_RoomEffectInstance* arg0)
 void Field_FinishRoomEffectSetup(void) { }
 
 // decomp: BATTLE.PRG func_8009291C (src/BATTLE/BATTLE.PRG/2842C.c:990)
-int Field_StartRoomEffect(int arg0)
+int Field_StartRoomEffect(int effect_index)
 {
-    if (arg0 < Field_textureEffectCount) {
-        Field_roomEffectInstances[arg0].isActive = 1;
+    if (effect_index < Field_textureEffectCount) {
+        Field_roomEffectInstances[effect_index].isActive = 1;
         return 1;
     }
-    if (arg0 < 0x40) {
+    if (effect_index < 0x40) {
         return 0;
     }
-    if (arg0 < Field_roomEffectScriptCount + 0x40) {
-        if ((Field_roomEffectInstances[arg0].isActive != 0)
-            || (Field_roomEffectInstances[arg0].currentData != Field_roomEffectInstances[arg0].originalData)) {
-            Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[arg0].currentData);
+    if (effect_index < Field_roomEffectScriptCount + 0x40) {
+        if ((Field_roomEffectInstances[effect_index].isActive != 0)
+            || (Field_roomEffectInstances[effect_index].currentData != Field_roomEffectInstances[effect_index].originalData)) {
+            Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[effect_index].currentData);
         }
-        Field_roomEffectInstances[arg0].isActive = 1;
-        Field_roomEffectInstances[arg0].currentData = Field_roomEffectInstances[arg0].originalData;
-        Field_CreateRoomEffectObjects(&Field_roomEffectInstances[arg0]);
+        Field_roomEffectInstances[effect_index].isActive = 1;
+        Field_roomEffectInstances[effect_index].currentData = Field_roomEffectInstances[effect_index].originalData;
+        Field_CreateRoomEffectObjects(&Field_roomEffectInstances[effect_index]);
         return 1;
     }
     return 0;
@@ -542,28 +542,28 @@ int Field_ReleaseRoomEffects(void)
 }
 
 // decomp: BATTLE.PRG func_80092B04 (src/BATTLE/BATTLE.PRG/2842C.c:1038)
-int Field_ExecuteRoomEffectCommands(Field_RoomEffectObjectView* arg0, int arg1, Field_RoomEffectInstance* arg2)
+int Field_ExecuteRoomEffectCommands(Field_RoomEffectObjectView* effect_object_cursor, int object_count, Field_RoomEffectInstance* arg2)
 {
     int i;
     int idle = 0;
 
-    for (i = 0; i < arg1; ++i, ++arg0) {
-        if (arg0->scriptCursor != NULL) {
+    for (i = 0; i < object_count; ++i, ++effect_object_cursor) {
+        if (effect_object_cursor->scriptCursor != NULL) {
             while (1) {
-                Field_RoomEffectCommandHeader* temp_s0 = arg0->scriptCursor;
+                Field_RoomEffectCommandHeader* command_header = effect_object_cursor->scriptCursor;
 
-                if ((temp_s0->size != 0) && (temp_s0->opcode < 0xD)) {
+                if ((command_header->size != 0) && (command_header->opcode < 0xD)) {
                     if (Audio_Seq_unusedStateFlags.opaqueA8 != 0) {
-                        if (temp_s0->opcode == 0xB) {
+                        if (command_header->opcode == 0xB) {
                             break;
                         }
-                        while (Field_kRoomEffectOpcodeHandlers[temp_s0->opcode](arg0, temp_s0) != 0) { }
-                    } else if (Field_kRoomEffectOpcodeHandlers[temp_s0->opcode](arg0, temp_s0) != 0) {
+                        while (Field_kRoomEffectOpcodeHandlers[command_header->opcode](effect_object_cursor, command_header) != 0) { }
+                    } else if (Field_kRoomEffectOpcodeHandlers[command_header->opcode](effect_object_cursor, command_header) != 0) {
                         break;
                     }
-                    arg0->scriptCursor = (char*)arg0->scriptCursor + temp_s0->size;
+                    effect_object_cursor->scriptCursor = (char*)effect_object_cursor->scriptCursor + command_header->size;
                 } else {
-                    arg0->scriptCursor = NULL;
+                    effect_object_cursor->scriptCursor = NULL;
                     break;
                 }
             }
@@ -571,135 +571,135 @@ int Field_ExecuteRoomEffectCommands(Field_RoomEffectObjectView* arg0, int arg1, 
             ++idle;
         }
     }
-    return idle != arg1;
+    return idle != object_count;
 }
 
 // decomp: BATTLE.PRG func_80092C68 (src/BATTLE/BATTLE.PRG/2842C.c:1070)
-int Field_SetRoomEffectRadialVelocity(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_SetRoomEffectRadialVelocity(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
 {
-    int x = arg0->position.vx / 16 - arg1->operands[0].signedHalves[0];
+    int x = effect_object->position.vx / 16 - effect_command->operands[0].signedHalves[0];
     int y;
     int z;
     int d;
 
-    arg0->velocity.vx = arg1->operands[1].unsignedHalves[1] - ABS(x);
-    y = arg0->position.vy / 16 - arg1->operands[0].signedHalves[1];
-    arg0->velocity.vy = arg1->operands[1].unsignedHalves[1] - ABS(y);
-    z = arg0->position.vz / 16;
-    z -= arg1->operands[1].signedHalves[0];
-    arg0->velocity.vz = arg1->operands[1].unsignedHalves[1] - ABS(z);
+    effect_object->velocity.vx = effect_command->operands[1].unsignedHalves[1] - ABS(x);
+    y = effect_object->position.vy / 16 - effect_command->operands[0].signedHalves[1];
+    effect_object->velocity.vy = effect_command->operands[1].unsignedHalves[1] - ABS(y);
+    z = effect_object->position.vz / 16;
+    z -= effect_command->operands[1].signedHalves[0];
+    effect_object->velocity.vz = effect_command->operands[1].unsignedHalves[1] - ABS(z);
 
-    d = arg0->velocity.vx;
+    d = effect_object->velocity.vx;
 
     if (d > 0) {
-        z = arg0->position.vx - (arg1->operands[0].signedHalves[0] << 4);
+        z = effect_object->position.vx - (effect_command->operands[0].signedHalves[0] << 4);
         if (z < 0) {
-            arg0->velocity.vx = -d;
+            effect_object->velocity.vx = -d;
         }
     } else {
-        arg0->velocity.vx = 0;
+        effect_object->velocity.vx = 0;
     }
 
-    d = arg0->velocity.vy;
+    d = effect_object->velocity.vy;
 
     if (d > 0) {
-        if (arg0->position.vy - (arg1->operands[0].signedHalves[1] << 4) < 0) {
-            arg0->velocity.vy = -d;
+        if (effect_object->position.vy - (effect_command->operands[0].signedHalves[1] << 4) < 0) {
+            effect_object->velocity.vy = -d;
         }
     } else {
-        arg0->velocity.vy = 0;
+        effect_object->velocity.vy = 0;
     }
 
-    d = arg0->velocity.vz;
+    d = effect_object->velocity.vz;
 
     if (d > 0) {
-        if (arg0->position.vz - (arg1->operands[1].signedHalves[0] << 4) < 0) {
-            arg0->velocity.vz = -d;
+        if (effect_object->position.vz - (effect_command->operands[1].signedHalves[0] << 4) < 0) {
+            effect_object->velocity.vz = -d;
         }
     } else {
-        arg0->velocity.vz = 0;
+        effect_object->velocity.vz = 0;
     }
 
-    applyVector(&arg0->velocity, 4, 4, 4, /=);
-    arg0->velocity.pad = arg1->operands[2].unsignedHalves[0] + 1;
+    applyVector(&effect_object->velocity, 4, 4, 4, /=);
+    effect_object->velocity.pad = effect_command->operands[2].unsignedHalves[0] + 1;
     setVector(
-        &arg0->angularVelocity, (arg0->velocity.vx & 0x1F) - 16, (arg0->velocity.vy & 0x3F) - 32, 0);
-    arg0->angularVelocity.pad = 0;
+        &effect_object->angularVelocity, (effect_object->velocity.vx & 0x1F) - 16, (effect_object->velocity.vy & 0x3F) - 32, 0);
+    effect_object->angularVelocity.pad = 0;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80092E14 (src/BATTLE/BATTLE.PRG/2842C.c:1123)
-int Field_SetRoomEffectVelocity(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_SetRoomEffectVelocity(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
 {
     setVector(
-        &arg0->velocity, arg1->operands[0].unsignedHalves[0], arg1->operands[0].unsignedHalves[1], arg1->operands[1].unsignedHalves[0]);
-    arg0->velocity.pad = arg1->operands[1].unsignedHalves[1];
+        &effect_object->velocity, effect_command->operands[0].unsignedHalves[0], effect_command->operands[0].unsignedHalves[1], effect_command->operands[1].unsignedHalves[0]);
+    effect_object->velocity.pad = effect_command->operands[1].unsignedHalves[1];
     setVector(
-        &arg0->angularVelocity, arg1->operands[2].unsignedHalves[0], arg1->operands[2].unsignedHalves[1], arg1->operands[3].unsignedHalves[0]);
-    arg0->angularVelocity.pad = arg1->operands[3].unsignedHalves[1];
+        &effect_object->angularVelocity, effect_command->operands[2].unsignedHalves[0], effect_command->operands[2].unsignedHalves[1], effect_command->operands[3].unsignedHalves[0]);
+    effect_object->angularVelocity.pad = effect_command->operands[3].unsignedHalves[1];
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80092E7C (src/BATTLE/BATTLE.PRG/2842C.c:1134)
-int Field_SetRoomEffectTransform(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_SetRoomEffectTransform(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
 {
-    setVector(&arg0->position, arg1->operands[0].word, arg1->operands[1].word, arg1->operands[2].word);
-    setVector(&arg0->rotation, arg1->operands[3].word, arg1->extraOperandOne, arg1->extraOperandTwo);
-    Field_WriteRoomEffectTransform(arg0);
+    setVector(&effect_object->position, effect_command->operands[0].word, effect_command->operands[1].word, effect_command->operands[2].word);
+    setVector(&effect_object->rotation, effect_command->operands[3].word, effect_command->extraOperandOne, effect_command->extraOperandTwo);
+    Field_WriteRoomEffectTransform(effect_object);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80092EDC (src/BATTLE/BATTLE.PRG/2842C.c:1142)
-void Field_WriteRoomEffectTransform(Field_RoomEffectObject* arg0)
+void Field_WriteRoomEffectTransform(Field_RoomEffectObject* effect_object)
 {
-    if (arg0->objectId >= 0) {
-        int* temp_v1 = arg0->sceneEntry;
-        temp_v1[1] = arg0->position.vx / 16;
-        temp_v1[2] = arg0->position.vy / 16;
-        temp_v1[3] = arg0->position.vz / 16;
+    if (effect_object->objectId >= 0) {
+        int* geometry_group_words = effect_object->sceneEntry;
+        geometry_group_words[1] = effect_object->position.vx / 16;
+        geometry_group_words[2] = effect_object->position.vy / 16;
+        geometry_group_words[3] = effect_object->position.vz / 16;
 
-        temp_v1[4] = arg0->rotation.vx;
-        temp_v1[5] = arg0->rotation.vy;
-        temp_v1[6] = arg0->rotation.vz;
+        geometry_group_words[4] = effect_object->rotation.vx;
+        geometry_group_words[5] = effect_object->rotation.vy;
+        geometry_group_words[6] = effect_object->rotation.vz;
     }
 }
 
 // decomp: BATTLE.PRG func_80092F74 (src/BATTLE/BATTLE.PRG/2842C.c:1162)
-int Field_HideRoomEffectObject(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1 __attribute__((unused)))
+int Field_HideRoomEffectObject(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* arg1 __attribute__((unused)))
 {
-    if (arg0->objectId >= 0) {
-        *arg0->sceneEntry = 0x100;
+    if (effect_object->objectId >= 0) {
+        *effect_object->sceneEntry = 0x100;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80092F98 (src/BATTLE/BATTLE.PRG/2842C.c:1170)
-int Field_ExecuteRoomEffectShowGroup(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_ExecuteRoomEffectShowGroup(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
 {
-    Field_ShowRoomGeometryGroup(arg1->operands[0].word);
+    Field_ShowRoomGeometryGroup(effect_command->operands[0].word);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80092FBC (src/BATTLE/BATTLE.PRG/2842C.c:1176)
-int Field_AdvanceRoomEffectMotion(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_AdvanceRoomEffectMotion(Field_RoomEffectObject* effect_object, Field_RoomEffectCommand* effect_command)
 {
-    int var_a0 = 0;
-    Field_RoomEffectCommand* new_var = arg1;
+    int motion_still_active = 0;
+    Field_RoomEffectCommand* motion_command = effect_command;
 
-    if (new_var->operands[0].unsignedHalves[1] == 1) {
-        var_a0 = Field_StepRoomEffectGravity(arg0);
-    } else if (new_var->operands[0].unsignedHalves[1] == 2) {
-        var_a0 = Field_StepRoomEffectDampedMotion(arg0);
+    if (motion_command->operands[0].unsignedHalves[1] == 1) {
+        motion_still_active = Field_StepRoomEffectGravity(effect_object);
+    } else if (motion_command->operands[0].unsignedHalves[1] == 2) {
+        motion_still_active = Field_StepRoomEffectDampedMotion(effect_object);
     }
 
-    if (new_var->operands[0].unsignedHalves[0] == 0x8000) {
-        if (var_a0 == 0) {
+    if (motion_command->operands[0].unsignedHalves[0] == 0x8000) {
+        if (motion_still_active == 0) {
             return 0;
         }
     } else {
-        ++arg0->position.pad;
-        if (arg0->position.pad >= new_var->operands[0].unsignedHalves[0]) {
-            arg0->position.pad = 0;
+        ++effect_object->position.pad;
+        if (effect_object->position.pad >= motion_command->operands[0].unsignedHalves[0]) {
+            effect_object->position.pad = 0;
             return 0;
         }
     }
@@ -707,203 +707,203 @@ int Field_AdvanceRoomEffectMotion(Field_RoomEffectObject* arg0, Field_RoomEffect
 }
 
 // decomp: BATTLE.PRG func_8009306C (src/BATTLE/BATTLE.PRG/2842C.c:1201)
-int Field_StepRoomEffectGravity(Field_RoomEffectObject* arg0)
+int Field_StepRoomEffectGravity(Field_RoomEffectObject* effect_object)
 {
     int height;
 
-    addVector(&arg0->position, &arg0->velocity);
-    addVector(&arg0->rotation, &arg0->angularVelocity);
-    applyVector(&arg0->rotation, 0xFFF, 0xFFF, 0xFFF, &=);
+    addVector(&effect_object->position, &effect_object->velocity);
+    addVector(&effect_object->rotation, &effect_object->angularVelocity);
+    applyVector(&effect_object->rotation, 0xFFF, 0xFFF, 0xFFF, &=);
 
-    height = Field_FloorHeightAt(arg0->position.vx / 16, arg0->position.vz / 16) << 17;
+    height = Field_FloorHeightAt(effect_object->position.vx / 16, effect_object->position.vz / 16) << 17;
     height >>= 17;
 
-    if (height < arg0->position.vy / 16) {
-        ++arg0->rotation.pad;
+    if (height < effect_object->position.vy / 16) {
+        ++effect_object->rotation.pad;
 
-        if ((arg0->rotation.pad < 3) && (arg0->velocity.pad > 0)) {
+        if ((effect_object->rotation.pad < 3) && (effect_object->velocity.pad > 0)) {
             int velocity;
 
-            arg0->position.vy = height * 16;
-            velocity = arg0->velocity.vy / -(ABS(arg0->velocity.pad) + 2);
-            arg0->velocity.vx /= 2;
-            arg0->velocity.vz /= 2;
-            applyVector(&arg0->angularVelocity, 2, 2, 2, /=);
-            arg0->velocity.vy = velocity;
+            effect_object->position.vy = height * 16;
+            velocity = effect_object->velocity.vy / -(ABS(effect_object->velocity.pad) + 2);
+            effect_object->velocity.vx /= 2;
+            effect_object->velocity.vz /= 2;
+            applyVector(&effect_object->angularVelocity, 2, 2, 2, /=);
+            effect_object->velocity.vy = velocity;
         } else {
-            arg0->rotation.pad = 0;
+            effect_object->rotation.pad = 0;
             return 0;
         }
     }
 
-    if (arg0->velocity.pad != 0) {
-        arg0->velocity.vx -= (arg0->velocity.vx * arg0->velocity.pad) / 16;
-        arg0->velocity.vz -= (arg0->velocity.vz * arg0->velocity.pad) / 16;
+    if (effect_object->velocity.pad != 0) {
+        effect_object->velocity.vx -= (effect_object->velocity.vx * effect_object->velocity.pad) / 16;
+        effect_object->velocity.vz -= (effect_object->velocity.vz * effect_object->velocity.pad) / 16;
     }
 
-    arg0->velocity.vy += 16;
+    effect_object->velocity.vy += 16;
 
-    if (arg0->angularVelocity.pad != 0) {
-        applyVector(&arg0->angularVelocity, (arg0->angularVelocity.vx * arg0->angularVelocity.pad) / 16,
-            (arg0->angularVelocity.vy * arg0->angularVelocity.pad) / 16,
-            (arg0->angularVelocity.vz * arg0->angularVelocity.pad) / 16, -=);
+    if (effect_object->angularVelocity.pad != 0) {
+        applyVector(&effect_object->angularVelocity, (effect_object->angularVelocity.vx * effect_object->angularVelocity.pad) / 16,
+            (effect_object->angularVelocity.vy * effect_object->angularVelocity.pad) / 16,
+            (effect_object->angularVelocity.vz * effect_object->angularVelocity.pad) / 16, -=);
     }
 
-    Field_WriteRoomEffectTransform(arg0);
+    Field_WriteRoomEffectTransform(effect_object);
     return 1;
 }
 
 // decomp: BATTLE.PRG func_80093364 (src/BATTLE/BATTLE.PRG/2842C.c:1247)
-int Field_StepRoomEffectDampedMotion(Field_RoomEffectObject* arg0)
+int Field_StepRoomEffectDampedMotion(Field_RoomEffectObject* effect_object)
 {
-    addVector(&arg0->position, &arg0->velocity);
-    addVector(&arg0->rotation, &arg0->angularVelocity);
-    applyVector(&arg0->rotation, 0xFFF, 0xFFF, 0xFFF, &=);
+    addVector(&effect_object->position, &effect_object->velocity);
+    addVector(&effect_object->rotation, &effect_object->angularVelocity);
+    applyVector(&effect_object->rotation, 0xFFF, 0xFFF, 0xFFF, &=);
 
-    if (arg0->velocity.pad != 0) {
-        applyVector(&arg0->velocity, (arg0->velocity.vx * arg0->velocity.pad) / 16,
-            (arg0->velocity.vy * arg0->velocity.pad) / 16,
-            (arg0->velocity.vz * arg0->velocity.pad) / 16, -=);
+    if (effect_object->velocity.pad != 0) {
+        applyVector(&effect_object->velocity, (effect_object->velocity.vx * effect_object->velocity.pad) / 16,
+            (effect_object->velocity.vy * effect_object->velocity.pad) / 16,
+            (effect_object->velocity.vz * effect_object->velocity.pad) / 16, -=);
     }
 
-    if (arg0->angularVelocity.pad != 0) {
-        applyVector(&arg0->angularVelocity, (arg0->angularVelocity.vx * arg0->angularVelocity.pad) / 16,
-            (arg0->angularVelocity.vy * arg0->angularVelocity.pad) / 16,
-            (arg0->angularVelocity.vz * arg0->angularVelocity.pad) / 16, -=);
+    if (effect_object->angularVelocity.pad != 0) {
+        applyVector(&effect_object->angularVelocity, (effect_object->angularVelocity.vx * effect_object->angularVelocity.pad) / 16,
+            (effect_object->angularVelocity.vy * effect_object->angularVelocity.pad) / 16,
+            (effect_object->angularVelocity.vz * effect_object->angularVelocity.pad) / 16, -=);
     }
 
-    Field_WriteRoomEffectTransform(arg0);
+    Field_WriteRoomEffectTransform(effect_object);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8009352C (src/BATTLE/BATTLE.PRG/2842C.c:1269)
-int Field_ExecuteRoomEffectPlaySound(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_ExecuteRoomEffectPlaySound(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
 {
     if (Field_roomData.soundData != NULL) {
-        if ((arg1->operands[0].unsignedHalves[0] == 0) || (Field_isRoomEffectSoundRestored != 0)) {
-            Audio_PlayBankSfxCentered(0x200, Field_roomData.soundData, arg1->operands[0].unsignedHalves[1]);
+        if ((effect_command->operands[0].unsignedHalves[0] == 0) || (Field_isRoomEffectSoundRestored != 0)) {
+            Audio_PlayBankSfxCentered(0x200, Field_roomData.soundData, effect_command->operands[0].unsignedHalves[1]);
         } else {
             Audio_PlayBankSfx(
-                0x200, Field_roomData.soundData, arg1->operands[0].unsignedHalves[1], 0x80, 0);
+                0x200, Field_roomData.soundData, effect_command->operands[0].unsignedHalves[1], 0x80, 0);
         }
-        Field_roomEffectSoundId = arg1->operands[0].unsignedHalves[1];
+        Field_roomEffectSoundId = effect_command->operands[0].unsignedHalves[1];
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800935B8 (src/BATTLE/BATTLE.PRG/2842C.c:1283)
-int Field_ExecuteRoomEffectStopSound(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_ExecuteRoomEffectStopSound(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
 {
     if (Field_roomData.soundData != NULL) {
-        Audio_StopBankSfx(0x200, Field_roomData.soundData, arg1->operands[0].unsignedHalves[1]);
+        Audio_StopBankSfx(0x200, Field_roomData.soundData, effect_command->operands[0].unsignedHalves[1]);
         Field_roomEffectSoundId = -1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800935F8 (src/BATTLE/BATTLE.PRG/2842C.c:1292)
-int Field_ExecuteRoomEffectStartEffect(Field_RoomEffectObject* arg0 __attribute__((unused)), Field_RoomEffectCommand* arg1)
+int Field_ExecuteRoomEffectStartEffect(Field_RoomEffectObject* arg0 __attribute__((unused)), Field_RoomEffectCommand* effect_command)
 {
-    Field_StartRoomEffect(arg1->operands[0].word);
+    Field_StartRoomEffect(effect_command->operands[0].word);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8009361C (src/BATTLE/BATTLE.PRG/2842C.c:1298)
-int Field_ExecuteRoomEffectHideGroup(Field_RoomEffectObject* unk0 __attribute__((unused)), Field_RoomEffectCommand* arg1)
+int Field_ExecuteRoomEffectHideGroup(Field_RoomEffectObject* unk0 __attribute__((unused)), Field_RoomEffectCommand* effect_command)
 {
-    Field_HideRoomGeometryGroup(arg1->operands[0].word);
+    Field_HideRoomGeometryGroup(effect_command->operands[0].word);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80093640 (src/BATTLE/BATTLE.PRG/2842C.c:1304)
-int Field_ExecuteRoomEffectStopScript(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* arg1)
+int Field_ExecuteRoomEffectStopScript(Field_RoomEffectObject* arg0, Field_RoomEffectCommand* effect_command)
 {
-    if (Field_roomEffectInstances[arg1->operands[0].word + 0x40].isActive != 0) {
-        Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[arg1->operands[0].word + 0x40].currentData);
-        Field_roomEffectInstances[arg1->operands[0].word + 0x40].currentData =
-            Field_roomEffectInstances[arg1->operands[0].word + 0x40].originalData;
-        Field_roomEffectInstances[arg1->operands[0].word + 0x40].isActive = 0;
+    if (Field_roomEffectInstances[effect_command->operands[0].word + 0x40].isActive != 0) {
+        Core_Memory_FreeFromLowEnd(Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData);
+        Field_roomEffectInstances[effect_command->operands[0].word + 0x40].currentData =
+            Field_roomEffectInstances[effect_command->operands[0].word + 0x40].originalData;
+        Field_roomEffectInstances[effect_command->operands[0].word + 0x40].isActive = 0;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800936F8 (src/BATTLE/BATTLE.PRG/2842C.c:1321)
-int Field_ToggleRoomEffectUpdates(int arg0)
+int Field_ToggleRoomEffectUpdates(int effect_index)
 {
-    if (arg0 < Field_textureEffectCount) {
-        Field_roomEffectInstances[arg0].isUpdateEnabled = Field_roomEffectInstances[arg0].isUpdateEnabled < 1U;
+    if (effect_index < Field_textureEffectCount) {
+        Field_roomEffectInstances[effect_index].isUpdateEnabled = Field_roomEffectInstances[effect_index].isUpdateEnabled < 1U;
         return 1;
     }
-    if ((arg0 >= 0x40) && (arg0 < (Field_roomEffectScriptCount + 0x40))) {
-        Field_roomEffectInstances[arg0].isUpdateEnabled = Field_roomEffectInstances[arg0].isUpdateEnabled < 1U;
+    if ((effect_index >= 0x40) && (effect_index < (Field_roomEffectScriptCount + 0x40))) {
+        Field_roomEffectInstances[effect_index].isUpdateEnabled = Field_roomEffectInstances[effect_index].isUpdateEnabled < 1U;
         return 1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80093764 (src/BATTLE/BATTLE.PRG/2842C.c:1334)
-int Field_IsRoomEffectActive(int arg0) { return Field_roomEffectInstances[arg0].isActive; }
+int Field_IsRoomEffectActive(int effect_index) { return Field_roomEffectInstances[effect_index].isActive; }
 
 // decomp: BATTLE.PRG func_80093788 (src/BATTLE/BATTLE.PRG/2842C.c:1336)
-void Field_FinishRoomDoorRotation(int arg0)
+void Field_FinishRoomDoorRotation(int effect_index)
 {
-    Field_SwingEffectRecord* temp_a2;
-    int temp_a1;
-    int temp_v0;
-    int* temp_v1;
+    Field_SwingEffectRecord* swing_effect;
+    int previous_start_angle;
+    int reversed_initial_velocity;
+    int* geometry_group_words;
 
-    if (arg0 < 0x40) {
-        void* a0;
-        if (Field_roomEffectInstances[arg0].kindOrObjectCount == 6) {
-            temp_a2 = Field_roomEffectInstances[arg0].currentData;
-            a0 = (void*)Field_roomData.geometry;
-            if (Field_roomEffectInstances[arg0].isActive != 0) {
-                temp_v1 = a0 + temp_a2->geometryOffset;
-                temp_v1[5] = temp_a2->restAngle;
-                temp_v1[0] = (temp_v1[0] | 0x6000);
-                temp_v0 = -temp_a2->initialVelocity;
-                temp_a1 = temp_a2->startAngle;
-                temp_a2->initialVelocity = temp_v0;
-                temp_a2->angularVelocity = temp_v0;
-                temp_a2->startAngle = temp_a2->restAngle;
-                temp_a2->restAngle = temp_a1;
-                temp_a2->acceleration = -temp_a2->acceleration;
-                Field_roomEffectInstances[arg0].isActive = 0;
+    if (effect_index < 0x40) {
+        void* room_geometry_base;
+        if (Field_roomEffectInstances[effect_index].kindOrObjectCount == 6) {
+            swing_effect = Field_roomEffectInstances[effect_index].currentData;
+            room_geometry_base = (void*)Field_roomData.geometry;
+            if (Field_roomEffectInstances[effect_index].isActive != 0) {
+                geometry_group_words = room_geometry_base + swing_effect->geometryOffset;
+                geometry_group_words[5] = swing_effect->restAngle;
+                geometry_group_words[0] = (geometry_group_words[0] | 0x6000);
+                reversed_initial_velocity = -swing_effect->initialVelocity;
+                previous_start_angle = swing_effect->startAngle;
+                swing_effect->initialVelocity = reversed_initial_velocity;
+                swing_effect->angularVelocity = reversed_initial_velocity;
+                swing_effect->startAngle = swing_effect->restAngle;
+                swing_effect->restAngle = previous_start_angle;
+                swing_effect->acceleration = -swing_effect->acceleration;
+                Field_roomEffectInstances[effect_index].isActive = 0;
             }
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80093824 (src/BATTLE/BATTLE.PRG/2842C.c:1365)
-void Field_FinishRoomTiltRotation(int arg0)
+void Field_FinishRoomTiltRotation(int effect_index)
 {
-    int temp_a1;
-    Field_SwingEffectRecord* temp_a2;
-    int temp_v0;
-    int* temp_a0;
+    int previous_start_angle;
+    Field_SwingEffectRecord* swing_effect;
+    int reversed_initial_velocity;
+    int* geometry_group_words;
 
-    temp_a2 = (Field_SwingEffectRecord*)Field_roomEffectInstances[arg0].currentData;
-    temp_a0 = (void*)Field_roomData.geometry + temp_a2->geometryOffset;
+    swing_effect = (Field_SwingEffectRecord*)Field_roomEffectInstances[effect_index].currentData;
+    geometry_group_words = (void*)Field_roomData.geometry + swing_effect->geometryOffset;
 
-    if (temp_a2->axis == 2) {
-        temp_a0[4] = temp_a2->restAngle;
+    if (swing_effect->axis == 2) {
+        geometry_group_words[4] = swing_effect->restAngle;
     } else {
-        temp_a0[6] = temp_a2->restAngle;
+        geometry_group_words[6] = swing_effect->restAngle;
     }
-    temp_v0 = -temp_a2->initialVelocity;
-    temp_a1 = temp_a2->startAngle;
-    temp_a2->initialVelocity = temp_v0;
-    temp_a2->angularVelocity = temp_v0;
-    temp_a2->startAngle = temp_a2->restAngle;
-    temp_a2->restAngle = temp_a1;
-    temp_a2->acceleration = -temp_a2->acceleration;
+    reversed_initial_velocity = -swing_effect->initialVelocity;
+    previous_start_angle = swing_effect->startAngle;
+    swing_effect->initialVelocity = reversed_initial_velocity;
+    swing_effect->angularVelocity = reversed_initial_velocity;
+    swing_effect->startAngle = swing_effect->restAngle;
+    swing_effect->restAngle = previous_start_angle;
+    swing_effect->acceleration = -swing_effect->acceleration;
 }
 
 // decomp: BATTLE.PRG func_800938AC (src/BATTLE/BATTLE.PRG/2842C.c:1389)
-void Field_DuckRoomEffectSound(int arg0)
+void Field_DuckRoomEffectSound(int duck_enabled)
 {
     if ((Field_roomEffectSoundId != -1) && (Field_roomData.soundData != NULL)) {
-        if (arg0 != 0) {
+        if (duck_enabled != 0) {
             Audio_FadeBankSfxVolume(0x200, Field_roomData.soundData, Field_roomEffectSoundId, 0x20, 8);
         } else {
             Audio_FadeBankSfxVolume(0x200, Field_roomData.soundData, Field_roomEffectSoundId, 0x7F, 8);
@@ -912,10 +912,10 @@ void Field_DuckRoomEffectSound(int arg0)
 }
 
 // decomp: BATTLE.PRG func_80093914 (src/BATTLE/BATTLE.PRG/2842C.c:1400)
-void Field_SwapRoomGeometryRedGreen(int arg0)
+void Field_SwapRoomGeometryRedGreen(int geometry_group_id)
 {
     int* base = Field_roomData.geometry;
-    int* entry = Field_FindRoomGeometryGroup(arg0);
+    int* entry = Field_FindRoomGeometryGroup(geometry_group_id);
     int* block;
     int n0;
     int n1;

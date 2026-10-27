@@ -935,3 +935,38 @@ Evidence: `build\quality\issue148-actor-*`.
 The lexical inventory is 17,463 occurrences/1,625 pairs/291 files; all remaining
 actor matches have the specific retention evidence above or in the ledger.
 Other source scopes remain in progress.
+
+The actor cohort is published in `42018e8d`, exact green `40574623738`.
+The field review covers 246 pairs/2,899 occurrences, 184 ledger identities
+and 183 native definitions. It supplies 470 naming decisions, including
+separate F00543 inner cleared-section-address and reset-tail-word bindings
+before the outer requested-room-ID and MPD-section-offset substitutions.
+The shared moving-platform lookup is emitted only once. All newly proposed
+locals use lower_snake_case; existing meaningful names are not restyled.
+
+Forty-two function-binding retentions remain individually documented, including
+unused ABI parameters and existing camera/transition rates. Fourteen retained
+member declarations are recorded on their existing field-ledger rows:
+T00234.006, T00324.020/.022/.025, T00325.020/.022/.025/.034, T00338.004,
+T00448.005/.007/.010/.014 and T00458.015. These distinguish genuine packed UV
+coordinates and camera speed from register-like spellings. The weather `speed`
+byte's velocity-versus-trigonometric-phase roles are explicitly documented,
+not described as physical velocity in every particle mode.
+
+On dirty base `42018e8d`, field/room/terrain controls first pass
+49 cases/662,492 assertions. Debug/Release then each pass
+`[field],[room],[terrain],[event] --reporter compact`,
+71 cases/663,186 assertions. Copier tests pass 136/136 and naming tests 32/32;
+focused tooling quality reports zero new findings. The resume-order regression
+now selects its unique resume hook by contract rather than assuming it is the
+last fixup; all original mutation-order assertions remain intact.
+Exact expected identifier changes are confined to 27 generated files, with
+742 manifest paths checked, 121 owned paths unchanged and stable repeat output.
+Evidence: `build\quality\issue148-field-*`.
+The lexical inventory is 14,669 occurrences/1,421 pairs/279 files.
+
+This expansion also exposed #219: 1,919 regex fixups contain 695 distinct scope
+patterns. Fifty unchanged, unmatched `apply_fixups` calls compile regexes
+34,750 times, and repeat generation takes about 59 seconds. This measured
+cache-thrashing defect is tracked separately; performance repairs must preserve
+rule order, dynamic rule-list behavior, used-fixup reporting and exact output.

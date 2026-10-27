@@ -51,15 +51,15 @@ int Field_ScreenTransitionPhase(void)
 }
 
 // decomp: BATTLE.PRG func_8007C444 (src/BATTLE/BATTLE.PRG/146C.c:8774)
-void Field_ConfigureScreenTransition(int arg0, int arg1, int arg2)
+void Field_ConfigureScreenTransition(int transition_effect, int transition_speed, int wipe_angle)
 {
-    Field_screenTransitionEffect = arg0;
-    Field_screenTransitionSpeed = arg1;
-    Field_screenTransitionWipeAngle = arg2;
+    Field_screenTransitionEffect = transition_effect;
+    Field_screenTransitionSpeed = transition_speed;
+    Field_screenTransitionWipeAngle = wipe_angle;
 }
 
 // decomp: BATTLE.PRG func_8007C460 (src/BATTLE/BATTLE.PRG/146C.c:8781)
-void Field_SetTransitionWipeAngle(int arg0) { Field_screenTransitionWipeAngle = arg0; }
+void Field_SetTransitionWipeAngle(int wipe_angle) { Field_screenTransitionWipeAngle = wipe_angle; }
 
 // decomp: BATTLE.PRG func_8007C46C (src/BATTLE/BATTLE.PRG/146C.c:8783)
 void Field_BeginScreenFadeOut(int effect, int speed, int angle)
@@ -75,23 +75,23 @@ void Field_BeginScreenFadeOut(int effect, int speed, int angle)
 }
 
 // decomp: BATTLE.PRG func_8007C4AC (src/BATTLE/BATTLE.PRG/146C.c:8795)
-void Field_BeginScreenFadeIn(int effect, int arg1, int arg2)
+void Field_BeginScreenFadeIn(int effect, int transition_speed, int wipe_angle)
 {
     Field_screenTransitionStep = 7;
     Field_screenTransitionEffect = effect;
-    Field_screenTransitionSpeed = arg1;
-    Field_screenTransitionWipeAngle = arg2;
+    Field_screenTransitionSpeed = transition_speed;
+    Field_screenTransitionWipeAngle = wipe_angle;
 }
 
 // decomp: BATTLE.PRG func_8007C4E0 (src/BATTLE/BATTLE.PRG/146C.c:8805)
-int Field_BeginRoomTransition(Field_MpdDoorRecord* arg0, int effect, int speed)
+int Field_BeginRoomTransition(Field_MpdDoorRecord* destination_door, int effect, int speed)
 {
-    Field_pendingDestinationDoor = *arg0;
+    Field_pendingDestinationDoor = *destination_door;
     Field_screenTransitionStep = 1;
     Field_screenTransitionEffect = effect;
     Field_screenTransitionSpeed = speed;
     Field_pendingDestinationDoor.destinationZoneId = Field_zoneContext.zndId;
-    Field_QueueRoomLoad(arg0->destinationRoomId);
+    Field_QueueRoomLoad(destination_door->destinationRoomId);
     Actors_RestoreActorIdlePose(0);
     Field_SetActorCollisionBypass(0, 1);
     Field_SetEntranceDoorRecord(NULL);
@@ -100,24 +100,24 @@ int Field_BeginRoomTransition(Field_MpdDoorRecord* arg0, int effect, int speed)
 }
 
 // decomp: BATTLE.PRG func_8007C580 (src/BATTLE/BATTLE.PRG/146C.c:8820)
-void Field_BeginScriptedRoomTransition(Field_MpdDoorRecord* arg0, int arg1, int arg2)
+void Field_BeginScriptedRoomTransition(Field_MpdDoorRecord* destination_door, int transition_effect, int transition_speed)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery ashley_placement;
 
-    Field_BeginRoomTransition(arg0, arg1, arg2);
-    Actors_ActorPlacement(0, &sp10);
-    Field_FindEntranceDoorNearTile(sp10.location.packedTile.target.tileX, sp10.location.packedTile.target.tileZ,
-        sp10.location.packedTile.target.tileLayer);
+    Field_BeginRoomTransition(destination_door, transition_effect, transition_speed);
+    Actors_ActorPlacement(0, &ashley_placement);
+    Field_FindEntranceDoorNearTile(ashley_placement.location.packedTile.target.tileX, ashley_placement.location.packedTile.target.tileZ,
+        ashley_placement.location.packedTile.target.tileLayer);
 }
 
 // decomp: BATTLE.PRG func_8007C5C0 (src/BATTLE/BATTLE.PRG/146C.c:8830)
-int Field_BeginZoneTransition(Field_MpdDoorRecord* arg0, int effect, int speed)
+int Field_BeginZoneTransition(Field_MpdDoorRecord* destination_door, int effect, int speed)
 {
-    Field_pendingDestinationDoor = *arg0;
+    Field_pendingDestinationDoor = *destination_door;
     Field_screenTransitionStep = 2;
     Field_screenTransitionEffect = effect;
     Field_screenTransitionSpeed = speed;
-    Field_QueueZoneLoad(arg0->destinationZoneId);
+    Field_QueueZoneLoad(destination_door->destinationZoneId);
     Actors_RestoreActorIdlePose(0);
     Field_SetActorCollisionBypass(0, 1);
     Field_SetEntranceDoorRecord(NULL);
@@ -125,44 +125,44 @@ int Field_BeginZoneTransition(Field_MpdDoorRecord* arg0, int effect, int speed)
 }
 
 // decomp: BATTLE.PRG func_8007C654 (src/BATTLE/BATTLE.PRG/146C.c:8843)
-void Field_BeginScriptedZoneTransition(Field_MpdDoorRecord* arg0, int arg1, int arg2)
+void Field_BeginScriptedZoneTransition(Field_MpdDoorRecord* destination_door, int transition_effect, int transition_speed)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery ashley_placement;
 
-    Field_BeginZoneTransition(arg0, arg1, arg2);
-    Actors_ActorPlacement(0, &sp10);
-    Field_FindEntranceDoorNearTile(sp10.location.packedTile.target.tileX, sp10.location.packedTile.target.tileZ,
-        sp10.location.packedTile.target.tileLayer);
+    Field_BeginZoneTransition(destination_door, transition_effect, transition_speed);
+    Actors_ActorPlacement(0, &ashley_placement);
+    Field_FindEntranceDoorNearTile(ashley_placement.location.packedTile.target.tileX, ashley_placement.location.packedTile.target.tileZ,
+        ashley_placement.location.packedTile.target.tileLayer);
 }
 
 // decomp: BATTLE.PRG func_8007C694 (src/BATTLE/BATTLE.PRG/146C.c:8853)
-int Field_TeleportToLocation(int arg0, int arg1, int arg2, int effect, int speed)
+int Field_TeleportToLocation(int location_id, int destination_tile_x, int destination_tile_z, int effect, int speed)
 {
-    Actors_ActorLocationQuery sp10;
-    int temp_v1_2;
-    int var_a0;
+    Actors_ActorLocationQuery ashley_placement;
+    int rounded_facing_angle;
+    int wrapped_facing_for_quadrant;
     int zndId;
     int mpdId;
 
-    zndId = Field_locationDestinations[arg0 * 2];
-    mpdId = Field_locationDestinations[arg0 * 2 + 1];
+    zndId = Field_locationDestinations[location_id * 2];
+    mpdId = Field_locationDestinations[location_id * 2 + 1];
 
-    Field_pendingDestinationDoor.entryTileX = arg1;
-    Field_pendingDestinationDoor.entryTileZ = arg2;
+    Field_pendingDestinationDoor.entryTileX = destination_tile_x;
+    Field_pendingDestinationDoor.entryTileZ = destination_tile_z;
     Field_pendingDestinationDoor.tileLocation.entryDirection = 0;
 
-    Actors_ActorPlacement(0, &sp10);
+    Actors_ActorPlacement(0, &ashley_placement);
 
-    temp_v1_2 = sp10.location.position.pad + 0x200;
-    var_a0 = temp_v1_2 - ((temp_v1_2 / ONE) * ONE);
-    if (var_a0 < 0) {
-        var_a0 += 0x3FF;
+    rounded_facing_angle = ashley_placement.location.position.pad + 0x200;
+    wrapped_facing_for_quadrant = rounded_facing_angle - ((rounded_facing_angle / ONE) * ONE);
+    if (wrapped_facing_for_quadrant < 0) {
+        wrapped_facing_for_quadrant += 0x3FF;
     }
 
     Field_screenTransitionStep = 1;
     Field_screenTransitionEffect = effect;
     Field_screenTransitionSpeed = speed;
-    Field_pendingDestinationDoor.entryElevation = var_a0 >> 10;
+    Field_pendingDestinationDoor.entryElevation = wrapped_facing_for_quadrant >> 10;
     Field_pendingDestinationDoor.reserved06Bit15 = 0;
 
     if (zndId != Field_pendingDestinationDoor.destinationZoneId) {
@@ -185,8 +185,8 @@ int Field_TeleportToLocation(int arg0, int arg1, int arg2, int effect, int speed
 // decomp: INITBTL.PRG _initTransitionState (src/BATTLE/INITBTL.PRG/18.c:468)
 void Field_InitializeRoomTransitionPrimitives(void)
 {
-    RECT sp18;
-    memset(&sp18, 0, sizeof sp18);
+    RECT texture_window_rect;
+    memset(&texture_window_rect, 0, sizeof texture_window_rect);
 
     SetPolyF4(&Render_legacyTransitionFadePackets[0]);
     setRGB0(&Render_legacyTransitionFadePackets[0], 0, 0, 0);
@@ -211,7 +211,7 @@ void Field_InitializeRoomTransitionPrimitives(void)
     SetSemiTrans(Render_legacyTransitionEdgePackets, 1);
     Render_legacyTransitionEdgePackets[1] = Render_legacyTransitionEdgePackets[0];
 
-    SetDrawMode(Render_legacyTransitionDrawModes, 0, 1, getTPage(0, 2, 0, 0), &sp18);
+    SetDrawMode(Render_legacyTransitionDrawModes, 0, 1, getTPage(0, 2, 0, 0), &texture_window_rect);
     Render_legacyTransitionDrawModes[1] = Render_legacyTransitionDrawModes[0];
 
     Field_screenTransitionAlpha = 255;

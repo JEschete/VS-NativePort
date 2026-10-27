@@ -123,45 +123,45 @@ void Field_BeginBattleActionMenu(int arg0 __attribute__((unused)), int arg1 __at
 }
 
 // decomp: BATTLE.PRG func_800735CC (src/BATTLE/BATTLE.PRG/146C.c:4679)
-void Field_CloseBattleActionMenu(Menu_Framework_ActionSelection* arg0)
+void Field_CloseBattleActionMenu(Menu_Framework_ActionSelection* action_selection)
 {
     Menu_Framework_ReleaseMenuRows();
-    arg0->menuStatus = 0;
+    action_selection->menuStatus = 0;
     Field_ResumeFieldAfterMenu();
 }
 
 // decomp: BATTLE.PRG func_800735F8 (src/BATTLE/BATTLE.PRG/146C.c:4686)
-void Field_DispatchBattleActionMenuResult(Menu_Framework_ActionSelection* arg0)
+void Field_DispatchBattleActionMenuResult(Menu_Framework_ActionSelection* action_selection)
 {
-    Actors_ActorLocationQuery sp18;
+    Actors_ActorLocationQuery ashley_placement;
 
     Field_SetMinimapVisible(1);
     Battle_SetHudBattleMode(Battle_characterState->weaponDrawn & 1);
 
-    switch (arg0->selectionKind) {
+    switch (action_selection->selectionKind) {
     case 5:
         break;
     case 6:
     case 7:
     case 8:
-        Battle_BeginActorActionSelection(0, arg0->executeAbility.word);
+        Battle_BeginActorActionSelection(0, action_selection->executeAbility.word);
         return;
     case 10:
-        Actors_ActorPlacement(0, &sp18);
-        Effects_SpawnTrapTileEffect(&sp18.location);
+        Actors_ActorPlacement(0, &ashley_placement);
+        Effects_SpawnTrapTileEffect(&ashley_placement.location);
         State_SetScriptFlag(0xB7, 1);
-        Field_TeleportToLocation(arg0->executeAbility.bits.location,
-            arg0->executeAbility.bits.tileX, arg0->executeAbility.bits.tileZ, 0,
+        Field_TeleportToLocation(action_selection->executeAbility.bits.location,
+            action_selection->executeAbility.bits.tileX, action_selection->executeAbility.bits.tileZ, 0,
             8);
         if (Battle_characterState->stats->currentMp
-            >= arg0->executeAbility.bits.mpCost) {
+            >= action_selection->executeAbility.bits.mpCost) {
             Battle_characterState->stats->currentMp -=
-                arg0->executeAbility.bits.mpCost;
+                action_selection->executeAbility.bits.mpCost;
         }
         ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, NULL, 7);
         break;
     }
     Field_EnterFieldExplorationMode();
-    Field_CloseBattleActionMenu(arg0);
+    Field_CloseBattleActionMenu(action_selection);
 }
 

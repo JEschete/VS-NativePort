@@ -16,15 +16,15 @@ extern int Field_screenTransitionEffect;
 extern int Field_screenTransitionWipeAngle;
 extern int Field_screenTransitionSpeed;
 int Field_ScreenTransitionPhase(void);
-void Field_ConfigureScreenTransition(int arg0, int arg1, int arg2);
-void Field_SetTransitionWipeAngle(int arg0);
+void Field_ConfigureScreenTransition(int transition_effect, int transition_speed, int wipe_angle);
+void Field_SetTransitionWipeAngle(int wipe_angle);
 void Field_BeginScreenFadeOut(int effect, int speed, int angle);
-void Field_BeginScreenFadeIn(int effect, int arg1, int arg2);
-int Field_BeginRoomTransition(Field_MpdDoorRecord* arg0, int effect, int speed);
-void Field_BeginScriptedRoomTransition(Field_MpdDoorRecord* arg0, int arg1, int arg2);
-int Field_BeginZoneTransition(Field_MpdDoorRecord* arg0, int effect, int speed);
-void Field_BeginScriptedZoneTransition(Field_MpdDoorRecord* arg0, int arg1, int arg2);
-int Field_TeleportToLocation(int arg0, int arg1, int arg2, int effect, int speed);
+void Field_BeginScreenFadeIn(int effect, int transition_speed, int wipe_angle);
+int Field_BeginRoomTransition(Field_MpdDoorRecord* destination_door, int effect, int speed);
+void Field_BeginScriptedRoomTransition(Field_MpdDoorRecord* destination_door, int transition_effect, int transition_speed);
+int Field_BeginZoneTransition(Field_MpdDoorRecord* destination_door, int effect, int speed);
+void Field_BeginScriptedZoneTransition(Field_MpdDoorRecord* destination_door, int transition_effect, int transition_speed);
+int Field_TeleportToLocation(int location_id, int destination_tile_x, int destination_tile_z, int effect, int speed);
 void Field_InitializeRoomTransitionPrimitives(void);
 
 #endif // VS_FIELD_TRANSITIONS_H_DECLS

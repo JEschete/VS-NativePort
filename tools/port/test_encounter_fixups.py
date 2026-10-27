@@ -1099,7 +1099,12 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
                 )
 
     def test_native_resume_hooks_precede_event_and_reset_mutation(self):
-        finish = copy_fixups.FIXES["F00543"][-1]
+        finishes = [
+            item for item in copy_fixups.FIXES["F00543"]
+            if "Save_NativeFinishResume" in item[1]
+        ]
+        self.assertEqual(len(finishes), 1)
+        finish = finishes[0]
         self.assertIn("Boot_JumpToTitle(NULL)", finish[1])
         self.assertLess(
             finish[1].index("Save_NativeFinishResume"), finish[1].index("if ((temp_s4")
@@ -1910,6 +1915,29 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
             if re.search(row, "Actors::InitializeActorModelResources")
         ]
         self.assertNotIn(r"\bnew_var\b", patterns)
+
+    def test_room_load_names_preserve_shadowed_pointer_and_offset_bindings(self):
+        names = {
+            "cleared_section_address": r"\barg0\b",
+            "reset_tail_words": r"\bv0\b",
+        }
+        prepared = []
+        for name, pattern in names.items():
+            matches = [
+                (old, new) for old, new, _ in copy_fixups.FIXES["F00543"]
+                if name in new
+            ]
+            self.assertEqual(len(matches), 1)
+            old, new = matches[0]
+            self.assertEqual(new, re.sub(pattern, name, old))
+            prepared.append(new)
+        source = "void Load(int arg0) { int v0 = 0;\n" + "\n".join(prepared) + "}"
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Field::FinishRoomLoad"):
+                source = re.sub(pattern, replacement, source)
+        self.assertIn("void Load(int requested_room_id) { int mpd_section_offset = 0;", source)
+        self.assertIn("cleared_section_address", source)
+        self.assertIn("reset_tail_words", source)
 
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]

@@ -45,12 +45,12 @@ extern Field_BackgroundLayout* Field_loadedBackgroundLayout;
 extern u_long* Field_legacyBackgroundTimBuffer;
 void Field_InitializeRoomBackground(void);
 void Field_InitializeRoomBackgroundColors(void);
-void Field_SetBackgroundParallaxScale(int arg0, int arg1);
-void Field_SetTiledBackgroundEnabled(int arg0);
+void Field_SetBackgroundParallaxScale(int parallax_scale_x_fixed12, int parallax_scale_y_fixed12);
+void Field_SetTiledBackgroundEnabled(int enabled);
 int* Field_RoomBackgroundColors(void);
-void Field_SetRoomBackgroundColors(int* arg0);
-void Field_DrawRoomBackground(VECTOR* arg0);
-int Field_QueueTiledBackgroundLoad(int arg0);
+void Field_SetRoomBackgroundColors(int* gradient_color_cursor);
+void Field_DrawRoomBackground(VECTOR* background_rotation_override);
+int Field_QueueTiledBackgroundLoad(int texture_page);
 int Field_FinishTiledBackgroundLoad(void);
 int Field_ReleaseTiledBackground(void);
 

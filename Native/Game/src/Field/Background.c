@@ -85,7 +85,7 @@ void Field_InitializeRoomBackground(void)
 // decomp: BATTLE.PRG func_8008E938 (src/BATTLE/BATTLE.PRG/146C.c:17453)
 void Field_InitializeRoomBackgroundColors(void)
 {
-    Field_MpdEnvironment* temp_s0;
+    Field_MpdEnvironment* environment_record;
     int i;
 
     Field_backgroundOffsetX = 0;
@@ -95,93 +95,93 @@ void Field_InitializeRoomBackgroundColors(void)
 
     if (Field_roomData.environment != NULL) {
 
-        temp_s0 = Field_roomData.environment;
+        environment_record = Field_roomData.environment;
 
         for (i = 1; i < 5; ++i) {
-            if (temp_s0->backgroundColors[0] != temp_s0->backgroundColors[i]) {
+            if (environment_record->backgroundColors[0] != environment_record->backgroundColors[i]) {
                 break;
             }
         }
-        if ((i == 5) && (temp_s0->backgroundColors[0] & 0xFFFFFF)) {
+        if ((i == 5) && (environment_record->backgroundColors[0] & 0xFFFFFF)) {
             Field_isSolidBackground = 1;
         } else {
             Field_isSolidBackground = 0;
-            Field_SetRoomBackgroundColors(temp_s0->backgroundColors);
+            Field_SetRoomBackgroundColors(environment_record->backgroundColors);
         }
-        if ((temp_s0->weatherArea[0].word == 0) && (temp_s0->weatherArea[1].word == 0)) {
+        if ((environment_record->weatherArea[0].word == 0) && (environment_record->weatherArea[1].word == 0)) {
             Field_MpdCollisionHeader* collisionMap =
                 Field_roomData.collisionMap;
             if (collisionMap != NULL) {
-                temp_s0->weatherArea[1].halves[0] = collisionMap->width * 4;
-                temp_s0->weatherArea[1].halves[1] = collisionMap->height * 4;
+                environment_record->weatherArea[1].halves[0] = collisionMap->width * 4;
+                environment_record->weatherArea[1].halves[1] = collisionMap->height * 4;
             } else {
-                temp_s0->weatherArea[1].halves[0] = 0x20;
-                temp_s0->weatherArea[1].halves[1] = 0x20;
+                environment_record->weatherArea[1].halves[0] = 0x20;
+                environment_record->weatherArea[1].halves[1] = 0x20;
             }
         }
-        temp_s0->weatherArea[0].halves[0] *= 128;
-        temp_s0->weatherArea[0].halves[1] *= 128;
-        temp_s0->weatherArea[1].halves[0] *= 128;
-        temp_s0->weatherArea[1].halves[1] *= 128;
-        temp_s0->weatherArea[1].halves[0] -= temp_s0->weatherArea[0].halves[0];
-        temp_s0->weatherArea[1].halves[1] -= temp_s0->weatherArea[0].halves[1];
+        environment_record->weatherArea[0].halves[0] *= 128;
+        environment_record->weatherArea[0].halves[1] *= 128;
+        environment_record->weatherArea[1].halves[0] *= 128;
+        environment_record->weatherArea[1].halves[1] *= 128;
+        environment_record->weatherArea[1].halves[0] -= environment_record->weatherArea[0].halves[0];
+        environment_record->weatherArea[1].halves[1] -= environment_record->weatherArea[0].halves[1];
     }
 }
 
 // decomp: BATTLE.PRG func_8008EAE4 (src/BATTLE/BATTLE.PRG/146C.c:17517)
-void Field_SetBackgroundParallaxScale(int arg0, int arg1)
+void Field_SetBackgroundParallaxScale(int parallax_scale_x_fixed12, int parallax_scale_y_fixed12)
 {
-    Field_backgroundParallaxScaleXFixed12 = arg0;
-    Field_backgroundParallaxScaleYFixed12 = arg1;
+    Field_backgroundParallaxScaleXFixed12 = parallax_scale_x_fixed12;
+    Field_backgroundParallaxScaleYFixed12 = parallax_scale_y_fixed12;
 }
 
 // decomp: BATTLE.PRG func_8008EAF8 (src/BATTLE/BATTLE.PRG/146C.c:17523)
-void Field_SetTiledBackgroundEnabled(int arg0) { Field_isTiledBackgroundEnabled = arg0; }
+void Field_SetTiledBackgroundEnabled(int enabled) { Field_isTiledBackgroundEnabled = enabled; }
 
 // decomp: BATTLE.PRG func_8008EB24 (src/BATTLE/BATTLE.PRG/146C.c:17531)
 int* Field_RoomBackgroundColors(void) { return Field_backgroundGradientColors; }
 
 // decomp: BATTLE.PRG func_8008EB30 (src/BATTLE/BATTLE.PRG/146C.c:17533)
-void Field_SetRoomBackgroundColors(int* arg0)
+void Field_SetRoomBackgroundColors(int* gradient_color_cursor)
 {
     int i;
-    int* var_a0;
+    int* gradient_packet_word_cursor;
 
-    Core_Memory_CopyAlignedWords(Field_backgroundGradientColors, arg0, sizeof Field_backgroundGradientColors);
+    Core_Memory_CopyAlignedWords(Field_backgroundGradientColors, gradient_color_cursor, sizeof Field_backgroundGradientColors);
 
-    var_a0 = Field_legacyBackgroundGradientPackets;
+    gradient_packet_word_cursor = Field_legacyBackgroundGradientPackets;
 
-    var_a0 += 2;
-    var_a0[0] = (*arg0++ & 0xFFFFFF) | 0x30000000;
-    ++var_a0;
+    gradient_packet_word_cursor += 2;
+    gradient_packet_word_cursor[0] = (*gradient_color_cursor++ & 0xFFFFFF) | 0x30000000;
+    ++gradient_packet_word_cursor;
 
     for (i = 0; i < 8; ++i) {
-        var_a0 += 2;
-        var_a0[0] = (*arg0 & 0xFFFFFF) | 0x30000000;
-        ++var_a0;
+        gradient_packet_word_cursor += 2;
+        gradient_packet_word_cursor[0] = (*gradient_color_cursor & 0xFFFFFF) | 0x30000000;
+        ++gradient_packet_word_cursor;
     }
 
-    ++arg0;
+    ++gradient_color_cursor;
 
     for (i = 0; i < 16; ++i) {
-        var_a0 += 2;
-        var_a0[0] = (*arg0 & 0xFFFFFF) | 0x30000000;
-        ++var_a0;
+        gradient_packet_word_cursor += 2;
+        gradient_packet_word_cursor[0] = (*gradient_color_cursor & 0xFFFFFF) | 0x30000000;
+        ++gradient_packet_word_cursor;
     }
 
-    ++arg0;
+    ++gradient_color_cursor;
 
     for (i = 0; i < 8; ++i) {
-        var_a0 += 2;
-        var_a0[0] = (*arg0 & 0xFFFFFF) | 0x30000000;
-        ++var_a0;
+        gradient_packet_word_cursor += 2;
+        gradient_packet_word_cursor[0] = (*gradient_color_cursor & 0xFFFFFF) | 0x30000000;
+        ++gradient_packet_word_cursor;
     }
 
-    var_a0[2] = (arg0[1] & 0xFFFFFF) | 0x30000000;
+    gradient_packet_word_cursor[2] = (gradient_color_cursor[1] & 0xFFFFFF) | 0x30000000;
 }
 
 // decomp: BATTLE.PRG func_8008EC48 (src/BATTLE/BATTLE.PRG/146C.c:17571)
-void Field_DrawRoomBackground(VECTOR* arg0)
+void Field_DrawRoomBackground(VECTOR* background_rotation_override)
 {
     VECTOR position;
     MATRIX matrix;
@@ -220,7 +220,7 @@ void Field_DrawRoomBackground(VECTOR* arg0)
         AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 0x1FFC, prim++);
         ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim;
     } else {
-        angles = arg0;
+        angles = background_rotation_override;
         if (angles == NULL) {
             if (Field_roomData.environment != NULL) {
                 angles = &Field_roomData.environment->backgroundRotation;
@@ -249,38 +249,38 @@ void Field_DrawRoomBackground(VECTOR* arg0)
 }
 
 // decomp: BATTLE.PRG func_8008EFCC (src/BATTLE/BATTLE.PRG/146C.c:17638)
-int Field_QueueTiledBackgroundLoad(int arg0)
+int Field_QueueTiledBackgroundLoad(int texture_page)
 {
-    u_short* temp_s0;
-    int new_var;
-    Content_DiscFile* temp_s2;
-    Content_DiscFile* temp_s3;
-    int var_a0;
-    int var_s0;
+    u_short* background_section_words;
+    int disc_sector_bytes;
+    Content_DiscFile* texture_disc_file;
+    Content_DiscFile* layout_disc_file;
+    int texture_allocation_bytes;
+    int layout_allocation_bytes;
 
-    temp_s0 = Field_roomData.tiledBackground;
-    Field_legacyBackgroundTexturePage = arg0;
-    if (temp_s0 != 0) {
-        Field_legacyBackgroundTextureReservationId = *temp_s0;
+    background_section_words = Field_roomData.tiledBackground;
+    Field_legacyBackgroundTexturePage = texture_page;
+    if (background_section_words != 0) {
+        Field_legacyBackgroundTextureReservationId = *background_section_words;
         if (Render_ReserveTexturePageRange(Field_legacyBackgroundTexturePage, Field_legacyBackgroundTextureReservationId, 5) != 0) {
-            new_var = 0x800;
-            temp_s2 = (Content_DiscFile*)(temp_s0 + 0x20);
-            temp_s3 = (Content_DiscFile*)(temp_s0 + 0x42);
-            var_a0 = temp_s2->size;
-            var_s0 = temp_s3->size;
-            if ((var_a0 & 0x7FF) != 0) {
-                var_a0 = (var_a0 + new_var) - (var_a0 & 0x7FF);
+            disc_sector_bytes = 0x800;
+            texture_disc_file = (Content_DiscFile*)(background_section_words + 0x20);
+            layout_disc_file = (Content_DiscFile*)(background_section_words + 0x42);
+            texture_allocation_bytes = texture_disc_file->size;
+            layout_allocation_bytes = layout_disc_file->size;
+            if ((texture_allocation_bytes & 0x7FF) != 0) {
+                texture_allocation_bytes = (texture_allocation_bytes + disc_sector_bytes) - (texture_allocation_bytes & 0x7FF);
             }
-            if ((var_s0 & 0x7FF) != 0) {
-                var_s0 = (var_s0 + new_var) - (var_s0 & 0x7FF);
+            if ((layout_allocation_bytes & 0x7FF) != 0) {
+                layout_allocation_bytes = (layout_allocation_bytes + disc_sector_bytes) - (layout_allocation_bytes & 0x7FF);
             }
-            Field_legacyBackgroundTimBuffer = Core_Memory_AllocateFromHighEnd(var_a0);
-            Field_loadedBackgroundLayout = Core_Memory_AllocateFromHighEnd(var_s0);
+            Field_legacyBackgroundTimBuffer = Core_Memory_AllocateFromHighEnd(texture_allocation_bytes);
+            Field_loadedBackgroundLayout = Core_Memory_AllocateFromHighEnd(layout_allocation_bytes);
             if ((Field_legacyBackgroundTimBuffer == 0) || (Field_loadedBackgroundLayout == 0)) {
                 return 0;
             }
-            Field_backgroundTextureDiscRequest = Content_AllocateDiscRequest(temp_s2);
-            Field_backgroundLayoutDiscRequest = Content_AllocateDiscRequest(temp_s3);
+            Field_backgroundTextureDiscRequest = Content_AllocateDiscRequest(texture_disc_file);
+            Field_backgroundLayoutDiscRequest = Content_AllocateDiscRequest(layout_disc_file);
             Content_EnqueueDiscRequest(Field_backgroundTextureDiscRequest, Field_legacyBackgroundTimBuffer);
             Content_EnqueueDiscRequest(Field_backgroundLayoutDiscRequest, Field_loadedBackgroundLayout);
             return 1;

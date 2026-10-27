@@ -22,11 +22,11 @@
 // decomp: BATTLE.PRG func_8007F434 (src/BATTLE/BATTLE.PRG/146C.c:10124)
 int Field_RollRiskLockBreak(void)
 {
-    int var_s0 = ((Battle_characterState->stats->risk + 150) * 100 / 256);
-    if (var_s0 > 100) {
-        var_s0 = 100;
+    int risk_derived_percent = ((Battle_characterState->stats->risk + 150) * 100 / 256);
+    if (risk_derived_percent > 100) {
+        risk_derived_percent = 100;
     }
-    return Core_Random_NextBounded(100) < (var_s0 + 20);
+    return Core_Random_NextBounded(100) < (risk_derived_percent + 20);
 }
 
 // decomp: BATTLE.PRG _damageFromTrapPanel (src/BATTLE/BATTLE.PRG/146C.c:11730)
@@ -34,37 +34,37 @@ short Field_CalculateTrapPanelDamage(Battle_ActionDefinition* action,
     Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* hit, int nHit,
     int withRandMod)
 {
-    Battle_DamageCalculation sp10;
+    Battle_DamageCalculation damage_calculation;
     short damage;
     int randMod;
     int dpMod;
     int defense;
-    int new_var2;
+    int trap_attack_value;
     Battle_ActorStats* actor = Battle_actors[hit->target.targetActor]->stats;
     int limb = hit->target.targetLimb;
 
-    sp10.attackStat = actor->maxHp / 10;
-    sp10.attackStat *= action->hits[nHit].statFactor;
-    sp10.attackStat += (Field_RoomTrapLevel() + 1) * 10;
-    sp10.type = action->hits[nHit].damageType;
-    sp10.sourceAffinity = action->hits[nHit].affinity - 1;
-    sp10.mediatingStat = actor->strength;
-    sp10.armorStat = actor->limbs[limb].armor.currentStr;
-    sp10.shieldStat = 0;
-    sp10.armorStatFactor = 100;
-    sp10.shieldStatFactor = 100;
-    sp10.statFactor = 100;
+    damage_calculation.attackStat = actor->maxHp / 10;
+    damage_calculation.attackStat *= action->hits[nHit].statFactor;
+    damage_calculation.attackStat += (Field_RoomTrapLevel() + 1) * 10;
+    damage_calculation.type = action->hits[nHit].damageType;
+    damage_calculation.sourceAffinity = action->hits[nHit].affinity - 1;
+    damage_calculation.mediatingStat = actor->strength;
+    damage_calculation.armorStat = actor->limbs[limb].armor.currentStr;
+    damage_calculation.shieldStat = 0;
+    damage_calculation.armorStatFactor = 100;
+    damage_calculation.shieldStatFactor = 100;
+    damage_calculation.statFactor = 100;
 
-    if (sp10.type != 0) {
-        sp10.statFactor = actor->limbs[limb].types[sp10.type] + 100;
-        sp10.armorStatFactor = actor->limbs[limb].armor.types[sp10.type] + 100;
+    if (damage_calculation.type != 0) {
+        damage_calculation.statFactor = actor->limbs[limb].types[damage_calculation.type] + 100;
+        damage_calculation.armorStatFactor = actor->limbs[limb].armor.types[damage_calculation.type] + 100;
     }
 
-    if (sp10.sourceAffinity) {
-        sp10.statFactor += actor->limbs[limb].affinities[sp10.sourceAffinity];
-        sp10.armorStatFactor +=
+    if (damage_calculation.sourceAffinity) {
+        damage_calculation.statFactor += actor->limbs[limb].affinities[damage_calculation.sourceAffinity];
+        damage_calculation.armorStatFactor +=
             actor->limbs[limb]
-                .armor.classAffinityCurrent.affinities[0][sp10.sourceAffinity];
+                .armor.classAffinityCurrent.affinities[0][damage_calculation.sourceAffinity];
     }
 
     if (actor->limbs[limb].armor.maxDp != 0) {
@@ -77,20 +77,20 @@ short Field_CalculateTrapPanelDamage(Battle_ActionDefinition* action,
             dpMod += 3;
         }
 
-        sp10.armorStatFactor -= dpMod >> 2;
+        damage_calculation.armorStatFactor -= dpMod >> 2;
     }
 
     if (Battle_actors[actor->actorId]->weaponDrawn & 1) {
 
-        sp10.shieldStat = actor->shield.currentStr;
+        damage_calculation.shieldStat = actor->shield.currentStr;
 
-        if (sp10.type != 0) {
-            sp10.shieldStatFactor += actor->shield.types[sp10.type];
+        if (damage_calculation.type != 0) {
+            damage_calculation.shieldStatFactor += actor->shield.types[damage_calculation.type];
         }
 
-        if (sp10.sourceAffinity != 0) {
-            sp10.shieldStatFactor +=
-                actor->shield.classAffinityCurrent.affinities[0][sp10.sourceAffinity];
+        if (damage_calculation.sourceAffinity != 0) {
+            damage_calculation.shieldStatFactor +=
+                actor->shield.classAffinityCurrent.affinities[0][damage_calculation.sourceAffinity];
         }
 
         if (actor->shield.maxDp != 0) {
@@ -102,7 +102,7 @@ short Field_CalculateTrapPanelDamage(Battle_ActionDefinition* action,
                 dpMod += 3;
             }
 
-            sp10.shieldStatFactor -= dpMod >> 2;
+            damage_calculation.shieldStatFactor -= dpMod >> 2;
         }
 
         if (actor->shield.maxPp != 0) {
@@ -113,19 +113,19 @@ short Field_CalculateTrapPanelDamage(Battle_ActionDefinition* action,
                 dpMod += 3;
             }
 
-            sp10.shieldStatFactor += dpMod >> 2;
+            damage_calculation.shieldStatFactor += dpMod >> 2;
         }
     }
 
-    sp10.mediatingStat += actor->accessory.currentStr;
-    sp10.statFactor += actor->accessory.types[sp10.type]
-                     + actor->accessory.affinities[sp10.sourceAffinity];
-    defense = (sp10.mediatingStat - 20) * sp10.statFactor;
-    defense += sp10.shieldStat * sp10.shieldStatFactor;
-    defense += sp10.armorStat * sp10.armorStatFactor;
+    damage_calculation.mediatingStat += actor->accessory.currentStr;
+    damage_calculation.statFactor += actor->accessory.types[damage_calculation.type]
+                     + actor->accessory.affinities[damage_calculation.sourceAffinity];
+    defense = (damage_calculation.mediatingStat - 20) * damage_calculation.statFactor;
+    defense += damage_calculation.shieldStat * damage_calculation.shieldStatFactor;
+    defense += damage_calculation.armorStat * damage_calculation.armorStatFactor;
     defense /= (actor->risk / 2) + 100;
-    new_var2 = sp10.attackStat;
-    damage = new_var2 - defense;
+    trap_attack_value = damage_calculation.attackStat;
+    damage = trap_attack_value - defense;
 
     if (damage < 0) {
         damage = 0;
@@ -155,38 +155,38 @@ short Field_CalculateHealingPanelRecovery(Battle_ActionDefinition* action,
     Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* hit, int nHit,
     int withRandMod)
 {
-    Battle_DamageCalculation sp10;
+    Battle_DamageCalculation recovery_calculation;
     short hpHealed;
     int randMod;
     int dpMod;
     int defense;
-    int new_var2;
+    int panel_attack_value;
 
     Battle_ActorStats* actor = Battle_actors[hit->target.targetActor]->stats;
     int limb = hit->target.targetLimb;
 
-    sp10.attackStat = actor->maxHp / 10;
-    sp10.attackStat *= action->hits[nHit].statFactor;
-    sp10.attackStat += (Field_RoomTrapLevel() + 1) * 10;
-    sp10.type = action->hits[nHit].damageType;
-    sp10.sourceAffinity = action->hits[nHit].affinity - 1;
-    sp10.mediatingStat = actor->strength;
-    sp10.armorStat = actor->limbs[limb].armor.currentStr;
-    sp10.shieldStat = 0;
-    sp10.armorStatFactor = 100;
-    sp10.shieldStatFactor = 100;
-    sp10.statFactor = 100;
+    recovery_calculation.attackStat = actor->maxHp / 10;
+    recovery_calculation.attackStat *= action->hits[nHit].statFactor;
+    recovery_calculation.attackStat += (Field_RoomTrapLevel() + 1) * 10;
+    recovery_calculation.type = action->hits[nHit].damageType;
+    recovery_calculation.sourceAffinity = action->hits[nHit].affinity - 1;
+    recovery_calculation.mediatingStat = actor->strength;
+    recovery_calculation.armorStat = actor->limbs[limb].armor.currentStr;
+    recovery_calculation.shieldStat = 0;
+    recovery_calculation.armorStatFactor = 100;
+    recovery_calculation.shieldStatFactor = 100;
+    recovery_calculation.statFactor = 100;
 
-    if (sp10.type != 0) {
-        sp10.statFactor = actor->limbs[limb].types[sp10.type] + 100;
-        sp10.armorStatFactor = actor->limbs[limb].armor.types[sp10.type] + 100;
+    if (recovery_calculation.type != 0) {
+        recovery_calculation.statFactor = actor->limbs[limb].types[recovery_calculation.type] + 100;
+        recovery_calculation.armorStatFactor = actor->limbs[limb].armor.types[recovery_calculation.type] + 100;
     }
 
-    if (sp10.sourceAffinity) {
-        sp10.statFactor += actor->limbs[limb].affinities[sp10.sourceAffinity];
-        sp10.armorStatFactor +=
+    if (recovery_calculation.sourceAffinity) {
+        recovery_calculation.statFactor += actor->limbs[limb].affinities[recovery_calculation.sourceAffinity];
+        recovery_calculation.armorStatFactor +=
             actor->limbs[limb]
-                .armor.classAffinityCurrent.affinities[0][sp10.sourceAffinity];
+                .armor.classAffinityCurrent.affinities[0][recovery_calculation.sourceAffinity];
     }
 
     if (actor->limbs[limb].armor.maxDp != 0) {
@@ -199,20 +199,20 @@ short Field_CalculateHealingPanelRecovery(Battle_ActionDefinition* action,
             dpMod += 3;
         }
 
-        sp10.armorStatFactor -= dpMod >> 2;
+        recovery_calculation.armorStatFactor -= dpMod >> 2;
     }
 
     if (Battle_actors[actor->actorId]->weaponDrawn & 1) {
 
-        sp10.shieldStat = actor->shield.currentStr;
+        recovery_calculation.shieldStat = actor->shield.currentStr;
 
-        if (sp10.type != 0) {
-            sp10.shieldStatFactor += actor->shield.types[sp10.type];
+        if (recovery_calculation.type != 0) {
+            recovery_calculation.shieldStatFactor += actor->shield.types[recovery_calculation.type];
         }
 
-        if (sp10.sourceAffinity != 0) {
-            sp10.shieldStatFactor +=
-                actor->shield.classAffinityCurrent.affinities[0][sp10.sourceAffinity];
+        if (recovery_calculation.sourceAffinity != 0) {
+            recovery_calculation.shieldStatFactor +=
+                actor->shield.classAffinityCurrent.affinities[0][recovery_calculation.sourceAffinity];
         }
 
         if (actor->shield.maxDp != 0) {
@@ -224,7 +224,7 @@ short Field_CalculateHealingPanelRecovery(Battle_ActionDefinition* action,
                 dpMod += 3;
             }
 
-            sp10.shieldStatFactor -= dpMod >> 2;
+            recovery_calculation.shieldStatFactor -= dpMod >> 2;
         }
 
         if (actor->shield.maxPp != 0) {
@@ -235,19 +235,19 @@ short Field_CalculateHealingPanelRecovery(Battle_ActionDefinition* action,
                 dpMod += 3;
             }
 
-            sp10.shieldStatFactor += dpMod >> 2;
+            recovery_calculation.shieldStatFactor += dpMod >> 2;
         }
     }
 
-    sp10.mediatingStat += actor->accessory.currentStr;
-    sp10.statFactor += actor->accessory.types[sp10.type]
-                     + actor->accessory.affinities[sp10.sourceAffinity];
-    defense = (sp10.mediatingStat - 20) * sp10.statFactor;
-    defense += sp10.shieldStat * sp10.shieldStatFactor;
-    defense += sp10.armorStat * sp10.armorStatFactor;
+    recovery_calculation.mediatingStat += actor->accessory.currentStr;
+    recovery_calculation.statFactor += actor->accessory.types[recovery_calculation.type]
+                     + actor->accessory.affinities[recovery_calculation.sourceAffinity];
+    defense = (recovery_calculation.mediatingStat - 20) * recovery_calculation.statFactor;
+    defense += recovery_calculation.shieldStat * recovery_calculation.shieldStatFactor;
+    defense += recovery_calculation.armorStat * recovery_calculation.armorStatFactor;
     defense /= (actor->risk / 2) + 100;
-    new_var2 = sp10.attackStat;
-    hpHealed = new_var2 - defense;
+    panel_attack_value = recovery_calculation.attackStat;
+    hpHealed = panel_attack_value - defense;
 
     if (hpHealed < 0) {
         hpHealed = 0;

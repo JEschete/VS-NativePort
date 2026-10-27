@@ -50,7 +50,7 @@ char const Field_kWeatherVolumeByIntensity[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0
     0x67, 0x6E, 0x74, 0x79, 0x7C, 0x7E, 0x7F };
 
 // decomp: BATTLE.PRG func_80090C2C (src/BATTLE/BATTLE.PRG/2842C.c:266)
-void Field_SetRoomWeather(int arg0)
+void Field_SetRoomWeather(int weather_kind)
 {
     Field_MpdEnvironment* room = Field_roomData.environment;
 
@@ -62,38 +62,38 @@ void Field_SetRoomWeather(int arg0)
         Field_weatherParameters[8] = 1;
         Field_weatherParameters[4] = room->windStrength;
         Field_weatherParameters[5] = room->windDirection;
-        Field_roomWeatherKind = arg0;
+        Field_roomWeatherKind = weather_kind;
         Field_weatherIntensity = room->weatherIntensity;
         Field_ApplyWeatherIntensity();
         Effects_RecalculateWeatherVelocity();
 
-        switch (arg0) {
+        switch (weather_kind) {
         case 0:
             break;
         case 1:
             Effects_InitializeFallingWeatherParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 4,
                               4, 128),
-                arg0);
+                weather_kind);
             sound = 21;
             break;
         case 2:
             Effects_InitializeFallingWeatherParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 4,
                               4, 128),
-                arg0);
+                weather_kind);
             break;
         case 3:
             Effects_InitializeScreenWeatherParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 4,
                               4, 128),
-                arg0);
+                weather_kind);
             break;
         case 4:
             Effects_InitializeRisingEmberParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 2,
                               4, 128),
-                arg0);
+                weather_kind);
             break;
         }
 
@@ -194,21 +194,21 @@ void Field_ApplyWeatherIntensity(void)
 }
 
 // decomp: BATTLE.PRG func_80091314 (src/BATTLE/BATTLE.PRG/2842C.c:428)
-void Field_SetWeatherVariationEnabled(int arg0) { Field_isWeatherVariationEnabled = arg0; }
+void Field_SetWeatherVariationEnabled(int enabled) { Field_isWeatherVariationEnabled = enabled; }
 
 // decomp: BATTLE.PRG func_80091320 (src/BATTLE/BATTLE.PRG/2842C.c:430)
-void Field_SetWeatherIntensity(int arg0)
+void Field_SetWeatherIntensity(int intensity)
 {
-    Field_weatherIntensity = arg0;
+    Field_weatherIntensity = intensity;
     Field_ApplyWeatherIntensity();
     Effects_RecalculateWeatherVelocity();
 }
 
 // decomp: BATTLE.PRG func_8009134C (src/BATTLE/BATTLE.PRG/2842C.c:437)
-void Field_SetWeatherWindAngles(int arg0, int arg1)
+void Field_SetWeatherWindAngles(int wind_azimuth_angle, int wind_elevation_angle)
 {
-    Field_weatherParameters[5] = arg0;
-    Field_weatherParameters[4] = arg1;
+    Field_weatherParameters[5] = wind_azimuth_angle;
+    Field_weatherParameters[4] = wind_elevation_angle;
     Effects_RecalculateWeatherVelocity();
 }
 
@@ -224,48 +224,48 @@ void Field_ReleaseWeatherParticles(void)
 }
 
 // decomp: BATTLE.PRG func_800913BC (src/BATTLE/BATTLE.PRG/2842C.c:454)
-int Field_SetWeatherAmbientSound(int arg0)
+int Field_SetWeatherAmbientSound(int sound_id)
 {
-    int temp_s3;
+    int previous_sound_id;
 
-    temp_s3 = Field_weatherAmbientSoundId;
-    Field_weatherAmbientSoundId = arg0;
+    previous_sound_id = Field_weatherAmbientSoundId;
+    Field_weatherAmbientSoundId = sound_id;
 
-    if (arg0 >= 0) {
+    if (sound_id >= 0) {
         if (Field_kWeatherVolumeByIntensity[Field_weatherIntensity] != 0) {
-            Audio_PlaySfxCentered(0x200, (short)arg0);
+            Audio_PlaySfxCentered(0x200, (short)sound_id);
             Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity], 8);
         } else {
-            Audio_StopSfx(0x200, (short)arg0);
+            Audio_StopSfx(0x200, (short)sound_id);
         }
     }
-    return temp_s3;
+    return previous_sound_id;
 }
 
 // decomp: BATTLE.PRG func_80091468 (src/BATTLE/BATTLE.PRG/2842C.c:472)
-void Field_SetRoomBackgroundOffset(int arg0, int arg1)
+void Field_SetRoomBackgroundOffset(int offset_x, int offset_y)
 {
-    Field_backgroundOffsetX = arg0;
-    Field_backgroundOffsetY = arg1;
+    Field_backgroundOffsetX = offset_x;
+    Field_backgroundOffsetY = offset_y;
 }
 
 // decomp: BATTLE.PRG func_8009147C (src/BATTLE/BATTLE.PRG/2842C.c:478)
-void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* arg0, int arg1, int arg2, int arg3)
+void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* background_layout, int horizontal_offset, int vertical_offset, int base_texture_page)
 {
     void* buffer = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;
-    Field_BackgroundTile* tiles = arg0->tiles;
+    Field_BackgroundTile* tiles = background_layout->tiles;
     int cosStep = Core_Gte_Cos(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
     int sinStep = Core_Gte_Sin(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
     int row;
     int col;
     TILE* background;
 
-    for (row = 0; row < arg0->height * 32; row += 32) {
-        int y = row - arg2;
+    for (row = 0; row < background_layout->height * 32; row += 32) {
+        int y = row - vertical_offset;
         POLY_GT4* prim = buffer;
 
         for (col = 0; col < 1024; col += 32) {
-            int x = ((col + arg1) & 1023) - 512;
+            int x = ((col + horizontal_offset) & 1023) - 512;
             int screenX = Core_Gte_Cos(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
                         - Core_Gte_Sin(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
             int screenY = Core_Gte_Sin(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
@@ -277,7 +277,7 @@ void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* arg0, int arg1, int a
                 continue;
             }
 
-            tile = &tiles[(row / 32) * arg0->width + (col / 32) % arg0->width];
+            tile = &tiles[(row / 32) * background_layout->width + (col / 32) % background_layout->width];
 
             if ((tile->textureRect.w == 0) && (tile->textureRect.h == 0)) {
                 continue;
@@ -295,7 +295,7 @@ void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* arg0, int arg1, int a
             setUV4(prim, tile->textureRect.x, tile->textureRect.y, tile->textureRect.x + tile->textureRect.w, tile->textureRect.y,
                 tile->textureRect.x, tile->textureRect.y + tile->textureRect.h, tile->textureRect.x + tile->textureRect.w,
                 tile->textureRect.y + tile->textureRect.h);
-            prim->tpage = arg3 | (tile->cornerColors[1].cd << 7);
+            prim->tpage = base_texture_page | (tile->cornerColors[1].cd << 7);
             prim->clut = getClut(768, 238);
             buffer += sizeof(POLY_GT4);
             AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + 0x1FFC, prim++);
@@ -312,10 +312,10 @@ void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* arg0, int arg1, int a
 }
 
 // decomp: BATTLE.PRG func_800918E8 (src/BATTLE/BATTLE.PRG/2842C.c:539)
-void Field_DuckWeatherAmbientSound(int arg0)
+void Field_DuckWeatherAmbientSound(int duck_enabled)
 {
     if (Field_weatherAmbientSoundId >= 0) {
-        if (arg0 != 0) {
+        if (duck_enabled != 0) {
             Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity] >> 2, 8);
         } else {
             Audio_FadeSfxVolume(0x200, Field_weatherAmbientSoundId, Field_kWeatherVolumeByIntensity[Field_weatherIntensity], 8);

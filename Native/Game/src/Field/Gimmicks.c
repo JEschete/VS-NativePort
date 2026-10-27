@@ -150,9 +150,9 @@ int Field_gimmickInteractionDirection;
 short const Field_kPlatformBounceOffsets[] = { 8, 14, 16, 11, 7, 3, 1 };
 
 // decomp: BATTLE.PRG func_8006CDD8 (src/BATTLE/BATTLE.PRG/146C.c:2151)
-void Field_DisableTrapAtPosition(SVECTOR* arg0)
+void Field_DisableTrapAtPosition(SVECTOR* trap_position)
 {
-    Field_MpdFloorTrigger* section = Field_RoomTriggerAtTile(arg0->vx / 128, arg0->vz / 128, 0);
+    Field_MpdFloorTrigger* section = Field_RoomTriggerAtTile(trap_position->vx / 128, trap_position->vz / 128, 0);
 
     if (section != NULL) {
         Field_SetRoomTriggerEnabled(section, 1);
@@ -166,33 +166,33 @@ void Field_FreezeRoomGimmicksTemporarily(void) { Field_FreezeMovingPlatforms(0xB
 // decomp: BATTLE.PRG func_8008A4FC (src/BATTLE/BATTLE.PRG/146C.c:15530)
 int Field_CurrentSavePointId(void)
 {
-    Actors_ActorLocationQuery sp10;
-    u_int temp_a2;
-    u_int temp_v0_2;
-    u_int var_a2;
-    int var_a0;
-    int var_a1;
-    Actors_TileTarget* s0;
+    Actors_ActorLocationQuery ashley_placement;
+    u_int platform_layer_flags;
+    u_int ashley_state_flags;
+    u_int collision_layer;
+    int collision_tile_x;
+    int collision_tile_z;
+    Actors_TileTarget* ashley_tile;
 
-    Actors_ActorPlacement(0, &sp10);
+    Actors_ActorPlacement(0, &ashley_placement);
 
-    temp_v0_2 = Actors_ActorStateFlags(0);
-    temp_a2 = temp_v0_2 & 0x70000;
-    s0 = &sp10.location.packedTile.target;
+    ashley_state_flags = Actors_ActorStateFlags(0);
+    platform_layer_flags = ashley_state_flags & 0x70000;
+    ashley_tile = &ashley_placement.location.packedTile.target;
 
-    if (temp_a2 != 0) {
-        var_a0 = 0;
-        var_a1 = 0;
-        var_a2 = temp_a2 >> 0x10;
+    if (platform_layer_flags != 0) {
+        collision_tile_x = 0;
+        collision_tile_z = 0;
+        collision_layer = platform_layer_flags >> 0x10;
     } else {
-        var_a0 = s0->tileX;
-        var_a1 = s0->tileZ;
-        var_a2 = s0->tileLayer;
+        collision_tile_x = ashley_tile->tileX;
+        collision_tile_z = ashley_tile->tileZ;
+        collision_layer = ashley_tile->tileLayer;
     }
 
-    if ((Field_CollisionCellAt(var_a0, var_a1, var_a2)->hasRoomTrigger & 1)
-        && (!(temp_v0_2 & 0x504000))) {
-        Field_MpdFloorTrigger* room = Field_RoomTriggerAtTile(s0->tileX, s0->tileZ, s0->tileLayer);
+    if ((Field_CollisionCellAt(collision_tile_x, collision_tile_z, collision_layer)->hasRoomTrigger & 1)
+        && (!(ashley_state_flags & 0x504000))) {
+        Field_MpdFloorTrigger* room = Field_RoomTriggerAtTile(ashley_tile->tileX, ashley_tile->tileZ, ashley_tile->tileLayer);
         if ((room != NULL) && (room->kind == 16)) {
             return room->activation;
         }
@@ -209,7 +209,7 @@ void Field_ResetGimmickAnimationQueue(void)
 }
 
 // decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338)
-void Field_QueueGimmickAnimation(int arg0, Field_MpdLockTrigger* arg1)
+void Field_QueueGimmickAnimation(int queued_job_kind, Field_MpdLockTrigger* lock_trigger)
 {
     int i;
 
@@ -217,8 +217,8 @@ void Field_QueueGimmickAnimation(int arg0, Field_MpdLockTrigger* arg1)
 
     for (i = 0; i < 8; ++i) {
         if (Field_gimmickAnimationQueue[i].jobKind == 0) {
-            Field_gimmickAnimationQueue[i].jobKind = arg0;
-            Field_gimmickAnimationQueue[i].trigger = arg1;
+            Field_gimmickAnimationQueue[i].jobKind = queued_job_kind;
+            Field_gimmickAnimationQueue[i].trigger = lock_trigger;
             return;
         }
     }
@@ -227,7 +227,7 @@ void Field_QueueGimmickAnimation(int arg0, Field_MpdLockTrigger* arg1)
 // decomp: BATTLE.PRG func_8008C0C0 (src/BATTLE/BATTLE.PRG/146C.c:16353)
 void Field_UpdateGimmickAnimationQueue(void)
 {
-    Field_MpdLockTrigger* temp_a0;
+    Field_MpdLockTrigger* queued_trigger;
     int i;
 
     if (Field_pendingGimmickAnimationCount <= 0) {
@@ -242,17 +242,17 @@ void Field_UpdateGimmickAnimationQueue(void)
                 --Field_pendingGimmickAnimationCount;
             }
         } else if (Field_gimmickAnimationQueue[i].jobKind == 2) {
-            temp_a0 = Field_gimmickAnimationQueue[i].trigger;
-            if ((--temp_a0->trigger.activation << 0x18) <= 0) {
-                Field_ToggleRoomSwitch(temp_a0);
+            queued_trigger = Field_gimmickAnimationQueue[i].trigger;
+            if ((--queued_trigger->trigger.activation << 0x18) <= 0) {
+                Field_ToggleRoomSwitch(queued_trigger);
                 Field_gimmickAnimationQueue[i].jobKind = 0;
                 Field_gimmickAnimationQueue[i].trigger = NULL;
                 --Field_pendingGimmickAnimationCount;
             }
         } else if (Field_gimmickAnimationQueue[i].jobKind == 3) {
-            temp_a0 = Field_gimmickAnimationQueue[i].trigger;
-            if (!(--temp_a0->delayFrames)) {
-                Field_StartDoorAnimation(temp_a0);
+            queued_trigger = Field_gimmickAnimationQueue[i].trigger;
+            if (!(--queued_trigger->delayFrames)) {
+                Field_StartDoorAnimation(queued_trigger);
                 Field_gimmickAnimationQueue[i].jobKind = 0;
                 Field_gimmickAnimationQueue[i].trigger = NULL;
                 --Field_pendingGimmickAnimationCount;
@@ -262,12 +262,12 @@ void Field_UpdateGimmickAnimationQueue(void)
 }
 
 // decomp: BATTLE.PRG func_8008C49C (src/BATTLE/BATTLE.PRG/146C.c:16475)
-int Field_SetMovingPlatformActor(int arg0, int arg1)
+int Field_SetMovingPlatformActor(int platform_index, int platform_control_state)
 {
     if (Field_roomData.movingPlatforms != NULL) {
-        Field_roomData.movingPlatforms[arg0].controlState = arg1;
-        if ((arg1 >= 0) && (Field_platformFreezeFrames == 0)) {
-            Field_platformBounceFrames[arg0] = 0;
+        Field_roomData.movingPlatforms[platform_index].controlState = platform_control_state;
+        if ((platform_control_state >= 0) && (Field_platformFreezeFrames == 0)) {
+            Field_platformBounceFrames[platform_index] = 0;
         }
         return 1;
     }
@@ -275,16 +275,16 @@ int Field_SetMovingPlatformActor(int arg0, int arg1)
 }
 
 // decomp: BATTLE.PRG func_8008C518 (src/BATTLE/BATTLE.PRG/146C.c:16487)
-void Field_ClearMovingPlatformActor(int arg0) { Field_SetMovingPlatformActor(arg0, -1); }
+void Field_ClearMovingPlatformActor(int platform_index) { Field_SetMovingPlatformActor(platform_index, -1); }
 
 // decomp: BATTLE.PRG func_8008C538 (src/BATTLE/BATTLE.PRG/146C.c:16489)
 void Field_InitializeMovingPlatforms(void)
 {
-    Field_MpdMovingPlatform* var_s2;
-    int temp_s3;
+    Field_MpdMovingPlatform* platform_cursor;
+    int platform_count;
     int i;
-    int* temp_v0;
-    u_int temp_a0;
+    int* geometry_group_words;
+    u_int entrance_platform_layer;
 
     Field_areMovingPlatformsPaused = 0;
     Field_platformFreezeFrames = 0;
@@ -295,64 +295,64 @@ void Field_InitializeMovingPlatforms(void)
     }
 
     if (Field_roomData.movingPlatforms != NULL) {
-        temp_s3 = Field_roomData.header.movingPlatformsLength / 184;
-        var_s2 = Field_roomData.movingPlatforms;
-        for (i = 0; i < temp_s3; ++i, ++var_s2) {
-            temp_v0 = ((int* (*)(int))Field_FindRoomGeometryGroup)(var_s2->sceneObjectId);
-            if (temp_v0 != NULL) {
-                if (var_s2->isHidden) {
-                    temp_v0[0] |= 0x100;
+        platform_count = Field_roomData.header.movingPlatformsLength / 184;
+        platform_cursor = Field_roomData.movingPlatforms;
+        for (i = 0; i < platform_count; ++i, ++platform_cursor) {
+            geometry_group_words = ((int* (*)(int))Field_FindRoomGeometryGroup)(platform_cursor->sceneObjectId);
+            if (geometry_group_words != NULL) {
+                if (platform_cursor->isHidden) {
+                    geometry_group_words[0] |= 0x100;
                 }
 
-                temp_v0[1] = var_s2->positionX / ONE;
-                temp_v0[2] = -(var_s2->positionY / ONE);
-                temp_v0[3] = var_s2->positionZ / ONE;
+                geometry_group_words[1] = platform_cursor->positionX / ONE;
+                geometry_group_words[2] = -(platform_cursor->positionY / ONE);
+                geometry_group_words[3] = platform_cursor->positionZ / ONE;
             }
         }
     }
 
-    temp_a0 = Field_entranceDoorPlatformFlags >> 0xD;
-    if (temp_a0 >= 2) {
-        Field_ResetMovingPlatformWaypoint(temp_a0 - 2, -1);
+    entrance_platform_layer = Field_entranceDoorPlatformFlags >> 0xD;
+    if (entrance_platform_layer >= 2) {
+        Field_ResetMovingPlatformWaypoint(entrance_platform_layer - 2, -1);
     }
 }
 
 // decomp: BATTLE.PRG func_8008C6B4 (src/BATTLE/BATTLE.PRG/146C.c:16528)
-void Field_ResetMovingPlatformWaypoint(int arg0, int arg1)
+void Field_ResetMovingPlatformWaypoint(int platform_index, int waypoint_index)
 {
-    Field_MpdMovingPlatform* temp_s0;
-    int* temp_v0_5;
+    Field_MpdMovingPlatform* platform_record;
+    int* geometry_group_words;
 
     if (Field_roomData.movingPlatforms != NULL) {
-        temp_s0 = &Field_roomData.movingPlatforms[arg0];
-        if (arg1 == -1) {
-            arg1 = temp_s0->terminalWaypoint;
+        platform_record = &Field_roomData.movingPlatforms[platform_index];
+        if (waypoint_index == -1) {
+            waypoint_index = platform_record->terminalWaypoint;
         }
-        if (arg1 >= 0) {
-            temp_s0->isHidden = 0;
-            temp_s0->controlState = 0;
-            temp_s0->currentWaypoint = arg1;
-            temp_s0->startWaypoint = arg1;
-            temp_s0->currentSegment = arg1;
-            temp_s0->motionTicks = 0;
-            temp_s0->isWaiting = 0;
+        if (waypoint_index >= 0) {
+            platform_record->isHidden = 0;
+            platform_record->controlState = 0;
+            platform_record->currentWaypoint = waypoint_index;
+            platform_record->startWaypoint = waypoint_index;
+            platform_record->currentSegment = waypoint_index;
+            platform_record->motionTicks = 0;
+            platform_record->isWaiting = 0;
 
-            temp_s0->positionX = temp_s0->waypoints[temp_s0->currentWaypoint].vx;
-            temp_s0->positionY = temp_s0->waypoints[temp_s0->currentWaypoint].vy;
-            temp_s0->positionZ = temp_s0->waypoints[temp_s0->currentWaypoint].vz;
+            platform_record->positionX = platform_record->waypoints[platform_record->currentWaypoint].vx;
+            platform_record->positionY = platform_record->waypoints[platform_record->currentWaypoint].vy;
+            platform_record->positionZ = platform_record->waypoints[platform_record->currentWaypoint].vz;
 
-            if (((temp_s0->startWaypoint)) == ((temp_s0->endWaypoint))) {
-                temp_s0->isMovingForward = 0;
-                --temp_s0->currentWaypoint;
+            if (((platform_record->startWaypoint)) == ((platform_record->endWaypoint))) {
+                platform_record->isMovingForward = 0;
+                --platform_record->currentWaypoint;
             } else {
-                temp_s0->isMovingForward = 1;
-                ++temp_s0->currentWaypoint;
+                platform_record->isMovingForward = 1;
+                ++platform_record->currentWaypoint;
             }
-            temp_v0_5 = ((int* (*)(int))Field_FindRoomGeometryGroup)(temp_s0->sceneObjectId);
-            if (temp_v0_5 != NULL) {
-                temp_v0_5[1] = temp_s0->positionX / ONE;
-                temp_v0_5[2] = -(temp_s0->positionY / ONE);
-                temp_v0_5[3] = temp_s0->positionZ / ONE;
+            geometry_group_words = ((int* (*)(int))Field_FindRoomGeometryGroup)(platform_record->sceneObjectId);
+            if (geometry_group_words != NULL) {
+                geometry_group_words[1] = platform_record->positionX / ONE;
+                geometry_group_words[2] = -(platform_record->positionY / ONE);
+                geometry_group_words[3] = platform_record->positionZ / ONE;
             }
         }
     }
@@ -554,57 +554,57 @@ void Field_DrawMovingPlatformShadows(void)
 }
 
 // decomp: BATTLE.PRG func_8008D2C0 (src/BATTLE/BATTLE.PRG/146C.c:16763)
-int Field_CollectMovingPlatformPositions(Field_PlatformContactPoint arg0[])
+int Field_CollectMovingPlatformPositions(Field_PlatformContactPoint output_contacts[])
 {
-    Field_MpdMovingPlatform* var_t0;
+    Field_MpdMovingPlatform* platform_cursor;
     int i;
-    int var_t1;
-    int temp_t3;
+    int contact_count;
+    int platform_count;
 
-    Field_PlatformContactPoint* a0 = arg0;
+    Field_PlatformContactPoint* contact_cursor = output_contacts;
 
     do {
         if (Field_roomData.movingPlatforms != NULL) {
-            var_t0 = Field_roomData.movingPlatforms;
-            temp_t3 = Field_roomData.header.movingPlatformsLength / 184;
-            var_t1 = 0;
+            platform_cursor = Field_roomData.movingPlatforms;
+            platform_count = Field_roomData.header.movingPlatformsLength / 184;
+            contact_count = 0;
 
-            for (i = 0; i < temp_t3; ++i, ++var_t0) {
-                if (!((var_t0->isHidden))) {
+            for (i = 0; i < platform_count; ++i, ++platform_cursor) {
+                if (!((platform_cursor->isHidden))) {
                     do {
                         int v;
-                        a0->x = var_t0->positionX / ONE;
-                        v = var_t0->positionY / ONE;
-                        a0->height = (Field_kPlatformBounceOffsets[Field_platformBounceFrames[i]] - v);
-                        a0->z = (var_t0->positionZ / ONE);
-                        a0->platformIndex = i;
+                        contact_cursor->x = platform_cursor->positionX / ONE;
+                        v = platform_cursor->positionY / ONE;
+                        contact_cursor->height = (Field_kPlatformBounceOffsets[Field_platformBounceFrames[i]] - v);
+                        contact_cursor->z = (platform_cursor->positionZ / ONE);
+                        contact_cursor->platformIndex = i;
                     } while (0);
-                    ++a0;
-                    ++var_t1;
+                    ++contact_cursor;
+                    ++contact_count;
                 }
             }
-            return var_t1;
+            return contact_count;
         }
     } while (0);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8008D438 (src/BATTLE/BATTLE.PRG/146C.c:16810)
-Field_MpdFloorTrigger* Field_RoomTriggerAtTile(int arg0, int arg1, int arg2)
+Field_MpdFloorTrigger* Field_RoomTriggerAtTile(int query_tile_x, int query_tile_z, int query_floor_layer)
 {
     if (Field_roomData.floorTriggers != NULL) {
-        Field_MpdFloorTrigger* var_t0 = Field_roomData.floorTriggers;
-        int temp_t1 =
+        Field_MpdFloorTrigger* trigger_cursor = Field_roomData.floorTriggers;
+        int trigger_count =
             Field_roomData.header.floorTriggersLength / sizeof *Field_roomData.floorTriggers;
         int i;
-        for (i = 0; i < temp_t1; ++i, ++var_t0) {
-            if ((var_t0->tileX == arg0) && (var_t0->tileZ == arg1)
-                && (var_t0->floorLayer == arg2)) {
+        for (i = 0; i < trigger_count; ++i, ++trigger_cursor) {
+            if ((trigger_cursor->tileX == query_tile_x) && (trigger_cursor->tileZ == query_tile_z)
+                && (trigger_cursor->floorLayer == query_floor_layer)) {
                 if (((Audio_Seq_unusedStateFlags.opaque20 != 0) || (Audio_Seq_unusedStateFlags.opaque40 != 0))
-                    && (var_t0->kind < 16)) {
+                    && (trigger_cursor->kind < 16)) {
                     return NULL;
                 } else {
-                    return var_t0;
+                    return trigger_cursor;
                 }
             }
         }
@@ -613,160 +613,160 @@ Field_MpdFloorTrigger* Field_RoomTriggerAtTile(int arg0, int arg1, int arg2)
 }
 
 // decomp: BATTLE.PRG func_8008D594 (src/BATTLE/BATTLE.PRG/146C.c:16855)
-void Field_SetMovingPlatformsPaused(int arg0) { Field_areMovingPlatformsPaused = arg0; }
+void Field_SetMovingPlatformsPaused(int paused) { Field_areMovingPlatformsPaused = paused; }
 
 // decomp: BATTLE.PRG func_8008D5A0 (src/BATTLE/BATTLE.PRG/146C.c:16857)
-void Field_FreezeMovingPlatforms(int arg0)
+void Field_FreezeMovingPlatforms(int freeze_frames)
 {
 
     if ((Field_roomData.header.movingPlatformsLength / 184) != 0) {
-        if (arg0 != 0) {
+        if (freeze_frames != 0) {
             Field_SetPlatformFreezeAppearance(1);
         } else {
             Field_SetPlatformFreezeAppearance(0);
         }
-        Field_platformFreezeFrames = arg0;
+        Field_platformFreezeFrames = freeze_frames;
     }
 }
 
 // decomp: BATTLE.PRG func_8008D5FC (src/BATTLE/BATTLE.PRG/146C.c:16870)
-void Field_BeginSwitchToggle(Field_MpdLockTrigger* arg0)
+void Field_BeginSwitchToggle(Field_MpdLockTrigger* switch_trigger)
 {
-    if ((signed char)arg0->trigger.markerFade == 0) {
-        arg0->trigger.markerFade = 1;
-        if (arg0->trigger.lockState.switchValue == 0) {
-            arg0->trigger.activation = 0x14;
-            Field_QueueGimmickAnimation(2, arg0);
+    if ((signed char)switch_trigger->trigger.markerFade == 0) {
+        switch_trigger->trigger.markerFade = 1;
+        if (switch_trigger->trigger.lockState.switchValue == 0) {
+            switch_trigger->trigger.activation = 0x14;
+            Field_QueueGimmickAnimation(2, switch_trigger);
             return;
         }
-        Field_ToggleRoomSwitch(arg0);
+        Field_ToggleRoomSwitch(switch_trigger);
     }
 }
 
 // decomp: BATTLE.PRG func_8008D658 (src/BATTLE/BATTLE.PRG/146C.c:16883)
-void Field_ToggleRoomSwitch(Field_MpdLockTrigger* arg0)
+void Field_ToggleRoomSwitch(Field_MpdLockTrigger* switch_trigger)
 {
-    Field_MpdTileCell* temp_v0;
+    Field_MpdTileCell* collision_cell;
 
-    if (arg0->trigger.lockState.switchValue == 0) {
+    if (switch_trigger->trigger.lockState.switchValue == 0) {
         Audio_PlaySfxCentered(0x7E, 0x3B);
         Audio_PlaySfxCentered(0x7E, 0x3C);
     } else {
         Audio_PlaySfxCentered(0x7E, 0x3D);
         Audio_PlaySfxCentered(0x7E, 0x3E);
     }
-    Field_StartRoomEffect(arg0->trigger.kind);
-    arg0->trigger.markerFade = 0;
-    arg0->trigger.lockState.switchValue = arg0->trigger.lockState.switchValue == 0;
-    temp_v0 = Field_CollisionCellAt(arg0->trigger.tileX, arg0->trigger.tileZ, arg0->trigger.floorLayer);
-    if (temp_v0 != NULL) {
-        temp_v0->doorPassability = arg0->trigger.lockState.switchValue * 5;
+    Field_StartRoomEffect(switch_trigger->trigger.kind);
+    switch_trigger->trigger.markerFade = 0;
+    switch_trigger->trigger.lockState.switchValue = switch_trigger->trigger.lockState.switchValue == 0;
+    collision_cell = Field_CollisionCellAt(switch_trigger->trigger.tileX, switch_trigger->trigger.tileZ, switch_trigger->trigger.floorLayer);
+    if (collision_cell != NULL) {
+        collision_cell->doorPassability = switch_trigger->trigger.lockState.switchValue * 5;
     }
 }
 
 // decomp: BATTLE.PRG func_8008DEAC (src/BATTLE/BATTLE.PRG/146C.c:17147)
-void Field_SetRoomTriggerEnabled(Field_MpdFloorTrigger* arg0, int arg1)
+void Field_SetRoomTriggerEnabled(Field_MpdFloorTrigger* selected_trigger, int activation_value)
 {
-    if (arg0 == NULL) {
-        Field_MpdFloorTrigger* var_a2 = Field_roomData.floorTriggers;
-        if (var_a2 != NULL) {
+    if (selected_trigger == NULL) {
+        Field_MpdFloorTrigger* trigger_cursor = Field_roomData.floorTriggers;
+        if (trigger_cursor != NULL) {
             int i;
-            int temp_a3 = Field_roomData.header.floorTriggersLength / 12;
-            for (i = 0; i < temp_a3; ++i) {
-                var_a2->activation = arg1;
-                ++var_a2;
+            int trigger_count = Field_roomData.header.floorTriggersLength / 12;
+            for (i = 0; i < trigger_count; ++i) {
+                trigger_cursor->activation = activation_value;
+                ++trigger_cursor;
             }
         }
     } else {
-        arg0->activation = arg1;
+        selected_trigger->activation = activation_value;
     }
 }
 
 // decomp: BATTLE.PRG func_8008E224 (src/BATTLE/BATTLE.PRG/146C.c:17243)
-void Field_SetMovingPlatformVisibility(int arg0, int arg1)
+void Field_SetMovingPlatformVisibility(int platform_index, int visibility_value)
 {
-    int* temp_v0;
-    Field_MpdMovingPlatform* temp_s0 = Field_roomData.movingPlatforms;
+    int* geometry_group_words;
+    Field_MpdMovingPlatform* platform_record = Field_roomData.movingPlatforms;
 
-    if (temp_s0 != NULL) {
-        temp_s0 = &Field_roomData.movingPlatforms[arg0];
-        temp_s0->isHidden = arg1 - 1;
-        temp_v0 = ((int* (*)(int))Field_FindRoomGeometryGroup)(temp_s0->sceneObjectId);
-        if (temp_v0 != NULL) {
-            if (!temp_s0->isHidden) {
-                *temp_v0 &= ~0x100;
+    if (platform_record != NULL) {
+        platform_record = &Field_roomData.movingPlatforms[platform_index];
+        platform_record->isHidden = visibility_value - 1;
+        geometry_group_words = ((int* (*)(int))Field_FindRoomGeometryGroup)(platform_record->sceneObjectId);
+        if (geometry_group_words != NULL) {
+            if (!platform_record->isHidden) {
+                *geometry_group_words &= ~0x100;
             } else {
-                *temp_v0 |= 0x100;
+                *geometry_group_words |= 0x100;
             }
         }
     }
 }
 
 // decomp: BATTLE.PRG func_8008E2D4 (src/BATTLE/BATTLE.PRG/146C.c:17262)
-void* Field_MovingPlatformTargetWaypoint(int arg0)
+void* Field_MovingPlatformTargetWaypoint(int platform_index)
 {
-    Field_MpdMovingPlatform* temp_v1 = Field_roomData.movingPlatforms;
+    Field_MpdMovingPlatform* platform_record = Field_roomData.movingPlatforms;
 
     if (Field_roomData.movingPlatforms != NULL) {
-        temp_v1 = &Field_roomData.movingPlatforms[arg0];
-        return ((char*)temp_v1) + 8 + temp_v1->currentWaypoint * 16;
+        platform_record = &Field_roomData.movingPlatforms[platform_index];
+        return ((char*)platform_record) + 8 + platform_record->currentWaypoint * 16;
     }
     return NULL;
 }
 
 // decomp: BATTLE.PRG func_8008E320 (src/BATTLE/BATTLE.PRG/146C.c:17273)
-u_int Field_MovingPlatformDwellTicks(int arg0)
+u_int Field_MovingPlatformDwellTicks(int platform_index)
 {
-    Field_MpdMovingPlatform* temp_v1 = Field_roomData.movingPlatforms;
+    Field_MpdMovingPlatform* platform_record = Field_roomData.movingPlatforms;
     if (Field_roomData.movingPlatforms != NULL) {
-        temp_v1 = &Field_roomData.movingPlatforms[arg0];
-        if (temp_v1->isWaiting == 1) {
-            return temp_v1->motionTicks;
+        platform_record = &Field_roomData.movingPlatforms[platform_index];
+        if (platform_record->isWaiting == 1) {
+            return platform_record->motionTicks;
         }
     }
     return -1;
 }
 
 // decomp: BATTLE.PRG func_8008E400 (src/BATTLE/BATTLE.PRG/146C.c:17307)
-Field_MpdFloorTrigger* Field_ActiveRoomTriggers(int* arg0)
+Field_MpdFloorTrigger* Field_ActiveRoomTriggers(int* output_trigger_count)
 {
     if ((Audio_Seq_unusedStateFlags.opaque20 != 0) || (Audio_Seq_unusedStateFlags.opaque40 != 0)) {
-        *arg0 = 0;
+        *output_trigger_count = 0;
         return NULL;
     }
     if (Field_roomData.floorTriggers != NULL) {
-        *arg0 = Field_roomData.header.floorTriggersLength / 12;
+        *output_trigger_count = Field_roomData.header.floorTriggersLength / 12;
         return Field_roomData.floorTriggers;
     }
-    *arg0 = 0;
+    *output_trigger_count = 0;
     return NULL;
 }
 
 // decomp: BATTLE.PRG func_8008E4DC (src/BATTLE/BATTLE.PRG/146C.c:17333)
-void Field_SetPlatformFreezeAppearance(int arg0)
+void Field_SetPlatformFreezeAppearance(int freeze_appearance_enabled)
 {
     static u_short const Field_platformFreezePalette[0x10] = { 0x10, 1, 0x865, 0xC66, 0x869, 0xCA9, 0x88D,
         0x10AD, 0xCB1, 0x14D1, 0xCD5, 0x14F5, 0xCF9, 0x113A, 0x199B, 0x21FC };
 
-    Field_MpdMovingPlatform* var_s0;
-    int temp_s2;
+    Field_MpdMovingPlatform* platform_cursor;
+    int platform_count;
     int i;
 
-    if (Field_isPlatformFreezeTintActive != arg0) {
-        if (arg0 != 0) {
+    if (Field_isPlatformFreezeTintActive != freeze_appearance_enabled) {
+        if (freeze_appearance_enabled != 0) {
             Render_LoadClutColors(Field_platformFreezePalette, 2, 0x30, 0x10);
         } else {
             Render_LoadClutColors(Field_roomPalettes + 0x230, 2, 0x30, 0x10);
         }
 
-        var_s0 = Field_roomData.movingPlatforms;
-        temp_s2 = Field_roomData.header.movingPlatformsLength / 184;
+        platform_cursor = Field_roomData.movingPlatforms;
+        platform_count = Field_roomData.header.movingPlatformsLength / 184;
 
-        for (i = 0; i < temp_s2; ++i) {
-            if (var_s0->swapsColorsWhenFrozen) {
-                Field_SwapRoomGeometryRedGreen(var_s0->sceneObjectId);
+        for (i = 0; i < platform_count; ++i) {
+            if (platform_cursor->swapsColorsWhenFrozen) {
+                Field_SwapRoomGeometryRedGreen(platform_cursor->sceneObjectId);
             }
-            ++var_s0;
+            ++platform_cursor;
         }
         if (Field_roomData.environment != NULL) {
             if (Field_roomData.environment->freezeEffectId >= 0) {
@@ -778,15 +778,15 @@ void Field_SetPlatformFreezeAppearance(int arg0)
 }
 
 // decomp: BATTLE.PRG func_80099900 (src/BATTLE/BATTLE.PRG/30DB0.c:273)
-int Field_FindSharedGimmickModel(Content_ActorAssetRequest* arg0)
+int Field_FindSharedGimmickModel(Content_ActorAssetRequest* asset_request)
 {
     int i;
 
     for (i = 0; i < 16; ++i) {
-        if ((i != arg0->targetSlot)
+        if ((i != asset_request->targetSlot)
             && ((Field_gimmickInstances[i] != NULL)
-                && (Field_gimmickInstances[i]->objectInfo.objectId == arg0->subKind))) {
-            arg0->dataAddress = i;
+                && (Field_gimmickInstances[i]->objectInfo.objectId == asset_request->subKind))) {
+            asset_request->dataAddress = i;
             return 1;
         }
     }
@@ -794,110 +794,110 @@ int Field_FindSharedGimmickModel(Content_ActorAssetRequest* arg0)
 }
 
 // decomp: BATTLE.PRG func_80099960 (src/BATTLE/BATTLE.PRG/30DB0.c:288)
-void Field_SetGimmickPaletteTable(void* arg0) { Core_Memory_CopyAlignedWords(&Field_gimmickPaletteColors, arg0, 0xE0); }
+void Field_SetGimmickPaletteTable(void* palette_data) { Core_Memory_CopyAlignedWords(&Field_gimmickPaletteColors, palette_data, 0xE0); }
 
 // decomp: BATTLE.PRG func_8009998C (src/BATTLE/BATTLE.PRG/30DB0.c:290)
-int Field_CreateGimmickInstance(Content_ActorAssetRequest* arg0)
+int Field_CreateGimmickInstance(Content_ActorAssetRequest* asset_request)
 {
-    Field_GimmickInstance* temp_a0;
-    int temp_s0;
+    Field_GimmickInstance* supporting_gimmick;
+    int model_recolor_count;
     int j;
-    int var_v0_2;
-    u_short* var_s0;
+    int has_shared_model;
+    u_short* base_palette_colors;
     int i;
-    Field_GimmickInstance* s1;
-    Field_GimmickTemplate* temp_v1_2;
+    Field_GimmickInstance* created_gimmick;
+    Field_GimmickTemplate* template_or_polygon_section;
 
-    if (Field_gimmickInstances[arg0->targetSlot] != NULL) {
+    if (Field_gimmickInstances[asset_request->targetSlot] != NULL) {
         return -3;
     }
 
-    s1 = Field_gimmickInstances[arg0->targetSlot] = arg0->destination;
+    created_gimmick = Field_gimmickInstances[asset_request->targetSlot] = asset_request->destination;
 
-    if (s1 == NULL) {
+    if (created_gimmick == NULL) {
         return -2;
     }
 
-    memset(s1, 0, offsetof(Field_GimmickInstance, reserved178));
+    memset(created_gimmick, 0, offsetof(Field_GimmickInstance, reserved178));
 
     for (i = 0; i < 16; ++i) {
-        if ((i != arg0->targetSlot) && (Field_gimmickInstances[i] != NULL)
-            && (Field_gimmickInstances[i]->objectInfo.objectId == arg0->subKind)) {
-            arg0->dataAddress = i;
-            var_v0_2 = 1;
+        if ((i != asset_request->targetSlot) && (Field_gimmickInstances[i] != NULL)
+            && (Field_gimmickInstances[i]->objectInfo.objectId == asset_request->subKind)) {
+            asset_request->dataAddress = i;
+            has_shared_model = 1;
             goto exit;
         }
     }
-    var_v0_2 = 0;
+    has_shared_model = 0;
 exit:
-    if (var_v0_2 != 0) {
-        Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], offsetof(Field_GimmickInstance, reserved178));
+    if (has_shared_model != 0) {
+        Core_Memory_CopyAlignedWords(created_gimmick, Field_gimmickInstances[asset_request->dataAddress], offsetof(Field_GimmickInstance, reserved178));
     } else {
-        temp_v1_2 = Field_gimmickModelTemplates[Field_gimmickTemplateIndices[arg0->subKind]];
-        *(int*)&s1->boneCount = temp_v1_2->instanceFlags;
-        s1->reserved4 = temp_v1_2->instanceWord4;
-        temp_s0 = temp_v1_2->recolorCount;
-        s1->model = Content_CopyModelGeometry(NULL, temp_v1_2 + 1, temp_v1_2->modelDataSize);
+        template_or_polygon_section = Field_gimmickModelTemplates[Field_gimmickTemplateIndices[asset_request->subKind]];
+        *(int*)&created_gimmick->boneCount = template_or_polygon_section->instanceFlags;
+        created_gimmick->reserved4 = template_or_polygon_section->instanceWord4;
+        model_recolor_count = template_or_polygon_section->recolorCount;
+        created_gimmick->model = Content_CopyModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize);
 
-        if (s1->model == NULL) {
+        if (created_gimmick->model == NULL) {
             return -2;
         }
 
-        temp_v1_2 = VS_ONDISC(s1->model, polygonSection, void *);
-        j = arg0->subKind;
+        template_or_polygon_section = VS_ONDISC(created_gimmick->model, polygonSection, void *);
+        j = asset_request->subKind;
 
         if (j >= 6) {
             j = 5;
         }
 
-        Content_OffsetModelTextureCoordinates(temp_v1_2, temp_s0, 1, Field_gimmickPaletteParameters[j * 2], Field_gimmickPaletteParameters[j * 2 + 1]);
+        Content_OffsetModelTextureCoordinates(template_or_polygon_section, model_recolor_count, 1, Field_gimmickPaletteParameters[j * 2], Field_gimmickPaletteParameters[j * 2 + 1]);
     }
 
-    var_s0 = s1->basePalette;
+    base_palette_colors = created_gimmick->basePalette;
 
-    s1->slot = arg0->targetSlot;
-    s1->objectInfo.objectId = arg0->subKind;
+    created_gimmick->slot = asset_request->targetSlot;
+    created_gimmick->objectInfo.objectId = asset_request->subKind;
 
-    Core_Memory_CopyAlignedWords(var_s0, (s1->objectInfo.objectId * 32) + Field_gimmickPaletteColors, sizeof s1->basePalette);
-    Render_LoadClutColors(var_s0, 0xD, s1->slot * 0x10, 0x10);
+    Core_Memory_CopyAlignedWords(base_palette_colors, (created_gimmick->objectInfo.objectId * 32) + Field_gimmickPaletteColors, sizeof created_gimmick->basePalette);
+    Render_LoadClutColors(base_palette_colors, 0xD, created_gimmick->slot * 0x10, 0x10);
 
-    s1->objectInfo.carrier = 0xFF;
-    s1->parent = 0xFF;
+    created_gimmick->objectInfo.carrier = 0xFF;
+    created_gimmick->parent = 0xFF;
 
-    if (s1->objectInfo.objectId == 1) {
-        s1->objectInfo.subtype = arg0->textureSlot;
+    if (created_gimmick->objectInfo.objectId == 1) {
+        created_gimmick->objectInfo.subtype = asset_request->textureSlot;
     }
 
-    s1->baseColor = 0x808080;
-    s1->scaleX = 0x40;
-    s1->scaleY = 0x40;
-    s1->scaleZ = 0x40;
-    s1->mode = 0;
-    s1->palettePulse.kind = 0;
-    s1->isSkipped = 1;
-    s1->isVisible = 0;
-    *(int*)&s1->tileX = *(int*)&arg0->placement;
-    s1->reserved5F = 0;
-    s1->positionX = (s1->tileX << 7) + 0x40;
-    s1->positionZ = (s1->tileZ << 7) + 0x40;
-    s1->positionY = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&s1->positionX, 0, 0, 1) - (arg0->variant << 7);
-    Field_SetGimmickOrientation(arg0->targetSlot, arg0->material);
-    Battle_Ai_AddAiTileOccupant(s1);
-    s1->objectInfo.interaction = 0;
+    created_gimmick->baseColor = 0x808080;
+    created_gimmick->scaleX = 0x40;
+    created_gimmick->scaleY = 0x40;
+    created_gimmick->scaleZ = 0x40;
+    created_gimmick->mode = 0;
+    created_gimmick->palettePulse.kind = 0;
+    created_gimmick->isSkipped = 1;
+    created_gimmick->isVisible = 0;
+    *(int*)&created_gimmick->tileX = *(int*)&asset_request->placement;
+    created_gimmick->reserved5F = 0;
+    created_gimmick->positionX = (created_gimmick->tileX << 7) + 0x40;
+    created_gimmick->positionZ = (created_gimmick->tileZ << 7) + 0x40;
+    created_gimmick->positionY = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&created_gimmick->positionX, 0, 0, 1) - (asset_request->variant << 7);
+    Field_SetGimmickOrientation(asset_request->targetSlot, asset_request->material);
+    Battle_Ai_AddAiTileOccupant(created_gimmick);
+    created_gimmick->objectInfo.interaction = 0;
 
-    if (s1->objectInfo.objectId > 4) {
+    if (created_gimmick->objectInfo.objectId > 4) {
 
-        for (j = 0; j < arg0->targetSlot; ++j) {
-            temp_a0 = Field_gimmickInstances[j];
-            if ((temp_a0 != NULL) && (*(int*)&temp_a0->tileX == *(int*)&s1->tileX)
-                && (temp_a0->positionY == (s1->positionY + 0x80))
-                && (temp_a0->objectInfo.objectId > 4)) {
-                if (temp_a0->objectInfo.objectId != s1->objectInfo.objectId) {
-                    s1->objectInfo.interaction = 1;
+        for (j = 0; j < asset_request->targetSlot; ++j) {
+            supporting_gimmick = Field_gimmickInstances[j];
+            if ((supporting_gimmick != NULL) && (*(int*)&supporting_gimmick->tileX == *(int*)&created_gimmick->tileX)
+                && (supporting_gimmick->positionY == (created_gimmick->positionY + 0x80))
+                && (supporting_gimmick->objectInfo.objectId > 4)) {
+                if (supporting_gimmick->objectInfo.objectId != created_gimmick->objectInfo.objectId) {
+                    created_gimmick->objectInfo.interaction = 1;
                 } else {
-                    s1->objectInfo.interaction = 2;
-                    s1->positionY = s1->positionY - 0x80;
-                    Battle_Ai_AddAiTileOccupant(s1);
+                    created_gimmick->objectInfo.interaction = 2;
+                    created_gimmick->positionY = created_gimmick->positionY - 0x80;
+                    Battle_Ai_AddAiTileOccupant(created_gimmick);
                 }
                 break;
             }
@@ -907,35 +907,35 @@ exit:
 }
 
 // decomp: BATTLE.PRG func_80099D6C (src/BATTLE/BATTLE.PRG/30DB0.c:399)
-int Field_ReleaseGimmickInstance(int arg0)
+int Field_ReleaseGimmickInstance(int gimmick_slot)
 {
-    Content_ActorAssetRequest sp10;
-    Field_GimmickInstance* temp_s0;
+    Content_ActorAssetRequest shared_model_query;
+    Field_GimmickInstance* released_gimmick;
     int i;
     int found;
 
-    if (arg0 >= 16) {
+    if (gimmick_slot >= 16) {
         return -1;
     }
 
-    temp_s0 = Field_gimmickInstances[arg0];
+    released_gimmick = Field_gimmickInstances[gimmick_slot];
 
-    if (temp_s0 == NULL) {
+    if (released_gimmick == NULL) {
         return -1;
     }
 
-    if (temp_s0->boneCount == 0) {
+    if (released_gimmick->boneCount == 0) {
         return -1;
     }
 
-    sp10.targetSlot = arg0;
-    sp10.subKind = temp_s0->objectInfo.objectId;
+    shared_model_query.targetSlot = gimmick_slot;
+    shared_model_query.subKind = released_gimmick->objectInfo.objectId;
 
     for (i = 0; i < 16; ++i) {
-        Content_ActorAssetRequest* a2 = &sp10;
-        if ((i != a2->targetSlot) && (Field_gimmickInstances[i] != NULL)
-            && (Field_gimmickInstances[i]->objectInfo.objectId == a2->subKind)) {
-            a2->dataAddress = i;
+        Content_ActorAssetRequest* shared_model_query_alias = &shared_model_query;
+        if ((i != shared_model_query_alias->targetSlot) && (Field_gimmickInstances[i] != NULL)
+            && (Field_gimmickInstances[i]->objectInfo.objectId == shared_model_query_alias->subKind)) {
+            shared_model_query_alias->dataAddress = i;
             found = 1;
             goto exit;
         }
@@ -945,117 +945,117 @@ int Field_ReleaseGimmickInstance(int arg0)
 
 exit:
     if (!found) {
-        Core_Memory_FreeFromLowEnd(temp_s0->model);
+        Core_Memory_FreeFromLowEnd(released_gimmick->model);
     }
 
-    Battle_Ai_RemoveAiTileOccupant(temp_s0);
-    Field_gimmickInstances[arg0] = NULL;
+    Battle_Ai_RemoveAiTileOccupant(released_gimmick);
+    Field_gimmickInstances[gimmick_slot] = NULL;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8009E634 (src/BATTLE/BATTLE.PRG/30DB0.c:2695)
-void Field_RefreshAshleyInteractionTile(Actors_ActorRecord* arg0)
+void Field_RefreshAshleyInteractionTile(Actors_ActorRecord* actor_record)
 {
-    int temp_v1_2;
-    int var_a0;
-    int var_a2;
-    int var_a3;
+    int facing_quadrant;
+    int signed_interaction_reach;
+    int tile_offset_x;
+    int tile_offset_z;
 
-    var_a0 = 1;
+    signed_interaction_reach = 1;
 
-    if (arg0->instance.slot == 0) {
-        if ((arg0->animationId - 0x4F) >= 4U) {
-            if (((arg0->animationId - 0x47) >= 4U) && (arg0->animationId != 0x4C)) {
+    if (actor_record->instance.slot == 0) {
+        if ((actor_record->animationId - 0x4F) >= 4U) {
+            if (((actor_record->animationId - 0x47) >= 4U) && (actor_record->animationId != 0x4C)) {
                 return;
             }
         } else {
-            var_a0 = 2;
+            signed_interaction_reach = 2;
         }
 
-        temp_v1_2 = arg0->instance.facing + 0x200;
-        temp_v1_2 &= 0xFFF;
-        temp_v1_2 /= 1024;
+        facing_quadrant = actor_record->instance.facing + 0x200;
+        facing_quadrant &= 0xFFF;
+        facing_quadrant /= 1024;
 
-        var_a2 = 0;
-        var_a3 = 0;
+        tile_offset_x = 0;
+        tile_offset_z = 0;
 
-        if (temp_v1_2 < 2) {
-            var_a0 = -var_a0;
+        if (facing_quadrant < 2) {
+            signed_interaction_reach = -signed_interaction_reach;
         }
 
-        if (temp_v1_2 & 1) {
-            var_a2 = var_a0;
+        if (facing_quadrant & 1) {
+            tile_offset_x = signed_interaction_reach;
         } else {
-            var_a3 = var_a0;
+            tile_offset_z = signed_interaction_reach;
         }
-        ((void (*)(int, int, int, int))Battle_Ai_ReleaseAiDestinationTile)(arg0->instance.currentTileX + var_a2, arg0->instance.currentTileZ + var_a3,
-            var_a2, var_a3);
+        ((void (*)(int, int, int, int))Battle_Ai_ReleaseAiDestinationTile)(actor_record->instance.currentTileX + tile_offset_x, actor_record->instance.currentTileZ + tile_offset_z,
+            tile_offset_x, tile_offset_z);
     }
 }
 
 // decomp: BATTLE.PRG func_8009F530 (src/BATTLE/BATTLE.PRG/30DB0.c:3256)
-void Field_DropUnsupportedGimmickStack(int arg0)
+void Field_DropUnsupportedGimmickStack(int removed_gimmick_slot)
 {
-    Actors_ActorRecord* temp_v0_2;
-    int temp_s4;
-    int temp_v0;
+    Actors_ActorRecord* supported_actor;
+    int top_gimmick_slot;
+    int falling_base_slot;
     int i;
-    Field_GimmickInstance* temp_s0 = Field_gimmickInstances[arg0];
+    Field_GimmickInstance* removed_or_scanned_gimmick = Field_gimmickInstances[removed_gimmick_slot];
 
-    temp_s0->objectInfo.isFalling = 1;
-    temp_s4 = Field_FindTopGimmickAtTile(temp_s0->tileX, temp_s0->tileZ, 0);
-    temp_v0 = Field_FindGimmickBelow(temp_s0);
+    removed_or_scanned_gimmick->objectInfo.isFalling = 1;
+    top_gimmick_slot = Field_FindTopGimmickAtTile(removed_or_scanned_gimmick->tileX, removed_or_scanned_gimmick->tileZ, 0);
+    falling_base_slot = Field_FindGimmickBelow(removed_or_scanned_gimmick);
 
-    if (temp_v0 != -1) {
-        Field_GimmickInstance* temp_s1 = Field_gimmickInstances[temp_v0];
-        temp_s1->velocityY = 0;
-        temp_s1->mode = 0xFC;
-        Battle_Ai_RemoveAiTileOccupant(temp_s1);
+    if (falling_base_slot != -1) {
+        Field_GimmickInstance* falling_base_gimmick = Field_gimmickInstances[falling_base_slot];
+        falling_base_gimmick->velocityY = 0;
+        falling_base_gimmick->mode = 0xFC;
+        Battle_Ai_RemoveAiTileOccupant(falling_base_gimmick);
 
-        if (temp_s1->objectInfo.interaction == 2) {
-            Battle_Ai_RemoveAiTileOccupant(temp_s1);
+        if (falling_base_gimmick->objectInfo.interaction == 2) {
+            Battle_Ai_RemoveAiTileOccupant(falling_base_gimmick);
         }
 
         for (i = 0; i < 16; ++i) {
-            temp_s0 = Field_gimmickInstances[i];
-            if ((temp_s0 != NULL) && (temp_s0 != temp_s1) && !(temp_s0->isSkipped)) {
-                temp_s0->objectInfo.carrier = 0xFF;
-                if ((temp_s0->mode == 0) && !(temp_s0->objectInfo.isFalling)
-                    && (temp_s0->parent == 0xFF) && (temp_s0->tileX == temp_s1->tileX)
-                    && (temp_s0->tileLayer == temp_s1->tileLayer)
-                    && (temp_s0->tileZ == temp_s1->tileZ)
-                    && (temp_s0->positionY <= temp_s1->positionY)) {
-                    temp_s0->objectInfo.carrier = temp_v0;
+            removed_or_scanned_gimmick = Field_gimmickInstances[i];
+            if ((removed_or_scanned_gimmick != NULL) && (removed_or_scanned_gimmick != falling_base_gimmick) && !(removed_or_scanned_gimmick->isSkipped)) {
+                removed_or_scanned_gimmick->objectInfo.carrier = 0xFF;
+                if ((removed_or_scanned_gimmick->mode == 0) && !(removed_or_scanned_gimmick->objectInfo.isFalling)
+                    && (removed_or_scanned_gimmick->parent == 0xFF) && (removed_or_scanned_gimmick->tileX == falling_base_gimmick->tileX)
+                    && (removed_or_scanned_gimmick->tileLayer == falling_base_gimmick->tileLayer)
+                    && (removed_or_scanned_gimmick->tileZ == falling_base_gimmick->tileZ)
+                    && (removed_or_scanned_gimmick->positionY <= falling_base_gimmick->positionY)) {
+                    removed_or_scanned_gimmick->objectInfo.carrier = falling_base_slot;
                 }
             }
         }
     }
 
-    if (Field_gimmickInstances[temp_s4] == NULL) {
-        Core_Debugf("gimmick", "no eligible stack top while removing slot=%d", arg0);
+    if (Field_gimmickInstances[top_gimmick_slot] == NULL) {
+        Core_Debugf("gimmick", "no eligible stack top while removing slot=%d", removed_gimmick_slot);
         return;
     }
 
     i = 0;
 
-    while ((temp_v0_2 = Field_FindActorAboveGimmick(Field_gimmickInstances[temp_s4], i))) {
+    while ((supported_actor = Field_FindActorAboveGimmick(Field_gimmickInstances[top_gimmick_slot], i))) {
 
-        if ((temp_v0_2->instance.movementMode) != 3) {
-            *(int*)&temp_v0_2->instance.rootMotion = 0;
-            *(int*)&temp_v0_2->instance.rootMotion.vz = 0;
-            temp_v0_2->instance.movementMode = 3;
-            if (temp_v0_2->instance.slot != 0) {
-                temp_v0_2->destinationMode = 1;
-                temp_v0_2->destinationX = temp_v0_2->instance.currentTileX;
-                temp_v0_2->destinationZ = temp_v0_2->instance.currentTileZ;
+        if ((supported_actor->instance.movementMode) != 3) {
+            *(int*)&supported_actor->instance.rootMotion = 0;
+            *(int*)&supported_actor->instance.rootMotion.vz = 0;
+            supported_actor->instance.movementMode = 3;
+            if (supported_actor->instance.slot != 0) {
+                supported_actor->destinationMode = 1;
+                supported_actor->destinationX = supported_actor->instance.currentTileX;
+                supported_actor->destinationZ = supported_actor->instance.currentTileZ;
             }
-            temp_v0_2->instance.jumpCountdown = 4;
+            supported_actor->instance.jumpCountdown = 4;
         }
 
-        i = temp_v0_2->instance.slot + 1;
-        temp_v0_2->instance.locomotionState = 0;
-        temp_v0_2->instance.movementPending = 0;
-        temp_v0_2->supportGimmick = 0;
+        i = supported_actor->instance.slot + 1;
+        supported_actor->instance.locomotionState = 0;
+        supported_actor->instance.movementPending = 0;
+        supported_actor->supportGimmick = 0;
 
         if (i == 1) {
             i = 2;
@@ -1064,84 +1064,84 @@ void Field_DropUnsupportedGimmickStack(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8009F794 (src/BATTLE/BATTLE.PRG/30DB0.c:3320)
-int Field_FindGimmickBelow(Field_GimmickInstance* arg0)
+int Field_FindGimmickBelow(Field_GimmickInstance* reference_gimmick)
 {
-    Field_GimmickInstance* temp_v1;
-    int temp_v1_2;
-    int var_a3;
+    Field_GimmickInstance* candidate_gimmick;
+    int candidate_height;
+    int best_height;
     int i;
-    int var_t0;
-    int t1;
+    int best_gimmick_slot;
+    int reference_packed_tile;
 
-    var_a3 = -0x7530;
-    var_t0 = -1;
-    t1 = *(int*)&arg0->tileX;
+    best_height = -0x7530;
+    best_gimmick_slot = -1;
+    reference_packed_tile = *(int*)&reference_gimmick->tileX;
 
     for (i = 0; i < 16; ++i) {
-        temp_v1 = Field_gimmickInstances[i];
-        if ((temp_v1 != NULL) && !(temp_v1->isSkipped) && (temp_v1->mode == 0)
-            && !(temp_v1->objectInfo.isFalling) && (temp_v1->parent == 0xFF)
-            && (t1 == *(int*)&temp_v1->tileX)) {
-            temp_v1_2 = temp_v1->positionY;
-            if ((arg0->positionY >= temp_v1_2) && (var_a3 < temp_v1_2)) {
-                var_a3 = temp_v1_2;
-                var_t0 = i;
+        candidate_gimmick = Field_gimmickInstances[i];
+        if ((candidate_gimmick != NULL) && !(candidate_gimmick->isSkipped) && (candidate_gimmick->mode == 0)
+            && !(candidate_gimmick->objectInfo.isFalling) && (candidate_gimmick->parent == 0xFF)
+            && (reference_packed_tile == *(int*)&candidate_gimmick->tileX)) {
+            candidate_height = candidate_gimmick->positionY;
+            if ((reference_gimmick->positionY >= candidate_height) && (best_height < candidate_height)) {
+                best_height = candidate_height;
+                best_gimmick_slot = i;
             }
         }
     }
-    return var_t0;
+    return best_gimmick_slot;
 }
 
 // decomp: BATTLE.PRG func_8009F858 (src/BATTLE/BATTLE.PRG/30DB0.c:3348)
-int Field_GimmickSubtype(int arg0)
+int Field_GimmickSubtype(int gimmick_slot)
 {
-    Field_GimmickInstance* temp_a0 = Field_gimmickInstances[arg0];
+    Field_GimmickInstance* gimmick_record = Field_gimmickInstances[gimmick_slot];
 
-    if (temp_a0 == NULL) {
+    if (gimmick_record == NULL) {
         return -1;
     }
 
-    if (temp_a0->objectInfo.objectId != 1) {
+    if (gimmick_record->objectInfo.objectId != 1) {
         return -1;
     }
 
-    return temp_a0->objectInfo.subtype;
+    return gimmick_record->objectInfo.subtype;
 }
 
 // decomp: BATTLE.PRG func_800A0024 (src/BATTLE/BATTLE.PRG/30DB0.c:3654)
-int Field_GimmickPlacement(int arg0, Field_GimmickSnapshot* arg1)
+int Field_GimmickPlacement(int gimmick_slot, Field_GimmickSnapshot* output_snapshot)
 {
-    Field_GimmickInstance* temp_s0;
-    int var_v0_2;
+    Field_GimmickInstance* gimmick_record;
+    int support_height_difference;
 
     // BUG: Check performed on garbage
-    if (temp_s0 == 0) {
+    if (gimmick_record == 0) {
         return -1;
     }
 
-    temp_s0 = Field_gimmickInstances[arg0];
+    gimmick_record = Field_gimmickInstances[gimmick_slot];
 
-    if (temp_s0->parent != 0xFF) {
+    if (gimmick_record->parent != 0xFF) {
         return -1;
     }
 
-    if ((temp_s0->objectInfo.isFalling)) {
+    if ((gimmick_record->objectInfo.isFalling)) {
         return -1;
     }
 
-    if (temp_s0->mode != 0) {
+    if (gimmick_record->mode != 0) {
         return -1;
     }
 
-    *(int*)&arg1->placementByte0 = *(int*)&temp_s0->tileX;
-    arg1->orientation = temp_s0->objectInfo.material;
-    var_v0_2 = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&temp_s0->positionX, 0, 0, 0) - temp_s0->positionY;
-    if (var_v0_2 < 0) {
-        var_v0_2 += 0x7F;
+    *(int*)&output_snapshot->placementByte0 = *(int*)&gimmick_record->tileX;
+    output_snapshot->orientation = gimmick_record->objectInfo.material;
+    support_height_difference = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&gimmick_record->positionX, 0, 0, 0) - gimmick_record->positionY;
+    if (support_height_difference < 0) {
+        support_height_difference += 0x7F;
     }
-    arg1->heightAboveGround = var_v0_2 >> 7;
-    arg1->positionXY = *(int*)&temp_s0->positionX;
-    arg1->positionZ = *(int*)&temp_s0->positionZ;
+    output_snapshot->heightAboveGround = support_height_difference >> 7;
+    output_snapshot->positionXY = *(int*)&gimmick_record->positionX;
+    output_snapshot->positionZ = *(int*)&gimmick_record->positionZ;
     return 0;
 }
 
@@ -1298,9 +1298,9 @@ int Field_FindInteractableGimmickAhead(int actorId)
 }
 
 // decomp: BATTLE.PRG func_800A3C00 (src/BATTLE/BATTLE.PRG/3A1A0.c:661)
-Actors_ActorRecord* Field_FindActorAboveGimmick(Field_GimmickInstance* arg0, u_int arg1)
+Actors_ActorRecord* Field_FindActorAboveGimmick(Field_GimmickInstance* support_gimmick, u_int occupancy_mode_or_first_actor)
 {
-    return Field_FindActorOccupyingTile(arg0->tileX, arg0->tileZ, arg0->positionY, arg1);
+    return Field_FindActorOccupyingTile(support_gimmick->tileX, support_gimmick->tileZ, support_gimmick->positionY, occupancy_mode_or_first_actor);
 }
 
 // decomp: BATTLE.PRG func_800A3DB4 (src/BATTLE/BATTLE.PRG/3A1A0.c:708)
@@ -1535,9 +1535,9 @@ int Field_AreGimmicksMoving(void)
     int i;
 
     for (i = 0; i < 16; ++i) {
-        Field_GimmickInstance* temp_v1 = Field_gimmickInstances[i];
-        if ((Field_gimmickInstances[i] != NULL) && !Field_gimmickInstances[i]->isSkipped && !temp_v1->motionState
-            && temp_v1->mode) {
+        Field_GimmickInstance* gimmick_record = Field_gimmickInstances[i];
+        if ((Field_gimmickInstances[i] != NULL) && !Field_gimmickInstances[i]->isSkipped && !gimmick_record->motionState
+            && gimmick_record->mode) {
             return 1;
         }
     }
@@ -1545,30 +1545,30 @@ int Field_AreGimmicksMoving(void)
 }
 
 // decomp: BATTLE.PRG func_800A91DC (src/BATTLE/BATTLE.PRG/40564.c:317)
-int Field_FindTopGimmickAtTile(int arg0, int arg1, int arg2)
+int Field_FindTopGimmickAtTile(int query_tile_x, int query_tile_z, int require_idle_mode)
 {
     int _[2] __attribute__((unused));
     int i;
 
-    int var_t2 = ONE;
-    int var_t3 = 0;
+    int minimum_height = ONE;
+    int top_gimmick_slot = 0;
 
     for (i = 0; i < 16; ++i) {
-        Field_GimmickInstance* temp_v1 = Field_gimmickInstances[i];
-        if ((temp_v1 != NULL) && !(temp_v1->isSkipped)
-            && ((arg2 == 0) || (temp_v1->mode == 0)) && (temp_v1->parent == 0xFF)
-            && (temp_v1->objectInfo.carrier == temp_v1->parent) && (temp_v1->tileX == arg0)
-            && (temp_v1->tileZ == arg1) && (var_t2 >= temp_v1->positionY)) {
-            var_t2 = temp_v1->positionY;
-            var_t3 = i;
+        Field_GimmickInstance* candidate_gimmick = Field_gimmickInstances[i];
+        if ((candidate_gimmick != NULL) && !(candidate_gimmick->isSkipped)
+            && ((require_idle_mode == 0) || (candidate_gimmick->mode == 0)) && (candidate_gimmick->parent == 0xFF)
+            && (candidate_gimmick->objectInfo.carrier == candidate_gimmick->parent) && (candidate_gimmick->tileX == query_tile_x)
+            && (candidate_gimmick->tileZ == query_tile_z) && (minimum_height >= candidate_gimmick->positionY)) {
+            minimum_height = candidate_gimmick->positionY;
+            top_gimmick_slot = i;
         }
     }
 
-    if (var_t3 == 0) {
+    if (top_gimmick_slot == 0) {
         return 0;
     }
 
-    return var_t3;
+    return top_gimmick_slot;
 }
 
 // decomp: BATTLE.PRG func_800B0908 (src/BATTLE/BATTLE.PRG/44F14.c:1717)
@@ -1877,44 +1877,44 @@ done:
 }
 
 // decomp: MAINMENU.PRG func_800FA188 (src/MENU/MAINMENU.PRG/224.c:261)
-int Field_MeasureTileStack(int arg0, int arg1, int* arg2)
+int Field_MeasureTileStack(int query_tile_x, int query_tile_z, int* output_stack_height)
 {
     int i;
-    int var_t2 = 0;
+    int stack_height = 0;
     int ret = 0;
-    Field_GimmickInstance** var_t0 = Field_gimmickInstances;
+    Field_GimmickInstance** gimmick_table = Field_gimmickInstances;
 
     for (i = 0; i < 16; ++i) {
-        Field_GimmickInstance* temp_v1 = var_t0[i];
-        if ((var_t0[i] != 0)
-            && ((((!var_t0[i]->isSkipped) && (!temp_v1->motionState)) && (temp_v1->mode == 0))
-                && (temp_v1->tileX == arg0))
-            && (temp_v1->tileZ == arg1)) {
-            if (temp_v1->objectInfo.interaction == 2) {
+        Field_GimmickInstance* gimmick_record = gimmick_table[i];
+        if ((gimmick_table[i] != 0)
+            && ((((!gimmick_table[i]->isSkipped) && (!gimmick_record->motionState)) && (gimmick_record->mode == 0))
+                && (gimmick_record->tileX == query_tile_x))
+            && (gimmick_record->tileZ == query_tile_z)) {
+            if (gimmick_record->objectInfo.interaction == 2) {
                 ret = 1;
             } else {
-                var_t2 -= 0x80;
+                stack_height -= 0x80;
             }
         }
     }
 
-    *arg2 = var_t2;
+    *output_stack_height = stack_height;
     return ret;
 }
 
 // decomp: MAINMENU.PRG func_800FA238 (src/MENU/MAINMENU.PRG/224.c:286)
-int Field_IsGimmickWithinHeightBand(int arg0, int arg1, int arg2)
+int Field_IsGimmickWithinHeightBand(int query_tile_x, int query_tile_z, int minimum_height)
 {
     int i;
-    Field_GimmickInstance** var_t0 = Field_gimmickInstances;
-    int new_var = arg2 + 0x80;
+    Field_GimmickInstance** gimmick_table = Field_gimmickInstances;
+    int maximum_height = minimum_height + 0x80;
 
     for (i = 0; i < 16; ++i) {
-        Field_GimmickInstance* temp_v1 = var_t0[i];
+        Field_GimmickInstance* gimmick_record = gimmick_table[i];
 
-        if (var_t0[i] && !var_t0[i]->isSkipped && !temp_v1->motionState
-            && (temp_v1->tileX == arg0) && (temp_v1->tileZ == arg1)
-            && (temp_v1->positionY >= arg2) && (new_var >= temp_v1->positionY)) {
+        if (gimmick_table[i] && !gimmick_table[i]->isSkipped && !gimmick_record->motionState
+            && (gimmick_record->tileX == query_tile_x) && (gimmick_record->tileZ == query_tile_z)
+            && (gimmick_record->positionY >= minimum_height) && (maximum_height >= gimmick_record->positionY)) {
             return 1;
         }
     }

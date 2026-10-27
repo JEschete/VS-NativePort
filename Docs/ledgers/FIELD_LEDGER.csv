@@ -1477,7 +1477,7 @@ T00234.002,T00234,D_800F1DD4_t,2,unkA,1,short,,,,screenY,Screen y of a screen-sp
 T00234.003,T00234,D_800F1DD4_t,3,unkC,1,char,,,particle phase,opaqueC,"Used, but its meaning is not established",low,source:146C.c:17775
 T00234.004,T00234,D_800F1DD4_t,4,unkD,1,char,,,phase animation tick,swayPhase,Phase of the sideways sway; also the splash frame of rain,low,source:146C.c:17968
 T00234.005,T00234,D_800F1DD4_t,5,unkE,1,char,,,offscreen speed shift,fallShift,Shift applied to the fall speed of rain,low,source:146C.c:17778
-T00234.006,T00234,D_800F1DD4_t,6,unkF,1,char,,,rising speed for weather type 4,speed,Rise speed of embers; random phase of screen particles,low,source:146C.c:17906
+T00234.006,T00234,D_800F1DD4_t,6,unkF,1,char,,,rising speed for weather type 4,speed,Rise speed of embers; random phase of screen particles,low,source:146C.c:17906;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.c:183;retained-name:speed=Offset0xF is an explicitly per-kind state byte: ember initializer17886 sets8..23 and update17906 subtracts speed*tickSpeed from Y; screen-particle initializer17749 and18218 uses rand&127 and updates17961..17977/18107..18121 use it as wrapping trig phase. Native Effects\Weather.c preserves both lifetimes. Retain existing speed spelling with this precise overloaded-state justification; do not claim all weather modes use physical velocity or rename outside this cohort.
 T00235.000,T00235,D_800F1DD8_t,0,unk0,1,char,,,active,isActive,Effect is running,med,source:2842C.c:621;use cited by sanity pass;source:2842C.c:52
 T00235.001,T00235,D_800F1DD8_t,1,unk1,1,u_char,,,effect type or script object count,kindOrObjectCount,Texture-effect kind or script object count,med,source:2842C.c:621;use cited by sanity pass;source:2842C.c:53
 T00235.002,T00235,D_800F1DD8_t,2,unk2,1,char,,,update enabled,isUpdateEnabled,Updates enabled,med,source:2842C.c:622;use cited by sanity pass;source:2842C.c:54
@@ -2836,12 +2836,12 @@ T00324.016,T00324,_mpdPolygt3,16,u3,0,char,,,,u3,Vertex 3 texture U,med,declarat
 T00324.017,T00324,_mpdPolygt3,17,r3,0,char,,,,red3,Vertex 3 red,med,declaration-only;source:146C.h:39
 T00324.018,T00324,_mpdPolygt3,18,g3,0,char,,,,green3,Vertex 3 green,med,declaration-only;source:146C.h:39
 T00324.019,T00324,_mpdPolygt3,19,b3,0,char,,,,blue3,Vertex 3 blue,med,declaration-only;source:146C.h:39
-T00324.020,T00324,_mpdPolygt3,20,v3,0,char,,,,v3,Vertex 3 texture V,med,declaration-only;source:146C.h:39
+T00324.020,T00324,_mpdPolygt3,20,v3,0,char,,,,v3,Vertex 3 texture V,med,"declaration-only;source:146C.h:39;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:39;retained-name:v3=Existing serialized triangle third-vertex texture V coordinate at offset0x17, paired with u3 at0x13. Preserve layout and UV convention."
 T00324.021,T00324,_mpdPolygt3,21,u1,0,char,,,,u1,Vertex 1 texture U,med,declaration-only;source:146C.h:40
-T00324.022,T00324,_mpdPolygt3,22,v1,0,char,,,,v1,Vertex 1 texture V,med,declaration-only;source:146C.h:40
+T00324.022,T00324,_mpdPolygt3,22,v1,0,char,,,,v1,Vertex 1 texture V,med,"declaration-only;source:146C.h:40;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:40;retained-name:v1=Existing serialized triangle first-vertex texture V coordinate paired with u1; offset0x19, not MIPS v1."
 T00324.023,T00324,_mpdPolygt3,23,texelMask,0,short,,,,texelMask,Texel transparency mask,med,declaration-only;source:146C.h:41
 T00324.024,T00324,_mpdPolygt3,24,u2,0,char,,,,u2,Vertex 2 texture U,med,declaration-only;source:146C.h:42
-T00324.025,T00324,_mpdPolygt3,25,v2,0,char,,,,v2,Vertex 2 texture V,med,declaration-only;source:146C.h:42
+T00324.025,T00324,_mpdPolygt3,25,v2,0,char,,,,v2,Vertex 2 texture V,med,"declaration-only;source:146C.h:42;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:42;retained-name:v2=Existing serialized triangle second-vertex texture V coordinate paired with u2; offset0x1D, not MIPS v2."
 T00324.026,T00324,_mpdPolygt3,26,idTexture,0,short,,,,textureId,Texture id; changes at run time,med,declaration-only;source:146C.h:43
 T00325.000,T00325,_mpdPolygt4,0,p1x,0,short,,,,vertex1X,Vertex 1 X,med,declaration-only;source:146C.h:47
 T00325.001,T00325,_mpdPolygt4,1,p1y,0,short,,,,vertex1Y,Vertex 1 Y,med,declaration-only;source:146C.h:47
@@ -2863,12 +2863,12 @@ T00325.016,T00325,_mpdPolygt4,16,u3,0,char,,,,u3,Vertex 3 texture U,med,declarat
 T00325.017,T00325,_mpdPolygt4,17,r3,0,char,,,,red3,Vertex 3 red,med,declaration-only;source:146C.h:52
 T00325.018,T00325,_mpdPolygt4,18,g3,0,char,,,,green3,Vertex 3 green,med,declaration-only;source:146C.h:52
 T00325.019,T00325,_mpdPolygt4,19,b3,0,char,,,,blue3,Vertex 3 blue,med,declaration-only;source:146C.h:52
-T00325.020,T00325,_mpdPolygt4,20,v3,0,char,,,,v3,Vertex 3 texture V,med,declaration-only;source:146C.h:52
+T00325.020,T00325,_mpdPolygt4,20,v3,0,char,,,,v3,Vertex 3 texture V,med,declaration-only;source:146C.h:52;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:52;retained-name:v3=Existing serialized quad third-vertex V coordinate at0x17 paired with u3 at0x13; no rename.
 T00325.021,T00325,_mpdPolygt4,21,u1,0,char,,,,u1,Vertex 1 texture U,med,declaration-only;source:146C.h:53
-T00325.022,T00325,_mpdPolygt4,22,v1,0,char,,,,v1,Vertex 1 texture V,med,declaration-only;source:146C.h:53
+T00325.022,T00325,_mpdPolygt4,22,v1,0,char,,,,v1,Vertex 1 texture V,med,"declaration-only;source:146C.h:53;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:53;retained-name:v1=Existing serialized quad first-vertex V coordinate at0x19 paired with u1, not a local register."
 T00325.023,T00325,_mpdPolygt4,23,texelMask,0,short,,,,texelMask,Texel transparency mask,med,declaration-only;source:146C.h:54
 T00325.024,T00325,_mpdPolygt4,24,u2,0,char,,,,u2,Vertex 2 texture U,med,declaration-only;source:146C.h:55
-T00325.025,T00325,_mpdPolygt4,25,v2,0,char,,,,v2,Vertex 2 texture V,med,declaration-only;source:146C.h:55
+T00325.025,T00325,_mpdPolygt4,25,v2,0,char,,,,v2,Vertex 2 texture V,med,"declaration-only;source:146C.h:55;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:55;retained-name:v2=Existing serialized quad second-vertex V coordinate at0x1D paired with u2, not a local register."
 T00325.026,T00325,_mpdPolygt4,26,idTexture,0,short,,,,textureId,Texture id; changes at run time,med,declaration-only;source:146C.h:56
 T00325.027,T00325,_mpdPolygt4,27,p4x,0,char,,,,vertex4OffsetX,Vertex 4 X relative to vertex 1,med,declaration-only;source:146C.h:57
 T00325.028,T00325,_mpdPolygt4,28,p4y,0,char,,,,vertex4OffsetY,Vertex 4 Y relative to vertex 1,med,declaration-only;source:146C.h:57
@@ -2877,7 +2877,7 @@ T00325.030,T00325,_mpdPolygt4,30,u4,0,char,,,,u4,Vertex 4 texture U,med,declarat
 T00325.031,T00325,_mpdPolygt4,31,r4,0,char,,,,red4,Vertex 4 red,med,declaration-only;source:146C.h:58
 T00325.032,T00325,_mpdPolygt4,32,g4,0,char,,,,green4,Vertex 4 green,med,declaration-only;source:146C.h:58
 T00325.033,T00325,_mpdPolygt4,33,b4,0,char,,,,blue4,Vertex 4 blue,med,declaration-only;source:146C.h:58
-T00325.034,T00325,_mpdPolygt4,34,v4,0,char,,,,v4,Vertex 4 texture V,med,declaration-only;source:146C.h:58
+T00325.034,T00325,_mpdPolygt4,34,v4,0,char,,,,v4,Vertex 4 texture V,med,declaration-only;source:146C.h:58;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:58;retained-name:v4=Existing serialized quad fourth-vertex V coordinate at0x27 paired with u4 at0x23; no rename.
 T00326.000,T00326,_mpdRoomCollisionMapSection,0,width,0,short,,,,width,Tile columns,high,DataCrystal
 T00326.001,T00326,_mpdRoomCollisionMapSection,1,height,0,short,,,,height,Tile rows,high,DataCrystal
 T00326.002,T00326,_mpdRoomCollisionMapSection,2,unk4,1,short,,,height origin in eight-world-unit steps,heightOrigin,Height origin subtracted from floor samples,low,source:146C.c:17032
@@ -3030,7 +3030,7 @@ T00338.000,T00338,_sphericalCamera,0,values,0,_sphericalValues,,,,values,Current
 T00338.001,T00338,_sphericalCamera,1,delta,0,_sphericalValues,,,,delta,Pending rotation phase target pitch and zoom step,med,source:146C.c:2643;use cited by sanity pass;source:146C.h:742
 T00338.002,T00338,_sphericalCamera,2,initialDistance,0,int,,,,initialDistance,Default camera distance,med,source:146C.c:2727;use cited by sanity pass;source:146C.h:743
 T00338.003,T00338,_sphericalCamera,3,unk24,1,int,,,zoom velocity,zoomVelocity,Distance change per frame,med,source:146C.c:2745;use cited by sanity pass;source:146C.h:744
-T00338.004,T00338,_sphericalCamera,4,speed,0,int,,,,speed,Camera step speed,med,source:146C.c:2544;use cited by sanity pass;source:146C.h:745
+T00338.004,T00338,_sphericalCamera,4,speed,0,int,,,,speed,Camera step speed,med,"source:146C.c:2544;use cited by sanity pass;source:146C.h:745;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\146C.h:745;retained-name:speed=Original _sphericalCamera.speed at offset0x28 is already semantic; 146C.c:2544..2562 accelerates/decelerates by8 and caps maxSpeed, then scales camera step. sp[hex] lexical false positive. Preserve field name/layout and member uses F00074/F00075."
 T00339.000,T00339,_sphericalValues,0,yaw,0,int,,,,yaw,Yaw of the spherical camera,low,used as a rotation phase 0 1 2 when this is the delta member at 146C.c:2643;source:146C.c:2643;use cited by sanity pass;source:146C.h:734
 T00339.001,T00339,_sphericalValues,1,pitch,0,int,,,,pitch,Pitch of the spherical camera,med,source:146C.c:2647;use cited by sanity pass;source:146C.h:735
 T00339.002,T00339,_sphericalValues,2,distance,0,int,,,,distance,Distance of the spherical camera,med,source:146C.c:2434;use cited by sanity pass;source:146C.h:736
@@ -4035,16 +4035,16 @@ T00448.001,T00448,func_80091C6C_t2,1,type,0,u_char,,,,type,Polygon type,high,Dat
 T00448.002,T00448,func_80091C6C_t2,2,unk10,1,char[3],,,,secondColor,Second vertex color,med,DataCrystal
 T00448.003,T00448,func_80091C6C_t2,3,u2,0,u_char,,,,u2,Third vertex U,high,DataCrystal
 T00448.004,T00448,func_80091C6C_t2,4,unk14,1,char[3],,,,thirdColor,Third vertex color,med,DataCrystal
-T00448.005,T00448,func_80091C6C_t2,5,v2,0,u_char,,,,v2,Third vertex V,high,DataCrystal
+T00448.005,T00448,func_80091C6C_t2,5,v2,0,u_char,,,,v2,Third vertex V,high,DataCrystal;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:141;retained-name:v2=Zero-based third-vertex texture V at0x17 (aliases one-based v3); frame/scroll handlers write effect.v[2]. Preserve established UV naming.
 T00448.006,T00448,func_80091C6C_t2,6,u0,0,u_char,,,,u0,First vertex U,high,DataCrystal
-T00448.007,T00448,func_80091C6C_t2,7,v0,0,u_char,,,,v0,First vertex V,high,DataCrystal
+T00448.007,T00448,func_80091C6C_t2,7,v0,0,u_char,,,,v0,First vertex V,high,"DataCrystal;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:143;retained-name:v0=Zero-based first-vertex texture V at0x19 (aliases one-based MpdTriangle/Quad.v1); frame and scroll handlers write it from effect.v[0]. Distinct member binding, not local v0."
 T00448.008,T00448,func_80091C6C_t2,8,unk1A,1,char[2],,,,texelMask,Texel transparency mask,med,DataCrystal
 T00448.009,T00448,func_80091C6C_t2,9,u1,0,u_char,,,,u1,Second vertex U,high,DataCrystal
-T00448.010,T00448,func_80091C6C_t2,10,v1,0,u_char,,,,v1,Second vertex V,high,DataCrystal
+T00448.010,T00448,func_80091C6C_t2,10,v1,0,u_char,,,,v1,Second vertex V,high,DataCrystal;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:146;retained-name:v1=Zero-based second-vertex texture V at0x1D (aliases one-based v2); frame/scroll handlers write effect.v[1]. Distinct from other v1 member declarations.
 T00448.011,T00448,func_80091C6C_t2,11,unk1E,1,char[5],,,,textureIdAndFourthPosition,Texture identifier and fourth vertex position,med,DataCrystal
 T00448.012,T00448,func_80091C6C_t2,12,u3,0,u_char,,,,u3,Fourth vertex U,high,DataCrystal
 T00448.013,T00448,func_80091C6C_t2,13,unk24,1,char[3],,,,fourthColor,Fourth vertex color,med,DataCrystal
-T00448.014,T00448,func_80091C6C_t2,14,v3,0,u_char,,,,v3,Fourth vertex V,high,DataCrystal
+T00448.014,T00448,func_80091C6C_t2,14,v3,0,u_char,,,,v3,Fourth vertex V,high,"DataCrystal;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:150;retained-name:v3=Zero-based fourth-vertex texture V at0x27 (aliases one-based v4); quad branches write effect.v[3], no register meaning."
 T00449.000,T00449,func_80091E10_t,0,geometryOffset,0,int,,,,geometryOffset,Offset of the scrolled polygon,med,source:2842C.c:714;use cited by sanity pass;source:2842C.c:154
 T00449.001,T00449,func_80091E10_t,1,unk4,1,char[3],,,,reserved04,Unreferenced bytes,low,declaration-only;source:2842C.c:155
 T00449.002,T00449,func_80091E10_t,2,delay,0,u_char,,,,delay,Ticks per step,med,source:2842C.c:687;use cited by sanity pass;source:2842C.c:156
@@ -4120,7 +4120,7 @@ T00458.011,T00458,func_80093914_t2,11,unk16,1,u_char[14],,,,middle,Bytes between
 T00458.012,T00458,func_80093914_t2,12,unk24,1,u_char,,,,red4,Fourth vertex red,high,source:2842C.c:1442
 T00458.013,T00458,func_80093914_t2,13,unk25,1,u_char,,,,green4,Fourth vertex green,high,source:2842C.c:1443
 T00458.014,T00458,func_80093914_t2,14,unk26,1,u_char,,,,blue4,Fourth vertex blue,med,DataCrystal
-T00458.015,T00458,func_80093914_t2,15,unk27,1,u_char,,,,v4,Fourth vertex V,med,DataCrystal
+T00458.015,T00458,func_80093914_t2,15,unk27,1,u_char,,,,v4,Fourth vertex V,med,DataCrystal;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2842C.c:116;retained-name:v4=Original func_80093914_t2.unk27 overlays same quad offset0x27 as _mpdPolygt4.v4; ledger names fourth-vertex texture V. SwapRoomGeometryRedGreen changes red/green only and must leave this texture byte untouched.
 T00459.000,T00459,func_800962E4_t,0,unk0,1,u_short,,,,opaque0,"Used, but its meaning is not established",low,source:2842C.c:1482
 T00459.001,T00459,func_800962E4_t,1,unk2,1,u_short,,,,opaque2,"Used, but its meaning is not established",low,source:2842C.c:1483
 T00459.002,T00459,func_800962E4_t,2,unk4,1,u_short,,,,opaque4,"Used, but its meaning is not established",low,source:2842C.c:1484

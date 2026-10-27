@@ -84,11 +84,11 @@ void Field_ClampCameraLookAtToZone(VECTOR* inPos, VECTOR* outPos);
 int Field_ComputeCameraTrackingStep(SVECTOR* targetPos, VECTOR* outStep,
     VECTOR* outDisplacement, int clampToZone, int maxSpeed);
 int Field_StepCameraLookAtTowardTarget(SVECTOR* targetPos, int transformFlag, int maxSpeed);
-void Field_TrackCameraLookAtWithinDeadZone(VECTOR* arg0);
+void Field_TrackCameraLookAtWithinDeadZone(VECTOR* target_position);
 #include "Battle/TargetPages.h"
 
 void Field_UpdateCameraOrbitInput(void);
-void Field_TrackActionCameraTarget(int arg0);
+void Field_TrackActionCameraTarget(int tracked_actor_index);
 int Field_UpdateAshleyFollowCamera(void);
 void Field_UpdateFirstPersonCamera(void);
 void Field_StorePreferredActionCameraDistance(void);
@@ -99,10 +99,10 @@ void Field_EndFirstPersonView(void);
 void Field_UpdateFirstPersonViewEntry(void);
 void Field_CheckFirstPersonViewExit(void);
 void Field_UpdateFirstPersonViewExit(void);
-void Field_UpdateCameraTileConstraint(int arg0, Actors_TileTarget* arg1);
+void Field_UpdateCameraTileConstraint(int actor_index, Actors_TileTarget* actor_tile);
 int Field_IsCameraLookAtOnAshley(void);
 void Field_ResetCameraToAshley(void);
-int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* arg0);
+int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* output_spherical_camera);
 void Field_ComputeSphericalCameraPosition(
     VECTOR* outPosition, VECTOR* basePosition, Field_SphericalCameraValues* angles);
 void Field_SetCameraPositionFromAngles(Field_SphericalCameraValues* spherical);
@@ -111,11 +111,11 @@ void Field_CameraPosition(VECTOR* outPosition);
 void Field_SetCameraPosition(VECTOR* inPosition);
 void Field_CameraLookAt(VECTOR* outLookAt);
 void Field_SetCameraLookAt(VECTOR* inLookAt);
-void Field_SetCameraRoll(int arg0);
+void Field_SetCameraRoll(int roll_angle);
 int Field_CameraRoll(void);
-int Field_SetFirstPersonViewDisabled(int arg0);
+int Field_SetFirstPersonViewDisabled(int disabled);
 void Field_InitializeSphericalCamera(
     VECTOR* outputPos, VECTOR* outputLookAt, int facing, int mode);
-void Field_SetCameraPitchPreset(int arg0);
+void Field_SetCameraPitchPreset(int requested_pitch);
 
 #endif // VS_FIELD_CAMERA_H_DECLS

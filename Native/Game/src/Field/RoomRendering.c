@@ -48,9 +48,9 @@ u_short* Field_roomPalettes;
 Field_RoomTint Field_roomTint;
 
 // decomp: BATTLE.PRG func_8008A4DC (src/BATTLE/BATTLE.PRG/146C.c:15521)
-void Field_SetFieldRenderingEnabled(int arg0)
+void Field_SetFieldRenderingEnabled(int enabled)
 {
-    if (arg0 != 0) {
+    if (enabled != 0) {
         Field_isFieldRenderingEnabled = 1;
     } else {
         Field_isFieldRenderingEnabled = 0;
@@ -58,9 +58,9 @@ void Field_SetFieldRenderingEnabled(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8008AB80 (src/BATTLE/BATTLE.PRG/146C.c:15756)
-int Field_EnableOwnedRoomRendering(int arg0)
+int Field_EnableOwnedRoomRendering(int owner_room_index)
 {
-    if ((Field_roomData.isLoaded == 1) && (Field_roomData.roomIndex == arg0)) {
+    if ((Field_roomData.isLoaded == 1) && (Field_roomData.roomIndex == owner_room_index)) {
         Field_roomData.displayFlag = Field_roomData.isLoaded;
         return 1;
     }
@@ -68,9 +68,9 @@ int Field_EnableOwnedRoomRendering(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8008ABB8 (src/BATTLE/BATTLE.PRG/146C.c:15765)
-int Field_DisableOwnedRoomRendering(int arg0)
+int Field_DisableOwnedRoomRendering(int owner_room_index)
 {
-    if ((Field_roomData.isLoaded == 1) && (Field_roomData.roomIndex == arg0)) {
+    if ((Field_roomData.isLoaded == 1) && (Field_roomData.roomIndex == owner_room_index)) {
         Field_roomData.displayFlag = 0;
         return 1;
     }
@@ -215,17 +215,17 @@ void Field_DrawRoomScene(void)
 }
 
 // decomp: BATTLE.PRG func_8008B1FC (src/BATTLE/BATTLE.PRG/146C.c:15926)
-void Field_DrawRoomGeometry(void* arg0)
+void Field_DrawRoomGeometry(void* room_geometry)
 {
-    if (!Render_ValidateRoomGeometry(arg0, Field_roomData.header.geometryLength)) {
+    if (!Render_ValidateRoomGeometry(room_geometry, Field_roomData.header.geometryLength)) {
         Core_Debugf("render", "Invalid room geometry extent");
         return;
     }
     Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix); // _camera.viewMatrix
     Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix); // _camera.viewMatrix
-    Render_UpdateRoomGroupTransforms(arg0);
+    Render_UpdateRoomGroupTransforms(room_geometry);
     Field_roomPrimitiveRangeStart = Render_frameScratch.primitiveCursor; // _camera.unk0
-    Render_DrawRoomGeometry(arg0, Field_roomGeometryDrawMode);
+    Render_DrawRoomGeometry(room_geometry, Field_roomGeometryDrawMode);
     Field_roomPrimitiveRangeEnd = Render_frameScratch.primitiveCursor; // _camera.unk0
     if (Field_roomTint.isActive != 0) {
         Render_TintRoomGeometryPrimitives(Field_roomPrimitiveRangeStart, Field_roomPrimitiveRangeEnd, &Field_roomTint, 0);
@@ -241,17 +241,17 @@ void Field_AdvanceRoomAnimationClock(void)
 }
 
 // decomp: BATTLE.PRG func_8008B2C0 (src/BATTLE/BATTLE.PRG/146C.c:15946)
-void Field_SetRoomRenderingEnabled(int arg0)
+void Field_SetRoomRenderingEnabled(int enabled)
 {
     if (Field_roomData.isLoaded != 0) {
-        Field_roomData.displayFlag = arg0;
+        Field_roomData.displayFlag = enabled;
     }
 }
 
 // decomp: BATTLE.PRG func_8008B2E0 (src/BATTLE/BATTLE.PRG/146C.c:15953)
-void Field_CopyZonePaletteRow(void* arg0, int arg1, int arg2, int arg3)
+void Field_CopyZonePaletteRow(void* source_colors, int palette_row, int first_color, int color_count)
 {
-    Core_Memory_CopyAlignedWords(Field_roomPalettes + (((arg1 * 256) + arg2)), arg0, arg3 * 2);
+    Core_Memory_CopyAlignedWords(Field_roomPalettes + (((palette_row * 256) + first_color)), source_colors, color_count * 2);
 }
 
 // decomp: BATTLE.PRG func_8008B320 (src/BATTLE/BATTLE.PRG/146C.c:15958)
@@ -264,88 +264,88 @@ void Field_UploadRoomPalettes(void)
 }
 
 // decomp: BATTLE.PRG func_8008B390 (src/BATTLE/BATTLE.PRG/146C.c:15966)
-void Field_OffsetRoomTextureIds(int arg0, int* arg1)
+void Field_OffsetRoomTextureIds(int texture_id_offset, int* geometry_words)
 {
     int i;
 
-    int* var_a1 = arg1;
-    int temp_t3 = *arg1;
-    var_a1 = arg1 + 1;
+    int* group_word_cursor = geometry_words;
+    int group_count = *geometry_words;
+    group_word_cursor = geometry_words + 1;
 
-    for (i = 0; i < temp_t3; ++i) {
-        void* temp_v1 = arg1 + ((var_a1[7] >> 2));
-        int temp_t0 = *(int*)temp_v1;
-        int temp_t2;
+    for (i = 0; i < group_count; ++i) {
+        void* polygon_block_cursor = geometry_words + ((group_word_cursor[7] >> 2));
+        int triangle_count = *(int*)polygon_block_cursor;
+        int quad_count;
         int j;
 
-        temp_v1 += 4;
-        temp_t2 = *(int*)temp_v1;
-        temp_v1 += 4;
+        polygon_block_cursor += 4;
+        quad_count = *(int*)polygon_block_cursor;
+        polygon_block_cursor += 4;
 
-        for (j = 0; j < temp_t0; ++j, temp_v1 += 0x20) {
-            *((short*)(temp_v1 + 0x1E)) += arg0;
+        for (j = 0; j < triangle_count; ++j, polygon_block_cursor += 0x20) {
+            *((short*)(polygon_block_cursor + 0x1E)) += texture_id_offset;
         }
 
-        for (j = 0; j < temp_t2; ++j, temp_v1 += 0x28) {
-            *((short*)(temp_v1 + 0x1E)) += arg0;
+        for (j = 0; j < quad_count; ++j, polygon_block_cursor += 0x28) {
+            *((short*)(polygon_block_cursor + 0x1E)) += texture_id_offset;
         }
-        var_a1 += 0x10;
+        group_word_cursor += 0x10;
     }
 }
 
 // decomp: BATTLE.PRG func_8008B430 (src/BATTLE/BATTLE.PRG/146C.c:15995)
-void Field_SetRoomTint(Render_ColorCode* arg0, int arg1)
+void Field_SetRoomTint(Render_ColorCode* tint_color, int tint_strength)
 {
-    if ((arg0->red == 0) && (arg0->green == 0) && (arg0->blue == 0) && (arg1 == 0)) {
+    if ((tint_color->red == 0) && (tint_color->green == 0) && (tint_color->blue == 0) && (tint_strength == 0)) {
         Field_isRoomTintActive = 0;
         return;
     }
     Field_roomTint.isActive = 1;
-    Field_roomTint.strength = arg1;
-    Field_roomTint.red = arg0->red;
-    Field_roomTint.green = arg0->green;
-    Field_roomTint.blue = arg0->blue;
+    Field_roomTint.strength = tint_strength;
+    Field_roomTint.red = tint_color->red;
+    Field_roomTint.green = tint_color->green;
+    Field_roomTint.blue = tint_color->blue;
 }
 
 // decomp: BATTLE.PRG func_8008B4B0 (src/BATTLE/BATTLE.PRG/146C.c:16008)
 void Field_ClearRoomTint(void) { Field_isRoomTintActive = 0; }
 
 // decomp: BATTLE.PRG func_8008B4BC (src/BATTLE/BATTLE.PRG/146C.c:16010)
-void Field_SetRoomAnimationsPaused(int arg0) { Field_areRoomUpdatesPaused = arg0; }
+void Field_SetRoomAnimationsPaused(int paused) { Field_areRoomUpdatesPaused = paused; }
 
 // decomp: BATTLE.PRG func_8008C2C0 (src/BATTLE/BATTLE.PRG/146C.c:16412)
-int Field_ApplyCameraGeometryOcclusion(int arg0, int arg1, int arg2, int arg3)
+int Field_ApplyCameraGeometryOcclusion(int query_tile_x, int query_tile_z, int query_floor_layer, int camera_distance_mode)
 {
-    Field_MpdViewTrigger* var_a1;
-    Field_MpdViewTrigger* new_var;
+    Field_MpdViewTrigger* view_trigger_cursor;
+    Field_MpdViewTrigger* view_trigger;
     int i;
     int j;
     int len;
     int v;
-    char* s1;
+    char* effect_id_cursor;
 
     if (Field_roomData.viewTriggers != 0) {
         Field_ClearGeometryOcclusion();
         v = ((Render_frameScratch.camera.angles.vy + 0x900) & 0xFFF) >> 9;
-        var_a1 = Field_roomData.viewTriggers;
+        view_trigger_cursor = Field_roomData.viewTriggers;
         len = Field_roomData.header.viewTriggersLength;
         for (i = 0; i < len;) {
-            new_var = var_a1;
-            if (new_var->tileX == arg0) {
-                if ((((new_var->tileZ)) == arg1) && (((new_var->floorLayer)) == arg2)
-                    && (((new_var->mode)) == arg3)
-                    && (((new_var->viewDirection)) == (((v))))) {
+            view_trigger = view_trigger_cursor;
+            if (view_trigger->tileX == query_tile_x) {
+                if ((((view_trigger->tileZ)) == query_tile_z) && (((view_trigger->floorLayer)) == query_floor_layer)
+                    && (((view_trigger->mode)) == camera_distance_mode)
+                    && (((view_trigger->viewDirection)) == (((v))))) {
 
-                    s1 = new_var->effectIds;
-                    for (j = 0; j < new_var->effectCount; ++j, ++s1) {
-                        ((void (*)(int))Field_DisableRoomGeometryGroup)(*s1);
+                    effect_id_cursor = view_trigger->effectIds;
+                    for (j = 0; j < view_trigger->effectCount; ++j, ++effect_id_cursor) {
+                        ((void (*)(int))Field_DisableRoomGeometryGroup)(*effect_id_cursor);
                     }
                     return 1;
                 }
             }
-            j = new_var->effectCount + ((4 - (new_var->effectCount & 3)) & 3) + 4;
+            j = view_trigger->effectCount + ((4 - (view_trigger->effectCount & 3)) & 3) + 4;
             i += j;
-            var_a1 = (Field_MpdViewTrigger*)((char*)var_a1 + j);
+            view_trigger_cursor = (Field_MpdViewTrigger*)((char*)view_trigger_cursor + j);
         }
     }
     return 0;
@@ -354,24 +354,24 @@ int Field_ApplyCameraGeometryOcclusion(int arg0, int arg1, int arg2, int arg3)
 // decomp: BATTLE.PRG func_8008C40C (src/BATTLE/BATTLE.PRG/146C.c:16449)
 void Field_ClearGeometryOcclusion(void)
 {
-    int temp_a1;
+    int geometry_group_count;
     int i;
-    int* var_a0;
+    int* geometry_group_cursor;
 
-    var_a0 = Field_roomData.geometry + 1;
+    geometry_group_cursor = Field_roomData.geometry + 1;
     if (Field_roomData.geometry != 0) {
-        temp_a1 = Field_roomData.geometry[0];
-        for (i = 0; i < temp_a1; ++i) {
-            *var_a0 &= ~0x1000;
-            var_a0 += 16;
+        geometry_group_count = Field_roomData.geometry[0];
+        for (i = 0; i < geometry_group_count; ++i) {
+            *geometry_group_cursor &= ~0x1000;
+            geometry_group_cursor += 16;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_8008C458 (src/BATTLE/BATTLE.PRG/146C.c:16465)
-void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color)
+void Field_SampleRoomGroundColor(int packed_world_position, int layer, Render_ColorCode* color)
 {
     (void)layer;
-    Render_SampleRoomLighting(arg0, 0, color);
+    Render_SampleRoomLighting(packed_world_position, 0, color);
 }
 

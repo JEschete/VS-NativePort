@@ -58,49 +58,49 @@ Field_InteractionFocus Field_interactionFocus;
 u_int Field_controlMode;
 
 // decomp: BATTLE.PRG func_8006CE70 (src/BATTLE/BATTLE.PRG/146C.c:2163)
-void Field_ApplyUnlockEffectToRoomObject(SVECTOR* arg0)
+void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
 {
-    int sp10;
-    Field_MpdLockTrigger* temp_v0;
-    Items_TreasureChest* temp_v0_2;
-    int new_var2 = 4;
-    int new_var3 = 2;
+    int room_object_count;
+    Field_MpdLockTrigger* door_records;
+    Items_TreasureChest* chest_records;
+    int lock_level_upper_exclusive = 4;
+    int minimum_breakable_lock_level = 2;
 
-    switch (arg0->pad & 0x1F0) {
+    switch (target_position->pad & 0x1F0) {
     case 0x10:
-        temp_v0 = Field_RoomInteractiveDoors(&sp10);
+        door_records = Field_RoomInteractiveDoors(&room_object_count);
 
-        if ((temp_v0[arg0->pad & 0xF].trigger.lockState.lock.state < new_var2)
-            && (temp_v0[arg0->pad & 0xF].trigger.lockState.lock.state >= new_var3)
+        if ((door_records[target_position->pad & 0xF].trigger.lockState.lock.state < lock_level_upper_exclusive)
+            && (door_records[target_position->pad & 0xF].trigger.lockState.lock.state >= minimum_breakable_lock_level)
             && (Field_RollRiskLockBreak() != 0)) {
 
-            temp_v0[arg0->pad & 0xF].trigger.lockState.lock.state = 0;
+            door_records[target_position->pad & 0xF].trigger.lockState.lock.state = 0;
 
             Audio_PlaySfxCentered(0x7E, 0x3F);
             Audio_PlaySfxCentered(0x7E, 0x40);
 
         } else {
-            ((void (*)(void*))Battle_QueueWorldLockedLabel)(arg0);
+            ((void (*)(void*))Battle_QueueWorldLockedLabel)(target_position);
         }
 
         break;
 
     case 0x20:
     case 0x100:
-        temp_v0_2 = Items_RoomTreasureChests(&sp10);
+        chest_records = Items_RoomTreasureChests(&room_object_count);
 
-        if ((temp_v0_2[arg0->pad & 0xF].lockLevel < new_var2)
-            && (temp_v0_2[arg0->pad & 0xF].lockLevel >= 2)
-            && !State_ScriptFlag(temp_v0_2[arg0->pad & 0xF].openedFlag + 0x3C0)
+        if ((chest_records[target_position->pad & 0xF].lockLevel < lock_level_upper_exclusive)
+            && (chest_records[target_position->pad & 0xF].lockLevel >= 2)
+            && !State_ScriptFlag(chest_records[target_position->pad & 0xF].openedFlag + 0x3C0)
             && (Field_RollRiskLockBreak() != 0)) {
 
-            temp_v0_2[arg0->pad & 0xF].lockLevel = 0;
+            chest_records[target_position->pad & 0xF].lockLevel = 0;
 
             Audio_PlaySfxCentered(0x7E, 0x3F);
             Audio_PlaySfxCentered(0x7E, 0x40);
 
         } else {
-            ((void (*)(void*))Battle_QueueWorldLockedLabel)(arg0);
+            ((void (*)(void*))Battle_QueueWorldLockedLabel)(target_position);
         }
         break;
     }
@@ -122,34 +122,34 @@ void Field_EndObjectInteractionWait(void)
 }
 
 // decomp: BATTLE.PRG func_80073AFC (src/BATTLE/BATTLE.PRG/146C.c:4836)
-int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* arg0)
+int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger)
 {
-    short sp10[4];
+    short interaction_target_position[4];
     int action;
     int template;
 
-    if (arg0->isOpen == 0) {
-        if (arg0->isTriggered == 0) {
+    if (door_trigger->isOpen == 0) {
+        if (door_trigger->isTriggered == 0) {
             int v = 7;
-            sp10[0] = (arg0->trigger.tileX << v) + 0x40;
-            sp10[2] = (arg0->trigger.tileZ << v) + 0x40;
+            interaction_target_position[0] = (door_trigger->trigger.tileX << v) + 0x40;
+            interaction_target_position[2] = (door_trigger->trigger.tileZ << v) + 0x40;
             action = 0;
 
-            switch (arg0->trigger.lockState.lock.state) {
+            switch (door_trigger->trigger.lockState.lock.state) {
             case 0:
                 action = 1;
                 break;
             case 1:
             case 3:
-                if (Items_InventoryItemCount(arg0->keyOrSigil) != 0) {
-                    if (arg0->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
-                        State_SetScriptFlag(arg0->keyOrSigil + 0x1B6, 2);
-                        Items_ConsumeMiscItem(arg0->keyOrSigil);
+                if (Items_InventoryItemCount(door_trigger->keyOrSigil) != 0) {
+                    if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
+                        State_SetScriptFlag(door_trigger->keyOrSigil + 0x1B6, 2);
+                        Items_ConsumeMiscItem(door_trigger->keyOrSigil);
                     }
-                    arg0->trigger.lockState.lock.state = 0;
+                    door_trigger->trigger.lockState.lock.state = 0;
                     action = 2;
-                } else if (State_ScriptFlag(arg0->keyOrSigil + 0x1B6)) {
-                    arg0->trigger.lockState.lock.state = 0;
+                } else if (State_ScriptFlag(door_trigger->keyOrSigil + 0x1B6)) {
+                    door_trigger->trigger.lockState.lock.state = 0;
                     action = 3;
                 }
                 break;
@@ -158,21 +158,21 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* arg0)
             if (action != 0) {
                 if (action == 2) {
                     template = 7; // Unlocked with key
-                    if (arg0->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
+                    if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
                         template = 9; // Unlocked with sigil
                     }
-                    Menu_ShowSceneNotification(template, arg0->keyOrSigil, 1);
+                    Menu_ShowSceneNotification(template, door_trigger->keyOrSigil, 1);
                 }
-                ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, sp10, 5);
-                Field_BeginDoorToggle(arg0);
+                ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 5);
+                Field_BeginDoorToggle(door_trigger);
                 return 0;
             }
 
-            if (arg0->trigger.lockState.lock.state != 0) {
-                switch (arg0->trigger.lockState.lock.state) {
+            if (door_trigger->trigger.lockState.lock.state != 0) {
+                switch (door_trigger->trigger.lockState.lock.state) {
                 case 1:
                     template = 6; // Locked with key
-                    if (arg0->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
+                    if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
                         template = 8; // Locked with sigil
                     }
                     break;
@@ -183,7 +183,7 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* arg0)
                     template = 10; // Unconditionally locked
                     break;
                 }
-                Menu_ShowSceneNotification(template, arg0->keyOrSigil, 1);
+                Menu_ShowSceneNotification(template, door_trigger->keyOrSigil, 1);
             }
 
             Audio_PlaySfxCentered(0x7E, 0x65);
@@ -196,7 +196,7 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* arg0)
 }
 
 // decomp: BATTLE.PRG func_80073D30 (src/BATTLE/BATTLE.PRG/146C.c:4909)
-void Field_TriggerActorTrap(Field_MpdLockTrigger* arg0, Actors_ActorLocationQuery* arg1, int targetActor)
+void Field_TriggerActorTrap(Field_MpdLockTrigger* trap_trigger, Actors_ActorLocationQuery* victim_placement, int targetActor)
 {
     Effects_ActionEffectRequest request;
 
@@ -208,11 +208,11 @@ void Field_TriggerActorTrap(Field_MpdLockTrigger* arg0, Actors_ActorLocationQuer
         Battle_actors[targetActor]->stats->defaultTargetLimb;
     Battle_actionState->chainStep = 1;
     Battle_actionState->queueIndex = 0;
-    Battle_actionState->rangeOrigin.vx = arg1->location.position.vx;
-    Battle_actionState->rangeOrigin.vy = arg1->location.position.vy;
-    Battle_actionState->rangeOrigin.vz = arg1->location.position.vz;
-    Battle_ResolveActionTargets(arg0->trigger.kind + 6, &Battle_actionState->queue[0], &Battle_actionState->selection, 1);
-    request.effectId = arg0->trigger.kind + 6;
+    Battle_actionState->rangeOrigin.vx = victim_placement->location.position.vx;
+    Battle_actionState->rangeOrigin.vy = victim_placement->location.position.vy;
+    Battle_actionState->rangeOrigin.vz = victim_placement->location.position.vz;
+    Battle_ResolveActionTargets(trap_trigger->trigger.kind + 6, &Battle_actionState->queue[0], &Battle_actionState->selection, 1);
+    request.effectId = trap_trigger->trigger.kind + 6;
     request.source.type = 5;
     request.targets[0].type = 4;
     request.count = 1;
@@ -223,88 +223,88 @@ void Field_TriggerActorTrap(Field_MpdLockTrigger* arg0, Actors_ActorLocationQuer
 }
 
 // decomp: BATTLE.PRG func_80073E30 (src/BATTLE/BATTLE.PRG/146C.c:4935)
-void Field_TryOpenChest(Field_MpdLockTrigger* arg0, int arg1)
+void Field_TryOpenChest(Field_MpdLockTrigger* chest_trigger, int arg1)
 {
-    short sp10[4];
-    int var_s1;
+    short interaction_target_position[4];
+    int can_open;
     int shift = 7;
 
-    sp10[0] = (arg0->trigger.tileX << shift) + 0x40;
-    sp10[2] = (arg0->trigger.tileZ << shift) + 0x40;
-    var_s1 = 0;
+    interaction_target_position[0] = (chest_trigger->trigger.tileX << shift) + 0x40;
+    interaction_target_position[2] = (chest_trigger->trigger.tileZ << shift) + 0x40;
+    can_open = 0;
 
-    switch (arg0->keyOrSigil) {
+    switch (chest_trigger->keyOrSigil) {
     case 0:
-        var_s1 = 1;
+        can_open = 1;
         break;
     case 1:
     case 3:
-        if (!State_ScriptFlag(arg0->isOpen + 0x1B6)) {
-            if (Items_InventoryItemCount(arg0->isOpen) == 0) {
+        if (!State_ScriptFlag(chest_trigger->isOpen + 0x1B6)) {
+            if (Items_InventoryItemCount(chest_trigger->isOpen) == 0) {
                 break;
             }
-            State_SetScriptFlag(arg0->isOpen + 0x1B6, 1);
-            if (arg0->isOpen >= 0x1D2) {
-                Items_ConsumeMiscItem(arg0->isOpen);
+            State_SetScriptFlag(chest_trigger->isOpen + 0x1B6, 1);
+            if (chest_trigger->isOpen >= 0x1D2) {
+                Items_ConsumeMiscItem(chest_trigger->isOpen);
             }
         }
-        arg0->keyOrSigil = 0;
-        Menu_ShowSceneNotification(4, arg0->isOpen, 1);
-        var_s1 = 1;
+        chest_trigger->keyOrSigil = 0;
+        Menu_ShowSceneNotification(4, chest_trigger->isOpen, 1);
+        can_open = 1;
         break;
     }
-    if (var_s1 != 0) {
-        ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, sp10, 2);
-        Field_BeginSwitchToggle(arg0);
+    if (can_open != 0) {
+        ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 2);
+        Field_BeginSwitchToggle(chest_trigger);
         return;
     }
-    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, sp10, 3);
+    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 3);
 }
 
 // decomp: BATTLE.PRG func_80073F7C (src/BATTLE/BATTLE.PRG/146C.c:4973)
-void Field_BeginTrapInteraction(Field_MpdLockTrigger* arg0, Actors_ActorLocation* arg1, int arg2)
+void Field_BeginTrapInteraction(Field_MpdLockTrigger* trap_trigger, Actors_ActorLocation* victim_location, int victim_actor_index)
 {
     int i;
 
     Field_controlMode = 8;
     Battle_actionFlowMode = 1;
     Field_StorePreferredActionCameraDistance();
-    Field_interactionFocus.triggerRecord = arg0;
-    Field_interactionFocus.actorQuery.location = *arg1;
-    Field_interactionFocus.actorQuery.actorIndex = arg2;
+    Field_interactionFocus.triggerRecord = trap_trigger;
+    Field_interactionFocus.actorQuery.location = *victim_location;
+    Field_interactionFocus.actorQuery.actorIndex = victim_actor_index;
     for (i = 0; i < 16; ++i) {
         Actors_RestoreActorIdlePose(i);
     }
     if (Input_settings.information != 0) {
-        Menu_ShowSceneNotification(0xB, arg0->trigger.kind + 6, 1);
+        Menu_ShowSceneNotification(0xB, trap_trigger->trigger.kind + 6, 1);
     }
     Battle_actionState->chainStep = 0;
     Battle_actionState->selection.actionId = 0;
 }
 
 // decomp: BATTLE.PRG func_80074050 (src/BATTLE/BATTLE.PRG/146C.c:4993)
-void Field_BeginChestInteraction(Field_MpdLockTrigger* arg0, int arg1)
+void Field_BeginChestInteraction(Field_MpdLockTrigger* chest_trigger, int interacting_actor_index)
 {
-    short sp10[4];
+    short interaction_target_position[4];
     int i;
-    int var_v0;
+    int target_tile_coordinate;
 
     Field_controlMode = 9;
     Battle_actionFlowMode = 1;
     Field_StorePreferredActionCameraDistance();
-    Field_interactionFocus.triggerRecord = arg0;
-    Actors_ActorPlacement(arg1, &Field_interactionFocus.actorQuery);
-    Field_interactionFocus.actorQuery.actorIndex = arg1;
+    Field_interactionFocus.triggerRecord = chest_trigger;
+    Actors_ActorPlacement(interacting_actor_index, &Field_interactionFocus.actorQuery);
+    Field_interactionFocus.actorQuery.actorIndex = interacting_actor_index;
 
     for (i = 0; i < 16; ++i) {
         Actors_RestoreActorIdlePose(i);
     }
 
-    var_v0 = arg0->trigger.tileX;
-    sp10[0] = (var_v0 << 7) + 0x40;
-    var_v0 = arg0->trigger.tileZ;
-    sp10[2] = (var_v0 << 7) + 0x40;
-    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, sp10, 1);
+    target_tile_coordinate = chest_trigger->trigger.tileX;
+    interaction_target_position[0] = (target_tile_coordinate << 7) + 0x40;
+    target_tile_coordinate = chest_trigger->trigger.tileZ;
+    interaction_target_position[2] = (target_tile_coordinate << 7) + 0x40;
+    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 1);
     Battle_actionState->chainStep = 0;
     Battle_actionState->selection.actionId = 0;
 }
@@ -312,13 +312,13 @@ void Field_BeginChestInteraction(Field_MpdLockTrigger* arg0, int arg1)
 // decomp: BATTLE.PRG func_80074120 (src/BATTLE/BATTLE.PRG/146C.c:5019)
 int Field_WaitForChestCameraFocus(void)
 {
-    SVECTOR sp10;
+    SVECTOR interaction_camera_target;
 
-    sp10.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
-    sp10.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
-    sp10.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
+    interaction_camera_target.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
+    interaction_camera_target.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
+    interaction_camera_target.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
 
-    if ((Field_StepCameraLookAtTowardTarget(&sp10, 0, 0x28) == 0)
+    if ((Field_StepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28) == 0)
         && (((Actors_ActorStateFlags(0) & 0x08000000) != 0))) {
         return 0;
     }
@@ -328,12 +328,12 @@ int Field_WaitForChestCameraFocus(void)
 // decomp: BATTLE.PRG func_8007418C (src/BATTLE/BATTLE.PRG/146C.c:5034)
 int Field_StepTrapCameraFocus(void)
 {
-    SVECTOR sp10;
+    SVECTOR interaction_camera_target;
 
-    sp10.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
-    sp10.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
-    sp10.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
-    return Field_StepCameraLookAtTowardTarget(&sp10, 0, 0x28);
+    interaction_camera_target.vx = (u_short)Field_interactionFocus.actorQuery.location.position.vx;
+    interaction_camera_target.vy = (u_short)Field_interactionFocus.actorQuery.location.position.vy;
+    interaction_camera_target.vz = (u_short)Field_interactionFocus.actorQuery.location.position.vz;
+    return Field_StepCameraLookAtTowardTarget(&interaction_camera_target, 0, 0x28);
 }
 
 // decomp: BATTLE.PRG func_800741D4 (src/BATTLE/BATTLE.PRG/146C.c:5044)
@@ -361,15 +361,15 @@ int Field_IsChestAnimationReady(void)
 // decomp: BATTLE.PRG func_800742A4 (src/BATTLE/BATTLE.PRG/146C.c:5066)
 void Field_FinishChestInteraction(void)
 {
-    short sp10[4];
+    short interaction_target_position[4];
     int v;
 
     Battle_actionFlowMode = 4;
     State_tickSpeed = 2;
     v = 7;
-    sp10[0] = (Field_interactionFocus.triggerRecord->trigger.tileX << v) + 0x40;
-    sp10[2] = (Field_interactionFocus.triggerRecord->trigger.tileZ << v) + 0x40;
-    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, sp10, 4);
+    interaction_target_position[0] = (Field_interactionFocus.triggerRecord->trigger.tileX << v) + 0x40;
+    interaction_target_position[2] = (Field_interactionFocus.triggerRecord->trigger.tileZ << v) + 0x40;
+    ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, interaction_target_position, 4);
     Menu_ReleaseSceneNotification();
 }
 
@@ -386,50 +386,50 @@ void Field_FinishTrapInteraction(void)
 // decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089)
 int Field_TrackInteractionCameraToAshley(void)
 {
-    SVECTOR sp10;
-    short sp18[6];
-    int temp_s0;
+    SVECTOR ashley_camera_target;
+    short ashley_placement_words[6];
+    int camera_tracking_speed;
 
-    Actors_ActorPlacement(0, (Actors_ActorLocationQuery*)sp18);
-    sp10.vx = sp18[2];
-    sp10.vz = sp18[4];
-    sp10.vy = sp18[3] - 0x5A;
-    temp_s0 = Field_StepCameraLookAtTowardTarget(&sp10, 1, 0x28);
+    Actors_ActorPlacement(0, (Actors_ActorLocationQuery*)ashley_placement_words);
+    ashley_camera_target.vx = ashley_placement_words[2];
+    ashley_camera_target.vz = ashley_placement_words[4];
+    ashley_camera_target.vy = ashley_placement_words[3] - 0x5A;
+    camera_tracking_speed = Field_StepCameraLookAtTowardTarget(&ashley_camera_target, 1, 0x28);
 
     if (Actors_IsAshleyTransitionPose() != 0) {
         return 0;
     }
-    return temp_s0;
+    return camera_tracking_speed;
 }
 
 // decomp: BATTLE.PRG func_800743E0 (src/BATTLE/BATTLE.PRG/146C.c:5107)
 void Field_OpenChestContents()
 {
-    int temp_v1 = Field_interactionFocus.triggerRecord->keyOrSigil;
-    int arg1;
+    int chest_lock_state = Field_interactionFocus.triggerRecord->keyOrSigil;
+    int notification_template;
 
     Battle_actionFlowMode = 3;
 
-    if (temp_v1 != 0) {
-        switch (temp_v1) {
+    if (chest_lock_state != 0) {
+        switch (chest_lock_state) {
         case 1:
-            arg1 = 2;
+            notification_template = 2;
             break;
         case 2:
-            arg1 = 1;
+            notification_template = 1;
             break;
         case 3:
-            arg1 = 3;
+            notification_template = 3;
             break;
         }
-        Menu_ShowSceneNotification(arg1, Field_interactionFocus.triggerRecord->isOpen, 1);
+        Menu_ShowSceneNotification(notification_template, Field_interactionFocus.triggerRecord->isOpen, 1);
         Field_PauseFieldForInteractionDialog();
     } else {
-        short temp_v1_2 = Field_interactionFocus.triggerRecord->linkedLockIndex;
-        if (temp_v1_2 < 0x40) {
+        short loot_or_storage_index = Field_interactionFocus.triggerRecord->linkedLockIndex;
+        if (loot_or_storage_index < 0x40) {
             Menu_Framework_OpenLootEntryMenu((Items_BattleLoot*)(Field_interactionFocus.triggerRecord + 1));
         } else {
-            Menu_Framework_OpenChestStorageMenu(temp_v1_2 - 0x40);
+            Menu_Framework_OpenChestStorageMenu(loot_or_storage_index - 0x40);
         }
         Field_PauseFieldForMenu();
     }
@@ -438,7 +438,7 @@ void Field_OpenChestContents()
 // decomp: BATTLE.PRG func_800744B8 (src/BATTLE/BATTLE.PRG/146C.c:5139)
 int Field_UpdateChestContentsSelection(void)
 {
-    Menu_Framework_ActionSelection* temp_v0;
+    Menu_Framework_ActionSelection* action_selection;
 
     if (Field_interactionFocus.triggerRecord->keyOrSigil != 0) {
         if (Menu_IsSceneNotificationPending() != 0) {
@@ -448,11 +448,11 @@ int Field_UpdateChestContentsSelection(void)
         return 0;
     }
     Menu_Framework_UpdateMenuOverlay();
-    temp_v0 = Menu_Framework_ActionSelectionState();
-    if (temp_v0->menuStatus == 1) {
+    action_selection = Menu_Framework_ActionSelectionState();
+    if (action_selection->menuStatus == 1) {
         return 1;
     }
-    if (temp_v0->selectionKind != 0) {
+    if (action_selection->selectionKind != 0) {
         State_SetScriptFlag((Field_interactionFocus.triggerRecord->linkedLockIndex + 0x3C0), 1);
     } else {
         Field_BeginSwitchToggle(Field_interactionFocus.triggerRecord);
@@ -463,86 +463,86 @@ int Field_UpdateChestContentsSelection(void)
 }
 
 // decomp: BATTLE.PRG func_80074798 (src/BATTLE/BATTLE.PRG/146C.c:5232)
-int Field_TileInFrontOfActor(Actors_ActorLocationQuery* arg0, u_char* arg1)
+int Field_TileInFrontOfActor(Actors_ActorLocationQuery* actor_placement, u_char* output_facing_tile)
 {
-    int var_v1 = (arg0->location.position.pad + 0x200) & 0xFFF;
-    if (var_v1 < 0) {
-        var_v1 += 0x3FF;
+    int rounded_facing_or_quadrant = (actor_placement->location.position.pad + 0x200) & 0xFFF;
+    if (rounded_facing_or_quadrant < 0) {
+        rounded_facing_or_quadrant += 0x3FF;
     }
-    arg1[0] = arg0->location.packedTile.target.tileX;
-    arg1[2] = arg0->location.packedTile.target.tileZ;
-    arg1[1] = arg0->location.packedTile.target.tileLayer;
+    output_facing_tile[0] = actor_placement->location.packedTile.target.tileX;
+    output_facing_tile[2] = actor_placement->location.packedTile.target.tileZ;
+    output_facing_tile[1] = actor_placement->location.packedTile.target.tileLayer;
 
-    var_v1 = var_v1 >> 0xA;
-    switch (var_v1) {
+    rounded_facing_or_quadrant = rounded_facing_or_quadrant >> 0xA;
+    switch (rounded_facing_or_quadrant) {
     case 0:
-        --arg1[2];
+        --output_facing_tile[2];
         break;
     case 1:
-        --arg1[0];
+        --output_facing_tile[0];
         break;
     case 2:
-        ++arg1[2];
+        ++output_facing_tile[2];
         break;
     default:
-        ++arg1[0];
+        ++output_facing_tile[0];
         break;
     }
-    return var_v1;
+    return rounded_facing_or_quadrant;
 }
 
 // decomp: BATTLE.PRG func_80074860 (src/BATTLE/BATTLE.PRG/146C.c:5260)
-int Field_TryTriggerFacingTileEvent(int arg0)
+int Field_TryTriggerFacingTileEvent(int actor_index)
 {
-    Actors_ActorLocationQuery sp10;
-    u_char sp20[4];
+    Actors_ActorLocationQuery actor_placement;
+    u_char facing_tile[4];
 
-    Actors_ActorPlacement(arg0, &sp10);
-    Field_TileInFrontOfActor(&sp10, sp20);
+    Actors_ActorPlacement(actor_index, &actor_placement);
+    Field_TileInFrontOfActor(&actor_placement, facing_tile);
     // BUG: arg2 should be an actor ID?
-    return Event_EvaluateRoomEventTriggers(4, 0, sp20, 1) == 1;
+    return Event_EvaluateRoomEventTriggers(4, 0, facing_tile, 1) == 1;
 }
 
 // decomp: BATTLE.PRG func_800748B8 (src/BATTLE/BATTLE.PRG/146C.c:5271)
-Field_MpdLockTrigger* Field_FindFacingRoomObject(int arg0)
+Field_MpdLockTrigger* Field_FindFacingRoomObject(int actor_index)
 {
-    Actors_ActorLocationQuery sp10;
-    u_char sp20[4];
-    Field_MpdLockTrigger* temp_s1;
-    u_char* s0 = sp20;
+    Actors_ActorLocationQuery actor_placement;
+    u_char facing_tile[4];
+    Field_MpdLockTrigger* facing_door;
+    u_char* facing_tile_bytes = facing_tile;
 
-    Actors_ActorPlacement(arg0, &sp10);
-    Field_TileInFrontOfActor(&sp10, sp20);
-    temp_s1 = Field_InteractiveDoorAtTile(s0[0], s0[2], s0[1]);
-    if (((((Field_FloorHeightAt((s0[0] << 7) | 0x40, (s0[2] << 7) | 0x40) << 0x11) >> 0x11)
-             - sp10.location.position.vy)
+    Actors_ActorPlacement(actor_index, &actor_placement);
+    Field_TileInFrontOfActor(&actor_placement, facing_tile);
+    facing_door = Field_InteractiveDoorAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
+    if (((((Field_FloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11) >> 0x11)
+             - actor_placement.location.position.vy)
             + 0x3F)
         >= 0x7FU) {
-        temp_s1 = NULL;
+        facing_door = NULL;
     }
-    return temp_s1;
+    return facing_door;
 }
 
 // decomp: BATTLE.PRG func_80074950 (src/BATTLE/BATTLE.PRG/146C.c:5290)
-Items_TreasureChest* Field_FindFacingUnlootedChest(int arg0)
+Items_TreasureChest* Field_FindFacingUnlootedChest(int actor_index)
 {
-    Actors_ActorLocationQuery sp10;
-    u_char sp20[4];
-    Items_TreasureChest* temp_v0;
-    int temp_s2;
-    u_char* s1 = sp20;
+    Actors_ActorLocationQuery actor_placement;
+    u_char facing_tile[4];
+    Items_TreasureChest* facing_chest;
+    int facing_quadrant;
+    u_char* facing_tile_bytes = facing_tile;
 
-    Actors_ActorPlacement(arg0, &sp10);
-    temp_s2 = Field_TileInFrontOfActor(&sp10, sp20);
-    temp_v0 = Items_TreasureChestAtTile(s1[0], s1[2], s1[1]);
+    Actors_ActorPlacement(actor_index, &actor_placement);
+    facing_quadrant = Field_TileInFrontOfActor(&actor_placement, facing_tile);
+    facing_chest = Items_TreasureChestAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
 
-    if ((temp_v0 != NULL) && (temp_v0->facing == temp_s2)) {
-        if (!State_ScriptFlag((temp_v0->openedFlag + 0x3C0))) {
-            int v = ((Field_FloorHeightAt((s1[0] << 7) | 0x40, (s1[2] << 7) | 0x40) << 0x11)
+    if ((facing_chest != NULL) && (facing_chest->facing == facing_quadrant)) {
+        if (!State_ScriptFlag((facing_chest->openedFlag + 0x3C0))) {
+            int v = ((Field_FloorHeightAt((facing_tile_bytes[0] << 7) | 0x40, (facing_tile_bytes[2] << 7) | 0x40) << 0x11)
                         >> 0x11)
                   + 0x60;
-            if (sp10.location.position.vy == v) {
-                return temp_v0;
+            if (actor_placement.location.position.vy == v) {
+                return facing_chest;
             }
         }
     }
@@ -700,58 +700,58 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
 }
 
 // decomp: BATTLE.PRG func_800751B8 (src/BATTLE/BATTLE.PRG/146C.c:5514)
-int Field_CheckActorTrapAndFallTriggers(int arg0, Actors_ActorLocation* arg1)
+int Field_CheckActorTrapAndFallTriggers(int actor_index, Actors_ActorLocation* actor_location)
 {
-    Field_MpdFloorTrigger* temp_v0_2;
-    Field_MpdTileCell* temp_s4;
-    int temp_s3;
-    u_int temp_a2;
-    u_int temp_v0;
-    Battle_Actor* temp_s0;
-    Actors_ActorLocation* s2 = arg1;
+    Field_MpdFloorTrigger* floor_trigger;
+    Field_MpdTileCell* collision_cell;
+    int trigger_tile_mode;
+    u_int platform_layer_flags;
+    u_int actor_state_flags;
+    Battle_Actor* battle_actor;
+    Actors_ActorLocation* location_alias = actor_location;
     int _[4] __attribute__((unused));
 
-    temp_v0 = Actors_ActorStateFlags(arg0);
-    temp_a2 = temp_v0 & 0x70000;
-    temp_s3 = (temp_v0 >> 0xE);
-    temp_s3 &= 1;
+    actor_state_flags = Actors_ActorStateFlags(actor_index);
+    platform_layer_flags = actor_state_flags & 0x70000;
+    trigger_tile_mode = (actor_state_flags >> 0xE);
+    trigger_tile_mode &= 1;
 
-    if (temp_a2 != 0) {
-        temp_s4 = Field_CollisionCellAt(0, 0, temp_a2 >> 0x10);
+    if (platform_layer_flags != 0) {
+        collision_cell = Field_CollisionCellAt(0, 0, platform_layer_flags >> 0x10);
     } else {
-        temp_s4 = Field_CollisionCellAt(arg1->packedTile.target.tileX, arg1->packedTile.target.tileZ,
-            arg1->packedTile.target.tileLayer);
+        collision_cell = Field_CollisionCellAt(actor_location->packedTile.target.tileX, actor_location->packedTile.target.tileZ,
+            actor_location->packedTile.target.tileLayer);
     }
 
     if (Field_screenTransitionStep == 0) {
-        if (!(temp_v0 & 0x01000000)) {
-            temp_s0 = Battle_actors[arg0];
+        if (!(actor_state_flags & 0x01000000)) {
+            battle_actor = Battle_actors[actor_index];
 
-            if (((s2->packedTile.word & 0xFFFFFF) != (temp_s0->lastTriggerTile.word & 0xFFFFFF))
-                || (temp_s3 != temp_s0->lastTriggerTile.bytes[3]) || (temp_v0 & 0x70000)) {
+            if (((location_alias->packedTile.word & 0xFFFFFF) != (battle_actor->lastTriggerTile.word & 0xFFFFFF))
+                || (trigger_tile_mode != battle_actor->lastTriggerTile.bytes[3]) || (actor_state_flags & 0x70000)) {
                 if (Field_controlMode != 3) {
-                    if (temp_s4->hasRoomTrigger) {
-                        if (!(temp_v0 & 0x16704000)) {
-                            temp_v0_2 = Field_RoomTriggerAtTile(s2->packedTile.target.tileX,
-                                s2->packedTile.target.tileZ, s2->packedTile.target.tileLayer);
-                            if ((temp_v0_2 != NULL) && (temp_v0_2->kind != 0x10)) {
-                                Field_BeginTrapInteraction((Field_MpdLockTrigger*)temp_v0_2, arg1, arg0);
-                                temp_s0->lastTriggerTile.word = s2->packedTile.word;
-                                temp_s0->lastTriggerTile.bytes[3] = temp_s3;
+                    if (collision_cell->hasRoomTrigger) {
+                        if (!(actor_state_flags & 0x16704000)) {
+                            floor_trigger = Field_RoomTriggerAtTile(location_alias->packedTile.target.tileX,
+                                location_alias->packedTile.target.tileZ, location_alias->packedTile.target.tileLayer);
+                            if ((floor_trigger != NULL) && (floor_trigger->kind != 0x10)) {
+                                Field_BeginTrapInteraction((Field_MpdLockTrigger*)floor_trigger, actor_location, actor_index);
+                                battle_actor->lastTriggerTile.word = location_alias->packedTile.word;
+                                battle_actor->lastTriggerTile.bytes[3] = trigger_tile_mode;
                                 return 3;
                             }
                         }
                     }
                 }
-                if (!(temp_v0 & 0x504000)) {
-                    temp_s0->lastTriggerTile.word = s2->packedTile.word;
+                if (!(actor_state_flags & 0x504000)) {
+                    battle_actor->lastTriggerTile.word = location_alias->packedTile.word;
                 }
-                temp_s0->lastTriggerTile.bytes[3] = temp_s3;
+                battle_actor->lastTriggerTile.bytes[3] = trigger_tile_mode;
             }
-            if ((temp_s4->isPit)) {
-                if (arg1->position.vy >= 0x11) {
-                    Battle_actors[arg0]->stats->currentHp = 0;
-                    Battle_ResolveActorDefeat(0, arg0, 0);
+            if ((collision_cell->isPit)) {
+                if (actor_location->position.vy >= 0x11) {
+                    Battle_actors[actor_index]->stats->currentHp = 0;
+                    Battle_ResolveActorDefeat(0, actor_index, 0);
                     if (Event_EvaluateRoomEventTriggers(0xC, 0, NULL, 0) == 1) {
                         return 1;
                     }

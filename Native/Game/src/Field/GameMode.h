@@ -19,7 +19,7 @@ void Field_EnterFieldExplorationMode(void);
 void Field_BeginShortcutMenu(void);
 void Field_EndShortcutMenu(void);
 void Field_BeginBattleActionMenu(int arg0 __attribute__((unused)), int arg1 __attribute__((unused)));
-void Field_CloseBattleActionMenu(Menu_Framework_ActionSelection* arg0);
-void Field_DispatchBattleActionMenuResult(Menu_Framework_ActionSelection* arg0);
+void Field_CloseBattleActionMenu(Menu_Framework_ActionSelection* action_selection);
+void Field_DispatchBattleActionMenuResult(Menu_Framework_ActionSelection* action_selection);
 
 #endif // VS_FIELD_GAMEMODE_H_DECLS

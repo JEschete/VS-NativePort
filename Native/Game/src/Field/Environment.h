@@ -21,16 +21,16 @@ extern char Field_roomWeatherKind;
 extern char Field_isWeatherVariationEnabled;
 extern Field_WeatherParticle* Field_weatherParticles;
 extern char const Field_kWeatherVolumeByIntensity[];
-void Field_SetRoomWeather(int arg0);
+void Field_SetRoomWeather(int weather_kind);
 void Field_UpdateRoomWeather(void);
 void Field_ApplyWeatherIntensity(void);
-void Field_SetWeatherVariationEnabled(int arg0);
-void Field_SetWeatherIntensity(int arg0);
-void Field_SetWeatherWindAngles(int arg0, int arg1);
+void Field_SetWeatherVariationEnabled(int enabled);
+void Field_SetWeatherIntensity(int intensity);
+void Field_SetWeatherWindAngles(int wind_azimuth_angle, int wind_elevation_angle);
 void Field_ReleaseWeatherParticles(void);
-int Field_SetWeatherAmbientSound(int arg0);
-void Field_SetRoomBackgroundOffset(int arg0, int arg1);
-void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* arg0, int arg1, int arg2, int arg3);
-void Field_DuckWeatherAmbientSound(int arg0);
+int Field_SetWeatherAmbientSound(int sound_id);
+void Field_SetRoomBackgroundOffset(int offset_x, int offset_y);
+void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* background_layout, int horizontal_offset, int vertical_offset, int base_texture_page);
+void Field_DuckWeatherAmbientSound(int duck_enabled);
 
 #endif // VS_FIELD_ENVIRONMENT_H_DECLS

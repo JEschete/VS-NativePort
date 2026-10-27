@@ -40,12 +40,12 @@ void Field_StoreEntranceDoorForReload(void)
 }
 
 // decomp: BATTLE.PRG func_8008B8F8 (src/BATTLE/BATTLE.PRG/146C.c:16127)
-void Field_SetEntranceDoorRecord(char (*arg0)[12])
+void Field_SetEntranceDoorRecord(char (*entrance_record)[12])
 {
-    if (arg0 != NULL) {
+    if (entrance_record != NULL) {
         int doorId;
-        Core_Memory_CopyAlignedWords(&Field_entranceDoorRecord, arg0, sizeof Field_entranceDoorRecord);
-        doorId = Field_SceneDoorId((*arg0)[8]);
+        Core_Memory_CopyAlignedWords(&Field_entranceDoorRecord, entrance_record, sizeof Field_entranceDoorRecord);
+        doorId = Field_SceneDoorId((*entrance_record)[8]);
         Field_enteredDoorId = doorId;
     } else {
         Core_Memory_ZeroAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
@@ -54,26 +54,26 @@ void Field_SetEntranceDoorRecord(char (*arg0)[12])
 }
 
 // decomp: BATTLE.PRG func_8008B960 (src/BATTLE/BATTLE.PRG/146C.c:16140)
-void Field_FindEntranceDoorNearTile(int arg0, int arg1, int arg2)
+void Field_FindEntranceDoorNearTile(int query_tile_x, int query_tile_z, int query_floor_layer)
 {
-    int temp_t4;
+    int door_count_or_scene_door_id;
     int j;
-    Field_MpdDoorRecord* var_s0;
+    Field_MpdDoorRecord* entrance_door_cursor;
     int i;
 
     if (Field_roomData.doors != 0) {
-        temp_t4 = Field_roomData.header.doorsLength / 12;
-        var_s0 = Field_roomData.doors;
-        for (i = 0; i < temp_t4; ++i, ++var_s0) {
-            if ((arg2 >= 2) && ((&var_s0->tileLocation)->floorLayer == arg2)) {
+        door_count_or_scene_door_id = Field_roomData.header.doorsLength / 12;
+        entrance_door_cursor = Field_roomData.doors;
+        for (i = 0; i < door_count_or_scene_door_id; ++i, ++entrance_door_cursor) {
+            if ((query_floor_layer >= 2) && ((&entrance_door_cursor->tileLocation)->floorLayer == query_floor_layer)) {
                 break;
             }
-            if ((&var_s0->tileLocation)->floorLayer == arg2) {
+            if ((&entrance_door_cursor->tileLocation)->floorLayer == query_floor_layer) {
                 for (j = 0; j < 9; ++j) {
-                    int new_var = 1;
-                    if (((&var_s0->tileLocation)->tileX
-                            == ((arg0 - new_var) + (j - ((j / 3) * 3))))
-                        && ((&var_s0->tileLocation)->tileZ == ((arg1 - new_var) + (j / 3)))) {
+                    int neighbor_tile_radius = 1;
+                    if (((&entrance_door_cursor->tileLocation)->tileX
+                            == ((query_tile_x - neighbor_tile_radius) + (j - ((j / 3) * 3))))
+                        && ((&entrance_door_cursor->tileLocation)->tileZ == ((query_tile_z - neighbor_tile_radius) + (j / 3)))) {
                         break;
                     }
                 }
@@ -82,17 +82,17 @@ void Field_FindEntranceDoorNearTile(int arg0, int arg1, int arg2)
                 }
             }
         }
-        if (i == temp_t4) {
-            var_s0 = NULL;
+        if (i == door_count_or_scene_door_id) {
+            entrance_door_cursor = NULL;
         }
     } else {
-        var_s0 = NULL;
+        entrance_door_cursor = NULL;
     }
 
-    if (var_s0 != NULL) {
-        Core_Memory_CopyAlignedWords(&Field_entranceDoorRecord, var_s0, sizeof Field_entranceDoorRecord);
-        temp_t4 = Field_SceneDoorId(var_s0->doorId);
-        Field_enteredDoorId = temp_t4;
+    if (entrance_door_cursor != NULL) {
+        Core_Memory_CopyAlignedWords(&Field_entranceDoorRecord, entrance_door_cursor, sizeof Field_entranceDoorRecord);
+        door_count_or_scene_door_id = Field_SceneDoorId(entrance_door_cursor->doorId);
+        Field_enteredDoorId = door_count_or_scene_door_id;
     } else {
         Core_Memory_ZeroAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
         Field_enteredDoorId = -1;
@@ -100,44 +100,44 @@ void Field_FindEntranceDoorNearTile(int arg0, int arg1, int arg2)
 }
 
 // decomp: BATTLE.PRG func_8008BC04 (src/BATTLE/BATTLE.PRG/146C.c:16215)
-Field_MpdLockTrigger* Field_InteractiveDoorAtTile(int arg0, int arg1, int arg2)
+Field_MpdLockTrigger* Field_InteractiveDoorAtTile(int query_tile_x, int query_tile_z, int query_floor_layer)
 {
-    int temp_t2;
-    Field_MpdLockTrigger* var_t0;
+    int lock_trigger_count;
+    Field_MpdLockTrigger* lock_trigger_cursor;
     int i;
 
     if (Field_roomData.lockTriggers != 0) {
-        temp_t2 = Field_roomData.header.lockTriggersLength / 20;
-        var_t0 = Field_roomData.lockTriggers;
-        if (var_t0->trigger.activation != 0) {
-            for (i = 0; i < temp_t2; ++i, ++var_t0) {
-                if ((var_t0->trigger.tileX == arg0) && (var_t0->trigger.tileZ == arg1)
-                    && (var_t0->trigger.floorLayer == arg2)) {
-                    return var_t0;
+        lock_trigger_count = Field_roomData.header.lockTriggersLength / 20;
+        lock_trigger_cursor = Field_roomData.lockTriggers;
+        if (lock_trigger_cursor->trigger.activation != 0) {
+            for (i = 0; i < lock_trigger_count; ++i, ++lock_trigger_cursor) {
+                if ((lock_trigger_cursor->trigger.tileX == query_tile_x) && (lock_trigger_cursor->trigger.tileZ == query_tile_z)
+                    && (lock_trigger_cursor->trigger.floorLayer == query_floor_layer)) {
+                    return lock_trigger_cursor;
                 }
-                switch (var_t0->trigger.kind - 4) {
+                switch (lock_trigger_cursor->trigger.kind - 4) {
                 case 0:
-                    if ((var_t0->trigger.tileX == arg0) && ((var_t0->trigger.tileZ - 1) == arg1)
-                        && (var_t0->trigger.floorLayer == arg2)) {
-                        return var_t0;
+                    if ((lock_trigger_cursor->trigger.tileX == query_tile_x) && ((lock_trigger_cursor->trigger.tileZ - 1) == query_tile_z)
+                        && (lock_trigger_cursor->trigger.floorLayer == query_floor_layer)) {
+                        return lock_trigger_cursor;
                     }
                     break;
                 case 1:
-                    if (((var_t0->trigger.tileX + 1) == arg0) && (var_t0->trigger.tileZ == arg1)
-                        && (var_t0->trigger.floorLayer == arg2)) {
-                        return var_t0;
+                    if (((lock_trigger_cursor->trigger.tileX + 1) == query_tile_x) && (lock_trigger_cursor->trigger.tileZ == query_tile_z)
+                        && (lock_trigger_cursor->trigger.floorLayer == query_floor_layer)) {
+                        return lock_trigger_cursor;
                     }
                     break;
                 case 2:
-                    if ((var_t0->trigger.tileX == arg0) && ((var_t0->trigger.tileZ + 1) == arg1)
-                        && (var_t0->trigger.floorLayer == arg2)) {
-                        return var_t0;
+                    if ((lock_trigger_cursor->trigger.tileX == query_tile_x) && ((lock_trigger_cursor->trigger.tileZ + 1) == query_tile_z)
+                        && (lock_trigger_cursor->trigger.floorLayer == query_floor_layer)) {
+                        return lock_trigger_cursor;
                     }
                     break;
                 case 3:
-                    if (((var_t0->trigger.tileX - 1) == arg0) && (var_t0->trigger.tileZ == arg1)
-                        && (var_t0->trigger.floorLayer == arg2)) {
-                        return var_t0;
+                    if (((lock_trigger_cursor->trigger.tileX - 1) == query_tile_x) && (lock_trigger_cursor->trigger.tileZ == query_tile_z)
+                        && (lock_trigger_cursor->trigger.floorLayer == query_floor_layer)) {
+                        return lock_trigger_cursor;
                     }
                     break;
                 }
@@ -148,103 +148,103 @@ Field_MpdLockTrigger* Field_InteractiveDoorAtTile(int arg0, int arg1, int arg2)
 }
 
 // decomp: BATTLE.PRG func_8008BD74 (src/BATTLE/BATTLE.PRG/146C.c:16262)
-void Field_ToggleDoorCollision(Field_MpdLockTrigger* arg0)
+void Field_ToggleDoorCollision(Field_MpdLockTrigger* door_trigger)
 {
-    Field_MpdTileCell* var_a0;
+    Field_MpdTileCell* collision_cell;
 
-    var_a0 = Field_CollisionCellAt(arg0->trigger.tileX, arg0->trigger.tileZ, arg0->trigger.floorLayer);
-    if (var_a0 != NULL) {
-        var_a0->doorPassability ^= 5;
+    collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
+    if (collision_cell != NULL) {
+        collision_cell->doorPassability ^= 5;
     }
-    var_a0 = NULL;
-    switch (arg0->trigger.kind - 4) {
+    collision_cell = NULL;
+    switch (door_trigger->trigger.kind - 4) {
     case 0:
-        var_a0 = Field_CollisionCellAt(arg0->trigger.tileX, arg0->trigger.tileZ - 1, arg0->trigger.floorLayer);
+        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ - 1, door_trigger->trigger.floorLayer);
         break;
     case 1:
-        var_a0 = Field_CollisionCellAt(arg0->trigger.tileX + 1, arg0->trigger.tileZ, arg0->trigger.floorLayer);
+        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX + 1, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
         break;
     case 2:
-        var_a0 = Field_CollisionCellAt(arg0->trigger.tileX, arg0->trigger.tileZ + 1, arg0->trigger.floorLayer);
+        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX, door_trigger->trigger.tileZ + 1, door_trigger->trigger.floorLayer);
         break;
     case 3:
-        var_a0 = Field_CollisionCellAt(arg0->trigger.tileX - 1, arg0->trigger.tileZ, arg0->trigger.floorLayer);
+        collision_cell = Field_CollisionCellAt(door_trigger->trigger.tileX - 1, door_trigger->trigger.tileZ, door_trigger->trigger.floorLayer);
         break;
     }
-    if ((arg0->trigger.kind >= 4) && (var_a0 != NULL)) {
-        var_a0->doorPassability ^= 5;
+    if ((door_trigger->trigger.kind >= 4) && (collision_cell != NULL)) {
+        collision_cell->doorPassability ^= 5;
     }
 }
 
 // decomp: BATTLE.PRG func_8008BEBC (src/BATTLE/BATTLE.PRG/146C.c:16290)
-int Field_BeginDoorToggle(Field_MpdLockTrigger* arg0)
+int Field_BeginDoorToggle(Field_MpdLockTrigger* door_trigger)
 {
-    if (arg0->isTriggered == 0) {
-        u_int temp_a0 = (u_short)arg0->keyOrSigil;
-        arg0->isTriggered = 1;
-        if ((temp_a0 - 0x1CA) < 7) {
-            Field_MarkSigilDoorUnlocked((short)temp_a0 - 0x1CA);
+    if (door_trigger->isTriggered == 0) {
+        u_int key_or_sigil_id = (u_short)door_trigger->keyOrSigil;
+        door_trigger->isTriggered = 1;
+        if ((key_or_sigil_id - 0x1CA) < 7) {
+            Field_MarkSigilDoorUnlocked((short)key_or_sigil_id - 0x1CA);
         }
-        if (arg0->isOpen == 0) {
-            arg0->delayFrames = 8;
-            Field_QueueGimmickAnimation(3, arg0);
+        if (door_trigger->isOpen == 0) {
+            door_trigger->delayFrames = 8;
+            Field_QueueGimmickAnimation(3, door_trigger);
             return 1;
         }
-        Field_StartDoorAnimation(arg0);
+        Field_StartDoorAnimation(door_trigger);
         return 1;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8008BF48 (src/BATTLE/BATTLE.PRG/146C.c:16309)
-int Field_StartDoorAnimation(Field_MpdLockTrigger* arg0)
+int Field_StartDoorAnimation(Field_MpdLockTrigger* door_trigger)
 {
-    Field_MpdLockTrigger* temp_s0;
+    Field_MpdLockTrigger* lock_trigger_table;
 
-    if (arg0->isOpen == 0) {
+    if (door_trigger->isOpen == 0) {
         Audio_PlaySfxCentered(0x7E, 0x1D);
         Audio_PlaySfxCentered(0x7E, 0x1E);
     } else {
         Audio_PlaySfxCentered(0x7E, 0x16);
         Audio_PlaySfxCentered(0x7E, 0x17);
     }
-    Field_StartRoomEffect(arg0->trigger.lockState.lock.roomEffect);
-    if (arg0->isOpen != 0) {
-        Field_ToggleDoorCollision(arg0);
+    Field_StartRoomEffect(door_trigger->trigger.lockState.lock.roomEffect);
+    if (door_trigger->isOpen != 0) {
+        Field_ToggleDoorCollision(door_trigger);
     }
-    if (arg0->linkedLockIndex != -1) {
-        temp_s0 = Field_roomData.lockTriggers;
-        if (temp_s0[arg0->linkedLockIndex].trigger.activation != 0) {
-            Field_StartRoomEffect(temp_s0[arg0->linkedLockIndex].trigger.lockState.lock.roomEffect);
-            if (temp_s0[arg0->linkedLockIndex].isOpen != 0) {
-                Field_ToggleDoorCollision(&temp_s0[arg0->linkedLockIndex]);
+    if (door_trigger->linkedLockIndex != -1) {
+        lock_trigger_table = Field_roomData.lockTriggers;
+        if (lock_trigger_table[door_trigger->linkedLockIndex].trigger.activation != 0) {
+            Field_StartRoomEffect(lock_trigger_table[door_trigger->linkedLockIndex].trigger.lockState.lock.roomEffect);
+            if (lock_trigger_table[door_trigger->linkedLockIndex].isOpen != 0) {
+                Field_ToggleDoorCollision(&lock_trigger_table[door_trigger->linkedLockIndex]);
             }
-            temp_s0[arg0->linkedLockIndex].isTriggered = 1;
+            lock_trigger_table[door_trigger->linkedLockIndex].isTriggered = 1;
         }
     }
-    Field_QueueGimmickAnimation(1, arg0);
+    Field_QueueGimmickAnimation(1, door_trigger);
     return 1;
 }
 
 // decomp: BATTLE.PRG func_8008C1C8 (src/BATTLE/BATTLE.PRG/146C.c:16389)
-int Field_FinishDoorAnimation(Field_MpdLockTrigger* arg0)
+int Field_FinishDoorAnimation(Field_MpdLockTrigger* door_trigger)
 {
-    if (Field_IsRoomEffectActive(arg0->trigger.lockState.lock.roomEffect) != 0) {
+    if (Field_IsRoomEffectActive(door_trigger->trigger.lockState.lock.roomEffect) != 0) {
         return 0;
     }
-    if (arg0->isOpen == 0) {
-        Field_ToggleDoorCollision(arg0);
+    if (door_trigger->isOpen == 0) {
+        Field_ToggleDoorCollision(door_trigger);
     }
-    arg0->isTriggered = 0;
-    arg0->isOpen = arg0->isOpen == 0;
-    if (arg0->linkedLockIndex != -1) {
+    door_trigger->isTriggered = 0;
+    door_trigger->isOpen = door_trigger->isOpen == 0;
+    if (door_trigger->linkedLockIndex != -1) {
         Field_MpdLockTrigger* p = Field_roomData.lockTriggers;
-        if (p[arg0->linkedLockIndex].trigger.activation != 0) {
-            if (p[arg0->linkedLockIndex].isOpen == 0) {
-                Field_ToggleDoorCollision(&p[arg0->linkedLockIndex]);
+        if (p[door_trigger->linkedLockIndex].trigger.activation != 0) {
+            if (p[door_trigger->linkedLockIndex].isOpen == 0) {
+                Field_ToggleDoorCollision(&p[door_trigger->linkedLockIndex]);
             }
-            p[arg0->linkedLockIndex].isOpen = p[arg0->linkedLockIndex].isOpen == 0;
-            p[arg0->linkedLockIndex].isTriggered = 0;
+            p[door_trigger->linkedLockIndex].isOpen = p[door_trigger->linkedLockIndex].isOpen == 0;
+            p[door_trigger->linkedLockIndex].isTriggered = 0;
         }
     }
     return 1;
@@ -253,68 +253,68 @@ int Field_FinishDoorAnimation(Field_MpdLockTrigger* arg0)
 // decomp: BATTLE.PRG _getDoorId (src/BATTLE/BATTLE.PRG/146C.c:16954)
 int Field_SceneDoorId(int door)
 {
-    int* temp_v1;
+    int* scene_section_word_cursor;
 
     if (Field_roomData.minimapScene != NULL) {
-        temp_v1 = (int*)Field_roomData.minimapScene
+        scene_section_word_cursor = (int*)Field_roomData.minimapScene
                 + (Field_roomData.minimapScene->roomCount * 3 + 1);
-        temp_v1 = temp_v1 + ((*temp_v1 * 2) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        if ((door < *temp_v1++) && (door >= 0)) {
-            temp_v1 += door;
-            return ((char*)temp_v1)[1];
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor * 2) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        if ((door < *scene_section_word_cursor++) && (door >= 0)) {
+            scene_section_word_cursor += door;
+            return ((char*)scene_section_word_cursor)[1];
         }
     }
     return -1;
 }
 
 // decomp: BATTLE.PRG vs_battle_setDoorEntered2 (src/BATTLE/BATTLE.PRG/146C.c:16974)
-void Field_MarkEntranceDoorOnSceneMap(int arg0)
+void Field_MarkEntranceDoorOnSceneMap(int entered_door_index)
 {
-    int temp_a3;
+    int scene_door_count;
     int i;
 
-    Field_enteredDoorId = arg0;
+    Field_enteredDoorId = entered_door_index;
 
     if (Field_roomData.minimapScene != NULL) {
-        int* temp_v1 = (int*)Field_roomData.minimapScene;
-        temp_v1 += Field_roomData.minimapScene->roomCount * 3 + 1;
-        temp_v1 = temp_v1 + ((*temp_v1 * 2) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_v1 = temp_v1 + ((*temp_v1) + 1);
-        temp_a3 = *temp_v1++;
+        int* scene_section_word_cursor = (int*)Field_roomData.minimapScene;
+        scene_section_word_cursor += Field_roomData.minimapScene->roomCount * 3 + 1;
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor * 2) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_section_word_cursor = scene_section_word_cursor + ((*scene_section_word_cursor) + 1);
+        scene_door_count = *scene_section_word_cursor++;
 
-        for (i = 0; i < temp_a3; ++i) {
-            if (i == arg0) {
-                ((char*)temp_v1)[2] |= 0x10;
+        for (i = 0; i < scene_door_count; ++i) {
+            if (i == entered_door_index) {
+                ((char*)scene_section_word_cursor)[2] |= 0x10;
             }
-            ++temp_v1;
+            ++scene_section_word_cursor;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_8008E3B8 (src/BATTLE/BATTLE.PRG/146C.c:17296)
-Field_MpdLockTrigger* Field_RoomInteractiveDoors(int* arg0)
+Field_MpdLockTrigger* Field_RoomInteractiveDoors(int* output_door_count)
 {
     if (Field_roomData.lockTriggers != 0) {
-        *arg0 =
+        *output_door_count =
             Field_roomData.header.lockTriggersLength / sizeof *Field_roomData.lockTriggers;
         return Field_roomData.lockTriggers;
     }
-    *arg0 = 0;
+    *output_door_count = 0;
     return 0;
 }
 
 // decomp: BATTLE.PRG get_D_800E84AC (src/BATTLE/BATTLE.PRG/146C.c:17397)
-char Field_SigilDoorEndpointCoordinate(int arg0, int arg1) { return Field_lockedDoorRoomPairs[arg0][arg1]; }
+char Field_SigilDoorEndpointCoordinate(int door_pair_index, int endpoint_component) { return Field_lockedDoorRoomPairs[door_pair_index][endpoint_component]; }
 
 // decomp: BATTLE.PRG func_8008E6DC (src/BATTLE/BATTLE.PRG/146C.c:17399)
-void Field_MarkSigilDoorUnlocked(int arg0)
+void Field_MarkSigilDoorUnlocked(int sigil_index)
 {
     int mapId;
     int zoneId;
@@ -325,7 +325,7 @@ void Field_MarkSigilDoorUnlocked(int arg0)
     zoneId = room->zoneId;
     mapId = room->mapId;
 
-    for (i = Field_lockedDoorIndexRanges[arg0]; i < Field_lockedDoorIndexRanges[arg0 + 1]; ++i) {
+    for (i = Field_lockedDoorIndexRanges[sigil_index]; i < Field_lockedDoorIndexRanges[sigil_index + 1]; ++i) {
         if (((Field_SigilDoorEndpointCoordinate(i, 0) == zoneId) && (Field_SigilDoorEndpointCoordinate(i, 1) == mapId))
             || ((Field_SigilDoorEndpointCoordinate(i, 2) == zoneId) && (Field_SigilDoorEndpointCoordinate(i, 3) == mapId))) {
             Audio_Seq_unusedStateFlags.opaque186[i] = 1;
@@ -335,12 +335,12 @@ void Field_MarkSigilDoorUnlocked(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8008E7BC (src/BATTLE/BATTLE.PRG/146C.c:17419)
-int Field_IsRoomSigilDoorUnlocked(int arg0, int arg1, u_int arg2)
+int Field_IsRoomSigilDoorUnlocked(int zone_id, int map_id, u_int sigil_index)
 {
     int i;
-    for (i = Field_lockedDoorIndexRanges[arg2]; i < Field_lockedDoorIndexRanges[arg2 + 1]; ++i) {
-        if (((Field_SigilDoorEndpointCoordinate(i, 0) == arg0) && (Field_SigilDoorEndpointCoordinate(i, 1) == arg1))
-            || ((Field_SigilDoorEndpointCoordinate(i, 2) == arg0) && (Field_SigilDoorEndpointCoordinate(i, 3) == arg1))) {
+    for (i = Field_lockedDoorIndexRanges[sigil_index]; i < Field_lockedDoorIndexRanges[sigil_index + 1]; ++i) {
+        if (((Field_SigilDoorEndpointCoordinate(i, 0) == zone_id) && (Field_SigilDoorEndpointCoordinate(i, 1) == map_id))
+            || ((Field_SigilDoorEndpointCoordinate(i, 2) == zone_id) && (Field_SigilDoorEndpointCoordinate(i, 3) == map_id))) {
             return Audio_Seq_unusedStateFlags.opaque186[i];
         }
     }

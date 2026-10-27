@@ -174,10 +174,10 @@ int Field_ComputeCameraTrackingStep(SVECTOR* targetPos, VECTOR* outStep,
     Core_Gte_RotTransPers(&targetPosScaled, &sxy, &p, &notCentered);
 
     if (clampToZone == 0) {
-        int temp_a0 = sxy / 0x10000;
-        if (((sxy - (temp_a0 * 0x10000)) - 61) < 199U) {
-            int new_var = 180;
-            if ((temp_a0 > 60) && (temp_a0 < new_var)) {
+        int projected_y = sxy / 0x10000;
+        if (((sxy - (projected_y * 0x10000)) - 61) < 199U) {
+            int dead_zone_bottom_y = 180;
+            if ((projected_y > 60) && (projected_y < dead_zone_bottom_y)) {
                 notCentered = 0;
             } else {
                 notCentered = 1;
@@ -265,43 +265,43 @@ int Field_StepCameraLookAtTowardTarget(SVECTOR* targetPos, int transformFlag, in
 }
 
 // decomp: BATTLE.PRG _snapLookAtToPosition (src/BATTLE/BATTLE.PRG/146C.c:2597)
-void Field_TrackCameraLookAtWithinDeadZone(VECTOR* arg0)
+void Field_TrackCameraLookAtWithinDeadZone(VECTOR* target_position)
 {
-    Field_CameraPositionPair sp10;
-    int new_var;
+    Field_CameraPositionPair target_and_displacement;
+    int negative_axis_threshold;
 
-    Field_ClampCameraLookAtToZone(arg0, &sp10.position);
-    sp10.lookAt.vx = sp10.position.vx - Render_frameScratch.camera.lookAt.vx;
-    sp10.lookAt.vz = sp10.position.vz - Render_frameScratch.camera.lookAt.vz;
-    sp10.lookAt.vy = sp10.position.vy - Render_frameScratch.camera.lookAt.vy;
+    Field_ClampCameraLookAtToZone(target_position, &target_and_displacement.position);
+    target_and_displacement.lookAt.vx = target_and_displacement.position.vx - Render_frameScratch.camera.lookAt.vx;
+    target_and_displacement.lookAt.vz = target_and_displacement.position.vz - Render_frameScratch.camera.lookAt.vz;
+    target_and_displacement.lookAt.vy = target_and_displacement.position.vy - Render_frameScratch.camera.lookAt.vy;
 
-    if (sp10.lookAt.vx > 0x12000) {
+    if (target_and_displacement.lookAt.vx > 0x12000) {
         Render_frameScratch.camera.lookAt.vx += 0x12000;
     } else {
-        new_var = 0xFFFEE000;
-        if (sp10.lookAt.vx < new_var) {
+        negative_axis_threshold = 0xFFFEE000;
+        if (target_and_displacement.lookAt.vx < negative_axis_threshold) {
             Render_frameScratch.camera.lookAt.vx -= 0x12000;
         } else {
-            Render_frameScratch.camera.lookAt.vx = sp10.position.vx;
+            Render_frameScratch.camera.lookAt.vx = target_and_displacement.position.vx;
         }
     }
-    if (sp10.lookAt.vz > 0x12000) {
+    if (target_and_displacement.lookAt.vz > 0x12000) {
         Render_frameScratch.camera.lookAt.vz += 0x12000;
     } else {
-        new_var = 0xFFFEE000;
-        if (sp10.lookAt.vz < new_var) {
+        negative_axis_threshold = 0xFFFEE000;
+        if (target_and_displacement.lookAt.vz < negative_axis_threshold) {
             Render_frameScratch.camera.lookAt.vz -= 0x12000;
         } else {
-            Render_frameScratch.camera.lookAt.vz = sp10.position.vz;
+            Render_frameScratch.camera.lookAt.vz = target_and_displacement.position.vz;
         }
     }
-    if (sp10.lookAt.vy < 0) {
-        new_var = 0xFFFA0000;
-        if (sp10.lookAt.vy < new_var) {
-            Render_frameScratch.camera.lookAt.vy += 0x60000 + sp10.lookAt.vy;
+    if (target_and_displacement.lookAt.vy < 0) {
+        negative_axis_threshold = 0xFFFA0000;
+        if (target_and_displacement.lookAt.vy < negative_axis_threshold) {
+            Render_frameScratch.camera.lookAt.vy += 0x60000 + target_and_displacement.lookAt.vy;
         }
-    } else if (sp10.lookAt.vy > 0x60000) {
-        Render_frameScratch.camera.lookAt.vy -= 0x60000 - sp10.lookAt.vy;
+    } else if (target_and_displacement.lookAt.vy > 0x60000) {
+        Render_frameScratch.camera.lookAt.vy -= 0x60000 - target_and_displacement.lookAt.vy;
     }
     if (Render_frameScratch.camera.lookAt.vy > 0) {
         Render_frameScratch.camera.lookAt.vy = 0;
@@ -469,17 +469,17 @@ void Field_UpdateCameraOrbitInput(void)
 #undef CAMERA_INPUT_LOCKED
 
 // decomp: BATTLE.PRG func_8006E640 (src/BATTLE/BATTLE.PRG/146C.c:2794)
-void Field_TrackActionCameraTarget(int arg0)
+void Field_TrackActionCameraTarget(int tracked_actor_index)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery tracked_actor_placement;
     SVECTOR targetPos;
     int _[2] __attribute__((unused));
 
-    Actors_ActorPlacement(arg0, &sp10);
-    targetPos.vx = sp10.location.position.vx;
-    targetPos.vz = sp10.location.position.vz;
-    targetPos.vy = sp10.location.position.vy - 0x5A;
-    Field_UpdateCameraTileConstraint(arg0, &sp10.location.packedTile.target);
+    Actors_ActorPlacement(tracked_actor_index, &tracked_actor_placement);
+    targetPos.vx = tracked_actor_placement.location.position.vx;
+    targetPos.vz = tracked_actor_placement.location.position.vz;
+    targetPos.vy = tracked_actor_placement.location.position.vy - 0x5A;
+    Field_UpdateCameraTileConstraint(tracked_actor_index, &tracked_actor_placement.location.packedTile.target);
     switch (Battle_actionFlowMode) {
     case 1:
     case 3:
@@ -516,17 +516,17 @@ void Field_TrackActionCameraTarget(int arg0)
 int Field_UpdateAshleyFollowCamera(void)
 {
     int v;
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery ashley_placement;
     VECTOR position;
 
     if (Field_isInteractionPaused == 0) {
         Actors_UpdateRoomActorMovement();
     }
-    Actors_ActorPlacement(0, &sp10);
+    Actors_ActorPlacement(0, &ashley_placement);
 
-    position.vx = sp10.location.position.vx << 0xC;
-    position.vy = (sp10.location.position.vy << 0xC) + 0xFFFA6000;
-    position.vz = sp10.location.position.vz << 0xC;
+    position.vx = ashley_placement.location.position.vx << 0xC;
+    position.vy = (ashley_placement.location.position.vy << 0xC) + 0xFFFA6000;
+    position.vz = ashley_placement.location.position.vz << 0xC;
     Field_TrackCameraLookAtWithinDeadZone(&position);
     Field_SetCameraPositionFromAngles(&Field_sphericalCamera.values);
     return v;
@@ -535,9 +535,9 @@ int Field_UpdateAshleyFollowCamera(void)
 // decomp: BATTLE.PRG func_8006EC7C (src/BATTLE/BATTLE.PRG/146C.c:2984)
 void Field_UpdateFirstPersonCamera(void)
 {
-    Actors_ActorLocationQuery sp10;
-    int temp_a1;
-    int var_a0;
+    Actors_ActorLocationQuery ashley_placement;
+    int pitch_stick_offset;
+    int yaw_stick_offset;
 
     if (Input_previousButtons & PADLup) {
         Field_sphericalCamera.values.pitch =
@@ -556,26 +556,26 @@ void Field_UpdateFirstPersonCamera(void)
             (Field_sphericalCamera.values.yaw + 32) % ONE;
     }
     if (Input_controllerPorts->controllerType == 7) {
-        var_a0 = Input_controllerPorts->rightStickX - 128;
-        temp_a1 = Input_controllerPorts->rightStickY - 128;
+        yaw_stick_offset = Input_controllerPorts->rightStickX - 128;
+        pitch_stick_offset = Input_controllerPorts->rightStickY - 128;
 
         if ((Input_controllerPorts->rightStickX - 64u) > 128) {
-            if (var_a0 <= 0) {
-                var_a0 = Input_controllerPorts->rightStickX - 64;
+            if (yaw_stick_offset <= 0) {
+                yaw_stick_offset = Input_controllerPorts->rightStickX - 64;
             } else {
-                var_a0 = Input_controllerPorts->rightStickX - 192;
+                yaw_stick_offset = Input_controllerPorts->rightStickX - 192;
             }
             Field_sphericalCamera.values.yaw =
-                (Field_sphericalCamera.values.yaw + (var_a0 / 3)) % ONE;
+                (Field_sphericalCamera.values.yaw + (yaw_stick_offset / 3)) % ONE;
         }
-        if ((temp_a1 + 64) > 128u) {
-            if (temp_a1 <= 0) {
-                temp_a1 += 64;
+        if ((pitch_stick_offset + 64) > 128u) {
+            if (pitch_stick_offset <= 0) {
+                pitch_stick_offset += 64;
             } else {
-                temp_a1 -= 64;
+                pitch_stick_offset -= 64;
             }
             Field_sphericalCamera.values.pitch =
-                (Field_sphericalCamera.values.pitch + (temp_a1 / 3)) % ONE;
+                (Field_sphericalCamera.values.pitch + (pitch_stick_offset / 3)) % ONE;
         }
     }
 
@@ -586,10 +586,10 @@ void Field_UpdateFirstPersonCamera(void)
     }
 
     Actors_TurnActorToOverTime(0, Field_sphericalCamera.values.yaw & 0xFFF, 0);
-    Actors_ActorPlacement(0, &sp10);
-    Render_frameScratch.camera.position.vx = sp10.location.position.vx * ONE;
-    Render_frameScratch.camera.position.vz = sp10.location.position.vz * ONE;
-    Render_frameScratch.camera.position.vy = (sp10.location.position.vy - 180) * ONE;
+    Actors_ActorPlacement(0, &ashley_placement);
+    Render_frameScratch.camera.position.vx = ashley_placement.location.position.vx * ONE;
+    Render_frameScratch.camera.position.vz = ashley_placement.location.position.vz * ONE;
+    Render_frameScratch.camera.position.vy = (ashley_placement.location.position.vy - 180) * ONE;
     Field_SetCameraLookAtFromAngles(&Field_sphericalCamera.values);
 }
 
@@ -726,8 +726,8 @@ int Field_StepFirstPersonCameraTransition(void)
 // decomp: BATTLE.PRG _initBattleCameraTransition (src/BATTLE/BATTLE.PRG/146C.c:4544)
 void Field_BeginFirstPersonView(void)
 {
-    VECTOR sp10;
-    Actors_ActorLocationQuery sp20;
+    VECTOR eye_position_fixed12;
+    Actors_ActorLocationQuery ashley_placement;
     int i;
 
     if (Field_cameraTransition == NULL) {
@@ -744,17 +744,17 @@ void Field_BeginFirstPersonView(void)
     Field_cameraTransition->toNearClip = 4;
     Field_cameraTransition->toProjectionDistance = 224;
     Field_cameraTransition->toFarClip = 0x2000;
-    Actors_ActorPlacement(0, &sp20);
+    Actors_ActorPlacement(0, &ashley_placement);
 
-    Field_cameraTransition->toSpherical.values.yaw = sp20.location.position.pad;
+    Field_cameraTransition->toSpherical.values.yaw = ashley_placement.location.position.pad;
     Field_cameraTransition->toSpherical.values.pitch = 0;
     Field_cameraTransition->toSpherical.values.distance =
         Field_sphericalCamera.values.distance;
 
-    setVector(&sp10, sp20.location.position.vx * ONE, (sp20.location.position.vy - 0xB4) * ONE,
-        sp20.location.position.vz * ONE);
+    setVector(&eye_position_fixed12, ashley_placement.location.position.vx * ONE, (ashley_placement.location.position.vy - 0xB4) * ONE,
+        ashley_placement.location.position.vz * ONE);
 
-    Field_ComputeFirstPersonCameraTransition(&sp10);
+    Field_ComputeFirstPersonCameraTransition(&eye_position_fixed12);
 
     Field_controlMode = 7;
     Battle_actionFlowMode = 0;
@@ -812,7 +812,7 @@ void Field_UpdateFirstPersonViewEntry(void)
 // decomp: BATTLE.PRG _checkFirstPersonViewExit (src/BATTLE/BATTLE.PRG/146C.c:5179)
 void Field_CheckFirstPersonViewExit(void)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery ashley_placement;
 
     if (!(Input_buttonsPressed.allButtons & (PADRdown | PADj | PADstart))) {
         return;
@@ -822,8 +822,8 @@ void Field_CheckFirstPersonViewExit(void)
     Field_isFirstPersonViewEnabled = 0;
     Field_roomGeometryDrawMode = 0;
 
-    Actors_ActorPlacement(0, &sp10);
-    Field_UpdateCameraTileConstraint(0, &sp10.location.packedTile.target);
+    Actors_ActorPlacement(0, &ashley_placement);
+    Field_UpdateCameraTileConstraint(0, &ashley_placement.location.packedTile.target);
     Field_SyncCameraAnglesFromPosition(&Field_cameraTransition->toSpherical);
 
     if ((Field_cameraTransition->toSpherical.values.yaw
@@ -865,25 +865,25 @@ void Field_UpdateFirstPersonViewExit(void)
 }
 
 // decomp: BATTLE.PRG func_80074B14 (src/BATTLE/BATTLE.PRG/146C.c:5339)
-void Field_UpdateCameraTileConstraint(int arg0, Actors_TileTarget* arg1)
+void Field_UpdateCameraTileConstraint(int actor_index, Actors_TileTarget* actor_tile)
 {
-    u_int temp_v0;
-    int var_a2;
-    char var_a0;
-    char var_a1;
+    u_int platform_layer_flags;
+    int collision_layer;
+    char collision_tile_x;
+    char collision_tile_z;
 
-    temp_v0 = Actors_ActorStateFlags(arg0) & 0x70000;
-    var_a0 = 0;
-    if (temp_v0 != 0) {
-        var_a1 = 0;
-        var_a2 = temp_v0 >> 0x10;
+    platform_layer_flags = Actors_ActorStateFlags(actor_index) & 0x70000;
+    collision_tile_x = 0;
+    if (platform_layer_flags != 0) {
+        collision_tile_z = 0;
+        collision_layer = platform_layer_flags >> 0x10;
     } else {
-        var_a0 = arg1->tileX;
-        var_a1 = arg1->tileZ;
-        var_a2 = arg1->tileLayer;
+        collision_tile_x = actor_tile->tileX;
+        collision_tile_z = actor_tile->tileZ;
+        collision_layer = actor_tile->tileLayer;
     }
-    if (Field_CollisionCellAt(var_a0, var_a1, var_a2)->occlusionAndFloorFlags & 1) {
-        Field_ApplyCameraGeometryOcclusion(arg1->tileX, arg1->tileZ, arg1->tileLayer,
+    if (Field_CollisionCellAt(collision_tile_x, collision_tile_z, collision_layer)->occlusionAndFloorFlags & 1) {
+        Field_ApplyCameraGeometryOcclusion(actor_tile->tileX, actor_tile->tileZ, actor_tile->tileLayer,
             Field_sphericalCamera.initialDistance == 0x900);
         return;
     }
@@ -893,22 +893,22 @@ void Field_UpdateCameraTileConstraint(int arg0, Actors_TileTarget* arg1)
 // decomp: BATTLE.PRG _isLookAtAtDestination (src/BATTLE/BATTLE.PRG/146C.c:6788)
 int Field_IsCameraLookAtOnAshley(void)
 {
-    Field_CameraPositionPair sp10;
-    Actors_ActorLocationQuery sp30;
+    Field_CameraPositionPair target_and_current_look_at;
+    Actors_ActorLocationQuery ashley_placement;
 
-    Actors_ActorPlacement(0, &sp30);
-    sp10.position.vx = sp30.location.position.vx * ONE;
-    sp10.position.vy = sp30.location.position.vy * ONE + 0xFFFA6000;
-    sp10.position.vz = sp30.location.position.vz * ONE;
-    if (sp10.position.vy > 0) {
-        sp10.position.vy = 0;
+    Actors_ActorPlacement(0, &ashley_placement);
+    target_and_current_look_at.position.vx = ashley_placement.location.position.vx * ONE;
+    target_and_current_look_at.position.vy = ashley_placement.location.position.vy * ONE + 0xFFFA6000;
+    target_and_current_look_at.position.vz = ashley_placement.location.position.vz * ONE;
+    if (target_and_current_look_at.position.vy > 0) {
+        target_and_current_look_at.position.vy = 0;
     }
-    Field_ClampCameraLookAtToZone(&sp10.position, &sp10.position);
-    sp10.lookAt = Render_frameScratch.camera.lookAt;
+    Field_ClampCameraLookAtToZone(&target_and_current_look_at.position, &target_and_current_look_at.position);
+    target_and_current_look_at.lookAt = Render_frameScratch.camera.lookAt;
 
-    if ((sp10.position.vx == (sp10.lookAt.vx & ~0xFFF))
-        && (sp10.position.vz == (sp10.lookAt.vz & ~0xFFF))
-        && (sp10.position.vy == (sp10.lookAt.vy & ~0xFFF))) {
+    if ((target_and_current_look_at.position.vx == (target_and_current_look_at.lookAt.vx & ~0xFFF))
+        && (target_and_current_look_at.position.vz == (target_and_current_look_at.lookAt.vz & ~0xFFF))
+        && (target_and_current_look_at.position.vy == (target_and_current_look_at.lookAt.vy & ~0xFFF))) {
         return 1;
     }
     return 0;
@@ -926,7 +926,7 @@ void Field_ResetCameraToAshley(void)
 }
 
 // decomp: BATTLE.PRG vs_battle_syncCameraAnglesFromPosition (src/BATTLE/BATTLE.PRG/146C.c:8057)
-int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* arg0)
+int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* output_spherical_camera)
 {
     VECTOR toCamera;
     VECTOR toCameraNorm;
@@ -947,15 +947,15 @@ int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* arg0)
                                       + (toCameraNorm.vz * toCameraNorm.vz) / ONE));
     Render_frameScratch.camera.angles.vx = pitch;
 
-    if (arg0 != NULL) {
-        arg0->values.yaw = yaw;
-        arg0->values.pitch = pitch;
+    if (output_spherical_camera != NULL) {
+        output_spherical_camera->values.yaw = yaw;
+        output_spherical_camera->values.pitch = pitch;
         if (toCamera.vx != 0) {
-            arg0->values.distance = (toCamera.vx * ONE) / toCameraNorm.vx;
+            output_spherical_camera->values.distance = (toCamera.vx * ONE) / toCameraNorm.vx;
         } else if (toCamera.vz != 0) {
-            arg0->values.distance = (toCamera.vz * ONE) / toCameraNorm.vz;
+            output_spherical_camera->values.distance = (toCamera.vz * ONE) / toCameraNorm.vz;
         } else {
-            arg0->values.distance = ONE / 4;
+            output_spherical_camera->values.distance = ONE / 4;
         }
     }
     return yaw;
@@ -1030,35 +1030,35 @@ void Field_SetCameraLookAt(VECTOR* inLookAt)
 }
 
 // decomp: BATTLE.PRG vs_battle_setCameraRoll (src/BATTLE/BATTLE.PRG/146C.c:8153)
-void Field_SetCameraRoll(int arg0) { Render_frameScratch.camera.angles.vz = arg0; }
+void Field_SetCameraRoll(int roll_angle) { Render_frameScratch.camera.angles.vz = roll_angle; }
 
 // decomp: BATTLE.PRG vs_battle_getCameraRoll (src/BATTLE/BATTLE.PRG/146C.c:8155)
 int Field_CameraRoll(void) { return Render_frameScratch.camera.angles.vz & 0xFFF; }
 
 // decomp: BATTLE.PRG func_8007BDD8 (src/BATTLE/BATTLE.PRG/146C.c:8573)
-int Field_SetFirstPersonViewDisabled(int arg0)
+int Field_SetFirstPersonViewDisabled(int disabled)
 {
     Field_ClearGeometryOcclusion();
-    return Field_isFirstPersonViewEnabled = ~arg0 & 1;
+    return Field_isFirstPersonViewEnabled = ~disabled & 1;
 }
 
 // decomp: BATTLE.PRG vs_battle_initialiseCameraFromSpherical (src/BATTLE/BATTLE.PRG/146C.c:9071)
 void Field_InitializeSphericalCamera(
     VECTOR* outputPos, VECTOR* outputLookAt, int facing, int mode)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery ashley_placement;
     int temp_v0;
-    int var_v0;
+    int facing_division_numerator;
 
     if (facing != -1) {
-        var_v0 = facing;
+        facing_division_numerator = facing;
         temp_v0 = Field_sphericalCamera.values.yaw;
         if (facing < 0) {
-            var_v0 = facing + 7;
+            facing_division_numerator = facing + 7;
         }
-        Field_sphericalCamera.delta.pitch = (facing - ((var_v0 >> 3) * 8))
+        Field_sphericalCamera.delta.pitch = (facing - ((facing_division_numerator >> 3) * 8))
                                                     << 9;
-        Field_sphericalCamera.values.yaw = (facing - ((var_v0 >> 3) * 8)) << 9;
+        Field_sphericalCamera.values.yaw = (facing - ((facing_division_numerator >> 3) * 8)) << 9;
     }
     if (mode == 1) {
         Field_sphericalCamera.initialDistance = 0x600;
@@ -1069,20 +1069,20 @@ void Field_InitializeSphericalCamera(
         Field_sphericalCamera.values.distance = 0x900;
         Field_sphericalCamera.delta.mode = mode;
     }
-    Actors_ActorPlacement(0, &sp10);
-    outputLookAt->vx = sp10.location.position.vx << 0xC;
-    outputLookAt->vy = (sp10.location.position.vy << 0xC) + 0xFFFA6000;
-    outputLookAt->vz = sp10.location.position.vz << 0xC;
+    Actors_ActorPlacement(0, &ashley_placement);
+    outputLookAt->vx = ashley_placement.location.position.vx << 0xC;
+    outputLookAt->vy = (ashley_placement.location.position.vy << 0xC) + 0xFFFA6000;
+    outputLookAt->vz = ashley_placement.location.position.vz << 0xC;
     Field_ClampCameraLookAtToZone(outputLookAt, outputLookAt);
     Field_ComputeSphericalCameraPosition(
         outputPos, outputLookAt, &Field_sphericalCamera.values);
 }
 
 // decomp: BATTLE.PRG func_8007CE74 (src/BATTLE/BATTLE.PRG/146C.c:9106)
-void Field_SetCameraPitchPreset(int arg0)
+void Field_SetCameraPitchPreset(int requested_pitch)
 {
-    if ((arg0 == -0x300) || (arg0 == -0x80)) {
-        Field_sphericalCamera.values.pitch = arg0;
+    if ((requested_pitch == -0x300) || (requested_pitch == -0x80)) {
+        Field_sphericalCamera.values.pitch = requested_pitch;
         return;
     }
     Field_sphericalCamera.values.pitch = -0x180;
