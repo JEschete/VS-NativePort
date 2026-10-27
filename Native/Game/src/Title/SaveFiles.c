@@ -150,7 +150,7 @@ void Title_SaveFiles_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_in
     u_int placeDivisor;
     int x1y1;
     int red;
-    int new_var4;
+    int number_right_offset;
 
     if (maxValue != 0) {
         currentValueDigits = (((currentValue * 64) + maxValue) - 1) / maxValue;
@@ -197,8 +197,8 @@ void Title_SaveFiles_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_in
     maxValueDigits = Menu_Files_DecimalDigitCount(maxValue);
     Title_SaveFiles_DrawSummaryLabel(xy - 1, stat + Menu_Files_FileMenuUiId_Hp);
     wh = currentValueDigits * 6;
-    new_var4 = 55;
-    xy = (xy - (wh - new_var4)) - (maxValueDigits * 5);
+    number_right_offset = 55;
+    xy = (xy - (wh - number_right_offset)) - (maxValueDigits * 5);
     placeDivisor = Title_kHpMpDigitDivisors[currentValueDigits];
     do {
         Title_SaveFiles_DrawImmediateSprite(xy - vs_getXY(0, 1),
@@ -215,14 +215,14 @@ void Title_SaveFiles_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_in
 // decomp: TITLE.PRG _fileProcessingAnim (src/TITLE/TITLE.PRG/22C.c:1233)
 void Title_SaveFiles_DrawTransferProgress(int x, int y)
 {
-    char* new_var __attribute__((unused));
+    char* saving_flag_alias __attribute__((unused));
     int gradientColor1;
     int gradientColor2;
     u_int leftEdge;
     u_int i;
 
     leftEdge = x - 48;
-    new_var = &Title_isSaving;
+    saving_flag_alias = &Title_isSaving;
 
     if (leftEdge < 64) {
         leftEdge = 64;
@@ -439,16 +439,16 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
     u_long clut[130];
     Save_CardFileInfoRecord* saveInfo;
     int xy;
-    int var_a3;
+    int location_fade_texture_flags;
     int location;
     int x;
     int y;
-    int var1;
-    int var2;
+    int left_color_text_index_or_stat;
+    int right_color_glyph_or_slot;
     int uvClut;
     int slotState;
     u_short* locationClut;
-    int new_var;
+    int location_texture_page_x;
 
     if (element->selected != 0) {
         element->outertextBlendFactor = 8;
@@ -460,8 +460,8 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
     }
     if ((element->slotId >= 5) || ((element->y - 72) < 0x51U)) {
         y = element->innertextBlendFactor;
-        var1 = Menu_Files_ElementBackgroundColor(8 - element->outertextBlendFactor, y);
-        var2 = Menu_Files_ElementBackgroundColor(element->outertextBlendFactor, y);
+        left_color_text_index_or_stat = Menu_Files_ElementBackgroundColor(8 - element->outertextBlendFactor, y);
+        right_color_glyph_or_slot = Menu_Files_ElementBackgroundColor(element->outertextBlendFactor, y);
         if (y & 7) {
             element->innertextBlendFactor = y + 1;
         }
@@ -474,35 +474,35 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
         Title_fileMenuPrimitiveBuffer.prim.tilePoly.tileTpage.position =
             ((element->x + 2) & 0xFFFF) | (element->y + 2) << 16;
         Title_fileMenuPrimitiveBuffer.prim.tilePoly.tileTpage.size = element->w | (element->h << 0x10);
-        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorZeroAndCode = vs_getRGB0Raw(Render_LegacyPrimitiveCode_PolyG4, var1);
+        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorZeroAndCode = vs_getRGB0Raw(Render_LegacyPrimitiveCode_PolyG4, left_color_text_index_or_stat);
         Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.positionZero = (u_short)element->x | y;
-        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorOne = var2;
+        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorOne = right_color_glyph_or_slot;
         Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.positionOne = ((element->x + element->w) & 0xFFFF) | y;
-        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorTwo = var1;
+        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorTwo = left_color_text_index_or_stat;
         Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.positionTwo =
             (u_short)element->x | ((element->y + element->h) << 0x10);
-        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorThree = var2;
+        Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.colorThree = right_color_glyph_or_slot;
         Title_fileMenuPrimitiveBuffer.prim.tilePoly.polyG4.positionThree =
             ((element->x + element->w) & 0xFFFF) | ((element->y + element->h) << 0x10);
         DrawPrim(&Title_fileMenuPrimitiveBuffer);
 
         x = element->x + 6;
-        for (var1 = 0; var1 < 32; ++var1) {
-            var2 = element->text[var1];
-            if (var2 == Core_TextCode_Spacing) {
-                x += element->text[++var1];
-            } else if (var2 != 0xFF) {
-                x = Title_SaveFiles_DrawGlyph(var2, x, element->y, 0);
+        for (left_color_text_index_or_stat = 0; left_color_text_index_or_stat < 32; ++left_color_text_index_or_stat) {
+            right_color_glyph_or_slot = element->text[left_color_text_index_or_stat];
+            if (right_color_glyph_or_slot == Core_TextCode_Spacing) {
+                x += element->text[++left_color_text_index_or_stat];
+            } else if (right_color_glyph_or_slot != 0xFF) {
+                x = Title_SaveFiles_DrawGlyph(right_color_glyph_or_slot, x, element->y, 0);
             } else {
                 break;
             }
         }
-        var2 = element->slotId;
-        if (var2 < 5) {
+        right_color_glyph_or_slot = element->slotId;
+        if (right_color_glyph_or_slot < 5) {
             Render_ReadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
-            saveInfo = &Title_saveFileSummaries[var2];
+            saveInfo = &Title_saveFileSummaries[right_color_glyph_or_slot];
             location = element->saveLocation - 1;
-            var1 = saveInfo->summary.base.slotState;
+            left_color_text_index_or_stat = saveInfo->summary.base.slotState;
             if (saveInfo->summary.base.slotState < 3) {
                 if (saveInfo->summary.base.slotState == 0) {
                     location = -2;
@@ -528,18 +528,18 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
                 Title_SaveFiles_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32),
                     ((8 - element->outertextBlendFactor) << 19) | 0x9C);
             } else {
-                int v0;
+                int location_texture_page;
                 uvClut = ((location & 8) * 8) | ((location & 7) << 0xD)
                        | vs_getUV0Clut(0, 0, 768, 227);
                 xy = (element->x - 64) | y;
-                new_var = (((location & 0x30) * 4) + 832) & 0x3FF;
-                v0 = new_var >> 6;
-                var_a3 = (((8 - element->outertextBlendFactor) << 19) | 0x90);
-                Title_SaveFiles_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32), v0 | var_a3);
+                location_texture_page_x = (((location & 0x30) * 4) + 832) & 0x3FF;
+                location_texture_page = location_texture_page_x >> 6;
+                location_fade_texture_flags = (((8 - element->outertextBlendFactor) << 19) | 0x90);
+                Title_SaveFiles_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32), location_texture_page | location_fade_texture_flags);
             }
             Render_UploadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
             Title_SaveFiles_DrawSummaryLabel((element->x - 22) | y, Menu_Files_FileMenuUiId_Number);
-            Menu_Files_DrawInteger((element->x - 9) | y, var2 + 1, 0xAU);
+            Menu_Files_DrawInteger((element->x - 9) | y, right_color_glyph_or_slot + 1, 0xAU);
             slotState = saveInfo->summary.base.slotState;
             if (slotState == Save_CardFileSlotStatus_Unavailable) {
                 Menu_Files_DrawText((char*)(Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_inUse),
@@ -560,13 +560,13 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
                     element->x + 6, element->y + 4, 0);
                 Title_SaveFiles_DrawSummaryLabel(y | 172, Menu_Files_FileMenuUiId_Map);
                 Title_SaveFiles_DrawSummaryLabel(y | 189, Menu_Files_FileMenuUiId_Colon);
-                var1 = saveInfo->summary.stats.mapCompletion;
+                left_color_text_index_or_stat = saveInfo->summary.stats.mapCompletion;
 
-                if (var1 == 100) {
+                if (left_color_text_index_or_stat == 100) {
                     Menu_Files_DrawInteger(y | 192, 100, 100);
                     Title_SaveFiles_DrawSummaryLabel((y + 0xFFFF0000) | 207, Menu_Files_FileMenuUiId_Percent);
                 } else {
-                    Menu_Files_DrawInteger(y | 192, var1, 10);
+                    Menu_Files_DrawInteger(y | 192, left_color_text_index_or_stat, 10);
                     Title_SaveFiles_DrawSummaryLabel((y + 0xFFFF0000) | 202, Menu_Files_FileMenuUiId_Percent);
                 }
                 Title_SaveFiles_DrawSummaryLabel(y | 217, Menu_Files_FileMenuUiId_Save);
@@ -581,11 +581,11 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
                         getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, 768, 0));
                 }
                 Title_SaveFiles_DrawSummaryLabel(y | 240, Menu_Files_FileMenuUiId_Time);
-                var1 = saveInfo->summary.stats.gameTime.t.hours;
-                if (var1 == 100) {
-                    Menu_Files_DrawInteger(y | 263, var1, 100);
+                left_color_text_index_or_stat = saveInfo->summary.stats.gameTime.t.hours;
+                if (left_color_text_index_or_stat == 100) {
+                    Menu_Files_DrawInteger(y | 263, left_color_text_index_or_stat, 100);
                 } else {
-                    Menu_Files_DrawInteger(y | 268, var1, 10);
+                    Menu_Files_DrawInteger(y | 268, left_color_text_index_or_stat, 10);
                 }
                 Title_SaveFiles_DrawSummaryLabel(y | 279, Menu_Files_FileMenuUiId_Colon);
                 Menu_Files_DrawInteger(y | 282, saveInfo->summary.stats.gameTime.t.minutes, 10);
@@ -602,12 +602,12 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
                     signed char* p = (Title_kFileOperationCursorSaturation + Title_transferProgressCounter++);
                     Title_SaveFiles_DrawTransferComplete(-p[17], y);
                 } else {
-                    int new_var3 = 0x140;
+                    int progress_target_x = 0x140;
                     Title_SaveFiles_DrawTransferProgress(
                         Title_transferProgressPosition
                             + (((Title_transferProgressCounter - Title_previousTransferProgress)
                                    * ((Title_saveTransferErrorOffset * 0x14)
-                                       - (Title_transferProgressPosition - new_var3)))
+                                       - (Title_transferProgressPosition - progress_target_x)))
                                 / Title_transferProgressTarget),
                         y);
                 }
@@ -625,7 +625,7 @@ void Title_SaveFiles_DrawFrame(int framebuf)
     int i;
     u_int x;
     int state;
-    int new_var;
+    int strip_width_and_texture_mode;
 
     element = Title_fileMenuElements;
     x = 0;
@@ -700,11 +700,11 @@ void Title_SaveFiles_DrawFrame(int framebuf)
     }
 
     for (i = 1; i < 4; ++i) {
-        new_var = 256;
+        strip_width_and_texture_mode = 256;
         Title_SaveFiles_DrawImmediateSprite(vs_getXY(0, 187 - i), (187 - i) << 8, vs_getWH(256, 1),
-            (x >> 6) | (((4 - i) << 21) | new_var));
+            (x >> 6) | (((4 - i) << 21) | strip_width_and_texture_mode));
         Title_SaveFiles_DrawImmediateSprite(vs_getXY(256, 187 - i), (187 - i) << 8, vs_getWH(64, 1),
-            (((int)(x + new_var)) >> 6) | (((4 - i) << 21) | new_var));
+            (((int)(x + strip_width_and_texture_mode)) >> 6) | (((4 - i) << 21) | strip_width_and_texture_mode));
     }
     Title_SaveFiles_DrawImmediateSprite(vs_getXY(10, 181), vs_getUV0Clut(64, 145, 848, 223), vs_getWH(33, 7),
         getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, 768, 0)); // "Caution"
@@ -850,9 +850,9 @@ int Title_SaveFiles_UpdateLoadFiles(int initPort)
         currentSlot = Title_SaveFiles_CheckCardStep(0);
         if (currentSlot != Title_CardPollResult_Pending) {
             if (currentSlot >= Title_CardPollResult_Pending) {
-                int new_var;
+                int card_and_partial_read_flags;
                 Title_SaveCard_ReadSaveStep(
-                    ((Title_loadMenuSelectedSlot + Title_loadMenuPageIndex) + 1) | (new_var = ((Title_loadMenuCardSlot - 1) << 16) | 256));
+                    ((Title_loadMenuSelectedSlot + Title_loadMenuPageIndex) + 1) | (card_and_partial_read_flags = ((Title_loadMenuCardSlot - 1) << 16) | 256));
                 Title_loadMenuPhase = Menu_Files_LoadFilesState_ApplyLoad;
                 Title_memoryCardMessage = (char*)(Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_loading);
             } else {
@@ -1041,7 +1041,7 @@ long Title_SaveFiles_UpdateLoadCard(int initPort)
 }
 
 // decomp: TITLE.PRG _promptConfirm (src/TITLE/TITLE.PRG/22C.c:2330)
-int Title_SaveFiles_UpdateConfirmation(int arg0)
+int Title_SaveFiles_UpdateConfirmation(int initialize)
 {
     enum Menu_Files_ConfirmationState {
         Menu_Files_ConfirmationState_InitYes = 0,
@@ -1054,10 +1054,10 @@ int Title_SaveFiles_UpdateConfirmation(int arg0)
     static char Title_confirmationWasCancelled;
     static char Title_confirmationPadding[2] __attribute__((unused));
 
-    Menu_Files_FileMenuElement* temp_v0;
+    Menu_Files_FileMenuElement* confirmation_element;
     int i;
 
-    if (arg0 != 0) {
+    if (initialize != 0) {
         Title_confirmationWasCancelled = 1;
         Title_confirmationPhase = Menu_Files_ConfirmationState_InitYes;
         return 0;
@@ -1066,11 +1066,11 @@ int Title_SaveFiles_UpdateConfirmation(int arg0)
     switch (Title_confirmationPhase) {
     case Menu_Files_ConfirmationState_InitYes:
     case Menu_Files_ConfirmationState_InitNo:
-        temp_v0 = Title_SaveFiles_InitializeElement(Title_confirmationPhase + 3,
+        confirmation_element = Title_SaveFiles_InitializeElement(Title_confirmationPhase + 3,
             vs_getXY(-126 & 0xFFFF, Title_confirmationPhase * 16 + 18), vs_getWH(126, 12),
             (char*)&Title_saveMenuText[Title_saveMenuText[Title_confirmationPhase + Text_Menu_MCMAN_BIN_Index_yesIndent]]);
-        temp_v0->state = 4;
-        temp_v0->targetPosition = 0;
+        confirmation_element->state = 4;
+        confirmation_element->targetPosition = 0;
         ++Title_confirmationPhase;
         break;
     case Menu_Files_ConfirmationState_WaitForAnimation:

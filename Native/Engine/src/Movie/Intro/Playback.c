@@ -16,23 +16,23 @@ int Movie_Intro_frameHeight = 0;
 int Movie_Intro_frameWidth = 0;
 
 // decomp: TITLE.PRG _initMovieData (src/TITLE/TITLE.PRG/22C.c:3433)
-void Movie_Intro_InitializeFrameBuffers(Movie_Intro_MdecState* arg0, short x0, short y0, short x1, int y1)
+void Movie_Intro_InitializeFrameBuffers(Movie_Intro_MdecState* movie_state, short x0, short y0, short x1, int y1)
 {
-    arg0->frameRects[0].x = x0;
-    arg0->sliceRect.x = x0;
-    arg0->frameRects[0].y = y0;
-    arg0->sliceRect.y = y0;
-    arg0->encodedBufferIndex = 0;
-    arg0->decodedBufferIndex = 0;
-    arg0->frameRects[1].x = x1;
-    arg0->frameRectIndex = 0;
-    arg0->sliceRect.w = 24;
-    arg0->frameComplete = 0;
-    arg0->encodedBuffers[0] = Movie_Intro_legacyEncodedFrameZero;
-    arg0->encodedBuffers[1] = Movie_Intro_legacyEncodedFrameOne;
-    arg0->decodedBuffers[0] = Movie_Intro_legacyDecodedStripZero;
-    arg0->decodedBuffers[1] = Movie_Intro_legacyDecodedStripOne;
-    arg0->frameRects[1].y = y1;
+    movie_state->frameRects[0].x = x0;
+    movie_state->sliceRect.x = x0;
+    movie_state->frameRects[0].y = y0;
+    movie_state->sliceRect.y = y0;
+    movie_state->encodedBufferIndex = 0;
+    movie_state->decodedBufferIndex = 0;
+    movie_state->frameRects[1].x = x1;
+    movie_state->frameRectIndex = 0;
+    movie_state->sliceRect.w = 24;
+    movie_state->frameComplete = 0;
+    movie_state->encodedBuffers[0] = Movie_Intro_legacyEncodedFrameZero;
+    movie_state->encodedBuffers[1] = Movie_Intro_legacyEncodedFrameOne;
+    movie_state->decodedBuffers[0] = Movie_Intro_legacyDecodedStripZero;
+    movie_state->decodedBuffers[1] = Movie_Intro_legacyDecodedStripOne;
+    movie_state->frameRects[1].y = y1;
 }
 
 // decomp: TITLE.PRG _initMoviePlayback (src/TITLE/TITLE.PRG/22C.c:3452)
@@ -81,12 +81,12 @@ void Movie_Intro_OnDecodedStrip(void)
 int Movie_Intro_DecodeNextFrame(Movie_Intro_MdecState* movie)
 {
     u_long* frameData;
-    int i;
+    int poll_attempts_left;
 
-    i = 2000;
+    poll_attempts_left = 2000;
 
     while ((frameData = (u_long*)Movie_Intro_ReadNextFrame(movie)) == 0) {
-        if (--i == 0) {
+        if (--poll_attempts_left == 0) {
             return -1;
         }
     }
@@ -103,11 +103,11 @@ u_short* Movie_Intro_ReadNextFrame(Movie_Intro_MdecState* movie)
     RECT rect;
     void* addr;
     StHEADER* header;
-    int i;
-    u_int temp_v1;
+    int poll_attempts_left;
+    u_int rgb_row_bytes;
 
-    for (i = 2000; StGetNext((u_long**)&addr, (u_long**)&header) != 0;) {
-        if (--i == 0) {
+    for (poll_attempts_left = 2000; StGetNext((u_long**)&addr, (u_long**)&header) != 0;) {
+        if (--poll_attempts_left == 0) {
             return 0;
         }
     }
@@ -118,9 +118,9 @@ u_short* Movie_Intro_ReadNextFrame(Movie_Intro_MdecState* movie)
         Movie_Intro_frameWidth = header->width;
         Movie_Intro_frameHeight = header->height;
     }
-    temp_v1 = Movie_Intro_frameWidth * 3;
-    movie->frameRects[1].w = (int)(temp_v1 + (temp_v1 >> 31)) >> 1;
-    movie->frameRects[0].w = (int)(temp_v1 + (temp_v1 >> 31)) >> 1;
+    rgb_row_bytes = Movie_Intro_frameWidth * 3;
+    movie->frameRects[1].w = (int)(rgb_row_bytes + (rgb_row_bytes >> 31)) >> 1;
+    movie->frameRects[0].w = (int)(rgb_row_bytes + (rgb_row_bytes >> 31)) >> 1;
     movie->frameRects[1].h = Movie_Intro_frameHeight;
     movie->frameRects[0].h = Movie_Intro_frameHeight;
     movie->sliceRect.h = Movie_Intro_frameHeight;
@@ -130,19 +130,19 @@ u_short* Movie_Intro_ReadNextFrame(Movie_Intro_MdecState* movie)
 // decomp: TITLE.PRG _waitForFrame (src/TITLE/TITLE.PRG/22C.c:3542)
 void Movie_Intro_WaitForDecodedFrame(Movie_Intro_MdecState* movie, int arg1 __attribute__((unused)))
 {
-    volatile int sp0[2];
-    int* new_var;
-    int i = movie->frameComplete;
-    sp0[0] = 0x800000;
+    volatile int decode_spin_countdown[2];
+    int* frame_complete_alias;
+    int frame_complete = movie->frameComplete;
+    decode_spin_countdown[0] = 0x800000;
 
-    while ((*(new_var = &i)) == 0) {
-        if ((--sp0[0]) == 0) {
+    while ((*(frame_complete_alias = &frame_complete)) == 0) {
+        if ((--decode_spin_countdown[0]) == 0) {
             movie->frameComplete = 1;
             movie->frameRectIndex = movie->frameRectIndex == 0;
             movie->sliceRect.x = movie->frameRects[movie->frameRectIndex].x;
             movie->sliceRect.y = movie->frameRects[movie->frameRectIndex].y;
         }
-        i = movie->frameComplete;
+        frame_complete = movie->frameComplete;
     }
 
     movie->frameComplete = 0;

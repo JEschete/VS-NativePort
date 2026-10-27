@@ -76,7 +76,7 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element);
 void Title_SaveFiles_DrawFrame(int framebuf);
 int Title_SaveFiles_UpdateLoadFiles(int initPort);
 long Title_SaveFiles_UpdateLoadCard(int initPort);
-int Title_SaveFiles_UpdateConfirmation(int arg0);
+int Title_SaveFiles_UpdateConfirmation(int initialize);
 int Title_SaveFiles_UpdateOverwritePrompt(int init);
 int Title_SaveFiles_UpdateFormatPrompt(int initPort);
 int Title_SaveFiles_UpdateSaveFiles(int initPort);

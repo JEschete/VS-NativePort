@@ -26,7 +26,7 @@ extern u_int Movie_Intro_playbackStartTick;;
 extern int Movie_Intro_isPlaying;;
 extern int Movie_Intro_frameHeight;
 extern int Movie_Intro_frameWidth;
-void Movie_Intro_InitializeFrameBuffers(Movie_Intro_MdecState* arg0, short x0, short y0, short x1, int y1);
+void Movie_Intro_InitializeFrameBuffers(Movie_Intro_MdecState* movie_state, short x0, short y0, short x1, int y1);
 void Movie_Intro_InitializeStream(DslLOC* loc, void (*dctoutCb)(void));
 void Movie_Intro_OnDecodedStrip(void);
 int Movie_Intro_DecodeNextFrame(Movie_Intro_MdecState* movie);

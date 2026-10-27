@@ -32,7 +32,7 @@ int Title_SaveCard_ReadSaveSummary(int id);
 int Title_SaveCard_HasSaveSuffix(int id);
 int Title_SaveCard_ScanSaveDirectory(int port);
 enum Save_CardReadinessResult Title_SaveCard_AdvanceCardReadiness(int initPort);
-int Title_SaveCard_ValidateAndApplyLoadedSave(int verifyOnly);
+int Title_SaveCard_ValidateAndApplyLoadedSave(int apply_loaded_state);
 int Title_SaveCard_ReadSaveStep(int portFileno);
 int Title_SaveCard_WriteSaveStep(int portFile);
 

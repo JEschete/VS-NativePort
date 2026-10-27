@@ -85,7 +85,7 @@ typedef enum Save_CardEventSignal Save_CardEventSignal;
 typedef struct Save_SaveSlotBase {
     enum Save_CardFileSlotStatus slotState;
     u_int generation;
-    int opaque8;
+    int formatSignature;
 } Save_SaveSlotBase;
 _Static_assert(sizeof(Save_SaveSlotBase) == 0xC, "Save_SaveSlotBase must keep its PS1 layout");
 
@@ -108,7 +108,7 @@ typedef struct Save_SaveFileStats {
 typedef struct Save_SaveFileSummary {
     Save_SaveSlotBase base;
     Save_SaveFileStats stats;
-    u_short opaque20[16];
+    u_short cardTitleTail[16];
 } Save_SaveFileSummary;
 
 // decomp: saveFileInfo_t (src/MENU/MENU7.PRG/260.c:76)
@@ -176,7 +176,7 @@ int Save_MemoryCard_DeleteRedundantTemporaryFiles(int port);
 int Save_MemoryCard_ScanSaveDirectory(int port);
 int Save_MemoryCard_CreateSaveFile(int port, int id);
 enum Save_CardReadinessResult Save_MemoryCard_AdvanceCardReadiness(int initPort);
-int Save_MemoryCard_ValidateAndApplyLoadedSave(int write);
+int Save_MemoryCard_ValidateAndApplyLoadedSave(int apply_loaded_state);
 void Save_MemoryCard_PackageGameSave(int targetFile);
 int Save_MemoryCard_ReadSaveStep(int portFileno);
 int Save_MemoryCard_WriteSaveStep(int portFile);

@@ -319,48 +319,48 @@ enum Save_CardReadinessResult Title_SaveCard_AdvanceCardReadiness(int initPort)
 }
 
 // decomp: TITLE.PRG _applyLoadedSaveFile (src/TITLE/TITLE.PRG/22C.c:569)
-int Title_SaveCard_ValidateAndApplyLoadedSave(int verifyOnly)
+int Title_SaveCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
 {
     int blockCount;
-    Save_GameSaveImage* spmcimg = (Save_GameSaveImage*)Title_memoryCardUiResource;
-    void* spmcimg2 = spmcimg + 1;
-    Save_GameSaveImage* s4 = spmcimg + 1;
-    Save_SaveCipherHeader* unk180 = &spmcimg[1].protectedHeader.cipherHeader;
+    Save_GameSaveImage* save_image_workspace = (Save_GameSaveImage*)Title_memoryCardUiResource;
+    void* spmcimg2 = save_image_workspace + 1;
+    Save_GameSaveImage* loaded_save_image = save_image_workspace + 1;
+    Save_SaveCipherHeader* cipher_header = &save_image_workspace[1].protectedHeader.cipherHeader;
 
-    Save_MemoryCard_DecodeSaveBytes(unk180->cipherKey, &unk180->slotHeader.slotState,
+    Save_MemoryCard_DecodeSaveBytes(cipher_header->cipherKey, &cipher_header->slotHeader.slotState,
         sizeof(Save_GameSaveImage) - (uintptr_t) & ((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState);
 
     blockCount = 92;
-    if (verifyOnly != 0) {
+    if (apply_loaded_state != 0) {
         blockCount = 32;
     }
 
-    if ((Save_MemoryCard_HasChecksumError(spmcimg + 1, blockCount) != 0)
-        || (unk180->slotHeader.opaque8 != 0x20000107)) {
+    if ((Save_MemoryCard_HasChecksumError(save_image_workspace + 1, blockCount) != 0)
+        || (cipher_header->slotHeader.formatSignature != 0x20000107)) {
         do {
             return 1;
         } while (0);
     }
 
-    if (verifyOnly == 0) {
+    if (apply_loaded_state == 0) {
         return 0;
     }
 
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedStateFlags, spmcimg[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
-    Core_Memory_CopyBytesBackward(State_learnedActionFlags, spmcimg[1].learnedActions, sizeof State_learnedActionFlags);
-    Core_Memory_CopyBytesBackward(&State_roomVisitProgress, spmcimg[1].mapStatus, sizeof State_roomVisitProgress);
-    Core_Memory_CopyBytesBackward(&Input_settings, &spmcimg[1].settings, sizeof Input_settings);
-    Core_Memory_CopyBytesBackward(&State_ashleySnapshot, &spmcimg[1].ashleySnapshot, sizeof State_ashleySnapshot);
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedInventory, &spmcimg[1].inventory, sizeof Audio_Seq_unusedInventory);
+    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedStateFlags, save_image_workspace[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
+    Core_Memory_CopyBytesBackward(State_learnedActionFlags, save_image_workspace[1].learnedActions, sizeof State_learnedActionFlags);
+    Core_Memory_CopyBytesBackward(&State_roomVisitProgress, save_image_workspace[1].mapStatus, sizeof State_roomVisitProgress);
+    Core_Memory_CopyBytesBackward(&Input_settings, &save_image_workspace[1].settings, sizeof Input_settings);
+    Core_Memory_CopyBytesBackward(&State_ashleySnapshot, &save_image_workspace[1].ashleySnapshot, sizeof State_ashleySnapshot);
+    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedInventory, &save_image_workspace[1].inventory, sizeof Audio_Seq_unusedInventory);
     Core_Memory_CopyBytesBackward(
-        &Audio_Seq_unusedInventoryIndices, &spmcimg[1].inventoryIndices, sizeof Audio_Seq_unusedInventoryIndices);
-    Core_Memory_CopyBytesBackward(&State_savedEntryDoor, &spmcimg[1].entryDoor, sizeof State_savedEntryDoor);
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedScoredata, &spmcimg[1].scoreData, sizeof Audio_Seq_unusedScoredata);
-    State_currentRoomStateSlot = s4->roomStateSlot;
-    Core_Memory_CopyBytesBackward(State_recentRoomEnemyStates, spmcimg[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
+        &Audio_Seq_unusedInventoryIndices, &save_image_workspace[1].inventoryIndices, sizeof Audio_Seq_unusedInventoryIndices);
+    Core_Memory_CopyBytesBackward(&State_savedEntryDoor, &save_image_workspace[1].entryDoor, sizeof State_savedEntryDoor);
+    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedScoredata, &save_image_workspace[1].scoreData, sizeof Audio_Seq_unusedScoredata);
+    State_currentRoomStateSlot = loaded_save_image->roomStateSlot;
+    Core_Memory_CopyBytesBackward(State_recentRoomEnemyStates, save_image_workspace[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
     spmcimg2 = &Audio_Seq_unusedArtsStatus;
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedArtsStatus, &spmcimg[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
-    State_playTime.t = spmcimg[1].protectedHeader.summary.gameTime.t;
+    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
+    State_playTime.t = save_image_workspace[1].protectedHeader.summary.gameTime.t;
     Save_MarkAshleySnapshotValid();
     Audio_SetMonoOutput(Input_settings.monoSound);
     return 0;
@@ -379,7 +379,7 @@ int Title_SaveCard_ReadSaveStep(int portFileno)
     static short Title_saveReadPadding __attribute__((unused));
     static int Title_saveReadFileDescriptor;
 
-    void* temp_s2 = (Save_GameSaveImage*)Title_memoryCardUiResource + 1;
+    void* loaded_save_buffer = (Save_GameSaveImage*)Title_memoryCardUiResource + 1;
 
     if (portFileno != 0) {
         Title_saveReadPhase = Save_SaveReadState_Init;
@@ -397,17 +397,17 @@ int Title_SaveCard_ReadSaveStep(int portFileno)
     case Save_SaveReadState_Init: {
         int nBytes;
         char* filename;
-        int new_var = 320;
+        int progress_target_x = 320;
 
         Title_transferProgressPosition +=
             ((Title_transferProgressCounter - Title_previousTransferProgress)
-                * ((Title_saveTransferErrorOffset * 20) - (Title_transferProgressPosition - new_var)))
+                * ((Title_saveTransferErrorOffset * 20) - (Title_transferProgressPosition - progress_target_x)))
             / Title_transferProgressTarget;
         Title_saveTransferErrorOffset = Title_saveReadErrorCount;
         Title_transferProgressTarget = 192 - (Title_isReadingTemporarySave << 7);
         Title_previousTransferProgress = Title_transferProgressCounter;
 
-        memset(temp_s2, 0, sizeof(Save_GameSaveImage));
+        memset(loaded_save_buffer, 0, sizeof(Save_GameSaveImage));
 
         if (Title_saveReadFileIndex & 8) {
             filename = Save_MemoryCard_BuildTemporaryFilename(Title_saveReadCardSlot, Title_saveReadFileIndex & 7);
@@ -424,7 +424,7 @@ int Title_SaveCard_ReadSaveStep(int portFileno)
         if (Title_isReadingTemporarySave != 0) {
             nBytes = 0x2000;
         }
-        if (LegacyApi_read(Title_saveReadFileDescriptor, temp_s2, nBytes) == -1) {
+        if (LegacyApi_read(Title_saveReadFileDescriptor, loaded_save_buffer, nBytes) == -1) {
             LegacyApi_close(Title_saveReadFileDescriptor);
             ++Title_saveReadErrorCount;
             break;
@@ -467,9 +467,9 @@ int Title_SaveCard_WriteSaveStep(int portFile)
     static char Title_saveWritePadding[3] __attribute__((unused));
     static int Title_saveWriteFileDescriptor;
 
-    int temp_v1_2;
+    int progress_x_delta;
     int i;
-    int temp_s3;
+    int io_result_or_saved_progress;
 
     if (portFile != 0) {
         Title_saveWriteErrorCount = 0;
@@ -495,12 +495,12 @@ int Title_SaveCard_WriteSaveStep(int portFile)
         }
         break;
     case Save_SaveWriteState_TemporaryFileCreated:
-        temp_v1_2 = ((Title_transferProgressCounter - Title_previousTransferProgress)
+        progress_x_delta = ((Title_transferProgressCounter - Title_previousTransferProgress)
                         * (320 - Title_transferProgressPosition))
                   / Title_transferProgressTarget;
         Title_previousTransferProgress = Title_transferProgressCounter;
         Title_transferProgressTarget = 384;
-        Title_transferProgressPosition += temp_v1_2;
+        Title_transferProgressPosition += progress_x_delta;
         Title_saveWriteFileDescriptor = LegacyApi_open(Save_MemoryCard_BuildTemporaryFilename(Title_saveWriteCardSlot, Title_saveWriteFileIndex), O_NOWAIT | O_WRONLY);
         ;
         if (Title_saveWriteFileDescriptor == -1) {
@@ -516,16 +516,16 @@ int Title_SaveCard_WriteSaveStep(int portFile)
         Title_saveWritePhase = Save_SaveWriteState_ReadReady;
         // fallthrough
     case Save_SaveWriteState_ReadReady: {
-        temp_s3 = Title_SaveCard_PollEvents(Save_CardEventGroup_Software);
-        if (temp_s3 < Save_CardEventSignal_None) {
+        io_result_or_saved_progress = Title_SaveCard_PollEvents(Save_CardEventGroup_Software);
+        if (io_result_or_saved_progress < Save_CardEventSignal_None) {
             LegacyApi_close(Title_saveWriteFileDescriptor);
-            if (temp_s3 == Save_CardEventSignal_IoEnd) {
+            if (io_result_or_saved_progress == Save_CardEventSignal_IoEnd) {
                 Title_saveWritePhase = Save_SaveWriteState_VerifyPending;
                 i = Title_transferProgressPosition;
-                temp_s3 = Title_previousTransferProgress;
+                io_result_or_saved_progress = Title_previousTransferProgress;
                 Title_SaveCard_ReadSaveStep((Title_saveWriteCardSlot << 12) | (Title_saveWriteFileIndex + 8));
                 Title_transferProgressPosition = i;
-                Title_previousTransferProgress = temp_s3;
+                Title_previousTransferProgress = io_result_or_saved_progress;
             } else {
                 ++Title_saveWriteErrorCount;
                 Title_saveWritePhase = Save_SaveWriteState_TemporaryFileCreated;
@@ -534,11 +534,11 @@ int Title_SaveCard_WriteSaveStep(int portFile)
         break;
     }
     case Save_SaveWriteState_VerifyPending:
-        temp_s3 = Title_SaveCard_ReadSaveStep(0);
-        if (temp_s3 == 0) {
+        io_result_or_saved_progress = Title_SaveCard_ReadSaveStep(0);
+        if (io_result_or_saved_progress == 0) {
             break;
         }
-        if (temp_s3 < 0) {
+        if (io_result_or_saved_progress < 0) {
             return -1;
         }
         for (i = 0; i < (int)sizeof(Save_GameSaveImage); ++i) {

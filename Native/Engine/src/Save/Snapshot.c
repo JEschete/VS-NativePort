@@ -29,79 +29,79 @@ void Save_MarkAshleySnapshotValid(void) { State_ashleySnapshot.stats.isPending =
 // decomp: SLUS_010.40 func_80042CB0 (src/SLUS_010.40/main.c:8375)
 void Save_CaptureAshleySnapshot(void)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery ashley_placement;
     int j;
     int i;
-    int var_s1;
+    int action_byte_or_actor_slot;
     int var_t3;
     int new_var;
     int var_t4;
     signed char actionsLearned;
-    Battle_ActorStats* temp_t0;
-    State_AshleySnapshot* temp_t5;
+    Battle_ActorStats* ashley_stats;
+    State_AshleySnapshot* ashley_snapshot;
     int v0;
     int v0_2;
     int v1;
     int v1_2;
 
     State_savedEntryDoor = Field_pendingDestinationDoor;
-    Actors_ActorPlacement(0, &sp10);
+    Actors_ActorPlacement(0, &ashley_placement);
 
-    State_savedEntryDoor.entryTileX = sp10.location.packedTile.target.tileX;
-    State_savedEntryDoor.entryTileZ = sp10.location.packedTile.target.tileZ;
-    State_savedEntryDoor.tileLocation.entryDirection = sp10.location.packedTile.target.tileLayer;
-    State_savedEntryDoor.entryElevation = sp10.location.packedTile.target.facing >> 6;
+    State_savedEntryDoor.entryTileX = ashley_placement.location.packedTile.target.tileX;
+    State_savedEntryDoor.entryTileZ = ashley_placement.location.packedTile.target.tileZ;
+    State_savedEntryDoor.tileLocation.entryDirection = ashley_placement.location.packedTile.target.tileLayer;
+    State_savedEntryDoor.entryElevation = ashley_placement.location.packedTile.target.facing >> 6;
     State_savedEntryDoor.requiredFlagId = Field_snapshotDoorFlagSource.requiredFlagId;
 
-    for (var_s1 = 0; var_s1 < 32; ++var_s1) {
+    for (action_byte_or_actor_slot = 0; action_byte_or_actor_slot < 32; ++action_byte_or_actor_slot) {
         for (actionsLearned = 0, i = 0; i < 8; ++i) {
             actionsLearned =
-                (*(int*)&actionsLearned * 2) | Battle_actionDefinitions[var_s1 * 8 + i].unlocked;
+                (*(int*)&actionsLearned * 2) | Battle_actionDefinitions[action_byte_or_actor_slot * 8 + i].unlocked;
         }
-        State_learnedActionFlags[var_s1] = actionsLearned;
+        State_learnedActionFlags[action_byte_or_actor_slot] = actionsLearned;
     }
-    temp_t0 = Battle_characterState->stats;
-    temp_t5 = &State_ashleySnapshot;
-    temp_t5->stats.currentHp = temp_t0->currentHp;
-    temp_t5->stats.maxHp = temp_t0->maxHp;
-    temp_t5->stats.currentMp = temp_t0->currentMp;
-    temp_t5->stats.maxMp = temp_t0->maxMp;
-    temp_t5->stats.strength = temp_t0->strength;
-    temp_t5->stats.totalStrength = temp_t0->totalStrength;
-    temp_t5->stats.intelligence = temp_t0->intelligence;
-    temp_t5->stats.totalIntelligence = temp_t0->totalIntelligence;
-    temp_t5->stats.agility = temp_t0->agility;
-    temp_t5->stats.totalAgility = temp_t0->totalAgility;
-    temp_t5->stats.risk = temp_t0->risk;
-    temp_t5->stats.actorFlags = temp_t0->actionRecoveryTimer;
-    temp_t5->stats.statuses = temp_t0->statuses;
+    ashley_stats = Battle_characterState->stats;
+    ashley_snapshot = &State_ashleySnapshot;
+    ashley_snapshot->stats.currentHp = ashley_stats->currentHp;
+    ashley_snapshot->stats.maxHp = ashley_stats->maxHp;
+    ashley_snapshot->stats.currentMp = ashley_stats->currentMp;
+    ashley_snapshot->stats.maxMp = ashley_stats->maxMp;
+    ashley_snapshot->stats.strength = ashley_stats->strength;
+    ashley_snapshot->stats.totalStrength = ashley_stats->totalStrength;
+    ashley_snapshot->stats.intelligence = ashley_stats->intelligence;
+    ashley_snapshot->stats.totalIntelligence = ashley_stats->totalIntelligence;
+    ashley_snapshot->stats.agility = ashley_stats->agility;
+    ashley_snapshot->stats.totalAgility = ashley_stats->totalAgility;
+    ashley_snapshot->stats.risk = ashley_stats->risk;
+    ashley_snapshot->stats.actorFlags = ashley_stats->actionRecoveryTimer;
+    ashley_snapshot->stats.statuses = ashley_stats->statuses;
 
     for (i = 0; i < 8; ++i) {
-        temp_t5->stats.statusTimers[i] = temp_t0->statusTimers[i];
+        ashley_snapshot->stats.statusTimers[i] = ashley_stats->statusTimers[i];
     }
 
     var_t4 = 0;
     var_t3 = 0;
 
     for (i = 0; i < 6; ++i) {
-        temp_t5->stats.limbs[i].hp = temp_t0->limbs[i].hp;
-        temp_t5->stats.limbs[i].maxHp = temp_t0->limbs[i].maxHp;
+        ashley_snapshot->stats.limbs[i].hp = ashley_stats->limbs[i].hp;
+        ashley_snapshot->stats.limbs[i].maxHp = ashley_stats->limbs[i].maxHp;
 
         for (j = 0; j < 4; ++j) {
-            temp_t5->stats.limbs[i].types[j] = temp_t0->limbs[i].types[j];
+            ashley_snapshot->stats.limbs[i].types[j] = ashley_stats->limbs[i].types[j];
         }
 
         for (j = 0; j < 8; ++j) {
-            temp_t5->stats.limbs[i].affinities[j] = temp_t0->limbs[i].affinities[j];
+            ashley_snapshot->stats.limbs[i].affinities[j] = ashley_stats->limbs[i].affinities[j];
         }
     }
 
-    temp_t5->stats.weaponDrawn = Battle_characterState->weaponDrawn;
-    temp_t5->stats.cameraPitch = Field_sphericalCamera.delta.pitch;
-    temp_t5->stats.cameraDistance = Field_sphericalCamera.initialDistance;
+    ashley_snapshot->stats.weaponDrawn = Battle_characterState->weaponDrawn;
+    ashley_snapshot->stats.cameraPitch = Field_sphericalCamera.delta.pitch;
+    ashley_snapshot->stats.cameraDistance = Field_sphericalCamera.initialDistance;
 
-    for (var_s1 = 0; var_s1 < 16; ++var_s1) {
-        Actors_StoreRoomActorState(var_s1, 0);
+    for (action_byte_or_actor_slot = 0; action_byte_or_actor_slot < 16; ++action_byte_or_actor_slot) {
+        Actors_StoreRoomActorState(action_byte_or_actor_slot, 0);
     }
     Field_StoreEntranceDoorForReload();
 }

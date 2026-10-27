@@ -1109,7 +1109,7 @@ T00838.000,T00838,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-rev
 T00838.001,T00838,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:1070:9),1,polyG4,0,VS_POLY_G4,,,,gradientQuad,Gradient quad,med,declaration-only;source:22C.c:1072
 T00189.000,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),0,tag,0,u_long,,,,dmaTag,PS1 DMA packet tag,med,replaced-by:Render draw commands;declaration-only;source:22C.c:4494
 T00189.001,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),1,tile,0,VS_TILE_TPAGE,,,,tile,Tile and texture-page packet,med,replaced-by:Render rectangle commands;declaration-only;source:22C.c:4495
-T00189.002,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),2,_,0,char[44],,,,reserved14,Unresolved bytes following the tile packet,low,Do not discard until title-loop workspace uses are resolved;declaration-only;source:22C.c:4496
+T00189.002,T00189,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\TITLE\TITLE.PRG\22C.c:4493:12),2,_,0,char[44],,,,reserved14,Unresolved bytes following the tile packet,low,Do not discard until title-loop workspace uses are resolved;declaration-only;source:22C.c:4496;source-review:#148 Original vs_title_exec static fileBuf contains char _[44] after VS_TILE_TPAGE. The final fade accesses only tag/tile and DrawPrim(&fileBuf); no direct tail member reference exists. Native reserved14 distinguishes this member from the separate Title_titleLoopPadding static. Preserve all 44 bytes; DrawPrim use does not prove a semantic record in the tail.
 T00190.000,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),0,f,0,signed char,,,,frames,Frame component of elapsed game time,high,source:main.h:166
 T00190.001,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),1,s,0,signed char,,,,seconds,Second component of elapsed game time,high,source:main.h:166
 T00190.002,T00190,(unnamed at D:\Dev\NativePort\VS-NativePort\resources\rood-reverseWin\src\include\..\SLUS_010.40\main.h:166:5),2,m,0,signed char,,,,minutes,Minute component of elapsed game time,high,source:main.h:166
@@ -1210,7 +1210,7 @@ T00206.001,T00206,D_8005DC80_t,1,unk6,1,short[5],,,,blendParams,Shorts: [0..2] p
 T00206.002,T00206,D_8005DC80_t,2,unk10,1,int[6],,,colorValuesAndSteps,colorFixed,Current red green blue in 16.16 then the per-frame step of each,high,source:main.c:11012;source:main.c:11297
 T00206.003,T00206,D_8005DC80_t,3,unk28,1,D_8005DC6C_t,,,,baseColor,Base color that relative transitions are computed from,high,source:main.c:11051;source:main.c:11089
 T00207.000,T00207,D_80060068_t,0,unk0,1,D_80060068_t3,,,,stats,Ashley's statistics status and limb records,high,source:260.c:811
-T00207.001,T00207,D_80060068_t,1,unkDC,1,int[9],,,,reservedDC,Unread words completing the 256-byte snapshot,low,declaration-only;source:main.h:235
+T00207.001,T00207,D_80060068_t,1,unkDC,1,int[9],,,,reservedDC,Unread words completing the 256-byte snapshot,low,"declaration-only;source:main.h:235;source-review:#148 main.h:235 declares int unkDC[9] after the 0xDC-byte stats record, making the snapshot0x100. func_80042CB0 and Actors_RestoreAshleyRuntimeState access only stats; save packaging copies the whole snapshot. No tail-field reads or writes give these nine words a semantic payload. Preserve int[9] and the 0x100 assertion."
 T00208.000,T00208,D_80060068_t2,0,hp,0,u_short,,,,hp,Limb hit points,high,source:BATTLE/INITBTL.PRG/18.c:337
 T00208.001,T00208,D_80060068_t2,1,maxHp,0,u_short,,,,maxHp,Limb maximum hit points,high,source:BATTLE/INITBTL.PRG/18.c:338
 T00208.002,T00208,D_80060068_t2,2,types,0,u_short[4],,,,types,Saved limb type values,high,source:BATTLE/INITBTL.PRG/18.c:341
@@ -3296,7 +3296,7 @@ T00371.003,T00371,actionReactionAction,3,pad1C,1,char[24],,,,reserved1C,Not read
 T00372.000,T00372,actionReactionMotion,0,pad0,1,char[10],,,,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:710
 T00372.001,T00372,actionReactionMotion,1,flag,0,unsigned char,,,,isOrbiting,Cleared when the actor reacts (same byte as Battle::Ai::ArenaOrbitState.isOrbiting),med,source:74088.c:758
 T00373.000,T00373,actionReactionState,0,pad0,1,char[19],,,,reserved0,Not read through this view,low,declaration-only;source:74088.c:687
-T00373.001,T00373,actionReactionState,1,flag13,0,unsigned char,,,temporaryAshleyAlliance,usesRoomActionDelay,"Room action-delay override; the same byte marks the temporary Ashley alliance",high,source:74088.c:749;source:7399C.s:11;source:7399C.s:37
+T00373.001,T00373,actionReactionState,1,flag13,0,unsigned char,,,temporaryAshleyAlliance,usesRoomActionDelay,Room action-delay override; the same byte marks the temporary Ashley alliance,high,source:74088.c:749;source:7399C.s:11;source:7399C.s:37
 T00373.002,T00373,actionReactionState,2,pad14,1,char[12],,,,reserved14,Not read through this view,low,declaration-only;source:74088.c:689
 T00373.003,T00373,actionReactionState,3,flag20,0,unsigned char,,,,settingsBit26,Bit 26 of the AI settings word,low,source:74088.c:763
 T00373.004,T00373,actionReactionState,4,flag21,0,unsigned char,,,,settingsByte3Bit0,Bit 0 of settings byte 3,low,source:74088.c:810
@@ -4956,9 +4956,9 @@ T00546.001,T00546,limbEffects_t,1,value1,0,short,,,,opaque2,"Used, but its meani
 T00547.000,T00547,mcdata_t,0,locationCluts,0,u_short[2][256],,,,locationPalettes,Two palettes for the save-location artwork,high,source:260.c:1849
 T00547.001,T00547,mcdata_t,1,unk400,1,char[7][32],,,,fileIconPalettes,Per-file 32-byte card icon palette copied into the save header,med,source:260.c:771;PS1 card header icon palette at 0x60
 T00547.002,T00547,mcdata_t,2,unk4E0,1,char[7][128],,,,fileIconBitmaps,Per-file 128-byte card icon bitmap copied after the header,med,source:260.c:773;PS1 card icon frame at 0x80
-T00547.003,T00547,mcdata_t,3,unk860,1,char[7][128],,,,reserved860,No access found,low,declaration-only;source:260.c:156
-T00547.004,T00547,mcdata_t,4,unkBE0,1,char[8][128],,,,reservedBE0,No access found,low,declaration-only;source:260.c:157
-T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,reservedFE0,No access found,low,declaration-only;source:260.c:158
+T00547.003,T00547,mcdata_t,3,unk860,1,char[7][128],,,,reserved860,No access found,low,"declaration-only;source:260.c:156;source-review:#148 MENU7 mcdata_t line156 and TITLE line176 declare this 7x128-byte region after the icon bitmaps. All _mcData consumers inspected select locationCluts, unk400 palettes, unk4E0 bitmaps, textTable, file summaries or directory buffer; none addresses unk860. Adjacent icon shape alone is not evidence that this is a second animation-frame bank."
+T00547.004,T00547,mcdata_t,4,unkBE0,1,char[8][128],,,,reservedBE0,No access found,low,"declaration-only;source:260.c:157;source-review:#148 Distinct 8x128-byte region at mcdata_t.unkBE0, declared in both original overlays without a field consumer. It follows the seven-element region but has a different count; do not merge it with icon bitmaps or infer a palette bank from size."
+T00547.005,T00547,mcdata_t,5,unkFE0,1,char[32],,,,reservedFE0,No access found,low,"declaration-only;source:260.c:158;source-review:#148 Original mcdata_t.unkFE0[32] is the final 32-byte span before textTable. Resource initialization points at textTable directly, and no field consumer reads unkFE0; its size is insufficient evidence to call it an icon palette. Preserve the gap and text-table start."
 T00547.006,T00547,mcdata_t,6,textTable,0,u_short[2048],,,,textTable,Menu text table,high,source:260.c:1101
 T00547.007,T00547,mcdata_t,7,saveFileInfo,0,saveFileInfo_t[5],,,,fileHeaders,Card header of each of the five save files,high,source:260.c:1102
 T00547.008,T00547,mcdata_t,8,_dirEntBuf,0,struct DIRENTRY,,,,directoryEntry,Card directory entry buffer,high,source:260.c:1103
@@ -5377,14 +5377,14 @@ T00593.028,T00593,routeEdgeState,28,gate,0,u_char,,,,gate,Named in the fork view
 T00593.029,T00593,routeEdgeState,29,exit,0,func_800DFA54_t,,,,exit,Named in the fork view; see cited use,med,source:771A8.c:638
 T00594.000,T00594,saveBase_t,0,slotState,0,enum slotState_e,,,saveIdentityWhenOccupied,slotState,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
 T00594.001,T00594,saveBase_t,1,generation,0,u_int,,,,generation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:286
-T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,opaque8,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:698
+T00594.002,T00594,saveBase_t,2,unk8,1,int,,,formatSignature,formatSignature,Fixed save-format signature 0x20000107 written by both packagers and checked before loaded state is applied; individual bits are not interpreted.,high,"source:MENU/MENU7.PRG/260.c:698;source-review:#148 T00594.002 original unk8: MENU7/260.c:698,809 and TITLE/22C.c:586,688 compare/write 0x20000107;fixed format signature only;int and 0xC slot-base layout unchanged"
 T00595.000,T00595,saveFileInfo_t,0,key,0,u_int,,,,key,Original save-file key word,high,source:22C.c:165
 T00595.001,T00595,saveFileInfo_t,1,unk4,1,saveFileSubInfo_t,,,,summary,Save slot metadata statistics and formatted card title,high,source:22C.c:640
-T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,reserved44,Unresolved 28-byte range in the original save header,low,No direct field accesses found;preserve in legacy decoder;declaration-only;source:260.c:74
+T00595.002,T00595,saveFileInfo_t,2,unk44,1,char[28],,,,reserved44,Unresolved 28-byte range in the original save header,low,"No direct field accesses found;preserve in legacy decoder;declaration-only;source:260.c:74;source-review:#148 Original saveFileInfo_t.unk44[0x1C] lies after the title/summary at offset0x44 and before the 32-byte icon palette at0x60. Packaging zeroes the image and explicitly writes title and palette, not this span; whole-record read/decode/checksum copies do not establish a more specific role. Retain exact 28-byte range."
 T00595.003,T00595,saveFileInfo_t,3,unk60,1,char[32],,,,iconHeaderBytes,32 bytes copied from the selected card image header,med,source:22C.c:654;exact subformat still needs confirmation
 T00596.000,T00596,saveFileSubInfo_t,0,base,0,saveBase_t,,,,base,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:285
 T00596.001,T00596,saveFileSubInfo_t,1,stats,0,stats_t,,,,stats,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:307
-T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,opaque20,"Used, but its meaning is not established",low,source:MENU/MENU7.PRG/260.c:758
+T00596.002,T00596,saveFileSubInfo_t,2,unk20,1,u_short[16],,,,cardTitleTail,Last 16 halfwords of the card-header title view; slot number and play-time digits plus terminator are written here. The structure is also reused for save-summary records.,high,source:MENU/MENU7.PRG/260.c:758;source-review:#148 T00596.002 original unk20: MENU7/260.c:758-770 and TITLE/22C.c:641-653 update card-title slot/time/terminator;u_short[16] and reused summary layout unchanged;no encoding/type reinterpretation
 T00597.000,T00597,savedEnemyState,0,unk0,1,u_char,,,,spawnSlot,Spawn index + 1; 0 marks a free slot,med,declaration-only;source:146C.c:359
 T00597.001,T00597,savedEnemyState,1,hidden,0,u_char,,,,isHidden,Hidden flag saved for the spawn,high,source:146C.c:15131
 T00597.002,T00597,savedEnemyState,2,unk2,1,short,,,,aiFlags,Packed AI relation and behavior flags handed to the AI on respawn,high,source:146C.c:6774
@@ -5404,7 +5404,7 @@ T00597.015,T00597,savedEnemyState,15,z,0,u_char,,,,tileZ,Tile Z,high,source:146C
 T00597.016,T00597,savedEnemyState,16,height,0,u_char,,,,height,Height,high,source:146C.c:6656
 T00598.000,T00598,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,cardHeader,Card file header with title and icon palette,high,source:260.c:753
 T00598.001,T00598,savedata_t,1,unk80,1,char[128],,,,iconBitmap,Card icon bitmap,high,source:260.c:773
-T00598.002,T00598,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1,low,source:260.c:376
+T00598.002,T00598,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1,low,"source:260.c:376;source-review:#148 Both savedata_t layouts declare unk100[0x80] between icon bitmap and protected header. Packaging initializes this 128-byte span through the image memset. The verifier starts a 256-byte XOR here, spanning this region AND the protected header; do not rename the member to an entire checksum block or expand it. Native C references at HasChecksumError are the same member, not locals."
 T00598.003,T00598,savedata_t,3,unk180,1,savedata_unk180_t,,,,protectedHeader,Cipher key slot header summary and block checksums,high,source:260.c:749
 T00598.004,T00598,savedata_t,4,stateFlags,0,char[1088],,,,stateFlags,Game state flags,high,source:260.c:820
 T00598.005,T00598,savedata_t,5,actionsLearned,0,char[32],,,,learnedActions,Learned action flags,high,source:260.c:821
@@ -5419,7 +5419,7 @@ T00598.013,T00598,savedata_t,13,unk1898,1,int,,,,roomStateSlot,Current room stat
 T00598.014,T00598,savedata_t,14,unk189C,1,char[1312],,,,recentRoomEnemyStates,Recent room enemy states,high,source:260.c:833
 T00598.015,T00598,savedata_t,15,artsStatus,0,vs_main_artsStatus_t,,,,artsStatus,Break art progress,high,source:260.c:834
 T00598.016,T00598,savedata_t,16,containerData,0,vs_menu_containerData,,,,containerData,Container contents,high,source:260.c:830
-T00598.017,T00598,savedata_t,17,unk59E0,1,char[544],,,,reserved59E0,Zero padding to the end of the 23 blocks,low,source:260.c:752;no member access;source:260.c:107
+T00598.017,T00598,savedata_t,17,unk59E0,1,char[544],,,,reserved59E0,Zero padding to the end of the 23 blocks,low,"source:260.c:752;no member access;source:260.c:107;source-review:#148 Both original savedata_t variants end with unk59E0[0x220]. No field accesses occur in either packager/loader: whole-image zeroing, checksum/encryption and I/O cover the tail. It pads the 0x5C00 image, not a demonstrated extra gameplay record. Preserve exact size and layout."
 T00599.000,T00599,savedata_t,0,fileInfo,0,saveFileInfo_t,,,,cardHeader,Card file header with title and icon palette,med,source:MENU/MENU7.PRG/260.c:753;use cited by sanity pass;source:22C.c:264;same layout as T00598
 T00599.001,T00599,savedata_t,1,unk80,1,char[128],,,,iconBitmap,Card icon bitmap,med,source:MENU/MENU7.PRG/260.c:773;use cited by sanity pass;source:22C.c:265;same layout as T00598
 T00599.002,T00599,savedata_t,2,unk100,1,char[128],,,,reserved100,Zero block included in checksum block 1,low,source:MENU/MENU7.PRG/260.c:376;use cited by sanity pass;source:22C.c:266;same layout as T00598
@@ -5475,7 +5475,7 @@ T00605.004,T00605,stats_t,4,maxHP,0,u_short,,,,maxHP,Named in the fork; see cite
 T00605.005,T00605,stats_t,5,saveLocation,0,char,,,,saveLocation,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:815
 T00605.006,T00605,stats_t,6,clearCount,0,char,,,,clearCount,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:817
 T00605.007,T00605,stats_t,7,mapCompletion,0,char,,,,mapCompletion,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:816
-T00605.008,T00605,stats_t,8,unk1B,1,char,,,,reservedF,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:60
+T00605.008,T00605,stats_t,8,unk1B,1,char,,,,reservedF,Not read by decompiled code,low,declaration-only;source:MENU/MENU7.PRG/260.c:60;source-review:#148 Original stats_t.unk1B is the byte between mapCompletion and currentMP. Both packagers set the neighboring stats explicitly but do not assign this byte; image memset and whole-summary transfers preserve it. No stat meaning is supported. Preserve the char byte and offsets.
 T00605.009,T00605,stats_t,9,currentMP,0,u_short,,,,currentMP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:818
 T00605.010,T00605,stats_t,10,maxMP,0,u_short,,,,maxMP,Named in the fork; see cited use,med,source:MENU/MENU7.PRG/260.c:819
 T00606.000,T00606,statusEffectTable,0,entries,0,statusEffectTick[1],,,,reserved0,Not read by decompiled code,low,declaration-only;source:74088.c:1164
@@ -6282,9 +6282,9 @@ T00695.008,T00695,vs_main_flags_t,8,unk8,1,char,,,,reserved8,Not read by decompi
 T00695.009,T00695,vs_main_flags_t,9,unk9,1,char,,,,reserved9,Not read by decompiled code,low,declaration-only;source:main.h:250
 T00695.010,T00695,vs_main_flags_t,10,unkA,1,char,,,,reservedA,Not read by decompiled code,low,declaration-only;source:main.h:251
 T00695.011,T00695,vs_main_flags_t,11,unkB,1,char,,,,reservedB,Not read by decompiled code,low,declaration-only;source:main.h:252
-T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaqueC,"Used, but its meaning is not established",low,source:22C.c:4745
-T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaqueD,"Used, but its meaning is not established",low,source:22C.c:4746
-T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaqueE,"Used, but its meaning is not established",low,source:22C.c:4753
+T00695.012,T00695,vs_main_flags_t,12,unkC,1,char,,,,opaqueC,"Used, but its meaning is not established",low,source:22C.c:4745;source-review:#148 Every _setTitleExitFlags branch writes vs_main_stateFlags.unkC=0. Direct original symbol search finds only these writes; generic event flag access is not a field-specific semantic reader. No nonzero producer or full event meaning was established by this scope. Do not call it a boolean demo flag simply because neighboring D changes for attract scenes.
+T00695.013,T00695,vs_main_flags_t,13,unkD,1,char,,,attractModeCandidate,opaqueD,"Used, but its meaning is not established",low,"source:22C.c:4746;source-review:#148 _setTitleExitFlags writes byte D=1 for both attract destinations and D=0 otherwise. This establishes title-side mode initialization, but direct source consumers do not distinguish its general event-script role from adjacent E. Retain the offset name rather than invent an authoritative attract/demo semantic across all event readers."
+T00695.014,T00695,vs_main_flags_t,14,unkE,1,char,,,attractCutsceneFlagCandidate,opaqueE,"Used, but its meaning is not established",low,"source:22C.c:4753;source-review:#148 _setTitleExitFlags sets E=1 only for attract scene cases3/4; other branches leave it unchanged, unlike D. Initial new-game state clearing is bytewise. No field-specific consumer establishes whether it is initialization, progression or mode state. Do not conflate E with D or rename both to the same guessed flag."
 T00695.015,T00695,vs_main_flags_t,15,unkF,1,char,,,,reservedF,Not read by decompiled code,low,declaration-only;source:main.h:256
 T00695.016,T00695,vs_main_flags_t,16,textBoxSelection,0,char,,,,textBoxSelection,Named in the fork; see cited use,med,source:4A0A8.c:724
 T00695.017,T00695,vs_main_flags_t,17,unk11,1,char,,,,opaque11,"Used, but its meaning is not established",low,source:5BF94.c:1590

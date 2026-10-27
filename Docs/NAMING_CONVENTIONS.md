@@ -1144,3 +1144,32 @@ comments remain masked at their original offsets. On dirty base `ab4a893d`,
 18 mask/audit tests and 153 copier tests pass, scoped quality has zero findings,
 and two complete generations preserve all 742 generated and 121 owned paths
 byte-for-byte. Evidence: `build\quality\issue221-*`.
+
+The rendering checkpoint is published in `ab4a893d`, exact green `40591382282`;
+the numeric-mask repair is published in `c39f7338`, exact green `40592059980`
+and #221 is closed.
+
+The lifecycle review then covers 32 catalog identities, applying 57 bindings in
+25 physical definitions with six explicit block-declaration preimages and six
+linked header maps. The misleading `verifyOnly` formal is now
+`apply_loaded_state`, preserving the original true-means-apply branch. Movie
+retry counts, volatile spin storage, save-image aliases, progress coordinates,
+title scanlines and packed card flags retain their original types and order.
+The owner's separate clear-save staging call/fixup/test remain uncommitted.
+
+Two typed field decisions use the existing FIELD_LEDGER/reference-index route:
+T00594.002 becomes `formatSignature`, the fixed `0x20000107` discriminator;
+T00596.002 becomes `cardTitleTail`, the observed latter 32 title bytes in the
+card-header use of a shared record. This does not claim that every encrypted
+summary instance is title text. Exactly two declarations and 22 typed member
+references change, with widths/layouts preserved. Twelve other field rows
+receive individual retention evidence without confidence/layout/status changes.
+
+On dirty base `c39f7338`, Debug/Release native builds and
+`[save],[movie],[runtime-snapshot],[native-snapshot],[save-menu] --reporter compact`
+pass 71 cases/7,094 assertions each. All 156 dirty-tree copier tests, 32 naming
+tests and focused tooling quality pass with zero new findings. Both the local
+and field batches independently verify all 742 manifest paths and 121 unchanged
+owned paths over stable repeat generations. Evidence:
+`build\quality\issue148-lifecycle-*`. These are naming/layout-preservation checks,
+not new certification of legacy card I/O, MDEC playback or compatibility retirement.

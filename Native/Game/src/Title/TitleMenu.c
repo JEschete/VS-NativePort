@@ -277,8 +277,8 @@ void Title_ShowPublisherAndDeveloper()
     DISPENV disp;
     DRAWENV draw;
     RECT rect;
-    int var_a3;
-    int var_a3_2;
+    int publisher_fade_attenuation;
+    int developer_fade_attenuation;
     int i;
 
     setRECT(&rect, 0, 0, 320, 512);
@@ -295,15 +295,15 @@ void Title_ShowPublisherAndDeveloper()
     SetDispMask(1);
 
     for (i = 0; i < 364; ++i) {
-        var_a3 = 0;
+        publisher_fade_attenuation = 0;
         if (i < 32) {
-            var_a3 = (31 - i) * 4;
+            publisher_fade_attenuation = (31 - i) * 4;
         }
         if (i > 331) {
-            var_a3 = (i - 331) * 4;
+            publisher_fade_attenuation = (i - 331) * 4;
         }
         Title_SaveFiles_DrawImmediateSprite(vs_getXY(32, 88), vs_getUV0Clut(0, 0, 320, 64), vs_getWH(256, 48),
-            (var_a3 << 16) | (320 / 64));
+            (publisher_fade_attenuation << 16) | (320 / 64));
         SetDefDispEnv(&disp, 0, (i & 1) * 256, 320, 240);
         SetDefDrawEnv(&draw, 0, (1 - (i & 1)) * 256, 320, 240);
         disp.screen.y = 8;
@@ -316,16 +316,16 @@ void Title_ShowPublisherAndDeveloper()
     Render_UploadPackedRectangle(vs_getXY(0, 240), Title_developerLogo, vs_getWH(128 / 4, 14));
 
     for (i = 0; i < 364; ++i) {
-        var_a3_2 = 0;
+        developer_fade_attenuation = 0;
         if (i < 32) {
-            var_a3_2 = (31 - i) * 4;
+            developer_fade_attenuation = (31 - i) * 4;
         } else if (i > 331) {
-            var_a3_2 = (i - 331) * 4;
+            developer_fade_attenuation = (i - 331) * 4;
         } else if ((Input_buttonsState & 0xFFFF) != 0) {
             i = 331;
         }
         Title_SaveFiles_DrawImmediateSprite(vs_getXY(96, 104), vs_getUV0Clut(0, 240, 0, 253), vs_getWH(128, 13),
-            var_a3_2 << 16);
+            developer_fade_attenuation << 16);
         SetDefDispEnv(&disp, 0, (i & 1) * 256, 320, 240);
         SetDefDrawEnv(&draw, 0, (1 - (i & 1)) * 256, 320, 240);
         disp.screen.y = 8;
@@ -439,7 +439,7 @@ void* Title_InitializeMenu(int menuItem)
 }
 
 // decomp: TITLE.PRG _freeHeap (src/TITLE/TITLE.PRG/22C.c:3867)
-void Title_ReleaseMenuCapture(void* arg0) { Core_Memory_FreeFromLowEnd(arg0); }
+void Title_ReleaseMenuCapture(void* menu_capture) { Core_Memory_FreeFromLowEnd(menu_capture); }
 
 // decomp: TITLE.PRG _fadeInMenu (src/TITLE/TITLE.PRG/22C.c:3869)
 void Title_BlendMenuBackground(u_short* bgData, int textBlendFactor)
@@ -486,7 +486,7 @@ void Title_BlendMenuBackground(u_short* bgData, int textBlendFactor)
 }
 
 // decomp: TITLE.PRG _fadeInMenuCopyright (src/TITLE/TITLE.PRG/22C.c:3914)
-void Title_BlendCopyright(u_short* arg0, int textBlendFactor)
+void Title_BlendCopyright(u_short* menu_capture, int textBlendFactor)
 {
     RECT rect;
     int i;
@@ -501,7 +501,7 @@ void Title_BlendCopyright(u_short* arg0, int textBlendFactor)
     u_short* src;
     u_short* dst;
 
-    src = arg0 + 0xF000;
+    src = menu_capture + 0xF000;
     dst = src + (180 * 24);
 
     for (i = 0; i < (180 * 24); ++i) {
@@ -713,17 +713,17 @@ void Title_DrawMenuItems(void)
         wh |= vs_getWH(0, 1);
 
         for (j = 0; j < 32; ++j) {
-            int new_var = j + menuState[i].textPosition;
+            int text_scanline_position = j + menuState[i].textPosition;
             prim->dmaTag = vs_getTag(prim->sprite, Render_LegacyPrimitiveAddress_End);
             prim->sprite.texturePageCommand = Title_textTexturePageWords[i];
 
-            switch ((new_var >> 5) & 3) {
+            switch ((text_scanline_position >> 5) & 3) {
             case 0:
                 prim->dmaTag = Render_LegacyPrimitiveAddress_End;
                 break;
             case 1:
                 prim->sprite.colorCommand = vs_getRGB0Raw(Render_LegacyPrimitiveCode_SpriteSemiTrans,
-                    ((saturation * (new_var - 32)) >> 5) * vs_getRGB888(1, 1, 1));
+                    ((saturation * (text_scanline_position - 32)) >> 5) * vs_getRGB888(1, 1, 1));
                 break;
             case 2:
                 if (saturation == 128) {
@@ -735,7 +735,7 @@ void Title_DrawMenuItems(void)
                 break;
             case 3:
                 prim->sprite.colorCommand = vs_getRGB0Raw(Render_LegacyPrimitiveCode_SpriteSemiTrans,
-                    (((saturation * (127 - new_var)) >> 5) * vs_getRGB888(1, 1, 1)));
+                    (((saturation * (127 - text_scanline_position)) >> 5) * vs_getRGB888(1, 1, 1)));
                 break;
             }
 
@@ -747,7 +747,7 @@ void Title_DrawMenuItems(void)
                         Render_LegacyPrimitiveCode_SpriteSemiTrans, saturation * vs_getRGB888(1, 1, 1));
                 }
             }
-            prim->sprite.position = x | ((new_var + 240) << 16);
+            prim->sprite.position = x | ((text_scanline_position + 240) << 16);
             prim->sprite.uvPalette = textUv + (j << 8);
             prim->sprite.size = wh;
             DrawPrim(prim);
@@ -1259,13 +1259,13 @@ void Title_InitializeNewGameData(void)
     Save_NativeResetSession();
     int i;
     int j;
-    char* v0;
+    char* state_flags_cursor;
 
     Title_InitializeGameDisplay(640, 240, 512, 0, 0, 0);
     i = 0x43F;
-    v0 = ((char*)&Audio_Seq_unusedStateFlags) + i;
+    state_flags_cursor = ((char*)&Audio_Seq_unusedStateFlags) + i;
     do {
-        *v0-- = 0;
+        *state_flags_cursor-- = 0;
     } while (--i >= 0);
 
     Core_Memory_CopyAlignedWords(State_learnedActionFlags, Title_initialLearnedActionBits, sizeof Title_initialLearnedActionBits);

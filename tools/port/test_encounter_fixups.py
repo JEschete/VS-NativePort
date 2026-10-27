@@ -2112,6 +2112,56 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
                 self.assertEqual(source, retained)
 
+    def test_loaded_save_validation_names_preserve_true_means_apply(self):
+        for name, old in (
+            ("Save::MemoryCard::ValidateAndApplyLoadedSave", "write"),
+            ("Title::SaveCard::ValidateAndApplyLoadedSave", "verifyOnly"),
+        ):
+            with self.subTest(name=name):
+                source = f"int Validate(int {old}) {{ if ({old}) Apply(); return 0; }}"
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
+                self.assertEqual(
+                    source,
+                    "int Validate(int apply_loaded_state) { if (apply_loaded_state) Apply(); return 0; }",
+                )
+
+    def test_lifecycle_scoped_names_preserve_exact_declaration_shapes(self):
+        for identity, old, new in (
+            ("F02735", "int new_var = 320;", "int progress_target_x = 320;"),
+            ("F03602", "int new_var = 320;", "int progress_target_x = 320;"),
+            ("F03623", "int v0;", "int location_texture_page;"),
+            ("F03626", "int new_var;", "int card_and_partial_read_flags;"),
+            ("F03663", "int new_var = j + menuState[i].textPosition;",
+             "int text_scanline_position = j + menuState[i].textPosition;"),
+        ):
+            with self.subTest(identity=identity):
+                self.assertIn(
+                    (old, new),
+                    [(before.strip(), after.strip())
+                     for before, after, _ in copy_fixups.FIXES[identity]],
+                )
+
+    def test_save_format_field_names_keep_original_identity_and_storage(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FIELD_LEDGER.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            fields = {row["id"]: row for row in csv.DictReader(stream)}
+        for identity, original, name in (
+            ("T00594.002", "unk8", "formatSignature"),
+            ("T00596.002", "unk20", "cardTitleTail"),
+        ):
+            with self.subTest(identity=identity):
+                self.assertEqual(fields[identity]["name"], original)
+                self.assertEqual(fields[identity]["final_name"], name)
+        header = (root / r"Native\Engine\src\Save\MemoryCard\GameFiles.h").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("    int formatSignature;", header)
+        self.assertIn("    u_short cardTitleTail[16];", header)
+
     def test_identifier_fixups_see_code_between_numeric_separator_literals(self):
         source = "auto n = 1'000; int arg0 = 7; auto m = 2'000; // arg0\n"
         changed, count = copy_to_native.substitute_fixup(source, r"\barg0\b", "value")
