@@ -4132,8 +4132,8 @@ T00459.007,T00459,func_800962E4_t,7,unkB,1,char,,,,opaqueB,"Used, but its meanin
 T00459.008,T00459,func_800962E4_t,8,unkC,1,short,,,,reservedC,Not read by decompiled code,low,declaration-only;source:2842C.c:80
 T00459.009,T00459,func_800962E4_t,9,unkE,1,char,,,,reservedE,Not read by decompiled code,low,declaration-only;source:2842C.c:81
 T00459.010,T00459,func_800962E4_t,10,unkF,1,char,,,,reservedF,Not read by decompiled code,low,declaration-only;source:2842C.c:82
-T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,firstSectionPointer,First self-relative offset rebased to an address on load,med,source:30DB0.c:1721
-T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,secondSectionPointer,Second self-relative offset rebased to an address on load,med,source:30DB0.c:1722
+T00460.000,T00460,func_8009C378_t,0,unk0,1,void *,,,,firstSectionPointer,First struct-relative SEQ section offset preserved natively,med,source:30DB0.c:1721;original rebases on load;native F00797/F00798 on-disc fixups retain the serialized offset
+T00460.001,T00460,func_8009C378_t,1,unk4,1,void *,,,,secondSectionPointer,Second struct-relative SEQ section offset preserved natively,med,source:30DB0.c:1722;original rebases on load;native F00797/F00798 on-disc fixups retain the serialized offset
 T00460.002,T00460,func_8009C378_t,2,unk8,1,char[30968],,,,body,Remaining sequence bytes,med,declaration-only;source:30DB0.h:8
 T00461.000,T00461,func_800A0024_t,0,unk0,1,u_char,,,,placementByte0,First copied placement byte,low,source:30DB0.c:3678
 T00461.001,T00461,func_800A0024_t,1,unk1,1,u_char,,,,heightAboveGround,Height above ground in units of 128,med,source:30DB0.c:3684

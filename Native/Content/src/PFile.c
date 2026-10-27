@@ -5,15 +5,15 @@
 #include "PFile.h"
 
 // decomp: BATTLE.PRG _getPFileBlock3section (src/BATTLE/BATTLE.PRG/5BF94.c:7874)
-void* Content_PFileTimelineSection(Effects_PackageBlock3* arg0, int arg1)
+void* Content_PFileTimelineSection(Effects_PackageBlock3* timeline_block, int section_index)
 {
-    return (char*)arg0 + arg0->offsets[arg1];
+    return (char*)timeline_block + timeline_block->offsets[section_index];
 }
 
 // decomp: BATTLE.PRG func_800D5564 (src/BATTLE/BATTLE.PRG/5BF94.c:7879)
-void* Content_PFileTimelineTrackData(Effects_PackageBlock3* arg0, int arg1, int arg2)
+void* Content_PFileTimelineTrackData(Effects_PackageBlock3* timeline_block, int section_index, int track_index)
 {
-    Content_PFileTimelineTable* entry = Content_PFileTimelineSection(arg0, arg1);
-    return (char*)arg0 + entry->tracks[arg2].dataOffset;
+    Content_PFileTimelineTable* entry = Content_PFileTimelineSection(timeline_block, section_index);
+    return (char*)timeline_block + entry->tracks[track_index].dataOffset;
 }
 

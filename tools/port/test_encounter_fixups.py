@@ -1798,6 +1798,27 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source = re.sub(pattern, replacement, source)
                 self.assertEqual(source, expected)
 
+    def test_weapon_sequence_copy_names_preserve_the_native_offset_contract(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            row = next(item for item in csv.DictReader(stream)
+                       if item["id"] == "F00797")
+        self.assertEqual(row["name"], "func_8009C378")
+        self.assertEqual(row["final_name"], "Content::CopyWeaponSequence")
+        self.assertEqual(len(copy_fixups.FIXES["F00797"]), 4)
+        self.assertTrue(all(not new for _, new, _ in copy_fixups.FIXES["F00797"]))
+        source = (root / row["final_location"]).read_text(encoding="utf-8")
+        definition = audit_assembly_gaps.definitions(
+            source, {"Content_CopyWeaponSequence"}
+        )
+        self.assertEqual(len(definition), 1)
+        self.assertEqual(
+            definition[0].body.strip(),
+            "Core_Memory_CopyAlignedWords(destination, source, 0x7800);",
+        )
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

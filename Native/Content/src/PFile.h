@@ -36,7 +36,7 @@ _Static_assert(sizeof(Content_PFileTimelineTable) == 0x4, "Content_PFileTimeline
 #define VS_PFILE_H_DECLS
 #include "Effects/Package.h"
 
-void* Content_PFileTimelineSection(Effects_PackageBlock3* arg0, int arg1);
-void* Content_PFileTimelineTrackData(Effects_PackageBlock3* arg0, int arg1, int arg2);
+void* Content_PFileTimelineSection(Effects_PackageBlock3* timeline_block, int section_index);
+void* Content_PFileTimelineTrackData(Effects_PackageBlock3* timeline_block, int section_index, int track_index);
 
 #endif // VS_PFILE_H_DECLS

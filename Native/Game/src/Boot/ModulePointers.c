@@ -1124,7 +1124,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009AEA0u, 0u, (void*)&Content_ParseActorModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009BD90u, 0u, (void*)&Content_FindSharedActorSequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009BE5Cu, 0u, (void*)&Content_UpdateActorSequenceLoad, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009C378u, 0u, (void*)&Content_CopyRelocatedWeaponSequence, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8009C378u, 0u, (void*)&Content_CopyWeaponSequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009C3D8u, 0u, (void*)&Content_ParseActorSequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009CAECu, 0u, (void*)&Content_BindSharedActorSequence, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009CC20u, 0u, (void*)&Content_ReleaseActorSequence, 0u, 0u, 0u},

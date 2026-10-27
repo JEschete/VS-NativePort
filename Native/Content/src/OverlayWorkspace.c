@@ -7,10 +7,10 @@
 char Content_overlayWorkspaceOwner;
 
 // decomp: BATTLE.PRG func_8007E180 (src/BATTLE/BATTLE.PRG/146C.c:9562)
-int Content_AcquireOverlayWorkspace(int arg0)
+int Content_AcquireOverlayWorkspace(int owner_tag)
 {
     if (Content_overlayWorkspaceOwner == 0) {
-        Content_overlayWorkspaceOwner = arg0;
+        Content_overlayWorkspaceOwner = owner_tag;
         return 1;
     }
     Core_IgnoreDiagnostic(0x66, 0);
@@ -18,9 +18,9 @@ int Content_AcquireOverlayWorkspace(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8007E1C0 (src/BATTLE/BATTLE.PRG/146C.c:9572)
-int Content_ReleaseOverlayWorkspace(int arg0)
+int Content_ReleaseOverlayWorkspace(int owner_tag)
 {
-    if (Content_overlayWorkspaceOwner == arg0) {
+    if (Content_overlayWorkspaceOwner == owner_tag) {
         Content_overlayWorkspaceOwner = 0;
         return 1;
     }

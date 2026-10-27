@@ -10,7 +10,7 @@
 #define VS_OVERLAYWORKSPACE_H_DECLS
 
 extern char Content_overlayWorkspaceOwner;
-int Content_AcquireOverlayWorkspace(int arg0);
-int Content_ReleaseOverlayWorkspace(int arg0);
+int Content_AcquireOverlayWorkspace(int owner_tag);
+int Content_ReleaseOverlayWorkspace(int owner_tag);
 
 #endif // VS_OVERLAYWORKSPACE_H_DECLS

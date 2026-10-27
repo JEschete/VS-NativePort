@@ -143,7 +143,7 @@ int Content_UpdateActorAssetQueue(void)
 }
 
 // decomp: BATTLE.PRG func_80099854 (src/BATTLE/BATTLE.PRG/30DB0.c:239)
-void Content_QueueAshleyWeaponSequence(int arg0)
+void Content_QueueAshleyWeaponSequence(int sequence_id)
 {
     Content_ActorAssetRequest objectData;
     Content_ActorAssetRequest* src;
@@ -151,7 +151,7 @@ void Content_QueueAshleyWeaponSequence(int arg0)
     int slot;
     Content_ActorAssetRequest* dst;
 
-    if (arg0 == 0) {
+    if (sequence_id == 0) {
         return;
     }
 
@@ -159,7 +159,7 @@ void Content_QueueAshleyWeaponSequence(int arg0)
     src->assetKind = 7;
     src->targetSlot = 0;
     src->subKind = 3;
-    src->material = arg0;
+    src->material = sequence_id;
 
     for (i = 0; i < 16; ++i) {
         if (Content_legacyActorAssetRequests[i].assetKind == 0) {
@@ -255,24 +255,24 @@ void* Content_CopyModelGeometry(int* destination, void* source, int byteCount)
 }
 
 // decomp: BATTLE.PRG _loadWep (src/BATTLE/BATTLE.PRG/30DB0.c:523)
-int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* arg0)
+int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* request)
 {
     int wepData;
     int found;
     int wepFileSize;
     int i;
 
-    if ((arg0->modelId == 0) || (arg0->modelId >= 0x80)) {
+    if ((request->modelId == 0) || (request->modelId >= 0x80)) {
         return 0;
     }
 
     switch (Content_legacyModelLoadPhase) {
     case 0:
         for (i = 0; i < 20; ++i) {
-            if ((i != arg0->targetSlot) && (Actors_weaponModels[i] != NULL)
-                && ((Actors_weaponModels[i]->actorId) || (arg0->targetSlot < 4))
-                && (Actors_weaponModels[i]->modelId == arg0->modelId)) {
-                arg0->dataAddress = i;
+            if ((i != request->targetSlot) && (Actors_weaponModels[i] != NULL)
+                && ((Actors_weaponModels[i]->actorId) || (request->targetSlot < 4))
+                && (Actors_weaponModels[i]->modelId == request->modelId)) {
+                request->dataAddress = i;
                 found = 1;
                 goto exit;
             }
@@ -288,20 +288,20 @@ int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* arg0)
         // Fallthrough
 
     default:
-        wepFileSize = Content_legacyWepSectorCounts[arg0->modelId];
+        wepFileSize = Content_legacyWepSectorCounts[request->modelId];
         wepFileSize <<= 0xB;
         Content_legacyWeaponFileBuffer = Core_Memory_AllocateFromHighEnd(wepFileSize);
-        arg0->dataAddress = (uintptr_t)Content_legacyWeaponFileBuffer;
+        request->dataAddress = (uintptr_t)Content_legacyWeaponFileBuffer;
 
         if (Content_legacyWeaponFileBuffer == NULL) {
             return -2;
         }
 
         Content_legacyModelLoadPhase = 1;
-        Content_legacyWeaponFileLocation.lba = Content_legacyWepDiscOffsets[arg0->modelId] + VS_01_WEP_LBA;
+        Content_legacyWeaponFileLocation.lba = Content_legacyWepDiscOffsets[request->modelId] + VS_01_WEP_LBA;
         Content_legacyWeaponFileLocation.size = wepFileSize;
         Content_legacyWeaponDiscRequest = Content_AllocateDiscRequest(&Content_legacyWeaponFileLocation);
-        Content_EnqueueDiscRequest(Content_legacyWeaponDiscRequest, (void*)arg0->dataAddress);
+        Content_EnqueueDiscRequest(Content_legacyWeaponDiscRequest, (void*)request->dataAddress);
         // Fallthrough
 
     case 1:
@@ -315,7 +315,7 @@ int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* arg0)
         break;
     }
 
-    wepData = Content_ParseWeaponModel(arg0);
+    wepData = Content_ParseWeaponModel(request);
 
     if (wepData == -1) {
         return -1;
@@ -624,7 +624,7 @@ int Content_ReleaseWeaponModel(int index)
         objData.modelId = model->modelId;
 
         if (index >= 4) {
-            int var_v0;
+            int shared_model_found;
             Content_ActorAssetRequest* obj = &objData;
 
             for (i = 0; i < 20; ++i) {
@@ -632,14 +632,14 @@ int Content_ReleaseWeaponModel(int index)
                     && ((Actors_weaponModels[i]->actorId) || (obj->targetSlot < 4))
                     && (Actors_weaponModels[i]->modelId == obj->modelId)) {
                     obj->dataAddress = i;
-                    var_v0 = 1;
+                    shared_model_found = 1;
                     goto exit;
                 }
             }
 
-            var_v0 = 0;
+            shared_model_found = 0;
         exit:
-            if (var_v0 == 0) {
+            if (shared_model_found == 0) {
                 Core_Memory_FreeFromLowEnd(model->sectionOffsets);
             }
         } else {
@@ -658,14 +658,14 @@ int Content_ReleaseWeaponModel(int index)
 }
 
 // decomp: BATTLE.PRG func_8009AC24 (src/BATTLE/BATTLE.PRG/30DB0.c:930)
-int Content_FindSharedActorModel(Content_ActorAssetRequest* arg0)
+int Content_FindSharedActorModel(Content_ActorAssetRequest* request)
 {
     int i;
 
     for (i = 0; i < 17; ++i) {
-        if ((i != arg0->targetSlot)
-            && ((Actors_actorRecords[i] != NULL) && (Actors_actorRecords[i]->modelId == arg0->modelId))) {
-            arg0->dataAddress = i;
+        if ((i != request->targetSlot)
+            && ((Actors_actorRecords[i] != NULL) && (Actors_actorRecords[i]->modelId == request->modelId))) {
+            request->dataAddress = i;
             return 1;
         }
     }
@@ -673,7 +673,7 @@ int Content_FindSharedActorModel(Content_ActorAssetRequest* arg0)
 }
 
 // decomp: BATTLE.PRG _loadShp (src/BATTLE/BATTLE.PRG/30DB0.c:944)
-int Content_UpdateActorModelLoad(Content_ActorAssetRequest* arg0)
+int Content_UpdateActorModelLoad(Content_ActorAssetRequest* request)
 {
     int shpData;
     int found;
@@ -682,15 +682,15 @@ int Content_UpdateActorModelLoad(Content_ActorAssetRequest* arg0)
 
     switch (Content_legacyModelLoadPhase) {
     case 0:
-        if (arg0->modelId == 0x7F) {
+        if (request->modelId == 0x7F) {
             Content_legacyShpAllocated = 0;
             break;
         }
 
         for (i = 0; i < 17; ++i) {
-            if ((i != arg0->targetSlot) && ((Actors_actorRecords[i] != NULL))
-                && (Actors_actorRecords[i]->modelId == arg0->modelId)) {
-                arg0->dataAddress = i;
+            if ((i != request->targetSlot) && ((Actors_actorRecords[i] != NULL))
+                && (Actors_actorRecords[i]->modelId == request->modelId)) {
+                request->dataAddress = i;
                 found = 1;
                 goto exit;
             }
@@ -705,27 +705,27 @@ int Content_UpdateActorModelLoad(Content_ActorAssetRequest* arg0)
         // Fallthrough
 
     default:
-        shpFileSize = Content_legacyShpSectorCounts[arg0->modelId];
+        shpFileSize = Content_legacyShpSectorCounts[request->modelId];
 
         if (shpFileSize == 0) {
-            arg0->modelId = 0;
+            request->modelId = 0;
             shpFileSize = Content_legacyShpSectorCounts[0];
         }
 
         shpFileSize <<= 0xB;
         Content_legacyShpFileBuffer = Core_Memory_AllocateFromHighEnd(shpFileSize);
-        arg0->dataAddress = (uintptr_t)Content_legacyShpFileBuffer;
+        request->dataAddress = (uintptr_t)Content_legacyShpFileBuffer;
 
         if (Content_legacyShpFileBuffer == NULL) {
             return -2;
         }
 
         Content_legacyModelLoadPhase = 1;
-        Content_legacyShpFileLocation.lba = Content_legacyShpDiscOffsets[arg0->modelId] + VS_00_SHP_LBA;
+        Content_legacyShpFileLocation.lba = Content_legacyShpDiscOffsets[request->modelId] + VS_00_SHP_LBA;
         Content_legacyShpFileLocation.size = shpFileSize;
         Content_legacyShpDiscRequest = Content_AllocateDiscRequest(&Content_legacyShpFileLocation);
 
-        Content_EnqueueDiscRequest(Content_legacyShpDiscRequest, (void*)arg0->dataAddress);
+        Content_EnqueueDiscRequest(Content_legacyShpDiscRequest, (void*)request->dataAddress);
     case 1:
         if (Content_legacyShpDiscRequest->state != 4) {
             return -1;
@@ -740,7 +740,7 @@ int Content_UpdateActorModelLoad(Content_ActorAssetRequest* arg0)
         break;
     }
 
-    shpData = Content_ParseActorModel(arg0);
+    shpData = Content_ParseActorModel(request);
 
     if (shpData == -1) {
         return -1;
@@ -1164,18 +1164,18 @@ setupPalettes:
 }
 
 // decomp: BATTLE.PRG func_8009BD90 (src/BATTLE/BATTLE.PRG/30DB0.c:1433)
-int Content_FindSharedActorSequence(Content_ActorAssetRequest* arg0)
+int Content_FindSharedActorSequence(Content_ActorAssetRequest* request)
 {
-    Actors_ActorRecord* temp_v1;
-    int var_a2;
-    int t1 = Actors_actorRecords[arg0->targetSlot]->modelId;
-    for (var_a2 = (arg0->targetSlot >= 2) * 2; var_a2 < 17; ++var_a2) {
-        if (var_a2 != arg0->targetSlot) {
-            temp_v1 = Actors_actorRecords[var_a2];
-            if ((temp_v1 != NULL) && (temp_v1->modelId == t1)) {
-                if ((arg0->modelId == 0 && temp_v1->commonSequence != 0)
-                    || (arg0->modelId != 0 && temp_v1->sequenceModelId == arg0->modelId)) {
-                    arg0->dataAddress = var_a2;
+    Actors_ActorRecord* candidate;
+    int candidate_index;
+    int model_id = Actors_actorRecords[request->targetSlot]->modelId;
+    for (candidate_index = (request->targetSlot >= 2) * 2; candidate_index < 17; ++candidate_index) {
+        if (candidate_index != request->targetSlot) {
+            candidate = Actors_actorRecords[candidate_index];
+            if ((candidate != NULL) && (candidate->modelId == model_id)) {
+                if ((request->modelId == 0 && candidate->commonSequence != 0)
+                    || (request->modelId != 0 && candidate->sequenceModelId == request->modelId)) {
+                    request->dataAddress = candidate_index;
                     return 1;
                 }
             }
@@ -1320,9 +1320,9 @@ parse:
 }
 
 // decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1608)
-void Content_CopyRelocatedWeaponSequence(Content_SequenceBuffer* arg0, Content_SequenceBuffer* arg1)
+void Content_CopyWeaponSequence(Content_SequenceBuffer* destination, Content_SequenceBuffer* source)
 {
-    Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);
+    Core_Memory_CopyAlignedWords(destination, source, 0x7800);
 }
 
 // decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
@@ -1399,7 +1399,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
                 if (Content_legacySequenceParseData == 0) {
                     seq = Core_Memory_AllocateFromLowEnd(0x7800);
                 clone:
-                    Content_CopyRelocatedWeaponSequence(seq, source->battleSequence);
+                    Content_CopyWeaponSequence(seq, source->battleSequence);
                 }
             }
             actor->battleSequence = seq;
@@ -1501,62 +1501,62 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
 }
 
 // decomp: BATTLE.PRG func_8009CAEC (src/BATTLE/BATTLE.PRG/30DB0.c:1795)
-void Content_BindSharedActorSequence(Actors_ActorRecord* arg0, int arg1)
+void Content_BindSharedActorSequence(Actors_ActorRecord* actor, int bank_index)
 {
     int i = 0;
     int id;
     char* p;
 
     while (1) {
-        if (Actors_sharedSequenceAnimationIds[arg1][i] == -1) {
+        if (Actors_sharedSequenceAnimationIds[bank_index][i] == -1) {
             goto tail;
         }
-        if (Actors_sharedSequenceAnimationIds[arg1][i] == Actors_sharedSequenceIdsByKind[arg0->modelId]) {
-            p = Actors_sharedSequenceAnimationData[arg1][i];
+        if (Actors_sharedSequenceAnimationIds[bank_index][i] == Actors_sharedSequenceIdsByKind[actor->modelId]) {
+            p = Actors_sharedSequenceAnimationData[bank_index][i];
             p += 8;
             break;
         }
-        if (Actors_sharedSequenceAnimationIds[arg1][i] == arg0->modelId) {
-            p = Actors_sharedSequenceAnimationData[arg1][i];
+        if (Actors_sharedSequenceAnimationIds[bank_index][i] == actor->modelId) {
+            p = Actors_sharedSequenceAnimationData[bank_index][i];
             p += 8;
             break;
         }
         ++i;
     }
-    arg0->sharedSequences[arg1] = p;
+    actor->sharedSequences[bank_index] = p;
 tail:
-    for (i = 0; (id = Actors_sharedSequenceAnimationIds[arg1][i]) != -1; ++i) {
-        if (id == arg0->modelId) {
-            arg0->textureRowOffsets[arg1] = Actors_sharedSequenceEntryParams[arg1][i];
+    for (i = 0; (id = Actors_sharedSequenceAnimationIds[bank_index][i]) != -1; ++i) {
+        if (id == actor->modelId) {
+            actor->textureRowOffsets[bank_index] = Actors_sharedSequenceEntryParams[bank_index][i];
             return;
         }
     }
-    arg0->textureRowOffsets[arg1] = 0xFF;
+    actor->textureRowOffsets[bank_index] = 0xFF;
 }
 
 // decomp: BATTLE.PRG func_8009CC20 (src/BATTLE/BATTLE.PRG/30DB0.c:1828)
-int Content_ReleaseActorSequence(int arg0, int arg1)
+int Content_ReleaseActorSequence(int target_id, int sequence_kind)
 {
     Content_ActorAssetRequest objectData;
     Actors_ActorRecord* actor;
     int i;
 
-    switch (arg1) {
+    switch (sequence_kind) {
     case 0:
-        if (arg0 >= 17) {
+        if (target_id >= 17) {
             return -1;
         }
-        actor = Actors_actorRecords[arg0];
+        actor = Actors_actorRecords[target_id];
         if (actor == NULL) {
             return -1;
         }
         if (actor->battleSequence == NULL) {
             return 0;
         }
-        if (arg0 != 0) {
-            objectData.targetSlot = arg0;
+        if (target_id != 0) {
+            objectData.targetSlot = target_id;
             objectData.modelId = actor->sequenceModelId;
-            if (arg0 == 1 && actor->modelId == 0) {
+            if (target_id == 1 && actor->modelId == 0) {
                 Core_Memory_FreeFromLowEnd(actor->battleSequence);
             } else if (!Content_FindSharedActorSequence(&objectData)) {
                 Core_Memory_FreeFromLowEnd(actor->battleSequence);
@@ -1568,25 +1568,25 @@ int Content_ReleaseActorSequence(int arg0, int arg1)
         break;
     case 1:
     case 2:
-        --arg0;
+        --target_id;
         for (i = 0; i < 17; ++i) {
             actor = Actors_actorRecords[i];
             if (actor != NULL) {
-                actor->sharedSequences[arg0] = NULL;
+                actor->sharedSequences[target_id] = NULL;
             }
         }
-        i = Content_ReleaseSequenceEffectTexture(arg0 + 1);
+        i = Content_ReleaseSequenceEffectTexture(target_id + 1);
         if (i < 0) {
             return i;
         }
-        if (Actors_sharedSequenceData[arg0] != NULL) {
-            Core_Memory_FreeFromLowEnd(Actors_sharedSequenceData[arg0]);
+        if (Actors_sharedSequenceData[target_id] != NULL) {
+            Core_Memory_FreeFromLowEnd(Actors_sharedSequenceData[target_id]);
         }
-        Actors_sharedSequenceData[arg0] = NULL;
+        Actors_sharedSequenceData[target_id] = NULL;
         break;
     case 4:
     case 5:
-        actor = Actors_actorRecords[arg0];
+        actor = Actors_actorRecords[target_id];
         if (actor == NULL) {
             return -1;
         }
@@ -1602,92 +1602,92 @@ int Content_ReleaseActorSequence(int arg0, int arg1)
 }
 
 // decomp: BATTLE.PRG func_8009CFB0 (src/BATTLE/BATTLE.PRG/30DB0.c:1920)
-int Content_ReleaseActorModel(int arg0)
+int Content_ReleaseActorModel(int actor_index)
 {
-    Content_ActorAssetRequest sp10;
-    Actors_ActorRecord* temp_s1;
+    Content_ActorAssetRequest sharing_request;
+    Actors_ActorRecord* actor;
     int i;
 
-    if (arg0 >= 0x11) {
+    if (actor_index >= 0x11) {
         return -1;
     }
 
-    temp_s1 = Actors_actorRecords[arg0];
+    actor = Actors_actorRecords[actor_index];
 
-    if (temp_s1 == NULL) {
+    if (actor == NULL) {
         return -1;
     }
 
-    if (temp_s1->modelId != 0x7F) {
-        Content_ActorAssetRequest* a2;
-        int var_v0;
-        sp10.targetSlot = arg0;
-        sp10.modelId = temp_s1->modelId;
-        a2 = &sp10;
+    if (actor->modelId != 0x7F) {
+        Content_ActorAssetRequest* request;
+        int shared_model_found;
+        sharing_request.targetSlot = actor_index;
+        sharing_request.modelId = actor->modelId;
+        request = &sharing_request;
 
         for (i = 0; i < 17; ++i) {
-            if ((i != a2->targetSlot) && ((Actors_actorRecords[i] != NULL))
-                && (Actors_actorRecords[i]->modelId == a2->modelId)) {
-                a2->dataAddress = i;
-                var_v0 = 1;
+            if ((i != request->targetSlot) && ((Actors_actorRecords[i] != NULL))
+                && (Actors_actorRecords[i]->modelId == request->modelId)) {
+                request->dataAddress = i;
+                shared_model_found = 1;
                 goto exit;
             }
         }
 
         if (i >= 17) {
-            var_v0 = 0;
+            shared_model_found = 0;
         }
     exit:
-        if (var_v0 == 0) {
-            Audio_StopBankSfx(0x180, VS_ONDISC(temp_s1->instance.model, soundSection, void *), 0);
-            Core_Memory_FreeFromLowEnd(temp_s1->instance.model);
-            Core_Memory_FreeFromLowEnd(temp_s1->ownedSequence);
+        if (shared_model_found == 0) {
+            Audio_StopBankSfx(0x180, VS_ONDISC(actor->instance.model, soundSection, void *), 0);
+            Core_Memory_FreeFromLowEnd(actor->instance.model);
+            Core_Memory_FreeFromLowEnd(actor->ownedSequence);
         }
 
-        if (temp_s1->commonSequence != 0) {
+        if (actor->commonSequence != 0) {
             for (i = 0; i < 17; ++i) {
-                if ((i != arg0) && ((Actors_actorRecords[i] != NULL))
-                    && (Actors_actorRecords[i]->commonSequence == temp_s1->commonSequence)) {
+                if ((i != actor_index) && ((Actors_actorRecords[i] != NULL))
+                    && (Actors_actorRecords[i]->commonSequence == actor->commonSequence)) {
                     goto exit2;
                 }
             }
             if (i >= 17) {
-                Core_Memory_FreeFromLowEnd(temp_s1->commonSequence);
+                Core_Memory_FreeFromLowEnd(actor->commonSequence);
             }
         }
     exit2:
 
-        Content_ReleaseActorSequence(arg0, 0);
+        Content_ReleaseActorSequence(actor_index, 0);
 
-        if (arg0 < 10) {
-            Content_ReleaseWeaponModel(arg0 * 2);
-            Content_ReleaseWeaponModel(arg0 * 2 | 1);
+        if (actor_index < 10) {
+            Content_ReleaseWeaponModel(actor_index * 2);
+            Content_ReleaseWeaponModel(actor_index * 2 | 1);
         }
 
-        if (temp_s1->holdsTextureSlots) {
-            for (i = 0; i < (temp_s1->instance.textureSlotCountMinusOne + 1); ++i) {
-                --Render_legacyActorTextureSlots[temp_s1->textureSlot + i].referenceCount;
+        if (actor->holdsTextureSlots) {
+            for (i = 0; i < (actor->instance.textureSlotCountMinusOne + 1); ++i) {
+                --Render_legacyActorTextureSlots[actor->textureSlot + i].referenceCount;
             }
 
-            if (temp_s1->textureSlot == 20) {
+            if (actor->textureSlot == 20) {
                 Render_RetireTexturePageRange(31, 1, 4);
             }
         }
     }
-    Actors_actorRecords[arg0] = NULL;
+    Actors_actorRecords[actor_index] = NULL;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8009D208 (src/BATTLE/BATTLE.PRG/30DB0.c:1996)
-int Content_ReleaseSequenceEffectTexture(int arg0)
+int Content_ReleaseSequenceEffectTexture(int bank_id)
 {
-    if (arg0 < 1 || arg0 > 3) return -1;
-    if (Actors_sharedSequenceBankTexturePages[arg0 - 1] != 0) {
-        Actors_ResetActorTextureFrames(arg0 - 1);
-        if (Render_RetireTexturePageRange(Actors_sharedSequenceBankTexturePages[arg0 - 1], 1, 4) == 0) {
+    if (bank_id < 1 || bank_id > 3) return -1;
+    if (Actors_sharedSequenceBankTexturePages[bank_id - 1] != 0) {
+        Actors_ResetActorTextureFrames(bank_id - 1);
+        if (Render_RetireTexturePageRange(Actors_sharedSequenceBankTexturePages[bank_id - 1], 1, 4) == 0) {
             return -3;
         }
-        Actors_sharedSequenceBankTexturePages[arg0 - 1] = 0;
+        Actors_sharedSequenceBankTexturePages[bank_id - 1] = 0;
     }
     return 0;
 }

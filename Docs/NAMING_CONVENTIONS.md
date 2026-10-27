@@ -802,3 +802,30 @@ all 742 manifest paths checked and all 121 owned paths preserved.
 Evidence: `build\quality\issue148-interpolation-*`.
 The lexical inventory is 24,102 occurrences/2,074 pairs/355 files; other
 subsystems' candidates remain subject to individual review.
+
+The interpolation cohort is published in `2f021fa5`, exact green
+`40563858491`. The content cohort then reviews 28 bindings across 15 emitted
+functions, the identical F00795 sequence-search alias, and the deliberately
+unused F03468 callback parameter. Workspace owner tags, asset requests,
+peer-model searches, bank-versus-actor selectors and block-relative timeline
+indices follow their original bodies and callers; all decisions are in the
+existing function ledger and copier rules.
+
+F00797 is corrected to `Content::CopyWeaponSequence`: the original function
+rebased two addresses, but existing native on-disc fixups intentionally remove
+those assignments. The native operation copies exactly `0x7800` bytes and keeps
+both relative offsets, not the entire `0x7900`-byte declared buffer. T00460 and
+its first two field descriptions now distinguish this native contract from
+original rebasing without changing layout, field names, confidence or status.
+The symbol change reaches both copy callers and the module-address registry.
+
+On dirty base `2f021fa5`, nine controls pass 47 assertions before the rename.
+Debug/Release then each pass 91 cases/1,370,357 assertions with
+`[content],[animation],[actors] --reporter compact`. Controls cover the exact
+copy prefix and untouched tail, offset preservation, workspace contention and
+repeat release, section/track index order, sequence selectors, peer filtering,
+one-based shared banks, and special-model record cleanup. Copier tests pass
+130/130; naming tests 32/32. Focused tidy has three existing/zero new findings.
+All 742 manifest paths and 121 owned paths are checked; two generations differ
+only by the approved identifier changes across eight generated files and are
+stable on repeat. Evidence: `build\quality\issue148-content-*`.

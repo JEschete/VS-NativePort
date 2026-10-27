@@ -100,7 +100,7 @@ void Menu_Framework_CloneActorPreview(int arg0)
     if (temp_s2->instance.slot == 0) {
         temp_s3->battleSequence = Core_Memory_AllocateFromLowEnd(0x7800);
 
-        Content_CopyRelocatedWeaponSequence(temp_s3->battleSequence, temp_s2->battleSequence);
+        Content_CopyWeaponSequence(temp_s3->battleSequence, temp_s2->battleSequence);
     } else {
         temp_s3->battleSequence = temp_s2->battleSequence;
     }
