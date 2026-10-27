@@ -24,12 +24,15 @@ verification of the current worktree.
   fixture values and assertion counts preserved. Fresh four-file tidy0/0
   plus exact-source incremental verification leaves294 existing/0 new,
   baseline unchanged. Production22fbc737 has exact green40431257034;
-  final test-cleanup publication/CI remains the #197 closure gate.
+  final test cleanupeb0e49a2 has exact green40433467658. #197 is closed.
   #160 still AVs at1508 in both current builds; original E084 table1
   binding/history is the next required observation. Portable reference
   cards/states are empty and Ghidra MCP is unavailable. #167's current
   standalone scene chain passes; the historical producer remains unresolved.
-  No texture/default/packet-skip fallback is authorized.
+  No texture/default/packet-skip fallback is authorized. The next crash fix
+  is blocked on the original E084 observation, not on an uncommitted patch.
+  #18/#148/#149/#151/#160/#167 remain open with their distinct acceptance
+  limits; neither selected replay nor naming/coverage inventory closes them.
 - #42's last seven entries are resolved locally: F01805/F01806 native
   navigation (`15d290bc`, exact green40421506975); F00745/F00747 bounded room
   rendering (owner checkpoint `506f750b`, exact green40425198955); F01769

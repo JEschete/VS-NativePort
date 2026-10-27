@@ -120,7 +120,13 @@ and baseline SHA256
 a205dd02dd039ded00ff4a0d99160cc9c1966b9609c263add4ce892b97faad24.
 This is explicit source-checked incremental verification, not a claim that
 the earlier full command exited0 or a baseline refresh. Final fast gate is
-0/0; exact final test-cleanup publication/CI is the remaining closure gate.
+0/0. Final test repair `eb0e49a287b2327ae8bd7728c67851ae4f5094ae` has exact
+green Source Quality40433467658 and #197 is closed. The issue-close CLI
+completed, then its Python output display hit a local encoding error;
+subsequent readback independently confirmed CLOSED and the exact green
+revision. #4/#149/#151/#160/#167 were reconciled with actual outcomes.
+The next unresolved crash investigation is blocked on original E084 table1
+binding/history; no unsafe placeholder patch is left in the worktree.
 
 ## Final seven assembly-gap resolution (2026-10-26)
 
