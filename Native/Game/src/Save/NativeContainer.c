@@ -12,6 +12,7 @@
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
+#include "Core/Diagnostics.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
@@ -58,101 +59,161 @@
 #include "Title/SaveFiles.h"
 #include "Title/TitleMenu.h"
 
+enum { kContainerComparisonActor = 16, kConfirmContainerOpening = 5 };
+enum ContainerSaveState {
+  kInitializeContainer,
+  kConfirmContainer,
+  kLoadContainerFiles,
+  kSelectContainerFile,
+  kStageContainerItems = 7,
+  kWaitForContainerScreen,
+  kReloadContainerFiles,
+  kBeginContainerWrite,
+  kWaitForContainerWrite,
+  kConfirmContainerDiscard,
+  kRestoreContainerItems,
+  kCloseContainerFiles,
+  kDismissContainerMenu,
+  kReleaseContainerStorage
+};
+enum {
+  kContainerHeadingWidth = 320,
+  kContainerHeadingY = 18,
+  kContainerHeadingColor = 126,
+  kContainerHeadingHeight = 8,
+  kContainerHeadingPosition = 180,
+  kContainerInventoryMenu = 14,
+  kContainerHiddenHudOffset = 0x200000,
+  kContainerBackgroundPriority = 2046,
+  kContainerBackgroundAlpha = 128,
+  kContainerRestorePriority = -4,
+  kContainerInformationBox = 7
+};
+
+static void InitializeContainerSave(u_char* state) {
+  Menu_PlayOpenSound();
+  Menu_Framework_unusedContainerEmptyBackup = Input_settings.containerEmpty;
+  Menu_Framework_unusedInventoryStorage = Core_Memory_AllocateFromHighEnd(
+      sizeof *Menu_Framework_unusedInventoryStorage);
+  Core_Memory_ZeroWordsBackward(Menu_Framework_unusedInventoryStorage,
+                                sizeof *Menu_Framework_unusedInventoryStorage);
+  Menu_Framework_SetActorComparisonStats(kContainerComparisonActor);
+  Menu_InitInformationTextBox(1);
+  Menu_Files_UpdateContainerConfirmation(kConfirmContainerOpening);
+  Menu_Framework_SetInformationMessage(
+      (char*)&Menu_Files_containerStrings
+          [Text_Menu7_container_Offset_checkContainer]);
+  *state = kConfirmContainer;
+}
+
+static void OpenContainerFiles(u_char* state) {
+  Save_MemoryCard_InitializeMenuResourcesStep(1);
+  Menu_Framework_SetBackgroundFade(1);
+  Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
+  Menu_Framework_MenuRow* menu_item = Menu_Framework_SetMenuItem(
+      0, kContainerHeadingWidth, kContainerHeadingY, kContainerHeadingColor,
+      kContainerHeadingHeight,
+      (char*)&Menu_Files_containerStrings
+          [Text_Menu7_container_Offset_container]);
+  menu_item->state = 2;
+  menu_item->targetPosition0 = kContainerHeadingPosition;
+  menu_item->selected = 1;
+  *state = kLoadContainerFiles;
+}
+
+static void StageContainerInventory(u_char* state) {
+  Core_Memory_CopyHalfwordBlocks(
+      Menu_Framework_unusedInventoryStorage->savedInventory,
+      &Audio_Seq_unusedInventory,
+      sizeof Menu_Framework_unusedInventoryStorage->savedInventory);
+  Core_Memory_CopyHalfwordBlocks(
+      &Menu_Framework_unusedInventoryStorage->savedInventoryIndices,
+      &Audio_Seq_unusedInventoryIndices,
+      sizeof Menu_Framework_unusedInventoryStorage->savedInventoryIndices);
+  Core_Memory_CopyHalfwordBlocks(
+      &Menu_Framework_unusedInventoryStorage->storedContainer,
+      Save_NativeContainerData(),
+      sizeof Menu_Framework_unusedInventoryStorage->storedContainer);
+  Save_MemoryCard_ReleaseMenuResources();
+  *state = kWaitForContainerScreen;
+  Menu_Framework_menuState.returnState = Menu_Framework_menuState.currentMenu;
+  Menu_Framework_menuState.currentMenu = kContainerInventoryMenu;
+}
+
+static int UpdateContainerSaveCompletion(u_char* state);
+
+static void RestoreContainerInventory(void) {
+  Input_settings.containerEmpty = Menu_Framework_unusedContainerEmptyBackup;
+  Core_Memory_CopyHalfwordBlocks(
+      &Audio_Seq_unusedInventory,
+      Menu_Framework_unusedInventoryStorage->savedInventory,
+      sizeof Menu_Framework_unusedInventoryStorage->savedInventory);
+  Core_Memory_CopyHalfwordBlocks(
+      &Audio_Seq_unusedInventoryIndices,
+      &Menu_Framework_unusedInventoryStorage->savedInventoryIndices,
+      sizeof Menu_Framework_unusedInventoryStorage->savedInventoryIndices);
+}
+
 // decomp: MENU7.PRG vs_menu7_saveContainerMenu (src/MENU/MENU7.PRG/260.c:3944)
 int Menu_Files_UpdateContainerSave(u_char* state) {
-  enum Menu_Framework_InitOnlyState {
-    Menu_Framework_InitOnlyState_Init,
-  };
-
   int option;
-
   switch (*state) {
-    case Menu_Framework_InitOnlyState_Init:
-      Menu_PlayOpenSound();
-      Menu_Framework_unusedContainerEmptyBackup = Input_settings.containerEmpty;
-      Menu_Framework_unusedInventoryStorage = Core_Memory_AllocateFromHighEnd(
-          sizeof *Menu_Framework_unusedInventoryStorage);
-      Core_Memory_ZeroWordsBackward(
-          Menu_Framework_unusedInventoryStorage,
-          sizeof *Menu_Framework_unusedInventoryStorage);
-      Menu_Framework_SetActorComparisonStats(16);
-      Menu_InitInformationTextBox(1);
-      Menu_Files_UpdateContainerConfirmation(5);
-      Menu_Framework_SetInformationMessage(
-          (char*)&Menu_Files_containerStrings
-              [Text_Menu7_container_Offset_checkContainer]);
-      *state = 1;
+    case kInitializeContainer:
+      InitializeContainerSave(state);
       break;
-    case 1:
+    case kConfirmContainer:
       option = Menu_Files_UpdateContainerConfirmation(0);
       if (option != 0) {
         if (option >= 0) {
-          Menu_Framework_MenuRow* menuItem;
-          Save_MemoryCard_InitializeMenuResourcesStep(1);
-          Menu_Framework_SetBackgroundFade(1);
-          Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
-          menuItem = Menu_Framework_SetMenuItem(
-              0, 0x140, 0x12, 0x7E, 8,
-              (char*)&Menu_Files_containerStrings
-                  [Text_Menu7_container_Offset_container]);
-          menuItem->state = 2;
-          menuItem->targetPosition0 = 180;
-          menuItem->selected = 1;
-          *state = 2;
+          OpenContainerFiles(state);
         } else {
-          *state = 16;
+          *state = kReleaseContainerStorage;
         }
       }
       break;
-    case 2:
+    case kLoadContainerFiles:
       if ((Menu_Framework_AreMenuRowsIdle() != 0) &&
           (Save_MemoryCard_InitializeMenuResourcesStep(0) != 0)) {
         Field_SetFieldRenderingEnabled(0);
         Battle_SetHudHidden(1);
-        Battle_hudSlideOffset = 0x200000;
-        Menu_Framework_SetBackgroundPriority(2046, 128);
+        Battle_hudSlideOffset = kContainerHiddenHudOffset;
+        Menu_Framework_SetBackgroundPriority(kContainerBackgroundPriority,
+                                             kContainerBackgroundAlpha);
         Menu_Files_ResetElements();
         Save_NativeSelectContainer(1);
-        *state = 3;
+        *state = kSelectContainerFile;
       }
       break;
-    case 3:
+    case kSelectContainerFile:
       option = Save_NativeSelectContainer(0);
       if (option != 0) {
         if (option < 0) {
-          *state = 14;
+          *state = kCloseContainerFiles;
         } else {
-          *state = 7;
+          *state = kStageContainerItems;
         }
       }
       Menu_Files_DrawFrame(Render_frameBuf);
       break;
-    case 7:
-      Core_Memory_CopyHalfwordBlocks(
-          Menu_Framework_unusedInventoryStorage->savedInventory,
-          &Audio_Seq_unusedInventory,
-          sizeof Menu_Framework_unusedInventoryStorage->savedInventory);
-      Core_Memory_CopyHalfwordBlocks(
-          &Menu_Framework_unusedInventoryStorage->savedInventoryIndices,
-          &Audio_Seq_unusedInventoryIndices,
-          sizeof Menu_Framework_unusedInventoryStorage->savedInventoryIndices);
-      Core_Memory_CopyHalfwordBlocks(
-          &Menu_Framework_unusedInventoryStorage->storedContainer,
-          Save_NativeContainerData(),
-          sizeof Menu_Framework_unusedInventoryStorage->storedContainer);
-      Save_MemoryCard_ReleaseMenuResources();
-      *state = 8;
-      Menu_Framework_menuState.returnState =
-          Menu_Framework_menuState.currentMenu;
-      Menu_Framework_menuState.currentMenu = 14;
+    case kStageContainerItems:
+      StageContainerInventory(state);
       break;
-    case 8:
+    default:
+      return UpdateContainerSaveCompletion(state);
+  }
+  return 0;
+}
+
+static int UpdateContainerSaveCompletion(u_char* state) {
+  int option;
+  switch (*state) {
+    case kWaitForContainerScreen:
       if (Menu_Framework_AreMenuRowsIdle() != 0) {
         Save_MemoryCard_InitializeMenuResourcesStep(1);
-        *state = 9;
+        *state = kReloadContainerFiles;
       }
       break;
-    case 9:
+    case kReloadContainerFiles:
       if (Save_MemoryCard_InitializeMenuResourcesStep(0) != 0) {
         option = Menu_Framework_menuState.returnState;
         if (option != 0) {
@@ -162,24 +223,24 @@ int Menu_Files_UpdateContainerSave(u_char* state) {
             Menu_Framework_SetInformationMessage(
                 (char*)&Menu_Files_containerStrings
                     [Text_Menu7_container_Offset_cancelWarning]);
-            *state = 12;
+            *state = kConfirmContainerDiscard;
           } else {
-            *state = 10;
+            *state = kBeginContainerWrite;
           }
         } else {
-          *state = 13;
+          *state = kRestoreContainerItems;
         }
       }
       break;
-    case 10:
+    case kBeginContainerWrite:
       Menu_Files_CopySelectedContainerItems(
           Save_NativeContainerData(),
           &Menu_Framework_unusedInventoryStorage->container.items,
           &Menu_Framework_unusedInventoryStorage->container.indices);
       Menu_Files_UpdateDataSaveMenu(2);
-      *state = 11;
+      *state = kWaitForContainerWrite;
       break;
-    case 11:
+    case kWaitForContainerWrite:
       option = Menu_Files_UpdateDataSaveMenu(0);
       if (option != 0) {
         if ((Menu_Files_dataNotSaved == 0) && (option < 0)) {
@@ -188,59 +249,55 @@ int Menu_Files_UpdateContainerSave(u_char* state) {
           Menu_Framework_SetInformationMessage(
               (char*)&Menu_Files_containerStrings
                   [Text_Menu7_container_Offset_cancelWarning]);
-          *state = 12;
+          *state = kConfirmContainerDiscard;
         } else {
-          *state = 14;
+          *state = kCloseContainerFiles;
         }
       }
       Menu_Files_DrawFrame(Render_frameBuf);
       break;
-    case 12:
+    case kConfirmContainerDiscard:
       option = Menu_Files_UpdateContainerConfirmation(0);
       if (option != 0) {
         if (option == 1) {
-          *state = 10;
+          *state = kBeginContainerWrite;
           break;
         }
-        *state = 13;
+        *state = kRestoreContainerItems;
       }
       break;
-    case 13:
-      Input_settings.containerEmpty = Menu_Framework_unusedContainerEmptyBackup;
-      Core_Memory_CopyHalfwordBlocks(
-          &Audio_Seq_unusedInventory,
-          Menu_Framework_unusedInventoryStorage->savedInventory,
-          sizeof Menu_Framework_unusedInventoryStorage->savedInventory);
-      Core_Memory_CopyHalfwordBlocks(
-          &Audio_Seq_unusedInventoryIndices,
-          &Menu_Framework_unusedInventoryStorage->savedInventoryIndices,
-          sizeof Menu_Framework_unusedInventoryStorage->savedInventoryIndices);
+    case kRestoreContainerItems:
+      RestoreContainerInventory();
       /* fallthrough */
-    case 14:
+    case kCloseContainerFiles:
       Field_SetFieldRenderingEnabled(1);
       Battle_SetHudHidden(0);
       Battle_hudSlideOffset = 0;
       Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-      Menu_Framework_SetBackgroundPriority(-4, 0x80);
-      *state = 15;
+      Menu_Framework_SetBackgroundPriority(kContainerRestorePriority,
+                                           kContainerBackgroundAlpha);
+      *state = kDismissContainerMenu;
       break;
-    case 15:
+    case kDismissContainerMenu:
       Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
       Menu_Framework_DismissInformationBox();
       Menu_Framework_SetBackgroundFade(0);
       if (Menu_Framework_AreMenuRowsIdle() != 0) {
         Save_MemoryCard_ReleaseMenuResources();
-        *state = 16;
+        *state = kReleaseContainerStorage;
       }
       break;
-    case 16:
-      if ((Menu_DismissTextBox(7) == 0) &&
+    case kReleaseContainerStorage:
+      if ((Menu_DismissTextBox(kContainerInformationBox) == 0) &&
           (Menu_Framework_backgroundFadeStep == 0)) {
         Core_Memory_FreeFromHighEnd(Menu_Framework_unusedInventoryStorage);
         Save_NativeReleaseContainer();
-        *state = Menu_Framework_InitOnlyState_Init;
+        *state = kInitializeContainer;
         return 1;
       }
+      break;
+    default:
+      Core_Errorf("save", "Invalid container menu state: %u", (unsigned)*state);
       break;
   }
   return 0;

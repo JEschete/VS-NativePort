@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <expected>
 #include <string>
@@ -19,6 +20,13 @@ extern "C" {
 
 namespace VS::Game::Save {
 
+inline constexpr std::size_t kPositionAxes = 3;
+inline constexpr std::size_t kCachedRoomActors = 8;
+inline constexpr std::size_t kRandomShuffleEntries = 97;
+inline constexpr std::size_t kScriptFlagBytes = 0x440;
+inline constexpr std::size_t kLearnedActionCount = 256;
+inline constexpr std::size_t kCachedRooms = 4;
+
 struct TileAddress {
   std::uint8_t x = 0;
   std::uint8_t z = 0;
@@ -34,7 +42,7 @@ struct Location {
   std::uint16_t zone = 0;
   std::uint16_t room = 0;
   std::uint16_t scene = 0;
-  std::array<std::int32_t, 3> position{};
+  std::array<std::int32_t, kPositionAxes> position{};
   std::int32_t facing = 0;
   std::int32_t camera_yaw = 0;
   std::uint8_t floor_layer = 0;
@@ -53,8 +61,8 @@ struct OrbitCamera {
   std::int32_t zoom_mode = 0;
   std::int32_t zoom_velocity = 0;
   std::int32_t tracking_speed = 0;
-  std::array<std::int32_t, 3> look_at{};
-  std::array<std::int32_t, 3> view_angles{};
+  std::array<std::int32_t, kPositionAxes> look_at{};
+  std::array<std::int32_t, kPositionAxes> view_angles{};
 };
 
 struct RoomCache {
@@ -62,20 +70,20 @@ struct RoomCache {
   std::uint8_t zone = 0;
   std::uint16_t map = 0;
   std::uint32_t next_slot = 0;
-  std::array<Actors_RoomActorRecord, 8> actors{};
+  std::array<Actors_RoomActorRecord, kCachedRoomActors> actors{};
 };
 
 struct RandomState {
   std::uint32_t bios_state = 0;
   std::uint32_t interface_state = 0;
-  std::array<std::int32_t, 97> shuffle{};
+  std::array<std::int32_t, kRandomShuffleEntries> shuffle{};
   std::uint32_t shuffle_index = 0;
   std::uint32_t movement_state = 0;
 };
 
 struct Snapshot {
-  std::array<std::uint8_t, 0x440> script_flags{};
-  std::array<bool, 256> learned_actions{};
+  std::array<std::uint8_t, kScriptFlagBytes> script_flags{};
+  std::array<bool, kLearnedActionCount> learned_actions{};
   State_Settings settings{};
   State_AshleyStatsSnapshot ashley{};
   Items_Inventory inventory{};
@@ -84,7 +92,7 @@ struct Snapshot {
   State_RoomVisitFlags visits{};
   State_ArtsStatus arts{};
   State_ScoreData score{};
-  std::array<RoomCache, 4> room_cache{};
+  std::array<RoomCache, kCachedRooms> room_cache{};
   std::uint32_t room_cache_slot = 0;
   std::uint64_t play_ticks = 0;
   State_SceneTimer scene_timer{};

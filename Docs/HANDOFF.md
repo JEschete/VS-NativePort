@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42 is closed after final source98d38089 and evidence011eecc3 both received
+  exact green CI40428688667/40429529689. Separate non-MA #197 now repairs
+  the newly inventoried unchanged-source header/save quality findings:
+  named dimensions/states, C/C++ null spelling, size_t arithmetic and
+  sampled-data member naming; container phases are split without changing
+  valid state values or copy/cleanup order. Existing save assertions remain
+  intact; one invalid-state diagnostic regression is added.
+  Focused tidy3 existing/0 new, save19/1,426 and full Debug/Release
+  1002/9,572,050 each pass;131 port controls and two stable generations
+  preserve119 owned paths/1,028 outputs and the unchanged quality baseline.
+  The repeat full-tidy run is still in progress; #197 stays open until that
+  result and exact publication CI are reconciled. #160's original E084
+  table1 binding and #167's historical producer/history remain unresolved;
+  no texture/default/packet-skip fallback is authorized.
 - #42's last seven entries are resolved locally: F01805/F01806 native
   navigation (`15d290bc`, exact green40421506975); F00745/F00747 bounded room
   rendering (owner checkpoint `506f750b`, exact green40425198955); F01769

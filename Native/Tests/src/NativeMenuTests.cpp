@@ -35,6 +35,7 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/Categories.h"
 #include "Menu/Files.h"
+#include "Save/NativeContainer.h"
 #include "Title/SaveFiles.h"
 }
 
@@ -348,6 +349,40 @@ void CheckStagedBank(const Items_ContainerData* bank) {
 
 void CheckSelectedSlot(int slot) { CHECK(SelectedSlot() == slot); }
 
+void CheckTitlePickerWrapAndCancel() {
+  Move(PADLdown, Menu_Files_UpdateLoadMenu);
+  CHECK(SelectedSlot() == 0);
+  Move(PADLup, Menu_Files_UpdateLoadMenu);
+  CHECK(SelectedSlot() == 99);
+  CHECK(Screen().files.front().slot == 97);
+  CHECK(Screen().files.back().slot == 99);
+  Buttons(PADRdown);
+  CHECK(Menu_Files_UpdateLoadMenu(0) == -1);
+  CHECK_FALSE(Save::FileMenuPresentation());
+}
+
+void CheckContainerTail(const Items_ContainerData* bank) {
+  CHECK(Save_NativeContainerData() == bank);
+  CHECK(Save_NativeContainerData()->misc[255].id == 308);
+  CHECK(Save_NativeContainerData()->misc[255].count == 2);
+}
+
+void CheckVerticalConsent() {
+  Move(PADLleft, Save_NativeSelectContainer);
+  CHECK_FALSE(Screen().affirmative);
+  Move(PADLright, Save_NativeSelectContainer);
+  CHECK_FALSE(Screen().affirmative);
+  Move(PADLup, Save_NativeSelectContainer);
+  CHECK(Screen().affirmative);
+  Move(PADLdown, Save_NativeSelectContainer);
+  CHECK_FALSE(Screen().affirmative);
+}
+
+void CheckCanceledConsent(const fs::path& root) {
+  CHECK_FALSE(Screen().confirmation);
+  CHECK(fs::is_empty(root));
+}
+
 void CheckFirstTwoFiles(std::array<Save::FileStatus, 2> expected) {
   const auto screen = Screen();
   REQUIRE(screen.files.size() == 3);
@@ -372,8 +407,7 @@ TEST_CASE("Native Continue scrolls all one hundred files vertically",
           "[save-menu]") {
   MenuFixture fixture;
   CHECK(Save_NativeInitialTitleSelection() == 0);
-  REQUIRE(Menu_Files_UpdateLoadMenu(2) == 0);
-  REQUIRE(Menu_Files_UpdateLoadMenu(0) == 0);
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
   CHECK(SelectedSlot() == 0);
   CHECK(Screen().summaries.size() == 3);
   CHECK(Text(Title_memoryCardMessage) == "Select a file");
@@ -383,22 +417,13 @@ TEST_CASE("Native Continue scrolls all one hundred files vertically",
     CHECK(SelectedSlot() == slot);
     CHECK(Screen().files.front().slot == std::max(0, slot - 2));
   }
-  Move(PADLdown, Menu_Files_UpdateLoadMenu);
-  CHECK(SelectedSlot() == 0);
-  Move(PADLup, Menu_Files_UpdateLoadMenu);
-  CHECK(SelectedSlot() == 99);
-  CHECK(Screen().files.front().slot == 97);
-  CHECK(Screen().files.back().slot == 99);
-  Buttons(PADRdown);
-  CHECK(Menu_Files_UpdateLoadMenu(0) == -1);
-  CHECK_FALSE(Save::FileMenuPresentation());
+  CheckTitlePickerWrapAndCancel();
 }
 
 TEST_CASE("Native file screens have three cards without generic row panels",
           "[save-menu]") {
   MenuFixture fixture;
-  REQUIRE(Menu_Files_UpdateLoadMenu(2) == 0);
-  REQUIRE(Menu_Files_UpdateLoadMenu(0) == 0);
+  BeginPicker(Menu_Files_UpdateLoadMenu, 2);
   REQUIRE(Screen().files.size() == 3);
   CHECK(Screen().title);
   CHECK_FALSE(Screen().save);
@@ -410,9 +435,9 @@ TEST_CASE("Native file screens have three cards without generic row panels",
     CHECK_FALSE(file.document);
   }
   Move(PADLleft, Menu_Files_UpdateLoadMenu);
-  CHECK(SelectedSlot() == 0);
+  CheckSelectedSlot(0);
   Move(PADLright, Menu_Files_UpdateLoadMenu);
-  CHECK(SelectedSlot() == 0);
+  CheckSelectedSlot(0);
 }
 
 TEST_CASE("Native Save cannot bypass production save-point eligibility",
@@ -454,16 +479,13 @@ TEST_CASE("Native picker never replaces an invalid existing file",
 TEST_CASE("Container selection owns typed storage beyond picker reentry",
           "[save-menu]") {
   MenuFixture fixture;
-  REQUIRE(Save_NativeSelectContainer(1) == 0);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  BeginPicker(Save_NativeSelectContainer, 1);
+  Press(PADRright, Save_NativeSelectContainer);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
   Buttons(0, PADLup);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  Tick(Save_NativeSelectContainer);
+  Press(PADRright, Save_NativeSelectContainer);
   Buttons(0);
   REQUIRE(Save_NativeSelectContainer(0) == 1);
   auto* bank = Save_NativeContainerData();
@@ -472,61 +494,41 @@ TEST_CASE("Container selection owns typed storage beyond picker reentry",
   bank->misc[255].id = 308;
   bank->misc[255].count = 2;
   REQUIRE(Menu_Files_UpdateDataSaveMenu(2) == 0);
-  CHECK(Save_NativeContainerData() == bank);
-  CHECK(Save_NativeContainerData()->misc[255].id == 308);
-  CHECK(Save_NativeContainerData()->misc[255].count == 2);
+  CheckContainerTail(bank);
   Save_NativeReleaseContainer();
 }
 
 TEST_CASE("Native confirmation is vertical explicit consent and cancelable",
           "[save-menu]") {
   MenuFixture fixture;
-  REQUIRE(Save_NativeSelectContainer(1) == 0);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  BeginPicker(Save_NativeSelectContainer, 1);
+  Press(PADRright, Save_NativeSelectContainer);
   REQUIRE(Screen().confirmation);
   CHECK_FALSE(Screen().affirmative);
-  Move(PADLleft, Save_NativeSelectContainer);
-  CHECK_FALSE(Screen().affirmative);
-  Move(PADLright, Save_NativeSelectContainer);
-  CHECK_FALSE(Screen().affirmative);
-  Move(PADLup, Save_NativeSelectContainer);
-  CHECK(Screen().affirmative);
-  Move(PADLdown, Save_NativeSelectContainer);
-  CHECK_FALSE(Screen().affirmative);
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
-  CHECK_FALSE(Screen().confirmation);
-  CHECK(fs::is_empty(fixture.root));
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  CheckVerticalConsent();
+  Press(PADRright, Save_NativeSelectContainer);
+  CheckCanceledConsent(fixture.root);
+  Press(PADRright, Save_NativeSelectContainer);
   CHECK_FALSE(Screen().affirmative);
   Move(PADLup, Save_NativeSelectContainer);
   CHECK(Screen().affirmative);
-  Buttons(PADRdown);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
-  CHECK_FALSE(Screen().confirmation);
-  CHECK(fs::is_empty(fixture.root));
+  Press(PADRdown, Save_NativeSelectContainer);
+  CheckCanceledConsent(fixture.root);
 }
 
 TEST_CASE("Native reentry retains the last file at the end of the scroll",
           "[save-menu]") {
   MenuFixture fixture;
-  REQUIRE(Save_NativeSelectContainer(1) == 0);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  BeginPicker(Save_NativeSelectContainer, 1);
   Move(PADLup, Save_NativeSelectContainer);
-  CHECK(SelectedSlot() == 99);
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  CheckSelectedSlot(99);
+  Press(PADRright, Save_NativeSelectContainer);
   Move(PADLup, Save_NativeSelectContainer);
-  Buttons(PADRright);
-  REQUIRE(Save_NativeSelectContainer(0) == 0);
+  Press(PADRright, Save_NativeSelectContainer);
   Buttons(0);
   REQUIRE(Save_NativeSelectContainer(0) == 1);
-  REQUIRE(Menu_Files_UpdateDataSaveMenu(2) == 0);
-  REQUIRE(Menu_Files_UpdateDataSaveMenu(0) == 0);
-  CHECK(SelectedSlot() == 99);
+  BeginPicker(Menu_Files_UpdateDataSaveMenu, 2);
+  CheckSelectedSlot(99);
   CHECK(Screen().files.front().slot == 97);
   CHECK(Screen().files.back().slot == 99);
   CHECK_FALSE(Screen().title);
@@ -767,4 +769,21 @@ TEST_CASE("Native cached previews cannot conceal missing load content",
   Press(0, Menu_Files_UpdateLoadMenu);
   CHECK(Screen().files[0].status == Save::FileStatus::kInvalid);
   CHECK_FALSE(Screen().files[0].message.empty());
+}
+
+TEST_CASE("Invalid container menu states are diagnosed without mutating state",
+          "[save-menu][container-state]") {
+  bool diagnosed = false;
+  const auto previous =
+      VS::Core::SetLogObserver([&diagnosed](const VS::Core::LogRecord& record) {
+        diagnosed |= record.level == VS::Core::LogLevel::Error &&
+                     record.channel == "save" &&
+                     record.message == "Invalid container menu state: 255";
+      });
+  u_char state = 255;
+  const auto result = Menu_Files_UpdateContainerSave(&state);
+  VS::Core::SetLogObserver(previous);
+  CHECK(result == 0);
+  CHECK(state == 255);
+  CHECK(diagnosed);
 }

@@ -606,8 +606,8 @@ const Content_ModuleSymbol& LoadedLfoOwner() {
       tables, reinterpret_cast<void**>(Audio_Seq_kLfoWaveforms),
       &Content_ModulePointerTable::target);
   REQUIRE(found != tables.end());
-  REQUIRE(found->sampleSource != nullptr);
-  return *found->sampleSource;
+  REQUIRE(found->sample_source != nullptr);
+  return *found->sample_source;
 }
 
 void CheckOriginalLfoOwner(const Content_ModuleSymbol& owner,

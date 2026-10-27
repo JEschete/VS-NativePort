@@ -227,8 +227,8 @@ bool RelocateTable(const Content_ModulePointerTable& table,
     return false;
   }
   std::optional<SamplePrograms> samples;
-  if (table.sampleSource != nullptr) {
-    samples.emplace(*table.sampleSource);
+  if (table.sample_source != nullptr) {
+    samples.emplace(*table.sample_source);
     if (!samples->Valid(table.module)) {
       VS_LOG_ERROR("content", "LFO table {} has an invalid sample-data owner",
                    table.module);

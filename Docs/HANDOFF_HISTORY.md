@@ -11,6 +11,52 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Separate whole-tree header/save quality repair (2026-10-26)
+
+#42 closed after final source98d38089 and evidence011eecc3 received exact
+green CI40428688667/40429529689. #197 was opened before repairing the
+newly inventoried whole-tree findings; it is separate non-MA work.
+
+The eight original affected source files are repaired without baseline
+changes. Content's sampled-data member uses the native spelling
+`sample_source` with both loader/test consumers updated; table layout and
+positional generated bindings are unchanged. LFO invalid selectors retain
+their explicit error/null result in both C17 and C++23. Save size-limit
+arithmetic widens before multiplication. Room-light and snapshot dimensions
+receive semantic constants with identical values/types/extents; snapshot
+wire schemas remain unchanged. Save-menu parameter names and asset phases
+follow current naming, with explicit resource-count/page constants.
+
+The container-save state machine keeps its original0..3/7..16 values,
+frame boundaries, inventory-copy order, rollback, fallthrough and cleanup.
+Named phases and bounded initialization/staging/restoration/completion
+helpers replace the oversized function. Invalid states now log explicitly
+without changing the state or pretending completion; a new observer test
+verifies that contract. During extraction a missing source-address operator
+was caught by the compiler and corrected before acceptance.
+
+Five existing save tests exceeded expanded Catch statement limits when
+their source was analyzed explicitly. Existing input/consent/scroll/bank
+checks were moved into bounded helpers, retaining all original assertions
+and sequences rather than suppressing checks. The save selection remains
+19 cases/1,426 assertions including the new three-assertion diagnostic test.
+Full Debug/Release each pass1,002 cases/9,572,050 assertions.
+
+Fresh commands/evidence under `build\quality\issue42-final`:
+
+- `quality-native.cmd --files Native\Game\src\Save\MenuAssets.c
+  Native\Game\src\Save\NativeContainer.c Native\Content\src\ModuleLoader.cpp
+  Native\Tests\src\NativeMenuTests.cpp Native\Tests\src\ContentTests.cpp
+  --tidy`:3 existing/0 new.
+- `test-native.cmd Debug "[save-menu]"`, direct full Debug executable,
+  and `test-native.cmd Release`: all pass with the counts above.
+- Port unittest discovery131 passes. Two copier generations repeat1,028
+  native outputs, preserve119 owned paths and leave the baseline unchanged.
+- The required repeat `quality-native.cmd --tidy` is running and will retain
+  both its text output and JSON report as `quality197-full-tidy.txt` and
+  `quality197-full-report.json`. This checkpoint does not pre-claim a clean
+  full-tree result or issue completion.
+
 ## Final seven assembly-gap resolution (2026-10-26)
 
 The resumed base was `15d290bc`; during the pause the owner published

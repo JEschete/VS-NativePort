@@ -16,7 +16,8 @@
 #include "Title/SaveCard.h"
 #include "Title/SaveFiles.h"
 
-enum AssetPhase { ASSETS_IMAGE, ASSETS_TEXT_QUEUE, ASSETS_TEXT };
+enum AssetPhase { kAssetImage, kAssetTextQueue, kAssetText };
+enum { kSaveImageCount = 3, kSaveTexturePage = 0x1D, kSaveTextureOwner = 6 };
 static enum AssetPhase phase;
 static Content_DiscQueueSlot* request;
 
@@ -25,16 +26,20 @@ static Content_DiscQueueSlot* request;
 static int InitializeAssets(int init, int menu) {
   Content_DiscFile file;
   if (init) {
-    if (menu) Render_ReserveTexturePageRange(0x1D, 3, 6);
+    if (menu) {
+      Render_ReserveTexturePageRange(kSaveTexturePage, kSaveImageCount,
+                                     kSaveTextureOwner);
+    }
     Title_memoryCardUiResource =
         Core_Memory_AllocateFromLowEnd(VS_SPMCIMG_BIN_SIZE);
     Save_MemoryCard_uiResources =
         (Save_CardUiResources*)(Title_memoryCardUiResource +
-                                sizeof(Save_GameSaveImage) * 3);
-    if (menu)
+                                sizeof(Save_GameSaveImage) * kSaveImageCount);
+    if (menu) {
       Menu_Files_textTable = Save_MemoryCard_uiResources->textTable;
-    else
+    } else {
       Title_saveMenuText = Save_MemoryCard_uiResources->textTable;
+    }
     Title_saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
     Title_cardDirectoryEntryBuffer =
         &Save_MemoryCard_uiResources->directoryEntry;
@@ -42,24 +47,24 @@ static int InitializeAssets(int init, int menu) {
     file.size = VS_SPMCIMG_BIN_SIZE;
     request = Content_AllocateDiscRequest(&file);
     Content_EnqueueDiscRequest(request, Title_memoryCardUiResource);
-    phase = ASSETS_IMAGE;
+    phase = kAssetImage;
     return 0;
   }
-  if (phase == ASSETS_IMAGE) {
+  if (phase == kAssetImage) {
     if (request->state == Content_DiscRequestState_Loaded) {
       Content_ReleaseDiscRequest(request);
       Render_UploadPackedRectangle(
           vs_getXY(800, 256), Title_memoryCardUiResource, vs_getWH(224, 256));
-      phase = ASSETS_TEXT_QUEUE;
+      phase = kAssetTextQueue;
     }
     return 0;
   }
-  if (phase == ASSETS_TEXT_QUEUE) {
+  if (phase == kAssetTextQueue) {
     file.lba = VS_MCDATA_BIN_LBA;
     file.size = VS_MCDATA_BIN_SIZE + VS_MCMAN_BIN_SIZE;
     request = Content_AllocateDiscRequest(&file);
     Content_EnqueueDiscRequest(request, Save_MemoryCard_uiResources);
-    phase = ASSETS_TEXT;
+    phase = kAssetText;
   }
   if (request->state != Content_DiscRequestState_Loaded) return 0;
   Content_ReleaseDiscRequest(request);
@@ -72,7 +77,10 @@ static void ReleaseAssets(int menu) {
   Core_Memory_FreeFromLowEnd(Title_memoryCardUiResource);
   Title_memoryCardUiResource = NULL;
   Save_MemoryCard_uiResources = NULL;
-  if (menu) Render_RetireTexturePageRange(0x1D, 3, 6);
+  if (menu) {
+    Render_RetireTexturePageRange(kSaveTexturePage, kSaveImageCount,
+                                  kSaveTextureOwner);
+  }
 }
 
 int Save_MemoryCard_InitializeMenuResourcesStep(int init) {

@@ -10,17 +10,23 @@
 #include "Render/Render.h"
 
 // decomp: 2EA3C.s:1857, eight words per imported lighting triangle.
+enum {
+  kRoomLightTriangleVertices = 3,
+  kRoomLightPositionAxes = 2,
+  kRoomLightTriangleBytes = 32
+};
+
 typedef struct Render_RoomLightTriangle {
   int16_t minimum_x, minimum_z, maximum_x, maximum_z;
-  int16_t points[3][2];
-  uint32_t colors[3];
+  int16_t points[kRoomLightTriangleVertices][kRoomLightPositionAxes];
+  uint32_t colors[kRoomLightTriangleVertices];
 } Render_RoomLightTriangle;
 
 #ifdef __cplusplus
-static_assert(sizeof(Render_RoomLightTriangle) == 32);
+static_assert(sizeof(Render_RoomLightTriangle) == kRoomLightTriangleBytes);
 extern "C" {
 #else
-_Static_assert(sizeof(Render_RoomLightTriangle) == 32,
+_Static_assert(sizeof(Render_RoomLightTriangle) == kRoomLightTriangleBytes,
                "room lighting triangle disk layout");
 #endif
 

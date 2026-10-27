@@ -42,7 +42,7 @@ typedef struct Content_ModulePointerTable {
   void** target;    // the native array
   unsigned capacity;
   // LFO references are original short sample/control data, even at code labels.
-  const Content_ModuleSymbol* sampleSource;
+  const Content_ModuleSymbol* sample_source;
 } Content_ModulePointerTable;
 
 extern const Content_ModuleSymbol Content_moduleSymbols[];

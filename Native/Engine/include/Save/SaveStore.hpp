@@ -24,7 +24,7 @@ enum class WriteConsent { kNormal, kReplaceRecovered };
 class SaveStore {
  public:
   static constexpr int kSlotCount = 100;
-  static constexpr std::size_t kMaximumBytes = 16u * 1024u * 1024u;
+  static constexpr std::size_t kMaximumBytes = std::size_t{16} * 1024 * 1024;
 
   static std::expected<SaveStore, std::string> Open(std::filesystem::path root);
 
