@@ -265,7 +265,6 @@
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomGeometry.h"
 #include "Render/RoomLighting.h"
 #include "Render/ScaledFont.h"
 #include "Render/ScreenTransition.h"

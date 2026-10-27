@@ -17,7 +17,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomGeometry.h"
 #include "Render/UiPrimitives.h"
 }
 

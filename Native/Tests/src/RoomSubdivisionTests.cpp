@@ -10,13 +10,13 @@
 
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
+#include "Platform/CrashHandler.hpp"
 
 extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomGeometry.h"
 #include "Render/UiPrimitives.h"
 }
 
@@ -82,6 +82,51 @@ struct SubdivisionFixture {
     const NativeSubdivision draw =
         quad ? Render_SubdivideRoomQuad : Render_SubdivideRoomTriangle;
     return draw(vertices.data(), levels, &material, bytes);
+  }
+
+  std::vector<unsigned char> Batch() const {
+    std::vector<unsigned char> bytes(8 + 32 + 40);
+    constexpr std::array<unsigned, 2> kCounts{1, 1};
+    std::memcpy(bytes.data(), kCounts.data(), sizeof kCounts);
+    constexpr std::array<std::size_t, 4> kColors{12, 16, 20, 36};
+    constexpr std::array<std::size_t, 4> kU{24, 28, 19, 35};
+    constexpr std::array<std::size_t, 4> kV{25, 29, 23, 39};
+    for (bool quad : {false, true}) {
+      auto* record = bytes.data() + (quad ? 40 : 8);
+      std::memcpy(record, &vertices[0].position, 6);
+      for (std::size_t corner = 0; corner < (quad ? 4u : 3u); ++corner) {
+        const auto& vertex = vertices[corner];
+        if (corner != 0) {
+          const std::size_t offset = corner == 3 ? 32 : 6 + (corner - 1) * 3;
+          record[offset] = static_cast<unsigned char>(
+              (vertex.position.vx - vertices[0].position.vx) / 8);
+          record[offset + 1] = static_cast<unsigned char>(
+              (vertex.position.vy - vertices[0].position.vy) / 8);
+          record[offset + 2] = static_cast<unsigned char>(
+              (vertex.position.vz - vertices[0].position.vz) / 8);
+        }
+        std::memcpy(record + kColors[corner], &vertex.color, 3);
+        record[kU[corner]] = static_cast<unsigned char>(vertex.uv);
+        record[kV[corner]] = static_cast<unsigned char>(vertex.uv >> 8);
+      }
+      record[15] = quad ? 0x3D : 0x35;
+      const auto clut = static_cast<std::uint16_t>(material.clut);
+      const auto page = static_cast<std::uint16_t>(material.page);
+      std::memcpy(record + 26, &clut, sizeof clut);
+      std::memcpy(record + 30, &page, sizeof page);
+    }
+    return bytes;
+  }
+
+  void CheckBatchCoordinates() {
+    const auto* triangle = reinterpret_cast<const u_long*>(Buffer());
+    CHECK(triangle[2] == (128u | (88u << 16)));
+    CHECK(triangle[5] == (192u | (88u << 16)));
+    CHECK(triangle[8] == (128u | (152u << 16)));
+    CHECK(triangle[3] == 0x12342010);
+    CHECK(triangle[6] == 0x00154030);
+    CHECK(memory.front() == 0xA5);
+    CHECK(memory.back() == 0xA5);
   }
 };
 
@@ -262,4 +307,88 @@ TEST_CASE(
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             address + 1) == nullptr);
   }
+}
+
+TEST_CASE("Room polygon batches adopt the original entry and native materials",
+          "[render][room-batch]") {
+  using BatchDraw =
+      int (*)(const void*, std::size_t, unsigned, int, std::size_t);
+  CHECK(
+      (std::is_same_v<decltype(&Render_DrawRoomGeometryPolygons), BatchDraw>));
+  SubdivisionFixture fixture;
+  const auto batch = fixture.Batch();
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  const auto draw =
+      reinterpret_cast<BatchDraw>(VS::Content::ResolveModuleAddress(
+          symbols, "BATTLE/BATTLE.PRG", 0x80097388));
+  REQUIRE(draw == &Render_DrawRoomGeometryPolygons);
+  CHECK(draw(batch.data(), batch.size(), 0, 0, 92) == 2);
+  CHECK(fixture.Used() == 92);
+  const std::array expected{1, 1};
+  CHECK(CheckPackets(fixture) == expected);
+  fixture.CheckBatchCoordinates();
+}
+
+TEST_CASE("Room batches preserve capacity and exact final-record boundaries",
+          "[render][room-batch]") {
+  for (const std::size_t capacity : {0, 39, 40, 91, 92}) {
+    SubdivisionFixture fixture;
+    const auto batch = fixture.Batch();
+    CHECK(Render_DrawRoomGeometryPolygons(batch.data(), batch.size(), 0, 0,
+                                          capacity) ==
+          (capacity == 92 ? 2 : -1));
+    CHECK(fixture.Used() == (capacity < 40 ? 0 : capacity < 92 ? 40 : 92));
+    CHECK(*static_cast<unsigned char*>(Render_frameScratch.primitiveCursor) ==
+          0xA5);
+  }
+  SubdivisionFixture fixture;
+  const std::array<unsigned, 2> empty{};
+  CHECK(Render_DrawRoomGeometryPolygons(empty.data(), sizeof empty, 0, 0, 0) ==
+        0);
+  CHECK(fixture.Used() == 0);
+}
+
+TEST_CASE("Room batches retain subdivision clipping and texture LOD",
+          "[render][room-batch]") {
+  SubdivisionFixture fixture;
+  const auto batch = fixture.Batch();
+  CHECK(Render_DrawRoomGeometryPolygons(batch.data(), batch.size(), 3u << 13, 1,
+                                        0x20000) == 15);
+  const std::array expected{11, 4};
+  CHECK(CheckPackets(fixture) == expected);
+  Render_frameScratch.primitiveCursor = fixture.Buffer();
+  const VECTOR distant{0, 0, 2048, 0};
+  Core_Gte_SetTransVector(&distant);
+  Render_SetRoomTextureLodDepth(512);
+  CHECK(Render_DrawRoomGeometryPolygons(batch.data(), batch.size(), 0, 0,
+                                        0x20000) == 2);
+  const auto* triangle = reinterpret_cast<const u_long*>(fixture.Buffer());
+  CHECK(triangle[3] == 0x12341008);
+  CHECK(triangle[6] == 0x00142018);
+  Render_frameScratch.primitiveCursor = fixture.Buffer();
+  Render_SetRoomPolygonFarClip(512);
+  CHECK(Render_DrawRoomGeometryPolygons(batch.data(), batch.size(), 0, 0,
+                                        0x20000) == 0);
+  CHECK(fixture.Used() == 0);
+}
+
+TEST_CASE("Room batch rejects truncated polygon records before writing",
+          "[.room-batch-truncated]") {
+  VS::Platform::InstallCrashHandler();
+  SubdivisionFixture fixture;
+  const auto batch = fixture.Batch();
+  Render_DrawRoomGeometryPolygons(batch.data(), batch.size() - 1, 0, 0,
+                                  0x20000);
+  FAIL("Truncated room polygon input was accepted");
+}
+
+TEST_CASE("Room batch rejects aliasing its output storage",
+          "[.room-batch-overlap]") {
+  VS::Platform::InstallCrashHandler();
+  SubdivisionFixture fixture;
+  const auto batch = fixture.Batch();
+  std::memcpy(fixture.Buffer(), batch.data(), batch.size());
+  Render_DrawRoomGeometryPolygons(fixture.Buffer(), batch.size(), 0, 0,
+                                  0x20000);
+  FAIL("Overlapping room polygon input and output were accepted");
 }

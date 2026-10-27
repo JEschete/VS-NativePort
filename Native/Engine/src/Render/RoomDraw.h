@@ -48,6 +48,12 @@ typedef struct Render_RoomPolygonMaterial {
   unsigned page;
 } Render_RoomPolygonMaterial;
 
+typedef struct Render_RoomPolygonProjection {
+  Core_GteWord screen[kRoomTriangleVertexCount];
+  Core_GteWord depth[kRoomTriangleVertexCount];
+  Core_GteWord winding;
+} Render_RoomPolygonProjection;
+
 #ifdef __cplusplus
 static_assert(sizeof(Render_RoomGeometryGroup) == kRoomGeometryGroupBytes);
 extern "C" {
@@ -66,6 +72,13 @@ void Render_DrawRoomGeometry(void* data, int mode);
 void Render_DecodeRoomPolygonVertices(
     const void* data, size_t size, unsigned coordinate_shift,
     Render_RoomVertex vertices[kRoomTriangleVertexCount]);
+void Render_ProjectAndDecodeRoomPolygon(
+    const void* data, size_t size, unsigned coordinate_shift,
+    Render_RoomVertex vertices[kRoomTriangleVertexCount],
+    Render_RoomPolygonProjection* projection);
+int Render_DrawRoomGeometryPolygons(const void* data, size_t size,
+                                    unsigned flags, int mode,
+                                    size_t available_bytes);
 int Render_SubdivideRoomTriangle(
     const Render_RoomVertex vertices[kRoomTriangleVertexCount], int levels,
     const Render_RoomPolygonMaterial* material, size_t available_bytes);

@@ -10,6 +10,8 @@ Status: **design v1, accepted by the owner**. The owner's decisions are:
 
 This document is the contract between the extractor (`VS.Extract`) and the game's loaders (`VS.Content` and each system). Whenever a format below changes, bump that converter's version (§8).
 
+**Implementation boundary:** this is a target contract, not a claim that every converter or loader exists. The character/event-animation packages in §6.2.3 are planned work, scheduled through ordered tracker [#4](https://github.com/JEschete/VS-NativePort/issues/4). They do not move asset migration ahead of maintained-code quality or the queued gameplay work. Legacy formats remain import sources, not the long-term authoring interface.
+
 ---
 
 ## 1. Principles
@@ -19,7 +21,7 @@ This document is the contract between the extractor (`VS.Extract`) and the game'
 | P1 | **The game never reads the disc.** At runtime, `VS.Desktop` loads only `Native\data\` (plus the patch and mod layers). Only `VS.Extract` reads `.bin/.cue`. |
 | P2 | **Convert everything up front.** One command (`extract-native-assets.cmd`) converts every file on the disc. Nothing is converted lazily or per phase. If a format's converter is not written yet, the run reports it as `unconverted` in the manifest, and the gate in §9 fails. |
 | P3 | **Modern, open formats only:** JSON, glTF 2.0, PNG, WAV, FLAC and Matroska (AV1 + FLAC). There are no PS1 formats (TIM, VAB, AKAO, STR, XA, MPD, …) under `Native\data\`. |
-| P4 | **Lossless with respect to the game.** Every value the original code reads must survive conversion. Fields with no standard home go in documented `extras` or JSON members (§4.1). A round-trip test proves this for every converter (§7). |
+| P4 | **Lossless with respect to the game.** Every value the original code reads must survive conversion. Fields with no standard home go in documented `extras`, an optional project extension (§6.2.1), or JSON members (§4.1). A round-trip test proves data preservation for every converter; preview and playback fidelity have separate checks (§7). |
 | P5 | **Not committed.** `Native\data\` is git-ignored. Only the extractor, its schemas and the hand-written patches are committed. Users supply their own disc. |
 | P6 | **Readable by humans and tools.** The output opens in Blender, any image viewer, VLC and a text editor. This is what makes Phase 2/3 modding possible. |
 | P7 | **Deterministic.** The same disc plus the same extractor version gives byte-identical output (sorted keys, fixed float formatting, fixed encoder settings), so diffs between extractor versions are meaningful. |
@@ -70,12 +72,13 @@ Native\data\
     strings.en.json                (every game string: id → UTF-8 text with markup)
     fonts\ main.png main.font.json (glyph atlas + metrics)
   models\            Tier 3: glTF 2.0 (one file each, embedded buffers/PNG like the Sydney reference)
-    characters\<SHP>.gltf          (skinned mesh + all SEQ clips that apply to it)
+    characters\<SHP>.gltf          (skinned mesh + applicable SEQ/ESQ clips, texture frames and VS metadata)
     weapons\<WEP>.gltf             (material variants = blade materials)
     armor\ shields\ ...            (as discovered per CONTENT_LEDGER)
     zud\<ZUD>.json                 (enemy model set: references SHP/WEP/SEQ glTFs; no duplicate meshes)
   rooms\<zone>\<MAPxxx>.gltf       (room geometry + textures)  + <MAPxxx>.room.json (collision, tiles, doors, scripts)
   textures\<dir>\<name>.png        (TIM/GIM/FBT/standalone images; indexed PNG + .palettes.json where palettes matter)
+    actors\<ETM>\<binding>.png     (inspection export + .palettes.json; actor-bound atlas regions, §6.2.2)
   ui\                              (menu art, title art, illustrations as PNG + layout JSON)
   events\<id>.json                 (EVT event scripts as decoded command lists; text by string id)
   effects\<id>.json + textures     (EFFECT .P/.FBT/.FBC data)
@@ -155,7 +158,7 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 | `SMALL\MON.BIN` | `catalogs\enemies\bestiary.json` | | ENEMY_DATA_SCHEME |
 | `SMALL\HELP*.HF0/HF1` (28) | `text\strings.en.json` | help pages | |
 | `EFFECT\*.P` (290), `*.FBT` (755), `*.FBC` (277), `EFFECT\*.BIN` (311) | `effects\<id>.json` + `textures\effect\*.png` | `.FBT` texture pages + `.FBC` CLUTs → PNG; `.P`/`.BIN` parameters → JSON; plugin code is already in `Native\` (the decomp). Effect behaviors stay in code (plan §9.7) | decomp `Effects\` |
-| `OBJ\*.ESQ` (97), `OBJ\*.ETM` (80) | `effects\` JSON + PNG | effect sequences / effect textures (to confirm) | |
+| `OBJ\*.ESQ` (97), `OBJ\*.ETM` (80) | applicable character glTFs + actor-bound PNG/palette inspection exports | event animation banks and texture overlays, including facial frames; resolve actor/bank/palette bindings from loaders, not matching filenames (§6.2.2) | decomp `BATTLE.PRG/30DB0.c`, `40564.c`; native `Actors/TextureAnimation.c` |
 | `SOUND\WAVE*.DAT` (101) | `audio\samples\` + `audio\banks\` | §6.5 | decomp `Audio\` |
 | `MUSIC\MUSIC*.DAT` (192) | `audio\music\*.seq.json` | §6.5 | decomp `Audio\Seq` |
 | `SE\EFFECT*.DAT` (102) | `audio\sfx\*.seq.json` (+ bank if embedded) | §6.5 | |
@@ -167,29 +170,73 @@ The disc has 27 kinds of files. The "Source" column below names the files on the
 
 "To confirm" rows are settled while building `CONTENT_LEDGER.csv`. Settling a row means: read the decomp loader that consumes the file, then write the converter. **No converter is written from community docs alone.** The decomp's loader is the ground truth for what each byte means. vstools, VagrantStoryImporter, GodHands and DataCrystal speed up understanding, but they are reference only (licenses: `TOOLS_INVENTORY.md`).
 
-### 6.2 Character models (SHP + SEQ → glTF), matching the Sydney reference
+### 6.2 Character models (SHP + SEQ/ESQ + ETM → glTF), matching the Sydney reference
 
-`resources\Sydney Losstarot (Dying)\6F.SHP.gltf` is the target. Every character file must have the same structure:
+`resources\Sydney Losstarot (Dying)\6F.SHP.gltf` is the standard-tool preview baseline. Preserve that structure where compatible with the source; it does not override the lossless metadata or renderer requirements below:
 
 | Element | Rule (from the reference) |
 |---|---|
 | asset | glTF 2.0, one scene, embedded buffer and PNG as base64 data URIs (one self-contained file) |
 | mesh | one skinned mesh; attributes `POSITION`, `NORMAL`, `TEXCOORD_0`, `COLOR_0`, `JOINTS_0`, `WEIGHTS_0` + indices |
 | skeleton | one node per SHP bone named `bone<N>` (N = SHP bone index), with rotation + translation; one `skin` with `inverseBindMatrices` |
-| animations | **every** SEQ that applies to this SHP, one clip per animation, named `<SHP>_<SEQ>_<n>` (e.g. `6F_BT2_0`) |
-| material | one material, `KHR_materials_unlit`, `alphaMode: BLEND`, `metallicFactor: 0`, `roughnessFactor: 0.9` |
+| animations | **every** applicable SEQ/ESQ skeletal clip, one clip per animation, named `<SHP>_<bank>_<n>` (e.g. `6F_BT2_0`); texture/event tracks follow §6.2.2 |
+| material | baseline: `KHR_materials_unlit`, `alphaMode: BLEND`, `metallicFactor: 0`, `roughnessFactor: 0.9`; split primitives/materials where source blend or lighting state differs |
 | texture | PNG with the palette applied; sampler `magFilter/minFilter = 9728` (NEAREST), wrap `10497` (REPEAT) |
 
-Additions the reference does not have, required by P4 (lossless). They go in `extras` so that standard tools ignore them safely:
+Additions the reference does not have, required by P4 (lossless). The initial contract uses `extras`; standard tools can display the baseline without interpreting VS behavior:
+- `asset.extras.vs.schemaVersion`: version of the VS payload across the file's `extras.vs` objects (§6.2.1).
 - `extras.vs.shp`: SHP header values the game uses (collision/size, shadow, overlay/attachment points for weapons and effects, magic points, bone groups, body-part mapping used by targeting).
 - `extras.vs.seq` on each animation: the SEQ key data the game reads at runtime (frame count, per-key flags, sound/effect triggers, root-motion flags).
-- Vertex colors and per-polygon flags (semi-transparency, double-sided, lighting mode) go in `COLOR_0` plus a per-primitive `extras.vs.polyFlags`.
-- **Which SEQs belong to which SHP** comes from the decomp's loaders and the ZUD bundles, not file-name guessing. The SEQ file prefix (e.g. `00BT1B00` → SHP `00`) is a hint that is checked against the loader.
+- `asset.extras.vs.textureAnimation`: actor-local atlas bindings, overlay regions, frame definitions and palette data; animation-local texture/event tracks live with `extras.vs.seq` (§6.2.2).
+- Vertex colors and per-polygon flags (semi-transparency, double-sided, lighting mode) go in `COLOR_0` plus a per-primitive `extras.vs.polyFlags`. Group polygons by compatible flags rather than collapsing different states into one primitive.
+- **Which SEQ/ESQ clips and ETM regions belong to which SHP** comes from the decomp's loaders, event commands and ZUD bundles, not file-name guessing. A matching prefix/stem is a candidate association, not proof.
 - **Fixed-point scale:** positions are SHP units divided by a constant `VS_UNIT_SCALE`, recorded in `asset.extras.vs.unitScale` so the loader can return exact integer values. The Sydney reference's scale is measured and matched.
 
 **Runtime loader:** `VS.Content::ModelLoader` reads glTF (nlohmann-json; base64 buffers) into the engine's `ModelDef` / `AnimationDef`. In Phase 1 the copied actor code expects SHP-shaped data. The loader provides it from the glTF (bone table, vertex groups, the `extras`). This is why the round-trip in §7 is mandatory: `decode(SHP) == ModelLoader(glTF)` field for field.
 
 **Also emitted** (optional, `--posed`): `<SHP>_posed.obj/.mtl/_0.png`, like the reference folder. This is for quick previews only; the game never reads it.
+
+#### 6.2.1 Container, schema and optional extension
+
+- **First delivery:** keep the existing `extras.vs` design and define its versioned contract in `Native\Content\schemas\actor-animation.schema.json` (planned). VS.Content and Workshop must agree on IDs, units, track semantics and fixtures; do not build incompatible per-tool interpretations.
+- **Extension adoption gate:** once the payload is exercised by both consumers, assess packaging it as one documented optional vendor extension. Choose a project/vendor namespace, publish its schema and fallback behavior, and test both readers before switching the writer. Do not invent a `KHR_` or `EXT_` standard. The extension must be in `extensionsUsed`, but not `extensionsRequired`, only while the asset has a valid standard preview without it. See the [glTF extension rules](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html#specifying-extensions) and [extension registry guidance](https://github.com/KhronosGroup/glTF/tree/main/extensions).
+- There is **one authoritative VS payload** per asset. A packaging change requires a schema/converter-version change and an explicit migration; do not emit independently editable copies in both `extras` and an extension. A native loader rejects missing required VS data or unsupported versions with an actionable error, even when a generic viewer can still show the baseline.
+- Ordinary viewers need not execute facial tracks, event commands or VS rendering rules. Ignoring custom data is not a promise to preserve it on re-export. Before accepting an edited model, validate the VS payload and references; missing or altered metadata must be reported, not silently defaulted.
+- Keep scene-wide scripts, room logic and gameplay catalogs in their existing JSON contracts. Model-local metadata belongs with the model, but glTF extensibility is not a reason to move all game data into it.
+
+#### 6.2.2 Event and facial texture animation contract
+
+Treat skeletal pose, texture overlays and event synchronization as related but separate data. A correct ESQ bone pose alone does not prove facial playback, and texture-based expressions do not prove that every facial movement excludes bone animation.
+
+The [original ETM loader](../resources/rood-reverse/src/BATTLE/BATTLE.PRG/30DB0.c) skips a 16-bit word, reads a 16-bit height and uploads 128 bytes per row. [Native texture animation](../Native/Game/src/Actors/TextureAnimation.c) selects rectangular frames and handles packed texture addressing. These are reference mechanisms, not a complete converted-format specification: AP1 must establish actual actor, palette and event bindings before implementing a converter.
+
+| Contract component | Required content |
+|---|---|
+| Provenance and association | Source paths/hashes, legacy model/bank/clip IDs and evidence for the ESQ/ETM/SHP association. Preserve source meaning without using executable addresses as native IDs. |
+| Atlas binding | Stable binding ID, glTF image reference, actor/model association, index depth and palette selection. Resolve 4-bit/8-bit interpretation per binding; do not assume an entire ETM uses one depth or carries its own palette. |
+| Texture patches | Logical destination texture/region, source and destination rectangles in integer pixel coordinates, atlas columns/frame ordering and overlay-slot identity. Validate bounds and packing; keep original layout/offset provenance separate from native texture ownership. |
+| Tracks and clock | Integer frame durations, declared tick rate, clip/event associations, start/stop commands, looping and synchronization with skeletal clips. Derive boundary/order semantics from the original scheduler rather than inferring them from filenames or a viewer's frame rate. |
+| Lifecycle | Base-texture restoration, bank/clip switching, actor-local mutable texture state and cleanup on cancellation, scene exit and repeat entry. Shared immutable images must not make one actor's expressions change another actor. |
+
+Embed the bound image data and actor-local contract in the character glTF so it remains self-contained. Preserve palette indices, all consumed palette entries and transparency/STP information, not only a baked RGBA appearance. The inspector also emits `textures\actors\<ETM>\<binding>.png` plus `.palettes.json` from the same decoded data; these are inspection derivatives, not a second runtime authority. A chosen-palette RGBA PNG or individual expression-frame PNG is a convenient additional export, not a lossless replacement for the indexed data.
+
+Resolve colors from the verified character palette binding; never guess a palette or interpret index bytes as RGB. Missing/ambiguous bindings remain explicit errors or `unconverted` entries with diagnostics, not plausible-looking successful exports. Inventory unresolved regions and aliases until their consumption is understood. Multiple characters may reference the same source bank without duplicating meshes; §8 tracks every dependency that contributes to each output.
+
+#### 6.2.3 Bounded implementation packages
+
+All packages below are **planned**, not completed by this document. Their prerequisites describe technical dependencies, not permission to reorder tracker #4. They are incremental implementation slices within the up-front conversion architecture; runtime lazy conversion remains prohibited.
+
+| Package | Prerequisite | Deliverable and acceptance gate |
+|---|---|---|
+| AP1: establish source bindings | Asset work reaches its place in #4 | Trace original loaders, event producers and texture-frame consumers. Record exact SHP/ESQ/ETM/CLUT/region/clip mappings and scheduler/reset behavior for at least two actors covering 4-bit and 8-bit bindings. Keep observed header relations and same-stem filenames separate from verified pixel/timing evidence. |
+| AP2: typed decode and schema | AP1 | Extend the existing content decoders and define the §6.2.1 schema. Fixtures cover indices/palettes, rectangle addressing, duration boundaries and association rules. Reject truncated data, invalid references, unsupported depth, out-of-bounds patches and ambiguous palettes without partially publishing an asset. Keep reference code read-only; native implementations belong in existing content/actor systems. |
+| AP3: inspection and PNG export | AP2 | Extend Workshop's existing viewer/export path: show source IDs, actor/bank/clip/region/palette selection, decoded atlas and individual frames; provide readable playback/pause/step controls for skeletal and texture tracks together. Export palette-correct atlas/frame PNGs, label unsupported event/render behavior, and distinguish manual frame preview from verified event playback. |
+| AP4: conversion and native loading | AP2 | Implement versioned glTF/PNG writers and VS.Content readers from the same typed contract, reusing Workshop decoder findings rather than a second guessed parser. Pass exact decoded-data comparisons and schema/glTF validation. Two unchanged extraction runs produce byte-identical outputs with no unnecessary rebuild; changing any consumed SHP/SEQ/ESQ/ETM/palette dependency rebuilds affected outputs. |
+| AP5: production playback and fidelity | AP4 | Connect typed tracks to the existing native actor/event lifecycle, not a new hardware-shaped bridge. Exercise normal scene/event flow with synchronized body and expression playback, loops, cancellation, bank switching, two actors sharing source data and repeated scene entry. Prove patch pixels and unchanged pixels outside the target, then compare named scene/event states against the reference. Record inspection, preservation and rendering results separately (§7.1). |
+
+AP3 and AP4 can proceed independently after AP2. The two-actor slice establishes the contract, not full coverage: before the content gate passes, inventory every ESQ/ETM and settle each consumed binding or record a justified skip. Do not claim universal viewer support or facial fidelity from a single successful clip.
+
+**Rendering boundary:** the unlit glTF baseline and baked preview colors are not the final lighting implementation. Preserve vertex colors, per-primitive lighting/blend flags, palette changes and scene lighting inputs for the native renderer. Standard `alphaMode: BLEND` does not express every PS1 blend operation. For a reported cutscene rim/backlight effect, trace the specific shot's texture, lighting, vertex-color and event inputs before choosing its native representation; do not assume it is an animated texture.
 
 ### 6.3 Rooms (MPD → glTF + room JSON)
 - **Geometry:** one glTF per room. Each texture page/CLUT group is one primitive with an unlit, nearest-sampled PNG. Vertex colors are kept, and the same `VS_UNIT_SCALE` applies.
@@ -414,6 +461,7 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 | Tier 1 tables | disc bytes → decoder → JSON → runtime loader → re-encode with the PS1 layout == the original bytes |
 | text | string bytes → markup → encode == the original bytes, for every string |
 | SHP/SEQ/WEP | `decode(raw)` == `ModelLoader(glTF)` field by field (bones, vertices, UVs, colours, flags, every `extras` value, every keyframe) |
+| ESQ/ETM actor bindings | decoded source == converted/reloaded skeletal and texture tracks, indexed pixels, palettes, patch rectangles, associations, timing and lifecycle commands; malformed or unresolved inputs fail explicitly |
 | MPD | the same, via `RoomLoader` |
 | textures | PNG + palettes → 15-bit texels/CLUTs == the original (exact) |
 | samples | WAV PCM == the ADPCM decode (exact); loop points equal |
@@ -423,6 +471,16 @@ Every converter ships with a test in `VS.Tests` (tagged `[extract]`; it runs onl
 | ENEMY catalogs | ENEMY_DATA_SCHEME §3 (expanded `extends` == the original record) |
 
 Schema validation runs at load in every build. Round-trip tests run in CI where a disc is available, and locally through `test-native.cmd --extract`.
+
+### 7.1 Separate preservation, preview and playback acceptance
+
+| Evidence class | Required check | Does not establish |
+|---|---|---|
+| Data preservation | Exact comparisons of every consumed field/index/palette value, references and track timing; schema validation; dependency invalidation; deterministic second extraction. | Correct scheduling or rendering in a running scene. |
+| Standard-tool preview | glTF validation and opening the exported model in Blender plus an independent standard viewer. Base appearance and skeletal clips work without VS-specific processing. Test an editor re-export through the native metadata validator; lost VS data is rejected explicitly. | Facial/event playback or lossless re-export by arbitrary editors. |
+| Native behavior and visual fidelity | Actual production scene/event playback at matched event states, including patch contents, unaffected pixels, restoration, actor isolation and repeat-entry behavior. Compare named shots for lighting/blending; record exact frame/tick/state and differences. | Untested characters, scenes, render modes or full-game fidelity. |
+
+Record source revision/dirty state, disc identity, tool/converter/schema versions, configuration, exact commands or UI actions, selected actor/bank/clip/palette, expected results, observed results and remaining limits. Keep disc-derived fixtures/captures local and out of commits or issue attachments. Converter round trips, viewer inspection and native/reference comparisons are independent acceptance records; none substitutes for another.
 
 ---
 
@@ -445,6 +503,8 @@ Schema validation runs at load in every build. Round-trip tests run in CI where 
 ```
 
 - **Versions:** each converter has an integer version in code (`VS.Extract`). The runtime embeds the minimum version it requires for each converter, so an old `Native\data\` is rejected with instructions (§2).
+- **Composite dependencies:** an output entry retains its primary `source` and adds a sorted `dependencies` array of `{ "source", "source_sha256" }` records for every other consumed input. Character outputs include the resolved SEQ/ESQ/ETM files and palette sources, not just SHP. A changed/deleted dependency or contributing converter/schema version invalidates the output; a missing dependency is an error, never a reason to reuse a stale model.
+- **Character contract changes:** version ESQ/ETM conversion alongside the model converter and `asset.extras.vs.schemaVersion` (or its explicitly migrated extension equivalent). Runtime requirements must include the VS payload version; successful generic glTF loading is not an acceptable fallback for incompatible gameplay data.
 - **Wrong disc:** the disc hash is checked against the known SLUS-01040 hashes; another release or a modified disc gives a warning, not a failure.
 
 ---
@@ -453,6 +513,7 @@ Schema validation runs at load in every build. Round-trip tests run in CI where 
 
 - **`CONTENT_LEDGER.csv`** (generated from the ISO9660 listing, plan §4.5) has one row per disc file. Its columns: `path, size, kind, decoder, converter, output, round_trip, status, notes`.
 - **`DATA_LEDGER.csv`:** each `catalog` row also names its output catalog file and decoder.
+- **Character evidence:** use the existing content-ledger notes/evidence links to distinguish preservation, standard-tool preview and native playback results (§7.1). `round_trip=pass` proves preservation only. AP package status and remaining limits belong in the ordered issue/handoff; this plan does not promote any ESQ/ETM row to converted or behavior-verified.
 - **Asset gate:**
   - 1a requires the extractor skeleton, the manifest, Tier 1 for the tables that 1b reads, and text.
   - **1b requires the title-slice assets:** title art, fonts, menu text, `TITLE.STR`, and the title music and its banks.

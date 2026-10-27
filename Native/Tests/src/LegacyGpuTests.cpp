@@ -16,7 +16,6 @@ extern "C" {
 #include "Field/Camera.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
-#include "Render/RoomGeometry.h"
 }
 static_assert(
     std::is_same_v<decltype(&Render_SetRoomPolygonFarClip), void (*)(int)>);

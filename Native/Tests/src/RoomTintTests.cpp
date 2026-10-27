@@ -19,7 +19,6 @@
 extern "C" {
 #include "Field/Room.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomGeometry.h"
 }
 
 namespace {

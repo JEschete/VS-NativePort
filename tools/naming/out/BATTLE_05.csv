@@ -86,9 +86,9 @@ F00741,Battle::DrawAbilityTimingCue,Native\Game\src\Battle\Feedback.c,Draws the 
 F00742,Battle::CommitEquipmentStatChanges,Native\Game\src\Battle\Feedback.c,Activates pending equipment stat-change labels so they enter the visible notification queue.,high,
 F00743,Battle::SuppressAshleyStatusLabels,Native\Game\src\Battle\Feedback.c,Suppresses Ashley's floating status captions while leaving other actors' captions visible.,high,
 F00744,Render::DrawRoomGeometry,Native\Engine\src\Render\RoomGeometry.c,"Draws visible MPD geometry groups with their prepared transforms, facing masks, and subdivision settings.",high,asm
-F00745,Render::DrawRoomGeometryPolygons,Native\Engine\src\Render\RoomGeometry.c,Projects and emits an MPD group's textured triangles and quads with culling and optional subdivision.,high,asm
+F00745,Render::DrawRoomGeometryPolygons,Native\Engine\src\Render\RoomDraw.c,Projects and emits an MPD group's textured triangles and quads with culling and optional subdivision.,high,asm;2EA3C.s:104-500;bounded native batch/frame spans;production group caller adopted
 F00746,Render::DecodeRoomPolygonVertices,Native\Engine\src\Render\RoomGeometry.c,Expands the first packed room polygon's base position and signed vertex offsets into triangle vertices.,high,asm
-F00747,Render::ProjectAndDecodeRoomPolygon,Native\Engine\src\Render\RoomGeometry.c,"Projects one packed room triangle, calculates winding and depth, and decodes the following polygon's vertices.",high,asm
+F00747,Render::ProjectAndDecodeRoomPolygon,Native\Engine\src\Render\RoomDraw.c,"Projects one packed room triangle, calculates winding and depth, and decodes the following polygon's vertices.",high,asm;2EA3C.s:548-607;bounded record decode and explicit projection/winding output;source register lookahead collapsed without next-record overread
 F00748,Render::SubdivideRoomTriangle,Native\Engine\src\Render\RoomGeometry.c,Recursively subdivides a textured room triangle and emits its visible leaf primitives.,high,asm
 F00749,Render::SubdivideRoomQuad,Native\Engine\src\Render\RoomGeometry.c,Recursively subdivides a textured room quad and emits its visible leaf primitives.,high,asm
 F00750,Render::InterpolateRoomVertexMidpoint,Native\Engine\src\Render\RoomGeometry.c,"Averages two room subdivision vertices' positions, colors, and texture coordinates into a midpoint.",high,asm

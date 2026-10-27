@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Core/Diagnostics.h"
 #include "Core/Gte.h"
 #include "Core/Math/ScalarMath.h"
 #include "Field/Room.h"
@@ -518,23 +519,29 @@ static int SubdivideRoomQuad(const RoomVertex vertices[kQuadCorners],
   return emitted;
 }
 
-static uintptr_t RoomSubdivisionLimit(
-    const Render_RoomVertex* vertices, int levels,
-    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
+static uintptr_t RoomFrameLimit(size_t available_bytes) {
   const uintptr_t base =
       (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
   const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (vertices == NULL || material == NULL || levels < 0 ||
-      levels > kRoomMaximumSubdivisionLevels || base == 0 || cursor < base ||
-      cursor - base > kPrimitiveBufferBytes ||
+  if (base == 0 || cursor < base || cursor - base > kPrimitiveBufferBytes ||
       available_bytes > kPrimitiveBufferBytes - (cursor - base) ||
       Render_frameScratch.orderingTable == NULL) {
-    Core_Debugf("render",
-                "Room subdivision requires valid vertices, material, depth and "
-                "frame span");
+    Core_Errorf("render", "Room polygons require a valid native frame span");
     abort();
   }
   return cursor + available_bytes;
+}
+
+static uintptr_t RoomSubdivisionLimit(
+    const Render_RoomVertex* vertices, int levels,
+    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
+  if (vertices == NULL || material == NULL || levels < 0 ||
+      levels > kRoomMaximumSubdivisionLevels) {
+    Core_Errorf("render",
+                "Room subdivision requires valid vertices, material and depth");
+    abort();
+  }
+  return RoomFrameLimit(available_bytes);
 }
 
 // decomp: func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612-746).
@@ -597,14 +604,39 @@ void Render_DecodeRoomPolygonVertices(
   }
 }
 
+// decomp: func_80097A10 (src/BATTLE/BATTLE.PRG/2EA3C.s:548-607).
+// Collapse the original register-pipelined lookahead onto one bounded record;
+// no read past the final polygon is needed. Native projection uses
+// quarter-depth.
+void Render_ProjectAndDecodeRoomPolygon(
+    const void* data, size_t size, unsigned coordinate_shift,
+    Render_RoomVertex vertices[kRoomTriangleVertexCount],
+    Render_RoomPolygonProjection* projection) {
+  if (projection == NULL) {
+    Core_Errorf("render", "Room projection requires a native output");
+    abort();
+  }
+  Render_DecodeRoomPolygonVertices(data, size, coordinate_shift, vertices);
+  Render_RoomPolygonProjection captured;
+  for (int index = 0; index < kTriangleCorners; ++index) {
+    Core_GteWord fog, flags;
+    captured.depth[index] = Core_Gte_RotTransPers(
+        &vertices[index].position, &captured.screen[index], &fog, &flags);
+  }
+  captured.winding = Core_Gte_NormalClip(captured.screen[0], captured.screen[1],
+                                         captured.screen[2]);
+  *projection = captured;
+}
+
 static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
                             int corners, int mode, uintptr_t limit) {
   RoomVertex vertices[kQuadCorners] = {0};
   const unsigned coordinate_shift = (flags & 0x800) != 0 ? 0 : 3;
   const int scale = 1 << coordinate_shift;
-  Render_DecodeRoomPolygonVertices(
+  Render_RoomPolygonProjection triangle;
+  Render_ProjectAndDecodeRoomPolygon(
       data, corners == kTriangleCorners ? kRoomTriangleBytes : kRoomQuadBytes,
-      coordinate_shift, vertices);
+      coordinate_shift, vertices, &triangle);
   const unsigned color_offsets[4] = {12, 16, 20, 36};
   const unsigned u_offsets[4] = {24, 28, 19, 35};
   const unsigned v_offsets[4] = {25, 29, 23, 39};
@@ -629,8 +661,14 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
     vertices[index].uv =
         data[u_offsets[index]] | ((uint16_t)data[v_offsets[index]] << CHAR_BIT);
     Core_GteWord fog, projection_flags;
-    const Core_GteWord vertex_depth = Core_Gte_RotTransPers(
-        &vertices[index].position, &screen[index], &fog, &projection_flags);
+    Core_GteWord vertex_depth;
+    if (index < kTriangleCorners) {
+      screen[index] = triangle.screen[index];
+      vertex_depth = triangle.depth[index];
+    } else {
+      vertex_depth = Core_Gte_RotTransPers(
+          &vertices[index].position, &screen[index], &fog, &projection_flags);
+    }
     if (vertex_depth > depth) {
       depth = vertex_depth;
     }
@@ -646,8 +684,7 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
   if (OutsideScreenBounds(&projected) || depth < room_near_depth) {
     return 0;
   }
-  const Core_GteWord winding =
-      Core_Gte_NormalClip(screen[0], screen[1], screen[2]);
+  const Core_GteWord winding = triangle.winding;
   if ((data[kRoomCommandOffset] & 1) == 0 && winding <= 0 &&
       (corners == kTriangleCorners ||
        Core_Gte_NormalClip(screen[1], screen[kQuadCorners - 1], screen[2]) <=
@@ -701,8 +738,47 @@ static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
   return WriteRoomPolygon(&polygon, limit);
 }
 
-// decomp: BATTLE.PRG func_8009723C / func_80097388
-// (src/BATTLE/BATTLE.PRG/2EA3C.s:10,112).
+// decomp: func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:104-500).
+int Render_DrawRoomGeometryPolygons(const void* data, size_t size,
+                                    unsigned flags, int mode,
+                                    size_t available_bytes) {
+  unsigned counts[2];
+  if (data == NULL || size < sizeof counts) {
+    Core_Errorf("render", "Room polygon batch has no complete count header");
+    abort();
+  }
+  memcpy(counts, data, sizeof counts);
+  const uint64_t required = sizeof counts +
+                            (uint64_t)counts[0] * kRoomTriangleBytes +
+                            (uint64_t)counts[1] * kRoomQuadBytes;
+  if (required > size) {
+    Core_Errorf("render", "Room polygon counts exceed their native input span");
+    abort();
+  }
+  const uintptr_t limit = RoomFrameLimit(available_bytes);
+  const uintptr_t input = (uintptr_t)data;
+  const uintptr_t output = (uintptr_t)Render_frameScratch.primitiveCursor;
+  if (required > UINTPTR_MAX - input ||
+      (input < limit && output < input + (uintptr_t)required)) {
+    Core_Errorf("render", "Room polygon input overlaps its native output span");
+    abort();
+  }
+  const unsigned char* polygon = (const unsigned char*)data + sizeof counts;
+  int emitted = 0;
+  for (int kind = 0; kind < 2; ++kind) {
+    for (unsigned face = 0; face < counts[kind]; ++face) {
+      const int count = QueueRoomPolygon(
+          polygon, flags, kind == 0 ? kTriangleCorners : kQuadCorners, mode,
+          limit);
+      if (count < 0) return -1;
+      emitted += count;
+      polygon += kind == 0 ? kRoomTriangleBytes : kRoomQuadBytes;
+    }
+  }
+  return emitted;
+}
+
+// decomp: func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:10).
 void Render_DrawRoomGeometry(void* data, int mode) {
   if (data == NULL || Render_frameScratch.orderingTable == NULL) {
     return;
@@ -739,16 +815,14 @@ void Render_DrawRoomGeometry(void* data, int mode) {
         (const unsigned char*)data + group->polygonOffset;
     unsigned counts[2];
     memcpy(counts, polygon, sizeof counts);
-    polygon += sizeof counts;
-    for (int kind = 0; kind < 2; ++kind) {
-      for (unsigned face = 0; face < counts[kind]; ++face) {
-        if (QueueRoomPolygon(polygon, group->flags,
-                             kind == 0 ? kTriangleCorners : kQuadCorners, mode,
-                             limit) < 0) {
-          return;
-        }
-        polygon += kind == 0 ? kRoomTriangleBytes : kRoomQuadBytes;
-      }
+    const size_t polygon_bytes = sizeof counts +
+                                 (size_t)counts[0] * kRoomTriangleBytes +
+                                 (size_t)counts[1] * kRoomQuadBytes;
+    const size_t available =
+        (size_t)(limit - (uintptr_t)Render_frameScratch.primitiveCursor);
+    if (Render_DrawRoomGeometryPolygons(polygon, polygon_bytes, group->flags,
+                                        mode, available) < 0) {
+      return;
     }
   }
 }

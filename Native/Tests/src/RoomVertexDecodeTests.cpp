@@ -5,6 +5,7 @@
 #include <cstring>
 #include <span>
 #include <type_traits>
+#include <utility>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -13,7 +14,6 @@
 
 extern "C" {
 #include "Render/RoomDraw.h"
-#include "Render/RoomGeometry.h"
 }
 
 namespace {
@@ -109,12 +109,70 @@ void CheckAliasedCoordinates(unsigned shift, std::size_t offset) {
   std::memcpy(expected_bytes.data(), expected.data(), expected_bytes.size());
   CHECK(actual_bytes == expected_bytes);
 }
+
+void CheckProjection(const PackedCoordinates& data,
+                     const RoomVertices& vertices, const RoomVertices& before,
+                     const Render_RoomPolygonProjection& projection) {
+  constexpr std::array<std::array<int, 2>, 3> kScreen{
+      {{128, 88}, {192, 88}, {128, 152}}};
+  for (std::size_t index = 0; index < vertices.size(); ++index) {
+    CHECK(Position(vertices[index]) == ExpectedPosition(data, 3, index));
+    CHECK(vertices[index].position.pad == before[index].position.pad);
+    CHECK(vertices[index].color == before[index].color);
+    CHECK(vertices[index].uv == before[index].uv);
+    CHECK(static_cast<std::int16_t>(projection.screen[index]) ==
+          kScreen[index][0]);
+    CHECK(static_cast<std::int16_t>(
+              static_cast<std::uint32_t>(projection.screen[index]) >> 16) ==
+          kScreen[index][1]);
+    CHECK(projection.depth[index] == 256);
+  }
+}
 }  // namespace
 
 TEST_CASE("Room vertex decoder exposes bounded bytes and typed native outputs",
           "[render][room-decode]") {
   CHECK((std::is_same_v<decltype(&Render_DecodeRoomPolygonVertices),
                         NativeDecode>));
+}
+
+TEST_CASE("Room projection exposes bounded geometry and explicit outputs",
+          "[render][room-projection]") {
+  using Project = void (*)(const void*, std::size_t, unsigned,
+                           Render_RoomVertex*, Render_RoomPolygonProjection*);
+  CHECK(
+      (std::is_same_v<decltype(&Render_ProjectAndDecodeRoomPolygon), Project>));
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80097A10) ==
+        reinterpret_cast<void*>(&Render_ProjectAndDecodeRoomPolygon));
+}
+
+TEST_CASE("Room projection preserves decoded positions winding and depths",
+          "[render][room-projection]") {
+  Core_Gte_Reset();
+  Core_Gte_SetGeomScreen(256);
+  Core_Gte_SetGeomOffset(160, 120);
+  const VECTOR translation{0, 0, 1024, 0};
+  Core_Gte_SetTransVector(&translation);
+  PackedCoordinates data{};
+  constexpr std::array<std::int16_t, 3> kBase{-128, -128, 0};
+  std::memcpy(data.data(), kBase.data(), sizeof kBase);
+  data[6] = 32;
+  data[10] = 32;
+  auto vertices = Vertices();
+  const auto before = vertices;
+  Render_RoomPolygonProjection projection{};
+  Render_ProjectAndDecodeRoomPolygon(data.data(), data.size(), 3,
+                                     vertices.data(), &projection);
+  CheckProjection(data, vertices, before, projection);
+  CHECK(projection.winding == 4096);
+  std::swap(data[6], data[9]);
+  std::swap(data[7], data[10]);
+  Render_ProjectAndDecodeRoomPolygon(data.data(), data.size(), 3,
+                                     vertices.data(), &projection);
+  CHECK(projection.winding == -4096);
+  Core_Gte_Reset();
 }
 
 TEST_CASE(

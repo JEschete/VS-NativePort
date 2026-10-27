@@ -433,12 +433,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Render\RoomGeometry.c">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Render\RoomLighting.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -607,7 +601,6 @@
     <ClInclude Include="src\Render\Render.h" />
     <ClInclude Include="src\Render\ResultAtlas.h" />
     <ClInclude Include="src\Render\RoomDraw.h" />
-    <ClInclude Include="src\Render\RoomGeometry.h" />
     <ClInclude Include="src\Render\RoomLighting.h" />
     <ClInclude Include="src\Render\ScaledFont.h" />
     <ClInclude Include="src\Render\ScreenTransition.h" />
