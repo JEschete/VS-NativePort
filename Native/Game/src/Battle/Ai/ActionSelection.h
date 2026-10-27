@@ -16,7 +16,7 @@
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 
-void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* arg0);
+void Battle_Ai_ForgetAiActionTarget(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state);
 
 #endif // VS_BATTLE_AI_ACTIONSELECTION_H_DECLS

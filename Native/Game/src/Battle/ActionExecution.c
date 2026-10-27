@@ -34,81 +34,81 @@ int Battle_settledCameraDistance;
 int Battle_cameraEaseMode;
 
 // decomp: BATTLE.PRG func_80077F14 (src/BATTLE/BATTLE.PRG/146C.c:6821)
-void Battle_ActionTargetLimbPosition(int arg0, int arg1, SVECTOR* arg2)
+void Battle_ActionTargetLimbPosition(int actor_slot, int limb_tag, SVECTOR* position_out)
 {
-    int var_v0;
+    int bone_index;
 
-    if (arg1 == -1) {
-        var_v0 = 0;
+    if (limb_tag == -1) {
+        bone_index = 0;
     } else {
-        var_v0 = Actors_FindActorBoneTag(arg0, arg1, 2);
+        bone_index = Actors_FindActorBoneTag(actor_slot, limb_tag, 2);
     }
-    Actors_ActorBonePosition(arg0, var_v0, arg2, 0);
+    Actors_ActorBonePosition(actor_slot, bone_index, position_out, 0);
 }
 
 // decomp: BATTLE.PRG func_80077F70 (src/BATTLE/BATTLE.PRG/146C.c:6833)
 int Battle_ActionTargetDistance(void)
 {
-    SVECTOR sp10;
-    SVECTOR sp18;
-    Battle_ActionRequest* temp_s0;
-    int temp_v0;
-    int temp_v0_2;
-    int temp_v0_3;
-    int temp_v1;
+    SVECTOR source_position;
+    SVECTOR target_position;
+    Battle_ActionRequest* queued_action;
+    int delta_x;
+    int delta_z;
+    int horizontal_distance;
+    int delta_y;
 
-    temp_s0 = &Battle_actionState->queue[Battle_actionState->queueIndex];
-    Actors_ActorBonePosition(temp_s0->primaryTarget.target.targetActor, 0, &sp10, 0);
-    if (temp_s0->targetCount != 0) {
-        if (temp_s0->targets[0].targetsPosition == 0) {
-            Battle_ActionTargetLimbPosition(temp_s0->targets[0].target.targetActor,
-                temp_s0->targets[0].target.targetLimb, &sp18);
+    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex];
+    Actors_ActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &source_position, 0);
+    if (queued_action->targetCount != 0) {
+        if (queued_action->targets[0].targetsPosition == 0) {
+            Battle_ActionTargetLimbPosition(queued_action->targets[0].target.targetActor,
+                queued_action->targets[0].target.targetLimb, &target_position);
         } else {
-            sp18 = *(SVECTOR*)&temp_s0->targets[0].target;
+            target_position = *(SVECTOR*)&queued_action->targets[0].target;
         }
     } else {
-        Actors_ActorBonePosition(temp_s0->primaryTarget.target.targetActor, 0, &sp18, 0);
+        Actors_ActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &target_position, 0);
     }
-    temp_v0 = sp18.vx - sp10.vx;
-    temp_v0_2 = sp18.vz - sp10.vz;
-    temp_v0_3 = Core_Math_SquareRootInteger((temp_v0 * temp_v0) + (temp_v0_2 * temp_v0_2));
-    temp_v1 = sp18.vy - sp10.vy;
+    delta_x = target_position.vx - source_position.vx;
+    delta_z = target_position.vz - source_position.vz;
+    horizontal_distance = Core_Math_SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z));
+    delta_y = target_position.vy - source_position.vy;
 
-    return Core_Math_SquareRootInteger((temp_v1 * temp_v1) + (temp_v0_3 * temp_v0_3));
+    return Core_Math_SquareRootInteger((delta_y * delta_y) + (horizontal_distance * horizontal_distance));
 }
 
 // decomp: BATTLE.PRG func_800780A8 (src/BATTLE/BATTLE.PRG/146C.c:6863)
-void Battle_ActionCameraMidpoint(SVECTOR* arg0)
+void Battle_ActionCameraMidpoint(SVECTOR* midpoint_out)
 {
-    SVECTOR sp10;
-    SVECTOR sp18;
-    Battle_ActionRequest* temp_s0;
+    SVECTOR source_position;
+    SVECTOR target_position;
+    Battle_ActionRequest* queued_action;
 
-    temp_s0 = &Battle_actionState->queue[Battle_actionState->queueIndex];
-    Actors_ActorBonePosition(temp_s0->primaryTarget.target.targetActor, 0, &sp10, 0);
-    if (temp_s0->targetCount != 0) {
-        if (temp_s0->targets[0].targetsPosition == 0) {
-            Battle_ActionTargetLimbPosition(temp_s0->targets[0].target.targetActor,
-                temp_s0->targets[0].target.targetLimb, &sp18);
+    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex];
+    Actors_ActorBonePosition(queued_action->primaryTarget.target.targetActor, 0, &source_position, 0);
+    if (queued_action->targetCount != 0) {
+        if (queued_action->targets[0].targetsPosition == 0) {
+            Battle_ActionTargetLimbPosition(queued_action->targets[0].target.targetActor,
+                queued_action->targets[0].target.targetLimb, &target_position);
         } else {
-            sp18 = *(SVECTOR*)&temp_s0->targets[0].target;
+            target_position = *(SVECTOR*)&queued_action->targets[0].target;
         }
     } else {
-        sp18 = temp_s0->focusPosition;
+        target_position = queued_action->focusPosition;
     }
-    arg0->vx = sp10.vx + (sp18.vx - sp10.vx) / 2;
-    arg0->vz = sp10.vz + (sp18.vz - sp10.vz) / 2;
-    arg0->vy = sp10.vy + (sp18.vy - sp10.vy) / 2;
+    midpoint_out->vx = source_position.vx + (target_position.vx - source_position.vx) / 2;
+    midpoint_out->vz = source_position.vz + (target_position.vz - source_position.vz) / 2;
+    midpoint_out->vy = source_position.vy + (target_position.vy - source_position.vy) / 2;
 }
 
 // decomp: BATTLE.PRG func_8007820C (src/BATTLE/BATTLE.PRG/146C.c:6886)
-void Battle_StepCameraTowardActionMidpoint(int arg0)
+void Battle_StepCameraTowardActionMidpoint(int update_camera)
 {
-    SVECTOR sp10;
+    SVECTOR action_midpoint;
 
-    Battle_ActionCameraMidpoint(&sp10);
-    if (arg0 != 0) {
-        Field_StepCameraLookAtTowardTarget(&sp10, 1, 0x28);
+    Battle_ActionCameraMidpoint(&action_midpoint);
+    if (update_camera != 0) {
+        Field_StepCameraLookAtTowardTarget(&action_midpoint, 1, 0x28);
     }
 }
 
@@ -180,9 +180,9 @@ void Battle_UpdateFinalTargetSelection(void)
 // decomp: BATTLE.PRG _handleCombatCameraZoom (src/BATTLE/BATTLE.PRG/146C.c:6958)
 void Battle_UpdateActionCameraZoom(void)
 {
-    SVECTOR sp18;
-    VECTOR sp20;
-    VECTOR sp30;
+    SVECTOR action_midpoint;
+    VECTOR camera_displacement;
+    VECTOR camera_step;
     Core_Debugf("combat-flow", "camera mode=%d zoom=%d yaw=%d distance=%d action=%u targets=%u",
         Field_sphericalCamera.delta.mode, Battle_actionState->cameraZoomState,
         Field_sphericalCamera.delta.yaw, Field_sphericalCamera.values.distance,
@@ -192,10 +192,10 @@ void Battle_UpdateActionCameraZoom(void)
         || (Field_sphericalCamera.delta.mode == 3)) {
         if (Battle_actionState->cameraZoomState == 0) {
             Battle_StepCameraTowardActionMidpoint(1);
-            Battle_ActionCameraMidpoint(&sp18);
-            Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);
-                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);
-            if ((((sp20.vx | sp20.vy | sp20.vz) == 0)
+            Battle_ActionCameraMidpoint(&action_midpoint);
+            Field_ComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
+                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", camera_displacement.vx, camera_displacement.vy, camera_displacement.vz);
+            if ((((camera_displacement.vx | camera_displacement.vy | camera_displacement.vz) == 0)
                     && (Field_sphericalCamera.delta.yaw == 0))
                 && ((Field_sphericalCamera.delta.mode == 1)
                     || (Field_sphericalCamera.delta.mode == 3))) {
@@ -215,10 +215,10 @@ void Battle_UpdateActionCameraZoom(void)
                 }
             }
             if (Render_projectionDistance == 0x300) {
-                Battle_ActionCameraMidpoint(&sp18);
-                Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);
-                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);
-                if ((((sp20.vx | sp20.vy | sp20.vz) == 0)
+                Battle_ActionCameraMidpoint(&action_midpoint);
+                Field_ComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
+                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", camera_displacement.vx, camera_displacement.vy, camera_displacement.vz);
+                if ((((camera_displacement.vx | camera_displacement.vy | camera_displacement.vz) == 0)
                         && (Field_sphericalCamera.delta.yaw == 0))
                     && ((Field_sphericalCamera.delta.mode == 1)
                         || (Field_sphericalCamera.delta.mode == 3))) {
@@ -234,10 +234,10 @@ void Battle_UpdateActionCameraZoom(void)
                 }
             }
             if (Field_sphericalCamera.values.distance == 0x900) {
-                Battle_ActionCameraMidpoint(&sp18);
-                Field_ComputeCameraTrackingStep(&sp18, &sp30, &sp20, 1, 0x28);
-                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", sp20.vx, sp20.vy, sp20.vz);
-                if ((((sp20.vx | sp20.vy | sp20.vz) == 0)
+                Battle_ActionCameraMidpoint(&action_midpoint);
+                Field_ComputeCameraTrackingStep(&action_midpoint, &camera_step, &camera_displacement, 1, 0x28);
+                Core_Debugf("combat-flow", "tracking error=%ld,%ld,%ld", camera_displacement.vx, camera_displacement.vy, camera_displacement.vz);
+                if ((((camera_displacement.vx | camera_displacement.vy | camera_displacement.vz) == 0)
                         && (Field_sphericalCamera.delta.yaw == 0))
                     && ((Field_sphericalCamera.delta.mode == 1)
                         || (Field_sphericalCamera.delta.mode == 3))) {
@@ -255,9 +255,9 @@ void Battle_UpdateActionCameraZoom(void)
 // decomp: BATTLE.PRG func_80078748 (src/BATTLE/BATTLE.PRG/146C.c:7025)
 void Battle_WaitForActionEffectReady(void)
 {
-    Battle_ActionRequest* temp_s0 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+    Battle_ActionRequest* queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
     if ((Menu_IsSceneNotificationPending() == 0)
-        && ((Actors_ActorStateFlags(temp_s0->primaryTarget.target.targetActor) & 0x08000100) == 0x08000100)
+        && ((Actors_ActorStateFlags(queued_action->primaryTarget.target.targetActor) & 0x08000100) == 0x08000100)
         && (Content_FindFreeActorAssetRequest() == 0) && (Effects_CanStartEffectTrack() != 0)) {
         Battle_AdvanceActionEffectPhase();
     }
@@ -287,7 +287,7 @@ void Battle_WaitForActionResolution(void)
 // decomp: BATTLE.PRG func_800790BC (src/BATTLE/BATTLE.PRG/146C.c:7364)
 void Battle_WaitForTargetRecovery(void)
 {
-    Battle_ActionRequest* var_s3;
+    Battle_ActionRequest* queued_action;
     int j;
     int i;
     int var_s4;
@@ -296,11 +296,11 @@ void Battle_WaitForTargetRecovery(void)
 
     for (i = 0; i < Battle_actionState->chainStep; ++i) {
 
-        var_s3 = &Battle_actionState->queue[i % 4];
+        queued_action = &Battle_actionState->queue[i % 4];
 
-        for (j = 0; j < var_s3->targetCount; ++j) {
-            if ((var_s3->targets[j].targetsPosition == 0)
-                && ((((u_int (*)(int))Actors_IsActorActionAnimationBusy)(var_s3->targets[j].target.targetActor) + 1) > 1)) {
+        for (j = 0; j < queued_action->targetCount; ++j) {
+            if ((queued_action->targets[j].targetsPosition == 0)
+                && ((((u_int (*)(int))Actors_IsActorActionAnimationBusy)(queued_action->targets[j].target.targetActor) + 1) > 1)) {
                 var_s4 = 0;
             }
         }
@@ -312,21 +312,21 @@ void Battle_WaitForTargetRecovery(void)
 
         for (i = 0; i < Battle_actionState->chainStep; ++i) {
 
-            var_s3 = &Battle_actionState->queue[i % 4];
+            queued_action = &Battle_actionState->queue[i % 4];
 
-            if (var_s3->primaryTarget.targetsPosition == 0) {
-                Battle_BeginActorDefeatAnimation(var_s3->primaryTarget.target.targetActor);
+            if (queued_action->primaryTarget.targetsPosition == 0) {
+                Battle_BeginActorDefeatAnimation(queued_action->primaryTarget.target.targetActor);
             }
 
-            for (j = 0; j < var_s3->targetCount; ++j) {
-                if ((var_s3->targets[j].targetsPosition == 0)
-                    && (Battle_BeginActorDefeatAnimation(var_s3->targets[j].target.targetActor) != 0)) {
+            for (j = 0; j < queued_action->targetCount; ++j) {
+                if ((queued_action->targets[j].targetsPosition == 0)
+                    && (Battle_BeginActorDefeatAnimation(queued_action->targets[j].target.targetActor) != 0)) {
                     var_s4 = 2;
                 }
             }
         }
 
-        if (var_s3->primaryTarget.target.targetActor != 0) {
+        if (queued_action->primaryTarget.target.targetActor != 0) {
             var_s4 = 0;
         }
 

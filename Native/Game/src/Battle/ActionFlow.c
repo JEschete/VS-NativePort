@@ -84,7 +84,7 @@ void Battle_ReleaseQueuedActorAttacks(void)
 }
 
 // decomp: BATTLE.PRG _enemyDefeated (src/BATTLE/BATTLE.PRG/146C.c:1824)
-void Battle_ResolveEnemyDefeat(int arg0, int actorId, int arg2)
+void Battle_ResolveEnemyDefeat(int source_actor_slot, int actorId, int count_kill)
 {
     Battle_Actor* enemy = Battle_actors[actorId];
 
@@ -92,7 +92,7 @@ void Battle_ResolveEnemyDefeat(int arg0, int actorId, int arg2)
         return;
     }
 
-    if ((arg2 != 0) && (arg0 == 0)) {
+    if ((count_kill != 0) && (source_actor_slot == 0)) {
         State_RecordEnemyKillScore(enemy);
         State_UpdateWeaponKillStreak(0);
     }
@@ -103,84 +103,84 @@ void Battle_ResolveEnemyDefeat(int arg0, int actorId, int arg2)
 }
 
 // decomp: BATTLE.PRG func_8006C5AC (src/BATTLE/BATTLE.PRG/146C.c:1955)
-int Battle_PlayWeaponHitSounds(int arg0)
+int Battle_PlayWeaponHitSounds(int source_actor_slot)
 {
-    Actors_ActorLocationQuery sp10;
-    SVECTOR sp20;
-    Battle_ActionRequest* temp_s3;
+    Actors_ActorLocationQuery target_placement;
+    SVECTOR hit_position;
+    Battle_ActionRequest* queued_action;
     int i;
 
-    temp_s3 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
 
-    for (i = 0; i < temp_s3->targetCount; ++i) {
-        if (temp_s3->targets[i].targetsPosition == 0) {
+    for (i = 0; i < queued_action->targetCount; ++i) {
+        if (queued_action->targets[i].targetsPosition == 0) {
 
-            Actors_ActorPlacement(temp_s3->targets[i].target.targetActor, &sp10);
+            Actors_ActorPlacement(queued_action->targets[i].target.targetActor, &target_placement);
 
-            sp20.vx = sp10.location.position.vx;
-            sp20.vz = sp10.location.position.vz;
-            sp20.vy = sp10.location.position.vy;
+            hit_position.vx = target_placement.location.position.vx;
+            hit_position.vz = target_placement.location.position.vz;
+            hit_position.vy = target_placement.location.position.vy;
 
-            switch (temp_s3->targets[i].target.impactKind) {
+            switch (queued_action->targets[i].target.impactKind) {
             case 0:
             case 1:
             case 2:
             case 4:
-                switch (Battle_actors[arg0]->equippedWeaponCategory) {
+                switch (Battle_actors[source_actor_slot]->equippedWeaponCategory) {
                 case 1:
-                    Audio_PlayWorldSfx(0x7E, 0x47, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x48, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x47, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x48, &hit_position);
                     break;
 
                 case 2:
-                    Audio_PlayWorldSfx(0x7E, 0x49, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x4A, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x49, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x4A, &hit_position);
                     break;
 
                 case 3:
-                    Audio_PlayWorldSfx(0x7E, 0x4B, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x4C, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x4B, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x4C, &hit_position);
                     break;
 
                 case 4:
-                    Audio_PlayWorldSfx(0x7E, 0x50, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x51, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x50, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x51, &hit_position);
                     break;
 
                 case 5:
-                    Audio_PlayWorldSfx(0x7E, 0x52, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x53, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x52, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x53, &hit_position);
                     break;
 
                 case 6:
-                    Audio_PlayWorldSfx(0x7E, 0x4D, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x4D, &hit_position);
                     break;
 
                 case 7:
-                    Audio_PlayWorldSfx(0x7E, 0x4E, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x4F, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x4E, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x4F, &hit_position);
                     break;
 
                 case 8:
-                    Audio_PlayWorldSfx(0x7E, 0x54, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x55, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x54, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x55, &hit_position);
                     break;
 
                 case 10:
-                    Audio_PlayWorldSfx(0x7E, 0x5B, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x5C, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x5B, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x5C, &hit_position);
                     break;
 
                 case 9:
-                    Audio_PlayWorldSfx(0x7E, 0x69, &sp20);
-                    Audio_PlayWorldSfx(0x7E, 0x6A, &sp20);
+                    Audio_PlayWorldSfx(0x7E, 0x69, &hit_position);
+                    Audio_PlayWorldSfx(0x7E, 0x6A, &hit_position);
                     break;
                 }
 
                 break;
 
             case 3:
-                Audio_PlayWorldSfx(0x7E, 0x33, &sp20);
+                Audio_PlayWorldSfx(0x7E, 0x33, &hit_position);
                 break;
 
             case 5:
@@ -193,19 +193,19 @@ int Battle_PlayWeaponHitSounds(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8006CA20 (src/BATTLE/BATTLE.PRG/146C.c:2106)
-void Battle_ApplyActionSourceEffects(int arg0, SVECTOR* arg1)
+void Battle_ApplyActionSourceEffects(int source_actor_slot, SVECTOR* arg1)
 {
-    Battle_ActionRequest* temp_s0;
+    Battle_ActionRequest* queued_action;
 
-    if (arg0 >= 16) {
+    if (source_actor_slot >= 16) {
         return;
     }
 
-    temp_s0 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
 
-    if ((temp_s0->primaryTarget.target.targetActor == arg0) && (temp_s0->primaryTarget.targetsPosition == 0)) {
+    if ((queued_action->primaryTarget.target.targetActor == source_actor_slot) && (queued_action->primaryTarget.targetsPosition == 0)) {
 
-        switch (temp_s0->primaryTarget.target.impactKind) {
+        switch (queued_action->primaryTarget.target.impactKind) {
         case 2:
         case 3:
         case 4:
@@ -213,18 +213,18 @@ void Battle_ApplyActionSourceEffects(int arg0, SVECTOR* arg1)
 
         case 0:
         case 1:
-            Battle_PlayActorDamageReaction(arg0, &temp_s0->focusPosition);
+            Battle_PlayActorDamageReaction(source_actor_slot, &queued_action->focusPosition);
             break;
 
         case 5:
-            if (arg0 == 0) {
+            if (source_actor_slot == 0) {
                 ((void (*)(int, short*, int))Actors_PlayActorActionPose)(0, NULL, 6);
             }
 
             break;
         }
 
-        Battle_ApplyActorActionResult(&temp_s0->primaryTarget);
+        Battle_ApplyActorActionResult(&queued_action->primaryTarget);
     }
 }
 
@@ -237,7 +237,7 @@ void Battle_WaitForPostActionMovement(void)
 }
 
 // decomp: BATTLE.PRG func_8006FBCC (src/BATTLE/BATTLE.PRG/146C.c:3388)
-void Battle_BeginPostActionRecovery(int arg0)
+void Battle_BeginPostActionRecovery(int recovery_reward_mode)
 {
     int i;
 
@@ -252,7 +252,7 @@ void Battle_BeginPostActionRecovery(int arg0)
     Render_SetClutAnimationEnabled(1);
     Field_SetRoomAnimationsPaused(0);
     Battle_SetActorMarkersHidden(0);
-    Battle_recoveryRewardMode = arg0;
+    Battle_recoveryRewardMode = recovery_reward_mode;
     State_tickSpeed = 2;
     Battle_actionFlowMode = 0xB;
 }
@@ -260,12 +260,12 @@ void Battle_BeginPostActionRecovery(int arg0)
 // decomp: BATTLE.PRG func_8006FCBC (src/BATTLE/BATTLE.PRG/146C.c:3408)
 void Battle_BeginActionTrailFade(void)
 {
-    Battle_ActionRequest* temp_s0;
+    Battle_ActionRequest* initial_action;
 
     Battle_actionFlowMode = 10;
-    temp_s0 = &Battle_actionState->queue[0];
-    Effects_FadeWeaponTrails(temp_s0->primaryTarget.target.targetActor,
-        Actors_FindActorBoneTag(temp_s0->primaryTarget.target.targetActor, 0xF0, 0));
+    initial_action = &Battle_actionState->queue[0];
+    Effects_FadeWeaponTrails(initial_action->primaryTarget.target.targetActor,
+        Actors_FindActorBoneTag(initial_action->primaryTarget.target.targetActor, 0xF0, 0));
 }
 
 // decomp: BATTLE.PRG func_8006FD0C (src/BATTLE/BATTLE.PRG/146C.c:3418)
@@ -274,55 +274,55 @@ void Battle_FinishBattleAbilitySequence(void) { Battle_actionFlowMode = 9; }
 // decomp: BATTLE.PRG func_80070278 (src/BATTLE/BATTLE.PRG/146C.c:3510)
 void Battle_StartActionAnimation(void)
 {
-    Battle_ActionRequest* temp_s0;
-    int temp_a3;
+    Battle_ActionRequest* queued_action;
+    int chain_index;
 
     Battle_actionState->abilityWindow = 0;
     Battle_actionState->abilityTimer = 0;
-    temp_s0 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
 
-    if (((temp_s0->actionId - 0x16u) < 0x20) && (temp_s0->primaryTarget.targetsPosition == 0)
-        && (temp_s0->primaryTarget.target.targetActor == 0)) {
+    if (((queued_action->actionId - 0x16u) < 0x20) && (queued_action->primaryTarget.targetsPosition == 0)
+        && (queued_action->primaryTarget.target.targetActor == 0)) {
         State_SetScriptFlag(0xB8, 1);
     }
 
-    temp_a3 = Battle_actionState->queueIndex;
+    chain_index = Battle_actionState->queueIndex;
 
-    if (temp_a3 == 0) {
-        if (!(Battle_actionDefinitions[temp_s0->actionId].returnsToMenuOnCancel)) {
+    if (chain_index == 0) {
+        if (!(Battle_actionDefinitions[queued_action->actionId].returnsToMenuOnCancel)) {
             Battle_PlayMeleeAttackAnimation(
-                temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, temp_s0->animationParameter);
+                queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, queued_action->animationParameter);
             Battle_actionState->abilityWindow =
-                Actors_AnimationBattleWindowFrame(temp_s0->primaryTarget.target.targetActor) * 2;
+                Actors_AnimationBattleWindowFrame(queued_action->primaryTarget.target.targetActor) * 2;
         } else {
-            if (temp_s0->actionId >= 0x8D) {
-                if (temp_s0->actionId < 0xB8) {
+            if (queued_action->actionId >= 0x8D) {
+                if (queued_action->actionId < 0xB8) {
                     Battle_PlayBreakArtAnimation(
-                        temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
-                } else if (temp_s0->actionId < 0xE0) {
+                        queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
+                } else if (queued_action->actionId < 0xE0) {
                     Battle_PlaySpecialActionAnimation(
-                        temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
+                        queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
                 } else {
                     Battle_PlaySpellCastAnimation(
-                        temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
+                        queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
                 }
             } else {
                 Battle_PlaySpellCastAnimation(
-                    temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
+                    queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 1);
             }
             Battle_actionState->abilityWindow = 0;
             State_tickSpeed = 4;
         }
     } else {
-        if (temp_s0->actionId < 0x28) {
-            Battle_PlayChainAbilityAnimation(temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition,
+        if (queued_action->actionId < 0x28) {
+            Battle_PlayChainAbilityAnimation(queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition,
                 Input_settings.mappedChainAbilities[Battle_actionState->chainAbilitySlot - 1] - 0x16,
-                temp_a3);
+                chain_index);
         } else {
-            Battle_PlayDefenseAbilityAnimation(temp_s0->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
+            Battle_PlayDefenseAbilityAnimation(queued_action->primaryTarget.target.targetActor, &Battle_actionState->selection.focusPosition, 0);
         }
         Battle_actionState->abilityWindow =
-            Actors_AnimationBattleWindowFrame(temp_s0->primaryTarget.target.targetActor) * 2;
+            Actors_AnimationBattleWindowFrame(queued_action->primaryTarget.target.targetActor) * 2;
     }
 
     Audio_StopSfx(0x7E, 0x34);
@@ -342,22 +342,22 @@ void Battle_AdvanceActionEffectPhase(void)
 }
 
 // decomp: BATTLE.PRG func_80070F28 (src/BATTLE/BATTLE.PRG/146C.c:3775)
-void Battle_CommitSelectedAction(int arg0)
+void Battle_CommitSelectedAction(int target_selection_mode)
 {
     int i;
-    int temp_v1_2;
-    u_char temp_s0;
+    int action_id;
+    u_char selected_preview;
     int var_a0;
 
     Field_StorePreferredActionCameraDistance();
-    temp_s0 = Battle_actionState->selectedPreview;
+    selected_preview = Battle_actionState->selectedPreview;
     ((void (*)())Battle_ClearSphereTargets)();
     Battle_ClearPrimarySphereVolume();
     Battle_ClearSecondarySphereVolume();
     Battle_FreeSphere();
 
-    if (arg0 != 0) {
-        if (temp_s0 == 0xFF) {
+    if (target_selection_mode != 0) {
+        if (selected_preview == 0xFF) {
             if (Battle_actionState->selection.primaryTarget.target.targetActor != 0) {
                 Menu_Framework_ReleaseMenuRows();
                 Battle_Ai_ResetActorAiReactionDelay(Battle_actionState->selection.primaryTarget.target.targetActor);
@@ -391,9 +391,9 @@ void Battle_CommitSelectedAction(int arg0)
         Battle_Ai_DisengageActorById(Battle_actionState->selection.primaryTarget.target.targetActor);
     }
     Menu_Framework_ReleaseMenuRows();
-    if (arg0 == 0) {
+    if (target_selection_mode == 0) {
         Battle_CollectEnvironmentActionTargets();
-    } else if (arg0 == 2) {
+    } else if (target_selection_mode == 2) {
         Battle_SetAllActionTargets();
     } else {
         Battle_SetSingleActionTarget();
@@ -402,8 +402,8 @@ void Battle_CommitSelectedAction(int arg0)
     Battle_ResolveActionTargets(Battle_actionState->selection.actionId, Battle_actionState->queue, &Battle_actionState->selection, 1);
 
     if ((Battle_actionState->selection.primaryTarget.target.targetActor == 0)
-        && ((temp_v1_2 = Battle_actionState->selection.actionId, (temp_v1_2 == 1))
-            || ((temp_v1_2 - 0xB8) < 0x28U))
+        && ((action_id = Battle_actionState->selection.actionId, (action_id == 1))
+            || ((action_id - 0xB8) < 0x28U))
         && (Battle_actionState->selection.targets[0].targetsPosition == 0)
         && (Battle_actors[Battle_actionState->selection.targets[0].target.targetActor]->roomSpawnIndex
             != 0x80)) {
@@ -674,22 +674,22 @@ void Battle_BeginAshleyWeaponToggle(void)
 void Battle_EndAshleyWeaponToggle(void) { Field_EnterFieldExplorationMode(); }
 
 // decomp: BATTLE.PRG func_80074A20 (src/BATTLE/BATTLE.PRG/146C.c:5315)
-int Battle_BeginActorDefeatAnimation(int arg0)
+int Battle_BeginActorDefeatAnimation(int actor_slot)
 {
     int ret;
 
-    Battle_Ai_RefreshActorAiReservations(arg0);
+    Battle_Ai_RefreshActorAiReservations(actor_slot);
     ret = 0;
 
-    if (Battle_actors[arg0] != NULL) {
-        Battle_actors[arg0]->commandState = 0;
-        if (Battle_actors[arg0]->stats->currentHp == 0) {
-            Battle_SetActorMarker(arg0, 0);
-            Battle_actors[arg0]->commandState = 0x20;
-            if (Battle_actors[arg0]->retainAfterDefeat == 0) {
-                Actors_BeginActorDeath(arg0, &Battle_actionState->rangeOrigin, 1);
-                Actors_SetActorAnimationLocked(arg0, 1);
-                if ((Battle_actors[arg0]->roomSpawnIndex != 0x80) || (arg0 == 0)) {
+    if (Battle_actors[actor_slot] != NULL) {
+        Battle_actors[actor_slot]->commandState = 0;
+        if (Battle_actors[actor_slot]->stats->currentHp == 0) {
+            Battle_SetActorMarker(actor_slot, 0);
+            Battle_actors[actor_slot]->commandState = 0x20;
+            if (Battle_actors[actor_slot]->retainAfterDefeat == 0) {
+                Actors_BeginActorDeath(actor_slot, &Battle_actionState->rangeOrigin, 1);
+                Actors_SetActorAnimationLocked(actor_slot, 1);
+                if ((Battle_actors[actor_slot]->roomSpawnIndex != 0x80) || (actor_slot == 0)) {
                     ret = 1;
                 }
             }
@@ -702,14 +702,14 @@ int Battle_BeginActorDefeatAnimation(int arg0)
 void Battle_ApplyLearnedActionUnlocks(void)
 {
     int i;
-    int var_v0;
+    int learned_flag_index;
 
     for (i = 0; i < 256; ++i) {
-        var_v0 = i;
+        learned_flag_index = i;
         if (i < 0) {
-            var_v0 = i + 7;
+            learned_flag_index = i + 7;
         }
-        if (State_learnedActionFlags[var_v0 >> 3] & (0x80 >> (i - ((var_v0 >> 3) * 8)))) {
+        if (State_learnedActionFlags[learned_flag_index >> 3] & (0x80 >> (i - ((learned_flag_index >> 3) * 8)))) {
             Battle_actionDefinitions[i].unlocked = 1;
         } else {
             Battle_actionDefinitions[i].unlocked = 0;

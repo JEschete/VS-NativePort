@@ -22,8 +22,8 @@ extern int Battle_Ai_orbitAngularVelocity;
 extern int Battle_Ai_orbitHeightOffset;
 extern Battle_Ai_ArenaOrbitState* Battle_Ai_arenaOrbit;
 int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state);
-int Battle_Ai_IsBossActionReady(Battle_Ai_ActorAiState* arg0);
+int Battle_Ai_IsBossActionReady(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state);
-int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* arg0);
+int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* ai_state);
 
 #endif // VS_BATTLE_AI_ORBITINGBOSS_H_DECLS

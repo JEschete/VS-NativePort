@@ -57,22 +57,22 @@ u_short Battle_battleAbilityPointRequirements[150]; /* contents: module image (M
 short Battle_abilityInputResult;
 
 // decomp: BATTLE.PRG func_80069C6C (src/BATTLE/BATTLE.PRG/146C.c:735)
-void Battle_ArmDefenseAbilityTimingWindow(int arg0)
+void Battle_ArmDefenseAbilityTimingWindow(int target_actor_slot)
 {
-    Battle_HitResult* new_var2;
+    Battle_HitResult* queued_source_hit;
 
-    if (arg0 != 0) {
+    if (target_actor_slot != 0) {
         return;
     }
 
-    new_var2 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3].primaryTarget;
+    queued_source_hit = &Battle_actionState->queue[Battle_actionState->queueIndex & 3].primaryTarget;
 
-    if (new_var2->target.targetActor == 0) {
+    if (queued_source_hit->target.targetActor == 0) {
         return;
     }
 
     // TODO: Remove dead code
-    switch (new_var2->target.targetActor != 0) {
+    switch (queued_source_hit->target.targetActor != 0) {
     case 0:
         return;
     }
@@ -156,7 +156,7 @@ void Battle_BeginPendingAbilityReward(void)
 // decomp: BATTLE.PRG func_8006FA20 (src/BATTLE/BATTLE.PRG/146C.c:3352)
 void Battle_GrantPendingAbilityUnlock(void)
 {
-    u_int temp_v0_2;
+    u_int pending_unlocks;
 
     if ((Battle_actionState->selection.actionId != 0)
         && !((Battle_actionDefinitions[Battle_actionState->selection.actionId].unlocked))
@@ -168,10 +168,10 @@ void Battle_GrantPendingAbilityUnlock(void)
         Battle_actionDefinitions[Battle_actionState->selection.actionId].unlocked = 1;
         return;
     }
-    temp_v0_2 = Battle_PendingBattleAbilityUnlocks();
+    pending_unlocks = Battle_PendingBattleAbilityUnlocks();
     Battle_actionFlowMode = 14;
     Field_PauseFieldForMenu();
-    Menu_Framework_OpenAbilityUnlockMenu(temp_v0_2 >> 0x10, temp_v0_2 & 0xFFFF);
+    Menu_Framework_OpenAbilityUnlockMenu(pending_unlocks >> 0x10, pending_unlocks & 0xFFFF);
 }
 
 // decomp: BATTLE.PRG func_8006FD1C (src/BATTLE/BATTLE.PRG/146C.c:3420)
@@ -265,24 +265,24 @@ void Battle_AdvanceBattleAbilitySequence(void)
 }
 
 // decomp: BATTLE.PRG func_80078828 (src/BATTLE/BATTLE.PRG/146C.c:7043)
-int Battle_CanTriggerBattleAbility(int arg0)
+int Battle_CanTriggerBattleAbility(int ability_input_slot)
 {
-    Battle_ActionRequest* temp_s1;
+    Battle_ActionRequest* queued_action;
     int hasMappedAbility;
     int ret;
     int i;
 
-    temp_s1 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+    queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
     ret = 1;
 
-    if ((temp_s1->primaryTarget.targetsPosition == 0) && (temp_s1->targetCount != 0)
-        && (temp_s1->targets[0].targetsPosition == 0)) {
+    if ((queued_action->primaryTarget.targetsPosition == 0) && (queued_action->targetCount != 0)
+        && (queued_action->targets[0].targetsPosition == 0)) {
 
-        if (temp_s1->primaryTarget.target.targetActor == 0) {
+        if (queued_action->primaryTarget.target.targetActor == 0) {
 
             hasMappedAbility = 0;
 
-            if (arg0 == 0) {
+            if (ability_input_slot == 0) {
 
                 for (i = 0; i < 3; ++i) {
 
@@ -302,7 +302,7 @@ int Battle_CanTriggerBattleAbility(int arg0)
 
             hasMappedAbility = 0;
 
-            if (arg0 == 0) {
+            if (ability_input_slot == 0) {
 
                 for (i = 0; i < 3; ++i) {
                     if (Input_settings.mappedDefenseAbilities[i] != 0) {
@@ -316,45 +316,45 @@ int Battle_CanTriggerBattleAbility(int arg0)
             }
         }
 
-        if (temp_s1->targets[0].target.targetActor == 0) {
+        if (queued_action->targets[0].target.targetActor == 0) {
             Actors_ActorStateFlags(0);
-        } else if (Battle_actors[temp_s1->targets[0].target.targetActor]->roomSpawnIndex == 0x80) {
+        } else if (Battle_actors[queued_action->targets[0].target.targetActor]->roomSpawnIndex == 0x80) {
             ret = 0;
         }
 
-        if (temp_s1->primaryTarget.target.targetActor != 0) {
-            if (temp_s1->targets[0].target.targetActor != 0) {
+        if (queued_action->primaryTarget.target.targetActor != 0) {
+            if (queued_action->targets[0].target.targetActor != 0) {
                 ret = 0;
             }
-        } else if (temp_s1->actionId >= 40) {
+        } else if (queued_action->actionId >= 40) {
             ret = 0;
         }
 
-        if ((temp_s1->actionId - 40u) < 14) {
+        if ((queued_action->actionId - 40u) < 14) {
             ret = 0;
         }
 
-        if (temp_s1->primaryTarget.target.targetActor == temp_s1->targets[0].target.targetActor) {
+        if (queued_action->primaryTarget.target.targetActor == queued_action->targets[0].target.targetActor) {
             ret = 0;
         }
 
-        if (arg0 != 0) {
+        if (ability_input_slot != 0) {
 
-            if (temp_s1->primaryTarget.target.targetActor == 0) {
-                if (!(Battle_ActionCostAndAvailability(Input_settings.mappedChainAbilities[arg0 - 1],
+            if (queued_action->primaryTarget.target.targetActor == 0) {
+                if (!(Battle_ActionCostAndAvailability(Input_settings.mappedChainAbilities[ability_input_slot - 1],
                           Battle_characterState->stats, 0)
                         & 0xFF000000)) {
                     ret = 0;
                 }
             } else {
-                if (!(Battle_ActionCostAndAvailability(Input_settings.mappedDefenseAbilities[arg0 - 1],
+                if (!(Battle_ActionCostAndAvailability(Input_settings.mappedDefenseAbilities[ability_input_slot - 1],
                           Battle_characterState->stats, 0)
                         & 0xFF000000)) {
                     ret = 0;
                 }
             }
 
-            if (Battle_actionState->previousChainInput == arg0) {
+            if (Battle_actionState->previousChainInput == ability_input_slot) {
                 ret = 0;
             }
         }
@@ -372,21 +372,21 @@ int Battle_CanTriggerBattleAbility(int arg0)
 // decomp: BATTLE.PRG func_80078AB4 (src/BATTLE/BATTLE.PRG/146C.c:7147)
 void Battle_UpdateBattleAbilityTiming(void)
 {
-    int var_a0;
+    int timing_result;
     int i;
     int margin;
     int button;
     int isMapped;
     int abilityTimer;
-    u_int* new_var;
+    u_int* pressed_buttons;
 
-    Battle_ActionRequest* temp_s3 = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
+    Battle_ActionRequest* queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
 
-    if (temp_s3->primaryTarget.target.targetActor == 0) {
+    if (queued_action->primaryTarget.target.targetActor == 0) {
         margin = State_ScriptFlag(1) ? 8 : 10;
     } else {
         margin = State_ScriptFlag(1) ? 8 : 10;
-        if (temp_s3->actionId >= 54) {
+        if (queued_action->actionId >= 54) {
             margin += 4;
         }
     }
@@ -398,12 +398,12 @@ void Battle_UpdateBattleAbilityTiming(void)
     }
 
     abilityTimer = Battle_actionState->abilityTimer;
-    const Actors_ActorRecord* actingActor = Actors_actorRecords[temp_s3->primaryTarget.target.targetActor];
+    const Actors_ActorRecord* actingActor = Actors_actorRecords[queued_action->primaryTarget.target.targetActor];
     Core_Debugf("combat-flow", "animation id=%u state=%u active=%u held=%u timer=%d window=%u effects=%u action=%u",
         (unsigned)actingActor->animationId, (unsigned)actingActor->instance.actionAnimationState,
         (unsigned)actingActor->instance.currentAnimation, (unsigned)actingActor->pose.holdingLastFrame,
         abilityTimer, (unsigned)Battle_actionState->abilityWindow,
-        (unsigned)Effects_effectBusyFlags, (unsigned)temp_s3->actionId);
+        (unsigned)Effects_effectBusyFlags, (unsigned)queued_action->actionId);
 
     if (Battle_actionState->abilityWindow != 0) {
         if (abilityTimer
@@ -418,22 +418,22 @@ void Battle_UpdateBattleAbilityTiming(void)
 
     Battle_actionState->abilityTimer += State_tickSpeed;
 
-    new_var = &Input_buttonsPressed.allButtons;
+    pressed_buttons = &Input_buttonsPressed.allButtons;
 
-    if (*new_var & (PADRup | PADRright | PADRleft)) {
+    if (*pressed_buttons & (PADRup | PADRright | PADRleft)) {
 
-        if (*new_var & PADRleft) {
+        if (*pressed_buttons & PADRleft) {
             button = 3;
-        } else if (*new_var & PADRup) {
+        } else if (*pressed_buttons & PADRup) {
             button = 2;
-        } else if (*new_var & PADRright) {
+        } else if (*pressed_buttons & PADRright) {
             button = 1;
         }
 
         isMapped = 0;
 
-        if (temp_s3->primaryTarget.targetsPosition == 0) {
-            if (temp_s3->primaryTarget.target.targetActor == 0) {
+        if (queued_action->primaryTarget.targetsPosition == 0) {
+            if (queued_action->primaryTarget.target.targetActor == 0) {
                 isMapped = Input_settings.mappedChainAbilities[button - 1] != 0;
             } else if (Input_settings.mappedDefenseAbilities[button - 1] != 0) {
                 isMapped = 1;
@@ -447,7 +447,7 @@ void Battle_UpdateBattleAbilityTiming(void)
                 if (Battle_actionState->abilityWindow == 0) {
                     Battle_QueueAbilityTimingResult(1);
                     Battle_actionState->abilityInputAttempted = 1;
-                } else if (temp_s3->primaryTarget.targetsPosition == 0) {
+                } else if (queued_action->primaryTarget.targetsPosition == 0) {
 
                     if ((Battle_actionState->abilityWindow - margin)
                         >= abilityTimer) {
@@ -470,7 +470,7 @@ void Battle_UpdateBattleAbilityTiming(void)
 
                             if (Input_buttonsPressed.allButtons & v) {
 
-                                if (temp_s3->primaryTarget.target.targetActor == 0) {
+                                if (queued_action->primaryTarget.target.targetActor == 0) {
 
                                     if ((Battle_actionState->previousChainInput != button)
                                         && (Input_settings
@@ -489,10 +489,10 @@ void Battle_UpdateBattleAbilityTiming(void)
 
                                 } else {
 
-                                    for (i = 0; i < temp_s3->targetCount; ++i) {
+                                    for (i = 0; i < queued_action->targetCount; ++i) {
 
-                                        if ((temp_s3->targets[0].target.targetActor == 0)
-                                            && (temp_s3->targets[0].targetsPosition == 0)) {
+                                        if ((queued_action->targets[0].target.targetActor == 0)
+                                            && (queued_action->targets[0].targetsPosition == 0)) {
 
                                             if ((Battle_actionState->previousChainInput != button)
                                                 && (Input_settings
@@ -527,14 +527,14 @@ void Battle_UpdateBattleAbilityTiming(void)
                         }
                     } else {
 
-                        var_a0 = 4;
+                        timing_result = 4;
 
                         if ((Battle_actionState->abilityWindow + (margin * 2))
                             >= abilityTimer) {
-                            var_a0 = 3;
+                            timing_result = 3;
                         }
 
-                        Battle_QueueAbilityTimingResult(var_a0);
+                        Battle_QueueAbilityTimingResult(timing_result);
 
                         Battle_actionState->abilityInputSucceeded = 0;
                         Battle_actionState->abilityInputAttempted = 1;
@@ -560,21 +560,21 @@ void Battle_UpdateBattleAbilityTiming(void)
         }
     }
 
-    if (temp_s3->primaryTarget.targetsPosition == 0) {
+    if (queued_action->primaryTarget.targetsPosition == 0) {
 
-        if (((u_int (*)(int))Actors_IsActorActionAnimationBusy)(temp_s3->primaryTarget.target.targetActor) != 0) {
+        if (((u_int (*)(int))Actors_IsActorActionAnimationBusy)(queued_action->primaryTarget.target.targetActor) != 0) {
             return;
         }
 
         if ((Battle_actionState->abilityInputAttempted != 0)
             || (Battle_actionState->chainAbilitySlot == 0)) {
-            Actors_RestoreActorIdlePose(temp_s3->primaryTarget.target.targetActor);
+            Actors_RestoreActorIdlePose(queued_action->primaryTarget.target.targetActor);
         }
 
-        if ((temp_s3->targets[0].targetsPosition == 0)
-            && (Battle_actors[temp_s3->targets[0].target.targetActor]->stats->currentHp
+        if ((queued_action->targets[0].targetsPosition == 0)
+            && (Battle_actors[queued_action->targets[0].target.targetActor]->stats->currentHp
                 == 0)) {
-            Actors_RestoreActorIdlePose(temp_s3->primaryTarget.target.targetActor);
+            Actors_RestoreActorIdlePose(queued_action->primaryTarget.target.targetActor);
         }
     }
 
@@ -584,19 +584,19 @@ void Battle_UpdateBattleAbilityTiming(void)
 }
 
 // decomp: BATTLE.PRG vs_battle_isActionUnlocked (src/BATTLE/BATTLE.PRG/146C.c:9241)
-int Battle_IsActionUnlocked(u_int arg0)
+int Battle_IsActionUnlocked(u_int action_id)
 {
-    if ((arg0 - 1) < 0xFF) {
-        return Battle_actionDefinitions[arg0].unlocked;
+    if ((action_id - 1) < 0xFF) {
+        return Battle_actionDefinitions[action_id].unlocked;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_setActionUnlocked (src/BATTLE/BATTLE.PRG/146C.c:9249)
-void Battle_UnlockAction(u_int arg0)
+void Battle_UnlockAction(u_int action_id)
 {
-    if ((arg0 - 1) < 0xFF) {
-        Battle_actionDefinitions[arg0].unlocked = 1;
+    if ((action_id - 1) < 0xFF) {
+        Battle_actionDefinitions[action_id].unlocked = 1;
     }
 }
 
@@ -632,11 +632,11 @@ int Battle_HasUnlockedWeaponBreakArt(void)
 int Battle_HasUnlockedBattleAbility(int defense)
 {
     int i;
-    Battle_ActionDefinition* v0;
+    Battle_ActionDefinition* action_definitions;
 
     for (i = 0; i < 14; ++i) {
-        v0 = Battle_actionDefinitions;
-        if (v0[defense == 0 ? Battle_chainAbilityActionIds[i]
+        action_definitions = Battle_actionDefinitions;
+        if (action_definitions[defense == 0 ? Battle_chainAbilityActionIds[i]
                             : Battle_defenseAbilityActionIds[i]]
                 .unlocked) {
             return 1;

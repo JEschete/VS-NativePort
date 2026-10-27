@@ -86,14 +86,14 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
 }
 
 // decomp: BATTLE.PRG func_800E78F4 (src/BATTLE/BATTLE.PRG/7EE98.c:553)
-int Battle_Ai_IsBossActionReady(Battle_Ai_ActorAiState* arg0)
+int Battle_Ai_IsBossActionReady(Battle_Ai_ActorAiState* ai_state)
 {
     int r = 0;
     int a;
     int b;
 
-    if (arg0->candidateCount != 0 && Battle_Ai_IsActionCooldownReady(arg0, arg0->candidateOrder[0])) {
-        a = arg0->candidateOrder[0]->threshold;
+    if (ai_state->candidateCount != 0 && Battle_Ai_IsActionCooldownReady(ai_state, ai_state->candidateOrder[0])) {
+        a = ai_state->candidateOrder[0]->threshold;
         b = Battle_Ai_roomAiState->readinessLevel;
         r = a < b;
     }
@@ -256,71 +256,71 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
 }
 
 // decomp: BATTLE.PRG func_800E7F8C (src/BATTLE/BATTLE.PRG/7EE98.c:753)
-int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* arg0)
+int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* ai_state)
 {
-    Battle_Ai_ArenaOrbitState* temp_s0;
+    Battle_Ai_ArenaOrbitState* orbit_state;
     char state;
 
-    if (Battle_Ai_IsBossActionReady(arg0) != 0) {
-        Battle_Ai_TryEngageActor(arg0);
+    if (Battle_Ai_IsBossActionReady(ai_state) != 0) {
+        Battle_Ai_TryEngageActor(ai_state);
     }
 
     state = State_ScriptFlag(0xA6);
-    temp_s0 = Battle_Ai_arenaOrbit;
+    orbit_state = Battle_Ai_arenaOrbit;
 
-    if (temp_s0->cooldown > 0) {
-        --temp_s0->cooldown;
+    if (orbit_state->cooldown > 0) {
+        --orbit_state->cooldown;
     }
 
     switch (state) {
     case 0:
-        if (temp_s0->planSaved != 0) {
-            temp_s0->planSaved = 0;
-            arg0->candidateCount = temp_s0->savedPlanCount;
+        if (orbit_state->planSaved != 0) {
+            orbit_state->planSaved = 0;
+            ai_state->candidateCount = orbit_state->savedPlanCount;
         }
 
-        temp_s0->isOrbiting = 0;
-        Battle_Ai_UpdateBossOrbitTracking((void*)arg0);
+        orbit_state->isOrbiting = 0;
+        Battle_Ai_UpdateBossOrbitTracking((void*)ai_state);
 
-        if ((temp_s0->requested != 0) && (temp_s0->cooldown == 0)
-            && (arg0->stats->limbs[4].hp >= 2)) {
-            temp_s0->cooldown = 900;
-            temp_s0->requested = 0;
-            temp_s0->savedPlanCount = arg0->candidateCount;
+        if ((orbit_state->requested != 0) && (orbit_state->cooldown == 0)
+            && (ai_state->stats->limbs[4].hp >= 2)) {
+            orbit_state->cooldown = 900;
+            orbit_state->requested = 0;
+            orbit_state->savedPlanCount = ai_state->candidateCount;
             state = 1;
-            arg0->candidateCount = 0;
-            temp_s0->planSaved = 1;
+            ai_state->candidateCount = 0;
+            orbit_state->planSaved = 1;
         }
         break;
 
     case 4:
-        temp_s0->started = 0;
-        Battle_Ai_DisengageActor(arg0);
+        orbit_state->started = 0;
+        Battle_Ai_DisengageActor(ai_state);
 
-        if (Battle_Ai_UpdateBossRadialRetreat((void*)arg0) != 0) {
-            if (temp_s0->isOrbiting != 0) {
-                Battle_Ai_EngagementData* temp_a1 = arg0->actor;
+        if (Battle_Ai_UpdateBossRadialRetreat((void*)ai_state) != 0) {
+            if (orbit_state->isOrbiting != 0) {
+                Battle_Ai_EngagementData* command_actor = ai_state->actor;
 
-                if (temp_a1->opaque3C->limbs[4].hp >= 2) {
-                    temp_a1->opaqueC = 4;
-                    temp_a1->opaqueE = 0;
-                    setVector(&temp_a1->opaque10, Actors_actorRecords[0]->instance.position.vx,
+                if (command_actor->opaque3C->limbs[4].hp >= 2) {
+                    command_actor->opaqueC = 4;
+                    command_actor->opaqueE = 0;
+                    setVector(&command_actor->opaque10, Actors_actorRecords[0]->instance.position.vx,
                         Actors_actorRecords[0]->instance.position.vy
                             - (Actors_actorRecords[0]->collisionHeight >> 1),
                         Actors_actorRecords[0]->instance.position.vz);
-                    temp_a1->opaque9 = 24;
-                    temp_a1->opaque8 = 0x80;
+                    command_actor->opaque9 = 24;
+                    command_actor->opaque8 = 0x80;
                 }
 
-                temp_s0->savedHeight = arg0->position.vy;
-                arg0->candidateCount = temp_s0->savedPlanCount;
-                temp_s0->planSaved = 0;
+                orbit_state->savedHeight = ai_state->position.vy;
+                ai_state->candidateCount = orbit_state->savedPlanCount;
+                orbit_state->planSaved = 0;
             } else {
                 state = 6;
             }
 
             Battle_Ai_orbitHeightOffset = 0;
-            temp_s0->requested = 0;
+            orbit_state->requested = 0;
             Battle_Ai_orbitAngularVelocity = 0;
         }
         break;

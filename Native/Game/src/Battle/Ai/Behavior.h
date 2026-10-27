@@ -17,14 +17,14 @@
 #include "Items/Loadout.h"
 
 int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Battle_Ai_CandidateEntryView* entry);
-int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* arg0);
-int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1);
+int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state);
+int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate);
 int Battle_Ai_UpdateCloseFollowBehavior(Battle_Ai_EscortView* state);
 int Battle_Ai_UpdateEnemyPursuitBehavior(Battle_Ai_EscortView* state);
 int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state);
 int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state);
-int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1);
-int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* arg0);
+int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate);
+int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_UpdateActorDecisions(void);
 
 #endif // VS_BATTLE_AI_BEHAVIOR_H_DECLS

@@ -128,16 +128,16 @@ char Battle_puzzleTimerText[9] = "00:00:00";
 int Battle_puzzleTimer;
 
 // decomp: BATTLE.PRG func_8007BD8C (src/BATTLE/BATTLE.PRG/146C.c:8561)
-int Battle_SetGameplayHudHidden(int arg0)
+int Battle_SetGameplayHudHidden(int hidden)
 {
-    if (arg0 != 0) {
+    if (hidden != 0) {
         Battle_SetHudHidden(1);
         Field_SetMinimapVisible(0);
     } else {
         Battle_SetHudHidden(0);
         Field_SetMinimapVisible(1);
     }
-    return arg0;
+    return hidden;
 }
 
 // decomp: BATTLE.PRG _renderStatBar (src/BATTLE/BATTLE.PRG/5BF94.c:3088)
@@ -166,67 +166,67 @@ void Battle_DrawHudStatGauge(int colorIndex, int current, int max)
 }
 
 // decomp: BATTLE.PRG func_800C9CB4 (src/BATTLE/BATTLE.PRG/5BF94.c:3112)
-void Battle_DrawSlidingStatusIcon(int arg0, int arg1, int arg2)
+void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2)
 {
-    int var_s1;
-    int var_s2;
-    u_long* temp_a0;
+    int clipped_width;
+    int texture_offset;
+    u_long* sprite_packet;
 
-    if ((arg0 != 0xFF) && (Battle_hudSlideOffset == 0)) {
+    if ((status_icon_id != 0xFF) && (Battle_hudSlideOffset == 0)) {
 
-        var_s2 = Battle_statusIconTexOffsets[arg0];
+        texture_offset = Battle_statusIconTexOffsets[status_icon_id];
         arg2 = (arg2 * 0x10) + 0xA0;
 
-        if (arg1 < 0) {
-            var_s2 -= arg1;
-            var_s1 = arg1 + 0x10;
+        if (slide_offset < 0) {
+            texture_offset -= slide_offset;
+            clipped_width = slide_offset + 0x10;
         } else {
-            arg2 += arg1;
-            var_s1 = 0x10 - arg1;
+            arg2 += slide_offset;
+            clipped_width = 0x10 - slide_offset;
         }
 
-        temp_a0 = Render_QueueSpriteWithTexturePage(
-            0x80, arg2 | 0x80000, var_s1 | 0x100000, Render_frameScratch.orderingTable - 4);
+        sprite_packet = Render_QueueSpriteWithTexturePage(
+            0x80, arg2 | 0x80000, clipped_width | 0x100000, Render_frameScratch.orderingTable - 4);
 
-        temp_a0[4] = (var_s2 | (((0x0F0F906A >> arg0) & 1) ? 0x37F90000 : 0x37F80000));
+        sprite_packet[4] = (texture_offset | (((0x0F0F906A >> status_icon_id) & 1) ? 0x37F90000 : 0x37F80000));
 
-        if ((arg0 & 0x10) && !(arg2 & 8)) {
-            var_s2 = (arg0 & 3) * 8 + 0x3068;
-            if (var_s1 >= 9) {
+        if ((status_icon_id & 0x10) && !(arg2 & 8)) {
+            texture_offset = (status_icon_id & 3) * 8 + 0x3068;
+            if (clipped_width >= 9) {
                 if (arg2 & 7) {
                     arg2 += 8;
-                    var_s1 -= 8;
+                    clipped_width -= 8;
                 } else {
-                    int v0 = arg2 - 8;
-                    arg2 = v0 + var_s1;
-                    var_s1 = 8;
+                    int clipped_icon_left = arg2 - 8;
+                    arg2 = clipped_icon_left + clipped_width;
+                    clipped_width = 8;
                 }
             } else {
-                int v0 = (arg0 & 3) * 8 + 0x3070;
-                var_s2 = v0 - var_s1;
+                int overlay_texture_end = (status_icon_id & 3) * 8 + 0x3070;
+                texture_offset = overlay_texture_end - clipped_width;
             }
 
-            Render_QueueSpriteWithTexturePage(0x80, arg2 | 0x80000, var_s1 | 0x80000,
-                Render_frameScratch.orderingTable - 4)[4] = var_s2 | 0x37FF0000;
+            Render_QueueSpriteWithTexturePage(0x80, arg2 | 0x80000, clipped_width | 0x80000,
+                Render_frameScratch.orderingTable - 4)[4] = texture_offset | 0x37FF0000;
         }
     }
 }
 
 // decomp: BATTLE.PRG vs_battle_getStatusFlags (src/BATTLE/BATTLE.PRG/5BF94.c:3158)
-int Battle_StatusIconFlags(Battle_ActorStats* arg0)
+int Battle_StatusIconFlags(Battle_ActorStats* actor_stats)
 {
     int i;
-    int temp_v1 = (u_int)arg0->statuses >> 5;
-    int var_a2 = temp_v1 & 0xFFFF;
-    temp_v1 >>= 16;
+    int remaining_status_bits = (u_int)actor_stats->statuses >> 5;
+    int icon_flags = remaining_status_bits & 0xFFFF;
+    remaining_status_bits >>= 16;
 
     for (i = 0; i < 8; ++i) {
-        if ((temp_v1 >> i) & 1) {
-            var_a2 |= Battle_upperStatusIconFlags[i] << 16;
+        if ((remaining_status_bits >> i) & 1) {
+            icon_flags |= Battle_upperStatusIconFlags[i] << 16;
         }
     }
 
-    return var_a2;
+    return icon_flags;
 }
 
 // decomp: BATTLE.PRG vs_battle_getLimbStatus (src/BATTLE/BATTLE.PRG/5BF94.c:3174)
@@ -254,31 +254,31 @@ int Battle_LimbCondition(Battle_LimbStats* limb)
 }
 
 // decomp: BATTLE.PRG func_800C9EB8 (src/BATTLE/BATTLE.PRG/5BF94.c:3197)
-int Battle_ShortcutIconBrightness(int arg0)
+int Battle_ShortcutIconBrightness(int shortcut_index)
 {
-    int temp_s0 = Menu_Framework_ActionRestrictionFlags(0);
-    int var_s2 = 0x180;
+    int restriction_flags = Menu_Framework_ActionRestrictionFlags(0);
+    int brightness_transparency = 0x180;
 
-    switch (arg0) {
+    switch (shortcut_index) {
     case 0:
     case 1:
     case 2:
     case 3:
-        if (Battle_HasUnlockedSpellClass((0x3021 >> (arg0 * 4)) & 0xF) == 0) {
+        if (Battle_HasUnlockedSpellClass((0x3021 >> (shortcut_index * 4)) & 0xF) == 0) {
             return 0;
         }
-        if (temp_s0 & 0xB7) {
-            var_s2 = 0x140;
+        if (restriction_flags & 0xB7) {
+            brightness_transparency = 0x140;
         }
         break;
     case 4:
-        if (temp_s0 & 0x7) {
-            var_s2 = 0x140;
+        if (restriction_flags & 0x7) {
+            brightness_transparency = 0x140;
         }
         break;
     case 5:
     case 6:
-        if (Battle_HasUnlockedBattleAbility(6 - arg0) == 0) {
+        if (Battle_HasUnlockedBattleAbility(6 - shortcut_index) == 0) {
             return 0;
         }
         break;
@@ -286,35 +286,35 @@ int Battle_ShortcutIconBrightness(int arg0)
         if (Battle_HasUnlockedWeaponBreakArt() == 0) {
             return 0;
         }
-        if (temp_s0 & 0x15F) {
-            var_s2 = 0x140;
+        if (restriction_flags & 0x15F) {
+            brightness_transparency = 0x140;
         }
         break;
     default:
         break;
     }
-    return var_s2;
+    return brightness_transparency;
 }
 
 // decomp: BATTLE.PRG func_800C9F88 (src/BATTLE/BATTLE.PRG/5BF94.c:3239)
 void Battle_ShowShortcutHud(void) { Battle_shortcutHudRequested = 1; }
 
 // decomp: BATTLE.PRG func_800C9F98 (src/BATTLE/BATTLE.PRG/5BF94.c:3241)
-void Battle_DrawShortcutButtonMarker(int arg0, int arg1)
+void Battle_DrawShortcutButtonMarker(int packed_screen_position, int brightness_transparency)
 {
-    u_long* temp_v0 =
-        Render_QueueSpriteWithTexturePage(arg1, arg0, 0x60006, Render_frameScratch.overlayOrderingTable);
-    temp_v0[1] = 0xE1000017;
-    temp_v0[4] = 0x373D80C0;
+    u_long* sprite_packet =
+        Render_QueueSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, Render_frameScratch.overlayOrderingTable);
+    sprite_packet[1] = 0xE1000017;
+    sprite_packet[4] = 0x373D80C0;
 }
 
 // decomp: BATTLE.PRG func_800C9FE8 (src/BATTLE/BATTLE.PRG/5BF94.c:3249)
 void Battle_DrawShortcutHud(void)
 {
-    int temp_s3;
-    int temp_v0;
+    int panel_x_offset;
+    int icon_brightness_transparency;
     int i;
-    u_long* temp_v0_2;
+    u_long* sprite_packet;
 
     if (Battle_shortcutHudRequested != 0) {
         if (Battle_shortcutHudAnimationStep != 0) {
@@ -326,40 +326,40 @@ void Battle_DrawShortcutHud(void)
 
     if (Battle_shortcutHudAnimationStep != 10) {
 
-        temp_s3 = -Menu_Framework_rowAnimationSteps[Battle_shortcutHudAnimationStep];
+        panel_x_offset = -Menu_Framework_rowAnimationSteps[Battle_shortcutHudAnimationStep];
 
         for (i = 0; i < 4; ++i) {
-            temp_v0 = Battle_ShortcutIconBrightness(i + 4);
-            if (temp_v0 != 0) {
+            icon_brightness_transparency = Battle_ShortcutIconBrightness(i + 4);
+            if (icon_brightness_transparency != 0) {
                 Battle_DrawShortcutButtonMarker(
-                    ((temp_s3 + Battle_secondShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_secondShortcutMarkerPositions[i + 4] << 0x10),
-                    temp_v0);
-                temp_v0_2 = Render_QueueSpriteWithTexturePage(temp_v0,
-                    ((temp_s3 + Battle_secondShortcutIconPositions[i]) & 0xFFFF) | (Battle_secondShortcutIconPositions[i + 4] << 0x10),
+                    ((panel_x_offset + Battle_secondShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_secondShortcutMarkerPositions[i + 4] << 0x10),
+                    icon_brightness_transparency);
+                sprite_packet = Render_QueueSpriteWithTexturePage(icon_brightness_transparency,
+                    ((panel_x_offset + Battle_secondShortcutIconPositions[i]) & 0xFFFF) | (Battle_secondShortcutIconPositions[i + 4] << 0x10),
                     Battle_secondShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);
-                temp_v0_2[1] = 0xE1000017;
-                temp_v0_2[4] = (*((i) + Battle_secondShortcutIconTexCoords) | 0x373D0000);
+                sprite_packet[1] = 0xE1000017;
+                sprite_packet[4] = (*((i) + Battle_secondShortcutIconTexCoords) | 0x373D0000);
             }
         }
 
-        Render_QueueSpriteWithTexturePage(0x180, ((temp_s3 + 0x48) & 0xFFFF) | 0x660000,
+        Render_QueueSpriteWithTexturePage(0x180, ((panel_x_offset + 0x48) & 0xFFFF) | 0x660000,
             0x1E001E, Render_frameScratch.overlayOrderingTable)[4] = 0x37FBA0B8;
-        temp_s3 = (0xA0 - temp_s3);
+        panel_x_offset = (0xA0 - panel_x_offset);
 
         for (i = 0; i < 4; ++i) {
-            temp_v0 = Battle_ShortcutIconBrightness(i);
-            if (temp_v0 != 0) {
+            icon_brightness_transparency = Battle_ShortcutIconBrightness(i);
+            if (icon_brightness_transparency != 0) {
                 Battle_DrawShortcutButtonMarker(
-                    ((temp_s3 + Battle_firstShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_firstShortcutMarkerPositions[i + 4] << 0x10),
-                    temp_v0);
-                temp_v0_2 = Render_QueueSpriteWithTexturePage(temp_v0,
-                    (((temp_s3 + Battle_firstShortcutIconPositions[i]) - 2) & 0xFFFF)
+                    ((panel_x_offset + Battle_firstShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_firstShortcutMarkerPositions[i + 4] << 0x10),
+                    icon_brightness_transparency);
+                sprite_packet = Render_QueueSpriteWithTexturePage(icon_brightness_transparency,
+                    (((panel_x_offset + Battle_firstShortcutIconPositions[i]) - 2) & 0xFFFF)
                         | (Battle_firstShortcutIconPositions[i + 4] << 0x10),
                     Battle_firstShortcutIconSizes[i], Render_frameScratch.overlayOrderingTable);
-                temp_v0_2[1] = 0xE1000017;
-                temp_v0_2[4] = Battle_firstShortcutIconTexCoords[i] | 0x373D0000;
+                sprite_packet[1] = 0xE1000017;
+                sprite_packet[4] = Battle_firstShortcutIconTexCoords[i] | 0x373D0000;
             }
-            Render_QueueSpriteWithTexturePage(0x80, temp_s3 + Battle_firstShortcutDigitOffsets[3 - i], 0x100010,
+            Render_QueueSpriteWithTexturePage(0x80, panel_x_offset + Battle_firstShortcutDigitOffsets[3 - i], 0x100010,
                 Render_frameScratch.overlayOrderingTable)[4] = (((3 - i) * 0x10) | 0x37FB8000);
         }
     }
@@ -546,19 +546,19 @@ void Battle_HidePuzzleTimer(void) { Battle_lowerScreenUiState = 0; }
 // decomp: BATTLE.PRG _renderTimer (src/BATTLE/BATTLE.PRG/5BF94.c:3844)
 void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
 {
-    char sp10[4] = {0, timer->seconds, timer->minutes, timer->hours};
+    char timer_components[4] = {0, timer->seconds, timer->minutes, timer->hours};
     int i;
 
-    sp10[0] = Audio_Seq_unusedStateFlags.puzzleTimerHundredths;
+    timer_components[0] = Audio_Seq_unusedStateFlags.puzzleTimerHundredths;
 
-    if (sp10[3] != 0) {
-        sp10[2] = 59;
-        sp10[1] = 59;
-        sp10[0] = 99;
+    if (timer_components[3] != 0) {
+        timer_components[2] = 59;
+        timer_components[1] = 59;
+        timer_components[0] = 99;
     }
 
     for (i = 0; i < 3; ++i) {
-        int bcd = Core_Math_SplitDecimalDigit(sp10[i]);
+        int bcd = Core_Math_SplitDecimalDigit(timer_components[i]);
         Battle_puzzleTimerText[6 - i * 3] = (bcd >> 4) + '0';
         Battle_puzzleTimerText[7 - i * 3] = (bcd & 0xF) + '0';
     }
@@ -569,8 +569,8 @@ void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
 }
 
 // decomp: BATTLE.PRG func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867)
-void Battle_SetHudHidden(int arg0) { Battle_hudHidden = arg0; }
+void Battle_SetHudHidden(int hidden) { Battle_hudHidden = hidden; }
 
 // decomp: BATTLE.PRG func_800CB660 (src/BATTLE/BATTLE.PRG/5BF94.c:3869)
-void Battle_SetHudBattleMode(int arg0) { Battle_hudBattleMode = arg0; }
+void Battle_SetHudBattleMode(int battle_mode) { Battle_hudBattleMode = battle_mode; }
 

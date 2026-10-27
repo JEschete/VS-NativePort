@@ -126,7 +126,7 @@ void Battle_CheckRewardUnlocks(void)
 // decomp: BATTLE.PRG func_8007B63C (src/BATTLE/BATTLE.PRG/146C.c:8346)
 void Battle_ShowPendingRewardUnlock(void)
 {
-    u_int temp_v0_2;
+    u_int pending_unlocks;
 
     if ((Battle_actionState->selection.actionId != 0)
         && !((Battle_actionDefinitions[Battle_actionState->selection.actionId].unlocked))
@@ -138,10 +138,10 @@ void Battle_ShowPendingRewardUnlock(void)
         Battle_actionDefinitions[Battle_actionState->selection.actionId].unlocked = 1;
         return;
     }
-    temp_v0_2 = Battle_PendingBattleAbilityUnlocks();
+    pending_unlocks = Battle_PendingBattleAbilityUnlocks();
     Battle_actionFlowMode = 6;
     Battle_BeginRewardPause();
-    Menu_Framework_OpenAbilityUnlockMenu(temp_v0_2 >> 0x10, temp_v0_2 & 0xFFFF);
+    Menu_Framework_OpenAbilityUnlockMenu(pending_unlocks >> 0x10, pending_unlocks & 0xFFFF);
 }
 
 // decomp: BATTLE.PRG func_8007B764 (src/BATTLE/BATTLE.PRG/146C.c:8366)

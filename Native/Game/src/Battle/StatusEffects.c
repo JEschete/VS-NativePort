@@ -64,21 +64,21 @@ Battle_StatusEffectParams Battle_statusEffectParams[32]; /* contents: module ima
 void Battle_PreserveAshleyStatuses(void) { Battle_RemoveActorStatuses(0, Battle_characterState->stats); }
 
 // decomp: BATTLE.PRG _setApplicableStatuses (src/BATTLE/BATTLE.PRG/146C.c:11195)
-int Battle_QueueApplicableStatusChanges(int arg0, Battle_HitResult* entity)
+int Battle_QueueApplicableStatusChanges(int status_id, Battle_HitResult* entity)
 {
     int inflict = 0;
     int remove = 0;
-    Battle_StatusEffectParams* params = &Battle_statusEffectParams[arg0];
-    Battle_ActorStats* temp_a2 = Battle_actors[entity->target.targetActor]->stats;
+    Battle_StatusEffectParams* params = &Battle_statusEffectParams[status_id];
+    Battle_ActorStats* target_stats = Battle_actors[entity->target.targetActor]->stats;
 
-    if (temp_a2->actorId != 128) {
+    if (target_stats->actorId != 128) {
 
-        int temp_t0 = temp_a2->statuses;
+        int current_statuses = target_stats->statuses;
 
-        if (!(temp_t0 & params->blockingStatuses)) {
-            remove = params->statusFlags & ~temp_a2->statusImmunities & (~temp_t0 | params->cancelledStatuses);
+        if (!(current_statuses & params->blockingStatuses)) {
+            remove = params->statusFlags & ~target_stats->statusImmunities & (~current_statuses | params->cancelledStatuses);
             entity->removeStatuses |= remove;
-            inflict = params->cancelledStatuses & temp_a2->statuses;
+            inflict = params->cancelledStatuses & target_stats->statuses;
             entity->inflictStatuses |= inflict;
         }
     }
@@ -87,10 +87,10 @@ int Battle_QueueApplicableStatusChanges(int arg0, Battle_HitResult* entity)
 }
 
 // decomp: BATTLE.PRG _setInflictedStatuses (src/BATTLE/BATTLE.PRG/146C.c:11217)
-int Battle_QueueStatusRemovalMask(int arg0, Battle_HitResult* entity)
+int Battle_QueueStatusRemovalMask(int status_id, Battle_HitResult* entity)
 {
     int ret = 0;
-    Battle_StatusEffectParams* params = &Battle_statusEffectParams[arg0];
+    Battle_StatusEffectParams* params = &Battle_statusEffectParams[status_id];
 
     if (Battle_actors[entity->target.targetActor]->stats->actorId != 128) {
         ret = params->statusFlags & Battle_actors[entity->target.targetActor]->stats->statuses;
@@ -101,428 +101,428 @@ int Battle_QueueStatusRemovalMask(int arg0, Battle_HitResult* entity)
 }
 
 // decomp: BATTLE.PRG func_80083998 (src/BATTLE/BATTLE.PRG/146C.c:12273)
-int Battle_QueueStrengthDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueStrengthDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(5, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(5, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_800839E8 (src/BATTLE/BATTLE.PRG/146C.c:12282)
-int Battle_QueueIntelligenceDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueIntelligenceDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(7, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(7, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083A38 (src/BATTLE/BATTLE.PRG/146C.c:12291)
-int Battle_QueueAgilityDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueAgilityDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(9, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(9, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083A88 (src/BATTLE/BATTLE.PRG/146C.c:12300)
-int Battle_QueueEquipmentDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueEquipmentDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(19, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(19, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083AD8 (src/BATTLE/BATTLE.PRG/146C.c:12309)
-int Battle_QueueHalfMovement(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueHalfMovement(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(4, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(4, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083B28 (src/BATTLE/BATTLE.PRG/146C.c:12318)
-int Battle_QueueStrengthUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueStrengthUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(6, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueApplicableStatusChanges(6, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80083B78 (src/BATTLE/BATTLE.PRG/146C.c:12327)
-int Battle_QueueIntelligenceUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueIntelligenceUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(8, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueApplicableStatusChanges(8, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80083BC8 (src/BATTLE/BATTLE.PRG/146C.c:12336)
-int Battle_QueueAgilityUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueAgilityUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(10, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueApplicableStatusChanges(10, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80083C18 (src/BATTLE/BATTLE.PRG/146C.c:12345)
-int Battle_QueueEquipmentUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueEquipmentUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(20, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueApplicableStatusChanges(20, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80083C68 (src/BATTLE/BATTLE.PRG/146C.c:12354)
-int Battle_QueueQuicken(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueQuicken(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(11, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueApplicableStatusChanges(11, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80083CB8 (src/BATTLE/BATTLE.PRG/146C.c:12363)
-int Battle_QueueSilence(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueSilence(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(12, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(12, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083D08 (src/BATTLE/BATTLE.PRG/146C.c:12372)
-int Battle_QueueMagicWard(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)))
+int Battle_QueueMagicWard(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x12, arg2);
+    Battle_QueueApplicableStatusChanges(0x12, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083D2C (src/BATTLE/BATTLE.PRG/146C.c:12380)
-int Battle_QueueRegeneration(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueRegeneration(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(17, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueApplicableStatusChanges(17, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80083D7C (src/BATTLE/BATTLE.PRG/146C.c:12389)
-int Battle_QueueBanish(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4)
+int Battle_QueueBanish(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action)
 {
-    Battle_QueueApplicableStatusChanges(0x1D, arg2);
-    if (arg4 != 0) {
-        Battle_actors[arg2->target.targetActor]->stats->isAnalyzed = 1;
+    Battle_QueueApplicableStatusChanges(0x1D, target_hit);
+    if (execute_action != 0) {
+        Battle_actors[target_hit->target.targetActor]->stats->isAnalyzed = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083DEC (src/BATTLE/BATTLE.PRG/146C.c:12399)
-int Battle_QueueParalysis(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueParalysis(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(13, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(13, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083E3C (src/BATTLE/BATTLE.PRG/146C.c:12408)
-int Battle_QueuePoison(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueuePoison(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(14, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(14, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083E8C (src/BATTLE/BATTLE.PRG/146C.c:12417)
-int Battle_QueueNumbness(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueNumbness(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(15, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(15, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083EDC (src/BATTLE/BATTLE.PRG/146C.c:12426)
-int Battle_QueueCurse(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueCurse(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueApplicableStatusChanges(16, arg2) != 0) {
-        arg2->statStatusEffect = 1;
+    if (Battle_QueueApplicableStatusChanges(16, target_hit) != 0) {
+        target_hit->statStatusEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80083F2C (src/BATTLE/BATTLE.PRG/146C.c:12435)
-int Battle_QueueAirAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueAirAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x15, arg2);
+    Battle_QueueApplicableStatusChanges(0x15, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083F50 (src/BATTLE/BATTLE.PRG/146C.c:12442)
-int Battle_QueueFireAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueFireAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x16, arg2);
+    Battle_QueueApplicableStatusChanges(0x16, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083F74 (src/BATTLE/BATTLE.PRG/146C.c:12449)
-int Battle_QueueEarthAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueEarthAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x17, arg2);
+    Battle_QueueApplicableStatusChanges(0x17, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083F98 (src/BATTLE/BATTLE.PRG/146C.c:12456)
-int Battle_QueueWaterAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueWaterAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x18, arg2);
+    Battle_QueueApplicableStatusChanges(0x18, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083FBC (src/BATTLE/BATTLE.PRG/146C.c:12463)
-int Battle_QueueAirDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueAirDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x19, arg2);
+    Battle_QueueApplicableStatusChanges(0x19, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80083FE0 (src/BATTLE/BATTLE.PRG/146C.c:12470)
-int Battle_QueueFireDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueFireDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x1A, arg2);
+    Battle_QueueApplicableStatusChanges(0x1A, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80084004 (src/BATTLE/BATTLE.PRG/146C.c:12477)
-int Battle_QueueEarthDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueEarthDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x1B, arg2);
+    Battle_QueueApplicableStatusChanges(0x1B, target_hit);
 }
 
 // decomp: BATTLE.PRG func_80084028 (src/BATTLE/BATTLE.PRG/146C.c:12484)
-int Battle_QueueWaterDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueWaterDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_QueueApplicableStatusChanges(0x1C, arg2);
+    Battle_QueueApplicableStatusChanges(0x1C, target_hit);
 }
 
 // decomp: BATTLE.PRG func_8008404C (src/BATTLE/BATTLE.PRG/146C.c:12491)
-int Battle_QueueParalysisCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueParalysisCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0xD, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueStatusRemovalMask(0xD, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_8008409C (src/BATTLE/BATTLE.PRG/146C.c:12500)
-int Battle_QueuePoisonCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueuePoisonCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0xE, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueStatusRemovalMask(0xE, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_800840EC (src/BATTLE/BATTLE.PRG/146C.c:12509)
-int Battle_QueueCurseCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueCurseCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0x10, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueStatusRemovalMask(0x10, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_8008413C (src/BATTLE/BATTLE.PRG/146C.c:12518)
-int Battle_QueueNumbnessCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueNumbnessCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_QueueStatusRemovalMask(0xF, arg2) != 0) {
-        arg2->statStatusEffect = 2;
+    if (Battle_QueueStatusRemovalMask(0xF, target_hit) != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_8008418C (src/BATTLE/BATTLE.PRG/146C.c:12527)
-int Battle_QueueDispel(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueDispel(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    arg2->inflictStatuses |=
-        (Battle_actors[arg2->target.targetActor]->stats->statuses & 0x1FFE1FE0);
+    target_hit->inflictStatuses |=
+        (Battle_actors[target_hit->target.targetActor]->stats->statuses & 0x1FFE1FE0);
 }
 
 // decomp: BATTLE.PRG func_800841C8 (src/BATTLE/BATTLE.PRG/146C.c:12535)
-int Battle_QueueNegativeStatusCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_QueueNegativeStatusCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int temp_v1 = Battle_actors[arg2->target.targetActor]->stats->statuses & 0xE000;
-    arg2->inflictStatuses |= temp_v1;
+    int negative_status_mask = Battle_actors[target_hit->target.targetActor]->stats->statuses & 0xE000;
+    target_hit->inflictStatuses |= negative_status_mask;
 
-    if (temp_v1 != 0) {
-        arg2->statStatusEffect = 2;
+    if (negative_status_mask != 0) {
+        target_hit->statStatusEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80086754 (src/BATTLE/BATTLE.PRG/146C.c:13532)
-void Battle_RemoveActorStatuses(int arg0, Battle_ActorStats* arg1)
+void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
 {
     int i;
     int statDecrease;
     int statIncrease;
-    u_int temp_v1_2;
+    u_int element_status_mask;
 
-    arg1->statuses &= ~arg0;
+    actor_stats->statuses &= ~status_mask;
 
-    if (arg0 & 0x7E0) {
-        if (!(arg1->statuses & 0x7E0)) {
-            arg1->statusTimers[0] = 0;
+    if (status_mask & 0x7E0) {
+        if (!(actor_stats->statuses & 0x7E0)) {
+            actor_stats->statusTimers[0] = 0;
         }
     }
 
-    if (arg0 & 0x810) {
-        if (!(arg1->statuses & 0x810)) {
-            arg1->statusTimers[1] = 0;
+    if (status_mask & 0x810) {
+        if (!(actor_stats->statuses & 0x810)) {
+            actor_stats->statusTimers[1] = 0;
         }
     }
 
-    if (arg0 & 0x1FF80000) {
-        if (!(arg1->statuses & 0x1FF80000)) {
-            arg1->statusTimers[2] = 0;
+    if (status_mask & 0x1FF80000) {
+        if (!(actor_stats->statuses & 0x1FF80000)) {
+            actor_stats->statusTimers[2] = 0;
         }
     }
 
-    if (arg0 & 0x2000) {
-        if (!(arg1->statuses & 0x2000)) {
-            arg1->statusTimers[3] = 0;
+    if (status_mask & 0x2000) {
+        if (!(actor_stats->statuses & 0x2000)) {
+            actor_stats->statusTimers[3] = 0;
         }
     }
 
-    if (arg0 & 0x8000) {
-        if (!(arg1->statuses & 0x8000)) {
-            arg1->statusTimers[4] = 0;
+    if (status_mask & 0x8000) {
+        if (!(actor_stats->statuses & 0x8000)) {
+            actor_stats->statusTimers[4] = 0;
         }
     }
 
-    if (arg0 & 0x24000) {
-        if (!(arg1->statuses & 0x24000)) {
-            arg1->statusTimers[5] = 0;
+    if (status_mask & 0x24000) {
+        if (!(actor_stats->statuses & 0x24000)) {
+            actor_stats->statusTimers[5] = 0;
         }
     }
 
-    if (arg0 & 0x60) {
-        arg1->strength = arg1->totalStrength;
+    if (status_mask & 0x60) {
+        actor_stats->strength = actor_stats->totalStrength;
     }
 
-    if (arg0 & 0x180) {
-        arg1->intelligence = arg1->totalIntelligence;
+    if (status_mask & 0x180) {
+        actor_stats->intelligence = actor_stats->totalIntelligence;
     }
 
-    if (arg0 & 0x600) {
-        arg1->agility = arg1->totalAgility;
+    if (status_mask & 0x600) {
+        actor_stats->agility = actor_stats->totalAgility;
     }
 
-    if (arg0 & 0x10000) {
-        arg1->strength = arg1->totalStrength;
-        arg1->intelligence = arg1->totalIntelligence;
-        arg1->agility = arg1->totalAgility;
+    if (status_mask & 0x10000) {
+        actor_stats->strength = actor_stats->totalStrength;
+        actor_stats->intelligence = actor_stats->totalIntelligence;
+        actor_stats->agility = actor_stats->totalAgility;
     }
 
-    if (arg0 & 0x8010) {
-        if (arg0 & 0x10) {
+    if (status_mask & 0x8010) {
+        if (status_mask & 0x10) {
 
-            if ((arg1->mobilityLimb0 != 0) && (arg1->limbs[arg1->mobilityLimb0].maxHp != 0)
-                && (arg1->limbs[arg1->mobilityLimb0].hp < 2)) {
-                arg1->limbs[arg1->mobilityLimb0].hp = 2;
+            if ((actor_stats->mobilityLimb0 != 0) && (actor_stats->limbs[actor_stats->mobilityLimb0].maxHp != 0)
+                && (actor_stats->limbs[actor_stats->mobilityLimb0].hp < 2)) {
+                actor_stats->limbs[actor_stats->mobilityLimb0].hp = 2;
             }
 
-            if ((arg1->mobilityLimb1 != 0) && (arg1->limbs[arg1->mobilityLimb1].maxHp != 0)
-                && (arg1->limbs[arg1->mobilityLimb1].hp < 2)) {
-                arg1->limbs[arg1->mobilityLimb1].hp = 2;
+            if ((actor_stats->mobilityLimb1 != 0) && (actor_stats->limbs[actor_stats->mobilityLimb1].maxHp != 0)
+                && (actor_stats->limbs[actor_stats->mobilityLimb1].hp < 2)) {
+                actor_stats->limbs[actor_stats->mobilityLimb1].hp = 2;
             }
         }
 
-        if (!(arg1->statuses & 0x10)) {
-            arg1->walkSpeed = arg1->baseWalkSpeed;
-            arg1->runSpeed = arg1->baseRunSpeed;
+        if (!(actor_stats->statuses & 0x10)) {
+            actor_stats->walkSpeed = actor_stats->baseWalkSpeed;
+            actor_stats->runSpeed = actor_stats->baseRunSpeed;
         }
 
-        Battle_Ai_SetActorVerticalMovementSteps(arg1->actorId, arg1->walkSpeed, arg1->runSpeed);
+        Battle_Ai_SetActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
     }
 
-    if ((arg0 & 0x800) && !(arg1->statuses & 0x8010)) {
+    if ((status_mask & 0x800) && !(actor_stats->statuses & 0x8010)) {
 
-        arg1->walkSpeed = arg1->baseWalkSpeed;
-        arg1->runSpeed = arg1->baseRunSpeed;
+        actor_stats->walkSpeed = actor_stats->baseWalkSpeed;
+        actor_stats->runSpeed = actor_stats->baseRunSpeed;
 
-        Battle_Ai_SetActorVerticalMovementSteps(arg1->actorId, arg1->walkSpeed, arg1->runSpeed);
+        Battle_Ai_SetActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
     }
 
-    if (arg0 & 0x180000) {
-        if (arg1->weapon.blade.id != 0) {
-            arg1->weapon.currentStr = arg1->weapon.baseStr;
-            arg1->weapon.currentInt = arg1->weapon.baseInt;
+    if (status_mask & 0x180000) {
+        if (actor_stats->weapon.blade.id != 0) {
+            actor_stats->weapon.currentStr = actor_stats->weapon.baseStr;
+            actor_stats->weapon.currentInt = actor_stats->weapon.baseInt;
         }
 
-        if (arg1->shield.base.id != 0) {
-            arg1->shield.currentStr = arg1->shield.baseStr;
-            arg1->shield.currentInt = arg1->shield.baseInt;
+        if (actor_stats->shield.base.id != 0) {
+            actor_stats->shield.currentStr = actor_stats->shield.baseStr;
+            actor_stats->shield.currentInt = actor_stats->shield.baseInt;
         }
 
         for (i = 0; i < 6; ++i) {
-            if (arg1->limbs[i].armor.armor.id != 0) {
-                arg1->limbs[i].armor.currentStr = arg1->limbs[i].armor.baseStr;
-                arg1->limbs[i].armor.currentInt = arg1->limbs[i].armor.baseInt;
+            if (actor_stats->limbs[i].armor.armor.id != 0) {
+                actor_stats->limbs[i].armor.currentStr = actor_stats->limbs[i].armor.baseStr;
+                actor_stats->limbs[i].armor.currentInt = actor_stats->limbs[i].armor.baseInt;
             }
         }
     }
 
-    temp_v1_2 = arg0 & 0x01E00000;
+    element_status_mask = status_mask & 0x01E00000;
 
-    if (temp_v1_2 != 0) {
-        switch (temp_v1_2) {
+    if (element_status_mask != 0) {
+        switch (element_status_mask) {
         case 0x200000:
             statIncrease = 1;
             statDecrease = 3;
@@ -550,41 +550,41 @@ void Battle_RemoveActorStatuses(int arg0, Battle_ActorStats* arg1)
         }
 
         if (statIncrease != 7) {
-            if (arg1->weapon.blade.id != 0) {
+            if (actor_stats->weapon.blade.id != 0) {
 
-                if ((arg1->weapon.blade.affinities[statIncrease] < 50)
+                if ((actor_stats->weapon.blade.affinities[statIncrease] < 50)
                     && (Core_Random_NextBounded(8) == 0)) {
 
-                    ++arg1->weapon.blade.affinities[statIncrease];
+                    ++actor_stats->weapon.blade.affinities[statIncrease];
 
-                    if (arg1->actorId == 0) {
+                    if (actor_stats->actorId == 0) {
                         ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(240, statIncrease + 6, 1);
                     }
                 }
 
-                if ((arg1->weapon.blade.affinities[statDecrease] > -100)
+                if ((actor_stats->weapon.blade.affinities[statDecrease] > -100)
                     && (Core_Random_NextBounded(16) == 0)) {
 
-                    --arg1->weapon.blade.affinities[statDecrease];
+                    --actor_stats->weapon.blade.affinities[statDecrease];
 
-                    if (arg1->actorId == 0) {
+                    if (actor_stats->actorId == 0) {
                         ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(240, statDecrease + 6, 0x80000001);
                     }
                 }
             }
 
-            arg1->weapon.affinityModifiers[statIncrease] = 0;
-            arg1->weapon.affinityModifiers[statDecrease] = 0;
+            actor_stats->weapon.affinityModifiers[statIncrease] = 0;
+            actor_stats->weapon.affinityModifiers[statDecrease] = 0;
 
-            Items_RebuildWeaponClassAffinity(arg1);
+            Items_RebuildWeaponClassAffinity(actor_stats);
         }
     }
 
-    temp_v1_2 = arg0 & 0x1E000000;
+    element_status_mask = status_mask & 0x1E000000;
 
-    if (temp_v1_2 != 0) {
+    if (element_status_mask != 0) {
 
-        switch (temp_v1_2) {
+        switch (element_status_mask) {
         case 0x2000000:
             statIncrease = 1;
             statDecrease = 3;
@@ -612,63 +612,63 @@ void Battle_RemoveActorStatuses(int arg0, Battle_ActorStats* arg1)
         }
 
         if (statIncrease != 7) {
-            if (arg1->shield.base.id != 0) {
+            if (actor_stats->shield.base.id != 0) {
 
-                if ((arg1->shield.base.affinities[statIncrease] < 50)
+                if ((actor_stats->shield.base.affinities[statIncrease] < 50)
                     && (Core_Random_NextBounded(8) == 0)) {
 
-                    ++arg1->shield.base.affinities[statIncrease];
+                    ++actor_stats->shield.base.affinities[statIncrease];
 
-                    if (arg1->actorId == 0) {
+                    if (actor_stats->actorId == 0) {
                         ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(241, statIncrease + 6, 1);
                     }
                 }
 
-                if ((arg1->shield.base.affinities[statDecrease] > -100)
+                if ((actor_stats->shield.base.affinities[statDecrease] > -100)
                     && (Core_Random_NextBounded(0x10) == 0)) {
 
-                    --arg1->shield.base.affinities[statDecrease];
+                    --actor_stats->shield.base.affinities[statDecrease];
 
-                    if (arg1->actorId == 0) {
+                    if (actor_stats->actorId == 0) {
                         ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(241, statDecrease + 6, 0x80000001);
                     }
                 }
             }
 
-            arg1->shield.affinityModifiers[statIncrease] = 0;
-            arg1->shield.affinityModifiers[statDecrease] = 0;
+            actor_stats->shield.affinityModifiers[statIncrease] = 0;
+            actor_stats->shield.affinityModifiers[statDecrease] = 0;
 
-            Items_RebuildShieldClassAffinity(arg1);
+            Items_RebuildShieldClassAffinity(actor_stats);
 
             for (i = 0; i < 6; ++i) {
-                if (arg1->limbs[i].armor.armor.id != 0) {
+                if (actor_stats->limbs[i].armor.armor.id != 0) {
 
-                    if ((arg1->limbs[i].armor.armor.affinities[statIncrease] < 50)
+                    if ((actor_stats->limbs[i].armor.armor.affinities[statIncrease] < 50)
                         && (Core_Random_NextBounded(8) == 0)) {
 
-                        ++arg1->limbs[i].armor.armor.affinities[statIncrease];
+                        ++actor_stats->limbs[i].armor.armor.affinities[statIncrease];
 
-                        if (arg1->actorId == 0) {
-                            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg1->limbs[i].nameIndex, statIncrease + 6, 1);
+                        if (actor_stats->actorId == 0) {
+                            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(actor_stats->limbs[i].nameIndex, statIncrease + 6, 1);
                         }
                     }
 
-                    if ((arg1->limbs[i].armor.armor.affinities[statDecrease] > -100)
+                    if ((actor_stats->limbs[i].armor.armor.affinities[statDecrease] > -100)
                         && (Core_Random_NextBounded(16) == 0)) {
 
-                        --arg1->limbs[i].armor.armor.affinities[statDecrease];
+                        --actor_stats->limbs[i].armor.armor.affinities[statDecrease];
 
-                        if (arg1->actorId == 0) {
+                        if (actor_stats->actorId == 0) {
                             ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(
-                                arg1->limbs[i].nameIndex, statDecrease + 6, 0x80000001);
+                                actor_stats->limbs[i].nameIndex, statDecrease + 6, 0x80000001);
                         }
                     }
                 }
 
-                arg1->limbs[i].armor.affinityModifiers[statIncrease] = 0;
-                arg1->limbs[i].armor.affinityModifiers[statDecrease] = 0;
+                actor_stats->limbs[i].armor.affinityModifiers[statIncrease] = 0;
+                actor_stats->limbs[i].armor.affinityModifiers[statDecrease] = 0;
 
-                Items_RebuildArmorClassAffinity(arg1, i);
+                Items_RebuildArmorClassAffinity(actor_stats, i);
             }
         }
 
@@ -677,228 +677,228 @@ void Battle_RemoveActorStatuses(int arg0, Battle_ActorStats* arg1)
 }
 
 // decomp: BATTLE.PRG func_80086EA4 (src/BATTLE/BATTLE.PRG/146C.c:13801)
-void Battle_ApplyWeaponElementEnchantment(Battle_ActorStats* arg0, int arg1, int arg2, int arg3)
+void Battle_ApplyWeaponElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount)
 {
-    if (arg0->weapon.blade.id != 0) {
-        arg0->weapon.classAffinityCurrent.affinities[0][arg1] += arg3;
-        arg0->weapon.classAffinityCurrent.affinities[0][arg2] -= arg3;
-        arg0->weapon.affinityModifiers[arg1] = arg3;
-        arg0->weapon.affinityModifiers[arg2] = -arg3;
+    if (actor_stats->weapon.blade.id != 0) {
+        actor_stats->weapon.classAffinityCurrent.affinities[0][increased_affinity] += modifier_amount;
+        actor_stats->weapon.classAffinityCurrent.affinities[0][decreased_affinity] -= modifier_amount;
+        actor_stats->weapon.affinityModifiers[increased_affinity] = modifier_amount;
+        actor_stats->weapon.affinityModifiers[decreased_affinity] = -modifier_amount;
     }
 }
 
 // decomp: BATTLE.PRG func_80086EF4 (src/BATTLE/BATTLE.PRG/146C.c:13811)
-void Battle_ApplyArmorElementEnchantment(Battle_ActorStats* arg0, int arg1, int arg2, int arg3)
+void Battle_ApplyArmorElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount)
 {
     int i;
 
-    if (arg0->shield.base.id != 0) {
-        arg0->shield.classAffinityCurrent.affinities[0][arg1] += arg3;
-        arg0->shield.classAffinityCurrent.affinities[0][arg2] -= arg3;
-        arg0->shield.affinityModifiers[arg1] = arg3;
-        arg0->shield.affinityModifiers[arg2] = -arg3;
+    if (actor_stats->shield.base.id != 0) {
+        actor_stats->shield.classAffinityCurrent.affinities[0][increased_affinity] += modifier_amount;
+        actor_stats->shield.classAffinityCurrent.affinities[0][decreased_affinity] -= modifier_amount;
+        actor_stats->shield.affinityModifiers[increased_affinity] = modifier_amount;
+        actor_stats->shield.affinityModifiers[decreased_affinity] = -modifier_amount;
     }
 
     for (i = 0; i < 6; ++i) {
-        if (arg0->limbs[i].armor.armor.id != 0) {
-            arg0->limbs[i].armor.classAffinityCurrent.affinities[0][arg1] += arg3;
-            arg0->limbs[i].armor.classAffinityCurrent.affinities[0][arg2] -= arg3;
-            arg0->limbs[i].armor.affinityModifiers[arg1] = arg3;
-            arg0->limbs[i].armor.affinityModifiers[arg2] = -arg3;
+        if (actor_stats->limbs[i].armor.armor.id != 0) {
+            actor_stats->limbs[i].armor.classAffinityCurrent.affinities[0][increased_affinity] += modifier_amount;
+            actor_stats->limbs[i].armor.classAffinityCurrent.affinities[0][decreased_affinity] -= modifier_amount;
+            actor_stats->limbs[i].armor.affinityModifiers[increased_affinity] = modifier_amount;
+            actor_stats->limbs[i].armor.affinityModifiers[decreased_affinity] = -modifier_amount;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80086FA8 (src/BATTLE/BATTLE.PRG/146C.c:13832)
-void Battle_InflictActorStatuses(int arg0, Battle_ActorStats* arg1)
+void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
 {
     int i;
-    int var_a3;
-    u_int temp_a0;
+    int equipment_modifier_amount;
+    u_int element_status_mask;
 
-    arg1->statuses |= arg0;
+    actor_stats->statuses |= status_mask;
 
-    if (arg0 & 0x7E0) {
-        arg1->statusTimers[0] = Battle_statusParams5Duration;
+    if (status_mask & 0x7E0) {
+        actor_stats->statusTimers[0] = Battle_statusParams5Duration;
     }
 
-    if (arg0 & 0x810) {
-        arg1->statusTimers[1] = Battle_statusParams11Duration;
+    if (status_mask & 0x810) {
+        actor_stats->statusTimers[1] = Battle_statusParams11Duration;
     }
 
-    if (arg0 & 0x1FF80000) {
-        arg1->statusTimers[2] = Battle_statusParams19Duration;
+    if (status_mask & 0x1FF80000) {
+        actor_stats->statusTimers[2] = Battle_statusParams19Duration;
     }
 
-    if (arg0 & 0x2000) {
-        arg1->statusTimers[3] = Battle_statusParams13Duration;
+    if (status_mask & 0x2000) {
+        actor_stats->statusTimers[3] = Battle_statusParams13Duration;
     }
 
-    if (arg0 & 0x8000) {
-        arg1->statusTimers[4] = Battle_statusParams13Duration;
+    if (status_mask & 0x8000) {
+        actor_stats->statusTimers[4] = Battle_statusParams13Duration;
     }
 
-    if (arg0 & 0x4000) {
-        arg1->statusTimers[5] = Battle_statusParams14TickInterval;
-    } else if (arg0 & 0x20000) {
-        arg1->statusTimers[5] = Battle_statusParams17TickInterval;
+    if (status_mask & 0x4000) {
+        actor_stats->statusTimers[5] = Battle_statusParams14TickInterval;
+    } else if (status_mask & 0x20000) {
+        actor_stats->statusTimers[5] = Battle_statusParams17TickInterval;
     }
 
-    if (arg0 & 0x20) {
-        arg1->strength = arg1->totalStrength - (arg1->totalStrength / 10);
+    if (status_mask & 0x20) {
+        actor_stats->strength = actor_stats->totalStrength - (actor_stats->totalStrength / 10);
     }
 
-    if (arg0 & 0x40) {
-        arg1->strength = arg1->totalStrength + (arg1->totalStrength / 10);
+    if (status_mask & 0x40) {
+        actor_stats->strength = actor_stats->totalStrength + (actor_stats->totalStrength / 10);
     }
 
-    if (arg0 & 0x80) {
-        arg1->intelligence = arg1->totalIntelligence - (arg1->totalIntelligence / 10);
+    if (status_mask & 0x80) {
+        actor_stats->intelligence = actor_stats->totalIntelligence - (actor_stats->totalIntelligence / 10);
     }
 
-    if (arg0 & 0x100) {
-        arg1->intelligence = arg1->totalIntelligence + (arg1->totalIntelligence / 10);
+    if (status_mask & 0x100) {
+        actor_stats->intelligence = actor_stats->totalIntelligence + (actor_stats->totalIntelligence / 10);
     }
 
-    if (arg0 & 0x200) {
-        arg1->agility = arg1->totalAgility - (arg1->totalAgility / 10);
+    if (status_mask & 0x200) {
+        actor_stats->agility = actor_stats->totalAgility - (actor_stats->totalAgility / 10);
     }
-    if (arg0 & 0x400) {
-        arg1->agility = arg1->totalAgility + (arg1->totalAgility / 10);
-    }
-
-    if (arg0 & 0x10000) {
-        arg1->strength = arg1->totalStrength - (arg1->totalStrength / 10);
-        arg1->intelligence = arg1->totalIntelligence - (arg1->totalIntelligence / 10);
-        arg1->agility = arg1->totalAgility - (arg1->totalAgility / 10);
+    if (status_mask & 0x400) {
+        actor_stats->agility = actor_stats->totalAgility + (actor_stats->totalAgility / 10);
     }
 
-    if (arg0 & 0x8810) {
+    if (status_mask & 0x10000) {
+        actor_stats->strength = actor_stats->totalStrength - (actor_stats->totalStrength / 10);
+        actor_stats->intelligence = actor_stats->totalIntelligence - (actor_stats->totalIntelligence / 10);
+        actor_stats->agility = actor_stats->totalAgility - (actor_stats->totalAgility / 10);
+    }
 
-        if (arg1->statuses & 0x8010) {
-            arg1->walkSpeed = (arg1->baseWalkSpeed >> 1);
-            arg1->runSpeed = arg1->baseRunSpeed >> 1;
-        } else if (arg1->statuses & 0x800) {
-            arg1->walkSpeed = arg1->baseWalkSpeed + (arg1->baseWalkSpeed >> 2);
-            arg1->runSpeed = arg1->baseRunSpeed + (arg1->baseRunSpeed >> 2);
+    if (status_mask & 0x8810) {
+
+        if (actor_stats->statuses & 0x8010) {
+            actor_stats->walkSpeed = (actor_stats->baseWalkSpeed >> 1);
+            actor_stats->runSpeed = actor_stats->baseRunSpeed >> 1;
+        } else if (actor_stats->statuses & 0x800) {
+            actor_stats->walkSpeed = actor_stats->baseWalkSpeed + (actor_stats->baseWalkSpeed >> 2);
+            actor_stats->runSpeed = actor_stats->baseRunSpeed + (actor_stats->baseRunSpeed >> 2);
         }
 
-        Battle_Ai_SetActorVerticalMovementSteps(arg1->actorId, arg1->walkSpeed, arg1->runSpeed);
+        Battle_Ai_SetActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
     }
 
-    if (arg0 & 0x80000) {
+    if (status_mask & 0x80000) {
 
-        var_a3 = ((arg1->intelligence + arg1->weapon.currentInt) * 7) / 100;
+        equipment_modifier_amount = ((actor_stats->intelligence + actor_stats->weapon.currentInt) * 7) / 100;
 
-        if (var_a3 < 0) {
-            var_a3 = 0;
+        if (equipment_modifier_amount < 0) {
+            equipment_modifier_amount = 0;
         }
 
-        if (arg1->weapon.blade.id != 0) {
-            arg1->weapon.currentStr -= var_a3;
+        if (actor_stats->weapon.blade.id != 0) {
+            actor_stats->weapon.currentStr -= equipment_modifier_amount;
         }
 
-        if (arg1->shield.base.id != 0) {
-            arg1->shield.currentStr -= var_a3;
+        if (actor_stats->shield.base.id != 0) {
+            actor_stats->shield.currentStr -= equipment_modifier_amount;
         }
 
         for (i = 0; i < 6; ++i) {
-            if (arg1->limbs[i].armor.armor.id != 0) {
-                arg1->limbs[i].armor.currentStr -= var_a3;
+            if (actor_stats->limbs[i].armor.armor.id != 0) {
+                actor_stats->limbs[i].armor.currentStr -= equipment_modifier_amount;
             }
         }
     }
 
-    if (arg0 & 0x100000) {
+    if (status_mask & 0x100000) {
 
-        var_a3 = ((arg1->intelligence + arg1->weapon.currentInt) * 7) / 100;
+        equipment_modifier_amount = ((actor_stats->intelligence + actor_stats->weapon.currentInt) * 7) / 100;
 
-        if (var_a3 < 0) {
-            var_a3 = 0;
+        if (equipment_modifier_amount < 0) {
+            equipment_modifier_amount = 0;
         }
 
-        if (arg1->weapon.blade.id != 0) {
-            arg1->weapon.currentStr += var_a3;
+        if (actor_stats->weapon.blade.id != 0) {
+            actor_stats->weapon.currentStr += equipment_modifier_amount;
         }
 
-        if (arg1->shield.base.id != 0) {
-            arg1->shield.currentStr += var_a3;
+        if (actor_stats->shield.base.id != 0) {
+            actor_stats->shield.currentStr += equipment_modifier_amount;
         }
 
         for (i = 0; i < 6; ++i) {
-            if (arg1->limbs[i].armor.armor.id != 0) {
-                arg1->limbs[i].armor.currentStr += var_a3;
+            if (actor_stats->limbs[i].armor.armor.id != 0) {
+                actor_stats->limbs[i].armor.currentStr += equipment_modifier_amount;
             }
         }
     }
 
-    if (arg0 & 0x20000000) {
-        *(int*)&arg1->actionRecoveryTimer |= 0x20000;
+    if (status_mask & 0x20000000) {
+        *(int*)&actor_stats->actionRecoveryTimer |= 0x20000;
     }
 
-    temp_a0 = arg0 & 0x01E00000;
+    element_status_mask = status_mask & 0x01E00000;
 
-    if (temp_a0 != 0) {
+    if (element_status_mask != 0) {
 
-        var_a3 = (arg1->intelligence + arg1->weapon.currentInt) / 2;
+        equipment_modifier_amount = (actor_stats->intelligence + actor_stats->weapon.currentInt) / 2;
 
-        if (var_a3 < 0) {
-            var_a3 = 0;
+        if (equipment_modifier_amount < 0) {
+            equipment_modifier_amount = 0;
         }
 
-        switch (temp_a0) {
+        switch (element_status_mask) {
         case 0x200000:
-            Battle_ApplyWeaponElementEnchantment(arg1, 1, 3, var_a3);
+            Battle_ApplyWeaponElementEnchantment(actor_stats, 1, 3, equipment_modifier_amount);
             break;
         case 0x400000:
-            Battle_ApplyWeaponElementEnchantment(arg1, 2, 4, var_a3);
+            Battle_ApplyWeaponElementEnchantment(actor_stats, 2, 4, equipment_modifier_amount);
             break;
         case 0x800000:
-            Battle_ApplyWeaponElementEnchantment(arg1, 3, 1, var_a3);
+            Battle_ApplyWeaponElementEnchantment(actor_stats, 3, 1, equipment_modifier_amount);
             break;
         case 0x01000000:
-            Battle_ApplyWeaponElementEnchantment(arg1, 4, 2, var_a3);
+            Battle_ApplyWeaponElementEnchantment(actor_stats, 4, 2, equipment_modifier_amount);
             break;
         }
     }
 
-    temp_a0 = arg0 & 0x01E000000;
+    element_status_mask = status_mask & 0x01E000000;
 
-    if (temp_a0) {
+    if (element_status_mask) {
 
-        var_a3 = (arg1->intelligence + arg1->weapon.currentInt) / 2;
+        equipment_modifier_amount = (actor_stats->intelligence + actor_stats->weapon.currentInt) / 2;
 
-        if (var_a3 < 0) {
-            var_a3 = 0;
+        if (equipment_modifier_amount < 0) {
+            equipment_modifier_amount = 0;
         }
 
-        switch (temp_a0) {
+        switch (element_status_mask) {
         case 0x2000000:
-            Battle_ApplyArmorElementEnchantment(arg1, 1, 3, var_a3);
+            Battle_ApplyArmorElementEnchantment(actor_stats, 1, 3, equipment_modifier_amount);
             break;
         case 0x4000000:
-            Battle_ApplyArmorElementEnchantment(arg1, 2, 4, var_a3);
+            Battle_ApplyArmorElementEnchantment(actor_stats, 2, 4, equipment_modifier_amount);
             break;
         case 0x8000000:
-            Battle_ApplyArmorElementEnchantment(arg1, 3, 1, var_a3);
+            Battle_ApplyArmorElementEnchantment(actor_stats, 3, 1, equipment_modifier_amount);
             break;
         case 0x10000000:
-            Battle_ApplyArmorElementEnchantment(arg1, 4, 2, var_a3);
+            Battle_ApplyArmorElementEnchantment(actor_stats, 4, 2, equipment_modifier_amount);
             break;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80087578 (src/BATTLE/BATTLE.PRG/146C.c:14011)
-void Battle_QueueActorStatChangeNumber(int arg0, int arg1, int arg2, int arg3)
+void Battle_QueueActorStatChangeNumber(int actor_slot, int limb_tag, int encoded_amount, int label_flags)
 {
-    if ((Battle_actors[arg0]->roomSpawnIndex != 0x80) || (arg0 == 0)) {
-        ((void (*)(int arg0, int arg1, u_int arg2, int arg3))Battle_QueueActorValueLabel)(arg0, arg1, arg2, arg3);
+    if ((Battle_actors[actor_slot]->roomSpawnIndex != 0x80) || (actor_slot == 0)) {
+        ((void (*)(int actor_slot, int limb_tag, u_int encoded_amount, int label_flags))Battle_QueueActorValueLabel)(actor_slot, limb_tag, encoded_amount, label_flags);
     }
 }
 
 // decomp: BATTLE.PRG _applyBattleAbilityEffect (src/BATTLE/BATTLE.PRG/146C.c:14018)
-void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
+void Battle_ApplyActorActionResult(Battle_HitResult* hit_result)
 {
     int flag;
     u_int i;
@@ -907,19 +907,19 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     Battle_CommitEquipmentStatChanges();
 
-    targetActorId = arg0->target.targetActor;
+    targetActorId = hit_result->target.targetActor;
     actor = Battle_actors[targetActorId]->stats;
 
-    if (arg0->target.impactKind == 4) {
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, 0, 2);
+    if (hit_result->target.impactKind == 4) {
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, 0, 2);
     }
 
-    switch (arg0->hpEffect) {
+    switch (hit_result->hpEffect) {
     case 2:
 
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->target.hp, 0);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->target.hp, 0);
 
-        actor->currentHp += arg0->target.hp;
+        actor->currentHp += hit_result->target.hp;
 
         if (actor->maxHp < actor->currentHp) {
             actor->currentHp = actor->maxHp;
@@ -927,7 +927,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
         for (i = 0; i < 6; ++i) {
 
-            actor->limbs[i].hp += arg0->limbs[i].effects.opaque0;
+            actor->limbs[i].hp += hit_result->limbs[i].effects.opaque0;
 
             if (actor->limbs[i].maxHp < actor->limbs[i].hp) {
                 actor->limbs[i].hp = actor->limbs[i].maxHp;
@@ -940,22 +940,22 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
     case 1:
 
         Battle_QueueActorStatChangeNumber(
-            targetActorId, arg0->target.targetLimb, arg0->target.hp | 0x80000000, 0);
+            targetActorId, hit_result->target.targetLimb, hit_result->target.hp | 0x80000000, 0);
 
-        if (actor->currentHp > arg0->target.hp) {
-            actor->currentHp -= arg0->target.hp;
+        if (actor->currentHp > hit_result->target.hp) {
+            actor->currentHp -= hit_result->target.hp;
         } else {
             actor->currentHp = 0;
         }
 
         for (i = 0; i < 6; ++i) {
-            if (actor->limbs[i].hp > arg0->limbs[i].effects.opaque0) {
-                actor->limbs[i].hp -= arg0->limbs[i].effects.opaque0;
+            if (actor->limbs[i].hp > hit_result->limbs[i].effects.opaque0) {
+                actor->limbs[i].hp -= hit_result->limbs[i].effects.opaque0;
             } else {
                 actor->limbs[i].hp = 0;
             }
-            if (actor->limbs[i].armor.currentDp > arg0->limbs[i].effects.opaque2) {
-                actor->limbs[i].armor.currentDp -= arg0->limbs[i].effects.opaque2;
+            if (actor->limbs[i].armor.currentDp > hit_result->limbs[i].effects.opaque2) {
+                actor->limbs[i].armor.currentDp -= hit_result->limbs[i].effects.opaque2;
             } else {
                 actor->limbs[i].armor.currentDp = 0;
             }
@@ -964,11 +964,11 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->mpEffect) {
+    switch (hit_result->mpEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->target.mp, 1);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->target.mp, 1);
 
-        actor->currentMp += arg0->target.mp;
+        actor->currentMp += hit_result->target.mp;
 
         if (actor->maxMp < actor->currentMp) {
             actor->currentMp = actor->maxMp;
@@ -978,42 +978,42 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     case 1:
         Battle_QueueActorStatChangeNumber(
-            targetActorId, arg0->target.targetLimb, arg0->target.mp | 0x80000000, 1);
+            targetActorId, hit_result->target.targetLimb, hit_result->target.mp | 0x80000000, 1);
 
-        if (actor->currentMp > arg0->target.mp) {
-            actor->currentMp -= arg0->target.mp;
+        if (actor->currentMp > hit_result->target.mp) {
+            actor->currentMp -= hit_result->target.mp;
         } else {
             actor->currentMp = 0;
         }
         break;
     }
 
-    switch (arg0->riskEffect) {
+    switch (hit_result->riskEffect) {
     case 1:
         break;
 
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->riskChange | 0x80000000, 8);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->riskChange | 0x80000000, 8);
 
-        if (actor->risk > arg0->riskChange) {
-            actor->risk -= arg0->riskChange;
+        if (actor->risk > hit_result->riskChange) {
+            actor->risk -= hit_result->riskChange;
         } else {
             actor->risk = 0;
         }
         break;
     }
 
-    switch (arg0->strengthEffect) {
+    switch (hit_result->strengthEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->strengthChange, 5);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->strengthChange, 5);
 
-        actor->totalStrength += arg0->strengthChange;
+        actor->totalStrength += hit_result->strengthChange;
 
         if (actor->totalStrength > 999) {
             actor->totalStrength = 999;
         }
 
-        actor->strength += arg0->strengthChange;
+        actor->strength += hit_result->strengthChange;
 
         if (actor->strength > 999) {
             actor->strength = 999;
@@ -1023,16 +1023,16 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     case 1:
         Battle_QueueActorStatChangeNumber(
-            targetActorId, arg0->target.targetLimb, arg0->strengthChange | 0x80000000, 5);
+            targetActorId, hit_result->target.targetLimb, hit_result->strengthChange | 0x80000000, 5);
 
-        if (actor->totalStrength > arg0->strengthChange) {
-            actor->totalStrength -= arg0->strengthChange;
+        if (actor->totalStrength > hit_result->strengthChange) {
+            actor->totalStrength -= hit_result->strengthChange;
         } else {
             actor->totalStrength = 0;
         }
 
-        if (actor->strength > arg0->strengthChange) {
-            actor->strength -= arg0->strengthChange;
+        if (actor->strength > hit_result->strengthChange) {
+            actor->strength -= hit_result->strengthChange;
         } else {
             actor->strength = 0;
         }
@@ -1040,17 +1040,17 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->intelligenceEffect) {
+    switch (hit_result->intelligenceEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->intelligenceChange, 6);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->intelligenceChange, 6);
 
-        actor->totalIntelligence += arg0->intelligenceChange;
+        actor->totalIntelligence += hit_result->intelligenceChange;
 
         if (actor->totalIntelligence > 999) {
             actor->totalIntelligence = 999;
         }
 
-        actor->intelligence += arg0->intelligenceChange;
+        actor->intelligence += hit_result->intelligenceChange;
 
         if (actor->intelligence > 999) {
             actor->intelligence = 999;
@@ -1060,16 +1060,16 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     case 1:
         Battle_QueueActorStatChangeNumber(
-            targetActorId, arg0->target.targetLimb, arg0->intelligenceChange | 0x80000000, 6);
+            targetActorId, hit_result->target.targetLimb, hit_result->intelligenceChange | 0x80000000, 6);
 
-        if (actor->totalIntelligence > arg0->intelligenceChange) {
-            actor->totalIntelligence -= arg0->intelligenceChange;
+        if (actor->totalIntelligence > hit_result->intelligenceChange) {
+            actor->totalIntelligence -= hit_result->intelligenceChange;
         } else {
             actor->totalIntelligence = 0;
         }
 
-        if (actor->intelligence > arg0->intelligenceChange) {
-            actor->intelligence -= arg0->intelligenceChange;
+        if (actor->intelligence > hit_result->intelligenceChange) {
+            actor->intelligence -= hit_result->intelligenceChange;
         } else {
             actor->intelligence = 0;
         }
@@ -1077,17 +1077,17 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->agilityEffect) {
+    switch (hit_result->agilityEffect) {
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->agilityChange, 7);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->agilityChange, 7);
 
-        actor->totalAgility += arg0->agilityChange;
+        actor->totalAgility += hit_result->agilityChange;
 
         if (actor->totalAgility > 999) {
             actor->totalAgility = 999;
         }
 
-        actor->agility += arg0->agilityChange;
+        actor->agility += hit_result->agilityChange;
 
         if (actor->agility > 999) {
             actor->agility = 999;
@@ -1097,29 +1097,29 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     case 1:
         Battle_QueueActorStatChangeNumber(
-            targetActorId, arg0->target.targetLimb, arg0->agilityChange | 0x80000000, 7);
+            targetActorId, hit_result->target.targetLimb, hit_result->agilityChange | 0x80000000, 7);
 
-        if (actor->totalAgility > arg0->agilityChange) {
-            actor->totalAgility -= arg0->agilityChange;
+        if (actor->totalAgility > hit_result->agilityChange) {
+            actor->totalAgility -= hit_result->agilityChange;
         } else {
             actor->totalAgility = 0;
         }
 
-        if (actor->agility > arg0->agilityChange) {
-            actor->agility -= arg0->agilityChange;
+        if (actor->agility > hit_result->agilityChange) {
+            actor->agility -= hit_result->agilityChange;
         } else {
             actor->agility = 0;
         }
         break;
     }
 
-    switch (arg0->maxHpEffect) {
+    switch (hit_result->maxHpEffect) {
     case 1:
         break;
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->maxHpChange, 3);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->maxHpChange, 3);
 
-        actor->maxHp += arg0->maxHpChange;
+        actor->maxHp += hit_result->maxHpChange;
 
         if (actor->maxHp > 999) {
             actor->maxHp = 999;
@@ -1127,13 +1127,13 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->maxMpEffect) {
+    switch (hit_result->maxMpEffect) {
     case 1:
         break;
     case 2:
-        Battle_QueueActorStatChangeNumber(targetActorId, arg0->target.targetLimb, arg0->maxMpChange, 4);
+        Battle_QueueActorStatChangeNumber(targetActorId, hit_result->target.targetLimb, hit_result->maxMpChange, 4);
 
-        actor->maxMp += arg0->maxMpChange;
+        actor->maxMp += hit_result->maxMpChange;
 
         if (actor->maxMp > 999) {
             actor->maxMp = 999;
@@ -1141,11 +1141,11 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->weaponDpEffect) {
+    switch (hit_result->weaponDpEffect) {
     case 1:
         break;
     case 2:
-        actor->weapon.currentDp += arg0->weaponDpChange;
+        actor->weapon.currentDp += hit_result->weaponDpChange;
 
         if (actor->weapon.maxDp < actor->weapon.currentDp) {
             actor->weapon.currentDp = actor->weapon.maxDp;
@@ -1153,9 +1153,9 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->weaponPpEffect) {
+    switch (hit_result->weaponPpEffect) {
     case 2:
-        actor->weapon.currentPp += arg0->weaponPpChange;
+        actor->weapon.currentPp += hit_result->weaponPpChange;
 
         if (actor->weapon.maxPp < actor->weapon.currentPp) {
             actor->weapon.currentPp = actor->weapon.maxPp;
@@ -1164,8 +1164,8 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
 
     case 1:
-        if (actor->weapon.currentPp > arg0->weaponPpChange) {
-            actor->weapon.currentPp -= arg0->weaponPpChange;
+        if (actor->weapon.currentPp > hit_result->weaponPpChange) {
+            actor->weapon.currentPp -= hit_result->weaponPpChange;
         } else {
             actor->weapon.currentPp = 0;
         }
@@ -1173,27 +1173,27 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
         break;
     }
 
-    switch (arg0->armorDpEffect) {
+    switch (hit_result->armorDpEffect) {
     case 1:
-        if (actor->shield.currentDp > arg0->armorDpChange) {
-            actor->shield.currentDp -= arg0->armorDpChange;
+        if (actor->shield.currentDp > hit_result->armorDpChange) {
+            actor->shield.currentDp -= hit_result->armorDpChange;
         } else {
             actor->shield.currentDp = 0;
         }
 
-        if (actor->limbs[arg0->target.targetLimb].armor.currentDp > arg0->armorDpChange) {
-            actor->limbs[arg0->target.targetLimb].armor.currentDp -= arg0->armorDpChange;
+        if (actor->limbs[hit_result->target.targetLimb].armor.currentDp > hit_result->armorDpChange) {
+            actor->limbs[hit_result->target.targetLimb].armor.currentDp -= hit_result->armorDpChange;
         } else {
-            actor->limbs[arg0->target.targetLimb].armor.currentDp = 0;
+            actor->limbs[hit_result->target.targetLimb].armor.currentDp = 0;
         }
 
         break;
     }
 
-    switch (arg0->shieldPpEffect) {
+    switch (hit_result->shieldPpEffect) {
     case 1:
-        if (actor->shield.currentPp > arg0->shieldPpChange) {
-            actor->shield.currentPp -= arg0->shieldPpChange;
+        if (actor->shield.currentPp > hit_result->shieldPpChange) {
+            actor->shield.currentPp -= hit_result->shieldPpChange;
         } else {
             actor->shield.currentPp = 0;
         }
@@ -1203,11 +1203,11 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     flag = 1;
 
-    if (arg0->inflictStatuses != 0) {
+    if (hit_result->inflictStatuses != 0) {
 
         for (i = 0; i < 32; ++i) {
 
-            int status = arg0->inflictStatuses & flag;
+            int status = hit_result->inflictStatuses & flag;
 
             if ((status != 0) && (actor->statuses & flag)) {
 
@@ -1221,7 +1221,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
                     ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(0, 0, status, 1);
                 }
 
-                Battle_RemoveActorStatuses(arg0->inflictStatuses & flag, actor);
+                Battle_RemoveActorStatuses(hit_result->inflictStatuses & flag, actor);
             }
 
             flag <<= 1;
@@ -1230,11 +1230,11 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 
     flag = 1;
 
-    if (arg0->removeStatuses != 0) {
+    if (hit_result->removeStatuses != 0) {
 
         for (i = 0; i < 32; ++i) {
 
-            int status = arg0->removeStatuses & flag;
+            int status = hit_result->removeStatuses & flag;
 
             if ((status != 0) && !(actor->statuses & flag)) {
 
@@ -1248,7 +1248,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
                     ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(0, 0, status, 0);
                 }
 
-                Battle_InflictActorStatuses(arg0->removeStatuses & flag, actor);
+                Battle_InflictActorStatuses(hit_result->removeStatuses & flag, actor);
             }
 
             flag <<= 1;
@@ -1259,7 +1259,7 @@ void Battle_ApplyActorActionResult(Battle_HitResult* arg0)
 // decomp: BATTLE.PRG func_80087EF4 (src/BATTLE/BATTLE.PRG/146C.c:14376)
 void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
 {
-    int var_a0_2;
+    int limb_recovered;
     int i;
     int statuses;
 
@@ -1304,7 +1304,7 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
                 actor->currentHp -= hp;
             }
 
-            ((void (*)(int arg0, int arg1, u_int arg2, int arg3))Battle_QueueActorValueLabel)(actor->actorId, 0, hp | 0x80000000, 0);
+            ((void (*)(int actor_slot, int limb_tag, u_int encoded_amount, int label_flags))Battle_QueueActorValueLabel)(actor->actorId, 0, hp | 0x80000000, 0);
 
         } else if (actor->statuses & 0x20000) {
 
@@ -1319,13 +1319,13 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
 
             for (i = 0; i < 6; ++i) {
                 if (actor->limbs[i].maxHp != 0) {
-                    int var_v1 = hp;
+                    int healing_dividend = hp;
 
                     if (hp < 0) {
-                        var_v1 = hp + 7;
+                        healing_dividend = hp + 7;
                     }
 
-                    actor->limbs[i].hp += (var_v1 >> 3);
+                    actor->limbs[i].hp += (healing_dividend >> 3);
 
                     if (actor->limbs[i].maxHp < actor->limbs[i].hp) {
                         actor->limbs[i].hp = actor->limbs[i].maxHp;
@@ -1333,23 +1333,23 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
                 }
             }
 
-            ((void (*)(int arg0, int arg1, u_int arg2, int arg3))Battle_QueueActorValueLabel)(actor->actorId, 0, hp, 0);
+            ((void (*)(int actor_slot, int limb_tag, u_int encoded_amount, int label_flags))Battle_QueueActorValueLabel)(actor->actorId, 0, hp, 0);
         }
     }
 
     if (actor->statuses & 0x10) {
 
-        var_a0_2 = 0;
+        limb_recovered = 0;
 
         if (actor->mobilityLimb0 != 0) {
-            var_a0_2 = actor->limbs[actor->mobilityLimb0].hp >= 2;
+            limb_recovered = actor->limbs[actor->mobilityLimb0].hp >= 2;
         }
 
         if ((actor->mobilityLimb1 != 0) && (actor->limbs[actor->mobilityLimb1].hp >= 2)) {
-            var_a0_2 = 1;
+            limb_recovered = 1;
         }
 
-        if (var_a0_2 != 0) {
+        if (limb_recovered != 0) {
             statuses |= 0x10;
         }
     }
@@ -1360,13 +1360,13 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
             for (i = 0; i < 4; ++i) {
                 if (actor->statuses & Battle_limbStatusFlags[i]) {
 
-                    var_a0_2 = 0;
+                    limb_recovered = 0;
 
                     if (actor->mobilityLimb0 != 0) {
-                        var_a0_2 = actor->limbs[i].hp >= 2;
+                        limb_recovered = actor->limbs[i].hp >= 2;
                     }
 
-                    if (var_a0_2 != 0) {
+                    if (limb_recovered != 0) {
                         statuses |= Battle_limbStatusFlags[i];
                     }
                 }
@@ -1383,129 +1383,129 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
 // decomp: BATTLE.PRG func_80088554 (src/BATTLE/BATTLE.PRG/146C.c:14560)
 int Battle_UpdateActorVitals(void)
 {
-    int var_s1;
+    int update_result;
     int i;
-    int var_s5 = 0;
+    int pending_event_result = 0;
 
     for (i = 0; i < 16; ++i) {
 
-        Battle_Actor* temp_s3 = Battle_actors[i];
-        var_s1 = 0;
+        Battle_Actor* battle_actor = Battle_actors[i];
+        update_result = 0;
 
-        if ((temp_s3 != NULL) && ((temp_s3->roomSpawnIndex != 0x80) || (i == 0))) {
+        if ((battle_actor != NULL) && ((battle_actor->roomSpawnIndex != 0x80) || (i == 0))) {
 
-            int temp_v0 = Actors_ActorStateFlags(i);
+            int actor_state_flags = Actors_ActorStateFlags(i);
 
-            if (temp_v0 & 0x01000000) {
+            if (actor_state_flags & 0x01000000) {
 
                 if (((u_int (*)(int))Actors_IsActorActionAnimationBusy)(i) != 1) {
 
-                    var_s1 = Battle_ResolveActorDefeat(0, i, 0);
+                    update_result = Battle_ResolveActorDefeat(0, i, 0);
 
-                    if ((var_s1 == 0) && (i != 0)) {
+                    if ((update_result == 0) && (i != 0)) {
                         if (Event_EvaluateRoomEventTriggers(0xC, 0, NULL, 0) == 1) {
-                            var_s1 = 1;
+                            update_result = 1;
                         } else {
-                            var_s1 = 2;
+                            update_result = 2;
                         }
                     }
                 }
 
-            } else if ((temp_v0 & 0x01002001) == 1) {
+            } else if ((actor_state_flags & 0x01002001) == 1) {
 
-                Battle_ActorStats* temp_s0 = temp_s3->stats;
+                Battle_ActorStats* actor_stats = battle_actor->stats;
 
-                if (temp_s0 != NULL) {
+                if (actor_stats != NULL) {
 
-                    if (temp_s0->actionRecoveryTimer > 35) {
-                        temp_s0->actionRecoveryTimer -= 35;
-                    } else if (temp_s0->actionRecoveryTimer != 0) {
-                        temp_s0->actionRecoveryTimer = 0;
+                    if (actor_stats->actionRecoveryTimer > 35) {
+                        actor_stats->actionRecoveryTimer -= 35;
+                    } else if (actor_stats->actionRecoveryTimer != 0) {
+                        actor_stats->actionRecoveryTimer = 0;
                     }
 
-                    if ((Battle_vitalsTickCounter % 30 == 0) && (temp_s0->currentHp != 0)) {
+                    if ((Battle_vitalsTickCounter % 30 == 0) && (actor_stats->currentHp != 0)) {
 
-                        if (temp_s3->weaponDrawn & 1) {
+                        if (battle_actor->weaponDrawn & 1) {
 
                             if (Battle_vitalsTickCounter % 120 == 0) {
-                                if (temp_s0->risk != 0) {
-                                    --temp_s0->risk;
+                                if (actor_stats->risk != 0) {
+                                    --actor_stats->risk;
                                 }
                             }
 
                             if (Battle_vitalsTickCounter % 180 == 0) {
 
-                                if (temp_s0->currentMp < temp_s0->maxMp) {
-                                    ++temp_s0->currentMp;
+                                if (actor_stats->currentMp < actor_stats->maxMp) {
+                                    ++actor_stats->currentMp;
                                 }
 
-                                if (temp_s3->weaponDrawn & 1) {
+                                if (battle_actor->weaponDrawn & 1) {
 
-                                    if (temp_s0->weapon.currentPp != 0) {
-                                        --temp_s0->weapon.currentPp;
+                                    if (actor_stats->weapon.currentPp != 0) {
+                                        --actor_stats->weapon.currentPp;
                                     }
 
-                                    if (temp_s0->shield.currentPp != 0) {
-                                        --temp_s0->shield.currentPp;
+                                    if (actor_stats->shield.currentPp != 0) {
+                                        --actor_stats->shield.currentPp;
                                     }
                                 }
                             }
 
                             if (Battle_vitalsTickCounter % 240 == 0) {
 
-                                if (temp_s0->currentHp < temp_s0->maxHp) {
-                                    if (temp_s0->currentHp != 0) {
-                                        ++temp_s0->currentHp;
+                                if (actor_stats->currentHp < actor_stats->maxHp) {
+                                    if (actor_stats->currentHp != 0) {
+                                        ++actor_stats->currentHp;
                                     }
                                 }
 
-                                if (temp_s0->limbs[Battle_regeneratingLimb].maxHp != 0) {
-                                    if (temp_s0->limbs[Battle_regeneratingLimb].hp
-                                        < temp_s0->limbs[Battle_regeneratingLimb].maxHp) {
-                                        ++temp_s0->limbs[Battle_regeneratingLimb].hp;
+                                if (actor_stats->limbs[Battle_regeneratingLimb].maxHp != 0) {
+                                    if (actor_stats->limbs[Battle_regeneratingLimb].hp
+                                        < actor_stats->limbs[Battle_regeneratingLimb].maxHp) {
+                                        ++actor_stats->limbs[Battle_regeneratingLimb].hp;
                                     }
                                 }
                             }
 
                         } else {
 
-                            if (!(temp_s0->statuses & 8) || (Battle_vitalsTickCounter % 120 == 0)) {
+                            if (!(actor_stats->statuses & 8) || (Battle_vitalsTickCounter % 120 == 0)) {
 
-                                if (temp_s0->risk != 0) {
-                                    --temp_s0->risk;
+                                if (actor_stats->risk != 0) {
+                                    --actor_stats->risk;
                                 }
                             }
 
                             if (Battle_vitalsTickCounter % 60 == 0) {
 
-                                if (temp_s0->currentMp < temp_s0->maxMp) {
-                                    ++temp_s0->currentMp;
+                                if (actor_stats->currentMp < actor_stats->maxMp) {
+                                    ++actor_stats->currentMp;
                                 }
 
-                                if (temp_s3->weaponDrawn & 1) {
+                                if (battle_actor->weaponDrawn & 1) {
 
-                                    if (temp_s0->weapon.currentPp != 0) {
-                                        --temp_s0->weapon.currentPp;
+                                    if (actor_stats->weapon.currentPp != 0) {
+                                        --actor_stats->weapon.currentPp;
                                     }
 
-                                    if (temp_s0->shield.currentPp != 0) {
-                                        --temp_s0->shield.currentPp;
+                                    if (actor_stats->shield.currentPp != 0) {
+                                        --actor_stats->shield.currentPp;
                                     }
                                 }
                             }
 
                             if (Battle_vitalsTickCounter % 120 == 0) {
 
-                                if (temp_s0->currentHp < temp_s0->maxHp) {
-                                    if (temp_s0->currentHp != 0) {
-                                        ++temp_s0->currentHp;
+                                if (actor_stats->currentHp < actor_stats->maxHp) {
+                                    if (actor_stats->currentHp != 0) {
+                                        ++actor_stats->currentHp;
                                     }
                                 }
 
-                                if (temp_s0->limbs[Battle_regeneratingLimb].maxHp != 0) {
-                                    if (temp_s0->limbs[Battle_regeneratingLimb].hp
-                                        < temp_s0->limbs[Battle_regeneratingLimb].maxHp) {
-                                        ++temp_s0->limbs[Battle_regeneratingLimb].hp;
+                                if (actor_stats->limbs[Battle_regeneratingLimb].maxHp != 0) {
+                                    if (actor_stats->limbs[Battle_regeneratingLimb].hp
+                                        < actor_stats->limbs[Battle_regeneratingLimb].maxHp) {
+                                        ++actor_stats->limbs[Battle_regeneratingLimb].hp;
                                     }
                                 }
                             }
@@ -1514,23 +1514,23 @@ int Battle_UpdateActorVitals(void)
 
                     if (Battle_vitalsTickCounter % 60 == 0) {
 
-                        if (temp_s0->currentHp != 0) {
-                            Battle_UpdateActorStatusTimers(temp_s0);
+                        if (actor_stats->currentHp != 0) {
+                            Battle_UpdateActorStatusTimers(actor_stats);
                         }
 
-                        if (temp_s0->currentHp == 0) {
+                        if (actor_stats->currentHp == 0) {
 
-                            if (temp_s3->retainAfterDefeat == 0) {
+                            if (battle_actor->retainAfterDefeat == 0) {
                                 Battle_BeginActorDefeatAnimation(i);
                             } else {
 
-                                var_s1 = Battle_ResolveActorDefeat(0, i, 0);
+                                update_result = Battle_ResolveActorDefeat(0, i, 0);
 
-                                if ((var_s1 == 0) && (i != 0)) {
+                                if ((update_result == 0) && (i != 0)) {
                                     if (Event_EvaluateRoomEventTriggers(0xC, 0, NULL, 0) == 1) {
-                                        var_s1 = 1;
+                                        update_result = 1;
                                     } else {
-                                        var_s1 = 2;
+                                        update_result = 2;
                                     }
                                 }
                             }
@@ -1540,11 +1540,11 @@ int Battle_UpdateActorVitals(void)
             }
         }
 
-        if (var_s1 != 0) {
-            if (var_s5 == 0) {
-                var_s5 = var_s1;
-            } else if (var_s1 == 1) {
-                var_s5 = 1;
+        if (update_result != 0) {
+            if (pending_event_result == 0) {
+                pending_event_result = update_result;
+            } else if (update_result == 1) {
+                pending_event_result = 1;
             }
         }
     }
@@ -1555,13 +1555,13 @@ int Battle_UpdateActorVitals(void)
         Battle_regeneratingLimb = (Battle_regeneratingLimb + 1) % 6;
     }
 
-    var_s1 = State_UpdateEventTimer();
+    update_result = State_UpdateEventTimer();
 
-    if (var_s1 != 0) {
-        var_s5 = var_s1;
+    if (update_result != 0) {
+        pending_event_result = update_result;
     }
 
-    return var_s5;
+    return pending_event_result;
 }
 
 // decomp: BATTLE.PRG func_80088B6C (src/BATTLE/BATTLE.PRG/146C.c:14743)

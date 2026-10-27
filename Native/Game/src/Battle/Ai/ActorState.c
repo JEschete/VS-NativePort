@@ -84,9 +84,9 @@ void Battle_Ai_ResolveAiLinkedActors(void)
 }
 
 // decomp: BATTLE.PRG func_800E5A74 (src/BATTLE/BATTLE.PRG/7CD68.c:595)
-void Battle_Ai_ApplySavedAiSettingsFlags(int* arg0, Battle_Ai_SavedSettingsPair* arg1)
+void Battle_Ai_ApplySavedAiSettingsFlags(int* settings_word, Battle_Ai_SavedSettingsPair* saved_settings)
 {
-    *arg0 = ((arg1->opaque4 & 0xFFE) << 20) | (*arg0 & 0x1FFFFF);
+    *settings_word = ((saved_settings->opaque4 & 0xFFE) << 20) | (*settings_word & 0x1FFFFF);
 }
 
 // decomp: BATTLE.PRG func_800E5A9C (src/BATTLE/BATTLE.PRG/7CD68.c:689)

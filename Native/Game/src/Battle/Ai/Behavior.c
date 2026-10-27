@@ -134,7 +134,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
 }
 
 // decomp: BATTLE.PRG func_800DA1D4 (src/BATTLE/BATTLE.PRG/71618.c:610)
-int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* arg0)
+int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
 {
     int i;
     int id = -1;
@@ -144,88 +144,88 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* arg0)
     Battle_Ai_ActionCandidate* entry;
     Battle_Actor* actor;
 
-    switch (arg0->actionStatus) {
+    switch (ai_state->actionStatus) {
     case 0:
-        entry = arg0->candidateOrder[0];
+        entry = ai_state->candidateOrder[0];
         id = entry->targetId;
 
-        if (Battle_Ai_MoveForActionCandidate((void*)arg0, (void*)entry)) {
+        if (Battle_Ai_MoveForActionCandidate((void*)ai_state, (void*)entry)) {
             return 1;
         }
 
-        for (i = 1; i < arg0->candidateCount; ++i) {
-            entry = arg0->candidateOrder[i];
+        for (i = 1; i < ai_state->candidateCount; ++i) {
+            entry = ai_state->candidateOrder[i];
 
             if (entry->threshold < Battle_Ai_roomAiState->readinessLevel && entry->targetId != id) {
-                return Battle_Ai_MoveForActionCandidate((void*)arg0, (void*)entry);
+                return Battle_Ai_MoveForActionCandidate((void*)ai_state, (void*)entry);
             }
         }
 
         return 0;
 
     case 1:
-        Battle_Ai_DisengageActor(arg0);
+        Battle_Ai_DisengageActor(ai_state);
 
-        if (arg0->relations[0].classification == 3) {
-            if (Battle_Ai_ApproachActor(arg0, 0, 640, 1)) {
+        if (ai_state->relations[0].classification == 3) {
+            if (Battle_Ai_ApproachActor(ai_state, 0, 640, 1)) {
                 return 1;
             }
 
-            if (Battle_Ai_TrackActorPosition(arg0, 0)) {
+            if (Battle_Ai_TrackActorPosition(ai_state, 0)) {
                 return 1;
             }
         }
 
-        id = arg0->candidateOrder[0]->targetId;
+        id = ai_state->candidateOrder[0]->targetId;
 
-        if (arg0->relations[id].classification == 3) {
+        if (ai_state->relations[id].classification == 3) {
             flag = 1;
             distance = 640;
         } else {
-            if (arg0->candidateCount < 2) {
+            if (ai_state->candidateCount < 2) {
                 return 0;
             }
 
             flag = 0;
-            distance = Core_Math_SquareRootInteger(arg0->candidateOrder[1]->distanceSquared);
+            distance = Core_Math_SquareRootInteger(ai_state->candidateOrder[1]->distanceSquared);
         }
 
-        if (Battle_Ai_ApproachActor(arg0, id, distance, flag)) {
+        if (Battle_Ai_ApproachActor(ai_state, id, distance, flag)) {
             return 1;
         }
 
-        if (Battle_Ai_TrackActorPosition(arg0, id)) {
+        if (Battle_Ai_TrackActorPosition(ai_state, id)) {
             return 1;
         }
         // Fallthrough
 
     case 2:
-        Battle_Ai_DisengageActor(arg0);
+        Battle_Ai_DisengageActor(ai_state);
 
-        if (arg0->relations[0].classification == 3) {
-            if (Battle_Ai_ApproachActor(arg0, 0, 640, 1)) {
+        if (ai_state->relations[0].classification == 3) {
+            if (Battle_Ai_ApproachActor(ai_state, 0, 640, 1)) {
                 return 1;
             }
 
-            if (Battle_Ai_TrackActorPosition(arg0, 0)) {
+            if (Battle_Ai_TrackActorPosition(ai_state, 0)) {
                 return 1;
             }
         }
 
         for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-            if (arg0->relations[actor->id].classification == 3
-                && arg0->distancesSquared[actor->id] < nearest) {
-                nearest = arg0->distancesSquared[actor->id];
+            if (ai_state->relations[actor->id].classification == 3
+                && ai_state->distancesSquared[actor->id] < nearest) {
+                nearest = ai_state->distancesSquared[actor->id];
                 id = actor->id;
             }
         }
 
         if (id >= 0) {
-            if (Battle_Ai_ApproachActor(arg0, id, 640, 1)) {
+            if (Battle_Ai_ApproachActor(ai_state, id, 640, 1)) {
                 return 1;
             }
 
-            if (Battle_Ai_TrackActorPosition(arg0, id)) {
+            if (Battle_Ai_TrackActorPosition(ai_state, id)) {
                 return 1;
             }
         }
@@ -236,25 +236,25 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* arg0)
 }
 
 // decomp: BATTLE.PRG func_800DA4BC (src/BATTLE/BATTLE.PRG/71618.c:788)
-int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1)
+int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate)
 {
-    if (Battle_Ai_CanApproachEngagedTarget(arg0, arg1)) {
-        int id = arg1->targetId;
-        int distance = Core_Math_SquareRootInteger(arg1->distanceSquared);
-        int range = distance + arg0->maxRange * 32;
+    if (Battle_Ai_CanApproachEngagedTarget(ai_state, candidate)) {
+        int id = candidate->targetId;
+        int distance = Core_Math_SquareRootInteger(candidate->distanceSquared);
+        int range = distance + ai_state->maxRange * 32;
 
         range *= range;
         ++Battle_Ai_roomAiState->approachMoves;
 
-        if (arg0->distancesSquared[id] < range && arg0->relations[arg1->targetId].active) {
-            Battle_Ai_TryEngageActor(arg0);
+        if (ai_state->distancesSquared[id] < range && ai_state->relations[candidate->targetId].active) {
+            Battle_Ai_TryEngageActor(ai_state);
         }
 
-        if (Battle_Ai_ApproachActor(arg0, id, distance, 1)) {
+        if (Battle_Ai_ApproachActor(ai_state, id, distance, 1)) {
             return 1;
         }
 
-        if (Battle_Ai_TrackActorPosition(arg0, id)) {
+        if (Battle_Ai_TrackActorPosition(ai_state, id)) {
             return 1;
         }
     }
@@ -386,7 +386,7 @@ fallback:
             if ((unsigned int)Battle_Ai_NextActorRandomMasked(128) < 128) {
                 state->opaque18 = 1;
             }
-            ((void (*)(Battle_Ai_ActionExecutionView* arg0, int arg1, int arg2))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)state, 6, 0);
+            ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)state, 6, 0);
         }
         if (Battle_Ai_FleeVisibleEnemies((void*)state, 1)) {
             return 1;
@@ -436,30 +436,30 @@ int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state)
 }
 
 // decomp: BATTLE.PRG func_800DAC80 (src/BATTLE/BATTLE.PRG/71618.c:1006)
-int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1)
+int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate)
 {
-    if (!Battle_Ai_CanExecuteActionCandidate(arg0, arg1)) {
+    if (!Battle_Ai_CanExecuteActionCandidate(ai_state, candidate)) {
         return 0;
     }
 
-    Battle_Ai_TryEngageActor(arg0);
+    Battle_Ai_TryEngageActor(ai_state);
 
-    if (Battle_Ai_IsEngagementReady(arg0)) {
+    if (Battle_Ai_IsEngagementReady(ai_state)) {
         Actors_ActorRecord* actor;
 
-        arg0->currentCandidate = arg1;
+        ai_state->currentCandidate = candidate;
         Battle_Ai_candidateEngagedThisUpdate = 1;
-        actor = Actors_actorRecords[arg1->targetId];
+        actor = Actors_actorRecords[candidate->targetId];
 
         if (actor != NULL && actor->instance.locomotionState) {
-            arg1->targetLimb = Battle_Ai_NextActorRandomMasked(2);
-            arg1->opaqueCBit7 = 217;
+            candidate->targetLimb = Battle_Ai_NextActorRandomMasked(2);
+            candidate->opaqueCBit7 = 217;
         }
 
-        Battle_Ai_IssueActorCommand(arg0, 15);
+        Battle_Ai_IssueActorCommand(ai_state, 15);
 
-        if (Battle_Ai_DoesActionRequireCooldown(arg0, arg1)) {
-            arg0->minActionDelay = arg0->usesRoomActionDelay == 0 ? Battle_Ai_roomAiState->defaultActionDelay : 50;
+        if (Battle_Ai_DoesActionRequireCooldown(ai_state, candidate)) {
+            ai_state->minActionDelay = ai_state->usesRoomActionDelay == 0 ? Battle_Ai_roomAiState->defaultActionDelay : 50;
         }
 
         return 1;
@@ -469,21 +469,21 @@ int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* arg0, Battle_Ai_
 }
 
 // decomp: BATTLE.PRG func_800DAD9C (src/BATTLE/BATTLE.PRG/71618.c:1093)
-int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* arg0)
+int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* ai_state)
 {
     int i;
     int j;
     Battle_Ai_ActionCandidate* entry;
 
-    for (i = 0; i < arg0->candidateCount; ++i) {
-        entry = arg0->candidateOrder[i];
+    for (i = 0; i < ai_state->candidateCount; ++i) {
+        entry = ai_state->candidateOrder[i];
 
-        if (Battle_Ai_TryExecuteActionCandidate(arg0, entry)) {
+        if (Battle_Ai_TryExecuteActionCandidate(ai_state, entry)) {
             return 1;
         }
     }
 
-    entry = &arg0->currentChoice;
+    entry = &ai_state->currentChoice;
 
     if (entry->action) {
         for (j = 0; j < 4; ++j) {
@@ -495,7 +495,7 @@ int Battle_Ai_TryExecutePlannedActions(Battle_Ai_ActorAiState* arg0)
                 entry->targetId = actor->id;
                 model = Field_gimmickInstances[actor->id];
 
-                if (model->parent && model->mode == 0 && Battle_Ai_TryExecuteActionCandidate(arg0, entry)) {
+                if (model->parent && model->mode == 0 && Battle_Ai_TryExecuteActionCandidate(ai_state, entry)) {
                     return 1;
                 }
             }

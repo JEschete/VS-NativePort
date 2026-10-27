@@ -150,18 +150,18 @@ void Battle_FreeSphere(void)
 }
 
 // decomp: BATTLE.PRG func_800C05EC (src/BATTLE/BATTLE.PRG/573B8.c:444)
-void Battle_SetSphereVolumes(Battle_TargetSphereSpec* arg0, Battle_TargetSphereSpec* arg1, u_char arg2, Battle_TargetPreview* arg3)
+void Battle_SetSphereVolumes(Battle_TargetSphereSpec* primary_volume, Battle_TargetSphereSpec* secondary_volume, u_char sphere_mode, Battle_TargetPreview* target_previews)
 {
-    Battle_targetSphere->primaryVolume = *arg0;
+    Battle_targetSphere->primaryVolume = *primary_volume;
 
-    if (arg0->kind != 1) {
+    if (primary_volume->kind != 1) {
         Battle_targetSphere->wirePhaseA = 0;
         Battle_targetSphere->wirePhaseC = 0;
     }
 
     if (Battle_reuseSphereVolumes != 0) {
         Battle_targetSphere->primaryVolume.kind |= 0x80;
-        Battle_targetSphere->secondaryVolume.kind = arg1->kind;
+        Battle_targetSphere->secondaryVolume.kind = secondary_volume->kind;
         Battle_reuseSphereVolumes = 0;
         return;
     }
@@ -170,11 +170,11 @@ void Battle_SetSphereVolumes(Battle_TargetSphereSpec* arg0, Battle_TargetSphereS
     Battle_targetSphere->reserved3C = 0;
     Battle_targetSphere->wireShape = 0xF;
 
-    if (arg1 != NULL) {
-        Battle_targetSphere->secondaryVolume = *arg1;
+    if (secondary_volume != NULL) {
+        Battle_targetSphere->secondaryVolume = *secondary_volume;
         Battle_targetSphere->secondaryVolume.kind |= 0x80;
-        Battle_targetSphere->sphereMode = arg2;
-        Battle_targetSphere->targetList1 = arg3;
+        Battle_targetSphere->sphereMode = sphere_mode;
+        Battle_targetSphere->targetList1 = target_previews;
         return;
     }
 
@@ -190,9 +190,9 @@ void Battle_ClearPrimarySphereVolume(void)
 }
 
 // decomp: BATTLE.PRG func_800C0700 (src/BATTLE/BATTLE.PRG/573B8.c:482)
-void Battle_SetSecondarySphereVolume(Battle_TargetSphereSpec* arg0)
+void Battle_SetSecondarySphereVolume(Battle_TargetSphereSpec* secondary_volume)
 {
-    Battle_targetSphere->secondaryVolume = *arg0;
+    Battle_targetSphere->secondaryVolume = *secondary_volume;
     Battle_targetSphere->wireShape = 0;
 }
 
@@ -416,26 +416,26 @@ void Battle_DrawSphere(void)
 }
 
 // decomp: BATTLE.PRG func_800C0FA8 (src/BATTLE/BATTLE.PRG/58578.c:170)
-void Battle_BuildTargetVolumeTestTransform(Battle_TargetVolume* arg0, Battle_TargetVolumeMatrix* arg1, MATRIX* arg2)
+void Battle_BuildTargetVolumeTestTransform(Battle_TargetVolume* volume, Battle_TargetVolumeMatrix* test_transform, MATRIX* rotation_matrix)
 {
     int temp_v0;
     int i;
-    char* new_var;
+    char* extent_component;
 
     for (i = 0; i < 3; ++i) {
-        arg1->opaque10[i] = arg0->position[i];
-        arg1->opaque18[i] = 0x8000 / *(new_var = &arg0->scale.extents[i]);
+        test_transform->opaque10[i] = volume->position[i];
+        test_transform->opaque18[i] = 0x8000 / *(extent_component = &volume->scale.extents[i]);
     }
 
-    arg1->opaque0.vx = arg0->scale.extents[3] * 0x10;
-    arg1->opaque0.vy = -arg0->angle;
-    arg1->opaque0.vz = 0;
+    test_transform->opaque0.vx = volume->scale.extents[3] * 0x10;
+    test_transform->opaque0.vy = -volume->angle;
+    test_transform->opaque0.vz = 0;
 
-    Core_Gte_RotMatrix(&arg1->opaque0, arg2);
+    Core_Gte_RotMatrix(&test_transform->opaque0, rotation_matrix);
 }
 
 // decomp: BATTLE.PRG func_800C1034 (src/BATTLE/BATTLE.PRG/58578.c:188)
-int Battle_IsPointInTargetEllipsoid(Battle_TargetVolume* arg0, u_short* arg1)
+int Battle_IsPointInTargetEllipsoid(Battle_TargetVolume* volume, u_short* point_components)
 {
     Battle_TargetVolumeMatrix work;
     MATRIX matrix;
@@ -443,7 +443,7 @@ int Battle_IsPointInTargetEllipsoid(Battle_TargetVolume* arg0, u_short* arg1)
     int term;
     int i;
 
-    Battle_BuildTargetVolumeTestTransform(arg0, &work, &matrix);
+    Battle_BuildTargetVolumeTestTransform(volume, &work, &matrix);
 
     {
         void* ptr;
@@ -456,7 +456,7 @@ int Battle_IsPointInTargetEllipsoid(Battle_TargetVolume* arg0, u_short* arg1)
         offset = 0x10;
 
         do {
-            *(short*)ptr = *arg1++ - *(u_short*)(base + offset);
+            *(short*)ptr = *point_components++ - *(u_short*)(base + offset);
             offset += 2;
             ++i;
             ptr += 2;
@@ -490,7 +490,7 @@ int Battle_IsPointInTargetEllipsoid(Battle_TargetVolume* arg0, u_short* arg1)
 }
 
 // decomp: BATTLE.PRG func_800C110C (src/BATTLE/BATTLE.PRG/58578.c:242)
-int Battle_IsPointInTargetCylinder(Battle_TargetVolume* arg0, u_short* arg1, int arg2)
+int Battle_IsPointInTargetCylinder(Battle_TargetVolume* volume, u_short* point_components, int shift_height_origin)
 {
     Battle_TargetVolumeMatrix work;
     MATRIX matrix;
@@ -498,7 +498,7 @@ int Battle_IsPointInTargetCylinder(Battle_TargetVolume* arg0, u_short* arg1, int
     int term;
     int i;
 
-    Battle_BuildTargetVolumeTestTransform(arg0, &work, &matrix);
+    Battle_BuildTargetVolumeTestTransform(volume, &work, &matrix);
 
     {
         short* ptr;
@@ -511,7 +511,7 @@ int Battle_IsPointInTargetCylinder(Battle_TargetVolume* arg0, u_short* arg1, int
         offset = 0x10;
 
         for (; i < 3; ++i) {
-            *ptr = *arg1++ - *(u_short*)(base + offset);
+            *ptr = *point_components++ - *(u_short*)(base + offset);
             offset += 2;
             ++ptr;
         }
@@ -521,11 +521,11 @@ int Battle_IsPointInTargetCylinder(Battle_TargetVolume* arg0, u_short* arg1, int
 
     Core_Gte_ApplyMatrixSV(&matrix, &work.opaque0, &work.opaque8);
 
-    if (arg2 != 0) {
-        work.opaque8.vy -= arg0->scale.flags.opaque1Bit0 << 4;
+    if (shift_height_origin != 0) {
+        work.opaque8.vy -= volume->scale.flags.opaque1Bit0 << 4;
     }
 
-    if (!((u_short)-work.opaque8.vy > (arg0->scale.flags.opaque1Bit0 << 5))) {
+    if (!((u_short)-work.opaque8.vy > (volume->scale.flags.opaque1Bit0 << 5))) {
         char* base;
         int offset2;
         int offset;
@@ -548,7 +548,7 @@ int Battle_IsPointInTargetCylinder(Battle_TargetVolume* arg0, u_short* arg1, int
 }
 
 // decomp: BATTLE.PRG func_800C123C (src/BATTLE/BATTLE.PRG/58578.c:299)
-int Battle_IsPointInTargetCone(Battle_TargetVolume* arg0, u_short* arg1, int arg2)
+int Battle_IsPointInTargetCone(Battle_TargetVolume* volume, u_short* point_components, int shift_height_origin)
 {
     Battle_TargetVolumeMatrix work;
     MATRIX matrix;
@@ -557,7 +557,7 @@ int Battle_IsPointInTargetCone(Battle_TargetVolume* arg0, u_short* arg1, int arg
     int divisor;
     int radius;
 
-    Battle_BuildTargetVolumeTestTransform(arg0, &work, &matrix);
+    Battle_BuildTargetVolumeTestTransform(volume, &work, &matrix);
 
     {
         int i;
@@ -571,7 +571,7 @@ int Battle_IsPointInTargetCone(Battle_TargetVolume* arg0, u_short* arg1, int arg
         offset = 0x10;
 
         do {
-            *(short*)ptr = *arg1++ - *(u_short*)(base + offset);
+            *(short*)ptr = *point_components++ - *(u_short*)(base + offset);
             offset += 2;
             ptr += 2;
             ++i;
@@ -580,12 +580,12 @@ int Battle_IsPointInTargetCone(Battle_TargetVolume* arg0, u_short* arg1, int arg
 
     Core_Gte_ApplyMatrixSV(&matrix, &work.opaque0, &work.opaque8);
 
-    if (arg2 != 0) {
-        work.opaque8.vy -= arg0->scale.flags.opaque1Bit0 << 5;
+    if (shift_height_origin != 0) {
+        work.opaque8.vy -= volume->scale.flags.opaque1Bit0 << 5;
     }
 
-    if (!((u_short)-work.opaque8.vy > (arg0->scale.flags.opaque1Bit0 << 5))) {
-        divisor = -(((int)work.opaque8.vy << 16) >> 13) / arg0->scale.flags.opaque1Bit0;
+    if (!((u_short)-work.opaque8.vy > (volume->scale.flags.opaque1Bit0 << 5))) {
+        divisor = -(((int)work.opaque8.vy << 16) >> 13) / volume->scale.flags.opaque1Bit0;
         temp1 = (work.opaque8.vx * work.opaque18[0]) >> 12;
         temp2 = ((radius = work.opaque8.vz) * work.opaque18[2]) >> 12;
         radius = 0x100 - divisor;
@@ -662,38 +662,38 @@ int Battle_IsPointInTargetPrism(Battle_TargetVolume* shape, u_short* position, i
 }
 
 // decomp: BATTLE.PRG func_800C1564 (src/BATTLE/BATTLE.PRG/58578.c:411)
-int Battle_IsPointInTargetVolume(Battle_TargetVolume* arg0, u_short* arg1)
+int Battle_IsPointInTargetVolume(Battle_TargetVolume* volume, u_short* point_components)
 {
-    Battle_TargetVolumeFlags saved_unk4 = arg0->scale.flags;
+    Battle_TargetVolumeFlags saved_unk4 = volume->scale.flags;
     int ret = 0;
 
-    switch (arg0->kind) {
+    switch (volume->kind) {
     case 1:
-        ret = Battle_IsPointInTargetEllipsoid(arg0, arg1);
+        ret = Battle_IsPointInTargetEllipsoid(volume, point_components);
         break;
     case 2:
-        arg0->scale.flags.opaque1Bit0 <<= 1;
-        ret = Battle_IsPointInTargetCylinder(arg0, arg1, 1);
+        volume->scale.flags.opaque1Bit0 <<= 1;
+        ret = Battle_IsPointInTargetCylinder(volume, point_components, 1);
         break;
     case 3:
-        ret = Battle_IsPointInTargetCylinder(arg0, arg1, 0);
+        ret = Battle_IsPointInTargetCylinder(volume, point_components, 0);
         break;
     case 4:
-        ret = Battle_IsPointInTargetCone(arg0, arg1, 0);
+        ret = Battle_IsPointInTargetCone(volume, point_components, 0);
         break;
     case 5:
-        arg0->scale.flags.opaque3Bit0 = saved_unk4.opaque3Bit0 + 0x80;
-        ret = Battle_IsPointInTargetCone(arg0, arg1, 1);
+        volume->scale.flags.opaque3Bit0 = saved_unk4.opaque3Bit0 + 0x80;
+        ret = Battle_IsPointInTargetCone(volume, point_components, 1);
         break;
     case 6:
-        ret = Battle_IsPointInTargetPrism(arg0, arg1, 1);
+        ret = Battle_IsPointInTargetPrism(volume, point_components, 1);
         break;
     case 7:
-        ret = Battle_IsPointInTargetPrism(arg0, arg1, 0);
+        ret = Battle_IsPointInTargetPrism(volume, point_components, 0);
         break;
     }
 
-    arg0->scale.flags = saved_unk4;
+    volume->scale.flags = saved_unk4;
     return ret;
 }
 
@@ -889,10 +889,10 @@ int Battle_AreTargetLabelsSettled(void)
 }
 
 // decomp: BATTLE.PRG func_800C1DC4 (src/BATTLE/BATTLE.PRG/58578.c:656)
-void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* arg0)
+void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* label)
 {
-    int gradient = arg0->gradient;
-    u_long* nextPrim = Render_frameScratch.overlayOrderingTable - (arg0->depth * 4 - 8);
+    int gradient = label->gradient;
+    u_long* nextPrim = Render_frameScratch.overlayOrderingTable - (label->depth * 4 - 8);
     int color0;
     int color1;
     int isLeft;
@@ -903,21 +903,21 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* arg0)
     int color;
     Battle_TargetLabelPrimitive* prim;
 
-    if (arg0->depth != 0) {
+    if (label->depth != 0) {
         gradient = 8;
     }
     color0 = 8 - gradient;
-    color0 = Menu_Framework_GradientStopColor(color0, arg0->fade * 8, 0x80);
-    color1 = Menu_Framework_GradientStopColor(gradient, arg0->fade * 8, 0x80);
+    color0 = Menu_Framework_GradientStopColor(color0, label->fade * 8, 0x80);
+    color1 = Menu_Framework_GradientStopColor(gradient, label->fade * 8, 0x80);
 
-    xy = arg0->screenX;
+    xy = label->screenX;
     isLeft = xy < 160;
     if (isLeft) {
         y = color0;
         color0 = color1;
         color1 = y;
     }
-    y = arg0->offsetY + Battle_targetColumnTopOffset;
+    y = label->offsetY + Battle_targetColumnTopOffset;
     x = xy;
     if (isLeft) {
         x += 0x42;
@@ -926,17 +926,17 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* arg0)
     }
     color = 0x404040;
     textXy = vs_getXY_2(x, y - 1);
-    if (arg0->depth != 0) {
+    if (label->depth != 0) {
         color = 0x808080;
     }
-    Render_DrawCompactTextColor(arg0->text, textXy, color, nextPrim);
+    Render_DrawCompactTextColor(label->text, textXy, color, nextPrim);
 
     prim = Render_frameScratch.primitiveCursor;
     if (gradient != 0) {
-        arg0->gradient = gradient - 1;
+        label->gradient = gradient - 1;
     }
-    x = arg0->screenX & 0xFFFF;
-    gradient = (arg0->screenX < 160) * 2;
+    x = label->screenX & 0xFFFF;
+    gradient = (label->screenX < 160) * 2;
     prim->tag = vs_getTag(prim->box, *nextPrim);
     prim->box.tile.colorAndCode = vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0);
     prim->box.tile.position = vs_getXY_2(x + 2 - gradient, y + 2);
@@ -955,29 +955,29 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* arg0)
     ++prim;
     Render_frameScratch.primitiveCursor = prim;
 
-    if (arg0->depth != 0) {
+    if (label->depth != 0) {
         int sxy;
         int otz;
         int ringXy;
 
         y += 4;
         Render_LoadFrameViewMatrix();
-        Core_Gte_LoadV0(&arg0->worldPosition);
+        Core_Gte_LoadV0(&label->worldPosition);
         Core_Gte_Rtps();
         Core_Gte_StoreSxy2(&sxy);
         Core_Gte_StoreOtz(&otz);
-        if (arg0->screenX < 160) {
+        if (label->screenX < 160) {
             x = (x + 0x47) & 0xFFFF;
             ringXy = x | (y << 16);
-            Battle_DrawLeftTargetLabelLink(sxy, ringXy, arg0->ringSize - 2);
-            if (arg0->ringSize >= 18) {
-                Battle_DrawLeftTargetLabelLink(sxy, ringXy, (arg0->ringSize + 14) & 0x1F);
+            Battle_DrawLeftTargetLabelLink(sxy, ringXy, label->ringSize - 2);
+            if (label->ringSize >= 18) {
+                Battle_DrawLeftTargetLabelLink(sxy, ringXy, (label->ringSize + 14) & 0x1F);
             }
         } else {
             ringXy = x | (y << 16);
-            Battle_DrawRightTargetLabelLink(sxy, ringXy, arg0->ringSize - 2);
-            if (arg0->ringSize >= 18) {
-                Battle_DrawRightTargetLabelLink(sxy, ringXy, (arg0->ringSize + 14) & 0x1F);
+            Battle_DrawRightTargetLabelLink(sxy, ringXy, label->ringSize - 2);
+            if (label->ringSize >= 18) {
+                Battle_DrawRightTargetLabelLink(sxy, ringXy, (label->ringSize + 14) & 0x1F);
             }
         }
     }
@@ -986,72 +986,72 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* arg0)
 // decomp: BATTLE.PRG func_800C20B4 (src/BATTLE/BATTLE.PRG/58578.c:750)
 void Battle_UpdateSphereTargetLabels(void)
 {
-    int temp_a0;
-    int var_s3;
-    int var_v1;
-    Battle_SphereTargetLabel* var_s1 = (*(Battle_TargetSphere* (*))&Battle_targetSphere)->labels;
-    short* var_s0 = &(*(Battle_TargetSphere* (*))&Battle_targetSphere)->labels[0].screenX;
+    int screen_x;
+    int label_index;
+    int animation_step;
+    Battle_SphereTargetLabel* label = (*(Battle_TargetSphere* (*))&Battle_targetSphere)->labels;
+    short* screen_x_ptr = &(*(Battle_TargetSphere* (*))&Battle_targetSphere)->labels[0].screenX;
 
-    for (var_s3 = 0; var_s3 < 24; ++var_s3, ++var_s1) {
-        var_s0 = &var_s1->screenX;
-        int v1 = var_s1->state;
+    for (label_index = 0; label_index < 24; ++label_index, ++label) {
+        screen_x_ptr = &label->screenX;
+        int label_state = label->state;
 
-        if (v1 == 0) {
+        if (label_state == 0) {
             continue;
         }
 
-        switch (v1) {
+        switch (label_state) {
         case 0:
             break;
         case 2:
-            temp_a0 = *var_s0;
+            screen_x = *screen_x_ptr;
 
-            if (temp_a0 >= 160) {
-                for (var_v1 = 0; var_v1 < 16; ++var_v1) {
-                    if ((Menu_Framework_rowAnimationSteps[var_v1] + 0xF8) >= temp_a0) {
+            if (screen_x >= 160) {
+                for (animation_step = 0; animation_step < 16; ++animation_step) {
+                    if ((Menu_Framework_rowAnimationSteps[animation_step] + 0xF8) >= screen_x) {
                         break;
                     }
                 }
 
-                if (var_v1 != 0) {
-                    *var_s0 = Menu_Framework_rowAnimationSteps[var_v1 - 1] + 0xF8;
+                if (animation_step != 0) {
+                    *screen_x_ptr = Menu_Framework_rowAnimationSteps[animation_step - 1] + 0xF8;
                 } else {
-                    *var_s0 = 0xF8;
-                    var_s1->state = 1;
+                    *screen_x_ptr = 0xF8;
+                    label->state = 1;
                 }
             } else {
-                *var_s0 = temp_a0 - 0x20;
+                *screen_x_ptr = screen_x - 0x20;
             }
             break;
 
         case 3:
-            temp_a0 = *var_s0;
+            screen_x = *screen_x_ptr;
 
-            if (temp_a0 >= 0xA0) {
-                *var_s0 = temp_a0 + 0x20;
+            if (screen_x >= 0xA0) {
+                *screen_x_ptr = screen_x + 0x20;
             } else {
-                for (var_v1 = 0; var_v1 < 16; ++var_v1) {
-                    if ((temp_a0 + 4) >= -Menu_Framework_rowAnimationSteps[var_v1]) {
+                for (animation_step = 0; animation_step < 16; ++animation_step) {
+                    if ((screen_x + 4) >= -Menu_Framework_rowAnimationSteps[animation_step]) {
                         break;
                     }
                 }
 
-                if (var_v1 != 0) {
-                    temp_a0 = -Menu_Framework_rowAnimationSteps[var_v1 - 1];
+                if (animation_step != 0) {
+                    screen_x = -Menu_Framework_rowAnimationSteps[animation_step - 1];
                 } else {
-                    temp_a0 = 0;
-                    var_s1->state = 1;
+                    screen_x = 0;
+                    label->state = 1;
                 }
 
-                *var_s0 = temp_a0 - 4;
+                *screen_x_ptr = screen_x - 4;
             }
             break;
         }
 
-        if ((*var_s0 + 0x7E) < 0x1BEU) {
-            Battle_DrawSphereTargetLabel(var_s1);
+        if ((*screen_x_ptr + 0x7E) < 0x1BEU) {
+            Battle_DrawSphereTargetLabel(label);
         } else {
-            var_s1->state = 0;
+            label->state = 0;
         }
     }
 }
@@ -1207,24 +1207,24 @@ void Battle_BuildSphereWireframe(int type)
 void* Battle_BuildSphereCameraBasis(void)
 {
     Field_SphericalCamera camera;
-    int temp_a0;
-    int temp_s2;
+    int yaw_sine;
+    int yaw_cosine;
     int yaw;
     short* p = (short*)((uintptr_t)Core_ScratchBase() + 0x350);
     Field_SyncCameraAnglesFromPosition(&camera);
     yaw = camera.values.yaw;
-    temp_s2 = Core_Gte_Cos(yaw);
-    temp_a0 = Core_Gte_Sin(yaw);
-    p[0] = temp_s2;
-    p[2] = temp_a0;
-    p[8] = -temp_a0;
-    p[10] = temp_s2;
+    yaw_cosine = Core_Gte_Cos(yaw);
+    yaw_sine = Core_Gte_Sin(yaw);
+    p[0] = yaw_cosine;
+    p[2] = yaw_sine;
+    p[8] = -yaw_sine;
+    p[10] = yaw_cosine;
     (*(Battle_TargetSphere* (*))&Battle_targetSphere)->cameraYaw = yaw;
     return (void*)((uintptr_t)Core_ScratchBase() + 0x350);
 }
 
 // decomp: BATTLE.PRG func_800C28AC (src/BATTLE/BATTLE.PRG/58578.c:984)
-void Battle_DrawSpherePositionCursor(SVECTOR* position, int arg1)
+void Battle_DrawSpherePositionCursor(SVECTOR* position, int lock_pitch)
 {
     int xy;
     int i;
@@ -1237,7 +1237,7 @@ void Battle_DrawSpherePositionCursor(SVECTOR* position, int arg1)
 
     Battle_positionCursorBlinkFrame = (Battle_positionCursorBlinkFrame + 1) & 0xF;
 
-    if (arg1 == 0) {
+    if (lock_pitch == 0) {
         prim = Render_frameScratch.primitiveCursor;
         prim[0] = vs_getTag(Render_PolyFt4, *ot);
         prim[1] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyFt4, 0x80, 0x80, 0x80);
@@ -1267,7 +1267,7 @@ void Battle_DrawSpherePositionCursor(SVECTOR* position, int arg1)
     }
 
     for (i = 0; i < 3; ++i) {
-        int index = i + arg1 * 2;
+        int index = i + lock_pitch * 2;
 
         prim = Render_QueueSpriteWithTexturePage(
             index == 2 ? Menu_Framework_cursorBrightnessAnimation[Battle_positionCursorBlinkFrame] : 0x80,
@@ -1362,18 +1362,18 @@ void Battle_CacheSphereTerrainRow(SVECTOR* position, u_int row)
 }
 
 // decomp: BATTLE.PRG func_800C4650 (src/BATTLE/BATTLE.PRG/5BE50.c:65)
-void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* arg0, int arg1)
+void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* target_lines, int target_count)
 {
     int i;
     int type;
 
-    for (i = 0; i < arg1; i++, arg0++) {
-        type = arg0->opaque9;
+    for (i = 0; i < target_count; i++, target_lines++) {
+        type = target_lines->opaque9;
         if ((type >> 4) == 0) {
-            if (Battle_IsPointInTargetVolume(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->volumes[1], arg0->opaque0)) {
-                Actors_EnableModelPalettePulse(type, 0, arg0->opaqueA);
+            if (Battle_IsPointInTargetVolume(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->volumes[1], target_lines->opaque0)) {
+                Actors_EnableModelPalettePulse(type, 0, target_lines->opaqueA);
             } else {
-                Actors_DisableModelPalettePulse(type, arg0->opaqueA);
+                Actors_DisableModelPalettePulse(type, target_lines->opaqueA);
             }
         }
     }

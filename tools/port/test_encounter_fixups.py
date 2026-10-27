@@ -1972,6 +1972,36 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                 self.assertTrue(patterns)
                 self.assertEqual(len(patterns), len(set(patterns)))
 
+    def test_battle_hud_shadowed_locals_preserve_screen_and_texture_units(self):
+        names = ("clipped_icon_left", "overlay_texture_end")
+        for name in names:
+            with self.subTest(name=name):
+                matches = [
+                    (old, new) for old, new, _ in copy_fixups.FIXES["F01355"]
+                    if name in new
+                ]
+                self.assertEqual(len(matches), 1)
+                old, new = matches[0]
+                self.assertEqual(new, re.sub(r"\bv0\b", name, old))
+        patterns = [
+            pattern for row, pattern, _, _ in copy_fixups.REGEX_FIXES
+            if re.search(row, "Battle::DrawSlidingStatusIcon")
+        ]
+        self.assertNotIn(r"\bv0\b", patterns)
+
+    def test_battle_repeated_cast_prototypes_keep_declared_types_and_roles(self):
+        original = "int arg0, int arg1, u_int arg2, int arg3"
+        expected = "int actor_slot, int limb_tag, u_int encoded_amount, int label_flags"
+        matches = [
+            (old, new) for old, new, _ in copy_fixups.FIXES["F00523"]
+            if old == original
+        ]
+        self.assertEqual(matches, [(original, expected)])
+        self.assertEqual(
+            (original + "; " + original).replace(*matches[0]),
+            expected + "; " + expected,
+        )
+
     def test_regex_fixups_compile_each_distinct_selector_once(self):
         copy_to_native.compiled_fixup_regex.cache_clear()
         self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)

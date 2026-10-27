@@ -114,7 +114,7 @@ done:
 }
 
 // decomp: BATTLE.PRG func_800DC888 (src/BATTLE/BATTLE.PRG/74088.c:473)
-void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* arg0)
+void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_actor_rows)
 {
     int i;
     Battle_Ai_ActionTiming* row;
@@ -122,7 +122,7 @@ void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* arg0)
     if (Battle_Ai_planningWorkspace->opaque4.opaque40 == 0) {
         Battle_ActionDefinition* action = &Battle_actionDefinitions[Battle_Ai_planningWorkspace->opaque0];
 
-        row = &arg0[Battle_Ai_planningWorkspace->opaque4.opaque0];
+        row = &simulated_actor_rows[Battle_Ai_planningWorkspace->opaque4.opaque0];
 
         switch (action->type) {
         case Battle_ActionType_Spell:
@@ -143,7 +143,7 @@ void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* arg0)
         Battle_Ai_EngagementActor* entry = i < 0 ? &Battle_Ai_planningWorkspace->opaque4 : &Battle_Ai_planningWorkspace->opaque4C[i];
 
         if (entry->opaque40 == 0) {
-            row = &arg0[entry->opaque0];
+            row = &simulated_actor_rows[entry->opaque0];
             Battle_Ai_ApplySimulatedStatDelta(&row->opaque4, &row->opaque6, entry->opaque4, entry->opaque1CBit0);
             Battle_Ai_ApplySimulatedStatDelta(&row->opaque8, &row->opaqueA, entry->opaque6, entry->opaque1CBit2);
             Battle_Ai_ApplySimulatedStatDelta(&row->opaque10, &row->opaque12, entry->opaque38, entry->opaque1EBit2);
@@ -156,37 +156,37 @@ void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* arg0)
 
 // decomp: BATTLE.PRG func_800DCAA0 (src/BATTLE/BATTLE.PRG/74088.c:513)
 void Battle_Ai_SimulateActionCandidate(
-    Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionTiming* arg1, Battle_Ai_ActionCandidate* arg2, int arg3)
+    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode)
 {
-    SVECTOR sp20;
-    SVECTOR sp28;
-    int temp_s0 = arg2->targetId;
-    int temp_v0;
+    SVECTOR simulated_source_position;
+    SVECTOR target_position;
+    int target_actor_slot = candidate->targetId;
+    int action_available;
 
-    if (arg3 != 3) {
-        temp_v0 =
-            Battle_PreviewActionAgainstLimb(arg2->action, arg0->actorId, temp_s0, arg2->targetLimb, Battle_Ai_planningWorkspace);
+    if (simulation_mode != 3) {
+        action_available =
+            Battle_PreviewActionAgainstLimb(candidate->action, ai_state->actorId, target_actor_slot, candidate->targetLimb, Battle_Ai_planningWorkspace);
     } else {
-        Actors_ActorRecord* actor = Actors_actorRecords[temp_s0];
-        sp28.vx = actor->instance.position.vx;
-        sp28.vz = actor->instance.position.vz;
-        sp28.vy = actor->instance.position.vy - arg2->opaqueCBit7;
-        *(int*)&sp20.vx = *(int*)&sp28.vx;
-        sp20.vz = sp28.vz + Core_Math_SquareRootInteger(arg2->distanceSquared);
-        temp_v0 = ((int (*)(int, int, int, int, SVECTOR*, SVECTOR*, void*))Battle_PreviewActionAgainstActor)(
-            arg2->action, arg0->actorId, temp_s0, arg2->targetLimb, &sp20, &sp28, Battle_Ai_planningWorkspace);
+        Actors_ActorRecord* actor = Actors_actorRecords[target_actor_slot];
+        target_position.vx = actor->instance.position.vx;
+        target_position.vz = actor->instance.position.vz;
+        target_position.vy = actor->instance.position.vy - candidate->opaqueCBit7;
+        *(int*)&simulated_source_position.vx = *(int*)&target_position.vx;
+        simulated_source_position.vz = target_position.vz + Core_Math_SquareRootInteger(candidate->distanceSquared);
+        action_available = ((int (*)(int, int, int, int, SVECTOR*, SVECTOR*, void*))Battle_PreviewActionAgainstActor)(
+            candidate->action, ai_state->actorId, target_actor_slot, candidate->targetLimb, &simulated_source_position, &target_position, Battle_Ai_planningWorkspace);
     }
-    if (temp_v0 != 0) {
-        Battle_Ai_ApplySimulatedActionResults(arg1);
+    if (action_available != 0) {
+        Battle_Ai_ApplySimulatedActionResults(simulated_actor_rows);
     }
 }
 
 // decomp: BATTLE.PRG func_800DCBD8 (src/BATTLE/BATTLE.PRG/74088.c:539)
-void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* arg0)
+void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate)
 {
     int i;
     int threshold = 0;
-    int id = arg0->targetId;
+    int id = candidate->targetId;
 
     for (i = 0; i < Battle_Ai_planningWorkspace->opaque4A; ++i) {
         Battle_Ai_EngagementActor* entry = &Battle_Ai_planningWorkspace->opaque4C[i];
@@ -196,7 +196,7 @@ void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* arg0)
         }
     }
 
-    arg0->weight = threshold + (threshold >> 2) + (threshold >> 5);
+    candidate->weight = threshold + (threshold >> 2) + (threshold >> 5);
 }
 
 // decomp: BATTLE.PRG _getStatusScore (src/BATTLE/BATTLE.PRG/74088.c:565)
@@ -264,38 +264,38 @@ int Battle_Ai_ActorEquipmentDpRatio(Battle_Ai_ActionTiming* stats, int id)
 
 // decomp: BATTLE.PRG func_800DCC94 (src/BATTLE/BATTLE.PRG/74088.c:620)
 void Battle_Ai_EvaluateActionCandidate(
-    Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1, int arg2, Battle_ActionDefinition* arg3)
+    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate, int simulation_mode, Battle_ActionDefinition* action_definition)
 {
     int special = 0;
     Battle_ActionAiFlags flags = { 0 };
     Battle_Actor* actor;
     Battle_Ai_ActionTiming* stats;
 
-    if (arg3 != NULL) {
-        flags = arg3->aiFlags;
+    if (action_definition != NULL) {
+        flags = action_definition->aiFlags;
     }
 
     if (flags.rarelyChosen && (Core_Random_Rand() & 0x7F) < 115) {
-        arg1->opaque0 = 0x80000000;
+        candidate->opaque0 = 0x80000000;
         return;
     }
 
-    arg1->opaque0 = 0;
-    arg1->weight = 128;
+    candidate->opaque0 = 0;
+    candidate->weight = 128;
     stats = (Battle_Ai_ActionTiming*)((uintptr_t)Core_ScratchBase() + 0x18C);
     Battle_Ai_CaptureActorConditionTable(stats);
 
-    if (arg0->settingsModeLow && flags.opaque0Bit4) {
+    if (ai_state->settingsModeLow && flags.opaque0Bit4) {
         special = 1;
-        arg1->weight = 40;
-    } else if (arg2 != 0) {
-        Battle_Ai_SimulateActionCandidate(arg0, stats, arg1, arg2);
-        Battle_Ai_UpdateCandidateHitWeight(arg1);
+        candidate->weight = 40;
+    } else if (simulation_mode != 0) {
+        Battle_Ai_SimulateActionCandidate(ai_state, stats, candidate, simulation_mode);
+        Battle_Ai_UpdateCandidateHitWeight(candidate);
     }
 
     for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
         int id = actor->id;
-        int kind = arg0->relations[id].classification;
+        int kind = ai_state->relations[id].classification;
         int value;
 
         if (kind == 1) {
@@ -309,32 +309,32 @@ void Battle_Ai_EvaluateActionCandidate(
             value = -value;
         }
 
-        arg1->opaque0 += value;
+        candidate->opaque0 += value;
     }
 
     if (special) {
-        ++arg1->opaque0;
+        ++candidate->opaque0;
     }
 
-    arg1->opaque0 = arg1->opaque0 * 128 + arg1->weight;
+    candidate->opaque0 = candidate->opaque0 * 128 + candidate->weight;
 }
 
 // decomp: BATTLE.PRG func_800DD604 (src/BATTLE/BATTLE.PRG/74088.c:899)
-void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* arg0)
+void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state)
 {
     u_int best = 0;
     int row;
     int col;
-    Battle_Ai_ActionCandidate* choice = &arg0->currentChoice;
-    Battle_ActorStats* stats = arg0->stats;
+    Battle_Ai_ActionCandidate* choice = &ai_state->currentChoice;
+    Battle_ActorStats* stats = ai_state->stats;
 
     for (row = 0; row < 6; ++row) {
         for (col = 0; col < 4; ++col) {
             int action = stats->limbActions[row][col].actionId;
-            Battle_Ai_ActionSlotMetadata* config = &arg0->actionSlots[row][col];
+            Battle_Ai_ActionSlotMetadata* config = &ai_state->actionSlots[row][col];
             Battle_Ai_CandidateFlags flags;
 
-            if (!Battle_Ai_RefreshAiActionUsability(arg0, row, col) || !config->special
+            if (!Battle_Ai_RefreshAiActionUsability(ai_state, row, col) || !config->special
                 || best >= config->rangeSquared) {
                 continue;
             }
@@ -360,7 +360,7 @@ void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* arg0)
 }
 
 // decomp: BATTLE.PRG func_800DD918 (src/BATTLE/BATTLE.PRG/74088.c:1007)
-void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
+void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int readiness_threshold)
 {
     Battle_Ai_ActionCandidate* list = (Battle_Ai_ActionCandidate*)((uintptr_t)Core_ScratchBase() + 0x30C);
     Battle_Ai_ActionCandidate* candidate;
@@ -375,16 +375,16 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
 
     Core_Memory_ClearAlignedWords(list, sizeof *list);
     list[0].distanceSquared = 256;
-    list[0].threshold = arg1;
-    Battle_Ai_EvaluateActionCandidate(arg0, list, 0, NULL);
+    list[0].threshold = readiness_threshold;
+    Battle_Ai_EvaluateActionCandidate(ai_state, list, 0, NULL);
     Battle_Ai_CopyActionCandidate(&list[1], list);
-    list[1].threshold = arg1;
+    list[1].threshold = readiness_threshold;
     candidate = &list[1];
 
     for (row = 0; row < 6; ++row) {
         for (col = 0; col < 4; ++col) {
-            int action = arg0->stats->limbActions[row][col].actionId;
-            Battle_Ai_ActionSlotMetadata* config = &arg0->actionSlots[row][col];
+            int action = ai_state->stats->limbActions[row][col].actionId;
+            Battle_Ai_ActionSlotMetadata* config = &ai_state->actionSlots[row][col];
             Battle_ActionDefinition* info = &Battle_actionDefinitions[action];
             int flag;
 
@@ -414,17 +414,17 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
                 list[1].opaque10.opaque0Bit5 = Battle_Ai_IsActionBeneficialToActor(action, id);
                 list[1].opaque10.opaque0Bit0 = config->longRange && list[1].opaque10.opaque0Bit4;
 
-                if (!Battle_Ai_CanAiActionAffectActor(arg0, candidate, id) || Battle_Ai_candidateExclusions[id][action]) {
+                if (!Battle_Ai_CanAiActionAffectActor(ai_state, candidate, id) || Battle_Ai_candidateExclusions[id][action]) {
                     continue;
                 }
 
                 switch (config->kind) {
                 case 1:
-                    Battle_Ai_EvaluateActionCandidate(arg0, candidate, 1, info);
+                    Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 1, info);
                     Battle_Ai_CacheFallbackActionCandidate(candidate, info);
 
                     if (list[1].opaque0 > list[0].opaque0) {
-                        Battle_Ai_AppendActionCandidate(arg0, candidate);
+                        Battle_Ai_AppendActionCandidate(ai_state, candidate);
                     }
                     break;
 
@@ -442,7 +442,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
 
                         last = limb;
                         list[1].targetLimb = last;
-                        Battle_Ai_EvaluateActionCandidate(arg0, candidate, 2, info);
+                        Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 2, info);
                         chance = list[1].weight;
 
                         if ((Core_Random_Rand() & 0x7F) < chance && list[1].opaque0 > list[2].opaque0) {
@@ -467,9 +467,9 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
                     }
 
                     if (list[2].opaque0 > list[0].opaque0) {
-                        Battle_Ai_AppendActionCandidate(arg0, &list[2]);
+                        Battle_Ai_AppendActionCandidate(ai_state, &list[2]);
                     } else if (list[0].opaque0 < list[3].opaque0) {
-                        Battle_Ai_AppendActionCandidate(arg0, &list[3]);
+                        Battle_Ai_AppendActionCandidate(ai_state, &list[3]);
                     }
                     break;
 
@@ -483,7 +483,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
                         int chance;
 
                         list[1].opaqueCBit7 = ABS(target->pointHeight);
-                        Battle_Ai_EvaluateActionCandidate(arg0, candidate, 3, info);
+                        Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 3, info);
                         chance = list[1].weight;
 
                         if ((Core_Random_Rand() & 0x7F) < chance && list[1].opaque0 > list[2].opaque0) {
@@ -498,9 +498,9 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
                     Battle_Ai_CacheFallbackActionCandidate(&list[1], info);
 
                     if (list[2].opaque0 > list[0].opaque0) {
-                        Battle_Ai_AppendActionCandidate(arg0, &list[2]);
+                        Battle_Ai_AppendActionCandidate(ai_state, &list[2]);
                     } else if (list[0].opaque0 < list[3].opaque0) {
-                        Battle_Ai_AppendActionCandidate(arg0, &list[3]);
+                        Battle_Ai_AppendActionCandidate(ai_state, &list[3]);
                     }
                     break;
                 }
@@ -510,12 +510,12 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1)
 }
 
 // decomp: BATTLE.PRG func_800DE030 (src/BATTLE/BATTLE.PRG/74088.c:1167)
-void Battle_Ai_AdvancePlanningSimulation(int arg0)
+void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step)
 {
     Battle_Actor* actor;
-    int ticks = (arg0 >> 5) + (arg0 >> 9);
+    int ticks = (simulation_time_step >> 5) + (simulation_time_step >> 9);
 
-    Battle_Ai_roomAiState->readinessLevel += arg0;
+    Battle_Ai_roomAiState->readinessLevel += simulation_time_step;
 
     for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
         Battle_ActorStats* stats = actor->stats;
@@ -543,7 +543,7 @@ void Battle_Ai_AdvancePlanningSimulation(int arg0)
             statuses &= ~0x10;
         }
 
-        amount = arg0 / 240;
+        amount = simulation_time_step / 240;
 
         if (amount > 0) {
             stats->currentHp += amount - 1;
@@ -553,7 +553,7 @@ void Battle_Ai_AdvancePlanningSimulation(int arg0)
             stats->currentHp = stats->maxHp;
         }
 
-        amount = arg0 / 180;
+        amount = simulation_time_step / 180;
 
         if (amount > 0) {
             stats->currentMp += amount - 1;
@@ -777,41 +777,41 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
 #undef MIN
 
 // decomp: BATTLE.PRG func_800DEB10 (src/BATTLE/BATTLE.PRG/74088.c:1458)
-void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* arg0)
+void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* completed_action)
 {
     int i;
     int j;
     Battle_Ai_ActorAiState* entry;
-    Battle_Ai_EngagementData* temp_t1;
+    Battle_Ai_EngagementData* command_actor;
 
-    if (arg0 == NULL) {
+    if (completed_action == NULL) {
         return;
     }
 
-    if (arg0->opaque4.opaque40 != 0) {
+    if (completed_action->opaque4.opaque40 != 0) {
         return;
     }
 
-    entry = Battle_Ai_actorAiStates[arg0->opaque4.opaque0];
-    temp_t1 = entry->actor;
+    entry = Battle_Ai_actorAiStates[completed_action->opaque4.opaque0];
+    command_actor = entry->actor;
 
     if (entry == NULL) {
         return;
     }
 
-    if (temp_t1->opaque9 != 24) {
+    if (command_actor->opaque9 != 24) {
         return;
     }
 
     for (i = 0; i < entry->candidateCount; ++i) {
         Battle_Ai_ActionCandidate** list = entry->candidateOrder;
-        Battle_Ai_ActionCandidate* temp_a2 = list[i];
+        Battle_Ai_ActionCandidate* candidate = list[i];
 
-        if ((arg0->opaque0 == temp_a2->action) && (temp_t1->opaqueC == temp_a2->row)
-            && (temp_t1->opaqueE == temp_a2->column)) {
-            entry->opaqueFB = temp_a2->targetId;
-            for (j = 0; j < arg0->opaque4A; ++j) {
-                Battle_Ai_EngagementActor* elem = &arg0->opaque4C[j];
+        if ((completed_action->opaque0 == candidate->action) && (command_actor->opaqueC == candidate->row)
+            && (command_actor->opaqueE == candidate->column)) {
+            entry->opaqueFB = candidate->targetId;
+            for (j = 0; j < completed_action->opaque4A; ++j) {
+                Battle_Ai_EngagementActor* elem = &completed_action->opaque4C[j];
 
                 if (elem->opaque40 == 0) {
                     Field_GimmickInstance* actor = Field_gimmickInstances[elem->opaque0];

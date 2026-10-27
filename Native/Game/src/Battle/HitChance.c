@@ -171,25 +171,25 @@ short Battle_DefenseGemHitBonus(Battle_ActionDefinition* action, Battle_ActorSta
 }
 
 // decomp: BATTLE.PRG _invalidHitFunction (src/BATTLE/BATTLE.PRG/146C.c:9860)
-int Battle_IgnoreHitCallback(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)))
+int Battle_IgnoreHitCallback(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)))
 {
 }
 
 // decomp: BATTLE.PRG func_8007E97C (src/BATTLE/BATTLE.PRG/146C.c:9867)
-int Battle_PreviousHitSuccessThreshold(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)))
+int Battle_PreviousHitSuccessThreshold(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)))
 {
     return Battle_previousHitResult != 0 ? 100 : 255;
 }
 
 // decomp: BATTLE.PRG _getHitGemModifier (src/BATTLE/BATTLE.PRG/146C.c:9875)
 int Battle_GemHitChance(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target,
-    int hitNumber, int arg4 __attribute__((unused)))
+    int hitNumber, int execute_action __attribute__((unused)))
 {
     int gemModifier = 100;
     if ((source != NULL) && (source->targetsPosition == 0)) {
@@ -239,8 +239,8 @@ int Battle_AgilityHitChance(Battle_ActionDefinition* action, Battle_HitResult* s
 
     if (addVariance != 0) {
         int variance = Core_Random_NextAveraged(11);
-        int v1 = agiDiff - 5;
-        agiDiff = v1 + variance;
+        int variance_base_chance = agiDiff - 5;
+        agiDiff = variance_base_chance + variance;
     }
 
     agiDiff += Battle_AttackGemHitBonus(action, sourceActor);
@@ -291,8 +291,8 @@ int Battle_IntelligenceHitChance(Battle_ActionDefinition* action, Battle_HitResu
 
     if (addVariance != 0) {
         int variance = Core_Random_NextAveraged(11);
-        int v1 = intDiff - 5;
-        intDiff = v1 + variance;
+        int variance_base_chance = intDiff - 5;
+        intDiff = variance_base_chance + variance;
     }
 
     intDiff += Battle_AttackGemHitBonus(action, sourceActor);
@@ -345,8 +345,8 @@ int Battle_CostAdjustedAgilityHitChance(Battle_ActionDefinition* action, Battle_
 
     if (addVariance != 0) {
         int variance = Core_Random_NextAveraged(11);
-        int v1 = agiDiff - 5;
-        agiDiff = v1 + variance;
+        int variance_base_chance = agiDiff - 5;
+        agiDiff = variance_base_chance + variance;
     }
 
     agiDiff += Battle_AttackGemHitBonus(action, sourceActor);
@@ -362,9 +362,9 @@ int Battle_CostAdjustedAgilityHitChance(Battle_ActionDefinition* action, Battle_
 }
 
 // decomp: BATTLE.PRG _getRiskModifier (src/BATTLE/BATTLE.PRG/146C.c:10045)
-int Battle_RiskHitChance(Battle_ActionDefinition* arg0 __attribute__((unused)), Battle_HitResult* source,
-    Battle_HitResult* arg2 __attribute__((unused)), int hitNumber __attribute__((unused)),
-    int arg4 __attribute__((unused)))
+int Battle_RiskHitChance(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source,
+    Battle_HitResult* target_hit __attribute__((unused)), int hitNumber __attribute__((unused)),
+    int execute_action __attribute__((unused)))
 {
     int rate =
         ((Battle_actors[source->target.targetActor]->stats->risk + 150) * 100) / 256;
@@ -375,9 +375,9 @@ int Battle_RiskHitChance(Battle_ActionDefinition* arg0 __attribute__((unused)), 
 }
 
 // decomp: BATTLE.PRG _getChainEvasionModifier (src/BATTLE/BATTLE.PRG/146C.c:10057)
-int Battle_ChainHitChance(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* target,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_ChainHitChance(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
     int rate;
 

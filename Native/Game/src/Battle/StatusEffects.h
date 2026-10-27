@@ -107,111 +107,111 @@ extern Menu_Framework_PreviewPoseState* Battle_unusedGlobal1[1];
 extern int Battle_unusedGlobal2;
 extern Battle_StatusEffectParams Battle_statusEffectParams[32];
 void Battle_PreserveAshleyStatuses(void);
-int Battle_QueueApplicableStatusChanges(int arg0, Battle_HitResult* entity);
-int Battle_QueueStatusRemovalMask(int arg0, Battle_HitResult* entity);
-int Battle_QueueStrengthDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueIntelligenceDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueAgilityDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueEquipmentDown(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueHalfMovement(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueStrengthUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueIntelligenceUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueAgilityUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueEquipmentUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueQuicken(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueSilence(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueMagicWard(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)));
-int Battle_QueueRegeneration(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueBanish(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4);
-int Battle_QueueParalysis(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueuePoison(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueNumbness(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueCurse(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueAirAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueFireAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueEarthAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueWaterAttackUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueAirDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueFireDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueEarthDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueWaterDefenseUp(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueParalysisCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueuePoisonCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueCurseCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueNumbnessCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueDispel(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-int Battle_QueueNegativeStatusCure(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
-void Battle_RemoveActorStatuses(int arg0, Battle_ActorStats* arg1);
-void Battle_ApplyWeaponElementEnchantment(Battle_ActorStats* arg0, int arg1, int arg2, int arg3);
-void Battle_ApplyArmorElementEnchantment(Battle_ActorStats* arg0, int arg1, int arg2, int arg3);
-void Battle_InflictActorStatuses(int arg0, Battle_ActorStats* arg1);
-void Battle_QueueActorStatChangeNumber(int arg0, int arg1, int arg2, int arg3);
-void Battle_ApplyActorActionResult(Battle_HitResult* arg0);
+int Battle_QueueApplicableStatusChanges(int status_id, Battle_HitResult* entity);
+int Battle_QueueStatusRemovalMask(int status_id, Battle_HitResult* entity);
+int Battle_QueueStrengthDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueIntelligenceDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueAgilityDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueEquipmentDown(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueHalfMovement(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueStrengthUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueIntelligenceUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueAgilityUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueEquipmentUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueQuicken(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueSilence(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueMagicWard(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)));
+int Battle_QueueRegeneration(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueBanish(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action);
+int Battle_QueueParalysis(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueuePoison(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueNumbness(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueCurse(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueAirAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueFireAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueEarthAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueWaterAttackUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueAirDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueFireDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueEarthDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueWaterDefenseUp(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueParalysisCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueuePoisonCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueCurseCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueNumbnessCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueDispel(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+int Battle_QueueNegativeStatusCure(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
+void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats);
+void Battle_ApplyWeaponElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount);
+void Battle_ApplyArmorElementEnchantment(Battle_ActorStats* actor_stats, int increased_affinity, int decreased_affinity, int modifier_amount);
+void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats);
+void Battle_QueueActorStatChangeNumber(int actor_slot, int limb_tag, int encoded_amount, int label_flags);
+void Battle_ApplyActorActionResult(Battle_HitResult* hit_result);
 void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor);
 int Battle_UpdateActorVitals(void);
 int Battle_UpdateRoomActorVitals(void);

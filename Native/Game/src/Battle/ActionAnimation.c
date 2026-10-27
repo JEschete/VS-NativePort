@@ -24,147 +24,147 @@ int Battle_chainAbilityAnimationSide;
 char Battle_specialActionPitch;
 
 // decomp: BATTLE.PRG func_8009DD00 (src/BATTLE/BATTLE.PRG/30DB0.c:2331)
-void Battle_PlayMeleeAttackAnimation(int arg0, SVECTOR* arg1, int arg2)
+void Battle_PlayMeleeAttackAnimation(int actor_slot, SVECTOR* target_position, int animation_parameter)
 {
     int _[2];
-    Actors_ActorRecord* temp_s0;
-    int temp_v0;
-    int var_a1;
+    Actors_ActorRecord* actor;
+    int target_pitch;
+    int animation_id;
 
-    temp_s0 = Actors_actorRecords[arg0];
-    if (temp_s0 != NULL) {
-        temp_s0->instance.facingDelta = Actors_ActorFacingDeltaToPoint(temp_s0, arg1);
-        temp_s0->instance.turnFrames = 0xA;
-        if (temp_s0->collisionRadius >= 0x81U) {
-            temp_s0->instance.turnFrames = 0x14;
+    actor = Actors_actorRecords[actor_slot];
+    if (actor != NULL) {
+        actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, target_position);
+        actor->instance.turnFrames = 0xA;
+        if (actor->collisionRadius >= 0x81U) {
+            actor->instance.turnFrames = 0x14;
         }
 
-        temp_v0 = Actors_ActorPitchToPoint(temp_s0, arg1);
+        target_pitch = Actors_ActorPitchToPoint(actor, target_position);
 
-        if (temp_v0 >= -0xE4) {
-            var_a1 = 0x49;
-            if (temp_v0 >= 0xAC) {
-                var_a1 = 0x4A;
-                if ((temp_v0 >= 0x301) && (arg2 == 0) && (temp_s0->modelId == 0x28)) {
-                    var_a1 = 0x4E;
+        if (target_pitch >= -0xE4) {
+            animation_id = 0x49;
+            if (target_pitch >= 0xAC) {
+                animation_id = 0x4A;
+                if ((target_pitch >= 0x301) && (animation_parameter == 0) && (actor->modelId == 0x28)) {
+                    animation_id = 0x4E;
                 }
             }
         } else {
-            var_a1 = 0x48;
+            animation_id = 0x48;
         }
 
-        Actors_PlayActorAnimation(arg0, var_a1, 0, 6);
-        Actors_ResetActorHeadTrackingSpeed(temp_s0);
+        Actors_PlayActorAnimation(actor_slot, animation_id, 0, 6);
+        Actors_ResetActorHeadTrackingSpeed(actor);
     }
 }
 
 // decomp: BATTLE.PRG func_8009DDF4 (src/BATTLE/BATTLE.PRG/30DB0.c:2365)
-void Battle_PlayDefenseAnimation(int arg0, SVECTOR* arg1)
+void Battle_PlayDefenseAnimation(int actor_slot, SVECTOR* target_position)
 {
     int _[3] __attribute__((unused));
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
 
-    if (temp_s0->instance.weaponDrawn
-        && ((temp_s0->instance.slot == 0)
-            || (!temp_s0->instance.motionLocked && !temp_s0->instance.isJumping
-                && ((temp_s0->instance.movementMode != 2)) && (temp_s0->instance.movementMode != 3)))) {
-        int var_s1;
-        int var_a1;
-        int temp_v0;
+    if (actor->instance.weaponDrawn
+        && ((actor->instance.slot == 0)
+            || (!actor->instance.motionLocked && !actor->instance.isJumping
+                && ((actor->instance.movementMode != 2)) && (actor->instance.movementMode != 3)))) {
+        int blend_frames;
+        int animation_id;
+        int target_pitch;
 
-        if (temp_s0->collisionRadius < 0x80) {
-            temp_s0->instance.facingDelta = Actors_ActorFacingDeltaToPoint(temp_s0, arg1);
-            temp_s0->instance.turnFrames = 4;
-            var_s1 = 8;
+        if (actor->collisionRadius < 0x80) {
+            actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, target_position);
+            actor->instance.turnFrames = 4;
+            blend_frames = 8;
         } else {
-            var_s1 = 4;
+            blend_frames = 4;
         }
 
-        temp_v0 = Actors_ActorPitchToPoint(temp_s0, arg1);
-        var_a1 = 0x4F;
+        target_pitch = Actors_ActorPitchToPoint(actor, target_position);
+        animation_id = 0x4F;
 
-        if (temp_v0 >= -0xE4) {
-            var_a1 = 0x50;
-            if (temp_v0 >= 0xAC) {
-                var_a1 = 0x51;
+        if (target_pitch >= -0xE4) {
+            animation_id = 0x50;
+            if (target_pitch >= 0xAC) {
+                animation_id = 0x51;
             }
         }
 
-        Actors_PlayActorAnimation(arg0, var_a1, 0, var_s1);
-        Actors_ResetActorHeadTrackingSpeed(temp_s0);
+        Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
+        Actors_ResetActorHeadTrackingSpeed(actor);
     }
 
-    if (temp_s0->instance.slot == 0) {
-        if (temp_s0->instance.movementMode != 3) {
-            temp_s0->instance.movementMode = 0;
+    if (actor->instance.slot == 0) {
+        if (actor->instance.movementMode != 3) {
+            actor->instance.movementMode = 0;
         }
-        temp_s0->instance.jumpCountdown = 0;
+        actor->instance.jumpCountdown = 0;
     }
 }
 
 // decomp: BATTLE.PRG func_8009DF3C (src/BATTLE/BATTLE.PRG/30DB0.c:2408)
-void Battle_SetEnemyCombatPose(int arg0, int arg1)
+void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode)
 {
-    u_short* sp10;
-    Actors_ActorRecord* temp_s2 = Actors_actorRecords[arg0];
+    u_short* animation_header;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
 
-    int var_s0 = 0;
-    int var_s1 = 0;
+    int animation_id = 0;
+    int blend_frames = 0;
 
-    if (temp_s2->instance.slot == 0) {
+    if (actor->instance.slot == 0) {
         return;
     }
 
-    switch (arg1) {
+    switch (pose_mode) {
     case 0:
-        var_s0 = 6;
+        animation_id = 6;
         break;
     case 1:
-        var_s0 = 0xC6;
+        animation_id = 0xC6;
         break;
     case 2:
-        var_s0 = 0xC8;
+        animation_id = 0xC8;
         break;
     case 3:
-        var_s0 = temp_s2->animationId;
-        if ((var_s0 != 0xC6) && (var_s0 != 0xC8)) {
+        animation_id = actor->animationId;
+        if ((animation_id != 0xC6) && (animation_id != 0xC8)) {
             return;
         }
-        ++var_s0;
-        var_s1 = 8;
-        Actors_FindActorAnimationHeader(temp_s2, var_s0, &sp10);
-        if (sp10 == NULL) {
-            var_s0 = 6;
-            var_s1 = 0x10;
+        ++animation_id;
+        blend_frames = 8;
+        Actors_FindActorAnimationHeader(actor, animation_id, &animation_header);
+        if (animation_header == NULL) {
+            animation_id = 6;
+            blend_frames = 0x10;
         }
         break;
     }
 
-    Actors_PlayActorAnimation(arg0, var_s0, 0, var_s1);
-    if (arg1 < 3) {
-        Core_Memory_CopyAlignedWords(&temp_s2->blendPose, &temp_s2->pose, sizeof temp_s2->blendPose);
+    Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
+    if (pose_mode < 3) {
+        Core_Memory_CopyAlignedWords(&actor->blendPose, &actor->pose, sizeof actor->blendPose);
     }
 }
 
 // decomp: BATTLE.PRG func_8009E2E0 (src/BATTLE/BATTLE.PRG/30DB0.c:2554)
-void Battle_PlaySpellCastAnimation(int arg0, SVECTOR* arg1, int arg2)
+void Battle_PlaySpellCastAnimation(int actor_slot, SVECTOR* target_position, int cast_phase)
 {
-    u_char sp10[2] = { 0x55, 0x58 };
-    u_char sp18[2] = { 0x57, 0x59 };
-    u_short* sp20;
+    u_char cast_animations[2] = { 0x55, 0x58 };
+    u_char fallback_cast_animations[2] = { 0x57, 0x59 };
+    u_short* animation_header;
     int angle;
     int diff;
     int anim;
-    Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
 
     if (actor == NULL) {
         return;
     }
 
-    if (arg2 == 0) {
-        if (arg1 != NULL) {
-            int dx = arg1->vx - actor->instance.position.vx;
-            int dz = arg1->vz - actor->instance.position.vz;
+    if (cast_phase == 0) {
+        if (target_position != NULL) {
+            int dx = target_position->vx - actor->instance.position.vx;
+            int dz = target_position->vz - actor->instance.position.vz;
 
             if (dx == 0 && dz == 0) {
                 angle = actor->instance.facing;
@@ -193,149 +193,149 @@ void Battle_PlaySpellCastAnimation(int arg0, SVECTOR* arg1, int arg2)
         }
     }
 
-    anim = sp10[arg2];
+    anim = cast_animations[cast_phase];
 
     if (actor->instance.weaponDrawn) {
         anim += 100;
     }
 
-    Actors_FindActorAnimationHeader(actor, anim, &sp20);
+    Actors_FindActorAnimationHeader(actor, anim, &animation_header);
 
-    if (sp20 == 0) {
-        anim = sp18[arg2];
+    if (animation_header == 0) {
+        anim = fallback_cast_animations[cast_phase];
         if (actor->instance.weaponDrawn) {
             anim += 100;
         }
     }
 
-    Actors_PlayActorAnimation(arg0, anim, 0, 6);
+    Actors_PlayActorAnimation(actor_slot, anim, 0, 6);
     Actors_ResetActorHeadTrackingSpeed(actor);
 }
 
 // decomp: BATTLE.PRG func_8009EA14 (src/BATTLE/BATTLE.PRG/30DB0.c:2837)
-void Battle_PlayActorDamageReaction(int arg0, SVECTOR* arg1)
+void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
 {
-    SVECTOR sp10;
-    Actors_ActorRecord* temp_s1;
-    int temp_a0;
-    int temp_a1;
+    SVECTOR bone_position;
+    Actors_ActorRecord* actor;
+    int source_delta_z;
+    int source_delta_x;
     int var_s0;
-    int temp_v1;
-    int temp_v1_2;
-    int var_s4;
-    int var_v1;
-    int var_v1_2;
-    u_int var_v0;
+    int distance_delta_z;
+    int source_facing_delta;
+    int blend_frames;
+    int source_pitch;
+    int distance_z_squared;
+    u_int biased_facing_delta;
 
     // var_s4 = saved_reg_s4;
 
-    temp_s1 = Actors_actorRecords[arg0];
+    actor = Actors_actorRecords[actor_slot];
 
-    if (temp_s1 != NULL) {
+    if (actor != NULL) {
 
         var_s0 = 0x5B;
 
-        if (!(temp_s1->actionPoseActive << 3)) {
-            if (arg0 == 0) {
+        if (!(actor->actionPoseActive << 3)) {
+            if (actor_slot == 0) {
 
-                var_v1 = 0;
+                source_pitch = 0;
 
-                if (arg1 != NULL) {
+                if (source_position != NULL) {
 
-                    var_s0 = arg1->vx - temp_s1->instance.position.vx;
+                    var_s0 = source_position->vx - actor->instance.position.vx;
                     var_s0 *= var_s0;
-                    temp_v1 = arg1->vz - temp_s1->instance.position.vz;
+                    distance_delta_z = source_position->vz - actor->instance.position.vz;
 
                     if (var_s0 < 0) {
                         var_s0 = -var_s0;
                     }
 
-                    var_v1_2 = temp_v1 * temp_v1;
+                    distance_z_squared = distance_delta_z * distance_delta_z;
 
-                    if (var_v1_2 < 0) {
-                        var_v1_2 = -var_v1_2;
+                    if (distance_z_squared < 0) {
+                        distance_z_squared = -distance_z_squared;
                     }
 
-                    var_s0 = Core_Math_SquareRootInteger(var_s0 + var_v1_2);
-                    Actors_ActorBonePosition(temp_s1->instance.slot, 0, &sp10, 0);
-                    var_v1 = Core_Gte_Atan2(arg1->vy - sp10.vy, var_s0);
+                    var_s0 = Core_Math_SquareRootInteger(var_s0 + distance_z_squared);
+                    Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
+                    source_pitch = Core_Gte_Atan2(source_position->vy - bone_position.vy, var_s0);
                 }
 
                 var_s0 = 0x45;
 
-                if (var_v1 >= -0xE4) {
+                if (source_pitch >= -0xE4) {
                     var_s0 = 0x44;
-                    if (var_v1 < 0xAC) {
+                    if (source_pitch < 0xAC) {
                         goto block_11;
                     }
                 }
             } else {
             block_11:
-                temp_v1_2 = 0;
+                source_facing_delta = 0;
 
-                if (arg1 != NULL) {
+                if (source_position != NULL) {
 
-                    temp_a1 = arg1->vx - temp_s1->instance.position.vx;
-                    temp_a0 = arg1->vz - temp_s1->instance.position.vz;
+                    source_delta_x = source_position->vx - actor->instance.position.vx;
+                    source_delta_z = source_position->vz - actor->instance.position.vz;
 
-                    if ((temp_a1 == 0) && (temp_a0 == 0)) {
-                        temp_v1_2 = temp_s1->instance.facing;
+                    if ((source_delta_x == 0) && (source_delta_z == 0)) {
+                        source_facing_delta = actor->instance.facing;
                     } else {
-                        temp_v1_2 = (0xC00 - Core_Gte_Atan2(temp_a0, temp_a1)) & 0xFFF;
+                        source_facing_delta = (0xC00 - Core_Gte_Atan2(source_delta_z, source_delta_x)) & 0xFFF;
                     }
 
-                    temp_v1_2 = temp_v1_2 - temp_s1->instance.facing;
+                    source_facing_delta = source_facing_delta - actor->instance.facing;
 
-                    if (temp_v1_2 > 0x800) {
-                        temp_v1_2 = temp_v1_2 - 0x1000;
+                    if (source_facing_delta > 0x800) {
+                        source_facing_delta = source_facing_delta - 0x1000;
                     } else {
-                        if (temp_v1_2 < -0x800) {
-                            temp_v1_2 = temp_v1_2 + 0x1000;
+                        if (source_facing_delta < -0x800) {
+                            source_facing_delta = source_facing_delta + 0x1000;
                         }
                     }
                 }
 
-                var_v0 = temp_v1_2 + 0x200;
+                biased_facing_delta = source_facing_delta + 0x200;
                 var_s0 = 0x40;
 
-                if (var_v0 >= 0x801) {
+                if (biased_facing_delta >= 0x801) {
                     var_s0 = 0x42;
                 }
             }
         }
 
-        if (temp_s1->instance.locomotionState == 2) {
-            if (temp_s1->instance.supportLayer) {
-                ((void (*)(int, int))Field_SetMovingPlatformActor)(temp_s1->instance.supportLayer - 2, -1);
-                temp_s1->instance.supportLayer = 0;
+        if (actor->instance.locomotionState == 2) {
+            if (actor->instance.supportLayer) {
+                ((void (*)(int, int))Field_SetMovingPlatformActor)(actor->instance.supportLayer - 2, -1);
+                actor->instance.supportLayer = 0;
             }
             var_s0 = 0x3B;
         } else {
-            if (temp_s1->instance.reactionState == 3) {
-                Actors_CancelActorTeleportTransition(temp_s1);
+            if (actor->instance.reactionState == 3) {
+                Actors_CancelActorTeleportTransition(actor);
             }
-            temp_s1->instance.turnFrames = 0;
-            if (temp_s1->instance.slot == 0) {
-                temp_s1->instance.jumpCountdown = 0;
-                temp_s1->instance.locomotionState = 0;
-                temp_s1->instance.movementPending = 0;
-                temp_s1->instance.movementMode = 0;
-                var_s4 = 0;
+            actor->instance.turnFrames = 0;
+            if (actor->instance.slot == 0) {
+                actor->instance.jumpCountdown = 0;
+                actor->instance.locomotionState = 0;
+                actor->instance.movementPending = 0;
+                actor->instance.movementMode = 0;
+                blend_frames = 0;
             } else {
-                var_s4 = 8;
+                blend_frames = 8;
             }
         }
-        Actors_ClearActorMovementRequest(temp_s1);
-        temp_s1->animationSet = 0xFF;
-        Actors_PlayActorAnimation(arg0, var_s0, 0, var_s4);
-        Actors_ResetActorHeadTrackingSpeed(temp_s1);
+        Actors_ClearActorMovementRequest(actor);
+        actor->animationSet = 0xFF;
+        Actors_PlayActorAnimation(actor_slot, var_s0, 0, blend_frames);
+        Actors_ResetActorHeadTrackingSpeed(actor);
     }
 }
 
 // decomp: BATTLE.PRG func_8009EC9C (src/BATTLE/BATTLE.PRG/30DB0.c:2956)
-void Battle_PlayChainAbilityAnimation(int arg0, SVECTOR* arg1, int arg2, int arg3)
+void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, int chain_ability_index, int chain_index)
 {
-    SVECTOR sp10;
+    SVECTOR bone_position;
     int dx;
     int dz;
     int z;
@@ -345,20 +345,20 @@ void Battle_PlayChainAbilityAnimation(int arg0, SVECTOR* arg1, int arg2, int arg
     int angle;
     int turn;
     int anim;
-    Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
 
     if (actor == NULL) {
         return;
     }
 
-    anim = Battle_chainAbilityAnimationGroups[arg2] * 6 + 0xCA;
+    anim = Battle_chainAbilityAnimationGroups[chain_ability_index] * 6 + 0xCA;
 
-    if (arg1 == NULL) {
+    if (target_position == NULL) {
         pitch = 0;
     } else {
-        dist = arg1->vx - actor->instance.position.vx;
+        dist = target_position->vx - actor->instance.position.vx;
         dist = dist * dist;
-        z = arg1->vz - actor->instance.position.vz;
+        z = target_position->vz - actor->instance.position.vz;
 
         if (dist < 0) {
             dist = -dist;
@@ -371,8 +371,8 @@ void Battle_PlayChainAbilityAnimation(int arg0, SVECTOR* arg1, int arg2, int arg
         }
 
         dist = Core_Math_SquareRootInteger(dist + zz);
-        Actors_ActorBonePosition(actor->instance.slot, 0, &sp10, 0);
-        pitch = Core_Gte_Atan2(arg1->vy - sp10.vy, dist);
+        Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
+        pitch = Core_Gte_Atan2(target_position->vy - bone_position.vy, dist);
     }
 
     if (pitch >= -0xE4) {
@@ -383,18 +383,18 @@ void Battle_PlayChainAbilityAnimation(int arg0, SVECTOR* arg1, int arg2, int arg
         }
     }
 
-    if (arg3 == 1) {
-        Battle_chainAbilityAnimationSide = arg3;
+    if (chain_index == 1) {
+        Battle_chainAbilityAnimationSide = chain_index;
     }
 
     Battle_chainAbilityAnimationSide ^= 1;
     anim += Battle_chainAbilityAnimationSide;
 
-    if (arg1 == NULL) {
+    if (target_position == NULL) {
         turn = 0;
     } else {
-        dx = arg1->vx - actor->instance.position.vx;
-        dz = arg1->vz - actor->instance.position.vz;
+        dx = target_position->vx - actor->instance.position.vx;
+        dz = target_position->vz - actor->instance.position.vz;
 
         if ((dx == 0) && (dz == 0)) {
             angle = actor->instance.facing;
@@ -414,53 +414,53 @@ void Battle_PlayChainAbilityAnimation(int arg0, SVECTOR* arg1, int arg2, int arg
 
     actor->instance.facingDelta = turn;
     actor->instance.turnFrames = 0xA;
-    Actors_PlayActorAnimation(arg0, anim, 0, 8);
+    Actors_PlayActorAnimation(actor_slot, anim, 0, 8);
 }
 
 // decomp: BATTLE.PRG func_8009EE9C (src/BATTLE/BATTLE.PRG/30DB0.c:3040)
-void Battle_PlayDefenseAbilityAnimation(int arg0, SVECTOR* arg1, int arg2)
+void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position, int arg2)
 {
     int _[3] __attribute__((unused));
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
 
-    if (temp_s0->instance.weaponDrawn
-        && ((temp_s0->instance.slot == 0)
-            || (!temp_s0->instance.motionLocked && !temp_s0->instance.isJumping
-                && (temp_s0->instance.movementMode != 2) && (temp_s0->instance.movementMode != 3)))) {
-        int temp_v0;
-        int var_a1;
-        int var_s1;
+    if (actor->instance.weaponDrawn
+        && ((actor->instance.slot == 0)
+            || (!actor->instance.motionLocked && !actor->instance.isJumping
+                && (actor->instance.movementMode != 2) && (actor->instance.movementMode != 3)))) {
+        int target_pitch;
+        int animation_id;
+        int blend_frames;
 
-        if (temp_s0->collisionRadius < 0x80) {
-            temp_s0->instance.facingDelta = Actors_ActorFacingDeltaToPoint(temp_s0, arg1);
-            temp_s0->instance.turnFrames = 4;
-            var_s1 = 8;
+        if (actor->collisionRadius < 0x80) {
+            actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, target_position);
+            actor->instance.turnFrames = 4;
+            blend_frames = 8;
         } else {
-            var_s1 = 4;
+            blend_frames = 4;
         }
 
-        temp_v0 = Actors_ActorPitchToPoint(temp_s0, arg1);
-        var_a1 = 0x4F;
+        target_pitch = Actors_ActorPitchToPoint(actor, target_position);
+        animation_id = 0x4F;
 
-        if (temp_v0 >= -0xE4) {
-            var_a1 = 0x50;
-            if (temp_v0 >= 0xAC) {
-                var_a1 = 0x51;
+        if (target_pitch >= -0xE4) {
+            animation_id = 0x50;
+            if (target_pitch >= 0xAC) {
+                animation_id = 0x51;
             }
         }
 
-        Actors_PlayActorAnimation(arg0, var_a1, 0, var_s1);
-        Actors_ResetActorHeadTrackingSpeed(temp_s0);
+        Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
+        Actors_ResetActorHeadTrackingSpeed(actor);
     }
 
-    if (temp_s0->instance.slot == 0) {
-        if (temp_s0->instance.movementMode != 3) {
-            temp_s0->instance.movementMode = 0;
+    if (actor->instance.slot == 0) {
+        if (actor->instance.movementMode != 3) {
+            actor->instance.movementMode = 0;
         }
-        temp_s0->instance.jumpCountdown = 0;
+        actor->instance.jumpCountdown = 0;
     }
 
-    Effects_QueueActionImpactEffects(arg0);
+    Effects_QueueActionImpactEffects(actor_slot);
 }
 
 // decomp: BATTLE.PRG func_8009EFEC (src/BATTLE/BATTLE.PRG/30DB0.c:3087)
@@ -567,25 +567,25 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
 }
 
 // decomp: BATTLE.PRG func_8009F298 (src/BATTLE/BATTLE.PRG/30DB0.c:3189)
-void Battle_PlayBreakArtAnimation(int arg0, SVECTOR* arg1, int arg2)
+void Battle_PlayBreakArtAnimation(int actor_slot, SVECTOR* target_position, int action_phase)
 {
-    u_short* sp10;
+    u_short* animation_header;
 
-    Battle_PlaySpecialActionAnimation(arg0, arg1, arg2);
-    if (arg2 == 1) {
-        Actors_FindActorAnimationHeader(Actors_actorRecords[arg0], 0xFE, &sp10);
-        if (sp10 != 0) {
-            Actors_QueueActorAnimation((int)arg0, 0xFE, 8, 0);
+    Battle_PlaySpecialActionAnimation(actor_slot, target_position, action_phase);
+    if (action_phase == 1) {
+        Actors_FindActorAnimationHeader(Actors_actorRecords[actor_slot], 0xFE, &animation_header);
+        if (animation_header != 0) {
+            Actors_QueueActorAnimation((int)actor_slot, 0xFE, 8, 0);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800A2574 (src/BATTLE/BATTLE.PRG/38C1C.c:625)
-void Battle_FinishEnemyCombatPose(int arg0, short arg1)
+void Battle_FinishEnemyCombatPose(int actor_slot, short facing)
 {
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
-    ((void (*)(int, int, int))Actors_TurnActorToAtRate)(arg0, arg1, 8);
-    Battle_SetEnemyCombatPose(arg0, 3);
-    temp_s1->instance.poseState = 6;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_slot];
+    ((void (*)(int, int, int))Actors_TurnActorToAtRate)(actor_slot, facing, 8);
+    Battle_SetEnemyCombatPose(actor_slot, 3);
+    actor->instance.poseState = 6;
 }
 

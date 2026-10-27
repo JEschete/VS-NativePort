@@ -12,15 +12,15 @@
 extern u_char Battle_chainAbilityAnimationGroups[168];
 extern int Battle_chainAbilityAnimationSide;
 extern char Battle_specialActionPitch;
-void Battle_PlayMeleeAttackAnimation(int arg0, SVECTOR* arg1, int arg2);
-void Battle_PlayDefenseAnimation(int arg0, SVECTOR* arg1);
-void Battle_SetEnemyCombatPose(int arg0, int arg1);
-void Battle_PlaySpellCastAnimation(int arg0, SVECTOR* arg1, int arg2);
-void Battle_PlayActorDamageReaction(int arg0, SVECTOR* arg1);
-void Battle_PlayChainAbilityAnimation(int arg0, SVECTOR* arg1, int arg2, int arg3);
-void Battle_PlayDefenseAbilityAnimation(int arg0, SVECTOR* arg1, int arg2);
+void Battle_PlayMeleeAttackAnimation(int actor_slot, SVECTOR* target_position, int animation_parameter);
+void Battle_PlayDefenseAnimation(int actor_slot, SVECTOR* target_position);
+void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode);
+void Battle_PlaySpellCastAnimation(int actor_slot, SVECTOR* target_position, int cast_phase);
+void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position);
+void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, int chain_ability_index, int chain_index);
+void Battle_PlayDefenseAbilityAnimation(int actor_slot, SVECTOR* target_position, int arg2);
 void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode);
-void Battle_PlayBreakArtAnimation(int arg0, SVECTOR* arg1, int arg2);
-void Battle_FinishEnemyCombatPose(int arg0, short arg1);
+void Battle_PlayBreakArtAnimation(int actor_slot, SVECTOR* target_position, int action_phase);
+void Battle_FinishEnemyCombatPose(int actor_slot, short facing);
 
 #endif // VS_BATTLE_ACTIONANIMATION_H_DECLS

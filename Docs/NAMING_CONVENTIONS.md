@@ -1030,3 +1030,32 @@ owned paths. All 143 dirty-tree source-adaptation controls and focused tooling
 quality pass without baseline changes. Evidence: `build\quality\issue220-*`
 and `issue148-battle-verification.json`. #220 remains subject to its own
 fixing-commit/exact-CI gate; it is not permission to weaken #148's review gate.
+
+The menu cohort is published in `661199fc`, exact green `40582286455`.
+The complete battle review accounts for 283 pairs/4,223 occurrences in 104
+scoped source files and 1,614 individual native bindings. It covers 287 ledger
+identities/272 physical definitions, including 15 shared-definition aliases.
+There are 859 ordinary binding renames, six scoped ordinary renames and 21
+cast-prototype parameter renames; 697 header bindings follow their definitions.
+Seventeen ordinary bindings and 13 header parameters remain with specific
+source-backed reasons, not a blanket unknown classification.
+
+Nine distinct exact-preimage preparations cover the separately scoped names.
+Repeated identical prototype spans are validated against their reviewed match
+counts and rewritten once per producer, not duplicated into conflicting fixups.
+F01355 keeps screen-coordinate and texture-end locals distinct; F00521's
+forwarding signature and casts, status-timer casts and AI awareness casts
+retain their original signed types and roles. The owned `Gait::speed` member
+is separately documented on F01720 from native uses and original
+`766FC.s:80-120`; it is a movement magnitude, not an anonymous register.
+
+On dirty base `661199fc` with the #220 repair, pre-change combat/AI controls
+pass 359 cases/3,697,668 assertions. Debug/Release then each pass
+`[combat],[ai],[actors],[animation] --reporter compact`,
+412 cases/3,714,707 assertions. Copier tests pass 145/145, naming tests 32/32
+and focused tooling quality zero new findings. Expected code-token output
+matches all 47 changed generated files, with every other manifest path,
+comment/literal/type/operator and all 121 owned paths preserved across two
+stable generations. Evidence: `build\quality\issue148-battle-*`.
+The four-extension lexical inventory is 7,733 occurrences/820 pairs/231 files;
+inline templates and the remaining scopes still require their separate gates.

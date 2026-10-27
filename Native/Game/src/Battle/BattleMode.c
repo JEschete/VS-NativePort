@@ -14,34 +14,34 @@
 #include "Render/Palette.h"
 
 // decomp: BATTLE.PRG func_8007C088 (src/BATTLE/BATTLE.PRG/146C.c:8655)
-int Battle_IsActorWeaponDrawn(int arg0) { return Battle_actors[arg0]->weaponDrawn & 1; }
+int Battle_IsActorWeaponDrawn(int actor_slot) { return Battle_actors[actor_slot]->weaponDrawn & 1; }
 
 // decomp: BATTLE.PRG func_8007C0AC (src/BATTLE/BATTLE.PRG/146C.c:8657)
-void Battle_SetActorBattleMode(int arg0, int arg1)
+void Battle_SetActorBattleMode(int actor_slot, int battle_mode)
 {
-    if (arg1 == 2) {
-        Battle_actors[arg0]->weaponDrawn ^= 1;
+    if (battle_mode == 2) {
+        Battle_actors[actor_slot]->weaponDrawn ^= 1;
 
-        if (Battle_actors[arg0]->weaponDrawn & 1) {
-            Actors_SetActorWeaponDrawn(arg0, 1, 0);
+        if (Battle_actors[actor_slot]->weaponDrawn & 1) {
+            Actors_SetActorWeaponDrawn(actor_slot, 1, 0);
         } else {
-            Actors_SetActorWeaponDrawn(arg0, 0, 0);
+            Actors_SetActorWeaponDrawn(actor_slot, 0, 0);
         }
-    } else if (arg0 != 0) {
-        if ((Battle_actors[arg0]->kind == 4)
-            || (Battle_actors[arg0]->kind == 8)) {
-            if (arg1 != 0) {
-                Battle_actors[arg0]->kind = 4;
+    } else if (actor_slot != 0) {
+        if ((Battle_actors[actor_slot]->kind == 4)
+            || (Battle_actors[actor_slot]->kind == 8)) {
+            if (battle_mode != 0) {
+                Battle_actors[actor_slot]->kind = 4;
             } else {
-                Battle_actors[arg0]->kind = 8;
+                Battle_actors[actor_slot]->kind = 8;
             }
         }
     } else {
         (*Battle_actors)->weaponDrawn &= ~1;
-        (*Battle_actors)->weaponDrawn |= arg1;
-        Actors_SetActorWeaponDrawn(0, arg1, 1);
+        (*Battle_actors)->weaponDrawn |= battle_mode;
+        Actors_SetActorWeaponDrawn(0, battle_mode, 1);
     }
-    if (arg0 == 0) {
+    if (actor_slot == 0) {
         Battle_SetHudBattleMode(Battle_characterState->weaponDrawn & 1);
     }
 }

@@ -19,22 +19,22 @@ extern int Battle_recoveryRewardMode;
 extern Battle_ActionState* Battle_actionState;
 extern char Battle_spellCommitFlag;
 void Battle_ReleaseQueuedActorAttacks(void);
-void Battle_ResolveEnemyDefeat(int arg0, int actorId, int arg2);
-int Battle_PlayWeaponHitSounds(int arg0);
-void Battle_ApplyActionSourceEffects(int arg0, SVECTOR* arg1);
+void Battle_ResolveEnemyDefeat(int source_actor_slot, int actorId, int count_kill);
+int Battle_PlayWeaponHitSounds(int source_actor_slot);
+void Battle_ApplyActionSourceEffects(int source_actor_slot, SVECTOR* arg1);
 void Battle_WaitForPostActionMovement(void);
-void Battle_BeginPostActionRecovery(int arg0);
+void Battle_BeginPostActionRecovery(int recovery_reward_mode);
 void Battle_BeginActionTrailFade(void);
 void Battle_FinishBattleAbilitySequence(void);
 void Battle_StartActionAnimation(void);
 void Battle_AdvanceActionEffectPhase(void);
-void Battle_CommitSelectedAction(int arg0);
+void Battle_CommitSelectedAction(int target_selection_mode);
 void Battle_StartActionPresentation(void);
 void Battle_CommitEnvironmentAction(int arg0 __attribute__((unused)));
 void Battle_ResetActionPhase(void);
 void Battle_BeginAshleyWeaponToggle(void);
 void Battle_EndAshleyWeaponToggle(void);
-int Battle_BeginActorDefeatAnimation(int arg0);
+int Battle_BeginActorDefeatAnimation(int actor_slot);
 void Battle_ApplyLearnedActionUnlocks(void);
 
 #endif // VS_BATTLE_ACTIONFLOW_H_DECLS

@@ -45,186 +45,186 @@ u_int Battle_previousHitResult;
 
 // decomp: BATTLE.PRG func_80084CAC (src/BATTLE/BATTLE.PRG/146C.c:12820)
 int Battle_AccumulateMpDamage(
-    Battle_ActionDefinition* arg0, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    Battle_ActorStats* temp_s0 = Battle_actors[arg2->target.targetActor]->stats;
-    short amount = Battle_CalculateActionStatChange(arg0, arg1, arg2, arg3, arg4);
+    Battle_ActorStats* target_stats = Battle_actors[target_hit->target.targetActor]->stats;
+    short amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
 
-    if (temp_s0->currentMp < amount) {
-        amount = temp_s0->currentMp;
-        Battle_lastActionStatValue = temp_s0->currentMp;
+    if (target_stats->currentMp < amount) {
+        amount = target_stats->currentMp;
+        Battle_lastActionStatValue = target_stats->currentMp;
     }
 
-    arg2->target.mp += amount;
-    arg2->mpEffect = 1;
+    target_hit->target.mp += amount;
+    target_hit->mpEffect = 1;
 }
 
 // decomp: BATTLE.PRG func_80084D44 (src/BATTLE/BATTLE.PRG/146C.c:12835)
-int Battle_AccumulateWeaponPpDrain(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_AccumulateWeaponPpDrain(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    if (Battle_actors[arg2->target.targetActor]->stats->weapon.blade.id != 0) {
+    if (Battle_actors[target_hit->target.targetActor]->stats->weapon.blade.id != 0) {
         u_short amount =
-            Battle_actors[arg2->target.targetActor]->stats->weapon.currentPp;
-        arg2->weaponPpChange += amount;
-        arg2->weaponPpEffect = 1;
+            Battle_actors[target_hit->target.targetActor]->stats->weapon.currentPp;
+        target_hit->weaponPpChange += amount;
+        target_hit->weaponPpEffect = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_80084DA8 (src/BATTLE/BATTLE.PRG/146C.c:12847)
-int Battle_AccumulateShieldPpDrain(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* arg2,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)))
+int Battle_AccumulateShieldPpDrain(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    Battle_ActorStats* actor = Battle_actors[arg2->target.targetActor]->stats;
+    Battle_ActorStats* actor = Battle_actors[target_hit->target.targetActor]->stats;
 
     if ((Battle_actionState->selection.primaryTarget.hpEffect == 1) || (Battle_actionState->selection.primaryTarget.hpEffect == 3)) {
         if (actor->shield.base.id != 0) {
             short amount = actor->shield.currentPp;
-            arg2->shieldPpChange += amount;
-            arg2->shieldPpEffect = 1;
+            target_hit->shieldPpChange += amount;
+            target_hit->shieldPpEffect = 1;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80084E28 (src/BATTLE/BATTLE.PRG/146C.c:12862)
 int Battle_AccumulateHpRestoration(
-    Battle_ActionDefinition* action, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short amount = Battle_CalculateActionStatChange(action, arg1, arg2, arg3, arg4);
-    arg2->target.hp += amount;
-    arg2->hpEffect = 2;
+    short amount = Battle_CalculateActionStatChange(action, source_hit, target_hit, hit_index, execute_action);
+    target_hit->target.hp += amount;
+    target_hit->hpEffect = 2;
 
-    if (arg2->targetsPosition == 0) {
-        Battle_DistributeLimbRecovery(action, arg2, amount);
+    if (target_hit->targetsPosition == 0) {
+        Battle_DistributeLimbRecovery(action, target_hit, amount);
     }
 }
 
 // decomp: BATTLE.PRG func_80084EA0 (src/BATTLE/BATTLE.PRG/146C.c:12874)
 int Battle_AccumulateMpRestoration(
-    Battle_ActionDefinition* arg0, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short temp_v0 = Battle_CalculateActionStatChange(arg0, arg1, arg2, arg3, arg4);
-    arg2->target.mp = arg2->target.mp + temp_v0;
-    arg2->mpEffect = 2;
+    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    target_hit->target.mp = target_hit->target.mp + restoration_amount;
+    target_hit->mpEffect = 2;
 }
 
 // decomp: BATTLE.PRG func_80084EEC (src/BATTLE/BATTLE.PRG/146C.c:12882)
 int Battle_AccumulateWeaponPpRestoration(
-    Battle_ActionDefinition* arg0, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short temp_v0 = Battle_CalculateActionStatChange(arg0, arg1, arg2, arg3, arg4);
-    arg2->weaponPpChange += temp_v0;
-    arg2->weaponPpEffect = 2;
+    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    target_hit->weaponPpChange += restoration_amount;
+    target_hit->weaponPpEffect = 2;
 }
 
 // decomp: BATTLE.PRG func_80084F40 (src/BATTLE/BATTLE.PRG/146C.c:12890)
 int Battle_AccumulateWeaponDpRestoration(
-    Battle_ActionDefinition* arg0, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short temp_v0 = Battle_CalculateActionStatChange(arg0, arg1, arg2, arg3, arg4);
-    arg2->limbs[6].effects.opaque0 += temp_v0;
-    arg2->weaponDpEffect = 2;
+    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    target_hit->limbs[6].effects.opaque0 += restoration_amount;
+    target_hit->weaponDpEffect = 2;
 }
 
 // decomp: BATTLE.PRG func_80084F94 (src/BATTLE/BATTLE.PRG/146C.c:12898)
 int Battle_AccumulateRiskReduction(
-    Battle_ActionDefinition* arg0, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action_definition, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int hit_index, int execute_action)
 {
-    short temp_v0 = Battle_CalculateActionStatChange(arg0, arg1, arg2, arg3, arg4);
-    int var_v0 = temp_v0 << 0x10;
-    if (var_v0 != 0) {
-        arg2->riskChange += temp_v0;
-        arg2->riskEffect = 2;
+    short restoration_amount = Battle_CalculateActionStatChange(action_definition, source_hit, target_hit, hit_index, execute_action);
+    int shifted_restoration_amount = restoration_amount << 0x10;
+    if (shifted_restoration_amount != 0) {
+        target_hit->riskChange += restoration_amount;
+        target_hit->riskEffect = 2;
     }
 }
 
 // decomp: BATTLE.PRG func_80084FF0 (src/BATTLE/BATTLE.PRG/146C.c:12909)
-int Battle_IgnoreActionEffect(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)))
+int Battle_IgnoreActionEffect(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)))
 {
 }
 
 // decomp: BATTLE.PRG func_80085008 (src/BATTLE/BATTLE.PRG/146C.c:12930)
-void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* arg0)
+void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* hit_result)
 {
     int i;
-    int var_v1;
-    short var_a1;
-    u_short var_a2;
-    Battle_ActorStats* temp_s3;
+    int limb_health_test;
+    short projected_secondary_mobility_hp;
+    u_short projected_limb_hp;
+    Battle_ActorStats* target_stats;
 
-    temp_s3 = Battle_actors[arg0->target.targetActor]->stats;
+    target_stats = Battle_actors[hit_result->target.targetActor]->stats;
 
-    switch (arg0->hpEffect) {
+    switch (hit_result->hpEffect) {
     case 2:
-        var_a2 = temp_s3->limbs[temp_s3->mobilityLimb0].hp + arg0->limbs[temp_s3->mobilityLimb0].packed;
-        var_a1 = temp_s3->limbs[temp_s3->mobilityLimb1].hp + arg0->limbs[temp_s3->mobilityLimb1].packed;
+        projected_limb_hp = target_stats->limbs[target_stats->mobilityLimb0].hp + hit_result->limbs[target_stats->mobilityLimb0].packed;
+        projected_secondary_mobility_hp = target_stats->limbs[target_stats->mobilityLimb1].hp + hit_result->limbs[target_stats->mobilityLimb1].packed;
         break;
     case 3:
     case 1:
-        var_a2 = temp_s3->limbs[temp_s3->mobilityLimb0].hp - arg0->limbs[temp_s3->mobilityLimb0].packed;
-        var_a1 = temp_s3->limbs[temp_s3->mobilityLimb1].hp - arg0->limbs[temp_s3->mobilityLimb1].packed;
+        projected_limb_hp = target_stats->limbs[target_stats->mobilityLimb0].hp - hit_result->limbs[target_stats->mobilityLimb0].packed;
+        projected_secondary_mobility_hp = target_stats->limbs[target_stats->mobilityLimb1].hp - hit_result->limbs[target_stats->mobilityLimb1].packed;
         break;
     default:
-        var_a2 = temp_s3->limbs[temp_s3->mobilityLimb0].hp;
-        var_a1 = temp_s3->limbs[temp_s3->mobilityLimb1].hp;
+        projected_limb_hp = target_stats->limbs[target_stats->mobilityLimb0].hp;
+        projected_secondary_mobility_hp = target_stats->limbs[target_stats->mobilityLimb1].hp;
         break;
     }
-    if (!(temp_s3->statuses & 0x10)) {
-        if ((temp_s3->mobilityLimb0 | temp_s3->mobilityLimb1) != 0) {
-            var_v1 = 0;
-            if (temp_s3->mobilityLimb0 != 0) {
-                var_v1 = (var_a2 << 0x10) > 0x10000;
+    if (!(target_stats->statuses & 0x10)) {
+        if ((target_stats->mobilityLimb0 | target_stats->mobilityLimb1) != 0) {
+            limb_health_test = 0;
+            if (target_stats->mobilityLimb0 != 0) {
+                limb_health_test = (projected_limb_hp << 0x10) > 0x10000;
             }
-            if ((temp_s3->mobilityLimb1 != 0) && (var_a1 >= 2)) {
-                var_v1 = 1;
+            if ((target_stats->mobilityLimb1 != 0) && (projected_secondary_mobility_hp >= 2)) {
+                limb_health_test = 1;
             }
-            if (var_v1 == 0) {
-                Battle_QueueApplicableStatusChanges(4, arg0);
+            if (limb_health_test == 0) {
+                Battle_QueueApplicableStatusChanges(4, hit_result);
             }
         }
     } else {
-        if ((temp_s3->mobilityLimb0 | temp_s3->mobilityLimb1) != 0) {
-            var_v1 = 0;
-            if (temp_s3->mobilityLimb0 != 0) {
-                var_v1 = (var_a2 << 0x10) > 0x10000;
+        if ((target_stats->mobilityLimb0 | target_stats->mobilityLimb1) != 0) {
+            limb_health_test = 0;
+            if (target_stats->mobilityLimb0 != 0) {
+                limb_health_test = (projected_limb_hp << 0x10) > 0x10000;
             }
-            if ((temp_s3->mobilityLimb1 != 0) && (var_a1 >= 2)) {
-                var_v1 = 1;
+            if ((target_stats->mobilityLimb1 != 0) && (projected_secondary_mobility_hp >= 2)) {
+                limb_health_test = 1;
             }
-            if (var_v1 != 0) {
-                Battle_QueueStatusRemovalMask(4, arg0);
+            if (limb_health_test != 0) {
+                Battle_QueueStatusRemovalMask(4, hit_result);
             }
         }
     }
-    if (arg0->target.targetActor == 0) {
+    if (hit_result->target.targetActor == 0) {
         for (i = 0; i < 4; ++i) {
-            switch (arg0->hpEffect) {
+            switch (hit_result->hpEffect) {
             case 2:
-                var_a2 = temp_s3->limbs[i].hp + arg0->limbs[i].packed;
+                projected_limb_hp = target_stats->limbs[i].hp + hit_result->limbs[i].packed;
                 break;
             case 3:
             case 1:
-                var_a2 = temp_s3->limbs[i].hp - arg0->limbs[i].packed;
+                projected_limb_hp = target_stats->limbs[i].hp - hit_result->limbs[i].packed;
                 break;
             default:
-                var_a2 = temp_s3->limbs[i].hp;
+                projected_limb_hp = target_stats->limbs[i].hp;
                 break;
             }
-            if (!(temp_s3->statuses & Battle_statusEffectParams[Battle_limbInjuryStatusIds[i]].statusFlags)) {
-                var_v1 = var_a2 << 0x10;
-                var_v1 = 0x10000 < var_v1;
-                if (!var_v1) {
-                    Battle_QueueApplicableStatusChanges(Battle_limbInjuryStatusIds[i], arg0);
+            if (!(target_stats->statuses & Battle_statusEffectParams[Battle_limbInjuryStatusIds[i]].statusFlags)) {
+                limb_health_test = projected_limb_hp << 0x10;
+                limb_health_test = 0x10000 < limb_health_test;
+                if (!limb_health_test) {
+                    Battle_QueueApplicableStatusChanges(Battle_limbInjuryStatusIds[i], hit_result);
                 }
             } else {
-                var_v1 = (var_a2 << 0x10) > 0x10000;
-                if (var_v1) {
-                    Battle_QueueStatusRemovalMask(Battle_limbInjuryStatusIds[i], arg0);
+                limb_health_test = (projected_limb_hp << 0x10) > 0x10000;
+                if (limb_health_test) {
+                    Battle_QueueStatusRemovalMask(Battle_limbInjuryStatusIds[i], hit_result);
                 }
             }
         }
@@ -233,60 +233,60 @@ void Battle_DeriveLimbInjuryStatuses(Battle_HitResult* arg0)
 
 // decomp: BATTLE.PRG func_80085390 (src/BATTLE/BATTLE.PRG/146C.c:13012)
 void Battle_ApplyActionHitEffect(
-    Battle_ActionDefinition* action, Battle_HitResult* arg1, Battle_HitResult* arg2, int arg3, int hit)
+    Battle_ActionDefinition* action, Battle_HitResult* source_hit, Battle_HitResult* target_hit, int execute_action, int hit)
 {
-    if ((arg2->targetsPosition == 0)
-        && (Battle_actors[arg2->target.targetActor]->stats->actorId == 0x80)) {
-        arg2->target.hp += 999;
-        arg2->hpEffect = 1;
+    if ((target_hit->targetsPosition == 0)
+        && (Battle_actors[target_hit->target.targetActor]->stats->actorId == 0x80)) {
+        target_hit->target.hp += 999;
+        target_hit->hpEffect = 1;
     } else if (action->type == Battle_ActionType_Spell) {
-        if ((arg2->targetsPosition == 0)
-            && (Battle_actors[arg2->target.targetActor]->stats->statuses & 0x80040000)) {
+        if ((target_hit->targetsPosition == 0)
+            && (Battle_actors[target_hit->target.targetActor]->stats->statuses & 0x80040000)) {
             Battle_lastActionStatValue = 0;
         } else {
             Battle_actionEffectMediators[action->hits[hit].effectId](
-                action, arg1, arg2, hit, arg3);
+                action, source_hit, target_hit, hit, execute_action);
         }
-        if (arg2->targetsPosition == 0) {
-            if (Battle_actors[arg2->target.targetActor]->stats->actorId != 0x80) {
-                arg2->inflictStatuses |=
-                    Battle_actors[arg2->target.targetActor]->stats->statuses & 0x61000;
+        if (target_hit->targetsPosition == 0) {
+            if (Battle_actors[target_hit->target.targetActor]->stats->actorId != 0x80) {
+                target_hit->inflictStatuses |=
+                    Battle_actors[target_hit->target.targetActor]->stats->statuses & 0x61000;
             }
         }
     } else {
         Battle_actionEffectMediators[action->hits[hit].effectId](
-            action, arg1, arg2, hit, arg3);
+            action, source_hit, target_hit, hit, execute_action);
     }
-    if ((arg3 != 0) && (arg1->targetsPosition == 0) && (arg1->target.targetActor == 0)
-        && (arg2->targetsPosition == 0)
-        && (Battle_actors[arg2->target.targetActor]->stats->actorId != 0x80)
+    if ((execute_action != 0) && (source_hit->targetsPosition == 0) && (source_hit->target.targetActor == 0)
+        && (target_hit->targetsPosition == 0)
+        && (Battle_actors[target_hit->target.targetActor]->stats->actorId != 0x80)
         && (action->type == Battle_ActionType_Ability || action->type == Battle_ActionType_BreakArt
             || action->type == Battle_ActionType_BaseAttack)
-        && (Battle_actors[arg2->target.targetActor]->stats->currentHp <= arg2->target.hp)
-        && (arg2->target.targetActor != 0)
-        && (Battle_actors[arg2->target.targetActor]->killCounted == 0)) {
-        int temp_s0;
-        Battle_actors[arg2->target.targetActor]->killCounted = 1;
-        temp_s0 = Battle_characterState->equippedWeaponCategory % 10;
+        && (Battle_actors[target_hit->target.targetActor]->stats->currentHp <= target_hit->target.hp)
+        && (target_hit->target.targetActor != 0)
+        && (Battle_actors[target_hit->target.targetActor]->killCounted == 0)) {
+        int weapon_category;
+        Battle_actors[target_hit->target.targetActor]->killCounted = 1;
+        weapon_category = Battle_characterState->equippedWeaponCategory % 10;
         if ((State_ScriptFlag(0x82) >= 0xA)
-            && (Audio_Seq_unusedArtsStatus.artsLearned[temp_s0] < 4)
-            && (Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[temp_s0]
-                < Battle_breakArtPointRequirements[temp_s0][Audio_Seq_unusedArtsStatus
-                        .artsLearned[temp_s0]])) {
-            ++Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[temp_s0];
+            && (Audio_Seq_unusedArtsStatus.artsLearned[weapon_category] < 4)
+            && (Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[weapon_category]
+                < Battle_breakArtPointRequirements[weapon_category][Audio_Seq_unusedArtsStatus
+                        .artsLearned[weapon_category]])) {
+            ++Audio_Seq_unusedArtsStatus.kills.weaponCategoryKills[weapon_category];
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:13058)
-void Battle_ClearActionResult(void* arg0) { Core_Memory_ZeroAlignedWords(arg0, sizeof(Battle_ActionRequest)); }
+void Battle_ClearActionResult(void* action_result) { Core_Memory_ZeroAlignedWords(action_result, sizeof(Battle_ActionRequest)); }
 
 // decomp: BATTLE.PRG func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:13060)
-void Battle_InitializeHitResult(Battle_HitResult* arg0)
+void Battle_InitializeHitResult(Battle_HitResult* hit_result)
 {
-    Core_Memory_ZeroAlignedWords(arg0, sizeof *arg0);
-    arg0->target.impactKind = 6;
-    *(&arg0->inflictStatuses + 1) = 0;
+    Core_Memory_ZeroAlignedWords(hit_result, sizeof *hit_result);
+    hit_result->target.impactKind = 6;
+    *(&hit_result->inflictStatuses + 1) = 0;
 }
 
 // decomp: BATTLE.PRG _getActionCost (src/BATTLE/BATTLE.PRG/146C.c:13075)
@@ -383,67 +383,67 @@ int Battle_ActionCostAndAvailability(u_int actionId, Battle_ActorStats* actor, i
 }
 
 // decomp: BATTLE.PRG func_80085978 (src/BATTLE/BATTLE.PRG/146C.c:13167)
-void Battle_PreviewActorActionCost(int arg0, int arg1)
+void Battle_PreviewActorActionCost(int action_id, int actor_slot)
 {
-    Battle_ActionCostAndAvailability(arg0, Battle_actors[arg1]->stats, 0);
+    Battle_ActionCostAndAvailability(action_id, Battle_actors[actor_slot]->stats, 0);
 }
 
 // decomp: BATTLE.PRG func_800859B4 (src/BATTLE/BATTLE.PRG/146C.c:13172)
-void Battle_AddActionRecoveryDelay(u_int arg0, Battle_ActorStats* arg1, int arg2)
+void Battle_AddActionRecoveryDelay(u_int action_id, Battle_ActorStats* actor_stats, int execute_action)
 {
-    Battle_ActionDefinition* new_var = &Battle_actionDefinitions[arg0];
+    Battle_ActionDefinition* action_definition = &Battle_actionDefinitions[action_id];
 
-    if ((arg2 != 0) && ((arg0 - 0x16) >= 0x20)) {
-        if (new_var->recoveryDelay == 0xFF) {
-            arg1->actionRecoveryTimer += (arg1->weapon.recoveryDelay + arg1->recoveryDelayBonus) << 8;
+    if ((execute_action != 0) && ((action_id - 0x16) >= 0x20)) {
+        if (action_definition->recoveryDelay == 0xFF) {
+            actor_stats->actionRecoveryTimer += (actor_stats->weapon.recoveryDelay + actor_stats->recoveryDelayBonus) << 8;
         } else {
-            int new_var2 = new_var->recoveryDelay + arg1->recoveryDelayBonus;
-            arg1->actionRecoveryTimer += new_var2 << 8;
+            int recovery_delay = action_definition->recoveryDelay + actor_stats->recoveryDelayBonus;
+            actor_stats->actionRecoveryTimer += recovery_delay << 8;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80085A34 (src/BATTLE/BATTLE.PRG/146C.c:13186)
-void Battle_FinalizeHitOutcome(Battle_HitStatusView* arg0)
+void Battle_FinalizeHitOutcome(Battle_HitStatusView* hit_status)
 {
     int i;
-    u_int var_a1;
+    u_int remaining_effect_flags;
 
-    if (arg0->opaque40 == 0) {
-        if (arg0->opaque2 == 0xFF) {
-            arg0->opaque2 = 0;
+    if (hit_status->opaque40 == 0) {
+        if (hit_status->opaque2 == 0xFF) {
+            hit_status->opaque2 = 0;
         }
-        if (arg0->opaque3 == 6) {
-            var_a1 = arg0->opaque1C;
-            if (var_a1 != 0) {
-                for (i = 0; i < 9; var_a1 /= 4, ++i) {
-                    switch (var_a1 & 3) {
+        if (hit_status->opaque3 == 6) {
+            remaining_effect_flags = hit_status->opaque1C;
+            if (remaining_effect_flags != 0) {
+                for (i = 0; i < 9; remaining_effect_flags /= 4, ++i) {
+                    switch (remaining_effect_flags & 3) {
                     case 2:
-                        arg0->opaque3 = 5;
+                        hit_status->opaque3 = 5;
                         return;
                     case 1:
-                        arg0->opaque3 = 0;
+                        hit_status->opaque3 = 0;
                         return;
                     case 3:
-                        arg0->opaque3 = 1;
+                        hit_status->opaque3 = 1;
                         return;
                     }
                 }
-            } else if ((arg0->opaque14 | arg0->opaque18) == 0) {
-                arg0->opaque3 = 4;
-                arg0->opaque2 = 0;
+            } else if ((hit_status->opaque14 | hit_status->opaque18) == 0) {
+                hit_status->opaque3 = 4;
+                hit_status->opaque2 = 0;
             }
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80085B10 (src/BATTLE/BATTLE.PRG/146C.c:13221)
-void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battle_ActionRequest* source, int arg3)
+void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battle_ActionRequest* source, int execute_action)
 {
     SVECTOR origin;
     SVECTOR position;
     SVECTOR impact;
-    Battle_ActionDefinition* spec;
+    Battle_ActionDefinition* action_definition;
     Battle_ActorStats* attacker;
     Battle_ActorStats* stats;
     Battle_HitResult* user;
@@ -455,9 +455,9 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
     short max;
     int target;
     int limb;
-    __typeof__(spec->hits[0]) params;
+    __typeof__(action_definition->hits[0]) params;
 
-    spec = &Battle_actionDefinitions[action];
+    action_definition = &Battle_actionDefinitions[action];
     Battle_ClearActionResult(result);
     result->actionId = action;
     Battle_InitializeHitResult(&result->primaryTarget);
@@ -486,8 +486,8 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
 
     best = 0;
     max = 0;
-    if (spec->hits[0].affinity != 0) {
-        best = spec->hits[0].affinity - 1;
+    if (action_definition->hits[0].affinity != 0) {
+        best = action_definition->hits[0].affinity - 1;
     } else if (attacker != NULL) {
         if ((Battle_actors[attacker->actorId]->weaponDrawn & 1)
             && attacker->weapon.blade.id) {
@@ -503,7 +503,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
     }
     result->effectVariant = best;
 
-    params = spec->hits[0];
+    params = action_definition->hits[0];
     if ((params.statCalculatorId == 2) || (params.statCalculatorId == 25)) {
         if (params.damageType == 0) {
             if (attacker->weapon.blade.id) {
@@ -523,11 +523,11 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
     Battle_previousHitResult = 0;
     Battle_hitPrerequisiteResult = 0;
     for (; hit < 2; ++hit) {
-        switch (spec->hits[hit].prerequisiteFunctionId) {
+        switch (action_definition->hits[hit].prerequisiteFunctionId) {
         case 6:
         case 7:
         case 8:
-            Battle_ApplyActionHitEffect(spec, &result->primaryTarget, result->targets, arg3, hit);
+            Battle_ApplyActionHitEffect(action_definition, &result->primaryTarget, result->targets, execute_action, hit);
             break;
 
         case 3:
@@ -537,10 +537,10 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
             entry = &result->primaryTarget;
             stats = Battle_actors[result->primaryTarget.target.targetActor]->stats;
             Battle_hitPrerequisiteResult = 1;
-            Battle_previousHitResult = Battle_RollActionHit(spec, entry, entry, hit, arg3);
-            if ((Battle_previousHitResult != 0) || (arg3 == 0)) {
-                Battle_ApplyActionHitEffect(spec, entry, entry, arg3, hit);
-                if (arg3 && stats->cancelsHitResults) {
+            Battle_previousHitResult = Battle_RollActionHit(action_definition, entry, entry, hit, execute_action);
+            if ((Battle_previousHitResult != 0) || (execute_action == 0)) {
+                Battle_ApplyActionHitEffect(action_definition, entry, entry, execute_action, hit);
+                if (execute_action && stats->cancelsHitResults) {
                     Battle_InitializeHitResult(entry);
                     entry->target.impactKind = 4;
                 }
@@ -555,7 +555,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
             for (i = 0; i < result->targetCount; ++i) {
                 entry = &result->targets[i];
                 redirected = 0;
-                if (arg3 && (spec->resetsHitResults)) {
+                if (execute_action && (action_definition->resetsHitResults)) {
                     if (entry->targetsPosition == 0) {
                         Battle_ActionTargetLimbPosition(
                             entry->target.targetActor, entry->target.targetLimb, &position);
@@ -592,12 +592,12 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
                     continue;
                 }
                 stats = Battle_actors[entry->target.targetActor]->stats;
-                Battle_hitPrerequisiteResult = Battle_CheckActionHitPrerequisite(spec, (char*)entry, hit);
+                Battle_hitPrerequisiteResult = Battle_CheckActionHitPrerequisite(action_definition, (char*)entry, hit);
                 if (Battle_hitPrerequisiteResult != 0) {
-                    Battle_previousHitResult = Battle_RollActionHit(spec, user, entry, hit, arg3);
-                    if ((Battle_previousHitResult != 0) || (arg3 == 0)) {
+                    Battle_previousHitResult = Battle_RollActionHit(action_definition, user, entry, hit, execute_action);
+                    if ((Battle_previousHitResult != 0) || (execute_action == 0)) {
 
-                        Battle_ApplyActionHitEffect(spec, user, entry, arg3, hit);
+                        Battle_ApplyActionHitEffect(action_definition, user, entry, execute_action, hit);
                         target = entry->target.targetActor;
                         if ((Battle_actors[target]->roomSpawnIndex == 0x80) && (target != 0)
                             && stats->cancelsHitResults) {
@@ -607,7 +607,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
                             entry->target.impactKind = 4;
                             entry->target.targetLimb = limb;
                         }
-                        if (arg3 && stats->cancelsHitResults) {
+                        if (execute_action && stats->cancelsHitResults) {
                             limb = (u_char)entry->target.targetLimb;
                             target = entry->target.targetActor;
                             Battle_InitializeHitResult(entry);
@@ -629,126 +629,126 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
     for (i = 0; i < result->targetCount; ++i) {
         Battle_FinalizeHitOutcome((Battle_HitStatusView*)&result->targets[i]);
     }
-    if ((Battle_actionState->queueIndex == 0) && arg3) {
+    if ((Battle_actionState->queueIndex == 0) && execute_action) {
         *source = *result;
     }
-    if (arg3 && (attacker != NULL)) {
+    if (execute_action && (attacker != NULL)) {
         Battle_AddActionRecoveryDelay(action, attacker, 1);
         Battle_ActionCostAndAvailability(action, attacker, 1);
     }
 }
 
 // decomp: BATTLE.PRG func_8008631C (src/BATTLE/BATTLE.PRG/146C.c:13421)
-int Battle_PreviewActionAgainstLimb(int arg0, int arg1, int targetActor, int targetLimb, void* arg4)
+int Battle_PreviewActionAgainstLimb(int action_id, int source_actor_slot, int targetActor, int targetLimb, void* result_out)
 {
-    Battle_ActionRequest sp10;
+    Battle_ActionRequest preview_request;
 
-    sp10.targets[0].target.targetActor = targetActor;
-    sp10.actionId = arg0;
-    sp10.primaryTarget.targetsPosition = 0;
-    sp10.primaryTarget.target.targetActor = arg1;
-    sp10.targetCount = 1;
-    sp10.targets[0].targetsPosition = 0;
-    sp10.targets[0].target.targetLimb = targetLimb;
-    Battle_ResolveActionTargets(arg0, arg4, &sp10, 0);
-    return Battle_ActionCostAndAvailability(arg0, Battle_actors[arg1]->stats, 0) & 0xFF000000;
+    preview_request.targets[0].target.targetActor = targetActor;
+    preview_request.actionId = action_id;
+    preview_request.primaryTarget.targetsPosition = 0;
+    preview_request.primaryTarget.target.targetActor = source_actor_slot;
+    preview_request.targetCount = 1;
+    preview_request.targets[0].targetsPosition = 0;
+    preview_request.targets[0].target.targetLimb = targetLimb;
+    Battle_ResolveActionTargets(action_id, result_out, &preview_request, 0);
+    return Battle_ActionCostAndAvailability(action_id, Battle_actors[source_actor_slot]->stats, 0) & 0xFF000000;
 }
 
 // decomp: BATTLE.PRG func_800863A4 (src/BATTLE/BATTLE.PRG/146C.c:13436)
-int Battle_PreviewActionAgainstActor(int arg0, int arg1, int targetActor, int arg3, SVECTOR* arg4,
-    SVECTOR* arg5, Battle_ActionRequest* arg6)
+int Battle_PreviewActionAgainstActor(int action_id, int source_actor_slot, int targetActor, int target_limb, SVECTOR* source_position,
+    SVECTOR* target_position, Battle_ActionRequest* result_out)
 {
-    Battle_ActionRequest sp10;
-    Battle_TargetVolume sp860;
-    SVECTOR sp870;
-    int var_s2;
-    int temp_s0;
-    int temp_s0_2;
-    int temp_s1;
-    int temp_v0;
+    Battle_ActionRequest preview_request;
+    Battle_TargetVolume target_volume;
+    SVECTOR limb_position;
+    int target_count;
+    int delta_z;
+    int delta_y;
+    int delta_x;
+    int action_category;
     int i;
 
-    sp10.actionId = arg0;
-    sp10.primaryTarget.targetsPosition = 0;
-    sp10.primaryTarget.target.targetActor = arg1;
-    sp10.targetCount = 0;
-    temp_v0 = (Battle_actionDefinitions[arg0].category);
+    preview_request.actionId = action_id;
+    preview_request.primaryTarget.targetsPosition = 0;
+    preview_request.primaryTarget.target.targetActor = source_actor_slot;
+    preview_request.targetCount = 0;
+    action_category = (Battle_actionDefinitions[action_id].category);
 
-    switch (temp_v0) {
+    switch (action_category) {
     case 11:
     case 12:
-        sp860.kind = Battle_actionDefinitions[arg0].shape;
-        sp860.opaque1 = 1;
-        sp860.scale.extents[0] = Battle_actionDefinitions[arg0].rangeX;
-        sp860.scale.extents[1] = Battle_actionDefinitions[arg0].rangeY;
-        sp860.scale.extents[2] = Battle_actionDefinitions[arg0].rangeZ;
-        temp_s1 = arg5->vx - arg4->vx;
-        temp_s0 = arg5->vz - arg4->vz;
-        sp860.angle = Core_Gte_Atan2(temp_s1, temp_s0);
-        temp_s0_2 = arg5->vy - arg4->vy;
-        sp860.scale.extents[3] =
-            (Core_Gte_Atan2(temp_s0_2, Core_Math_SquareRootInteger((temp_s1 * temp_s1) + (temp_s0 * temp_s0)))
+        target_volume.kind = Battle_actionDefinitions[action_id].shape;
+        target_volume.opaque1 = 1;
+        target_volume.scale.extents[0] = Battle_actionDefinitions[action_id].rangeX;
+        target_volume.scale.extents[1] = Battle_actionDefinitions[action_id].rangeY;
+        target_volume.scale.extents[2] = Battle_actionDefinitions[action_id].rangeZ;
+        delta_x = target_position->vx - source_position->vx;
+        delta_z = target_position->vz - source_position->vz;
+        target_volume.angle = Core_Gte_Atan2(delta_x, delta_z);
+        delta_y = target_position->vy - source_position->vy;
+        target_volume.scale.extents[3] =
+            (Core_Gte_Atan2(delta_y, Core_Math_SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)))
                 / 16)
             + 0x40;
-        *(SVECTOR*)sp860.position = *arg4;
+        *(SVECTOR*)target_volume.position = *source_position;
         break;
 
     case 2:
     case 4:
     case 6:
     case 8:
-        sp860.kind = Battle_actionDefinitions[arg0].areaShape & 7;
-        sp860.opaque1 = 1;
-        sp860.scale.extents[0] = Battle_actionDefinitions[arg0].areaRangeX;
-        sp860.scale.extents[1] = Battle_actionDefinitions[arg0].areaRangeY;
-        sp860.scale.extents[2] = Battle_actionDefinitions[arg0].areaRangeZ;
-        sp860.angle = 0;
-        sp860.scale.extents[3] = Battle_actionDefinitions[arg0].areaShape & 0xF8;
-        *(SVECTOR*)sp860.position = *arg5;
+        target_volume.kind = Battle_actionDefinitions[action_id].areaShape & 7;
+        target_volume.opaque1 = 1;
+        target_volume.scale.extents[0] = Battle_actionDefinitions[action_id].areaRangeX;
+        target_volume.scale.extents[1] = Battle_actionDefinitions[action_id].areaRangeY;
+        target_volume.scale.extents[2] = Battle_actionDefinitions[action_id].areaRangeZ;
+        target_volume.angle = 0;
+        target_volume.scale.extents[3] = Battle_actionDefinitions[action_id].areaShape & 0xF8;
+        *(SVECTOR*)target_volume.position = *target_position;
         break;
     }
 
-    switch (Battle_actionDefinitions[arg0].category) {
+    switch (Battle_actionDefinitions[action_id].category) {
     case 6:
     case 8:
     case 11:
     case 12:
-        var_s2 = 0;
+        target_count = 0;
 
         for (i = 0; i < 6; ++i) {
-            if ((Actors_ActorLowGroupBonePosition(targetActor, i, &sp870, 2) >= 0)
-                && (Battle_IsPointInTargetVolume(&sp860, (u_short*)&sp870) != 0)) {
-                sp10.targets[var_s2].targetsPosition = 0;
-                sp10.targets[var_s2].target.targetActor = targetActor;
-                sp10.targets[var_s2].target.targetLimb = i;
-                ++var_s2;
+            if ((Actors_ActorLowGroupBonePosition(targetActor, i, &limb_position, 2) >= 0)
+                && (Battle_IsPointInTargetVolume(&target_volume, (u_short*)&limb_position) != 0)) {
+                preview_request.targets[target_count].targetsPosition = 0;
+                preview_request.targets[target_count].target.targetActor = targetActor;
+                preview_request.targets[target_count].target.targetLimb = i;
+                ++target_count;
             }
         }
 
-        sp10.targetCount = var_s2;
+        preview_request.targetCount = target_count;
         break;
 
     case 5:
     case 7:
-        sp10.targets[0].targetsPosition = 0;
-        sp10.targets[0].target.targetActor = targetActor;
-        sp10.targets[0].target.targetLimb = arg3;
-        sp10.targetCount = 1;
+        preview_request.targets[0].targetsPosition = 0;
+        preview_request.targets[0].target.targetActor = targetActor;
+        preview_request.targets[0].target.targetLimb = target_limb;
+        preview_request.targetCount = 1;
         break;
 
     case 1:
     case 2:
     case 3:
     case 4:
-        sp10.targets[0].targetsPosition = 0;
-        sp10.targets[0].target.targetActor = targetActor;
-        sp10.targets[0].target.targetLimb = Battle_actors[targetActor]->stats->defaultTargetLimb;
-        sp10.targetCount = 1;
+        preview_request.targets[0].targetsPosition = 0;
+        preview_request.targets[0].target.targetActor = targetActor;
+        preview_request.targets[0].target.targetLimb = Battle_actors[targetActor]->stats->defaultTargetLimb;
+        preview_request.targetCount = 1;
         break;
     }
 
-    Battle_ResolveActionTargets(arg0, arg6, &sp10, 0);
-    return Battle_ActionCostAndAvailability(arg0, Battle_actors[arg1]->stats, 0) & 0xFF000000;
+    Battle_ResolveActionTargets(action_id, result_out, &preview_request, 0);
+    return Battle_ActionCostAndAvailability(action_id, Battle_actors[source_actor_slot]->stats, 0) & 0xFF000000;
 }
 
 // decomp: BATTLE.PRG vs_battle_getActionFlags (src/BATTLE/BATTLE.PRG/146C.c:15566)

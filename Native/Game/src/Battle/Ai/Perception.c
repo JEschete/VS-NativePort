@@ -46,10 +46,10 @@ int Battle_Ai_secondPerceptionTarget;
 int Battle_Ai_candidateEngagedThisUpdate;
 
 // decomp: BATTLE.PRG func_800D8260 (src/BATTLE/BATTLE.PRG/6FA60.c:407)
-void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* arg0, int arg1, int arg2)
+void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* ai_state, int awareness_marker, int duration_frames)
 {
-    arg0->awarenessMarker = arg1;
-    arg0->awarenessFramesRemaining = arg2;
+    ai_state->awarenessMarker = awareness_marker;
+    ai_state->awarenessFramesRemaining = duration_frames;
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/6FC00.c:644
@@ -471,26 +471,26 @@ void Battle_Ai_UpdateActorPerception(void)
 }
 
 // decomp: BATTLE.PRG func_800DBF00 (src/BATTLE/BATTLE.PRG/73700.c:414)
-void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0)
+void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* ai_state)
 {
-    Battle_Ai_EngagementData* data = arg0->actor;
+    Battle_Ai_EngagementData* data = ai_state->actor;
     Battle_Ai_ActorAiState* node;
 
-    arg0->opaque12F = 0;
+    ai_state->opaque12F = 0;
     data->opaqueBBit2 = 2;
 
-    if (arg0 == Battle_Ai_roomAiState->engagedTail) {
+    if (ai_state == Battle_Ai_roomAiState->engagedTail) {
         data->opaqueBBit2 = 2;
         Battle_Ai_roomAiState->engagedTail = Battle_Ai_roomAiState->engagedTail->nextEngaged != NULL ? Battle_Ai_roomAiState->engagedTail->nextEngaged
                                                               : Battle_Ai_roomAiState->engagedHead;
     }
 
-    if (Battle_Ai_roomAiState->engagedHead == arg0) {
-        Battle_Ai_roomAiState->engagedHead = arg0->nextEngaged;
+    if (Battle_Ai_roomAiState->engagedHead == ai_state) {
+        Battle_Ai_roomAiState->engagedHead = ai_state->nextEngaged;
     } else {
         for (node = Battle_Ai_roomAiState->engagedHead; node != NULL; node = node->nextEngaged) {
-            if (node->nextEngaged == arg0) {
-                node->nextEngaged = arg0->nextEngaged;
+            if (node->nextEngaged == ai_state) {
+                node->nextEngaged = ai_state->nextEngaged;
                 return;
             }
         }
@@ -502,40 +502,40 @@ void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0)
 }
 
 // decomp: BATTLE.PRG func_800DBFE4 (src/BATTLE/BATTLE.PRG/73700.c:463)
-void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* arg0)
+void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* ai_state)
 {
-    if (arg0->engagementFrames != 0 && ++arg0->engagementFrames != 0) {
+    if (ai_state->engagementFrames != 0 && ++ai_state->engagementFrames != 0) {
         int frame;
 
-        if (arg0->engagementFrames < 8) {
+        if (ai_state->engagementFrames < 8) {
             frame = 0;
-        } else if (arg0->engagementFrames < 16) {
+        } else if (ai_state->engagementFrames < 16) {
             frame = 1;
-        } else if (arg0->engagementFrames < 24) {
+        } else if (ai_state->engagementFrames < 24) {
             frame = 2;
         } else {
             frame = 3;
         }
 
-        if (arg0->engagementFrames <= 120) {
-            Battle_Ai_SetActorAwarenessIndicator(arg0->actorId, frame + 1);
+        if (ai_state->engagementFrames <= 120) {
+            Battle_Ai_SetActorAwarenessIndicator(ai_state->actorId, frame + 1);
             return;
         }
 
-        Battle_Ai_RememberAiActionTarget(arg0);
-        Battle_Ai_DisengageActor(arg0);
+        Battle_Ai_RememberAiActionTarget(ai_state);
+        Battle_Ai_DisengageActor(ai_state);
     }
 
-    if (arg0->reengagementGraceFrames != 0) {
-        if (--arg0->reengagementGraceFrames != 0) {
-            Battle_Ai_SetActorAwarenessIndicator(arg0->actorId, 4);
+    if (ai_state->reengagementGraceFrames != 0) {
+        if (--ai_state->reengagementGraceFrames != 0) {
+            Battle_Ai_SetActorAwarenessIndicator(ai_state->actorId, 4);
         } else {
-            Battle_Ai_SetActorAwarenessIndicator(arg0->actorId, 0);
+            Battle_Ai_SetActorAwarenessIndicator(ai_state->actorId, 0);
         }
     }
 
-    if (arg0->engagementCooldownFrames != 0) {
-        --arg0->engagementCooldownFrames;
+    if (ai_state->engagementCooldownFrames != 0) {
+        --ai_state->engagementCooldownFrames;
     }
 }
 
@@ -698,18 +698,18 @@ void Battle_Ai_PropagateActorRelationships(Battle_Ai_ReactionView* state)
 }
 
 // decomp: BATTLE.PRG func_800DEEA4 (src/BATTLE/BATTLE.PRG/74088.c:1596)
-void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0)
+void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* completed_action)
 {
-    if (arg0 != NULL) {
-        if (arg0->opaque4.opaque40 == 0) {
-            Battle_Ai_ActorAiState* entry = Battle_Ai_actorAiStates[arg0->opaque4.opaque0];
+    if (completed_action != NULL) {
+        if (completed_action->opaque4.opaque40 == 0) {
+            Battle_Ai_ActorAiState* entry = Battle_Ai_actorAiStates[completed_action->opaque4.opaque0];
 
             if (entry != NULL) {
                 entry->reengagementGraceFrames = 0;
             }
         }
 
-        Battle_Ai_ApplyActionRelationshipChanges(arg0);
+        Battle_Ai_ApplyActionRelationshipChanges(completed_action);
     }
 }
 

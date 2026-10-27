@@ -528,55 +528,55 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
 #undef MOVEMENT_STEP_TILES
 
 // decomp: BATTLE.PRG func_800E1238 (src/BATTLE/BATTLE.PRG/771A8.c:1278)
-void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* arg0, int arg1)
+void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state, int movement_angle)
 {
-    int sp10;
-    int sp14;
+    int vertical_step;
+    int movement_command;
     int angle;
     int c;
     int s;
 
-    if (Battle_Ai_UpdateFlightGroundTransition((void*)arg0, arg1, 0) != 0) {
+    if (Battle_Ai_UpdateFlightGroundTransition((void*)ai_state, movement_angle, 0) != 0) {
         return;
     }
 
-    if (Battle_Ai_SelectActorVerticalMovementStep(arg0, &sp10, &sp14) == 0) {
-        Battle_Ai_UpdateMovementRecovery((void*)arg0);
+    if (Battle_Ai_SelectActorVerticalMovementStep(ai_state, &vertical_step, &movement_command) == 0) {
+        Battle_Ai_UpdateMovementRecovery((void*)ai_state);
         return;
     }
 
-    arg0->movementDisabled = 1;
-    Battle_Ai_ResolveDirectionalMovement(arg0, arg1, 3);
+    ai_state->movementDisabled = 1;
+    Battle_Ai_ResolveDirectionalMovement(ai_state, movement_angle, 3);
 
     if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 5 && *(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 7) {
-        Battle_Ai_ReleaseActorAiReservations(arg0);
-        Battle_Ai_UpdateMovementRecovery((void*)arg0);
+        Battle_Ai_ReleaseActorAiReservations(ai_state);
+        Battle_Ai_UpdateMovementRecovery((void*)ai_state);
         return;
     }
 
     if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) == 5) {
-        arg1 = arg0->heading * (ONE / 8);
+        movement_angle = ai_state->heading * (ONE / 8);
     }
 
-    angle = (-arg1 + ONE * 3 / 4) & 0xFFF;
+    angle = (-movement_angle + ONE * 3 / 4) & 0xFFF;
     c = Core_Gte_Cos(angle);
     s = Core_Gte_Sin(angle);
 
-    if (Battle_Ai_LowestReachableGroundHeight(arg0, arg1) + arg0->flightHeight < arg0->position.vy) {
-        arg0->moveY = -ONE;
-        arg0->moveZ = 0;
-        arg0->moveX = 0;
+    if (Battle_Ai_LowestReachableGroundHeight(ai_state, movement_angle) + ai_state->flightHeight < ai_state->position.vy) {
+        ai_state->moveY = -ONE;
+        ai_state->moveZ = 0;
+        ai_state->moveX = 0;
     } else {
-        arg0->moveY = 0;
-        arg0->moveX = c;
-        arg0->moveZ = s;
+        ai_state->moveY = 0;
+        ai_state->moveX = c;
+        ai_state->moveZ = s;
     }
 
-    if (!(arg0->model->opaqueABit5 << 21)) {
-        Battle_Ai_BeginAiAlternateTerrainMovement(arg0);
+    if (!(ai_state->model->opaqueABit5 << 21)) {
+        Battle_Ai_BeginAiAlternateTerrainMovement(ai_state);
     } else {
-        arg0->stallCounter = 0;
-        Battle_Ai_IssueActorCommand(arg0, sp14);
+        ai_state->stallCounter = 0;
+        Battle_Ai_IssueActorCommand(ai_state, movement_command);
     }
 }
 
@@ -684,22 +684,22 @@ void Battle_Ai_MoveAwayFromReference(Battle_Ai_MovementDestinationView* state, i
 }
 
 // decomp: BATTLE.PRG func_800E1850 (src/BATTLE/BATTLE.PRG/771A8.c:1455)
-u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char arg0, u_int arg1, int arg2)
+u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char direction_mask, u_int packed_tile, int maximum_ground_height)
 {
-    int x = arg1 & 0xFF;
-    int z = (arg1 >> 16) & 0xFF;
+    int x = packed_tile & 0xFF;
+    int z = (packed_tile >> 16) & 0xFF;
     int i;
 
     for (i = 0; i < 8; ++i) {
-        if ((arg0 >> i) & 1) {
+        if ((direction_mask >> i) & 1) {
             if (Field_GroundHeightAtTile(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dx,
                     z + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dz)
-                > arg2) {
-                arg0 &= ~(1 << i);
+                > maximum_ground_height) {
+                direction_mask &= ~(1 << i);
             }
         }
     }
-    return arg0;
+    return direction_mask;
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/771A8.c:1511
@@ -1125,7 +1125,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                     result = 0;
                     goto done;
                 }
-                ((void (*)(Battle_Ai_ActionExecutionView* arg0, int arg1, int arg2))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);
+                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);
                 if (!Battle_Ai_UpdateHesitationTurn(s, 128, 1, 1)) {
                     result = 0;
                 }
@@ -1145,7 +1145,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                     result = 0;
                     goto done;
                 }
-                ((void (*)(Battle_Ai_ActionExecutionView* arg0, int arg1, int arg2))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);
+                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);
                 if (!Battle_Ai_UpdateHesitationTurn(s, 128, 1, 1)) {
                 cancel:
                     s->opaqueE4 = 0;

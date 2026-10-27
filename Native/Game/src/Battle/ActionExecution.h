@@ -11,10 +11,10 @@
 
 extern int Battle_settledCameraDistance;
 extern int Battle_cameraEaseMode;
-void Battle_ActionTargetLimbPosition(int arg0, int arg1, SVECTOR* arg2);
+void Battle_ActionTargetLimbPosition(int actor_slot, int limb_tag, SVECTOR* position_out);
 int Battle_ActionTargetDistance(void);
-void Battle_ActionCameraMidpoint(SVECTOR* arg0);
-void Battle_StepCameraTowardActionMidpoint(int arg0);
+void Battle_ActionCameraMidpoint(SVECTOR* midpoint_out);
+void Battle_StepCameraTowardActionMidpoint(int update_camera);
 void Battle_UpdateInitialTargetSelection(void);
 void Battle_UpdateActionAreaSelection(void);
 void Battle_UpdateFinalTargetSelection(void);

@@ -57,20 +57,20 @@ extern char* Battle_puzzleTimerTextPointer;
 extern char Battle_lowerScreenUiState;
 extern char Battle_puzzleTimerText[9];
 extern int Battle_puzzleTimer;
-int Battle_SetGameplayHudHidden(int arg0);
+int Battle_SetGameplayHudHidden(int hidden);
 void Battle_DrawHudStatGauge(int colorIndex, int current, int max);
-void Battle_DrawSlidingStatusIcon(int arg0, int arg1, int arg2);
-int Battle_StatusIconFlags(Battle_ActorStats* arg0);
+void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2);
+int Battle_StatusIconFlags(Battle_ActorStats* actor_stats);
 int Battle_LimbCondition(Battle_LimbStats* limb);
-int Battle_ShortcutIconBrightness(int arg0);
+int Battle_ShortcutIconBrightness(int shortcut_index);
 void Battle_ShowShortcutHud(void);
-void Battle_DrawShortcutButtonMarker(int arg0, int arg1);
+void Battle_DrawShortcutButtonMarker(int packed_screen_position, int brightness_transparency);
 void Battle_DrawShortcutHud(void);
 void Battle_DrawBattleHud(void);
 void Battle_ShowPuzzleTimer(void);
 void Battle_HidePuzzleTimer(void);
 void Battle_DrawPuzzleTimer(const State_SceneTimer* timer);
-void Battle_SetHudHidden(int arg0);
-void Battle_SetHudBattleMode(int arg0);
+void Battle_SetHudHidden(int hidden);
+void Battle_SetHudBattleMode(int battle_mode);
 
 #endif // VS_BATTLE_HUD_H_DECLS

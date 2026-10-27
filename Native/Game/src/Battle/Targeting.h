@@ -54,33 +54,33 @@ extern u_char Battle_secondColumnGroupCount;
 extern u_char Battle_firstColumnGroupCount;
 extern u_char Battle_targetColumnTopOffset;
 extern Menu_StringContext Battle_stringContext;
-void Battle_PopulateActionTargetPreview(Battle_TargetPreview* arg0, Battle_ActionRequest* arg1, Battle_HitResult* arg2);
+void Battle_PopulateActionTargetPreview(Battle_TargetPreview* preview_out, Battle_ActionRequest* action_result, Battle_HitResult* hit_result);
 void Battle_ReturnToBattleActionMenu(void);
 void Battle_FilterAreaActionTargets(void);
-void Battle_AimActionBehindSource(Battle_ActionRequest* arg0);
+void Battle_AimActionBehindSource(Battle_ActionRequest* action_request);
 void Battle_SetSingleActionTarget(void);
 void Battle_SetAllActionTargets(void);
 void Battle_CollectEnvironmentActionTargets(void);
 #include "Battle/TargetPages.h"
 
 void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)));
-void Battle_CollectDirectActionTargets(int arg0);
-void Battle_CollectGroundAreaActionTargets(int arg0);
+void Battle_CollectDirectActionTargets(int source_actor_slot);
+void Battle_CollectGroundAreaActionTargets(int source_actor_slot);
 void Battle_InitializeActionTargeting(int action);
-void Battle_BeginActorActionSelection(int arg0, u_short arg1);
-int Battle_UpdateSphereTargetPosition(SVECTOR* arg0);
-void Battle_ClearTargetActorHighlight(int arg0, int arg1);
-void Battle_SetTargetActorHighlight(int arg0, int arg1, int arg2);
-void Battle_SetTargetActorColorOverride(int arg0, void* arg1);
+void Battle_BeginActorActionSelection(int source_actor_slot, u_short action_id);
+int Battle_UpdateSphereTargetPosition(SVECTOR* target_position);
+void Battle_ClearTargetActorHighlight(int actor_slot, int pulse_slot);
+void Battle_SetTargetActorHighlight(int actor_slot, int pulse_flags, int pulse_slot);
+void Battle_SetTargetActorColorOverride(int actor_slot, void* tint);
 void Battle_UpdateTargetSelectionHighlight(int mode);
 void Battle_AppendTargetGroupToColumn(int group);
 void Battle_BuildTargetSelectionColumns(void);
 void Battle_DismissTargetSelectionRows(void);
-Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int arg0, int arg1, int arg2);
-char* Battle_FirstTargetStatusText(uint arg0);
+Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int target_index, int row_state, int row_index);
+char* Battle_FirstTargetStatusText(uint status_mask);
 int Battle_UpdateTargetSelectionMenu(u_char* target);
-int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* arg0);
-int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int arg2);
-int Battle_CalculateActionRangeSquared(Battle_Ai_ActionRangeView* arg0, int actionId);
+int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* range_shape);
+int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int maximum_reach);
+int Battle_CalculateActionRangeSquared(Battle_Ai_ActionRangeView* actor_range_view, int actionId);
 
 #endif // VS_BATTLE_TARGETING_H_DECLS

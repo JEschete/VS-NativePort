@@ -34,18 +34,18 @@ _Static_assert(sizeof(Battle_Ai_RelationWord) == 0x4, "Battle_Ai_RelationWord mu
 extern int Battle_Ai_frameTickBudget;
 extern int Battle_Ai_secondPerceptionTarget;
 extern int Battle_Ai_candidateEngagedThisUpdate;
-void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* arg0, int arg1, int arg2);
+void Battle_Ai_SetTemporaryAwarenessIndicator(Battle_Ai_ActorAiState* ai_state, int awareness_marker, int duration_frames);
 int Battle_Ai_IsTargetOccludedAtExtent(
     SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id);
 int Battle_Ai_IsTargetOccludedAtHeight(
     SVECTOR* from, SVECTOR* to, Battle_Ai_PerceptionView* state, int id);
 void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id);
 void Battle_Ai_UpdateActorPerception(void);
-void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* arg0);
-void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* arg0);
+void Battle_Ai_UnlinkEngagedActor(Battle_Ai_ActorAiState* ai_state);
+void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* ai_state);
 void Battle_Ai_AnimateEngagementPhase(void);
 void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai_StatApplicationView* app);
 void Battle_Ai_PropagateActorRelationships(Battle_Ai_ReactionView* state);
-void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* arg0);
+void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* completed_action);
 
 #endif // VS_BATTLE_AI_PERCEPTION_H_DECLS

@@ -57,9 +57,9 @@ unsigned int Battle_Ai_FindAdjacentMovementDestination(
 unsigned int Battle_Ai_WaypointValue(unsigned short* row, int index);
 unsigned short* Battle_Ai_WaypointAddress(unsigned short* row, int index);
 void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Battle_Ai_WaypointTile* destination);
-void Battle_Ai_ResolveRouteGateExit(Battle_Ai_RouteGateTile* arg0, Battle_Ai_RouteGateTile* arg1);
-void Battle_Ai_FindNearestRouteGateEntry(int arg0, int arg1, int arg2, Battle_Ai_RouteGateTile* arg3);
-int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int arg1, int arg2);
+void Battle_Ai_ResolveRouteGateExit(Battle_Ai_RouteGateTile* entry_tile, Battle_Ai_RouteGateTile* exit_tile_out);
+void Battle_Ai_FindNearestRouteGateEntry(int platform_index, int arg1, int arg2, Battle_Ai_RouteGateTile* entry_tile_out);
+int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int packed_tile, int match_entry_end);
 u_int Battle_Ai_RouteEndpointPair(Battle_Ai_RouteEdgePair* pair);
 u_short Battle_Ai_RouteEndpointValue(Battle_Ai_RouteEdgePair* pair, int index);
 u_int Battle_Ai_NavigationTileFlags(int z, int x);
@@ -67,8 +67,8 @@ int Battle_Ai_SetNavigationAreaFromTile(Battle_Ai_AreaRouteView* state, Battle_A
 int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int index, int area);
 void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state);
 int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_PathTest test, int mask);
-void Battle_Ai_FloodFillAiTerrainHeights(int arg0, int arg1, int arg2);
-int Battle_Ai_FindAdjacentAiGroundHeight(int arg0, int arg1);
+void Battle_Ai_FloodFillAiTerrainHeights(int tile_x, int tile_z, int height_value);
+int Battle_Ai_FindAdjacentAiGroundHeight(int tile_x, int tile_z);
 void Battle_Ai_BuildAiSpecialTerrainHeights(void);
 void Battle_Ai_InitializeRoomNavigation(void);
 

@@ -58,12 +58,12 @@ int Battle_Ai_IsFlightDirectionObstructed(Battle_Ai_ObstructionView* state, int 
 int Battle_Ai_CanFlyInDirection(Battle_Ai_DirectionCacheView* state, int direction);
 int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, int action, int mode);
 void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int action);
-void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* arg0, int arg1);
+void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state, int movement_angle);
 void Battle_Ai_ProjectClearRadialDestination(Battle_Ai_MoveTargetView* state, Battle_Ai_TilePosition source, int angle,
     unsigned int distance);
 void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state, int unused);
 void Battle_Ai_MoveAwayFromReference(Battle_Ai_MovementDestinationView* state, int angle);
-u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char arg0, u_int arg1, int arg2);
+u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char direction_mask, u_int packed_tile, int maximum_ground_height);
 void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state);
 Battle_Ai_DirectionDelta* Battle_Ai_WanderDirectionOffset(int index);
 int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int tile, unsigned int maxCount, int arg3);

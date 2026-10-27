@@ -165,63 +165,63 @@ void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Ba
 }
 
 // decomp: BATTLE.PRG func_800DF9A8 (src/BATTLE/BATTLE.PRG/771A8.c:459)
-void Battle_Ai_ResolveRouteGateExit(Battle_Ai_RouteGateTile* arg0, Battle_Ai_RouteGateTile* arg1)
+void Battle_Ai_ResolveRouteGateExit(Battle_Ai_RouteGateTile* entry_tile, Battle_Ai_RouteGateTile* exit_tile_out)
 {
     int i;
 
     for (i = 0; i < 8; i++) {
-        if (Battle_Ai_routeGates[i * 2].tileX == arg0->opaque0
-            && Battle_Ai_routeGates[i * 2].tileZ == arg0->opaque2) {
+        if (Battle_Ai_routeGates[i * 2].tileX == entry_tile->opaque0
+            && Battle_Ai_routeGates[i * 2].tileZ == entry_tile->opaque2) {
             if (i & 1) {
                 i--;
             } else {
                 i++;
             }
-            arg1->opaque0 = Battle_Ai_routeGates[i * 2 + 1].tileX;
-            arg1->opaque2 = Battle_Ai_routeGates[i * 2 + 1].tileZ;
-            arg1->opaque1 = i >> 1;
+            exit_tile_out->opaque0 = Battle_Ai_routeGates[i * 2 + 1].tileX;
+            exit_tile_out->opaque2 = Battle_Ai_routeGates[i * 2 + 1].tileZ;
+            exit_tile_out->opaque1 = i >> 1;
             return;
         }
     }
-    *(int*)arg1 = *(int*)arg0;
+    *(int*)exit_tile_out = *(int*)entry_tile;
 }
 
 // decomp: BATTLE.PRG func_800DFA54 (src/BATTLE/BATTLE.PRG/771A8.c:480)
-void Battle_Ai_FindNearestRouteGateEntry(int arg0, int arg1, int arg2, Battle_Ai_RouteGateTile* arg3)
+void Battle_Ai_FindNearestRouteGateEntry(int platform_index, int arg1, int arg2, Battle_Ai_RouteGateTile* entry_tile_out)
 {
     int i;
 
     arg1 >>= 19;
     arg2 >>= 19;
-    for (i = arg0 * 2; i < arg0 * 2 + 2; i++) {
+    for (i = platform_index * 2; i < platform_index * 2 + 2; i++) {
         if (arg1 == Battle_Ai_routeGates[i * 2 + 1].tileX
             && arg2 == Battle_Ai_routeGates[i * 2 + 1].tileZ) {
             goto found;
         }
     }
-    i = arg0 * 2;
+    i = platform_index * 2;
 found:
-    arg3->opaque0 = Battle_Ai_routeGates[i * 2].tileX;
-    arg3->opaque2 = Battle_Ai_routeGates[i * 2].tileZ;
+    entry_tile_out->opaque0 = Battle_Ai_routeGates[i * 2].tileX;
+    entry_tile_out->opaque2 = Battle_Ai_routeGates[i * 2].tileZ;
 }
 
 // decomp: BATTLE.PRG func_800DFAF8 (src/BATTLE/BATTLE.PRG/771A8.c:498)
-int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int arg1, int arg2)
+int Battle_Ai_FindRouteGateAtTile(intptr_t arg0, u_int packed_tile, int match_entry_end)
 {
-    Field_PlatformContactPoint sp10[4];
+    Field_PlatformContactPoint platform_positions[4];
     Field_PlatformContactPoint* m;
     int i;
     int j;
 
-    Field_CollectMovingPlatformPositions(sp10);
+    Field_CollectMovingPlatformPositions(platform_positions);
     for (i = 0; i < 8; ++i) {
         Battle_Ai_RouteGateEnd* e = &Battle_Ai_routeGates[i * 2];
         j = i >> 1;
-        if (arg2 == 0) {
+        if (match_entry_end == 0) {
             ++e;
         }
-        if ((u_char)arg1 == e->tileX && (u_char)(arg1 >> 16) == e->tileZ) {
-            m = &sp10[j];
+        if ((u_char)packed_tile == e->tileX && (u_char)(packed_tile >> 16) == e->tileZ) {
+            m = &platform_positions[j];
             if (Battle_Ai_routeGates[i * 2 + 1].tileX == m->x >> 7
                 && Battle_Ai_routeGates[i * 2 + 1].tileZ == m->z >> 7) {
                 return i;
@@ -643,35 +643,35 @@ done:
 }
 
 // decomp: BATTLE.PRG func_800E5EC0 (src/BATTLE/BATTLE.PRG/7CD68.c:760)
-void Battle_Ai_FloodFillAiTerrainHeights(int arg0, int arg1, int arg2)
+void Battle_Ai_FloodFillAiTerrainHeights(int tile_x, int tile_z, int height_value)
 {
     Battle_Ai_DirectionDelta* step;
     int i;
-    int value = arg2 & 0x3FF;
+    int value = height_value & 0x3FF;
 
-    Battle_Ai_specialTerrainHeights[arg1][arg0] = (Battle_Ai_specialTerrainHeights[arg1][arg0] & 0xFC00) | value | 0x2000;
+    Battle_Ai_specialTerrainHeights[tile_z][tile_x] = (Battle_Ai_specialTerrainHeights[tile_z][tile_x] & 0xFC00) | value | 0x2000;
 
     for (i = 0, step = Battle_Ai_directionDeltas; i < 4; ++i, step += 2) {
-        u_int x = arg0 + step->dx;
-        u_int z = arg1 + step->dz;
+        u_int x = tile_x + step->dx;
+        u_int z = tile_z + step->dz;
 
         if (x < 32 && z < 32 && (Battle_Ai_tileFlagMap[z][x] & 0x20)
             && !(Battle_Ai_specialTerrainHeights[z][x] & 0x2000)) {
-            Battle_Ai_FloodFillAiTerrainHeights(x, z, arg2);
+            Battle_Ai_FloodFillAiTerrainHeights(x, z, height_value);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800E5FDC (src/BATTLE/BATTLE.PRG/7CD68.c:779)
-int Battle_Ai_FindAdjacentAiGroundHeight(int arg0, int arg1)
+int Battle_Ai_FindAdjacentAiGroundHeight(int tile_x, int tile_z)
 {
     int i;
     u_int x;
     u_int z;
 
     for (i = 0; i < 4; i++) {
-        x = arg0 + Battle_Ai_directionDeltas[i * 2].dx;
-        z = arg1 + Battle_Ai_directionDeltas[i * 2].dz;
+        x = tile_x + Battle_Ai_directionDeltas[i * 2].dx;
+        z = tile_z + Battle_Ai_directionDeltas[i * 2].dz;
         if (x < 32 && z < 32 && !(Battle_Ai_tileFlagMap[z][x] & 0x70)) {
             return Field_FloorHeightAt(x << 7 | 0x40, z << 7 | 0x40) >> 6;
         }

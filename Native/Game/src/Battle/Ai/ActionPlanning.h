@@ -30,22 +30,22 @@ extern Battle_Ai_CandidateEntryView* Battle_Ai_fallbackCandidates;
 extern Battle_Ai_ReactionRecord* Battle_Ai_planningWorkspace;
 extern u_char (*Battle_Ai_candidateExclusions)[256];
 int Battle_Ai_RefreshActionCandidateReadiness(Battle_Ai_CandidateReadinessView* state);
-void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* arg0);
+void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_actor_rows);
 void Battle_Ai_SimulateActionCandidate(
-    Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionTiming* arg1, Battle_Ai_ActionCandidate* arg2, int arg3);
-void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* arg0);
+    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionTiming* simulated_actor_rows, Battle_Ai_ActionCandidate* candidate, int simulation_mode);
+void Battle_Ai_UpdateCandidateHitWeight(Battle_Ai_ActionCandidate* candidate);
 int Battle_Ai_ActorStatusConditionScore(Battle_Ai_ActionTiming* stats);
 int Battle_Ai_ActorHpRatio(Battle_Ai_ActionTiming* stats, int id);
 int Battle_Ai_ActorMpRatio(Battle_Ai_ActionTiming* stats, int id);
 int Battle_Ai_ActorEquipmentDpRatio(Battle_Ai_ActionTiming* stats, int id);
 void Battle_Ai_EvaluateActionCandidate(
-    Battle_Ai_ActorAiState* arg0, Battle_Ai_ActionCandidate* arg1, int arg2, Battle_ActionDefinition* arg3);
-void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* arg0);
-void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* arg0, int arg1);
-void Battle_Ai_AdvancePlanningSimulation(int arg0);
+    Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate, int simulation_mode, Battle_ActionDefinition* action_definition);
+void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state);
+void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int readiness_threshold);
+void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step);
 int Battle_Ai_SnapshotPlanningActorStats(void);
 void Battle_Ai_RestorePlanningActorStats(void);
 void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state);
-void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* arg0);
+void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* completed_action);
 
 #endif // VS_BATTLE_AI_ACTIONPLANNING_H_DECLS

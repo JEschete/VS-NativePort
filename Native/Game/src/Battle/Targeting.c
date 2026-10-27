@@ -120,39 +120,39 @@ u_char Battle_targetColumnTopOffset;
 Menu_StringContext Battle_stringContext;
 
 // decomp: BATTLE.PRG func_8006F630 (src/BATTLE/BATTLE.PRG/146C.c:3235)
-void Battle_PopulateActionTargetPreview(Battle_TargetPreview* arg0, Battle_ActionRequest* arg1, Battle_HitResult* arg2)
+void Battle_PopulateActionTargetPreview(Battle_TargetPreview* preview_out, Battle_ActionRequest* action_result, Battle_HitResult* hit_result)
 {
-    int effect = Battle_actionDefinitions[arg1->actionId].hits[0].effectId;
-    u_short var_v0;
+    int effect = Battle_actionDefinitions[action_result->actionId].hits[0].effectId;
+    u_short preview_amount;
 
     switch (effect) {
     case 0x3A:
     case 0x3E:
-        var_v0 = arg2->target.hp;
-        arg0->effect = effect;
-        arg0->previewAmount = var_v0;
+        preview_amount = hit_result->target.hp;
+        preview_out->effect = effect;
+        preview_out->previewAmount = preview_amount;
         break;
     case 0x3B:
-        var_v0 = arg2->target.mp;
-        arg0->effect = effect;
-        arg0->previewAmount = var_v0;
+        preview_amount = hit_result->target.mp;
+        preview_out->effect = effect;
+        preview_out->previewAmount = preview_amount;
         break;
     case 0x3F:
-        var_v0 = arg2->target.mp;
-        arg0->effect = effect;
-        arg0->previewAmount = var_v0;
+        preview_amount = hit_result->target.mp;
+        preview_out->effect = effect;
+        preview_out->previewAmount = preview_amount;
         break;
     default:
-        arg0->effect = effect;
+        preview_out->effect = effect;
         break;
     }
 
-    arg0->hitChance = arg2->target.hitThreshold;
-    arg0->removedStatuses = arg2->removeStatuses & 0x1FFFFFE0;
-    arg0->actionKind = Battle_actionDefinitions[arg1->actionId].category;
-    arg0->opaque15 = arg1->damageType;
-    arg0->opaque16 = arg1->effectVariant;
-    arg0->enemyClass = Battle_actors[arg2->target.targetActor & 15]->stats->enemyClass;
+    preview_out->hitChance = hit_result->target.hitThreshold;
+    preview_out->removedStatuses = hit_result->removeStatuses & 0x1FFFFFE0;
+    preview_out->actionKind = Battle_actionDefinitions[action_result->actionId].category;
+    preview_out->opaque15 = action_result->damageType;
+    preview_out->opaque16 = action_result->effectVariant;
+    preview_out->enemyClass = Battle_actors[hit_result->target.targetActor & 15]->stats->enemyClass;
 }
 
 // decomp: BATTLE.PRG func_800704D8 (src/BATTLE/BATTLE.PRG/146C.c:3578)
@@ -232,24 +232,24 @@ void Battle_FilterAreaActionTargets(void)
 }
 
 // decomp: BATTLE.PRG func_8007087C (src/BATTLE/BATTLE.PRG/146C.c:3650)
-void Battle_AimActionBehindSource(Battle_ActionRequest* arg0)
+void Battle_AimActionBehindSource(Battle_ActionRequest* action_request)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery source_placement;
 
-    Actors_ActorPlacement(arg0->primaryTarget.target.targetActor, &sp10);
-    arg0->focusPosition.vx = sp10.location.position.vx + Core_Gte_Sin(sp10.location.position.pad + ONE / 2);
-    arg0->focusPosition.vz = sp10.location.position.vz + Core_Gte_Cos(sp10.location.position.pad + ONE / 2);
-    arg0->focusPosition.vy = sp10.location.position.vy;
+    Actors_ActorPlacement(action_request->primaryTarget.target.targetActor, &source_placement);
+    action_request->focusPosition.vx = source_placement.location.position.vx + Core_Gte_Sin(source_placement.location.position.pad + ONE / 2);
+    action_request->focusPosition.vz = source_placement.location.position.vz + Core_Gte_Cos(source_placement.location.position.pad + ONE / 2);
+    action_request->focusPosition.vy = source_placement.location.position.vy;
 }
 
 // decomp: BATTLE.PRG func_800708EC (src/BATTLE/BATTLE.PRG/146C.c:3660)
 void Battle_SetSingleActionTarget(void)
 {
-    char temp_v1;
+    char encoded_target_id;
 
     Battle_actionState->selection.targetCount = 1;
-    temp_v1 = Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
-    if (temp_v1 < 16) {
+    encoded_target_id = Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
+    if (encoded_target_id < 16) {
         Battle_actionState->selection.targets[0].targetsPosition = 0;
         Battle_actionState->selection.targets[0].target.targetActor =
             Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
@@ -261,7 +261,7 @@ void Battle_SetSingleActionTarget(void)
                     ->stats->defaultTargetLimb;
         }
     } else {
-        Battle_actionState->selection.targets[0].targetsPosition = temp_v1 & 0x10 ? 4 : 1;
+        Battle_actionState->selection.targets[0].targetsPosition = encoded_target_id & 0x10 ? 4 : 1;
         *(SVECTOR*)&Battle_actionState->selection.targets[0].target =
             Battle_actionState->previews[Battle_actionState->selectedPreview].position;
         Battle_actionState->selection.targets[0].target.mp = Battle_actionState->previews[Battle_actionState->selectedPreview].actorId;
@@ -369,15 +369,15 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
     int action = Battle_actionState->selection.actionId;
     int count;
     int i;
-    Battle_ActionDefinition* spec;
+    Battle_ActionDefinition* action_definition;
 
     Actors_ActorBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 0, &origin, 0);
-    spec = &Battle_actionDefinitions[action];
-    Battle_actionState->areaShape = spec->shape;
+    action_definition = &Battle_actionDefinitions[action];
+    Battle_actionState->areaShape = action_definition->shape;
     Battle_actionState->areaKind = 1;
-    Battle_actionState->areaX = spec->rangeX;
-    Battle_actionState->areaY = spec->rangeY;
-    Battle_actionState->areaZ = spec->rangeZ;
+    Battle_actionState->areaX = action_definition->rangeX;
+    Battle_actionState->areaY = action_definition->rangeY;
+    Battle_actionState->areaZ = action_definition->rangeZ;
     if (Battle_actionState->selection.primaryTarget.target.targetActor) {
         short dx;
         short dz;
@@ -453,35 +453,35 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
 }
 
 // decomp: BATTLE.PRG func_80071F68 (src/BATTLE/BATTLE.PRG/146C.c:4176)
-void Battle_CollectDirectActionTargets(int arg0)
+void Battle_CollectDirectActionTargets(int source_actor_slot)
 {
     Actors_ActorLocationQuery state;
     Battle_ActionRequest result;
     int i;
     int action = Battle_actionState->selection.actionId;
     Battle_ActorStats* attacker;
-    Battle_ActionDefinition* spec;
+    Battle_ActionDefinition* action_definition;
     int count;
     int j;
 
-    Battle_actionState->sourceActorId = arg0;
+    Battle_actionState->sourceActorId = source_actor_slot;
     Battle_actionState->rangeShape = Battle_actionDefinitions[action].shape;
-    spec = &Battle_actionDefinitions[action];
+    action_definition = &Battle_actionDefinitions[action];
     Battle_actionState->rangeKind = 1;
     Actors_ActorPlacement(Battle_actionState->selection.primaryTarget.target.targetActor, &state);
     Battle_actionState->rangeFacing = state.location.position.pad;
     attacker = Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->stats;
 
-    if (spec->rangeX == 0xFF) {
+    if (action_definition->rangeX == 0xFF) {
         Battle_actionState->rangeX = attacker->currentRange;
         Battle_actionState->rangeY = attacker->currentRangeY;
         Battle_actionState->rangeZ = attacker->currentRangeZ;
         Battle_actionState->rangeAngle = attacker->currentAttackShapeAngle * 8;
     } else {
-        Battle_actionState->rangeX = spec->rangeX;
-        Battle_actionState->rangeY = spec->rangeY;
-        Battle_actionState->rangeZ = spec->rangeZ;
-        Battle_actionState->rangeAngle = spec->angle * 8;
+        Battle_actionState->rangeX = action_definition->rangeX;
+        Battle_actionState->rangeY = action_definition->rangeY;
+        Battle_actionState->rangeZ = action_definition->rangeZ;
+        Battle_actionState->rangeAngle = action_definition->angle * 8;
     }
 
     Actors_ActorTaggedBonePosition(Battle_actionState->selection.primaryTarget.target.targetActor, 250, &Battle_actionState->rangeOrigin, 0);
@@ -607,41 +607,41 @@ void Battle_CollectDirectActionTargets(int arg0)
 }
 
 // decomp: BATTLE.PRG func_80072734 (src/BATTLE/BATTLE.PRG/146C.c:4329)
-void Battle_CollectGroundAreaActionTargets(int arg0)
+void Battle_CollectGroundAreaActionTargets(int source_actor_slot)
 {
     Actors_ActorLocationQuery state;
     Battle_ActorStats* attacker =
         Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->stats;
-    Battle_ActionDefinition* spec;
+    Battle_ActionDefinition* action_definition;
     int action = Battle_actionState->selection.actionId;
     int count;
     int i;
 
-    Battle_actionState->sourceActorId = arg0;
+    Battle_actionState->sourceActorId = source_actor_slot;
     Battle_actionState->rangeShape = Battle_actionDefinitions[action].shape;
-    spec = &Battle_actionDefinitions[action];
+    action_definition = &Battle_actionDefinitions[action];
     Battle_actionState->rangeKind = 2;
     Actors_ActorPlacement(Battle_actionState->selection.primaryTarget.target.targetActor, &state);
     Battle_actionState->rangeFacing = state.location.position.pad;
     count = 0;
 
     // BUG: the angle bits of the range word can never equal 0xFF
-    if ((*(u_int*)&spec->rangeX >> 27) == 0xFF) {
+    if ((*(u_int*)&action_definition->rangeX >> 27) == 0xFF) {
         Battle_actionState->rangeX = attacker->currentRange;
         Battle_actionState->rangeY = attacker->currentRangeY;
         Battle_actionState->rangeZ = attacker->currentRangeZ;
         Battle_actionState->rangeAngle = attacker->currentAttackShapeAngle * 8;
     } else {
-        Battle_actionState->rangeX = spec->rangeX;
-        Battle_actionState->rangeY = spec->rangeY;
-        Battle_actionState->rangeZ = spec->rangeZ;
-        Battle_actionState->rangeAngle = spec->angle * 8;
+        Battle_actionState->rangeX = action_definition->rangeX;
+        Battle_actionState->rangeY = action_definition->rangeY;
+        Battle_actionState->rangeZ = action_definition->rangeZ;
+        Battle_actionState->rangeAngle = action_definition->angle * 8;
         Battle_actionState->areaFacing = 0;
-        Battle_actionState->areaShape = spec->areaShape & 7;
-        Battle_actionState->areaX = spec->areaRangeX;
-        Battle_actionState->areaY = spec->areaRangeY;
-        Battle_actionState->areaZ = spec->areaRangeZ;
-        Battle_actionState->areaAngle = spec->areaShape & 0xF8;
+        Battle_actionState->areaShape = action_definition->areaShape & 7;
+        Battle_actionState->areaX = action_definition->areaRangeX;
+        Battle_actionState->areaY = action_definition->areaRangeY;
+        Battle_actionState->areaZ = action_definition->areaRangeZ;
+        Battle_actionState->areaAngle = action_definition->areaShape & 0xF8;
 
         for (i = 0; i < 10; ++i) {
             u_int status = Actors_ActorStateFlags(i);
@@ -767,28 +767,28 @@ void Battle_InitializeActionTargeting(int action)
 }
 
 // decomp: BATTLE.PRG func_80072EC4 (src/BATTLE/BATTLE.PRG/146C.c:4489)
-void Battle_BeginActorActionSelection(int arg0, u_short arg1)
+void Battle_BeginActorActionSelection(int source_actor_slot, u_short action_id)
 {
     int i;
-    u_int temp_v0;
-    Battle_Actor* temp_a0;
+    u_int actor_state_flags;
+    Battle_Actor* source_actor;
 
     Field_controlMode = 2;
     Core_Memory_ZeroAlignedWords(&Battle_actionState->selection, sizeof Battle_actionState->selection);
     Battle_actionState->selection.primaryTarget.targetsPosition = 0;
-    Battle_actionState->selection.primaryTarget.target.targetActor = arg0;
-    Battle_actionState->selection.actionId = arg1;
+    Battle_actionState->selection.primaryTarget.target.targetActor = source_actor_slot;
+    Battle_actionState->selection.actionId = action_id;
     Field_StorePreferredActionCameraDistance();
     Battle_ResetTargetingRiskPenaltyTimer();
-    if (arg0 != 0) {
+    if (source_actor_slot != 0) {
         Battle_actionState->isPlayerAction = 0;
     } else {
         Battle_actionState->isPlayerAction = 1;
     }
     Battle_actionState->selectedPreview = Battle_actionState->cameraPreview = -1;
-    temp_a0 = Battle_actors[arg0];
-    Battle_actionState->previews[0].actorId = temp_a0->commandArg1.bytes[0];
-    Battle_actionState->previews[0].limb = temp_a0->commandArg1.bytes[2];
+    source_actor = Battle_actors[source_actor_slot];
+    Battle_actionState->previews[0].actorId = source_actor->commandArg1.bytes[0];
+    Battle_actionState->previews[0].limb = source_actor->commandArg1.bytes[2];
     Battle_actionState->selection.targetCount = 0;
     Battle_actionState->selectionFrames = 0;
     Battle_actionState->chainStep = 0;
@@ -803,14 +803,14 @@ void Battle_BeginActorActionSelection(int arg0, u_short arg1)
 
     for (i = 0; i < 16; ++i) {
         if (i != Battle_actionState->selection.primaryTarget.target.targetActor) {
-            temp_v0 = Actors_ActorStateFlags(i);
-            if (temp_v0 & 4) {
-                Actors_SetActorDisplayFlags(i, temp_v0 & ~4);
+            actor_state_flags = Actors_ActorStateFlags(i);
+            if (actor_state_flags & 4) {
+                Actors_SetActorDisplayFlags(i, actor_state_flags & ~4);
             }
         }
     }
 
-    if (arg0 == 0) {
+    if (source_actor_slot == 0) {
         Field_SetMinimapVisible(0);
     }
     Field_SetRoomAnimationsPaused(1);
@@ -823,7 +823,7 @@ void Battle_BeginActorActionSelection(int arg0, u_short arg1)
 }
 
 // decomp: BATTLE.PRG func_800C4794 (src/BATTLE/BATTLE.PRG/5BF94.c:640)
-int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
+int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
 {
     Battle_TargetSphereLabelView* state = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere);
     SVECTOR offset;
@@ -838,12 +838,12 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
 
     ((VECTOR*)&offset)->vx = stickX;
     ((VECTOR*)&offset)->vy = stickY;
-    arg0->pad = 0;
+    target_position->pad = 0;
     result = 0;
 
     if (state->opaque2A != 0) {
         setVector(
-            arg0, state->opaque0[0].position[0], state->opaque0[0].position[1], state->opaque0[0].position[2]);
+            target_position, state->opaque0[0].position[0], state->opaque0[0].position[1], state->opaque0[0].position[2]);
         ((void (*)(SVECTOR*, int))Battle_CacheSphereTerrainRow)((SVECTOR*)state->opaque0[0].position, state->opaque2A - 1);
         return 0;
     }
@@ -852,7 +852,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
     lockPitch = 0;
     stickX = Input_MapStickDeadZone(Input_stickPosBuf.rStickX);
     stickY = Input_MapStickDeadZone(Input_stickPosBuf.rStickY);
-    arg0->pad = 0;
+    target_position->pad = 0;
 
     if ((offset.pad == 0) || (Input_buttonsState & PADRleft)) {
         lockPitch = 1;
@@ -934,7 +934,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
     if (offset.pad == 0) {
         if (Input_buttonsPressed.allButtons & PADRdown) {
             Menu_PlayLeaveSound();
-            arg0->pad = 1;
+            target_position->pad = 1;
             return 1;
         }
         if (Input_buttonsPressed.allButtons & PADRright) {
@@ -982,42 +982,42 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
             break;
         }
 
-        setVector(arg0, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0],
+        setVector(target_position, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0],
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[1] + (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy,
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2]);
 
-        if (arg0->vy < -1) {
+        if (target_position->vy < -1) {
             break;
         }
 
         (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy = -(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[1] - 2;
     }
 
-    Battle_DrawSphereTerrainIntersection(arg0, m, scale);
+    Battle_DrawSphereTerrainIntersection(target_position, m, scale);
     stickX = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx * scale + ONE / 2) >> 12;
     stickY = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz * scale + ONE / 2) >> 12;
-    arg0->vx += (stickX * m->m[0][0] + stickY * m->m[2][0] + ONE / 2) >> 12;
-    arg0->vz += (stickX * m->m[0][2] + stickY * m->m[2][2] + ONE / 2) >> 12;
+    target_position->vx += (stickX * m->m[0][0] + stickY * m->m[2][0] + ONE / 2) >> 12;
+    target_position->vz += (stickX * m->m[0][2] + stickY * m->m[2][2] + ONE / 2) >> 12;
 
     value = Field_CollisionMapDimensions(0);
 
-    if (((u_int)arg0->vx >= (value & 0xFFFF) * 8)
-        || ((u_int)arg0->vz >= (value >> 16) * 8)) {
-        if (arg0->vx < 0) {
-            arg0->vx = 0;
+    if (((u_int)target_position->vx >= (value & 0xFFFF) * 8)
+        || ((u_int)target_position->vz >= (value >> 16) * 8)) {
+        if (target_position->vx < 0) {
+            target_position->vx = 0;
         }
-        if (arg0->vx >= (value & 0xFFFF) * 8) {
-            arg0->vx = (value & 0xFFFF) * 8 - 1;
+        if (target_position->vx >= (value & 0xFFFF) * 8) {
+            target_position->vx = (value & 0xFFFF) * 8 - 1;
         }
-        if (arg0->vz < 0) {
-            arg0->vz = 0;
+        if (target_position->vz < 0) {
+            target_position->vz = 0;
         }
-        if (arg0->vz >= (value >> 16) * 8) {
-            arg0->vz = (value >> 16) * 8 - 1;
+        if (target_position->vz >= (value >> 16) * 8) {
+            target_position->vz = (value >> 16) * 8 - 1;
         }
 
-        stickX = arg0->vx - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0];
-        stickY = arg0->vz - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2];
+        stickX = target_position->vx - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0];
+        stickY = target_position->vz - (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2];
         value = (m->m[0][0] * m->m[2][2] - m->m[0][2] * m->m[2][0] + ONE - 1) / ONE;
 
         if ((scale != 0) && (value != 0)) {
@@ -1029,18 +1029,18 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
 
         stickX = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx * scale + ONE / 2) >> 12;
         stickY = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz * scale + ONE / 2) >> 12;
-        arg0->vx = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0]
+        target_position->vx = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[0]
                  + ((stickX * m->m[0][0] + stickY * m->m[2][0] + ONE / 2) >> 12);
-        arg0->vz = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2]
+        target_position->vz = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[2]
                  + ((stickX * m->m[0][2] + stickY * m->m[2][2] + ONE / 2) >> 12);
     }
 
-    Battle_DrawSpherePositionCursor(arg0, lockPitch);
+    Battle_DrawSpherePositionCursor(target_position, lockPitch);
 
     if (!((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].kind & 0x80)) {
         (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].opaque1 = 0;
-        stickX = ((VECTOR*)arg0)->vx;
-        stickY = ((VECTOR*)arg0)->vy;
+        stickX = ((VECTOR*)target_position)->vx;
+        stickY = ((VECTOR*)target_position)->vy;
         ((VECTOR*)(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].position)->vx = stickX;
         ((VECTOR*)(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].position)->vy = stickY;
     }
@@ -1053,26 +1053,26 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* arg0)
 }
 
 // decomp: BATTLE.PRG func_800C513C (src/BATTLE/BATTLE.PRG/5BF94.c:869)
-void Battle_ClearTargetActorHighlight(int arg0, int arg1)
+void Battle_ClearTargetActorHighlight(int actor_slot, int pulse_slot)
 {
-    if (!(arg0 & 0xF0)) {
-        Actors_DisableModelPalettePulse(arg0, arg1);
+    if (!(actor_slot & 0xF0)) {
+        Actors_DisableModelPalettePulse(actor_slot, pulse_slot);
     }
 }
 
 // decomp: BATTLE.PRG func_800C5164 (src/BATTLE/BATTLE.PRG/5BF94.c:876)
-void Battle_SetTargetActorHighlight(int arg0, int arg1, int arg2)
+void Battle_SetTargetActorHighlight(int actor_slot, int pulse_flags, int pulse_slot)
 {
-    if (!(arg0 & 0xF0)) {
-        Actors_EnableModelPalettePulse(arg0, arg1, arg2);
+    if (!(actor_slot & 0xF0)) {
+        Actors_EnableModelPalettePulse(actor_slot, pulse_flags, pulse_slot);
     }
 }
 
 // decomp: BATTLE.PRG func_800C518C (src/BATTLE/BATTLE.PRG/5BF94.c:883)
-void Battle_SetTargetActorColorOverride(int arg0, void* arg1)
+void Battle_SetTargetActorColorOverride(int actor_slot, void* tint)
 {
-    if (!(arg0 & 0xF0)) {
-        Actors_SetActorTint(arg0, arg1);
+    if (!(actor_slot & 0xF0)) {
+        Actors_SetActorTint(actor_slot, tint);
     }
 }
 
@@ -1212,20 +1212,20 @@ void Battle_DismissTargetSelectionRows(void)
 }
 
 // decomp: BATTLE.PRG func_800C5798 (src/BATTLE/BATTLE.PRG/5BF94.c:1021)
-Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int arg0, int arg1, int arg2)
+Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int target_index, int row_state, int row_index)
 {
-    int temp_v1;
-    Battle_TargetSphereLabelEntry* item = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[arg0];
-    Battle_TargetInfoLine* src = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[arg0];
+    int position_z_pad_word;
+    Battle_TargetSphereLabelEntry* item = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[target_index];
+    Battle_TargetInfoLine* src = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[target_index];
 
     Core_Memory_ZeroWordsBackward(item, sizeof *item);
-    item->opaque0 = arg1;
-    item->opaque6 = arg2 * 11 + 32;
-    temp_v1 = src->opaque4;
+    item->opaque0 = row_state;
+    item->opaque6 = row_index * 11 + 32;
+    position_z_pad_word = src->opaque4;
     item->opaque8 = src->opaque0;
-    item->opaqueC = temp_v1;
+    item->opaqueC = position_z_pad_word;
 
-    if (arg1 == 2) {
+    if (row_state == 2) {
         item->opaque4 = 320;
         item->limbName = Battle_limbNames[src->opaque8] + 1;
     } else {
@@ -1237,12 +1237,12 @@ Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int arg0, int arg1,
 }
 
 // decomp: BATTLE.PRG _getStatusString (src/BATTLE/BATTLE.PRG/5BF94.c:1045)
-char* Battle_FirstTargetStatusText(uint arg0)
+char* Battle_FirstTargetStatusText(uint status_mask)
 {
     int i;
-    arg0 >>= 5;
+    status_mask >>= 5;
     for (i = 0; i < 24; i++) {
-        if ((arg0 >> i) & 1) {
+        if ((status_mask >> i) & 1) {
             return (char*)&Battle_statusStrings
                 [Battle_statusStrings[Text_Battle_statusStrings_Index_strDown + i]];
         }
@@ -1530,30 +1530,30 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
 }
 
 // decomp: BATTLE.PRG func_800E5568 (src/BATTLE/BATTLE.PRG/7CD68.c:437)
-int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* arg0)
+int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* range_shape)
 {
     int (*fn)(int);
     int mask;
     int r;
     int v;
 
-    mask = 1 << arg0->shape;
+    mask = 1 << range_shape->shape;
     if (mask & 0x16) {
-        r = arg0->rangeZ;
+        r = range_shape->rangeZ;
         fn = Core_Gte_Cos;
     } else if (mask & 0x8) {
-        r = arg0->rangeY;
+        r = range_shape->rangeY;
         fn = Core_Gte_Cos;
     } else {
-        r = arg0->rangeY;
+        r = range_shape->rangeY;
         fn = Core_Gte_Sin;
     }
-    v = fn(arg0->angle << 7);
+    v = fn(range_shape->angle << 7);
     return ((r << 5) * ABS(v)) >> 12;
 }
 
 // decomp: BATTLE.PRG func_800E5600 (src/BATTLE/BATTLE.PRG/7CD68.c:459)
-int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int arg2)
+int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int maximum_reach)
 {
     Battle_ActionDefinition* action = &Battle_actionDefinitions[actionId];
     int r = 0;
@@ -1563,7 +1563,7 @@ int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int arg2)
         r = action->areaRangeY << 5;
     } else if (action->aiFlags.shapedArea << 0x17) {
         v = Battle_CalculateRangeShapeExtent((Battle_Ai_ActionRangeShape*)&action->areaRangeX);
-        if (v < arg2) {
+        if (v < maximum_reach) {
             r = v;
         }
     }
@@ -1571,14 +1571,14 @@ int Battle_CalculateActionAreaReach(intptr_t arg0, int actionId, u_int arg2)
 }
 
 // decomp: BATTLE.PRG func_800E5698 (src/BATTLE/BATTLE.PRG/7CD68.c:476)
-int Battle_CalculateActionRangeSquared(Battle_Ai_ActionRangeView* arg0, int actionId)
+int Battle_CalculateActionRangeSquared(Battle_Ai_ActionRangeView* actor_range_view, int actionId)
 {
     Battle_ActionDefinition* action = &Battle_actionDefinitions[actionId];
     Battle_Ai_ActionRangeShape* range;
     u_int v;
 
     if (action->rangeX == 0xFF) {
-        range = &arg0->opaque5C->opaque38;
+        range = &actor_range_view->opaque5C->opaque38;
     } else {
         range = (Battle_Ai_ActionRangeShape*)&action->rangeX;
     }

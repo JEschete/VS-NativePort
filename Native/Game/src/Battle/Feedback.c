@@ -132,22 +132,22 @@ void Battle_ResetFloatingLabels(void)
 }
 
 // decomp: BATTLE.PRG func_80093B04 (src/BATTLE/BATTLE.PRG/2842C.c:1475)
-int Battle_QueueWorldLockedLabel(u_short* arg0)
+int Battle_QueueWorldLockedLabel(u_short* world_position)
 {
-    Battle_FloatingLabelSpec* temp_v0;
+    Battle_FloatingLabelSpec* label_spec;
 
-    temp_v0 = ((void* (*)())Battle_ReserveFloatingLabel)();
-    temp_v0->opaqueB = 0;
-    temp_v0->opaque8 = 3;
-    temp_v0->opaque0 = arg0[0];
-    temp_v0->opaque2 = arg0[1];
-    temp_v0->opaque4 = arg0[2];
+    label_spec = ((void* (*)())Battle_ReserveFloatingLabel)();
+    label_spec->opaqueB = 0;
+    label_spec->opaque8 = 3;
+    label_spec->opaque0 = world_position[0];
+    label_spec->opaque2 = world_position[1];
+    label_spec->opaque4 = world_position[2];
     ++Battle_floatingLabelCount;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80093B68 (src/BATTLE/BATTLE.PRG/2842C.c:1544)
-int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
+int Battle_QueueActorValueLabel(int actor_slot, int limb_tag, u_int encoded_amount, int label_flags)
 {
     SVECTOR position;
     int limb;
@@ -159,8 +159,8 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
     int amount;
     Battle_FloatingLabel* p;
 
-    if (arg1 != -1) {
-        limb = Actors_FindActorBoneTag(arg0, arg1, 2);
+    if (limb_tag != -1) {
+        limb = Actors_FindActorBoneTag(actor_slot, limb_tag, 2);
 
         if (limb < 0) {
             return -2;
@@ -174,7 +174,7 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
     frame = 0;
 
     for (p = *Battle_floatingLabels; i < Battle_floatingLabelCount; ++i, ++p) {
-        if ((p->key.bytes[0] == 1) && (p->key.bytes[1] == arg0) && (p->position.pad >= 0)) {
+        if ((p->key.bytes[0] == 1) && (p->key.bytes[1] == actor_slot) && (p->position.pad >= 0)) {
             frame = p->frame;
             ++count;
         }
@@ -184,7 +184,7 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
     flags = 0;
 
     for (p = *Battle_floatingLabels; i < Battle_floatingLabelCount; ++i, ++p) {
-        if ((p->key.bytes[0] == 1) && (p->key.bytes[1] == arg0) && (p->limb == limb)
+        if ((p->key.bytes[0] == 1) && (p->key.bytes[1] == actor_slot) && (p->limb == limb)
             && (p->position.pad == count - 1)) {
             flags = 128;
             break;
@@ -194,17 +194,17 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
     p = ((void* (*)())Battle_ReserveFloatingLabel)();
 
     if (limb != 255) {
-        result = Actors_ActorBonePosition(arg0, limb, &p->position, 2);
+        result = Actors_ActorBonePosition(actor_slot, limb, &p->position, 2);
     } else {
-        result = Actors_ActorTaggedBonePosition(arg0, 255, &p->position, 2);
+        result = Actors_ActorTaggedBonePosition(actor_slot, 255, &p->position, 2);
     }
 
     if (result != 0) {
         return -2;
     }
 
-    if (arg3 & 128) {
-        if (Actors_ProjectActorTaggedBone(arg0, 251, &position, 0) != 0) {
+    if (label_flags & 128) {
+        if (Actors_ProjectActorTaggedBone(actor_slot, 251, &position, 0) != 0) {
             return 0;
         }
 
@@ -217,9 +217,9 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
         }
     }
 
-    arg3 &= 127;
+    label_flags &= 127;
 
-    if (Actors_ActorTaggedBonePosition(arg0, 251, &position, 0) != 0) {
+    if (Actors_ActorTaggedBonePosition(actor_slot, 251, &position, 0) != 0) {
         return -2;
     }
 
@@ -229,15 +229,15 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
     p->key.bytes[0] = 1;
     p->position.pad = count;
     p->frame = frame;
-    p->key.bytes[1] = arg0;
+    p->key.bytes[1] = actor_slot;
     p->limb = limb;
-    p->colorFlags = arg3 | flags;
-    amount = arg2 & 0x7FFF;
+    p->colorFlags = label_flags | flags;
+    amount = encoded_amount & 0x7FFF;
 
     if (amount > 999) {
-        p->value = 999 | ((arg2 >> 16) & 0x8000);
+        p->value = 999 | ((encoded_amount >> 16) & 0x8000);
     } else {
-        p->value = amount | ((arg2 >> 16) & 0x8000);
+        p->value = amount | ((encoded_amount >> 16) & 0x8000);
     }
 
     sprintf(p->text, "%d", p->value & 0x7FFF);
@@ -247,7 +247,7 @@ int Battle_QueueActorValueLabel(int arg0, int arg1, u_int arg2, int arg3)
 }
 
 // decomp: BATTLE.PRG vs_battle_renderBattleAbilityTimingResult (src/BATTLE/BATTLE.PRG/2842C.c:1643)
-int Battle_QueueAbilityTimingResult(int arg0)
+int Battle_QueueAbilityTimingResult(int timing_result)
 {
     int _[2] __attribute__((unused));
     Battle_FloatingLabel* p = *Battle_floatingLabels;
@@ -264,14 +264,14 @@ int Battle_QueueAbilityTimingResult(int arg0)
     p->frame = 0;
     p->key.bytes[0] = 4;
     p->key.bytes[1] = 0;
-    p->value = arg0;
+    p->value = timing_result;
     p->textLength = Core_Random_Rand() & 7;
     ++Battle_floatingLabelCount;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_80093F24 (src/BATTLE/BATTLE.PRG/2842C.c:1666)
-int Battle_QueueChainCount(int arg0)
+int Battle_QueueChainCount(int chain_count)
 {
     Battle_FloatingLabel* p = *Battle_floatingLabels;
     Battle_FloatingLabel* q;
@@ -284,7 +284,7 @@ int Battle_QueueChainCount(int arg0)
         }
     }
 
-    if (arg0 == 0) {
+    if (chain_count == 0) {
         return 0;
     }
 
@@ -292,7 +292,7 @@ int Battle_QueueChainCount(int arg0)
     q->key.bytes[0] = 5;
     q->frame = 0;
     q->key.bytes[1] = 0;
-    q->value = arg0;
+    q->value = chain_count;
     if (q->value >= 1000) {
         q->value = 999;
     }
@@ -301,23 +301,23 @@ int Battle_QueueChainCount(int arg0)
 }
 
 // decomp: BATTLE.PRG func_80093FEC (src/BATTLE/BATTLE.PRG/2842C.c:1695)
-int Battle_QueueActorStatusLabels(int arg0, int arg1, int arg2, int arg3)
+int Battle_QueueActorStatusLabels(int actor_slot, int arg1, int status_mask, int label_flags)
 {
     int i;
-    int var_s1;
+    int status_bit;
 
-    for (i = 0, var_s1 = 1; i < 29; ++i, var_s1 <<= 1) {
-        if (arg2 & var_s1) {
-            Battle_QueueActorStatusLabel(arg0, 0xFB, i, arg3);
+    for (i = 0, status_bit = 1; i < 29; ++i, status_bit <<= 1) {
+        if (status_mask & status_bit) {
+            Battle_QueueActorStatusLabel(actor_slot, 0xFB, i, label_flags);
         }
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8009406C (src/BATTLE/BATTLE.PRG/2842C.c:1708)
-int Battle_QueueActorStatusLabel(int arg0, int arg1, int arg2, int arg3)
+int Battle_QueueActorStatusLabel(int actor_slot, int bone_tag, int status_index, int label_flags)
 {
-    SVECTOR sp10;
+    SVECTOR screen_position;
     int i = 0;
     int found = 0;
     int frame = 0;
@@ -325,7 +325,7 @@ int Battle_QueueActorStatusLabel(int arg0, int arg1, int arg2, int arg3)
     Battle_FloatingLabel* p = *Battle_floatingLabels;
 
     for (; i < Battle_floatingLabelCount; ++i, ++p) {
-        if ((p->key.bytes[0] == 2) && (p->key.bytes[1] == arg0)) {
+        if ((p->key.bytes[0] == 2) && (p->key.bytes[1] == actor_slot)) {
             frame = p->textLength + 0xC;
             if (p->position.pad >= 0) {
                 kind = p->frame;
@@ -335,18 +335,18 @@ int Battle_QueueActorStatusLabel(int arg0, int arg1, int arg2, int arg3)
     }
 
     p = ((void* (*)())Battle_ReserveFloatingLabel)();
-    if (arg3 & 0x80) {
-        if (Actors_ProjectActorTaggedBone(arg0, 0xFB, &sp10, 0) != 0) {
+    if (label_flags & 0x80) {
+        if (Actors_ProjectActorTaggedBone(actor_slot, 0xFB, &screen_position, 0) != 0) {
             return 0;
         }
-        if ((u_short)sp10.vx >= 0x141) {
+        if ((u_short)screen_position.vx >= 0x141) {
             return 0;
         }
-        if ((u_short)sp10.vy >= 0xF1) {
+        if ((u_short)screen_position.vy >= 0xF1) {
             return 0;
         }
     }
-    arg3 &= 0x7F;
+    label_flags &= 0x7F;
     p->key.bytes[0] = 2;
     setVector(&p->position, 0, 0, 0);
     p->position.pad = found;
@@ -356,10 +356,10 @@ int Battle_QueueActorStatusLabel(int arg0, int arg1, int arg2, int arg3)
         p->textLength = 0;
     }
     p->frame = kind;
-    p->key.bytes[1] = arg0;
-    p->limb = arg1;
-    p->colorFlags = arg3;
-    p->value = arg2;
+    p->key.bytes[1] = actor_slot;
+    p->limb = bone_tag;
+    p->colorFlags = label_flags;
+    p->value = status_index;
     ++Battle_floatingLabelCount;
     return 0;
 }
@@ -677,10 +677,10 @@ void Battle_PlaceActorValueLabel(short* pos, Battle_FloatingLabel* label)
 }
 
 // decomp: BATTLE.PRG func_80094AF8 (src/BATTLE/BATTLE.PRG/2842C.c:2067)
-void Battle_AdvanceFloatingLabelQueue(Battle_FloatingLabel* arg0)
+void Battle_AdvanceFloatingLabelQueue(Battle_FloatingLabel* label)
 {
-    arg0->frame = 0;
-    --arg0->position.pad;
+    label->frame = 0;
+    --label->position.pad;
 }
 
 // decomp: BATTLE.PRG func_80094B0C (src/BATTLE/BATTLE.PRG/2842C.c:2073)
@@ -780,7 +780,7 @@ int Battle_DrawValueLabelCaption(int x, int y, Battle_FloatingLabel* p)
 }
 
 // decomp: BATTLE.PRG func_8009506C (src/BATTLE/BATTLE.PRG/2842C.c:2167)
-void Battle_DrawLockedFloatingLabel(int arg0, int arg1, Battle_FloatingLabel* arg2)
+void Battle_DrawLockedFloatingLabel(int screen_x, int screen_y, Battle_FloatingLabel* label)
 {
     POLY_FT4* prim;
     int step;
@@ -788,24 +788,24 @@ void Battle_DrawLockedFloatingLabel(int arg0, int arg1, Battle_FloatingLabel* ar
     int y1;
     int i;
 
-    if (arg2->frame < 4) {
-        step = arg2->frame;
-    } else if (arg2->frame >= 27) {
-        step = 30 - arg2->frame;
+    if (label->frame < 4) {
+        step = label->frame;
+    } else if (label->frame >= 27) {
+        step = 30 - label->frame;
     } else {
         step = 4;
     }
 
-    arg0 -= 16;
-    y0 = arg1 - Battle_lockedLabelHalfHeights[step];
-    y1 = arg1 + Battle_lockedLabelHalfHeights[step];
+    screen_x -= 16;
+    y0 = screen_y - Battle_lockedLabelHalfHeights[step];
+    y1 = screen_y + Battle_lockedLabelHalfHeights[step];
     prim = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;
 
     for (i = 0; i < 4; ++i) {
-        if ((arg0 < 320) && ((arg0 + Battle_lockedLabelPieces[i].w) >= 0)) {
+        if ((screen_x < 320) && ((screen_x + Battle_lockedLabelPieces[i].w) >= 0)) {
             setPolyFT4(prim);
-            setXY4(prim, arg0, y0, arg0 + Battle_lockedLabelPieces[i].w, y0, arg0, y1,
-                arg0 + Battle_lockedLabelPieces[i].w, y1);
+            setXY4(prim, screen_x, y0, screen_x + Battle_lockedLabelPieces[i].w, y0, screen_x, y1,
+                screen_x + Battle_lockedLabelPieces[i].w, y1);
             setShadeTex(prim, 1);
             setUV4(prim, Battle_lockedLabelPieces[i].x, Battle_lockedLabelPieces[i].y,
                 Battle_lockedLabelPieces[i].x + Battle_lockedLabelPieces[i].w, Battle_lockedLabelPieces[i].y, Battle_lockedLabelPieces[i].x,
@@ -817,7 +817,7 @@ void Battle_DrawLockedFloatingLabel(int arg0, int arg1, Battle_FloatingLabel* ar
             AddPrim(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable - 20, prim++);
         }
 
-        arg0 += Battle_lockedLabelPieces[i].w;
+        screen_x += Battle_lockedLabelPieces[i].w;
     }
 
     ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim;
@@ -927,17 +927,17 @@ void Battle_DrawActorStatusLabel(int x, int y, Battle_FloatingLabel* p)
 }
 
 // decomp: BATTLE.PRG func_800957D0 (src/BATTLE/BATTLE.PRG/2842C.c:2312)
-void Battle_DrawStatusRemovalMarker(int arg0, int arg1, int arg2)
+void Battle_DrawStatusRemovalMarker(int screen_x, int screen_y, int arg2)
 {
     void** p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
     POLY_FT4* prim = (POLY_FT4*)p[0];
 
     setlen(prim, 9);
     setcode(prim, 0x2C);
-    arg0 -= 8;
+    screen_x -= 8;
     arg2 <<= 4;
     setXY4(
-        prim, arg0, arg1 - 5, arg0 + 16, arg1 - 5, arg0, arg1 + 5, arg0 + 16, arg1 + 5);
+        prim, screen_x, screen_y - 5, screen_x + 16, screen_y - 5, screen_x, screen_y + 5, screen_x + 16, screen_y + 5);
     setUV4(
         prim, arg2 + 0x40, 0x30, arg2 + 0x50, 0x30, arg2 + 0x40, 0x3A, arg2 + 0x50, 0x3A);
     prim->tpage = 0x17;
@@ -997,25 +997,25 @@ void Battle_DrawChainCount(int x, int y, Battle_FloatingLabel* p)
 }
 
 // decomp: BATTLE.PRG func_80095B70 (src/BATTLE/BATTLE.PRG/2842C.c:2379)
-void Battle_SetActorMarkersHidden(int arg0) { Battle_actorMarkersHidden = arg0; }
+void Battle_SetActorMarkersHidden(int hidden) { Battle_actorMarkersHidden = hidden; }
 
 // decomp: BATTLE.PRG func_80095B7C (src/BATTLE/BATTLE.PRG/2842C.c:2381)
-void Battle_SetActorMarker(int arg0, int arg1)
+void Battle_SetActorMarker(int actor_slot, int marker_flags)
 {
-    if (arg0 != 0) {
-        if (arg1 & 0x80) {
-            Battle_actorMarkers[arg0] |= 0x80;
+    if (actor_slot != 0) {
+        if (marker_flags & 0x80) {
+            Battle_actorMarkers[actor_slot] |= 0x80;
             return;
         }
-        if (arg1 & 0x40) {
-            Battle_actorMarkers[arg0] &= 0x7F;
+        if (marker_flags & 0x40) {
+            Battle_actorMarkers[actor_slot] &= 0x7F;
             return;
         }
-        Battle_actorMarkers[arg0] &= 0x80;
-        Battle_actorMarkers[arg0] |= arg1 & 0x7F;
+        Battle_actorMarkers[actor_slot] &= 0x80;
+        Battle_actorMarkers[actor_slot] |= marker_flags & 0x7F;
         return;
     }
-    memset(Battle_actorMarkers, arg1, 0x10);
+    memset(Battle_actorMarkers, marker_flags, 0x10);
 }
 
 // decomp: BATTLE.PRG func_80095C18 (src/BATTLE/BATTLE.PRG/2842C.c:2399)
@@ -1230,12 +1230,12 @@ void* Battle_ReserveFloatingLabel(void)
 }
 
 // decomp: BATTLE.PRG func_8009639C (src/BATTLE/BATTLE.PRG/2842C.c:2613)
-void Battle_CompactFloatingLabels(int arg0)
+void Battle_CompactFloatingLabels(int removal_count)
 {
     int j;
     int i;
 
-    for (i = 0; i < arg0; ++i) {
+    for (i = 0; i < removal_count; ++i) {
         for (j = 0; j < Battle_floatingLabelCount; ++j) {
             if ((*Battle_floatingLabels)[j].key.bytes[0] == 0) {
                 Battle_RemoveFloatingLabel(j);
@@ -1246,13 +1246,13 @@ void Battle_CompactFloatingLabels(int arg0)
 }
 
 // decomp: BATTLE.PRG func_80096444 (src/BATTLE/BATTLE.PRG/2842C.c:2628)
-void Battle_RemoveFloatingLabel(int arg0)
+void Battle_RemoveFloatingLabel(int label_index)
 {
     int i;
 
     --Battle_floatingLabelCount;
-    if (arg0 != Battle_floatingLabelCount) {
-        for (i = arg0; i < Battle_floatingLabelCount; ++i) {
+    if (label_index != Battle_floatingLabelCount) {
+        for (i = label_index; i < Battle_floatingLabelCount; ++i) {
             Core_Memory_CopyAlignedWords(
                 &(*Battle_floatingLabels)[i], &(*Battle_floatingLabels)[i + 1], sizeof(*Battle_floatingLabels)[i]);
         }
@@ -1314,7 +1314,7 @@ void Battle_DrawOffscreenActorArrow(SVECTOR* position, int direction)
 }
 
 // decomp: BATTLE.PRG func_80096768 (src/BATTLE/BATTLE.PRG/2842C.c:2694)
-int Battle_QueueEquipmentStatChange(int arg0, int arg1, int arg2)
+int Battle_QueueEquipmentStatChange(int arg0, int stat_label_kind, int encoded_amount)
 {
     int _[2] __attribute__((unused));
     int i;
@@ -1369,12 +1369,12 @@ int Battle_QueueEquipmentStatChange(int arg0, int arg1, int arg2)
         p->scaleY = 0;
         p->frame = 0;
         p->colorFlags = arg0;
-        p->limb = arg1;
+        p->limb = stat_label_kind;
 
-        if ((arg2 & 0x7FFF) >= 1000) {
-            p->value = 999 | ((arg2 & 0x80000000) >> 16);
+        if ((encoded_amount & 0x7FFF) >= 1000) {
+            p->value = 999 | ((encoded_amount & 0x80000000) >> 16);
         } else {
-            p->value = (arg2 & 0x7FFF) | ((arg2 & 0x80000000) >> 16);
+            p->value = (encoded_amount & 0x7FFF) | ((encoded_amount & 0x80000000) >> 16);
         }
 
         sprintf(p->text, "%d", p->value & 0x7FFF);
@@ -1460,7 +1460,7 @@ void Battle_DrawEquipmentStatChange(int x, int y, Battle_FloatingLabel* p)
 }
 
 // decomp: BATTLE.PRG func_80096FF0 (src/BATTLE/BATTLE.PRG/2842C.c:2838)
-void Battle_ShowAbilityTimingCue(int arg0)
+void Battle_ShowAbilityTimingCue(int cue_duration_frames)
 {
     int d;
 
@@ -1483,7 +1483,7 @@ void Battle_ShowAbilityTimingCue(int arg0)
         Battle_abilityTimingCuePosition.vy += d;
     }
 
-    Battle_abilityTimingCueFrames += arg0;
+    Battle_abilityTimingCueFrames += cue_duration_frames;
 }
 
 // decomp: BATTLE.PRG func_800970BC (src/BATTLE/BATTLE.PRG/2842C.c:2864)

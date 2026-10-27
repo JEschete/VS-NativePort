@@ -21,28 +21,28 @@
 extern int (*Battle_hitFunctions[8])(Battle_ActionDefinition*, Battle_HitResult*, Battle_HitResult*, int, int);
 short Battle_AttackGemHitBonus(Battle_ActionDefinition* action, Battle_ActorStats* actor);
 short Battle_DefenseGemHitBonus(Battle_ActionDefinition* action, Battle_ActorStats* actor, int hitNumber);
-int Battle_IgnoreHitCallback(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)));
-int Battle_PreviousHitSuccessThreshold(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3 __attribute__((unused)),
-    int arg4 __attribute__((unused)));
+int Battle_IgnoreHitCallback(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)));
+int Battle_PreviousHitSuccessThreshold(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)),
+    Battle_HitResult* target_hit __attribute__((unused)), int hit_index __attribute__((unused)),
+    int execute_action __attribute__((unused)));
 int Battle_GemHitChance(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target,
-    int hitNumber, int arg4 __attribute__((unused)));
+    int hitNumber, int execute_action __attribute__((unused)));
 int Battle_AgilityHitChance(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target,
     int hitNumber, int addVariance);
 int Battle_IntelligenceHitChance(Battle_ActionDefinition* action, Battle_HitResult* source,
     Battle_HitResult* target, int hitNumber, int addVariance);
 int Battle_CostAdjustedAgilityHitChance(Battle_ActionDefinition* action, Battle_HitResult* source,
     Battle_HitResult* target, int hitNumber, int addVariance);
-int Battle_RiskHitChance(Battle_ActionDefinition* arg0 __attribute__((unused)), Battle_HitResult* source,
-    Battle_HitResult* arg2 __attribute__((unused)), int hitNumber __attribute__((unused)),
-    int arg4 __attribute__((unused)));
-int Battle_ChainHitChance(Battle_ActionDefinition* arg0 __attribute__((unused)),
-    Battle_HitResult* arg1 __attribute__((unused)), Battle_HitResult* target,
-    int arg3 __attribute__((unused)), int arg4 __attribute__((unused)));
+int Battle_RiskHitChance(Battle_ActionDefinition* action_definition __attribute__((unused)), Battle_HitResult* source,
+    Battle_HitResult* target_hit __attribute__((unused)), int hitNumber __attribute__((unused)),
+    int execute_action __attribute__((unused)));
+int Battle_ChainHitChance(Battle_ActionDefinition* action_definition __attribute__((unused)),
+    Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target,
+    int hit_index __attribute__((unused)), int execute_action __attribute__((unused)));
 int Battle_RollActionHit(Battle_ActionDefinition* action, Battle_HitResult* source, Battle_HitResult* target,
     int hitNumber, int addVariance);
 
