@@ -23,6 +23,7 @@ verification of the current worktree.
   quality0 new pass. Actual Debug/Release resumes retain95 prior passes,
   run only z048-r006-d000 and pass at13452; a chained retry retains96 and
   executes0. Missing checkpoint exits1, never restarts history.
+  Publishedc9f6b43a has exact green Source Quality40445126847.
   This is resume/planning coverage, not all-door completion or a #167 fix.
   See [checkpoint resume](HANDOFF_HISTORY.md#passed-stage-checkpoint-resume-2026-10-26).
 - #160 now has a locally verified native material and target-placement repair,

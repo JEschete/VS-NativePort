@@ -72,6 +72,10 @@ The original132-stage evidence is read-only and its blocked rows stay blocked.
 This feature satisfies bounded resume workflow, not all of #151's exhaustive
 door/physical-story acceptance or #167's unresolved historical producer.
 Unrelated owner deletion of Docs/ENEMY_DATA_SCHEME.md remains untouched.
+The resume milestone is published in
+`c9f6b43a491581e55709ce1fcacb2a6db4f557de`, exact successful Source Quality
+40445126847. #151 retains its broader open acceptance; only this retry
+workflow slice is complete.
 
 ## Gravity material and canonical target origin (2026-10-26)
 
