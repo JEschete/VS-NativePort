@@ -11,6 +11,68 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Passed-stage checkpoint resume (2026-10-26)
+
+Owner observed that retrying an entire132-case prefix after each fix wastes
+time. New `--door-resume <sequence-results.json>` reads actual prior door
+results and their neighboring manifest. The existing stable inventory,
+single-window runner, selectors and per-case acceptance are reused.
+No prior passes are rerun in repair workflow unless full/history replay is
+deliberately requested by omitting the checkpoint.
+
+The planner retains only actual passed door rows with initialized=true,
+engine_errors=0, teardown_complete=true and the existing120-tick observation
+interval. Current encoded door identities/conditions/destination/entry data
+must match. Changed/removed contracts are reported as invalidated, not reused.
+Schema, duplicate identities, incomplete passes, unknown selectors and unreadable
+checkpoints fail explicitly. Current empty inventory cannot become a successful
+zero-work fallback. Data-root identity is checked before reuse.
+
+Prior evidence stays in `retained_passed` with original checkpoint, revision,
+dirty state/source status and data-root provenance. Fresh scripts/counts include
+only cases actually executed. Prior passes outside a selected retry range are
+carried forward for the next checkpoint; they are not called fresh verification
+of a new revision. Failed/blocked/cancelled/running/not-run rows are never promoted.
+The next checkpoint combines retained passes and fresh passed rows without
+losing their distinct provenance. Already-passed-only selections produce a
+zero-case completed checkpoint, no gameplay frames, and no fabricated fresh pass.
+`--door-limit` counts executable pending cases after filtering, not skipped rows.
+
+Fresh dirty-base5db1173d verification:
+
+- `test-native.cmd Debug "[resume]"`:8 cases/39 assertions cover132 synthetic
+  stages,95 retained/37 pending, broken-stage selection, post-filter limits,
+  zero-work reporting, chained provenance, changed contracts, incomplete/
+  duplicate passes, malformed schema/selectors and all non-pass states.
+- Full Debug and Release each1,020 cases/9,578,414 assertions pass.
+- Focused `quality-native.cmd --files Native\Tools\CombatLab\src\DoorTests.cpp
+  Native\Tools\CombatLab\src\main.cpp Native\Tests\src\DoorTransitionTests.cpp
+  --tidy` and default gate both0 findings/0 new; baselines unchanged.
+  These are the affected planner/runtime/test translation units; no full-tree
+  static-analysis result is claimed by this focused command.
+- Real checkpoint:
+  `build\quality\issue160-native\history167-Debug\combat-lab\runs\
+  1793068535457849-0\sequence-results.json`.
+  Already-passed z040-r008-d000 resumes in Debug1793071650310342-0:
+  selected0,retained95,empty fresh counts/scripts,exit0 and no gameplay.
+- Actual Debug1793071739553589-0/Release1793071739641813-0 use that checkpoint
+  with `--door-from z048-r006-d000 --door-limit1 --frames36000 --speed8
+  --scripted`, private saves and frozen matching executable/PDB/DLLs.
+  Both retain95, execute exactly one `sequence.script.begin` for
+  z048-r006-d000, restore control13320 and pass/teardown13452 with0 errors.
+  No passed stage is replayed; this reduces132 executed selections to1.
+- Resuming the resulting Release checkpoint again for z048-r006-d000 retains
+  96 passes and executes0,exit0. This verifies cumulative reuse after a fix.
+- A missing checkpoint in actual `--catalog-only` mode returns1 and a
+  diagnostic, not an unfiltered fallback. The full inventory remains saved
+  even for filtered/zero-case runs.
+
+Logs/results are local under ignored `build\quality\door-resume151`.
+The original132-stage evidence is read-only and its blocked rows stay blocked.
+This feature satisfies bounded resume workflow, not all of #151's exhaustive
+door/physical-story acceptance or #167's unresolved historical producer.
+Unrelated owner deletion of Docs/ENEMY_DATA_SCHEME.md remains untouched.
+
 ## Gravity material and canonical target origin (2026-10-26)
 
 Owner clarified that #160/#167 may be modernized for correct native behavior,

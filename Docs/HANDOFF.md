@@ -9,6 +9,22 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Owner-directed #151 retry optimization now adds `--door-resume
+  <sequence-results.json>`. Subsequent fix runs must reuse a checkpoint and
+  select the broken case/from point, not replay the132-stage passed prefix.
+  Complete history is a deliberate exception for full regression or a
+  demonstrated history-dependent reproduction.
+  Passed rows are removed from execution, not deleted from evidence:
+  initialization/zero-errors/teardown/120-tick gates and the current door
+  contract are checked; original source provenance is retained separately.
+  Blocked/failed/running/unrun cases remain pending. Chained retries retain
+  earlier passes; already-passed selections execute zero cases.
+  Focused8/39, full Debug/Release1020/9,578,414 each, focused/default
+  quality0 new pass. Actual Debug/Release resumes retain95 prior passes,
+  run only z048-r006-d000 and pass at13452; a chained retry retains96 and
+  executes0. Missing checkpoint exits1, never restarts history.
+  This is resume/planning coverage, not all-door completion or a #167 fix.
+  See [checkpoint resume](HANDOFF_HISTORY.md#passed-stage-checkpoint-resume-2026-10-26).
 - #160 now has a locally verified native material and target-placement repair,
   following owner authorization for behavioral modernization and fresh live
   confirmation that Gravity is on Ashley. E084 explicitly maps its missing

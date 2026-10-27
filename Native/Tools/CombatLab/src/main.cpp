@@ -62,6 +62,7 @@ struct Options {
   bool door_transitions = false;
   std::string door_case;
   std::string door_from;
+  fs::path door_resume;
   std::uint64_t door_limit = 0;
   std::vector<ScriptPress> presses;
   std::optional<Render::EffectPathTraceRange> effect_paths;
@@ -124,6 +125,11 @@ void ParseValue(Options& options, std::string_view argument,
     options.door_case = value;
   } else if (argument == "--door-from") {
     options.door_from = value;
+  } else if (argument == "--door-resume") {
+    if (value.empty() || value.starts_with("--")) {
+      throw std::runtime_error("--door-resume requires a checkpoint file");
+    }
+    options.door_resume = value;
   } else if (argument == "--capture") {
     options.capture = value;
   } else if (argument == "--save-dir") {
@@ -172,7 +178,7 @@ void ValidateOptions(Options& options) {
   }
   if (!options.door_transitions) {
     if (!options.door_case.empty() || !options.door_from.empty() ||
-        options.door_limit) {
+        !options.door_resume.empty() || options.door_limit) {
       throw std::runtime_error("door selectors require --door-transitions");
     }
     return;
@@ -332,10 +338,14 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
        {"worktree", source.at("worktree")},
        {"source_status", source.at("status")},
        {"data_root", fs::absolute(options.data).string()},
-       {"configuration", scripts == 0 ? "standalone production-gameplay lab"
-                                      : "single-window script sequence"},
+       {"configuration", options.door_transitions ? "single-window door checks"
+                         : scripts == 0 ? "standalone production-gameplay lab"
+                                        : "single-window script sequence"},
        {"frames", options.frames},
        {"sequence", options.sequence.string()},
+       {"door_resume", options.door_resume.empty()
+                           ? std::string{}
+                           : fs::absolute(options.door_resume).string()},
        {"scripts", scripts},
        {"speed", options.speed},
        {"effect_path_trace",
@@ -344,6 +354,17 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
                              {"last", options.effect_paths->last}}
             : nlohmann::json(nullptr)},
        {"devices", options.devices}});
+}
+
+void CompleteRetainedDoors(const Options& options, Trace& trace,
+                           const nlohmann::json& retained_passed) {
+  WriteManifest(options, trace, 0);
+  WriteJson(trace.Directory() / "sequence-results.json",
+            EncodeDoorCheckpoint(nlohmann::json::array(), retained_passed,
+                                 "completed"));
+  trace.Event("door.resume.complete",
+              {{"executed_cases", 0},
+               {"retained_passed_count", retained_passed.size()}});
 }
 
 void WriteDoorInventory(Trace& trace,
@@ -375,27 +396,42 @@ void WriteDoorInventory(Trace& trace,
 
 std::vector<EncounterScript> BuildDoorScripts(
     const Options& options, Trace& trace,
-    const std::vector<Game::EncounterZone>& catalog) {
+    const std::vector<Game::EncounterZone>& catalog,
+    nlohmann::json& retained_passed) {
   auto tests = EnumerateDoorTests(catalog);
   WriteDoorInventory(trace, catalog, tests);
-  const auto selector =
-      options.door_case.empty() ? options.door_from : options.door_case;
-  auto first = selector.empty()
-                   ? tests.begin()
-                   : std::ranges::find(tests, selector, &DoorTestCase::id);
-  if (first == tests.end()) {
-    throw std::runtime_error("door selector has no inventory match");
+  auto prior = options.door_resume.empty()
+                   ? nlohmann::json::array()
+                   : ReadDoorCheckpoint(options.door_resume);
+  for (const auto& entry : prior) {
+    const auto root = entry.at("provenance").at("data_root").get<std::string>();
+    if (!fs::equivalent(root, options.data)) {
+      throw std::runtime_error("door checkpoint uses a different data root");
+    }
   }
+  auto plan = PlanDoorResume(
+      tests, {options.door_from, options.door_case, options.door_limit}, prior);
+  retained_passed = std::move(plan.retained_passed);
+  auto pending_ids = nlohmann::json::array();
+  for (const auto& test : plan.pending) pending_ids.push_back(test.id);
+  const nlohmann::json selection = {
+      {"checkpoint", options.door_resume.string()},
+      {"selected_cases", plan.pending.size()},
+      {"pending", pending_ids},
+      {"retained_passed_count", retained_passed.size()},
+      {"invalidated_passes", plan.invalidated}};
+  WriteJson(trace.Directory() / "door-plan.json", selection);
+  trace.Event("door.resume.plan", selection);
+  VS_LOG_INFO("combat-lab", "door plan: {} to run, {} prior passes retained",
+              plan.pending.size(), retained_passed.size());
   std::vector<EncounterScript> scripts;
-  for (auto test = first; test != tests.end(); ++test) {
-    if (!options.door_case.empty() && test->id != options.door_case) break;
-    if (options.door_limit && scripts.size() >= options.door_limit) break;
+  for (const auto& test : plan.pending) {
     EncounterScript script;
-    script.name = test->id;
+    script.name = test.id;
     script.scenario = trace.Directory() / "door-inventory.json";
-    script.setup = test->setup;
+    script.setup = test.setup;
     script.frames = options.frames;
-    script.door = *test;
+    script.door = test;
     scripts.push_back(std::move(script));
   }
   return scripts;
@@ -422,7 +458,7 @@ class LiveSession {
   LiveSession(const Options& options, Trace& trace,
               std::vector<Game::EncounterZone> catalog,
               std::vector<EncounterScript> scripts, Canvas canvas,
-              Input::InputSystem& input)
+              Input::InputSystem& input, nlohmann::json retained_passed)
       : options_(options),
         trace_(trace),
         canvas_(std::move(canvas)),
@@ -437,7 +473,8 @@ class LiveSession {
         paused_(false),
         step_(false),
         rejected_(false),
-        scripts_(std::move(scripts)) {
+        scripts_(std::move(scripts)),
+        retained_passed_(std::move(retained_passed)) {
     input_.SetDevicesEnabled(options_.devices);
     if (!options_.scenario.empty()) {
       std::ifstream file(options_.scenario);
@@ -522,6 +559,7 @@ class LiveSession {
   std::size_t script_index_ = 0;
   fs::path script_directory_;
   nlohmann::json results_ = nlohmann::json::array();
+  nlohmann::json retained_passed_ = nlohmann::json::array();
   std::uint64_t script_start_tick_ = 0;
   std::uint64_t script_stop_tick_ = 0;
   std::uint64_t script_start_errors_ = 0;
@@ -564,14 +602,8 @@ class LiveSession {
                                                              : "running"},
                               {"scripts", results_}};
     if (options_.door_transitions) {
-      nlohmann::json counts = nlohmann::json::object();
-      for (const auto& result : results_) {
-        const auto status = result.at("status").get<std::string>();
-        counts[status] = counts.value(status, 0) + 1;
-      }
-      summary["coverage"] = "loader_entry_event";
-      summary["selected_cases"] = scripts_.size();
-      summary["counts"] = std::move(counts);
+      summary = EncodeDoorCheckpoint(results_, retained_passed_,
+                                     summary.at("status").get<std::string>());
     }
     WriteJson(trace_.Directory() / "sequence-results.json", summary);
   }
@@ -1002,7 +1034,10 @@ int Run(int argc, char** argv) {
     trace.Event("startup.stage", {{"stage", "data.end"}});
     if (options.catalog_only) {
       const auto catalog = LoadCatalog(options, trace);
-      if (options.door_transitions) BuildDoorScripts(options, trace, catalog);
+      nlohmann::json retained = nlohmann::json::array();
+      if (options.door_transitions) {
+        BuildDoorScripts(options, trace, catalog, retained);
+      }
       return trace.Failed() ? 1 : 0;
     }
 
@@ -1025,11 +1060,16 @@ int Run(int argc, char** argv) {
     }
     trace.Event("startup.stage", {{"stage", "catalog.begin"}});
     auto catalog = LoadCatalog(options, trace);
+    auto retained_passed = nlohmann::json::array();
     if (options.door_transitions) {
-      scripts = BuildDoorScripts(options, trace, catalog);
+      scripts = BuildDoorScripts(options, trace, catalog, retained_passed);
     }
     ValidateScripts(scripts, catalog);
     trace.Event("startup.stage", {{"stage", "catalog.end"}});
+    if (options.door_transitions && scripts.empty()) {
+      CompleteRetainedDoors(options, trace, retained_passed);
+      return trace.Failed() ? 1 : 0;
+    }
     if (!ShowLoading(app, gpu, canvas, input, trace,
                      "INITIALIZING AUDIO AND CONTROLLERS")) {
       return scripts.empty() ? 0 : 2;
@@ -1053,7 +1093,7 @@ int Run(int argc, char** argv) {
     }
     trace.Event("startup.stage", {{"stage", "audio.end"}});
     LiveSession session(options, trace, std::move(catalog), std::move(scripts),
-                        std::move(canvas), input);
+                        std::move(canvas), input, std::move(retained_passed));
     struct FileMenuScope {
       ~FileMenuScope() { Game::Save::ShutdownFileMenus(); }
     } file_menu_scope;

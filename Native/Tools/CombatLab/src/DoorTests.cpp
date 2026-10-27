@@ -3,7 +3,11 @@
 #include <algorithm>
 #include <cstdlib>
 #include <format>
+#include <fstream>
 #include <limits>
+#include <map>
+#include <set>
+#include <stdexcept>
 #include <string>
 #include <utility>
 #include <vector>
@@ -45,6 +49,58 @@ std::string DestinationIssue(const std::vector<Game::EncounterZone>& catalog,
                                       &Game::EncounterRoom::index);
   if (room == zone->rooms.end()) return "destination room unavailable";
   return room->unavailable_reason;
+}
+
+std::string ResultIdentity(const nlohmann::json& result) {
+  if (!result.is_object() || !result.contains("door") ||
+      !result.at("door").is_object() || !result.contains("name") ||
+      !result.at("name").is_string() || !result.at("door").contains("id") ||
+      result.at("door").at("id") != result.at("name")) {
+    throw std::runtime_error("door checkpoint has an invalid case identity");
+  }
+  const auto name = result.at("name").get<std::string>();
+  if (name.empty()) throw std::runtime_error("door checkpoint case is unnamed");
+  return name;
+}
+
+void RequirePassedResult(const nlohmann::json& result) {
+  if (result.value("status", "") != "passed" ||
+      result.at("door").value("status", "") != "passed" ||
+      !result.value("initialized", false) ||
+      !result.value("teardown_complete", false) ||
+      !result.contains("engine_errors") || result.at("engine_errors") != 0) {
+    throw std::runtime_error(
+        "door checkpoint pass lacks successful initialization/teardown");
+  }
+  const auto& control = result.at("door").at("control_tick");
+  const auto& ticks = result.at("ticks");
+  if (!control.is_number_integer() || control <= 0 ||
+      !ticks.is_number_integer() || ticks < control ||
+      ticks.get<std::uint64_t>() - control.get<std::uint64_t>() <
+          DoorTrial::kObservationTicks) {
+    throw std::runtime_error(
+        "door checkpoint pass lacks the required observation interval");
+  }
+}
+
+bool SameDoorContract(const DoorTestCase& test, const nlohmann::json& result) {
+  const auto expected = EncodeDoorTest(test);
+  const auto& actual = result.at("door");
+  for (const auto& [key, value] : expected.items()) {
+    if (!actual.contains(key)) {
+      throw std::runtime_error("door checkpoint pass lacks field: " + key);
+    }
+    if (actual.at(key) != value) return false;
+  }
+  return true;
+}
+
+nlohmann::json ReadCheckpointJson(const std::filesystem::path& path) {
+  std::ifstream input(path);
+  if (!input) {
+    throw std::runtime_error("cannot open door checkpoint: " + path.string());
+  }
+  return nlohmann::json::parse(input);
 }
 }  // namespace
 
@@ -94,6 +150,134 @@ nlohmann::json EncodeDoorTest(const DoorTestCase& test) {
           {"required_flag", test.door.required_flag},
           {"required_value", test.door.required_value},
           {"unavailable", test.unavailable}};
+}
+
+nlohmann::json DecodeDoorCheckpoint(const nlohmann::json& summary,
+                                    const nlohmann::json& provenance) {
+  if (!summary.is_object() || summary.value("schema", 0) != 1 ||
+      summary.value("coverage", "") != "loader_entry_event" ||
+      !summary.contains("scripts") || !summary.at("scripts").is_array() ||
+      !provenance.is_object()) {
+    throw std::runtime_error(
+        "resume requires a schema 1 door result checkpoint");
+  }
+  auto passed = nlohmann::json::array();
+  std::set<std::string> seen;
+  const auto add = [&passed, &seen](const nlohmann::json& entry) {
+    const auto& result = entry.at("result");
+    const auto id = ResultIdentity(result);
+    RequirePassedResult(result);
+    if (!entry.at("provenance").is_object() || !seen.insert(id).second) {
+      throw std::runtime_error(
+          "door checkpoint has duplicate/invalid prior passes");
+    }
+    passed.push_back(entry);
+  };
+  if (summary.contains("retained_passed")) {
+    if (!summary.at("retained_passed").is_array()) {
+      throw std::runtime_error(
+          "door checkpoint retained passes must be an array");
+    }
+    for (const auto& entry : summary.at("retained_passed")) add(entry);
+  }
+  for (const auto& result : summary.at("scripts")) {
+    const auto id = ResultIdentity(result);
+    const auto status = result.at("status").get<std::string>();
+    if (status == "passed") {
+      add({{"result", result}, {"provenance", provenance}});
+    } else {
+      if (status != "blocked" && status != "failed" && status != "running" &&
+          status != "not_run" && status != "cancelled") {
+        throw std::runtime_error("door checkpoint has unknown status: " +
+                                 status);
+      }
+      if (!seen.insert(id).second) {
+        throw std::runtime_error("door checkpoint has duplicate case: " + id);
+      }
+    }
+  }
+  return passed;
+}
+
+nlohmann::json ReadDoorCheckpoint(const std::filesystem::path& path) {
+  const auto absolute = std::filesystem::absolute(path).lexically_normal();
+  const auto summary = ReadCheckpointJson(absolute);
+  const auto manifest =
+      ReadCheckpointJson(absolute.parent_path() / "manifest.json");
+  const auto provenance =
+      nlohmann::json{{"checkpoint", absolute.string()},
+                     {"revision", manifest.at("revision")},
+                     {"worktree", manifest.at("worktree")},
+                     {"source_status", manifest.at("source_status")},
+                     {"data_root", manifest.at("data_root")}};
+  return DecodeDoorCheckpoint(summary, provenance);
+}
+
+DoorResumePlan PlanDoorResume(const std::vector<DoorTestCase>& tests,
+                              const DoorSelection& selection,
+                              const nlohmann::json& passed) {
+  if (tests.empty() || !passed.is_array() ||
+      (!selection.first.empty() && !selection.only.empty())) {
+    throw std::runtime_error("invalid door resume selection");
+  }
+  std::map<std::string, const DoorTestCase*> indexed;
+  for (const auto& test : tests) {
+    if (!indexed.emplace(test.id, &test).second) {
+      throw std::runtime_error("duplicate current door identity: " + test.id);
+    }
+  }
+  const auto& selector =
+      selection.only.empty() ? selection.first : selection.only;
+  if (!selector.empty() && !indexed.contains(selector)) {
+    throw std::runtime_error("door selector has no inventory match");
+  }
+  DoorResumePlan plan;
+  std::set<std::string> retained;
+  std::set<std::string> seen_passes;
+  for (const auto& entry : passed) {
+    const auto& result = entry.at("result");
+    const auto id = ResultIdentity(result);
+    RequirePassedResult(result);
+    if (!seen_passes.insert(id).second) {
+      throw std::runtime_error("duplicate resumed door pass: " + id);
+    }
+    const auto found = indexed.find(id);
+    if (found != indexed.end() && SameDoorContract(*found->second, result)) {
+      plan.retained_passed.push_back(entry);
+      retained.insert(id);
+    } else {
+      plan.invalidated.push_back(id);
+    }
+  }
+  bool started = selector.empty();
+  for (const auto& test : tests) {
+    started |= test.id == selector;
+    if (!started || (!selection.only.empty() && test.id != selection.only) ||
+        retained.contains(test.id)) {
+      continue;
+    }
+    if (selection.limit != 0 && plan.pending.size() >= selection.limit) break;
+    plan.pending.push_back(test);
+  }
+  return plan;
+}
+
+nlohmann::json EncodeDoorCheckpoint(const nlohmann::json& results,
+                                    const nlohmann::json& retained_passed,
+                                    std::string_view status) {
+  nlohmann::json counts = nlohmann::json::object();
+  for (const auto& result : results) {
+    const auto outcome = result.at("status").get<std::string>();
+    counts[outcome] = counts.value(outcome, 0) + 1;
+  }
+  return {{"schema", 1},
+          {"status", status},
+          {"coverage", "loader_entry_event"},
+          {"selected_cases", results.size()},
+          {"scripts", results},
+          {"counts", std::move(counts)},
+          {"retained_passed_count", retained_passed.size()},
+          {"retained_passed", retained_passed}};
 }
 
 DoorTrial::DoorTrial(DoorTestCase test) : test_(std::move(test)) {

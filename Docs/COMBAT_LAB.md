@@ -2599,7 +2599,42 @@ build\Debug\VS.CombatLab.exe --door-transitions --door-from z009-r017-d003 --doo
 
 Use Release equivalents to test that configuration. `--door-case` selects one
 stable source-zone/room/record ID; `--door-from` resumes inclusively in inventory
-order, and `--door-limit` bounds the selected range. Invalid IDs and conflicting
+order, and `--door-limit` bounds the number of cases actually executed.
+`--door-from` alone does not remember earlier results.
+
+**Repair/retry workflow:** use `--door-resume` with the previous run's
+`sequence-results.json`, then select the broken case or starting point. Do not
+restart a long passed prefix after each fix. For example, with `$checkpoint`
+set to that saved results path:
+
+```powershell
+build\Debug\VS.CombatLab.exe --door-transitions --door-resume $checkpoint --door-case z048-r006-d000 --frames 36000 --speed 8 --scripted
+build\Debug\VS.CombatLab.exe --door-transitions --door-resume $checkpoint --door-from z048-r006-d000 --door-limit 1 --frames 36000 --speed 8 --scripted
+```
+
+Only previous `passed` cases with successful initialization, zero engine
+errors, complete teardown and the required observation interval are reused.
+Failed, blocked, cancelled, running and unrun cases remain pending. A changed
+door contract invalidates its old pass and returns it to pending work.
+Different data roots and malformed/unreadable checkpoints fail explicitly;
+they never silently fall back to replaying the complete inventory.
+
+Results keep `retained_passed` and its source-checkpoint/revision/worktree
+provenance separate from newly executed `scripts` and `counts`.
+`retained_passed_count` is not a fresh pass count for the changed revision.
+The new results file is itself resumable: later retries carry forward all
+still-valid earlier passes plus newly passed stages. If the selected stage
+has already passed, the run executes zero gameplay cases, reports the retained
+evidence and exits successfully without fabricating a new pass.
+`door-plan.json` records exact pending IDs, retained count and invalidated
+passes before execution.
+
+For a deliberate full regression or a failure proven to depend on prior
+history, omit `--door-resume` and select the needed history explicitly.
+Retaining old passes is a retry optimization, not proof that unrelated code
+or asset changes preserve every earlier behavior.
+
+Invalid IDs and conflicting
 scenario, sequence, input or selector options fail explicitly. `--frames` is a
 per-case budget (default **3,600 logical ticks**), not a successful outcome.
 
@@ -2648,7 +2683,8 @@ text/JSONL traces and manifests. Results start as `not_run`, then record the
 active case and final `passed`, `blocked` or `failed` state, reason, request/
 arrival/control ticks, destination observation count, dialogue pulses and last
 room/control state. A fatal process crash leaves the active/unrun checkpoint;
-resume using its ID after investigating the failure. An interrupted batch is
+resume using its checkpoint plus the broken ID after investigating the failure.
+An interrupted batch is
 not full coverage. Any blocked/failed/cancelled selection returns **2**;
 configuration/tool errors return **1**. Engine errors terminate the current
 case as failed before the next production cleanup.

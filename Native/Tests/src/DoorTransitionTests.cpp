@@ -1,9 +1,13 @@
+#include <array>
 #include <cstdint>
+#include <format>
 #include <map>
 #include <set>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -123,6 +127,51 @@ void ObserveDoorWaiting(DoorTrial& trial, const VS::Game::EncounterState& state,
 
 using DoorCase = VS::combat_lab::DoorTestCase;
 using DoorCaseIndex = std::map<std::tuple<int, int, int>, const DoorCase*>;
+
+std::vector<DoorCase> ResumeCases() {
+  const auto base =
+      VS::combat_lab::EnumerateDoorTests(TestDoorCatalog()).front();
+  std::vector<DoorCase> cases;
+  for (int index = 0; index < 132; ++index) {
+    auto test = base;
+    test.id = std::format("stage-{:03}", index);
+    test.door.index = index;
+    cases.push_back(std::move(test));
+  }
+  return cases;
+}
+
+nlohmann::json PassedDoor(const DoorCase& test) {
+  auto door = VS::combat_lab::EncodeDoorTest(test);
+  door["status"] = "passed";
+  door["control_tick"] = 10;
+  return {{"name", test.id},
+          {"door", door},
+          {"status", "passed"},
+          {"initialized", true},
+          {"teardown_complete", true},
+          {"engine_errors", 0},
+          {"ticks", 142}};
+}
+
+nlohmann::json ResumeCheckpoint(const std::vector<DoorCase>& cases) {
+  auto results = nlohmann::json::array();
+  for (std::size_t index = 0; index < cases.size(); ++index) {
+    auto result = PassedDoor(cases[index]);
+    if (index >= 95) {
+      result["status"] = "blocked";
+      result["door"]["status"] = "blocked";
+    }
+    results.push_back(std::move(result));
+  }
+  return VS::combat_lab::EncodeDoorCheckpoint(results, nlohmann::json::array(),
+                                              "failed");
+}
+
+nlohmann::json PriorDoorPasses(const nlohmann::json& summary) {
+  return VS::combat_lab::DecodeDoorCheckpoint(
+      summary, {{"checkpoint", "original-results.json"}, {"revision", "old"}});
+}
 
 std::size_t CheckRawRoomDoors(std::span<const std::uint8_t> bytes, int zone,
                               int room, const DoorCaseIndex& indexed) {
@@ -350,4 +399,136 @@ TEST_CASE(
   const auto result = VS::Game::RequestEncounterDoorTransition(0);
   CHECK(result.status == EncounterDoorRequestStatus::kInvalid);
   CHECK_FALSE(result.reason.empty());
+}
+
+TEST_CASE("Door resume removes every passed stage from a 132-stage retry",
+          "[doors][resume]") {
+  const auto cases = ResumeCases();
+  const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
+  const auto plan = VS::combat_lab::PlanDoorResume(cases, {}, prior);
+  REQUIRE(plan.pending.size() == 37);
+  CHECK(plan.retained_passed.size() == 95);
+  CHECK(plan.pending.front().id == "stage-095");
+  CHECK(plan.pending.back().id == "stage-131");
+  CHECK(plan.invalidated.empty());
+}
+
+TEST_CASE("Door resume starts at the broken stage without replaying history",
+          "[doors][resume]") {
+  const auto cases = ResumeCases();
+  const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
+  const auto plan =
+      VS::combat_lab::PlanDoorResume(cases, {"stage-131", {}, 1}, prior);
+  REQUIRE(plan.pending.size() == 1);
+  CHECK(plan.pending.front().id == "stage-131");
+  CHECK(plan.retained_passed.size() == 95);
+  const auto limited =
+      VS::combat_lab::PlanDoorResume(cases, {{}, {}, 1}, prior);
+  REQUIRE(limited.pending.size() == 1);
+  CHECK(limited.pending.front().id == "stage-095");
+}
+
+TEST_CASE(
+    "Already passed selected doors produce no fresh pass or executed case",
+    "[doors][resume]") {
+  const auto cases = ResumeCases();
+  const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
+  const auto plan =
+      VS::combat_lab::PlanDoorResume(cases, {{}, "stage-000", 0}, prior);
+  CHECK(plan.pending.empty());
+  const auto result = VS::combat_lab::EncodeDoorCheckpoint(
+      nlohmann::json::array(), plan.retained_passed, "completed");
+  CHECK(result.at("selected_cases") == 0);
+  CHECK(result.at("counts").empty());
+  CHECK(result.at("scripts").empty());
+  CHECK(result.at("retained_passed_count") == 95);
+}
+
+TEST_CASE("Chained door retries retain original pass provenance across fixes",
+          "[doors][resume]") {
+  const auto cases = ResumeCases();
+  const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
+  const auto summary = VS::combat_lab::EncodeDoorCheckpoint(
+      nlohmann::json::array({PassedDoor(cases[95])}), prior, "completed");
+  const auto combined = VS::combat_lab::DecodeDoorCheckpoint(
+      summary, {{"checkpoint", "retry.json"}, {"revision", "new"}});
+  const auto plan = VS::combat_lab::PlanDoorResume(cases, {}, combined);
+  CHECK(plan.retained_passed.size() == 96);
+  REQUIRE(plan.pending.size() == 36);
+  CHECK(plan.pending.front().id == "stage-096");
+  CHECK(combined.front().at("provenance").at("revision") == "old");
+  CHECK(combined.back().at("provenance").at("revision") == "new");
+}
+
+TEST_CASE(
+    "Changed door contracts invalidate prior passes rather than hiding work",
+    "[doors][resume]") {
+  auto cases = ResumeCases();
+  const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
+  cases[4].door.destination.direction = 3;
+  const auto plan = VS::combat_lab::PlanDoorResume(cases, {}, prior);
+  REQUIRE(plan.invalidated.size() == 1);
+  CHECK(plan.invalidated.front() == "stage-004");
+  CHECK(plan.retained_passed.size() == 94);
+  REQUIRE(plan.pending.size() == 38);
+  CHECK(plan.pending.front().id == "stage-004");
+}
+
+TEST_CASE("Door resume rejects incomplete passes and duplicate case results",
+          "[doors][resume]") {
+  const auto cases = ResumeCases();
+  auto summary = ResumeCheckpoint(cases);
+  SECTION("teardown did not complete") {
+    summary["scripts"][0]["teardown_complete"] = false;
+  }
+  SECTION("engine error") { summary["scripts"][0]["engine_errors"] = 1; }
+  SECTION("initialization failed") {
+    summary["scripts"][0]["initialized"] = false;
+  }
+  SECTION("door did not pass") {
+    summary["scripts"][0]["door"]["status"] = "blocked";
+  }
+  SECTION("observation interval too short") {
+    summary["scripts"][0]["ticks"] = 129;
+  }
+  SECTION("duplicate case") {
+    summary["scripts"].push_back(summary["scripts"][0]);
+  }
+  CHECK_THROWS_AS(PriorDoorPasses(summary), std::runtime_error);
+}
+
+TEST_CASE("Door resume rejects malformed schemas and selector mismatches",
+          "[doors][resume]") {
+  const auto cases = ResumeCases();
+  const auto prior = PriorDoorPasses(ResumeCheckpoint(cases));
+  CHECK_THROWS_AS(
+      VS::combat_lab::PlanDoorResume(cases, {"missing", {}, 0}, prior),
+      std::runtime_error);
+  CHECK_THROWS_AS(VS::combat_lab::PlanDoorResume({}, {}, prior),
+                  std::runtime_error);
+  CHECK_THROWS_AS(VS::combat_lab::PlanDoorResume(
+                      cases, {"stage-000", "stage-001", 0}, prior),
+                  std::runtime_error);
+  auto summary = ResumeCheckpoint(cases);
+  summary["schema"] = 2;
+  CHECK_THROWS_AS(PriorDoorPasses(summary), std::runtime_error);
+}
+
+TEST_CASE("Blocked failed interrupted and unrun doors remain pending on resume",
+          "[doors][resume]") {
+  const auto cases = ResumeCases();
+  auto summary = ResumeCheckpoint(cases);
+  const std::array statuses{"blocked", "failed", "running", "not_run",
+                            "cancelled"};
+  for (std::size_t index = 0; index < statuses.size(); ++index) {
+    summary["scripts"][95 + index]["status"] = statuses[index];
+  }
+  const auto plan =
+      VS::combat_lab::PlanDoorResume(cases, {}, PriorDoorPasses(summary));
+  CHECK(plan.pending.size() == 37);
+  CHECK(plan.retained_passed.size() == 95);
+  const auto full =
+      VS::combat_lab::PlanDoorResume(cases, {}, nlohmann::json::array());
+  CHECK(full.pending.size() == 132);
+  CHECK(full.retained_passed.empty());
 }

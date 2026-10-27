@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include "Battle/Encounter.hpp"
@@ -19,6 +21,28 @@ struct DoorTestCase {
 std::vector<DoorTestCase> EnumerateDoorTests(
     const std::vector<Game::EncounterZone>& catalog);
 nlohmann::json EncodeDoorTest(const DoorTestCase& test);
+
+struct DoorSelection {
+  std::string first;
+  std::string only;
+  std::uint64_t limit = 0;
+};
+
+struct DoorResumePlan {
+  std::vector<DoorTestCase> pending;
+  nlohmann::json retained_passed = nlohmann::json::array();
+  std::vector<std::string> invalidated;
+};
+
+nlohmann::json DecodeDoorCheckpoint(const nlohmann::json& summary,
+                                    const nlohmann::json& provenance);
+nlohmann::json ReadDoorCheckpoint(const std::filesystem::path& path);
+DoorResumePlan PlanDoorResume(const std::vector<DoorTestCase>& tests,
+                              const DoorSelection& selection,
+                              const nlohmann::json& passed);
+nlohmann::json EncodeDoorCheckpoint(const nlohmann::json& results,
+                                    const nlohmann::json& retained_passed,
+                                    std::string_view status);
 
 class DoorTrial {
  public:
