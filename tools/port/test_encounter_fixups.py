@@ -1741,6 +1741,35 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source = re.sub(pattern, replacement, source)
                 self.assertEqual(source, expected)
 
+    def test_math_names_preserve_distinct_vector_destination_positions(self):
+        examples = {
+            "Core::Math::AddVectors": (
+                "setVector(arg0, arg1->vx + arg2->vx, "
+                "arg1->vy + arg2->vy, arg1->vz + arg2->vz); return arg0;",
+                "setVector(destination, left->vx + right->vx, "
+                "left->vy + right->vy, left->vz + right->vz); "
+                "return destination;",
+            ),
+            "Core::Math::AddWideVectors": (
+                "arg2->vx = arg0->vx + arg1->vx;",
+                "destination->vx = left->vx + right->vx;",
+            ),
+            "Core::Math::NormalizeFixedVector": (
+                "setVector(&sp10, arg0->vx >> 12, arg0->vy >> 12, "
+                "arg0->vz >> 12); VectorNormal(&sp10, arg1);",
+                "setVector(&integer_vector, source->vx >> 12, "
+                "source->vy >> 12, source->vz >> 12); "
+                "VectorNormal(&integer_vector, destination);",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

@@ -757,3 +757,25 @@ units remain the documented old-C parsing limitations, with zero unresolved
 references in them. Log: `build\quality\issue148-reference-index.log`.
 Resolving an occurrence to its ledger ID is not a semantic review of every
 local or parameter; #148's individual-review closure gate remains unmet.
+
+The continuing math cohort reviews 20 functions in generated `FixedPoint`,
+`Matrix`, `Trig` and `Vector` source/header pairs. Sixty-one bindings now name
+vector sources/destinations, differently ordered output parameters, fixed-point
+scales, component squares, signed magnitude selection, unordered clamp bounds,
+packed coordinates, and orientation axes. Each function's ledger note and
+copier rule cite its original body; the negative-Y look-at reference, short
+narrowing, tie selection, matrix translation preservation and Q12 arithmetic
+are unchanged. Existing meaningful names and the unused look-at padding remain.
+
+On dirty base `a488d710`, nine new native controls pass 81 assertions before
+renaming. Afterward Debug/Release each pass 39 cases/867 assertions using
+`[core][math],[event] --reporter compact`; expected missing-actor diagnostics
+come from the existing event negative controls. Dirty-tree copier tests are
+128/128 and naming tests 32/32. Focused tidy reports one existing/zero new,
+with unchanged baselines. Exact expected-output comparison covers all 742
+manifest paths, restricts changes to the eight reviewed math files, preserves
+121 owned paths and verifies a stable second generation.
+Evidence: `build\quality\issue148-math-*`. The candidate inventory is now
+24,342 occurrences/2,095 pairs/357 files; it still is not an all-reviewed count.
+Work continues through the remaining individual source reviews rather than
+treating this milestone as an issue-completion or stopping gate.

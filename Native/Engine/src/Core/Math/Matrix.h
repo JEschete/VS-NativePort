@@ -14,8 +14,8 @@
 #define VS_CORE_MATH_MATRIX_H_DECLS
 
 void Core_Math_BuildLookAtOrientation(VECTOR* from, VECTOR* to, MATRIX* mat);
-void Core_Math_DirectionRotationMatrix(VECTOR* arg0, MATRIX* arg1);
-void Core_Math_SetIdentityRotation(MATRIX* arg0);
-void Core_Math_SetTranslationMatrix(SVECTOR* arg0, MATRIX* arg1);
+void Core_Math_DirectionRotationMatrix(VECTOR* direction_q12, MATRIX* rotation);
+void Core_Math_SetIdentityRotation(MATRIX* matrix);
+void Core_Math_SetTranslationMatrix(SVECTOR* translation, MATRIX* matrix);
 
 #endif // VS_CORE_MATH_MATRIX_H_DECLS

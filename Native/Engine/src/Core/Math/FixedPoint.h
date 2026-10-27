@@ -50,11 +50,11 @@
 #define VS_CORE_MATH_FIXEDPOINT_H_DECLS
 
 extern u_char Core_Math_kArcTangentTable[1296];
-short Core_Math_ClampSignedShort(short arg0, int arg1, int arg2);
-VECTOR* Core_Math_ScaleFixedVector(VECTOR* arg0, VECTOR* arg1, int arg2);
-int Core_Math_FixedVectorMagnitude(VECTOR* arg0);
-VECTOR* Core_Math_ShortVectorToFixed(VECTOR* arg0, SVECTOR* arg1);
-void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1);
+short Core_Math_ClampSignedShort(short value, int bound_a, int bound_b);
+VECTOR* Core_Math_ScaleFixedVector(VECTOR* destination, VECTOR* source, int scale_q12);
+int Core_Math_FixedVectorMagnitude(VECTOR* source);
+VECTOR* Core_Math_ShortVectorToFixed(VECTOR* destination, SVECTOR* source);
+void Core_Math_NormalizeFixedVector(VECTOR* source, VECTOR* destination);
 int Core_Math_SplitDecimalDigit(int value);
 long Core_Math_ArcTangent2(long y, long x);
 

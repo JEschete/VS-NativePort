@@ -9,16 +9,16 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_CORE_MATH_VECTOR_H_DECLS)
 #define VS_CORE_MATH_VECTOR_H_DECLS
 
-int Core_Math_AddPackedScreenCoordinates(int arg0, int arg1);
-VECTOR* Core_Math_AddVectors(VECTOR* arg0, VECTOR* arg1, VECTOR* arg2);
-VECTOR* Core_Math_SubtractVectors(VECTOR* arg0, VECTOR* arg1, VECTOR* arg2);
-VECTOR* Core_Math_CopyVector(VECTOR* arg0, VECTOR* arg1);
-int Core_Math_GreatestMagnitudeComponent(int arg0, int arg1, int arg2);
-int Core_Math_LargerMagnitude(int arg0, int arg1);
+int Core_Math_AddPackedScreenCoordinates(int left_coordinates, int right_coordinates);
+VECTOR* Core_Math_AddVectors(VECTOR* destination, VECTOR* left, VECTOR* right);
+VECTOR* Core_Math_SubtractVectors(VECTOR* destination, VECTOR* left, VECTOR* right);
+VECTOR* Core_Math_CopyVector(VECTOR* destination, VECTOR* source);
+int Core_Math_GreatestMagnitudeComponent(int first, int second, int third);
+int Core_Math_LargerMagnitude(int first, int second);
 void Core_Math_AddShortAndWideVectors(SVECTOR* svec, VECTOR* vec, VECTOR* out);
-void Core_Math_AddWideVectors(VECTOR* arg0, VECTOR* arg1, VECTOR* arg2);
-void Core_Math_AddWideAndShortVectors(VECTOR* arg0, SVECTOR* arg1, VECTOR* arg2);
-void Core_Math_WidenShortVector(SVECTOR* arg0, VECTOR* arg1);
-void Core_Math_NarrowWideVector(VECTOR* arg0, SVECTOR* arg1);
+void Core_Math_AddWideVectors(VECTOR* left, VECTOR* right, VECTOR* destination);
+void Core_Math_AddWideAndShortVectors(VECTOR* wide, SVECTOR* narrow, VECTOR* destination);
+void Core_Math_WidenShortVector(SVECTOR* source, VECTOR* destination);
+void Core_Math_NarrowWideVector(VECTOR* source, SVECTOR* destination);
 
 #endif // VS_CORE_MATH_VECTOR_H_DECLS

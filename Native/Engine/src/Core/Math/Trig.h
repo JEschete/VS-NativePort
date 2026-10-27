@@ -17,6 +17,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_CORE_MATH_TRIG_H_DECLS)
 #define VS_CORE_MATH_TRIG_H_DECLS
 
-int Core_Math_FixedAtan2(int arg0, int arg1);
+int Core_Math_FixedAtan2(int y, int x);
 
 #endif // VS_CORE_MATH_TRIG_H_DECLS

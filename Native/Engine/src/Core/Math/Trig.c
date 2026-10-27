@@ -3,5 +3,5 @@
 #include "Core/Math/Trig.h"
 
 // decomp: BATTLE.PRG _atan2FixedPoint (src/BATTLE/BATTLE.PRG/4A0A8.c:4177)
-int Core_Math_FixedAtan2(int arg0, int arg1) { return Core_Gte_Atan2(arg0 >> 6, arg1 >> 6); }
+int Core_Math_FixedAtan2(int y, int x) { return Core_Gte_Atan2(y >> 6, x >> 6); }
 

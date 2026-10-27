@@ -8,69 +8,69 @@
 u_char Core_Math_kArcTangentTable[1296]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG vs_battle_clamp (src/BATTLE/BATTLE.PRG/2842C.c:390)
-short Core_Math_ClampSignedShort(short arg0, int arg1, int arg2)
+short Core_Math_ClampSignedShort(short value, int bound_a, int bound_b)
 {
-    short var_t0;
-    short var_v1;
+    short lower;
+    short upper;
 
-    if ((arg1 << 0x10) < (arg2 << 0x10)) {
-        var_t0 = arg1;
-        var_v1 = arg2;
+    if ((bound_a << 0x10) < (bound_b << 0x10)) {
+        lower = bound_a;
+        upper = bound_b;
     } else {
-        var_t0 = arg2;
-        var_v1 = arg1;
+        lower = bound_b;
+        upper = bound_a;
     }
-    if (arg0 < var_t0) {
-        return var_t0;
+    if (value < lower) {
+        return lower;
     }
-    if (var_v1 < arg0) {
-        return var_v1;
+    if (upper < value) {
+        return upper;
     }
-    return arg0;
+    return value;
 }
 
 // decomp: BATTLE.PRG _vectorFixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4118)
-VECTOR* Core_Math_ScaleFixedVector(VECTOR* arg0, VECTOR* arg1, int arg2)
+VECTOR* Core_Math_ScaleFixedVector(VECTOR* destination, VECTOR* source, int scale_q12)
 {
-    setVector(arg0, Core_Math_MultiplyFixed(arg1->vx, arg2), Core_Math_MultiplyFixed(arg1->vy, arg2),
-        Core_Math_MultiplyFixed(arg1->vz, arg2));
-    return arg0;
+    setVector(destination, Core_Math_MultiplyFixed(source->vx, scale_q12), Core_Math_MultiplyFixed(source->vy, scale_q12),
+        Core_Math_MultiplyFixed(source->vz, scale_q12));
+    return destination;
 }
 
 // decomp: BATTLE.PRG _vectorMagnitude (src/BATTLE/BATTLE.PRG/4A0A8.c:4131)
-int Core_Math_FixedVectorMagnitude(VECTOR* arg0)
+int Core_Math_FixedVectorMagnitude(VECTOR* source)
 {
-    VECTOR sp10;
-    int temp_lo;
-    int temp_lo_2;
-    int temp_v0;
+    VECTOR components;
+    int x_squared;
+    int y_squared;
+    int z_squared;
 
-    Core_Math_CopyVector(&sp10, arg0);
-    temp_lo = (sp10.vx >> 0xC) * (sp10.vx >> 0xC);
-    temp_lo_2 = (sp10.vy >> 0xC) * (sp10.vy >> 0xC);
-    temp_v0 = (sp10.vz >> 0xC) * (sp10.vz >> 0xC);
-    sp10.vx = sp10.vx >> 0xC;
-    sp10.vy = sp10.vy >> 0xC;
-    sp10.vz = sp10.vz >> 0xC;
-    return Core_Math_SquareRootInteger(temp_lo + temp_lo_2 + temp_v0) * ONE;
+    Core_Math_CopyVector(&components, source);
+    x_squared = (components.vx >> 0xC) * (components.vx >> 0xC);
+    y_squared = (components.vy >> 0xC) * (components.vy >> 0xC);
+    z_squared = (components.vz >> 0xC) * (components.vz >> 0xC);
+    components.vx = components.vx >> 0xC;
+    components.vy = components.vy >> 0xC;
+    components.vz = components.vz >> 0xC;
+    return Core_Math_SquareRootInteger(x_squared + y_squared + z_squared) * ONE;
 }
 
 // decomp: BATTLE.PRG _sVectorToFixedPointVector (src/BATTLE/BATTLE.PRG/4A0A8.c:4155)
-VECTOR* Core_Math_ShortVectorToFixed(VECTOR* arg0, SVECTOR* arg1)
+VECTOR* Core_Math_ShortVectorToFixed(VECTOR* destination, SVECTOR* source)
 {
-    arg0->vx = arg1->vx * ONE;
-    arg0->vy = arg1->vy * ONE;
-    arg0->vz = arg1->vz * ONE;
-    return arg0;
+    destination->vx = source->vx * ONE;
+    destination->vy = source->vy * ONE;
+    destination->vz = source->vz * ONE;
+    return destination;
 }
 
 // decomp: BATTLE.PRG _toNormalIntegerVector (src/BATTLE/BATTLE.PRG/4A0A8.c:4193)
-void Core_Math_NormalizeFixedVector(VECTOR* arg0, VECTOR* arg1)
+void Core_Math_NormalizeFixedVector(VECTOR* source, VECTOR* destination)
 {
-    VECTOR sp10;
+    VECTOR integer_vector;
 
-    setVector(&sp10, arg0->vx >> 0xC, arg0->vy >> 0xC, arg0->vz >> 0xC);
-    Core_Gte_VectorNormal(&sp10, arg1);
+    setVector(&integer_vector, source->vx >> 0xC, source->vy >> 0xC, source->vz >> 0xC);
+    Core_Gte_VectorNormal(&integer_vector, destination);
 }
 
 // decomp: BATTLE.PRG vs_battle_toBCD (src/BATTLE/BATTLE.PRG/5BF94.c:4494)

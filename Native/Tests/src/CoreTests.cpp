@@ -16,6 +16,10 @@
 #include "Legacy/Core/LibEtc.h"
 
 extern "C" {
+#include "Core/Math/FixedPoint.h"
+#include "Core/Math/Matrix.h"
+#include "Core/Math/Trig.h"
+#include "Core/Math/Vector.h"
 #include "Core/Random.h"
 }
 
@@ -23,6 +27,24 @@ using VS::i32;
 namespace Core = VS::Core;
 
 namespace {
+template <typename VectorType>
+void CheckVectorComponents(const VectorType& actual,
+                           const VectorType& expected) {
+  CHECK(actual.vx == expected.vx);
+  CHECK(actual.vy == expected.vy);
+  CHECK(actual.vz == expected.vz);
+  CHECK(actual.pad == expected.pad);
+}
+
+void CheckRotationDiagonal(const MATRIX& matrix, int x, int y, int z) {
+  const std::array<int, 9> actual{
+      matrix.m[0][0], matrix.m[0][1], matrix.m[0][2],
+      matrix.m[1][0], matrix.m[1][1], matrix.m[1][2],
+      matrix.m[2][0], matrix.m[2][1], matrix.m[2][2]};
+  const std::array<int, 9> expected{x, 0, 0, 0, y, 0, 0, 0, z};
+  CHECK(actual == expected);
+}
+
 struct OriginalRandomState {
   decltype(std::to_array(Core_randomShuffleTable)) table =
       std::to_array(Core_randomShuffleTable);
@@ -394,4 +416,123 @@ TEST_CASE("Interface random requests return high bits of the previous state",
           (kInitial >> (32 - bits)));
     CHECK(Core_interfaceRandomState == kInitial * 0x19660Du);
   }
+}
+
+TEST_CASE("Vector arithmetic preserves destination order and aliases",
+          "[core][math][semantic-names]") {
+  VECTOR left{7, -3, 11, 101};
+  VECTOR right{-2, 5, -4, 102};
+  VECTOR result{0, 0, 0, 103};
+  CHECK(Core_Math_AddVectors(&result, &left, &right) == &result);
+  CheckVectorComponents(result, VECTOR{5, 2, 7, 103});
+  CHECK(Core_Math_SubtractVectors(&left, &left, &right) == &left);
+  CheckVectorComponents(left, VECTOR{9, -8, 15, 101});
+  CHECK(Core_Math_CopyVector(&result, &right) == &result);
+  CheckVectorComponents(result, VECTOR{-2, 5, -4, 103});
+}
+
+TEST_CASE("Wide and short vector helpers preserve widths and output positions",
+          "[core][math][semantic-names]") {
+  SVECTOR narrow{2, -3, 4, 91};
+  VECTOR wide{9, 8, 7, 93};
+  VECTOR result{0, 0, 0, 95};
+  Core_Math_AddWideVectors(&wide, &wide, &result);
+  CheckVectorComponents(result, VECTOR{18, 16, 14, 95});
+  Core_Math_AddWideAndShortVectors(&wide, &narrow, &wide);
+  CheckVectorComponents(wide, VECTOR{11, 5, 11, 93});
+  Core_Math_WidenShortVector(&narrow, &result);
+  CheckVectorComponents(result, VECTOR{2, -3, 4, 95});
+  wide = {-65535, 65534, 98304, 93};
+  Core_Math_NarrowWideVector(&wide, &narrow);
+  CheckVectorComponents(narrow, SVECTOR{1, -2, -32768, 91});
+}
+
+TEST_CASE("Fixed vectors preserve scaling and destination padding",
+          "[core][math][semantic-names]") {
+  SVECTOR source{2, -3, 4, 91};
+  VECTOR result{0, 0, 0, 95};
+  CHECK(Core_Math_ShortVectorToFixed(&result, &source) == &result);
+  CheckVectorComponents(result, VECTOR{8192, -12288, 16384, 95});
+  CHECK(Core_Math_ScaleFixedVector(&result, &result, 2048) == &result);
+  CheckVectorComponents(result, VECTOR{4096, -6144, 8192, 95});
+  VECTOR magnitude{3 * 4096, 4 * 4096, 0, 73};
+  CHECK(Core_Math_FixedVectorMagnitude(&magnitude) == 5 * 4096);
+  VECTOR direction{4096, 0, 0, 71};
+  Core_Math_NormalizeFixedVector(&direction, &result);
+  CheckVectorComponents(result, VECTOR{4096, 0, 0, 95});
+}
+
+TEST_CASE("Signed clamp preserves unordered bound semantics",
+          "[core][math][semantic-names]") {
+  for (const int first : {-7, 3}) {
+    const int second = first == -7 ? 3 : -7;
+    CHECK(Core_Math_ClampSignedShort(-8, first, second) == -7);
+    CHECK(Core_Math_ClampSignedShort(-7, first, second) == -7);
+    CHECK(Core_Math_ClampSignedShort(0, first, second) == 0);
+    CHECK(Core_Math_ClampSignedShort(3, first, second) == 3);
+    CHECK(Core_Math_ClampSignedShort(4, first, second) == 3);
+  }
+  CHECK(Core_Math_ClampSignedShort(5, 2, 2) == 2);
+}
+
+TEST_CASE("Magnitude selection retains signs and first-component ties",
+          "[core][math][semantic-names]") {
+  CHECK(Core_Math_GreatestMagnitudeComponent(-7, 7, 3) == -7);
+  CHECK(Core_Math_GreatestMagnitudeComponent(3, -7, 7) == -7);
+  CHECK(Core_Math_GreatestMagnitudeComponent(-1, 2, -3) == -3);
+  CHECK(Core_Math_GreatestMagnitudeComponent(0, 0, 0) == 0);
+  CHECK(Core_Math_LargerMagnitude(-7, 7) == -7);
+  CHECK(Core_Math_LargerMagnitude(1, -3) == -3);
+}
+
+TEST_CASE("Packed screen addition does not carry between coordinates",
+          "[core][math][semantic-names]") {
+  CHECK(Core_Math_AddPackedScreenCoordinates(0x0001FFFF, 0x00020001) ==
+        0x00030000);
+  CHECK(Core_Math_AddPackedScreenCoordinates(std::bit_cast<int>(0xFFFF0001u),
+                                             0x00010002) == 3);
+}
+
+TEST_CASE("Look-at orientation preserves its negative vertical reference",
+          "[core][math][semantic-names]") {
+  VECTOR from{10, 20, 30, 0};
+  VECTOR to{10, 20, 40, 0};
+  MATRIX matrix{};
+  matrix.t[0] = 77;
+  matrix.t[1] = 88;
+  matrix.t[2] = 99;
+  Core_Math_BuildLookAtOrientation(&from, &to, &matrix);
+  CheckRotationDiagonal(matrix, 4096, -4096, 4096);
+  CHECK(matrix.t[0] == 77);
+  CHECK(matrix.t[1] == 88);
+  CHECK(matrix.t[2] == 99);
+}
+
+TEST_CASE("Direction rotations and fixed headings preserve angle units",
+          "[core][math][semantic-names]") {
+  VECTOR direction{0, 0, 4096, 0};
+  MATRIX matrix{};
+  matrix.t[0] = 73;
+  Core_Math_DirectionRotationMatrix(&direction, &matrix);
+  CheckRotationDiagonal(matrix, 4096, 4096, 4096);
+  CHECK(matrix.t[0] == 73);
+  CHECK(Core_Math_FixedAtan2(0, 4096) == 0);
+  CHECK(Core_Math_FixedAtan2(4096, 0) == 1024);
+  CHECK(Core_Math_FixedAtan2(-4096, 0) == -1024);
+  CHECK(Core_Math_FixedAtan2(4096, 4096) == 512);
+}
+
+TEST_CASE("Identity and translation setters preserve their separate contracts",
+          "[core][math][semantic-names]") {
+  MATRIX matrix{};
+  matrix.t[0] = 73;
+  Core_Math_SetIdentityRotation(&matrix);
+  CheckRotationDiagonal(matrix, 4096, 4096, 4096);
+  CHECK(matrix.t[0] == 73);
+  SVECTOR translation{-3, 17, 29, 0};
+  Core_Math_SetTranslationMatrix(&translation, &matrix);
+  CheckRotationDiagonal(matrix, 4096, 4096, 4096);
+  CHECK(matrix.t[0] == -3);
+  CHECK(matrix.t[1] == 17);
+  CHECK(matrix.t[2] == 29);
 }
