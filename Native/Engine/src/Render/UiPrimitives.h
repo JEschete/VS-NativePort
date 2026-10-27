@@ -17,8 +17,8 @@
 #define VS_RENDER_UIPRIMITIVES_H_DECLS
 
 extern int Render_kStatGaugeColors[4];
-void Render_AppendOverlayPrimitive(int* arg0);
-void Render_SplicePrimitiveList(u_long* arg0, int* arg1);
+void Render_AppendOverlayPrimitive(int* primitive);
+void Render_SplicePrimitiveList(u_long* ordering_link, int* primitive);
 u_int Render_BlendRgbWithBrightness(u_int color0, u_int color1, int brightness, int blendFactor);
 void Render_DrawNumericGlyph(int font, int xy, int digit, u_long* before);
 int Render_DrawIntegerRightAligned(int font, int xy, int value, u_long* before);

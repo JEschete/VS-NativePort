@@ -149,85 +149,85 @@ signed char Render_paletteDeltaSequenceEight[][8] = { { 252, 252, 252, 252, 252,
     { 3, 4, 3, 4, 4, 3, 4, 4 }, { 3, 4, 4, 4, 3, 4, 4, 4 }, { 3, 4, 4, 4, 4, 4, 4, 4 } };
 
 // decomp: BATTLE.PRG func_8007B10C (src/BATTLE/BATTLE.PRG/146C.c:8241)
-void Render_TransformRoomPalettes(int arg0, int arg1, int arg2, short arg3, short arg4)
+void Render_TransformRoomPalettes(int mode, int duration, int red_offset, short green_offset, short blue_offset)
 {
-    Render_TransformClutSlot(arg0, arg1, 0, arg2, arg3, arg4);
-    Render_TransformClutSlot(arg0, arg1, 1, arg2, arg3, arg4);
-    Render_TransformClutSlot(arg0, arg1, 2, arg2, arg3, arg4);
+    Render_TransformClutSlot(mode, duration, 0, red_offset, green_offset, blue_offset);
+    Render_TransformClutSlot(mode, duration, 1, red_offset, green_offset, blue_offset);
+    Render_TransformClutSlot(mode, duration, 2, red_offset, green_offset, blue_offset);
 }
 
 // decomp: BATTLE.PRG func_8007B1B8 (src/BATTLE/BATTLE.PRG/146C.c:8248)
-void Render_TransformSceneColors(int arg0, int arg1, short arg2, short arg3, short arg4)
+void Render_TransformSceneColors(int mode, int duration, short red_offset, short green_offset, short blue_offset)
 {
-    Render_TransformClutSlot(arg0, arg1, 0, arg2, arg3, arg4);
-    Render_TransformClutSlot(arg0, arg1, 1, arg2, arg3, arg4);
-    Render_TransformClutSlot(arg0, arg1, 2, arg2, arg3, arg4);
-    Render_RequestModelTintTransform(arg0, arg1, 0, arg2, arg3, arg4);
-    Render_TransformClutSlot(arg0, arg1, 0xD, arg2, arg3, arg4);
+    Render_TransformClutSlot(mode, duration, 0, red_offset, green_offset, blue_offset);
+    Render_TransformClutSlot(mode, duration, 1, red_offset, green_offset, blue_offset);
+    Render_TransformClutSlot(mode, duration, 2, red_offset, green_offset, blue_offset);
+    Render_RequestModelTintTransform(mode, duration, 0, red_offset, green_offset, blue_offset);
+    Render_TransformClutSlot(mode, duration, 0xD, red_offset, green_offset, blue_offset);
 }
 
 // decomp: BATTLE.PRG func_8007B29C (src/BATTLE/BATTLE.PRG/146C.c:8257)
-void Render_TransformActorColors(int arg0, int arg1, int arg2, short arg3, short arg4, short arg5)
+void Render_TransformActorColors(int mode, int duration, int actor_index, short red_offset, short green_offset, short blue_offset)
 {
-    if (arg2 < 9) {
-        Render_TransformClutSlot(arg0, arg1, arg2 + 4, arg3, arg4, arg5);
-        Render_RequestModelTintTransform(arg0, arg1, arg2 + 1, arg3, arg4, arg5);
+    if (actor_index < 9) {
+        Render_TransformClutSlot(mode, duration, actor_index + 4, red_offset, green_offset, blue_offset);
+        Render_RequestModelTintTransform(mode, duration, actor_index + 1, red_offset, green_offset, blue_offset);
     }
 }
 
 // decomp: BATTLE.PRG func_8007B344 (src/BATTLE/BATTLE.PRG/146C.c:8265)
-void Render_TransformBackgroundColors(int arg0, int arg1, short arg2, short arg3, short arg4)
+void Render_TransformBackgroundColors(int mode, int duration, short red_offset, short green_offset, short blue_offset)
 {
-    Render_RequestBackgroundGradientTransform(arg0, arg1, arg2, arg3, arg4);
+    Render_RequestBackgroundGradientTransform(mode, duration, red_offset, green_offset, blue_offset);
 }
 
 // decomp: BATTLE.PRG func_8007B378 (src/BATTLE/BATTLE.PRG/146C.c:8270)
-void Render_LoadRoomPaletteTransition(int arg0, u_short* arg1, int arg2, int arg3)
+void Render_LoadRoomPaletteTransition(int duration, u_short* palette_colors, int arg2, int clut_offset)
 {
-    ((void (*)())Render_StartClutTransition)(arg0, 0, arg1, arg3);
+    ((void (*)())Render_StartClutTransition)(duration, 0, palette_colors, clut_offset);
     // BUG: Missing last parameter to vs_main_loadClutTransition
-    ((void (*)())Render_StartClutTransition)(arg0, 1, arg1 + 0x100);
-    ((void (*)())Render_StartClutTransition)(arg0, 2, arg1 + 0x200);
+    ((void (*)())Render_StartClutTransition)(duration, 1, palette_colors + 0x100);
+    ((void (*)())Render_StartClutTransition)(duration, 2, palette_colors + 0x200);
 }
 
 // decomp: BATTLE.PRG func_8007B3D0 (src/BATTLE/BATTLE.PRG/146C.c:8280)
-void Render_StartSharedPaletteTransition(int arg0, int arg1, u_short* arg2, int arg3)
+void Render_StartSharedPaletteTransition(int duration, int shared_slot, u_short* palette_colors, int clut_offset)
 {
-    ((void (*)())Render_StartClutTransition)(arg0, arg1 + 4, arg2, arg3);
+    ((void (*)())Render_StartClutTransition)(duration, shared_slot + 4, palette_colors, clut_offset);
 }
 
 // decomp: BATTLE.PRG func_8007B3F0 (src/BATTLE/BATTLE.PRG/146C.c:8285)
-void Render_ApplyBackgroundGradientColors(int arg0, Render_ColorRgb8* arg1) { Render_SetBackgroundGradientColors(arg0, arg1); }
+void Render_ApplyBackgroundGradientColors(int duration, Render_ColorRgb8* colors) { Render_SetBackgroundGradientColors(duration, colors); }
 
 // decomp: BATTLE.PRG func_800AC0D4 (src/BATTLE/BATTLE.PRG/40564.c:2003)
-int Render_StepRgbTowardTarget(u_char* arg0, u_char* arg1, int arg2)
+int Render_StepRgbTowardTarget(u_char* current_channels, u_char* target_channels, int signed_step)
 {
     int i;
-    int var_t0 = 0;
+    int changed = 0;
 
     for (i = 0; i < 3; ++i) {
-        if (arg2 < 0) {
-            if (*arg1 < *arg0) {
-                var_t0 = 1;
-                *arg0 += arg2;
-                if (*arg0 < *arg1) {
-                    *arg0 = *arg1;
+        if (signed_step < 0) {
+            if (*target_channels < *current_channels) {
+                changed = 1;
+                *current_channels += signed_step;
+                if (*current_channels < *target_channels) {
+                    *current_channels = *target_channels;
                 }
             }
         } else {
-            if (*arg0 < *arg1) {
-                var_t0 = 1;
-                *arg0 += arg2;
-                if (*arg1 < *arg0) {
-                    *arg0 = *arg1;
+            if (*current_channels < *target_channels) {
+                changed = 1;
+                *current_channels += signed_step;
+                if (*target_channels < *current_channels) {
+                    *current_channels = *target_channels;
                 }
             }
         }
-        ++arg0;
-        ++arg1;
+        ++current_channels;
+        ++target_channels;
     }
 
-    return var_t0;
+    return changed;
 }
 
 // decomp: BATTLE.PRG func_800AC168 (src/BATTLE/BATTLE.PRG/40564.c:2033)
@@ -641,506 +641,506 @@ void Render_TransformClutSlot(
 }
 
 // decomp: SLUS_010.40 _shift_left (src/SLUS_010.40/main.c:10778)
-int Render_ToFixed16(int arg0) { return arg0 << 0x10; }
+int Render_ToFixed16(int value) { return value << 0x10; }
 
 // decomp: SLUS_010.40 func_800472D0 (src/SLUS_010.40/main.c:10780)
-void Render_SetBackgroundGradientColors(int arg0, Render_ColorRgb8* arg1)
+void Render_SetBackgroundGradientColors(int duration, Render_ColorRgb8* colors)
 {
-    int sp10[5];
+    int packed_colors[5];
     int i;
 
     if (Render_paletteTransitionState.enabled != 0) {
-        int (*temp_t6)[6] = Render_paletteTransitionState.backgroundColorsFixed;
+        int (*color_components_fixed)[6] = Render_paletteTransitionState.backgroundColorsFixed;
         for (i = 0; i < 5; ++i) {
             int r;
             int g;
             int b;
-            r = Render_ToFixed16(arg1[i].red);
-            g = Render_ToFixed16(arg1[i].green);
-            b = Render_ToFixed16(arg1[i].blue);
+            r = Render_ToFixed16(colors[i].red);
+            g = Render_ToFixed16(colors[i].green);
+            b = Render_ToFixed16(colors[i].blue);
 
-            if (arg0 != 0) {
-                temp_t6[i][3] = ((int)(r - (temp_t6[i][0] & 0xFFFF0000)) / (arg0 * 2));
-                temp_t6[i][4] = ((int)(g - (temp_t6[i][1] & 0xFFFF0000)) / (arg0 * 2));
-                temp_t6[i][5] = ((int)(b - (temp_t6[i][2] & 0xFFFF0000)) / (arg0 * 2));
+            if (duration != 0) {
+                color_components_fixed[i][3] = ((int)(r - (color_components_fixed[i][0] & 0xFFFF0000)) / (duration * 2));
+                color_components_fixed[i][4] = ((int)(g - (color_components_fixed[i][1] & 0xFFFF0000)) / (duration * 2));
+                color_components_fixed[i][5] = ((int)(b - (color_components_fixed[i][2] & 0xFFFF0000)) / (duration * 2));
             } else {
-                temp_t6[i][0] = r;
-                temp_t6[i][1] = g;
-                temp_t6[i][2] = b;
+                color_components_fixed[i][0] = r;
+                color_components_fixed[i][1] = g;
+                color_components_fixed[i][2] = b;
             }
         }
-        if (arg0 != 0) {
+        if (duration != 0) {
             Render_paletteTransitionState.backgroundFadeActive = 1;
             Render_paletteTransitionState.backgroundFadeFrame = 0;
             Render_paletteTransitionState.backgroundFadeTick = 0;
-            Render_paletteTransitionState.backgroundFadeSpeed = arg0;
+            Render_paletteTransitionState.backgroundFadeSpeed = duration;
             return;
         }
         Render_paletteTransitionState.backgroundFadeActive = 0;
 
         for (i = 0; i < 5; ++i) {
-            sp10[i] = ((temp_t6[i][0] / 65536) + ((temp_t6[i][1] / 65536) << 8))
-                    + (((temp_t6[i][2] / 65536)) << 0x10);
+            packed_colors[i] = ((color_components_fixed[i][0] / 65536) + ((color_components_fixed[i][1] / 65536) << 8))
+                    + (((color_components_fixed[i][2] / 65536)) << 0x10);
         }
-        Field_SetRoomBackgroundColors(sp10);
+        Field_SetRoomBackgroundColors(packed_colors);
     }
 }
 
 // decomp: SLUS_010.40 func_80047464 (src/SLUS_010.40/main.c:10822)
-void Render_SetBackgroundGradientBase(int arg0, Render_ColorRgb8* arg1)
+void Render_SetBackgroundGradientBase(int duration, Render_ColorRgb8* colors)
 {
     int i;
 
     if (Render_paletteTransitionState.enabled != 0) {
-        Render_SetBackgroundGradientColors(arg0, arg1);
+        Render_SetBackgroundGradientColors(duration, colors);
         for (i = 0; i < 5; ++i) {
-            Render_paletteTransitionState.backgroundBaseColors[i] = arg1[i];
+            Render_paletteTransitionState.backgroundBaseColors[i] = colors[i];
         }
     }
 }
 
 // decomp: SLUS_010.40 func_800474DC (src/SLUS_010.40/main.c:10834)
-void Render_TransformBackgroundGradient(int arg0, int arg1, int arg2, int arg3, int arg4)
+void Render_TransformBackgroundGradient(int mode, int duration, int red_offset, int green_offset, int blue_offset)
 {
-    int sp10[5];
-    int temp_v0;
-    int var_a1;
-    int var_t0;
-    int var_t1;
+    int packed_colors[5];
+    int luminance_or_channel_fixed;
+    int blue_target_or_green_fixed;
+    int green_target_fixed;
+    int red_target_fixed;
     int i;
     int (*p)[6] = Render_paletteTransitionState.backgroundColorsFixed;
 
     for (i = 0; i < 5; ++i) {
-        switch (arg0) {
+        switch (mode) {
         case 1:
-            var_t1 = (p[i][0] / 2) + (arg2 << 0x10);
-            var_t0 = p[i][1] / 2 + (arg3 << 0x10);
-            var_a1 = (p[i][2] / 2) + (arg4 << 0x10);
+            red_target_fixed = (p[i][0] / 2) + (red_offset << 0x10);
+            green_target_fixed = p[i][1] / 2 + (green_offset << 0x10);
+            blue_target_or_green_fixed = (p[i][2] / 2) + (blue_offset << 0x10);
             break;
         case 2:
-            var_t1 = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 6 + (arg2 << 0x10);
-            var_t0 = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 6 + (arg3 << 0x10);
-            var_a1 = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 6 + (arg4 << 0x10);
+            red_target_fixed = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 6 + (red_offset << 0x10);
+            green_target_fixed = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 6 + (green_offset << 0x10);
+            blue_target_or_green_fixed = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 6 + (blue_offset << 0x10);
             break;
         case 3:
-            temp_v0 = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 12;
-            var_t1 = temp_v0 + (arg2 << 0x10);
-            var_t0 = temp_v0 + (arg3 << 0x10);
-            var_a1 = temp_v0 + (arg4 << 0x10);
+            luminance_or_channel_fixed = ((p[i][0] * 2) + (p[i][1] * 3) + p[i][2]) / 12;
+            red_target_fixed = luminance_or_channel_fixed + (red_offset << 0x10);
+            green_target_fixed = luminance_or_channel_fixed + (green_offset << 0x10);
+            blue_target_or_green_fixed = luminance_or_channel_fixed + (blue_offset << 0x10);
             break;
         case 4:
         case 9:
-            var_t1 = (Render_paletteTransitionState.backgroundBaseColors[i].red + arg2) << 0x10;
-            var_t0 = (Render_paletteTransitionState.backgroundBaseColors[i].green + arg3) << 0x10;
-            var_a1 = (Render_paletteTransitionState.backgroundBaseColors[i].blue + arg4) << 0x10;
+            red_target_fixed = (Render_paletteTransitionState.backgroundBaseColors[i].red + red_offset) << 0x10;
+            green_target_fixed = (Render_paletteTransitionState.backgroundBaseColors[i].green + green_offset) << 0x10;
+            blue_target_or_green_fixed = (Render_paletteTransitionState.backgroundBaseColors[i].blue + blue_offset) << 0x10;
             break;
         case 5:
-            var_t1 = (Render_paletteTransitionState.backgroundBaseColors[i].red << 0xF) + (arg2 << 0x10);
-            var_t0 = (Render_paletteTransitionState.backgroundBaseColors[i].green << 0xF) + (arg3 << 0x10);
-            var_a1 = (Render_paletteTransitionState.backgroundBaseColors[i].blue << 0xF) + (arg4 << 0x10);
+            red_target_fixed = (Render_paletteTransitionState.backgroundBaseColors[i].red << 0xF) + (red_offset << 0x10);
+            green_target_fixed = (Render_paletteTransitionState.backgroundBaseColors[i].green << 0xF) + (green_offset << 0x10);
+            blue_target_or_green_fixed = (Render_paletteTransitionState.backgroundBaseColors[i].blue << 0xF) + (blue_offset << 0x10);
             break;
         case 6: {
-            int v1 = Render_paletteTransitionState.backgroundBaseColors[i].green;
-            int a0 = Render_paletteTransitionState.backgroundBaseColors[i].blue;
-            int v0 = Render_paletteTransitionState.backgroundBaseColors[i].red;
-            var_a1 = v1 << 0x10;
-            a0 <<= 0x10;
-            v0 <<= 0x11;
-            v1 <<= 0x11;
-            v0 += v1 + var_a1;
-            v0 += a0;
-            var_t1 = v0 / 6 + (arg2 << 0x10);
-            var_t0 = v0 / 6 + (arg3 << 0x10);
-            var_a1 = v0 / 6 + (arg4 << 0x10);
+            int base_green_work = Render_paletteTransitionState.backgroundBaseColors[i].green;
+            int base_blue_work = Render_paletteTransitionState.backgroundBaseColors[i].blue;
+            int base_luminance_work = Render_paletteTransitionState.backgroundBaseColors[i].red;
+            blue_target_or_green_fixed = base_green_work << 0x10;
+            base_blue_work <<= 0x10;
+            base_luminance_work <<= 0x11;
+            base_green_work <<= 0x11;
+            base_luminance_work += base_green_work + blue_target_or_green_fixed;
+            base_luminance_work += base_blue_work;
+            red_target_fixed = base_luminance_work / 6 + (red_offset << 0x10);
+            green_target_fixed = base_luminance_work / 6 + (green_offset << 0x10);
+            blue_target_or_green_fixed = base_luminance_work / 6 + (blue_offset << 0x10);
         } break;
         case 7: {
-            int v1 = Render_paletteTransitionState.backgroundBaseColors[i].green;
-            int a0 = Render_paletteTransitionState.backgroundBaseColors[i].blue;
-            int v0 = Render_paletteTransitionState.backgroundBaseColors[i].red;
-            var_a1 = v1 << 0x10;
-            a0 <<= 0x10;
-            v0 <<= 0x11;
-            v1 <<= 0x11;
-            v0 += v1 + var_a1;
-            v0 += a0;
-            var_t1 = v0 / 12 + (arg2 << 0x10);
-            var_t0 = v0 / 12 + (arg3 << 0x10);
-            var_a1 = v0 / 12 + (arg4 << 0x10);
+            int base_green_work = Render_paletteTransitionState.backgroundBaseColors[i].green;
+            int base_blue_work = Render_paletteTransitionState.backgroundBaseColors[i].blue;
+            int base_luminance_work = Render_paletteTransitionState.backgroundBaseColors[i].red;
+            blue_target_or_green_fixed = base_green_work << 0x10;
+            base_blue_work <<= 0x10;
+            base_luminance_work <<= 0x11;
+            base_green_work <<= 0x11;
+            base_luminance_work += base_green_work + blue_target_or_green_fixed;
+            base_luminance_work += base_blue_work;
+            red_target_fixed = base_luminance_work / 12 + (red_offset << 0x10);
+            green_target_fixed = base_luminance_work / 12 + (green_offset << 0x10);
+            blue_target_or_green_fixed = base_luminance_work / 12 + (blue_offset << 0x10);
         } break;
         case 8:
-            var_t1 = Render_paletteTransitionState.backgroundBaseColors[i].red << 0x10;
-            var_t0 = Render_paletteTransitionState.backgroundBaseColors[i].green << 0x10;
-            var_a1 = Render_paletteTransitionState.backgroundBaseColors[i].blue << 0x10;
+            red_target_fixed = Render_paletteTransitionState.backgroundBaseColors[i].red << 0x10;
+            green_target_fixed = Render_paletteTransitionState.backgroundBaseColors[i].green << 0x10;
+            blue_target_or_green_fixed = Render_paletteTransitionState.backgroundBaseColors[i].blue << 0x10;
             break;
         case 11:
             Render_paletteTransitionState.backgroundFadeMode = 0;
             return;
         case 0:
         default:
-            var_t1 = p[i][0] + (arg2 << 0x10);
-            var_t0 = p[i][1] + (arg3 << 0x10);
-            var_a1 = p[i][2] + (arg4 << 0x10);
+            red_target_fixed = p[i][0] + (red_offset << 0x10);
+            green_target_fixed = p[i][1] + (green_offset << 0x10);
+            blue_target_or_green_fixed = p[i][2] + (blue_offset << 0x10);
             break;
         }
 
-        var_t1 &= 0xFFFF0000;
-        var_t0 &= 0xFFFF0000;
-        var_a1 &= 0xFFFF0000;
+        red_target_fixed &= 0xFFFF0000;
+        green_target_fixed &= 0xFFFF0000;
+        blue_target_or_green_fixed &= 0xFFFF0000;
 
-        if (var_t1 > 0xFF0000) {
-            var_t1 = 0xFF0000;
+        if (red_target_fixed > 0xFF0000) {
+            red_target_fixed = 0xFF0000;
         }
-        if (var_t0 > 0xFF0000) {
-            var_t0 = 0xFF0000;
+        if (green_target_fixed > 0xFF0000) {
+            green_target_fixed = 0xFF0000;
         }
-        if (var_a1 > 0xFF0000) {
-            var_a1 = 0xFF0000;
+        if (blue_target_or_green_fixed > 0xFF0000) {
+            blue_target_or_green_fixed = 0xFF0000;
         }
-        if (var_t1 < 0) {
-            var_t1 = 0;
+        if (red_target_fixed < 0) {
+            red_target_fixed = 0;
         }
-        if (var_t0 < 0) {
-            var_t0 = 0;
+        if (green_target_fixed < 0) {
+            green_target_fixed = 0;
         }
-        if (var_a1 < 0) {
-            var_a1 = 0;
+        if (blue_target_or_green_fixed < 0) {
+            blue_target_or_green_fixed = 0;
         }
-        if (arg1 != 0) {
-            p[i][3] = (int)(var_t1 - (p[i][0] & 0xFFFF0000)) / (arg1 * 2);
-            p[i][4] = (int)(var_t0 - (p[i][1] & 0xFFFF0000)) / (arg1 * 2);
-            p[i][5] = (int)(var_a1 - (p[i][2] & 0xFFFF0000)) / (arg1 * 2);
+        if (duration != 0) {
+            p[i][3] = (int)(red_target_fixed - (p[i][0] & 0xFFFF0000)) / (duration * 2);
+            p[i][4] = (int)(green_target_fixed - (p[i][1] & 0xFFFF0000)) / (duration * 2);
+            p[i][5] = (int)(blue_target_or_green_fixed - (p[i][2] & 0xFFFF0000)) / (duration * 2);
         } else {
-            p[i][0] = var_t1;
-            p[i][1] = var_t0;
-            p[i][2] = var_a1;
+            p[i][0] = red_target_fixed;
+            p[i][1] = green_target_fixed;
+            p[i][2] = blue_target_or_green_fixed;
         }
     }
 
-    if (arg1 != 0) {
+    if (duration != 0) {
         Render_paletteTransitionState.backgroundFadeActive = 1;
         Render_paletteTransitionState.backgroundFadeFrame = 0;
         Render_paletteTransitionState.backgroundFadeTick = 0;
-        Render_paletteTransitionState.backgroundFadeSpeed = arg1;
-        Render_paletteTransitionState.backgroundFadeMode = arg0;
-        if (arg0 == 9) {
-            Render_paletteTransitionState.backgroundPulseRed = arg2;
-            Render_paletteTransitionState.backgroundPulseGreen = arg3;
-            Render_paletteTransitionState.backgroundPulseBlue = arg4;
+        Render_paletteTransitionState.backgroundFadeSpeed = duration;
+        Render_paletteTransitionState.backgroundFadeMode = mode;
+        if (mode == 9) {
+            Render_paletteTransitionState.backgroundPulseRed = red_offset;
+            Render_paletteTransitionState.backgroundPulseGreen = green_offset;
+            Render_paletteTransitionState.backgroundPulseBlue = blue_offset;
         }
     } else {
         Render_paletteTransitionState.backgroundFadeActive = 0;
         for (i = 0; i < 5; ++i) {
-            int temp_a1, var_v0, new_var;
-            temp_v0 = p[i][0];
+            int red_byte, rounded_green_fixed, packed_red_green;
+            luminance_or_channel_fixed = p[i][0];
 
-            if (temp_v0 < 0) {
-                temp_v0 += 0xFFFF;
+            if (luminance_or_channel_fixed < 0) {
+                luminance_or_channel_fixed += 0xFFFF;
             }
 
-            temp_a1 = (temp_v0 >> 0x10);
-            var_v0 = p[i][1];
+            red_byte = (luminance_or_channel_fixed >> 0x10);
+            rounded_green_fixed = p[i][1];
 
-            if (var_v0 < 0) {
-                var_v0 += 0xFFFF;
+            if (rounded_green_fixed < 0) {
+                rounded_green_fixed += 0xFFFF;
             }
 
-            new_var = temp_a1 + ((var_v0 >> 0x10) << 8);
-            temp_v0 = p[i][2];
+            packed_red_green = red_byte + ((rounded_green_fixed >> 0x10) << 8);
+            luminance_or_channel_fixed = p[i][2];
 
-            if (temp_v0 < 0) {
-                temp_v0 += 0xFFFF;
+            if (luminance_or_channel_fixed < 0) {
+                luminance_or_channel_fixed += 0xFFFF;
             }
-            sp10[i] = new_var + ((temp_v0 >> 0x10) << 0x10);
+            packed_colors[i] = packed_red_green + ((luminance_or_channel_fixed >> 0x10) << 0x10);
         }
-        Field_SetRoomBackgroundColors(sp10);
+        Field_SetRoomBackgroundColors(packed_colors);
     }
 }
 
 // decomp: SLUS_010.40 func_800478E0 (src/SLUS_010.40/main.c:10990)
-void Render_RequestBackgroundGradientTransform(int arg0, int arg1, int arg2, int arg3, int arg4)
+void Render_RequestBackgroundGradientTransform(int mode, int duration, int red_offset, int green_offset, int blue_offset)
 {
     if (Render_paletteTransitionState.enabled != 0) {
-        Render_TransformBackgroundGradient(arg0, arg1, arg2, arg3, arg4);
+        Render_TransformBackgroundGradient(mode, duration, red_offset, green_offset, blue_offset);
     }
 }
 
 // decomp: SLUS_010.40 func_80047910 (src/SLUS_010.40/main.c:10997)
-void Render_SetModelTint(int arg0, int arg1, Render_ColorRgb8* arg2)
+void Render_SetModelTint(int duration, int tint_slot, Render_ColorRgb8* color)
 {
-    Render_ColorCode sp10;
-    Render_ModelColorFade* temp_t0;
-    int temp_a1;
-    int temp_t1;
-    int temp_t2;
+    Render_ColorCode tint_code;
+    Render_ModelColorFade* fade_state;
+    int red_fixed;
+    int green_fixed;
+    int blue_fixed;
     int v0;
-    int* temp_a3;
+    int* color_components_fixed;
 
     if (Render_paletteTransitionState.enabled == 0) {
         return;
     }
 
-    temp_t0 = &Render_paletteTransitionState.modelColorFades[arg1];
-    temp_a3 = Render_paletteTransitionState.modelColorFades[arg1].colorFixed;
-    temp_a1 = Render_ToFixed16(arg2->red);
-    temp_t1 = Render_ToFixed16(arg2->green);
-    temp_t2 = Render_ToFixed16(arg2->blue);
+    fade_state = &Render_paletteTransitionState.modelColorFades[tint_slot];
+    color_components_fixed = Render_paletteTransitionState.modelColorFades[tint_slot].colorFixed;
+    red_fixed = Render_ToFixed16(color->red);
+    green_fixed = Render_ToFixed16(color->green);
+    blue_fixed = Render_ToFixed16(color->blue);
 
-    if (arg0 != 0) {
-        temp_a3[3] = ((int)(temp_a1 - (temp_a3[0] & 0xFFFF0000)) / (arg0 * 2));
-        temp_a3[4] = ((int)(temp_t1 - (temp_a3[1] & 0xFFFF0000)) / (arg0 * 2));
-        temp_a3[5] = ((int)(temp_t2 - (temp_a3[2] & 0xFFFF0000)) / (arg0 * 2));
+    if (duration != 0) {
+        color_components_fixed[3] = ((int)(red_fixed - (color_components_fixed[0] & 0xFFFF0000)) / (duration * 2));
+        color_components_fixed[4] = ((int)(green_fixed - (color_components_fixed[1] & 0xFFFF0000)) / (duration * 2));
+        color_components_fixed[5] = ((int)(blue_fixed - (color_components_fixed[2] & 0xFFFF0000)) / (duration * 2));
     } else {
-        temp_a3[0] = temp_a1;
-        temp_a3[1] = temp_t1;
-        temp_a3[2] = temp_t2;
+        color_components_fixed[0] = red_fixed;
+        color_components_fixed[1] = green_fixed;
+        color_components_fixed[2] = blue_fixed;
     }
-    if (arg0 != 0) {
-        temp_t0->progress[0] = 1;
-        temp_t0->progress[1] = 0;
-        temp_t0->progress[2] = 0;
-        temp_t0->progress[3] = arg0;
+    if (duration != 0) {
+        fade_state->progress[0] = 1;
+        fade_state->progress[1] = 0;
+        fade_state->progress[2] = 0;
+        fade_state->progress[3] = duration;
         return;
     }
 
-    temp_t0->progress[0] = 0;
-    sp10.red = (temp_a3[0] / 65536) - 64;
-    sp10.green = (temp_a3[1] / 65536) - 64;
-    sp10.blue = (temp_a3[2] / 65536) - 64;
-    sp10.code = 0;
+    fade_state->progress[0] = 0;
+    tint_code.red = (color_components_fixed[0] / 65536) - 64;
+    tint_code.green = (color_components_fixed[1] / 65536) - 64;
+    tint_code.blue = (color_components_fixed[2] / 65536) - 64;
+    tint_code.code = 0;
 
-    if (arg1 != 0) {
-        Actors_SetActorFadeParameters(arg1 - 1, &sp10);
+    if (tint_slot != 0) {
+        Actors_SetActorFadeParameters(tint_slot - 1, &tint_code);
     } else {
-        Field_SetRoomTint(&sp10, temp_t0->blendParams[3] >> 2);
+        Field_SetRoomTint(&tint_code, fade_state->blendParams[3] >> 2);
     }
 }
 
 // decomp: SLUS_010.40 func_80047AB4 (src/SLUS_010.40/main.c:11047)
-void Render_SetModelTintBase(int arg0, int arg1, Render_ColorRgb8* arg2)
+void Render_SetModelTintBase(int duration, int tint_slot, Render_ColorRgb8* color)
 {
     if (Render_paletteTransitionState.enabled != 0) {
-        Render_SetModelTint(arg0, arg1, arg2);
-        Render_paletteTransitionState.modelColorFades[arg1].baseColor = *arg2;
+        Render_SetModelTint(duration, tint_slot, color);
+        Render_paletteTransitionState.modelColorFades[tint_slot].baseColor = *color;
     }
 }
 
 // decomp: SLUS_010.40 func_80047B30 (src/SLUS_010.40/main.c:11055)
-void Render_TransformModelTint(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5)
+void Render_TransformModelTint(int mode, int duration, int tint_slot, int red_offset, int green_offset, int blue_offset)
 {
-    Render_ColorCode sp10;
-    short var_t4;
-    int var_a1;
-    int var_a2;
-    int var_t0;
-    int var_v0;
-    int var_v1;
-    Render_ModelColorFade* t1 = &Render_paletteTransitionState.modelColorFades[arg2];
-    int* t2 = t1->colorFixed;
+    Render_ColorCode tint_code;
+    short blend_target;
+    int red_target_fixed;
+    int blue_target_or_green_fixed;
+    int green_target_fixed;
+    int channel_value;
+    int luminance_or_rounding_fixed;
+    Render_ModelColorFade* fade_state = &Render_paletteTransitionState.modelColorFades[tint_slot];
+    int* color_components_fixed = fade_state->colorFixed;
 
-    var_t4 = 0;
-    switch (arg0) {
+    blend_target = 0;
+    switch (mode) {
     case 1:
-        var_a1 = (t2[0] / 2) + (arg3 << 16);
-        var_t0 = (t2[1] / 2) + (arg4 << 16);
-        var_a2 = (t2[2] / 2) + (arg5 << 16);
+        red_target_fixed = (color_components_fixed[0] / 2) + (red_offset << 16);
+        green_target_fixed = (color_components_fixed[1] / 2) + (green_offset << 16);
+        blue_target_or_green_fixed = (color_components_fixed[2] / 2) + (blue_offset << 16);
         break;
     case 2:
-        var_t4 = 0x4000;
-        var_a1 = ((t2[0] * 2) + (t2[1] * 3) + t2[2]) / 6 + (arg3 << 0x10);
-        var_t0 = ((t2[0] * 2) + (t2[1] * 3) + t2[2]) / 6 + (arg4 << 0x10);
-        var_a2 = ((t2[0] * 2) + (t2[1] * 3) + t2[2]) / 6 + (arg5 << 0x10);
+        blend_target = 0x4000;
+        red_target_fixed = ((color_components_fixed[0] * 2) + (color_components_fixed[1] * 3) + color_components_fixed[2]) / 6 + (red_offset << 0x10);
+        green_target_fixed = ((color_components_fixed[0] * 2) + (color_components_fixed[1] * 3) + color_components_fixed[2]) / 6 + (green_offset << 0x10);
+        blue_target_or_green_fixed = ((color_components_fixed[0] * 2) + (color_components_fixed[1] * 3) + color_components_fixed[2]) / 6 + (blue_offset << 0x10);
         break;
     case 3:
-        var_t4 = 0x4000;
-        var_v1 = ((t2[0] * 2) + (t2[1] * 3) + t2[2]) / 12;
-        var_a1 = var_v1 + (arg3 << 0x10);
-        var_t0 = var_v1 + (arg4 << 0x10);
-        var_a2 = var_v1 + (arg5 << 0x10);
+        blend_target = 0x4000;
+        luminance_or_rounding_fixed = ((color_components_fixed[0] * 2) + (color_components_fixed[1] * 3) + color_components_fixed[2]) / 12;
+        red_target_fixed = luminance_or_rounding_fixed + (red_offset << 0x10);
+        green_target_fixed = luminance_or_rounding_fixed + (green_offset << 0x10);
+        blue_target_or_green_fixed = luminance_or_rounding_fixed + (blue_offset << 0x10);
         break;
     case 4:
     case 9:
-        var_a1 = (t1->baseColor.red + arg3) << 0x10;
-        var_t0 = (t1->baseColor.green + arg4) << 0x10;
-        var_a2 = (t1->baseColor.blue + arg5) << 0x10;
+        red_target_fixed = (fade_state->baseColor.red + red_offset) << 0x10;
+        green_target_fixed = (fade_state->baseColor.green + green_offset) << 0x10;
+        blue_target_or_green_fixed = (fade_state->baseColor.blue + blue_offset) << 0x10;
         break;
     case 5:
-        var_t4 = 0x4000;
-        var_a1 = (t1->baseColor.red << 0xF) + (arg3 << 0x10);
-        var_t0 = (t1->baseColor.green << 0xF) + (arg4 << 0x10);
-        var_a2 = (t1->baseColor.blue << 0xF) + (arg5 << 0x10);
+        blend_target = 0x4000;
+        red_target_fixed = (fade_state->baseColor.red << 0xF) + (red_offset << 0x10);
+        green_target_fixed = (fade_state->baseColor.green << 0xF) + (green_offset << 0x10);
+        blue_target_or_green_fixed = (fade_state->baseColor.blue << 0xF) + (blue_offset << 0x10);
         break;
     case 6:
-        var_t4 = 0x4000;
+        blend_target = 0x4000;
         {
-            int v1 = t1->baseColor.green;
-            int a0 = t1->baseColor.blue;
-            int v0 = t1->baseColor.red;
-            var_a2 = v1 << 0x10;
-            a0 <<= 0x10;
-            v0 <<= 0x11;
-            v1 <<= 0x11;
-            v0 += v1 + var_a2;
-            v0 += a0;
-            var_a1 = v0 / 6 + (arg3 << 0x10);
-            var_t0 = v0 / 6 + (arg4 << 0x10);
-            var_a2 = v0 / 6 + (arg5 << 0x10);
+            int base_green_work = fade_state->baseColor.green;
+            int base_blue_work = fade_state->baseColor.blue;
+            int base_luminance_work = fade_state->baseColor.red;
+            blue_target_or_green_fixed = base_green_work << 0x10;
+            base_blue_work <<= 0x10;
+            base_luminance_work <<= 0x11;
+            base_green_work <<= 0x11;
+            base_luminance_work += base_green_work + blue_target_or_green_fixed;
+            base_luminance_work += base_blue_work;
+            red_target_fixed = base_luminance_work / 6 + (red_offset << 0x10);
+            green_target_fixed = base_luminance_work / 6 + (green_offset << 0x10);
+            blue_target_or_green_fixed = base_luminance_work / 6 + (blue_offset << 0x10);
         }
         break;
     case 7:
-        var_t4 = 0x4000;
+        blend_target = 0x4000;
         {
-            int v1 = t1->baseColor.green;
-            int a0 = t1->baseColor.blue;
-            int v0 = t1->baseColor.red;
-            var_a2 = v1 << 0x10;
-            a0 <<= 0x10;
-            v0 <<= 0x11;
-            v1 <<= 0x11;
-            v0 += v1 + var_a2;
-            v0 += a0;
-            var_a1 = v0 / 12 + (arg3 << 0x10);
-            var_t0 = v0 / 12 + (arg4 << 0x10);
-            var_a2 = v0 / 12 + (arg5 << 0x10);
+            int base_green_work = fade_state->baseColor.green;
+            int base_blue_work = fade_state->baseColor.blue;
+            int base_luminance_work = fade_state->baseColor.red;
+            blue_target_or_green_fixed = base_green_work << 0x10;
+            base_blue_work <<= 0x10;
+            base_luminance_work <<= 0x11;
+            base_green_work <<= 0x11;
+            base_luminance_work += base_green_work + blue_target_or_green_fixed;
+            base_luminance_work += base_blue_work;
+            red_target_fixed = base_luminance_work / 12 + (red_offset << 0x10);
+            green_target_fixed = base_luminance_work / 12 + (green_offset << 0x10);
+            blue_target_or_green_fixed = base_luminance_work / 12 + (blue_offset << 0x10);
         }
         break;
     case 8:
     case 15:
-        var_a1 = t1->baseColor.red << 0x10;
-        var_t0 = t1->baseColor.green << 0x10;
-        var_a2 = t1->baseColor.blue << 0x10;
+        red_target_fixed = fade_state->baseColor.red << 0x10;
+        green_target_fixed = fade_state->baseColor.green << 0x10;
+        blue_target_or_green_fixed = fade_state->baseColor.blue << 0x10;
         break;
     case 11:
-        t1->progress[4] = 0;
+        fade_state->progress[4] = 0;
         return;
     default:
-        var_a1 = t2[0] + (arg3 << 0x10);
-        var_t0 = t2[1] + (arg4 << 0x10);
-        var_a2 = t2[2] + (arg5 << 0x10);
+        red_target_fixed = color_components_fixed[0] + (red_offset << 0x10);
+        green_target_fixed = color_components_fixed[1] + (green_offset << 0x10);
+        blue_target_or_green_fixed = color_components_fixed[2] + (blue_offset << 0x10);
         break;
     }
-    var_a1 = var_a1 & 0xFFFF0000;
-    var_t0 = var_t0 & 0xFFFF0000;
-    var_a2 = var_a2 & 0xFFFF0000;
+    red_target_fixed = red_target_fixed & 0xFFFF0000;
+    green_target_fixed = green_target_fixed & 0xFFFF0000;
+    blue_target_or_green_fixed = blue_target_or_green_fixed & 0xFFFF0000;
 
-    if (var_a1 > 0x800000) {
-        var_a1 = 0x800000;
+    if (red_target_fixed > 0x800000) {
+        red_target_fixed = 0x800000;
     }
-    if (var_t0 > 0x800000) {
-        var_t0 = 0x800000;
+    if (green_target_fixed > 0x800000) {
+        green_target_fixed = 0x800000;
     }
-    if (var_a2 > 0x800000) {
-        var_a2 = 0x800000;
+    if (blue_target_or_green_fixed > 0x800000) {
+        blue_target_or_green_fixed = 0x800000;
     }
-    if (var_a1 < 0) {
-        var_a1 = 0;
+    if (red_target_fixed < 0) {
+        red_target_fixed = 0;
     }
-    if (var_t0 < 0) {
-        var_t0 = 0;
+    if (green_target_fixed < 0) {
+        green_target_fixed = 0;
     }
-    if (var_a2 < 0) {
-        var_a2 = 0;
+    if (blue_target_or_green_fixed < 0) {
+        blue_target_or_green_fixed = 0;
     }
-    if (arg1 != 0) {
-        t2[3] = ((int)(var_a1 - (t2[0] & 0xFFFF0000)) / (arg1 * 2));
-        t2[4] = ((int)(var_t0 - (t2[1] & 0xFFFF0000)) / (arg1 * 2));
-        t2[5] = ((int)(var_a2 - (t2[2] & 0xFFFF0000)) / (arg1 * 2));
-        t1->blendParams[4] = ((var_t4 - t1->blendParams[3]) / (arg1 * 2));
+    if (duration != 0) {
+        color_components_fixed[3] = ((int)(red_target_fixed - (color_components_fixed[0] & 0xFFFF0000)) / (duration * 2));
+        color_components_fixed[4] = ((int)(green_target_fixed - (color_components_fixed[1] & 0xFFFF0000)) / (duration * 2));
+        color_components_fixed[5] = ((int)(blue_target_or_green_fixed - (color_components_fixed[2] & 0xFFFF0000)) / (duration * 2));
+        fade_state->blendParams[4] = ((blend_target - fade_state->blendParams[3]) / (duration * 2));
     } else {
-        t2[0] = var_a1;
-        t2[1] = var_t0;
-        t2[2] = var_a2;
-        t1->blendParams[3] = var_t4;
+        color_components_fixed[0] = red_target_fixed;
+        color_components_fixed[1] = green_target_fixed;
+        color_components_fixed[2] = blue_target_or_green_fixed;
+        fade_state->blendParams[3] = blend_target;
     }
-    var_v0 = 1;
-    if (arg1 != 0) {
-        t1->progress[0] = 1;
-        t1->progress[1] = 0;
-        t1->progress[2] = 0;
-        t1->progress[3] = arg1;
-        t1->progress[4] = arg0;
-        if (arg0 == 9) {
-            t1->blendParams[0] = arg3;
-            t1->blendParams[1] = arg4;
-            t1->blendParams[2] = arg5;
+    channel_value = 1;
+    if (duration != 0) {
+        fade_state->progress[0] = 1;
+        fade_state->progress[1] = 0;
+        fade_state->progress[2] = 0;
+        fade_state->progress[3] = duration;
+        fade_state->progress[4] = mode;
+        if (mode == 9) {
+            fade_state->blendParams[0] = red_offset;
+            fade_state->blendParams[1] = green_offset;
+            fade_state->blendParams[2] = blue_offset;
         }
     } else {
-        t1->progress[0] = 0;
-        var_v0 = t2[0] >> 0x10;
-        if (t2[0] < 0) {
-            var_v1 = t2[0] + 0xFFFF;
-            var_v0 = var_v1 >> 0x10;
+        fade_state->progress[0] = 0;
+        channel_value = color_components_fixed[0] >> 0x10;
+        if (color_components_fixed[0] < 0) {
+            luminance_or_rounding_fixed = color_components_fixed[0] + 0xFFFF;
+            channel_value = luminance_or_rounding_fixed >> 0x10;
         }
-        sp10.red = var_v0 - 0x40;
-        var_v0 = t2[1] >> 0x10;
-        if (t2[1] < 0) {
-            var_v1 = t2[1] + 0xFFFF;
-            var_v0 = var_v1 >> 0x10;
+        tint_code.red = channel_value - 0x40;
+        channel_value = color_components_fixed[1] >> 0x10;
+        if (color_components_fixed[1] < 0) {
+            luminance_or_rounding_fixed = color_components_fixed[1] + 0xFFFF;
+            channel_value = luminance_or_rounding_fixed >> 0x10;
         }
-        sp10.green = var_v0 - 0x40;
-        var_v0 = t2[2] >> 0x10;
-        if (t2[2] < 0) {
-            var_v1 = t2[2] + 0xFFFF;
-            var_v0 = var_v1 >> 0x10;
+        tint_code.green = channel_value - 0x40;
+        channel_value = color_components_fixed[2] >> 0x10;
+        if (color_components_fixed[2] < 0) {
+            luminance_or_rounding_fixed = color_components_fixed[2] + 0xFFFF;
+            channel_value = luminance_or_rounding_fixed >> 0x10;
         }
-        sp10.blue = var_v0 - 0x40;
-        sp10.code = 0;
-        if (arg2 != 0) {
-            Actors_SetActorFadeParameters(arg2 - 1, &sp10);
+        tint_code.blue = channel_value - 0x40;
+        tint_code.code = 0;
+        if (tint_slot != 0) {
+            Actors_SetActorFadeParameters(tint_slot - 1, &tint_code);
         } else {
-            Field_SetRoomTint(&sp10, ((u_short)t1->blendParams[3] << 0x10) >> 0x12);
+            Field_SetRoomTint(&tint_code, ((u_short)fade_state->blendParams[3] << 0x10) >> 0x12);
         }
     }
 }
 
 // decomp: SLUS_010.40 func_80047FC0 (src/SLUS_010.40/main.c:11222)
-void Render_RequestModelTintTransform(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5)
+void Render_RequestModelTintTransform(int mode, int duration, int tint_slot, int red_offset, int green_offset, int blue_offset)
 {
     if (Render_paletteTransitionState.enabled != 0) {
-        Render_TransformModelTint(arg0, arg1, arg2, arg3, arg4, arg5);
+        Render_TransformModelTint(mode, duration, tint_slot, red_offset, green_offset, blue_offset);
     }
 }
 
 // decomp: SLUS_010.40 func_80047FFC (src/SLUS_010.40/main.c:11229)
 void Render_UpdateBackgroundGradientTransition(void)
 {
-    int sp18[5];
+    int packed_colors[5];
     int i;
-    int var_v0;
-    int new_var;
-    int new_var2;
-    int var_v1;
-    int (*t1)[6];
+    int rounded_green_fixed;
+    int packed_red_green;
+    int red_byte;
+    int rounded_red_or_blue_fixed;
+    int (*color_components_fixed)[6];
 
     if (Render_paletteTransitionState.backgroundFadeActive == 0) {
         return;
     }
 
-    t1 = Render_paletteTransitionState.backgroundColorsFixed;
+    color_components_fixed = Render_paletteTransitionState.backgroundColorsFixed;
 
     for (i = 0; i < 5; ++i) {
-        t1[i][0] += t1[i][3];
-        t1[i][1] += t1[i][4];
-        t1[i][2] += t1[i][5];
+        color_components_fixed[i][0] += color_components_fixed[i][3];
+        color_components_fixed[i][1] += color_components_fixed[i][4];
+        color_components_fixed[i][2] += color_components_fixed[i][5];
     }
 
     for (i = 0; i < 5; ++i) {
-        var_v1 = t1[i][0];
-        if (var_v1 < 0) {
-            var_v1 += 0xFFFF;
+        rounded_red_or_blue_fixed = color_components_fixed[i][0];
+        if (rounded_red_or_blue_fixed < 0) {
+            rounded_red_or_blue_fixed += 0xFFFF;
         }
-        var_v0 = t1[i][1];
-        new_var2 = var_v1 >> 16;
-        if (var_v0 < 0) {
-            var_v0 += 0xFFFF;
+        rounded_green_fixed = color_components_fixed[i][1];
+        red_byte = rounded_red_or_blue_fixed >> 16;
+        if (rounded_green_fixed < 0) {
+            rounded_green_fixed += 0xFFFF;
         }
-        var_v1 = t1[i][2];
-        new_var = new_var2 + ((var_v0 >> 16) << 8);
-        if (var_v1 < 0) {
-            var_v1 += 0xFFFF;
+        rounded_red_or_blue_fixed = color_components_fixed[i][2];
+        packed_red_green = red_byte + ((rounded_green_fixed >> 16) << 8);
+        if (rounded_red_or_blue_fixed < 0) {
+            rounded_red_or_blue_fixed += 0xFFFF;
         }
-        sp18[i] = new_var + ((var_v1 >> 16) << 16);
+        packed_colors[i] = packed_red_green + ((rounded_red_or_blue_fixed >> 16) << 16);
     }
-    Field_SetRoomBackgroundColors(sp18);
+    Field_SetRoomBackgroundColors(packed_colors);
     Render_paletteTransitionState.backgroundFadeFrame += 1;
     if (Render_paletteTransitionState.backgroundFadeFrame >= (Render_paletteTransitionState.backgroundFadeSpeed * 2)) {
         if (Render_paletteTransitionState.backgroundFadeMode == 9) {
@@ -1162,40 +1162,40 @@ void Render_UpdateBackgroundGradientTransition(void)
 // decomp: SLUS_010.40 func_800481C0 (src/SLUS_010.40/main.c:11287)
 void Render_UpdateModelColorTransitions(void)
 {
-    Render_ColorCode sp18;
+    Render_ColorCode tint_code;
     int i;
-    int var_v0;
+    int rounded_channel_fixed;
     Render_ModelColorFade* p = Render_paletteTransitionState.modelColorFades;
 
     for (i = 0; i < 17; ++i) {
-        int* a2 = p[i].colorFixed;
+        int* color_components_fixed = p[i].colorFixed;
         if (p[i].progress[0] != 0) {
-            a2[0] += a2[3];
-            a2[1] += a2[4];
-            a2[2] += a2[5];
+            color_components_fixed[0] += color_components_fixed[3];
+            color_components_fixed[1] += color_components_fixed[4];
+            color_components_fixed[2] += color_components_fixed[5];
 
-            var_v0 = a2[0];
-            if (var_v0 < 0) {
-                var_v0 += 0xFFFF;
+            rounded_channel_fixed = color_components_fixed[0];
+            if (rounded_channel_fixed < 0) {
+                rounded_channel_fixed += 0xFFFF;
             }
-            sp18.red = (var_v0 >> 16) - 0x40;
-            var_v0 = a2[1];
-            if (var_v0 < 0) {
-                var_v0 += 0xFFFF;
+            tint_code.red = (rounded_channel_fixed >> 16) - 0x40;
+            rounded_channel_fixed = color_components_fixed[1];
+            if (rounded_channel_fixed < 0) {
+                rounded_channel_fixed += 0xFFFF;
             }
-            sp18.green = (var_v0 >> 16) - 0x40;
-            var_v0 = a2[2];
-            if (var_v0 < 0) {
-                var_v0 += 0xFFFF;
+            tint_code.green = (rounded_channel_fixed >> 16) - 0x40;
+            rounded_channel_fixed = color_components_fixed[2];
+            if (rounded_channel_fixed < 0) {
+                rounded_channel_fixed += 0xFFFF;
             }
-            sp18.blue = (var_v0 >> 16) - 0x40;
-            sp18.code = 0;
+            tint_code.blue = (rounded_channel_fixed >> 16) - 0x40;
+            tint_code.code = 0;
 
             if (i != 0) {
-                Actors_SetActorFadeParameters(i - 1, &sp18);
+                Actors_SetActorFadeParameters(i - 1, &tint_code);
             } else {
                 p[0].blendParams[3] += p[0].blendParams[4];
-                Field_SetRoomTint(&sp18, p[0].blendParams[3] >> 2);
+                Field_SetRoomTint(&tint_code, p[0].blendParams[3] >> 2);
             }
             ++p[i].progress[1];
             if (p[i].progress[1] >= (p[i].progress[3] * 2)) {
@@ -1223,7 +1223,7 @@ void Render_UpdateClutTransitions(void)
 {
     int i;
     int j;
-    u_int var_t5;
+    u_int frame_divisor;
     u_short g;
     u_short r;
     u_short b;
@@ -1240,7 +1240,7 @@ void Render_UpdateClutTransitions(void)
             Render_paletteTransitionState.slots[i].transition.tick = 0;
 
             if (Render_paletteTransitionState.slots[i].transition.speed >= 8) {
-                var_t5 = 1;
+                frame_divisor = 1;
                 c = Render_paletteTransitionState.slots[i].transition.frame;
                 index = Render_paletteTransitionState.slots[i].entries;
                 for (j = 0; j < 256; ++j) {
@@ -1259,7 +1259,7 @@ void Render_UpdateClutTransitions(void)
                     Render_paletteColors[i][j] = r + (g << 5) + (b << 10) + (index[j].maskBit << 15);
                 }
             } else if (Render_paletteTransitionState.slots[i].transition.speed >= 4) {
-                var_t5 = 2;
+                frame_divisor = 2;
                 c = Render_paletteTransitionState.slots[i].transition.frame;
                 index = Render_paletteTransitionState.slots[i].entries;
                 for (j = 0; j < 256; ++j) {
@@ -1278,7 +1278,7 @@ void Render_UpdateClutTransitions(void)
                     Render_paletteColors[i][j] = r + (g << 5) + (b << 10) + (index[j].maskBit << 15);
                 }
             } else if (Render_paletteTransitionState.slots[i].transition.speed >= 2) {
-                var_t5 = 4;
+                frame_divisor = 4;
                 c = Render_paletteTransitionState.slots[i].transition.frame;
                 index = Render_paletteTransitionState.slots[i].entries;
                 for (j = 0; j < 256; ++j) {
@@ -1297,7 +1297,7 @@ void Render_UpdateClutTransitions(void)
                     Render_paletteColors[i][j] = r + (g << 5) + (b << 10) + (index[j].maskBit << 15);
                 }
             } else {
-                var_t5 = 8;
+                frame_divisor = 8;
                 c = Render_paletteTransitionState.slots[i].transition.frame;
                 index = Render_paletteTransitionState.slots[i].entries;
                 for (j = 0; j < 256; ++j) {
@@ -1316,7 +1316,7 @@ void Render_UpdateClutTransitions(void)
                     Render_paletteColors[i][j] = r + (g << 5) + (b << 10) + (index[j].maskBit << 15);
                 }
             }
-            if (++Render_paletteTransitionState.slots[i].transition.frame >= (16 / var_t5)) {
+            if (++Render_paletteTransitionState.slots[i].transition.frame >= (16 / frame_divisor)) {
                 if (Render_paletteTransitionState.slots[i].transition.mode == 9) {
                     Render_ApplyClutSlotTransform(4, Render_paletteTransitionState.slots[i].transition.speed, i,
                         Render_paletteTransitionState.slots[i].transition.pulseRed / 2,
@@ -1343,7 +1343,7 @@ void Render_UpdateClutTransitions(void)
 }
 
 // decomp: SLUS_010.40 func_80048A3C (src/SLUS_010.40/main.c:11468)
-void Render_StopClutTransition(int arg0) { Render_paletteTransitionState.slots[arg0].transition.active = 0; }
+void Render_StopClutTransition(int slot) { Render_paletteTransitionState.slots[slot].transition.active = 0; }
 
 // decomp: SLUS_010.40 vs_main_loadClut (src/SLUS_010.40/main.c:11470)
 void Render_LoadClutColors(u_short const* img, u_int slot, u_int colorOffset, u_int count)
@@ -1377,12 +1377,12 @@ void Render_LoadClutColors(u_short const* img, u_int slot, u_int colorOffset, u_
 
 // decomp: SLUS_010.40 func_80048B8C (src/SLUS_010.40/main.c:11499)
 void Render_TransformClutBase(int mode, u_short* srcClut, int slot, short rOffset, short gOffset,
-    short bOffset, int arg6)
+    short bOffset, int update_current_colors)
 {
     int i;
-    int new_var;
-    int new_var2;
-    int new_var3;
+    int source_red;
+    int source_green;
+    int source_blue;
     short r;
     short g;
     short b;
@@ -1400,21 +1400,21 @@ void Render_TransformClutBase(int mode, u_short* srcClut, int slot, short rOffse
                 break;
 
             case 6:
-                new_var = value & 0x1F;
-                new_var2 = (value & 0x3E0) >> 5;
-                new_var3 = (value & 0x7C00) >> 10;
-                r = rOffset + ((new_var * 2) + (new_var2 * 3) + new_var3) / 6;
-                g = gOffset + ((new_var * 2) + (new_var2 * 3) + new_var3) / 6;
-                b = bOffset + ((new_var * 2) + (new_var2 * 3) + new_var3) / 6;
+                source_red = value & 0x1F;
+                source_green = (value & 0x3E0) >> 5;
+                source_blue = (value & 0x7C00) >> 10;
+                r = rOffset + ((source_red * 2) + (source_green * 3) + source_blue) / 6;
+                g = gOffset + ((source_red * 2) + (source_green * 3) + source_blue) / 6;
+                b = bOffset + ((source_red * 2) + (source_green * 3) + source_blue) / 6;
                 break;
 
             case 7:
-                new_var = value & 0x1F;
-                new_var2 = (value & 0x3E0) >> 5;
-                new_var3 = (value & 0x7C00) >> 10;
-                r = rOffset + ((new_var * 2) + (new_var2 * 3) + new_var3) / 12;
-                g = gOffset + ((new_var * 2) + (new_var2 * 3) + new_var3) / 12;
-                b = bOffset + ((new_var * 2) + (new_var2 * 3) + new_var3) / 12;
+                source_red = value & 0x1F;
+                source_green = (value & 0x3E0) >> 5;
+                source_blue = (value & 0x7C00) >> 10;
+                r = rOffset + ((source_red * 2) + (source_green * 3) + source_blue) / 12;
+                g = gOffset + ((source_red * 2) + (source_green * 3) + source_blue) / 12;
+                b = bOffset + ((source_red * 2) + (source_green * 3) + source_blue) / 12;
                 break;
 
             case 0:
@@ -1457,7 +1457,7 @@ void Render_TransformClutBase(int mode, u_short* srcClut, int slot, short rOffse
             b = 1;
         }
 
-        if (arg6 != 0) {
+        if (update_current_colors != 0) {
             Render_paletteColors[slot][i] = r + (g << 5) + (b << 10) + (stp << 15);
 
             if (Render_paletteTransitionState.slots[slot].transition.active == 0) {
@@ -1477,9 +1477,9 @@ void Render_TransformClutBase(int mode, u_short* srcClut, int slot, short rOffse
 
 // decomp: SLUS_010.40 func_80048E68 (src/SLUS_010.40/main.c:11598)
 void Render_OffsetClutBase(u_short* srcClut, int slot, u_short rOffset, u_short gOffset,
-    u_short bOffset, int arg5)
+    u_short bOffset, int update_current_colors)
 {
-    Render_TransformClutBase(8, srcClut, slot, rOffset, gOffset, bOffset, arg5);
+    Render_TransformClutBase(8, srcClut, slot, rOffset, gOffset, bOffset, update_current_colors);
 }
 
 // decomp: SLUS_010.40 func_80048EC4 (src/SLUS_010.40/main.c:11604)
@@ -1487,16 +1487,16 @@ void Render_CaptureRoomBackgroundColors(void)
 {
     int i;
     int (*bgColors)[6] = Render_paletteTransitionState.backgroundColorsFixed;
-    int* var_v1 = Field_RoomBackgroundColors();
+    int* packed_room_colors = Field_RoomBackgroundColors();
 
     for (i = 0; i < 5; ++i) {
-        Render_paletteTransitionState.backgroundBaseColors[i].red = var_v1[i];
-        Render_paletteTransitionState.backgroundBaseColors[i].green = (var_v1[i] & 0xFF00) / 256;
-        Render_paletteTransitionState.backgroundBaseColors[i].blue = (var_v1[i] & 0xFF0000) / 65536;
+        Render_paletteTransitionState.backgroundBaseColors[i].red = packed_room_colors[i];
+        Render_paletteTransitionState.backgroundBaseColors[i].green = (packed_room_colors[i] & 0xFF00) / 256;
+        Render_paletteTransitionState.backgroundBaseColors[i].blue = (packed_room_colors[i] & 0xFF0000) / 65536;
 
-        bgColors[i][0] = (var_v1[i] & 0xFF) << 16;
-        bgColors[i][1] = (var_v1[i] & 0xFF00) << 8;
-        bgColors[i][2] = var_v1[i] & 0xFF0000;
+        bgColors[i][0] = (packed_room_colors[i] & 0xFF) << 16;
+        bgColors[i][1] = (packed_room_colors[i] & 0xFF00) << 8;
+        bgColors[i][2] = packed_room_colors[i] & 0xFF0000;
     }
 }
 

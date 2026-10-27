@@ -42,13 +42,13 @@ void Render_ParseTimImage(u_int* data, TIM_IMAGE* tim)
 }
 
 // decomp: MENU7.PRG _renderImage (src/MENU/MENU7.PRG/260.c:199)
-void Render_UploadPackedRectangle(int xy, void* arg1, int wh)
+void Render_UploadPackedRectangle(int xy, void* pixels, int wh)
 {
     RECT rect;
 
     *(int*)&rect.x = xy;
     *(int*)&rect.w = wh;
-    LoadImage(&rect, arg1);
+    LoadImage(&rect, pixels);
 }
 
 // decomp: MENU7.PRG _readImage (src/MENU/MENU7.PRG/260.c:212)
@@ -188,15 +188,15 @@ void Render_DrawTextureFlashFade(int x, int y, int texId, CVECTOR colors[])
             setRGB2(poly, 224, 224, 224);
             setRGB3(poly, 224, 224, 224);
         } else if (colors[0].cd < 14) {
-            int temp_a0 = colors[0].cd - 10;
-            setRGB0(poly, Render_BlendFlashComponent(colors[0].r, temp_a0), Render_BlendFlashComponent(colors[0].g, temp_a0),
-                Render_BlendFlashComponent(colors[0].b, temp_a0));
-            setRGB1(poly, Render_BlendFlashComponent(colors[1].r, temp_a0), Render_BlendFlashComponent(colors[1].g, temp_a0),
-                Render_BlendFlashComponent(colors[1].b, temp_a0));
-            setRGB2(poly, Render_BlendFlashComponent(colors[0].r, temp_a0), Render_BlendFlashComponent(colors[0].g, temp_a0),
-                Render_BlendFlashComponent(colors[0].b, temp_a0));
-            setRGB3(poly, Render_BlendFlashComponent(colors[1].r, temp_a0), Render_BlendFlashComponent(colors[1].g, temp_a0),
-                Render_BlendFlashComponent(colors[1].b, temp_a0));
+            int flash_blend_weight = colors[0].cd - 10;
+            setRGB0(poly, Render_BlendFlashComponent(colors[0].r, flash_blend_weight), Render_BlendFlashComponent(colors[0].g, flash_blend_weight),
+                Render_BlendFlashComponent(colors[0].b, flash_blend_weight));
+            setRGB1(poly, Render_BlendFlashComponent(colors[1].r, flash_blend_weight), Render_BlendFlashComponent(colors[1].g, flash_blend_weight),
+                Render_BlendFlashComponent(colors[1].b, flash_blend_weight));
+            setRGB2(poly, Render_BlendFlashComponent(colors[0].r, flash_blend_weight), Render_BlendFlashComponent(colors[0].g, flash_blend_weight),
+                Render_BlendFlashComponent(colors[0].b, flash_blend_weight));
+            setRGB3(poly, Render_BlendFlashComponent(colors[1].r, flash_blend_weight), Render_BlendFlashComponent(colors[1].g, flash_blend_weight),
+                Render_BlendFlashComponent(colors[1].b, flash_blend_weight));
         } else {
             setRGB0(poly, colors[0].r, colors[0].g, colors[0].b);
             setRGB1(poly, colors[1].r, colors[1].g, colors[1].b);
@@ -223,16 +223,16 @@ void Render_DrawTextureFlashFade(int x, int y, int texId, CVECTOR colors[])
 }
 
 // decomp: renderTextures.h _renderTextureWipe (src/renderTextures.h:130)
-void Render_DrawTextureWipe(int x, int y, int texId, CVECTOR arg3[], int arg4)
+void Render_DrawTextureWipe(int x, int y, int texId, CVECTOR colors[], int wipe_edge_x)
 {
-    int temp_a1;
-    int var_a0;
+    int strip_right_x;
+    int strip_width_or_fade_weight;
     int i;
-    char var_s6;
+    char texture_u;
     POLY_GT4* poly;
     void** scratch;
 
-    if ((x + Ending_resultAtlasRegions[texId].w) < (arg4 - 64)) {
+    if ((x + Ending_resultAtlasRegions[texId].w) < (wipe_edge_x - 64)) {
 
         scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
         poly = scratch[0];
@@ -244,10 +244,10 @@ void Render_DrawTextureWipe(int x, int y, int texId, CVECTOR arg3[], int arg4)
             Ending_resultAtlasRegions[texId].x + Ending_resultAtlasRegions[texId].w, Ending_resultAtlasRegions[texId].y, Ending_resultAtlasRegions[texId].x,
             Ending_resultAtlasRegions[texId].y + Ending_resultAtlasRegions[texId].h, Ending_resultAtlasRegions[texId].x + Ending_resultAtlasRegions[texId].w,
             Ending_resultAtlasRegions[texId].y + Ending_resultAtlasRegions[texId].h);
-        setRGB0(poly, arg3[0].r, arg3[0].g, arg3[0].b);
-        setRGB1(poly, arg3[1].r, arg3[1].g, arg3[1].b);
-        setRGB2(poly, arg3[0].r, arg3[0].g, arg3[0].b);
-        setRGB3(poly, arg3[1].r, arg3[1].g, arg3[1].b);
+        setRGB0(poly, colors[0].r, colors[0].g, colors[0].b);
+        setRGB1(poly, colors[1].r, colors[1].g, colors[1].b);
+        setRGB2(poly, colors[0].r, colors[0].g, colors[0].b);
+        setRGB3(poly, colors[1].r, colors[1].g, colors[1].b);
         setSemiTrans(poly, 1);
 
         poly->clut = Ending_resultAtlasRegions[texId].clut;
@@ -261,57 +261,57 @@ void Render_DrawTextureWipe(int x, int y, int texId, CVECTOR arg3[], int arg4)
         return;
     }
 
-    if (x < arg4) {
+    if (x < wipe_edge_x) {
 
         scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
         poly = scratch[0];
-        var_s6 = Ending_resultAtlasRegions[texId].x;
+        texture_u = Ending_resultAtlasRegions[texId].x;
 
-        for (i = 0; i < Ending_resultAtlasRegions[texId].w; i += 12, x += 12, var_s6 += 12) {
+        for (i = 0; i < Ending_resultAtlasRegions[texId].w; i += 12, x += 12, texture_u += 12) {
 
-            var_a0 = 12;
+            strip_width_or_fade_weight = 12;
 
             if ((i + 12) >= Ending_resultAtlasRegions[texId].w) {
-                var_a0 = Ending_resultAtlasRegions[texId].w - i;
+                strip_width_or_fade_weight = Ending_resultAtlasRegions[texId].w - i;
             }
 
             setPolyGT4(poly);
-            temp_a1 = x + var_a0;
-            setXY4(poly, x, y, temp_a1, y, x, Ending_resultAtlasRegions[texId].h + y, temp_a1,
+            strip_right_x = x + strip_width_or_fade_weight;
+            setXY4(poly, x, y, strip_right_x, y, x, Ending_resultAtlasRegions[texId].h + y, strip_right_x,
                 Ending_resultAtlasRegions[texId].h + y);
-            setUV4(poly, var_s6, Ending_resultAtlasRegions[texId].y, var_s6 + var_a0, Ending_resultAtlasRegions[texId].y,
-                var_s6, Ending_resultAtlasRegions[texId].y + Ending_resultAtlasRegions[texId].h, var_s6 + var_a0,
+            setUV4(poly, texture_u, Ending_resultAtlasRegions[texId].y, texture_u + strip_width_or_fade_weight, Ending_resultAtlasRegions[texId].y,
+                texture_u, Ending_resultAtlasRegions[texId].y + Ending_resultAtlasRegions[texId].h, texture_u + strip_width_or_fade_weight,
                 Ending_resultAtlasRegions[texId].y + Ending_resultAtlasRegions[texId].h);
 
-            var_a0 = arg4 - x;
+            strip_width_or_fade_weight = wipe_edge_x - x;
 
-            if (var_a0 > 64) {
-                var_a0 = 64;
+            if (strip_width_or_fade_weight > 64) {
+                strip_width_or_fade_weight = 64;
             }
 
-            if (var_a0 < 0) {
-                var_a0 = 0;
+            if (strip_width_or_fade_weight < 0) {
+                strip_width_or_fade_weight = 0;
             }
 
-            setRGB0(poly, (arg3[0].r * var_a0) / 64, (arg3[0].g * var_a0) / 64,
-                (arg3[0].b * var_a0) / 64);
-            setRGB2(poly, (arg3[0].r * var_a0) / 64, (arg3[0].g * var_a0) / 64,
-                (arg3[0].b * var_a0) / 64);
+            setRGB0(poly, (colors[0].r * strip_width_or_fade_weight) / 64, (colors[0].g * strip_width_or_fade_weight) / 64,
+                (colors[0].b * strip_width_or_fade_weight) / 64);
+            setRGB2(poly, (colors[0].r * strip_width_or_fade_weight) / 64, (colors[0].g * strip_width_or_fade_weight) / 64,
+                (colors[0].b * strip_width_or_fade_weight) / 64);
 
-            var_a0 = arg4 - temp_a1;
+            strip_width_or_fade_weight = wipe_edge_x - strip_right_x;
 
-            if (var_a0 > 64) {
-                var_a0 = 64;
+            if (strip_width_or_fade_weight > 64) {
+                strip_width_or_fade_weight = 64;
             }
 
-            if (var_a0 < 0) {
-                var_a0 = 0;
+            if (strip_width_or_fade_weight < 0) {
+                strip_width_or_fade_weight = 0;
             }
 
-            setRGB1(poly, (arg3[1].r * var_a0) / 64, (arg3[1].g * var_a0) / 64,
-                (arg3[1].b * var_a0) / 64);
-            setRGB3(poly, (arg3[1].r * var_a0) / 64, (arg3[1].g * var_a0) / 64,
-                (arg3[1].b * var_a0) / 64);
+            setRGB1(poly, (colors[1].r * strip_width_or_fade_weight) / 64, (colors[1].g * strip_width_or_fade_weight) / 64,
+                (colors[1].b * strip_width_or_fade_weight) / 64);
+            setRGB3(poly, (colors[1].r * strip_width_or_fade_weight) / 64, (colors[1].g * strip_width_or_fade_weight) / 64,
+                (colors[1].b * strip_width_or_fade_weight) / 64);
 
             setSemiTrans(poly, 1);
 

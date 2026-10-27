@@ -1111,3 +1111,26 @@ all 28 inline bodies, all 430 generated template declarations, the separately
 verified macro change and all 121 unchanged owned paths across stable repeats.
 Evidence: `build\quality\issue148-effect-*`. These are naming/producer checks,
 not proof that every effect has been visually played or compatibility retired.
+
+The effect cohort is published in `a1eb0368`, exact green `40588814747`.
+The subsequent direct rendering review covers 67 ledger identities and applies
+188 parameter/local names in 62 physical definitions and 18 generated paths.
+Camera clipping/LOD, display setup, framebuffer effects, GIM/TIM transfer,
+texture reservation, font budgets, palette transitions and repeated block-local
+color calculations were checked against their original producers/consumers.
+Mixed numeric lifetimes keep explicit compound names. Unused arguments, the
+unconsumed framebuffer auxiliary parameter and the declaration-only tint local
+remain specifically justified in their existing function rows. No unrelated
+original framebuffer-getter or unused palette-call behavior is repaired.
+
+On dirty base `a1eb0368`, Debug/Release native test builds and
+`[render],[gte],[palette],[font],[texture] --reporter compact` pass
+150 cases/1,804,142 assertions each. An initial Debug selection also requested
+the nonexistent `[pagespace]` tag; it is not counted as coverage. All 152
+dirty-tree copier controls, 32 naming tests and focused tooling quality pass,
+with zero new findings and no baseline update. Exact code-identifier substitution
+checks cover all 742 manifest paths and 121 unchanged owned paths; both complete
+generation runs are identical. The alias for the packed-rectangle uploader has
+separate original provenance, not a second application of its rule.
+Evidence: `build\quality\issue148-render-direct-*`. The remaining lifecycle and
+expanded-inventory reconciliation gates are still active.

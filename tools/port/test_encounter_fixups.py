@@ -2056,6 +2056,62 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertIn("LegacyGpu_Handle(p_)", macro)
         self.assertIn("Render_frameScratch.primitiveCursor = p_ + 3;", macro)
 
+    def test_render_names_preserve_member_names_and_distinct_numeric_lifetimes(self):
+        cases = (
+            (
+                "Render::DrawGimFramebufferFade",
+                "int temp_s0 = arg0->brightness; Draw(arg0, arg1, arg2);",
+                "int brightness = image->brightness; Draw(image, clut, ordering_table);",
+            ),
+            (
+                "Render::DrawProgressiveTextBoxText",
+                "int speed = 1; arg0->speed += speed; var_a2 = 1000000000; var_a0 >>= 4;",
+                "int speed = 1; text_box->speed += speed; "
+                "hex_value_or_decimal_divisor = 1000000000; hexadecimal_divisor >>= 4;",
+            ),
+            (
+                "Render::DrawTextureWipe",
+                "var_a0 = 12; temp_a1 = x + var_a0; var_a0 = arg4 - x; var_s6 += 12;",
+                "strip_width_or_fade_weight = 12; strip_right_x = x + strip_width_or_fade_weight; "
+                "strip_width_or_fade_weight = wipe_edge_x - x; texture_u += 12;",
+            ),
+        )
+        for name, source, expected in cases:
+            with self.subTest(name=name):
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
+                self.assertEqual(source, expected)
+
+    def test_render_palette_block_bindings_preserve_scopes_and_provenance(self):
+        block = "{ int v0 = 2; int v1 = 3; int a0 = 4; }"
+        expected = (
+            "{ int base_luminance_work = 2; int base_green_work = 3; "
+            "int base_blue_work = 4; }"
+        )
+        for name in ("Render::TransformBackgroundGradient", "Render::TransformModelTint"):
+            with self.subTest(name=name):
+                source = block + "\n" + block + "\n// v0, v1, a0\n"
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
+                self.assertEqual(source, expected + "\n" + expected + "\n// v0, v1, a0\n")
+
+    def test_render_unproven_and_unused_arguments_remain_explicit_retentions(self):
+        for name, retained in (
+            ("Render::InitializeLoadingDisplay", "arg2 arg3 arg4 arg5"),
+            ("Render::SetFramebufferEffectParameter", "arg0"),
+            ("Render::ActivateGimLayer", "arg1 arg2"),
+            ("Render::LoadRoomPaletteTransition", "arg2"),
+            ("Render::SetModelTint", "v0"),
+        ):
+            with self.subTest(name=name):
+                source = retained
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
+                self.assertEqual(source, retained)
+
     def test_regex_fixups_compile_each_distinct_selector_once(self):
         copy_to_native.compiled_fixup_regex.cache_clear()
         self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)

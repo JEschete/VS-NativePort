@@ -52,28 +52,28 @@ int Render_legacyGimDiscFiles[] = { squashLba(VS_STAFF011_GIM), squashLba(VS_STA
     squashLba(VS_SQUARE_GIM), squashLba(VS_DEMOFIN_GIM) };
 
 // decomp: BATTLE.PRG vs_battle_loadGim (src/BATTLE/BATTLE.PRG/5BF94.c:2347)
-void Render_QueueGimImage(int id, int arg1)
+void Render_QueueGimImage(int id, int first_texture_page)
 {
     Content_DiscFile file;
-    Render_GimLayer* var_s0;
+    Render_GimLayer* layer_cursor;
     int i;
 
     if ((*(Render_GimLayer* (*))&Render_gimLayers) == NULL) {
-        var_s0 = Core_Memory_AllocateFromHighEnd(sizeof *var_s0 * 3);
-        (*(Render_GimLayer* (*))&Render_gimLayers) = var_s0;
-        var_s0->fileData = Core_Memory_AllocateFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB);
+        layer_cursor = Core_Memory_AllocateFromHighEnd(sizeof *layer_cursor * 3);
+        (*(Render_GimLayer* (*))&Render_gimLayers) = layer_cursor;
+        layer_cursor->fileData = Core_Memory_AllocateFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB);
 
         for (i = 0; i < 3; ++i) {
-            *(u_short*)var_s0 = 0;
-            var_s0->loading = 1;
-            var_s0->loadPhase = 1;
-            var_s0->vramPage = arg1;
-            var_s0->brightness = 0x80;
-            var_s0->imageId = id;
-            var_s0->offsetX = 0;
-            var_s0->offsetY = 0;
-            var_s0->scaleAndOrder = 0x1000;
-            ++var_s0;
+            *(u_short*)layer_cursor = 0;
+            layer_cursor->loading = 1;
+            layer_cursor->loadPhase = 1;
+            layer_cursor->vramPage = first_texture_page;
+            layer_cursor->brightness = 0x80;
+            layer_cursor->imageId = id;
+            layer_cursor->offsetX = 0;
+            layer_cursor->offsetY = 0;
+            layer_cursor->scaleAndOrder = 0x1000;
+            ++layer_cursor;
         }
         file.lba = (*(u_int (*)[])&Render_legacyGimDiscFiles)[id] >> 8;
         file.size = (u_char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB;
@@ -83,9 +83,9 @@ void Render_QueueGimImage(int id, int arg1)
 }
 
 // decomp: BATTLE.PRG func_800C8550 (src/BATTLE/BATTLE.PRG/5BF94.c:2377)
-void Render_ActivateGimLayer(u_int arg0, void* arg1, u_char* arg2)
+void Render_ActivateGimLayer(u_int layer_index, void* arg1, u_char* arg2)
 {
-    Render_GimLayer* gim = &(*(Render_GimLayer* (*))&Render_gimLayers)[arg0];
+    Render_GimLayer* gim = &(*(Render_GimLayer* (*))&Render_gimLayers)[layer_index];
     int step;
     int next;
     int i;
@@ -131,16 +131,16 @@ void Render_ActivateGimLayer(u_int arg0, void* arg1, u_char* arg2)
 // decomp: BATTLE.PRG func_800C86AC (src/BATTLE/BATTLE.PRG/5BF94.c:2422)
 void Render_ReleaseGimImages(void)
 {
-    Render_GimLayer* var_s0 = (*(Render_GimLayer* (*))&Render_gimLayers);
+    Render_GimLayer* layer_cursor = (*(Render_GimLayer* (*))&Render_gimLayers);
     int i;
 
-    if ((var_s0 != NULL) && (var_s0->loadPhase == 3)) {
-        Render_RetireTexturePageRange(var_s0->vramPage, var_s0->texturePageCount, 6);
+    if ((layer_cursor != NULL) && (layer_cursor->loadPhase == 3)) {
+        Render_RetireTexturePageRange(layer_cursor->vramPage, layer_cursor->texturePageCount, 6);
         for (i = 0; i < 3; ++i) {
-            if (var_s0->drawRoutine == 3) {
+            if (layer_cursor->drawRoutine == 3) {
                 Render_RetireTexturePageRange((*(Render_GimLayer* (*))&Render_gimLayers)->vramPage + (*(Render_GimLayer* (*))&Render_gimLayers)->texturePageCount, 1, 6);
             }
-            ++var_s0;
+            ++layer_cursor;
         }
         Core_Memory_FreeFromHighEnd((*(Render_GimLayer* (*))&Render_gimLayers));
         (*(Render_GimLayer* (*))&Render_gimLayers) = NULL;
@@ -428,32 +428,32 @@ void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot)
 }
 
 // decomp: BATTLE.PRG func_800CC128 (src/BATTLE/BATTLE.PRG/5BF94.c:4192)
-void Render_DrawGimFramebufferFade(Render_GimLayer* arg0, int arg1, u_long* arg2)
+void Render_DrawGimFramebufferFade(Render_GimLayer* image, int clut, u_long* ordering_table)
 {
-    int var_s1;
-    int new_var;
+    int other_framebuffer_x;
+    int blend_texture_mode;
 
-    int temp_s0 = arg0->brightness;
+    int brightness = image->brightness;
 
-    if (temp_s0 == 0x80) {
-        Render_DrawGimTiles(arg0, arg1, arg2);
+    if (brightness == 0x80) {
+        Render_DrawGimTiles(image, clut, ordering_table);
         return;
     }
 
     Render_gimBlendSelect = 1;
 
-    Render_DrawGimTiles(arg0, arg1, arg2);
-    var_s1 = 0;
+    Render_DrawGimTiles(image, clut, ordering_table);
+    other_framebuffer_x = 0;
 
     if (Render_frameBuf == 0) {
-        var_s1 = 0x140;
+        other_framebuffer_x = 0x140;
     }
 
-    new_var = 0x120;
-    Render_QueueSprite(0x80 - temp_s0, 0, 0xF00100, arg2)[1] =
-        ((u_int)var_s1 >> 6) | new_var | 0xE1000000;
-    Render_QueueSprite(0x80 - temp_s0, 0x100, 0xF00040, arg2)[1] =
-        ((var_s1 + 0x100) >> 6) | new_var | 0xE1000000;
+    blend_texture_mode = 0x120;
+    Render_QueueSprite(0x80 - brightness, 0, 0xF00100, ordering_table)[1] =
+        ((u_int)other_framebuffer_x >> 6) | blend_texture_mode | 0xE1000000;
+    Render_QueueSprite(0x80 - brightness, 0x100, 0xF00040, ordering_table)[1] =
+        ((other_framebuffer_x + 0x100) >> 6) | blend_texture_mode | 0xE1000000;
 }
 
 // decomp: BATTLE.PRG func_800CC204 (src/BATTLE/BATTLE.PRG/5BF94.c:4220)
@@ -557,17 +557,17 @@ void Render_DrawGimScanlineWipe(Render_GimLayer* image, int clut, u_long* ot)
 }
 
 // decomp: BATTLE.PRG func_800CC580 (src/BATTLE/BATTLE.PRG/5BF94.c:4319)
-void Render_SetGimWorkspaceDrawArea(u_long* arg0, int arg1)
+void Render_SetGimWorkspaceDrawArea(u_long* ordering_link, int page_x)
 {
     Render_InsertThreeWordPrimitive(
-        arg0, arg1 | 0xE3040000, (arg1 + 0x3F) | 0xE407FC00, arg1 | 0xE5080000);
+        ordering_link, page_x | 0xE3040000, (page_x + 0x3F) | 0xE407FC00, page_x | 0xE5080000);
 }
 
 // decomp: BATTLE.PRG func_800CC5C0 (src/BATTLE/BATTLE.PRG/5BF94.c:4325)
-void Render_SetGimFramebufferDrawArea(u_long* arg0, int arg1)
+void Render_SetGimFramebufferDrawArea(u_long* ordering_link, int page_x)
 {
     Render_InsertThreeWordPrimitive(
-        arg0, arg1 | 0xE3000000, (arg1 + 0x13F) | 0xE403BC00, arg1 | 0xE5000000);
+        ordering_link, page_x | 0xE3000000, (page_x + 0x13F) | 0xE403BC00, page_x | 0xE5000000);
 }
 
 // decomp: BATTLE.PRG func_800CC600 (src/BATTLE/BATTLE.PRG/5BF94.c:4331)
@@ -670,9 +670,9 @@ void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot)
 }
 
 // decomp: BATTLE.PRG func_800CCA90 (src/BATTLE/BATTLE.PRG/5BF94.c:4429)
-void Render_DrawGimLayer(int arg0)
+void Render_DrawGimLayer(int layer_index)
 {
-    Render_GimLayer* gim = &(*(Render_GimLayer* (*))&Render_gimLayers)[arg0];
+    Render_GimLayer* gim = &(*(Render_GimLayer* (*))&Render_gimLayers)[layer_index];
     int clut = (gim->vramPage - 16) << 6;
 
     if ((gim->brightness == 0) && (gim->drawRoutine != 2)) {
@@ -686,12 +686,12 @@ void Render_DrawGimLayer(int arg0)
             clut = getClut(768, 227);
         }
     } else {
-        clut = getClut(clut + arg0 * 16, 511);
+        clut = getClut(clut + layer_index * 16, 511);
     }
 
     Render_gimBlendSelect = 0;
     Render_kGimLayerDrawRoutines[gim->drawRoutine](gim, clut << 16,
-        gim->scaleAndOrder & 0x4000 ? Render_frameScratch.orderingTable + 0x1FF8 - arg0 * 4
-                           : Render_frameScratch.overlayOrderingTable + 0x18 - arg0 * 8);
+        gim->scaleAndOrder & 0x4000 ? Render_frameScratch.orderingTable + 0x1FF8 - layer_index * 4
+                           : Render_frameScratch.overlayOrderingTable + 0x18 - layer_index * 8);
 }
 

@@ -47,22 +47,22 @@ void Render_AdvanceTexturePageRetirements(void)
 }
 
 // decomp: BATTLE.PRG func_8007DFF0 (src/BATTLE/BATTLE.PRG/146C.c:9509)
-int Render_ReserveTexturePageRange(u_int arg0, u_int arg1, int arg2)
+int Render_ReserveTexturePageRange(u_int first_page, u_int page_count, int owner_tag)
 {
-    if (arg0 > 0x18) {
-        int var_a3 = 0;
-        if ((arg0 + arg1) < 0x21) {
+    if (first_page > 0x18) {
+        int range_occupied = 0;
+        if ((first_page + page_count) < 0x21) {
             u_int i;
-            for (i = 0; i < arg1; ++i) {
-                if (Render_legacyTexturePageReservations[arg0 + i] != 0) {
-                    var_a3 = 1;
+            for (i = 0; i < page_count; ++i) {
+                if (Render_legacyTexturePageReservations[first_page + i] != 0) {
+                    range_occupied = 1;
                 }
             }
-            if (var_a3 == 0) {
-                for (i = 0; i < arg1; ++i) {
-                    Render_legacyTexturePageReservations[arg0 + i] = (char)arg2;
+            if (range_occupied == 0) {
+                for (i = 0; i < page_count; ++i) {
+                    Render_legacyTexturePageReservations[first_page + i] = (char)owner_tag;
                 }
-                return arg0;
+                return first_page;
             }
         }
     }
@@ -71,30 +71,30 @@ int Render_ReserveTexturePageRange(u_int arg0, u_int arg1, int arg2)
 }
 
 // decomp: BATTLE.PRG func_8007E0A8 (src/BATTLE/BATTLE.PRG/146C.c:9532)
-int Render_RetireTexturePageRange(u_int arg0, u_int arg1, int arg2)
+int Render_RetireTexturePageRange(u_int first_page, u_int page_count, int owner_tag)
 {
-    int var_s0 = 0;
+    int owner_mismatch = 0;
 
-    if ((25 <= arg0) && ((arg0 + arg1) < 33)) {
+    if ((25 <= first_page) && ((first_page + page_count) < 33)) {
         int i;
 
-        for (i = 0; i < arg1; ++i) {
-            if (Render_legacyTexturePageReservations[arg0 + i] != arg2) {
-                var_s0 = 1;
+        for (i = 0; i < page_count; ++i) {
+            if (Render_legacyTexturePageReservations[first_page + i] != owner_tag) {
+                owner_mismatch = 1;
             }
         }
 
-        if (var_s0 != 0) {
+        if (owner_mismatch != 0) {
             Core_IgnoreDiagnostic(101, 0);
         } else {
-            if (var_s0 < arg1) {
-                for (i = 0; i < arg1; ++i) {
-                    Render_legacyTexturePageReservations[arg0 + i] = -3;
+            if (owner_mismatch < page_count) {
+                for (i = 0; i < page_count; ++i) {
+                    Render_legacyTexturePageReservations[first_page + i] = -3;
                 }
             }
         }
 
-        return !var_s0;
+        return !owner_mismatch;
     }
 
     Core_IgnoreDiagnostic(101, 0);
@@ -102,23 +102,23 @@ int Render_RetireTexturePageRange(u_int arg0, u_int arg1, int arg2)
 }
 
 // decomp: BATTLE.PRG vs_battle_parseTim (src/BATTLE/BATTLE.PRG/146C.c:16935)
-void Render_ParseTextureImage(u_long* arg0, TIM_IMAGE* tim)
+void Render_ParseTextureImage(u_long* image_cursor, TIM_IMAGE* tim)
 {
-    ++arg0;
-    tim->mode = *arg0;
-    ++arg0;
+    ++image_cursor;
+    tim->mode = *image_cursor;
+    ++image_cursor;
 
     if (tim->mode & 8) {
-        tim->crect = (RECT*)(arg0 + 1);
-        tim->caddr = (u_long*)arg0 + 3;
-        arg0 += *arg0 >> 2;
+        tim->crect = (RECT*)(image_cursor + 1);
+        tim->caddr = (u_long*)image_cursor + 3;
+        image_cursor += *image_cursor >> 2;
     } else {
         tim->crect = NULL;
         tim->caddr = NULL;
     }
 
-    tim->prect = (RECT*)(arg0 + 1);
-    tim->paddr = arg0 + 3;
+    tim->prect = (RECT*)(image_cursor + 1);
+    tim->paddr = image_cursor + 3;
 }
 
 // decomp: BATTLE.PRG vs_battlePacketBegin (src/BATTLE/BATTLE.PRG/40564.c:110)
@@ -134,10 +134,10 @@ void Render_EndTextureMovePacket(DR_MOVE* p)
 }
 
 // decomp: BATTLE.PRG func_800AAC80 (src/BATTLE/BATTLE.PRG/40564.c:1272)
-void Render_QueueTextureRectangleMove(RECT* arg0, int arg1, int arg2)
+void Render_QueueTextureRectangleMove(RECT* source_rectangle, int destination_x, int destination_y)
 {
     DR_MOVE* drMove = *(DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000);
-    SetDrawMove(drMove, arg0, arg1, arg2);
+    SetDrawMove(drMove, source_rectangle, destination_x, destination_y);
     ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(drMove);
     *(DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000) = drMove + 1;
 }

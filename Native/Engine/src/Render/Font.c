@@ -277,18 +277,18 @@ int Render_DrawVariableWidthGlyph(u_int glyphId, int x, int y, u_long* ot)
 }
 
 // decomp: BATTLE.PRG vs_battle_setFontStyle (src/BATTLE/BATTLE.PRG/5BF94.c:1699)
-void Render_SetMenuFontStyle(int arg0)
+void Render_SetMenuFontStyle(int palette_offset)
 {
     Render_fontTableSelect = 0;
     Render_fontColor = 384;
-    Render_fontPaletteOffset = arg0;
+    Render_fontPaletteOffset = palette_offset;
 }
 
 // decomp: BATTLE.PRG _printVariableWidthFont (src/BATTLE/BATTLE.PRG/5BF94.c:1706)
-void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
+void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* text_box)
 {
     char intBuf[16];
-    u_long* sp20 = Menu_activeTextBoxOrderingTable + Render_activeTextBoxIndex * 4;
+    u_long* ordering_table = Menu_activeTextBoxOrderingTable + Render_activeTextBoxIndex * 4;
     int done = 0;
     int sfx = 0;
     int chunksPrinted = 0;
@@ -297,36 +297,36 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
     int justify = 0;
     int inInlineString = 0;
     int postContinuation = 0;
-    int charsRemaining = arg0->speed;
+    int charsRemaining = text_box->speed;
 
     int printX;
     int printY;
-    int temp_v0;
-    int var_a0;
-    int var_a2;
+    int signed_animation_counter_word;
+    int hexadecimal_divisor;
+    int hex_value_or_decimal_divisor;
     int hexBufPos;
     int decInt;
     int decBufPos;
     char* currentString;
-    u_short temp_v1;
+    u_short animation_counter_snapshot;
     u_int currentChar;
     u_int opcodeParam;
 
     if (charsRemaining != 0) {
 
-        Render_fontTableSelect = arg0->flags.kind != 4;
-        Render_fontColor = arg0->brightness;
-        Render_fontPaletteOffset = (1 - (*((char*)arg0) & 1)) * 4;
+        Render_fontTableSelect = text_box->flags.kind != 4;
+        Render_fontColor = text_box->brightness;
+        Render_fontPaletteOffset = (1 - (*((char*)text_box) & 1)) * 4;
 
-        if (arg0->flags.kind == 2) {
+        if (text_box->flags.kind == 2) {
             Render_fontTableSelect = 0;
             Render_fontPaletteOffset = 0;
         }
-        currentString = arg0->string;
-        printX = arg0->xIndent;
-        printY = arg0->yIndent;
+        currentString = text_box->string;
+        printX = text_box->xIndent;
+        printY = text_box->yIndent;
 
-        arg0->flags.done = 0;
+        text_box->flags.done = 0;
 
         while (charsRemaining > 0) {
             if (postContinuation != 0) {
@@ -337,7 +337,7 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
             if (currentChar < 0xEC) {
                 if (currentChar < 0xE5) {
                     printX = Render_DrawVariableWidthGlyph(
-                        currentChar, printX, printY, sp20);
+                        currentChar, printX, printY, ordering_table);
                     charsRemaining -= speed;
                     ++chunksPrinted;
                     continue;
@@ -345,9 +345,9 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
 
                 switch (currentChar - 0xE5) {
                 case 0: // 0xE5 New page
-                    arg0->string = currentString;
-                    done = (arg0->speed = 1);
-                    arg0->prevChunksPrinted = 0;
+                    text_box->string = currentString;
+                    done = (text_box->speed = 1);
+                    text_box->prevChunksPrinted = 0;
                     break;
                 case 1: // 0xE6 Continuation arrow
                     if (charsRemaining == 1) {
@@ -355,10 +355,10 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                             charsRemaining = 0;
                         } else {
                             done =
-                                (arg0->flags.arrowAnimFrame + State_tickSpeed) % 24;
+                                (text_box->flags.arrowAnimFrame + State_tickSpeed) % 24;
                             printX = Render_DrawVariableWidthGlyph(
-                                0xBC - (done >> 3), printX, printY, sp20);
-                            arg0->flags.arrowAnimFrame = done;
+                                0xBC - (done >> 3), printX, printY, ordering_table);
+                            text_box->flags.arrowAnimFrame = done;
                         }
                         done = 1;
                     } else {
@@ -371,23 +371,23 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                         currentString = savedString;
                         inInlineString = 0;
                     } else {
-                        temp_v1 = arg0->opaque2C;
-                        temp_v0 = temp_v1 << 0x10;
-                        if (temp_v0 > 0) {
-                            arg0->opaque2C = ((temp_v0 >> 0x12) - temp_v1);
+                        animation_counter_snapshot = text_box->opaque2C;
+                        signed_animation_counter_word = animation_counter_snapshot << 0x10;
+                        if (signed_animation_counter_word > 0) {
+                            text_box->opaque2C = ((signed_animation_counter_word >> 0x12) - animation_counter_snapshot);
                         }
-                        arg0->flags.done = 1;
+                        text_box->flags.done = 1;
                         if (((*(&Input_buttonsPressed.ports[0].lowByte)) != 0)
                             || (postContinuation != 0)) {
-                            arg0->speed = 0xFFFF;
+                            text_box->speed = 0xFFFF;
                         }
                         done = 1;
                     }
                     break;
                 case 3: // 0xE8 New line
-                    printX = arg0->xIndent;
+                    printX = text_box->xIndent;
                     if (justify != 0) {
-                        printX += ((arg0->charsPerLine * 2)
+                        printX += ((text_box->charsPerLine * 2)
                                       - Render_MeasureEncodedTextLine(currentString))
                                 * 3;
                     }
@@ -428,10 +428,10 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                             justify ^= 1;
                             if (justify != 0) {
                                 printX =
-                                    (((arg0->charsPerLine * 2)
+                                    (((text_box->charsPerLine * 2)
                                          - Render_MeasureEncodedTextLine(currentString))
                                         * 3)
-                                    + arg0->xIndent;
+                                    + text_box->xIndent;
                             }
                         } else { // Color
                             Render_fontPaletteOffset = (Render_fontPaletteOffset & 4) | opcodeParam;
@@ -439,43 +439,43 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                     }
                     break;
                 case 0xFC:
-                    if (arg0->opaque2C > 0) {
-                        arg0->opaque2C = -opcodeParam;
+                    if (text_box->opaque2C > 0) {
+                        text_box->opaque2C = -opcodeParam;
                     }
                     break;
                 case 0xFD: // Print hex
                     hexBufPos = 0;
-                    var_a2 = Battle_stringContext.integers[opcodeParam % 10];
-                    var_a0 = 0x10000000;
-                    if (var_a2 < 0) {
-                        var_a2 = -var_a2;
+                    hex_value_or_decimal_divisor = Battle_stringContext.integers[opcodeParam % 10];
+                    hexadecimal_divisor = 0x10000000;
+                    if (hex_value_or_decimal_divisor < 0) {
+                        hex_value_or_decimal_divisor = -hex_value_or_decimal_divisor;
                         intBuf[0] = 0xA7;
                         hexBufPos = 1;
                     }
                     if (opcodeParam < 10) {
-                        if (var_a2 == 0) {
+                        if (hex_value_or_decimal_divisor == 0) {
                             intBuf[hexBufPos++] = 0;
                         } else {
 
-                            while ((var_a2 / var_a0) == 0) {
-                                var_a0 >>= 4;
+                            while ((hex_value_or_decimal_divisor / hexadecimal_divisor) == 0) {
+                                hexadecimal_divisor >>= 4;
                             }
 
-                            while (var_a0 != 0) {
-                                intBuf[hexBufPos++] = (var_a2 / var_a0) & 0xF;
-                                var_a0 >>= 4;
+                            while (hexadecimal_divisor != 0) {
+                                intBuf[hexBufPos++] = (hex_value_or_decimal_divisor / hexadecimal_divisor) & 0xF;
+                                hexadecimal_divisor >>= 4;
                             }
                         }
                     } else {
                         opcodeParam = (opcodeParam / 10) - 1;
-                        var_a0 = 1;
+                        hexadecimal_divisor = 1;
                         while (opcodeParam != 0) {
                             --opcodeParam;
-                            var_a0 *= 16;
+                            hexadecimal_divisor *= 16;
                         }
-                        while (var_a0 != 0) {
-                            intBuf[hexBufPos++] = (var_a2 / var_a0) & 0xF;
-                            var_a0 >>= 4;
+                        while (hexadecimal_divisor != 0) {
+                            intBuf[hexBufPos++] = (hex_value_or_decimal_divisor / hexadecimal_divisor) & 0xF;
+                            hexadecimal_divisor >>= 4;
                         }
                     }
                     intBuf[hexBufPos] = 0xE7;
@@ -486,7 +486,7 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                 case 0xFE: // Print decimal
                     decBufPos = 0;
                     decInt = Battle_stringContext.integers[opcodeParam % 10];
-                    var_a2 = 1000000000;
+                    hex_value_or_decimal_divisor = 1000000000;
                     if (decInt < 0) {
                         decInt = -decInt;
                         intBuf[0] = 0xA7; // -
@@ -498,25 +498,25 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
                             ++decBufPos;
                         } else {
 
-                            while ((decInt / var_a2) == 0) {
-                                var_a2 /= 10;
+                            while ((decInt / hex_value_or_decimal_divisor) == 0) {
+                                hex_value_or_decimal_divisor /= 10;
                             }
 
-                            while (var_a2 != 0) {
-                                intBuf[decBufPos++] = (decInt / var_a2) % 10;
-                                var_a2 /= 10;
+                            while (hex_value_or_decimal_divisor != 0) {
+                                intBuf[decBufPos++] = (decInt / hex_value_or_decimal_divisor) % 10;
+                                hex_value_or_decimal_divisor /= 10;
                             }
                         }
                     } else {
                         opcodeParam = (opcodeParam / 10) - 1;
-                        var_a2 = 1;
+                        hex_value_or_decimal_divisor = 1;
                         while (opcodeParam != 0) {
-                            var_a2 *= 10;
+                            hex_value_or_decimal_divisor *= 10;
                             --opcodeParam;
                         }
-                        while (var_a2 != 0) {
-                            intBuf[decBufPos++] = (decInt / var_a2) % 10;
-                            var_a2 /= 10;
+                        while (hex_value_or_decimal_divisor != 0) {
+                            intBuf[decBufPos++] = (decInt / hex_value_or_decimal_divisor) % 10;
+                            hex_value_or_decimal_divisor /= 10;
                         }
                     }
                     intBuf[decBufPos] = 0xE7;
@@ -534,21 +534,21 @@ void Render_DrawProgressiveTextBoxText(Menu_TextBoxState* arg0)
         }
 
         if (charsRemaining <= 0) {
-            arg0->speed += State_tickSpeed >> 1;
+            text_box->speed += State_tickSpeed >> 1;
         }
 
-        if ((arg0->prevChunksPrinted != chunksPrinted) && (sfx != 0)) {
+        if ((text_box->prevChunksPrinted != chunksPrinted) && (sfx != 0)) {
             Audio_PlaySfxCentered(0x7E, sfx);
         }
 
-        if (!(arg0->flags.speakerTexture & 0x20)) {
-            if (arg0->opaque2C != 0) {
-                ++arg0->opaque2C;
+        if (!(text_box->flags.speakerTexture & 0x20)) {
+            if (text_box->opaque2C != 0) {
+                ++text_box->opaque2C;
             } else {
-                Actors_SetActorTextureAnimation(arg0->flags.speakerTexture, 0, 0, 0);
+                Actors_SetActorTextureAnimation(text_box->flags.speakerTexture, 0, 0, 0);
             }
         }
-        arg0->prevChunksPrinted = chunksPrinted;
+        text_box->prevChunksPrinted = chunksPrinted;
     }
 }
 
@@ -562,7 +562,7 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
     int lineHeight = scale * 13;
 
     if (ctx->speed != 0) {
-        int temp_s6;
+        int line_origin_x;
         int done;
         int printX = (ctx->frameX << 0x10) + ((ctx->xIndent - ctx->x) * scale);
         int printY = (ctx->frameY << 0x10) + ((ctx->yIndent - ctx->y) * scale);
@@ -571,7 +571,7 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
         Render_fontTableSelect = ctx->flags.kind != 4;
         Render_fontColor = ctx->brightness;
 
-        temp_s6 = printX;
+        line_origin_x = printX;
 
         if (ctx->flags.kind == 2) {
             Render_fontTableSelect = 0;
@@ -597,9 +597,9 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
                     done = 1;
                     break;
                 case 3: // 0xE8 New line
-                    printX = temp_s6;
+                    printX = line_origin_x;
                     if (justify != 0) {
-                        printX = temp_s6
+                        printX = line_origin_x
                                + (((ctx->charsPerLine * 2)
                                       - Render_MeasureEncodedTextLine(str))
                                    * (charWidth >> 2));
@@ -632,7 +632,7 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
                         } else if (opcodeParam == 4) { // Justify
                             justify ^= 1;
                             if (justify != 0) {
-                                printX = temp_s6
+                                printX = line_origin_x
                                        + (((ctx->charsPerLine * 2)
                                               - Render_MeasureEncodedTextLine(str))
                                            * (charWidth >> 2));
@@ -692,7 +692,7 @@ void Render_BlendGlyphIntoPixels(u_short* destination, u_int glyph, int stride, 
 }
 
 // decomp: BATTLE.PRG _renderTextImmediate (src/BATTLE/BATTLE.PRG/5BF94.c:2236)
-void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
+void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* text_box, int glyph_alpha)
 {
     RECT rect;
     int height;
@@ -700,17 +700,17 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
     int done = 0;
     u_short* buf;
     int width;
-    int x = arg0->x;
-    int y = arg0->y;
+    int x = text_box->x;
+    int y = text_box->y;
     int justify = 0;
-    char* str = arg0->string;
-    u_int printX = arg0->xIndent - x;
+    char* str = text_box->string;
+    u_int printX = text_box->xIndent - x;
     u_int printY;
 
     _y = y;
-    printY = arg0->yIndent - y;
-    width = arg0->charsPerLine * 12 + 10;
-    height = arg0->lineCount * 13 + 4;
+    printY = text_box->yIndent - y;
+    width = text_box->charsPerLine * 12 + 10;
+    height = text_box->lineCount * 13 + 4;
 
     if ((x < 0) || (y < 0) || ((x + width) >= 320) || ((y + height) >= 224)) {
         return;
@@ -718,8 +718,8 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
 
     buf = Core_Memory_AllocateFromHighEnd(width * height * 2);
 
-    if ((arg1 >> 0x10) != 0) {
-        arg1 = 0x10000;
+    if ((glyph_alpha >> 0x10) != 0) {
+        glyph_alpha = 0x10000;
     }
 
     setRECT(&rect, x + Render_frameBuf * 320, y, width, height);
@@ -736,7 +736,7 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
                     currentChar += Render_fontTableSelect * 21 * 9;
                     if (((width - 12) >= printX) && ((height - 12) >= printY)) {
                         Render_BlendGlyphIntoPixels(buf + ((printX + (printY * width))), currentChar,
-                            width, arg1);
+                            width, glyph_alpha);
                     }
                 }
                 printX += Render_variableFontGlyphWidths[currentChar];
@@ -744,15 +744,15 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
                 switch (currentChar - Core_TextCode_NonPrinting) {
                 case 2:
                     if (Input_buttonsPressed.allButtons & PADRright) {
-                        arg0->speed = 0xFFFF;
+                        text_box->speed = 0xFFFF;
                     }
                     done = 1;
                     break;
                 case 3:
-                    printX = arg0->xIndent - x;
+                    printX = text_box->xIndent - x;
                     if (justify != 0) {
                         printX +=
-                            ((arg0->charsPerLine * 2) - Render_MeasureEncodedTextLine(str))
+                            ((text_box->charsPerLine * 2) - Render_MeasureEncodedTextLine(str))
                             * 3;
                     }
                     printY += 13;
@@ -784,10 +784,10 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* arg0, int arg1)
                     } else if (opcodeParam == 4) {
                         justify ^= 1;
                         if (justify != 0) {
-                            printX = ((((arg0->charsPerLine * 2)
+                            printX = ((((text_box->charsPerLine * 2)
                                            - Render_MeasureEncodedTextLine(str))
                                           * 3)
-                                         + arg0->xIndent)
+                                         + text_box->xIndent)
                                    - x;
                         }
                     }

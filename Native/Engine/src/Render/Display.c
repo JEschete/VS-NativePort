@@ -36,31 +36,31 @@ int Render_frameBuf;
 int Render_isFrameStepPaused = 0;
 
 // decomp: BATTLE.PRG func_800760CC (src/BATTLE/BATTLE.PRG/146C.c:5959)
-void Render_ConfigureFieldDisplay(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5)
+void Render_ConfigureFieldDisplay(int frame_width, int frame_height, int projection_distance, int clear_red, int clear_green, int clear_blue)
 {
-    u_int temp_s3;
+    u_int drawable_height;
 
-    temp_s3 = arg1 - 16;
-    Core_Gte_SetGeomOffset(arg0 / 2, ((int)(temp_s3 + (temp_s3 >> 0x1F)) >> 1) + 0x10);
-    Core_Gte_SetGeomScreen(arg2);
-    SetDefDrawEnv(Render_legacyDrawEnvironments, 0, 0, arg0, temp_s3);
-    SetDefDispEnv(Render_legacyDisplayEnvironments, arg0, 0, arg0, temp_s3);
-    SetDefDrawEnv(&Render_legacyDrawEnvironments[1], arg0, 0, arg0, temp_s3);
-    SetDefDispEnv(&Render_legacyDisplayEnvironments[1], 0, 0, arg0, temp_s3);
+    drawable_height = frame_height - 16;
+    Core_Gte_SetGeomOffset(frame_width / 2, ((int)(drawable_height + (drawable_height >> 0x1F)) >> 1) + 0x10);
+    Core_Gte_SetGeomScreen(projection_distance);
+    SetDefDrawEnv(Render_legacyDrawEnvironments, 0, 0, frame_width, drawable_height);
+    SetDefDispEnv(Render_legacyDisplayEnvironments, frame_width, 0, frame_width, drawable_height);
+    SetDefDrawEnv(&Render_legacyDrawEnvironments[1], frame_width, 0, frame_width, drawable_height);
+    SetDefDispEnv(&Render_legacyDisplayEnvironments[1], 0, 0, frame_width, drawable_height);
     setRECT(&Render_legacyDisplayEnvironments[0].screen, 0, 8, 256, 224);
     setRECT(&Render_legacyDisplayEnvironments[1].screen, 0, 8, 256, 224);
     Render_legacyViewportLeft = 0;
     Render_legacyViewportTop = 0;
-    Render_viewportWidth = arg0;
-    Render_viewportHeight = temp_s3;
+    Render_viewportWidth = frame_width;
+    Render_viewportHeight = drawable_height;
     Render_legacyDrawEnvironments[1].dtd = 1;
     Render_legacyDrawEnvironments[0].dtd = 1;
     Render_legacyDrawEnvironments[1].dfe = 0;
     Render_legacyDrawEnvironments[0].dfe = 0;
     Render_legacyDrawEnvironments[1].isbg = 0;
     Render_legacyDrawEnvironments[0].isbg = 0;
-    setRGB0(&Render_legacyDrawEnvironments[0], arg3, arg4, arg5);
-    setRGB0(&Render_legacyDrawEnvironments[1], arg3, arg4, arg5);
+    setRGB0(&Render_legacyDrawEnvironments[0], clear_red, clear_green, clear_blue);
+    setRGB0(&Render_legacyDrawEnvironments[1], clear_red, clear_green, clear_blue);
     PutDispEnv(&Render_legacyDisplayEnvironments[Render_frameBuf]);
     PutDrawEnv(&Render_legacyDrawEnvironments[Render_frameBuf]);
 }
@@ -69,7 +69,7 @@ void Render_ConfigureFieldDisplay(int arg0, int arg1, int arg2, int arg3, int ar
 int Render_PresentFieldFrame(u_long* otag)
 {
     int ret;
-    u_int temp_a0;
+    u_int second_port_pressed_buttons;
 
     Render_frameBuf = Render_frameBuf == 0;
     Core_Random_NextBounded(0);
@@ -85,14 +85,14 @@ int Render_PresentFieldFrame(u_long* otag)
             Input_UpdateControllerConnection(16, Input_legacyPadResponseBytes[1]);
             Input_buttonsPressed.allButtons =
                 ~Input_previousButtons & Input_buttonsState;
-            temp_a0 = Input_buttonsPressed.allButtons >> 16;
+            second_port_pressed_buttons = Input_buttonsPressed.allButtons >> 16;
             Input_releasedButtons =
                 Input_previousButtons & ~Input_buttonsState;
             Input_previousButtons = Input_buttonsState;
-            if (temp_a0 & 0x800) {
+            if (second_port_pressed_buttons & 0x800) {
                 Render_isFrameStepPaused ^= 1;
             }
-            if ((temp_a0 & 0x100) || (Render_isFrameStepPaused == 0)) {
+            if ((second_port_pressed_buttons & 0x100) || (Render_isFrameStepPaused == 0)) {
                 break;
             }
         }

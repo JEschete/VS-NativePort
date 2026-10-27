@@ -60,16 +60,16 @@ extern Event_SplashLayerView* Render_gimLayers;
 extern void (*Render_kGimLayerDrawRoutines[4])(Render_GimLayer*, int, u_long*);
 extern char Render_gimBlendSelect;
 extern int Render_legacyGimDiscFiles[];
-void Render_QueueGimImage(int id, int arg1);
-void Render_ActivateGimLayer(u_int arg0, void* arg1, u_char* arg2);
+void Render_QueueGimImage(int id, int first_texture_page);
+void Render_ActivateGimLayer(u_int layer_index, void* arg1, u_char* arg2);
 void Render_ReleaseGimImages(void);
 void Render_UpdateGimImages(void);
 void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot);
-void Render_DrawGimFramebufferFade(Render_GimLayer* arg0, int arg1, u_long* arg2);
+void Render_DrawGimFramebufferFade(Render_GimLayer* image, int clut, u_long* ordering_table);
 void Render_DrawGimScanlineWipe(Render_GimLayer* image, int clut, u_long* ot);
-void Render_SetGimWorkspaceDrawArea(u_long* arg0, int arg1);
-void Render_SetGimFramebufferDrawArea(u_long* arg0, int arg1);
+void Render_SetGimWorkspaceDrawArea(u_long* ordering_link, int page_x);
+void Render_SetGimFramebufferDrawArea(u_long* ordering_link, int page_x);
 void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot);
-void Render_DrawGimLayer(int arg0);
+void Render_DrawGimLayer(int layer_index);
 
 #endif // VS_RENDER_IMAGES_H_DECLS

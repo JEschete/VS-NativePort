@@ -15,20 +15,20 @@
 int Render_kStatGaugeColors[4]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_8007A824 (src/BATTLE/BATTLE.PRG/146C.c:8055)
-void Render_AppendOverlayPrimitive(int* arg0) { Render_SplicePrimitiveList(Render_legacyCurrentOrderingTable + 0x2084, arg0); }
+void Render_AppendOverlayPrimitive(int* primitive) { Render_SplicePrimitiveList(Render_legacyCurrentOrderingTable + 0x2084, primitive); }
 
 // decomp: BATTLE.PRG func_800C64D0 (src/BATTLE/BATTLE.PRG/5BF94.c:1332)
-void Render_SplicePrimitiveList(u_long* arg0, int* arg1)
+void Render_SplicePrimitiveList(u_long* ordering_link, int* primitive)
 {
-    int a3 = 0xFFFFFF;
-    u_long temp_t0 = LegacyGpu_Handle(arg0 - 1);
+    int link_mask = 0xFFFFFF;
+    u_long sentinel_handle = LegacyGpu_Handle(ordering_link - 1);
 
-    while ((*arg0 & a3) != temp_t0) {
-        arg0 = (u_long*)LegacyGpu_Pointer(*arg0 & a3);
+    while ((*ordering_link & link_mask) != sentinel_handle) {
+        ordering_link = (u_long*)LegacyGpu_Pointer(*ordering_link & link_mask);
     }
 
-    *arg0 = (*arg0 & 0xFF000000) | LegacyGpu_Handle(arg1);
-    *arg1 = (int)((*arg1 & 0xFF000000) | temp_t0);
+    *ordering_link = (*ordering_link & 0xFF000000) | LegacyGpu_Handle(primitive);
+    *primitive = (int)((*primitive & 0xFF000000) | sentinel_handle);
 }
 
 // decomp: BATTLE.PRG _lerpColor (src/BATTLE/BATTLE.PRG/5BF94.c:2704)
@@ -38,11 +38,11 @@ u_int Render_BlendRgbWithBrightness(u_int color0, u_int color1, int brightness, 
     u_int ret = 0;
 
     for (i = 0; i < 3; ++i) {
-        u_int temp_lo = ((((color0 >> 0x10) & 0xFF) * (8 - blendFactor))
+        u_int weighted_channel = ((((color0 >> 0x10) & 0xFF) * (8 - blendFactor))
                             + (((color1 >> 0x10) & 0xFF) * blendFactor))
                       * brightness;
         color0 <<= 8;
-        ret = (ret << 8) + (temp_lo >> 0xA);
+        ret = (ret << 8) + (weighted_channel >> 0xA);
         color1 <<= 8;
     }
 
@@ -65,7 +65,7 @@ void Render_DrawNumericGlyph(int font, int xy, int digit, u_long* before)
 // decomp: BATTLE.PRG vs_battle_renderValue (src/BATTLE/BATTLE.PRG/5BF94.c:3033)
 int Render_DrawIntegerRightAligned(int font, int xy, int value, u_long* before)
 {
-    int new_var;
+    int base_advanced_xy;
 
     if (before == NULL) {
         before = Render_frameScratch.orderingTable - 0x10;
@@ -76,8 +76,8 @@ int Render_DrawIntegerRightAligned(int font, int xy, int value, u_long* before)
 
         Render_DrawNumericGlyph(font, xy, value & 0xF, before);
 
-        new_var = xy - 5;
-        xy = new_var - font;
+        base_advanced_xy = xy - 5;
+        xy = base_advanced_xy - font;
         value >>= 4;
     } while (value != 0);
 

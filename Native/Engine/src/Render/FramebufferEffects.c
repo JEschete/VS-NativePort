@@ -263,7 +263,7 @@ void Render_BuildFramebufferEffectPrimitives(void)
 }
 
 // decomp: BATTLE.PRG func_8007D734 (src/BATTLE/BATTLE.PRG/146C.c:9311)
-void Render_DrawFramebufferEffect(void* arg0)
+void Render_DrawFramebufferEffect(void* ordering_table)
 {
     MATRIX transform;
     VECTOR translation;
@@ -323,7 +323,7 @@ void Render_DrawFramebufferEffect(void* arg0)
                 bottomRight = &Render_legacyFramebufferEffectPackets->rotatedStrips[(Render_frameBuf * 5) + i];
                 bottomRight->x3 = projected.vx;
                 bottomRight->y3 = projected.vy;
-                AddPrim(arg0 + (Render_framebufferEffectDepth * 4),
+                AddPrim(ordering_table + (Render_framebufferEffectDepth * 4),
                     &Render_legacyFramebufferEffectPackets->rotatedStrips[(Render_frameBuf * 5) + i]);
             }
         } else {
@@ -339,14 +339,14 @@ void Render_DrawFramebufferEffect(void* arg0)
                                  + sizeof(Render_legacyFramebufferEffectPackets->rotatedStrips));
                 sprite->x0 = Render_framebufferEffectOffset.x + i * 64;
                 sprite->y0 = Render_framebufferEffectOffset.y;
-                AddPrim(arg0 + (Render_framebufferEffectDepth * 4), &Render_legacyFramebufferEffectPackets->flatStrips[index]);
+                AddPrim(ordering_table + (Render_framebufferEffectDepth * 4), &Render_legacyFramebufferEffectPackets->flatStrips[index]);
                 tpage = Render_framebufferEffectUsesPreviousFrame ? GetTPage(2, Render_framebufferEffectBlendMode,
                                          i * 64 + ((Render_frameBuf ^ 1) * 320), 0)
                                    : GetTPage(2, Render_framebufferEffectBlendMode,
                                          i * 64 + ((Render_frameBuf & 1) * 320), 0);
                 SetDrawMode(&Render_legacyFramebufferEffectPackets->drawModes[(Render_frameBuf * 5) + i], 0, 1,
                     tpage, &clip);
-                AddPrim(arg0 + (Render_framebufferEffectDepth * 4),
+                AddPrim(ordering_table + (Render_framebufferEffectDepth * 4),
                     &Render_legacyFramebufferEffectPackets->drawModes[(Render_frameBuf * 5) + i]);
             }
         }
@@ -370,9 +370,9 @@ void Render_DrawFramebufferEffect(void* arg0)
 }
 
 // decomp: BATTLE.PRG func_8007DD50 (src/BATTLE/BATTLE.PRG/146C.c:9417)
-void Render_SetFramebufferEffectEnabled(int arg0)
+void Render_SetFramebufferEffectEnabled(int enabled)
 {
-    if (arg0 != 0) {
+    if (enabled != 0) {
         Render_framebufferEffectState = 1;
         if (Render_legacyFramebufferEffectPackets == NULL) {
             Render_legacyFramebufferEffectPackets = Core_Memory_AllocateFromHighEnd(sizeof *Render_legacyFramebufferEffectPackets);
@@ -384,37 +384,37 @@ void Render_SetFramebufferEffectEnabled(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8007DDAC (src/BATTLE/BATTLE.PRG/146C.c:9430)
-void Render_SetFramebufferEffectRotation(int arg0) { Render_framebufferEffectRoll = arg0; }
+void Render_SetFramebufferEffectRotation(int roll_angle) { Render_framebufferEffectRoll = roll_angle; }
 
 // decomp: BATTLE.PRG func_8007DDB8 (src/BATTLE/BATTLE.PRG/146C.c:9432)
-void Render_SetFramebufferEffectScale(Render_FramebufferEffectTranslation* arg0)
+void Render_SetFramebufferEffectScale(Render_FramebufferEffectTranslation* scale)
 {
-    Render_framebufferEffectScale.vx = arg0->x;
-    Render_framebufferEffectScale.vy = arg0->y;
+    Render_framebufferEffectScale.vx = scale->x;
+    Render_framebufferEffectScale.vy = scale->y;
 }
 
 // decomp: BATTLE.PRG func_8007DDD4 (src/BATTLE/BATTLE.PRG/146C.c:9438)
-void Render_SetFramebufferEffectTint(CVECTOR* arg0) { Render_framebufferEffectTint = *arg0; }
+void Render_SetFramebufferEffectTint(CVECTOR* tint) { Render_framebufferEffectTint = *tint; }
 
 // decomp: BATTLE.PRG func_8007DDF8 (src/BATTLE/BATTLE.PRG/146C.c:9440)
-void Render_SetFramebufferEffectOffset(Render_FramebufferEffectTranslation* arg0) { Render_framebufferEffectOffset = *arg0; }
+void Render_SetFramebufferEffectOffset(Render_FramebufferEffectTranslation* offset) { Render_framebufferEffectOffset = *offset; }
 
 // decomp: BATTLE.PRG func_8007DE2C (src/BATTLE/BATTLE.PRG/146C.c:9442)
-void Render_SetFramebufferEffectBlendMode(int arg0) { Render_framebufferEffectBlendMode = arg0; }
+void Render_SetFramebufferEffectBlendMode(int blend_mode) { Render_framebufferEffectBlendMode = blend_mode; }
 
 // decomp: BATTLE.PRG func_8007DE38 (src/BATTLE/BATTLE.PRG/146C.c:9444)
 void Render_SetFramebufferEffectParameter(int arg0) { Render_framebufferEffectParameter = arg0; }
 
 // decomp: BATTLE.PRG func_8007DE44 (src/BATTLE/BATTLE.PRG/146C.c:9446)
-void Render_SetFramebufferEffectDepth(u_int arg0)
+void Render_SetFramebufferEffectDepth(u_int ordering_depth)
 {
-    if (arg0 < 0x800) {
-        Render_framebufferEffectDepth = arg0;
+    if (ordering_depth < 0x800) {
+        Render_framebufferEffectDepth = ordering_depth;
     }
 }
 
 // decomp: BATTLE.PRG func_8007DE5C (src/BATTLE/BATTLE.PRG/146C.c:9453)
-void Render_SetFramebufferPreviousFrame(int arg0) { Render_framebufferEffectUsesPreviousFrame = arg0; }
+void Render_SetFramebufferPreviousFrame(int use_previous_frame) { Render_framebufferEffectUsesPreviousFrame = use_previous_frame; }
 
 // decomp: BATTLE.PRG func_8007DE68 (src/BATTLE/BATTLE.PRG/146C.c:9455)
 int Render_FramebufferEffectState(void) { return Render_framebufferEffectState; }
@@ -423,18 +423,18 @@ int Render_FramebufferEffectState(void) { return Render_framebufferEffectState; 
 short Render_FramebufferEffectRotation(void) { return Render_framebufferEffectRoll; }
 
 // decomp: BATTLE.PRG func_8007DE88 (src/BATTLE/BATTLE.PRG/146C.c:9459)
-void Render_FramebufferEffectScale(int* arg0)
+void Render_FramebufferEffectScale(int* output)
 {
-    arg0[0] = Render_framebufferEffectScale.vx;
-    arg0[1] = Render_framebufferEffectScale.vx;
-    arg0[2] = 0;
+    output[0] = Render_framebufferEffectScale.vx;
+    output[1] = Render_framebufferEffectScale.vx;
+    output[2] = 0;
 }
 
 // decomp: BATTLE.PRG func_8007DEA8 (src/BATTLE/BATTLE.PRG/146C.c:9466)
-void Render_FramebufferEffectTint(CVECTOR* arg0) { *arg0 = Render_framebufferEffectTint; }
+void Render_FramebufferEffectTint(CVECTOR* output) { *output = Render_framebufferEffectTint; }
 
 // decomp: BATTLE.PRG func_8007DECC (src/BATTLE/BATTLE.PRG/146C.c:9468)
-void Render_FramebufferEffectOffset(Render_FramebufferEffectTranslation* arg0) { *arg0 = Render_framebufferEffectOffset; }
+void Render_FramebufferEffectOffset(Render_FramebufferEffectTranslation* output) { *output = Render_framebufferEffectOffset; }
 
 // decomp: BATTLE.PRG func_8007DF00 (src/BATTLE/BATTLE.PRG/146C.c:9470)
 int Render_FramebufferEffectBlendMode(void) { return Render_framebufferEffectBlendMode; }

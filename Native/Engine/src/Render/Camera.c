@@ -72,10 +72,10 @@ void Render_BuildCameraViewMatrix(void)
 }
 
 // decomp: BATTLE.PRG vs_battle_setNearClip (src/BATTLE/BATTLE.PRG/146C.c:9041)
-void Render_SetCameraNearClip(int arg0)
+void Render_SetCameraNearClip(int near_clip)
 {
-    Render_nearClip = arg0;
-    Render_SetRoomPolygonNearClip(arg0);
+    Render_nearClip = near_clip;
+    Render_SetRoomPolygonNearClip(near_clip);
 }
 
 // decomp: BATTLE.PRG vs_battle_setProjectionDistance (src/BATTLE/BATTLE.PRG/146C.c:9047)
@@ -86,11 +86,11 @@ void Render_SetCameraProjectionDistance(int projectionDistance)
 }
 
 // decomp: BATTLE.PRG vs_battle_setFarClip (src/BATTLE/BATTLE.PRG/146C.c:9053)
-void Render_SetCameraFarClip(int farClip, int arg1)
+void Render_SetCameraFarClip(int farClip, int preserve_texture_lod)
 {
     Render_frameScratch.camera.farClip = farClip;
 
-    if (arg1 == 0) {
+    if (preserve_texture_lod == 0) {
         if (farClip < 0) {
             farClip += 7;
         }

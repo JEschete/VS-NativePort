@@ -17,7 +17,7 @@ extern DRAWENV Render_legacyDrawEnvironments[2];
 extern DISPENV Render_legacyDisplayEnvironments[2];
 extern int Render_frameBuf;
 extern int Render_isFrameStepPaused;
-void Render_ConfigureFieldDisplay(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5);
+void Render_ConfigureFieldDisplay(int frame_width, int frame_height, int projection_distance, int clear_red, int clear_green, int clear_blue);
 int Render_PresentFieldFrame(u_long* otag);
 void Render_EnableDisplay(void);
 void Render_DisableDisplay(void);

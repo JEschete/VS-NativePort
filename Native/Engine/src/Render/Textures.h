@@ -24,11 +24,11 @@ extern Render_TextureSlot Render_legacyActorTextureSlots[25];
 extern Render_TextureSlot Render_legacyWeaponTextureSlots[20];
 void Render_InitializeTextureSlotReservations(void);
 void Render_AdvanceTexturePageRetirements(void);
-int Render_ReserveTexturePageRange(u_int arg0, u_int arg1, int arg2);
-int Render_RetireTexturePageRange(u_int arg0, u_int arg1, int arg2);
-void Render_ParseTextureImage(u_long* arg0, TIM_IMAGE* tim);
+int Render_ReserveTexturePageRange(u_int first_page, u_int page_count, int owner_tag);
+int Render_RetireTexturePageRange(u_int first_page, u_int page_count, int owner_tag);
+void Render_ParseTextureImage(u_long* image_cursor, TIM_IMAGE* tim);
 DR_MOVE* Render_BeginTextureMovePacket(void);
 void Render_EndTextureMovePacket(DR_MOVE* p);
-void Render_QueueTextureRectangleMove(RECT* arg0, int arg1, int arg2);
+void Render_QueueTextureRectangleMove(RECT* source_rectangle, int destination_x, int destination_y);
 
 #endif // VS_RENDER_TEXTURES_H_DECLS
