@@ -32,8 +32,12 @@ verification of the current worktree.
   Separate #167's exact132-case persistent Release prefix completes with
   96 passed/36 blocked and0 engine errors on the preserved22fbc737 image;
   no malformed producer or causal fix is inferred.
-  The matching current132-case Debug history is still running; #167 stays
-  open until a producer/reproducible defect or justified resolution exists.
+  Matching current132-case Debug history now completes95 passed/37 blocked
+  with0 engine errors and complete tracing. At case132/script1050 it
+  matches the historical scene30/32/17/eventPC233/wait70/models0/170/169/10
+  without malformed packets. #167 stays open: no causal producer repair
+  is established. Next evidence is a current failing packet/producer stack
+  or the historical ACFD matching image, not Ghidra startup or byte matching.
   See the [Gravity checkpoint](HANDOFF_HISTORY.md#gravity-material-and-canonical-target-origin-2026-10-26).
 - #42 is closed after final source98d38089 and evidence011eecc3 both received
   exact green CI40428688667/40429529689. Separate non-MA #197 now repairs
@@ -55,9 +59,9 @@ verification of the current worktree.
   binding/history is the next required observation. Portable reference
   cards/states are empty and Ghidra MCP is unavailable. #167's current
   standalone scene chain passes; the historical producer remains unresolved.
-  No texture/default/packet-skip fallback is authorized. The next crash fix
-  is blocked on the original E084 observation, not on an uncommitted patch.
-  #18/#148/#149/#151/#160/#167 remain open with their distinct acceptance
+  No texture/default/packet-skip fallback is authorized.   The earlier E084 reference blocker is superseded by the verified owner-
+  authorized native material correction and canonical-origin producer fix.
+  #18/#148/#149/#151/#167 remain open with their distinct acceptance
   limits; neither selected replay nor naming/coverage inventory closes them.
 - #42's last seven entries are resolved locally: F01805/F01806 native
   navigation (`15d290bc`, exact green40421506975); F00745/F00747 bounded room

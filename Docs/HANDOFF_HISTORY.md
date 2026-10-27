@@ -121,9 +121,28 @@ retain original four-limb damage at1504. All active captures are local
 under target-visual-Debug/Release; owner accepted the actual placement.
 #160 is closed with source/CI/component/runtime and owner evidence; #149/
 #151 were reconciled without rewriting the later fixture-defeat result.
-Current exact132-case Debug history for #167 remains in progress under
-`history167-Debug`; only the completed Release prefix counts above are
-acceptance evidence at this checkpoint.
+Current exact132-case Debug history for #167 subsequently completes under
+`history167-Debug`, session1793068535457849-0:95 passed/37 blocked,0 engine
+errors, complete host trace and teardown. At final case132/script1050
+(aggregate168592) it matches the historical fault state exactly:
+zone32/room17/scene30/control3,event0/source1/phase4,thread0 PC delta233/
+wait70,models0/170/169/10. No malformed packet/AV occurs. The original
+3600-tick final-case budget still blocks the long authored chain; no gate
+is relaxed. Blocked reasons are14 fixture defeats,7 source-event budgets
+and16 destination-event budgets. Current Debug exe SHA256
+210b16e2ea56d9051b4688b295e7dd43c2e75e6a5440c80bbe7d0b54d1e5ae3e;
+the preserved pre-fix Release prefix separately reports96/36 with0 errors.
+All132 cases are accounted for in each run, not all passed.
+
+The source/code fix and owner acceptance close #160. #167's historical
+producer remains unproven despite exact current state/history alignment;
+no code was invented simply to close it. Its next discriminating input is
+a current failing packet with producer/call stack or the historical ACFD
+matching image. Ghidra MCP is live and is no longer a startup blocker.
+Per-issue/#4 comments and local
+`scene167-persistent-debug-verified.json` preserve these limits. Unrelated
+owner deletion of Docs/ENEMY_DATA_SCHEME.md appeared during validation and
+was left untouched and unstaged.
 
 ## Current separate scene observations and blockers (2026-10-26)
 
