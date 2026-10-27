@@ -24,7 +24,9 @@ BODY_ALIASES = {
                "7E05C.s func_800E6974"),
 }
 TOKEN = re.compile(
-    r'R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
+    # Consume preprocessing numbers before character quotes (C++ digit separators).
+    r"(?P<number>(?<!\w)(?:\d|\.\d)(?:[eEpP][+-]|[\w.]|'(?=\w))*)"
+    r'|R"(?P<delimiter>[^ ()\\\t\r\n]{0,16})\(.*?\)(?P=delimiter)"'
     r'|"(?:\\.|[^"\\])*"|\'(?:\\.|[^\'\\])*\'|//[^\n]*|/\*.*?\*/',
     re.DOTALL,
 )
@@ -47,7 +49,11 @@ class Definition:
 
 
 def mask_literals(text: str) -> str:
-    return TOKEN.sub(lambda match: re.sub(r"[^\n]", " ", match[0]), text)
+    return TOKEN.sub(
+        lambda match: match[0] if match["number"] is not None
+        else re.sub(r"[^\n]", " ", match[0]),
+        text,
+    )
 
 
 def closing(text: str, start: int, left: str, right: str) -> int:

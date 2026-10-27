@@ -1134,3 +1134,13 @@ generation runs are identical. The alias for the packed-rectangle uploader has
 separate original provenance, not a second application of its rule.
 Evidence: `build\quality\issue148-render-direct-*`. The remaining lifecycle and
 expanded-inventory reconciliation gates are still active.
+
+The shared lexical mask also preserves C++ preprocessing numbers, including
+apostrophe digit separators (#221). It no longer mistakes the span between
+`1'000` and `2'000` for a character literal and hides intervening identifiers.
+Decimal, hexadecimal, binary, floating/exponent and user-defined numeric literals
+have red/green controls; real characters, ordinary/prefixed raw strings and
+comments remain masked at their original offsets. On dirty base `ab4a893d`,
+18 mask/audit tests and 153 copier tests pass, scoped quality has zero findings,
+and two complete generations preserve all 742 generated and 121 owned paths
+byte-for-byte. Evidence: `build\quality\issue221-*`.

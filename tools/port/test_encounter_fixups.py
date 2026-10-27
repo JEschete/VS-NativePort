@@ -2112,6 +2112,12 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
                 self.assertEqual(source, retained)
 
+    def test_identifier_fixups_see_code_between_numeric_separator_literals(self):
+        source = "auto n = 1'000; int arg0 = 7; auto m = 2'000; // arg0\n"
+        changed, count = copy_to_native.substitute_fixup(source, r"\barg0\b", "value")
+        self.assertEqual(changed, source.replace("int arg0", "int value"))
+        self.assertEqual(count, 1)
+
     def test_regex_fixups_compile_each_distinct_selector_once(self):
         copy_to_native.compiled_fixup_regex.cache_clear()
         self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)

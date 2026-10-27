@@ -21,6 +21,34 @@ from tools.port.audit_assembly_gaps import (
 
 
 class AssemblyGapAuditTests(unittest.TestCase):
+    def test_mask_keeps_cpp_numeric_separators(self):
+        for literal in (
+            "1'000", "0xAB'CDu", "0b10'01", "07'77", "1'000.25'00f",
+            ".12'34", "1e+1'000", "0x1.A'Bp-1'0", "1'000_units",
+        ):
+            with self.subTest(literal=literal):
+                source = f"auto n = {literal}; int arg0 = 7;\nauto m = {literal};"
+                self.assertEqual(audit_module.mask_literals(source), source)
+
+    def test_numeric_separators_do_not_unmask_real_literals_or_comments(self):
+        source = (
+            "auto n = 1'000; char c = '7'; auto q = L'\\'';\n"
+            'auto s = "arg9 2\'000"; auto r = R"tag(arg9 3\'000)tag";\n'
+            'auto prefixed = u8R"tag(arg9 " 6\'000)tag";\n'
+            "// arg9 4'000\n/* arg9 5'000 */ int arg0 = 7;\n"
+        )
+        masked = audit_module.mask_literals(source)
+        self.assertEqual(len(masked), len(source))
+        self.assertEqual(
+            [index for index, value in enumerate(masked) if value == "\n"],
+            [index for index, value in enumerate(source) if value == "\n"],
+        )
+        self.assertIn("1'000", masked)
+        self.assertIn("int arg0 = 7;", masked)
+        self.assertNotIn("arg9", masked)
+        self.assertNotIn("'7'", masked)
+        self.assertNotIn("L'\\''", masked)
+
     def test_published_report_does_not_claim_an_unversioned_pin_is_a_parent_head(self):
         reference = {
             "revision": "unversioned snapshot",
