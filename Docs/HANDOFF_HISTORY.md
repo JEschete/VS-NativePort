@@ -98,8 +98,25 @@ Fresh final validation on dirty506f750b plus this scoped work:
   unavailable zone1 hostile and was correctly rejected; it is not acceptance.
 
 All local evidence is under ignored `build\quality\issue42-final`; no
-disc-derived data or captures are committed. Final publication, exact CI,
-full-tidy result and #42 closure are separate remaining checkpoint gates.
+disc-derived data or captures are committed. Final implementation is
+`c61d4eab47b35a79ce5bfdc920a4dadd4ac3dab1`. Its exact CI40428271455 failed
+on the three owned-AI timing-header include positions. The scoped repair
+`98d38089bf1b9b38ec5dab7668a5da389fb47a69` passes exact Source Quality
+40428688667, the default gate0 findings/0 new and focused AI tidy0/0.
+No baseline changed.
+
+The full `quality-native.cmd --tidy` completed with389 actionable/95 absent
+from its historical baseline. Three are the now-fixed include positions.
+The remaining emitted locations are eight unchanged Content/audio/render/
+save headers and save implementations; their Git blobs exactly match
+owner checkpoint506f750b. Header diagnostics repeat across translation
+units, so95 is not a distinct-defect count. This newly inventoried scope is
+tracked in #197 and is not hidden by a baseline refresh, misrepresented as
+an all-tree pass, or silently folded into #42. The full command's UTF-16
+output remains `final-full-quality.txt`; changed-code analysis and both
+full runtime suites pass independently. #25's earlier fast-quality scope
+remains distinct. Continue #197 as separate non-MA quality work, then the
+remaining crash/coverage/name investigations without weakening their gates.
 
 ## Scripted-navigation draft verification (2026-10-26)
 

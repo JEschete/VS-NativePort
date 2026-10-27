@@ -19,11 +19,16 @@ verification of the current worktree.
   SDK/platform coverage, MA retirement and full-game parity remain separate.
   Full Debug/Release1001/9,572,047 each, focused20/262,416,131 port/32 naming,
   621 native fields/0 mismatches, two stable generations/1,028 outputs/
-  119 owned paths pass. Focused tidy0 new; full tidy is still running.
+  119 owned paths pass. Focused tidy0 new. Full tidy completed and exposed
+  pre-existing header/save debt now tracked separately in #197; its eight
+  source files are byte-identical to506f750b. Three introduced include-order
+  findings are fixed in98d38089, exact green Source Quality40428688667.
   Normal-speed private-save Debug/Release New Game reaches MAP001/6000,
   with4,586 scripted-control frames and0 errors each. Real Lab AI targeting
   and movement runs1800 ticks each without errors; no damage or full-combat
-  parity is claimed. Final publication/exact CI and issue closure remain gates.
+  parity is claimed. Final implementation is c61d4eab plus98d38089;
+  original-cohort closure does not certify the #197 whole-tree quality gate.
+  Separate non-MA work proceeds after reconciling #42.
   See the [final-seven checkpoint](HANDOFF_HISTORY.md#final-seven-assembly-gap-resolution-2026-10-26).
 - #42 F01805/F01806's existing scripted-navigation draft is now source-reviewed
   and locally verified against `7C7E0.s:216-421`. It preserves full native
