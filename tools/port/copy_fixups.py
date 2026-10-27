@@ -2327,6 +2327,26 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
                        ("blockSz", "allocation_units"))],
     (r"^Core::Memory::InitializeHeap$", r"\bvalue\b", "byte_count",
      "main.c:9008 divides the supplied arena byte extent by sizeof the native heap header"),
+    (r"^Core::Memory::ReadUnalignedShort$", r"\barg0\b", "source",
+     "573B8.c:146-152 reads two little-endian bytes from the supplied source address"),
+    *[(r"^Core::Memory::ZeroWordsBackward$", rf"\b{old}\b", new,
+       "5BF94.c:4476-4484 forms the end cursor from a byte extent then clears descending words")
+      for old, new in (("arg0", "destination"), ("arg1", "byte_count"),
+                       ("var_v0", "word_cursor"))],
+    *[(r"^Core::Random::NextInterfaceRandomBits$", rf"\b{old}\b", new,
+       "5BF94.c:4496-4501 returns high bits of the previous multiplicative state")
+      for old, new in (("value", "bit_count"), ("temp_a1", "previous_state"))],
+    *[(r"^Core::Random::RandomRangeExclusive$", rf"\b{old}\b", new,
+       "5BF94.c:5810-5826 accepts either bound order and adds a modulo offset to the lesser")
+      for old, new in (("arg0", "bound_a"), ("arg1", "bound_b"),
+                       ("new_var", "offset"))],
+    *[(r"^Core::Random::NextBounded$", rf"\b{old}\b", new,
+       "main.c:8251-8275 scales the shuffle index then the complemented sample with signed rounding")
+      for old, new in (("var_v0", "scaled_index"),
+                       ("temp_s0", "picked_sample"),
+                       ("var_a0", "scaled_result"))],
+    (r"^Core::Random::NextAveraged$", r"\barg0\b", "max",
+     "main.c:8277-8285 forwards the same maximum to twelve bounded draws before averaging"),
     *[(r"^Field::ClearSavedRoomEnemies$", rf"\b{old}\b", new,
        "146C.c:8509 forwards room and zone to the matching actor-state cache clear at146C.c:789")
       for old, new in (("arg0", "mapId"), ("arg1", "zoneId"))],

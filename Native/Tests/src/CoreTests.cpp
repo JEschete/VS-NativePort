@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <array>
 #include <bit>
 #include <chrono>
@@ -7,14 +8,36 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/BiosRand.h"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Random.hpp"
 #include "Legacy/Core/LibEtc.h"
 
+extern "C" {
+#include "Core/Random.h"
+}
+
 using VS::i32;
 namespace Core = VS::Core;
+
+namespace {
+struct OriginalRandomState {
+  decltype(std::to_array(Core_randomShuffleTable)) table =
+      std::to_array(Core_randomShuffleTable);
+  int index = Core_randomShuffleIndex;
+  unsigned int seed = Core_Random_State();
+  unsigned int interface_state = Core_interfaceRandomState;
+
+  ~OriginalRandomState() {
+    std::copy(table.begin(), table.end(), Core_randomShuffleTable);
+    Core_randomShuffleIndex = index;
+    Core_Random_Seed(seed);
+    Core_interfaceRandomState = interface_state;
+  }
+};
+}  // namespace
 
 TEST_CASE("AI distances preserve signed GTE components and vertical offsets",
           "[core][math][distance]") {
@@ -323,4 +346,52 @@ TEST_CASE("Frame work baseline resets at actual logical frame boundaries",
         Core::FrameCounterTicks(
             std::chrono::duration_cast<std::chrono::nanoseconds>(duration)) +
             1);
+}
+
+TEST_CASE("Copied shuffled random draws match the native sequence",
+          "[core][random]") {
+  OriginalRandomState state;
+  Core_Random_InitializeShuffleTable();
+  Core::Random expected;
+  for (int maximum : {0, 1, 2, 255, 1024, 65536}) {
+    CHECK(Core_Random_NextBounded(maximum) == expected.Next(maximum));
+    CHECK(Core_Random_NextAveraged(maximum) == expected.NextSmoothed(maximum));
+    CHECK(Core_Random_Rand() == expected.Raw());
+  }
+}
+
+TEST_CASE("Original random ranges preserve unordered and equal bounds",
+          "[core][random]") {
+  OriginalRandomState state;
+  constexpr std::array<std::array<int, 2>, 8> kBounds{{{0, 0},
+                                                       {-3, -3},
+                                                       {2, 10},
+                                                       {10, 2},
+                                                       {-8, -2},
+                                                       {-2, -8},
+                                                       {-7, 5},
+                                                       {5, -7}}};
+  for (const auto& [first, second] : kBounds) {
+    Core_Random_Seed(1);
+    Core::Rand15 expected(1);
+    const auto [low, high] = std::minmax(first, second);
+    for (int sample = 0; sample < 64; ++sample) {
+      const auto value =
+          low == high ? low : low + expected.Next() % (high - low);
+      CHECK(Core_Random_RandomRangeExclusive(first, second) == value);
+      CHECK(Core_Random_State() == expected.State());
+    }
+  }
+}
+
+TEST_CASE("Interface random requests return high bits of the previous state",
+          "[core][random]") {
+  OriginalRandomState state;
+  constexpr unsigned int kInitial = 0x81234567;
+  for (int bits : {1, 8, 10, 31, 32}) {
+    Core_interfaceRandomState = kInitial;
+    CHECK(Core_Random_NextInterfaceRandomBits(bits) ==
+          (kInitial >> (32 - bits)));
+    CHECK(Core_interfaceRandomState == kInitial * 0x19660Du);
+  }
 }

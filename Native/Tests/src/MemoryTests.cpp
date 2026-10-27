@@ -6,6 +6,34 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Memory/WordCopy.h"
+#include "Legacy/Psx.h"
+
+extern "C" {
+#include "Core/Memory/Copy.h"
+}
+
+TEST_CASE("Signed short reads preserve aligned and unaligned byte order",
+          "[core][memory]") {
+  alignas(std::uint16_t) std::array<unsigned char, 5> bytes{0x34, 0x12, 0xFF,
+                                                            0x80, 0x7F};
+  CHECK(Core_Memory_ReadUnalignedShort(bytes.data()) == 0x1234);
+  CHECK(Core_Memory_ReadUnalignedShort(bytes.data() + 1) == -238);
+  CHECK(Core_Memory_ReadUnalignedShort(bytes.data() + 2) == -32513);
+  CHECK(Core_Memory_ReadUnalignedShort(bytes.data() + 3) == 0x7F80);
+}
+
+TEST_CASE("Backward word clear consumes bytes without touching adjacent words",
+          "[core][memory]") {
+  for (int bytes : {4, 8, 12, 16, 20, 32, 256}) {
+    const auto words = static_cast<std::size_t>(bytes / 4);
+    std::vector<std::uint32_t> memory(words + 2, 0xA5A5A5A5u);
+    Core_Memory_ZeroWordsBackward(memory.data() + 1, bytes);
+    CHECK(memory.front() == 0xA5A5A5A5u);
+    CHECK(memory.back() == 0xA5A5A5A5u);
+    CHECK(std::all_of(memory.begin() + 1, memory.end() - 1,
+                      [](auto word) { return word == 0; }));
+  }
+}
 
 TEST_CASE("Battle memory clear preserves bounds and uses the full size",
           "[core][memory]") {

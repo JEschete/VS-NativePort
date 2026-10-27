@@ -12,29 +12,29 @@ int Core_randomShuffleTable[97];
 int Core_randomShuffleIndex;
 
 // decomp: BATTLE.PRG vs_battle_keystreamBits (src/BATTLE/BATTLE.PRG/5BF94.c:4496)
-u_int Core_Random_NextInterfaceRandomBits(int value)
+u_int Core_Random_NextInterfaceRandomBits(int bit_count)
 {
-    u_int temp_a1 = Core_interfaceRandomState;
-    Core_interfaceRandomState = temp_a1 * 0x19660D;
-    return temp_a1 >> (32 - value);
+    u_int previous_state = Core_interfaceRandomState;
+    Core_interfaceRandomState = previous_state * 0x19660D;
+    return previous_state >> (32 - bit_count);
 }
 
 // decomp: BATTLE.PRG vs_battle_randUniformInt (src/BATTLE/BATTLE.PRG/5BF94.c:5810)
-int Core_Random_RandomRangeExclusive(int arg0, int arg1)
+int Core_Random_RandomRangeExclusive(int bound_a, int bound_b)
 {
-    if (arg0 != arg1) {
-        int new_var;
+    if (bound_a != bound_b) {
+        int offset;
 
-        if (arg1 < arg0) {
-            new_var = Core_Random_Rand() % (arg0 - arg1);
-            return new_var + arg1;
+        if (bound_b < bound_a) {
+            offset = Core_Random_Rand() % (bound_a - bound_b);
+            return offset + bound_b;
         }
 
-        new_var = Core_Random_Rand() % (arg1 - arg0);
-        return new_var + arg0;
+        offset = Core_Random_Rand() % (bound_b - bound_a);
+        return offset + bound_a;
     }
 
-    return arg0;
+    return bound_a;
 }
 
 // decomp: SLUS_010.40 _initRand (src/SLUS_010.40/main.c:8239)
@@ -53,37 +53,37 @@ void Core_Random_InitializeShuffleTable(void)
 // decomp: SLUS_010.40 vs_main_getRand (src/SLUS_010.40/main.c:8251)
 int Core_Random_NextBounded(int max)
 {
-    int temp_s0;
-    int var_a0;
-    int var_v0;
+    int picked_sample;
+    int scaled_result;
+    int scaled_index;
 
-    var_v0 = Core_randomShuffleTable[Core_randomShuffleIndex] * (sizeof Core_randomShuffleTable / sizeof Core_randomShuffleTable[0]);
+    scaled_index = Core_randomShuffleTable[Core_randomShuffleIndex] * (sizeof Core_randomShuffleTable / sizeof Core_randomShuffleTable[0]);
 
-    if (var_v0 < 0) {
-        var_v0 += 0x7FFF;
+    if (scaled_index < 0) {
+        scaled_index += 0x7FFF;
     }
 
-    Core_randomShuffleIndex = var_v0 >> 0xF;
+    Core_randomShuffleIndex = scaled_index >> 0xF;
 
-    temp_s0 = 0x7FFF - Core_randomShuffleTable[Core_randomShuffleIndex];
+    picked_sample = 0x7FFF - Core_randomShuffleTable[Core_randomShuffleIndex];
     Core_randomShuffleTable[Core_randomShuffleIndex] = Core_Random_Rand();
 
-    var_a0 = temp_s0 * max;
+    scaled_result = picked_sample * max;
 
-    if (var_a0 < 0) {
-        var_a0 += 0x7FFF;
+    if (scaled_result < 0) {
+        scaled_result += 0x7FFF;
     }
 
-    return var_a0 >> 0xF;
+    return scaled_result >> 0xF;
 }
 
 // decomp: SLUS_010.40 vs_main_getRandSmoothed (src/SLUS_010.40/main.c:8277)
-int Core_Random_NextAveraged(int arg0)
+int Core_Random_NextAveraged(int max)
 {
-    return (Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0)
-               + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0)
-               + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0)
-               + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0) + Core_Random_NextBounded(arg0))
+    return (Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max)
+               + Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max)
+               + Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max)
+               + Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max))
          / 12;
 }
 

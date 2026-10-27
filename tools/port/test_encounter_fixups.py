@@ -1695,6 +1695,52 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source = re.sub(pattern, replacement, source)
                 self.assertEqual(source, expected)
 
+    def test_core_names_preserve_memory_units_and_random_draws(self):
+        examples = {
+            "Core::Memory::ReadUnalignedShort": (
+                "return arg0[0] | (arg0[1] << 8);",
+                "return source[0] | (source[1] << 8);",
+            ),
+            "Core::Memory::ZeroWordsBackward": (
+                "var_v0 = arg0 + arg1; do { *--var_v0 = 0; } "
+                "while (arg0 != var_v0);",
+                "word_cursor = destination + byte_count; "
+                "do { *--word_cursor = 0; } "
+                "while (destination != word_cursor);",
+            ),
+            "Core::Random::NextInterfaceRandomBits": (
+                "state = temp_a1 * 0x19660D; return temp_a1 >> (32 - value);",
+                "state = previous_state * 0x19660D; "
+                "return previous_state >> (32 - bit_count);",
+            ),
+            "Core::Random::RandomRangeExclusive": (
+                "if (arg1 < arg0) { new_var = Rand() % (arg0 - arg1); "
+                "return new_var + arg1; }",
+                "if (bound_b < bound_a) { "
+                "offset = Rand() % (bound_a - bound_b); "
+                "return offset + bound_b; }",
+            ),
+            "Core::Random::NextBounded": (
+                "index = var_v0 >> 15; temp_s0 = 32767 - table[index]; "
+                "var_a0 = temp_s0 * max; return var_a0 >> 15;",
+                "index = scaled_index >> 15; "
+                "picked_sample = 32767 - table[index]; "
+                "scaled_result = picked_sample * max; "
+                "return scaled_result >> 15;",
+            ),
+            "Core::Random::NextAveraged": (
+                "return (Next(arg0) + Next(arg0)) / 12;",
+                "return (Next(max) + Next(max)) / 12;",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

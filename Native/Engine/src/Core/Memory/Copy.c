@@ -3,23 +3,23 @@
 #include "Core/Memory/Copy.h"
 
 // decomp: BATTLE.PRG vs_battle_getShort (src/BATTLE/BATTLE.PRG/573B8.c:146)
-short Core_Memory_ReadUnalignedShort(u_char* arg0)
+short Core_Memory_ReadUnalignedShort(u_char* source)
 {
-    if (!((long)arg0 & 1)) {
-        return *(short*)arg0;
+    if (!((long)source & 1)) {
+        return *(short*)source;
     }
-    return arg0[0] | (arg0[1] << 8);
+    return source[0] | (source[1] << 8);
 }
 
 // decomp: BATTLE.PRG vs_battle_rMemzero (src/BATTLE/BATTLE.PRG/5BF94.c:4476)
-void Core_Memory_ZeroWordsBackward(void* arg0, int arg1)
+void Core_Memory_ZeroWordsBackward(void* destination, int byte_count)
 {
-    int* var_v0;
+    int* word_cursor;
 
-    var_v0 = arg0 + arg1;
+    word_cursor = destination + byte_count;
     do {
-        *(int*)--var_v0 = 0;
-    } while (arg0 != var_v0);
+        *(int*)--word_cursor = 0;
+    } while (destination != word_cursor);
 }
 
 // decomp: BATTLE.PRG vs_battle_rMemcpy (src/BATTLE/BATTLE.PRG/5BF94.c:4486)

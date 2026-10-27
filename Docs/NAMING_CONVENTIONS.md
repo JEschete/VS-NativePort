@@ -695,9 +695,51 @@ unrelated dirty work:
 
 Evidence is local under `build\quality\issue148-reviewed-*`,
 `issue148-input-*`, and the earlier vibration/event/heap/room-name proof files.
-The refreshed lexical snapshot still has 24,710 occurrences, 2,145
+That checkpoint's lexical snapshot has 24,710 occurrences, 2,145
 file/identifier pairs and 368 files. Those are **not reviewed-unknown counts**:
 the legacy regex also matches meaningful `speed`/`spec` and the standard-library
 `temp_directory_path`, and file/name pairs can combine several distinct
 bindings. Those matches need contextual classification, not cosmetic renaming
 or blanket exclusion. Repository-wide individual review remains open.
+
+The first batch is published as `aec9a7be`, with successful exact-revision
+Source Quality run `40556560359`.
+
+A second source-reviewed batch on that revision names 13 bindings in
+F01273/F01401/F01404/F01455/F03434/F03435: source bytes, a backward-clear
+destination/byte extent/word cursor, previous interface-RNG state and requested
+bit count, unordered random bounds/modulo offset, and shuffle scaling/sample
+locals. Original `573B8.c:146-152`, `5BF94.c:4476-4501/5810-5826` and
+`SLUS_010.40/main.c:8251-8285` provide the contracts.
+
+F03264 deliberately retains `a0`/`a1`: original `25AC.c:3993-4022` uses these
+as the first two staged words from buffer A, paired with `b0`/`b1` from buffer B.
+F03569 and its F03570 alias retain `arg0`/`arg1`: the original empty bodies
+explicitly declare both unused. The ledger records each retention separately;
+this is not a blanket exception for matching spellings elsewhere.
+
+Before renaming, Debug memory/random controls pass 15 cases/31,343 assertions.
+Afterward Debug and Release each pass 42 cases/719,587 assertions with
+`[core][memory],[core][random],[loot] --reporter compact`. This checks signed
+aligned/unaligned reads, positive word-multiple clear boundaries, exact shuffled
+and averaged RNG sequences, reversed/equal bounds and draw consumption, and
+1..32-bit interface requests. Zero-bit return semantics, unsupported ranges,
+gameplay completion and compatibility retirement are not newly certified.
+Tests restore all previous RNG state, including the underlying seed.
+
+Both configurations build through
+`MSBuild.exe Native\Tests\VS.Tests.vcxproj /m /p:Configuration=<Debug|Release>
+/p:Platform=x64 /nologo /v:minimal`.
+Two generations again preserve 121 owned paths and compare all 742 manifest
+paths: only `Core\Random.c/.h` and `Core\Memory\Copy.c/.h` change, exactly by
+the approved identifier substitutions. Dirty-tree copier tests are 127/127;
+naming tests remain 32/32. Focused `quality-native.cmd --files` with `--tidy`
+reports one existing finding and zero new findings, with no baseline edits.
+New RNG tests are appended so Catch's generated function IDs do not relabel old
+quality debt. Evidence is under `build\quality\issue148-core-*`.
+
+The subsequent lexical snapshot has 24,643 occurrences, 2,131 pairs and 365
+files, still subject to the same false-positive and binding-identity limits.
+All candidates in the reviewed input controller, memory-copy, random and
+runtime source/header files now have either verified replacements or specific
+retention evidence. Other files are not implicitly marked reviewed.

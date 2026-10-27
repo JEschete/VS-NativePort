@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #148's owner clarified the closure gate: individually source-review every
+  remaining candidate, then give it a proven semantic name or a specific
+  retention justification. An unresolved inventory alone cannot close it.
+  Scoped naming milestone `aec9a7be` has exact green Source Quality
+  `40556560359`; Debug/Release each pass 41 cases/912 assertions.
+  A further local core-memory/RNG batch adds 13 verified bindings and four
+  justified retained names, with Debug/Release 42/719,587, stable generation,
+  121 preserved owned paths and focused quality zero new.
+  The lexical snapshot still contains 2,131 file/name pairs in 365 files;
+  that is not an individually reviewed count. See
+  [semantic sweep evidence](NAMING_CONVENTIONS.md#116-native-semantic-sweep-148-2026-10-27).
+  The following resumed-work entry is earlier dirty-tree context: its #148
+  unpublished status is superseded here. Save, scene-catalog, #218 and the
+  owner document deletion remain separate uncommitted work; do not stage them
+  with #148.
 - Owner-directed #151 retry optimization now adds `--door-resume
   <sequence-results.json>`. Subsequent fix runs must reuse a checkpoint and
   select the broken case/from point, not replay the132-stage passed prefix.
