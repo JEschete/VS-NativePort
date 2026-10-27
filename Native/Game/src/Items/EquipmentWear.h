@@ -15,10 +15,10 @@
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 
-short Items_ApplyPpGemMultiplier(int arg0, short arg1, char* arg2);
+short Items_ApplyPpGemMultiplier(int arg0, short base_pp_amount, char* gem_scan_bytes);
 void Items_ConsumeHitEquipmentDp(
     Battle_ActionDefinition* action, Battle_ActorStats* source, Battle_ActorStats* target, int amount);
 void Items_AccumulateHitEquipmentPp(
-    Battle_ActionDefinition* action, Battle_ActorStats* arg1, Battle_ActorStats* arg2, int arg3);
+    Battle_ActionDefinition* action, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats, int dp_amount);
 
 #endif // VS_ITEMS_EQUIPMENTWEAR_H_DECLS

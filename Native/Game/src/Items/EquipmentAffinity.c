@@ -16,73 +16,73 @@
 #include "Render/Palette.h"
 
 // decomp: BATTLE.PRG _calculateArmorClassAffinity (src/BATTLE/BATTLE.PRG/146C.c:9582)
-void Items_RebuildArmorClassAffinity(Battle_ActorStats* arg0, int arg1)
+void Items_RebuildArmorClassAffinity(Battle_ActorStats* actor_stats, int limb_index)
 {
     int i;
 
     for (i = 0; i < 6; ++i) {
-        u_short v = arg0->limbs[arg1].armor.armor.classes[i];
-        arg0->limbs[arg1].armor.classAffinityCurrent.classes[1][i] = v;
-        arg0->limbs[arg1].armor.classAffinityCurrent.classes[0][i] = v;
+        u_short v = actor_stats->limbs[limb_index].armor.armor.classes[i];
+        actor_stats->limbs[limb_index].armor.classAffinityCurrent.classes[1][i] = v;
+        actor_stats->limbs[limb_index].armor.classAffinityCurrent.classes[0][i] = v;
     }
 
     for (i = 0; i < 7; ++i) {
-        u_short v = arg0->limbs[arg1].armor.armor.affinities[i];
-        arg0->limbs[arg1].armor.classAffinityCurrent.affinities[1][i] = v;
-        arg0->limbs[arg1].armor.classAffinityCurrent.affinities[0][i] =
-            v + arg0->limbs[arg1].armor.affinityModifiers[i];
+        u_short v = actor_stats->limbs[limb_index].armor.armor.affinities[i];
+        actor_stats->limbs[limb_index].armor.classAffinityCurrent.affinities[1][i] = v;
+        actor_stats->limbs[limb_index].armor.classAffinityCurrent.affinities[0][i] =
+            v + actor_stats->limbs[limb_index].armor.affinityModifiers[i];
     }
 }
 
 // decomp: BATTLE.PRG _calculateShieldClassAffinity (src/BATTLE/BATTLE.PRG/146C.c:9600)
-void Items_RebuildShieldClassAffinity(Battle_ActorStats* arg0)
+void Items_RebuildShieldClassAffinity(Battle_ActorStats* actor_stats)
 {
-    short temp_v0_2;
+    short combined_rating;
     int i;
 
     for (i = 0; i < 6; ++i) {
-        temp_v0_2 = arg0->shield.base.classes[i] + arg0->shield.gems[0].classes[i]
-                  + arg0->shield.gems[1].classes[i] + arg0->shield.gems[2].classes[i];
-        arg0->shield.classAffinityCurrent.classes[1][i] = temp_v0_2;
-        arg0->shield.classAffinityCurrent.classes[0][i] = temp_v0_2;
+        combined_rating = actor_stats->shield.base.classes[i] + actor_stats->shield.gems[0].classes[i]
+                  + actor_stats->shield.gems[1].classes[i] + actor_stats->shield.gems[2].classes[i];
+        actor_stats->shield.classAffinityCurrent.classes[1][i] = combined_rating;
+        actor_stats->shield.classAffinityCurrent.classes[0][i] = combined_rating;
     }
 
     for (i = 0; i < 7; ++i) {
-        temp_v0_2 = arg0->shield.base.affinities[i] + arg0->shield.gems[0].affinities[i]
-                  + arg0->shield.gems[1].affinities[i]
-                  + arg0->shield.gems[2].affinities[i];
-        arg0->shield.classAffinityCurrent.affinities[1][i] = temp_v0_2;
-        arg0->shield.classAffinityCurrent.affinities[0][i] =
-            temp_v0_2 + arg0->shield.affinityModifiers[i];
+        combined_rating = actor_stats->shield.base.affinities[i] + actor_stats->shield.gems[0].affinities[i]
+                  + actor_stats->shield.gems[1].affinities[i]
+                  + actor_stats->shield.gems[2].affinities[i];
+        actor_stats->shield.classAffinityCurrent.affinities[1][i] = combined_rating;
+        actor_stats->shield.classAffinityCurrent.affinities[0][i] =
+            combined_rating + actor_stats->shield.affinityModifiers[i];
     }
 }
 
 // decomp: BATTLE.PRG _calculateWeaponClassAffinity (src/BATTLE/BATTLE.PRG/146C.c:9622)
-void Items_RebuildWeaponClassAffinity(Battle_ActorStats* arg0)
+void Items_RebuildWeaponClassAffinity(Battle_ActorStats* actor_stats)
 {
-    short temp_v0_2;
+    short combined_rating;
     int i;
 
     for (i = 0; i < 6; ++i) {
-        temp_v0_2 = arg0->weapon.blade.classes[i] + arg0->weapon.gems[0].classes[i]
-                  + arg0->weapon.gems[1].classes[i] + arg0->weapon.gems[2].classes[i];
-        arg0->weapon.classAffinityCurrent.classes[1][i] = temp_v0_2;
-        arg0->weapon.classAffinityCurrent.classes[0][i] = temp_v0_2;
+        combined_rating = actor_stats->weapon.blade.classes[i] + actor_stats->weapon.gems[0].classes[i]
+                  + actor_stats->weapon.gems[1].classes[i] + actor_stats->weapon.gems[2].classes[i];
+        actor_stats->weapon.classAffinityCurrent.classes[1][i] = combined_rating;
+        actor_stats->weapon.classAffinityCurrent.classes[0][i] = combined_rating;
     }
 
     for (i = 0; i < 7; ++i) {
-        temp_v0_2 = arg0->weapon.blade.affinities[i] + arg0->weapon.gems[0].affinities[i]
-                  + arg0->weapon.gems[1].affinities[i]
-                  + arg0->weapon.gems[2].affinities[i];
-        arg0->weapon.classAffinityCurrent.affinities[1][i] = temp_v0_2;
-        arg0->weapon.classAffinityCurrent.affinities[0][i] =
-            temp_v0_2 + arg0->weapon.affinityModifiers[i];
+        combined_rating = actor_stats->weapon.blade.affinities[i] + actor_stats->weapon.gems[0].affinities[i]
+                  + actor_stats->weapon.gems[1].affinities[i]
+                  + actor_stats->weapon.gems[2].affinities[i];
+        actor_stats->weapon.classAffinityCurrent.affinities[1][i] = combined_rating;
+        actor_stats->weapon.classAffinityCurrent.affinities[0][i] =
+            combined_rating + actor_stats->weapon.affinityModifiers[i];
     }
 }
 
 // decomp: BATTLE.PRG _triggerArmorAffinityChange (src/BATTLE/BATTLE.PRG/146C.c:10773)
 void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
-    int affinity, int arg3, int actorId)
+    int affinity, int equipment_label_id, int actorId)
 {
     int targetAffinity;
     int i;
@@ -147,7 +147,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
         ++equipment->affinities[targetAffinity];
 
         if (actorId == 0) {
-            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, targetAffinity + 6, 1);
+            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, targetAffinity + 6, 1);
         }
 
         if (targetAffinity == 0) {
@@ -161,7 +161,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
                         --equipment->affinities[i];
 
                         if (actorId == 0) {
-                            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, i + 6, 0x80000001);
+                            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, i + 6, 0x80000001);
                         }
                     }
                 }
@@ -178,7 +178,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
                 --equipment->affinities[physical];
 
                 if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, physical + 6, 0x80000001);
+                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, physical + 6, 0x80000001);
                 }
             }
         }
@@ -193,7 +193,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
                 --equipment->affinities[opposingAffinity];
 
                 if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, opposingAffinity + 6, 0x80000001);
+                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingAffinity + 6, 0x80000001);
                 }
             }
         }
@@ -202,7 +202,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 
 // decomp: BATTLE.PRG _triggerWeaponAffinityChange (src/BATTLE/BATTLE.PRG/146C.c:10892)
 void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
-    int affinity, int arg3, int suppressNotification)
+    int affinity, int equipment_label_id, int suppressNotification)
 {
     int targetAffinity;
     int i;
@@ -269,7 +269,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
     ++equipment->affinities[targetAffinity];
 
     if (suppressNotification == 0) {
-        ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, targetAffinity + 6, 1);
+        ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, targetAffinity + 6, 1);
     }
 
     if (targetAffinity == 0) {
@@ -283,7 +283,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
                     --equipment->affinities[i];
 
                     if (suppressNotification == 0) {
-                        ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, i + 6, 0x80000001);
+                        ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, i + 6, 0x80000001);
                     }
                 }
             }
@@ -300,7 +300,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
             --equipment->affinities[physical];
 
             if (suppressNotification == 0) {
-                ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, physical + 6, 0x80000001);
+                ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, physical + 6, 0x80000001);
             }
         }
     }
@@ -314,7 +314,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
             --equipment->affinities[opposingAffinity];
 
             if (suppressNotification == 0) {
-                ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, opposingAffinity + 6, 0x80000001);
+                ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingAffinity + 6, 0x80000001);
             }
         }
     }
@@ -322,7 +322,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 
 // decomp: BATTLE.PRG _triggerClassChange (src/BATTLE/BATTLE.PRG/146C.c:11011)
 void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unused)),
-    Items_EquipmentPartStats* equipment, int class, int arg3, int actorId)
+    Items_EquipmentPartStats* equipment, int class, int equipment_label_id, int actorId)
 {
     int opposingClass0;
     int opposingClass1;
@@ -367,7 +367,7 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
         ++equipment->classes[targetClass];
 
         if (actorId == 0) {
-            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, targetClass, 1);
+            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, targetClass, 1);
         }
 
         if (equipment->classes[opposingClass0] > -100) {
@@ -379,7 +379,7 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
                 --equipment->classes[opposingClass0];
 
                 if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, opposingClass0, 0x80000001);
+                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingClass0, 0x80000001);
                 }
             }
         }
@@ -393,7 +393,7 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
                 --equipment->classes[opposingClass1];
 
                 if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(arg3, opposingClass1, 0x80000001);
+                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingClass1, 0x80000001);
                 }
             }
         }
@@ -402,27 +402,27 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
 
 // decomp: BATTLE.PRG func_80080C9C (src/BATTLE/BATTLE.PRG/146C.c:11090)
 void Items_GrowDefenderEquipmentRatings(
-    Battle_ActionDefinition* arg0, Battle_ActorStats* arg1, int arg2, int arg3, int arg4)
+    Battle_ActionDefinition* action, Battle_ActorStats* defender_stats, int attacker_class_id, int attacker_affinity_id, int hit_limb_index)
 {
-    int sp10[8];
-    int temp_s2;
+    int eligible_equipment_slots[8];
+    int selected_equipment_slot;
     int i;
     Items_EquipmentPartStats* equipment;
-    int var_a0 = 0;
+    int eligible_equipment_count = 0;
 
-    switch (arg0->category) {
+    switch (action->category) {
     case 1:
     case 2:
     case 3:
     case 4:
-        if ((Battle_actors[arg1->actorId]->weaponDrawn & 1)
-            && (arg1->shield.base.id != 0)) {
-            sp10[var_a0++] = 0xFF;
+        if ((Battle_actors[defender_stats->actorId]->weaponDrawn & 1)
+            && (defender_stats->shield.base.id != 0)) {
+            eligible_equipment_slots[eligible_equipment_count++] = 0xFF;
         }
 
         for (i = 0; i < 6; ++i) {
-            if ((arg1->limbs[i].maxHp != 0) && (arg1->limbs[i].armor.armor.id != 0)) {
-                sp10[var_a0++] = i;
+            if ((defender_stats->limbs[i].maxHp != 0) && (defender_stats->limbs[i].armor.armor.id != 0)) {
+                eligible_equipment_slots[eligible_equipment_count++] = i;
             }
         }
 
@@ -431,9 +431,9 @@ void Items_GrowDefenderEquipmentRatings(
     case 5:
     case 7:
     case 14:
-        if (Battle_actors[arg1->actorId]->weaponDrawn & 1) {
-            if (arg1->shield.base.id != 0) {
-                sp10[var_a0++] = 0xFF;
+        if (Battle_actors[defender_stats->actorId]->weaponDrawn & 1) {
+            if (defender_stats->shield.base.id != 0) {
+                eligible_equipment_slots[eligible_equipment_count++] = 0xFF;
             }
         }
 
@@ -441,69 +441,69 @@ void Items_GrowDefenderEquipmentRatings(
     case 8:
     case 11:
     case 12:
-        if (arg1->limbs[arg4].maxHp && (arg1->limbs[arg4].armor.armor.id != 0)) {
-            sp10[var_a0++] = arg4;
+        if (defender_stats->limbs[hit_limb_index].maxHp && (defender_stats->limbs[hit_limb_index].armor.armor.id != 0)) {
+            eligible_equipment_slots[eligible_equipment_count++] = hit_limb_index;
         }
 
         break;
     }
 
-    if (var_a0 == 0) {
+    if (eligible_equipment_count == 0) {
         return;
     }
 
-    temp_s2 = sp10[Core_Random_NextBounded(var_a0)];
+    selected_equipment_slot = eligible_equipment_slots[Core_Random_NextBounded(eligible_equipment_count)];
 
-    if (temp_s2 == 0xFF) {
-        Items_EquipmentPartStats* equipment = &arg1->shield.base;
+    if (selected_equipment_slot == 0xFF) {
+        Items_EquipmentPartStats* equipment = &defender_stats->shield.base;
 
-        if (arg1->shield.base.id != 0) {
+        if (defender_stats->shield.base.id != 0) {
 
-            if (arg2 != 0) {
-                Items_GrowEquipmentClass(arg0, equipment, arg2 - 1, 0xF1, arg1->actorId);
+            if (attacker_class_id != 0) {
+                Items_GrowEquipmentClass(action, equipment, attacker_class_id - 1, 0xF1, defender_stats->actorId);
             }
-            if (arg3 != 0) {
+            if (attacker_affinity_id != 0) {
                 Items_GrowMatchingEquipmentAffinity(
-                    arg0, equipment, arg3 - 1, 0xF1, arg1->actorId);
+                    action, equipment, attacker_affinity_id - 1, 0xF1, defender_stats->actorId);
             }
         }
-        Items_RebuildShieldClassAffinity(arg1);
+        Items_RebuildShieldClassAffinity(defender_stats);
     } else {
 
-        equipment = &arg1->limbs[temp_s2].armor.armor;
+        equipment = &defender_stats->limbs[selected_equipment_slot].armor.armor;
 
         if (equipment->id != 0) {
-            if (arg2 != 0) {
+            if (attacker_class_id != 0) {
                 do {
-                    Items_GrowEquipmentClass(arg0, equipment, arg2 - 1,
-                        arg1->limbs[temp_s2].nameIndex, arg1->actorId);
+                    Items_GrowEquipmentClass(action, equipment, attacker_class_id - 1,
+                        defender_stats->limbs[selected_equipment_slot].nameIndex, defender_stats->actorId);
                 } while (0);
             }
-            if (arg3 != 0) {
-                Items_GrowMatchingEquipmentAffinity(arg0, equipment, arg3 - 1,
-                    arg1->limbs[temp_s2].nameIndex, arg1->actorId);
+            if (attacker_affinity_id != 0) {
+                Items_GrowMatchingEquipmentAffinity(action, equipment, attacker_affinity_id - 1,
+                    defender_stats->limbs[selected_equipment_slot].nameIndex, defender_stats->actorId);
             }
         }
 
-        Items_RebuildArmorClassAffinity(arg1, temp_s2);
+        Items_RebuildArmorClassAffinity(defender_stats, selected_equipment_slot);
     }
 }
 
 // decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11178)
-void Items_GrowAttackerWeaponRatings(Battle_ActionDefinition* action, Battle_ActorStats* arg1, int arg2, int arg3)
+void Items_GrowAttackerWeaponRatings(Battle_ActionDefinition* action, Battle_ActorStats* attacker_stats, int defender_class_id, int defender_affinity_id)
 {
     if (action->type != Battle_ActionType_Spell) {
-        Items_EquipmentPartStats* temp_s1 = &arg1->weapon.blade;
-        if (arg1->weapon.blade.id != 0) {
-            if (arg2 != 0) {
-                Items_GrowEquipmentClass(action, temp_s1, arg2 - 1, 0xF0, arg1->actorId);
+        Items_EquipmentPartStats* weapon_blade = &attacker_stats->weapon.blade;
+        if (attacker_stats->weapon.blade.id != 0) {
+            if (defender_class_id != 0) {
+                Items_GrowEquipmentClass(action, weapon_blade, defender_class_id - 1, 0xF0, attacker_stats->actorId);
             }
-            if (arg3 != 0) {
+            if (defender_affinity_id != 0) {
                 Items_GrowOpposingEquipmentAffinity(
-                    action, temp_s1, arg3 - 1, 0xF0, arg1->actorId);
+                    action, weapon_blade, defender_affinity_id - 1, 0xF0, attacker_stats->actorId);
             }
         }
-        Items_RebuildWeaponClassAffinity(arg1);
+        Items_RebuildWeaponClassAffinity(attacker_stats);
     }
 }
 

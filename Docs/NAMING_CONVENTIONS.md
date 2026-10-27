@@ -1059,3 +1059,26 @@ comment/literal/type/operator and all 121 owned paths preserved across two
 stable generations. Evidence: `build\quality\issue148-battle-*`.
 The four-extension lexical inventory is 7,733 occurrences/820 pairs/231 files;
 inline templates and the remaining scopes still require their separate gates.
+
+#220 is fixed and closed in `90deccb1`, exact green `40585135267`.
+The battle cohort is published in `cb9de39d`, exact green `40585478959`.
+The ancillary review covers all 53 Items/Ending/State source/header files:
+56 candidate-bearing functions, 144 ordinary mappings and one scoped mapping.
+F02446's score-prefix and thousands-separator positions remain separate
+bindings. F02511 changes only a local matching-stack pointer; its separately
+provided inventory declaration is verified unchanged rather than assumed to
+be a generated sibling header. Twenty function retentions and the existing
+opaque/reserved/padding fields retain their specific original evidence and
+confidence; no unknown field meaning is fabricated.
+
+On dirty base `cb9de39d`, the available `[items]` baseline passes
+11 cases/1,467 assertions; there are no `[ending]` or `[state]` test tags.
+Debug/Release each then pass
+`[items],[equipment],[inventory],[loot],[menu],[event] --reporter compact`,
+112 cases/726,972 assertions. This exercises relevant consumers, not full ending
+playback. Copier tests pass 146/146, naming tests 32/32 and tooling quality
+zero new findings. Eighteen generated files change only by the approved code
+identifiers, with all 742 manifest paths, all 121 owned paths and repeat
+generation verified. Evidence: `build\quality\issue148-ancillary-*`.
+The original four-extension inventory is 6,803 occurrences/717 pairs/221 files;
+the explicit template and remaining-source review gates are still active.

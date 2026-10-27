@@ -13,7 +13,7 @@
 #include "Battle/BattleTypes.h"
 #include "Battle/Hit.h"
 
-short Items_CalculateItemRecovery(Battle_ActionDefinition* arg0, Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3, int arg4);
+short Items_CalculateItemRecovery(Battle_ActionDefinition* action, Battle_HitResult* arg1 __attribute__((unused)),
+    Battle_HitResult* arg2 __attribute__((unused)), int hit_index, int add_random_variation);
 
 #endif // VS_ITEMS_RECOVERY_H_DECLS

@@ -173,50 +173,50 @@ void Ending_Credits_DrawPhantomPainRipple(Ending_Credits_Element* element)
 }
 
 // decomp: ENDING.PRG _renderFin (src/ENDING/ENDING.PRG/D4.c:325)
-void Ending_Credits_DrawFinCaption(Ending_Credits_Element* arg0)
+void Ending_Credits_DrawFinCaption(Ending_Credits_Element* element)
 {
     int temp_a0_2;
-    int temp_a0;
-    int temp_v0;
-    u_char var_s0;
+    int fade_out_frame;
+    int fade_in_frame;
+    u_char brightness;
     void** p;
-    int new_var;
+    int primitive_cursor_slot;
 
     SPRT* sprt = *(SPRT**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-    switch (arg0->phase) {
+    switch (element->phase) {
     case 1:
-        arg0->animationFrame = 0;
-        arg0->phase = 2;
+        element->animationFrame = 0;
+        element->phase = 2;
         /* fallthrough */
 
     case 2:
-        temp_v0 = arg0->animationFrame;
-        arg0->animationFrame = temp_v0 + 1;
-        var_s0 = (temp_v0 << 7) / 60;
+        fade_in_frame = element->animationFrame;
+        element->animationFrame = fade_in_frame + 1;
+        brightness = (fade_in_frame << 7) / 60;
 
-        if (arg0->animationFrame == 60) {
-            arg0->animationFrame = 0;
-            arg0->phase = 3;
+        if (element->animationFrame == 60) {
+            element->animationFrame = 0;
+            element->phase = 3;
         }
         break;
 
     case 3:
-        var_s0 = 128;
+        brightness = 128;
 
-        if (++arg0->animationFrame == 240) {
-            arg0->animationFrame = 0;
-            arg0->phase = 4;
+        if (++element->animationFrame == 240) {
+            element->animationFrame = 0;
+            element->phase = 4;
         }
         break;
 
     case 4:
-        temp_a0 = arg0->animationFrame;
-        arg0->animationFrame = temp_a0 + 1;
-        var_s0 = ((0x3C - temp_a0) << 7) / 60;
+        fade_out_frame = element->animationFrame;
+        element->animationFrame = fade_out_frame + 1;
+        brightness = ((0x3C - fade_out_frame) << 7) / 60;
 
-        if (arg0->animationFrame == 60) {
-            arg0->phase = -1;
+        if (element->animationFrame == 60) {
+            element->phase = -1;
         }
 
         break;
@@ -226,25 +226,25 @@ void Ending_Credits_DrawFinCaption(Ending_Credits_Element* arg0)
     setXY0(sprt, 248, 184);
     setUV0(sprt, 0, 160);
     setWH(sprt, 36, 17);
-    sprt->r0 = sprt->g0 = sprt->b0 = var_s0;
+    sprt->r0 = sprt->g0 = sprt->b0 = brightness;
     setClut(sprt, 896, 82);
 
     p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
     setaddr(sprt, ((u_long*)p[1])[1]);
     setaddr(p[1] + 4, sprt++);
 
-    new_var = 0;
-    p[new_var] = sprt;
-    p[new_var] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 896, 0), 1);
+    primitive_cursor_slot = 0;
+    p[primitive_cursor_slot] = sprt;
+    p[primitive_cursor_slot] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 896, 0), 1);
 }
 
 // decomp: ENDING.PRG _renderVagrantStory (src/ENDING/ENDING.PRG/D4.c:390)
 void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
 {
     SPRT* sprt;
-    int var_fp;
-    void** s0;
-    int new_var;
+    int brightness;
+    void** frame_scratch_slots;
+    int primitive_cursor_slot;
 
     sprt = *(SPRT**)((uintptr_t)Core_ScratchBase() + 0x000);
 
@@ -257,7 +257,7 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
         /* fallthrough */
 
     case 2:
-        var_fp = (Ending_Credits_backgroundBrightness * ++element->animationFrame) / 60;
+        brightness = (Ending_Credits_backgroundBrightness * ++element->animationFrame) / 60;
 
         if (element->animationFrame == 60) {
             element->phase = 3;
@@ -266,7 +266,7 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
         break;
 
     case 3:
-        var_fp = Ending_Credits_backgroundBrightness;
+        brightness = Ending_Credits_backgroundBrightness;
 
         if (++element->animationFrame == 60) {
             element->phase = 4;
@@ -274,7 +274,7 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
         break;
 
     case 4:
-        var_fp = Ending_Credits_backgroundBrightness;
+        brightness = Ending_Credits_backgroundBrightness;
         element->yFixed8 += Ending_Credits_scrollSpeedFixed8;
 
         if (element->yFixed8 < -(60 << 8)) {
@@ -290,14 +290,14 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
     setUV0(sprt, 0, 96);
     setWH(sprt, 208, 48);
     setClut(sprt, 896, 80);
-    sprt->r0 = sprt->g0 = sprt->b0 = var_fp;
+    sprt->r0 = sprt->g0 = sprt->b0 = brightness;
 
-    s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-    setaddr(sprt, getaddr(s0[1] + 12));
-    setaddr(s0[1] + 12, sprt++);
+    frame_scratch_slots = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    setaddr(sprt, getaddr(frame_scratch_slots[1] + 12));
+    setaddr(frame_scratch_slots[1] + 12, sprt++);
 
-    new_var = 0;
-    s0[new_var] = sprt;
+    primitive_cursor_slot = 0;
+    frame_scratch_slots[primitive_cursor_slot] = sprt;
 
     sprt = Render_AppendTexturePage(0x2E, 3);
 
@@ -307,141 +307,141 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
     setUV0(sprt, 0, 0x60);
     setWH(sprt, 0xD0, 0x30);
     setClut(sprt, 896, 81);
-    sprt->r0 = sprt->g0 = sprt->b0 = var_fp;
+    sprt->r0 = sprt->g0 = sprt->b0 = brightness;
 
-    setaddr(sprt, getaddr(s0[1] + 12));
-    setaddr(s0[1] + 12, sprt++);
+    setaddr(sprt, getaddr(frame_scratch_slots[1] + 12));
+    setaddr(frame_scratch_slots[1] + 12, sprt++);
 
-    s0[new_var] = sprt;
-    s0[new_var] = Render_AppendTexturePage(0x4E, 3);
+    frame_scratch_slots[primitive_cursor_slot] = sprt;
+    frame_scratch_slots[primitive_cursor_slot] = Render_AppendTexturePage(0x4E, 3);
     return;
 }
 
 // decomp: ENDING.PRG _inverseDistanceFromScreencenter (src/ENDING/ENDING.PRG/D4.c:468)
-int Ending_Credits_DistanceFromScreenCenter(int arg0, int arg1)
+int Ending_Credits_DistanceFromScreenCenter(int x, int y)
 {
-    arg0 -= 160;
-    arg1 -= 112;
-    return Core_Math_SquareRootInteger(arg0 * arg0 + arg1 * arg1);
+    x -= 160;
+    y -= 112;
+    return Core_Math_SquareRootInteger(x * x + y * y);
 }
 
 // decomp: ENDING.PRG func_80069388 (src/ENDING/ENDING.PRG/D4.c:475)
-void Ending_Credits_ApplyRadialVertexFade(Ending_Credits_TexturedGradientQuadView* arg0, short arg1, short arg2)
+void Ending_Credits_ApplyRadialVertexFade(Ending_Credits_TexturedGradientQuadView* quad, short fade_step, short fade_out)
 {
-    short temp_s0;
-    short v0;
+    short base_brightness;
+    short vertex_brightness;
 
-    if (arg2 == 0) {
-        temp_s0 = (arg1 * 128) / 80;
-        v0 = temp_s0
-           + (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexZeroX, arg0->vertexZeroY)) << 7)
+    if (fade_out == 0) {
+        base_brightness = (fade_step * 128) / 80;
+        vertex_brightness = base_brightness
+           + (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexZeroX, quad->vertexZeroY)) << 7)
                / 400);
 
-        if (v0 < 0x81) {
-            arg0->vertexZeroBlue = v0;
+        if (vertex_brightness < 0x81) {
+            quad->vertexZeroBlue = vertex_brightness;
         } else {
-            arg0->vertexZeroBlue = 128;
+            quad->vertexZeroBlue = 128;
         }
 
-        arg0->vertexZeroRed = arg0->vertexZeroGreen = arg0->vertexZeroBlue;
+        quad->vertexZeroRed = quad->vertexZeroGreen = quad->vertexZeroBlue;
 
-        v0 = temp_s0
-           + (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexOneX, arg0->vertexOneY)) << 7)
+        vertex_brightness = base_brightness
+           + (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexOneX, quad->vertexOneY)) << 7)
                / 400);
 
-        if (v0 < 0x81) {
-            arg0->vertexOneBlue = v0;
+        if (vertex_brightness < 0x81) {
+            quad->vertexOneBlue = vertex_brightness;
         } else {
-            arg0->vertexOneBlue = 128;
+            quad->vertexOneBlue = 128;
         }
 
-        arg0->vertexOneRed = arg0->vertexOneGreen = arg0->vertexOneBlue;
+        quad->vertexOneRed = quad->vertexOneGreen = quad->vertexOneBlue;
 
-        v0 = temp_s0
-           + (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexTwoX, arg0->vertexTwoY)) << 7)
+        vertex_brightness = base_brightness
+           + (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexTwoX, quad->vertexTwoY)) << 7)
                / 400);
 
-        if (v0 < 0x81) {
-            arg0->vertexTwoBlue = v0;
+        if (vertex_brightness < 0x81) {
+            quad->vertexTwoBlue = vertex_brightness;
         } else {
-            arg0->vertexTwoBlue = 128;
+            quad->vertexTwoBlue = 128;
         }
 
-        arg0->vertexTwoRed = arg0->vertexTwoGreen = arg0->vertexTwoBlue;
+        quad->vertexTwoRed = quad->vertexTwoGreen = quad->vertexTwoBlue;
 
-        v0 = temp_s0
-           + (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexThreeX, arg0->vertexThreeY)) << 7)
+        vertex_brightness = base_brightness
+           + (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexThreeX, quad->vertexThreeY)) << 7)
                / 400);
 
-        if (v0 < 0x81) {
-            arg0->vertexThreeBlue = v0;
+        if (vertex_brightness < 0x81) {
+            quad->vertexThreeBlue = vertex_brightness;
         } else {
-            arg0->vertexThreeBlue = 128;
+            quad->vertexThreeBlue = 128;
         }
 
     } else {
 
-        temp_s0 = ((0x50 - arg1) << 7) / 80;
-        v0 = temp_s0
-           - (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexZeroX, arg0->vertexZeroY)) << 7)
+        base_brightness = ((0x50 - fade_step) << 7) / 80;
+        vertex_brightness = base_brightness
+           - (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexZeroX, quad->vertexZeroY)) << 7)
                / 400);
 
-        if (v0 >= 0) {
-            arg0->vertexZeroBlue = v0;
+        if (vertex_brightness >= 0) {
+            quad->vertexZeroBlue = vertex_brightness;
         } else {
-            arg0->vertexZeroBlue = 0;
+            quad->vertexZeroBlue = 0;
         }
 
-        arg0->vertexZeroRed = arg0->vertexZeroGreen = arg0->vertexZeroBlue;
+        quad->vertexZeroRed = quad->vertexZeroGreen = quad->vertexZeroBlue;
 
-        v0 = temp_s0
-           - (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexOneX, arg0->vertexOneY)) << 7)
+        vertex_brightness = base_brightness
+           - (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexOneX, quad->vertexOneY)) << 7)
                / 400);
 
-        if (v0 >= 0) {
-            arg0->vertexOneBlue = v0;
+        if (vertex_brightness >= 0) {
+            quad->vertexOneBlue = vertex_brightness;
         } else {
-            arg0->vertexOneBlue = 0;
+            quad->vertexOneBlue = 0;
         }
 
-        arg0->vertexOneRed = arg0->vertexOneGreen = arg0->vertexOneBlue;
+        quad->vertexOneRed = quad->vertexOneGreen = quad->vertexOneBlue;
 
-        v0 = temp_s0
-           - (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexTwoX, arg0->vertexTwoY)) << 7)
+        vertex_brightness = base_brightness
+           - (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexTwoX, quad->vertexTwoY)) << 7)
                / 400);
 
-        if (v0 >= 0) {
-            arg0->vertexTwoBlue = v0;
+        if (vertex_brightness >= 0) {
+            quad->vertexTwoBlue = vertex_brightness;
         } else {
-            arg0->vertexTwoBlue = 0;
+            quad->vertexTwoBlue = 0;
         }
 
-        arg0->vertexTwoRed = arg0->vertexTwoGreen = arg0->vertexTwoBlue;
+        quad->vertexTwoRed = quad->vertexTwoGreen = quad->vertexTwoBlue;
 
-        v0 = temp_s0
-           - (((200 - Ending_Credits_DistanceFromScreenCenter(arg0->vertexThreeX, arg0->vertexThreeY)) << 7)
+        vertex_brightness = base_brightness
+           - (((200 - Ending_Credits_DistanceFromScreenCenter(quad->vertexThreeX, quad->vertexThreeY)) << 7)
                / 400);
 
-        if (v0 >= 0) {
-            arg0->vertexThreeBlue = v0;
+        if (vertex_brightness >= 0) {
+            quad->vertexThreeBlue = vertex_brightness;
         } else {
-            arg0->vertexThreeBlue = 0;
+            quad->vertexThreeBlue = 0;
         }
     }
 
-    arg0->vertexThreeRed = arg0->vertexThreeGreen = arg0->vertexThreeBlue;
+    quad->vertexThreeRed = quad->vertexThreeGreen = quad->vertexThreeBlue;
 }
 
 // decomp: ENDING.PRG _renderllustration (src/ENDING/ENDING.PRG/D4.c:583)
 void Ending_Credits_DrawIllustration(Ending_Credits_Element* element)
 {
     SPRT* sprt;
-    short temp_v0;
+    short phase_index;
     void** p;
 
-    temp_v0 = element->phase - 1;
+    phase_index = element->phase - 1;
 
-    switch (temp_v0) {
+    switch (phase_index) {
     case 0:
         if ((element->illustrationIndex >= 4) && (element->illustrationIndex != 15)) {
             Ending_Credits_QueueIllustrationDecode(Ending_Credits_illustrationTimWorkspace, Ending_Credits_illustrationResources[element->illustrationIndex + 1]);
@@ -457,12 +457,12 @@ void Ending_Credits_DrawIllustration(Ending_Credits_Element* element)
         Ending_Credits_illustrationBrightness = (Ending_Credits_backgroundBrightness * element->animationFrame) / 80;
 
         if (++element->animationFrame == 80) {
-            int var_a0 = 3;
+            int next_phase = 3;
             element->animationFrame = 0;
             if (element->illustrationIndex == 15) {
-                var_a0 = 5;
+                next_phase = 5;
             }
-            element->phase = var_a0;
+            element->phase = next_phase;
         }
         break;
 
@@ -530,7 +530,7 @@ int Ending_Credits_MeasureTextWidth(u_char* str)
     unsigned short charTableOffset;
     short len;
     int c;
-    int new_var;
+    int printable_character_base;
 
     len = *str++;
     width = 0;
@@ -554,7 +554,7 @@ int Ending_Credits_MeasureTextWidth(u_char* str)
                 break;
             }
         } else {
-            width += Ending_Credits_glyphWidths[(charTableOffset - (new_var = 32)) + c] - 1;
+            width += Ending_Credits_glyphWidths[(charTableOffset - (printable_character_base = 32)) + c] - 1;
         }
     }
 
@@ -683,27 +683,27 @@ void Ending_Credits_DrawScrollingText(Ending_Credits_Element* element)
 }
 
 // decomp: ENDING.PRG _renderCopyright (src/ENDING/ENDING.PRG/D4.c:831)
-void Ending_Credits_DrawScrollingCopyright(Ending_Credits_Element* arg0)
+void Ending_Credits_DrawScrollingCopyright(Ending_Credits_Element* element)
 {
     void** p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
     SPRT* sprt = p[0];
-    int new_var;
+    int primitive_cursor_slot;
 
-    if (arg0->phase == 1) {
-        arg0->xFixed8 = 100 << 8;
-        arg0->yFixed8 = 224 << 8;
-        arg0->phase = 2;
+    if (element->phase == 1) {
+        element->xFixed8 = 100 << 8;
+        element->yFixed8 = 224 << 8;
+        element->phase = 2;
     }
 
-    arg0->yFixed8 += Ending_Credits_scrollSpeedFixed8;
+    element->yFixed8 += Ending_Credits_scrollSpeedFixed8;
 
-    if (arg0->yFixed8 < -(12 << 8)) {
-        arg0->phase = -1;
+    if (element->yFixed8 < -(12 << 8)) {
+        element->phase = -1;
         return;
     }
 
     SetSprt(sprt);
-    setXY0(sprt, arg0->xFixed8 >> 8, arg0->yFixed8 >> 8);
+    setXY0(sprt, element->xFixed8 >> 8, element->yFixed8 >> 8);
     setUV0(sprt, 0, 0x30);
     setWH(sprt, 0x78, 0x10);
     setClut(sprt, 960, 64);
@@ -712,13 +712,13 @@ void Ending_Credits_DrawScrollingCopyright(Ending_Credits_Element* arg0)
     setaddr(sprt, ((u_long*)p[1])[3]);
     setaddr(p[1] + 12, sprt++);
 
-    new_var = 0;
-    p[new_var] = sprt;
-    p[new_var] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 960, 0), 3);
+    primitive_cursor_slot = 0;
+    p[primitive_cursor_slot] = sprt;
+    p[primitive_cursor_slot] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 960, 0), 3);
 }
 
 // decomp: ENDING.PRG _renderBackground (src/ENDING/ENDING.PRG/D4.c:865)
-void Ending_Credits_DrawBackground(Ending_Credits_Element* arg0 __attribute__((unused)))
+void Ending_Credits_DrawBackground(Ending_Credits_Element* element __attribute__((unused)))
 {
     TILE* tile;
     POLY_G4* poly;
@@ -809,29 +809,29 @@ void Ending_Credits_FadeInBackground(Ending_Credits_Element* element)
 }
 
 // decomp: ENDING.PRG _backgroundFadeOut (src/ENDING/ENDING.PRG/D4.c:954)
-void Ending_Credits_FadeOutBackground(Ending_Credits_Element* arg0)
+void Ending_Credits_FadeOutBackground(Ending_Credits_Element* element)
 {
-    if (arg0->phase == 1) {
-        arg0->phase = 2;
-        arg0->animationFrame = 0;
+    if (element->phase == 1) {
+        element->phase = 2;
+        element->animationFrame = 0;
         Ending_Credits_isBackgroundFading = 1;
     }
 
-    if (++arg0->animationFrame == 128) {
-        if (arg0->width != 0) {
+    if (++element->animationFrame == 128) {
+        if (element->width != 0) {
             Ending_Credits_hasFinished = 1;
         }
-        arg0->phase = -1;
+        element->phase = -1;
     }
 
-    Ending_Credits_backgroundBrightness = 128 - ((Core_Math_EvaluateEase(Ending_Credits_EasingMode_Linear, arg0->animationFrame, 128) << 7) >> 0xC);
+    Ending_Credits_backgroundBrightness = 128 - ((Core_Math_EvaluateEase(Ending_Credits_EasingMode_Linear, element->animationFrame, 128) << 7) >> 0xC);
 }
 
 // decomp: ENDING.PRG func_8006A4D8 (src/ENDING/ENDING.PRG/D4.c:972)
 void Ending_Credits_FadeOutForSkip(Ending_Credits_Element* element)
 {
-    void** s2 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-    TILE* temp_s0 = s2[0];
+    void** frame_scratch_slots = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    TILE* fade_tile = frame_scratch_slots[0];
 
     if (element->phase == 1) {
         element->animationFrame = 0;
@@ -842,17 +842,17 @@ void Ending_Credits_FadeOutForSkip(Ending_Credits_Element* element)
         Ending_Credits_hasFinished = 1;
     }
 
-    SetTile(temp_s0);
-    setSemiTrans(temp_s0, 1);
-    temp_s0->r0 = temp_s0->g0 = temp_s0->b0 =
+    SetTile(fade_tile);
+    setSemiTrans(fade_tile, 1);
+    fade_tile->r0 = fade_tile->g0 = fade_tile->b0 =
         (Core_Math_EvaluateEase(Ending_Credits_EasingMode_EaseOut, element->animationFrame, 128) * 255) >> 0xC;
-    setWH(temp_s0, 320, 240);
-    setXY0(temp_s0, 0, 0);
+    setWH(fade_tile, 320, 240);
+    setXY0(fade_tile, 0, 0);
 
-    AddPrim(s2[1], temp_s0++);
+    AddPrim(frame_scratch_slots[1], fade_tile++);
 
-    s2[0] = temp_s0;
-    s2[0] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Subtract, 0, 0), 0);
+    frame_scratch_slots[0] = fade_tile;
+    frame_scratch_slots[0] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Subtract, 0, 0), 0);
 }
 
 // decomp: ENDING.PRG vs_ending_exec (src/ENDING/ENDING.PRG/D4.c:999)
@@ -962,18 +962,18 @@ void Ending_Credits_RunFrames(void)
 }
 
 // decomp: ENDING.PRG func_8006A9C0 (src/ENDING/ENDING.PRG/D4.c:1115)
-void Ending_Credits_UploadTexture(Ending_Credits_TimHeader* arg0)
+void Ending_Credits_UploadTexture(Ending_Credits_TimHeader* tim)
 {
     RECT rect;
-    Ending_Credits_TimImageBlockHeader* p = &arg0->firstBlock;
+    Ending_Credits_TimImageBlockHeader* p = &tim->firstBlock;
 
-    if (arg0->mode & 8) {
+    if (tim->mode & 8) {
         rect.x = p->uploadRect.x;
         rect.y = p->uploadRect.y;
         rect.w = p->uploadRect.w;
         rect.h = p->uploadRect.h;
         LoadImage(&rect, (void*)p->pixelBytes);
-        p = (Ending_Credits_TimImageBlockHeader*)((void*)arg0 + (p->blockSizeBytes + 8));
+        p = (Ending_Credits_TimImageBlockHeader*)((void*)tim + (p->blockSizeBytes + 8));
     }
 
     rect.x = p->uploadRect.x;
@@ -998,19 +998,19 @@ void Ending_Credits_ResetElements(void)
 int Ending_Credits_DrawElements(void)
 {
     short i;
-    short var_s3 = 0;
+    short active_element_count = 0;
     Ending_Credits_Element* element = Ending_Credits_elements;
 
     for (i = 0; i < 32; ++i, ++element) {
         if (element->phase < 0) {
             element->phase = 0;
         } else if (element->phase > 0) {
-            ++var_s3;
+            ++active_element_count;
             element->render(element);
         }
     }
 
-    return var_s3;
+    return active_element_count;
 }
 
 // decomp: ENDING.PRG _addRenderer (src/ENDING/ENDING.PRG/D4.c:1164)
@@ -1145,11 +1145,11 @@ void Ending_Credits_ExecuteScript(void)
 }
 
 // decomp: ENDING.PRG func_8006AF44 (src/ENDING/ENDING.PRG/D4.c:1307)
-void Ending_Credits_QueueIllustrationDecode(Ending_Credits_TimHeader* arg0, void* arg1)
+void Ending_Credits_QueueIllustrationDecode(Ending_Credits_TimHeader* tim_destination, void* compressed_image)
 {
     Ending_Credits_illustrationDecodePhase = 1;
-    Ending_Credits_queuedCompressedImage = arg1;
-    Ending_Credits_queuedTimDestination = arg0;
+    Ending_Credits_queuedCompressedImage = compressed_image;
+    Ending_Credits_queuedTimDestination = tim_destination;
 }
 
 // decomp: ENDING.PRG func_8006AF64 (src/ENDING/ENDING.PRG/D4.c:1317)
@@ -1227,86 +1227,86 @@ int Ending_Credits_DecodeIllustrationStep(void)
 }
 
 // decomp: ENDING.PRG func_8006B324 (src/ENDING/ENDING.PRG/D4.c:1390)
-void Ending_Credits_DrawSmallText(short arg0, short arg1, int arg2, u_char* arg3)
+void Ending_Credits_DrawSmallText(short x, short y, int palette_row_offset, u_char* text)
 {
-    int temp_v0;
-    u_char var_v1_2;
-    int var_v1;
-    SPRT_8* var_a2;
-    u_long** t4;
+    int character_offset;
+    u_char glyph_index;
+    int character;
+    SPRT_8* glyph_sprite;
+    u_long** frame_scratch_slots;
 
-    var_v1 = *arg3;
-    var_a2 = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    character = *text;
+    glyph_sprite = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-    while (var_v1 != 0) {
+    while (character != 0) {
 
-        temp_v0 = var_v1 - 32;
-        var_v1_2 = temp_v0;
+        character_offset = character - 32;
+        glyph_index = character_offset;
 
-        if (((temp_v0 & 0xFF) < 96u) && (var_v1_2 != 0)) {
+        if (((character_offset & 0xFF) < 96u) && (glyph_index != 0)) {
 
-            if (var_v1_2 == 60) {
-                var_v1_2 = 15;
+            if (glyph_index == 60) {
+                glyph_index = 15;
             }
 
-            if (var_v1_2 > 64) {
-                var_v1_2 -= 32;
+            if (glyph_index > 64) {
+                glyph_index -= 32;
             }
 
-            setSprt8(var_a2);
-            setShadeTex(var_a2, 1);
-            setXY0(var_a2, arg0, arg1);
-            setUV0(var_a2, (var_v1_2 & 0xF) * 8, (var_v1_2 & 0xF0) / 2);
-            setClut(var_a2, 960, arg2 + 32);
+            setSprt8(glyph_sprite);
+            setShadeTex(glyph_sprite, 1);
+            setXY0(glyph_sprite, x, y);
+            setUV0(glyph_sprite, (glyph_index & 0xF) * 8, (glyph_index & 0xF0) / 2);
+            setClut(glyph_sprite, 960, palette_row_offset + 32);
 
-            t4 = (u_long**)((uintptr_t)Core_ScratchBase() + 0x000);
-            setaddr(var_a2, *t4[1] & 0xFFFFFF);
-            setaddr(t4[1], var_a2);
+            frame_scratch_slots = (u_long**)((uintptr_t)Core_ScratchBase() + 0x000);
+            setaddr(glyph_sprite, *frame_scratch_slots[1] & 0xFFFFFF);
+            setaddr(frame_scratch_slots[1], glyph_sprite);
 
-            ++var_a2;
+            ++glyph_sprite;
         }
 
-        ++arg3;
-        var_v1 = *arg3;
-        arg0 += 7;
+        ++text;
+        character = *text;
+        x += 7;
     }
 
-    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = var_a2;
+    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = glyph_sprite;
     *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = Render_AppendTexturePage(0xF, 0);
 }
 
 // decomp: ENDING.PRG func_8006B450 (src/ENDING/ENDING.PRG/D4.c:1438)
-void Ending_Credits_InitializeDisplay(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5)
+void Ending_Credits_InitializeDisplay(int screen_width, int screen_height, int projection_distance, int background_red, int background_green, int background_blue)
 {
     RECT rect;
-    int temp_s1;
+    int viewport_height;
 
     rect = (RECT) { 0, 0, 1024, 512 };
 
     SetDispMask(0);
-    Core_Gte_SetGeomOffset(arg0 / 2, (arg1 + (int)((u_int)arg1 >> 0x1F)) >> 1);
-    Core_Gte_SetGeomScreen(arg2);
+    Core_Gte_SetGeomOffset(screen_width / 2, (screen_height + (int)((u_int)screen_height >> 0x1F)) >> 1);
+    Core_Gte_SetGeomScreen(projection_distance);
 
-    temp_s1 = arg1 - 0x10;
+    viewport_height = screen_height - 0x10;
 
-    SetDefDrawEnv(Render_legacyDrawEnvironments, 0, 0, arg0, temp_s1);
-    SetDefDispEnv(Render_legacyDisplayEnvironments, arg0, 0, arg0, temp_s1);
-    SetDefDrawEnv(&Render_legacyDrawEnvironments[1], arg0, 0, arg0, temp_s1);
-    SetDefDispEnv(&Render_legacyDisplayEnvironments[1], 0, 0, arg0, temp_s1);
+    SetDefDrawEnv(Render_legacyDrawEnvironments, 0, 0, screen_width, viewport_height);
+    SetDefDispEnv(Render_legacyDisplayEnvironments, screen_width, 0, screen_width, viewport_height);
+    SetDefDrawEnv(&Render_legacyDrawEnvironments[1], screen_width, 0, screen_width, viewport_height);
+    SetDefDispEnv(&Render_legacyDisplayEnvironments[1], 0, 0, screen_width, viewport_height);
 
     setRECT(&Render_legacyDisplayEnvironments[0].screen, 0, 8, 256, 224);
     setRECT(&Render_legacyDisplayEnvironments[1].screen, 0, 8, 256, 224);
 
     Render_legacyViewportLeft = 0;
     Render_legacyViewportTop = 0;
-    Render_viewportWidth = arg0;
-    Render_viewportHeight = temp_s1;
+    Render_viewportWidth = screen_width;
+    Render_viewportHeight = viewport_height;
     Render_legacyDrawEnvironments[1].dtd = 0;
     Render_legacyDrawEnvironments[0].dtd = 0;
     Render_legacyDrawEnvironments[1].isbg = 1;
     Render_legacyDrawEnvironments[0].isbg = 1;
-    setRGB0(&Render_legacyDrawEnvironments[0], arg3, arg4, arg5);
-    setRGB0(&Render_legacyDrawEnvironments[1], arg3, arg4, arg5);
+    setRGB0(&Render_legacyDrawEnvironments[0], background_red, background_green, background_blue);
+    setRGB0(&Render_legacyDrawEnvironments[1], background_red, background_green, background_blue);
 
     ClearImage(&rect, 0, 0, 0);
     PutDispEnv(&Render_legacyDisplayEnvironments[Render_frameBuf]);
@@ -1316,23 +1316,23 @@ void Ending_Credits_InitializeDisplay(int arg0, int arg1, int arg2, int arg3, in
 }
 
 // decomp: ENDING.PRG _drawScreen (src/ENDING/ENDING.PRG/D4.c:1480)
-int Ending_Credits_PresentFrame(u_long* arg0)
+int Ending_Credits_PresentFrame(u_long* ordering_table)
 {
     int _[2];
-    int temp_s1;
+    int vsync_result;
 
     Render_frameBuf = Render_frameBuf == 0;
 
 
-    temp_s1 = State_UpdatePlayTimeAndLoading(0);
+    vsync_result = State_UpdatePlayTimeAndLoading(0);
 
     PutDispEnv(&Render_legacyDisplayEnvironments[Render_frameBuf]);
     PutDrawEnv(&Render_legacyDrawEnvironments[Render_frameBuf]);
-    DrawOTag(arg0);
+    DrawOTag(ordering_table);
 
     ++Ending_Credits_xaResumeFrameCount;
 
-    return temp_s1;
+    return vsync_result;
 }
 
 // decomp: ENDING.PRG func_8006B884 (src/ENDING/ENDING.PRG/D4.c:1539)
@@ -1349,13 +1349,13 @@ void Ending_Credits_AllocateRenderBuffers(void)
 // decomp: ENDING.PRG func_8006B930 (src/ENDING/ENDING.PRG/D4.c:1551)
 void Ending_Credits_BeginFrame(void)
 {
-    void* temp_a0;
+    void* ordering_table_base;
 
     Input_UpdateControllers();
-    temp_a0 = Render_legacyOrderingTables[Render_frameBuf];
-    Render_frameScratch.overlayOrderingTable = temp_a0 + 8;
-    Render_frameScratch.orderingTable = temp_a0 + 0x48;
-    ClearOTagR((u_long*)temp_a0, 0x822);
+    ordering_table_base = Render_legacyOrderingTables[Render_frameBuf];
+    Render_frameScratch.overlayOrderingTable = ordering_table_base + 8;
+    Render_frameScratch.orderingTable = ordering_table_base + 0x48;
+    ClearOTagR((u_long*)ordering_table_base, 0x822);
     Render_frameScratch.primitiveCursor = Render_legacyPrimitiveBuffers[Render_frameBuf];
 }
 

@@ -2002,6 +2002,22 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
             expected + "; " + expected,
         )
 
+    def test_ending_score_separator_keeps_its_own_shadowed_position_binding(self):
+        matches = [
+            (old, new) for old, new, _ in copy_fixups.FIXES["F02446"]
+            if "padded_separator_x" in new
+        ]
+        self.assertEqual(len(matches), 1)
+        old, new = matches[0]
+        self.assertEqual(new, re.sub(r"\bv0\b", "padded_separator_x", old))
+        source = "int v0 = arg0 + 1;\n" + new
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Ending::DrawScore"):
+                source = re.sub(pattern, replacement, source)
+        self.assertIn("int padded_prefix_x = x + 1;", source)
+        self.assertIn("int padded_separator_x;", source)
+        self.assertIn("x = padded_separator_x + Ending_resultAtlasRegions[10].w;", source)
+
     def test_regex_fixups_compile_each_distinct_selector_once(self):
         copy_to_native.compiled_fixup_regex.cache_clear()
         self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)

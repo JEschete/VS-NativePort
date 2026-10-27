@@ -388,7 +388,7 @@ int Items_Inventory_FirstEmptySlot(int itemCategory, Items_Inventory* inventory)
 int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
     int sourceItemIndex, Items_Inventory* sourceInventory)
 {
-    Items_InventoryMisc* temp_a0;
+    Items_InventoryMisc* matching_misc_stack;
     int emptySlot;
     int itemCount;
     int i;
@@ -580,24 +580,24 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
                 continue;
             }
 
-            temp_a0 = &target[slot - 1];
+            matching_misc_stack = &target[slot - 1];
 
-            if (temp_a0->id != source->id) {
+            if (matching_misc_stack->id != source->id) {
                 continue;
             }
 
             if (write != 0) {
-                int space_left = 100 - temp_a0->count;
+                int space_left = 100 - matching_misc_stack->count;
 
                 if (space_left >= count) {
-                    temp_a0->count += count;
+                    matching_misc_stack->count += count;
                     count = 0;
                 } else {
-                    count = count + (temp_a0->count - 100);
-                    temp_a0->count = 100;
+                    count = count + (matching_misc_stack->count - 100);
+                    matching_misc_stack->count = 100;
                 }
             } else {
-                count = count - (100 - temp_a0->count);
+                count = count - (100 - matching_misc_stack->count);
 
                 if (count < 0) {
                     count = 0;

@@ -420,33 +420,33 @@ void Items_LoadInventoryAccessoryStats(
 // decomp: BATTLE.PRG func_8006B214 (src/BATTLE/BATTLE.PRG/146C.c:1356)
 void Items_RemoveEquipmentBoostOnEquip(void)
 {
-    Battle_ActorStats* temp_s0 = Battle_characterState->stats;
+    Battle_ActorStats* ashley_stats = Battle_characterState->stats;
 
-    if (temp_s0->statuses & 0x100000) {
-        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(temp_s0->actorId, 0, 0x100000, 1);
-        Battle_RemoveActorStatuses(0x100000, temp_s0);
+    if (ashley_stats->statuses & 0x100000) {
+        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(ashley_stats->actorId, 0, 0x100000, 1);
+        Battle_RemoveActorStatuses(0x100000, ashley_stats);
     }
 }
 
 // decomp: BATTLE.PRG func_8006B270 (src/BATTLE/BATTLE.PRG/146C.c:1366)
 void Items_RemoveWeaponEnchantmentOnEquip(void)
 {
-    Battle_ActorStats* temp_s0 = Battle_characterState->stats;
+    Battle_ActorStats* ashley_stats = Battle_characterState->stats;
 
-    if (temp_s0->statuses & 0x01E00000) {
-        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(temp_s0->actorId, 0, temp_s0->statuses & 0x01E00000, 1);
-        Battle_RemoveActorStatuses(temp_s0->statuses & 0x01E00000, temp_s0);
+    if (ashley_stats->statuses & 0x01E00000) {
+        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(ashley_stats->actorId, 0, ashley_stats->statuses & 0x01E00000, 1);
+        Battle_RemoveActorStatuses(ashley_stats->statuses & 0x01E00000, ashley_stats);
     }
 }
 
 // decomp: BATTLE.PRG func_8006B2D4 (src/BATTLE/BATTLE.PRG/146C.c:1376)
 void Items_RemoveArmorEnchantmentOnEquip(void)
 {
-    Battle_ActorStats* temp_s0 = Battle_characterState->stats;
+    Battle_ActorStats* ashley_stats = Battle_characterState->stats;
 
-    if (temp_s0->statuses & 0x1E000000) {
-        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(temp_s0->actorId, 0, temp_s0->statuses & 0x1E000000, 1);
-        Battle_RemoveActorStatuses(temp_s0->statuses & 0x1E000000, temp_s0);
+    if (ashley_stats->statuses & 0x1E000000) {
+        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(ashley_stats->actorId, 0, ashley_stats->statuses & 0x1E000000, 1);
+        Battle_RemoveActorStatuses(ashley_stats->statuses & 0x1E000000, ashley_stats);
     }
 }
 

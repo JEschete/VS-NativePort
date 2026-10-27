@@ -15,17 +15,17 @@
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 
-void Items_RebuildArmorClassAffinity(Battle_ActorStats* arg0, int arg1);
-void Items_RebuildShieldClassAffinity(Battle_ActorStats* arg0);
-void Items_RebuildWeaponClassAffinity(Battle_ActorStats* arg0);
+void Items_RebuildArmorClassAffinity(Battle_ActorStats* actor_stats, int limb_index);
+void Items_RebuildShieldClassAffinity(Battle_ActorStats* actor_stats);
+void Items_RebuildWeaponClassAffinity(Battle_ActorStats* actor_stats);
 void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
-    int affinity, int arg3, int actorId);
+    int affinity, int equipment_label_id, int actorId);
 void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
-    int affinity, int arg3, int suppressNotification);
+    int affinity, int equipment_label_id, int suppressNotification);
 void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unused)),
-    Items_EquipmentPartStats* equipment, int class, int arg3, int actorId);
+    Items_EquipmentPartStats* equipment, int class, int equipment_label_id, int actorId);
 void Items_GrowDefenderEquipmentRatings(
-    Battle_ActionDefinition* arg0, Battle_ActorStats* arg1, int arg2, int arg3, int arg4);
-void Items_GrowAttackerWeaponRatings(Battle_ActionDefinition* action, Battle_ActorStats* arg1, int arg2, int arg3);
+    Battle_ActionDefinition* action, Battle_ActorStats* defender_stats, int attacker_class_id, int attacker_affinity_id, int hit_limb_index);
+void Items_GrowAttackerWeaponRatings(Battle_ActionDefinition* action, Battle_ActorStats* attacker_stats, int defender_class_id, int defender_affinity_id);
 
 #endif // VS_ITEMS_EQUIPMENTAFFINITY_H_DECLS

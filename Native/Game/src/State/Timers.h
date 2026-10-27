@@ -12,10 +12,10 @@
 
 extern State_SceneTimer State_sceneTimer;
 extern int State_tickSpeed;
-void State_StartSceneTimer(int arg0, int arg1, int arg2);
+void State_StartSceneTimer(int timer_mode, int reset_scope, int packed_time);
 void State_ResetSceneTimer(void);
-void State_SetSceneTimerPaused(int arg0);
-int State_SetTickSpeed(int arg0);
+void State_SetSceneTimerPaused(int paused);
+int State_SetTickSpeed(int requested_tick_speed);
 int State_UpdateEventTimer(void);
 
 #endif // VS_STATE_TIMERS_H_DECLS

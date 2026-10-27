@@ -152,9 +152,9 @@ void Items_QueueEnemyLoot(Battle_Actor* enemy);
 void Items_OpenPendingEnemyLoot(void);
 void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1);
 void Items_ClearRoomLootList(void);
-Items_TreasureChest* Items_TreasureChestAtTile(int arg0, int arg1, int arg2);
+Items_TreasureChest* Items_TreasureChestAtTile(int tile_x, int tile_z, int tile_layer);
 void Items_RestoreRoomChestStates(void);
-Items_TreasureChest* Items_RoomTreasureChests(int* arg0);
+Items_TreasureChest* Items_RoomTreasureChests(int* chest_count_out);
 void Items_LoadRoomChestLoot(void* data);
 
 #endif // VS_ITEMS_LOOT_H_DECLS

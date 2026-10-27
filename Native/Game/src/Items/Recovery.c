@@ -8,24 +8,24 @@
 #include "Items/Recovery.h"
 
 // decomp: BATTLE.PRG _itemRecovery (src/BATTLE/BATTLE.PRG/146C.c:12109)
-short Items_CalculateItemRecovery(Battle_ActionDefinition* arg0, Battle_HitResult* arg1 __attribute__((unused)),
-    Battle_HitResult* arg2 __attribute__((unused)), int arg3, int arg4)
+short Items_CalculateItemRecovery(Battle_ActionDefinition* action, Battle_HitResult* arg1 __attribute__((unused)),
+    Battle_HitResult* arg2 __attribute__((unused)), int hit_index, int add_random_variation)
 {
-    short temp_v0;
-    short temp_s0 = arg0->hits[arg3].statFactor * 5;
+    short random_variation;
+    short recovery_amount = action->hits[hit_index].statFactor * 5;
 
-    if (arg4 != 0) {
-        temp_v0 = Core_Random_NextAveraged(0xB) - 5;
+    if (add_random_variation != 0) {
+        random_variation = Core_Random_NextAveraged(0xB) - 5;
     } else {
-        temp_v0 = 0;
+        random_variation = 0;
     }
 
-    temp_s0 += temp_v0;
+    recovery_amount += random_variation;
 
-    if (temp_s0 < 0) {
-        temp_s0 = 0;
+    if (recovery_amount < 0) {
+        recovery_amount = 0;
     }
 
-    return temp_s0;
+    return recovery_amount;
 }
 

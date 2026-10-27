@@ -13,20 +13,20 @@ State_SceneTimer State_sceneTimer;
 int State_tickSpeed;
 
 // decomp: BATTLE.PRG func_8007BBD8 (src/BATTLE/BATTLE.PRG/146C.c:8511)
-void State_StartSceneTimer(int arg0, int arg1, int arg2)
+void State_StartSceneTimer(int timer_mode, int reset_scope, int packed_time)
 {
-    State_sceneTimer.mode = arg0;
-    State_sceneTimer.resetScope = arg1;
+    State_sceneTimer.mode = timer_mode;
+    State_sceneTimer.resetScope = reset_scope;
     State_sceneTimer.hours = 0;
     State_sceneTimer.minutes = 0;
     State_sceneTimer.seconds = 0;
     State_sceneTimer.frames = 0;
 
-    if (arg0 != 1) {
-        State_sceneTimer.frames = arg2 % 256;
-        State_sceneTimer.seconds = (arg2 / 256) % 256;
-        State_sceneTimer.minutes = (arg2 / 65536) % 256;
-        State_sceneTimer.hours = (arg2 / 16777216) % 256;
+    if (timer_mode != 1) {
+        State_sceneTimer.frames = packed_time % 256;
+        State_sceneTimer.seconds = (packed_time / 256) % 256;
+        State_sceneTimer.minutes = (packed_time / 65536) % 256;
+        State_sceneTimer.hours = (packed_time / 16777216) % 256;
     }
 
     State_SetScriptFlag(0xA0, State_sceneTimer.frames);
@@ -52,12 +52,12 @@ void State_ResetSceneTimer(void)
 }
 
 // decomp: BATTLE.PRG func_8007BD3C (src/BATTLE/BATTLE.PRG/146C.c:8548)
-void State_SetSceneTimerPaused(int arg0)
+void State_SetSceneTimerPaused(int paused)
 {
-    if (arg0 != 0) {
-        int temp_v1 = State_sceneTimer.mode;
+    if (paused != 0) {
+        int active_mode = State_sceneTimer.mode;
         State_sceneTimer.mode = 0;
-        State_sceneTimer.pausedMode = temp_v1;
+        State_sceneTimer.pausedMode = active_mode;
         Battle_HidePuzzleTimer();
         return;
     }
@@ -66,10 +66,10 @@ void State_SetSceneTimerPaused(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8007C36C (src/BATTLE/BATTLE.PRG/146C.c:8740)
-int State_SetTickSpeed(int arg0)
+int State_SetTickSpeed(int requested_tick_speed)
 {
-    if ((arg0 == 2) || (arg0 == 4)) {
-        State_tickSpeed = arg0;
+    if ((requested_tick_speed == 2) || (requested_tick_speed == 4)) {
+        State_tickSpeed = requested_tick_speed;
     }
     return State_tickSpeed;
 }
@@ -77,11 +77,11 @@ int State_SetTickSpeed(int arg0)
 // decomp: BATTLE.PRG func_800882F4 (src/BATTLE/BATTLE.PRG/146C.c:14499)
 int State_UpdateEventTimer(void)
 {
-    int var_s1 = 0;
+    int timer_event_triggered = 0;
     int var_s2 = 0;
 
-    if (State_sceneTimer.mode == var_s1) {
-        return var_s1;
+    if (State_sceneTimer.mode == timer_event_triggered) {
+        return timer_event_triggered;
     }
 
     if (State_sceneTimer.mode == 1) {
@@ -130,9 +130,9 @@ int State_UpdateEventTimer(void)
     State_SetScriptFlag(0xA3, State_sceneTimer.hours);
 
     if ((var_s2 == 0) && (State_sceneTimer.frames == 0) && (Event_EvaluateRoomEventTriggers(16, 0, 0, 0) == 1)) {
-        var_s1 = 1;
+        timer_event_triggered = 1;
     }
 
-    return var_s1;
+    return timer_event_triggered;
 }
 

@@ -14,22 +14,22 @@
 #include "Render/Palette.h"
 
 // decomp: BATTLE.PRG func_8007FF8C (src/BATTLE/BATTLE.PRG/146C.c:10594)
-short Items_ApplyPpGemMultiplier(int arg0, short arg1, char* arg2)
+short Items_ApplyPpGemMultiplier(int arg0, short base_pp_amount, char* gem_scan_bytes)
 {
     int i;
-    int var_t0 = 100;
-    int var_a3 = 0;
+    int pp_percent = 100;
+    int has_pp_gem = 0;
 
     for (i = 0; i < 3; ++i) {
-        if (arg2[i * 0x30 + 0xCA] == 9) {
-            var_a3 = 1;
+        if (gem_scan_bytes[i * 0x30 + 0xCA] == 9) {
+            has_pp_gem = 1;
         }
     }
 
-    if (var_a3 != 0) {
-        var_t0 += 5;
+    if (has_pp_gem != 0) {
+        pp_percent += 5;
     }
-    return (arg1 * var_t0) / 100;
+    return (base_pp_amount * pp_percent) / 100;
 }
 
 // decomp: BATTLE.PRG _adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10689)
@@ -67,53 +67,53 @@ void Items_ConsumeHitEquipmentDp(
 
 // decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10721)
 void Items_AccumulateHitEquipmentPp(
-    Battle_ActionDefinition* action, Battle_ActorStats* arg1, Battle_ActorStats* arg2, int arg3)
+    Battle_ActionDefinition* action, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats, int dp_amount)
 {
-    int var_t0;
-    int var_t1;
+    int has_pp_gem;
+    int pp_percent_or_gain;
     int i;
 
-    var_t1 = 100;
+    pp_percent_or_gain = 100;
 
     if (action->type != Battle_ActionType_Spell) {
-        var_t0 = 0;
+        has_pp_gem = 0;
 
         for (i = 0; i < 3; ++i) {
-            if (arg1->weapon.gems[i].gemEffects == 9) {
-                var_t0 = 1;
+            if (source_stats->weapon.gems[i].gemEffects == 9) {
+                has_pp_gem = 1;
             }
         }
 
-        if (var_t0 != 0) {
-            var_t1 += 5;
+        if (has_pp_gem != 0) {
+            pp_percent_or_gain += 5;
         }
 
-        var_t1 = (((arg3 / 10) * var_t1) / 100);
-        if (arg1->weapon.currentPp + var_t1 < arg1->weapon.maxPp) {
-            arg1->weapon.currentPp = arg1->weapon.currentPp + var_t1;
+        pp_percent_or_gain = (((dp_amount / 10) * pp_percent_or_gain) / 100);
+        if (source_stats->weapon.currentPp + pp_percent_or_gain < source_stats->weapon.maxPp) {
+            source_stats->weapon.currentPp = source_stats->weapon.currentPp + pp_percent_or_gain;
         } else {
-            arg1->weapon.currentPp = arg1->weapon.maxPp;
+            source_stats->weapon.currentPp = source_stats->weapon.maxPp;
         }
     }
 
-    var_t1 = 100;
+    pp_percent_or_gain = 100;
 
-    if (Battle_actors[arg2->actorId]->weaponDrawn & 1) {
-        var_t0 = 0;
+    if (Battle_actors[target_stats->actorId]->weaponDrawn & 1) {
+        has_pp_gem = 0;
         for (i = 0; i < 3; ++i) {
-            if (arg2->shield.gems[i].gemEffects == 9) {
-                var_t0 = 1;
+            if (target_stats->shield.gems[i].gemEffects == 9) {
+                has_pp_gem = 1;
             }
         }
-        if (var_t0 != 0) {
-            var_t1 -= 5;
+        if (has_pp_gem != 0) {
+            pp_percent_or_gain -= 5;
         }
 
-        var_t1 = (((arg3 / 10) * var_t1) / 100);
-        if (arg2->shield.currentPp + var_t1 < arg2->shield.maxPp != 0) {
-            arg2->shield.currentPp = arg2->shield.currentPp + var_t1;
+        pp_percent_or_gain = (((dp_amount / 10) * pp_percent_or_gain) / 100);
+        if (target_stats->shield.currentPp + pp_percent_or_gain < target_stats->shield.maxPp != 0) {
+            target_stats->shield.currentPp = target_stats->shield.currentPp + pp_percent_or_gain;
         } else {
-            arg2->shield.currentPp = arg2->shield.maxPp;
+            target_stats->shield.currentPp = target_stats->shield.maxPp;
         }
     }
 }

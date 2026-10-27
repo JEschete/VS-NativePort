@@ -174,9 +174,9 @@ void Ending_AwardClearTitles(void)
     count = 0;
 
     for (i = 0; i < 16; ++i) {
-        int t1 = 1;
+        int room_bit_base = 1;
         for (j = 0; j < 32; ++j) {
-            if (State_roomVisitProgress.roomFlags[i] & Ending_countableRoomBits[i] & (t1 << j)) {
+            if (State_roomVisitProgress.roomFlags[i] & Ending_countableRoomBits[i] & (room_bit_base << j)) {
                 ++count;
             }
         }
@@ -234,23 +234,23 @@ void Ending_AwardClearTitles(void)
 // decomp: ENDING.PRG func_8006BD78 (src/ENDING/ENDING.PRG/D4.c:1677)
 void Ending_ShowClearResults(void)
 {
-    int temp_s0;
+    int phase_complete;
 
     Ending_resultsLoadPhase = 0;
     SetDispMask(1);
 
     do {
         Ending_Credits_BeginFrame();
-        temp_s0 = Ending_LoadClearResultsStep();
+        phase_complete = Ending_LoadClearResultsStep();
         Ending_Credits_PresentFrame(*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);
-    } while (temp_s0 == 0);
+    } while (phase_complete == 0);
 
     do {
         Ending_Credits_BeginFrame();
-        temp_s0 = Ending_DrawClearResults();
+        phase_complete = Ending_DrawClearResults();
         VSync(0);
         Ending_Credits_PresentFrame(*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);
-    } while (temp_s0 == 0);
+    } while (phase_complete == 0);
 }
 
 // decomp: ENDING.PRG func_8006BE04 (src/ENDING/ENDING.PRG/D4.c:1698)
@@ -279,10 +279,10 @@ int Ending_LoadClearResultsStep(void)
     extern Content_DiscQueueSlot* Ending_resultsDiscReadSlot;
     extern void* Ending_resultsTimBuffer;
 
-    TIM_IMAGE sp10;
+    TIM_IMAGE tim_image;
     int i;
-    int var_a1;
-    int var_v1;
+    int visited_room_count;
+    int opened_chest_count;
 
     if (Ending_resultsLoadPhase == 0) {
 
@@ -301,23 +301,23 @@ int Ending_LoadClearResultsStep(void)
 
         for (i = 0; i < 3; ++i) {
 
-            Render_ParseTimImage(Ending_resultsTimBuffer + i * 0x8220, &sp10);
+            Render_ParseTimImage(Ending_resultsTimBuffer + i * 0x8220, &tim_image);
 
-            if (sp10.paddr != NULL) {
-                sp10.prect->x = 832 + i * 64;
-                sp10.prect->y = 0x100;
-                sp10.prect->h = 0xFF;
-                LoadImage(sp10.prect, sp10.paddr);
+            if (tim_image.paddr != NULL) {
+                tim_image.prect->x = 832 + i * 64;
+                tim_image.prect->y = 0x100;
+                tim_image.prect->h = 0xFF;
+                LoadImage(tim_image.prect, tim_image.paddr);
             }
 
             if (i == 0) {
-                if (sp10.caddr != NULL) {
-                    sp10.crect->x = 0x300;
-                    sp10.crect->y = 0x1FF;
-                    sp10.crect->w = 0x80;
-                    sp10.crect->h = 1;
-                    *sp10.caddr = 0;
-                    LoadImage(sp10.crect, sp10.caddr);
+                if (tim_image.caddr != NULL) {
+                    tim_image.crect->x = 0x300;
+                    tim_image.crect->y = 0x1FF;
+                    tim_image.crect->w = 0x80;
+                    tim_image.crect->h = 1;
+                    *tim_image.caddr = 0;
+                    LoadImage(tim_image.crect, tim_image.caddr);
                 }
             }
         }
@@ -329,7 +329,7 @@ int Ending_LoadClearResultsStep(void)
 
         Core_Memory_FreeFromHighEnd(Ending_resultsTimBuffer);
 
-        var_a1 = 0;
+        visited_room_count = 0;
         Ending_displayedMapCompletion = 0;
         Ending_displayedScore = 0;
         Ending_resultsAnimationFrame = 0;
@@ -341,25 +341,25 @@ int Ending_LoadClearResultsStep(void)
             for (flag = 0; flag < 32; ++flag) {
                 int v = 1;
                 if (State_roomVisitProgress.roomFlags[i] & Ending_countableRoomBits[i] & (v << flag)) {
-                    ++var_a1;
+                    ++visited_room_count;
                 }
             }
         }
 
-        var_v1 = 0;
+        opened_chest_count = 0;
 
         for (i = 0; i < 64; ++i) {
             if (Audio_Seq_unusedStateFlags.chestsOpened[i] != 0) {
-                ++var_v1;
+                ++opened_chest_count;
             }
         }
 
-        if (Audio_Seq_unusedScoredata.mapCompletion < var_a1) {
-            Audio_Seq_unusedScoredata.mapCompletion = var_a1;
+        if (Audio_Seq_unusedScoredata.mapCompletion < visited_room_count) {
+            Audio_Seq_unusedScoredata.mapCompletion = visited_room_count;
         }
 
-        if (Audio_Seq_unusedScoredata.openedChestCount < var_v1) {
-            Audio_Seq_unusedScoredata.openedChestCount = var_v1;
+        if (Audio_Seq_unusedScoredata.openedChestCount < opened_chest_count) {
+            Audio_Seq_unusedScoredata.openedChestCount = opened_chest_count;
         }
 
         Ending_mapCompletion = (Audio_Seq_unusedScoredata.mapCompletion * 100) / 361;
@@ -378,12 +378,12 @@ int Ending_LoadClearResultsStep(void)
             return 0;
         }
 
-        Render_ParseTimImage(Ending_resultsTimBuffer, &sp10);
+        Render_ParseTimImage(Ending_resultsTimBuffer, &tim_image);
 
-        if (sp10.paddr != NULL) {
-            sp10.prect->x = 0;
-            sp10.prect->y = 0x100;
-            LoadImage(sp10.prect, sp10.paddr);
+        if (tim_image.paddr != NULL) {
+            tim_image.prect->x = 0;
+            tim_image.prect->y = 0x100;
+            LoadImage(tim_image.prect, tim_image.paddr);
         }
 
         Content_ReleaseDiscRequest(Ending_resultsDiscReadSlot);
@@ -445,24 +445,24 @@ int Ending_DrawClearResults(void)
 }
 
 // decomp: ENDING.PRG func_8006C3CC (src/ENDING/ENDING.PRG/D4.c:1887)
-void Ending_DrawRankBackground(int arg0)
+void Ending_DrawRankBackground(int fade_frame)
 {
     int var_s2;
     int i;
-    int temp_s4;
+    int brightness;
     POLY_FT4* poly;
 
-    if (arg0 < 0) {
-        arg0 = 0;
+    if (fade_frame < 0) {
+        fade_frame = 0;
     }
 
-    if (arg0 > 64) {
-        arg0 = 64;
+    if (fade_frame > 64) {
+        fade_frame = 64;
     }
 
-    temp_s4 = arg0 * 2;
+    brightness = fade_frame * 2;
 
-    if (arg0 <= 0) {
+    if (fade_frame <= 0) {
         return;
     }
 
@@ -473,7 +473,7 @@ void Ending_DrawRankBackground(int arg0)
         setPolyFT4(poly);
         setXY4(poly, i * 64, 8, 64 + i * 64, 8, i * 64, 232, 64 + i * 64, 232);
         setUV4(poly, 0, 0, 64, 0, 0, 224, 64, 224);
-        setRGB0(poly, temp_s4, temp_s4, temp_s4);
+        setRGB0(poly, brightness, brightness, brightness);
         setClut(poly, 0, 0);
         poly->tpage = (i + 16) | getTPage(3, 0, 0, 0);
         AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) + 0x1FF8, poly++);
@@ -484,105 +484,105 @@ void Ending_DrawRankBackground(int arg0)
 }
 
 // decomp: ENDING.PRG _renderCongratulations (src/ENDING/ENDING.PRG/D4.c:1925)
-void Ending_DrawCongratulations(int arg0, int arg1, int arg2)
+void Ending_DrawCongratulations(int x, int y, int fade_frame)
 {
     extern CVECTOR Ending_congratulationsTint[2];
 
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (fade_frame < 0) {
+        fade_frame = 0;
     }
 
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (fade_frame > 64) {
+        fade_frame = 64;
     }
 
-    if (arg2 > 0) {
-        Ending_congratulationsTint[0].cd = arg2;
-        Ending_congratulationsTint[1].cd = arg2;
-        arg0 = arg0 - ((Ending_resultAtlasRegions[22].w + Ending_resultAtlasRegions[23].w) >> 1);
-        Render_DrawTextureFlashFade(arg0, arg1, 0x16, Ending_congratulationsTint);
-        Render_DrawTextureFlashFade(arg0 + Ending_resultAtlasRegions[22].w, arg1, 0x17, &Ending_congratulationsTint[1]);
+    if (fade_frame > 0) {
+        Ending_congratulationsTint[0].cd = fade_frame;
+        Ending_congratulationsTint[1].cd = fade_frame;
+        x = x - ((Ending_resultAtlasRegions[22].w + Ending_resultAtlasRegions[23].w) >> 1);
+        Render_DrawTextureFlashFade(x, y, 0x16, Ending_congratulationsTint);
+        Render_DrawTextureFlashFade(x + Ending_resultAtlasRegions[22].w, y, 0x17, &Ending_congratulationsTint[1]);
     }
 }
 
 // decomp: ENDING.PRG _renderScore (src/ENDING/ENDING.PRG/D4.c:1946)
-void Ending_DrawScore(int arg0, int arg1, int arg2, int arg3 __attribute__((unused)))
+void Ending_DrawScore(int x, int y, int fade_frame, int arg3 __attribute__((unused)))
 {
     extern CVECTOR Ending_scoreTint[];
 
-    char sp10[10];
+    char score_digits[10];
     int i;
-    int v0;
-    int v1;
+    int padded_prefix_x;
+    int label_width;
 
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (fade_frame < 0) {
+        fade_frame = 0;
     }
 
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (fade_frame > 64) {
+        fade_frame = 64;
     }
 
-    if (arg2 > 0) {
+    if (fade_frame > 0) {
 
-        Ending_scoreTint[0].cd = arg2;
+        Ending_scoreTint[0].cd = fade_frame;
 
-        sprintf(sp10, "%09d", Ending_finalScore);
+        sprintf(score_digits, "%09d", Ending_finalScore);
 
-        v1 = Ending_resultAtlasRegions[18].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[20].w;
-        arg0 -= (Ending_resultAtlasRegions[10].w * 2 + v1 + 0x74) >> 1;
+        label_width = Ending_resultAtlasRegions[18].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[20].w;
+        x -= (Ending_resultAtlasRegions[10].w * 2 + label_width + 0x74) >> 1;
 
-        Render_DrawTextureTintFade(arg0, arg1, 0x12, Ending_scoreTint);
+        Render_DrawTextureTintFade(x, y, 0x12, Ending_scoreTint);
 
-        arg0 += Ending_resultAtlasRegions[18].w;
+        x += Ending_resultAtlasRegions[18].w;
 
-        Render_DrawTextureTintFade(arg0, arg1 + 7, 0x1A, Ending_scoreTint);
+        Render_DrawTextureTintFade(x, y + 7, 0x1A, Ending_scoreTint);
 
-        v0 = arg0 + 2;
-        arg0 = v0 + Ending_resultAtlasRegions[26].w;
+        padded_prefix_x = x + 2;
+        x = padded_prefix_x + Ending_resultAtlasRegions[26].w;
 
         for (i = 0; i < 9; ++i) {
-            Render_DrawTextureTintFade(arg0, arg1 + 3, sp10[i] - 0x30, Ending_scoreTint);
-            arg0 += 12;
+            Render_DrawTextureTintFade(x, y + 3, score_digits[i] - 0x30, Ending_scoreTint);
+            x += 12;
             if ((i == 2) || (i == 5)) {
-                int v0;
-                Render_DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);
-                v0 = arg0 + 3;
-                arg0 = v0 + Ending_resultAtlasRegions[10].w;
+                int padded_separator_x;
+                Render_DrawTextureTintFade(x, y + 0xE, 0xA, Ending_scoreTint);
+                padded_separator_x = x + 3;
+                x = padded_separator_x + Ending_resultAtlasRegions[10].w;
             }
         }
 
-        Render_DrawTextureTintFade(arg0, arg1 + 8, 0x14, Ending_scoreTint);
+        Render_DrawTextureTintFade(x, y + 8, 0x14, Ending_scoreTint);
     }
 }
 
 // decomp: ENDING.PRG _renderIncrementalScore (src/ENDING/ENDING.PRG/D4.c:1996)
 void Ending_DrawCountingScore(
-    int arg0, int arg1, int arg2, int arg3 __attribute__((unused)))
+    int x, int y, int animation_frame, int arg3 __attribute__((unused)))
 {
     extern CVECTOR Ending_countingScoreTint[];
 
-    char sp18[16];
-    int temp_s2;
-    int var_s1;
+    char score_digits[16];
+    int wipe_boundary_x;
+    int fade_frame;
     int i;
-    int v0;
-    int v1;
+    int padded_prefix_x;
+    int label_width;
 
-    var_s1 = arg2;
+    fade_frame = animation_frame;
 
-    if (var_s1 < 0) {
-        var_s1 = 0;
+    if (fade_frame < 0) {
+        fade_frame = 0;
     }
 
-    if (var_s1 > 64) {
-        var_s1 = 64;
+    if (fade_frame > 64) {
+        fade_frame = 64;
     }
 
-    if (var_s1 > 0) {
-        temp_s2 = arg0 + (var_s1 * 8);
+    if (fade_frame > 0) {
+        wipe_boundary_x = x + (fade_frame * 8);
 
-        if (Ending_finalScore != 0 && var_s1 >= 32) {
+        if (Ending_finalScore != 0 && fade_frame >= 32) {
 
             if (Ending_displayedScore == 0) {
                 Ending_isScoreIncrementing = 1;
@@ -596,111 +596,111 @@ void Ending_DrawCountingScore(
             }
         }
 
-        if (var_s1 >= 32) {
-            Ending_displayedScore = ((u_int)Ending_finalScore >> 5) * (var_s1 - 32);
+        if (fade_frame >= 32) {
+            Ending_displayedScore = ((u_int)Ending_finalScore >> 5) * (fade_frame - 32);
         }
 
-        if (var_s1 == 64) {
+        if (fade_frame == 64) {
             Ending_displayedScore = Ending_finalScore;
         }
 
-        sprintf(sp18, "%09d", Ending_displayedScore);
+        sprintf(score_digits, "%09d", Ending_displayedScore);
 
-        v1 = Ending_resultAtlasRegions[18].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[20].w;
-        arg0 -= (Ending_resultAtlasRegions[10].w * 2 + v1 + 0x74) >> 1;
+        label_width = Ending_resultAtlasRegions[18].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[20].w;
+        x -= (Ending_resultAtlasRegions[10].w * 2 + label_width + 0x74) >> 1;
 
-        Render_DrawTextureWipe(arg0, arg1, 0x12, Ending_countingScoreTint, temp_s2);
+        Render_DrawTextureWipe(x, y, 0x12, Ending_countingScoreTint, wipe_boundary_x);
 
-        arg0 += Ending_resultAtlasRegions[18].w;
+        x += Ending_resultAtlasRegions[18].w;
 
-        Render_DrawTextureWipe(arg0, arg1 + 7, 0x1A, Ending_countingScoreTint, temp_s2);
+        Render_DrawTextureWipe(x, y + 7, 0x1A, Ending_countingScoreTint, wipe_boundary_x);
 
-        v0 = arg0 + 2;
-        arg0 = v0 + Ending_resultAtlasRegions[26].w;
+        padded_prefix_x = x + 2;
+        x = padded_prefix_x + Ending_resultAtlasRegions[26].w;
 
         for (i = 0; i < 9; ++i) {
-            Render_DrawTextureWipe(arg0, arg1 + 3, sp18[i] - '0', Ending_countingScoreTint, temp_s2);
-            arg0 += 12;
+            Render_DrawTextureWipe(x, y + 3, score_digits[i] - '0', Ending_countingScoreTint, wipe_boundary_x);
+            x += 12;
             if ((i == 2) || (i == 5)) {
-                Render_DrawTextureWipe(arg0, arg1 + 0xE, 0xA, Ending_countingScoreTint, temp_s2);
-                arg0 += 3 + Ending_resultAtlasRegions[10].w;
+                Render_DrawTextureWipe(x, y + 0xE, 0xA, Ending_countingScoreTint, wipe_boundary_x);
+                x += 3 + Ending_resultAtlasRegions[10].w;
             }
         }
 
-        Render_DrawTextureWipe(arg0, arg1 + 8, 0x14, Ending_countingScoreTint, temp_s2);
+        Render_DrawTextureWipe(x, y + 8, 0x14, Ending_countingScoreTint, wipe_boundary_x);
     }
 }
 
 // decomp: ENDING.PRG _renderMapCompletion (src/ENDING/ENDING.PRG/D4.c:2070)
 void Ending_DrawMapCompletion(
-    int arg0, int arg1, int arg2, int arg3 __attribute__((unused)))
+    int x, int y, int fade_frame, int arg3 __attribute__((unused)))
 {
     extern CVECTOR Ending_mapCompletionTint[];
 
-    char sp10[2];
+    char completion_digits[2];
     int i;
-    int v0;
+    int padded_prefix_x;
 
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (fade_frame < 0) {
+        fade_frame = 0;
     }
 
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (fade_frame > 64) {
+        fade_frame = 64;
     }
 
-    if (arg2 > 0) {
+    if (fade_frame > 0) {
 
-        Ending_mapCompletionTint[0].cd = arg2;
+        Ending_mapCompletionTint[0].cd = fade_frame;
 
-        sprintf(sp10, "%03d", Ending_mapCompletion);
+        sprintf(completion_digits, "%03d", Ending_mapCompletion);
 
-        arg0 -= ((Ending_resultAtlasRegions[21].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[19].w + 0x26) >> 1);
+        x -= ((Ending_resultAtlasRegions[21].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[19].w + 0x26) >> 1);
 
-        Render_DrawTextureTintFade(arg0, arg1, 0x15, Ending_mapCompletionTint);
+        Render_DrawTextureTintFade(x, y, 0x15, Ending_mapCompletionTint);
 
-        arg0 += Ending_resultAtlasRegions[21].w;
+        x += Ending_resultAtlasRegions[21].w;
 
-        Render_DrawTextureTintFade(arg0, arg1 + 7, 0x1A, Ending_mapCompletionTint);
+        Render_DrawTextureTintFade(x, y + 7, 0x1A, Ending_mapCompletionTint);
 
-        v0 = arg0 + 2;
-        arg0 = v0 + Ending_resultAtlasRegions[26].w;
+        padded_prefix_x = x + 2;
+        x = padded_prefix_x + Ending_resultAtlasRegions[26].w;
 
         for (i = 0; i < 3; ++i) {
-            Render_DrawTextureTintFade(arg0, arg1 + 3, sp10[i] - '0', Ending_mapCompletionTint);
-            arg0 += 12;
+            Render_DrawTextureTintFade(x, y + 3, completion_digits[i] - '0', Ending_mapCompletionTint);
+            x += 12;
         }
 
-        Render_DrawTextureTintFade(arg0, arg1 + 8, 0x13, Ending_mapCompletionTint);
+        Render_DrawTextureTintFade(x, y + 8, 0x13, Ending_mapCompletionTint);
     }
 }
 
 // decomp: ENDING.PRG _renderIncrementalMapCompletion (src/ENDING/ENDING.PRG/D4.c:2113)
 void Ending_DrawCountingMapCompletion(
-    int arg0, int arg1, int arg2, int arg3 __attribute__((unused)))
+    int x, int y, int fade_frame, int arg3 __attribute__((unused)))
 {
     extern CVECTOR Ending_countingMapCompletionTint[];
 
-    char sp18[2];
-    int temp_s4;
+    char completion_digits[2];
+    int wipe_boundary_x;
     int i;
-    int v0;
+    int padded_prefix_x;
 
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (fade_frame < 0) {
+        fade_frame = 0;
     }
 
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (fade_frame > 64) {
+        fade_frame = 64;
     }
 
-    if (arg2 <= 0) {
+    if (fade_frame <= 0) {
         return;
     }
 
-    temp_s4 = arg0 + arg2 * 8;
+    wipe_boundary_x = x + fade_frame * 8;
 
-    if (Ending_mapCompletion != 0 && arg2 >= 32) {
+    if (Ending_mapCompletion != 0 && fade_frame >= 32) {
 
         if (Ending_displayedMapCompletion == 0) {
             Ending_isMapCompletionIncrementing = 1;
@@ -715,33 +715,33 @@ void Ending_DrawCountingMapCompletion(
         }
     }
 
-    if (arg2 >= 32) {
+    if (fade_frame >= 32) {
         if (Ending_mapCompletion >= 32u) {
-            Ending_displayedMapCompletion = (u_int)(Ending_mapCompletion * (arg2 - 32)) >> 5;
+            Ending_displayedMapCompletion = (u_int)(Ending_mapCompletion * (fade_frame - 32)) >> 5;
         } else if (Ending_displayedMapCompletion < Ending_mapCompletion) {
             Ending_displayedMapCompletion += 1;
         }
     }
 
-    sprintf(sp18, "%03d", Ending_displayedMapCompletion);
+    sprintf(completion_digits, "%03d", Ending_displayedMapCompletion);
 
-    arg0 -= ((int)(Ending_resultAtlasRegions[21].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[19].w + 0x26) >> 1);
+    x -= ((int)(Ending_resultAtlasRegions[21].w + Ending_resultAtlasRegions[26].w + Ending_resultAtlasRegions[19].w + 0x26) >> 1);
 
-    Render_DrawTextureWipe(arg0, arg1, 0x15, Ending_countingMapCompletionTint, temp_s4);
+    Render_DrawTextureWipe(x, y, 0x15, Ending_countingMapCompletionTint, wipe_boundary_x);
 
-    arg0 += Ending_resultAtlasRegions[21].w;
+    x += Ending_resultAtlasRegions[21].w;
 
-    Render_DrawTextureWipe(arg0, arg1 + 7, 0x1A, Ending_countingMapCompletionTint, temp_s4);
+    Render_DrawTextureWipe(x, y + 7, 0x1A, Ending_countingMapCompletionTint, wipe_boundary_x);
 
-    v0 = arg0 + 2;
-    arg0 = v0 + Ending_resultAtlasRegions[26].w;
+    padded_prefix_x = x + 2;
+    x = padded_prefix_x + Ending_resultAtlasRegions[26].w;
 
     for (i = 0; i < 3; ++i) {
-        Render_DrawTextureWipe(arg0, arg1 + 3, sp18[i] - '0', Ending_countingMapCompletionTint, temp_s4);
-        arg0 += 12;
+        Render_DrawTextureWipe(x, y + 3, completion_digits[i] - '0', Ending_countingMapCompletionTint, wipe_boundary_x);
+        x += 12;
     }
 
-    Render_DrawTextureWipe(arg0, arg1 + 8, 0x13, Ending_countingMapCompletionTint, temp_s4);
+    Render_DrawTextureWipe(x, y + 8, 0x13, Ending_countingMapCompletionTint, wipe_boundary_x);
 }
 
 // decomp: ENDING.PRG _renderRiskbreakerRankHeader (src/ENDING/ENDING.PRG/D4.c:2181)

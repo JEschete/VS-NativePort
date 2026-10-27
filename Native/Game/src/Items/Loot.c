@@ -157,7 +157,7 @@ int Items_RollEnemyItemDrop(Items_BattleLoot* looted, Items_MiscItemDrop* base)
 void Items_QueueEnemyLoot(Battle_Actor* enemy)
 {
     int i;
-    Battle_ActorStats* temp_s2 = enemy->stats;
+    Battle_ActorStats* enemy_stats = enemy->stats;
     Items_LootListNode* lootList = Core_Memory_AllocateFromHighEnd(sizeof *lootList);
 
     if (lootList == NULL) {
@@ -166,20 +166,20 @@ void Items_QueueEnemyLoot(Battle_Actor* enemy)
 
     Core_Memory_ZeroAlignedWords(lootList, sizeof *lootList);
 
-    lootList->droppedMask |= Items_RollEnemyWeaponDrop(&lootList->loot.weapon, &temp_s2->weapon);
-    lootList->droppedMask |= Items_RollEnemyShieldDrop(&lootList->loot.shield, &temp_s2->shield);
+    lootList->droppedMask |= Items_RollEnemyWeaponDrop(&lootList->loot.weapon, &enemy_stats->weapon);
+    lootList->droppedMask |= Items_RollEnemyShieldDrop(&lootList->loot.shield, &enemy_stats->shield);
     lootList->droppedMask |=
-        Items_RollEnemyAccessoryDrop(&lootList->loot.accessory, &temp_s2->accessory);
+        Items_RollEnemyAccessoryDrop(&lootList->loot.accessory, &enemy_stats->accessory);
 
     for (i = 0; i < 6; ++i) {
-        if (temp_s2->limbs[i].armor.armor.id != 0) {
+        if (enemy_stats->limbs[i].armor.armor.id != 0) {
             lootList->droppedMask |=
-                Items_RollEnemyArmorDrop(lootList->loot.armor, &temp_s2->limbs[i].armor);
+                Items_RollEnemyArmorDrop(lootList->loot.armor, &enemy_stats->limbs[i].armor);
         }
     }
 
-    lootList->droppedMask |= Items_CopyGuaranteedEnemyItemDrops(&lootList->loot, &temp_s2->dropItem);
-    lootList->droppedMask |= Items_RollEnemyItemDrop(&lootList->loot, &temp_s2->randomDropItem);
+    lootList->droppedMask |= Items_CopyGuaranteedEnemyItemDrops(&lootList->loot, &enemy_stats->dropItem);
+    lootList->droppedMask |= Items_RollEnemyItemDrop(&lootList->loot, &enemy_stats->randomDropItem);
 
     if (lootList->droppedMask != 0) {
 
@@ -226,31 +226,31 @@ void Items_OpenPendingEnemyLoot(void)
 // decomp: BATTLE.PRG func_8007BA98 (src/BATTLE/BATTLE.PRG/146C.c:8470)
 void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
 {
-    Items_LootListNode* temp_a0;
-    Items_LootListNode* temp_v0;
+    Items_LootListNode* previous_loot_head;
+    Items_LootListNode* scripted_loot;
 
-    temp_v0 = Core_Memory_AllocateFromHighEnd(sizeof *temp_v0);
-    if (temp_v0 != NULL) {
-        Core_Memory_ZeroAlignedWords(temp_v0, sizeof *temp_v0);
-        temp_v0->loot.misc[0].itemId = id0;
+    scripted_loot = Core_Memory_AllocateFromHighEnd(sizeof *scripted_loot);
+    if (scripted_loot != NULL) {
+        Core_Memory_ZeroAlignedWords(scripted_loot, sizeof *scripted_loot);
+        scripted_loot->loot.misc[0].itemId = id0;
         if (id0 & 0xFFFF) {
-            temp_v0->loot.misc[0].count = count0;
-            temp_v0->loot.misc[0].difficultyFlags = 3;
-            temp_v0->droppedMask |= 1;
+            scripted_loot->loot.misc[0].count = count0;
+            scripted_loot->loot.misc[0].difficultyFlags = 3;
+            scripted_loot->droppedMask |= 1;
         }
-        temp_v0->loot.misc[1].itemId = id1;
+        scripted_loot->loot.misc[1].itemId = id1;
         if (id1 & 0xFFFF) {
-            temp_v0->loot.misc[1].count = count1;
-            temp_v0->loot.misc[1].difficultyFlags = 3;
-            temp_v0->droppedMask |= 1;
+            scripted_loot->loot.misc[1].count = count1;
+            scripted_loot->loot.misc[1].difficultyFlags = 3;
+            scripted_loot->droppedMask |= 1;
         }
-        if (temp_v0->droppedMask != 0) {
-            temp_a0 = Items_lootListHead;
-            temp_v0->droppedMask = 0xFF;
-            Items_lootListHead = temp_v0;
-            temp_v0->next = temp_a0;
+        if (scripted_loot->droppedMask != 0) {
+            previous_loot_head = Items_lootListHead;
+            scripted_loot->droppedMask = 0xFF;
+            Items_lootListHead = scripted_loot;
+            scripted_loot->next = previous_loot_head;
         } else {
-            Core_Memory_FreeFromHighEnd(temp_v0);
+            Core_Memory_FreeFromHighEnd(scripted_loot);
         }
     }
     if (Items_lootListHead != NULL) {
@@ -266,34 +266,34 @@ void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
 // decomp: BATTLE.PRG func_8008A6FC (src/BATTLE/BATTLE.PRG/146C.c:15596)
 void Items_ClearRoomLootList(void)
 {
-    Items_LootListNode* var_a0 = Items_lootListHead;
+    Items_LootListNode* loot_node = Items_lootListHead;
 
     Menu_Loot_ResetPaging();
 
-    while (var_a0 != 0) {
-        Items_LootListNode* temp_s0 = var_a0->next;
-        Core_Memory_FreeFromHighEnd(var_a0);
-        var_a0 = temp_s0;
+    while (loot_node != 0) {
+        Items_LootListNode* next_loot_node = loot_node->next;
+        Core_Memory_FreeFromHighEnd(loot_node);
+        loot_node = next_loot_node;
     }
     Items_lootListHead = NULL;
 }
 
 // decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16832)
-Items_TreasureChest* Items_TreasureChestAtTile(int arg0, int arg1, int arg2)
+Items_TreasureChest* Items_TreasureChestAtTile(int tile_x, int tile_z, int tile_layer)
 {
-    int temp_t1;
-    Items_TreasureChest* var_a3;
+    int chest_count;
+    Items_TreasureChest* chest;
     int i;
 
-    var_a3 = Field_roomData.containers;
+    chest = Field_roomData.containers;
     do {
-        if (var_a3 != NULL) {
-            temp_t1 = Field_roomData.header.containersLength
+        if (chest != NULL) {
+            chest_count = Field_roomData.header.containersLength
                     / sizeof *Field_roomData.containers;
-            for (i = 0; i < temp_t1; ++i, ++var_a3) {
-                if ((var_a3->tileX == arg0) && (var_a3->tileZ == arg1)) {
-                    if (var_a3->layer == arg2) {
-                        return var_a3;
+            for (i = 0; i < chest_count; ++i, ++chest) {
+                if ((chest->tileX == tile_x) && (chest->tileZ == tile_z)) {
+                    if (chest->layer == tile_layer) {
+                        return chest;
                     }
                 }
             }
@@ -305,30 +305,30 @@ Items_TreasureChest* Items_TreasureChestAtTile(int arg0, int arg1, int arg2)
 // decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16903)
 void Items_RestoreRoomChestStates(void)
 {
-    Field_MpdTileCell* temp_s0;
-    Items_TreasureChest* var_s3;
-    int temp_s4;
+    Field_MpdTileCell* collision_cell;
+    Items_TreasureChest* chest;
+    int chest_count;
     int i;
 
     if (Field_roomData.containers != NULL) {
 
-        var_s3 = Field_roomData.containers;
-        temp_s4 =
+        chest = Field_roomData.containers;
+        chest_count =
             Field_roomData.header.containersLength / sizeof *Field_roomData.containers;
 
-        for (i = 0; i < temp_s4; ++i, ++var_s3) {
-            temp_s0 = Field_CollisionCellAt(
-                (u_int)var_s3->tileX, (u_int)var_s3->tileZ, (int)var_s3->layer);
-            if (State_ScriptFlag((short)(var_s3->openedFlag + 0x3C0))) {
-                var_s3->isOpen = 1;
-                Field_FinishRoomTiltRotation(var_s3->lidRotationId);
-                if (temp_s0 != NULL) {
-                    temp_s0->doorPassability = 5;
+        for (i = 0; i < chest_count; ++i, ++chest) {
+            collision_cell = Field_CollisionCellAt(
+                (u_int)chest->tileX, (u_int)chest->tileZ, (int)chest->layer);
+            if (State_ScriptFlag((short)(chest->openedFlag + 0x3C0))) {
+                chest->isOpen = 1;
+                Field_FinishRoomTiltRotation(chest->lidRotationId);
+                if (collision_cell != NULL) {
+                    collision_cell->doorPassability = 5;
                 }
             } else {
-                var_s3->isOpen = 0;
-                if (temp_s0 != NULL) {
-                    temp_s0->doorPassability = 0;
+                chest->isOpen = 0;
+                if (collision_cell != NULL) {
+                    collision_cell->doorPassability = 0;
                 }
             }
         }
@@ -336,14 +336,14 @@ void Items_RestoreRoomChestStates(void)
 }
 
 // decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17285)
-Items_TreasureChest* Items_RoomTreasureChests(int* arg0)
+Items_TreasureChest* Items_RoomTreasureChests(int* chest_count_out)
 {
     if (Field_roomData.containers != NULL) {
-        *arg0 =
+        *chest_count_out =
             Field_roomData.header.containersLength / sizeof *Field_roomData.containers;
         return Field_roomData.containers;
     }
-    *arg0 = 0;
+    *chest_count_out = 0;
     return NULL;
 }
 
