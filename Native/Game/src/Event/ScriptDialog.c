@@ -21,7 +21,7 @@ u_char Event_kDialogPlacementOrder[324]; /* contents: module image (ModuleData.c
 intptr_t Event_ScriptInitDialogBox(u_char* script, short thread_index __attribute__((unused)))
 {
     Menu_TextBoxState* box;
-    short temp_v0_4;
+    short speaker_reference;
     short centerY;
     short centerX;
 
@@ -42,9 +42,9 @@ intptr_t Event_ScriptInitDialogBox(u_char* script, short thread_index __attribut
     box = Menu_TextBox(script[1] & 0xF);
     box->opaque2E = script[10];
 
-    temp_v0_4 = Core_Memory_ReadUnalignedShort(&script[8]);
-    if (temp_v0_4 < 0x2000) {
-        box->flags.speakerTexture = Event_ResolveScriptActorReference(temp_v0_4);
+    speaker_reference = Core_Memory_ReadUnalignedShort(&script[8]);
+    if (speaker_reference < 0x2000) {
+        box->flags.speakerTexture = Event_ResolveScriptActorReference(speaker_reference);
     }
 
     return 0;
@@ -53,7 +53,7 @@ intptr_t Event_ScriptInitDialogBox(u_char* script, short thread_index __attribut
 // decomp: BATTLE.PRG vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707)
 intptr_t Event_ScriptShowDialogText(u_char* script, short thread_index __attribute__((unused)))
 {
-    int temp_v0;
+    int text_result;
 
     if (Event_isTextBoxAwaitingClose[script[1]] == 0) {
         Menu_SetTextBoxText(script[1], (char*)&Event_dialogStrings[Event_dialogStrings[script[2]]]);
@@ -64,11 +64,11 @@ intptr_t Event_ScriptShowDialogText(u_char* script, short thread_index __attribu
         return 0;
     }
 
-    temp_v0 = Menu_SetTextBoxText(script[1], 0);
+    text_result = Menu_SetTextBoxText(script[1], 0);
 
-    if (temp_v0 >= 0) {
-        if (temp_v0 > 0) {
-            Audio_Seq_unusedStateFlags.textBoxSelection = temp_v0;
+    if (text_result >= 0) {
+        if (text_result > 0) {
+            Audio_Seq_unusedStateFlags.textBoxSelection = text_result;
         }
         Event_isTextBoxAwaitingClose[script[1]] = 0;
         return 0;
@@ -185,24 +185,24 @@ intptr_t Event_ScriptWaitForDialogDismissal(u_char* instruction, short thread_in
 // decomp: BATTLE.PRG vs_battle_script_setStringContextInt (src/BATTLE/BATTLE.PRG/4A0A8.c:916)
 intptr_t Event_ScriptSetDialogInteger(u_char* instruction, short thread_index)
 {
-    int temp_s0 = Core_Memory_ReadUnalignedShort(instruction + 2) & 0x3FF;
+    int source_flag_id = Core_Memory_ReadUnalignedShort(instruction + 2) & 0x3FF;
     switch (instruction[3] >> 6) {
     case 0:
-        Battle_stringContext.integers[instruction[1]] = State_ScriptFlag(temp_s0);
+        Battle_stringContext.integers[instruction[1]] = State_ScriptFlag(source_flag_id);
         break;
     case 1:
         Battle_stringContext.integers[instruction[1]] =
-            (signed char)State_ScriptFlag(temp_s0);
+            (signed char)State_ScriptFlag(source_flag_id);
         break;
     case 2:
         Battle_stringContext.integers[instruction[1]] =
-            State_ScriptFlag(temp_s0)
-            | ((State_ScriptFlag(temp_s0 + 1)) << 8);
+            State_ScriptFlag(source_flag_id)
+            | ((State_ScriptFlag(source_flag_id + 1)) << 8);
         break;
     case 3:
         Battle_stringContext.integers[instruction[1]] =
-            (short)(State_ScriptFlag(temp_s0)
-                    | ((State_ScriptFlag(temp_s0 + 1)) << 8));
+            (short)(State_ScriptFlag(source_flag_id)
+                    | ((State_ScriptFlag(source_flag_id + 1)) << 8));
         break;
     }
     return 0;
@@ -223,9 +223,9 @@ intptr_t Event_ScriptSelectDialogChoice(u_char* script, short thread_index __att
     }
 
     if (Event_isTextSelectionActive != 0) {
-        short temp_v0 = Menu_SelectTextBoxChoice(script[1]);
-        if ((temp_v0 << 0x10) != 0) {
-            State_SetScriptFlag(0x10, temp_v0);
+        short selected_choice = Menu_SelectTextBoxChoice(script[1]);
+        if ((selected_choice << 0x10) != 0) {
+            State_SetScriptFlag(0x10, selected_choice);
             Event_isTextSelectionActive = 0;
             return 0;
         }
@@ -239,20 +239,20 @@ intptr_t Event_ScriptSelectDialogChoice(u_char* script, short thread_index __att
 // decomp: BATTLE.PRG func_800B9564 (src/BATTLE/BATTLE.PRG/4A0A8.c:1897)
 intptr_t Event_ScriptSetDialogSpeaker(u_char* instruction, short thread_index)
 {
-    Menu_TextBoxState* temp_s1;
-    u_short temp_s0;
-    int var_a0;
+    Menu_TextBoxState* text_box;
+    u_short speaker_reference;
+    int speaker_texture;
 
-    temp_s0 = Core_Memory_ReadUnalignedShort(instruction + 2);
-    temp_s1 = Menu_TextBox(instruction[1] & 0xF);
+    speaker_reference = Core_Memory_ReadUnalignedShort(instruction + 2);
+    text_box = Menu_TextBox(instruction[1] & 0xF);
 
-    if (temp_s0 < 0x2000) {
-        var_a0 = Event_ResolveScriptActorReference(temp_s0);
+    if (speaker_reference < 0x2000) {
+        speaker_texture = Event_ResolveScriptActorReference(speaker_reference);
     } else {
-        var_a0 = 0x20;
+        speaker_texture = 0x20;
     }
-    temp_s1->flags.speakerTexture = var_a0;
-    temp_s1->opaque2E = instruction[1] >> 4;
+    text_box->flags.speakerTexture = speaker_texture;
+    text_box->opaque2E = instruction[1] >> 4;
     return 0;
 }
 

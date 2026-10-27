@@ -59,9 +59,9 @@ intptr_t Event_CommandSetActorActivity(u_char* instruction, short thread_index);
 intptr_t Event_CommandAwardMiscLoot(u_char* instruction, short thread_index);
 intptr_t Event_CommandConsumeMiscItem(u_char* instruction, short thread_index);
 intptr_t Event_CommandStoreActorDistance(u_char* instruction, short thread_index);
-void Event_SetEventActorActivity(short arg0);
-void Event_BuildScriptActorSelection(u_short arg0, Event_ActorSelection* arg1);
-u_short Event_NextScriptSelectedActor(Event_ActorSelection* arg0);
-int Event_ActorDialogAnchor(int arg0, SVECTOR* arg1);
+void Event_SetEventActorActivity(short activity_enabled);
+void Event_BuildScriptActorSelection(u_short actor_selector, Event_ActorSelection* selection);
+u_short Event_NextScriptSelectedActor(Event_ActorSelection* selection);
+int Event_ActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor);
 
 #endif // VS_EVENT_SCRIPTACTORS_H_DECLS

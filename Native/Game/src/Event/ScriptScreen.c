@@ -29,50 +29,50 @@ intptr_t Event_ScriptLoadSplashImage(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800B7014 (src/BATTLE/BATTLE.PRG/4A0A8.c:857)
 intptr_t Event_ScriptConfigureSplashLayer(u_char* instruction, short thread_index)
 {
-    Event_SplashTween* new_var;
+    Event_SplashTween* splash_tween;
 
-    Event_SplashLayerView* temp_a1 = Render_gimLayers;
+    Event_SplashLayerView* splash_layer = Render_gimLayers;
 
-    if (temp_a1 == NULL) {
+    if (splash_layer == NULL) {
         return 0;
     }
 
-    new_var = &Event_splashTweens[instruction[1] >> 6];
-    new_var->durationFrames = 0;
-    temp_a1 = temp_a1 + ((instruction[1] >> 6));
-    temp_a1->renderMode = instruction[1] & 3;
-    temp_a1->offsetX = (signed char)instruction[2] * 2;
-    temp_a1->offsetY = (signed char)instruction[3] * 2;
-    temp_a1->scaleFixed12 = instruction[4] << 7;
-    temp_a1->brightness = instruction[5];
-    Render_ActivateGimLayer(instruction[1] >> 6, temp_a1, instruction);
+    splash_tween = &Event_splashTweens[instruction[1] >> 6];
+    splash_tween->durationFrames = 0;
+    splash_layer = splash_layer + ((instruction[1] >> 6));
+    splash_layer->renderMode = instruction[1] & 3;
+    splash_layer->offsetX = (signed char)instruction[2] * 2;
+    splash_layer->offsetY = (signed char)instruction[3] * 2;
+    splash_layer->scaleFixed12 = instruction[4] << 7;
+    splash_layer->brightness = instruction[5];
+    Render_ActivateGimLayer(instruction[1] >> 6, splash_layer, instruction);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B70E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:879)
 intptr_t Event_ScriptTweenSplashLayer(u_char* instruction, short thread_index)
 {
-    Event_SplashLayerView* temp_a3 = Render_gimLayers;
-    int temp_a2 = instruction[5] >> 6;
-    Event_SplashTween* temp_a1 = &Event_splashTweens[temp_a2];
+    Event_SplashLayerView* splash_layer = Render_gimLayers;
+    int layer_index = instruction[5] >> 6;
+    Event_SplashTween* splash_tween = &Event_splashTweens[layer_index];
 
-    if (temp_a3 == NULL) {
+    if (splash_layer == NULL) {
         return 0;
     }
 
-    temp_a3 += temp_a2;
+    splash_layer += layer_index;
 
-    if (temp_a1->durationFrames != 0) {
+    if (splash_tween->durationFrames != 0) {
         return 1;
     }
 
-    temp_a1->deltaX = (((signed char)instruction[1] * 2) - (temp_a1->startX = temp_a3->offsetX));
-    temp_a1->deltaY = (((signed char)instruction[2] * 2) - (temp_a1->startY = temp_a3->offsetY));
-    temp_a1->deltaScaleFixed12 = ((instruction[3] << 7) - (temp_a1->startScaleFixed12 = temp_a3->scaleFixed12));
-    temp_a1->deltaBrightness = instruction[4] - (temp_a1->startBrightness = ((char*)temp_a3)[3]);
-    temp_a1->easingMode = instruction[5] & 7;
-    temp_a1->durationFrames = instruction[6];
-    temp_a1->elapsedFrames = 0;
+    splash_tween->deltaX = (((signed char)instruction[1] * 2) - (splash_tween->startX = splash_layer->offsetX));
+    splash_tween->deltaY = (((signed char)instruction[2] * 2) - (splash_tween->startY = splash_layer->offsetY));
+    splash_tween->deltaScaleFixed12 = ((instruction[3] << 7) - (splash_tween->startScaleFixed12 = splash_layer->scaleFixed12));
+    splash_tween->deltaBrightness = instruction[4] - (splash_tween->startBrightness = ((char*)splash_layer)[3]);
+    splash_tween->easingMode = instruction[5] & 7;
+    splash_tween->durationFrames = instruction[6];
+    splash_tween->elapsedFrames = 0;
     return 0;
 }
 
@@ -92,9 +92,9 @@ intptr_t Event_ScriptWaitForSplashTween(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800B9A40 (src/BATTLE/BATTLE.PRG/4A0A8.c:2049)
 intptr_t Event_ScriptFadeOutAndWait(u_char* instruction, short thread_index)
 {
-    int temp_v0 = Field_ScreenTransitionPhase();
-    if (temp_v0 != 5) {
-        if (temp_v0 == 0) {
+    int transition_phase = Field_ScreenTransitionPhase();
+    if (transition_phase != 5) {
+        if (transition_phase == 0) {
             Field_BeginScreenFadeOut(instruction[1], instruction[2], instruction[3] * 0x10);
         }
         return 1;
@@ -172,18 +172,18 @@ intptr_t Event_ScriptTogglePaletteHook(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800B9C58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2122)
 intptr_t Event_ScriptTransformPalettes(u_char* instruction, short thread_index)
 {
-    Event_ActorSelection sp18;
-    int temp_a2;
+    Event_ActorSelection actor_selection;
+    int actor_id;
 
     switch (instruction[1] >> 4) {
     case 0:
-        Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 2), &sp18);
+        Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 2), &actor_selection);
         while (1) {
-            temp_a2 = Event_NextScriptSelectedActor(&sp18);
-            if (temp_a2 == 1) {
+            actor_id = Event_NextScriptSelectedActor(&actor_selection);
+            if (actor_id == 1) {
                 break;
             }
-            Render_TransformActorColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, temp_a2,
+            Render_TransformActorColors(instruction[1] & 0xF, (1 << instruction[4]) & 0x1F, actor_id,
                 (signed char)instruction[5], (signed char)instruction[6], (signed char)instruction[7]);
         }
         break;

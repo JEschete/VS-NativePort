@@ -859,3 +859,34 @@ source/header files change. All 121 owned paths are unchanged and the second
 generation is identical. Evidence: `build\quality\issue148-audio-*`.
 The refreshed whole-tree lexical count is 21,485 occurrences/1,868 pairs/
 315 files; the remaining source reviews continue independently of this checkpoint.
+
+The audio cohort is published in `08f718ec`, exact green `40568510803`.
+The complete remaining event-scope review accounts for 995 occurrences in
+36 scanned files: 193 approved mappings across 90 definitions and 33 linked
+header bindings. All native and original scope fingerprints are checked before
+application; registered-owned F01130 has no candidate mappings and stays intact.
+
+Two bindings intentionally remain, with individual ledger evidence:
+
+- F00972 `new_var`: original `40564.c:1282/1291/1293` declares it, assigns a
+  scratch address, then overwrites it with `0x10`, without any read. The incompatible
+  write-only roles do not justify inventing a runtime meaning or deleting code.
+- F01277 `arg0`: original `573B8.c:223-229` never consumes the parameter;
+  the file selection uses the current global event instead. The native body
+  and sibling header preserve the unused call contract.
+
+On dirty base `08f718ec`, `[event]` first passes 22 cases/694 assertions.
+After naming, Debug/Release each pass `[event],[core][math] --reporter compact`,
+44 cases/932 assertions. Copier tests pass 133/133 and naming tests 32/32;
+focused tooling quality reports zero new findings and no baseline changes.
+The original negative opcode-scope control still asserts unchanged helper
+parameters when applying the two general opcode rules. Separately reviewed
+helper-specific names now have positive controls; applying all naming rules
+to that old negative fixture was an obsolete test-scope assumption, not a
+reason to suppress either contract.
+Exact expected code-token changes are confined to 14 generated event files;
+all 742 manifest paths and 121 unchanged owned paths are verified across two
+stable generations. Evidence: `build\quality\issue148-event-remaining-*`
+and `issue148-event-verification.json`. The remaining event matches are exactly
+the five occurrences of the two reviewed retentions above. Whole-tree lexical
+counts are 20,495 occurrences/1,778 pairs/303 files; other scopes continue.

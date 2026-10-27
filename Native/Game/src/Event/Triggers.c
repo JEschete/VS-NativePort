@@ -93,7 +93,7 @@ void Event_FreeRoomEventSections(void)
 void Event_ReleaseZoneEventResources(void) { }
 
 // decomp: BATTLE.PRG func_800BEC58 (src/BATTLE/BATTLE.PRG/4A0A8.c:4302)
-short Event_EvaluateRoomEventTriggers(int arg0, int arg1, u_char* arg2, int arg3)
+short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id, u_char* trigger_context, int context_kind)
 {
     char buf[64];
     Actors_ActorLocationQuery position;
@@ -111,8 +111,8 @@ short Event_EvaluateRoomEventTriggers(int arg0, int arg1, u_char* arg2, int arg3
     short left;
     int right;
 
-    type = arg0;
-    mode = arg3;
+    type = trigger_request;
+    mode = context_kind;
 
     if (type == 0xFF) {
         if (Event_playbackPhase == 0) {
@@ -131,7 +131,7 @@ short Event_EvaluateRoomEventTriggers(int arg0, int arg1, u_char* arg2, int arg3
         }
     }
     if (type == 0x40) {
-        Event_eventId = arg1;
+        Event_eventId = event_or_actor_id;
         Event_eventSource = 0;
         Event_playbackPhase = 1;
         Event_isDirectEventRequest = 1;
@@ -254,8 +254,8 @@ short Event_EvaluateRoomEventTriggers(int arg0, int arg1, u_char* arg2, int arg3
                 if (mode == 0) {
                     actorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 1));
                     otherActorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 3));
-                    if (actorId != 1 && otherActorId != 1 && arg1 == actorId
-                        && arg2 == otherActorId) {
+                    if (actorId != 1 && otherActorId != 1 && event_or_actor_id == actorId
+                        && trigger_context == otherActorId) {
                         result = 1;
                     }
                 }
@@ -278,8 +278,8 @@ short Event_EvaluateRoomEventTriggers(int arg0, int arg1, u_char* arg2, int arg3
                 p += 5;
                 break;
             case 8:
-                if (mode == 1 && ((u_char*)arg2)[0] == p[1]
-                    && ((u_char*)arg2)[2] == p[2]) {
+                if (mode == 1 && ((u_char*)trigger_context)[0] == p[1]
+                    && ((u_char*)trigger_context)[2] == p[2]) {
                     result = 1;
                 }
                 p += 3;

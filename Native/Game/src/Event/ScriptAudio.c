@@ -90,9 +90,9 @@ intptr_t Event_CommandSelectSfxBank(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG vs_battle_script_loadSoundFile (src/BATTLE/BATTLE.PRG/4A0A8.c:2339)
 intptr_t Event_CommandLoadEventMusic(u_char* instruction, short thread_index)
 {
-    short temp_v0 = Field_ZoneSoundFileId();
-    Audio_LoadMusicSlot(temp_v0, 3);
-    Audio_LoadMappedWaveBank(temp_v0);
+    short zone_sound_file_id = Field_ZoneSoundFileId();
+    Audio_LoadMusicSlot(zone_sound_file_id, 3);
+    Audio_LoadMappedWaveBank(zone_sound_file_id);
     return 0;
 }
 
@@ -156,12 +156,12 @@ intptr_t Event_CommandStopMusic(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BA6E0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2396)
 intptr_t Event_CommandWaitMusicSlot(u_char* instruction, short thread_index)
 {
-    int temp_s0 = instruction[1];
-    if (Audio_QueryMusicSlotVolume(temp_s0) != 0) {
-        if (Audio_MusicSlotVolume(temp_s0) != 0) {
+    int music_slot = instruction[1];
+    if (Audio_QueryMusicSlotVolume(music_slot) != 0) {
+        if (Audio_MusicSlotVolume(music_slot) != 0) {
             return 1;
         }
-        Audio_StopMusicSlotPlayback(temp_s0);
+        Audio_StopMusicSlotPlayback(music_slot);
     }
     return 0;
 }
@@ -195,8 +195,8 @@ intptr_t Event_CommandWaitSoundQueue(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BA7BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2430)
 intptr_t Event_CommandWaitMusicTimer(u_char* instruction, short thread_index)
 {
-    int temp_s1 = Audio_MusicBeatPosition() >> 0x10;
-    return temp_s1 < Core_Memory_ReadUnalignedShort(instruction + 1);
+    int music_timer_count = Audio_MusicBeatPosition() >> 0x10;
+    return music_timer_count < Core_Memory_ReadUnalignedShort(instruction + 1);
 }
 
 // decomp: BATTLE.PRG func_800BA800 (src/BATTLE/BATTLE.PRG/4A0A8.c:2436)

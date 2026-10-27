@@ -222,22 +222,22 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
 void Event_RestoreScriptTextureRectangle(void)
 {
     void* new_var;
-    RECT sp10;
-    DR_MOVE* temp_s0;
+    RECT source_rectangle;
+    DR_MOVE* move_primitive;
 
-    sp10.x = 470;
-    sp10.y = 384;
-    sp10.w = 18;
-    sp10.h = 36;
+    source_rectangle.x = 470;
+    source_rectangle.y = 384;
+    source_rectangle.w = 18;
+    source_rectangle.h = 36;
 
     new_var = (void*)((uintptr_t)Core_ScratchBase() + 0x000);
-    temp_s0 = *((DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000));
+    move_primitive = *((DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000));
     new_var = (void*)0x10;
 
-    SetDrawMove(temp_s0, &sp10, 16, 400);
-    ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(temp_s0);
+    SetDrawMove(move_primitive, &source_rectangle, 16, 400);
+    ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(move_primitive);
 
-    *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(temp_s0 + 1);
+    *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(move_primitive + 1);
 }
 
 // decomp: BATTLE.PRG vs_battle_invalidOpcode (src/BATTLE/BATTLE.PRG/4A0A8.c:588)
@@ -274,7 +274,7 @@ intptr_t Event_ScriptBeginSkippableCutscene(u_char* instruction, short thread_in
 }
 
 // decomp: BATTLE.PRG func_800B6778 (src/BATTLE/BATTLE.PRG/4A0A8.c:618)
-void Event_FinishSkippedCutscene(u_char* arg0)
+void Event_FinishSkippedCutscene(u_char* scan_cursor)
 {
     short i;
 
@@ -286,12 +286,12 @@ void Event_FinishSkippedCutscene(u_char* arg0)
     Event_RestoreScriptTextureRectangle();
 
     i = 0xF;
-    while (*arg0 != i) {
-        if (memcmp(arg0, Event_kSkipSoundRestoreMarker, 4) == 0) {
+    while (*scan_cursor != i) {
+        if (memcmp(scan_cursor, Event_kSkipSoundRestoreMarker, 4) == 0) {
             State_SetScriptFlag(0xA8, 0);
             return;
         }
-        arg0 = &arg0[Event_kOpcodeSizes[*arg0]];
+        scan_cursor = &scan_cursor[Event_kOpcodeSizes[*scan_cursor]];
     }
 
     Field_RestartRoomEffectSound();
@@ -301,9 +301,9 @@ void Event_FinishSkippedCutscene(u_char* arg0)
 // decomp: BATTLE.PRG func_800B6868 (src/BATTLE/BATTLE.PRG/4A0A8.c:642)
 intptr_t Event_ScriptEndCutsceneAndJump(u_char* instruction, short thread_index)
 {
-    char temp_v1 = Event_skipState;
+    char previous_skip_state = Event_skipState;
     Event_skipState = 0;
-    if (temp_v1 == 2) {
+    if (previous_skip_state == 2) {
         Event_FinishSkippedCutscene(instruction);
         return 4;
     }
@@ -313,9 +313,9 @@ intptr_t Event_ScriptEndCutsceneAndJump(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800B68C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:653)
 intptr_t Event_ScriptEndCutscene(u_char* instruction, short thread_index)
 {
-    char temp_v1 = Event_skipState;
+    char previous_skip_state = Event_skipState;
     Event_skipState = 0;
-    if (temp_v1 == 2) {
+    if (previous_skip_state == 2) {
         Event_FinishSkippedCutscene(instruction);
         return 4;
     }
@@ -334,43 +334,43 @@ intptr_t Event_ScriptWaitForButtonAndYield(u_char* instruction, short thread_ind
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlag (src/BATTLE/BATTLE.PRG/4A0A8.c:1543)
 intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_index)
 {
-    char temp_a0 =
+    char flag_value =
         State_ScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
-    char temp_a1 = instruction[3];
+    char immediate_value = instruction[3];
 
     switch (instruction[1] & 0xF0) {
     case 0:
-        if (temp_a1 >= temp_a0) {
+        if (immediate_value >= flag_value) {
             return (int)NULL;
         }
         break;
     case 16:
-        if (temp_a0 >= temp_a1) {
+        if (flag_value >= immediate_value) {
             return (int)NULL;
         }
         break;
     case 32:
-        if (temp_a0 == temp_a1) {
+        if (flag_value == immediate_value) {
             return (int)NULL;
         }
         break;
     case 48:
-        if (temp_a0 != temp_a1) {
+        if (flag_value != immediate_value) {
             return (int)NULL;
         }
         break;
     case 64:
-        if (temp_a0 < temp_a1) {
+        if (flag_value < immediate_value) {
             return (int)NULL;
         }
         break;
     case 80:
-        if (temp_a1 < temp_a0) {
+        if (immediate_value < flag_value) {
             return (int)NULL;
         }
         break;
     case 96:
-        if (temp_a0 & temp_a1) {
+        if (flag_value & immediate_value) {
             return (int)NULL;
         }
         break;
@@ -381,38 +381,38 @@ intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_ind
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (src/BATTLE/BATTLE.PRG/4A0A8.c:1589)
 intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index)
 {
-    char temp_s0 =
+    char left_flag_value =
         State_ScriptFlag(((u_char)instruction[2] >> 2) | ((instruction[1] & 0xF) << 6));
-    char temp_a0 = State_ScriptFlag(instruction[3] | ((instruction[2] & 3) << 8));
+    char right_flag_value = State_ScriptFlag(instruction[3] | ((instruction[2] & 3) << 8));
 
     switch (instruction[1] & 0xF0) {
     case 0:
-        if (temp_s0 <= temp_a0) {
+        if (left_flag_value <= right_flag_value) {
             return (int)NULL;
         }
         break;
     case 16:
-        if (temp_s0 >= temp_a0) {
+        if (left_flag_value >= right_flag_value) {
             return (int)NULL;
         }
         break;
     case 32:
-        if (temp_s0 == temp_a0) {
+        if (left_flag_value == right_flag_value) {
             return (int)NULL;
         }
         break;
     case 48:
-        if (temp_s0 != temp_a0) {
+        if (left_flag_value != right_flag_value) {
             return (int)NULL;
         }
         break;
     case 64:
-        if (temp_s0 < temp_a0) {
+        if (left_flag_value < right_flag_value) {
             return (int)NULL;
         }
         break;
     case 80:
-        if (temp_s0 > temp_a0) {
+        if (left_flag_value > right_flag_value) {
             return (int)NULL;
         }
         break;
@@ -469,34 +469,34 @@ intptr_t Event_ScriptLoopBackward(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG vs_battle_script_setFlagImm (src/BATTLE/BATTLE.PRG/4A0A8.c:1685)
 intptr_t Event_ScriptApplyImmediateFlagOperation(u_char* instruction, short thread_index)
 {
-    int temp_a1 = instruction[1];
-    short temp_s1 = instruction[3];
-    int temp_s0 = (instruction[2] >> 2) + ((temp_a1 & 0xF) << 6);
+    int operation_and_flag_bits = instruction[1];
+    short immediate_value = instruction[3];
+    int target_flag_id = (instruction[2] >> 2) + ((operation_and_flag_bits & 0xF) << 6);
 
-    switch (temp_a1 & 0xF0) {
+    switch (operation_and_flag_bits & 0xF0) {
     case 0x0:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) + temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) + immediate_value);
         break;
     case 0x10:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) - temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) - immediate_value);
         break;
     case 0x20:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) * temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) * immediate_value);
         break;
     case 0x30:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) / temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) / immediate_value);
         break;
     case 0x40:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) % temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) % immediate_value);
         break;
     case 0x50:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) & temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) & immediate_value);
         break;
     case 0x60:
-        State_SetScriptFlag(temp_s0, State_ScriptFlag(temp_s0) | temp_s1);
+        State_SetScriptFlag(target_flag_id, State_ScriptFlag(target_flag_id) | immediate_value);
         break;
     case 0x70:
-        State_SetScriptFlag(temp_s0, temp_s1);
+        State_SetScriptFlag(target_flag_id, immediate_value);
         break;
     }
     return 0;
@@ -567,8 +567,8 @@ intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short threa
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfButton (src/BATTLE/BATTLE.PRG/4A0A8.c:1798)
 intptr_t Event_ScriptStoreButtonState(u_char* instruction, short thread_index)
 {
-    short temp_v0 = Core_Memory_ReadUnalignedShort(instruction + 1);
-    State_SetScriptFlag(temp_v0 & 0x3FF, temp_v0 & 0x8000
+    short flag_and_button_source = Core_Memory_ReadUnalignedShort(instruction + 1);
+    State_SetScriptFlag(flag_and_button_source & 0x3FF, flag_and_button_source & 0x8000
                                                 ? Input_buttonsPressed.ports[0].lowByte
                                                 : Input_previousButtons);
     return 0;
@@ -604,26 +604,26 @@ intptr_t Event_ScriptWaitForButtonOrTimeout(u_char* instruction, short thread_in
 // decomp: BATTLE.PRG func_800B9724 (src/BATTLE/BATTLE.PRG/4A0A8.c:1948)
 intptr_t Event_ScriptConfigureEasingCurve(u_char* instruction, short thread_index)
 {
-    int var_v1;
-    u_char* temp_a1;
-    u_short* new_var;
+    int encoded_power;
+    u_char* curve_bytes;
+    u_short* curve_table;
 
-    new_var = Event_customEasingCurves;
-    temp_a1 = (u_char*)((instruction[1] >> 6) + new_var);
-    temp_a1[0] = ((instruction[1] >> 4) & 3);
+    curve_table = Event_customEasingCurves;
+    curve_bytes = (u_char*)((instruction[1] >> 6) + curve_table);
+    curve_bytes[0] = ((instruction[1] >> 4) & 3);
 
-    var_v1 = instruction[1] & 7;
+    encoded_power = instruction[1] & 7;
     if (instruction[1] & 8) {
-        var_v1 |= 0xF8;
+        encoded_power |= 0xF8;
     }
-    temp_a1[1] = var_v1;
+    curve_bytes[1] = encoded_power;
     return 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_script_specialOp (src/BATTLE/BATTLE.PRG/4A0A8.c:2651)
 intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
 {
-    char sp10[32];
+    char diagnostic_message[32];
 
     switch (instruction[1]) {
     case 0:
@@ -697,7 +697,7 @@ intptr_t Event_CommandSpecialOperation(u_char* instruction, short thread_index)
         Field_CancelPendingRoomVisit();
         break;
     default:
-        sprintf(sp10, "<SPECIAL=%d> IS UNDEFINED!", instruction[1]);
+        sprintf(diagnostic_message, "<SPECIAL=%d> IS UNDEFINED!", instruction[1]);
         break;
     }
     return 0;
@@ -730,12 +730,12 @@ intptr_t Event_CommandSetTickSpeed(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BB504 (src/BATTLE/BATTLE.PRG/4A0A8.c:2827)
 intptr_t Event_CommandWaitScriptContext(u_char* instruction, short thread_index)
 {
-    u_short temp_a0 = instruction[1] & 3;
+    u_short target_thread_index = instruction[1] & 3;
     if ((instruction[1] & 0x80)) {
-        Event_threadCursors[temp_a0] = 0;
+        Event_threadCursors[target_thread_index] = 0;
         return 0;
     }
-    return Event_threadCursors[temp_a0] != 0;
+    return Event_threadCursors[target_thread_index] != 0;
 }
 
 // decomp: BATTLE.PRG func_800BB554 (src/BATTLE/BATTLE.PRG/4A0A8.c:2837)
@@ -762,17 +762,17 @@ intptr_t Event_CommandLoadNextEvent(u_char* instruction, short thread_index)
 intptr_t Event_CommandFinishEvent(u_char* instruction, short thread_index)
 {
     int i;
-    int var_s1;
+    int pending_text_box_count;
 
-    var_s1 = 0;
+    pending_text_box_count = 0;
 
     for (i = 0; i < 8; ++i) {
         if (Menu_DismissTextBox(i) != 0) {
-            ++var_s1;
+            ++pending_text_box_count;
         }
     }
 
-    if (var_s1 == 0) {
+    if (pending_text_box_count == 0) {
         State_SetTickSpeed(2);
         return 2;
     }
@@ -930,12 +930,12 @@ int Event_UpdateEventPlayback(void)
 }
 
 // decomp: BATTLE.PRG func_800BFBB8 (src/BATTLE/BATTLE.PRG/573B8.c:67)
-short Event_ExecuteScriptThread(u_char** arg0, short arg1)
+short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
 {
     intptr_t ret;
-    u_char* script = *arg0;
+    u_char* script = *thread_cursor;
 
-    if ((arg1 == 0) && (Event_skipState == 1)
+    if ((thread_index == 0) && (Event_skipState == 1)
         && ((Input_buttonsPressed.allButtons & PADstart) || (Event_isSkipForced != 0))) {
         Event_isSkipForced = 0;
         Event_threadWaitFrames[3] = 0;
@@ -962,13 +962,13 @@ short Event_ExecuteScriptThread(u_char** arg0, short arg1)
 
     while (1) {
         if (Event_skipState != 2) {
-            ret = Event_kOpcodeHandlers[*script](script, arg1);
+            ret = Event_kOpcodeHandlers[*script](script, thread_index);
         } else {
-            ret = Event_legacySkipHandlerCopy[*script](script, arg1);
+            ret = Event_legacySkipHandlerCopy[*script](script, thread_index);
         }
 
         Core_Debugf("event-step", "event=%d thread=%d op=%02X result=%lld args=%02X,%02X,%02X pc=%p",
-            (int)Event_eventId, (int)arg1, (unsigned)*script, (long long)ret,
+            (int)Event_eventId, (int)thread_index, (unsigned)*script, (long long)ret,
             Event_kOpcodeSizes[*script] > 1 ? (unsigned)script[1] : 0,
             Event_kOpcodeSizes[*script] > 2 ? (unsigned)script[2] : 0,
             Event_kOpcodeSizes[*script] > 3 ? (unsigned)script[3] : 0, (void*)script);
@@ -981,7 +981,7 @@ short Event_ExecuteScriptThread(u_char** arg0, short arg1)
             break;
 
         case 3:
-            *arg0 = NULL;
+            *thread_cursor = NULL;
             return 0;
 
         case 2:
@@ -993,12 +993,12 @@ short Event_ExecuteScriptThread(u_char** arg0, short arg1)
 
         default:
             Core_Debugf("event", "thread=%d branch=%p -> %p skip=%d",
-                (int)arg1, (void*)script, (void*)ret, (int)Event_skipState);
+                (int)thread_index, (void*)script, (void*)ret, (int)Event_skipState);
             script = (u_char*)ret;
             continue;
         }
 
-        *arg0 = script;
+        *thread_cursor = script;
         return 0;
     }
 }
@@ -1018,18 +1018,18 @@ void Event_ReleaseScriptActorControl(void)
 }
 
 // decomp: BATTLE.PRG func_800BFE34 (src/BATTLE/BATTLE.PRG/573B8.c:154)
-int Event_OpcodeSize(u_char* arg0) { return Event_kOpcodeSizes[arg0[0]]; }
+int Event_OpcodeSize(u_char* instruction) { return Event_kOpcodeSizes[instruction[0]]; }
 
 // decomp: BATTLE.PRG func_800BFE50 (src/BATTLE/BATTLE.PRG/573B8.c:156)
-int Event_ResolveScriptActorReference(u_short arg0)
+int Event_ResolveScriptActorReference(u_short actor_reference)
 {
-    switch (arg0 >> 12) {
+    switch (actor_reference >> 12) {
     case 0:
-        return Actors_FindActorByModelId(arg0 & 0xFFF);
+        return Actors_FindActorByModelId(actor_reference & 0xFFF);
     case 1:
-        return arg0 & 0x1F;
+        return actor_reference & 0x1F;
     case 2:
-        return arg0;
+        return actor_reference;
     }
 }
 
@@ -1090,12 +1090,12 @@ int Event_EvaluateInterpolationCurve(short mode, short frame, short duration)
 }
 
 // decomp: BATTLE.PRG func_800C00E8 (src/BATTLE/BATTLE.PRG/573B8.c:223)
-void Event_QueueEventScriptLoad(int arg0, void* arg1)
+void Event_QueueEventScriptLoad(int arg0, void* destination_buffer)
 {
     Event_eventFileDiscLocation.size = VS_0000_EVT_SIZE;
     Event_eventFileDiscLocation.lba = (Event_eventId * 3) + VS_0000_EVT_LBA; // .EVT files must be sequential
     (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = Content_AllocateDiscRequest(&Event_eventFileDiscLocation);
-    Content_EnqueueDiscRequest((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest), arg1);
+    Content_EnqueueDiscRequest((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest), destination_buffer);
 }
 
 // decomp: BATTLE.PRG func_800C0150 (src/BATTLE/BATTLE.PRG/573B8.c:231)

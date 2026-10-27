@@ -57,8 +57,8 @@ intptr_t Event_CommandStopCameraMotion(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BB35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2767)
 intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index)
 {
-    int new_var = instruction[1] & 2;
-    Event_SetEventCameraFollowing(instruction[1] & 1, new_var != 0);
+    int eye_follow_bit = instruction[1] & 2;
+    Event_SetEventCameraFollowing(instruction[1] & 1, eye_follow_bit != 0);
     return 0;
 }
 
@@ -95,18 +95,18 @@ intptr_t Event_CommandSetScreenCapture(u_char* instruction, short thread_index)
 void Event_InitializeEventCamera(void)
 {
     VECTOR _ __attribute__((unused));
-    VECTOR sp20;
-    VECTOR sp30;
+    VECTOR field_eye_position;
+    VECTOR field_look_at;
 
     Event_camera = Core_Memory_AllocateFromHighEnd(sizeof *Event_camera);
     Event_skipNextFieldCameraRestore = 0;
 
-    Field_CameraPosition(&sp20);
-    Field_CameraLookAt(&sp30);
-    Core_Math_CopyVector(&Event_camera->eye.currentPosition, &sp20);
-    Core_Math_CopyVector(&Event_camera->lookAt.partnerPosition, &sp20);
-    Core_Math_CopyVector(&Event_camera->lookAt.currentPosition, &sp30);
-    Core_Math_CopyVector(&Event_camera->eye.partnerPosition, &sp30);
+    Field_CameraPosition(&field_eye_position);
+    Field_CameraLookAt(&field_look_at);
+    Core_Math_CopyVector(&Event_camera->eye.currentPosition, &field_eye_position);
+    Core_Math_CopyVector(&Event_camera->lookAt.partnerPosition, &field_eye_position);
+    Core_Math_CopyVector(&Event_camera->lookAt.currentPosition, &field_look_at);
+    Core_Math_CopyVector(&Event_camera->eye.partnerPosition, &field_look_at);
 
     Event_camera->lookAt.motionMode = 0xF;
     Event_camera->lookAt.followRequest = Event_camera->lookAt.isFollowing = 0;
@@ -164,28 +164,28 @@ void Event_InitializeEventCamera(void)
 void Event_FreeEventCamera(void) { Core_Memory_FreeFromHighEnd(Event_camera); }
 
 // decomp: BATTLE.PRG func_800BBE04 (src/BATTLE/BATTLE.PRG/4A0A8.c:3084)
-void Event_SetEventFieldCameraOverride(int arg0) { Event_skipNextFieldCameraRestore = arg0; }
+void Event_SetEventFieldCameraOverride(int field_camera_override) { Event_skipNextFieldCameraRestore = field_camera_override; }
 
 // decomp: BATTLE.PRG func_800BBE10 (src/BATTLE/BATTLE.PRG/4A0A8.c:3086)
-void Event_SetEventCameraOriginActor(u_short arg0)
+void Event_SetEventCameraOriginActor(u_short origin_actor)
 {
     int _[4];
-    if (arg0 == 0x2000) {
-        if (Event_camera->originActorId != arg0) {
+    if (origin_actor == 0x2000) {
+        if (Event_camera->originActorId != origin_actor) {
             Core_Math_AddVectors(
                 &Event_camera->eye.currentPosition, &Event_camera->eye.currentPosition, &Event_camera->originOffset);
             Core_Math_AddVectors(&Event_camera->lookAt.currentPosition, &Event_camera->lookAt.currentPosition,
                 &Event_camera->originOffset);
         }
     }
-    Event_camera->originActorId = arg0;
+    Event_camera->originActorId = origin_actor;
     Event_UpdateEventCameraOrigin();
 }
 
 // decomp: BATTLE.PRG func_800BBE94 (src/BATTLE/BATTLE.PRG/4A0A8.c:3101)
 void Event_UpdateEventCameraOrigin(void)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery origin_actor_location;
 
     if (Event_camera->originActorId == 0x2000) {
         Event_camera->originOffset.vz = 0;
@@ -193,10 +193,10 @@ void Event_UpdateEventCameraOrigin(void)
         Event_camera->originOffset.vx = 0;
         return;
     }
-    Actors_ActorPlacement(Event_camera->originActorId, &sp10);
-    Event_camera->originOffset.vx = sp10.location.position.vx * ONE;
-    Event_camera->originOffset.vy = sp10.location.position.vy * ONE;
-    Event_camera->originOffset.vz = sp10.location.position.vz * ONE;
+    Actors_ActorPlacement(Event_camera->originActorId, &origin_actor_location);
+    Event_camera->originOffset.vx = origin_actor_location.location.position.vx * ONE;
+    Event_camera->originOffset.vy = origin_actor_location.location.position.vy * ONE;
+    Event_camera->originOffset.vz = origin_actor_location.location.position.vz * ONE;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyCameraState (src/BATTLE/BATTLE.PRG/4A0A8.c:3117)
@@ -257,28 +257,28 @@ void Event_ApplyEventCameraState(void)
 }
 
 // decomp: BATTLE.PRG func_800BC1CC (src/BATTLE/BATTLE.PRG/4A0A8.c:3173)
-void Event_RestoreEventFieldCamera(short arg0, int arg1)
+void Event_RestoreEventFieldCamera(short field_facing, int field_distance_mode)
 {
-    VECTOR sp10;
-    VECTOR sp20;
-    int temp_s0;
-    short temp_v0;
+    VECTOR field_eye_position;
+    VECTOR field_look_at;
+    int eye_travel_distance;
+    short return_duration_frames;
 
     if (Event_skipNextFieldCameraRestore != 0) {
         Event_skipNextFieldCameraRestore = 0;
         return;
     }
-    Field_InitializeSphericalCamera(&sp10, &sp20, arg0, (short)arg1);
-    Core_Math_CopyVector(&Event_camera->eye.destination, &sp10);
-    Core_Math_CopyVector(&Event_camera->lookAt.destination, &sp20);
-    temp_s0 = Core_Math_FixedVectorMagnitude(Core_Math_SubtractVectors(
+    Field_InitializeSphericalCamera(&field_eye_position, &field_look_at, field_facing, (short)field_distance_mode);
+    Core_Math_CopyVector(&Event_camera->eye.destination, &field_eye_position);
+    Core_Math_CopyVector(&Event_camera->lookAt.destination, &field_look_at);
+    eye_travel_distance = Core_Math_FixedVectorMagnitude(Core_Math_SubtractVectors(
         (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), &Event_camera->eye.currentPosition, &Event_camera->eye.destination));
-    temp_v0 = (temp_s0
+    return_duration_frames = (eye_travel_distance
                   + Core_Math_FixedVectorMagnitude(Core_Math_SubtractVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098),
                       &Event_camera->lookAt.currentPosition, &Event_camera->lookAt.destination)))
             / 0x28000;
-    if ((temp_v0 << 0x10) != 0) {
-        Event_fieldCameraReturnCommands[2] = Event_fieldCameraReturnCommands[6] = temp_v0;
+    if ((return_duration_frames << 0x10) != 0) {
+        Event_fieldCameraReturnCommands[2] = Event_fieldCameraReturnCommands[6] = return_duration_frames;
         Event_CommandCameraMotion(Event_fieldCameraReturnCommands, 0);
         Event_CommandCameraMotion(Event_fieldCameraReturnCommands + 3, 0);
     }
@@ -663,7 +663,7 @@ void Event_AdvanceTerrainCameraTrack(Event_CameraTrack* c)
 }
 
 // decomp: BATTLE.PRG func_800BD2B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:3556)
-int Event_EventCameraGroundClearance(MATRIX* arg0)
+int Event_EventCameraGroundClearance(MATRIX* camera_transform)
 {
     VECTOR pos;
     SVECTOR offset;
@@ -673,8 +673,8 @@ int Event_EventCameraGroundClearance(MATRIX* arg0)
     int h;
     short lowest;
 
-    Core_Gte_SetRotMatrix(arg0);
-    Core_Gte_SetTransMatrix(arg0);
+    Core_Gte_SetRotMatrix(camera_transform);
+    Core_Gte_SetTransMatrix(camera_transform);
 
     setVector(&offset, 80, 80, 150);
     Core_Gte_RotTrans(&offset, &pos, &flag);
@@ -711,94 +711,94 @@ int Event_EventCameraGroundClearance(MATRIX* arg0)
 // decomp: BATTLE.PRG func_800BD444 (src/BATTLE/BATTLE.PRG/4A0A8.c:3601)
 intptr_t Event_CommandTweenCameraRoll(u_char* instruction, short thread_index)
 {
-    Event_AngleTween* var_s0;
+    Event_AngleTween* roll_tween;
 
     switch (instruction[0]) {
     case 0xE2:
-        var_s0 = &Event_camera->cameraRoll;
+        roll_tween = &Event_camera->cameraRoll;
         break;
     case 0xE3:
-        var_s0 = &Event_camera->capturedScreenRoll;
+        roll_tween = &Event_camera->capturedScreenRoll;
         break;
     }
 
-    var_s0->durationFrames = instruction[4];
+    roll_tween->durationFrames = instruction[4];
 
-    if (var_s0->durationFrames == 0) {
-        var_s0->angle = Core_Memory_ReadUnalignedShort(instruction + 1);
-        var_s0->hasChanged = 1;
+    if (roll_tween->durationFrames == 0) {
+        roll_tween->angle = Core_Memory_ReadUnalignedShort(instruction + 1);
+        roll_tween->hasChanged = 1;
     } else {
-        var_s0->startAngle = var_s0->angle;
-        var_s0->deltaAngle = Core_Memory_ReadUnalignedShort(instruction + 1) - var_s0->angle;
-        if (var_s0->deltaAngle < -(ONE / 2)) {
-            var_s0->deltaAngle += ONE;
-        } else if (var_s0->deltaAngle > (ONE / 2)) {
-            var_s0->deltaAngle -= ONE;
+        roll_tween->startAngle = roll_tween->angle;
+        roll_tween->deltaAngle = Core_Memory_ReadUnalignedShort(instruction + 1) - roll_tween->angle;
+        if (roll_tween->deltaAngle < -(ONE / 2)) {
+            roll_tween->deltaAngle += ONE;
+        } else if (roll_tween->deltaAngle > (ONE / 2)) {
+            roll_tween->deltaAngle -= ONE;
         }
 
         switch (instruction[3] >> 4) {
         case 0:
-            if (var_s0->deltaAngle > 0) {
-                var_s0->deltaAngle -= ONE;
+            if (roll_tween->deltaAngle > 0) {
+                roll_tween->deltaAngle -= ONE;
             }
             break;
         case 2:
-            if (var_s0->deltaAngle < 0) {
-                var_s0->deltaAngle += ONE;
+            if (roll_tween->deltaAngle < 0) {
+                roll_tween->deltaAngle += ONE;
             }
             break;
         }
 
-        var_s0->easingMode = instruction[3] & 0xF;
-        var_s0->elapsedFrames = 0;
+        roll_tween->easingMode = instruction[3] & 0xF;
+        roll_tween->elapsedFrames = 0;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BD57C (src/BATTLE/BATTLE.PRG/4A0A8.c:3647)
-void Event_UpdateEventAngleTween(Event_AngleTween* arg0)
+void Event_UpdateEventAngleTween(Event_AngleTween* angle_tween)
 {
-    if (arg0->durationFrames > 0) {
-        arg0->elapsedFrames += State_tickSpeed >> 1;
+    if (angle_tween->durationFrames > 0) {
+        angle_tween->elapsedFrames += State_tickSpeed >> 1;
 
-        arg0->angle = (arg0->startAngle
-                      + ((arg0->deltaAngle * ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(arg0->easingMode, arg0->elapsedFrames, arg0->durationFrames))
+        angle_tween->angle = (angle_tween->startAngle
+                      + ((angle_tween->deltaAngle * ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(angle_tween->easingMode, angle_tween->elapsedFrames, angle_tween->durationFrames))
                           >> 0xC));
 
-        if (arg0->elapsedFrames >= arg0->durationFrames) {
-            arg0->durationFrames = 0;
+        if (angle_tween->elapsedFrames >= angle_tween->durationFrames) {
+            angle_tween->durationFrames = 0;
         }
-        arg0->hasChanged = 1;
+        angle_tween->hasChanged = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_800BD610 (src/BATTLE/BATTLE.PRG/4A0A8.c:3663)
 int Event_EventCameraCompletionMask(void)
 {
-    char temp_a2 = Event_camera->lookAt.motionMode == 0xF;
+    char completion_mask = Event_camera->lookAt.motionMode == 0xF;
 
     if (Event_camera->eye.motionMode == 0xF) {
-        temp_a2 = temp_a2 | 2;
+        completion_mask = completion_mask | 2;
     }
     if (Event_camera->cameraRoll.durationFrames == 0) {
-        temp_a2 |= 4;
+        completion_mask |= 4;
     }
     if (Event_camera->projectionDistance.durationFrames == 0) {
-        temp_a2 |= 8;
+        completion_mask |= 8;
     }
     if (Event_camera->nearClip.durationFrames == 0) {
-        temp_a2 |= 0x10;
+        completion_mask |= 0x10;
     }
     if (Event_camera->farClip.durationFrames == 0) {
-        temp_a2 |= 0x20;
+        completion_mask |= 0x20;
     }
     if (Event_camera->screenEffectTween.durationFrames == 0) {
-        temp_a2 |= 0x40;
+        completion_mask |= 0x40;
     }
     if ((Event_camera->shakeOscillatorA.reserved0B + Event_camera->shakeOscillatorB.reserved0B) == 0) {
-        temp_a2 |= 0x80;
+        completion_mask |= 0x80;
     }
-    return temp_a2;
+    return completion_mask;
 }
 
 // decomp: BATTLE.PRG func_800BD6C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:3691)
@@ -926,24 +926,24 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
 // decomp: BATTLE.PRG func_800BDAB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:3812)
 void Event_UpdateEventScreenTransforms(void)
 {
-    Render_FramebufferEffectTranslation sp10;
-    CVECTOR sp20;
+    Render_FramebufferEffectTranslation screen_transform;
+    CVECTOR screen_tint;
 
     if (Event_UpdateEventTripleTween(&Event_camera->screenScale) != 0) {
-        sp10.x = Event_camera->screenScale.currentValue0;
-        sp10.y = Event_camera->screenScale.currentValue1;
-        Render_SetFramebufferEffectScale(&sp10);
+        screen_transform.x = Event_camera->screenScale.currentValue0;
+        screen_transform.y = Event_camera->screenScale.currentValue1;
+        Render_SetFramebufferEffectScale(&screen_transform);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenTint) != 0) {
-        sp20.r = Event_camera->screenTint.currentValue0;
-        sp20.g = Event_camera->screenTint.currentValue1;
-        sp20.b = Event_camera->screenTint.currentValue2;
-        Render_SetFramebufferEffectTint(&sp20);
+        screen_tint.r = Event_camera->screenTint.currentValue0;
+        screen_tint.g = Event_camera->screenTint.currentValue1;
+        screen_tint.b = Event_camera->screenTint.currentValue2;
+        Render_SetFramebufferEffectTint(&screen_tint);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenTranslation) != 0) {
-        sp10.x = Event_camera->screenTranslation.currentValue0;
-        sp10.y = Event_camera->screenTranslation.currentValue1;
-        Render_SetFramebufferEffectOffset(&sp10);
+        screen_transform.x = Event_camera->screenTranslation.currentValue0;
+        screen_transform.y = Event_camera->screenTranslation.currentValue1;
+        Render_SetFramebufferEffectOffset(&screen_transform);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenEffectTween) != 0) {
         ((void (*)(int, int))Effects_ScreenDistortion_SetRadialWarp)(Event_camera->screenEffectTween.currentValue0, Event_camera->screenEffectTween.currentValue1);
@@ -951,26 +951,26 @@ void Event_UpdateEventScreenTransforms(void)
 }
 
 // decomp: BATTLE.PRG func_800BDBB4 (src/BATTLE/BATTLE.PRG/4A0A8.c:3838)
-int Event_UpdateEventTripleTween(Event_TripleTween* arg0)
+int Event_UpdateEventTripleTween(Event_TripleTween* triple_tween)
 {
-    Event_EasedFractionScratch* a0;
-    int v0;
+    Event_EasedFractionScratch* fraction_scratch;
+    int eased_fraction;
 
-    if (arg0->durationFrames == 0) {
+    if (triple_tween->durationFrames == 0) {
         return 0;
     }
 
-    arg0->elapsedFrames = arg0->elapsedFrames + (State_tickSpeed >> 1);
+    triple_tween->elapsedFrames = triple_tween->elapsedFrames + (State_tickSpeed >> 1);
 
-    v0 = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(arg0->easingMode, arg0->elapsedFrames, arg0->durationFrames);
-    a0 = (Event_EasedFractionScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
-    a0->easedFraction = v0;
-    arg0->currentValue0 = (arg0->startValue0 + ((arg0->deltaValue0 * a0->easedFraction) >> 0xC));
-    arg0->currentValue1 = (arg0->startValue1 + ((arg0->deltaValue1 * a0->easedFraction) >> 0xC));
-    arg0->currentValue2 = (arg0->startValue2 + ((arg0->deltaValue2 * a0->easedFraction) >> 0xC));
+    eased_fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(triple_tween->easingMode, triple_tween->elapsedFrames, triple_tween->durationFrames);
+    fraction_scratch = (Event_EasedFractionScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
+    fraction_scratch->easedFraction = eased_fraction;
+    triple_tween->currentValue0 = (triple_tween->startValue0 + ((triple_tween->deltaValue0 * fraction_scratch->easedFraction) >> 0xC));
+    triple_tween->currentValue1 = (triple_tween->startValue1 + ((triple_tween->deltaValue1 * fraction_scratch->easedFraction) >> 0xC));
+    triple_tween->currentValue2 = (triple_tween->startValue2 + ((triple_tween->deltaValue2 * fraction_scratch->easedFraction) >> 0xC));
 
-    if (arg0->elapsedFrames == arg0->durationFrames) {
-        arg0->durationFrames = 0;
+    if (triple_tween->elapsedFrames == triple_tween->durationFrames) {
+        triple_tween->durationFrames = 0;
     }
     return 1;
 }
@@ -1042,58 +1042,58 @@ intptr_t Event_CommandCameraLensOrShake(u_char* script, short thread_index)
 }
 
 // decomp: BATTLE.PRG func_800BDF6C (src/BATTLE/BATTLE.PRG/4A0A8.c:3927)
-void Event_UpdateEventLensTween(Event_LensTween* arg0)
+void Event_UpdateEventLensTween(Event_LensTween* lens_tween)
 {
-    if (arg0->durationFrames != 0) {
-        short* new_var;
-        arg0->elapsedFrames += State_tickSpeed >> 1;
-        if (arg0->durationFrames < arg0->elapsedFrames) {
-            arg0->elapsedFrames = arg0->durationFrames;
+    if (lens_tween->durationFrames != 0) {
+        short* delta_value_ptr;
+        lens_tween->elapsedFrames += State_tickSpeed >> 1;
+        if (lens_tween->durationFrames < lens_tween->elapsedFrames) {
+            lens_tween->elapsedFrames = lens_tween->durationFrames;
         }
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(arg0->easingMode, arg0->elapsedFrames, arg0->durationFrames);
-        new_var = &arg0->deltaValue;
-        arg0->value = arg0->startValue + ((*new_var * *(int*)((uintptr_t)Core_ScratchBase() + 0x088)) >> 0xC);
-        if (arg0->elapsedFrames == arg0->durationFrames) {
-            arg0->durationFrames = 0;
+        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(lens_tween->easingMode, lens_tween->elapsedFrames, lens_tween->durationFrames);
+        delta_value_ptr = &lens_tween->deltaValue;
+        lens_tween->value = lens_tween->startValue + ((*delta_value_ptr * *(int*)((uintptr_t)Core_ScratchBase() + 0x088)) >> 0xC);
+        if (lens_tween->elapsedFrames == lens_tween->durationFrames) {
+            lens_tween->durationFrames = 0;
         }
-        arg0->hasChanged = 1;
+        lens_tween->hasChanged = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_800BE01C (src/BATTLE/BATTLE.PRG/4A0A8.c:3945)
-int Event_UpdateEventShakeOscillator(Event_ShakeOscillator* arg0)
+int Event_UpdateEventShakeOscillator(Event_ShakeOscillator* shake_oscillator)
 {
-    int temp_s1 = arg0->cycles << 0xC;
+    int total_phase_angle = shake_oscillator->cycles << 0xC;
 
-    if (arg0->durationFrames == 0) {
+    if (shake_oscillator->durationFrames == 0) {
         return 0;
     }
 
-    arg0->elapsedFrames += State_tickSpeed >> 1;
+    shake_oscillator->elapsedFrames += State_tickSpeed >> 1;
 
-    if (arg0->durationFrames < arg0->elapsedFrames) {
-        arg0->elapsedFrames = arg0->durationFrames;
+    if (shake_oscillator->durationFrames < shake_oscillator->elapsedFrames) {
+        shake_oscillator->elapsedFrames = shake_oscillator->durationFrames;
     }
 
-    switch (arg0->envelopeShape.bytes[1]) {
+    switch (shake_oscillator->envelopeShape.bytes[1]) {
     case 0:
         *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = 0x1000;
         break;
     case 1:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = Core_Gte_Sin(((arg0->elapsedFrames << 0xA) / arg0->durationFrames) + 0x400);
+        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = Core_Gte_Sin(((shake_oscillator->elapsedFrames << 0xA) / shake_oscillator->durationFrames) + 0x400);
         break;
     case 2:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = Core_Gte_Sin((arg0->elapsedFrames << 0xB) / arg0->durationFrames);
+        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = Core_Gte_Sin((shake_oscillator->elapsedFrames << 0xB) / shake_oscillator->durationFrames);
         break;
     case 3:
-        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = Core_Gte_Sin((arg0->elapsedFrames << 0xA) / arg0->durationFrames);
+        *(int*)((uintptr_t)Core_ScratchBase() + 0x088) = Core_Gte_Sin((shake_oscillator->elapsedFrames << 0xA) / shake_oscillator->durationFrames);
         break;
     }
-    arg0->displacement = (((Core_Gte_Sin((temp_s1 * arg0->elapsedFrames) / arg0->durationFrames) * arg0->amplitude) >> 0xC)
+    shake_oscillator->displacement = (((Core_Gte_Sin((total_phase_angle * shake_oscillator->elapsedFrames) / shake_oscillator->durationFrames) * shake_oscillator->amplitude) >> 0xC)
                      * *(int*)((uintptr_t)Core_ScratchBase() + 0x088))
               >> 0xC;
-    if (arg0->elapsedFrames == arg0->durationFrames) {
-        arg0->durationFrames = 0;
+    if (shake_oscillator->elapsedFrames == shake_oscillator->durationFrames) {
+        shake_oscillator->durationFrames = 0;
     }
     return 1;
 }
@@ -1135,11 +1135,11 @@ void Event_UpdateEventCameraShake(void)
 }
 
 // decomp: BATTLE.PRG func_800BE36C (src/BATTLE/BATTLE.PRG/4A0A8.c:4018)
-void Event_SetEventCameraFollowing(int arg0, int arg1)
+void Event_SetEventCameraFollowing(int look_at_follow, int eye_follow)
 {
-    Event_camera->lookAt.followRequest = arg0;
+    Event_camera->lookAt.followRequest = look_at_follow;
     Event_camera->lookAt.isFollowing = 0;
-    Event_camera->eye.followRequest = arg1;
+    Event_camera->eye.followRequest = eye_follow;
     Event_camera->eye.isFollowing = 0;
 }
 
@@ -1158,80 +1158,80 @@ void Event_StopEventCameraMotion(void)
 }
 
 // decomp: BATTLE.PRG func_800BE3D0 (src/BATTLE/BATTLE.PRG/4A0A8.c:4039)
-void Event_StartEventCameraOrbitReturn(char arg0)
+void Event_StartEventCameraOrbitReturn(char orbit_side_selector)
 {
-    VECTOR sp10;
-    VECTOR sp20;
-    VECTOR sp30;
-    VECTOR sp40;
-    u_char temp_s0;
-    u_char temp_s3;
-    int new_var;
+    VECTOR start_look_at;
+    VECTOR destination_look_at;
+    VECTOR start_eye_position;
+    VECTOR destination_eye_position;
+    u_char distance_mode_index;
+    u_char saved_facing;
+    int preceding_facing;
 
-    temp_s3 = State_ScriptFlag(0xAF);
-    temp_s0 = State_ScriptFlag(0xB0);
-    new_var = temp_s3 - 1;
+    saved_facing = State_ScriptFlag(0xAF);
+    distance_mode_index = State_ScriptFlag(0xB0);
+    preceding_facing = saved_facing - 1;
     Field_InitializeSphericalCamera(
-        &sp30, &sp10, (new_var + (arg0 * 2)) & 7, temp_s0 + 1);
+        &start_eye_position, &start_look_at, (preceding_facing + (orbit_side_selector * 2)) & 7, distance_mode_index + 1);
 
-    sp30.vy += Event_kOrbitReturnHeightOffsets[temp_s0] << 0xC;
-    sp10.vy += Event_kOrbitReturnHeightOffsets[temp_s0] << 0xC;
+    start_eye_position.vy += Event_kOrbitReturnHeightOffsets[distance_mode_index] << 0xC;
+    start_look_at.vy += Event_kOrbitReturnHeightOffsets[distance_mode_index] << 0xC;
 
-    Core_Math_CopyVector(&Event_camera->lookAt.currentPosition, &sp10);
-    Core_Math_CopyVector(&Event_camera->lookAt.partnerPosition, &sp30);
-    Core_Math_CopyVector(&Event_camera->eye.partnerPosition, &sp10);
-    Core_Math_CopyVector(&Event_camera->eye.currentPosition, &sp30);
+    Core_Math_CopyVector(&Event_camera->lookAt.currentPosition, &start_look_at);
+    Core_Math_CopyVector(&Event_camera->lookAt.partnerPosition, &start_eye_position);
+    Core_Math_CopyVector(&Event_camera->eye.partnerPosition, &start_look_at);
+    Core_Math_CopyVector(&Event_camera->eye.currentPosition, &start_eye_position);
 
     Event_camera->lookAt.motionMode = 0xF;
 
-    Field_InitializeSphericalCamera(&sp40, &sp20, temp_s3, temp_s0 + 1);
+    Field_InitializeSphericalCamera(&destination_eye_position, &destination_look_at, saved_facing, distance_mode_index + 1);
 
-    Core_Math_CopyVector(&Event_camera->eye.destination, &sp40);
-    Core_Math_CopyVector(&Event_camera->lookAt.destination, &sp20);
+    Core_Math_CopyVector(&Event_camera->eye.destination, &destination_eye_position);
+    Core_Math_CopyVector(&Event_camera->lookAt.destination, &destination_look_at);
 
     Event_CommandCameraMotion(Event_kOrbitReturnFirstCommand, 0);
     Event_CommandCameraMotion(Event_kOrbitReturnSecondCommand, 0);
 }
 
 // decomp: BATTLE.PRG func_800BE53C (src/BATTLE/BATTLE.PRG/4A0A8.c:4074)
-void Event_ScaleEventCameraTrackDuration(Event_CameraTrack* arg0)
+void Event_ScaleEventCameraTrackDuration(Event_CameraTrack* camera_track)
 {
-    VECTOR sp10;
+    VECTOR remaining_displacement;
 
-    Core_Math_SubtractVectors(&sp10, &arg0->currentPosition, &arg0->destination);
-    arg0->durationFrames = ((Core_Math_FixedVectorMagnitude(&sp10) >> 0xC) * arg0->durationFrames) / 1000;
+    Core_Math_SubtractVectors(&remaining_displacement, &camera_track->currentPosition, &camera_track->destination);
+    camera_track->durationFrames = ((Core_Math_FixedVectorMagnitude(&remaining_displacement) >> 0xC) * camera_track->durationFrames) / 1000;
 }
 
 // decomp: BATTLE.PRG func_800BE5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:4082)
-void Event_ScaleEventCameraDuration(short arg0)
+void Event_ScaleEventCameraDuration(short track_selector)
 {
-    Event_CameraTrack* temp_s0;
-    Event_CameraTrack* var_a0;
-    Event_CameraTrack* temp_s1;
+    Event_CameraTrack* look_at_track;
+    Event_CameraTrack* selected_track;
+    Event_CameraTrack* eye_track;
 
-    temp_s0 = &Event_camera->lookAt;
-    temp_s1 = &Event_camera->eye;
+    look_at_track = &Event_camera->lookAt;
+    eye_track = &Event_camera->eye;
 
-    if (arg0 == 2) {
-        Event_ScaleEventCameraTrackDuration(temp_s0);
-        Event_ScaleEventCameraTrackDuration(temp_s1);
-        temp_s0->durationFrames = temp_s1->durationFrames =
-            (temp_s0->durationFrames + temp_s1->durationFrames) >> 1;
+    if (track_selector == 2) {
+        Event_ScaleEventCameraTrackDuration(look_at_track);
+        Event_ScaleEventCameraTrackDuration(eye_track);
+        look_at_track->durationFrames = eye_track->durationFrames =
+            (look_at_track->durationFrames + eye_track->durationFrames) >> 1;
 
         return;
     }
-    var_a0 = temp_s0;
-    if (arg0 != 0) {
-        var_a0 = temp_s1;
+    selected_track = look_at_track;
+    if (track_selector != 0) {
+        selected_track = eye_track;
     }
-    Event_ScaleEventCameraTrackDuration(var_a0);
+    Event_ScaleEventCameraTrackDuration(selected_track);
 }
 
 // decomp: BATTLE.PRG _setVectorImm (src/BATTLE/BATTLE.PRG/4A0A8.c:4148)
-VECTOR* Event_ReadScriptFixedVector(VECTOR* arg0, u_char* arg1)
+VECTOR* Event_ReadScriptFixedVector(VECTOR* destination, u_char* operand_bytes)
 {
-    setVector(arg0, Core_Memory_ReadUnalignedShort(arg1) * ONE, Core_Memory_ReadUnalignedShort(arg1 + 2) * ONE,
-        Core_Memory_ReadUnalignedShort(arg1 + 4) * ONE);
-    return arg0;
+    setVector(destination, Core_Memory_ReadUnalignedShort(operand_bytes) * ONE, Core_Memory_ReadUnalignedShort(operand_bytes + 2) * ONE,
+        Core_Memory_ReadUnalignedShort(operand_bytes + 4) * ONE);
+    return destination;
 }
 

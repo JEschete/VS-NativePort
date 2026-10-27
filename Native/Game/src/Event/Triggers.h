@@ -18,6 +18,6 @@ int Event_LoadRoomEventSections(void* clearedSection, u_short clearedSectionLen,
     u_short doorSectionLen, int startState);
 void Event_FreeRoomEventSections(void);
 void Event_ReleaseZoneEventResources(void);
-short Event_EvaluateRoomEventTriggers(int arg0, int arg1, u_char* arg2, int arg3);
+short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id, u_char* trigger_context, int context_kind);
 
 #endif // VS_EVENT_TRIGGERS_H_DECLS

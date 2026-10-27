@@ -123,10 +123,10 @@ intptr_t Event_ScriptSetGimmickVisibility(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800B979C (src/BATTLE/BATTLE.PRG/4A0A8.c:1972)
 intptr_t Event_ScriptOverrideDepthCueDistance(u_char* instruction, short thread_index)
 {
-    short temp_v0 = Core_Memory_ReadUnalignedShort(instruction + 1);
-    Event_isScriptBackdropEnabled = (temp_v0 << 0x10) >> 0x1F;
+    short depth_cue_operand = Core_Memory_ReadUnalignedShort(instruction + 1);
+    Event_isScriptBackdropEnabled = (depth_cue_operand << 0x10) >> 0x1F;
     if (Event_isScriptBackdropEnabled) {
-        Render_SetRoomTextureLodDepth(temp_v0 & 0x7FF);
+        Render_SetRoomTextureLodDepth(depth_cue_operand & 0x7FF);
     }
     return 0;
 }
@@ -169,24 +169,24 @@ intptr_t Event_ScriptSetCollisionTileMode(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800B98C0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2018)
 intptr_t Event_ScriptChangeRoom(u_char* instruction, short thread_index)
 {
-    Field_MpdDoorRecord sp10;
+    Field_MpdDoorRecord door_record;
 
     if (Event_roomChangeState == 0) {
 
-        sp10.destinationZoneId = instruction[1];
-        sp10.destinationRoomId = instruction[2];
-        sp10.entryTileX = instruction[3];
-        sp10.entryTileZ = instruction[5];
-        sp10.tileLocation.entryDirection = instruction[4];
-        sp10.entryElevation = instruction[6];
-        sp10.hasEntryStep = instruction[7];
-        sp10.reserved06Bit15 = instruction[7] >> 1;
+        door_record.destinationZoneId = instruction[1];
+        door_record.destinationRoomId = instruction[2];
+        door_record.entryTileX = instruction[3];
+        door_record.entryTileZ = instruction[5];
+        door_record.tileLocation.entryDirection = instruction[4];
+        door_record.entryElevation = instruction[6];
+        door_record.hasEntryStep = instruction[7];
+        door_record.reserved06Bit15 = instruction[7] >> 1;
 
         if (instruction[1] == 0) {
-            Field_BeginScriptedRoomTransition(&sp10, instruction[8], instruction[9]);
+            Field_BeginScriptedRoomTransition(&door_record, instruction[8], instruction[9]);
         } else {
             Audio_SetZoneMusicSwitchEnabled((instruction[7] >> 3) & 1);
-            Field_BeginScriptedZoneTransition(&sp10, instruction[8], instruction[9]);
+            Field_BeginScriptedZoneTransition(&door_record, instruction[8], instruction[9]);
         }
         Event_roomChangeState = instruction[7] & 4 ? 1 : 3;
     }
@@ -286,17 +286,17 @@ intptr_t Event_ScriptMuteEnvironmentSound(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800BA194 (src/BATTLE/BATTLE.PRG/4A0A8.c:2238)
 intptr_t Event_ScriptControlRoomAnimation(u_char* instruction, short thread_index)
 {
-    int temp_s0 = instruction[2];
+    int room_effect_id = instruction[2];
 
     switch (instruction[1]) {
     case 0:
-        if ((Event_skipState == 2) && (Field_IsRoomEffectActive(temp_s0) != 0)) {
-            Field_FinishRoomDoorRotation(temp_s0);
+        if ((Event_skipState == 2) && (Field_IsRoomEffectActive(room_effect_id) != 0)) {
+            Field_FinishRoomDoorRotation(room_effect_id);
         }
-        Field_StartRoomEffect(temp_s0);
+        Field_StartRoomEffect(room_effect_id);
         break;
     case 1:
-        Field_ToggleRoomEffectUpdates(temp_s0);
+        Field_ToggleRoomEffectUpdates(room_effect_id);
         break;
     }
     return 0;

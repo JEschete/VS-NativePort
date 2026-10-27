@@ -101,7 +101,7 @@ void Event_BeginQueuedCutscene(void)
 // decomp: BATTLE.PRG func_800738E4 (src/BATTLE/BATTLE.PRG/146C.c:4777)
 void Event_EndFieldCutscene(void)
 {
-    Actors_ModelEffectSlot sp10;
+    Actors_ModelEffectSlot sound_override_reset;
     int i;
 
     Field_SetMovingPlatformsPaused(0);
@@ -122,8 +122,8 @@ void Event_EndFieldCutscene(void)
         return;
     }
 
-    sp10.kind = 0;
-    Actors_SetActorSoundOverrides(-1, &sp10);
+    sound_override_reset.kind = 0;
+    Actors_SetActorSoundOverrides(-1, &sound_override_reset);
 
     for (i = 0; i < 16; ++i) {
         Actors_SetActorPaletteFade(i, 0);

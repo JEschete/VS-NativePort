@@ -1846,6 +1846,32 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                 self.assertEqual(source, expected)
                 self.assertEqual(unrelated, original)
 
+    def test_remaining_event_names_preserve_snapshot_and_retained_bindings(self):
+        examples = {
+            "Event::ScriptEndCutsceneAndJump": (
+                "temp_v1 = state; state = 0; if (temp_v1) Cleanup();",
+                "previous_skip_state = state; state = 0; "
+                "if (previous_skip_state) Cleanup();",
+            ),
+            "Event::RestoreScriptTextureRectangle": (
+                "temp_s0 = Allocate(); SetRect(&sp10); "
+                "new_var = 0x1F800000; new_var = 0x10;",
+                "move_primitive = Allocate(); SetRect(&source_rectangle); "
+                "new_var = 0x1F800000; new_var = 0x10;",
+            ),
+            "Event::QueueEventScriptLoad": (
+                "int Load(int arg0) { return CurrentEvent(); }",
+                "int Load(int arg0) { return CurrentEvent(); }",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
@@ -1900,13 +1926,42 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
 
     def test_event_opcode_naming_does_not_change_non_handler_parameters(self):
         original = "int Utility(int arg0, int arg1) { return arg0 + arg1; }"
+        opcode_rules = [
+            rule for rule in copy_fixups.REGEX_FIXES
+            if rule[0] == r"^Event::(?:Script|Command)"
+        ]
+        self.assertEqual(
+            {pattern for _, pattern, _, _ in opcode_rules},
+            {r"\barg0\b", r"\barg1\b"},
+        )
         for name in ("Event::EvaluateRoomEventTriggers", "Event::OpcodeSize"):
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in opcode_rules:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, original)
+
+    def test_event_helpers_receive_only_their_reviewed_parameter_names(self):
+        examples = {
+            "Event::EvaluateRoomEventTriggers": (
+                "int Utility(int arg0, int arg1) { return arg0 + arg1; }",
+                "int Utility(int trigger_request, int event_or_actor_id) "
+                "{ return trigger_request + event_or_actor_id; }",
+            ),
+            "Event::OpcodeSize": (
+                "int Size(u_char* arg0) { return sizes[arg0[0]]; }",
+                "int Size(u_char* instruction) "
+                "{ return sizes[instruction[0]]; }",
+            ),
+        }
+        for name, (original, expected) in examples.items():
             with self.subTest(name=name):
                 source = original
                 for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
                     if re.search(row, name):
                         source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, original)
+                self.assertEqual(source, expected)
 
     def test_vibration_names_are_scoped_identifier_only_changes(self):
         examples = {
