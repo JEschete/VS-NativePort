@@ -61,9 +61,6 @@ u_char Effects_actionVariant;
 // decomp: D_800F5230 (D_800F5230@BATTLE/BATTLE.PRG)
 Effects_ActionEffectRequest Effects_actionRequest;
 
-// decomp: D_800F5310 (D_800F5310@BATTLE/BATTLE.PRG)
-SVECTOR Effects_effectOrigin[109];
-
 // decomp: D_800F5318 (D_800F5318@BATTLE/BATTLE.PRG)
 char Effects_primaryToken;
 

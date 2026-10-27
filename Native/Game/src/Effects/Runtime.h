@@ -43,6 +43,9 @@ typedef struct Effects_TransformDefinition Effects_TransformDefinition;
 #undef VS_EFFECTS_RUNTIME_H_SET_TYPES_ONLY
 #endif
 
+// decomp: D_800F5310 (D_800F5310@BATTLE/BATTLE.PRG): a view into another global
+#define Effects_effectOrigin ((SVECTOR*)(&Effects_actionRequest.position))
+
 // decomp: D_800F5798 (D_800F5798@BATTLE/BATTLE.PRG): a view into another global
 #define Effects_actionRequestPointer (*(Effects_ActionEffectRequest**)(&Effects_actionPackage.request))
 
@@ -311,7 +314,6 @@ extern int Effects_trackCount;
 extern int Effects_startedTrackCount;
 extern u_char Effects_actionVariant;
 extern Effects_ActionEffectRequest Effects_actionRequest;
-extern SVECTOR Effects_effectOrigin[109];
 extern char Effects_primaryToken;
 extern u_int Effects_primaryPhase;
 extern int Effects_tokenBitmaps[215];
