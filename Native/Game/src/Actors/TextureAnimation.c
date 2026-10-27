@@ -211,17 +211,17 @@ void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int fr
 #undef getActorFlags
 
 // decomp: BATTLE.PRG func_800AB2AC (src/BATTLE/BATTLE.PRG/40564.c:1486)
-void Actors_ResetActorTextureFrames(int arg0)
+void Actors_ResetActorTextureFrames(int bank_index)
 {
 
-    if (arg0 == Actors_sharedSequenceBankIndex) {
+    if (bank_index == Actors_sharedSequenceBankIndex) {
         int i;
 
         for (i = 0; i < 17; ++i) {
-            Actors_ActorRecord* temp_s0 = Actors_actorRecords[i];
-            if ((temp_s0 != NULL) && (temp_s0->textureRowOffsets[arg0] != 0xFF)) {
-                Actors_UploadActorTextureFrame(temp_s0, 0, 0);
-                Actors_UploadActorTextureFrame(temp_s0, 1, 0);
+            Actors_ActorRecord* actor = Actors_actorRecords[i];
+            if ((actor != NULL) && (actor->textureRowOffsets[bank_index] != 0xFF)) {
+                Actors_UploadActorTextureFrame(actor, 0, 0);
+                Actors_UploadActorTextureFrame(actor, 1, 0);
             }
         }
     }

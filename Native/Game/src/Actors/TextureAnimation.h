@@ -107,7 +107,7 @@ _Static_assert(sizeof(Actors_TextureOverlayRect) == 0x4, "Actors_TextureOverlayR
 int Actors_SetActorTextureAnimation(int actorId, int index, int value, int mode);
 int Actors_UpdateActorTextureAnimations(Actors_ActorRecord* actor);
 void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int frame);
-void Actors_ResetActorTextureFrames(int arg0);
+void Actors_ResetActorTextureFrames(int bank_index);
 void Actors_UploadActorTextureOverlay(int index, Actors_TextureOverlayUpload* arg);
 void Actors_UpdateActorTextureScrolling(Actors_ActorRecord* actor);
 

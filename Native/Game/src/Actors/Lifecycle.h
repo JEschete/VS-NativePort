@@ -18,9 +18,9 @@
 
 int Actors_LinkActorAfterAshley(Battle_Actor* actor);
 int Actors_UnlinkActorFromRoomList(Battle_Actor* actor);
-int Actors_RemoveActorAtSlot(u_int index, int arg1);
+int Actors_RemoveActorAtSlot(u_int index, int hidden_in_cache);
 void Actors_FreezeAllActorAnimations(void);
 void Actors_UnfreezeAllActorAnimations(void);
-void Actors_InitializePlaceholderActorStats(int arg0, int arg1);
+void Actors_InitializePlaceholderActorStats(int actor_id, int auxiliary_actor_id);
 
 #endif // VS_ACTORS_LIFECYCLE_H_DECLS

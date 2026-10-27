@@ -479,8 +479,8 @@ void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
 // decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
 void Actors_InitializeActorModelResources(void)
 {
-    VECTOR sp10;
-    int temp_s0;
+    VECTOR unit_room_scale;
+    int equipment_actor_slot;
     int i;
 
     Actors_reservedControlByte = 0;
@@ -490,18 +490,18 @@ void Actors_InitializeActorModelResources(void)
     }
 
     for (i = 0; i < 12; ++i) {
-        short (*new_var)[2];
+        short (*primary_texture_origins)[2];
         Render_legacyActorTextureSlots[i].texturePage =
-            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (new_var = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);
+            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (primary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);
         Render_legacyActorTextureSlots[i].palette = GetClut(768, i + 228);
         Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, i + 246);
         Render_legacyActorTextureSlots[i].referenceCount = 0;
     }
 
     for (; i < 24; ++i) {
-        short (*new_var)[2];
+        short (*secondary_texture_origins)[2];
         Render_legacyActorTextureSlots[i].texturePage =
-            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (new_var = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);
+            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (secondary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);
         Render_legacyActorTextureSlots[i].palette = GetClut(768, 229);
         Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, 247);
         Render_legacyActorTextureSlots[i].referenceCount = 0;
@@ -515,9 +515,9 @@ void Actors_InitializeActorModelResources(void)
     Actors_sequenceWorkBuffer = Core_Memory_AllocateFromLowEnd(0x4800);
 
     for (i = 0; i < 20; ++i) {
-        temp_s0 = (i / 2);
-        Render_legacyWeaponTextureSlots[i].texturePage = GetTPage(1, 0, temp_s0 * 64, 0);
-        Render_legacyWeaponTextureSlots[i].palette = GetClut(((i & 1) * 48) + 928, temp_s0 + 228);
+        equipment_actor_slot = (i / 2);
+        Render_legacyWeaponTextureSlots[i].texturePage = GetTPage(1, 0, equipment_actor_slot * 64, 0);
+        Render_legacyWeaponTextureSlots[i].palette = GetClut(((i & 1) * 48) + 928, equipment_actor_slot + 228);
         Render_legacyWeaponTextureSlots[i].referenceCount = 0;
     }
 
@@ -548,10 +548,10 @@ void Actors_InitializeActorModelResources(void)
     Menu_Inventory_equipmentModelLoadStep = 0;
     (*(char (*))&Content_legacyModelLoadPhase) = 0;
     (*(char (*))&Actors_sharedSequenceBankIndex) = 0;
-    sp10.vx = 0x1000;
-    sp10.vy = 0x1000;
-    sp10.vz = 0x1000;
-    Actors_SetRoomActorScale(&sp10);
+    unit_room_scale.vx = 0x1000;
+    unit_room_scale.vy = 0x1000;
+    unit_room_scale.vz = 0x1000;
+    Actors_SetRoomActorScale(&unit_room_scale);
     (*(char (*))&Actors_pushedGimmickIndex) = 0;
     Actors_isActorUpdateComplete = 0;
 }

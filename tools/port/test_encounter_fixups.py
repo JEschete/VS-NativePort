@@ -811,7 +811,7 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertEqual(
             source.count(
-                "Actors_TranslateActorToTileAtRate(arg0->instance.slot, "
+                "Actors_TranslateActorToTileAtRate(actor->instance.slot, "
                 "(Actors_TileTarget*)&"
             ),
             3,
@@ -833,7 +833,7 @@ class EncounterFixupTests(unittest.TestCase):
         caller = (root / r"Native\Game\src\Actors\Movement.c").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Battle_Ai_ActorNavigationOverrideStatus(arg0);", caller)
+        self.assertIn("Battle_Ai_ActorNavigationOverrideStatus(actor_id);", caller)
         self.assertNotIn("Battle_Ai_ActorNavigationOverrideStatus();", caller)
 
     def test_vignette_producers_publish_one_encoded_ordering_word(self):
@@ -1871,6 +1871,45 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                     if re.search(row, name):
                         source = re.sub(pattern, replacement, source)
                 self.assertEqual(source, expected)
+
+    def test_actor_projection_names_keep_cast_bone_index_separate_from_tag(self):
+        cast = (
+            "((int (*)(int arg0, int arg1, int* arg2, int arg3))"
+            "Actors_ProjectActorBoneEndpoint)"
+        )
+        original = "void Wrapper(int arg1) { " + cast + "; Use(arg1); }"
+        preparation = next(
+            item for item in copy_fixups.FIXES["F00876"] if item[0] == cast
+        )
+        source = original.replace(preparation[0], preparation[1])
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Actors::ProjectActorTaggedBone"):
+                source = re.sub(pattern, replacement, source)
+        self.assertEqual(
+            source,
+            "void Wrapper(int bone_tag) { "
+            "((int (*)(int actor_id, int bone_index, "
+            "int* screen_position_out, int endpoint))"
+            "Actors_ProjectActorBoneEndpoint); Use(bone_tag); }",
+        )
+
+    def test_actor_texture_origin_scopes_keep_distinct_local_bindings(self):
+        preparations = [
+            item for item in copy_fixups.FIXES["F01860"]
+            if "short (*new_var)[2];" in item[0]
+        ]
+        self.assertEqual(len(preparations), 2)
+        for (old, new, _), name in zip(
+            preparations, ("primary_texture_origins", "secondary_texture_origins"),
+            strict=True,
+        ):
+            with self.subTest(name=name):
+                self.assertEqual(new, re.sub(r"\bnew_var\b", name, old))
+        patterns = [
+            pattern for row, pattern, _, _ in copy_fixups.REGEX_FIXES
+            if re.search(row, "Actors::InitializeActorModelResources")
+        ]
+        self.assertNotIn(r"\bnew_var\b", patterns)
 
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]

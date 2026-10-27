@@ -18,17 +18,17 @@
 #include "Render/Palette.h"
 
 extern VECTOR Actors_roomActorScale;
-void Actors_SetActorPaletteFade(int arg0, int arg1);
-void Actors_ResetActorWeaponVisibilityBlend(int arg0);
-void Actors_SetWeaponBrightnessOverride(int arg0, int arg1, int arg2);
-void Actors_SetRoomActorScale(VECTOR* arg0);
-int Actors_EnableModelPalettePulse(int arg0, int arg1, int arg2);
-int Actors_DisableModelPalettePulse(int arg0, int arg1);
-void Actors_BeginActorShadowBlend(Actors_ActorRecord* arg0, int arg1);
-int Actors_ActorFadeParameters(int arg0, Render_ColorCode* arg1);
-int Actors_SetActorFadeParameters(int arg0, Render_ColorCode* arg1);
-int Actors_ActorTint(int arg0, Render_ColorCode* arg1);
-int Actors_SetActorTint(int arg0, Render_ColorCode* arg1);
-void Actors_StartActorAppearanceTransition(int arg0, int arg1);
+void Actors_SetActorPaletteFade(int actor_id, int fade_parameter);
+void Actors_ResetActorWeaponVisibilityBlend(int actor_id);
+void Actors_SetWeaponBrightnessOverride(int actor_id, int override_enabled, int brightness);
+void Actors_SetRoomActorScale(VECTOR* room_scale);
+int Actors_EnableModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot);
+int Actors_DisableModelPalettePulse(int actor_id, int pulse_slot);
+void Actors_BeginActorShadowBlend(Actors_ActorRecord* actor, int blend_frames);
+int Actors_ActorFadeParameters(int actor_id, Render_ColorCode* fade_color_out);
+int Actors_SetActorFadeParameters(int actor_id, Render_ColorCode* fade_color);
+int Actors_ActorTint(int actor_id, Render_ColorCode* tint_out);
+int Actors_SetActorTint(int actor_id, Render_ColorCode* tint);
+void Actors_StartActorAppearanceTransition(int actor_id, int transition_kind);
 
 #endif // VS_ACTORS_APPEARANCE_H_DECLS

@@ -54,12 +54,12 @@ Actors_CharacterInit* Actors_zoneCharacterInitData;
 
 // decomp: BATTLE.PRG func_800765B0 (src/BATTLE/BATTLE.PRG/146C.c:6064)
 Battle_Actor* Actors_CreateAuxiliaryActor(
-    int index, int actorId, Field_ActorPlacement* arg2, int material, int arg4)
+    int index, int actorId, Field_ActorPlacement* placement, int material, int arg4)
 {
     Content_ActorAssetRequest objData;
     int i;
-    int var_v1_2;
-    Actors_ActorCore* temp_v0;
+    int texture_slot_dividend;
+    Actors_ActorCore* actor_core;
 
     if (index == 0xFF) {
         for (i = 2; i < 16; ++i) {
@@ -75,29 +75,29 @@ Battle_Actor* Actors_CreateAuxiliaryActor(
     }
 
     if (Battle_actors[index] == NULL) {
-        temp_v0 = Core_Memory_AllocateFromLowEnd(sizeof *temp_v0);
-        Core_Memory_ZeroAlignedWords(temp_v0, sizeof temp_v0->actor);
-        temp_v0->actor.actor.stats = &temp_v0->actor.stats;
-        temp_v0->actor.actor.model = &temp_v0->model;
-        temp_v0->actor.actor.modelId = 0xFE;
-        temp_v0->actor.actor.kind = 0x10;
-        temp_v0->actor.actor.allocationKind = 0;
-        temp_v0->actor.actor.id = index;
-        temp_v0->actor.actor.next = NULL;
-        temp_v0->actor.actor.retainAfterDefeat = 0;
+        actor_core = Core_Memory_AllocateFromLowEnd(sizeof *actor_core);
+        Core_Memory_ZeroAlignedWords(actor_core, sizeof actor_core->actor);
+        actor_core->actor.actor.stats = &actor_core->actor.stats;
+        actor_core->actor.actor.model = &actor_core->model;
+        actor_core->actor.actor.modelId = 0xFE;
+        actor_core->actor.actor.kind = 0x10;
+        actor_core->actor.actor.allocationKind = 0;
+        actor_core->actor.actor.id = index;
+        actor_core->actor.actor.next = NULL;
+        actor_core->actor.actor.retainAfterDefeat = 0;
         objData.assetKind = 6;
         objData.targetSlot = index;
-        objData.placement = *arg2;
+        objData.placement = *placement;
         objData.placement.direction &= 1;
-        var_v1_2 = actorId;
-        objData.destination = temp_v0->actor.actor.model;
+        texture_slot_dividend = actorId;
+        objData.destination = actor_core->actor.actor.model;
         objData.subKind = actorId;
         if (actorId < 0) {
-            var_v1_2 = actorId + 0xFF;
+            texture_slot_dividend = actorId + 0xFF;
         }
-        objData.textureSlot = var_v1_2 >> 8;
+        objData.textureSlot = texture_slot_dividend >> 8;
         objData.material = material;
-        objData.variant = arg2->direction >> 4;
+        objData.variant = placement->direction >> 4;
 
         Content_QueueActorAssetRequest(&objData);
 
@@ -106,98 +106,98 @@ Battle_Actor* Actors_CreateAuxiliaryActor(
             State_UpdatePlayTimeAndLoading(0);
         }
 
-        Battle_actors[index] = &temp_v0->actor.actor;
+        Battle_actors[index] = &actor_core->actor.actor;
 
         Actors_InitializePlaceholderActorStats(index, actorId);
-        Battle_Ai_CreateActorAiState(&temp_v0->actor.actor, -1);
+        Battle_Ai_CreateActorAiState(&actor_core->actor.actor, -1);
         Actors_SetActorDisplayFlags(index, 0x1846);
 
-        return &temp_v0->actor.actor;
+        return &actor_core->actor.actor;
     }
     return NULL;
 }
 
 // decomp: BATTLE.PRG func_80076784 (src/BATTLE/BATTLE.PRG/146C.c:6128)
 void Actors_ApplyActorInitialStats(
-    int arg0, Battle_ActorStats* actor, Actors_CharacterInit* init, int arg3)
+    int actor_id, Battle_ActorStats* actor, Actors_CharacterInit* init, int randomize_stats)
 {
     int j;
     int i;
-    short var_s0;
+    short initial_stat_value;
 
-    actor->actorId = arg0;
+    actor->actorId = actor_id;
 
     for (i = 0; i < 24; ++i) {
         actor->name[i] = init->name[i];
     }
 
-    var_s0 = init->hp;
-    if (arg3 != 0) {
-        var_s0 += -10 + Core_Random_NextAveraged(21);
+    initial_stat_value = init->hp;
+    if (randomize_stats != 0) {
+        initial_stat_value += -10 + Core_Random_NextAveraged(21);
     }
-    if (var_s0 < 0) {
-        var_s0 = 0;
-    } else if (var_s0 > 999) {
-        var_s0 = 999;
+    if (initial_stat_value < 0) {
+        initial_stat_value = 0;
+    } else if (initial_stat_value > 999) {
+        initial_stat_value = 999;
     }
 
-    actor->maxHp = var_s0;
-    actor->currentHp = var_s0;
+    actor->maxHp = initial_stat_value;
+    actor->currentHp = initial_stat_value;
     actor->risk = 0;
 
-    var_s0 = init->mp;
-    if (var_s0 != 0) {
-        if (arg3 != 0) {
-            var_s0 += -10 + Core_Random_NextAveraged(21);
+    initial_stat_value = init->mp;
+    if (initial_stat_value != 0) {
+        if (randomize_stats != 0) {
+            initial_stat_value += -10 + Core_Random_NextAveraged(21);
         }
-        if (var_s0 < 0) {
-            var_s0 = 0;
-        } else if (var_s0 > 999) {
-            var_s0 = 999;
+        if (initial_stat_value < 0) {
+            initial_stat_value = 0;
+        } else if (initial_stat_value > 999) {
+            initial_stat_value = 999;
         }
     }
 
-    actor->maxMp = var_s0;
-    actor->currentMp = var_s0;
+    actor->maxMp = initial_stat_value;
+    actor->currentMp = initial_stat_value;
 
-    var_s0 = init->strength;
-    if (arg3 != 0) {
-        var_s0 += -10 + Core_Random_NextAveraged(21);
+    initial_stat_value = init->strength;
+    if (randomize_stats != 0) {
+        initial_stat_value += -10 + Core_Random_NextAveraged(21);
     }
-    if (var_s0 < 0) {
-        var_s0 = 0;
-    } else if (var_s0 > 999) {
-        var_s0 = 999;
-    }
-
-    actor->totalStrength = var_s0;
-    actor->strength = var_s0;
-
-    var_s0 = init->intelligence;
-    if (arg3 != 0) {
-        var_s0 += -10 + Core_Random_NextAveraged(21);
-    }
-    if (var_s0 < 0) {
-        var_s0 = 0;
-    } else if (var_s0 > 999) {
-        var_s0 = 999;
+    if (initial_stat_value < 0) {
+        initial_stat_value = 0;
+    } else if (initial_stat_value > 999) {
+        initial_stat_value = 999;
     }
 
-    actor->totalIntelligence = var_s0;
-    actor->intelligence = var_s0;
+    actor->totalStrength = initial_stat_value;
+    actor->strength = initial_stat_value;
 
-    var_s0 = init->agility;
-    if (arg3 != 0) {
-        var_s0 += -10 + Core_Random_NextAveraged(21);
+    initial_stat_value = init->intelligence;
+    if (randomize_stats != 0) {
+        initial_stat_value += -10 + Core_Random_NextAveraged(21);
     }
-    if (var_s0 < 0) {
-        var_s0 = 0;
-    } else if (var_s0 > 999) {
-        var_s0 = 999;
+    if (initial_stat_value < 0) {
+        initial_stat_value = 0;
+    } else if (initial_stat_value > 999) {
+        initial_stat_value = 999;
     }
 
-    actor->totalAgility = var_s0;
-    actor->agility = var_s0;
+    actor->totalIntelligence = initial_stat_value;
+    actor->intelligence = initial_stat_value;
+
+    initial_stat_value = init->agility;
+    if (randomize_stats != 0) {
+        initial_stat_value += -10 + Core_Random_NextAveraged(21);
+    }
+    if (initial_stat_value < 0) {
+        initial_stat_value = 0;
+    } else if (initial_stat_value > 999) {
+        initial_stat_value = 999;
+    }
+
+    actor->totalAgility = initial_stat_value;
+    actor->agility = initial_stat_value;
     actor->movementClass = init->material;
     actor->gaitClass = init->opaque26;
     actor->walkSpeed = actor->baseWalkSpeed = (init->walkSpeed * 9) / 10;
@@ -223,11 +223,11 @@ void Actors_ApplyActorInitialStats(
         actor->limbs[i].hp = actor->limbs[i].maxHp = init->limbs[i].hp;
         actor->limbs[i].agilityDefenseBonus = init->limbs[i].agilityDefenseBonus;
 
-        j = Actors_FindActorBoneTag(arg0, i, 2);
+        j = Actors_FindActorBoneTag(actor_id, i, 2);
 
         if (j >= 0) {
             actor->limbs[i].anchorBone = j;
-            actor->limbs[i].nameIndex = Actors_ActorBoneTag(arg0, j, 0);
+            actor->limbs[i].nameIndex = Actors_ActorBoneTag(actor_id, j, 0);
         } else {
             actor->limbs[i].nameIndex = 0;
             actor->limbs[i].anchorBone = 0;
@@ -283,206 +283,206 @@ void Actors_ApplyActorInitialStats(
 }
 
 // decomp: BATTLE.PRG func_80076D50 (src/BATTLE/BATTLE.PRG/146C.c:6292)
-void Actors_InitializeActorDefaults(u_int id, int arg1, int arg2, int arg3, int arg4)
+void Actors_InitializeActorDefaults(u_int id, int model_id, int blade_id, int shield_id, int spawn_flags)
 {
-    Battle_Actor* temp_s1 = Battle_actors[id];
-    Battle_ActorStats* temp_s0 = temp_s1->stats;
+    Battle_Actor* actor = Battle_actors[id];
+    Battle_ActorStats* stats = actor->stats;
 
-    temp_s1->id = id;
-    temp_s1->modelId = arg1;
-    temp_s1->subType = 0;
-    temp_s1->bladeId = arg2;
-    temp_s1->shieldId = arg3;
-    temp_s1->weaponDrawn = 0;
+    actor->id = id;
+    actor->modelId = model_id;
+    actor->subType = 0;
+    actor->bladeId = blade_id;
+    actor->shieldId = shield_id;
+    actor->weaponDrawn = 0;
 
     switch (id) {
     case 0:
-        temp_s1->kind = 1;
+        actor->kind = 1;
         break;
     case 1:
-        temp_s1->kind = 2;
+        actor->kind = 2;
         break;
     default:
-        switch (arg4 & 3) {
+        switch (spawn_flags & 3) {
         case 1:
-            temp_s1->kind = 4;
-            temp_s1->weaponDrawn |= 1;
+            actor->kind = 4;
+            actor->weaponDrawn |= 1;
             Actors_SetActorWeaponDrawn(id, 1, 0);
             break;
         case 0:
-            temp_s1->kind = 2;
+            actor->kind = 2;
             break;
         case 2:
         case 3:
-            temp_s1->kind = 8;
+            actor->kind = 8;
             break;
         }
     }
 
-    temp_s1->interactionFlags = arg4 & 0x1C;
-    temp_s1->lastTriggerTile.bytes[3] = 0;
-    temp_s1->lastTriggerTile.bytes[2] = 0;
-    temp_s1->lastTriggerTile.bytes[1] = 0;
-    temp_s1->lastTriggerTile.bytes[0] = 0;
-    temp_s1->facing = 0;
-    temp_s1->commandState = 0;
-    temp_s0->maxHp = 100;
-    temp_s0->currentHp = 100;
-    temp_s0->maxMp = 100;
-    temp_s0->currentMp = 100;
-    temp_s0->risk = 0;
-    temp_s0->actionRecoveryTimer = 0;
+    actor->interactionFlags = spawn_flags & 0x1C;
+    actor->lastTriggerTile.bytes[3] = 0;
+    actor->lastTriggerTile.bytes[2] = 0;
+    actor->lastTriggerTile.bytes[1] = 0;
+    actor->lastTriggerTile.bytes[0] = 0;
+    actor->facing = 0;
+    actor->commandState = 0;
+    stats->maxHp = 100;
+    stats->currentHp = 100;
+    stats->maxMp = 100;
+    stats->currentMp = 100;
+    stats->risk = 0;
+    stats->actionRecoveryTimer = 0;
 
-    if (arg1 == 41) {
-        temp_s0->movementClass = 16;
-        temp_s0->gaitClass = 32;
-    } else if (arg1 == 48) {
-        temp_s0->movementClass = 2;
-        temp_s0->gaitClass = 8;
+    if (model_id == 41) {
+        stats->movementClass = 16;
+        stats->gaitClass = 32;
+    } else if (model_id == 48) {
+        stats->movementClass = 2;
+        stats->gaitClass = 8;
     } else {
-        temp_s0->movementClass = 2;
-        temp_s0->gaitClass = 4;
+        stats->movementClass = 2;
+        stats->gaitClass = 4;
     }
 
-    temp_s0->walkSpeed = 9;
-    temp_s0->runSpeed = 18;
-    temp_s0->weapon.recoveryDelay = 20;
-    temp_s0->weapon.range.range = 5;
-    temp_s0->weapon.range.secondRange = 4;
-    temp_s0->weapon.range.thirdRange = 5;
-    temp_s0->cancelsHitResults = 0;
-    temp_s0->weapon.range.attackShapeAngle = 0;
-    temp_s1->roomSpawnIndex = 128;
-    temp_s1->killCounted = 0;
-    temp_s1->defeated = 0;
-    temp_s0->actorId = 128;
+    stats->walkSpeed = 9;
+    stats->runSpeed = 18;
+    stats->weapon.recoveryDelay = 20;
+    stats->weapon.range.range = 5;
+    stats->weapon.range.secondRange = 4;
+    stats->weapon.range.thirdRange = 5;
+    stats->cancelsHitResults = 0;
+    stats->weapon.range.attackShapeAngle = 0;
+    actor->roomSpawnIndex = 128;
+    actor->killCounted = 0;
+    actor->defeated = 0;
+    stats->actorId = 128;
 }
 
 // decomp: BATTLE.PRG func_80076F24 (src/BATTLE/BATTLE.PRG/146C.c:6367)
 void Actors_InitializeActorFromTemplate(
-    int id, Actors_CharacterInit* arg1, int arg2, int arg3, int arg4, int arg5)
+    int id, Actors_CharacterInit* character_init, int blade_id, int shield_id, int spawn_flags, int randomize_stats)
 {
-    int temp_v1;
-    Battle_Actor* temp_s0;
-    Battle_ActorStats* temp_s4;
+    int actor_kind;
+    Battle_Actor* actor;
+    Battle_ActorStats* stats;
 
-    temp_s0 = Battle_actors[id];
-    temp_s0->id = id;
-    temp_s4 = temp_s0->stats;
-    temp_s0->modelId = arg1->characterKind;
-    temp_s0->subType = arg1->subType;
-    temp_s0->bladeId = arg2;
-    temp_s0->shieldId = arg3;
-    temp_s0->weaponDrawn = 0;
+    actor = Battle_actors[id];
+    actor->id = id;
+    stats = actor->stats;
+    actor->modelId = character_init->characterKind;
+    actor->subType = character_init->subType;
+    actor->bladeId = blade_id;
+    actor->shieldId = shield_id;
+    actor->weaponDrawn = 0;
 
     switch (id) {
     case 0:
-        temp_s0->kind = 1;
+        actor->kind = 1;
         break;
     case 1:
-        temp_v1 = 2;
-        temp_s0->kind = temp_v1;
+        actor_kind = 2;
+        actor->kind = actor_kind;
         break;
     default:
-        switch (arg4 & 3) {
+        switch (spawn_flags & 3) {
         case 1:
-            temp_s0->kind = 4;
-            temp_s0->weaponDrawn |= 1;
+            actor->kind = 4;
+            actor->weaponDrawn |= 1;
             Actors_SetActorWeaponDrawn(id, 1, 0);
             break;
         case 2:
         case 3:
-            temp_s0->kind = 8;
+            actor->kind = 8;
             break;
         case 0:
-            temp_s0->kind = 2;
+            actor->kind = 2;
             break;
         }
     }
 
-    if (arg4 & 0x80) {
-        temp_s0->retainAfterDefeat = 1;
+    if (spawn_flags & 0x80) {
+        actor->retainAfterDefeat = 1;
     } else {
-        temp_s0->retainAfterDefeat = 0;
+        actor->retainAfterDefeat = 0;
     }
 
-    temp_s0->interactionFlags = arg4 & 0x1C;
-    temp_s0->commandState = 0;
-    temp_s0->lastTriggerTile.bytes[3] = 0;
-    temp_s0->lastTriggerTile.bytes[2] = 0;
-    temp_s0->lastTriggerTile.bytes[1] = 0;
-    temp_s0->lastTriggerTile.bytes[0] = 0;
-    Actors_ApplyActorInitialStats(id, temp_s4, arg1, arg5);
+    actor->interactionFlags = spawn_flags & 0x1C;
+    actor->commandState = 0;
+    actor->lastTriggerTile.bytes[3] = 0;
+    actor->lastTriggerTile.bytes[2] = 0;
+    actor->lastTriggerTile.bytes[1] = 0;
+    actor->lastTriggerTile.bytes[0] = 0;
+    Actors_ApplyActorInitialStats(id, stats, character_init, randomize_stats);
 }
 
 // decomp: BATTLE.PRG func_80077078 (src/BATTLE/BATTLE.PRG/146C.c:6423)
-int Actors_QueueActorModelLoad(Battle_Actor* arg0, int index, int wepId,
-    Field_ActorPlacement* arg3, int arg4)
+int Actors_QueueActorModelLoad(Battle_Actor* actor, int index, int wepId,
+    Field_ActorPlacement* placement, int load_flags)
 {
-    Content_ActorAssetRequest sp10;
+    Content_ActorAssetRequest asset_request;
 
-    sp10.assetKind = 1;
-    sp10.targetSlot = index;
-    sp10.modelId = wepId;
-    sp10.placement = *arg3;
-    sp10.destination = arg0->model;
-    if (arg4 & 0x80) {
-        sp10.subKind = (arg4 & 0xF00) >> 8;
-        sp10.textureSlot = (arg4 & 0xF000) >> 0xC;
+    asset_request.assetKind = 1;
+    asset_request.targetSlot = index;
+    asset_request.modelId = wepId;
+    asset_request.placement = *placement;
+    asset_request.destination = actor->model;
+    if (load_flags & 0x80) {
+        asset_request.subKind = (load_flags & 0xF00) >> 8;
+        asset_request.textureSlot = (load_flags & 0xF000) >> 0xC;
     } else {
-        sp10.subKind = 0xFF;
+        asset_request.subKind = 0xFF;
     }
-    sp10.variant = 0;
-    sp10.material = 2;
-    return Content_QueueActorAssetRequest(&sp10);
+    asset_request.variant = 0;
+    asset_request.material = 2;
+    return Content_QueueActorAssetRequest(&asset_request);
 }
 
 // decomp: BATTLE.PRG func_80077130 (src/BATTLE/BATTLE.PRG/146C.c:6455)
 void Actors_QueueEquipmentModelLoad(
     Battle_Actor* actor, int actorId, int wepId, int isShield, int material)
 {
-    Content_ActorAssetRequest sp10;
+    Content_ActorAssetRequest asset_request;
 
     if (wepId != 0xFF) {
-        int temp_s0 = (actorId * 2) + isShield;
-        Content_ReleaseWeaponModel(temp_s0);
+        int equipment_slot = (actorId * 2) + isShield;
+        Content_ReleaseWeaponModel(equipment_slot);
         if (wepId != 0) {
-            sp10.assetKind = 3;
-            sp10.targetSlot = temp_s0;
-            sp10.modelId = wepId;
-            sp10.destination = actor->equipmentModels[isShield];
-            sp10.subKind = actorId;
+            asset_request.assetKind = 3;
+            asset_request.targetSlot = equipment_slot;
+            asset_request.modelId = wepId;
+            asset_request.destination = actor->equipmentModels[isShield];
+            asset_request.subKind = actorId;
             if (isShield == 0) {
-                sp10.textureSlot = 0xF0;
+                asset_request.textureSlot = 0xF0;
             } else {
-                sp10.textureSlot = 0xF1;
+                asset_request.textureSlot = 0xF1;
             }
-            sp10.material = material;
-            Content_QueueActorAssetRequest(&sp10);
+            asset_request.material = material;
+            Content_QueueActorAssetRequest(&asset_request);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_80077240 (src/BATTLE/BATTLE.PRG/146C.c:6493)
-Actors_ActorAllocation* Actors_AllocateActorWithEquipment(int arg0, int arg1, int bladeWepId, int bladeMaterial,
-    int shieldWepId, int shieldMaterial, Field_ActorPlacement* arg6, int arg7)
+Actors_ActorAllocation* Actors_AllocateActorWithEquipment(int actor_id, int model_id, int bladeWepId, int bladeMaterial,
+    int shieldWepId, int shieldMaterial, Field_ActorPlacement* placement, int load_flags)
 {
     int i;
-    Actors_ActorAllocation* temp_v0;
+    Actors_ActorAllocation* allocation;
     int _[6] __attribute__((unused));
 
-    if (Battle_actors[arg0] != NULL) {
+    if (Battle_actors[actor_id] != NULL) {
         return NULL;
     }
-    if (arg0 < 0xA) {
-        temp_v0 = Core_Memory_AllocateFromLowEnd(sizeof *temp_v0);
-        Core_Memory_ZeroAlignedWords(temp_v0, sizeof temp_v0->core.actor);
+    if (actor_id < 0xA) {
+        allocation = Core_Memory_AllocateFromLowEnd(sizeof *allocation);
+        Core_Memory_ZeroAlignedWords(allocation, sizeof allocation->core.actor);
         i = 0xA;
-        temp_v0->core.actor.actor.stats = &temp_v0->core.actor.stats;
-        temp_v0->core.actor.actor.allocationKind = 1;
-        temp_v0->core.actor.actor.model = &temp_v0->core.model;
-        temp_v0->core.actor.actor.equipmentModels[0] = &temp_v0->modelSlots[0];
-        temp_v0->core.actor.actor.equipmentModels[1] = &temp_v0->modelSlots[1];
+        allocation->core.actor.actor.stats = &allocation->core.actor.stats;
+        allocation->core.actor.actor.allocationKind = 1;
+        allocation->core.actor.actor.model = &allocation->core.model;
+        allocation->core.actor.actor.equipmentModels[0] = &allocation->modelSlots[0];
+        allocation->core.actor.actor.equipmentModels[1] = &allocation->modelSlots[1];
 
         if (bladeWepId != 0) {
             for (i = 1; i < 11; ++i) {
@@ -492,61 +492,61 @@ Actors_ActorAllocation* Actors_AllocateActorWithEquipment(int arg0, int arg1, in
             }
         }
 
-        temp_v0->core.actor.actor.equippedWeaponCategory = i;
+        allocation->core.actor.actor.equippedWeaponCategory = i;
 
-        Actors_QueueActorModelLoad(&temp_v0->core.actor.actor, arg0, arg1, arg6, arg7);
-        if (arg1 != 0x7F) {
-            Actors_QueueActorBaseSequenceLoad(&temp_v0->core.actor.actor, arg0);
-            Actors_QueueEquipmentModelLoad(&temp_v0->core.actor.actor, arg0, bladeWepId, 0, bladeMaterial);
-            Actors_QueueEquipmentModelLoad(&temp_v0->core.actor.actor, arg0, shieldWepId, 1, shieldMaterial);
-            Actors_QueueActorWeaponSequenceLoad((char*)&temp_v0->core, arg0,
-                temp_v0->core.actor.actor.equippedWeaponCategory, arg7);
+        Actors_QueueActorModelLoad(&allocation->core.actor.actor, actor_id, model_id, placement, load_flags);
+        if (model_id != 0x7F) {
+            Actors_QueueActorBaseSequenceLoad(&allocation->core.actor.actor, actor_id);
+            Actors_QueueEquipmentModelLoad(&allocation->core.actor.actor, actor_id, bladeWepId, 0, bladeMaterial);
+            Actors_QueueEquipmentModelLoad(&allocation->core.actor.actor, actor_id, shieldWepId, 1, shieldMaterial);
+            Actors_QueueActorWeaponSequenceLoad((char*)&allocation->core, actor_id,
+                allocation->core.actor.actor.equippedWeaponCategory, load_flags);
         }
-        return temp_v0;
+        return allocation;
     }
     return NULL;
 }
 
 // decomp: BATTLE.PRG func_800773BC (src/BATTLE/BATTLE.PRG/146C.c:6536)
 void Actors_RegisterLoadedActor(
-    Battle_Actor* arg0, int arg1, int arg2, int arg3, int arg4, int arg5)
+    Battle_Actor* actor, int actor_id, int model_id, int blade_id, int shield_id, int spawn_flags)
 {
-    Actors_PlayActorAnimation(arg1, 0, 0, 0);
-    Actors_SetActorDisplayFlags(arg1, 0x1847);
-    Battle_actors[arg1] = arg0;
-    Actors_InitializeActorDefaults(arg1, arg2, arg3, arg4, arg5);
-    Actors_SetActorWalkRunSpeeds(arg1, 0x9000, 0x12000);
-    Battle_SetEnemyCombatPose(arg1, 0);
-    if (arg0->kind & 7) {
-        if (arg1 != 0) {
-            arg0->next = Battle_actors[0]->next;
-            Battle_actors[0]->next = arg0;
+    Actors_PlayActorAnimation(actor_id, 0, 0, 0);
+    Actors_SetActorDisplayFlags(actor_id, 0x1847);
+    Battle_actors[actor_id] = actor;
+    Actors_InitializeActorDefaults(actor_id, model_id, blade_id, shield_id, spawn_flags);
+    Actors_SetActorWalkRunSpeeds(actor_id, 0x9000, 0x12000);
+    Battle_SetEnemyCombatPose(actor_id, 0);
+    if (actor->kind & 7) {
+        if (actor_id != 0) {
+            actor->next = Battle_actors[0]->next;
+            Battle_actors[0]->next = actor;
         } else {
-            arg0->next = NULL;
+            actor->next = NULL;
         }
     }
-    if (arg0->weaponDrawn & 1) {
-        Actors_SetActorDisplayFlags(arg1, 0x1846);
+    if (actor->weaponDrawn & 1) {
+        Actors_SetActorDisplayFlags(actor_id, 0x1846);
     } else {
-        Actors_SetActorDisplayFlags(arg1, 0x46);
+        Actors_SetActorDisplayFlags(actor_id, 0x46);
     }
-    arg0->templateWord2C = 0;
-    Battle_Ai_CreateActorAiState(arg0, -1);
+    actor->templateWord2C = 0;
+    Battle_Ai_CreateActorAiState(actor, -1);
 }
 
 // decomp: BATTLE.PRG func_800774FC (src/BATTLE/BATTLE.PRG/146C.c:6562)
-Battle_Actor* Actors_CreateActorWithEquipment(int arg0, int arg1, int bladeWepId, int bladeMaterial,
-    int shieldWepId, int shieldMaterial, Field_ActorPlacement* arg6, int arg7)
+Battle_Actor* Actors_CreateActorWithEquipment(int actor_id, int model_id, int bladeWepId, int bladeMaterial,
+    int shieldWepId, int shieldMaterial, Field_ActorPlacement* placement, int spawn_flags)
 {
-    Battle_Actor* temp_v0 = (Battle_Actor*)Actors_AllocateActorWithEquipment(
-        arg0, arg1, bladeWepId, bladeMaterial, shieldWepId, shieldMaterial, arg6, arg7);
-    if (temp_v0 != NULL) {
+    Battle_Actor* actor = (Battle_Actor*)Actors_AllocateActorWithEquipment(
+        actor_id, model_id, bladeWepId, bladeMaterial, shieldWepId, shieldMaterial, placement, spawn_flags);
+    if (actor != NULL) {
         while (Content_FindFreeActorAssetRequest() != 0) {
             Content_UpdateActorAssetQueue();
             State_UpdatePlayTimeAndLoading(0);
         }
-        Actors_RegisterLoadedActor(temp_v0, arg0, arg1, bladeWepId, shieldWepId, arg7);
-        return temp_v0;
+        Actors_RegisterLoadedActor(actor, actor_id, model_id, bladeWepId, shieldWepId, spawn_flags);
+        return actor;
     }
     return 0;
 }
@@ -766,40 +766,40 @@ Battle_Actor* Actors_SpawnRoomEnemy(
 int Actors_ActorLoadProbeResult(void) { return 0; }
 
 // decomp: BATTLE.PRG func_8007C8F8 (src/BATTLE/BATTLE.PRG/146C.c:8926)
-int Actors_QueueAshleyModelLoad(int arg0)
+int Actors_QueueAshleyModelLoad(int model_id)
 {
-    Content_ActorAssetRequest sp10;
+    Content_ActorAssetRequest asset_request;
 
-    sp10.modelId = arg0;
-    sp10.assetKind = 1;
-    sp10.targetSlot = 0;
-    return Content_QueueActorAssetRequest(&sp10) + 1;
+    asset_request.modelId = model_id;
+    asset_request.assetKind = 1;
+    asset_request.targetSlot = 0;
+    return Content_QueueActorAssetRequest(&asset_request) + 1;
 }
 
 // decomp: BATTLE.PRG func_8007C928 (src/BATTLE/BATTLE.PRG/146C.c:8936)
-int Actors_QueueScriptedActorSpawn(u_int arg0, int arg1, Field_ActorPlacement* arg2)
+int Actors_QueueScriptedActorSpawn(u_int actor_id, int model_id, Field_ActorPlacement* placement)
 {
     int _[6] __attribute__((unused));
-    Actors_ActorAllocation* temp_v0;
-    Battle_Actor** temp_s1;
-    int s0;
+    Actors_ActorAllocation* allocation;
+    Battle_Actor** actor_slot;
+    int load_request_index;
 
-    Core_Debugf("actors", "script spawn actor=%u model=%d existing=%p", arg0, arg1,
-        arg0 < 16 ? (void*)Battle_actors[arg0] : NULL);
-    if (arg0 < 16) {
-        if (Battle_actors[arg0] == NULL) {
-            temp_s1 = &Battle_actors[arg0];
-            temp_v0 = Core_Memory_AllocateFromLowEnd(sizeof *temp_v0);
-            *temp_s1 = &temp_v0->core.actor.actor;
-            temp_v0->core.actor.actor.stats = &temp_v0->core.actor.stats;
-            temp_v0->core.actor.actor.allocationKind = 1;
-            temp_v0->core.actor.actor.model = &temp_v0->core.model;
-            temp_v0->core.actor.actor.equipmentModels[0] = &temp_v0->modelSlots[0];
-            temp_v0->core.actor.actor.equipmentModels[1] = &temp_v0->modelSlots[1];
-            Actors_InitializeActorDefaults(arg0, arg1, 0, 0, 6);
-            s0 = Actors_QueueActorModelLoad(&temp_v0->core.actor.actor, arg0, arg1, arg2, 0);
-            Battle_Ai_CreateActorAiState(*temp_s1, -1);
-            return s0 + 1;
+    Core_Debugf("actors", "script spawn actor=%u model=%d existing=%p", actor_id, model_id,
+        actor_id < 16 ? (void*)Battle_actors[actor_id] : NULL);
+    if (actor_id < 16) {
+        if (Battle_actors[actor_id] == NULL) {
+            actor_slot = &Battle_actors[actor_id];
+            allocation = Core_Memory_AllocateFromLowEnd(sizeof *allocation);
+            *actor_slot = &allocation->core.actor.actor;
+            allocation->core.actor.actor.stats = &allocation->core.actor.stats;
+            allocation->core.actor.actor.allocationKind = 1;
+            allocation->core.actor.actor.model = &allocation->core.model;
+            allocation->core.actor.actor.equipmentModels[0] = &allocation->modelSlots[0];
+            allocation->core.actor.actor.equipmentModels[1] = &allocation->modelSlots[1];
+            Actors_InitializeActorDefaults(actor_id, model_id, 0, 0, 6);
+            load_request_index = Actors_QueueActorModelLoad(&allocation->core.actor.actor, actor_id, model_id, placement, 0);
+            Battle_Ai_CreateActorAiState(*actor_slot, -1);
+            return load_request_index + 1;
         }
     }
     return 0;
@@ -808,35 +808,35 @@ int Actors_QueueScriptedActorSpawn(u_int arg0, int arg1, Field_ActorPlacement* a
 // decomp: BATTLE.PRG func_8007CA20 (src/BATTLE/BATTLE.PRG/146C.c:8962)
 void Actors_LoadActorEquipmentModels(int actorId, int bladeWepId, int shieldWepId)
 {
-    Battle_Actor* temp_s0 = Battle_actors[actorId];
-    if (temp_s0 != NULL) {
-        Actors_QueueEquipmentModelLoad(temp_s0, actorId, bladeWepId, 0, 0);
-        Actors_QueueEquipmentModelLoad(temp_s0, actorId, shieldWepId, 1, 0);
+    Battle_Actor* actor = Battle_actors[actorId];
+    if (actor != NULL) {
+        Actors_QueueEquipmentModelLoad(actor, actorId, bladeWepId, 0, 0);
+        Actors_QueueEquipmentModelLoad(actor, actorId, shieldWepId, 1, 0);
     }
 }
 
 // decomp: BATTLE.PRG func_8007CAA4 (src/BATTLE/BATTLE.PRG/146C.c:8971)
-void Actors_RefreshActorEquipmentModels(int arg0)
+void Actors_RefreshActorEquipmentModels(int actor_id)
 {
-    Battle_Actor* temp_s1;
-    Battle_ActorStats* temp_s0;
+    Battle_Actor* actor;
+    Battle_ActorStats* stats;
 
-    temp_s1 = Battle_actors[arg0];
-    if (temp_s1 != NULL) {
-        temp_s0 = temp_s1->stats;
-        if (temp_s0 != NULL) {
-            if (temp_s0->weapon.blade.id != 0) {
-                Actors_QueueEquipmentModelLoad(temp_s1, arg0, temp_s0->weapon.wepId, 0,
-                    temp_s0->weapon.blade.material);
+    actor = Battle_actors[actor_id];
+    if (actor != NULL) {
+        stats = actor->stats;
+        if (stats != NULL) {
+            if (stats->weapon.blade.id != 0) {
+                Actors_QueueEquipmentModelLoad(actor, actor_id, stats->weapon.wepId, 0,
+                    stats->weapon.blade.material);
 
             } else {
-                Actors_QueueEquipmentModelLoad(temp_s1, arg0, 0, 0, 0);
+                Actors_QueueEquipmentModelLoad(actor, actor_id, 0, 0, 0);
             }
-            if (temp_s0->shield.base.id != 0) {
-                Actors_QueueEquipmentModelLoad(temp_s1, arg0, temp_s0->shield.wepId, 1,
-                    temp_s0->shield.base.material);
+            if (stats->shield.base.id != 0) {
+                Actors_QueueEquipmentModelLoad(actor, actor_id, stats->shield.wepId, 1,
+                    stats->shield.base.material);
             } else {
-                Actors_QueueEquipmentModelLoad(temp_s1, arg0, 0, 0, 0);
+                Actors_QueueEquipmentModelLoad(actor, actor_id, 0, 0, 0);
             }
         }
     }
@@ -846,5 +846,5 @@ void Actors_RefreshActorEquipmentModels(int arg0)
 int Actors_FirstFreeAssetLoadSlot(void) { return Content_FindFreeActorAssetRequest(); }
 
 // decomp: BATTLE.PRG func_8007D340 (src/BATTLE/BATTLE.PRG/146C.c:9256)
-void Actors_RemoveScriptedActor(int arg0) { Actors_RemoveActorAtSlot(arg0, 0); }
+void Actors_RemoveScriptedActor(int actor_id) { Actors_RemoveActorAtSlot(actor_id, 0); }
 

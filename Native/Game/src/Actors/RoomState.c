@@ -39,37 +39,37 @@ void Actors_ClearCachedRoomActorStates(int mapId, int zndId)
 }
 
 // decomp: BATTLE.PRG func_80069E80 (src/BATTLE/BATTLE.PRG/146C.c:800)
-void* Actors_FindCachedRoomActorState(int arg0)
+void* Actors_FindCachedRoomActorState(int spawn_index)
 {
     int i;
-    void* var_a3 = NULL;
+    void* cached_state = NULL;
 
     for (i = 0; i < 8; ++i) {
-        if (State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i][0] == (arg0 + 1)) {
-            var_a3 = &State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i];
+        if (State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i][0] == (spawn_index + 1)) {
+            cached_state = &State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i];
         }
     }
-    return var_a3;
+    return cached_state;
 }
 
 // decomp: BATTLE.PRG func_80069EF0 (src/BATTLE/BATTLE.PRG/146C.c:813)
-void* Actors_AcquireCachedRoomActorState(int arg0)
+void* Actors_AcquireCachedRoomActorState(int spawn_index)
 {
     int i;
-    void* var_a3;
+    void* cached_state;
 
-    var_a3 = NULL;
+    cached_state = NULL;
 
     for (i = 0; i < 8; ++i) {
-        if (State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i][0] == (arg0 + 1)) {
-            var_a3 = &State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i];
+        if (State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i][0] == (spawn_index + 1)) {
+            cached_state = &State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i];
             break;
         }
     }
 
-    if (var_a3 == NULL) {
+    if (cached_state == NULL) {
         i = State_recentRoomEnemyStates[State_currentRoomStateSlot].nextSlot;
-        var_a3 = &State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i];
+        cached_state = &State_recentRoomEnemyStates[State_currentRoomStateSlot].actorStates[i];
         ++State_recentRoomEnemyStates[State_currentRoomStateSlot].nextSlot;
 
         if (State_recentRoomEnemyStates[State_currentRoomStateSlot].nextSlot >= 8) {
@@ -77,51 +77,51 @@ void* Actors_AcquireCachedRoomActorState(int arg0)
         }
     }
 
-    return var_a3;
+    return cached_state;
 }
 
 // decomp: BATTLE.PRG func_80069FC4 (src/BATTLE/BATTLE.PRG/146C.c:840)
-void Actors_StoreRoomActorState(int arg0, int arg1)
+void Actors_StoreRoomActorState(int actor_id, int hidden_in_cache)
 {
-    Actors_ActorLocationQuery sp10;
+    Actors_ActorLocationQuery placement;
     int i;
-    Actors_RoomActorRecordWrite* temp_v0;
-    Battle_ActorStats* temp_s1;
-    Battle_Actor* temp_s0 = Battle_actors[arg0];
+    Actors_RoomActorRecordWrite* cached_state;
+    Battle_ActorStats* stats;
+    Battle_Actor* actor = Battle_actors[actor_id];
 
-    if ((temp_s0 == NULL) || (temp_s0->roomSpawnIndex == 0x80)) {
+    if ((actor == NULL) || (actor->roomSpawnIndex == 0x80)) {
         return;
     }
 
-    temp_s1 = temp_s0->stats;
-    temp_v0 = Actors_AcquireCachedRoomActorState(temp_s0->roomSpawnIndex);
-    temp_v0->spawnSlot = temp_s0->roomSpawnIndex + 1;
-    temp_v0->currentHp = temp_s1->currentHp;
-    temp_v0->maxHp = temp_s1->maxHp;
-    temp_v0->currentMp = temp_s1->currentMp;
-    temp_v0->maxMp = temp_s1->maxMp;
-    temp_v0->strength = temp_s1->totalStrength;
-    temp_v0->intelligence = temp_s1->totalIntelligence;
-    temp_v0->agility = temp_s1->totalAgility;
+    stats = actor->stats;
+    cached_state = Actors_AcquireCachedRoomActorState(actor->roomSpawnIndex);
+    cached_state->spawnSlot = actor->roomSpawnIndex + 1;
+    cached_state->currentHp = stats->currentHp;
+    cached_state->maxHp = stats->maxHp;
+    cached_state->currentMp = stats->currentMp;
+    cached_state->maxMp = stats->maxMp;
+    cached_state->strength = stats->totalStrength;
+    cached_state->intelligence = stats->totalIntelligence;
+    cached_state->agility = stats->totalAgility;
 
     for (i = 0; i < 6; ++i) {
-        temp_v0->limbHp[i] = temp_s1->limbs[i].hp;
+        cached_state->limbHp[i] = stats->limbs[i].hp;
     }
 
-    temp_v0->statuses = temp_s1->statuses;
+    cached_state->statuses = stats->statuses;
 
-    if (Actors_ActorStateFlags(arg0) & 0x01000000) {
-        temp_v0->isHidden = arg1;
-        temp_v0->currentHp = 1;
+    if (Actors_ActorStateFlags(actor_id) & 0x01000000) {
+        cached_state->isHidden = hidden_in_cache;
+        cached_state->currentHp = 1;
     } else {
-        temp_v0->isHidden = arg1;
+        cached_state->isHidden = hidden_in_cache;
     }
 
-    temp_v0->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(arg0);
+    cached_state->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(actor_id);
 
-    Actors_ActorPlacement(arg0, &sp10);
-    Actors_ActorSavedPlacement(arg0, temp_s1->movementClass, &sp10);
+    Actors_ActorPlacement(actor_id, &placement);
+    Actors_ActorSavedPlacement(actor_id, stats->movementClass, &placement);
 
-    temp_v0->placement = sp10.location.packedTile.word;
+    cached_state->placement = placement.location.packedTile.word;
 }
 

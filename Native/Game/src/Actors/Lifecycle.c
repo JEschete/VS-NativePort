@@ -66,7 +66,7 @@ int Actors_UnlinkActorFromRoomList(Battle_Actor* actor)
 }
 
 // decomp: BATTLE.PRG _removeActorAtIndex (src/BATTLE/BATTLE.PRG/146C.c:926)
-int Actors_RemoveActorAtSlot(u_int index, int arg1)
+int Actors_RemoveActorAtSlot(u_int index, int hidden_in_cache)
 {
     int i;
 
@@ -76,7 +76,7 @@ int Actors_RemoveActorAtSlot(u_int index, int arg1)
 
         if (actor != NULL) {
 
-            Actors_StoreRoomActorState(index, arg1);
+            Actors_StoreRoomActorState(index, hidden_in_cache);
 
             if (actor->kind == 0x10) {
                 Field_DropUnsupportedGimmickStack(index);
@@ -114,9 +114,9 @@ void Actors_FreezeAllActorAnimations(void)
     int i;
 
     for (i = 0; i < 16; ++i) {
-        int temp_v0 = Actors_ActorStateFlags(i);
-        if (!(temp_v0 & 4)) {
-            Actors_SetActorDisplayFlags(i, temp_v0 | 4);
+        int state_flags = Actors_ActorStateFlags(i);
+        if (!(state_flags & 4)) {
+            Actors_SetActorDisplayFlags(i, state_flags | 4);
         }
     }
 }
@@ -127,47 +127,47 @@ void Actors_UnfreezeAllActorAnimations(void)
     int i;
 
     for (i = 0; i < 16; ++i) {
-        int temp_v0 = Actors_ActorStateFlags(i);
-        if (temp_v0 & 4) {
-            Actors_SetActorDisplayFlags(i, temp_v0 & ~4);
+        int state_flags = Actors_ActorStateFlags(i);
+        if (state_flags & 4) {
+            Actors_SetActorDisplayFlags(i, state_flags & ~4);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_8007647C (src/BATTLE/BATTLE.PRG/146C.c:6028)
-void Actors_InitializePlaceholderActorStats(int arg0, int arg1)
+void Actors_InitializePlaceholderActorStats(int actor_id, int auxiliary_actor_id)
 {
     int i;
 
-    Battle_Actor* temp_s1 = Battle_actors[arg0];
-    Battle_ActorStats* temp_s0 = temp_s1->stats;
+    Battle_Actor* actor = Battle_actors[actor_id];
+    Battle_ActorStats* stats = actor->stats;
 
-    Core_Memory_ZeroAlignedWords(temp_s0, sizeof *temp_s0);
+    Core_Memory_ZeroAlignedWords(stats, sizeof *stats);
 
-    temp_s0->maxHp = 1;
-    temp_s0->currentHp = 1;
+    stats->maxHp = 1;
+    stats->currentHp = 1;
 
     for (i = 0; i < 24; ++i) {
-        temp_s1->stats->name[i] =
+        actor->stats->name[i] =
             Actors_placeholderActorName[i]; // Cube // Ashley Riot? But also reads 4 bytes over...
     }
 
-    switch (arg1 & 0xFF) {
+    switch (auxiliary_actor_id & 0xFF) {
     case 1:
-        temp_s0->cancelsHitResults = 1;
-        Battle_SetActorMarker(arg0, 8);
+        stats->cancelsHitResults = 1;
+        Battle_SetActorMarker(actor_id, 8);
         break;
     case 2:
         /* fallthrough */
     case 4:
-        temp_s0->cancelsHitResults = 0;
+        stats->cancelsHitResults = 0;
         break;
     default:
-        temp_s0->cancelsHitResults = 1;
+        stats->cancelsHitResults = 1;
     }
-    temp_s1->roomSpawnIndex = 0x80;
-    temp_s1->killCounted = 0;
-    temp_s1->defeated = 0;
-    temp_s0->actorId = 0x80;
+    actor->roomSpawnIndex = 0x80;
+    actor->killCounted = 0;
+    actor->defeated = 0;
+    stats->actorId = 0x80;
 }
 

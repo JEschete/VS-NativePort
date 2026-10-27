@@ -19,34 +19,34 @@
 #include "Render/Palette.h"
 
 extern u_int Actors_stateFlagsScratch;
-void Actors_EnableActorModel(int arg0);
+void Actors_EnableActorModel(int actor_id);
 void Actors_EnableAllActorModels(void);
-void Actors_DisableActorModel(int arg0);
+void Actors_DisableActorModel(int actor_id);
 void Actors_DisableAllActorModels(void);
-void Actors_SetActorHostile(int arg0, int arg1);
-int Actors_ActorHpPercentage(int arg0);
-void Actors_RestoreActorVitals(int arg0);
-int Actors_FindActorByModelId(int arg0);
+void Actors_SetActorHostile(int actor_id, int hostile);
+int Actors_ActorHpPercentage(int actor_id);
+void Actors_RestoreActorVitals(int actor_id);
+int Actors_FindActorByModelId(int model_id);
 Battle_Actor* Actors_ActorAtSlot(int actorId);
-int Actors_CountActorsByDisposition(int arg0);
-char Actors_IsActorRetainedAfterDefeat(int arg0);
-int Actors_SetActorLogicEnabled(int arg0, int arg1);
-int Actors_SetOtherActorLogicEnabled(int arg0);
-void Actors_SetActorDetached(int arg0, int arg1);
+int Actors_CountActorsByDisposition(int actor_kind);
+char Actors_IsActorRetainedAfterDefeat(int actor_id);
+int Actors_SetActorLogicEnabled(int actor_id, int enabled);
+int Actors_SetOtherActorLogicEnabled(int enabled);
+void Actors_SetActorDetached(int actor_id, int detached);
 void Actors_FinishActorPlacement(void);
-void Actors_ResetActorMotionState(int arg0, int arg1);
+void Actors_ResetActorMotionState(int actor_id, int arg1);
 void Actors_ResetAllActorMovement(void);
 void Actors_BeginActorDeath(int actorId, void* context, int animate);
-void Actors_SetActorCompanion(int arg0, int arg1, Render_ColorCode* arg2, Render_ColorCode* arg3);
-void Actors_AttachActorToParentBone(int arg0, int arg1, int arg2, int arg3);
-int Actors_ReleaseActorAttachmentLock(int arg0, int arg1);
-void Actors_SetActorDisplayFlags(int actorId, int arg1);
+void Actors_SetActorCompanion(int actor_id, int companion_slot, Render_ColorCode* companion_state, Render_ColorCode* companion_color);
+void Actors_AttachActorToParentBone(int actor_id, int parent_actor_id, int parent_bone_index, int arg3);
+int Actors_ReleaseActorAttachmentLock(int actor_id, int arg1);
+void Actors_SetActorDisplayFlags(int actorId, int display_flags);
 u_int Actors_ActorStateFlags(int actorId);
-int Actors_ActorPlacement(int arg0, void* arg1);
+int Actors_ActorPlacement(int actor_id, void* placement_out);
 void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int height, int mode);
-int Actors_FindActorAtFlightPosition(int arg0, SVECTOR* arg1);
-void Actors_SeparateActorFlightPlacement(int arg0, SVECTOR* arg1);
-void Actors_ActorSavedPlacement(int arg0, int arg1, Actors_ActorLocationQuery* arg2);
-int Actors_FindNearestActorAhead(int arg0, int arg1, int arg2);
+int Actors_FindActorAtFlightPosition(int actor_id, SVECTOR* position);
+void Actors_SeparateActorFlightPlacement(int actor_id, SVECTOR* position);
+void Actors_ActorSavedPlacement(int actor_id, int movement_class, Actors_ActorLocationQuery* placement_out);
+int Actors_FindNearestActorAhead(int actor_id, int horizontal_range, int vertical_range);
 
 #endif // VS_ACTORS_ACTORSTATE_H_DECLS

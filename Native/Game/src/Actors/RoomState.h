@@ -11,8 +11,8 @@
 
 void Actors_ClearRoomActorStateCache(void);
 void Actors_ClearCachedRoomActorStates(int mapId, int zndId);
-void* Actors_FindCachedRoomActorState(int arg0);
-void* Actors_AcquireCachedRoomActorState(int arg0);
-void Actors_StoreRoomActorState(int arg0, int arg1);
+void* Actors_FindCachedRoomActorState(int spawn_index);
+void* Actors_AcquireCachedRoomActorState(int spawn_index);
+void Actors_StoreRoomActorState(int actor_id, int hidden_in_cache);
 
 #endif // VS_ACTORS_ROOMSTATE_H_DECLS

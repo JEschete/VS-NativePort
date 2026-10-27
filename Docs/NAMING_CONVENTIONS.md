@@ -890,3 +890,48 @@ stable generations. Evidence: `build\quality\issue148-event-remaining-*`
 and `issue148-event-verification.json`. The remaining event matches are exactly
 the five occurrences of the two reviewed retentions above. Whole-tree lexical
 counts are 20,495 occurrences/1,778 pairs/303 files; other scopes continue.
+
+The event cohort is published in `5491cd4f`, exact green `40570845238`.
+The actor review covers 175 definitions in 53 source/header files, including
+owned implementations. There are 530 binding-specific naming decisions:
+520 ordinary mappings in 156 changed definitions, two separately scoped texture
+origin locals, and eight cast-prototype parameters. All original bodies and
+binding occurrences are reviewed; source fingerprints and collision checks
+guard application. The 168 existing function-ledger rows record original
+evidence; no identities are invented for the seven native-only helpers.
+
+F01860's two block-local `new_var` declarations now have distinct primary and
+secondary texture-origin names. F00876/F00877 cast prototypes are prepared
+separately before outer parameter naming, so F00876 retains `bone_index` in
+the projection callee type while its wrapper parameter becomes `bone_tag`.
+Four exact-preimage fixups and explicit controls enforce these binding
+distinctions. Existing three-call full-actor-ID and nonempty-navigation-call
+assertions retain their exact counts/types/argument checks with the reviewed
+identifier spellings; they are not removed or relaxed.
+
+Retained ABI/dead bindings and existing meaningful speeds have individual
+ledger evidence. Native-only speed retentions are specific to:
+
+- `AppearanceTransition.c::ApplyPalettes`: palette transition step forwarded
+  for the actor and each equipment palette.
+- `IncreaseFade`: the fade increment is `speed * 2`, bounded at 64.
+- `AdvanceDisappearance`: the color decrement is `speed * 4`.
+- `AdvanceReturnTint`: fade decrement, RGB step and palette restoration.
+- `Field_UpdateGimmickAppearanceTransition`: tick-speed-derived rate, doubled
+  for the death-fade state.
+- `MotionRequests.cpp::BeginJump`: forwarded jump rate, including the original
+  minimum and horizontal-distance division in the consumer.
+- `QueueFlight`: the consuming mode-3 vector scale. Mode 4 does not read the
+  distance slot, so no fictitious mode-4 speed meaning is claimed.
+
+On dirty base `5491cd4f`, actor/animation controls first pass 53 cases/17,039
+assertions. Debug/Release then each pass
+`[actors],[animation],[event] --reporter compact`, 73 cases/17,697 assertions.
+Copier tests pass 135/135 and naming tests 32/32; focused tooling quality has
+zero new findings with unchanged baselines. All 742 manifest paths are checked;
+only the 20 approved generated actor files change, all 121 owned paths remain
+byte-identical and repeat generation is stable.
+Evidence: `build\quality\issue148-actor-*`.
+The lexical inventory is 17,463 occurrences/1,625 pairs/291 files; all remaining
+actor matches have the specific retention evidence above or in the ledger.
+Other source scopes remain in progress.

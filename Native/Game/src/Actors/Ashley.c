@@ -38,51 +38,51 @@ void Actors_RestoreAshleyRuntimeState(void)
 {
     int j;
     int i;
-    Battle_ActorStats* temp_s0 = Battle_characterState->stats;
-    State_AshleyStatsSnapshot* s1 = &State_ashleySnapshot.stats;
+    Battle_ActorStats* runtime_stats = Battle_characterState->stats;
+    State_AshleyStatsSnapshot* saved_stats = &State_ashleySnapshot.stats;
 
-    temp_s0->currentHp = s1->currentHp;
-    temp_s0->maxHp = s1->maxHp;
-    temp_s0->currentMp = s1->currentMp;
-    temp_s0->maxMp = s1->maxMp;
-    temp_s0->strength = s1->strength;
-    temp_s0->totalStrength = s1->totalStrength;
-    temp_s0->intelligence = s1->intelligence;
-    temp_s0->totalIntelligence = s1->totalIntelligence;
-    temp_s0->agility = s1->agility;
-    temp_s0->totalAgility = s1->totalAgility;
-    temp_s0->risk = s1->risk;
-    temp_s0->actionRecoveryTimer = s1->actorFlags;
+    runtime_stats->currentHp = saved_stats->currentHp;
+    runtime_stats->maxHp = saved_stats->maxHp;
+    runtime_stats->currentMp = saved_stats->currentMp;
+    runtime_stats->maxMp = saved_stats->maxMp;
+    runtime_stats->strength = saved_stats->strength;
+    runtime_stats->totalStrength = saved_stats->totalStrength;
+    runtime_stats->intelligence = saved_stats->intelligence;
+    runtime_stats->totalIntelligence = saved_stats->totalIntelligence;
+    runtime_stats->agility = saved_stats->agility;
+    runtime_stats->totalAgility = saved_stats->totalAgility;
+    runtime_stats->risk = saved_stats->risk;
+    runtime_stats->actionRecoveryTimer = saved_stats->actorFlags;
 
-    Battle_InflictActorStatuses(s1->statuses, temp_s0);
+    Battle_InflictActorStatuses(saved_stats->statuses, runtime_stats);
 
     for (i = 0; i < 8; ++i) {
-        temp_s0->statusTimers[i] = s1->statusTimers[i];
+        runtime_stats->statusTimers[i] = saved_stats->statusTimers[i];
     }
 
     for (i = 0; i < 6; ++i) {
-        temp_s0->limbs[i].hp = s1->limbs[i].hp;
-        temp_s0->limbs[i].maxHp = s1->limbs[i].maxHp;
+        runtime_stats->limbs[i].hp = saved_stats->limbs[i].hp;
+        runtime_stats->limbs[i].maxHp = saved_stats->limbs[i].maxHp;
 
         for (j = 0; j < 4; ++j) {
-            temp_s0->limbs[i].types[j] = s1->limbs[i].types[j];
+            runtime_stats->limbs[i].types[j] = saved_stats->limbs[i].types[j];
         }
 
         for (j = 0; j < 8; ++j) {
-            temp_s0->limbs[i].affinities[j] = s1->limbs[i].affinities[j];
+            runtime_stats->limbs[i].affinities[j] = saved_stats->limbs[i].affinities[j];
         }
     }
 
-    Battle_characterState->weaponDrawn = s1->weaponDrawn;
+    Battle_characterState->weaponDrawn = saved_stats->weaponDrawn;
 
-    if (s1->weaponDrawn & 1) {
+    if (saved_stats->weaponDrawn & 1) {
         Actors_SetActorWeaponDrawn(0, 1, 2);
         Battle_SetHudBattleMode(1);
     }
 
     State_ashleySnapshot.stats.isPending = 0;
-    Field_sphericalCamera.delta.pitch = s1->cameraPitch;
-    Field_sphericalCamera.initialDistance = s1->cameraDistance;
+    Field_sphericalCamera.delta.pitch = saved_stats->cameraPitch;
+    Field_sphericalCamera.initialDistance = saved_stats->cameraDistance;
 }
 
 // decomp: INITBTL.PRG func_800F9CCC (src/BATTLE/INITBTL.PRG/18.c:361)
@@ -97,12 +97,12 @@ void Actors_SpawnAshleyWithEquipment(void)
     int bladeMaterial = 0;
     int shieldMaterial = 0;
 
-    Field_ActorPlacement sp20;
+    Field_ActorPlacement spawn_placement;
 
-    sp20.tileX = 4;
-    sp20.tileZ = 2;
-    sp20.direction = 0;
-    sp20.height = 128;
+    spawn_placement.tileX = 4;
+    spawn_placement.tileZ = 2;
+    spawn_placement.direction = 0;
+    spawn_placement.height = 128;
 
     bladeWepId = 0;
     bladeIndex = 0;
@@ -129,7 +129,7 @@ void Actors_SpawnAshleyWithEquipment(void)
     }
 
     Battle_characterState = Actors_CreateActorWithEquipment(
-        0, 0, bladeWepId, bladeMaterial, shieldWepId, shieldMaterial, &sp20, 0);
+        0, 0, bladeWepId, bladeMaterial, shieldWepId, shieldMaterial, &spawn_placement, 0);
 
     Actors_InitializeActorFromTemplate(0, &Actors_ashleyInitialLoadout, 0x10, 0, 0x80, 0);
     if (bladeIndex != 0) {

@@ -93,33 +93,33 @@ short Actors_sharedSequenceEntryParams[4][16];
 char Actors_lastResolvedSequenceIndex;
 
 // decomp: BATTLE.PRG func_800770FC (src/BATTLE/BATTLE.PRG/146C.c:6444)
-void Actors_QueueActorBaseSequenceLoad(Battle_Actor* arg0 __attribute__((unused)), int arg1)
+void Actors_QueueActorBaseSequenceLoad(Battle_Actor* arg0 __attribute__((unused)), int actor_id)
 {
-    Content_ActorAssetRequest sp10;
+    Content_ActorAssetRequest asset_request;
 
-    sp10.assetKind = 7;
-    sp10.targetSlot = arg1;
-    sp10.modelId = 0;
-    sp10.subKind = 0;
-    Content_QueueActorAssetRequest(&sp10);
+    asset_request.assetKind = 7;
+    asset_request.targetSlot = actor_id;
+    asset_request.modelId = 0;
+    asset_request.subKind = 0;
+    Content_QueueActorAssetRequest(&asset_request);
 }
 
 // decomp: BATTLE.PRG func_800771E0 (src/BATTLE/BATTLE.PRG/146C.c:6480)
-void Actors_QueueActorWeaponSequenceLoad(char* arg0, int arg1, int arg2, int arg3)
+void Actors_QueueActorWeaponSequenceLoad(char* actor_bytes, int actor_id, int weapon_category, int spawn_flags)
 {
-    Content_ActorAssetRequest sp10;
+    Content_ActorAssetRequest asset_request;
 
-    if (((arg2 != 0) || (arg1 >= 2)) && ((arg1 < 2) || ((arg3 & 3) == 1))) {
-        sp10.assetKind = 7;
-        sp10.targetSlot = arg1;
-        sp10.modelId = ((Battle_Actor*)arg0)->equippedWeaponCategory;
-        sp10.subKind = 0;
-        Content_QueueActorAssetRequest(&sp10);
+    if (((weapon_category != 0) || (actor_id >= 2)) && ((actor_id < 2) || ((spawn_flags & 3) == 1))) {
+        asset_request.assetKind = 7;
+        asset_request.targetSlot = actor_id;
+        asset_request.modelId = ((Battle_Actor*)actor_bytes)->equippedWeaponCategory;
+        asset_request.subKind = 0;
+        Content_QueueActorAssetRequest(&asset_request);
     }
 }
 
 // decomp: BATTLE.PRG func_8007C348 (src/BATTLE/BATTLE.PRG/146C.c:8738)
-void Actors_InterruptActorAction(int arg0, int arg1) { Actors_BeginActorDeath(arg0, NULL, arg1); }
+void Actors_InterruptActorAction(int actor_id, int animate) { Actors_BeginActorDeath(actor_id, NULL, animate); }
 
 // decomp: BATTLE.PRG func_8007CB84 (src/BATTLE/BATTLE.PRG/146C.c:8997)
 void Actors_QueueSharedSequenceLoad(int index, int wepId)
@@ -182,7 +182,7 @@ int Actors_UnloadSharedSequence(int bankId)
 }
 
 // decomp: BATTLE.PRG func_8007CBDC (src/BATTLE/BATTLE.PRG/146C.c:9010)
-void Actors_QueueSharedSequenceWithTextures(int index, int wepId, int arg2)
+void Actors_QueueSharedSequenceWithTextures(int index, int wepId, int texture_slot)
 {
     Content_ActorAssetRequest objData;
 
@@ -190,33 +190,33 @@ void Actors_QueueSharedSequenceWithTextures(int index, int wepId, int arg2)
     objData.targetSlot = index;
     objData.modelId = wepId;
     objData.subKind = 2;
-    objData.textureSlot = arg2;
+    objData.textureSlot = texture_slot;
     Content_QueueActorAssetRequest(&objData);
 }
 
 // decomp: BATTLE.PRG vs_battle_loadEtm (src/BATTLE/BATTLE.PRG/146C.c:9022)
-void Actors_QueueSequenceEffectTextures(int index, int wepId, int arg2)
+void Actors_QueueSequenceEffectTextures(int index, int wepId, int texture_slot)
 {
     Content_ActorAssetRequest objData;
 
     objData.assetKind = 9;
     objData.targetSlot = index;
     objData.modelId = wepId;
-    objData.textureSlot = arg2;
+    objData.textureSlot = texture_slot;
     Content_QueueActorAssetRequest(&objData);
 }
 
 // decomp: BATTLE.PRG func_8007CC4C (src/BATTLE/BATTLE.PRG/146C.c:9033)
-void Actors_ReleaseSequenceEffectTextures(int arg0) { Content_ReleaseSequenceEffectTexture(arg0); }
+void Actors_ReleaseSequenceEffectTextures(int bank_id) { Content_ReleaseSequenceEffectTexture(bank_id); }
 
 // decomp: BATTLE.PRG func_8007CC6C (src/BATTLE/BATTLE.PRG/146C.c:9035)
-void Actors_SetSharedSequenceBank(int arg0) { Actors_SelectSharedSequenceBank(arg0); }
+void Actors_SetSharedSequenceBank(int bank_id) { Actors_SelectSharedSequenceBank(bank_id); }
 
 // decomp: BATTLE.PRG func_8007CC8C (src/BATTLE/BATTLE.PRG/146C.c:9037)
 void Actors_SharedSequenceBank(void) { Actors_SharedSequenceBankId(); }
 
 // decomp: BATTLE.PRG func_8007CEA0 (src/BATTLE/BATTLE.PRG/146C.c:9115)
-void Actors_ReturnActorToIdle(int arg0) { Actors_RestoreActorIdlePose(arg0); }
+void Actors_ReturnActorToIdle(int actor_id) { Actors_RestoreActorIdlePose(actor_id); }
 
 // decomp: BATTLE.PRG func_8007CEC0 (src/BATTLE/BATTLE.PRG/146C.c:9117)
 void Actors_ReturnAllActorsToIdle(void)
@@ -230,27 +230,27 @@ void Actors_ReturnAllActorsToIdle(void)
 }
 
 // decomp: BATTLE.PRG func_8009CE9C (src/BATTLE/BATTLE.PRG/30DB0.c:1894)
-int Actors_SelectSharedSequenceBank(u_int arg0)
+int Actors_SelectSharedSequenceBank(u_int bank_id)
 {
     int i;
 
-    if (arg0 - 1 >= 3) {
+    if (bank_id - 1 >= 3) {
         return -1;
     }
 
     for (i = 0; i < 17; ++i) {
-        Actors_ActorRecord* temp_s0 = Actors_actorRecords[i];
-        if ((temp_s0 != NULL) && temp_s0->textureRowOffsets[Actors_sharedSequenceBankIndex] != 0xFF
-            && (temp_s0->textureRowOffsets[arg0 - 1] == 0xFF)) {
-            if (temp_s0->textureAnimationSlots[0].currentFrame >= 2) {
-                Actors_UploadActorTextureFrame(temp_s0, 0, 0);
+        Actors_ActorRecord* actor = Actors_actorRecords[i];
+        if ((actor != NULL) && actor->textureRowOffsets[Actors_sharedSequenceBankIndex] != 0xFF
+            && (actor->textureRowOffsets[bank_id - 1] == 0xFF)) {
+            if (actor->textureAnimationSlots[0].currentFrame >= 2) {
+                Actors_UploadActorTextureFrame(actor, 0, 0);
             }
-            if (temp_s0->textureAnimationSlots[1].currentFrame >= 2) {
-                Actors_UploadActorTextureFrame(temp_s0, 1, 0);
+            if (actor->textureAnimationSlots[1].currentFrame >= 2) {
+                Actors_UploadActorTextureFrame(actor, 1, 0);
             }
         }
     }
-    Actors_sharedSequenceBankIndex = arg0 - 1;
+    Actors_sharedSequenceBankIndex = bank_id - 1;
     return 0;
 }
 
@@ -258,139 +258,139 @@ int Actors_SelectSharedSequenceBank(u_int arg0)
 int Actors_SharedSequenceBankId(void) { return Actors_sharedSequenceBankIndex + 1; }
 
 // decomp: BATTLE.PRG func_8009D854 (src/BATTLE/BATTLE.PRG/30DB0.c:2188)
-void Actors_RequestActorAnimationAdvance(int arg0)
+void Actors_RequestActorAnimationAdvance(int actor_id)
 {
-    if (Actors_actorRecords[arg0] != NULL) {
-        Actors_actorRecords[arg0]->advanceRequested = 1;
+    if (Actors_actorRecords[actor_id] != NULL) {
+        Actors_actorRecords[actor_id]->advanceRequested = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_8009D934 (src/BATTLE/BATTLE.PRG/30DB0.c:2219)
-void Actors_SetActorWeaponDrawn(int arg0, int arg1, int arg2)
+void Actors_SetActorWeaponDrawn(int actor_id, int weapon_drawn, int transition_mode)
 {
-    int var_s2;
-    int temp_s1;
+    int blend_frames;
+    int draw_sound_base;
 
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_s0 == NULL) {
+    if (actor == NULL) {
         return;
     }
 
-    if (arg2 == 2) {
+    if (transition_mode == 2) {
         int i;
-        temp_s0->instance.weaponDrawn = arg1;
+        actor->instance.weaponDrawn = weapon_drawn;
 
         for (i = 0; i < 2; ++i) {
-            Actors_WeaponModel* temp_v1 = Actors_weaponModels[arg0 * 2 + i];
-            if (temp_v1 != NULL) {
-                if (arg1 != 0) {
-                    temp_v1->reserved11 = 0x40;
-                    temp_v1->reserved12 = 0x40;
-                    temp_v1->reserved08Bit4 = 1;
+            Actors_WeaponModel* equipment_model = Actors_weaponModels[actor_id * 2 + i];
+            if (equipment_model != NULL) {
+                if (weapon_drawn != 0) {
+                    equipment_model->reserved11 = 0x40;
+                    equipment_model->reserved12 = 0x40;
+                    equipment_model->reserved08Bit4 = 1;
                 } else {
-                    temp_v1->reserved11 = 0;
-                    temp_v1->reserved12 = 0;
-                    temp_v1->reserved08Bit4 = 0;
+                    equipment_model->reserved11 = 0;
+                    equipment_model->reserved12 = 0;
+                    equipment_model->reserved08Bit4 = 0;
                 }
             }
         }
         return;
     }
 
-    var_s2 = 5;
+    blend_frames = 5;
 
-    if (arg2 != 0) {
-        var_s2 = 16;
-        temp_s1 = Actors_drawnWeaponAnimationBases[temp_s0->sequenceModelId];
+    if (transition_mode != 0) {
+        blend_frames = 16;
+        draw_sound_base = Actors_drawnWeaponAnimationBases[actor->sequenceModelId];
     } else {
-        temp_s1 = Actors_sheathedWeaponAnimationBases[temp_s0->sequenceModelId];
+        draw_sound_base = Actors_sheathedWeaponAnimationBases[actor->sequenceModelId];
     }
 
     if (((int (*)())Event_EventPlaybackState)() == 4) {
-        temp_s0->instance.weaponDrawn = arg1;
-        Actors_PlayActorAnimation(arg0, 1, 0, 16);
+        actor->instance.weaponDrawn = weapon_drawn;
+        Actors_PlayActorAnimation(actor_id, 1, 0, 16);
         return;
     }
 
-    if (arg1 != temp_s0->instance.weaponDrawn) {
-        if (arg1 == 0) {
+    if (weapon_drawn != actor->instance.weaponDrawn) {
+        if (weapon_drawn == 0) {
 
-            if (temp_s0->modelId == 0) {
-                Audio_PlayActorSoundPair(temp_s0, temp_s1 + 1, 0);
+            if (actor->modelId == 0) {
+                Audio_PlayActorSoundPair(actor, draw_sound_base + 1, 0);
             }
 
-            Actors_PlayActorAnimation(arg0, (arg2 * 2) + 10, 0, var_s2);
+            Actors_PlayActorAnimation(actor_id, (transition_mode * 2) + 10, 0, blend_frames);
 
-            temp_s0->weaponPoseActive = 1;
-            temp_s0->instance.weaponDrawn = 0;
+            actor->weaponPoseActive = 1;
+            actor->instance.weaponDrawn = 0;
 
-            Actors_QueueActorAnimation(arg0, 1, 16, 0);
+            Actors_QueueActorAnimation(actor_id, 1, 16, 0);
         } else {
 
-            if (temp_s0->modelId == 0) {
-                Audio_PlayActorSoundPair(temp_s0, (int)temp_s1, 0);
+            if (actor->modelId == 0) {
+                Audio_PlayActorSoundPair(actor, (int)draw_sound_base, 0);
             }
 
-            temp_s0->instance.weaponDrawn = arg1;
+            actor->instance.weaponDrawn = weapon_drawn;
 
-            Actors_PlayActorAnimation(arg0, (arg2 * 2) + 9, 0, var_s2);
+            Actors_PlayActorAnimation(actor_id, (transition_mode * 2) + 9, 0, blend_frames);
 
-            temp_s0->weaponPoseActive = 1;
+            actor->weaponPoseActive = 1;
 
-            Actors_QueueActorAnimation(arg0, 1, 16, 0);
+            Actors_QueueActorAnimation(actor_id, 1, 16, 0);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_8009DBDC (src/BATTLE/BATTLE.PRG/30DB0.c:2296)
-void Actors_PlayActorWeaponDrawSound(int arg0, int arg1)
+void Actors_PlayActorWeaponDrawSound(int actor_id, int sound_offset)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
-    if (temp_a0 != NULL) {
-        Audio_PlayActorSoundPair(temp_a0, Actors_drawnWeaponAnimationBases[temp_a0->sequenceModelId] + arg1, 0);
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor != NULL) {
+        Audio_PlayActorSoundPair(actor, Actors_drawnWeaponAnimationBases[actor->sequenceModelId] + sound_offset, 0);
     }
 }
 
 // decomp: BATTLE.PRG func_8009E070 (src/BATTLE/BATTLE.PRG/30DB0.c:2451)
-void Actors_PlayActorActionPose(int arg0, SVECTOR* arg1, int arg2)
+void Actors_PlayActorActionPose(int actor_id, SVECTOR* facing_target, int pose_kind)
 {
-    int var_s1;
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    int animation_id;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    switch (arg2) {
+    switch (pose_kind) {
     case 1:
     case 2:
     case 3:
     case 4:
-        var_s1 = arg2 + 0x5F;
+        animation_id = pose_kind + 0x5F;
         break;
     case 5:
-        var_s1 = 0x1E;
+        animation_id = 0x1E;
         break;
     case 6:
-        var_s1 = 0x1C;
-        if (temp_s0->actionPoseActive << 3) {
-            var_s1 = 1;
+        animation_id = 0x1C;
+        if (actor->actionPoseActive << 3) {
+            animation_id = 1;
         }
 
-        if ((temp_s0->instance.movementMode == 3) || (temp_s0->instance.locomotionState == 2)) {
+        if ((actor->instance.movementMode == 3) || (actor->instance.locomotionState == 2)) {
             return;
         }
         break;
     case 7:
-        var_s1 = 0x1D;
+        animation_id = 0x1D;
         break;
     default:
         return;
     }
 
-    temp_s0->instance.facingDelta = Actors_ActorFacingDeltaToPoint(temp_s0, arg1);
-    temp_s0->instance.turnFrames = 0xA;
-    temp_s0->runFrames = 0;
-    temp_s0->weaponPoseActive = 1;
-    Actors_PlayActorAnimation(arg0, var_s1, 0, 6);
-    temp_s0->queuedAnimation = 0;
+    actor->instance.facingDelta = Actors_ActorFacingDeltaToPoint(actor, facing_target);
+    actor->instance.turnFrames = 0xA;
+    actor->runFrames = 0;
+    actor->weaponPoseActive = 1;
+    Actors_PlayActorAnimation(actor_id, animation_id, 0, 6);
+    actor->queuedAnimation = 0;
 }
 
 // decomp: BATTLE.PRG func_8009E480 (src/BATTLE/BATTLE.PRG/30DB0.c:2619)
@@ -403,58 +403,58 @@ int Actors_IsAshleyTransitionPose(void)
 }
 
 // decomp: BATTLE.PRG func_8009E4B0 (src/BATTLE/BATTLE.PRG/30DB0.c:2627)
-int Actors_IsActorActionAnimationBusy(int arg0)
+int Actors_IsActorActionAnimationBusy(int actor_id)
 {
-    Actors_ActorRecord* temp_a1 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a1 == NULL) {
-        if (Field_gimmickInstances[arg0] == NULL) {
+    if (actor == NULL) {
+        if (Field_gimmickInstances[actor_id] == NULL) {
             return -1;
         }
         return 0;
     }
 
-    if ((temp_a1->instance.actionAnimationState != 0) && (temp_a1->instance.actionAnimationState != 5)
-        && (temp_a1->instance.actionAnimationState != 11)) {
+    if ((actor->instance.actionAnimationState != 0) && (actor->instance.actionAnimationState != 5)
+        && (actor->instance.actionAnimationState != 11)) {
         return 1;
     }
 
-    if (!temp_a1->pose.holdingLastFrame) {
-        int temp_a0 = temp_a1->animationId;
-        if (temp_a0 >= 100) {
-            temp_a0 -= 100;
+    if (!actor->pose.holdingLastFrame) {
+        int base_animation_id = actor->animationId;
+        if (base_animation_id >= 100) {
+            base_animation_id -= 100;
 
-            if ((temp_a0 - 9) < 4U) {
+            if ((base_animation_id - 9) < 4U) {
                 return 1;
             }
 
-            if (temp_a0 == 0x1C) {
+            if (base_animation_id == 0x1C) {
                 return 1;
             }
 
-            if ((temp_a0 - 0x62) < 4U) {
+            if ((base_animation_id - 0x62) < 4U) {
                 return 0;
             }
-            if (temp_a0 >= 0x40) {
+            if (base_animation_id >= 0x40) {
                 return 1;
             }
-            temp_a1 = Actors_actorRecords[arg0];
+            actor = Actors_actorRecords[actor_id];
             return 0;
         }
 
-        if (temp_a0 == 0x1C) {
+        if (base_animation_id == 0x1C) {
             return 1;
         }
-        if (temp_a0 == 0x3B) {
+        if (base_animation_id == 0x3B) {
             return 1;
         }
-        if ((temp_a0 - 0x40) < 7U) {
+        if ((base_animation_id - 0x40) < 7U) {
             return 1;
         }
-        if ((temp_a0 - 0x55) < 7U) {
+        if ((base_animation_id - 0x55) < 7U) {
             return 1;
         }
-        if (temp_a0 == 0x5E) {
+        if (base_animation_id == 0x5E) {
             return 1;
         }
     }
@@ -462,17 +462,17 @@ int Actors_IsActorActionAnimationBusy(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8009E5C4 (src/BATTLE/BATTLE.PRG/30DB0.c:2685)
-void Actors_RestoreActorIdlePose(int arg0)
+void Actors_RestoreActorIdlePose(int actor_id)
 {
-    if (Actors_actorRecords[arg0] == NULL
-        || ((Actors_actorRecords[arg0]->animationId != 0x63)
-            && (Actors_actorRecords[arg0]->animationId != 0xC7))) {
-        Actors_RestoreActorBasePose(arg0, 1);
+    if (Actors_actorRecords[actor_id] == NULL
+        || ((Actors_actorRecords[actor_id]->animationId != 0x63)
+            && (Actors_actorRecords[actor_id]->animationId != 0xC7))) {
+        Actors_RestoreActorBasePose(actor_id, 1);
     }
 }
 
 // decomp: BATTLE.PRG func_8009E614 (src/BATTLE/BATTLE.PRG/30DB0.c:2693)
-void Actors_RestoreActorNeutralPose(int arg0) { Actors_RestoreActorBasePose(arg0, 6); }
+void Actors_RestoreActorNeutralPose(int actor_id) { Actors_RestoreActorBasePose(actor_id, 6); }
 
 // decomp: BATTLE.PRG func_8009E700 (src/BATTLE/BATTLE.PRG/30DB0.c:2735)
 void Actors_RestoreActorBasePose(int actorId, int animation)
@@ -578,138 +578,138 @@ void Actors_RestoreActorBasePose(int actorId, int animation)
 }
 
 // decomp: BATTLE.PRG func_8009F8DC (src/BATTLE/BATTLE.PRG/30DB0.c:3373)
-int Actors_AnimationBattleWindowFrame(int arg0)
+int Actors_AnimationBattleWindowFrame(int actor_id)
 {
-    u_char* temp_s2;
-    int temp_v0;
-    int temp_s1;
-    Actors_AnimationPose* s0 = &Actors_actorRecords[arg0]->pose;
+    u_char* saved_event_script;
+    int battle_window_frame;
+    int saved_event_frame;
+    Actors_AnimationPose* pose = &Actors_actorRecords[actor_id]->pose;
 
-    if (s0->eventScript == NULL) {
+    if (pose->eventScript == NULL) {
         return 0;
     }
-    temp_s1 = s0->nextEventFrame;
-    temp_s2 = s0->eventScript;
-    temp_v0 = Actors_RunAnimationEvents(Actors_actorRecords[arg0], s0, 3);
-    s0->nextEventFrame = temp_s1;
-    s0->eventScript = temp_s2;
-    return temp_v0;
+    saved_event_frame = pose->nextEventFrame;
+    saved_event_script = pose->eventScript;
+    battle_window_frame = Actors_RunAnimationEvents(Actors_actorRecords[actor_id], pose, 3);
+    pose->nextEventFrame = saved_event_frame;
+    pose->eventScript = saved_event_script;
+    return battle_window_frame;
 }
 
 // decomp: BATTLE.PRG func_8009F990 (src/BATTLE/BATTLE.PRG/30DB0.c:3401)
-void Actors_SetActorSoundOverrides(int arg0, Actors_ModelEffectSlot* arg1)
+void Actors_SetActorSoundOverrides(int actor_id, Actors_ModelEffectSlot* sound_override)
 {
     int i;
 
-    if (arg0 == -1) {
+    if (actor_id == -1) {
         for (i = 0; i < 17; ++i) {
-            Actors_ApplyActorSoundOverrides(i, arg1);
+            Actors_ApplyActorSoundOverrides(i, sound_override);
         }
     } else {
-        Actors_ApplyActorSoundOverrides(arg0, arg1);
+        Actors_ApplyActorSoundOverrides(actor_id, sound_override);
     }
 }
 
 // decomp: BATTLE.PRG func_8009F9F4 (src/BATTLE/BATTLE.PRG/30DB0.c:3414)
-void Actors_ApplyActorSoundOverrides(int arg0, Actors_ModelEffectSlot* arg1)
+void Actors_ApplyActorSoundOverrides(int actor_id, Actors_ModelEffectSlot* sound_override)
 {
-    int temp_a2;
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    int override_kind;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_s0 == NULL) {
+    if (actor == NULL) {
         return;
     }
 
-    temp_a2 = arg1->kind;
+    override_kind = sound_override->kind;
 
-    if (temp_a2 == 0) {
-        temp_s0->soundEffect.level = 0;
-        temp_s0->soundEffect.flags = 0;
-    } else if (temp_a2 == 1) {
-        if (arg1->parameter == 0) {
-            temp_s0->soundEffect = *arg1;
+    if (override_kind == 0) {
+        actor->soundEffect.level = 0;
+        actor->soundEffect.flags = 0;
+    } else if (override_kind == 1) {
+        if (sound_override->parameter == 0) {
+            actor->soundEffect = *sound_override;
         } else {
-            int sp10;
-            int sp14;
-            int temp_v1;
+            int pan;
+            int volume;
+            int previous_kind;
 
-            temp_s0->soundEffectTarget = *arg1;
-            temp_s0->soundEffect.parameter = arg1->parameter;
-            temp_v1 = temp_s0->soundEffect.kind;
+            actor->soundEffectTarget = *sound_override;
+            actor->soundEffect.parameter = sound_override->parameter;
+            previous_kind = actor->soundEffect.kind;
 
-            if (temp_v1 == 0) {
-                ((void (*)(int, int*, int*, int))Audio_ActorSoundPanAndVolume)(arg0, &sp10, &sp14, arg0);
-                temp_s0->soundEffect.level = sp10;
-                temp_s0->soundEffect.flags = sp14;
-            } else if (temp_v1 == temp_a2) {
-                ((void (*)(int, int*, int*, int))Audio_ActorSoundPanAndVolume)(arg0, &sp10, &sp14, arg0);
-                if (temp_s0->soundEffect.level == 0) {
-                    temp_s0->soundEffect.level = sp10;
+            if (previous_kind == 0) {
+                ((void (*)(int, int*, int*, int))Audio_ActorSoundPanAndVolume)(actor_id, &pan, &volume, actor_id);
+                actor->soundEffect.level = pan;
+                actor->soundEffect.flags = volume;
+            } else if (previous_kind == override_kind) {
+                ((void (*)(int, int*, int*, int))Audio_ActorSoundPanAndVolume)(actor_id, &pan, &volume, actor_id);
+                if (actor->soundEffect.level == 0) {
+                    actor->soundEffect.level = pan;
                 }
-                if (temp_s0->soundEffect.flags == 0) {
-                    temp_s0->soundEffect.flags = sp14;
+                if (actor->soundEffect.flags == 0) {
+                    actor->soundEffect.flags = volume;
                 }
-            } else if (temp_v1 == 2) {
-                temp_s0->soundEffect.level = 0x80;
-                temp_s0->soundEffect.flags = temp_a2;
+            } else if (previous_kind == 2) {
+                actor->soundEffect.level = 0x80;
+                actor->soundEffect.flags = override_kind;
             }
-            if (arg1->level == 0) {
-                temp_s0->soundEffect.level = 0;
+            if (sound_override->level == 0) {
+                actor->soundEffect.level = 0;
             }
-            if (arg1->flags == 0) {
-                temp_s0->soundEffect.flags = 0;
+            if (sound_override->flags == 0) {
+                actor->soundEffect.flags = 0;
             }
         }
     }
-    temp_s0->soundEffect.kind = arg1->kind;
+    actor->soundEffect.kind = sound_override->kind;
 }
 
 // decomp: BATTLE.PRG func_8009FBD8 (src/BATTLE/BATTLE.PRG/30DB0.c:3480)
-int Actors_SetActorTravelAnimation(int arg0, int arg1)
+int Actors_SetActorTravelAnimation(int actor_id, int animation_id)
 {
     int _[2] __attribute__((unused));
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a0 == NULL) {
+    if (actor == NULL) {
         return -1;
     }
 
-    if (arg1 == -1) {
-        temp_a0->travelAnimation = 0xD;
+    if (animation_id == -1) {
+        actor->travelAnimation = 0xD;
     } else {
-        temp_a0->travelAnimation = arg1;
+        actor->travelAnimation = animation_id;
     }
 
     return 0;
 }
 
 // decomp: BATTLE.PRG func_8009FC20 (src/BATTLE/BATTLE.PRG/30DB0.c:3498)
-int Actors_ActorTravelAnimation(int arg0, int* arg1)
+int Actors_ActorTravelAnimation(int actor_id, int* animation_out)
 {
     int _[2] __attribute__((unused));
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a0 == NULL) {
+    if (actor == NULL) {
         return -1;
     }
 
-    *arg1 = temp_a0->travelAnimation;
+    *animation_out = actor->travelAnimation;
 
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800A01C8 (src/BATTLE/BATTLE.PRG/30DB0.c:3710)
-int Actors_QueueActorAnimation(int arg0, int arg1, int arg2, int arg3)
+int Actors_QueueActorAnimation(int actor_id, int animation_id, int blend_frames, int start_frame)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a0 == NULL) {
+    if (actor == NULL) {
         return -1;
     }
 
-    temp_a0->queuedAnimation = arg1;
-    temp_a0->queuedParameterA = arg2;
-    temp_a0->queuedParameterB = arg3;
+    actor->queuedAnimation = animation_id;
+    actor->queuedParameterA = blend_frames;
+    actor->queuedParameterB = start_frame;
 
     return 0;
 }
@@ -841,90 +841,90 @@ retry:
 }
 
 // decomp: BATTLE.PRG func_800A0618 (src/BATTLE/BATTLE.PRG/30DB0.c:3850)
-int Actors_PlayActorAnimationAtFrame(int arg0, int arg1, int arg2, int arg3)
+int Actors_PlayActorAnimationAtFrame(int actor_id, int animation_id, int blend_frames, int start_frame)
 {
-    Actors_ActorRecord* temp_s0;
+    Actors_ActorRecord* actor;
 
-    int v0 = Actors_PlayActorAnimation(arg0, arg1, 0, arg2);
+    int play_result = Actors_PlayActorAnimation(actor_id, animation_id, 0, blend_frames);
 
-    if (v0 < 0) {
-        return v0;
+    if (play_result < 0) {
+        return play_result;
     }
 
-    if (arg3 == 0) {
+    if (start_frame == 0) {
         return 0;
     }
 
-    arg3 -= State_tickSpeed / 2;
-    temp_s0 = Actors_actorRecords[arg0];
+    start_frame -= State_tickSpeed / 2;
+    actor = Actors_actorRecords[actor_id];
 
-    if (arg3 > 0) {
-        temp_s0->framesPerStep = arg3;
-        Actors_AdvanceSkeletalAnimation(temp_s0, &temp_s0->pose, 1);
+    if (start_frame > 0) {
+        actor->framesPerStep = start_frame;
+        Actors_AdvanceSkeletalAnimation(actor, &actor->pose, 1);
     }
 
-    temp_s0->framesPerStep = 1;
+    actor->framesPerStep = 1;
 
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800A0870 (src/BATTLE/BATTLE.PRG/30DB0.c:3948)
-void Actors_SetActorTransitionMode(int arg0) { Actors_reservedControlByte = arg0; }
+void Actors_SetActorTransitionMode(int control_byte) { Actors_reservedControlByte = control_byte; }
 
 // decomp: BATTLE.PRG func_800A09D8 (src/BATTLE/BATTLE.PRG/30DB0.c:3987)
-void Actors_SetActorAnimationLocked(int arg0, int arg1)
+void Actors_SetActorAnimationLocked(int actor_id, int locked)
 {
-    if (Actors_actorRecords[arg0] != NULL) {
-        Actors_actorRecords[arg0]->animationLocked = arg1;
+    if (Actors_actorRecords[actor_id] != NULL) {
+        Actors_actorRecords[actor_id]->animationLocked = locked;
     }
 }
 
 // decomp: BATTLE.PRG func_800A249C (src/BATTLE/BATTLE.PRG/38C1C.c:578)
-void Actors_PlayActorTurnAnimation(int arg0, int arg1)
+void Actors_PlayActorTurnAnimation(int actor_id, int target_facing)
 {
-    int var_a2;
-    int var_a1;
-    int v1;
-    Actors_ActorRecord* temp_a3 = Actors_actorRecords[arg0];
+    int turn_animation_id;
+    int facing_delta;
+    int current_animation_id;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a3->instance.motionLocked) {
+    if (actor->instance.motionLocked) {
         return;
     }
 
-    var_a1 = arg1 - temp_a3->instance.facing;
+    facing_delta = target_facing - actor->instance.facing;
 
-    if (var_a1 > 0x800) {
-        var_a1 -= 0x1000;
+    if (facing_delta > 0x800) {
+        facing_delta -= 0x1000;
     }
 
-    if (var_a1 < -0x800) {
-        var_a1 += 0x1000;
+    if (facing_delta < -0x800) {
+        facing_delta += 0x1000;
     }
 
-    if (var_a1 == 0) {
+    if (facing_delta == 0) {
         return;
     }
 
-    temp_a3->turnState.mode = 6;
+    actor->turnState.mode = 6;
 
-    v1 = temp_a3->animationId;
+    current_animation_id = actor->animationId;
 
-    if ((v1 == 0x76) || (temp_a3->animationId == 0x75) || temp_a3->instance.supportLayer) {
+    if ((current_animation_id == 0x76) || (actor->animationId == 0x75) || actor->instance.supportLayer) {
         return;
     }
 
-    var_a2 = 0x1F;
+    turn_animation_id = 0x1F;
 
-    if (!(temp_a3->instance.isJumping)) {
+    if (!(actor->instance.isJumping)) {
 
-        var_a2 = 0x11;
+        turn_animation_id = 0x11;
 
-        if (var_a1 < 0) {
-            var_a2 = 0x12;
+        if (facing_delta < 0) {
+            turn_animation_id = 0x12;
         }
     }
 
-    ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, var_a2, 0, 0xA);
+    ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, turn_animation_id, 0, 0xA);
 }
 
 // decomp: BATTLE.PRG func_800A6AA0 (src/BATTLE/BATTLE.PRG/3A1A0.c:2032)
@@ -1072,70 +1072,70 @@ int Actors_UpdateActorLocomotionAnimation(Actors_ActorRecord* actor, int speed, 
 }
 
 // decomp: BATTLE.PRG func_800AC440 (src/BATTLE/BATTLE.PRG/40564.c:2199)
-void Actors_SetActorBonePoseLock(Actors_ActorRecord* arg0, int arg1, int arg2)
+void Actors_SetActorBonePoseLock(Actors_ActorRecord* actor, int bone_index, int lock_pose)
 {
-    int sp10;
+    int bone_length;
     int i;
-    Actors_ShpBone* temp_s2 = &arg0->instance.model->bones[arg1];
+    Actors_ShpBone* bone = &actor->instance.model->bones[bone_index];
 
     for (i = 0; i < 2; ++i) {
-        if (arg2 == 0) {
-            if (arg0->lockedBones[i] == arg1) {
-                arg0->lockedBones[i] = 0;
-                temp_s2->poseLockSlot = 0;
+        if (lock_pose == 0) {
+            if (actor->lockedBones[i] == bone_index) {
+                actor->lockedBones[i] = 0;
+                bone->poseLockSlot = 0;
                 return;
             }
-        } else if (arg0->lockedBones[i] == 0) {
-            ((void (*)(int, int, void*, int*))Actors_ActorAnchorMatrix)(arg0->instance.slot, arg1, &arg0->lockedBoneMatrices[i], &sp10);
-            temp_s2->poseLockSlot = i + 1;
-            arg0->lockedBones[i] = arg1;
+        } else if (actor->lockedBones[i] == 0) {
+            ((void (*)(int, int, void*, int*))Actors_ActorAnchorMatrix)(actor->instance.slot, bone_index, &actor->lockedBoneMatrices[i], &bone_length);
+            bone->poseLockSlot = i + 1;
+            actor->lockedBones[i] = bone_index;
             return;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800AC500 (src/BATTLE/BATTLE.PRG/40564.c:2221)
-void Actors_ClearActorBonePoseLocks(Actors_ActorRecord* arg0)
+void Actors_ClearActorBonePoseLocks(Actors_ActorRecord* actor)
 {
     int i;
 
-    arg0->lockedBones[0] = 0;
-    arg0->lockedBones[1] = 0;
+    actor->lockedBones[0] = 0;
+    actor->lockedBones[1] = 0;
 
-    for (i = 0; i < arg0->instance.boneCount; ++i) {
-        arg0->instance.model->bones[i].poseLockSlot = 0;
+    for (i = 0; i < actor->instance.boneCount; ++i) {
+        actor->instance.model->bones[i].poseLockSlot = 0;
     }
 }
 
 // decomp: BATTLE.PRG func_800ACFA0 (src/BATTLE/BATTLE.PRG/40564.c:2561)
-void Actors_DecodeInitialPoseVector(short* arg0, u_char* arg1, int arg2)
+void Actors_DecodeInitialPoseVector(short* pose_key, u_char* encoded_vector, int base_animation_index)
 {
-    int a3;
-    a3 = arg1[0];
-    a3 <<= 8;
-    a3 |= arg1[1];
-    a3 *= 2;
-    arg0[0] = a3;
+    int component_value;
+    component_value = encoded_vector[0];
+    component_value <<= 8;
+    component_value |= encoded_vector[1];
+    component_value *= 2;
+    pose_key[0] = component_value;
 
-    a3 = arg1[2];
-    a3 <<= 8;
-    a3 |= arg1[3];
-    a3 *= 2;
-    arg0[1] = a3;
+    component_value = encoded_vector[2];
+    component_value <<= 8;
+    component_value |= encoded_vector[3];
+    component_value *= 2;
+    pose_key[1] = component_value;
 
-    a3 = arg1[4];
-    a3 <<= 8;
-    a3 |= arg1[5];
-    a3 *= 2;
-    arg0[2] = a3;
+    component_value = encoded_vector[4];
+    component_value <<= 8;
+    component_value |= encoded_vector[5];
+    component_value *= 2;
+    pose_key[2] = component_value;
 
-    arg0[3] = 6;
+    pose_key[3] = 6;
 
-    if (arg2 != 0xFF) {
-        arg0[3] = 0;
+    if (base_animation_index != 0xFF) {
+        pose_key[3] = 0;
     }
 
-    arg0[339] = 0;
+    pose_key[339] = 0;
 }
 
 // decomp: BATTLE.PRG func_800AD008 (src/BATTLE/BATTLE.PRG/40564.c:2623)
@@ -1236,18 +1236,18 @@ void Actors_InitializeActorAnimationPose(Actors_ActorRecord* actor, Actors_Anima
 }
 
 // decomp: BATTLE.PRG func_800AD494 (src/BATTLE/BATTLE.PRG/40564.c:2719)
-intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
+intptr_t Actors_FindActorAnimationHeader(void* actor_context, int animation_id, u_short** header_out)
 {
-    Actors_ActorRecord* actor = arg0;
+    Actors_ActorRecord* actor = actor_context;
     Actors_SeqAnimationBank* p;
     int idx;
 
-    *arg2 = NULL;
+    *header_out = NULL;
 
-    if (arg1 == 0) {
+    if (animation_id == 0) {
         p = actor->ownedSequence;
         idx = 0;
-    } else if (arg1 == 0xFF) {
+    } else if (animation_id == 0xFF) {
         p = actor->sharedSequences[3];
         if ((actor->instance.slot == 0) || (actor->modelId == 2)) {
             idx = (*(u_char (*))&Battle_specialActionPitch);
@@ -1261,7 +1261,7 @@ intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
         if (idx >= actor->battleAnimationCount) {
             return 0;
         }
-    } else if (arg1 == 0xFE) {
+    } else if (animation_id == 0xFE) {
         p = actor->sharedSequences[3];
         if (actor->sequenceModelId == 0) {
             return 0;
@@ -1271,21 +1271,21 @@ intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
         if (idx >= actor->battleAnimationCount) {
             return 0;
         }
-    } else if (arg1 >= 0xDC) {
+    } else if (animation_id >= 0xDC) {
         p = actor->sharedSequences[Actors_sharedSequenceBankIndex];
-        idx = arg1 - 0xDC;
-    } else if (arg1 >= 0xCA) {
+        idx = animation_id - 0xDC;
+    } else if (animation_id >= 0xCA) {
         p = Actors_sequenceWorkBuffer;
-        idx = arg1 - 0xCA;
-    } else if (arg1 >= 100) {
+        idx = animation_id - 0xCA;
+    } else if (animation_id >= 100) {
         p = actor->battleSequence;
-        idx = arg1 - 100;
+        idx = animation_id - 100;
         if (idx >= actor->commonAnimationCount) {
             return 0;
         }
     } else {
         p = actor->commonSequence;
-        idx = arg1;
+        idx = animation_id;
         if (idx >= actor->sequenceFlags) {
             return 0;
         }
@@ -1299,9 +1299,9 @@ intptr_t Actors_FindActorAnimationHeader(void* arg0, int arg1, u_short** arg2)
     Actors_lastResolvedSequenceIndex = idx;
 
     if (idx == 0xFF) {
-        *arg2 = NULL;
+        *header_out = NULL;
     } else {
-        *arg2 = &p->headers[(((actor->instance.boneCount * 4) + 10) * idx) >> 1];
+        *header_out = &p->headers[(((actor->instance.boneCount * 4) + 10) * idx) >> 1];
     }
     return (intptr_t)p;
 }
@@ -1749,40 +1749,40 @@ check:
 void Actors_IgnoreAnimationEvent(void) { }
 
 // decomp: BATTLE.PRG func_800AE47C (src/BATTLE/BATTLE.PRG/44F14.c:610)
-int Actors_RestartActorAnimationEvents(Actors_ActorRecord* arg0)
+int Actors_RestartActorAnimationEvents(Actors_ActorRecord* actor)
 {
-    u_short* sp10;
-    int var_v1;
-    void* var_a3;
+    u_short* animation_header;
+    int next_event_frame;
+    void* event_script;
 
-    Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(arg0, arg0->animationId, &sp10);
-    u_char* temp_a3;
-    if (v0 == NULL || sp10 == NULL || (sp10[2] == 0 && arg0->poseOverrideActive)) {
+    Actors_SeqAnimationBank* animation_bank = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(actor, actor->animationId, &animation_header);
+    u_char* event_data;
+    if (animation_bank == NULL || animation_header == NULL || (animation_header[2] == 0 && actor->poseOverrideActive)) {
         Core_Errorf("actors.sequence", "cannot unwind actor=%u animation=%u: unavailable events",
-            (unsigned)arg0->instance.slot, (unsigned)arg0->animationId);
+            (unsigned)actor->instance.slot, (unsigned)actor->animationId);
         return -1;
     }
-    if (sp10[2] == 0) {
+    if (animation_header[2] == 0) {
         return 0;
     }
-    temp_a3 = VS_ONDISC(v0, animationData, u_char*);
-    temp_a3 += sp10[2];
+    event_data = VS_ONDISC(animation_bank, animationData, u_char*);
+    event_data += animation_header[2];
 
-    var_v1 = temp_a3[0];
+    next_event_frame = event_data[0];
 
-    if (var_v1 == 0xFF) {
-        var_a3 = temp_a3 + 2;
-        var_v1 = temp_a3[1] + 0xFF;
+    if (next_event_frame == 0xFF) {
+        event_script = event_data + 2;
+        next_event_frame = event_data[1] + 0xFF;
     } else {
-        var_a3 = temp_a3 + 1;
+        event_script = event_data + 1;
     }
 
-    arg0->blendPose.nextEventFrame = var_v1;
-    arg0->blendPose.eventScript = var_a3;
+    actor->blendPose.nextEventFrame = next_event_frame;
+    actor->blendPose.eventScript = event_script;
 
     /* The decoder reads state->unk544 itself; this caller passes an ignored fourth
      * argument. */
-    ((void (*)())Actors_RunAnimationEvents)(arg0, &arg0->blendPose, 2, var_a3);
+    ((void (*)())Actors_RunAnimationEvents)(actor, &actor->blendPose, 2, event_script);
     return 0;
 }
 
@@ -1833,50 +1833,50 @@ void Actors_BlendActorPoseHalfway(Actors_AnimationPose* dst, Actors_AnimationPos
 }
 
 // decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1146)
-void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* arg0)
+void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* actor)
 {
-    Actors_AdvanceSkeletalAnimation(arg0, &arg0->pose, 0);
+    Actors_AdvanceSkeletalAnimation(actor, &actor->pose, 0);
 
-    if (arg0->blendFrame != 0) {
-        int v5b2;
+    if (actor->blendFrame != 0) {
+        int frames_per_step;
 
-        if (arg0->blendFrame == 1) {
-            Actors_AlignPoseRotationBranches(arg0->blendPose.boneKeys, arg0->pose.boneKeys, arg0->instance.boneCount);
+        if (actor->blendFrame == 1) {
+            Actors_AlignPoseRotationBranches(actor->blendPose.boneKeys, actor->pose.boneKeys, actor->instance.boneCount);
         }
 
-        v5b2 = arg0->framesPerStep;
+        frames_per_step = actor->framesPerStep;
 
-        if (v5b2 != 1) {
-            int next = arg0->blendFrame + 0xFF;
-            arg0->blendFrame = v5b2 + next;
+        if (frames_per_step != 1) {
+            int next = actor->blendFrame + 0xFF;
+            actor->blendFrame = frames_per_step + next;
 
-            if (arg0->blendFrame >= arg0->blendFrames) {
-                arg0->blendFrame = 0;
-                arg0->blendFrames = 0;
+            if (actor->blendFrame >= actor->blendFrames) {
+                actor->blendFrame = 0;
+                actor->blendFrames = 0;
                 goto tail;
             }
         }
 
         Actors_BlendActorPose(
-            &arg0->blendPose, &arg0->pose, arg0->instance.boneCount, arg0->blendFrame, arg0->blendFrames);
+            &actor->blendPose, &actor->pose, actor->instance.boneCount, actor->blendFrame, actor->blendFrames);
 
-        arg0->blendPose.holdingLastFrame = arg0->pose.holdingLastFrame;
-        arg0->blendPose.reachedEnd = arg0->pose.reachedEnd;
+        actor->blendPose.holdingLastFrame = actor->pose.holdingLastFrame;
+        actor->blendPose.reachedEnd = actor->pose.reachedEnd;
 
-        Actors_UpdateMotionAndLookAt(arg0, 0);
+        Actors_UpdateMotionAndLookAt(actor, 0);
 
-        ++arg0->blendFrame;
+        ++actor->blendFrame;
 
-        if (arg0->blendFrame >= arg0->blendFrames) {
-            arg0->blendFrame = 0;
-            arg0->blendFrames = 0;
+        if (actor->blendFrame >= actor->blendFrames) {
+            actor->blendFrame = 0;
+            actor->blendFrames = 0;
         }
         return;
     }
 
 tail:
-    Core_Memory_CopyAlignedWords(&arg0->blendPose, &arg0->pose, sizeof(arg0->blendPose));
-    Actors_UpdateMotionAndLookAt(arg0, 0);
+    Core_Memory_CopyAlignedWords(&actor->blendPose, &actor->pose, sizeof(actor->blendPose));
+    Actors_UpdateMotionAndLookAt(actor, 0);
 }
 
 // decomp: BATTLE.PRG func_800AF844 (src/BATTLE/BATTLE.PRG/44F14.c:1192)
@@ -1914,7 +1914,7 @@ void Actors_AlignPoseRotationBranches(SVECTOR* dst, SVECTOR* src, int count)
 }
 
 // decomp: BATTLE.PRG func_800B002C (src/BATTLE/BATTLE.PRG/44F14.c:1486)
-void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int arg1)
+void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int skip_motion_update)
 {
     Render_ModelScratchpad* scratch = Render_ModelWorkspace();
     int dx;
@@ -1938,7 +1938,7 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int arg1)
     scratch->rootOffset.vy = scratch->rootOffset.vy * actor->scale / ONE;
     scratch->rootOffset.vz = scratch->rootOffset.vz * actor->scale / ONE;
 
-    if (arg1 == 0) {
+    if (skip_motion_update == 0) {
         if (actor->scaleFrames != 0) {
             dx = actor->instance.scaleDelta.vx / actor->scaleFrames;
             actor->instance.scaleDelta.vx -= dx;

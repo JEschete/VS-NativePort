@@ -102,21 +102,21 @@ u_char Actors_pushedGimmickIndex;
 // decomp: BATTLE.PRG func_8006E7F0 (src/BATTLE/BATTLE.PRG/146C.c:2837)
 int Actors_UpdateAshleyMovementInput(void)
 {
-    Actors_PlacementBuffer unksp10;
-    int temp_a0;
-    int temp_a1;
-    int temp_s1;
-    Battle_ActorStats* temp_s0;
+    Actors_PlacementBuffer placement;
+    int stick_y;
+    int stick_x;
+    int state_flags;
+    Battle_ActorStats* stats;
 
-    Actors_ActorPlacement(0, &unksp10);
-    Field_UpdateCameraTileConstraint(0, (Actors_TileTarget*)&unksp10);
-    temp_s0 = Battle_characterState->stats;
-    temp_s1 = Actors_ActorStateFlags(0);
+    Actors_ActorPlacement(0, &placement);
+    Field_UpdateCameraTileConstraint(0, (Actors_TileTarget*)&placement);
+    stats = Battle_characterState->stats;
+    state_flags = Actors_ActorStateFlags(0);
 
     if (((Field_screenTransitionStep - 1) < 2U)
         || (Field_screenTransitionStep == 4)) {
         if (Field_pendingDestinationDoor.reserved06Bit15) {
-            Actors_SetDirectMovement(0, Field_pendingDestinationDoor.entryElevation << 10, temp_s0->walkSpeed * ONE / 2);
+            Actors_SetDirectMovement(0, Field_pendingDestinationDoor.entryElevation << 10, stats->walkSpeed * ONE / 2);
         } else {
             Actors_SetDirectMovement(0, 0, 0);
         }
@@ -129,30 +129,30 @@ int Actors_UpdateAshleyMovementInput(void)
 
         if (Input_controllerPorts->controllerType == 7) {
 
-            temp_a1 = Input_controllerPorts->rightStickX - ONE / 32;
-            temp_a0 = Input_controllerPorts->rightStickY - ONE / 32;
+            stick_x = Input_controllerPorts->rightStickX - ONE / 32;
+            stick_y = Input_controllerPorts->rightStickY - ONE / 32;
 
-            if (((Input_controllerPorts->rightStickX - ONE / 64) > ONE / 32u) || (temp_a0 < -ONE / 64)
-                || (temp_a0 > ONE / 64)) {
+            if (((Input_controllerPorts->rightStickX - ONE / 64) > ONE / 32u) || (stick_y < -ONE / 64)
+                || (stick_y > ONE / 64)) {
 
-                if (temp_a1 > ONE / 64) {
-                    temp_a1 -= ONE / 64;
-                } else if (temp_a1 < -ONE / 64) {
-                    temp_a1 += ONE / 64;
+                if (stick_x > ONE / 64) {
+                    stick_x -= ONE / 64;
+                } else if (stick_x < -ONE / 64) {
+                    stick_x += ONE / 64;
                 } else {
-                    temp_a1 = 0;
+                    stick_x = 0;
                 }
 
-                if (temp_a0 > ONE / 64) {
-                    temp_a0 = temp_a0 - ONE / 64;
-                } else if (temp_a0 < -ONE / 64) {
-                    temp_a0 = temp_a0 + ONE / 64;
+                if (stick_y > ONE / 64) {
+                    stick_y = stick_y - ONE / 64;
+                } else if (stick_y < -ONE / 64) {
+                    stick_y = stick_y + ONE / 64;
                 } else {
-                    temp_a0 = 0;
+                    stick_y = 0;
                 }
                 Actors_ashleyMoveInput[3] = 0;
-                Actors_ashleyMoveInput[1] = -temp_a1;
-                Actors_ashleyMoveInput[3] = temp_a0;
+                Actors_ashleyMoveInput[1] = -stick_x;
+                Actors_ashleyMoveInput[3] = stick_y;
             }
         }
 
@@ -182,40 +182,40 @@ int Actors_UpdateAshleyMovementInput(void)
         }
 
         if ((Actors_ashleyMoveInput[1] != 0) || (Actors_ashleyMoveInput[3] != 0)) {
-            if (temp_s1 & 0x80000) {
+            if (state_flags & 0x80000) {
                 Actors_SetDirectMovement(0,
                     (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
-                    temp_s0->walkSpeed * ONE);
+                    stats->walkSpeed * ONE);
             } else if (Input_previousButtons & PADR2) {
                 if (Input_buttonsPressed.allButtons & PADRleft) {
                     Actors_BeginActorJumpMovement(0,
                         (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                             + Field_sphericalCamera.values.yaw + ONE / 2)
                             & 0xFFF,
-                        temp_s0->walkSpeed * ONE);
+                        stats->walkSpeed * ONE);
                 } else {
                     Actors_SetDirectMovement(0,
                         (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                             + Field_sphericalCamera.values.yaw + ONE / 2)
                             & 0xFFF,
-                        temp_s0->walkSpeed * ONE);
+                        stats->walkSpeed * ONE);
                 }
             } else if (Input_buttonsPressed.allButtons & PADRleft) {
                 Actors_BeginActorJumpMovement(0,
                     (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
-                    temp_s0->runSpeed * ONE);
+                    stats->runSpeed * ONE);
             } else {
                 Actors_SetDirectMovement(0,
                     (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
-                    temp_s0->runSpeed * ONE);
+                    stats->runSpeed * ONE);
             }
-        } else if (!(temp_s1 & 0x80000) && (Input_buttonsPressed.allButtons & PADRleft)) {
+        } else if (!(state_flags & 0x80000) && (Input_buttonsPressed.allButtons & PADRleft)) {
             Actors_BeginActorJumpMovement(0,
                 (Core_Gte_Atan2(0, 0) + Field_sphericalCamera.values.yaw + ONE / 2)
                     & 0xFFF,
@@ -229,54 +229,54 @@ int Actors_UpdateAshleyMovementInput(void)
 }
 
 // decomp: BATTLE.PRG func_800753F8 (src/BATTLE/BATTLE.PRG/146C.c:5577)
-void Actors_ConsumeActorMovementOffset(Battle_Actor* arg0, SVECTOR* arg1)
+void Actors_ConsumeActorMovementOffset(Battle_Actor* actor, SVECTOR* offset_out)
 {
-    if (arg0->commandArg0 < 0) {
-        if (arg0->commandArg0 >= -0x7FFF) {
-            arg1->vx = arg0->commandArg0 / ONE;
-            arg0->commandArg0 = 0;
+    if (actor->commandArg0 < 0) {
+        if (actor->commandArg0 >= -0x7FFF) {
+            offset_out->vx = actor->commandArg0 / ONE;
+            actor->commandArg0 = 0;
         } else {
-            arg1->vx = -8;
-            arg0->commandArg0 += 0x8000;
+            offset_out->vx = -8;
+            actor->commandArg0 += 0x8000;
         }
-    } else if (arg0->commandArg0 <= 0x7FFF) {
-        arg1->vx = arg0->commandArg0 / ONE;
-        arg0->commandArg0 = 0;
+    } else if (actor->commandArg0 <= 0x7FFF) {
+        offset_out->vx = actor->commandArg0 / ONE;
+        actor->commandArg0 = 0;
     } else {
-        arg1->vx = 8;
-        arg0->commandArg0 -= 0x8000;
+        offset_out->vx = 8;
+        actor->commandArg0 -= 0x8000;
     }
 
-    if (arg0->commandArg1.word < 0) {
-        if (arg0->commandArg1.word >= -0x7FFF) {
-            arg1->vz = arg0->commandArg1.word / ONE;
-            arg0->commandArg1.word = 0;
+    if (actor->commandArg1.word < 0) {
+        if (actor->commandArg1.word >= -0x7FFF) {
+            offset_out->vz = actor->commandArg1.word / ONE;
+            actor->commandArg1.word = 0;
         } else {
-            arg1->vz = -8;
-            arg0->commandArg1.word += 0x8000;
+            offset_out->vz = -8;
+            actor->commandArg1.word += 0x8000;
         }
-    } else if (arg0->commandArg1.word <= 0x7FFF) {
-        arg1->vz = arg0->commandArg1.word / ONE;
-        arg0->commandArg1.word = 0;
+    } else if (actor->commandArg1.word <= 0x7FFF) {
+        offset_out->vz = actor->commandArg1.word / ONE;
+        actor->commandArg1.word = 0;
     } else {
-        arg1->vz = 8;
-        arg0->commandArg1.word -= 0x8000;
+        offset_out->vz = 8;
+        actor->commandArg1.word -= 0x8000;
     }
 
-    if (arg0->commandArg2 < 0) {
-        if (arg0->commandArg2 >= -0x7FFF) {
-            arg1->vy = arg0->commandArg2 / ONE;
-            arg0->commandArg2 = 0;
+    if (actor->commandArg2 < 0) {
+        if (actor->commandArg2 >= -0x7FFF) {
+            offset_out->vy = actor->commandArg2 / ONE;
+            actor->commandArg2 = 0;
         } else {
-            arg1->vy = -8;
-            arg0->commandArg2 += 0x8000;
+            offset_out->vy = -8;
+            actor->commandArg2 += 0x8000;
         }
-    } else if (arg0->commandArg2 <= 0x7FFF) {
-        arg1->vy = arg0->commandArg2 / ONE;
-        arg0->commandArg2 = 0;
+    } else if (actor->commandArg2 <= 0x7FFF) {
+        offset_out->vy = actor->commandArg2 / ONE;
+        actor->commandArg2 = 0;
     } else {
-        arg1->vy = 8;
-        arg0->commandArg2 -= 0x8000;
+        offset_out->vy = 8;
+        actor->commandArg2 -= 0x8000;
     }
 }
 
@@ -612,148 +612,148 @@ int Actors_ExecuteQueuedActorCommands(void)
 }
 
 // decomp: BATTLE.PRG func_8007CFF8 (src/BATTLE/BATTLE.PRG/146C.c:9163)
-void Actors_BeginScriptedActorPath(int arg0, SVECTOR* arg1)
+void Actors_BeginScriptedActorPath(int actor_id, SVECTOR* target_position)
 {
-    Field_SetActorCollisionBypass(arg0, 2);
-    Battle_Ai_SetActorNavigationOverride(arg0, arg1->vx, arg1->vz);
+    Field_SetActorCollisionBypass(actor_id, 2);
+    Battle_Ai_SetActorNavigationOverride(actor_id, target_position->vx, target_position->vz);
 }
 
 // decomp: BATTLE.PRG func_8007D03C (src/BATTLE/BATTLE.PRG/146C.c:9169)
-int Actors_IsScriptedActorPathFinished(int arg0)
+int Actors_IsScriptedActorPathFinished(int actor_id)
 {
-    int temp_v0 = Battle_Ai_ActorNavigationOverrideStatus(arg0);
-    if (temp_v0 == 0) {
-        Field_SetActorCollisionBypass(arg0, Field_ActorCollisionBypass(arg0) & ~2);
+    int navigation_status = Battle_Ai_ActorNavigationOverrideStatus(actor_id);
+    if (navigation_status == 0) {
+        Field_SetActorCollisionBypass(actor_id, Field_ActorCollisionBypass(actor_id) & ~2);
         return 1;
     }
-    return temp_v0 == 2;
+    return navigation_status == 2;
 }
 
 // decomp: BATTLE.PRG func_8007D260 (src/BATTLE/BATTLE.PRG/146C.c:9232)
-void Actors_ResetActorMovement(int arg0)
+void Actors_ResetActorMovement(int actor_id)
 {
-    Battle_Actor* temp_a1 = Battle_actors[arg0];
-    if ((temp_a1 != NULL) && (temp_a1->commandState != 0x20)) {
-        temp_a1->commandState = 0;
+    Battle_Actor* actor = Battle_actors[actor_id];
+    if ((actor != NULL) && (actor->commandState != 0x20)) {
+        actor->commandState = 0;
     }
-    Actors_StopActorMotion(arg0);
+    Actors_StopActorMotion(actor_id);
 }
 
 // decomp: BATTLE.PRG func_8009DC38 (src/BATTLE/BATTLE.PRG/30DB0.c:2304)
-void Actors_StopActorMotion(int arg0)
+void Actors_StopActorMotion(int actor_id)
 {
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
-    if (temp_s0 != NULL) {
-        Actors_ClearActorMovementModes(arg0);
-        temp_s0->instance.currentAnimation = 0;
-        temp_s0->instance.turnFrames = 0;
-        *(int*)&temp_s0->instance.rootMotion = 0;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor != NULL) {
+        Actors_ClearActorMovementModes(actor_id);
+        actor->instance.currentAnimation = 0;
+        actor->instance.turnFrames = 0;
+        *(int*)&actor->instance.rootMotion = 0;
     }
 }
 
 // decomp: BATTLE.PRG func_8009DC8C (src/BATTLE/BATTLE.PRG/30DB0.c:2315)
-void Actors_ClearActorMovementModes(int arg0)
+void Actors_ClearActorMovementModes(int actor_id)
 {
-    Actors_ActorRecord* temp_a3 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a3 == NULL) {
+    if (actor == NULL) {
         return;
     }
 
-    temp_a3->instance.jumpCountdown = 0;
-    temp_a3->instance.movementMode = 0;
-    temp_a3->weaponPoseActive = 0;
-    temp_a3->instance.poseState = 0;
-    temp_a3->instance.locomotionState = 0;
-    temp_a3->instance.movementPending = 0;
+    actor->instance.jumpCountdown = 0;
+    actor->instance.movementMode = 0;
+    actor->weaponPoseActive = 0;
+    actor->instance.poseState = 0;
+    actor->instance.locomotionState = 0;
+    actor->instance.movementPending = 0;
 }
 
 // decomp: BATTLE.PRG func_8009E180 (src/BATTLE/BATTLE.PRG/30DB0.c:2491)
-int Actors_ActorFacingDeltaToPoint(Actors_ActorRecord* arg0, SVECTOR* arg1)
+int Actors_ActorFacingDeltaToPoint(Actors_ActorRecord* actor, SVECTOR* target_point)
 {
-    int temp_a0;
-    int temp_a1;
-    int var_v1;
-    int var_v0;
+    int delta_z;
+    int delta_x;
+    int heading_delta_work;
+    int wrapped_facing_delta;
 
-    if (arg1 == NULL) {
+    if (target_point == NULL) {
         return 0;
     }
 
-    temp_a1 = arg1->vx - arg0->instance.position.vx;
-    temp_a0 = arg1->vz - arg0->instance.position.vz;
+    delta_x = target_point->vx - actor->instance.position.vx;
+    delta_z = target_point->vz - actor->instance.position.vz;
 
-    if ((temp_a1 == 0) && (temp_a0 == 0)) {
-        var_v1 = arg0->instance.facing;
+    if ((delta_x == 0) && (delta_z == 0)) {
+        heading_delta_work = actor->instance.facing;
     } else {
-        var_v1 = (0xC00 - Core_Gte_Atan2(temp_a0, temp_a1)) & 0xFFF;
+        heading_delta_work = (0xC00 - Core_Gte_Atan2(delta_z, delta_x)) & 0xFFF;
     }
 
-    var_v1 -= arg0->instance.facing;
+    heading_delta_work -= actor->instance.facing;
 
-    if (var_v1 >= 0x801) {
-        var_v0 = var_v1 - 0x1000;
+    if (heading_delta_work >= 0x801) {
+        wrapped_facing_delta = heading_delta_work - 0x1000;
     } else {
-        var_v0 = var_v1;
-        if (var_v1 < -0x800) {
-            var_v0 = var_v1 + 0x1000;
+        wrapped_facing_delta = heading_delta_work;
+        if (heading_delta_work < -0x800) {
+            wrapped_facing_delta = heading_delta_work + 0x1000;
         }
     }
 
-    return var_v0;
+    return wrapped_facing_delta;
 }
 
 // decomp: BATTLE.PRG func_800A0ABC (src/BATTLE/BATTLE.PRG/30DB0.c:4015)
-void Actors_ResetActorRunMomentum(int arg0)
+void Actors_ResetActorRunMomentum(int actor_id)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
-    if (temp_a0 != NULL) {
-        temp_a0->momentumDistance = 0;
-        temp_a0->runFrames = 0;
-        temp_a0->isRunning = 0;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor != NULL) {
+        actor->momentumDistance = 0;
+        actor->runFrames = 0;
+        actor->isRunning = 0;
     }
 }
 
 // decomp: BATTLE.PRG func_800A0AFC (src/BATTLE/BATTLE.PRG/30DB0.c:4025)
-void Actors_SetActorWalkRunSpeeds(int arg0, int arg1, int arg2)
+void Actors_SetActorWalkRunSpeeds(int actor_id, int walk_speed_fixed, int run_speed_fixed)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
-    if (temp_a0 != NULL) {
-        temp_a0->walkSpeed = arg1 / ONE;
-        temp_a0->runSpeed = arg2 / ONE;
-        if (arg1 >= arg2) {
-            temp_a0->runSpeed = 0xFF;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor != NULL) {
+        actor->walkSpeed = walk_speed_fixed / ONE;
+        actor->runSpeed = run_speed_fixed / ONE;
+        if (walk_speed_fixed >= run_speed_fixed) {
+            actor->runSpeed = 0xFF;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800A0B5C (src/BATTLE/BATTLE.PRG/30DB0.c:4037)
-void Actors_SetActorTravelStepCounts(int arg0, int arg1, int arg2)
+void Actors_SetActorTravelStepCounts(int actor_id, int move_steps_per_tile, int turn_steps_per_revolution)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a0 == NULL) {
+    if (actor == NULL) {
         return;
     }
 
-    if (arg1 < 0) {
-        arg1 = 1;
+    if (move_steps_per_tile < 0) {
+        move_steps_per_tile = 1;
     }
-    temp_a0->moveRate = arg1;
+    actor->moveRate = move_steps_per_tile;
 
-    if (arg2 < 0) {
-        arg2 = 1;
+    if (turn_steps_per_revolution < 0) {
+        turn_steps_per_revolution = 1;
     }
-    temp_a0->turnRate = arg2;
+    actor->turnRate = turn_steps_per_revolution;
 }
 
 // decomp: BATTLE.PRG func_800A0BA0 (src/BATTLE/BATTLE.PRG/30DB0.c:4056)
-void Actors_ActorTravelStepCounts(int arg0, int* arg1, int* arg2)
+void Actors_ActorTravelStepCounts(int actor_id, int* move_steps_per_tile_out, int* turn_steps_per_revolution_out)
 {
-    Actors_ActorRecord* temp_a0 = Actors_actorRecords[arg0];
-    if (temp_a0 != 0) {
-        *arg1 = temp_a0->moveRate;
-        *arg2 = temp_a0->turnRate;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor != 0) {
+        *move_steps_per_tile_out = actor->moveRate;
+        *turn_steps_per_revolution_out = actor->turnRate;
     }
 }
 
@@ -968,207 +968,207 @@ void Actors_ApplyActorFlightMovement(Actors_ActorRecord* actor)
 }
 
 // decomp: BATTLE.PRG func_800A291C (src/BATTLE/BATTLE.PRG/38C1C.c:712)
-void Actors_ApplyActorMovementVector(Actors_ActorRecord* arg0)
+void Actors_ApplyActorMovementVector(Actors_ActorRecord* actor)
 {
-    addVector(&arg0->instance.position, &arg0->turnState.step);
+    addVector(&actor->instance.position, &actor->turnState.step);
 
-    arg0->instance.currentTileX = arg0->instance.position.vx / 128;
-    arg0->instance.currentTileZ = arg0->instance.position.vz / 128;
+    actor->instance.currentTileX = actor->instance.position.vx / 128;
+    actor->instance.currentTileZ = actor->instance.position.vz / 128;
 
-    ((void (*)(int, int, int))Actors_TurnActorToOverTime)(arg0->instance.slot, arg0->turnState.facing, 12);
+    ((void (*)(int, int, int))Actors_TurnActorToOverTime)(actor->instance.slot, actor->turnState.facing, 12);
 }
 
 // decomp: BATTLE.PRG func_800A29A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:86)
-void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* arg0)
+void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* actor)
 {
     int busy;
 
-    switch (arg0->instance.reactionState) {
+    switch (actor->instance.reactionState) {
     case 1:
-        arg0->instance.motionLocked = 0;
-        Actors_PlayActorAnimation(arg0->instance.slot, 0x13, 0, 8);
-        Actors_QueueActorAnimation(arg0->instance.slot, 0x14, 8, 0);
-        arg0->instance.baseColor.cd = 0;
-        arg0->instance.reactionState = 2;
-        arg0->instance.actionAnimationState = 6;
+        actor->instance.motionLocked = 0;
+        Actors_PlayActorAnimation(actor->instance.slot, 0x13, 0, 8);
+        Actors_QueueActorAnimation(actor->instance.slot, 0x14, 8, 0);
+        actor->instance.baseColor.cd = 0;
+        actor->instance.reactionState = 2;
+        actor->instance.actionAnimationState = 6;
         return;
 
     case 2:
-        if (arg0->instance.actionAnimationState < 8) {
+        if (actor->instance.actionAnimationState < 8) {
             return;
         }
 
-        if (arg0->instance.attachBone == 0xFC) {
-            busy = Actors_actorRecords[arg0->instance.attachParent]->instance.actionAnimationState < 9;
-        } else if (arg0->pose.reachedEnd) {
-            busy = arg0->blendFrame;
+        if (actor->instance.attachBone == 0xFC) {
+            busy = Actors_actorRecords[actor->instance.attachParent]->instance.actionAnimationState < 9;
+        } else if (actor->pose.reachedEnd) {
+            busy = actor->blendFrame;
         } else {
             return;
         }
 
         if (busy == 0) {
-            arg0->instance.actionAnimationState = 9;
-            Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, 0);
-            arg0->instance.facing = arg0->routeTarget.pad;
-            Actors_PlayActorAnimation(arg0->instance.slot, 0x15, 0, 8);
-            Actors_QueueActorAnimation(arg0->instance.slot, 0x16, 8, 0);
-            arg0->instance.reactionState = 3;
+            actor->instance.actionAnimationState = 9;
+            Actors_TranslateActorToTileAtRate(actor->instance.slot, (Actors_TileTarget*)&actor->routeTarget, 0);
+            actor->instance.facing = actor->routeTarget.pad;
+            Actors_PlayActorAnimation(actor->instance.slot, 0x15, 0, 8);
+            Actors_QueueActorAnimation(actor->instance.slot, 0x16, 8, 0);
+            actor->instance.reactionState = 3;
         }
 
         return;
 
     case 3:
-        if (arg0->instance.actionAnimationState) {
+        if (actor->instance.actionAnimationState) {
             return;
         }
 
-        if (arg0->instance.attachBone == 0xFC ? Actors_actorRecords[arg0->instance.attachParent]->instance.actionAnimationState
-                                     : arg0->blendFrame) {
+        if (actor->instance.attachBone == 0xFC ? Actors_actorRecords[actor->instance.attachParent]->instance.actionAnimationState
+                                     : actor->blendFrame) {
             return;
         }
 
-        Actors_PlayActorAnimation(arg0->instance.slot, 1, 0, 8);
+        Actors_PlayActorAnimation(actor->instance.slot, 1, 0, 8);
         // fallthrough
 
     case 4:
-        ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(arg0);
-        Battle_Ai_ReleaseAiDestinationTile(arg0->instance.currentTileX, arg0->instance.currentTileZ);
+        ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(actor);
+        Battle_Ai_ReleaseAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
         // fallthrough
 
     case 5:
-        if (arg0->companionSlot >= 2 && Actors_actorRecords[arg0->companionSlot]->instance.reactionState) {
-            arg0->instance.reactionState = 5;
+        if (actor->companionSlot >= 2 && Actors_actorRecords[actor->companionSlot]->instance.reactionState) {
+            actor->instance.reactionState = 5;
             return;
         }
 
-        arg0->instance.reactionState = 0;
+        actor->instance.reactionState = 0;
         return;
     }
 }
 
 // decomp: BATTLE.PRG func_800A2C48 (src/BATTLE/BATTLE.PRG/3A1A0.c:153)
-void Actors_CancelActorTeleportTransition(Actors_ActorRecord* arg0)
+void Actors_CancelActorTeleportTransition(Actors_ActorRecord* actor)
 {
-    Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->sharedSequences[4], 0);
-    arg0->queuedAnimation = 0;
-    arg0->instance.reactionState = 4;
-    Actors_UpdateActorTeleportTransition(arg0);
-    if (arg0->companionSlot >= 2) {
-        Actors_CancelActorTeleportTransition(Actors_actorRecords[arg0->companionSlot]);
+    Actors_TranslateActorToTileAtRate(actor->instance.slot, (Actors_TileTarget*)&actor->sharedSequences[4], 0);
+    actor->queuedAnimation = 0;
+    actor->instance.reactionState = 4;
+    Actors_UpdateActorTeleportTransition(actor);
+    if (actor->companionSlot >= 2) {
+        Actors_CancelActorTeleportTransition(Actors_actorRecords[actor->companionSlot]);
     }
 }
 
 // decomp: BATTLE.PRG func_800A2CD4 (src/BATTLE/BATTLE.PRG/3A1A0.c:164)
-void Actors_UpdateActorTravelTransition(Actors_ActorRecord* arg0)
+void Actors_UpdateActorTravelTransition(Actors_ActorRecord* actor)
 {
     u_short steps;
     u_char animation;
 
-    switch (arg0->instance.poseState) {
+    switch (actor->instance.poseState) {
     case 1:
-        Actors_PlayActorAnimation(arg0->instance.slot, 9, 0, 8);
-        Actors_TranslateActorToTileAtRate(arg0->instance.slot, (Actors_TileTarget*)&arg0->routeTarget, -1);
-        ((void (*)())Actors_TurnActorToAtRate)(arg0->instance.slot, arg0->routeTarget.pad, 8);
-        arg0->transitionFrames = arg0->instance.currentAnimation;
-        arg0->instance.currentAnimation = 0;
-        if (arg0->transitionFrames != 0) {
-            arg0->instance.poseState = 2;
+        Actors_PlayActorAnimation(actor->instance.slot, 9, 0, 8);
+        Actors_TranslateActorToTileAtRate(actor->instance.slot, (Actors_TileTarget*)&actor->routeTarget, -1);
+        ((void (*)())Actors_TurnActorToAtRate)(actor->instance.slot, actor->routeTarget.pad, 8);
+        actor->transitionFrames = actor->instance.currentAnimation;
+        actor->instance.currentAnimation = 0;
+        if (actor->transitionFrames != 0) {
+            actor->instance.poseState = 2;
             return;
         }
         goto land;
     case 2:
-        Actors_StepActorTransitionDisplacement(arg0);
+        Actors_StepActorTransitionDisplacement(actor);
         Field_MovingPlatformContactHeight(
-            arg0->instance.position.vx, arg0->instance.position.vy, arg0->instance.position.vz, 2);
+            actor->instance.position.vx, actor->instance.position.vy, actor->instance.position.vz, 2);
         if (*(int*)&Actors_supportingPlatformLayer != 0) {
-            arg0->instance.motionLocked = 1;
+            actor->instance.motionLocked = 1;
             goto idle;
         }
-        if (arg0->transitionFrames == 0) {
-            Actors_PlayActorAnimation(arg0->instance.slot, 0xA, 0, 8);
-            arg0->instance.motionLocked = 0;
-            arg0->instance.poseState = 3;
+        if (actor->transitionFrames == 0) {
+            Actors_PlayActorAnimation(actor->instance.slot, 0xA, 0, 8);
+            actor->instance.motionLocked = 0;
+            actor->instance.poseState = 3;
         }
         return;
     case 3:
-        if (arg0->instance.currentAnimation == 0 && arg0->pose.reachedEnd) {
+        if (actor->instance.currentAnimation == 0 && actor->pose.reachedEnd) {
         land:
-            arg0->instance.motionLocked = 0;
-            ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(arg0);
-            Battle_Ai_ReleaseAiDestinationTile(arg0->instance.currentTileX, arg0->instance.currentTileZ);
-            Actors_PlayActorAnimation(arg0->instance.slot, 1, 0, 8);
-            arg0->instance.poseState = 0;
+            actor->instance.motionLocked = 0;
+            ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(actor);
+            Battle_Ai_ReleaseAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
+            Actors_PlayActorAnimation(actor->instance.slot, 1, 0, 8);
+            actor->instance.poseState = 0;
         }
         return;
     case 4:
-        Actors_PlayActorAnimation(arg0->instance.slot, 7, 0, 8);
-        Actors_QueueActorAnimation(arg0->instance.slot, 0x25, 8, 0);
-        ((void (*)())Actors_TranslateActorToOverTime)(arg0->instance.slot, &arg0->routeTarget, -1);
-        ((void (*)())Actors_TurnActorToAtRate)(arg0->instance.slot, arg0->routeTarget.pad, 8);
-        steps = arg0->instance.currentAnimation;
-        arg0->instance.currentAnimation = 0;
-        arg0->transitionFrames = steps;
-        arg0->instance.motionLocked = 1;
-        if (arg0->transitionFrames == 0) {
-            arg0->queuedAnimation = 0;
+        Actors_PlayActorAnimation(actor->instance.slot, 7, 0, 8);
+        Actors_QueueActorAnimation(actor->instance.slot, 0x25, 8, 0);
+        ((void (*)())Actors_TranslateActorToOverTime)(actor->instance.slot, &actor->routeTarget, -1);
+        ((void (*)())Actors_TurnActorToAtRate)(actor->instance.slot, actor->routeTarget.pad, 8);
+        steps = actor->instance.currentAnimation;
+        actor->instance.currentAnimation = 0;
+        actor->transitionFrames = steps;
+        actor->instance.motionLocked = 1;
+        if (actor->transitionFrames == 0) {
+            actor->queuedAnimation = 0;
             goto idle;
         }
-        arg0->instance.poseState = 5;
+        actor->instance.poseState = 5;
         return;
     case 5:
-        Actors_StepActorTransitionDisplacement(arg0);
+        Actors_StepActorTransitionDisplacement(actor);
         Field_MovingPlatformContactHeight(
-            arg0->instance.position.vx, arg0->instance.position.vy, arg0->instance.position.vz, 3);
-        if (*(int*)&Actors_supportingPlatformLayer != 0 || arg0->transitionFrames == 0) {
+            actor->instance.position.vx, actor->instance.position.vy, actor->instance.position.vz, 3);
+        if (*(int*)&Actors_supportingPlatformLayer != 0 || actor->transitionFrames == 0) {
         idle:
-            Actors_PlayActorAnimation(arg0->instance.slot, 1, 0, 8);
-            arg0->instance.poseState = 0;
+            Actors_PlayActorAnimation(actor->instance.slot, 1, 0, 8);
+            actor->instance.poseState = 0;
         }
         return;
     case 6:
-        animation = arg0->animationId;
-        if (animation != 0xC7 && animation != 0xC9 && arg0->blendFrame == 0) {
-            arg0->instance.poseState = 0;
+        animation = actor->animationId;
+        if (animation != 0xC7 && animation != 0xC9 && actor->blendFrame == 0) {
+            actor->instance.poseState = 0;
         }
         return;
     }
 }
 
 // decomp: BATTLE.PRG func_800A2FBC (src/BATTLE/BATTLE.PRG/3A1A0.c:239)
-void Actors_StepActorTransitionDisplacement(Actors_ActorRecord* arg0)
+void Actors_StepActorTransitionDisplacement(Actors_ActorRecord* actor)
 {
-    int temp_a1 = arg0->instance.rootMotion.vx / arg0->transitionFrames;
-    arg0->instance.rootMotion.vx -= temp_a1;
-    arg0->instance.position.vx += temp_a1;
+    int component_step = actor->instance.rootMotion.vx / actor->transitionFrames;
+    actor->instance.rootMotion.vx -= component_step;
+    actor->instance.position.vx += component_step;
 
-    temp_a1 = arg0->instance.rootMotion.vy / arg0->transitionFrames;
-    arg0->instance.rootMotion.vy -= temp_a1;
-    arg0->instance.position.vy += temp_a1;
+    component_step = actor->instance.rootMotion.vy / actor->transitionFrames;
+    actor->instance.rootMotion.vy -= component_step;
+    actor->instance.position.vy += component_step;
 
-    temp_a1 = arg0->instance.rootMotion.vz / arg0->transitionFrames;
-    arg0->instance.rootMotion.vz -= temp_a1;
-    arg0->instance.position.vz += temp_a1;
+    component_step = actor->instance.rootMotion.vz / actor->transitionFrames;
+    actor->instance.rootMotion.vz -= component_step;
+    actor->instance.position.vz += component_step;
 
-    --arg0->transitionFrames;
+    --actor->transitionFrames;
 }
 
 // decomp: BATTLE.PRG func_800A3054 (src/BATTLE/BATTLE.PRG/3A1A0.c:256)
-void Actors_SetActorFallDestination(Actors_ActorRecord* arg0, Actors_FallDirection* arg1)
+void Actors_SetActorFallDestination(Actors_ActorRecord* actor, Actors_FallDirection* fall_direction)
 {
-    int var_a2;
-    int var_a3;
+    int offset_x;
+    int offset_z;
 
-    var_a2 = 0x3F;
-    var_a3 = 0x3F;
-    if (arg1->directionX < 0) {
-        var_a2 = -0x3F;
+    offset_x = 0x3F;
+    offset_z = 0x3F;
+    if (fall_direction->directionX < 0) {
+        offset_x = -0x3F;
     }
-    if (arg1->directionZ < 0) {
-        var_a3 = -0x3F;
+    if (fall_direction->directionZ < 0) {
+        offset_z = -0x3F;
     }
-    arg0->destinationMode = 1;
-    arg0->destinationX = (u_short)arg0->instance.position.vx + var_a2;
-    arg0->destinationZ = (u_short)arg0->instance.position.vz + var_a3;
+    actor->destinationMode = 1;
+    actor->destinationX = (u_short)actor->instance.position.vx + offset_x;
+    actor->destinationZ = (u_short)actor->instance.position.vz + offset_z;
 }
 
 // decomp: BATTLE.PRG func_800A48CC (src/BATTLE/BATTLE.PRG/3A1A0.c:1048)
@@ -1417,15 +1417,15 @@ void Actors_UpdateActorMovement(int actorId)
 }
 
 // decomp: BATTLE.PRG func_800A525C (src/BATTLE/BATTLE.PRG/3A1A0.c:1336)
-void Actors_ClearActorMovementRequest(Actors_ActorRecord* arg0)
+void Actors_ClearActorMovementRequest(Actors_ActorRecord* actor)
 {
-    arg0->turnState.mode = 1;
-    if (arg0->instance.slot == 0) {
-        arg0->turnState.mode = 0;
+    actor->turnState.mode = 1;
+    if (actor->instance.slot == 0) {
+        actor->turnState.mode = 0;
     }
-    arg0->turnState.direction = 0;
-    arg0->turnState.distance = 0;
-    arg0->turnState.facing = 0;
+    actor->turnState.direction = 0;
+    actor->turnState.distance = 0;
+    actor->turnState.facing = 0;
 }
 
 // decomp: BATTLE.PRG func_800A5280 (src/BATTLE/BATTLE.PRG/3A1A0.c:1347)
@@ -2003,96 +2003,96 @@ done:
 }
 
 // decomp: BATTLE.PRG func_800A6660 (src/BATTLE/BATTLE.PRG/3A1A0.c:1920)
-void Actors_UpdateActorSteering(Actors_ActorRecord* arg0, int arg1, Actors_TurnRequest* arg2)
+void Actors_UpdateActorSteering(Actors_ActorRecord* actor, int target_facing, Actors_TurnRequest* turn_request)
 {
     int delta;
 
-    if (arg1 == arg0->instance.facing) {
+    if (target_facing == actor->instance.facing) {
         return;
     }
-    if (arg0->instance.turnFrames != 0) {
-        if (arg2->restartTurn == 0) {
-            delta = arg1 - ((arg0->instance.facing + arg0->instance.facingDelta) & 0xFFF);
+    if (actor->instance.turnFrames != 0) {
+        if (turn_request->restartTurn == 0) {
+            delta = target_facing - ((actor->instance.facing + actor->instance.facingDelta) & 0xFFF);
             if (delta >= ONE / 2) {
                 delta -= ONE;
             } else if (delta < -ONE / 2) {
                 delta += ONE;
             }
-            arg0->instance.facingDelta += delta;
+            actor->instance.facingDelta += delta;
         } else {
-            delta = arg1 - arg0->instance.facing;
+            delta = target_facing - actor->instance.facing;
             if (delta >= ONE / 2) {
                 delta -= ONE;
             } else if (delta < -ONE / 2) {
                 delta += ONE;
             }
-            arg0->instance.facingDelta = delta;
-            arg0->instance.turnFrames = 12;
+            actor->instance.facingDelta = delta;
+            actor->instance.turnFrames = 12;
         }
     } else {
-        ((void (*)(int, short, int))Actors_TurnActorToOverTime)(arg0->instance.slot, arg1, 12);
+        ((void (*)(int, short, int))Actors_TurnActorToOverTime)(actor->instance.slot, target_facing, 12);
     }
-    if (arg0->collisionRadius > 0x80) {
-        delta = arg0->instance.facingDelta / 32;
+    if (actor->collisionRadius > 0x80) {
+        delta = actor->instance.facingDelta / 32;
         if (delta < 0) {
             delta = -delta;
         }
-        if (arg0->instance.turnFrames < delta) {
-            arg0->instance.turnFrames = delta;
+        if (actor->instance.turnFrames < delta) {
+            actor->instance.turnFrames = delta;
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800A97EC (src/BATTLE/BATTLE.PRG/40564.c:522)
-void Actors_MoveActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2, int arg3)
+void Actors_MoveActorToTileAtRate(int actor_id, Actors_TileTarget* tile_target, int move_steps_per_tile, int turn_steps_per_revolution)
 {
     int angle;
 
-    Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
     if (actor == NULL) {
-        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", actor_id);
         return;
     }
 
-    if (arg2 == 0 && arg3 == 0) {
+    if (move_steps_per_tile == 0 && turn_steps_per_revolution == 0) {
 
-        Actors_SetActorTileTranslation(arg0, arg1, -1, 0);
+        Actors_SetActorTileTranslation(actor_id, tile_target, -1, 0);
 
-        angle = arg1->facing;
+        angle = tile_target->facing;
         angle <<= 4;
         angle %= ONE;
         angle -= actor->instance.facing;
 
-        Actors_SetActorYawTurn(arg0, (short)angle, 0);
+        Actors_SetActorYawTurn(actor_id, (short)angle, 0);
 
         actor->routePhase = 0;
-        actor->instance.currentTileX = arg1->tileX;
-        actor->instance.currentTileLayer = arg1->tileLayer;
-        actor->instance.currentTileZ = arg1->tileZ;
+        actor->instance.currentTileX = tile_target->tileX;
+        actor->instance.currentTileLayer = tile_target->tileLayer;
+        actor->instance.currentTileZ = tile_target->tileZ;
     } else {
-        if (arg3 == -1) {
+        if (turn_steps_per_revolution == -1) {
             actor->routeTurnRate = actor->turnRate;
         } else {
-            actor->routeTurnRate = arg3;
+            actor->routeTurnRate = turn_steps_per_revolution;
         }
 
-        if (arg2 == -1) {
+        if (move_steps_per_tile == -1) {
             actor->routeMoveRate = actor->moveRate;
         } else {
-            actor->routeMoveRate = arg2;
+            actor->routeMoveRate = move_steps_per_tile;
         }
 
-        Actors_SetActorTileTurn(arg0, arg1, -1, actor->routeTurnRate);
+        Actors_SetActorTileTurn(actor_id, tile_target, -1, actor->routeTurnRate);
 
-        actor->routeTarget.vx = (arg1->tileX * 128) + 64;
-        actor->routeTarget.vz = (arg1->tileZ * 128) + 64;
+        actor->routeTarget.vx = (tile_target->tileX * 128) + 64;
+        actor->routeTarget.vz = (tile_target->tileZ * 128) + 64;
         actor->routeTarget.vy = Field_SampleActorSupportHeight(&actor->routeTarget, 0, 0, 1);
         angle = 0x8000;
 
-        if (arg1->facing == 0xFF) {
+        if (tile_target->facing == 0xFF) {
             actor->routeTarget.pad = angle;
         } else {
-            actor->routeTarget.pad = arg1->facing * 16;
+            actor->routeTarget.pad = tile_target->facing * 16;
         }
 
         actor->routePhase = 1;
@@ -2101,7 +2101,7 @@ void Actors_MoveActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2, i
 }
 
 // decomp: BATTLE.PRG func_800A9988 (src/BATTLE/BATTLE.PRG/40564.c:574)
-void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg3)
+void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int move_steps_per_tile, int turn_steps_per_revolution)
 {
     Actors_ActorRecord* actor = Actors_actorRecords[id];
     if (actor == NULL) {
@@ -2111,7 +2111,7 @@ void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg
     int angle;
     int dz;
 
-    if (arg2 == 0 && arg3 == 0) {
+    if (move_steps_per_tile == 0 && turn_steps_per_revolution == 0) {
         u_short facing = target->pad;
 
         if (facing == 0x8000) {
@@ -2153,18 +2153,18 @@ void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg
     }
 
     angle = (short)angle;
-    Actors_TurnActorToAtRate(id, angle, arg3);
+    Actors_TurnActorToAtRate(id, angle, turn_steps_per_revolution);
 
-    if (arg2 == -1) {
+    if (move_steps_per_tile == -1) {
         actor->routeMoveRate = actor->moveRate;
     } else {
-        actor->routeMoveRate = arg2;
+        actor->routeMoveRate = move_steps_per_tile;
     }
 
-    if (arg3 == -1) {
+    if (turn_steps_per_revolution == -1) {
         actor->routeTurnRate = actor->turnRate;
     } else {
-        actor->routeTurnRate = arg3;
+        actor->routeTurnRate = turn_steps_per_revolution;
     }
 
     actor->routeTarget.vx = target->vx;
@@ -2193,278 +2193,278 @@ void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int arg2, int arg
 }
 
 // decomp: BATTLE.PRG func_800A9C54 (src/BATTLE/BATTLE.PRG/40564.c:661)
-void Actors_TranslateActorToTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2)
+void Actors_TranslateActorToTileAtRate(int actor_id, Actors_TileTarget* tile_target, int move_steps_per_tile)
 {
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
-    if (temp_s0 == NULL) {
-        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", actor_id);
         return;
     }
 
-    if (arg2 == -1) {
-        Actors_SetActorTileTranslation(arg0, arg1, -1, temp_s0->moveRate);
+    if (move_steps_per_tile == -1) {
+        Actors_SetActorTileTranslation(actor_id, tile_target, -1, actor->moveRate);
     } else {
-        Actors_SetActorTileTranslation(arg0, arg1, -1, arg2);
+        Actors_SetActorTileTranslation(actor_id, tile_target, -1, move_steps_per_tile);
     }
 
-    temp_s0->instance.currentTileX = arg1->tileX;
-    temp_s0->instance.currentTileLayer = arg1->tileLayer;
-    temp_s0->instance.currentTileZ = arg1->tileZ;
+    actor->instance.currentTileX = tile_target->tileX;
+    actor->instance.currentTileLayer = tile_target->tileLayer;
+    actor->instance.currentTileZ = tile_target->tileZ;
 }
 
 // decomp: BATTLE.PRG func_800A9CDC (src/BATTLE/BATTLE.PRG/40564.c:676)
-void Actors_TurnActorTowardTileAtRate(int arg0, Actors_TileTarget* arg1, int arg2)
+void Actors_TurnActorTowardTileAtRate(int actor_id, Actors_TileTarget* tile_target, int turn_steps_per_revolution)
 {
-    Actors_ActorRecord* new_var = Actors_actorRecords[arg0];
-    if (new_var == NULL) {
-        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", actor_id);
         return;
     }
 
-    if (arg2 == -1) {
-        Actors_SetActorTileTurn(arg0, arg1, -1, new_var->turnRate);
+    if (turn_steps_per_revolution == -1) {
+        Actors_SetActorTileTurn(actor_id, tile_target, -1, actor->turnRate);
     } else {
-        Actors_SetActorTileTurn(arg0, arg1, -1, arg2);
+        Actors_SetActorTileTurn(actor_id, tile_target, -1, turn_steps_per_revolution);
     }
 }
 
 // decomp: BATTLE.PRG func_800A9D24 (src/BATTLE/BATTLE.PRG/40564.c:687)
-void Actors_TranslateActorByAtRate(int arg0, SVECTOR* arg1, int arg2)
+void Actors_TranslateActorByAtRate(int actor_id, SVECTOR* translation, int move_steps_per_tile)
 {
-    u_short temp_s0;
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
-    if (temp_s1 == NULL) {
-        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+    u_short saved_move_rate;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", actor_id);
         return;
     }
 
-    if (arg2 == -1) {
-        Actors_SetActorTranslation(arg0, arg1, -1);
+    if (move_steps_per_tile == -1) {
+        Actors_SetActorTranslation(actor_id, translation, -1);
         return;
     }
 
-    temp_s0 = temp_s1->moveRate;
-    temp_s1->moveRate = arg2;
+    saved_move_rate = actor->moveRate;
+    actor->moveRate = move_steps_per_tile;
 
-    Actors_SetActorTranslation(arg0, arg1, -1);
+    Actors_SetActorTranslation(actor_id, translation, -1);
 
-    temp_s1->moveRate = temp_s0;
+    actor->moveRate = saved_move_rate;
 }
 
 // decomp: BATTLE.PRG func_800A9D90 (src/BATTLE/BATTLE.PRG/40564.c:705)
-void Actors_TranslateActorToAtRate(int arg0, SVECTOR* arg1, int arg2)
+void Actors_TranslateActorToAtRate(int actor_id, SVECTOR* target_position, int move_steps_per_tile)
 {
-    SVECTOR sp10;
-    u_short temp_s0;
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
-    if (temp_s1 == NULL) {
-        Core_Debugf("actors", "absolute slide skips absent actor=%d", arg0);
+    SVECTOR translation;
+    u_short saved_move_rate;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor == NULL) {
+        Core_Debugf("actors", "absolute slide skips absent actor=%d", actor_id);
         return;
     }
 
-    sp10.vx = arg1->vx - temp_s1->instance.position.vx;
-    sp10.vy = arg1->vy - temp_s1->instance.position.vy;
-    sp10.vz = arg1->vz - temp_s1->instance.position.vz;
+    translation.vx = target_position->vx - actor->instance.position.vx;
+    translation.vy = target_position->vy - actor->instance.position.vy;
+    translation.vz = target_position->vz - actor->instance.position.vz;
 
-    if (arg2 == -1) {
-        Actors_SetActorTranslation(arg0, &sp10, -1);
+    if (move_steps_per_tile == -1) {
+        Actors_SetActorTranslation(actor_id, &translation, -1);
         return;
     }
 
-    temp_s0 = temp_s1->moveRate;
-    temp_s1->moveRate = arg2;
+    saved_move_rate = actor->moveRate;
+    actor->moveRate = move_steps_per_tile;
 
-    Actors_SetActorTranslation(arg0, &sp10, -1);
+    Actors_SetActorTranslation(actor_id, &translation, -1);
 
-    temp_s1->moveRate = temp_s0;
+    actor->moveRate = saved_move_rate;
 }
 
 // decomp: BATTLE.PRG func_800A9E38 (src/BATTLE/BATTLE.PRG/40564.c:728)
-void Actors_TurnActorByAtRate(int arg0, short arg1, int arg2)
+void Actors_TurnActorByAtRate(int actor_id, short yaw_delta, int turn_steps_per_revolution)
 {
-    u_short temp_s0;
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
-    if (temp_s1 == NULL) {
-        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+    u_short saved_turn_rate;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", actor_id);
         return;
     }
 
-    if (arg2 == -1) {
-        Actors_SetActorYawTurn(arg0, arg1, -1);
+    if (turn_steps_per_revolution == -1) {
+        Actors_SetActorYawTurn(actor_id, yaw_delta, -1);
         return;
     }
 
-    temp_s0 = temp_s1->turnRate;
-    temp_s1->turnRate = arg2;
+    saved_turn_rate = actor->turnRate;
+    actor->turnRate = turn_steps_per_revolution;
 
-    Actors_SetActorYawTurn(arg0, arg1, -1);
+    Actors_SetActorYawTurn(actor_id, yaw_delta, -1);
 
-    temp_s1->turnRate = temp_s0;
+    actor->turnRate = saved_turn_rate;
 }
 
 // decomp: BATTLE.PRG func_800A9EB4 (src/BATTLE/BATTLE.PRG/40564.c:746)
-void Actors_TurnActorToAtRate(int arg0, short arg1, int arg2)
+void Actors_TurnActorToAtRate(int actor_id, short target_yaw, int turn_steps_per_revolution)
 {
-    u_short temp_s0;
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
-    if (temp_s1 == NULL) {
-        Core_Debugf("actors", "movement wrapper skips absent actor=%d", arg0);
+    u_short saved_turn_rate;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
+    if (actor == NULL) {
+        Core_Debugf("actors", "movement wrapper skips absent actor=%d", actor_id);
         return;
     }
 
-    arg1 -= temp_s1->instance.facing;
+    target_yaw -= actor->instance.facing;
 
-    if (arg1 > ONE / 2) {
-        arg1 -= ONE;
+    if (target_yaw > ONE / 2) {
+        target_yaw -= ONE;
     }
 
-    if (arg1 < -ONE / 2) {
-        arg1 += ONE;
+    if (target_yaw < -ONE / 2) {
+        target_yaw += ONE;
     }
 
-    if (arg2 == -1) {
-        Actors_SetActorYawTurn(arg0, arg1, -1);
+    if (turn_steps_per_revolution == -1) {
+        Actors_SetActorYawTurn(actor_id, target_yaw, -1);
         return;
     }
 
-    temp_s0 = temp_s1->turnRate;
-    temp_s1->turnRate = arg2;
+    saved_turn_rate = actor->turnRate;
+    actor->turnRate = turn_steps_per_revolution;
 
-    Actors_SetActorYawTurn(arg0, arg1, -1);
+    Actors_SetActorYawTurn(actor_id, target_yaw, -1);
 
-    temp_s1->turnRate = temp_s0;
+    actor->turnRate = saved_turn_rate;
 }
 
 // decomp: BATTLE.PRG func_800A9F64 (src/BATTLE/BATTLE.PRG/40564.c:774)
-void Actors_RotateActorByAtRate(int arg0, SVECTOR* arg1, int arg2)
+void Actors_RotateActorByAtRate(int actor_id, SVECTOR* rotation_delta, int turn_steps_per_revolution)
 {
-    u_short temp_s0;
+    u_short saved_turn_rate;
 
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (arg2 == -1) {
-        Actors_SetActorRotation(arg0, arg1, -1);
+    if (turn_steps_per_revolution == -1) {
+        Actors_SetActorRotation(actor_id, rotation_delta, -1);
         return;
     }
 
-    temp_s0 = temp_s1->turnRate;
-    temp_s1->turnRate = arg2;
+    saved_turn_rate = actor->turnRate;
+    actor->turnRate = turn_steps_per_revolution;
 
-    Actors_SetActorRotation(arg0, arg1, -1);
+    Actors_SetActorRotation(actor_id, rotation_delta, -1);
 
-    temp_s1->turnRate = temp_s0;
+    actor->turnRate = saved_turn_rate;
 }
 
 // decomp: BATTLE.PRG func_800A9FD0 (src/BATTLE/BATTLE.PRG/40564.c:793)
-void Actors_RotateActorToAtRate(int arg0, SVECTOR* arg1, int arg2)
+void Actors_RotateActorToAtRate(int actor_id, SVECTOR* target_rotation, int turn_steps_per_revolution)
 {
-    SVECTOR sp10;
-    int temp_s0;
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[arg0];
+    SVECTOR rotation_delta;
+    int saved_turn_rate;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    sp10.vx = arg1->vx - temp_s1->instance.rotationX;
+    rotation_delta.vx = target_rotation->vx - actor->instance.rotationX;
 
-    if (sp10.vx > ONE / 2) {
-        sp10.vx -= ONE;
+    if (rotation_delta.vx > ONE / 2) {
+        rotation_delta.vx -= ONE;
     }
 
-    if (sp10.vx < -ONE / 2) {
-        sp10.vx += ONE;
+    if (rotation_delta.vx < -ONE / 2) {
+        rotation_delta.vx += ONE;
     }
 
-    sp10.vy = arg1->vy - temp_s1->instance.facing;
+    rotation_delta.vy = target_rotation->vy - actor->instance.facing;
 
-    if (sp10.vy > ONE / 2) {
-        sp10.vy -= ONE;
+    if (rotation_delta.vy > ONE / 2) {
+        rotation_delta.vy -= ONE;
     }
 
-    if (sp10.vy < -ONE / 2) {
-        sp10.vy += ONE;
+    if (rotation_delta.vy < -ONE / 2) {
+        rotation_delta.vy += ONE;
     }
 
-    sp10.vz = arg1->vz - temp_s1->instance.rotationZ;
+    rotation_delta.vz = target_rotation->vz - actor->instance.rotationZ;
 
-    if (sp10.vz > ONE / 2) {
-        sp10.vz -= ONE;
+    if (rotation_delta.vz > ONE / 2) {
+        rotation_delta.vz -= ONE;
     }
 
-    if (sp10.vz < -ONE / 2) {
-        sp10.vz += ONE;
+    if (rotation_delta.vz < -ONE / 2) {
+        rotation_delta.vz += ONE;
     }
 
-    if (arg2 == -1) {
-        Actors_SetActorRotation(arg0, &sp10, -1);
+    if (turn_steps_per_revolution == -1) {
+        Actors_SetActorRotation(actor_id, &rotation_delta, -1);
         return;
     }
 
-    temp_s0 = temp_s1->turnRate;
-    temp_s1->turnRate = arg2;
+    saved_turn_rate = actor->turnRate;
+    actor->turnRate = turn_steps_per_revolution;
 
-    Actors_SetActorRotation(arg0, &sp10, -1);
+    Actors_SetActorRotation(actor_id, &rotation_delta, -1);
 
-    temp_s1->turnRate = temp_s0;
+    actor->turnRate = saved_turn_rate;
 }
 
 // decomp: BATTLE.PRG func_800AA108 (src/BATTLE/BATTLE.PRG/40564.c:842)
-void Actors_MoveActorToTileOverTime(int arg0, Actors_TileTarget* arg1, int arg2, int arg3)
+void Actors_MoveActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target, int move_steps, int turn_steps)
 {
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_s0 != NULL) {
+    if (actor != NULL) {
 
-        temp_s0->routeMoveRate = arg2;
+        actor->routeMoveRate = move_steps;
 
-        if ((arg2 == 0) && (arg3 == 0)) {
-            int temp_a1;
+        if ((move_steps == 0) && (turn_steps == 0)) {
+            int yaw_delta;
 
-            Actors_SetActorTileTranslation(arg0, arg1, -1, 0);
+            Actors_SetActorTileTranslation(actor_id, tile_target, -1, 0);
 
-            temp_a1 = arg1->facing;
-            temp_a1 *= 0x10;
-            temp_a1 %= 0x1000;
-            temp_a1 -= temp_s0->instance.facing;
+            yaw_delta = tile_target->facing;
+            yaw_delta *= 0x10;
+            yaw_delta %= 0x1000;
+            yaw_delta -= actor->instance.facing;
 
-            Actors_SetActorYawTurn(arg0, temp_a1, 0);
-            temp_s0->routePhase = 0;
+            Actors_SetActorYawTurn(actor_id, yaw_delta, 0);
+            actor->routePhase = 0;
         } else {
-            Actors_SetActorTileTurn(arg0, arg1, arg3, temp_s0->turnRate);
-            temp_s0->routePhase = 1;
+            Actors_SetActorTileTurn(actor_id, tile_target, turn_steps, actor->turnRate);
+            actor->routePhase = 1;
         }
 
-        temp_s0->instance.currentTileX = arg1->tileX;
-        temp_s0->instance.currentTileLayer = arg1->tileLayer;
-        temp_s0->instance.currentTileZ = arg1->tileZ;
-        temp_s0->routeUsesDuration = 1;
+        actor->instance.currentTileX = tile_target->tileX;
+        actor->instance.currentTileLayer = tile_target->tileLayer;
+        actor->instance.currentTileZ = tile_target->tileZ;
+        actor->routeUsesDuration = 1;
     }
 }
 
 // decomp: BATTLE.PRG func_800AA218 (src/BATTLE/BATTLE.PRG/40564.c:874)
-void Actors_TranslateActorToTileOverTime(int arg0, Actors_TileTarget* arg1, int arg2)
+void Actors_TranslateActorToTileOverTime(int actor_id, Actors_TileTarget* tile_target, int move_steps)
 {
-    Actors_ActorRecord* temp_s0 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_s0 != NULL) {
-        Actors_SetActorTileTranslation(arg0, arg1, arg2, temp_s0->moveRate);
-        temp_s0->instance.currentTileX = arg1->tileX;
-        temp_s0->instance.currentTileLayer = arg1->tileLayer;
-        temp_s0->instance.currentTileZ = arg1->tileZ;
+    if (actor != NULL) {
+        Actors_SetActorTileTranslation(actor_id, tile_target, move_steps, actor->moveRate);
+        actor->instance.currentTileX = tile_target->tileX;
+        actor->instance.currentTileLayer = tile_target->tileLayer;
+        actor->instance.currentTileZ = tile_target->tileZ;
     }
 }
 
 // decomp: BATTLE.PRG func_800AA290 (src/BATTLE/BATTLE.PRG/40564.c:886)
-void Actors_SetActorTileTranslation(int arg0, Actors_TileTarget* arg1, int arg2, int arg3)
+void Actors_SetActorTileTranslation(int actor_id, Actors_TileTarget* tile_target, int move_steps, int move_steps_per_tile)
 {
     SVECTOR target;
     int dist;
     int temp;
-    Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
     if (actor == NULL) {
         return;
     }
 
-    target.vx = arg1->tileX * 128 + 64;
-    target.vz = arg1->tileZ * 128 + 64;
+    target.vx = tile_target->tileX * 128 + 64;
+    target.vz = tile_target->tileZ * 128 + 64;
     actor->instance.rootMotion.vx = target.vx - actor->instance.position.vx;
     actor->instance.rootMotion.vz = target.vz - actor->instance.position.vz;
     actor->instance.rootMotion.vy = Field_SampleActorSupportHeight(&target, 0, 0, 4) - actor->instance.position.vy;
@@ -2474,14 +2474,14 @@ void Actors_SetActorTileTranslation(int arg0, Actors_TileTarget* arg1, int arg2,
         return;
     }
 
-    if (arg2 == 0) {
+    if (move_steps == 0) {
         actor->instance.currentAnimation = 0;
     move:
         addVector(&actor->instance.position, &actor->instance.rootMotion);
         return;
     }
 
-    if (arg2 == -1) {
+    if (move_steps == -1) {
         temp = actor->instance.rootMotion.vx;
         temp *= temp;
         if (temp < 0) {
@@ -2499,7 +2499,7 @@ void Actors_SetActorTileTranslation(int arg0, Actors_TileTarget* arg1, int arg2,
         if (temp < 0) {
             temp = -temp;
         }
-        dist = Core_Math_SquareRootInteger(dist + temp) * arg3;
+        dist = Core_Math_SquareRootInteger(dist + temp) * move_steps_per_tile;
         temp = dist / 128;
         actor->instance.currentAnimation = temp;
         if (dist & 0x7F) {
@@ -2511,31 +2511,31 @@ void Actors_SetActorTileTranslation(int arg0, Actors_TileTarget* arg1, int arg2,
         return;
     }
 
-    actor->instance.currentAnimation = arg2;
+    actor->instance.currentAnimation = move_steps;
 }
 
 // decomp: BATTLE.PRG func_800AA454 (src/BATTLE/BATTLE.PRG/40564.c:948)
-void Actors_TurnActorTowardTileOverTime(int arg0, Actors_TileTarget* arg1, int arg2)
+void Actors_TurnActorTowardTileOverTime(int actor_id, Actors_TileTarget* tile_target, int turn_steps)
 {
-    Actors_SetActorTileTurn(arg0, arg1, arg2, Actors_actorRecords[arg0]->turnRate);
+    Actors_SetActorTileTurn(actor_id, tile_target, turn_steps, Actors_actorRecords[actor_id]->turnRate);
 }
 
 // decomp: BATTLE.PRG func_800AA490 (src/BATTLE/BATTLE.PRG/40564.c:953)
-void Actors_SetActorTileTurn(int arg0, Actors_TileTarget* arg1, int arg2, int arg3)
+void Actors_SetActorTileTurn(int actor_id, Actors_TileTarget* tile_target, int turn_steps, int turn_steps_per_revolution)
 {
     int angle;
     int dz;
-    Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
     if (actor == NULL) {
         return;
     }
 
-    angle = arg1->tileX - actor->instance.currentTileX;
-    dz = arg1->tileZ - actor->instance.currentTileZ;
+    angle = tile_target->tileX - actor->instance.currentTileX;
+    dz = tile_target->tileZ - actor->instance.currentTileZ;
 
     if (angle == 0 && dz == 0) {
-        angle = arg1->facing * 16;
+        angle = tile_target->facing * 16;
     } else {
         angle = 0xC00 - Core_Gte_Atan2(dz, angle);
         angle %= ONE;
@@ -2559,18 +2559,18 @@ void Actors_SetActorTileTurn(int arg0, Actors_TileTarget* arg1, int arg2, int ar
         return;
     }
 
-    if (arg2 == 0) {
+    if (turn_steps == 0) {
         actor->instance.turnFrames = 0;
     turn:
         actor->instance.facing = (actor->instance.facing + actor->instance.facingDelta) & 0xFFF;
         return;
     }
 
-    if (arg2 == -1) {
+    if (turn_steps == -1) {
         if (angle < 0) {
             angle = -angle;
         }
-        angle *= arg3;
+        angle *= turn_steps_per_revolution;
         actor->instance.turnFrames = angle / ONE;
         if (angle & 0xFFF) {
             actor->instance.turnFrames = angle / ONE + 1;
@@ -2581,54 +2581,54 @@ void Actors_SetActorTileTurn(int arg0, Actors_TileTarget* arg1, int arg2, int ar
         return;
     }
 
-    actor->instance.turnFrames = arg2;
+    actor->instance.turnFrames = turn_steps;
 }
 
 // decomp: BATTLE.PRG func_800AA600 (src/BATTLE/BATTLE.PRG/40564.c:1016)
-void Actors_SetActorMotion(int arg0, SVECTOR* arg1, int arg2) { Actors_SetActorTranslation(arg0, arg1, arg2); }
+void Actors_SetActorMotion(int actor_id, SVECTOR* translation, int move_steps) { Actors_SetActorTranslation(actor_id, translation, move_steps); }
 
 // decomp: BATTLE.PRG func_800AA620 (src/BATTLE/BATTLE.PRG/40564.c:1018)
-void Actors_TranslateActorToOverTime(int arg0, SVECTOR* arg1, int arg2)
+void Actors_TranslateActorToOverTime(int actor_id, SVECTOR* target_position, int move_steps)
 {
-    SVECTOR sp10;
-    Actors_ActorRecord* temp_a3 = Actors_actorRecords[arg0];
+    SVECTOR translation;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a3 != NULL) {
-        sp10.vx = arg1->vx - temp_a3->instance.position.vx;
-        sp10.vy = arg1->vy - temp_a3->instance.position.vy;
-        sp10.vz = arg1->vz - temp_a3->instance.position.vz;
+    if (actor != NULL) {
+        translation.vx = target_position->vx - actor->instance.position.vx;
+        translation.vy = target_position->vy - actor->instance.position.vy;
+        translation.vz = target_position->vz - actor->instance.position.vz;
 
-        Actors_SetActorTranslation(arg0, &sp10, arg2);
+        Actors_SetActorTranslation(actor_id, &translation, move_steps);
     }
 }
 
 // decomp: BATTLE.PRG func_800AA698 (src/BATTLE/BATTLE.PRG/40564.c:1032)
-void Actors_SetActorTranslation(int arg0, SVECTOR* arg1, int arg2)
+void Actors_SetActorTranslation(int actor_id, SVECTOR* translation, int move_steps)
 {
     int dist;
     int temp;
-    Actors_ActorRecord* actor = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
     if (actor == NULL) {
         return;
     }
 
-    actor->instance.rootMotion.vx = arg1->vx;
-    actor->instance.rootMotion.vy = arg1->vy;
-    actor->instance.rootMotion.vz = arg1->vz;
+    actor->instance.rootMotion.vx = translation->vx;
+    actor->instance.rootMotion.vy = translation->vy;
+    actor->instance.rootMotion.vz = translation->vz;
 
-    if (arg2 == 0) {
+    if (move_steps == 0) {
         actor->instance.currentAnimation = 0;
     move:
-        actor->instance.position.vx += arg1->vx;
-        actor->instance.position.vy += arg1->vy;
-        actor->instance.position.vz += arg1->vz;
+        actor->instance.position.vx += translation->vx;
+        actor->instance.position.vy += translation->vy;
+        actor->instance.position.vz += translation->vz;
         actor->instance.currentTileX = actor->instance.position.vx / 128;
         actor->instance.currentTileZ = actor->instance.position.vz / 128;
         return;
     }
 
-    if (arg2 == -1) {
+    if (move_steps == -1) {
         temp = actor->instance.rootMotion.vx;
         temp *= temp;
         if (temp < 0) {
@@ -2657,106 +2657,106 @@ void Actors_SetActorTranslation(int arg0, SVECTOR* arg1, int arg2)
         return;
     }
 
-    actor->instance.currentAnimation = arg2;
+    actor->instance.currentAnimation = move_steps;
 }
 
 // decomp: BATTLE.PRG func_800AA82C (src/BATTLE/BATTLE.PRG/40564.c:1089)
-void Actors_SetActorYawMotion(int arg0, short arg1, int arg2) { Actors_SetActorYawTurn(arg0, arg1, arg2); }
+void Actors_SetActorYawMotion(int actor_id, short yaw_delta, int turn_steps) { Actors_SetActorYawTurn(actor_id, yaw_delta, turn_steps); }
 
 // decomp: BATTLE.PRG func_800AA850 (src/BATTLE/BATTLE.PRG/40564.c:1091)
-void Actors_TurnActorToOverTime(int arg0, u_short arg1, int arg2)
+void Actors_TurnActorToOverTime(int actor_id, u_short target_yaw, int turn_steps)
 {
-    short temp_a1;
-    short var_v1;
-    Actors_ActorRecord* temp_v0 = Actors_actorRecords[arg0];
+    short yaw_delta;
+    short wrapped_yaw_delta;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_v0 == NULL) {
+    if (actor == NULL) {
         return;
     }
 
-    temp_a1 = arg1 - temp_v0->instance.facing;
-    var_v1 = temp_a1;
+    yaw_delta = target_yaw - actor->instance.facing;
+    wrapped_yaw_delta = yaw_delta;
 
-    if (temp_a1 > ONE / 2) {
-        var_v1 = temp_a1 - ONE;
+    if (yaw_delta > ONE / 2) {
+        wrapped_yaw_delta = yaw_delta - ONE;
     }
 
-    if (var_v1 < -ONE / 2) {
-        var_v1 += ONE;
+    if (wrapped_yaw_delta < -ONE / 2) {
+        wrapped_yaw_delta += ONE;
     }
 
-    Actors_SetActorYawTurn(arg0, var_v1, arg2);
+    Actors_SetActorYawTurn(actor_id, wrapped_yaw_delta, turn_steps);
 }
 
 // decomp: BATTLE.PRG func_800AA8D0 (src/BATTLE/BATTLE.PRG/40564.c:1115)
-void Actors_TurnActorToAtAngularSpeed(int arg0, short arg1, int arg2)
+void Actors_TurnActorToAtAngularSpeed(int actor_id, short target_yaw, int angular_speed)
 {
-    int arg2_2;
-    int var_v0;
-    Actors_ActorRecord* temp_v0 = Actors_actorRecords[arg0];
+    int turn_steps;
+    int absolute_yaw_delta;
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_v0 == NULL) {
+    if (actor == NULL) {
         return;
     }
 
-    arg1 -= temp_v0->instance.facing;
+    target_yaw -= actor->instance.facing;
 
-    if (arg1 > ONE / 2) {
-        arg1 -= ONE;
+    if (target_yaw > ONE / 2) {
+        target_yaw -= ONE;
     }
 
-    if (arg1 < -ONE / 2) {
-        arg1 += ONE;
+    if (target_yaw < -ONE / 2) {
+        target_yaw += ONE;
     }
 
-    var_v0 = arg1;
+    absolute_yaw_delta = target_yaw;
 
-    var_v0 = ABS(var_v0);
-    arg2 = ABS(arg2);
+    absolute_yaw_delta = ABS(absolute_yaw_delta);
+    angular_speed = ABS(angular_speed);
 
-    arg2_2 = var_v0 / arg2;
+    turn_steps = absolute_yaw_delta / angular_speed;
 
-    if ((var_v0 % arg2) != 0) {
-        ++arg2_2;
+    if ((absolute_yaw_delta % angular_speed) != 0) {
+        ++turn_steps;
     }
 
-    Actors_SetActorYawTurn(arg0, arg1, arg2_2);
+    Actors_SetActorYawTurn(actor_id, target_yaw, turn_steps);
 }
 
 // decomp: BATTLE.PRG func_800AA984 (src/BATTLE/BATTLE.PRG/40564.c:1149)
-void Actors_SetActorYawTurn(int arg0, short arg1, int arg2)
+void Actors_SetActorYawTurn(int actor_id, short yaw_delta, int turn_steps)
 {
     int m;
-    Actors_ActorRecord* a = Actors_actorRecords[arg0];
+    Actors_ActorRecord* a = Actors_actorRecords[actor_id];
 
     if (a == NULL) {
         return;
     }
 
-    m = arg1;
+    m = yaw_delta;
     a->instance.facingDelta = m;
     a->instance.rotationStepX = 0;
     a->instance.rotationStepZ = 0;
 
-    if (arg2 == 0) {
+    if (turn_steps == 0) {
         short sum;
         a->instance.turnFrames = 0;
     recenter:
         sum = (u_short)a->instance.facing + a->instance.facingDelta;
         a->instance.facing = sum;
         a->instance.facing = sum % ONE;
-    } else if (arg2 == -1) {
-        int speed;
+    } else if (turn_steps == -1) {
+        int turn_step_numerator;
 
         if (m < 0) {
             m = -m;
         }
 
-        speed = m * a->turnRate;
-        a->instance.turnFrames = speed / ONE;
+        turn_step_numerator = m * a->turnRate;
+        a->instance.turnFrames = turn_step_numerator / ONE;
 
-        if (speed & 0xFFF) {
-            a->instance.turnFrames = (speed / ONE) + 1;
+        if (turn_step_numerator & 0xFFF) {
+            a->instance.turnFrames = (turn_step_numerator / ONE) + 1;
         }
 
         if (a->instance.turnFrames != 0) {
@@ -2766,24 +2766,24 @@ void Actors_SetActorYawTurn(int arg0, short arg1, int arg2)
         goto recenter;
 
     } else {
-        a->instance.turnFrames = arg2;
+        a->instance.turnFrames = turn_steps;
     }
 }
 
 // decomp: BATTLE.PRG func_800AAA68 (src/BATTLE/BATTLE.PRG/40564.c:1195)
-void Actors_SetActorRotationMotion(int arg0, SVECTOR* arg1, int arg2) { Actors_SetActorRotation(arg0, arg1, arg2); }
+void Actors_SetActorRotationMotion(int actor_id, SVECTOR* rotation_delta, int turn_steps) { Actors_SetActorRotation(actor_id, rotation_delta, turn_steps); }
 
 // decomp: BATTLE.PRG func_800AAA88 (src/BATTLE/BATTLE.PRG/40564.c:1197)
-void Actors_SetActorRotation(int arg0, SVECTOR* arg1, int arg2)
+void Actors_SetActorRotation(int actor_id, SVECTOR* rotation_delta, int turn_steps)
 {
-    Actors_ActorRecord* a = Actors_actorRecords[arg0];
+    Actors_ActorRecord* a = Actors_actorRecords[actor_id];
     int m;
 
-    a->instance.rotationStepX = arg1->vx;
-    a->instance.facingDelta = arg1->vy;
-    a->instance.rotationStepZ = arg1->vz;
+    a->instance.rotationStepX = rotation_delta->vx;
+    a->instance.facingDelta = rotation_delta->vy;
+    a->instance.rotationStepZ = rotation_delta->vz;
 
-    if (arg2 == 0) {
+    if (turn_steps == 0) {
         a->instance.turnFrames = 0;
     recenter:
         a->instance.rotationX += a->instance.rotationStepX;
@@ -2792,7 +2792,7 @@ void Actors_SetActorRotation(int arg0, SVECTOR* arg1, int arg2)
         a->instance.rotationX &= 0xFFF;
         a->instance.facing &= 0xFFF;
         a->instance.rotationZ &= 0xFFF;
-    } else if (arg2 == -1) {
+    } else if (turn_steps == -1) {
         m = ABS(a->instance.rotationStepX);
 
         if (m < ABS(a->instance.facingDelta)) {
@@ -2817,80 +2817,80 @@ void Actors_SetActorRotation(int arg0, SVECTOR* arg1, int arg2)
         goto recenter;
 
     } else {
-        a->instance.turnFrames = arg2;
+        a->instance.turnFrames = turn_steps;
     }
 }
 
 // decomp: BATTLE.PRG func_800AABD0 (src/BATTLE/BATTLE.PRG/40564.c:1244)
-void Actors_ScaleActorToOverTime(int arg0, SVECTOR* arg1, int arg2)
+void Actors_ScaleActorToOverTime(int actor_id, SVECTOR* target_scale, int scale_steps)
 {
-    Actors_ActorRecord* temp_a3 = Actors_actorRecords[arg0];
+    Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
-    if (temp_a3 != NULL) {
+    if (actor != NULL) {
 
-        if (arg2 == 0) {
-            temp_a3->scaleFrames = 0;
-            temp_a3->instance.scaleX = arg1->vx;
-            temp_a3->instance.scaleY = arg1->vy;
-            temp_a3->instance.scaleZ = arg1->vz;
+        if (scale_steps == 0) {
+            actor->scaleFrames = 0;
+            actor->instance.scaleX = target_scale->vx;
+            actor->instance.scaleY = target_scale->vy;
+            actor->instance.scaleZ = target_scale->vz;
             return;
         }
 
-        temp_a3->instance.scaleDelta.vx = arg1->vx - temp_a3->instance.scaleX;
-        temp_a3->instance.scaleDelta.vy = arg1->vy - temp_a3->instance.scaleY;
-        temp_a3->instance.scaleDelta.vz = arg1->vz - temp_a3->instance.scaleZ;
+        actor->instance.scaleDelta.vx = target_scale->vx - actor->instance.scaleX;
+        actor->instance.scaleDelta.vy = target_scale->vy - actor->instance.scaleY;
+        actor->instance.scaleDelta.vz = target_scale->vz - actor->instance.scaleZ;
 
-        if ((*(int*)&temp_a3->instance.scaleDelta == 0)
-            && ((temp_a3->instance.scaleDelta.vz << 0x10) == 0)) {
-            temp_a3->scaleFrames = 0;
+        if ((*(int*)&actor->instance.scaleDelta == 0)
+            && ((actor->instance.scaleDelta.vz << 0x10) == 0)) {
+            actor->scaleFrames = 0;
             return;
         }
 
-        temp_a3->scaleFrames = arg2;
+        actor->scaleFrames = scale_steps;
     }
 }
 
 // decomp: BATTLE.PRG func_800AC540 (src/BATTLE/BATTLE.PRG/40564.c:2233)
-void Actors_UpdateActorRoute(int arg0, Actors_ActorRecord* arg1)
+void Actors_UpdateActorRoute(int actor_id, Actors_ActorRecord* actor)
 {
 
-    switch (arg1->routePhase) {
+    switch (actor->routePhase) {
     case 1:
-        if (arg1->instance.turnFrames == 0) {
+        if (actor->instance.turnFrames == 0) {
 
-            if (arg1->instance.motionLocked) {
-                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, 0x1F, 0, 8);
+            if (actor->instance.motionLocked) {
+                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, 0x1F, 0, 8);
             } else {
-                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, arg1->travelAnimation, 0, 8);
+                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, actor->travelAnimation, 0, 8);
             }
 
-            if (!(arg1->routeUsesDuration << 2)) {
-                Actors_TranslateActorToAtRate(arg0, &arg1->routeTarget, arg1->routeMoveRate);
+            if (!(actor->routeUsesDuration << 2)) {
+                Actors_TranslateActorToAtRate(actor_id, &actor->routeTarget, actor->routeMoveRate);
             } else {
-                Actors_TranslateActorToOverTime(arg0, &arg1->routeTarget, arg1->routeMoveRate);
+                Actors_TranslateActorToOverTime(actor_id, &actor->routeTarget, actor->routeMoveRate);
             }
 
-            arg1->routePhase = 2;
+            actor->routePhase = 2;
         }
         break;
 
     case 2:
-        if (arg1->instance.currentAnimation == 0) {
-            int temp_a1;
+        if (actor->instance.currentAnimation == 0) {
+            int target_facing;
 
-            ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, 1, 0, 8);
+            ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, 1, 0, 8);
 
-            temp_a1 = (u_short)arg1->routeTarget.pad;
+            target_facing = (u_short)actor->routeTarget.pad;
 
-            if (temp_a1 != 0x8000) {
-                temp_a1 = temp_a1 & 0xFFF;
-                if ((arg1->routeUsesDuration << 2) == 0) {
-                    Actors_TurnActorToAtRate(arg0, temp_a1, arg1->routeTurnRate);
+            if (target_facing != 0x8000) {
+                target_facing = target_facing & 0xFFF;
+                if ((actor->routeUsesDuration << 2) == 0) {
+                    Actors_TurnActorToAtRate(actor_id, target_facing, actor->routeTurnRate);
                 } else {
-                    Actors_TurnActorToOverTime(arg0, temp_a1, arg1->routeTurnRate);
+                    Actors_TurnActorToOverTime(actor_id, target_facing, actor->routeTurnRate);
                 }
             }
-            arg1->routePhase = 0;
+            actor->routePhase = 0;
         }
         break;
     }
@@ -2917,7 +2917,7 @@ int Actors_ActorJumpAnimationProfile(Actors_ActorRecord* actor)
 }
 
 // decomp: BATTLE.PRG func_800AC690 (src/BATTLE/BATTLE.PRG/40564.c:2297)
-void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
+void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor)
 {
     Field_GimmickInstance* platform;
     SVECTOR* position;
@@ -2947,7 +2947,7 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
             timer = actor->instance.jumpCountdown - State_tickSpeed / 2;
             actor->instance.jumpCountdown = timer;
             if (timer < 2) {
-                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, Actors_kAirTimerEndAnimations[profile], 0, 8);
+                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, Actors_kAirTimerEndAnimations[profile], 0, 8);
                 actor->instance.jumpCountdown = 0;
             }
         } else {
@@ -2989,7 +2989,7 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
             floor = Field_CeilingHeightAt(actor->instance.position.vx, actor->instance.position.vz);
             floor <<= 17;
             floor >>= 17;
-            if (arg0 != 0) {
+            if (actor_id != 0) {
                 y = 3;
                 Field_platformContactSearchDepth = actor->collisionHeight + 0x40;
             }
@@ -3001,7 +3001,7 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
             top = actor->instance.position.vy + actor->instance.rootMotion.vy - 0xC0;
             if (top < floor) {
                 actor->instance.rootMotion.vy = -actor->instance.rootMotion.vy;
-                if (arg0 != 0) {
+                if (actor_id != 0) {
                     actor->instance.rootMotion.vx = 0;
                     actor->instance.rootMotion.vz = 0;
                     actor->destinationMode = 0;
@@ -3013,10 +3013,10 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
         y = actor->instance.rootMotion.vy;
         if (y <= limit) {
             if (y >= -limit) {
-                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, Actors_kSoftLandingAnimations[profile], 0, 16);
+                ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, Actors_kSoftLandingAnimations[profile], 0, 16);
             }
         } else {
-            ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, Actors_kHardLandingAnimations[profile], 0, 8);
+            ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, Actors_kHardLandingAnimations[profile], 0, 8);
         }
         switch (actor->destinationMode) {
         case 0:
@@ -3065,10 +3065,10 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
                 actor->instance.currentTileX = actor->instance.position.vx / 128;
                 actor->instance.currentTileZ = actor->instance.position.vz / 128;
                 actor->instance.currentTileLayer = 0;
-                ((void (*)(int, int))Field_SetMovingPlatformActor)((*(int (*))&Actors_supportingPlatformLayer) - 2, arg0);
+                ((void (*)(int, int))Field_SetMovingPlatformActor)((*(int (*))&Actors_supportingPlatformLayer) - 2, actor_id);
                 ((void (*)(int, int))Field_SetMovingPlatformActor)((*(int (*))&Actors_supportingPlatformLayer) - 2, -1);
                 (*(int (*))&Actors_supportingPlatformLayer) = 0;
-                Battle_Ai_ForceReleaseActorAiReservations(arg0);
+                Battle_Ai_ForceReleaseActorAiReservations(actor_id);
                 goto land;
             }
             if (actor->jumpFrames > 0) {
@@ -3111,28 +3111,28 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
         actor->supportGimmick = Actors_supportingGimmickIndex;
         actor->instance.rootMotion.vy = y - actor->instance.position.vy;
         actor->instance.movementMode = 4;
-        Actors_SetActorTranslation(arg0, &actor->instance.rootMotion, 0);
+        Actors_SetActorTranslation(actor_id, &actor->instance.rootMotion, 0);
         floor = actor->instance.position.vy - ((SVECTOR*)&actor->instance.supportOffset)->vy;
         floor /= 64;
         actor->instance.jumpCountdown = 0;
         if (y < 3000) {
             if (actor->instance.slot != 0 || !actor->instance.actionAnimationState || actor->instance.actionAnimationState >= 6) {
                 if (floor >= 4) {
-                    Audio_PlayActorSurfaceContactSound(arg0, actor, 0x42);
-                    if (floor >= 6 && arg0 == 0) {
+                    Audio_PlayActorSurfaceContactSound(actor_id, actor, 0x42);
+                    if (floor >= 6 && actor_id == 0) {
                         actor->instance.jumpCountdown = 8;
                     }
                 } else {
-                    Audio_PlayActorSurfaceContactSound(arg0, actor, 0x41);
+                    Audio_PlayActorSurfaceContactSound(actor_id, actor, 0x41);
                 }
             }
         }
         actor->destinationMode = 0;
         actor->landingPending = 0;
-        ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, Actors_kLandingRecoveryAnimations[profile], 0, 8);
+        ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, Actors_kLandingRecoveryAnimations[profile], 0, 8);
         break;
     fall:
-        Actors_SetActorTranslation(arg0, &actor->instance.rootMotion, 0);
+        Actors_SetActorTranslation(actor_id, &actor->instance.rootMotion, 0);
         break;
     case 4:
         if (flags & 0x200000) {
@@ -3151,7 +3151,7 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
                     break;
                 }
                 if (profile != 3) {
-                    ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(arg0, 1, 0, 8);
+                    ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, 1, 0, 8);
                 }
                 ((void (*)())Battle_Ai_ReleaseAiDestinationTile)(actor->instance.currentTileX, actor->instance.currentTileZ);
                 Battle_Ai_ReleaseActorAiContactOccupancy(actor->instance.slot);
@@ -3164,29 +3164,29 @@ void Actors_UpdateActorJumpAndFall(int arg0, Actors_ActorRecord* actor)
 }
 
 // decomp: BATTLE.PRG func_800AF960 (src/BATTLE/BATTLE.PRG/44F14.c:1225)
-void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* arg0)
+void Actors_UpdateActorAuxiliaryMotion(Field_GimmickInstance* gimmick)
 {
-    int temp_lo;
+    int blend_step;
 
-    Actors_ShadowBlend* a2 = &arg0->shadowBlend;
+    Actors_ShadowBlend* shadow_blend = &gimmick->shadowBlend;
 
-    if (a2->levelFrames != 0) {
-        temp_lo = a2->levelDelta / a2->levelFrames;
-        a2->levelDelta -= temp_lo;
-        a2->level += temp_lo;
-        --a2->levelFrames;
+    if (shadow_blend->levelFrames != 0) {
+        blend_step = shadow_blend->levelDelta / shadow_blend->levelFrames;
+        shadow_blend->levelDelta -= blend_step;
+        shadow_blend->level += blend_step;
+        --shadow_blend->levelFrames;
     }
 
-    a2->level &= 0xFFF;
+    shadow_blend->level &= 0xFFF;
 
-    if (a2->radiusFrames != 0) {
-        temp_lo = a2->radiusExpandDelta / a2->radiusFrames;
-        a2->radiusExpandDelta -= temp_lo;
-        a2->radiusExpandRate += temp_lo;
-        temp_lo = a2->radiusShrinkDelta / a2->radiusFrames;
-        a2->radiusShrinkDelta -= temp_lo;
-        a2->radiusShrinkRate += temp_lo;
-        --a2->radiusFrames;
+    if (shadow_blend->radiusFrames != 0) {
+        blend_step = shadow_blend->radiusExpandDelta / shadow_blend->radiusFrames;
+        shadow_blend->radiusExpandDelta -= blend_step;
+        shadow_blend->radiusExpandRate += blend_step;
+        blend_step = shadow_blend->radiusShrinkDelta / shadow_blend->radiusFrames;
+        shadow_blend->radiusShrinkDelta -= blend_step;
+        shadow_blend->radiusShrinkRate += blend_step;
+        --shadow_blend->radiusFrames;
     }
 }
 
