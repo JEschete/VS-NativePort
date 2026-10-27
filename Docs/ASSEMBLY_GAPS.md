@@ -6,10 +6,10 @@ native-code change, or resource-file write is performed.
 ## Results
 
 - Catalog rows checked: **4,207**.
-- Port-target rows reconciled: **3,762**.
-- Open native entries: **3** (3 stubs and 0 partial implementations).
-- Matching C/C++ reference bodies located: **2**.
-- Assembly located, but no matching C body located: **1**.
+- Port-target rows reconciled: **3,760**.
+- Open native entries: **0** (0 stubs and 0 partial implementations).
+- Matching C/C++ reference bodies located: **0**.
+- Assembly located, but no matching C body located: **0**.
 - Assembly-backed declarations with no local assembly located: **0**.
 
 [ASSEMBLY_GAPS.csv](ASSEMBLY_GAPS.csv) contains **every open entry**, with its
@@ -26,7 +26,6 @@ and instantiation bindings rather than counted as missing C functions.
 
 | ID | Native name | Original source |
 | --- | --- | --- |
-| F00766 | `Field::CallRoomEntryPoint` | `resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\2EA3C.s:1770` |
 
 ## Assembly not locally extracted
 

@@ -23,7 +23,7 @@
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
-#include "Core/Timing.h"
+#include "Core/FrameTiming.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"

@@ -29,7 +29,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Timing.h"
+#include "Core/FrameTiming.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"

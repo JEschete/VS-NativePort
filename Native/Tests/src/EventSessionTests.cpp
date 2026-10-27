@@ -330,3 +330,20 @@ TEST_CASE("Native title and battle jumps invalidate interrupted scene UI",
   CHECK(ui_title_entries == (ui_return_to_title ? 2 : 1));
   CHECK(SessionUiIsClear());
 }
+
+TEST_CASE("Retired stack capture and room code jumps have no native bindings",
+          "[event][session-reset][retired-entry]") {
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80010AA4) ==
+        nullptr);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80098B1C) == nullptr);
+  UiSessionFixture fixture;
+  for (int iteration = 0; iteration < 32; ++iteration) {
+    ui_return_to_title = true;
+    ui_title_entries = 0;
+    CHECK(Boot_RunSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
+    CHECK(ui_title_entries == 2);
+    CHECK(SessionUiIsClear());
+  }
+}

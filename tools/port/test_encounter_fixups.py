@@ -12,6 +12,27 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_retired_execution_hooks_have_no_production_consumers(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            catalog = {row["id"]: row for row in csv.DictReader(stream)}
+        for identity in ("F03575", "F00766"):
+            row = catalog[identity]
+            self.assertEqual(row["copy"], "no")
+            self.assertIn("retired-", row["notes"])
+            name = row["final_name"].replace("::", "_")
+            for path in (root / "Native").rglob("*"):
+                if path.suffix not in (".c", ".cpp", ".h", ".hpp"):
+                    continue
+                if "Tests" in path.parts:
+                    continue
+                text = audit_assembly_gaps.mask_literals(
+                    path.read_text(encoding="utf-8")
+                )
+                self.assertNotRegex(text, rf"\b{re.escape(name)}\b", str(path))
+
     def test_scripted_navigation_uses_full_native_records_and_explicit_aliases(self):
         root = Path(__file__).resolve().parents[2]
         owned = self.owned_items()

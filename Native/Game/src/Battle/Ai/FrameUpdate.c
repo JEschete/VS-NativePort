@@ -29,7 +29,7 @@
 #include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Timing.h"
+#include "Core/FrameTiming.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"

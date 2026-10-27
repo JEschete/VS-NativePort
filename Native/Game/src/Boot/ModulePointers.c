@@ -117,6 +117,7 @@
 #include "CdDrive.h"
 #include "Core/Callbacks.h"
 #include "Core/Compatibility.h"
+#include "Core/FrameTiming.h"
 #include "Core/Legacy.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Interpolation.h"
@@ -133,7 +134,6 @@
 #include "Core/PointerSort.h"
 #include "Core/Random.h"
 #include "Core/Runtime.h"
-#include "Core/Timing.h"
 #include "DiscQueue.h"
 #include "DiscReader.h"
 #include "Effects/ActionEffects.h"
@@ -1094,7 +1094,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800989B8u, 0u, (void*)&Core_Math_MultiplyRotationMatrixInPlace, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098AB4u, 0u, (void*)&Core_Math_CosineFixedPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098AB8u, 0u, (void*)&Core_Math_SineFixedPoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098B1Cu, 0u, (void*)&Field_CallRoomEntryPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098B38u, 0u, (void*)&Render_SampleRoomLighting, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098C3Cu, 0u, (void*)&Render_InterpolateRoomLightTriangle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098D6Cu, 0u, (void*)&Render_TintRoomGeometryPrimitives, 0u, 0u, 0u},
@@ -2637,7 +2636,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F591Cu, 4u, (void*)&Battle_Ai_orbitHeightOffset, sizeof Battle_Ai_orbitHeightOffset, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5920u, 4u, (void*)&Battle_Ai_arenaOrbit, sizeof Battle_Ai_arenaOrbit, 0u, 0u},
     {"SLUS_010.40", 0x80010000u, 20u, (void*)&Core_overlaySlots, sizeof Core_overlaySlots, 0u, 0u},
-    {"SLUS_010.40", 0x80010AA4u, 0u, (void*)&Boot_CaptureOverlayStack, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80010AB4u, 0u, (void*)&Boot_JumpToTitle, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80010AC4u, 0u, (void*)&Boot_JumpToGameLoop, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80010AD4u, 0u, (void*)&Boot_DelayAfterOverlayLoad, 0u, 0u, 0u},

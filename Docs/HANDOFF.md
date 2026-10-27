@@ -9,6 +9,22 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #42's last seven entries are resolved locally: F01805/F01806 native
+  navigation (`15d290bc`, exact green40421506975); F00745/F00747 bounded room
+  rendering (owner checkpoint `506f750b`, exact green40425198955); F01769
+  native monotonic frame-work timing; and justified retirement of F03575's
+  unused stack capture and F00766's unused executable-room dispatch.
+  The original186 cohort is184 implementations/2 retirements, not186
+  translated bodies. Fresh audit0 gaps/3139 implementations/161 aliases;
+  SDK/platform coverage, MA retirement and full-game parity remain separate.
+  Full Debug/Release1001/9,572,047 each, focused20/262,416,131 port/32 naming,
+  621 native fields/0 mismatches, two stable generations/1,028 outputs/
+  119 owned paths pass. Focused tidy0 new; full tidy is still running.
+  Normal-speed private-save Debug/Release New Game reaches MAP001/6000,
+  with4,586 scripted-control frames and0 errors each. Real Lab AI targeting
+  and movement runs1800 ticks each without errors; no damage or full-combat
+  parity is claimed. Final publication/exact CI and issue closure remain gates.
+  See the [final-seven checkpoint](HANDOFF_HISTORY.md#final-seven-assembly-gap-resolution-2026-10-26).
 - #42 F01805/F01806's existing scripted-navigation draft is now source-reviewed
   and locally verified against `7C7E0.s:216-421`. It preserves full native
   allocation, original repeat-request base/route aliasing, countdowns,

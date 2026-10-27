@@ -1,11 +1,14 @@
 #include <array>
 #include <bit>
+#include <chrono>
 #include <cstdint>
 #include <limits>
+#include <thread>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/FrameClock.hpp"
+#include "Core/FrameTiming.h"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Random.hpp"
 #include "Legacy/Core/LibEtc.h"
@@ -285,4 +288,39 @@ TEST_CASE("Vector normalization handles full-range squared lengths",
   const std::array zero_values{output.vx, output.vy, output.vz};
   constexpr decltype(zero_values) kZero{};
   CHECK(zero_values == kZero);
+}
+
+TEST_CASE("Frame work timing preserves source units and halfword wrap",
+          "[core][clock][frame-budget]") {
+  using Nanoseconds = std::chrono::nanoseconds;
+  CHECK(Core::FrameCounterTicks(Nanoseconds{0}) == 0);
+  CHECK(Core::FrameCounterTicks(Nanoseconds{63556}) == 0);
+  CHECK(Core::FrameCounterTicks(Nanoseconds{63557}) == 1);
+  CHECK(Core::FrameCounterTicks(std::chrono::seconds{1}) == 15734);
+  CHECK(Core::FrameCounterTicks(std::chrono::seconds{5}) == 13134);
+  for (std::int64_t seconds = 0; seconds < 65537; ++seconds) {
+    CHECK(Core::FrameCounterTicks(std::chrono::seconds{seconds}) ==
+          (seconds * 15734) % 65536);
+  }
+  const auto maximum = std::numeric_limits<std::int64_t>::max();
+  const auto expected = ((maximum / 1000000000 % 65536) * 15734 +
+                         (maximum % 1000000000) * 15734 / 1000000000) %
+                        65536;
+  CHECK(Core::FrameCounterTicks(Nanoseconds{maximum}) == expected);
+}
+
+TEST_CASE("Frame work baseline resets at actual logical frame boundaries",
+          "[core][clock][frame-budget]") {
+  Core_ResetFrameTimingBaseline();
+  std::this_thread::sleep_for(std::chrono::milliseconds{2});
+  CHECK(Core_ElapsedFrameCounterTicks() >= 1);
+  const auto before = std::chrono::steady_clock::now();
+  VSync(0);
+  const auto ticks = Core_ElapsedFrameCounterTicks();
+  const auto duration = std::chrono::steady_clock::now() - before;
+  CHECK(ticks >= 0);
+  CHECK(ticks <=
+        Core::FrameCounterTicks(
+            std::chrono::duration_cast<std::chrono::nanoseconds>(duration)) +
+            1);
 }

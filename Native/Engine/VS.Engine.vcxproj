@@ -206,6 +206,7 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Core\FrameClock.cpp" />
+    <ClCompile Include="src\Core\FrameTiming.cpp" />
     <ClCompile Include="src\Core\Gte.cpp" />
     <ClCompile Include="src\Core\Legacy.c">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -299,12 +300,6 @@
     </ClCompile>
     <ClCompile Include="src\Core\Scratch.cpp" />
     <ClCompile Include="src\Core\String\GameText.c">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Core\Timing.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -560,6 +555,7 @@
     <ClInclude Include="src\Audio\Voices.h" />
     <ClInclude Include="src\Core\Callbacks.h" />
     <ClInclude Include="src\Core\Compatibility.h" />
+    <ClInclude Include="src\Core\FrameTiming.h" />
     <ClInclude Include="src\Core\Legacy.h" />
     <ClInclude Include="src\Core\Math\FixedPoint.h" />
     <ClInclude Include="src\Core\Math\Interpolation.h" />
@@ -576,7 +572,6 @@
     <ClInclude Include="src\Core\Random.h" />
     <ClInclude Include="src\Core\Runtime.h" />
     <ClInclude Include="src\Core\String\GameText.h" />
-    <ClInclude Include="src\Core\Timing.h" />
     <ClInclude Include="src\Input\Buttons.h" />
     <ClInclude Include="src\Input\Controller.h" />
     <ClInclude Include="src\Input\Controllers.h" />

@@ -11,6 +11,96 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Final seven assembly-gap resolution (2026-10-26)
+
+The resumed base was `15d290bc`; during the pause the owner published
+`506f750be767d159e537b6c937468aca6a205f3d`, including the verified room APIs
+and their unrelated asset/solution/reference edits. That history is retained,
+not rewritten. Its exact Source Quality40425198955 succeeded. F01805/F01806
+have exact green40421506975 at15d290bc.
+
+F00745/F00747 now share the actual renderer in RoomDraw.c. Native bounded
+batch/frame spans and explicit projection outputs replace register inputs
+and pipeline lookahead without reading past the final polygon. Existing
+quarter-depth, culling, material, subdivision and texture-LOD behavior is
+preserved. M2C output and diagnostics for all three assembly-only entries
+remain in ignored `build\quality\issue42-final`. `.nop` was normalized only
+in a local assembly copy; GTE operations still required instruction review,
+and M2C cannot infer F00766's executable-data jump table.
+
+The room milestone passes batch3/140 and coupled30/726,890 assertions;
+full Debug/Release998/9,506,403 each. Truncation and overlap controls exit3.
+Focused tidy has1 existing/0 new; default quality0 new;130 port controls.
+Two generations are identical across1,028 outputs and preserve117 owned
+paths. Before/after isolated normal-speed1800-tick New Game replays reach
+MAP001 with0 errors and complete tracing. Their frame1790 BMPs both hash
+`F2309B847B77D40C32B31A2BF69DC230670251F996075BB3AEB56917E029BE01`.
+This is selected-frame/component evidence, not all-room visual parity.
+
+The final three entries are resolved as follows:
+
+- F01769 retains original `7BDB4.s:7-16` elapsed-unit/16-bit-wrap semantics,
+  backed by native steady-clock frame-work duration. The baseline resets
+  after each host yield, before callback work. The15,734 units/second match
+  the read-only PC reference; imported AI budget490 remains unchanged.
+  Tests cover sub-unit boundaries,65,537 whole-second samples, very large
+  durations, real elapsed work and VSync baseline reset. This does not claim
+  deterministic wall-time-independent AI or retire all scheduling bridges.
+- F03575's original `overlay.c:6` stack capture has no native consumer:
+  Boot_RunSessionLoop already replaces the original capture/jump paths.
+  Remove the generated stub/prototype and original symbol registration.
+  Repeated Title/Battle/Title C-boundary tests verify32 complete cycles;
+  no host stack pointer or no-op replacement is stored.
+- F00766's `2EA3C.s:1770` jumps to sectionE+20. There are no original-source
+  or native callers and no aligned absolute/j/jal references in the scanned
+  executable/PRG/BIN files. Every one of512 MPDs has zero sectionE length,
+  including91 short64-byte room headers (the first421-only inspection
+  unnecessarily excluded these; the final audit covers them).
+  Retire the unused stub/prototype/module registration, rather than invent
+  a successful executable-data dispatcher. Per-file hashes and lengths
+  remain in `section-e-complete-audit.json`. Future authored executable
+  payloads are not supported or authorized by this retirement.
+
+Both retirements retain original catalog identity/provenance and explicit
+`copy=no`/`copied=retired` states. The audit reports them as excluded, not
+implemented bodies. The original186 cohort is184 implementations plus2
+justified retirements. Thirty SDK/library assembly labels remain outside
+the game-entry cohort. This is not a zero-compatibility or whole-game claim.
+
+Fresh final validation on dirty506f750b plus this scoped work:
+
+- `test-native.cmd Debug "[frame-budget]"` and direct
+  `build\Debug\VS.Tests.exe "[frame-budget],[retired-entry],[session-reset],[scripted-override]"`:
+  2/65,546 and20/262,416 respectively. The wrapper's earlier multi-tag
+  attempt split its filter and ran no tests; only direct combined runs count.
+- Full `build\Debug\VS.Tests.exe` and `test-native.cmd Release` each pass
+  1,001 cases/9,572,047 assertions.
+- Port unittest discovery131, naming32, native-view check621/0 mismatches.
+  Two generations preserve119 owned paths and repeat1,028 outputs.
+- Focused `quality-native.cmd --files ... --tidy` has1 existing/0 new;
+  the full `quality-native.cmd --tidy` is still running at this checkpoint.
+  Existing Catch macro identities were preserved by appending new tests,
+  rather than renumbering old generated test functions or changing baselines.
+- Frozen Debug/Release hosts under `final-Debug`/`final-Release` use private
+  `--save-dir`, `--scripted --speed 1 --frames 6000 --press
+  1000:Start,1300:Circle`. Sessions1793061408406775-0/
+  1793061408406128-0 reach MAP001 at1415, execute4,586 scripted-control
+  frames, and end with exit0/engine_errors0/trace_failed=false.
+  Earlier Up1200 attempts stayed on title because the private save folders
+  were empty; those clean exits are explicitly not room-entry evidence.
+- Real Lab AI runs use existing
+  `build\Release\combat-lab\runs\1792906154560166-0\encounter-1.json`,
+  normal speed1800 ticks and controller presses140/220/280/800/880:Circle.
+  Debug1793061567198447-0/Release1793061567197798-0 both exit0 with complete
+  tracing and no engine errors,1,566 ordinary-control frames, live target0,
+  and enemy movement from[1088,0,576] toward Ashley. No combat-result/damage
+  acceptance is claimed. The first stale last-scenario attempted an
+  unavailable zone1 hostile and was correctly rejected; it is not acceptance.
+
+All local evidence is under ignored `build\quality\issue42-final`; no
+disc-derived data or captures are committed. Final publication, exact CI,
+full-tidy result and #42 closure are separate remaining checkpoint gates.
+
 ## Scripted-navigation draft verification (2026-10-26)
 
 Resumed from `d692407e08e462fe4048401ee7802c91c5ae55e7` with the owner's

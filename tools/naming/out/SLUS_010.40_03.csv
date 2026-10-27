@@ -177,5 +177,5 @@ F03571,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for
 F03572,Core::Memory::CopyAlignedWords,Native\Engine\src\Core\Memory\Heap.c,Copies aligned memory in sixteen-byte chunks and remaining words without copying trailing bytes.,high,inline asm;requires word alignment and word-multiple length;positive length required by assembly loop
 F03573,Core::Memory::ZeroAlignedWords,Native\Engine\src\Core\Memory\Heap.c,Clears aligned words while leaving any trailing bytes untouched.,high,inline asm
 F03574,Core::IgnoreCall,Native\Engine\src\Core\Runtime.c,Returns immediately for a callback or legacy hook with no work to perform.,high,dup-of:F03427
-F03575,Boot::CaptureOverlayStack,Native\Game\src\Boot\Lifecycle.c,Stores the current stack pointer so an overlay transition can restore its execution stack.,high,inline asm;replaced-by:Boot::OverlayDispatcher
+F03575,Boot::CaptureOverlayStack,Native\Game\src\Boot\Session.c,Stores the current stack pointer so an overlay transition can restore its execution stack.,high,inline asm;retired-by:Boot_RunSessionLoop;all original native capture/jump callers replaced;no host stack storage
 F03576,Boot::DelayAfterOverlayLoad,Native\Game\src\Boot\Lifecycle.c,Executes 4096 no-operation instructions as the legacy post-load overlay delay.,high,inline asm;replaced-by:Boot::OverlayDispatcher

@@ -19,6 +19,5 @@ void Boot_InitializePlatformServices(void);
 void Boot_InitializeTitleSession(void);
 void Boot_WaitForOverlayReady(void);
 void Boot_SetSoftResetEnabled(int enable);
-void Boot_CaptureOverlayStack(int*);
 
 #endif // VS_BOOT_LIFECYCLE_H_DECLS

@@ -201,6 +201,5 @@ void Field_DuckRoomEffectSound(int arg0);
 void Field_SwapRoomGeometryRedGreen(int arg0);
 void Field_RestoreRoomEffectSoundVolume(void);
 void Field_RestartRoomEffectSound(void);
-int Field_CallRoomEntryPoint();
 
 #endif // VS_FIELD_ROOMEFFECTS_H_DECLS

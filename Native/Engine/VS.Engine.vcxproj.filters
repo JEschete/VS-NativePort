@@ -306,6 +306,12 @@
     <ClCompile Include="src\Core\FrameClock.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\FrameTiming.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Core\FrameTiming.h">
+      <Filter>src\Core</Filter>
+    </ClInclude>
     <ClCompile Include="src\Core\Gte.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -416,12 +422,6 @@
     </ClCompile>
     <ClInclude Include="src\Core\String\GameText.h">
       <Filter>src\Core\String</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Core\Timing.c">
-      <Filter>src\Core</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Timing.h">
-      <Filter>src\Core</Filter>
     </ClInclude>
     <ClCompile Include="src\Core\Unported.cpp">
       <Filter>src\Core</Filter>

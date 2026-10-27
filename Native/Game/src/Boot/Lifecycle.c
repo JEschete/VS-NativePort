@@ -211,9 +211,3 @@ void Boot_WaitForOverlayReady(void) { Boot_DelayAfterOverlayLoad(); }
 // decomp: SLUS_010.40 vs_main_enableReset (src/SLUS_010.40/main.c:8371)
 void Boot_SetSoftResetEnabled(int enable) { Boot_isSoftResetEnabled = enable; }
 
-// decomp: SLUS_010.40 vs_overlay_getSp (src/SLUS_010.40/overlay.c:6) [C: not yet ported]
-void Boot_CaptureOverlayStack(int*)
-{
-    VS_UNPORTED("Boot::CaptureOverlayStack");
-}
-

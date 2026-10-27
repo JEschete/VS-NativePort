@@ -174,4 +174,4 @@ F01765,Battle::Ai::TickActorDecisionTimers,Native\Game\src\Battle\Ai\Perception.
 F01766,Battle::Ai::TargetFacingCosine,Native\Game\src\Battle\Ai\Perception.c,Returns the normalized horizontal dot product between the actor's facing and its target direction.,high,asm
 F01767,Field::IsPositionAboveGround,Native\Game\src\Field\Collision.c,Tests whether a world position lies above the decoded collision ground surface.,high,asm
 F01768,Field::IsTerrainSegmentBlocked,Native\Game\src\Field\Collision.c,Samples an extent-adjusted segment and reports whether terrain blocks any of its sixteen steps.,high,asm
-F01769,Core::ElapsedFrameCounterTicks,Native\Engine\src\Core\Timing.c,Returns the elapsed hardware root-counter ticks since the frame timing baseline.,high,asm;uses root counter 1 with 16-bit wraparound
+F01769,Core::ElapsedFrameCounterTicks,Native\Engine\src\Core\FrameTiming.cpp,Returns the elapsed hardware root-counter ticks since the frame timing baseline.,high,asm;7BDB4.s:7-16;native monotonic frame-work time reset after host yield;source16-bit elapsed-unit contract;15734 units/sec matches read-only PC reference

@@ -979,10 +979,3 @@ void Field_RestartRoomEffectSound(void)
     }
 }
 
-// decomp: BATTLE.PRG func_80098B1C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file: not yet ported]
-int Field_CallRoomEntryPoint()
-{
-    VS_UNPORTED("Field::CallRoomEntryPoint");
-    return 0;
-}
-
