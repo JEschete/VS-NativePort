@@ -6,16 +6,16 @@
 u_short Core_kSineTable[1674]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG func_800CFB68 (src/BATTLE/BATTLE.PRG/5BF94.c:5805)
-int Core_Math_InterpolateSevenBitScalar(int arg0, int arg1, int arg2)
+int Core_Math_InterpolateSevenBitScalar(int start, int end, int weight_q7)
 {
-    return (((arg1 - arg0) * arg2) >> 7) + arg0;
+    return (((end - start) * weight_q7) >> 7) + start;
 }
 
 // decomp: BATTLE.PRG func_800CFC8C (src/BATTLE/BATTLE.PRG/5BF94.c:5859)
-int Core_Math_InterpolateCosineScalar(int arg0, int arg1, int arg2, int arg3)
+int Core_Math_InterpolateCosineScalar(int start, int end, int total_steps, int current_step)
 {
-    return arg0
-         + ((int)((arg1 - arg0) * (ONE - Core_Gte_Cos((int)(arg3 * ONE / 2) / arg2)))
+    return start
+         + ((int)((end - start) * (ONE - Core_Gte_Cos((int)(current_step * ONE / 2) / total_steps)))
              / (ONE * 2));
 }
 
@@ -62,114 +62,114 @@ void Core_Math_InterpolatePairsToPlaneVector(short* src, int t, int* vec)
 }
 
 // decomp: BATTLE.PRG func_800CFE1C (src/BATTLE/BATTLE.PRG/5BF94.c:5905)
-int Core_Math_InterpolateShortPair(short* arg0, int arg1)
+int Core_Math_InterpolateShortPair(short* endpoints, int weight_q7)
 {
-    int new_var = arg0[0];
-    return (((arg0[1] - new_var) * arg1) >> 7) + new_var;
+    int start = endpoints[0];
+    return (((endpoints[1] - start) * weight_q7) >> 7) + start;
 }
 
 // decomp: BATTLE.PRG vs_battle_lerpRatio (src/BATTLE/BATTLE.PRG/5BF94.c:6382)
-int Core_Math_InterpolateFixedPointRatio(int arg0, int arg1, int arg2, int arg3)
+int Core_Math_InterpolateFixedPointRatio(int start, int end, int numerator, int denominator)
 {
-    int var_v0 = (arg1 - arg0) * ((arg2 * ONE) / arg3);
-    return arg0 + var_v0 / ONE;
+    int scaled_delta = (end - start) * ((numerator * ONE) / denominator);
+    return start + scaled_delta / ONE;
 }
 
 // decomp: BATTLE.PRG vs_battle_splineInterpolate (src/BATTLE/BATTLE.PRG/5BF94.c:6388)
 void Core_Math_InterpolateLagrangeShortVector(
     SVECTOR* p0, SVECTOR* p1, SVECTOR* p2, SVECTOR* p3, int t, SVECTOR* out)
 {
-    int temp_t3 = -t;
-    int temp_t2 = t - ONE;
-    int temp_t1 = t + ONE;
+    int negative_phase = -t;
+    int phase_minus_one = t - ONE;
+    int phase_plus_one = t + ONE;
 
-    int temp_t0 =
-        (((((temp_t3 * temp_t2) >> 0xC) * (t - ONE * 2)) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
-    int temp_t3_2 = (((temp_t1 * temp_t2) >> 0xC) * (t - ONE * 2)) >> 0xD;
-    int temp_t2_2 = (((temp_t1 * temp_t3) >> 0xC) * (t - ONE * 2)) >> 0xD;
-    int temp_v1_2 = (((((temp_t1 * t) >> 0xC) * temp_t2) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
+    int weight0_q12 =
+        (((((negative_phase * phase_minus_one) >> 0xC) * (t - ONE * 2)) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
+    int weight1_q12 = (((phase_plus_one * phase_minus_one) >> 0xC) * (t - ONE * 2)) >> 0xD;
+    int weight2_q12 = (((phase_plus_one * negative_phase) >> 0xC) * (t - ONE * 2)) >> 0xD;
+    int weight3_q12 = (((((phase_plus_one * t) >> 0xC) * phase_minus_one) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
 
-    out->vx = ((p0->vx * temp_t0) + (p1->vx * temp_t3_2) + (p2->vx * temp_t2_2)
-                  + (p3->vx * temp_v1_2))
+    out->vx = ((p0->vx * weight0_q12) + (p1->vx * weight1_q12) + (p2->vx * weight2_q12)
+                  + (p3->vx * weight3_q12))
            >> 0xC;
-    out->vy = ((p0->vy * temp_t0) + (p1->vy * temp_t3_2) + (p2->vy * temp_t2_2)
-                  + (p3->vy * temp_v1_2))
+    out->vy = ((p0->vy * weight0_q12) + (p1->vy * weight1_q12) + (p2->vy * weight2_q12)
+                  + (p3->vy * weight3_q12))
            >> 0xC;
-    out->vz = ((p0->vz * temp_t0) + (p1->vz * temp_t3_2) + (p2->vz * temp_t2_2)
-                  + (p3->vz * temp_v1_2))
+    out->vz = ((p0->vz * weight0_q12) + (p1->vz * weight1_q12) + (p2->vz * weight2_q12)
+                  + (p3->vz * weight3_q12))
            >> 0xC;
 }
 
 // decomp: BATTLE.PRG func_800D155C (src/BATTLE/BATTLE.PRG/5BF94.c:6412)
-void Core_Math_InterpolateLagrangeScalar(int arg0, int arg1, int arg2, int arg3, int arg4, int* arg5)
+void Core_Math_InterpolateLagrangeScalar(int value0, int value1, int value2, int value3, int phase_q12, int* destination)
 {
-    int p0 = ((-arg4 * (arg4 - ONE)) >> 12) * (arg4 - (ONE * 2));
-    int p1 = (((arg4 + ONE) * (arg4 - ONE)) >> 12) * (arg4 - (ONE * 2));
-    int p2 = (((arg4 + ONE) * -arg4) >> 12) * (arg4 - (ONE * 2));
-    int p3 = (((arg4 + ONE) * arg4) >> 12) * (arg4 - ONE);
+    int p0 = ((-phase_q12 * (phase_q12 - ONE)) >> 12) * (phase_q12 - (ONE * 2));
+    int p1 = (((phase_q12 + ONE) * (phase_q12 - ONE)) >> 12) * (phase_q12 - (ONE * 2));
+    int p2 = (((phase_q12 + ONE) * -phase_q12) >> 12) * (phase_q12 - (ONE * 2));
+    int p3 = (((phase_q12 + ONE) * phase_q12) >> 12) * (phase_q12 - ONE);
 
-    *arg5 = ((arg0 * (((p0 >> 12) * (ONE * 2 / 3)) >> 14)) + (arg1 * (p1 >> 13))
-                + (arg2 * (p2 >> 13)) + (arg3 * (((p3 >> 12) * (ONE * 2 / 3)) >> 14)))
+    *destination = ((value0 * (((p0 >> 12) * (ONE * 2 / 3)) >> 14)) + (value1 * (p1 >> 13))
+                + (value2 * (p2 >> 13)) + (value3 * (((p3 >> 12) * (ONE * 2 / 3)) >> 14)))
          >> 12;
 }
 
 // decomp: BATTLE.PRG vs_battle_lerp (src/BATTLE/BATTLE.PRG/5BF94.c:6424)
-int Core_Math_InterpolateThirteenBitScalar(int arg0, int arg1, int arg2)
+int Core_Math_InterpolateThirteenBitScalar(int start, int end, int weight_q13)
 {
-    int var_v0 = (arg1 - arg0) * arg2;
-    return arg0 + (var_v0 / (ONE * 2));
+    int scaled_delta = (end - start) * weight_q13;
+    return start + (scaled_delta / (ONE * 2));
 }
 
 // decomp: BATTLE.PRG func_800D169C (src/BATTLE/BATTLE.PRG/5BF94.c:6430)
-void Core_Math_InterpolateThirteenBitShortVector(SVECTOR* arg0, SVECTOR* arg1, int arg2, SVECTOR* arg3)
+void Core_Math_InterpolateThirteenBitShortVector(SVECTOR* start, SVECTOR* end, int weight_q13, SVECTOR* destination)
 {
-    arg3->vx = Core_Math_InterpolateThirteenBitScalar(arg0->vx, arg1->vx, arg2);
-    arg3->vy = Core_Math_InterpolateThirteenBitScalar(arg0->vy, arg1->vy, arg2);
-    arg3->vz = Core_Math_InterpolateThirteenBitScalar(arg0->vz, arg1->vz, arg2);
+    destination->vx = Core_Math_InterpolateThirteenBitScalar(start->vx, end->vx, weight_q13);
+    destination->vy = Core_Math_InterpolateThirteenBitScalar(start->vy, end->vy, weight_q13);
+    destination->vz = Core_Math_InterpolateThirteenBitScalar(start->vz, end->vz, weight_q13);
 }
 
 // decomp: BATTLE.PRG func_800D1718 (src/BATTLE/BATTLE.PRG/5BF94.c:6437)
-void Core_Math_InterpolateCosineShortVector(SVECTOR* arg0, SVECTOR* arg1, int arg2, int arg3, SVECTOR* arg4)
+void Core_Math_InterpolateCosineShortVector(SVECTOR* start, SVECTOR* end, int total_steps, int current_step, SVECTOR* destination)
 {
-    Core_Math_InterpolateThirteenBitShortVector(arg0, arg1, ONE - Core_Gte_Cos((arg3 * ONE / 2) / arg2), arg4);
+    Core_Math_InterpolateThirteenBitShortVector(start, end, ONE - Core_Gte_Cos((current_step * ONE / 2) / total_steps), destination);
 }
 
 // decomp: BATTLE.PRG func_800D1778 (src/BATTLE/BATTLE.PRG/5BF94.c:6442)
-void Core_Math_InterpolateTimedShortVector(SVECTOR* arg0, SVECTOR* arg1, int arg2, int arg3, SVECTOR* arg4)
+void Core_Math_InterpolateTimedShortVector(SVECTOR* start, SVECTOR* end, int total_steps, int current_step, SVECTOR* destination)
 {
-    Core_Math_InterpolateThirteenBitShortVector(arg0, arg1, (arg3 * (ONE * 2)) / arg2, arg4);
+    Core_Math_InterpolateThirteenBitShortVector(start, end, (current_step * (ONE * 2)) / total_steps, destination);
 }
 
 // decomp: BATTLE.PRG func_800D17A8 (src/BATTLE/BATTLE.PRG/5BF94.c:6447)
-void Core_Math_InterpolateThirteenBitWideVector(VECTOR* arg0, VECTOR* arg1, int arg2, VECTOR* arg3)
+void Core_Math_InterpolateThirteenBitWideVector(VECTOR* start, VECTOR* end, int weight_q13, VECTOR* destination)
 {
-    arg3->vx = Core_Math_InterpolateThirteenBitScalar(arg0->vx, arg1->vx, arg2);
-    arg3->vy = Core_Math_InterpolateThirteenBitScalar(arg0->vy, arg1->vy, arg2);
-    arg3->vz = Core_Math_InterpolateThirteenBitScalar(arg0->vz, arg1->vz, arg2);
+    destination->vx = Core_Math_InterpolateThirteenBitScalar(start->vx, end->vx, weight_q13);
+    destination->vy = Core_Math_InterpolateThirteenBitScalar(start->vy, end->vy, weight_q13);
+    destination->vz = Core_Math_InterpolateThirteenBitScalar(start->vz, end->vz, weight_q13);
 }
 
 // decomp: BATTLE.PRG func_800D1824 (src/BATTLE/BATTLE.PRG/5BF94.c:6454)
-void Core_Math_InterpolateCosineWideVector(VECTOR* arg0, VECTOR* arg1, int arg2, int arg3, VECTOR* arg4)
+void Core_Math_InterpolateCosineWideVector(VECTOR* start, VECTOR* end, int total_steps, int current_step, VECTOR* destination)
 {
-    Core_Math_InterpolateThirteenBitWideVector(arg0, arg1, ONE - Core_Gte_Cos((arg3 * ONE / 2) / arg2), arg4);
+    Core_Math_InterpolateThirteenBitWideVector(start, end, ONE - Core_Gte_Cos((current_step * ONE / 2) / total_steps), destination);
 }
 
 // decomp: BATTLE.PRG func_800D1884 (src/BATTLE/BATTLE.PRG/5BF94.c:6459)
-void Core_Math_InterpolateTimedWideVector(VECTOR* arg0, VECTOR* arg1, int arg2, int arg3, VECTOR* arg4)
+void Core_Math_InterpolateTimedWideVector(VECTOR* start, VECTOR* end, int total_steps, int current_step, VECTOR* destination)
 {
-    Core_Math_InterpolateThirteenBitWideVector(arg0, arg1, (arg3 * (ONE * 2)) / arg2, arg4);
+    Core_Math_InterpolateThirteenBitWideVector(start, end, (current_step * (ONE * 2)) / total_steps, destination);
 }
 
 // decomp: BATTLE.PRG func_800D18B4 (src/BATTLE/BATTLE.PRG/5BF94.c:6464)
-int Core_Math_InterpolateCosineTimedScalar(int arg0, int arg1, int arg2, int arg3)
+int Core_Math_InterpolateCosineTimedScalar(int start, int end, int total_steps, int current_step)
 {
-    return Core_Math_InterpolateThirteenBitScalar(arg0, arg1, ONE - Core_Gte_Cos((arg3 * ONE / 2) / arg2));
+    return Core_Math_InterpolateThirteenBitScalar(start, end, ONE - Core_Gte_Cos((current_step * ONE / 2) / total_steps));
 }
 
 // decomp: BATTLE.PRG func_800D1904 (src/BATTLE/BATTLE.PRG/5BF94.c:6469)
-int Core_Math_InterpolateTimedScalar(int arg0, int arg1, int arg2, int arg3)
+int Core_Math_InterpolateTimedScalar(int start, int end, int total_steps, int current_step)
 {
-    return Core_Math_InterpolateThirteenBitScalar(arg0, arg1, (arg3 * (ONE * 2)) / arg2);
+    return Core_Math_InterpolateThirteenBitScalar(start, end, (current_step * (ONE * 2)) / total_steps);
 }
 
 // decomp: ENDING.PRG func_800688D4 (src/ENDING/ENDING.PRG/D4.c:187)

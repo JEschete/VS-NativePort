@@ -17,6 +17,7 @@
 
 extern "C" {
 #include "Core/Math/FixedPoint.h"
+#include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
@@ -535,4 +536,80 @@ TEST_CASE("Identity and translation setters preserve their separate contracts",
   CHECK(matrix.t[0] == -3);
   CHECK(matrix.t[1] == 17);
   CHECK(matrix.t[2] == 29);
+}
+
+TEST_CASE("Interpolation weights preserve distinct scales and signed rounding",
+          "[core][math][interpolation-names]") {
+  CHECK(Core_Math_InterpolateSevenBitScalar(10, -10, 0) == 10);
+  CHECK(Core_Math_InterpolateSevenBitScalar(10, -10, 64) == 0);
+  CHECK(Core_Math_InterpolateSevenBitScalar(10, -10, 128) == -10);
+  std::array<std::int16_t, 2> endpoints{10, -11};
+  CHECK(Core_Math_InterpolateShortPair(endpoints.data(), 64) == -1);
+  CHECK(Core_Math_InterpolateThirteenBitScalar(10, -11, 4096) == 0);
+  CHECK(Core_Math_InterpolateFixedPointRatio(10, -11, 1, 2) == 0);
+  CHECK(Core_Math_InterpolateFixedPointRatio(0, 8192, 1, 3) == 2730);
+}
+
+TEST_CASE("Timed scalar interpolation keeps duration before elapsed steps",
+          "[core][math][interpolation-names]") {
+  CHECK(Core_Math_InterpolateTimedScalar(10, -10, 8, 2) == 5);
+  for (const auto interpolate : {Core_Math_InterpolateCosineScalar,
+                                 Core_Math_InterpolateCosineTimedScalar}) {
+    CHECK(interpolate(10, -10, 8, 0) == 10);
+    CHECK(interpolate(10, -10, 8, 2) == 8);
+    CHECK(interpolate(10, -10, 8, 4) == 0);
+    CHECK(interpolate(10, -10, 8, 8) == -10);
+  }
+}
+
+TEST_CASE("Short-vector interpolation retains aliasing and fixed-point phases",
+          "[core][math][interpolation-names]") {
+  SVECTOR start{0, 32, -32, 71};
+  SVECTOR end{16, -16, 48, 73};
+  Core_Math_InterpolateThirteenBitShortVector(&start, &end, 4096, &start);
+  CheckVectorComponents(start, SVECTOR{8, 8, 8, 71});
+  start = {0, 32, -32, 71};
+  Core_Math_InterpolateTimedShortVector(&start, &end, 8, 2, &start);
+  CheckVectorComponents(start, SVECTOR{4, 20, -12, 71});
+  start = {0, 32, -32, 71};
+  Core_Math_InterpolateCosineShortVector(&start, &end, 8, 2, &start);
+  CheckVectorComponents(start, SVECTOR{2, 25, -21, 71});
+}
+
+TEST_CASE("Wide-vector interpolation preserves units and destination padding",
+          "[core][math][interpolation-names]") {
+  VECTOR start{0, 32, -32, 71};
+  VECTOR end{16, -16, 48, 73};
+  Core_Math_InterpolateThirteenBitWideVector(&start, &end, 4096, &start);
+  CheckVectorComponents(start, VECTOR{8, 8, 8, 71});
+  start = {0, 32, -32, 71};
+  Core_Math_InterpolateTimedWideVector(&start, &end, 8, 2, &start);
+  CheckVectorComponents(start, VECTOR{4, 20, -12, 71});
+  start = {0, 32, -32, 71};
+  Core_Math_InterpolateCosineWideVector(&start, &end, 8, 2, &start);
+  CheckVectorComponents(start, VECTOR{2, 25, -21, 71});
+}
+
+TEST_CASE("Lagrange interpolation preserves original fixed-point coefficients",
+          "[core][math][interpolation-names]") {
+  SVECTOR point0{8, -16, 24, 0};
+  SVECTOR point1{16, -8, 32, 0};
+  SVECTOR point2{32, 24, -16, 0};
+  SVECTOR point3{64, -32, 8, 0};
+  constexpr std::array<std::array<int, 4>, 5> kSamples{{{-4096, 7, -16, 23},
+                                                        {0, 16, -8, 32},
+                                                        {2048, 22, 12, 7},
+                                                        {4096, 32, 24, -16},
+                                                        {8192, 63, -32, 7}}};
+  for (const auto& [phase, x, y, z] : kSamples) {
+    SVECTOR result{0, 0, 0, 75};
+    Core_Math_InterpolateLagrangeShortVector(&point0, &point1, &point2, &point3,
+                                             phase, &result);
+    CheckVectorComponents(result, SVECTOR{static_cast<std::int16_t>(x),
+                                          static_cast<std::int16_t>(y),
+                                          static_cast<std::int16_t>(z), 75});
+    int scalar = 0;
+    Core_Math_InterpolateLagrangeScalar(8, 16, 32, 64, phase, &scalar);
+    CHECK(scalar == x);
+  }
 }

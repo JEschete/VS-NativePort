@@ -1770,6 +1770,34 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source = re.sub(pattern, replacement, source)
                 self.assertEqual(source, expected)
 
+    def test_interpolation_names_preserve_duration_order_and_rounding(self):
+        examples = {
+            "Core::Math::InterpolateTimedScalar": (
+                "return Interpolate(arg0, arg1, (arg3 * (ONE * 2)) / arg2);",
+                "return Interpolate(start, end, "
+                "(current_step * (ONE * 2)) / total_steps);",
+            ),
+            "Core::Math::InterpolateShortPair": (
+                "int new_var = arg0[0]; "
+                "return (((arg0[1] - new_var) * arg1) >> 7) + new_var;",
+                "int start = endpoints[0]; "
+                "return (((endpoints[1] - start) * weight_q7) >> 7) + start;",
+            ),
+            "Core::Math::InterpolateThirteenBitScalar": (
+                "int var_v0 = (arg1 - arg0) * arg2; "
+                "return arg0 + var_v0 / (ONE * 2);",
+                "int scaled_delta = (end - start) * weight_q13; "
+                "return start + scaled_delta / (ONE * 2);",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

@@ -779,3 +779,26 @@ Evidence: `build\quality\issue148-math-*`. The candidate inventory is now
 24,342 occurrences/2,095 pairs/357 files; it still is not an all-reviewed count.
 Work continues through the remaining individual source reviews rather than
 treating this milestone as an issue-completion or stopping gate.
+
+The math cohort is published in `baa0a27f`, exact green Source Quality
+`40562493951`. The next reviewed cohort covers all remaining generic bindings
+in generated `Core\Math\Interpolation.c/.h`: 15 functions and 68 bindings.
+Original `5BF94.c:5805-5909/6382-6472` and its transform/camera callers establish
+endpoint order, Q7/Q12/Q13 units, total/current step order, and the four
+Lagrange control weights. No polynomial, divide/shift order, truncation,
+extrapolation, callback, or ownership behavior changes.
+
+On dirty base `baa0a27f`, five new controls first pass 65 assertions before
+renaming. Debug/Release then each pass 44 cases/932 assertions with
+`[core][math],[event] --reporter compact`. Controls distinguish negative
+seven-bit shifts from thirteen-bit truncating division, ratio quantization,
+aliasing and padding, quarter-step cosine/linear interpolation, and the
+original rounded two-thirds Lagrange coefficients outside the central interval.
+Copier tests pass 129/129 and naming tests 32/32. Final scoped compilation-based
+quality has one existing/zero new findings; explicit fixed-width test types
+repair the initial style findings without changing values or baselines.
+Two generations again prove exact identifier-only changes to these two files,
+all 742 manifest paths checked and all 121 owned paths preserved.
+Evidence: `build\quality\issue148-interpolation-*`.
+The lexical inventory is 24,102 occurrences/2,074 pairs/355 files; other
+subsystems' candidates remain subject to individual review.
