@@ -15,105 +15,105 @@
 // Template body: Effects::Templates::TrailControl (decomp src/EFFECT/trails5.h:278). Included once per instance by Effects/Templates/TrailControl.c with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 5
 
-void VS_TRAIL_CONTROL_FUNCTION(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_TrailQuadSet* arg3)
+void VS_TRAIL_CONTROL_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_TrailQuadSet* trail_set)
 {
-    SVECTOR sp10;
-    SVECTOR sp18;
+    SVECTOR first_local_control;
+    SVECTOR second_local_control;
     int i;
-    int temp_s0;
-    int var_s0;
-    int var_s1;
-    int var_s3;
-    int var_s4;
+    int spline_span_length;
+    int first_control_angle;
+    int second_control_angle;
+    int first_control_radius;
+    int second_control_radius;
 
-    for (i = 0; i < arg3->trailcount; ++i) {
+    for (i = 0; i < trail_set->trailcount; ++i) {
 
-        SVECTOR* temp_s5 = arg3->trails[i].splinePoints;
+        SVECTOR* spline_control_points = trail_set->trails[i].splinePoints;
 
-        arg1->aimPoint.vx = temp_s5[3].vx - temp_s5[0].vx;
-        arg1->aimPoint.vy = temp_s5[3].vy - temp_s5[0].vy;
-        arg1->aimPoint.vz = temp_s5[3].vz - temp_s5[0].vz;
+        emitter_scratch->aimPoint.vx = spline_control_points[3].vx - spline_control_points[0].vx;
+        emitter_scratch->aimPoint.vy = spline_control_points[3].vy - spline_control_points[0].vy;
+        emitter_scratch->aimPoint.vz = spline_control_points[3].vz - spline_control_points[0].vz;
 
-        temp_s0 = Core_Math_SquareRootInteger((arg1->aimPoint.vx * arg1->aimPoint.vx)
-                               + (arg1->aimPoint.vy * arg1->aimPoint.vy)
-                               + (arg1->aimPoint.vz * arg1->aimPoint.vz));
+        spline_span_length = Core_Math_SquareRootInteger((emitter_scratch->aimPoint.vx * emitter_scratch->aimPoint.vx)
+                               + (emitter_scratch->aimPoint.vy * emitter_scratch->aimPoint.vy)
+                               + (emitter_scratch->aimPoint.vz * emitter_scratch->aimPoint.vz));
 
-        Core_Math_InterpolatePairsToPlaneVector(arg0->pairRanges[0],
-            Effects_SampleEffectCurve(arg0->massCurve, arg3->curveSampleDistance), arg1->massRange);
-        Core_Math_InterpolatePairsToPlaneVector(arg0->pairRanges[1],
-            Effects_SampleEffectCurve(arg0->gravityScaleCurve, arg3->curveSampleDistance), arg1->gravityScaleRange);
-        Core_Math_InterpolatePairsToPlaneVector(arg0->pairRanges[2],
-            Effects_SampleEffectCurve(arg0->speedCurve, arg3->curveSampleDistance), arg1->speedRange);
-        Core_Math_InterpolatePairsToWideVector(arg0->vectorRanges[1],
-            Effects_SampleEffectCurve(arg0->directionJitterCurve, arg3->curveSampleDistance), &arg1->directionJitter);
-        Core_Math_InterpolatePairsToWideVector(arg0->vectorRanges[0],
-            Effects_SampleEffectCurve(arg0->directionCurve, arg3->curveSampleDistance), &arg1->baseDirection);
-        Core_Math_InterpolatePairsToShortVector(arg0->vectorRanges[2],
-            Effects_SampleEffectCurve(arg0->forceCurve, arg3->curveSampleDistance), &arg1->forceMin);
+        Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[0],
+            Effects_SampleEffectCurve(particle_definition->massCurve, trail_set->curveSampleDistance), emitter_scratch->massRange);
+        Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[1],
+            Effects_SampleEffectCurve(particle_definition->gravityScaleCurve, trail_set->curveSampleDistance), emitter_scratch->gravityScaleRange);
+        Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[2],
+            Effects_SampleEffectCurve(particle_definition->speedCurve, trail_set->curveSampleDistance), emitter_scratch->speedRange);
+        Core_Math_InterpolatePairsToWideVector(particle_definition->vectorRanges[1],
+            Effects_SampleEffectCurve(particle_definition->directionJitterCurve, trail_set->curveSampleDistance), &emitter_scratch->directionJitter);
+        Core_Math_InterpolatePairsToWideVector(particle_definition->vectorRanges[0],
+            Effects_SampleEffectCurve(particle_definition->directionCurve, trail_set->curveSampleDistance), &emitter_scratch->baseDirection);
+        Core_Math_InterpolatePairsToShortVector(particle_definition->vectorRanges[2],
+            Effects_SampleEffectCurve(particle_definition->forceCurve, trail_set->curveSampleDistance), &emitter_scratch->forceMin);
 
-        if (arg1->forceMin.vx != 0) {
-            int var_v0_2 =
-                (arg1->speedRange[0] + (Core_Random_Rand() % arg1->forceMin.vx)) - (arg1->forceMin.vx / 2);
-            if (&arg1->aimPoint) {
-                sp10.vz = (temp_s0 * var_v0_2) / 256;
+        if (emitter_scratch->forceMin.vx != 0) {
+            int first_longitudinal_factor_256 =
+                (emitter_scratch->speedRange[0] + (Core_Random_Rand() % emitter_scratch->forceMin.vx)) - (emitter_scratch->forceMin.vx / 2);
+            if (&emitter_scratch->aimPoint) {
+                first_local_control.vz = (spline_span_length * first_longitudinal_factor_256) / 256;
             } else {
-                sp10.vz = (temp_s0 * var_v0_2) / 256;
+                first_local_control.vz = (spline_span_length * first_longitudinal_factor_256) / 256;
             }
         } else {
-            sp10.vz = (temp_s0 * arg1->speedRange[0]) / 256;
+            first_local_control.vz = (spline_span_length * emitter_scratch->speedRange[0]) / 256;
         }
 
-        if (arg1->forceMin.vy != 0) {
-            int var_v0_3 =
-                (arg1->speedRange[1] + (Core_Random_Rand() % arg1->forceMin.vy)) - (arg1->forceMin.vy / 2);
-            sp18.vz = temp_s0 + ((temp_s0 * var_v0_3) / 256);
+        if (emitter_scratch->forceMin.vy != 0) {
+            int second_longitudinal_factor_256 =
+                (emitter_scratch->speedRange[1] + (Core_Random_Rand() % emitter_scratch->forceMin.vy)) - (emitter_scratch->forceMin.vy / 2);
+            second_local_control.vz = spline_span_length + ((spline_span_length * second_longitudinal_factor_256) / 256);
         } else {
-            sp18.vz = temp_s0 + ((temp_s0 * arg1->speedRange[1]) / 256);
+            second_local_control.vz = spline_span_length + ((spline_span_length * emitter_scratch->speedRange[1]) / 256);
         }
 
-        var_s3 = arg1->massRange[0];
+        first_control_radius = emitter_scratch->massRange[0];
 
-        if (arg1->massRange[1] != 0) {
-            var_s3 += Core_Random_Rand() % arg1->massRange[1];
+        if (emitter_scratch->massRange[1] != 0) {
+            first_control_radius += Core_Random_Rand() % emitter_scratch->massRange[1];
         }
 
-        var_s4 = arg1->gravityScaleRange[0];
+        second_control_radius = emitter_scratch->gravityScaleRange[0];
 
-        if (arg1->gravityScaleRange[1] != 0) {
-            var_s4 += Core_Random_Rand() % arg1->gravityScaleRange[1];
+        if (emitter_scratch->gravityScaleRange[1] != 0) {
+            second_control_radius += Core_Random_Rand() % emitter_scratch->gravityScaleRange[1];
         }
 
-        var_s0 = arg1->baseDirection.vx;
+        first_control_angle = emitter_scratch->baseDirection.vx;
 
-        if (arg1->directionJitter.vx != 0) {
-            var_s0 += (Core_Random_Rand() % (arg1->directionJitter.vx * 2)) - arg1->directionJitter.vx;
+        if (emitter_scratch->directionJitter.vx != 0) {
+            first_control_angle += (Core_Random_Rand() % (emitter_scratch->directionJitter.vx * 2)) - emitter_scratch->directionJitter.vx;
         }
 
-        var_s1 = arg1->baseDirection.vy;
+        second_control_angle = emitter_scratch->baseDirection.vy;
 
-        if (arg1->directionJitter.vy != 0) {
-            var_s1 += (Core_Random_Rand() % (arg1->directionJitter.vy * 2)) - arg1->directionJitter.vy;
+        if (emitter_scratch->directionJitter.vy != 0) {
+            second_control_angle += (Core_Random_Rand() % (emitter_scratch->directionJitter.vy * 2)) - emitter_scratch->directionJitter.vy;
         }
 
-        sp10.vx = (Core_Gte_Cos(var_s0) * var_s3) >> 0xC;
-        sp10.vy = (Core_Gte_Sin(var_s0) * var_s3) >> 0xC;
-        sp18.vx = (Core_Gte_Cos(var_s1) * var_s4) >> 0xC;
-        sp18.vy = (Core_Gte_Sin(var_s1) * var_s4) >> 0xC;
+        first_local_control.vx = (Core_Gte_Cos(first_control_angle) * first_control_radius) >> 0xC;
+        first_local_control.vy = (Core_Gte_Sin(first_control_angle) * first_control_radius) >> 0xC;
+        second_local_control.vx = (Core_Gte_Cos(second_control_angle) * second_control_radius) >> 0xC;
+        second_local_control.vy = (Core_Gte_Sin(second_control_angle) * second_control_radius) >> 0xC;
 
-        Core_Math_WidenShortVector(temp_s5, &arg1->aimPoint);
-        Core_Math_WidenShortVector(temp_s5 + 3, &arg1->spawnPoint);
-        Core_Math_BuildLookAtOrientation(&arg1->aimPoint, &arg1->spawnPoint, &arg1->aimMatrix);
-        Core_Gte_SetRotMatrix(&arg1->aimMatrix);
-        Core_Gte_SetTransVector(&arg1->aimPoint);
-        Core_Gte_LoadV0(&sp10);
+        Core_Math_WidenShortVector(spline_control_points, &emitter_scratch->aimPoint);
+        Core_Math_WidenShortVector(spline_control_points + 3, &emitter_scratch->spawnPoint);
+        Core_Math_BuildLookAtOrientation(&emitter_scratch->aimPoint, &emitter_scratch->spawnPoint, &emitter_scratch->aimMatrix);
+        Core_Gte_SetRotMatrix(&emitter_scratch->aimMatrix);
+        Core_Gte_SetTransVector(&emitter_scratch->aimPoint);
+        Core_Gte_LoadV0(&first_local_control);
         Core_Gte_Rtv0Tr();
-        Core_Gte_StoreLvnl(&arg1->aimPoint);
-        Core_Math_NarrowWideVector(&arg1->aimPoint, temp_s5 + 1);
-        Core_Gte_LoadV0(&sp18);
+        Core_Gte_StoreLvnl(&emitter_scratch->aimPoint);
+        Core_Math_NarrowWideVector(&emitter_scratch->aimPoint, spline_control_points + 1);
+        Core_Gte_LoadV0(&second_local_control);
         Core_Gte_Rtv0Tr();
-        Core_Gte_StoreLvnl(&arg1->spawnPoint);
-        Core_Math_NarrowWideVector(&arg1->spawnPoint, temp_s5 + 2);
+        Core_Gte_StoreLvnl(&emitter_scratch->spawnPoint);
+        Core_Math_NarrowWideVector(&emitter_scratch->spawnPoint, spline_control_points + 2);
     }
 }
 #undef TRAIL_SAMPLE_COUNT

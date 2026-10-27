@@ -19,7 +19,7 @@
 #define VS_RING_TYPES
 #endif
 
-int VS_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     int radius[3];
     int height[3];
@@ -43,7 +43,7 @@ int VS_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     int angleA, angleB;
     int cosAngle;
     int sinAngle;
-    int speed;
+    int angular_step;
     int maxSpeed;
     int row;
     intptr_t column;
@@ -60,14 +60,14 @@ int VS_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
 
     alive = 1;
-    state = arg0->rendererState;
+    state = renderer_slot->rendererState;
     battle = Effects_currentInstance;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
         state = Core_Memory_AllocateFromHighEnd(sizeof *state);
-        arg0->rendererState = state;
-        state->effect = arg2 >> 8;
-        state->lifetime = arg2;
+        renderer_slot->rendererState = state;
+        state->effect = packed_parameters >> 8;
+        state->lifetime = packed_parameters;
         state->radiusSpeed = 0;
         state->radius = 0;
         state->heightSpeed = 0;
@@ -131,20 +131,20 @@ int VS_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
         radius[1] = ((radius[1] * row) >> 12) + radius[0];
         radius[2] = ((radius[2] * row) >> 12) + radius[0];
         do {
-            speed = scratch->speedRange[0];
+            angular_step = scratch->speedRange[0];
             maxSpeed = scratch->speedRange[1];
         } while (0);
         row = state->angle;
-        if (speed != maxSpeed) {
-            if (maxSpeed < speed) {
-                speed = Core_Random_Rand() % (scratch->speedRange[0] - scratch->speedRange[1] + 1)
+        if (angular_step != maxSpeed) {
+            if (maxSpeed < angular_step) {
+                angular_step = Core_Random_Rand() % (scratch->speedRange[0] - scratch->speedRange[1] + 1)
                       + scratch->speedRange[1];
             } else {
-                speed = Core_Random_Rand() % (scratch->speedRange[1] - scratch->speedRange[0] + 1)
+                angular_step = Core_Random_Rand() % (scratch->speedRange[1] - scratch->speedRange[0] + 1)
                       + scratch->speedRange[0];
             }
         }
-        maxSpeed = row + speed;
+        maxSpeed = row + angular_step;
         baseAngle = state->angle = maxSpeed;
         Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[1],
             Effects_SampleEffectCurve(effect->directionJitterCurve, state->age), &scratch->directionJitter);

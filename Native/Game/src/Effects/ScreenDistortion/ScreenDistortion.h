@@ -9,12 +9,12 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_EFFECTS_SCREENDISTORTION_SCREENDISTORTION_H_DECLS)
 #define VS_EFFECTS_SCREENDISTORTION_SCREENDISTORTION_H_DECLS
 
-void Effects_ScreenDistortion_SetFeedbackLayer(int arg0);
+void Effects_ScreenDistortion_SetFeedbackLayer(int ordering_layer);
 void Effects_ScreenDistortion_DrawFeedbackTiles(void);
-void Effects_ScreenDistortion_SetRadialWarp(short arg0, short arg1);
-void Effects_ScreenDistortion_SetVignetteEnabled(int arg0);
-int Effects_ScreenDistortion_EllipsePoint(int arg0, int arg1);
-int* Effects_ScreenDistortion_AppendVignetteCorner(int arg0, int arg1, int* arg2, u_long* arg3);
+void Effects_ScreenDistortion_SetRadialWarp(short initial_scale_q12, short radial_growth_q12);
+void Effects_ScreenDistortion_SetVignetteEnabled(int enabled);
+int Effects_ScreenDistortion_EllipsePoint(int angular_step, int radius);
+int* Effects_ScreenDistortion_AppendVignetteCorner(int packed_corner_xy, int first_angular_step, int* packet_words, u_long* ordering_head);
 void Effects_ScreenDistortion_DrawVignette(void);
 
 #endif // VS_EFFECTS_SCREENDISTORTION_SCREENDISTORTION_H_DECLS

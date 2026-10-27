@@ -45,20 +45,20 @@ int Effects_particleDrag;
 Effects_ParticleGravity Effects_particleGravity;
 
 // decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5770)
-void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* arg0)
+void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* particle_endpoints)
 {
     int dx;
     int dy;
     int sx;
     int sy;
 
-    if (*(int*)&arg0->endX == *(int*)&arg0->startX) {
+    if (*(int*)&particle_endpoints->endX == *(int*)&particle_endpoints->startX) {
         return;
     }
     sx = -1;
     sy = -1;
-    dx = arg0->startX - arg0->endX;
-    dy = arg0->startY - arg0->endY;
+    dx = particle_endpoints->startX - particle_endpoints->endX;
+    dy = particle_endpoints->startY - particle_endpoints->endY;
     if (dx < 0) {
         dx = -dx;
         sx = 1;
@@ -68,14 +68,14 @@ void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* arg0)
         sy = 1;
     }
     if (dy < dx) {
-        arg0->startX += sx;
+        particle_endpoints->startX += sx;
         if (dx < dy * 2) {
-            arg0->startY += sy;
+            particle_endpoints->startY += sy;
         }
     } else {
-        arg0->startY += sy;
+        particle_endpoints->startY += sy;
         if (dy < dx * 2) {
-            arg0->startX += sx;
+            particle_endpoints->startX += sx;
         }
     }
 }
@@ -125,7 +125,7 @@ void Effects_ReleaseParticlePool(void)
 }
 
 // decomp: BATTLE.PRG func_800D27F0 (src/BATTLE/BATTLE.PRG/5BF94.c:6818)
-Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* arg0)
+Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* effect_instance)
 {
     Effects_Particle* node = Effects_freeParticles;
 
@@ -139,14 +139,14 @@ Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* arg0)
     node->previous = NULL;
     ++Effects_usedParticleCount;
     Effects_freeParticles = node->next;
-    node->next = arg0->particles;
+    node->next = effect_instance->particles;
 
-    if (arg0->particles != NULL) {
-        arg0->particles->previous = node;
+    if (effect_instance->particles != NULL) {
+        effect_instance->particles->previous = node;
     }
 
-    arg0->particles = node;
-    ++arg0->particleCount;
+    effect_instance->particles = node;
+    ++effect_instance->particleCount;
 
     do {
     } while (0);
@@ -155,60 +155,60 @@ Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* arg0)
 }
 
 // decomp: BATTLE.PRG func_800D2888 (src/BATTLE/BATTLE.PRG/5BF94.c:6847)
-void Effects_ReleaseEffectParticle(Effects_Particle* arg0, Effects_EffectInstance* arg1)
+void Effects_ReleaseEffectParticle(Effects_Particle* particle_node, Effects_EffectInstance* effect_instance)
 {
-    if (arg0->next != NULL) {
-        arg0->next->previous = arg0->previous;
+    if (particle_node->next != NULL) {
+        particle_node->next->previous = particle_node->previous;
     }
 
-    if (arg0->previous != NULL) {
-        arg0->previous->next = arg0->next;
+    if (particle_node->previous != NULL) {
+        particle_node->previous->next = particle_node->next;
     } else {
-        arg1->particles = arg0->next;
+        effect_instance->particles = particle_node->next;
     }
 
-    arg0->next = Effects_freeParticles;
-    Effects_freeParticles = arg0;
+    particle_node->next = Effects_freeParticles;
+    Effects_freeParticles = particle_node;
     --Effects_usedParticleCount;
-    --arg1->particleCount;
+    --effect_instance->particleCount;
 }
 
 // decomp: BATTLE.PRG func_800D2904 (src/BATTLE/BATTLE.PRG/5BF94.c:6865)
-void Effects_ReleaseAllEffectParticles(Effects_EffectInstance* arg0)
+void Effects_ReleaseAllEffectParticles(Effects_EffectInstance* effect_instance)
 {
-    Effects_Particle* temp_a1;
-    Effects_Particle* var_a0;
+    Effects_Particle* particle_list_head;
+    Effects_Particle* particle_list_tail;
 
-    temp_a1 = arg0->particles;
-    var_a0 = temp_a1;
+    particle_list_head = effect_instance->particles;
+    particle_list_tail = particle_list_head;
 
-    if (temp_a1 == 0) {
+    if (particle_list_head == 0) {
         return;
     }
 
-    while (var_a0->next != 0) {
-        var_a0 = var_a0->next;
+    while (particle_list_tail->next != 0) {
+        particle_list_tail = particle_list_tail->next;
     }
 
-    var_a0->next = Effects_freeParticles;
-    Effects_freeParticles = temp_a1;
-    Effects_usedParticleCount -= arg0->particleCount;
-    arg0->particleCount = 0;
+    particle_list_tail->next = Effects_freeParticles;
+    Effects_freeParticles = particle_list_head;
+    Effects_usedParticleCount -= effect_instance->particleCount;
+    effect_instance->particleCount = 0;
 }
 
 // decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
-void Effects_SetParticleSpawnPosition(Effects_ParticleEmitterScratch* arg0, Effects_Particle* arg1)
+void Effects_SetParticleSpawnPosition(Effects_ParticleEmitterScratch* emitter_scratch, Effects_Particle* particle_node)
 {
-    if (arg0->flags & 0x40000) {
-        Core_Gte_ApplyRotMatrix(&arg0->vector, &arg0->aimPoint);
+    if (emitter_scratch->flags & 0x40000) {
+        Core_Gte_ApplyRotMatrix(&emitter_scratch->vector, &emitter_scratch->aimPoint);
     } else {
-        arg0->aimPoint.vx = arg0->vector.vx;
-        arg0->aimPoint.vy = arg0->vector.vy;
-        arg0->aimPoint.vz = arg0->vector.vz;
+        emitter_scratch->aimPoint.vx = emitter_scratch->vector.vx;
+        emitter_scratch->aimPoint.vy = emitter_scratch->vector.vy;
+        emitter_scratch->aimPoint.vz = emitter_scratch->vector.vz;
     }
-    arg1->motion.position.vx = arg0->position.vx + arg0->aimPoint.vx * ONE;
-    arg1->motion.position.vy = arg0->position.vy + arg0->aimPoint.vy * ONE;
-    arg1->motion.position.vz = arg0->position.vz + arg0->aimPoint.vz * ONE;
+    particle_node->motion.position.vx = emitter_scratch->position.vx + emitter_scratch->aimPoint.vx * ONE;
+    particle_node->motion.position.vy = emitter_scratch->position.vy + emitter_scratch->aimPoint.vy * ONE;
+    particle_node->motion.position.vz = emitter_scratch->position.vz + emitter_scratch->aimPoint.vz * ONE;
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/5BF94.c:6930
@@ -218,7 +218,7 @@ void Effects_SetParticleSpawnPosition(Effects_ParticleEmitterScratch* arg0, Effe
                  : (Core_Random_Rand() + (Core_Random_Rand() << 16)) % ((b) - (a) + 1) + (a))
 // decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6935)
 void Effects_EmitParticleEvent(
-    Effects_EffectInstance* arg0, int event, int arg2, int arg3, Effects_PluginEffectState* parent)
+    Effects_EffectInstance* effect_instance, int event, int transparency_override, int particle_variant, Effects_PluginEffectState* parent)
 {
     int _[4] __attribute__((unused));
     int frame;
@@ -244,8 +244,8 @@ void Effects_EmitParticleEvent(
     scratch->transformIndex = def->transformIndex;
     scratch->attractionTransform = def->attractionTransform;
 
-    if (arg2 != 0) {
-        scratch->transparency = arg2;
+    if (transparency_override != 0) {
+        scratch->transparency = transparency_override;
     } else if (def->transparencyCurve != 0) {
         scratch->transparency = def->transparencyCurve;
     } else if (parent != NULL) {
@@ -254,11 +254,11 @@ void Effects_EmitParticleEvent(
         scratch->transparency = 4;
     }
 
-    if (parent != NULL && arg3 == 0) {
-        arg3 = parent->variant & 0xF;
+    if (parent != NULL && particle_variant == 0) {
+        particle_variant = parent->variant & 0xF;
     }
 
-    frame = arg0->frame;
+    frame = effect_instance->frame;
     sample = def->intervalCurve;
     if (frame % Core_Math_InterpolateShortPair(def->intervalRange, Effects_curveSamples[sample]) != 0) {
         return;
@@ -266,7 +266,7 @@ void Effects_EmitParticleEvent(
 
     Core_Gte_ClearTranslation();
 
-    matrix = &arg0->transforms[scratch->transformIndex].world;
+    matrix = &effect_instance->transforms[scratch->transformIndex].world;
     sample = def->countCurve;
     count = Core_Math_InterpolateShortPair(def->countRange, Effects_curveSamples[sample]);
     if (count + Effects_usedParticleCount >= Effects_particleCapacity) {
@@ -280,7 +280,7 @@ void Effects_EmitParticleEvent(
     }
 
     for (i = 0; i < count; ++i) {
-        node = Effects_AllocateEffectParticle(arg0);
+        node = Effects_AllocateEffectParticle(effect_instance);
         node->transformIndex = scratch->transformIndex;
         node->attractionTransform = scratch->attractionTransform;
         Effects_InitializeParticleTextureAnimation(&node->textureAnimation, def->textureIndex, def->animationId);
@@ -611,19 +611,19 @@ void Effects_EmitParticleEvent(
 
     switch (scratch->flags & 0xE000) {
     case 0x4000:
-        if (arg0->context.emitFrom.type == 4) {
-            Actors_ActorBonePosition(((u_char*)&arg0->context.emitFrom.value)[0],
-                ((u_char*)&arg0->context.emitFrom.value)[2], &scratch->vector, 0);
+        if (effect_instance->context.emitFrom.type == 4) {
+            Actors_ActorBonePosition(((u_char*)&effect_instance->context.emitFrom.value)[0],
+                ((u_char*)&effect_instance->context.emitFrom.value)[2], &scratch->vector, 0);
         } else {
-            scratch->vector = arg0->context.emitFrom.value.position;
+            scratch->vector = effect_instance->context.emitFrom.value.position;
         }
         goto aim;
     case 0x6000:
-        if (arg0->context.emitTo.type == 4) {
-            Actors_ActorBonePosition(((u_char*)&arg0->context.emitTo.value)[0],
-                ((u_char*)&arg0->context.emitTo.value)[2], &scratch->vector, 0);
+        if (effect_instance->context.emitTo.type == 4) {
+            Actors_ActorBonePosition(((u_char*)&effect_instance->context.emitTo.value)[0],
+                ((u_char*)&effect_instance->context.emitTo.value)[2], &scratch->vector, 0);
         } else {
-            scratch->vector = arg0->context.emitTo.value.position;
+            scratch->vector = effect_instance->context.emitTo.value.position;
         }
     aim:
         Core_Math_WidenShortVector(&scratch->vector, &scratch->aimPoint);
@@ -761,13 +761,13 @@ void Effects_EmitParticleEvent(
     case 0xC0:
         for (i = 0; i < count; ++i) {
             node->attractionTarget[0] =
-                arg0->transforms[scratch->attractionTransform].world.t[0] + scratch->attractionOffset.vx
+                effect_instance->transforms[scratch->attractionTransform].world.t[0] + scratch->attractionOffset.vx
                 + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vx, -scratch->attractionJitter.vy);
             node->attractionTarget[1] =
-                arg0->transforms[scratch->attractionTransform].world.t[1] + scratch->attractionOffset.vy
+                effect_instance->transforms[scratch->attractionTransform].world.t[1] + scratch->attractionOffset.vy
                 + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vy, -scratch->attractionJitter.vy);
             node->attractionTarget[2] =
-                arg0->transforms[scratch->attractionTransform].world.t[2] + scratch->attractionOffset.vz
+                effect_instance->transforms[scratch->attractionTransform].world.t[2] + scratch->attractionOffset.vz
                 + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vz, -scratch->attractionJitter.vz);
             node = node->next;
         }
@@ -795,20 +795,20 @@ void Effects_EmitParticleEvent(
         node->attraction = value;
         *(u_short*)&node->endEvent = *(u_short*)&def->endEvent;
         node->transparency = scratch->transparency;
-        node->opaque61Bit0 = arg3;
+        node->opaque61Bit0 = particle_variant;
         node = node->next;
     }
 }
 #undef RAND_UNIFORM_WIDE
 
 // decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:7658)
-int Effects_TickEffectParticles(Effects_EffectInstance* arg0)
+int Effects_TickEffectParticles(Effects_EffectInstance* effect_instance)
 {
-    Effects_Particle* next = arg0->particles;
+    Effects_Particle* next = effect_instance->particles;
     Effects_Particle* node;
 
     Effects_IntegrateParticleMotion(next);
-    Effects_DrawEffectParticleList(arg0->particles);
+    Effects_DrawEffectParticleList(effect_instance->particles);
     node = next;
     while (next != NULL) {
         next = node->next;
@@ -820,20 +820,20 @@ int Effects_TickEffectParticles(Effects_EffectInstance* arg0)
         parent.transparency = node->transparency;
         parent.variant = node->opaque61Bit0;
         if (node->tickEvent != 0) {
-            Effects_EmitParticleEvent(arg0, node->tickEvent - 1, 0, 0, &parent);
+            Effects_EmitParticleEvent(effect_instance, node->tickEvent - 1, 0, 0, &parent);
         }
         if (node->lifetime == -1) {
             if (node->textureAnimation.frameTimer == 0) {
                 if (node->endEvent != 0) {
-                    Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, &parent);
+                    Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
                 }
-                Effects_ReleaseEffectParticle(node, arg0);
+                Effects_ReleaseEffectParticle(node, effect_instance);
             }
         } else if (--node->lifetime == 0) {
             if (node->endEvent != 0) {
-                Effects_EmitParticleEvent(arg0, node->endEvent - 1, 0, 0, &parent);
+                Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
             }
-            Effects_ReleaseEffectParticle(node, arg0);
+            Effects_ReleaseEffectParticle(node, effect_instance);
         }
         node = next;
     }
@@ -841,10 +841,10 @@ int Effects_TickEffectParticles(Effects_EffectInstance* arg0)
 }
 
 // decomp: BATTLE.PRG func_800D5260 (src/BATTLE/BATTLE.PRG/5BF94.c:7826)
-void Effects_SetParticleGravity(Effects_ParticleGravity* arg0) { Effects_particleGravity = *arg0; }
+void Effects_SetParticleGravity(Effects_ParticleGravity* gravity_vector) { Effects_particleGravity = *gravity_vector; }
 
 // decomp: BATTLE.PRG func_800D5294 (src/BATTLE/BATTLE.PRG/5BF94.c:7828)
-void Effects_SetParticleDrag(int* arg0) { Effects_particleDrag = *arg0; }
+void Effects_SetParticleDrag(int* drag_value) { Effects_particleDrag = *drag_value; }
 
 // decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7830)
 void Effects_IntegrateParticleMotion(Effects_Particle* node)

@@ -14,27 +14,27 @@
 #include "Effects/Templates/TemplateState.h"
 #include "Effects/Transforms.h"
 
-void Effects_Plg049_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg050_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg057_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg069_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg135_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg161_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg165_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg167_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg168_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg169_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
-void Effects_Plg232_TrailNineOrigin(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3);
+void Effects_Plg049_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg050_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg057_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg069_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg135_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg161_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg165_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg167_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg168_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg169_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
+void Effects_Plg232_TrailNineOrigin(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set);
 
 #endif // VS_EFFECTS_TEMPLATES_TRAILNINEORIGIN_H_DECLS

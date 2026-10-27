@@ -11,43 +11,43 @@
 // Template body: Effects::Templates::TrailNineUpdate (decomp src/EFFECT/trails9.h:414). Included once per instance by Effects/Templates/TrailNineUpdate.c with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 9
 
-void VS_TRAIL_UPDATE_FUNCTION(Effects_ParticleDefinition* arg0 __attribute__((unused)),
-    Effects_ParticleEmitterScratch* arg1 __attribute__((unused)),
-    Effects_EffectInstance* arg2 __attribute__((unused)), Effects_Trail9State* arg3)
+void VS_TRAIL_UPDATE_FUNCTION(Effects_ParticleDefinition* particle_definition __attribute__((unused)),
+    Effects_ParticleEmitterScratch* emitter_scratch __attribute__((unused)),
+    Effects_EffectInstance* effect_instance __attribute__((unused)), Effects_Trail9State* trail_set)
 {
     int i;
 
-    for (i = 0; i < arg3->trailCount; ++i) {
+    for (i = 0; i < trail_set->trailCount; ++i) {
 
-        Effects_Trail9* temp_s0 = &arg3->trails[i];
+        Effects_Trail9* trail = &trail_set->trails[i];
 
-        if (temp_s0->trailCollapseCounter == 0) {
+        if (trail->trailCollapseCounter == 0) {
             continue;
         }
 
-        if (arg3->curveSampleDistance >= temp_s0->stepCount) {
-            --temp_s0->trailCollapseCounter;
-            if (temp_s0->trailCollapseCounter < temp_s0->stepCount) {
-                --temp_s0->splineSampleCount;
+        if (trail_set->curveSampleDistance >= trail->stepCount) {
+            --trail->trailCollapseCounter;
+            if (trail->trailCollapseCounter < trail->stepCount) {
+                --trail->splineSampleCount;
             }
         } else {
-            int currentStep = temp_s0->stepCount - arg3->curveSampleDistance;
-            int speed = temp_s0->speed;
+            int currentStep = trail->stepCount - trail_set->curveSampleDistance;
+            int speed = trail->speed;
 
-            speed += ((0x06000000 - (temp_s0->splineProgress * 2))
+            speed += ((0x06000000 - (trail->splineProgress * 2))
                          / (currentStep * currentStep))
                    - ((speed * 2) / currentStep);
-            temp_s0->speed = speed;
-            temp_s0->splineProgress += speed;
-            temp_s0->currentSplineSample = (temp_s0->currentSplineSample + 1) % 9;
+            trail->speed = speed;
+            trail->splineProgress += speed;
+            trail->currentSplineSample = (trail->currentSplineSample + 1) % 9;
 
-            Core_Math_InterpolateLagrangeShortVector(&temp_s0->splinePoints[0],
-                &temp_s0->splinePoints[1], &temp_s0->splinePoints[2],
-                &temp_s0->splinePoints[3], (temp_s0->splineProgress >> 0xC) - ONE,
-                &temp_s0->splineSamples[temp_s0->currentSplineSample]);
+            Core_Math_InterpolateLagrangeShortVector(&trail->splinePoints[0],
+                &trail->splinePoints[1], &trail->splinePoints[2],
+                &trail->splinePoints[3], (trail->splineProgress >> 0xC) - ONE,
+                &trail->splineSamples[trail->currentSplineSample]);
 
-            if (temp_s0->splineSampleCount < 9) {
-                ++temp_s0->splineSampleCount;
+            if (trail->splineSampleCount < 9) {
+                ++trail->splineSampleCount;
             }
         }
     }

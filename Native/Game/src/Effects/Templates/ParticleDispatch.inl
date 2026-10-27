@@ -9,95 +9,95 @@
 #include "Effects/Transforms.h"
 
 // Template body: Effects::Templates::ParticleDispatch (decomp src/EFFECT/particleDispatch.h:3). Included once per instance by Effects/Templates/ParticleDispatch.c with that plugin's bindings.
-int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
-    Effects_ParticleDefinition* temp_s2;
-    int var_a0;
-    short var_v0;
-    Effects_ParticleEmitterScratch* a2 = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
-    Effects_ParticleQuadSet* temp_s1 = arg0->rendererState;
-    Effects_EffectInstance* temp_s0 = Effects_currentInstance;
-    int s3 = 1;
+    Effects_ParticleDefinition* particle_definition;
+    int control_point_capacity;
+    short max_interval_endpoint;
+    Effects_ParticleEmitterScratch* emitter_scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
+    Effects_ParticleQuadSet* particle_set = renderer_slot->rendererState;
+    Effects_EffectInstance* effect_instance = Effects_currentInstance;
+    int renderer_alive = 1;
 
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
 #ifdef VS_PARTICLE_UNTEXTURED
         /* This variant uses only the state prefix, without texture animation. */
-        temp_s1 = Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation));
+        particle_set = Core_Memory_AllocateFromHighEnd(offsetof(Effects_ParticleQuadSet, textureAnimation));
 #else
-        temp_s1 = Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet));
+        particle_set = Core_Memory_AllocateFromHighEnd(sizeof(Effects_ParticleQuadSet));
 #endif
-        arg0->rendererState = temp_s1;
-        temp_s1->definitionIndex = arg2 >> 8;
-        temp_s1->opaque0 = arg2;
-        temp_s1->age = 0;
-        temp_s1->opaque8 = 0;
-        temp_s2 = &Effects_package->block5Data->definitions[temp_s1->definitionIndex];
+        renderer_slot->rendererState = particle_set;
+        particle_set->definitionIndex = packed_parameters >> 8;
+        particle_set->opaque0 = packed_parameters;
+        particle_set->age = 0;
+        particle_set->opaque8 = 0;
+        particle_definition = &Effects_package->block5Data->definitions[particle_set->definitionIndex];
 
-        var_v0 = temp_s2->intervalRange[1];
-        if (temp_s2->intervalRange[1] < temp_s2->intervalRange[0]) {
-            var_v0 = temp_s2->intervalRange[0];
+        max_interval_endpoint = particle_definition->intervalRange[1];
+        if (particle_definition->intervalRange[1] < particle_definition->intervalRange[0]) {
+            max_interval_endpoint = particle_definition->intervalRange[0];
         }
 
-        var_a0 = var_v0;
+        control_point_capacity = max_interval_endpoint;
 
-        if (var_a0 >= 9) {
-            var_a0 = 8;
+        if (control_point_capacity >= 9) {
+            control_point_capacity = 8;
         }
 
-        temp_s1->controlPoints = Core_Memory_AllocateFromHighEnd(var_a0 << 5);
+        particle_set->controlPoints = Core_Memory_AllocateFromHighEnd(control_point_capacity << 5);
 #ifndef VS_PARTICLE_UNTEXTURED
-        Effects_ClearParticleTextureState((int*)(&temp_s1->textureAnimation));
-        Effects_InitializeParticleTextureAnimation(&temp_s1->textureAnimation, temp_s2->textureIndex, temp_s2->animationId);
+        Effects_ClearParticleTextureState((int*)(&particle_set->textureAnimation));
+        Effects_InitializeParticleTextureAnimation(&particle_set->textureAnimation, particle_definition->textureIndex, particle_definition->animationId);
 #endif
         break;
 
     case 2:
-        temp_s2 = &Effects_package->block5Data->definitions[temp_s1->definitionIndex];
+        particle_definition = &Effects_package->block5Data->definitions[particle_set->definitionIndex];
 #ifdef VS_PARTICLE_UNTEXTURED
-        a2->flags = temp_s2->flags & 0x3FFFFFF;
+        emitter_scratch->flags = particle_definition->flags & 0x3FFFFFF;
 #else
-        a2->flags = temp_s2->flags;
+        emitter_scratch->flags = particle_definition->flags;
 #endif
-        temp_s1->count = Core_Math_InterpolateShortPair(
-            temp_s2->intervalRange, Effects_SampleEffectCurve(temp_s2->intervalCurve, temp_s1->age));
+        particle_set->count = Core_Math_InterpolateShortPair(
+            particle_definition->intervalRange, Effects_SampleEffectCurve(particle_definition->intervalCurve, particle_set->age));
 
-        if (temp_s1->count >= 9) {
-            temp_s1->count = 8;
+        if (particle_set->count >= 9) {
+            particle_set->count = 8;
         }
 
-        if (temp_s1->opaque8 <= 0) {
-            VS_PARTICLE_ORIGIN_FUNCTION(temp_s2, a2, temp_s0, temp_s1);
-            VS_PARTICLE_TARGET_FUNCTION(temp_s2, a2, temp_s0, temp_s1);
-            temp_s1->opaque8 = temp_s2->vectorRanges[5][2];
+        if (particle_set->opaque8 <= 0) {
+            VS_PARTICLE_ORIGIN_FUNCTION(particle_definition, emitter_scratch, effect_instance, particle_set);
+            VS_PARTICLE_TARGET_FUNCTION(particle_definition, emitter_scratch, effect_instance, particle_set);
+            particle_set->opaque8 = particle_definition->vectorRanges[5][2];
         }
 
-        temp_s1->opaque8 = (temp_s1->opaque8 - 1);
+        particle_set->opaque8 = (particle_set->opaque8 - 1);
 
-        VS_PARTICLE_CONTROL_FUNCTION(temp_s2, a2, temp_s0, temp_s1);
-        VS_PARTICLE_RENDER_FUNCTION(temp_s2, a2, temp_s0, temp_s1);
+        VS_PARTICLE_CONTROL_FUNCTION(particle_definition, emitter_scratch, effect_instance, particle_set);
+        VS_PARTICLE_RENDER_FUNCTION(particle_definition, emitter_scratch, effect_instance, particle_set);
 
-        ++temp_s1->age;
+        ++particle_set->age;
 
-        if (temp_s1->opaque0 != 0) {
-            --temp_s1->opaque0;
-            if (!temp_s1->opaque0) {
-                Core_Memory_FreeFromHighEnd(temp_s1->controlPoints);
-                s3 = 0;
+        if (particle_set->opaque0 != 0) {
+            --particle_set->opaque0;
+            if (!particle_set->opaque0) {
+                Core_Memory_FreeFromHighEnd(particle_set->controlPoints);
+                renderer_alive = 0;
             }
         }
         break;
 
     case 3:
-        temp_s1->opaque0 = 1;
+        particle_set->opaque0 = 1;
         break;
 
     case 4:
-        Core_Memory_FreeFromHighEnd(temp_s1->controlPoints);
-        s3 = 0;
+        Core_Memory_FreeFromHighEnd(particle_set->controlPoints);
+        renderer_alive = 0;
         break;
     }
 
-    return s3;
+    return renderer_alive;
 }
 

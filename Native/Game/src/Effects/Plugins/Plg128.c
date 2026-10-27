@@ -25,109 +25,109 @@ SVECTOR Effects_Plg128_surfaceVertices2[5][16]; /* contents: module image (Modul
 int Effects_Plg128_trailEmissionCounter; /* contents: module image (ModuleData.c) */
 
 // decomp: PLG128.BIN func_800FD9A4 (src/EFFECT/PLG128.BIN/F8.c:66)
-void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* arg0, VECTOR* arg1)
+void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* camera_effect, VECTOR* translation)
 {
-    Core_Math_BuildLookAtOrientation(&arg0->eye, &arg0->lookAt, &arg0->view);
-    arg0->view.t[0] = arg1->vx;
-    arg0->view.t[1] = arg1->vy;
-    arg0->view.t[2] = arg1->vz;
+    Core_Math_BuildLookAtOrientation(&camera_effect->eye, &camera_effect->lookAt, &camera_effect->view);
+    camera_effect->view.t[0] = translation->vx;
+    camera_effect->view.t[1] = translation->vy;
+    camera_effect->view.t[2] = translation->vz;
 }
 
 // decomp: PLG128.BIN func_800FDA04 (src/EFFECT/PLG128.BIN/F8.c:74)
-void Effects_Plg128_ResolveCameraEndpoints(Effects_Plg128_CameraEffectState* arg0, Effects_ParticleEmitterScratch* arg1, Effects_EffectInstance* arg2,
-    Effects_ParticleDefinition* arg3)
+void Effects_Plg128_ResolveCameraEndpoints(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* emitter_scratch, Effects_EffectInstance* effect_instance,
+    Effects_ParticleDefinition* particle_definition)
 {
-    switch (arg1->flags & 7) {
+    switch (emitter_scratch->flags & 7) {
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&arg1->position, Effects_effectOrigin, &arg1->position);
+        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     case 2:
-        arg1->position.vx += arg2->transforms[arg3->transformIndex].world.t[0];
-        arg1->position.vy += arg2->transforms[arg3->transformIndex].world.t[1];
-        arg1->position.vz += arg2->transforms[arg3->transformIndex].world.t[2];
+        emitter_scratch->position.vx += effect_instance->transforms[particle_definition->transformIndex].world.t[0];
+        emitter_scratch->position.vy += effect_instance->transforms[particle_definition->transformIndex].world.t[1];
+        emitter_scratch->position.vz += effect_instance->transforms[particle_definition->transformIndex].world.t[2];
         break;
     }
-    arg0->lookAt.vx = arg1->position.vx;
-    arg0->lookAt.vy = arg1->position.vy;
-    arg0->lookAt.vz = arg1->position.vz;
-    switch (arg1->flags & 0x1C0) {
+    camera_effect->lookAt.vx = emitter_scratch->position.vx;
+    camera_effect->lookAt.vy = emitter_scratch->position.vy;
+    camera_effect->lookAt.vz = emitter_scratch->position.vz;
+    switch (emitter_scratch->flags & 0x1C0) {
     case 0:
         break;
     case 0xC0:
-        arg1->attractionOffset.vx += arg2->transforms[arg3->attractionTransform].world.t[0];
-        arg1->attractionOffset.vy += arg2->transforms[arg3->attractionTransform].world.t[1];
-        arg1->attractionOffset.vz += arg2->transforms[arg3->attractionTransform].world.t[2];
+        emitter_scratch->attractionOffset.vx += effect_instance->transforms[particle_definition->attractionTransform].world.t[0];
+        emitter_scratch->attractionOffset.vy += effect_instance->transforms[particle_definition->attractionTransform].world.t[1];
+        emitter_scratch->attractionOffset.vz += effect_instance->transforms[particle_definition->attractionTransform].world.t[2];
         break;
     case 0x80:
-        arg1->attractionOffset.vx += Effects_actionRequest.position.vx;
-        arg1->attractionOffset.vy += Effects_actionRequest.position.vy;
-        arg1->attractionOffset.vz += Effects_actionRequest.position.vz;
+        emitter_scratch->attractionOffset.vx += Effects_actionRequest.position.vx;
+        emitter_scratch->attractionOffset.vy += Effects_actionRequest.position.vy;
+        emitter_scratch->attractionOffset.vz += Effects_actionRequest.position.vz;
         break;
     }
-    arg0->eye.vx = arg1->attractionOffset.vx;
-    arg0->eye.vy = arg1->attractionOffset.vy;
-    arg0->eye.vz = arg1->attractionOffset.vz;
+    camera_effect->eye.vx = emitter_scratch->attractionOffset.vx;
+    camera_effect->eye.vy = emitter_scratch->attractionOffset.vy;
+    camera_effect->eye.vz = emitter_scratch->attractionOffset.vz;
 }
 
 // decomp: PLG128.BIN func_800FDC80 (src/EFFECT/PLG128.BIN/F8.c:111)
-void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* arg0, Effects_ParticleEmitterScratch* arg1, Effects_EffectInstance* arg2,
-    Effects_ParticleDefinition* arg3)
+void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* emitter_scratch, Effects_EffectInstance* effect_instance,
+    Effects_ParticleDefinition* particle_definition)
 {
-    switch (arg1->flags & 7) {
+    switch (emitter_scratch->flags & 7) {
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&arg1->position, Effects_effectOrigin, &arg1->position);
+        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     case 2:
-        arg1->position.vx += arg2->transforms[arg3->transformIndex].world.t[0];
-        arg1->position.vy += arg2->transforms[arg3->transformIndex].world.t[1];
-        arg1->position.vz += arg2->transforms[arg3->transformIndex].world.t[2];
+        emitter_scratch->position.vx += effect_instance->transforms[particle_definition->transformIndex].world.t[0];
+        emitter_scratch->position.vy += effect_instance->transforms[particle_definition->transformIndex].world.t[1];
+        emitter_scratch->position.vz += effect_instance->transforms[particle_definition->transformIndex].world.t[2];
         break;
     }
-    arg0->eye.vx = arg1->position.vx;
-    arg0->eye.vy = arg1->position.vy;
-    arg0->eye.vz = arg1->position.vz;
-    arg0->lookAt.vx = arg1->position.vx
-                   + ((-arg1->attractionJitter.vx * Core_Gte_Sin(arg2->transforms[arg3->transformIndex].opaqueBE)) >> 12);
-    arg0->lookAt.vz = arg1->position.vz
-                   + ((-arg1->attractionJitter.vx * Core_Gte_Cos(arg2->transforms[arg3->transformIndex].opaqueBE)) >> 12);
-    arg0->lookAt.vy = arg1->position.vy;
+    camera_effect->eye.vx = emitter_scratch->position.vx;
+    camera_effect->eye.vy = emitter_scratch->position.vy;
+    camera_effect->eye.vz = emitter_scratch->position.vz;
+    camera_effect->lookAt.vx = emitter_scratch->position.vx
+                   + ((-emitter_scratch->attractionJitter.vx * Core_Gte_Sin(effect_instance->transforms[particle_definition->transformIndex].opaqueBE)) >> 12);
+    camera_effect->lookAt.vz = emitter_scratch->position.vz
+                   + ((-emitter_scratch->attractionJitter.vx * Core_Gte_Cos(effect_instance->transforms[particle_definition->transformIndex].opaqueBE)) >> 12);
+    camera_effect->lookAt.vy = emitter_scratch->position.vy;
 }
 
 // decomp: PLG128.BIN func_800FDE78 (src/EFFECT/PLG128.BIN/F8.c:136)
-void Effects_Plg128_StoreCameraEndpoints(Effects_Plg128_CameraEffectState* arg0, Effects_ParticleEmitterScratch* scratch)
+void Effects_Plg128_StoreCameraEndpoints(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* scratch)
 {
-    arg0->endCamera.position.vx = arg0->lookAt.vx << 12;
-    arg0->endCamera.position.vy = arg0->lookAt.vy << 12;
-    arg0->endCamera.position.vz = arg0->lookAt.vz << 12;
-    arg0->endCamera.lookAt.vx = arg0->eye.vx << 12;
-    arg0->endCamera.lookAt.vy = arg0->eye.vy << 12;
-    arg0->endCamera.lookAt.vz = arg0->eye.vz << 12;
+    camera_effect->endCamera.position.vx = camera_effect->lookAt.vx << 12;
+    camera_effect->endCamera.position.vy = camera_effect->lookAt.vy << 12;
+    camera_effect->endCamera.position.vz = camera_effect->lookAt.vz << 12;
+    camera_effect->endCamera.lookAt.vx = camera_effect->eye.vx << 12;
+    camera_effect->endCamera.lookAt.vy = camera_effect->eye.vy << 12;
+    camera_effect->endCamera.lookAt.vz = camera_effect->eye.vz << 12;
 }
 
 // decomp: PLG128.BIN func_800FDEC4 (src/EFFECT/PLG128.BIN/F8.c:146)
-int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
-    Effects_Plg128_CameraEffectState* state = arg0->rendererState;
+    Effects_Plg128_CameraEffectState* state = renderer_slot->rendererState;
     Effects_EffectInstance* battle = Effects_currentInstance;
     Effects_ParticleEmitterScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x1D0);
     Effects_ParticleDefinition* effect;
     int alive = 1;
     int curve;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
-        state = arg0->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));
-        state->effect = arg2 >> 8;
-        state->lifetime = arg2;
-        state->mode = arg2 >> 16;
+        state = renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));
+        state->effect = packed_parameters >> 8;
+        state->lifetime = packed_parameters;
+        state->mode = packed_parameters >> 16;
         state->age = 0;
         Effects_CaptureEffectCamera(&state->startCamera);
         Effects_CaptureEffectCamera(&state->endCamera);
         Effects_cameraMotionFrame = 0;
-        Effects_cameraMotionDuration = arg2 & 0xFF;
+        Effects_cameraMotionDuration = packed_parameters & 0xFF;
         switch (state->mode) {
         case 0:
         case 1:

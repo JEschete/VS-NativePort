@@ -14,164 +14,164 @@
 #define VS_PARTICLE_SETUP_TYPES
 #endif
 
-void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3)
+void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set)
 {
-    int sp10;
-    SVECTOR* temp_s1;
-    int temp_a1;
-    int temp_lo;
+    int ring_edge_start_x;
+    SVECTOR* origin_control_point;
+    int next_corner_index;
+    int ring_angle_step;
     int temp_s0_2;
-    int temp_s3;
-    int temp_v0;
-    int temp_v0_4;
-    int var_fp;
+    int ring_x;
+    int random_angle;
+    int edge_interpolation_q12;
+    int ring_edge_start_z;
     int i;
-    u_short var_a0_2;
-    u_short var_v1;
-    u_short var_v1_2;
-    MATRIX* temp_s0;
+    u_short corner_x_bits;
+    u_short corner_y_bits;
+    u_short corner_z_bits;
+    MATRIX* emitter_world_matrix;
 
     Core_Math_InterpolatePairsToWideVector(
-        arg0->positionRange, Effects_SampleEffectCurve(arg0->positionCurve, arg3->age), &arg1->position);
-    temp_s0 = &arg2->transforms[arg0->transformIndex].world;
+        particle_definition->positionRange, Effects_SampleEffectCurve(particle_definition->positionCurve, particle_set->age), &emitter_scratch->position);
+    emitter_world_matrix = &effect_instance->transforms[particle_definition->transformIndex].world;
 
-    switch (arg1->flags & 7) {
+    switch (emitter_scratch->flags & 7) {
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&arg1->position, Effects_effectOrigin, &arg1->position);
+        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     case 2:
-        arg1->position.vx += temp_s0->t[0];
-        arg1->position.vy += temp_s0->t[1];
-        arg1->position.vz += temp_s0->t[2];
+        emitter_scratch->position.vx += emitter_world_matrix->t[0];
+        emitter_scratch->position.vy += emitter_world_matrix->t[1];
+        emitter_scratch->position.vz += emitter_world_matrix->t[2];
         break;
     }
 
     Core_Math_InterpolatePairsToWideVector(
-        arg0->extentRange, Effects_SampleEffectCurve(arg0->extentCurve, arg3->age), &arg1->extent);
-    Core_Gte_SetRotMatrix(temp_s0);
+        particle_definition->extentRange, Effects_SampleEffectCurve(particle_definition->extentCurve, particle_set->age), &emitter_scratch->extent);
+    Core_Gte_SetRotMatrix(emitter_world_matrix);
     Core_Gte_ClearTranslation();
 
-    switch (arg1->flags & 0x38) {
+    switch (emitter_scratch->flags & 0x38) {
     case 0:
-        for (i = 0; i < arg3->count; ++i) {
+        for (i = 0; i < particle_set->count; ++i) {
 
-            temp_s1 = arg3->controlPoints + (i * 4);
+            origin_control_point = particle_set->controlPoints + (i * 4);
 
-            temp_v0 = Core_Random_Rand();
-            arg1->sinAngle0 = Core_Gte_Sin(temp_v0);
-            arg1->cosAngle0 = Core_Gte_Cos(temp_v0);
+            random_angle = Core_Random_Rand();
+            emitter_scratch->sinAngle0 = Core_Gte_Sin(random_angle);
+            emitter_scratch->cosAngle0 = Core_Gte_Cos(random_angle);
 
-            temp_v0 = Core_Random_Rand();
-            arg1->sinAngle1 = Core_Gte_Sin(temp_v0);
-            arg1->cosAngle1 = Core_Gte_Cos(temp_v0);
+            random_angle = Core_Random_Rand();
+            emitter_scratch->sinAngle1 = Core_Gte_Sin(random_angle);
+            emitter_scratch->cosAngle1 = Core_Gte_Cos(random_angle);
 
-            temp_s1->vx =
-                (((arg1->extent.vx * arg1->cosAngle0) >> 0xC) * arg1->cosAngle1) >> 0xC;
-            temp_s1->vy =
-                (((arg1->extent.vy * arg1->cosAngle0) >> 0xC) * arg1->sinAngle1) >> 0xC;
-            temp_s1->vz = (arg1->extent.vz * arg1->sinAngle0) >> 0xC;
+            origin_control_point->vx =
+                (((emitter_scratch->extent.vx * emitter_scratch->cosAngle0) >> 0xC) * emitter_scratch->cosAngle1) >> 0xC;
+            origin_control_point->vy =
+                (((emitter_scratch->extent.vy * emitter_scratch->cosAngle0) >> 0xC) * emitter_scratch->sinAngle1) >> 0xC;
+            origin_control_point->vz = (emitter_scratch->extent.vz * emitter_scratch->sinAngle0) >> 0xC;
 
-            if (arg1->flags & 0x40000) {
-                Core_Gte_ApplyRotMatrix(temp_s1, &arg1->aimPoint);
-                temp_s1->vx = arg1->aimPoint.vx;
-                temp_s1->vy = arg1->aimPoint.vy;
-                temp_s1->vz = arg1->aimPoint.vz;
+            if (emitter_scratch->flags & 0x40000) {
+                Core_Gte_ApplyRotMatrix(origin_control_point, &emitter_scratch->aimPoint);
+                origin_control_point->vx = emitter_scratch->aimPoint.vx;
+                origin_control_point->vy = emitter_scratch->aimPoint.vy;
+                origin_control_point->vz = emitter_scratch->aimPoint.vz;
             }
 
-            temp_s1->vx += arg1->position.vx;
-            temp_s1->vy += arg1->position.vy;
-            temp_s1->vz += arg1->position.vz;
+            origin_control_point->vx += emitter_scratch->position.vx;
+            origin_control_point->vy += emitter_scratch->position.vy;
+            origin_control_point->vz += emitter_scratch->position.vz;
         }
         return;
 
     case 8:
-        for (i = 0; i < arg3->count; ++i) {
+        for (i = 0; i < particle_set->count; ++i) {
 
-            temp_s1 = arg3->controlPoints + i * 4;
+            origin_control_point = particle_set->controlPoints + i * 4;
 
-            switch (arg1->flags & 0x1800) {
+            switch (emitter_scratch->flags & 0x1800) {
             case 0x0:
             case 0x800:
                 switch (Core_Random_Rand() % 6) {
                 case 0:
-                    temp_s1->vx = arg1->extent.vx;
+                    origin_control_point->vx = emitter_scratch->extent.vx;
                     goto jump1;
 
                 case 1:
-                    temp_s1->vx = -arg1->extent.vx;
+                    origin_control_point->vx = -emitter_scratch->extent.vx;
                 jump1:
-                    temp_s1->vy =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vy, -arg1->extent.vy);
-                    temp_s1->vz =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vz, -arg1->extent.vz);
+                    origin_control_point->vy =
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
+                    origin_control_point->vz =
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 2:
-                    temp_s1->vy = arg1->extent.vy;
+                    origin_control_point->vy = emitter_scratch->extent.vy;
                     goto jump2;
 
                 case 3:
-                    temp_s1->vy = -arg1->extent.vy;
+                    origin_control_point->vy = -emitter_scratch->extent.vy;
                 jump2:
-                    temp_s1->vx =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vx, -arg1->extent.vx);
-                    temp_s1->vz =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vz, -arg1->extent.vz);
+                    origin_control_point->vx =
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
+                    origin_control_point->vz =
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 4:
-                    temp_s1->vz = arg1->extent.vz;
+                    origin_control_point->vz = emitter_scratch->extent.vz;
                     goto jump3;
 
                 case 5:
-                    temp_s1->vz = -arg1->extent.vz;
+                    origin_control_point->vz = -emitter_scratch->extent.vz;
                 jump3:
-                    temp_s1->vx =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vx, -arg1->extent.vx);
-                    temp_s1->vy =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vy, -arg1->extent.vy);
+                    origin_control_point->vx =
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
+                    origin_control_point->vy =
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     break;
                 }
                 break;
 
             case 0x1000:
-                temp_a1 = VS_PARTICLE_CORNER_STATE + 1;
-                VS_PARTICLE_CORNER_STATE = temp_a1 & 7;
+                next_corner_index = VS_PARTICLE_CORNER_STATE + 1;
+                VS_PARTICLE_CORNER_STATE = next_corner_index & 7;
 
-                var_a0_2 = arg1->extent.vx;
+                corner_x_bits = emitter_scratch->extent.vx;
                 if (!(VS_PARTICLE_CORNER_STATE & 1)) {
-                    var_a0_2 = -var_a0_2;
+                    corner_x_bits = -corner_x_bits;
                 }
-                temp_s1->vx = var_a0_2;
+                origin_control_point->vx = corner_x_bits;
 
-                var_v1 = arg1->extent.vy;
+                corner_y_bits = emitter_scratch->extent.vy;
                 if (!(VS_PARTICLE_CORNER_STATE & 2)) {
-                    var_v1 = -var_v1;
+                    corner_y_bits = -corner_y_bits;
                 }
-                temp_s1->vy = var_v1;
+                origin_control_point->vy = corner_y_bits;
 
-                var_v1_2 = arg1->extent.vz;
+                corner_z_bits = emitter_scratch->extent.vz;
                 if (!(VS_PARTICLE_CORNER_STATE & 4)) {
-                    var_v1_2 = -var_v1_2;
+                    corner_z_bits = -corner_z_bits;
                 }
-                temp_s1->vz = var_v1_2;
+                origin_control_point->vz = corner_z_bits;
 
                 break;
             }
 
-            if (arg1->flags & 0x40000) {
-                Core_Gte_ApplyRotMatrix(temp_s1, &arg1->aimPoint);
-                temp_s1->vx = arg1->aimPoint.vx;
-                temp_s1->vy = arg1->aimPoint.vy;
-                temp_s1->vz = arg1->aimPoint.vz;
+            if (emitter_scratch->flags & 0x40000) {
+                Core_Gte_ApplyRotMatrix(origin_control_point, &emitter_scratch->aimPoint);
+                origin_control_point->vx = emitter_scratch->aimPoint.vx;
+                origin_control_point->vy = emitter_scratch->aimPoint.vy;
+                origin_control_point->vz = emitter_scratch->aimPoint.vz;
             }
 
-            temp_s1->vx = temp_s1->vx + arg1->position.vx;
-            temp_s1->vy = temp_s1->vy + arg1->position.vy;
-            temp_s1->vz = temp_s1->vz + arg1->position.vz;
+            origin_control_point->vx = origin_control_point->vx + emitter_scratch->position.vx;
+            origin_control_point->vy = origin_control_point->vy + emitter_scratch->position.vy;
+            origin_control_point->vz = origin_control_point->vz + emitter_scratch->position.vz;
         }
         return;
 
@@ -179,21 +179,21 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
     case 24:
     case 32:
     case 40:
-        arg1->ringSegments = 4;
-        arg1->ringPositions = 4;
+        emitter_scratch->ringSegments = 4;
+        emitter_scratch->ringPositions = 4;
         break;
 
     case 48:
-        arg1->ringSegments = arg0->ringSegments;
+        emitter_scratch->ringSegments = particle_definition->ringSegments;
 
-        if (arg1->ringSegments == 0) {
-            arg1->ringSegments = 1;
+        if (emitter_scratch->ringSegments == 0) {
+            emitter_scratch->ringSegments = 1;
         }
 
-        arg1->ringPositions = arg0->ringPositions;
+        emitter_scratch->ringPositions = particle_definition->ringPositions;
 
-        if (arg1->ringPositions == 0) {
-            arg1->ringPositions = arg1->ringSegments;
+        if (emitter_scratch->ringPositions == 0) {
+            emitter_scratch->ringPositions = emitter_scratch->ringSegments;
         }
         break;
 
@@ -201,42 +201,42 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
         return;
     }
 
-    temp_lo = 0x1000 / arg1->ringSegments;
+    ring_angle_step = 0x1000 / emitter_scratch->ringSegments;
 
-    if ((arg1->flags & 0x1800) != 0x1000) {
-        VS_PARTICLE_CORNER_STATE %= arg1->ringPositions;
-        temp_s0_2 = (VS_PARTICLE_CORNER_STATE * temp_lo) + 0x200;
-        sp10 = (Core_Gte_Cos(temp_s0_2) * arg1->extent.vx) >> 0xC;
-        var_fp = (Core_Gte_Sin(temp_s0_2) * arg1->extent.vz) >> 0xC;
+    if ((emitter_scratch->flags & 0x1800) != 0x1000) {
+        VS_PARTICLE_CORNER_STATE %= emitter_scratch->ringPositions;
+        temp_s0_2 = (VS_PARTICLE_CORNER_STATE * ring_angle_step) + 0x200;
+        ring_edge_start_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        ring_edge_start_z = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
     }
 
-    for (i = 0; i < arg3->count; ++i) {
-        temp_s1 = arg3->controlPoints + (i * 4);
-        VS_PARTICLE_CORNER_STATE = (VS_PARTICLE_CORNER_STATE + 1) % arg1->ringPositions;
-        temp_s0_2 = (VS_PARTICLE_CORNER_STATE * temp_lo) + 0x200;
-        temp_s3 = (Core_Gte_Cos(temp_s0_2) * arg1->extent.vx) >> 0xC;
-        temp_s0_2 = (Core_Gte_Sin(temp_s0_2) * arg1->extent.vz) >> 0xC;
+    for (i = 0; i < particle_set->count; ++i) {
+        origin_control_point = particle_set->controlPoints + (i * 4);
+        VS_PARTICLE_CORNER_STATE = (VS_PARTICLE_CORNER_STATE + 1) % emitter_scratch->ringPositions;
+        temp_s0_2 = (VS_PARTICLE_CORNER_STATE * ring_angle_step) + 0x200;
+        ring_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        temp_s0_2 = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
 
-        if ((arg1->flags & 0x1800) == 0x1000) {
-            temp_s1->vx = temp_s3;
-            temp_s1->vz = temp_s0_2;
+        if ((emitter_scratch->flags & 0x1800) == 0x1000) {
+            origin_control_point->vx = ring_x;
+            origin_control_point->vz = temp_s0_2;
         } else {
-            temp_v0_4 = Core_Random_Rand() >> 3;
-            temp_s1->vx = (((temp_s3 - sp10) * temp_v0_4) >> 0xC) + sp10;
-            temp_s1->vz = (((temp_s0_2 - var_fp) * temp_v0_4) >> 0xC) + var_fp;
+            edge_interpolation_q12 = Core_Random_Rand() >> 3;
+            origin_control_point->vx = (((ring_x - ring_edge_start_x) * edge_interpolation_q12) >> 0xC) + ring_edge_start_x;
+            origin_control_point->vz = (((temp_s0_2 - ring_edge_start_z) * edge_interpolation_q12) >> 0xC) + ring_edge_start_z;
         }
 
-        temp_s1->vy = 0;
+        origin_control_point->vy = 0;
 
-        if (arg1->flags & 0x40000) {
-            Core_Gte_ApplyRotMatrix(temp_s1, &arg1->aimPoint);
-            temp_s1->vx = arg1->aimPoint.vx;
-            temp_s1->vy = arg1->aimPoint.vy;
-            temp_s1->vz = arg1->aimPoint.vz;
+        if (emitter_scratch->flags & 0x40000) {
+            Core_Gte_ApplyRotMatrix(origin_control_point, &emitter_scratch->aimPoint);
+            origin_control_point->vx = emitter_scratch->aimPoint.vx;
+            origin_control_point->vy = emitter_scratch->aimPoint.vy;
+            origin_control_point->vz = emitter_scratch->aimPoint.vz;
         }
-        temp_s1->vx += arg1->position.vx;
-        temp_s1->vy += arg1->position.vy;
-        temp_s1->vz += arg1->position.vz;
+        origin_control_point->vx += emitter_scratch->position.vx;
+        origin_control_point->vy += emitter_scratch->position.vy;
+        origin_control_point->vz += emitter_scratch->position.vz;
     }
 }
 #undef VS_PARTICLE_SETUP_TYPES

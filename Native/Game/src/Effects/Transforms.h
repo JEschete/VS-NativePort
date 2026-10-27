@@ -105,15 +105,15 @@ _Static_assert(sizeof(Effects_AnimatedLocalTransform) == 0x74, "Effects_Animated
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 
-void Effects_InitializeTransformStates(Effects_EffectInstance* arg0);
-void Effects_InterpolateTransformPosition(Effects_TransformDefinition* arg0, Effects_TransformMotionView* arg1);
-void Effects_InterpolateTransformSpline(Effects_TransformDefinition* arg0, Effects_TransformMotionView* arg1);
-void Effects_AdvanceTransformMotion(Effects_TransformDefinition* arg0, Effects_TransformMotionView* arg1);
-void Effects_BuildTransformSplineControls(Effects_TransformDefinition* arg0, Effects_TransformMotionView* arg1);
-void Effects_BuildCameraAttachment(Effects_EffectInstance* arg0, Effects_TransformMotionView* arg1, int arg2);
-void Effects_BuildEffectOriginAttachment(MATRIX* arg0);
-void Effects_BuildAnimatedLocalTransform(Effects_TransformDefinition* arg0, SVECTOR* arg1, Effects_AnimatedLocalTransform* arg2);
-void Effects_ResolveTransformAttachment(Effects_EffectInstance* arg0, Effects_TransformMotionView* arg1);
-void Effects_UpdateEffectTransforms(Effects_EffectInstance* arg0);
+void Effects_InitializeTransformStates(Effects_EffectInstance* effect_instance);
+void Effects_InterpolateTransformPosition(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
+void Effects_InterpolateTransformSpline(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
+void Effects_AdvanceTransformMotion(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
+void Effects_BuildTransformSplineControls(Effects_TransformDefinition* transform_definition, Effects_TransformMotionView* transform_motion);
+void Effects_BuildCameraAttachment(Effects_EffectInstance* effect_instance, Effects_TransformMotionView* transform_motion, int offset_toward_camera);
+void Effects_BuildEffectOriginAttachment(MATRIX* attachment_matrix);
+void Effects_BuildAnimatedLocalTransform(Effects_TransformDefinition* transform_definition, SVECTOR* rotation_angles, Effects_AnimatedLocalTransform* local_transform);
+void Effects_ResolveTransformAttachment(Effects_EffectInstance* effect_instance, Effects_TransformMotionView* transform_motion);
+void Effects_UpdateEffectTransforms(Effects_EffectInstance* effect_instance);
 
 #endif // VS_EFFECTS_TRANSFORMS_H_DECLS

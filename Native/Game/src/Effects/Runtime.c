@@ -116,7 +116,7 @@ Effects_EffectPackage Effects_actionPackage;
 Effects_EffectPackage Effects_secondaryPackage;
 
 // decomp: BATTLE.PRG func_800CE644 (src/BATTLE/BATTLE.PRG/5BF94.c:5045)
-int Effects_IgnoreRuntimeDiagnostic(int arg0 __attribute__((unused))) { }
+int Effects_IgnoreRuntimeDiagnostic(int diagnostic_code __attribute__((unused))) { }
 
 // decomp: BATTLE.PRG func_800CE64C (src/BATTLE/BATTLE.PRG/5BF94.c:5047)
 void Effects_InitEffectRuntime(void)
@@ -148,62 +148,62 @@ void Effects_ResetEffectInstances(void)
 }
 
 // decomp: BATTLE.PRG func_800CE714 (src/BATTLE/BATTLE.PRG/5BF94.c:5074)
-void Effects_InitEffectInstance(Effects_EffectSpawnRequest* arg0, Effects_EffectInstance* arg1)
+void Effects_InitEffectInstance(Effects_EffectSpawnRequest* spawn_request, Effects_EffectInstance* effect_instance)
 {
     int i;
 
-    arg1->parent = arg0->parent;
-    arg1->particleCount = 0;
-    arg1->priority = arg0->priority;
-    arg1->scriptOffset = arg0->scriptOffset;
-    arg1->script = arg0->script;
-    *(int*)&arg1->registers = 0;
-    arg1->token = arg0->token;
-    arg1->particles = 0;
-    arg1->childCount = 0;
-    arg1->frame = 0;
+    effect_instance->parent = spawn_request->parent;
+    effect_instance->particleCount = 0;
+    effect_instance->priority = spawn_request->priority;
+    effect_instance->scriptOffset = spawn_request->scriptOffset;
+    effect_instance->script = spawn_request->script;
+    *(int*)&effect_instance->registers = 0;
+    effect_instance->token = spawn_request->token;
+    effect_instance->particles = 0;
+    effect_instance->childCount = 0;
+    effect_instance->frame = 0;
 
     for (i = 0; i < 16; ++i) {
-        ((short*)&arg1->transforms[i].reserved4)[1] = 0;
-        arg1->transforms[i].reserved4 = 0;
-        arg1->transforms[i].reserved0 = 0;
-        arg1->transforms[i].reservedC = 0;
-        arg1->transforms[i].reserved8 = 0;
-        arg1->transforms[i].reserved18 = 0;
-        arg1->transforms[i].reserved14 = 0;
-        arg1->transforms[i].reserved10 = 0;
-        arg1->transforms[i].reserved30 = 0;
-        arg1->transforms[i].reserved2C = 0;
-        arg1->transforms[i].reserved28 = 0;
-        *(int*)&arg1->transforms[i].actor = 0;
+        ((short*)&effect_instance->transforms[i].reserved4)[1] = 0;
+        effect_instance->transforms[i].reserved4 = 0;
+        effect_instance->transforms[i].reserved0 = 0;
+        effect_instance->transforms[i].reservedC = 0;
+        effect_instance->transforms[i].reserved8 = 0;
+        effect_instance->transforms[i].reserved18 = 0;
+        effect_instance->transforms[i].reserved14 = 0;
+        effect_instance->transforms[i].reserved10 = 0;
+        effect_instance->transforms[i].reserved30 = 0;
+        effect_instance->transforms[i].reserved2C = 0;
+        effect_instance->transforms[i].reserved28 = 0;
+        *(int*)&effect_instance->transforms[i].actor = 0;
     }
 
-    arg1->context.source = *arg0->source;
-    arg1->context.emitFrom = *arg0->emitFrom;
-    arg1->context.target = *arg0->target;
-    arg1->context.emitTo = *arg0->emitTo;
+    effect_instance->context.source = *spawn_request->source;
+    effect_instance->context.emitFrom = *spawn_request->emitFrom;
+    effect_instance->context.target = *spawn_request->target;
+    effect_instance->context.emitTo = *spawn_request->emitTo;
 
-    arg1->context.timeline = 0;
-    arg1->context.renderer = 0;
-    arg1->context.parameter = 0;
+    effect_instance->context.timeline = 0;
+    effect_instance->context.renderer = 0;
+    effect_instance->context.parameter = 0;
 }
 
 // decomp: BATTLE.PRG func_800CE83C (src/BATTLE/BATTLE.PRG/5BF94.c:5114)
-Effects_EffectInstance* Effects_CreatePrimaryEffectInstance(Effects_EffectSpawnRequest* arg0)
+Effects_EffectInstance* Effects_CreatePrimaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
 {
     Effects_EffectInstance* currentNode;
     Effects_EffectInstance* newNode = Core_Memory_AllocateFromHighEnd(sizeof *newNode);
 
-    Effects_InitEffectInstance(arg0, newNode);
+    Effects_InitEffectInstance(spawn_request, newNode);
 
     currentNode = Effects_primaryInstances;
 
-    if ((currentNode == NULL) || (arg0->priority < currentNode->priority)) {
+    if ((currentNode == NULL) || (spawn_request->priority < currentNode->priority)) {
         newNode->next = currentNode;
         Effects_primaryInstances = newNode;
     } else {
         while (1) {
-            if ((currentNode->next == NULL) || (arg0->priority < currentNode->next->priority)) {
+            if ((currentNode->next == NULL) || (spawn_request->priority < currentNode->next->priority)) {
                 newNode->next = currentNode->next;
                 currentNode->next = newNode;
                 break;
@@ -215,53 +215,53 @@ Effects_EffectInstance* Effects_CreatePrimaryEffectInstance(Effects_EffectSpawnR
 }
 
 // decomp: BATTLE.PRG func_800CE8F4 (src/BATTLE/BATTLE.PRG/5BF94.c:5139)
-void Effects_DestroyPrimaryEffectInstance(Effects_EffectInstance* arg0)
+void Effects_DestroyPrimaryEffectInstance(Effects_EffectInstance* effect_instance)
 {
-    Effects_RendererSlot* var_s1;
-    Effects_EffectInstance* var_v1 = Effects_primaryInstances;
+    Effects_RendererSlot* renderer_cursor;
+    Effects_EffectInstance* instance_cursor = Effects_primaryInstances;
 
-    if (var_v1 == arg0) {
-        Effects_primaryInstances = arg0->next;
+    if (instance_cursor == effect_instance) {
+        Effects_primaryInstances = effect_instance->next;
     } else {
-        while (var_v1->next != NULL) {
-            if (var_v1->next == arg0) {
-                var_v1->next = arg0->next;
+        while (instance_cursor->next != NULL) {
+            if (instance_cursor->next == effect_instance) {
+                instance_cursor->next = effect_instance->next;
                 break;
             }
-            var_v1 = var_v1->next;
+            instance_cursor = instance_cursor->next;
         }
     }
 
-    Effects_ReleaseAllEffectParticles(arg0);
+    Effects_ReleaseAllEffectParticles(effect_instance);
 
-    var_s1 = arg0->context.renderer;
+    renderer_cursor = effect_instance->context.renderer;
 
-    while (var_s1 != NULL) {
-        Effects_RendererSlot* temp_s0 = var_s1->next;
-        var_s1->renderer(var_s1, 4, 0);
-        Effects_DetachEffectRenderer(arg0, var_s1);
-        var_s1 = temp_s0;
+    while (renderer_cursor != NULL) {
+        Effects_RendererSlot* next_renderer = renderer_cursor->next;
+        renderer_cursor->renderer(renderer_cursor, 4, 0);
+        Effects_DetachEffectRenderer(effect_instance, renderer_cursor);
+        renderer_cursor = next_renderer;
     }
 
-    Core_Memory_FreeFromHighEnd(arg0);
+    Core_Memory_FreeFromHighEnd(effect_instance);
 }
 
 // decomp: BATTLE.PRG func_800CE9B0 (src/BATTLE/BATTLE.PRG/5BF94.c:5170)
 int Effects_UpdatePrimaryEffects(void)
 {
     int _[10] __attribute__((unused));
-    Content_DiscFile sp38;
-    Effects_EffectInstance* temp_s1;
-    Effects_EffectInstance* var_s0;
+    Content_DiscFile menu_reload_file;
+    Effects_EffectInstance* next_instance;
+    Effects_EffectInstance* instance_cursor;
     int i;
-    int var_s2;
+    int primary_busy;
 
-    var_s0 = Effects_primaryInstances;
-    var_s2 = 1;
+    instance_cursor = Effects_primaryInstances;
+    primary_busy = 1;
 
     switch (Effects_primaryPhase) {
     case 0:
-        var_s2 = 0;
+        primary_busy = 0;
         break;
 
     case 6:
@@ -308,32 +308,32 @@ int Effects_UpdatePrimaryEffects(void)
             }
 
             Effects_primaryLoaded = 1;
-            sp38.lba = Content_MainMenuOverlayDiscSector();
-            sp38.size = 0;
-            Effects_menuReloadSlot = Content_AllocateDiscRequest(&sp38);
+            menu_reload_file.lba = Content_MainMenuOverlayDiscSector();
+            menu_reload_file.size = 0;
+            Effects_menuReloadSlot = Content_AllocateDiscRequest(&menu_reload_file);
             Content_EnqueueDiscRequest(Effects_menuReloadSlot, NULL);
         }
         break;
 
     case 4:
-        while (var_s0 != NULL) {
+        while (instance_cursor != NULL) {
 
-            temp_s1 = var_s0->next;
-            Effects_currentInstance = var_s0;
+            next_instance = instance_cursor->next;
+            Effects_currentInstance = instance_cursor;
 
             if (Effects_package->curveBlock != NULL) {
-                Effects_SampleAllEffectCurves(var_s0->frame);
+                Effects_SampleAllEffectCurves(instance_cursor->frame);
             }
 
             Effects_UpdateParticleGravityAndDrag();
 
-            if (Effects_RunEffectScript(var_s0) == 0) {
-                Effects_DestroyPrimaryEffectInstance(var_s0);
+            if (Effects_RunEffectScript(instance_cursor) == 0) {
+                Effects_DestroyPrimaryEffectInstance(instance_cursor);
             } else {
-                ++var_s0->frame;
+                ++instance_cursor->frame;
             }
 
-            var_s0 = temp_s1;
+            instance_cursor = next_instance;
         }
 
         if (Effects_primaryInstances != NULL) {
@@ -372,18 +372,18 @@ int Effects_UpdatePrimaryEffects(void)
             Effects_SetPrimaryEffectPhase(5);
         }
 
-        var_s2 = 1;
+        primary_busy = 1;
         break;
 
     case 9:
         if (Effects_menuReloadSlot != NULL) {
             if (Effects_menuReloadSlot->state != 4) {
                 // Ugly match hack
-                if (Effects_package || var_s2) {
-                    var_s2 = 1;
+                if (Effects_package || primary_busy) {
+                    primary_busy = 1;
                     break;
                 } else {
-                    var_s2 = 1;
+                    primary_busy = 1;
                     break;
                 }
             }
@@ -391,120 +391,120 @@ int Effects_UpdatePrimaryEffects(void)
             Effects_menuReloadSlot = NULL;
         }
         Effects_SetPrimaryEffectPhase(0);
-        var_s2 = 0;
+        primary_busy = 0;
         break;
     }
 
-    return var_s2;
+    return primary_busy;
 }
 
 // decomp: BATTLE.PRG func_800CED60 (src/BATTLE/BATTLE.PRG/5BF94.c:5321)
 int Effects_UpdateSecondaryEffects(void)
 {
-    Effects_EffectInstance* temp_s4;
-    Effects_EffectInstance* var_s1;
-    Effects_RendererSlot* var_s0;
-    int var_s3;
+    Effects_EffectInstance* next_instance;
+    Effects_EffectInstance* instance_cursor;
+    Effects_RendererSlot* renderer_cursor;
+    int secondary_busy_bits;
 
-    var_s1 = Effects_secondaryInstances;
-    var_s3 = 0;
+    instance_cursor = Effects_secondaryInstances;
+    secondary_busy_bits = 0;
 
-    while (var_s1 != NULL) {
+    while (instance_cursor != NULL) {
 
-        Effects_currentInstance = var_s1;
-        temp_s4 = var_s1->next;
+        Effects_currentInstance = instance_cursor;
+        next_instance = instance_cursor->next;
 
-        switch (var_s1->context.phase) {
+        switch (instance_cursor->context.phase) {
         case 2:
             break;
         case 3:
             Effects_AcquireParticlePool(0xFF);
-            Effects_SetSecondaryEffectPhase(4, var_s1);
+            Effects_SetSecondaryEffectPhase(4, instance_cursor);
             break;
         case 4:
             if (Effects_package->curveBlock != NULL) {
-                Effects_SampleAllEffectCurves(var_s1->frame);
+                Effects_SampleAllEffectCurves(instance_cursor->frame);
             }
 
             Effects_UpdateParticleGravityAndDrag();
 
-            var_s0 = var_s1->context.renderer;
+            renderer_cursor = instance_cursor->context.renderer;
 
-            while (var_s0 != NULL) {
-                Effects_RendererSlot* temp_s2 = var_s0->next;
-                if (var_s0->renderer(var_s0, 2, 0) == 0) {
-                    Effects_DetachEffectRenderer(var_s1, var_s0);
+            while (renderer_cursor != NULL) {
+                Effects_RendererSlot* next_renderer = renderer_cursor->next;
+                if (renderer_cursor->renderer(renderer_cursor, 2, 0) == 0) {
+                    Effects_DetachEffectRenderer(instance_cursor, renderer_cursor);
                 }
-                var_s0 = temp_s2;
+                renderer_cursor = next_renderer;
             }
-            if (Effects_RunEffectScript(var_s1) == 0) {
-                Effects_DestroySecondaryEffectInstance(var_s1);
+            if (Effects_RunEffectScript(instance_cursor) == 0) {
+                Effects_DestroySecondaryEffectInstance(instance_cursor);
                 Effects_ReleaseParticlePool();
             } else {
-                ++var_s1->frame;
+                ++instance_cursor->frame;
             }
             break;
         }
-        var_s3 |= var_s1->busyBits;
-        var_s1 = temp_s4;
+        secondary_busy_bits |= instance_cursor->busyBits;
+        instance_cursor = next_instance;
     }
-    return var_s3;
+    return secondary_busy_bits;
 }
 
 // decomp: BATTLE.PRG func_800CEEBC (src/BATTLE/BATTLE.PRG/5BF94.c:5373)
 int Effects_CanStartEffectTrack(void)
 {
-    int var_a1 = 0;
+    int can_start_track = 0;
     if (((Effects_primaryPhase - 4) < 2) && (Effects_trackCount > Effects_startedTrackCount)) {
-        var_a1 = Effects_pendingTracks > 0;
+        can_start_track = Effects_pendingTracks > 0;
     }
-    return var_a1;
+    return can_start_track;
 }
 
 // decomp: BATTLE.PRG func_800CEF0C (src/BATTLE/BATTLE.PRG/5BF94.c:5382)
 int Effects_PrimaryEffectTrackCount(void)
 {
-    int var_v1 = 0;
+    int active_track_count = 0;
     if ((Effects_primaryPhase - 4) < 2) {
-        var_v1 = Effects_trackCount;
+        active_track_count = Effects_trackCount;
     }
-    return var_v1;
+    return active_track_count;
 }
 
 // decomp: BATTLE.PRG func_800CEF38 (src/BATTLE/BATTLE.PRG/5BF94.c:5391)
-void Effects_RequeueEffectTrack(int arg0)
+void Effects_RequeueEffectTrack(int track_index)
 {
     Effects_startedTrackCount -= 1;
-    Effects_pendingTracks |= 1 << arg0;
+    Effects_pendingTracks |= 1 << track_index;
 }
 
 // decomp: BATTLE.PRG func_800CEF64 (src/BATTLE/BATTLE.PRG/5BF94.c:5397)
 int Effects_IsPrimaryEffectLoaded(void) { return Effects_primaryLoaded != 0; }
 
 // decomp: BATTLE.PRG func_800CEF74 (src/BATTLE/BATTLE.PRG/5BF94.c:5399)
-int Effects_StartEffectTrack(int arg0)
+int Effects_StartEffectTrack(int track_index)
 {
-    Effects_EffectSpawnRequest sp10;
+    Effects_EffectSpawnRequest spawn_request;
     int v;
 
     Effects_SelectEffectResourceContext(1);
     v = Effects_CanStartEffectTrack();
     if (v != 0) {
-        if (Effects_pendingTracks & (1 << arg0)) {
-            char* a1 = Effects_package->block8Data;
-            sp10.scriptOffset = arg0 * 3;
-            sp10.source = &Effects_actionRequest.source;
-            sp10.emitFrom = &Effects_actionRequest.source;
-            sp10.priority = 0;
-            sp10.target = &Effects_actionRequest.targets[0];
-            sp10.emitTo = &Effects_actionRequest.targets[0];
-            sp10.parent = 0;
-            sp10.token = Effects_primaryToken;
-            sp10.script = a1;
-            Effects_CreatePrimaryEffectInstance(&sp10);
+        if (Effects_pendingTracks & (1 << track_index)) {
+            char* script_bytes = Effects_package->block8Data;
+            spawn_request.scriptOffset = track_index * 3;
+            spawn_request.source = &Effects_actionRequest.source;
+            spawn_request.emitFrom = &Effects_actionRequest.source;
+            spawn_request.priority = 0;
+            spawn_request.target = &Effects_actionRequest.targets[0];
+            spawn_request.emitTo = &Effects_actionRequest.targets[0];
+            spawn_request.parent = 0;
+            spawn_request.token = Effects_primaryToken;
+            spawn_request.script = script_bytes;
+            Effects_CreatePrimaryEffectInstance(&spawn_request);
             Effects_SetPrimaryEffectPhase(4);
             ++Effects_startedTrackCount;
-            Effects_pendingTracks &= ~(1 << arg0);
+            Effects_pendingTracks &= ~(1 << track_index);
         }
     }
     return v;
@@ -513,29 +513,29 @@ int Effects_StartEffectTrack(int arg0)
 // decomp: BATTLE.PRG func_800CF060 (src/BATTLE/BATTLE.PRG/5BF94.c:5427)
 int Effects_UpdateEffectRuntime(void)
 {
-    int temp_s0;
-    int temp_s1;
+    int secondary_busy_bits;
+    int primary_busy;
 
     Effects_effectBufferIndex = 1 - Effects_effectBufferIndex;
     Effects_SelectEffectResourceContext(1);
-    temp_s1 = Effects_UpdatePrimaryEffects();
+    primary_busy = Effects_UpdatePrimaryEffects();
     Effects_SelectEffectResourceContext(0);
-    temp_s0 = Effects_UpdateSecondaryEffects();
+    secondary_busy_bits = Effects_UpdateSecondaryEffects();
     Effects_SelectEffectResourceContext(1);
     if (Effects_primaryPhase == 4) {
         Effects_UpdateEffectCameraMotion();
     }
-    return temp_s1 | temp_s0;
+    return primary_busy | secondary_busy_bits;
 }
 
 // decomp: BATTLE.PRG func_800CF0E8 (src/BATTLE/BATTLE.PRG/5BF94.c:5444)
-int Effects_BeginActionEffect(Effects_ActionEffectRequest* arg0, int arg1, int arg2)
+int Effects_BeginActionEffect(Effects_ActionEffectRequest* effect_request, int action_variant, int variant_argument)
 {
-    Effects_actionRequest = *arg0;
+    Effects_actionRequest = *effect_request;
 
-    if ((arg1 != 0) && (arg0->source.type == 4)) {
-        Effects_actionVariant = arg1;
-        Effects_actionVariantArgument = arg2;
+    if ((action_variant != 0) && (effect_request->source.type == 4)) {
+        Effects_actionVariant = action_variant;
+        Effects_actionVariantArgument = variant_argument;
     }
 
     Effects_primaryToken = ((int (*)())Effects_AllocateEffectToken)();
@@ -550,64 +550,64 @@ int Effects_BeginActionEffect(Effects_ActionEffectRequest* arg0, int arg1, int a
 // decomp: BATTLE.PRG func_800CF1A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5462)
 void Effects_ClearPrimaryEffects(void)
 {
-    Effects_EffectInstance* var_s0 = Effects_primaryInstances;
+    Effects_EffectInstance* instance_cursor = Effects_primaryInstances;
 
     Input_StopVibrationPatterns(0U, 1);
 
-    while (var_s0 != NULL) {
-        Effects_EffectInstance* temp_s1 = var_s0->next;
-        if (var_s0->context.timeline != NULL) {
-            Core_Memory_FreeFromHighEnd(var_s0->context.timeline);
-            var_s0->context.timeline = NULL;
+    while (instance_cursor != NULL) {
+        Effects_EffectInstance* next_instance = instance_cursor->next;
+        if (instance_cursor->context.timeline != NULL) {
+            Core_Memory_FreeFromHighEnd(instance_cursor->context.timeline);
+            instance_cursor->context.timeline = NULL;
         }
-        Effects_DestroyPrimaryEffectInstance(var_s0);
-        var_s0 = temp_s1;
+        Effects_DestroyPrimaryEffectInstance(instance_cursor);
+        instance_cursor = next_instance;
     }
 }
 
 // decomp: BATTLE.PRG func_800CF218 (src/BATTLE/BATTLE.PRG/5BF94.c:5479)
-char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* arg0, int arg1, int arg2)
+char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters)
 {
     Effects_EffectSpawnRequest spawn;
     int _[4] __attribute__((unused));
     char token = ((int (*)())Effects_AllocateEffectToken)();
     int i;
 
-    spawn.source = &arg0->source;
+    spawn.source = &effect_request->source;
     spawn.script = Effects_package->block8Data;
-    spawn.scriptOffset = arg0->effectId * 3;
+    spawn.scriptOffset = effect_request->effectId * 3;
     spawn.parent = NULL;
     spawn.token = token;
-    Effects_secondaryRequest = *arg0;
+    Effects_secondaryRequest = *effect_request;
 
-    for (i = 0; i < arg0->count; ++i) {
+    for (i = 0; i < effect_request->count; ++i) {
         Effects_EffectInstance* child;
-        int id = arg0->effectId;
+        int id = effect_request->effectId;
 
         if ((id >= 40 && id <= 41) || (id >= 44 && id <= 53)) {
-            spawn.emitFrom = &arg0->targets[i];
-            spawn.emitTo = &arg0->source;
+            spawn.emitFrom = &effect_request->targets[i];
+            spawn.emitTo = &effect_request->source;
         } else {
             switch ((u_short)id) {
             case 23:
             case 25:
-                spawn.emitFrom = &arg0->targets[i];
-                spawn.emitTo = &arg0->source;
+                spawn.emitFrom = &effect_request->targets[i];
+                spawn.emitTo = &effect_request->source;
                 break;
             default:
-                spawn.emitFrom = &arg0->source;
-                spawn.emitTo = &arg0->targets[i];
+                spawn.emitFrom = &effect_request->source;
+                spawn.emitTo = &effect_request->targets[i];
                 break;
             }
         }
 
-        spawn.target = &arg0->targets[i];
-        spawn.priority = arg0->targets[i].type;
+        spawn.target = &effect_request->targets[i];
+        spawn.priority = effect_request->targets[i].type;
         child = Effects_CreateSecondaryEffectInstance(&spawn);
-        child->context.parameter = arg2;
-        child->context.effectId = arg0->effectId;
+        child->context.parameter = renderer_parameters;
+        child->context.effectId = effect_request->effectId;
 
-        if (arg0->effectId == 54) {
+        if (effect_request->effectId == 54) {
             child->busyBits = 4;
         } else {
             child->busyBits = 2;
@@ -620,26 +620,26 @@ char Effects_SpawnSecondaryEffects(Effects_ActionEffectRequest* arg0, int arg1, 
 }
 
 // decomp: BATTLE.PRG func_800CF3F8 (src/BATTLE/BATTLE.PRG/5BF94.c:5532)
-int Effects_BeginSecondaryEffects(Effects_ActionEffectRequest* arg0, int arg1)
+int Effects_BeginSecondaryEffects(Effects_ActionEffectRequest* effect_request, int renderer_parameters)
 {
     int _[4] __attribute__((unused));
     Effects_SelectEffectResourceContext(0);
     Effects_CaptureEffectCamera(&Effects_savedActionCamera);
     Effects_CaptureEffectCamera(&Effects_effectCamera);
-    return Effects_SpawnSecondaryEffects(arg0, 0, arg1);
+    return Effects_SpawnSecondaryEffects(effect_request, 0, renderer_parameters);
 }
 
 // decomp: BATTLE.PRG func_800CF458 (src/BATTLE/BATTLE.PRG/5BF94.c:5541)
-int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* arg0, int arg1, int arg2)
+int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* effect_request, int arg1, int renderer_parameters)
 {
-    return Effects_SpawnSecondaryEffects(arg0, arg1, arg2);
+    return Effects_SpawnSecondaryEffects(effect_request, arg1, renderer_parameters);
 }
 
 // decomp: BATTLE.PRG func_800CF478 (src/BATTLE/BATTLE.PRG/5BF94.c:5546)
-void Effects_SetPrimaryEffectPhase(int arg0) { Effects_primaryPhase = arg0; }
+void Effects_SetPrimaryEffectPhase(int effect_phase) { Effects_primaryPhase = effect_phase; }
 
 // decomp: BATTLE.PRG func_800CF484 (src/BATTLE/BATTLE.PRG/5BF94.c:5548)
-void Effects_SetSecondaryEffectPhase(int arg0, Effects_EffectInstance* arg1) { arg1->context.phase = arg0; }
+void Effects_SetSecondaryEffectPhase(int effect_phase, Effects_EffectInstance* effect_instance) { effect_instance->context.phase = effect_phase; }
 
 // decomp: BATTLE.PRG func_800CF48C (src/BATTLE/BATTLE.PRG/5BF94.c:5550)
 int Effects_PrimaryEffectPhase(void) { return Effects_primaryPhase; }
@@ -647,121 +647,121 @@ int Effects_PrimaryEffectPhase(void) { return Effects_primaryPhase; }
 // decomp: BATTLE.PRG func_800CF49C (src/BATTLE/BATTLE.PRG/5BF94.c:5552)
 int Effects_AllocateEffectToken(void)
 {
-    int temp_a1;
+    int allocated_bits;
     int j;
     int i;
-    int var_t2;
-    int* var_a2;
+    int allocated_token;
+    int* bitmap_base;
 
-    var_t2 = 0;
-    var_a2 = Effects_tokenBitmaps;
+    allocated_token = 0;
+    bitmap_base = Effects_tokenBitmaps;
 
     for (i = 0; i < 4; ++i) {
-        temp_a1 = Effects_tokenBitmaps[i];
-        if (temp_a1 == -2) {
+        allocated_bits = Effects_tokenBitmaps[i];
+        if (allocated_bits == -2) {
             continue;
         }
 
         for (j = 1; j < 32; ++j) {
             int v = 1 << j;
-            if (!(temp_a1 & v)) {
-                Effects_tokenBitmaps[i] = temp_a1 | v;
-                var_t2 = (i << 5) + j;
+            if (!(allocated_bits & v)) {
+                Effects_tokenBitmaps[i] = allocated_bits | v;
+                allocated_token = (i << 5) + j;
                 goto done;
             }
         }
     }
 done:
-    return var_t2;
+    return allocated_token;
 }
 
 // decomp: BATTLE.PRG func_800CF514 (src/BATTLE/BATTLE.PRG/5BF94.c:5582)
-void Effects_ReleaseEffectToken(int arg0)
+void Effects_ReleaseEffectToken(int effect_token)
 {
     int* ptr = Effects_tokenBitmaps;
-    int var_v1 = arg0;
-    if (arg0 < 0) {
-        var_v1 = arg0 + 0x1F;
+    int bitmap_word_index = effect_token;
+    if (effect_token < 0) {
+        bitmap_word_index = effect_token + 0x1F;
     }
-    var_v1 >>= 5;
-    ptr[var_v1] &= ~(1 << (arg0 - (var_v1 << 5)));
+    bitmap_word_index >>= 5;
+    ptr[bitmap_word_index] &= ~(1 << (effect_token - (bitmap_word_index << 5)));
 }
 
 // decomp: BATTLE.PRG func_800CF55C (src/BATTLE/BATTLE.PRG/5BF94.c:5593)
-Effects_EffectInstance* Effects_CreateSecondaryEffectInstance(Effects_EffectSpawnRequest* arg0)
+Effects_EffectInstance* Effects_CreateSecondaryEffectInstance(Effects_EffectSpawnRequest* spawn_request)
 {
-    Effects_EffectInstance* var_a1;
-    Effects_EffectInstance* temp_v0 = Core_Memory_AllocateFromHighEnd(sizeof *temp_v0);
-    Effects_InitEffectInstance(arg0, temp_v0);
-    var_a1 = Effects_secondaryInstances;
+    Effects_EffectInstance* instance_cursor;
+    Effects_EffectInstance* new_instance = Core_Memory_AllocateFromHighEnd(sizeof *new_instance);
+    Effects_InitEffectInstance(spawn_request, new_instance);
+    instance_cursor = Effects_secondaryInstances;
 
-    if ((var_a1 == NULL) || (arg0->priority < var_a1->priority)) {
-        temp_v0->next = var_a1;
-        Effects_secondaryInstances = temp_v0;
+    if ((instance_cursor == NULL) || (spawn_request->priority < instance_cursor->priority)) {
+        new_instance->next = instance_cursor;
+        Effects_secondaryInstances = new_instance;
     } else {
         while (1) {
-            Effects_EffectInstance* temp_a0 = var_a1->next;
-            if ((temp_a0 == NULL) || (arg0->priority < temp_a0->priority)) {
-                temp_v0->next = temp_a0;
-                var_a1->next = temp_v0;
+            Effects_EffectInstance* next_instance = instance_cursor->next;
+            if ((next_instance == NULL) || (spawn_request->priority < next_instance->priority)) {
+                new_instance->next = next_instance;
+                instance_cursor->next = new_instance;
                 break;
             }
-            var_a1 = temp_a0;
+            instance_cursor = next_instance;
         }
     }
-    return temp_v0;
+    return new_instance;
 }
 
 // decomp: BATTLE.PRG func_800CF614 (src/BATTLE/BATTLE.PRG/5BF94.c:5617)
-void Effects_DestroySecondaryEffectInstance(Effects_EffectInstance* arg0)
+void Effects_DestroySecondaryEffectInstance(Effects_EffectInstance* effect_instance)
 {
-    Effects_EffectInstance* var_v1 = Effects_secondaryInstances;
-    if (var_v1 == arg0) {
-        Effects_secondaryInstances = arg0->next;
+    Effects_EffectInstance* instance_cursor = Effects_secondaryInstances;
+    if (instance_cursor == effect_instance) {
+        Effects_secondaryInstances = effect_instance->next;
     } else {
-        while (var_v1->next != NULL) {
-            if (var_v1->next == arg0) {
-                var_v1->next = arg0->next;
+        while (instance_cursor->next != NULL) {
+            if (instance_cursor->next == effect_instance) {
+                instance_cursor->next = effect_instance->next;
                 break;
             }
-            var_v1 = var_v1->next;
+            instance_cursor = instance_cursor->next;
         }
     }
-    Effects_ReleaseAllEffectParticles(arg0);
-    Effects_ReleaseEffectToken(arg0->token);
-    Core_Memory_FreeFromHighEnd(arg0);
+    Effects_ReleaseAllEffectParticles(effect_instance);
+    Effects_ReleaseEffectToken(effect_instance->token);
+    Core_Memory_FreeFromHighEnd(effect_instance);
 }
 
 // decomp: BATTLE.PRG func_800CF694 (src/BATTLE/BATTLE.PRG/5BF94.c:5636)
-Effects_RendererSlot* Effects_AttachEffectRenderer(Effects_EffectInstance* arg0, Effects_EffectRenderer renderer, int arg2)
+Effects_RendererSlot* Effects_AttachEffectRenderer(Effects_EffectInstance* effect_instance, Effects_EffectRenderer renderer, int renderer_parameters)
 {
-    Effects_RendererSlot* temp_v0 = Core_Memory_AllocateFromHighEnd(sizeof *temp_v0);
-    temp_v0->next = arg0->context.renderer;
-    arg0->context.renderer = temp_v0;
-    temp_v0->renderer = renderer;
-    temp_v0->rendererState = 0;
-    temp_v0->renderer(temp_v0, 1, arg2);
-    return temp_v0;
+    Effects_RendererSlot* new_renderer = Core_Memory_AllocateFromHighEnd(sizeof *new_renderer);
+    new_renderer->next = effect_instance->context.renderer;
+    effect_instance->context.renderer = new_renderer;
+    new_renderer->renderer = renderer;
+    new_renderer->rendererState = 0;
+    new_renderer->renderer(new_renderer, 1, renderer_parameters);
+    return new_renderer;
 }
 
 // decomp: BATTLE.PRG func_800CF70C (src/BATTLE/BATTLE.PRG/5BF94.c:5647)
-void Effects_DetachEffectRenderer(Effects_EffectInstance* arg0, Effects_RendererSlot* arg1)
+void Effects_DetachEffectRenderer(Effects_EffectInstance* effect_instance, Effects_RendererSlot* renderer_slot)
 {
-    if (arg1->rendererState != NULL) {
-        Core_Memory_FreeFromHighEnd(arg1->rendererState);
+    if (renderer_slot->rendererState != NULL) {
+        Core_Memory_FreeFromHighEnd(renderer_slot->rendererState);
     }
 
-    if (arg0->context.renderer == arg1) {
-        arg0->context.renderer = arg1->next;
+    if (effect_instance->context.renderer == renderer_slot) {
+        effect_instance->context.renderer = renderer_slot->next;
     } else {
-        Effects_RendererSlot* var_v1 = arg0->context.renderer;
-        while (var_v1->next != arg1) {
-            var_v1 = var_v1->next;
+        Effects_RendererSlot* renderer_cursor = effect_instance->context.renderer;
+        while (renderer_cursor->next != renderer_slot) {
+            renderer_cursor = renderer_cursor->next;
         }
-        var_v1->next = arg1->next;
+        renderer_cursor->next = renderer_slot->next;
     }
 
-    Core_Memory_FreeFromHighEnd(arg1);
+    Core_Memory_FreeFromHighEnd(renderer_slot);
 }
 
 // decomp: BATTLE.PRG func_800CF8BC (src/BATTLE/BATTLE.PRG/5BF94.c:5697)

@@ -58,9 +58,9 @@ extern CVECTOR Effects_trailAdditiveColors[5473];
 extern CVECTOR Effects_trailColors[5465];
 void Effects_DrawTrailSegment(Effects_BoneTrail* t, int head, int tail);
 int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config);
-void Effects_SpawnBoneTrail(int arg0, int arg1, int arg2, int arg3);
+void Effects_SpawnBoneTrail(int actor_index, int bone_index, int texture_index, int color_index);
 void Effects_FadeBoneTrails(int arg0, int arg1);
-void Effects_ClampTrailTexturePoint(int arg0, int arg1, int arg2, u_short* arg3);
-void Effects_MapTrailFramebufferTexture(Render_TrailPacket* arg0, int arg1, int arg2, int arg3);
+void Effects_ClampTrailTexturePoint(int u_offset, int v_offset, int packed_screen_xy, u_short* packed_uv_output);
+void Effects_MapTrailFramebufferTexture(Render_TrailPacket* trail_packet, int u_offset, int v_offset, int texture_page_flags);
 
 #endif // VS_EFFECTS_TRAILS_H_DECLS

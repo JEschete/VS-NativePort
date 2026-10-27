@@ -170,7 +170,7 @@ int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config)
 }
 
 // decomp: BATTLE.PRG func_800CF7A8 (src/BATTLE/BATTLE.PRG/5BF94.c:5666)
-void Effects_SpawnBoneTrail(int arg0, int arg1, int arg2, int arg3)
+void Effects_SpawnBoneTrail(int actor_index, int bone_index, int texture_index, int color_index)
 {
     Effects_ActionEffectRequest request;
 
@@ -181,82 +181,82 @@ void Effects_SpawnBoneTrail(int arg0, int arg1, int arg2, int arg3)
     setVector(&request.source.value.position, 0, 0, 0);
     setVector(&request.targets[0].value.position, 0, 0, 0);
     request.otherCount = 0;
-    Effects_BeginSecondaryEffects(&request, (arg0 & 0xFF) | ((arg1 & 0xFF) << 8) | ((arg2 & 0xF) << 0x10)
-                                | ((arg3 & 0xF) << 0x14) | 0xFF000000);
+    Effects_BeginSecondaryEffects(&request, (actor_index & 0xFF) | ((bone_index & 0xFF) << 8) | ((texture_index & 0xF) << 0x10)
+                                | ((color_index & 0xF) << 0x14) | 0xFF000000);
 }
 
 // decomp: BATTLE.PRG func_800CF830 (src/BATTLE/BATTLE.PRG/5BF94.c:5681)
 void Effects_FadeBoneTrails(int arg0, int arg1)
 {
-    Effects_EffectInstance* var_s1 = Effects_secondaryInstances;
+    Effects_EffectInstance* instance_cursor = Effects_secondaryInstances;
 
-    while (var_s1 != NULL) {
-        Effects_RendererSlot* var_s0 = var_s1->context.renderer;
-        while (var_s0 != NULL) {
-            if (var_s0->renderer == Effects_UpdateBoneTrail) {
-                var_s0->renderer(var_s0, 3, 0);
+    while (instance_cursor != NULL) {
+        Effects_RendererSlot* renderer_cursor = instance_cursor->context.renderer;
+        while (renderer_cursor != NULL) {
+            if (renderer_cursor->renderer == Effects_UpdateBoneTrail) {
+                renderer_cursor->renderer(renderer_cursor, 3, 0);
             }
-            var_s0 = var_s0->next;
+            renderer_cursor = renderer_cursor->next;
         }
-        var_s1 = var_s1->next;
+        instance_cursor = instance_cursor->next;
     }
 }
 
 // decomp: BATTLE.PRG func_800CF92C (src/BATTLE/BATTLE.PRG/5BF94.c:5714)
-void Effects_ClampTrailTexturePoint(int arg0, int arg1, int arg2, u_short* arg3)
+void Effects_ClampTrailTexturePoint(int u_offset, int v_offset, int packed_screen_xy, u_short* packed_uv_output)
 {
-    int var_v1;
-    int temp_a1;
+    int clamped_u;
+    int clamped_v;
 
-    var_v1 = (short)arg2 + arg0;
+    clamped_u = (short)packed_screen_xy + u_offset;
 
-    if (var_v1 <= 0) {
-        var_v1 = 1;
-    } else if (var_v1 >= 0xFF) {
-        var_v1 = 0xFE;
+    if (clamped_u <= 0) {
+        clamped_u = 1;
+    } else if (clamped_u >= 0xFF) {
+        clamped_u = 0xFE;
     }
 
-    temp_a1 = (arg2 >> 16) + arg1;
+    clamped_v = (packed_screen_xy >> 16) + v_offset;
 
-    if (temp_a1 <= 0) {
-        temp_a1 = 1;
-    } else if (temp_a1 >= 0xFF) {
-        temp_a1 = 0xFE;
+    if (clamped_v <= 0) {
+        clamped_v = 1;
+    } else if (clamped_v >= 0xFF) {
+        clamped_v = 0xFE;
     }
 
-    *arg3 = var_v1 | temp_a1 << 8;
+    *packed_uv_output = clamped_u | clamped_v << 8;
 }
 
 // decomp: BATTLE.PRG func_800CF988 (src/BATTLE/BATTLE.PRG/5BF94.c:5738)
-void Effects_MapTrailFramebufferTexture(Render_TrailPacket* arg0, int arg1, int arg2, int arg3)
+void Effects_MapTrailFramebufferTexture(Render_TrailPacket* trail_packet, int u_offset, int v_offset, int texture_page_flags)
 {
     int page;
     int offset;
     int left = 320;
 
-    if ((short)arg0->xy0 < left) {
-        left = (short)arg0->xy0;
+    if ((short)trail_packet->xy0 < left) {
+        left = (short)trail_packet->xy0;
     }
 
-    if ((short)arg0->xy1 < left) {
-        left = (short)arg0->xy1;
+    if ((short)trail_packet->xy1 < left) {
+        left = (short)trail_packet->xy1;
     }
 
-    if ((short)arg0->xy2 < left) {
-        left = (short)arg0->xy2;
+    if ((short)trail_packet->xy2 < left) {
+        left = (short)trail_packet->xy2;
     }
 
-    if ((short)arg0->xy3 < left) {
-        left = (short)arg0->xy3;
+    if ((short)trail_packet->xy3 < left) {
+        left = (short)trail_packet->xy3;
     }
 
     left &= ~0x3F;
     page = left / 64;
-    arg0->tpage = ((Render_frameBuf & 1) ? page : page + 5) | arg3 | 0x100;
-    offset = arg1 - left;
-    Effects_ClampTrailTexturePoint(offset, arg2, arg0->xy0, &arg0->uv0);
-    Effects_ClampTrailTexturePoint(offset, arg2, arg0->xy1, &arg0->uv1);
-    Effects_ClampTrailTexturePoint(offset, arg2, arg0->xy2, &arg0->uv2);
-    Effects_ClampTrailTexturePoint(offset, arg2, arg0->xy3, &arg0->uv3);
+    trail_packet->tpage = ((Render_frameBuf & 1) ? page : page + 5) | texture_page_flags | 0x100;
+    offset = u_offset - left;
+    Effects_ClampTrailTexturePoint(offset, v_offset, trail_packet->xy0, &trail_packet->uv0);
+    Effects_ClampTrailTexturePoint(offset, v_offset, trail_packet->xy1, &trail_packet->uv1);
+    Effects_ClampTrailTexturePoint(offset, v_offset, trail_packet->xy2, &trail_packet->uv2);
+    Effects_ClampTrailTexturePoint(offset, v_offset, trail_packet->xy3, &trail_packet->uv3);
 }
 

@@ -2018,6 +2018,44 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertIn("int padded_separator_x;", source)
         self.assertIn("x = padded_separator_x + Ending_resultAtlasRegions[10].w;", source)
 
+    def test_effect_shared_body_names_supply_instance_prototypes(self):
+        source = (
+            "int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, "
+            "u_int arg1, int arg2) { return arg1; }"
+        )
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Effects::Templates::ClosedRing"):
+                source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
+        head = copy_to_native.Copier.head_of(source)
+        self.assertEqual(
+            head.replace("VS_CLOSED_RING_FUNCTION", "Effects_Plg047_ClosedRing"),
+            "int Effects_Plg047_ClosedRing(Effects_RendererSlot* renderer_slot, "
+            "u_int lifecycle_command, int packed_parameters)",
+        )
+
+    def test_effect_timeline_shadow_declaration_is_not_the_active_track(self):
+        old = "    Effects_TimelineTrack* temp_a1;"
+        new = "    Effects_TimelineTrack* unused_track_declaration;"
+        self.assertIn(
+            (old, new),
+            [(before, after) for before, after, _ in copy_fixups.FIXES["F01589"]],
+        )
+        source = old + "\n{ Effects_TimelineTrack* temp_a1 = tracks; Use(temp_a1); }"
+        source = source.replace(old, new, 1)
+        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+            if re.search(row, "Effects::TickEffectTimeline"):
+                source, _ = copy_to_native.substitute_fixup(source, pattern, replacement)
+        self.assertIn("Effects_TimelineTrack* unused_track_declaration;", source)
+        self.assertIn("Effects_TimelineTrack* timeline_track = tracks; Use(timeline_track);", source)
+
+    def test_texture_page_macro_name_preserves_packet_and_handle_contracts(self):
+        macro = copy_fixups.MACRO_REPLACEMENTS["_insertTPage"]
+        self.assertIn("#define _insertTPage(after, texture_page_mode)", macro)
+        self.assertNotRegex(macro, r"\barg1\b")
+        self.assertIn("0xE1000200 | ((texture_page_mode) & 0x1FF)", macro)
+        self.assertIn("LegacyGpu_Handle(p_)", macro)
+        self.assertIn("Render_frameScratch.primitiveCursor = p_ + 3;", macro)
+
     def test_regex_fixups_compile_each_distinct_selector_once(self):
         copy_to_native.compiled_fixup_regex.cache_clear()
         self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)

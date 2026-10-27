@@ -16,8 +16,8 @@
 #define VS_PARTICLE_PRIM_TYPE
 #endif
 
-void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3)
+void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set)
 {
     Render_ParticleQuadPacket quad;
     DVECTOR screenPoints[10];
@@ -39,30 +39,30 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
     DVECTOR* point;
     int width;
 
-    width = Core_Math_InterpolateShortPair(arg0->innerExtentRange, Effects_SampleEffectCurve(arg0->innerExtentCurve, arg3->age));
+    width = Core_Math_InterpolateShortPair(particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, particle_set->age));
     if (!width) {
         width = 1;
     }
 
     Core_Math_InterpolatePairsToShortVector(
-        arg0->vectorRanges[4], Effects_SampleEffectCurve(arg0->accelerationCurve, arg3->age), &arg1->accelerationMin);
+        particle_definition->vectorRanges[4], Effects_SampleEffectCurve(particle_definition->accelerationCurve, particle_set->age), &emitter_scratch->accelerationMin);
 
-    if (arg0->rCurve != 0) {
-        segment = Effects_SampleEffectCurve(arg0->rCurve, arg3->age) * 2;
+    if (particle_definition->rCurve != 0) {
+        segment = Effects_SampleEffectCurve(particle_definition->rCurve, particle_set->age) * 2;
         color.r = segment <= 255 ? segment : 255;
     } else {
         color.r = 128;
     }
 
-    if (arg0->gCurve != 0) {
-        segment = Effects_SampleEffectCurve(arg0->gCurve, arg3->age) * 2;
+    if (particle_definition->gCurve != 0) {
+        segment = Effects_SampleEffectCurve(particle_definition->gCurve, particle_set->age) * 2;
         color.g = segment <= 255 ? segment : 255;
     } else {
         color.g = 128;
     }
 
-    if (arg0->bCurve != 0) {
-        segment = Effects_SampleEffectCurve(arg0->bCurve, arg3->age) * 2;
+    if (particle_definition->bCurve != 0) {
+        segment = Effects_SampleEffectCurve(particle_definition->bCurve, particle_set->age) * 2;
         color.b = segment <= 255 ? segment : 255;
     } else {
         color.b = 128;
@@ -70,21 +70,21 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
 
     color.cd = Render_LegacyPrimitiveCode_PolyGt4SemiTrans;
 
-    if (arg1->flags & 0x20000) {
-        Core_Gte_SetRotMatrix(&arg2->transforms[arg0->transformIndex].view);
-        Core_Gte_SetTransMatrix(&arg2->transforms[arg0->transformIndex].view);
+    if (emitter_scratch->flags & 0x20000) {
+        Core_Gte_SetRotMatrix(&effect_instance->transforms[particle_definition->transformIndex].view);
+        Core_Gte_SetTransMatrix(&effect_instance->transforms[particle_definition->transformIndex].view);
     } else {
         Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
         Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
     }
 
-    Effects_AdvanceParticleTextureAnimation(&arg3->textureAnimation);
+    Effects_AdvanceParticleTextureAnimation(&particle_set->textureAnimation);
 
-    texture = &Effects_package->textures[arg3->textureAnimation.textureInfo->dataIndex];
+    texture = &Effects_package->textures[particle_set->textureAnimation.textureInfo->dataIndex];
 
-    for (particleIndex = 0; particleIndex < arg3->count; ++particleIndex) {
+    for (particleIndex = 0; particleIndex < particle_set->count; ++particleIndex) {
 
-        controlPoints = &arg3->controlPoints[particleIndex * 4];
+        controlPoints = &particle_set->controlPoints[particleIndex * 4];
         Core_Gte_LoadV0(controlPoints);
         Core_Gte_Rtps();
         Core_Gte_StoreSxy2(&screenPoints[0]);
@@ -99,8 +99,8 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
             curveSamples[segment] = segment * 0x600 + sampleJitter - width / 2;
             Core_Math_InterpolateLagrangeShortVector(controlPoints, controlPoints + 1,
                 controlPoints + 2, controlPoints + 3, curveSamples[segment] - 0x1000,
-                &arg1->vector);
-            Core_Gte_LoadV0(&arg1->vector);
+                &emitter_scratch->vector);
+            Core_Gte_LoadV0(&emitter_scratch->vector);
             Core_Gte_Rtps();
             Core_Gte_StoreSxy2(&screenPoints[segment]);
             Core_Gte_StoreSz3Otz(&depths[segment]);
@@ -117,10 +117,10 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
             angles[segment] -= 0x400;
         }
 
-        width = arg1->accelerationMin.vx / 2;
+        width = emitter_scratch->accelerationMin.vx / 2;
         screenStart = screenPoints;
-        if (arg1->accelerationMin.vy) {
-            width += (Core_Random_Rand() % arg1->accelerationMin.vy) / 2;
+        if (emitter_scratch->accelerationMin.vy) {
+            width += (Core_Random_Rand() % emitter_scratch->accelerationMin.vy) / 2;
         }
         offsetX = (Core_Gte_Cos(angles[0]) * width) >> 0xC;
         offsetY = (Core_Gte_Sin(angles[0]) * width) >> 0xC;
@@ -135,9 +135,9 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
         quad.opaque4.v0 = topV;
         quad.opaque4.v2 = bottomV;
         for (segment = 0; segment < 7; ++segment) {
-            width = arg1->accelerationMin.vx / 2;
-            if (arg1->accelerationMin.vy) {
-                width += (Core_Random_Rand() % arg1->accelerationMin.vy) / 2;
+            width = emitter_scratch->accelerationMin.vx / 2;
+            if (emitter_scratch->accelerationMin.vy) {
+                width += (Core_Random_Rand() % emitter_scratch->accelerationMin.vy) / 2;
             }
             angleOrDepth = (angles[segment] + angles[segment + 1]) / 2;
             offsetX = (Core_Gte_Cos(angleOrDepth) * width) >> 0xC;
@@ -155,7 +155,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
             angleOrDepth = (depths[segment] + depths[segment + 1]) / 2;
 
             if ((angleOrDepth < 0x800) && (Render_nearClip < angleOrDepth)) {
-                switch (arg0->vectorRanges[5][0]) {
+                switch (particle_definition->vectorRanges[5][0]) {
                 case 0:
                     break;
                 case 1:
@@ -208,9 +208,9 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
             *(short*)&quad.opaque4.u2 = *(short*)&quad.opaque4.u3;
         }
 
-        width = arg1->accelerationMin.vx / 2;
-        if (arg1->accelerationMin.vy) {
-            width += (Core_Random_Rand() % arg1->accelerationMin.vy) / 2;
+        width = emitter_scratch->accelerationMin.vx / 2;
+        if (emitter_scratch->accelerationMin.vy) {
+            width += (Core_Random_Rand() % emitter_scratch->accelerationMin.vy) / 2;
         }
         offsetX = (Core_Gte_Cos(angles[segment]) * width) >> 0xC;
         offsetY = (Core_Gte_Sin(angles[segment]) * width) >> 0xC;
@@ -224,7 +224,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Parti
         angleOrDepth = (depths[segment] + depths[segment + 1]) / 2;
 
         if ((angleOrDepth < 0x800) && (Render_nearClip < angleOrDepth)) {
-            switch (arg0->vectorRanges[5][0]) {
+            switch (particle_definition->vectorRanges[5][0]) {
             case 0:
                 break;
             case 1:

@@ -10,6 +10,6 @@
 #define VS_EFFECTS_PLUGINS_PLG052_H_DECLS
 #include "Effects/Runtime.h"
 
-int Effects_Plg052_UpdateRepeatingRing(Effects_RendererSlot* arg0, u_int arg1, int arg2);
+int Effects_Plg052_UpdateRepeatingRing(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_PLUGINS_PLG052_H_DECLS

@@ -13,29 +13,29 @@
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 
-void Effects_Plg045_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg057_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg082_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg114_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg152_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg153_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg156_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg263_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg265_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg266_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg300_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg301_ParticleRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
+void Effects_Plg045_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg057_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg082_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg114_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg152_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg153_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg156_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg263_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg265_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg266_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg300_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg301_ParticleRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
 
 #endif // VS_EFFECTS_TEMPLATES_PARTICLERENDER_H_DECLS

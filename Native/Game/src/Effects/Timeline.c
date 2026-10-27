@@ -26,25 +26,25 @@
 #include "Render/Palette.h"
 
 // decomp: BATTLE.PRG func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
-void Effects_LoadEffectTimeline(Effects_EffectInstance* arg0, int arg1, int arg2)
+void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int timeline_index, int arg2)
 {
-    Content_PFileTimelineTable* entry = Content_PFileTimelineSection(Effects_package->block3Data, arg1);
+    Content_PFileTimelineTable* entry = Content_PFileTimelineSection(Effects_package->block3Data, timeline_index);
     Effects_EffectTimeline* p;
     int count = 0;
     int i;
 
-    if (arg0->context.timeline != NULL) {
-        Core_Memory_FreeFromHighEnd(arg0->context.timeline);
+    if (effect_instance->context.timeline != NULL) {
+        Core_Memory_FreeFromHighEnd(effect_instance->context.timeline);
     }
 
-    arg0->context.timeline = Core_Memory_AllocateFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));
-    p = arg0->context.timeline;
+    effect_instance->context.timeline = Core_Memory_AllocateFromHighEnd(sizeof(Effects_EffectTimeline) + entry->trackCount * sizeof(Effects_TimelineTrack));
+    p = effect_instance->context.timeline;
     p->trackCount = entry->trackCount;
     p->frame = 0;
     p->activeTracks = 0;
 
     for (i = 0; i < p->trackCount; ++i) {
-        p->tracks[i].keys = Content_PFileTimelineTrackData(Effects_package->block3Data, arg1, i);
+        p->tracks[i].keys = Content_PFileTimelineTrackData(Effects_package->block3Data, timeline_index, i);
         p->tracks[i].header = entry->tracks[i].header;
 
         if (p->tracks[i].header.kind == 3) {
@@ -59,76 +59,76 @@ void Effects_LoadEffectTimeline(Effects_EffectInstance* arg0, int arg1, int arg2
     }
 
     p->flags = count ? 2 : 0;
-    Core_Debugf("effects", "timeline=%d state=%p tracks=%d stride=%u", arg1, (void*)p,
+    Core_Debugf("effects", "timeline=%d state=%p tracks=%d stride=%u", timeline_index, (void*)p,
         (int)p->trackCount, (unsigned int)sizeof(Effects_TimelineTrack));
 }
 
 // decomp: BATTLE.PRG func_800D5700 (src/BATTLE/BATTLE.PRG/5BF94.c:7920)
-void Effects_InitializeParticleTimelineKey(Effects_TimelineTrack* arg0)
+void Effects_InitializeParticleTimelineKey(Effects_TimelineTrack* timeline_track)
 {
-    Effects_ParticleTrackKey* base = (Effects_ParticleTrackKey*)arg0->keys;
-    arg0->keyParameter = base[arg0->keyIndex].opaque2Bit4;
-    arg0->keyTimer = base[arg0->keyIndex].duration;
+    Effects_ParticleTrackKey* base = (Effects_ParticleTrackKey*)timeline_track->keys;
+    timeline_track->keyParameter = base[timeline_track->keyIndex].opaque2Bit4;
+    timeline_track->keyTimer = base[timeline_track->keyIndex].duration;
 }
 
 // decomp: BATTLE.PRG func_800D5738 (src/BATTLE/BATTLE.PRG/5BF94.c:7927)
-void Effects_InitializeShakeTimelineKey(Effects_TimelineTrack* arg0)
+void Effects_InitializeShakeTimelineKey(Effects_TimelineTrack* timeline_track)
 {
-    arg0->keyTimer =
-        Effects_SegmentedEffectCurveDuration((((Effects_ShakeTrackKey*)&arg0->keys[arg0->keyIndex * 2 + 1])->curve));
+    timeline_track->keyTimer =
+        Effects_SegmentedEffectCurveDuration((((Effects_ShakeTrackKey*)&timeline_track->keys[timeline_track->keyIndex * 2 + 1])->curve));
 }
 
 // decomp: BATTLE.PRG func_800D5780 (src/BATTLE/BATTLE.PRG/5BF94.c:7933)
-int Effects_AdvanceEffectTimelineKey(Effects_TimelineTrack* arg0)
+int Effects_AdvanceEffectTimelineKey(Effects_TimelineTrack* timeline_track)
 {
-    if (arg0->keyIndex + 1 >= arg0->header.keyCount) {
+    if (timeline_track->keyIndex + 1 >= timeline_track->header.keyCount) {
         return 0;
     }
-    arg0->keyIndex++;
-    switch (arg0->header.kind) {
+    timeline_track->keyIndex++;
+    switch (timeline_track->header.kind) {
     case 1:
-        Effects_InitializeParticleTimelineKey(arg0);
+        Effects_InitializeParticleTimelineKey(timeline_track);
         break;
     case 0xD:
-        Effects_InitializeShakeTimelineKey(arg0);
+        Effects_InitializeShakeTimelineKey(timeline_track);
         break;
     }
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D57FC (src/BATTLE/BATTLE.PRG/5BF94.c:7950)
-int Effects_TickParticleEmissionTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickParticleEmissionTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_ParticleTrackKey* e = (Effects_ParticleTrackKey*)arg1->keys;
+    Effects_ParticleTrackKey* e = (Effects_ParticleTrackKey*)timeline_track->keys;
     int ret = 1;
-    int key = e[arg1->keyIndex].frame;
-    int cur = arg0->context.timeline->frame;
+    int key = e[timeline_track->keyIndex].frame;
+    int cur = effect_instance->context.timeline->frame;
 
     if (cur < key) {
         return ret;
     }
-    Effects_SampleAllEffectCurves(arg1->curveFrame);
+    Effects_SampleAllEffectCurves(timeline_track->curveFrame);
     Effects_EmitParticleEvent(
-        arg0, e[arg1->keyIndex].opaque2Bit4, e[arg1->keyIndex].opaque3Bit2, e[arg1->keyIndex].opaque2Bit0, NULL);
-    ++arg1->curveFrame;
-    if (!(arg0->context.timeline->flags & 1)) {
-        --arg1->keyTimer;
+        effect_instance, e[timeline_track->keyIndex].opaque2Bit4, e[timeline_track->keyIndex].opaque3Bit2, e[timeline_track->keyIndex].opaque2Bit0, NULL);
+    ++timeline_track->curveFrame;
+    if (!(effect_instance->context.timeline->flags & 1)) {
+        --timeline_track->keyTimer;
     }
-    if (arg1->keyTimer == 0) {
-        ret = Effects_AdvanceEffectTimelineKey(arg1);
-        arg1->curveFrame = 0;
+    if (timeline_track->keyTimer == 0) {
+        ret = Effects_AdvanceEffectTimelineKey(timeline_track);
+        timeline_track->curveFrame = 0;
     }
     return ret;
 }
 
 // decomp: BATTLE.PRG func_800D5904 (src/BATTLE/BATTLE.PRG/5BF94.c:7974)
-int Effects_TickEffectSoundTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickEffectSoundTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
     SVECTOR position;
-    u_long* commands = arg1->keys;
-    u_long command = commands[arg1->keyIndex];
+    u_long* commands = timeline_track->keys;
+    u_long command = commands[timeline_track->keyIndex];
 
-    if ((command & 0x1FF) != arg0->context.timeline->frame) {
+    if ((command & 0x1FF) != effect_instance->context.timeline->frame) {
         return 1;
     }
 
@@ -143,41 +143,41 @@ int Effects_TickEffectSoundTrack(Effects_EffectInstance* arg0, Effects_TimelineT
             Audio_PlaySfxCentered(bank, (command >> 9) & 0x1FF);
         } else {
             setVector(&position,
-                arg0->transforms[(commands[arg1->keyIndex] >> 22) & 63].world.t[0],
-                arg0->transforms[(commands[arg1->keyIndex] >> 22) & 63].world.t[1],
-                arg0->transforms[(commands[arg1->keyIndex] >> 22) & 63].world.t[2]);
-            Audio_PlayWorldSfx(bank, (commands[arg1->keyIndex] >> 9) & 0x1FF, &position);
+                effect_instance->transforms[(commands[timeline_track->keyIndex] >> 22) & 63].world.t[0],
+                effect_instance->transforms[(commands[timeline_track->keyIndex] >> 22) & 63].world.t[1],
+                effect_instance->transforms[(commands[timeline_track->keyIndex] >> 22) & 63].world.t[2]);
+            Audio_PlayWorldSfx(bank, (commands[timeline_track->keyIndex] >> 9) & 0x1FF, &position);
         }
     }
 
-    return Effects_AdvanceEffectTimelineKey(arg1);
+    return Effects_AdvanceEffectTimelineKey(timeline_track);
 }
 
 // decomp: BATTLE.PRG func_800D5A98 (src/BATTLE/BATTLE.PRG/5BF94.c:8005)
-int Effects_TickChildEffectTrack(Effects_EffectInstance* arg0, Effects_ChildTrackView* arg1, int arg2)
+int Effects_TickChildEffectTrack(Effects_EffectInstance* effect_instance, Effects_ChildTrackView* child_track, int child_script_offset)
 {
     Effects_EffectSpawnRequest spawn;
-    Effects_ChildTrackKey* event = arg1->event;
+    Effects_ChildTrackKey* event = child_track->event;
     Effects_EffectInstance* child;
     int result = 1;
 
-    if (event->frame > arg0->context.timeline->frame) {
+    if (event->frame > effect_instance->context.timeline->frame) {
         return result;
     }
 
-    if (arg1->index < Effects_package->request->count) {
-        while (arg1->delay == 0) {
+    if (child_track->index < Effects_package->request->count) {
+        while (child_track->delay == 0) {
             spawn.script = Effects_package->block8Data;
-            spawn.scriptOffset = arg2;
+            spawn.scriptOffset = child_script_offset;
             spawn.priority = 0;
             spawn.source = &Effects_package->request->source;
             spawn.emitFrom = &Effects_package->request->source;
-            spawn.target = &Effects_package->request->targets[arg1->index];
-            spawn.emitTo = &Effects_package->request->targets[arg1->index];
-            spawn.parent = arg0;
-            spawn.token = arg0->token;
+            spawn.target = &Effects_package->request->targets[child_track->index];
+            spawn.emitTo = &Effects_package->request->targets[child_track->index];
+            spawn.parent = effect_instance;
+            spawn.token = effect_instance->token;
             child = Effects_CreatePrimaryEffectInstance(&spawn);
-            ++arg0->childCount;
+            ++effect_instance->childCount;
 
             if (spawn.target->type == 4) {
                 child->registers[1] = event->actors[spawn.target->value.actor.eventActorSlot];
@@ -185,31 +185,31 @@ int Effects_TickChildEffectTrack(Effects_EffectInstance* arg0, Effects_ChildTrac
                 child->registers[1] = event->actors[0];
             }
 
-            if (++arg1->index == Effects_package->request->count) {
+            if (++child_track->index == Effects_package->request->count) {
                 break;
             }
 
-            arg1->delay += event->delay;
+            child_track->delay += event->delay;
         }
 
-        if (arg1->delay != 0) {
-            --arg1->delay;
+        if (child_track->delay != 0) {
+            --child_track->delay;
         }
-    } else if (arg1->index == Effects_package->request->count) {
-        if (arg0->childCount == 0) {
+    } else if (child_track->index == Effects_package->request->count) {
+        if (effect_instance->childCount == 0) {
             spawn.script = Effects_package->block8Data;
-            spawn.scriptOffset = arg2;
+            spawn.scriptOffset = child_script_offset;
             spawn.priority = 0;
             spawn.source = &Effects_package->request->source;
             spawn.emitFrom = &Effects_package->request->source;
             spawn.target = &Effects_package->request->targets[0];
             spawn.emitTo = &Effects_package->request->targets[0];
-            spawn.parent = arg0;
-            spawn.token = arg0->token;
+            spawn.parent = effect_instance;
+            spawn.token = effect_instance->token;
             child = Effects_CreatePrimaryEffectInstance(&spawn);
-            ++arg0->childCount;
+            ++effect_instance->childCount;
             child->registers[1] = event->final;
-            ++arg1->index;
+            ++child_track->index;
         }
     } else {
         result = 0;
@@ -219,14 +219,14 @@ int Effects_TickChildEffectTrack(Effects_EffectInstance* arg0, Effects_ChildTrac
 }
 
 // decomp: BATTLE.PRG func_800D5D74 (src/BATTLE/BATTLE.PRG/5BF94.c:8069)
-int Effects_TickEffectRendererTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickEffectRendererTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_RendererTrackKey* temp_a3 = (Effects_RendererTrackKey*)(arg1->keyIndex * 8 + (uintptr_t)arg1->keys);
+    Effects_RendererTrackKey* renderer_key = (Effects_RendererTrackKey*)(timeline_track->keyIndex * 8 + (uintptr_t)timeline_track->keys);
 
-    if (temp_a3->frame == arg0->context.timeline->frame) {
-        Effects_AttachEffectRenderer(arg0, Effects_effectRenderers[temp_a3->effectRenderer],
-            (temp_a3->opaque1Bit1 + temp_a3->opaque2Bit5 * 256) | (temp_a3->opaque4 << 0x10));
-        return Effects_AdvanceEffectTimelineKey(arg1);
+    if (renderer_key->frame == effect_instance->context.timeline->frame) {
+        Effects_AttachEffectRenderer(effect_instance, Effects_effectRenderers[renderer_key->effectRenderer],
+            (renderer_key->opaque1Bit1 + renderer_key->opaque2Bit5 * 256) | (renderer_key->opaque4 << 0x10));
+        return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
     return 1;
 }
@@ -280,33 +280,33 @@ int Effects_TickControllerVibrationTrack(Effects_EffectInstance* actor, Effects_
 }
 
 // decomp: BATTLE.PRG func_800D5F8C (src/BATTLE/BATTLE.PRG/5BF94.c:8128)
-int Effects_TickSourceActorColorTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickSourceActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_ColorTrackKey* temp_s0 = (Effects_ColorTrackKey*)arg1->keys + arg1->keyIndex;
+    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)timeline_track->keys + timeline_track->keyIndex;
 
-    if (temp_s0->frame == arg0->context.timeline->frame) {
-        if ((arg0->context.emitFrom.type == 4)
-            && (Actors_ActorStateFlags(arg0->context.emitFrom.value.actor.actor) & 2)) {
-            Render_TransformActorColors(temp_s0->mode, temp_s0->duration,
-                arg0->context.emitFrom.value.actor.actor, temp_s0->red - 0x80,
-                temp_s0->green - 0x80, temp_s0->blue - 0x80);
+    if (color_key->frame == effect_instance->context.timeline->frame) {
+        if ((effect_instance->context.emitFrom.type == 4)
+            && (Actors_ActorStateFlags(effect_instance->context.emitFrom.value.actor.actor) & 2)) {
+            Render_TransformActorColors(color_key->mode, color_key->duration,
+                effect_instance->context.emitFrom.value.actor.actor, color_key->red - 0x80,
+                color_key->green - 0x80, color_key->blue - 0x80);
         }
-        return Effects_AdvanceEffectTimelineKey(arg1);
+        return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D6048 (src/BATTLE/BATTLE.PRG/5BF94.c:8144)
-int Effects_TickTargetActorColorTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1, int arg2)
+int Effects_TickTargetActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track, int apply_to_all_targets)
 {
     int i;
-    Effects_ColorTrackKey* entry = (Effects_ColorTrackKey*)arg1->keys + arg1->keyIndex;
+    Effects_ColorTrackKey* entry = (Effects_ColorTrackKey*)timeline_track->keys + timeline_track->keyIndex;
 
-    if (entry->frame != arg0->context.timeline->frame) {
+    if (entry->frame != effect_instance->context.timeline->frame) {
         return 1;
     }
 
-    if (arg2 != 0) {
+    if (apply_to_all_targets != 0) {
         Effects_ActionEffectRequest* effect = &Effects_actionRequest;
 
         for (i = 0; i < Effects_actionRequest.count; ++i) {
@@ -317,93 +317,93 @@ int Effects_TickTargetActorColorTrack(Effects_EffectInstance* arg0, Effects_Time
                     entry->green - 128, entry->blue - 128);
             }
         }
-    } else if ((arg0->context.emitTo.type == 4)
-               && (Actors_ActorStateFlags(arg0->context.emitTo.value.actor.actor) & 2)) {
-        Render_TransformActorColors(entry->mode, entry->duration, arg0->context.emitTo.value.actor.actor,
+    } else if ((effect_instance->context.emitTo.type == 4)
+               && (Actors_ActorStateFlags(effect_instance->context.emitTo.value.actor.actor) & 2)) {
+        Render_TransformActorColors(entry->mode, entry->duration, effect_instance->context.emitTo.value.actor.actor,
             entry->red - 128, entry->green - 128, entry->blue - 128);
     }
-    return Effects_AdvanceEffectTimelineKey(arg1);
+    return Effects_AdvanceEffectTimelineKey(timeline_track);
 }
 
 // decomp: BATTLE.PRG func_800D61AC (src/BATTLE/BATTLE.PRG/5BF94.c:8172)
-int Effects_TickOtherActorColorTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickOtherActorColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
     int i;
-    Effects_ColorTrackKey* temp_s2 = (Effects_ColorTrackKey*)(arg1->keys + (arg1->keyIndex * 2));
+    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)(timeline_track->keys + (timeline_track->keyIndex * 2));
 
-    if (temp_s2->frame == arg0->context.timeline->frame) {
+    if (color_key->frame == effect_instance->context.timeline->frame) {
         for (i = 0; i < Effects_actionRequest.otherCount; ++i) {
             if (Actors_ActorStateFlags(Effects_actionRequest.others[i]) & 2) {
-                Render_TransformActorColors(temp_s2->mode, temp_s2->duration, Effects_actionRequest.others[i],
-                    temp_s2->red - 0x80, (temp_s2->green - 0x80), (temp_s2->blue - 0x80));
+                Render_TransformActorColors(color_key->mode, color_key->duration, Effects_actionRequest.others[i],
+                    color_key->red - 0x80, (color_key->green - 0x80), (color_key->blue - 0x80));
             }
         }
-        return Effects_AdvanceEffectTimelineKey(arg1);
+        return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D6298 (src/BATTLE/BATTLE.PRG/5BF94.c:8189)
-int Effects_TickSceneColorTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickSceneColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_ColorTrackKey* temp_a3 = (Effects_ColorTrackKey*)arg1->keys + (arg1->keyIndex);
+    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)timeline_track->keys + (timeline_track->keyIndex);
 
-    if (temp_a3->frame == arg0->context.timeline->frame) {
-        Render_TransformSceneColors(temp_a3->mode, temp_a3->duration, temp_a3->red - 0x80,
-            temp_a3->green - 0x80, (temp_a3->blue - 0x80));
-        return Effects_AdvanceEffectTimelineKey(arg1);
+    if (color_key->frame == effect_instance->context.timeline->frame) {
+        Render_TransformSceneColors(color_key->mode, color_key->duration, color_key->red - 0x80,
+            color_key->green - 0x80, (color_key->blue - 0x80));
+        return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D6310 (src/BATTLE/BATTLE.PRG/5BF94.c:8201)
-int Effects_TickBackgroundColorTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_ColorTrackKey* temp_a3 = (Effects_ColorTrackKey*)(arg1->keys + arg1->keyIndex * 2);
+    Effects_ColorTrackKey* color_key = (Effects_ColorTrackKey*)(timeline_track->keys + timeline_track->keyIndex * 2);
 
-    if (temp_a3->frame == arg0->context.timeline->frame) {
-        Render_TransformBackgroundColors(temp_a3->mode, temp_a3->duration, temp_a3->red - 0x80,
-            temp_a3->green - 0x80, temp_a3->blue - 0x80);
-        return Effects_AdvanceEffectTimelineKey(arg1);
+    if (color_key->frame == effect_instance->context.timeline->frame) {
+        Render_TransformBackgroundColors(color_key->mode, color_key->duration, color_key->red - 0x80,
+            color_key->green - 0x80, color_key->blue - 0x80);
+        return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D6388 (src/BATTLE/BATTLE.PRG/5BF94.c:8213)
-void Effects_ApplyTargetActionImpact(Effects_EffectInstance* arg0)
+void Effects_ApplyTargetActionImpact(Effects_EffectInstance* effect_instance)
 {
-    if (arg0->context.target.type == 4) {
-        Battle_ApplyActionTargetEffects(arg0->context.target.value.actor.actor, NULL);
+    if (effect_instance->context.target.type == 4) {
+        Battle_ApplyActionTargetEffects(effect_instance->context.target.value.actor.actor, NULL);
     } else {
         Battle_ApplyActionTargetEffects(
-            arg0->context.target.value.position.pad, &arg0->context.target.value.position);
+            effect_instance->context.target.value.position.pad, &effect_instance->context.target.value.position);
     }
 }
 
 // decomp: BATTLE.PRG func_800D63D0 (src/BATTLE/BATTLE.PRG/5BF94.c:8223)
-void Effects_ApplySourceActionImpact(Effects_EffectInstance* arg0)
+void Effects_ApplySourceActionImpact(Effects_EffectInstance* effect_instance)
 {
-    if (arg0->context.source.type == 4) {
-        Battle_ApplyActionSourceEffects(arg0->context.source.value.actor.actor, NULL);
+    if (effect_instance->context.source.type == 4) {
+        Battle_ApplyActionSourceEffects(effect_instance->context.source.value.actor.actor, NULL);
     } else {
         Battle_ApplyActionSourceEffects(
-            arg0->context.source.value.position.pad, &arg0->context.source.value.position);
+            effect_instance->context.source.value.position.pad, &effect_instance->context.source.value.position);
     }
 }
 
 // decomp: BATTLE.PRG func_800D6418 (src/BATTLE/BATTLE.PRG/5BF94.c:8233)
-void Effects_ActivateTargetRoomTile(Effects_EffectInstance* arg0)
+void Effects_ActivateTargetRoomTile(Effects_EffectInstance* effect_instance)
 {
-    if (arg0->context.target.type == 5) {
-        Field_DisableTrapAtPosition(&arg0->context.target.value.position);
+    if (effect_instance->context.target.type == 5) {
+        Field_DisableTrapAtPosition(&effect_instance->context.target.value.position);
     }
 }
 
 // decomp: BATTLE.PRG func_800D6448 (src/BATTLE/BATTLE.PRG/5BF94.c:8240)
-void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* arg0, u_char arg1, u_char arg2)
+void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* effect_instance, u_char transform_index, u_char packed_trail_style)
 {
     Effects_SaveEffectResourceContext();
-    Effects_SpawnBoneTrail(arg0->transforms[arg1].actor, arg0->transforms[arg1].bone, arg2 % 10, arg2 / 10);
+    Effects_SpawnBoneTrail(effect_instance->transforms[transform_index].actor, effect_instance->transforms[transform_index].bone, packed_trail_style % 10, packed_trail_style / 10);
     Effects_RestoreEffectResourceContext();
 }
 
@@ -411,104 +411,104 @@ void Effects_SpawnTransformWeaponTrail(Effects_EffectInstance* arg0, u_char arg1
 void Effects_FadeActionWeaponTrails(void) { Effects_FadeBoneTrails(0, 0); }
 
 // decomp: BATTLE.PRG func_800D6508 (src/BATTLE/BATTLE.PRG/5BF94.c:8249)
-void Effects_ResumeEffectTransformMotion(Effects_TransformControlView* arg0, char arg1)
+void Effects_ResumeEffectTransformMotion(Effects_TransformControlView* transform_controls, char transform_index)
 {
-    arg0 += arg1;
-    arg0->motionResumed = 1;
+    transform_controls += transform_index;
+    transform_controls->motionResumed = 1;
 }
 
 // decomp: BATTLE.PRG func_800D6538 (src/BATTLE/BATTLE.PRG/5BF94.c:8255)
-void Effects_HoldEffectTimelineFrame(Effects_EffectInstance* arg0) { arg0->context.timeline->flags |= 1; }
+void Effects_HoldEffectTimelineFrame(Effects_EffectInstance* effect_instance) { effect_instance->context.timeline->flags |= 1; }
 
 // decomp: BATTLE.PRG func_800D6554 (src/BATTLE/BATTLE.PRG/5BF94.c:8257)
 void Effects_PauseMovingRoomObjects(void) { Field_FreezeRoomGimmicksTemporarily(); }
 
 // decomp: BATTLE.PRG func_800D6574 (src/BATTLE/BATTLE.PRG/5BF94.c:8259)
-void Effects_SignalSourceActorFromTimeline(Effects_EffectInstance* arg0)
+void Effects_SignalSourceActorFromTimeline(Effects_EffectInstance* effect_instance)
 {
-    if (arg0->context.source.type == 4) {
-        Effects_SignalActorEffectAnimation(arg0->context.source.value.actor.actor);
+    if (effect_instance->context.source.type == 4) {
+        Effects_SignalActorEffectAnimation(effect_instance->context.source.value.actor.actor);
     }
 }
 
 // decomp: BATTLE.PRG func_800D65A8 (src/BATTLE/BATTLE.PRG/5BF94.c:8266)
-void Effects_InvalidateEffectTransformAttachments(Effects_TransformControlView* arg0, char arg1)
+void Effects_InvalidateEffectTransformAttachments(Effects_TransformControlView* transform_controls, char transform_index)
 {
-    arg0 += arg1;
-    arg0->attachmentMode = 0;
+    transform_controls += transform_index;
+    transform_controls->attachmentMode = 0;
 }
 
 // decomp: BATTLE.PRG func_800D65D8 (src/BATTLE/BATTLE.PRG/5BF94.c:8272)
-void Effects_SetSourceWeaponBrightness(Effects_EffectInstance* arg0, u_char arg1)
+void Effects_SetSourceWeaponBrightness(Effects_EffectInstance* effect_instance, u_char brightness_override)
 {
 
-    if (arg0->context.emitFrom.type == 4) {
-        if (arg1 != 0) {
-            Actors_SetWeaponBrightnessOverride(arg0->context.emitFrom.value.actor.actor, 1, arg1);
+    if (effect_instance->context.emitFrom.type == 4) {
+        if (brightness_override != 0) {
+            Actors_SetWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 1, brightness_override);
 
         } else {
-            Actors_SetWeaponBrightnessOverride(arg0->context.emitFrom.value.actor.actor, 0, 0);
+            Actors_SetWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 0, 0);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800D6628 (src/BATTLE/BATTLE.PRG/5BF94.c:8285)
-void Effects_PlaySourceActorReactionSound(Effects_EffectInstance* arg0, u_char arg1)
+void Effects_PlaySourceActorReactionSound(Effects_EffectInstance* effect_instance, u_char reaction_sound_variant)
 {
     int var;
 
-    if (arg0->context.emitFrom.type == 4) {
-        if (arg1 < 4) {
-            Audio_PlayActorModelSoundVariant(arg0->context.emitFrom.value.actor.actor, arg1);
+    if (effect_instance->context.emitFrom.type == 4) {
+        if (reaction_sound_variant < 4) {
+            Audio_PlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, reaction_sound_variant);
         } else {
             do {
                 var = Core_Random_Rand() % 3;
             } while (var == Effects_lastReactionSoundVariant);
-            Audio_PlayActorModelSoundVariant(arg0->context.emitFrom.value.actor.actor, Effects_lastReactionSoundVariant = var);
+            Audio_PlayActorModelSoundVariant(effect_instance->context.emitFrom.value.actor.actor, Effects_lastReactionSoundVariant = var);
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800D66CC (src/BATTLE/BATTLE.PRG/5BF94.c:8301)
-void Effects_ActivateTargetGimmick(Effects_EffectInstance* arg0)
+void Effects_ActivateTargetGimmick(Effects_EffectInstance* effect_instance)
 {
-    if (arg0->context.target.type == 5) {
-        Field_ApplyUnlockEffectToRoomObject(&arg0->context.target.value.position);
+    if (effect_instance->context.target.type == 5) {
+        Field_ApplyUnlockEffectToRoomObject(&effect_instance->context.target.value.position);
     }
 }
 
 // decomp: BATTLE.PRG func_800D6860 (src/BATTLE/BATTLE.PRG/5BF94.c:8335)
-void Effects_PrepareAshleyTargetImpact(Effects_EffectInstance* arg0)
+void Effects_PrepareAshleyTargetImpact(Effects_EffectInstance* effect_instance)
 {
-    if (arg0->context.emitTo.type == 4) {
-        Battle_ArmDefenseAbilityTimingWindow(arg0->context.emitTo.value.actor.actor);
+    if (effect_instance->context.emitTo.type == 4) {
+        Battle_ArmDefenseAbilityTimingWindow(effect_instance->context.emitTo.value.actor.actor);
     }
 }
 
 // decomp: BATTLE.PRG func_800D6894 (src/BATTLE/BATTLE.PRG/5BF94.c:8342)
-int Effects_TickActionControlTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickActionControlTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_ActionControlKey* temp_a2 = (Effects_ActionControlKey*)(arg1->keys - (-arg1->keyIndex));
+    Effects_ActionControlKey* control_key = (Effects_ActionControlKey*)(timeline_track->keys - (-timeline_track->keyIndex));
 
-    if ((temp_a2->frame & 0x1FF) == arg0->context.timeline->frame) {
-        u_char temp_a1_2 = temp_a2->opaque2;
-        u_char temp_a2_2 = temp_a2->opaque3;
+    if ((control_key->frame & 0x1FF) == effect_instance->context.timeline->frame) {
+        u_char control_operand0 = control_key->opaque2;
+        u_char control_operand1 = control_key->opaque3;
 
-        switch (temp_a2->frame >> 9) {
+        switch (control_key->frame >> 9) {
         case 0:
-            Effects_ApplyTargetActionImpact(arg0);
+            Effects_ApplyTargetActionImpact(effect_instance);
             break;
 
         case 1:
-            Effects_ApplySourceActionImpact(arg0);
+            Effects_ApplySourceActionImpact(effect_instance);
             break;
 
         case 2:
-            Effects_ActivateTargetRoomTile(arg0);
+            Effects_ActivateTargetRoomTile(effect_instance);
             break;
 
         case 3:
-            Effects_SpawnTransformWeaponTrail(arg0, temp_a1_2, temp_a2_2);
+            Effects_SpawnTransformWeaponTrail(effect_instance, control_operand0, control_operand1);
             break;
 
         case 4:
@@ -516,11 +516,11 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* arg0, Effects_Timelin
             break;
 
         case 5:
-            Effects_ResumeEffectTransformMotion((Effects_TransformControlView*)arg0, temp_a1_2);
+            Effects_ResumeEffectTransformMotion((Effects_TransformControlView*)effect_instance, control_operand0);
             break;
 
         case 6:
-            Effects_HoldEffectTimelineFrame(arg0);
+            Effects_HoldEffectTimelineFrame(effect_instance);
             break;
 
         case 7:
@@ -528,51 +528,51 @@ int Effects_TickActionControlTrack(Effects_EffectInstance* arg0, Effects_Timelin
             break;
 
         case 8:
-            Effects_SignalSourceActorFromTimeline(arg0);
+            Effects_SignalSourceActorFromTimeline(effect_instance);
             break;
 
         case 9:
-            Effects_InvalidateEffectTransformAttachments((Effects_TransformControlView*)arg0, temp_a1_2);
+            Effects_InvalidateEffectTransformAttachments((Effects_TransformControlView*)effect_instance, control_operand0);
             break;
 
         case 10:
-            Effects_SetSourceWeaponBrightness(arg0, temp_a1_2);
+            Effects_SetSourceWeaponBrightness(effect_instance, control_operand0);
             break;
 
         case 11:
-            Effects_PlaySourceActorReactionSound(arg0, temp_a1_2);
+            Effects_PlaySourceActorReactionSound(effect_instance, control_operand0);
             break;
 
         case 12:
-            Effects_ActivateTargetGimmick(arg0);
+            Effects_ActivateTargetGimmick(effect_instance);
             break;
 
         case 13:
-            Effects_FocusCameraOnEffectTransform(arg0, temp_a1_2, temp_a2_2);
+            Effects_FocusCameraOnEffectTransform(effect_instance, control_operand0, control_operand1);
             break;
 
         case 14:
-            Effects_RestoreActionEffectCamera(arg0, temp_a1_2);
+            Effects_RestoreActionEffectCamera(effect_instance, control_operand0);
             break;
 
         case 15:
-            Effects_PrepareAshleyTargetImpact(arg0);
+            Effects_PrepareAshleyTargetImpact(effect_instance);
             break;
         }
 
-        return Effects_AdvanceEffectTimelineKey(arg1);
+        return Effects_AdvanceEffectTimelineKey(timeline_track);
     }
 
     return 1;
 }
 
 // decomp: BATTLE.PRG func_800D6A18 (src/BATTLE/BATTLE.PRG/5BF94.c:8422)
-int Effects_TickCameraShakeTrack(Effects_EffectInstance* arg0, Effects_TimelineTrack* arg1)
+int Effects_TickCameraShakeTrack(Effects_EffectInstance* effect_instance, Effects_TimelineTrack* timeline_track)
 {
-    Effects_ShakeChannelKey* e = (Effects_ShakeChannelKey*)arg1->keys;
+    Effects_ShakeChannelKey* e = (Effects_ShakeChannelKey*)timeline_track->keys;
     int ret = 1;
-    int key = e[arg1->keyIndex].frame;
-    int cur = arg0->context.timeline->frame;
+    int key = e[timeline_track->keyIndex].frame;
+    int cur = effect_instance->context.timeline->frame;
 
     if (cur < key) {
         return ret;
@@ -581,69 +581,69 @@ int Effects_TickCameraShakeTrack(Effects_EffectInstance* arg0, Effects_TimelineT
         Effects_StartCameraShakeChannels(e->opaque4Bit0, e->opaque4Bit4, e->opaque5Bit1, e->opaque6Bit0, e->opaque6Bit1, e->opaque7Bit0,
             e->opaque7Bit1);
     }
-    if (--arg1->keyTimer == 0) {
-        ret = Effects_AdvanceEffectTimelineKey(arg1);
+    if (--timeline_track->keyTimer == 0) {
+        ret = Effects_AdvanceEffectTimelineKey(timeline_track);
     }
     return ret;
 }
 
 // decomp: BATTLE.PRG func_800D6AEC (src/BATTLE/BATTLE.PRG/5BF94.c:8442)
-void Effects_TickEffectTimeline(Effects_EffectInstance* arg0, int arg1)
+void Effects_TickEffectTimeline(Effects_EffectInstance* effect_instance, int child_script_offset)
 {
     Effects_EffectTimeline* temp_a0;
-    Effects_TimelineTrack* temp_a1;
-    int var_s1;
+    Effects_TimelineTrack* unused_track_declaration;
+    int track_index;
 
-    for (var_s1 = 0; var_s1 < arg0->context.timeline->trackCount; var_s1++) {
-        if ((arg0->context.timeline->activeTracks >> var_s1) & 1) {
+    for (track_index = 0; track_index < effect_instance->context.timeline->trackCount; track_index++) {
+        if ((effect_instance->context.timeline->activeTracks >> track_index) & 1) {
             int temp;
-            Effects_TimelineTrack* temp_a1 =
-                &arg0->context.timeline->tracks[var_s1];
-            switch (temp_a1->header.kind) {
+            Effects_TimelineTrack* timeline_track =
+                &effect_instance->context.timeline->tracks[track_index];
+            switch (timeline_track->header.kind) {
             case 1:
-                temp = Effects_TickParticleEmissionTrack(arg0, temp_a1);
+                temp = Effects_TickParticleEmissionTrack(effect_instance, timeline_track);
                 break;
             case 2:
-                temp = Effects_TickEffectSoundTrack(arg0, temp_a1);
+                temp = Effects_TickEffectSoundTrack(effect_instance, timeline_track);
                 break;
             case 3:
-                temp = Effects_TickChildEffectTrack(arg0, (Effects_ChildTrackView*)temp_a1, arg1);
+                temp = Effects_TickChildEffectTrack(effect_instance, (Effects_ChildTrackView*)timeline_track, child_script_offset);
                 break;
             case 4:
-                temp = Effects_TickEffectRendererTrack(arg0, temp_a1);
+                temp = Effects_TickEffectRendererTrack(effect_instance, timeline_track);
                 break;
             case 5:
-                temp = Effects_TickControllerVibrationTrack(arg0, temp_a1);
+                temp = Effects_TickControllerVibrationTrack(effect_instance, timeline_track);
                 break;
             case 6:
-                temp = Effects_TickSourceActorColorTrack(arg0, temp_a1);
+                temp = Effects_TickSourceActorColorTrack(effect_instance, timeline_track);
                 break;
             case 7:
-                temp = Effects_TickTargetActorColorTrack(arg0, temp_a1, arg0->context.timeline->flags & 2);
+                temp = Effects_TickTargetActorColorTrack(effect_instance, timeline_track, effect_instance->context.timeline->flags & 2);
                 break;
             case 8:
-                temp = Effects_TickOtherActorColorTrack(arg0, temp_a1);
+                temp = Effects_TickOtherActorColorTrack(effect_instance, timeline_track);
                 break;
             case 9:
-                temp = Effects_TickSceneColorTrack(arg0, temp_a1);
+                temp = Effects_TickSceneColorTrack(effect_instance, timeline_track);
                 break;
             case 10:
-                temp = Effects_TickBackgroundColorTrack(arg0, temp_a1);
+                temp = Effects_TickBackgroundColorTrack(effect_instance, timeline_track);
                 break;
             case 12:
-                temp = Effects_TickActionControlTrack(arg0, temp_a1);
+                temp = Effects_TickActionControlTrack(effect_instance, timeline_track);
                 break;
             case 13:
-                temp = Effects_TickCameraShakeTrack(arg0, temp_a1);
+                temp = Effects_TickCameraShakeTrack(effect_instance, timeline_track);
                 break;
             }
             if (temp == 0) {
-                arg0->context.timeline->activeTracks &= ~(1 << var_s1);
+                effect_instance->context.timeline->activeTracks &= ~(1 << track_index);
             }
         }
     }
-    if (!(arg0->context.timeline->flags & 1)) {
-        arg0->context.timeline->frame++;
+    if (!(effect_instance->context.timeline->flags & 1)) {
+        effect_instance->context.timeline->frame++;
     }
 }
 

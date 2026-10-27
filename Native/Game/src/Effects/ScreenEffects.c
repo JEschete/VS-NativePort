@@ -24,19 +24,19 @@ void Effects_ResetScreenEffectState(void)
 }
 
 // decomp: BATTLE.PRG _loadScreff2 (src/BATTLE/BATTLE.PRG/5BF94.c:3873)
-void Effects_LoadScreenEffectOverlay(int arg0)
+void Effects_LoadScreenEffectOverlay(int begin_load)
 {
     Content_DiscFile file;
     Effects_ScreenEffectOverlay* p = Effects_screenEffectOverlay;
-    void* const* new_var;
+    void* const* overlay_destination_slot;
 
-    if (arg0 != 0) {
+    if (begin_load != 0) {
         p->loading = 1;
         file.lba = VS_SCREFF2_PRG_LBA;
         file.size = VS_SCREFF2_PRG_SIZE;
         p->slot = Content_AllocateDiscRequest(&file);
-        new_var = &Core_overlaySlots[1];
-        Content_EnqueueDiscRequest(p->slot, *new_var);
+        overlay_destination_slot = &Core_overlaySlots[1];
+        Content_EnqueueDiscRequest(p->slot, *overlay_destination_slot);
         return;
     }
 
@@ -50,19 +50,19 @@ void Effects_LoadScreenEffectOverlay(int arg0)
 // decomp: BATTLE.PRG func_800CB708 (src/BATTLE/BATTLE.PRG/5BF94.c:3896)
 void Effects_DrawScreenEffectOverlay(void)
 {
-    Effects_ScreenEffectOverlay* temp_s0 = Effects_screenEffectOverlay;
-    if (temp_s0 != NULL) {
-        if (temp_s0->loading != 0) {
+    Effects_ScreenEffectOverlay* screen_effect_state = Effects_screenEffectOverlay;
+    if (screen_effect_state != NULL) {
+        if (screen_effect_state->loading != 0) {
             Effects_LoadScreenEffectOverlay(0);
             return;
         }
-        if (temp_s0->radialWarpArg0 != 0x1000 || temp_s0->radialWarpArg1 != 0) {
+        if (screen_effect_state->radialWarpArg0 != 0x1000 || screen_effect_state->radialWarpArg1 != 0) {
             Effects_ScreenDistortion_WarpPolygonVertices();
         }
-        if (temp_s0->feedbackLayer != 0) {
+        if (screen_effect_state->feedbackLayer != 0) {
             Effects_ScreenDistortion_DrawFeedbackTiles();
         }
-        if (temp_s0->vignetteEnabled != 0) {
+        if (screen_effect_state->vignetteEnabled != 0) {
             Effects_ScreenDistortion_DrawVignette();
         }
     }

@@ -15,7 +15,7 @@
 #include "Render/UiPrimitives.h"
 
 // Template body: Effects::Templates::Grid (decomp src/EFFECT/grids.h:23). Included once per instance by Effects/Templates/Grid.c with that plugin's bindings.
-int VS_GRID_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_GRID_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     int x[9];
     int z[9];
@@ -48,13 +48,13 @@ int VS_GRID_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     MATRIX* matrix;
     Render_GridPacket* prim;
     alive = 1;
-    state = arg0->rendererState;
+    state = renderer_slot->rendererState;
     battle = Effects_currentInstance;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
-        state = arg0->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));
-        state->effect = arg2 >> 8;
-        state->lifetime = arg2;
+        state = renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));
+        state->effect = packed_parameters >> 8;
+        state->lifetime = packed_parameters;
         state->age = 0;
         state->xSpacing = state->xSpeed = 0;
         state->zSpacing = state->zSpeed = 0;

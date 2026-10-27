@@ -51,14 +51,14 @@ void Effects_ResetEffectCameraMotion(void)
 }
 
 // decomp: BATTLE.PRG func_800D1B18 (src/BATTLE/BATTLE.PRG/5BF94.c:6516)
-void Effects_CaptureEffectCamera(Effects_EffectCamera* arg0)
+void Effects_CaptureEffectCamera(Effects_EffectCamera* camera_state)
 {
-    Field_CameraPosition(&arg0->position);
-    Field_CameraLookAt(&arg0->lookAt);
-    arg0->roll = Field_CameraRoll() + ONE * 8;
-    arg0->nearClip = Render_nearClip;
-    arg0->projectionDistance = Render_projectionDistance;
-    arg0->farClip = Render_frameScratch.camera.farClip;
+    Field_CameraPosition(&camera_state->position);
+    Field_CameraLookAt(&camera_state->lookAt);
+    camera_state->roll = Field_CameraRoll() + ONE * 8;
+    camera_state->nearClip = Render_nearClip;
+    camera_state->projectionDistance = Render_projectionDistance;
+    camera_state->farClip = Render_frameScratch.camera.farClip;
 }
 
 // decomp: BATTLE.PRG func_800D1B80 (src/BATTLE/BATTLE.PRG/5BF94.c:6526)
@@ -101,66 +101,66 @@ void Effects_ApplyEffectCamera(Effects_EffectCamera* camera)
 }
 
 // decomp: BATTLE.PRG func_800D1DE4 (src/BATTLE/BATTLE.PRG/5BF94.c:6564)
-void Effects_EnableCameraShakeChannels(int arg0) { Effects_enabledShakeChannels |= arg0; }
+void Effects_EnableCameraShakeChannels(int channel_mask) { Effects_enabledShakeChannels |= channel_mask; }
 
 // decomp: BATTLE.PRG func_800D1DFC (src/BATTLE/BATTLE.PRG/5BF94.c:6566)
-void Effects_DisableCameraShakeChannels(int arg0)
+void Effects_DisableCameraShakeChannels(int channel_mask)
 {
-    if (arg0 != 0) {
-        Effects_enabledShakeChannels &= ~arg0;
+    if (channel_mask != 0) {
+        Effects_enabledShakeChannels &= ~channel_mask;
         return;
     }
     Effects_enabledShakeChannels = 0;
 }
 
 // decomp: BATTLE.PRG func_800D1E20 (src/BATTLE/BATTLE.PRG/5BF94.c:6575)
-void Effects_SetEffectCameraTransitionMode(int arg0) { Effects_cameraTransitionMode = arg0; }
+void Effects_SetEffectCameraTransitionMode(int transition_mode) { Effects_cameraTransitionMode = transition_mode; }
 
 // decomp: BATTLE.PRG func_800D1E2C (src/BATTLE/BATTLE.PRG/5BF94.c:6577)
-u_char Effects_CameraShakePhaseStep(Effects_CameraShakeChannel* arg0)
+u_char Effects_CameraShakePhaseStep(Effects_CameraShakeChannel* shake_channel)
 {
-    int var_v0;
+    int phase_step;
 
-    if (arg0->curveStep) {
-        var_v0 = Effects_SampleEffectCurve(arg0->stepCurve, arg0->phase);
+    if (shake_channel->curveStep) {
+        phase_step = Effects_SampleEffectCurve(shake_channel->stepCurve, shake_channel->phase);
     } else {
-        var_v0 = arg0->stepCurve;
+        phase_step = shake_channel->stepCurve;
     }
-    return var_v0;
+    return phase_step;
 }
 
 // decomp: BATTLE.PRG func_800D1E78 (src/BATTLE/BATTLE.PRG/5BF94.c:6589)
-u_char Effects_RandomCameraShakePhaseStep(Effects_CameraShakeChannel* arg0)
+u_char Effects_RandomCameraShakePhaseStep(Effects_CameraShakeChannel* shake_channel)
 {
-    int var_s0;
+    int random_step_limit;
 
-    if (arg0->randomStep) {
-        var_s0 = Effects_SampleEffectCurve(arg0->randomStepCurve, arg0->phase);
+    if (shake_channel->randomStep) {
+        random_step_limit = Effects_SampleEffectCurve(shake_channel->randomStepCurve, shake_channel->phase);
     } else {
-        var_s0 = arg0->randomStepCurve;
+        random_step_limit = shake_channel->randomStepCurve;
     }
 
-    if (var_s0 == 0) {
+    if (random_step_limit == 0) {
         return 0;
     }
 
-    return (Core_Random_Rand() % var_s0);
+    return (Core_Random_Rand() % random_step_limit);
 }
 
 // decomp: BATTLE.PRG func_800D1EF0 (src/BATTLE/BATTLE.PRG/5BF94.c:6606)
-void Effects_StartCameraShakeChannels(int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6)
+void Effects_StartCameraShakeChannels(int channel_mask, int shape_curve, int amplitude, int step_uses_curve, int step_curve_or_value, int random_step_uses_curve, int random_step_curve_or_value)
 {
     int i;
 
     for (i = 0; i < 4; ++i) {
-        if ((arg0 >> i) & 1) {
+        if ((channel_mask >> i) & 1) {
             Effects_CameraShakeChannel* p = &Effects_cameraShakeChannels[i];
-            p->shapeCurve = arg1;
-            p->amplitude = arg2;
-            p->curveStep = arg3;
-            p->stepCurve = arg4;
-            p->randomStep = arg5;
-            p->randomStepCurve = arg6;
+            p->shapeCurve = shape_curve;
+            p->amplitude = amplitude;
+            p->curveStep = step_uses_curve;
+            p->stepCurve = step_curve_or_value;
+            p->randomStep = random_step_uses_curve;
+            p->randomStepCurve = random_step_curve_or_value;
             p->phase = 0;
             p->angle = Effects_RandomCameraShakePhaseStep(p);
             Effects_EnableCameraShakeChannels(1 << i);
@@ -169,12 +169,12 @@ void Effects_StartCameraShakeChannels(int arg0, int arg1, int arg2, int arg3, in
 }
 
 // decomp: BATTLE.PRG func_800D1FEC (src/BATTLE/BATTLE.PRG/5BF94.c:6626)
-void Effects_StopCameraShakeChannels(int arg0)
+void Effects_StopCameraShakeChannels(int channel_mask)
 {
     int i;
 
     for (i = 0; i < 4; ++i) {
-        if ((arg0 >> i) & 1) {
+        if ((channel_mask >> i) & 1) {
             Effects_cameraShakeChannels[i].phase = 0xFF;
             Effects_DisableCameraShakeChannels(1 << i);
         }
@@ -287,7 +287,7 @@ void Effects_HoldEffectCameraStartPose(void) { Effects_effectCamera = Effects_ca
 // decomp: BATTLE.PRG func_800D2560 (src/BATTLE/BATTLE.PRG/5BF94.c:6737)
 void Effects_UpdateEffectCameraMotion(void)
 {
-    int temp_s0 = Effects_cameraTransitionMode != 0;
+    int had_camera_transition = Effects_cameraTransitionMode != 0;
 
     if (Effects_cameraMotionDuration != 0) {
         switch (Effects_cameraTransitionMode) {
@@ -320,37 +320,37 @@ void Effects_UpdateEffectCameraMotion(void)
         Effects_effectCamera.shakeVertical = 0;
         Effects_effectCamera.shakeLateral = 0;
     }
-    if (Effects_enabledShakeChannels != 0 || temp_s0) {
+    if (Effects_enabledShakeChannels != 0 || had_camera_transition) {
         Effects_ApplyEffectCamera(&Effects_effectCamera);
     }
 }
 
 // decomp: BATTLE.PRG func_800D66FC (src/BATTLE/BATTLE.PRG/5BF94.c:8308)
-void Effects_FocusCameraOnEffectTransform(Effects_EffectInstance* arg0, u_char arg1, u_char arg2)
+void Effects_FocusCameraOnEffectTransform(Effects_EffectInstance* effect_instance, u_char transform_index, u_char duration_frames)
 {
     Effects_CaptureEffectCamera(Effects_cameraMotionEnds);
     Effects_CaptureEffectCamera(&Effects_cameraMotionEnds[1]);
-    Effects_cameraMotionEnds[1].lookAt.vx = arg0->transforms[arg1].world.t[0] * ONE;
-    Effects_cameraMotionEnds[1].lookAt.vy = arg0->transforms[arg1].world.t[1] * ONE;
-    Effects_cameraMotionEnds[1].lookAt.vz = arg0->transforms[arg1].world.t[2] * ONE;
+    Effects_cameraMotionEnds[1].lookAt.vx = effect_instance->transforms[transform_index].world.t[0] * ONE;
+    Effects_cameraMotionEnds[1].lookAt.vy = effect_instance->transforms[transform_index].world.t[1] * ONE;
+    Effects_cameraMotionEnds[1].lookAt.vz = effect_instance->transforms[transform_index].world.t[2] * ONE;
     Effects_cameraMotionFrame = 0;
-    if (arg2 == 0) {
-        arg2 = 1;
+    if (duration_frames == 0) {
+        duration_frames = 1;
     }
-    Effects_cameraMotionDuration = arg2;
+    Effects_cameraMotionDuration = duration_frames;
     Effects_SetEffectCameraTransitionMode(2);
 }
 
 // decomp: BATTLE.PRG func_800D67C4 (src/BATTLE/BATTLE.PRG/5BF94.c:8323)
-void Effects_RestoreActionEffectCamera(Effects_EffectInstance* arg0, u_char arg1)
+void Effects_RestoreActionEffectCamera(Effects_EffectInstance* effect_instance, u_char duration_frames)
 {
     Effects_CaptureEffectCamera(Effects_cameraMotionEnds);
     Effects_cameraMotionEnds[1] = Effects_savedActionCamera;
     Effects_cameraMotionFrame = 0;
-    if (arg1 == 0) {
-        arg1 = 1;
+    if (duration_frames == 0) {
+        duration_frames = 1;
     }
-    Effects_cameraMotionDuration = arg1;
+    Effects_cameraMotionDuration = duration_frames;
     Effects_SetEffectCameraTransitionMode(2);
 }
 

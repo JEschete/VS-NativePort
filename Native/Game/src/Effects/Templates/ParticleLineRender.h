@@ -13,25 +13,25 @@
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 
-void Effects_Plg065_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg087_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg114_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg146_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg147_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg168_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg224_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg255_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg265_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
-void Effects_Plg266_ParticleLineRender(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3);
+void Effects_Plg065_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg087_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg114_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg146_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg147_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg168_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg224_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg255_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg265_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
+void Effects_Plg266_ParticleLineRender(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set);
 
 #endif // VS_EFFECTS_TEMPLATES_PARTICLELINERENDER_H_DECLS

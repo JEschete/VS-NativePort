@@ -88,9 +88,9 @@ void Effects_InitializeEffectResources(void)
 }
 
 // decomp: BATTLE.PRG func_800D7890 (src/BATTLE/BATTLE.PRG/6F014.c:460)
-void Effects_SelectEffectResourceContext(int arg0)
+void Effects_SelectEffectResourceContext(int use_primary_context)
 {
-    if (arg0 == 0) {
+    if (use_primary_context == 0) {
         Effects_package = &Effects_secondaryPackage;
     } else {
         Effects_package = &Effects_actionPackage;
@@ -109,15 +109,15 @@ void Effects_BindParticleDefinitions(Effects_PackageBlock5* block) { Effects_pac
 // decomp: BATTLE.PRG func_800D78F0 (src/BATTLE/BATTLE.PRG/6F014.c:477)
 void Effects_UpdateParticleGravityAndDrag(void)
 {
-    VECTOR sp10;
-    int sp20;
+    VECTOR sampled_gravity;
+    int sampled_drag;
 
     Core_Math_InterpolatePairsToWideVector(
-        Effects_package->block9Data->gravityRange, Effects_curveSamples[Effects_package->block9Data->gravityCurve], &sp10);
-    sp20 = Core_Math_InterpolateShortPair(
+        Effects_package->block9Data->gravityRange, Effects_curveSamples[Effects_package->block9Data->gravityCurve], &sampled_gravity);
+    sampled_drag = Core_Math_InterpolateShortPair(
         Effects_package->block9Data->dragRange, Effects_curveSamples[Effects_package->block9Data->dragCurve]);
-    ((void (*)(VECTOR*))Effects_SetParticleGravity)(&sp10);
-    Effects_SetParticleDrag(&sp20);
+    ((void (*)(VECTOR*))Effects_SetParticleGravity)(&sampled_gravity);
+    Effects_SetParticleDrag(&sampled_drag);
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock3 (src/BATTLE/BATTLE.PRG/6F014.c:490)
@@ -142,10 +142,10 @@ void Effects_BindEffectCurves(Effects_CurveBlock* block)
 void Effects_BindEffectPrograms(void* block) { Effects_package->block8Data = block; }
 
 // decomp: BATTLE.PRG _parsePfileBlock9 (src/BATTLE/BATTLE.PRG/6F014.c:508)
-void Effects_BindEffectPackageParameters(Effects_PackageBlock9* arg0) { Effects_package->block9Data = arg0; }
+void Effects_BindEffectPackageParameters(Effects_PackageBlock9* package_parameters) { Effects_package->block9Data = package_parameters; }
 
 // decomp: BATTLE.PRG _parsePfileBlock10 (src/BATTLE/BATTLE.PRG/6F014.c:510)
-void Effects_BindEffectTransformDefinitions(void* arg0) { Effects_package->block10Data = arg0; }
+void Effects_BindEffectTransformDefinitions(void* block_data) { Effects_package->block10Data = block_data; }
 
 // decomp: BATTLE.PRG _parsePfileBlock2 (src/BATTLE/BATTLE.PRG/6F014.c:524)
 void Effects_BindParticleAnimationTable(Effects_PackageBlock2* block)
@@ -155,26 +155,26 @@ void Effects_BindParticleAnimationTable(Effects_PackageBlock2* block)
 }
 
 // decomp: BATTLE.PRG func_800D7A90 (src/BATTLE/BATTLE.PRG/6F014.c:530)
-void* Effects_ParticleAnimationData(int arg0)
+void* Effects_ParticleAnimationData(int animation_index)
 {
-    return (u_char*)Effects_package->block2Data + Effects_package->block2Data[arg0 + 2];
+    return (u_char*)Effects_package->block2Data + Effects_package->block2Data[animation_index + 2];
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock11 (src/BATTLE/BATTLE.PRG/6F014.c:535)
-void Effects_BindEffectSoundSequences(u_char* arg0) { Effects_package->block11Data = arg0; }
+void Effects_BindEffectSoundSequences(u_char* block_data) { Effects_package->block11Data = block_data; }
 
 // decomp: BATTLE.PRG _parsePfileBlock12 (src/BATTLE/BATTLE.PRG/6F014.c:537)
-void Effects_BindEffectSoundBank(void* arg0)
+void Effects_BindEffectSoundBank(void* sound_bank_data)
 {
-    Effects_package->block12Data = arg0;
-    Audio_BindRoomSfxBank((uintptr_t)arg0);
+    Effects_package->block12Data = sound_bank_data;
+    Audio_BindRoomSfxBank((uintptr_t)sound_bank_data);
 }
 
 // decomp: BATTLE.PRG _parsePfileBlock13 (src/BATTLE/BATTLE.PRG/6F014.c:543)
-void Effects_BindEffectAuxiliarySoundBank(void* arg0, size_t byte_count)
+void Effects_BindEffectAuxiliarySoundBank(void* stream_data, size_t byte_count)
 {
-    Effects_package->block13Data = arg0;
-    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream(arg0, byte_count);
+    Effects_package->block13Data = stream_data;
+    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream(stream_data, byte_count);
 }
 
 // decomp: BATTLE.PRG _loadfile (src/BATTLE/BATTLE.PRG/6F014.c:549)
@@ -248,46 +248,46 @@ void Effects_ReleaseEffectPackageResources(void)
 int Effects_UpdateEffectTextureLoading(void)
 {
     int _[16] __attribute__((unused));
-    RECT sp50;
-    u_int temp_s1;
-    int var_s0;
+    RECT upload_rectangle;
+    u_int load_state;
+    int loading_pending;
 
     if ((Effects_textureLoadState == 0) && (Effects_textureLoads.assetCount != 0)) {
         Effects_textureLoadIndex = 0;
         Effects_SetEffectTextureLoadState(1);
     }
 
-    temp_s1 = Effects_textureLoadState;
+    load_state = Effects_textureLoadState;
 
-    switch (temp_s1) {
+    switch (load_state) {
     case 1:
         if (Effects_textureLoadBuffer == NULL) {
             // FBT sizes are all equal
             Effects_textureLoadBuffer = Core_Memory_AllocateFromHighEnd(VS_E000_0_FBT_SIZE);
         }
 
-        var_s0 = Effects_PollEffectResourceRead(Effects_textureLoads.loadContexts[Effects_textureLoadIndex].lba + VS_E000_P_LBA,
+        loading_pending = Effects_PollEffectResourceRead(Effects_textureLoads.loadContexts[Effects_textureLoadIndex].lba + VS_E000_P_LBA,
             Effects_textureLoads.loadContexts[Effects_textureLoadIndex].size, Effects_textureLoadBuffer);
 
-        if (var_s0 == 0) {
+        if (loading_pending == 0) {
             void* temp_v0_3 = (Effects_textureLoadIndex * 2) + &Effects_textureLoads;
             int slot = Effects_textureLoads.slots[Effects_textureLoadIndex];
 
             if (Effects_textureLoads.isClut[Effects_textureLoadIndex] == 0) {
                 slot += 24;
                 Render_ReserveTexturePageRange(slot, 1, 2);
-                Effects_loadedTextureSlots |= temp_s1 << slot;
-                sp50.x = (slot - (slot / 16 * 16)) << 6;
-                sp50.y = slot / 16 << 8;
-                sp50.w = 64;
-                sp50.h = 256;
-                LoadImage(&sp50, Effects_textureLoadBuffer);
+                Effects_loadedTextureSlots |= load_state << slot;
+                upload_rectangle.x = (slot - (slot / 16 * 16)) << 6;
+                upload_rectangle.y = slot / 16 << 8;
+                upload_rectangle.w = 64;
+                upload_rectangle.h = 256;
+                LoadImage(&upload_rectangle, Effects_textureLoadBuffer);
             } else {
-                sp50.x = 768;
-                sp50.y = slot + 240;
-                sp50.w = 256;
-                sp50.h = 5 - slot;
-                LoadImage(&sp50, Effects_textureLoadBuffer);
+                upload_rectangle.x = 768;
+                upload_rectangle.y = slot + 240;
+                upload_rectangle.w = 256;
+                upload_rectangle.h = 5 - slot;
+                LoadImage(&upload_rectangle, Effects_textureLoadBuffer);
             }
 
             ++Effects_textureLoadIndex;
@@ -296,7 +296,7 @@ int Effects_UpdateEffectTextureLoading(void)
                 Effects_SetEffectTextureLoadState(2);
             }
 
-            var_s0 = 1;
+            loading_pending = 1;
         }
         break;
 
@@ -308,10 +308,10 @@ int Effects_UpdateEffectTextureLoading(void)
         /* fallthrough */
 
     case 0:
-        var_s0 = 0;
+        loading_pending = 0;
         break;
     }
-    return var_s0;
+    return loading_pending;
 }
 
 // decomp: BATTLE.PRG func_800D7EF4 (src/BATTLE/BATTLE.PRG/6F014.c:681)
@@ -367,7 +367,7 @@ void Effects_SetEffectRenderer(Effects_EffectRenderer func, int index)
 }
 
 // decomp: BATTLE.PRG func_800D7FFC (src/BATTLE/BATTLE.PRG/6F014.c:730)
-void Effects_SetEffectTextureAssetCount(int arg0) { Effects_textureLoads.assetCount = arg0; }
+void Effects_SetEffectTextureAssetCount(int asset_count) { Effects_textureLoads.assetCount = asset_count; }
 
 // decomp: BATTLE.PRG vs_battle_configureEffectFbLoad (src/BATTLE/BATTLE.PRG/6F014.c:732)
 void Effects_ConfigureEffectTextureAsset(int lba, int size, int slot, int isClut, int index)
@@ -379,71 +379,71 @@ void Effects_ConfigureEffectTextureAsset(int lba, int size, int slot, int isClut
 }
 
 // decomp: BATTLE.PRG func_800D8038 (src/BATTLE/BATTLE.PRG/6F014.c:740)
-void Effects_SetEffectTextureLoadState(int arg0) { Effects_textureLoadState = arg0; }
+void Effects_SetEffectTextureLoadState(int load_state) { Effects_textureLoadState = load_state; }
 
 // decomp: BATTLE.PRG func_800D8044 (src/BATTLE/BATTLE.PRG/6F014.c:742)
 u_int Effects_EffectTextureLoadState(void) { return Effects_textureLoadState; }
 
 // decomp: BATTLE.PRG vs_battle_setPlgLoadState (src/BATTLE/BATTLE.PRG/6F014.c:744)
-void Effects_SetEffectPluginLoadState(int arg0) { Effects_pluginLoadState = arg0; }
+void Effects_SetEffectPluginLoadState(int load_state) { Effects_pluginLoadState = load_state; }
 
 // decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6F014.c:746)
-void Effects_BindEffectPackageBlocks(Effects_PackageFile* arg0)
+void Effects_BindEffectPackageBlocks(Effects_PackageFile* package_block)
 {
     while (1) {
-        int meta = arg0->meta;
+        int meta = package_block->meta;
 
         switch (meta & 0xFFFF0000) {
         case 0:
             return;
 
         case 0x10000:
-            Effects_BindEffectTextureTables(arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta));
+            Effects_BindEffectTextureTables(package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta));
             break;
 
         case 0x20000:
-            Effects_BindParticleAnimationTable((Effects_PackageBlock2*)arg0->blocks);
+            Effects_BindParticleAnimationTable((Effects_PackageBlock2*)package_block->blocks);
             break;
 
         case 0x30000:
-            Effects_BindEffectTimelines(arg0->blocks);
+            Effects_BindEffectTimelines(package_block->blocks);
             break;
 
         case 0x40000:
-            Effects_BindEffectCurves((Effects_CurveBlock*)arg0->blocks);
+            Effects_BindEffectCurves((Effects_CurveBlock*)package_block->blocks);
             break;
 
         case 0x50000:
-            Effects_BindParticleDefinitions((Effects_PackageBlock5*)arg0->blocks);
+            Effects_BindParticleDefinitions((Effects_PackageBlock5*)package_block->blocks);
             break;
 
         case 0x80000:
-            Effects_BindEffectPrograms(arg0->blocks);
+            Effects_BindEffectPrograms(package_block->blocks);
             break;
 
         case 0x90000:
-            Effects_BindEffectPackageParameters((Effects_PackageBlock9*)arg0->blocks);
+            Effects_BindEffectPackageParameters((Effects_PackageBlock9*)package_block->blocks);
             break;
 
         case 0xA0000:
-            Effects_BindEffectTransformDefinitions(arg0->blocks);
+            Effects_BindEffectTransformDefinitions(package_block->blocks);
             break;
 
         case 0xB0000:
-            Effects_BindEffectSoundSequences(arg0->blocks);
+            Effects_BindEffectSoundSequences(package_block->blocks);
             break;
 
         case 0xC0000:
-            Effects_BindEffectSoundBank(arg0->blocks);
+            Effects_BindEffectSoundBank(package_block->blocks);
             break;
 
         case 0xD0000:
             Effects_BindEffectAuxiliarySoundBank(
-                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));
+                package_block->blocks, (meta & 0xFFFF) - sizeof(u_int));
             break;
         }
 
-        arg0 = (void*)arg0 + (meta & 0xFFFF);
+        package_block = (void*)package_block + (meta & 0xFFFF);
     }
 }
 
@@ -786,27 +786,27 @@ void Effects_ConfigureTextureLoads(void)
 {
     int i;
     int texCount;
-    u_char* a2;
+    u_char* clut_slot_entry;
 
-    int new_var = Effects_effectUsesTextures[Effects_actionRequest.effectId];
-    int var_s2 = 0;
+    int uses_texture_assets = Effects_effectUsesTextures[Effects_actionRequest.effectId];
+    int first_texture_asset = 0;
 
     for (i = 0; i < Effects_actionRequest.effectId; ++i) {
-        var_s2 += Effects_fbtCounts[i];
+        first_texture_asset += Effects_fbtCounts[i];
     }
 
     texCount = Effects_fbtCounts[Effects_actionRequest.effectId];
 
-    Effects_SetEffectTextureAssetCount(texCount + (new_var != 0));
+    Effects_SetEffectTextureAssetCount(texCount + (uses_texture_assets != 0));
 
-    a2 = &Effects_fbcSlots[Effects_actionRequest.effectId];
+    clut_slot_entry = &Effects_fbcSlots[Effects_actionRequest.effectId];
 
     Effects_ConfigureEffectTextureAsset(Effects_fbcFiles[Effects_actionRequest.effectId].lba,
-        Effects_fbcFiles[Effects_actionRequest.effectId].size, *a2, 1, 0);
+        Effects_fbcFiles[Effects_actionRequest.effectId].size, *clut_slot_entry, 1, 0);
 
     for (i = 0; i < texCount; ++i) {
-        Effects_ConfigureEffectTextureAsset(Effects_fbtFiles[var_s2 + i].lba,
-            Effects_fbtFiles[var_s2 + i].size, Effects_fbtSlots[var_s2 + i], 0, i + 1);
+        Effects_ConfigureEffectTextureAsset(Effects_fbtFiles[first_texture_asset + i].lba,
+            Effects_fbtFiles[first_texture_asset + i].size, Effects_fbtSlots[first_texture_asset + i], 0, i + 1);
     }
 }
 

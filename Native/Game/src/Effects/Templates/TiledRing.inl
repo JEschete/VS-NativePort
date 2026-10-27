@@ -15,7 +15,7 @@
 #include "Render/UiPrimitives.h"
 
 // Template body: Effects::Templates::TiledRing (decomp src/EFFECT/tiledRings.h:35). Included once per instance by Effects/Templates/TiledRing.c with that plugin's bindings.
-int VS_TILED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_TILED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     int radius[3];
     int height[3];
@@ -27,7 +27,7 @@ int VS_TILED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     Render_TiledRingTexCoord uv[2][4];
     MATRIX unusedTransform;
     Effects_PluginEffectState child;
-    Effects_TiledRingState* state = arg0->rendererState;
+    Effects_TiledRingState* state = renderer_slot->rendererState;
     Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
     Effects_ParticleDefinition* effect;
     Effects_EffectInstance* battle = Effects_currentInstance;
@@ -39,7 +39,7 @@ int VS_TILED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     CVECTOR* factorBytes;
     int cosAngle;
     int sinAngle;
-    int speed;
+    int angular_step;
     int maxSpeed;
     int row;
     int oldAngle;
@@ -49,12 +49,12 @@ int VS_TILED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     int drawColumn;
     Render_TiledRingPacket* prim;
     Effects_PackageTexture* texture;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
         state = Core_Memory_AllocateFromHighEnd(sizeof(*state));
-        arg0->rendererState = state;
-        state->lifetime = arg2;
-        state->effect = arg2 >> 8;
+        renderer_slot->rendererState = state;
+        state->lifetime = packed_parameters;
+        state->effect = packed_parameters >> 8;
         state->radiusSpeed = 0;
         state->radius = 0;
         state->heightSpeed = 0;
@@ -125,16 +125,16 @@ int VS_TILED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
         oldAngle = state->angle;
         if (scratch->speedRange[0] != scratch->speedRange[1]) {
             if (scratch->speedRange[1] < scratch->speedRange[0]) {
-                speed = (Core_Random_Rand() % ((scratch->speedRange[0] - scratch->speedRange[1]) + 1))
+                angular_step = (Core_Random_Rand() % ((scratch->speedRange[0] - scratch->speedRange[1]) + 1))
                       + scratch->speedRange[1];
             } else {
-                speed = (Core_Random_Rand() % ((scratch->speedRange[1] - scratch->speedRange[0]) + 1))
+                angular_step = (Core_Random_Rand() % ((scratch->speedRange[1] - scratch->speedRange[0]) + 1))
                       + scratch->speedRange[0];
             }
         } else {
-            speed = scratch->speedRange[0];
+            angular_step = scratch->speedRange[0];
         }
-        maxSpeed = oldAngle + speed;
+        maxSpeed = oldAngle + angular_step;
         baseAngle = state->angle = maxSpeed;
         for (column = 0; column < 4; ++column) {
             for (row = 0; row < 3; ++row) {

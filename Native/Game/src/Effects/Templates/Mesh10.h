@@ -10,12 +10,12 @@
 #define VS_EFFECTS_TEMPLATES_MESH10_H_DECLS
 #include "Effects/Runtime.h"
 
-int Effects_Plg069_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg077_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg129_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg137_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg153_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg154_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg260_Mesh10(Effects_RendererSlot* arg0, u_int arg1, int arg2);
+int Effects_Plg069_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg077_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg129_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg137_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg153_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg154_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg260_Mesh10(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_TEMPLATES_MESH10_H_DECLS

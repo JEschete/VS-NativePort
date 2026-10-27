@@ -19,7 +19,7 @@
 #define VS_MESH10_TYPES
 #endif
 
-int VS_MESH10_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     SVECTOR vertices[10];
     int screen[10];
@@ -38,14 +38,14 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     u_char* face;
     Render_Mesh10Packet* prim;
     alive = 1;
-    state = arg0->rendererState;
+    state = renderer_slot->rendererState;
     battle = Effects_currentInstance;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
         state = Core_Memory_AllocateFromHighEnd(sizeof *state);
-        arg0->rendererState = state;
-        state->effect = arg2 >> 8;
-        state->lifetime = arg2;
+        renderer_slot->rendererState = state;
+        state->effect = packed_parameters >> 8;
+        state->lifetime = packed_parameters;
         *(int*)&state->rotation.vx = 0;
         *(int*)&state->rotation.vz = 0;
         state->age = 0;

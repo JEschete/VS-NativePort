@@ -24,7 +24,7 @@ typedef struct Effects_ScreenEffectOverlay {
 
 extern Effects_ScreenEffectOverlay* Effects_screenEffectOverlay;
 void Effects_ResetScreenEffectState(void);
-void Effects_LoadScreenEffectOverlay(int arg0);
+void Effects_LoadScreenEffectOverlay(int begin_load);
 void Effects_DrawScreenEffectOverlay(void);
 void Effects_AcquireScreenEffectOverlay(void);
 void Effects_ReleaseScreenEffectOverlay(void);

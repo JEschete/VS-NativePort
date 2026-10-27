@@ -29,15 +29,15 @@ void Effects_AllocateWeatherParticles(void)
 }
 
 // decomp: BATTLE.PRG func_8008EA90 (src/BATTLE/BATTLE.PRG/146C.c:17500)
-int Effects_InitializeRoomWeather(int arg0)
+int Effects_InitializeRoomWeather(int suppress_rain)
 {
-    Field_MpdEnvironment* new_var2 = Field_roomData.environment;
+    Field_MpdEnvironment* room_environment = Field_roomData.environment;
 
-    if (new_var2 != 0) {
-        Field_MpdEnvironment* new_var4 = new_var2;
-        new_var2 = Field_roomData.environment;
-        if ((arg0 == 0) || (new_var4->weatherKind != 1)) {
-            ((int (*)(int))Field_SetRoomWeather)(new_var4->weatherKind);
+    if (room_environment != 0) {
+        Field_MpdEnvironment* selected_environment = room_environment;
+        room_environment = Field_roomData.environment;
+        if ((suppress_rain == 0) || (selected_environment->weatherKind != 1)) {
+            ((int (*)(int))Field_SetRoomWeather)(selected_environment->weatherKind);
         } else {
             ((int (*)(int))Field_SetRoomWeather)(0);
         }
@@ -47,46 +47,46 @@ int Effects_InitializeRoomWeather(int arg0)
 }
 
 // decomp: BATTLE.PRG func_8008EB04 (src/BATTLE/BATTLE.PRG/146C.c:17525)
-void Effects_RoomWeatherState(int* arg0, int* arg1)
+void Effects_RoomWeatherState(int* weather_kind_output, int* intensity_output)
 {
-    *arg0 = Field_roomWeatherKind;
-    *arg1 = Field_weatherIntensity;
+    *weather_kind_output = Field_roomWeatherKind;
+    *intensity_output = Field_weatherIntensity;
 }
 
 // decomp: BATTLE.PRG func_8008F29C (src/BATTLE/BATTLE.PRG/146C.c:17723)
-void Effects_InitializeFallingWeatherParticles(int arg0, int arg1)
+void Effects_InitializeFallingWeatherParticles(int particle_count, int weather_kind)
 {
     int i;
-    Field_WeatherParticle* var_s1 = Field_weatherParticles;
-    Field_roomWeatherKind = arg1;
-    Field_weatherParticleCapacity = arg0;
-    Field_weatherParticleCount = arg0;
+    Field_WeatherParticle* particle_cursor = Field_weatherParticles;
+    Field_roomWeatherKind = weather_kind;
+    Field_weatherParticleCapacity = particle_count;
+    Field_weatherParticleCount = particle_count;
 
-    for (i = 0; i < arg0; ++i) {
-        Effects_ResetFallingWeatherParticle(var_s1);
-        ++var_s1;
+    for (i = 0; i < particle_count; ++i) {
+        Effects_ResetFallingWeatherParticle(particle_cursor);
+        ++particle_cursor;
     }
 }
 
 // decomp: BATTLE.PRG func_8008F30C (src/BATTLE/BATTLE.PRG/146C.c:17737)
-void Effects_InitializeScreenWeatherParticles(int arg0, int arg1)
+void Effects_InitializeScreenWeatherParticles(int particle_count, int weather_kind)
 {
-    Field_WeatherParticle* var_s1;
+    Field_WeatherParticle* particle_cursor;
     int i;
 
-    var_s1 = Field_weatherParticles;
+    particle_cursor = Field_weatherParticles;
     Field_screenWeatherFade = 0;
-    Field_roomWeatherKind = arg1;
-    Field_weatherParticleCapacity = arg0;
-    Field_weatherParticleCount = arg0;
+    Field_roomWeatherKind = weather_kind;
+    Field_weatherParticleCapacity = particle_count;
+    Field_weatherParticleCount = particle_count;
 
-    for (i = 0; i < arg0; ++i, ++var_s1) {
-        var_s1->speed = Core_Random_Rand() & 0x7F;
-        var_s1->position.vx = Core_Random_Rand() % 320;
-        var_s1->position.vy = Core_Random_Rand() % 240;
-        var_s1->position.vz = Core_Random_Rand() % 256;
-        var_s1->screenX = -1;
-        var_s1->screenY = -1;
+    for (i = 0; i < particle_count; ++i, ++particle_cursor) {
+        particle_cursor->speed = Core_Random_Rand() & 0x7F;
+        particle_cursor->position.vx = Core_Random_Rand() % 320;
+        particle_cursor->position.vy = Core_Random_Rand() % 240;
+        particle_cursor->position.vz = Core_Random_Rand() % 256;
+        particle_cursor->screenX = -1;
+        particle_cursor->screenY = -1;
     }
 }
 
@@ -198,30 +198,30 @@ void Effects_DrawRainParticles(void)
 }
 
 // decomp: BATTLE.PRG func_8008F9A4 (src/BATTLE/BATTLE.PRG/146C.c:17864)
-void Effects_InitializeRisingEmberParticles(int arg0, int arg1)
+void Effects_InitializeRisingEmberParticles(int particle_count, int weather_kind)
 {
     int i;
-    Field_WeatherParticle* var_s1 = Field_weatherParticles;
-    Field_roomWeatherKind = arg1;
-    Field_weatherParticleCapacity = arg0;
-    Field_weatherParticleCount = arg0;
+    Field_WeatherParticle* particle_cursor = Field_weatherParticles;
+    Field_roomWeatherKind = weather_kind;
+    Field_weatherParticleCapacity = particle_count;
+    Field_weatherParticleCount = particle_count;
 
-    for (i = 0; i < arg0; ++i) {
-        Effects_ResetRisingEmberParticle(var_s1);
-        ++var_s1;
+    for (i = 0; i < particle_count; ++i) {
+        Effects_ResetRisingEmberParticle(particle_cursor);
+        ++particle_cursor;
     }
 }
 
 // decomp: BATTLE.PRG func_8008FA14 (src/BATTLE/BATTLE.PRG/146C.c:17878)
-void Effects_ResetRisingEmberParticle(Field_WeatherParticle* arg0)
+void Effects_ResetRisingEmberParticle(Field_WeatherParticle* weather_particle)
 {
-    Field_MpdEnvironment* temp_s0 = Field_roomData.environment;
+    Field_MpdEnvironment* room_environment = Field_roomData.environment;
 
-    arg0->position.vx = temp_s0->weatherArea[0].halves[0] + (Core_Random_Rand() % temp_s0->weatherArea[1].halves[0]);
-    arg0->position.vz = temp_s0->weatherArea[0].halves[1] + (Core_Random_Rand() % temp_s0->weatherArea[1].halves[1]);
-    arg0->position.vy = (Core_Random_Rand() % 512) + 0x200;
-    arg0->opaqueC = 0;
-    arg0->speed = (Core_Random_Rand() & 0xF) + 8;
+    weather_particle->position.vx = room_environment->weatherArea[0].halves[0] + (Core_Random_Rand() % room_environment->weatherArea[1].halves[0]);
+    weather_particle->position.vz = room_environment->weatherArea[0].halves[1] + (Core_Random_Rand() % room_environment->weatherArea[1].halves[1]);
+    weather_particle->position.vy = (Core_Random_Rand() % 512) + 0x200;
+    weather_particle->opaqueC = 0;
+    weather_particle->speed = (Core_Random_Rand() & 0xF) + 8;
 }
 
 // decomp: BATTLE.PRG func_8008FAC8 (src/BATTLE/BATTLE.PRG/146C.c:17889)
@@ -539,61 +539,61 @@ void Effects_DrawScreenWeatherParticles(void)
 }
 
 // decomp: BATTLE.PRG func_80090A1C (src/BATTLE/BATTLE.PRG/146C.c:18200)
-void Effects_ResetFallingWeatherParticle(Field_WeatherParticle* arg0)
+void Effects_ResetFallingWeatherParticle(Field_WeatherParticle* weather_particle)
 {
-    Field_MpdEnvironment* temp_s0;
+    Field_MpdEnvironment* room_environment;
 
-    temp_s0 = Field_roomData.environment;
-    if (temp_s0 != NULL) {
-        arg0->position.vx =
-            temp_s0->weatherArea[0].halves[0] + (Core_Random_Rand() % temp_s0->weatherArea[1].halves[0]);
-        arg0->position.vz =
-            temp_s0->weatherArea[0].halves[1] + (Core_Random_Rand() % temp_s0->weatherArea[1].halves[1]);
+    room_environment = Field_roomData.environment;
+    if (room_environment != NULL) {
+        weather_particle->position.vx =
+            room_environment->weatherArea[0].halves[0] + (Core_Random_Rand() % room_environment->weatherArea[1].halves[0]);
+        weather_particle->position.vz =
+            room_environment->weatherArea[0].halves[1] + (Core_Random_Rand() % room_environment->weatherArea[1].halves[1]);
     } else {
-        arg0->position.vx = Core_Random_Rand() % 4096;
-        arg0->position.vz = Core_Random_Rand() % 4096;
+        weather_particle->position.vx = Core_Random_Rand() % 4096;
+        weather_particle->position.vz = Core_Random_Rand() % 4096;
     }
-    arg0->position.vy = (Core_Random_Rand() % 512) - 2560;
-    arg0->fallShift = 2;
-    arg0->opaqueC = 0;
-    arg0->swayPhase = 0;
-    arg0->speed = Core_Random_Rand() & 0x7F;
+    weather_particle->position.vy = (Core_Random_Rand() % 512) - 2560;
+    weather_particle->fallShift = 2;
+    weather_particle->opaqueC = 0;
+    weather_particle->swayPhase = 0;
+    weather_particle->speed = Core_Random_Rand() & 0x7F;
 }
 
 // decomp: BATTLE.PRG func_80090B28 (src/BATTLE/BATTLE.PRG/146C.c:18221)
 void Effects_RecalculateWeatherVelocity(void)
 {
-    int temp_v1;
-    int var_s0;
-    int var_v0;
+    int elevation_cosine;
+    int horizontal_direction_product;
+    int direction_component_product;
 
-    var_s0 = Core_Gte_Sin(Field_weatherParameters[5]);
-    temp_v1 = Core_Gte_Cos(Field_weatherParameters[4]);
-    var_s0 *= Field_weatherParameters[6];
-    if (var_s0 < 0) {
-        var_s0 += 0xFFF;
+    horizontal_direction_product = Core_Gte_Sin(Field_weatherParameters[5]);
+    elevation_cosine = Core_Gte_Cos(Field_weatherParameters[4]);
+    horizontal_direction_product *= Field_weatherParameters[6];
+    if (horizontal_direction_product < 0) {
+        horizontal_direction_product += 0xFFF;
     }
-    var_v0 = (var_s0 >> 0xC) * temp_v1;
-    if (var_v0 < 0) {
-        var_v0 += 0xFFF;
+    direction_component_product = (horizontal_direction_product >> 0xC) * elevation_cosine;
+    if (direction_component_product < 0) {
+        direction_component_product += 0xFFF;
     }
-    Field_weatherParameters[0] = (var_v0 >> 0xC);
-    var_s0 = Core_Gte_Cos(Field_weatherParameters[5]);
-    temp_v1 = Core_Gte_Cos(Field_weatherParameters[4]);
-    var_s0 = -var_s0;
-    var_s0 *= Field_weatherParameters[6];
-    if (var_s0 < 0) {
-        var_s0 += 0xFFF;
+    Field_weatherParameters[0] = (direction_component_product >> 0xC);
+    horizontal_direction_product = Core_Gte_Cos(Field_weatherParameters[5]);
+    elevation_cosine = Core_Gte_Cos(Field_weatherParameters[4]);
+    horizontal_direction_product = -horizontal_direction_product;
+    horizontal_direction_product *= Field_weatherParameters[6];
+    if (horizontal_direction_product < 0) {
+        horizontal_direction_product += 0xFFF;
     }
-    var_v0 = (var_s0 >> 0xC) * temp_v1;
-    if (var_v0 < 0) {
-        var_v0 += 0xFFF;
+    direction_component_product = (horizontal_direction_product >> 0xC) * elevation_cosine;
+    if (direction_component_product < 0) {
+        direction_component_product += 0xFFF;
     }
-    Field_weatherParameters[2] = (var_v0 >> 0xC);
-    var_v0 = Core_Gte_Sin(Field_weatherParameters[4]) * Field_weatherParameters[6];
-    if (var_v0 < 0) {
-        var_v0 += 0xFFF;
+    Field_weatherParameters[2] = (direction_component_product >> 0xC);
+    direction_component_product = Core_Gte_Sin(Field_weatherParameters[4]) * Field_weatherParameters[6];
+    if (direction_component_product < 0) {
+        direction_component_product += 0xFFF;
     }
-    Field_weatherParameters[1] = (var_v0 >> 0xC);
+    Field_weatherParameters[1] = (direction_component_product >> 0xC);
 }
 

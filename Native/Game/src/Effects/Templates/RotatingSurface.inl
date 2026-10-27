@@ -26,7 +26,7 @@
 #define VS_ROTATING_SURFACE_U_INDEX(column) (column)
 #endif
 
-int VS_ROTATING_SURFACE_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_ROTATING_SURFACE_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     SVECTOR vertices[5][16];
     int screen[5][16];
@@ -53,21 +53,21 @@ int VS_ROTATING_SURFACE_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg
     int depth;
     int curveIndex;
     int initIndex, tempHeight, tempRadius, heightBase;
-    int speed, oldAngle, radiusBase;
+    int angular_step, oldAngle, radiusBase;
     int cosAngle, sinAngle;
     MATRIX* actorMatrix;
     Render_RotatingSurfacePacket* prim;
     Effects_PackageTexture* texture;
 
     alive = 1;
-    state = arg0->rendererState;
+    state = renderer_slot->rendererState;
     battle = Effects_currentInstance;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
         state = Core_Memory_AllocateFromHighEnd(sizeof *state);
-        arg0->rendererState = state;
-        state->effect = arg2 >> 8;
-        state->lifetime = arg2;
+        renderer_slot->rendererState = state;
+        state->effect = packed_parameters >> 8;
+        state->lifetime = packed_parameters;
         state->radiusSpeed = 0;
         state->radius = 0;
         state->heightSpeed = 0;
@@ -139,16 +139,16 @@ int VS_ROTATING_SURFACE_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg
         oldAngle = state->angle;
         if (scratch->speedRange[0] != scratch->speedRange[1]) {
             if (scratch->speedRange[1] < scratch->speedRange[0]) {
-                speed = Core_Random_Rand() % (scratch->speedRange[0] - scratch->speedRange[1] + 1)
+                angular_step = Core_Random_Rand() % (scratch->speedRange[0] - scratch->speedRange[1] + 1)
                       + scratch->speedRange[1];
             } else {
-                speed = Core_Random_Rand() % (scratch->speedRange[1] - scratch->speedRange[0] + 1)
+                angular_step = Core_Random_Rand() % (scratch->speedRange[1] - scratch->speedRange[0] + 1)
                       + scratch->speedRange[0];
             }
         } else {
-            speed = scratch->speedRange[0];
+            angular_step = scratch->speedRange[0];
         }
-        baseAngle = state->angle = oldAngle + speed;
+        baseAngle = state->angle = oldAngle + angular_step;
         angleAccel = 0;
         angleSpeed = 0;
         heightStep = 0;

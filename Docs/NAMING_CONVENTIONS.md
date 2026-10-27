@@ -1082,3 +1082,32 @@ identifiers, with all 742 manifest paths, all 121 owned paths and repeat
 generation verified. Evidence: `build\quality\issue148-ancillary-*`.
 The original four-extension inventory is 6,803 occurrences/717 pairs/221 files;
 the explicit template and remaining-source review gates are still active.
+
+The ancillary cohort is published in `b6d02abd`, exact green `40587157963`.
+The effect review covers 316 original inventory pairs plus 264 additional inline
+template-body pairs: 5,953 physical occurrences, 205 unique bodies and 706
+catalog identities including instances/aliases. Actual application names
+565 ordinary bindings, one separately scoped timeline declaration and one
+texture-page macro parameter. The unused outer F01589 track declaration is not
+mistaken for the live inner track pointer.
+
+All 28 canonical template producers are explicitly wired through
+`Copier.copy_templates`: their fixups update the `.inl` body and its saved
+prototype head, which supplies 430 generated instance declarations. Instance
+rules are not falsely treated as edits to an included body. Both owned PLG074
+headers remain untouched. `_insertTPage` is changed at its existing
+`MACRO_REPLACEMENTS` producer, preserving the exact packet words, mask,
+native handle and cursor advance. Retained packet UV fields are not renamed
+as registers; T00535.023, T00732.007 and T00343.007 separately record the
+particle/spline speed-field meanings and units.
+
+On dirty base `b6d02abd`, the available effect/render baseline passes
+217 cases/2,040,275 assertions; there is no `[particles]` tag.
+Debug/Release each then pass `[effects],[render],[content] --reporter compact`,
+256 cases/3,393,594 assertions. All 149 dirty-tree copier tests, 32 naming
+tests and focused tooling quality pass with zero new findings. Exact expected
+code-token output covers all 742 manifest paths, 92 changed generated files,
+all 28 inline bodies, all 430 generated template declarations, the separately
+verified macro change and all 121 unchanged owned paths across stable repeats.
+Evidence: `build\quality\issue148-effect-*`. These are naming/producer checks,
+not proof that every effect has been visually played or compatibility retired.

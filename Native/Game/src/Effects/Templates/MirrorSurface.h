@@ -10,12 +10,12 @@
 #define VS_EFFECTS_TEMPLATES_MIRRORSURFACE_H_DECLS
 #include "Effects/Runtime.h"
 
-int Effects_Plg146_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg158_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg166_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg170_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg273_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg297_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg300_MirrorSurface(Effects_RendererSlot* arg0, u_int arg1, int arg2);
+int Effects_Plg146_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg158_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg166_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg170_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg273_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg297_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg300_MirrorSurface(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_TEMPLATES_MIRRORSURFACE_H_DECLS

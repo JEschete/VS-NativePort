@@ -3058,7 +3058,7 @@ T00343.003,T00343,_trail,3,trailCollapseCounter,0,u_char,,,,trailCollapseCounter
 T00343.004,T00343,_trail,4,currentSplineSample,0,u_char,,,,currentSplineSample,Named in the fork; see cited use,med,source:trails5.h:398
 T00343.005,T00343,_trail,5,splineSamples,0,SVECTOR[5],,,,splineSamples,Named in the fork; see cited use,med,source:trails5.h:399
 T00343.006,T00343,_trail,6,splineProgress,0,int,,,,splineProgress,Named in the fork; see cited use,med,source:trails5.h:400
-T00343.007,T00343,_trail,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,source:trails5.h:401
+T00343.007,T00343,_trail,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,"source:trails5.h:401;source-review:resources\rood-reverseWin\src\EFFECT\trails.h:14;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution splineProgress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
 T00343.008,T00343,_trail,8,unk,1,int,,,,opaque54,"Used, but its meaning is not established",low,source:trails5.h:402
 T00344.000,T00344,_wepModelOffsets,0,unk0,1,u_char[48],,,,header,WEP header bytes before the section offsets,med,declaration-only;source:3A1A0.h:114
 T00344.001,T00344,_wepModelOffsets,1,texturesOffset,0,int,,,,textureSection,Texture section; file offset relocated to an address,high,source:30DB0.c:663
@@ -4862,7 +4862,7 @@ T00535.019,T00535,func_800FA098_arg1,19,unk100,1,SVECTOR,,,,forceMax,Sampled max
 T00535.020,T00535,func_800FA098_arg1,20,unk108,1,SVECTOR,,,,accelerationMin,Sampled minimum acceleration,high,source:5BF94.c:7421
 T00535.021,T00535,func_800FA098_arg1,21,unk110,1,SVECTOR,,,,accelerationMax,Sampled maximum acceleration,high,source:5BF94.c:7422
 T00535.022,T00535,func_800FA098_arg1,22,unk118,1,int[2],,,,speedRange,Sampled speed min and max,high,source:5BF94.c:7306
-T00535.023,T00535,func_800FA098_arg1,23,unk120,1,int,,,,speed,Speed of one particle,high,source:5BF94.c:7359
+T00535.023,T00535,func_800FA098_arg1,23,unk120,1,int,,,,speed,Speed of one particle,high,"source:5BF94.c:7359;source-review:resources\rood-reverseWin\src\BATTLE\BATTLE.PRG\5BF94.h:306;retained-name:speed=Intentionally retain Effects_ParticleEmitterScratch.speed (T00535.023): sampled scalar speed multiplies normalized direction components then >>12 to form velocity, or directly sets Y. Existing semantic field, not a register temporary; numeric units/ranges unchanged."
 T00535.024,T00535,func_800FA098_arg1,24,unk124,1,int[2],,,,massRange,Sampled mass min and max,high,source:5BF94.c:7435
 T00535.025,T00535,func_800FA098_arg1,25,unk12C,1,int[2],,,,gravityScaleRange,Sampled gravity scale min and max,high,source:5BF94.c:7437
 T00535.026,T00535,func_800FA098_arg1,26,unk134,1,int[2],,,,lifetimeRange,Sampled lifetime min and max,high,source:5BF94.c:7439
@@ -6667,7 +6667,7 @@ T00732.003,T00732,vs_trail9,3,trailCollapseCounter,0,u_char,,,,trailCollapseCoun
 T00732.004,T00732,vs_trail9,4,currentSplineSample,0,u_char,,,,currentSplineSample,Named in the fork; see cited use,med,source:trails9.h:405
 T00732.005,T00732,vs_trail9,5,splineSamples,0,SVECTOR[9],,,,splineSamples,Named in the fork; see cited use,med,source:trails9.h:406
 T00732.006,T00732,vs_trail9,6,splineProgress,0,int,,,,splineProgress,Named in the fork; see cited use,med,source:trails9.h:407
-T00732.007,T00732,vs_trail9,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,source:trails9.h:408
+T00732.007,T00732,vs_trail9,7,speed,0,int,,,,speed,Named in the fork; see cited use,med,"source:trails9.h:408;source-review:resources\rood-reverseWin\src\EFFECT\trails9Types.h:14;retained-name:speed=Intentionally retain source-authored spline progress increment field speed (T00343.007 or T00732.007): high-resolution splineProgress accumulates it and is shifted>>12 before the Q12 interpolation call. It is not world translation speed, and this report does not modify type layouts."
 T00732.008,T00732,vs_trail9,8,unk,1,int,,,,opaque74,"Used, but its meaning is not established",low,source:trails9.h:409
 T00733.000,T00733,vs_trail9Prim,0,unk0,1,u_char,,,,tag0,"Byte of the ordering-table tag, written when the packet is added",low,declaration-only;source:trails9.h:17
 T00733.001,T00733,vs_trail9Prim,1,unk1,1,u_char,,,,tag1,Byte of the ordering-table tag,low,declaration-only;source:trails9.h:18

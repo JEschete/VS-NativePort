@@ -10,27 +10,27 @@
 #define VS_EFFECTS_TEMPLATES_PARTICLEDISPATCH_H_DECLS
 #include "Effects/Runtime.h"
 
-int Effects_Plg045_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg057_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg065_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg082_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg087_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg114_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg114_ParticleDispatch2(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg146_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg147_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg152_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg153_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg156_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg168_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg224_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg255_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg263_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg265_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg265_ParticleDispatch2(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg266_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg266_ParticleDispatch2(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg300_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
-int Effects_Plg301_ParticleDispatch(Effects_RendererSlot* arg0, u_int arg1, int arg2);
+int Effects_Plg045_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg057_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg065_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg082_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg087_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg114_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg114_ParticleDispatch2(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg146_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg147_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg152_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg153_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg156_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg168_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg224_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg255_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg263_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg265_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg265_ParticleDispatch2(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg266_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg266_ParticleDispatch2(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg300_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
+int Effects_Plg301_ParticleDispatch(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_TEMPLATES_PARTICLEDISPATCH_H_DECLS

@@ -25,7 +25,7 @@ u_char Effects_Plg162_ringColorFactors2[][4]; /* contents: module image (ModuleD
 CVECTOR Effects_Plg162_closedRingColorFactors[]; /* contents: module image (ModuleData.c) */
 
 // decomp: PLG162.BIN func_800F9800 (src/EFFECT/PLG162.BIN/0.c:32)
-int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     int radius[3];
     int height[3];
@@ -50,7 +50,7 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, 
     u_char* factorBytes;
     int cosAngle;
     int sinAngle;
-    int speed;
+    int angular_step;
     int maxSpeed;
     int row;
     int oldAngle;
@@ -61,14 +61,14 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, 
     Render_TransposedRingPacket* prim;
     Effects_PackageTexture* texture;
     alive = 1;
-    state = arg0->rendererState;
+    state = renderer_slot->rendererState;
     battle = Effects_currentInstance;
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
         state = Core_Memory_AllocateFromHighEnd(sizeof(*state));
-        arg0->rendererState = state;
-        state->lifetime = arg2;
-        state->effect = arg2 >> 8;
+        renderer_slot->rendererState = state;
+        state->lifetime = packed_parameters;
+        state->effect = packed_parameters >> 8;
         state->radiusSpeed = 0;
         state->radius = 0;
         state->heightSpeed = 0;
@@ -140,16 +140,16 @@ int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, 
         oldAngle = state->angle;
         if (scratch->speedRange[0] != scratch->speedRange[1]) {
             if (scratch->speedRange[1] < scratch->speedRange[0]) {
-                speed = (Core_Random_Rand() % ((scratch->speedRange[0] - scratch->speedRange[1]) + 1))
+                angular_step = (Core_Random_Rand() % ((scratch->speedRange[0] - scratch->speedRange[1]) + 1))
                       + scratch->speedRange[1];
             } else {
-                speed = (Core_Random_Rand() % ((scratch->speedRange[1] - scratch->speedRange[0]) + 1))
+                angular_step = (Core_Random_Rand() % ((scratch->speedRange[1] - scratch->speedRange[0]) + 1))
                       + scratch->speedRange[0];
             }
         } else {
-            speed = scratch->speedRange[0];
+            angular_step = scratch->speedRange[0];
         }
-        maxSpeed = oldAngle + speed;
+        maxSpeed = oldAngle + angular_step;
         baseAngle = (state->angle = maxSpeed);
         for (column = 0; column < 4; ++column) {
             for (row = 0; row < 3; ++row) {

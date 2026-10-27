@@ -7,13 +7,13 @@
 #include "Effects/Transforms.h"
 
 // decomp: BATTLE.PRG func_800D1104 (src/BATTLE/BATTLE.PRG/5BF94.c:6314)
-void Effects_SampleAllEffectCurves(int arg0)
+void Effects_SampleAllEffectCurves(int sample_distance)
 {
     int i;
-    Effects_CurveBlock* temp_a2 = Effects_package->curveBlock;
+    Effects_CurveBlock* curve_block = Effects_package->curveBlock;
 
-    for (i = 0; i < temp_a2->count; ++i) {
-        Effects_curveSamples[i + 1] = Effects_package->curves[i][arg0 % temp_a2->curveSizes[i]];
+    for (i = 0; i < curve_block->count; ++i) {
+        Effects_curveSamples[i + 1] = Effects_package->curves[i][sample_distance % curve_block->curveSizes[i]];
     }
 }
 
@@ -30,29 +30,29 @@ int Effects_SampleEffectCurve(int curveId, int distance)
 }
 
 // decomp: BATTLE.PRG func_800D11F4 (src/BATTLE/BATTLE.PRG/5BF94.c:6335)
-int Effects_SampleSegmentedEffectCurve(int arg0, int arg1)
+int Effects_SampleSegmentedEffectCurve(int curve_index, int segment_distance)
 {
     u_char* buf = Effects_package->block11Data;
     Effects_PackageBlock11* table = (Effects_PackageBlock11*)buf;
     int offset;
     int v;
 
-    if (arg0 < table->count) {
-        offset = *(arg0 + table->offsets);
+    if (curve_index < table->count) {
+        offset = *(curve_index + table->offsets);
         offset += buf[offset];
         while (buf[offset] != 0) {
-            v = arg1 - buf[offset];
+            v = segment_distance - buf[offset];
             if (v < 0) {
                 break;
             }
             offset += 2;
-            arg1 = v;
+            segment_distance = v;
         }
         if (buf[offset] != 0) {
-            return (buf[offset + 3] - buf[offset + 1]) * arg1 / buf[offset]
+            return (buf[offset + 3] - buf[offset + 1]) * segment_distance / buf[offset]
                  + buf[offset + 1];
         }
-        if (arg1 == 0) {
+        if (segment_distance == 0) {
             return buf[offset + 1];
         }
         return -1;
@@ -61,13 +61,13 @@ int Effects_SampleSegmentedEffectCurve(int arg0, int arg1)
 }
 
 // decomp: BATTLE.PRG func_800D12D8 (src/BATTLE/BATTLE.PRG/5BF94.c:6365)
-int Effects_SegmentedEffectCurveDuration(int arg0)
+int Effects_SegmentedEffectCurveDuration(int curve_index)
 {
     u_char* table = Effects_package->block11Data;
     int sum = 0;
 
-    if (arg0 < *(int*)table) {
-        int off = ((short*)table)[arg0 + 2];
+    if (curve_index < *(int*)table) {
+        int off = ((short*)table)[curve_index + 2];
         off += table[off];
         while (table[off] != 0) {
             sum += table[off];

@@ -13,39 +13,39 @@
 #define VS_PARTICLE_SETUP_TYPES
 #endif
 
-void VS_PARTICLE_TARGET_FUNCTION(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_ParticleQuadSet* arg3)
+void VS_PARTICLE_TARGET_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_ParticleQuadSet* particle_set)
 {
     int i;
 
     Core_Math_InterpolatePairsToShortVector(
-        arg0->vectorRanges[6], Effects_SampleEffectCurve(arg0->attractionOffsetCurve, arg3->age), &arg1->attractionOffset);
+        particle_definition->vectorRanges[6], Effects_SampleEffectCurve(particle_definition->attractionOffsetCurve, particle_set->age), &emitter_scratch->attractionOffset);
     Core_Math_InterpolatePairsToShortVector(
-        arg0->vectorRanges[7], Effects_SampleEffectCurve(arg0->attractionJitterCurve, arg3->age), &arg1->attractionJitter);
+        particle_definition->vectorRanges[7], Effects_SampleEffectCurve(particle_definition->attractionJitterCurve, particle_set->age), &emitter_scratch->attractionJitter);
 
-    switch (arg1->flags & 0x1C0) {
+    switch (emitter_scratch->flags & 0x1C0) {
     case 0xC0:
-        arg1->attractionOffset.vx += arg2->transforms[arg0->attractionTransform].world.t[0];
-        arg1->attractionOffset.vy += arg2->transforms[arg0->attractionTransform].world.t[1];
-        arg1->attractionOffset.vz += arg2->transforms[arg0->attractionTransform].world.t[2];
+        emitter_scratch->attractionOffset.vx += effect_instance->transforms[particle_definition->attractionTransform].world.t[0];
+        emitter_scratch->attractionOffset.vy += effect_instance->transforms[particle_definition->attractionTransform].world.t[1];
+        emitter_scratch->attractionOffset.vz += effect_instance->transforms[particle_definition->attractionTransform].world.t[2];
         break;
     case 0x80:
-        arg1->attractionOffset.vx += Effects_actionRequest.position.vx;
-        arg1->attractionOffset.vy += Effects_actionRequest.position.vy;
-        arg1->attractionOffset.vz += Effects_actionRequest.position.vz;
+        emitter_scratch->attractionOffset.vx += Effects_actionRequest.position.vx;
+        emitter_scratch->attractionOffset.vy += Effects_actionRequest.position.vy;
+        emitter_scratch->attractionOffset.vz += Effects_actionRequest.position.vz;
         break;
     case 0:
         break;
     }
 
-    for (i = 0; i < arg3->count; ++i) {
-        SVECTOR* temp_s0 = &arg3->controlPoints[i * 4 + 3];
-        temp_s0->vx =
-            arg1->attractionOffset.vx + Core_Random_RandomRangeExclusive(arg1->attractionJitter.vx, -arg1->attractionJitter.vx);
-        temp_s0->vy =
-            arg1->attractionOffset.vy + Core_Random_RandomRangeExclusive(arg1->attractionJitter.vy, -arg1->attractionJitter.vy);
-        temp_s0->vz =
-            arg1->attractionOffset.vz + Core_Random_RandomRangeExclusive(arg1->attractionJitter.vz, -arg1->attractionJitter.vz);
+    for (i = 0; i < particle_set->count; ++i) {
+        SVECTOR* target_control_point = &particle_set->controlPoints[i * 4 + 3];
+        target_control_point->vx =
+            emitter_scratch->attractionOffset.vx + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vx, -emitter_scratch->attractionJitter.vx);
+        target_control_point->vy =
+            emitter_scratch->attractionOffset.vy + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vy, -emitter_scratch->attractionJitter.vy);
+        target_control_point->vz =
+            emitter_scratch->attractionOffset.vz + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vz, -emitter_scratch->attractionJitter.vz);
     }
 }
 #undef VS_PARTICLE_SETUP_TYPES

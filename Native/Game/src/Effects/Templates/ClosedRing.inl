@@ -23,7 +23,7 @@
 #define VS_CLOSED_RING_TEXTURE_COLUMN(column) (column)
 #endif
 
-int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
+int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     int radius[3];
     int height[3];
@@ -36,7 +36,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     u_char v[3];
     MATRIX _;
     Effects_PluginEffectState child;
-    Effects_ClosedRingState* state = arg0->rendererState;
+    Effects_ClosedRingState* state = renderer_slot->rendererState;
     Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
     Effects_ParticleDefinition* effect;
     Effects_EffectInstance* battle = Effects_currentInstance;
@@ -46,7 +46,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     int radiusValue;
     int baseAngle;
     CVECTOR* factorBytes;
-    int speed;
+    int angular_step;
     int maxSpeed;
     int row;
     int oldAngle;
@@ -55,12 +55,12 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
     int drawColumn;
     Effects_PackageTexture* texture;
 
-    switch (arg1) {
+    switch (lifecycle_command) {
     case 1:
         state = Core_Memory_AllocateFromHighEnd(sizeof *state);
-        arg0->rendererState = state;
-        state->lifetime = arg2;
-        state->effect = arg2 >> 8;
+        renderer_slot->rendererState = state;
+        state->lifetime = packed_parameters;
+        state->effect = packed_parameters >> 8;
         state->radiusSpeed = 0;
         state->radius = 0;
         state->heightSpeed = 0;
@@ -71,7 +71,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
         Effects_ClearParticleTextureState((int*)&state->texture);
         Effects_InitializeParticleTextureAnimation(&state->texture, effect->ringSegments, effect->ringPositions);
         Core_Debugf("effects.texture", "closed ring init definition=%u parameter=0x%X table=%u program=%u context=%s request_effect=%u tables=%d",
-            (unsigned)state->effect, (unsigned)arg2,
+            (unsigned)state->effect, (unsigned)packed_parameters,
             (unsigned)effect->ringSegments, (unsigned)effect->ringPositions,
             Effects_package == &Effects_actionPackage ? "primary" : "secondary",
             (unsigned)(Effects_package == &Effects_actionPackage ?
@@ -80,7 +80,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
         if (effect->ringSegments >= Effects_package->block1TableCount ||
             effect->ringSegments >= 4 || Effects_package->textureInfoTable[effect->ringSegments] == NULL) {
             Core_Debugf("effects.texture", "closed ring definition=%u parameter=0x%X table=%u program=%u",
-                (unsigned)state->effect, (unsigned)arg2,
+                (unsigned)state->effect, (unsigned)packed_parameters,
                 (unsigned)effect->ringSegments, (unsigned)effect->ringPositions);
         }
         break;
@@ -146,17 +146,17 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* arg0, u_int arg1, int arg2)
 
         if (scratch->speedRange[0] != scratch->speedRange[1]) {
             if (scratch->speedRange[1] < scratch->speedRange[0]) {
-                speed = (Core_Random_Rand() % ((scratch->speedRange[0] - scratch->speedRange[1]) + 1))
+                angular_step = (Core_Random_Rand() % ((scratch->speedRange[0] - scratch->speedRange[1]) + 1))
                       + scratch->speedRange[1];
             } else {
-                speed = (Core_Random_Rand() % ((scratch->speedRange[1] - scratch->speedRange[0]) + 1))
+                angular_step = (Core_Random_Rand() % ((scratch->speedRange[1] - scratch->speedRange[0]) + 1))
                       + scratch->speedRange[0];
             }
         } else {
-            speed = scratch->speedRange[0];
+            angular_step = scratch->speedRange[0];
         }
 
-        maxSpeed = oldAngle + speed;
+        maxSpeed = oldAngle + angular_step;
         baseAngle = state->angle = maxSpeed;
 
         for (column = 0; column < 4; ++column) {

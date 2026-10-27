@@ -14,159 +14,159 @@
 // Template body: Effects::Templates::TrailNineOrigin (decomp src/EFFECT/trails9.h:27). Included once per instance by Effects/Templates/TrailNineOrigin.c with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 9
 
-void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* arg0, Effects_ParticleEmitterScratch* arg1,
-    Effects_EffectInstance* arg2, Effects_Trail9State* arg3)
+void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
+    Effects_EffectInstance* effect_instance, Effects_Trail9State* trail_set)
 {
-    int sp10;
-    int sp14;
+    int ring_edge_start_x;
+    int ring_edge_start_z;
     MATRIX* matrix;
     SVECTOR* splinePoint;
-    int temp_a1;
-    int temp_lo;
+    int next_corner_index;
+    int ring_angle_step;
     int temp_s0_2;
-    int temp_s3;
-    int temp_v0;
-    int temp_v0_4;
+    int ring_x;
+    int random_angle;
+    int edge_interpolation_q12;
     int i;
-    u_short var_a0;
-    u_short var_v1;
-    u_short var_v1_2;
+    u_short corner_x_bits;
+    u_short corner_y_bits;
+    u_short corner_z_bits;
 
-    Core_Math_InterpolatePairsToWideVector(arg0->positionRange,
-        Effects_SampleEffectCurve(arg0->positionCurve, arg3->curveSampleDistance), &arg1->position);
+    Core_Math_InterpolatePairsToWideVector(particle_definition->positionRange,
+        Effects_SampleEffectCurve(particle_definition->positionCurve, trail_set->curveSampleDistance), &emitter_scratch->position);
 
-    matrix = &arg2->transforms[arg0->transformIndex].world;
+    matrix = &effect_instance->transforms[particle_definition->transformIndex].world;
 
     // Determines trail origin:
-    switch (arg1->flags & 7) {
+    switch (emitter_scratch->flags & 7) {
     case 0:
         break;
     // Fixed point D_800F5310
     case 1:
-        Core_Math_AddWideAndShortVectors(&arg1->position, Effects_effectOrigin, &arg1->position);
+        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     // Caster
     case 2:
-        applyVector(&arg1->position, matrix->t[0], matrix->t[1], matrix->t[2], +=);
+        applyVector(&emitter_scratch->position, matrix->t[0], matrix->t[1], matrix->t[2], +=);
         break;
     }
 
-    Core_Math_InterpolatePairsToWideVector(arg0->extentRange,
-        Effects_SampleEffectCurve(arg0->extentCurve, arg3->curveSampleDistance), &arg1->extent);
+    Core_Math_InterpolatePairsToWideVector(particle_definition->extentRange,
+        Effects_SampleEffectCurve(particle_definition->extentCurve, trail_set->curveSampleDistance), &emitter_scratch->extent);
     Core_Gte_SetRotMatrix(matrix);
     Core_Gte_ClearTranslation();
 
-    switch (arg1->flags & 0x38) {
+    switch (emitter_scratch->flags & 0x38) {
     case 0:
-        for (i = 0; i < arg3->trailCount; ++i) {
+        for (i = 0; i < trail_set->trailCount; ++i) {
 
-            splinePoint = &arg3->trails[i].splinePoints[0];
+            splinePoint = &trail_set->trails[i].splinePoints[0];
 
-            temp_v0 = Core_Random_Rand();
-            arg1->sinAngle0 = Core_Gte_Sin(temp_v0);
-            arg1->cosAngle0 = Core_Gte_Cos(temp_v0);
+            random_angle = Core_Random_Rand();
+            emitter_scratch->sinAngle0 = Core_Gte_Sin(random_angle);
+            emitter_scratch->cosAngle0 = Core_Gte_Cos(random_angle);
 
-            temp_v0 = Core_Random_Rand();
-            arg1->sinAngle1 = Core_Gte_Sin(temp_v0);
-            arg1->cosAngle1 = Core_Gte_Cos(temp_v0);
+            random_angle = Core_Random_Rand();
+            emitter_scratch->sinAngle1 = Core_Gte_Sin(random_angle);
+            emitter_scratch->cosAngle1 = Core_Gte_Cos(random_angle);
 
             setVector(splinePoint,
-                ((((arg1->extent.vx * arg1->cosAngle0) >> 0xC) * arg1->cosAngle1) >> 0xC),
-                ((((arg1->extent.vy * arg1->cosAngle0) >> 0xC) * arg1->sinAngle1) >> 0xC),
-                ((arg1->extent.vz * arg1->sinAngle0) >> 0xC));
+                ((((emitter_scratch->extent.vx * emitter_scratch->cosAngle0) >> 0xC) * emitter_scratch->cosAngle1) >> 0xC),
+                ((((emitter_scratch->extent.vy * emitter_scratch->cosAngle0) >> 0xC) * emitter_scratch->sinAngle1) >> 0xC),
+                ((emitter_scratch->extent.vz * emitter_scratch->sinAngle0) >> 0xC));
 
-            if (arg1->flags & 0x40000) {
-                Core_Gte_ApplyRotMatrix(splinePoint, &arg1->aimPoint);
-                copyVector(splinePoint, &arg1->aimPoint);
+            if (emitter_scratch->flags & 0x40000) {
+                Core_Gte_ApplyRotMatrix(splinePoint, &emitter_scratch->aimPoint);
+                copyVector(splinePoint, &emitter_scratch->aimPoint);
             }
 
-            addVector(splinePoint, &arg1->position);
+            addVector(splinePoint, &emitter_scratch->position);
         }
         return;
 
     case 8:
-        for (i = 0; i < arg3->trailCount; ++i) {
+        for (i = 0; i < trail_set->trailCount; ++i) {
 
-            splinePoint = &arg3->trails[i].splinePoints[0];
+            splinePoint = &trail_set->trails[i].splinePoints[0];
 
-            switch (arg1->flags & 0x1800) {
+            switch (emitter_scratch->flags & 0x1800) {
             case 0x0:
             case 0x800:
                 switch (Core_Random_Rand() % 6) {
                 case 0:
-                    splinePoint->vx = arg1->extent.vx;
+                    splinePoint->vx = emitter_scratch->extent.vx;
                     if (0) {
                     case 1:
-                        splinePoint->vx = -arg1->extent.vx;
+                        splinePoint->vx = -emitter_scratch->extent.vx;
                     }
 
                     splinePoint->vy =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vy, -arg1->extent.vy);
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     splinePoint->vz =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vz, -arg1->extent.vz);
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 2:
-                    splinePoint->vy = arg1->extent.vy;
+                    splinePoint->vy = emitter_scratch->extent.vy;
                     if (0) {
                     case 3:
-                        splinePoint->vy = -arg1->extent.vy;
+                        splinePoint->vy = -emitter_scratch->extent.vy;
                     }
 
                     splinePoint->vx =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vx, -arg1->extent.vx);
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
                     splinePoint->vz =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vz, -arg1->extent.vz);
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 4:
-                    splinePoint->vz = arg1->extent.vz;
+                    splinePoint->vz = emitter_scratch->extent.vz;
                     if (0) {
                     case 5:
-                        splinePoint->vz = -arg1->extent.vz;
+                        splinePoint->vz = -emitter_scratch->extent.vz;
                     }
 
                     splinePoint->vx =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vx, -arg1->extent.vx);
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
                     splinePoint->vy =
-                        Core_Random_RandomRangeExclusive(arg1->extent.vy, -arg1->extent.vy);
+                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     break;
                 }
 
                 break;
 
             case 0x1000:
-                temp_a1 = VS_TRAIL_CORNER_STATE + 1;
-                VS_TRAIL_CORNER_STATE = temp_a1 & 7;
+                next_corner_index = VS_TRAIL_CORNER_STATE + 1;
+                VS_TRAIL_CORNER_STATE = next_corner_index & 7;
 
-                var_a0 = arg1->extent.vx;
-                if (!(temp_a1 & 1)) {
-                    var_a0 = -var_a0;
+                corner_x_bits = emitter_scratch->extent.vx;
+                if (!(next_corner_index & 1)) {
+                    corner_x_bits = -corner_x_bits;
                 }
 
-                splinePoint->vx = var_a0;
+                splinePoint->vx = corner_x_bits;
 
-                var_v1 = arg1->extent.vy;
-                if (!(temp_a1 & 2)) {
-                    var_v1 = -var_v1;
+                corner_y_bits = emitter_scratch->extent.vy;
+                if (!(next_corner_index & 2)) {
+                    corner_y_bits = -corner_y_bits;
                 }
-                splinePoint->vy = var_v1;
+                splinePoint->vy = corner_y_bits;
 
-                var_v1_2 = arg1->extent.vz;
-                if (!(temp_a1 & 4)) {
-                    var_v1_2 = -var_v1_2;
+                corner_z_bits = emitter_scratch->extent.vz;
+                if (!(next_corner_index & 4)) {
+                    corner_z_bits = -corner_z_bits;
                 }
-                splinePoint->vz = var_v1_2;
+                splinePoint->vz = corner_z_bits;
 
                 break;
             }
 
-            if (arg1->flags & 0x40000) {
-                Core_Gte_ApplyRotMatrix(splinePoint, &arg1->aimPoint);
-                copyVector(splinePoint, &arg1->aimPoint);
+            if (emitter_scratch->flags & 0x40000) {
+                Core_Gte_ApplyRotMatrix(splinePoint, &emitter_scratch->aimPoint);
+                copyVector(splinePoint, &emitter_scratch->aimPoint);
             }
 
-            addVector(splinePoint, &arg1->position);
+            addVector(splinePoint, &emitter_scratch->position);
         }
 
         return;
@@ -175,18 +175,18 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Particle
     case 24:
     case 32:
     case 40:
-        arg1->ringSegments = 4;
-        arg1->ringPositions = 4;
+        emitter_scratch->ringSegments = 4;
+        emitter_scratch->ringPositions = 4;
         break;
 
     case 48:
-        arg1->ringSegments = arg0->ringSegments;
-        if (arg1->ringSegments == 0) {
-            arg1->ringSegments = 1;
+        emitter_scratch->ringSegments = particle_definition->ringSegments;
+        if (emitter_scratch->ringSegments == 0) {
+            emitter_scratch->ringSegments = 1;
         }
-        arg1->ringPositions = arg0->ringPositions;
-        if (arg1->ringPositions == 0) {
-            arg1->ringPositions = arg1->ringSegments;
+        emitter_scratch->ringPositions = particle_definition->ringPositions;
+        if (emitter_scratch->ringPositions == 0) {
+            emitter_scratch->ringPositions = emitter_scratch->ringSegments;
         }
         break;
 
@@ -194,39 +194,39 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* arg0, Effects_Particle
         return;
     }
 
-    temp_lo = ONE / arg1->ringSegments;
+    ring_angle_step = ONE / emitter_scratch->ringSegments;
 
-    if ((arg1->flags & 0x1800) != 0x1000) {
-        VS_TRAIL_CORNER_STATE = VS_TRAIL_CORNER_STATE % arg1->ringPositions;
-        temp_s0_2 = (VS_TRAIL_CORNER_STATE * temp_lo) + ONE / 8;
-        sp10 = (Core_Gte_Cos(temp_s0_2) * arg1->extent.vx) >> 0xC;
-        sp14 = (Core_Gte_Sin(temp_s0_2) * arg1->extent.vz) >> 0xC;
+    if ((emitter_scratch->flags & 0x1800) != 0x1000) {
+        VS_TRAIL_CORNER_STATE = VS_TRAIL_CORNER_STATE % emitter_scratch->ringPositions;
+        temp_s0_2 = (VS_TRAIL_CORNER_STATE * ring_angle_step) + ONE / 8;
+        ring_edge_start_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        ring_edge_start_z = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
     }
 
-    for (i = 0; i < arg3->trailCount; ++i) {
-        splinePoint = &arg3->trails[i].splinePoints[0];
-        VS_TRAIL_CORNER_STATE = (VS_TRAIL_CORNER_STATE + 1) % arg1->ringPositions;
-        temp_s0_2 = (VS_TRAIL_CORNER_STATE * temp_lo) + ONE / 8;
-        temp_s3 = (Core_Gte_Cos(temp_s0_2) * arg1->extent.vx) >> 0xC;
-        temp_s0_2 = (Core_Gte_Sin(temp_s0_2) * arg1->extent.vz) >> 0xC;
+    for (i = 0; i < trail_set->trailCount; ++i) {
+        splinePoint = &trail_set->trails[i].splinePoints[0];
+        VS_TRAIL_CORNER_STATE = (VS_TRAIL_CORNER_STATE + 1) % emitter_scratch->ringPositions;
+        temp_s0_2 = (VS_TRAIL_CORNER_STATE * ring_angle_step) + ONE / 8;
+        ring_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        temp_s0_2 = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
 
-        if ((arg1->flags & 0x1800) == 0x1000) {
-            splinePoint->vx = temp_s3;
+        if ((emitter_scratch->flags & 0x1800) == 0x1000) {
+            splinePoint->vx = ring_x;
             splinePoint->vz = temp_s0_2;
         } else {
-            temp_v0_4 = Core_Random_Rand() >> 3;
-            splinePoint->vx = (((temp_s3 - sp10) * temp_v0_4) >> 0xC) + sp10;
-            splinePoint->vz = (((temp_s0_2 - sp14) * temp_v0_4) >> 0xC) + sp14;
+            edge_interpolation_q12 = Core_Random_Rand() >> 3;
+            splinePoint->vx = (((ring_x - ring_edge_start_x) * edge_interpolation_q12) >> 0xC) + ring_edge_start_x;
+            splinePoint->vz = (((temp_s0_2 - ring_edge_start_z) * edge_interpolation_q12) >> 0xC) + ring_edge_start_z;
         }
 
         splinePoint->vy = 0;
 
-        if (arg1->flags & 0x40000) {
-            Core_Gte_ApplyRotMatrix(splinePoint, &arg1->aimPoint);
-            copyVector(splinePoint, &arg1->aimPoint);
+        if (emitter_scratch->flags & 0x40000) {
+            Core_Gte_ApplyRotMatrix(splinePoint, &emitter_scratch->aimPoint);
+            copyVector(splinePoint, &emitter_scratch->aimPoint);
         }
 
-        addVector(splinePoint, &arg1->position);
+        addVector(splinePoint, &emitter_scratch->position);
     }
 }
 #undef TRAIL_SAMPLE_COUNT

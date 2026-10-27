@@ -10,15 +10,15 @@
 #include "Render/UiPrimitives.h"
 
 // decomp: SCREFF2.PRG func_800F9800 (src/GIM/SCREFF2.PRG/0.c:8)
-void Effects_ScreenDistortion_SetFeedbackLayer(int arg0)
+void Effects_ScreenDistortion_SetFeedbackLayer(int ordering_layer)
 {
-    Effects_screenEffectOverlay->feedbackLayer = arg0;
+    Effects_screenEffectOverlay->feedbackLayer = ordering_layer;
     if (Effects_screenEffectOverlay->opaque1 == 0) {
-        if (arg0 != 0) {
+        if (ordering_layer != 0) {
             Effects_screenEffectOverlay->opaque1 = 1U;
             Render_ReserveTexturePageRange(0x1B, 5, 6);
         }
-    } else if (arg0 == 0) {
+    } else if (ordering_layer == 0) {
         Effects_screenEffectOverlay->opaque1 = 0U;
         Render_RetireTexturePageRange(0x1B, 5, 6);
     }
@@ -27,34 +27,34 @@ void Effects_ScreenDistortion_SetFeedbackLayer(int arg0)
 // decomp: SCREFF2.PRG func_800F986C (src/GIM/SCREFF2.PRG/0.c:22)
 void Effects_ScreenDistortion_DrawFeedbackTiles(void)
 {
-    int temp_v0;
+    int texture_page_bits;
     int var_s0;
     int x;
-    int var_s2;
+    int tile_strip_x;
     int y;
-    u_long* temp_s4;
-    u_long* var_t2;
+    u_long* ordering_table;
+    u_long* packet_words;
 
-    temp_s4 = Render_frameScratch.orderingTable;
+    ordering_table = Render_frameScratch.orderingTable;
 
     for (y = 192; y >= 0; y -= 32) {
-        for (var_s2 = 0x100; var_s2 >= 0; var_s2 -= 64) {
+        for (tile_strip_x = 0x100; tile_strip_x >= 0; tile_strip_x -= 64) {
             for (x = 0x40; x >= 0; x -= 0x20) {
-                int s5;
+                int texture_page_mode;
                 if (x == 0x40) {
-                    var_t2 = Render_QueueSprite(
-                        0x160, (var_s2 + 2) | ((y + 30) << 16), 0x40000 | 0x40, temp_s4);
+                    packet_words = Render_QueueSprite(
+                        0x160, (tile_strip_x + 2) | ((y + 30) << 16), 0x40000 | 0x40, ordering_table);
                     var_s0 = (y + 0x1C) << 8;
                 } else {
-                    var_t2 = Render_QueueSprite(
-                        0x160, (var_s2 + x + 0x1E) | ((y + 2) << 16), 0x1C0004, temp_s4);
+                    packet_words = Render_QueueSprite(
+                        0x160, (tile_strip_x + x + 0x1E) | ((y + 2) << 16), 0x1C0004, ordering_table);
                     var_s0 = (x + 0x1C) | (y << 8);
                 }
 
-                s5 = (((var_s2 + 0x2C0) & 0x3FF) >> 6) | 0x170;
+                texture_page_mode = (((tile_strip_x + 0x2C0) & 0x3FF) >> 6) | 0x170;
 
-                var_t2[1] = s5 | 0xE1000200;
-                var_t2[4] = var_s0;
+                packet_words[1] = texture_page_mode | 0xE1000200;
+                packet_words[4] = var_s0;
             }
         }
     }
@@ -64,129 +64,129 @@ void Effects_ScreenDistortion_DrawFeedbackTiles(void)
             for (var_s0 = 0; var_s0 < 3; ++var_s0) {
                 switch (var_s0) {
                 case 0:
-                    var_t2 = Render_QueueSprite(
-                        0x160, (x + 2) | ((y + 2) << 16), 0x1C001C, temp_s4);
+                    packet_words = Render_QueueSprite(
+                        0x160, (x + 2) | ((y + 2) << 16), 0x1C001C, ordering_table);
                     break;
                 case 1:
-                    var_t2 = Render_QueueSprite(
-                        0x160, ((x - 2) & 0xFFFF) | ((y - 2) << 16), 0x200020, temp_s4);
+                    packet_words = Render_QueueSprite(
+                        0x160, ((x - 2) & 0xFFFF) | ((y - 2) << 16), 0x200020, ordering_table);
                     break;
                 case 2:
-                    var_t2 =
-                        Render_QueueSprite(0x60, x | (y << 0x10), 0x200020, temp_s4);
+                    packet_words =
+                        Render_QueueSprite(0x60, x | (y << 0x10), 0x200020, ordering_table);
                     break;
                 }
 
-                temp_v0 = (((x & 0x1C0) + 0x2C0) & 0x3FF) >> 6;
+                texture_page_bits = (((x & 0x1C0) + 0x2C0) & 0x3FF) >> 6;
 
                 if (var_s0 == 0) {
-                    temp_v0 |= 0x170;
-                    var_t2[1] = temp_v0 | 0xE1000200;
+                    texture_page_bits |= 0x170;
+                    packet_words[1] = texture_page_bits | 0xE1000200;
                 } else {
-                    temp_v0 |= 0x110;
-                    var_t2[1] = temp_v0 | 0xE1000200;
+                    texture_page_bits |= 0x110;
+                    packet_words[1] = texture_page_bits | 0xE1000200;
                 }
 
-                var_t2[4] = (x & 0x20) | (y << 8);
+                packet_words[4] = (x & 0x20) | (y << 8);
             }
         }
     }
 
     var_s0 = Effects_screenEffectOverlay->feedbackLayer - 3;
-    var_t2 = Render_frameScratch.primitiveCursor;
-    var_t2[0] = ((temp_s4[var_s0] & 0xFFFFFF) | 0x07000000);
-    var_t2[1] = 0xE30402C0;
-    var_t2[2] = 0xE4077FFF;
-    var_t2[3] = 0xE50802C0;
-    var_t2[4] = 0x60000000;
-    var_t2[5] = 0;
-    var_t2[6] = 0xE00140;
-    var_t2[7] = 0xE6000001;
-    temp_s4[var_s0] = LegacyGpu_Handle(var_t2);
-    var_t2 += 8;
+    packet_words = Render_frameScratch.primitiveCursor;
+    packet_words[0] = ((ordering_table[var_s0] & 0xFFFFFF) | 0x07000000);
+    packet_words[1] = 0xE30402C0;
+    packet_words[2] = 0xE4077FFF;
+    packet_words[3] = 0xE50802C0;
+    packet_words[4] = 0x60000000;
+    packet_words[5] = 0;
+    packet_words[6] = 0xE00140;
+    packet_words[7] = 0xE6000001;
+    ordering_table[var_s0] = LegacyGpu_Handle(packet_words);
+    packet_words += 8;
 
     x = Render_frameBuf == 0 ? 0x140 : 0;
 
-    var_t2[0] = ((*temp_s4 & 0xFFFFFF) | 0x04000000);
-    var_t2[1] = x | 0xE3000000;
-    var_t2[2] = (x + 0x13F) | 0xE4037C00;
-    var_t2[3] = x | 0xE5000000;
-    var_t2[4] = 0xE6000000;
+    packet_words[0] = ((*ordering_table & 0xFFFFFF) | 0x04000000);
+    packet_words[1] = x | 0xE3000000;
+    packet_words[2] = (x + 0x13F) | 0xE4037C00;
+    packet_words[3] = x | 0xE5000000;
+    packet_words[4] = 0xE6000000;
 
-    *temp_s4 = LegacyGpu_Handle(var_t2);
-    Render_frameScratch.primitiveCursor = var_t2 + 5;
+    *ordering_table = LegacyGpu_Handle(packet_words);
+    Render_frameScratch.primitiveCursor = packet_words + 5;
 }
 
 // decomp: SCREFF2.PRG func_800F9BC0 (src/GIM/SCREFF2.PRG/0.c:114)
-void Effects_ScreenDistortion_SetRadialWarp(short arg0, short arg1)
+void Effects_ScreenDistortion_SetRadialWarp(short initial_scale_q12, short radial_growth_q12)
 {
-    Effects_screenEffectOverlay->radialWarpArg0 = arg0;
-    Effects_screenEffectOverlay->radialWarpArg1 = arg1;
+    Effects_screenEffectOverlay->radialWarpArg0 = initial_scale_q12;
+    Effects_screenEffectOverlay->radialWarpArg1 = radial_growth_q12;
 }
 
 // decomp: SCREFF2.PRG func_800F9DE8 (src/GIM/SCREFF2.PRG/5E8.c:8)
-void Effects_ScreenDistortion_SetVignetteEnabled(int arg0) { Effects_screenEffectOverlay->vignetteEnabled = arg0; }
+void Effects_ScreenDistortion_SetVignetteEnabled(int enabled) { Effects_screenEffectOverlay->vignetteEnabled = enabled; }
 
 // decomp: SCREFF2.PRG func_800F9DF8 (src/GIM/SCREFF2.PRG/5E8.c:10)
-int Effects_ScreenDistortion_EllipsePoint(int arg0, int arg1)
+int Effects_ScreenDistortion_EllipsePoint(int angular_step, int radius)
 {
-    int var_s1;
+    int radial_modulation_q6;
 
-    var_s1 = 8 - ((arg0 + 8) & 0xF);
-    if (var_s1 < 0) {
-        var_s1 = -var_s1;
+    radial_modulation_q6 = 8 - ((angular_step + 8) & 0xF);
+    if (radial_modulation_q6 < 0) {
+        radial_modulation_q6 = -radial_modulation_q6;
     }
-    var_s1 += 0x40;
-    return ((((((Core_Gte_Cos(arg0 << 6) * arg1 * 0xB) >> 0xF) * var_s1) >> 6) + 0xA0) & 0xFFFF)
-         | ((((((Core_Gte_Sin(arg0 << 6) * arg1) >> 0xC) * var_s1) >> 6) + 0x70) << 0x10);
+    radial_modulation_q6 += 0x40;
+    return ((((((Core_Gte_Cos(angular_step << 6) * radius * 0xB) >> 0xF) * radial_modulation_q6) >> 6) + 0xA0) & 0xFFFF)
+         | ((((((Core_Gte_Sin(angular_step << 6) * radius) >> 0xC) * radial_modulation_q6) >> 6) + 0x70) << 0x10);
 }
 
 // decomp: SCREFF2.PRG func_800F9EBC (src/GIM/SCREFF2.PRG/5E8.c:23)
-int* Effects_ScreenDistortion_AppendVignetteCorner(int arg0, int arg1, int* arg2, u_long* arg3)
+int* Effects_ScreenDistortion_AppendVignetteCorner(int packed_corner_xy, int first_angular_step, int* packet_words, u_long* ordering_head)
 {
-    int var_s2;
+    int angular_step;
 
-    for (var_s2 = arg1; var_s2 < arg1 + 4; ++var_s2) {
-        arg2[0] = (*arg3 & 0xFFFFFF) | 0x06000000;
-        arg2[1] = 0x32FFFFFF;
-        arg2[2] = arg0;
-        arg2[3] = 0xA0A0A0;
-        arg2[4] = Effects_ScreenDistortion_EllipsePoint(var_s2 + 1, 0x80);
-        arg2[5] = 0xA0A0A0;
-        arg2[6] = Effects_ScreenDistortion_EllipsePoint(var_s2, 0x80);
-        *arg3 = LegacyGpu_Handle(arg2);
-        arg2 += 7;
+    for (angular_step = first_angular_step; angular_step < first_angular_step + 4; ++angular_step) {
+        packet_words[0] = (*ordering_head & 0xFFFFFF) | 0x06000000;
+        packet_words[1] = 0x32FFFFFF;
+        packet_words[2] = packed_corner_xy;
+        packet_words[3] = 0xA0A0A0;
+        packet_words[4] = Effects_ScreenDistortion_EllipsePoint(angular_step + 1, 0x80);
+        packet_words[5] = 0xA0A0A0;
+        packet_words[6] = Effects_ScreenDistortion_EllipsePoint(angular_step, 0x80);
+        *ordering_head = LegacyGpu_Handle(packet_words);
+        packet_words += 7;
     }
-    return arg2;
+    return packet_words;
 }
 
 // decomp: SCREFF2.PRG func_800F9FB8 (src/GIM/SCREFF2.PRG/5E8.c:41)
 void Effects_ScreenDistortion_DrawVignette(void)
 {
-    int* var_s2;
+    int* packet_words;
     int i;
-    u_long* temp_s4;
+    u_long* overlay_ordering_table;
 
-    temp_s4 = Render_frameScratch.overlayOrderingTable;
-    var_s2 = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, Render_frameScratch.primitiveCursor, temp_s4);
-    var_s2 = Effects_ScreenDistortion_AppendVignetteCorner(0xE00000, 0x16, var_s2, temp_s4);
-    var_s2 = Effects_ScreenDistortion_AppendVignetteCorner(0, 0x26, var_s2, temp_s4);
-    var_s2 = Effects_ScreenDistortion_AppendVignetteCorner(0x140, 0x36, var_s2, temp_s4);
+    overlay_ordering_table = Render_frameScratch.overlayOrderingTable;
+    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0xE00140, 6, Render_frameScratch.primitiveCursor, overlay_ordering_table);
+    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0xE00000, 0x16, packet_words, overlay_ordering_table);
+    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0, 0x26, packet_words, overlay_ordering_table);
+    packet_words = Effects_ScreenDistortion_AppendVignetteCorner(0x140, 0x36, packet_words, overlay_ordering_table);
 
     for (i = 0; i < 0x40; ++i) {
-        var_s2[0] = (*temp_s4 & 0xFFFFFF) | 0x09000000;
-        var_s2[1] = 0xE1000220;
-        var_s2[2] = 0x3AA0A0A0;
-        var_s2[3] = Effects_ScreenDistortion_EllipsePoint(i + 1, 0x80);
-        var_s2[4] = 0xA0A0A0;
-        var_s2[5] = Effects_ScreenDistortion_EllipsePoint(i, 0x80);
-        var_s2[6] = 0;
-        var_s2[7] = Effects_ScreenDistortion_EllipsePoint(i + 1, 0x60);
-        var_s2[8] = 0;
-        var_s2[9] = Effects_ScreenDistortion_EllipsePoint(i, 0x60);
-        *temp_s4 = LegacyGpu_Handle(var_s2);
-        var_s2 += 10;
+        packet_words[0] = (*overlay_ordering_table & 0xFFFFFF) | 0x09000000;
+        packet_words[1] = 0xE1000220;
+        packet_words[2] = 0x3AA0A0A0;
+        packet_words[3] = Effects_ScreenDistortion_EllipsePoint(i + 1, 0x80);
+        packet_words[4] = 0xA0A0A0;
+        packet_words[5] = Effects_ScreenDistortion_EllipsePoint(i, 0x80);
+        packet_words[6] = 0;
+        packet_words[7] = Effects_ScreenDistortion_EllipsePoint(i + 1, 0x60);
+        packet_words[8] = 0;
+        packet_words[9] = Effects_ScreenDistortion_EllipsePoint(i, 0x60);
+        *overlay_ordering_table = LegacyGpu_Handle(packet_words);
+        packet_words += 10;
     }
-    Render_frameScratch.primitiveCursor = var_s2;
+    Render_frameScratch.primitiveCursor = packet_words;
 }
 

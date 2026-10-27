@@ -43,12 +43,12 @@ extern SVECTOR Effects_Plg128_surfaceVertices[5][16];
 extern CVECTOR Effects_Plg128_closedRingColorFactors[];
 extern SVECTOR Effects_Plg128_surfaceVertices2[5][16];
 extern int Effects_Plg128_trailEmissionCounter;
-void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* arg0, VECTOR* arg1);
-void Effects_Plg128_ResolveCameraEndpoints(Effects_Plg128_CameraEffectState* arg0, Effects_ParticleEmitterScratch* arg1, Effects_EffectInstance* arg2,
-    Effects_ParticleDefinition* arg3);
-void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* arg0, Effects_ParticleEmitterScratch* arg1, Effects_EffectInstance* arg2,
-    Effects_ParticleDefinition* arg3);
-void Effects_Plg128_StoreCameraEndpoints(Effects_Plg128_CameraEffectState* arg0, Effects_ParticleEmitterScratch* scratch);
-int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* arg0, u_int arg1, int arg2);
+void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* camera_effect, VECTOR* translation);
+void Effects_Plg128_ResolveCameraEndpoints(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* emitter_scratch, Effects_EffectInstance* effect_instance,
+    Effects_ParticleDefinition* particle_definition);
+void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* emitter_scratch, Effects_EffectInstance* effect_instance,
+    Effects_ParticleDefinition* particle_definition);
+void Effects_Plg128_StoreCameraEndpoints(Effects_Plg128_CameraEffectState* camera_effect, Effects_ParticleEmitterScratch* scratch);
+int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_PLUGINS_PLG128_H_DECLS

@@ -13,6 +13,6 @@
 extern u_char Effects_Plg162_ringColorFactors[][4];
 extern u_char Effects_Plg162_ringColorFactors2[][4];
 extern CVECTOR Effects_Plg162_closedRingColorFactors[];
-int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* arg0, u_int arg1, int arg2);
+int Effects_Plg162_UpdateTransposedRing(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters);
 
 #endif // VS_EFFECTS_PLUGINS_PLG162_H_DECLS
