@@ -37,7 +37,6 @@ void Effects_BindEffectCurves(Effects_CurveBlock* block);
 void Effects_BindEffectPrograms(void* block);
 void Effects_BindEffectPackageParameters(Effects_PackageBlock9* arg0);
 void Effects_BindEffectTransformDefinitions(void* arg0);
-void Effects_BindEffectTextureTables(Effects_PackageBlock1* block);
 void Effects_BindParticleAnimationTable(Effects_PackageBlock2* block);
 void* Effects_ParticleAnimationData(int arg0);
 void Effects_BindEffectSoundSequences(u_char* arg0);

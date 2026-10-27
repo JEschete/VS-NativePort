@@ -1094,6 +1094,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Effects\TextureBindings.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\Timeline.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2004,6 +2007,7 @@
     <ClInclude Include="src\Effects\Templates\TrailTarget.inl" />
     <ClInclude Include="src\Effects\Templates\TrailUpdate.h" />
     <ClInclude Include="src\Effects\Templates\TrailUpdate.inl" />
+    <ClInclude Include="src\Effects\TextureBindings.h" />
     <ClInclude Include="src\Effects\Timeline.h" />
     <ClInclude Include="src\Effects\Trails.h" />
     <ClInclude Include="src\Effects\Transforms.h" />

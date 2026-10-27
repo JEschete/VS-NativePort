@@ -31,6 +31,7 @@
 #include "Effects/Templates/TiledRing.h"
 #include "Effects/Templates/TrailDispatch.h"
 #include "Effects/Templates/TrailNineDispatch.h"
+#include "Effects/TextureBindings.h"
 #include "Effects/Transforms.h"
 #include "OverlayWorkspace.h"
 #include "Render/Textures.h"
@@ -145,19 +146,6 @@ void Effects_BindEffectPackageParameters(Effects_PackageBlock9* arg0) { Effects_
 
 // decomp: BATTLE.PRG _parsePfileBlock10 (src/BATTLE/BATTLE.PRG/6F014.c:510)
 void Effects_BindEffectTransformDefinitions(void* arg0) { Effects_package->block10Data = arg0; }
-
-// decomp: BATTLE.PRG _parsePfileBlock1 (src/BATTLE/BATTLE.PRG/6F014.c:512)
-void Effects_BindEffectTextureTables(Effects_PackageBlock1* block)
-{
-    int i;
-
-    Effects_package->block1TableCount = block->tableCount;
-    Effects_package->textures = (void*)block + block->dataOffset;
-
-    for (i = 0; i < Effects_package->block1TableCount; ++i) {
-        Effects_package->textureInfoTable[i] = (void*)block + block->tableOffsets[i];
-    }
-}
 
 // decomp: BATTLE.PRG _parsePfileBlock2 (src/BATTLE/BATTLE.PRG/6F014.c:524)
 void Effects_BindParticleAnimationTable(Effects_PackageBlock2* block)
@@ -410,7 +398,7 @@ void Effects_BindEffectPackageBlocks(Effects_PackageFile* arg0)
             return;
 
         case 0x10000:
-            Effects_BindEffectTextureTables((Effects_PackageBlock1*)arg0->blocks);
+            Effects_BindEffectTextureTables(arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta));
             break;
 
         case 0x20000:

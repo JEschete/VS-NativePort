@@ -29,10 +29,12 @@ extern "C" {
 #include "Effects/EffectResources.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
+#include "Effects/Plugins/Plg053.h"
 #include "Effects/Plugins/Plg073.h"
 #include "Effects/PurgeTables.h"
 #include "Effects/Runtime.h"
 #include "Effects/ScriptVm.h"
+#include "Effects/Templates/ClosedRing.h"
 #include "Effects/Templates/ParticleDispatch.h"
 #include "Effects/Templates/ParticleRender.h"
 #include "Effects/Templates/RadialSurge.h"
@@ -1254,7 +1256,6 @@ struct Plg074Fixture : EmissionFixture {
   int saved_sample = Effects_curveSamples[0];
   int saved_corner = Effects_Plg073_trailEmissionCounter;
   int saved_plg074_corner = Content_plg074TrailEmissionCounter[0];
-  SVECTOR saved_origin = Effects_effectOrigin[0];
   Effects_ActionEffectRequest saved_request = Effects_actionRequest;
   std::array<CVECTOR, 8> saved_colors{};
   std::array<std::array<u_char, 4>, 8> saved_arc_colors{};
@@ -1268,7 +1269,6 @@ struct Plg074Fixture : EmissionFixture {
     Effects_curveSamples[0] = 0;
     Effects_Plg073_trailEmissionCounter = 0;
     Content_plg074TrailEmissionCounter[0] = 0;
-    Effects_effectOrigin[0] = {100, -200, 300, 0};
     Effects_actionRequest.position = {400, -500, 600, 0};
     std::ranges::copy(Effects_Plg073_tiledRingColorFactors,
                       saved_colors.begin());
@@ -1292,7 +1292,6 @@ struct Plg074Fixture : EmissionFixture {
     Effects_curveSamples[0] = saved_sample;
     Effects_Plg073_trailEmissionCounter = saved_corner;
     Content_plg074TrailEmissionCounter[0] = saved_plg074_corner;
-    Effects_effectOrigin[0] = saved_origin;
     Effects_actionRequest = saved_request;
     std::ranges::copy(saved_colors, Effects_Plg073_tiledRingColorFactors);
     std::memcpy(Effects_Plg073_ringColorFactors, saved_arc_colors.data(),
@@ -1398,6 +1397,15 @@ void CheckPlg074RingArcPackets(const Render_RingPacket* packets, int mode) {
     CHECK(quad.r2 == (index < 8 ? 64 : 96) + mode);
   }
 }
+
+void CheckGravityRingMaterial(const Render_ClosedRingPacket* packets) {
+  CHECK(Render_frameScratch.primitiveCursor == packets + 32);
+  CHECK(packets[0].poly.clut == 0x1234);
+  CHECK(packets[0].poly.tpage == 0x567);
+  CHECK(packets[0].poly.u0 == 16);
+  CHECK(packets[0].poly.v0 == 32);
+  CHECK(packets[0].poly.code == Render_LegacyPrimitiveCode_PolyGt4SemiTrans);
+}
 }  // namespace
 
 TEST_CASE("PLG074 F01986 draws tiled rings through the production slot",
@@ -1452,6 +1460,7 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
       Plg074Entry(0x800FB414, Effects_Plg074_GenerateTrailOrigins);
   const int anchor = GENERATE(0, 1, 2);
   Plg074Fixture fixture;
+  Effects_actionRequest.position = {100, -200, 300, 0};
   auto& definition = fixture.Definition();
   std::ranges::copy(std::array<std::int16_t, 6>{10, 10, 20, 20, 30, 30},
                     definition.extentRange);
@@ -1681,6 +1690,7 @@ TEST_CASE(
       REQUIRE(slot != nullptr);
       REQUIRE(slot->rendererState != nullptr);
     }
+
     CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
     REQUIRE(fixture.instance.context.renderer != nullptr);
     fixture.ResetPackets();
@@ -1690,4 +1700,32 @@ TEST_CASE(
     fixture.CheckGuards();
     fixture.ResetPackets();
   }
+}
+
+TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
+          "[effects][gravity-material][closed-ring]") {
+  Plg074Fixture fixture;
+  fixture.ConfigureRing();
+  fixture.package.block1TableCount = 2;
+  fixture.package.textureInfoTable[1] = &fixture.info;
+  fixture.Definition().ringSegments = 1;
+  fixture.Definition().ringPositions = 0;
+  const auto saved_color = Effects_Plg053_closedRingColorFactors[0];
+  Effects_Plg053_closedRingColorFactors[0] = {32, 64, 96, 0};
+  DispatchHeap heap;
+  for (int cycle = 0; cycle < 3; ++cycle) {
+    auto* slot = Effects_AttachEffectRenderer(&fixture.instance,
+                                              Effects_Plg053_ClosedRing, 2);
+    REQUIRE(slot != nullptr);
+    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    const auto* packets = reinterpret_cast<const Render_ClosedRingPacket*>(
+        fixture.storage.data() + 1);
+    CheckGravityRingMaterial(packets);
+    fixture.ResetPackets();
+    CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
+    CHECK(fixture.instance.context.renderer == nullptr);
+    CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+    fixture.ResetPackets();
+  }
+  Effects_Plg053_closedRingColorFactors[0] = saved_color;
 }

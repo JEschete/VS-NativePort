@@ -12,6 +12,34 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_effect_origin_aliases_the_primary_request_position(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            row = next(item for item in csv.DictReader(stream)
+                       if item["id"] == "G00532")
+        self.assertIn("view-of:G00529+0xE0", row["notes"])
+        self.assertIn("Effects_ActionEffectRequest.position", row["notes"])
+        self.assertEqual(row["size"], "8")
+        self.assertEqual(row["type"], "SVECTOR[1]")
+
+    def test_texture_binding_receives_its_payload_extent(self):
+        fixups = copy_fixups.FIXES["F01626"]
+        self.assertTrue(any(
+            "Effects_BindEffectTextureTables(arg0->blocks," in new
+            and "sizeof(arg0->meta)" in new
+            for _, new, _ in fixups
+        ))
+        self.assertTrue(any(
+            "Effects_BindEffectAuxiliarySoundBank(" in new
+            for _, new, _ in fixups
+        ))
+        self.assertEqual(
+            self.owned_items()["F01606"]["path"],
+            r"Native\Game\src\Effects\TextureBindings.cpp",
+        )
+
     def test_retired_execution_hooks_have_no_production_consumers(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

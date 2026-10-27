@@ -25,7 +25,7 @@ G00526,state,Effects::trackCount,Native\Game\src\Effects\Runtime.c,Gives the num
 G00527,state,Effects::startedTrackCount,Native\Game\src\Effects\Runtime.c,Counts the primary effect tracks started; the effect ends once all have.,high,source:5BF94.c:5420;source:5BF94.c:5263
 G00528,state,Effects::actionVariant,Native\Game\src\Effects\Runtime.c,Gives the action variant of the current effect; 0 for none.,med,source:5BF94.c:5449;source:5BF94.c:7628
 G00529,state,Effects::actionRequest,Native\Game\src\Effects\Runtime.c,Holds the action effect request being presented.,high,source:5BF94.c:5191;type Effects::ActionEffectRequest
-G00532,state,Effects::effectOrigin,Native\Game\src\Effects\Runtime.c,Gives the effect origin added to spawn positions for emission origin 1.,med,source:5BF94.c:7006
+G00532,state,Effects::effectOrigin,Native\Game\src\Effects\Runtime.c,Aliases the primary action request focus position used as the shared effect origin.,high,view-of:G00529+0xE0;native-field:Effects_ActionEffectRequest.position;source:146C.c:4041;source:5BF94.c:5444/6182/7006;do not allocate independent mutable storage
 G00533,state,Effects::primaryToken,Native\Game\src\Effects\Runtime.c,Holds the token of the current primary effect.,high,source:5BF94.c:5453;source:5BF94.c:5279
 G00534,state,Effects::primaryPhase,Native\Game\src\Effects\Runtime.c,"Steps the primary effect: 6 load the purge overlay, 2/8/3 load package, 4/5 run tracks, 9 reload the menu, 0 idle.",high,source:5BF94.c:5182;source:5BF94.c:5546
 G00535,state,Effects::tokenBitmaps,Native\Game\src\Effects\Runtime.c,Holds four 32-bit maps of allocated effect tokens.,high,source:5BF94.c:5572;source:5BF94.c:5590

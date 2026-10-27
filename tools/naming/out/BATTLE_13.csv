@@ -11,7 +11,7 @@ F01602,Effects::BindEffectCurves,Native\Game\src\Effects\EffectResources.c,Resol
 F01603,Effects::BindEffectPrograms,Native\Game\src\Effects\EffectResources.c,Binds the effect program block used to spawn effect instances.,high,package-block:8
 F01604,Effects::BindEffectPackageParameters,Native\Game\src\Effects\EffectResources.c,Binds the effect package parameters containing channels and instance counts.,high,package-block:9
 F01605,Effects::BindEffectTransformDefinitions,Native\Game\src\Effects\EffectResources.c,Binds the transform definitions used by effect instances.,high,package-block:10
-F01606,Effects::BindEffectTextureTables,Native\Game\src\Effects\EffectResources.c,Resolves texture descriptors and indexed texture information tables in the effect package.,high,package-block:1
+F01606,Effects::BindEffectTextureTables,Native\Game\src\Effects\TextureBindings.cpp,Resolves texture descriptors and indexed texture information tables in the effect package.,high,package-block:1;#160 bounded native tables and frame descriptors;E084 logical channel1 intentionally shares authored table0;source bytes unchanged;reentry clears stale bindings
 F01607,Effects::BindParticleAnimationTable,Native\Game\src\Effects\EffectResources.c,Binds the indexed particle sprite animation table and its entry count.,high,package-block:2
 F01608,Effects::ParticleAnimationData,Native\Game\src\Effects\EffectResources.c,Returns a particle sprite animation record from the selected effect package.,high,
 F01609,Effects::BindEffectSoundSequences,Native\Game\src\Effects\EffectResources.c,Binds the indexed sound sequence block used by effect timelines.,high,package-block:11

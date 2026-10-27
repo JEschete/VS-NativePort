@@ -11,6 +11,99 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Gravity material and canonical target origin (2026-10-26)
+
+Owner clarified that #160/#167 may be modernized for correct native behavior,
+not byte-exact legacy reproduction. Ghidra12.1.4 and its installed MCP
+extension were launched with JDK25 into ignored `build\ghidra\VSNativePort`;
+the owner opened/analyzed BATTLE.PRG. MCP confirms little-endian MIPS,
+577,828 bytes mapped80068800..800F5923, source SHA256
+ad6914c81be92a008af8dece6ad394ce39c5aa42360542b5531716ebd00bba12.
+The installed PS1 loader is not active in12.1.4; this raw-overlay static
+analysis is checked against existing original instructions, not certified
+GTE emulation or dynamic original-state evidence.
+
+Ghidra800D7A14/800D6CF0 confirms the source binder and unchanged selector.
+Among278 nonempty original effect block1 payloads,276 supply one table,
+one supplies zero and E210 supplies three. All table/descriptor extents
+validate. E084 authors channel1 for its grid/rings but supplies only table0.
+The native binding intentionally maps logical channel1 to that package's
+own authored table0 only for primary E084 with one source table. It retains
+authored frame numbers, descriptor/palette/UVs and immutable original bytes;
+there is no white texture, cross-package borrowed table or skipped draw.
+The new owned TextureBindings API receives the actual block payload extent
+from the copier, checks table/header/count/alignment/frame descriptor spans
+before publication, and clears channels absent on reentry. E210's distinct
+tables and secondary resource contexts are unchanged.
+
+Material red2 cases/8 assertions has3 failures (missing E084 channel and a
+stale table on reentry). New controls cover actual authored holds/offsets,
+ended/delayed frame retention, multi-table separation, secondary isolation,
+all290 extracted P files (including placeholder/empty files), and three
+isolated malformed descriptor/offset/frame controls, each diagnosed/exit3.
+The actual ClosedRing entry emits32 textured packets with correct CLUT/page/
+UVs and expires/releases storage on three production-list cycles.
+
+The material-only route no longer AVs, but owner observed Gravity bottom-left
+offscreen. This was not accepted as visual completion. A separate exact
+source defect explains it: G00532/D_800F5310 equals G00529/D_800F5230+0xE0,
+the request's position. Ghidra800CF0E8 copies232 bytes including that field;
+Battle_StartActionPresentation copies action.focusPosition into it.
+Native code had separate SVECTOR[109] storage inferred from an oversized
+876-byte source-symbol extent, so origin-attached transforms used zero.
+G00532 is now an8-byte field view of Effects_actionRequest.position through
+the existing ledger/generator; detached storage/module registration is gone.
+Red2/11 placement checks all fail; green2/12 verifies the canonical request
+address, absence of the stale module symbol, and actual initialized/updated
+world/view matrices at target[1200,-384,900], camera offset[-100,200,600].
+The PLG074 fixture formerly assigned conflicting origin/request values.
+It now assigns one canonical request per case, preserving every original
+anchor expected value and assertion; no runtime expectation was weakened.
+
+Owner fresh live observation after the repair: Gravity was on Ashley.
+Normal-speed frozen Debug/Release original z023-r004-d002 replays use
+private saves, original actors/events and no stat/HP/position/flag edits.
+Material-only Debug1793066888797409-0/Release1793067082710968-0 and
+target-corrected runs under `target-visual-Debug`/`target-visual-Release`
+survive1508, retain original action137 damage45/45/46/46 at1504, clear
+effect state1692 and restore ordinary control1726. A later real action84
+defeats the unchanged fixture; the runner exits2/blocked with complete
+teardown, not a passed door. Live-window captures1512/1540/1580/1620
+and bounded primitive traces remain local. The initial `--capture` image
+was taken after teardown and showed the editor; it is explicitly not active
+effect evidence. Owned-window PrintWindow captures and owner confirmation
+establish selected target placement, not all-spell artistic/reference parity.
+
+Fresh dirty-base4e89e9ae validation:
+
+- `test-native.cmd Debug "[gravity-placement]"`:2/12;
+  direct `[plg074],[gravity-placement]`:15/3,654.
+- Full Debug and Release each1,012 cases/9,578,375 assertions.
+- Port133/naming32; native-view621/0 mismatches; two copier generations
+  repeat1,031 outputs and preserve121 owned paths and unchanged baseline.
+- Focused `quality-native.cmd --files ... --tidy` and default gate0 new.
+  Required full `quality-native.cmd --tidy` is still running and is not
+  pre-claimed successful.
+- The new parser fixup initially duplicated an existing F01626 registry key;
+  the failed compile exposed that it was shadowed. It was merged into the
+  existing list, preserving auxiliary-audio extent adaptation, and a registry
+  regression now checks both. C-header interop is registered in the existing
+  scaffold predicate. No generated native/project output is hand-patched.
+
+Separate #167 observation uses the preserved pre-fix22fbc737 Release image,
+not this E084 repair. Exact persistent prefix `--door-from z040-r008-d000
+--door-limit132 --frames3600 --speed64 --scripted` completes all132 cases:
+96 passed/36 blocked,0 engine errors, no AV/malformed packet. Final
+z048-r006-d000 remains honestly blocked by authored event budget, as its
+long standalone chain previously passed; no threshold is weakened. Local
+session1793066888873758-0 retains per-case results. This does not identify
+the historical ACFD56-word packet producer or justify a speculative #167
+code change.
+
+Evidence and retained scripts are under ignored `build\quality\issue160-native`.
+No original assets, screenshots, dumps or Ghidra databases are committed.
+#160 stays open until this coherent repair is published and exact CI passes.
+
 ## Current separate scene observations and blockers (2026-10-26)
 
 Both observations below use frozen22fbc737 executable/PDB/DLL sets with

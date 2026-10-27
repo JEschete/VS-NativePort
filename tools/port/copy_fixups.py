@@ -534,6 +534,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "bind native stream assets instead of a PS1 array-offset alias"),
     ],
     "F01626": [
+        ("Effects_BindEffectTextureTables((Effects_PackageBlock1*)arg0->blocks);",
+         "Effects_BindEffectTextureTables(arg0->blocks, "
+         "(unsigned)(meta & 0xFFFF) - sizeof(arg0->meta));",
+         "pass the actual block payload extent to the native material binding validator"),
         ("Effects_BindEffectAuxiliarySoundBank(arg0->blocks);",
          "Effects_BindEffectAuxiliarySoundBank(\n"
          "                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));",

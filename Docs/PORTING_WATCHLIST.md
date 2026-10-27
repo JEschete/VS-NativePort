@@ -42,6 +42,12 @@ globals are reloaded.
 
 The copied code compiles for x64, but some of it assumes 32-bit pointers or fixed struct sizes:
 
+- **Interior symbols are not independent ownership.** G00532 at800F5310
+  aliases G00529's action-request position at+0xE0. Its inferred876-byte
+  unsized-array span crossed following globals; allocating it independently
+  left origin-attached effects at world zero. Preserve the canonical8-byte
+  field view, actual request producer and repeat-entry placement (#160).
+  Valid texture/material binding alone does not establish spatial fidelity.
 - **Opaque views can hide pointer widening.** F00979's palette view omitted a
   gimmick model pointer and kept PS1 offsets300/332 while the native owner used
   304/336. Shifting source and destination together made part of the CPU array

@@ -1371,6 +1371,12 @@
     <ClInclude Include="src\Effects\Templates\TrailUpdate.inl">
       <Filter>src\Effects\Templates</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\TextureBindings.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Effects\TextureBindings.h">
+      <Filter>src\Effects</Filter>
+    </ClInclude>
     <ClCompile Include="src\Effects\Timeline.c">
       <Filter>src\Effects</Filter>
     </ClCompile>

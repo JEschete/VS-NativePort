@@ -158,6 +158,7 @@
 #include "Effects/Templates/TrailRender.h"
 #include "Effects/Templates/TrailTarget.h"
 #include "Effects/Templates/TrailUpdate.h"
+#include "Effects/TextureBindings.h"
 #include "Effects/Timeline.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
@@ -2569,7 +2570,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F5230u, 232u, (void*)&Effects_actionRequest, sizeof Effects_actionRequest, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5234u, 64u, (void*)&Battle_legacyUnusedTargetBlock, sizeof Battle_legacyUnusedTargetBlock, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5238u, 4u, (void*)&Battle_legacyUnreferencedByte, sizeof Battle_legacyUnreferencedByte, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F5310u, 876u, (void*)&Effects_effectOrigin, sizeof Effects_effectOrigin, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5318u, 4u, (void*)&Effects_primaryToken, sizeof Effects_primaryToken, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F531Cu, 4u, (void*)&Effects_primaryPhase, sizeof Effects_primaryPhase, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5320u, 860u, (void*)&Effects_tokenBitmaps, sizeof Effects_tokenBitmaps, 1u, 1u},

@@ -9,6 +9,27 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #160 now has a locally verified native material and target-placement repair,
+  following owner authorization for behavioral modernization and fresh live
+  confirmation that Gravity is on Ashley. E084 explicitly maps its missing
+  logical channel1 to its own sole authored source table0, with bounded
+  frame/descriptor validation and stale-channel clearing. The offscreen
+  placement was independently traced to G00532: original800F5310 is
+  G00529.position at+0xE0, not independent SVECTOR[109] storage. The existing
+  field-view generator now preserves that canonical8-byte alias.
+  Material red2/8 has3 failures; placement red2/11 all fail before repair.
+  Full Debug/Release1012/9,578,375 each,133 port/32 naming,621 fields/0
+  mismatches and two stable generations1,031 outputs/121 owned paths pass.
+  Focused/default quality0 new; required full tidy is still running.
+  Normal-speed original Gravity renders beyond1508, clears1692, restores
+  control1726 and retains45/45/46/46 damage; later fixture defeat is a
+  blocked door result, not a passed edge. Owner visual acceptance is recorded
+  on #160; publication/exact CI remains the closure gate.
+  Ghidra12.1.4/MCP is now live on analyzed BATTLE.PRG in ignored build\ghidra.
+  Separate #167's exact132-case persistent Release prefix completes with
+  96 passed/36 blocked and0 engine errors on the preserved22fbc737 image;
+  no malformed producer or causal fix is inferred.
+  See the [Gravity checkpoint](HANDOFF_HISTORY.md#gravity-material-and-canonical-target-origin-2026-10-26).
 - #42 is closed after final source98d38089 and evidence011eecc3 both received
   exact green CI40428688667/40429529689. Separate non-MA #197 now repairs
   the newly inventoried unchanged-source header/save quality findings:
