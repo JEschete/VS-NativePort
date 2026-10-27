@@ -19,10 +19,17 @@ verification of the current worktree.
   Focused tidy3 existing/0 new, save19/1,426 and full Debug/Release
   1002/9,572,050 each pass;131 port controls and two stable generations
   preserve119 owned paths/1,028 outputs and the unchanged quality baseline.
-  The repeat full-tidy run is still in progress; #197 stays open until that
-  result and exact publication CI are reconciled. #160's original E084
-  table1 binding and #167's historical producer/history remain unresolved;
-  no texture/default/packet-skip fallback is authorized.
+  Repeat full tidy reached304 existing/10 new; the ten residuals were four
+  pre-existing test files. Those are now repaired with original byte checks,
+  fixture values and assertion counts preserved. Fresh four-file tidy0/0
+  plus exact-source incremental verification leaves294 existing/0 new,
+  baseline unchanged. Production22fbc737 has exact green40431257034;
+  final test-cleanup publication/CI remains the #197 closure gate.
+  #160 still AVs at1508 in both current builds; original E084 table1
+  binding/history is the next required observation. Portable reference
+  cards/states are empty and Ghidra MCP is unavailable. #167's current
+  standalone scene chain passes; the historical producer remains unresolved.
+  No texture/default/packet-skip fallback is authorized.
 - #42's last seven entries are resolved locally: F01805/F01806 native
   navigation (`15d290bc`, exact green40421506975); F00745/F00747 bounded room
   rendering (owner checkpoint `506f750b`, exact green40425198955); F01769

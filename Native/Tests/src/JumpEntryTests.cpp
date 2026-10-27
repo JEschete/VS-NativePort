@@ -77,7 +77,7 @@ void CheckGroundedSnapshot(Actors_ActorRecord& actor) {
   CHECK(actor.instance.supportOffset == expected.instance.supportOffset);
   CHECK(actor.instance.reserved50 == expected.instance.reserved50);
   CHECK(actor.instance.previousFacing == expected.instance.previousFacing);
-  CHECK(std::memcmp(&actor, &expected, sizeof(actor)) == 0);
+  CHECK(Bytes(actor) == Bytes(expected));
 }
 
 struct JumpFixture {

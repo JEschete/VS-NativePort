@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <string>
@@ -35,11 +36,13 @@ struct TextTransitionFixture {
       std::to_array(Render_kGlyphPixelExpansion);
   char font_table = Render_fontTableSelect;
   int frame_buffer = Render_frameBuf;
-  int buttons = Input_buttonsPressed.allButtons;
+  decltype(Input_buttonsPressed.allButtons) buttons =
+      Input_buttonsPressed.allButtons;
   RECT target{32, 32, kWidth, kHeight};
   RECT atlas{832, 108, 63, 12};
-  std::vector<u_short> saved_target = std::vector<u_short>(kWidth * kHeight);
-  std::vector<u_short> saved_atlas = std::vector<u_short>(63 * 12);
+  std::vector<u_short> saved_target =
+      std::vector<u_short>(std::size_t{kWidth} * kHeight);
+  std::vector<u_short> saved_atlas = std::vector<u_short>(std::size_t{63} * 12);
   Menu_TextBoxState box{};
 
   TextTransitionFixture() {
@@ -56,7 +59,7 @@ struct TextTransitionFixture {
     Glyph(10, 2);
     Glyph(11, 3);
     Glyph(12, 4);
-    std::vector<u_short> pixels(kWidth * kHeight, kBackground);
+    std::vector<u_short> pixels(std::size_t{kWidth} * kHeight, kBackground);
     LoadImage(&target, reinterpret_cast<u_long*>(pixels.data()));
     Render_frameBuf = 0;
     Input_buttonsPressed.allButtons = 0;
@@ -87,8 +90,8 @@ struct TextTransitionFixture {
                   static_cast<std::int16_t>(glyph / 21 * 12), 3, 12};
     std::array<u_short, 36> pixels{};
     for (unsigned row = 0; row < 12; ++row) {
-      pixels[row * 3] = static_cast<u_short>(index * 0x1111);
-      pixels[row * 3 + 1] = static_cast<u_short>(index * 0x11);
+      pixels[std::size_t{row} * 3] = static_cast<u_short>(index * 0x1111);
+      pixels[std::size_t{row} * 3 + 1] = static_cast<u_short>(index * 0x11);
     }
     LoadImage(&location, reinterpret_cast<u_long*>(pixels.data()));
   }
@@ -98,7 +101,7 @@ struct TextTransitionFixture {
     INFO(std::string("Encoded transition bytes: ") + std::to_string(Size));
     box.string = reinterpret_cast<char*>(text.data());
     Render_BlendTextBoxIntoFramebuffer(&box, 0x10000);
-    std::vector<u_short> pixels(kWidth * kHeight);
+    std::vector<u_short> pixels(std::size_t{kWidth} * kHeight);
     StoreImage(&target, reinterpret_cast<u_long*>(pixels.data()));
     return pixels;
   }
@@ -143,5 +146,5 @@ TEST_CASE("Framebuffer transition newlines use the encoded control range",
   const auto pixels = fixture.Draw(text);
   CHECK(pixels[0] == 0x001F);
   CHECK(pixels[6] == kBackground);
-  CHECK(pixels[13 * kWidth] == 0x03E0);
+  CHECK(pixels[std::size_t{13} * kWidth] == 0x03E0);
 }

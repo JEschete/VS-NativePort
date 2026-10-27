@@ -63,6 +63,14 @@ EncounterSetup TestSetup(int count = 1, int enemy = 0) {
   return setup;
 }
 
+void CheckExternalEventHandoff(const EncounterSetup& setup) {
+  CHECK_FALSE(VS::Game::UsesEncounterRoomEvents(setup, false));
+  CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, false));
+  CHECK(VS::Game::UsesEncounterRoomEvents(setup, true));
+  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, true));
+  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 19, 0, true));
+}
+
 void EditorPress(VS::combat_lab::Editor& editor, std::uint32_t button,
                  int times = 1) {
   VS::Input::PadState pad{};
@@ -778,11 +786,7 @@ TEST_CASE(
   CHECK_FALSE(VS::Game::UsesEncounterRoomEvents(setup, true));
   CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, true));
   setup.external_event = 80;
-  CHECK_FALSE(VS::Game::UsesEncounterRoomEvents(setup, false));
-  CHECK(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, false));
-  CHECK(VS::Game::UsesEncounterRoomEvents(setup, true));
-  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 9, 0, true));
-  CHECK_FALSE(VS::Game::UsesConfiguredEncounterPlacements(setup, 19, 0, true));
+  CheckExternalEventHandoff(setup);
   setup.external_event.reset();
   setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
   CHECK(VS::Game::UsesEncounterRoomEvents(setup, false));

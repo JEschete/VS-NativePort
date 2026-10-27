@@ -11,6 +11,49 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Current separate scene observations and blockers (2026-10-26)
+
+Both observations below use frozen22fbc737 executable/PDB/DLL sets with
+private save directories, after exact green Source Quality40431257034.
+Original assets/health/story state are not modified; Lab uses authored
+room events and original dialogue-confirmation inputs.
+
+- #167/#149/#151: `VS.CombatLab.exe --data <Native\data> --save-dir <private>
+  --door-transitions --door-case z048-r006-d000 --frames 36000 --speed 8
+  --scripted`. Debug1793063834761061-0 and Release1793063834657676-0 both
+  align zone32/room17/scene30 at ticks979..6216, restore40/21 ordinary
+  control13320, meet the unchanged120-tick gate13440 and teardown13452.
+  Each records280 dialogue confirmations, a passed loader_entry_event
+  result,0 engine errors, host exit0 and complete trace. Debug exe hash
+  736a233584bccd934de5c3b09ad823e5e95e98f98875571939b0b7b112bc119d;
+  Release435c8fbebd733195a86a56fa6a8833c1c8575f7169c562a12ba9d34c5d6260c8.
+  These reproduce current standalone success, not the historical ACFD
+  persistent-image malformed56-word packet. The named historical frozen
+  artifacts are absent from current build\quality; a matching-image stack/
+  packet producer or a current persistent-history reproduction is still
+  needed. #167 stays open; no inferred #184/#185 shared cause or skip fix.
+- #160: the same hosts with `--door-case z023-r004-d002 --frames 4800
+  --speed 16` both AV at1508. Debug1793064516424253-0 and
+  Release1793064516431171-0 retain primary request84, definition16,
+  parameter101E, table1/program1/count1, cursor4/word0002001D, null
+  previous texture and the0x76 read at ClosedRing.inl:230. This is fresh
+  evidence that #42/#197 did not repair the authored-selector/binding
+  problem. The original-runtime table1 binding/history during action137
+  remains the discriminating observation; static/native data does not
+  justify subtracting a selector, aliasing a table or supplying a texture.
+  Portable DuckStation savestate/memcard directories currently have no
+  files; its installed copy was not run/reconfigured. Ghidra MCP's backend
+  remains unavailable at localhost8080. No native effect code was changed.
+
+Logs/manifests/results remain under
+`build\quality\issue42-final\nonma167-Debug` and `nonma167-Release`; later
+E084 sessions coexist with the successful scene-chain sessions. Per-issue
+comments retain the actual outcomes and limits. #18 still includes
+campaign/NG+ and compatibility-retirement acceptance; excluded MA work is
+not silently completed. #148's full semantic sweep and #149/#151's
+exhaustive scene/door coverage also remain open, not inferred from these
+selected runs.
+
 ## Separate whole-tree header/save quality repair (2026-10-26)
 
 #42 closed after final source98d38089 and evidence011eecc3 received exact
@@ -56,6 +99,28 @@ Fresh commands/evidence under `build\quality\issue42-final`:
   both its text output and JSON report as `quality197-full-tidy.txt` and
   `quality197-full-report.json`. This checkpoint does not pre-claim a clean
   full-tree result or issue completion.
+
+Production repair22fbc737 has exact green40431257034. The repeat full tidy
+subsequently completed with304 actionable/10 new, all ten in four unchanged
+test files: ActorAttachmentTests, JumpEntryTests, EncounterTests and
+TextTransitionTests. Whole-object memcmp checks become explicit byte-array
+snapshots (retaining every byte), an existing snapshot helper is reused,
+fixture extents/indexing widen before multiplication, and controller buttons
+retain their original unsigned type. An oversized event test moves the same
+handoff assertions into a bounded helper. No expected values/assertions are
+removed; full Debug/Release remain1,002/9,572,050 each.
+
+The smallest covering recheck is four-file tidy:0 findings/0 new. The retained
+full-tree JSON plus the fresh four-file JSON are verified using the existing
+quality Finding/new_findings API and the unchanged baseline. `git diff
+22fbc737 --name-only -- Native` must equal those exact four test paths, with
+no untracked native sources, before retaining any full-tree diagnostics.
+The resulting `quality197-incremental-report.json` records294 existing/0 new
+and baseline SHA256
+a205dd02dd039ded00ff4a0d99160cc9c1966b9609c263add4ce892b97faad24.
+This is explicit source-checked incremental verification, not a claim that
+the earlier full command exited0 or a baseline refresh. Final fast gate is
+0/0; exact final test-cleanup publication/CI is the remaining closure gate.
 
 ## Final seven assembly-gap resolution (2026-10-26)
 

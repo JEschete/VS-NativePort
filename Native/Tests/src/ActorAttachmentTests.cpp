@@ -63,12 +63,14 @@ TEST_CASE("Attached props borrow the actual resident parent bone matrix",
 TEST_CASE("Scene prop survives parent release without a fabricated camera",
           "[actor-attachment]") {
   AttachmentFixture fixture;
-  Actors_ActorRecord before;
-  std::memcpy(&before, &fixture.child, sizeof(before));
+  std::array<unsigned char, sizeof(Actors_ActorRecord)> before{};
+  std::array<unsigned char, sizeof(Actors_ActorRecord)> after{};
+  std::memcpy(before.data(), &fixture.child, before.size());
   REQUIRE(Actors_ResolveAttachmentParentMatrix(&fixture.child) != nullptr);
   Actors_actorRecords[2] = nullptr;
   CHECK(Actors_ResolveAttachmentParentMatrix(&fixture.child) == nullptr);
-  CHECK(std::memcmp(&before, &fixture.child, sizeof(before)) == 0);
+  std::memcpy(after.data(), &fixture.child, after.size());
+  CHECK(before == after);
   CHECK(Actors_actorRecords[7] == &fixture.child);
 
   Actors_ActorRecord replacement{};
