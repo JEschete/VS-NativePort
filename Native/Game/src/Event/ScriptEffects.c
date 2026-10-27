@@ -46,10 +46,10 @@ u_char Event_isEffectWaitPending;
 void* Event_vibrationPatternBuffer;
 
 // decomp: BATTLE.PRG func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454)
-intptr_t Event_CommandPlayActorEffect(u_char* arg0, short arg1)
+intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
 {
-    const int effect = Core_Memory_ReadUnalignedShort(arg0 + 1);
-    const u_short selector = Core_Memory_ReadUnalignedShort(arg0 + 3);
+    const int effect = Core_Memory_ReadUnalignedShort(instruction + 1);
+    const u_short selector = Core_Memory_ReadUnalignedShort(instruction + 3);
     const unsigned referenceType = selector >> 12;
     const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;
     const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;
@@ -65,9 +65,9 @@ intptr_t Event_CommandPlayActorEffect(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BA90C (src/BATTLE/BATTLE.PRG/4A0A8.c:2461)
-intptr_t Event_CommandAdvanceEffectStage(u_char* arg0, short arg1)
+intptr_t Event_CommandAdvanceEffectStage(u_char* instruction, short thread_index)
 {
-    Effects_ReleaseScriptedEffectTrigger(arg0[1]);
+    Effects_ReleaseScriptedEffectTrigger(instruction[1]);
     if (Event_skipState == 2) {
         Effects_ClearPrimaryEffects();
     }
@@ -75,11 +75,11 @@ intptr_t Event_CommandAdvanceEffectStage(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BA94C (src/BATTLE/BATTLE.PRG/4A0A8.c:2470)
-intptr_t Event_CommandWaitEffectState(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitEffectState(u_char* instruction, short thread_index)
 {
-    if ((Event_skipState == 2) && ((arg0[1] == 0) || (arg0[1] == 5))) {
+    if ((Event_skipState == 2) && ((instruction[1] == 0) || (instruction[1] == 5))) {
         if (Event_isEffectWaitPending != 0) {
-            if (Effects_ScriptedEffectPlaybackState() == arg0[1]) {
+            if (Effects_ScriptedEffectPlaybackState() == instruction[1]) {
                 Event_isEffectWaitPending = 0;
                 return 0;
             }
@@ -89,21 +89,21 @@ intptr_t Event_CommandWaitEffectState(u_char* arg0, short arg1)
         }
         return 1;
     }
-    return Effects_ScriptedEffectPlaybackState() != arg0[1];
+    return Effects_ScriptedEffectPlaybackState() != instruction[1];
 }
 
 // decomp: BATTLE.PRG func_800BAA04 (src/BATTLE/BATTLE.PRG/4A0A8.c:2487)
-intptr_t Event_CommandYieldEffectRelease(u_char* arg0, short arg1)
+intptr_t Event_CommandYieldEffectRelease(u_char* instruction, short thread_index)
 {
     Core_NoOperation();
     return (Event_skipState == 2) * 4;
 }
 
 // decomp: BATTLE.PRG func_800BAA34 (src/BATTLE/BATTLE.PRG/4A0A8.c:2493)
-intptr_t Event_CommandWaitEffectContinuation(u_char* arg0, short arg1) { return Effects_IsScriptedEffectTriggerReady() != 1; }
+intptr_t Event_CommandWaitEffectContinuation(u_char* instruction, short thread_index) { return Effects_IsScriptedEffectTriggerReady() != 1; }
 
 // decomp: BATTLE.PRG func_800BAA58 (src/BATTLE/BATTLE.PRG/4A0A8.c:2495)
-intptr_t Event_CommandWaitEffectRelease(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitEffectRelease(u_char* instruction, short thread_index)
 {
     if (Event_isEffectWaitPending == 0) {
         Effects_ClearPrimaryEffects();
@@ -116,16 +116,16 @@ intptr_t Event_CommandWaitEffectRelease(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BAACC (src/BATTLE/BATTLE.PRG/4A0A8.c:2507)
-intptr_t Event_CommandMarkEffectStageReady(u_char* arg0, short arg1)
+intptr_t Event_CommandMarkEffectStageReady(u_char* instruction, short thread_index)
 {
-    Effects_RequeueEffectTrack(arg0[1]);
+    Effects_RequeueEffectTrack(instruction[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAB14 (src/BATTLE/BATTLE.PRG/4A0A8.c:2519)
-intptr_t Event_CommandPlayVibrationPattern(u_char* arg0, short arg1)
+intptr_t Event_CommandPlayVibrationPattern(u_char* instruction, short thread_index)
 {
-    short a0 = arg0[1];
+    short a0 = instruction[1];
     if (a0 == 0xFF) {
         Input_StopVibrationPatterns(0, 2);
     } else {
@@ -142,20 +142,20 @@ intptr_t Event_CommandPlayVibrationPattern(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BABCC (src/BATTLE/BATTLE.PRG/4A0A8.c:2537)
-intptr_t Event_CommandSetActorTrail(u_char* arg0, short arg1)
+intptr_t Event_CommandSetActorTrail(u_char* instruction, short thread_index)
 {
-    short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 2));
+    short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 2));
 
-    if (arg0[1] != 0) {
-        Effects_StartWeaponTrail(temp_v0, arg0[4]);
+    if (instruction[1] != 0) {
+        Effects_StartWeaponTrail(temp_v0, instruction[4]);
     } else {
-        Effects_FadeWeaponTrails(temp_v0, arg0[4]);
+        Effects_FadeWeaponTrails(temp_v0, instruction[4]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB288 (src/BATTLE/BATTLE.PRG/4A0A8.c:2733)
-intptr_t Event_CommandWaitScreenEffectLoad(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitScreenEffectLoad(u_char* instruction, short thread_index)
 {
     if ((Effects_screenEffectOverlay != NULL) && (Effects_screenEffectOverlay->loading != 0)) {
         return 1;
@@ -164,33 +164,33 @@ intptr_t Event_CommandWaitScreenEffectLoad(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BB2B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2741)
-intptr_t Event_CommandSetScreenDistortion(u_char* arg0, short arg1)
+intptr_t Event_CommandSetScreenDistortion(u_char* instruction, short thread_index)
 {
-    Effects_ScreenDistortion_SetFeedbackLayer(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    Effects_ScreenDistortion_SetFeedbackLayer(Core_Memory_ReadUnalignedShort(instruction + 1));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB2E4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2747)
-intptr_t Event_CommandLoadScreenEffects(u_char* arg0, short arg1)
+intptr_t Event_CommandLoadScreenEffects(u_char* instruction, short thread_index)
 {
     Effects_AcquireScreenEffectOverlay();
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB304 (src/BATTLE/BATTLE.PRG/4A0A8.c:2753)
-intptr_t Event_CommandReservedScreenEffect(u_char* arg0, short arg1) { return 0; }
+intptr_t Event_CommandReservedScreenEffect(u_char* instruction, short thread_index) { return 0; }
 
 // decomp: BATTLE.PRG func_800BB30C (src/BATTLE/BATTLE.PRG/4A0A8.c:2755)
-intptr_t Event_CommandFreeScreenEffects(u_char* arg0, short arg1)
+intptr_t Event_CommandFreeScreenEffects(u_char* instruction, short thread_index)
 {
     Effects_ReleaseScreenEffectOverlay();
     return (Event_skipState == 2) * 4;
 }
 
 // decomp: BATTLE.PRG func_800BB4F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2821)
-intptr_t Event_CommandSetScanlineOverlay(u_char* arg0, short arg1)
+intptr_t Event_CommandSetScanlineOverlay(u_char* instruction, short thread_index)
 {
-    Event_isScanlineOverlayEnabled = arg0[1];
+    Event_isScanlineOverlayEnabled = instruction[1];
     return 0;
 }
 

@@ -18,7 +18,7 @@
 u_char Event_kDialogPlacementOrder[324]; /* contents: module image (ModuleData.c) */
 
 // decomp: BATTLE.PRG vs_battle_script_initTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:672)
-intptr_t Event_ScriptInitDialogBox(u_char* script, short arg1 __attribute__((unused)))
+intptr_t Event_ScriptInitDialogBox(u_char* script, short thread_index __attribute__((unused)))
 {
     Menu_TextBoxState* box;
     short temp_v0_4;
@@ -51,7 +51,7 @@ intptr_t Event_ScriptInitDialogBox(u_char* script, short arg1 __attribute__((unu
 }
 
 // decomp: BATTLE.PRG vs_battle_script_showTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:707)
-intptr_t Event_ScriptShowDialogText(u_char* script, short arg1 __attribute__((unused)))
+intptr_t Event_ScriptShowDialogText(u_char* script, short thread_index __attribute__((unused)))
 {
     int temp_v0;
 
@@ -77,9 +77,9 @@ intptr_t Event_ScriptShowDialogText(u_char* script, short arg1 __attribute__((un
 }
 
 // decomp: BATTLE.PRG vs_battle_script_dismissTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:733)
-intptr_t Event_ScriptDismissDialogBox(u_char* arg0, short arg1)
+intptr_t Event_ScriptDismissDialogBox(u_char* instruction, short thread_index)
 {
-    Menu_DismissTextBox(arg0[1]);
+    Menu_DismissTextBox(instruction[1]);
     return 0;
 }
 
@@ -132,7 +132,7 @@ int Event_CalcDialogAnchorPlacement(
 }
 
 // decomp: BATTLE.PRG func_800B6D48 (src/BATTLE/BATTLE.PRG/4A0A8.c:794)
-intptr_t Event_ScriptInitActorDialogBox(u_char* script, short arg1 __attribute__((unused)))
+intptr_t Event_ScriptInitActorDialogBox(u_char* script, short thread_index __attribute__((unused)))
 {
     Event_DialogPlacement placements[4];
     SVECTOR origin;
@@ -177,30 +177,30 @@ intptr_t Event_ScriptInitActorDialogBox(u_char* script, short arg1 __attribute__
 }
 
 // decomp: BATTLE.PRG func_800B6F8C (src/BATTLE/BATTLE.PRG/4A0A8.c:838)
-intptr_t Event_ScriptWaitForDialogDismissal(u_char* arg0, short arg1)
+intptr_t Event_ScriptWaitForDialogDismissal(u_char* instruction, short thread_index)
 {
-    return Menu_DismissTextBox(arg0[1]) != 0;
+    return Menu_DismissTextBox(instruction[1]) != 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setStringContextInt (src/BATTLE/BATTLE.PRG/4A0A8.c:916)
-intptr_t Event_ScriptSetDialogInteger(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetDialogInteger(u_char* instruction, short thread_index)
 {
-    int temp_s0 = Core_Memory_ReadUnalignedShort(arg0 + 2) & 0x3FF;
-    switch (arg0[3] >> 6) {
+    int temp_s0 = Core_Memory_ReadUnalignedShort(instruction + 2) & 0x3FF;
+    switch (instruction[3] >> 6) {
     case 0:
-        Battle_stringContext.integers[arg0[1]] = State_ScriptFlag(temp_s0);
+        Battle_stringContext.integers[instruction[1]] = State_ScriptFlag(temp_s0);
         break;
     case 1:
-        Battle_stringContext.integers[arg0[1]] =
+        Battle_stringContext.integers[instruction[1]] =
             (signed char)State_ScriptFlag(temp_s0);
         break;
     case 2:
-        Battle_stringContext.integers[arg0[1]] =
+        Battle_stringContext.integers[instruction[1]] =
             State_ScriptFlag(temp_s0)
             | ((State_ScriptFlag(temp_s0 + 1)) << 8);
         break;
     case 3:
-        Battle_stringContext.integers[arg0[1]] =
+        Battle_stringContext.integers[instruction[1]] =
             (short)(State_ScriptFlag(temp_s0)
                     | ((State_ScriptFlag(temp_s0 + 1)) << 8));
         break;
@@ -209,14 +209,14 @@ intptr_t Event_ScriptSetDialogInteger(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7358 (src/BATTLE/BATTLE.PRG/4A0A8.c:941)
-intptr_t Event_ScriptSetDialogTransitionDuration(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetDialogTransitionDuration(u_char* instruction, short thread_index)
 {
-    Menu_TextBox(arg0[1] >> 5)->openDuration = arg0[1] & 0x1F;
+    Menu_TextBox(instruction[1] >> 5)->openDuration = instruction[1] & 0x1F;
     return 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_script_selectTextBox (src/BATTLE/BATTLE.PRG/4A0A8.c:947)
-intptr_t Event_ScriptSelectDialogChoice(u_char* script, short arg1 __attribute__((unused)))
+intptr_t Event_ScriptSelectDialogChoice(u_char* script, short thread_index __attribute__((unused)))
 {
     if (Event_skipState == 2) {
         return 0;
@@ -237,14 +237,14 @@ intptr_t Event_ScriptSelectDialogChoice(u_char* script, short arg1 __attribute__
 }
 
 // decomp: BATTLE.PRG func_800B9564 (src/BATTLE/BATTLE.PRG/4A0A8.c:1897)
-intptr_t Event_ScriptSetDialogSpeaker(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetDialogSpeaker(u_char* instruction, short thread_index)
 {
     Menu_TextBoxState* temp_s1;
     u_short temp_s0;
     int var_a0;
 
-    temp_s0 = Core_Memory_ReadUnalignedShort(arg0 + 2);
-    temp_s1 = Menu_TextBox(arg0[1] & 0xF);
+    temp_s0 = Core_Memory_ReadUnalignedShort(instruction + 2);
+    temp_s1 = Menu_TextBox(instruction[1] & 0xF);
 
     if (temp_s0 < 0x2000) {
         var_a0 = Event_ResolveScriptActorReference(temp_s0);
@@ -252,7 +252,7 @@ intptr_t Event_ScriptSetDialogSpeaker(u_char* arg0, short arg1)
         var_a0 = 0x20;
     }
     temp_s1->flags.speakerTexture = var_a0;
-    temp_s1->opaque2E = arg0[1] >> 4;
+    temp_s1->opaque2E = instruction[1] >> 4;
     return 0;
 }
 

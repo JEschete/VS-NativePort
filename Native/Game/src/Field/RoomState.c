@@ -47,7 +47,7 @@ void Field_MarkCurrentRoomVisited(void)
 }
 
 // decomp: BATTLE.PRG func_8007BBB8 (src/BATTLE/BATTLE.PRG/146C.c:8509)
-void Field_ClearSavedRoomEnemies(int arg0, int arg1) { Actors_ClearCachedRoomActorStates(arg0, arg1); }
+void Field_ClearSavedRoomEnemies(int mapId, int zoneId) { Actors_ClearCachedRoomActorStates(mapId, zoneId); }
 
 // decomp: BATTLE.PRG func_8007BF2C (src/BATTLE/BATTLE.PRG/146C.c:8619)
 void Field_ShowPrimaryRoomGeometry(void) { Field_EnableOwnedRoomRendering(0); }

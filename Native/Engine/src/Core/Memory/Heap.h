@@ -22,6 +22,6 @@ void Core_Memory_FreeFromHighEnd(void* block);
 void Core_Memory_FreeFromLowEnd(void* block);
 void* Core_Memory_AllocateFromHighEnd(u_int size);
 void* Core_Memory_AllocateFromLowEnd(u_int size);
-void Core_Memory_InitializeHeap(Core_HeapBlockHeader* node, u_int value);
+void Core_Memory_InitializeHeap(Core_HeapBlockHeader* node, u_int byte_count);
 
 #endif // VS_CORE_MEMORY_HEAP_H_DECLS

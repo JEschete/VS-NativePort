@@ -12,16 +12,16 @@
 #include "Event/Dialog.h"
 
 extern u_char Event_kDialogPlacementOrder[324];
-intptr_t Event_ScriptInitDialogBox(u_char* script, short arg1 __attribute__((unused)));
-intptr_t Event_ScriptShowDialogText(u_char* script, short arg1 __attribute__((unused)));
-intptr_t Event_ScriptDismissDialogBox(u_char* arg0, short arg1);
+intptr_t Event_ScriptInitDialogBox(u_char* script, short thread_index __attribute__((unused)));
+intptr_t Event_ScriptShowDialogText(u_char* script, short thread_index __attribute__((unused)));
+intptr_t Event_ScriptDismissDialogBox(u_char* instruction, short thread_index);
 int Event_CalcDialogAnchorPlacement(
     SVECTOR* origin, u_char* script, Event_DialogPlacement* result, u_char direction);
-intptr_t Event_ScriptInitActorDialogBox(u_char* script, short arg1 __attribute__((unused)));
-intptr_t Event_ScriptWaitForDialogDismissal(u_char* arg0, short arg1);
-intptr_t Event_ScriptSetDialogInteger(u_char* arg0, short arg1);
-intptr_t Event_ScriptSetDialogTransitionDuration(u_char* arg0, short arg1);
-intptr_t Event_ScriptSelectDialogChoice(u_char* script, short arg1 __attribute__((unused)));
-intptr_t Event_ScriptSetDialogSpeaker(u_char* arg0, short arg1);
+intptr_t Event_ScriptInitActorDialogBox(u_char* script, short thread_index __attribute__((unused)));
+intptr_t Event_ScriptWaitForDialogDismissal(u_char* instruction, short thread_index);
+intptr_t Event_ScriptSetDialogInteger(u_char* instruction, short thread_index);
+intptr_t Event_ScriptSetDialogTransitionDuration(u_char* instruction, short thread_index);
+intptr_t Event_ScriptSelectDialogChoice(u_char* script, short thread_index __attribute__((unused)));
+intptr_t Event_ScriptSetDialogSpeaker(u_char* instruction, short thread_index);
 
 #endif // VS_EVENT_SCRIPTDIALOG_H_DECLS

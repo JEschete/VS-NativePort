@@ -33,27 +33,27 @@ char Event_scriptControlledActors[17];
 char Event_skipState;
 
 // decomp: BATTLE.PRG func_800B7428 (src/BATTLE/BATTLE.PRG/4A0A8.c:967)
-intptr_t Event_ScriptResetActorGroupState(u_char* arg0, short arg1)
+intptr_t Event_ScriptResetActorGroupState(u_char* instruction, short thread_index)
 {
     Event_ActorSelection sp10;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(arg0 + 1), &sp10);
+    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &sp10);
     while (1) {
         int temp_a0 = Event_NextScriptSelectedActor(&sp10);
         if (temp_a0 == 1) {
             break;
         }
-        Actors_InterruptActorAction(temp_a0, arg0[3]);
+        Actors_InterruptActorAction(temp_a0, instruction[3]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B7490 (src/BATTLE/BATTLE.PRG/4A0A8.c:983)
-intptr_t Event_ScriptStoreActorTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptStoreActorTile(u_char* instruction, short thread_index)
 {
     u_char position[12];
-    u_short actor = Core_Memory_ReadUnalignedShort(arg0 + 1);
-    u_short flag = Core_Memory_ReadUnalignedShort(arg0 + 3);
+    u_short actor = Core_Memory_ReadUnalignedShort(instruction + 1);
+    u_short flag = Core_Memory_ReadUnalignedShort(instruction + 3);
 
     if (actor & 0x1000) {
         actor &= 0x1F;
@@ -76,27 +76,27 @@ intptr_t Event_ScriptStoreActorTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7574 (src/BATTLE/BATTLE.PRG/4A0A8.c:1009)
-intptr_t Event_ScriptSpawnActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptSpawnActor(u_char* instruction, short thread_index)
 {
     u_char sp10[12];
 
-    sp10[0] = arg0[5];
-    sp10[1] = arg0[6];
-    sp10[2] = arg0[7];
-    sp10[3] = arg0[8];
-    Actors_QueueScriptedActorSpawn(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
-        Core_Memory_ReadUnalignedShort(arg0 + 3), (Field_ActorPlacement*)(sp10));
+    sp10[0] = instruction[5];
+    sp10[1] = instruction[6];
+    sp10[2] = instruction[7];
+    sp10[3] = instruction[8];
+    Actors_QueueScriptedActorSpawn(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+        Core_Memory_ReadUnalignedShort(instruction + 3), (Field_ActorPlacement*)(sp10));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B75F4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1022)
-intptr_t Event_ScriptNavigateActorToTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptNavigateActorToTile(u_char* instruction, short thread_index)
 {
     SVECTOR sp10;
-    u_short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    sp10.vx = (arg0[3] << 7) + 0x40;
+    u_short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    sp10.vx = (instruction[3] << 7) + 0x40;
     sp10.vy = 0;
-    sp10.vz = (arg0[5] << 7) + 0x40;
+    sp10.vz = (instruction[5] << 7) + 0x40;
     if (Event_skipState == 2) {
         sp10.pad = -0x8000;
         Actors_TranslateActorToAtRate(temp_v0, &sp10, 0);
@@ -109,15 +109,15 @@ intptr_t Event_ScriptNavigateActorToTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B76A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1040)
-intptr_t Event_ScriptPlayActorAnimation(u_char* arg0, short arg1)
+intptr_t Event_ScriptPlayActorAnimation(u_char* instruction, short thread_index)
 {
-    Actors_PlayActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
-        Event_animationBankBases[arg0[5] >> 6] + arg0[3], arg0[4], arg0[5] & 0x3F);
+    Actors_PlayActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+        Event_animationBankBases[instruction[5] >> 6] + instruction[3], instruction[4], instruction[5] & 0x3F);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B770C (src/BATTLE/BATTLE.PRG/4A0A8.c:1047)
-intptr_t Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorGroupFlags(u_char* instruction, short thread_index)
 {
     Event_ActorSelection sp10;
     int temp_s0;
@@ -126,7 +126,7 @@ intptr_t Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
     int temp_v0;
     u_int a1;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(arg0 + 1), &sp10);
+    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &sp10);
 
     while (1) {
         temp_s0 = Event_NextScriptSelectedActor(&sp10);
@@ -136,7 +136,7 @@ intptr_t Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
         temp_v0 = Actors_ActorStateFlags(temp_s0);
         var_s2 = temp_v0 & 0x800;
         var_s1 = temp_v0 & 0x1000;
-        a1 = arg0[4];
+        a1 = instruction[4];
         if (!(a1 & 2)) {
             var_s2 = (a1 & 1) << 0xB;
         }
@@ -144,23 +144,23 @@ intptr_t Event_ScriptSetActorGroupFlags(u_char* arg0, short arg1)
             var_s1 = (a1 << 0xA) & 0x1000;
         }
         Actors_SetActorDetached(temp_s0, (a1 >> 5) & 1);
-        Actors_SetActorDisplayFlags(temp_s0, var_s2 | var_s1 | arg0[3]);
+        Actors_SetActorDisplayFlags(temp_s0, var_s2 | var_s1 | instruction[3]);
         Actors_ResetActorWeaponVisibilityBlend(temp_s0);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B77DC (src/BATTLE/BATTLE.PRG/4A0A8.c:1080)
-intptr_t Event_ScriptSetActorSoundMix(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorSoundMix(u_char* instruction, short thread_index)
 {
     Actors_ModelEffectSlot sp10;
     int var_a0;
 
-    sp10.kind = arg0[3];
-    sp10.level = arg0[4];
-    sp10.flags = arg0[5];
-    sp10.parameter = arg0[6];
-    var_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    sp10.kind = instruction[3];
+    sp10.level = instruction[4];
+    sp10.flags = instruction[5];
+    sp10.parameter = instruction[6];
+    var_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
     if (var_a0 == 0x2001) {
         var_a0 = -1;
     }
@@ -169,19 +169,19 @@ intptr_t Event_ScriptSetActorSoundMix(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B784C (src/BATTLE/BATTLE.PRG/4A0A8.c:1097)
-intptr_t Event_ScriptWalkActorToTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptWalkActorToTile(u_char* instruction, short thread_index)
 {
     u_char sp10[10];
-    u_short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    sp10[0] = arg0[3];
-    sp10[1] = arg0[4];
-    sp10[2] = arg0[5];
-    sp10[3] = arg0[6];
+    u_short temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    sp10[0] = instruction[3];
+    sp10[1] = instruction[4];
+    sp10[2] = instruction[5];
+    sp10[3] = instruction[6];
     if (Event_skipState == 2) {
         Actors_MoveActorToTileAtRate(temp_v0, (Actors_TileTarget*)sp10, 0, 0);
     } else {
         Actors_MoveActorToTileAtRate(temp_v0, (Actors_TileTarget*)sp10,
-            arg0[7] != 0xFF ? arg0[7] : -1, arg0[8] != 0xFF ? arg0[8] : -1);
+            instruction[7] != 0xFF ? instruction[7] : -1, instruction[8] != 0xFF ? instruction[8] : -1);
     }
     Actors_ClearActorMovementModes(temp_v0);
     Event_scriptControlledActors[temp_v0] = 1;
@@ -189,32 +189,32 @@ intptr_t Event_ScriptWalkActorToTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B792C (src/BATTLE/BATTLE.PRG/4A0A8.c:1116)
-intptr_t Event_ScriptWalkActorToWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptWalkActorToWorldPos(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery sp10;
 
-    u_short temp_s4 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    int temp_s1 = Core_Memory_ReadUnalignedShort(arg0 + 3) >> 1;
-    short temp_s2 = Core_Memory_ReadUnalignedShort(arg0 + 5);
-    short temp_s3 = Core_Memory_ReadUnalignedShort(arg0 + 7);
+    u_short temp_s4 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    int temp_s1 = Core_Memory_ReadUnalignedShort(instruction + 3) >> 1;
+    short temp_s2 = Core_Memory_ReadUnalignedShort(instruction + 5);
+    short temp_s3 = Core_Memory_ReadUnalignedShort(instruction + 7);
 
-    if (arg0[3] & 1) {
+    if (instruction[3] & 1) {
         Actors_ActorPlacement(temp_s4, &sp10);
         applyVector(&sp10.location.position, temp_s1, temp_s2, temp_s3, +=);
     } else {
         setVector(&sp10.location.position, temp_s1, temp_s2, temp_s3);
     }
-    if (arg0[9] != 0xFF) {
+    if (instruction[9] != 0xFF) {
         char v = 0x10;
-        sp10.location.position.pad = arg0[9] * v;
+        sp10.location.position.pad = instruction[9] * v;
     } else {
         sp10.location.position.pad = -0x8000;
     }
     if (Event_skipState == 2) {
         Actors_MoveActorToPositionAtRate(temp_s4, &sp10.location.position, 0, 0);
     } else {
-        Actors_MoveActorToPositionAtRate(temp_s4, &sp10.location.position, arg0[10] != 0xFF ? arg0[10] : -1,
-            arg0[11] != 0xFF ? arg0[11] : -1);
+        Actors_MoveActorToPositionAtRate(temp_s4, &sp10.location.position, instruction[10] != 0xFF ? instruction[10] : -1,
+            instruction[11] != 0xFF ? instruction[11] : -1);
     }
     Actors_ClearActorMovementModes(temp_s4);
     Event_scriptControlledActors[temp_s4] = 1;
@@ -222,19 +222,19 @@ intptr_t Event_ScriptWalkActorToWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7A98 (src/BATTLE/BATTLE.PRG/4A0A8.c:1148)
-intptr_t Event_ScriptSlideActorToTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptSlideActorToTile(u_char* instruction, short thread_index)
 {
     u_char sp10[16];
-    u_short temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    sp10[0] = arg0[3];
-    sp10[1] = arg0[4];
-    sp10[2] = arg0[5];
+    u_short temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    sp10[0] = instruction[3];
+    sp10[1] = instruction[4];
+    sp10[2] = instruction[5];
     sp10[3] = 0xFF;
     if (Event_skipState == 2) {
         Actors_TranslateActorToTileAtRate(temp_s0, (Actors_TileTarget*)sp10, 0);
     } else {
         Actors_TranslateActorToTileAtRate(
-            temp_s0, (Actors_TileTarget*)sp10, arg0[6] != 0xFF ? arg0[6] : -1);
+            temp_s0, (Actors_TileTarget*)sp10, instruction[6] != 0xFF ? instruction[6] : -1);
     }
     Actors_ClearActorMovementModes(temp_s0);
     Event_scriptControlledActors[temp_s0] = 1;
@@ -242,7 +242,7 @@ intptr_t Event_ScriptSlideActorToTile(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7B58 (src/BATTLE/BATTLE.PRG/4A0A8.c:1167)
-intptr_t Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptSlideActorToWorldPos(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery sp10;
     short temp_s3;
@@ -250,12 +250,12 @@ intptr_t Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
     int temp_s1;
     u_short temp_s2;
 
-    temp_s2 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    temp_s1 = Core_Memory_ReadUnalignedShort(arg0 + 3) >> 1;
-    temp_s3 = Core_Memory_ReadUnalignedShort(arg0 + 5);
-    temp_s4 = Core_Memory_ReadUnalignedShort(arg0 + 7);
+    temp_s2 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    temp_s1 = Core_Memory_ReadUnalignedShort(instruction + 3) >> 1;
+    temp_s3 = Core_Memory_ReadUnalignedShort(instruction + 5);
+    temp_s4 = Core_Memory_ReadUnalignedShort(instruction + 7);
 
-    if (arg0[3] & 1) {
+    if (instruction[3] & 1) {
         Actors_ActorPlacement(temp_s2, &sp10);
         applyVector(&sp10.location.position, temp_s1, temp_s3, temp_s4, +=);
     } else {
@@ -267,7 +267,7 @@ intptr_t Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
     if (Event_skipState == 2) {
         Actors_TranslateActorToAtRate(temp_s2, &sp10.location.position, 0);
     } else {
-        Actors_TranslateActorToAtRate(temp_s2, &sp10.location.position, arg0[9] != 0xFF ? arg0[9] : -1);
+        Actors_TranslateActorToAtRate(temp_s2, &sp10.location.position, instruction[9] != 0xFF ? instruction[9] : -1);
     }
 
     Actors_ClearActorMovementModes(temp_s2);
@@ -276,26 +276,26 @@ intptr_t Event_ScriptSlideActorToWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7C90 (src/BATTLE/BATTLE.PRG/4A0A8.c:1200)
-intptr_t Event_ScriptSetActorAttachment(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorAttachment(u_char* instruction, short thread_index)
 {
-    u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    u_int temp_a1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)) & 0xFFFF;
+    u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    u_int temp_a1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)) & 0xFFFF;
     if (temp_a1 >= 0x2000) {
         Actors_ReleaseActorAttachmentLock(temp_s1, temp_a1);
     } else {
-        Actors_AttachActorToParentBone(temp_s1, temp_a1, arg0[5], arg0[6]);
+        Actors_AttachActorToParentBone(temp_s1, temp_a1, instruction[5], instruction[6]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B7D10 (src/BATTLE/BATTLE.PRG/4A0A8.c:1212)
-intptr_t Event_ScriptNavigateActorToWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptNavigateActorToWorldPos(u_char* instruction, short thread_index)
 {
     SVECTOR sp10;
-    u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1) & 0xFFFF);
-    sp10.vx = Core_Memory_ReadUnalignedShort(arg0 + 3);
+    u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1) & 0xFFFF);
+    sp10.vx = Core_Memory_ReadUnalignedShort(instruction + 3);
     sp10.vy = 0;
-    sp10.vz = Core_Memory_ReadUnalignedShort(arg0 + 5);
+    sp10.vz = Core_Memory_ReadUnalignedShort(instruction + 5);
     if (Event_skipState == 2) {
         sp10.pad = -0x8000;
         Actors_TranslateActorToAtRate(temp_s1, &sp10, 0);
@@ -308,23 +308,23 @@ intptr_t Event_ScriptNavigateActorToWorldPos(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7DC4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1230)
-intptr_t Event_ScriptTurnActorToFacing(u_char* arg0, short arg1)
+intptr_t Event_ScriptTurnActorToFacing(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery sp10;
-    u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    short var_s2 = arg0[5] != 0xFF ? arg0[5] : -1;
+    u_short temp_s1 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    short var_s2 = instruction[5] != 0xFF ? instruction[5] : -1;
     int var_a1;
 
-    if (arg0[4] != 0) {
+    if (instruction[4] != 0) {
         Actors_ActorPlacement(temp_s1, &sp10);
-        var_a1 = (arg0[3] << 4) - sp10.location.position.pad;
+        var_a1 = (instruction[3] << 4) - sp10.location.position.pad;
         if (var_a1 < -ONE / 2) {
             var_a1 += ONE;
         }
         if (var_a1 > ONE / 2) {
             var_a1 -= ONE;
         }
-        switch ((signed char)arg0[4]) {
+        switch ((signed char)instruction[4]) {
         case -1:
             if (var_a1 > 0) {
                 var_a1 -= ONE;
@@ -338,26 +338,26 @@ intptr_t Event_ScriptTurnActorToFacing(u_char* arg0, short arg1)
         }
         Actors_TurnActorByAtRate(temp_s1, var_a1, var_s2);
     } else {
-        Actors_TurnActorToAtRate(temp_s1, arg0[3] << 4, var_s2);
+        Actors_TurnActorToAtRate(temp_s1, instruction[3] << 4, var_s2);
     }
     Event_scriptControlledActors[temp_s1] = 1;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B7EF0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1266)
-intptr_t Event_ScriptFaceOtherActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptFaceOtherActor(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery sp10;
     int temp_s0;
     int temp_s0_2;
     int var_a2;
 
-    temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)), &sp10);
+    temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &sp10);
     var_a2 = -1;
     temp_s0_2 = temp_s0 & 0xFFFF;
-    if (arg0[5] != 0xFF) {
-        var_a2 = arg0[5];
+    if (instruction[5] != 0xFF) {
+        var_a2 = instruction[5];
     }
     Actors_TurnActorTowardTileAtRate(temp_s0_2, &sp10.location.packedTile.target, var_a2);
     Event_scriptControlledActors[temp_s0_2] = 1;
@@ -365,37 +365,37 @@ intptr_t Event_ScriptFaceOtherActor(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B7F84 (src/BATTLE/BATTLE.PRG/4A0A8.c:1285)
-intptr_t Event_ScriptFaceTile(u_char* arg0, short arg1)
+intptr_t Event_ScriptFaceTile(u_char* instruction, short thread_index)
 {
     Actors_TileTarget sp10;
-    int temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)) & 0xFFFF;
+    int temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)) & 0xFFFF;
 
-    sp10.tileX = arg0[3];
-    sp10.tileLayer = arg0[4];
-    sp10.tileZ = arg0[5];
+    sp10.tileX = instruction[3];
+    sp10.tileLayer = instruction[4];
+    sp10.tileZ = instruction[5];
 
-    Actors_TurnActorTowardTileAtRate(temp_s0, &sp10, arg0[6] != 0xFF ? arg0[6] : -1);
+    Actors_TurnActorTowardTileAtRate(temp_s0, &sp10, instruction[6] != 0xFF ? instruction[6] : -1);
     Event_scriptControlledActors[temp_s0] = 1;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B804C (src/BATTLE/BATTLE.PRG/4A0A8.c:1299)
-intptr_t Event_ScriptScaleActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptScaleActor(u_char* instruction, short thread_index)
 {
     SVECTOR sp10;
 
-    setVector(&sp10, Core_Memory_ReadUnalignedShort(arg0 + 3), Core_Memory_ReadUnalignedShort(arg0 + 5),
-        Core_Memory_ReadUnalignedShort(arg0 + 7));
-    Actors_ScaleActorToOverTime(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), &sp10, arg0[9]);
+    setVector(&sp10, Core_Memory_ReadUnalignedShort(instruction + 3), Core_Memory_ReadUnalignedShort(instruction + 5),
+        Core_Memory_ReadUnalignedShort(instruction + 7));
+    Actors_ScaleActorToOverTime(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &sp10, instruction[9]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B80B4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1309)
-intptr_t Event_ScriptRemoveActorGroup(u_char* arg0, short arg1)
+intptr_t Event_ScriptRemoveActorGroup(u_char* instruction, short thread_index)
 {
     Event_ActorSelection sp10;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(arg0 + 1), &sp10);
+    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &sp10);
     while (1) {
         int temp_a0 = Event_NextScriptSelectedActor(&sp10);
         if (temp_a0 == 1) {
@@ -407,16 +407,16 @@ intptr_t Event_ScriptRemoveActorGroup(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B810C (src/BATTLE/BATTLE.PRG/4A0A8.c:1324)
-intptr_t Event_ScriptWaitForActorFlags(u_char* arg0, short arg1)
+intptr_t Event_ScriptWaitForActorFlags(u_char* instruction, short thread_index)
 {
     short temp_v0;
     u_short temp_s3;
     int temp_s2;
     u_short var_v0;
 
-    temp_s2 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)) & 0xFFFF;
+    temp_s2 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)) & 0xFFFF;
     temp_s3 = Actors_ActorStateFlags(temp_s2) ^ 0x81;
-    temp_v0 = Core_Memory_ReadUnalignedShort(arg0 + 3);
+    temp_v0 = Core_Memory_ReadUnalignedShort(instruction + 3);
 
     if (temp_v0 & 1) {
         if (Actors_IsScriptedActorPathFinished(temp_s2) == 0) {
@@ -428,46 +428,46 @@ intptr_t Event_ScriptWaitForActorFlags(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B81A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1344)
-intptr_t Event_ScriptSetActorColorOverride(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorColorOverride(u_char* instruction, short thread_index)
 {
     Render_ColorCode sp10;
 
-    sp10.red = arg0[3];
-    sp10.green = arg0[4];
-    sp10.blue = arg0[5];
+    sp10.red = instruction[3];
+    sp10.green = instruction[4];
+    sp10.blue = instruction[5];
 
     if (sp10.red | sp10.green | sp10.blue) {
-        Actors_SetActorTint(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), &sp10);
+        Actors_SetActorTint(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &sp10);
     } else {
-        Actors_SetActorTint(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), 0);
+        Actors_SetActorTint(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), 0);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B822C (src/BATTLE/BATTLE.PRG/4A0A8.c:1360)
-intptr_t Event_ScriptQueueActorAnimation(u_char* arg0, short arg1)
+intptr_t Event_ScriptQueueActorAnimation(u_char* instruction, short thread_index)
 {
-    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
-        Event_animationBankBases[arg0[5] >> 6] + arg0[3], arg0[5] & 0x3F, 0);
+    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+        Event_animationBankBases[instruction[5] >> 6] + instruction[3], instruction[5] & 0x3F, 0);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8290 (src/BATTLE/BATTLE.PRG/4A0A8.c:1367)
-intptr_t Event_ScriptRotateActorAxes(u_char* arg0, short arg1)
+intptr_t Event_ScriptRotateActorAxes(u_char* instruction, short thread_index)
 {
     SVECTOR sp10;
     u_short temp_s2;
     short var_s1;
 
-    temp_s2 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    temp_s2 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
     var_s1 = -1;
-    if (arg0[10] != 0xFF) {
-        var_s1 = arg0[10];
+    if (instruction[10] != 0xFF) {
+        var_s1 = instruction[10];
     }
-    sp10.vx = Core_Memory_ReadUnalignedShort(arg0 + 4);
-    sp10.vy = Core_Memory_ReadUnalignedShort(arg0 + 6);
-    sp10.vz = Core_Memory_ReadUnalignedShort(arg0 + 8);
-    if (arg0[3] != 0) {
+    sp10.vx = Core_Memory_ReadUnalignedShort(instruction + 4);
+    sp10.vy = Core_Memory_ReadUnalignedShort(instruction + 6);
+    sp10.vz = Core_Memory_ReadUnalignedShort(instruction + 8);
+    if (instruction[3] != 0) {
         Actors_RotateActorByAtRate(temp_s2, &sp10, var_s1);
     } else {
         Actors_RotateActorToAtRate(temp_s2, &sp10, var_s1);
@@ -477,60 +477,60 @@ intptr_t Event_ScriptRotateActorAxes(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8360 (src/BATTLE/BATTLE.PRG/4A0A8.c:1390)
-intptr_t Event_ScriptSetActorHeadAngles(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorHeadAngles(u_char* instruction, short thread_index)
 {
     SVECTOR sp10;
     int temp_v0;
     int var_a3;
 
-    sp10.vx = Core_Memory_ReadUnalignedShort(arg0 + 3);
-    sp10.vy = Core_Memory_ReadUnalignedShort(arg0 + 5);
+    sp10.vx = Core_Memory_ReadUnalignedShort(instruction + 3);
+    sp10.vy = Core_Memory_ReadUnalignedShort(instruction + 5);
     sp10.vz = 0;
-    temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
     var_a3 = 0x1000;
-    if (arg0[7] != 0) {
-        var_a3 = arg0[7];
+    if (instruction[7] != 0) {
+        var_a3 = instruction[7];
     }
     Actors_SetActorHeadTracking(temp_v0, -4, &sp10, var_a3);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B83D4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1408)
-intptr_t Event_ScriptPlayActorAnimationAtFrame(u_char* arg0, short arg1)
+intptr_t Event_ScriptPlayActorAnimationAtFrame(u_char* instruction, short thread_index)
 {
-    Actors_PlayActorAnimationAtFrame(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
-        Event_animationBankBases[arg0[6] >> 6] + arg0[3], arg0[6] & 0x3F, arg0[4]);
+    Actors_PlayActorAnimationAtFrame(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+        Event_animationBankBases[instruction[6] >> 6] + instruction[3], instruction[6] & 0x3F, instruction[4]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8438 (src/BATTLE/BATTLE.PRG/4A0A8.c:1415)
-intptr_t Event_ScriptQueueActorAnimationAtFrame(u_char* arg0, short arg1)
+intptr_t Event_ScriptQueueActorAnimationAtFrame(u_char* instruction, short thread_index)
 {
-    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)),
-        Event_animationBankBases[arg0[6] >> 6] + arg0[3], arg0[6] & 0x3F, arg0[4]);
+    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+        Event_animationBankBases[instruction[6] >> 6] + instruction[3], instruction[6] & 0x3F, instruction[4]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B849C (src/BATTLE/BATTLE.PRG/4A0A8.c:1422)
-intptr_t Event_ScriptSetActorIdleAnimation(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorIdleAnimation(u_char* instruction, short thread_index)
 {
-    int temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    int temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
 
-    if (arg0[4] == 0xFF) {
+    if (instruction[4] == 0xFF) {
         Actors_SetActorTravelAnimation(temp_a0, -1);
     } else {
-        Actors_SetActorTravelAnimation(temp_a0, Event_animationBankBases[arg0[3]] + arg0[4]);
+        Actors_SetActorTravelAnimation(temp_a0, Event_animationBankBases[instruction[3]] + instruction[4]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8510 (src/BATTLE/BATTLE.PRG/4A0A8.c:1434)
-intptr_t Event_ScriptLookAtActor(u_char* arg0, short arg1)
+intptr_t Event_ScriptLookAtActor(u_char* instruction, short thread_index)
 {
     int var_a3;
 
-    int temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3));
-    int temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    int temp_s0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3));
+    int temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
 
     int var_a1 = -2;
     if (temp_s0 != 0x2000) {
@@ -538,59 +538,59 @@ intptr_t Event_ScriptLookAtActor(u_char* arg0, short arg1)
     }
 
     var_a3 = 0x1000;
-    if (arg0[5] != 0) {
-        var_a3 = arg0[5];
+    if (instruction[5] != 0) {
+        var_a3 = instruction[5];
     }
     Actors_SetActorHeadTracking(temp_a0, var_a1, 0, var_a3);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8590 (src/BATTLE/BATTLE.PRG/4A0A8.c:1454)
-intptr_t Event_ScriptLookAtWorldPos(u_char* arg0, short arg1)
+intptr_t Event_ScriptLookAtWorldPos(u_char* instruction, short thread_index)
 {
     SVECTOR sp10;
     int temp_v0;
     int var_a3;
 
-    setVector(&sp10, Core_Memory_ReadUnalignedShort(arg0 + 3), Core_Memory_ReadUnalignedShort(arg0 + 5),
-        Core_Memory_ReadUnalignedShort(arg0 + 7));
-    temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    setVector(&sp10, Core_Memory_ReadUnalignedShort(instruction + 3), Core_Memory_ReadUnalignedShort(instruction + 5),
+        Core_Memory_ReadUnalignedShort(instruction + 7));
+    temp_v0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
     var_a3 = 0x1000;
-    if (arg0[9] != 0) {
-        var_a3 = arg0[9];
+    if (instruction[9] != 0) {
+        var_a3 = instruction[9];
     }
     Actors_SetActorHeadTracking(temp_v0, -1, &sp10, var_a3);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B860C (src/BATTLE/BATTLE.PRG/4A0A8.c:1471)
-intptr_t Event_ScriptLoadObjectModel(u_char* arg0, short arg1)
+intptr_t Event_ScriptLoadObjectModel(u_char* instruction, short thread_index)
 {
-    switch ((arg0[3] >> 2) & 3) {
+    switch ((instruction[3] >> 2) & 3) {
     case 0:
-        Actors_QueueSharedSequenceLoad(arg0[3] & 3, Core_Memory_ReadUnalignedShort(arg0 + 1));
+        Actors_QueueSharedSequenceLoad(instruction[3] & 3, Core_Memory_ReadUnalignedShort(instruction + 1));
         break;
     case 1:
-        Actors_QueueSharedSequenceWithTextures(arg0[3] & 3, Core_Memory_ReadUnalignedShort(arg0 + 1), (arg0[3] >> 4) + 0x1A);
+        Actors_QueueSharedSequenceWithTextures(instruction[3] & 3, Core_Memory_ReadUnalignedShort(instruction + 1), (instruction[3] >> 4) + 0x1A);
         break;
     case 2:
         Actors_QueueSequenceEffectTextures(
-            arg0[3] & 3, Core_Memory_ReadUnalignedShort(arg0 + 1), (arg0[3] >> 4) + 0x1A);
+            instruction[3] & 3, Core_Memory_ReadUnalignedShort(instruction + 1), (instruction[3] >> 4) + 0x1A);
         break;
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B86E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1488)
-intptr_t Event_ScriptWaitForObjectLoad(u_char* arg0, short arg1) { return Actors_FirstFreeAssetLoadSlot() > 0; }
+intptr_t Event_ScriptWaitForObjectLoad(u_char* instruction, short thread_index) { return Actors_FirstFreeAssetLoadSlot() > 0; }
 
 // decomp: BATTLE.PRG func_800B8708 (src/BATTLE/BATTLE.PRG/4A0A8.c:1490)
-intptr_t Event_ScriptReleaseObjectModel(u_char* arg0, short arg1)
+intptr_t Event_ScriptReleaseObjectModel(u_char* instruction, short thread_index)
 {
-    if (arg0[1] & 4) {
-        Actors_ReleaseSequenceEffectTextures(arg0[1] & 3);
+    if (instruction[1] & 4) {
+        Actors_ReleaseSequenceEffectTextures(instruction[1] & 3);
     } else {
-        if (Actors_UnloadSharedSequence(arg0[1]) < 0) {
+        if (Actors_UnloadSharedSequence(instruction[1]) < 0) {
             return 1;
         }
     }
@@ -598,115 +598,115 @@ intptr_t Event_ScriptReleaseObjectModel(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800B8764 (src/BATTLE/BATTLE.PRG/4A0A8.c:1500)
-intptr_t Event_ScriptSelectObjectTextureBank(u_char* arg0, short arg1)
+intptr_t Event_ScriptSelectObjectTextureBank(u_char* instruction, short thread_index)
 {
-    Actors_SetSharedSequenceBank(arg0[1]);
+    Actors_SetSharedSequenceBank(instruction[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B8788 (src/BATTLE/BATTLE.PRG/4A0A8.c:1506)
-intptr_t Event_ScriptSetActorOverlayPass(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorOverlayPass(u_char* instruction, short thread_index)
 {
     Render_ColorCode sp10[6];
 
-    sp10[0].red = arg0[7];
-    sp10[0].green = arg0[8];
-    sp10[0].blue = arg0[9];
+    sp10[0].red = instruction[7];
+    sp10[0].green = instruction[8];
+    sp10[0].blue = instruction[9];
 
     if (sp10[0].red | sp10[0].green | sp10[0].blue) {
-        sp10[2].red = arg0[3];
-        sp10[2].green = arg0[4];
-        sp10[2].blue = arg0[5];
-        sp10[2].code = arg0[6];
-        Actors_SetActorCompanion(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), 1, &sp10[2], &sp10[0]);
+        sp10[2].red = instruction[3];
+        sp10[2].green = instruction[4];
+        sp10[2].blue = instruction[5];
+        sp10[2].code = instruction[6];
+        Actors_SetActorCompanion(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), 1, &sp10[2], &sp10[0]);
     } else {
-        Actors_SetActorCompanion(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), 0, 0, 0);
+        Actors_SetActorCompanion(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), 0, 0, 0);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B884C (src/BATTLE/BATTLE.PRG/4A0A8.c:1526)
-intptr_t Event_ScriptSetActorWeaponDrawn(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorWeaponDrawn(u_char* instruction, short thread_index)
 {
     Event_ActorSelection sp10;
     int temp_a0;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(arg0 + 1), &sp10);
+    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &sp10);
 
     while (1) {
         temp_a0 = Event_NextScriptSelectedActor(&sp10);
         if (temp_a0 == 1) {
             break;
         }
-        Battle_SetActorBattleMode(temp_a0, Event_weaponDrawStates[arg0[3]]);
+        Battle_SetActorBattleMode(temp_a0, Event_weaponDrawStates[instruction[3]]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B91F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1786)
-intptr_t Event_ScriptPlayActorAnimationSound(u_char* arg0, short arg1)
+intptr_t Event_ScriptPlayActorAnimationSound(u_char* instruction, short thread_index)
 {
-    Actors_PlayActorWeaponDrawSound(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), arg0[3]);
+    Actors_PlayActorWeaponDrawSound(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9230 (src/BATTLE/BATTLE.PRG/4A0A8.c:1792)
-intptr_t Event_ScriptSetNpcUpdatesEnabled(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetNpcUpdatesEnabled(u_char* instruction, short thread_index)
 {
-    Actors_SetOtherActorLogicEnabled(arg0[1]);
+    Actors_SetOtherActorLogicEnabled(instruction[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B92A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1807)
-intptr_t Event_ScriptRestoreActorVitals(u_char* arg0, short arg1)
+intptr_t Event_ScriptRestoreActorVitals(u_char* instruction, short thread_index)
 {
-    Actors_RestoreActorVitals(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)));
+    Actors_RestoreActorVitals(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9608 (src/BATTLE/BATTLE.PRG/4A0A8.c:1916)
-intptr_t Event_ScriptSetActorEquipmentModels(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorEquipmentModels(u_char* instruction, short thread_index)
 {
-    u_short temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    u_short temp_a0 = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
 
-    if (arg0[3] == 0xFE) {
+    if (instruction[3] == 0xFE) {
         Actors_RefreshActorEquipmentModels(temp_a0);
     } else {
-        Actors_LoadActorEquipmentModels(temp_a0, arg0[3], arg0[5]);
+        Actors_LoadActorEquipmentModels(temp_a0, instruction[3], instruction[5]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9670 (src/BATTLE/BATTLE.PRG/4A0A8.c:1928)
-intptr_t Event_ScriptSetActorYawOscillation(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorYawOscillation(u_char* instruction, short thread_index)
 {
-    Actors_SetActorPaletteFade(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), arg0[3]);
+    Actors_SetActorPaletteFade(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B97F8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1988)
-intptr_t Event_ScriptClearAshleyStatusEffects(u_char* arg0, short arg1)
+intptr_t Event_ScriptClearAshleyStatusEffects(u_char* instruction, short thread_index)
 {
     Battle_PreserveAshleyStatuses();
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9D74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2151)
-intptr_t Event_ScriptSetActorRenderMode(u_char* arg0, short arg1)
+intptr_t Event_ScriptSetActorRenderMode(u_char* instruction, short thread_index)
 {
-    Actors_StartActorAppearanceTransition(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), arg0[3]);
+    Actors_StartActorAppearanceTransition(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAC38 (src/BATTLE/BATTLE.PRG/4A0A8.c:2549)
-intptr_t Event_CommandSetEnteredDoor(u_char* arg0, short arg1)
+intptr_t Event_CommandSetEnteredDoor(u_char* instruction, short thread_index)
 {
-    Field_MarkEntranceDoorOnSceneMap(arg0[1]);
+    Field_MarkEntranceDoorOnSceneMap(instruction[1]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAC5C (src/BATTLE/BATTLE.PRG/4A0A8.c:2555)
-intptr_t Event_CommandStoreActorRangeBearing(u_char* arg0, short arg1)
+intptr_t Event_CommandStoreActorRangeBearing(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery sp10;
     Actors_ActorLocationQuery sp20;
@@ -715,39 +715,39 @@ intptr_t Event_CommandStoreActorRangeBearing(u_char* arg0, short arg1)
     short temp_v0_2;
     int temp_lo;
 
-    temp_s3 = Core_Memory_ReadUnalignedShort(arg0 + 6);
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), &sp10);
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)), &sp20);
+    temp_s3 = Core_Memory_ReadUnalignedShort(instruction + 6);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &sp10);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &sp20);
     temp_v0 = sp10.location.position.vx - sp20.location.position.vx;
     temp_v0_2 = sp10.location.position.vz - sp20.location.position.vz;
-    temp_lo = Core_Math_SquareRootInteger((temp_v0 * temp_v0) + (temp_v0_2 * temp_v0_2)) / arg0[5];
+    temp_lo = Core_Math_SquareRootInteger((temp_v0 * temp_v0) + (temp_v0_2 * temp_v0_2)) / instruction[5];
     State_SetScriptFlag(temp_s3, temp_lo < 0x100 ? temp_lo & 0xFF : -1);
     State_SetScriptFlag(temp_s3 + 1, (Core_Gte_Atan2(temp_v0, temp_v0_2) >> 4) & 0xFF);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAD78 (src/BATTLE/BATTLE.PRG/4A0A8.c:2575)
-intptr_t Event_CommandSetActorActivity(u_char* arg0, short arg1)
+intptr_t Event_CommandSetActorActivity(u_char* instruction, short thread_index)
 {
     Event_ActorSelection sp10;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(arg0 + 1), &sp10);
+    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &sp10);
     while (1) {
         int temp_a0 = Event_NextScriptSelectedActor(&sp10);
         if (temp_a0 == 1) {
             break;
         }
-        Actors_SetActorLogicEnabled(temp_a0, arg0[3]);
+        Actors_SetActorLogicEnabled(temp_a0, instruction[3]);
     }
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BADE0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2590)
-intptr_t Event_CommandAwardMiscLoot(u_char* arg0, short arg1)
+intptr_t Event_CommandAwardMiscLoot(u_char* instruction, short thread_index)
 {
     if (Event_isMenuTransitionActive == 0) {
         Items_PresentScriptedLoot(
-            Core_Memory_ReadUnalignedShort(arg0 + 1), arg0[3], Core_Memory_ReadUnalignedShort(arg0 + 4), arg0[6]);
+            Core_Memory_ReadUnalignedShort(instruction + 1), instruction[3], Core_Memory_ReadUnalignedShort(instruction + 4), instruction[6]);
         Event_isMenuTransitionActive = 1;
         return 1;
     }
@@ -760,14 +760,14 @@ intptr_t Event_CommandAwardMiscLoot(u_char* arg0, short arg1)
 }
 
 // decomp: BATTLE.PRG func_800BAE74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2606)
-intptr_t Event_CommandConsumeMiscItem(u_char* arg0, short arg1)
+intptr_t Event_CommandConsumeMiscItem(u_char* instruction, short thread_index)
 {
-    Items_ConsumeMiscItem(Core_Memory_ReadUnalignedShort(arg0 + 1));
+    Items_ConsumeMiscItem(Core_Memory_ReadUnalignedShort(instruction + 1));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BAEA0 (src/BATTLE/BATTLE.PRG/4A0A8.c:2612)
-intptr_t Event_CommandStoreActorDistance(u_char* arg0, short arg1)
+intptr_t Event_CommandStoreActorDistance(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery sp10;
     Actors_ActorLocationQuery sp20;
@@ -776,11 +776,11 @@ intptr_t Event_CommandStoreActorDistance(u_char* arg0, short arg1)
     short temp_s1;
     int var_v0;
 
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)), &sp10);
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)), &sp20);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &sp10);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &sp20);
     temp_s0 = sp10.location.position.vx - sp20.location.position.vx;
     temp_s1 = sp10.location.position.vz - sp20.location.position.vz;
-    temp_s0_2 = Core_Memory_ReadUnalignedShort(arg0 + 5);
+    temp_s0_2 = Core_Memory_ReadUnalignedShort(instruction + 5);
     var_v0 = Core_Math_SquareRootInteger((temp_s0 * temp_s0) + (temp_s1 * temp_s1));
     if (var_v0 < 0) {
         var_v0 += 0x7F;

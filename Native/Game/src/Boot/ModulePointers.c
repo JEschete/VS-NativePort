@@ -1440,7 +1440,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B8D50u, 0u, (void*)&Event_ScriptApplyImmediateFlagOperation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B8EDCu, 0u, (void*)&Event_ScriptApplyFlagPairOperation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9170u, 0u, (void*)&Event_ScriptStoreInventoryItemPresence, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B91C4u, 0u, (void*)&Event_ScriptPreloadRoom, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B91C4u, 0u, (void*)&Event_ScriptClearRoomActorCache, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B91F0u, 0u, (void*)&Event_ScriptPlayActorAnimationSound, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9230u, 0u, (void*)&Event_ScriptSetNpcUpdatesEnabled, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9254u, 0u, (void*)&Event_ScriptStoreButtonState, 0u, 0u, 0u},

@@ -40,13 +40,13 @@ int Input_buttonsState;
 State_Settings Input_settings;
 
 // decomp: BATTLE.PRG vs_battle_mapStickDeadZone (src/BATTLE/BATTLE.PRG/5BE50.c:82)
-int Input_MapStickDeadZone(int arg0)
+int Input_MapStickDeadZone(int axis_byte)
 {
-    if (arg0 < 64) {
-        return arg0 - 64;
+    if (axis_byte < 64) {
+        return axis_byte - 64;
     }
-    if (arg0 >= 192) {
-        return arg0 - 192;
+    if (axis_byte >= 192) {
+        return axis_byte - 192;
     }
     return 0;
 }
@@ -154,140 +154,140 @@ void Input_UpdateControllerConnection(int portID, char padBuf[34])
 }
 
 // decomp: SLUS_010.40 _padSetActData (src/SLUS_010.40/main.c:8551)
-void Input_SetMotorCommand(int port, int pos, int val)
+void Input_SetMotorCommand(int port_index, int motor_index, int command)
 {
-    if (pos != 0) {
-        Input_controllerPorts[port].actuatorLevels[pos] = val;
-    } else if (Input_controllerPorts[port].extendedType) {
-        Input_controllerPorts[port].actuatorLevels[0] = val;
+    if (motor_index != 0) {
+        Input_controllerPorts[port_index].actuatorLevels[motor_index] = command;
+    } else if (Input_controllerPorts[port_index].extendedType) {
+        Input_controllerPorts[port_index].actuatorLevels[0] = command;
     } else {
-        Input_controllerPorts[port].actuatorLevels[0] = 0x40;
+        Input_controllerPorts[port_index].actuatorLevels[0] = 0x40;
     }
 }
 
 // decomp: SLUS_010.40 _padGetActData (src/SLUS_010.40/main.c:8562)
-char Input_MotorCommand(int port, int pos) { return Input_controllerPorts[port].actuatorLevels[pos]; }
+char Input_MotorCommand(int port_index, int motor_index) { return Input_controllerPorts[port_index].actuatorLevels[motor_index]; }
 
 // decomp: SLUS_010.40 func_800433B4 (src/SLUS_010.40/main.c:8564)
-int Input_StartVibrationPattern(char* arg0, u_int arg1, int arg2)
+int Input_StartVibrationPattern(char* pattern, u_int slot_request, int owner_tag)
 {
-    int i;
-    int ret = 0;
+    int slot_index;
+    int slot_id = 0;
 
-    if (arg1 == 0xFF) {
-        for (i = 0; i < 2; ++i) {
-            if (Input_vibrationPatternSlots[i].active == 0) {
-                ret = i + 1;
+    if (slot_request == 0xFF) {
+        for (slot_index = 0; slot_index < 2; ++slot_index) {
+            if (Input_vibrationPatternSlots[slot_index].active == 0) {
+                slot_id = slot_index + 1;
                 break;
             }
         }
-    } else if ((arg1 - 1) < 2) {
-        ret = arg1;
+    } else if ((slot_request - 1) < 2) {
+        slot_id = slot_request;
     }
 
-    if (ret != 0) {
-        i = ret - 1;
-        Input_vibrationPatternSlots[i].pattern = arg0;
-        Input_vibrationPatternSlots[i].channels[4] = 1;
-        Input_vibrationPatternSlots[i].channels[10] = *arg0;
-        Input_vibrationPatternSlots[i].channels[11] = 0;
-        Input_vibrationPatternSlots[i].channels[5] = 0;
-        Input_vibrationPatternSlots[i].channels[7] = 0;
-        Input_vibrationPatternSlots[i].channels[1] = 0;
-        Input_vibrationPatternSlots[i].active = 1;
-        Input_vibrationPatternSlots[i].ownerTag = arg2;
-        return ret;
+    if (slot_id != 0) {
+        slot_index = slot_id - 1;
+        Input_vibrationPatternSlots[slot_index].pattern = pattern;
+        Input_vibrationPatternSlots[slot_index].channels[4] = 1;
+        Input_vibrationPatternSlots[slot_index].channels[10] = *pattern;
+        Input_vibrationPatternSlots[slot_index].channels[11] = 0;
+        Input_vibrationPatternSlots[slot_index].channels[5] = 0;
+        Input_vibrationPatternSlots[slot_index].channels[7] = 0;
+        Input_vibrationPatternSlots[slot_index].channels[1] = 0;
+        Input_vibrationPatternSlots[slot_index].active = 1;
+        Input_vibrationPatternSlots[slot_index].ownerTag = owner_tag;
+        return slot_id;
     }
     return 0;
 }
 
 // decomp: SLUS_010.40 func_80043470 (src/SLUS_010.40/main.c:8596)
-int Input_ClearVibrationSlot(int arg0)
+int Input_ClearVibrationSlot(int slot_id)
 {
-    int i = arg0 - 1;
-    Input_vibrationPatternSlots[i].channels[7] = 0;
-    Input_vibrationPatternSlots[i].channels[1] = 0;
-    Input_vibrationPatternSlots[i].pattern = 0;
-    Input_vibrationPatternSlots[i].active = 0;
+    int slot_index = slot_id - 1;
+    Input_vibrationPatternSlots[slot_index].channels[7] = 0;
+    Input_vibrationPatternSlots[slot_index].channels[1] = 0;
+    Input_vibrationPatternSlots[slot_index].pattern = 0;
+    Input_vibrationPatternSlots[slot_index].active = 0;
 
-    return arg0;
+    return slot_id;
 }
 
 // decomp: SLUS_010.40 func_800434A4 (src/SLUS_010.40/main.c:8607)
-int Input_StopVibrationPatterns(u_int arg0, int arg1)
+int Input_StopVibrationPatterns(u_int slot_selector, int owner_tag)
 {
-    int i;
-    if (arg0 - 1 < 2) {
-        return Input_ClearVibrationSlot(arg0);
+    int slot_cursor;
+    if (slot_selector - 1 < 2) {
+        return Input_ClearVibrationSlot(slot_selector);
     }
-    if (arg0 != 0) {
+    if (slot_selector != 0) {
         return 0;
     }
-    if (arg1 != 0) {
-        for (i = 0; i < 2; ++i) {
-            if (Input_vibrationPatternSlots[i].ownerTag == arg1) {
-                Input_ClearVibrationSlot(i + 1);
+    if (owner_tag != 0) {
+        for (slot_cursor = 0; slot_cursor < 2; ++slot_cursor) {
+            if (Input_vibrationPatternSlots[slot_cursor].ownerTag == owner_tag) {
+                Input_ClearVibrationSlot(slot_cursor + 1);
             }
         }
     } else {
-        for (i = 0; i < 2;) {
-            Input_ClearVibrationSlot(++i);
+        for (slot_cursor = 0; slot_cursor < 2;) {
+            Input_ClearVibrationSlot(++slot_cursor);
         }
     }
     return 1;
 }
 
 // decomp: SLUS_010.40 func_80043554 (src/SLUS_010.40/main.c:8630)
-int Input_PauseVibrationSlot(int arg0)
+int Input_PauseVibrationSlot(int slot_id)
 {
-    int v0 = arg0 - 1;
-    Input_vibrationPatternSlots[v0].active = 0;
-    return arg0;
+    int slot_index = slot_id - 1;
+    Input_vibrationPatternSlots[slot_index].active = 0;
+    return slot_id;
 }
 
 // decomp: SLUS_010.40 func_8004357C (src/SLUS_010.40/main.c:8637)
-int Input_PauseVibrationPatterns(int arg0)
+int Input_PauseVibrationPatterns(int slot_selector)
 {
-    int i;
+    int slot_id;
 
-    if ((arg0 - 1u) < 2) {
-        return Input_PauseVibrationSlot(arg0);
+    if ((slot_selector - 1u) < 2) {
+        return Input_PauseVibrationSlot(slot_selector);
     }
 
-    if (arg0 != 0) {
+    if (slot_selector != 0) {
         return 0;
     }
 
-    for (i = 0; i < 2;) {
-        Input_PauseVibrationSlot(++i);
+    for (slot_id = 0; slot_id < 2;) {
+        Input_PauseVibrationSlot(++slot_id);
     }
 
     return 1;
 }
 
 // decomp: SLUS_010.40 func_800435DC (src/SLUS_010.40/main.c:8656)
-int Input_ResumeVibrationSlot(int arg0)
+int Input_ResumeVibrationSlot(int slot_id)
 {
-    int v0 = arg0 - 1;
-    Input_vibrationPatternSlots[v0].active = 1;
-    return arg0;
+    int slot_index = slot_id - 1;
+    Input_vibrationPatternSlots[slot_index].active = 1;
+    return slot_id;
 }
 
 // decomp: SLUS_010.40 func_80043608 (src/SLUS_010.40/main.c:8663)
-int Input_ResumeVibrationPatterns(int arg0)
+int Input_ResumeVibrationPatterns(int slot_selector)
 {
-    int i;
+    int slot_id;
 
-    if ((arg0 - 1u) < 2) {
-        return Input_ResumeVibrationSlot(arg0);
+    if ((slot_selector - 1u) < 2) {
+        return Input_ResumeVibrationSlot(slot_selector);
     }
 
-    if (arg0 != 0) {
+    if (slot_selector != 0) {
         return 0;
     }
 
-    for (i = 0; i < 2;) {
-        Input_ResumeVibrationSlot(++i);
+    for (slot_id = 0; slot_id < 2;) {
+        Input_ResumeVibrationSlot(++slot_id);
     }
 
     return 1;
@@ -296,85 +296,85 @@ int Input_ResumeVibrationPatterns(int arg0)
 // decomp: SLUS_010.40 vs_main_resetPadAct (src/SLUS_010.40/main.c:8682)
 void Input_ResetVibrationPatterns(void)
 {
-    int i;
+    int slot_index;
 
     Input_InvalidateControllerConnections();
 
-    for (i = 0; i < 2; ++i) {
-        Input_vibrationPatternSlots[i].pattern = NULL;
-        Input_vibrationPatternSlots[i].channels[7] = 0;
-        Input_vibrationPatternSlots[i].channels[1] = 0;
-        Input_vibrationPatternSlots[i].active = 0;
+    for (slot_index = 0; slot_index < 2; ++slot_index) {
+        Input_vibrationPatternSlots[slot_index].pattern = NULL;
+        Input_vibrationPatternSlots[slot_index].channels[7] = 0;
+        Input_vibrationPatternSlots[slot_index].channels[1] = 0;
+        Input_vibrationPatternSlots[slot_index].active = 0;
     }
 }
 
 // decomp: SLUS_010.40 _abs2 (src/SLUS_010.40/main.c:8696)
-int Input_RoundMotorIntensityTowardZero(int arg) { return arg < 0 ? arg += 0xFF : arg; }
+int Input_RoundMotorIntensityTowardZero(int intensity_q8) { return intensity_q8 < 0 ? intensity_q8 += 0xFF : intensity_q8; }
 
 // decomp: SLUS_010.40 vs_main_setVibrateParams (src/SLUS_010.40/main.c:8698)
 void Input_UpdateVibrationPatterns(void)
 {
-    int temp_a0;
+    int pattern_offset;
     int var_a2_2;
-    int i;
-    int j;
+    int motor_index;
+    int slot_index;
     int var_v0;
-    char* temp_t1;
-    int new_var;
+    char* pattern;
+    int interpolate_intensity;
 
     Input_vibrationPatternSlots[0].motorLevels[1] = 0;
     Input_vibrationPatternSlots[0].motorLevels[0] = 0;
 
-    for (j = 0; j < 2; ++j) {
-        if (Input_vibrationPatternSlots[j].active == 0) {
+    for (slot_index = 0; slot_index < 2; ++slot_index) {
+        if (Input_vibrationPatternSlots[slot_index].active == 0) {
             continue;
         }
 
-        temp_t1 = Input_vibrationPatternSlots[j].pattern;
+        pattern = Input_vibrationPatternSlots[slot_index].pattern;
 
-        if (temp_t1 != 0) {
-            for (i = 0; i < 2; ++i) {
-                int (*a1)[6] = (int (*)[6])Input_vibrationPatternSlots[j].channels;
-                if (a1[i][5] == 0) {
-                    temp_a0 = a1[i][4];
-                    a1[i][5] = temp_t1[temp_a0++];
-                    a1[i][1] = a1[i][3] = temp_t1[temp_a0++] << 8;
-                    if (a1[i][5] == 0) {
-                        a1[i][1] = 0;
-                        a1[i][0] = 0;
+        if (pattern != 0) {
+            for (motor_index = 0; motor_index < 2; ++motor_index) {
+                int (*motor_envelopes)[6] = (int (*)[6])Input_vibrationPatternSlots[slot_index].channels;
+                if (motor_envelopes[motor_index][5] == 0) {
+                    pattern_offset = motor_envelopes[motor_index][4];
+                    motor_envelopes[motor_index][5] = pattern[pattern_offset++];
+                    motor_envelopes[motor_index][1] = motor_envelopes[motor_index][3] = pattern[pattern_offset++] << 8;
+                    if (motor_envelopes[motor_index][5] == 0) {
+                        motor_envelopes[motor_index][1] = 0;
+                        motor_envelopes[motor_index][0] = 0;
                     } else {
-                        new_var = i != 0;
-                        a1[i][3] = temp_t1[temp_a0 + 1] << 8;
-                        if (new_var) {
-                            a1[i][2] = ((a1[i][3] - a1[i][1]) / a1[i][5]);
+                        interpolate_intensity = motor_index != 0;
+                        motor_envelopes[motor_index][3] = pattern[pattern_offset + 1] << 8;
+                        if (interpolate_intensity) {
+                            motor_envelopes[motor_index][2] = ((motor_envelopes[motor_index][3] - motor_envelopes[motor_index][1]) / motor_envelopes[motor_index][5]);
                         } else {
-                            a1[i][2] = 0;
+                            motor_envelopes[motor_index][2] = 0;
                         }
-                        a1[i][0] = 1;
-                        a1[i][4] += 2;
+                        motor_envelopes[motor_index][0] = 1;
+                        motor_envelopes[motor_index][4] += 2;
                     }
                 }
-                if (a1[i][5] != 0) {
-                    a1[i][1] += a1[i][2];
-                    a1[i][5] -= 1;
+                if (motor_envelopes[motor_index][5] != 0) {
+                    motor_envelopes[motor_index][1] += motor_envelopes[motor_index][2];
+                    motor_envelopes[motor_index][5] -= 1;
                 } else {
-                    a1[i][1] = a1[i][3];
+                    motor_envelopes[motor_index][1] = motor_envelopes[motor_index][3];
                 }
 
-                Input_vibrationPatternSlots[0].motorLevels[i] += a1[i][1];
-                if (Input_vibrationPatternSlots[0].motorLevels[i] > 0xFF00) {
-                    Input_vibrationPatternSlots[0].motorLevels[i] = 0xFF00;
-                } else if (Input_vibrationPatternSlots[0].motorLevels[i] < 0) {
-                    Input_vibrationPatternSlots[0].motorLevels[i] = 0;
+                Input_vibrationPatternSlots[0].motorLevels[motor_index] += motor_envelopes[motor_index][1];
+                if (Input_vibrationPatternSlots[0].motorLevels[motor_index] > 0xFF00) {
+                    Input_vibrationPatternSlots[0].motorLevels[motor_index] = 0xFF00;
+                } else if (Input_vibrationPatternSlots[0].motorLevels[motor_index] < 0) {
+                    Input_vibrationPatternSlots[0].motorLevels[motor_index] = 0;
                 }
             }
-            Input_vibrationPatternSlots[j].active = Input_vibrationPatternSlots[j].channels[0] | Input_vibrationPatternSlots[j].channels[6];
-            if (Input_vibrationPatternSlots[j].active == 0) {
-                Input_vibrationPatternSlots[j].pattern = 0;
+            Input_vibrationPatternSlots[slot_index].active = Input_vibrationPatternSlots[slot_index].channels[0] | Input_vibrationPatternSlots[slot_index].channels[6];
+            if (Input_vibrationPatternSlots[slot_index].active == 0) {
+                Input_vibrationPatternSlots[slot_index].pattern = 0;
             }
             continue;
         }
-        Input_vibrationPatternSlots[j].active = 0;
+        Input_vibrationPatternSlots[slot_index].active = 0;
     }
 
     if (Input_settings.vibrationOn != 0) {
@@ -384,22 +384,22 @@ void Input_UpdateVibrationPatterns(void)
 }
 
 // decomp: SLUS_010.40 func_800438C8 (src/SLUS_010.40/main.c:8769)
-void Input_PlayVibrationPreset(int arg0)
+void Input_PlayVibrationPreset(int preset_index)
 {
-    int new_var4;
-    int new_var;
-    int new_var3;
-    int new_var2;
+    int offset_byte2_index;
+    int offset_byte1_index;
+    int directory_stride;
+    int offset_byte3_index;
 
-    if (arg0 < Input_vibrationPresets[0]) {
-        new_var = 5;
-        new_var3 = 4;
-        new_var4 = 6;
-        new_var2 = 7;
-        Input_StartVibrationPattern(&Input_vibrationPresets[(&Input_vibrationPresets[arg0 * new_var3])[new_var3]
-                                  + ((&Input_vibrationPresets[arg0 * new_var3])[new_var] << 8)
-                                  + ((&Input_vibrationPresets[arg0 * new_var3])[new_var4] << 16)
-                                  + ((&Input_vibrationPresets[arg0 * new_var3])[new_var2] << 24)],
+    if (preset_index < Input_vibrationPresets[0]) {
+        offset_byte1_index = 5;
+        directory_stride = 4;
+        offset_byte2_index = 6;
+        offset_byte3_index = 7;
+        Input_StartVibrationPattern(&Input_vibrationPresets[(&Input_vibrationPresets[preset_index * directory_stride])[directory_stride]
+                                  + ((&Input_vibrationPresets[preset_index * directory_stride])[offset_byte1_index] << 8)
+                                  + ((&Input_vibrationPresets[preset_index * directory_stride])[offset_byte2_index] << 16)
+                                  + ((&Input_vibrationPresets[preset_index * directory_stride])[offset_byte3_index] << 24)],
             0xFF, 0x80);
     }
 }

@@ -6,140 +6,140 @@
 // decomp: SLUS_010.40 vs_main_freeHeapR (src/SLUS_010.40/main.c:8884)
 void Core_Memory_FreeFromHighEnd(void* block)
 {
-    Core_HeapBlockHeader* var_a1 = Core_legacyHeapList.prev;
+    Core_HeapBlockHeader* previous_free = Core_legacyHeapList.prev;
     Core_HeapBlockHeader* target = (Core_HeapBlockHeader*)block - 1;
 
-    for (; var_a1 >= target || target >= var_a1->next; var_a1 = var_a1->prev) {
-        if (var_a1 >= var_a1->next && ((var_a1 < target) || (target < var_a1->next))) {
+    for (; previous_free >= target || target >= previous_free->next; previous_free = previous_free->prev) {
+        if (previous_free >= previous_free->next && ((previous_free < target) || (target < previous_free->next))) {
             break;
         }
     }
 
-    if ((target + target->blockSize) == var_a1->next) {
-        target->blockSize += var_a1->next->blockSize;
-        target->next = var_a1->next->next;
+    if ((target + target->blockSize) == previous_free->next) {
+        target->blockSize += previous_free->next->blockSize;
+        target->next = previous_free->next->next;
         target->next->prev = target;
     } else {
-        target->next = var_a1->next;
+        target->next = previous_free->next;
         target->next->prev = target;
     }
 
-    if ((var_a1 + var_a1->blockSize) == target) {
-        var_a1->blockSize += target->blockSize;
-        var_a1->next = target->next;
-        var_a1->next->prev = var_a1;
+    if ((previous_free + previous_free->blockSize) == target) {
+        previous_free->blockSize += target->blockSize;
+        previous_free->next = target->next;
+        previous_free->next->prev = previous_free;
         return;
     }
-    var_a1->next = target;
-    target->prev = var_a1;
+    previous_free->next = target;
+    target->prev = previous_free;
 }
 
 // decomp: SLUS_010.40 vs_main_freeHeap (src/SLUS_010.40/main.c:8914)
 void Core_Memory_FreeFromLowEnd(void* block)
 {
-    Core_HeapBlockHeader* var_a1 = Core_legacyHeapList.next;
+    Core_HeapBlockHeader* previous_free = Core_legacyHeapList.next;
     Core_HeapBlockHeader* target = (Core_HeapBlockHeader*)block - 1;
 
-    for (; var_a1 >= target || target >= var_a1->next; var_a1 = var_a1->next) {
-        if (var_a1 >= var_a1->next && ((var_a1 < target) || (target < var_a1->next))) {
+    for (; previous_free >= target || target >= previous_free->next; previous_free = previous_free->next) {
+        if (previous_free >= previous_free->next && ((previous_free < target) || (target < previous_free->next))) {
             break;
         }
     }
 
-    if ((target + target->blockSize) == var_a1->next) {
-        target->blockSize += var_a1->next->blockSize;
-        target->next = var_a1->next->next;
+    if ((target + target->blockSize) == previous_free->next) {
+        target->blockSize += previous_free->next->blockSize;
+        target->next = previous_free->next->next;
         target->next->prev = target;
     } else {
-        target->next = var_a1->next;
+        target->next = previous_free->next;
         target->next->prev = target;
     }
 
-    if ((var_a1 + var_a1->blockSize) == target) {
-        var_a1->blockSize += target->blockSize;
-        var_a1->next = target->next;
-        var_a1->next->prev = var_a1;
+    if ((previous_free + previous_free->blockSize) == target) {
+        previous_free->blockSize += target->blockSize;
+        previous_free->next = target->next;
+        previous_free->next->prev = previous_free;
         return;
     }
-    var_a1->next = target;
-    target->prev = var_a1;
+    previous_free->next = target;
+    target->prev = previous_free;
 }
 
 // decomp: SLUS_010.40 vs_main_allocHeapR (src/SLUS_010.40/main.c:8944)
 void* Core_Memory_AllocateFromHighEnd(u_int size)
 {
-    Core_HeapBlockHeader* var_a1;
-    Core_HeapBlockHeader* var_a2;
-    u_int blockSz;
+    Core_HeapBlockHeader* allocation_block;
+    Core_HeapBlockHeader* following_free;
+    u_int allocation_units;
 
-    blockSz = ((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1;
-    var_a2 = &Core_legacyHeapList;
-    var_a1 = Core_legacyHeapList.prev;
+    allocation_units = ((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1;
+    following_free = &Core_legacyHeapList;
+    allocation_block = Core_legacyHeapList.prev;
 
     while (1) {
-        if (var_a1->blockSize >= blockSz) {
-            if (var_a1->blockSize == blockSz) {
-                var_a2->prev = var_a1->prev;
-                var_a1->prev->next = var_a1->next;
+        if (allocation_block->blockSize >= allocation_units) {
+            if (allocation_block->blockSize == allocation_units) {
+                following_free->prev = allocation_block->prev;
+                allocation_block->prev->next = allocation_block->next;
             } else {
-                var_a1->blockSize = var_a1->blockSize - blockSz;
-                var_a1 += var_a1->blockSize;
-                var_a1->blockSize = blockSz;
+                allocation_block->blockSize = allocation_block->blockSize - allocation_units;
+                allocation_block += allocation_block->blockSize;
+                allocation_block->blockSize = allocation_units;
             }
-            return (u_long*)(var_a1 + 1);
+            return (u_long*)(allocation_block + 1);
         }
-        var_a2 = var_a1;
-        if (var_a1 == &Core_legacyHeapList) {
+        following_free = allocation_block;
+        if (allocation_block == &Core_legacyHeapList) {
             return 0;
         }
-        var_a1 = var_a1->prev;
+        allocation_block = allocation_block->prev;
     }
 }
 
 // decomp: SLUS_010.40 vs_main_allocHeap (src/SLUS_010.40/main.c:8974)
 void* Core_Memory_AllocateFromLowEnd(u_int size)
 {
-    u_int blockSz;
-    Core_HeapBlockHeader* var_a1;
-    Core_HeapBlockHeader* var_v1;
+    u_int allocation_units;
+    Core_HeapBlockHeader* allocation_block;
+    Core_HeapBlockHeader* previous_free;
 
-    var_v1 = &Core_legacyHeapList;
-    var_a1 = Core_legacyHeapList.next;
-    blockSz = ((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1;
+    previous_free = &Core_legacyHeapList;
+    allocation_block = Core_legacyHeapList.next;
+    allocation_units = ((size + sizeof(Core_HeapBlockHeader) - 1) / sizeof(Core_HeapBlockHeader)) + 1;
 
     while (1) {
-        if (var_a1->blockSize >= blockSz) {
-            if (var_a1->blockSize == blockSz) {
-                var_v1->next = var_a1->next;
-                var_a1->next->prev = var_a1->prev;
+        if (allocation_block->blockSize >= allocation_units) {
+            if (allocation_block->blockSize == allocation_units) {
+                previous_free->next = allocation_block->next;
+                allocation_block->next->prev = allocation_block->prev;
             } else {
-                Core_HeapBlockHeader* temp_v1 = var_a1 + blockSz;
-                temp_v1->blockSize = var_a1->blockSize - blockSz;
-                temp_v1->prev = var_a1->prev;
-                temp_v1->next = var_a1->next;
-                temp_v1->prev->next = temp_v1;
-                temp_v1->next->prev = temp_v1;
-                var_a1->blockSize = blockSz;
+                Core_HeapBlockHeader* remainder = allocation_block + allocation_units;
+                remainder->blockSize = allocation_block->blockSize - allocation_units;
+                remainder->prev = allocation_block->prev;
+                remainder->next = allocation_block->next;
+                remainder->prev->next = remainder;
+                remainder->next->prev = remainder;
+                allocation_block->blockSize = allocation_units;
             }
-            return (u_long*)(var_a1 + 1);
+            return (u_long*)(allocation_block + 1);
         }
-        var_v1 = var_a1;
-        if (var_a1 == &Core_legacyHeapList) {
+        previous_free = allocation_block;
+        if (allocation_block == &Core_legacyHeapList) {
             return 0;
         }
-        var_a1 = var_a1->next;
+        allocation_block = allocation_block->next;
     }
 }
 
 // decomp: SLUS_010.40 vs_main_initHeap (src/SLUS_010.40/main.c:9008)
-void Core_Memory_InitializeHeap(Core_HeapBlockHeader* node, u_int value)
+void Core_Memory_InitializeHeap(Core_HeapBlockHeader* node, u_int byte_count)
 {
     Core_legacyHeapList.prev = node;
     Core_legacyHeapList.next = node;
     Core_legacyHeapList.blockSize = 0;
     node->prev = &Core_legacyHeapList;
     node->next = &Core_legacyHeapList;
-    node->blockSize = value / sizeof(Core_HeapBlockHeader) - 1;
+    node->blockSize = byte_count / sizeof(Core_HeapBlockHeader) - 1;
     Core_legacySecondaryHeapList.prev = &Core_legacySecondaryHeapList;
     Core_legacySecondaryHeapList.next = &Core_legacySecondaryHeapList;
     Core_legacySecondaryHeapList.blockSize = 0;

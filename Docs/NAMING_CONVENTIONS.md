@@ -643,3 +643,61 @@ Copying and compiling everything (plan Step 4) showed six naming defects; each i
   T00838 -> T00836 (field references follow by index).
 - **Same-as field names:** a field reference through a same-as type now uses the canonical type's field at the same
   index, since only the canonical type is written.
+
+#### 11.6 Native semantic sweep (#148, 2026-10-27)
+
+The owner requires individual source review of every remaining candidate before
+#148 can close: apply a proven semantic name or record a specific justification
+for retaining it. A lexical inventory, an automatically populated unresolved
+list, a successful build, and a passing quality baseline do not meet that gate.
+Existing function/data/type/field ledgers remain the sources of truth; naming
+does not promote behavior, C++ ownership, or compatibility-retirement status.
+
+The source-backed generator batch covers:
+
+- F03449-F03460: 31 vibration bindings for port/motor indices, one-based slot
+  IDs, owner tags and fixed-point motor envelopes. F03460 deliberately retains
+  `var_a2_2` and `var_v0`: each is an unused declaration in original
+  `SLUS_010.40/main.c:8701/8704`, with no native read, write or initializer.
+  Inventing a runtime role for these two artifacts would be misleading.
+- 180 opcode ledger identities: 353 instruction/thread parameter bindings
+  (177 unique native names, 347 unique pairs). Both dispatch paths in original
+  `BATTLE/BATTLE.PRG/573B8.c:67-142` establish the shared call contract.
+- F01099/F00231: `ScriptClearRoomActorCache` and map/zone arguments follow
+  original `4A0A8.c:1780`, `146C.c:8509` and `146C.c:786`. This is a cache clear,
+  not the previously claimed room preload.
+- F03463-F03467: 10 allocator bindings describe search direction, free-list
+  predecessors, split remainders and native header units. They do not promise
+  fixed 16-byte alignment.
+- F01311/F03461: six further bindings name the raw stick-axis byte, preset
+  index and little-endian preset-directory indices. Original
+  `5BE50.c:82-91`, callers `5BF94.c:667-668`, and `main.c:139/8769-8785`
+  establish the meanings. `directory_stride` is both the four-byte entry
+  stride and the first offset-byte index after the count header; arithmetic
+  and signedness remain unchanged.
+
+Fresh local checks on base `804d1899` plus these edits and the pre-existing
+unrelated dirty work:
+
+- Debug and Release: `[input],[heap],[room-cache],[event]`, 41 cases and
+  912 assertions each. New input boundary/preset controls also passed before
+  the two input functions were renamed.
+- 126 copier and 32 naming tests pass in the dirty tree. This includes the
+  separately uncommitted title/owned-dispatch controls; it is not evidence that
+  their associated issues are complete.
+- The final input generation verifies exact expected identifier substitutions
+  across all 742 manifest paths, preserves all 121 registered owned paths,
+  and produces an identical manifest on the second generation.
+- Scoped formatting/lint/compilation-based analysis has no new findings;
+  the six existing event-test findings remain debt. The initially oversized
+  preset test was split through a fixture assertion helper without dropping
+  checks or changing the baseline.
+
+Evidence is local under `build\quality\issue148-reviewed-*`,
+`issue148-input-*`, and the earlier vibration/event/heap/room-name proof files.
+The refreshed lexical snapshot still has 24,710 occurrences, 2,145
+file/identifier pairs and 368 files. Those are **not reviewed-unknown counts**:
+the legacy regex also matches meaningful `speed`/`spec` and the standard-library
+`temp_directory_path`, and file/name pairs can combine several distinct
+bindings. Those matches need contextual classification, not cosmetic renaming
+or blanket exclusion. Repository-wide individual review remains open.

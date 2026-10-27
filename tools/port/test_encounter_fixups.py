@@ -1663,6 +1663,218 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertIn("2 * sizeof(Actors_ActorRecord)", allocation)
         self.assertIn("2 * sizeof(Actors_WeaponModel)", allocation)
 
+    def test_heap_names_preserve_native_header_units_and_search_direction(self):
+        examples = {
+            "Core::Memory::FreeFromHighEnd": (
+                "var_a1 = var_a1->prev; target->next = var_a1->next;",
+                "previous_free = previous_free->prev; "
+                "target->next = previous_free->next;",
+            ),
+            "Core::Memory::AllocateFromHighEnd": (
+                "blockSz = size; var_a2 = var_a1; "
+                "var_a1 += var_a1->blockSize;",
+                "allocation_units = size; following_free = allocation_block; "
+                "allocation_block += allocation_block->blockSize;",
+            ),
+            "Core::Memory::AllocateFromLowEnd": (
+                "temp_v1 = var_a1 + blockSz; var_v1->next = temp_v1;",
+                "remainder = allocation_block + allocation_units; "
+                "previous_free->next = remainder;",
+            ),
+            "Core::Memory::InitializeHeap": (
+                "node->blockSize = value / sizeof(Core_HeapBlockHeader) - 1;",
+                "node->blockSize = byte_count / "
+                "sizeof(Core_HeapBlockHeader) - 1;",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
+    def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            row = next(item for item in csv.DictReader(stream)
+                       if item["id"] == "F01099")
+        self.assertEqual(row["name"], "func_800B91C4")
+        self.assertEqual(row["final_name"], "Event::ScriptClearRoomActorCache")
+        source = (root / row["final_location"]).read_text(encoding="utf-8")
+        self.assertIn("func_800B91C4", source)
+        self.assertIn("Event_ScriptClearRoomActorCache", source)
+        self.assertNotIn("Event_ScriptPreloadRoom", source)
+        self.assertIn(
+            "Field_ClearSavedRoomEnemies(instruction[2], instruction[1]);",
+            source,
+        )
+
+    def test_event_parameter_scope_matches_registered_opcode_handlers(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(
+            encoding="utf-8", newline=""
+        ) as stream:
+            scope = {
+                row["id"] for row in csv.DictReader(stream)
+                if re.match(r"^Event::(?:Script|Command)", row["final_name"])
+            }
+        self.assertEqual(scope, copy_fixups.EVENT_OPCODE_HANDLERS)
+
+    def test_event_opcode_parameter_names_follow_the_dispatch_contract(self):
+        examples = (
+            "Event::ScriptBranchOnFlagImmediate",
+            "Event::ScriptPlayActorAnimation",
+            "Event::CommandStartScriptContext",
+            "Event::CommandLoadNextEvent",
+        )
+        original = (
+            "intptr_t Handler(u_char* arg0, short arg1) "
+            "{ return arg0[Event_threadWaitFrames[arg1]]; }"
+        )
+        expected = (
+            "intptr_t Handler(u_char* instruction, short thread_index) "
+            "{ return instruction[Event_threadWaitFrames[thread_index]]; }"
+        )
+        for name in examples:
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
+    def test_event_opcode_naming_does_not_change_non_handler_parameters(self):
+        original = "int Utility(int arg0, int arg1) { return arg0 + arg1; }"
+        for name in ("Event::EvaluateRoomEventTriggers", "Event::OpcodeSize"):
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, original)
+
+    def test_vibration_names_are_scoped_identifier_only_changes(self):
+        examples = {
+            "Input::MapStickDeadZone": (
+                "int Map(int arg0) { if (arg0 < 64) return arg0 - 64; "
+                "if (arg0 >= 192) return arg0 - 192; return 0; }",
+                "int Map(int axis_byte) { "
+                "if (axis_byte < 64) return axis_byte - 64; "
+                "if (axis_byte >= 192) return axis_byte - 192; return 0; }",
+            ),
+            "Input::PlayVibrationPreset": (
+                "void Play(int arg0) { int new_var4, new_var, new_var3, new_var2; "
+                "if (arg0 < presets[0]) { new_var = 5; new_var3 = 4; "
+                "new_var4 = 6; new_var2 = 7; "
+                "Start(&presets[presets[arg0 * new_var3 + new_var3] "
+                "+ (presets[arg0 * new_var3 + new_var] << 8) "
+                "+ (presets[arg0 * new_var3 + new_var4] << 16) "
+                "+ (presets[arg0 * new_var3 + new_var2] << 24)], 255, 128); }}",
+                "void Play(int preset_index) { int offset_byte2_index, "
+                "offset_byte1_index, directory_stride, offset_byte3_index; "
+                "if (preset_index < presets[0]) { offset_byte1_index = 5; "
+                "directory_stride = 4; offset_byte2_index = 6; "
+                "offset_byte3_index = 7; "
+                "Start(&presets[presets[preset_index * directory_stride "
+                "+ directory_stride] "
+                "+ (presets[preset_index * directory_stride "
+                "+ offset_byte1_index] << 8) "
+                "+ (presets[preset_index * directory_stride "
+                "+ offset_byte2_index] << 16) "
+                "+ (presets[preset_index * directory_stride "
+                "+ offset_byte3_index] << 24)], 255, 128); }}",
+            ),
+            "Input::MotorCommand": (
+                "char Input_MotorCommand(int port, int pos) "
+                "{ return Input_controllerPorts[port].actuatorLevels[pos]; }",
+                "char Input_MotorCommand(int port_index, int motor_index) "
+                "{ return Input_controllerPorts[port_index]."
+                "actuatorLevels[motor_index]; }",
+            ),
+            "Input::ResetVibrationPatterns": (
+                "int i; for (i = 0; i < 2; ++i) slots[i].active = 0;",
+                "int slot_index; for (slot_index = 0; slot_index < 2; "
+                "++slot_index) slots[slot_index].active = 0;",
+            ),
+            "Input::RoundMotorIntensityTowardZero": (
+                "int Round(int arg) { return arg < 0 ? arg += 0xFF : arg; }",
+                "int Round(int intensity_q8) { return intensity_q8 < 0 ? "
+                "intensity_q8 += 0xFF : intensity_q8; }",
+            ),
+            "Input::SetMotorCommand": (
+                "void Input_SetMotorCommand(int port, int pos, int val) "
+                "{ Input_controllerPorts[port].actuatorLevels[pos] = val; }",
+                "void Input_SetMotorCommand(int port_index, int motor_index, "
+                "int command) { Input_controllerPorts[port_index]."
+                "actuatorLevels[motor_index] = command; }",
+            ),
+            "Input::StartVibrationPattern": (
+                "int Start(char* arg0, u_int arg1, int arg2) "
+                "{ int i = 0; int ret = arg1; slots[i].pattern = arg0; "
+                "slots[i].ownerTag = arg2; return ret; }",
+                "int Start(char* pattern, u_int slot_request, int owner_tag) "
+                "{ int slot_index = 0; int slot_id = slot_request; "
+                "slots[slot_index].pattern = pattern; "
+                "slots[slot_index].ownerTag = owner_tag; return slot_id; }",
+            ),
+            "Input::StopVibrationPatterns": (
+                "int Stop(u_int arg0, int arg1) "
+                "{ int i; if (arg0 - 1 < 2) return Clear(arg0); "
+                "for (i = 0; i < 2; ++i) "
+                "if (slots[i].ownerTag == arg1) Clear(i + 1); return 1; }",
+                "int Stop(u_int slot_selector, int owner_tag) "
+                "{ int slot_cursor; if (slot_selector - 1 < 2) "
+                "return Clear(slot_selector); "
+                "for (slot_cursor = 0; slot_cursor < 2; ++slot_cursor) "
+                "if (slots[slot_cursor].ownerTag == owner_tag) "
+                "Clear(slot_cursor + 1); return 1; }",
+            ),
+            "Input::UpdateVibrationPatterns": (
+                "int temp_a0, var_a2_2, i, j, var_v0, new_var; "
+                "char* temp_t1; int (*a1)[6]; "
+                "new_var = i != 0; a1[i][5] = temp_t1[temp_a0++]; "
+                "slots[j].active = a1[i][0];",
+                "int pattern_offset, var_a2_2, motor_index, slot_index, "
+                "var_v0, interpolate_intensity; "
+                "char* pattern; int (*motor_envelopes)[6]; "
+                "interpolate_intensity = motor_index != 0; "
+                "motor_envelopes[motor_index][5] = pattern[pattern_offset++]; "
+                "slots[slot_index].active = motor_envelopes[motor_index][0];",
+            ),
+        }
+        for action in ("Clear", "Pause", "Resume"):
+            index = "i" if action == "Clear" else "v0"
+            examples[f"Input::{action}VibrationSlot"] = (
+                f"int Slot(int arg0) {{ int {index} = arg0 - 1; "
+                f"slots[{index}].active = 0; return arg0; }}",
+                "int Slot(int slot_id) { int slot_index = slot_id - 1; "
+                "slots[slot_index].active = 0; return slot_id; }",
+            )
+        for action in ("Pause", "Resume"):
+            examples[f"Input::{action}VibrationPatterns"] = (
+                "int Select(int arg0) { int i; "
+                "if ((arg0 - 1u) < 2) return Slot(arg0); "
+                "for (i = 0; i < 2;) Slot(++i); return 1; }",
+                "int Select(int slot_selector) { int slot_id; "
+                "if ((slot_selector - 1u) < 2) return Slot(slot_selector); "
+                "for (slot_id = 0; slot_id < 2;) Slot(++slot_id); return 1; }",
+            )
+        for name, (source, expected) in examples.items():
+            with self.subTest(name=name):
+                renamed = source
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        renamed = re.sub(pattern, replacement, renamed)
+                self.assertEqual(renamed, expected)
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, "Content::Unrelated"):
+                        source = re.sub(pattern, replacement, source)
+                self.assertNotEqual(source, renamed)
+
     def test_geometry_copy_preserves_offsets_and_verified_parameter_names(self):
         source = """void* Content_CopyModelGeometry(int* arg0, void* arg1, int arg2)
 {

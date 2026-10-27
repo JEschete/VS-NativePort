@@ -48,46 +48,46 @@ char Event_skipNextFieldCameraRestore;
 Event_CameraState* Event_camera;
 
 // decomp: BATTLE.PRG func_800BB33C (src/BATTLE/BATTLE.PRG/4A0A8.c:2761)
-intptr_t Event_CommandStopCameraMotion(u_char* arg0, short arg1)
+intptr_t Event_CommandStopCameraMotion(u_char* instruction, short thread_index)
 {
     Event_StopEventCameraMotion();
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2767)
-intptr_t Event_CommandSetCameraFollowing(u_char* arg0, short arg1)
+intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index)
 {
-    int new_var = arg0[1] & 2;
-    Event_SetEventCameraFollowing(arg0[1] & 1, new_var != 0);
+    int new_var = instruction[1] & 2;
+    Event_SetEventCameraFollowing(instruction[1] & 1, new_var != 0);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB38C (src/BATTLE/BATTLE.PRG/4A0A8.c:2774)
-intptr_t Event_CommandSetCameraOriginActor(u_char* arg0, short arg1)
+intptr_t Event_CommandSetCameraOriginActor(u_char* instruction, short thread_index)
 {
-    Event_SetEventCameraOriginActor(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 1)));
+    Event_SetEventCameraOriginActor(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB3BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2780)
-intptr_t Event_CommandRestoreFieldCamera(u_char* arg0, short arg1)
+intptr_t Event_CommandRestoreFieldCamera(u_char* instruction, short thread_index)
 {
     Event_RestoreEventFieldCamera(
-        arg0[1] != 0xFF ? ((arg0[1] + 4) & 7) : -1, arg0[2] != 0 ? arg0[2] : -1);
+        instruction[1] != 0xFF ? ((instruction[1] + 4) & 7) : -1, instruction[2] != 0 ? instruction[2] : -1);
     Event_isFieldCameraRestoreScripted = 1;
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800BB41C (src/BATTLE/BATTLE.PRG/4A0A8.c:2788)
-intptr_t Event_CommandWaitCameraTracks(u_char* arg0, short arg1)
+intptr_t Event_CommandWaitCameraTracks(u_char* instruction, short thread_index)
 {
-    return arg0[1] != (arg0[1] & Event_EventCameraCompletionMask());
+    return instruction[1] != (instruction[1] & Event_EventCameraCompletionMask());
 }
 
 // decomp: BATTLE.PRG func_800BB450 (src/BATTLE/BATTLE.PRG/4A0A8.c:2793)
-intptr_t Event_CommandSetScreenCapture(u_char* arg0, short arg1)
+intptr_t Event_CommandSetScreenCapture(u_char* instruction, short thread_index)
 {
-    Render_SetFramebufferEffectEnabled(arg0[1]);
+    Render_SetFramebufferEffectEnabled(instruction[1]);
     return 0;
 }
 
@@ -709,11 +709,11 @@ int Event_EventCameraGroundClearance(MATRIX* arg0)
 }
 
 // decomp: BATTLE.PRG func_800BD444 (src/BATTLE/BATTLE.PRG/4A0A8.c:3601)
-intptr_t Event_CommandTweenCameraRoll(u_char* arg0, short arg1)
+intptr_t Event_CommandTweenCameraRoll(u_char* instruction, short thread_index)
 {
     Event_AngleTween* var_s0;
 
-    switch (arg0[0]) {
+    switch (instruction[0]) {
     case 0xE2:
         var_s0 = &Event_camera->cameraRoll;
         break;
@@ -722,21 +722,21 @@ intptr_t Event_CommandTweenCameraRoll(u_char* arg0, short arg1)
         break;
     }
 
-    var_s0->durationFrames = arg0[4];
+    var_s0->durationFrames = instruction[4];
 
     if (var_s0->durationFrames == 0) {
-        var_s0->angle = Core_Memory_ReadUnalignedShort(arg0 + 1);
+        var_s0->angle = Core_Memory_ReadUnalignedShort(instruction + 1);
         var_s0->hasChanged = 1;
     } else {
         var_s0->startAngle = var_s0->angle;
-        var_s0->deltaAngle = Core_Memory_ReadUnalignedShort(arg0 + 1) - var_s0->angle;
+        var_s0->deltaAngle = Core_Memory_ReadUnalignedShort(instruction + 1) - var_s0->angle;
         if (var_s0->deltaAngle < -(ONE / 2)) {
             var_s0->deltaAngle += ONE;
         } else if (var_s0->deltaAngle > (ONE / 2)) {
             var_s0->deltaAngle -= ONE;
         }
 
-        switch (arg0[3] >> 4) {
+        switch (instruction[3] >> 4) {
         case 0:
             if (var_s0->deltaAngle > 0) {
                 var_s0->deltaAngle -= ONE;
@@ -749,7 +749,7 @@ intptr_t Event_CommandTweenCameraRoll(u_char* arg0, short arg1)
             break;
         }
 
-        var_s0->easingMode = arg0[3] & 0xF;
+        var_s0->easingMode = instruction[3] & 0xF;
         var_s0->elapsedFrames = 0;
     }
     return 0;
@@ -802,7 +802,7 @@ int Event_EventCameraCompletionMask(void)
 }
 
 // decomp: BATTLE.PRG func_800BD6C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:3691)
-intptr_t Event_CommandScreenTransform(u_char* script, short arg1)
+intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
 {
     Render_FramebufferEffectTranslation values;
     CVECTOR color;
@@ -976,7 +976,7 @@ int Event_UpdateEventTripleTween(Event_TripleTween* arg0)
 }
 
 // decomp: BATTLE.PRG func_800BDC9C (src/BATTLE/BATTLE.PRG/4A0A8.c:3862)
-intptr_t Event_CommandCameraLensOrShake(u_char* script, short arg1)
+intptr_t Event_CommandCameraLensOrShake(u_char* script, short thread_index)
 {
     Event_ShakeOscillator* entry;
     short i;

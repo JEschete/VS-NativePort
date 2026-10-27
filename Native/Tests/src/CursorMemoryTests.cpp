@@ -104,6 +104,14 @@ struct CursorFixture {
   }
 };
 
+void CheckNativeHeapAllocation(void* allocation, std::size_t units) {
+  const auto* header = static_cast<Core_HeapBlockHeader*>(allocation) - 1;
+  CHECK(header->blockSize == units);
+  CHECK(reinterpret_cast<std::uintptr_t>(allocation) %
+            alignof(Core_HeapBlockHeader) ==
+        0);
+}
+
 struct PuzzleOptionsFixture {
   CursorFixture rows;
   std::array<u_short, 1070> saved_table =
@@ -649,6 +657,45 @@ std::vector<unsigned char> ReadWorkshopRecipe(std::string_view file) {
   SKIP("Extracted original workshop recipe is unavailable");
 }
 }  // namespace
+
+TEST_CASE(
+    "Heap allocation splitting uses native header units in both directions",
+    "[memory][heap]") {
+  CursorFixture fixture;
+  const bool from_high = GENERATE(false, true);
+  const auto allocate = from_high ? Core_Memory_AllocateFromHighEnd
+                                  : Core_Memory_AllocateFromLowEnd;
+  const auto release =
+      from_high ? Core_Memory_FreeFromHighEnd : Core_Memory_FreeFromLowEnd;
+  constexpr std::size_t kUnit = sizeof(Core_HeapBlockHeader);
+  constexpr u_int kBytes = static_cast<u_int>(kUnit + 1);
+  constexpr std::size_t kAllocationUnits = (kBytes + kUnit - 1) / kUnit + 1;
+  const auto available = Core_legacyHeapList.next->blockSize;
+  void* first = allocate(kBytes);
+  void* second = allocate(kBytes);
+  REQUIRE(first != nullptr);
+  REQUIRE(second != nullptr);
+  CheckNativeHeapAllocation(first, kAllocationUnits);
+  CheckNativeHeapAllocation(second, kAllocationUnits);
+  CHECK(Core_legacyHeapList.next->blockSize ==
+        available - 2 * kAllocationUnits);
+  release(first);
+  release(second);
+  CHECK(Core_legacyHeapList.next == fixture.heap.data());
+  CHECK(Core_legacyHeapList.prev == fixture.heap.data());
+  CHECK(Core_legacyHeapList.next->blockSize == available);
+}
+
+TEST_CASE("Heap setup and allocation do not manufacture initialized payloads",
+          "[memory][heap]") {
+  CursorFixture fixture;
+  auto* payload = reinterpret_cast<std::byte*>(fixture.heap.data() + 1);
+  std::fill_n(payload, sizeof(Core_HeapBlockHeader), std::byte{0xCD});
+  void* allocation = Core_Memory_AllocateFromLowEnd(1);
+  REQUIRE(allocation == payload);
+  CHECK(*static_cast<std::byte*>(allocation) == std::byte{0xCD});
+  Core_Memory_FreeFromLowEnd(allocation);
+}
 
 TEST_CASE("Workshop repair restores DP with original rounded PP cost",
           "[menu][equipment][workshop][repair]") {

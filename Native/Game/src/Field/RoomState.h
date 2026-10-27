@@ -11,7 +11,7 @@
 
 extern int Field_isRoomVisitPending;
 void Field_MarkCurrentRoomVisited(void);
-void Field_ClearSavedRoomEnemies(int arg0, int arg1);
+void Field_ClearSavedRoomEnemies(int mapId, int zoneId);
 void Field_ShowPrimaryRoomGeometry(void);
 void Field_HidePrimaryRoomGeometry(void);
 void Field_CancelPendingRoomVisit(void);

@@ -2229,6 +2229,48 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Input::MapStickDeadZone$", r"\barg0\b", "axis_byte",
+     "5BE50.c:82-91 and 5BF94.c:667-668 map the raw right-stick axis byte outside64..191"),
+    *[(r"^Input::PlayVibrationPreset$", rf"\b{old}\b", new,
+       "main.c:139/8769-8785 four-byte directory entries hold little-endian pattern offsets after the count header")
+      for old, new in (("arg0", "preset_index"),
+                       ("new_var3", "directory_stride"),
+                       ("new_var", "offset_byte1_index"),
+                       ("new_var4", "offset_byte2_index"),
+                       ("new_var2", "offset_byte3_index"))],
+    *[(r"^Input::(?:SetMotorCommand|MotorCommand)$", rf"\b{old}\b", new,
+       "main.c:8551-8562 actuator storage is indexed by controller port and motor")
+      for old, new in (("port", "port_index"), ("pos", "motor_index"),
+                       ("val", "command"))],
+    *[(r"^Input::StartVibrationPattern$", rf"\b{old}\b", new,
+       "main.c:8564-8593 and func_800433B4.s: slots are one-based; 255 requests a free slot")
+      for old, new in (("arg0", "pattern"), ("arg1", "slot_request"),
+                       ("arg2", "owner_tag"), ("i", "slot_index"),
+                       ("ret", "slot_id"))],
+    (r"^Input::(?:Clear|Pause|Resume)VibrationSlot$", r"\barg0\b", "slot_id",
+     "main.c:8596/8630/8656 subtract one from the public slot ID before indexing storage"),
+    (r"^Input::ClearVibrationSlot$", r"\bi\b", "slot_index",
+     "main.c:8598 derives the zero-based slot index from the one-based ID"),
+    (r"^Input::(?:Pause|Resume)VibrationSlot$", r"\bv0\b", "slot_index",
+     "main.c:8632/8658 derive the zero-based slot index from the one-based ID"),
+    (r"^Input::(?:Stop|Pause|Resume)VibrationPatterns$", r"\barg0\b", "slot_selector",
+     "main.c:8607/8637/8663 accept one slot ID or zero to select all slots"),
+    (r"^Input::StopVibrationPatterns$", r"\barg1\b", "owner_tag",
+     "main.c:8616-8620 and 4A0A8.c:2523 match the owner tag assigned when starting a pattern"),
+    (r"^Input::StopVibrationPatterns$", r"\bi\b", "slot_cursor",
+     "main.c:8617-8625 uses a zero-based search cursor or increments it to the one-based clear ID"),
+    (r"^Input::(?:Pause|Resume)VibrationPatterns$", r"\bi\b", "slot_id",
+     "main.c:8650/8676 increments from zero before passing each one-based slot ID"),
+    (r"^Input::ResetVibrationPatterns$", r"\bi\b", "slot_index",
+     "main.c:8688 iterates the two stored vibration slots"),
+    (r"^Input::RoundMotorIntensityTowardZero$", r"\barg\b", "intensity_q8",
+     "main.c:8764-8765 and vs_main_setVibrateParams.s:8004387C-800438B4 round before shifting eight bits"),
+    *[(r"^Input::UpdateVibrationPatterns$", rf"\b{old}\b", new,
+       "main.c:8710-8756 and vs_main_setVibrateParams.s: slot/motor loops, bytecode cursor and six-word envelopes")
+      for old, new in (("temp_a0", "pattern_offset"), ("i", "motor_index"),
+                       ("j", "slot_index"), ("temp_t1", "pattern"),
+                       ("a1", "motor_envelopes"),
+                       ("new_var", "interpolate_intensity"))],
     (r"^Actors::UpdateAndDrawRoomActors$",
      r"(?s)if \(\((actor|attached)->soundEffect\.kind == 1\)\s*"
      r"&& \1->soundEffect\.parameter != 0\) \{.*?"
@@ -2270,6 +2312,27 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
                        ("i", "variantIndex"))],
     (r"^Menu::Score::LoadEnemyModelParts$", r"\bslot\b", "request",
      "592C.c:203 the local is an asset request, not a queue slot"),
+    *[(r"^Core::Memory::FreeFrom(?:High|Low)End$", r"\bvar_a1\b", "previous_free",
+       "main.c:8884/8914 locate the free-list insertion predecessor before coalescing")],
+    *[(r"^Core::Memory::AllocateFromHighEnd$", rf"\b{old}\b", new,
+       "main.c:8944 searches backward and splits allocation units from the selected block tail")
+      for old, new in (("var_a1", "allocation_block"),
+                       ("var_a2", "following_free"),
+                       ("blockSz", "allocation_units"))],
+    *[(r"^Core::Memory::AllocateFromLowEnd$", rf"\b{old}\b", new,
+       "main.c:8974 searches forward and preserves the split remainder as a free block")
+      for old, new in (("var_a1", "allocation_block"),
+                       ("var_v1", "previous_free"),
+                       ("temp_v1", "remainder"),
+                       ("blockSz", "allocation_units"))],
+    (r"^Core::Memory::InitializeHeap$", r"\bvalue\b", "byte_count",
+     "main.c:9008 divides the supplied arena byte extent by sizeof the native heap header"),
+    *[(r"^Field::ClearSavedRoomEnemies$", rf"\b{old}\b", new,
+       "146C.c:8509 forwards room and zone to the matching actor-state cache clear at146C.c:789")
+      for old, new in (("arg0", "mapId"), ("arg1", "zoneId"))],
+    *[(r"^Event::(?:Script|Command)", rf"\b{old}\b", new,
+       "573B8.c:67-142 dispatches the current instruction and thread index through both opcode tables")
+      for old, new in (("arg0", "instruction"), ("arg1", "thread_index"))],
     *[(r"^Content::CopyModelGeometry$", rf"\b{old}\b", new,
        "30DB0.c:507 verified geometry-copy parameter meaning")
       for old, new in (("arg0", "destination"), ("arg1", "source"),
