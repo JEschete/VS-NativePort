@@ -970,3 +970,20 @@ patterns. Fifty unchanged, unmatched `apply_fixups` calls compile regexes
 34,750 times, and repeat generation takes about 59 seconds. This measured
 cache-thrashing defect is tracked separately; performance repairs must preserve
 rule order, dynamic rule-list behavior, used-fixup reporting and exact output.
+
+#219 now has a locally verified pattern-cache repair on dirty base `4652e031`.
+The isolated 600-selector regression fails before the repair with 1,800
+compilations instead of 600; afterward it performs 600 cold compilations and
+zero on the next pass. Separate controls preserve literal-before-regex order,
+newly appended rules, changed replacement strings, unanchored searches,
+inline flags, backreferences and exact used-fixup keys.
+
+The actual 1,919-rule benchmark drops from 34,750 compilations for 50 calls
+to 695 cold and zero hot compilations for two 50-call rounds (0.034 seconds
+combined). Full generations take 7.68 and 6.94 seconds instead of about 59
+seconds each. Both manifests and all 742 generated/121 owned paths remain
+byte-identical, including the newly recorded field-retention notes.
+All 139 dirty-tree copier controls and focused tooling quality pass without
+baseline changes. This caches immutable pattern strings only: rule lists and
+replacement values are still read in order on every invocation.
+Evidence: `build\quality\issue219-*` and `issue148-regex-cache-before.json`.

@@ -41,6 +41,7 @@ import json
 import re
 import sys
 from dataclasses import dataclass, field
+from functools import cache
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
@@ -92,6 +93,12 @@ REMOVED = set(re.findall(r"static inline [\w\s\*]+?\b(\w+)\(",
                          (NATIVE / "Engine" / "Legacy" / "Removed.h").read_text(encoding="utf-8")))
 # The game's scratch block (vs_scratch) is the start of the PS1 scratch memory, which getScratchAddr(n) also reaches.
 SCRATCH_GLOBAL = "G00011"
+
+
+@cache
+def compiled_fixup_regex(pattern: str) -> re.Pattern[str]:
+    """Keep immutable fixup patterns outside re's bounded shared cache."""
+    return re.compile(pattern)
 
 
 def delete_removed_calls(text: str) -> tuple[str, int]:
@@ -809,8 +816,8 @@ class Copier:
             text = text.replace(old, new)
             self.used_fixups.add((r["id"], old))
         for row_rx, pat, rep, _reason in cf.REGEX_FIXES:
-            if re.search(row_rx, r["final_name"]):
-                text, n = re.subn(pat, rep, text)
+            if compiled_fixup_regex(row_rx).search(r["final_name"]):
+                text, n = compiled_fixup_regex(pat).subn(rep, text)
                 if n:
                     self.used_fixups.add((row_rx, pat))
         return text

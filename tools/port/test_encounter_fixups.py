@@ -5,9 +5,11 @@ import re
 import runpy
 import unittest
 from pathlib import Path
+from unittest import mock
 
 import audit_assembly_gaps
 import copy_fixups
+import copy_to_native
 import native_views
 
 
@@ -1938,6 +1940,67 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertIn("void Load(int requested_room_id) { int mpd_section_offset = 0;", source)
         self.assertIn("cleared_section_address", source)
         self.assertIn("reset_tail_words", source)
+
+    def test_regex_fixups_compile_each_distinct_selector_once(self):
+        copy_to_native.compiled_fixup_regex.cache_clear()
+        self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        rules = [
+            (rf"^RegexCacheFixture::{index}$", r"\barg0\b", "value", "fixture")
+            for index in range(600)
+        ]
+        row = {"id": "REGEX_CACHE_FIXTURE", "final_name": "Unrelated::NoMatch"}
+        re.purge()
+        with (
+            mock.patch.object(copy_fixups, "REGEX_FIXES", rules),
+            mock.patch("re._compiler.compile", wraps=re._compiler.compile) as compile_regex,
+        ):
+            for _ in range(3):
+                self.assertEqual(copier.apply_fixups(row, "arg0"), "arg0")
+            self.assertEqual(compile_regex.call_count, 600)
+            compile_regex.reset_mock()
+            self.assertEqual(copier.apply_fixups(row, "arg0"), "arg0")
+            self.assertEqual(compile_regex.call_count, 0)
+
+    def test_regex_fixups_keep_order_and_observe_rule_list_changes(self):
+        copy_to_native.compiled_fixup_regex.cache_clear()
+        self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        row = {"id": "REGEX_ORDER_FIXTURE", "final_name": "Fixture::Ordered"}
+        rules = [
+            (r"^Fixture::Ordered$", r"\barg0\b", "middle", "first"),
+            (r"^Fixture::Ordered$", r"\bmiddle\b", "result", "second"),
+        ]
+        with (
+            mock.patch.dict(copy_fixups.FIXES, {row["id"]: [("SOURCE", "arg0", "literal")]}),
+            mock.patch.object(copy_fixups, "REGEX_FIXES", rules),
+        ):
+            self.assertEqual(copier.apply_fixups(row, "SOURCE"), "result")
+            self.assertEqual(
+                copier.used_fixups,
+                {(row["id"], "SOURCE"), (rules[0][0], rules[0][1]),
+                 (rules[1][0], rules[1][1])},
+            )
+            rules.append((r"^Fixture::Ordered$", r"\bresult\b", "updated", "third"))
+            self.assertEqual(copier.apply_fixups(row, "SOURCE"), "updated")
+            rules[0] = (rules[0][0], rules[0][1], "different", "replacement changed")
+            self.assertEqual(copier.apply_fixups(row, "SOURCE"), "different")
+
+    def test_regex_fixups_preserve_search_flags_and_backreferences(self):
+        copy_to_native.compiled_fixup_regex.cache_clear()
+        self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        row = {"id": "REGEX_FLAGS_FIXTURE", "final_name": "Prefix::FIXTURE::Nested"}
+        rule = (r"(?i)fixture::", r"(?i)\barg([01])\b", r"parameter_\1", "fixture")
+        with mock.patch.object(copy_fixups, "REGEX_FIXES", [rule]):
+            self.assertEqual(
+                copier.apply_fixups(row, "ARG0 + arg1"),
+                "parameter_0 + parameter_1",
+            )
+            self.assertEqual(copier.used_fixups, {(rule[0], rule[1])})
 
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
