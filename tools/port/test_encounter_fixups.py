@@ -2033,6 +2033,41 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
             )
             self.assertEqual(copier.used_fixups, {(rule[0], rule[1])})
 
+    def test_identifier_fixups_preserve_comments_and_literal_data(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        source = r'''int arg0 = 0; // arg0
+/* arg0 */ const char* text = "arg0 \"arg0";
+const char* raw = R"tag(arg0 // still literal)tag";
+int character = 'arg0';
+arg0++;
+int arg01 = arg0;'''
+        expected = source.replace("int arg0 = 0;", "int actor_id = 0;")
+        expected = expected.replace("arg0++;", "actor_id++;")
+        expected = expected.replace("int arg01 = arg0;", "int arg01 = actor_id;")
+        rule = (r"^Fixture$", r"\barg0\b", "actor_id", "identifier only")
+        with mock.patch.object(copy_fixups, "REGEX_FIXES", [rule]):
+            self.assertEqual(
+                copier.apply_fixups({"id": "IDENTIFIER_FIXTURE",
+                                     "final_name": "Fixture"}, source),
+                expected,
+            )
+        self.assertEqual(copier.used_fixups, {(rule[0], rule[1])})
+
+    def test_explicit_literal_fixups_keep_their_existing_regex_contract(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        rule = (r"^Fixture$", r'"legacy-name"', '"native-name"', "explicit literal")
+        with mock.patch.object(copy_fixups, "REGEX_FIXES", [rule]):
+            self.assertEqual(
+                copier.apply_fixups(
+                    {"id": "LITERAL_FIXTURE", "final_name": "Fixture"},
+                    'const char* name = "legacy-name";',
+                ),
+                'const char* name = "native-name";',
+            )
+        self.assertEqual(copier.used_fixups, {(rule[0], rule[1])})
+
     def test_room_actor_cache_opcode_name_preserves_original_provenance(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\FUNCTION_CATALOG.csv").open(

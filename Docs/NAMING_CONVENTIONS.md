@@ -1015,3 +1015,18 @@ two stable generations. Evidence: `build\quality\issue148-menu-*`.
 The original four-extension lexical count is now 11,869 occurrences/1,074
 pairs/262 files; the separately discovered inline template bodies are still
 included in the remaining review work, not silently excluded.
+
+The battle cohort's code-token proof caught #220 before publication: an exact
+identifier rule also rewrote the original `var_s4` provenance comment.
+The copier now uses the existing C/C++ literal/comment mask for exact
+whole-identifier-to-identifier substitutions only. General structural and
+explicit literal regex rewrites retain their previous semantics and ordering.
+Red/green controls cover ordinary code, line/block comments, escaped strings,
+raw strings, character literals, longer identifiers and explicit literal edits.
+
+Two complete generations then match every source-reviewed battle identifier
+change while preserving all comments/literals/types/operators and all 121
+owned paths. All 143 dirty-tree source-adaptation controls and focused tooling
+quality pass without baseline changes. Evidence: `build\quality\issue220-*`
+and `issue148-battle-verification.json`. #220 remains subject to its own
+fixing-commit/exact-CI gate; it is not permission to weaken #148's review gate.

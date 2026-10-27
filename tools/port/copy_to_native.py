@@ -48,6 +48,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import copy_fixups as cf  # noqa: E402
 import decomp_index as dx  # noqa: E402
 import native_views as nv  # noqa: E402
+from audit_assembly_gaps import mask_literals  # noqa: E402
 from ref_index import RESIDENT, overlay_of  # noqa: E402
 from ref_index import norm_key as rx_norm  # noqa: E402
 
@@ -60,6 +61,7 @@ OWNED = REPO / "tools" / "port" / "owned.csv"
 NATIVE = REPO / "Native"
 LEGACY_HEADER = "Legacy/Psx.h"
 IDENT = re.compile(r"[A-Za-z_]\w*")
+IDENTIFIER_FIXUP = re.compile(r"\\b[A-Za-z_]\w*\\b")
 
 # Strategy R (SDK_API_LEDGER.md): SDK calls rewritten to the native API at copy time.
 GTE_FUNCS = {n: f"Core_Gte_{n}" for n in (
@@ -99,6 +101,16 @@ SCRATCH_GLOBAL = "G00011"
 def compiled_fixup_regex(pattern: str) -> re.Pattern[str]:
     """Keep immutable fixup patterns outside re's bounded shared cache."""
     return re.compile(pattern)
+
+
+def substitute_fixup(text: str, pattern: str, replacement: str) -> tuple[str, int]:
+    compiled = compiled_fixup_regex(pattern)
+    if IDENTIFIER_FIXUP.fullmatch(pattern) and IDENT.fullmatch(replacement):
+        matches = list(compiled.finditer(mask_literals(text)))
+        for match in reversed(matches):
+            text = text[:match.start()] + replacement + text[match.end():]
+        return text, len(matches)
+    return compiled.subn(replacement, text)
 
 
 def delete_removed_calls(text: str) -> tuple[str, int]:
@@ -817,7 +829,7 @@ class Copier:
             self.used_fixups.add((r["id"], old))
         for row_rx, pat, rep, _reason in cf.REGEX_FIXES:
             if compiled_fixup_regex(row_rx).search(r["final_name"]):
-                text, n = compiled_fixup_regex(pat).subn(rep, text)
+                text, n = substitute_fixup(text, pat, rep)
                 if n:
                     self.used_fixups.add((row_rx, pat))
         return text
