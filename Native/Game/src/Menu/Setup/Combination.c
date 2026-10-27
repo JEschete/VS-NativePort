@@ -160,23 +160,23 @@ Menu_Framework_MenuRow* Menu_Setup_AnimateCombinationResult(int itemType, int in
 }
 
 // decomp: MENUC.PRG _setCombineBladeUi (src/MENU/MENUC.PRG/168.c:2735)
-void Menu_Setup_PreviewBladeCombination(int arg0)
+void Menu_Setup_PreviewBladeCombination(int preview_selection)
 {
     int i;
-    int var_s3;
-    u_int temp_v1;
-    int temp_s2;
+    int ingredient_presence_mask;
+    u_int selected_ingredient_index;
+    int second_blade_id;
     Items_InventoryBlade* blade;
 
     i = Menu_Setup_combiningBladeIds[0];
-    temp_s2 = Menu_Setup_combiningBladeIds[1];
+    second_blade_id = Menu_Setup_combiningBladeIds[1];
 
-    var_s3 = i != 0;
-    if (temp_s2 != 0) {
-        var_s3 += 2;
+    ingredient_presence_mask = i != 0;
+    if (second_blade_id != 0) {
+        ingredient_presence_mask += 2;
     }
 
-    switch (var_s3) {
+    switch (ingredient_presence_mask) {
     case 0:
         Core_Memory_ZeroWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
         break;
@@ -184,13 +184,13 @@ void Menu_Setup_PreviewBladeCombination(int arg0)
     case 1:
     case 2:
         Core_Memory_CopyHalfwords(
-            &Menu_Setup_bladeBuf, &Audio_Seq_unusedInventory.blades[i + temp_s2 - 1], sizeof Menu_Setup_bladeBuf);
+            &Menu_Setup_bladeBuf, &Audio_Seq_unusedInventory.blades[i + second_blade_id - 1], sizeof Menu_Setup_bladeBuf);
         break;
 
     case 3:
         Core_Memory_ZeroWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
         Menu_Setup_BuildCombinedBlade(&Audio_Seq_unusedInventory.blades[i - 1],
-            &Audio_Seq_unusedInventory.blades[temp_s2 - 1], &Menu_Setup_bladeBuf, Menu_Setup_sydData);
+            &Audio_Seq_unusedInventory.blades[second_blade_id - 1], &Menu_Setup_bladeBuf, Menu_Setup_sydData);
         break;
     }
 
@@ -200,9 +200,9 @@ void Menu_Setup_PreviewBladeCombination(int arg0)
     Menu_Framework_ResetEquipmentStats();
     Menu_Framework_SetRangeAndRisk(0, 0, 0, 1);
 
-    temp_v1 = arg0 - 1;
+    selected_ingredient_index = preview_selection - 1;
 
-    if (temp_v1 >= 2) {
+    if (selected_ingredient_index >= 2) {
         if (Menu_Setup_bladeBuf.id != 0) {
             for (i = 0; i < 16; ++i) {
                 Menu_Framework_equipmentStats[i] = blade->classes[i & 7];
@@ -215,13 +215,13 @@ void Menu_Setup_PreviewBladeCombination(int arg0)
             Menu_Framework_SetRangeAndRisk(blade->range.range, blade->cost, 0, 1);
             Menu_Framework_equipmentSubtype = 2;
         }
-    } else if (var_s3 & arg0) {
-        Menu_Framework_SetBladeStats(Menu_Setup_combiningBladeIds[temp_v1]);
+    } else if (ingredient_presence_mask & preview_selection) {
+        Menu_Framework_SetBladeStats(Menu_Setup_combiningBladeIds[selected_ingredient_index]);
     }
 }
 
 // decomp: MENUC.PRG _selectBlade (src/MENU/MENUC.PRG/168.c:2801)
-int Menu_Setup_SelectCombinationBlade(int arg0)
+int Menu_Setup_SelectCombinationBlade(int ingredient_slot)
 {
     static int Menu_Setup_combinationBladeSelectedRow;
     static char Menu_Setup_combinationBladeState;
@@ -231,13 +231,13 @@ int Menu_Setup_SelectCombinationBlade(int arg0)
     int i;
     char* textBuf;
     char* menuText[2 * 17];
-    int temp_a0;
+    int parent_weapon_id;
     int itemId;
     Items_InventoryBlade* blade = NULL;
 
-    if (arg0 != 0) {
-        Menu_Setup_combinationBladeSlot = arg0;
-        Menu_Setup_AnimateItemHeader(arg0 + 10);
+    if (ingredient_slot != 0) {
+        Menu_Setup_combinationBladeSlot = ingredient_slot;
+        Menu_Setup_AnimateItemHeader(ingredient_slot + 10);
         Menu_Setup_combinationBladeState = 0;
         return 0;
     }
@@ -275,7 +275,7 @@ int Menu_Setup_SelectCombinationBlade(int arg0)
             if ((itemId != 0) && (itemId != Menu_Setup_combiningBladeIds[0])
                 && (itemId != Menu_Setup_combiningBladeIds[1])) {
 
-                int new_var = itemId;
+                int available_blade_id = itemId;
                 blade = &Audio_Seq_unusedInventory.blades[itemId - 1];
 
                 Menu_Framework_FormatBladeRow(blade, menuText + count * 2,
@@ -287,15 +287,15 @@ int Menu_Setup_SelectCombinationBlade(int arg0)
                     Menu_Framework_rowTypeBuf[count] |= 1;
                 }
 
-                temp_a0 = blade->assembledWeaponIndex;
+                parent_weapon_id = blade->assembledWeaponIndex;
 
-                if (temp_a0 != 0) {
+                if (parent_weapon_id != 0) {
                     Menu_Framework_rowTypeBuf[count] |=
-                        (Audio_Seq_unusedInventory.weapons[temp_a0 - 1].isEquipped == 0 ? 0xCC00
+                        (Audio_Seq_unusedInventory.weapons[parent_weapon_id - 1].isEquipped == 0 ? 0xCC00
                                                                                 : 0xCA00);
                 }
 
-                Menu_Setup_availableItems[count] = new_var;
+                Menu_Setup_availableItems[count] = available_blade_id;
                 ++count;
             }
         }
@@ -352,7 +352,7 @@ void Menu_Setup_SetCombinationBladeRow(
 }
 
 // decomp: MENUC.PRG _combineBladeMenu (src/MENU/MENUC.PRG/168.c:2939)
-int Menu_Setup_UpdateBladeCombination(int arg0)
+int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 {
 
     static char Menu_Setup_bladeCombinationState;
@@ -366,12 +366,12 @@ int Menu_Setup_UpdateBladeCombination(int arg0)
     int var_s1;
     int temp_v0_2;
     int i;
-    char* var_a0_2;
+    char* combination_help_text;
     int i_2;
     Items_InventoryBlade* blade;
     Menu_Framework_MenuRow* menuItem;
 
-    if (arg0 != 0) {
+    if (initialize_blade_combination != 0) {
         Menu_Setup_RecordSlotSelection(5);
 
         *(u_short*)&Menu_Setup_combiningBladeIds = 0;
@@ -649,14 +649,14 @@ int Menu_Setup_UpdateBladeCombination(int arg0)
         }
 
         if (var_s1 == 0) {
-            var_a0_2 =
+            combination_help_text =
                 (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_attachmentConfirm];
         } else {
-            var_a0_2 =
+            combination_help_text =
                 (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_cancelCombineConfirm];
         }
 
-        Menu_Framework_SetInformationMessage(var_a0_2);
+        Menu_Framework_SetInformationMessage(combination_help_text);
 
         Menu_Setup_bladeCombinationState = 5;
         break;
@@ -752,21 +752,21 @@ void Menu_Setup_SetShieldBaseStats(Items_InventoryShield* shield)
 }
 
 // decomp: MENUC.PRG _initCombineShields (src/MENU/MENUC.PRG/168.c:3353)
-void Menu_Setup_PreviewShieldCombination(int arg0)
+void Menu_Setup_PreviewShieldCombination(int preview_selection)
 {
-    u_int temp_v1;
+    u_int selected_ingredient_index;
     Items_InventoryShield* shield;
 
     int first = Menu_Setup_itemsToCombine[0];
     int second = Menu_Setup_itemsToCombine[1];
 
-    int var_s2 = first > 0;
+    int ingredient_presence_mask = first > 0;
 
     if (second != 0) {
-        var_s2 += 2;
+        ingredient_presence_mask += 2;
     }
 
-    switch (var_s2) {
+    switch (ingredient_presence_mask) {
     case 0:
         Core_Memory_ZeroWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
         break;
@@ -789,14 +789,14 @@ void Menu_Setup_PreviewShieldCombination(int arg0)
 
     Menu_Framework_ResetEquipmentStats();
 
-    temp_v1 = arg0 - 1;
+    selected_ingredient_index = preview_selection - 1;
 
-    if (temp_v1 > 1) {
+    if (selected_ingredient_index > 1) {
         if (shield->base.id != 0) {
             Menu_Setup_SetShieldBaseStats(shield);
         }
-    } else if (var_s2 & arg0) {
-        Menu_Setup_SetShieldBaseStats(&Audio_Seq_unusedInventory.shields[Menu_Setup_itemsToCombine[temp_v1] - 1]);
+    } else if (ingredient_presence_mask & preview_selection) {
+        Menu_Setup_SetShieldBaseStats(&Audio_Seq_unusedInventory.shields[Menu_Setup_itemsToCombine[selected_ingredient_index] - 1]);
     }
 }
 
@@ -813,7 +813,7 @@ void Menu_Setup_SetShieldRowWithoutGems(
 }
 
 // decomp: MENUC.PRG _selectShields (src/MENU/MENUC.PRG/168.c:3421)
-int Menu_Setup_SelectCombinationShield(int arg0)
+int Menu_Setup_SelectCombinationShield(int ingredient_slot)
 {
     static int Menu_Setup_combinationShieldSelectedRow;
     static char Menu_Setup_combinationShieldState;
@@ -828,11 +828,11 @@ int Menu_Setup_SelectCombinationShield(int arg0)
 
     shield = NULL;
 
-    if (arg0 != 0) {
+    if (ingredient_slot != 0) {
 
-        Menu_Setup_combinationShieldSlot = arg0;
+        Menu_Setup_combinationShieldSlot = ingredient_slot;
 
-        Menu_Setup_AnimateItemHeader(arg0 + 10);
+        Menu_Setup_AnimateItemHeader(ingredient_slot + 10);
         Menu_Setup_combinationShieldState = 0;
         return 0;
     }
@@ -947,7 +947,7 @@ void Menu_Setup_SetCombinationShieldRow(
 }
 
 // decomp: MENUC.PRG _combineShieldMenu (src/MENU/MENUC.PRG/168.c:3562)
-int Menu_Setup_UpdateShieldCombination(int arg0)
+int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
 {
 
     static char Menu_Setup_shieldCombinationState;
@@ -958,18 +958,18 @@ int Menu_Setup_UpdateShieldCombination(int arg0)
     char* menuText[2];
     int rowType;
     int itemId_3;
-    int var_a0;
+    int gem_slot_index;
     int var_s1;
     int i;
-    u_short* var_a0_2;
+    u_short* combination_help_text;
     int temp_s1;
     int temp_s2;
-    int temp_v1_2;
+    int shield_gem_slot_count;
     Items_InventoryShield* shield1;
     Items_InventoryShield* shield0;
-    Menu_Framework_MenuRow* temp_v0;
+    Menu_Framework_MenuRow* combination_menu_row;
 
-    if (arg0 != 0) {
+    if (initialize_shield_combination != 0) {
 
         Menu_Setup_RecordSlotSelection(5);
 
@@ -1004,10 +1004,10 @@ int Menu_Setup_UpdateShieldCombination(int arg0)
 
     case 1:
         temp_s1 = Menu_Setup_shieldBuf.base.id;
-        temp_v0 = Menu_Setup_AnimateCombinationResult(1, temp_s1);
+        combination_menu_row = Menu_Setup_AnimateCombinationResult(1, temp_s1);
 
         if (temp_s1 != 0) {
-            Menu_Setup_SetCombinationShieldRow(temp_v0, &Menu_Setup_shieldBuf);
+            Menu_Setup_SetCombinationShieldRow(combination_menu_row, &Menu_Setup_shieldBuf);
         }
 
         for (i = 0; i < 2; ++i) {
@@ -1018,17 +1018,17 @@ int Menu_Setup_UpdateShieldCombination(int arg0)
                 shield0 = &Audio_Seq_unusedInventory.shields[temp_s1 - 1];
             }
 
-            temp_v0 = Menu_Framework_SetMenuItem(i + 0xB, 0x14E, 0x22 + i * 0x10, 0x97, 0,
+            combination_menu_row = Menu_Framework_SetMenuItem(i + 0xB, 0x14E, 0x22 + i * 0x10, 0x97, 0,
                 (temp_s1 == 0
                         ? (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_shield]
                         : Menu_Framework_itemNames[shield0->base.id]));
-            temp_v0->state = 2;
-            temp_v0->targetPosition0 = 0xA9;
+            combination_menu_row->state = 2;
+            combination_menu_row->targetPosition0 = 0xA9;
 
             if (temp_s1 == 0) {
-                temp_v0->fontColor = 1;
+                combination_menu_row->fontColor = 1;
             } else {
-                Menu_Setup_SetCombinationShieldRow(temp_v0, shield0);
+                Menu_Setup_SetCombinationShieldRow(combination_menu_row, shield0);
             }
         }
 
@@ -1055,17 +1055,17 @@ int Menu_Setup_UpdateShieldCombination(int arg0)
                         Menu_Setup_itemsToCombine[temp_s2 - 1] = 0;
 
                         Menu_Setup_PreviewShieldCombination(temp_s2);
-                        temp_v0 = Menu_Framework_SetMenuItem(temp_s2 + 0xA, 0xA9,
+                        combination_menu_row = Menu_Framework_SetMenuItem(temp_s2 + 0xA, 0xA9,
                             (temp_s2 * 0x10) + 0x12, 0x97, 0,
                             (char*)(Menu_Framework_menu12Text + 0x439));
 
-                        temp_v0->selected = 1;
-                        temp_v0->fontColor = 1;
+                        combination_menu_row->selected = 1;
+                        combination_menu_row->fontColor = 1;
                         var_s1 = Menu_Setup_shieldBuf.base.id;
-                        temp_v0 = Menu_Setup_SetCombinationResultRow(1, var_s1);
+                        combination_menu_row = Menu_Setup_SetCombinationResultRow(1, var_s1);
 
                         if (var_s1 != 0) {
-                            Menu_Setup_SetCombinationShieldRow(temp_v0, &Menu_Setup_shieldBuf);
+                            Menu_Setup_SetCombinationShieldRow(combination_menu_row, &Menu_Setup_shieldBuf);
                             return 0;
                         }
 
@@ -1236,21 +1236,21 @@ int Menu_Setup_UpdateShieldCombination(int arg0)
         for (i = 0; i < 2; ++i) {
 
             shield0 = &Audio_Seq_unusedInventory.shields[Menu_Setup_itemsToCombine[i] - 1];
-            temp_v1_2 = shield0->base.gemSlots;
+            shield_gem_slot_count = shield0->base.gemSlots;
             var_s1 |= shield0->isEquipped;
 
-            for (var_a0 = 0; var_a0 < temp_v1_2; ++var_a0) {
-                var_s1 |= shield0->gems[var_a0];
+            for (gem_slot_index = 0; gem_slot_index < shield_gem_slot_count; ++gem_slot_index) {
+                var_s1 |= shield0->gems[gem_slot_index];
             }
         }
 
         if (var_s1 == 0) {
-            var_a0_2 = Menu_Framework_menu12Text + 0x42B;
+            combination_help_text = Menu_Framework_menu12Text + 0x42B;
         } else {
-            var_a0_2 = Menu_Framework_menu12Text + 0x4A7;
+            combination_help_text = Menu_Framework_menu12Text + 0x4A7;
         }
 
-        Menu_Framework_SetInformationMessage((char*)var_a0_2);
+        Menu_Framework_SetInformationMessage((char*)combination_help_text);
 
         Menu_Setup_shieldCombinationState = 5;
         break;
@@ -1319,21 +1319,21 @@ int Menu_Setup_UpdateShieldCombination(int arg0)
 }
 
 // decomp: MENUC.PRG _initCombineArmor (src/MENU/MENUC.PRG/168.c:3947)
-void Menu_Setup_PreviewArmorCombination(int arg0)
+void Menu_Setup_PreviewArmorCombination(int preview_selection)
 {
     int var_a0;
-    u_int temp_v1;
+    u_int selected_ingredient_index;
     Items_InventoryArmor* armor;
 
     int i = Menu_Setup_combiningArmorIds[0];
-    int temp_s3 = Menu_Setup_combiningArmorIds[1];
-    int var_s2 = i != 0;
+    int second_armor_id = Menu_Setup_combiningArmorIds[1];
+    int ingredient_presence_mask = i != 0;
 
-    if (temp_s3 != 0) {
-        var_s2 += 2;
+    if (second_armor_id != 0) {
+        ingredient_presence_mask += 2;
     }
 
-    switch (var_s2) {
+    switch (ingredient_presence_mask) {
     case 0:
         Core_Memory_ZeroWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
         break;
@@ -1341,13 +1341,13 @@ void Menu_Setup_PreviewArmorCombination(int arg0)
     case 1:
     case 2:
         Core_Memory_CopyHalfwords(
-            &Menu_Setup_armorBuf, &Audio_Seq_unusedInventory.armor[i + temp_s3 - 1], sizeof Menu_Setup_armorBuf);
+            &Menu_Setup_armorBuf, &Audio_Seq_unusedInventory.armor[i + second_armor_id - 1], sizeof Menu_Setup_armorBuf);
         break;
 
     case 3:
         Core_Memory_ZeroWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
         Menu_Setup_BuildCombinedArmor(&Audio_Seq_unusedInventory.armor[i - 1],
-            &Audio_Seq_unusedInventory.armor[temp_s3 - 1], &Menu_Setup_armorBuf, Menu_Setup_sydData);
+            &Audio_Seq_unusedInventory.armor[second_armor_id - 1], &Menu_Setup_armorBuf, Menu_Setup_sydData);
         break;
     }
 
@@ -1356,9 +1356,9 @@ void Menu_Setup_PreviewArmorCombination(int arg0)
 
     Menu_Framework_ResetEquipmentStats();
 
-    temp_v1 = arg0 - 1;
+    selected_ingredient_index = preview_selection - 1;
 
-    if (temp_v1 >= 2) {
+    if (selected_ingredient_index >= 2) {
         if (Menu_Setup_armorBuf.id != 0) {
 
             for (i = 0; i < 16; ++i) {
@@ -1380,82 +1380,82 @@ void Menu_Setup_PreviewArmorCombination(int arg0)
             Menu_Framework_strIntAgi[5] = armor->intelligence;
             Menu_Framework_strIntAgi[6] = armor->agility;
         }
-    } else if (var_s2 & arg0) {
-        Menu_Framework_SetArmorStats(Menu_Setup_combiningArmorIds[temp_v1]);
+    } else if (ingredient_presence_mask & preview_selection) {
+        Menu_Framework_SetArmorStats(Menu_Setup_combiningArmorIds[selected_ingredient_index]);
     }
 }
 
 // decomp: MENUC.PRG _initUiArmor (src/MENU/MENUC.PRG/168.c:4019)
-int Menu_Setup_SelectCombinationArmor(int arg0)
+int Menu_Setup_SelectCombinationArmor(int ingredient_slot)
 {
     static int Menu_Setup_combinationArmorSelectedRow;
     static char Menu_Setup_combinationArmorStep;
     static char Menu_Setup_combinationArmorSlot;
 
-    char* sp10[2 * 17];
-    int var_s4;
+    char* armor_row_text[2 * 17];
+    int armor_row_count;
     int i;
-    char* temp_v0;
+    char* armor_text_allocation;
     int itemId;
     int s0_2;
-    Items_InventoryArmor* var_s2;
+    Items_InventoryArmor* armor_item;
 
-    var_s2 = NULL;
-    if (arg0 != 0) {
-        Menu_Setup_combinationArmorSlot = arg0;
-        Menu_Setup_AnimateItemHeader(arg0 + 0xA);
+    armor_item = NULL;
+    if (ingredient_slot != 0) {
+        Menu_Setup_combinationArmorSlot = ingredient_slot;
+        Menu_Setup_AnimateItemHeader(ingredient_slot + 0xA);
         Menu_Setup_combinationArmorStep = 0;
         return 0;
     }
 
     itemId = Menu_Setup_combiningArmorIds[Menu_Setup_combinationArmorSlot - 1];
     if (itemId != 0) {
-        var_s2 = &Audio_Seq_unusedInventory.armor[itemId - 1];
+        armor_item = &Audio_Seq_unusedInventory.armor[itemId - 1];
     }
 
     switch (Menu_Setup_combinationArmorStep) {
     case 0:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             s0_2 = itemId;
-            temp_v0 = Core_Memory_AllocateFromHighEnd(0x72CU);
+            armor_text_allocation = Core_Memory_AllocateFromHighEnd(0x72CU);
 
-            if (var_s2 == NULL) {
-                sp10[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor];
-                sp10[1] =
+            if (armor_item == NULL) {
+                armor_row_text[0] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor];
+                armor_row_text[1] =
                     (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_selectArmor];
                 *Menu_Framework_rowTypeBuf = 1;
             } else {
                 Menu_Framework_FormatInventoryArmorRow(
-                    var_s2, sp10, Menu_Framework_rowTypeBuf, temp_v0);
+                    armor_item, armor_row_text, Menu_Framework_rowTypeBuf, armor_text_allocation);
             }
 
             *Menu_Setup_availableItems = s0_2;
-            var_s4 = 1;
+            armor_row_count = 1;
 
             for (i = 0; i < 16; ++i) {
                 itemId = Audio_Seq_unusedInventoryIndices.armor[i];
                 if ((itemId != 0) && (itemId != Menu_Setup_combiningArmorIds[0])
                     && (itemId != Menu_Setup_combiningArmorIds[1])) {
-                    var_s2 = &Audio_Seq_unusedInventory.armor[itemId - 1];
-                    if (var_s2->category != 7) {
-                        Menu_Framework_FormatInventoryArmorRow(var_s2, sp10 + var_s4 * 2,
-                            &Menu_Framework_rowTypeBuf[var_s4], temp_v0 + var_s4 * 0x60);
-                        if (!((Menu_Setup_workshopMaterials[Menu_Setup_currentWorkshop] >> var_s2->material)
+                    armor_item = &Audio_Seq_unusedInventory.armor[itemId - 1];
+                    if (armor_item->category != 7) {
+                        Menu_Framework_FormatInventoryArmorRow(armor_item, armor_row_text + armor_row_count * 2,
+                            &Menu_Framework_rowTypeBuf[armor_row_count], armor_text_allocation + armor_row_count * 0x60);
+                        if (!((Menu_Setup_workshopMaterials[Menu_Setup_currentWorkshop] >> armor_item->material)
                                 & 1)) {
-                            sp10[var_s4 * 2 + 1] = (char*)&Menu_Framework_menu12Text
+                            armor_row_text[armor_row_count * 2 + 1] = (char*)&Menu_Framework_menu12Text
                                 [Text_Menu_MENU12_BIN_Offset_invalidArmorMaterial];
-                            Menu_Framework_rowTypeBuf[var_s4] |= 1;
+                            Menu_Framework_rowTypeBuf[armor_row_count] |= 1;
                         }
-                        if (var_s2->limb != 0) {
-                            Menu_Framework_rowTypeBuf[var_s4] |= 0xCA00;
+                        if (armor_item->limb != 0) {
+                            Menu_Framework_rowTypeBuf[armor_row_count] |= 0xCA00;
                         }
-                        Menu_Setup_availableItems[var_s4] = itemId;
-                        ++var_s4;
+                        Menu_Setup_availableItems[armor_row_count] = itemId;
+                        ++armor_row_count;
                     }
                 }
             }
-            Menu_Setup_BuildItemList(var_s4, sp10, Menu_Framework_rowTypeBuf);
-            Core_Memory_FreeFromHighEnd(temp_v0);
+            Menu_Setup_BuildItemList(armor_row_count, armor_row_text, Menu_Framework_rowTypeBuf);
+            Core_Memory_FreeFromHighEnd(armor_text_allocation);
             Menu_Setup_combinationArmorStep = 1;
         }
         break;
@@ -1500,7 +1500,7 @@ void Menu_Setup_SetCombinationArmorRow(
 }
 
 // decomp: MENUC.PRG _combineArmorMenu (src/MENU/MENUC.PRG/168.c:4140)
-int Menu_Setup_UpdateArmorCombination(int arg0)
+int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
 {
 
     static char Menu_Setup_armorCombinationState;
@@ -1510,16 +1510,16 @@ int Menu_Setup_UpdateArmorCombination(int arg0)
     char* menuText[2];
     int rowType;
     int itemId;
-    int temp_v0_6;
+    int confirmation_result;
     int i;
     int var_s1;
-    char* var_a0_2;
+    char* combination_help_text;
     int i_2;
     Items_InventoryArmor* armor;
-    Menu_Framework_MenuRow* temp_a0;
-    Menu_Framework_MenuRow* temp_v0;
+    Menu_Framework_MenuRow* result_menu_row;
+    Menu_Framework_MenuRow* ingredient_menu_row;
 
-    if (arg0 != 0) {
+    if (initialize_armor_combination != 0) {
         Menu_Setup_RecordSlotSelection(5);
         *(u_short*)Menu_Setup_combiningArmorIds = 0;
         Menu_Setup_PreviewArmorCombination(0);
@@ -1548,9 +1548,9 @@ int Menu_Setup_UpdateArmorCombination(int arg0)
         // Fallthrough
     case 1:
         var_s1 = Menu_Setup_armorBuf.id;
-        temp_a0 = Menu_Setup_AnimateCombinationResult(2, var_s1);
+        result_menu_row = Menu_Setup_AnimateCombinationResult(2, var_s1);
         if (var_s1 != 0) {
-            Menu_Setup_SetCombinationArmorRow(temp_a0, &Menu_Setup_armorBuf);
+            Menu_Setup_SetCombinationArmorRow(result_menu_row, &Menu_Setup_armorBuf);
         }
 
         for (i = 0; i < 2; ++i) {
@@ -1558,16 +1558,16 @@ int Menu_Setup_UpdateArmorCombination(int arg0)
             if (var_s1 != 0) {
                 armor = &Audio_Seq_unusedInventory.armor[var_s1 - 1];
             }
-            temp_v0 = Menu_Framework_SetMenuItem(i + 11, 334, 34 + i * 16, 151, 0,
+            ingredient_menu_row = Menu_Framework_SetMenuItem(i + 11, 334, 34 + i * 16, 151, 0,
                 var_s1 == 0 ? (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor]
                             : Menu_Framework_itemNames[armor->id]);
-            temp_v0->state = 2;
-            temp_v0->targetPosition0 = 169;
+            ingredient_menu_row->state = 2;
+            ingredient_menu_row->targetPosition0 = 169;
 
             if (var_s1 == 0) {
-                temp_v0->fontColor = 1;
+                ingredient_menu_row->fontColor = 1;
             } else {
-                Menu_Setup_SetCombinationArmorRow(temp_v0, armor);
+                Menu_Setup_SetCombinationArmorRow(ingredient_menu_row, armor);
             }
         }
 
@@ -1580,21 +1580,21 @@ int Menu_Setup_UpdateArmorCombination(int arg0)
                     Menu_Setup_DrawConfirmationLabel(2, Menu_Setup_armorCombinationOkBlinkPhase);
                 }
                 if (Input_buttonsPressed.allButtons & PADRdown) {
-                    int temp_v0_2 = Menu_Setup_PopSlotSelection(5);
-                    if (temp_v0_2 != 0) {
+                    int restored_ingredient_slot = Menu_Setup_PopSlotSelection(5);
+                    if (restored_ingredient_slot != 0) {
                         Menu_PlayLeaveSound();
-                        Menu_Setup_armorCombinationRow = temp_v0_2;
-                        Menu_Setup_combiningArmorIds[temp_v0_2 - 1] = 0;
-                        Menu_Setup_PreviewArmorCombination(temp_v0_2);
-                        temp_v0 = Menu_Framework_SetMenuItem(temp_v0_2 + 10, 169,
-                            (temp_v0_2 * 16) + 18, 151, 0,
+                        Menu_Setup_armorCombinationRow = restored_ingredient_slot;
+                        Menu_Setup_combiningArmorIds[restored_ingredient_slot - 1] = 0;
+                        Menu_Setup_PreviewArmorCombination(restored_ingredient_slot);
+                        ingredient_menu_row = Menu_Framework_SetMenuItem(restored_ingredient_slot + 10, 169,
+                            (restored_ingredient_slot * 16) + 18, 151, 0,
                             (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_armor]);
-                        temp_v0->selected = 1;
-                        temp_v0->fontColor = 1;
+                        ingredient_menu_row->selected = 1;
+                        ingredient_menu_row->fontColor = 1;
                         var_s1 = Menu_Setup_armorBuf.id;
-                        temp_a0 = Menu_Setup_SetCombinationResultRow(2, var_s1);
+                        result_menu_row = Menu_Setup_SetCombinationResultRow(2, var_s1);
                         if (var_s1 != 0) {
-                            Menu_Setup_SetCombinationArmorRow(temp_a0, &Menu_Setup_armorBuf);
+                            Menu_Setup_SetCombinationArmorRow(result_menu_row, &Menu_Setup_armorBuf);
                         }
                         break;
                     }
@@ -1730,23 +1730,23 @@ int Menu_Setup_UpdateArmorCombination(int arg0)
             var_s1 |= Audio_Seq_unusedInventory.armor[Menu_Setup_combiningArmorIds[i] - 1].limb;
         }
         if (var_s1 == 0) {
-            var_a0_2 =
+            combination_help_text =
                 (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_attachmentConfirm];
         } else {
-            var_a0_2 =
+            combination_help_text =
                 (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_cancelCombineConfirm];
         }
-        Menu_Framework_SetInformationMessage(var_a0_2);
+        Menu_Framework_SetInformationMessage(combination_help_text);
         Menu_Setup_armorCombinationState = 5;
         break;
     case 5:
-        temp_v0_6 = Menu_Setup_UpdateThreeChoicePrompt(0);
+        confirmation_result = Menu_Setup_UpdateThreeChoicePrompt(0);
 
-        if (temp_v0_6 == 0) {
+        if (confirmation_result == 0) {
             break;
         }
 
-        switch (temp_v0_6) {
+        switch (confirmation_result) {
         case 1:
             Audio_PlaySfxCentered(0x7E, 0x18);
 
@@ -1773,7 +1773,7 @@ int Menu_Setup_UpdateArmorCombination(int arg0)
         case 2:
             Menu_PlayLeaveSound();
             Menu_Framework_UpdatePrimaryStatPanel(1);
-            Menu_Setup_armorCombinationState = temp_v0_6;
+            Menu_Setup_armorCombinationState = confirmation_result;
             break;
         case 3:
             return Menu_Setup_LeaveItemSelection(1);
@@ -1793,11 +1793,11 @@ int Menu_Setup_CountCombinationIngredients(int category)
 
     if (category == 2) {
         for (i = 0; i < 16; ++i, ++armor) {
-            int var_v1 = 0;
+            int is_combinable_armor = 0;
             if (armor->id != 0) {
-                var_v1 = armor->category != 7;
+                is_combinable_armor = armor->category != 7;
             }
-            count += var_v1;
+            count += is_combinable_armor;
         }
     } else {
         count = Items_Inventory_CountItems((category * 2) | 1, NULL);
@@ -1806,7 +1806,7 @@ int Menu_Setup_CountCombinationIngredients(int category)
 }
 
 // decomp: MENUC.PRG _combineTopMenu (src/MENU/MENUC.PRG/168.c:4455)
-int Menu_Setup_UpdateCombinationCategory(int arg0)
+int Menu_Setup_UpdateCombinationCategory(int initialize_combination_category)
 {
 
     static char Menu_Setup_combinationCategoryState;
@@ -1815,9 +1815,9 @@ int Menu_Setup_UpdateCombinationCategory(int arg0)
     char* text[6];
     int selectedRow;
     int i;
-    int temp_s1;
+    int saved_cursor_memory;
 
-    if (arg0 != 0) {
+    if (initialize_combination_category != 0) {
         Menu_Setup_combinationCategoryForceNoCursorMemory = 1;
         Menu_Framework_FlyOutRowsAndHoistSelection(5, 1);
         Menu_Setup_combinationCategoryState = 0;
@@ -1839,13 +1839,13 @@ int Menu_Setup_UpdateCombinationCategory(int arg0)
                 Menu_Framework_rowTypeBuf[i] = count < 2;
             }
 
-            temp_s1 = Input_settings.cursorMemory;
+            saved_cursor_memory = Input_settings.cursorMemory;
             if (Menu_Setup_combinationCategoryForceNoCursorMemory == 0) {
                 Input_settings.cursorMemory = 1;
             }
             Menu_Setup_combinationCategoryForceNoCursorMemory = 0;
             Menu_Framework_CreateMenuRows(3, 0x23D, text, Menu_Framework_rowTypeBuf);
-            Input_settings.cursorMemory = temp_s1;
+            Input_settings.cursorMemory = saved_cursor_memory;
             Menu_Setup_combinationCategoryState = 1;
         }
         break;

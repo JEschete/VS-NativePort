@@ -55,26 +55,26 @@ extern char Menu_Setup_workshopMaterials[];
 int Menu_Setup_LoadCombinationRecipes(int id);
 Menu_Framework_MenuRow* Menu_Setup_SetCombinationResultRow(int itemType, int index);
 Menu_Framework_MenuRow* Menu_Setup_AnimateCombinationResult(int itemType, int index);
-void Menu_Setup_PreviewBladeCombination(int arg0);
-int Menu_Setup_SelectCombinationBlade(int arg0);
+void Menu_Setup_PreviewBladeCombination(int preview_selection);
+int Menu_Setup_SelectCombinationBlade(int ingredient_slot);
 void Menu_Setup_SetCombinationBladeRow(
     Menu_Framework_MenuRow* menuItem, Items_InventoryBlade* blade);
-int Menu_Setup_UpdateBladeCombination(int arg0);
+int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination);
 void Menu_Setup_SetShieldBaseStats(Items_InventoryShield* shield);
-void Menu_Setup_PreviewShieldCombination(int arg0);
+void Menu_Setup_PreviewShieldCombination(int preview_selection);
 void Menu_Setup_SetShieldRowWithoutGems(
     Items_InventoryShield* shield, char** menuText, int* rowTypes, char* stringBuf);
-int Menu_Setup_SelectCombinationShield(int arg0);
+int Menu_Setup_SelectCombinationShield(int ingredient_slot);
 void Menu_Setup_SetCombinationShieldRow(
     Menu_Framework_MenuRow* menuItem, Items_InventoryShield* shield);
-int Menu_Setup_UpdateShieldCombination(int arg0);
-void Menu_Setup_PreviewArmorCombination(int arg0);
-int Menu_Setup_SelectCombinationArmor(int arg0);
+int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination);
+void Menu_Setup_PreviewArmorCombination(int preview_selection);
+int Menu_Setup_SelectCombinationArmor(int ingredient_slot);
 void Menu_Setup_SetCombinationArmorRow(
     Menu_Framework_MenuRow* menuItem, Items_InventoryArmor* armor);
-int Menu_Setup_UpdateArmorCombination(int arg0);
+int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination);
 int Menu_Setup_CountCombinationIngredients(int category);
-int Menu_Setup_UpdateCombinationCategory(int arg0);
+int Menu_Setup_UpdateCombinationCategory(int initialize_combination_category);
 void Menu_Setup_CombineClassOrAffinityValues(signed char* first, signed char* second,
     signed char* result, int materialsDifferent, int setAffinities);
 void Menu_Setup_CombinePhysicalTypeValues(

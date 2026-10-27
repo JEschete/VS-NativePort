@@ -66,7 +66,7 @@ void Menu_Score_CreateTitleRows(void)
 {
     int i;
     Menu_Score_Row* row;
-    int new_var;
+    int title_flag_bit;
 
     for (i = 0, row = Menu_Score_gazetteRows; i < 32; ++i, ++row) {
 
@@ -76,7 +76,7 @@ void Menu_Score_CreateTitleRows(void)
         row->animationState = 0;
         row->disabled = 0;
 
-        if (Audio_Seq_unusedScoredata.titles & ((new_var = 1) << i)) {
+        if (Audio_Seq_unusedScoredata.titles & ((title_flag_bit = 1) << i)) {
             row->opaque1 = 1;
             row->title = (char*)&Menu_Score_titleText[Menu_Score_titleText[i]];
             row->description = (char*)&Menu_Score_titleDescriptions[Menu_Score_titleDescriptions[i]];
@@ -220,22 +220,22 @@ void Menu_Score_CreateStatisticRows(void)
 void Menu_Score_RenderStatistics(int animState)
 {
 
-    char sp18[32];
+    char aligned_value_text[32];
     Menu_Score_Row* row;
-    u_short temp_v1_4;
-    int s5;
+    u_short selected_record_index;
+    int value_right_edge_x;
     int i;
     Menu_Framework_MenuRow* menuItem;
     char* intBuf;
-    Menu_Score_CursorMemory* new_var;
+    Menu_Score_CursorMemory* record_cursor_memory;
     int v1;
 
     row = Menu_Score_gazetteRows;
-    temp_v1_4 = Battle_unusedMenu9CursorMemory.recordTimePage
+    selected_record_index = Battle_unusedMenu9CursorMemory.recordTimePage
               + Battle_unusedMenu9CursorMemory.recordTimeRow;
 
     for (i = 0; i < 23; ++i, ++row) {
-        if (i == temp_v1_4) {
+        if (i == selected_record_index) {
             if (row->selected == 0) {
                 Menu_Framework_SetInformationMessage(row->description);
             }
@@ -251,29 +251,29 @@ void Menu_Score_RenderStatistics(int animState)
 
     row = &Menu_Score_gazetteRows[Battle_unusedMenu9CursorMemory.recordTimePage];
     i = 0;
-    new_var = &Battle_unusedMenu9CursorMemory;
-    intBuf = &sp18[2];
-    s5 = 0x30 * 6;
+    record_cursor_memory = &Battle_unusedMenu9CursorMemory;
+    intBuf = &aligned_value_text[2];
+    value_right_edge_x = 0x30 * 6;
 
     for (; i < 8; ++i, ++row) {
-        int var_s4 = 0xF0 - (animState * 0x17);
+        int record_row_y = 0xF0 - (animState * 0x17);
 
-        if (var_s4 < ((i * 0x10) + 0x38)) {
-            var_s4 = ((i * 0x10) + 0x38);
+        if (record_row_y < ((i * 0x10) + 0x38)) {
+            record_row_y = ((i * 0x10) + 0x38);
         }
         if ((row->selected != 0) && (animState == 8)) {
             Menu_Score_statisticsCursorAnimStep = Menu_Framework_DrawCursor(
-                Menu_Score_statisticsCursorAnimStep, ((row->x - 0xC) & 0xFFFF) | ((var_s4 - 8) << 0x10));
+                Menu_Score_statisticsCursorAnimStep, ((row->x - 0xC) & 0xFFFF) | ((record_row_y - 8) << 0x10));
         }
 
-        menuItem = Menu_Framework_SetMenuItem(0, row->x, var_s4, 0x8E, 0, row->title);
+        menuItem = Menu_Framework_SetMenuItem(0, row->x, record_row_y, 0x8E, 0, row->title);
         menuItem->gradientState = row->animationState;
 
-        if ((i == 0) && (new_var->recordTimePage != 0)) {
+        if ((i == 0) && (record_cursor_memory->recordTimePage != 0)) {
             menuItem->isScrollable = 1;
         }
 
-        if ((i == 7) && (new_var->recordTimePage != 0xF)) {
+        if ((i == 7) && (record_cursor_memory->recordTimePage != 0xF)) {
             menuItem->isScrollable = 2;
         }
 
@@ -283,7 +283,7 @@ void Menu_Score_RenderStatistics(int animState)
             Menu_Framework_DrawMenuItem(menuItem);
         }
 
-        v1 = new_var->recordTimePage + i;
+        v1 = record_cursor_memory->recordTimePage + i;
 
         if (v1 == 0) {
             Core_String_FormatGameInteger(intBuf, Menu_Score_clearCount);
@@ -310,18 +310,18 @@ void Menu_Score_RenderStatistics(int animState)
             Core_String_FormatGameInteger(intBuf, Audio_Seq_unusedScoredata.weaponAttacks[v1]);
         }
 
-        v1 = s5 - (Render_MeasureEncodedTextLine(intBuf) * 6);
-        ++s5;
-        --s5;
-        sp18[0] = 0xFA;
-        sp18[1] = v1 - (row->x - 0x72);
-        menuItem = Menu_Framework_SetMenuItem(0, row->x + 0x8E, var_s4, 0x8E, 0, sp18);
+        v1 = value_right_edge_x - (Render_MeasureEncodedTextLine(intBuf) * 6);
+        ++value_right_edge_x;
+        --value_right_edge_x;
+        aligned_value_text[0] = 0xFA;
+        aligned_value_text[1] = v1 - (row->x - 0x72);
+        menuItem = Menu_Framework_SetMenuItem(0, row->x + 0x8E, record_row_y, 0x8E, 0, aligned_value_text);
         menuItem->gradientState = 8 - row->animationState;
 
-        if ((i == 0) && (new_var->recordTimePage != 0)) {
+        if ((i == 0) && (record_cursor_memory->recordTimePage != 0)) {
             menuItem->isScrollable = 1;
         }
-        if ((i == 7) && (new_var->recordTimePage != 0xF)) {
+        if ((i == 7) && (record_cursor_memory->recordTimePage != 0xF)) {
             menuItem->isScrollable = 2;
         }
 
@@ -444,64 +444,64 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
     int difficultyColors[]
         __attribute__((unused)) = { vs_getRGB(0, 128, 128), vs_getRGB(128, 128, 0) };
 
-    char sp28[16];
-    int sp38;
-    Menu_Score_Row* sp3C;
-    Menu_Score_Row* var_s1;
-    int var_fp;
+    char record_value_text[16];
+    int selected_trial_index;
+    Menu_Score_Row* selected_trial_row;
+    Menu_Score_Row* trial_row_cursor;
+    int packed_trial_cursor_position;
     int i;
     int j;
-    int var_s7;
+    int settled_row_count;
     int time;
     Menu_Framework_MenuRow* menuItem;
     void** p;
     void** r;
     void** q;
 
-    var_s1 = Menu_Score_gazetteRows;
-    var_s7 = 0;
-    sp38 = Battle_unusedMenu9CursorMemory.gazettePage;
+    trial_row_cursor = Menu_Score_gazetteRows;
+    settled_row_count = 0;
+    selected_trial_index = Battle_unusedMenu9CursorMemory.gazettePage;
 
-    for (i = 0; i < 8; ++i, ++var_s1) {
-        if (var_s1->animationState != 0) {
-            if (!(--var_s1->animationState)) {
+    for (i = 0; i < 8; ++i, ++trial_row_cursor) {
+        if (trial_row_cursor->animationState != 0) {
+            if (!(--trial_row_cursor->animationState)) {
                 menuItem = Menu_Framework_SetMenuItem(
-                    i, 0x140, 0x32 + i * 0x10, 0x88, 0, var_s1->title);
-                menuItem->unselectable = var_s1->disabled;
+                    i, 0x140, 0x32 + i * 0x10, 0x88, 0, trial_row_cursor->title);
+                menuItem->unselectable = trial_row_cursor->disabled;
                 menuItem->state = 2;
                 menuItem->targetPosition0 = 0xC2;
             }
         } else if (Menu_Framework_MenuItem(i)->state == 1) {
-            ++var_s7;
+            ++settled_row_count;
         }
     }
 
-    var_s1 = Menu_Score_gazetteRows;
+    trial_row_cursor = Menu_Score_gazetteRows;
 
-    for (i = 0; i < 8; ++var_s1, ++i) {
+    for (i = 0; i < 8; ++trial_row_cursor, ++i) {
 
-        if ((var_s7 != 8) || (selected != var_s7)) {
+        if ((settled_row_count != 8) || (selected != settled_row_count)) {
             continue;
         }
 
         menuItem = Menu_Framework_MenuItem(i);
 
-        if (i == sp38) {
+        if (i == selected_trial_index) {
 
-            if (var_s1->selected == 0) {
-                Menu_Framework_SetInformationMessage(var_s1->description);
+            if (trial_row_cursor->selected == 0) {
+                Menu_Framework_SetInformationMessage(trial_row_cursor->description);
             }
 
-            var_s1->selected = 1;
+            trial_row_cursor->selected = 1;
             menuItem->selected = 1;
-            var_fp = (((sp38 * 0x10) + 0x2A) << 0x10) | 0xB6;
+            packed_trial_cursor_position = (((selected_trial_index * 0x10) + 0x2A) << 0x10) | 0xB6;
 
-            Menu_Score_timeTrialRecordsCursorAnimStep = Menu_Framework_DrawCursor(Menu_Score_timeTrialRecordsCursorAnimStep, var_fp);
+            Menu_Score_timeTrialRecordsCursorAnimStep = Menu_Framework_DrawCursor(Menu_Score_timeTrialRecordsCursorAnimStep, packed_trial_cursor_position);
 
-            sp3C = var_s1;
+            selected_trial_row = trial_row_cursor;
 
         } else {
-            var_s1->selected = 0;
+            trial_row_cursor->selected = 0;
             menuItem->selected = 0;
         }
     }
@@ -519,18 +519,18 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
 
     for (j = 0; j < 3; ++j) {
 
-        time = Audio_Seq_unusedScoredata.bossTimeTrialScores[sp38][j].time;
+        time = Audio_Seq_unusedScoredata.bossTimeTrialScores[selected_trial_index][j].time;
 
         if (time != 0x800000) {
             sprintf(
-                sp28, "$%02d:%02d:%02d", time >> 0x10, (time >> 8) & 0xFF, time & 0xFF);
+                record_value_text, "$%02d:%02d:%02d", time >> 0x10, (time >> 8) & 0xFF, time & 0xFF);
             q = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-            Render_DrawCompactTextColor(sp28,
+            Render_DrawCompactTextColor(record_value_text,
                 vs_getXY_2((selected * 16) - 40, 50 + j * 30), vs_getRGB(128, 128, 128),
                 q[1] + 0x1C);
-            sprintf(sp28, "ROUND    %d",
-                Audio_Seq_unusedScoredata.bossTimeTrialScores[sp38][j].round + 1);
-            Render_DrawCompactTextColor(sp28,
+            sprintf(record_value_text, "ROUND    %d",
+                Audio_Seq_unusedScoredata.bossTimeTrialScores[selected_trial_index][j].round + 1);
+            Render_DrawCompactTextColor(record_value_text,
                 vs_getXY_2((selected * 16) - 60, 62 + j * 30), vs_getRGB(128, 128, 128),
                 q[1] + 0x1C);
         } else {
@@ -547,12 +547,12 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
         vs_getRGB(128, 128, 128), r[1] + 0x1C);
     Menu_Score_DrawGradientPanel((selected * 0x10) - 0x80, 0x8C, 0x70, 0xC, 1);
 
-    if ((var_s7 == 8) && (selected == var_s7)) {
-        if (sp3C->disabled != 0) {
+    if ((settled_row_count == 8) && (selected == settled_row_count)) {
+        if (selected_trial_row->disabled != 0) {
             Render_DrawCompactTextColor(
                 "$--:--:--", vs_getXY(88, 158), vs_getRGB(80, 80, 80), r[1] + 0x1C);
         } else {
-            Render_DrawCompactTextColor(Menu_Score_kTimeAttackReferenceTimes[sp38],
+            Render_DrawCompactTextColor(Menu_Score_kTimeAttackReferenceTimes[selected_trial_index],
                 vs_getXY(88, 158), vs_getRGB(128, 128, 128), r[1] + 0x1C);
         }
     }

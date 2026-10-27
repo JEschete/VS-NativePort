@@ -67,20 +67,20 @@ int Menu_Container_ParentWeaponIndex(
 int Menu_Container_ParentShieldIndex(
     int itemCategory, int index, Items_ContainerData* container);
 void Menu_Container_SortWeapons(int stat);
-void Menu_Container_SortShields(int arg0);
-void Menu_Container_SortMisc(int arg0);
+void Menu_Container_SortShields(int sort_stat_id);
+void Menu_Container_SortMisc(int sort_stat_id);
 void Menu_Container_CopyEquipmentStats(Items_EquipmentPartStats* item, int type, int index);
-void Menu_Container_SortEquipment(int arg0, int arg1);
-int Menu_Container_UpdateSortMenu(int arg0);
-int Menu_Container_UpdateDiscardMenu(int arg0);
-int Menu_Container_CountWeaponGems(int arg0);
-int Menu_Container_CountShieldGems(int arg0);
-int Menu_Container_WouldExceedCapacity(int arg0, int arg1);
-int Menu_Container_TransferCapacityError(int arg0, int arg1);
-void Menu_Container_UndoPendingTransfer(int arg0);
-void Menu_Container_StageItemTransfer(int arg0, int arg1);
-int Menu_Container_FindPendingTransfer(int arg0, int arg1);
-void Menu_Container_AppendPendingTransfer(int arg0, int arg1);
+void Menu_Container_SortEquipment(int category_id, int sort_stat_id);
+int Menu_Container_UpdateSortMenu(int category_selection);
+int Menu_Container_UpdateDiscardMenu(int packed_discard_selection);
+int Menu_Container_CountWeaponGems(int weapon_index);
+int Menu_Container_CountShieldGems(int shield_index);
+int Menu_Container_WouldExceedCapacity(int category_id, int additional_item_count);
+int Menu_Container_TransferCapacityError(int category_id, int item_index);
+void Menu_Container_UndoPendingTransfer(int pending_transfer_index);
+void Menu_Container_StageItemTransfer(int category_id, int item_index);
+int Menu_Container_FindPendingTransfer(int category_id, int item_index);
+void Menu_Container_AppendPendingTransfer(int category_id, int item_index);
 void Menu_Container_RebuildPendingTransfers(void);
 void Menu_Container_Storage_ResetMenudStatics(void);
 

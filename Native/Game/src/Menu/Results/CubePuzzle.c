@@ -46,37 +46,37 @@ static CVECTOR Menu_Results_evolveOrDieColors[] = { { 128, 96, 64 }, { 200, 180,
 static CVECTOR Menu_Results_foodChainColors[] = { { 128, 96, 64 }, { 200, 180, 160 }, { 128, 96, 64 } };
 
 // decomp: MENUF.PRG _pulseCubePuzzleEnd (src/MENU/MENUF.PRG/3B8.c:1294)
-void Menu_Results_PulseCubePuzzleClut(int arg0)
+void Menu_Results_PulseCubePuzzleClut(int blend_weight)
 {
     RECT rect;
-    int var_a1;
+    int weighted_red;
     int b;
-    int var_a2;
+    int weighted_green;
     int i;
     int r;
-    int new_var3;
-    int new_var4;
+    int packed_blue;
+    int packed_red_green;
 
     for (i = 0; i < 32; ++i) {
 
         b = Menu_Results_clutBuf[128 + i];
 
-        var_a1 = ((Menu_Results_clutBuf[96 + i] & 0x1F) * arg0)
-               + ((Menu_Results_clutBuf[64 + i] & 0x1F) * (16 - arg0));
+        weighted_red = ((Menu_Results_clutBuf[96 + i] & 0x1F) * blend_weight)
+               + ((Menu_Results_clutBuf[64 + i] & 0x1F) * (16 - blend_weight));
 
-        r = (var_a1 / 16) & 0x1F;
+        r = (weighted_red / 16) & 0x1F;
 
-        var_a2 = ((Menu_Results_clutBuf[96 + i] & 0x3E0) * arg0)
-               + ((Menu_Results_clutBuf[64 + i] & 0x3E0) * (16 - arg0));
+        weighted_green = ((Menu_Results_clutBuf[96 + i] & 0x3E0) * blend_weight)
+               + ((Menu_Results_clutBuf[64 + i] & 0x3E0) * (16 - blend_weight));
 
-        new_var4 = r | ((var_a2 / 16) & 0x3E0);
+        packed_red_green = r | ((weighted_green / 16) & 0x3E0);
 
-        b = ((Menu_Results_clutBuf[96 + i] & 0x7C00) * arg0)
-          + ((Menu_Results_clutBuf[64 + i] & 0x7C00) * (16 - arg0));
+        b = ((Menu_Results_clutBuf[96 + i] & 0x7C00) * blend_weight)
+          + ((Menu_Results_clutBuf[64 + i] & 0x7C00) * (16 - blend_weight));
 
-        new_var3 = (b / 16) & 0x7C00;
+        packed_blue = (b / 16) & 0x7C00;
 
-        Menu_Results_clutBuf[128 + i] = (new_var4 | new_var3) | (Menu_Results_clutBuf[96 + i] & 0x8000);
+        Menu_Results_clutBuf[128 + i] = (packed_red_green | packed_blue) | (Menu_Results_clutBuf[96 + i] & 0x8000);
     }
 
     setRECT(&rect, 768, 511, 160, 1);
@@ -302,7 +302,7 @@ int Menu_Results_UpdateCubePuzzleResults(void)
     static int Menu_Results_cubePuzzleResultsPuzzleModeRankPoints[] = { 100, 200, 400, 600, 800, 1000, 2000, 3000,
         4000, 5000, 6000, 7000, 8000, 9000, 10000, 20000 };
 
-    int var_v0;
+    int rank_index_bias;
 
     Menu_Results_PulseCubePuzzleClut((Core_Gte_Sin(Menu_Results_elementAnimationState) / 512) + 8);
 
@@ -319,8 +319,8 @@ int Menu_Results_UpdateCubePuzzleResults(void)
         } else {
             --rank;
             rank = rank / 200;
-            var_v0 = 1;
-            rank = 15 - (Menu_Results_puzzleRankCap + (rank + var_v0));
+            rank_index_bias = 1;
+            rank = 15 - (Menu_Results_puzzleRankCap + (rank + rank_index_bias));
 
             if (rank >= 16) {
                 rank = 15;
@@ -429,34 +429,34 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
 }
 
 // decomp: MENUF.PRG _renderGivingUp (src/MENU/MENUF.PRG/3B8.c:2610)
-void Menu_Results_DrawGivingUp(int arg0, int arg1)
+void Menu_Results_DrawGivingUp(int draw_y, int fade_timer)
 {
-    if (arg1 < 0) {
-        arg1 = 0;
+    if (fade_timer < 0) {
+        fade_timer = 0;
     }
-    if (arg1 > 64) {
-        arg1 = 64;
+    if (fade_timer > 64) {
+        fade_timer = 64;
     }
-    if (arg1 > 0) {
-        Menu_Results_DrawFadingTexture(0, arg0, Menu_Results_DisIndex_Esc0GivingUp, arg1);
-        Menu_Results_DrawFadingTexture(160, arg0, Menu_Results_DisIndex_Esc0GivingUp + 1, arg1);
+    if (fade_timer > 0) {
+        Menu_Results_DrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0GivingUp, fade_timer);
+        Menu_Results_DrawFadingTexture(160, draw_y, Menu_Results_DisIndex_Esc0GivingUp + 1, fade_timer);
     }
 }
 
 // decomp: MENUF.PRG _renderChicken (src/MENU/MENUF.PRG/3B8.c:2624)
-void Menu_Results_DrawChicken(int arg0, int arg1)
+void Menu_Results_DrawChicken(int draw_y, int fade_timer)
 {
-    if (arg1 < 0) {
-        arg1 = 0;
+    if (fade_timer < 0) {
+        fade_timer = 0;
     }
 
-    if (arg1 > 64) {
-        arg1 = 64;
+    if (fade_timer > 64) {
+        fade_timer = 64;
     }
 
-    if (arg1 > 0) {
-        Menu_Results_DrawFadingTexture(0, arg0, Menu_Results_DisIndex_Esc0Chicken, arg1);
-        Menu_Results_DrawFadingTexture(0xA0, arg0, Menu_Results_DisIndex_Esc0Chicken + 1, arg1);
+    if (fade_timer > 0) {
+        Menu_Results_DrawFadingTexture(0, draw_y, Menu_Results_DisIndex_Esc0Chicken, fade_timer);
+        Menu_Results_DrawFadingTexture(0xA0, draw_y, Menu_Results_DisIndex_Esc0Chicken + 1, fade_timer);
     }
 }
 
@@ -528,9 +528,9 @@ void Menu_Results_DrawCubePuzzleParTime(int x, int y, int timer)
     }
 
     if (timer > 0) {
-        int new_var = (Menu_Results_puzzleParTime % 60) << 0x10;
+        int seconds_shifted_for_packing = (Menu_Results_puzzleParTime % 60) << 0x10;
 
-        Menu_Results_DrawTime(x, y, timer, ((Menu_Results_puzzleParTime / 60) << 0x10) | (new_var >> 8), 0);
+        Menu_Results_DrawTime(x, y, timer, ((Menu_Results_puzzleParTime / 60) << 0x10) | (seconds_shifted_for_packing >> 8), 0);
     }
 }
 
@@ -559,8 +559,8 @@ void Menu_Results_DrawCountingCubePuzzleTime(int x, int y, int timer)
 {
     int temp_a3;
     int time;
-    int new_var2;
-    int* new_var4;
+    int display_minutes;
+    int* time_accumulator_address;
 
     if (timer < 0) {
         timer = 0;
@@ -580,16 +580,16 @@ void Menu_Results_DrawCountingCubePuzzleTime(int x, int y, int timer)
 
     if (timer >= 16) {
         temp_a3 = Audio_Seq_unusedStateFlags.puzzleTimerSeconds;
-        new_var2 = Audio_Seq_unusedStateFlags.puzzleTimerMins;
-        temp_a3 = ((new_var2 * 6000) + (temp_a3 * 100))
+        display_minutes = Audio_Seq_unusedStateFlags.puzzleTimerMins;
+        temp_a3 = ((display_minutes * 6000) + (temp_a3 * 100))
                 + Audio_Seq_unusedStateFlags.puzzleTimerHundredths;
         time = temp_a3;
-        time = ((*(new_var4 = &time)) * (timer - 16)) / 48;
-        new_var2 = time / 6000;
+        time = ((*(time_accumulator_address = &time)) * (timer - 16)) / 48;
+        display_minutes = time / 6000;
         time = time % 6000;
         temp_a3 = time / 100;
         time = time % 100;
-        time = (new_var2 << 0x10) | (temp_a3 << 8) | time;
+        time = (display_minutes << 0x10) | (temp_a3 << 8) | time;
     } else {
         time = 0;
     }

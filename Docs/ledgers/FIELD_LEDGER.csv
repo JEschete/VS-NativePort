@@ -6003,7 +6003,7 @@ T00671.000,T00671,vs_battle_textBox,0,unk0,1,vs_battle_textBox_fields,,,,flags,"
 T00671.001,T00671,vs_battle_textBox,1,unk4,1,short,,,,opaque4,"Used, but its meaning is not established",low,source:5BF94.c:1543
 T00671.002,T00671,vs_battle_textBox,2,unk6,1,short,,,,opaque6,"Used, but its meaning is not established",low,source:5BF94.c:4577
 T00671.003,T00671,vs_battle_textBox,3,string,0,char *,,,,string,Named in the fork; see cited use,med,source:5BF94.c:1541
-T00671.004,T00671,vs_battle_textBox,4,speed,0,u_short,,,,speed,Named in the fork; see cited use,med,source:5BF94.c:1542
+T00671.004,T00671,vs_battle_textBox,4,speed,0,u_short,,,,speed,Named in the fork; see cited use,med,source:5BF94.c:1542;source-review:5BF94.h:96-121 and 5BF94.c text-box producers/reset/renderers;retained-name:speed=existing text-advance budget with 1/0xFFFF control values and tick accumulation;not an anonymous stack/register name;preserve owning field identity and layout
 T00671.005,T00671,vs_battle_textBox,5,prevChunksPrinted,0,u_short,,,,prevChunksPrinted,Named in the fork; see cited use,med,source:5BF94.c:1544
 T00671.006,T00671,vs_battle_textBox,6,xIndent,0,short,,,,xIndent,Named in the fork; see cited use,med,source:5BF94.c:1744
 T00671.007,T00671,vs_battle_textBox,7,yIndent,0,short,,,,yIndent,Named in the fork; see cited use,med,source:5BF94.c:1745

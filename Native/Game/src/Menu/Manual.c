@@ -243,7 +243,7 @@ int Menu_Manual_UpdateHelpPages(void)
     int lastPage;
     int selectedRow;
     int currentPage;
-    Render_FrameScratch* s0;
+    Render_FrameScratch* frame_scratch;
     int cdState;
 
     switch (Menu_Manual_showMenuState) {
@@ -366,18 +366,18 @@ int Menu_Manual_UpdateHelpPages(void)
                 Audio_PlaySfxCentered(0x7E, VS_SFX_MENUCHANGE);
             }
         }
-        s0 = &Render_frameScratch;
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)s0->orderingTable) + 6);
-        Render_DrawCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)s0->orderingTable) + 6);
+        frame_scratch = &Render_frameScratch;
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)frame_scratch->orderingTable) + 6);
+        Render_DrawCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x12, 0x60, 0xC);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)s0->orderingTable) + 6);
-        Render_DrawCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)s0->orderingTable) + 6);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)frame_scratch->orderingTable) + 6);
+        Render_DrawCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x24, 0x40, 0xC);
-        Render_DrawCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)s0->orderingTable) + 7);
+        Render_DrawCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         sprintf(charBuf, "#%d/", currentPage + 1);
-        Render_DrawCompactTextColor(charBuf, 0xC40118, 0x808080, ((u_long*)s0->orderingTable) + 7);
+        Render_DrawCompactTextColor(charBuf, 0xC40118, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         sprintf(charBuf, "#%d", lastPage + 1);
-        Render_DrawCompactTextColor(charBuf, 0xC40130, 0x808080, ((u_long*)s0->orderingTable) + 7);
+        Render_DrawCompactTextColor(charBuf, 0xC40130, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         Field_manualDisplayState
             .scrollPositions[Field_manualDisplayState.currentManual] =
             Menu_Manual_scrollPosition;
@@ -548,20 +548,20 @@ void Menu_Manual_CopyPageText(void)
 }
 
 // decomp: MENUE.PRG _vsStrcpy (src/MENU/MENUE.PRG/494.c:561)
-char* Menu_Manual_CopyEncodedLine(char* arg0, char* arg1)
+char* Menu_Manual_CopyEncodedLine(char* destination_text, char* source_text)
 {
     char c;
 
-    for (c = *arg1; c != Core_TextCode_Terminator; c = *arg1) {
+    for (c = *source_text; c != Core_TextCode_Terminator; c = *source_text) {
         if (c >= Core_TextCode_Control) {
-            *arg0 = c;
-            ++arg1;
-            ++arg0;
+            *destination_text = c;
+            ++source_text;
+            ++destination_text;
         }
-        *arg0++ = *arg1++;
+        *destination_text++ = *source_text++;
     }
-    *arg0 = Core_TextCode_Newline;
-    return arg0 + 1;
+    *destination_text = Core_TextCode_Newline;
+    return destination_text + 1;
 }
 
 // decomp: MENUE.PRG _drawContent (src/MENU/MENUE.PRG/494.c:577)
@@ -608,16 +608,16 @@ void Menu_Manual_DrawPageContent(void)
 }
 
 // decomp: MENUE.PRG _min (src/MENU/MENUE.PRG/494.c:619)
-int Menu_Manual_MinTileExtent(int arg0, int arg1)
+int Menu_Manual_MinTileExtent(int remaining_extent, int tile_extent_limit)
 {
-    if (arg0 >= arg1) {
-        return arg1;
+    if (remaining_extent >= tile_extent_limit) {
+        return tile_extent_limit;
     }
-    return arg0;
+    return remaining_extent;
 }
 
 // decomp: MENUE.PRG _add_int (src/MENU/MENUE.PRG/494.c:627)
-int Menu_Manual_AddSpriteOffset(int arg0, int arg1) { return (arg0 + arg1); }
+int Menu_Manual_AddSpriteOffset(int sprite_origin, int tile_offset) { return (sprite_origin + tile_offset); }
 
 // decomp: MENUE.PRG _drawSprite (src/MENU/MENUE.PRG/494.c:629)
 void Menu_Manual_DrawIllustration(short* data)
@@ -732,8 +732,8 @@ void Menu_Manual_DrawUpperScrollFade(void)
 {
     int widths[4];
     int transparency[16];
-    Menu_Manual_BackgroundTransparencies const* var_v0;
-    Menu_Manual_BackgroundTransparencies* var_v1;
+    Menu_Manual_BackgroundTransparencies const* transparency_source;
+    Menu_Manual_BackgroundTransparencies* transparency_destination;
     int i;
     int j;
     POLY_FT4* poly;
@@ -741,12 +741,12 @@ void Menu_Manual_DrawUpperScrollFade(void)
 
     *(Menu_Manual_BackgroundChunkWidths*)widths = Menu_Manual_kMenuBgChunkWidths;
 
-    var_v1 = (Menu_Manual_BackgroundTransparencies*)transparency;
-    var_v0 = Menu_Manual_kMenuBgTransparencies;
+    transparency_destination = (Menu_Manual_BackgroundTransparencies*)transparency;
+    transparency_source = Menu_Manual_kMenuBgTransparencies;
 
     do {
-        *var_v1++ = *var_v0++;
-    } while (var_v0 != (Menu_Manual_kMenuBgTransparencies + 4));
+        *transparency_destination++ = *transparency_source++;
+    } while (transparency_source != (Menu_Manual_kMenuBgTransparencies + 4));
 
     Menu_Manual_DrawPageArrow(Menu_Manual_ArrowType_Up);
     poly = Render_frameScratch.primitiveCursor;
@@ -784,8 +784,8 @@ void Menu_Manual_DrawLowerScrollFade(void)
 {
     int widths[4];
     int transparency[16];
-    Menu_Manual_BackgroundTransparencies const* var_v0;
-    Menu_Manual_BackgroundTransparencies* var_v1;
+    Menu_Manual_BackgroundTransparencies const* transparency_source;
+    Menu_Manual_BackgroundTransparencies* transparency_destination;
     int i;
     int j;
     POLY_FT4* poly;
@@ -793,12 +793,12 @@ void Menu_Manual_DrawLowerScrollFade(void)
 
     *(Menu_Manual_BackgroundChunkWidths*)widths = Menu_Manual_kMenuBgChunkWidths;
 
-    var_v1 = (Menu_Manual_BackgroundTransparencies*)transparency;
-    var_v0 = Menu_Manual_kMenuBgTransparencies;
+    transparency_destination = (Menu_Manual_BackgroundTransparencies*)transparency;
+    transparency_source = Menu_Manual_kMenuBgTransparencies;
 
     do {
-        *var_v1++ = *var_v0++;
-    } while (var_v0 != (Menu_Manual_kMenuBgTransparencies + 4));
+        *transparency_destination++ = *transparency_source++;
+    } while (transparency_source != (Menu_Manual_kMenuBgTransparencies + 4));
 
     Menu_Manual_DrawPageArrow(Menu_Manual_ArrowType_Down);
 
@@ -848,8 +848,8 @@ void Menu_Manual_DrawPageArrow(enum Menu_Manual_ArrowType arrowType)
         }
     } else {
         if (Menu_Manual_pageArrowAnimState < 9) {
-            int v0 = 40;
-            y = v0 - (Menu_Manual_pageArrowAnimState >> 1);
+            int upper_arrow_base_y = 40;
+            y = upper_arrow_base_y - (Menu_Manual_pageArrowAnimState >> 1);
         } else {
             y = (Menu_Manual_pageArrowAnimState >> 2) + 34;
         }

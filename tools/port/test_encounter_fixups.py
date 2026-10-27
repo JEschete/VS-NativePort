@@ -1941,6 +1941,37 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertIn("cleared_section_address", source)
         self.assertIn("reset_tail_words", source)
 
+    def test_menu_names_preserve_choice_arithmetic_and_retained_speed_member(self):
+        examples = {
+            "Menu::SelectTextBoxChoice": (
+                "int v0 = selectedIndex - 1; selectedIndex = v0 + count;",
+                "int previous_choice_index = selectedIndex - 1; "
+                "selectedIndex = previous_choice_index + count;",
+            ),
+            "Menu::SetTextBoxText": (
+                "box->speed = 1; if (box->speed != 0) Continue();",
+                "box->speed = 1; if (box->speed != 0) Continue();",
+            ),
+        }
+        for name, (original, expected) in examples.items():
+            with self.subTest(name=name):
+                source = original
+                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
+                    if re.search(row, name):
+                        source = re.sub(pattern, replacement, source)
+                self.assertEqual(source, expected)
+
+    def test_menu_matrix_aliases_apply_each_binding_rule_once(self):
+        for name in ("Menu::Framework::BuildYawMatrix",
+                     "Menu::Framework::BuildPitchMatrix"):
+            with self.subTest(name=name):
+                patterns = [
+                    pattern for row, pattern, _, _ in copy_fixups.REGEX_FIXES
+                    if re.search(row, name)
+                ]
+                self.assertTrue(patterns)
+                self.assertEqual(len(patterns), len(set(patterns)))
+
     def test_regex_fixups_compile_each_distinct_selector_once(self):
         copy_to_native.compiled_fixup_regex.cache_clear()
         self.addCleanup(copy_to_native.compiled_fixup_regex.cache_clear)
@@ -2412,7 +2443,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         source = (root / "Native/Game/src/Menu/Rename.c").read_text()
         for function, variable in (
             ("DrawFrame", "prim"),
-            ("DrawSelectionBox", "temp_t0"),
+            ("DrawSelectionBox", "selection_box_primitive"),
         ):
             with self.subTest(function=function):
                 body = source.split(f"void Menu_Rename_{function}(", 1)[1]
@@ -2429,7 +2460,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
             ("Assembly.c", "SelectGem", "menuText", 49),
             ("Combination.c", "SelectCombinationBlade", "menuText", 17),
             ("Combination.c", "SelectCombinationShield", "menuText", 9),
-            ("Combination.c", "SelectCombinationArmor", "sp10", 17),
+            ("Combination.c", "SelectCombinationArmor", "armor_row_text", 17),
         )
         for filename, function, variable, rows in selectors:
             with self.subTest(function=function):
@@ -2448,6 +2479,11 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
     def test_loot_staging_uses_last_slots_and_preflights_composites(self):
         root = Path(__file__).resolve().parents[2]
         source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
+        reviewed_arguments = {
+            "F02849": "looted_weapon",
+            "F02851": "looted_shield",
+            "F02852": "looted_item",
+        }
         for fid in (
             "F02846",
             "F02847",
@@ -2458,6 +2494,9 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
             "F02852",
         ):
             for old, new, _ in copy_fixups.FIXES[fid]:
+                if fid in reviewed_arguments:
+                    old = re.sub(r"\barg0\b", reviewed_arguments[fid], old)
+                    new = re.sub(r"\barg0\b", reviewed_arguments[fid], new)
                 self.assertIn(new, source)
                 self.assertNotIn(old, source)
         self.assertIn("Items_ItemCategory_Grip, 1", source)
@@ -2588,8 +2627,8 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         source = (root / "Native/Game/src/Menu/Magic.c").read_text()
         menu = source.split("int Menu_Magic_UpdateWarlockMenu(", 1)[1]
         menu = menu.split("int Menu_Magic_UpdateShamanMenu(", 1)[0]
-        self.assertIn("*temp_s6 = LegacyGpu_Handle(prim);", menu)
-        self.assertNotIn("*temp_s6 = ((u_int)prim << 8) >> 8;", menu)
+        self.assertIn("*spell_level_ordering_table = LegacyGpu_Handle(prim);", menu)
+        self.assertNotIn("*spell_level_ordering_table = ((u_int)prim << 8) >> 8;", menu)
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]

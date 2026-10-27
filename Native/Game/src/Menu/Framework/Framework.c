@@ -297,10 +297,10 @@ static int Menu_Framework_ashleyRender = 0;
 static char Menu_Framework_ashleySkipFrame = 0;
 
 // decomp: BATTLE.PRG vs_battle_loadMenuPrg (src/BATTLE/BATTLE.PRG/5BF94.c:2576)
-int Menu_Framework_LoadMenuOverlay(int arg0)
+int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
 {
     Menu_Framework_MenuControlState* state = &Menu_Framework_menuState;
-    int subMenu = arg0 & 0x1F;
+    int subMenu = packed_menu_state & 0x1F;
 
     if (subMenu == 31) {
         return 1;
@@ -385,7 +385,7 @@ Menu_Framework_MenuRow* Menu_Framework_SetMenuItem(
     int row, int x, int y, int w, int backgroundWidth, char* text)
 {
     Menu_Framework_MenuRow* menuItem;
-    Menu_Framework_MenuRow* var_a0;
+    Menu_Framework_MenuRow* text_destination_row;
     int i;
     u_int c;
 
@@ -396,7 +396,7 @@ Menu_Framework_MenuRow* Menu_Framework_SetMenuItem(
 
     Core_Memory_ZeroWordsBackward(&menuItem->gradientState, 0x3C);
 
-    var_a0 = menuItem;
+    text_destination_row = menuItem;
     menuItem->x = x;
     menuItem->y = y;
 
@@ -404,16 +404,16 @@ Menu_Framework_MenuRow* Menu_Framework_SetMenuItem(
 
         c = *text++;
         if (c == Core_TextCode_Spacing) {
-            var_a0->text[i++] = c;
+            text_destination_row->text[i++] = c;
             c = *text++;
         } else if (c == Core_TextCode_Terminator) {
-            var_a0->text[i] = 0xFF;
+            text_destination_row->text[i] = 0xFF;
             break;
         } else if (c >= Core_TextCode_NonPrinting) {
             continue;
         }
 
-        var_a0->text[i++] = c;
+        text_destination_row->text[i++] = c;
     }
 
     return menuItem;
@@ -447,7 +447,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
     char* text = menuItem->text;
 
     if (menuItem->state != 0) {
-        int temp_v1;
+        int row_left_x;
         int x;
         int c;
         int var_s2;
@@ -468,11 +468,11 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
 
         Render_SetMenuFontStyle(color + 4);
 
-        temp_v1 = menuItem->x;
-        var_s2 = temp_v1 + 6;
+        row_left_x = menuItem->x;
+        var_s2 = row_left_x + 6;
 
         if ((menuItem->rowIcon - 1) < 23u) {
-            var_s2 = temp_v1 + 22;
+            var_s2 = row_left_x + 22;
         }
 
         c = text[0];
@@ -670,23 +670,23 @@ int Menu_Framework_UpdateMainMenuSelection(int mode)
 // decomp: BATTLE.PRG func_800C97BC (src/BATTLE/BATTLE.PRG/5BF94.c:2966)
 void Menu_Framework_UpdateMenuOverlay(void)
 {
-    Menu_Framework_MenuRow* var_s2;
-    int temp_s1;
+    Menu_Framework_MenuRow* menu_row_cursor;
+    int selected_menu_id;
     int miscIndex;
     int i;
-    int var_s0;
+    int packed_menu_state;
 
-    var_s2 = Menu_Framework_menuItems;
-    var_s0 = Menu_Framework_menuState.currentMenu;
+    menu_row_cursor = Menu_Framework_menuItems;
+    packed_menu_state = Menu_Framework_menuState.currentMenu;
 
-    if (var_s0 == 0x7F) {
+    if (packed_menu_state == 0x7F) {
         Menu_Framework_actionSelection.menuStatus = 2;
         Menu_Framework_menuState.currentMenu = 0x3F;
     }
 
-    temp_s1 = var_s0 & 0x3F;
+    selected_menu_id = packed_menu_state & 0x3F;
 
-    if (temp_s1 != 0x3F) {
+    if (selected_menu_id != 0x3F) {
         if (Menu_Framework_LoadMenuOverlay(0) != 0) {
 
             if (Menu_Framework_shortcutInvoked == 5) {
@@ -694,37 +694,37 @@ void Menu_Framework_UpdateMenuOverlay(void)
                 return;
             }
 
-            Menu_Framework_UpdateMainMenu(var_s0);
+            Menu_Framework_UpdateMainMenu(packed_menu_state);
             return;
         }
 
-        if (temp_s1 == 0) {
+        if (selected_menu_id == 0) {
 
             miscIndex = Menu_Framework_UpdateMainMenuSelection(0);
 
             if (miscIndex != 0) {
 
-                var_s0 = 0x1F;
+                packed_menu_state = 0x1F;
 
                 if (miscIndex > 0) {
-                    var_s0 = miscIndex | 0x40;
+                    packed_menu_state = miscIndex | 0x40;
                 }
 
-                Menu_Framework_menuState.currentMenu = var_s0;
+                Menu_Framework_menuState.currentMenu = packed_menu_state;
             }
         }
 
-        if ((var_s0 >= 0x1F) || (temp_s1 == 0)) {
+        if ((packed_menu_state >= 0x1F) || (selected_menu_id == 0)) {
             for (i = 0; i < 10; ++i) {
-                Menu_Framework_DrawMenuItem(var_s2);
-                ++var_s2;
+                Menu_Framework_DrawMenuItem(menu_row_cursor);
+                ++menu_row_cursor;
             }
         }
     }
 }
 
 // decomp: BATTLE.PRG func_800CA9C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3484)
-void Menu_Framework_InitGameInterface(void* arg0)
+void Menu_Framework_InitGameInterface(void* interface_texture_data)
 {
     (*(char (*))&Battle_reuseSphereVolumes) = 0;
     Menu_Framework_loadedSubMenu = 0;
@@ -752,9 +752,9 @@ void Menu_Framework_InitGameInterface(void* arg0)
     Core_Memory_ZeroWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
     Menu_Framework_menuMemory = (Menu_Framework_MenuMemory) { { 0 } };
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
-    Render_UploadImageRectangle(0x340, arg0, 0xE00040);
-    Render_UploadImageRectangle(0x380, arg0 + 0x7000, 0xE00040);
-    Render_UploadImageRectangle(0x4203C0, arg0 + 0xE000, 0x9E0040);
+    Render_UploadImageRectangle(0x340, interface_texture_data, 0xE00040);
+    Render_UploadImageRectangle(0x380, interface_texture_data + 0x7000, 0xE00040);
+    Render_UploadImageRectangle(0x4203C0, interface_texture_data + 0xE000, 0x9E0040);
     ClearOTag(Menu_activeTextBoxOrderingTable, 0x22);
 }
 
@@ -777,22 +777,22 @@ void Menu_Framework_ResumeAfterActionSelection(void)
 }
 
 // decomp: BATTLE.PRG func_800CABE0 (src/BATTLE/BATTLE.PRG/5BF94.c:3535)
-int Menu_Framework_ActionRestrictionFlags(int arg0)
+int Menu_Framework_ActionRestrictionFlags(int menu_invocation_mode)
 {
     int ret;
     Battle_ActorStats* actor = Battle_characterState->stats;
-    int temp_v0 = Actors_ActorStateFlags(0);
-    int var_a0 = ((temp_v0 & 0x80000) != 0) * 2;
+    int ashley_state_flags = Actors_ActorStateFlags(0);
+    int actor_restriction_flags = ((ashley_state_flags & 0x80000) != 0) * 2;
 
-    if ((temp_v0 & 0x40100000) == 0x100000) {
-        var_a0 |= 4;
+    if ((ashley_state_flags & 0x40100000) == 0x100000) {
+        actor_restriction_flags |= 4;
     }
 
     if (!(Battle_characterState->model->weaponDrawn)) {
-        var_a0 |= 8;
+        actor_restriction_flags |= 8;
     }
 
-    ret = var_a0;
+    ret = actor_restriction_flags;
 
     if (actor->currentMp == 0) {
         ret |= 0x20;
@@ -810,7 +810,7 @@ int Menu_Framework_ActionRestrictionFlags(int arg0)
         ret |= 0x100;
     }
 
-    if (arg0 == 2) {
+    if (menu_invocation_mode == 2) {
         ret |= 0x200;
     }
 
@@ -818,22 +818,22 @@ int Menu_Framework_ActionRestrictionFlags(int arg0)
 }
 
 // decomp: BATTLE.PRG func_800CACD0 (src/BATTLE/BATTLE.PRG/5BF94.c:3575)
-int Menu_Framework_OpenGameMenu(int menuState, int arg1)
+int Menu_Framework_OpenGameMenu(int menuState, int menu_invocation_mode)
 {
     int i;
-    u_short var_a1;
-    int var_a0;
+    u_short enabled_menu_flags;
+    int ability_action_id;
     void* miscIndex;
 
     if (Menu_Framework_menuState.currentMenu == 0x3F) {
         Menu_Framework_shortcutInvoked = 0;
         Menu_Framework_openedWithoutMainMenu = 0;
-        Menu_Framework_actionRestrictions = Menu_Framework_ActionRestrictionFlags(arg1);
+        Menu_Framework_actionRestrictions = Menu_Framework_ActionRestrictionFlags(menu_invocation_mode);
         Menu_Framework_actionSelection.selectionKind = 0;
         Menu_Framework_menuState.currentMenu = menuState;
         Menu_Framework_actionSelection.menuStatus = 1;
 
-        if (arg1 == 0) {
+        if (menu_invocation_mode == 0) {
             Menu_PlayOpenSound();
         }
 
@@ -843,28 +843,28 @@ int Menu_Framework_OpenGameMenu(int menuState, int arg1)
             Content_AcquireOverlayWorkspace(6);
 
             miscIndex = Core_Memory_AllocateFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
-            var_a1 = Input_settings.menuFlags;
+            enabled_menu_flags = Input_settings.menuFlags;
             Menu_Framework_stringBuf = (char*)((Menu_Framework_MenuRow*)miscIndex + 40);
             Menu_Framework_menuItems = miscIndex;
             Menu_Framework_rowTypeBuf = (int*)(Menu_Framework_stringBuf + 0x60);
 
             for (i = 0; i < 3; ++i) {
-                for (var_a0 = Menu_Framework_abilityGroupActionRanges[i * 2]; var_a0 < Menu_Framework_abilityGroupActionRanges[i * 2 + 1];
-                    ++var_a0) {
-                    if (Battle_actionDefinitions[var_a0].unlocked) {
-                        var_a1 |= 1 << i;
+                for (ability_action_id = Menu_Framework_abilityGroupActionRanges[i * 2]; ability_action_id < Menu_Framework_abilityGroupActionRanges[i * 2 + 1];
+                    ++ability_action_id) {
+                    if (Battle_actionDefinitions[ability_action_id].unlocked) {
+                        enabled_menu_flags |= 1 << i;
                         break;
                     }
                 }
             }
 
             if (Audio_Seq_unusedStateFlags.opaqueB5 != 0) {
-                var_a1 |= 1;
+                enabled_menu_flags |= 1;
             }
             if (Audio_Seq_unusedStateFlags.introState >= 3) {
-                var_a1 |= 0x120;
+                enabled_menu_flags |= 0x120;
             }
-            Input_settings.menuFlags = var_a1;
+            Input_settings.menuFlags = enabled_menu_flags;
             Menu_Framework_UpdateMainMenuSelection(2);
         }
         return 1;
@@ -927,26 +927,26 @@ void Menu_Framework_ReleaseMenuRows(void)
 }
 
 // decomp: BATTLE.PRG func_800CB158 (src/BATTLE/BATTLE.PRG/5BF94.c:3723)
-void Menu_Framework_OpenLootListMenu(Items_LootListNode* arg0)
+void Menu_Framework_OpenLootListMenu(Items_LootListNode* loot_list_head)
 {
-    Menu_Framework_lootLists = arg0;
+    Menu_Framework_lootLists = loot_list_head;
     Menu_Framework_lootEntry = NULL;
     Menu_Framework_OpenGameMenu(0xC, 2);
 }
 
 // decomp: BATTLE.PRG func_800CB18C (src/BATTLE/BATTLE.PRG/5BF94.c:3730)
-void Menu_Framework_OpenLootEntryMenu(Items_BattleLoot* arg0)
+void Menu_Framework_OpenLootEntryMenu(Items_BattleLoot* loot_entry)
 {
-    Menu_Framework_lootEntry = arg0;
+    Menu_Framework_lootEntry = loot_entry;
     Menu_Framework_lootLists = NULL;
     Menu_Framework_OpenGameMenu(0xC, 2);
 }
 
 // decomp: BATTLE.PRG func_800CB1C0 (src/BATTLE/BATTLE.PRG/5BF94.c:3737)
-void Menu_Framework_OpenChestStorageMenu(int arg0)
+void Menu_Framework_OpenChestStorageMenu(int chest_location_id)
 {
     Menu_Framework_OpenGameMenu(7, 2);
-    Menu_saveLocationId = arg0 + 0x40;
+    Menu_saveLocationId = chest_location_id + 0x40;
     Menu_Framework_actionRestrictions |= 0x400;
 }
 
@@ -1637,22 +1637,22 @@ void Menu_Framework_DrawActionCostPanel(void)
 void Menu_Framework_DrawButtonPromptBackground(int x, int y, int w, int h)
 {
     int i;
-    u_long* var_t2 = Render_frameScratch.primitiveCursor;
-    u_long* temp_v1 = Render_frameScratch.orderingTable - 0xC;
+    u_long* background_primitive_cursor = Render_frameScratch.primitiveCursor;
+    u_long* background_ordering_table = Render_frameScratch.orderingTable - 0xC;
 
     for (i = 0; i < h; ++i) {
-        var_t2[0] = vs_getTag(u_long[6], temp_v1[0]);
-        var_t2[1] = vs_getTpage(0, 0, 0, 0, Render_Dithering_On);
-        var_t2[2] = vs_getRGB0(Render_LegacyPrimitiveCode_LineG2, 64, 56, 32);
-        var_t2[3] = ((x & 0xFFFF) | ((y + i) << 0x10));
-        var_t2[4] = vs_getRGB888(16, 16, 8);
-        var_t2[5] = vs_getXY_2((x + w) - i, y + i);
-        var_t2[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
-        temp_v1[0] = (LegacyGpu_Handle(var_t2));
-        var_t2 += 7;
+        background_primitive_cursor[0] = vs_getTag(u_long[6], background_ordering_table[0]);
+        background_primitive_cursor[1] = vs_getTpage(0, 0, 0, 0, Render_Dithering_On);
+        background_primitive_cursor[2] = vs_getRGB0(Render_LegacyPrimitiveCode_LineG2, 64, 56, 32);
+        background_primitive_cursor[3] = ((x & 0xFFFF) | ((y + i) << 0x10));
+        background_primitive_cursor[4] = vs_getRGB888(16, 16, 8);
+        background_primitive_cursor[5] = vs_getXY_2((x + w) - i, y + i);
+        background_primitive_cursor[6] = vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
+        background_ordering_table[0] = (LegacyGpu_Handle(background_primitive_cursor));
+        background_primitive_cursor += 7;
     }
 
-    Render_frameScratch.primitiveCursor = var_t2;
+    Render_frameScratch.primitiveCursor = background_primitive_cursor;
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_setBackgroundRenderPriority (src/MENU/MAINMENU.PRG/58EC.c:739)
@@ -1672,22 +1672,22 @@ void Menu_Framework_SetBackgroundPriority(int otOffset, int brightness)
 void Menu_Framework_LoadBackgroundTexture(u_int* buf)
 {
 
-    int var_a2;
+    int decoded_word_index;
     int i;
-    u_int var_v1;
+    u_int run_words_remaining;
     void* data = Core_overlaySlots[2];
-    u_int* temp_t1 = data + 0x200;
+    u_int* encoded_texture_words = data + 0x200;
 
-    for (i = 0, var_a2 = 0; i < 0x1780;) {
+    for (i = 0, decoded_word_index = 0; i < 0x1780;) {
 
-        u_int temp_a0 = temp_t1[i++];
+        u_int packed_run_lengths = encoded_texture_words[i++];
 
-        for (var_v1 = temp_a0 & 0xFFFF; var_v1 != 0; --var_v1) {
-            buf[var_a2++] = 0;
+        for (run_words_remaining = packed_run_lengths & 0xFFFF; run_words_remaining != 0; --run_words_remaining) {
+            buf[decoded_word_index++] = 0;
         }
 
-        for (var_v1 = temp_a0 >> 16; var_v1 != 0; --var_v1) {
-            buf[var_a2++] = temp_t1[i++];
+        for (run_words_remaining = packed_run_lengths >> 16; run_words_remaining != 0; --run_words_remaining) {
+            buf[decoded_word_index++] = encoded_texture_words[i++];
         }
     }
 
@@ -1709,8 +1709,8 @@ void Menu_Framework_LoadBackgroundTexture(u_int* buf)
 // decomp: MAINMENU.PRG vs_mainmenu_setMenuRows (src/MENU/MAINMENU.PRG/58EC.c:798)
 void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], int rowTypes[])
 {
-    int temp_v1_2;
-    int var_v0;
+    int maximum_page_offset;
+    int has_following_page;
     u_int var_a0;
 
     int i = 0;
@@ -1725,35 +1725,35 @@ void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], i
         page = Menu_Framework_menuMemory.cursorMemories[subMenuId * 2 + 1];
     }
 
-    temp_v1_2 = 10;
-    temp_v1_2 = rowCount - temp_v1_2 + rowInfo;
+    maximum_page_offset = 10;
+    maximum_page_offset = rowCount - maximum_page_offset + rowInfo;
 
-    if (temp_v1_2 < 0) {
+    if (maximum_page_offset < 0) {
         i += page;
         page = 0;
         if (i >= rowCount) {
             i = 0;
         }
     } else {
-        if (temp_v1_2 < page) {
+        if (maximum_page_offset < page) {
             if ((i + page) >= rowCount) {
                 i = 0;
                 page = 0;
             } else {
-                i += page - temp_v1_2;
-                page = temp_v1_2;
+                i += page - maximum_page_offset;
+                page = maximum_page_offset;
             }
         }
 
-        var_v0 = page < temp_v1_2;
+        has_following_page = page < maximum_page_offset;
 
         if ((page > 0) && (i == 0)) {
             i = 1;
             page -= 1;
-            var_v0 = page < temp_v1_2;
+            has_following_page = page < maximum_page_offset;
         }
 
-        if (var_v0 != 0) {
+        if (has_following_page != 0) {
             var_a0 = rowCount << 7;
             if (i == (9 - rowInfo)) {
                 i -= 1;
@@ -1822,7 +1822,7 @@ int Menu_Framework_GetSelectedRow(void) { return Menu_Framework_itemsText != NUL
 // decomp: MAINMENU.PRG _initItemRow (src/MENU/MAINMENU.PRG/58EC.c:910)
 Menu_Framework_MenuRow* Menu_Framework_CreateListRow(int row, int x)
 {
-    int temp_v1;
+    int invert_gradient_flag;
     Menu_Framework_MenuRow* menuItem = Menu_Framework_SetMenuItem(row + (Menu_Framework_subMenuRowInfo * 10),
         x, ((row + Menu_Framework_subMenuRowInfo) * 16) + 18, Menu_Framework_menuRowYOffset + 126, 0,
         (char*)((Menu_Framework_ItemText*)Menu_Framework_itemsText)[Menu_Framework_subMenuPage + row].name);
@@ -1832,10 +1832,10 @@ Menu_Framework_MenuRow* Menu_Framework_CreateListRow(int row, int x)
     menuItem->unselectable = flags & 1;
     menuItem->backgroundWidth += (flags & 2) * 12;
 
-    temp_v1 = (flags >> 3) & 1;
+    invert_gradient_flag = (flags >> 3) & 1;
 
-    menuItem->invertGradient = temp_v1;
-    menuItem->fontColor = temp_v1 | ((flags >> 2) & 1);
+    menuItem->invertGradient = invert_gradient_flag;
+    menuItem->fontColor = invert_gradient_flag | ((flags >> 2) & 1);
     menuItem->rowIcon = (flags >> 26);
 
     if ((row == 0) && (Menu_Framework_subMenuPage != 0)) {
@@ -1862,9 +1862,9 @@ void Menu_Framework_UpdateRowSelection(void)
 {
 
     int absRow;
-    int temp_v1;
+    int visible_row_capacity;
     int i;
-    int var_s1;
+    int visible_row_count;
     int page;
     Menu_Framework_MenuRow* menuItem;
 
@@ -2033,14 +2033,14 @@ void Menu_Framework_UpdateRowSelection(void)
                         gradientStates[i] = 0;
                     }
 
-                    var_s1 = Menu_Framework_subMenuRowCount;
-                    temp_v1 = 10 - Menu_Framework_subMenuRowInfo;
+                    visible_row_count = Menu_Framework_subMenuRowCount;
+                    visible_row_capacity = 10 - Menu_Framework_subMenuRowInfo;
 
-                    if (temp_v1 < var_s1) {
-                        var_s1 = temp_v1;
+                    if (visible_row_capacity < visible_row_count) {
+                        visible_row_count = visible_row_capacity;
                     }
 
-                    for (i = 0; i < var_s1; ++i) {
+                    for (i = 0; i < visible_row_count; ++i) {
                         gradientStates[i + page] =
                             Menu_Framework_MenuItem(i + (Menu_Framework_subMenuRowInfo * 10))
                                 ->gradientState;
@@ -2107,14 +2107,14 @@ void Menu_Framework_DrawBackground(int brightness)
     prim[4] = vs_getUV0Clut(0, 0, 768, 227);
 
     if (!opaque) {
-        int new_var = 288;
+        int background_texture_page_flags = 288;
         brightness = (256 | 128) - brightness;
 
         Render_QueueSprite(brightness, 0, vs_getWH(256, 240), before)[1] =
-            (((u_int)uCoord >> 6) | new_var
+            (((u_int)uCoord >> 6) | background_texture_page_flags
                 | vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off));
         Render_QueueSprite(brightness, 256, vs_getWH(64, 240), before)[1] =
-            (((uCoord + 256) >> 6) | new_var
+            (((uCoord + 256) >> 6) | background_texture_page_flags
                 | vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off));
     }
 }
@@ -2126,13 +2126,13 @@ int Menu_Framework_DrawFeatheredRowCharacter(
     int i;
     int uvClut;
     u_long* prim;
-    int new_var;
+    int non_printing_character_threshold;
 
-    int s7 = character >> 0x1F;
+    int scroll_direction_sign = character >> 0x1F;
     character &= 0xFFFF;
-    new_var = Core_TextCode_NonPrinting;
+    non_printing_character_threshold = Core_TextCode_NonPrinting;
 
-    if ((character < new_var) && (character == ' ')) {
+    if ((character < non_printing_character_threshold) && (character == ' ')) {
         do {
             do {
                 return x + 6;
@@ -2151,7 +2151,7 @@ int Menu_Framework_DrawFeatheredRowCharacter(
 
     for (i = 0; i < 12; ++i) {
 
-        prim = Render_QueueSprite(s7 == 0 ? (i * 8) + 264 : 352 - (i * 8),
+        prim = Render_QueueSprite(scroll_direction_sign == 0 ? (i * 8) + 264 : 352 - (i * 8),
             vs_getXY_2(x, menuItem->y + i), vs_getWH(12, 1), before);
         prim[4] = uvClut;
         prim[1] = vs_getTpage(832, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0);
@@ -2211,23 +2211,23 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
 {
 
     int wh;
-    u_int sp14;
+    u_int texture_bank_x;
     int gradientState;
     int backgroundWidth;
     int scroll;
-    int temp_v1_2;
+    int texture_u;
     int i;
     u_long* prim;
     int var_s3;
     u_int xy;
-    int temp_a0;
+    int texture_v;
     u_long* before;
 
     char* ptr = &menuItem->text[0];
-    sp14 = 0;
+    texture_bank_x = 0;
 
     if (Render_frameBuf == 0) {
-        sp14 = 320;
+        texture_bank_x = 320;
     }
 
     xy = *(int*)&menuItem->x;
@@ -2338,14 +2338,14 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
         for (i = 0; i < 12; ++i) {
             prim = Render_QueueSprite(
                 scroll == 0 ? 120 - i * 8 : i * 8 + 32, xy, wh, before);
-            temp_v1_2 = (xy - var_s3);
-            temp_a0 = xy >> 0x10;
+            texture_u = (xy - var_s3);
+            texture_v = xy >> 0x10;
             xy += vs_getXY(0, 1);
-            prim[1] = ((sp14 + var_s3) >> 6)
+            prim[1] = ((texture_bank_x + var_s3) >> 6)
                     | vs_getTpage(0, 0, Render_BlendMode_Subtract, Render_BlendMode_Add,
                         Render_Dithering_Off);
-            prim[4] = temp_v1_2 & 0xFF;
-            prim[4] = prim[4] | (temp_a0 << 8);
+            prim[4] = texture_u & 0xFF;
+            prim[4] = prim[4] | (texture_v << 8);
         }
     }
 }
@@ -2357,7 +2357,7 @@ void Menu_Framework_UpdateAndDrawRows(void)
     Menu_Framework_MenuRow* menuItem = Menu_Framework_menuItems;
 
     for (i = 0; i < 40; ++i, ++menuItem) {
-        int var_v1;
+        int row_marker_x;
         u_long* before;
         int target;
         int origin;
@@ -2537,11 +2537,11 @@ void Menu_Framework_UpdateAndDrawRows(void)
             int xy;
 
             if (menuItem->w == 126) {
-                var_v1 = menuItem->x + 116;
-                origin = var_v1 | ((menuItem->y + 1) << 0x10);
+                row_marker_x = menuItem->x + 116;
+                origin = row_marker_x | ((menuItem->y + 1) << 0x10);
             } else {
-                var_v1 = (((menuItem->x * 19) >> 4) + 96) & 0xFFFF;
-                origin = var_v1 | ((menuItem->y + 1) << 0x10);
+                row_marker_x = (((menuItem->x * 19) >> 4) + 96) & 0xFFFF;
+                origin = row_marker_x | ((menuItem->y + 1) << 0x10);
             }
 
             Menu_Framework_DrawNeutralInteger(j, origin, before);
@@ -2753,9 +2753,9 @@ int Menu_Framework_QuitDelay(void)
 }
 
 // decomp: MAINMENU.PRG func_800FAA5C (src/MENU/MAINMENU.PRG/C48.c:316)
-int Menu_Framework_ReturnFromSubmenu(int arg0)
+int Menu_Framework_ReturnFromSubmenu(int packed_menu_state)
 {
-    if (arg0 & Menu_Framework_MenuState_OpenedFromMainMenu) {
+    if (packed_menu_state & Menu_Framework_MenuState_OpenedFromMainMenu) {
         Menu_Framework_menuState.currentMenu = 0;
 
         Menu_Framework_UpdateMainMenuSelection(1);
@@ -2772,7 +2772,7 @@ int Menu_Framework_ReturnFromSubmenu(int arg0)
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_exec (src/MENU/MAINMENU.PRG/C48.c:334)
-void Menu_Framework_UpdateMainMenu(int arg0)
+void Menu_Framework_UpdateMainMenu(int packed_menu_state)
 {
     static int (*Menu_Framework_mainMenuSubmenuEntrypoints[])(u_char*) = { Menu_Magic_Update, Menu_BreakArts_Update,
         Menu_BattleAbilities_Update, Menu_Inventory_Update, Menu_Status_Update, Menu_Map_UpdateScreen, Menu_Files_UpdateDataMenu,
@@ -2783,7 +2783,7 @@ void Menu_Framework_UpdateMainMenu(int arg0)
     int state;
     char* submenuState;
     Menu_Framework_MenuControlState* menuState = &Menu_Framework_menuState;
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem((arg0 - 1) & 0xF);
+    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem((packed_menu_state - 1) & 0xF);
     int submenuReturn = 0;
     Items_Inventory* inventory = &Audio_Seq_unusedInventory;
 
@@ -2794,9 +2794,9 @@ void Menu_Framework_UpdateMainMenu(int arg0)
     Menu_Framework_armor = inventory->armor;
     Menu_Framework_gems = inventory->gems;
 
-    submenuState = &Menu_Framework_submenuStates[arg0 & 0xF];
-    menuLoaded = Menu_Framework_LoadMenuOverlay(arg0);
-    selectedMenu = arg0 & 0x3F;
+    submenuState = &Menu_Framework_submenuStates[packed_menu_state & 0xF];
+    menuLoaded = Menu_Framework_LoadMenuOverlay(packed_menu_state);
+    selectedMenu = packed_menu_state & 0x3F;
 
     if (selectedMenu != 0) {
         if (selectedMenu == 31) {
@@ -2827,7 +2827,7 @@ void Menu_Framework_UpdateMainMenu(int arg0)
 
             switch (*submenuState) {
             case 0:
-                if (!(arg0 & 0x40)) {
+                if (!(packed_menu_state & 0x40)) {
 
                     state = 0;
 
@@ -2935,37 +2935,37 @@ void Menu_Framework_SetMenuVisible(int display)
 void Menu_Framework_ClearMenuExceptTitle(void) { Menu_Framework_ClearMenuExcept(5); }
 
 // decomp: MENU5.PRG _buildYawMatrix (src/MENU/MENU5.PRG/4D8.c:1756)
-void Menu_Framework_BuildYawMatrix(MATRIX* arg0, short arg1)
+void Menu_Framework_BuildYawMatrix(MATRIX* camera_matrix, short angle)
 {
-    int temp_s0 = Core_Gte_Sin(-arg1);
-    int temp_v0 = Core_Gte_Cos(-arg1);
+    int sine = Core_Gte_Sin(-angle);
+    int cosine = Core_Gte_Cos(-angle);
 
-    arg0->m[0][0] = temp_v0;
-    arg0->m[0][1] = 0;
-    arg0->m[0][2] = -temp_s0;
-    arg0->m[1][0] = 0;
-    arg0->m[1][1] = 0x1000;
-    arg0->m[1][2] = 0;
-    arg0->m[2][0] = temp_s0;
-    arg0->m[2][1] = 0;
-    arg0->m[2][2] = temp_v0;
+    camera_matrix->m[0][0] = cosine;
+    camera_matrix->m[0][1] = 0;
+    camera_matrix->m[0][2] = -sine;
+    camera_matrix->m[1][0] = 0;
+    camera_matrix->m[1][1] = 0x1000;
+    camera_matrix->m[1][2] = 0;
+    camera_matrix->m[2][0] = sine;
+    camera_matrix->m[2][1] = 0;
+    camera_matrix->m[2][2] = cosine;
 }
 
 // decomp: MENU5.PRG _buildPitchMatrix (src/MENU/MENU5.PRG/4D8.c:1772)
-void Menu_Framework_BuildPitchMatrix(MATRIX* arg0, short arg1)
+void Menu_Framework_BuildPitchMatrix(MATRIX* pitch_matrix, short angle)
 {
-    int temp_s0 = Core_Gte_Sin(arg1);
-    int temp_v0 = Core_Gte_Cos(arg1);
+    int sine = Core_Gte_Sin(angle);
+    int cosine = Core_Gte_Cos(angle);
 
-    arg0->m[0][0] = 0x1000;
-    arg0->m[0][1] = 0;
-    arg0->m[0][2] = 0;
-    arg0->m[1][0] = 0;
-    arg0->m[1][1] = temp_v0;
-    arg0->m[1][2] = -temp_s0;
-    arg0->m[2][0] = 0;
-    arg0->m[2][1] = temp_s0;
-    arg0->m[2][2] = temp_v0;
+    pitch_matrix->m[0][0] = 0x1000;
+    pitch_matrix->m[0][1] = 0;
+    pitch_matrix->m[0][2] = 0;
+    pitch_matrix->m[1][0] = 0;
+    pitch_matrix->m[1][1] = cosine;
+    pitch_matrix->m[1][2] = -sine;
+    pitch_matrix->m[2][0] = 0;
+    pitch_matrix->m[2][1] = sine;
+    pitch_matrix->m[2][2] = cosine;
 }
 
 // decomp: MENU9.PRG _setMenuRow10 (src/MENU/MENU9.PRG/238.c:244)

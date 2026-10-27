@@ -208,21 +208,21 @@ int Menu_Magic_UpdateTeleportMenu(int init)
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             if (Menu_Magic_teleportMenuSelectedRow > 0) {
                 int v1;
-                int v0;
-                int a0;
-                int a2 = Menu_Magic_teleportMenuAvailableSavePoints[Menu_Magic_teleportMenuSelectedRow - 1];
-                i = Menu_Magic_savePointData[a2] + 1;
+                int packed_location_and_tile_x;
+                int packed_destination_tile_z;
+                int selected_save_point_index = Menu_Magic_teleportMenuAvailableSavePoints[Menu_Magic_teleportMenuSelectedRow - 1];
+                i = Menu_Magic_savePointData[selected_save_point_index] + 1;
                 v1 = i & 0x1FF;
                 init = ~0x3E00;
-                v0 = (rowCount & ~0x1FF) | v1;
+                packed_location_and_tile_x = (rowCount & ~0x1FF) | v1;
                 v1 = (i >> 7) & 0x3E00;
-                v0 &= init;
-                v0 |= v1;
-                a0 = (i >> 0x18) & 0x1F;
-                a0 <<= 0xE;
+                packed_location_and_tile_x &= init;
+                packed_location_and_tile_x |= v1;
+                packed_destination_tile_z = (i >> 0x18) & 0x1F;
+                packed_destination_tile_z <<= 0xE;
                 v1 = Menu_Magic_teleportCosts[Menu_Magic_teleportMenuSelectedRow - 1] << 0x13;
-                v0 &= 0x3FFF;
-                return v0 | a0 | v1;
+                packed_location_and_tile_x &= 0x3FFF;
+                return packed_location_and_tile_x | packed_destination_tile_z | v1;
             }
             return Menu_Magic_teleportMenuSelectedRow;
         }
@@ -858,9 +858,9 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         break;
 
     case Menu_Magic_WarlockMenuState_LevelledSpell: {
-        u_long* temp_s6;
+        u_long* spell_level_ordering_table;
         int level;
-        int var_s7_2;
+        int level_locked;
         u_long* prim;
 
         i = Menu_Framework_menuMemory.cursorMemories[12];
@@ -932,11 +932,11 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
         Menu_Magic_SetSpellMpCost(Menu_Magic_warlockMenuSelectedRow + i);
 
-        temp_s6 = Render_frameScratch.orderingTable - 4;
+        spell_level_ordering_table = Render_frameScratch.orderingTable - 4;
 
         for (level = 0; level < 4; ++level) {
 
-            var_s7_2 = 0;
+            level_locked = 0;
 
             if (i >= level) {
                 int v;
@@ -946,7 +946,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
                 prim = Render_QueueSpriteWithTexturePage(
                     Menu_Framework_cursorBrightnessAnimation[Menu_Magic_warlockLevelCursorBlink],
-                    (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), temp_s6);
+                    (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
                 prim[4] = vs_getUV0Clut(192, 112, 976, 223);
 
                 v = Menu_Magic_warlockLevelCursorBlink;
@@ -964,18 +964,18 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                     Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
 
                 prim = Render_QueueSpriteWithTexturePage(
-                    64, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), temp_s6);
+                    64, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
                 prim[4] = vs_getUV0Clut(192, 112, 992, 223);
 
             } else {
 
-                var_s7_2 = 1;
+                level_locked = 1;
 
                 Render_DrawCompactText(
                     Menu_Magic_warlockMenuSpellLevels[4], (102 + level * 32) | vs_getXY(0, 103), NULL);
 
                 prim = Render_QueueSpriteWithTexturePage(
-                    0, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), temp_s6);
+                    0, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
                 prim[1] = 0x64602000;
                 prim[4] = vs_getUV0Clut(192, 112, 992, 223);
             }
@@ -985,7 +985,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
             prim[-8] = (u_short)prim[-8] | (getClut(848, 223) << 16);
             prim[-10] |= 0x02000000;
 
-            if (var_s7_2 != 0) {
+            if (level_locked != 0) {
                 prim[-12] =
                     vs_getTpage(768, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, Render_Dithering_Off);
             } else {
@@ -997,12 +997,12 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         }
 
         prim = Render_QueueSpriteWithTexturePage(
-            128, vs_getXY(80, 100), vs_getWH(16, 16), temp_s6);
+            128, vs_getXY(80, 100), vs_getWH(16, 16), spell_level_ordering_table);
         prim[4] = vs_getUV0Clut(80, 48, 976, 223);
 
         prim += 6;
 
-        prim[0] = vs_getTag(u_long[9], *temp_s6);
+        prim[0] = vs_getTag(u_long[9], *spell_level_ordering_table);
         prim[1] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyFt4, 128, 128, 128);
         prim[2] = vs_getXY(224, 100);
         prim[3] = vs_getUV0Clut(95, 48, 976, 223);
@@ -1014,7 +1014,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         prim[8] = vs_getXY(240, 116);
         prim[9] = vs_getUV(79, 64);
 
-        *temp_s6 = LegacyGpu_Handle(prim);
+        *spell_level_ordering_table = LegacyGpu_Handle(prim);
         Render_frameScratch.primitiveCursor = prim + 10;
 
         break;

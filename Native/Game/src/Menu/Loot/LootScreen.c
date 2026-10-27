@@ -519,9 +519,9 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
 
             for (i = 0; i < 64; ++i, ++item) {
                 if (item->id == Menu_Loot_stackConsolidationItemId) {
-                    int v0 = Menu_Loot_stackConsolidationAmountToAdd + 100;
-                    v0 -= item->count;
-                    Menu_Loot_stackConsolidationAmountToAdd = v0;
+                    int remaining_stack_capacity = Menu_Loot_stackConsolidationAmountToAdd + 100;
+                    remaining_stack_capacity -= item->count;
+                    Menu_Loot_stackConsolidationAmountToAdd = remaining_stack_capacity;
                 }
             }
 
@@ -729,8 +729,8 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
 {
     int itemCountPos;
     int buttonBgPos;
-    int var_a2;
-    int var_fp;
+    int all_command_color;
+    int all_command_availability;
     int i;
     int y;
     Menu_Loot_LootListItem* item;
@@ -738,7 +738,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
     char* str;
 
     item = NULL;
-    var_fp = 1;
+    all_command_availability = 1;
 
     if (Menu_Loot_previewedLoot != 0) {
 
@@ -746,11 +746,11 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
 
         if (Menu_Loot_previewedLoot & 0xF) {
 
-            var_fp = 0;
+            all_command_availability = 0;
             item = &Menu_Loot_lootList[Menu_Loot_lootListOffset + Menu_Loot_previewedLoot - 1];
 
             for (i = 0; i < Menu_Loot_lootListCount; ++i) {
-                var_fp += Menu_Loot_lootList[i].state;
+                all_command_availability += Menu_Loot_lootList[i].state;
             }
         }
     }
@@ -804,13 +804,13 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
     str = "ALL";
     xy = (edgeX + 252) | (112 << 16);
 
-    if (var_fp != 0) {
-        var_a2 = vs_getRGB(64, 64, 64) << (Menu_Loot_controlsEnabled & 1);
+    if (all_command_availability != 0) {
+        all_command_color = vs_getRGB(64, 64, 64) << (Menu_Loot_controlsEnabled & 1);
     } else {
-        var_a2 = vs_getRGB(64, 64, 64);
+        all_command_color = vs_getRGB(64, 64, 64);
     }
 
-    Render_DrawCompactTextColor(str, xy, var_a2, NULL);
+    Render_DrawCompactTextColor(str, xy, all_command_color, NULL);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, edgeX + 232, 110, NULL);
     Render_DrawCompactTextColor("END", (edgeX + 196) | (128 << 16),
         vs_getRGB(64, 64, 64) << Menu_Loot_controlsEnabled, NULL);
@@ -823,7 +823,7 @@ void Menu_Loot_RenderLootRows(int x)
     char gradientStates[256];
     int i;
     int index;
-    int temp_v1_3;
+    int loot_row_state;
     Menu_Framework_MenuRow* menuItem;
 
     int count = Menu_Loot_lootListCount;
@@ -924,14 +924,14 @@ void Menu_Loot_RenderLootRows(int x)
             menuItem->isScrollable = 2;
         }
 
-        temp_v1_3 = loot->state;
+        loot_row_state = loot->state;
 
-        if (temp_v1_3 == 2) {
+        if (loot_row_state == 2) {
             menuItem->backgroundWidth = 0x18;
         }
 
-        if (temp_v1_3 > 2) {
-            menuItem->x += (temp_v1_3 - 3) * 7;
+        if (loot_row_state > 2) {
+            menuItem->x += (loot_row_state - 3) * 7;
         }
 
         ++i;
@@ -1070,13 +1070,13 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
             }
 
             if ((Menu_Loot_leaveConfirmationYesNoChoice == 0) && !(Input_buttonsPressed.allButtons & PADRdown)) {
-                int var_v1;
+                int leave_confirmation_result;
                 Audio_PlaySfxCentered(0x7E, 0x1C);
-                var_v1 = 1;
+                leave_confirmation_result = 1;
                 if (Menu_Loot_lootClaimed == 0) {
-                    var_v1 = 2;
+                    leave_confirmation_result = 2;
                 }
-                return var_v1;
+                return leave_confirmation_result;
             }
 
             Menu_PlayLeaveSound();
@@ -1241,7 +1241,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
     int lootIndex;
     int temp_s2;
     int i;
-    int var_v0_4;
+    int nested_menu_result;
 
     if (initialize != 0) {
         Menu_Loot_selectedLoot = 0;
@@ -1460,27 +1460,27 @@ int Menu_Loot_UpdateLootSelection(int initialize)
         break;
 
     case Menu_Loot_LootSelectionState_TopMenu:
-        var_v0_4 = Menu_Loot_UpdateInventoryTransition(0);
+        nested_menu_result = Menu_Loot_UpdateInventoryTransition(0);
 
-        if (var_v0_4 != 0) {
+        if (nested_menu_result != 0) {
             Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_WaitForTopMenu;
         }
 
         break;
 
     case Menu_Loot_LootSelectionState_Dissasemble:
-        var_v0_4 = Menu_Loot_UpdateDisassembly(0);
+        nested_menu_result = Menu_Loot_UpdateDisassembly(0);
 
-        if (var_v0_4 != 0) {
+        if (nested_menu_result != 0) {
             Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_WaitForTopMenu;
         }
 
         break;
 
     case Menu_Loot_LootSelectionState_ConsolidateItems:
-        var_v0_4 = Menu_Loot_UpdateStackConsolidation(0);
+        nested_menu_result = Menu_Loot_UpdateStackConsolidation(0);
 
-        if (var_v0_4 != 0) {
+        if (nested_menu_result != 0) {
             Menu_Loot_lootSelectionState = Menu_Loot_LootSelectionState_WaitForTopMenu;
         }
 

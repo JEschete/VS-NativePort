@@ -571,8 +571,8 @@ int Menu_Options_Update(u_char* state)
     int rowTypes[9];
     int selectedRow;
     int i;
-    int var_v1;
-    u_int temp_v1_2;
+    int updated_settings_word;
+    u_int settings_with_puzzle_mode;
 
     switch (*state) {
     case Menu_Options_OptionsMenuState_WaitReady:
@@ -691,9 +691,9 @@ int Menu_Options_Update(u_char* state)
             break;
         }
         if (i > 0) {
-            var_v1 = *(int*)&Input_settings & ~0x20;
-            var_v1 |= ((2 - i) & 1) << 5;
-            *(int*)&Input_settings = var_v1;
+            updated_settings_word = *(int*)&Input_settings & ~0x20;
+            updated_settings_word |= ((2 - i) & 1) << 5;
+            *(int*)&Input_settings = updated_settings_word;
         }
         *state = Menu_Options_OptionsMenuState_Init;
         break;
@@ -707,9 +707,9 @@ int Menu_Options_Update(u_char* state)
             break;
         }
         if (i > 0) {
-            var_v1 = *(int*)&Input_settings & ~0x40;
-            var_v1 |= (((2 - i) & 1) << 6);
-            *(int*)&Input_settings = var_v1;
+            updated_settings_word = *(int*)&Input_settings & ~0x40;
+            updated_settings_word |= (((2 - i) & 1) << 6);
+            *(int*)&Input_settings = updated_settings_word;
         }
         *state = Menu_Options_OptionsMenuState_Init;
         break;
@@ -723,9 +723,9 @@ int Menu_Options_Update(u_char* state)
             break;
         }
         if (i > 0) {
-            var_v1 = *(int*)&Input_settings & ~0x80;
-            var_v1 |= (((2 - i) & 1) << 7);
-            *(int*)&Input_settings = var_v1;
+            updated_settings_word = *(int*)&Input_settings & ~0x80;
+            updated_settings_word |= (((2 - i) & 1) << 7);
+            *(int*)&Input_settings = updated_settings_word;
         }
         *state = Menu_Options_OptionsMenuState_Init;
         break;
@@ -768,9 +768,9 @@ int Menu_Options_Update(u_char* state)
             break;
         }
         if (i > 0) {
-            temp_v1_2 = (*(int*)&Input_settings & ~8) | (((i - 1) & 1) * 8);
-            *(int*)&Input_settings = temp_v1_2;
-            Audio_Seq_unusedStateFlags.puzzleMode = ~(temp_v1_2 >> 3) & 1;
+            settings_with_puzzle_mode = (*(int*)&Input_settings & ~8) | (((i - 1) & 1) * 8);
+            *(int*)&Input_settings = settings_with_puzzle_mode;
+            Audio_Seq_unusedStateFlags.puzzleMode = ~(settings_with_puzzle_mode >> 3) & 1;
         }
         *state = Menu_Options_OptionsMenuState_Init;
         break;

@@ -101,9 +101,9 @@ int Menu_BattleAbilities_UpdateBreakArtUnlock(int init)
         int actionId;
         int weaponCategory = Battle_characterState->equippedWeaponCategory;
         int weaponCategoryMod = weaponCategory;
-        u_char(*new_var)[12] = &Audio_Seq_unusedArtsStatus.artsLearned;
+        u_char(*learned_arts_by_weapon_category)[12] = &Audio_Seq_unusedArtsStatus.artsLearned;
         weaponCategoryMod %= 10;
-        actionId = (*new_var)[weaponCategoryMod];
+        actionId = (*learned_arts_by_weapon_category)[weaponCategoryMod];
 
         if (actionId == 4) {
             return 1;
@@ -1015,7 +1015,7 @@ int Menu_BattleAbilities_UpdateChainAbilityMenu(int initialize)
 }
 
 // decomp: MENU2.PRG _defenseAbilityMenu (src/MENU/MENU2.PRG/64.c:553)
-int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int arg0)
+int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int reset_menu)
 {
     enum Menu_BattleAbilities_AbilityListState { Menu_BattleAbilities_AbilityListState_Init, Menu_BattleAbilities_AbilityListState_AbilityMenu };
 
@@ -1025,7 +1025,7 @@ int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int arg0)
     int i;
     int row;
 
-    if (arg0 != 0) {
+    if (reset_menu != 0) {
         Menu_Framework_FlyOutRowsAndHoistSelection(1, 1);
 
         Menu_BattleAbilities_defenseAbilityMenuState = Menu_BattleAbilities_AbilityListState_Init;

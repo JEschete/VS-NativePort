@@ -399,9 +399,9 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
 {
 
     int temp_s0;
-    int temp_s4;
+    int selected_absolute_row;
     int i;
-    int temp_s6;
+    int previous_first_row;
     Menu_Framework_MenuRow* menuItem;
 
     if (Menu_Inventory_equipListStep < 6) {
@@ -436,11 +436,11 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
         return;
     }
 
-    temp_s6 = Menu_Inventory_itemsFirstRow;
-    temp_s4 = Menu_Inventory_selectedItemRow + temp_s6;
+    previous_first_row = Menu_Inventory_itemsFirstRow;
+    selected_absolute_row = Menu_Inventory_selectedItemRow + previous_first_row;
 
     menuItem = Menu_Framework_MenuItem(Menu_Inventory_selectedItemRow + 20);
-    Menu_Framework_SetInformationMessage(Menu_Inventory_itemsText + ((temp_s4 << 7) + 0x20));
+    Menu_Framework_SetInformationMessage(Menu_Inventory_itemsText + ((selected_absolute_row << 7) + 0x20));
 
     switch (Menu_Inventory_equipListStep) {
     case 16:
@@ -473,10 +473,10 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
                 Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
 
                 Menu_Inventory_itemsText = NULL;
-                Menu_Inventory_selectedItemRow = temp_s4;
+                Menu_Inventory_selectedItemRow = selected_absolute_row;
 
                 if (hasSfx != 0) {
-                    if (temp_s4 == 0) {
+                    if (selected_absolute_row == 0) {
                         Audio_PlaySfxCentered(0x7E, 0x22);
                     } else {
                         Audio_PlaySfxCentered(0x7E, 0x21);
@@ -527,10 +527,10 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
             }
         }
 
-        if (temp_s4 != (Menu_Inventory_selectedItemRow + Menu_Inventory_itemsFirstRow)) {
+        if (selected_absolute_row != (Menu_Inventory_selectedItemRow + Menu_Inventory_itemsFirstRow)) {
             Menu_PlayChangeSound();
 
-            if (Menu_Inventory_itemsFirstRow != temp_s6) {
+            if (Menu_Inventory_itemsFirstRow != previous_first_row) {
                 char buf[Menu_Inventory_menuRowCount];
                 for (i = 0; i < Menu_Inventory_menuRowCount; ++i) {
                     buf[i] = 0;
@@ -541,7 +541,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
                     temp_s0 = 6;
                 }
                 for (i = 1; i < temp_s0; ++i) {
-                    buf[i + temp_s6] = Menu_Framework_MenuItem(i + 0x14)->gradientState;
+                    buf[i + previous_first_row] = Menu_Framework_MenuItem(i + 0x14)->gradientState;
                 }
 
                 for (i = 1;;) {
@@ -1503,8 +1503,8 @@ int Menu_Inventory_Update(u_char* state)
 
     int category;
     int row;
-    char temp_a1;
-    char temp_a1_2;
+    char item_use_return_menu;
+    char equipment_return_menu;
 
     switch (*state) {
     case Menu_Inventory_InventoryMenuState_Init:
@@ -1635,9 +1635,9 @@ int Menu_Inventory_Update(u_char* state)
             Menu_Framework_RenderAshley(2);
 
             *state = 8;
-            temp_a1 = Menu_Framework_menuState.currentMenu;
+            item_use_return_menu = Menu_Framework_menuState.currentMenu;
             Menu_Framework_menuState.currentMenu = 13;
-            Menu_Framework_menuState.returnState = temp_a1;
+            Menu_Framework_menuState.returnState = item_use_return_menu;
             Menu_Framework_actionRestrictions |= 0x200;
         }
         break;
@@ -1723,9 +1723,9 @@ int Menu_Inventory_Update(u_char* state)
             && Menu_Framework_UnloadItemTextWhenReady()) {
 
             Menu_Framework_actionSelection.selectionKind = 8;
-            temp_a1_2 = Menu_Framework_menuState.currentMenu;
+            equipment_return_menu = Menu_Framework_menuState.currentMenu;
             Menu_Framework_menuState.currentMenu = 4;
-            Menu_Framework_menuState.returnState = temp_a1_2;
+            Menu_Framework_menuState.returnState = equipment_return_menu;
             *state = Menu_Inventory_InventoryMenuState_None;
 
             return 1;
@@ -1805,7 +1805,7 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
 {
     int _[6] __attribute__((unused));
     int i;
-    Actors_ActorRecord* temp_s1 = Actors_actorRecords[1];
+    Actors_ActorRecord* preview_actor = Actors_actorRecords[1];
 
     switch (Menu_Inventory_equipmentModelLoadStep) {
     case 0:
@@ -1813,12 +1813,12 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
 
             Content_ReleaseWeaponModel(1);
 
-            if ((i = wepId) && Menu_Inventory_IsTwoHandedWeapon(temp_s1->sequenceModelId)) {
+            if ((i = wepId) && Menu_Inventory_IsTwoHandedWeapon(preview_actor->sequenceModelId)) {
                 Content_ReleaseWeaponModel(0);
                 Menu_Framework_QueueAshleyWeaponAnimations(10);
             }
         } else {
-            if (category != temp_s1->sequenceModelId) {
+            if (category != preview_actor->sequenceModelId) {
                 Menu_Framework_QueueAshleyWeaponAnimations(category);
             }
 
@@ -1836,7 +1836,7 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
         break;
 
     case 1:
-        if ((Content_UpdateActorAssetQueue() == 0) && (temp_s1->animationId == 1)) {
+        if ((Content_UpdateActorAssetQueue() == 0) && (preview_actor->animationId == 1)) {
             Menu_Framework_ResetAshleyEquipmentPose();
 
             ++Menu_Inventory_equipmentModelLoadStep;
@@ -1848,11 +1848,11 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
         Menu_Framework_CloneActorPreview(0);
         Menu_Framework_ResetActorPreviewPose();
 
-        temp_s1->instance.weaponDrawn = 0;
+        preview_actor->instance.weaponDrawn = 0;
 
         Actors_PlayActorAnimation(1, 1, 0, 0);
-        Actors_AdvanceSkeletalAnimation(temp_s1, &temp_s1->pose, 1);
-        Core_Memory_CopyAlignedWords(&temp_s1->blendPose, &temp_s1->pose, sizeof temp_s1->blendPose);
+        Actors_AdvanceSkeletalAnimation(preview_actor, &preview_actor->pose, 1);
+        Core_Memory_CopyAlignedWords(&preview_actor->blendPose, &preview_actor->pose, sizeof preview_actor->blendPose);
 
         for (i = 0; i < 2; ++i) {
             if (Actors_weaponModels[i + 2] != NULL) {
@@ -1866,7 +1866,7 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
         break;
 
     case 3:
-        if (temp_s1->animationId == 101) {
+        if (preview_actor->animationId == 101) {
             Menu_Inventory_equipmentModelLoadStep = 0;
             return 0;
         }
@@ -1895,7 +1895,7 @@ void Menu_Inventory_QueueEquipmentModel(int wepId, int material)
 {
     Content_ActorAssetRequest objData;
     int index;
-    int var_a3;
+    int equipment_texture_slot;
 
     if (wepId == 0) {
         return;
@@ -1904,10 +1904,10 @@ void Menu_Inventory_QueueEquipmentModel(int wepId, int material)
     index = 0;
 
     if (wepId < 96) {
-        var_a3 = 240;
+        equipment_texture_slot = 240;
     } else {
         index = 1;
-        var_a3 = 241;
+        equipment_texture_slot = 241;
     }
 
     objData.assetKind = 3;
@@ -1915,7 +1915,7 @@ void Menu_Inventory_QueueEquipmentModel(int wepId, int material)
     objData.modelId = wepId;
     objData.destination = Battle_characterState->equipmentModels[index];
     objData.subKind = 0;
-    objData.textureSlot = var_a3;
+    objData.textureSlot = equipment_texture_slot;
     objData.material = material;
 
     Content_QueueActorAssetRequest(&objData);

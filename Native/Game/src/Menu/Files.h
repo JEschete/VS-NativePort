@@ -145,14 +145,14 @@ u_int Menu_Files_ElementBackgroundColor(u_int outerFactor, u_int innerFactor);
 void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element);
 void Menu_Files_DrawFrame(int framebuf);
 void Menu_Files_DrawBackground(void);
-int Menu_Files_UpdateConfirmation(int arg0);
-int Menu_Files_UpdateOverwritePrompt(int arg0);
+int Menu_Files_UpdateConfirmation(int initialize_confirmation);
+int Menu_Files_UpdateOverwritePrompt(int initialize_overwrite_prompt);
 int Menu_Files_UpdateFormatPrompt(int initPort);
 int Menu_Files_UpdateSaveFiles(int initPort);
 int Menu_Files_UpdateSaveCard(int initPort);
 int Menu_Files_UpdateLoadFiles(int initPort);
 long Menu_Files_UpdateLoadCard(int initPort);
-int Menu_Files_LoadGameOverAssetsStep(int arg0);
+int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load);
 void Menu_Files_BlendGameOverTextClut(
     short* clut, int textBlendFactor, u_short* clut0, u_short* clut1);
 int Menu_Files_UpdateGameOverChoices(int init);

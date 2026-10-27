@@ -306,7 +306,7 @@ void Menu_Score_RenderEnemyList(int animState)
 {
 
     int i;
-    int sp18;
+    int list_slide_y_offset;
     int selectedRow = Battle_unusedMenu9CursorMemory.encyclopaediaPage
                     + Battle_unusedMenu9CursorMemory.encyclopaediaRow;
     Menu_Score_EnemyEntry* enemy = Menu_Score_monBinData;
@@ -343,7 +343,7 @@ void Menu_Score_RenderEnemyList(int animState)
     }
 
     i = 0;
-    sp18 = animState * 23;
+    list_slide_y_offset = animState * 23;
     enemy = &Menu_Score_monBinData[Battle_unusedMenu9CursorMemory.encyclopaediaPage];
 
     for (; i < 8; ++i, ++enemy) {
@@ -351,7 +351,7 @@ void Menu_Score_RenderEnemyList(int animState)
         Menu_Framework_MenuRow* menuItem;
 
         Menu_Score_CursorMemory* cursorMem = &Battle_unusedMenu9CursorMemory;
-        int y = sp18 - 16;
+        int y = list_slide_y_offset - 16;
 
         if ((56 + i * 16) < y) {
             y = 56 + i * 16;
@@ -400,14 +400,14 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 {
     char const* enemyClassName[] = { "HUMAN", "BEAST", "UNDEAD", "PHANTOM", "DRAGON",
         "EVIL" };
-    MATRIX sp30;
-    Render_ScreenOffset sp50;
-    Render_ScreenOffset sp58;
-    char sp60[sizeof "NO.   000/000"];
-    int temp_s0;
-    int temp_s2;
-    int temp_s4;
-    int temp_s6;
+    MATRIX viewer_camera_matrix;
+    Render_ScreenOffset saved_projection_offset;
+    Render_ScreenOffset viewer_projection_offset;
+    char enemy_number_text[sizeof "NO.   000/000"];
+    int control_label_x;
+    int name_panel_slide_x;
+    int controls_slide_x;
+    int control_banner_x;
     void** scratch;
 
     if (animState < 8) {
@@ -416,20 +416,20 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 
     if (state != 3) {
 
-        Render_GetProjectionScreenOffset(&sp50);
+        Render_GetProjectionScreenOffset(&saved_projection_offset);
 
         if (state == 2) {
-            sp58.x = ((8 - animState) << 5) + 160;
+            viewer_projection_offset.x = ((8 - animState) << 5) + 160;
         } else {
-            sp58.x = 160 - ((8 - animState) << 5);
+            viewer_projection_offset.x = 160 - ((8 - animState) << 5);
         }
 
-        sp58.y = 0x68;
+        viewer_projection_offset.y = 0x68;
 
-        Render_SetProjectionScreenOffset(&sp58);
-        Menu_Score_BuildViewerCamera(&sp30);
-        Menu_Framework_DrawActorPreview(&sp30);
-        Render_SetProjectionScreenOffset(&sp50);
+        Render_SetProjectionScreenOffset(&viewer_projection_offset);
+        Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
+        Menu_Framework_DrawActorPreview(&viewer_camera_matrix);
+        Render_SetProjectionScreenOffset(&saved_projection_offset);
     }
 
     if (state > 0) {
@@ -437,36 +437,36 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
     }
 
     if (Menu_Score_hideUi == 0) {
-        temp_s2 = (8 - animState) * 16;
+        name_panel_slide_x = (8 - animState) * 16;
 
         Menu_Framework_DrawMenuItem(Menu_Framework_SetMenuItem(
-            0, temp_s2 + 184, 166, 256, 0, &Menu_Score_monBinData[Menu_Score_selectedEnemy].name[2]));
+            0, name_panel_slide_x + 184, 166, 256, 0, &Menu_Score_monBinData[Menu_Score_selectedEnemy].name[2]));
         Menu_Framework_MenuItem(0)->state = 0;
 
-        temp_s4 = animState * 16;
+        controls_slide_x = animState * 16;
         scratch = (void**)Core_ScratchAddr(0);
 
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L2, temp_s4 - 120, 15, scratch[1] + 24);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L2, controls_slide_x - 120, 15, scratch[1] + 24);
 
-        temp_s0 = (temp_s4 - 100) & 0xFFFF;
+        control_label_x = (controls_slide_x - 100) & 0xFFFF;
 
         Render_DrawCompactTextColor(
-            "ROTATION", temp_s0 | (18 << 16), Menu_Score_rotationColor, scratch[1] + 24);
+            "ROTATION", control_label_x | (18 << 16), Menu_Score_rotationColor, scratch[1] + 24);
 
-        temp_s6 = temp_s4 - 112;
+        control_banner_x = controls_slide_x - 112;
 
-        Menu_Score_DrawEnemyBanner(temp_s6, 18, 96, 12, 3);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, temp_s4 - 120, 34, scratch[1] + 24);
+        Menu_Score_DrawEnemyBanner(control_banner_x, 18, 96, 12, 3);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, scratch[1] + 24);
         Render_DrawCompactTextColor(
-            "ZOOM", temp_s0 | (36 << 16), Menu_Score_zoomColor, scratch[1] + 24);
-        Menu_Score_DrawEnemyBanner(temp_s6, 36, 78, 12, 3);
-        sprintf(sp60, "NO.   %03d/%03d", Menu_Score_selectedEnemy + 1, 78);
+            "ZOOM", control_label_x | (36 << 16), Menu_Score_zoomColor, scratch[1] + 24);
+        Menu_Score_DrawEnemyBanner(control_banner_x, 36, 78, 12, 3);
+        sprintf(enemy_number_text, "NO.   %03d/%03d", Menu_Score_selectedEnemy + 1, 78);
         Render_DrawCompactTextColor(
-            sp60, ((temp_s4 - 120) & 0xFFFF) | 0xA00000, 0x808080, scratch[1] + 0x1C);
-        Menu_Score_DrawGradientPanel(temp_s4 - 128, 160, 100, 12, 2);
+            enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, scratch[1] + 0x1C);
+        Menu_Score_DrawGradientPanel(controls_slide_x - 128, 160, 100, 12, 2);
         Render_DrawCompactTextColor(enemyClassName[Menu_Score_monBinData[Menu_Score_selectedEnemy].classId],
-            ((temp_s2 + 188) & 0xFFFF) | 0x9B0000, 0x808080, NULL);
-        Menu_Score_DrawGradientPanel(temp_s2 + 180, 155, 140, 26, 1);
+            ((name_panel_slide_x + 188) & 0xFFFF) | 0x9B0000, 0x808080, NULL);
+        Menu_Score_DrawGradientPanel(name_panel_slide_x + 180, 155, 140, 26, 1);
     }
 }
 
@@ -477,7 +477,7 @@ void Menu_Score_UpdateEnemyNavigation(int direction)
     int clut;
     POLY_FT4* poly;
     void** scratch;
-    int new_var;
+    int arrow_base_x;
 
     if (Menu_Score_hideUi == 0) {
 
@@ -502,8 +502,8 @@ void Menu_Score_UpdateEnemyNavigation(int direction)
                 "L1", vs_getXY(34, 98), vs_getRGB888(128, 128, 128), NULL);
 
             if (Menu_Score_enemyNavigationState < 9) {
-                new_var = 32;
-                x = new_var - (Menu_Score_enemyNavigationState >> 1);
+                arrow_base_x = 32;
+                x = arrow_base_x - (Menu_Score_enemyNavigationState >> 1);
             } else {
                 x = (Menu_Score_enemyNavigationState >> 2) + 26;
             }

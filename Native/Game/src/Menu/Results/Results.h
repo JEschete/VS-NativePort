@@ -129,14 +129,14 @@ void Menu_Results_DrawScore(int x, int y, int timer, int arg3 __attribute__((unu
 void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribute__((unused)));
 void Menu_Results_DrawMapCompletion(int x, int y, int timer, int arg3 __attribute__((unused)));
 void Menu_Results_DrawCountingMapCompletion(
-    int arg0, int arg1, int arg2, int arg3 __attribute__((unused)));
+    int draw_x, int draw_y, int animation_timer, int arg3 __attribute__((unused)));
 void Menu_Results_DrawRiskbreakerRankHeading(int x, int y, int timer);
 void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer);
 void Menu_Results_DrawFadingTexture(int x, int y, int texIndex, int brightness);
 void Menu_Results_DrawFadingTextureClut(int x, int y, int texIndex, int brightness, int clut);
 void Menu_Results_DrawTime(int x, int y, int timer, int time, int isNewRecord);
-void Menu_Results_DrawBonusReel(int x, int y, int timer, int arg3);
-void Menu_Results_DrawPressButtonPrompt(int x, int y, int arg2, int arg3);
+void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state);
+void Menu_Results_DrawPressButtonPrompt(int x, int y, int slide_timer, int bounce_timer);
 void Menu_Results_DrawBonusReelTexture(int x, int y, int texId);
 void Menu_Results_DetermineRiskbreakerRank(void);
 void Menu_Results_CalculateScore(void);

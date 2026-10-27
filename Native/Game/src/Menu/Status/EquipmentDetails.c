@@ -346,24 +346,24 @@ char* Menu_Status_SelectShieldComponent(int row, Items_ShieldLoadout* shield)
 }
 
 // decomp: MENU4.PRG _drawArmorInfoRow (src/MENU/MENU4.PRG/120.c:368)
-char* Menu_Status_ArmorDescription(Items_ArmorLoadout* arg0)
+char* Menu_Status_ArmorDescription(Items_ArmorLoadout* armor_loadout)
 {
     char* menuText[2];
     int rowType;
 
-    Menu_Framework_FormatArmorRow(arg0, menuText, &rowType, Menu_Framework_stringBuf);
+    Menu_Framework_FormatArmorRow(armor_loadout, menuText, &rowType, Menu_Framework_stringBuf);
 
     return menuText[1];
 }
 
 // decomp: MENU4.PRG _drawAccessoryInfoRow (src/MENU/MENU4.PRG/120.c:383)
-char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* arg0)
+char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* accessory_loadout)
 {
     char* menuText[2];
     Items_InventoryArmor armor;
     int rowType[2];
 
-    Items_StoreInventoryAccessoryStats(&armor, arg0);
+    Items_StoreInventoryAccessoryStats(&armor, accessory_loadout);
     Menu_Framework_FormatInventoryArmorRow(&armor, menuText, rowType, Menu_Framework_stringBuf);
 
     return menuText[1];
@@ -372,8 +372,8 @@ char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* arg0)
 // decomp: MENU4.PRG _equipmentDetailElementSelectable (src/MENU/MENU4.PRG/120.c:401)
 int Menu_Status_IsDetailElementSelectable(int newSelection, int flags)
 {
-    int v0;
-    int v1;
+    int maximum_component_selection;
+    int component_selection_index;
     int ret = 0;
 
     switch (newSelection) {
@@ -402,9 +402,9 @@ int Menu_Status_IsDetailElementSelectable(int newSelection, int flags)
     case 13:
     case 14:
     case 15:
-        v1 = newSelection - 9;
-        v0 = flags & 0xF;
-        ret = (v0 < v1) ^ 1;
+        component_selection_index = newSelection - 9;
+        maximum_component_selection = flags & 0xF;
+        ret = (maximum_component_selection < component_selection_index) ^ 1;
         break;
 
     case 16:
@@ -655,17 +655,17 @@ int Menu_Status_UpdateEquipmentDetails(int row)
     static char Menu_Status_equipmentDetailRowToRender;
     static char Menu_Status_equipmentDetailSelectedElement;
 
-    char* sp18[2];
+    char* equipment_row_text[2];
     Items_InventoryArmor armor;
-    u_int sp48;
+    u_int equipment_row_flags;
     int limbs;
     int equipmentCount;
-    int var_a0_5;
-    int var_s0_2;
+    int dp_pp_panel_command;
+    int equipment_row_advance;
     int i;
-    int var_s2;
+    int selected_equipment_row;
     int newSelection;
-    char* var_s3;
+    char* detail_help_text;
     int previousSelection;
     Menu_Framework_MenuRow* menuItem;
     unsigned char state;
@@ -762,31 +762,31 @@ int Menu_Status_UpdateEquipmentDetails(int row)
 
     case 2:
         if ((Input_buttonsState & (PADL1 | PADR1)) != (PADL1 | PADR1)) {
-            int a1;
-            var_s0_2 = 0;
+            int previous_equipment_row;
+            equipment_row_advance = 0;
             equipmentCount = Menu_Status_EquipmentRowCount();
-            var_s2 = Menu_Status_equipmentDetailsSelectedEquipmentRow;
+            selected_equipment_row = Menu_Status_equipmentDetailsSelectedEquipmentRow;
 
             if (Input_buttonRepeat & PADL1) {
-                var_s0_2 = equipmentCount - 1;
+                equipment_row_advance = equipmentCount - 1;
             }
 
             if (Input_buttonRepeat & PADR1) {
-                var_s0_2 = 1;
+                equipment_row_advance = 1;
             }
 
-            a1 = var_s2;
+            previous_equipment_row = selected_equipment_row;
 
             while (1) {
-                if ((var_s2 += var_s0_2) >= equipmentCount) {
-                    var_s2 -= equipmentCount;
+                if ((selected_equipment_row += equipment_row_advance) >= equipmentCount) {
+                    selected_equipment_row -= equipmentCount;
                 }
 
-                if (var_s2 == a1) {
+                if (selected_equipment_row == previous_equipment_row) {
                     goto here;
                 }
 
-                switch (var_s2) {
+                switch (selected_equipment_row) {
                 case 0:
                     if (actor->weapon.blade.id != 0) {
                         equipmentCount = 0;
@@ -800,8 +800,8 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     break;
 
                 default:
-                    if ((var_s2 - 2) >= limbs
-                        || (actor->limbs[var_s2 - 2].armor.armor.id != 0)) {
+                    if ((selected_equipment_row - 2) >= limbs
+                        || (actor->limbs[selected_equipment_row - 2].armor.armor.id != 0)) {
                         equipmentCount = 0;
                     }
                 }
@@ -811,7 +811,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                 }
             }
 
-            if (var_s2 != Menu_Status_equipmentDetailsSelectedEquipmentRow) {
+            if (selected_equipment_row != Menu_Status_equipmentDetailsSelectedEquipmentRow) {
 
                 Menu_PlayChangeSound();
 
@@ -819,9 +819,9 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     Menu_Framework_DeactivateRow(i);
                 }
 
-                Menu_Status_equipmentDetailsSelectedEquipmentRow = var_s2;
+                Menu_Status_equipmentDetailsSelectedEquipmentRow = selected_equipment_row;
 
-                switch (var_s2) {
+                switch (selected_equipment_row) {
                 case 0:
                     Menu_Framework_UpdateDpPpBars(11);
                     Menu_Status_PopulateWeaponStats(&actor->weapon);
@@ -831,9 +831,9 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     }
 
                     Menu_Framework_FormatWeaponRow(
-                        &actor->weapon, sp18, &sp48, Menu_Framework_stringBuf);
+                        &actor->weapon, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);
 
-                    sp18[0] = (char*)&actor->weapon;
+                    equipment_row_text[0] = (char*)&actor->weapon;
                     break;
 
                 case 1:
@@ -845,46 +845,46 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                     }
 
                     Menu_Framework_FormatShieldRow(
-                        &actor->shield, sp18, &sp48, Menu_Framework_stringBuf);
+                        &actor->shield, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);
 
                     break;
 
                 default:
-                    if ((var_s2 - 2) < limbs) {
+                    if ((selected_equipment_row - 2) < limbs) {
                         Menu_Framework_UpdateDpPpBars(
                             Menu_Framework_DpPpBarsTarget_Dp | Menu_Framework_DpPpBarsState_Static);
-                        Menu_Status_PopulateArmorStats(&actor->limbs[var_s2 - 2].armor);
-                        Menu_Framework_FormatArmorRow(&actor->limbs[var_s2 - 2].armor, sp18,
-                            &sp48, Menu_Framework_stringBuf);
+                        Menu_Status_PopulateArmorStats(&actor->limbs[selected_equipment_row - 2].armor);
+                        Menu_Framework_FormatArmorRow(&actor->limbs[selected_equipment_row - 2].armor, equipment_row_text,
+                            &equipment_row_flags, Menu_Framework_stringBuf);
                     } else {
                         Menu_Framework_UpdateDpPpBars(
                             Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);
                         Menu_Status_PopulateAccessoryStats((Items_AccessorySpawnLoadout*)&actor->accessory);
                         Items_StoreInventoryAccessoryStats(&armor, &actor->accessory);
                         Menu_Framework_FormatInventoryArmorRow(
-                            &armor, sp18, &sp48, Menu_Framework_stringBuf);
+                            &armor, equipment_row_text, &equipment_row_flags, Menu_Framework_stringBuf);
                     }
 
                     break;
                 }
 
-                menuItem = Menu_Framework_SetMenuItem(var_s2 + 10, 155, 18, 165, 0, sp18[0]);
+                menuItem = Menu_Framework_SetMenuItem(selected_equipment_row + 10, 155, 18, 165, 0, equipment_row_text[0]);
                 menuItem->selected = 1;
-                menuItem->rowIcon = (sp48 >> 0x1A);
-                menuItem->material = ((sp48 & 0xFFFF0000) >> 16) & 7;
+                menuItem->rowIcon = (equipment_row_flags >> 0x1A);
+                menuItem->material = ((equipment_row_flags & 0xFFFF0000) >> 16) & 7;
 
-                Menu_Framework_SetInformationMessage(sp18[1]);
+                Menu_Framework_SetInformationMessage(equipment_row_text[1]);
 
                 menuItem = Menu_Framework_SetMenuItem(0x20, 0x10, 0x12, 0xA4, 8,
                     (char*)&Menu_Status_statusStrings
-                        [Menu_Status_statusStrings[var_s2 < 2 ? (var_s2 + Text_Menu4_status_Index_weapon)
+                        [Menu_Status_statusStrings[selected_equipment_row < 2 ? (selected_equipment_row + Text_Menu4_status_Index_weapon)
                                                    : Text_Menu4_status_Index_armor]]);
                 menuItem->selected = 1;
                 i = 0x1C;
 
-                if (var_s2 == 0) {
+                if (selected_equipment_row == 0) {
                     i = 0x18;
-                } else if (var_s2 == 1) {
+                } else if (selected_equipment_row == 1) {
                     i = 0x1B;
                 }
 
@@ -928,12 +928,12 @@ int Menu_Status_UpdateEquipmentDetails(int row)
             break;
 
         default:
-            var_a0_5 = 8;
+            dp_pp_panel_command = 8;
             if ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) {
-                var_a0_5 = 9;
+                dp_pp_panel_command = 9;
             }
 
-            Menu_Framework_UpdateDpPpBars(var_a0_5);
+            Menu_Framework_UpdateDpPpBars(dp_pp_panel_command);
             newSelection = Menu_Status_NavigateDetailElements(
                 previousSelection, ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) << 6);
 
@@ -946,61 +946,61 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         }
 
         if (newSelection < 2) {
-            var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+            detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                     [Text_Menu_ITEMHELP_BIN_Index_phantomPointsDesc - newSelection]];
         } else if (newSelection < 9) {
             switch (Menu_Framework_itemStatPage) {
             case Menu_Framework_StatPage_Class:
-                var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+                detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                         [newSelection + Text_Menu_ITEMHELP_BIN_Index_damagePointsDesc]];
                 break;
 
             case Menu_Framework_StatPage_Affinity:
-                var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+                detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                         [newSelection + Text_Menu_ITEMHELP_BIN_Index_evilClassDesc - 1]];
                 break;
 
             case Menu_Framework_StatPage_Type:
-                var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+                detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                         [newSelection + Text_Menu_ITEMHELP_BIN_Index_darkAffinityDesc - 1]];
                 break;
             }
         } else if (newSelection < 16) {
             switch (Menu_Status_equipmentDetailsSelectedEquipmentRow) {
             case 0:
-                var_s3 = Menu_Status_SelectWeaponComponent(newSelection - 9, &actor->weapon);
+                detail_help_text = Menu_Status_SelectWeaponComponent(newSelection - 9, &actor->weapon);
                 break;
 
             case 1:
-                var_s3 = Menu_Status_SelectShieldComponent(newSelection - 9, &actor->shield);
+                detail_help_text = Menu_Status_SelectShieldComponent(newSelection - 9, &actor->shield);
                 break;
 
             default:
                 if ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) {
-                    var_s3 =
+                    detail_help_text =
                         Menu_Status_ArmorDescription(&actor->limbs[Menu_Status_equipmentDetailsSelectedEquipmentRow - 2].armor);
                 } else {
-                    var_s3 = Menu_Status_AccessoryDescription(&actor->accessory);
+                    detail_help_text = Menu_Status_AccessoryDescription(&actor->accessory);
                 }
                 break;
             }
         } else {
 
-            var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+            detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                     [newSelection + Text_Menu_ITEMHELP_BIN_Index_humanClassDesc]];
 
             if (newSelection >= 18) {
                 if (Menu_Status_equipmentDetailsSelectedEquipmentRow == 0) {
-                    var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+                    detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                             [newSelection + Text_Menu_ITEMHELP_BIN_Index_shortGrip - 1]];
                 } else if ((Menu_Status_equipmentDetailsSelectedEquipmentRow - 2) < limbs) {
-                    var_s3 = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
+                    detail_help_text = (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                             [newSelection + Text_Menu_ITEMHELP_BIN_Index_polearmGrip]];
                 }
             }
         }
 
-        Menu_Framework_SetInformationMessage(var_s3);
+        Menu_Framework_SetInformationMessage(detail_help_text);
 
         i = Menu_Framework_statusViewCursorPositions[newSelection];
 
@@ -1052,7 +1052,7 @@ int Menu_Status_UpdateEquipmentList(int element)
     char* rowStrings[18];
     int rowTypes[9];
     char equipmentDescriptions[9][96];
-    Items_InventoryArmor sp3E0;
+    Items_InventoryArmor accessory_inventory_view;
     int rowCount;
     int limbCount;
     int rowType;
@@ -1060,10 +1060,10 @@ int Menu_Status_UpdateEquipmentList(int element)
     int i;
     int temp_s1_2;
     Menu_Framework_MenuRow* menuItem;
-    int new_var;
+    int weapon_row_style_flags;
 
-    Battle_ActorStats* temp_s6 = Battle_actors[Menu_Status_selectedActor - 1]->stats;
-    Battle_LimbStats* limbs = temp_s6->limbs;
+    Battle_ActorStats* selected_actor_stats = Battle_actors[Menu_Status_selectedActor - 1]->stats;
+    Battle_LimbStats* limbs = selected_actor_stats->limbs;
 
     limbCount = Menu_Status_LimbCount(Menu_Status_selectedActor - 1);
     rowCount = Menu_Status_EquipmentRowCount();
@@ -1083,25 +1083,25 @@ int Menu_Status_UpdateEquipmentList(int element)
             rowTypes[i] = 1;
         }
 
-        if (temp_s6->weapon.blade.id != 0) {
+        if (selected_actor_stats->weapon.blade.id != 0) {
             Menu_Framework_FormatWeaponRow(
-                &temp_s6->weapon, rowStrings, rowTypes, equipmentDescriptions[0]);
-            rowStrings[0] = temp_s6->weapon.name;
+                &selected_actor_stats->weapon, rowStrings, rowTypes, equipmentDescriptions[0]);
+            rowStrings[0] = selected_actor_stats->weapon.name;
         }
 
-        if (temp_s6->shield.base.id != 0) {
+        if (selected_actor_stats->shield.base.id != 0) {
             Menu_Framework_FormatShieldRow(
-                &temp_s6->shield, &rowStrings[2], rowTypes + 1, equipmentDescriptions[1]);
+                &selected_actor_stats->shield, &rowStrings[2], rowTypes + 1, equipmentDescriptions[1]);
         }
 
-        temp_s5 = (temp_s6->isAnalyzed == 0) & (Menu_Status_selectedActor != 1); // Disable row
-        new_var = 0xF000;
+        temp_s5 = (selected_actor_stats->isAnalyzed == 0) & (Menu_Status_selectedActor != 1); // Disable row
+        weapon_row_style_flags = 0xF000;
         temp_s1_2 = 0xF200;
-        rowTypes[0] |= temp_s5 | new_var;
+        rowTypes[0] |= temp_s5 | weapon_row_style_flags;
         rowTypes[1] |= temp_s5 | temp_s1_2;
 
         for (i = 2; i < rowCount; ++i, ++limbs) {
-            Items_InventoryArmor* p = &sp3E0;
+            Items_InventoryArmor* p = &accessory_inventory_view;
             rowType = temp_s5 | 0xF400;
 
             if ((i - 2) < limbCount) {
@@ -1113,7 +1113,7 @@ int Menu_Status_UpdateEquipmentList(int element)
                 rowTypes[i] |= ((limbs->nameIndex + 103) << 9) + temp_s5;
 
             } else {
-                Items_StoreInventoryAccessoryStats(p, &temp_s6->accessory);
+                Items_StoreInventoryAccessoryStats(p, &selected_actor_stats->accessory);
                 Menu_Framework_FormatInventoryArmorRow(
                     p, &rowStrings[i * 2], &rowTypes[i], equipmentDescriptions[i]);
 

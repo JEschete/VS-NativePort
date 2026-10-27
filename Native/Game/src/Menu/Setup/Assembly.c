@@ -206,18 +206,18 @@ int Menu_Setup_IsGripCompatible(Items_InventoryBlade* blade, Items_InventoryGrip
 // decomp: MENUC.PRG _setUiStats (src/MENU/MENUC.PRG/168.c:730)
 void Menu_Setup_SetAssemblyStats(int blade, int grip)
 {
-    int var_v1;
+    int assembly_part_mask;
 
     Menu_Framework_ResetEquipmentStats();
     Menu_Framework_SetRangeAndRisk(0, 0, 0, 1);
     Menu_Framework_equipmentSubtype = 0;
 
-    var_v1 = blade != 0;
+    assembly_part_mask = blade != 0;
     if (grip != 0) {
-        var_v1 += 2;
+        assembly_part_mask += 2;
     }
 
-    switch (var_v1) {
+    switch (assembly_part_mask) {
     case 1:
         Menu_Framework_SetBladeStats(blade);
         break;
@@ -592,7 +592,7 @@ int Menu_Setup_CancelAssembly(void)
 }
 
 // decomp: MENUC.PRG _assembleMenu (src/MENU/MENUC.PRG/168.c:1164)
-int Menu_Setup_UpdateAssembly(int arg0)
+int Menu_Setup_UpdateAssembly(int initialize_assembly)
 {
 
 
@@ -603,7 +603,7 @@ int Menu_Setup_UpdateAssembly(int arg0)
     static char Menu_Setup_assemblyLayoutPadding[2] __attribute__((unused));
 
     char* menuText[2];
-    int sp20;
+    int formatted_row_flags;
     int itemInfo;
     int itemSlot;
     int submenuResult;
@@ -614,7 +614,7 @@ int Menu_Setup_UpdateAssembly(int arg0)
     Items_InventoryGrip* grip;
     Menu_Framework_MenuRow* menuItem;
 
-    if (arg0 != 0) {
+    if (initialize_assembly != 0) {
         Menu_InitInformationTextBox(1);
         Menu_Setup_RecordSlotSelection(5);
         Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
@@ -774,15 +774,15 @@ int Menu_Setup_UpdateAssembly(int arg0)
                     if (i == (gemSlots + 2)) {
                         Menu_Setup_assemblyState = 6;
                     } else {
-                        int a0;
+                        int packed_grip_selection;
                         int a0_2;
                         Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
                         switch (i) {
                         case 0:
                             Menu_Setup_SetAssemblyHeader(1);
-                            a0 = Menu_Setup_assemblyGripToAssemble << 8;
-                            a0 += 128;
-                            Menu_Setup_SelectAssemblyBlade(Menu_Setup_assemblyBladeToAssemble + a0);
+                            packed_grip_selection = Menu_Setup_assemblyGripToAssemble << 8;
+                            packed_grip_selection += 128;
+                            Menu_Setup_SelectAssemblyBlade(Menu_Setup_assemblyBladeToAssemble + packed_grip_selection);
                             Menu_Setup_assemblyState = 3;
                             break;
                         case 1:
@@ -851,13 +851,13 @@ int Menu_Setup_UpdateAssembly(int arg0)
                     if (Menu_Setup_assemblyBladeToAssemble != 0) {
                         Menu_Framework_FormatBladeRow(
                             &Audio_Seq_unusedInventory.blades[Menu_Setup_assemblyBladeToAssemble - 1], menuText,
-                            &sp20, Menu_Framework_stringBuf);
+                            &formatted_row_flags, Menu_Framework_stringBuf);
                     }
                     break;
                 case 1:
                     if (Menu_Setup_assemblyGripToAssemble != 0) {
                         Menu_Framework_FormatGripRow(
-                            &Audio_Seq_unusedInventory.grips[Menu_Setup_assemblyGripToAssemble - 1], menuText, &sp20,
+                            &Audio_Seq_unusedInventory.grips[Menu_Setup_assemblyGripToAssemble - 1], menuText, &formatted_row_flags,
                             Menu_Framework_stringBuf);
                     }
                     break;
@@ -867,7 +867,7 @@ int Menu_Setup_UpdateAssembly(int arg0)
                     itemSlot = Menu_Setup_assemblyGemInfo[Menu_Setup_assemblySelectedOption - 2];
                     if (itemSlot != 0) {
                         Menu_Framework_FormatGemRow(&Audio_Seq_unusedInventory.gems[itemSlot - 1],
-                            menuText, &sp20, Menu_Framework_stringBuf);
+                            menuText, &formatted_row_flags, Menu_Framework_stringBuf);
                     }
                     break;
                 }
@@ -1019,14 +1019,14 @@ int Menu_Setup_UpdateAssembly(int arg0)
 }
 
 // decomp: MENUC.PRG _addGemSelector (src/MENU/MENUC.PRG/168.c:1599)
-void Menu_Setup_CreateEmptyGemSlotRow(int arg0 __attribute__((unused)), int arg1)
+void Menu_Setup_CreateEmptyGemSlotRow(int arg0 __attribute__((unused)), int gem_row_index)
 {
-    Menu_Framework_MenuRow* temp_v0 =
-        Menu_Framework_SetMenuItem(arg1 + 10, 320, (arg1 * 16) + 18, 320 - 169, 0,
+    Menu_Framework_MenuRow* empty_gem_row =
+        Menu_Framework_SetMenuItem(gem_row_index + 10, 320, (gem_row_index * 16) + 18, 320 - 169, 0,
             (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_gems]);
-    temp_v0->state = 2;
-    temp_v0->targetPosition0 = 169;
-    temp_v0->fontColor = 1;
+    empty_gem_row->state = 2;
+    empty_gem_row->targetPosition0 = 169;
+    empty_gem_row->fontColor = 1;
 }
 
 // decomp: MENUC.PRG _attachGems (src/MENU/MENUC.PRG/168.c:1616)
@@ -1074,7 +1074,7 @@ int Menu_Setup_RestoreGemsAndLeaveSelection(char* gems, int isShield)
 }
 
 // decomp: MENUC.PRG _attachGemsMenu (src/MENU/MENUC.PRG/168.c:1666)
-int Menu_Setup_UpdateGemAttachment(int arg0)
+int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
 {
 
     static int Menu_Setup_gemAttachmentSelectedRow;
@@ -1089,18 +1089,18 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
     char textBuf[0x300];
     char* menuText[16];
     int rowTypes[8];
-    int var_s2;
+    int equipment_id;
     int j;
     int i;
-    int var_a2;
+    int equipment_row_icon;
     int itemInfo;
     Items_InventoryShield* shield;
     Items_InventoryWeapon* weapon;
     Menu_Framework_MenuRow* menuItem;
 
-    if (arg0 != 0) {
+    if (equipment_category_selection != 0) {
         Menu_InitInformationTextBox(1);
-        Menu_Setup_gemAttachmentIsShield = arg0 - 1;
+        Menu_Setup_gemAttachmentIsShield = equipment_category_selection - 1;
         Menu_Setup_gemAttachmentState = 0;
         return 0;
     }
@@ -1120,38 +1120,38 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
         i = 0;
 
         for (j = 0; j < 8; ++j) {
-            char* new_var = textBuf;
+            char* equipment_description_buffer = textBuf;
             itemInfo = 0;
 
             if (Menu_Setup_gemAttachmentIsShield != 0) {
-                var_s2 = Audio_Seq_unusedInventoryIndices.shields[j];
-                if (var_s2 != 0) {
-                    shield = &Audio_Seq_unusedInventory.shields[var_s2 - 1];
+                equipment_id = Audio_Seq_unusedInventoryIndices.shields[j];
+                if (equipment_id != 0) {
+                    shield = &Audio_Seq_unusedInventory.shields[equipment_id - 1];
                     Menu_Framework_FormatInventoryShieldRow(
                         shield, &menuText[i * 2], &rowTypes[i], textBuf + i * 96);
                     itemInfo = shield->base.gemSlots;
                 }
             } else {
-                var_s2 = Audio_Seq_unusedInventoryIndices.weapons[j];
-                if (var_s2 != 0) {
-                    weapon = &Audio_Seq_unusedInventory.weapons[var_s2 - 1];
+                equipment_id = Audio_Seq_unusedInventoryIndices.weapons[j];
+                if (equipment_id != 0) {
+                    weapon = &Audio_Seq_unusedInventory.weapons[equipment_id - 1];
                     Menu_Framework_FormatInventoryWeaponRow(
                         weapon, &menuText[i * 2], &rowTypes[i], textBuf + i * 96);
                     itemInfo = Audio_Seq_unusedInventory.grips[weapon->grip - 1].gemSlots;
                 }
             }
 
-            if (var_s2 != 0) {
+            if (equipment_id != 0) {
                 Battle_stringContext.integers[0] = itemInfo;
                 Render_FormatEncodedText(textBuf + i * 96,
                     (char*)&Menu_Framework_menu12Text[Menu_Framework_menu12Text
                             [Menu_Setup_gemAttachmentIsShield * 2
                                 + (itemInfo == 0 ? Text_Menu_MENU12_BIN_Index_weaponNoGemSlots
                                                  : Text_Menu_MENU12_BIN_Index_weaponGemSlots)]]);
-                menuText[i * 2 + 1] = new_var + i * 96;
+                menuText[i * 2 + 1] = equipment_description_buffer + i * 96;
                 rowTypes[i] |= itemInfo == 0;
                 ++i;
-                Menu_Setup_availableItems[i] = var_s2;
+                Menu_Setup_availableItems[i] = equipment_id;
             }
         }
 
@@ -1180,26 +1180,26 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(0);
 
-            var_a2 = 24;
+            equipment_row_icon = 24;
             if (Menu_Setup_gemAttachmentIsShield != 0) {
-                var_a2 = 27;
+                equipment_row_icon = 27;
             }
-            menuItem->rowIcon = var_a2;
+            menuItem->rowIcon = equipment_row_icon;
 
             Menu_Setup_MoveMenuRow(0, 32);
             Menu_Setup_MoveMenuRow(Menu_Setup_gemAttachmentSelectedRow + 9, 10);
 
-            var_s2 = Menu_Setup_availableItems[Menu_Setup_gemAttachmentSelectedRow];
-            Menu_Setup_combiningItem = var_s2 - 1;
+            equipment_id = Menu_Setup_availableItems[Menu_Setup_gemAttachmentSelectedRow];
+            Menu_Setup_combiningItem = equipment_id - 1;
 
             if (Menu_Setup_gemAttachmentIsShield != 0) {
-                Menu_Framework_SetShieldStats(var_s2);
-                shield = &Audio_Seq_unusedInventory.shields[var_s2 - 1];
+                Menu_Framework_SetShieldStats(equipment_id);
+                shield = &Audio_Seq_unusedInventory.shields[equipment_id - 1];
                 Menu_Setup_gemAttachmentGemSlots = shield->base.gemSlots;
                 Menu_Setup_gemAttachmentAttachedGems = shield->gems;
             } else {
-                Menu_Framework_SetWeaponStats(var_s2);
-                weapon = &Audio_Seq_unusedInventory.weapons[var_s2 - 1];
+                Menu_Framework_SetWeaponStats(equipment_id);
+                weapon = &Audio_Seq_unusedInventory.weapons[equipment_id - 1];
                 Menu_Setup_gemAttachmentGemSlots = Audio_Seq_unusedInventory.grips[weapon->grip - 1].gemSlots;
                 Menu_Setup_gemAttachmentAttachedGems = weapon->gems;
             }
@@ -1246,9 +1246,9 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
                     Menu_Setup_RestoreGemsAndLeaveSelection(Menu_Setup_gemAttachmentTargetGems, Menu_Setup_gemAttachmentIsShield);
                     Menu_Setup_gemAttachmentState = 0;
                 } else if (Input_buttonsPressed.allButtons & PADstart) {
-                    int new_var2 = 11;
+                    int gem_row_base_id = 11;
                     Menu_PlaySelectSound();
-                    Menu_Framework_MenuItem(((1 - Menu_Setup_gemAttachmentIsShield) * 2) + (Menu_Setup_selectedGemSlot + new_var2))
+                    Menu_Framework_MenuItem(((1 - Menu_Setup_gemAttachmentIsShield) * 2) + (Menu_Setup_selectedGemSlot + gem_row_base_id))
                         ->selected = 0;
                     Menu_Setup_gemAttachmentState = 7;
                     Menu_Setup_selectedGemSlot = Menu_Setup_gemAttachmentGemSlots;
@@ -1259,10 +1259,10 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
                         if (itemInfo == Menu_Setup_gemAttachmentGemSlots) {
                             Menu_Setup_gemAttachmentState = 7;
                         } else {
-                            int new_var3;
+                            int gem_component_base;
                             Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-                            new_var3 = ((1 - Menu_Setup_gemAttachmentIsShield) * 2) + 1;
-                            Menu_Setup_SelectGem((itemInfo + new_var3) | ((itemInfo + 1) * 8)
+                            gem_component_base = ((1 - Menu_Setup_gemAttachmentIsShield) * 2) + 1;
+                            Menu_Setup_SelectGem((itemInfo + gem_component_base) | ((itemInfo + 1) * 8)
                                        | (*(int*)Menu_Setup_stagedGems << 8));
                             Menu_Setup_gemAttachmentState = 6;
                         }
@@ -1327,9 +1327,9 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
         itemInfo = Menu_Setup_SelectGem(0);
         if (itemInfo != 0) {
             if (itemInfo != -2) {
-                var_s2 = Menu_Setup_combiningItem + 1;
-                weapon = &Audio_Seq_unusedInventory.weapons[var_s2 - 1];
-                shield = &Audio_Seq_unusedInventory.shields[var_s2 - 1];
+                equipment_id = Menu_Setup_combiningItem + 1;
+                weapon = &Audio_Seq_unusedInventory.weapons[equipment_id - 1];
+                shield = &Audio_Seq_unusedInventory.shields[equipment_id - 1];
                 Menu_Setup_gemAttachmentAttachedGems = Menu_Setup_gemAttachmentIsShield != 0 ? shield->gems : weapon->gems;
                 if (itemInfo > 0) {
                     i = Menu_Setup_stagedGems[Menu_Setup_selectedGemSlot];
@@ -1342,7 +1342,7 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
                             Audio_Seq_unusedInventory.gems[i - 1].setItemIndex = 0;
                         }
                         Audio_Seq_unusedInventory.gems[itemInfo - 1].setItemIndex =
-                            var_s2 + (Menu_Setup_gemAttachmentIsShield << 7);
+                            equipment_id + (Menu_Setup_gemAttachmentIsShield << 7);
                         Menu_Setup_gemAttachmentAttachedGems[Menu_Setup_selectedGemSlot] = itemInfo;
                         Menu_Setup_stagedGems[Menu_Setup_selectedGemSlot] = itemInfo;
                         ++Menu_Setup_selectedGemSlot;
@@ -1358,11 +1358,11 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
                 Menu_Framework_SetEnabledStatPages(7);
                 Menu_Framework_UpdateDpPpBars(11);
                 if (Menu_Setup_gemAttachmentIsShield != 0) {
-                    Menu_Framework_SetShieldStats(var_s2);
+                    Menu_Framework_SetShieldStats(equipment_id);
                     Menu_Framework_FormatInventoryShieldRow(
                         shield, menuText, rowTypes, textBuf);
                 } else {
-                    Menu_Framework_SetWeaponStats(var_s2);
+                    Menu_Framework_SetWeaponStats(equipment_id);
                     Menu_Framework_FormatInventoryWeaponRow(
                         weapon, menuText, rowTypes, textBuf);
                 }
@@ -1416,7 +1416,7 @@ int Menu_Setup_UpdateGemAttachment(int arg0)
 }
 
 // decomp: MENUC.PRG _attachGemsTopMenu (src/MENU/MENUC.PRG/168.c:2016)
-int Menu_Setup_UpdateGemCategoryMenu(int arg0)
+int Menu_Setup_UpdateGemCategoryMenu(int initialize_gem_category_menu)
 {
     static char Menu_Setup_gemCategoryMenuState;
     static char Menu_Setup_gemCategoryMenuNoForceCursorMemory;
@@ -1426,7 +1426,7 @@ int Menu_Setup_UpdateGemCategoryMenu(int arg0)
     int rowTypes[4];
     int i;
 
-    if (arg0 != 0) {
+    if (initialize_gem_category_menu != 0) {
         Menu_Setup_gemCategoryMenuNoForceCursorMemory = 1;
         Menu_Framework_FlyOutRowsAndHoistSelection(1, 1);
         Menu_Setup_gemCategoryMenuState = 0;

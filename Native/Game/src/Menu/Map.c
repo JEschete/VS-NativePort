@@ -291,13 +291,13 @@ void Menu_Map_ShowAreaName(char* mapName, char fontColor)
 void Menu_Map_PollMenuReady(void) { Menu_Framework_AreMenuRowsIdle(); }
 
 // decomp: MENU5.PRG _loadMapBackground (src/MENU/MENU5.PRG/4D8.c:206)
-int Menu_Map_LoadBackground(int arg0)
+int Menu_Map_LoadBackground(int begin_background_load)
 {
     static Content_DiscQueueSlot* Menu_Map_loadBackgroundSlot;
     static u_short* Menu_Map_backgroundImage;
     static int Menu_Map_loadBackgroundState;
 
-    if (arg0 != 0) {
+    if (begin_background_load != 0) {
         Content_DiscFile cdFile;
         cdFile.lba = VS_MAPBG_BIN_LBA;
         cdFile.size = VS_MAPBG_BIN_SIZE;
@@ -536,9 +536,9 @@ int Menu_Map_UpdateMapMenu(void)
         Menu_Map_MapMenuState_WaitForMapAnimation
     };
 
-    int var_s2;
+    int controls_state;
     int roomIndex;
-    int new_var2;
+    int area_selection_result;
 
     Core_Gte_SetFarColor(0, 0, 0);
 
@@ -574,7 +574,7 @@ int Menu_Map_UpdateMapMenu(void)
         break;
 
     case Menu_Map_MapMenuState_ProcessInput:
-        var_s2 = 0;
+        controls_state = 0;
 
         if (Menu_Map_triggerHideUi != Menu_Map_hideUi) {
             Menu_Map_hideUi = Menu_Map_triggerHideUi;
@@ -582,7 +582,7 @@ int Menu_Map_UpdateMapMenu(void)
         }
 
         if (Input_buttonsPressed.allButtons & PADRright) {
-            var_s2 = 5;
+            controls_state = 5;
 
             Audio_PlaySfxCentered(0x7E, 5);
 
@@ -608,7 +608,7 @@ int Menu_Map_UpdateMapMenu(void)
             Menu_DismissTextBox(0);
 
         } else if (Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] != 0) {
-            var_s2 = 5;
+            controls_state = 5;
         } else {
             int lStickX;
             int lStickY;
@@ -616,7 +616,7 @@ int Menu_Map_UpdateMapMenu(void)
             if ((lStickX = Input_stickPosBuf.lStickX - 128, ABS(lStickX)) > 64
                 || (lStickY = Input_stickPosBuf.lStickY - 128, ABS(lStickY) > 64)) {
 
-                var_s2 = 3;
+                controls_state = 3;
 
                 if ((Input_stickPosBuf.lStickX - 128) < -64) {
                     Menu_Map_cameraAngles.vy -= 64;
@@ -643,7 +643,7 @@ int Menu_Map_UpdateMapMenu(void)
                     int rstickX;
                     int rstickY;
 
-                    var_s2 = 3;
+                    controls_state = 3;
 
                     if ((rstickX = Input_stickPosBuf.rStickX - 128, ABS(rstickX) > 64)
                         || (rstickY = Input_stickPosBuf.rStickY - 128,
@@ -683,7 +683,7 @@ int Menu_Map_UpdateMapMenu(void)
                     int rstickX;
                     int rstickY;
 
-                    var_s2 = 2;
+                    controls_state = 2;
 
                     if ((rstickX = Input_stickPosBuf.rStickX - 128, ABS(rstickX) > 64)
                         || (rstickY = Input_stickPosBuf.rStickY - 128,
@@ -790,7 +790,7 @@ int Menu_Map_UpdateMapMenu(void)
             }
         }
 
-        Menu_Map_menuCommandsState = var_s2;
+        Menu_Map_menuCommandsState = controls_state;
 
         Menu_Map_DrawFrame();
         break;
@@ -798,18 +798,18 @@ int Menu_Map_UpdateMapMenu(void)
     case Menu_Map_MapMenuState_DisplayMapMenu:
         Menu_Map_DrawFrame();
 
-        Menu_Map_selectedMap = new_var2 = Menu_Map_UpdateAreaSelection(0);
+        Menu_Map_selectedMap = area_selection_result = Menu_Map_UpdateAreaSelection(0);
 
-        if (new_var2 == -1) {
+        if (area_selection_result == -1) {
             break;
-        } else if (new_var2 == -3) {
+        } else if (area_selection_result == -3) {
 
             Menu_Map_menuState = Menu_Map_MapMenuState_Quit;
             Menu_Map_quitState = 2;
 
             Menu_DismissTextBox(0);
 
-        } else if (new_var2 == -2) {
+        } else if (area_selection_result == -2) {
             Menu_Map_menuState = Menu_Map_MapMenuState_ProcessInput;
 
             Menu_Map_ShowAreaName((char*)&Menu_Map_mapNames[Menu_Map_mapNames[Menu_Map_currentScene]],
@@ -817,7 +817,7 @@ int Menu_Map_UpdateMapMenu(void)
         } else {
 
             Menu_Map_isPaling = Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene];
-            Menu_Map_currentScene = Menu_Map_sceneRowIdMap[new_var2];
+            Menu_Map_currentScene = Menu_Map_sceneRowIdMap[area_selection_result];
             Menu_Map_menuState = Menu_Map_MapMenuState_InitNewMap;
 
             Menu_Map_armFileBuff = Core_Memory_AllocateFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
@@ -938,8 +938,8 @@ void Menu_Map_DrawFrame(void)
 // decomp: MENU5.PRG _setCamera (src/MENU/MENU5.PRG/4D8.c:948)
 void Menu_Map_ApplyCamera(void)
 {
-    SVECTOR sp10;
-    MATRIX sp18;
+    SVECTOR negative_camera_position;
+    MATRIX view_rotation;
     MATRIX sp38;
 
     Menu_Map_cameraPos.vx =
@@ -950,14 +950,14 @@ void Menu_Map_ApplyCamera(void)
         / ONE;
     Menu_Map_cameraPos.vy = (Core_Gte_Sin(Menu_Map_cameraAngles.vx) * -Menu_Map_cameraDistance) / ONE;
 
-    Menu_Framework_BuildYawMatrix(&sp18, Menu_Map_cameraAngles.vy);
+    Menu_Framework_BuildYawMatrix(&view_rotation, Menu_Map_cameraAngles.vy);
     Menu_Framework_BuildPitchMatrix(&sp38, Menu_Map_cameraAngles.vx);
-    Core_Math_MultiplyMatrixIntoRight(&sp38, &sp18);
+    Core_Math_MultiplyMatrixIntoRight(&sp38, &view_rotation);
 
-    applyVector(&sp10, Menu_Map_cameraPos.vx, Menu_Map_cameraPos.vy, Menu_Map_cameraPos.vz, = -);
+    applyVector(&negative_camera_position, Menu_Map_cameraPos.vx, Menu_Map_cameraPos.vy, Menu_Map_cameraPos.vz, = -);
 
-    Core_Gte_ApplyMatrix(&sp18, &sp10, (VECTOR*)sp38.t);
-    Core_Gte_SetRotMatrix(&sp18);
+    Core_Gte_ApplyMatrix(&view_rotation, &negative_camera_position, (VECTOR*)sp38.t);
+    Core_Gte_SetRotMatrix(&view_rotation);
     Core_Gte_SetTransMatrix(&sp38);
 }
 
@@ -1050,7 +1050,7 @@ void Menu_Map_DrawVisitedRooms(Field_MapScene* scene)
     int roomCount;
     int i;
     Field_MapRoom* room;
-    int* new_var;
+    int* room_count_address;
     Render_ScreenOffset prevOffset;
     Render_ScreenOffset tmpOffset;
 
@@ -1061,8 +1061,8 @@ void Menu_Map_DrawVisitedRooms(Field_MapScene* scene)
     Render_SetProjectionScreenOffset(&tmpOffset);
 
     Menu_Map_mapLabelCount = 0;
-    new_var = &scene->roomCount;
-    roomCount = *new_var;
+    room_count_address = &scene->roomCount;
+    roomCount = *room_count_address;
     room = (Field_MapRoom*)scene;
     room = scene->rooms;
 
@@ -1077,15 +1077,15 @@ void Menu_Map_DrawVisitedRooms(Field_MapScene* scene)
 }
 
 // decomp: MENU5.PRG _renderRoom (src/MENU/MENU5.PRG/4D8.c:1112)
-int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
+int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
 {
     CVECTOR colorIn;
     CVECTOR colorOut0;
     CVECTOR colorOut1;
-    int sp28[4];
+    int available_marker_kinds[4];
     long sp38;
     long sp3C;
-    u_char* var_s3;
+    u_char* room_element_cursor;
     int i;
     int j;
     POLY_G3* polyG3;
@@ -1096,17 +1096,17 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
 
     enum { kMapVertexCapacity = 256 };
     short projectedVertices[kMapVertexCapacity][4];
-    short (*var_s1)[4] = projectedVertices;
+    short (*projected_vertex_rows)[4] = projectedVertices;
     int elementCount = *(int*)roomData;
     roomData += 4;
 
     for (i = 0; i < elementCount; ++i) {
-        u_int v0 = Core_Gte_RotTransPers(roomData, (long*)var_s1[i], &sp38, &sp3C);
-        var_s1[i][2] = v0;
-        v0 -= 0x40;
-        var_s1[i][3] = sp38;
+        u_int projected_depth = Core_Gte_RotTransPers(roomData, (long*)projected_vertex_rows[i], &sp38, &sp3C);
+        projected_vertex_rows[i][2] = projected_depth;
+        projected_depth -= 0x40;
+        projected_vertex_rows[i][3] = sp38;
 
-        if (v0 >= 0x7BF) {
+        if (projected_depth >= 0x7BF) {
             return 0;
         }
 
@@ -1123,118 +1123,118 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
         colorIn.b = 0x80;
     }
 
-    var_s3 = roomData;
-    var_s3 += 4;
+    room_element_cursor = roomData;
+    room_element_cursor += 4;
     elementCount = *(int*)roomData;
     polyG3 = *(void**)Core_ScratchAddr(0);
 
     for (i = 0; i < elementCount; ++i) {
 
-        sp38 = var_s1[var_s3[0]][2];
+        sp38 = projected_vertex_rows[room_element_cursor[0]][2];
 
-        if (sp38 < var_s1[var_s3[1]][2]) {
-            sp38 = var_s1[var_s3[1]][2];
+        if (sp38 < projected_vertex_rows[room_element_cursor[1]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[1]][2];
         }
 
-        if (sp38 < var_s1[var_s3[2]][2]) {
-            sp38 = var_s1[var_s3[2]][2];
+        if (sp38 < projected_vertex_rows[room_element_cursor[2]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[2]][2];
         }
 
         setPolyG3(polyG3);
-        polyG3->x0 = var_s1[var_s3[0]][0];
-        polyG3->x1 = var_s1[var_s3[1]][0];
-        polyG3->x2 = var_s1[var_s3[2]][0];
-        polyG3->y0 = var_s1[var_s3[0]][1];
-        polyG3->y1 = var_s1[var_s3[1]][1];
-        polyG3->y2 = var_s1[var_s3[2]][1];
+        polyG3->x0 = projected_vertex_rows[room_element_cursor[0]][0];
+        polyG3->x1 = projected_vertex_rows[room_element_cursor[1]][0];
+        polyG3->x2 = projected_vertex_rows[room_element_cursor[2]][0];
+        polyG3->y0 = projected_vertex_rows[room_element_cursor[0]][1];
+        polyG3->y1 = projected_vertex_rows[room_element_cursor[1]][1];
+        polyG3->y2 = projected_vertex_rows[room_element_cursor[2]][1];
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[0]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
         setRGB0(polyG3, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[1]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut0);
         setRGB1(polyG3, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[2]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[2]][3], &colorOut0);
         setRGB2(polyG3, colorOut0.r, colorOut0.g, colorOut0.b);
 
         AddPrim(((int**)Core_ScratchAddr(0))[1] + sp38, polyG3++);
 
-        var_s3 += 4;
+        room_element_cursor += 4;
     }
 
-    elementCount = *(int*)var_s3;
-    var_s3 += 4;
+    elementCount = *(int*)room_element_cursor;
+    room_element_cursor += 4;
     polyG4 = (POLY_G4*)polyG3;
 
     for (i = 0; i < elementCount; ++i) {
-        sp38 = var_s1[var_s3[0]][2];
+        sp38 = projected_vertex_rows[room_element_cursor[0]][2];
 
-        if (sp38 < var_s1[var_s3[1]][2]) {
-            sp38 = var_s1[var_s3[1]][2];
+        if (sp38 < projected_vertex_rows[room_element_cursor[1]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[1]][2];
         }
 
-        if (sp38 < var_s1[var_s3[2]][2]) {
-            sp38 = var_s1[var_s3[2]][2];
+        if (sp38 < projected_vertex_rows[room_element_cursor[2]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[2]][2];
         }
 
-        if (sp38 < var_s1[var_s3[3]][2]) {
-            sp38 = var_s1[var_s3[3]][2];
+        if (sp38 < projected_vertex_rows[room_element_cursor[3]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[3]][2];
         }
 
         setPolyG4(polyG4);
-        polyG4->x0 = var_s1[var_s3[0]][0];
-        polyG4->x1 = var_s1[var_s3[1]][0];
-        polyG4->x2 = var_s1[var_s3[3]][0];
-        polyG4->x3 = var_s1[var_s3[2]][0];
-        polyG4->y0 = var_s1[var_s3[0]][1];
-        polyG4->y1 = var_s1[var_s3[1]][1];
-        polyG4->y2 = var_s1[var_s3[3]][1];
-        polyG4->y3 = var_s1[var_s3[2]][1];
+        polyG4->x0 = projected_vertex_rows[room_element_cursor[0]][0];
+        polyG4->x1 = projected_vertex_rows[room_element_cursor[1]][0];
+        polyG4->x2 = projected_vertex_rows[room_element_cursor[3]][0];
+        polyG4->x3 = projected_vertex_rows[room_element_cursor[2]][0];
+        polyG4->y0 = projected_vertex_rows[room_element_cursor[0]][1];
+        polyG4->y1 = projected_vertex_rows[room_element_cursor[1]][1];
+        polyG4->y2 = projected_vertex_rows[room_element_cursor[3]][1];
+        polyG4->y3 = projected_vertex_rows[room_element_cursor[2]][1];
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[0]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
         setRGB0(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[1]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut0);
         setRGB1(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[3]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[3]][3], &colorOut0);
         setRGB2(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[2]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[2]][3], &colorOut0);
         setRGB3(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
         AddPrim(((int**)Core_ScratchAddr(0))[1] + sp38, polyG4++);
 
-        var_s3 += 4;
+        room_element_cursor += 4;
     }
 
-    new_var = (int*)var_s3;
+    new_var = (int*)room_element_cursor;
     elementCount = *new_var;
-    var_s3 += 4;
+    room_element_cursor += 4;
     lineG2 = (LINE_G2*)polyG4;
 
     for (i = 0; i < elementCount; ++i) {
         long scratch = 0;
-        sp38 = var_s1[var_s3[0]][2] - 1;
+        sp38 = projected_vertex_rows[room_element_cursor[0]][2] - 1;
 
-        if (sp38 < var_s1[var_s3[1]][2]) {
-            sp38 = var_s1[var_s3[1]][2] - 1;
+        if (sp38 < projected_vertex_rows[room_element_cursor[1]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[1]][2] - 1;
         }
 
         colorIn.g = 0x80;
         colorIn.r = 0;
         colorIn.b = 0xFF;
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[0]][3], &colorOut0);
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[1]][3], &colorOut1);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
 
         setLineG2(lineG2);
         setSemiTrans(lineG2, 1);
 
-        lineG2->x0 = var_s1[var_s3[0]][0] - 1;
-        lineG2->x1 = var_s1[var_s3[1]][0] - 1;
-        lineG2->y0 = var_s1[var_s3[0]][1];
-        lineG2->y1 = var_s1[var_s3[1]][1];
+        lineG2->x0 = projected_vertex_rows[room_element_cursor[0]][0] - 1;
+        lineG2->x1 = projected_vertex_rows[room_element_cursor[1]][0] - 1;
+        lineG2->y0 = projected_vertex_rows[room_element_cursor[0]][1];
+        lineG2->y1 = projected_vertex_rows[room_element_cursor[1]][1];
 
         setRGB0(lineG2, colorOut0.r, colorOut0.g, colorOut0.b);
         setRGB1(lineG2, colorOut1.r, colorOut1.g, colorOut1.b);
@@ -1244,10 +1244,10 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
         setLineG2(lineG2);
         setSemiTrans(lineG2, 1);
 
-        lineG2->x0 = var_s1[var_s3[0]][0];
-        lineG2->x1 = var_s1[var_s3[1]][0];
-        lineG2->y0 = var_s1[var_s3[0]][1] - 1;
-        lineG2->y1 = var_s1[var_s3[1]][1] - 1;
+        lineG2->x0 = projected_vertex_rows[room_element_cursor[0]][0];
+        lineG2->x1 = projected_vertex_rows[room_element_cursor[1]][0];
+        lineG2->y0 = projected_vertex_rows[room_element_cursor[0]][1] - 1;
+        lineG2->y1 = projected_vertex_rows[room_element_cursor[1]][1] - 1;
 
         setRGB0(lineG2, colorOut0.r, colorOut0.g, colorOut0.b);
         setRGB1(lineG2, colorOut1.r, colorOut1.g, colorOut1.b);
@@ -1257,10 +1257,10 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
         setLineG2(lineG2);
         setSemiTrans(lineG2, 1);
 
-        lineG2->x0 = var_s1[var_s3[0]][0] + 1;
-        lineG2->x1 = var_s1[var_s3[1]][0] + 1;
-        lineG2->y0 = var_s1[var_s3[0]][1];
-        lineG2->y1 = var_s1[var_s3[1]][1];
+        lineG2->x0 = projected_vertex_rows[room_element_cursor[0]][0] + 1;
+        lineG2->x1 = projected_vertex_rows[room_element_cursor[1]][0] + 1;
+        lineG2->y0 = projected_vertex_rows[room_element_cursor[0]][1];
+        lineG2->y1 = projected_vertex_rows[room_element_cursor[1]][1];
 
         setRGB0(lineG2, colorOut0.r, colorOut0.g, colorOut0.b);
         setRGB1(lineG2, colorOut1.r, colorOut1.g, colorOut1.b);
@@ -1270,10 +1270,10 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
         setLineG2(lineG2);
         setSemiTrans(lineG2, 1);
 
-        lineG2->x0 = var_s1[var_s3[0]][0];
-        lineG2->x1 = var_s1[var_s3[1]][0];
-        lineG2->y0 = var_s1[var_s3[0]][1] + 1;
-        lineG2->y1 = var_s1[var_s3[1]][1] + 1;
+        lineG2->x0 = projected_vertex_rows[room_element_cursor[0]][0];
+        lineG2->x1 = projected_vertex_rows[room_element_cursor[1]][0];
+        lineG2->y0 = projected_vertex_rows[room_element_cursor[0]][1] + 1;
+        lineG2->y1 = projected_vertex_rows[room_element_cursor[1]][1] + 1;
 
         setRGB0(lineG2, colorOut0.r, colorOut0.g, colorOut0.b);
         setRGB1(lineG2, colorOut1.r, colorOut1.g, colorOut1.b);
@@ -1284,34 +1284,34 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
             colorIn.g = 0xFF;
             colorIn.r = 0;
             colorIn.b = 0x80;
-            Core_Gte_DpqColor(&colorIn, var_s1[var_s3[0]][3], &colorOut0);
-            Core_Gte_DpqColor(&colorIn, var_s1[var_s3[1]][3], &colorOut1);
+            Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+            Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
         }
 
         setLineG2(lineG2);
 
-        lineG2->x0 = var_s1[var_s3[0]][0];
-        lineG2->x1 = var_s1[var_s3[1]][0];
-        lineG2->y0 = var_s1[var_s3[0]][1];
-        lineG2->y1 = var_s1[var_s3[1]][1];
+        lineG2->x0 = projected_vertex_rows[room_element_cursor[0]][0];
+        lineG2->x1 = projected_vertex_rows[room_element_cursor[1]][0];
+        lineG2->y0 = projected_vertex_rows[room_element_cursor[0]][1];
+        lineG2->y1 = projected_vertex_rows[room_element_cursor[1]][1];
 
         setRGB0(lineG2, colorOut0.r, colorOut0.g, colorOut0.b);
         setRGB1(lineG2, colorOut1.r, colorOut1.g, colorOut1.b);
 
         AddPrim(((int**)(((uintptr_t)Core_ScratchBase() + 0x000) + scratch))[1] + sp38, lineG2++);
 
-        var_s3 += 4;
+        room_element_cursor += 4;
     }
 
-    elementCount = *(int*)var_s3;
-    var_s3 += 4;
+    elementCount = *(int*)room_element_cursor;
+    room_element_cursor += 4;
 
-    for (i = 0; i < elementCount; ++i, var_s3 += 4) {
+    for (i = 0; i < elementCount; ++i, room_element_cursor += 4) {
 
-        sp38 = var_s1[var_s3[0]][2] - 1;
+        sp38 = projected_vertex_rows[room_element_cursor[0]][2] - 1;
 
-        if (sp38 < var_s1[var_s3[1]][2]) {
-            sp38 = var_s1[var_s3[1]][2] - 1;
+        if (sp38 < projected_vertex_rows[room_element_cursor[1]][2]) {
+            sp38 = projected_vertex_rows[room_element_cursor[1]][2] - 1;
         }
 
         if (roomIndex == Menu_Map_currentRoomIndex) {
@@ -1323,8 +1323,8 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
         colorIn.r = 0;
         colorIn.b = 0x80;
 
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[0]][3], &colorOut0);
-        Core_Gte_DpqColor(&colorIn, var_s1[var_s3[1]][3], &colorOut1);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
 
         setLineG2(lineG2);
 
@@ -1332,10 +1332,10 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
             setSemiTrans(lineG2, 1);
         } while (0);
 
-        lineG2->x0 = var_s1[var_s3[0]][0];
-        lineG2->x1 = var_s1[var_s3[1]][0];
-        lineG2->y0 = var_s1[var_s3[0]][1];
-        lineG2->y1 = var_s1[var_s3[1]][1];
+        lineG2->x0 = projected_vertex_rows[room_element_cursor[0]][0];
+        lineG2->x1 = projected_vertex_rows[room_element_cursor[1]][0];
+        lineG2->y0 = projected_vertex_rows[room_element_cursor[0]][1];
+        lineG2->y1 = projected_vertex_rows[room_element_cursor[1]][1];
 
         setRGB0(lineG2, colorOut0.r, colorOut0.g, colorOut0.b);
         setRGB1(lineG2, colorOut1.r, colorOut1.g, colorOut1.b);
@@ -1344,28 +1344,28 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
     }
 
     tile = (TILE*)lineG2;
-    elementCount = *(int*)var_s3;
-    var_s3 += 4;
+    elementCount = *(int*)room_element_cursor;
+    room_element_cursor += 4;
 
-    for (i = 0; i < elementCount; ++i, var_s3 += 4) {
+    for (i = 0; i < elementCount; ++i, room_element_cursor += 4) {
 
         sp3C = 0;
         *(void**)Core_ScratchAddr(0) = tile;
 
-        if ((var_s3[3] != 0) && (Menu_Map_ShouldDrawDoorStateMarker(var_s3[3], arg2, arg3) != 0)
+        if ((room_element_cursor[3] != 0) && (Menu_Map_ShouldDrawDoorStateMarker(room_element_cursor[3], zone_id, map_id) != 0)
             && (roomIndex == Menu_Map_currentRoomIndex)) {
 
-            Menu_Map_DrawDoorStateMarker(var_s1[var_s3[0]][0], var_s1[var_s3[0]][1] - 0xE, var_s3[3]);
+            Menu_Map_DrawDoorStateMarker(projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE, room_element_cursor[3]);
 
             tile = *(void**)Core_ScratchAddr(0);
             sp3C = 1;
         }
 
         if (sp3C == 0) {
-            if ((var_s3[2] & 4) && (roomIndex == Menu_Map_currentRoomIndex)) {
+            if ((room_element_cursor[2] & 4) && (roomIndex == Menu_Map_currentRoomIndex)) {
 
-                Menu_Map_DrawFeatureMarker(0, var_s1[var_s3[0]][0], var_s1[var_s3[0]][1] - 0xE);
-                Menu_Map_QueueLabel(var_s1[var_s3[0]][0], var_s1[var_s3[0]][1], 1, var_s3[1]);
+                Menu_Map_DrawFeatureMarker(0, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
+                Menu_Map_QueueLabel(projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1], 1, room_element_cursor[1]);
 
                 if ((roomIndex == Menu_Map_isCurrentScene) && (i == Field_enteredDoorId)) {
                     if (Menu_Map_menuFramesCounter & 0x10) {
@@ -1382,7 +1382,7 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
                 }
             }
 
-            if ((roomIndex == Menu_Map_currentRoomIndex) && (var_s3[2] == 0)) {
+            if ((roomIndex == Menu_Map_currentRoomIndex) && (room_element_cursor[2] == 0)) {
                 if ((roomIndex == Menu_Map_isCurrentScene) && (i == Field_enteredDoorId)) {
                     if (Menu_Map_menuFramesCounter & 0x10) {
                         colorIn.r = 0xFF;
@@ -1400,22 +1400,22 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
 
             j = 0;
 
-            if ((var_s3[2] & 0xB) && (roomIndex == Menu_Map_isCurrentScene)) {
-                sp28[j++] = 0;
+            if ((room_element_cursor[2] & 0xB) && (roomIndex == Menu_Map_isCurrentScene)) {
+                available_marker_kinds[j++] = 0;
             }
 
-            if ((var_s3[2] & 2) && (roomIndex == Menu_Map_currentRoomIndex)) {
-                sp28[j++] = 1;
+            if ((room_element_cursor[2] & 2) && (roomIndex == Menu_Map_currentRoomIndex)) {
+                available_marker_kinds[j++] = 1;
             }
 
-            if ((var_s3[2] & 8) && (roomIndex == Menu_Map_currentRoomIndex)) {
-                sp28[j++] = 2;
-                sp28[j++] = 1;
-                sp28[j++] = 3;
+            if ((room_element_cursor[2] & 8) && (roomIndex == Menu_Map_currentRoomIndex)) {
+                available_marker_kinds[j++] = 2;
+                available_marker_kinds[j++] = 1;
+                available_marker_kinds[j++] = 3;
             }
 
-            if ((var_s3[2] & 0x10) && (roomIndex == Menu_Map_currentRoomIndex)) {
-                sp28[j++] = 3;
+            if ((room_element_cursor[2] & 0x10) && (roomIndex == Menu_Map_currentRoomIndex)) {
+                available_marker_kinds[j++] = 3;
             }
 
             if (j > 0) {
@@ -1425,25 +1425,25 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
                 colorIn.b = 0;
                 sp3C = 1;
 
-                switch (sp28[(Menu_Map_menuFramesCounter >> 5) % j]) {
+                switch (available_marker_kinds[(Menu_Map_menuFramesCounter >> 5) % j]) {
                 case 0:
                     Menu_Map_DrawAshleyMarker(0,
-                        ((var_s1[var_s3[0]][0] - 8) & 0xFFFF)
-                            | ((var_s1[var_s3[0]][1] << 16) + 0xFFF80000),
+                        ((projected_vertex_rows[room_element_cursor[0]][0] - 8) & 0xFFFF)
+                            | ((projected_vertex_rows[room_element_cursor[0]][1] << 16) + 0xFFF80000),
                         *((Menu_Map_menuFramesCounter & 0xF) + (new_var = Menu_Map_kAshleyIconBrightness)),
                         ((void**)Core_ScratchAddr(0))[1] + 32);
                     break;
 
                 case 1:
-                    Menu_Map_DrawFeatureMarker(2, var_s1[var_s3[0]][0], var_s1[var_s3[0]][1] - 0xE);
+                    Menu_Map_DrawFeatureMarker(2, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
                     break;
 
                 case 2:
-                    Menu_Map_DrawFeatureMarker(1, var_s1[var_s3[0]][0], var_s1[var_s3[0]][1] - 0xE);
+                    Menu_Map_DrawFeatureMarker(1, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
                     break;
 
                 case 3:
-                    Menu_Map_DrawFeatureMarker(3, var_s1[var_s3[0]][0], var_s1[var_s3[0]][1] - 0xE);
+                    Menu_Map_DrawFeatureMarker(3, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 0xE);
                     break;
                 }
             }
@@ -1451,24 +1451,24 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int arg2, int arg3)
             tile = *(void**)Core_ScratchAddr(0);
 
             if (sp3C != 0) {
-                int** s2;
-                sp38 = var_s1[var_s3[0]][2] - 1;
+                int** legacy_render_scratch;
+                sp38 = projected_vertex_rows[room_element_cursor[0]][2] - 1;
 
                 setTile(tile);
-                setXY0(tile, var_s1[var_s3[0]][0] - 1, var_s1[var_s3[0]][1]);
+                setXY0(tile, projected_vertex_rows[room_element_cursor[0]][0] - 1, projected_vertex_rows[room_element_cursor[0]][1]);
                 setWH(tile, 3, 1);
                 setRGB0(tile, colorIn.r, colorIn.g, colorIn.b);
 
                 AddPrim(((int**)Core_ScratchAddr(0))[1] + sp38, tile++);
 
                 setTile(tile);
-                setXY0(tile, var_s1[var_s3[0]][0], var_s1[var_s3[0]][1] - 1);
+                setXY0(tile, projected_vertex_rows[room_element_cursor[0]][0], projected_vertex_rows[room_element_cursor[0]][1] - 1);
                 setWH(tile, 1, 3);
                 setRGB0(tile, colorIn.r, colorIn.g, colorIn.b);
 
-                s2 = ((int**)Core_ScratchAddr(0));
+                legacy_render_scratch = ((int**)Core_ScratchAddr(0));
 
-                AddPrim(s2[1] + sp38, tile++);
+                AddPrim(legacy_render_scratch[1] + sp38, tile++);
             }
         }
     }
@@ -1827,7 +1827,7 @@ void Menu_Map_DrawPalingDistortion(void)
 
     for (y = 0; y < 239; ++y) {
         int x;
-        void** new_var;
+        void** legacy_render_scratch;
         int v;
         SPRT* sprt = *(void**)Core_ScratchAddr(0);
 
@@ -1836,7 +1836,7 @@ void Menu_Map_DrawPalingDistortion(void)
         setRGB0(sprt, 128, 128, 128);
 
         v = Menu_Map_menuFramesCounter;
-        new_var = (void**)Core_ScratchAddr(0);
+        legacy_render_scratch = (void**)Core_ScratchAddr(0);
 
         if (y & 1) {
             x = Core_Gte_Sin((Menu_Map_menuFramesCounter + y) << 6);
@@ -1857,9 +1857,9 @@ void Menu_Map_DrawPalingDistortion(void)
         setUV0(sprt, 0, y);
         setClut(sprt, 0, 0);
 
-        AddPrim(new_var[1] + 0x20, sprt++);
+        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);
 
-        new_var[0] = (void*)sprt;
+        legacy_render_scratch[0] = (void*)sprt;
 
         if (Render_frameBuf != 0) {
             _insertTPage(8, getTPage(2, 0, 320, 0));
@@ -1892,9 +1892,9 @@ void Menu_Map_DrawPalingDistortion(void)
         setWH(sprt, 128, 1);
         setUV0(sprt, 0, y);
 
-        AddPrim(new_var[1] + 0x20, sprt++);
+        AddPrim(legacy_render_scratch[1] + 0x20, sprt++);
 
-        new_var[0] = (void*)sprt;
+        legacy_render_scratch[0] = (void*)sprt;
 
         if (Render_frameBuf != 0) {
             _insertTPage(8, getTPage(2, 0, 512, 0));
@@ -1971,13 +1971,13 @@ void Menu_Map_DrawControls(void)
 
     if (Audio_Seq_unusedStateFlags.mapPaling[Menu_Map_currentScene] == 0) {
         int index = Menu_Map_controlsUiXOffset;
-        void** s1 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+        void** legacy_button_render_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L1, index + 8, 15, s1[1] + 24);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R1, Menu_Map_controlsUiXOffset + 64, 15, s1[1] + 24);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L2, Menu_Map_controlsUiXOffset + 8, 33, s1[1] + 24);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, Menu_Map_controlsUiXOffset + 8, 52, s1[1] + 24);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, Menu_Map_controlsUiXOffset + 8, 70, s1[1] + 24);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L1, index + 8, 15, legacy_button_render_scratch[1] + 24);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R1, Menu_Map_controlsUiXOffset + 64, 15, legacy_button_render_scratch[1] + 24);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_L2, Menu_Map_controlsUiXOffset + 8, 33, legacy_button_render_scratch[1] + 24);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, Menu_Map_controlsUiXOffset + 8, 52, legacy_button_render_scratch[1] + 24);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, Menu_Map_controlsUiXOffset + 8, 70, legacy_button_render_scratch[1] + 24);
 
         switch (Menu_Map_menuCommandsState) {
         case 0: {
@@ -2123,9 +2123,9 @@ void Menu_Map_DrawDoorStateMarker(int x, int y, int id)
     RECT* rect0;
     RECT* rect1;
     int temp;
-    void** new_var = (void**)Core_ScratchAddr(0);
-    POLY_FT4* poly = new_var[0];
-    int s6 = (id - 1);
+    void** legacy_render_scratch = (void**)Core_ScratchAddr(0);
+    POLY_FT4* poly = legacy_render_scratch[0];
+    int zero_based_marker_id = (id - 1);
 
     id = Audio_Seq_unusedStateFlags.opaque33F[id] & 1;
     rect0 = &Menu_Map_kDoorMarkerUpperRects[id];
@@ -2139,9 +2139,9 @@ void Menu_Map_DrawDoorStateMarker(int x, int y, int id)
     setTPage(poly, 0, 0, 768, 0);
     setClut(poly, 976, 223);
 
-    temp = s6 & 0x7F;
+    temp = zero_based_marker_id & 0x7F;
 
-    AddPrim(new_var[1] + 28, poly++);
+    AddPrim(legacy_render_scratch[1] + 28, poly++);
 
     y += rect0->h;
     rect1 = &Menu_Map_kDoorMarkerLowerRects[id];
@@ -2155,9 +2155,9 @@ void Menu_Map_DrawDoorStateMarker(int x, int y, int id)
     setTPage(poly, 0, 0, 768, 0);
     setClut(poly, 864, 223);
 
-    AddPrim(new_var[1] + 28, poly++);
+    AddPrim(legacy_render_scratch[1] + 28, poly++);
 
-    new_var[0] = poly;
+    legacy_render_scratch[0] = poly;
 
     Menu_Map_QueueLabel(x, y, 0, temp);
 }
@@ -2214,10 +2214,10 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
 {
     int i;
     int uCoords[] = { 0x30, 0x40, 0x48, 0x38 };
-    void** new_var2;
-    void** new_var3;
+    void** legacy_primitive_scratch;
+    void** legacy_ordering_table_scratch;
     int v;
-    int new_var4;
+    int compass_texture_right_u;
 
     POLY_FT4* poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
@@ -2229,14 +2229,14 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
         setSemiTrans(poly, 1);
         setShadeTex(poly, 1);
 
-        new_var4 = 45;
+        compass_texture_right_u = 45;
 
         if (!(i & 3)) {
             v = 128;
-            setUV4(poly, 2, v, new_var4, v, 2, 131, new_var4, 131);
+            setUV4(poly, 2, v, compass_texture_right_u, v, 2, 131, compass_texture_right_u, 131);
         } else {
             v = 132;
-            setUV4(poly, 2, v, new_var4, v, 2, 135, new_var4, 135);
+            setUV4(poly, 2, v, compass_texture_right_u, v, 2, 135, compass_texture_right_u, 135);
         }
 
         setXY4(poly, Menu_Map_compassBounds[0].x, Menu_Map_compassBounds[0].y, Menu_Map_compassBounds[1].x,
@@ -2245,9 +2245,9 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
         setTPage(poly, 0, 1, 448, 256);
         setClut(poly, 960, 222);
 
-        new_var3 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+        legacy_ordering_table_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-        AddPrim(new_var3[1] + 28, poly++);
+        AddPrim(legacy_ordering_table_scratch[1] + 28, poly++);
     }
 
     Menu_Map_ComputeCompassCorners(x, y, 39, 39, angle + 0x200);
@@ -2269,9 +2269,9 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
             setClut(poly, 1008, 220);
         }
 
-        new_var3 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+        legacy_ordering_table_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-        AddPrim(new_var3[1] + 0x18, poly++);
+        AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);
 
         setPolyFT4(poly);
         setSemiTrans(poly, 1);
@@ -2288,9 +2288,9 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
             setClut(poly, 960, 222);
         }
 
-        new_var3 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+        legacy_ordering_table_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-        AddPrim(new_var3[1] + 0x18, poly++);
+        AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);
     }
 
     Menu_Map_ComputeCompassCorners(x, y, 15, 15, (angle - Menu_Map_cameraAngles.vz) + 0x200);
@@ -2307,25 +2307,25 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
     setTPage(poly, 0, 0, 448, 256);
     setClut(poly, 992, 222);
 
-    new_var2 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
-    new_var3 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    legacy_primitive_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    legacy_ordering_table_scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-    AddPrim(new_var3[1] + 0x18, poly++);
+    AddPrim(legacy_ordering_table_scratch[1] + 0x18, poly++);
 
-    new_var2[0] = (void*)poly;
+    legacy_primitive_scratch[0] = (void*)poly;
 }
 
 // decomp: MENU5.PRG _computeRotatedRect (src/MENU/MENU5.PRG/4D8.c:2377)
-void Menu_Map_ComputeCompassCorners(int arg0, int arg1, int arg2, int arg3, int arg4)
+void Menu_Map_ComputeCompassCorners(int compass_center_x, int compass_center_y, int compass_half_width, int compass_half_height, int compass_angle)
 {
     int i;
-    int temp_s1 = Core_Gte_Sin(arg4);
-    int temp_v0 = Core_Gte_Cos(arg4);
+    int angle_sine = Core_Gte_Sin(compass_angle);
+    int angle_cosine = Core_Gte_Cos(compass_angle);
 
-    Menu_Map_compassBounds[0].x = (-arg2 * temp_v0) + (arg3 * temp_s1);
-    Menu_Map_compassBounds[0].y = (-arg3 * temp_v0) - (arg2 * temp_s1);
-    Menu_Map_compassBounds[1].x = (arg2 * temp_v0) + (arg3 * temp_s1);
-    Menu_Map_compassBounds[1].y = (-arg3 * temp_v0) + (arg2 * temp_s1);
+    Menu_Map_compassBounds[0].x = (-compass_half_width * angle_cosine) + (compass_half_height * angle_sine);
+    Menu_Map_compassBounds[0].y = (-compass_half_height * angle_cosine) - (compass_half_width * angle_sine);
+    Menu_Map_compassBounds[1].x = (compass_half_width * angle_cosine) + (compass_half_height * angle_sine);
+    Menu_Map_compassBounds[1].y = (-compass_half_height * angle_cosine) + (compass_half_width * angle_sine);
     Menu_Map_compassBounds[2].x = -Menu_Map_compassBounds[1].x;
     Menu_Map_compassBounds[2].y = -Menu_Map_compassBounds[1].y;
     Menu_Map_compassBounds[3].x = -Menu_Map_compassBounds[0].x;
@@ -2334,8 +2334,8 @@ void Menu_Map_ComputeCompassCorners(int arg0, int arg1, int arg2, int arg3, int 
     for (i = 0; i < 4; ++i) {
         Menu_Map_compassBounds[i].x = Menu_Map_compassBounds[i].x / ONE / 2;
         Menu_Map_compassBounds[i].y = Menu_Map_compassBounds[i].y / ONE / 2;
-        Menu_Map_compassBounds[i].x = Menu_Map_compassBounds[i].x + arg0;
-        Menu_Map_compassBounds[i].y = Menu_Map_compassBounds[i].y + arg1;
+        Menu_Map_compassBounds[i].x = Menu_Map_compassBounds[i].x + compass_center_x;
+        Menu_Map_compassBounds[i].y = Menu_Map_compassBounds[i].y + compass_center_y;
     }
 }
 
@@ -2411,14 +2411,14 @@ void Menu_Map_DrawLabels(void)
 }
 
 // decomp: MENU5.PRG func_8010839C (src/MENU/MENU5.PRG/4D8.c:2471)
-int Menu_Map_ShouldDrawDoorStateMarker(int arg0, int arg1, int arg2)
+int Menu_Map_ShouldDrawDoorStateMarker(int door_state_id, int zone_id, int map_id)
 {
-    u_int temp_a2 = arg0 - 0x41;
+    u_int sigil_door_kind = door_state_id - 0x41;
 
-    if ((temp_a2 < 7) && ((Field_IsRoomSigilDoorUnlocked(arg1, arg2, temp_a2) != 0))) {
+    if ((sigil_door_kind < 7) && ((Field_IsRoomSigilDoorUnlocked(zone_id, map_id, sigil_door_kind) != 0))) {
         return 0;
     }
-    return Audio_Seq_unusedStateFlags.opaque33F[arg0] < 2;
+    return Audio_Seq_unusedStateFlags.opaque33F[door_state_id] < 2;
 }
 
 // MENU5.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

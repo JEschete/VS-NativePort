@@ -172,7 +172,7 @@ void Menu_Rename_DrawFrame(int xOffset)
     // Seemingly no purpose, perhaps an unimplemented animation
     static char Menu_Rename_unusedFrameCycle = 0;
 
-    u_int* sp18;
+    u_int* frame_ordering_table;
     int x;
     int y;
     int j;
@@ -181,7 +181,7 @@ void Menu_Rename_DrawFrame(int xOffset)
     u_long* prim;
     int counter;
 
-    sp18 = (u_int*)Render_frameScratch.orderingTable - 1;
+    frame_ordering_table = (u_int*)Render_frameScratch.orderingTable - 1;
 
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, (-xOffset + 16), 50, 0);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, (-xOffset + 16), 66, 0);
@@ -207,20 +207,20 @@ void Menu_Rename_DrawFrame(int xOffset)
         y = Menu_Framework_GradientStopColor(counter, 0, 128);
 
         for (j = 0; j < 12; ++j) {
-            int v1;
+            int background_right_inset;
 
-            prim[0] = (*sp18 & 0xFFFFFF) | 0x06000000;
+            prim[0] = (*frame_ordering_table & 0xFFFFFF) | 0x06000000;
             prim[1] = vs_getTpage(0, 0, 0, 0, 1);
             prim[2] = x;
             prim[3] = ((-xOffset) & 0xFFFF) | (j + 20 + i * 16) << 16;
             prim[4] = y;
 
-            v1 = j - 96;
+            background_right_inset = j - 96;
 
-            prim[5] = ((-xOffset - v1) & 0xFFFF) | (j + 20 + i * 16) << 16;
+            prim[5] = ((-xOffset - background_right_inset) & 0xFFFF) | (j + 20 + i * 16) << 16;
             prim[6] = vs_getTpage(0, 0, 0, 0, 0);
 
-            *sp18 = LegacyGpu_Handle(prim);
+            *frame_ordering_table = LegacyGpu_Handle(prim);
 
             prim += 7;
         }
@@ -251,15 +251,15 @@ void Menu_Rename_DrawFrame(int xOffset)
 
         if (counter != Core_TextCode_Space) {
 
-            int new_var3 = (j * 6 + 0xA2);
+            int name_character_x = (j * 6 + 0xA2);
 
             Render_DrawVariableWidthGlyph(
-                counter, xOffset + new_var3, 0x30, Render_frameScratch.overlayOrderingTable - 8);
+                counter, xOffset + name_character_x, 0x30, Render_frameScratch.overlayOrderingTable - 8);
         }
     }
 
     if (xOffset == 0) {
-        u_long* a1;
+        u_long* frame_overlay_ordering_table;
 
         int color = vs_getRGB888(64, 64, 64);
         x = 0x37F9;
@@ -287,10 +287,10 @@ void Menu_Rename_DrawFrame(int xOffset)
         Render_QueueDefaultSprite(vs_getWH(16, 16), (j + 296) | (48 << 16))[4] =
             (x << 0x10) | vs_getUV(16, 48);
 
-        a1 = Render_frameScratch.overlayOrderingTable;
+        frame_overlay_ordering_table = Render_frameScratch.overlayOrderingTable;
         prim = Render_frameScratch.primitiveCursor;
 
-        prim[0] = ((u_long)a1[0] & 0xFFFFFF) | 0x09000000;
+        prim[0] = ((u_long)frame_overlay_ordering_table[0] & 0xFFFFFF) | 0x09000000;
         prim[1] = vs_getTpage(0, 0, 0, 0, 1);
         prim[2] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyG4, 0, 0, 0);
         prim[3] = vs_getRGB888(208, 0, 30);
@@ -314,17 +314,17 @@ void Menu_Rename_DrawFrame(int xOffset)
     for (i = 0; i < 9; ++i) {
         for (j = 0; j < 14; ++j) {
 
-            int temp_s8 = (xOffset + 0x82);
+            int character_grid_origin_x = (xOffset + 0x82);
 
             Render_DrawVariableWidthGlyph(commandString[i * 15 + j],
-                temp_s8 + j * 12, (i * 16) + 78, Render_frameScratch.overlayOrderingTable - 8);
+                character_grid_origin_x + j * 12, (i * 16) + 78, Render_frameScratch.overlayOrderingTable - 8);
         }
     }
 
     for (j = 0; j < 16; j += 4) {
         prim = Render_frameScratch.primitiveCursor;
 
-        prim[0] = (*sp18 & 0xFFFFFF) | 0x09000000;
+        prim[0] = (*frame_ordering_table & 0xFFFFFF) | 0x09000000;
         prim[1] = vs_getTpage(0, 0, 0, 0, 1);
         prim[2] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyG4, 0, 65, 107);
         prim[3] = xOffset + Menu_Rename_frameBackgroundHexCoords[j];
@@ -335,7 +335,7 @@ void Menu_Rename_DrawFrame(int xOffset)
         prim[8] = vs_getRGB888(0, 5, 51);
         prim[9] = xOffset + Menu_Rename_frameBackgroundHexCoords[j + 3];
 
-        *sp18 = LegacyGpu_Handle(prim);
+        *frame_ordering_table = LegacyGpu_Handle(prim);
         Render_frameScratch.primitiveCursor = (u_long*)(prim + 10);
     }
 }
@@ -343,25 +343,25 @@ void Menu_Rename_DrawFrame(int xOffset)
 // decomp: MENU8.PRG _highlightSelection (src/MENU/MENU8.PRG/21A0.c:318)
 void Menu_Rename_DrawSelectionBox(int x, int y, int w, int h)
 {
-    u_long* temp_t0;
-    u_long* temp_t4;
+    u_long* selection_box_primitive;
+    u_long* selection_box_ordering_table;
 
-    temp_t4 = Render_frameScratch.overlayOrderingTable;
-    temp_t0 = Render_frameScratch.primitiveCursor;
+    selection_box_ordering_table = Render_frameScratch.overlayOrderingTable;
+    selection_box_primitive = Render_frameScratch.primitiveCursor;
 
-    temp_t0[0] = (*temp_t4 & 0xFFFFFF) | 0x09000000;
-    temp_t0[1] = vs_getTpage(0, 0, 0, Render_BlendMode_Add, Render_Dithering_On);
-    temp_t0[2] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyG4SemiTrans, 128, 160, 192);
-    temp_t0[3] = (x | (y << 16));
-    temp_t0[4] = 0;
-    temp_t0[5] = (x + w) | (y << 16);
-    temp_t0[6] = 0;
-    temp_t0[7] = x | ((y + h) << 16);
-    temp_t0[8] = vs_getRGB888(128, 160, 192);
-    temp_t0[9] = (x + w) | ((y + h) << 16);
+    selection_box_primitive[0] = (*selection_box_ordering_table & 0xFFFFFF) | 0x09000000;
+    selection_box_primitive[1] = vs_getTpage(0, 0, 0, Render_BlendMode_Add, Render_Dithering_On);
+    selection_box_primitive[2] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyG4SemiTrans, 128, 160, 192);
+    selection_box_primitive[3] = (x | (y << 16));
+    selection_box_primitive[4] = 0;
+    selection_box_primitive[5] = (x + w) | (y << 16);
+    selection_box_primitive[6] = 0;
+    selection_box_primitive[7] = x | ((y + h) << 16);
+    selection_box_primitive[8] = vs_getRGB888(128, 160, 192);
+    selection_box_primitive[9] = (x + w) | ((y + h) << 16);
 
-    *temp_t4 = LegacyGpu_Handle(temp_t0);
-    Render_frameScratch.primitiveCursor = temp_t0 + 10;
+    *selection_box_ordering_table = LegacyGpu_Handle(selection_box_primitive);
+    Render_frameScratch.primitiveCursor = selection_box_primitive + 10;
 }
 
 // decomp: MENU8.PRG _highlightCharSelection (src/MENU/MENU8.PRG/21A0.c:346)
@@ -826,9 +826,9 @@ int Menu_Rename_Update(char* state)
 {
     int i;
     int currentState;
-    char* var_v1;
-    char* var_v0;
-    int v1;
+    char* weapon_name_cursor;
+    char* name_padding_cursor;
+    int encoded_space;
 
     currentState = *state;
 
@@ -839,24 +839,24 @@ int Menu_Rename_Update(char* state)
 
         Menu_Framework_DismissInformationBox();
 
-        v1 = Core_TextCode_Space;
+        encoded_space = Core_TextCode_Space;
         i = 19;
-        var_v0 = &Menu_Rename_stringBuf[i];
+        name_padding_cursor = &Menu_Rename_stringBuf[i];
 
         for (; i >= 0; --i) {
-            *var_v0-- = v1;
+            *name_padding_cursor-- = encoded_space;
         }
 
         if (Menu_Framework_stringBuf[0] == 1) {
-            var_v1 = Audio_Seq_unusedInventory.weapons[Menu_Rename_weaponId].name;
+            weapon_name_cursor = Audio_Seq_unusedInventory.weapons[Menu_Rename_weaponId].name;
             for (i = 0; i < 20; ++i) {
-                int c = *var_v1++;
+                int c = *weapon_name_cursor++;
                 if (c == Core_TextCode_Terminator) {
                     break;
                 } else if (c == Core_TextCode_Space) {
                     continue;
                 } else if (c == Core_TextCode_Spacing) {
-                    ++var_v1;
+                    ++weapon_name_cursor;
                 } else {
                     Menu_Rename_stringBuf[i] = c;
                 }

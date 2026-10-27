@@ -131,8 +131,8 @@ int Menu_SelectTextBoxChoice(u_char boxMask)
         }
 
         if (Input_buttonsPressed.allButtons & PADLup) {
-            int v0 = selectedIndex - 1;
-            selectedIndex = v0 + count;
+            int previous_choice_index = selectedIndex - 1;
+            selectedIndex = previous_choice_index + count;
         }
 
         if (Input_buttonsPressed.allButtons & PADLdown) {
@@ -182,22 +182,22 @@ void Menu_InitInformationTextBox(enum Menu_InformationBoxHeader header)
 int Menu_DismissAllTextBoxes(void)
 {
     int i;
-    int var_s1 = 1;
+    int all_text_boxes_dismissed = 1;
 
     for (i = 0; i < 8; ++i) {
         if (Menu_DismissTextBox(i) != 0) {
-            var_s1 = 0;
+            all_text_boxes_dismissed = 0;
         }
     }
 
-    return var_s1;
+    return all_text_boxes_dismissed;
 }
 
 // decomp: BATTLE.PRG vs_battle_displaySceneMessage (src/BATTLE/BATTLE.PRG/5BF94.c:3771)
-void Menu_ShowSceneNotification(int arg0, int arg1, int arg2)
+void Menu_ShowSceneNotification(int notification_kind, int notification_subject_id, int timed_notification)
 {
     Menu_sceneNotificationBuffer = Core_Memory_AllocateFromHighEnd(112);
-    Menu_sceneNotificationTimed = arg2;
+    Menu_sceneNotificationTimed = timed_notification;
     if (Menu_sceneNotificationTimed) {
         Menu_sceneNotificationTimer = 0x78;
     }
@@ -205,21 +205,21 @@ void Menu_ShowSceneNotification(int arg0, int arg1, int arg2)
     Menu_InitTextBox(7, 0x304, 0, 1, 0, 3, 0, 0);
 
     Menu_sceneNotificationBuffer[0] = 0x00F8 | (0x04FB << 16);
-    Battle_stringContext.strings[0] = Battle_actionDefinitions[arg1].name;
+    Battle_stringContext.strings[0] = Battle_actionDefinitions[notification_subject_id].name;
 
-    if (arg0 == 12) {
+    if (notification_kind == 12) {
         Render_FormatEncodedText((char*)&Menu_sceneNotificationBuffer[1],
             (char*)&Menu_menuStrings[Text_Battle_menuStrings_Offset_spellMastered]);
-    } else if (arg0 == 11) {
+    } else if (notification_kind == 11) {
         Menu_textBoxes[7].flags.frameShape = 0;
         Render_FormatEncodedText((char*)&Menu_sceneNotificationBuffer[1],
-            (char*)&Menu_menuStrings[Menu_menuStrings[Battle_actionDefinitions[arg1].type
+            (char*)&Menu_menuStrings[Menu_menuStrings[Battle_actionDefinitions[notification_subject_id].type
                                                                 + 22]]);
     } else {
-        if (arg1 != 0) {
-            Battle_stringContext.strings[0] = Menu_kNotificationItemNames[(arg1 - 0x1CA) * 2];
+        if (notification_subject_id != 0) {
+            Battle_stringContext.strings[0] = Menu_kNotificationItemNames[(notification_subject_id - 0x1CA) * 2];
         }
-        Render_FormatEncodedText((char*)Menu_sceneNotificationBuffer, (char*)&Battle_doorStrings[Battle_doorStrings[arg0]]);
+        Render_FormatEncodedText((char*)Menu_sceneNotificationBuffer, (char*)&Battle_doorStrings[Battle_doorStrings[notification_kind]]);
     }
 
     Menu_SetTextBoxText(7, (char*)Menu_sceneNotificationBuffer);
@@ -388,23 +388,23 @@ void Menu_UpdateTextBoxes(void)
 Menu_TextBoxState* Menu_TextBox(int id) { return &Menu_textBoxes[id]; }
 
 // decomp: BATTLE.PRG func_800CCE10 (src/BATTLE/BATTLE.PRG/5BF94.c:4546)
-Menu_TextAnchorWord Menu_TextBoxAnchor(int arg0, int arg1, int arg2, int arg3)
+Menu_TextAnchorWord Menu_TextBoxAnchor(int anchor_preset_index, int orientation_flags, int text_column_count, int text_line_count)
 {
     Menu_TextAnchorWord ret;
     Menu_TextAnchorWord* p =
-        &Menu_textBoxAnchors[arg0][((arg1 >> 2) & 3) == 1 || ((arg1 >> 2) & 3) == 2];
+        &Menu_textBoxAnchors[anchor_preset_index][((orientation_flags >> 2) & 3) == 1 || ((orientation_flags >> 2) & 3) == 2];
     int offsetX = p->x;
     int offsetY = p->y;
-    int unk24 = p->alignment;
+    int anchor_alignment = p->alignment;
 
-    if ((arg1 >> 2) & 1) {
+    if ((orientation_flags >> 2) & 1) {
         offsetX = -offsetX;
-        unk24 ^= 2;
+        anchor_alignment ^= 2;
     }
 
-    ret.x = offsetX - ((arg2 * 12 + 10) >> 1);
-    ret.y = offsetY - ((arg3 * 13 + 4) >> 1);
-    ret.alignment = unk24;
+    ret.x = offsetX - ((text_column_count * 12 + 10) >> 1);
+    ret.y = offsetY - ((text_line_count * 13 + 4) >> 1);
+    ret.alignment = anchor_alignment;
     ret.opaque3Bit2 = p->opaque3Bit2;
     return ret;
 }
@@ -478,11 +478,11 @@ int Menu_DismissTextBox(int id)
 }
 
 // decomp: BATTLE.PRG func_800CD0FC (src/BATTLE/BATTLE.PRG/5BF94.c:4633)
-void Menu_DrawInformationBoxHeader(int arg0, u_int arg1)
+void Menu_DrawInformationBoxHeader(int header_y, u_int header_kind)
 {
-    if (arg1 < 3) {
-        Render_QueueDefaultSprite(Menu_informationHeaderPositions[arg1], (arg0 << 0x10) | 0xA)[4] =
-            Menu_kInformationHeaderSpriteWords[arg1];
+    if (header_kind < 3) {
+        Render_QueueDefaultSprite(Menu_informationHeaderPositions[header_kind], (header_y << 0x10) | 0xA)[4] =
+            Menu_kInformationHeaderSpriteWords[header_kind];
     }
 }
 
@@ -543,19 +543,19 @@ void Menu_DrawInformationBoxBackdrop(int id)
 }
 
 // decomp: BATTLE.PRG func_800CD3A0 (src/BATTLE/BATTLE.PRG/5BF94.c:4697)
-int Menu_FlipTextBoxShapePoint(int arg0, int arg1)
+int Menu_FlipTextBoxShapePoint(int packed_shape_point, int flip_axes)
 {
-    int var_v1 = arg0;
+    int flipped_shape_point = packed_shape_point;
 
-    if (arg1 & 1) {
-        var_v1 = (var_v1 & 0xFF) | ((0xFF - (var_v1 >> 8)) << 8);
+    if (flip_axes & 1) {
+        flipped_shape_point = (flipped_shape_point & 0xFF) | ((0xFF - (flipped_shape_point >> 8)) << 8);
     }
 
-    if (arg1 & 2) {
-        var_v1 = (~var_v1 & 0xFF) | (var_v1 & 0xFF00);
+    if (flip_axes & 2) {
+        flipped_shape_point = (~flipped_shape_point & 0xFF) | (flipped_shape_point & 0xFF00);
     }
 
-    return var_v1;
+    return flipped_shape_point;
 }
 
 // decomp: src/BATTLE/BATTLE.PRG/5BF94.c:4712

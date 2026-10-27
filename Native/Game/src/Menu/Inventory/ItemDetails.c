@@ -665,7 +665,7 @@ int Menu_Inventory_UpdateItemDetails(int itemInfo)
     static u_char Menu_Inventory_itemDetailsItemCategory;
 
     int page = 0;
-    int new_var;
+    int has_initial_page;
 
     if (itemInfo != 0) {
         page = itemInfo >> 4;
@@ -679,9 +679,9 @@ int Menu_Inventory_UpdateItemDetails(int itemInfo)
     }
 
     page = Menu_Inventory_itemDetailsStatusViewDispatch[Menu_Inventory_itemDetailsItemCategory](page);
-    new_var = page != 0;
+    has_initial_page = page != 0;
 
-    if (new_var) {
+    if (has_initial_page) {
         if (Menu_Inventory_exitToBattle == 0) {
             Menu_Inventory_itemCategoryIconsEnabled = 1;
             Menu_Inventory_selectedItemCategoryIconOnTop = 0;

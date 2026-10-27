@@ -1285,14 +1285,14 @@ loop_1:
 
         if (((char)(itemCategory - 1) < 2) || (itemCategory == Items_ItemCategory_Gem)) {
 
-            int var_s2 = itemCategory & 0xFF;
+            int base_item_category = itemCategory & 0xFF;
             sp310[rowCount * 2] =
                 (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_searchItem];
             sp310[rowCount * 2 + 1] =
                 (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_searchItemDesc];
 
-            if ((Menu_Inventory_ParentWeaponIndex(var_s2, index) == 0)
-                && (Menu_Inventory_ParentShieldIndex(var_s2, index) == 0)) {
+            if ((Menu_Inventory_ParentWeaponIndex(base_item_category, index) == 0)
+                && (Menu_Inventory_ParentShieldIndex(base_item_category, index) == 0)) {
                 sp310[rowCount * 2 + 1] =
                     (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_invalidSearch];
                 Menu_Framework_rowTypeBuf[rowCount] = 1;

@@ -568,23 +568,23 @@ int Menu_Results_UpdateGameClear(void)
             Menu_Results_onScreenScore = Menu_Results_score;
         }
     } else if (Menu_Results_screenState == 1) {
-        int temp_v1;
-        int temp_a2_2 = 48 - Menu_Results_gameClearStateTimer;
+        int updated_reel_phase;
+        int prompt_slide_step = 48 - Menu_Results_gameClearStateTimer;
 
-        if (temp_a2_2 > 0) {
-            Menu_Results_DrawPressButtonPrompt(0xD6, 0xBB, temp_a2_2, Menu_Results_screenTimer);
+        if (prompt_slide_step > 0) {
+            Menu_Results_DrawPressButtonPrompt(0xD6, 0xBB, prompt_slide_step, Menu_Results_screenTimer);
         }
 
-        temp_v1 = Menu_Results_buffReelSelection + (Menu_Results_elementAnimationState >> 3);
-        Menu_Results_buffReelSelection = temp_v1 & 0xFF;
+        updated_reel_phase = Menu_Results_buffReelSelection + (Menu_Results_elementAnimationState >> 3);
+        Menu_Results_buffReelSelection = updated_reel_phase & 0xFF;
 
         if (Menu_Results_elementAnimationState >= 9) {
             --Menu_Results_elementAnimationState;
         }
 
-        temp_v1 &= 0xF;
+        updated_reel_phase &= 0xF;
 
-        if ((temp_v1 == 8) && (Menu_Results_elementAnimationState == temp_v1)) {
+        if ((updated_reel_phase == 8) && (Menu_Results_elementAnimationState == updated_reel_phase)) {
 
             Audio_StopSfx(0x7E, 0x74);
             Audio_StopSfx(0x7E, 0x75);
@@ -676,7 +676,7 @@ void Menu_Results_DrawScore(int x, int y, int timer, int arg3 __attribute__((unu
 
     char buf[16];
     int i;
-    int new_var;
+    int score_label_and_colon_width;
 
     if (timer < 0) {
         timer = 0;
@@ -691,9 +691,9 @@ void Menu_Results_DrawScore(int x, int y, int timer, int arg3 __attribute__((unu
 
         sprintf(buf, "%09d", Menu_Results_score);
 
-        new_var = Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
+        score_label_and_colon_width = Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
         x -= (((Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w * 2)
-                  + (new_var + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Pts].w))
+                  + (score_label_and_colon_width + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Pts].w))
                  + 116)
           >> 1;
 
@@ -727,7 +727,7 @@ void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribut
 {
 
     char buf[16];
-    int temp_s2;
+    int wipe_edge_x;
     int i;
     int v;
 
@@ -741,7 +741,7 @@ void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribut
         return;
     }
 
-    temp_s2 = x + (timer * 8);
+    wipe_edge_x = x + (timer * 8);
 
     if ((Menu_Results_score != 0) && (timer >= 32)) {
 
@@ -775,28 +775,28 @@ void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribut
       + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Pts].w;
     x -= (((Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w * 2) + v) + 116) >> 1;
 
-    Render_DrawTextureWipe(x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_countingScoreColors, temp_s2);
+    Render_DrawTextureWipe(x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_countingScoreColors, wipe_edge_x);
 
     x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w;
 
-    Render_DrawTextureWipe(x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingScoreColors, temp_s2);
+    Render_DrawTextureWipe(x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingScoreColors, wipe_edge_x);
 
     i = 2;
     x = x + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
 
     for (i = 0; i < 9; ++i) {
-        Render_DrawTextureWipe(x, y + 3, buf[i] - '0', Menu_Results_countingScoreColors, temp_s2);
+        Render_DrawTextureWipe(x, y + 3, buf[i] - '0', Menu_Results_countingScoreColors, wipe_edge_x);
 
         x += 12;
 
         if ((i == 2) || (i == 5)) {
-            Render_DrawTextureWipe(x, y + 14, Menu_Results_DisIndex_Rank0Comma, Menu_Results_countingScoreColors, temp_s2);
+            Render_DrawTextureWipe(x, y + 14, Menu_Results_DisIndex_Rank0Comma, Menu_Results_countingScoreColors, wipe_edge_x);
 
             x += 3 + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w;
         }
     }
 
-    Render_DrawTextureWipe(x, y + 8, 0x14, Menu_Results_countingScoreColors, temp_s2);
+    Render_DrawTextureWipe(x, y + 8, 0x14, Menu_Results_countingScoreColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderMapCompletion (src/MENU/MENUF.PRG/3B8.c:1486)
@@ -842,28 +842,28 @@ void Menu_Results_DrawMapCompletion(int x, int y, int timer, int arg3 __attribut
 
 // decomp: MENUF.PRG _renderIncrementalMapCompletion (src/MENU/MENUF.PRG/3B8.c:1527)
 void Menu_Results_DrawCountingMapCompletion(
-    int arg0, int arg1, int arg2, int arg3 __attribute__((unused)))
+    int draw_x, int draw_y, int animation_timer, int arg3 __attribute__((unused)))
 {
 
     char buf[8];
-    int temp_s4;
+    int wipe_edge_x;
     int i;
 
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (animation_timer < 0) {
+        animation_timer = 0;
     }
 
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (animation_timer > 64) {
+        animation_timer = 64;
     }
 
-    if (arg2 <= 0) {
+    if (animation_timer <= 0) {
         return;
     }
 
-    temp_s4 = arg0 + (arg2 * 8);
+    wipe_edge_x = draw_x + (animation_timer * 8);
 
-    if ((Menu_Results_mapCompletion != 0) && (arg2 >= 32)) {
+    if ((Menu_Results_mapCompletion != 0) && (animation_timer >= 32)) {
 
         if (Menu_Results_onScreenMapCompletion == 0) {
             Menu_Results_incrementingMapCompletion = 1;
@@ -880,9 +880,9 @@ void Menu_Results_DrawCountingMapCompletion(
         }
     }
 
-    if (arg2 >= 32) {
+    if (animation_timer >= 32) {
         if (Menu_Results_mapCompletion >= 32) {
-            Menu_Results_onScreenMapCompletion = (Menu_Results_mapCompletion * (arg2 - 32)) >> 5;
+            Menu_Results_onScreenMapCompletion = (Menu_Results_mapCompletion * (animation_timer - 32)) >> 5;
         } else if (Menu_Results_onScreenMapCompletion < Menu_Results_mapCompletion) {
             ++Menu_Results_onScreenMapCompletion;
         }
@@ -890,25 +890,25 @@ void Menu_Results_DrawCountingMapCompletion(
 
     sprintf(buf, "%03d", Menu_Results_onScreenMapCompletion);
 
-    arg0 -= (Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w
+    draw_x -= (Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w
                 + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Percent].w + 38)
          >> 1;
 
-    Render_DrawTextureWipe(arg0, arg1, Menu_Results_DisIndex_Rank0MapCompleted, Menu_Results_countingMapCompletionColors, temp_s4);
+    Render_DrawTextureWipe(draw_x, draw_y, Menu_Results_DisIndex_Rank0MapCompleted, Menu_Results_countingMapCompletionColors, wipe_edge_x);
 
-    arg0 += Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w;
+    draw_x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w;
     i = 2;
 
-    Render_DrawTextureWipe(arg0, arg1 + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingMapCompletionColors, temp_s4);
-    arg0 = arg0 + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
+    Render_DrawTextureWipe(draw_x, draw_y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingMapCompletionColors, wipe_edge_x);
+    draw_x = draw_x + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
 
     for (i = 0; i < 3; ++i) {
-        Render_DrawTextureWipe(arg0, arg1 + 3, buf[i] - '0', Menu_Results_countingMapCompletionColors, temp_s4);
+        Render_DrawTextureWipe(draw_x, draw_y + 3, buf[i] - '0', Menu_Results_countingMapCompletionColors, wipe_edge_x);
 
-        arg0 += 12;
+        draw_x += 12;
     }
 
-    Render_DrawTextureWipe(arg0, arg1 + 8, Menu_Results_DisIndex_Rank0Percent, Menu_Results_countingMapCompletionColors, temp_s4);
+    Render_DrawTextureWipe(draw_x, draw_y + 8, Menu_Results_DisIndex_Rank0Percent, Menu_Results_countingMapCompletionColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderRiskbreakerRankHeader (src/MENU/MENUF.PRG/3B8.c:1598)
@@ -1048,7 +1048,7 @@ void Menu_Results_DrawTime(int x, int y, int timer, int time, int isNewRecord)
 {
     char buf[16];
     int i;
-    int s2;
+    int time_digits_clut;
 
     if (time == 0x800000) {
         sprintf(buf, "------");
@@ -1057,30 +1057,30 @@ void Menu_Results_DrawTime(int x, int y, int timer, int time, int isNewRecord)
             buf, "%02d%02d%02d", (time >> 0x10) & 0xFF, (time >> 8) & 0xFF, time & 0xFF);
     }
 
-    s2 = getClut(800, 511);
+    time_digits_clut = getClut(800, 511);
 
     if (isNewRecord != 0) {
-        s2 = getClut(896, 511);
+        time_digits_clut = getClut(896, 511);
     }
 
     for (i = 0; i < 6; ++i) {
         if (buf[i] == '-') {
-            Menu_Results_DrawFadingTextureClut(x, y, Menu_Results_DisIndex_Time0Dash, timer, s2);
+            Menu_Results_DrawFadingTextureClut(x, y, Menu_Results_DisIndex_Time0Dash, timer, time_digits_clut);
 
             x += 12;
         } else {
-            Menu_Results_DrawFadingTextureClut(x, y - 3, buf[i] - '0', timer, s2);
+            Menu_Results_DrawFadingTextureClut(x, y - 3, buf[i] - '0', timer, time_digits_clut);
 
             x += 12;
         }
 
         if (i == 1) {
-            Menu_Results_DrawFadingTextureClut(x, y - 2, Menu_Results_DisIndex_Time0Prime, timer, s2);
+            Menu_Results_DrawFadingTextureClut(x, y - 2, Menu_Results_DisIndex_Time0Prime, timer, time_digits_clut);
 
             x += 6;
 
         } else if (i == 3) {
-            Menu_Results_DrawFadingTextureClut(x, y - 2, Menu_Results_DisIndex_Time0DoublePrime, timer, s2);
+            Menu_Results_DrawFadingTextureClut(x, y - 2, Menu_Results_DisIndex_Time0DoublePrime, timer, time_digits_clut);
 
             x += 6;
         }
@@ -1088,18 +1088,18 @@ void Menu_Results_DrawTime(int x, int y, int timer, int time, int isNewRecord)
 }
 
 // decomp: MENUF.PRG _renderStatWheel (src/MENU/MENUF.PRG/3B8.c:1996)
-void Menu_Results_DrawBonusReel(int x, int y, int timer, int arg3)
+void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_state)
 {
 
-    RECT sp18;
+    RECT reel_clip_rect;
     char buf[8];
     DR_AREA* area;
     int i;
     int j;
     void** p;
     void** q;
-    int new_var2;
-    int v1;
+    int reel_base_clip_height;
+    int reel_entry_index;
     int len;
     int temp;
 
@@ -1122,7 +1122,7 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int arg3)
         Render_DrawTextureTintFade(x, y, Menu_Results_DisIndex_Rank0Colon, Menu_Results_bonusReelColors);
 
         x += 2 + Menu_Results_disMap[26].w;
-        new_var2 = 16;
+        reel_base_clip_height = 16;
         p = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
         area = p[0];
 
@@ -1132,37 +1132,37 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int arg3)
         p[0] = area;
 
         if (Render_legacyDrawEnvironments[(Render_frameBuf + 1) & 1].clip.x >= 320) {
-            sp18.x = 320;
+            reel_clip_rect.x = 320;
         } else {
-            sp18.x = 0;
+            reel_clip_rect.x = 0;
         }
 
-        sp18.y = y - (Menu_Results_elementAnimationState >> 3);
-        sp18.w = 320;
-        sp18.h = ((Menu_Results_elementAnimationState >> 3) * 2) + new_var2;
+        reel_clip_rect.y = y - (Menu_Results_elementAnimationState >> 3);
+        reel_clip_rect.w = 320;
+        reel_clip_rect.h = ((Menu_Results_elementAnimationState >> 3) * 2) + reel_base_clip_height;
 
-        if (arg3 < 2) {
-            int a0 = x;
-            int new_var;
+        if (results_screen_state < 2) {
+            int reel_origin_x = x;
+            int reel_row_offset;
             y += 8 + (Menu_Results_buffReelSelection & 0xF);
 
             for (i = 0; i < 3; ++i) {
-                x = a0;
-                new_var = i - 1;
-                v1 = (Menu_Results_buffReelSelection / 16);
-                v1 += new_var;
-                temp = v1 & 0xF;
+                x = reel_origin_x;
+                reel_row_offset = i - 1;
+                reel_entry_index = (Menu_Results_buffReelSelection / 16);
+                reel_entry_index += reel_row_offset;
+                temp = reel_entry_index & 0xF;
 
                 Menu_Results_DrawBonusReelTexture(
-                    x, y - 1, Menu_Results_buffReels[Menu_Results_buffReelIndex][v1 & 0xF].stat);
+                    x, y - 1, Menu_Results_buffReels[Menu_Results_buffReelIndex][reel_entry_index & 0xF].stat);
 
-                x += Menu_Results_disMap[Menu_Results_buffReels[Menu_Results_buffReelIndex][v1 & 0xF].stat].w;
+                x += Menu_Results_disMap[Menu_Results_buffReels[Menu_Results_buffReelIndex][reel_entry_index & 0xF].stat].w;
 
                 Menu_Results_DrawBonusReelTexture(x, y + 4, Menu_Results_DisIndex_Rank0Plus);
 
                 x += Menu_Results_disMap[24].w;
 
-                sprintf(buf, "%d", Menu_Results_buffReels[Menu_Results_buffReelIndex][v1 & 0xF].amount);
+                sprintf(buf, "%d", Menu_Results_buffReels[Menu_Results_buffReelIndex][reel_entry_index & 0xF].amount);
 
                 len = strlen(buf);
 
@@ -1201,7 +1201,7 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int arg3)
         q = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
         area = q[0];
 
-        SetDrawArea(area, &sp18);
+        SetDrawArea(area, &reel_clip_rect);
         AddPrim(q[1] - 0x1C, area++);
 
         q[0] = area;
@@ -1209,23 +1209,23 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int arg3)
 }
 
 // decomp: MENUF.PRG _renderPressButtonPrompt (src/MENU/MENUF.PRG/3B8.c:2117)
-void Menu_Results_DrawPressButtonPrompt(int x, int y, int arg2, int arg3)
+void Menu_Results_DrawPressButtonPrompt(int x, int y, int slide_timer, int bounce_timer)
 {
     POLY_FT4* poly;
     void** p;
     int v1;
 
-    if (arg2 < 0) {
+    if (slide_timer < 0) {
         return;
     }
 
     v1 = x + 288;
 
-    if (arg2 > 48) {
-        arg2 = 48;
+    if (slide_timer > 48) {
+        slide_timer = 48;
     }
 
-    x = (v1 - (arg2 * 6));
+    x = (v1 - (slide_timer * 6));
 
     Render_DrawCompactTextColor(
         "PRESS", vs_getXY_2(x + 18, y), vs_getRGB888(255, 128, 128), NULL);
@@ -1234,12 +1234,12 @@ void Menu_Results_DrawPressButtonPrompt(int x, int y, int arg2, int arg3)
 
     y += 22;
 
-    if ((arg3 & 0xF) < 9) {
+    if ((bounce_timer & 0xF) < 9) {
         v1 = y - 16;
-        y = v1 + ((arg3 & 0xF) >> 1);
+        y = v1 + ((bounce_timer & 0xF) >> 1);
     } else {
         v1 = y - 10;
-        y = v1 - ((arg3 & 0xF) >> 2);
+        y = v1 - ((bounce_timer & 0xF) >> 2);
     }
 
     poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
@@ -1438,9 +1438,9 @@ void Menu_Results_CalculateScore(void)
 // decomp: MENUF.PRG _addHealBonus (src/MENU/MENUF.PRG/3B8.c:2865)
 void Menu_Results_ApplyHealingScoreBonus(void)
 {
-    int new_var = Audio_Seq_unusedScoredata.miscScore + 100000;
+    int score_before_healing_penalty = Audio_Seq_unusedScoredata.miscScore + 100000;
 
-    Audio_Seq_unusedScoredata.miscScore = new_var - (Audio_Seq_unusedScoredata.healCount * 100);
+    Audio_Seq_unusedScoredata.miscScore = score_before_healing_penalty - (Audio_Seq_unusedScoredata.healCount * 100);
 
     if (Audio_Seq_unusedScoredata.miscScore > 999999999) {
         Audio_Seq_unusedScoredata.miscScore = 999999999;

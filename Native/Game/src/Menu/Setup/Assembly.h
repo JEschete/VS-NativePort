@@ -27,11 +27,11 @@ int Menu_Setup_SelectAssemblyBlade(int params);
 int Menu_Setup_SelectAssemblyGrip(int params);
 int Menu_Setup_SelectGem(int params);
 int Menu_Setup_CancelAssembly(void);
-int Menu_Setup_UpdateAssembly(int arg0);
-void Menu_Setup_CreateEmptyGemSlotRow(int arg0 __attribute__((unused)), int arg1);
+int Menu_Setup_UpdateAssembly(int initialize_assembly);
+void Menu_Setup_CreateEmptyGemSlotRow(int arg0 __attribute__((unused)), int gem_row_index);
 int Menu_Setup_RestoreGemsAndLeaveSelection(char* gems, int isShield);
-int Menu_Setup_UpdateGemAttachment(int arg0);
-int Menu_Setup_UpdateGemCategoryMenu(int arg0);
+int Menu_Setup_UpdateGemAttachment(int equipment_category_selection);
+int Menu_Setup_UpdateGemCategoryMenu(int initialize_gem_category_menu);
 void Menu_Setup_Assembly_ResetMenucStatics(void);
 
 #endif // VS_MENU_SETUP_ASSEMBLY_H_DECLS

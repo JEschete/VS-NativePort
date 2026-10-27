@@ -40,7 +40,7 @@ int Menu_BattleAbilities_CreateAbilityRows(int abilityCount, int abilityType, u_
 void Menu_BattleAbilities_ToggleButtonAssignment(int abilityType, int button, int abilityId);
 int Menu_BattleAbilities_UpdateAssignments(void);
 int Menu_BattleAbilities_UpdateChainAbilityMenu(int initialize);
-int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int arg0);
+int Menu_BattleAbilities_UpdateDefenseAbilityMenu(int reset_menu);
 void Menu_BattleAbilities_DrawNextUnlockPoints(int row);
 int Menu_BattleAbilities_Update(u_char* state);
 void Menu_BattleAbilities_ResetMenu2Statics(void);

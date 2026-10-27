@@ -133,7 +133,7 @@ void Menu_Setup_MoveMenuRow(int source, int target)
 }
 
 // decomp: MENUC.PRG _confirmationPrompt (src/MENU/MENUC.PRG/168.c:155)
-int Menu_Setup_UpdateConfirmationPrompt(int arg0)
+int Menu_Setup_UpdateConfirmationPrompt(int initialize_confirmation)
 {
     static char Menu_Setup_confirmationPromptState;
     static char Menu_Setup_confirmationPromptSelectedOption;
@@ -143,7 +143,7 @@ int Menu_Setup_UpdateConfirmationPrompt(int arg0)
 
     int action = 0;
 
-    if (arg0 != 0) {
+    if (initialize_confirmation != 0) {
         Menu_InitInformationTextBox(1);
         Menu_Setup_confirmationPromptSelectedOption = 0;
         Menu_Setup_confirmationPromptState = 0;
@@ -197,7 +197,7 @@ int Menu_Setup_UpdateConfirmationPrompt(int arg0)
 }
 
 // decomp: MENUC.PRG _confirmCombine (src/MENU/MENUC.PRG/168.c:225)
-int Menu_Setup_UpdateThreeChoicePrompt(int arg0)
+int Menu_Setup_UpdateThreeChoicePrompt(int cancel_combine_row)
 {
     static char Menu_Setup_threeChoicePromptState;
     static char Menu_Setup_threeChoicePromptSelectedOption;
@@ -210,9 +210,9 @@ int Menu_Setup_UpdateThreeChoicePrompt(int arg0)
 
     int action = 0;
 
-    if (arg0 != 0) {
+    if (cancel_combine_row != 0) {
         Menu_InitInformationTextBox(1);
-        Menu_Setup_threeChoicePromptCancelCombinePos = arg0;
+        Menu_Setup_threeChoicePromptCancelCombinePos = cancel_combine_row;
         Menu_Setup_threeChoicePromptSelectedOption = 0;
         Menu_Setup_threeChoicePromptState = 0;
         return 0;
@@ -278,14 +278,14 @@ int Menu_Setup_UpdateThreeChoicePrompt(int arg0)
 }
 
 // decomp: MENUC.PRG _leaveItemSlotSelection (src/MENU/MENUC.PRG/168.c:419)
-int Menu_Setup_LeaveItemSelection(int arg0)
+int Menu_Setup_LeaveItemSelection(int hide_equipment_panels)
 {
 
     Menu_PlayLeaveSound();
     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
     Menu_Framework_FlyOutRowLeft(0);
 
-    if (arg0 != 0) {
+    if (hide_equipment_panels != 0) {
         Menu_Framework_UpdateEquipmentStatPages(-1);
         Menu_Framework_UpdatePrimaryStatPanel(2);
         Menu_Framework_UpdateDpPpBars(4);
@@ -301,7 +301,7 @@ void Menu_Setup_BuildItemList(int count, char** text, int* rowTypes)
 {
     int j;
     int i;
-    u_short* temp_v1;
+    u_short* encoded_row_text;
     Menu_Framework_MenuRow* menuItem;
 
     Menu_Setup_itemCount = count;
@@ -321,23 +321,23 @@ void Menu_Setup_BuildItemList(int count, char** text, int* rowTypes)
 
         *((int*)(&(&Menu_Setup_itemsList[i * 0x40])[14])) = rowTypes[i];
 
-        temp_v1 = (u_short*)text[i * 2];
+        encoded_row_text = (u_short*)text[i * 2];
 
-        if (temp_v1 != NULL) {
+        if (encoded_row_text != NULL) {
             for (j = 0; j < 13; ++j) {
-                Menu_Setup_itemsList[(i * 0x40) + j] = temp_v1[j];
+                Menu_Setup_itemsList[(i * 0x40) + j] = encoded_row_text[j];
             }
             Menu_Setup_itemsList[(i * 0x40) + 13] = 0xE7E7;
         } else {
             Menu_Setup_itemsList[i * 0x40] = 0xE7E7;
         }
 
-        temp_v1 = (u_short*)text[i * 2 + 1];
+        encoded_row_text = (u_short*)text[i * 2 + 1];
 
-        if (temp_v1 != NULL) {
+        if (encoded_row_text != NULL) {
             Menu_Setup_itemsList[(i * 0x40) + 16] = 0xF8;
             for (j = 0; j < 46; ++j) {
-                Menu_Setup_itemsList[(i * 0x40) + j + 17] = temp_v1[j];
+                Menu_Setup_itemsList[(i * 0x40) + j + 17] = encoded_row_text[j];
             }
             Menu_Setup_itemsList[(i * 0x40) + 63] = 0xE7E7;
         } else {
@@ -358,13 +358,13 @@ void Menu_Setup_BuildItemList(int count, char** text, int* rowTypes)
 int Menu_Setup_GetSelectedItemRow(void) { return Menu_Setup_itemsList == NULL ? Menu_Setup_itemsListSelection : -1; }
 
 // decomp: MENUC.PRG _navigateItemsList (src/MENU/MENUC.PRG/168.c:518)
-void Menu_Setup_UpdateItemList(int arg0)
+void Menu_Setup_UpdateItemList(int list_update_flags)
 {
 
     int itemInfo;
     int previousSelection;
     int v0;
-    int v1;
+    int outset_icon_code;
     int i;
     int previousWindow;
     Menu_Framework_MenuRow* menuItem;
@@ -412,7 +412,7 @@ void Menu_Setup_UpdateItemList(int arg0)
 
         case 17:
             if (Input_buttonsPressed.allButtons & PADRup) {
-                if (!(arg0 & 2)) {
+                if (!(list_update_flags & 2)) {
                     Menu_PlayLeaveSound();
                 }
 
@@ -432,7 +432,7 @@ void Menu_Setup_UpdateItemList(int arg0)
                     Menu_Setup_itemsList = NULL;
                     Menu_Setup_itemsListSelection = previousSelection;
 
-                    if (arg0 != 0) {
+                    if (list_update_flags != 0) {
                         if (previousSelection == 0) {
                             Audio_PlaySfxCentered(0x7E, 0x22);
                         } else {
@@ -493,10 +493,10 @@ void Menu_Setup_UpdateItemList(int arg0)
 
                 if (Menu_Setup_itemsListWindow != previousWindow) {
 
-                    char unksp18[Menu_Setup_itemCount];
+                    char saved_row_gradient_states[Menu_Setup_itemCount];
 
                     for (i = 0; i < Menu_Setup_itemCount; ++i) {
-                        unksp18[i] = 0;
+                        saved_row_gradient_states[i] = 0;
                     }
 
                     itemInfo = Menu_Setup_itemCount;
@@ -507,23 +507,23 @@ void Menu_Setup_UpdateItemList(int arg0)
 
                     for (i = 1; i < itemInfo; ++i) {
                         menuItem = Menu_Framework_MenuItem(i + 20);
-                        unksp18[i + previousWindow] = menuItem->gradientState;
+                        saved_row_gradient_states[i + previousWindow] = menuItem->gradientState;
                     }
 
                     for (i = 1;;) {
                         int v0;
                         menuItem = Menu_Framework_SetMenuItem(i + 20, 169, i * 16 + 18, 151, 0,
                             (char*)&Menu_Setup_itemsList[(i + Menu_Setup_itemsListWindow) * 64]);
-                        menuItem->gradientState = *(unksp18 + (i + Menu_Setup_itemsListWindow));
+                        menuItem->gradientState = *(saved_row_gradient_states + (i + Menu_Setup_itemsListWindow));
                         v0 = Menu_Setup_itemsListWindow;
                         v0 = i + Menu_Setup_itemsListWindow;
                         itemInfo = *(int*)&Menu_Setup_itemsList[v0 * 64 + 14];
                         menuItem->unselectable = itemInfo & 1;
                         menuItem->rowIcon = (itemInfo >> 0x1A);
-                        v1 = (itemInfo >> 9) & 0x7F;
+                        outset_icon_code = (itemInfo >> 9) & 0x7F;
 
-                        if (v1 != 0) {
-                            menuItem->outsetIcon = v1 - 100;
+                        if (outset_icon_code != 0) {
+                            menuItem->outsetIcon = outset_icon_code - 100;
                         }
 
                         menuItem->material = (itemInfo >> 0x10) & 7;
@@ -566,16 +566,16 @@ void Menu_Setup_UpdateItemList(int arg0)
 }
 
 // decomp: MENUC.PRG _initMenuHeader (src/MENU/MENUC.PRG/168.c:784)
-void Menu_Setup_AnimateItemHeader(int arg0)
+void Menu_Setup_AnimateItemHeader(int menu_row_id)
 {
-    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(arg0);
+    Menu_Framework_MenuRow* menuItem = Menu_Framework_MenuItem(menu_row_id);
     menuItem->state = 4;
     menuItem->targetPosition0 = 155;
     menuItem->targetPosition1 = 18;
 }
 
 // decomp: MENUC.PRG _disassembleMenu (src/MENU/MENUC.PRG/168.c:2100)
-int Menu_Setup_UpdateDisassembly(int arg0)
+int Menu_Setup_UpdateDisassembly(int equipment_category_selection)
 {
     static int Menu_Setup_disassemblySelectedRow;
     static char Menu_Setup_disassemblyState;
@@ -593,9 +593,9 @@ int Menu_Setup_UpdateDisassembly(int arg0)
     Items_InventoryShield* shield;
     Menu_Framework_MenuRow* menuItem;
 
-    if (arg0 != 0) {
+    if (equipment_category_selection != 0) {
         Menu_InitInformationTextBox(1);
-        Menu_Setup_disassemblyIsShield = arg0 - 1;
+        Menu_Setup_disassemblyIsShield = equipment_category_selection - 1;
         Menu_Setup_disassemblyState = 0;
         return 0;
     }
@@ -756,7 +756,7 @@ int Menu_Setup_UpdateDisassembly(int arg0)
 }
 
 // decomp: MENUC.PRG _disassembleTopMenu (src/MENU/MENUC.PRG/168.c:2285)
-int Menu_Setup_UpdateDisassemblyCategory(int arg0)
+int Menu_Setup_UpdateDisassemblyCategory(int initialize_disassembly_category)
 {
     static char Menu_Setup_disassemblyCategoryState;
     static char Menu_Setup_disassemblyCategoryLayoutPadding __attribute__((unused));
@@ -769,7 +769,7 @@ int Menu_Setup_UpdateDisassemblyCategory(int arg0)
     int itemCount;
     int i;
 
-    if (arg0 != 0) {
+    if (initialize_disassembly_category != 0) {
         Menu_Setup_disassemblyCategoryForceNoCursorMemory = 1;
         Menu_Framework_FlyOutRowsAndHoistSelection(2, 1);
         Menu_Setup_disassemblyCategoryState = 0;
@@ -840,7 +840,7 @@ int Menu_Setup_UpdateDisassemblyCategory(int arg0)
 }
 
 // decomp: MENUC.PRG _renameWeaponMenu (src/MENU/MENUC.PRG/168.c:2374)
-int Menu_Setup_UpdateWeaponRename(int arg0)
+int Menu_Setup_UpdateWeaponRename(int initialize_weapon_rename)
 {
     static int Menu_Setup_weaponRenameSelectedRow;
     static char Menu_Setup_weaponRenameState;
@@ -853,7 +853,7 @@ int Menu_Setup_UpdateWeaponRename(int arg0)
     int itemId;
     Menu_Framework_MenuRow* menuItem;
 
-    if (arg0 != 0) {
+    if (initialize_weapon_rename != 0) {
         Menu_InitInformationTextBox(1);
         Menu_Framework_SetInformationMessage(
             (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_chooseWeaponRename]);
@@ -970,7 +970,7 @@ int Menu_Setup_UpdateWeaponRename(int arg0)
 }
 
 // decomp: MENUC.PRG _repairMenu (src/MENU/MENUC.PRG/168.c:2509)
-int Menu_Setup_UpdateRepair(int arg0)
+int Menu_Setup_UpdateRepair(int initialize_repair)
 {
     static int Menu_Setup_repairReturnedFromPrompt;
     static char Menu_Setup_repairState;
@@ -978,9 +978,9 @@ int Menu_Setup_UpdateRepair(int arg0)
 
     int ppCost;
     int i;
-    int new_var;
+    int repair_item_id;
 
-    if (arg0 != 0) {
+    if (initialize_repair != 0) {
         Menu_Framework_FlyOutRowsAndHoistSelection(4, 1);
         Menu_Setup_repairState = 0;
         return 0;
@@ -1020,9 +1020,9 @@ int Menu_Setup_UpdateRepair(int arg0)
             (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_repairComplete]);
 
         for (i = 0; i < 16; ++i) {
-            new_var = Audio_Seq_unusedInventoryIndices.blades[i];
-            if (new_var != 0) {
-                Items_InventoryBlade* blade = &Audio_Seq_unusedInventory.blades[new_var - 1];
+            repair_item_id = Audio_Seq_unusedInventoryIndices.blades[i];
+            if (repair_item_id != 0) {
+                Items_InventoryBlade* blade = &Audio_Seq_unusedInventory.blades[repair_item_id - 1];
 
                 ppCost = blade->maxDp - blade->currentDp;
                 ppCost = blade->currentPp - (ppCost / 100);
@@ -1037,9 +1037,9 @@ int Menu_Setup_UpdateRepair(int arg0)
         }
 
         for (i = 0; i < 8; ++i) {
-            new_var = Audio_Seq_unusedInventoryIndices.weapons[i];
-            if (new_var != 0) {
-                Items_InventoryWeapon* weapon = &Audio_Seq_unusedInventory.weapons[new_var - 1];
+            repair_item_id = Audio_Seq_unusedInventoryIndices.weapons[i];
+            if (repair_item_id != 0) {
+                Items_InventoryWeapon* weapon = &Audio_Seq_unusedInventory.weapons[repair_item_id - 1];
                 if (weapon->isEquipped != 0) {
                     Items_EquipAshleyWeapon(weapon);
                 }
@@ -1047,9 +1047,9 @@ int Menu_Setup_UpdateRepair(int arg0)
         }
 
         for (i = 0; i < 8; ++i) {
-            new_var = Audio_Seq_unusedInventoryIndices.shields[i];
-            if (new_var != 0) {
-                Items_InventoryShield* shield = &Audio_Seq_unusedInventory.shields[new_var - 1];
+            repair_item_id = Audio_Seq_unusedInventoryIndices.shields[i];
+            if (repair_item_id != 0) {
+                Items_InventoryShield* shield = &Audio_Seq_unusedInventory.shields[repair_item_id - 1];
 
                 ppCost = shield->base.maxDp - shield->base.currentDp;
                 ppCost = shield->base.currentPp - (ppCost / 100);
@@ -1068,9 +1068,9 @@ int Menu_Setup_UpdateRepair(int arg0)
         }
 
         for (i = 0; i < 16; ++i) {
-            new_var = Audio_Seq_unusedInventoryIndices.armor[i];
-            if (new_var != 0) {
-                Items_InventoryArmor* armor = &Audio_Seq_unusedInventory.armor[new_var - 1];
+            repair_item_id = Audio_Seq_unusedInventoryIndices.armor[i];
+            if (repair_item_id != 0) {
+                Items_InventoryArmor* armor = &Audio_Seq_unusedInventory.armor[repair_item_id - 1];
                 if (armor->category != 7) {
 
                     ppCost = armor->maxDp - armor->currentDp;
@@ -1313,12 +1313,12 @@ int Menu_Setup_Update(u_char* state)
 }
 
 // decomp: MENUC.PRG _loadObject (src/MENU/MENUC.PRG/9258.c:7)
-int Menu_Setup_ReloadAshleyEquipment(int arg0)
+int Menu_Setup_ReloadAshleyEquipment(int equipment_reload_mode)
 {
     int _[6] __attribute__((unused));
-    Actors_ActorRecord* new_var = Actors_actorRecords[0];
+    Actors_ActorRecord* ashley_actor = Actors_actorRecords[0];
 
-    if (arg0 == 1) {
+    if (equipment_reload_mode == 1) {
         Content_ReleaseWeaponModel(1);
         Menu_Framework_ResetAshleyEquipmentPose();
         return 0;
@@ -1326,7 +1326,7 @@ int Menu_Setup_ReloadAshleyEquipment(int arg0)
 
     switch (Menu_Inventory_equipmentModelLoadStep) {
     case 0:
-        if (new_var->sequenceModelId == 10) {
+        if (ashley_actor->sequenceModelId == 10) {
             return 0;
         }
 

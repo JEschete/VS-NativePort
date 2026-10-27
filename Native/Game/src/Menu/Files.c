@@ -223,7 +223,7 @@ void Menu_Files_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_int cur
     u_int placeDivisor;
     int x1y1;
     int red;
-    int new_var4;
+    int value_right_edge_offset;
 
     if (maxValue != 0) {
         currentValueDigits = (((currentValue * 64) + maxValue) - 1) / maxValue;
@@ -270,8 +270,8 @@ void Menu_Files_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_int cur
     maxValueDigits = Menu_Files_DecimalDigitCount(maxValue);
     Menu_Files_DrawSummaryLabel(xy - 1, stat + Menu_Files_FileMenuUiId_Hp);
     wh = currentValueDigits * 6;
-    new_var4 = 55;
-    xy = (xy - (wh - new_var4)) - (maxValueDigits * 5);
+    value_right_edge_offset = 55;
+    xy = (xy - (wh - value_right_edge_offset)) - (maxValueDigits * 5);
     placeDivisor = Menu_Files_hpMpSummaryDigitDivisors[currentValueDigits];
     do {
         Render_DrawImmediateSprite(xy - vs_getXY(0, 1),
@@ -624,7 +624,7 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
     u_long clut[130];
     Save_CardFileInfoRecord* saveInfo;
     int xy;
-    int var_a3;
+    int thumbnail_page_flags_and_dimming;
     int location;
     int x;
     int y;
@@ -633,7 +633,7 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
     int uvClut;
     int slotState;
     void* locationClut;
-    int new_var;
+    int thumbnail_texture_page_x;
 
     if (element->selected != 0) {
         element->outertextBlendFactor = 8;
@@ -713,14 +713,14 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
                 Render_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32),
                     ((8 - element->outertextBlendFactor) << 19) | 0x9C);
             } else {
-                int v0;
+                int thumbnail_texture_page_column;
                 uvClut = ((location & 8) * 8) | ((location & 7) << 0xD)
                        | vs_getUV0Clut(0, 0, 768, 227);
                 xy = (element->x - 64) | y;
-                new_var = (((location & 0x30) * 4) + 832) & 0x3FF;
-                v0 = new_var >> 6;
-                var_a3 = (((8 - element->outertextBlendFactor) << 19) | 0x90);
-                Render_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32), v0 | var_a3);
+                thumbnail_texture_page_x = (((location & 0x30) * 4) + 832) & 0x3FF;
+                thumbnail_texture_page_column = thumbnail_texture_page_x >> 6;
+                thumbnail_page_flags_and_dimming = (((8 - element->outertextBlendFactor) << 19) | 0x90);
+                Render_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32), thumbnail_texture_page_column | thumbnail_page_flags_and_dimming);
             }
             Render_UploadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
             Menu_Files_DrawSummaryLabel((element->x - 22) | y, Menu_Files_FileMenuUiId_Number);
@@ -787,12 +787,12 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
                     signed char* p = (Menu_Files_cursorFileOpSaturation + Menu_Files_fileProgressCounter++);
                     Menu_Files_DrawTransferComplete(-p[17], y);
                 } else {
-                    int new_var3 = 0x140;
+                    int screen_width_pixels = 0x140;
                     Menu_Files_DrawTransferProgress(
                         Title_transferProgressPosition
                             + (((Menu_Files_fileProgressCounter - Title_previousTransferProgress)
                                    * ((Title_saveTransferErrorOffset * 0x14)
-                                       - (Title_transferProgressPosition - new_var3)))
+                                       - (Title_transferProgressPosition - screen_width_pixels)))
                                 / Title_transferProgressTarget),
                         y);
                 }
@@ -936,7 +936,7 @@ void Menu_Files_DrawBackground(void)
 }
 
 // decomp: MENU7.PRG _promptConfirm (src/MENU/MENU7.PRG/260.c:2092)
-int Menu_Files_UpdateConfirmation(int arg0)
+int Menu_Files_UpdateConfirmation(int initialize_confirmation)
 {
     enum Menu_Files_ConfirmationState {
         Menu_Files_ConfirmationState_InitYes = 0,
@@ -949,10 +949,10 @@ int Menu_Files_UpdateConfirmation(int arg0)
     static char Menu_Files_confirmationCancelled;
     static char Menu_Files_confirmationLayoutPadding[2] __attribute__((unused));
 
-    Menu_Files_FileMenuElement* temp_v0;
+    Menu_Files_FileMenuElement* confirmation_element;
     int i;
 
-    if (arg0 != 0) {
+    if (initialize_confirmation != 0) {
         Menu_Files_confirmationCancelled = 1;
         Menu_Files_confirmationState = Menu_Files_ConfirmationState_InitYes;
         return 0;
@@ -961,11 +961,11 @@ int Menu_Files_UpdateConfirmation(int arg0)
     switch (Menu_Files_confirmationState) {
     case Menu_Files_ConfirmationState_InitYes:
     case Menu_Files_ConfirmationState_InitNo:
-        temp_v0 = Menu_Files_InitializeElement(Menu_Files_confirmationState + 3,
+        confirmation_element = Menu_Files_InitializeElement(Menu_Files_confirmationState + 3,
             vs_getXY(-126 & 0xFFFF, Menu_Files_confirmationState * 16 + 18), vs_getWH(126, 12),
             (char*)&Menu_Files_textTable[Menu_Files_textTable[Menu_Files_confirmationState + Text_Menu_MCMAN_BIN_Index_yesIndent]]);
-        temp_v0->state = 4;
-        temp_v0->targetPosition = 0;
+        confirmation_element->state = 4;
+        confirmation_element->targetPosition = 0;
         ++Menu_Files_confirmationState;
         break;
     case Menu_Files_ConfirmationState_WaitForAnimation:
@@ -1000,15 +1000,15 @@ int Menu_Files_UpdateConfirmation(int arg0)
 }
 
 // decomp: MENU7.PRG _promptOverwrite (src/MENU/MENU7.PRG/260.c:2161)
-int Menu_Files_UpdateOverwritePrompt(int arg0)
+int Menu_Files_UpdateOverwritePrompt(int initialize_overwrite_prompt)
 {
     static int Menu_Files_overwritePromptConfirmed;
     static char Menu_Files_overwritePromptState;
     static char Menu_Files_overwritePromptInitialized;
 
-    int temp_v0;
+    int confirmation_result;
 
-    if (arg0 != 0) {
+    if (initialize_overwrite_prompt != 0) {
         Menu_Files_overwritePromptInitialized = 1;
         Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_overwritePrompt);
         Menu_Files_UpdateConfirmation(1);
@@ -1017,9 +1017,9 @@ int Menu_Files_UpdateOverwritePrompt(int arg0)
     }
     switch (Menu_Files_overwritePromptState) {
     case 0:
-        temp_v0 = Menu_Files_UpdateConfirmation(0);
-        Menu_Files_overwritePromptConfirmed = temp_v0;
-        if (temp_v0 != 0) {
+        confirmation_result = Menu_Files_UpdateConfirmation(0);
+        Menu_Files_overwritePromptConfirmed = confirmation_result;
+        if (confirmation_result != 0) {
             Menu_Files_overwritePromptState = 1;
         }
         break;
@@ -1596,8 +1596,8 @@ int Menu_Files_UpdateLoadFiles(int initPort)
         currentSlot = Menu_Files_CheckCardStep(0);
         if (currentSlot != Save_MaskedHandlerResult_Pending) {
             if (currentSlot >= Save_MaskedHandlerResult_Pending) {
-                int new_var;
-                Save_MemoryCard_ReadSaveStep(((Menu_Files_loadFilesSlot + Menu_Files_loadFilesPage) + 1) | (new_var = ((Menu_Files_loadFilesPort - 1) << 16) | 256));
+                int load_port_and_read_flags;
+                Save_MemoryCard_ReadSaveStep(((Menu_Files_loadFilesSlot + Menu_Files_loadFilesPage) + 1) | (load_port_and_read_flags = ((Menu_Files_loadFilesPort - 1) << 16) | 256));
                 Menu_Files_loadFilesState = Menu_Files_LoadFilesState_ApplyLoad;
                 Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_loading);
             } else {
@@ -1786,7 +1786,7 @@ long Menu_Files_UpdateLoadCard(int initPort)
 }
 
 // decomp: MENU7.PRG _initGameOver (src/MENU/MENU7.PRG/260.c:3395)
-int Menu_Files_LoadGameOverAssetsStep(int arg0)
+int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load)
 {
 
     static Content_DiscQueueSlot* Menu_Files_loadGameOverAssetsStepQueueSlot;
@@ -1796,7 +1796,7 @@ int Menu_Files_LoadGameOverAssetsStep(int arg0)
 
     Content_DiscFile cdFile;
 
-    if (arg0 != 0) {
+    if (begin_asset_load != 0) {
         cdFile.lba = VS_GAMEOVER_BIN_LBA;
         cdFile.size = VS_GAMEOVER_BIN_SIZE;
         Menu_Files_loadGameOverAssetsStepQueueSlot = Content_AllocateDiscRequest(&cdFile);

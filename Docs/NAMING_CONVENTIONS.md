@@ -987,3 +987,31 @@ All 139 dirty-tree copier controls and focused tooling quality pass without
 baseline changes. This caches immutable pattern strings only: rule lists and
 replacement values are still read in order on every invocation.
 Evidence: `build\quality\issue219-*` and `issue148-regex-cache-before.json`.
+
+The field cohort is published in `4652e031`, exact green `40579629751`.
+#219 is fixed and closed in `0b599413`, exact green `40580642131`; this does
+not close #148.
+
+The complete menu review covers 414 pairs/3,700 occurrences in 75 scoped
+source/header files. It supplies 514 unique binding mappings across 208 changed
+definitions and evidence for 227 ledger identities. F02697/F02698 and
+F02808/F02809 share two native matrix definitions; each binding rule is applied
+once, with alias provenance retained. All newly proposed locals use
+lower_snake_case. Seventy-one specific retentions distinguish unused ABI/dead
+locals and existing SDK/UV/member spellings from unknown register names.
+T00671.004 records the retained text-box `speed` budget and its
+producer/reset/renderer contract; it is not a blanket lexical exception.
+
+On dirty base `0b599413`, the pre-change `[menu]` selection passes
+50 cases/36,527 assertions. Debug/Release each then pass
+`[menu],[equipment],[inventory],[loot] --reporter compact`,
+79 cases/724,811 assertions. Copier tests pass 141/141; naming tests 32/32;
+focused tooling quality reports zero new findings with unchanged baselines.
+Pointer-array sizes, native packet handles, loot preflight/staging and forbidden
+narrowing assertions keep their original values and invariants while using the
+reviewed identifier spellings. Exact expected token changes affect 48 generated
+files; all 742 manifest paths and 121 unchanged owned paths are verified across
+two stable generations. Evidence: `build\quality\issue148-menu-*`.
+The original four-extension lexical count is now 11,869 occurrences/1,074
+pairs/262 files; the separately discovered inline template bodies are still
+included in the remaining review work, not silently excluded.

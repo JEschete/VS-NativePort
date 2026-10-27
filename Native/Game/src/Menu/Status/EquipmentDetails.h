@@ -27,8 +27,8 @@ void Menu_Status_CopyGemDescription(
     Items_EquipmentPartStats* gem, char* menuText[], int rowTypes[] __attribute__((unused)));
 char* Menu_Status_SelectWeaponComponent(int row, Items_WeaponLoadout* weapon);
 char* Menu_Status_SelectShieldComponent(int row, Items_ShieldLoadout* shield);
-char* Menu_Status_ArmorDescription(Items_ArmorLoadout* arg0);
-char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* arg0);
+char* Menu_Status_ArmorDescription(Items_ArmorLoadout* armor_loadout);
+char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* accessory_loadout);
 int Menu_Status_IsDetailElementSelectable(int newSelection, int flags);
 int Menu_Status_NavigateDetailElements(u_int newSelection, int flags);
 int Menu_Status_EquipmentRowCount(void);

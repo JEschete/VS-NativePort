@@ -236,9 +236,9 @@ int Menu_Results_InitializeTimeAttackStart(void)
 // decomp: MENUF.PRG _renderTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:905)
 int Menu_Results_UpdateTimeAttackResults(void)
 {
-    int var_v0 = Core_Gte_Sin(Menu_Results_elementAnimationState);
+    int palette_pulse_sine = Core_Gte_Sin(Menu_Results_elementAnimationState);
 
-    Menu_Results_PulseTimeAttackClut(ABS(var_v0) / 256);
+    Menu_Results_PulseTimeAttackClut(ABS(palette_pulse_sine) / 256);
 
     Menu_Results_elementAnimationState = (Menu_Results_elementAnimationState + 64) & 0xFFF;
 
@@ -344,7 +344,7 @@ int Menu_Results_UpdateTimeAttackStart(void)
     static Render_FramebufferEffectTranslation Menu_Results_kFramebufferEffectParams[3] = { { 0x1029, 0x1029, 0x1000 },
         { 0x107A, 0x107A, 0x1000 } };
 
-    int temp_v1_2;
+    int countdown_interval;
     int x;
 
     if (Menu_Results_screenState == 0) {
@@ -396,11 +396,11 @@ int Menu_Results_UpdateTimeAttackStart(void)
 
     } else if (Menu_Results_screenState == 3) {
 
-        temp_v1_2 = Menu_Results_screenTimer / 15;
+        countdown_interval = Menu_Results_screenTimer / 15;
 
-        if (Menu_Results_screenTimer == (temp_v1_2 * 0xF)) {
+        if (Menu_Results_screenTimer == (countdown_interval * 0xF)) {
 
-            switch (temp_v1_2) {
+            switch (countdown_interval) {
             case 0:
             case 1:
             case 2:
@@ -498,7 +498,7 @@ void Menu_Results_DrawTimeAttackHeading(int x, int y, int timer)
 // decomp: MENUF.PRG _renderCourse (src/MENU/MENUF.PRG/3B8.c:1175)
 void Menu_Results_DrawCourseNumber(int x, int y, int timer)
 {
-    int new_var;
+    int course_number_base_x;
 
     if (timer > 64) {
         timer = 64;
@@ -509,9 +509,9 @@ void Menu_Results_DrawCourseNumber(int x, int y, int timer)
 
         Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0Course, timer);
 
-        new_var = x + 12;
+        course_number_base_x = x + 12;
 
-        Menu_Results_DrawFadingTextureClut(new_var + Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w, y - 1,
+        Menu_Results_DrawFadingTextureClut(course_number_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0Course].w, y - 1,
             Audio_Seq_unusedStateFlags.timeAttackBoss + 1, timer, 0x7FF4);
     }
 }
@@ -554,15 +554,15 @@ void Menu_Results_DrawBestTime(int x, int y, int timer)
     }
 
     if (timer > 0) {
-        int new_var;
+        int best_time_base_x;
         x -= (Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w + 96) >> 1;
 
         Menu_Results_DrawFadingTexture(x, y, Menu_Results_DisIndex_Attack0BestTime, timer);
 
         x++;
-        new_var = x + 11;
+        best_time_base_x = x + 11;
 
-        Menu_Results_DrawTime(new_var + Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w, y + 2, timer,
+        Menu_Results_DrawTime(best_time_base_x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0BestTime].w, y + 2, timer,
             Audio_Seq_unusedScoredata.bossTimeTrialScores[Audio_Seq_unusedStateFlags.timeAttackBoss][0]
                 .time,
             0);
@@ -572,44 +572,44 @@ void Menu_Results_DrawBestTime(int x, int y, int timer)
 // decomp: MENUF.PRG _renderStartCountdown (src/MENU/MENUF.PRG/3B8.c:1248)
 void Menu_Results_DrawStartCountdown(int x, int y, int timer)
 {
-    int temp_a2 = (timer / 15) + Menu_Results_DisIndex_Attack0Three;
+    int countdown_texture_id = (timer / 15) + Menu_Results_DisIndex_Attack0Three;
 
     Menu_Results_DrawFadingTexture(
-        x - (Menu_Results_disMap[temp_a2].w / 2), y - (Menu_Results_disMap[temp_a2].h / 2), temp_a2, timer % 15);
+        x - (Menu_Results_disMap[countdown_texture_id].w / 2), y - (Menu_Results_disMap[countdown_texture_id].h / 2), countdown_texture_id, timer % 15);
 }
 
 // decomp: MENUF.PRG _pulseTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:1256)
-void Menu_Results_PulseTimeAttackClut(int arg0)
+void Menu_Results_PulseTimeAttackClut(int blend_weight)
 {
     RECT rect;
-    int var_a1;
+    int weighted_red;
     int r;
     int g;
     int b;
     int i;
-    int new_var3;
-    int new_var4;
+    int packed_blue;
+    int packed_red_green;
 
     for (i = 0; i < 32; ++i) {
 
         b = Menu_Results_clutBuf[128 + i];
 
-        var_a1 = ((Menu_Results_clutBuf[32 + i] & 0x1F) * arg0)
-               + ((Menu_Results_clutBuf[96 + i] & 0x1F) * (16 - arg0));
+        weighted_red = ((Menu_Results_clutBuf[32 + i] & 0x1F) * blend_weight)
+               + ((Menu_Results_clutBuf[96 + i] & 0x1F) * (16 - blend_weight));
 
-        r = (var_a1 / 16) & 0x1F;
+        r = (weighted_red / 16) & 0x1F;
 
-        g = ((Menu_Results_clutBuf[32 + i] & 0x3E0) * arg0)
-          + ((Menu_Results_clutBuf[96 + i] & 0x3E0) * (16 - arg0));
+        g = ((Menu_Results_clutBuf[32 + i] & 0x3E0) * blend_weight)
+          + ((Menu_Results_clutBuf[96 + i] & 0x3E0) * (16 - blend_weight));
 
-        new_var4 = r | ((g / 16) & 0x3E0);
+        packed_red_green = r | ((g / 16) & 0x3E0);
 
-        b = ((Menu_Results_clutBuf[32 + i] & 0x7C00) * arg0)
-          + ((Menu_Results_clutBuf[96 + i] & 0x7C00) * (16 - arg0));
+        b = ((Menu_Results_clutBuf[32 + i] & 0x7C00) * blend_weight)
+          + ((Menu_Results_clutBuf[96 + i] & 0x7C00) * (16 - blend_weight));
 
-        new_var3 = (b / 16) & 0x7C00;
+        packed_blue = (b / 16) & 0x7C00;
 
-        Menu_Results_clutBuf[128 + i] = (new_var4 | new_var3) | (Menu_Results_clutBuf[32 + i] & 0x8000);
+        Menu_Results_clutBuf[128 + i] = (packed_red_green | packed_blue) | (Menu_Results_clutBuf[32 + i] & 0x8000);
     }
 
     setRECT(&rect, 768, 511, 160, 1);
@@ -642,41 +642,41 @@ void Menu_Results_DrawTimeAttackResultsHeading(int x, int y, int timer)
 }
 
 // decomp: MENUF.PRG _renderTimeAttackRating (src/MENU/MENUF.PRG/3B8.c:1678)
-void Menu_Results_DrawTimeAttackRating(int x, int y, int arg2)
+void Menu_Results_DrawTimeAttackRating(int x, int y, int fade_timer)
 {
-    int var_a2;
+    int rating_texture_offset;
 
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (fade_timer < 0) {
+        fade_timer = 0;
     }
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (fade_timer > 64) {
+        fade_timer = 64;
     }
 
-    if (arg2 <= 0) {
+    if (fade_timer <= 0) {
         return;
     }
 
     if (Menu_Results_timeTrialTime < 7680) {
-        var_a2 = 0;
+        rating_texture_offset = 0;
     } else if (Menu_Results_timeTrialTime <= 65535) {
-        var_a2 = 1;
+        rating_texture_offset = 1;
     } else if (Menu_Results_timeTrialTime <= 73215) {
-        var_a2 = 2;
+        rating_texture_offset = 2;
     } else if (Menu_Results_timeTrialTime <= 131071) {
-        var_a2 = 3;
+        rating_texture_offset = 3;
     } else {
-        var_a2 = 4;
+        rating_texture_offset = 4;
     }
 
-    Menu_Results_DrawFadingTexture(x, y, var_a2 + Menu_Results_DisIndex_Time0Excellent, arg2);
+    Menu_Results_DrawFadingTexture(x, y, rating_texture_offset + Menu_Results_DisIndex_Time0Excellent, fade_timer);
 }
 
 // decomp: MENUF.PRG _renderTimeAttackRatingWipe (src/MENU/MENUF.PRG/3B8.c:1708)
 void Menu_Results_DrawTimeAttackRatingWipe(int x, int y, int arg2)
 {
 
-    int arg3;
+    int wipe_edge_x;
 
     if (arg2 < 0) {
         arg2 = 0;
@@ -690,7 +690,7 @@ void Menu_Results_DrawTimeAttackRatingWipe(int x, int y, int arg2)
         return;
     }
 
-    arg3 = x + (arg2 * 8);
+    wipe_edge_x = x + (arg2 * 8);
 
     if (Menu_Results_timeTrialTime < 7680) {
         arg2 = 0;
@@ -704,35 +704,35 @@ void Menu_Results_DrawTimeAttackRatingWipe(int x, int y, int arg2)
         arg2 = 4;
     }
 
-    Render_DrawTextureWipe(x, y, arg2 + Menu_Results_DisIndex_Time0Excellent, Menu_Results_timeAttackRatingWipeColors, arg3);
+    Render_DrawTextureWipe(x, y, arg2 + Menu_Results_DisIndex_Time0Excellent, Menu_Results_timeAttackRatingWipeColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1743)
-void Menu_Results_DrawTimeAttackTime(int arg0, int arg1, int arg2)
+void Menu_Results_DrawTimeAttackTime(int draw_x, int draw_y, int fade_timer)
 {
-    if (arg2 < 0) {
-        arg2 = 0;
+    if (fade_timer < 0) {
+        fade_timer = 0;
     }
 
-    if (arg2 > 64) {
-        arg2 = 64;
+    if (fade_timer > 64) {
+        fade_timer = 64;
     }
 
-    if (arg2 > 0) {
-        Menu_Results_DrawFadingTexture(arg0, arg1, Menu_Results_DisIndex_Time0Time, arg2);
+    if (fade_timer > 0) {
+        Menu_Results_DrawFadingTexture(draw_x, draw_y, Menu_Results_DisIndex_Time0Time, fade_timer);
 
-        arg0 += Menu_Results_disMap[Menu_Results_DisIndex_Time0Time].w;
+        draw_x += Menu_Results_disMap[Menu_Results_DisIndex_Time0Time].w;
 
-        Menu_Results_DrawTime(arg0, arg1 + 2, arg2, Menu_Results_timeTrialTime, 0);
+        Menu_Results_DrawTime(draw_x, draw_y + 2, fade_timer, Menu_Results_timeTrialTime, 0);
     }
 }
 
 // decomp: MENUF.PRG _renderHeaderAndIncrementalTime (src/MENU/MENUF.PRG/3B8.c:1762)
 void Menu_Results_DrawCountingTimeAttackTime(int x, int y, int timer)
 {
-    int temp_a3;
+    int total_centiseconds;
     int var_a3;
-    int* new_var4;
+    int* time_accumulator_address;
 
     if (timer < 0) {
         timer = 0;
@@ -751,9 +751,9 @@ void Menu_Results_DrawCountingTimeAttackTime(int x, int y, int timer)
             int mins = (Menu_Results_timeTrialTime >> 0x10) & 0xFF;
             int secs = (Menu_Results_timeTrialTime >> 8) & 0xFF;
             int ms = Menu_Results_timeTrialTime & 0xFF;
-            temp_a3 = ((mins * 6000) + (secs * 100)) + ms;
-            var_a3 = temp_a3;
-            var_a3 = ((*(new_var4 = &var_a3)) * (timer - 16)) / 48;
+            total_centiseconds = ((mins * 6000) + (secs * 100)) + ms;
+            var_a3 = total_centiseconds;
+            var_a3 = ((*(time_accumulator_address = &var_a3)) * (timer - 16)) / 48;
             mins = var_a3 / 6000;
             var_a3 = var_a3 % 6000;
             secs = var_a3 / 100;
@@ -788,7 +788,7 @@ void Menu_Results_DrawLeaderboard(int x, int y, int timer)
 {
     int isNewRecord;
     int i;
-    int var_s3;
+    int leaderboard_clut;
 
     if (timer < 0) {
         timer = 0;
@@ -800,11 +800,11 @@ void Menu_Results_DrawLeaderboard(int x, int y, int timer)
 
     for (i = 0; i < 3; ++i) {
 
-        var_s3 = getClut(800, 511);
+        leaderboard_clut = getClut(800, 511);
         isNewRecord = Menu_Results_newTimeSlot == i;
 
         if (isNewRecord != 0) {
-            var_s3 = getClut(896, 511);
+            leaderboard_clut = getClut(896, 511);
         }
 
         Menu_Results_DrawTime(x - 84, y + i * 20 + 2, timer,
@@ -813,7 +813,7 @@ void Menu_Results_DrawLeaderboard(int x, int y, int timer)
                 .time,
             isNewRecord);
         Menu_Results_DrawFadingTextureClut((x - Menu_Results_disMap[Menu_Results_DisIndex_Time0First + i].w) - 88, y + i * 20,
-            Menu_Results_DisIndex_Time0First + i, timer, var_s3);
+            Menu_Results_DisIndex_Time0First + i, timer, leaderboard_clut);
     }
 }
 

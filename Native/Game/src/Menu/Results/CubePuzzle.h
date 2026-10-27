@@ -12,15 +12,15 @@
 extern u_short Menu_Results_clutBuf[160];;
 extern short Menu_Results_puzzleParTime;;
 extern short Menu_Results_puzzleRankCap;;
-void Menu_Results_PulseCubePuzzleClut(int arg0);
+void Menu_Results_PulseCubePuzzleClut(int blend_weight);
 int Menu_Results_InitializeCubePuzzleStart(void);
 int Menu_Results_InitializeCubePuzzleResults(void);
 int Menu_Results_InitializeCubePuzzleQuit(void);
 int Menu_Results_UpdateCubePuzzleStart(void);
 int Menu_Results_UpdateCubePuzzleResults(void);
 int Menu_Results_UpdateCubePuzzleQuit(void);
-void Menu_Results_DrawGivingUp(int arg0, int arg1);
-void Menu_Results_DrawChicken(int arg0, int arg1);
+void Menu_Results_DrawGivingUp(int draw_y, int fade_timer);
+void Menu_Results_DrawChicken(int draw_y, int fade_timer);
 void Menu_Results_DrawEvolveOrDie(int x, int y, int step);
 void Menu_Results_DrawFoodChain(int x, int y, int timer);
 void Menu_Results_DrawAverageTimeHeading(int x, int y, int timer);

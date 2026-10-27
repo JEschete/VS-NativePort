@@ -45,7 +45,7 @@ void Menu_Status_DrawLimbConditionIndicator(int colorIndex, int xy, int subdued)
 void Menu_Status_DrawLimbLeaderLine(
     int limb, int xy, int arg2 __attribute__((unused)), int opaque);
 void Menu_Status_DrawStatusEffectIcons(Battle_ActorStats* actor, int animationStep);
-int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int arg1);
+int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_active);
 int Menu_Status_LimbCount(int actor);
 int Menu_Status_UpdateLimbPanel(int init);
 void Menu_Status_DrawModelSlideFade(void);

@@ -89,11 +89,11 @@ u_short Menu_Container_menuText[690]; /* contents: disc string table (ModuleData
 Items_Container* Menu_Container_containerData;
 
 // decomp: MENUD.PRG func_80103D50 (src/MENU/MENUD.PRG/234.c:659)
-void Menu_Container_SetPanelVisibility(char arg0)
+void Menu_Container_SetPanelVisibility(char panel_visibility)
 {
-    Menu_Container_categoryTitleVisible = arg0;
-    Menu_Container_categoryIconsVisible = arg0;
-    Menu_Container_controlsPanelMode = arg0;
+    Menu_Container_categoryTitleVisible = panel_visibility;
+    Menu_Container_categoryIconsVisible = panel_visibility;
+    Menu_Container_controlsPanelMode = panel_visibility;
 }
 
 // decomp: MENUD.PRG _pollItemNavigation (src/MENU/MENUD.PRG/234.c:666)
@@ -101,13 +101,13 @@ int Menu_Container_PollDetailsPaging(int itemCategory, int currentSelection)
 {
     int previousSelection;
     int count;
-    int temp_a0;
+    int item_count_for_wrap;
 
     if ((Input_buttonsState & (PADL1 | PADR1)) != (PADL1 | PADR1)) {
 
         previousSelection = currentSelection;
         count = Menu_Container_CountItems(itemCategory, &Menu_Container_containerData->items);
-        temp_a0 = count;
+        item_count_for_wrap = count;
 
         if (Input_buttonRepeat & PADL1) {
             int temp = currentSelection - 1;
@@ -118,8 +118,8 @@ int Menu_Container_PollDetailsPaging(int itemCategory, int currentSelection)
             if (Input_buttonRepeat & PADR1) {
                 ++currentSelection;
             }
-            if (currentSelection >= temp_a0) {
-                currentSelection -= temp_a0;
+            if (currentSelection >= item_count_for_wrap) {
+                currentSelection -= item_count_for_wrap;
             }
         } while (0);
 
@@ -132,13 +132,13 @@ int Menu_Container_PollDetailsPaging(int itemCategory, int currentSelection)
 }
 
 // decomp: MENUD.PRG func_80103E24 (src/MENU/MENUD.PRG/234.c:700)
-void Menu_Container_DrawCategoryIcons(int arg0, int arg1)
+void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase)
 {
     int i;
-    u_long* var_v1;
-    Menu_Framework_MenuRow* temp_v0;
+    u_long* icon_sprite_packet;
+    Menu_Framework_MenuRow* details_menu_row;
 
-    int temp_s4 = (Menu_Framework_menuMemory.opaque85[0x1B] - 1) & 7;
+    int selected_category_icon = (Menu_Framework_menuMemory.opaque85[0x1B] - 1) & 7;
 
     if (arg0 == 4) {
         Menu_Framework_DrawTabNavigation(0);
@@ -148,27 +148,27 @@ void Menu_Container_DrawCategoryIcons(int arg0, int arg1)
 
     for (i = 0; i < 8; ++i) {
 
-        int temp_s0 = (((i + 1) & 7) * 0x10) + 0x20;
+        int icon_x = (((i + 1) & 7) * 0x10) + 0x20;
 
-        if ((i == temp_s4) && (arg1 == 1)) {
-            temp_v0 = Menu_Framework_MenuItem(0x1F);
-            if (temp_s0 >= (temp_v0->x - 0xC)) {
-                temp_v0->rowIcon = i + 0x18;
+        if ((i == selected_category_icon) && (details_view_phase == 1)) {
+            details_menu_row = Menu_Framework_MenuItem(0x1F);
+            if (icon_x >= (details_menu_row->x - 0xC)) {
+                details_menu_row->rowIcon = i + 0x18;
                 continue;
             } else {
-                var_v1 = Render_QueueDefaultSprite(0x100010, temp_s0 | 0x100000);
+                icon_sprite_packet = Render_QueueDefaultSprite(0x100010, icon_x | 0x100000);
             }
         } else {
-            var_v1 = Render_QueueSpriteWithTexturePage(
-                0x80, temp_s0 | (arg0 << 0x10), 0x100010, Render_frameScratch.orderingTable - 0xC);
+            icon_sprite_packet = Render_QueueSpriteWithTexturePage(
+                0x80, icon_x | (arg0 << 0x10), 0x100010, Render_frameScratch.orderingTable - 0xC);
         }
 
-        var_v1[4] = (0x78 + i * 0x10) | 0x8000 | (i == temp_s4 ? 0x37FD0000 : 0x37FE0000);
+        icon_sprite_packet[4] = (0x78 + i * 0x10) | 0x8000 | (i == selected_category_icon ? 0x37FD0000 : 0x37FE0000);
     }
 }
 
 // decomp: MENUD.PRG func_80103F64 (src/MENU/MENUD.PRG/234.c:735)
-void Menu_Container_BeginDetailsTransition(int arg0)
+void Menu_Container_BeginDetailsTransition(int menu_row_id)
 {
     Menu_Framework_MenuRow* menuItem;
 
@@ -178,7 +178,7 @@ void Menu_Container_BeginDetailsTransition(int arg0)
     menuItem->state = 3;
     menuItem->targetPosition0 = 0x12;
 
-    menuItem = Menu_Framework_MenuItem(arg0);
+    menuItem = Menu_Framework_MenuItem(menu_row_id);
     menuItem->state = 2;
     menuItem->targetPosition0 = 0x9B;
     menuItem->selected = 1;
@@ -187,25 +187,25 @@ void Menu_Container_BeginDetailsTransition(int arg0)
 }
 
 // decomp: MENUD.PRG func_80104034 (src/MENU/MENUD.PRG/234.c:767)
-void Menu_Container_InitializeDetailsLayout(int arg0, int arg1)
+void Menu_Container_InitializeDetailsLayout(int selected_menu_row_id, int stat_page_panel_command)
 {
     Menu_Container_categoryIconsVisible = 0;
     Menu_Container_controlsPanelMode = 0;
-    Menu_Framework_ContinueItemDetailsTransition(arg0);
-    Menu_Framework_UpdateEquipmentStatPages(arg1);
+    Menu_Framework_ContinueItemDetailsTransition(selected_menu_row_id);
+    Menu_Framework_UpdateEquipmentStatPages(stat_page_panel_command);
     Menu_Framework_UpdatePrimaryStatPanel(1);
 }
 
 // decomp: MENUD.PRG func_80104114 (src/MENU/MENUD.PRG/234.c:789)
-int Menu_Container_SelectDetailsItem(int arg0, int arg1)
+int Menu_Container_SelectDetailsItem(int category_id, int category_item_index)
 {
-    Menu_Framework_menuMemory.cursorMemories[(arg0 + 0x51) * 2] = 0;
-    Menu_Framework_menuMemory.cursorMemories[(arg0 + 0x51) * 2 + 1] = arg1;
-    return Menu_Container_CategoryIndices(arg0, Menu_Container_containerData)[arg1];
+    Menu_Framework_menuMemory.cursorMemories[(category_id + 0x51) * 2] = 0;
+    Menu_Framework_menuMemory.cursorMemories[(category_id + 0x51) * 2 + 1] = category_item_index;
+    return Menu_Container_CategoryIndices(category_id, Menu_Container_containerData)[category_item_index];
 }
 
 // decomp: MENUD.PRG func_80104170 (src/MENU/MENUD.PRG/234.c:796)
-void Menu_Container_ExitDetailsView(int arg0)
+void Menu_Container_ExitDetailsView(int hide_dp_pp_bars)
 {
     Menu_PlayLeaveSound();
     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
@@ -214,7 +214,7 @@ void Menu_Container_ExitDetailsView(int arg0)
     Menu_Framework_UpdatePrimaryStatPanel(2);
     Menu_Container_detailsViewPhase = 2;
     Menu_Container_detailsClosedWithTriangle = Input_buttonsPressed.allButtons & PADRup;
-    if (arg0 != 0) {
+    if (hide_dp_pp_bars != 0) {
         Menu_Framework_UpdateDpPpBars(4);
     }
 }
@@ -325,9 +325,9 @@ int Menu_Container_UpdateBladeDetails(int bladeIndex)
     enum Menu_Container_EquipmentDetailsState { Menu_Container_EquipmentDetailsState_Init, Menu_Container_EquipmentDetailsState_Animate, Menu_Container_EquipmentDetailsState_HandleInput, Menu_Container_EquipmentDetailsState_Exit };
 
     char* text[2];
-    int sp18;
+    int row_type;
     int selectedBlade;
-    int temp_v0_3;
+    int blade_id;
 
     if (bladeIndex != 0) {
         Menu_Container_bladeDetailsItemSource = bladeIndex >> 8;
@@ -363,12 +363,12 @@ int Menu_Container_UpdateBladeDetails(int bladeIndex)
             selectedBlade = Menu_Container_PollDetailsPaging(1, Menu_Container_bladeDetailsItemIndex);
             if (selectedBlade != Menu_Container_bladeDetailsItemIndex) {
                 Menu_Container_bladeDetailsItemIndex = selectedBlade;
-                temp_v0_3 = Menu_Container_SelectDetailsItem(1, selectedBlade);
+                blade_id = Menu_Container_SelectDetailsItem(1, selectedBlade);
                 Menu_Framework_FormatBladeRow(
-                    &Menu_Container_containerData->items.blades[temp_v0_3 - 1], text, &sp18,
+                    &Menu_Container_containerData->items.blades[blade_id - 1], text, &row_type,
                     Menu_Framework_stringBuf);
-                Menu_Framework_SetBladeStats(temp_v0_3);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_bladeDetailsItemSource, text, sp18, selectedBlade);
+                Menu_Framework_SetBladeStats(blade_id);
+                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_bladeDetailsItemSource, text, row_type, selectedBlade);
             }
         }
         break;
@@ -379,7 +379,7 @@ int Menu_Container_UpdateBladeDetails(int bladeIndex)
 }
 
 // decomp: MENUD.PRG _gripNavigation (src/MENU/MENUD.PRG/234.c:965)
-int Menu_Container_UpdateGripDetails(int arg0)
+int Menu_Container_UpdateGripDetails(int packed_details_selection)
 {
 
     static char Menu_Container_gripDetailsStep;
@@ -388,14 +388,14 @@ int Menu_Container_UpdateGripDetails(int arg0)
     static u_char Menu_Container_gripDetailsItemIndex;
     static char Menu_Container_unusedGripDetailsFlag;
 
-    char* sp10[2];
-    int sp18;
-    int temp_v0_2;
-    int temp_v0_3;
+    char* row_text[2];
+    int row_type;
+    int selected_grip_index;
+    int grip_id;
 
-    if (arg0 != 0) {
-        Menu_Container_gripDetailsItemSource = arg0 >> 8;
-        Menu_Container_gripDetailsItemIndex = arg0 - 1;
+    if (packed_details_selection != 0) {
+        Menu_Container_gripDetailsItemSource = packed_details_selection >> 8;
+        Menu_Container_gripDetailsItemIndex = packed_details_selection - 1;
         Menu_Container_BeginDetailsTransition(Menu_Container_gripDetailsItemSource);
         Menu_Container_unusedGripDetailsFlag = 0;
         Menu_Container_gripDetailsSlideStep = 0;
@@ -423,14 +423,14 @@ int Menu_Container_UpdateGripDetails(int arg0)
             Menu_Container_ExitDetailsView(0);
             Menu_Container_gripDetailsStep = 3U;
         } else {
-            temp_v0_2 = Menu_Container_PollDetailsPaging(2, Menu_Container_gripDetailsItemIndex);
-            if (temp_v0_2 != Menu_Container_gripDetailsItemIndex) {
-                Menu_Container_gripDetailsItemIndex = temp_v0_2;
-                temp_v0_3 = Menu_Container_SelectDetailsItem(2, temp_v0_2);
-                Menu_Framework_FormatGripRow(&Menu_Container_containerData->items.grips[temp_v0_3 - 1],
-                    sp10, &sp18, Menu_Framework_stringBuf);
-                Menu_Framework_SetGripStats(temp_v0_3);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_gripDetailsItemSource, sp10, sp18, temp_v0_2);
+            selected_grip_index = Menu_Container_PollDetailsPaging(2, Menu_Container_gripDetailsItemIndex);
+            if (selected_grip_index != Menu_Container_gripDetailsItemIndex) {
+                Menu_Container_gripDetailsItemIndex = selected_grip_index;
+                grip_id = Menu_Container_SelectDetailsItem(2, selected_grip_index);
+                Menu_Framework_FormatGripRow(&Menu_Container_containerData->items.grips[grip_id - 1],
+                    row_text, &row_type, Menu_Framework_stringBuf);
+                Menu_Framework_SetGripStats(grip_id);
+                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_gripDetailsItemSource, row_text, row_type, selected_grip_index);
             }
         }
         // BUG: write to .rodata
@@ -451,7 +451,7 @@ int Menu_Container_UpdateGripDetails(int arg0)
 }
 
 // decomp: MENUD.PRG _shieldNavigation (src/MENU/MENUD.PRG/234.c:1037)
-int Menu_Container_UpdateShieldDetails(int arg0)
+int Menu_Container_UpdateShieldDetails(int packed_details_selection)
 {
     static char Menu_Container_shieldDetailsStep;
     static char Menu_Container_shieldDetailsSlideStep;
@@ -459,14 +459,14 @@ int Menu_Container_UpdateShieldDetails(int arg0)
     static u_char Menu_Container_shieldDetailsItemIndex;
     static char Menu_Container_unusedShieldDetailsFlag;
 
-    char* sp18[2];
-    int sp20;
-    int temp_v0_2;
+    char* row_text[2];
+    int row_type;
+    int selected_shield_index;
     int i;
 
-    if (arg0 != 0) {
-        Menu_Container_shieldDetailsItemSource = arg0 >> 8;
-        Menu_Container_shieldDetailsItemIndex = arg0 - 1;
+    if (packed_details_selection != 0) {
+        Menu_Container_shieldDetailsItemSource = packed_details_selection >> 8;
+        Menu_Container_shieldDetailsItemIndex = packed_details_selection - 1;
         Menu_Container_BeginDetailsTransition(Menu_Container_shieldDetailsItemSource);
         Menu_Container_unusedShieldDetailsFlag = 0;
         Menu_Container_shieldDetailsSlideStep = 0;
@@ -502,17 +502,17 @@ int Menu_Container_UpdateShieldDetails(int arg0)
             Menu_Container_ExitDetailsView(1);
             Menu_Container_shieldDetailsStep = 3;
         } else {
-            temp_v0_2 = Menu_Container_PollDetailsPaging(3, Menu_Container_shieldDetailsItemIndex);
-            if (temp_v0_2 != Menu_Container_shieldDetailsItemIndex) {
-                Menu_Container_shieldDetailsItemIndex = temp_v0_2;
-                i = Menu_Container_SelectDetailsItem(3, temp_v0_2);
-                Menu_Container_BuildShieldRow(&Menu_Container_containerData->items, sp18, &sp20,
+            selected_shield_index = Menu_Container_PollDetailsPaging(3, Menu_Container_shieldDetailsItemIndex);
+            if (selected_shield_index != Menu_Container_shieldDetailsItemIndex) {
+                Menu_Container_shieldDetailsItemIndex = selected_shield_index;
+                i = Menu_Container_SelectDetailsItem(3, selected_shield_index);
+                Menu_Container_BuildShieldRow(&Menu_Container_containerData->items, row_text, &row_type,
                     Menu_Framework_stringBuf, i - 1);
                 Menu_Framework_SetShieldStats(i);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_shieldDetailsItemSource, sp18, sp20, temp_v0_2);
+                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_shieldDetailsItemSource, row_text, row_type, selected_shield_index);
                 for (i = 1; i < 4; ++i) {
                     Menu_Framework_CreateShieldGemRow(
-                        i, Menu_Container_containerData->indices.shields[temp_v0_2], 0);
+                        i, Menu_Container_containerData->indices.shields[selected_shield_index], 0);
                 }
                 return 0;
             }
@@ -525,21 +525,21 @@ int Menu_Container_UpdateShieldDetails(int arg0)
 }
 
 // decomp: MENUD.PRG _armorNavigation (src/MENU/MENUD.PRG/234.c:1110)
-int Menu_Container_UpdateArmorDetails(int arg0)
+int Menu_Container_UpdateArmorDetails(int packed_details_selection)
 {
     static char Menu_Container_armorDetailsStep;
     static char Menu_Container_armorDetailsDelay;
     static char Menu_Container_armorDetailsItemSource;
     static u_char Menu_Container_armorDetailsItemIndex;
 
-    char* sp10[2];
-    int sp18;
-    int temp_v0_2;
-    int temp_v0_3;
+    char* row_text[2];
+    int row_type;
+    int selected_armor_index;
+    int armor_id;
 
-    if (arg0 != 0) {
-        Menu_Container_armorDetailsItemSource = arg0 >> 8;
-        Menu_Container_armorDetailsItemIndex = (arg0 - 1);
+    if (packed_details_selection != 0) {
+        Menu_Container_armorDetailsItemSource = packed_details_selection >> 8;
+        Menu_Container_armorDetailsItemIndex = (packed_details_selection - 1);
         Menu_Container_BeginDetailsTransition(Menu_Container_armorDetailsItemSource);
         Menu_Container_armorDetailsDelay = 10;
         Menu_Container_armorDetailsStep = 0;
@@ -573,15 +573,15 @@ int Menu_Container_UpdateArmorDetails(int arg0)
             Menu_Container_ExitDetailsView(1);
             Menu_Container_armorDetailsStep = 3;
         } else {
-            temp_v0_2 = Menu_Container_PollDetailsPaging(4, Menu_Container_armorDetailsItemIndex);
-            if (temp_v0_2 != Menu_Container_armorDetailsItemIndex) {
-                Menu_Container_armorDetailsItemIndex = temp_v0_2;
-                temp_v0_3 = Menu_Container_SelectDetailsItem(4, temp_v0_2);
+            selected_armor_index = Menu_Container_PollDetailsPaging(4, Menu_Container_armorDetailsItemIndex);
+            if (selected_armor_index != Menu_Container_armorDetailsItemIndex) {
+                Menu_Container_armorDetailsItemIndex = selected_armor_index;
+                armor_id = Menu_Container_SelectDetailsItem(4, selected_armor_index);
                 Menu_Framework_FormatInventoryArmorRow(
-                    &Menu_Container_containerData->items.armor[temp_v0_3 - 1], sp10, &sp18,
+                    &Menu_Container_containerData->items.armor[armor_id - 1], row_text, &row_type,
                     Menu_Framework_stringBuf);
-                Menu_Framework_SetArmorStats(temp_v0_3);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_armorDetailsItemSource, sp10, sp18, temp_v0_2);
+                Menu_Framework_SetArmorStats(armor_id);
+                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_armorDetailsItemSource, row_text, row_type, selected_armor_index);
             }
         }
         break;
@@ -592,21 +592,21 @@ int Menu_Container_UpdateArmorDetails(int arg0)
 }
 
 // decomp: MENUD.PRG _gemNavigation (src/MENU/MENUD.PRG/234.c:1176)
-int Menu_Container_UpdateGemDetails(int arg0)
+int Menu_Container_UpdateGemDetails(int packed_details_selection)
 {
     static u_char Menu_Container_gemDetailsStep;
     static u_char Menu_Container_gemDetailsDelay;
     static u_char Menu_Container_gemDetailsItemSource;
     static u_char Menu_Container_gemDetailsItemIndex;
 
-    char* sp10[2];
-    int sp18;
-    int temp_v0_2;
-    int temp_v0_3;
+    char* row_text[2];
+    int row_type;
+    int selected_gem_index;
+    int gem_id;
 
-    if (arg0 != 0) {
-        Menu_Container_gemDetailsItemSource = arg0 >> 8;
-        Menu_Container_gemDetailsItemIndex = arg0 - 1;
+    if (packed_details_selection != 0) {
+        Menu_Container_gemDetailsItemSource = packed_details_selection >> 8;
+        Menu_Container_gemDetailsItemIndex = packed_details_selection - 1;
         Menu_Container_BeginDetailsTransition(Menu_Container_gemDetailsItemSource);
         Menu_Container_gemDetailsDelay = 10;
         Menu_Container_gemDetailsStep = 0;
@@ -634,14 +634,14 @@ int Menu_Container_UpdateGemDetails(int arg0)
             Menu_Container_gemDetailsStep = 3;
             Menu_Container_detailsClosedWithTriangle = Input_buttonsPressed.allButtons & 0x10;
         } else {
-            temp_v0_2 = Menu_Container_PollDetailsPaging(5, Menu_Container_gemDetailsItemIndex);
-            if (temp_v0_2 != Menu_Container_gemDetailsItemIndex) {
-                Menu_Container_gemDetailsItemIndex = temp_v0_2;
-                temp_v0_3 = Menu_Container_SelectDetailsItem(5, temp_v0_2);
-                Menu_Framework_FormatGemRow(&Menu_Container_containerData->items.gems[temp_v0_3 - 1],
-                    sp10, &sp18, Menu_Framework_stringBuf);
-                Menu_Framework_SetGemStats(temp_v0_3);
-                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_gemDetailsItemSource, sp10, sp18, temp_v0_2);
+            selected_gem_index = Menu_Container_PollDetailsPaging(5, Menu_Container_gemDetailsItemIndex);
+            if (selected_gem_index != Menu_Container_gemDetailsItemIndex) {
+                Menu_Container_gemDetailsItemIndex = selected_gem_index;
+                gem_id = Menu_Container_SelectDetailsItem(5, selected_gem_index);
+                Menu_Framework_FormatGemRow(&Menu_Container_containerData->items.gems[gem_id - 1],
+                    row_text, &row_type, Menu_Framework_stringBuf);
+                Menu_Framework_SetGemStats(gem_id);
+                Menu_Framework_UpdateItemDetailsSelection(Menu_Container_gemDetailsItemSource, row_text, row_type, selected_gem_index);
             }
         }
         break;
@@ -652,29 +652,29 @@ int Menu_Container_UpdateGemDetails(int arg0)
 }
 
 // decomp: MENUD.PRG func_80105008 (src/MENU/MENUD.PRG/234.c:1235)
-int Menu_Container_UpdateItemDetails(int arg0)
+int Menu_Container_UpdateItemDetails(int packed_category_selection)
 {
     static int (*Menu_Container_kItemDetailHandlers[])(int) = { Menu_Container_UpdateWeaponDetails, Menu_Container_UpdateBladeDetails,
         Menu_Container_UpdateGripDetails, Menu_Container_UpdateShieldDetails, Menu_Container_UpdateArmorDetails, Menu_Container_UpdateGemDetails };
 
     static u_char Menu_Container_detailsCategory;
 
-    int temp_v0;
-    int var_s0 = 0;
+    int detail_handler_result;
+    int packed_details_selection = 0;
 
-    if (arg0 != 0) {
-        var_s0 = arg0 >> 4;
-        Menu_Container_detailsCategory = arg0 & 0xF;
+    if (packed_category_selection != 0) {
+        packed_details_selection = packed_category_selection >> 4;
+        Menu_Container_detailsCategory = packed_category_selection & 0xF;
         Menu_Container_detailsViewPhase = 1;
         Menu_Container_detailsClosedWithTriangle = 0;
         Menu_Framework_ResetItemDetailCursor();
-        Menu_Framework_MenuItem(0x1F)->itemPage = var_s0 & 0xFF;
+        Menu_Framework_MenuItem(0x1F)->itemPage = packed_details_selection & 0xFF;
         Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
     }
 
-    temp_v0 = Menu_Container_kItemDetailHandlers[Menu_Container_detailsCategory](var_s0);
+    detail_handler_result = Menu_Container_kItemDetailHandlers[Menu_Container_detailsCategory](packed_details_selection);
 
-    if (temp_v0 != 0) {
+    if (detail_handler_result != 0) {
         if (Menu_Container_detailsClosedWithTriangle != 0) {
             return -2;
         }
@@ -687,23 +687,23 @@ int Menu_Container_UpdateItemDetails(int arg0)
         Menu_Framework_DrawTabNavigation(1);
         Menu_Framework_UpdateItemDetails();
     }
-    return temp_v0;
+    return detail_handler_result;
 }
 
 // decomp: MENUD.PRG func_80106464 (src/MENU/MENUD.PRG/234.c:1925)
-void Menu_Container_DrawCapacityCount(int arg0, int arg1, int arg2)
+void Menu_Container_DrawCapacityCount(int capacity_limit, int packed_count_position, int occupied_count)
 {
-    int var_s2;
-    int temp_s0;
+    int used_count_color;
+    int packed_used_count_position;
 
-    var_s2 = 0x808080;
-    Menu_Framework_DrawColoredInteger(arg0, arg1, 0x808080, 0);
-    temp_s0 = arg1 - 0x20;
-    Render_DrawCompactTextColor("/", temp_s0, 0x808080, NULL);
-    if ((arg2 * 2) < arg0) {
-        var_s2 = 0x804020;
+    used_count_color = 0x808080;
+    Menu_Framework_DrawColoredInteger(capacity_limit, packed_count_position, 0x808080, 0);
+    packed_used_count_position = packed_count_position - 0x20;
+    Render_DrawCompactTextColor("/", packed_used_count_position, 0x808080, NULL);
+    if ((occupied_count * 2) < capacity_limit) {
+        used_count_color = 0x804020;
     }
-    Menu_Framework_DrawColoredInteger(arg2, temp_s0, var_s2, 0);
+    Menu_Framework_DrawColoredInteger(occupied_count, packed_used_count_position, used_count_color, 0);
 }
 
 // decomp: MENUD.PRG func_80106504 (src/MENU/MENUD.PRG/234.c:1940)
@@ -892,9 +892,9 @@ int Menu_Container_BuildItemRows(int itemCategory, char** text, int* rowTypes, c
 }
 
 // decomp: MENUD.PRG func_801071D8 (src/MENU/MENUD.PRG/234.c:2309)
-void Menu_Container_RestoreItemRows(int arg0)
+void Menu_Container_RestoreItemRows(int category_id)
 {
-    int temp_v0_2;
+    int selected_row_mismatch;
     int i;
 
     while (Menu_Framework_itemsListRow < 16) {
@@ -903,31 +903,31 @@ void Menu_Container_RestoreItemRows(int arg0)
 
     for (i = 20; i < 40; ++i) {
 
-        Menu_Framework_MenuRow* temp_v0 = Menu_Framework_MenuItem(i);
+        Menu_Framework_MenuRow* restored_menu_row = Menu_Framework_MenuItem(i);
 
-        if (temp_v0->state == 2) {
-            temp_v0->state = 1;
-            temp_v0->x = temp_v0->targetPosition0;
+        if (restored_menu_row->state == 2) {
+            restored_menu_row->state = 1;
+            restored_menu_row->x = restored_menu_row->targetPosition0;
         }
 
-        temp_v0_2 = i ^ (Menu_Framework_menuMemory.cursorMemories[(arg0 + 81) * 2] + 20);
-        temp_v0->selected = temp_v0_2 == 0;
+        selected_row_mismatch = i ^ (Menu_Framework_menuMemory.cursorMemories[(category_id + 81) * 2] + 20);
+        restored_menu_row->selected = selected_row_mismatch == 0;
     }
 }
 
 // decomp: MENUD.PRG func_801072B0 (src/MENU/MENUD.PRG/234.c:2332)
-int Menu_Container_UpdateTransferConfirmation(int arg0)
+int Menu_Container_UpdateTransferConfirmation(int initialize_confirmation)
 {
     static int Menu_Container_transferConfirmationSelectedAction;
     static char Menu_Container_transferConfirmationStep;
     static char Menu_Container_transferConfirmationLayoutPadding[3] __attribute__((unused));
 
-    char* sp10[4];
-    int sp20[2];
+    char* confirmation_row_text[4];
+    int confirmation_row_types[2];
     int i;
-    int temp_s0;
+    int confirmation_step;
 
-    if (arg0 != 0) {
+    if (initialize_confirmation != 0) {
         Menu_InitInformationTextBox(1);
         Menu_Container_controlsPanelMode = 5;
         Menu_Inventory_freezeTabArrows = 0;
@@ -936,17 +936,17 @@ int Menu_Container_UpdateTransferConfirmation(int arg0)
         return 0;
     }
 
-    temp_s0 = Menu_Container_transferConfirmationStep;
+    confirmation_step = Menu_Container_transferConfirmationStep;
 
-    switch (temp_s0) {
+    switch (confirmation_step) {
     case 0:
         for (i = 0; i < 2; ++i) {
-            sp10[i * 2] = (char*)&Menu_Container_menuText[Menu_Container_menuText[8 + i]];
-            sp10[i * 2 + 1] = (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 10]];
-            sp20[i] = 0;
+            confirmation_row_text[i * 2] = (char*)&Menu_Container_menuText[Menu_Container_menuText[8 + i]];
+            confirmation_row_text[i * 2 + 1] = (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 10]];
+            confirmation_row_types[i] = 0;
         }
 
-        Menu_Framework_CreateActionRows(2, 3, sp10, sp20);
+        Menu_Framework_CreateActionRows(2, 3, confirmation_row_text, confirmation_row_types);
         Menu_Container_transferConfirmationStep = 1;
         break;
     case 1:
@@ -956,7 +956,7 @@ int Menu_Container_UpdateTransferConfirmation(int arg0)
         if (Menu_Container_transferConfirmationSelectedAction != 0) {
             Menu_Framework_FlyOutRowLeft(0);
             Menu_Framework_FlyOutRowLeft(1);
-            if (Menu_Container_transferConfirmationSelectedAction == temp_s0) {
+            if (Menu_Container_transferConfirmationSelectedAction == confirmation_step) {
                 Menu_PlaySelectSound();
                 Menu_Framework_ClearMenuExcept(0);
                 Menu_Container_SetPanelVisibility(0);
@@ -978,7 +978,7 @@ int Menu_Container_UpdateTransferConfirmation(int arg0)
 }
 
 // decomp: MENUD.PRG func_80107490 (src/MENU/MENUD.PRG/234.c:2393)
-int Menu_Container_UpdateItemList(int arg0)
+int Menu_Container_UpdateItemList(int transfer_direction_selection)
 {
     static char Menu_Container_itemListStep;
     static char Menu_Container_categoryEmpty;
@@ -986,31 +986,31 @@ int Menu_Container_UpdateItemList(int arg0)
     static char Menu_Container_itemListLayoutPadding __attribute__((unused));
     static int Menu_Container_itemListSelectedRow;
 
-    u_short* sp10[8];
+    u_short* action_row_text[8];
     int temp_a0;
     int temp_s0;
     int temp_s2;
     int temp_s3;
-    int temp_v0_17;
-    int temp_v0_18;
-    int temp_v0_8;
+    int parent_item_row;
+    int category_cursor_memory_offset;
+    int previous_category_buttons_held;
     int var_a1;
     int var_a2;
-    int var_s4;
-    int var_v0_3;
-    int* temp_s1_3;
-    int* temp_s1_4;
-    int* temp_s6;
-    char** temp_s0_2;
-    char** temp_s3_7;
-    char** temp_s5;
+    int selected_category_id;
+    int next_category_buttons_repeated;
+    int* rebuilt_row_types;
+    int* pending_row_types;
+    int* initial_row_types;
+    char** rebuilt_row_text;
+    char** pending_row_text;
+    char** initial_row_text;
     u_short* temp_s1;
-    void* temp_v0_19;
-    void* temp_v0_7;
-    Menu_Framework_MenuRow* temp_v0_11;
+    void* pending_rows_allocation;
+    void* rebuilt_rows_allocation;
+    Menu_Framework_MenuRow* category_title_row;
 
 loop_1:
-    if (arg0 != 0) {
+    if (transfer_direction_selection != 0) {
         Menu_Container_itemListFirstEntry = 1;
         Menu_Container_SetPanelVisibility(1);
         Menu_Container_categoryTitleSlideStep = 0;
@@ -1021,7 +1021,7 @@ loop_1:
             &Menu_Framework_unusedInventoryStorage->stagedTransfer, sizeof Menu_Framework_unusedInventoryStorage->stagedTransfer);
         Core_Memory_ZeroWordsBackward(Menu_Framework_unusedInventoryStorage->itemsToTransfer,
             sizeof Menu_Framework_unusedInventoryStorage->itemsToTransfer);
-        Menu_Container_browsingGadgetBag = arg0 - 1;
+        Menu_Container_browsingGadgetBag = transfer_direction_selection - 1;
         if (Menu_Container_browsingGadgetBag) {
             Menu_Container_containerData = &Menu_Framework_unusedInventoryStorage->gadgetBag;
             Menu_Container_otherStorage = &Menu_Framework_unusedInventoryStorage->container;
@@ -1032,8 +1032,8 @@ loop_1:
         Menu_Container_itemListStep = 1;
         return 0;
     }
-    var_s4 = (Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7;
-    temp_s1 = Menu_Container_CategoryIndices(var_s4, Menu_Container_containerData);
+    selected_category_id = (Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7;
+    temp_s1 = Menu_Container_CategoryIndices(selected_category_id, Menu_Container_containerData);
 
     switch (Menu_Container_itemListStep) { /* switch 1 */
     case 0:
@@ -1041,8 +1041,8 @@ loop_1:
         /* fallthrough */
     case 1:
         temp_s1 = Core_Memory_AllocateFromHighEnd(0x6C00);
-        temp_s6 = (void*)temp_s1 + 0x6000;
-        temp_s5 = (void*)temp_s1 + 0x6400;
+        initial_row_types = (void*)temp_s1 + 0x6000;
+        initial_row_text = (void*)temp_s1 + 0x6400;
         Menu_Inventory_freezeTabArrows = 1;
 
         for (temp_s3 = 0; temp_s3 < 7; ++temp_s3) {
@@ -1050,20 +1050,20 @@ loop_1:
         }
 
         Menu_Container_RebuildPendingTransfers();
-        temp_s2 = Menu_Container_BuildItemRows(var_s4, temp_s5, temp_s6, (char*)temp_s1);
+        temp_s2 = Menu_Container_BuildItemRows(selected_category_id, initial_row_text, initial_row_types, (char*)temp_s1);
         Menu_Container_categoryEmpty = temp_s2 == 0;
         if (Menu_Container_categoryEmpty != 0) {
             Menu_Framework_SetInformationMessage(
-                (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 27 + (var_s4 == 7) * 2]]);
+                (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 27 + (selected_category_id == 7) * 2]]);
         } else {
             temp_s3 = Input_settings.cursorMemory;
             if (Menu_Container_itemListFirstEntry == 0) {
                 Input_settings.cursorMemory = 1;
             }
             Menu_Container_itemListFirstEntry = 0;
-            Menu_Framework_CreateMenuRows(temp_s2, (var_s4 + 0x51) | 0x19200, temp_s5, temp_s6);
+            Menu_Framework_CreateMenuRows(temp_s2, (selected_category_id + 0x51) | 0x19200, initial_row_text, initial_row_types);
             if (Menu_Container_itemListStep == 0) {
-                Menu_Container_RestoreItemRows(var_s4);
+                Menu_Container_RestoreItemRows(selected_category_id);
             }
             Input_settings.cursorMemory = temp_s3;
         }
@@ -1082,7 +1082,7 @@ loop_1:
                 if (Menu_Framework_unusedInventoryStorage->itemsToTransfer[0] == 0) {
                     return -1;
                 }
-                if (var_s4 == 7) {
+                if (selected_category_id == 7) {
                     Menu_Container_UpdateTransferConfirmation(1);
                     Menu_Container_itemListStep = 0xF;
                 } else {
@@ -1096,8 +1096,8 @@ loop_1:
                 Menu_PlayInvalidSound();
             }
         } else {
-            int s6 = 1;
-            temp_s0 = var_s4 < 6;
+            int details_index_bias = 1;
+            temp_s0 = selected_category_id < 6;
             Menu_Container_controlsPanelMode = temp_s0 + 1;
             Menu_Container_itemListSelectedRow = Menu_Framework_GetSelectedRow() + 1;
             if (Menu_Container_itemListSelectedRow == 0) {
@@ -1106,7 +1106,7 @@ loop_1:
                         Menu_PlaySelectSound();
                         temp_s0 = Menu_Framework_CloseRowsAndRememberCursor();
                         Menu_Framework_MenuItem(temp_s0 >> 8)->outsetIcon = 0;
-                        Menu_Container_UpdateItemDetails(var_s4 | ((temp_s0 + s6) * 0x10));
+                        Menu_Container_UpdateItemDetails(selected_category_id | ((temp_s0 + details_index_bias) * 0x10));
                         Menu_Container_categoryTitleVisible = 0;
                         Menu_Container_itemListStep = 7;
                         break;
@@ -1114,26 +1114,26 @@ loop_1:
                     Menu_PlayInvalidSound();
                 }
             } else if (Menu_Container_itemListSelectedRow > 0) {
-                if (var_s4 == 7) {
+                if (selected_category_id == 7) {
                     Menu_Container_UndoPendingTransfer(Menu_Container_itemListSelectedRow - 1);
                     Menu_Container_RefreshMiscTransferCount();
                     Menu_Framework_ClearMenuExcept(0);
                     Menu_Container_itemListStep = 4;
                 } else {
-                    temp_v0_7 = Core_Memory_AllocateFromHighEnd(0x6C00U);
-                    temp_s0_2 = temp_v0_7 + 0x6400;
-                    temp_s1_3 = temp_v0_7 + 0x6000;
-                    temp_s0 = Menu_Container_BuildItemRows(var_s4, temp_s0_2, temp_s1_3, temp_v0_7);
-                    temp_s1_3[Menu_Container_itemListSelectedRow - 1] |= 8;
+                    rebuilt_rows_allocation = Core_Memory_AllocateFromHighEnd(0x6C00U);
+                    rebuilt_row_text = rebuilt_rows_allocation + 0x6400;
+                    rebuilt_row_types = rebuilt_rows_allocation + 0x6000;
+                    temp_s0 = Menu_Container_BuildItemRows(selected_category_id, rebuilt_row_text, rebuilt_row_types, rebuilt_rows_allocation);
+                    rebuilt_row_types[Menu_Container_itemListSelectedRow - 1] |= 8;
                     temp_s3 = Input_settings.cursorMemory;
                     Input_settings.cursorMemory = 1;
                     Menu_Framework_CreateMenuRows(
-                        temp_s0, (var_s4 + 0x51) | 0x19200, temp_s0_2, temp_s1_3);
+                        temp_s0, (selected_category_id + 0x51) | 0x19200, rebuilt_row_text, rebuilt_row_types);
                     Input_settings.cursorMemory = temp_s3;
-                    Menu_Container_RestoreItemRows(var_s4);
+                    Menu_Container_RestoreItemRows(selected_category_id);
                     Menu_Container_controlsPanelMode = 1;
                     Menu_Inventory_freezeTabArrows = 0;
-                    Core_Memory_FreeFromHighEnd(temp_v0_7);
+                    Core_Memory_FreeFromHighEnd(rebuilt_rows_allocation);
                     Menu_Container_itemListStep = 6;
                 }
             } else if (Menu_Container_itemListSelectedRow == -2) {
@@ -1143,7 +1143,7 @@ loop_1:
                     Menu_Framework_ClearMenuExcept(0);
                     return -1;
                 }
-                if (var_s4 != 7) {
+                if (selected_category_id != 7) {
                     Menu_Framework_menuMemory.opaqueA0[0] = 0;
                     Menu_Framework_ClearMenuExcept(0);
                     Menu_Container_itemListStep = 0xD;
@@ -1158,11 +1158,11 @@ loop_1:
     case 3:
         temp_s3 = Input_buttonsState & 0x8004;
         temp_s2 = Input_buttonsState & 0x2008;
-        temp_v0_8 = (temp_s3 != 0);
+        previous_category_buttons_held = (temp_s3 != 0);
         if (temp_s2 != 0) {
-            temp_s0 = temp_v0_8 ^ 1;
+            temp_s0 = previous_category_buttons_held ^ 1;
         } else {
-            temp_s0 = temp_v0_8 & 1;
+            temp_s0 = previous_category_buttons_held & 1;
         }
         if (temp_s0 != 0) {
             var_a2 = 0x8004;
@@ -1170,19 +1170,19 @@ loop_1:
                 var_a2 = 0x8000;
             }
             if (Input_buttonRepeat & var_a2) {
-                var_s4 = (var_s4 - 1) & 7;
+                selected_category_id = (selected_category_id - 1) & 7;
             }
             var_a2 = 0x2008;
             if (temp_s2 == 0x2008) {
                 var_a2 = 0x2000;
             }
-            var_v0_3 = Input_buttonRepeat & var_a2;
-            if (var_v0_3 != 0) {
-                var_s4 = (var_s4 + 1) & 7;
+            next_category_buttons_repeated = Input_buttonRepeat & var_a2;
+            if (next_category_buttons_repeated != 0) {
+                selected_category_id = (selected_category_id + 1) & 7;
             }
-            if (var_s4 != ((Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7)) {
+            if (selected_category_id != ((Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7)) {
                 Menu_PlayChangeSound();
-                Menu_Framework_menuMemory.opaqueA0[0] = (var_s4 + 1) & 7;
+                Menu_Framework_menuMemory.opaqueA0[0] = (selected_category_id + 1) & 7;
                 if (Menu_Container_itemListStep == 2) {
                     if (Menu_Container_categoryEmpty == 0) {
                         Menu_Framework_CloseRowsAndRememberCursor();
@@ -1200,7 +1200,7 @@ loop_1:
                     }
                 }
                 Menu_Container_itemListStep = 1;
-                arg0 = 0;
+                transfer_direction_selection = 0;
                 goto loop_1;
             }
         }
@@ -1229,7 +1229,7 @@ loop_1:
             if (temp_s3 > 0) {
                 temp_s0 = temp_s1[temp_s3 - 1];
                 var_a2 = temp_s1[temp_s2 - 1];
-                if ((var_s4 == 6)
+                if ((selected_category_id == 6)
                     && (Menu_Container_containerData->items.misc[temp_s0 - 1].id
                         == Menu_Container_containerData->items.misc[var_a2 - 1].id)) {
                     Menu_Container_containerData->items.misc[var_a2 - 1].count +=
@@ -1263,13 +1263,13 @@ loop_1:
                 return -2;
             }
             Menu_Container_categoryTitleVisible = 1;
-            temp_v0_11 = Menu_Framework_MenuItem(0);
-            if (temp_v0_11->x >= 0xB5) {
-                if (temp_v0_11->x >= 0xCD) {
-                    temp_v0_11->x = (u_short)temp_v0_11->x - 0x18;
+            category_title_row = Menu_Framework_MenuItem(0);
+            if (category_title_row->x >= 0xB5) {
+                if (category_title_row->x >= 0xCD) {
+                    category_title_row->x = (u_short)category_title_row->x - 0x18;
                 }
-                temp_v0_11->state = 2;
-                temp_v0_11->targetPosition0 = 0xB4;
+                category_title_row->state = 2;
+                category_title_row->targetPosition0 = 0xB4;
             }
             Menu_Container_itemListStep = 1;
         }
@@ -1280,7 +1280,7 @@ loop_1:
         Core_Memory_ZeroWordsBackward(Menu_Framework_rowTypeBuf, 0x10);
         temp_s0 = 0;
         temp_s2 = 0x33;
-        switch (var_s4) {
+        switch (selected_category_id) {
         case 0:
             temp_s0 = Menu_Container_containerData->items.weapons[temp_s3].isEquipped;
             temp_s2 = 0x4A;
@@ -1298,7 +1298,7 @@ loop_1:
             break;
         }
 
-        var_a2 = Menu_Container_ParentWeaponIndex(var_s4, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = Menu_Container_ParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         var_a1 = 8;
 
         if (var_a2 != 0) {
@@ -1309,7 +1309,7 @@ loop_1:
                               : 4];
         }
 
-        var_a2 = Menu_Container_ParentShieldIndex(var_s4, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = Menu_Container_ParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         var_a1 = 8;
 
         if (var_a2 != 0) {
@@ -1323,8 +1323,8 @@ loop_1:
         var_a2 = temp_s0;
 
         if (temp_s0 != 0) {
-            sp10[1] = &Menu_Container_menuText[temp_s2];
-        } else if (var_s4 == 6) {
+            action_row_text[1] = &Menu_Container_menuText[temp_s2];
+        } else if (selected_category_id == 6) {
             int temp_s0 = 0;
 
             for (temp_s2 = 0; temp_s2 < 7; ++temp_s2) {
@@ -1355,37 +1355,37 @@ loop_1:
                 }
             }
             var_a2 = var_a2 == 0;
-            sp10[1] = &Menu_Container_menuText[temp_s2];
+            action_row_text[1] = &Menu_Container_menuText[temp_s2];
         } else {
-            var_a2 = Menu_Container_TransferCapacityError(var_s4, temp_s3);
-            sp10[1] = &Menu_Container_menuText[Menu_Container_menuText[var_a2 + 5]];
+            var_a2 = Menu_Container_TransferCapacityError(selected_category_id, temp_s3);
+            action_row_text[1] = &Menu_Container_menuText[Menu_Container_menuText[var_a2 + 5]];
         }
 
-        sp10[0] = &Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag * 2 + 0x1F]];
+        action_row_text[0] = &Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag * 2 + 0x1F]];
 
         if (var_a2 != 0) {
             Menu_Framework_rowTypeBuf[0] = 1;
         } else {
-            sp10[1] = &Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag * 2 + 0x20]];
+            action_row_text[1] = &Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag * 2 + 0x20]];
         }
         Menu_Container_itemActionIds[1] = 1;
         temp_s2 = 1;
-        if (((u_int)(var_s4 - 1) < 2) || ((var_s4 == 5))) {
-            sp10[2] = Menu_Framework_itemHelp + 0x3527;
-            sp10[3] = Menu_Framework_itemHelp + 0x352C;
-            if ((Menu_Container_ParentWeaponIndex(var_s4, temp_s3, &Menu_Container_containerData->items) == 0)
-                && (Menu_Container_ParentShieldIndex(var_s4, temp_s3, &Menu_Container_containerData->items)
+        if (((u_int)(selected_category_id - 1) < 2) || ((selected_category_id == 5))) {
+            action_row_text[2] = Menu_Framework_itemHelp + 0x3527;
+            action_row_text[3] = Menu_Framework_itemHelp + 0x352C;
+            if ((Menu_Container_ParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items) == 0)
+                && (Menu_Container_ParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items)
                     == 0)) {
-                sp10[3] = Menu_Framework_itemHelp + 0x35B2;
+                action_row_text[3] = Menu_Framework_itemHelp + 0x35B2;
                 Menu_Framework_rowTypeBuf[1] = 1;
             }
             ++temp_s2;
             Menu_Container_itemActionIds[temp_s2] = 2;
         }
         temp_s0 = 0;
-        sp10[temp_s2 * 2] = Menu_Framework_itemHelp + 0x354A;
-        sp10[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x354F;
-        switch (var_s4) {
+        action_row_text[temp_s2 * 2] = Menu_Framework_itemHelp + 0x354A;
+        action_row_text[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x354F;
+        switch (selected_category_id) {
         case 0:
             temp_s0 = Menu_Container_containerData->items.weapons[temp_s3].isEquipped != 0;
             break;
@@ -1401,14 +1401,14 @@ loop_1:
             }
             break;
         }
-        var_a2 = Menu_Container_ParentWeaponIndex(var_s4, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = Menu_Container_ParentWeaponIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         if (var_a2 != 0) {
             temp_s0 = 1;
             if (Menu_Container_containerData->items.weapons[var_a2 - 1].isEquipped == 0) {
                 temp_s0 = 2;
             }
         }
-        var_a2 = Menu_Container_ParentShieldIndex(var_s4, temp_s3, &Menu_Container_containerData->items);
+        var_a2 = Menu_Container_ParentShieldIndex(selected_category_id, temp_s3, &Menu_Container_containerData->items);
         if (var_a2 != 0) {
             temp_s0 = 1;
             if (Menu_Container_containerData->items.shields[var_a2 - 1].isEquipped == 0) {
@@ -1416,29 +1416,29 @@ loop_1:
             }
         }
         if (temp_s0 != 0) {
-            sp10[temp_s2 * 2 + 1] =
+            action_row_text[temp_s2 * 2 + 1] =
                 &Menu_Framework_itemHelp[Menu_Framework_itemHelp[temp_s0 + 663]];
             temp_s0 = 1;
         }
         Menu_Framework_rowTypeBuf[temp_s2++] = temp_s0;
         Menu_Container_itemActionIds[temp_s2] = 3;
-        if (var_s4 == 6) {
-            sp10[temp_s2 * 2] = Menu_Framework_itemHelp + 0x356D;
-            sp10[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x3574;
+        if (selected_category_id == 6) {
+            action_row_text[temp_s2 * 2] = Menu_Framework_itemHelp + 0x356D;
+            action_row_text[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x3574;
             if (Menu_Container_containerData->items.misc[temp_s3].id >= 0x1CA) {
-                sp10[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x350E;
+                action_row_text[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x350E;
                 Menu_Framework_rowTypeBuf[temp_s2] = 1;
             }
             ++temp_s2;
             Menu_Container_itemActionIds[temp_s2] = 4;
         }
 
-        sp10[temp_s2 * 2] = Menu_Framework_itemHelp + 0x3586;
-        sp10[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x358A;
+        action_row_text[temp_s2 * 2] = Menu_Framework_itemHelp + 0x3586;
+        action_row_text[temp_s2 * 2 + 1] = Menu_Framework_itemHelp + 0x358A;
         ++temp_s2;
         Menu_Container_itemActionIds[temp_s2] = 5;
         Menu_Framework_CreateActionRows(
-            temp_s2, var_s4 + 0x59, (char**)&sp10, (int*)Menu_Framework_rowTypeBuf);
+            temp_s2, selected_category_id + 0x59, (char**)&action_row_text, (int*)Menu_Framework_rowTypeBuf);
         Menu_Container_itemListStep = 9;
         break;
     case 9:
@@ -1453,7 +1453,7 @@ loop_1:
                 switch (Menu_Container_itemActionIds[temp_s3]) {
                 case 1:
                     Menu_Framework_InitializeInformationBox();
-                    Menu_Container_StageItemTransfer(var_s4, Menu_Container_CategoryIndices(var_s4,
+                    Menu_Container_StageItemTransfer(selected_category_id, Menu_Container_CategoryIndices(selected_category_id,
                                               Menu_Container_containerData)[Menu_Container_itemListSelectedRow - 1]
                                               - 1);
                     Menu_Framework_ClearMenuExcept(0);
@@ -1465,8 +1465,8 @@ loop_1:
                     Menu_Container_itemListStep = 10;
                     break;
                 case 3:
-                    temp_s2 = temp_s1[Menu_Container_itemListSelectedRow - 1] | (var_s4 << 0xC);
-                    if ((var_s4 == 6)
+                    temp_s2 = temp_s1[Menu_Container_itemListSelectedRow - 1] | (selected_category_id << 0xC);
+                    if ((selected_category_id == 6)
                         && (Menu_Container_containerData->items.misc[temp_s1[Menu_Container_itemListSelectedRow - 1] - 1]
                                 .count
                             >= 2)) {
@@ -1476,12 +1476,12 @@ loop_1:
                     Menu_Container_itemListStep = 0xB;
                     break;
                 case 4:
-                    Menu_Container_UpdateDiscardMenu(temp_s1[Menu_Container_itemListSelectedRow - 1] | (var_s4 << 0xC) | 0x20000);
+                    Menu_Container_UpdateDiscardMenu(temp_s1[Menu_Container_itemListSelectedRow - 1] | (selected_category_id << 0xC) | 0x20000);
                     Menu_Container_itemListStep = 0xB;
                     break;
                 case 5:
                     Menu_Framework_InitializeInformationBox();
-                    Menu_Container_UpdateSortMenu(var_s4 + 1);
+                    Menu_Container_UpdateSortMenu(selected_category_id + 1);
                     Menu_Container_itemListStep = 0xC;
                     break;
                 }
@@ -1498,18 +1498,18 @@ loop_1:
     case 10:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             temp_s3 = Menu_Container_ParentWeaponIndex(
-                var_s4, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
+                selected_category_id, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
             if (temp_s3 != 0) {
-                var_s4 = 0;
+                selected_category_id = 0;
             } else {
                 temp_s3 = Menu_Container_ParentShieldIndex(
-                    var_s4, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
-                var_s4 = 3;
+                    selected_category_id, temp_s1[Menu_Container_itemListSelectedRow - 1] - 1, &Menu_Container_containerData->items);
+                selected_category_id = 3;
             }
-            temp_s2 = Menu_Container_CountItems(var_s4, &Menu_Container_containerData->items);
-            temp_v0_17 = Menu_Container_FindItemRow(var_s4, temp_s3 - 1,
-                Menu_Container_CategoryIndices(var_s4, Menu_Container_containerData));
-            temp_s3 = temp_v0_17 - 1;
+            temp_s2 = Menu_Container_CountItems(selected_category_id, &Menu_Container_containerData->items);
+            parent_item_row = Menu_Container_FindItemRow(selected_category_id, temp_s3 - 1,
+                Menu_Container_CategoryIndices(selected_category_id, Menu_Container_containerData));
+            temp_s3 = parent_item_row - 1;
             if ((temp_s2 < 9) || (temp_s3 < 8)) {
                 temp_s2 = 0;
             } else {
@@ -1518,14 +1518,14 @@ loop_1:
                     temp_s2 = temp_a0;
                     temp_s3 -= temp_s2;
                 } else {
-                    temp_s2 = temp_v0_17 - 2;
+                    temp_s2 = parent_item_row - 2;
                     temp_s3 = 1;
                 }
             }
-            Menu_Framework_menuMemory.opaqueA0[0] = (var_s4 + 1) & 7;
-            temp_v0_18 = (var_s4 + 0x51) * 2;
-            Menu_Framework_menuMemory.cursorMemories[temp_v0_18] = temp_s3;
-            Menu_Framework_menuMemory.cursorMemories[temp_v0_18 + 1] = temp_s2;
+            Menu_Framework_menuMemory.opaqueA0[0] = (selected_category_id + 1) & 7;
+            category_cursor_memory_offset = (selected_category_id + 0x51) * 2;
+            Menu_Framework_menuMemory.cursorMemories[category_cursor_memory_offset] = temp_s3;
+            Menu_Framework_menuMemory.cursorMemories[category_cursor_memory_offset + 1] = temp_s2;
             Menu_Container_itemListStep = 1;
         }
         break;
@@ -1554,19 +1554,19 @@ loop_1:
         break;
     case 13:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            temp_v0_19 = Core_Memory_AllocateFromHighEnd(0x6C00U);
-            temp_s3_7 = temp_v0_19 + 0x6400;
-            temp_s1_4 = temp_v0_19 + 0x6000;
-            temp_s2 = Menu_Container_BuildItemRows(7, temp_s3_7, temp_s1_4, temp_v0_19);
+            pending_rows_allocation = Core_Memory_AllocateFromHighEnd(0x6C00U);
+            pending_row_text = pending_rows_allocation + 0x6400;
+            pending_row_types = pending_rows_allocation + 0x6000;
+            temp_s2 = Menu_Container_BuildItemRows(7, pending_row_text, pending_row_types, pending_rows_allocation);
             Menu_Container_categoryEmpty = temp_s2 == 0;
             if (Menu_Container_categoryEmpty != 0) {
                 Menu_Framework_SetInformationMessage(
                     (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_browsingGadgetBag + 0x1D]]);
             } else {
                 Menu_Framework_CreateMenuRows(
-                    temp_s2, (var_s4 + 0x51) | 0x19200, temp_s3_7, temp_s1_4);
+                    temp_s2, (selected_category_id + 0x51) | 0x19200, pending_row_text, pending_row_types);
             }
-            Core_Memory_FreeFromHighEnd(temp_v0_19);
+            Core_Memory_FreeFromHighEnd(pending_rows_allocation);
             Menu_Container_itemListStep = 0xE;
         }
         break;
@@ -1622,7 +1622,7 @@ loop_1:
 }
 
 // decomp: MENUD.PRG func_801089BC (src/MENU/MENUD.PRG/234.c:3037)
-int Menu_Container_UpdateTransferDirection(int arg0)
+int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
 {
     static char Menu_Container_transferDirectionLayoutPadding __attribute__((unused)) = 1;
 
@@ -1630,12 +1630,12 @@ int Menu_Container_UpdateTransferDirection(int arg0)
     static char Menu_Container_transferDirectionLayoutPadding2[3] __attribute__((unused));
 
     int i;
-    int var_s1;
-    Menu_Framework_MenuRow* temp_v0_2;
+    int selected_direction;
+    Menu_Framework_MenuRow* selected_direction_row;
     int v;
-    char* a0;
+    char* direction_help_text;
 
-    if (arg0 != 0) {
+    if (initialize_direction_menu != 0) {
         if (Menu_Container_directionCursorResetPending != 0) {
             Menu_Container_directionCursorResetPending = 0;
             if (Input_settings.cursorMemory == 0) {
@@ -1650,21 +1650,21 @@ int Menu_Container_UpdateTransferDirection(int arg0)
     switch (Menu_Container_transferDirectionStep) {
     case 0:
     case 1:
-        temp_v0_2 =
+        selected_direction_row =
             Menu_Framework_SetMenuItem(Menu_Container_transferDirectionStep + 0xA, 0x140, (Menu_Container_transferDirectionStep * 0x10) + 0x22,
                 0x7E, 0, (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_transferDirectionStep * 2 + 12]]);
-        temp_v0_2->state = 2;
-        temp_v0_2->targetPosition0 = 0xC2;
+        selected_direction_row->state = 2;
+        selected_direction_row->targetPosition0 = 0xC2;
         ++Menu_Container_transferDirectionStep;
         break;
     case 2:
         Menu_Container_transferDirectionStep += Menu_Framework_AreMenuRowsIdle();
         break;
     case 3:
-        var_s1 = Menu_Framework_menuMemory.opaque9E;
+        selected_direction = Menu_Framework_menuMemory.opaque9E;
 
         for (i = 0; i < 2; ++i) {
-            Menu_Framework_MenuItem(i + 0xA)->selected = i == var_s1;
+            Menu_Framework_MenuItem(i + 0xA)->selected = i == selected_direction;
         }
         if (Input_buttonsPressed.allButtons & 0x10) {
             Menu_PlayLeaveSound();
@@ -1677,33 +1677,33 @@ int Menu_Container_UpdateTransferDirection(int arg0)
         }
         if (Input_buttonsPressed.allButtons & 0x20) {
             Menu_PlaySelectSound();
-            return var_s1 + 1;
+            return selected_direction + 1;
         }
         Menu_Container_transferDirectionOkBlink += 16;
         Render_DrawCompactTextColor("OK", 0x4200C8,
             ((Core_Gte_Sin((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);
         v = 0x1A;
         Menu_Container_transferDirectionCursorAnimation = Menu_Framework_DrawCursor(
-            Menu_Container_transferDirectionCursorAnimation, (((var_s1 * 0x10) - (((var_s1 * 2) & 4) - v)) << 0x10) | 0xB4);
+            Menu_Container_transferDirectionCursorAnimation, (((selected_direction * 0x10) - (((selected_direction * 2) & 4) - v)) << 0x10) | 0xB4);
         if (Input_buttonRepeat & 0x1000) {
-            var_s1 += 2;
+            selected_direction += 2;
         }
         if (Input_buttonRepeat & 0x4000) {
-            ++var_s1;
+            ++selected_direction;
         }
-        if (var_s1 >= 3) {
-            var_s1 -= 3;
+        if (selected_direction >= 3) {
+            selected_direction -= 3;
         }
-        if (var_s1 != ((u_short*)&Menu_Framework_menuMemory)[0x4F]) {
+        if (selected_direction != ((u_short*)&Menu_Framework_menuMemory)[0x4F]) {
             Menu_PlayChangeSound();
-            ((u_short*)&Menu_Framework_menuMemory)[0x4F] = var_s1;
+            ((u_short*)&Menu_Framework_menuMemory)[0x4F] = selected_direction;
         }
-        if (var_s1 != 2) {
-            a0 = (char*)&Menu_Container_menuText[Menu_Container_menuText[var_s1 * 2 + 13]];
+        if (selected_direction != 2) {
+            direction_help_text = (char*)&Menu_Container_menuText[Menu_Container_menuText[selected_direction * 2 + 13]];
         } else {
-            a0 = (char*)&Menu_Container_menuText[Text_Menud_menuText_Offset_endTransfer];
+            direction_help_text = (char*)&Menu_Container_menuText[Text_Menud_menuText_Offset_endTransfer];
         }
-        Menu_Framework_SetInformationMessage(a0);
+        Menu_Framework_SetInformationMessage(direction_help_text);
         break;
     }
     Menu_Container_DrawStorageCapacities();
@@ -1713,19 +1713,19 @@ int Menu_Container_UpdateTransferDirection(int arg0)
 // decomp: src/MENU/MENUD.PRG/234.c:3128
 #define vs_getXY_4(x, y) (((x)) + ((y) << 16))
 // decomp: MENUD.PRG vs_menuD_exec (src/MENU/MENUD.PRG/234.c:3130)
-int Menu_Container_UpdateScreen(u_char* arg0)
+int Menu_Container_UpdateScreen(u_char* screen_step)
 {
     static u_int Menu_Container_screenResult;
     static char Menu_Container_directionReopenDelay;
     static u_char Menu_Container_capacityListSlideStep;
 
-    int temp_a2;
-    int temp_s0;
-    int temp_s0_2;
+    int projected_category_count;
+    int control_icon_x;
+    int destination_category_count;
     int i;
-    int var_s6;
-    int var_a0;
-    int var_v0;
+    int packed_capacity_row_position;
+    int category_capacity;
+    int capacity_slide_offset;
     Menu_Framework_MenuRow* menuItem;
 
     Menu_Framework_weapons = Menu_Container_containerData->items.weapons;
@@ -1735,7 +1735,7 @@ int Menu_Container_UpdateScreen(u_char* arg0)
     Menu_Framework_armor = Menu_Container_containerData->items.armor;
     Menu_Framework_gems = Menu_Container_containerData->items.gems;
 
-    switch (*arg0) {
+    switch (*screen_step) {
     case 0:
         Menu_Framework_LoadItemText(1);
         Menu_Framework_InitializeInformationBox();
@@ -1749,17 +1749,17 @@ int Menu_Container_UpdateScreen(u_char* arg0)
         Menu_Container_categoryTitleSlideStep = 0;
         Menu_Container_categoryIconsSlideStep = 0;
         Menu_Container_controlsPanelSlideStep = 0;
-        *arg0 = 1;
+        *screen_step = 1;
         return 0;
     case 1:
-        *arg0 += Menu_Framework_LoadItemText(0);
+        *screen_step += Menu_Framework_LoadItemText(0);
         break;
     case 2:
         if (Menu_Container_directionReopenDelay != 0) {
             --Menu_Container_directionReopenDelay;
         } else {
             Menu_Container_UpdateTransferDirection(1);
-            *arg0 = 3;
+            *screen_step = 3;
         }
         break;
     case 3:
@@ -1770,16 +1770,16 @@ int Menu_Container_UpdateScreen(u_char* arg0)
                 Menu_Framework_SetMenuItem(0, 0xB4, 0x12, 0x8C, 8,
                     (char*)&Menu_Container_menuText[Menu_Container_menuText[Menu_Container_screenResult + 0xF]])
                     ->selected = 1;
-                *arg0 = 4;
+                *screen_step = 4;
             } else {
-                *arg0 = 6;
+                *screen_step = 6;
             }
         }
         break;
     case 4:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
             Menu_Container_UpdateItemList(Menu_Container_screenResult);
-            *arg0 = 5;
+            *screen_step = 5;
         }
         break;
     case 5:
@@ -1787,13 +1787,13 @@ int Menu_Container_UpdateScreen(u_char* arg0)
         if (Menu_Container_screenResult != 0) {
             Menu_Container_SetPanelVisibility(0);
             if (Menu_Container_screenResult == -2) {
-                *arg0 = 6;
+                *screen_step = 6;
             } else {
                 Menu_Framework_SetMenuItem(0, 0xB4, 0x12, 0x8C, 8,
                     (char*)&Menu_Container_menuText[Text_Menud_menuText_Offset_container])
                     ->selected = 1;
                 Menu_Container_directionReopenDelay = 5;
-                *arg0 = 2;
+                *screen_step = 2;
             }
         }
         break;
@@ -1813,7 +1813,7 @@ int Menu_Container_UpdateScreen(u_char* arg0)
             Menu_Framework_ClearMenuExcept(0);
             Menu_Framework_menuState.currentMenu = Menu_Framework_menuState.returnState;
             Menu_Framework_menuState.returnState = Menu_Container_screenResult + 2;
-            *arg0 = 0;
+            *screen_step = 0;
             return 0;
         }
         break;
@@ -1832,7 +1832,7 @@ int Menu_Container_UpdateScreen(u_char* arg0)
     }
     if (Menu_Container_categoryTitleSlideStep != 0) {
         if (Menu_Container_detailsViewPhase == 0) {
-            if (*arg0 != 6) {
+            if (*screen_step != 6) {
                 int itemCategory = ((Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7);
                 menuItem = Menu_Framework_SetMenuItem(0x1F, i + 0xB4, 0x22, 0x8C, 8,
                     (char*)&Menu_Container_menuText[Menu_Container_menuText[itemCategory + 0x12
@@ -1887,10 +1887,10 @@ int Menu_Container_UpdateScreen(u_char* arg0)
         i = 0x10 - i;
         Menu_Framework_DrawButtonPromptBackground(i, 0x26, 0x90, 0xA);
         Menu_Framework_DrawButtonPromptBackground(i, 0x36, 0x48, 0xA);
-        temp_s0 = i - 8;
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, temp_s0, 0x24, NULL);
+        control_icon_x = i - 8;
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, control_icon_x, 0x24, NULL);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Triangle, i + 0x40, 0x24, NULL);
-        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, temp_s0, 0x34, NULL);
+        Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, control_icon_x, 0x34, NULL);
         s3 = (i + 0xC) & 0xFFFF;
         Render_DrawCompactTextColor(
             "STATUS", s3 | 0x260000, 0x202020 << (Menu_Container_controlsPanelMode & 3), NULL);
@@ -1902,18 +1902,18 @@ int Menu_Container_UpdateScreen(u_char* arg0)
             if (Menu_Container_capacityListSlideStep < 0xAU) {
                 ++Menu_Container_capacityListSlideStep;
             }
-            var_v0 = Menu_Container_capacityListSlideStep << 5;
+            capacity_slide_offset = Menu_Container_capacityListSlideStep << 5;
         } else {
             if (Menu_Container_capacityListSlideStep != 0) {
                 --Menu_Container_capacityListSlideStep;
             }
-            var_v0 = Menu_Framework_rowAnimationSteps[Menu_Container_capacityListSlideStep];
+            capacity_slide_offset = Menu_Framework_rowAnimationSteps[Menu_Container_capacityListSlideStep];
         }
 
-        i -= var_v0;
+        i -= capacity_slide_offset;
         Render_DrawCompactText(Menu_Container_kStorageNames[Menu_Container_browsingGadgetBag], vs_getXY_4(i, 0x4C), NULL);
         s3 = 0;
-        var_s6 = vs_getXY_4(0x70, 0x58);
+        packed_capacity_row_position = vs_getXY_4(0x70, 0x58);
 
         for (;; ++s3) {
             Render_DrawCompactText(
@@ -1921,16 +1921,16 @@ int Menu_Container_UpdateScreen(u_char* arg0)
             if (s3 == 6) {
                 break;
             }
-            temp_s0_2 = Menu_Container_CountItems(s3, &Menu_Container_otherStorage->items);
-            temp_a2 =
-                temp_s0_2 + Menu_Container_CountItems(s3, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
+            destination_category_count = Menu_Container_CountItems(s3, &Menu_Container_otherStorage->items);
+            projected_category_count =
+                destination_category_count + Menu_Container_CountItems(s3, &Menu_Framework_unusedInventoryStorage->stagedTransfer);
             if (Menu_Container_browsingGadgetBag != 0) {
-                var_a0 = Menu_Container_containerItemCapacities[s3];
+                category_capacity = Menu_Container_containerItemCapacities[s3];
             } else {
-                var_a0 = Items_Inventory_inventoryItemCapacities[s3];
+                category_capacity = Items_Inventory_inventoryItemCapacities[s3];
             }
-            Menu_Container_DrawCapacityCount(var_a0, i + var_s6, temp_a2);
-            var_s6 += vs_getXY_4(0, 12);
+            Menu_Container_DrawCapacityCount(category_capacity, i + packed_capacity_row_position, projected_category_count);
+            packed_capacity_row_position += vs_getXY_4(0, 12);
         }
         Menu_Container_DrawCapacityCount(Menu_Container_browsingGadgetBag != 0 ? 0x100 : 0x40, i + 0xA00070, Menu_Container_transferredMiscCount);
     }

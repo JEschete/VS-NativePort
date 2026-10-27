@@ -77,7 +77,7 @@ int Menu_Loot_StageGem(Items_InventoryGem* source, int item)
 }
 
 // decomp: MENUB.PRG _copyWeaponToInventory (src/MENU/MENUB.PRG/260.c:792)
-int Menu_Loot_StageWeapon(Items_LootedWeapon* arg0)
+int Menu_Loot_StageWeapon(Items_LootedWeapon* looted_weapon)
 {
     int i;
     Items_InventoryWeapon* slot = Menu_Loot_inventory->weapons;
@@ -85,7 +85,7 @@ int Menu_Loot_StageWeapon(Items_LootedWeapon* arg0)
     int gems = 0;
 
     for (i = 0; i < 3; ++i) {
-        gems += arg0->gems[i].id != 0;
+        gems += looted_weapon->gems[i].id != 0;
     }
     if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Weapon, 1)
         || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Blade, 1)
@@ -104,16 +104,16 @@ int Menu_Loot_StageWeapon(Items_LootedWeapon* arg0)
     Core_Memory_ZeroWordsBackward(slot, sizeof *slot);
 
     slot->index = index;
-    slot->blade = Menu_Loot_StageBlade(&arg0->blade, index);
-    slot->grip = Menu_Loot_StageGrip(&arg0->grip, index);
+    slot->blade = Menu_Loot_StageBlade(&looted_weapon->blade, index);
+    slot->grip = Menu_Loot_StageGrip(&looted_weapon->grip, index);
 
     for (i = 0; i < 3; i++) {
-        if (arg0->gems[i].id != 0) {
-            slot->gems[i] = Menu_Loot_StageGem(&arg0->gems[i], index);
+        if (looted_weapon->gems[i].id != 0) {
+            slot->gems[i] = Menu_Loot_StageGem(&looted_weapon->gems[i], index);
         }
     }
 
-    Core_Memory_CopyBytesBackward(slot->name, arg0->name, sizeof slot->name);
+    Core_Memory_CopyBytesBackward(slot->name, looted_weapon->name, sizeof slot->name);
 
     return index;
 }
@@ -139,7 +139,7 @@ int Menu_Loot_StageArmor(Items_InventoryArmor* source)
 }
 
 // decomp: MENUB.PRG _copyShieldToInventory (src/MENU/MENUB.PRG/260.c:852)
-int Menu_Loot_StageShield(Items_LootedShield* arg0)
+int Menu_Loot_StageShield(Items_LootedShield* looted_shield)
 {
     int i;
 
@@ -148,7 +148,7 @@ int Menu_Loot_StageShield(Items_LootedShield* arg0)
     int gems = 0;
 
     for (i = 0; i < 3; ++i) {
-        gems += arg0->gems[i].id != 0;
+        gems += looted_shield->gems[i].id != 0;
     }
     if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Shield, 1)
         || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
@@ -164,13 +164,13 @@ int Menu_Loot_StageShield(Items_LootedShield* arg0)
     }
 
     Core_Memory_ZeroWordsBackward(shield, sizeof *shield);
-    Core_Memory_CopyHalfwords(&shield->base, &arg0->shield, sizeof shield->base);
+    Core_Memory_CopyHalfwords(&shield->base, &looted_shield->shield, sizeof shield->base);
 
     shield->base.limb = index;
 
     for (i = 0; i < 3; ++i) {
-        if (arg0->gems[i].id != 0) {
-            shield->gems[i] = Menu_Loot_StageGem(&arg0->gems[i], index | 0x80);
+        if (looted_shield->gems[i].id != 0) {
+            shield->gems[i] = Menu_Loot_StageGem(&looted_shield->gems[i], index | 0x80);
         }
     }
 
@@ -178,7 +178,7 @@ int Menu_Loot_StageShield(Items_LootedShield* arg0)
 }
 
 // decomp: MENUB.PRG _copyMiscToInventory (src/MENU/MENUB.PRG/260.c:886)
-int Menu_Loot_StageMiscItem(Items_LootedItem* arg0)
+int Menu_Loot_StageMiscItem(Items_LootedItem* looted_item)
 {
     int index = 1;
     Items_InventoryMisc* item = Menu_Loot_inventory->misc;
@@ -191,8 +191,8 @@ int Menu_Loot_StageMiscItem(Items_LootedItem* arg0)
         }
     }
 
-    item->id = arg0->itemId;
-    item->count = arg0->count;
+    item->id = looted_item->itemId;
+    item->count = looted_item->count;
     return index;
 }
 
@@ -245,16 +245,16 @@ void Menu_Loot_AppendLootRow(int itemCategory, int itemIndex)
 }
 
 // decomp: MENUB.PRG _itemIncludesItemsInCategory (src/MENU/MENUB.PRG/260.c:968)
-int Menu_Loot_CountContainedCategory(int arg0, Menu_Loot_LootListItem* arg1)
+int Menu_Loot_CountContainedCategory(int counted_category, Menu_Loot_LootListItem* loot_list_item)
 {
     int i;
     Items_InventoryShield* shield;
     Items_InventoryWeapon* weapon;
 
-    int category = arg1->itemCategory;
+    int category = loot_list_item->itemCategory;
     int count = 0;
 
-    switch (arg0) {
+    switch (counted_category) {
     case Items_ItemCategory_Blade:
     case Items_ItemCategory_Grip:
         count += category == Items_ItemCategory_Weapon;
@@ -264,21 +264,21 @@ int Menu_Loot_CountContainedCategory(int arg0, Menu_Loot_LootListItem* arg1)
     case Items_ItemCategory_Shield:
     case Items_ItemCategory_Armor:
     case Items_ItemCategory_Misc:
-        count += category == arg0;
+        count += category == counted_category;
         break;
 
     case Items_ItemCategory_Gem:
         count += category == Items_ItemCategory_Gem;
 
         if (category == Items_ItemCategory_Weapon) {
-            weapon = &Menu_Loot_inventory->weapons[arg1->itemIndex];
+            weapon = &Menu_Loot_inventory->weapons[loot_list_item->itemIndex];
             for (i = 0; i < Menu_Loot_inventory->grips[weapon->grip - 1].gemSlots; ++i) {
                 count += weapon->gems[i] != 0;
             }
         }
 
         if (category == Items_ItemCategory_Shield) {
-            shield = &Menu_Loot_inventory->shields[arg1->itemIndex];
+            shield = &Menu_Loot_inventory->shields[loot_list_item->itemIndex];
             for (i = 0; i < shield->base.gemSlots; ++i) {
                 count += shield->gems[i] != 0;
             }
@@ -290,52 +290,52 @@ int Menu_Loot_CountContainedCategory(int arg0, Menu_Loot_LootListItem* arg1)
 }
 
 // decomp: MENUB.PRG _droppableUnderCurrentDifficulty (src/MENU/MENUB.PRG/260.c:1113)
-int Menu_Loot_IsDropAllowed(int arg0)
+int Menu_Loot_IsDropAllowed(int drop_difficulty_flags)
 {
-    return arg0 & (Audio_Seq_unusedStateFlags.difficulty + 1);
+    return drop_difficulty_flags & (Audio_Seq_unusedStateFlags.difficulty + 1);
 }
 
 // decomp: MENUB.PRG _applyLootList (src/MENU/MENUB.PRG/260.c:1124)
-void Menu_Loot_StageDropRecord(Items_BattleLoot* arg0)
+void Menu_Loot_StageDropRecord(Items_BattleLoot* drop_record)
 {
     int i;
 
-    if (Menu_Loot_CanStageDrop(&arg0->weapon.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&arg0->weapon.difficultyFlags, Items_ItemCategory_Weapon, Menu_Loot_StageWeapon(&arg0->weapon));
+    if (Menu_Loot_CanStageDrop(&drop_record->weapon.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->weapon.difficultyFlags, Items_ItemCategory_Weapon, Menu_Loot_StageWeapon(&drop_record->weapon));
     }
 
-    if (Menu_Loot_CanStageDrop(&arg0->blade.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&arg0->blade.difficultyFlags, Items_ItemCategory_Blade, Menu_Loot_StageBlade(&arg0->blade.blade, 0));
+    if (Menu_Loot_CanStageDrop(&drop_record->blade.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->blade.difficultyFlags, Items_ItemCategory_Blade, Menu_Loot_StageBlade(&drop_record->blade.blade, 0));
     }
 
-    if (Menu_Loot_CanStageDrop(&arg0->grip.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&arg0->grip.difficultyFlags, Items_ItemCategory_Grip, Menu_Loot_StageGrip(&arg0->grip.grip, 0));
+    if (Menu_Loot_CanStageDrop(&drop_record->grip.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->grip.difficultyFlags, Items_ItemCategory_Grip, Menu_Loot_StageGrip(&drop_record->grip.grip, 0));
     }
 
-    if (Menu_Loot_CanStageDrop(&arg0->shield.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&arg0->shield.difficultyFlags, Items_ItemCategory_Shield, Menu_Loot_StageShield(&arg0->shield));
+    if (Menu_Loot_CanStageDrop(&drop_record->shield.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->shield.difficultyFlags, Items_ItemCategory_Shield, Menu_Loot_StageShield(&drop_record->shield));
     }
 
     for (i = 0; i < 2; ++i) {
-        if (Menu_Loot_CanStageDrop(&arg0->armor[i].difficultyFlags) != 0) {
-            Menu_Loot_AppendStagedDrop(&arg0->armor[i].difficultyFlags,
-                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->armor[i].armor));
+        if (Menu_Loot_CanStageDrop(&drop_record->armor[i].difficultyFlags) != 0) {
+            Menu_Loot_AppendStagedDrop(&drop_record->armor[i].difficultyFlags,
+                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&drop_record->armor[i].armor));
         }
     }
 
-    if (Menu_Loot_CanStageDrop(&arg0->accessory.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&arg0->accessory.difficultyFlags,
-            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&arg0->accessory.accessory));
+    if (Menu_Loot_CanStageDrop(&drop_record->accessory.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->accessory.difficultyFlags,
+            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&drop_record->accessory.accessory));
     }
 
-    if (Menu_Loot_CanStageDrop(&arg0->gem.difficultyFlags) != 0) {
-        Menu_Loot_AppendStagedDrop(&arg0->gem.difficultyFlags, Items_ItemCategory_Gem, Menu_Loot_StageGem(&arg0->gem.gem, 0));
+    if (Menu_Loot_CanStageDrop(&drop_record->gem.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->gem.difficultyFlags, Items_ItemCategory_Gem, Menu_Loot_StageGem(&drop_record->gem.gem, 0));
     }
 
     for (i = 0; i < 3; ++i) {
-        if ((Menu_Loot_CanStageDrop(&arg0->misc[i].difficultyFlags) != 0)
-            && (arg0->misc[i].itemId != 0) && (arg0->misc[i].count != 0)) {
-            Menu_Loot_AppendStagedDrop(&arg0->misc[i].difficultyFlags, Items_ItemCategory_Misc, Menu_Loot_StageMiscItem(&arg0->misc[i]));
+        if ((Menu_Loot_CanStageDrop(&drop_record->misc[i].difficultyFlags) != 0)
+            && (drop_record->misc[i].itemId != 0) && (drop_record->misc[i].count != 0)) {
+            Menu_Loot_AppendStagedDrop(&drop_record->misc[i].difficultyFlags, Items_ItemCategory_Misc, Menu_Loot_StageMiscItem(&drop_record->misc[i]));
         }
     }
 
@@ -426,10 +426,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
 }
 
 // decomp: MENUB.PRG _setKeyFlag (src/MENU/MENUB.PRG/260.c:2108)
-void Menu_Loot_RecordClaimedKey(int arg0)
+void Menu_Loot_RecordClaimedKey(int item_id)
 {
-    if (arg0 > 457) {
-        State_SetScriptFlag(arg0 + 438, 1);
+    if (item_id > 457) {
+        State_SetScriptFlag(item_id + 438, 1);
     }
 }
 

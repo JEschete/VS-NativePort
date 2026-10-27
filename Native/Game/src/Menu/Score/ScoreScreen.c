@@ -151,17 +151,17 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
     int animState;
     int bgWidth;
     int isScrollable;
-    char temp_v1_2;
+    char texture_u;
     int brightness;
     int var_s0;
     int i;
     u_long* prim;
     u_char* menuText;
-    u_int temp_a0;
+    u_int texture_v;
     u_int xy;
     u_long* before;
     int state;
-    int s5;
+    int gradient_intensity_offset;
 
     menuText = menuItem->text;
     frameBuf = 0;
@@ -221,12 +221,12 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
 
     prim = Render_frameScratch.primitiveCursor;
 
-    for (i = 0, s5 = 0; i < 12; s5 += 8, ++i) {
+    for (i = 0, gradient_intensity_offset = 0; i < 12; gradient_intensity_offset += 8, ++i) {
         if (isScrollable == 0) {
-            var_s0 = s5 + 32;
+            var_s0 = gradient_intensity_offset + 32;
         } else {
-            var_s0 = s5;
-            var_s0 = 120 - s5;
+            var_s0 = gradient_intensity_offset;
+            var_s0 = 120 - gradient_intensity_offset;
         }
 
         prim[0] = (*before & 0xFFFFFF) | (6 << 24);
@@ -268,14 +268,14 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
 
         prim = Render_QueueSprite(brightness, xy, w, before);
 
-        temp_v1_2 = xy - var_s0;
-        temp_a0 = xy >> 0x10;
+        texture_u = xy - var_s0;
+        texture_v = xy >> 0x10;
         xy += 1 << 16;
 
         prim[1] = ((u_int)(frameBuf + var_s0) >> 6)
                 | vs_getTpage(
                     0, 0, Render_BlendMode_Subtract, Render_BlendMode_Add, Render_Dithering_Off);
-        prim[4] = temp_v1_2 | (temp_a0 << 8);
+        prim[4] = texture_u | (texture_v << 8);
     }
 }
 
@@ -487,7 +487,7 @@ int Menu_Score_Update(void)
 
     int _[8] __attribute__((unused));
     Menu_TextBoxState* textBox;
-    Menu_Score_Row* var_s0;
+    Menu_Score_Row* gazette_row_cursor;
     int lStickX;
     int lStickY;
     int selectedRow;
@@ -851,9 +851,9 @@ int Menu_Score_Update(void)
             break;
         }
 
-        for (Menu_Score_updateMenuAnimState = 0, var_s0 = Menu_Score_gazetteRows; Menu_Score_updateMenuAnimState < 8;
-            ++Menu_Score_updateMenuAnimState, ++var_s0) {
-            if (var_s0->animationState == 0) {
+        for (Menu_Score_updateMenuAnimState = 0, gazette_row_cursor = Menu_Score_gazetteRows; Menu_Score_updateMenuAnimState < 8;
+            ++Menu_Score_updateMenuAnimState, ++gazette_row_cursor) {
+            if (gazette_row_cursor->animationState == 0) {
                 Menu_Framework_DeactivateRow(Menu_Score_updateMenuAnimState);
             }
         }
@@ -1003,10 +1003,10 @@ int Menu_Score_Update(void)
                     .zudId)
             == 0) {
 
-            int temp_v1_4 = Actors_actorRecords[1]->menuCameraDistance;
-            Menu_Score_initCameraDistance = temp_v1_4;
+            int initial_enemy_camera_distance = Actors_actorRecords[1]->menuCameraDistance;
+            Menu_Score_initCameraDistance = initial_enemy_camera_distance;
             Menu_Score_cameraHeightOffset = Actors_actorRecords[1]->collisionHeight;
-            Menu_Score_cameraDistance = (temp_v1_4 << 0x10) >> 0xE;
+            Menu_Score_cameraDistance = (initial_enemy_camera_distance << 0x10) >> 0xE;
 
             if (Menu_Score_cameraDistance < 0x280) {
                 Menu_Score_cameraDistance = 0x280;
@@ -1294,10 +1294,10 @@ int Menu_Score_Update(void)
                     .zudId)
             == 0) {
 
-            int temp_v1_10 = Actors_actorRecords[1]->menuCameraDistance;
-            Menu_Score_initCameraDistance = temp_v1_10;
+            int reselected_enemy_camera_distance = Actors_actorRecords[1]->menuCameraDistance;
+            Menu_Score_initCameraDistance = reselected_enemy_camera_distance;
             Menu_Score_cameraHeightOffset = Actors_actorRecords[1]->collisionHeight;
-            Menu_Score_cameraDistance = (temp_v1_10 << 0x10) >> 0xE;
+            Menu_Score_cameraDistance = (reselected_enemy_camera_distance << 0x10) >> 0xE;
 
             if (Menu_Score_cameraDistance < 0x280) {
                 Menu_Score_cameraDistance = 0x280;
@@ -1416,15 +1416,15 @@ void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix)
 void Menu_Score_DrawEnemyBanner(int x, int y, int w, int h, int color)
 {
     int i;
-    int var_s7;
+    int scanline_width;
     LINE_G2* line;
     POLY_F4* poly;
 
     line = Render_frameScratch.primitiveCursor;
 
-    for (i = y, var_s7 = w; i < ((y + h) - 1); ++i, --var_s7) {
+    for (i = y, scanline_width = w; i < ((y + h) - 1); ++i, --scanline_width) {
         setLineG2(line);
-        setXY2(line, x, i, (x + var_s7) - 1, i);
+        setXY2(line, x, i, (x + scanline_width) - 1, i);
         setRGB0(line, Menu_Score_kBgColorStops0[color].r, Menu_Score_kBgColorStops0[color].g,
             Menu_Score_kBgColorStops0[color].b);
         setRGB1(line, Menu_Score_kBgColorStops1[color].r, Menu_Score_kBgColorStops1[color].g,
@@ -1461,8 +1461,8 @@ void Menu_Score_DrawGradientPanel(int x, int y, int w, int h, int color)
     POLY_F4* polyF4;
     void** scratch = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-    int a3 = (x + w) - 1;
-    int a2 = (y + h) - 1;
+    int right_x = (x + w) - 1;
+    int bottom_y = (y + h) - 1;
 
     polyG4 = scratch[0];
     setPolyG4(polyG4);
@@ -1473,7 +1473,7 @@ void Menu_Score_DrawGradientPanel(int x, int y, int w, int h, int color)
     g1 = Menu_Score_kBgColorStops1[color].g;
     b1 = Menu_Score_kBgColorStops1[color].b;
 
-    setXY4(polyG4, x, y, a3, y, x, a2, a3, a2);
+    setXY4(polyG4, x, y, right_x, y, x, bottom_y, right_x, bottom_y);
     setRGB0(polyG4, r0, g0, b0);
     setRGB1(polyG4, r1, g1, b1);
     setRGB2(polyG4, r0, g0, b0);
@@ -1529,33 +1529,33 @@ void Menu_Score_DrawFooterBackground(int x)
 // decomp: MENU9.PRG _renderTopMenu (src/MENU/MENU9.PRG/238.c:1679)
 void Menu_Score_RenderOverview(int animStep)
 {
-    Render_ScreenOffset sp18;
-    Render_ScreenOffset sp20;
-    char sp28[128];
-    MATRIX spA8;
+    Render_ScreenOffset saved_projection_offset;
+    Render_ScreenOffset overview_projection_offset;
+    char score_text[128];
+    MATRIX viewer_camera_matrix;
     void** scratch;
 
     if (animStep < 8) {
         Menu_Score_DrawViewerEdgeFade();
     }
 
-    Render_GetProjectionScreenOffset(&sp18);
+    Render_GetProjectionScreenOffset(&saved_projection_offset);
 
-    sp20.x = 0x80 - ((8 - animStep) << 5);
-    sp20.y = 0xF0;
+    overview_projection_offset.x = 0x80 - ((8 - animStep) << 5);
+    overview_projection_offset.y = 0xF0;
 
-    Render_SetProjectionScreenOffset(&sp20);
-    Menu_Score_BuildViewerCamera(&spA8);
-    Menu_Framework_DrawActorPreview(&spA8);
-    Render_SetProjectionScreenOffset(&sp18);
+    Render_SetProjectionScreenOffset(&overview_projection_offset);
+    Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
+    Menu_Framework_DrawActorPreview(&viewer_camera_matrix);
+    Render_SetProjectionScreenOffset(&saved_projection_offset);
 
-    sprintf(sp28, "#%ld", Menu_Score_score);
+    sprintf(score_text, "#%ld", Menu_Score_score);
 
     scratch = (void**)Core_ScratchAddr(0);
 
     Render_DrawCompactTextColor("SCORE", (((animStep * 16) - 120) & 0xFFFF) | (16 << 16),
         vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);
-    Render_DrawCompactTextColor(sp28, ((animStep * 16) & 0xFFFF) | (16 << 16),
+    Render_DrawCompactTextColor(score_text, ((animStep * 16) & 0xFFFF) | (16 << 16),
         vs_getRGB888(128, 128, 128), scratch[1] + 0x1C);
 
     Menu_Score_DrawGradientPanel((animStep * 16) - 128, 16, 136, 12, 2);
