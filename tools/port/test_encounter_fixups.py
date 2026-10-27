@@ -23,6 +23,19 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("Effects_ActionEffectRequest.position", row["notes"])
         self.assertEqual(row["size"], "8")
         self.assertEqual(row["type"], "SVECTOR[1]")
+        header = (root / r"Native\Game\src\Effects\Runtime.h").read_text(
+            encoding="utf-8"
+        )
+        source = (root / r"Native\Game\src\Effects\Runtime.c").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "#define Effects_effectOrigin ((SVECTOR*)(&Effects_actionRequest.position))",
+            header,
+        )
+        self.assertNotRegex(
+            source, r"SVECTOR\s+Effects_effectOrigin\s*\["
+        )
 
     def test_texture_binding_receives_its_payload_extent(self):
         fixups = copy_fixups.FIXES["F01626"]
