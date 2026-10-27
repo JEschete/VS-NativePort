@@ -8,12 +8,52 @@ from pathlib import Path
 from unittest import mock
 
 import audit_assembly_gaps
+import check_event_dispatch
 import copy_fixups
 import copy_to_native
 import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_event_dispatch_audit_includes_owned_opcode_headers(self):
+        manifest = {
+            r"Native\Game\src\Event\ScriptVm.h": "generated",
+            r"Native\Game\src\Event\ScriptVm.c": "not-a-header",
+        }
+        owned = {
+            "F01130": {"header": r"Native\Game\src\Event\WeaponMode.h"},
+            "T00001": {"header": r"Native\Game\include\CppOnly.hpp"},
+            "F01033": {},
+        }
+        self.assertEqual(
+            check_event_dispatch.event_headers(manifest, owned),
+            [
+                r"Native\Game\src\Event\ScriptVm.h",
+                r"Native\Game\src\Event\WeaponMode.h",
+            ],
+        )
+
+    def test_event_dispatch_audit_rejects_an_owned_handler_without_a_header(self):
+        for row in ({}, {"header": ""}, {"header": " \t "}):
+            with (
+                self.subTest(row=row),
+                self.assertRaisesRegex(ValueError, "F01130.*header"),
+            ):
+                check_event_dispatch.event_headers({}, {"F01130": row})
+
+    def test_event_dispatch_audit_deduplicates_shared_and_generated_headers(self):
+        header = r"Native\Game\src\Event\WeaponMode.h"
+        self.assertEqual(
+            check_event_dispatch.event_headers(
+                {header: "generated"},
+                {
+                    "F01130": {"header": f" \t{header}\t "},
+                    "F01027": {"header": header},
+                },
+            ),
+            [header],
+        )
+
     def test_effect_origin_aliases_the_primary_request_position(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(

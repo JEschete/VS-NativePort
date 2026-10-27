@@ -9,6 +9,19 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #218's event-dispatch audit now includes registered owned opcode headers,
+  fixing the missing F01130 declaration without broadening the C ABI or
+  weakening table checks. On dirty base `f0326749`, the published audit
+  reproduces exactly one missing-handler error; the repaired and exact-staged
+  audits check all 256 normal/256 skip entries and 179 unique handler names
+  with zero errors. Three asset-independent controls cover owned/generated
+  selection, unrelated-header exclusion, shared-header deduplication and
+  absent/empty/whitespace registry contracts. All 156 exact-staged copier
+  tests pass (157 in the owner-dirty tree); focused tooling quality is
+  zero findings/zero new. Commands are in [QUALITY.md](QUALITY.md#event-dispatch-contract-audit);
+  local evidence is `build\quality\issue218-*`, with publication/exact-CI
+  closure evidence on #218. This supersedes older unpublished #218 notes
+  below; no gameplay, compatibility status or unrelated owner work changes.
 - #148's exhaustive source-backed naming/retention review is complete for
   the sweep scope, including all 28 inline-template producers. The 570
   individual binding/snapshot records in
@@ -30,7 +43,7 @@ verification of the current worktree.
   Final publication/CI and issue-closure evidence are recorded on #148.
   Naming does not certify all gameplay, C++ promotion or compatibility
   retirement. The following resumed-work entry is historical #148 context:
-  save, scene-catalog, #218, owner guidance and the owner document deletion
+  save, scene-catalog, owner guidance and the owner document deletion
   remain separate uncommitted work; do not stage them with #148.
 - Owner-directed #151 retry optimization now adds `--door-resume
   <sequence-results.json>`. Subsequent fix runs must reuse a checkpoint and

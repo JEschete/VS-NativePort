@@ -88,6 +88,35 @@ These tests use isolated fixtures, not disc data, reference indexes or live
 ledgers. Actual generator-output correctness, ownership preservation and repeat
 generation are separate required checks when changing generator behavior.
 
+## Event dispatch contract audit
+
+After generation, validate the event-handler C ABI and both 256-entry dispatch
+tables with:
+
+```powershell
+.\.venv-3\Scripts\python.exe tools\port\check_event_dispatch.py
+```
+
+This local check requires the extracted US `Native\data\disc\BATTLE\BATTLE.PRG`
+module; `--module <path>` can select another copy. It parses generated headers
+plus the registered headers of owned opcode handlers from `tools\port\owned.csv`,
+since those headers deliberately do not appear in the copier manifest.
+An owned opcode entry without a header is an error. Unrelated owned headers are
+not added to the C translation unit. Canonical function signatures, pointer
+table types, entry counts and the complete normal/skip target set are still
+checked; ownership is not an ABI exemption.
+
+Asset-independent header-selection, deduplication and missing-contract controls
+run in the existing encounter-fixup suite and CI:
+
+```powershell
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\port -p test_encounter_fixups.py
+```
+
+The actual disc-backed audit remains a separate local verification; its module
+is not committed or uploaded. Passing it is not gameplay or compatibility-
+retirement verification.
+
 ## Scope And Baseline
 
 The default scope includes hand-maintained native sources and first-party Python

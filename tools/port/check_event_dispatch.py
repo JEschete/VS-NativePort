@@ -18,12 +18,25 @@ import copy_to_native as ct
 from layout_check import INCLUDES
 
 
+def event_headers(manifest: dict[str, str],
+                  owned: dict[str, dict[str, str]]) -> list[str]:
+    """Include owned opcode declarations without pulling unrelated C++ headers into the C audit."""
+    headers = {path for path in manifest if path.endswith(".h")}
+    for identifier, row in owned.items():
+        if identifier in cf.EVENT_OPCODE_HANDLERS:
+            header = row.get("header", "").strip()
+            if not header:
+                raise ValueError(f"{identifier}: owned opcode handler needs a header")
+            headers.add(header)
+    return sorted(headers)
+
+
 def main() -> int:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument('--module', type=Path, default=ct.NATIVE / 'data/disc/BATTLE/BATTLE.PRG')
     args = ap.parse_args()
     cp = ct.Copier()
-    headers = sorted(p for p in json.loads(ct.MANIFEST.read_text()) if p.endswith('.h'))
+    headers = event_headers(json.loads(ct.MANIFEST.read_text()), cp.owned)
     source = ''.join(f'#include "{ct.include_spelling(h)}"\n' for h in headers)
     flags = ['-x', 'c', '-std=c17', '--target=x86_64-pc-windows-msvc', '-fms-extensions',
              '-fms-compatibility', '-Wno-everything'] + [f'-I{ct.NATIVE / p}' for p in INCLUDES]
