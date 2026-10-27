@@ -102,7 +102,28 @@ code change.
 
 Evidence and retained scripts are under ignored `build\quality\issue160-native`.
 No original assets, screenshots, dumps or Ghidra databases are committed.
-#160 stays open until this coherent repair is published and exact CI passes.
+
+Final publication:142491cc003c35ba040204d542338262c2eee988 contains the
+material/ledger/test repair;706c41592654f5dbee0fd8f9856feea151236b9b
+includes the generated Runtime.c/h canonical view that was initially
+omitted from staging. The output guard2e40a3212228cf4063a5ee416c2abc21e3fd8079
+now checks both the ledger and generated macro/no-independent-storage body,
+so CI cannot validate just the catalog while missing the generated fix.
+All three have exact green Source Quality40438987477/40439217035/
+40439326171. Required full tidy completes successfully:294 existing/
+0 new with unchanged baseline. The attempted Pylance syntax checks were
+unavailable after MCP catalog changes; BOM-aware Python AST validation,
+Ruff and all133 port controls pass instead, with no editor-environment claim.
+
+Target-corrected normal-speed Debug1793067819656796-0 and
+Release1793067908613441-0 both clear effect1692, restore control1726 and
+retain original four-limb damage at1504. All active captures are local
+under target-visual-Debug/Release; owner accepted the actual placement.
+#160 is closed with source/CI/component/runtime and owner evidence; #149/
+#151 were reconciled without rewriting the later fixture-defeat result.
+Current exact132-case Debug history for #167 remains in progress under
+`history167-Debug`; only the completed Release prefix counts above are
+acceptance evidence at this checkpoint.
 
 ## Current separate scene observations and blockers (2026-10-26)
 

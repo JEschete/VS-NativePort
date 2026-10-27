@@ -20,15 +20,20 @@ verification of the current worktree.
   Material red2/8 has3 failures; placement red2/11 all fail before repair.
   Full Debug/Release1012/9,578,375 each,133 port/32 naming,621 fields/0
   mismatches and two stable generations1,031 outputs/121 owned paths pass.
-  Focused/default quality0 new; required full tidy is still running.
+  Focused/default quality0 new; required full tidy exits0 with294
+  existing/0 new and unchanged baseline.
   Normal-speed original Gravity renders beyond1508, clears1692, restores
   control1726 and retains45/45/46/46 damage; later fixture defeat is a
   blocked door result, not a passed edge. Owner visual acceptance is recorded
-  on #160; publication/exact CI remains the closure gate.
+  on #160, now closed. Source142491cc plus generated Runtime view706c4159
+  and output guard2e40a321 have exact green40438987477/40439217035/
+  40439326171. No artistic/all-spell or passed-door claim is implied.
   Ghidra12.1.4/MCP is now live on analyzed BATTLE.PRG in ignored build\ghidra.
   Separate #167's exact132-case persistent Release prefix completes with
   96 passed/36 blocked and0 engine errors on the preserved22fbc737 image;
   no malformed producer or causal fix is inferred.
+  The matching current132-case Debug history is still running; #167 stays
+  open until a producer/reproducible defect or justified resolution exists.
   See the [Gravity checkpoint](HANDOFF_HISTORY.md#gravity-material-and-canonical-target-origin-2026-10-26).
 - #42 is closed after final source98d38089 and evidence011eecc3 both received
   exact green CI40428688667/40429529689. Separate non-MA #197 now repairs
