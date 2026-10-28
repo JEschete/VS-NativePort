@@ -9,6 +9,29 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #167's owner disposition (2026-10-27): close as **unreproduced/not planned**,
+  explicitly without claiming a fix. The historical ACFD8139/5B64FBA0
+  scene30 malformed packet and C++ termination remain confirmed; the
+  matching image/PDB and original failing logs are no longer at their recorded
+  paths, and no causal producer repair or matching historical stack is proven.
+  Existing Debug/Release standalone records `1793063834761061-0` and
+  `1793063834657676-0` restore control at13320 and tear down at13452,
+  with280 authored dialogue confirmations and0 engine errors each.
+  Recorded132-case histories are95 passed/37 blocked in Debug and
+  96 passed/36 blocked in Release, with0 engine errors and complete teardown;
+  their final3600-tick case remains budget-blocked, not a passed door.
+  Debug's recorded script1050 matches scene30/32/17/PC233/wait70 and
+  models0/170/169/10 without the historical packet failure.
+  These are existing recorded observations, not fresh replays of the current
+  documentation revision. No historical rebuild, renderer workaround or new
+  gameplay verification accompanies this disposition. The original causal-fix
+  acceptance gates are not marked complete. Reopen with a current failing
+  packet plus matching executable/PDB and exception/producer evidence, or
+  recovered historical artifacts. Evidence remains under
+  `build\quality\issue42-final\nonma167-{Debug,Release}` and
+  `build\quality\issue160-native\scene167-persistent-debug-verified.json`.
+  This owner disposition supersedes older keep-open statements below;
+  no shared root with #26, #184 or #185 is established.
 - #218's event-dispatch audit now includes registered owned opcode headers,
   fixing the missing F01130 declaration without broadening the C ABI or
   weakening table checks. On dirty base `f0326749`, the published audit
