@@ -150,6 +150,41 @@ Optional assistance presses only normal Circle while a visible dialogue wait
 is observed; it never presses Start or forces a skip. Source/command traces and
 aligned visual/audio evidence are still required for fidelity claims.
 
+### Investigation coverage and limits
+
+The #149 static investigation reconciles all1,822 original assets and1,311
+script definitions:706 indexed/93 empty room scripts and101 indexed/411 empty
+external EVTs. The797 actor-animation banks and single FMV are tracked
+separately. The inventory retains208 unresolved special-operation prerequisites,
+all branch successors and original room/asset identities.
+
+`build\quality\issue149-all-scene-status.json` overlays actual evidence without
+changing the original inventory: three external definitions (80/82/81) have
+source-backed component/control/reentry proof; **804 indexed definitions remain
+runtime-unverified**,504 definitions are empty, and all-branch coverage is not
+asserted. `build\quality\issue149-replay-evidence.json` verifies all four fresh
+Debug/Release normal-speed cases against original opcodes, complete operands
+and taken branches, along with camera/pose/effect state, flag writes, no skips,
+no engine errors and no audio-queue loss. Native control settles at10910 and
+passes the120-tick gate at11030 on each entry; teardown completes11042.
+This is not earned boss victory, complete campaign, pixel or listening parity.
+
+The actual Desktop shared-profile control is
+`build\Release\game-logs\1793209418183309-0`. Interactive controller control
+`build\Release\combat-lab\runs\1793210619128669-0` observes visible dialogue549,
+pauses549, steps exactly550 and receives native Circle558 with automatic
+dialogue disabled. F10 cancels and normally tears down; cancellation is not a
+scene-completion pass. Only messages to the owned window were used.
+
+The36 inherited door event-budget observations are separate historical
+evidence. Fourteen surviving end-state traces show phase0/control1 after
+original story room relocations, not VM hangs;22 missing raw traces stay
+unverified. Their old door outcomes are not relabeled passes. See
+`build\quality\scene149-inherited-event-frontier.json`.
+Investigation/tool availability, bounded playback, artistic fidelity,
+legitimate campaign progression, C++ promotion and compatibility retirement
+remain separate claims.
+
 ### Static scene inventory
 
 `--catalog-only --scene-catalog` writes `scene-inventory.json` and a source/data

@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #149 final acceptance reconciliation: semantic implementation
+  `b3f68b46ca50a3aa3a04fa28ef1edd81f4cb0c64` has exact green Source Quality
+  `40740895618`. Static inventory16e3d921 and diagnostic9db31b9c milestones
+  also have exact green40733732970/40736486701. All1,311 definitions are
+  reconciled in `build\quality\issue149-all-scene-status.json`: three bounded
+  external components verified,804 indexed runtime-unverified,504 empty;
+  208 special-operation prerequisites remain unresolved. Do not equate
+  investigation/tooling acceptance with all-story/all-branch fidelity.
+  Actual controller proof Release1793210619128669-0 uses no scripted or
+  automatic dialogue input: visible wait549, F6 pause549, F7 step550,
+  native Circle558, then F10 normal cancellation/teardown with0 errors.
+  The local report is `build\quality\scene149-interactive.json`. Two earlier
+  helper attempts were terminated: one sampled an incomplete live JSON line;
+  another assumed global foreground could not change. Neither is a scene
+  completion/crash proof. The final sampler uses complete lines and makes no
+  global-focus assumption or activation call. Final closure documentation
+  preserves all unverified cases and historical door nonpasses.
+
 - #149 semantic playback gate, dirty `9db31b9c`: sequence entries can assert
   ordered event IDs from an explicit native source, execution phase4 and
   target-room phase0/control1/no-transition/no-dialogue for120 ticks. Native
