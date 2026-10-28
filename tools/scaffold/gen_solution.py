@@ -70,6 +70,7 @@ PROJECTS = [
                 r"Tools\CombatLab\src\Canvas.cpp",
                 r"Tools\CombatLab\src\DoorTests.cpp",
                 r"Tools\CombatLab\src\Editor.cpp",
+                r"Tools\CombatLab\src\SceneCatalog.cpp",
                 r"Tools\CombatLab\src\Trace.cpp"]),
 ]
 BY_NAME = {p.name: p for p in PROJECTS}

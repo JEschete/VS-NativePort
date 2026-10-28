@@ -9,6 +9,27 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151 is closed completed with fixing/support revision
+  `deeecf8ad7d159f991b52aeb48b4f731a72731b0` and exact green Source Quality
+  `40731411773`; the issue's closure table explicitly preserves historical
+  nonpasses and excludes all-physical/full-campaign claims. Owner priority is
+  now #149, with general player work frozen.
+  Fresh dirty-`deeecf8a` scene catalog checks pass14 cases/5,527 assertions
+  per Debug/Release, including the actual original-disc inventory and repeated
+  output comparison. Both fresh CLI outputs contain1822 distinct assets:
+  512 MPDs/512 EVTs/797 SEQ-ESQ banks/one movie,807 indexed and504 empty
+  definitions,0 errors. All playback/precondition labels remain unverified.
+  Trigger-offset alias rejection is included; short sentinel tables remain
+  valid. VS.Tests/VS.CombatLab project generation matches the working files
+  and is identical on a second generation; scoped compilation quality is
+  0 new findings without baseline changes.
+  New inventory paths:
+  `build\Debug\combat-lab\runs\1793207081262353-0\scene-inventory.json` and
+  `build\Release\combat-lab\runs\1793207574668336-0\scene-inventory.json`.
+  The catalog is only the first #149 gate. Next close the explicit runtime
+  logging gaps (full executed operands and relevant flag transitions) and
+  reconcile source-backed playback/control/reentry evidence, including the
+  36 source/destination-event budget cases retained from #151.
 - #151 closure audit (dirty `e493fa2c`): the original exhaustive machine report
   still reconciles exactly1001 unique directed IDs/1003 observations/0 missing
   or unrun. Its SHA-256 remains

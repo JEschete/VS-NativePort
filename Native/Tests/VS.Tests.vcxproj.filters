@@ -219,6 +219,9 @@
     <ClCompile Include="src\SaveStoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SceneCatalogTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ScreenEffectStateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -274,6 +277,9 @@
       <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp">
+      <Filter>..\Tools\CombatLab\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\CombatLab\src\SceneCatalog.cpp">
       <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp">

@@ -137,6 +137,7 @@
     <ClCompile Include="src\RoomVertexDecodeTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />
+    <ClCompile Include="src\SceneCatalogTests.cpp" />
     <ClCompile Include="src\ScreenEffectStateTests.cpp" />
     <ClCompile Include="src\ScreenWarpTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
@@ -161,6 +162,7 @@
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\DoorTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp" />
+    <ClCompile Include="..\Tools\CombatLab\src\SceneCatalog.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
   </ItemGroup>
   <ItemGroup>

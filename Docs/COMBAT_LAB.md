@@ -83,6 +83,59 @@ Session UI borrows are invalidated before heap replacement; original in-scene
 close behavior is unchanged. Evidence is in `family179-interrupted-reentry-*`
 and `scene174-verified-<run-id>.json` under `build/quality`.
 
+### Static scene inventory
+
+`--catalog-only --scene-catalog` writes `scene-inventory.json` and a source/data
+manifest without opening a game window or executing scripts:
+
+```powershell
+build\Debug\VS.CombatLab.exe --data Native\data --catalog-only --scene-catalog
+```
+
+The inventory preserves all original MPD and external EVT identities, including
+unreferenced rooms and empty definitions. Room records retain their ZND
+zone/room references, entry/local script offsets, trigger masks and unevaluated
+conditions. Script graphs include both conditional successors, signed relative
+branches, loops and child/parent thread paths using the production opcode-size
+and dispatch tables. Chained external-event IDs and room handoffs retain their
+entry coordinates, flags, transition effect/speed and current-zone versus
+explicit-zone semantics. Saved return cursors and special-operation prerequisites
+are explicitly unresolved, not guessed. Truncated sections/instructions, invalid
+targets and overlapping operands are errors saved in the inventory; the command
+then fails rather than silently dropping the definitions.
+
+SEQ/ESQ actor-animation banks and the movie asset are listed separately from
+event scripts. They are not mistaken for independently playable cutscenes.
+All playback and legitimate-precondition statuses remain **unverified**:
+static reachability, an empty script and successful indexing do not establish
+story progression, audiovisual parity or return to player control. Use the
+existing interactive original-room or external-event modes for playback.
+
+Asset-independent tests use `[scenes][catalog]`. The optional local-data test
+`[disc-scene-inventory]` checks all 512 MPDs, 512 EVTs, 797 SEQ/ESQ banks and one
+movie, unique identities, explicit unverified statuses and repeatable output.
+No disc-derived inventory or assets are committed.
+
+The 2026-10-27 directed-door reconciliation accounts for all1,001 original IDs:
+latest observations are761 passed/238 blocked/2 failed, with0 unrun.
+There are764 prior-or-latest positive proofs, not764 fresh passes; three
+older passes have later blocked observations. The two failures are the known
+required-actor diagnostic in room12/0, not new crashes: the fixed diagnostic
+profile has story stage3 while the original Minotaur placement requires stage8,
+scene flag1=1 and flag187<=1. No actor is injected or story state changed to
+make those rows pass.
+
+Separate actual-controller checks load unchanged existing native saves through
+production Continue. Preboss Debug/Release both enter12/0 at2388 with real
+model53/E222, restore control3768 and satisfy the unchanged120-tick gate during
+4050..4267, with0 errors/forced skips. The longer Debug observation eventually
+ends in a genuine idle defeat; it is not a passed combat encounter. Postboss
+Debug/Release both travel9/17->12/0 at2402 and physically return9/17 at3066,
+remaining in normal control through3900. These physical/source-precondition
+observations remain distinct from the original fixed-profile failed rows.
+Local full reports are under `build/quality/issue151-frontier-20261027` and
+`build/quality/issue151-minotaur-legit`; owner save files remain byte-identical.
+
 ### Encounter setup
 
 The menu uses the extracted SYSTEM.DAT font. Select zone, room, enemy, quantity,

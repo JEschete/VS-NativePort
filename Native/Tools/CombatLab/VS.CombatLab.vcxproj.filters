@@ -24,6 +24,9 @@
     <ClCompile Include="src\main.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SceneCatalog.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Trace.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -34,6 +37,9 @@
       <Filter>include\CombatLab</Filter>
     </ClInclude>
     <ClInclude Include="include\CombatLab\Editor.hpp">
+      <Filter>include\CombatLab</Filter>
+    </ClInclude>
+    <ClInclude Include="include\CombatLab\SceneCatalog.hpp">
       <Filter>include\CombatLab</Filter>
     </ClInclude>
     <ClInclude Include="include\CombatLab\Trace.hpp">

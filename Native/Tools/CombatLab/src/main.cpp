@@ -17,6 +17,7 @@
 #include "Battle/Encounter.hpp"
 #include "CombatLab/Canvas.hpp"
 #include "CombatLab/Editor.hpp"
+#include "CombatLab/SceneCatalog.hpp"
 #include "CombatLab/Trace.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
@@ -61,6 +62,7 @@ struct Options {
   bool devices = true;
   bool player_observations = false;
   bool door_transitions = false;
+  bool scene_catalog = false;
   std::string door_case;
   std::string door_from;
   fs::path door_resume;
@@ -167,6 +169,9 @@ void ParseValue(Options& options, std::string_view argument,
 }
 
 void ValidateOptions(Options& options) {
+  if (options.scene_catalog && !options.catalog_only) {
+    throw std::runtime_error("--scene-catalog requires --catalog-only");
+  }
   if (options.effect_paths && options.speed != 1) {
     throw std::runtime_error("--trace-effect-paths requires normal --speed 1");
   }
@@ -213,6 +218,8 @@ Options Parse(int argc, char** argv) {
       options.player_observations = true;
     } else if (argument == "--door-transitions") {
       options.door_transitions = true;
+    } else if (argument == "--scene-catalog") {
+      options.scene_catalog = true;
     } else {
       if (++index == argc) {
         throw std::runtime_error("option is missing a value");
@@ -257,7 +264,8 @@ void LoadData(const Options& options) {
 
 std::vector<Game::EncounterZone> LoadCatalog(const Options& options,
                                              Trace& trace) {
-  auto catalog = Game::ReadEncounterCatalog(options.door_transitions);
+  auto catalog = Game::ReadEncounterCatalog(options.door_transitions ||
+                                            options.scene_catalog);
   if (!catalog) throw std::runtime_error(catalog.error());
   auto catalog_json = nlohmann::json::array();
   for (const auto& zone : *catalog) {
@@ -334,29 +342,31 @@ void InitializeWindow(Platform::App& app, Render::Device& gpu, Trace& trace) {
 
 void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
   const auto source = Game::TraceSourceProvenance(Platform::ExecutableDir());
-  WriteJson(
-      trace.Directory() / "manifest.json",
-      {{"schema", 1},
-       {"revision", source.at("revision")},
-       {"worktree", source.at("worktree")},
-       {"source_status", source.at("status")},
-       {"data_root", fs::absolute(options.data).string()},
-       {"configuration", options.door_transitions ? "single-window door checks"
-                         : scripts == 0 ? "standalone production-gameplay lab"
-                                        : "single-window script sequence"},
-       {"frames", options.frames},
-       {"sequence", options.sequence.string()},
-       {"door_resume", options.door_resume.empty()
-                           ? std::string{}
-                           : fs::absolute(options.door_resume).string()},
-       {"scripts", scripts},
-       {"speed", options.speed},
-       {"effect_path_trace",
-        options.effect_paths
-            ? nlohmann::json{{"first", options.effect_paths->first},
-                             {"last", options.effect_paths->last}}
-            : nlohmann::json(nullptr)},
-       {"devices", options.devices}});
+  WriteJson(trace.Directory() / "manifest.json",
+            {{"schema", 1},
+             {"revision", source.at("revision")},
+             {"worktree", source.at("worktree")},
+             {"source_status", source.at("status")},
+             {"data_root", fs::absolute(options.data).string()},
+             {"configuration",
+              options.scene_catalog      ? "static scene inventory"
+              : options.door_transitions ? "single-window door checks"
+              : scripts == 0             ? "standalone production-gameplay lab"
+                                         : "single-window script sequence"},
+             {"scene_catalog", options.scene_catalog},
+             {"frames", options.frames},
+             {"sequence", options.sequence.string()},
+             {"door_resume", options.door_resume.empty()
+                                 ? std::string{}
+                                 : fs::absolute(options.door_resume).string()},
+             {"scripts", scripts},
+             {"speed", options.speed},
+             {"effect_path_trace",
+              options.effect_paths
+                  ? nlohmann::json{{"first", options.effect_paths->first},
+                                   {"last", options.effect_paths->last}}
+                  : nlohmann::json(nullptr)},
+             {"devices", options.devices}});
 }
 
 void CompleteRetainedDoors(const Options& options, Trace& trace,
@@ -368,6 +378,20 @@ void CompleteRetainedDoors(const Options& options, Trace& trace,
   trace.Event("door.resume.complete",
               {{"executed_cases", 0},
                {"retained_passed_count", retained_passed.size()}});
+}
+
+void WriteSceneInventory(const Options& options, Trace& trace,
+                         const std::vector<Game::EncounterZone>& catalog) {
+  const auto inventory = ReadSceneCatalog(catalog);
+  WriteManifest(options, trace, 0);
+  WriteJson(trace.Directory() / "scene-inventory.json", inventory);
+  trace.Event("scene.catalog", {{"assets", inventory.at("assets").size()},
+                                {"errors", inventory.at("errors")}});
+  if (inventory.at("errors") != 0) {
+    throw std::runtime_error(
+        "scene inventory contains invalid definitions; see "
+        "scene-inventory.json");
+  }
 }
 
 void WriteDoorInventory(Trace& trace,
@@ -438,6 +462,16 @@ std::vector<EncounterScript> BuildDoorScripts(
     scripts.push_back(std::move(script));
   }
   return scripts;
+}
+
+int RunCatalogOnly(const Options& options, Trace& trace) {
+  const auto catalog = LoadCatalog(options, trace);
+  nlohmann::json retained = nlohmann::json::array();
+  if (options.door_transitions) {
+    BuildDoorScripts(options, trace, catalog, retained);
+  }
+  if (options.scene_catalog) WriteSceneInventory(options, trace, catalog);
+  return trace.Failed() ? 1 : 0;
 }
 
 void ValidateScripts(const std::vector<EncounterScript>& scripts,
@@ -1041,12 +1075,7 @@ int Run(int argc, char** argv) {
     LoadData(options);
     trace.Event("startup.stage", {{"stage", "data.end"}});
     if (options.catalog_only) {
-      const auto catalog = LoadCatalog(options, trace);
-      nlohmann::json retained = nlohmann::json::array();
-      if (options.door_transitions) {
-        BuildDoorScripts(options, trace, catalog, retained);
-      }
-      return trace.Failed() ? 1 : 0;
+      return RunCatalogOnly(options, trace);
     }
 
     Platform::App app;
