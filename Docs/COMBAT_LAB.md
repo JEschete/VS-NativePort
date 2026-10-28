@@ -83,6 +83,28 @@ Session UI borrows are invalidated before heap replacement; original in-scene
 close behavior is unchanged. Evidence is in `family179-interrupted-reentry-*`
 and `scene174-verified-<run-id>.json` under `build/quality`.
 
+### Executed scene diagnostics
+
+The shared Desktop/Lab detailed profile retains `event.command`, `event.result`
+and `state.flag_write` records in session and per-script `events.jsonl`, alongside
+the readable `session.log`. Commands snapshot event/source/thread, script-relative
+offset, opcode, **all** encoded operand bytes and skip state before dispatch.
+The unique command ID joins the subsequent full-width native result even when
+the handler changes event buffers. Result flow distinguishes advance, wait,
+return-to-VM, thread completion, advance/yield and branches; a finished thread is
+not by itself proof of restored player control.
+
+Actual script-flag writes retain old/new byte values and whether they changed;
+ordered tick/sequence fields correlate them with surrounding instructions.
+Ordinary and forced skip entry also logs the actual Start/forced inputs before
+the source clears them. No flags, outcomes or skip behavior are changed by
+observation. With Debug logging disabled the collectors return before reading
+operands; filters must include `event-command`, `event-result` and `state-flag`
+for a complete diagnostic profile. The default detailed profile selects all
+channels. Invalid records or serialization failures are surfaced, never treated
+as complete evidence. Instruction records use the existing frame-boundary flush
+policy rather than forcing disk flushes for each operand.
+
 ### Static scene inventory
 
 `--catalog-only --scene-catalog` writes `scene-inventory.json` and a source/data

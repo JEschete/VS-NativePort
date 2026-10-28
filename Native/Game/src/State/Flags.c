@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
+#include "Diagnostics/SceneTrace.h"
 #include "State/Flags.h"
 #include "State/StateFlags.h"
 
@@ -26,6 +27,8 @@ char State_ScriptFlag(short flag_id)
 void State_SetScriptFlag(short id, char value)
 {
     char* flags = (char*)&Audio_Seq_unusedStateFlags;
+    const unsigned char previous_flag = (unsigned char)flags[id];
     flags[id] = value;
+    Diagnostics_RecordScriptFlagWrite((int32_t)id, previous_flag, (unsigned char)value);
 }
 

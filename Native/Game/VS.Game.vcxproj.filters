@@ -645,6 +645,9 @@
     <ClCompile Include="src\Diagnostics\PlayerObservation.cpp">
       <Filter>src\Diagnostics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Diagnostics\SceneTrace.cpp">
+      <Filter>src\Diagnostics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ActionEffects.c">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -2170,6 +2173,9 @@
       <Filter>include\Diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp">
+      <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Equipment.h">

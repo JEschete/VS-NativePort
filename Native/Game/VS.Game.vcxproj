@@ -470,6 +470,7 @@
     <ClCompile Include="src\Diagnostics\PlayerObservation.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Diagnostics\SceneTrace.cpp" />
     <ClCompile Include="src\Effects\ActionEffects.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2156,6 +2157,7 @@
     <ClInclude Include="include\Boot\GameApp.hpp" />
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
+    <ClInclude Include="include\Diagnostics\SceneTrace.h" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />
     <ClInclude Include="include\Items\KeyItems.h" />

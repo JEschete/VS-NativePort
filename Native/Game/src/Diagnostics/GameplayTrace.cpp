@@ -60,6 +60,15 @@ GameplayTrace::GameplayTrace(const std::filesystem::path& parent,
   previous_observer_ =
       Core::SetLogObserver([this](const Core::LogRecord& record) noexcept {
         try {
+          if (record.channel == "event-command" ||
+              record.channel == "event-result" ||
+              record.channel == "state-flag") {
+            const auto category =
+                record.channel == "event-command"  ? "event.command"
+                : record.channel == "event-result" ? "event.result"
+                                                   : "state.flag_write";
+            Event(category, nlohmann::json::parse(record.message), record.tick);
+          }
           Event("engine",
                 {{"channel", record.channel},
                  {"level", static_cast<int>(record.level)},
@@ -161,9 +170,13 @@ void GameplayTrace::WriteRecord(std::string_view category,
   const auto line = record.dump();
   stream_ << line << '\n';
   if (script_stream_.is_open()) script_stream_ << line << '\n';
+  const bool instruction = category == "event.command" ||
+                           category == "event.result" ||
+                           category == "state.flag_write";
   const bool boundary =
-      category != "engine" ||
-      details.at("level").get<int>() >= static_cast<int>(Core::LogLevel::Warn);
+      !instruction &&
+      (category != "engine" || details.at("level").get<int>() >=
+                                   static_cast<int>(Core::LogLevel::Warn));
   if (category == "engine" && details.at("level").get<int>() >=
                                   static_cast<int>(Core::LogLevel::Error)) {
     ++errors_;

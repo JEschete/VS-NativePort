@@ -14,6 +14,7 @@
 
 #include "CombatLab/Trace.hpp"
 #include "Diagnostics/PlayerObservation.hpp"
+#include "Diagnostics/SceneTrace.h"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 
@@ -48,6 +49,7 @@ extern "C" {
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "State/Flags.h"
 #include "State/Timers.h"
 }
 
@@ -135,6 +137,48 @@ nlohmann::json FlushedFrame(TraceScope& scope,
   CHECK(text.find("retained buffered diagnostic") != std::string::npos);
   return frame;
 }
+void CheckSceneCommand(const nlohmann::json& record, std::uint64_t command) {
+  const auto& captured = record.at("data");
+  CHECK(record.at("tick") == 73);
+  CHECK(captured.at("command") == command);
+  CHECK(captured.at("event") == 80);
+  CHECK(captured.at("source") == 2);
+  CHECK(captured.at("thread") == 3);
+  CHECK(captured.at("script_offset") == 16);
+  CHECK(captured.at("encoded_size") == 10);
+  CHECK(captured.at("opcode") == 128);
+  CHECK(captured.at("operands") ==
+        nlohmann::json::array({129, 130, 131, 132, 133, 134, 135, 136, 137}));
+}
+
+void CheckSceneRecords(const TraceScope& scope, std::uint64_t command,
+                       std::int64_t branch_address) {
+  std::ifstream stream(scope.events);
+  std::string line;
+  std::vector<nlohmann::json> records;
+  while (std::getline(stream, line)) {
+    const auto record = nlohmann::json::parse(line);
+    if (record.at("category") == "event.command" ||
+        record.at("category") == "event.result" ||
+        record.at("category") == "state.flag_write") {
+      records.push_back(record);
+    }
+  }
+  REQUIRE(records.size() == 4);
+  CheckSceneCommand(records[0], command);
+  CHECK(records[1].at("data") ==
+        nlohmann::json(
+            {{"flag", 180}, {"before", 7}, {"after", 9}, {"changed", true}}));
+  CHECK(records[2].at("data").at("changed") == false);
+  CHECK(records[3].at("data").at("command") == command);
+  CHECK(records[3].at("data").at("result") == branch_address);
+  CHECK(records[3].at("data").at("flow") == "branch");
+  std::ifstream text_stream(scope.log);
+  const std::string text((std::istreambuf_iterator<char>(text_stream)), {});
+  CHECK(text.find("event-command") != std::string::npos);
+  CHECK(text.find("129,130,131,132,133,134,135,136,137") != std::string::npos);
+}
+
 void CheckItemAttributes(const nlohmann::json& snapshot) {
   CHECK(snapshot.at("strength") == 90);
   CHECK(snapshot.at("total_strength") == 100);
@@ -180,6 +224,86 @@ bool CompleteScriptLog(const std::filesystem::path& path, std::size_t number) {
   return frame && ended;
 }
 }  // namespace
+
+TEST_CASE(
+    "Shared scene diagnostics snapshot complete operands and native results",
+    "[scenes][diagnostics][trace]") {
+  for (const auto* host : {"combat-lab", "desktop"}) {
+    TraceScope scope;
+    std::array<std::uint8_t, 26> script{};
+    for (std::size_t index = 0; index < 10; ++index) {
+      script[16 + index] = static_cast<std::uint8_t>(index + 128);
+    }
+    std::uint64_t command = 0;
+    constexpr std::int64_t kBranchAddress = 0x7fff12345678LL;
+    {
+      VS::Game::GameplayTrace trace(scope.parent, host);
+      scope.run = trace.Directory();
+      scope.events = scope.run / "events.jsonl";
+      scope.log = scope.run / "session.log";
+      VS::Core::SetLogTick(73);
+      command = Diagnostics_RecordSceneCommand(80, 2, 3, script.data() + 16,
+                                               script.data(), 10, 0);
+      CHECK(command != 0);
+      script.fill(0);
+      Diagnostics_RecordScriptFlagWrite(180, 7, 9);
+      Diagnostics_RecordScriptFlagWrite(180, 9, 9);
+      Diagnostics_RecordSceneResult(command, kBranchAddress);
+      trace.Frame(73, {}, SampleState());
+      CHECK(trace.Errors() == 0);
+      CHECK_FALSE(trace.Failed());
+      VS::Core::SetLogTick(0);
+    }
+    CheckSceneRecords(scope, command, kBranchAddress);
+  }
+}
+
+TEST_CASE(
+    "Disabled scene diagnostics neither inspect operands nor alter native "
+    "flags",
+    "[scenes][diagnostics][trace]") {
+  TraceScope scope;
+  const auto saved_flag = State_ScriptFlag(180);
+  {
+    VS::Game::GameplayTrace trace(scope.parent);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
+    CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, nullptr, nullptr, 999, 0) ==
+          0);
+    Diagnostics_RecordSceneResult(0, 3);
+    State_SetScriptFlag(180, 17);
+    CHECK(State_ScriptFlag(180) == 17);
+    State_SetScriptFlag(180, saved_flag);
+    CHECK(trace.Errors() == 0);
+    CHECK_FALSE(trace.Failed());
+  }
+  std::ifstream stream(scope.events);
+  std::string line;
+  while (std::getline(stream, line)) {
+    const auto category = nlohmann::json::parse(line).at("category");
+    CHECK(category != "event.command");
+    CHECK(category != "event.result");
+    CHECK(category != "state.flag_write");
+  }
+}
+
+TEST_CASE("Invalid scene diagnostic records report explicit failures",
+          "[scenes][diagnostics][trace]") {
+  TraceScope scope;
+  VS::Game::GameplayTrace trace(scope.parent);
+  scope.run = trace.Directory();
+  scope.events = scope.run / "events.jsonl";
+  scope.log = scope.run / "session.log";
+  std::uint8_t opcode = 3;
+  CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, nullptr, nullptr, 1, 0) == 0);
+  CHECK(Diagnostics_RecordSceneCommand(80, 2, 0, &opcode, &opcode, 257, 0) ==
+        0);
+  CHECK(trace.Errors() == 2);
+  VS::Core::LogWrite(VS::Core::LogLevel::Debug, "event-command", "not-json");
+  CHECK(trace.Failed());
+}
 
 TEST_CASE("Combat Lab trace flushes read-only targeting state",
           "[combat][encounter][trace]") {

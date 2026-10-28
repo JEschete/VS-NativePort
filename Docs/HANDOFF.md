@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #149 diagnostic milestone, dirty `16e3d921`: full pre-dispatch command
+  snapshots and full-width result correlation now join ordered actual script
+  flag writes and original Start/forced skip reasons in shared Desktop/Lab
+  structured and readable logs. Observation is in Diagnostics; generated VM/
+  flag hooks come only from copier fixups. Disabled observation does not read
+  operands or change flags. Debug and Release each pass24 focused scene/trace
+  cases with5,650 assertions; both hosts are relinked. Scoped compilation
+  quality and default maintained-code quality have0 new findings. All742
+  copier outputs match a second generation, including preserved owner work;
+  Game project generation is stable. All1,873 lexical positions have exact
+  reviews; only three unchanged bindings were individually renewed. No scene
+  playback or fidelity claim is added by these diagnostic tests. Next establish
+  actual scene/control outcomes and fresh source-aligned playback/reentry.
+
 - #151 is closed completed with fixing/support revision
   `deeecf8ad7d159f991b52aeb48b4f731a72731b0` and exact green Source Quality
   `40731411773`; the issue's closure table explicitly preserves historical

@@ -13,6 +13,11 @@ so a stale fix is noticed.
 from __future__ import annotations
 
 NATIVE_HELPER_HEADERS = {
+    **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
+       for name in (
+           "Diagnostics_RecordSceneCommand", "Diagnostics_RecordSceneResult",
+           "Diagnostics_RecordScriptFlagWrite",
+       )},
     "Battle_Ai_ActorNavigationOverrideStatus":
         r"Native\Game\src\Battle\Ai\NavigationPrimitives.h",
     "Audio_UpdateActorSoundTransition": r"Native\Game\src\Actors\SoundOverrides.h",
@@ -2040,7 +2045,21 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # BATTLE 573B8.c:67: opcode results are control codes 0..4 or native instruction addresses.
     "F01271": [
         ("    int ret;", "    intptr_t ret;", "preserve opcode branch addresses"),
+        ("        Event_isSkipForced = 0;",
+         '        Core_Debugf("event", "skip event=%d source=%d thread=%d start=%u forced=%d",\n'
+         "            (int)Event_eventId, (int)Event_eventSource, (int)arg1,\n"
+         "            (unsigned)((Input_buttonsPressed.allButtons & PADstart) != 0), (int)Event_isSkipForced);\n"
+         "        Event_isSkipForced = 0;",
+         "preserve the actual user/forced skip reason before the source resets it"),
+        ("    while (1) {\n        if (Event_skipState != 2)",
+         "    while (1) {\n"
+         "        uint64_t scene_command = Diagnostics_RecordSceneCommand(\n"
+         "            (int32_t)Event_eventId, (int32_t)Event_eventSource, (int32_t)arg1,\n"
+         "            script, Event_scriptBuffer, Event_kOpcodeSizes[*script], (int32_t)Event_skipState);\n"
+         "        if (Event_skipState != 2)",
+         "capture full instruction provenance before the handler changes script context"),
         ("        switch (ret) {",
+         "        Diagnostics_RecordSceneResult(scene_command, (int64_t)ret);\n"
          '        Core_Debugf("event-step", "event=%d thread=%d op=%02X result=%lld args=%02X,%02X,%02X pc=%p",\n'
          "            (int)Event_eventId, (int)arg1, (unsigned)*script, (long long)ret,\n"
          "            Event_kOpcodeSizes[*script] > 1 ? (unsigned)script[1] : 0,\n"
@@ -2051,6 +2070,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
          '        default:\n            Core_Debugf("event", "thread=%d branch=%p -> %p skip=%d",\n'
          "                (int)arg1, (void*)script, (void*)ret, (int)Event_skipState);\n"
          "            script = (u_char*)ret;", "native branch trace"),
+    ],
+    "F01259": [
+        ("    flags[id] = value;",
+         "    const unsigned char previous_flag = (unsigned char)flags[id];\n"
+         "    flags[id] = value;\n"
+         "    Diagnostics_RecordScriptFlagWrite((int32_t)id, previous_flag, (unsigned char)value);",
+         "record ordered actual flag writes without changing their byte semantics"),
     ],
     "G00133": [
         ("int (*", "intptr_t (*", "normal opcode return contract"),

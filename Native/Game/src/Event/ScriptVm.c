@@ -18,6 +18,7 @@
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
+#include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Interpolation.h"
@@ -937,6 +938,9 @@ short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
 
     if ((thread_index == 0) && (Event_skipState == 1)
         && ((Input_buttonsPressed.allButtons & PADstart) || (Event_isSkipForced != 0))) {
+        Core_Debugf("event", "skip event=%d source=%d thread=%d start=%u forced=%d",
+            (int)Event_eventId, (int)Event_eventSource, (int)thread_index,
+            (unsigned)((Input_buttonsPressed.allButtons & PADstart) != 0), (int)Event_isSkipForced);
         Event_isSkipForced = 0;
         Event_threadWaitFrames[3] = 0;
         Event_threadWaitFrames[2] = 0;
@@ -961,12 +965,16 @@ short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
     }
 
     while (1) {
+        uint64_t scene_command = Diagnostics_RecordSceneCommand(
+            (int32_t)Event_eventId, (int32_t)Event_eventSource, (int32_t)thread_index,
+            script, Event_scriptBuffer, Event_kOpcodeSizes[*script], (int32_t)Event_skipState);
         if (Event_skipState != 2) {
             ret = Event_kOpcodeHandlers[*script](script, thread_index);
         } else {
             ret = Event_legacySkipHandlerCopy[*script](script, thread_index);
         }
 
+        Diagnostics_RecordSceneResult(scene_command, (int64_t)ret);
         Core_Debugf("event-step", "event=%d thread=%d op=%02X result=%lld args=%02X,%02X,%02X pc=%p",
             (int)Event_eventId, (int)thread_index, (unsigned)*script, (long long)ret,
             Event_kOpcodeSizes[*script] > 1 ? (unsigned)script[1] : 0,
