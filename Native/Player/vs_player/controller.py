@@ -5,6 +5,7 @@ from .model import Decision
 from .menus import MenuTransaction
 from .observations import Actor, Frame
 from .reaction import ReactionController
+from .choices import reward_menu_ready
 
 
 @dataclass(frozen=True)
@@ -64,6 +65,11 @@ class CombatController:
             observed.episode, observed.zone, observed.room
         ):
             raise StaleDecision("The observed scene changed during planning")
+        if decision.intent == "reward" and (
+            not reward_menu_ready(frame)
+            or frame.raw["menu"]["rows"] != observed.raw["menu"]["rows"]
+        ):
+            raise StaleDecision("The earned reward menu changed during planning")
         actor = next((actor for actor in frame.enemies
                       if actor.slot == decision.target_slot), None)
         original = next((actor for actor in observed.enemies
@@ -122,6 +128,20 @@ class CombatController:
             if frame.tick % 30 < 2:
                 return self._action(frame, ("Circle",), 2, "visible dialogue confirmation")
             return None
+        if reward_menu_ready(frame):
+            decision = self.decision
+            if decision is None or decision.intent != "reward":
+                return None
+            menu = frame.raw["menu"]
+            row = next((row for row in menu["rows"]
+                        if row["index"] == decision.action_id and not row["disabled"]), None)
+            if row is None:
+                raise StaleDecision("The selected reward row is no longer available")
+            if menu["selected_row"] != row["index"]:
+                button = "Down" if menu["selected_row"] < row["index"] else "Up"
+                return self._action(frame, (button,), 2, "select an enabled earned-reward row")
+            self.decision = None
+            return self._action(frame, ("Circle",), 2, "confirm the native earned ability reward")
         if self.preparing:
             if self.transaction is None:
                 raise RuntimeError("Preparation state lost its transaction")

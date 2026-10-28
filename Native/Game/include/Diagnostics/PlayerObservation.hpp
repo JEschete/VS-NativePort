@@ -1,0 +1,127 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+#include "Battle/Encounter.hpp"
+#include "nlohmann/json.hpp"
+
+namespace VS::Game {
+
+struct EncounterWeaponRangeState {
+  std::array<int, EncounterLimits::kPositionAxes> components_world{};
+  int shape = 0;
+  int angle_steps = 0;
+  int native_extent_world = 0;
+};
+
+struct PlayerActorObservation : EncounterActorState {
+  int model = -1;
+  EncounterWeaponRangeState weapon_range;
+  int relation_to_player = -1;
+  bool relation_active = false;
+  bool player_visible = false;
+  bool hostile_to_player = false;
+  std::uint32_t status_immunities = 0;
+  std::vector<int> action_ids;
+  std::vector<int> spell_action_ids;
+  int base_attack_type = 0;
+  int shield_pp = 0;
+  int weapon_pp = 0;
+};
+
+struct EncounterReactionTimingState {
+  static constexpr std::size_t kSlots = 3;
+  bool active = false;
+  std::string eligibility_status = "inactive";
+  int source_actor = -1;
+  int target_actor = -1;
+  int action = -1;
+  std::uint32_t queue_index = 0;
+  std::uint32_t chain_step = 0;
+  int timer = 0;
+  int window = 0;
+  int tick_speed = 0;
+  bool story_timing = false;
+  int previous_slot = 0;
+  std::uint32_t previous_buttons = 0;
+  bool attempted = false;
+  int succeeded = 0;
+  std::array<int, kSlots> chain_actions{};
+  std::array<int, kSlots> defense_actions{};
+  std::array<bool, kSlots> eligible{};
+  int incoming_type = 0;
+  int incoming_affinity = -1;
+  int incoming_cost = 0;
+  int incoming_hp_damage = 0;
+  int incoming_mp_damage = 0;
+  std::uint32_t incoming_statuses = 0;
+};
+
+struct EncounterActionOption {
+  int id = 0;
+  std::string name;
+  std::string family;
+  int menu_order = 0;
+  int type = 0;
+  int cost = 0;
+  int restrictions = 0;
+  std::uint32_t ai_flags = 0;
+};
+
+struct EncounterMenuRowState {
+  int index = 0;
+  std::string text;
+  bool disabled = false;
+  bool selected = false;
+};
+
+struct EncounterMenuState {
+  bool available = false;
+  bool loading = false;
+  int selected_menu = -1;
+  int submenu_phase = 0;
+  int selected_row = -1;
+  int list_phase = 0;
+  int assignment_phase = 0;
+  int assignment_type = 0;
+  int assignment_selected = -1;
+  std::vector<EncounterMenuRowState> rows;
+};
+
+struct EncounterNavigationState {
+  bool available = false;
+  int origin_x = 0;
+  int origin_z = 0;
+  int width = 0;
+  int depth = 0;
+  int spacing = 64;
+  int collision_radius = 0;
+  int collision_height = 0;
+  int movement_mode = 0;
+  int locomotion_state = 0;
+  int route_phase = 0;
+  bool jumping = false;
+  std::array<int, 3> facing_tile{};
+  // Packed heights; flags: point passable=1, pit=2, footprint clear=4.
+  std::vector<std::array<int, 3>> samples;
+};
+
+struct PlayerObservationState : EncounterState {
+  std::vector<PlayerActorObservation> player_actors;
+  int target_selection_step = 0;
+  EncounterReactionTimingState reaction_timing;
+  std::vector<EncounterActionOption> action_options;
+  EncounterMenuState menu;
+  std::array<std::uint32_t, 32> status_masks{};
+  std::vector<EncounterDoor> doors;
+  std::vector<int> door_flag_values;
+  EncounterNavigationState navigation;
+};
+
+// Explicit diagnostic query only; ordinary gameplay inspection never calls it.
+PlayerObservationState InspectPlayerObservation(const EncounterState& state);
+void AppendPlayerObservations(nlohmann::json& data,
+                              const EncounterState& state);
+
+}  // namespace VS::Game

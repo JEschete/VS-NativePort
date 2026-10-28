@@ -495,10 +495,18 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
 
 int main(int argc, char** argv) try {
   std::unique_ptr<Game::GameplayTrace> trace;
+  const bool player_observations =
+      std::any_of(argv + 1, argv + argc, [](const char* argument) {
+        return std::string_view(argument) == "--player-observations";
+      });
+  if (player_observations && !kEnableDetailedGameLogging) {
+    throw std::runtime_error("--player-observations requires detailed logging");
+  }
   if (kEnableDetailedGameLogging) {
     const auto directory = Platform::ExecutableDir();
     trace = std::make_unique<Game::GameplayTrace>(
-        directory / "game-logs", "desktop", directory / "vs-native.log");
+        directory / "game-logs", "desktop", directory / "vs-native.log",
+        player_observations);
     const auto source = Game::TraceSourceProvenance(directory);
     Game::WriteTraceManifest(
         trace->Directory(),

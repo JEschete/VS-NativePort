@@ -19,7 +19,8 @@ class GameplayTrace {
  public:
   explicit GameplayTrace(const std::filesystem::path& parent,
                          std::string_view host = "combat-lab",
-                         const std::filesystem::path& compatibility_log = {});
+                         const std::filesystem::path& compatibility_log = {},
+                         bool player_observations = false);
   ~GameplayTrace();
   GameplayTrace(const GameplayTrace&) = delete;
   GameplayTrace& operator=(const GameplayTrace&) = delete;
@@ -35,6 +36,7 @@ class GameplayTrace {
   void EndScript(std::uint64_t tick, const nlohmann::json& result);
 
  private:
+  const bool player_observations_;
   void WriteRecord(std::string_view category, const nlohmann::json& details,
                    std::uint64_t tick);
   void Fail() noexcept;

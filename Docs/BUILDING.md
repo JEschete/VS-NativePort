@@ -300,6 +300,7 @@ build\Release\VS.Desktop.exe
 | `--speed <n>` | Run `n` logical ticks per real tick (e.g. 8 to reach the title attract scenes, about tick 5300, quickly). |
 | `--log-level <level>` | Minimum severity: `trace`, `debug`, `info` (default), `warn`, `error`, or `off`. `off` suppresses all normal logging, including crash messages. Invalid/missing values fail startup. |
 | `--log-channels <names>` | Exact, case-sensitive comma-separated channels, without spaces; default `*` selects all. Filters trace/debug/info only; warnings/errors remain visible unless excluded by severity or `off`. |
+| `--player-observations` | Explicitly enable read-only external-player observations in detailed traces. Off by default in Desktop and Combat Lab; collectors live under Diagnostics, not normal gameplay inspection. The external [player runner](../Native/Player/README.md) supplies this flag itself. No inference or navigation policy runs in the game. |
 
 Native file-menu integration remains under verification in #18. Native slots
 are `slot00.vssave` through `slot99.vssave`, with recoverable `.bak` files;

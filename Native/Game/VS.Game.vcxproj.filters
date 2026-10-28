@@ -642,6 +642,9 @@
     <ClCompile Include="src\Diagnostics\GameplayTrace.cpp">
       <Filter>src\Diagnostics</Filter>
     </ClCompile>
+    <ClCompile Include="src\Diagnostics\PlayerObservation.cpp">
+      <Filter>src\Diagnostics</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ActionEffects.c">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -2164,6 +2167,9 @@
       <Filter>include\Boot</Filter>
     </ClInclude>
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp">
+      <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Diagnostics\PlayerObservation.hpp">
       <Filter>include\Diagnostics</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Equipment.h">

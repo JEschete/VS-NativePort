@@ -5,6 +5,13 @@ from .config import PROJECT
 from .observations import Frame
 
 
+def reward_menu_ready(frame: Frame) -> bool:
+    menu = frame.raw["menu"]
+    return (frame.control == 2 and frame.action_phase == 14 and menu["available"]
+            and not menu["loading"] and menu["list_phase"] == 17
+            and any(not row["disabled"] for row in menu["rows"]))
+
+
 def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     choices: dict[str, dict] = {}
     player = frame.player
@@ -23,6 +30,12 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     def unsuccessful(action: int, target: int) -> bool:
         return any(row.get("action_id") == action and row.get("target") == target
                    and row.get("status") in ("blocked", "no_effect") for row in feedback)
+
+    if reward_menu_ready(frame):
+        for row in frame.raw["menu"]["rows"]:
+            if not row["disabled"]:
+                add("reward", action=row["index"])
+        return choices
 
     learned_spells = [option for option in options
                       if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")

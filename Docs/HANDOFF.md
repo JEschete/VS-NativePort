@@ -9,6 +9,53 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Owner-approved player boundary: all player-only collectors/types now live in
+  `Diagnostics/PlayerObservation.*`. Desktop and Combat Lab require explicit
+  `--player-observations`; the managed external runner supplies it. Ordinary
+  `Boot/Encounter.cpp` and `Battle/Encounter.hpp` inspection are restored
+  exactly to pre-player `b1703e1d` content. Normal traces omit player schema,
+  geometry, reaction/options and extra actor fields; invalid-player-geometry
+  controls prove the default path does not invoke collection. All inference,
+  navigation, retrieval, tactics and controller actions remain outside the
+  game. Geometry collection includes native body clearance, current jump/
+  climb state and stationary object support, without mutating contact state.
+  The original `Field_GimmickSupportHeight` query is intentionally not called
+  because it writes the supporting-object index.
+  Fixed model route-cost comparisons and the corner-jitter detector: sideways
+  motion no longer resets progress without a new best waypoint distance.
+  Route endpoints, actual displacement and failed attempts feed later plans.
+  SQLite now retrieves measured local navigation evidence by room/original
+  door/exact geometry, retaining provenance across raw-log cleanup. This is
+  bounded local RAG, not weight training or proof that a whole route works.
+  The game still reloads the explicitly selected unchanged save per run.
+  Fresh dirty-`d5a54172` Debug `0f1f822bf00b4ddaa0109ddac742058f` verifies
+  17d002->12,12d000->11,11d001->10 and earned flag180 gate10d000->13.
+  Arrivals2136/5713/7757/9866; first120-tick control gates
+  4856/6839/9147/10812. Flag180 remains the untouched save's4.
+  Normal sheathing, source-gated native ledge climbing and stacked support
+  resolve the previous11d001 obstruction. Its eight-leg observation remains
+  budget-blocked in13 with one live higher-terrain hostile; the recorded
+  12/7 chain/defense timings and4/7 useful effects are not universal perfection.
+  Independent Release `04bfcfbe0c884e478557ecb3a540a651` passes the same four
+  physical legs at5778/7959/9117/12840 (arrivals2112/6903/8889/12216).
+  Its native earned-ability menu is selected through observed enabled rows,
+  normal Circle inputs11206/11299, and action24 becomes genuinely learned.
+  Earlier Release `5c04d159bf5c43a58d8ef3c644981114` remains blocked at that
+  unanswered earned prompt; it is not retrospectively passed. The tool does
+  not grant the skill or edit reward state, and future runs must still obey
+  their actual save's learned-action list.
+  Release records8 accepted chains/14 defenses and3/14 useful effects,0 timing
+  failures/errors/forced skips, clean host/trace exit12840. Nine hostiles
+  were observed and six reached0HP: physical control acceptance is not a
+  claim that all destination enemies died or campaign teardown ran.
+  Source save SHA remains the postboss hash below. Evidence is local under
+  the Player run IDs; successful Release proof is explicitly pinned.
+  Next: the remaining7d000/9d000 flag180 gates require continuing through13.
+  Current ordinary combat approach can still walk into geometry toward a
+  higher enemy; expose the original door objective to strategic choices and
+  use geometry-aware approach/avoidance rather than forcing every foe dead.
+  Later187/190 requirements remain unearned. Historical1001-ID results stay
+  unchanged; #151 is not closed by this checkpoint.
 - #151 external-player follow-up adds continuous original-record routes,
   per-leg audit checkpoints, bounded native Square/axis recovery and empty
   learned-chain assignment through normal menus. #222 records the discovered

@@ -50,6 +50,13 @@ releases keys and closes only the owned window; final host/trace evidence
 still decides whether shutdown completed normally.
 
 No system model service or global controller configuration is installed.
+The runner explicitly supplies `--player-observations` to its owned host.
+Player-only collectors and types live in the game's Diagnostics subsystem;
+ordinary gameplay inspection and normal traces do not collect or encode them.
+See [the diagnostic interface](../Game/include/Diagnostics/PlayerObservation.hpp)
+and [its read-only producers](../Game/src/Diagnostics/PlayerObservation.cpp).
+The opt-in observations contain facts only. Model inference, navigation,
+retrieval, tactics and input execution remain entirely in this external tool.
 Per-process SDL settings exclude hardware gamepads and prevent automatic
 window activation. Input messages target only the verified child PID/window;
 the tool does not move foreground focus or send global keyboard input.
@@ -111,6 +118,16 @@ means zero measured missed/rejected windows in the stated observation, not a
 universal scheduling guarantee. An uninterrupted boss-killing chain is a
 possible strategy, not an acceptance requirement.
 
+Navigation uses model-selected candidate paths through bounded live support/
+clearance samples, including stationary stacked objects. The executor checks
+new best waypoint distance rather than counting sideways jitter as progress.
+Takeoff alignment, native movement/climb state and normal weapon sheathing
+matter; merely sending Square is not proof of a jump or completed climb.
+Opening an object and walking onto a transition tile are separate operations.
+The model can also select enabled native rows in a legitimately earned ability
+reward menu. Newly learned actions must then appear in native observations;
+the tool never unlocks them directly.
+
 ## Persistent state and cleanup
 
 Default state: `%LOCALAPPDATA%\VS-NativePort\Player`. Override it only with a
@@ -122,6 +139,15 @@ effects, outcomes and verified reusable experience. Run folders retain native
 logs, setup, model knowledge, image hashes and failure diagnostics. Only
 verified passed outcomes become reusable experience; cleanup does not erase
 those compact lessons.
+
+Model weights are fixed: this is retrieval-augmented decision making, not
+online fine-tuning. Every request is a fresh bounded prompt containing current
+observations and retrieved evidence. Combat retrieval uses enemy/weapon context.
+Spatial retrieval uses room, original door ID and an exact observed-geometry
+fingerprint. Measured local waypoint completion and lack of progress survive
+raw-log cleanup, with the run/image provenance and their limited claims.
+An observed obstruction is not proof of permanent impassability, and reaching
+a waypoint is not proof that the full door route passed.
 
 Cleanup runs at startup and every 15 minutes while playing:
 

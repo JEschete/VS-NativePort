@@ -13,6 +13,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "CombatLab/Trace.hpp"
+#include "Diagnostics/PlayerObservation.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 
@@ -31,7 +32,9 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Core/BiosRand.h"
 #include "Event/ScriptVm.h"
+#include "Field/Collision.h"
 #include "Field/GameMode.h"
+#include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Input/Controller.h"
@@ -104,8 +107,10 @@ VS::Game::EncounterState SampleState() {
 }
 
 nlohmann::json FlushedFrame(TraceScope& scope,
-                            const VS::Game::EncounterState& state) {
-  VS::combat_lab::Trace trace(scope.parent);
+                            const VS::Game::EncounterState& state,
+                            bool player_observations = false) {
+  VS::combat_lab::Trace trace(scope.parent, "combat-lab", {},
+                              player_observations);
   scope.run = trace.Directory();
   scope.events = scope.run / "events.jsonl";
   scope.log = scope.run / "session.log";
@@ -515,6 +520,7 @@ struct GameplayInspectionFixture {
   decltype(Field_roomData.doors) saved_doors = Field_roomData.doors;
   decltype(Field_roomData.header.doorsLength) saved_door_length =
       Field_roomData.header.doorsLength;
+  decltype(Field_roomData) saved_room = Field_roomData;
   decltype(Menu_Framework_menuItems) saved_menu_items =
       Menu_Framework_menuItems;
   decltype(Menu_Framework_itemsText) saved_text = Menu_Framework_itemsText;
@@ -546,6 +552,8 @@ struct GameplayInspectionFixture {
     Field_roomData.floorTriggers = nullptr;
     Field_roomData.doors = nullptr;
     Field_roomData.header.doorsLength = 0;
+    Field_roomData.collisionMap = nullptr;
+    Field_roomData.tileCells = nullptr;
     Menu_Framework_menuItems = nullptr;
     Menu_Framework_itemsText = nullptr;
     Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
@@ -570,6 +578,7 @@ struct GameplayInspectionFixture {
     Field_roomData.floorTriggers = saved_triggers;
     Field_roomData.doors = saved_doors;
     Field_roomData.header.doorsLength = saved_door_length;
+    Field_roomData = saved_room;
     Menu_Framework_menuItems = saved_menu_items;
     Menu_Framework_itemsText = saved_text;
     Menu_Framework_menuState = saved_menu;
@@ -818,7 +827,7 @@ struct ReactionInspectionFixture : GameplayInspectionFixture {
   }
 };
 
-void CheckPlayerGeometry(const VS::Game::EncounterActorState& player) {
+void CheckPlayerGeometry(const VS::Game::PlayerActorObservation& player) {
   CHECK(player.model == 0);
   CHECK(player.weapon_range.components_world ==
         std::array<int, 3>{128, 192, 320});
@@ -827,7 +836,7 @@ void CheckPlayerGeometry(const VS::Game::EncounterActorState& player) {
   CHECK(player.weapon_range.native_extent_world == 320);
 }
 
-void CheckReactionActor(const VS::Game::EncounterActorState& enemy) {
+void CheckReactionActor(const VS::Game::PlayerActorObservation& enemy) {
   CHECK(enemy.model == 58);
   CHECK(enemy.hostile_to_player);
   CHECK(enemy.relation_to_player == 3);
@@ -870,14 +879,15 @@ TEST_CASE("Player observations retain native weapon geometry and hostility",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   fixture.player_stats.weapon.currentPp = 37;
-  const auto state = VS::Game::InspectGameplay();
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   REQUIRE(state.actors.size() == 2);
-  CheckPlayerGeometry(state.actors[0]);
-  CheckReactionActor(state.actors[1]);
+  CheckPlayerGeometry(state.player_actors[0]);
+  CheckReactionActor(state.player_actors[1]);
   TraceScope scope;
-  const auto data = FlushedFrame(scope, state).at("data");
+  const auto data = FlushedFrame(scope, state, true).at("data");
   CHECK(data.at("player_schema") == 1);
-  CHECK(state.actors[0].weapon_pp == 37);
+  CHECK(state.player_actors[0].weapon_pp == 37);
   CHECK(data.at("actors").at(0).at("weapon_pp") == 37);
   CHECK(data.at("actors").at(0).at("weapon_range").at("native_extent_world") ==
         320);
@@ -888,7 +898,8 @@ TEST_CASE("Player timing observations use production eligibility without costs",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
   const auto random = Core_Random_State();
-  const auto state = VS::Game::InspectGameplay();
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CheckNativeTiming(state.reaction_timing);
   CheckResourcesUnchanged(fixture);
   CHECK(Core_Random_State() == random);
@@ -901,7 +912,9 @@ TEST_CASE("Player timing keeps acknowledgments after the active input phase",
   fixture.action->queue[0].targets[0].target.targetActor = 0;
   fixture.action->queue[0].actionId = 54;
   fixture.action->previousChainInput = 2;
-  const auto defense = VS::Game::InspectGameplay().reaction_timing;
+  const auto defense =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
+          .reaction_timing;
   CHECK(defense.active);
   CHECK(defense.source_actor == 2);
   CHECK(defense.target_actor == 0);
@@ -910,10 +923,13 @@ TEST_CASE("Player timing keeps acknowledgments after the active input phase",
   fixture.action->abilityInputSucceeded = 2;
   fixture.action->previousChainInput = 3;
   Battle_actionFlowMode = 8;
-  const auto acknowledged = VS::Game::InspectGameplay().reaction_timing;
+  const auto acknowledged =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
+          .reaction_timing;
   CheckDefenseAcknowledgment(acknowledged);
   Boot_ResetGameplayInspection();
-  const auto released = VS::Game::InspectGameplay();
+  const auto released =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK_FALSE(released.ready);
   CHECK_FALSE(released.reaction_timing.active);
 }
@@ -932,12 +948,14 @@ TEST_CASE("Player reads actual learned spell data without granting an action",
   const std::array<char, 5> name{0x11, 0x28, 0x24, 0x2F,
                                  static_cast<char>(0xE7)};
   std::copy(name.begin(), name.end(), heal.name);
-  const auto absent = VS::Game::InspectGameplay();
+  const auto absent =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   CHECK(std::ranges::none_of(absent.action_options, [](const auto& option) {
     return option.id == kHeal;
   }));
   heal.unlocked = 1;
-  const auto state = VS::Game::InspectGameplay();
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   const auto found = std::ranges::find(state.action_options, kHeal,
                                        &VS::Game::EncounterActionOption::id);
   REQUIRE(found != state.action_options.end());
@@ -961,7 +979,9 @@ TEST_CASE("Incoming effect observations distinguish damage and recovery",
   incoming.targets[1].target.targetActor = 0;
   incoming.targets[1].hpEffect = 2;
   incoming.targets[1].target.hp = 80;
-  const auto timing = VS::Game::InspectGameplay().reaction_timing;
+  const auto timing =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
+          .reaction_timing;
   CHECK(timing.incoming_type == Battle_ActionType_BaseAttack);
   CHECK(timing.incoming_hp_damage == 16);
   CHECK(timing.incoming_mp_damage == 0);
@@ -979,9 +999,130 @@ TEST_CASE("Observed door contracts preserve the current authored flags",
   Field_roomData.doors = &door;
   Field_roomData.header.doorsLength = sizeof(door);
   Boot_EncounterPollStop();
-  const auto state = VS::Game::InspectGameplay();
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
   REQUIRE(state.doors.size() == 1);
   CHECK(state.doors[0].destination_room == 1);
   CHECK(state.doors[0].tile_z == 14);
   CHECK(state.door_flag_values.size() == 1);
+}
+
+namespace {
+void CheckNavigationGeometry(const VS::Game::PlayerObservationState& state) {
+  REQUIRE(state.navigation.available);
+  CHECK(state.navigation.width == 6);
+  CHECK(state.navigation.depth == 6);
+  REQUIRE(state.navigation.samples.size() == 36);
+  CHECK(state.navigation.samples[0] == std::array<int, 3>{0, 30736, 1});
+  CHECK(state.navigation.samples[2][2] == 0);
+  CHECK(state.navigation.samples[4][2] == 3);
+  CHECK(state.navigation.samples[7][2] == 5);
+  CHECK(state.navigation.collision_height == 128);
+}
+
+void CheckOrdinaryTraceSkipsPlayerInspection() {
+  TraceScope ordinary;
+  const auto data =
+      FlushedFrame(ordinary, VS::Game::InspectGameplay()).at("data");
+  CHECK_FALSE(data.contains("player_schema"));
+  CHECK_FALSE(data.contains("navigation"));
+  CHECK_FALSE(data.at("actors").at(0).contains("weapon_range"));
+}
+}  // namespace
+
+namespace {
+struct NavigationInspectionFixture : ReactionInspectionFixture {
+  decltype(std::to_array(Field_gimmickInstances)) saved_gimmicks =
+      std::to_array(Field_gimmickInstances);
+  struct Samples {
+    Field_MpdCollisionHeader header{3, 3, 0, 9};
+    std::array<std::uint16_t, 18> descriptors{};
+    std::array<unsigned char, 32> patterns{};
+  } samples;
+  std::array<Field_MpdTileCell, 9> cells{};
+  NavigationInspectionFixture() {
+    std::fill_n(Field_gimmickInstances, saved_gimmicks.size(), nullptr);
+    std::fill(samples.descriptors.begin() + 9, samples.descriptors.end(), 1);
+    std::fill(samples.patterns.begin() + 16, samples.patterns.end(), 127);
+    cells[1].doorPassability = 5;
+    cells[2].isPit = 1;
+    Field_roomData.collisionMap = &samples.header;
+    Field_roomData.tileCells = cells.data();
+    Field_roomData.header.collisionMapLength = sizeof(samples);
+    Field_roomData.header.tileCellsLength = sizeof(cells);
+    player_model.collisionHeight = 128;
+    player_model.collisionRadius = 48;
+  }
+  ~NavigationInspectionFixture() {
+    std::copy(saved_gimmicks.begin(), saved_gimmicks.end(),
+              Field_gimmickInstances);
+  }
+};
+}  // namespace
+
+TEST_CASE("Navigation observes bounded runtime terrain without changing it",
+          "[player][diagnostics][inspection]") {
+  NavigationInspectionFixture fixture;
+  const auto random = Core_Random_State();
+  const auto probe = Field_collisionProbePosition;
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  CheckNavigationGeometry(state);
+  CHECK(Core_Random_State() == random);
+  CHECK(Field_collisionProbePosition.vx == probe.vx);
+  CHECK(Field_collisionProbePosition.vz == probe.vz);
+  TraceScope scope;
+  const auto data =
+      FlushedFrame(scope, state, true).at("data").at("navigation");
+  CHECK(data.at("samples").size() == 36);
+  CHECK(data.at("collision_radius") == 48);
+}
+
+TEST_CASE("Ordinary traces never collect opt-in player geometry",
+          "[player][diagnostics][inspection]") {
+  NavigationInspectionFixture fixture;
+  Field_roomData.header.tileCellsLength = 0;
+  CheckOrdinaryTraceSkipsPlayerInspection();
+  CHECK_THROWS(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay()));
+  Field_roomData.collisionMap = nullptr;
+  CHECK_FALSE(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
+                  .navigation.available);
+}
+
+TEST_CASE("Navigation observes stacked support without mutating contact state",
+          "[player][diagnostics][inspection]") {
+  NavigationInspectionFixture fixture;
+  Field_GimmickInstance lower{};
+  Field_GimmickInstance upper{};
+  lower.tileX = upper.tileX = lower.tileZ = upper.tileZ = 1;
+  upper.positionY = -128;
+  Field_gimmickInstances[0] = &lower;
+  Field_gimmickInstances[1] = &upper;
+  const auto contact = Actors_supportingGimmickIndex;
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  CHECK(state.navigation.samples[21] == std::array<int, 3>{32512, 30736, 5});
+  CHECK(Actors_supportingGimmickIndex == contact);
+  upper.motionState = 1;
+  const auto moving =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  CHECK(moving.navigation.samples[21][0] == 32640);
+}
+
+TEST_CASE("Earned ability menus are observed without changing combat mode",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  std::array<Menu_Framework_MenuRow, 10> rows{};
+  Menu_Framework_menuItems = rows.data();
+  Menu_Framework_menuState.currentMenu = 3;
+  Battle_actionFlowMode = 14;
+  const auto reward =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  CHECK(reward.menu.available);
+  CHECK(reward.menu.selected_menu == 3);
+  CHECK(Field_controlMode == 2);
+  CHECK(Battle_actionFlowMode == 14);
+  Battle_actionFlowMode = 7;
+  CHECK_FALSE(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
+                  .menu.available);
 }

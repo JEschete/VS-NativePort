@@ -59,6 +59,7 @@ struct Options {
   bool start = false;
   bool catalog_only = false;
   bool devices = true;
+  bool player_observations = false;
   bool door_transitions = false;
   std::string door_case;
   std::string door_from;
@@ -208,6 +209,8 @@ Options Parse(int argc, char** argv) {
       options.catalog_only = true;
     } else if (argument == "--scripted") {
       options.devices = false;
+    } else if (argument == "--player-observations") {
+      options.player_observations = true;
     } else if (argument == "--door-transitions") {
       options.door_transitions = true;
     } else {
@@ -1014,7 +1017,12 @@ class LiveSession {
 };
 
 int Run(int argc, char** argv) {
-  Trace trace(Platform::ExecutableDir() / "combat-lab" / "runs");
+  const bool player_observations =
+      std::any_of(argv + 1, argv + argc, [](const char* argument) {
+        return std::string_view(argument) == "--player-observations";
+      });
+  Trace trace(Platform::ExecutableDir() / "combat-lab" / "runs", "combat-lab",
+              {}, player_observations);
   try {
     Platform::InstallCrashHandler();
     VS_LOG_INFO("combat-lab", "log files: {}", trace.Directory().string());

@@ -60,6 +60,12 @@ class RunStore:
                 run_id TEXT NOT NULL, model INTEGER NOT NULL, weapon INTEGER NOT NULL,
                 summary TEXT NOT NULL
             );
+            CREATE TABLE IF NOT EXISTS navigation_evidence (
+                run_id TEXT NOT NULL, sequence INTEGER NOT NULL,
+                zone INTEGER NOT NULL, room INTEGER NOT NULL, door TEXT NOT NULL,
+                geometry_sha256 TEXT NOT NULL, payload TEXT NOT NULL,
+                PRIMARY KEY (run_id, sequence)
+            );
         """)
         self.database.commit()
 
@@ -99,6 +105,16 @@ class RunStore:
             "INSERT INTO events VALUES (?,?,?,?,?)",
             (run_id, sequence, time.time(), kind, json.dumps(payload, separators=(",", ":"))),
         )
+        if kind == "navigation.outcome":
+            observation = payload["observation"]
+            if observation["status"] not in ("movement_blocked", "route_reached"):
+                self.database.rollback()
+                raise ValueError("Only measured navigation outcomes become spatial evidence")
+            self.database.execute(
+                "INSERT INTO navigation_evidence VALUES (?,?,?,?,?,?,?)",
+                (run_id, sequence, payload["zone"], payload["room"], payload["door"],
+                 payload["geometry_sha256"], json.dumps(payload)),
+            )
         self.database.commit()
 
     def finish(self, run_id: str, status: str, summary: dict) -> None:
@@ -125,6 +141,14 @@ class RunStore:
         return [json.loads(row[0]) for row in self.database.execute(
             "SELECT summary FROM outcomes WHERE model=? AND weapon=? ORDER BY rowid DESC LIMIT ?",
             (model, weapon, limit),
+        )]
+
+    def navigation_experience(self, zone: int, room: int, door: str,
+                              geometry_sha256: str, limit: int = 4) -> list[dict]:
+        return [json.loads(row[0]) for row in self.database.execute(
+            "SELECT payload FROM navigation_evidence WHERE zone=? AND room=? "
+            "AND door=? AND geometry_sha256=? ORDER BY rowid DESC LIMIT ?",
+            (zone, room, door, geometry_sha256, limit),
         )]
 
     def pin(self, run_id: str) -> None:

@@ -2,6 +2,7 @@ import re
 
 from .controller import InputAction, direction_buttons
 from .observations import Frame
+from .navigation import TerrainNavigator
 
 
 class PhysicalDoor:
@@ -26,6 +27,15 @@ class PhysicalDoor:
         self.axis_attempts: list[dict] = []
         self.recovery_axis: int | None = None
         self.axis_until = 0
+        self.navigator = TerrainNavigator()
+
+    def navigation_request(self, frame: Frame) -> dict | None:
+        if (self.contract is None or self.arrival_tick is not None or self.blocked_reason
+                or frame.player is None or not frame.raw.get("navigation", {}).get("available")
+                or (frame.zone, frame.room) != (self.source_zone, self.source_room)):
+            return None
+        destination = (self.contract["tile_x"] * 128 + 64, self.contract["tile_z"] * 128 + 64)
+        return self.navigator.request(frame, destination)
 
     def observe(self, frame: Frame) -> None:
         if self.contract is None:
@@ -84,12 +94,19 @@ class PhysicalDoor:
                 or sum((position[i]-self.progress_position[i])**2 for i in (0, 2)) >= 16**2):
             self.progress_position, self.progress_tick = position, frame.tick
         self.last_input_tick = frame.tick
-        if dx*dx+dz*dz <= 192*192 and (
+        navigation = frame.raw.get("navigation", {})
+        facing = (not navigation.get("available") or
+                  navigation["facing_tile"] == [
+                      self.contract["tile_x"], self.contract["tile_z"], self.contract["layer"],
+                  ])
+        if dx*dx+dz*dz <= 192*192 and facing and len(self.open_ticks) < 3 and (
             not self.interaction_seen and
             (not self.open_ticks or frame.tick-self.open_ticks[-1] >= 90)
         ):
             self.open_ticks.append(frame.tick)
             return InputAction(frozenset({"Cross"}), 2, "physically open the authored door")
+        if frame.raw.get("navigation", {}).get("available"):
+            return self.navigator.step(frame)
         buttons = direction_buttons(dx, dz, frame.camera_yaw)
         if not buttons:
             return None
@@ -143,6 +160,7 @@ class PhysicalDoor:
             "interaction_observed": self.interaction_seen,
             "jump_attempts": self.jump_attempts,
             "axis_attempts": self.axis_attempts,
+            "navigation_feedback": self.navigator.feedback,
         }
 
 
@@ -158,6 +176,10 @@ class PhysicalRoute:
     @property
     def blocked_reason(self) -> str | None:
         return self.legs[self.index].blocked_reason
+
+    @property
+    def active_leg(self) -> PhysicalDoor:
+        return self.legs[self.index]
 
     def observe(self, frame: Frame) -> None:
         if self.accepted_tick is not None:

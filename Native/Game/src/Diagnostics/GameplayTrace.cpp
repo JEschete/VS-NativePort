@@ -9,6 +9,8 @@
 #include <string>
 #include <utility>
 
+#include "Diagnostics/PlayerObservation.hpp"
+
 namespace VS::Game {
 namespace {
 std::string GitOutput(const std::filesystem::path& directory,
@@ -30,7 +32,9 @@ std::string GitOutput(const std::filesystem::path& directory,
 
 GameplayTrace::GameplayTrace(const std::filesystem::path& parent,
                              std::string_view host,
-                             const std::filesystem::path& compatibility_log) {
+                             const std::filesystem::path& compatibility_log,
+                             bool player_observations)
+    : player_observations_(player_observations) {
   const auto timestamp =
       std::chrono::duration_cast<std::chrono::microseconds>(
           std::chrono::system_clock::now().time_since_epoch())
@@ -174,7 +178,6 @@ void GameplayTrace::WriteRecord(std::string_view category,
 
 nlohmann::json EncodeActor(const EncounterActorState& actor) {
   return {{"slot", actor.slot},
-          {"model", actor.model},
           {"hp", actor.hp},
           {"mp", actor.mp},
           {"max_hp", actor.max_hp},
@@ -189,12 +192,6 @@ nlohmann::json EncodeActor(const EncounterActorState& actor) {
           {"walk_speed", actor.walk_speed},
           {"run_speed", actor.run_speed},
           {"statuses", actor.statuses},
-          {"status_immunities", actor.status_immunities},
-          {"action_ids", actor.action_ids},
-          {"spell_action_ids", actor.spell_action_ids},
-          {"base_attack_type", actor.base_attack_type},
-          {"shield_pp", actor.shield_pp},
-          {"weapon_pp", actor.weapon_pp},
           {"status_timers", actor.status_timers},
           {"command", actor.command},
           {"command_state", actor.command_state},
@@ -209,15 +206,6 @@ nlohmann::json EncodeActor(const EncounterActorState& actor) {
           {"spawn_index", actor.spawn_index},
           {"defeated", actor.defeated},
           {"awareness_marker", actor.awareness_marker},
-          {"weapon_range",
-           {{"components_world", actor.weapon_range.components_world},
-            {"shape", actor.weapon_range.shape},
-            {"angle_steps", actor.weapon_range.angle_steps},
-            {"native_extent_world", actor.weapon_range.native_extent_world}}},
-          {"relation_to_player", actor.relation_to_player},
-          {"relation_active", actor.relation_active},
-          {"player_visible", actor.player_visible},
-          {"hostile_to_player", actor.hostile_to_player},
           {"ai",
            {{"present", actor.ai_present},
             {"target", actor.ai_target},
@@ -227,91 +215,6 @@ nlohmann::json EncodeActor(const EncounterActorState& actor) {
             {"destination", {actor.ai_destination_x, actor.ai_destination_z}}}},
           {"position", {actor.x, actor.y, actor.z}}};
 }
-
-namespace {
-nlohmann::json EncodeReaction(const EncounterReactionTimingState& timing) {
-  return {{"active", timing.active},
-          {"eligibility_status", timing.eligibility_status},
-          {"source_actor", timing.source_actor},
-          {"target_actor", timing.target_actor},
-          {"action", timing.action},
-          {"queue_index", timing.queue_index},
-          {"chain_step", timing.chain_step},
-          {"timer", timing.timer},
-          {"window", timing.window},
-          {"tick_speed", timing.tick_speed},
-          {"story_timing", timing.story_timing},
-          {"previous_slot", timing.previous_slot},
-          {"previous_buttons", timing.previous_buttons},
-          {"attempted", timing.attempted},
-          {"succeeded", timing.succeeded},
-          {"chain_actions", timing.chain_actions},
-          {"defense_actions", timing.defense_actions},
-          {"eligible", timing.eligible},
-          {"incoming_type", timing.incoming_type},
-          {"incoming_affinity", timing.incoming_affinity},
-          {"incoming_cost", timing.incoming_cost},
-          {"incoming_hp_damage", timing.incoming_hp_damage},
-          {"incoming_mp_damage", timing.incoming_mp_damage},
-          {"incoming_statuses", timing.incoming_statuses}};
-}
-
-nlohmann::json EncodePlayerMenu(const EncounterMenuState& menu) {
-  auto rows = nlohmann::json::array();
-  for (const auto& row : menu.rows) {
-    rows.push_back({{"index", row.index},
-                    {"text", row.text},
-                    {"disabled", row.disabled},
-                    {"selected", row.selected}});
-  }
-  return {{"available", menu.available},
-          {"loading", menu.loading},
-          {"selected_menu", menu.selected_menu},
-          {"submenu_phase", menu.submenu_phase},
-          {"selected_row", menu.selected_row},
-          {"list_phase", menu.list_phase},
-          {"assignment_phase", menu.assignment_phase},
-          {"assignment_type", menu.assignment_type},
-          {"assignment_selected", menu.assignment_selected},
-          {"rows", rows}};
-}
-
-nlohmann::json EncodePlayerDoors(const EncounterState& state) {
-  auto doors = nlohmann::json::array();
-  if (state.doors.size() != state.door_flag_values.size()) {
-    throw std::runtime_error("observed door flags do not match their records");
-  }
-  for (std::size_t index = 0; index < state.doors.size(); ++index) {
-    const auto& door = state.doors[index];
-    doors.push_back({{"index", door.index},
-                     {"destination_zone", door.destination_zone},
-                     {"destination_room", door.destination_room},
-                     {"tile_x", door.tile_x},
-                     {"tile_z", door.tile_z},
-                     {"layer", door.layer},
-                     {"required_flag", door.required_flag},
-                     {"required_value", door.required_value},
-                     {"current_flag_value", state.door_flag_values[index]},
-                     {"door_id", door.door_id}});
-  }
-  return doors;
-}
-
-nlohmann::json EncodePlayerOptions(const EncounterState& state) {
-  auto options = nlohmann::json::array();
-  for (const auto& option : state.action_options) {
-    options.push_back({{"id", option.id},
-                       {"name", option.name},
-                       {"family", option.family},
-                       {"menu_order", option.menu_order},
-                       {"type", option.type},
-                       {"cost", option.cost},
-                       {"restrictions", option.restrictions},
-                       {"ai_flags", option.ai_flags}});
-  }
-  return options;
-}
-}  // namespace
 
 void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                           const EncounterState& state,
@@ -350,7 +253,6 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                                {"position", target.position}});
   }
   nlohmann::json data{
-      {"player_schema", 1},
       {"input",
        {{"held", input.held},
         {"pressed", input.pressed},
@@ -384,19 +286,13 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
         {"pages", state.target_page.pages},
         {"first", state.target_page.first},
         {"visible", state.target_page.visible},
-        {"selected", state.target_page.selected},
-        {"selection_step", state.target_page.selection_step}}},
+        {"selected", state.target_page.selected}}},
       {"rewards_available", state.rewards_available},
       {"pending_loot", pending_loot},
       {"items", items},
       {"learned_actions", state.learned_actions},
       {"floor_triggers", floor_triggers},
       {"actors", actors}};
-  data["reaction_timing"] = EncodeReaction(state.reaction_timing);
-  data["status_masks"] = state.status_masks;
-  data["action_options"] = EncodePlayerOptions(state);
-  data["menu"] = EncodePlayerMenu(state.menu);
-  data["doors"] = EncodePlayerDoors(state);
   if (state.roulette) {
     const auto& reel = *state.roulette;
     data["roulette"] = {{"entry_phase", reel.entry_phase},
@@ -407,6 +303,7 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                         {"selection", reel.selection},
                         {"bios_state", reel.bios_state}};
   }
+  if (player_observations_) AppendPlayerObservations(data, state);
   if (!scene.is_null()) data["scene"] = scene;
   Event("frame", data, tick);
 }

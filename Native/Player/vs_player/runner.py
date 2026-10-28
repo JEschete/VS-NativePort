@@ -14,7 +14,9 @@ from pathlib import Path
 from .config import PROJECT, PlayerPaths, runtime_manifest
 from .controller import CombatController, StaleDecision
 from .doors import PhysicalDoor, PhysicalRoute
-from .model import Decision, ModelResponseError
+from .model import Decision, ModelResponseError, NavigationDecision
+from .navigation import TerrainNavigator
+from .choices import reward_menu_ready
 from .observations import Frame
 from .processes import ProcessJob, freeze_game, game_environment, model_server, verify_installed_model, warm_model
 from .store import Retention, RunStore, owned_tree_size
@@ -195,6 +197,7 @@ def _play_game(store: RunStore, run_id: str,
     if setup.get("room_events") == "production" and setup.get("enemies"):
         raise ValueError("Production-room runs cannot replace original actors")
     command = [str(game / options.executable.name),
+               "--player-observations",
                "--data", str(options.data.resolve(strict=True)),
                "--speed", "1", "--save-dir", str(run / "private-saves")]
     if options.executable.name == "VS.CombatLab.exe" and options.scenario is not None:
@@ -227,6 +230,8 @@ def _play_game(store: RunStore, run_id: str,
     release_tick = 0
     held_deadline = 0.0
     future: Future[Decision] | None = None
+    navigation_future: Future[NavigationDecision] | None = None
+    navigation_owner: TerrainNavigator | None = None
     observed: Frame | None = None
     last_request = 0.0
     result_offset = 0
@@ -316,9 +321,26 @@ def _play_game(store: RunStore, run_id: str,
                             except StaleDecision as error:
                                 audit.event("model.stale_plan", {"reason": str(error), "tick": latest.tick})
                         future = None
+                    if navigation_future is not None and navigation_future.done():
+                        try:
+                            navigation_decision = navigation_future.result()
+                            if navigation_owner is None:
+                                raise RuntimeError("Navigation response lost its observed route")
+                            navigation_owner.accept(navigation_decision, latest)
+                            audit.event("model.navigation", asdict(navigation_decision))
+                            invalid_responses = 0
+                        except StaleDecision as error:
+                            audit.event("model.stale_navigation", {"reason": str(error), "tick": latest.tick})
+                        except ModelResponseError as error:
+                            audit.event("model.invalid_navigation", error.response)
+                            invalid_responses += 1
+                            if invalid_responses >= 3:
+                                raise RuntimeError("Model failed three navigation validation attempts") from error
+                        navigation_future = None
                     needs_plan = controller.decision is None or now - last_request >= 2.0
                     player = latest.player
-                    if (future is None and latest.ready and player and latest.enemies
+                    if (future is None and navigation_future is None and latest.ready and player
+                            and (latest.enemies or reward_menu_ready(latest))
                             and not controller.preparing
                             and needs_plan and now - last_request >= 0.5
                             and goal.accepted_tick is None):
@@ -326,8 +348,8 @@ def _play_game(store: RunStore, run_id: str,
                         position = player.position
                         nearest = min(latest.enemies, key=lambda actor: sum(
                             (actor.position[index] - position[index]) ** 2 for index in (0, 2)
-                        ))
-                        experience = store.experience(nearest.model, player.weapon_category)
+                        )) if latest.enemies else None
+                        experience = store.experience(nearest.model, player.weapon_category) if nearest else []
                         context = {
                             "last_decision": asdict(controller.decision) if controller.decision else None,
                             "required_successes": {"chain": options.minimum_chains,
@@ -350,6 +372,23 @@ def _play_game(store: RunStore, run_id: str,
                         })
                         future = planner.submit(client.decide, latest, options.goal, experience, context)
                         last_request = now
+                    if (future is None and navigation_future is None and not driver.held
+                            and not latest.enemies and not controller.preparing
+                            and goal.door is not None and goal.accepted_tick is None):
+                        leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
+                        navigation_context = leg.navigation_request(latest)
+                        if navigation_context is not None:
+                            navigation_owner = leg.navigator
+                            navigation_context["retrieved_navigation_evidence"] = store.navigation_experience(
+                                latest.zone, latest.room, leg.identity, leg.navigator.geometry_sha256,
+                            )
+                            audit.event("model.navigation_request", {
+                                "tick": latest.tick, "door": leg.identity,
+                                "context": navigation_context,
+                            })
+                            navigation_future = planner.submit(
+                                client.navigate, latest, options.goal, navigation_context,
+                            )
                     action = controller.step(
                         latest,
                         allow_strategy=not driver.held and goal.accepted_tick is None,
@@ -371,6 +410,15 @@ def _play_game(store: RunStore, run_id: str,
                         break
                     if latest.tick >= options.frames:
                         action = None
+                    if goal.door is not None:
+                        leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
+                        for observation in leg.navigator.observations():
+                            audit.event("navigation.outcome", {
+                                "zone": latest.zone, "room": latest.room, "door": leg.identity,
+                                "geometry_sha256": leg.navigator.geometry_sha256,
+                                "image_sha256": hashes, "observation": observation,
+                                "claim": "Measured local movement, not proof of whole-route passability",
+                            })
                     if action is not None and (not driver.held or action.reaction):
                         driver.set_buttons(action.buttons)
                         release_tick = latest.tick + action.duration

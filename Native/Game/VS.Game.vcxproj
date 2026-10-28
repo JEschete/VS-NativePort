@@ -467,6 +467,9 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Diagnostics\GameplayTrace.cpp" />
+    <ClCompile Include="src\Diagnostics\PlayerObservation.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Effects\ActionEffects.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2152,6 +2155,7 @@
     <ClInclude Include="include\Battle\TargetPages.h" />
     <ClInclude Include="include\Boot\GameApp.hpp" />
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
+    <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />
     <ClInclude Include="include\Items\KeyItems.h" />
