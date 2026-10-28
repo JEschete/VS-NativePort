@@ -1,10 +1,12 @@
 #include "CombatLab/Trace.hpp"
 
+#include <algorithm>
 #include <charconv>
 #include <chrono>
 #include <cstdio>
 #include <format>
 #include <limits>
+#include <ranges>
 #include <stdexcept>
 #include <string>
 #include <utility>
@@ -67,6 +69,170 @@ Game::EncounterStatOverrides DecodeStats(const nlohmann::json& json) {
   return stats;
 }
 }  // namespace
+
+SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
+  if (!value.is_object()) throw std::runtime_error("scene must be an object");
+  for (const auto& [key, unused] : value.items()) {
+    (void)unused;
+    if (key != "events" && key != "event_source" && key != "return_zone" &&
+        key != "return_room" && key != "preconditions" &&
+        key != "confirm_dialogue") {
+      throw std::runtime_error("unknown scene field: " + key);
+    }
+  }
+  const auto& events = value.at("events");
+  if (!events.is_array() || events.empty()) {
+    throw std::runtime_error("scene requires a nonempty ordered event list");
+  }
+  SceneExpectation expected;
+  for (const auto& event : events) {
+    if (!event.is_number_integer() ||
+        event < std::numeric_limits<std::int16_t>::min() ||
+        event > std::numeric_limits<std::int16_t>::max()) {
+      throw std::runtime_error(
+          "scene event ID must fit the native signed short");
+    }
+    expected.events.push_back(event.get<int>());
+  }
+  for (const auto* key : {"return_zone", "return_room"}) {
+    if (!value.at(key).is_number_integer() || value.at(key) < 0 ||
+        value.at(key) > std::numeric_limits<int>::max()) {
+      throw std::runtime_error(
+          "scene return zone/room must be nonnegative integers");
+    }
+  }
+  expected.return_zone = value.at("return_zone").get<int>();
+  expected.return_room = value.at("return_room").get<int>();
+  const auto source = value.value("event_source", nlohmann::json(0));
+  if (!source.is_number_integer() || source < 0 || source > 2) {
+    throw std::runtime_error("scene event_source must be a native source 0..2");
+  }
+  expected.event_source = source.get<int>();
+  if (expected.event_source == 0 &&
+      std::ranges::any_of(expected.events, [](int id) {
+        return id < 0 || id > Game::EncounterLimits::kLastExternalEvent;
+      })) {
+    throw std::runtime_error(
+        "external scene ID is outside the native asset range");
+  }
+  expected.preconditions = value.at("preconditions").get<std::string>();
+  expected.confirm_dialogue = value.value("confirm_dialogue", false);
+  if (expected.preconditions.empty()) {
+    throw std::runtime_error(
+        "scene requires documented source/save preconditions");
+  }
+  return expected;
+}
+
+SceneTrial::SceneTrial(SceneExpectation expected)
+    : expected_(std::move(expected)) {
+  if (expected_.events.empty() || expected_.preconditions.empty() ||
+      expected_.return_zone < 0 || expected_.return_room < 0 ||
+      expected_.event_source < 0 || expected_.event_source > 2) {
+    throw std::runtime_error(
+        "scene trial requires events and documented preconditions");
+  }
+}
+
+void SceneTrial::Observe(const Game::EncounterState& state,
+                         const nlohmann::json& scene, std::uint64_t tick) {
+  if (Finished()) return;
+  const bool available = scene.value("available", false);
+  const auto event = available ? scene.at("event") : nlohmann::json{};
+  last_ = {{"ready", state.ready},
+           {"zone", state.zone},
+           {"room", state.room},
+           {"control", state.control_mode},
+           {"transition", state.transition},
+           {"event", event},
+           {"tick", tick}};
+  dialogue_waiting_ =
+      available &&
+      std::ranges::any_of(event.at("dialogue_waits"), [](const auto& wait) {
+        return wait.template get<bool>();
+      });
+  if (state.game_over || (state.native_pressed & VS::Input::Start) != 0 ||
+      (available &&
+       (event.at("skip_state") == 2 || event.at("forced_skip").get<bool>()))) {
+    Fail(state.game_over ? "fixture defeated" : "target scene was skipped");
+    return;
+  }
+  // Event_UpdateEventPlayback: phases1..3 prepare/load; only4 executes.
+  // Source1 may retain an earlier external ID while running a room handoff.
+  constexpr int kExecutingPhase = 4;
+  if (available && event.at("phase") == kExecutingPhase &&
+      event.at("source") == expected_.event_source) {
+    const int id = event.at("id").get<int>();
+    if (!event_active_ || observed_.empty() || observed_.back() != id) {
+      observed_.push_back(id);
+      if (next_event_ < expected_.events.size() &&
+          id == expected_.events[next_event_]) {
+        ++next_event_;
+      }
+    }
+    event_active_ = true;
+  } else if (available) {
+    event_active_ = false;
+  }
+  const bool returned =
+      next_event_ == expected_.events.size() && state.ready && available &&
+      event.at("phase") == 0 && state.zone == expected_.return_zone &&
+      state.room == expected_.return_room && state.control_mode == 1 &&
+      state.transition == 0 && !dialogue_waiting_;
+  if (!returned) {
+    control_tick_.reset();
+  } else {
+    if (!control_tick_) control_tick_ = tick;
+    if (tick - *control_tick_ >= DoorTrial::kObservationTicks) {
+      status_ = "passed";
+      passed_tick_ = tick;
+    }
+  }
+}
+
+std::uint32_t SceneTrial::Input(std::uint64_t tick) {
+  constexpr std::uint64_t kDialoguePulsePeriod = 30;
+  constexpr std::uint64_t kDialogueHoldTicks = 2;
+  const bool held = !Finished() && expected_.confirm_dialogue &&
+                    dialogue_waiting_ &&
+                    tick % kDialoguePulsePeriod < kDialogueHoldTicks;
+  if (held && !dialogue_held_) ++dialogue_pulses_;
+  dialogue_held_ = held;
+  return held ? VS::Input::Circle : 0;
+}
+
+void SceneTrial::Timeout() {
+  if (Finished()) return;
+  status_ = "blocked";
+  reason_ = next_event_ == 0 ? "expected starting event was not observed"
+            : next_event_ < expected_.events.size()
+                ? "expected event handoff was not observed"
+                : "scene did not restore stable player control before budget";
+}
+
+void SceneTrial::Fail(std::string reason) {
+  status_ = "failed";
+  reason_ = std::move(reason);
+}
+
+nlohmann::json SceneTrial::Result() const {
+  return {{"status", status_},
+          {"reason", reason_},
+          {"coverage", "scene_playback_control"},
+          {"expected_events", expected_.events},
+          {"event_source", expected_.event_source},
+          {"observed_events", observed_},
+          {"matched_events", next_event_},
+          {"return_zone", expected_.return_zone},
+          {"return_room", expected_.return_room},
+          {"preconditions", expected_.preconditions},
+          {"campaign_progression", "not_established"},
+          {"control_tick",
+           control_tick_ ? nlohmann::json(*control_tick_) : nlohmann::json{}},
+          {"passed_tick", passed_tick_},
+          {"last", last_},
+          {"dialogue_confirm_pulses", dialogue_pulses_}};
+}
 
 std::uint64_t ParseTick(std::string_view value) {
   std::uint64_t result = 0;
@@ -137,7 +303,7 @@ std::vector<EncounterScript> ReadScriptSequence(
     for (const auto& [key, unused] : entry.items()) {
       (void)unused;
       if (key != "name" && key != "scenario" && key != "frames" &&
-          key != "press") {
+          key != "press" && key != "scene") {
         throw std::runtime_error("unknown script field: " + key);
       }
     }
@@ -160,6 +326,21 @@ std::vector<EncounterScript> ReadScriptSequence(
                                script.scenario.string());
     }
     script.setup = DecodeSetup(nlohmann::json::parse(preset));
+    if (entry.contains("scene")) {
+      script.scene = DecodeSceneExpectation(entry.at("scene"));
+      if ((!script.setup.external_event &&
+           script.setup.room_policy !=
+               Game::EncounterRoomPolicy::kOriginalRoom) ||
+          (script.setup.external_event &&
+           script.scene->events.front() != *script.setup.external_event) ||
+          std::ranges::any_of(script.presses, [](const auto& press) {
+            return (press.buttons & VS::Input::Start) != 0;
+          })) {
+        throw std::runtime_error(
+            "scene assertions require aligned production events and no Start "
+            "skips");
+      }
+    }
     scripts.push_back(std::move(script));
   }
   return scripts;

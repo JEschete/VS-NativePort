@@ -105,6 +105,51 @@ channels. Invalid records or serialization failures are surfaced, never treated
 as complete evidence. Instruction records use the existing frame-boundary flush
 policy rather than forcing disk flushes for each operand.
 
+### Scene playback acceptance
+
+A sequence entry can add a `scene` assertion instead of treating its `frames`
+budget as completion:
+
+```json
+{
+  "name": "source-backed-80-82-81",
+  "scenario": "component-80.json",
+  "frames": 24000,
+  "scene": {
+    "events": [80, 82, 81],
+    "event_source": 0,
+    "return_zone": 12,
+    "return_room": 0,
+    "preconditions": "Original80 at12/0 (7,2) establishes SEP26/WAVE99; component only, not earned Minotaur victory.",
+    "confirm_dialogue": true
+  }
+}
+```
+
+Events must enter **execution phase4**, in order, from the declared native
+source (0: disc EVT,1: preloaded buffer,2: local room event). Preparation/loading
+phases and inherited IDs in room-handoff scripts do not satisfy an external
+event expectation. After the last event, the declared room must be ready with
+phase0, ordinary control, no transition/dialogue, and the same120-tick stable
+control gate used by door trials. Repeated IDs require an observed execution
+boundary, not successive frames of one event. The budget yields **blocked**
+when the start/handoff/control conditions are unmet; defeat, skip or engine
+errors cannot pass. Blocked cases do not prevent the remaining selected scene
+cases from running in the same window. Results retain the last actual state,
+observed IDs, matched count, control interval, inputs and fixture limitations.
+Generic frame-budget scripts remain supported but explicitly report
+`playback_acceptance: not_asserted`.
+
+The manifest requires documented preconditions and production-room events or
+an aligned explicit external event. It does not grant story flags, HP, items or
+victories; scene results explicitly leave campaign progression unestablished.
+Live stat/status shortcuts are disabled during scene-proof cases.
+For interactive use omit `--scripted` and leave `confirm_dialogue` false:
+ordinary controller actions remain active, F6 pauses, F7 steps and F10 cancels.
+Optional assistance presses only normal Circle while a visible dialogue wait
+is observed; it never presses Start or forces a skip. Source/command traces and
+aligned visual/audio evidence are still required for fidelity claims.
+
 ### Static scene inventory
 
 `--catalog-only --scene-catalog` writes `scene-inventory.json` and a source/data

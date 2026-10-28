@@ -9,6 +9,45 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #149 semantic playback gate, dirty `9db31b9c`: sequence entries can assert
+  ordered event IDs from an explicit native source, execution phase4 and
+  target-room phase0/control1/no-transition/no-dialogue for120 ticks. Native
+  preparation phases and inherited IDs in preloaded room scripts cannot
+  satisfy external-event expectations. Missing start/handoff/control yields
+  blocked, not frame-budget success; skip/defeat/errors cannot pass. Ordinary
+  visible-wait Circle assistance is opt-in; stat shortcuts are unavailable
+  in proof cases. Generic scripts explicitly leave playback unasserted.
+  Final Debug/Release selections each pass55 cases/6,025 assertions; scoped
+  compilation quality is0 new and all affected projects match regeneration.
+  Actual Desktop run `build\Release\game-logs\1793209418183309-0` exits0 at2200,
+  retaining259/259 paired commands/results,121 flag writes, correct full
+  operand shapes and a durable session end; target prologue is not skipped.
+  Debug component run1793208919199067-0 completes first80/82/81 case and
+  120-tick control at11030, with7,894 paired commands/results and410 flag
+  writes. All7,879 external commands match original source offsets/opcodes/
+  complete operands; all40 branches,2,232 camera and4,679 model/pose states
+  are retained. The300s guard interrupted case2; it is not a full reentry pass.
+  Source-aware normal-speed Release1793209401166242-0 passes both cases:
+  each returns control10910, passes120 ticks11030 and cleanly tears down11042.
+  Each has7,894 paired commands/results,410 flag writes,0 unmatched records,
+  0 source/operand mismatches, all37 external branches source-valid,0 skips/
+  errors/audio-queue drops. Debug1793209654937857-0 passes both cases with the
+  same measurements; the strict four-case evidence checker passes and writes
+  `build\quality\issue149-replay-evidence.json`. The final BMP captures the
+  returned readable editor, not in-scene fidelity.
+  Mixed blocked-scene/generic-reset/blocked-scene/generic-reset run
+  Release1793210265851374-0 retains all four outcomes and clean teardowns;
+  exit2 correctly preserves nonpass status. Earlier blocked cases no longer
+  stop later successful generic resets and remaining scene cases.
+  Historical frontier reconciliation recovered14/36 raw end states: all14
+  have phase0/control1 after original story relocations, not VM hangs. Other
+  22 raw traces are absent and remain unverified; old door statuses/counts
+  are unchanged. See `build\quality\scene149-inherited-event-frontier.json`.
+  Full static definition counts are706 indexed/93 empty room scripts and101
+  indexed/411 empty external EVTs. There are208 explicitly unresolved special
+  operation preconditions; the807 indexed definitions are not807 playback
+  passes. The797 actor-animation assets and single movie stay distinct.
+
 - #149 diagnostic milestone, dirty `16e3d921`: full pre-dispatch command
   snapshots and full-width result correlation now join ordered actual script
   flag writes and original Start/forced skip reasons in shared Desktop/Lab

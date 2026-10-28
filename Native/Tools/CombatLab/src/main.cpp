@@ -607,6 +607,7 @@ class LiveSession {
   bool sequence_cancelled_ = false;
   std::string script_stop_reason_;
   std::optional<DoorTrial> door_trial_;
+  std::optional<SceneTrial> scene_trial_;
   SDL_Window* window_ = nullptr;
   bool help_ = false;
   bool paused_before_help_ = false;
@@ -649,6 +650,8 @@ class LiveSession {
     const auto& script = scripts_.at(script_index_);
     door_trial_.reset();
     if (script.door) door_trial_.emplace(*script.door);
+    scene_trial_.reset();
+    if (script.scene) scene_trial_.emplace(*script.scene);
     if (!door_trial_ || !door_trial_->Finished()) editor_.Load(script.setup);
     script_start_tick_ = ticks_;
     script_start_errors_ = trace_.Errors();
@@ -686,6 +689,11 @@ class LiveSession {
 
   void FinishScript() {
     const auto errors = trace_.Errors() - script_start_errors_;
+    if (scene_trial_ && (!scene_trial_->Finished() || errors != 0)) {
+      scene_trial_->Fail(script_stop_reason_.empty()
+                             ? "encounter ended before scene acceptance"
+                             : script_stop_reason_);
+    }
     if (door_trial_ && (!door_trial_->Finished() || errors != 0)) {
       door_trial_->Fail(script_stop_reason_.empty()
                             ? "encounter ended before transition acceptance"
@@ -694,16 +702,25 @@ class LiveSession {
     const bool door_case = scripts_.at(script_index_).door.has_value();
     const auto door_result =
         door_trial_ ? door_trial_->Result() : nlohmann::json{};
-    const bool complete = script_initialized_ && errors == 0 &&
-                          (door_trial_ ? door_result.at("status") == "passed"
-                                       : script_stop_reason_ == "frame_budget");
+    const auto scene_result =
+        scene_trial_ ? scene_trial_->Result() : nlohmann::json{};
+    const bool complete =
+        script_initialized_ && errors == 0 &&
+        (door_trial_    ? door_result.at("status") == "passed"
+         : scene_trial_ ? scene_result.at("status") == "passed"
+                        : script_stop_reason_ == "frame_budget");
     auto& result = results_[script_index_];
-    result["status"] = sequence_cancelled_ ? "cancelled"
-                       : door_trial_
-                           ? door_result.at("status").get<std::string>()
-                       : complete ? "completed"
-                                  : "failed";
+    result["status"] =
+        sequence_cancelled_ ? "cancelled"
+        : door_trial_       ? door_result.at("status").get<std::string>()
+        : scene_trial_      ? scene_result.at("status").get<std::string>()
+        : complete          ? "completed"
+                            : "failed";
     if (door_trial_) result["door"] = door_result;
+    if (scene_trial_) result["scene"] = scene_result;
+    if (!door_trial_ && !scene_trial_) {
+      result["playback_acceptance"] = "not_asserted";
+    }
     result["initialized"] = script_initialized_;
     result["engine_errors"] = errors;
     result["ticks"] = ticks_ - script_start_tick_;
@@ -715,8 +732,8 @@ class LiveSession {
     trace_.EndScript(ticks_, result);
     sequence_failed_ |= !complete && !sequence_cancelled_;
     ++script_index_;
-    sequence_done_ = (!door_case && sequence_failed_) || sequence_cancelled_ ||
-                     script_index_ == scripts_.size();
+    sequence_done_ = (!door_case && !scene_trial_ && !complete) ||
+                     sequence_cancelled_ || script_index_ == scripts_.size();
     SaveSequence();
     if (!sequence_done_) LoadScript();
   }
@@ -778,7 +795,15 @@ class LiveSession {
         throw std::logic_error("door trial has no inventory case");
       }
       UpdateDoorTrial(*door_trial_, *script.door, state, scene);
-    } else if (!door_trial_ && ticks_ - script_start_tick_ >= script.frames) {
+    } else if (scene_trial_ && !script_stopping_) {
+      scene_trial_->Observe(state, scene, ticks_ - script_start_tick_);
+      if (ticks_ - script_start_tick_ >= script.frames) scene_trial_->Timeout();
+      if (scene_trial_->Finished()) {
+        RequestScriptStop(
+            "scene_" + scene_trial_->Result().at("status").get<std::string>());
+      }
+    } else if (!door_trial_ && !scene_trial_ &&
+               ticks_ - script_start_tick_ >= script.frames) {
       RequestScriptStop("frame_budget");
     }
     if (script_stopping_ &&
@@ -831,13 +856,13 @@ class LiveSession {
   }
 
   bool HandleLabKey(SDL_Keycode key) {
-    if (options_.door_transitions &&
+    if ((options_.door_transitions || scene_trial_) &&
         (key == SDLK_F1 || key == SDLK_F2 || key == SDLK_F3 || key == SDLK_F4 ||
          key == SDLK_F5 || key == SDLK_F8)) {
       trace_.Event(
           "control.rejected",
           {{"reason",
-            "automated door fixtures prohibit live stat/status adjustments"}},
+            "door/scene proof fixtures prohibit live stat/status adjustments"}},
           ticks_);
       return true;
     }
@@ -947,6 +972,9 @@ class LiveSession {
         scripts_.empty() ? ticks_ : ticks_ - script_start_tick_;
     if (door_trial_ && !script_stopping_) {
       injected |= door_trial_->Input(input_tick);
+    }
+    if (scene_trial_ && !script_stopping_) {
+      injected |= scene_trial_->Input(input_tick);
     }
     for (const auto& press : presses) {
       if (!script_stopping_ && input_tick >= press.tick &&

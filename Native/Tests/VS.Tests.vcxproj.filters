@@ -222,6 +222,9 @@
     <ClCompile Include="src\SceneCatalogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ScenePlaybackTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ScreenEffectStateTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
