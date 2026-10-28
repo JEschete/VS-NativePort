@@ -9,6 +9,36 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151 remains open at the owner's request: continue resolving physical/story
+  gates, rather than close on inventory/tooling coverage. The original matrix
+  is unchanged: all1001 unique IDs match its original inventory, latest
+  761 passed/238 blocked/2 failed; all764 retained/prior-positive loader proofs
+  still satisfy their recorded initialization/error/teardown/120-tick gates.
+  New controller-only observations on dirty `a060e2d2` resolve two additional
+  combat-blocked physical routes in both builds:9/5->9/6 reaches the unchanged
+  quiet gate at2614 in Debug/Release, with Ashley225/218HP;9/4->9/3 reaches it
+  at1270/1086, with203/246HP. Both use original room actors and real attacks,
+  with0 engine errors/forced skips and complete teardown. The initial9/5
+  attempt did not hold120 ticks and remains recorded; a targeted controller
+  retry, not a threshold or HP change, settles the remaining enemy.
+  Fresh normal-speed Debug9/7->9/6 also matches the retained older Release
+  proof: arrival230, normal attacks reduce73->27->0 and42->0, actors leave
+  the live snapshot by1548/1838, quiet control1840..2999, acceptance1960.
+  No direct HP/story/actor/position writes or fixture enemy/stat overrides.
+  These are declared post-prologue production-room fixtures, not a full-story
+  claim, and do not rewrite the device-free runner's historical blocked rows.
+  Inputs/results and frozen matching images are under
+  `build\quality\issue151-physical-20261028`: Debug uses `room6-sequence.json`
+  at speed1, `nearby-sequence.json` and `room5-retry-sequence.json` at speed8;
+  Release uses `release-sequence.json` at speed8, all with `--sequence`,
+  `--scripted`, explicit `--data` and private `--save-dir`.
+  Strict reports: `room6-Debug-verified.json` and `nearby-physical-verified.json`.
+  Focused `[doors],[disc-door-inventory]` tests pass24 cases/41,767 assertions
+  per build, including the independent full-disc field comparison.
+  Next: untouched pre/post-Minotaur saves already have flag180=3/4, satisfying
+  the three flag180>=2 exits. Their187=1/2 and190=0 do not satisfy the later
+  thresholds; no flags will be manufactured. Remaining combat, authored
+  redirects and unavailable/conditional records retain their distinct limits.
 - #167's owner disposition (2026-10-27): close as **unreproduced/not planned**,
   explicitly without claiming a fix. The historical ACFD8139/5B64FBA0
   scene30 malformed packet and C++ termination remain confirmed; the
