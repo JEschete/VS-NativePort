@@ -14,6 +14,7 @@
     "Use the currently equipped weapon and learned actions. Do not grant equipment, HP, MP, flags or skills.",
     "Changing HP through ordinary attacks or equipped abilities is an observed outcome, not a controller state edit.",
     "Historical outcomes are evidence with their original context, not guaranteed predictions for another enemy, weapon or room.",
+    "A passed physical traversal is not proof that every observed enemy died. Read the coverage and observed-death counts; an older outcome without a coverage label does not establish a combat victory.",
     "An observed spell_action_ids list is evidence that this actor has native spell actions. Unknown capabilities are not proof that it is not a caster.",
     "Against a caster, consider Silence or intelligence reduction if learned, affordable, in range and not blocked by status immunity; verify application and do not repeatedly waste MP on an immune target.",
     "Buff yourself appropriately before offense when it is safe and affordable. Existing statuses must not be blindly recast.",

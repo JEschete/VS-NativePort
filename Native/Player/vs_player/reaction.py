@@ -38,6 +38,7 @@ class ReactionController:
         self.effect_probes: list[dict] = []
         self.effect_results: list[dict] = []
         self.pending_baseline: dict | None = None
+        self.opportunity_endings: list[dict] = []
 
     def observe_effects(self, frame: Frame) -> None:
         for probe in list(self.effect_probes):
@@ -124,6 +125,21 @@ class ReactionController:
                 self.pending = None
                 self.pending_baseline = None
         self.observe_effects(frame)
+        target = next((actor for actor in frame.actors if actor.slot == timing.target_actor), None)
+        if timing.kind == "chain" and target is not None and target.hp <= 0:
+            if not self.gap_recorded and (self.opportunity_seen or self.pending is not None):
+                self.opportunity_endings.append({
+                    "status": "target_defeated", "kind": "chain", "observed_tick": frame.tick,
+                    "target": target.slot, "hp": target.hp,
+                    "pending_press_tick": self.pending.tick if self.pending is not None else None,
+                    "claim": "No native continuation; not an accepted chain or useful effect",
+                })
+                self.gap_recorded = True
+            self.pending = None
+            self.pending_baseline = None
+            self.opportunity_seen = False
+            self.last_signature = None
+            return None
         if not timing.active:
             if self.opportunity_seen and not self.issued and not self.miss_recorded:
                 self.results.append({

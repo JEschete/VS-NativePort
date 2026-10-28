@@ -11,7 +11,7 @@ from .observations import Frame, integer
 from .abilities import defensive_loadout_advice
 from .choices import available_choices, reward_menu_ready
 
-INTENTS = ("attack", "approach", "retreat", "interact", "wait", "cast", "equip_chain", "equip_defense", "reward")
+INTENTS = ("attack", "approach", "retreat", "interact", "wait", "cast", "equip_chain", "equip_defense", "reward", "navigate")
 PRIORITY_ORDERS = ("123", "132", "213", "231", "312", "321")
 DECISION_SCHEMA = {
     "type": "object",
@@ -189,6 +189,13 @@ class LocalModel:
                 "Choose one enabled observed menu row. For reward only, action_id is its row "
                 "index, not a learned action ID. Read the actual menu text and ability semantics."
             )
+        elif (context or {}).get("physical_navigation_objective") and successful_defenses >= required_defenses:
+            prompt["current_milestone"] = (
+                "The objective is the next original physical door, not exterminating every room. "
+                "Choose navigate for normal onward movement when combat is unproductive or unnecessary. "
+                "Leaving a hostile alive is not defeating it; all native story/lock gates still apply. "
+                "Heal or prepare when needed. Native combat and reward UI always take priority."
+            )
         started = time.monotonic()
         response = self.request("/api/chat", {
             "model": self.model["name"],
@@ -237,6 +244,9 @@ class LocalModel:
                     "The command behind that key is already validated against current learned "
                     "options and preparation milestones; do not combine fields from different choices. "
                     "Return choice, chain_priority, defense_priority and reason only. "
+                    "When physical_navigation_objective is present, navigate means follow that "
+                    "observed original door through normal terrain controls, not teleport or skip "
+                    "a gate. It may be preferable to repeatedly attacking an unreachable enemy. "
                     "The choice key is intent:target_slot:action_id:equip_slot. "
                     "Output shape: {choice:string,chain_priority:order_string,"
                     "defense_priority:order_string,reason:short_string}."

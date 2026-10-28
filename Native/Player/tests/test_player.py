@@ -20,7 +20,7 @@ from vs_player.choices import available_choices
 from vs_player.doors import PhysicalDoor, PhysicalRoute
 from vs_player.menus import MenuTransaction
 from vs_player.model import Decision, LocalModel, ModelResponseError, NavigationDecision
-from vs_player.navigation import Terrain, TerrainNavigator
+from vs_player.navigation import Terrain, TerrainNavigator, field_navigation_ready
 from vs_player.observations import Frame
 from vs_player.reaction import ReactionController
 from vs_player.runtime import download, validate_archive
@@ -114,6 +114,104 @@ class ObservationTests(unittest.TestCase):
 
 
 class NavigationTests(unittest.TestCase):
+    def test_explicit_door_navigation_can_leave_a_hostile_honestly_alive(self):
+        record = self.frame()
+        enemy = copy.deepcopy(sample_record()["data"]["actors"][1])
+        record["data"]["actors"].append(enemy)
+        frame = Frame.decode(record)
+        navigator = TerrainNavigator()
+        self.assertIsNone(navigator.request(frame, (160, 96)))
+        self.assertIsNotNone(navigator.request(frame, (160, 96), avoid_hostiles=True))
+        navigator.accept(NavigationDecision("route1", "Continue to the original door", 1, 900), frame)
+        self.assertIsNotNone(navigator.step(frame))
+        self.assertEqual(frame.enemies[0].hp, 20)
+        self.assertEqual(len(frame.enemies), 1)
+
+    def test_ordinary_combat_motion_is_preserved_until_measured_approach_stalls(self):
+        navigator = TerrainNavigator()
+        record = self.frame()
+        enemy = copy.deepcopy(sample_record()["data"]["actors"][1])
+        enemy["position"] = [640, -448, 96]
+        record["data"]["actors"].append(enemy)
+        for index in range(10):
+            record["tick"] = index*8 + 1
+            record["data"]["actors"][0]["position"][0] += 18
+            frame = Frame.decode(record)
+            self.assertFalse(navigator.ordinary_approach_stalled(frame, frame.enemies[0], 8))
+        stalled = False
+        for index in range(12):
+            record["tick"] += 8
+            frame = Frame.decode(record)
+            stalled = navigator.ordinary_approach_stalled(frame, frame.enemies[0], 8)
+        self.assertTrue(stalled)
+        self.assertEqual(navigator.feedback[-1]["waypoint"]["mode"], "ordinary_approach")
+
+    def test_failed_walking_descent_proposes_a_logged_native_jump_before_rejecting_landing(self):
+        record = self.frame()
+        record["data"]["actors"][0]["position"] = [32, -640, 96]
+        samples = record["data"]["navigation"]["samples"]
+        for sample in samples:
+            sample[2] = 0
+        samples[3] = [32128, -2032, 5]
+        samples[4] = [32640, -2032, 1]
+        samples[5] = [32640, -2032, 5]
+        navigator = TerrainNavigator()
+        navigator.request(Frame.decode(record), (160, 96))
+        navigator.accept(NavigationDecision("route1", "descend", 1, 900), Frame.decode(record))
+        for tick in range(10, 160, 8):
+            record["tick"] = tick
+            navigator.step(Frame.decode(record))
+        self.assertEqual(navigator.feedback[-1]["retry_mode"], "directed_jump")
+        context = navigator.request(Frame.decode(record), (160, 96))
+        self.assertTrue(context["candidates"]["route1"]["waypoints"][-1]["jump"])
+
+    def test_native_steep_descent_also_waits_for_sheathed_weapon(self):
+        navigator = TerrainNavigator()
+        record = self.frame()
+        record["data"]["actors"][0]["weapon_drawn"] = 1
+        navigator.request(Frame.decode(record), (160, 96))
+        navigator.accept(NavigationDecision("route1", "advance", 1, 900), Frame.decode(record))
+        navigator.path = [{"position": (160, 512, 96), "jump": False,
+                           "takeoff": None, "drop": 512}]
+        self.assertEqual(navigator.step(Frame.decode(record)).buttons, frozenset({"Cross"}))
+
+    def test_pursuit_can_descend_a_real_ledge_without_inventing_a_jump(self):
+        record = self.frame()
+        record["data"]["actors"][0]["position"] = [32, -640, 96]
+        enemy = copy.deepcopy(sample_record()["data"]["actors"][1])
+        enemy["position"] = [160, -128, 96]
+        record["data"]["actors"].append(enemy)
+        samples = record["data"]["navigation"]["samples"]
+        for sample in samples:
+            sample[2] = 0
+        samples[3] = [32128, -2032, 5]
+        samples[4] = [32640, -2032, 1]
+        samples[5] = [32640, -2032, 5]
+        context = TerrainNavigator().request(Frame.decode(record), (160, 96), target_slot=2)
+        route = context["candidates"]["route1"]["waypoints"]
+        self.assertEqual(route[-1]["position"], (160, -128, 96))
+        self.assertFalse(route[-1]["jump"])
+
+    def test_selected_live_hostile_can_use_terrain_without_ignoring_identity_changes(self):
+        record = self.frame()
+        enemy = copy.deepcopy(sample_record()["data"]["actors"][1])
+        enemy["position"] = [160, 0, 96]
+        record["data"]["actors"].append(enemy)
+        frame = Frame.decode(record)
+        navigator = TerrainNavigator()
+        self.assertIsNone(navigator.request(frame, (160, 96)))
+        context = navigator.request(frame, (160, 96), target_slot=2)
+        self.assertEqual(context["target_identity"], (2, 58, 0))
+        decision = NavigationDecision("route1", "Approach the selected live hostile", 1, 900)
+        navigator.accept(decision, frame)
+        self.assertIsNotNone(navigator.step(frame))
+        record["tick"] = 10
+        record["data"]["actors"][1]["spawn_index"] = 1
+        with self.assertRaises(StaleDecision):
+            navigator.accept(decision, Frame.decode(record))
+        self.assertIsNone(navigator.step(Frame.decode(record)))
+        self.assertEqual(navigator.path, [])
+
     def test_native_climb_waits_for_normal_sheathe_acknowledgment(self):
         navigator = TerrainNavigator()
         record = self.frame()
@@ -277,6 +375,34 @@ class NavigationTests(unittest.TestCase):
 
 
 class ReactionTests(unittest.TestCase):
+    def test_defeated_offensive_target_has_no_continuation_window(self):
+        reactor = ReactionController()
+        record = sample_record(timer=40)
+        reactor.observe(Frame.decode(record))
+        record["tick"] = 2
+        record["data"]["reaction_timing"]["timer"] = 42
+        record["data"]["actors"][1]["hp"] = 0
+        self.assertIsNone(reactor.observe(Frame.decode(record)))
+        record["tick"] = 3
+        record["data"]["reaction_timing"]["active"] = False
+        reactor.observe(Frame.decode(record))
+        reactor.finish()
+        self.assertEqual(reactor.results, [])
+
+    def test_target_defeat_cancellation_never_hides_a_native_rejection(self):
+        for rejected in (False, True):
+            with self.subTest(rejected=rejected):
+                reactor = ReactionController()
+                record = sample_record(timer=42)
+                self.assertIsNotNone(reactor.observe(Frame.decode(record)))
+                record["tick"] = 2
+                record["data"]["reaction_timing"].update(timer=44, attempted=rejected)
+                record["data"]["actors"][1]["hp"] = 0
+                reactor.observe(Frame.decode(record))
+                reactor.finish()
+                self.assertEqual([row["status"] for row in reactor.results],
+                                 ["rejected"] if rejected else [])
+
     def test_base_hit_never_uses_ward_siphon_or_magic_reflection(self):
         frame = Frame.decode(sample_record(timer=42, source_actor=2, target_actor=0,
                                           incoming_type=0))
@@ -639,6 +765,36 @@ class StorageTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_door_navigation_is_a_choice_not_enemy_defeat_or_scene_reuse(self):
+        frame = self.frame()
+        self.assertNotIn("navigate", {row["intent"] for row in available_choices(frame, {}).values()})
+        context = {"physical_navigation_objective": {"id": "z009-r006-d000"}}
+        self.assertIn("navigate", {row["intent"] for row in available_choices(frame, context).values()})
+        decision = Decision("navigate", -1, -1, (1, 2, 3), (1, 2, 3),
+                            "Continue to the original door", 1, 900)
+        controller = CombatController()
+        controller.accept(decision, frame, frame)
+        self.assertIsNone(controller.step(frame))
+        targeting = self.frame(10, control_mode=2, action_phase=1)
+        self.assertEqual(controller.step(targeting).buttons, frozenset({"Cross"}))
+        self.assertIsNone(controller.step(self.frame(20, room=7)))
+        self.assertIsNone(controller.decision)
+        self.assertEqual(controller.feedback[-1]["kind"], "scene_changed")
+
+    def test_active_terrain_path_never_suppresses_native_target_confirmation(self):
+        controller = CombatController()
+        original = self.frame()
+        controller.accept(self.decision(), original, original)
+        path = [{"position": (160, 0, 96), "jump": False}]
+        frame = self.frame(
+            10, control_mode=2, action_phase=1,
+            target_page={"first": 0, "visible": 1, "selected": 0, "selection_step": 19},
+            target_previews=[{"actor": 2, "limb": 0}],
+        )
+        self.assertFalse(field_navigation_ready(frame))
+        action = controller.step(frame, allow_strategy=not (path and field_navigation_ready(frame)))
+        self.assertEqual(action.buttons, frozenset({"Circle"}))
+
     def test_earned_reward_uses_enabled_native_rows_and_normal_confirmation(self):
         record = sample_record(active=False)
         record["data"].update(control_mode=2, action_phase=14)
@@ -962,6 +1118,7 @@ class RunnerTests(unittest.TestCase):
             options = PlayOptions(Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
             summary = {
                 "passed": True, "experience_contexts": [{"model": 58, "weapon": 2}],
+                "seen_hostiles": 2, "zero_hp_hostiles": 2,
                 "scenario_sha256": "fixture", "ashley_profile": "all-abilities",
                 "accepted_reactions": {"chain": 2, "defense": 1}, "inputs": 10, "goal_tick": 900,
             }
@@ -976,6 +1133,7 @@ class RunnerTests(unittest.TestCase):
             try:
                 self.assertEqual(store.experience(58, 2)[0]["run_id"], result["run_id"])
                 self.assertEqual(store.experience(58, 2)[0]["accepted_reactions"], {"chain": 2, "defense": 1})
+                self.assertEqual(store.experience(58, 2)[0]["coverage"], "combat_defeat_and_control")
             finally:
                 store.close()
 

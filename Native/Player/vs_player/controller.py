@@ -49,6 +49,7 @@ class CombatController:
         self.feedback: list[dict] = []
         self.transaction: MenuTransaction | None = None
         self.rejected_positions: dict[tuple[int, int, int, int, int], tuple[int, int, int]] = {}
+        self.decision_scene: tuple[int, int, int] | None = None
 
     @property
     def preparing(self) -> bool:
@@ -90,6 +91,7 @@ class CombatController:
         if self.preparing:
             raise StaleDecision("An observed menu transaction is still in progress")
         self.decision = decision
+        self.decision_scene = (frame.episode, frame.zone, frame.room)
         self.identity = self.target_identity(frame, actor) if actor else None
         self.reactions.priorities(decision.chain_priority, decision.defense_priority)
         if transaction is not None:
@@ -120,6 +122,11 @@ class CombatController:
             return None
         if not frame.ready or frame.game_over or frame.player is None:
             return None
+        if self.decision is not None and (frame.episode, frame.zone, frame.room) != self.decision_scene:
+            if self.preparing:
+                raise StaleDecision("Scene changed during an observed preparation transaction")
+            self.feedback.append({"kind": "scene_changed", "tick": frame.tick})
+            self.decision = None
         if frame.reaction.active:
             return None
         if frame.tick - self.last_action_tick < 6:
@@ -210,7 +217,7 @@ class CombatController:
             return None
         if self.preparing:
             return None
-        if decision.intent == "wait":
+        if decision.intent in ("wait", "navigate"):
             return None
         if decision.intent == "interact":
             return self._action(frame, ("Cross",), 2, "normal field interaction")

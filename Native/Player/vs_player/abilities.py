@@ -75,7 +75,7 @@ def offensive_value(frame: "Frame", action: int) -> float:
     player = frame.player
     target = next((actor for actor in frame.actors
                    if actor.slot == frame.reaction.target_actor), None)
-    if player is None or target is None:
+    if player is None or target is None or target.hp <= 0:
         return 0
     if action == 23 and player.hp >= player.max_hp:
         return 0

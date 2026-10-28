@@ -9,6 +9,38 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- External-player follow-up on dirty `315549db` adds measured-stall terrain
+  pursuit without replacing successful ordinary combat, preserves native
+  target/reward/menu/reactor priority, and lets the model explicitly choose
+  an original onward door instead of requiring extermination of every room.
+  Living foes remain living in all metrics; native door flags/locks/loading/
+  entry events and the120-tick control gate are unchanged. Steep descents
+  require the same normal sheathing as climbs; failed walking descents can
+  propose a logged directed jump before rejecting that landing.
+  Source-backed defeated-target continuation controls are red/green:
+  no new offensive press at observed0HP, pending target-defeat cancellation
+  is separate from timing success/failure, and actual native rejection is
+  never hidden. The original806dcaf9 failure is retained, not relabeled.
+  Live Debug `cd172b3c03a041f1b3031977dc4dfd84` completes six physical legs
+  with clean host/trace exit20120, including the second flag180 gate
+  7d000->13. First control gates are4722/6713/9345/13930/18250/20119,
+  arrivals2106/5589/7649/13016/16296/18673. Native counters record twelve
+  hostiles observed/eleven at0HP, three accepted/useful chains and seventeen
+  accepted/useful defenses,0 timing failures/errors/forced skips. It uses
+  the unchanged postboss source save and original controller traversal;
+  leaving one enemy alive is not credited as defeating it. This is a
+  bounded six-leg proof, not successful completion of the longer route.
+  Earlier Debug `eaa79a6c6ab54ac6bb286187b2e0ca7d` also reaches the second
+  gate but later dies in13; the failed run remains failed. Its native
+  observations confirm no learned healing spell, despite50MP, and existing
+  consumable stacks (including IDs323/324). The external tool currently
+  supports spell healing but not using those items. Next wire ordinary
+  inventory use and require both count decrement and actual HP recovery.
+  Do not grant Heal, edit HP or silently pretend a usable spell exists.
+  Independently verify the new gate in Release and target9d000 without
+  gratuitously replaying already-proven physical branches. #151 remains
+  open; original matrix, later187/190 requirements and unverified limits
+  retain their previous status.
 - Owner-approved player boundary: all player-only collectors/types now live in
   `Diagnostics/PlayerObservation.*`. Desktop and Combat Lab require explicit
   `--player-observations`; the managed external runner supplies it. Ordinary

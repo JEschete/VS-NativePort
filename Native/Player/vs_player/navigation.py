@@ -6,7 +6,7 @@ from dataclasses import dataclass
 
 from .controller import InputAction, StaleDecision, direction_buttons
 from .model import NavigationDecision
-from .observations import Frame, boolean, integer
+from .observations import Actor, Frame, boolean, integer
 
 
 def geometry_digest(value: dict) -> str:
@@ -16,6 +16,11 @@ def geometry_digest(value: dict) -> str:
          if key in value},
         sort_keys=True, separators=(",", ":"),
     ).encode()).hexdigest()
+
+
+def field_navigation_ready(frame: Frame) -> bool:
+    return (frame.ready and frame.player is not None and not frame.game_over
+            and frame.control == 1 and frame.event_phase == 0 and not frame.reaction.active)
 
 
 def signed_height(packed: int) -> int:
@@ -88,6 +93,7 @@ class TerrainNavigator:
         self.progress_position: tuple[int, int, int] | None = None
         self.progress_tick = 0
         self.failed_points: set[tuple[int, int]] = set()
+        self.failed_walk_descents: set[tuple[int, int]] = set()
         self.feedback: list[dict] = []
         self.last_tick = -100
         self.completed_positions: dict[tuple[int, int], int] = {}
@@ -95,12 +101,53 @@ class TerrainNavigator:
         self.geometry_sha256 = ""
         self.feedback_offset = 0
         self.sheath_sent_tick: int | None = None
+        self.target_identity: tuple[int, int, int] | None = None
+        self.direct_goal: tuple[int, int, int] | None = None
+        self.direct_best_distance = math.inf
+        self.direct_attempt_ticks = 0
+        self.avoid_hostiles = False
 
-    def request(self, frame: Frame, destination: tuple[int, int]) -> dict | None:
-        if self.path or frame.player is None or frame.enemies or frame.control != 1:
+    def ordinary_approach_stalled(self, frame: Frame, target: Actor, duration: int) -> bool:
+        if frame.player is None:
+            raise ValueError("Ordinary approach lacks the observed player")
+        if self.direct_goal is None or sum(
+            (target.position[axis]-self.direct_goal[axis])**2 for axis in (0, 1, 2)
+        ) > 128**2:
+            self.direct_goal = target.position
+            self.direct_best_distance = math.dist(frame.player.position, self.direct_goal)
+        distance = math.dist(frame.player.position, self.direct_goal)
+        if distance < self.direct_best_distance - 16:
+            self.direct_best_distance, self.direct_attempt_ticks = distance, 0
+        else:
+            self.direct_attempt_ticks += duration
+        if self.direct_attempt_ticks >= 90:
+            if self.direct_attempt_ticks - duration < 90:
+                self.feedback.append({
+                    "status": "ordinary_approach_blocked", "tick": frame.tick,
+                    "player": frame.player.position,
+                    "waypoint": {"position": target.position, "mode": "ordinary_approach"},
+                    "weapon_drawn": frame.player.weapon_drawn,
+                })
+            return True
+        return False
+
+    def target(self, frame: Frame) -> Actor | None:
+        return next((actor for actor in frame.enemies
+                     if (actor.slot, actor.model, actor.spawn_index) == self.target_identity), None)
+
+    def request(self, frame: Frame, destination: tuple[int, int],
+                target_slot: int | None = None, avoid_hostiles: bool = False) -> dict | None:
+        if self.path or not field_navigation_ready(frame):
             return None
-        if frame.event_phase != 0 or not frame.ready:
+        if frame.enemies and target_slot is None and not avoid_hostiles:
             return None
+        if frame.player is None:
+            raise ValueError("Field navigation lost the observed player")
+        target = next((actor for actor in frame.enemies if actor.slot == target_slot), None)
+        if target_slot is not None and target is None:
+            raise StaleDecision("Navigation target is no longer an observed living hostile")
+        self.target_identity = (target.slot, target.model, target.spawn_index) if target else None
+        self.avoid_hostiles = avoid_hostiles
         self.scene = (frame.episode, frame.zone, frame.room)
         self.destination = destination
         self.request_tick = frame.tick
@@ -129,7 +176,7 @@ class TerrainNavigator:
                 if not (0 <= x < terrain.width and 0 <= z < terrain.depth and neighbor in valid_set):
                     continue
                 height_delta = terrain.point(neighbor)[1] - terrain.point(index)[1]
-                if not -256 <= height_delta <= 384:
+                if height_delta < -256:
                     continue
                 distance = abs(dx) + abs(dz)
                 if distance > 1:
@@ -143,10 +190,12 @@ class TerrainNavigator:
                         continue
                     if all(terrain.supported(mid) for mid in midpoints) and abs(height_delta) <= 64:
                         continue
-                jump = height_delta < -64 or distance > 1
+                point = terrain.point(neighbor)
+                jump = (height_delta < -64 or (distance > 1 and height_delta <= 64)
+                        or (height_delta > 64 and (point[0], point[2]) in self.failed_walk_descents))
                 next_cost = cost + terrain.spacing * distance + (
                     192 + terrain.spacing * (distance-1) if jump else 0
-                )
+                ) + max(0, height_delta-64)
                 if next_cost < costs.get(neighbor, math.inf):
                     costs[neighbor] = next_cost
                     previous[neighbor] = (index, jump)
@@ -170,7 +219,8 @@ class TerrainNavigator:
             while cursor != start:
                 parent, jump = previous[cursor]
                 route.append({"position": terrain.point(cursor), "jump": jump,
-                              "takeoff": terrain.point(parent) if jump else None})
+                              "takeoff": terrain.point(parent) if jump else None,
+                              "drop": max(0, terrain.point(cursor)[1]-terrain.point(parent)[1])})
                 cursor = parent
             route.reverse()
             first = (route[0]["position"][0], route[0]["position"][2])
@@ -194,8 +244,16 @@ class TerrainNavigator:
             "destination_world_xz": destination,
             "player_world": position, "candidates": self.offered,
             "weapon_drawn": frame.player.weapon_drawn,
-            "native_climbing_rule": "Actors/Movement.c rejects terrain climbs of two or more height bands "
-                                    "while the weapon is drawn. The controller must sheathe normally first.",
+            "player_hp": frame.player.hp,
+            "player_max_hp": frame.player.max_hp,
+            "falling_risk": "Descending edges use ordinary movement and native fall consequences. "
+                            "Prefer smaller drops, especially at low HP; never assume immunity.",
+            "target_identity": self.target_identity,
+            "target_world": target.position if target else None,
+            "living_hostiles": [{"slot": actor.slot, "position": actor.position, "hp": actor.hp}
+                                for actor in frame.enemies],
+            "native_climbing_rule": "Actors/Movement.c rejects steep terrain transitions while the weapon "
+                                    "is drawn, including large descents. Sheathe normally first.",
             "recent_feedback": self.feedback[-6:],
             "limits": "Candidates lead toward the same closest reachable goal region. "
                       "Estimated cost includes the full route and remaining goal distance, "
@@ -204,7 +262,9 @@ class TerrainNavigator:
         }
 
     def accept(self, decision: NavigationDecision, frame: Frame) -> None:
-        if ((frame.episode, frame.zone, frame.room) != self.scene or frame.enemies
+        if ((frame.episode, frame.zone, frame.room) != self.scene
+                or (frame.enemies and self.target_identity is None and not self.avoid_hostiles)
+                or (self.target_identity is not None and self.target(frame) is None)
                 or decision.observation_tick != self.request_tick
                 or frame.tick-decision.observation_tick > 600
                 or geometry_digest(frame.raw.get("navigation", {})) != self.geometry_sha256):
@@ -227,25 +287,38 @@ class TerrainNavigator:
         return rows
 
     def step(self, frame: Frame) -> InputAction | None:
-        if frame.enemies:
+        if ((frame.enemies and self.target_identity is None and not self.avoid_hostiles)
+                or (self.target_identity is not None and self.target(frame) is None)
+                or (frame.episode, frame.zone, frame.room) != self.scene):
             self.path.clear()
+            return None
+        target_actor = self.target(frame)
+        if target_actor is not None and self.destination is not None and sum(
+            (target_actor.position[axis]-self.destination[index])**2
+            for index, axis in enumerate((0, 2))
+        ) > 128**2:
+            self.path.clear()
+            self.feedback.append({"status": "target_moved", "tick": frame.tick,
+                                  "target": target_actor.slot, "position": target_actor.position})
             return None
         if not self.path or frame.player is None or frame.camera_yaw is None:
             return None
-        if frame.control != 1 or frame.event_phase != 0 or frame.tick-self.last_tick < 6:
+        if not field_navigation_ready(frame) or frame.tick-self.last_tick < 6:
             return None
         position = frame.player.position
-        needs_climb = any(step["jump"] and step.get("takeoff")
-                          and step["position"][1] < step["takeoff"][1] - 64
-                          for step in self.path)
-        if needs_climb and frame.player.weapon_drawn:
+        needs_sheathe = any(
+            (step["jump"] and step.get("takeoff")
+             and step["position"][1] < step["takeoff"][1] - 64)
+            or step.get("drop", 0) >= 128 for step in self.path
+        )
+        if needs_sheathe and frame.player.weapon_drawn:
             if self.sheath_sent_tick is not None:
                 if frame.tick-self.sheath_sent_tick > 120:
-                    raise RuntimeError("Normal sheathe input was not acknowledged before a native-gated climb")
+                    raise RuntimeError("Normal sheathe input was not acknowledged before a native-gated terrain transition")
                 return None
             self.sheath_sent_tick = self.last_tick = frame.tick
             self.progress_tick = frame.tick
-            return InputAction(frozenset({"Cross"}), 2, "sheathe normally before a native-gated terrain climb")
+            return InputAction(frozenset({"Cross"}), 2, "sheathe normally before a native-gated terrain transition")
         target = self.path[0]
         x, y, z = target["position"]
         native = frame.raw["navigation"]
@@ -264,6 +337,9 @@ class TerrainNavigator:
             self.progress_position, self.progress_tick = position, frame.tick
             self.best_waypoint_distance = math.inf
             if not self.path:
+                self.direct_attempt_ticks = 0
+                self.direct_goal = None
+                self.direct_best_distance = math.inf
                 endpoint = (x, z)
                 self.completed_positions[endpoint] = self.completed_positions.get(endpoint, 0) + 1
                 self.feedback.append({
@@ -279,10 +355,15 @@ class TerrainNavigator:
             self.best_waypoint_distance = distance
             self.progress_position, self.progress_tick = position, frame.tick
         if frame.tick-self.progress_tick > 120:
-            self.failed_points.add((x, z))
+            retry_jump = target.get("drop", 0) > 64 and not target["jump"]
+            if retry_jump:
+                self.failed_walk_descents.add((x, z))
+            else:
+                self.failed_points.add((x, z))
             self.feedback.append({"status": "movement_blocked", "tick": frame.tick,
                                   "player": position, "waypoint": target,
-                                  "weapon_drawn": frame.player.weapon_drawn})
+                                  "weapon_drawn": frame.player.weapon_drawn,
+                                  "retry_mode": "directed_jump" if retry_jump else None})
             self.path.clear()
             if len(self.failed_points) >= 8:
                 raise RuntimeError("Eight observed terrain waypoints failed; new geometry evidence is required")

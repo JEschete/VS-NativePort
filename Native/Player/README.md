@@ -103,6 +103,15 @@ from that position. This is retry pacing, not a guessed hit volume or an
 override of native eligibility. Learned chains can fill empty saved mappings
 through their normal menu; nothing is granted.
 
+Successful ordinary combat approach is preserved. Only measured lack of
+progress invokes model-selected terrain pursuit of the same live target;
+scene/spawn changes invalidate it, and native targeting, rewards, preparation
+and reactions preempt movement. Steep descents can require sheathing too.
+For an original physical-door objective, the model can explicitly choose
+onward navigation while foes remain alive. This does not bypass story/lock
+rules or declare those foes dead. Combat Lab defeat-all goals do not offer
+that door choice.
+
 Reflection and absorption require matching spell/nonspell damage; affinity
 defenses additionally require matching affinity. Integer rounding, missing
 resources, shield PP and native status masks matter. Ward cures paralysis/
@@ -113,6 +122,10 @@ reason to press an ineffective button.
 Native timing acknowledgments and observed effects are separate. Effect probes
 match the actual action and queue identity, and retain zero/unconfirmed effects.
 A chain accepted just as its target dies is not claimed to have executed.
+An observed defeated target cannot receive another offensive continuation.
+Target-defeat cancellation is logged separately from timing acceptance/failure;
+it never counts as an accepted chain or useful effect, and a real native
+rejection remains a rejection even if that target also dies.
 The required defense count also requires an observed useful effect. "Perfect"
 means zero measured missed/rejected windows in the stated observation, not a
 universal scheduling guarantee. An uninterrupted boss-killing chain is a

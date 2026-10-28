@@ -29,13 +29,13 @@ class PhysicalDoor:
         self.axis_until = 0
         self.navigator = TerrainNavigator()
 
-    def navigation_request(self, frame: Frame) -> dict | None:
+    def navigation_request(self, frame: Frame, avoid_hostiles: bool = False) -> dict | None:
         if (self.contract is None or self.arrival_tick is not None or self.blocked_reason
                 or frame.player is None or not frame.raw.get("navigation", {}).get("available")
                 or (frame.zone, frame.room) != (self.source_zone, self.source_room)):
             return None
         destination = (self.contract["tile_x"] * 128 + 64, self.contract["tile_z"] * 128 + 64)
-        return self.navigator.request(frame, destination)
+        return self.navigator.request(frame, destination, avoid_hostiles=avoid_hostiles)
 
     def observe(self, frame: Frame) -> None:
         if self.contract is None:

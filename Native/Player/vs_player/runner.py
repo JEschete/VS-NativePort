@@ -15,7 +15,7 @@ from .config import PROJECT, PlayerPaths, runtime_manifest
 from .controller import CombatController, StaleDecision
 from .doors import PhysicalDoor, PhysicalRoute
 from .model import Decision, ModelResponseError, NavigationDecision
-from .navigation import TerrainNavigator
+from .navigation import TerrainNavigator, field_navigation_ready
 from .choices import reward_menu_ready
 from .observations import Frame
 from .processes import ProcessJob, freeze_game, game_environment, model_server, verify_installed_model, warm_model
@@ -232,10 +232,13 @@ def _play_game(store: RunStore, run_id: str,
     future: Future[Decision] | None = None
     navigation_future: Future[NavigationDecision] | None = None
     navigation_owner: TerrainNavigator | None = None
+    pursuit = TerrainNavigator()
+    pursuit_scope: tuple[int, ...] | None = None
     observed: Frame | None = None
     last_request = 0.0
     result_offset = 0
     effect_offset = 0
+    ending_offset = 0
     invalid_responses = 0
     validation_feedback: str | None = None
     inputs = 0
@@ -364,7 +367,17 @@ def _play_game(store: RunStore, run_id: str,
                             "defense_coverage_gaps": controller.reactions.coverage_gaps[-4:],
                             "controller_feedback": controller.feedback[-8:],
                             "validation_error_to_correct": validation_feedback,
+                            "recent_terrain_feedback": pursuit.feedback[-6:],
                         }
+                        if goal.door is not None:
+                            leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
+                            if (leg.contract is not None and leg.arrival_tick is None
+                                    and not leg.blocked_reason
+                                    and (latest.zone, latest.room) == (leg.source_zone, leg.source_room)):
+                                context["physical_navigation_objective"] = {
+                                    "id": leg.identity, "contract": leg.contract,
+                                    "claim": "Original controller traversal; living foes are not declared defeated",
+                                }
                         audit.event("model.request", {
                             "tick": latest.tick, "goal": options.goal,
                             "observation": latest.planning_data(), "context": context,
@@ -373,10 +386,12 @@ def _play_game(store: RunStore, run_id: str,
                         future = planner.submit(client.decide, latest, options.goal, experience, context)
                         last_request = now
                     if (future is None and navigation_future is None and not driver.held
-                            and not latest.enemies and not controller.preparing
+                            and (not latest.enemies or (controller.decision is not None
+                                                       and controller.decision.intent == "navigate"))
+                            and not controller.preparing
                             and goal.door is not None and goal.accepted_tick is None):
                         leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
-                        navigation_context = leg.navigation_request(latest)
+                        navigation_context = leg.navigation_request(latest, avoid_hostiles=bool(latest.enemies))
                         if navigation_context is not None:
                             navigation_owner = leg.navigator
                             navigation_context["retrieved_navigation_evidence"] = store.navigation_experience(
@@ -389,12 +404,65 @@ def _play_game(store: RunStore, run_id: str,
                             navigation_future = planner.submit(
                                 client.navigate, latest, options.goal, navigation_context,
                             )
+                    decision = controller.decision
+                    pursuit_actor = next((actor for actor in latest.enemies
+                                          if decision is not None and actor.slot == decision.target_slot), None)
+                    pursuing = (decision is not None and decision.intent in ("attack", "approach")
+                                and pursuit_actor is not None and not controller.preparing)
+                    if pursuing and pursuit_actor is not None:
+                        scope = (latest.episode, latest.zone, latest.room, pursuit_actor.slot,
+                                 pursuit_actor.model, pursuit_actor.spawn_index)
+                        if scope != pursuit_scope:
+                            pursuit, pursuit_scope = TerrainNavigator(), scope
                     action = controller.step(
                         latest,
-                        allow_strategy=not driver.held and goal.accepted_tick is None,
+                        allow_strategy=(not driver.held and goal.accepted_tick is None
+                                        and not (pursuing and pursuit.path and field_navigation_ready(latest))),
                     )
+                    ordinary_movement = (action is not None
+                                         and action.reason == "move using current native positions and camera")
+                    needs_geometry = (
+                        pursuing and ordinary_movement and pursuit_actor is not None and action is not None
+                        and latest.raw.get("navigation", {}).get("available")
+                        and pursuit.ordinary_approach_stalled(latest, pursuit_actor, action.duration)
+                    )
+                    moving_to_hostile = (
+                        pursuing and pursuit_actor is not None
+                        and latest.raw.get("navigation", {}).get("available")
+                        and field_navigation_ready(latest)
+                        and not driver.held and goal.accepted_tick is None
+                        and (pursuit.path or needs_geometry)
+                    )
+                    if moving_to_hostile and pursuit_actor is not None and not (action and action.reaction):
+                        action = pursuit.step(latest)
+                        just_reached = (pursuit.feedback and
+                                        pursuit.feedback[-1]["status"] == "route_reached" and
+                                        pursuit.feedback[-1]["tick"] == latest.tick)
+                        if (not pursuit.path and future is None and navigation_future is None
+                                and latest.control == 1 and latest.event_phase == 0 and not just_reached):
+                            context = pursuit.request(
+                                latest, (pursuit_actor.position[0], pursuit_actor.position[2]),
+                                pursuit_actor.slot,
+                            )
+                            if context is not None:
+                                navigation_owner = pursuit
+                                key = f"actor:{pursuit_actor.model}:{pursuit_actor.spawn_index}"
+                                context["retrieved_navigation_evidence"] = store.navigation_experience(
+                                    latest.zone, latest.room, key, pursuit.geometry_sha256,
+                                )
+                                audit.event("model.navigation_request", {
+                                    "tick": latest.tick, "target": pursuit_actor.slot,
+                                    "context": context,
+                                })
+                                navigation_future = planner.submit(
+                                    client.navigate, latest,
+                                    f"Approach the observed hostile actor{pursuit_actor.slot} through "
+                                    "real terrain until native attack targeting can select it.", context,
+                                )
                     if (action is None and goal.door is not None and not driver.held
-                            and not controller.preparing and not latest.enemies
+                            and not controller.preparing
+                            and (not latest.enemies or (controller.decision is not None
+                                                       and controller.decision.intent == "navigate"))
                             and goal.accepted_tick is None):
                         action = goal.door.step(latest)
                     if goal.door is not None and (
@@ -410,6 +478,14 @@ def _play_game(store: RunStore, run_id: str,
                         break
                     if latest.tick >= options.frames:
                         action = None
+                    for observation in pursuit.observations():
+                        audit.event("navigation.outcome", {
+                            "zone": latest.zone, "room": latest.room,
+                            "door": f"actor:{pursuit_scope[-2]}:{pursuit_scope[-1]}" if pursuit_scope else "",
+                            "geometry_sha256": pursuit.geometry_sha256,
+                            "image_sha256": hashes, "observation": observation,
+                            "claim": "Measured approach, not target eligibility or enemy defeat",
+                        })
                     if goal.door is not None:
                         leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
                         for observation in leg.navigator.observations():
@@ -436,6 +512,9 @@ def _play_game(store: RunStore, run_id: str,
                     for effect in controller.reactions.effect_results[effect_offset:]:
                         audit.event("reaction.effect", effect)
                     effect_offset = len(controller.reactions.effect_results)
+                    for ending in controller.reactions.opportunity_endings[ending_offset:]:
+                        audit.event("reaction.opportunity_ended", ending)
+                    ending_offset = len(controller.reactions.opportunity_endings)
                     if options.strict_reactions and any(
                         result["status"] != "accepted" for result in outcomes
                     ):
@@ -471,6 +550,8 @@ def _play_game(store: RunStore, run_id: str,
         audit.event("reaction.result", outcome)
     for effect in controller.reactions.effect_results[effect_offset:]:
         audit.event("reaction.effect", effect)
+    for ending in controller.reactions.opportunity_endings[ending_offset:]:
+        audit.event("reaction.opportunity_ended", ending)
     accepted = {kind: sum(item["status"] == "accepted" and item["kind"] == kind
                           for item in controller.reactions.results)
                 for kind in ("chain", "defense")}
@@ -522,6 +603,7 @@ def _play_game(store: RunStore, run_id: str,
         "verified_reaction_effects": verified_effects,
         "reaction_effect_outcomes": controller.reactions.effect_results,
         "reaction_failures": failures,
+        "ended_reaction_opportunities": controller.reactions.opportunity_endings,
         "defense_coverage_gaps": controller.reactions.coverage_gaps,
         "reaction_coverage_demonstrated": all(accepted.values()) and all(verified_effects.values()) and not failures,
         "inputs": inputs, "max_observation_age_ms": max_age * 1000,
@@ -602,6 +684,11 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
                         for context in result["experience_contexts"]:
                             store.remember(run_id, context["model"], context["weapon"], {
                                 "run_id": run_id, "goal": options.goal,
+                                "coverage": ("physical_controller_route" if options.door_route else
+                                             "physical_controller_entry" if options.door_case else
+                                             "combat_defeat_and_control"),
+                                "seen_hostiles": result["seen_hostiles"],
+                                "zero_hp_hostiles": result["zero_hp_hostiles"],
                                 "scenario_sha256": result["scenario_sha256"],
                                 "ashley_profile": result["ashley_profile"],
                                 "accepted_reactions": result["accepted_reactions"],

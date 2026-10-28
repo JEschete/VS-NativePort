@@ -113,6 +113,12 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     if choices:
         return choices
 
+    if context.get("physical_navigation_objective") and all(
+        context.get("confirmed_successes", {}).get(kind, 0) >= count
+        for kind, count in context.get("required_successes", {}).items()
+    ):
+        add("navigate")
+
     for enemy in frame.enemies:
         add("attack", enemy.slot)
         add("approach", enemy.slot)
