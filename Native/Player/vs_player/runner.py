@@ -13,7 +13,7 @@ from pathlib import Path
 
 from .config import PROJECT, PlayerPaths, runtime_manifest
 from .controller import CombatController, StaleDecision
-from .doors import PhysicalDoor
+from .doors import PhysicalDoor, PhysicalRoute
 from .model import Decision, ModelResponseError
 from .observations import Frame
 from .processes import ProcessJob, freeze_game, game_environment, model_server, verify_installed_model, warm_model
@@ -118,11 +118,15 @@ class PlayOptions:
     model_port: int = 11551
     door_case: str = ""
     save_file: Path | None = None
+    door_route: tuple[str, ...] = ()
 
 
 class CombatGoal:
-    def __init__(self, door_case: str = "") -> None:
-        self.door = PhysicalDoor(door_case) if door_case else None
+    def __init__(self, door_case: str = "", door_route: tuple[str, ...] = ()) -> None:
+        if door_case and door_route:
+            raise ValueError("Choose a single physical door or a continuous route, not both")
+        self.door = (PhysicalRoute(door_route) if door_route else
+                     PhysicalDoor(door_case) if door_case else None)
         self.seen: set[tuple[int, int, int, int, int]] = set()
         self.dead: set[tuple[int, int, int, int, int]] = set()
         self.quiet_start: int | None = None
@@ -215,7 +219,8 @@ def _play_game(store: RunStore, run_id: str,
         "scenario_sha256": hashlib.sha256(scenario_bytes).hexdigest(),
     })
     controller = CombatController()
-    goal = CombatGoal(options.door_case)
+    goal = CombatGoal(options.door_case, options.door_route)
+    route_checkpoint_offset = 0
     latest: Frame | None = None
     reader: TraceReader | None = None
     driver: WindowInput | None = None
@@ -278,6 +283,10 @@ def _play_game(store: RunStore, run_id: str,
                         raise TimeoutError(f"Native observation is stale ({age * 1000:.1f} ms)")
                     if latest.tick <= options.frames:
                         goal.observe(latest)
+                    if isinstance(goal.door, PhysicalRoute):
+                        for checkpoint in goal.door.checkpoints[route_checkpoint_offset:]:
+                            audit.event("physical_door.accepted", checkpoint)
+                        route_checkpoint_offset = len(goal.door.checkpoints)
                     if latest.game_over:
                         raise RuntimeError("The player was defeated")
                     if driver.held and (
@@ -349,6 +358,17 @@ def _play_game(store: RunStore, run_id: str,
                             and not controller.preparing and not latest.enemies
                             and goal.accepted_tick is None):
                         action = goal.door.step(latest)
+                    if goal.door is not None and (
+                        goal.door.blocked_reason or
+                        (isinstance(goal.door, PhysicalRoute) and goal.accepted_tick is not None)
+                    ):
+                        audit.event("physical_route.finished", {
+                            "tick": latest.tick, "blocked_reason": goal.door.blocked_reason,
+                            "result": goal.door.result(),
+                        })
+                        driver.set_buttons(frozenset())
+                        driver.close_window()
+                        break
                     if latest.tick >= options.frames:
                         action = None
                     if action is not None and (not driver.held or action.reaction):
@@ -459,7 +479,8 @@ def _play_game(store: RunStore, run_id: str,
         "inputs": inputs, "max_observation_age_ms": max_age * 1000,
         "native_result": native_result,
         "last_tick": latest.tick,
-        "physical_door": goal.door.result() if goal.door else None,
+        "physical_door": goal.door.result() if isinstance(goal.door, PhysicalDoor) else None,
+        "physical_route": goal.door.result() if isinstance(goal.door, PhysicalRoute) else None,
         "preparation_outcomes": controller.feedback,
         "experience_contexts": [
             {"model": model, "weapon": weapon} for model, weapon in sorted(goal.encounters)
@@ -488,6 +509,8 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
         "minimum_chains": options.minimum_chains,
         "minimum_defenses": options.minimum_defenses,
         "strict_reactions": options.strict_reactions,
+        "door_case": options.door_case,
+        "door_route": options.door_route,
         "model": runtime_manifest()["model"],
     })
     (store.directory(run_id) / "combat-knowledge.json").write_bytes(

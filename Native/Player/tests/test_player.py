@@ -17,7 +17,7 @@ from vs_player.config import PlayerPaths
 from vs_player.abilities import defense_value, offensive_value
 from vs_player.controller import CombatController, StaleDecision, direction_buttons
 from vs_player.choices import available_choices
-from vs_player.doors import PhysicalDoor
+from vs_player.doors import PhysicalDoor, PhysicalRoute
 from vs_player.menus import MenuTransaction
 from vs_player.model import Decision, LocalModel, ModelResponseError
 from vs_player.observations import Frame
@@ -32,7 +32,7 @@ def sample_record(tick=1, **timing):
     actor = {
         "slot": 0, "model": 0, "hp": 100, "max_hp": 100, "mp": 20,
         "risk": 3, "position": [64, 0, 64], "weapon_drawn": 1,
-        "max_mp": 40, "base_attack_type": 0, "shield_pp": 0, "weapon_pp": 0,
+        "max_mp": 40, "base_attack_type": 0, "shield_pp": 0, "weapon_pp": 0, "actor_flags": 0,
         "weapon_category": 2, "spawn_index": 128, "hostile_to_player": False,
         "relation_to_player": -1,
         "statuses": 0, "status_immunities": 0, "spell_action_ids": [],
@@ -453,6 +453,38 @@ class StorageTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_native_target_rejection_requires_movement_before_retry(self):
+        controller = CombatController()
+        original = self.frame()
+        controller.accept(self.decision(), original, original)
+        rejected = self.frame(10, control_mode=2, action_phase=1,
+                              target_page={"selection_step": 16})
+        self.assertEqual(controller.step(rejected).buttons, frozenset({"Cross"}))
+        retry = self.frame(20)
+        controller.accept(self.decision(20), retry, retry)
+        movement = controller.step(retry)
+        self.assertIsNotNone(movement)
+        self.assertNotIn("Circle", movement.buttons)
+        record = sample_record(30, active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["actors"][0]["position"][1] = -15
+        self.assertNotIn("Circle", controller.step(Frame.decode(record)).buttons)
+        record["tick"] = 40
+        record["data"]["actors"][0]["position"][1] = -16
+        self.assertIn("Circle", controller.step(Frame.decode(record)).buttons)
+
+    def test_learned_chains_can_fill_an_empty_saved_loadout_without_grants(self):
+        record = sample_record(active=False, chain_actions=[0, 0, 0])
+        record["data"]["action_options"] = [
+            {"id": action, "family": "chain", "restrictions": 0} for action in (22, 23, 28)
+        ]
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual({(row["action_id"], row["equip_slot"]) for row in choices.values()},
+                         {(22, 1)})
+        record["data"]["reaction_timing"]["chain_actions"][0] = 22
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual({(row["action_id"], row["equip_slot"]) for row in choices.values()},
+                         {(28, 2)})
     def test_offensive_mapping_adapts_to_casters_and_empty_mp(self):
         record = sample_record(active=False)
         record["data"]["action_options"] = [
@@ -555,6 +587,77 @@ class ControllerTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
+    def test_walking_stall_uses_only_two_native_jumps_before_explicit_block(self):
+        door = PhysicalDoor("z009-r006-d000")
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 1, "tile_z": 10, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        door.observe(Frame.decode(record))
+        jumps = []
+        for tick in range(1, 650, 8):
+            record["tick"] = tick
+            action = door.step(Frame.decode(record))
+            if action is not None and "Square" in action.buttons:
+                jumps.append(action)
+        self.assertEqual(len(jumps), 2)
+        self.assertTrue(all(action.buttons - {"Square"} for action in jumps))
+        self.assertEqual(len(door.axis_attempts), 2)
+        self.assertIn("bounded jump and axis recovery", door.blocked_reason)
+
+    def test_continuous_route_requires_every_live_loading_and_quiet_gate(self):
+        route = PhysicalRoute(("z009-r006-d000", "z009-r007-d001"))
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        door = {"index": 0, "destination_zone": 9, "destination_room": 7,
+                "tile_x": 1, "tile_z": 0, "layer": 0, "required_value": 0,
+                "current_flag_value": 0}
+        record["data"]["doors"] = [door]
+        route.observe(Frame.decode(record))
+        route.step(Frame.decode(record))
+        record["tick"] = 2
+        record["data"]["ready"] = False
+        route.observe(Frame.decode(record))
+        record["tick"] = 3
+        record["data"].update(ready=True, room=7)
+        record["data"]["doors"] = [door | {"index": 1, "destination_room": 8}]
+        route.observe(Frame.decode(record))
+        record["tick"] = 123
+        route.observe(Frame.decode(record))
+        self.assertEqual(len(route.checkpoints), 1)
+        self.assertEqual(route.checkpoints[0]["acceptance_tick"], 123)
+        self.assertIsNone(route.accepted_tick)
+        self.assertIsNotNone(route.step(Frame.decode(record)))
+        record["tick"] = 124
+        record["data"]["ready"] = False
+        route.observe(Frame.decode(record))
+        record["tick"] = 125
+        record["data"].update(ready=True, room=8)
+        route.observe(Frame.decode(record))
+        record["tick"] = 245
+        route.observe(Frame.decode(record))
+        record["tick"] = 300
+        route.observe(Frame.decode(record))
+        self.assertEqual(route.accepted_tick, 245)
+        self.assertEqual(route.result()["accepted_legs"], 2)
+        self.assertEqual(route.checkpoints[0]["acceptance_tick"], 123)
+        self.assertIsNone(route.step(Frame.decode(record)))
+
+    def test_disconnected_route_is_rejected_before_an_interaction(self):
+        route = PhysicalRoute(("z009-r006-d000", "z009-r008-d000"))
+        record = sample_record(active=False)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 1, "tile_z": 0, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        with self.assertRaisesRegex(ValueError, "authored destination"):
+            route.observe(Frame.decode(record))
+        self.assertEqual(route.legs[0].open_ticks, [])
+
     def test_physical_door_needs_a_live_loading_cycle_and_unbroken_quiet_gate(self):
         route = PhysicalDoor("z009-r006-d000")
         record = sample_record(active=False)

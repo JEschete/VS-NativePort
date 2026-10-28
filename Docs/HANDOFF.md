@@ -9,6 +9,34 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151 external-player follow-up adds continuous original-record routes,
+  per-leg audit checkpoints, bounded native Square/axis recovery and empty
+  learned-chain assignment through normal menus. #222 records the discovered
+  same-position targeting loop: native no-target feedback was discarded while
+  a horizontal rough reach check kept reopening targeting above an enemy.
+  A red/green regression now preserves target/scene identity and the rejected
+  player position; a fresh query requires16 world units of actual movement,
+  including vertical movement, without guessing native hit eligibility.
+  On dirty `0c425c67`, Debug `a99a5dcbf5da48f686a092c2c5a9de58` maps the
+  save's learned22/28/23, moves off the elevated rejected position
+  `[448,-640,1802]` through normal directional inputs, then confirms the
+  native target and observes Heavy Shot13HP damage. Four original hostiles
+  die across two rooms, eight chain/one defense timings are accepted, four
+  chain/one defense effects are useful, including Gain Life7HP recovery.
+  It accepts17d002->12 at4332 and12d000->11 at6007. The following11d001
+  remains blocked at `[568,0,310]`: two directed jumps change height but not
+  horizontal position, and two bounded axis corrections also fail. The
+  owned window closes normally at6547 with0 engine errors/forced skips/
+  timing failures; this is a blocked route, not a passed flag180 gate.
+  Independent Release `2c73bc3b4ac74af6840759331b8f028a` passes the first
+  two physical legs at3660/5957, clears four original hostiles, and records
+  six/two accepted chain/defense timings and two/two useful effects, with0
+  engine errors/forced skips/timing failures and clean host/trace completion.
+  Both use the same untouched postboss source save hash documented below.
+  Player regressions now pass49 tests. The historical matrix is untouched.
+  Next discriminate the original physical interaction/lock in front of11d001;
+  its transition-record center is not proof of the physical object's reach.
+  Do not repeat the successful prefixes without a new discriminating change.
 - #151 now has a reusable standalone local-model player in
   [Native/Player](../Native/Player/README.md), not scripted combat timelines.
   It reads additive, read-only production observations, makes constrained

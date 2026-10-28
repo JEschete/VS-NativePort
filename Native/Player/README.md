@@ -33,6 +33,22 @@ private copy of the explicitly selected save. The source save is never edited.
 Desktop tick-limit observation is not claimed to finish a campaign or execute
 full in-game shutdown; its host/trace completion is reported separately.
 
+Use `--door-route <original-id> <original-id> ...` instead of `--door-case`
+for continuous legitimate traversal in the same game/window. Each leg must
+match the live authored destination, observe a real loading cycle and hold
+the unchanged 120-tick settled-control gate before the next leg starts.
+Accepted legs are checkpointed as `physical_door.accepted` audit events;
+`physical_route.cases` retains partial results if a later leg is blocked.
+This does not restore state, teleport between cases or relabel transit legs
+as new historical-matrix coverage.
+Observed walking stalls permit at most two directed Square jump attempts near
+the same position, using the production movement input and its native flag
+guard, followed by at most one short correction along each world axis.
+Continued lack of progress becomes an explicit blocker, not thousands
+of repeated movement inputs. A blocked objective or fully accepted route
+releases keys and closes only the owned window; final host/trace evidence
+still decides whether shutdown completed normally.
+
 No system model service or global controller configuration is installed.
 Per-process SDL settings exclude hardware gamepads and prevent automatic
 window activation. Input messages target only the verified child PID/window;
@@ -72,6 +88,13 @@ competition with other applications. A readiness check is not a gameplay test.
   Normal menus assign abilities and select spells; native targeting confirms
   actual selectable actors. A button-send acknowledgment is never a successful
   cast, chain, defense or door.
+
+An attack target rejected by the native selector retains its scene/spawn
+identity and the actual player position in feedback. The controller must move
+at least 16 world units, including vertical movement, before querying again
+from that position. This is retry pacing, not a guessed hit volume or an
+override of native eligibility. Learned chains can fill empty saved mappings
+through their normal menu; nothing is granted.
 
 Reflection and absorption require matching spell/nonspell damage; affinity
 defenses additionally require matching affinity. Integer rounding, missing

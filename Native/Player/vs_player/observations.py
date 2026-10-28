@@ -49,6 +49,7 @@ class Actor:
     shield_pp: int = 0
     max_mp: int = 0
     weapon_pp: int = 0
+    actor_flags: int = 0
 
     @classmethod
     def decode(cls, data: dict[str, Any]) -> "Actor":
@@ -78,6 +79,7 @@ class Actor:
             integer(data["shield_pp"], "actor.shield_pp", 0, 65535),
             integer(data["max_mp"], "actor.max_mp", 0, 32767),
             integer(data["weapon_pp"], "actor.weapon_pp", 0, 65535),
+            integer(data["actor_flags"], "actor.flags", 0, 2**32-1),
         )
 
 

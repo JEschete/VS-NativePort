@@ -4,7 +4,7 @@
     "Circle": "Draw the equipped weapon from idle field; otherwise open attack targeting or confirm a target. Do not send ordinary confirms during an active timing window.",
     "Cross": "Interact with a nearby authored door or cancel a targeting/menu screen.",
     "Triangle": "Open the ordinary menu from idle field.",
-    "Square": "Used only by an explicitly supported field skill or its equipped reaction slot.",
+    "Square": "A normal field jump with held direction when native movement flags permit it; otherwise only its equipped reaction slot. Never use it as an arbitrary menu confirm.",
     "movement": "World positions and camera yaw are authoritative. Movement must use normal directional buttons, never write position."
   },
   "combat": [

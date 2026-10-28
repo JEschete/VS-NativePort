@@ -20,6 +20,12 @@ class PhysicalDoor:
         self.blocked_reason: str | None = None
         self.last_input_tick = -100
         self.interaction_seen = False
+        self.progress_position: tuple[int, int, int] | None = None
+        self.progress_tick = 0
+        self.jump_attempts: list[dict] = []
+        self.axis_attempts: list[dict] = []
+        self.recovery_axis: int | None = None
+        self.axis_until = 0
 
     def observe(self, frame: Frame) -> None:
         if self.contract is None:
@@ -73,6 +79,10 @@ class PhysicalDoor:
         x = self.contract["tile_x"] * 128 + 64
         z = self.contract["tile_z"] * 128 + 64
         dx, dz = x-frame.player.position[0], z-frame.player.position[2]
+        position = frame.player.position
+        if (self.progress_position is None or frame.tick-self.last_input_tick > 32
+                or sum((position[i]-self.progress_position[i])**2 for i in (0, 2)) >= 16**2):
+            self.progress_position, self.progress_tick = position, frame.tick
         self.last_input_tick = frame.tick
         if dx*dx+dz*dz <= 192*192 and (
             not self.interaction_seen and
@@ -83,6 +93,44 @@ class PhysicalDoor:
         buttons = direction_buttons(dx, dz, frame.camera_yaw)
         if not buttons:
             return None
+        if self.recovery_axis is not None:
+            component = dx if self.recovery_axis == 0 else dz
+            if abs(component) <= 16 or frame.tick >= self.axis_until:
+                self.recovery_axis = None
+            else:
+                buttons = direction_buttons(
+                    dx if self.recovery_axis == 0 else 0,
+                    dz if self.recovery_axis == 2 else 0, frame.camera_yaw,
+                )
+                return InputAction(buttons, 8, "bounded world-axis correction at a walking obstruction")
+        if frame.tick-self.progress_tick >= 90 and dx*dx+dz*dz > 192*192:
+            if frame.player.actor_flags & 0x80000:
+                self.blocked_reason = "Native movement flags currently suppress field jump input"
+                return None
+            nearby = [attempt for attempt in self.jump_attempts
+                      if sum((position[i]-attempt["position_before"][i])**2 for i in (0, 2)) < 128**2]
+            if len(nearby) >= 2:
+                attempted = {attempt["axis"] for attempt in self.axis_attempts
+                             if sum((position[i]-attempt["position_before"][i])**2 for i in (0, 2)) < 128**2}
+                axes = [axis for axis, delta in ((0, dx), (2, dz))
+                        if abs(delta) > 16 and axis not in attempted]
+                if not axes:
+                    self.blocked_reason = "No walking progress after bounded jump and axis recovery"
+                    return None
+                self.recovery_axis = axes[0]
+                self.axis_until = frame.tick + 64
+                self.axis_attempts.append({
+                    "tick": frame.tick, "position_before": position, "axis": self.recovery_axis,
+                })
+                buttons = direction_buttons(
+                    dx if self.recovery_axis == 0 else 0,
+                    dz if self.recovery_axis == 2 else 0, frame.camera_yaw,
+                )
+                return InputAction(buttons, 8, "bounded world-axis correction at a walking obstruction")
+            self.jump_attempts.append({"tick": frame.tick, "position_before": position})
+            self.progress_tick = frame.tick
+            # Actors_UpdateAshleyMovementInput, original BATTLE/146C.c:2837.
+            return InputAction(buttons | {"Square"}, 2, "normal directed jump at an observed walking stall")
         return InputAction(buttons, 8, "walk toward the observed original door trigger")
 
     def result(self) -> dict:
@@ -93,4 +141,53 @@ class PhysicalDoor:
             "quiet_tick": self.quiet_tick, "acceptance_tick": self.accepted_tick,
             "blocked_reason": self.blocked_reason,
             "interaction_observed": self.interaction_seen,
+            "jump_attempts": self.jump_attempts,
+            "axis_attempts": self.axis_attempts,
+        }
+
+
+class PhysicalRoute:
+    def __init__(self, identities: tuple[str, ...]) -> None:
+        if not identities:
+            raise ValueError("A physical route needs at least one original door record")
+        self.legs = tuple(PhysicalDoor(identity) for identity in identities)
+        self.index = 0
+        self.accepted_tick: int | None = None
+        self.checkpoints: list[dict] = []
+
+    @property
+    def blocked_reason(self) -> str | None:
+        return self.legs[self.index].blocked_reason
+
+    def observe(self, frame: Frame) -> None:
+        if self.accepted_tick is not None:
+            return
+        leg = self.legs[self.index]
+        leg.observe(frame)
+        if leg.contract is not None and self.index + 1 < len(self.legs):
+            following = self.legs[self.index + 1]
+            destination = (leg.contract["destination_zone"], leg.contract["destination_room"])
+            if destination != (following.source_zone, following.source_room):
+                raise ValueError("Next route leg does not start at the observed authored destination")
+        if leg.accepted_tick is None:
+            return
+        self.checkpoints.append(leg.result())
+        if self.index + 1 == len(self.legs):
+            self.accepted_tick = leg.accepted_tick
+            return
+        self.index += 1
+        self.legs[self.index].observe(frame)
+
+    def step(self, frame: Frame) -> InputAction | None:
+        if self.accepted_tick is not None:
+            return None
+        return self.legs[self.index].step(frame)
+
+    def result(self) -> dict:
+        return {
+            "coverage": "physical_controller_route",
+            "acceptance_tick": self.accepted_tick,
+            "accepted_legs": len(self.checkpoints),
+            "active_index": self.index,
+            "cases": [leg.result() for leg in self.legs],
         }

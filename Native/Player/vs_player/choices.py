@@ -54,6 +54,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
 
     chains = {option["id"] for option in options if option["family"] == "chain"}
     mapped = frame.reaction.chain_actions
+    if 0 in mapped:
+        for action in (22, 28, 23):
+            if action in chains and action not in mapped:
+                add("equip_chain", 0, action, mapped.index(0) + 1)
+                return choices
     caster_targets = [enemy for enemy in frame.enemies if enemy.spell_action_ids]
     silence_mask = frame.raw["status_masks"][12]
     wants_silence = 35 in chains and any(

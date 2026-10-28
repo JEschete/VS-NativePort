@@ -47,6 +47,7 @@ class CombatController:
         self.target_wait_started: int | None = None
         self.feedback: list[dict] = []
         self.transaction: MenuTransaction | None = None
+        self.rejected_positions: dict[tuple[int, int, int, int, int], tuple[int, int, int]] = {}
 
     @property
     def preparing(self) -> bool:
@@ -92,6 +93,17 @@ class CombatController:
                 duration: int, reason: str, reaction: bool = False) -> InputAction:
         self.last_action_tick = frame.tick
         return InputAction(frozenset(buttons), duration, reason, reaction)
+
+    def _reject_target(self, kind: str, decision: Decision, frame: Frame) -> None:
+        player = frame.player
+        if player is None:
+            raise ValueError("Native target rejection lacks the observed player position")
+        self.feedback.append({
+            "kind": kind, "tick": frame.tick, "target": decision.target_slot,
+            "target_identity": self.identity, "player_position": player.position,
+        })
+        if decision.intent == "attack" and self.identity is not None:
+            self.rejected_positions[self.identity] = player.position
 
     def step(self, frame: Frame, allow_strategy: bool = True) -> InputAction | None:
         reaction = self.reactions.observe(frame)
@@ -145,7 +157,7 @@ class CombatController:
             page = frame.raw["target_page"]
             selection_step = page["selection_step"]
             if selection_step == 16:
-                self.feedback.append({"kind": "target_not_selectable", "tick": frame.tick})
+                self._reject_target("target_not_selectable", decision, frame)
                 if self.transaction and self.preparing:
                     self.transaction.closing = True
                     self.transaction.result = {"reason": "No native spell target"}
@@ -161,7 +173,7 @@ class CombatController:
                 and (decision.target_limb < 0 or entry["limb"] == decision.target_limb)
             ]
             if not desired:
-                self.feedback.append({"kind": "target_not_listed", "tick": frame.tick})
+                self._reject_target("target_not_listed", decision, frame)
                 if self.transaction and self.preparing:
                     self.transaction.closing = True
                     self.transaction.result = {"reason": "Requested actor/limb is not a native spell target"}
@@ -194,7 +206,11 @@ class CombatController:
         elif decision.intent == "attack":
             if player.native_extent <= 0:
                 raise ValueError("Native weapon reach is unavailable; refusing a guessed range")
-            if dx * dx + dz * dz <= player.native_extent * player.native_extent:
+            rejected = self.rejected_positions.get(self.identity) if self.identity is not None else None
+            moved = rejected is None or sum(
+                (player.position[index] - rejected[index])**2 for index in (0, 1, 2)
+            ) >= 16**2
+            if moved and dx * dx + dz * dz <= player.native_extent * player.native_extent:
                 return self._action(frame, ("Circle",), 2, "open native attack targeting")
         buttons = direction_buttons(dx, dz, frame.camera_yaw)
         if not buttons:

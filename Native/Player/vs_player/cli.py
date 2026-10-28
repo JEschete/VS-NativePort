@@ -28,7 +28,9 @@ def main() -> int:
     run.add_argument("--require-chains", type=int, default=0)
     run.add_argument("--require-defenses", type=int, default=0)
     run.add_argument("--goal", default=PlayOptions.goal)
-    run.add_argument("--door-case", default="", help="Physically traverse original zNNN-rNNN-dNNN record")
+    doors = run.add_mutually_exclusive_group()
+    doors.add_argument("--door-case", default="", help="Physically traverse original zNNN-rNNN-dNNN record")
+    doors.add_argument("--door-route", nargs="+", help="Traverse these original records in one continuous game")
     args = parser.parse_args()
     paths = PlayerPaths(args.state_dir) if args.state_dir else PlayerPaths.default()
     if args.command == "bootstrap":
@@ -58,6 +60,7 @@ def main() -> int:
             args.game_exe, args.data, args.scenario, args.frames, args.goal,
             args.require_chains, args.require_defenses, door_case=args.door_case,
             save_file=args.save_file,
+            door_route=tuple(args.door_route or ()),
         ))
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 2
