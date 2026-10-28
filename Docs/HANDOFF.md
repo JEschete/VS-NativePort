@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-26. This is a short entry point, not another work tracker.
+Updated 2026-10-28. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -9,6 +9,52 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151 now has a reusable standalone local-model player in
+  [Native/Player](../Native/Player/README.md), not scripted combat timelines.
+  It reads additive, read-only production observations, makes constrained
+  tactical decisions, uses normal menus/targeting and delivers exact-window
+  reaction inputs to its own PID/window without focusing it or accepting the
+  owner's gamepad. Source-verified semantics prevent Ward/Siphon Soul/magic
+  reflection from being selected against ordinary damaging nonspell hits.
+  Current live dirty-`b1703e1d` controls use the declared `all-abilities`
+  production-room fixture, no enemy/stat overrides:
+  Debug run `2f94547233c54c478867415939bb8a47` maps Reflect Damage43 and
+  replaces ineffective MP-only Mind Assault24 with Temper28 through menus;
+  actual reflections are4/1HP, three chain timings/two defense timings are
+  accepted, one chain and both defenses have independently observed useful
+  effects, both enemies die, quiet acceptance2496, normal teardown3612.
+  Release `1096cfb57e984cc7bbcfabf3a1aac8fa` verifies the same mappings,
+  reflections5/2HP, three/two accepted timings, one/two useful effects,
+  acceptance2500 and teardown3612. Both have0 engine errors/forced skips/
+  missed/rejected/unconfirmed timings; maximum measured observation age is
+  4.104ms/2.295ms. Accepted chains against an already dying target retain
+  `no_observed_effect`, not invented damage.
+  Separate Debug `b45cabc1fb72486d929c51c4393af62d` verifies native Herakles/
+  Prostasia status application; `376c652dce464dc697ad3f2e6e91b6fe` verifies
+  Heal73->132 and47->106 against an original Minotaur Zombie, but remains
+  budget-blocked rather than a victory. All-abilities/spells are explicit
+  Lab preconditions, not earned campaign skills. Successful acceptance runs
+  above and the physical proof below are explicitly pinned against cleanup.
+  Evidence lives in `%LOCALAPPDATA%\VS-NativePort\Player\runs\<id>`;
+  model/runtime, raw logs, frozen images and saves are not committed.
+  Asset-independent player tests pass44 cases; native Debug observation/
+  door tests pass40/490, Release plus `[ability-effects]` passes54/1353;
+  Debug's separate `[ability-effects]` passes14/863.
+  Pylance diagnostics timed out during final checking; actual Python tests
+  and scoped Ruff checks pass instead, with no claim of fresh editor approval.
+  Production Continue from the untouched postboss save SHA-256
+  `dda977497fd0bdf9e7cf3bc52cc85509546a3f4e622e7d6f53588f3ee07e3946`
+  independently traverses9/17d002->9/12 in Debug
+  (`f0e813ba6b3c4b10bf87210e59e31a3c`): Cross1709, arrival1854,
+  useful reflections4/4HP, both original hostiles defeated, quiet starts3510.
+  The first120-tick threshold is3630; the old raw report's6000 recorded the
+  last qualifying tick, not first acceptance, and is preserved unchanged.
+  A regression now keeps first acceptance stable. Desktop tick-limit/trace
+  completion is not campaign teardown. Next use this unchanged legitimate
+  progression for12d000->11d001->10d000->13 and its flag180 gates.
+  Straight-line navigation still lacks complete lock/terrain/platform logic;
+  caster/status matchups and ranked/area spell UI remain uncertified.
+  #151 stays open; the all1001-ID historical loader matrix is unchanged.
 - #151 remains open at the owner's request: continue resolving physical/story
   gates, rather than close on inventory/tooling coverage. The original matrix
   is unchanged: all1001 unique IDs match its original inventory, latest

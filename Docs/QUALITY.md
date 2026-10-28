@@ -125,6 +125,17 @@ native output. Reference repositories, extracted data, vendor packages, and tool
 collections under `tools/PSX` and `tools/Base` are not project-style targets.
 Python replay validators under `tools/test` are maintained tooling too; native
 sequence fixtures are exercised by their runtime and semantic verification steps.
+The standalone external player under `Native/Player` is also maintained Python
+tooling. Its asset-independent contracts run in Source Quality CI:
+
+```powershell
+.\.venv-3\Scripts\python.exe -m unittest discover -s Native\Player\tests -v
+```
+
+These controls cover observation validation, timing boundaries, useful-effect
+attribution, stale plans, menu transactions and owned evidence retention. They
+do not replace live gameplay; see [the player guide](../Native/Player/README.md)
+for local model setup and the separate combat/physical-door acceptance gates.
 
 ```cmd
 quality-native.cmd --list

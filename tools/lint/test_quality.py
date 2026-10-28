@@ -225,6 +225,7 @@ class BaselineTests(unittest.TestCase):
             ("Native/Game/src/Battle/ActionResults.c", "native"),
             ("Native/Engine/src/Core/Gte.cpp", "native"),
             ("tools/port/copy_fixups.py", "tooling"),
+            ("Native/Player/vs_player/controller.py", "tooling"),
         ):
             item = quality.Finding("tidy", "rule", path, 1, "message", "code")
             self.assertEqual(item.area, expected)
@@ -357,6 +358,8 @@ class BaselineTests(unittest.TestCase):
         native, python = quality.discover_files()
         self.assertIn("Native/Engine/src/Core/FrameClock.cpp", native)
         self.assertIn("tools/test/verify_first_lever.py", python)
+        self.assertIn("Native/Player/player.py", python)
+        self.assertIn("Native/Player/vs_player/reaction.py", python)
         self.assertNotIn("Native/Game/src/Battle/Targeting.c", native)
         self.assertTrue(all(path.startswith("Native/") for path in native))
         self.assertFalse(

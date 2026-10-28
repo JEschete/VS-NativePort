@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -19,9 +20,12 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
+#include "Battle/Abilities.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
+#include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Boot/GameLoop.h"
@@ -30,11 +34,14 @@ extern "C" {
 #include "Field/GameMode.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
+#include "Input/Controller.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
+#include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "State/Timers.h"
 }
 
 namespace {
@@ -505,6 +512,11 @@ struct GameplayInspectionFixture {
   decltype(Items_lootListHead) saved_loot = Items_lootListHead;
   decltype(Field_roomData.floorTriggers) saved_triggers =
       Field_roomData.floorTriggers;
+  decltype(Field_roomData.doors) saved_doors = Field_roomData.doors;
+  decltype(Field_roomData.header.doorsLength) saved_door_length =
+      Field_roomData.header.doorsLength;
+  decltype(Menu_Framework_menuItems) saved_menu_items =
+      Menu_Framework_menuItems;
   decltype(Menu_Framework_itemsText) saved_text = Menu_Framework_itemsText;
   decltype(Menu_Framework_menuState) saved_menu = Menu_Framework_menuState;
   decltype(Audio_Seq_unusedStateFlags.menuFSubmenu) saved_results_kind =
@@ -532,6 +544,9 @@ struct GameplayInspectionFixture {
     Battle_actionState = nullptr;
     Items_lootListHead = nullptr;
     Field_roomData.floorTriggers = nullptr;
+    Field_roomData.doors = nullptr;
+    Field_roomData.header.doorsLength = 0;
+    Menu_Framework_menuItems = nullptr;
     Menu_Framework_itemsText = nullptr;
     Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
@@ -553,6 +568,9 @@ struct GameplayInspectionFixture {
     Battle_actionState = saved_action;
     Items_lootListHead = saved_loot;
     Field_roomData.floorTriggers = saved_triggers;
+    Field_roomData.doors = saved_doors;
+    Field_roomData.header.doorsLength = saved_door_length;
+    Menu_Framework_menuItems = saved_menu_items;
     Menu_Framework_itemsText = saved_text;
     Menu_Framework_menuState = saved_menu;
     Audio_Seq_unusedStateFlags.menuFSubmenu = saved_results_kind;
@@ -721,4 +739,249 @@ TEST_CASE(
   Menu_Framework_menuState.currentMenu = 15;
   Boot_ResetGameplayInspection();
   CHECK_FALSE(VS::Game::InspectGameplay().roulette);
+}
+
+namespace {
+struct ReactionInspectionFixture : GameplayInspectionFixture {
+  decltype(Input_settings) saved_settings = Input_settings;
+  decltype(Battle_characterState) saved_character = Battle_characterState;
+  decltype(Battle_actionFlowMode) saved_phase = Battle_actionFlowMode;
+  int saved_tick_speed = State_tickSpeed;
+  decltype(std::to_array(Battle_Ai_actorAiStates)) saved_ai =
+      std::to_array(Battle_Ai_actorAiStates);
+  decltype(std::to_array(Battle_actionDefinitions)) saved_definitions =
+      std::to_array(Battle_actionDefinitions);
+  std::unique_ptr<Battle_ActionState> action =
+      std::make_unique<Battle_ActionState>();
+  Battle_Actor player{};
+  Battle_Actor enemy{};
+  Battle_ActorStats player_stats{};
+  Battle_ActorStats enemy_stats{};
+  Actors_ActorRecord player_model{};
+  Battle_Ai_ActorAiState enemy_ai{};
+  decltype(std::to_array(Menu_Magic_shamanSpellIds)) saved_shaman =
+      std::to_array(Menu_Magic_shamanSpellIds);
+
+  ReactionInspectionFixture() {
+    Field_controlMode = 2;
+    Battle_actionFlowMode = 7;
+    State_tickSpeed = 2;
+    Battle_actionState = action.get();
+    player.stats = &player_stats;
+    enemy.stats = &enemy_stats;
+    player_stats.currentHp = player_stats.maxHp = 250;
+    player_stats.currentMp = player_stats.maxMp = 50;
+    player_stats.risk = 12;
+    player_stats.currentRange = 4;
+    player_stats.currentRangeY = 6;
+    player_stats.currentRangeZ = 10;
+    player_stats.currentAttackShape = 1;
+    enemy_stats.currentHp = enemy_stats.maxHp = 73;
+    Battle_actors[0] = Battle_characterState = &player;
+    Battle_actors[2] = &enemy;
+    player_model.modelId = 0;
+    Actors_actorRecords[0] = &player_model;
+    std::fill_n(Battle_Ai_actorAiStates, saved_ai.size(), nullptr);
+    enemy_ai.relations[0].classification = 3;
+    enemy_ai.relations[0].active = 1;
+    enemy_ai.relations[0].visible = 1;
+    Battle_Ai_actorAiStates[2] = &enemy_ai;
+    action->abilityTimer = 42;
+    action->abilityWindow = 40;
+    action->previousChainInput = 1;
+    action->queue[0].primaryTarget.target.targetActor = 0;
+    action->queue[0].targetCount = 1;
+    action->queue[0].targets[0].target.targetActor = 2;
+    for (std::size_t slot = 0;
+         slot < VS::Game::EncounterReactionTimingState::kSlots; ++slot) {
+      Input_settings.mappedChainAbilities[slot] = static_cast<char>(22 + slot);
+      Input_settings.mappedDefenseAbilities[slot] =
+          static_cast<char>(40 + slot);
+      for (const auto id : {22 + slot, 40 + slot}) {
+        Battle_actionDefinitions[id].type = Battle_ActionType_Ability;
+        Battle_actionDefinitions[id].cost = 5;
+      }
+    }
+    Boot_EncounterPollStop();
+  }
+
+  ~ReactionInspectionFixture() {
+    Input_settings = saved_settings;
+    Battle_characterState = saved_character;
+    Battle_actionFlowMode = saved_phase;
+    State_tickSpeed = saved_tick_speed;
+    std::copy(saved_ai.begin(), saved_ai.end(), Battle_Ai_actorAiStates);
+    std::copy(saved_definitions.begin(), saved_definitions.end(),
+              Battle_actionDefinitions);
+    std::copy(saved_shaman.begin(), saved_shaman.end(),
+              Menu_Magic_shamanSpellIds);
+  }
+};
+
+void CheckPlayerGeometry(const VS::Game::EncounterActorState& player) {
+  CHECK(player.model == 0);
+  CHECK(player.weapon_range.components_world ==
+        std::array<int, 3>{128, 192, 320});
+  CHECK(player.weapon_range.shape == 1);
+  CHECK(player.weapon_range.angle_steps == 0);
+  CHECK(player.weapon_range.native_extent_world == 320);
+}
+
+void CheckReactionActor(const VS::Game::EncounterActorState& enemy) {
+  CHECK(enemy.model == 58);
+  CHECK(enemy.hostile_to_player);
+  CHECK(enemy.relation_to_player == 3);
+  CHECK(enemy.relation_active);
+  CHECK(enemy.player_visible);
+}
+
+void CheckNativeTiming(const VS::Game::EncounterReactionTimingState& timing) {
+  CHECK(timing.active);
+  CHECK(timing.eligibility_status == "evaluated");
+  CHECK(timing.source_actor == 0);
+  CHECK(timing.target_actor == 2);
+  CHECK(timing.timer == 42);
+  CHECK(timing.window == 40);
+  CHECK(timing.tick_speed == 2);
+  CHECK(timing.chain_actions == std::array<int, 3>{22, 23, 24});
+  CHECK(timing.defense_actions == std::array<int, 3>{40, 41, 42});
+  CHECK(timing.eligible == std::array<bool, 3>{false, true, true});
+}
+
+void CheckResourcesUnchanged(const ReactionInspectionFixture& fixture) {
+  CHECK(fixture.player_stats.currentHp == 250);
+  CHECK(fixture.player_stats.currentMp == 50);
+  CHECK(fixture.player_stats.risk == 12);
+  CHECK(fixture.action->abilityTimer == 42);
+  CHECK(fixture.action->abilityInputAttempted == 0);
+}
+
+void CheckDefenseAcknowledgment(
+    const VS::Game::EncounterReactionTimingState& timing) {
+  CHECK_FALSE(timing.active);
+  CHECK(timing.attempted);
+  CHECK(timing.succeeded == 2);
+  CHECK(timing.previous_slot == 3);
+  CHECK(timing.eligible == std::array<bool, 3>{false, false, false});
+}
+}  // namespace
+
+TEST_CASE("Player observations retain native weapon geometry and hostility",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  fixture.player_stats.weapon.currentPp = 37;
+  const auto state = VS::Game::InspectGameplay();
+  REQUIRE(state.actors.size() == 2);
+  CheckPlayerGeometry(state.actors[0]);
+  CheckReactionActor(state.actors[1]);
+  TraceScope scope;
+  const auto data = FlushedFrame(scope, state).at("data");
+  CHECK(data.at("player_schema") == 1);
+  CHECK(state.actors[0].weapon_pp == 37);
+  CHECK(data.at("actors").at(0).at("weapon_pp") == 37);
+  CHECK(data.at("actors").at(0).at("weapon_range").at("native_extent_world") ==
+        320);
+  CHECK(data.at("actors").at(1).at("hostile_to_player") == true);
+}
+
+TEST_CASE("Player timing observations use production eligibility without costs",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  const auto random = Core_Random_State();
+  const auto state = VS::Game::InspectGameplay();
+  CheckNativeTiming(state.reaction_timing);
+  CheckResourcesUnchanged(fixture);
+  CHECK(Core_Random_State() == random);
+}
+
+TEST_CASE("Player timing keeps acknowledgments after the active input phase",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  fixture.action->queue[0].primaryTarget.target.targetActor = 2;
+  fixture.action->queue[0].targets[0].target.targetActor = 0;
+  fixture.action->queue[0].actionId = 54;
+  fixture.action->previousChainInput = 2;
+  const auto defense = VS::Game::InspectGameplay().reaction_timing;
+  CHECK(defense.active);
+  CHECK(defense.source_actor == 2);
+  CHECK(defense.target_actor == 0);
+  CHECK(defense.eligible == std::array<bool, 3>{true, false, true});
+  fixture.action->abilityInputAttempted = 1;
+  fixture.action->abilityInputSucceeded = 2;
+  fixture.action->previousChainInput = 3;
+  Battle_actionFlowMode = 8;
+  const auto acknowledged = VS::Game::InspectGameplay().reaction_timing;
+  CheckDefenseAcknowledgment(acknowledged);
+  Boot_ResetGameplayInspection();
+  const auto released = VS::Game::InspectGameplay();
+  CHECK_FALSE(released.ready);
+  CHECK_FALSE(released.reaction_timing.active);
+}
+
+TEST_CASE("Player reads actual learned spell data without granting an action",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  constexpr unsigned kHeal = 96;
+  std::fill_n(Menu_Magic_shamanSpellIds, std::size(Menu_Magic_shamanSpellIds),
+              0);
+  Menu_Magic_shamanSpellIds[0] = kHeal;
+  auto& heal = Battle_actionDefinitions[kHeal];
+  heal = {};
+  heal.type = Battle_ActionType_Spell;
+  heal.cost = 5;
+  const std::array<char, 5> name{0x11, 0x28, 0x24, 0x2F,
+                                 static_cast<char>(0xE7)};
+  std::copy(name.begin(), name.end(), heal.name);
+  const auto absent = VS::Game::InspectGameplay();
+  CHECK(std::ranges::none_of(absent.action_options, [](const auto& option) {
+    return option.id == kHeal;
+  }));
+  heal.unlocked = 1;
+  const auto state = VS::Game::InspectGameplay();
+  const auto found = std::ranges::find(state.action_options, kHeal,
+                                       &VS::Game::EncounterActionOption::id);
+  REQUIRE(found != state.action_options.end());
+  CHECK(found->name == "Heal");
+  CHECK(found->cost == 5);
+  CHECK(found->family == "shaman");
+  CHECK(heal.unlocked == 1);
+}
+
+TEST_CASE("Incoming effect observations distinguish damage and recovery",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  auto& incoming = fixture.action->queue[0];
+  fixture.action->selection.actionId = 1;
+  Battle_actionDefinitions[1].type = Battle_ActionType_BaseAttack;
+  incoming.primaryTarget.target.targetActor = 2;
+  incoming.targetCount = 2;
+  incoming.targets[0].target.targetActor = 0;
+  incoming.targets[0].hpEffect = 1;
+  incoming.targets[0].target.hp = 16;
+  incoming.targets[1].target.targetActor = 0;
+  incoming.targets[1].hpEffect = 2;
+  incoming.targets[1].target.hp = 80;
+  const auto timing = VS::Game::InspectGameplay().reaction_timing;
+  CHECK(timing.incoming_type == Battle_ActionType_BaseAttack);
+  CHECK(timing.incoming_hp_damage == 16);
+  CHECK(timing.incoming_mp_damage == 0);
+  CHECK(incoming.targets[1].target.hp == 80);
+}
+
+TEST_CASE("Observed door contracts preserve the current authored flags",
+          "[player][diagnostics][inspection]") {
+  GameplayInspectionFixture fixture;
+  Field_MpdDoorRecord door{};
+  door.destinationZoneId = 9;
+  door.destinationRoomId = 1;
+  door.tileLocation.tileX = 3;
+  door.tileLocation.tileZ = 14;
+  Field_roomData.doors = &door;
+  Field_roomData.header.doorsLength = sizeof(door);
+  Boot_EncounterPollStop();
+  const auto state = VS::Game::InspectGameplay();
+  REQUIRE(state.doors.size() == 1);
+  CHECK(state.doors[0].destination_room == 1);
+  CHECK(state.doors[0].tile_z == 14);
+  CHECK(state.door_flag_values.size() == 1);
 }

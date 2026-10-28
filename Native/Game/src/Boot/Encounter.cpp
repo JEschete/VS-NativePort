@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <format>
 #include <ranges>
+#include <span>
 #include <sstream>
 #include <stdexcept>
 #include <string>
@@ -27,9 +28,11 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
+#include "Battle/Abilities.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
+#include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
@@ -37,6 +40,7 @@ extern "C" {
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/Targeting.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "Boot/PlayerSettings.h"
@@ -46,6 +50,7 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Random.h"
 #include "Core/Scratch.h"
+#include "Core/Text/TextCode.h"
 #include "Effects/Runtime.h"
 #include "Event/Cutscene.h"
 #include "Event/ScriptActors.h"
@@ -63,9 +68,12 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Loot.h"
+#include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
+#include "Menu/Framework/MenuRows.h"
+#include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
@@ -74,6 +82,7 @@ extern "C" {
 #include "State/Flags.h"
 #include "State/Location.h"
 #include "State/Progress.h"
+#include "State/Timers.h"
 #include "Title/TitleMenu.h"
 }
 
@@ -148,10 +157,31 @@ int EnterOrFinishEncounter() {
   return ResumeEncounter();
 }
 
+void InspectActorActions(const Battle_ActorStats& stats,
+                         EncounterActorState& snapshot) {
+  for (const auto& limb : stats.limbActions) {
+    for (const auto& action : limb) {
+      if (action.actionId != 0 &&
+          action.actionId < std::size(Battle_actionDefinitions) &&
+          std::ranges::find(snapshot.action_ids, action.actionId) ==
+              snapshot.action_ids.end()) {
+        snapshot.action_ids.push_back(action.actionId);
+        if (Battle_actionDefinitions[action.actionId].type ==
+            Battle_ActionType_Spell) {
+          snapshot.spell_action_ids.push_back(action.actionId);
+        }
+      }
+    }
+  }
+}
+
 EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   const auto& stats = *actor.stats;
   EncounterActorState snapshot;
   snapshot.slot = slot;
+  if (Actors_actorRecords[slot] != nullptr) {
+    snapshot.model = Actors_actorRecords[slot]->modelId;
+  }
   snapshot.hp = stats.currentHp;
   snapshot.mp = stats.currentMp;
   snapshot.max_hp = stats.maxHp;
@@ -166,6 +196,9 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.walk_speed = static_cast<unsigned char>(stats.walkSpeed);
   snapshot.run_speed = static_cast<unsigned char>(stats.runSpeed);
   snapshot.statuses = static_cast<std::uint32_t>(stats.statuses);
+  snapshot.status_immunities =
+      static_cast<std::uint32_t>(stats.statusImmunities);
+  InspectActorActions(stats, snapshot);
   std::ranges::copy(stats.statusTimers, snapshot.status_timers.begin());
   snapshot.command = actor.commandOpcode;
   snapshot.command_state = actor.commandState;
@@ -175,6 +208,9 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.weapon_grip = stats.weapon.grip.id;
   snapshot.weapon_model = static_cast<unsigned char>(stats.weapon.wepId);
   snapshot.shield_model = static_cast<unsigned char>(stats.shield.wepId);
+  snapshot.base_attack_type = stats.weapon.actionType;
+  snapshot.shield_pp = stats.shield.currentPp;
+  snapshot.weapon_pp = stats.weapon.currentPp;
   snapshot.actor_flags = Actors_ActorStateFlags(slot);
   snapshot.recovery = stats.actionRecoveryTimer;
   Actors_ActorLocationQuery location{};
@@ -186,8 +222,29 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   snapshot.defeated = actor.defeated != 0;
   snapshot.awareness_marker =
       static_cast<unsigned char>(Battle_actorMarkers[slot]);
+  // Original 7CD68.c:437 reads this four-byte range shape without modifying it.
+  constexpr int kRangeUnit = 32;
+  Battle_Ai_ActionRangeShape range{};
+  range.rangeY =
+      std::bit_cast<char>(static_cast<std::uint8_t>(stats.currentRangeY));
+  range.rangeZ =
+      std::bit_cast<char>(static_cast<std::uint8_t>(stats.currentRangeZ));
+  range.shape = stats.currentAttackShape;
+  range.angle = stats.currentAttackShapeAngle;
+  snapshot.weapon_range = {{static_cast<int>(stats.currentRange) * kRangeUnit,
+                            static_cast<int>(stats.currentRangeY) * kRangeUnit,
+                            static_cast<int>(stats.currentRangeZ) * kRangeUnit},
+                           static_cast<int>(stats.currentAttackShape),
+                           static_cast<int>(stats.currentAttackShapeAngle),
+                           Battle_CalculateRangeShapeExtent(&range)};
   const auto* ai = Battle_Ai_actorAiStates[slot];
   if (ai != nullptr) {
+    constexpr unsigned kHostileRelation = 3;
+    const auto& relation = ai->relations[0];
+    snapshot.relation_to_player = static_cast<int>(relation.classification);
+    snapshot.relation_active = relation.active != 0;
+    snapshot.player_visible = relation.visible != 0;
+    snapshot.hostile_to_player = relation.classification == kHostileRelation;
     snapshot.ai_present = true;
     snapshot.ai_candidates = ai->candidateCount;
     snapshot.ai_engagement_frames = ai->engagementFrames;
@@ -201,6 +258,214 @@ EncounterActorState InspectActor(int slot, const Battle_Actor& actor) {
   return snapshot;
 }
 
+std::string InspectGameText(std::span<const char> bytes) {
+  constexpr std::string_view kLetters =
+      "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  std::string result;
+  for (std::size_t index = 0; index < bytes.size(); ++index) {
+    const auto value = static_cast<unsigned char>(bytes[index]);
+    if (value == Core_TextCode_Terminator) break;
+    if (value >= Core_TextCode_ChunkSize) {
+      if (++index >= bytes.size()) break;
+    } else if (value < kLetters.size()) {
+      result += kLetters[value];
+    } else if (value == Core_TextCode_Space) {
+      result += ' ';
+    } else if (value == Core_TextCode_Hyphen) {
+      result += '-';
+    } else {
+      result += std::format("[{:02X}]", value);
+    }
+  }
+  return result;
+}
+
+void InspectActionOptions(EncounterState& state) {
+  const auto* player = Battle_actors[0];
+  if (player == nullptr || player->stats == nullptr ||
+      Battle_actionState == nullptr) {
+    return;
+  }
+  const auto append = [&](const auto& ids, std::size_t count,
+                          std::string_view family) {
+    if (count > std::size(ids)) {
+      throw std::runtime_error("action inspection exceeds the native list");
+    }
+    int menu_order = 0;
+    for (std::size_t index = 0; index < count; ++index) {
+      const auto id = static_cast<unsigned char>(ids[index]);
+      if (id == 0 || !Battle_actionDefinitions[id].unlocked) continue;
+      const auto& definition = Battle_actionDefinitions[id];
+      state.action_options.push_back(
+          {id, InspectGameText(definition.name), std::string(family),
+           menu_order++, static_cast<int>(definition.type),
+           static_cast<int>(definition.cost),
+           Battle_ActorActionRestrictionFlags(0, id),
+           std::bit_cast<std::uint16_t>(definition.aiFlags)});
+    }
+  };
+  // Counts are the original menu loops, not the overbroad SDK array extents.
+  constexpr std::size_t kWarlockRows = 18, kShamanRows = 6;
+  constexpr std::size_t kSorcererRows = 18, kEnchanterRows = 8;
+  constexpr std::size_t kBattleAbilityRows = 14;
+  append(Menu_Magic_warlockSpellIds, kWarlockRows, "warlock");
+  append(Menu_Magic_shamanSpellIds, kShamanRows, "shaman");
+  append(Menu_Magic_sorcererSpellIds, kSorcererRows, "sorcerer");
+  append(Menu_Magic_enchanterSpellIds, kEnchanterRows, "enchanter");
+  append(Battle_chainAbilityActionIds, kBattleAbilityRows, "chain");
+  append(Battle_defenseAbilityActionIds, kBattleAbilityRows, "defense");
+}
+
+EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
+  EncounterMenuState result;
+  constexpr unsigned kMenuControl = 5, kMenuIdMask = 0x3F;
+  constexpr unsigned kSubmenuStateMask = 0xF;
+  constexpr int kMainMenuEntries = 10;
+  if (state.control_mode != kMenuControl ||
+      Menu_Framework_menuItems == nullptr) {
+    return result;
+  }
+  result.available = true;
+  result.loading = Menu_Framework_menuState.loading != 0;
+  result.selected_menu = static_cast<int>(state.menu_state & kMenuIdMask);
+  result.submenu_phase = static_cast<unsigned char>(
+      Menu_Framework_submenuStates[state.menu_state & kSubmenuStateMask]);
+  result.selected_row = state.menu_highlighted_row;
+  result.list_phase = static_cast<unsigned char>(Menu_Framework_itemsListRow);
+  result.assignment_phase =
+      static_cast<int>(Menu_BattleAbilities_abilityMenuState);
+  result.assignment_type =
+      static_cast<unsigned char>(Menu_BattleAbilities_selectedAbilityType);
+  result.assignment_selected = Menu_BattleAbilities_highlightedAbility +
+                               Menu_BattleAbilities_firstAbility;
+  if (result.selected_menu == 0) {
+    for (int index = 0; index < kMainMenuEntries; ++index) {
+      if ((Input_settings.menuFlags & (1u << index)) == 0) continue;
+      const auto& row = Menu_Framework_menuItems[index];
+      result.rows.push_back({index, InspectGameText(row.text),
+                             row.unselectable != 0, row.selected != 0});
+      if (row.selected != 0) result.selected_row = index;
+    }
+  } else if (!result.loading && Menu_Framework_itemsText != nullptr) {
+    constexpr unsigned kMaximumObservedRows = 256;
+    if (Menu_Framework_subMenuRowCount > kMaximumObservedRows) {
+      throw std::runtime_error("menu inspection exceeds supported row count");
+    }
+    const auto* text = reinterpret_cast<const Menu_Framework_ItemText*>(
+        Menu_Framework_itemsText);
+    for (unsigned index = 0; index < Menu_Framework_subMenuRowCount; ++index) {
+      const auto* name = reinterpret_cast<const char*>(text[index].name);
+      result.rows.push_back(
+          {static_cast<int>(index),
+           InspectGameText(std::span(name, sizeof(text[index].name))),
+           (text[index].menuRowFlags & Menu_Framework_RowTypeFlag_Disabled) !=
+               0,
+           static_cast<int>(index) == result.selected_row});
+    }
+  }
+  return result;
+}
+
+void InspectIncomingEffect(const Battle_ActionState& action,
+                           const Battle_ActionRequest& queued,
+                           EncounterReactionTimingState& snapshot) {
+  constexpr unsigned kHpDamage = 1, kCombinedDamage = 3;
+  const auto incoming_id = action.selection.actionId;
+  if (incoming_id < std::size(Battle_actionDefinitions)) {
+    snapshot.incoming_type = Battle_actionDefinitions[incoming_id].type;
+    snapshot.incoming_cost = Battle_actionDefinitions[incoming_id].cost;
+    snapshot.incoming_affinity =
+        static_cast<unsigned char>(action.selection.effectVariant);
+  }
+  if (queued.targetCount > std::size(queued.targets)) {
+    throw std::runtime_error(
+        "reaction inspection exceeds native target storage");
+  }
+  for (unsigned index = 0; index < queued.targetCount; ++index) {
+    const auto& hit = queued.targets[index];
+    if (hit.targetsPosition != 0 || hit.target.targetActor != 0) continue;
+    if (hit.hpEffect == kHpDamage || hit.hpEffect == kCombinedDamage) {
+      snapshot.incoming_hp_damage +=
+          std::max(0, static_cast<int>(hit.target.hp));
+    }
+    if (hit.mpEffect == kHpDamage || hit.mpEffect == kCombinedDamage) {
+      snapshot.incoming_mp_damage +=
+          std::max(0, static_cast<int>(hit.target.mp));
+    }
+    snapshot.incoming_statuses |=
+        static_cast<std::uint32_t>(hit.removeStatuses);
+  }
+}
+
+void InspectReactionEligibility(EncounterReactionTimingState& snapshot) {
+  const auto present = [](int slot) {
+    return slot >= 0 && slot < EncounterLimits::kActorSlots &&
+           Battle_actors[slot] != nullptr &&
+           Battle_actors[slot]->stats != nullptr;
+  };
+  if (!present(snapshot.source_actor) || !present(snapshot.target_actor) ||
+      Battle_characterState == nullptr ||
+      Battle_characterState->stats == nullptr) {
+    snapshot.eligibility_status = "actor_state_unavailable";
+    return;
+  }
+  snapshot.eligibility_status = "evaluated";
+  const auto& mapped = snapshot.source_actor == 0 ? snapshot.chain_actions
+                                                  : snapshot.defense_actions;
+  for (std::size_t slot = 0; slot < mapped.size(); ++slot) {
+    if (mapped[slot] == 0) continue;
+    if (static_cast<std::size_t>(mapped[slot]) >=
+        std::size(Battle_actionDefinitions)) {
+      snapshot.eligibility_status = "invalid_equipped_action";
+      snapshot.eligible.fill(false);
+      return;
+    }
+    snapshot.eligible[slot] =
+        Battle_CanTriggerBattleAbility(static_cast<int>(slot) + 1) != 0;
+  }
+}
+
+EncounterReactionTimingState InspectReactionTiming(
+    const EncounterState& state) {
+  EncounterReactionTimingState snapshot;
+  snapshot.tick_speed = State_tickSpeed;
+  snapshot.story_timing = State_ScriptFlag(1) != 0;
+  for (std::size_t slot = 0; slot < snapshot.chain_actions.size(); ++slot) {
+    snapshot.chain_actions[slot] =
+        static_cast<unsigned char>(Input_settings.mappedChainAbilities[slot]);
+    snapshot.defense_actions[slot] =
+        static_cast<unsigned char>(Input_settings.mappedDefenseAbilities[slot]);
+  }
+  constexpr unsigned kAbilityTimingPhase = 7, kQueueIndexMask = 3;
+  if (Battle_actionState == nullptr) return snapshot;
+  const auto& action = *Battle_actionState;
+  snapshot.active =
+      state.control_mode == 2 && state.action_phase == kAbilityTimingPhase;
+  snapshot.queue_index = action.queueIndex;
+  snapshot.chain_step = action.chainStep;
+  snapshot.timer = action.abilityTimer;
+  snapshot.window = action.abilityWindow;
+  snapshot.previous_slot =
+      static_cast<unsigned char>(action.previousChainInput);
+  snapshot.previous_buttons =
+      static_cast<unsigned char>(action.previousChainButtons);
+  snapshot.attempted = action.abilityInputAttempted != 0;
+  snapshot.succeeded = static_cast<unsigned char>(action.abilityInputSucceeded);
+  const auto& queued = action.queue[action.queueIndex & kQueueIndexMask];
+  snapshot.action = queued.actionId;
+  InspectIncomingEffect(action, queued, snapshot);
+  if (queued.primaryTarget.targetsPosition != 0 || queued.targetCount == 0 ||
+      queued.targets[0].targetsPosition != 0) {
+    if (snapshot.active) snapshot.eligibility_status = "not_actor_targeted";
+    return snapshot;
+  }
+  snapshot.source_actor = queued.primaryTarget.target.targetActor;
+  snapshot.target_actor = queued.targets[0].target.targetActor;
+  if (!snapshot.active) return snapshot;
+  InspectReactionEligibility(snapshot);
+  return snapshot;
+}
+
 void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   state.action = action.selection.actionId;
   state.source_actor = action.selection.primaryTarget.target.targetActor;
@@ -208,6 +473,7 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   const auto page = Battle_GetTargetPageInfo();
   state.target_page = {page.total, page.page,    page.pages,
                        page.first, page.visible, page.selected};
+  state.target_page.selection_step = Battle_targetSelectionStep;
   constexpr unsigned kTargetingControl = 2;
   constexpr unsigned kFirstTargetPhase = 1, kLastTargetPhase = 3;
   if (state.control_mode != kTargetingControl ||
@@ -226,6 +492,59 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
         {target.actorId,
          target.limb,
          {target.position.vx, target.position.vy, target.position.vz}});
+  }
+}
+
+void InspectRoomDoors(EncounterState& state) {
+  if (Field_roomData.doors == nullptr) return;
+  if (Field_roomData.header.doorsLength % sizeof(Field_MpdDoorRecord) != 0) {
+    throw std::runtime_error(
+        "observed room door storage has an incomplete record");
+  }
+  const auto count =
+      Field_roomData.header.doorsLength / sizeof(Field_MpdDoorRecord);
+  for (unsigned index = 0; index < count; ++index) {
+    const auto& door = Field_roomData.doors[index];
+    state.doors.push_back(
+        {static_cast<int>(index),
+         door.destinationZoneId,
+         door.destinationRoomId,
+         static_cast<int>(door.tileLocation.tileX),
+         static_cast<int>(door.tileLocation.tileZ),
+         static_cast<int>(door.tileLocation.floorLayer),
+         {static_cast<int>(door.entryTileX), static_cast<int>(door.entryTileZ),
+          static_cast<int>(door.entryElevation), 0},
+         static_cast<int>(door.requiredFlagId),
+         static_cast<int>(door.requiredFlagValue),
+         door.doorId,
+         door.hasEntryStep != 0});
+    state.door_flag_values.push_back(static_cast<unsigned char>(
+        State_ScriptFlag(static_cast<std::int16_t>(door.requiredFlagId))));
+  }
+}
+
+void InspectInventoryAndLoot(EncounterState& state) {
+  for (std::size_t slot = 0; slot < std::size(Audio_Seq_unusedInventory.misc);
+       ++slot) {
+    const auto& item = Audio_Seq_unusedInventory.misc[slot];
+    if (item.id != 0) {
+      state.items.push_back({static_cast<int>(slot), item.id, item.count});
+    }
+  }
+  for (const auto* node = Items_lootListHead; node != nullptr;
+       node = node->next) {
+    if (state.pending_loot.size() >= EncounterLimits::kActorSlots) {
+      throw std::runtime_error("encounter loot list exceeds actor storage");
+    }
+    EncounterLootState loot;
+    loot.source_actor = node->droppedMask;
+    for (std::size_t slot = 0; slot < std::size(node->loot.misc); ++slot) {
+      const auto& item = node->loot.misc[slot];
+      if (item.itemId != 0 && item.count != 0) {
+        loot.items.push_back({static_cast<int>(slot), item.itemId, item.count});
+      }
+    }
+    state.pending_loot.push_back(std::move(loot));
   }
 }
 
@@ -737,33 +1056,20 @@ EncounterState InspectGameplay() {
   if (Battle_actionState != nullptr) {
     InspectTargeting(state, *Battle_actionState);
   }
+  state.reaction_timing = InspectReactionTiming(state);
+  for (std::size_t index = 0; index < state.status_masks.size(); ++index) {
+    state.status_masks[index] = static_cast<std::uint32_t>(
+        Battle_statusEffectParams[index].statusFlags);
+  }
+  InspectActionOptions(state);
+  state.menu = InspectPlayerMenu(state);
+  InspectRoomDoors(state);
   for (int slot = 0; slot < EncounterLimits::kActorSlots; ++slot) {
     const auto* actor = Battle_actors[slot];
     if (actor == nullptr || actor->stats == nullptr) continue;
     state.actors.push_back(InspectActor(slot, *actor));
   }
-  for (std::size_t slot = 0; slot < std::size(Audio_Seq_unusedInventory.misc);
-       ++slot) {
-    const auto& item = Audio_Seq_unusedInventory.misc[slot];
-    if (item.id != 0) {
-      state.items.push_back({static_cast<int>(slot), item.id, item.count});
-    }
-  }
-  for (const auto* node = Items_lootListHead; node != nullptr;
-       node = node->next) {
-    if (state.pending_loot.size() >= EncounterLimits::kActorSlots) {
-      throw std::runtime_error("encounter loot list exceeds actor storage");
-    }
-    EncounterLootState loot;
-    loot.source_actor = node->droppedMask;
-    for (std::size_t slot = 0; slot < std::size(node->loot.misc); ++slot) {
-      const auto& item = node->loot.misc[slot];
-      if (item.itemId != 0 && item.count != 0) {
-        loot.items.push_back({static_cast<int>(slot), item.itemId, item.count});
-      }
-    }
-    state.pending_loot.push_back(std::move(loot));
-  }
+  InspectInventoryAndLoot(state);
   if (Field_roomData.floorTriggers != nullptr) {
     const auto count = Field_roomData.header.floorTriggersLength /
                        sizeof(*Field_roomData.floorTriggers);

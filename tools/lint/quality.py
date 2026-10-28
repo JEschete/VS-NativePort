@@ -52,6 +52,8 @@ class Finding:
     def area(self) -> str:
         if self.path.startswith("Native/Tests/"):
             return "tests"
+        if self.path.startswith("Native/Player/"):
+            return "tooling"
         if "/Legacy/" in self.path:
             return "legacy"
         if self.path.startswith("Native/"):
@@ -143,6 +145,15 @@ def discover_files() -> tuple[list[str], list[str]]:
             if not {"node_modules", "__pycache__"}.intersection(path.parts)
         }
         | {relative(path) for path in (ROOT / "tools").glob("*.py")}
+        | {
+            relative(path)
+            for path in (ROOT / "Native" / "Player").rglob("*.py")
+            if not any(
+                part in {"node_modules", "__pycache__", "venv", ".venv"}
+                or part.startswith(".venv-")
+                for part in path.parts
+            )
+        }
     )
     return native, python
 
