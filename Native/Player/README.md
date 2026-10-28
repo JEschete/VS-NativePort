@@ -51,6 +51,8 @@ still decides whether shutdown completed normally.
 
 No system model service or global controller configuration is installed.
 The runner explicitly supplies `--player-observations` to its owned host.
+This version requires player observation schema 2; rebuild the selected host
+after native diagnostic changes. Older frozen images are rejected explicitly.
 Player-only collectors and types live in the game's Diagnostics subsystem;
 ordinary gameplay inspection and normal traces do not collect or encode them.
 See [the diagnostic interface](../Game/include/Diagnostics/PlayerObservation.hpp)
@@ -140,6 +142,13 @@ Opening an object and walking onto a transition tile are separate operations.
 The model can also select enabled native rows in a legitimately earned ability
 reward menu. Newly learned actions must then appear in native observations;
 the tool never unlocks them directly.
+If no healing spell is learned, currently owned HP-recovery consumables are
+available through the normal L2+Up item shortcut. Selection follows observed
+inventory IDs, not guessed row names. A useful item outcome requires its native
+action, one-item count decrement and HP recovery within the source-backed
+minimum (clamped to missing HP). Healing is prioritized against actual observed
+large-hit damage as well as a low-HP threshold. Native ready loot screens can
+claim currently fitting drops with Square; inventory capacity remains native.
 
 ## Persistent state and cleanup
 

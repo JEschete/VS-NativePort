@@ -6,6 +6,15 @@ if TYPE_CHECKING:
     from .observations import Frame
 
 
+def item_recovery_bounds(option: dict, semantics: dict) -> tuple[int, int] | None:
+    if (option["effect_id"] != semantics["effect_id"]
+            or option["calculator_id"] != semantics["calculator_id"]
+            or option["stat_factor"] <= 0):
+        return None
+    amount = option["stat_factor"] * semantics["factor_multiplier"]
+    return max(0, amount-semantics["random_variation"]), amount+semantics["random_variation"]
+
+
 def defense_value(frame: "Frame", action: int) -> float:
     player = frame.player
     if player is None:

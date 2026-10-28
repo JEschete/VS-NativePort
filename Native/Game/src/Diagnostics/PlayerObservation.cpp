@@ -45,6 +45,8 @@ extern "C" {
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/MenuRows.h"
+#include "Menu/Inventory/Inventory.h"
+#include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
 #include "State/Flags.h"
 #include "State/Timers.h"
@@ -174,20 +176,75 @@ void InspectActionOptions(PlayerObservationState& state) {
   append(Battle_defenseAbilityActionIds, kBattleAbilityRows, "defense");
 }
 
+void InspectItemOptions(PlayerObservationState& state) {
+  const auto* player = Battle_actors[0];
+  if (player == nullptr || player->stats == nullptr) return;
+  constexpr int kFirstItem = 323, kLastUsableItem = 457;
+  constexpr unsigned kFirstRankedSpell = 106, kRankedSpellCount = 28;
+  constexpr unsigned kRanks = 3;
+  // MENU/Inventory.c item shortcut uses this map without granting a spell.
+  for (const auto& item : state.items) {
+    if (item.id < kFirstItem || item.id > kLastUsableItem || item.count <= 0) {
+      continue;
+    }
+    unsigned action = Menu_Inventory_miscItemToActionMap[item.id - kFirstItem];
+    if (action - kFirstRankedSpell < kRankedSpellCount) {
+      for (unsigned rank = 0; rank < kRanks; ++rank) {
+        if (Battle_actionDefinitions[action].unlocked) ++action;
+      }
+    }
+    if (action >= std::size(Battle_actionDefinitions)) {
+      throw std::runtime_error(
+          "observed item action exceeds native definitions");
+    }
+    const auto& definition = Battle_actionDefinitions[action];
+    const auto& hit = definition.hits[0];
+    state.item_options.push_back(
+        {item.id, static_cast<int>(action), item.count,
+         InspectGameText(definition.name),
+         Battle_ActorActionRestrictionFlags(0, static_cast<int>(action)),
+         static_cast<int>(hit.effectId), static_cast<int>(hit.statCalculatorId),
+         static_cast<int>(hit.statFactor)});
+  }
+}
+
+void InspectItemMenuRow(EncounterMenuRowState& row) {
+  if (row.index < 0 || static_cast<std::size_t>(row.index) >=
+                           std::size(Audio_Seq_unusedInventoryIndices.misc)) {
+    throw std::runtime_error("item menu row exceeds inventory index storage");
+  }
+  const auto slot = static_cast<unsigned char>(
+      Audio_Seq_unusedInventoryIndices.misc[row.index]);
+  if (slot == 0 || slot > std::size(Audio_Seq_unusedInventory.misc)) {
+    throw std::runtime_error(
+        "item menu row has an invalid native inventory index");
+  }
+  const auto& item = Audio_Seq_unusedInventory.misc[slot - 1];
+  row.item_id = item.id;
+  row.item_count = static_cast<unsigned char>(item.count);
+}
+
 EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   EncounterMenuState result;
   constexpr unsigned kMenuControl = 5, kMenuIdMask = 0x3F;
-  constexpr unsigned kCombatControl = 2, kAbilityUnlockPhase = 14;
+  constexpr unsigned kCombatControl = 2, kAbilityUnlockPhase = 14,
+                     kLootPhase = 12;
   constexpr unsigned kSubmenuStateMask = 0xF;
   constexpr int kMainMenuEntries = 10;
   if ((state.control_mode != kMenuControl &&
        !(state.control_mode == kCombatControl &&
-         state.action_phase == kAbilityUnlockPhase)) ||
+         (state.action_phase == kAbilityUnlockPhase ||
+          state.action_phase == kLootPhase))) ||
       Menu_Framework_menuItems == nullptr) {
     return result;
   }
   result.available = true;
   result.loading = Menu_Framework_menuState.loading != 0;
+  result.shortcut = static_cast<unsigned char>(Menu_Framework_shortcutInvoked);
+  if ((state.menu_state & kMenuIdMask) == kLootPhase) {
+    result.loot_input_ready = Menu_Loot_controlsEnabled != 0;
+    result.loot_count = Menu_Loot_lootListCount;
+  }
   result.selected_menu = static_cast<int>(state.menu_state & kMenuIdMask);
   result.submenu_phase = static_cast<unsigned char>(
       Menu_Framework_submenuStates[state.menu_state & kSubmenuStateMask]);
@@ -222,6 +279,12 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
            (text[index].menuRowFlags & Menu_Framework_RowTypeFlag_Disabled) !=
                0,
            static_cast<int>(index) == result.selected_row});
+      constexpr int kInventoryMenu = 4, kItemShortcut = 5, kInputReady = 17;
+      if (result.selected_menu == kInventoryMenu &&
+          result.shortcut == kItemShortcut &&
+          result.list_phase == kInputReady) {
+        InspectItemMenuRow(result.rows.back());
+      }
     }
   }
   return result;
@@ -526,7 +589,9 @@ nlohmann::json EncodePlayerMenu(const EncounterMenuState& menu) {
     rows.push_back({{"index", row.index},
                     {"text", row.text},
                     {"disabled", row.disabled},
-                    {"selected", row.selected}});
+                    {"selected", row.selected},
+                    {"item_id", row.item_id},
+                    {"item_count", row.item_count}});
   }
   return {{"available", menu.available},
           {"loading", menu.loading},
@@ -537,6 +602,9 @@ nlohmann::json EncodePlayerMenu(const EncounterMenuState& menu) {
           {"assignment_phase", menu.assignment_phase},
           {"assignment_type", menu.assignment_type},
           {"assignment_selected", menu.assignment_selected},
+          {"shortcut", menu.shortcut},
+          {"loot_input_ready", menu.loot_input_ready},
+          {"loot_count", menu.loot_count},
           {"rows", rows}};
 }
 
@@ -625,6 +693,7 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
         Battle_statusEffectParams[index].statusFlags);
   }
   InspectActionOptions(state);
+  InspectItemOptions(state);
   state.menu = InspectPlayerMenu(base);
   InspectRoomDoors(state);
   state.navigation = InspectNavigation();
@@ -638,13 +707,25 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
 void AppendPlayerObservations(nlohmann::json& data,
                               const EncounterState& base) {
   const auto state = InspectPlayerObservation(base);
-  data["player_schema"] = 1;
+  data["player_schema"] = kPlayerObservationSchema;
   data["reaction_timing"] = EncodeReaction(state.reaction_timing);
   data["status_masks"] = state.status_masks;
   data["action_options"] = EncodePlayerOptions(state);
   data["menu"] = EncodePlayerMenu(state.menu);
   data["doors"] = EncodePlayerDoors(state);
   data["navigation"] = EncodeNavigation(state.navigation);
+  auto items = nlohmann::json::array();
+  for (const auto& item : state.item_options) {
+    items.push_back({{"id", item.id},
+                     {"action_id", item.action_id},
+                     {"count", item.count},
+                     {"name", item.name},
+                     {"restrictions", item.restrictions},
+                     {"effect_id", item.effect_id},
+                     {"calculator_id", item.calculator_id},
+                     {"stat_factor", item.stat_factor}});
+  }
+  data["item_options"] = std::move(items);
   data["target_page"]["selection_step"] = state.target_selection_step;
   auto actors = nlohmann::json::array();
   for (const auto& actor : state.player_actors) {

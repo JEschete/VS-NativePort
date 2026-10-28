@@ -11,7 +11,7 @@ from .observations import Frame, integer
 from .abilities import defensive_loadout_advice
 from .choices import available_choices, reward_menu_ready
 
-INTENTS = ("attack", "approach", "retreat", "interact", "wait", "cast", "equip_chain", "equip_defense", "reward", "navigate")
+INTENTS = ("attack", "approach", "retreat", "interact", "wait", "cast", "equip_chain", "equip_defense", "reward", "navigate", "item")
 PRIORITY_ORDERS = ("123", "132", "213", "231", "312", "321")
 DECISION_SCHEMA = {
     "type": "object",
@@ -22,6 +22,7 @@ DECISION_SCHEMA = {
         "target_limb": {"type": "integer", "minimum": -1, "maximum": 255},
         "action_id": {"type": "integer", "minimum": -1, "maximum": 255},
         "equip_slot": {"type": "integer", "enum": [1, 2, 3]},
+        "item_id": {"type": "integer", "minimum": -1, "maximum": 65535},
         "chain_priority": {
             "type": "string", "enum": list(PRIORITY_ORDERS),
         },
@@ -32,7 +33,7 @@ DECISION_SCHEMA = {
     },
     "required": [
         "intent", "target_slot", "target_limb", "chain_priority",
-        "defense_priority", "reason", "action_id", "equip_slot",
+        "defense_priority", "reason", "action_id", "equip_slot", "item_id",
     ],
 }
 
@@ -49,6 +50,7 @@ class Decision:
     latency_ms: float
     action_id: int = -1
     equip_slot: int = 0
+    item_id: int = -1
 
     @classmethod
     def decode(cls, value: object, tick: int, latency_ms: float) -> "Decision":
@@ -59,6 +61,7 @@ class Decision:
         target = integer(value["target_slot"], "decision.target_slot", -1, 15)
         action_id = integer(value["action_id"], "decision.action_id", -1, 255)
         equip_slot = integer(value["equip_slot"], "decision.equip_slot", 0, 3)
+        item_id = integer(value["item_id"], "decision.item_id", -1, 65535)
         limb = integer(value["target_limb"], "decision.target_limb", -1, 255)
         priorities = []
         for field in ("chain_priority", "defense_priority"):
@@ -73,10 +76,14 @@ class Decision:
             raise ValueError("Combat intent requires an observed non-player target")
         if value["intent"] == "cast" and (target < 0 or action_id < 0):
             raise ValueError("Casting requires an explicit observed target and learned action")
+        if value["intent"] == "item" and (target != 0 or action_id < 0 or item_id < 323):
+            raise ValueError("Healing-item use requires Ashley and an explicit owned item/action")
+        if value["intent"] != "item" and item_id != -1:
+            raise ValueError("A non-item decision cannot carry an inventory item")
         if value["intent"] in ("equip_chain", "equip_defense") and (action_id < 0 or equip_slot == 0):
             raise ValueError("Equipping requires an explicit learned action and button slot")
         return cls(value["intent"], target, limb, priorities[0], priorities[1],
-                   reason, tick, latency_ms, action_id, equip_slot)
+                   reason, tick, latency_ms, action_id, equip_slot, item_id)
 
 
 class ModelResponseError(ValueError):
@@ -247,6 +254,10 @@ class LocalModel:
                     "When physical_navigation_objective is present, navigate means follow that "
                     "observed original door through normal terrain controls, not teleport or skip "
                     "a gate. It may be preferable to repeatedly attacking an unreachable enemy. "
+                    "Item choices use a currently owned consumable through its normal menu. "
+                    "The final choice-key component is the inventory item ID; the action ID "
+                    "is its observed native effect, not a spell that needs to be learned. "
+                    "Prefer adequate healing for the observed deficit and incoming danger. "
                     "The choice key is intent:target_slot:action_id:equip_slot. "
                     "Output shape: {choice:string,chain_priority:order_string,"
                     "defense_priority:order_string,reason:short_string}."
@@ -272,7 +283,13 @@ class LocalModel:
             actor.slot == decision.target_slot for actor in frame.enemies
         ):
             raise ModelResponseError("Model chose a target absent from the authoritative enemy set", response)
-        if decision.action_id >= 0 and decision.intent != "reward":
+        if decision.intent == "item" and not any(
+            option["id"] == decision.item_id and option["action_id"] == decision.action_id
+            and option["count"] > 0 and option["restrictions"] & 2 == 0
+            for option in frame.raw["item_options"]
+        ):
+            raise ModelResponseError("Model chose an unavailable inventory item or effect", response)
+        if decision.action_id >= 0 and decision.intent not in ("reward", "item"):
             options = [option for option in frame.raw["action_options"] if option["id"] == decision.action_id]
             expected_family = {"equip_chain": "chain", "equip_defense": "defense"}.get(decision.intent)
             if not options or (expected_family is not None and not any(

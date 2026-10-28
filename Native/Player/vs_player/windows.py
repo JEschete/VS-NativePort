@@ -9,6 +9,7 @@ BUTTON_KEYS = {
     "Cross": (64, 0x58), "Circle": (32, 0x43),
     "Triangle": (16, 0x53), "Square": (128, 0x5A),
     "L1": (4, 0x51), "R1": (8, 0x45),
+    "L2": (1, 0x31),
 }
 
 

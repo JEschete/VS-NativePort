@@ -136,6 +136,7 @@ class CombatGoal:
         self.player_dead = False
         self.forced_skip = False
         self.encounters: set[tuple[int, int]] = set()
+        self.max_incoming_hp_damage = 0
 
     @staticmethod
     def identity(frame: Frame, actor) -> tuple[int, int, int, int, int]:
@@ -147,6 +148,10 @@ class CombatGoal:
             self.accepted_tick = self.door.accepted_tick
         if not frame.ready:
             return
+        if frame.reaction.source_actor > 0 and frame.reaction.target_actor == 0:
+            self.max_incoming_hp_damage = max(
+                self.max_incoming_hp_damage, frame.reaction.incoming_hp_damage,
+            )
         self.player_dead |= frame.game_over
         scene = frame.raw["scene"]
         if scene["available"]:
@@ -299,7 +304,7 @@ def _play_game(store: RunStore, run_id: str,
                         raise RuntimeError("The player was defeated")
                     if driver.held and (
                         latest.tick >= release_tick or not latest.ready
-                        or latest.control not in (1, 2, 5)
+                        or latest.control not in (1, 2, 5, 6)
                     ):
                         driver.set_buttons(frozenset())
                     if future is not None and future.done():
@@ -368,6 +373,7 @@ def _play_game(store: RunStore, run_id: str,
                             "controller_feedback": controller.feedback[-8:],
                             "validation_error_to_correct": validation_feedback,
                             "recent_terrain_feedback": pursuit.feedback[-6:],
+                            "max_incoming_hp_damage": goal.max_incoming_hp_damage,
                         }
                         if goal.door is not None:
                             leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door

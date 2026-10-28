@@ -9,6 +9,43 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #151 closure audit (dirty `e493fa2c`): the original exhaustive machine report
+  still reconciles exactly1001 unique directed IDs/1003 observations/0 missing
+  or unrun. Its SHA-256 remains
+  `1f0a586650b65f429e62d61511b01ba6f03014ca9f910b9c058652020be33487`.
+  Latest761 passed/238 blocked/2 failed and764 prior-or-latest loader proofs
+  are preserved, not converted into physical/story passes. Nonpasses remain
+  166 fixture defeats,27 unavailable destination zones/rooms,36 source/
+  destination event budgets and9 story gates, plus two correct historical
+  required-actor refusals with separate legitimate-save proofs. Report rows
+  retain actual reached phases and provenance. Owner log cleanup removed
+  two original raw sequence checkpoints; their embedded reconciled result
+  snapshots remain, and are not represented as fresh raw replays.
+  Original discovered runtime faults #150/#152-#166 have separately verified
+  source/generator fixes and dispositions; #167 remains owner-closed as
+  unreproduced/not planned, not a claimed causal repair. Fresh original-disc
+  and relevant lifecycle/inspection/effect controls pass62 cases/42,870
+  assertions in each build. Default and focused compilation quality have0
+  new findings without baseline changes. Retained actual Debug/Release
+  controller proofs cover repaired room6 entry/quiet control and legitimate
+  Minotaur preconditions; newer physical flag180 proofs stay supplemental.
+  This delivery is all-record loader/entry-event coverage plus explicit
+  physical evidence and limits, not all1001 records physically traversed,
+  full-campaign completion or compatibility retirement. The36 event-budget
+  cases belong to the subsequent all-sequence investigation #149.
+  Player support is frozen to this test workflow. Schema2 diagnostic item/
+  loot facts remain opt-in and contain no planning policy. Actual unchanged-
+  save Debug5644b1feb0f34983ae92125fa1e00982 proves owned Root consumption
+  7->6 with145->194HP and6->5 with142->192HP; its later native loot wait
+  remains a blocked run, not a completed route. Source-backed ready-loot
+  Square input is now wired with independent readiness/nonmutation controls.
+  Focused original-room Debugf7ef3bb91c7041cabefbcd42792bcea5 defeats both
+  actors and exits normally3611 with0 errors/forced skips/timing failures;
+  that fixture did not produce loot, so it is not live loot-claim evidence.
+  Larger Minotaur-Zombie item probes verified recovery but still lost and
+  remain failed. No boss showcase, universal navigation or further general
+  model development is part of the closure claim. Publication/exact-CI and
+  issue disposition are recorded on #151 before moving to #149.
 - External-player follow-up on dirty `315549db` adds measured-stall terrain
   pursuit without replacing successful ordinary combat, preserves native
   target/reward/menu/reactor priority, and lets the model explicitly choose

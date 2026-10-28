@@ -85,8 +85,14 @@ class CombatController:
             for option in frame.raw["action_options"]
         ):
             raise StaleDecision("Native spell availability changed during model inference")
+        if decision.intent == "item" and not any(
+            option["id"] == decision.item_id and option["action_id"] == decision.action_id
+            and option["count"] > 0 and option["restrictions"] & 2 == 0
+            for option in frame.raw["item_options"]
+        ):
+            raise StaleDecision("Owned consumable availability changed during model inference")
         transaction = None
-        if decision.intent in ("cast", "equip_chain", "equip_defense"):
+        if decision.intent in ("cast", "item", "equip_chain", "equip_defense"):
             transaction = MenuTransaction(decision, frame)
         if self.preparing:
             raise StaleDecision("An observed menu transaction is still in progress")
@@ -135,6 +141,11 @@ class CombatController:
             if frame.tick % 30 < 2:
                 return self._action(frame, ("Circle",), 2, "visible dialogue confirmation")
             return None
+        menu = frame.raw["menu"]
+        if (frame.control == 2 and frame.action_phase == 12 and menu["available"]
+                and not menu["loading"] and menu["selected_menu"] == 12
+                and menu["loot_input_ready"] and menu["loot_count"] > 0):
+            return self._action(frame, ("Square",), 2, "claim currently fitting native loot")
         if reward_menu_ready(frame):
             decision = self.decision
             if decision is None or decision.intent != "reward":
@@ -160,7 +171,8 @@ class CombatController:
                 self.decision = None
                 return None
             if instruction:
-                return self._action(frame, (instruction.button,), 2, instruction.reason)
+                return self._action(frame, tuple(instruction.button.split("+")),
+                                    instruction.duration, instruction.reason)
         if frame.control == 5:
             if self.preparing:
                 return None
@@ -179,7 +191,10 @@ class CombatController:
         if frame.control == 2 and frame.source_actor == 0 and frame.action_phase in (1, 3):
             if decision.intent == "wait":
                 return None
-            if decision.intent not in ("attack", "cast"):
+            if decision.intent == "item" and self.transaction is not None and not self.transaction.selected:
+                return self._action(frame, ("Cross",), 2,
+                                    "cancel prior targeting before opening a healing-item menu")
+            if decision.intent not in ("attack", "cast", "item"):
                 return self._action(frame, ("Cross",), 2, "cancel targeting before changing strategy")
             page = frame.raw["target_page"]
             selection_step = page["selection_step"]

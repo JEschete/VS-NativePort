@@ -1,5 +1,14 @@
 {
   "schema": 1,
+  "item_semantics": {
+    "hp_recovery": {
+      "effect_id": 62,
+      "calculator_id": 15,
+      "factor_multiplier": 5,
+      "random_variation": 5,
+      "source": "ActionResolution.c original146C.c:12862 and Items/Recovery.c original146C.c:12109; US module mediator/stat-calculator tables verified locally."
+    }
+  },
   "controls": {
     "Circle": "Draw the equipped weapon from idle field; otherwise open attack targeting or confirm a target. Do not send ordinary confirms during an active timing window.",
     "Cross": "Interact with a nearby authored door or cancel a targeting/menu screen.",

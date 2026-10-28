@@ -8,6 +8,8 @@
 
 namespace VS::Game {
 
+inline constexpr int kPlayerObservationSchema = 2;
+
 struct EncounterWeaponRangeState {
   std::array<int, EncounterLimits::kPositionAxes> components_world{};
   int shape = 0;
@@ -74,6 +76,8 @@ struct EncounterMenuRowState {
   std::string text;
   bool disabled = false;
   bool selected = false;
+  int item_id = 0;
+  int item_count = 0;
 };
 
 struct EncounterMenuState {
@@ -86,7 +90,21 @@ struct EncounterMenuState {
   int assignment_phase = 0;
   int assignment_type = 0;
   int assignment_selected = -1;
+  int shortcut = 0;
+  bool loot_input_ready = false;
+  int loot_count = 0;
   std::vector<EncounterMenuRowState> rows;
+};
+
+struct EncounterItemOption {
+  int id = 0;
+  int action_id = 0;
+  int count = 0;
+  std::string name;
+  int restrictions = 0;
+  int effect_id = 0;
+  int calculator_id = 0;
+  int stat_factor = 0;
 };
 
 struct EncounterNavigationState {
@@ -117,6 +135,7 @@ struct PlayerObservationState : EncounterState {
   std::vector<EncounterDoor> doors;
   std::vector<int> door_flag_values;
   EncounterNavigationState navigation;
+  std::vector<EncounterItemOption> item_options;
 };
 
 // Explicit diagnostic query only; ordinary gameplay inspection never calls it.

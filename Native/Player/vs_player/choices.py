@@ -1,6 +1,6 @@
 import json
 
-from .abilities import defensive_loadout_advice
+from .abilities import defensive_loadout_advice, item_recovery_bounds
 from .config import PROJECT
 from .observations import Frame
 
@@ -22,10 +22,13 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     options = frame.raw["action_options"]
     feedback = context.get("controller_feedback", [])
 
-    def add(intent: str, target: int = -1, action: int = -1, slot: int = 1) -> None:
+    def add(intent: str, target: int = -1, action: int = -1, slot: int = 1,
+            item: int = -1) -> None:
         key = f"{intent}:{target}:{action}:{slot}"
+        if item >= 0:
+            key += f":{item}"
         choices[key] = {"intent": intent, "target_slot": target, "target_limb": -1,
-                        "action_id": action, "equip_slot": slot}
+                        "action_id": action, "equip_slot": slot, "item_id": item}
 
     def unsuccessful(action: int, target: int) -> bool:
         return any(row.get("action_id") == action and row.get("target") == target
@@ -40,10 +43,17 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     learned_spells = [option for option in options
                       if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")
                       and option["restrictions"] == 0]
-    if player.hp * 5 < player.max_hp * 3:
+    danger_threshold = min(player.max_hp, context.get("max_incoming_hp_damage", 0) * 2)
+    if player.hp * 5 < max(player.max_hp * 3, danger_threshold * 5):
         for option in learned_spells:
             if semantics.get(str(option["id"]), {}).get("role") == "heal" and not unsuccessful(option["id"], 0):
                 add("cast", 0, option["id"])
+        for option in frame.raw["item_options"]:
+            bounds = item_recovery_bounds(option, knowledge["item_semantics"]["hp_recovery"])
+            if (bounds is not None and bounds[0] > 0 and option["count"] > 0
+                    and option["restrictions"] & 2 == 0
+                    and not unsuccessful(option["action_id"], 0)):
+                add("item", 0, option["action_id"], item=option["id"])
         if choices:
             return choices
 
@@ -118,6 +128,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         for kind, count in context.get("required_successes", {}).items()
     ):
         add("navigate")
+        return choices
 
     for enemy in frame.enemies:
         add("attack", enemy.slot)

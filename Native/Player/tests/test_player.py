@@ -62,7 +62,7 @@ def sample_record(tick=1, **timing):
         "sequence": tick, "tick": tick, "elapsed_us": tick * 16667,
         "category": "frame",
         "data": {
-            "player_schema": 1, "ready": True, "zone": 9, "room": 6,
+            "player_schema": 2, "ready": True, "zone": 9, "room": 6,
             "control_mode": 2, "action_phase": 7, "source_actor": 0,
             "game_over": False, "input": {"held": 0, "analog": False}, "actors": [actor, enemy],
             "transition": 0, "field_rendering_enabled": True,
@@ -70,11 +70,12 @@ def sample_record(tick=1, **timing):
             "target_page": {"first": 0, "visible": 0, "selected": -1, "selection_step": 0},
             "learned_actions": [22, 23, 24, 40, 41, 42],
             "action_options": [],
+            "item_options": [], "items": [],
             "status_masks": [1 << index for index in range(32)],
             "menu": {"available": False, "loading": False, "selected_menu": -1,
                      "submenu_phase": 0, "selected_row": -1, "list_phase": 0,
                      "assignment_phase": 0, "assignment_type": 0, "assignment_selected": -1,
-                     "rows": []},
+                     "rows": [], "shortcut": 0, "loot_input_ready": False, "loot_count": 0},
             "scene": {"available": True, "camera": {"yaw": 2048},
                       "event": {"phase": 0, "forced_skip": False, "dialogue_waits": [False] * 8}},
         },
@@ -590,6 +591,7 @@ class ModelTests(unittest.TestCase):
             "chain_priority": "123", "defense_priority": "321",
             "reason": "Observed hostile target is in the native range.",
             "action_id": -1, "equip_slot": 0,
+            "item_id": -1,
         }
         self.assertEqual(Decision.decode(decision, 3, 2.0).target_slot, 2)
         with self.assertRaises(ValueError):
@@ -765,6 +767,92 @@ class StorageTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_native_loot_claim_requires_the_actual_ready_loot_screen(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=2, action_phase=12)
+        record["data"]["menu"].update(available=True, selected_menu=12,
+                                      loot_input_ready=True, loot_count=1)
+        controller = CombatController()
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Square"}))
+        record["tick"] = 10
+        record["data"]["menu"]["loot_input_ready"] = False
+        self.assertIsNone(controller.step(Frame.decode(record)))
+
+    def item_record(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["actors"][0]["hp"] = 50
+        record["data"]["items"] = [{"slot": 0, "id": 323, "count": 2}]
+        record["data"]["item_options"] = [{
+            "id": 323, "action_id": 224, "count": 2, "name": "Recover",
+            "restrictions": 4, "effect_id": 62, "calculator_id": 15, "stat_factor": 10,
+        }]
+        return record
+
+    def test_owned_healing_item_does_not_require_a_learned_healing_spell(self):
+        record = self.item_record()
+        frame = Frame.decode(record)
+        choices = available_choices(frame, {})
+        self.assertEqual({row["intent"] for row in choices.values()}, {"item"})
+        self.assertEqual({row["item_id"] for row in choices.values()}, {323})
+        record["data"]["item_options"][0]["effect_id"] = 63
+        self.assertNotIn("item", {row["intent"] for row in available_choices(Frame.decode(record), {}).values()})
+
+    def test_observed_large_hits_prioritize_recovery_before_the_fixed_low_hp_threshold(self):
+        record = self.item_record()
+        record["data"]["actors"][0].update(hp=155, max_hp=250)
+        frame = Frame.decode(record)
+        self.assertNotIn("item", {row["intent"] for row in available_choices(frame, {}).values()})
+        choices = available_choices(frame, {"max_incoming_hp_damage": 106})
+        self.assertEqual({row["intent"] for row in choices.values()}, {"item"})
+
+    def test_item_preparation_cancels_old_attack_targeting_without_refusing_the_item(self):
+        record = self.item_record()
+        record["data"].update(control_mode=2, action_phase=1, source_actor=0)
+        frame = Frame.decode(record)
+        decision = Decision("item", 0, -1, (1, 2, 3), (1, 2, 3),
+                            "Recover before another large hit", 1, 900, 224, 1, 323)
+        controller = CombatController()
+        controller.accept(decision, frame, frame)
+        self.assertEqual(controller.step(frame).buttons, frozenset({"Cross"}))
+        self.assertFalse(controller.transaction.closing)
+        record["tick"] = 10
+        record["data"].update(control_mode=1, action_phase=0)
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"L2"}))
+
+    def test_consumable_shortcut_verifies_count_decrement_and_real_hp_recovery(self):
+        for consumed in (False, True):
+            with self.subTest(consumed=consumed):
+                record = self.item_record()
+                decision = Decision("item", 0, -1, (1, 2, 3), (1, 2, 3),
+                                    "Use owned recovery", 1, 900, 224, 1, 323)
+                transaction = MenuTransaction(decision, Frame.decode(record))
+                opening = transaction.step(Frame.decode(record))
+                self.assertEqual((opening.button, opening.duration), ("L2", 8))
+                record["tick"] = 10
+                record["data"]["control_mode"] = 6
+                self.assertEqual(transaction.step(Frame.decode(record)).button, "L2+Up")
+                record["tick"] = 20
+                record["data"]["control_mode"] = 5
+                record["data"]["menu"].update(
+                    available=True, selected_menu=4, shortcut=5, list_phase=17, selected_row=0,
+                    rows=[{"index": 0, "text": "Cure Root", "disabled": False,
+                           "item_id": 323, "item_count": 2}],
+                )
+                self.assertEqual(transaction.step(Frame.decode(record)).button, "Circle")
+                record["tick"] = 30
+                record["data"].update(control_mode=2, action_phase=5, source_actor=0)
+                record["data"]["reaction_timing"]["action"] = 224
+                record["data"]["actors"][0]["hp"] = 99
+                record["data"]["items"][0]["count"] = 1 if consumed else 2
+                transaction.step(Frame.decode(record))
+                record["tick"] = 40
+                record["data"].update(control_mode=1, action_phase=0)
+                transaction.step(Frame.decode(record))
+                self.assertEqual(transaction.result["status"], "accepted" if consumed else "no_effect")
+                self.assertEqual(transaction.result["item_id"], 323)
+                self.assertEqual(transaction.result["effect"]["item_count_after"], 1 if consumed else 2)
+
     def test_door_navigation_is_a_choice_not_enemy_defeat_or_scene_reuse(self):
         frame = self.frame()
         self.assertNotIn("navigate", {row["intent"] for row in available_choices(frame, {}).values()})

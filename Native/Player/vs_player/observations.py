@@ -190,8 +190,20 @@ class Frame:
         if record["category"] != "frame":
             raise ValueError("Expected a frame record")
         data = record["data"]
-        if data.get("player_schema") != 1:
-            raise ValueError("Game lacks authoritative player telemetry schema 1; rebuild the host")
+        if data.get("player_schema") != 2:
+            raise ValueError("Game lacks authoritative player telemetry schema 2; rebuild the host")
+        options = data["item_options"]
+        if not isinstance(options, list) or len(options) > 64:
+            raise ValueError("Invalid native consumable option list")
+        for option in options:
+            if not isinstance(option["name"], str) or len(option["name"]) > 128:
+                raise ValueError("Invalid native consumable name")
+            for key, minimum, maximum in (
+                ("id", 323, 457), ("action_id", 0, 255), ("count", 1, 65535),
+                ("restrictions", 0, 7), ("effect_id", 0, 127),
+                ("calculator_id", 0, 63), ("stat_factor", 0, 31),
+            ):
+                integer(option[key], f"item.{key}", minimum, maximum)
         if not isinstance(data["actors"], list) or len(data["actors"]) > 16:
             raise ValueError("Invalid native actor snapshot list")
         actors = tuple(Actor.decode(actor) for actor in data["actors"])
@@ -275,4 +287,9 @@ class Frame:
                                for option in self.raw["action_options"]],
             "menu": self.raw["menu"],
             "status_masks": self.raw["status_masks"],
+            "item_options_columns": ["id", "action_id", "count", "name", "restrictions",
+                                     "effect_id", "calculator_id", "stat_factor"],
+            "item_options": [[item[key] for key in ("id", "action_id", "count", "name", "restrictions",
+                                                   "effect_id", "calculator_id", "stat_factor")]
+                             for item in self.raw["item_options"]],
         }

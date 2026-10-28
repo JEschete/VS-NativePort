@@ -40,7 +40,11 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"
+#include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
+#include "Menu/Framework/MenuRows.h"
+#include "Menu/Inventory/Inventory.h"
+#include "Menu/Loot/LootScreen.h"
 #include "Menu/Magic.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
@@ -886,7 +890,7 @@ TEST_CASE("Player observations retain native weapon geometry and hostility",
   CheckReactionActor(state.player_actors[1]);
   TraceScope scope;
   const auto data = FlushedFrame(scope, state, true).at("data");
-  CHECK(data.at("player_schema") == 1);
+  CHECK(data.at("player_schema") == VS::Game::kPlayerObservationSchema);
   CHECK(state.player_actors[0].weapon_pp == 37);
   CHECK(data.at("actors").at(0).at("weapon_pp") == 37);
   CHECK(data.at("actors").at(0).at("weapon_range").at("native_extent_world") ==
@@ -1125,4 +1129,111 @@ TEST_CASE("Earned ability menus are observed without changing combat mode",
   Battle_actionFlowMode = 7;
   CHECK_FALSE(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay())
                   .menu.available);
+}
+
+namespace {
+struct ItemInspectionFixture : ReactionInspectionFixture {
+  decltype(Menu_Loot_controlsEnabled) saved_loot_controls =
+      Menu_Loot_controlsEnabled;
+  decltype(Menu_Loot_lootListCount) saved_loot_count = Menu_Loot_lootListCount;
+  decltype(std::to_array(Audio_Seq_unusedInventory.misc)) saved_items =
+      std::to_array(Audio_Seq_unusedInventory.misc);
+  decltype(std::to_array(Audio_Seq_unusedInventoryIndices.misc)) saved_indices =
+      std::to_array(Audio_Seq_unusedInventoryIndices.misc);
+  decltype(Menu_Framework_shortcutInvoked) saved_shortcut =
+      Menu_Framework_shortcutInvoked;
+  decltype(Menu_Framework_itemsListRow) saved_list =
+      Menu_Framework_itemsListRow;
+  decltype(Menu_Framework_subMenuRowCount) saved_rows =
+      Menu_Framework_subMenuRowCount;
+
+  ItemInspectionFixture() {
+    std::fill_n(Audio_Seq_unusedInventory.misc, saved_items.size(),
+                Items_InventoryMisc{});
+    Audio_Seq_unusedInventory.misc[0].id = 323;
+    Audio_Seq_unusedInventory.misc[0].count = 2;
+    auto& definition = Battle_actionDefinitions[224];
+    definition.type = Battle_ActionType_Item;
+    definition.cost = 0;
+    definition.unlocked = 0;
+    definition.hits[0].effectId = 62;
+    definition.hits[0].statCalculatorId = 15;
+    definition.hits[0].statFactor = 10;
+  }
+  ~ItemInspectionFixture() {
+    std::copy(saved_items.begin(), saved_items.end(),
+              Audio_Seq_unusedInventory.misc);
+    std::copy(saved_indices.begin(), saved_indices.end(),
+              Audio_Seq_unusedInventoryIndices.misc);
+    Menu_Framework_shortcutInvoked = saved_shortcut;
+    Menu_Framework_itemsListRow = saved_list;
+    Menu_Framework_subMenuRowCount = saved_rows;
+    Menu_Loot_controlsEnabled = saved_loot_controls;
+    Menu_Loot_lootListCount = saved_loot_count;
+  }
+};
+
+void CheckRecoveryItemOption(const VS::Game::EncounterItemOption& item) {
+  CHECK(item.id == 323);
+  CHECK(item.action_id == 224);
+  CHECK(item.count == 2);
+  CHECK(item.effect_id == 62);
+  CHECK(item.calculator_id == 15);
+  CHECK(item.stat_factor == 10);
+  CHECK((item.restrictions & 4) != 0);
+}
+}  // namespace
+
+TEST_CASE("Consumable observations do not consume stock or grant a spell",
+          "[player][diagnostics][inspection]") {
+  ItemInspectionFixture fixture;
+  const auto random = Core_Random_State();
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  REQUIRE(state.item_options.size() == 1);
+  CheckRecoveryItemOption(state.item_options.front());
+  CHECK(Audio_Seq_unusedInventory.misc[0].count == 2);
+  CHECK(Battle_actionDefinitions[224].unlocked == 0);
+  CHECK(Core_Random_State() == random);
+  CheckResourcesUnchanged(fixture);
+}
+
+TEST_CASE("Consumable menu rows retain native inventory identity and bounds",
+          "[player][diagnostics][inspection]") {
+  ItemInspectionFixture fixture;
+  std::array<Menu_Framework_MenuRow, 10> rows{};
+  std::array<Menu_Framework_ItemText, 1> text{};
+  Field_controlMode = 5;
+  Menu_Framework_menuItems = rows.data();
+  Menu_Framework_itemsText = reinterpret_cast<std::uint16_t*>(text.data());
+  Menu_Framework_menuState.currentMenu = 4;
+  Menu_Framework_shortcutInvoked = 5;
+  Menu_Framework_itemsListRow = 17;
+  Menu_Framework_subMenuRowCount = 1;
+  Audio_Seq_unusedInventoryIndices.misc[0] = 1;
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  REQUIRE(state.menu.rows.size() == 1);
+  CHECK(state.menu.shortcut == 5);
+  CHECK(state.menu.rows[0].item_id == 323);
+  CHECK(state.menu.rows[0].item_count == 2);
+  Audio_Seq_unusedInventoryIndices.misc[0] = 0;
+  CHECK_THROWS(VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay()));
+}
+
+TEST_CASE("Loot input readiness is observed without claiming the drop",
+          "[player][diagnostics][inspection]") {
+  ItemInspectionFixture fixture;
+  std::array<Menu_Framework_MenuRow, 10> rows{};
+  Menu_Framework_menuItems = rows.data();
+  Menu_Framework_menuState.currentMenu = 12;
+  Battle_actionFlowMode = 12;
+  Menu_Loot_controlsEnabled = 1;
+  Menu_Loot_lootListCount = 1;
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  CHECK(state.menu.available);
+  CHECK(state.menu.loot_input_ready);
+  CHECK(state.menu.loot_count == 1);
+  CHECK(Audio_Seq_unusedInventory.misc[0].count == 2);
 }
