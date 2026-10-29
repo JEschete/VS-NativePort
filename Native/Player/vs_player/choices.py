@@ -40,7 +40,10 @@ def urgent_recovery_needed(frame: Frame, context: dict) -> bool:
         return False
     incoming = context.get("max_incoming_hp_damage", 0)
     return (player.hp * 5 < player.max_hp * 3
-            or player.hp <= incoming <= player.max_hp)
+            or player.hp <= incoming <= player.max_hp
+            or (incoming > 0 and incoming <= player.max_hp
+                and player.hp <= incoming * 2
+                and any(enemy.spell_action_ids for enemy in frame.enemies)))
 
 
 def available_choices(frame: Frame, context: dict) -> dict[str, dict]:

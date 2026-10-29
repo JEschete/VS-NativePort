@@ -88,10 +88,12 @@ Exposing a choice is not proof that the spell was selected or took effect.
 Recovery remains available above the low-health boundary only when its
 verified maximum can restore the observed two-hit margin. Below60% HP, or when
 one observed hit can be survived only after recovery within the native maximum
-HP, urgent healing retains priority. Otherwise the model compares useful
-attacks, prevention or movement instead of repeating recovery that cannot
-outpace actual damage. An incoming forecast above maximum HP cannot be made
-survivable merely by forcing a heal.
+HP, urgent healing retains priority. With a living spell-capable hostile, an
+observed two-hit margin also makes recovery urgent, so attacks cannot crowd
+out healing before a known caster acts again. Otherwise the model compares
+useful attacks, prevention or movement instead of repeating recovery that
+cannot outpace actual damage. An incoming forecast above maximum HP cannot be
+made survivable merely by forcing a heal.
 Combat goals and per-enemy experience accrue observed opponents/threats only
 outside native cinematic ownership. Temporary story actors that carry a hostile
 classification are not automatically battle requirements. Actual zero-HP

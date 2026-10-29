@@ -1177,6 +1177,17 @@ class ControllerTests(unittest.TestCase):
         self.assertIn("attack:2:-1:1", choices)
         self.assertIn("retreat:2:-1:1", choices)
 
+    def test_caster_at_observed_two_hit_margin_makes_recovery_urgent(self):
+        record = self.item_record()
+        record["data"]["actors"][0].update(hp=158, max_hp=250)
+        record["data"]["actors"][1]["spell_action_ids"] = [130]
+        frame = Frame.decode(record)
+        context = {"max_incoming_hp_damage": 92}
+        self.assertTrue(urgent_recovery_needed(frame, context))
+        choices = available_choices(frame, context)
+        self.assertEqual({row["intent"] for row in choices.values()}, {"item"})
+        self.assertIn("item:0:224:1:323", choices)
+
     def test_one_survivable_observed_hit_retains_urgent_recovery_priority(self):
         record = self.item_record()
         record["data"]["actors"][0].update(hp=155, max_hp=250)
