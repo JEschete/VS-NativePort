@@ -18,7 +18,7 @@
 Audio_SeqChannel Audio_SoundEffects_channels[22];
 
 // decomp: SLUS_010.40 Sound_EvictSfxVoice (src/SLUS_010.40/25AC.c:2539)
-void Audio_SoundEffects_ReleaseMatchingVoices(int in_SfxId, int in_StopFlags)
+void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlags)
 {
     u_int i;
     int maxPriority;
@@ -84,7 +84,7 @@ void Audio_SoundEffects_ReleaseMatchingVoices(int in_SfxId, int in_StopFlags)
                 continue;
             }
             if (in_SfxId == -1) {
-                if (pChannel->effectId < 0) {
+                if ((uintptr_t)pChannel->effectId >= 0x80000000U) {
                     if (pChannel->updateFlags & 0x100000) {
                         pChannel->updateFlags |= 0x200000;
                     } else {

@@ -65,7 +65,7 @@ typedef struct Audio_SeqChannel {
     int pitchSlide;
     u_int updateFlags;
     int effectVoiceMask;
-    int effectId;
+    uintptr_t effectId;
     int effectPitchScale;
     u_int effectPitchScaleSlideStep;
     int volume;

@@ -223,7 +223,7 @@ void Audio_PlayWorldSfx(int channel_group, int effect_id, SVECTOR* vec)
 }
 
 // decomp: SLUS_010.40 func_80045B28 (src/SLUS_010.40/main.c:9950)
-int Audio_ResolveSfxProgram(int channel_group, int effect_id)
+intptr_t Audio_ResolveSfxProgram(int channel_group, int effect_id)
 {
     intptr_t program_address;
 
@@ -237,8 +237,26 @@ int Audio_ResolveSfxProgram(int channel_group, int effect_id)
         break;
     case 0xFF000:
     case 0xF00000:
+        if (Audio_soundState.currentSfxBank == 0 ||
+            Audio_soundState.currentSfxBank >
+                sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {
+            Core_Errorf("audio.sfx", "cannot resolve banked SFX group=0x%X id=%d bank=%u", channel_group, effect_id, Audio_soundState.currentSfxBank);
+            return -1;
+        }
         program_address = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];
-        program_address = (int)program_address + (effect_id + (int*)program_address)[1];
+        if (program_address == 0 || effect_id < 0 || (u_int)effect_id >= ((u_int*)program_address)[0]) {
+            Core_Errorf("audio.sfx", "unavailable bank or invalid SFX id=%d bank=%u", effect_id, Audio_soundState.currentSfxBank);
+            return -1;
+        }
+        {
+            int program_offset = ((int*)program_address)[(size_t)effect_id + 1];
+            if (program_offset < 0 ||
+                (size_t)program_offset < ((size_t)((u_int*)program_address)[0] + 1) * sizeof(u_int)) {
+                Core_Errorf("audio.sfx", "invalid banked SFX offset=%d id=%d", program_offset, effect_id);
+                return -1;
+            }
+            program_address += program_offset;
+        }
         break;
     default:
         Core_IgnoreDiagnostic(0x95, 0);
@@ -251,10 +269,11 @@ int Audio_ResolveSfxProgram(int channel_group, int effect_id)
 // decomp: SLUS_010.40 func_80045BFC (src/SLUS_010.40/main.c:9975)
 void Audio_FadeSfxVolume(int channel_group, int effect_id, int target_volume, char fade_ticks)
 {
-    int program_address;
+    intptr_t program_address;
 
     if (effect_id != 0) {
         program_address = Audio_ResolveSfxProgram(channel_group, effect_id);
+        if (program_address == -1) return;
 
         if (program_address != 0) {
             Audio_Control_FadeSoundEffectVolume(program_address, 0, fade_ticks, target_volume);
@@ -271,10 +290,11 @@ void Audio_FadeSfxVolume(int channel_group, int effect_id, int target_volume, ch
 // decomp: SLUS_010.40 func_80045C74 (src/SLUS_010.40/main.c:9994)
 void Audio_FadeSfxPitch(int channel_group, int effect_id, int target_pitch_scale, char fade_ticks)
 {
-    int program_address;
+    intptr_t program_address;
 
     if (effect_id != 0) {
         program_address = Audio_ResolveSfxProgram(channel_group, effect_id);
+        if (program_address == -1) return;
         if (program_address != 0) {
             Audio_Control_FadeSoundEffectPitch(program_address, 0, fade_ticks, target_pitch_scale);
         } else {
@@ -288,35 +308,37 @@ void Audio_FadeSfxPitch(int channel_group, int effect_id, int target_pitch_scale
 }
 
 // decomp: SLUS_010.40 func_80045CEC (src/SLUS_010.40/main.c:10012)
-void Audio_FadeSfxPan(int group_or_program_selector, int effect_id, int target_pan, char fade_ticks)
+void Audio_FadeSfxPan(int channel_group, int effect_id, int target_pan, char fade_ticks)
 {
     if (effect_id != 0) {
-        group_or_program_selector = Audio_ResolveSfxProgram(group_or_program_selector, effect_id);
-        if (group_or_program_selector != 0) {
-            Audio_Control_FadeSoundEffectPan(group_or_program_selector, 0, fade_ticks, target_pan);
+        intptr_t program_address = Audio_ResolveSfxProgram(channel_group, effect_id);
+        if (program_address == -1) return;
+        if (program_address != 0) {
+            Audio_Control_FadeSoundEffectPan(program_address, 0, fade_ticks, target_pan);
         } else {
             do {
                 Audio_Control_FadeSoundEffectPan(effect_id, 0, fade_ticks, target_pan);
             } while (0);
         }
     } else {
-        Audio_Control_FadeSoundEffectPan(0, group_or_program_selector, fade_ticks, target_pan);
+        Audio_Control_FadeSoundEffectPan(0, channel_group, fade_ticks, target_pan);
     }
 }
 
 // decomp: SLUS_010.40 func_80045D64 (src/SLUS_010.40/main.c:10028)
-void Audio_StopSfx(int group_or_program_selector, int effect_id)
+void Audio_StopSfx(int channel_group, int effect_id)
 {
     if (effect_id != 0) {
-        group_or_program_selector = Audio_ResolveSfxProgram(group_or_program_selector, effect_id);
+        intptr_t program_address = Audio_ResolveSfxProgram(channel_group, effect_id);
+        if (program_address == -1) return;
 
-        if (group_or_program_selector != 0) {
-            Audio_Playback_StopSoundEffects(group_or_program_selector, 0);
+        if (program_address != 0) {
+            Audio_Playback_StopSoundEffects(program_address, 0);
         } else {
             Audio_Playback_StopSoundEffects(effect_id, 0);
         }
     } else {
-        Audio_Playback_StopSoundEffects(0, group_or_program_selector);
+        Audio_Playback_StopSoundEffects(0, channel_group);
     }
 }
 

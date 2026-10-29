@@ -24,15 +24,15 @@ int Audio_Control_SetMixOptionLatch(int enabled);
 void Audio_Control_SetSceneSoundEffectVolume(u_long volume);
 void Audio_Control_FadeSceneSoundEffectVolume(void* fade_ticks, int target_volume);
 void Audio_Control_SetSoundEffectVolume(void* effect_selector, int effect_tag_mask, int volume);
-void Audio_Control_FadeSoundEffectVolume(int effect_selector, int effect_tag_mask, int fade_ticks, int target_volume);
+void Audio_Control_FadeSoundEffectVolume(intptr_t effect_selector, int effect_tag_mask, int fade_ticks, int target_volume);
 void Audio_Control_SetSceneSoundEffectPan(int pan);
 void Audio_Control_FadeSceneSoundEffectPan(void* fade_ticks, int target_pan);
 void Audio_Control_SetSoundEffectPan(void* effect_selector, int effect_tag_mask, int pan);
-void Audio_Control_FadeSoundEffectPan(int effect_selector, int effect_tag_mask, int fade_ticks, int target_pan);
+void Audio_Control_FadeSoundEffectPan(intptr_t effect_selector, int effect_tag_mask, int fade_ticks, int target_pan);
 void Audio_Control_SetSceneSoundEffectPitch(int pitch_scale);
 void Audio_Control_FadeSceneSoundEffectPitch(void* fade_ticks, int target_pitch_scale);
 void Audio_Control_SetSoundEffectPitch(void* effect_selector, int effect_tag_mask, int pitch_scale);
-void Audio_Control_FadeSoundEffectPitch(int effect_selector, int effect_tag_mask, int fade_ticks, int target_pitch_scale);
+void Audio_Control_FadeSoundEffectPitch(intptr_t effect_selector, int effect_tag_mask, int fade_ticks, int target_pitch_scale);
 void Audio_Control_SetMusicVolume(u_long music_id, int volume);
 void Audio_Control_FadeMusicVolume(u_long music_id, int fade_ticks, int target_volume);
 void Audio_Control_FadeMusicVolumeFrom(void* music_id, int fade_ticks, int start_volume, int target_volume);
@@ -55,6 +55,6 @@ void Audio_Control_StopCutsceneStream(void);
 void Audio_Control_SetCutsceneVolume(int volume);
 void Audio_Control_FadeCutsceneVolume(int fade_ticks, int target_volume);
 void Audio_Control_SetCutscenePan(int pan);
-u_int Audio_Control_SoundEffectChannelIds(u_int* output_effect_ids);
+u_int Audio_Control_SoundEffectChannelIds(intptr_t* output_effect_ids);
 
 #endif // VS_AUDIO_CONTROL_SOUNDCONTROL_H_DECLS

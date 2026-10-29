@@ -2288,7 +2288,7 @@ T00278.008,T00278,FSoundChannel,8,PitchBase,0,int,,,,pitchBase,Pitch before modu
 T00278.009,T00278,FSoundChannel,9,PitchSlide,0,int,,,,pitchSlide,Current pitch slide offset,high,source:25AC.c:1557
 T00278.010,T00278,FSoundChannel,10,UpdateFlags,0,u_int,,,,updateFlags,Voice parameters that need writing,high,source:25AC.c:1572
 T00278.011,T00278,FSoundChannel,11,unk38,1,int,,,sampleBankSlotMask,effectVoiceMask,Voices assigned to the sound-effect program,high,source:25AC.c:2658
-T00278.012,T00278,FSoundChannel,12,unk3C,1,int,,,soundEffectId | soundEffectIdOrBlobPointer,effectId,Sound-effect id the channel plays,high,source:25AC.c:2646;source:25AC.c:2624
+T00278.012,T00278,FSoundChannel,12,unk3C,1,int,,,soundEffectId | soundEffectIdOrBlobPointer,effectId,Built-in SFX ID or native bank-program identity,high,source:25AC.c:2646;source:25AC.c:2624;native-fix229:registered intptr_t runtime carrier through producer mixer fades stops and query outputs;original-type:int retained as source provenance;tests:high-address exact match and distinct2^32 selector alias rejected;compatibility-retirement:open
 T00278.013,T00278,FSoundChannel,13,unk40,1,int,,,externalPitchScale | pitchScale,effectPitchScale,Per-effect pitch scale set by command 0xA4,high,source:25AC.c:3437
 T00278.014,T00278,FSoundChannel,14,unk44,1,u_int,,,pitchScaleSlideStep,effectPitchScaleSlideStep,Per-tick step of the effect pitch scale slide (command 0xA5/0xAD),high,source:25AC.c:3464;source:25AC.c:4127;sanity pass 2026-10-17
 T00278.015,T00278,FSoundChannel,15,Volume,0,int,,,,volume,Channel volume,high,source:25AC.c:1421

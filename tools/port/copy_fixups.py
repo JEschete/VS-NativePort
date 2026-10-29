@@ -12,6 +12,18 @@ so a stale fix is noticed.
 """
 from __future__ import annotations
 
+NATIVE_SIGNATURE_REWRITES = {
+    "F03520": {"ret": "intptr_t"},
+    "F03108": {0: "intptr_t"},
+    "F03112": {0: "intptr_t"},
+    "F03116": {0: "intptr_t"},
+    "F03203": {0: "intptr_t"},
+    "F03097": {"ret": "intptr_t"},
+    "F03150": {0: "intptr_t"},
+}
+
+NATIVE_POINTER_FIELDS = {"T00278.012"}
+
 NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
        for name in (
@@ -173,6 +185,72 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    **{
+        function_id: [
+            ("int temp_v0;", "intptr_t temp_v0;",
+             "banked SFX selectors must survive in the caller's full-width carrier"),
+            ("temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);",
+             "temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);\n"
+             "        if (temp_v0 == -1) return;",
+             "a rejected bank binding must not become a built-in-ID fallback"),
+        ]
+        for function_id in ("F03521", "F03522")
+    },
+    "F03203": [
+        ("pChannel->effectId < 0",
+         "(uintptr_t)pChannel->effectId >= 0x80000000U",
+         "the existing program-selector domain used by UsesSoundEffectTags is not "
+         "the sign of a native x64 pointer; preserve the -1 banked-program release mode"),
+    ],
+    "F03524": [
+        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
+         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
+         "        if (program_address == -1) return;",
+         "main.c:10028 must not narrow a program pointer into the integer group parameter"),
+        ("if (arg0 != 0)", "if (program_address != 0)",
+         "preserve the built-in category discriminator"),
+        ("Audio_Playback_StopSoundEffects(arg0, 0);",
+         "Audio_Playback_StopSoundEffects(program_address, 0);",
+         "stop the exact native bank program, not a truncated pointer or fallback ID"),
+    ],
+    "F03523": [
+        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
+         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
+         "        if (program_address == -1) return;",
+         "preserve the original group parameter and a separate native pointer carrier"),
+        ("if (arg0 != 0)", "if (program_address != 0)",
+         "only built-in categories use the zero resolver result"),
+        ("Audio_Control_FadeSoundEffectPan(arg0, 0,",
+         "Audio_Control_FadeSoundEffectPan(program_address, 0,",
+         "dispatch the entire resolved bank pointer without narrowing through the group"),
+    ],
+    "F03520": [
+        ("temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];",
+         "if (Audio_soundState.currentSfxBank == 0 ||\n"
+         "            Audio_soundState.currentSfxBank >\n"
+         "                sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {\n"
+         "            Core_Errorf(\"audio.sfx\", \"cannot resolve banked SFX group=0x%X id=%d bank=%u\", arg0, arg1, Audio_soundState.currentSfxBank);\n"
+         "            return -1;\n"
+         "        }\n"
+         "        temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];\n"
+         "        if (temp_v1 == 0 || arg1 < 0 || (u_int)arg1 >= ((u_int*)temp_v1)[0]) {\n"
+         "            Core_Errorf(\"audio.sfx\", \"unavailable bank or invalid SFX id=%d bank=%u\", arg1, Audio_soundState.currentSfxBank);\n"
+         "            return -1;\n"
+         "        }",
+         "main.c:9950 must reject an unselected/null bank and out-of-table IDs "
+         "before indexing; -1 is failure, not the built-in zero selector"),
+        ("temp_v1 = (int)temp_v1 + (arg1 + (int*)temp_v1)[1];",
+         "{\n"
+         "            int program_offset = ((int*)temp_v1)[(size_t)arg1 + 1];\n"
+         "            if (program_offset < 0 ||\n"
+         "                (size_t)program_offset < ((size_t)((u_int*)temp_v1)[0] + 1) * sizeof(u_int)) {\n"
+         "                Core_Errorf(\"audio.sfx\", \"invalid banked SFX offset=%d id=%d\", program_offset, arg1);\n"
+         "                return -1;\n"
+         "            }\n"
+         "            temp_v1 += program_offset;\n"
+         "        }",
+         "retain the complete host pointer while adding the serialized relative offset"),
+    ],
     "F01013": [
         ("Battle_Ai_AddAiTileOccupant(object);",
          "Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);",
@@ -3370,7 +3448,7 @@ REGEX_FIXES += [
          "F03519 main.c:9937 projects the supplied SVECTOR through the view matrix then calls _do_panSfx with unchanged group/effect ID."),
         ("Audio::ResolveSfxProgram",
          (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('temp_v1', 'program_address')),
-         "F03520 main.c:9950 returns zero for built-in groups; for private/room masks the local receives the selected bank address then adds the indexed offset. Its native intptr_t carrier and existing int casts remain unchanged."),
+         "F03520 main.c:9950 returns zero for built-in groups and resolves both banked masks through the selected bank. Registered native bounds/offset checks reject with logged -1; return/local/callers preserve full pointers rather than original int casts."),
         ("Audio::FadeSfxVolume",
          (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('arg2', 'target_volume'), ('arg3', 'fade_ticks'), ('temp_v0', 'program_address')),
          "F03521 main.c:9975 resolves a bank program if possible, otherwise uses the built-in ID, or selects by group when ID is zero. func_8001264C receives duration before target volume, verified at 25AC.c:538/3276."),
@@ -3378,11 +3456,11 @@ REGEX_FIXES += [
          (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('arg2', 'target_pitch_scale'), ('arg3', 'fade_ticks'), ('temp_v0', 'program_address')),
          "F03522 main.c:9994 resolves program address or built-in ID, or selects a whole group; func_80012824 receives duration then target signed-byte pitch scale (25AC.c:598/3453)."),
         ("Audio::FadeSfxPan",
-         (('arg0', 'group_or_program_selector'), ('arg1', 'effect_id'), ('arg2', 'target_pan'), ('arg3', 'fade_ticks')),
-         "F03523 main.c:10012 reuses arg0: initially a group mask, then the resolved program address on the nonzero-ID branch. The compound selector name covers both actual uses. func_80012738 receives duration and target pan (25AC.c:568/3365)."),
+         (('arg0', 'channel_group'), ('arg1', 'effect_id'), ('arg2', 'target_pan'), ('arg3', 'fade_ticks')),
+         "F03523 main.c:10012 originally reused arg0 for a program pointer; the registered native adaptation now keeps a separate full-width program_address. func_80012738 receives duration and target pan (25AC.c:568/3365)."),
         ("Audio::StopSfx",
-         (('arg0', 'group_or_program_selector'), ('arg1', 'effect_id')),
-         "F03524 main.c:10028 reuses arg0 from group mask to resolved program address before StopSoundEffects; ID zero keeps it as the tag mask. No pointer-width or dispatch correction is proposed."),
+         (('arg0', 'channel_group'), ('arg1', 'effect_id')),
+         "F03524 main.c:10028 originally reused arg0 for a program pointer; the registered native adaptation preserves the group and keeps a separate full-width program_address. Rejected bank resolution never falls back to a built-in ID."),
         ("Audio::PlayBankSfx",
          (('arg0', 'channel_group'), ('arg1', 'sound_bank'), ('arg2', 'sound_index'), ('arg3', 'pan'), ('arg4', 'volume'), ('var_s0', 'effect_tag'), ('temp_s1', 'bank_program')),
          "F03535 main.c:10178 checks the bank's count, resolves bank-relative offset[index+1], selects/rotates a group tag, and calls func_800456EC(program,tag,pan,volume). The local bank_program initially holds the base, then the selected entry."),

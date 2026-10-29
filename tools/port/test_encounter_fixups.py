@@ -1,5 +1,6 @@
 """Regressions for native source adaptations, without game assets."""
 
+import collections
 import csv
 import re
 import runpy
@@ -15,6 +16,52 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_native_pointer_fields_cannot_widen_serialized_records(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.type_by_id = {"T00000": {"role": "OnDisc"}}
+        copier.fields = {"T00000.000": {"type": "int"}}
+        with (
+            mock.patch.object(copy_fixups, "NATIVE_POINTER_FIELDS", {"T00000.000"}),
+            self.assertRaisesRegex(ValueError, "requires a runtime field"),
+        ):
+            copier.load_hazards()
+
+
+    def test_sfx_reference_signatures_preserve_native_pointers(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.sig_retype = {}
+        copier.report = collections.defaultdict(list)
+        declarations = (
+            ("F03520", "Audio_ResolveSfxProgram",
+             "int Audio_ResolveSfxProgram(int group, int effect);",
+             "intptr_t Audio_ResolveSfxProgram(int group, int effect);"),
+            ("F03097", "Audio_Playback_SoundEffectIdForTag",
+             "int Audio_Playback_SoundEffectIdForTag(int tag);",
+             "intptr_t Audio_Playback_SoundEffectIdForTag(int tag);"),
+            ("F03203", "Audio_SoundEffects_ReleaseMatchingVoices",
+             "void Audio_SoundEffects_ReleaseMatchingVoices(int selector, int mask);",
+             "void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t selector, int mask);"),
+            ("F03150", "Audio_Control_SoundEffectChannelIds",
+             "u_int Audio_Control_SoundEffectChannelIds(u_int* ids);",
+             "u_int Audio_Control_SoundEffectChannelIds(intptr_t* ids);"),
+            *(
+                (function_id, name,
+                 f"void {name}(int selector, int mask, int ticks, int value);",
+                 f"void {name}(intptr_t selector, int mask, int ticks, int value);")
+                for function_id, name in (
+                    ("F03108", "Audio_Control_FadeSoundEffectVolume"),
+                    ("F03112", "Audio_Control_FadeSoundEffectPan"),
+                    ("F03116", "Audio_Control_FadeSoundEffectPitch"),
+                )
+            ),
+        )
+        for function_id, name, original, expected in declarations:
+            with self.subTest(function_id=function_id):
+                self.assertEqual(
+                    copier.retype_signature(function_id, original, name), expected
+                )
+
+
     def test_event_dispatch_audit_includes_owned_opcode_headers(self):
         manifest = {
             r"Native\Game\src\Event\ScriptVm.h": "generated",

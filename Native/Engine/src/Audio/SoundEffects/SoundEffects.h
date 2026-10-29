@@ -17,7 +17,7 @@
 #include "Audio/Seq/Channel.h"
 
 extern Audio_SeqChannel Audio_SoundEffects_channels[22];
-void Audio_SoundEffects_ReleaseMatchingVoices(int in_SfxId, int in_StopFlags);
+void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlags);
 void Audio_SoundEffects_StartChannelProgram(Audio_SeqChannel* in_Channel, Audio_CommandParams* in_CommandParams,
     int in_VoiceBit, char* in_ProgramCounter);
 void Audio_SoundEffects_DetachMusicVoice(Audio_SeqChannel* in_Channel, u_int in_Voice);

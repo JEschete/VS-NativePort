@@ -270,7 +270,7 @@ int Audio_Playback_ActiveSoundEffectTags(void)
 }
 
 // decomp: SLUS_010.40 func_80012358 (src/SLUS_010.40/25AC.c:421)
-int Audio_Playback_SoundEffectIdForTag(int effect_tag)
+intptr_t Audio_Playback_SoundEffectIdForTag(int effect_tag)
 {
     Audio_SeqChannel* channel;
     int voice_bit;

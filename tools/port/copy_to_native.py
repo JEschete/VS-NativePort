@@ -428,7 +428,11 @@ class Copier:
         (uintptr_t), ordering-table links become LegacyGpu_Handle(p), and the members, globals and locals those
         values are stored into become uintptr_t, unless the member is part of an on-disc layout (decoder work).
         Struct-size literals of structs that hold pointers become sizeof."""
-        self.ptr_fields: set[str] = set()
+        self.ptr_fields: set[str] = set(cf.NATIVE_POINTER_FIELDS)
+        for field_id in self.ptr_fields:
+            owner = self.type_by_id[field_id.split(".", 1)[0]]
+            if field_id not in self.fields or owner["role"] == "OnDisc":
+                raise ValueError(f"Native pointer override requires a runtime field: {field_id}")
         self.ptr_globals: set[str] = set()
         self.sig_retype: dict[tuple[str, int | str], str] = {}   # (function id, "ret" | param index) -> type
         path = PORT / "hazards.json"
@@ -855,6 +859,7 @@ class Copier:
     def retype_signature(self, fid: str, text: str, name: str) -> str:
         """Return type / parameters that carry pointers (hazards `return:`/`param:`) become pointer-sized."""
         keys = {k[1]: t for k, t in self.sig_retype.items() if k[0] == fid}
+        keys.update(cf.NATIVE_SIGNATURE_REWRITES.get(fid, {}))
         if not keys:
             return text
         m = re.search(rf"\b{re.escape(name)}\s*\(", text)

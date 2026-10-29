@@ -9,6 +9,17 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #229 is locally repaired and source-verified: native banked SFX selectors,
+  sequencer `effectId`, mixer stop/fade/query paths and output arrays retain
+  full pointer identity; missing banks/invalid indices log explicit failure,
+  never select a built-in fallback. Debug1793268807181493-0 and
+  Release1793268807093029-0 pass original E087/SFX67 -> MAP415/E089 -> authored
+  27/1, six instances/8172 commands, living control12080..12200, teardown12212,
+  exit0 and zero errors. Fresh zero-state MAP415 remains a failed prerequisite
+  with one explicit error/real teardown, not a pass. Full suites pass1141 cases/
+  9,589,946 assertions per configuration after subsequent owner-domain/trace
+  integration;168 copier controls pass. Publication/exact-revision CI remains.
+
 - #149 final acceptance reconciliation: semantic implementation
   `b3f68b46ca50a3aa3a04fa28ef1edd81f4cb0c64` has exact green Source Quality
   `40740895618`. Static inventory16e3d921 and diagnostic9db31b9c milestones

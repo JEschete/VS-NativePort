@@ -45,7 +45,7 @@ uintptr_t Audio_Playback_PlaySoundEffectBlob(void* program_blob, int effect_tag,
 void Audio_Playback_StopSoundEffects(intptr_t effect_selector, int effect_tag_mask);
 void Audio_Playback_PlayInterfaceSound(u_long effect_id);
 int Audio_Playback_ActiveSoundEffectTags(void);
-int Audio_Playback_SoundEffectIdForTag(int effect_tag);
+intptr_t Audio_Playback_SoundEffectIdForTag(int effect_tag);
 int Audio_Playback_UsesSoundEffectTags(Audio_SfxProgramHeader* program_or_effect_id);
 void Audio_Playback_SetMonoOutput(int mono_enabled);
 

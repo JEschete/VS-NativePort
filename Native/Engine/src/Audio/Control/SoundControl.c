@@ -108,7 +108,7 @@ void Audio_Control_SetSoundEffectVolume(void* effect_selector, int effect_tag_ma
 }
 
 // decomp: SLUS_010.40 func_8001264C (src/SLUS_010.40/25AC.c:538)
-void Audio_Control_FadeSoundEffectVolume(int effect_selector, int effect_tag_mask, int fade_ticks, int target_volume)
+void Audio_Control_FadeSoundEffectVolume(intptr_t effect_selector, int effect_tag_mask, int fade_ticks, int target_volume)
 {
     Audio_Driver_commandArguments.param1 = (void*)effect_selector;
     Audio_Driver_commandArguments.param2 = effect_tag_mask & 0xFFFFFF;
@@ -142,7 +142,7 @@ void Audio_Control_SetSoundEffectPan(void* effect_selector, int effect_tag_mask,
 }
 
 // decomp: SLUS_010.40 func_80012738 (src/SLUS_010.40/25AC.c:568)
-void Audio_Control_FadeSoundEffectPan(int effect_selector, int effect_tag_mask, int fade_ticks, int target_pan)
+void Audio_Control_FadeSoundEffectPan(intptr_t effect_selector, int effect_tag_mask, int fade_ticks, int target_pan)
 {
     Audio_Driver_commandArguments.param1 = (void*)effect_selector;
     Audio_Driver_commandArguments.param2 = effect_tag_mask & 0xFFFFFF;
@@ -176,7 +176,7 @@ void Audio_Control_SetSoundEffectPitch(void* effect_selector, int effect_tag_mas
 }
 
 // decomp: SLUS_010.40 func_80012824 (src/SLUS_010.40/25AC.c:598)
-void Audio_Control_FadeSoundEffectPitch(int effect_selector, int effect_tag_mask, int fade_ticks, int target_pitch_scale)
+void Audio_Control_FadeSoundEffectPitch(intptr_t effect_selector, int effect_tag_mask, int fade_ticks, int target_pitch_scale)
 {
     Audio_Driver_commandArguments.param1 = (void*)effect_selector;
     Audio_Driver_commandArguments.param2 = effect_tag_mask & 0xFFFFFF;
@@ -351,7 +351,7 @@ void Audio_Control_SetCutscenePan(int pan)
 }
 
 // decomp: SLUS_010.40 func_800133E0 (src/SLUS_010.40/25AC.c:959)
-u_int Audio_Control_SoundEffectChannelIds(u_int* output_effect_ids)
+u_int Audio_Control_SoundEffectChannelIds(intptr_t* output_effect_ids)
 {
     int i;
     Audio_SeqChannel* channel = Audio_SoundEffects_channels;
