@@ -244,8 +244,8 @@ defeat. Supported source positions in catalog room references are selected from
 original collision data, excluding door tiles; their presence establishes no
 story prerequisite. Original enemies and game rules remain active.
 
-Current checkpoint: **504/804** definitions have an actual verified runtime path,
-**97** in both Debug/Release; **300** remain unverified. The exact matrix, not
+Current checkpoint: **509/804** definitions have an actual verified runtime path,
+**99** in both Debug/Release; **295** remain unverified. The exact matrix, not
 this snapshot, is authoritative. All referenced entry definitions have had
 native attempts, but actor/story/geometry/combat prerequisites, incomplete
 playback and unsupported source contexts remain explicit nonpasses.
@@ -336,6 +336,32 @@ by claiming MAP259's original Aster Sigil472 room reward through the native
 loot screen. QA inventory does not earn it; using that sigil writes2 instead.
 Two genuine MAP259 attempts lose without claiming it and remain nonpasses.
 Stage130 alone is not the full prerequisite. #225 and inherited-audio #223 stay open.
+
+Further normal1x model victories now verify original MAP366, MAP377 and MAP392
+local1 through actual Wyvern Knight, Wyvern Queen and Dragon Zombie deaths.
+Their living-control intervals are14375..14495,11201..11321 and7995..8115,
+with actual native teardown14507,11333 and8127, zero errors and no forced skip.
+The original MAP175 local0/MAP177 local1 transit pair also verifies through
+normal changed tiles and the origin flag written by its own original producer,
+not a setup assignment: Release1793284268203836-0, control498..618/teardown630.
+
+The original MAP164/E040/E047 story chain genuinely earns stage130=41.
+Its actual post-story room40/21 contains original save-point trigger9,6,
+layer0/activation14. Normal walking and Data/Save/Yes controls produce an
+unchanged private native checkpoint, not a save-eligibility bypass:
+Release1793286571826273-0, four original instances,8173 total matched commands,
+control13123..13243 and teardown13255, zero errors. Native save occurs12993.
+The original return-to-temple door route is being tested through byte-identical
+Continue; a saved source-backed QA context is not full-campaign completion.
+
+External player #234 is separately closed at `296069ca`, successful exact CI
+40889102631. Legal self buffs remain visible alongside caster debuffs;117
+player tests and the actual observed-frame choice shape pass. A fresh genuine
+fight actually spends21MP on Magic Ward76 and obtains status262144, which blocks
+Tarnish57; later mana drain/Meteor still defeats Ashley. Availability, native
+spell effect, overall combat victory and scene verification are distinct gates.
+The earlier #225 CI formatting failure is repaired in `d2ce907b`,
+successful CI40888393696; no quality baseline was refreshed.
 
 The complete original viewer504/E078/E026/E038 chain now passes locally in
 Debug1793255056114631-0 and Release1793255464212292-0: all seven original

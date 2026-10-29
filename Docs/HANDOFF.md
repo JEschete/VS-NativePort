@@ -55,6 +55,53 @@ verification of the current worktree.
   additionally archives58 files/545,423,678 bytes into7,779,306 verified
   compressed bytes before unlinking; active evidence remains untouched.
 
+- Five more exact local definitions follow genuine prerequisites: original
+  MAP175 local0 crosses its authored tile, writes origin286=1 and loads
+  MAP177; normal movement then activates MAP177 local1 and its authored
+  return. Release1793284268203836-0 proves22/28/20 commands across those
+  three instances, control498..618 and teardown630, zero errors. Normal1x
+  model fights genuinely clear Wyvern Knight `10e4bb66`, Wyvern Queen
+  `9736e392` and Dragon Zombie `d91c3a09`, activating their original
+  MAP366/MAP377/MAP392 local1 callbacks. Their control/teardown intervals
+  are14375..14495/14507,11201..11321/11333 and7995..8115/8127;
+  each has zero errors and118/117/118 matched local commands. Native
+  reaction acceptance/effect counts and coverage gaps remain separate
+  from source certificates; no perfect-chain or universal-defense claim.
+
+- Original MAP164's missing portal context is now earned through its real
+  story producer, not assigned: MAP164 loads MAP200/E040, which loads E047;
+  original E047 writes stage130=41. Actual post-story room is40/21, not
+  the initially hypothesized32/17. Original save-point trigger9,6/layer0,
+  kind16/activation14 is reached by normal movement, then actual native
+  Data/Save/affirmative file controls write private `slot00.vssave` at12993.
+  Release1793286571826273-0 verifies3499/10/1351/3313 commands across four
+  original instances, control13123..13243 and teardown13255, zero errors.
+  Save SHA256 is16ff9f7cdddae9ebe765504a8f3dc3963b5aabbd82c40a9605c9a5eeffad6fea;
+  no save-point gate, capture API or file contents were bypassed/edited.
+  Current Desktop has been built and a byte-identical private Continue
+  follows the ten original door legs back to the temple/portal. This is
+  a source-backed QA checkpoint, not earned full-campaign progression;
+  traversal/source verification remains in progress.
+
+- #234's external choice-filter repair `296069ca`, CI40889102631 successful,
+  is closed. A real follow-up actually casts Magic Ward76:21MP spent,
+  native status262144 appears, original Tarnish57 consumes the ward.
+  Later mana drain/Meteor still defeats Ashley; no Aster or E073 pass is
+  claimed. Caster-first, Lich-first and existing curative-kit variants
+  also fail and must not be repeated unchanged. All117 player regressions
+  and full normal quality pass. Initial #225 CI40887801041's four shared-test
+  formatting findings are repaired in `d2ce907b`, CI40888393696 successful,
+  without changing a baseline.
+
+- Recorded-input replay now uses actual engine-held runs, not the cached
+  native pressed mask that duplicated edges and lost a64-tick movement.
+  Release Golem/Queen and own-input Debug Golem replay through real combat
+  and strict source gates; one-tick padding is explicitly measured and
+  wall-clock timing is not certified. Cross-configuration Debug Golem
+  and Wyvern Knight replays remain failed, not deterministic successes.
+  Latest cold pruning additionally verifies/decompresses50 logs:
+  1,294,807,385 raw bytes become10,088,533 archived bytes before unlinking.
+
 - Owner-authorized scoped publication is complete through `d9b79fa0`:
   #229 `96a6515c`, #224 `c892e420`, #227 `7971c4d9`, #226 `1080de58`,
   ending #228/#230/#231 `ad8a3c8a`, bounds portion #232 `2cf601aa`, external
@@ -130,8 +177,8 @@ verification of the current worktree.
   Interrupted MAP100/MAP101 effect-bone faults are #232; MAP214 camera
   constraints are #233. Neither suspected cause is patched or promoted.
 
-- Exact runtime progress is now504/804, with97 verified in both configurations
-  and300 still unverified (123 unrun/177 attempted-unverified).118 of the
+- Exact runtime progress is now509/804, with99 verified in both configurations
+  and295 still unverified (119 unrun/176 attempted-unverified).123 of the
   owner's418 outstanding definitions now have demonstrated runtime paths.
   #149 remains open; queues, blocked labels and cancelled cases are not passes.
   The original MAP506/ZONE250 NPC/type4 viewer producers and source-derived
