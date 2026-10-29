@@ -9,6 +9,17 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #233's nullable camera consumer is locally repaired: original MAP214 has
+  collision width13/height25, but source-driven motion reaches tile4,31.
+  The existing cell lookup returns null; camera occlusion now explicitly warns
+  and uses its normal geometry-clearing path when no authored cell exists.
+  No collision, actor position, source flag, geometry constraint record or
+  valid view-trigger behavior changes. New tests cover missing cells, ordinary
+  clearing and the valid authored occlusion branch. Original Release
+  1793278757543012-0 crosses the old AV with zero errors and real teardown,
+  but still fails the120-tick living-control goal; no runtime identity is added
+  and #233 stays open. This is native fault progress, not scene completion.
+
 - Native source-goal completion is now optional in the external player:
   `--scene-expectation` embeds the existing original Lab scene/control contract
   and lets the native observer finish the case, rather than WM_CLOSE/cancel

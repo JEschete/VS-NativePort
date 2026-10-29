@@ -11,6 +11,7 @@
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
 #include "Battle/Targeting.h"
+#include "Core/Diagnostics.h"
 #include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Field/Camera.h"
@@ -882,7 +883,11 @@ void Field_UpdateCameraTileConstraint(int actor_index, Actors_TileTarget* actor_
         collision_tile_z = actor_tile->tileZ;
         collision_layer = actor_tile->tileLayer;
     }
-    if (Field_CollisionCellAt(collision_tile_x, collision_tile_z, collision_layer)->occlusionAndFloorFlags & 1) {
+    Field_MpdTileCell* camera_cell = Field_CollisionCellAt(collision_tile_x, collision_tile_z, collision_layer);
+    if (camera_cell == NULL) {
+        Core_Warnf("field.camera", "camera tile has no authored collision cell: x=%d z=%d layer=%d", (int)collision_tile_x, (int)collision_tile_z, collision_layer);
+    }
+    if (camera_cell != NULL && (camera_cell->occlusionAndFloorFlags & 1)) {
         Field_ApplyCameraGeometryOcclusion(actor_tile->tileX, actor_tile->tileZ, actor_tile->tileLayer,
             Field_sphericalCamera.initialDistance == 0x900);
         return;

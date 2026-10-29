@@ -195,6 +195,18 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00157": [
+        ("if (Field_CollisionCellAt(var_a0, var_a1, var_a2)->occlusionAndFloorFlags & 1)",
+         "Field_MpdTileCell* camera_cell = Field_CollisionCellAt(var_a0, var_a1, var_a2);\n"
+         "    if (camera_cell == NULL) {\n"
+         "        Core_Warnf(\"field.camera\", \"camera tile has no authored collision cell: x=%d z=%d layer=%d\", (int)var_a0, (int)var_a1, var_a2);\n"
+         "    }\n"
+         "    if (camera_cell != NULL && (camera_cell->occlusionAndFloorFlags & 1))",
+         "146C.c:5339 camera occlusion consumes the nullable cell lookup; "
+         "original scene motion can end outside the authored grid. Explicitly "
+         "report that query and retain existing no-occlusion clearing without "
+         "changing collision, actor placement or any valid view-trigger branch"),
+    ],
     "F00882": [
         ("    *(MATRIX*)arg2 = *Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);",
          "    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);\n"

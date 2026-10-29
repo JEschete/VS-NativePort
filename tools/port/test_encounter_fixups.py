@@ -16,6 +16,19 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_camera_constraint_checks_the_nullable_collision_query(self):
+        source = (
+            "if (Field_CollisionCellAt(var_a0, var_a1, var_a2)"
+            "->occlusionAndFloorFlags & 1) {"
+        )
+        for old, new, _ in copy_fixups.FIXES.get("F00157", []):
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("camera_cell != NULL &&", source)
+        self.assertIn('Core_Warnf("field.camera"', source)
+        self.assertNotIn("Field_CollisionCellAt(var_a0, var_a1, var_a2)->", source)
+
+
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
             "Field_gimmickInstances[i] = NULL;\n"
