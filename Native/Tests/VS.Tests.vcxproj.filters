@@ -99,6 +99,9 @@
     <ClCompile Include="src\EncounterTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EndingArtTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EngagementTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

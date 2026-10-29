@@ -76,7 +76,7 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     (void)unused;
     if (key != "events" && key != "event_source" && key != "return_zone" &&
         key != "return_room" && key != "preconditions" &&
-        key != "confirm_dialogue") {
+        key != "confirm_dialogue" && key != "terminal") {
       throw std::runtime_error("unknown scene field: " + key);
     }
   }
@@ -94,15 +94,25 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     }
     expected.events.push_back(event.get<int>());
   }
-  for (const auto* key : {"return_zone", "return_room"}) {
-    if (!value.at(key).is_number_integer() || value.at(key) < 0 ||
-        value.at(key) > std::numeric_limits<int>::max()) {
+  if (value.contains("terminal")) {
+    if (!value.at("terminal").is_string() ||
+        value.at("terminal") != "ending_to_title" ||
+        value.contains("return_zone") || value.contains("return_room")) {
       throw std::runtime_error(
-          "scene return zone/room must be nonnegative integers");
+          "scene terminal must be ending_to_title without a room-return goal");
     }
+    expected.ending_to_title = true;
+  } else {
+    for (const auto* key : {"return_zone", "return_room"}) {
+      if (!value.at(key).is_number_integer() || value.at(key) < 0 ||
+          value.at(key) > std::numeric_limits<int>::max()) {
+        throw std::runtime_error(
+            "scene return zone/room must be nonnegative integers");
+      }
+    }
+    expected.return_zone = value.at("return_zone").get<int>();
+    expected.return_room = value.at("return_room").get<int>();
   }
-  expected.return_zone = value.at("return_zone").get<int>();
-  expected.return_room = value.at("return_room").get<int>();
   const auto source = value.value("event_source", nlohmann::json(0));
   if (!source.is_number_integer() || source < 0 || source > 2) {
     throw std::runtime_error("scene event_source must be a native source 0..2");
@@ -174,6 +184,7 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   } else if (available) {
     event_active_ = false;
   }
+  if (expected_.ending_to_title) return;
   const bool returned =
       next_event_ == expected_.events.size() && state.ready && available &&
       event.at("phase") == 0 && state.zone == expected_.return_zone &&
@@ -187,6 +198,30 @@ void SceneTrial::Observe(const Game::EncounterState& state,
       status_ = "passed";
       passed_tick_ = tick;
     }
+  }
+}
+
+void SceneTrial::ObserveEndingReturn(bool credits_finished,
+                                     bool credits_skipped,
+                                     bool clear_save_pending,
+                                     std::uint64_t tick) {
+  if (Finished() || !expected_.ending_to_title) return;
+  terminal_ = {{"kind", "ending_to_title"},
+               {"native_fiber_returned", true},
+               {"credits_finished", credits_finished},
+               {"credits_skipped", credits_skipped},
+               {"clear_save_pending", clear_save_pending},
+               {"title_host", "lab_encounter_finish_callback"},
+               {"tick", tick}};
+  if (credits_skipped) {
+    Fail("credits were skipped");
+  } else if (!credits_finished || !clear_save_pending) {
+    Fail("encounter ended without completed credits and clear-save handoff");
+  } else if (next_event_ != expected_.events.size()) {
+    Fail("ending returned without the expected source events");
+  } else {
+    status_ = "passed";
+    passed_tick_ = tick;
   }
 }
 
@@ -207,6 +242,8 @@ void SceneTrial::Timeout() {
   reason_ = next_event_ == 0 ? "expected starting event was not observed"
             : next_event_ < expected_.events.size()
                 ? "expected event handoff was not observed"
+            : expected_.ending_to_title
+                ? "ending did not return to title before budget"
                 : "scene did not restore stable player control before budget";
 }
 
@@ -216,22 +253,30 @@ void SceneTrial::Fail(std::string reason) {
 }
 
 nlohmann::json SceneTrial::Result() const {
-  return {{"status", status_},
-          {"reason", reason_},
-          {"coverage", "scene_playback_control"},
-          {"expected_events", expected_.events},
-          {"event_source", expected_.event_source},
-          {"observed_events", observed_},
-          {"matched_events", next_event_},
-          {"return_zone", expected_.return_zone},
-          {"return_room", expected_.return_room},
-          {"preconditions", expected_.preconditions},
-          {"campaign_progression", "not_established"},
-          {"control_tick",
-           control_tick_ ? nlohmann::json(*control_tick_) : nlohmann::json{}},
-          {"passed_tick", passed_tick_},
-          {"last", last_},
-          {"dialogue_confirm_pulses", dialogue_pulses_}};
+  auto result = nlohmann::json{
+      {"status", status_},
+      {"reason", reason_},
+      {"coverage", "scene_playback_control"},
+      {"expected_events", expected_.events},
+      {"event_source", expected_.event_source},
+      {"observed_events", observed_},
+      {"matched_events", next_event_},
+      {"return_zone", expected_.return_zone},
+      {"return_room", expected_.return_room},
+      {"preconditions", expected_.preconditions},
+      {"campaign_progression", "not_established"},
+      {"control_tick",
+       control_tick_ ? nlohmann::json(*control_tick_) : nlohmann::json{}},
+      {"passed_tick", passed_tick_},
+      {"last", last_},
+      {"dialogue_confirm_pulses", dialogue_pulses_}};
+  if (expected_.ending_to_title) {
+    result["coverage"] = "scene_playback_ending_to_title";
+    result["terminal"] = terminal_;
+    result.erase("return_zone");
+    result.erase("return_room");
+  }
+  return result;
 }
 
 std::uint64_t ParseTick(std::string_view value) {

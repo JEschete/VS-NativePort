@@ -1134,6 +1134,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Ending\Credits\EmbeddedArt.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Ending\Credits\StaffRoll.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2024,6 +2027,7 @@
     <ClInclude Include="src\Effects\Transforms.h" />
     <ClInclude Include="src\Effects\Weather.h" />
     <ClInclude Include="src\Ending\ClearResults.h" />
+    <ClInclude Include="src\Ending\Credits\EmbeddedArt.h" />
     <ClInclude Include="src\Ending\Credits\StaffRoll.h" />
     <ClInclude Include="src\Ending\Credits.h" />
     <ClInclude Include="src\Ending\Results.h" />

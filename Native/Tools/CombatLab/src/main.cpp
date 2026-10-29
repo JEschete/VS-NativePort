@@ -25,6 +25,7 @@
 #include "Core/Log.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
+#include "Legacy/Psx.h"
 #include "Movie/MoviePlayer.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
@@ -32,6 +33,11 @@
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
 #include "Save/NativeMenu.hpp"
+
+extern "C" {
+#include "Boot/GameLoop.h"
+#include "Ending/Credits/StaffRoll.h"
+}
 
 namespace VS::combat_lab {
 namespace {
@@ -61,6 +67,7 @@ struct Options {
   bool catalog_only = false;
   bool devices = true;
   bool player_observations = false;
+  bool verification_log = false;
   bool door_transitions = false;
   bool scene_catalog = false;
   std::string door_case;
@@ -216,6 +223,8 @@ Options Parse(int argc, char** argv) {
       options.devices = false;
     } else if (argument == "--player-observations") {
       options.player_observations = true;
+    } else if (argument == "--verification-log") {
+      options.verification_log = true;
     } else if (argument == "--door-transitions") {
       options.door_transitions = true;
     } else if (argument == "--scene-catalog") {
@@ -361,6 +370,7 @@ void WriteManifest(const Options& options, Trace& trace, std::size_t scripts) {
                                  : fs::absolute(options.door_resume).string()},
              {"scripts", scripts},
              {"speed", options.speed},
+             {"verification_log", options.verification_log},
              {"effect_path_trace",
               options.effect_paths
                   ? nlohmann::json{{"first", options.effect_paths->first},
@@ -687,8 +697,25 @@ class LiveSession {
     trace_.Event("control.stop", {{"reason", script_stop_reason_}}, ticks_);
   }
 
+  void ObserveEndingReturn(std::uint64_t errors) {
+    if (!scene_trial_ || !scene_trial_->ExpectsEndingReturn() ||
+        sequence_cancelled_ || script_stopping_ || !script_initialized_ ||
+        errors != 0 || fiber_) {
+      return;
+    }
+    scene_trial_->ObserveEndingReturn(
+        Ending_Credits_hasFinished != 0, Ending_Credits_wasSkipRequested != 0,
+        Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+    const auto result = scene_trial_->Result();
+    trace_.Event("scene.terminal", result.at("terminal"), ticks_);
+    if (result.at("status") == "passed") {
+      script_stop_reason_ = "ending_to_title";
+    }
+  }
+
   void FinishScript() {
     const auto errors = trace_.Errors() - script_start_errors_;
+    ObserveEndingReturn(errors);
     if (scene_trial_ && (!scene_trial_->Finished() || errors != 0)) {
       scene_trial_->Fail(script_stop_reason_.empty()
                              ? "encounter ended before scene acceptance"
@@ -1083,8 +1110,12 @@ int Run(int argc, char** argv) {
       std::any_of(argv + 1, argv + argc, [](const char* argument) {
         return std::string_view(argument) == "--player-observations";
       });
+  const bool verification_log =
+      std::any_of(argv + 1, argv + argc, [](const char* argument) {
+        return std::string_view(argument) == "--verification-log";
+      });
   Trace trace(Platform::ExecutableDir() / "combat-lab" / "runs", "combat-lab",
-              {}, player_observations);
+              {}, player_observations, verification_log);
   try {
     Platform::InstallCrashHandler();
     VS_LOG_INFO("combat-lab", "log files: {}", trace.Directory().string());

@@ -17,7 +17,9 @@
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Render/Images.h"
+#include "Render/Render.h"
 #include "Render/TextureAnimation.h"
+#include "Render/UiPrimitives.h"
 #include "State/GameTime.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
@@ -242,14 +244,14 @@ void Ending_ShowClearResults(void)
     do {
         Ending_Credits_BeginFrame();
         phase_complete = Ending_LoadClearResultsStep();
-        Ending_Credits_PresentFrame(*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);
+        Ending_Credits_PresentFrame((u_long*)Render_frameScratch.orderingTable + 0x7FF);
     } while (phase_complete == 0);
 
     do {
         Ending_Credits_BeginFrame();
         phase_complete = Ending_DrawClearResults();
         VSync(0);
-        Ending_Credits_PresentFrame(*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);
+        Ending_Credits_PresentFrame((u_long*)Render_frameScratch.orderingTable + 0x7FF);
     } while (phase_complete == 0);
 }
 
@@ -466,7 +468,7 @@ void Ending_DrawRankBackground(int fade_frame)
         return;
     }
 
-    poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);
+    poly = Render_frameScratch.primitiveCursor;
     var_s2 = 64;
 
     for (i = 0; i < 5; ++i) {
@@ -476,11 +478,11 @@ void Ending_DrawRankBackground(int fade_frame)
         setRGB0(poly, brightness, brightness, brightness);
         setClut(poly, 0, 0);
         poly->tpage = (i + 16) | getTPage(3, 0, 0, 0);
-        AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) + 0x1FF8, poly++);
+        AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);
         var_s2 += 64;
     }
 
-    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;
+    Render_frameScratch.primitiveCursor = poly;
 }
 
 // decomp: ENDING.PRG _renderCongratulations (src/ENDING/ENDING.PRG/D4.c:1925)
@@ -637,7 +639,7 @@ void Ending_DrawMapCompletion(
 {
     extern CVECTOR Ending_mapCompletionTint[];
 
-    char completion_digits[2];
+    char completion_digits[12];
     int i;
     int padded_prefix_x;
 
@@ -681,7 +683,7 @@ void Ending_DrawCountingMapCompletion(
 {
     extern CVECTOR Ending_countingMapCompletionTint[];
 
-    char completion_digits[2];
+    char completion_digits[12];
     int wipe_boundary_x;
     int i;
     int padded_prefix_x;

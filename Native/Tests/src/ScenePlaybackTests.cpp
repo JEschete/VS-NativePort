@@ -20,6 +20,14 @@ nlohmann::json ExpectedScene() {
           {"confirm_dialogue", true}};
 }
 
+nlohmann::json ExpectedEnding() {
+  auto value = ExpectedScene();
+  value.erase("return_zone");
+  value.erase("return_room");
+  value["terminal"] = "ending_to_title";
+  return value;
+}
+
 VS::Game::EncounterState ReadyState() {
   VS::Game::EncounterState state;
   state.ready = true;
@@ -91,6 +99,91 @@ TEST_CASE(
   CHECK(trial.Result().at("control_tick") == 4);
   CHECK(trial.Result().at("passed_tick") == 124);
   CHECK(trial.Result().at("campaign_progression") == "not_established");
+}
+
+TEST_CASE("Scene endings accept only an explicit terminal contract",
+          "[scenes][playback][ending-goal]") {
+  auto value = ExpectedEnding();
+  SECTION("valid") {
+    const auto expected = VS::combat_lab::DecodeSceneExpectation(value);
+    CHECK(expected.ending_to_title);
+  }
+  SECTION("invalid") {
+    SECTION("unknown terminal") { value["terminal"] = "any_exit"; }
+    SECTION("boolean terminal") { value["terminal"] = true; }
+    SECTION("mixed room goal") { value["return_room"] = 0; }
+    SECTION("mixed zone goal") { value["return_zone"] = 0; }
+    CHECK_THROWS_AS(VS::combat_lab::DecodeSceneExpectation(value),
+                    std::runtime_error);
+  }
+}
+
+TEST_CASE("Ending goals never substitute a field-control interval",
+          "[scenes][playback][ending-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedEnding()));
+  PlayExpectedEvents(trial);
+  trial.Observe(ReadyState(), Event(81, 0), 4);
+  trial.Observe(ReadyState(), Event(81, 0), 124);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Result().at("control_tick").is_null());
+  trial.ObserveEndingReturn(true, false, true, 140);
+  CHECK(trial.Result().at("status") == "passed");
+  CHECK(trial.Result().at("coverage") == "scene_playback_ending_to_title");
+  CHECK(trial.Result().at("passed_tick") == 140);
+  CHECK_FALSE(trial.Result().contains("return_zone"));
+}
+
+TEST_CASE("Ending acceptance requires completed unskipped native credits",
+          "[scenes][playback][ending-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedEnding()));
+  PlayExpectedEvents(trial);
+  bool credits_finished = true;
+  bool credits_skipped = false;
+  bool clear_save_pending = true;
+  SECTION("credits not finished") { credits_finished = false; }
+  SECTION("credits skipped") { credits_skipped = true; }
+  SECTION("no clear-save handoff") { clear_save_pending = false; }
+  trial.ObserveEndingReturn(credits_finished, credits_skipped,
+                            clear_save_pending, 140);
+  CHECK(trial.Result().at("status") == "failed");
+  CHECK_FALSE(trial.Result().at("reason").get<std::string>().empty());
+  CHECK(trial.Result().at("passed_tick") == 0);
+}
+
+TEST_CASE("Ending flags cannot replace the expected source events",
+          "[scenes][playback][ending-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedEnding()));
+  trial.Observe(ReadyState(), Event(80), 1);
+  trial.ObserveEndingReturn(true, false, true, 140);
+  CHECK(trial.Result().at("status") == "failed");
+  CHECK(trial.Result().at("matched_events") == 1);
+}
+
+TEST_CASE("Failed or timed-out endings cannot be upgraded by later flags",
+          "[scenes][playback][ending-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedEnding()));
+  PlayExpectedEvents(trial);
+  SECTION("timeout") { trial.Timeout(); }
+  SECTION("cancelled") { trial.Fail("cancelled"); }
+  SECTION("skipped") {
+    auto skipped = Event(81);
+    skipped["event"]["forced_skip"] = true;
+    trial.Observe(ReadyState(), skipped, 4);
+  }
+  const auto status = trial.Result().at("status");
+  trial.ObserveEndingReturn(true, false, true, 140);
+  CHECK(trial.Result().at("status") == status);
+  CHECK(trial.Result().at("passed_tick") == 0);
+}
+
+TEST_CASE("Ordinary scene goals ignore terminal ending flags",
+          "[scenes][playback][ending-goal]") {
+  auto trial = Trial();
+  PlayExpectedEvents(trial);
+  trial.ObserveEndingReturn(true, false, true, 140);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Result().at("coverage") == "scene_playback_control");
+  CHECK_FALSE(trial.Result().contains("terminal"));
 }
 
 TEST_CASE(

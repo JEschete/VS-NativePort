@@ -9,6 +9,7 @@
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits.h"
+#include "Ending/Credits/EmbeddedArt.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -863,6 +864,7 @@ void Ending_Credits_RunStaffRoll(void)
     Content_DiscQueueSlot* slot;
 
     Ending_Credits_AllocateRenderBuffers();
+    if (!Ending_Credits_PrepareEmbeddedArt()) abort();
     Core_Gte_SetGeomOffset(0xA0, 0x70);
     Core_Gte_SetGeomScreen(0x200);
     Ending_Credits_ConfigureDrawEnvironment(Render_legacyDrawEnvironments);
@@ -871,18 +873,18 @@ void Ending_Credits_RunStaffRoll(void)
     Render_legacyDisplayEnvironments[1].isinter = 0;
     Render_legacyDisplayEnvironments[0].isinter = 0;
 
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureOne);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureTwo);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureThree);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureFour);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureFive);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureSix);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureSeven);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureEight);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureNine);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureTen);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureEleven);
-    Ending_Credits_UploadTexture(&Ending_Credits_embeddedTextureTwelve);
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(0));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(1));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(2));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(3));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(4));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(5));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(6));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(7));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(8));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(9));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(10));
+    Ending_Credits_UploadTexture(Ending_Credits_EmbeddedArt(11));
 
     for (i = 5; i < 16; ++i) {
         file.lba = Ending_Credits_illustrationDiscLocations[i - 5];
@@ -955,7 +957,7 @@ void Ending_Credits_RunFrames(void)
             Ending_Credits_wasSkipRequested = 1;
         }
 
-        Ending_Credits_PresentFrame(*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);
+        Ending_Credits_PresentFrame((u_long*)Render_frameScratch.orderingTable + 0x7FF);
 
         ++Ending_Credits_elapsedFrames;
     }

@@ -82,6 +82,7 @@
     </ClCompile>
     <ClCompile Include="src\EncounterProfileTests.cpp" />
     <ClCompile Include="src\EncounterTests.cpp" />
+    <ClCompile Include="src\EndingArtTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />

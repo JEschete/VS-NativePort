@@ -499,20 +499,27 @@ int main(int argc, char** argv) try {
       std::any_of(argv + 1, argv + argc, [](const char* argument) {
         return std::string_view(argument) == "--player-observations";
       });
-  if (player_observations && !kEnableDetailedGameLogging) {
-    throw std::runtime_error("--player-observations requires detailed logging");
+  const bool verification_log =
+      std::any_of(argv + 1, argv + argc, [](const char* argument) {
+        return std::string_view(argument) == "--verification-log";
+      });
+  if ((player_observations || verification_log) &&
+      !kEnableDetailedGameLogging) {
+    throw std::runtime_error(
+        "player observations/verification log require detailed logging");
   }
   if (kEnableDetailedGameLogging) {
     const auto directory = Platform::ExecutableDir();
     trace = std::make_unique<Game::GameplayTrace>(
         directory / "game-logs", "desktop", directory / "vs-native.log",
-        player_observations);
+        player_observations, verification_log);
     const auto source = Game::TraceSourceProvenance(directory);
     Game::WriteTraceManifest(
         trace->Directory(),
         {{"schema", 1},
          {"host", "desktop"},
          {"detailed_logging", true},
+         {"verification_log", verification_log},
          {"build", __DATE__ " " __TIME__},
          {"revision", source.at("revision")},
          {"worktree", source.at("worktree")},

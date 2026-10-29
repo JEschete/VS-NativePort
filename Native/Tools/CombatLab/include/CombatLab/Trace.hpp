@@ -34,6 +34,7 @@ struct SceneExpectation {
   int return_room = 0;
   std::string preconditions;
   bool confirm_dialogue = false;
+  bool ending_to_title = false;
 };
 
 SceneExpectation DecodeSceneExpectation(const nlohmann::json& value);
@@ -43,6 +44,10 @@ class SceneTrial {
   explicit SceneTrial(SceneExpectation expected);
   void Observe(const Game::EncounterState& state, const nlohmann::json& scene,
                std::uint64_t tick);
+  // Only a natural native fiber return, never a stop request, supplies this.
+  void ObserveEndingReturn(bool credits_finished, bool credits_skipped,
+                           bool clear_save_pending, std::uint64_t tick);
+  bool ExpectsEndingReturn() const { return expected_.ending_to_title; }
   std::uint32_t Input(std::uint64_t tick);
   void Timeout();
   void Fail(std::string reason);
@@ -62,6 +67,7 @@ class SceneTrial {
   bool event_active_ = false;
   std::uint64_t dialogue_pulses_ = 0;
   nlohmann::json last_;
+  nlohmann::json terminal_;
 };
 
 struct EncounterScript {

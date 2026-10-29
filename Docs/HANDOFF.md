@@ -9,6 +9,24 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Ending blockers #228/#230/#231 are locally repaired: typed native OT
+  consumers preserve original buckets, all12 full embedded TIMs own their
+  palettes/pixels and writable72224-byte TIM8 workspace, and completion
+  strings hold their original formatting plus NUL. Original unskipped
+  Debug1793261918537648-0/Release1793261820312067-0 reach natural title handoff
+  and teardown at42579 with zero errors; their old field-control expectations
+  correctly fail. Final Debug1793263459268740-0/Release1793263459160911-0
+  each bind8722 original commands across five instances to the actual boot
+  title transition, unskipped completion flags, natural fiber return and
+  footer/teardown; actual exit0.31 exact source/lifecycle controls pass per
+  configuration. Persistent Release1793264413301690-0 then passes26 instances
+  across original MAP134/135/136/137 producers in one window, with four genuine
+  title handoffs/reset/reentries and zero errors. Six terminal-goal controls pass31
+  assertions; combined render/scene/verification-log selections pass185 cases/
+  1,812,710 assertions per configuration. Scoped style/tidy is clean. Ordinary
+  field gates, cancelled/error/timeout outcomes and default gameplay are not
+  relaxed. Publication/exact-revision CI, campaign and fidelity remain separate.
+
 - #226/#227 now pass the complete original viewer504/E078/E026/E038 chain:
   Debug1793255056114631-0 and Release1793255464212292-0 validate all seven
   original instances, control12024..12144 and native teardown12156 with zero

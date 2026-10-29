@@ -25,6 +25,10 @@ NATIVE_SIGNATURE_REWRITES = {
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
+    "Ending_Credits_EmbeddedArt":
+        r"Native\Game\src\Ending\Credits\EmbeddedArt.h",
+    "Ending_Credits_PrepareEmbeddedArt":
+        r"Native\Game\src\Ending\Credits\EmbeddedArt.h",
     "Actors_FindBoundAnimationHeader":
         r"Native\Game\src\Actors\AnimationBindings.h",
     "Field_CopyMovingPlatformPlacement":
@@ -189,6 +193,57 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F02449": [
+        ("char sp18[2];", "char sp18[12];",
+         "D4.c:2113 counting completion has the same undersized decomp buffer; "
+         "preserve counting/audio/format behavior with a complete native string"),
+    ],
+    "F02448": [
+        ("char sp10[2];", "char sp10[12];",
+         "D4.c:2070 formats at least three digits plus NUL; own enough native "
+         "storage for the full signed32 string without changing format or drawing"),
+    ],
+    "F02444": [
+        ("poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);",
+         "poly = Render_frameScratch.primitiveCursor;",
+         "D4.c:1887 results background borrows the typed native frame cursor"),
+        ("AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) + 0x1FF8, poly++);",
+         "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
+         "PS1 byte offset0x1FF8 is ordering bucket0x7FE; retain that bucket "
+         "without reading a native pointer at scratch byte4"),
+        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;",
+         "Render_frameScratch.primitiveCursor = poly;",
+         "publish all five native background primitives to the frame owner"),
+    ],
+    "F02441": [
+        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
+         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
+         "D4.c:1677 results loading and display both consume BeginFrame's native "
+         "ordering table, not a pointer read from PS1 scratch byte4"),
+    ],
+    "F02420": [
+        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
+         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
+         "D4.c:1081 credits presentation consumes the ordering table established "
+         "by BeginFrame; PS1 byte4 overlaps the native primitive pointer after "
+         "pointer widening. Preserve the original final ordering bucket."),
+    ],
+    "F02418": [
+        ("Ending_Credits_AllocateRenderBuffers();",
+         "Ending_Credits_AllocateRenderBuffers();\n"
+         "    if (!Ending_Credits_PrepareEmbeddedArt()) abort();",
+         "D4.c:999 needs complete owned embedded TIM payloads and the original "
+         "TIM8 workspace alias before any upload or illustration decode"),
+        *[
+            (f"&Ending_Credits_embeddedTexture{name}",
+             f"Ending_Credits_EmbeddedArt({index})",
+             "Preserve the complete original TIM palette/pixels, not only its header")
+            for index, name in enumerate((
+                "One", "Two", "Three", "Four", "Five", "Six",
+                "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+            ))
+        ],
+    ],
     "F01261": [
         ("((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId)",
          "Actors_IsActorRetainedAfterDefeat(actorId)",

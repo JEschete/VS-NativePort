@@ -1419,6 +1419,12 @@
     <ClInclude Include="src\Ending\ClearResults.h">
       <Filter>src\Ending</Filter>
     </ClInclude>
+    <ClCompile Include="src\Ending\Credits\EmbeddedArt.cpp">
+      <Filter>src\Ending\Credits</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Ending\Credits\EmbeddedArt.h">
+      <Filter>src\Ending\Credits</Filter>
+    </ClInclude>
     <ClCompile Include="src\Ending\Credits\StaffRoll.c">
       <Filter>src\Ending\Credits</Filter>
     </ClCompile>

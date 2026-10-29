@@ -33,8 +33,9 @@ std::string GitOutput(const std::filesystem::path& directory,
 GameplayTrace::GameplayTrace(const std::filesystem::path& parent,
                              std::string_view host,
                              const std::filesystem::path& compatibility_log,
-                             bool player_observations)
-    : player_observations_(player_observations) {
+                             bool player_observations, bool verification_log)
+    : player_observations_(player_observations),
+      verification_log_(verification_log) {
   const auto timestamp =
       std::chrono::duration_cast<std::chrono::microseconds>(
           std::chrono::system_clock::now().time_since_epoch())
@@ -53,7 +54,8 @@ GameplayTrace::GameplayTrace(const std::filesystem::path& parent,
     Core::SetLogFile("");
     throw std::runtime_error("cannot create compatibility engine log");
   }
-  Core::SetLogLevel(Core::LogLevel::Trace);
+  Core::SetLogLevel(verification_log_ ? Core::LogLevel::Debug
+                                      : Core::LogLevel::Trace);
   Core::SetLogChannels("*");
   previous_console_level_ = Core::SetConsoleLogLevel(Core::LogLevel::Warn);
   previous_flush_policy_ = Core::SetLogFlushEachMessage(false);
@@ -68,6 +70,11 @@ GameplayTrace::GameplayTrace(const std::filesystem::path& parent,
                 : record.channel == "event-result" ? "event.result"
                                                    : "state.flag_write";
             Event(category, nlohmann::json::parse(record.message), record.tick);
+            if (verification_log_) return;
+          }
+          if (verification_log_ && record.level < Core::LogLevel::Info &&
+              record.channel != "content" && record.channel != "boot") {
+            return;
           }
           Event("engine",
                 {{"channel", record.channel},
@@ -78,10 +85,18 @@ GameplayTrace::GameplayTrace(const std::filesystem::path& parent,
           Fail();
         }
       });
-  Event("session.begin", {{"schema", 1},
-                          {"trace", "full"},
-                          {"host", host},
-                          {"build", __DATE__ " " __TIME__}});
+  Event("session.begin",
+        {{"schema", 1},
+         {"trace", verification_log_ ? "verification" : "full"},
+         {"scoped_records", verification_log_ && !player_observations_
+                                ? "per-script"
+                                : "run-and-script"},
+         {"scoped_player_frames",
+          verification_log_ && player_observations_
+              ? "base-state-with-shared-rich-record-reference"
+              : "full"},
+         {"host", host},
+         {"build", __DATE__ " " __TIME__}});
 }
 
 GameplayTrace::~GameplayTrace() {
@@ -124,7 +139,10 @@ std::filesystem::path GameplayTrace::BeginScript(std::size_t number,
     if (!script_stream_) throw std::runtime_error("cannot create script trace");
     script_number_ = number;
     script_start_tick_ = tick;
-    WriteRecord("session.begin", {{"schema", 1}, {"trace", "full"}}, tick);
+    WriteRecord(
+        "session.begin",
+        {{"schema", 1}, {"trace", verification_log_ ? "verification" : "full"}},
+        tick);
   }
   return path;
 }
@@ -141,11 +159,11 @@ void GameplayTrace::EndScript(std::uint64_t tick,
 }
 
 void GameplayTrace::Event(std::string_view category,
-                          const nlohmann::json& details,
-                          std::uint64_t tick) noexcept {
+                          const nlohmann::json& details, std::uint64_t tick,
+                          const nlohmann::json* scoped_details) noexcept {
   try {
     std::lock_guard lock(mutex_);
-    WriteRecord(category, details, tick);
+    WriteRecord(category, details, tick, scoped_details);
   } catch (...) {
     Fail();
   }
@@ -153,7 +171,8 @@ void GameplayTrace::Event(std::string_view category,
 
 void GameplayTrace::WriteRecord(std::string_view category,
                                 const nlohmann::json& details,
-                                std::uint64_t tick) {
+                                std::uint64_t tick,
+                                const nlohmann::json* scoped_details) {
   const auto elapsed = std::chrono::duration_cast<std::chrono::microseconds>(
                            std::chrono::steady_clock::now() - started_)
                            .count();
@@ -168,8 +187,23 @@ void GameplayTrace::WriteRecord(std::string_view category,
         tick >= script_start_tick_ ? tick - script_start_tick_ : 0;
   }
   const auto line = record.dump();
-  stream_ << line << '\n';
-  if (script_stream_.is_open()) script_stream_ << line << '\n';
+  const bool scoped_only =
+      verification_log_ && !player_observations_ && script_stream_.is_open() &&
+      (category == "frame" ||
+       (category == "engine" && details.at("level").get<int>() <
+                                    static_cast<int>(Core::LogLevel::Warn)) ||
+       category == "event.command" || category == "event.result" ||
+       category == "state.flag_write");
+  if (!scoped_only) stream_ << line << '\n';
+  if (script_stream_.is_open()) {
+    if (scoped_details != nullptr) {
+      record["data"] = *scoped_details;
+      record["shared_record_sequence"] = sequence_;
+      script_stream_ << record.dump() << '\n';
+    } else {
+      script_stream_ << line << '\n';
+    }
+  }
   const bool instruction = category == "event.command" ||
                            category == "event.result" ||
                            category == "state.flag_write";
@@ -316,9 +350,18 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                         {"selection", reel.selection},
                         {"bios_state", reel.bios_state}};
   }
+  nlohmann::json scoped_frame;
+  const bool shared_player_frame =
+      verification_log_ && player_observations_ && script_stream_.is_open();
+  if (shared_player_frame) scoped_frame = data;
   if (player_observations_) AppendPlayerObservations(data, state);
   if (!scene.is_null()) data["scene"] = scene;
-  Event("frame", data, tick);
+  if (shared_player_frame) {
+    if (!scene.is_null()) scoped_frame["scene"] = scene;
+    Event("frame", data, tick, &scoped_frame);
+  } else {
+    Event("frame", data, tick);
+  }
 }
 
 void WriteTraceManifest(const std::filesystem::path& directory,

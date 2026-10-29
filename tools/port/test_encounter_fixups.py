@@ -16,6 +16,86 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_ending_completion_formatters_own_a_full_signed_integer_string(self):
+        for function_id, variable, value in (
+            ("F02448", "sp10", "Ending_mapCompletion"),
+            ("F02449", "sp18", "Ending_displayedMapCompletion"),
+        ):
+            with self.subTest(function_id=function_id):
+                formatting = f'sprintf({variable}, "%03d", {value});'
+                source = f"char {variable}[2];\n" + formatting
+                for old, new, _ in copy_fixups.FIXES.get(function_id, []):
+                    self.assertEqual(source.count(old), 1)
+                    source = source.replace(old, new)
+                self.assertIn(f"char {variable}[12];", source)
+                self.assertIn(formatting, source)
+
+
+    def test_ending_rank_background_uses_the_original_penultimate_bucket(self):
+        source = (
+            "poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);\n"
+            "AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) "
+            "+ 0x1FF8, poly++);\n"
+            "*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;"
+        )
+        for old, new, _ in copy_fixups.FIXES["F02444"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("poly = Render_frameScratch.primitiveCursor;", source)
+        self.assertIn(
+            "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
+            source,
+        )
+        self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
+        self.assertNotIn("Core_ScratchBase", source)
+
+
+    def test_ending_results_both_phases_present_the_native_ordering_table(self):
+        source = "\n".join(
+            ["Ending_Credits_PresentFrame("
+             "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"] * 2
+        )
+        for old, new, _ in copy_fixups.FIXES["F02441"]:
+            self.assertEqual(source.count(old), 2)
+            source = source.replace(old, new)
+        self.assertEqual(source.count(
+            "(u_long*)Render_frameScratch.orderingTable + 0x7FF"), 2)
+        self.assertNotIn("Core_ScratchBase", source)
+
+
+    def test_ending_credits_present_the_typed_native_ordering_table(self):
+        source = (
+            "Ending_Credits_PresentFrame("
+            "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"
+        )
+        for old, new, _ in copy_fixups.FIXES["F02420"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertEqual(
+            source,
+            "Ending_Credits_PresentFrame("
+            "(u_long*)Render_frameScratch.orderingTable + 0x7FF);",
+        )
+        self.assertNotIn("Core_ScratchBase", source)
+
+
+    def test_ending_credits_prepare_complete_art_before_all_twelve_uploads(self):
+        names = ("One", "Two", "Three", "Four", "Five", "Six",
+                 "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
+        source = "Ending_Credits_AllocateRenderBuffers();\n" + "\n".join(
+            f"Ending_Credits_UploadTexture(&Ending_Credits_embeddedTexture{name});"
+            for name in names
+        )
+        for old, new, _ in copy_fixups.FIXES["F02418"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("if (!Ending_Credits_PrepareEmbeddedArt()) abort();", source)
+        self.assertEqual(source.count("Ending_Credits_UploadTexture("), 12)
+        for index in range(12):
+            self.assertIn(f"Ending_Credits_EmbeddedArt({index})", source)
+        self.assertNotIn("&Ending_Credits_embeddedTexture", source)
+
+
     def test_animation_unwind_uses_the_bound_clip_without_suppressing_failures(self):
         fixups = copy_fixups.FIXES["F00998"]
         binding = next(new for old, new, _ in fixups if "Actors_FindActorAnimationHeader" in old)

@@ -196,10 +196,11 @@ extern "C" int Content_ReadDiscBytes(unsigned lba, unsigned bytes, void* dest) {
       return 0;
     }
     std::memset(out + n, 0, span - n);
-    if (logged.insert(e->path).second) {
-      VS_LOG_INFO("content", "disc read: {} (sector {}, {} bytes, {})", e->path,
-                  sector, span, e->form);
-    }
+    const auto level = logged.insert(e->path).second
+                           ? VS::Core::LogLevel::Info
+                           : VS::Core::LogLevel::Debug;
+    VS::Core::Log(level, "content", "disc read: {} (sector {}, {} bytes, {})",
+                  e->path, sector, span, e->form);
     out += span;
     remaining -= span;
     sector += static_cast<u32>(span / DataStore::kDataSectorBytes);

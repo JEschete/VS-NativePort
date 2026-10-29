@@ -22,6 +22,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Content/ModuleData.h"
+#include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Movie/MoviePlayer.h"
 #include "Render/PageSpace.hpp"
@@ -104,6 +105,54 @@ constexpr auto kTiledRingData = std::to_array<Content_ModuleDataEntry>({
 });
 
 void CheckTemplateReloads();
+
+struct DiscReadLogScope {
+  static constexpr unsigned kSector = 123;
+  static constexpr unsigned kSize = 4;
+  Content::DataStore::ScopedOverride store;
+  std::filesystem::path root =
+      std::filesystem::temp_directory_path() /
+      ("vs-disc-read-log-" +
+       std::to_string(
+           std::chrono::steady_clock::now().time_since_epoch().count()));
+  std::string asset = root.filename().string() + ".BIN";
+  const std::array<u8, kSize> expected{1, 2, 3, 4};
+  VS::Core::LogObserver previous_observer = VS::Core::SetLogObserver({});
+  VS::Core::LogLevel previous_console =
+      VS::Core::SetConsoleLogLevel(VS::Core::LogLevel::Off);
+
+  ~DiscReadLogScope() noexcept(false) {
+    VS::Core::SetLogObserver(std::move(previous_observer));
+    VS::Core::SetConsoleLogLevel(previous_console);
+    VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
+    VS::Core::SetLogChannels("*");
+    std::error_code error;
+    std::filesystem::remove_all(root, error);
+  }
+
+  void Open() const {
+    std::filesystem::create_directories(root / "disc");
+    std::ofstream manifest(root / Content::DataStore::ManifestName);
+    manifest << "lba\tsize\tform\tpath\n"
+             << kSector << '\t' << kSize << "\traw\t" << asset << '\n';
+    manifest.close();
+    REQUIRE(manifest.good());
+    std::ofstream file(root / "disc" / asset, std::ios::binary);
+    file.write(reinterpret_cast<const char*>(expected.data()), kSize);
+    file.close();
+    REQUIRE(file.good());
+    REQUIRE(Content::DataStore::Open(root).has_value());
+    VS::Core::SetLogLevel(VS::Core::LogLevel::Debug);
+    REQUIRE(VS::Core::SetLogChannels("content"));
+  }
+};
+
+void CheckDiscReadPayload(const DiscReadLogScope& scope) {
+  std::array<u8, DiscReadLogScope::kSize> buffer{};
+  REQUIRE(Content_ReadDiscBytes(DiscReadLogScope::kSector,
+                                DiscReadLogScope::kSize, buffer.data()) == 1);
+  CHECK(buffer == scope.expected);
+}
 
 std::filesystem::path FindRepoDisc() {
   for (auto dir = std::filesystem::current_path();
@@ -349,6 +398,32 @@ TEST_CASE(
     "Disc read rejects unrepresentable sizes without changing request state",
     "[content][disc]") {
   REQUIRE(TestsDiscReadSizeContract() == 1);
+}
+
+TEST_CASE("Repeated disc reads retain diagnostics without increasing Info logs",
+          "[content][disc][reentry][diagnostics]") {
+  DiscReadLogScope scope;
+  scope.Open();
+  std::vector<std::pair<VS::Core::LogLevel, std::string>> messages;
+  VS::Core::SetLogObserver([&messages](const VS::Core::LogRecord& record) {
+    if (record.channel == "content" &&
+        record.message.starts_with("disc read: ")) {
+      messages.emplace_back(record.level, record.message);
+    }
+  });
+  for (int read = 0; read < 2; ++read) {
+    CheckDiscReadPayload(scope);
+  }
+  REQUIRE(messages.size() == 2);
+  CHECK(messages[0].first == VS::Core::LogLevel::Info);
+  CHECK(messages[1].first == VS::Core::LogLevel::Debug);
+  const std::string expected_message =
+      "disc read: " + scope.asset + " (sector 123, 4 bytes, raw)";
+  CHECK(messages[0].second == expected_message);
+  CHECK(messages[1].second == expected_message);
+  VS::Core::SetLogLevel(VS::Core::LogLevel::Info);
+  CheckDiscReadPayload(scope);
+  CHECK(messages.size() == 2);
 }
 
 TEST_CASE("Manifest sector extents do not wrap at uint32 boundaries",

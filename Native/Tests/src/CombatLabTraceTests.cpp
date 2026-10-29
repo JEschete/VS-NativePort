@@ -223,7 +223,150 @@ bool CompleteScriptLog(const std::filesystem::path& path, std::size_t number) {
   }
   return frame && ended;
 }
+
+std::vector<nlohmann::json> ReadTraceRecords(
+    const std::filesystem::path& path) {
+  std::ifstream input(path);
+  if (!input) throw std::runtime_error("trace records are missing");
+  std::vector<nlohmann::json> records;
+  std::string line;
+  while (std::getline(input, line)) {
+    records.push_back(nlohmann::json::parse(line));
+  }
+  return records;
+}
+
+std::size_t CountCategory(const std::vector<nlohmann::json>& records,
+                          std::string_view category) {
+  return static_cast<std::size_t>(
+      std::ranges::count_if(records, [category](const nlohmann::json& record) {
+        return record.at("category").get_ref<const std::string&>() == category;
+      }));
+}
+
+void CheckVerificationScriptRecords(const std::filesystem::path& run,
+                                    const std::filesystem::path& script_path) {
+  const auto root = ReadTraceRecords(run);
+  const auto script = ReadTraceRecords(script_path / "events.jsonl");
+  CHECK(CountCategory(root, "frame") == 0);
+  CHECK(CountCategory(script, "frame") == 1);
+  CHECK(CountCategory(script, "event.command") == 1);
+  CHECK(CountCategory(script, "event.result") == 1);
+  CHECK(CountCategory(script, "state.flag_write") == 1);
+  CHECK(CountCategory(script, "engine") == 1);
+  CHECK(CompleteScriptLog(script_path / "events.jsonl", 1));
+  const auto command = std::ranges::find_if(script, [](const auto& record) {
+    return record.at("category") == "event.command";
+  });
+  REQUIRE(command != script.end());
+  CHECK(command->at("data").at("operands") == nlohmann::json::array({1, 2, 3}));
+}
 }  // namespace
+
+TEST_CASE(
+    "Verification logs retain source evidence without duplicate run frames",
+    "[diagnostics][trace][verification-log]") {
+  TraceScope scope;
+  std::filesystem::path script_path;
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {}, false, true);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    script_path = trace.BeginScript(1, 10);
+    scope.directories.push_back(script_path);
+    scope.files.push_back(script_path / "events.jsonl");
+    const std::array<std::uint8_t, 4> instruction{128, 1, 2, 3};
+    const auto command = Diagnostics_RecordSceneCommand(
+        80, 0, 0, instruction.data(), instruction.data(), instruction.size(),
+        0);
+    Diagnostics_RecordSceneResult(command, 2);
+    Diagnostics_RecordScriptFlagWrite(180, 0, 1);
+    VS_LOG_TRACE("rng", "unneeded per-draw trace");
+    VS_LOG_DEBUG("event-step", "duplicate instruction text");
+    VS_LOG_DEBUG("content", "disc read: repeated source evidence");
+    trace.Frame(12, {}, SampleState());
+    trace.EndScript(13, {{"status", "test"}});
+    CHECK_FALSE(trace.Failed());
+  }
+  CheckVerificationScriptRecords(scope.events, script_path);
+}
+
+namespace {
+void CheckPlayerFramePayload(const nlohmann::json& frame, bool shared) {
+  if (shared) {
+    CHECK(frame.at("data").at("player_schema") == 2);
+    CHECK(frame.at("data").contains("navigation"));
+    CHECK_FALSE(frame.contains("shared_record_sequence"));
+  } else {
+    CHECK_FALSE(frame.at("data").contains("player_schema"));
+    CHECK_FALSE(frame.at("data").contains("navigation"));
+    CHECK(frame.at("shared_record_sequence") == frame.at("sequence"));
+  }
+}
+
+void CheckPlayerFrameStorage(const std::filesystem::path& path, bool shared) {
+  const auto records = ReadTraceRecords(path);
+  CHECK(CountCategory(records, "frame") == 1);
+  CHECK(CountCategory(records, "engine") == 2);
+  const auto frame = std::ranges::find_if(records, [](const auto& record) {
+    return record.at("category") == "frame";
+  });
+  REQUIRE(frame != records.end());
+  CHECK(frame->at("data").at("actors").empty());
+  CHECK(frame->at("data").at("scene").at("proof") == "source");
+  CheckPlayerFramePayload(*frame, shared);
+}
+}  // namespace
+
+TEST_CASE("Verification logs preserve player root frames and all error gates",
+          "[player][diagnostics][trace][verification-log]") {
+  TraceScope scope;
+  std::filesystem::path script_path;
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {}, true, true);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    script_path = trace.BeginScript(1, 10);
+    scope.directories.push_back(script_path);
+    scope.files.push_back(script_path / "events.jsonl");
+    VS_LOG_WARN("audio", "retained verification warning");
+    VS_LOG_ERROR("audio", "retained verification error");
+    trace.Frame(12, {}, {}, {{"available", true}, {"proof", "source"}});
+    trace.EndScript(13, {{"status", "test"}});
+    CHECK(trace.Errors() == 1);
+    CHECK_FALSE(trace.Failed());
+  }
+  CheckPlayerFrameStorage(scope.events, true);
+  CheckPlayerFrameStorage(script_path / "events.jsonl", false);
+}
+
+TEST_CASE("Verification logs retain native boot transition receipts",
+          "[diagnostics][trace][verification-log][boot-transition]") {
+  TraceScope scope;
+  std::filesystem::path script_path;
+  {
+    VS::Game::GameplayTrace trace(scope.parent, "combat-lab", {}, false, true);
+    scope.run = trace.Directory();
+    scope.events = scope.run / "events.jsonl";
+    scope.log = scope.run / "session.log";
+    script_path = trace.BeginScript(1, 10);
+    scope.directories.push_back(script_path);
+    scope.files.push_back(script_path / "events.jsonl");
+    VS_LOG_DEBUG("boot", "native session transition: title");
+    trace.EndScript(13, {{"status", "test"}});
+  }
+  const auto records = ReadTraceRecords(script_path / "events.jsonl");
+  const auto transition = std::ranges::find_if(records, [](const auto& record) {
+    return record.at("category") == "engine" &&
+           record.at("data").at("channel") == "boot";
+  });
+  REQUIRE(transition != records.end());
+  CHECK(transition->at("data").at("message") ==
+        "native session transition: title");
+  CHECK(CountCategory(ReadTraceRecords(scope.events), "engine") == 0);
+}
 
 TEST_CASE(
     "Shared scene diagnostics snapshot complete operands and native results",
@@ -653,6 +796,8 @@ struct GameplayInspectionFixture {
       Menu_Framework_menuItems;
   decltype(Menu_Framework_itemsText) saved_text = Menu_Framework_itemsText;
   decltype(Menu_Framework_menuState) saved_menu = Menu_Framework_menuState;
+  decltype(Event_isMenuTransitionActive) saved_event_menu =
+      Event_isMenuTransitionActive;
   decltype(Audio_Seq_unusedStateFlags.menuFSubmenu) saved_results_kind =
       Audio_Seq_unusedStateFlags.menuFSubmenu;
   std::array<char, 16> saved_submenus =
@@ -685,6 +830,7 @@ struct GameplayInspectionFixture {
     Menu_Framework_menuItems = nullptr;
     Menu_Framework_itemsText = nullptr;
     Menu_Framework_menuState.currentMenu = Menu_Framework_MenuState_NoneClosed;
+    Event_isMenuTransitionActive = 0;
     std::fill_n(Battle_actors, saved_actors.size(), nullptr);
     std::fill_n(Actors_actorRecords, saved_models.size(), nullptr);
     model.modelId = 58;
@@ -710,6 +856,7 @@ struct GameplayInspectionFixture {
     Menu_Framework_menuItems = saved_menu_items;
     Menu_Framework_itemsText = saved_text;
     Menu_Framework_menuState = saved_menu;
+    Event_isMenuTransitionActive = saved_event_menu;
     Audio_Seq_unusedStateFlags.menuFSubmenu = saved_results_kind;
     std::copy(saved_submenus.begin(), saved_submenus.end(),
               Menu_Framework_submenuStates);
@@ -1001,6 +1148,15 @@ void CheckDefenseAcknowledgment(
   CHECK(timing.previous_slot == 3);
   CHECK(timing.eligible == std::array<bool, 3>{false, false, false});
 }
+
+void CheckCachedTargetForecasts(const nlohmann::json& data) {
+  REQUIRE(data.at("target_forecasts").size() == 2);
+  CHECK(data.at("target_forecasts").at(0).at("amount") == 3);
+  CHECK(data.at("target_forecasts").at(0).at("hit_threshold") == 25);
+  CHECK(data.at("target_forecasts").at(1).at("limb") == 3);
+  CHECK(data.at("target_forecasts").at(1).at("amount") == 18);
+  CHECK(data.at("target_forecasts").at(1).at("hit_threshold") == 90);
+}
 }  // namespace
 
 TEST_CASE("Player observations retain native weapon geometry and hostility",
@@ -1031,6 +1187,60 @@ TEST_CASE("Player timing observations use production eligibility without costs",
   CheckNativeTiming(state.reaction_timing);
   CheckResourcesUnchanged(fixture);
   CHECK(Core_Random_State() == random);
+}
+
+TEST_CASE("Opt-in player target forecasts mirror native cached values",
+          "[player][diagnostics][target-forecast]") {
+  ReactionInspectionFixture fixture;
+  Battle_actionFlowMode = 1;
+  fixture.action->previewCount = 2;
+  auto& head = fixture.action->previews[0];
+  head.actorId = 2;
+  head.limb = 0;
+  head.effect = 58;
+  head.previewAmount = 3;
+  head.hitChance = 25;
+  auto& limb = fixture.action->previews[1];
+  limb.actorId = 2;
+  limb.limb = 3;
+  limb.effect = 58;
+  limb.previewAmount = 18;
+  limb.hitChance = 90;
+  const auto random = Core_Random_State();
+  const auto state = VS::Game::InspectGameplay();
+  TraceScope scope;
+  const auto data = FlushedFrame(scope, state, true).at("data");
+  CheckCachedTargetForecasts(data);
+  CHECK(Core_Random_State() == random);
+  CHECK(head.previewAmount == 3);
+  CHECK(limb.previewAmount == 18);
+}
+
+TEST_CASE("Unknown native target effects do not expose stale amounts",
+          "[player][diagnostics][target-forecast]") {
+  ReactionInspectionFixture fixture;
+  Battle_actionFlowMode = 1;
+  fixture.action->previewCount = 1;
+  auto& preview = fixture.action->previews[0];
+  preview.actorId = 2;
+  preview.limb = 0;
+  preview.effect = 0;
+  preview.previewAmount = 999;
+  preview.hitChance = 255;
+  TraceScope scope;
+  const auto data =
+      FlushedFrame(scope, VS::Game::InspectGameplay(), true).at("data");
+  REQUIRE(data.at("target_forecasts").size() == 1);
+  CHECK(data.at("target_forecasts").at(0).at("amount").is_null());
+  CHECK(data.at("target_forecasts").at(0).at("hit_threshold") == 255);
+}
+
+TEST_CASE("Ordinary traces do not collect player target forecasts",
+          "[player][diagnostics][target-forecast]") {
+  ReactionInspectionFixture fixture;
+  TraceScope scope;
+  const auto data = FlushedFrame(scope, VS::Game::InspectGameplay()).at("data");
+  CHECK_FALSE(data.contains("target_forecasts"));
 }
 
 TEST_CASE("Player timing keeps acknowledgments after the active input phase",
@@ -1360,4 +1570,27 @@ TEST_CASE("Loot input readiness is observed without claiming the drop",
   CHECK(state.menu.loot_input_ready);
   CHECK(state.menu.loot_count == 1);
   CHECK(Audio_Seq_unusedInventory.misc[0].count == 2);
+}
+
+TEST_CASE(
+    "Event-owned loot is observed while native cutscene control remains active",
+    "[player][diagnostics][event-reward]") {
+  ItemInspectionFixture fixture;
+  std::array<Menu_Framework_MenuRow, 10> rows{};
+  Menu_Framework_menuItems = rows.data();
+  Menu_Framework_menuState.currentMenu = 12;
+  Field_controlMode = 3;
+  Battle_actionFlowMode = 4;
+  Event_isMenuTransitionActive = 1;
+  Menu_Loot_controlsEnabled = 1;
+  Menu_Loot_lootListCount = 2;
+  const auto base = VS::Game::InspectGameplay();
+  TraceScope scope;
+  const auto data = FlushedFrame(scope, base, true).at("data");
+  CHECK(data.at("menu").at("available") == true);
+  CHECK(data.at("menu").at("event_owned") == true);
+  CHECK(data.at("menu").at("loot_input_ready") == true);
+  CHECK(Field_controlMode == 3);
+  CHECK(Battle_actionFlowMode == 4);
+  CHECK(Menu_Loot_lootListCount == 2);
 }
