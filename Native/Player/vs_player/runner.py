@@ -243,7 +243,9 @@ class CombatGoal:
             self.accepted_tick = self.door.accepted_tick
         if not frame.ready:
             return
-        if frame.reaction.source_actor > 0 and frame.reaction.target_actor == 0:
+        combat_observation = frame.event_phase == 0 and frame.control != 3
+        if (combat_observation and frame.reaction.source_actor > 0
+                and frame.reaction.target_actor == 0):
             self.max_incoming_hp_damage = max(
                 self.max_incoming_hp_damage, frame.reaction.incoming_hp_damage,
             )
@@ -251,10 +253,11 @@ class CombatGoal:
         scene = frame.raw["scene"]
         if scene["available"]:
             self.forced_skip |= scene["event"]["forced_skip"]
-        for actor in frame.enemies:
-            self.seen.add(self.identity(frame, actor))
-            if frame.player is not None:
-                self.encounters.add((actor.model, frame.player.weapon_category))
+        if combat_observation:
+            for actor in frame.enemies:
+                self.seen.add(self.identity(frame, actor))
+                if frame.player is not None:
+                    self.encounters.add((actor.model, frame.player.weapon_category))
         for actor in frame.actors:
             identity = self.identity(frame, actor)
             if identity in self.seen and actor.hp == 0:

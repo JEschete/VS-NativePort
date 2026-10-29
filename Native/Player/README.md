@@ -92,6 +92,11 @@ HP, urgent healing retains priority. Otherwise the model may compare healing
 with useful attacks, prevention or movement; repeated recovery that cannot
 outpace actual damage is not a successful combat strategy. An incoming forecast
 above maximum HP cannot be made survivable merely by forcing a heal.
+Combat goals and per-enemy experience accrue observed opponents/threats only
+outside native cinematic ownership. Temporary story actors that carry a hostile
+classification are not automatically battle requirements. Actual zero-HP
+evidence for a previously observed combat actor is still recorded when its
+death starts a cinematic; disappearance alone never establishes a kill.
 
 Managed player runs now request `--verification-log`: all native player frames,
 command/result/flag records and errors remain available, without per-draw Trace

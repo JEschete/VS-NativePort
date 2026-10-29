@@ -1721,6 +1721,63 @@ class RunnerTests(unittest.TestCase):
         goal.observe(Frame.decode(record))
         self.assertFalse(goal.combat_pending(Frame.decode(record)))
 
+    def test_cinematic_only_actors_do_not_contaminate_a_real_combat_goal(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        goal = CombatGoal()
+        goal.observe(Frame.decode(record))
+        record["tick"] = 2
+        record["data"]["actors"][1]["hp"] = 0
+        record["data"]["control_mode"] = 3
+        record["data"]["scene"]["event"]["phase"] = 4
+        goal.observe(Frame.decode(record))
+        self.assertEqual(len(goal.dead), 1)
+
+        cinematic = copy.deepcopy(record)
+        cinematic["tick"] = 3
+        cinematic["data"]["room"] = 7
+        cinematic["data"]["actors"][1].update(slot=3, model=41, hp=100, max_hp=100,
+                                              spawn_index=1)
+        cinematic["data"]["reaction_timing"].update(source_actor=3, target_actor=0,
+                                                     incoming_hp_damage=999)
+        goal.observe(Frame.decode(cinematic))
+        self.assertEqual(len(goal.seen), 1)
+        self.assertEqual(goal.encounters, {(58, 2)})
+        self.assertEqual(goal.max_incoming_hp_damage, 0)
+
+        record["data"]["actors"] = record["data"]["actors"][:1]
+        record["data"]["control_mode"] = 1
+        record["data"]["scene"]["event"]["phase"] = 0
+        for tick in (4, 124):
+            record["tick"] = tick
+            goal.observe(Frame.decode(record))
+        self.assertEqual(goal.accepted_tick, 124)
+
+    def test_cinematic_actor_that_enters_normal_combat_still_needs_a_real_death(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=3, action_phase=0)
+        goal = CombatGoal()
+        goal.observe(Frame.decode(record))
+        self.assertFalse(goal.seen)
+        record["tick"] = 2
+        record["data"].update(control_mode=1)
+        record["data"]["scene"]["event"]["phase"] = 2
+        goal.observe(Frame.decode(record))
+        self.assertFalse(goal.seen)
+        record["tick"] = 3
+        record["data"]["scene"]["event"]["phase"] = 0
+        record["data"]["reaction_timing"].update(source_actor=2, target_actor=0,
+                                                 incoming_hp_damage=88)
+        goal.observe(Frame.decode(record))
+        self.assertEqual(len(goal.seen), 1)
+        self.assertEqual(goal.max_incoming_hp_damage, 88)
+        removed = copy.deepcopy(record)
+        removed["tick"] = 200
+        removed["data"]["actors"] = removed["data"]["actors"][:1]
+        goal.observe(Frame.decode(removed))
+        self.assertFalse(goal.dead)
+        self.assertIsNone(goal.accepted_tick)
+
     def test_explicit_scene_combat_first_uses_actual_deaths_in_its_declared_room(self):
         record = sample_record(active=False)
         record["data"].update(control_mode=1, action_phase=0)
