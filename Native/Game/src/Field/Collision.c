@@ -13,6 +13,7 @@
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/Zone.h"
@@ -487,25 +488,6 @@ int Field_IsHangingActorObstructed(Actors_ActorRecord* actor)
     }
 
     return 0;
-}
-
-// decomp: BATTLE.PRG func_800A4A24 (src/BATTLE/BATTLE.PRG/3A1A0.c:1089)
-Field_PlatformContactPoint* Field_FindMovingPlatformById(int platform_layer_or_index)
-{
-    Field_PlatformContactPoint platform_contacts[4];
-    int platform_contact_count;
-    int i;
-    platform_layer_or_index -= 2;
-
-    platform_contact_count = Field_CollectMovingPlatformPositions(platform_contacts);
-
-    for (i = 0; i < platform_contact_count; ++i) {
-        if (platform_contacts[i].platformIndex == platform_layer_or_index) {
-            // BUG: returns stack variable
-            return &platform_contacts[i];
-        }
-    }
-    return NULL;
 }
 
 // decomp: BATTLE.PRG func_800A51A0 (src/BATTLE/BATTLE.PRG/3A1A0.c:1307)

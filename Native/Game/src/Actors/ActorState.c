@@ -27,6 +27,7 @@
 #include "Field/Actors.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
+#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -624,7 +625,7 @@ void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int h
 
     int value;
     u_char tileType;
-    int* anchor;
+    Field_PlatformContactPoint platform_contact;
 
     actor = Actors_actorRecords[actorId];
     *(int*)&actor->instance.currentTileX = *(int*)placement;
@@ -662,11 +663,16 @@ void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int h
             actor->instance.movementMode = 3;
         } else {
             if (tileType >= 2U) {
-                anchor = (int*)Field_FindMovingPlatformById((u_char)placement->direction);
-                *(int*)&actor->instance.position.vx = anchor[0];
-                *(int*)&actor->instance.position.vz = anchor[1];
-                *(int*)&actor->platformAnchor.vx = anchor[0];
-                *(int*)&actor->platformAnchor.vz = anchor[1];
+                if (!Field_CopyMovingPlatformPlacement((u_char)placement->direction, &platform_contact)) {
+                    abort();
+                }
+                actor->instance.position.vx = platform_contact.x;
+                actor->instance.position.vy = platform_contact.height;
+                actor->instance.position.vz = platform_contact.z;
+                actor->instance.position.pad = platform_contact.platformIndex;
+                actor->platformAnchor.vx = platform_contact.x;
+                actor->platformAnchor.vy = platform_contact.height;
+                actor->platformAnchor.vz = platform_contact.z;
 
                 actor->platformAnchor.pad = (u_char)placement->direction;
 

@@ -9,6 +9,26 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #224's real hidden-platform placement crash is locally repaired and verified:
+  isolated fresh1x original event31 replay formerly faults entering22/7 at7104.
+  The native placement API now reads the existing authored transform without
+  enabling hidden rendering/collision or changing HP/flags/RNG; the visible-only
+  legacy lookup no longer returns stack storage. F00920/F00938 retain one owned
+  definition, and F00901 integration is generator-owned. Debug1793249226277744-0
+  and Release1793249507914535-0 both play3544 original event31 commands, return
+  to22/6, hold living/rendered control7947..8067 and complete native teardown
+  at8079 with zero errors. Exact1x images/PDBs are frozen under
+  `build\quality\scene804\platform-normal-images`; final rebuilt images repeat
+  the source/control path in1793250355766226-0/1793250478995821-0 (8x semantic
+  controls). Both builds and related114-case/57,321-assertion selections pass;
+  focused placement tests pass4 cases/66 assertions.158 copier tests,179
+  actual event-dispatch targets and39 naming tests pass;1874/1874 exact naming
+  positions are covered. Scoped quality and the changed C++ TU tidy have zero
+  new findings. Only clean Game/Tests projects were generated; owner solution,
+  browsing-project, Save and F03670 edits were preserved. #224 remains open
+  for uncommitted publication/exact-revision CI; no promotion/retirement or
+  pixel/audio-fidelity claim is made.
+
 - #229 is locally repaired and source-verified: native banked SFX selectors,
   sequencer `effectId`, mixer stop/fade/query paths and output arrays retain
   full pointer identity; missing banks/invalid indices log explicit failure,

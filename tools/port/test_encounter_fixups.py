@@ -16,6 +16,31 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_platform_placement_uses_an_owned_authored_contact(self):
+        fixups = copy_fixups.FIXES["F00901"]
+        declaration = next(new for old, new, _ in fixups if "int* anchor" in old)
+        body = next(new for old, new, _ in fixups if "anchor =" in old)
+        self.assertIn("Field_PlatformContactPoint platform_contact", declaration)
+        self.assertIn("Field_CopyMovingPlatformPlacement", body)
+        self.assertIn("abort();", body)
+        self.assertNotIn("anchor[", body)
+        self.assertNotIn("isHidden =", body)
+        self.assertNotIn("State_SetScriptFlag", body)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Field_CopyMovingPlatformPlacement"],
+            r"Native\Game\src\Field\PlatformPlacement.h",
+        )
+        scaffold = runpy.run_path(
+            str(Path(__file__).resolve().parents[1] / "scaffold" / "gen_solution.py"),
+            run_name="scaffold_platform_test",
+        )
+        self.assertTrue(
+            scaffold["needs_c_headers"](
+                "VS.Game", r"src\Field\PlatformPlacement.cpp"
+            )
+        )
+
+
     def test_native_pointer_fields_cannot_widen_serialized_records(self):
         copier = object.__new__(copy_to_native.Copier)
         copier.type_by_id = {"T00000": {"role": "OnDisc"}}

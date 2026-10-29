@@ -25,6 +25,8 @@ NATIVE_SIGNATURE_REWRITES = {
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
+    "Field_CopyMovingPlatformPlacement":
+        r"Native\Game\src\Field\PlatformPlacement.h",
     **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
        for name in (
            "Diagnostics_RecordSceneCommand", "Diagnostics_RecordSceneResult",
@@ -185,6 +187,27 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00901": [
+        ("    int* anchor;",
+         "    Field_PlatformContactPoint platform_contact;",
+         "3A1A0.c:274 platform placement owns its contact value instead of borrowing a returned stack address"),
+        ("                anchor = (int*)Field_FindMovingPlatformById((u_char)placement->direction);\n"
+         "                *(int*)&actor->instance.position.vx = anchor[0];\n"
+         "                *(int*)&actor->instance.position.vz = anchor[1];\n"
+         "                *(int*)&actor->platformAnchor.vx = anchor[0];\n"
+         "                *(int*)&actor->platformAnchor.vz = anchor[1];",
+         "                if (!Field_CopyMovingPlatformPlacement((u_char)placement->direction, &platform_contact)) {\n"
+         "                    abort();\n"
+         "                }\n"
+         "                actor->instance.position.vx = platform_contact.x;\n"
+         "                actor->instance.position.vy = platform_contact.height;\n"
+         "                actor->instance.position.vz = platform_contact.z;\n"
+         "                actor->instance.position.pad = platform_contact.platformIndex;\n"
+         "                actor->platformAnchor.vx = platform_contact.x;\n"
+         "                actor->platformAnchor.vy = platform_contact.height;\n"
+         "                actor->platformAnchor.vz = platform_contact.z;",
+         "800A3224 and event31/104:402 request an authored platform before its visibility command; read its actual transform without changing visibility or collision, and surface absent/invalid support instead of dereferencing null"),
+    ],
     **{
         function_id: [
             ("int temp_v0;", "intptr_t temp_v0;",

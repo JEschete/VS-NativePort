@@ -42,7 +42,6 @@ _Static_assert(sizeof(Field_SavedPositionWords) == 0x8, "Field_SavedPositionWord
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Field/Mpd.h"
-#include "Field/Platforms.h"
 #include "Field/Zone.h"
 #include "Render/Palette.h"
 
@@ -70,7 +69,6 @@ int Field_RoomCeilingHeight(int world_x, int world_z);
 Actors_ActorRecord* Field_FindActorOccupyingTile(int query_tile_x, int query_tile_z, int minimum_actor_height, int occupancy_mode_or_first_actor);
 int Field_CheckPlatformActorObstruction(int contact, SVECTOR* point);
 int Field_IsHangingActorObstructed(Actors_ActorRecord* actor);
-Field_PlatformContactPoint* Field_FindMovingPlatformById(int platform_layer_or_index);
 int Field_IsPointOnMovingPlatform(int platform_layer_or_index, SVECTOR* world_position);
 int Field_CanActorHangFromLedge(Actors_ActorRecord* actor, SVECTOR* offset, SVECTOR* motion);
 int Field_HasActorLedgeSideSupport(Actors_ActorRecord* actor_record);

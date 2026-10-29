@@ -205,6 +205,7 @@
 #include "Field/Minimap.h"
 #include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"

@@ -1335,6 +1335,9 @@
     <ClCompile Include="src\Field\MinimapScene.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Field\PlatformPlacement.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\Room.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2063,6 +2066,7 @@
     <ClInclude Include="src\Field\Minimap.h" />
     <ClInclude Include="src\Field\MinimapScene.h" />
     <ClInclude Include="src\Field\Mpd.h" />
+    <ClInclude Include="src\Field\PlatformPlacement.h" />
     <ClInclude Include="src\Field\Platforms.h" />
     <ClInclude Include="src\Field\Room.h" />
     <ClInclude Include="src\Field\RoomEffects.h" />
