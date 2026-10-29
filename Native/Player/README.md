@@ -85,6 +85,13 @@ availability must not hide a learned, affordable ward. Existing restriction,
 status, failed-action feedback and MP-reserve checks still apply; urgent
 healing and useful defensive-loadout preparation retain their priority.
 Exposing a choice is not proof that the spell was selected or took effect.
+The observed two-hit damage margin also keeps recovery available, but does not
+hide all counterattacks above the low-health boundary. Below60% HP, or when
+one observed hit can be survived only after recovery within the native maximum
+HP, urgent healing retains priority. Otherwise the model may compare healing
+with useful attacks, prevention or movement; repeated recovery that cannot
+outpace actual damage is not a successful combat strategy. An incoming forecast
+above maximum HP cannot be made survivable merely by forcing a heal.
 
 Managed player runs now request `--verification-log`: all native player frames,
 command/result/flag records and errors remain available, without per-draw Trace

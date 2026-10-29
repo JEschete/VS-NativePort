@@ -67,7 +67,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     learned_spells = [option for option in options
                       if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")
                       and option["restrictions"] == 0]
-    danger_threshold = min(player.max_hp, context.get("max_incoming_hp_damage", 0) * 2)
+    incoming = context.get("max_incoming_hp_damage", 0)
+    danger_threshold = min(player.max_hp, incoming * 2)
+    urgent_recovery = (player.hp * 5 < player.max_hp * 3
+                       or player.hp <= incoming <= player.max_hp)
+    healing_choices: dict[str, dict] = {}
     if player.hp * 5 < max(player.max_hp * 3, danger_threshold * 5):
         for option in learned_spells:
             if semantics.get(str(option["id"]), {}).get("role") == "heal" and not unsuccessful(option["id"], 0):
@@ -79,7 +83,10 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                     and not unsuccessful(option["action_id"], 0)):
                 add("item", 0, option["action_id"], item=option["id"])
         if choices:
-            return choices
+            if urgent_recovery:
+                return choices
+            healing_choices = choices
+            choices = {}
 
     advice = defensive_loadout_advice(frame)
     recommended = advice.get("recommended_available_actions", [])
@@ -88,7 +95,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         for action in recommended:
             for slot in (1, 2, 3):
                 add("equip_defense", 0, action, slot)
-        return choices
+        return choices | healing_choices
 
     # A model cannot wait for an acknowledged milestone forever.
     required = context.get("required_successes", {}).get("defense", 0)
@@ -97,7 +104,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         add("wait")
         for enemy in frame.enemies:
             add("approach", enemy.slot)
-        return choices
+        return choices | healing_choices
 
     chains = {option["id"] for option in options if option["family"] == "chain"}
     mapped = frame.reaction.chain_actions
@@ -105,7 +112,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         for action in (22, 28, 23):
             if action in chains and action not in mapped:
                 add("equip_chain", 0, action, mapped.index(0) + 1)
-                return choices
+                return choices | healing_choices
     caster_targets = [enemy for enemy in frame.enemies if enemy.spell_action_ids]
     silence_mask = frame.raw["status_masks"][12]
     wants_silence = 35 in chains and any(
@@ -114,11 +121,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     )
     if wants_silence and 35 not in mapped:
         add("equip_chain", 0, 35, 3)
-        return choices
+        return choices | healing_choices
     if (frame.enemies and all(enemy.mp == 0 for enemy in frame.enemies)
             and 24 in mapped and 28 in chains and 28 not in mapped):
         add("equip_chain", 0, 28, mapped.index(24) + 1)
-        return choices
+        return choices | healing_choices
 
     for enemy in frame.enemies:
         if not enemy.spell_action_ids:
@@ -143,7 +150,9 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         if mask and not player.statuses & mask and player.mp >= option["cost"] + 5:
             add("cast", 0, option["id"])
     if choices:
-        return choices
+        return choices | healing_choices
+
+    choices.update(healing_choices)
 
     if context.get("physical_navigation_objective") and all(
         context.get("confirmed_successes", {}).get(kind, 0) >= count

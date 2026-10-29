@@ -1152,13 +1152,33 @@ class ControllerTests(unittest.TestCase):
         record["data"]["item_options"][0]["effect_id"] = 63
         self.assertNotIn("item", {row["intent"] for row in available_choices(Frame.decode(record), {}).values()})
 
-    def test_observed_large_hits_prioritize_recovery_before_the_fixed_low_hp_threshold(self):
+    def test_observed_large_hits_offer_noncritical_recovery_without_hiding_combat(self):
         record = self.item_record()
         record["data"]["actors"][0].update(hp=155, max_hp=250)
         frame = Frame.decode(record)
         self.assertNotIn("item", {row["intent"] for row in available_choices(frame, {}).values()})
         choices = available_choices(frame, {"max_incoming_hp_damage": 106})
+        self.assertEqual({row["intent"] for row in choices.values()},
+                         {"item", "attack", "approach", "retreat"})
+
+    def test_dullahan_threat_margin_keeps_healing_and_counterattack_selectable(self):
+        record = self.item_record()
+        record["data"]["actors"][0].update(hp=162, max_hp=250)
+        record["data"]["actors"][1].update(hp=117, max_hp=186)
+        choices = available_choices(Frame.decode(record), {"max_incoming_hp_damage": 88})
+        self.assertIn("item:0:224:1:323", choices)
+        self.assertIn("attack:2:-1:1", choices)
+        self.assertIn("retreat:2:-1:1", choices)
+
+    def test_one_survivable_observed_hit_retains_urgent_recovery_priority(self):
+        record = self.item_record()
+        record["data"]["actors"][0].update(hp=155, max_hp=250)
+        choices = available_choices(Frame.decode(record), {"max_incoming_hp_damage": 160})
         self.assertEqual({row["intent"] for row in choices.values()}, {"item"})
+        record["data"]["actors"][0].update(hp=200, max_hp=250)
+        choices = available_choices(Frame.decode(record), {"max_incoming_hp_damage": 300})
+        self.assertIn("item:0:224:1:323", choices)
+        self.assertIn("retreat:2:-1:1", choices)
 
     def test_item_preparation_cancels_old_attack_targeting_without_refusing_the_item(self):
         record = self.item_record()
