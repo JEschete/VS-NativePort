@@ -231,6 +231,7 @@ int TestSharedSequenceRetirementControl(int scenario) {
     ((u_char*)bank)[bank->animationMap + 2] = 0xFF;
   }
   const intptr_t expected_header = first.actor.animationHeader;
+  if (scenario == 6) Actors_SelectSharedSequenceBank(2);
   int status;
   if (scenario == 4) {
     u_char instruction[] = {0x82, 3};
@@ -241,7 +242,7 @@ int TestSharedSequenceRetirementControl(int scenario) {
   const SVECTOR* vertex =
       VS_ONDISC(first.actor.instance.model, vertexSection, SVECTOR*);
   int passed;
-  if (scenario >= 3) {
+  if (scenario >= 3 && scenario <= 5) {
     passed = status == (scenario == 4 ? 1 : -1) && vertex->vx == 11 &&
              first.actor.poseOverrideActive &&
              first.actor.animationHeader == expected_header &&
@@ -263,18 +264,41 @@ int TestSharedSequenceRetirementControl(int scenario) {
 int TestAnimationEventUnwind(int scenario) {
   enum { kMorphOpcode = 36, kSlot = 3, kUnchangedFrame = 77 };
   MorphAnimationFixture fixture;
-  InitializeMorphAnimation(&fixture, scenario == 1 ? 222 : 1);
+  MorphAnimationFixture selected;
+  unsigned wide_sequence[1024] = {0};
+  InitializeMorphAnimation(&fixture, scenario == 1 || scenario == 8 ||
+                                             scenario == 9 || scenario == 10
+                                         ? 222
+                                         : 1);
+  if (scenario == 9) {
+    InitializeMorphAnimation(&selected, 222);
+    ((Actors_SeqAnimationBank*)selected.sequence)->headers[2] = 0;
+    fixture.actor.sharedSequences[1] = selected.sequence;
+  }
   Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
   const int saved_bank = Actors_sharedSequenceBankIndex;
   const u_char saved_length = Actors_animationEventLengths[kMorphOpcode];
   const char saved_resolved = Actors_lastResolvedSequenceIndex;
   Actors_actorRecords[kSlot] = &fixture.actor;
   Actors_sharedSequenceBankIndex = 2;
+  if (scenario == 8 || scenario == 9 || scenario == 10) {
+    Actors_SelectSharedSequenceBank(2);
+  }
   Actors_animationEventLengths[kMorphOpcode] = 3;
   fixture.actor.blendPose.nextEventFrame = kUnchangedFrame;
   fixture.actor.pose.frame = 9;
   u_char* expected_script = fixture.actor.blendPose.eventScript;
   Actors_SeqAnimationBank* bank = (void*)fixture.sequence;
+  if (scenario == 10) {
+    memcpy(wide_sequence, fixture.sequence, sizeof fixture.sequence);
+    Actors_SeqAnimationBank* wide = (void*)wide_sequence;
+    ((u_char*)wide)[wide->animationMap + 2] = 200;
+    wide->headers[5 * 200] = 16;
+    wide->headers[5 * 200 + 2] = 1;
+    fixture.actor.animationHeader = (intptr_t)wide;
+    fixture.actor.animationSet = 200;
+    fixture.actor.sharedSequences[2] = wide;
+  }
   if (scenario == 2 || scenario >= 6) fixture.actor.commonSequence = NULL;
   if (scenario == 3) ((u_char*)bank)[bank->animationMap + 1] = 0xFF;
   if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
@@ -289,10 +313,17 @@ int TestAnimationEventUnwind(int scenario) {
   }
   const SVECTOR* vertex =
       VS_ONDISC(fixture.actor.instance.model, vertexSection, SVECTOR*);
-  const int successful = scenario < 2;
+  const int successful =
+      scenario < 2 || scenario == 8 || scenario == 9 || scenario == 10;
   int passed = vertex->vx == (successful ? 10 : 11);
   if (successful) {
     passed &= result == 0 && fixture.actor.blendPose.nextEventFrame == 510;
+    if (scenario == 8 || scenario == 9 || scenario == 10) {
+      passed &= Actors_sharedSequenceBankIndex == 1;
+    }
+    if (scenario == 10) {
+      passed &= (u_char)Actors_lastResolvedSequenceIndex == 200;
+    }
   } else {
     passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
               fixture.actor.poseOverrideActive == (scenario != 4) &&

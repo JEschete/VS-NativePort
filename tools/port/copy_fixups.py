@@ -25,6 +25,8 @@ NATIVE_SIGNATURE_REWRITES = {
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
+    "Actors_FindBoundAnimationHeader":
+        r"Native\Game\src\Actors\AnimationBindings.h",
     "Field_CopyMovingPlatformPlacement":
         r"Native\Game\src\Field\PlatformPlacement.h",
     **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
@@ -1554,7 +1556,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
             !actor->poseOverrideActive) {
             continue;
         }
-        if (Actors_FindActorAnimationHeader(actor, actor->animationId, &entry) != actor->animationHeader ||
+        if (Actors_FindBoundAnimationHeader(actor, &entry) != actor->animationHeader ||
             entry == NULL || entry[2] == 0) {
             Core_Errorf("actors.sequence", "bank=%d cannot unwind actor=%d animation=%d",
                 bankId, slot, actor->animationId);
@@ -2002,8 +2004,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "int Actors_RestartActorAnimationEvents(",
          "native event-unwind failure is explicit to all three callers"),
         ("u_char** v0 = ((u_char** (*)(Actors_ActorRecord*, u_char, u_short**))Actors_FindActorAnimationHeader)(arg0, arg0->animationId, &sp10);",
-         "Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(arg0, arg0->animationId, &sp10);",
-         "typed on-disc sequence header"),
+         "Actors_SeqAnimationBank* v0 = (Actors_SeqAnimationBank*)Actors_FindBoundAnimationHeader(arg0, &sp10);",
+         "44F14.c:610 unwind the actor-owned old clip, not a different shared bank selected for its next animation"),
         ("u_char* temp_a3 = *v0;",
          "u_char* temp_a3;\n"
          "    if (v0 == NULL || sp10 == NULL || (sp10[2] == 0 && arg0->poseOverrideActive)) {\n"

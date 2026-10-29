@@ -140,6 +140,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\ActorCleanup.cpp",
                 r"src\Battle\Ai\MovementBehavior.cpp",
                 r"src\Actors\MotionRequests.cpp",
+                r"src\Actors\AnimationBindings.cpp",
                 r"src\Actors\SoundOverrides.cpp",
                 r"src\Event\WeaponMode.cpp",
                 r"src\Effects\ScreenEffectState.cpp",

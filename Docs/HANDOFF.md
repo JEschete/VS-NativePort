@@ -9,6 +9,20 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #226/#227 now pass the complete original viewer504/E078/E026/E038 chain:
+  Debug1793255056114631-0 and Release1793255464212292-0 validate all seven
+  original instances, control12024..12144 and native teardown12156 with zero
+  errors. Unwind/retirement uses the actual owned bound animation bank;
+  new-clip selection still uses the current selector. The separate retention
+  ABI fix calls the declared char-returning predicate directly, preventing
+  stale upper-register bits from entering an absent actor's HP query.
+  Debug/Release each pass123 related cases/57,352 assertions;160 copier
+  tests,179 VM dispatch targets and1874/1874 naming checks pass. Scoped
+  quality/changed-TU tidy has zero new findings; the all-owned tidy fanout was
+  stopped and is not claimed complete. Both issues remain open for publication
+  and exact-fixing-revision CI; these local results are not promotion or
+  compatibility-retirement acceptance.
+
 - #227: room triggers call the declared char-returning retention predicate
   directly instead of consuming stale upper bits through an incompatible
   int-return cast. Absent/nonretained actors do not reach the HP query;

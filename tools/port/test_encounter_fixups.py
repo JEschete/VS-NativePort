@@ -16,6 +16,22 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_animation_unwind_uses_the_bound_clip_without_suppressing_failures(self):
+        fixups = copy_fixups.FIXES["F00998"]
+        binding = next(new for old, new, _ in fixups if "Actors_FindActorAnimationHeader" in old)
+        validation = next(new for old, new, _ in fixups if "u_char* temp_a3 = *v0" in old)
+        self.assertIn("Actors_FindBoundAnimationHeader", binding)
+        self.assertIn("sp10[2] == 0 && arg0->poseOverrideActive", validation)
+        self.assertIn("return -1;", validation)
+        retirement = copy_fixups.FIXES["F00279"][0][1]
+        self.assertIn("Actors_FindBoundAnimationHeader(actor, &entry)", retirement)
+        self.assertIn("entry == NULL || entry[2] == 0", retirement)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Actors_FindBoundAnimationHeader"],
+            r"Native\Game\src\Actors\AnimationBindings.h",
+        )
+
+
     def test_room_retention_predicate_uses_the_declared_byte_return(self):
         fixups = copy_fixups.FIXES["F01261"]
         old, new, _ = next(item for item in fixups if "Actors_IsActorRetainedAfterDefeat" in item[0])

@@ -370,6 +370,23 @@ TEST_CASE("Animation event unwind preserves unavailable pose obligations",
   }
 }
 
+TEST_CASE(
+    "Pose unwind retains its bound shared clip after selecting another bank",
+    "[actors][animation][sequence-retirement]") {
+  CHECK(TestAnimationEventUnwind(8) == 1);
+  CHECK(TestAnimationEventUnwind(9) == 1);
+}
+
+TEST_CASE("Shared-bank retirement retains borrowers across selector changes",
+          "[actors][animation][sequence-retirement]") {
+  CHECK(TestSharedSequenceRetirementControl(6) == 1);
+}
+
+TEST_CASE("Bound shared clips preserve the full native physical-index byte",
+          "[actors][animation][sequence-retirement]") {
+  CHECK(TestAnimationEventUnwind(10) == 1);
+}
+
 TEST_CASE("Shared bank retirement preserves unrelated and failed borrowers",
           "[actors][animation][sequence-retirement]") {
   for (int scenario = 1; scenario < 6; ++scenario) {

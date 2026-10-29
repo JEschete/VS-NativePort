@@ -57,6 +57,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\AnimationBindings.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Actors\Appearance.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1787,6 +1790,7 @@
     <ClInclude Include="src\Actors\ActorRecord.h" />
     <ClInclude Include="src\Actors\ActorState.h" />
     <ClInclude Include="src\Actors\Animation.h" />
+    <ClInclude Include="src\Actors\AnimationBindings.h" />
     <ClInclude Include="src\Actors\Appearance.h" />
     <ClInclude Include="src\Actors\AppearanceTransition.h" />
     <ClInclude Include="src\Actors\Ashley.h" />

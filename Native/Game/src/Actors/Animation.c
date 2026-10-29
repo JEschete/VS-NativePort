@@ -5,6 +5,7 @@
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
+#include "Actors/AnimationBindings.h"
 #include "Actors/Appearance.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
@@ -150,7 +151,7 @@ int Actors_UnloadSharedSequence(int bankId)
             !actor->poseOverrideActive) {
             continue;
         }
-        if (Actors_FindActorAnimationHeader(actor, actor->animationId, &entry) != actor->animationHeader ||
+        if (Actors_FindBoundAnimationHeader(actor, &entry) != actor->animationHeader ||
             entry == NULL || entry[2] == 0) {
             Core_Errorf("actors.sequence", "bank=%d cannot unwind actor=%d animation=%d",
                 bankId, slot, actor->animationId);
@@ -1755,7 +1756,7 @@ int Actors_RestartActorAnimationEvents(Actors_ActorRecord* actor)
     int next_event_frame;
     void* event_script;
 
-    Actors_SeqAnimationBank* animation_bank = (Actors_SeqAnimationBank*)Actors_FindActorAnimationHeader(actor, actor->animationId, &animation_header);
+    Actors_SeqAnimationBank* animation_bank = (Actors_SeqAnimationBank*)Actors_FindBoundAnimationHeader(actor, &animation_header);
     u_char* event_data;
     if (animation_bank == NULL || animation_header == NULL || (animation_header[2] == 0 && actor->poseOverrideActive)) {
         Core_Errorf("actors.sequence", "cannot unwind actor=%u animation=%u: unavailable events",
