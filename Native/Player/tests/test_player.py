@@ -1308,6 +1308,53 @@ class ControllerTests(unittest.TestCase):
         choices = available_choices(Frame.decode(record), {})
         self.assertEqual({(row["action_id"], row["equip_slot"]) for row in choices.values()},
                          {(28, 3)})
+
+    def test_caster_debuff_choices_keep_legal_magic_ward_visible(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][0]["mp"] = 50
+        record["data"]["actors"][1]["spell_action_ids"] = [130]
+        record["data"]["action_options"] = [
+            {"id": action, "family": "sorcerer", "cost": cost, "restrictions": 0}
+            for action, cost in ((55, 7), (75, 7), (76, 21))
+        ]
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual({(row["target_slot"], row["action_id"]) for row in choices.values()},
+                         {(2, 55), (2, 75), (0, 76)})
+
+        for condition in ("active", "low_mp", "restricted", "unlearned", "no_caster", "blocked"):
+            with self.subTest(condition=condition):
+                variant = copy.deepcopy(record)
+                context = {}
+                if condition == "active":
+                    variant["data"]["actors"][0]["statuses"] = variant["data"]["status_masks"][18]
+                elif condition == "low_mp":
+                    variant["data"]["actors"][0]["mp"] = 25
+                elif condition == "restricted":
+                    variant["data"]["action_options"][-1]["restrictions"] = 1
+                elif condition == "unlearned":
+                    variant["data"]["action_options"].pop()
+                elif condition == "no_caster":
+                    variant["data"]["actors"][1]["spell_action_ids"] = []
+                else:
+                    context["controller_feedback"] = [
+                        {"action_id": 76, "target": 0, "status": "blocked"}
+                    ]
+                choices = available_choices(Frame.decode(variant), context)
+                self.assertNotIn((0, 76), {(row["target_slot"], row["action_id"])
+                                          for row in choices.values()})
+
+    def test_caster_buff_visibility_preserves_urgent_healing_priority(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][0].update(hp=20, mp=50)
+        record["data"]["actors"][1]["spell_action_ids"] = [130]
+        record["data"]["action_options"] = [
+            {"id": action, "family": "sorcerer", "cost": cost, "restrictions": 0}
+            for action, cost in ((55, 7), (75, 7), (76, 21), (96, 6))
+        ]
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual({(row["target_slot"], row["action_id"]) for row in choices.values()},
+                         {(0, 96)})
+
     def test_base_attack_preparation_choices_cannot_select_a_useless_defense(self):
         record = sample_record(active=False)
         record["data"]["action_options"] = [

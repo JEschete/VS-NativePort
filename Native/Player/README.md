@@ -79,6 +79,13 @@ preparations cannot start while a native cinematic owns input; event-owned
 reward selection remains interactive and transaction timeouts are unchanged.
 The option changes no game state or core-game policy; default play is unchanged.
 
+When caster debuffs are available, the model also receives otherwise-legal
+self buffs such as Magic Ward in the same constrained choice set. Debuff
+availability must not hide a learned, affordable ward. Existing restriction,
+status, failed-action feedback and MP-reserve checks still apply; urgent
+healing and useful defensive-loadout preparation retain their priority.
+Exposing a choice is not proof that the spell was selected or took effect.
+
 Managed player runs now request `--verification-log`: all native player frames,
 command/result/flag records and errors remain available, without per-draw Trace
 noise or redundant structured engine echoes. Native executables must be rebuilt

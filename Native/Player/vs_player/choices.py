@@ -130,8 +130,6 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
             mask = frame.raw["status_masks"][details["status_parameter"]]
             if not (enemy.statuses | enemy.status_immunities) & mask:
                 add("cast", enemy.slot, option["id"])
-    if choices:
-        return choices
 
     for option in learned_spells:
         details = semantics.get(str(option["id"]), {})
