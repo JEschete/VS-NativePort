@@ -85,6 +85,11 @@ availability must not hide a learned, affordable ward. Existing restriction,
 status, failed-action feedback and MP-reserve checks still apply; urgent
 healing and useful defensive-loadout preparation retain their priority.
 Exposing a choice is not proof that the spell was selected or took effect.
+Source-verified HP-damage spells (actions97–103 and106–130) are offered only
+when learned, unrestricted, affordable and targeted at an observed hostile.
+Actions104–105 are excluded from this set because their native hit effect is
+not HP damage. Blocked or no-effect feedback suppresses repeating a cast at
+that target; verify actual HP loss before treating a spell as effective.
 Recovery remains available above the low-health boundary only when its
 verified maximum can restore the observed two-hit margin. Below60% HP, or when
 one observed hit can be survived only after recovery within the native maximum

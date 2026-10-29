@@ -9,6 +9,11 @@
       "source": "ActionResolution.c original146C.c:12862 and Items/Recovery.c original146C.c:12109; US module mediator/stat-calculator tables verified locally."
     }
   },
+  "damage_spells": {
+    "effect_id": 58,
+    "action_ids": [97, 98, 99, 100, 101, 102, 103, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130],
+    "source": "resources/rood-reverseWin/src/SLUS_010.40/main.c native action definitions: these actions use hit effect58 (HP damage). Actions104-105 use hit effect34 and are excluded."
+  },
   "controls": {
     "Circle": "Draw the equipped weapon from idle field; otherwise open attack targeting or confirm a target. Do not send ordinary confirms during an active timing window.",
     "Cross": "Interact with a nearby authored door or cancel a targeting/menu screen.",
@@ -28,6 +33,7 @@
     "A passed physical traversal is not proof that every observed enemy died. Read the coverage and observed-death counts; an older outcome without a coverage label does not establish a combat victory.",
     "An observed spell_action_ids list is evidence that this actor has native spell actions. Unknown capabilities are not proof that it is not a caster.",
     "Prioritize a caster with a known direct-damage spell threat (Meteor130) before support/debuff casters; otherwise focus the nearest spell-capable hostile by observed world position. Reevaluate after each action. In an open native target menu, prefer the priority caster if the game previews it; otherwise select only among the actors and limbs the game actually previews.",
+    "damage_spells lists source-verified HP-damage actions. When learned, unrestricted, affordable and targetable, use them against an observed hostile; IDs104-105 are not HP-damage actions. Check actual HP changes and do not infer effectiveness from a forecast.",
     "Against a caster, consider Silence or intelligence reduction if learned, affordable, in range and not blocked by status immunity; verify application and do not repeatedly waste MP on an immune target.",
     "Buff yourself appropriately before offense when it is safe and affordable. Existing statuses must not be blindly recast.",
     "Heal before a dangerous HP deficit becomes fatal. Heal targets Ashley, consumes actual MP, and must be verified by native HP restoration rather than a menu-confirm acknowledgment.",

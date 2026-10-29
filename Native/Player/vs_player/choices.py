@@ -53,6 +53,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         return {}
     knowledge = json.loads((PROJECT / "combat-knowledge.json").read_text(encoding="utf-8"))
     semantics = knowledge["known_action_semantics"]
+    damage_spell_ids = set(knowledge["damage_spells"]["action_ids"])
     options = frame.raw["action_options"]
     feedback = context.get("controller_feedback", [])
 
@@ -70,6 +71,10 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         return any(row.get("action_id") == action and row.get("target") == target
                    and row.get("status") in ("blocked", "no_effect") for row in feedback)
 
+    def affordable_spell(option: dict) -> bool:
+        cost = option.get("cost")
+        return isinstance(cost, int) and 0 <= cost <= player.mp
+
     if reward_menu_ready(frame):
         for row in frame.raw["menu"]["rows"]:
             if not row["disabled"]:
@@ -83,7 +88,8 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     if caster_targets:
         dangerous_casters = [
             enemy for enemy in caster_targets
-            if any(semantics.get(str(action), {}).get("role") == "damage"
+            if any(action in damage_spell_ids
+                   or semantics.get(str(action), {}).get("role") == "damage"
                    for action in enemy.spell_action_ids)
         ]
         priority_casters = dangerous_casters or caster_targets
@@ -188,6 +194,13 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
             if not (enemy.statuses | enemy.status_immunities) & mask:
                 add("cast", enemy.slot, option["id"])
 
+    for enemy in target_enemies:
+        for option in learned_spells:
+            if (option["id"] not in damage_spell_ids or not affordable_spell(option)
+                    or unsuccessful(option["id"], enemy.slot)):
+                continue
+            add("cast", enemy.slot, option["id"])
+
     for option in learned_spells:
         details = semantics.get(str(option["id"]), {})
         if details.get("role") != "buff" or unsuccessful(option["id"], 0):
@@ -224,6 +237,8 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         details = semantics.get(str(option["id"]), {})
         role = details.get("role")
         if role in ("heal", "buff", "cure"):
+            continue
+        if role == "damage" and not affordable_spell(option):
             continue
         for enemy in frame.enemies:
             if not unsuccessful(option["id"], enemy.slot):

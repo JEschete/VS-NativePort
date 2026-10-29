@@ -1442,6 +1442,36 @@ class ControllerTests(unittest.TestCase):
                 self.assertNotIn((0, 76), {(row["target_slot"], row["action_id"])
                                           for row in choices.values()})
 
+    def test_damage_spell_choices_require_verified_effect_affordable_mp_and_no_failure(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][0]["mp"] = 50
+        record["data"]["actors"][1]["spell_action_ids"] = [130]
+        record["data"]["action_options"] = [
+            {"id": action, "family": "warlock", "cost": cost, "restrictions": 0}
+            for action, cost in ((97, 25), (104, 22), (105, 25), (106, 36), (130, 38))
+        ]
+
+        choices = available_choices(Frame.decode(record), {})
+        casts = {(row["target_slot"], row["action_id"]) for row in choices.values()
+                 if row["intent"] == "cast"}
+        self.assertEqual(casts, {(2, 97), (2, 106), (2, 130)})
+
+        record["data"]["actors"][0]["mp"] = 35
+        choices = available_choices(Frame.decode(record), {})
+        casts = {(row["target_slot"], row["action_id"]) for row in choices.values()
+                 if row["intent"] == "cast"}
+        self.assertEqual(casts, {(2, 97)})
+
+        record["data"]["actors"][0]["mp"] = 50
+        choices = available_choices(Frame.decode(record), {
+            "controller_feedback": [
+                {"action_id": 97, "target": 2, "status": "no_effect"}
+            ]
+        })
+        casts = {(row["target_slot"], row["action_id"]) for row in choices.values()
+                 if row["intent"] == "cast"}
+        self.assertEqual(casts, {(2, 106), (2, 130)})
+
     def test_combat_choices_prioritize_damage_spell_caster_over_nearer_caster(self):
         record = sample_record(active=False)
         nearer = record["data"]["actors"][1]
