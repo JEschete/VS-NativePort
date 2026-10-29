@@ -20,7 +20,7 @@ from vs_player.controller import (
     CombatController, StaleDecision, direction_buttons, input_lease_permitted,
     strategy_planning_ready,
 )
-from vs_player.choices import available_choices
+from vs_player.choices import available_choices, urgent_recovery_needed
 from vs_player.doors import PhysicalDoor, PhysicalRoute
 from vs_player.menus import MenuTransaction
 from vs_player.model import Decision, LocalModel, ModelResponseError, NavigationDecision
@@ -1154,12 +1154,19 @@ class ControllerTests(unittest.TestCase):
 
     def test_observed_large_hits_offer_noncritical_recovery_without_hiding_combat(self):
         record = self.item_record()
-        record["data"]["actors"][0].update(hp=155, max_hp=250)
+        record["data"]["actors"][0].update(hp=165, max_hp=250)
         frame = Frame.decode(record)
         self.assertNotIn("item", {row["intent"] for row in available_choices(frame, {}).values()})
         choices = available_choices(frame, {"max_incoming_hp_damage": 106})
         self.assertEqual({row["intent"] for row in choices.values()},
                          {"item", "attack", "approach", "retreat"})
+
+    def test_recovery_that_cannot_restore_the_two_hit_margin_is_not_offered(self):
+        record = self.item_record()
+        record["data"]["actors"][0].update(hp=166, max_hp=250)
+        choices = available_choices(Frame.decode(record), {"max_incoming_hp_damage": 121})
+        self.assertNotIn("item", {row["intent"] for row in choices.values()})
+        self.assertIn("attack", {row["intent"] for row in choices.values()})
 
     def test_dullahan_threat_margin_keeps_healing_and_counterattack_selectable(self):
         record = self.item_record()
@@ -1177,8 +1184,18 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual({row["intent"] for row in choices.values()}, {"item"})
         record["data"]["actors"][0].update(hp=200, max_hp=250)
         choices = available_choices(Frame.decode(record), {"max_incoming_hp_damage": 300})
-        self.assertIn("item:0:224:1:323", choices)
+        self.assertNotIn("item:0:224:1:323", choices)
         self.assertIn("retreat:2:-1:1", choices)
+
+    def test_urgent_recovery_is_detected_before_the_normal_planning_interval(self):
+        record = self.item_record()
+        record["data"]["actors"][0].update(hp=94, max_hp=250)
+        frame = Frame.decode(record)
+        self.assertTrue(urgent_recovery_needed(frame, {}))
+        self.assertEqual({row["intent"] for row in available_choices(frame, {}).values()},
+                         {"item"})
+        record["data"]["actors"][0].update(hp=160, max_hp=250)
+        self.assertFalse(urgent_recovery_needed(Frame.decode(record), {}))
 
     def test_item_preparation_cancels_old_attack_targeting_without_refusing_the_item(self):
         record = self.item_record()
@@ -1414,6 +1431,61 @@ class ControllerTests(unittest.TestCase):
                 self.assertNotIn((0, 76), {(row["target_slot"], row["action_id"])
                                           for row in choices.values()})
 
+    def test_combat_choices_prioritize_damage_spell_caster_over_nearer_caster(self):
+        record = sample_record(active=False)
+        nearer = record["data"]["actors"][1]
+        nearer.update(position=[128, 0, 64], spell_action_ids=[75])
+        priority = copy.deepcopy(nearer)
+        priority.update(slot=4, model=33, position=[640, 0, 64], spell_action_ids=[130])
+        record["data"]["actors"].append(priority)
+        record["data"]["action_options"] = [
+            {"id": 75, "family": "sorcerer", "cost": 7, "restrictions": 0}
+        ]
+
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual({row["target_slot"] for row in choices.values()}, {4})
+
+        record["data"]["action_options"] = []
+        record["data"].update(control_mode=2, action_phase=1)
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": 0, "position": [640, -100, 64]},
+            {"actor": 4, "limb": 0, "position": [128, -100, 64]},
+        ]
+        record["data"]["target_page"].update(first=0, visible=2, selected=0, selection_step=19)
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual({row["target_slot"] for row in choices.values()
+                          if row["intent"] == "attack"}, {4})
+
+    def test_zero_damage_forecast_does_not_remove_native_target_choices(self):
+        record = sample_record(active=False)
+        alternate = copy.deepcopy(record["data"]["actors"][1])
+        alternate.update(slot=3, position=[256, 0, 64])
+        record["data"]["actors"].append(alternate)
+        record["data"].update(control_mode=2, action_phase=1)
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": 0, "position": [128, -100, 64]},
+            {"actor": 3, "limb": 0, "position": [256, -100, 64]},
+        ]
+        record["data"]["target_page"].update(first=0, visible=2, selected=0, selection_step=19)
+        record["data"]["target_forecasts"] = [
+            {"actor": 2, "limb": 0, "effect_id": 58, "amount": 0},
+            {"actor": 3, "limb": 0, "effect_id": 58, "amount": 15},
+        ]
+
+        choices = available_choices(Frame.decode(record), {})
+        attacks = [choice for choice in choices.values() if choice["intent"] == "attack"]
+        self.assertEqual({choice["target_slot"] for choice in attacks}, {2, 3})
+
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": 0, "position": [128, -100, 64]},
+        ]
+        record["data"]["target_forecasts"] = [
+            {"actor": 2, "limb": 0, "effect_id": 58, "amount": 0},
+        ]
+        choices = available_choices(Frame.decode(record), {})
+        attacks = [choice for choice in choices.values() if choice["intent"] == "attack"]
+        self.assertEqual({choice["target_slot"] for choice in attacks}, {2})
+
     def test_caster_buff_visibility_preserves_urgent_healing_priority(self):
         record = sample_record(active=False)
         record["data"]["actors"][0].update(hp=20, mp=50)
@@ -1436,6 +1508,18 @@ class ControllerTests(unittest.TestCase):
         choices = available_choices(Frame.decode(record), {})
         self.assertTrue(choices)
         self.assertEqual({choice["intent"] for choice in choices.values()}, {"equip_defense"})
+        self.assertEqual({choice["action_id"] for choice in choices.values()}, {43, 45})
+
+    def test_defense_preparation_covers_physical_threat_even_when_spell_defense_is_mapped(self):
+        record = sample_record(active=False, defense_actions=[40, 41, 42])
+        record["data"]["actors"][1]["spell_action_ids"] = [130]
+        record["data"]["action_options"] = [
+            {"id": action, "name": str(action), "family": "defense", "cost": 2,
+             "restrictions": 0, "menu_order": action-40}
+            for action in (42, 43, 44, 45)
+        ]
+
+        choices = available_choices(Frame.decode(record), {})
         self.assertEqual({choice["action_id"] for choice in choices.values()}, {43, 45})
 
     def test_native_spell_cooldown_during_inference_waits_without_state_edits(self):

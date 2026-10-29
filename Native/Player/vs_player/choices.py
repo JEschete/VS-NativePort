@@ -34,6 +34,15 @@ def native_target_menu_ready(frame: Frame) -> bool:
             and frame.raw["target_page"]["selection_step"] == 19)
 
 
+def urgent_recovery_needed(frame: Frame, context: dict) -> bool:
+    player = frame.player
+    if player is None:
+        return False
+    incoming = context.get("max_incoming_hp_damage", 0)
+    return (player.hp * 5 < player.max_hp * 3
+            or player.hp <= incoming <= player.max_hp)
+
+
 def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     choices: dict[str, dict] = {}
     player = frame.player
@@ -67,21 +76,49 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     learned_spells = [option for option in options
                       if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")
                       and option["restrictions"] == 0]
+    caster_targets = [enemy for enemy in frame.enemies if enemy.spell_action_ids]
+    if caster_targets:
+        dangerous_casters = [
+            enemy for enemy in caster_targets
+            if any(semantics.get(str(action), {}).get("role") == "damage"
+                   for action in enemy.spell_action_ids)
+        ]
+        priority_casters = dangerous_casters or caster_targets
+        player_position = player.position
+        nearest_caster = min(
+            priority_casters,
+            key=lambda enemy: sum(
+                (left - right) ** 2 for left, right in zip(enemy.position, player_position)
+            ),
+        )
+        caster_targets = [nearest_caster]
+    if native_target_menu_ready(frame):
+        previews = frame.raw["target_previews"]
+        preferred_slots = {enemy.slot for enemy in caster_targets}
+        previewed_slots = {target["actor"] for target in previews}
+        selected_slots = preferred_slots & previewed_slots or previewed_slots
+        target_enemies = [enemy for enemy in frame.enemies if enemy.slot in selected_slots]
+    else:
+        target_enemies = caster_targets or frame.enemies
     incoming = context.get("max_incoming_hp_damage", 0)
     danger_threshold = min(player.max_hp, incoming * 2)
-    urgent_recovery = (player.hp * 5 < player.max_hp * 3
-                       or player.hp <= incoming <= player.max_hp)
+    urgent_recovery = urgent_recovery_needed(frame, context)
     healing_choices: dict[str, dict] = {}
     if player.hp * 5 < max(player.max_hp * 3, danger_threshold * 5):
-        for option in learned_spells:
-            if semantics.get(str(option["id"]), {}).get("role") == "heal" and not unsuccessful(option["id"], 0):
-                add("cast", 0, option["id"])
+        if urgent_recovery:
+            for option in learned_spells:
+                if (semantics.get(str(option["id"]), {}).get("role") == "heal"
+                        and not unsuccessful(option["id"], 0)):
+                    add("cast", 0, option["id"])
         for option in frame.raw["item_options"]:
             bounds = item_recovery_bounds(option, knowledge["item_semantics"]["hp_recovery"])
             if (bounds is not None and bounds[0] > 0 and option["count"] > 0
                     and option["restrictions"] & 2 == 0
                     and not unsuccessful(option["action_id"], 0)):
-                add("item", 0, option["action_id"], item=option["id"])
+                if (urgent_recovery
+                        or (incoming <= player.max_hp
+                            and player.hp + bounds[1] >= danger_threshold)):
+                    add("item", 0, option["action_id"], item=option["id"])
         if choices:
             if urgent_recovery:
                 return choices
@@ -91,8 +128,19 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     advice = defensive_loadout_advice(frame)
     recommended = advice.get("recommended_available_actions", [])
     defenses = frame.reaction.defense_actions
-    if recommended and not any(action in recommended for action in defenses):
-        for action in recommended:
+    missing_defenses = [
+        action for action in (40, 53)
+        if action in recommended and action not in defenses
+    ]
+    for threat_expected, actions in (
+        (advice.get("physical_attack_expected"), (43, 45)),
+        (advice.get("spell_attack_possible"), (42, 44)),
+    ):
+        available = [action for action in actions if action in recommended]
+        if threat_expected and available and not any(action in defenses for action in available):
+            missing_defenses.extend(available)
+    if missing_defenses:
+        for action in missing_defenses:
             for slot in (1, 2, 3):
                 add("equip_defense", 0, action, slot)
         return choices | healing_choices
@@ -102,7 +150,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     confirmed = context.get("confirmed_successes", {}).get("defense", 0)
     if confirmed < required:
         add("wait")
-        for enemy in frame.enemies:
+        for enemy in target_enemies:
             add("approach", enemy.slot)
         return choices | healing_choices
 
@@ -113,7 +161,6 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
             if action in chains and action not in mapped:
                 add("equip_chain", 0, action, mapped.index(0) + 1)
                 return choices | healing_choices
-    caster_targets = [enemy for enemy in frame.enemies if enemy.spell_action_ids]
     silence_mask = frame.raw["status_masks"][12]
     wants_silence = 35 in chains and any(
         not (enemy.statuses | enemy.status_immunities) & silence_mask
@@ -127,7 +174,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         add("equip_chain", 0, 28, mapped.index(24) + 1)
         return choices | healing_choices
 
-    for enemy in frame.enemies:
+    for enemy in caster_targets:
         if not enemy.spell_action_ids:
             continue
         for option in learned_spells:
@@ -161,7 +208,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         add("navigate")
         return choices
 
-    for enemy in frame.enemies:
+    for enemy in target_enemies:
         if native_target_menu_ready(frame):
             for target in frame.raw["target_previews"]:
                 if target["actor"] == enemy.slot:

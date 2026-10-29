@@ -16,7 +16,7 @@ from .controller import CombatController, StaleDecision, input_lease_permitted, 
 from .doors import PhysicalDoor, PhysicalRoute
 from .model import Decision, ModelResponseError, NavigationDecision
 from .navigation import SceneTileGoal, TerrainNavigator, field_navigation_ready
-from .choices import reward_menu_ready
+from .choices import reward_menu_ready, urgent_recovery_needed
 from .observations import Frame
 from .processes import ProcessJob, freeze_game, game_environment, model_server, verify_installed_model, warm_model
 from .store import Retention, RunStore, owned_tree_size
@@ -593,6 +593,9 @@ def _play_game(store: RunStore, run_id: str,
                             )
                     scene_pending = scene_navigation is not None and scene_navigation.pending(latest)
                     needs_plan = (controller.decision is None or now - last_request >= 2.0
+                                  or urgent_recovery_needed(
+                                      latest, {"max_incoming_hp_damage": goal.max_incoming_hp_damage}
+                                  )
                                   or controller.needs_target_choice(latest)
                                   or ((exit_ready or (scene_pending and not scene_combat_pending))
                                       and controller.decision.intent != "navigate"))

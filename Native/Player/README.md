@@ -85,13 +85,13 @@ availability must not hide a learned, affordable ward. Existing restriction,
 status, failed-action feedback and MP-reserve checks still apply; urgent
 healing and useful defensive-loadout preparation retain their priority.
 Exposing a choice is not proof that the spell was selected or took effect.
-The observed two-hit damage margin also keeps recovery available, but does not
-hide all counterattacks above the low-health boundary. Below60% HP, or when
+Recovery remains available above the low-health boundary only when its
+verified maximum can restore the observed two-hit margin. Below60% HP, or when
 one observed hit can be survived only after recovery within the native maximum
-HP, urgent healing retains priority. Otherwise the model may compare healing
-with useful attacks, prevention or movement; repeated recovery that cannot
-outpace actual damage is not a successful combat strategy. An incoming forecast
-above maximum HP cannot be made survivable merely by forcing a heal.
+HP, urgent healing retains priority. Otherwise the model compares useful
+attacks, prevention or movement instead of repeating recovery that cannot
+outpace actual damage. An incoming forecast above maximum HP cannot be made
+survivable merely by forcing a heal.
 Combat goals and per-enemy experience accrue observed opponents/threats only
 outside native cinematic ownership. Temporary story actors that carry a hostile
 classification are not automatically battle requirements. Actual zero-HP
