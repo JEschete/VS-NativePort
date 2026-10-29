@@ -24,6 +24,7 @@
 #include "CdDrive.h"
 #include "Effects/Camera.h"
 #include "Effects/Runtime.h"
+#include "Effects/TargetRequirements.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
@@ -885,6 +886,7 @@ static u_short ScriptedEffectSelector(int scenario) {
 
 int TestScriptedEffectTargetBinding(int scenario) {
   enum { kEffect = 222, kSlots = 16 };
+  Effects_ResetDeferredScriptTarget();
   Actors_ActorRecord actor = {0};
   Field_GimmickInstance object = {0};
   Battle_Actor battle_actor = {0};
@@ -912,7 +914,8 @@ int TestScriptedEffectTargetBinding(int scenario) {
   memcpy(saved_bitmaps, Effects_tokenBitmaps, sizeof saved_bitmaps);
   memset(Effects_tokenBitmaps, 0, sizeof saved_bitmaps);
   const int present = scenario < 3 || scenario == 7;
-  const int slot = scenario == 6 || scenario == 7 ? 1 : kScriptedEffectSlot;
+  const int slot =
+      scenario == 3 || scenario == 6 || scenario == 7 ? 1 : kScriptedEffectSlot;
   if (present || scenario == 6) {
     Battle_actors[slot] = &battle_actor;
     battle_actor.modelId =
@@ -929,13 +932,22 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Effects_primaryPhase = 3;
   const intptr_t result = Event_CommandPlayActorEffect(instruction, 0);
   memcpy(request_after, &Effects_actionRequest, sizeof request_after);
-  int passed = result == (present ? 0 : 1);
-  if (present) {
+  const int queued = present || scenario == 3;
+  int passed = result == (queued ? 0 : 1);
+  if (queued) {
     passed &= Effects_primaryPhase == 6 &&
               Effects_actionRequest.effectId == kEffect &&
               Effects_actionRequest.count == 1 &&
               Effects_actionRequest.targets[0].type == 4 &&
               Effects_actionRequest.targets[0].value.actor.actor == slot;
+    if (scenario == 3) {
+      passed &= Battle_actors[1] == NULL && Actors_actorRecords[1] == NULL &&
+                Field_gimmickInstances[1] == NULL;
+      Effects_SetPrimaryEffectPhase(0);
+      passed &= Effects_ValidateDeferredScriptTarget(
+                    kEffect, (unsigned char)Effects_primaryToken, -2, NULL, 0) ==
+                1;
+    }
   } else {
     passed &=
         Effects_primaryPhase == 3 && Effects_primaryToken == saved_token &&
@@ -957,6 +969,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Effects_package = saved_package;
   Effects_primaryPhase = saved_phase;
   Effects_primaryToken = saved_token;
+  Effects_ResetDeferredScriptTarget();
   return passed;
 }
 

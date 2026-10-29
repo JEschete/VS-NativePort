@@ -19,6 +19,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
+#include "Effects/TargetRequirements.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
@@ -53,14 +54,22 @@ intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
     const unsigned referenceType = selector >> 12;
     const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;
     const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;
-    if ((unsigned)actor >= 16 ||
+    const int unresolved_model = referenceType == 0 && actor == 1 &&
+        target == NULL && Actors_actorRecords[1] == NULL && Field_gimmickInstances[1] == NULL;
+    if (!unresolved_model && ((unsigned)actor >= 16 ||
         (referenceType == 0 && (target == NULL || target->modelId != selector)) ||
-        (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL)) {
+        (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL))) {
         Core_Errorf("event", "effect=%d awaits unavailable actor selector=0x%04X slot=%d",
             effect, (unsigned)selector, actor);
         return 1;
     }
+    if (unresolved_model) {
+        Core_Warnf("event", "effect=%d unresolved model selector=0x%04X; package target requirements must be proved before execution", effect, (unsigned)selector);
+    }
     Effects_StartScriptedActorEffect(effect, actor);
+    if (unresolved_model) {
+        Effects_RecordDeferredScriptTarget((unsigned)effect, selector, (unsigned char)Effects_primaryToken);
+    }
     return 0;
 }
 

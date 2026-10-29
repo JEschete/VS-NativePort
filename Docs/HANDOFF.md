@@ -21,6 +21,40 @@ verification of the current worktree.
   was not reclassified or used to weaken the804 matrix. Full current native
   suites pass1144 cases/9,589,968 assertions in each configuration.
 
+- #225's E068 branch now has a genuine normal1x Release pass:
+  model `e278ecabc4b44f719bafd33573444c8d`, native1793281890141797-0,
+  frozen image196ff263c201f34289b700fa54c0e74b5ef745e4b0070eab3b6569b8c4acb52d
+  from dirty `d856eeaf`. Original Golem actor2/model100 is genuinely defeated
+  while Ashley remains250HP; original type8 produces E068, with3193 matched
+  commands, living/rendered control11235..11355, teardown11367 and zero errors.
+  The absent model101 is not substituted: a bounded original-package proof
+  permits only target-independent mandatory execution and guarded optional
+  target colour. Unknown/malformed/mandatory-target/multi-entry packages,
+  wrong owners/tokens and no-package bypasses remain explicit failures.
+  New requests and phase-zero cleanup clear deferred ownership. Actual E239
+  and mandatory-target counterfactuals pass; Debug/Release native suites pass
+  1169 cases/9,594,085 assertions each, focused27/4153, copier170,
+  dispatch179 and exact naming1874/1874. Changed-TU quality/tidy is0 new;
+  the unnecessary all-owned header fanout was stopped, not completed.
+  Accelerated observed-edge replays genuinely lose and remain nonpasses.
+  Fresh normal1x Debug model `8d806ac3e5d244068d8f1d8917469960`,
+  native1793282324844776-0, also genuinely wins and verifies3193 E068
+  commands, control11559..11679, teardown11691, zero errors and no skip.
+  Its frozen image is7f640a3c89911cf0e45f8aca2a580dcd0262248f736fd8004479b8b3986e49d4.
+  E073 remains unverified; #225 is not closed for its E068 milestone alone.
+
+- E073's flag910=1 is an original loot-acquisition prerequisite, not a QA
+  inventory or sigil-use shortcut. MAP259/49/12 original room loot0/misc2
+  contains Aster Sigil472; `Menu_Loot_RecordClaimedKey` earns910=1 when it
+  is actually claimed. MAP312 sigil use instead writes2. The real contiguous
+  route is doors49/12/0,49/11/0,49/10/0 into MAP256's original boss intro.
+  Both genuine MAP259 model attempts remain defeats: `68b19d0c` loses to
+  original Meteor130 after one kill; `d4f8d76d` consumes no spell MP and
+  loses without earning910. Do not retry these unchanged or claim their
+  reasons mentioning Silence establish an actual cast. Cold-log pruning
+  additionally archives58 files/545,423,678 bytes into7,779,306 verified
+  compressed bytes before unlinking; active evidence remains untouched.
+
 - Owner-authorized scoped publication is complete through `d9b79fa0`:
   #229 `96a6515c`, #224 `c892e420`, #227 `7971c4d9`, #226 `1080de58`,
   ending #228/#230/#231 `ad8a3c8a`, bounds portion #232 `2cf601aa`, external
@@ -96,8 +130,8 @@ verification of the current worktree.
   Interrupted MAP100/MAP101 effect-bone faults are #232; MAP214 camera
   constraints are #233. Neither suspected cause is patched or promoted.
 
-- Exact runtime progress is now503/804, with95 verified in both configurations
-  and301 still unverified (123 unrun/178 attempted-unverified).117 of the
+- Exact runtime progress is now504/804, with97 verified in both configurations
+  and300 still unverified (123 unrun/177 attempted-unverified).118 of the
   owner's418 outstanding definitions now have demonstrated runtime paths.
   #149 remains open; queues, blocked labels and cancelled cases are not passes.
   The original MAP506/ZONE250 NPC/type4 viewer producers and source-derived

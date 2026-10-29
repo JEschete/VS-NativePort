@@ -244,8 +244,8 @@ defeat. Supported source positions in catalog room references are selected from
 original collision data, excluding door tiles; their presence establishes no
 story prerequisite. Original enemies and game rules remain active.
 
-Current checkpoint: **503/804** definitions have an actual verified runtime path,
-**95** in both Debug/Release; **301** remain unverified. The exact matrix, not
+Current checkpoint: **504/804** definitions have an actual verified runtime path,
+**97** in both Debug/Release; **300** remain unverified. The exact matrix, not
 this snapshot, is authoritative. All referenced entry definitions have had
 native attempts, but actor/story/geometry/combat prerequisites, incomplete
 playback and unsupported source contexts remain explicit nonpasses.
@@ -310,12 +310,32 @@ Earlier cancelled/defeated runs remain nonpasses.105 player regressions and
 scoped quality pass. Normal1x MAP316 run88c681b67b034854b42dab892204d008
 also genuinely wins:104 entry/84 local0 commands, control5137..5257 and
 native teardown5269. Its actual actions are Herakles/chains, not the requested
-offensive-spell probe. E068/E073 missing-effect actors remain #225: even a
-genuine retained Golem defeat leaves effect239 selector101 unavailable, while
-independent original-disc data identifies model100. No substitution or error
-downgrade was made. E073 additionally requires original Aster Sigil-used
-flag910 and retained Neesa/Tieger; stage130 alone is not its full prerequisite.
-Inherited audio remains #223.
+offensive-spell probe. #225's E068 now passes normal1x Release model
+`e278ecabc4b44f719bafd33573444c8d`: real retained Golem actor2/model100/HP0,
+Ashley250HP, original type8 producer,3193 matched E068 commands,
+control11235..11355, teardown11367, zero errors and no forced skip.
+The source model101 remains absent. Its original E239 package uses hard-coded
+actor2 transforms; only its guarded colour track optionally consumes that target.
+The native requirement proof conservatively validates source spans, definitions,
+dependencies and all reachable instructions of exactly one primary entry before
+execution. Unknown/malformed/multi-entry/mandatory-target packages still fail;
+no actor substitution or package-ID exception is allowed. Deferred proof is
+bound to the actual request/token, cleared on new requests/phase-zero cleanup,
+and cannot bypass validation through the no-package path.
+The hidden `[target-requirements-source]` selection reads local original E239,
+checks the absent-target proof and refuses a mandatory-target counterfactual;
+no disc-derived test payload is committed. Focused proof/binding selections
+pass27 cases/4153 assertions and complete native suites pass1169/9,594,085
+in both Debug and Release. Fresh normal1x Debug model
+`8d806ac3e5d244068d8f1d8917469960` also genuinely wins and completes3193
+E068 commands, control11559..11679 and native teardown11691 with zero errors
+and no skip. Accelerated observed-edge replays lose and are not equivalent
+proofs or timing certificates.
+E073 additionally needs retained Neesa/Tieger and original flag910=1, earned
+by claiming MAP259's original Aster Sigil472 room reward through the native
+loot screen. QA inventory does not earn it; using that sigil writes2 instead.
+Two genuine MAP259 attempts lose without claiming it and remain nonpasses.
+Stage130 alone is not the full prerequisite. #225 and inherited-audio #223 stay open.
 
 The complete original viewer504/E078/E026/E038 chain now passes locally in
 Debug1793255056114631-0 and Release1793255464212292-0: all seven original

@@ -396,7 +396,7 @@ TEST_CASE("Shared bank retirement preserves unrelated and failed borrowers",
 }
 
 TEST_CASE(
-    "Scripted actor effects wait for their required binding before playback",
+    "Scripted effects retain required bindings and defer only absent model proof",
     "[event][effects][effect-binding]") {
   for (int scenario = 0; scenario < 10; ++scenario) {
     CAPTURE(scenario);
