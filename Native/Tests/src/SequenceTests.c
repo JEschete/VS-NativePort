@@ -944,9 +944,9 @@ int TestScriptedEffectTargetBinding(int scenario) {
       passed &= Battle_actors[1] == NULL && Actors_actorRecords[1] == NULL &&
                 Field_gimmickInstances[1] == NULL;
       Effects_SetPrimaryEffectPhase(0);
-      passed &= Effects_ValidateDeferredScriptTarget(
-                    kEffect, (unsigned char)Effects_primaryToken, -2, NULL, 0) ==
-                1;
+      passed &=
+          Effects_ValidateDeferredScriptTarget(
+              kEffect, (unsigned char)Effects_primaryToken, -2, NULL, 0) == 1;
     }
   } else {
     passed &=
