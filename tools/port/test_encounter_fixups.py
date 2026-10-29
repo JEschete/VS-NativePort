@@ -16,6 +16,21 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
+        source = (
+            "Field_gimmickInstances[i] = NULL;\n"
+            "value = Field_gimmickInstances[actor_id];\n"
+            "if (Field_gimmickInstances[actor_id] == NULL) return -1;"
+        )
+        matches = [(pattern, replacement) for _, pattern, replacement, _ in copy_fixups.REGEX_FIXES
+                   if "Field_FindGimmickForActorSlot" in replacement]
+        self.assertEqual(len(matches), 1)
+        actual = re.sub(*matches[0], source)
+        self.assertIn("Field_gimmickInstances[i] = NULL;", actual)
+        self.assertIn("value = Field_FindGimmickForActorSlot(actor_id);", actual)
+        self.assertIn("if (Field_FindGimmickForActorSlot(actor_id) == NULL)", actual)
+
+
     def test_ending_completion_formatters_own_a_full_signed_integer_string(self):
         for function_id, variable, value in (
             ("F02448", "sp10", "Ending_mapCompletion"),

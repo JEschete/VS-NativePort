@@ -31,6 +31,7 @@
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
 #include "Field/Collision.h"
+#include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -409,7 +410,7 @@ int Actors_IsActorActionAnimationBusy(int actor_id)
     Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
     if (actor == NULL) {
-        if (Field_gimmickInstances[actor_id] == NULL) {
+        if (Field_FindGimmickForActorSlot(actor_id) == NULL) {
             return -1;
         }
         return 0;
@@ -491,7 +492,7 @@ void Actors_RestoreActorBasePose(int actorId, int animation)
 
     actor = Actors_actorRecords[actorId];
     if (actor == NULL) {
-        object = Field_gimmickInstances[actorId];
+        object = Field_FindGimmickForActorSlot(actorId);
         if (object != NULL && (object->mode == 0xF9 || object->mode == 0xFF)
             && object->objectInfo.supportIndex == 0) {
             object->mode = 0;

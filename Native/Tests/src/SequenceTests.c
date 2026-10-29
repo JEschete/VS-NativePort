@@ -961,17 +961,24 @@ int TestScriptedEffectTargetBinding(int scenario) {
 }
 
 int TestBoneEndpointOwner(int owner, int endpoint) {
-  enum { kSlot = 3, kModelWords = 20, kBoneLength = 128 };
+  enum { kModelWords = 20, kBoneLength = 128 };
+  const int slot = owner >= 4 ? 16 : 3;
+  const int has_gimmick_slot =
+      slot < sizeof Field_gimmickInstances / sizeof Field_gimmickInstances[0];
   Actors_ActorRecord actor = {0};
   Field_GimmickInstance object = {0};
   unsigned model_bytes[kModelWords] = {0};
   Actors_ShpModel* model = (void*)model_bytes;
-  Actors_ActorRecord* saved_actor = Actors_actorRecords[kSlot];
-  Field_GimmickInstance* saved_object = Field_gimmickInstances[kSlot];
+  Actors_ActorRecord* saved_actor = Actors_actorRecords[slot];
+  Field_GimmickInstance* saved_object =
+      has_gimmick_slot ? Field_gimmickInstances[slot] : NULL;
   const MATRIX saved_matrix = Actors_boneMatrixScratch;
   const Render_ModelScratchpad saved_workspace = *Render_ModelWorkspace();
-  Actors_actorRecords[kSlot] = owner == 0 || owner == 2 ? &actor : NULL;
-  Field_gimmickInstances[kSlot] = owner == 1 || owner == 2 ? &object : NULL;
+  Actors_actorRecords[slot] =
+      owner == 0 || owner == 2 || owner == 5 ? &actor : NULL;
+  if (has_gimmick_slot) {
+    Field_gimmickInstances[slot] = owner == 1 || owner == 2 ? &object : NULL;
+  }
   actor.instance.model = object.model = model;
   actor.instance.boneCount = object.boneCount = 1;
   model->bones[0].length = kBoneLength;
@@ -987,18 +994,31 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
   Core_Gte_Reset();
   SVECTOR result = {1, 2, 3, 77};
   const int status =
-      Actors_ActorBoneEndpointPosition(kSlot, 0, &result, endpoint);
+      Actors_ActorBoneEndpointPosition(slot, 0, &result, endpoint);
   const int offset = owner == 1 ? 100 : 0;
   const int length = endpoint == 0   ? 0
                      : endpoint == 1 ? kBoneLength
                                      : kBoneLength / 2;
-  const int passed =
-      owner == 3
+  int passed =
+      owner == 3 || owner == 4
           ? status == -1 && result.vx == 1 && result.vy == 2 && result.vz == 3
           : status == 0 && result.vx == 100 + offset - length &&
                 result.vy == 200 + offset && result.vz == 300 + offset;
-  Actors_actorRecords[kSlot] = saved_actor;
-  Field_gimmickInstances[kSlot] = saved_object;
+  if (owner == 3 || owner == 4) {
+    MATRIX untouched;
+    MATRIX original;
+    int bone_length = 777;
+    memset(&untouched, 0x6B, sizeof untouched);
+    original = untouched;
+    passed &= Actors_ActorBoneWorldTransform(slot, 0,
+                                             &Actors_boneMatrixScratch) == NULL;
+    passed &=
+        Actors_ActorBoneWorldMatrix(slot, 0, &untouched, &bone_length) == -1;
+    passed &= memcmp(&untouched, &original, sizeof untouched) == 0 &&
+              bone_length == 777;
+  }
+  Actors_actorRecords[slot] = saved_actor;
+  if (has_gimmick_slot) Field_gimmickInstances[slot] = saved_object;
   Actors_boneMatrixScratch = saved_matrix;
   *Render_ModelWorkspace() = saved_workspace;
   Core_Gte_Reset();

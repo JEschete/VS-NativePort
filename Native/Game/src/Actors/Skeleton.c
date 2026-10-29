@@ -12,6 +12,7 @@
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Math/ScalarMath.h"
+#include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
@@ -116,7 +117,7 @@ void Actors_ActorBoneMatrix(int actor_id, int bone_index, MATRIX* matrix_out, u_
     Actors_ActorRecord* model_owner = Actors_actorRecords[actor_id];
 
     if (model_owner == NULL) {
-        model_owner = (Actors_ActorRecord*)Field_gimmickInstances[actor_id];
+        model_owner = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
         if (model_owner == NULL) {
             return;
         }
@@ -140,7 +141,7 @@ int Actors_ProjectActorTaggedBone(int actor_id, int bone_tag, SVECTOR* screen_po
         Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
 
         if (actor == NULL) {
-            Field_GimmickInstance* gimmick = Field_gimmickInstances[actor_id];
+            Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(actor_id);
             if (gimmick == NULL) {
                 return -1;
             }
@@ -206,7 +207,7 @@ int Actors_FindActorBoneTag(int actor_id, int tag_value, int tag_kind)
     model_owner = Actors_actorRecords[actor_id];
 
     if (model_owner == NULL) {
-        model_owner = (Actors_ActorRecord*)Field_gimmickInstances[actor_id];
+        model_owner = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
         if (model_owner == NULL) {
             return -1;
         }
@@ -262,7 +263,7 @@ int Actors_ActorBoneTag(int actor_id, int bone_index, int tag_kind)
 
     actor = Actors_actorRecords[actor_id];
     if (actor == NULL) {
-        actor = (Actors_ActorRecord*)Field_gimmickInstances[actor_id];
+        actor = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
         if (actor == NULL) {
             return -1;
         }
@@ -318,11 +319,13 @@ int Actors_ActorBoneWorldMatrix(int actor_id, int bone_selector, void* matrix_ou
     Actors_WeaponModel* model;
     int _[22] __attribute__((unused));
 
-    *(MATRIX*)matrix_out = *Actors_ActorBoneWorldTransform(actor_id, bone_selector, &Actors_boneMatrixScratch);
+    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(actor_id, bone_selector, &Actors_boneMatrixScratch);
+    if (bone_transform == NULL) return -1;
+    *(MATRIX*)matrix_out = *bone_transform;
 
     actor = Actors_actorRecords[actor_id];
     if (actor == NULL) {
-        obj = (Actors_ActorRecord*)Field_gimmickInstances[actor_id];
+        obj = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
         if (obj == NULL) {
             return 0;
         }
@@ -351,7 +354,7 @@ int Actors_ActorTaggedBonePosition(int actor_id, int bone_tag, SVECTOR* position
         model_owner = Actors_actorRecords[actor_id];
 
         if (model_owner == NULL) {
-            model_owner = (Actors_ActorRecord*)Field_gimmickInstances[actor_id];
+            model_owner = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
             if (model_owner == NULL) {
                 return -1;
             }
@@ -454,7 +457,7 @@ int Actors_ActorBoneEndpointPosition(int actorId, int bone, SVECTOR* result, int
     MATRIX* matrix;
 
     if (actor == NULL) {
-        actor = (Actors_ActorRecord*)Field_gimmickInstances[actorId];
+        actor = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actorId);
 
         if (actor == NULL) {
             return -1;
@@ -509,7 +512,7 @@ MATRIX* Actors_ActorBoneWorldTransform(int actorId, int bone, MATRIX* unused)
     Actors_ActorRecord* actor = Actors_actorRecords[actorId];
 
     if (actor == NULL) {
-        Actors_ActorRecord* object = (Actors_ActorRecord*)Field_gimmickInstances[actorId];
+        Actors_ActorRecord* object = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actorId);
 
         if (object == NULL) {
             return NULL;

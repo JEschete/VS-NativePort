@@ -25,6 +25,8 @@ NATIVE_SIGNATURE_REWRITES = {
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
+    "Field_FindGimmickForActorSlot":
+        r"Native\Game\src\Field\GimmickLookup.h",
     "Ending_Credits_EmbeddedArt":
         r"Native\Game\src\Ending\Credits\EmbeddedArt.h",
     "Ending_Credits_PrepareEmbeddedArt":
@@ -193,6 +195,14 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F00882": [
+        ("    *(MATRIX*)arg2 = *Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);",
+         "    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);\n"
+         "    if (bone_transform == NULL) return -1;\n"
+         "    *(MATRIX*)arg2 = *bone_transform;",
+         "38C1C.c:216 must propagate the existing missing-owner/weapon status "
+         "without dereferencing a null transform or modifying output storage"),
+    ],
     "F02449": [
         ("char sp18[2];", "char sp18[12];",
          "D4.c:2113 counting completion has the same undersized decomp buffer; "
@@ -2418,6 +2428,10 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Actors::", r"\bField_gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
+     r"Field_FindGimmickForActorSlot(\1)",
+     "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
+     "must preserve the existing no-owner query result instead of reading gimmick16"),
     *[(rf"^Content::{name}$", rf"\b{old}\b", new, evidence)
       for name, bindings, evidence in (
           ("AcquireOverlayWorkspace", (("arg0", "owner_tag"),),

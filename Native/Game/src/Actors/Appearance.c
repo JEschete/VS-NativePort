@@ -11,6 +11,7 @@
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
+#include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
 
@@ -94,7 +95,7 @@ int Actors_EnableModelPalettePulse(int actor_id, int pulse_flags, int pulse_slot
     if (actor != NULL) {
         pulse = &actor->instance.palettePulse;
     } else {
-        gimmick = Field_gimmickInstances[actor_id];
+        gimmick = Field_FindGimmickForActorSlot(actor_id);
         if (gimmick == NULL) {
             return -1;
         }
@@ -129,10 +130,10 @@ int Actors_DisableModelPalettePulse(int actor_id, int pulse_slot)
     u_char* active_pulse_mask;
 
     if (actor == NULL) {
-        if (Field_gimmickInstances[actor_id] == NULL) {
+        if (Field_FindGimmickForActorSlot(actor_id) == NULL) {
             return -1;
         }
-        active_pulse_mask = (u_char*)Field_gimmickInstances[actor_id] + 0x64;
+        active_pulse_mask = (u_char*)Field_FindGimmickForActorSlot(actor_id) + 0x64;
     } else {
         active_pulse_mask = (u_char*)actor + 0x64;
     }

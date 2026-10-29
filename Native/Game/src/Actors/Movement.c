@@ -30,9 +30,11 @@
 #include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
+#include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
+#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Field/Transitions.h"
 #include "Input/Buttons.h"
@@ -1295,8 +1297,8 @@ void Actors_UpdateRoomActorMovement(void)
     int i;
 
     for (i = 0; i < 16; ++i) {
-        if ((Field_gimmickInstances[i] != NULL) && (Field_gimmickInstances[i]->boneCount != 0)) {
-            ((void (*)(Field_GimmickInstance*, int))Field_UpdateGimmickMotion)(Field_gimmickInstances[i], State_tickSpeed / 2);
+        if ((Field_FindGimmickForActorSlot(i) != NULL) && (Field_FindGimmickForActorSlot(i)->boneCount != 0)) {
+            ((void (*)(Field_GimmickInstance*, int))Field_UpdateGimmickMotion)(Field_FindGimmickForActorSlot(i), State_tickSpeed / 2);
         }
     }
     for (i = 0; i < 17; ++i) {
@@ -3099,7 +3101,7 @@ void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor)
         }
     land:
         if (Actors_supportingGimmickIndex != 0) {
-            platform = Field_gimmickInstances[Actors_supportingGimmickIndex];
+            platform = Field_FindGimmickForActorSlot(Actors_supportingGimmickIndex);
             if (platform->mode != 0) {
                 actor->instance.position.vy = platform->positionY - 0x80;
                 break;

@@ -26,6 +26,7 @@
 #include "Battle/StatusEffects.h"
 #include "Field/Actors.h"
 #include "Field/Collision.h"
+#include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
@@ -374,7 +375,7 @@ void Actors_BeginActorDeath(int actorId, void* context, int animate)
             Actors_BeginActorDeath(actor->companionSlot, context, animate);
         }
     } else {
-        object = Field_gimmickInstances[actorId];
+        object = Field_FindGimmickForActorSlot(actorId);
         if (object != NULL) {
             object->mode = 0xF7;
             object->objectInfo.supportIndex = 0;
@@ -446,7 +447,7 @@ void Actors_SetActorDisplayFlags(int actorId, int display_flags)
     Actors_ActorRecord* actor = Actors_actorRecords[actorId];
 
     if (actor == NULL) {
-        Field_GimmickInstance* gimmick = Field_gimmickInstances[actorId];
+        Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(actorId);
         if (gimmick != NULL) {
             gimmick->isSkipped = (display_flags & 1) ^ 1;
             gimmick->isVisible = display_flags >> 1;
@@ -487,7 +488,7 @@ u_int Actors_ActorStateFlags(int actorId)
     Actors_stateFlagsScratch = 0;
 
     if (actor == NULL) {
-        Field_GimmickInstance* gimmick = Field_gimmickInstances[actorId];
+        Field_GimmickInstance* gimmick = Field_FindGimmickForActorSlot(actorId);
         if (gimmick != NULL) {
             if (!(gimmick->isSkipped)) {
                 Actors_stateFlagsScratch = 1;
@@ -602,7 +603,7 @@ int Actors_ActorPlacement(int actor_id, void* placement_out)
     Actors_ActorRecord* placed_object = Actors_actorRecords[actor_id];
 
     if (placed_object == NULL) {
-        placed_object = (Actors_ActorRecord*)Field_gimmickInstances[actor_id];
+        placed_object = (Actors_ActorRecord*)Field_FindGimmickForActorSlot(actor_id);
         if (placed_object == NULL) {
             return -1;
         }

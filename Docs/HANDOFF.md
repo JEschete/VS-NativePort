@@ -9,6 +9,17 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #232's exact native AV is traced to the distinct slot domains: absent valid
+  renderer16 fell through to out-of-bounds `Field_gimmickInstances[16]`, not a
+  corrupted renderer registration. Bounded shared lookup preserves existing
+  missing-owner query results; missing world matrices leave caller outputs
+  untouched. Existing renderer16 models and valid gimmicks remain supported.
+  Temporary argument logging is removed. Related62 cases/17,091 assertions
+  pass per configuration. Original MAP101 now crosses3194 and completes3767
+  entry commands with zero errors, but passive cases still fail: a real enemy
+  starts at5304, only64 ticks after restored control, and later kills Ashley.
+  This is not a120-tick live-control certificate or issue completion.
+
 - Ending blockers #228/#230/#231 are locally repaired: typed native OT
   consumers preserve original buckets, all12 full embedded TIMs own their
   palettes/pixels and writable72224-byte TIM8 workspace, and completion

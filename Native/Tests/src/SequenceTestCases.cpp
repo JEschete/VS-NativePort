@@ -407,8 +407,8 @@ TEST_CASE(
 TEST_CASE(
     "Bone endpoints resolve actor and gimmick owners before reading models",
     "[actors][gimmick][model][bone-owner]") {
-  for (int index = 0; index < 24; ++index) {
-    const int owner = (index / 3) % 4;
+  for (int index = 0; index < 36; ++index) {
+    const int owner = (index / 3) % 6;
     const int endpoint = index % 3;
     CAPTURE(index, owner, endpoint);
     CHECK(TestBoneEndpointOwner(owner, endpoint) == 1);

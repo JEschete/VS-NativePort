@@ -1608,6 +1608,9 @@
     <ClInclude Include="src\Field\GameMode.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClInclude Include="src\Field\GimmickLookup.h">
+      <Filter>src\Field</Filter>
+    </ClInclude>
     <ClInclude Include="src\Field\GimmickMotion.h">
       <Filter>src\Field</Filter>
     </ClInclude>

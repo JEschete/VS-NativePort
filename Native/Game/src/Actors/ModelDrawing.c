@@ -23,6 +23,7 @@
 #include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
+#include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
 #include "Legacy/Psx.h"
@@ -411,10 +412,7 @@ int Actors_ProjectActorBoneEndpoint(int actor_id, int bone, int* output,
     matrix = &actor->boneMatrices[bone];
   } else {
     const Field_GimmickInstance* object =
-        (unsigned)actor_id <
-                sizeof Field_gimmickInstances / sizeof Field_gimmickInstances[0]
-            ? Field_gimmickInstances[actor_id]
-            : NULL;
+        Field_FindGimmickForActorSlot(actor_id);
     if (object == NULL) return -1;
     if (bone < 0 || bone >= object->boneCount ||
         (size_t)bone >= sizeof object->matrices / sizeof object->matrices[0]) {

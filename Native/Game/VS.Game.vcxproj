@@ -2062,6 +2062,7 @@
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
     <ClInclude Include="src\Field\Environment.h" />
     <ClInclude Include="src\Field\GameMode.h" />
+    <ClInclude Include="src\Field\GimmickLookup.h" />
     <ClInclude Include="src\Field\GimmickMotion.h" />
     <ClInclude Include="src\Field\Gimmicks.h" />
     <ClInclude Include="src\Field\Input.h" />
