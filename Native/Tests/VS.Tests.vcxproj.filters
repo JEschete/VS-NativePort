@@ -105,6 +105,9 @@
     <ClCompile Include="src\EquipmentDetailTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\EventRetentionPredicateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\EventScriptTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

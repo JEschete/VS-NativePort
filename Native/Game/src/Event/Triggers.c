@@ -358,7 +358,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                     negate = 0;
                     break;
                 }
-                if (((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId) != 0) {
+                if (Actors_IsActorRetainedAfterDefeat(actorId) != 0) {
                     result = 1;
                 }
                 p += 3;

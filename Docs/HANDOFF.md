@@ -9,6 +9,15 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #227: room triggers call the declared char-returning retention predicate
+  directly instead of consuming stale upper bits through an incompatible
+  int-return cast. Absent/nonretained actors do not reach the HP query;
+  retained-dead and retained-live controls preserve original semantics.
+  The complete E078/E026/E038 Debug1793255056114631-0 and
+  Release1793255464212292-0 replays restore control12024..12144 and
+  finish teardown12156 with zero errors, in combination with the separate
+  bound-animation repair. Publication CI remains to be confirmed.
+
 - #224's real hidden-platform placement crash is locally repaired and verified:
   isolated fresh1x original event31 replay formerly faults entering22/7 at7104.
   The native placement API now reads the existing authored transform without

@@ -16,6 +16,13 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_room_retention_predicate_uses_the_declared_byte_return(self):
+        fixups = copy_fixups.FIXES["F01261"]
+        old, new, _ = next(item for item in fixups if "Actors_IsActorRetainedAfterDefeat" in item[0])
+        self.assertIn("int (*)(int)", old)
+        self.assertEqual(new, "Actors_IsActorRetainedAfterDefeat(actorId)")
+
+
     def test_platform_placement_uses_an_owned_authored_contact(self):
         fixups = copy_fixups.FIXES["F00901"]
         declaration = next(new for old, new, _ in fixups if "int* anchor" in old)

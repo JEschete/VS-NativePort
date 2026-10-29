@@ -84,6 +84,7 @@
     <ClCompile Include="src\EncounterTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
+    <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
     <ClCompile Include="src\EventScriptTestCases.cpp" />
     <ClCompile Include="src\EventScriptTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>

@@ -187,6 +187,11 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
+    "F01261": [
+        ("((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId)",
+         "Actors_IsActorRetainedAfterDefeat(actorId)",
+         "4A0A8.c:4302-4584 predicate16 consumes the declared char result; an int-return cast reads stale upper return bits and enters HP predicates for absent actors on native x64"),
+    ],
     "F00901": [
         ("    int* anchor;",
          "    Field_PlatformContactPoint platform_contact;",
