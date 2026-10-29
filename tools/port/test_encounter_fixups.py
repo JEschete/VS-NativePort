@@ -28,7 +28,6 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn('Core_Warnf("field.camera"', source)
         self.assertNotIn("Field_CollisionCellAt(var_a0, var_a1, var_a2)->", source)
 
-
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
             "Field_gimmickInstances[i] = NULL;\n"
@@ -42,146 +41,6 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("Field_gimmickInstances[i] = NULL;", actual)
         self.assertIn("value = Field_FindGimmickForActorSlot(actor_id);", actual)
         self.assertIn("if (Field_FindGimmickForActorSlot(actor_id) == NULL)", actual)
-
-
-    def test_ending_completion_formatters_own_a_full_signed_integer_string(self):
-        for function_id, variable, value in (
-            ("F02448", "sp10", "Ending_mapCompletion"),
-            ("F02449", "sp18", "Ending_displayedMapCompletion"),
-        ):
-            with self.subTest(function_id=function_id):
-                formatting = f'sprintf({variable}, "%03d", {value});'
-                source = f"char {variable}[2];\n" + formatting
-                for old, new, _ in copy_fixups.FIXES.get(function_id, []):
-                    self.assertEqual(source.count(old), 1)
-                    source = source.replace(old, new)
-                self.assertIn(f"char {variable}[12];", source)
-                self.assertIn(formatting, source)
-
-
-    def test_ending_rank_background_uses_the_original_penultimate_bucket(self):
-        source = (
-            "poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);\n"
-            "AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) "
-            "+ 0x1FF8, poly++);\n"
-            "*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;"
-        )
-        for old, new, _ in copy_fixups.FIXES["F02444"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("poly = Render_frameScratch.primitiveCursor;", source)
-        self.assertIn(
-            "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
-            source,
-        )
-        self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
-        self.assertNotIn("Core_ScratchBase", source)
-
-
-    def test_ending_results_both_phases_present_the_native_ordering_table(self):
-        source = "\n".join(
-            ["Ending_Credits_PresentFrame("
-             "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"] * 2
-        )
-        for old, new, _ in copy_fixups.FIXES["F02441"]:
-            self.assertEqual(source.count(old), 2)
-            source = source.replace(old, new)
-        self.assertEqual(source.count(
-            "(u_long*)Render_frameScratch.orderingTable + 0x7FF"), 2)
-        self.assertNotIn("Core_ScratchBase", source)
-
-
-    def test_ending_credits_present_the_typed_native_ordering_table(self):
-        source = (
-            "Ending_Credits_PresentFrame("
-            "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"
-        )
-        for old, new, _ in copy_fixups.FIXES["F02420"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertEqual(
-            source,
-            "Ending_Credits_PresentFrame("
-            "(u_long*)Render_frameScratch.orderingTable + 0x7FF);",
-        )
-        self.assertNotIn("Core_ScratchBase", source)
-
-
-    def test_ending_credits_prepare_complete_art_before_all_twelve_uploads(self):
-        names = ("One", "Two", "Three", "Four", "Five", "Six",
-                 "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
-        source = "Ending_Credits_AllocateRenderBuffers();\n" + "\n".join(
-            f"Ending_Credits_UploadTexture(&Ending_Credits_embeddedTexture{name});"
-            for name in names
-        )
-        for old, new, _ in copy_fixups.FIXES["F02418"]:
-            self.assertEqual(source.count(old), 1)
-            source = source.replace(old, new)
-        self.assertIn("if (!Ending_Credits_PrepareEmbeddedArt()) abort();", source)
-        self.assertEqual(source.count("Ending_Credits_UploadTexture("), 12)
-        for index in range(12):
-            self.assertIn(f"Ending_Credits_EmbeddedArt({index})", source)
-        self.assertNotIn("&Ending_Credits_embeddedTexture", source)
-
-
-    def test_animation_unwind_uses_the_bound_clip_without_suppressing_failures(self):
-        fixups = copy_fixups.FIXES["F00998"]
-        binding = next(new for old, new, _ in fixups if "Actors_FindActorAnimationHeader" in old)
-        validation = next(new for old, new, _ in fixups if "u_char* temp_a3 = *v0" in old)
-        self.assertIn("Actors_FindBoundAnimationHeader", binding)
-        self.assertIn("sp10[2] == 0 && arg0->poseOverrideActive", validation)
-        self.assertIn("return -1;", validation)
-        retirement = copy_fixups.FIXES["F00279"][0][1]
-        self.assertIn("Actors_FindBoundAnimationHeader(actor, &entry)", retirement)
-        self.assertIn("entry == NULL || entry[2] == 0", retirement)
-        self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Actors_FindBoundAnimationHeader"],
-            r"Native\Game\src\Actors\AnimationBindings.h",
-        )
-
-
-    def test_room_retention_predicate_uses_the_declared_byte_return(self):
-        fixups = copy_fixups.FIXES["F01261"]
-        old, new, _ = next(item for item in fixups if "Actors_IsActorRetainedAfterDefeat" in item[0])
-        self.assertIn("int (*)(int)", old)
-        self.assertEqual(new, "Actors_IsActorRetainedAfterDefeat(actorId)")
-
-
-    def test_platform_placement_uses_an_owned_authored_contact(self):
-        fixups = copy_fixups.FIXES["F00901"]
-        declaration = next(new for old, new, _ in fixups if "int* anchor" in old)
-        body = next(new for old, new, _ in fixups if "anchor =" in old)
-        self.assertIn("Field_PlatformContactPoint platform_contact", declaration)
-        self.assertIn("Field_CopyMovingPlatformPlacement", body)
-        self.assertIn("abort();", body)
-        self.assertNotIn("anchor[", body)
-        self.assertNotIn("isHidden =", body)
-        self.assertNotIn("State_SetScriptFlag", body)
-        self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Field_CopyMovingPlatformPlacement"],
-            r"Native\Game\src\Field\PlatformPlacement.h",
-        )
-        scaffold = runpy.run_path(
-            str(Path(__file__).resolve().parents[1] / "scaffold" / "gen_solution.py"),
-            run_name="scaffold_platform_test",
-        )
-        self.assertTrue(
-            scaffold["needs_c_headers"](
-                "VS.Game", r"src\Field\PlatformPlacement.cpp"
-            )
-        )
-
-
-    def test_native_pointer_fields_cannot_widen_serialized_records(self):
-        copier = object.__new__(copy_to_native.Copier)
-        copier.type_by_id = {"T00000": {"role": "OnDisc"}}
-        copier.fields = {"T00000.000": {"type": "int"}}
-        with (
-            mock.patch.object(copy_fixups, "NATIVE_POINTER_FIELDS", {"T00000.000"}),
-            self.assertRaisesRegex(ValueError, "requires a runtime field"),
-        ):
-            copier.load_hazards()
-
 
     def test_sfx_reference_signatures_preserve_native_pointers(self):
         copier = object.__new__(copy_to_native.Copier)
@@ -217,6 +76,135 @@ class EncounterFixupTests(unittest.TestCase):
                     copier.retype_signature(function_id, original, name), expected
                 )
 
+    def test_native_pointer_fields_cannot_widen_serialized_records(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.type_by_id = {"T00000": {"role": "OnDisc"}}
+        copier.fields = {"T00000.000": {"type": "int"}}
+        with (
+            mock.patch.object(copy_fixups, "NATIVE_POINTER_FIELDS", {"T00000.000"}),
+            self.assertRaisesRegex(ValueError, "requires a runtime field"),
+        ):
+            copier.load_hazards()
+
+    def test_ending_credits_prepare_complete_art_before_all_twelve_uploads(self):
+        names = ("One", "Two", "Three", "Four", "Five", "Six",
+                 "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve")
+        source = "Ending_Credits_AllocateRenderBuffers();\n" + "\n".join(
+            f"Ending_Credits_UploadTexture(&Ending_Credits_embeddedTexture{name});"
+            for name in names
+        )
+        for old, new, _ in copy_fixups.FIXES["F02418"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("if (!Ending_Credits_PrepareEmbeddedArt()) abort();", source)
+        self.assertEqual(source.count("Ending_Credits_UploadTexture("), 12)
+        for index in range(12):
+            self.assertIn(f"Ending_Credits_EmbeddedArt({index})", source)
+        self.assertNotIn("&Ending_Credits_embeddedTexture", source)
+
+    def test_ending_credits_present_the_typed_native_ordering_table(self):
+        source = (
+            "Ending_Credits_PresentFrame("
+            "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"
+        )
+        for old, new, _ in copy_fixups.FIXES["F02420"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertEqual(
+            source,
+            "Ending_Credits_PresentFrame("
+            "(u_long*)Render_frameScratch.orderingTable + 0x7FF);",
+        )
+        self.assertNotIn("Core_ScratchBase", source)
+
+    def test_room_retention_predicate_uses_the_declared_byte_return(self):
+        fixups = copy_fixups.FIXES["F01261"]
+        old, new, _ = next(item for item in fixups if "Actors_IsActorRetainedAfterDefeat" in item[0])
+        self.assertIn("int (*)(int)", old)
+        self.assertEqual(new, "Actors_IsActorRetainedAfterDefeat(actorId)")
+
+    def test_ending_results_both_phases_present_the_native_ordering_table(self):
+        source = "\n".join(
+            ["Ending_Credits_PresentFrame("
+             "*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF);"] * 2
+        )
+        for old, new, _ in copy_fixups.FIXES["F02441"]:
+            self.assertEqual(source.count(old), 2)
+            source = source.replace(old, new)
+        self.assertEqual(source.count(
+            "(u_long*)Render_frameScratch.orderingTable + 0x7FF"), 2)
+        self.assertNotIn("Core_ScratchBase", source)
+
+    def test_ending_rank_background_uses_the_original_penultimate_bucket(self):
+        source = (
+            "poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);\n"
+            "AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) "
+            "+ 0x1FF8, poly++);\n"
+            "*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;"
+        )
+        for old, new, _ in copy_fixups.FIXES["F02444"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("poly = Render_frameScratch.primitiveCursor;", source)
+        self.assertIn(
+            "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
+            source,
+        )
+        self.assertIn("Render_frameScratch.primitiveCursor = poly;", source)
+        self.assertNotIn("Core_ScratchBase", source)
+
+    def test_ending_completion_formatters_own_a_full_signed_integer_string(self):
+        for function_id, variable, value in (
+            ("F02448", "sp10", "Ending_mapCompletion"),
+            ("F02449", "sp18", "Ending_displayedMapCompletion"),
+        ):
+            with self.subTest(function_id=function_id):
+                formatting = f'sprintf({variable}, "%03d", {value});'
+                source = f"char {variable}[2];\n" + formatting
+                for old, new, _ in copy_fixups.FIXES.get(function_id, []):
+                    self.assertEqual(source.count(old), 1)
+                    source = source.replace(old, new)
+                self.assertIn(f"char {variable}[12];", source)
+                self.assertIn(formatting, source)
+
+    def test_animation_unwind_uses_the_bound_clip_without_suppressing_failures(self):
+        fixups = copy_fixups.FIXES["F00998"]
+        binding = next(new for old, new, _ in fixups if "Actors_FindActorAnimationHeader" in old)
+        validation = next(new for old, new, _ in fixups if "u_char* temp_a3 = *v0" in old)
+        self.assertIn("Actors_FindBoundAnimationHeader", binding)
+        self.assertIn("sp10[2] == 0 && arg0->poseOverrideActive", validation)
+        self.assertIn("return -1;", validation)
+        retirement = copy_fixups.FIXES["F00279"][0][1]
+        self.assertIn("Actors_FindBoundAnimationHeader(actor, &entry)", retirement)
+        self.assertIn("entry == NULL || entry[2] == 0", retirement)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Actors_FindBoundAnimationHeader"],
+            r"Native\Game\src\Actors\AnimationBindings.h",
+        )
+
+    def test_platform_placement_uses_an_owned_authored_contact(self):
+        fixups = copy_fixups.FIXES["F00901"]
+        declaration = next(new for old, new, _ in fixups if "int* anchor" in old)
+        body = next(new for old, new, _ in fixups if "anchor =" in old)
+        self.assertIn("Field_PlatformContactPoint platform_contact", declaration)
+        self.assertIn("Field_CopyMovingPlatformPlacement", body)
+        self.assertIn("abort();", body)
+        self.assertNotIn("anchor[", body)
+        self.assertNotIn("isHidden =", body)
+        self.assertNotIn("State_SetScriptFlag", body)
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["Field_CopyMovingPlatformPlacement"],
+            r"Native\Game\src\Field\PlatformPlacement.h",
+        )
+        scaffold = runpy.run_path(
+            str(Path(__file__).resolve().parents[1] / "scaffold" / "gen_solution.py"),
+            run_name="scaffold_platform_test",
+        )
+        self.assertTrue(
+            scaffold["needs_c_headers"](
+                "VS.Game", r"src\Field\PlatformPlacement.cpp"
+            )
+        )
 
     def test_event_dispatch_audit_includes_owned_opcode_headers(self):
         manifest = {

@@ -9,6 +9,28 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- New original local proofs: Release1793278293922782-0 verifies MAP088 local0
+  and MAP360 local0 through their entry-earned flag40 and real interactions;
+  Release1793278925894121-0 verifies MAP199 local1 through its original
+  ungated facing-tile trigger. The other native outcomes and eight measured
+  survival replays remain nonpasses. A25-case longer original lock-producer
+  batch1793279234029838-0 adds no verified identity; do not repeat it unchanged.
+  Explicit standalone components cannot substitute: the native fixture
+  intentionally requires isolated entry for direct requests, while the strict
+  production-room source contract rejects isolated cases. That failed setup
+  was not reclassified or used to weaken the804 matrix. Full current native
+  suites pass1144 cases/9,589,968 assertions in each configuration.
+
+- Owner-authorized scoped publication is complete through `d9b79fa0`:
+  #229 `96a6515c`, #224 `c892e420`, #227 `7971c4d9`, #226 `1080de58`,
+  ending #228/#230/#231 `ad8a3c8a`, bounds portion #232 `2cf601aa`, external
+  source-testing support `58618938`, and camera portion #233 `d9b79fa0`.
+  Each exact pushed revision has successful Source Quality evidence. Issues
+  #224/#226/#227/#228/#229/#230/#231 are closed with their acceptance evidence.
+  #223/#225/#232/#233 and parent #149 remain open for the distinct recorded
+  prerequisites/runtime limits. No unrelated Save/title, solution, browsing
+  project, architecture or customization edits were included.
+
 - #233's nullable camera consumer is locally repaired: original MAP214 has
   collision width13/height25, but source-driven motion reaches tile4,31.
   The existing cell lookup returns null; camera occlusion now explicitly warns
@@ -18,7 +40,8 @@ verification of the current worktree.
   clearing and the valid authored occlusion branch. Original Release
   1793278757543012-0 crosses the old AV with zero errors and real teardown,
   but still fails the120-tick living-control goal; no runtime identity is added
-  and #233 stays open. This is native fault progress, not scene completion.
+  and #233 stays open. Published as `d9b79fa0`, exact CI40878539856 passes.
+  This is native fault progress, not scene completion.
 
 - Native source-goal completion is now optional in the external player:
   `--scene-expectation` embeds the existing original Lab scene/control contract
@@ -73,8 +96,8 @@ verification of the current worktree.
   Interrupted MAP100/MAP101 effect-bone faults are #232; MAP214 camera
   constraints are #233. Neither suspected cause is patched or promoted.
 
-- Exact runtime progress is now502/804, with95 verified in both configurations
-  and302 still unverified.116 of the
+- Exact runtime progress is now503/804, with95 verified in both configurations
+  and301 still unverified (123 unrun/178 attempted-unverified).117 of the
   owner's418 outstanding definitions now have demonstrated runtime paths.
   #149 remains open; queues, blocked labels and cancelled cases are not passes.
   The original MAP506/ZONE250 NPC/type4 viewer producers and source-derived
@@ -96,7 +119,8 @@ verification of the current worktree.
   pass per configuration. Original MAP101 now crosses3194 and completes3767
   entry commands with zero errors, but passive cases still fail: a real enemy
   starts at5304, only64 ticks after restored control, and later kills Ashley.
-  This is not a120-tick live-control certificate or issue completion.
+  Published bounds repair `2cf601aa` has exact green CI40876371035. This is
+  not a120-tick live-control certificate or issue completion; #232 stays open.
 
 - Ending blockers #228/#230/#231 are locally repaired: typed native OT
   consumers preserve original buckets, all12 full embedded TIMs own their
@@ -114,7 +138,9 @@ verification of the current worktree.
   assertions; combined render/scene/verification-log selections pass185 cases/
   1,812,710 assertions per configuration. Scoped style/tidy is clean. Ordinary
   field gates, cancelled/error/timeout outcomes and default gameplay are not
-  relaxed. Publication/exact-revision CI, campaign and fidelity remain separate.
+  relaxed. Published as `ad8a3c8a`, exact CI40876133291 passes and
+  #228/#230/#231 are closed. Campaign/fidelity/promotion/retirement remain
+  separate; subsequent audio integration also has fresh unskipped replays.
 
 - #226/#227 now pass the complete original viewer504/E078/E026/E038 chain:
   Debug1793255056114631-0 and Release1793255464212292-0 validate all seven
@@ -126,18 +152,10 @@ verification of the current worktree.
   Debug/Release each pass123 related cases/57,352 assertions;160 copier
   tests,179 VM dispatch targets and1874/1874 naming checks pass. Scoped
   quality/changed-TU tidy has zero new findings; the all-owned tidy fanout was
-  stopped and is not claimed complete. Both issues remain open for publication
-  and exact-fixing-revision CI; these local results are not promotion or
+  stopped and is not claimed complete. #226 is now published as `1080de58`,
+  exact CI40875836489 passes; #227 is `7971c4d9`, CI40875783132 passes.
+  Both are closed. These results remain distinct from promotion or
   compatibility-retirement acceptance.
-
-- #227: room triggers call the declared char-returning retention predicate
-  directly instead of consuming stale upper bits through an incompatible
-  int-return cast. Absent/nonretained actors do not reach the HP query;
-  retained-dead and retained-live controls preserve original semantics.
-  The complete E078/E026/E038 Debug1793255056114631-0 and
-  Release1793255464212292-0 replays restore control12024..12144 and
-  finish teardown12156 with zero errors, in combination with the separate
-  bound-animation repair. Publication CI remains to be confirmed.
 
 - #224's real hidden-platform placement crash is locally repaired and verified:
   isolated fresh1x original event31 replay formerly faults entering22/7 at7104.
@@ -155,8 +173,9 @@ verification of the current worktree.
   actual event-dispatch targets and39 naming tests pass;1874/1874 exact naming
   positions are covered. Scoped quality and the changed C++ TU tidy have zero
   new findings. Only clean Game/Tests projects were generated; owner solution,
-  browsing-project, Save and F03670 edits were preserved. #224 remains open
-  for uncommitted publication/exact-revision CI; no promotion/retirement or
+  browsing-project, Save and F03670 edits were preserved. The local checkpoint
+  initially left #224 open; it is now published as `c892e420`,
+  exact CI40875707111 passes and #224 is closed; no promotion/retirement or
   pixel/audio-fidelity claim is made.
 
 - #229 is locally repaired and source-verified: native banked SFX selectors,
@@ -168,7 +187,8 @@ verification of the current worktree.
   exit0 and zero errors. Fresh zero-state MAP415 remains a failed prerequisite
   with one explicit error/real teardown, not a pass. Full suites pass1141 cases/
   9,589,946 assertions per configuration after subsequent owner-domain/trace
-  integration;168 copier controls pass. Publication/exact-revision CI remains.
+  integration;168 copier controls pass. Published as `96a6515c`, exact
+  CI40875509110 passes and #229 is closed.
 
 - #149 final acceptance reconciliation: semantic implementation
   `b3f68b46ca50a3aa3a04fa28ef1edd81f4cb0c64` has exact green Source Quality

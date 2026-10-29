@@ -244,8 +244,8 @@ defeat. Supported source positions in catalog room references are selected from
 original collision data, excluding door tiles; their presence establishes no
 story prerequisite. Original enemies and game rules remain active.
 
-Current checkpoint: **502/804** definitions have an actual verified runtime path,
-**95** in both Debug/Release; **302** remain unverified. The exact matrix, not
+Current checkpoint: **503/804** definitions have an actual verified runtime path,
+**95** in both Debug/Release; **301** remain unverified. The exact matrix, not
 this snapshot, is authoritative. All referenced entry definitions have had
 native attempts, but actor/story/geometry/combat prerequisites, incomplete
 playback and unsupported source contexts remain explicit nonpasses.
@@ -281,7 +281,7 @@ Release1793264413301690-0 passes four original ending producers/26 instances
 and genuine native reset/reentry in one window with zero errors and exit0.
 Related render/scene/logging selections pass185 cases/1,812,710
 assertions each; six terminal-goal controls pass31 assertions. #228/#230/#231
-remain open for integrated source evidence/publication/exact-revision CI.
+are published in `ad8a3c8a`, with exact successful CI40876133291, and closed.
 No full campaign, pixel/audio fidelity or C++ promotion is claimed.
 
 The original event31 gallery path exposed #224's null hidden-platform contact.
@@ -296,7 +296,7 @@ Post-format rebuilt Debug/Release source/control replays also pass at8x;
 these do not certify timing. Both related114-case/57,321-assertion selections,
 focused4-case/66-assertion placement controls,158 copier tests and179 actual
 VM dispatch targets pass; scoped quality/tidy and exact naming1874/1874 pass.
-Publication and exact-revision CI remain pending; #224 is not closed.
+Published in `c892e420`, exact CI40875707111 passes and #224 is closed.
 
 The external player can now explicitly receive the existing native scene
 expectation JSON. Original playback and measured120-tick control finish the
@@ -325,9 +325,23 @@ without changing new-clip selection; #227 repairs the declared char-returning
 retention call rather than supplying fake HP. Each related native selection
 passes123 cases/57,352 assertions;160 copier regressions,179 actual VM dispatch
 targets, exact naming1874/1874 and scoped quality/changed-TU tidy pass. The
-all-owned tidy fanout was stopped, not completed. Publication/exact-revision
-CI and independent promotion/retirement gates remain pending. No generic
+all-owned tidy fanout was stopped, not completed. #226 is published in
+`1080de58`, CI40875836489 passes; #227 is `7971c4d9`, CI40875783132 passes.
+Both are closed. Independent promotion/retirement gates remain pending. No generic
 actor/animation/audio substitutes or forced flags establish coverage.
+
+The sound-reference repair #229 is published in `96a6515c`, exact
+CI40875509110 passes and the issue is closed. Source-backed E087 loads its
+actual private SFX67 bank, then MAP415/E089 returns to authored27/1:
+Debug1793268807181493-0/Release1793268807093029-0 verify six instances/
+8172 commands, living control12080..12200 and teardown12212 with zero errors.
+Missing inherited banks remain explicit nonpasses, not fallback sound programs.
+
+The bounds portion of #232 (`2cf601aa`, CI40876371035) and nullable camera
+consumer portion of #233 (`d9b79fa0`, CI40878539856) are published and green,
+but their original passive cases still lack the required living-control
+interval. Both issues remain open; crossing a crash is not scene completion.
+Current full Debug/Release suites pass1144 cases/9,589,968 assertions each.
 
 The completed normal-speed New Game trace independently verifies24 actual
 script instances,23 new exact identities, using the explicit Desktop v4

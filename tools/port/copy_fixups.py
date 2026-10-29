@@ -22,15 +22,16 @@ NATIVE_SIGNATURE_REWRITES = {
     "F03150": {0: "intptr_t"},
 }
 
+# FSoundChannel.effectId carries either a built-in ID or a native program pointer.
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
     "Field_FindGimmickForActorSlot":
         r"Native\Game\src\Field\GimmickLookup.h",
-    "Ending_Credits_EmbeddedArt":
-        r"Native\Game\src\Ending\Credits\EmbeddedArt.h",
-    "Ending_Credits_PrepareEmbeddedArt":
-        r"Native\Game\src\Ending\Credits\EmbeddedArt.h",
+    **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
+       for name in (
+           "Ending_Credits_PrepareEmbeddedArt", "Ending_Credits_EmbeddedArt",
+       )},
     "Actors_FindBoundAnimationHeader":
         r"Native\Game\src\Actors\AnimationBindings.h",
     "Field_CopyMovingPlatformPlacement":
@@ -206,157 +207,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "original scene motion can end outside the authored grid. Explicitly "
          "report that query and retain existing no-occlusion clearing without "
          "changing collision, actor placement or any valid view-trigger branch"),
-    ],
-    "F00882": [
-        ("    *(MATRIX*)arg2 = *Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);",
-         "    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);\n"
-         "    if (bone_transform == NULL) return -1;\n"
-         "    *(MATRIX*)arg2 = *bone_transform;",
-         "38C1C.c:216 must propagate the existing missing-owner/weapon status "
-         "without dereferencing a null transform or modifying output storage"),
-    ],
-    "F02449": [
-        ("char sp18[2];", "char sp18[12];",
-         "D4.c:2113 counting completion has the same undersized decomp buffer; "
-         "preserve counting/audio/format behavior with a complete native string"),
-    ],
-    "F02448": [
-        ("char sp10[2];", "char sp10[12];",
-         "D4.c:2070 formats at least three digits plus NUL; own enough native "
-         "storage for the full signed32 string without changing format or drawing"),
-    ],
-    "F02444": [
-        ("poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);",
-         "poly = Render_frameScratch.primitiveCursor;",
-         "D4.c:1887 results background borrows the typed native frame cursor"),
-        ("AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) + 0x1FF8, poly++);",
-         "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
-         "PS1 byte offset0x1FF8 is ordering bucket0x7FE; retain that bucket "
-         "without reading a native pointer at scratch byte4"),
-        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;",
-         "Render_frameScratch.primitiveCursor = poly;",
-         "publish all five native background primitives to the frame owner"),
-    ],
-    "F02441": [
-        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
-         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
-         "D4.c:1677 results loading and display both consume BeginFrame's native "
-         "ordering table, not a pointer read from PS1 scratch byte4"),
-    ],
-    "F02420": [
-        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
-         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
-         "D4.c:1081 credits presentation consumes the ordering table established "
-         "by BeginFrame; PS1 byte4 overlaps the native primitive pointer after "
-         "pointer widening. Preserve the original final ordering bucket."),
-    ],
-    "F02418": [
-        ("Ending_Credits_AllocateRenderBuffers();",
-         "Ending_Credits_AllocateRenderBuffers();\n"
-         "    if (!Ending_Credits_PrepareEmbeddedArt()) abort();",
-         "D4.c:999 needs complete owned embedded TIM payloads and the original "
-         "TIM8 workspace alias before any upload or illustration decode"),
-        *[
-            (f"&Ending_Credits_embeddedTexture{name}",
-             f"Ending_Credits_EmbeddedArt({index})",
-             "Preserve the complete original TIM palette/pixels, not only its header")
-            for index, name in enumerate((
-                "One", "Two", "Three", "Four", "Five", "Six",
-                "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
-            ))
-        ],
-    ],
-    "F01261": [
-        ("((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId)",
-         "Actors_IsActorRetainedAfterDefeat(actorId)",
-         "4A0A8.c:4302-4584 predicate16 consumes the declared char result; an int-return cast reads stale upper return bits and enters HP predicates for absent actors on native x64"),
-    ],
-    "F00901": [
-        ("    int* anchor;",
-         "    Field_PlatformContactPoint platform_contact;",
-         "3A1A0.c:274 platform placement owns its contact value instead of borrowing a returned stack address"),
-        ("                anchor = (int*)Field_FindMovingPlatformById((u_char)placement->direction);\n"
-         "                *(int*)&actor->instance.position.vx = anchor[0];\n"
-         "                *(int*)&actor->instance.position.vz = anchor[1];\n"
-         "                *(int*)&actor->platformAnchor.vx = anchor[0];\n"
-         "                *(int*)&actor->platformAnchor.vz = anchor[1];",
-         "                if (!Field_CopyMovingPlatformPlacement((u_char)placement->direction, &platform_contact)) {\n"
-         "                    abort();\n"
-         "                }\n"
-         "                actor->instance.position.vx = platform_contact.x;\n"
-         "                actor->instance.position.vy = platform_contact.height;\n"
-         "                actor->instance.position.vz = platform_contact.z;\n"
-         "                actor->instance.position.pad = platform_contact.platformIndex;\n"
-         "                actor->platformAnchor.vx = platform_contact.x;\n"
-         "                actor->platformAnchor.vy = platform_contact.height;\n"
-         "                actor->platformAnchor.vz = platform_contact.z;",
-         "800A3224 and event31/104:402 request an authored platform before its visibility command; read its actual transform without changing visibility or collision, and surface absent/invalid support instead of dereferencing null"),
-    ],
-    **{
-        function_id: [
-            ("int temp_v0;", "intptr_t temp_v0;",
-             "banked SFX selectors must survive in the caller's full-width carrier"),
-            ("temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);",
-             "temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);\n"
-             "        if (temp_v0 == -1) return;",
-             "a rejected bank binding must not become a built-in-ID fallback"),
-        ]
-        for function_id in ("F03521", "F03522")
-    },
-    "F03203": [
-        ("pChannel->effectId < 0",
-         "(uintptr_t)pChannel->effectId >= 0x80000000U",
-         "the existing program-selector domain used by UsesSoundEffectTags is not "
-         "the sign of a native x64 pointer; preserve the -1 banked-program release mode"),
-    ],
-    "F03524": [
-        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
-         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
-         "        if (program_address == -1) return;",
-         "main.c:10028 must not narrow a program pointer into the integer group parameter"),
-        ("if (arg0 != 0)", "if (program_address != 0)",
-         "preserve the built-in category discriminator"),
-        ("Audio_Playback_StopSoundEffects(arg0, 0);",
-         "Audio_Playback_StopSoundEffects(program_address, 0);",
-         "stop the exact native bank program, not a truncated pointer or fallback ID"),
-    ],
-    "F03523": [
-        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
-         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
-         "        if (program_address == -1) return;",
-         "preserve the original group parameter and a separate native pointer carrier"),
-        ("if (arg0 != 0)", "if (program_address != 0)",
-         "only built-in categories use the zero resolver result"),
-        ("Audio_Control_FadeSoundEffectPan(arg0, 0,",
-         "Audio_Control_FadeSoundEffectPan(program_address, 0,",
-         "dispatch the entire resolved bank pointer without narrowing through the group"),
-    ],
-    "F03520": [
-        ("temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];",
-         "if (Audio_soundState.currentSfxBank == 0 ||\n"
-         "            Audio_soundState.currentSfxBank >\n"
-         "                sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {\n"
-         "            Core_Errorf(\"audio.sfx\", \"cannot resolve banked SFX group=0x%X id=%d bank=%u\", arg0, arg1, Audio_soundState.currentSfxBank);\n"
-         "            return -1;\n"
-         "        }\n"
-         "        temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];\n"
-         "        if (temp_v1 == 0 || arg1 < 0 || (u_int)arg1 >= ((u_int*)temp_v1)[0]) {\n"
-         "            Core_Errorf(\"audio.sfx\", \"unavailable bank or invalid SFX id=%d bank=%u\", arg1, Audio_soundState.currentSfxBank);\n"
-         "            return -1;\n"
-         "        }",
-         "main.c:9950 must reject an unselected/null bank and out-of-table IDs "
-         "before indexing; -1 is failure, not the built-in zero selector"),
-        ("temp_v1 = (int)temp_v1 + (arg1 + (int*)temp_v1)[1];",
-         "{\n"
-         "            int program_offset = ((int*)temp_v1)[(size_t)arg1 + 1];\n"
-         "            if (program_offset < 0 ||\n"
-         "                (size_t)program_offset < ((size_t)((u_int*)temp_v1)[0] + 1) * sizeof(u_int)) {\n"
-         "                Core_Errorf(\"audio.sfx\", \"invalid banked SFX offset=%d id=%d\", program_offset, arg1);\n"
-         "                return -1;\n"
-         "            }\n"
-         "            temp_v1 += program_offset;\n"
-         "        }",
-         "retain the complete host pointer while adding the serialized relative offset"),
     ],
     "F01013": [
         ("Battle_Ai_AddAiTileOccupant(object);",
@@ -879,6 +729,123 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F00731": [
         ("*ot = ((u_long)prim << 8) >> 8;", "*ot = LegacyGpu_Handle(prim);",
          "overhead awareness frame links must retain native packet ownership, not truncated addresses"),
+    ],
+    "F02418": [
+        ("Ending_Credits_AllocateRenderBuffers();",
+         "Ending_Credits_AllocateRenderBuffers();\n"
+         "    if (!Ending_Credits_PrepareEmbeddedArt()) abort();",
+         "D4.c:999 needs complete owned embedded TIM payloads and the original "
+         "TIM8 workspace alias before any upload or illustration decode"),
+        *[
+            (f"&Ending_Credits_embeddedTexture{name}",
+             f"Ending_Credits_EmbeddedArt({index})",
+             "Preserve the complete original TIM palette/pixels, not only its header")
+            for index, name in enumerate((
+                "One", "Two", "Three", "Four", "Five", "Six",
+                "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+            ))
+        ],
+    ],
+    "F02420": [
+        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
+         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
+         "D4.c:1081 credits presentation consumes the ordering table established "
+         "by BeginFrame; PS1 byte4 overlaps the native primitive pointer after "
+         "pointer widening. Preserve the original final ordering bucket."),
+    ],
+    "F02441": [
+        ("*(u_long**)((uintptr_t)Core_ScratchBase() + 0x004) + 0x7FF",
+         "(u_long*)Render_frameScratch.orderingTable + 0x7FF",
+         "D4.c:1677 results loading and display both consume BeginFrame's native "
+         "ordering table, not a pointer read from PS1 scratch byte4"),
+    ],
+    "F02444": [
+        ("poly = *(void**)((uintptr_t)Core_ScratchBase() + 0x000);",
+         "poly = Render_frameScratch.primitiveCursor;",
+         "D4.c:1887 results background borrows the typed native frame cursor"),
+        ("AddPrim(*((void**)((uintptr_t)Core_ScratchBase() + 0x004)) + 0x1FF8, poly++);",
+         "AddPrim((u_long*)Render_frameScratch.orderingTable + 0x7FE, poly++);",
+         "PS1 byte offset0x1FF8 is ordering bucket0x7FE; retain that bucket "
+         "without reading a native pointer at scratch byte4"),
+        ("*(void**)((uintptr_t)Core_ScratchBase() + 0x000) = poly;",
+         "Render_frameScratch.primitiveCursor = poly;",
+         "publish all five native background primitives to the frame owner"),
+    ],
+    "F02448": [
+        ("char sp10[2];", "char sp10[12];",
+         "D4.c:2070 formats at least three digits plus NUL; own enough native "
+         "storage for the full signed32 string without changing format or drawing"),
+    ],
+    "F02449": [
+        ("char sp18[2];", "char sp18[12];",
+         "D4.c:2113 counting completion has the same undersized decomp buffer; "
+         "preserve counting/audio/format behavior with a complete native string"),
+    ],
+    "F03520": [
+        ("temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];",
+         "if (Audio_soundState.currentSfxBank == 0 ||\n"
+         "            Audio_soundState.currentSfxBank >\n"
+         "                sizeof Audio_soundState.sfxBankData / sizeof Audio_soundState.sfxBankData[0]) {\n"
+         "            Core_Errorf(\"audio.sfx\", \"cannot resolve banked SFX group=0x%X id=%d bank=%u\", arg0, arg1, Audio_soundState.currentSfxBank);\n"
+         "            return -1;\n"
+         "        }\n"
+         "        temp_v1 = (intptr_t)Audio_soundState.sfxBankData[Audio_soundState.currentSfxBank - 1];\n"
+         "        if (temp_v1 == 0 || arg1 < 0 || (u_int)arg1 >= ((u_int*)temp_v1)[0]) {\n"
+         "            Core_Errorf(\"audio.sfx\", \"unavailable bank or invalid SFX id=%d bank=%u\", arg1, Audio_soundState.currentSfxBank);\n"
+         "            return -1;\n"
+         "        }",
+         "main.c:9950 must reject an unselected/null bank and out-of-table IDs "
+         "before indexing; -1 is failure, not the built-in zero selector"),
+        ("temp_v1 = (int)temp_v1 + (arg1 + (int*)temp_v1)[1];",
+         "{\n"
+         "            int program_offset = ((int*)temp_v1)[(size_t)arg1 + 1];\n"
+         "            if (program_offset < 0 ||\n"
+         "                (size_t)program_offset < ((size_t)((u_int*)temp_v1)[0] + 1) * sizeof(u_int)) {\n"
+         "                Core_Errorf(\"audio.sfx\", \"invalid banked SFX offset=%d id=%d\", program_offset, arg1);\n"
+         "                return -1;\n"
+         "            }\n"
+         "            temp_v1 += program_offset;\n"
+         "        }",
+         "retain the complete host pointer while adding the serialized relative offset"),
+    ],
+    **{
+        function_id: [
+            ("int temp_v0;", "intptr_t temp_v0;",
+             "banked SFX selectors must survive in the caller's full-width carrier"),
+            ("temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);",
+             "temp_v0 = Audio_ResolveSfxProgram(arg0, arg1);\n"
+             "        if (temp_v0 == -1) return;",
+             "a rejected bank binding must not become a built-in-ID fallback"),
+        ]
+        for function_id in ("F03521", "F03522")
+    },
+    "F03523": [
+        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
+         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
+         "        if (program_address == -1) return;",
+         "preserve the original group parameter and a separate native pointer carrier"),
+        ("if (arg0 != 0)", "if (program_address != 0)",
+         "only built-in categories use the zero resolver result"),
+        ("Audio_Control_FadeSoundEffectPan(arg0, 0,",
+         "Audio_Control_FadeSoundEffectPan(program_address, 0,",
+         "dispatch the entire resolved bank pointer without narrowing through the group"),
+    ],
+    "F03524": [
+        ("arg0 = Audio_ResolveSfxProgram(arg0, arg1);",
+         "intptr_t program_address = Audio_ResolveSfxProgram(arg0, arg1);\n"
+         "        if (program_address == -1) return;",
+         "main.c:10028 must not narrow a program pointer into the integer group parameter"),
+        ("if (arg0 != 0)", "if (program_address != 0)",
+         "preserve the built-in category discriminator"),
+        ("Audio_Playback_StopSoundEffects(arg0, 0);",
+         "Audio_Playback_StopSoundEffects(program_address, 0);",
+         "stop the exact native bank program, not a truncated pointer or fallback ID"),
+    ],
+    "F03203": [
+        ("pChannel->effectId < 0",
+         "(uintptr_t)pChannel->effectId >= 0x80000000U",
+         "the existing program-selector domain used by UsesSoundEffectTags is not "
+         "the sign of a native x64 pointer; preserve the -1 banked-program release mode"),
     ],
     "F02771": [
         ("*nextPrim = ((u_long)prim << 8) >> 8;", "*nextPrim = LegacyGpu_Handle(prim);",
@@ -1683,6 +1650,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    matrix = Actors_ActorBoneWorldTransform",
          "resolve the actor or gimmick owner before the sole model read"),
     ],
+    "F00882": [
+        ("    *(MATRIX*)arg2 = *Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);",
+         "    MATRIX* bone_transform = Actors_ActorBoneWorldTransform(arg0, arg1, &Actors_boneMatrixScratch);\n"
+         "    if (bone_transform == NULL) return -1;\n"
+         "    *(MATRIX*)arg2 = *bone_transform;",
+         "38C1C.c:216 must propagate the existing missing-owner/weapon status "
+         "without dereferencing a null transform or modifying output storage"),
+    ],
     "F01170": [
         ("    Effects_StartScriptedActorEffect(\n"
          "        Core_Memory_ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)));",
@@ -1848,6 +1823,32 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("Actors_SaveActorGroundedTransform((Field_GimmickInstance*)actor)",
          "Actors_SaveActorGroundedTransform(actor)",
          "40564.c:2519 landing snapshots use the typed actor history API rather than a gimmick view"),
+    ],
+    "F00901": [
+        ("    int* anchor;",
+         "    Field_PlatformContactPoint platform_contact;",
+         "3A1A0.c:274 platform placement owns its contact value instead of borrowing a returned stack address"),
+        ("                anchor = (int*)Field_FindMovingPlatformById((u_char)placement->direction);\n"
+         "                *(int*)&actor->instance.position.vx = anchor[0];\n"
+         "                *(int*)&actor->instance.position.vz = anchor[1];\n"
+         "                *(int*)&actor->platformAnchor.vx = anchor[0];\n"
+         "                *(int*)&actor->platformAnchor.vz = anchor[1];",
+         "                if (!Field_CopyMovingPlatformPlacement((u_char)placement->direction, &platform_contact)) {\n"
+         "                    abort();\n"
+         "                }\n"
+         "                actor->instance.position.vx = platform_contact.x;\n"
+         "                actor->instance.position.vy = platform_contact.height;\n"
+         "                actor->instance.position.vz = platform_contact.z;\n"
+         "                actor->instance.position.pad = platform_contact.platformIndex;\n"
+         "                actor->platformAnchor.vx = platform_contact.x;\n"
+         "                actor->platformAnchor.vy = platform_contact.height;\n"
+         "                actor->platformAnchor.vz = platform_contact.z;",
+         "800A3224 and event31/104:402 request an authored platform before its visibility command; read its actual transform without changing visibility or collision, and surface absent/invalid support instead of dereferencing null"),
+    ],
+    "F01261": [
+        ("((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId)",
+         "Actors_IsActorRetainedAfterDefeat(actorId)",
+         "4A0A8.c:4302-4584 predicate16 consumes the declared char result; an int-return cast reads stale upper return bits and enters HP predicates for absent actors on native x64"),
     ],
     "F04130": [
         ("        *(int*)&actor->instance.previousTileX = *(int*)&actor->instance.currentTileX;\n"
