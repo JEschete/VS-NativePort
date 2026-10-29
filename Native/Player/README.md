@@ -23,6 +23,10 @@ From the repository root, using the existing Python 3.12+ environment:
   --game-exe build\Debug\VS.Desktop.exe --data Native\data `
   --save-file <unchanged-native-save.vssave> --frames 6000 `
   --door-case z009-r017-d002
+
+.\.venv-3\Scripts\python.exe Native\Player\player.py play `
+  --game-exe build\Release\VS.Desktop.exe --data Native\data `
+  --new-game --frames 18000
 ```
 
 Release uses the corresponding built executable/PDB. The tool copies the
@@ -30,8 +34,67 @@ selected image, matching PDB and DLLs into a private run, verifies hashes, and
 starts one owned window. Do not mix configurations or rebuild over frozen
 evidence. Desktop uses normal Start/Continue/menu inputs with a byte-identical
 private copy of the explicitly selected save. The source save is never edited.
+Alternatively, explicit `--new-game` selects the original New Game in an empty
+private save directory, preserving original equipment, learning and progression.
+These source modes are mutually exclusive. Startup sends Start only during the
+opening title movie and Circle to choose New Game; it sends no later story-scene
+skip. Ordinary dialogue, combat and original scene producers then remain in
+control. Starting directly in a later Lab room does not establish inherited
+music banks or other predecessor state.
 Desktop tick-limit observation is not claimed to finish a campaign or execute
 full in-game shutdown; its host/trace completion is reported separately.
+
+For a bounded production-room scene investigation, optional
+`--scene-expectation <source-scene.json>` embeds the existing Combat Lab
+`events`, `event_source`, `return_zone`, `return_room`, `preconditions` and
+optional `confirm_dialogue` contract in the owned native sequence. Its original
+VM/control observer ends the case after real playback and120 consecutive
+living-control ticks, rather than leaving the model in a completed room until
+the frame budget or closing its window to manufacture completion. The exact
+expectation is copied into the run and audit. Acceptance requires its matching
+native scene pass, measured control interval, finalized trace and actual
+teardown; a cancelled case, budget exit or generic pass cannot substitute.
+Default combat, Desktop and physical-door behavior is unchanged. This option
+requires an explicit Lab production-room fixture; it does not earn campaign
+progression or replace per-definition original-byte/branch verification.
+This option supports the field-control subset only. The native Lab's separate
+`terminal: ending_to_title` goal is not a player completion contract and is
+explicitly rejected here; it cannot bypass the player's existing120-tick gate.
+
+For one original room-local spatial producer, add `--scene-target-tile X Z`.
+This opt-in requires exactly one source2 event expectation and is exclusive
+with physical-door objectives. The existing terrain navigator plans from the
+actual post-entry player position, current camera and observed collision
+geometry, rather than assuming entry scripts preserve the fixture position.
+If Ashley is already on the predicate tile, normal movement first leaves it
+and then returns to earn the required tile change. Native scene/control
+ownership invalidates pending routes. Movement, route arrival and the target
+coordinate never establish a pass: the actual native source/selector must
+activate and the unchanged playback/control/teardown contract must finish.
+Only this opt-in goal may try supported observed patch frontiers after the
+nearest-progress endpoints are exhausted; normal door/combat navigation is
+unchanged. `--clear-enemies-first` also gates this voluntary scene approach on
+actual observed source-room deaths, not actor disappearance. Strategic
+preparations cannot start while a native cinematic owns input; event-owned
+reward selection remains interactive and transaction timeouts are unchanged.
+The option changes no game state or core-game policy; default play is unchanged.
+
+Managed player runs now request `--verification-log`: all native player frames,
+command/result/flag records and errors remain available, without per-draw Trace
+noise or redundant structured engine echoes. Native executables must be rebuilt
+with this option. Use full native tracing for a bounded rendering/audio
+investigation rather than keeping it enabled for every long gameplay run.
+
+For bounded Lab scene prerequisites, `--scene-investigation --speed 2` or
+`--scene-investigation --speed 4` uses the native fixed-tick multiplier without
+changing game rules or state. Normal play remains1x with strict reactions.
+Accelerated mode rejects reaction-count requirements, Desktop/save/New Game
+sources and physical-door objectives. Every missed/unconfirmed reaction remains
+recorded and still disqualifies the player run's overall `passed` result;
+`reaction_timing_certification_eligible` and `reaction_coverage_demonstrated`
+cannot certify accelerated timing. Source-bound scene verification remains an
+independent unchanged gate. All rates and their qualifications persist in run
+metadata and reusable experience.
 
 Use `--door-route <original-id> <original-id> ...` instead of `--door-case`
 for continuous legitimate traversal in the same game/window. Each leg must
@@ -41,6 +104,45 @@ Accepted legs are checkpointed as `physical_door.accepted` audit events;
 `physical_route.cases` retains partial results if a later leg is blocked.
 This does not restore state, teleport between cases or relabel transit legs
 as new historical-matrix coverage.
+An initially unsatisfied native door flag no longer ends a run while original
+hostiles remain alive. The existing combat planner continues fighting, onward
+navigation is withheld, and the live flag is refreshed from observations.
+Only the actual native threshold permits traversal. Enemy death alone never
+grants a flag: a still-unsatisfied gate is reported after native events and
+120 normal rendered-control ticks settle. Already-unlocked doors retain their
+existing traversal behavior; no universal requirement to clear every room is
+added.
+For explicitly enemy-gated investigations add `--clear-enemies-first` to a
+physical-door run. This withholds the model's onward-navigation option until
+the original source-room hostiles have observed zero-HP transitions; removed
+actors alone do not qualify. The actual native gate, loading cycle and
+settled-control checks must still pass afterward. This opt-in does not change
+ordinary unlocked-route testing or defeat-all Lab goals.
+After actual source-room deaths and native rewards/dialogue settle, the runner
+explicitly asks the model for the observed physical exit and records
+`goal.post_combat_exit`; empty enemy lists no longer suppress that planning
+request. Model-selected terrain routing and the authored door remain the only
+navigation source of truth.
+
+For source-backed scene fixtures, `--setup-press "120:Up,122:Up"` may establish
+an original tile-change producer before the model takes over combat. This uses
+the existing Lab input schedule, not position or flag writes. Only ordinary
+directions are accepted; combat, interaction, jump and skip buttons are rejected.
+Pulses must be ordered, non-overlapping and finish before the observation budget.
+The tactical planner waits until the final two-tick pulse and two neutral ticks
+have elapsed; the guarded reaction controller retains its normal behavior.
+The exact schedule and handoff tick are persisted with the run. This opt-in
+requires unchanged production-room actors/events and cannot be combined with
+physical-door assertions or Desktop saves. It does not assert scene completion:
+actual source commands, handoff, living control and teardown still need proof.
+
+The 100ms observation freshness limit still gates every model/controller input.
+A transient stale frame releases keys and waits for fresh state, with a bounded two-second
+recovery failure instead of issuing stale actions. Visible dialogue permits
+only a leased Circle confirmation in native cutscene control3; other movement
+or mixed-button leases are released immediately, and closing the dialogue
+also releases the confirmation. Scripted story redirects remain distinct
+from fixed authored-door acceptance.
 Observed walking stalls permit at most two directed Square jump attempts near
 the same position, using the production movement input and its native flag
 guard, followed by at most one short correction along each world axis.
@@ -97,6 +199,31 @@ competition with other applications. A readiness check is not a gameplay test.
   Normal menus assign abilities and select spells; native targeting confirms
   actual selectable actors. A button-send acknowledgment is never a successful
   cast, chain, defense or door.
+
+Ready multi-part target menus trigger a fresh model choice of an actual native
+actor/limb instead of blindly confirming the first row. Opt-in diagnostics copy
+cached target forecasts, including hit thresholds and supported damage/recovery
+amounts; they never recalculate attacks or consume RNG. Missing forecasts and
+unsupported effect amounts remain unknown. A limb that disappears during
+inference invalidates the plan.
+
+Actor observations preserve the native unsigned weapon-action byte, including
+unclassified values such as128 on scripted noncombat actors. These do not imply
+physical attacks or make an actor hostile. Defense advice reports unclassified
+values explicitly instead of guessing their effect.
+
+Original enemy-clear events can own the real loot/ability-reward menus while
+field control remains with the event. Read-only `menu.event_owned` identifies
+this context. Only an actually ready loot menu permits Square, and only enabled
+ability-reward rows permit their normal selection/confirmation keys. This does
+not authorize arbitrary cutscene movement, clear loot directly or bypass a VM
+wait. Event challenge menus have not been independently certified.
+
+Planning prompts use lossless compact JSON, not truncated observations. A local
+server HTTP failure includes its status, operation and bounded response detail
+in the persisted failure. The exact MAP360 request that exceeded the8192-token
+context at8218 tokens completes at6732 prompt tokens after compaction, with all
+prompt facts unchanged. This is a request repair, not combat or scene acceptance.
 
 An attack target rejected by the native selector retains its scene/spawn
 identity and the actual player position in feedback. The controller must move
@@ -191,6 +318,14 @@ Pin a successful run used as issue-acceptance evidence before routine cleanup
 ages it out. Pinning protects its raw logs and frozen image, not just its compact
 SQLite outcome.
 
+The owner's explicit2026-10-28 pruning authorization cold-archived older raw
+logs, including pinned evidence, without changing outcomes or deleting saves,
+assets or summaries. The verified path/digest index is
+`%LOCALAPPDATA%\VS-NativePort\evidence-archive\20261028\index.jsonl`.
+An archived path is not a new successful observation; restore/read its original
+bytes when needed. Do not keep raising raw-log budgets or replay the prologue
+again to replace evidence that already exists.
+
 ## Verified scope and remaining limits
 
 Local dirty `b1703e1d` observations demonstrate Debug/Release menu assignment
@@ -209,7 +344,8 @@ currently follows observed door/target coordinates, not a complete obstacle,
 jump, platform or campaign solver. Ranked multi-level/area spell UI and every
 caster/status matchup are not yet certified.
 
-#151 remains open. Do not rewrite its historical loader matrix or count a
-successful Combat Lab sequence exit as physical/story acceptance. Use saved
-passed checkpoints for loader retries; physical observations and necessary
-legitimate traversal have separate provenance.
+#151 is closed with its bounded loader/traversal evidence and explicit remaining
+limits. Do not rewrite its historical loader matrix or count a successful Combat
+Lab sequence exit as physical/story acceptance. #149 remains open for actual
+source-bound scene verification; physical observations and necessary legitimate
+traversal retain separate provenance.

@@ -5,11 +5,33 @@ from .config import PROJECT
 from .observations import Frame
 
 
+def event_menu_ready(frame: Frame) -> bool:
+    menu = frame.raw["menu"]
+    return (frame.ready and not frame.game_over and frame.control == 3
+            and frame.event_phase == 4 and menu["available"] and not menu["loading"]
+            and menu.get("event_owned") is True)
+
+
+def loot_menu_ready(frame: Frame) -> bool:
+    menu = frame.raw["menu"]
+    return (((frame.control == 2 and frame.action_phase == 12)
+             or (event_menu_ready(frame) and frame.action_phase == 4))
+            and menu["available"] and not menu["loading"] and menu["selected_menu"] == 12
+            and menu["loot_input_ready"] and menu["loot_count"] > 0)
+
+
 def reward_menu_ready(frame: Frame) -> bool:
     menu = frame.raw["menu"]
-    return (frame.control == 2 and frame.action_phase == 14 and menu["available"]
+    return (((frame.control == 2 and frame.action_phase == 14)
+             or (event_menu_ready(frame) and frame.action_phase == 6)) and menu["available"]
             and not menu["loading"] and menu["list_phase"] == 17
             and any(not row["disabled"] for row in menu["rows"]))
+
+
+def native_target_menu_ready(frame: Frame) -> bool:
+    return (frame.ready and not frame.game_over and frame.control == 2
+            and frame.source_actor == 0 and frame.action_phase in (1, 3)
+            and frame.raw["target_page"]["selection_step"] == 19)
 
 
 def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
@@ -23,11 +45,13 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     feedback = context.get("controller_feedback", [])
 
     def add(intent: str, target: int = -1, action: int = -1, slot: int = 1,
-            item: int = -1) -> None:
+            item: int = -1, limb: int = -1) -> None:
         key = f"{intent}:{target}:{action}:{slot}"
         if item >= 0:
             key += f":{item}"
-        choices[key] = {"intent": intent, "target_slot": target, "target_limb": -1,
+        if limb >= 0:
+            key += f":limb{limb}"
+        choices[key] = {"intent": intent, "target_slot": target, "target_limb": limb,
                         "action_id": action, "equip_slot": slot, "item_id": item}
 
     def unsuccessful(action: int, target: int) -> bool:
@@ -131,7 +155,12 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         return choices
 
     for enemy in frame.enemies:
-        add("attack", enemy.slot)
+        if native_target_menu_ready(frame):
+            for target in frame.raw["target_previews"]:
+                if target["actor"] == enemy.slot:
+                    add("attack", enemy.slot, limb=target["limb"])
+        else:
+            add("attack", enemy.slot)
         add("approach", enemy.slot)
         add("retreat", enemy.slot)
     for option in learned_spells:

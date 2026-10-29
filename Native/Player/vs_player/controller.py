@@ -5,7 +5,7 @@ from .model import Decision
 from .menus import MenuTransaction
 from .observations import Actor, Frame
 from .reaction import ReactionController
-from .choices import reward_menu_ready
+from .choices import loot_menu_ready, native_target_menu_ready, reward_menu_ready
 
 
 @dataclass(frozen=True)
@@ -18,6 +18,24 @@ class InputAction:
 
 class StaleDecision(ValueError):
     pass
+
+
+def input_lease_permitted(frame: Frame, buttons: frozenset[str]) -> bool:
+    return frame.ready and (
+        frame.control in (1, 2, 5, 6)
+        or (frame.control == 3 and frame.dialogue_waiting
+            and buttons == frozenset({"Circle"}))
+        or (loot_menu_ready(frame) and buttons == frozenset({"Square"}))
+        or (reward_menu_ready(frame) and buttons in (
+            frozenset({"Circle"}), frozenset({"Up"}), frozenset({"Down"})))
+    )
+
+
+def strategy_planning_ready(frame: Frame) -> bool:
+    return (frame.ready and not frame.game_over
+            and (reward_menu_ready(frame)
+                 or (frame.event_phase == 0 and frame.control in (1, 2, 5, 6)
+                     and not frame.dialogue_waiting)))
 
 
 def direction_buttons(dx: int, dz: int, yaw: int) -> frozenset[str]:
@@ -55,11 +73,20 @@ class CombatController:
     def preparing(self) -> bool:
         return self.transaction is not None and not self.transaction.done
 
+    def needs_target_choice(self, frame: Frame) -> bool:
+        decision = self.decision
+        return (decision is not None and decision.intent == "attack"
+                and decision.target_limb < 0 and native_target_menu_ready(frame)
+                and len({target["limb"] for target in frame.raw["target_previews"]
+                         if target["actor"] == decision.target_slot and target["limb"] >= 0}) > 1)
+
     @staticmethod
     def target_identity(frame: Frame, actor: Actor) -> tuple[int, int, int, int, int]:
         return frame.episode, frame.zone, frame.room, actor.model, actor.spawn_index
 
     def accept(self, decision: Decision, frame: Frame, observed: Frame) -> None:
+        if not strategy_planning_ready(frame):
+            raise StaleDecision("The original native scene owns strategic control")
         if frame.tick - decision.observation_tick > 600:
             raise StaleDecision("Model decision exceeded its semantic-plan lifetime")
         if (frame.episode, frame.zone, frame.room) != (
@@ -91,6 +118,13 @@ class CombatController:
             for option in frame.raw["item_options"]
         ):
             raise StaleDecision("Owned consumable availability changed during model inference")
+        if (decision.intent == "attack" and decision.target_limb >= 0
+                and native_target_menu_ready(observed)
+                and (not native_target_menu_ready(frame) or not any(
+                    target["actor"] == decision.target_slot
+                    and target["limb"] == decision.target_limb
+                    for target in frame.raw["target_previews"]))):
+            raise StaleDecision("The observed native target limb changed during planning")
         transaction = None
         if decision.intent in ("cast", "item", "equip_chain", "equip_defense"):
             transaction = MenuTransaction(decision, frame)
@@ -142,9 +176,7 @@ class CombatController:
                 return self._action(frame, ("Circle",), 2, "visible dialogue confirmation")
             return None
         menu = frame.raw["menu"]
-        if (frame.control == 2 and frame.action_phase == 12 and menu["available"]
-                and not menu["loading"] and menu["selected_menu"] == 12
-                and menu["loot_input_ready"] and menu["loot_count"] > 0):
+        if loot_menu_ready(frame):
             return self._action(frame, ("Square",), 2, "claim currently fitting native loot")
         if reward_menu_ready(frame):
             decision = self.decision
@@ -207,6 +239,8 @@ class CombatController:
                     self.decision = None
                 return self._action(frame, ("Cross",), 2, "cancel native no-target message")
             if selection_step != 19:
+                return None
+            if self.needs_target_choice(frame):
                 return None
             previews = frame.raw["target_previews"]
             desired = [

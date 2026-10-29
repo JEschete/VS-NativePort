@@ -53,7 +53,7 @@ def defensive_loadout_advice(frame: "Frame") -> dict:
         return {}
     types = {enemy.base_attack_type for enemy in frame.enemies}
     spell_capable = any(enemy.spell_action_ids for enemy in frame.enemies)
-    physical_expected = any(value != 1 for value in types)
+    physical_expected = any(0 <= value <= 7 and value != 1 for value in types)
     spell_expected = spell_capable or 1 in types
     available = {option["id"]: option for option in frame.raw["action_options"]
                  if option["family"] == "defense"}
@@ -70,12 +70,14 @@ def defensive_loadout_advice(frame: "Frame") -> dict:
     return {
         "physical_attack_expected": physical_expected,
         "spell_attack_possible": spell_expected,
+        "unclassified_base_attack_types": sorted(value for value in types if value > 7),
         "recommended_available_actions": list(dict.fromkeys(recommended)),
         "reason": (
             "Ward cures only native paralysis/numbness. Siphon Soul needs an incoming spell "
             "and missing MP. Reflect/Absorb require matching spell/nonspell damage; "
             "affinity defenses additionally require their exact affinity. These forecasts "
-            "are not hit-roll or damage guarantees."
+            "are not hit-roll or damage guarantees. Unclassified native action bytes "
+            "are not evidence of physical attacks."
         ),
     }
 

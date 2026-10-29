@@ -5,6 +5,25 @@ from pathlib import Path
 from .observations import Frame
 
 
+class ObservationFreshness:
+    def __init__(self, maximum_age: float) -> None:
+        self.maximum_age = maximum_age
+        self.stale_since: float | None = None
+
+    def check_timeout(self, now: float) -> None:
+        if self.stale_since is not None and now - self.stale_since >= 2.0:
+            raise TimeoutError("Native observations did not recover within2 seconds")
+
+    def observe(self, age: float, now: float, ready: bool) -> bool:
+        if not ready or age <= self.maximum_age:
+            self.stale_since = None
+            return True
+        if self.stale_since is None:
+            self.stale_since = now
+        self.check_timeout(now)
+        return False
+
+
 class TraceReader:
     def __init__(self, path: Path, maximum_record_bytes: int = 1024 * 1024) -> None:
         self.path = path

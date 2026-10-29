@@ -28,9 +28,45 @@ class PhysicalDoor:
         self.recovery_axis: int | None = None
         self.axis_until = 0
         self.navigator = TerrainNavigator()
+        self.gate_hostiles_seen = False
+        self.gate_quiet_tick: int | None = None
+        self.gate_observations: list[dict] = []
+
+    @property
+    def waiting_for_gate(self) -> bool:
+        return (self.contract is not None and
+                self.contract["current_flag_value"] < self.contract["required_value"])
+
+    def refresh_gate(self, frame: Frame) -> None:
+        if (not frame.ready or self.contract is None or self.arrival_tick is not None
+                or (frame.zone, frame.room) != (self.source_zone, self.source_room)):
+            return
+        matches = [door for door in frame.raw["doors"] if door["index"] == self.index]
+        if len(matches) != 1:
+            raise ValueError("Requested original door record disappeared from the live source room")
+        value = matches[0]["current_flag_value"]
+        self.contract["current_flag_value"] = value
+        if not self.gate_observations or self.gate_observations[-1]["value"] != value:
+            self.gate_observations.append({"tick": frame.tick, "value": value})
+        if not self.waiting_for_gate:
+            self.gate_quiet_tick = None
+            return
+        self.gate_hostiles_seen |= bool(frame.enemies)
+        if (frame.enemies or frame.event_phase != 0 or frame.control != 1
+                or frame.raw["transition"] != 0 or not frame.raw["field_rendering_enabled"]):
+            self.gate_quiet_tick = None
+            return
+        if self.gate_hostiles_seen:
+            if frame.player is None or frame.player.hp <= 0 or frame.game_over:
+                return
+            if self.gate_quiet_tick is None:
+                self.gate_quiet_tick = frame.tick
+            if frame.tick - self.gate_quiet_tick < 120:
+                return
+        self.blocked_reason = "Original story flag remains unsatisfied after native prerequisites settled"
 
     def navigation_request(self, frame: Frame, avoid_hostiles: bool = False) -> dict | None:
-        if (self.contract is None or self.arrival_tick is not None or self.blocked_reason
+        if (self.contract is None or self.waiting_for_gate or self.arrival_tick is not None or self.blocked_reason
                 or frame.player is None or not frame.raw.get("navigation", {}).get("available")
                 or (frame.zone, frame.room) != (self.source_zone, self.source_room)):
             return None
@@ -47,8 +83,10 @@ class PhysicalDoor:
             if len(matches) != 1:
                 raise ValueError("Requested original door record is absent from the live room")
             self.contract = dict(matches[0])
-            if self.contract["current_flag_value"] < self.contract["required_value"]:
-                self.blocked_reason = "Original story flag does not satisfy this physical door"
+        self.refresh_gate(frame)
+        if self.contract is not None and not self.waiting_for_gate and (
+            frame.zone, frame.room
+        ) == (self.source_zone, self.source_room):
             for other in frame.raw["doors"]:
                 if (other["index"] < self.index and
                     (other["tile_x"], other["tile_z"], other["layer"]) ==
@@ -80,7 +118,7 @@ class PhysicalDoor:
             self.quiet_tick = None
 
     def step(self, frame: Frame) -> InputAction | None:
-        if (self.contract is None or self.blocked_reason or self.arrival_tick is not None
+        if (self.contract is None or self.waiting_for_gate or self.blocked_reason or self.arrival_tick is not None
                 or not frame.ready or frame.control != 1 or frame.event_phase != 0
                 or frame.player is None or frame.camera_yaw is None
                 or frame.tick-self.last_input_tick < 6
@@ -161,6 +199,8 @@ class PhysicalDoor:
             "jump_attempts": self.jump_attempts,
             "axis_attempts": self.axis_attempts,
             "navigation_feedback": self.navigator.feedback,
+            "waiting_for_gate": self.waiting_for_gate,
+            "gate_observations": self.gate_observations,
         }
 
 

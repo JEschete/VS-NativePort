@@ -21,12 +21,7 @@ bool FindStart(const Game::EncounterRoom& room, Game::EncounterPosition& start,
   int best = std::numeric_limits<int>::max();
   for (int z = 0; z < room.depth; ++z) {
     for (int x = 0; x < room.width; ++x) {
-      const auto index = static_cast<std::size_t>(z) * room.width + x;
-      if (index >= room.floor.size() ||
-          room.floor[index] != Game::EncounterFloor::kSupported ||
-          std::ranges::any_of(room.doors, [x, z](const auto& door) {
-            return door.tile_x == x && door.tile_z == z;
-          })) {
+      if (!IsRoomFixtureTile(room, x, z)) {
         continue;
       }
       const int distance =
@@ -103,6 +98,32 @@ nlohmann::json ReadCheckpointJson(const std::filesystem::path& path) {
   return nlohmann::json::parse(input);
 }
 }  // namespace
+
+bool IsRoomFixtureTile(const Game::EncounterRoom& room, int x, int z) {
+  if (!room.unavailable_reason.empty() || x < 0 || z < 0 || x >= room.width ||
+      z >= room.depth) {
+    return false;
+  }
+  const auto index = static_cast<std::size_t>(z) * room.width + x;
+  return index < room.floor.size() &&
+         room.floor[index] == Game::EncounterFloor::kSupported &&
+         !std::ranges::any_of(
+             room.doors,
+             [x, z](const auto& door) {
+               return door.tile_x == x && door.tile_z == z;
+             });
+}
+
+std::optional<Game::EncounterPosition> FindRoomFixtureStart(
+    const Game::EncounterRoom& room, Game::EncounterPosition nearest) {
+  if (!room.unavailable_reason.empty()) return std::nullopt;
+  Game::EncounterDoor reference{};
+  reference.tile_x = nearest.x;
+  reference.tile_z = nearest.z;
+  Game::EncounterPosition start{};
+  if (!FindStart(room, start, reference)) return std::nullopt;
+  return start;
+}
 
 std::vector<DoorTestCase> EnumerateDoorTests(
     const std::vector<Game::EncounterZone>& catalog) {

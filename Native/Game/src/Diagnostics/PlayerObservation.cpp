@@ -33,6 +33,7 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
 #include "Core/Text/TextCode.h"
+#include "Event/ScriptVm.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -229,9 +230,12 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   constexpr unsigned kMenuControl = 5, kMenuIdMask = 0x3F;
   constexpr unsigned kCombatControl = 2, kAbilityUnlockPhase = 14,
                      kLootPhase = 12;
+  constexpr unsigned kEventControl = 3;
   constexpr unsigned kSubmenuStateMask = 0xF;
   constexpr int kMainMenuEntries = 10;
-  if ((state.control_mode != kMenuControl &&
+  result.event_owned =
+      state.control_mode == kEventControl && Event_isMenuTransitionActive != 0;
+  if ((state.control_mode != kMenuControl && !result.event_owned &&
        !(state.control_mode == kCombatControl &&
          (state.action_phase == kAbilityUnlockPhase ||
           state.action_phase == kLootPhase))) ||
@@ -594,6 +598,7 @@ nlohmann::json EncodePlayerMenu(const EncounterMenuState& menu) {
                     {"item_count", row.item_count}});
   }
   return {{"available", menu.available},
+          {"event_owned", menu.event_owned},
           {"loading", menu.loading},
           {"selected_menu", menu.selected_menu},
           {"submenu_phase", menu.submenu_phase},
@@ -704,6 +709,41 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
   return state;
 }
 
+namespace {
+nlohmann::json EncodeTargetForecasts(const EncounterState& base) {
+  auto forecasts = nlohmann::json::array();
+  if (!base.ready || base.target_previews.empty()) return forecasts;
+  const auto* action = Battle_actionState;
+  if (action == nullptr ||
+      base.target_previews.size() != action->previewCount ||
+      action->previewCount > std::size(action->previews)) {
+    throw std::runtime_error(
+        "native target forecast storage changed within a frame");
+  }
+  constexpr std::array<int, 4> kAmountEffects{58, 59, 62, 63};
+  for (std::size_t index = 0; index < base.target_previews.size(); ++index) {
+    const auto& target = action->previews[index];
+    const auto& observed = base.target_previews[index];
+    if (target.actorId != observed.actor || target.limb != observed.limb) {
+      throw std::runtime_error(
+          "native target forecast identity changed within a frame");
+    }
+    // Original 146C.c:3235 copies these cached values without another roll.
+    const int effect = static_cast<std::uint8_t>(target.effect);
+    nlohmann::json forecast = {{"actor", target.actorId},
+                               {"limb", target.limb},
+                               {"effect_id", effect},
+                               {"hit_threshold", target.hitChance},
+                               {"amount", nullptr}};
+    if (std::ranges::find(kAmountEffects, effect) != kAmountEffects.end()) {
+      forecast["amount"] = std::bit_cast<std::uint16_t>(target.previewAmount);
+    }
+    forecasts.push_back(std::move(forecast));
+  }
+  return forecasts;
+}
+}  // namespace
+
 void AppendPlayerObservations(nlohmann::json& data,
                               const EncounterState& base) {
   const auto state = InspectPlayerObservation(base);
@@ -727,6 +767,7 @@ void AppendPlayerObservations(nlohmann::json& data,
   }
   data["item_options"] = std::move(items);
   data["target_page"]["selection_step"] = state.target_selection_step;
+  data["target_forecasts"] = EncodeTargetForecasts(base);
   auto actors = nlohmann::json::array();
   for (const auto& actor : state.player_actors) {
     actors.push_back(EncodePlayerActor(actor));

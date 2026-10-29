@@ -82,6 +82,7 @@ struct EncounterMenuRowState {
 
 struct EncounterMenuState {
   bool available = false;
+  bool event_owned = false;
   bool loading = false;
   int selected_menu = -1;
   int submenu_phase = 0;

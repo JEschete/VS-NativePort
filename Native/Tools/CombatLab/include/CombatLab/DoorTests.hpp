@@ -2,6 +2,7 @@
 
 #include <cstdint>
 #include <filesystem>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <vector>
@@ -10,6 +11,10 @@
 #include "nlohmann/json.hpp"
 
 namespace VS::combat_lab {
+
+bool IsRoomFixtureTile(const Game::EncounterRoom& room, int x, int z);
+std::optional<Game::EncounterPosition> FindRoomFixtureStart(
+    const Game::EncounterRoom& room, Game::EncounterPosition nearest);
 
 struct DoorTestCase {
   std::string id;

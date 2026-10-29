@@ -8,6 +8,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "CombatLab/DoorTests.hpp"
 #include "CombatLab/SceneCatalog.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
@@ -55,6 +56,43 @@ void CheckSceneAssetIdentities(const nlohmann::json& inventory) {
   CHECK(counts["movie"] == 1);
 }
 }  // namespace
+
+TEST_CASE("Scene fixtures use original supported non-door tiles",
+          "[scenes][catalog][fixtures]") {
+  VS::Game::EncounterRoom room;
+  room.width = 3;
+  room.depth = 2;
+  room.floor.assign(6, VS::Game::EncounterFloor::kNoFloor);
+  room.entrance = {1, 0, 0, 0};
+  room.floor[1] = VS::Game::EncounterFloor::kSupported;
+  room.floor[4] = VS::Game::EncounterFloor::kSupported;
+  VS::Game::EncounterDoor door{};
+  door.tile_x = 1;
+  door.tile_z = 0;
+  room.doors.push_back(door);
+  const std::array<bool, 4> eligible = {
+      VS::combat_lab::IsRoomFixtureTile(room, 1, 0),
+      VS::combat_lab::IsRoomFixtureTile(room, -1, 0),
+      VS::combat_lab::IsRoomFixtureTile(room, 3, 0),
+      VS::combat_lab::IsRoomFixtureTile(room, 1, 1)};
+  const std::array<bool, 4> expected = {false, false, false, true};
+  CHECK(eligible == expected);
+  const auto start = VS::combat_lab::FindRoomFixtureStart(room, room.entrance);
+  if (!start.has_value()) {
+    FAIL("Original supported non-door fixture was not found");
+    return;
+  }
+  CHECK(start->x == 1);
+  CHECK(start->z == 1);
+  CHECK(room.floor[1] == VS::Game::EncounterFloor::kSupported);
+  room.floor[4] = VS::Game::EncounterFloor::kNoFloor;
+  CHECK_FALSE(
+      VS::combat_lab::FindRoomFixtureStart(room, room.entrance).has_value());
+  room.floor[4] = VS::Game::EncounterFloor::kSupported;
+  room.unavailable_reason = "original room asset unavailable";
+  CHECK_FALSE(
+      VS::combat_lab::FindRoomFixtureStart(room, room.entrance).has_value());
+}
 
 TEST_CASE("Scene inventory distinguishes empty and malformed scripts",
           "[scenes][catalog]") {

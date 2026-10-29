@@ -12,15 +12,15 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from .config import PROJECT, PlayerPaths, runtime_manifest
-from .controller import CombatController, StaleDecision
+from .controller import CombatController, StaleDecision, input_lease_permitted, strategy_planning_ready
 from .doors import PhysicalDoor, PhysicalRoute
 from .model import Decision, ModelResponseError, NavigationDecision
-from .navigation import TerrainNavigator, field_navigation_ready
+from .navigation import SceneTileGoal, TerrainNavigator, field_navigation_ready
 from .choices import reward_menu_ready
 from .observations import Frame
 from .processes import ProcessJob, freeze_game, game_environment, model_server, verify_installed_model, warm_model
 from .store import Retention, RunStore, owned_tree_size
-from .trace import TraceReader, find_trace
+from .trace import ObservationFreshness, TraceReader, find_trace
 from .windows import WindowInput
 
 
@@ -121,10 +121,80 @@ class PlayOptions:
     door_case: str = ""
     save_file: Path | None = None
     door_route: tuple[str, ...] = ()
+    clear_enemies_first: bool = False
+    setup_presses: str = ""
+    new_game: bool = False
+    simulation_speed: int = 1
+    scene_expectation: Path | None = None
+    scene_target_tile: tuple[int, int] | None = None
+
+    def validate_scene_expectation(self) -> None:
+        if self.scene_target_tile is not None and (
+                self.scene_expectation is None or self.door_case or self.door_route
+                or not isinstance(self.scene_target_tile, tuple)
+                or len(self.scene_target_tile) != 2
+                or any(type(value) is not int or not 0 <= value <= 255
+                       for value in self.scene_target_tile)):
+            raise ValueError("Scene-tile navigation requires an explicit local-scene goal, no door goal, and a native tile")
+        if self.scene_expectation is not None and (
+                self.executable.name != "VS.CombatLab.exe" or self.scenario is None
+                or self.new_game or self.save_file is not None):
+            raise ValueError("Native scene completion requires an explicit Combat Lab source fixture")
+
+    def validate_simulation_speed(self) -> None:
+        if type(self.simulation_speed) is not int or self.simulation_speed not in (1, 2, 4):
+            raise ValueError("Investigation speed must be1,2 or4")
+        if self.simulation_speed == 1:
+            return
+        if (self.strict_reactions or self.minimum_chains or self.minimum_defenses
+                or self.executable.name != "VS.CombatLab.exe" or self.scenario is None
+                or self.new_game or self.save_file is not None
+                or self.door_case or self.door_route):
+            raise ValueError(
+                "Accelerated play requires a Lab scene investigation without "
+                "reaction certification, save/New Game or physical-door objectives"
+            )
+
+    def desktop_startup_presses(self) -> str:
+        if self.executable.name != "VS.Desktop.exe" or self.scenario is not None:
+            raise ValueError("Production New Game/Continue requires Desktop without a Lab scenario")
+        if self.new_game:
+            if self.save_file is not None or self.setup_presses:
+                raise ValueError("Production New Game cannot use a save or source-fixture movement")
+            return "1000:Start,1300:Circle"
+        if self.save_file is None:
+            raise ValueError("Desktop requires an explicit New Game or unchanged native save")
+        return "1000:Start,1300:Circle,1450:Circle,1510:Up,1570:Circle"
+
+    def setup_control_tick(self) -> int:
+        if not self.setup_presses:
+            return 0
+        if (self.executable.name != "VS.CombatLab.exe" or self.scenario is None
+                or self.save_file is not None):
+            raise ValueError("Source setup movement requires a Combat Lab scenario")
+        if self.door_case or self.door_route or self.clear_enemies_first:
+            raise ValueError("Source setup movement cannot modify physical-door objectives")
+        previous = -2
+        for pulse in self.setup_presses.split(","):
+            tick_text, separator, keys_text = pulse.partition(":")
+            keys = keys_text.split("+")
+            if (not separator or not tick_text.isascii() or not tick_text.isdecimal()
+                    or not keys or len(set(keys)) != len(keys)
+                    or not set(keys) <= {"Up", "Down", "Left", "Right"}
+                    or {"Up", "Down"} <= set(keys) or {"Left", "Right"} <= set(keys)):
+                raise ValueError("Source setup pulses require decimal ticks and ordinary directions only")
+            tick = int(tick_text)
+            if tick < previous + 2:
+                raise ValueError("Source setup pulses must be ordered and cannot overlap")
+            if tick + 4 >= self.frames:
+                raise ValueError("Source setup movement must finish before the frame budget")
+            previous = tick
+        return previous + 4
 
 
 class CombatGoal:
-    def __init__(self, door_case: str = "", door_route: tuple[str, ...] = ()) -> None:
+    def __init__(self, door_case: str = "", door_route: tuple[str, ...] = (),
+                 clear_enemies_first: bool = False) -> None:
         if door_case and door_route:
             raise ValueError("Choose a single physical door or a continuous route, not both")
         self.door = (PhysicalRoute(door_route) if door_route else
@@ -137,6 +207,31 @@ class CombatGoal:
         self.forced_skip = False
         self.encounters: set[tuple[int, int]] = set()
         self.max_incoming_hp_damage = 0
+        self.clear_enemies_first = clear_enemies_first
+
+    def combat_pending(self, frame: Frame, source_scope: tuple[int, int] | None = None) -> bool:
+        if not self.clear_enemies_first:
+            return False
+        if source_scope is None:
+            if self.door is None:
+                return False
+            leg = self.door.active_leg if isinstance(self.door, PhysicalRoute) else self.door
+            source_scope = (leg.source_zone, leg.source_room)
+        source = source_scope
+        if (frame.zone, frame.room) == source and frame.enemies:
+            return True
+        return any(identity[1:3] == source and identity not in self.dead
+                   for identity in self.seen)
+
+    def exit_ready(self, frame: Frame) -> bool:
+        if self.door is None or self.accepted_tick is not None or self.combat_pending(frame):
+            return False
+        leg = self.door.active_leg if isinstance(self.door, PhysicalRoute) else self.door
+        return (field_navigation_ready(frame) and not frame.enemies
+                and not frame.dialogue_waiting and not reward_menu_ready(frame)
+                and leg.contract is not None and not leg.waiting_for_gate
+                and leg.arrival_tick is None and not leg.blocked_reason
+                and (frame.zone, frame.room) == (leg.source_zone, leg.source_room))
 
     @staticmethod
     def identity(frame: Frame, actor) -> tuple[int, int, int, int, int]:
@@ -183,13 +278,82 @@ class CombatGoal:
                 self.accepted_tick = None
 
 
+def native_lab_script(options: PlayOptions, scenario: Path, setup: dict) -> dict:
+    options.validate_scene_expectation()
+    script = {"name": "external-player", "scenario": str(scenario), "frames": options.frames}
+    if options.setup_presses:
+        script["press"] = options.setup_presses
+    if options.scene_expectation is not None:
+        if setup.get("room_events") != "production":
+            raise ValueError("Native scene completion requires unchanged production-room events")
+        expectation = json.loads(options.scene_expectation.read_text(encoding="utf-8"))
+        if not isinstance(expectation, dict):
+            raise ValueError("Native scene expectation must be a JSON object")
+        script["scene"] = expectation
+        if options.scene_target_tile is not None and (
+                expectation.get("event_source") != 2
+                or not isinstance(expectation.get("events"), list)
+                or len(expectation["events"]) != 1):
+            raise ValueError("Scene-tile navigation requires exactly one original room-local event")
+    return script
+
+
+def native_outcome(options: PlayOptions, reader: TraceReader,
+                   returncode: int | None,
+                   expected_scene: dict | None = None) -> tuple[bool, dict | None]:
+    if options.executable.name == "VS.Desktop.exe":
+        result = {
+            "coverage": ("production_new_game_controller_observation" if options.new_game
+                         else "production_continue_controller_observation"),
+            "host_exit": reader.host_exit,
+            "trace_finalized": reader.ended,
+            "engine_errors": len(reader.engine_errors),
+            "game_finished": bool(reader.host_exit and reader.host_exit.get("game_finished")),
+        }
+        complete = (returncode == 0 and reader.host_exit is not None
+                    and reader.ended and not reader.engine_errors and not reader.pending)
+        return complete, result
+    checkpoint = reader.path.parent / "sequence-results.json"
+    native = json.loads(checkpoint.read_text(encoding="utf-8"))
+    scripts = native["scripts"]
+    scene_complete = expected_scene is None
+    expected_status = "completed"
+    if options.scene_expectation is not None:
+        expected_status = "passed"
+        scene_complete = False
+        if len(scripts) == 1 and expected_scene is not None:
+            scene = scripts[0].get("scene", {})
+            start, end = scene.get("control_tick"), scene.get("passed_tick")
+            scene_complete = (
+                scene.get("coverage") == "scene_playback_control"
+                and scene.get("status") == "passed"
+                and scene.get("expected_events") == expected_scene.get("events")
+                and scene.get("matched_events") == len(expected_scene.get("events", []))
+                and scene.get("event_source") == expected_scene.get("event_source", 0)
+                and scene.get("return_zone") == expected_scene.get("return_zone")
+                and scene.get("return_room") == expected_scene.get("return_room")
+                and scene.get("preconditions") == expected_scene.get("preconditions")
+                and type(start) is int and type(end) is int and end - start >= 120
+            )
+    complete = (
+        returncode == 0 and len(scripts) == 1
+        and scripts[0]["status"] == expected_status and scripts[0]["teardown_complete"]
+        and scripts[0]["engine_errors"] == 0 and reader.ended and scene_complete
+        and not reader.engine_errors and not reader.pending
+    )
+    return complete, scripts[0] if scripts else None
+
+
 def _play_game(store: RunStore, run_id: str,
                options: PlayOptions, client, audit: AuditWriter,
                maintenance: PeriodicCleanup, retention: Retention) -> dict:
     run = store.directory(run_id)
     game = run / "game"
     hashes = freeze_game(options.executable, game)
-    if options.scenario is None:
+    if options.new_game:
+        setup = {"ashley_profile": "production-new-game"}
+        scenario_bytes = json.dumps(setup, separators=(",", ":")).encode()
+    elif options.scenario is None:
         if options.save_file is None:
             raise ValueError("A declared Lab scenario or an unchanged native save is required")
         scenario_bytes = options.save_file.resolve(strict=True).read_bytes()
@@ -197,37 +361,56 @@ def _play_game(store: RunStore, run_id: str,
     else:
         scenario_bytes = options.scenario.resolve(strict=True).read_bytes()
         setup = json.loads(scenario_bytes)
+    setup_control_tick = options.setup_control_tick()
+    if options.setup_presses and setup.get("room_events") != "production":
+        raise ValueError("Source setup movement requires unchanged production-room events")
     if setup.get("ashley_stats"):
         raise ValueError("Managed acceptance runs do not allow stat overrides")
     if setup.get("room_events") == "production" and setup.get("enemies"):
         raise ValueError("Production-room runs cannot replace original actors")
     command = [str(game / options.executable.name),
                "--player-observations",
+               "--verification-log",
                "--data", str(options.data.resolve(strict=True)),
-               "--speed", "1", "--save-dir", str(run / "private-saves")]
+               "--speed", str(options.simulation_speed), "--save-dir", str(run / "private-saves")]
+    scene_expectation = None
     if options.executable.name == "VS.CombatLab.exe" and options.scenario is not None:
         scenario = run / "scenario.json"
         scenario.write_bytes(scenario_bytes)
         sequence = run / "sequence.json"
+        script = native_lab_script(options, scenario, setup)
+        scene_expectation = script.get("scene")
+        if scene_expectation is not None:
+            (run / "scene-expectation.json").write_text(
+                json.dumps(scene_expectation, indent=2) + "\n", encoding="utf-8",
+            )
         sequence.write_text(json.dumps({
-            "version": 1, "scripts": [{"name": "external-player",
-                "scenario": str(scenario), "frames": options.frames}],
+            "version": 1, "scripts": [script],
         }, indent=2) + "\n", encoding="utf-8")
         command.extend(["--sequence", str(sequence)])
-    elif options.executable.name == "VS.Desktop.exe" and options.save_file is not None:
-        saves = run / "private-saves"
-        saves.mkdir()
-        (saves / "slot00.vssave").write_bytes(scenario_bytes)
+    elif options.executable.name == "VS.Desktop.exe":
+        presses = options.desktop_startup_presses()
+        if options.save_file is not None:
+            saves = run / "private-saves"
+            saves.mkdir()
+            (saves / "slot00.vssave").write_bytes(scenario_bytes)
         command.extend(["--frames", str(options.frames), "--press",
-                        "1000:Start,1300:Circle,1450:Circle,1510:Up,1570:Circle"])
+                        presses])
     else:
-        raise ValueError("Combat Lab requires --scenario; Desktop requires --save-file")
+        raise ValueError("Combat Lab requires --scenario; Desktop requires --new-game or --save-file")
     audit.event("game.launch", {
         "command": command, "image_sha256": hashes,
         "scenario_sha256": hashlib.sha256(scenario_bytes).hexdigest(),
+        "source_setup_presses": options.setup_presses,
+        "native_scene_expectation": scene_expectation,
+        "scene_target_tile": options.scene_target_tile,
+        "model_control_from_tick": setup_control_tick,
     })
     controller = CombatController()
-    goal = CombatGoal(options.door_case, options.door_route)
+    goal = CombatGoal(options.door_case, options.door_route, options.clear_enemies_first)
+    scene_navigation = (SceneTileGoal(options.scene_target_tile, setup["zone"], setup["room"],
+                                     scene_expectation["events"][0])
+                        if options.scene_target_tile is not None and scene_expectation is not None else None)
     route_checkpoint_offset = 0
     latest: Frame | None = None
     reader: TraceReader | None = None
@@ -236,7 +419,7 @@ def _play_game(store: RunStore, run_id: str,
     held_deadline = 0.0
     future: Future[Decision] | None = None
     navigation_future: Future[NavigationDecision] | None = None
-    navigation_owner: TerrainNavigator | None = None
+    navigation_owner: TerrainNavigator | SceneTileGoal | None = None
     pursuit = TerrainNavigator()
     pursuit_scope: tuple[int, ...] | None = None
     observed: Frame | None = None
@@ -246,6 +429,8 @@ def _play_game(store: RunStore, run_id: str,
     ending_offset = 0
     invalid_responses = 0
     validation_feedback: str | None = None
+    freshness = ObservationFreshness(options.maximum_trace_age)
+    exit_handoff: tuple[int, str] | None = None
     inputs = 0
     max_age = 0.0
     started = time.monotonic()
@@ -277,6 +462,7 @@ def _play_game(store: RunStore, run_id: str,
                     if reader.engine_errors:
                         raise RuntimeError("Native game recorded an engine error")
                     if not frames:
+                        freshness.check_timeout(now)
                         if driver.held and now > held_deadline:
                             driver.set_buttons(frozenset())
                             raise TimeoutError("Input lease expired without a fresh game frame")
@@ -286,16 +472,36 @@ def _play_game(store: RunStore, run_id: str,
                         controller.reactions.observe(historical, allow_input=False)
                         if historical.tick <= options.frames:
                             goal.observe(historical)
+                            if scene_navigation is not None:
+                                scene_navigation.observe(historical)
                     latest = frames[-1]
                     age = reader.age(latest)
                     max_age = max(max_age, age)
                     if latest.raw["input"]["analog"]:
                         raise RuntimeError("Managed game still accepts a hardware gamepad")
-                    if latest.ready and age > options.maximum_trace_age:
+                    was_stale = freshness.stale_since is not None
+                    if not freshness.observe(age, now, latest.ready):
                         driver.set_buttons(frozenset())
-                        raise TimeoutError(f"Native observation is stale ({age * 1000:.1f} ms)")
+                        controller.reactions.observe(latest, allow_input=False)
+                        if latest.tick <= options.frames:
+                            goal.observe(latest)
+                            if scene_navigation is not None:
+                                scene_navigation.observe(latest)
+                        if not was_stale:
+                            audit.event("observation.stale", {
+                                "tick": latest.tick, "age_ms": age * 1000,
+                                "action": "release all input and wait for fresh state",
+                            })
+                        time.sleep(0.001)
+                        continue
+                    if was_stale:
+                        audit.event("observation.recovered", {
+                            "tick": latest.tick, "age_ms": age * 1000,
+                        })
                     if latest.tick <= options.frames:
                         goal.observe(latest)
+                        if scene_navigation is not None:
+                            scene_navigation.observe(latest)
                     if isinstance(goal.door, PhysicalRoute):
                         for checkpoint in goal.door.checkpoints[route_checkpoint_offset:]:
                             audit.event("physical_door.accepted", checkpoint)
@@ -303,8 +509,8 @@ def _play_game(store: RunStore, run_id: str,
                     if latest.game_over:
                         raise RuntimeError("The player was defeated")
                     if driver.held and (
-                        latest.tick >= release_tick or not latest.ready
-                        or latest.control not in (1, 2, 5, 6)
+                        latest.tick >= release_tick
+                        or not input_lease_permitted(latest, driver.held)
                     ):
                         driver.set_buttons(frozenset())
                     if future is not None and future.done():
@@ -345,10 +551,53 @@ def _play_game(store: RunStore, run_id: str,
                             if invalid_responses >= 3:
                                 raise RuntimeError("Model failed three navigation validation attempts") from error
                         navigation_future = None
-                    needs_plan = controller.decision is None or now - last_request >= 2.0
+                    exit_ready = goal.exit_ready(latest)
+                    scene_combat_pending = bool(
+                        scene_navigation is not None
+                        and goal.combat_pending(latest, (scene_navigation.zone, scene_navigation.room))
+                    )
+                    if exit_ready:
+                        leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
+                        if leg is None:
+                            raise RuntimeError("Door handoff lost its physical objective")
+                        scope = (latest.episode, leg.identity)
+                        if exit_handoff != scope:
+                            audit.event("goal.post_combat_exit", {
+                                "tick": latest.tick, "door": leg.identity,
+                                "source_hostiles_observed_dead": len(goal.dead),
+                                "contract": leg.contract,
+                            })
+                            exit_handoff = scope
+                    if (scene_navigation is not None and future is None and navigation_future is None
+                            and not driver.held and not controller.preparing
+                            and not scene_combat_pending
+                            and latest.tick >= setup_control_tick
+                            and (not latest.enemies or (controller.decision is not None
+                                                       and controller.decision.intent == "navigate"))):
+                        context = scene_navigation.request(latest, avoid_hostiles=bool(latest.enemies))
+                        if context is not None:
+                            navigation_owner = scene_navigation
+                            context["retrieved_navigation_evidence"] = store.navigation_experience(
+                                latest.zone, latest.room, scene_navigation.identity,
+                                scene_navigation.navigator.geometry_sha256,
+                            )
+                            audit.event("model.navigation_request", {
+                                "tick": latest.tick, "scene_trigger": scene_navigation.result(),
+                                "context": context,
+                            })
+                            navigation_future = planner.submit(
+                                client.navigate, latest, options.goal, context,
+                            )
+                    scene_pending = scene_navigation is not None and scene_navigation.pending(latest)
+                    needs_plan = (controller.decision is None or now - last_request >= 2.0
+                                  or controller.needs_target_choice(latest)
+                                  or ((exit_ready or (scene_pending and not scene_combat_pending))
+                                      and controller.decision.intent != "navigate"))
                     player = latest.player
-                    if (future is None and navigation_future is None and latest.ready and player
-                            and (latest.enemies or reward_menu_ready(latest))
+                    if (future is None and navigation_future is None
+                            and strategy_planning_ready(latest) and player
+                            and latest.tick >= setup_control_tick
+                            and (latest.enemies or reward_menu_ready(latest) or exit_ready or scene_pending)
                             and not controller.preparing
                             and needs_plan and now - last_request >= 0.5
                             and goal.accepted_tick is None):
@@ -360,6 +609,7 @@ def _play_game(store: RunStore, run_id: str,
                         experience = store.experience(nearest.model, player.weapon_category) if nearest else []
                         context = {
                             "last_decision": asdict(controller.decision) if controller.decision else None,
+                            "target_choice_required": controller.needs_target_choice(latest),
                             "required_successes": {"chain": options.minimum_chains,
                                                    "defense": options.minimum_defenses},
                             "confirmed_successes": {
@@ -375,14 +625,39 @@ def _play_game(store: RunStore, run_id: str,
                             "recent_terrain_feedback": pursuit.feedback[-6:],
                             "max_incoming_hp_damage": goal.max_incoming_hp_damage,
                         }
+                        if scene_navigation is not None:
+                            context["source_scene_navigation_objective"] = {
+                                **scene_navigation.result(),
+                                "combat_clearance_required": scene_combat_pending,
+                            }
                         if goal.door is not None:
                             leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
                             if (leg.contract is not None and leg.arrival_tick is None
-                                    and not leg.blocked_reason
+                                    and not leg.blocked_reason and not leg.waiting_for_gate
+                                    and not goal.combat_pending(latest)
                                     and (latest.zone, latest.room) == (leg.source_zone, leg.source_room)):
                                 context["physical_navigation_objective"] = {
                                     "id": leg.identity, "contract": leg.contract,
                                     "claim": "Original controller traversal; living foes are not declared defeated",
+                                    "phase": "post_combat_exit" if exit_ready else "physical_traversal",
+                                    "next_action": "Navigate to and interact with this observed original door.",
+                                }
+                            elif leg.waiting_for_gate:
+                                context["native_gate_prerequisite"] = {
+                                    "id": leg.identity, "contract": leg.contract,
+                                    "instruction": (
+                                        "Fight the original living hostiles and let native events finish. "
+                                        "Onward navigation is unavailable until the observed flag qualifies; "
+                                        "enemy death alone is not proof that this gate opened."
+                                    ),
+                                }
+                            elif goal.combat_pending(latest):
+                                context["combat_clearance_required"] = {
+                                    "instruction": (
+                                        "Defeat the original source-room hostiles first. "
+                                        "Onward navigation remains unavailable until every observed "
+                                        "source hostile has an actual zero-HP observation."
+                                    ),
                                 }
                         audit.event("model.request", {
                             "tick": latest.tick, "goal": options.goal,
@@ -395,7 +670,8 @@ def _play_game(store: RunStore, run_id: str,
                             and (not latest.enemies or (controller.decision is not None
                                                        and controller.decision.intent == "navigate"))
                             and not controller.preparing
-                            and goal.door is not None and goal.accepted_tick is None):
+                            and goal.door is not None and not goal.combat_pending(latest)
+                            and goal.accepted_tick is None):
                         leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
                         navigation_context = leg.navigation_request(latest, avoid_hostiles=bool(latest.enemies))
                         if navigation_context is not None:
@@ -420,10 +696,18 @@ def _play_game(store: RunStore, run_id: str,
                                  pursuit_actor.model, pursuit_actor.spawn_index)
                         if scope != pursuit_scope:
                             pursuit, pursuit_scope = TerrainNavigator(), scope
+                    scene_movement = bool(
+                        scene_navigation is not None and scene_navigation.ready(latest)
+                        and (scene_navigation.navigator.path
+                             or (navigation_future is not None
+                                 and navigation_owner is scene_navigation))
+                    )
                     action = controller.step(
                         latest,
                         allow_strategy=(not driver.held and goal.accepted_tick is None
-                                        and not (pursuing and pursuit.path and field_navigation_ready(latest))),
+                                        and latest.tick >= setup_control_tick
+                                        and not (pursuing and pursuit.path and field_navigation_ready(latest))
+                                        and not scene_movement),
                     )
                     ordinary_movement = (action is not None
                                          and action.reason == "move using current native positions and camera")
@@ -465,11 +749,17 @@ def _play_game(store: RunStore, run_id: str,
                                     f"Approach the observed hostile actor{pursuit_actor.slot} through "
                                     "real terrain until native attack targeting can select it.", context,
                                 )
+                    if (action is None and scene_navigation is not None and not driver.held
+                            and not controller.preparing
+                            and not scene_combat_pending
+                            and (not latest.enemies or (controller.decision is not None
+                                                       and controller.decision.intent == "navigate"))):
+                        action = scene_navigation.step(latest)
                     if (action is None and goal.door is not None and not driver.held
                             and not controller.preparing
                             and (not latest.enemies or (controller.decision is not None
                                                        and controller.decision.intent == "navigate"))
-                            and goal.accepted_tick is None):
+                            and not goal.combat_pending(latest) and goal.accepted_tick is None):
                         action = goal.door.step(latest)
                     if goal.door is not None and (
                         goal.door.blocked_reason or
@@ -500,6 +790,15 @@ def _play_game(store: RunStore, run_id: str,
                                 "geometry_sha256": leg.navigator.geometry_sha256,
                                 "image_sha256": hashes, "observation": observation,
                                 "claim": "Measured local movement, not proof of whole-route passability",
+                            })
+                    if scene_navigation is not None:
+                        for observation in scene_navigation.navigator.observations():
+                            audit.event("navigation.outcome", {
+                                "zone": latest.zone, "room": latest.room,
+                                "door": scene_navigation.identity,
+                                "geometry_sha256": scene_navigation.navigator.geometry_sha256,
+                                "image_sha256": hashes, "observation": observation,
+                                "claim": "Measured source-trigger approach; not native scene activation or completion",
                             })
                     if action is not None and (not driver.held or action.reaction):
                         driver.set_buttons(action.buttons)
@@ -537,6 +836,8 @@ def _play_game(store: RunStore, run_id: str,
                             controller.reactions.observe(frame, allow_input=False)
                             if frame.tick <= options.frames:
                                 goal.observe(frame)
+                                if scene_navigation is not None:
+                                    scene_navigation.observe(frame)
                             latest = frame
                         if reader.at_eof:
                             break
@@ -576,27 +877,12 @@ def _play_game(store: RunStore, run_id: str,
     if options.save_file is not None:
         if options.save_file.read_bytes() != scenario_bytes:
             raise RuntimeError("The original save changed during the observation")
-        native_result = {
-            "coverage": "production_continue_controller_observation",
-            "host_exit": reader.host_exit,
-            "trace_finalized": reader.ended,
-            "engine_errors": len(reader.engine_errors),
-            "game_finished": bool(reader.host_exit and reader.host_exit.get("game_finished")),
-        }
-        complete = process.returncode == 0 and reader.host_exit is not None and reader.ended
-    else:
-        checkpoint = reader.path.parent / "sequence-results.json"
-        native = json.loads(checkpoint.read_text(encoding="utf-8"))
-        scripts = native["scripts"]
-        complete = (
-            process.returncode == 0 and len(scripts) == 1
-            and scripts[0]["status"] == "completed" and scripts[0]["teardown_complete"]
-            and scripts[0]["engine_errors"] == 0 and reader.ended
-        )
-        native_result = scripts[0] if scripts else None
+    complete, native_result = native_outcome(options, reader, process.returncode,
+                                            scene_expectation)
     passed = (
         complete and goal.accepted_tick is not None and not goal.player_dead
         and not goal.forced_skip and not failures
+        and not goal.combat_pending(latest)
         and accepted["chain"] >= options.minimum_chains
         and accepted["defense"] >= options.minimum_defenses
         and verified_effects["defense"] >= options.minimum_defenses
@@ -611,10 +897,14 @@ def _play_game(store: RunStore, run_id: str,
         "reaction_failures": failures,
         "ended_reaction_opportunities": controller.reactions.opportunity_endings,
         "defense_coverage_gaps": controller.reactions.coverage_gaps,
-        "reaction_coverage_demonstrated": all(accepted.values()) and all(verified_effects.values()) and not failures,
+        "reaction_coverage_demonstrated": (options.simulation_speed == 1 and all(accepted.values())
+                                           and all(verified_effects.values()) and not failures),
+        "simulation_speed": options.simulation_speed,
+        "reaction_timing_certification_eligible": options.simulation_speed == 1,
         "inputs": inputs, "max_observation_age_ms": max_age * 1000,
         "native_result": native_result,
         "last_tick": latest.tick,
+        "clear_enemies_first": options.clear_enemies_first,
         "physical_door": goal.door.result() if isinstance(goal.door, PhysicalDoor) else None,
         "physical_route": goal.door.result() if isinstance(goal.door, PhysicalRoute) else None,
         "preparation_outcomes": controller.feedback,
@@ -623,6 +913,10 @@ def _play_game(store: RunStore, run_id: str,
         ],
         "scenario_sha256": hashlib.sha256(scenario_bytes).hexdigest(),
         "ashley_profile": setup.get("ashley_profile"),
+        "source_setup_presses": options.setup_presses,
+        "native_scene_expectation": scene_expectation,
+        "scene_navigation": scene_navigation.result() if scene_navigation is not None else None,
+        "model_control_from_tick": setup_control_tick,
     }
 
 
@@ -631,6 +925,11 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
         raise ValueError("Frame budget and freshness bounds must be positive")
     if options.minimum_chains < 0 or options.minimum_defenses < 0:
         raise ValueError("Required reaction counts cannot be negative")
+    options.validate_simulation_speed()
+    options.validate_scene_expectation()
+    if options.new_game or options.executable.name == "VS.Desktop.exe":
+        options.desktop_startup_presses()
+    setup_control_tick = options.setup_control_tick()
     verify_installed_model(paths)
     store = RunStore(paths)
     cleanup = store.cleanup(retention)
@@ -641,12 +940,21 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
         "executable": str(options.executable.resolve()),
         "scenario": str(options.scenario.resolve()) if options.scenario else None,
         "save_file": str(options.save_file.resolve()) if options.save_file else None,
+        "new_game": options.new_game,
         "frames": options.frames,
         "minimum_chains": options.minimum_chains,
         "minimum_defenses": options.minimum_defenses,
         "strict_reactions": options.strict_reactions,
+        "simulation_speed": options.simulation_speed,
+        "reaction_timing_certification_eligible": options.simulation_speed == 1,
         "door_case": options.door_case,
         "door_route": options.door_route,
+        "clear_enemies_first": options.clear_enemies_first,
+        "source_setup_presses": options.setup_presses,
+        "scene_expectation": (str(options.scene_expectation.resolve())
+                              if options.scene_expectation else None),
+        "model_control_from_tick": setup_control_tick,
+        "retention": asdict(retention),
         "model": runtime_manifest()["model"],
     })
     (store.directory(run_id) / "combat-knowledge.json").write_bytes(
@@ -697,6 +1005,8 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
                                 "zero_hp_hostiles": result["zero_hp_hostiles"],
                                 "scenario_sha256": result["scenario_sha256"],
                                 "ashley_profile": result["ashley_profile"],
+                                "simulation_speed": options.simulation_speed,
+                                "reaction_timing_certification_eligible": options.simulation_speed == 1,
                                 "accepted_reactions": result["accepted_reactions"],
                                 "inputs": result["inputs"],
                                 "goal_tick": result["goal_tick"],

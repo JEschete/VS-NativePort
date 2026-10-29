@@ -16,6 +16,7 @@
 #include <utility>
 #include <vector>
 
+#include "CombatLab/DoorTests.hpp"
 #include "Content/DataStore.hpp"
 #include "Legacy/Psx.h"
 
@@ -192,6 +193,45 @@ nlohmann::json ReadRoomScenes(Bytes bytes, const SceneOpcodes& opcodes) {
   }
   return room;
 }
+nlohmann::json DescribeRoomContext(int zone, const Game::EncounterRoom& room) {
+  nlohmann::json context{{"zone", zone}, {"room", room.index}};
+  const auto start = FindRoomFixtureStart(room, room.entrance);
+  if (!start) {
+    context["unavailable"] = room.unavailable_reason.empty()
+                                 ? "no supported non-door fixture tile"
+                                 : room.unavailable_reason;
+    return context;
+  }
+  context["supported_start"] = {{"x", start->x},
+                                {"z", start->z},
+                                {"elevation", start->elevation},
+                                {"direction", start->direction}};
+  context["fixture_scope"] =
+      "original supported non-door tile; story prerequisites not granted";
+  auto alternatives = nlohmann::json::array();
+  for (const int z : {0, room.depth - 1}) {
+    for (const int x : {0, room.width - 1}) {
+      const auto corner = FindRoomFixtureStart(room, {x, z, 0, 0});
+      if (corner) {
+        alternatives.push_back({{"x", corner->x},
+                                {"z", corner->z},
+                                {"elevation", corner->elevation},
+                                {"direction", corner->direction}});
+      }
+    }
+  }
+  context["supported_alternatives"] = std::move(alternatives);
+  auto supported = nlohmann::json::array();
+  for (int z = 0; z < room.depth; ++z) {
+    for (int x = 0; x < room.width; ++x) {
+      if (IsRoomFixtureTile(room, x, z)) {
+        supported.push_back({{"x", x}, {"z", z}});
+      }
+    }
+  }
+  context["supported_tiles"] = std::move(supported);
+  return context;
+}
 }  // namespace
 
 nlohmann::json DecodeSceneScript(Bytes bytes, const SceneOpcodes& opcodes) {
@@ -349,7 +389,7 @@ nlohmann::json ReadSceneCatalog(
       if (!room.asset.empty()) {
         auto& rooms = references[room.asset];
         if (rooms.is_null()) rooms = nlohmann::json::array();
-        rooms.push_back({{"zone", zone.id}, {"room", room.index}});
+        rooms.push_back(DescribeRoomContext(zone.id, room));
       }
     }
   }

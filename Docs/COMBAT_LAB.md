@@ -140,6 +140,31 @@ observed IDs, matched count, control interval, inputs and fixture limitations.
 Generic frame-budget scripts remain supported but explicitly report
 `playback_acceptance: not_asserted`.
 
+An original ending has no post-credits living-field interval. For that specific
+source path, replace both room-return keys with the explicit terminal goal:
+
+```json
+{
+  "events": [505],
+  "event_source": 1,
+  "terminal": "ending_to_title",
+  "preconditions": "Original MAP506 hub/viewer505 selections3 then1 produce the unskipped MAP137/138/178 ending; debug playback, not earned campaign.",
+  "confirm_dialogue": true
+}
+```
+
+The original producer inputs and supported production-room fixture are still
+required; this declaration does not start an ending or set game state.
+Acceptance requires ordered source execution, naturally finished unskipped
+credits, the original clear-save-pending handoff, natural native fiber return,
+zero errors and actual case footer/teardown. Start/forced skip, a stop request,
+cancellation, an early return or budget cannot substitute. Results identify
+`scene_playback_ending_to_title` and retain the actual terminal observations
+instead of claiming120 field-control ticks. The Lab's native title entry ends
+the encounter; this is not retail title-UI or earned campaign verification.
+Original-byte/branch/terminal-invocation evidence remains a separate gate.
+Default field-control goals and isolated combat are unchanged.
+
 The manifest requires documented preconditions and production-room events or
 an aligned explicit external event. It does not grant story flags, HP, items or
 victories; scene results explicitly leave campaign progression unestablished.
@@ -150,7 +175,258 @@ Optional assistance presses only normal Circle while a visible dialogue wait
 is observed; it never presses Start or forces a skip. Source/command traces and
 aligned visual/audio evidence are still required for fidelity claims.
 
+### Bulk verification and log volume
+
+Use one persistent scene sequence for source-ready cases, not a New Game
+playthrough per definition:
+
+```powershell
+build\Release\VS.CombatLab.exe --sequence <source-backed-sequence.json> `
+  --speed 64 --scripted --verification-log
+```
+
+`--verification-log` retains every frame, complete command operands/results,
+flag writes, successful content reads (including Debug re-reads), lifecycle
+boundaries and warnings/errors. It disables per-draw Trace chatter and redundant
+structured engine echoes. In non-player sequences, heavy records are stored in
+each script's `events.jsonl` instead of duplicated in the run file; root
+lifecycle and warning/error records remain. Player observations retain root
+frames for the live controller. Full tracing remains the default and is required
+for effect-path investigations.
+
+The measured comparison in
+`build\quality\scene804\verification-throughput-01\benchmark.json` executes the
+same9 previously verified paths in9.39 seconds (57.5 paths/minute), with all
+original source/control gates still passing. Logs fall from21,396,377 to9,318,658
+bytes (56.45%). These are throughput controls, not9 new definitions or a promise
+that prerequisite-blocked cases can run at that rate. Accelerated runs establish
+semantic behavior only; real-time timing/listening/fidelity checks remain
+separate.
+
+Where real model-driven combat is necessary, the external player additionally
+supports explicit `--scene-investigation --speed 2|4` for Lab fixtures only.
+It preserves native fixed ticks, input freshness, HP/flag/RNG rules and all
+recorded reaction failures; it cannot certify reaction timing or physical doors.
+The4x MAP042 control satisfies its unchanged original source contract:
+85 matching commands and living pre-stop control4540..4660. Three unconfirmed
+chains remain nonpasses in the player result, not erased to advertise success.
+MAP106/MAP382 attempts end in genuine defeat and remain failed. Normal1x and
+strict reactions are unchanged defaults.
+
+`build\quality\scene804\batched-verification-queue.json` groups all remaining
+exact identities by their actual room/interaction/spatial/actor-state/external
+producer. Batch source-ready cases, record a failed prerequisite once, then
+prepare that prerequisite for the group. Use the external model only where
+earned combat/progression is genuinely required. Reuse the completed original
+New Game evidence instead of replaying its opening to inspect another scene.
+Do not grant flags, edit HP, collapse aliases or count the queue as verification.
+
+Owner-authorized pruning moved42.951GiB across2300 generated logs into a
+fully decompressed/SHA-256-verified cold archive of1.102GiB outside the workspace:
+`%LOCALAPPDATA%\VS-NativePort\evidence-archive\20261028`.
+`index.jsonl` maps every original path to its lossless archive and digest.
+Inventories, source-verification reports, manifests, source/assets and saves
+remain in place. Small/recent logs remain live. Old raw paths require indexed
+restoration or the archive-aware session reader before re-verification; they
+must not be treated as missing evidence or silently replaced by summaries.
+Build output is excluded from editor watching/searching, not from disk or build
+inputs. This pruning authorization supersedes the earlier keep-all-raw policy.
+
 ### Investigation coverage and limits
+
+**#149 is reopened for actual runtime verification of all804 remaining indexed
+definitions.** The previous investigation/tooling closure was premature.
+Inventory, blocked labels, startup and frame-budget exits are not verification.
+Resumable runtime progress is `build\quality\scene804\runtime-status.json`;
+Debug and Release evidence, exact definition identities and failed/unrun cases
+remain separate. No scene gains a pass from teardown-grace frames or fixture
+defeat. Supported source positions in catalog room references are selected from
+original collision data, excluding door tiles; their presence establishes no
+story prerequisite. Original enemies and game rules remain active.
+
+Current checkpoint: **502/804** definitions have an actual verified runtime path,
+**95** in both Debug/Release; **302** remain unverified. The exact matrix, not
+this snapshot, is authoritative. All referenced entry definitions have had
+native attempts, but actor/story/geometry/combat prerequisites, incomplete
+playback and unsupported source contexts remain explicit nonpasses.
+
+Original ZONE250/0 MAP506 NPC/type4 scene-viewer producers now run through
+ordinary controller movement and source-derived textbox choices. All six
+viewer exit paths and19 additional original gallery-produced identities pass
+explicit source-bound gates. These are documented original debug playback
+contexts, not earned campaign progression. The separate v5 Lab adapter uses
+actual per-case initialization, first stop, final footer and teardown;14 Lab,
+11 shared Desktop and six unchanged cleanup controls pass. Cancelled cases
+are explicitly rejected. Candidate scans and metadata never promote themselves.
+
+Two resumed batches establish35 original source instances and16 new exact
+identities. Their source completion and subsequent120-tick living/rendered
+intervals remain distinct from later fixture defeats and blocked whole-case
+goals. The new-only trace scans take5.38 and3.93 seconds; no old549-trace rescan
+or repeated prologue is needed. #232 records MAP100/MAP101 effect-bone faults;
+#233 records MAP214 camera constraints. Interrupted cases are attempted-
+unverified, not untouched `not_run` cases. No missing actor, sound bank or
+camera context is replaced to obtain a pass.
+
+The ending now owns all12 complete original TIM payloads and its72224-byte
+illustration workspace, uses the native OT in both results phases/background,
+and preserves completion formatting in adequately sized buffers. Fresh
+unskipped Debug/Release replays reach native title handoff and teardown;
+explicit terminal goals pass without inventing post-ending field control.
+Final Debug1793263459268740-0/Release1793263459160911-0 each certify five
+original instances/8722 commands through exact183/1, the actual boot title
+transition, natural fiber return and native footer/teardown.31 exact positive/
+counterfactual terminal-source controls pass per configuration. Persistent
+Release1793264413301690-0 passes four original ending producers/26 instances
+and genuine native reset/reentry in one window with zero errors and exit0.
+Related render/scene/logging selections pass185 cases/1,812,710
+assertions each; six terminal-goal controls pass31 assertions. #228/#230/#231
+remain open for integrated source evidence/publication/exact-revision CI.
+No full campaign, pixel/audio fidelity or C++ promotion is claimed.
+
+The original event31 gallery path exposed #224's null hidden-platform contact.
+An owned native placement value reads its existing authored transform without
+changing visibility/collision; the legacy visible-only contact query retains
+its semantics with valid borrowed lifetime. F00901 callers change through the
+copier, not manual generated output. Fresh1x Debug1793249226277744-0 and
+Release1793249507914535-0 both match3544 original event31 commands, the22/7
+temporary-room scene and22/6 return, living control7947..8067 and actual native
+teardown8079. Frozen executable/PDB/DLL images and digests remain local.
+Post-format rebuilt Debug/Release source/control replays also pass at8x;
+these do not certify timing. Both related114-case/57,321-assertion selections,
+focused4-case/66-assertion placement controls,158 copier tests and179 actual
+VM dispatch targets pass; scoped quality/tidy and exact naming1874/1874 pass.
+Publication and exact-revision CI remain pending; #224 is not closed.
+
+The external player can now explicitly receive the existing native scene
+expectation JSON. Original playback and measured120-tick control finish the
+Lab case through its production observer; a window close, generic pass or
+budget alone cannot replace that contract. Default behavior is unchanged.
+Normal1x model run491bdb7a823446da9499efd6dbe2bbd7 genuinely wins MAP121,
+completes native rewards/local2 and returns living control5657..5777; the native
+case finishes5789 of12000 with109 entry/119 local2 source matches and zero
+errors. Its unconfirmed defense still prevents an overall player pass.
+Earlier cancelled/defeated runs remain nonpasses.105 player regressions and
+scoped quality pass. Normal1x MAP316 run88c681b67b034854b42dab892204d008
+also genuinely wins:104 entry/84 local0 commands, control5137..5257 and
+native teardown5269. Its actual actions are Herakles/chains, not the requested
+offensive-spell probe. E068/E073 missing-effect actors remain #225: even a
+genuine retained Golem defeat leaves effect239 selector101 unavailable, while
+independent original-disc data identifies model100. No substitution or error
+downgrade was made. E073 additionally requires original Aster Sigil-used
+flag910 and retained Neesa/Tieger; stage130 alone is not its full prerequisite.
+Inherited audio remains #223.
+
+The complete original viewer504/E078/E026/E038 chain now passes locally in
+Debug1793255056114631-0 and Release1793255464212292-0: all seven original
+instances, living/rendered control12024..12144, native teardown12156, zero
+errors. #226 preserves the actual owned old-pose bank across selector changes
+without changing new-clip selection; #227 repairs the declared char-returning
+retention call rather than supplying fake HP. Each related native selection
+passes123 cases/57,352 assertions;160 copier regressions,179 actual VM dispatch
+targets, exact naming1874/1874 and scoped quality/changed-TU tidy pass. The
+all-owned tidy fanout was stopped, not completed. Publication/exact-revision
+CI and independent promotion/retirement gates remain pending. No generic
+actor/animation/audio substitutes or forced flags establish coverage.
+
+The completed normal-speed New Game trace independently verifies24 actual
+script instances,23 new exact identities, using the explicit Desktop v4
+instance/lifecycle contract. Original247 changes the pending event ID before
+the old caller tail finishes; instance ownership, every executed original
+operand/branch and every intervening source-defined handoff must be preserved.
+The terminal living/rendered control interval precedes the first host stop.
+Actual normally finalized Desktop scope/fiber destruction is recorded as
+Desktop evidence, never manufactured Lab teardown.11 positive/counterfactual
+controls and the six unchanged v2/v3 cleanup controls pass. `game_finished`,
+campaign completion, fidelity and promotion remain separate.549 existing Lab
+traces were scanned once with no additional new identities; do not repeat it.
+
+Three compact persistent-window ordinary-input batches add16 more paths under
+unchanged v3 gates. Release1793244075047574-0 verifies MAP010/015/252/266/306
+entries. Release1793245115600135-0 verifies MAP230/264/265/295/314/334/347/402
+entries by retaining ordinary supported-corridor movement after real enemy
+actions. Release1793245457958291-0 preserves original source-producer input,
+then verifies external11/84 and MAP265 local0. Original actors, stats, flags,
+RNG and collision remain unchanged; all other source/control/lifecycle
+nonpasses remain explicit. Acceleration is semantic-only, not audio/timing or
+physical-door certification. The current exact prerequisite queue follows
+the350 remaining identities above, not that earlier379 snapshot.
+
+Automatic type2 triggers require a real changed tile in the original native
+caller. Starting at a matching coordinate is not sufficient. Investigation
+fixtures use supported neighboring floors and ordinary camera-correct motion
+into original point/rectangle predicates; they do not replace enemies or grant
+flags. The external player can take over real combat after an explicitly logged
+direction-only setup schedule. Actor-mode0 interaction attempts remain separate:
+MAP020's slot2 is512 units above the tested floor poses, beyond the native128-unit
+vertical interaction gate. That context has not been earned or bypassed.
+
+Detailed disc-read diagnostics now retain every successful re-read at Debug,
+while the original first-read Info behavior and all I/O semantics stay unchanged.
+This closes a source-binding gap in persistent-window re-entry, not a gameplay
+or asset-cache change. Four normal-speed Debug/Release reentries and three
+unchanged source-defined handoffs verify the fix. Each final native configuration
+passes61 related content/disc/scene/door cases (1,400,309 assertions); the
+external player now passes100 tests. Ordinary Info logging is not made verbose.
+
+The external player now replans at actual multi-part target menus instead of
+confirming the first row. Explicit actor/limb choices use read-only cached native
+forecasts; no damage recalculation or RNG consumption is introduced. Original
+event-owned loot/reward menus remain interactive under native event control,
+with narrow ownership/readiness checks rather than arbitrary cutscene input.
+MAP032 `1e95c7846c02429fa1e72deb25bd3c36` genuinely defeats its hostile, claims
+native rewards and verifies local2 (324 matching commands/control2772..2892).
+MAP042 `5f68618952cb4a75ba46288697d6c79f` defeats both original hostiles and verifies
+local1 (85 matching commands/control2962..3082). These are declared existing
+post-minotaur representative-action fixtures, not earned campaign/save claims.
+The other seven cases in the eight-case enemy-clear batch remain nonpasses.
+Current related native Debug/Release selections each pass67 cases/47,570
+assertions; event-owned challenge-menu variants are not independently certified.
+
+The MAP360 model request failure is independently reproduced:8218 prompt tokens
+exceeded8192, producing HTTP400. Lossless JSON compaction preserves the same facts
+and completes at6732 prompt tokens; bounded HTTP response details now persist on
+failure. `build\quality\scene804\prompt-context-replay-01` retains both outcomes.
+This repair and passing tooling controls do not promote the failed combat case.
+
+Extended MAP051 `d46db4cdab2f467695e2ed25d638a665` genuinely defeats both original
+hostiles and verifies local1 (116 commands/control10532..10652). Extended
+MAP358/MAP362 end in player defeat. Release1793234635260661-0 adds9 entry proofs
+from supported alternative starts (MAP017/244/336/345/386/389/391/394/398);
+39 nonpasses and native batch exit2 remain recorded. This speed8 investigation
+does not certify audio fidelity.
+
+Later-room fixtures must establish inherited context too. #223 records MAP005's
+voice5/instrument107 error, independently reproduced alone at speed1. Original
+predecessor preparation loads WAVE0069; actual Desktop New Game imports bank69
+at1399 without an audio change. Direct MAP002 also lacks the earlier context.
+The external player now has explicit `--new-game` for actual production startup,
+original equipment/learning and private saves. Nonhostile script actors can
+carry raw weapon action bytes such as128; preserving that byte must not invent
+a physical/spell threat. Actual Desktop replay
+`5cb6f06375d54c289224c4d9286fc0bc` reaches the original1/0 ->2/0 ->3/0 ->4/0 ->5/0
+chain with zero native errors through18000 and finalized host diagnostics.
+Its external finalization-selection error is fixed without replacing Desktop's
+host-observation contract with a Lab teardown or campaign claim. Dedicated
+New Game/Continue/Lab finalization controls pass; the original failed run remains
+failed. Release `317d926d4cab4a44b438c0e2d7795a65` now reaches actual external4
+MUSIC019 load/play18902/18906 and successful instrument107 playback at18911;
+Debug `b05be49c5df54258ad5381c0ca7b6f7e` repeats the aligned music state with181
+subsequent107 notes and no native errors. No audio change or silent substitute
+is warranted. Both observations retain their blocked outcomes.
+Debug observes all3 hostiles at zero HP, then native7/0 ->8/0 ->18/0 handoffs.
+Its42000 budget ends during genuinely advancing dialogue, not a controller
+softlock. A bounded54000-tick normal-speed comparison continues to actual living
+field-control restoration. Desktop host completion is not relabeled as Lab
+teardown coverage; the completed run's independently source-bound v4 instances,
+not startup/host completion alone, contribute the23 new identities above.
+
+Native special-operation16 cleanup is verified only with original module bytes,
+opcode sizes and imported dispatch provenance, complete executed operands,
+exact saved-cursor return, actual caller completion and120 pre-stop control
+ticks. Explicit v3 reports retain the module hash and G00118 provenance;
+unknown builtin paths are not ignored or promoted. The208 static unresolved
+prerequisites and all-branch/fidelity limits are unchanged.
 
 The #149 static investigation reconciles all1,822 original assets and1,311
 script definitions:706 indexed/93 empty room scripts and101 indexed/411 empty
@@ -158,11 +434,12 @@ external EVTs. The797 actor-animation banks and single FMV are tracked
 separately. The inventory retains208 unresolved special-operation prerequisites,
 all branch successors and original room/asset identities.
 
-`build\quality\issue149-all-scene-status.json` overlays actual evidence without
-changing the original inventory: three external definitions (80/82/81) have
-source-backed component/control/reentry proof; **804 indexed definitions remain
-runtime-unverified**,504 definitions are empty, and all-branch coverage is not
-asserted. `build\quality\issue149-replay-evidence.json` verifies all four fresh
+`build\quality\issue149-all-scene-status.json` is the frozen investigation-baseline
+overlay: three external definitions (80/82/81) have source-backed component/
+control/reentry proof, the original804 were runtime-unverified,504 definitions
+are empty, and all-branch coverage is not asserted. Current804 progress is in
+`build\quality\scene804\runtime-status.json`, not this historical overlay.
+`build\quality\issue149-replay-evidence.json` verifies all four fresh
 Debug/Release normal-speed cases against original opcodes, complete operands
 and taken branches, along with camera/pose/effect state, flag writes, no skips,
 no engine errors and no audio-queue loss. Native control settles at10910 and

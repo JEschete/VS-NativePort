@@ -136,7 +136,8 @@ class TerrainNavigator:
                      if (actor.slot, actor.model, actor.spawn_index) == self.target_identity), None)
 
     def request(self, frame: Frame, destination: tuple[int, int],
-                target_slot: int | None = None, avoid_hostiles: bool = False) -> dict | None:
+                target_slot: int | None = None, avoid_hostiles: bool = False,
+                explore_frontier: bool = False) -> dict | None:
         if self.path or not field_navigation_ready(frame):
             return None
         if frame.enemies and target_slot is None and not avoid_hostiles:
@@ -209,38 +210,45 @@ class TerrainNavigator:
                                    terrain.point(index)[2]-destination[1])
                        for index in ranked), default=math.inf)
         first_steps: set[tuple[int, int]] = set()
-        for index in ranked:
-            remaining = math.hypot(terrain.point(index)[0]-destination[0],
-                                   terrain.point(index)[2]-destination[1])
-            if remaining > closest + terrain.spacing:
-                continue
-            route = []
-            cursor = index
-            while cursor != start:
-                parent, jump = previous[cursor]
-                route.append({"position": terrain.point(cursor), "jump": jump,
-                              "takeoff": terrain.point(parent) if jump else None,
-                              "drop": max(0, terrain.point(cursor)[1]-terrain.point(parent)[1])})
-                cursor = parent
-            route.reverse()
-            first = (route[0]["position"][0], route[0]["position"][2])
-            if first in first_steps:
-                continue
-            route = route[:6]
-            last = route[-1]["position"]
-            if self.completed_positions.get((last[0], last[2]), 0) >= 2:
-                continue
-            first_steps.add(first)
-            key = f"route{len(self.offered) + 1}"
-            self.offered[key] = {
-                "waypoints": route, "estimated_cost": round(costs[index] + remaining),
-                "remaining_distance": round(math.hypot(last[0]-destination[0], last[2]-destination[1])),
-            }
-            if len(self.offered) == 3:
+        for frontier_pass in ((False, True) if explore_frontier else (False,)):
+            for index in ranked:
+                remaining = math.hypot(terrain.point(index)[0]-destination[0],
+                                       terrain.point(index)[2]-destination[1])
+                if frontier_pass:
+                    if (index % terrain.width not in (0, terrain.width - 1)
+                            and index // terrain.width not in (0, terrain.depth - 1)):
+                        continue
+                elif remaining > closest + terrain.spacing:
+                    continue
+                route = []
+                cursor = index
+                while cursor != start:
+                    parent, jump = previous[cursor]
+                    route.append({"position": terrain.point(cursor), "jump": jump,
+                                  "takeoff": terrain.point(parent) if jump else None,
+                                  "drop": max(0, terrain.point(cursor)[1]-terrain.point(parent)[1])})
+                    cursor = parent
+                route.reverse()
+                first = (route[0]["position"][0], route[0]["position"][2])
+                if first in first_steps:
+                    continue
+                route = route[:6]
+                last = route[-1]["position"]
+                if self.completed_positions.get((last[0], last[2]), 0) >= 2:
+                    continue
+                first_steps.add(first)
+                key = f"route{len(self.offered) + 1}"
+                self.offered[key] = {
+                    "waypoints": route, "estimated_cost": round(costs[index] + remaining),
+                    "remaining_distance": round(math.hypot(last[0]-destination[0], last[2]-destination[1])),
+                }
+                if len(self.offered) == 3:
+                    break
+            if self.offered:
                 break
         if not self.offered:
             raise ValueError("Runtime geometry has no supported outgoing navigation edge")
-        return {
+        context = {
             "destination_world_xz": destination,
             "player_world": position, "candidates": self.offered,
             "weapon_drawn": frame.player.weapon_drawn,
@@ -260,6 +268,15 @@ class TerrainNavigator:
                       "not only the truncated execution prefix. Prefer objective progress. "
                       "Routes are proposals, not native reachability guarantees.",
         }
+        if frontier_pass:
+            context["frontier_exploration"] = True
+            context["limits"] = (
+                "Nearest-progress endpoints were already visited; these supported patch-boundary "
+                "routes explore around the obstacle and may initially move away from the goal. "
+                "Estimated cost includes the full route and remaining goal distance, not just its "
+                "execution prefix. Routes are proposals, not native reachability guarantees."
+            )
+        return context
 
     def accept(self, decision: NavigationDecision, frame: Frame) -> None:
         if ((frame.episode, frame.zone, frame.room) != self.scene
@@ -387,3 +404,90 @@ class TerrainNavigator:
         if airborne:
             duration = 8
         return InputAction(buttons, duration, "execute model-selected observed-terrain waypoint")
+
+
+class SceneTileGoal:
+    def __init__(self, tile: tuple[int, int], zone: int, room: int, selector: int) -> None:
+        if (not isinstance(tile, tuple) or len(tile) != 2
+                or any(type(value) is not int or not 0 <= value <= 255 for value in tile)
+                or any(type(value) is not int or value < 0 for value in (zone, room, selector))):
+            raise ValueError("A local-scene target requires native room/selector IDs and a byte-sized tile")
+        self.tile = tile
+        self.zone, self.room, self.selector = zone, room, selector
+        self.navigator = TerrainNavigator()
+        self.activation_tick: int | None = None
+        self.last_owned_tick = -1
+        self.identity = f"scene:{zone}:{room}:local:{selector}:tile:{tile[0]}:{tile[1]}"
+
+    def observe(self, frame: Frame) -> None:
+        scene = frame.raw["scene"]
+        event = scene.get("event", {}) if scene["available"] else {}
+        if ((frame.zone, frame.room) != (self.zone, self.room)
+                or not field_navigation_ready(frame) or frame.dialogue_waiting):
+            self.navigator.path.clear()
+            self.last_owned_tick = frame.tick
+        if (self.activation_tick is None and (frame.zone, frame.room) == (self.zone, self.room)
+                and event.get("phase") == 4 and event.get("source") == 2
+                and event.get("id") == self.selector):
+            self.activation_tick = frame.tick
+
+    def ready(self, frame: Frame) -> bool:
+        return (self.activation_tick is None and (frame.zone, frame.room) == (self.zone, self.room)
+                and frame.raw["scene"]["available"] and field_navigation_ready(frame)
+                and frame.raw.get("navigation", {}).get("available", False)
+                and not frame.dialogue_waiting)
+
+    def pending(self, frame: Frame) -> bool:
+        return (self.activation_tick is None and (frame.zone, frame.room) == (self.zone, self.room)
+                and frame.ready and frame.raw["scene"]["available"]
+                and frame.event_phase == 0 and frame.control in (1, 2))
+
+    def request(self, frame: Frame, avoid_hostiles: bool = False) -> dict | None:
+        self.observe(frame)
+        if (not self.ready(frame) or self.navigator.path
+                or not frame.raw.get("navigation", {}).get("available")):
+            return None
+        if frame.player is None:
+            raise ValueError("Scene navigation lost the observed player")
+        x, _, z = frame.player.position
+        destination = (self.tile[0] * 128 + 64, self.tile[1] * 128 + 64)
+        staging = (x // 128, z // 128) == self.tile
+        if staging:
+            terrain = Terrain.decode(frame.raw["navigation"])
+            candidates = []
+            for index in range(len(terrain.samples)):
+                if not terrain.supported(index):
+                    continue
+                px, _, pz = terrain.point(index)
+                if abs(px // 128 - self.tile[0]) + abs(pz // 128 - self.tile[1]) != 1:
+                    continue
+                clearance = max(self.tile[0] * 128 - px, px - (self.tile[0] + 1) * 128,
+                                self.tile[1] * 128 - pz, pz - (self.tile[1] + 1) * 128)
+                if clearance >= 64:
+                    candidates.append((px, pz))
+            if not candidates:
+                raise ValueError("No observed adjacent support can earn the scene's required tile change")
+            destination = min(candidates, key=lambda point: math.hypot(point[0] - x, point[1] - z))
+        context = self.navigator.request(frame, destination, avoid_hostiles=avoid_hostiles,
+                                         explore_frontier=True)
+        if context is not None:
+            context["scene_trigger_objective"] = {
+                **self.result(), "staging_tile_change": staging,
+                "requires_actual_native_activation": True,
+            }
+        return context
+
+    def accept(self, decision: NavigationDecision, frame: Frame) -> None:
+        self.observe(frame)
+        if not self.ready(frame) or self.last_owned_tick >= self.navigator.request_tick:
+            raise StaleDecision("Native scene/control ownership changed during trigger navigation")
+        self.navigator.accept(decision, frame)
+
+    def step(self, frame: Frame) -> InputAction | None:
+        self.observe(frame)
+        return self.navigator.step(frame) if self.ready(frame) else None
+
+    def result(self) -> dict:
+        return {"zone": self.zone, "room": self.room, "source": 2,
+                "selector": self.selector, "tile": self.tile,
+                "activation_tick": self.activation_tick}

@@ -9,6 +9,73 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Native source-goal completion is now optional in the external player:
+  `--scene-expectation` embeds the existing original Lab scene/control contract
+  and lets the native observer finish the case, rather than WM_CLOSE/cancel
+  or a needless full-budget continuation. Defaults and physical-door behavior
+  are unchanged.105 player tests and scoped quality pass. Original MAP121 run
+  `491bdb7a823446da9499efd6dbe2bbd7` genuinely defeats its hostile, completes
+  rewards/local2 and native source/control/teardown at5789 of12000:109 entry
+  commands,119 local2 commands, living control5657..5777, zero native errors.
+  Its one unconfirmed defense retains the overall player nonpass. The earlier
+  `116544bfaeb342e5afcfafc8aa55f419` wins that fight and walks the actual door,
+  but dies in the next room and cancels; it is not accepted Lab completion.
+  Normal1x MAP316 run88c681b67b034854b42dab892204d008 genuinely wins and
+  passes:104 entry/84 local0 commands, control5137..5257, teardown5269.
+  Despite its spell-probe intent, the actual actions are Herakles and ordinary
+  chains, not an offensive-spell victory or proof of spell adaptation.
+  Four-times-speed MAP316/336 attempts genuinely lose and remain failures;
+  MAP333 has no original type8 death producer and was not launched under an
+  invented target. One normal1x MAP316 variant follows measured planning latency.
+  #223 retains original inherited-audio failures. #225 remains unresolved:
+  genuine retained Iron Golem defeat in2b0ad063c7bf4b138a0024b92c49bda3
+  still leaves original effect239 selector101 unavailable. Independent
+  source-disc inspection confirms the authored Golem model/effects ID100 and
+  E068 operand101; a secondary-body explanation is rejected. No actor
+  substitution, asset patch or error downgrade was made. E073 also needs its
+  original Aster Sigil-used flag910 and retained Neesa/Tieger prerequisites;
+  stage130 alone is not sufficient.
+
+- External source-tile navigation is opt-in and has115 tests/clean scoped
+  quality. It uses actual post-entry camera/geometry, native activation and
+  the unchanged completion gate; only this objective can explore supported
+  patch frontiers after nearest endpoints are exhausted. Cinematic control
+  now rejects new/stale strategic preparations while preserving event-owned
+  rewards and the unchanged transaction timeout. Spatial/model attempts remain
+  nonpasses: MAP153 `dbd373c12dac4c658dd9d70940299031` never activates local0;
+  MAP203 basic/all-spell runs genuinely lose, and the all-ability run hits the
+  original512MiB budget after16091 ticks rather than proving victory. The
+  measured duplicate238MiB root/per-script traces prompted explicit
+  verification-only shared rich-frame references: every base actor/control/
+  scene frame remains scoped; full schema2 data stays in the root. Actual600-
+  tick control saves22.29% total bytes without sampling, deletion or a raised
+  budget. The model's goal/reason is not proof of actual spell execution.
+
+- Two resumed source batches add16 exact identities through35 independently
+  verified original instances. The new-only scans take5.38 and3.93 seconds;
+  they do not replay the old corpus. Some later fixture fights end in defeat,
+  while their earlier source-complete scenes and120 living/rendered control
+  ticks remain separately proved. Failed/blocked whole-case outcomes are not
+  victories. Reports are
+  `build\quality\scene804\verified-resumed-source-instances-1793261480262058-0.json`
+  and `verified-resumed-entry-instances-1793261820396309-0.json`.
+  Interrupted MAP100/MAP101 effect-bone faults are #232; MAP214 camera
+  constraints are #233. Neither suspected cause is patched or promoted.
+
+- Exact runtime progress is now502/804, with95 verified in both configurations
+  and302 still unverified.116 of the
+  owner's418 outstanding definitions now have demonstrated runtime paths.
+  #149 remains open; queues, blocked labels and cancelled cases are not passes.
+  The original MAP506/ZONE250 NPC/type4 viewer producers and source-derived
+  ordinary textbox selections establish documented debug playback contexts,
+  not earned campaign progression. Six original viewer exits and19 additional
+  gallery-produced identities are verified. Explicit Lab v5 reports now retain
+  actual instance ownership, original operands/branches/cleanup/handoffs,
+  pre-stop living control and native per-case footer/teardown;14 Lab controls,
+  11 shared Desktop controls and six unchanged cleanup controls pass.
+  A cancelled model run with earlier source activity is retained as a nonpass,
+  not promoted. Old549-trace and subsequent new-only scans are not to be repeated.
+
 - #232's exact native AV is traced to the distinct slot domains: absent valid
   renderer16 fell through to out-of-bounds `Field_gimmickInstances[16]`, not a
   corrupted renderer registration. Bounded shared lookup preserves existing

@@ -76,7 +76,7 @@ class Actor:
             integer(data["status_immunities"], "actor.status_immunities", 0, 2**32-1),
             tuple(integer(action, "actor.spell_action", 0, 255)
                   for action in data["spell_action_ids"]),
-            integer(data["base_attack_type"], "actor.base_attack_type", 0, 7),
+            integer(data["base_attack_type"], "actor.base_attack_type", 0, 255),
             integer(data["shield_pp"], "actor.shield_pp", 0, 65535),
             integer(data["max_mp"], "actor.max_mp", 0, 32767),
             integer(data["weapon_pp"], "actor.weapon_pp", 0, 65535),
@@ -273,6 +273,7 @@ class Frame:
                 self.raw["target_page"]["first"] + self.raw["target_page"]["visible"]
             ],
             "target_page": self.raw["target_page"],
+            "target_forecasts": self.raw.get("target_forecasts"),
             "chain_actions_by_slot": self.reaction.chain_actions,
             "defense_actions_by_slot": self.reaction.defense_actions,
             "active_reaction": {

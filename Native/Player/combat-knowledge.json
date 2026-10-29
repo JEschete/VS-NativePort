@@ -18,7 +18,9 @@
   },
   "combat": [
     "Non-player actors are not automatically enemies. Props and friendly actors can have HP; use native hostility or an active incoming attack.",
+    "base_attack_type preserves the native unsigned weapon action byte. Script-only actors can carry unclassified values such as128; these are not evidence of physical or spell attacks. Read unclassified_base_attack_types in defense advice rather than inventing semantics.",
     "Weapon range is a native shape descriptor, not a guessed universal sphere. Native target previews decide whether a body part can actually be selected.",
+    "When the native target menu is ready, select an explicit supplied limb rather than blindly confirming its first row. Cached target_forecasts are read-only game calculations: effect_id58 is HP damage,59 MP damage,62 HP recovery and63 MP recovery; amount is unknown/null for other effects. Native hit_threshold is0..100 and255 means unspecified, not a guaranteed hit. Forecasts are not actual applied damage; verify HP changes afterward.",
     "Do not replace an unavailable native fact with a plausible value.",
     "Use the currently equipped weapon and learned actions. Do not grant equipment, HP, MP, flags or skills.",
     "Changing HP through ordinary attacks or equipped abilities is an observed outcome, not a controller state edit.",

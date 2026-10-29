@@ -24,10 +24,24 @@ def main() -> int:
     fixture = run.add_mutually_exclusive_group(required=True)
     fixture.add_argument("--scenario", type=Path)
     fixture.add_argument("--save-file", type=Path, help="Copy an unchanged native save; use production Continue")
+    fixture.add_argument("--new-game", action="store_true",
+                         help="Use Desktop New Game with private saves and the original full prologue")
     run.add_argument("--frames", type=int, default=3600)
+    run.add_argument("--speed", type=int, choices=(1, 2, 4), default=1,
+                     help="Simulation rate; accelerated Lab play requires --scene-investigation")
+    run.add_argument("--scene-investigation", action="store_true",
+                     help="Keep ordinary reaction misses as nonpasses; never certify accelerated timing")
     run.add_argument("--require-chains", type=int, default=0)
     run.add_argument("--require-defenses", type=int, default=0)
     run.add_argument("--goal", default=PlayOptions.goal)
+    run.add_argument("--clear-enemies-first", action="store_true",
+                     help="Require observed source-room enemy deaths before door or scene-tile navigation")
+    run.add_argument("--setup-press", default="",
+                     help="Direction-only native source-fixture pulses before model strategy (Lab only)")
+    run.add_argument("--scene-expectation", type=Path,
+                     help="Original Lab scene expectation JSON; native playback/control completes the case")
+    run.add_argument("--scene-target-tile", nargs=2, type=int, metavar=("X", "Z"),
+                     help="Use observed terrain to cross one original local-scene trigger tile")
     doors = run.add_mutually_exclusive_group()
     doors.add_argument("--door-case", default="", help="Physically traverse original zNNN-rNNN-dNNN record")
     doors.add_argument("--door-route", nargs="+", help="Traverse these original records in one continuous game")
@@ -61,6 +75,14 @@ def main() -> int:
             args.require_chains, args.require_defenses, door_case=args.door_case,
             save_file=args.save_file,
             door_route=tuple(args.door_route or ()),
+            clear_enemies_first=args.clear_enemies_first,
+            setup_presses=args.setup_press,
+            new_game=args.new_game,
+            simulation_speed=args.speed,
+            strict_reactions=not args.scene_investigation,
+            scene_expectation=args.scene_expectation,
+            scene_target_tile=(args.scene_target_tile[0], args.scene_target_tile[1])
+            if args.scene_target_tile is not None else None,
         ))
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 2

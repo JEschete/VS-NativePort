@@ -2,6 +2,7 @@ import ipaddress
 import json
 import socket
 import time
+import urllib.error
 import urllib.request
 from dataclasses import dataclass
 from urllib.parse import urlsplit
@@ -9,7 +10,7 @@ from urllib.parse import urlsplit
 from .config import PROJECT, runtime_manifest
 from .observations import Frame, integer
 from .abilities import defensive_loadout_advice
-from .choices import available_choices, reward_menu_ready
+from .choices import available_choices, native_target_menu_ready, reward_menu_ready
 
 INTENTS = ("attack", "approach", "retreat", "interact", "wait", "cast", "equip_chain", "equip_defense", "reward", "navigate", "item")
 PRIORITY_ORDERS = ("123", "132", "213", "231", "312", "321")
@@ -129,13 +130,22 @@ class LocalModel:
                 timeout: float | None = None) -> dict:
         if path not in ("/api/version", "/api/tags", "/api/chat", "/api/ps", "/api/generate"):
             raise ValueError("Unsupported local model API operation")
-        data = json.dumps(payload).encode() if payload is not None else None
+        data = json.dumps(payload, separators=(",", ":")).encode() if payload is not None else None
         request = urllib.request.Request(
             self.endpoint + path, data=data,
             headers={"Content-Type": "application/json"},
         )
-        with self.opener.open(request, timeout=self.timeout if timeout is None else timeout) as response:
-            body = response.read(1024 * 1024 + 1)
+        try:
+            with self.opener.open(request, timeout=self.timeout if timeout is None else timeout) as response:
+                body = response.read(1024 * 1024 + 1)
+        except urllib.error.HTTPError as error:
+            with error:
+                detail = error.read(4097)
+            suffix = " [truncated]" if len(detail) > 4096 else ""
+            raise RuntimeError(
+                f"Local model HTTP {error.code} ({path}): "
+                f"{detail[:4096].decode('utf-8', errors='replace')}{suffix}"
+            ) from error
         if len(body) > 1024 * 1024:
             raise ValueError("Local model response exceeds its bounded protocol size")
         result = json.loads(body)
@@ -195,6 +205,14 @@ class LocalModel:
                 "The game has earned an ability reward and is waiting for a menu selection. "
                 "Choose one enabled observed menu row. For reward only, action_id is its row "
                 "index, not a learned action ID. Read the actual menu text and ability semantics."
+            )
+        elif native_target_menu_ready(frame):
+            prompt["current_milestone"] = (
+                "The production target menu is ready. Choose an explicit observed actor/limb "
+                "from the supplied limb choices, comparing native cached target_forecasts. "
+                "Prefer useful expected HP damage and hit likelihood; unknown forecasts are "
+                "not zero or guaranteed hits. If no useful target remains, approach or retreat "
+                "normally instead of confirming an unavailable target."
             )
         elif (context or {}).get("physical_navigation_objective") and successful_defenses >= required_defenses:
             prompt["current_milestone"] = (
@@ -258,11 +276,13 @@ class LocalModel:
                     "The final choice-key component is the inventory item ID; the action ID "
                     "is its observed native effect, not a spell that needs to be learned. "
                     "Prefer adequate healing for the observed deficit and incoming danger. "
+                    "Attack keys ending in limbN choose that actual native target limb, not "
+                    "the first menu row. Read native target_forecasts and their source semantics. "
                     "The choice key is intent:target_slot:action_id:equip_slot. "
                     "Output shape: {choice:string,chain_priority:order_string,"
                     "defense_priority:order_string,reason:short_string}."
                 )},
-                {"role": "user", "content": json.dumps(prompt)},
+                {"role": "user", "content": json.dumps(prompt, separators=(",", ":"))},
             ],
         })
         if response.get("done") is not True or response.get("done_reason") != "stop":
@@ -341,7 +361,7 @@ class LocalModel:
                 {"role": "user", "content": json.dumps({
                     "goal": goal, "zone": frame.zone, "room": frame.room,
                     "navigation": context,
-                })},
+                }, separators=(",", ":"))},
             ],
         })
         if response.get("done") is not True or response.get("done_reason") != "stop":

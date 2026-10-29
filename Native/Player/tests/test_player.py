@@ -7,6 +7,7 @@ import sys
 import tempfile
 import threading
 import unittest
+import urllib.error
 import zipfile
 from pathlib import Path
 from unittest import mock
@@ -14,19 +15,22 @@ from unittest import mock
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from vs_player.config import PlayerPaths
-from vs_player.abilities import defense_value, offensive_value
-from vs_player.controller import CombatController, StaleDecision, direction_buttons
+from vs_player.abilities import defense_value, defensive_loadout_advice, offensive_value
+from vs_player.controller import (
+    CombatController, StaleDecision, direction_buttons, input_lease_permitted,
+    strategy_planning_ready,
+)
 from vs_player.choices import available_choices
 from vs_player.doors import PhysicalDoor, PhysicalRoute
 from vs_player.menus import MenuTransaction
 from vs_player.model import Decision, LocalModel, ModelResponseError, NavigationDecision
-from vs_player.navigation import Terrain, TerrainNavigator, field_navigation_ready
+from vs_player.navigation import SceneTileGoal, Terrain, TerrainNavigator, field_navigation_ready
 from vs_player.observations import Frame
 from vs_player.reaction import ReactionController
 from vs_player.runtime import download, validate_archive
-from vs_player.runner import CombatGoal, PlayOptions, play
+from vs_player.runner import CombatGoal, PlayOptions, native_lab_script, native_outcome, play
 from vs_player.store import RUN_MARKER, Retention, RunStore
-from vs_player.trace import TraceReader
+from vs_player.trace import ObservationFreshness, TraceReader
 
 
 def sample_record(tick=1, **timing):
@@ -83,6 +87,29 @@ def sample_record(tick=1, **timing):
 
 
 class ObservationTests(unittest.TestCase):
+    def test_native_script_actor_preserves_unclassified_action_type_without_becoming_hostile(self):
+        record = sample_record()
+        actor = copy.deepcopy(record["data"]["actors"][1])
+        actor.update(slot=6, model=-1, hp=100, base_attack_type=128,
+                     hostile_to_player=False, relation_to_player=-1, spawn_index=128)
+        record["data"]["actors"].append(actor)
+        frame = Frame.decode(record)
+        self.assertEqual(frame.actors[-1].base_attack_type, 128)
+        self.assertEqual([actor.slot for actor in frame.enemies], [2])
+        self.assertEqual(record["data"]["actors"][-1], actor)
+        for value in (-1, 256, True):
+            with self.subTest(value=value), self.assertRaises(ValueError):
+                record["data"]["actors"][-1]["base_attack_type"] = value
+                Frame.decode(record)
+
+    def test_unclassified_native_attack_type_is_not_a_physical_attack_forecast(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][1]["base_attack_type"] = 128
+        advice = defensive_loadout_advice(Frame.decode(record))
+        self.assertFalse(advice["physical_attack_expected"])
+        self.assertFalse(advice["spell_attack_possible"])
+        self.assertEqual(advice["unclassified_base_attack_types"], [128])
+
     def test_native_enemy_identity_and_weapon_geometry_are_not_guessed(self):
         frame = Frame.decode(sample_record())
         self.assertEqual(frame.player.position, (64, 0, 64))
@@ -115,6 +142,114 @@ class ObservationTests(unittest.TestCase):
 
 
 class NavigationTests(unittest.TestCase):
+    def test_scene_frontier_exploration_is_opt_in_after_near_goal_visits(self):
+        frame = Frame.decode(self.frame())
+        navigator = TerrainNavigator()
+        self.assertNotIn("frontier_exploration", navigator.request(frame, (160, 96)))
+        terrain = Terrain.decode(frame.raw["navigation"])
+        navigator.completed_positions = {
+            (terrain.point(index)[0], terrain.point(index)[2]): 2
+            for index in range(len(terrain.samples)) if terrain.point(index)[0] >= 96
+        }
+        with self.assertRaisesRegex(ValueError, "no supported outgoing"):
+            navigator.request(frame, (320, 96))
+        context = navigator.request(frame, (320, 96), explore_frontier=True)
+        self.assertTrue(context["frontier_exploration"])
+        self.assertTrue(context["candidates"])
+        self.assertTrue(all(route["waypoints"][0]["position"][0] == 32
+                            for route in context["candidates"].values()))
+
+    def test_scene_target_uses_observed_routes_after_native_field_control(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        record["data"]["scene"]["event"]["phase"] = 4
+        self.assertIsNone(goal.request(Frame.decode(record)))
+        record["data"]["scene"]["event"]["phase"] = 0
+        context = goal.request(Frame.decode(record))
+        self.assertEqual(context["destination_world_xz"], (192, 64))
+        self.assertTrue(context["scene_trigger_objective"]["requires_actual_native_activation"])
+        self.assertIsNone(goal.activation_tick)
+        self.assertEqual(record["data"]["actors"][0]["position"], [32, 0, 96])
+
+    def test_scene_target_allows_a_normal_strategy_change_before_leaving_targeting(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        record["data"]["control_mode"] = 2
+        frame = Frame.decode(record)
+        self.assertTrue(goal.pending(frame))
+        self.assertFalse(goal.ready(frame))
+        self.assertIsNone(goal.request(frame))
+        record["data"]["scene"]["event"]["phase"] = 4
+        self.assertFalse(goal.pending(Frame.decode(record)))
+
+    def test_scene_target_can_leave_then_reenter_an_already_matching_tile(self):
+        record = self.frame()
+        record["data"]["actors"][0]["position"] = [160, 0, 96]
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        context = goal.request(frame)
+        self.assertEqual(context["destination_world_xz"], (32, 96))
+        self.assertTrue(context["scene_trigger_objective"]["staging_tile_change"])
+        record["data"]["actors"][0]["position"] = [32, 0, 96]
+        context = goal.request(Frame.decode(record))
+        self.assertEqual(context["destination_world_xz"], (192, 64))
+        self.assertIsNone(goal.activation_tick)
+        self.assertNotIn("passed", goal.result())
+
+    def test_scene_target_needs_the_actual_native_room_source_and_selector(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        event = record["data"]["scene"]["event"]
+        event.update({"phase": 4, "source": 1, "id": 0})
+        goal.observe(Frame.decode(record))
+        self.assertIsNone(goal.activation_tick)
+        event.update({"source": 2, "id": 1})
+        goal.observe(Frame.decode(record))
+        self.assertIsNone(goal.activation_tick)
+        event["id"] = 0
+        record["data"]["room"] += 1
+        goal.observe(Frame.decode(record))
+        self.assertIsNone(goal.activation_tick)
+        record["data"]["room"] -= 1
+        goal.navigator.path = [{"position": (160, 0, 96), "jump": False}]
+        goal.observe(Frame.decode(record))
+        self.assertEqual(goal.activation_tick, frame.tick)
+        self.assertFalse(goal.navigator.path)
+        self.assertIsNone(goal.request(Frame.decode(record)))
+
+    def test_scene_target_never_guesses_an_unobserved_staging_support(self):
+        record = self.frame()
+        record["data"]["actors"][0]["position"] = [160, 0, 64]
+        record["data"]["navigation"].update(
+            origin=[160, 64], width=1, depth=1, samples=[[0, -2032, 5]],
+        )
+        frame = Frame.decode(record)
+        with self.assertRaisesRegex(ValueError, "No observed adjacent support"):
+            SceneTileGoal((1, 0), frame.zone, frame.room, 0).request(frame)
+
+    def test_scene_target_rejects_a_route_from_before_native_scene_ownership(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        goal.request(frame)
+        record["tick"] += 1
+        record["data"]["scene"]["event"]["phase"] = 4
+        goal.observe(Frame.decode(record))
+        record["tick"] += 1
+        record["data"]["scene"]["event"]["phase"] = 0
+        with self.assertRaises(StaleDecision):
+            goal.accept(NavigationDecision("route1", "cross original tile", 1, frame.tick),
+                        Frame.decode(record))
+        self.assertFalse(goal.navigator.path)
+
+    def test_scene_target_rejects_non_native_coordinates(self):
+        for tile in ((-1, 0), (256, 0), (True, 0), (1,), [1, 0]):
+            with self.subTest(tile=tile), self.assertRaises(ValueError):
+                SceneTileGoal(tile, 1, 0, 0)
+
     def test_explicit_door_navigation_can_leave_a_hostile_honestly_alive(self):
         record = self.frame()
         enemy = copy.deepcopy(sample_record()["data"]["actors"][1])
@@ -574,6 +709,104 @@ class ReactionTests(unittest.TestCase):
 
 
 class ModelTests(unittest.TestCase):
+    def test_new_game_cli_wires_an_exclusive_production_source(self):
+        from vs_player import cli
+        command = ["player", "play", "--game-exe", "VS.Desktop.exe",
+                   "--data", "data", "--new-game"]
+        with (mock.patch.object(sys, "argv", command),
+              mock.patch.object(cli, "play", return_value={"passed": True}) as run,
+              mock.patch("sys.stdout", new_callable=io.StringIO)):
+            self.assertEqual(cli.main(), 0)
+        options = run.call_args.args[1]
+        self.assertTrue(options.new_game)
+        self.assertIsNone(options.scenario)
+        self.assertIsNone(options.save_file)
+        for extra in (["--save-file", "earned.vssave"], ["--scenario", "fixture.json"]):
+            with (self.subTest(extra=extra), mock.patch.object(sys, "argv", command + extra),
+                  mock.patch("sys.stderr", new_callable=io.StringIO),
+                  self.assertRaises(SystemExit) as caught):
+                cli.main()
+            self.assertEqual(caught.exception.code, 2)
+
+    def test_production_new_game_does_not_use_continue_or_scene_skip_inputs(self):
+        options = PlayOptions(Path("VS.Desktop.exe"), Path("data"), None, new_game=True)
+        self.assertEqual(options.desktop_startup_presses(), "1000:Start,1300:Circle")
+        continued = PlayOptions(Path("VS.Desktop.exe"), Path("data"), None,
+                                save_file=Path("earned.vssave"))
+        self.assertEqual(continued.desktop_startup_presses(),
+                         "1000:Start,1300:Circle,1450:Circle,1510:Up,1570:Circle")
+        for changes in (
+            {"save_file": Path("earned.vssave")},
+            {"scenario": Path("fixture.json")},
+            {"executable": Path("VS.CombatLab.exe")},
+            {"setup_presses": "120:Up"},
+        ):
+            arguments = {"executable": Path("VS.Desktop.exe"), "data": Path("data"),
+                         "scenario": None, "new_game": True}
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                PlayOptions(**(arguments | changes)).desktop_startup_presses()
+        with self.assertRaises(ValueError):
+            PlayOptions(Path("VS.Desktop.exe"), Path("data"), None).desktop_startup_presses()
+
+    def test_transport_json_is_lossless_and_compact(self):
+        client = LocalModel()
+        payload = {"model": "test", "messages": [{"role": "user", "content": "Exact facts."}]}
+        with mock.patch.object(client.opener, "open", return_value=io.BytesIO(b'{"done":true}')) as opener:
+            self.assertEqual(client.request("/api/chat", payload), {"done": True})
+        body = opener.call_args.args[0].data.decode()
+        self.assertEqual(json.loads(body), payload)
+        self.assertEqual(body, json.dumps(payload, separators=(",", ":")))
+
+    def test_navigation_json_is_compact_without_discarding_geometry(self):
+        client = LocalModel()
+        context = {"candidates": {"observed-route": {"waypoints": [[64, 128], [192, 128]]}}}
+        response = {
+            "done": True, "done_reason": "stop",
+            "message": {"content": '{"choice":"observed-route","reason":"Follow supported tiles."}'},
+        }
+        with mock.patch.object(client, "request", return_value=response) as request:
+            client.navigate(Frame.decode(sample_record()), "reach the door", context)
+        content = request.call_args.args[1]["messages"][1]["content"]
+        prompt = json.loads(content)
+        self.assertEqual(prompt["navigation"], context)
+        self.assertEqual(content, json.dumps(prompt, separators=(",", ":")))
+
+    def test_planning_json_is_compact_without_discarding_observations(self):
+        client = LocalModel()
+        frame = Frame.decode(sample_record())
+        response = {
+            "done": True, "done_reason": "stop",
+            "message": {"content": json.dumps({
+                "choice": "attack:2:-1:1", "chain_priority": "123",
+                "defense_priority": "321", "reason": "Attack the observed hostile.",
+            })},
+        }
+        with mock.patch.object(client, "request", return_value=response) as request:
+            client.decide(frame, "fight", [], {"target_choice_required": True})
+        content = request.call_args.args[1]["messages"][1]["content"]
+        prompt = json.loads(content)
+        self.assertEqual(prompt["observation"], json.loads(json.dumps(frame.planning_data())))
+        self.assertEqual(prompt["current_run"], {"target_choice_required": True})
+        self.assertEqual(content, json.dumps(prompt, separators=(",", ":")))
+
+    def test_http_failure_preserves_bounded_server_details(self):
+        client = LocalModel()
+        for detail in (b'{"error":"request exceeds context size"}', b"x" * 10000):
+            with self.subTest(length=len(detail)):
+                error = urllib.error.HTTPError(
+                    client.endpoint + "/api/chat", 400, "Bad Request", {},
+                    io.BytesIO(detail),
+                )
+                with mock.patch.object(client.opener, "open", side_effect=error):
+                    with self.assertRaises(RuntimeError) as caught:
+                        client.request("/api/chat", {"model": "test"})
+                message = str(caught.exception)
+                self.assertIn("400", message)
+                self.assertIn("/api/chat", message)
+                self.assertIn(detail[:100].decode(), message)
+                self.assertLess(len(message), 4300)
+                self.assertTrue(error.closed)
+
     def test_truncated_and_invalid_model_outputs_keep_their_evidence(self):
         client = LocalModel()
         for response in (
@@ -767,6 +1000,127 @@ class StorageTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_strategic_response_cannot_start_preparation_in_a_native_cinematic(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        observed = Frame.decode(record)
+        decision = Decision("wait", -1, -1, (1, 2, 3), (1, 2, 3),
+                            "Wait for owned control.", observed.tick, 0)
+        controller = CombatController()
+        record["tick"] += 50
+        record["data"]["control_mode"] = 3
+        record["data"]["scene"]["event"]["phase"] = 2
+        self.assertFalse(strategy_planning_ready(Frame.decode(record)))
+        with self.assertRaises(StaleDecision):
+            controller.accept(decision, Frame.decode(record), observed)
+        self.assertIsNone(controller.decision)
+        self.assertFalse(controller.preparing)
+
+    def test_event_owned_ability_reward_uses_only_the_real_enabled_rows(self):
+        record = sample_record(tick=10, active=False)
+        record["data"].update(control_mode=3, action_phase=6)
+        record["data"]["scene"]["event"]["phase"] = 4
+        record["data"]["menu"].update(
+            available=True, event_owned=True, list_phase=17, selected_row=0,
+            rows=[{"index": 0, "name": "Unavailable", "disabled": True},
+                  {"index": 1, "name": "Earned chain", "disabled": False}],
+        )
+        frame = Frame.decode(record)
+        choices = available_choices(frame, {})
+        self.assertEqual({row["action_id"] for row in choices.values()}, {1})
+        controller = CombatController()
+        decision = Decision("reward", -1, -1, (1, 2, 3), (1, 2, 3),
+                            "Choose the earned ability.", 10, 0, action_id=1)
+        controller.accept(decision, frame, frame)
+        self.assertEqual(controller.step(frame).buttons, frozenset({"Down"}))
+        for button in ("Circle", "Up", "Down"):
+            self.assertTrue(input_lease_permitted(frame, frozenset({button})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Square"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Circle", "Right"})))
+        record["tick"] = 20
+        record["data"]["menu"]["selected_row"] = 1
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+        record["data"]["menu"]["event_owned"] = False
+        self.assertFalse(input_lease_permitted(Frame.decode(record), frozenset({"Circle"})))
+        self.assertTrue(all(choice["intent"] != "reward"
+                            for choice in available_choices(Frame.decode(record), {}).values()))
+
+    def test_event_owned_loot_remains_interactive_without_authorizing_cutscene_movement(self):
+        record = sample_record(tick=10, active=False)
+        record["data"].update(control_mode=3, action_phase=4)
+        record["data"]["scene"]["event"]["phase"] = 4
+        record["data"]["menu"].update(available=True, event_owned=True, selected_menu=12,
+                                       loot_input_ready=True, loot_count=2)
+        frame = Frame.decode(record)
+        controller = CombatController()
+        self.assertEqual(controller.step(frame).buttons, frozenset({"Square"}))
+        self.assertTrue(input_lease_permitted(frame, frozenset({"Square"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Up"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Square", "Up"})))
+        record["data"]["menu"]["event_owned"] = False
+        self.assertFalse(input_lease_permitted(Frame.decode(record), frozenset({"Square"})))
+
+    def test_native_target_menu_exposes_explicit_limb_choices_to_the_model(self):
+        record = sample_record(tick=10, active=False)
+        record["data"].update(control_mode=2, action_phase=1)
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": 0, "position": [128, -100, 64]},
+            {"actor": 2, "limb": 3, "position": [128, -20, 64]},
+        ]
+        record["data"]["target_page"].update(first=0, visible=2, selected=0, selection_step=19)
+        choices = available_choices(Frame.decode(record), {})
+        attacks = [choice for choice in choices.values() if choice["intent"] == "attack"]
+        self.assertEqual({choice["target_limb"] for choice in attacks}, {0, 3})
+
+    def test_unspecified_limb_does_not_confirm_the_first_native_menu_row(self):
+        record = sample_record(tick=10, active=False)
+        record["data"].update(control_mode=2, action_phase=1)
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": 0, "position": [128, -100, 64]},
+            {"actor": 2, "limb": 3, "position": [128, -20, 64]},
+        ]
+        record["data"]["target_page"].update(first=0, visible=2, selected=0, selection_step=19)
+        frame = Frame.decode(record)
+        controller = CombatController()
+        decision = Decision("attack", 2, -1, (1, 2, 3), (1, 2, 3), "open native targets", 10, 0)
+        controller.accept(decision, frame, frame)
+        self.assertIsNone(controller.step(frame))
+        controller.accept(Decision("attack", 2, 3, (1, 2, 3), (1, 2, 3),
+                                   "choose observed limb", 10, 0), frame, frame)
+        self.assertEqual(controller.step(frame).buttons, frozenset({"Down"}))
+        record["tick"] = 20
+        record["data"]["target_page"]["selected"] = 1
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+
+    def test_native_whole_actor_targets_do_not_require_a_nonexistent_limb(self):
+        record = sample_record(tick=10, active=False)
+        record["data"].update(control_mode=2, action_phase=1)
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": -1, "position": [128, 0, 64]},
+        ]
+        record["data"]["target_page"].update(first=0, visible=1, selected=0, selection_step=19)
+        frame = Frame.decode(record)
+        controller = CombatController()
+        controller.accept(Decision("attack", 2, -1, (1, 2, 3), (1, 2, 3),
+                                   "whole actor target", 10, 0), frame, frame)
+        self.assertFalse(controller.needs_target_choice(frame))
+        self.assertEqual(controller.step(frame).buttons, frozenset({"Circle"}))
+
+    def test_native_limb_choice_is_rejected_if_the_menu_changes_during_planning(self):
+        record = sample_record(tick=10, active=False)
+        record["data"].update(control_mode=2, action_phase=1)
+        record["data"]["target_previews"] = [
+            {"actor": 2, "limb": 3, "position": [128, 0, 64]},
+        ]
+        record["data"]["target_page"]["selection_step"] = 19
+        observed = Frame.decode(record)
+        record["data"]["target_previews"] = []
+        controller = CombatController()
+        with self.assertRaisesRegex(StaleDecision, "target limb"):
+            controller.accept(Decision("attack", 2, 3, (1, 2, 3), (1, 2, 3),
+                                       "observed native limb", 10, 0),
+                              Frame.decode(record), observed)
+
     def test_native_loot_claim_requires_the_actual_ready_loot_screen(self):
         record = sample_record(active=False)
         record["data"].update(control_mode=2, action_phase=12)
@@ -1043,6 +1397,325 @@ class ControllerTests(unittest.TestCase):
 
 
 class RunnerTests(unittest.TestCase):
+    def test_accelerated_scene_cli_is_explicit_and_preserves_normal_defaults(self):
+        from vs_player import cli
+        command = ["player", "play", "--game-exe", "VS.CombatLab.exe", "--data", "data",
+                   "--scenario", "fixture.json", "--scene-investigation", "--speed", "4"]
+        with (mock.patch.object(sys, "argv", command),
+              mock.patch.object(cli, "play", return_value={"passed": False}) as run,
+              mock.patch("sys.stdout", new_callable=io.StringIO)):
+            self.assertEqual(cli.main(), 2)
+        options = run.call_args.args[1]
+        self.assertEqual(options.simulation_speed, 4)
+        self.assertFalse(options.strict_reactions)
+        options.validate_simulation_speed()
+        defaults = PlayOptions(Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+        self.assertEqual(defaults.simulation_speed, 1)
+        self.assertTrue(defaults.strict_reactions)
+
+    def test_accelerated_scene_investigation_cannot_certify_reaction_timing(self):
+        basic = {"executable": Path("VS.CombatLab.exe"), "data": Path("data"),
+                 "scenario": Path("fixture.json")}
+        PlayOptions(**basic).validate_simulation_speed()
+        PlayOptions(**basic, simulation_speed=4, strict_reactions=False).validate_simulation_speed()
+        for speed in (0, 3, 8, True):
+            with self.subTest(speed=speed), self.assertRaises(ValueError):
+                PlayOptions(**basic, simulation_speed=speed,
+                            strict_reactions=False).validate_simulation_speed()
+        for changes in (
+            {"strict_reactions": True},
+            {"minimum_chains": 1},
+            {"minimum_defenses": 1},
+            {"door_case": "z009-r017-d002"},
+            {"door_route": ("z009-r017-d002",)},
+            {"new_game": True},
+            {"save_file": Path("earned.vssave")},
+            {"executable": Path("VS.Desktop.exe")},
+        ):
+            arguments = basic | {"simulation_speed": 4, "strict_reactions": False} | changes
+            with self.subTest(changes=changes), self.assertRaises(ValueError):
+                PlayOptions(**arguments).validate_simulation_speed()
+
+    def test_desktop_new_game_and_continue_finalize_from_host_not_lab_results(self):
+        with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
+            path = Path(directory) / "events.jsonl"
+            path.write_text(
+                json.dumps({"sequence": 1, "category": "host.exit",
+                            "data": {"ticks": 18000, "game_finished": False}}) + "\n"
+                + json.dumps({"sequence": 2, "category": "session.end",
+                              "data": {"trace_failed": False}}) + "\n",
+                encoding="utf-8",
+            )
+            reader = TraceReader(path)
+            try:
+                reader.read()
+                for new_game in (False, True):
+                    options = PlayOptions(
+                        Path("VS.Desktop.exe"), Path("data"), None, new_game=new_game,
+                        save_file=None if new_game else Path("earned.vssave"),
+                    )
+                    complete, result = native_outcome(options, reader, 0)
+                    self.assertTrue(complete)
+                    assert result is not None
+                    self.assertFalse(result["game_finished"])
+                    self.assertIn("new_game" if new_game else "continue", result["coverage"])
+                    self.assertFalse(native_outcome(options, reader, 1)[0])
+                reader.host_exit = None
+                self.assertFalse(native_outcome(options, reader, 0)[0])
+                options = PlayOptions(Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+                checkpoint = path.parent / "sequence-results.json"
+                script = {"status": "completed", "teardown_complete": True, "engine_errors": 0}
+                checkpoint.write_text(json.dumps({"scripts": [script]}), encoding="utf-8")
+                self.assertTrue(native_outcome(options, reader, 0)[0])
+                for change in ({"teardown_complete": False}, {"engine_errors": 1},
+                               {"status": "blocked"}):
+                    checkpoint.write_text(json.dumps({"scripts": [script | change]}), encoding="utf-8")
+                    self.assertFalse(native_outcome(options, reader, 0)[0])
+            finally:
+                reader.close()
+
+    def test_native_lab_scene_goal_is_explicit_and_preserves_default_script(self):
+        basic = (Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+        options = PlayOptions(*basic)
+        self.assertEqual(native_lab_script(options, Path("owned.json"), {}),
+                         {"name": "external-player", "scenario": "owned.json", "frames": 3600})
+        with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
+            path = Path(directory) / "scene.json"
+            expectation = {"events": [2], "event_source": 2, "return_zone": 28,
+                           "return_room": 16, "preconditions": "Original local2 after genuine victory"}
+            path.write_text(json.dumps(expectation), encoding="utf-8")
+            options = PlayOptions(*basic, scene_expectation=path, setup_presses="120:Up",
+                                  scene_target_tile=(1, 17))
+            script = native_lab_script(options, Path("owned.json"), {"room_events": "production"})
+            self.assertEqual(script["scene"], expectation)
+            self.assertEqual(script["press"], "120:Up")
+            self.assertNotIn("stop", script)
+            path.write_text(json.dumps(expectation | {"event_source": 0}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "exactly one original room-local event"):
+                native_lab_script(options, Path("owned.json"), {"room_events": "production"})
+            path.write_text(json.dumps(expectation), encoding="utf-8")
+            with self.assertRaises(ValueError):
+                native_lab_script(options, Path("owned.json"), {"room_events": "isolated"})
+            path.write_text("[]", encoding="utf-8")
+            with self.assertRaises(ValueError):
+                native_lab_script(options, Path("owned.json"), {"room_events": "production"})
+        for change in ({"executable": Path("VS.Desktop.exe")}, {"scenario": None},
+                       {"new_game": True}, {"save_file": Path("save.vssave")}):
+            arguments = {"executable": basic[0], "data": basic[1], "scenario": basic[2],
+                         "scene_expectation": Path("scene.json")} | change
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                PlayOptions(**arguments).validate_scene_expectation()
+
+    def test_cli_forwards_the_explicit_native_scene_expectation(self):
+        from vs_player import cli
+
+        command = ["player.py", "play", "--game-exe", "VS.CombatLab.exe",
+                   "--data", "data", "--scenario", "fixture.json",
+                   "--scene-expectation", "source-scene.json", "--scene-target-tile", "1", "17"]
+        with (mock.patch.object(sys, "argv", command),
+              mock.patch("vs_player.cli.play", return_value={"passed": True}) as managed,
+              mock.patch("sys.stdout", new_callable=io.StringIO)):
+            self.assertEqual(cli.main(), 0)
+        options = managed.call_args.args[1]
+        self.assertEqual(options.scene_expectation, Path("source-scene.json"))
+        self.assertEqual(options.scenario, Path("fixture.json"))
+        self.assertEqual(options.scene_target_tile, (1, 17))
+
+    def test_native_scene_finalization_requires_exact_contract_control_and_teardown(self):
+        with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
+            path = Path(directory) / "events.jsonl"
+            path.write_text(json.dumps({"sequence": 1, "category": "session.end",
+                                        "data": {"trace_failed": False}}) + "\n", encoding="utf-8")
+            reader = TraceReader(path)
+            try:
+                reader.read()
+                basic = (Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+                options = PlayOptions(*basic, scene_expectation=Path("source-scene.json"))
+                expected = {"events": [2], "event_source": 2, "return_zone": 28,
+                            "return_room": 16, "preconditions": "Original local2 after genuine victory"}
+                scene = {"coverage": "scene_playback_control", "status": "passed",
+                         "expected_events": [2], "matched_events": 1, "event_source": 2,
+                         "return_zone": 28, "return_room": 16,
+                         "preconditions": expected["preconditions"],
+                         "control_tick": 50, "passed_tick": 170}
+                script = {"status": "passed", "teardown_complete": True,
+                          "engine_errors": 0, "scene": scene}
+                checkpoint = path.parent / "sequence-results.json"
+                checkpoint.write_text(json.dumps({"scripts": [script]}), encoding="utf-8")
+                self.assertTrue(native_outcome(options, reader, 0, expected)[0])
+                self.assertFalse(native_outcome(options, reader, 0)[0])
+                self.assertFalse(native_outcome(PlayOptions(*basic), reader, 0)[0])
+                self.assertFalse(native_outcome(options, reader, 1, expected)[0])
+                for change in ({"status": "blocked"}, {"expected_events": [3]},
+                               {"matched_events": 0}, {"event_source": 0}, {"return_room": 17},
+                               {"preconditions": "different"}, {"passed_tick": 169},
+                               {"control_tick": True}):
+                    with self.subTest(change=change):
+                        checkpoint.write_text(json.dumps({
+                            "scripts": [script | {"scene": scene | change}],
+                        }), encoding="utf-8")
+                        self.assertFalse(native_outcome(options, reader, 0, expected)[0])
+                for change in ({"status": "completed"}, {"status": "cancelled"},
+                               {"teardown_complete": False}, {"engine_errors": 1}):
+                    checkpoint.write_text(json.dumps({"scripts": [script | change]}), encoding="utf-8")
+                    self.assertFalse(native_outcome(options, reader, 0, expected)[0])
+            finally:
+                reader.close()
+
+    def test_source_setup_releases_before_model_strategy_and_preserves_default(self):
+        basic = (Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+        self.assertEqual(PlayOptions(*basic).setup_control_tick(), 0)
+        options = PlayOptions(*basic, frames=300, setup_presses="120:Up,122:Up+Right")
+        self.assertEqual(options.setup_control_tick(), 126)
+
+    def test_source_setup_rejects_combat_skip_conflicts_and_unbounded_pulses(self):
+        for pulses in ("120:Circle", "120:Cross", "120:Square", "120:Start", "120:L2",
+                       "bad", "120:", "120:Up+Down", "120:Left+Right", "120:Up+Up",
+                       "120:Up,121:Right", "120:Up,100:Right", "299:Up"):
+            with self.subTest(pulses=pulses):
+                options = PlayOptions(Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"),
+                                      frames=300, setup_presses=pulses)
+                with self.assertRaises(ValueError):
+                    options.setup_control_tick()
+
+    def test_source_setup_cannot_relax_physical_doors_or_replace_desktop_progression(self):
+        basic = (Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+        for changes in ({"door_case": "z009-r006-d000"},
+                        {"door_route": ("z009-r006-d000",)}, {"clear_enemies_first": True}):
+            with self.subTest(changes=changes):
+                options = PlayOptions(*basic, setup_presses="120:Up", **changes)
+                with self.assertRaisesRegex(ValueError, "physical-door"):
+                    options.setup_control_tick()
+        options = PlayOptions(Path("VS.Desktop.exe"), Path("data"), None,
+                              save_file=Path("earned.vssave"), setup_presses="120:Up")
+        with self.assertRaisesRegex(ValueError, "Combat Lab"):
+            options.setup_control_tick()
+
+    def test_native_dialogue_circle_lease_survives_cutscene_control_only_while_visible(self):
+        record = sample_record(active=False)
+        record["data"]["control_mode"] = 3
+        record["data"]["scene"]["event"].update(phase=4, dialogue_waits=[True] + [False] * 7)
+        frame = Frame.decode(record)
+        self.assertTrue(input_lease_permitted(frame, frozenset({"Circle"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Up"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Circle", "Up"})))
+        record["data"]["scene"]["event"]["dialogue_waits"] = [False] * 8
+        self.assertFalse(input_lease_permitted(Frame.decode(record), frozenset({"Circle"})))
+        record["data"]["ready"] = False
+        self.assertFalse(input_lease_permitted(Frame.decode(record), frozenset({"Circle"})))
+
+    def test_post_combat_handoff_requests_the_real_door_without_live_targets(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 2, "tile_z": 0, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        goal = CombatGoal("z009-r006-d000", clear_enemies_first=True)
+        goal.observe(Frame.decode(record))
+        self.assertFalse(goal.exit_ready(Frame.decode(record)))
+        record["data"]["actors"][1]["hp"] = 0
+        goal.observe(Frame.decode(record))
+        record["data"]["scene"]["event"]["phase"] = 4
+        self.assertFalse(goal.exit_ready(Frame.decode(record)))
+        record["data"]["scene"]["event"]["phase"] = 0
+        frame = Frame.decode(record)
+        self.assertTrue(goal.exit_ready(frame))
+        choices = available_choices(frame, {"physical_navigation_objective": {"id": goal.door.identity}})
+        self.assertEqual(list(choices.values())[0]["intent"], "navigate")
+
+    def test_stale_observations_never_authorize_input_but_transient_gaps_recover(self):
+        guard = ObservationFreshness(0.1)
+        self.assertFalse(guard.observe(0.1425, 10.0, True))
+        self.assertFalse(guard.observe(0.11, 10.5, True))
+        self.assertTrue(guard.observe(0.005, 10.6, True))
+        self.assertIsNone(guard.stale_since)
+        self.assertFalse(guard.observe(0.2, 20.0, True))
+        with self.assertRaisesRegex(TimeoutError, "recover"):
+            guard.check_timeout(22.0)
+
+    def test_explicit_combat_first_needs_observed_death_not_actor_disappearance(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        goal = CombatGoal("z009-r006-d000", clear_enemies_first=True)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 2, "tile_z": 0, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        goal.observe(Frame.decode(record))
+        self.assertTrue(goal.combat_pending(Frame.decode(record)))
+        removed = copy.deepcopy(record)
+        removed["data"]["actors"] = removed["data"]["actors"][:1]
+        goal.observe(Frame.decode(removed))
+        self.assertTrue(goal.combat_pending(Frame.decode(removed)))
+        record["data"]["actors"][1]["hp"] = 0
+        goal.observe(Frame.decode(record))
+        self.assertFalse(goal.combat_pending(Frame.decode(record)))
+
+    def test_explicit_scene_combat_first_uses_actual_deaths_in_its_declared_room(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        frame = Frame.decode(record)
+        scope = (frame.zone, frame.room)
+        goal = CombatGoal(clear_enemies_first=True)
+        goal.observe(frame)
+        self.assertTrue(goal.combat_pending(frame, scope))
+        removed = copy.deepcopy(record)
+        removed["data"]["actors"] = removed["data"]["actors"][:1]
+        goal.observe(Frame.decode(removed))
+        self.assertTrue(goal.combat_pending(Frame.decode(removed), scope))
+        record["data"]["actors"][1]["hp"] = 0
+        goal.observe(Frame.decode(record))
+        self.assertFalse(goal.combat_pending(Frame.decode(record), scope))
+        self.assertIsNone(goal.door)
+
+    def test_combat_gate_waits_for_real_native_flag_before_navigation(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 2, "tile_z": 0, "layer": 0, "required_value": 2,
+             "current_flag_value": 0}
+        ]
+        gate = PhysicalDoor("z009-r006-d000")
+        gate.observe(Frame.decode(record))
+        self.assertIsNone(gate.blocked_reason)
+        self.assertTrue(gate.waiting_for_gate)
+        self.assertIsNone(gate.step(Frame.decode(record)))
+        self.assertIsNone(gate.navigation_request(Frame.decode(record)))
+        record["tick"] = 20
+        record["data"]["doors"][0]["current_flag_value"] = 2
+        gate.observe(Frame.decode(record))
+        self.assertFalse(gate.waiting_for_gate)
+        self.assertEqual(gate.contract["current_flag_value"], 2)
+        self.assertIsNone(gate.blocked_reason)
+        self.assertIsNotNone(gate.step(Frame.decode(record)))
+
+    def test_enemy_death_alone_does_not_clear_a_still_unsatisfied_gate(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 2, "tile_z": 0, "layer": 0, "required_value": 2,
+             "current_flag_value": 0}
+        ]
+        gate = PhysicalDoor("z009-r006-d000")
+        gate.observe(Frame.decode(record))
+        record["tick"] = 100
+        record["data"]["actors"][1]["hp"] = 0
+        gate.observe(Frame.decode(record))
+        self.assertIsNone(gate.blocked_reason)
+        self.assertTrue(gate.waiting_for_gate)
+        record["tick"] = 219
+        gate.observe(Frame.decode(record))
+        self.assertIsNone(gate.blocked_reason)
+        record["tick"] = 220
+        gate.observe(Frame.decode(record))
+        self.assertIn("story flag", gate.blocked_reason)
+        self.assertEqual(record["data"]["doors"][0]["current_flag_value"], 0)
+
     def test_walking_stall_uses_only_two_native_jumps_before_explicit_block(self):
         door = PhysicalDoor("z009-r006-d000")
         record = sample_record(active=False)
@@ -1144,6 +1817,8 @@ class RunnerTests(unittest.TestCase):
 
     def test_physical_gate_never_manufactures_story_or_selects_a_shadowed_record(self):
         record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["actors"] = record["data"]["actors"][:1]
         door = {"index": 1, "destination_zone": 9, "destination_room": 7,
                 "tile_x": 2, "tile_z": 0, "layer": 0, "required_value": 2,
                 "current_flag_value": 0}
