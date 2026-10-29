@@ -1303,6 +1303,57 @@ class ControllerTests(unittest.TestCase):
         record["data"]["actors"][0]["position"][1] = -16
         self.assertIn("Circle", controller.step(Frame.decode(record)).buttons)
 
+    def test_attack_reposition_uses_only_current_native_refusal_and_unmoved_position(self):
+        controller = CombatController()
+        original = self.frame()
+        controller.accept(self.decision(), original, original)
+        self.assertFalse(controller.attack_reposition_required(original))
+        refused = self.frame(10, control_mode=2, action_phase=1,
+                             target_page={"selection_step": 16})
+        controller.step(refused)
+        retry = self.frame(20)
+        controller.accept(self.decision(20), retry, retry)
+        self.assertTrue(controller.attack_reposition_required(retry))
+        self.assertEqual(controller.step(retry).reason,
+                         "move using current native positions and camera")
+        for field in ("episode", "zone", "room"):
+            record = sample_record(30, active=False)
+            record["data"].update(control_mode=1, action_phase=0)
+            if field == "episode":
+                record["script"] = 1
+            else:
+                record["data"][field] += 1
+            with self.subTest(field=field):
+                self.assertFalse(controller.attack_reposition_required(Frame.decode(record)))
+        for field in ("model", "spawn_index", "slot"):
+            record = sample_record(30, active=False)
+            record["data"].update(control_mode=1, action_phase=0)
+            record["data"]["actors"][1][field] += 1
+            with self.subTest(field=field):
+                self.assertFalse(controller.attack_reposition_required(Frame.decode(record)))
+        for distance in (15, 16):
+            record = sample_record(30, active=False)
+            record["data"].update(control_mode=1, action_phase=0)
+            record["data"]["actors"][0]["position"][1] = -distance
+            with self.subTest(distance=distance):
+                self.assertEqual(controller.attack_reposition_required(Frame.decode(record)),
+                                 distance < 16)
+        controller.accept(self.decision(20, intent="approach"), retry, retry)
+        self.assertFalse(controller.attack_reposition_required(retry))
+
+    def test_unlisted_attack_target_also_requires_reposition(self):
+        controller = CombatController()
+        original = self.frame()
+        controller.accept(self.decision(), original, original)
+        refused = self.frame(10, control_mode=2, action_phase=1,
+                             target_page={"selection_step": 19},
+                             target_previews=[{"actor": 3, "limb": 0}])
+        self.assertEqual(controller.step(refused).buttons, frozenset({"Cross"}))
+        self.assertEqual(controller.feedback[-1]["kind"], "target_not_listed")
+        retry = self.frame(20)
+        controller.accept(self.decision(20), retry, retry)
+        self.assertTrue(controller.attack_reposition_required(retry))
+
     def test_learned_chains_can_fill_an_empty_saved_loadout_without_grants(self):
         record = sample_record(active=False, chain_actions=[0, 0, 0])
         record["data"]["action_options"] = [

@@ -717,7 +717,8 @@ def _play_game(store: RunStore, run_id: str,
                     needs_geometry = (
                         pursuing and ordinary_movement and pursuit_actor is not None and action is not None
                         and latest.raw.get("navigation", {}).get("available")
-                        and pursuit.ordinary_approach_stalled(latest, pursuit_actor, action.duration)
+                        and (controller.attack_reposition_required(latest)
+                             or pursuit.ordinary_approach_stalled(latest, pursuit_actor, action.duration))
                     )
                     moving_to_hostile = (
                         pursuing and pursuit_actor is not None

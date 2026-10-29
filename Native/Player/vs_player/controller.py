@@ -153,6 +153,20 @@ class CombatController:
         if decision.intent == "attack" and self.identity is not None:
             self.rejected_positions[self.identity] = player.position
 
+    def attack_reposition_required(self, frame: Frame) -> bool:
+        decision = self.decision
+        if (decision is None or decision.intent != "attack" or frame.player is None
+                or (frame.episode, frame.zone, frame.room) != self.decision_scene):
+            return False
+        target = next((actor for actor in frame.enemies
+                       if actor.slot == decision.target_slot), None)
+        if target is None or self.target_identity(frame, target) != self.identity:
+            return False
+        rejected = self.rejected_positions.get(self.identity)
+        return rejected is not None and sum(
+            (frame.player.position[index] - rejected[index])**2 for index in (0, 1, 2)
+        ) < 16**2
+
     def step(self, frame: Frame, allow_strategy: bool = True) -> InputAction | None:
         reaction = self.reactions.observe(frame)
         if reaction:
@@ -282,11 +296,8 @@ class CombatController:
         elif decision.intent == "attack":
             if player.native_extent <= 0:
                 raise ValueError("Native weapon reach is unavailable; refusing a guessed range")
-            rejected = self.rejected_positions.get(self.identity) if self.identity is not None else None
-            moved = rejected is None or sum(
-                (player.position[index] - rejected[index])**2 for index in (0, 1, 2)
-            ) >= 16**2
-            if moved and dx * dx + dz * dz <= player.native_extent * player.native_extent:
+            if (not self.attack_reposition_required(frame)
+                    and dx * dx + dz * dz <= player.native_extent * player.native_extent):
                 return self._action(frame, ("Circle",), 2, "open native attack targeting")
         buttons = direction_buttons(dx, dz, frame.camera_yaw)
         if not buttons:

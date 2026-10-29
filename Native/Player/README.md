@@ -97,6 +97,12 @@ outside native cinematic ownership. Temporary story actors that carry a hostile
 classification are not automatically battle requirements. Actual zero-HP
 evidence for a previously observed combat actor is still recorded when its
 death starts a cinematic; disappearance alone never establishes a kill.
+When native attack targeting refuses the selected hostile, the required
+reposition immediately requests the existing observed-terrain pursuit routes,
+instead of waiting for the ordinary approach timeout. Refusal evidence is
+scoped to the scene and target identity and ceases to require reposition after
+16 units of actual movement. Ordinary approach without refusal is unchanged;
+route arrival and approximate weapon reach never establish native targetability.
 
 Managed player runs now request `--verification-log`: all native player frames,
 command/result/flag records and errors remain available, without per-draw Trace
