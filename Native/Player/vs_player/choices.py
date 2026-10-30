@@ -183,7 +183,14 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                  if enemy.slot in combined["slots"]]
         mid = (sum(x for x, _ in spots) / len(spots), sum(z for _, z in spots) / len(spots))
         spread = max(math.dist(spot, mid) for spot in spots)
-        if not settling:
+        # An area whose previews lacked a required hostile from here fails for every spell and
+        # target in the set alike; Ashley must move before any area cast can cover them.
+        out_of_range_here = any(
+            row.get("status") == "area_out_of_range" and row.get("target") in combined["slots"]
+            and row.get("player_position") is not None
+            and math.dist(row["player_position"], player.position) < 128
+            for row in feedback)
+        if not settling and not out_of_range_here:
             # Per spell, offer only the highest affordable rank whose area may still cover the set.
             best: dict[int, dict] = {}
             for option in ranked_spells:
