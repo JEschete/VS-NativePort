@@ -342,11 +342,12 @@ def native_lab_script(options: PlayOptions, scenario: Path, setup: dict) -> dict
         script["scene"] = expectation
         if options.setup_interaction and expectation.get("event_source") not in (0, 2):
             raise ValueError("Setup interaction pulses require an original room-local or external event")
+        # A room trigger tile can start a room-local event or an external EVENT/*.EVT script.
         if options.scene_target_tile is not None and (
-                expectation.get("event_source") != 2
+                expectation.get("event_source") not in (0, 2)
                 or not isinstance(expectation.get("events"), list)
                 or len(expectation["events"]) != 1):
-            raise ValueError("Scene-tile navigation requires exactly one original room-local event")
+            raise ValueError("Scene-tile navigation requires exactly one original room-triggered event")
     return script
 
 
@@ -586,7 +587,8 @@ def _play_game(store: RunStore, run_id: str,
     # After a physical door route the trigger belongs to the arrival room, bound once the route is accepted.
     scene_tile_after_route = options.scene_target_tile is not None and bool(options.door_route)
     scene_navigation = (SceneTileGoal(options.scene_target_tile, setup["zone"], setup["room"],
-                                     scene_expectation["events"][0], options.scene_examine_quadrant)
+                                     scene_expectation["events"][0], options.scene_examine_quadrant,
+                                     scene_expectation.get("event_source", 2))
                         if options.scene_target_tile is not None and scene_expectation is not None
                         and not scene_tile_after_route else None)
     scene_hold = SceneReturnHold(scene_expectation) if scene_expectation is not None else None
@@ -696,7 +698,8 @@ def _play_game(store: RunStore, run_id: str,
                             and goal.accepted_tick is not None and latest.ready):
                         scene_navigation = SceneTileGoal(options.scene_target_tile, latest.zone, latest.room,
                                                          scene_expectation["events"][0],
-                                                         options.scene_examine_quadrant)
+                                                         options.scene_examine_quadrant,
+                                                         scene_expectation.get("event_source", 2))
                         audit.event("scene_navigation.bound", {
                             "tick": latest.tick, "zone": latest.zone, "room": latest.room,
                             "tile": options.scene_target_tile,

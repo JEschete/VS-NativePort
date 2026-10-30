@@ -222,6 +222,20 @@ class NavigationTests(unittest.TestCase):
         self.assertFalse(goal.navigator.path)
         self.assertIsNone(goal.request(Frame.decode(record)))
 
+    def test_scene_target_matches_external_event_started_by_room_trigger(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 67, source=0)
+        event = record["data"]["scene"]["event"]
+        event.update({"phase": 4, "source": 2, "id": 67})
+        goal.observe(Frame.decode(record))
+        self.assertIsNone(goal.activation_tick)
+        event["source"] = 0
+        goal.observe(Frame.decode(record))
+        self.assertEqual(goal.activation_tick, frame.tick)
+        with self.assertRaises(ValueError):
+            SceneTileGoal((1, 0), frame.zone, frame.room, 67, source=1)
+
     def test_scene_target_never_guesses_an_unobserved_staging_support(self):
         record = self.frame()
         record["data"]["actors"][0]["position"] = [160, 0, 64]
@@ -2480,7 +2494,10 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(script["press"], "120:Up")
             self.assertNotIn("stop", script)
             path.write_text(json.dumps(expectation | {"event_source": 0}), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "exactly one original room-local event"):
+            self.assertEqual(native_lab_script(options, Path("owned.json"),
+                                               {"room_events": "production"})["scene"]["event_source"], 0)
+            path.write_text(json.dumps(expectation | {"event_source": 1}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "exactly one original room-triggered event"):
                 native_lab_script(options, Path("owned.json"), {"room_events": "production"})
             path.write_text(json.dumps(expectation), encoding="utf-8")
             with self.assertRaises(ValueError):

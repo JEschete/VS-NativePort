@@ -421,14 +421,17 @@ FACING_QUADRANT_DELTA = ((0, -1), (-1, 0), (0, 1), (1, 0))
 
 class SceneTileGoal:
     def __init__(self, tile: tuple[int, int], zone: int, room: int, selector: int,
-                 examine_quadrant: int | None = None) -> None:
+                 examine_quadrant: int | None = None, source: int = 2) -> None:
         if (not isinstance(tile, tuple) or len(tile) != 2
                 or any(type(value) is not int or not 0 <= value <= 255 for value in tile)
                 or any(type(value) is not int or value < 0 for value in (zone, room, selector))
+                or source not in (0, 2)
                 or (examine_quadrant is not None
                     and (type(examine_quadrant) is not int or not 0 <= examine_quadrant <= 3))):
             raise ValueError("A local-scene target requires native room/selector IDs and a byte-sized tile")
         self.tile = tile
+        # Native event source of the triggered script: 2 room-local, 0 external EVENT/*.EVT.
+        self.source = source
         # A type-4 trigger is examined with ordinary Cross from this stand tile while facing the quadrant;
         # room-entry scripts can relocate Ashley after the fixture's setup pulses, so she walks back.
         self.examine_quadrant = examine_quadrant
@@ -466,7 +469,7 @@ class SceneTileGoal:
                 or frame.event_phase != 0 or frame.dialogue_waiting):
             self.last_owned_tick = frame.tick
         if (self.activation_tick is None and (frame.zone, frame.room) == (self.zone, self.room)
-                and event.get("phase") == 4 and event.get("source") == 2
+                and event.get("phase") == 4 and event.get("source") == self.source
                 and event.get("id") == self.selector):
             self.activation_tick = frame.tick
 
