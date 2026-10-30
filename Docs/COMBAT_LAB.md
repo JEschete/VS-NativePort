@@ -670,6 +670,20 @@ Omitting it leaves the New Game value. Values that are not integers, or are
 outside 0..255, are rejected.
 This is declared fixture state, not earned campaign progression.
 
+Production-room presets may declare an optional integer `inherited_music`
+(1..199). Zones whose ZND music id is 0 load no wave bank of their own
+(`_finishLoadZnd`, BATTLE 146C.c:14826); they keep the bank an earlier zone or
+event left loaded. A direct fixture skips that route, so its music can request
+programs that were never imported. For example, the MAP005 E004 cue
+(MUSIC019) needs WAVE0069, which the original prologue loads through Zone 1's
+music 16 and the external-2 `load-sound-file 17`. The declared value is
+an original music id. Before the first room loads, the Lab loads its mapped wave
+bank through the original blocking loader (`vs_main_loadAndWaitSoundSlot`). It
+loads and plays no music slot. Validation rejects ids without a mapped bank and
+zones whose header loads its own music, which would replace the bank anyway.
+Attract demos reject it. This is declared predecessor audio context, not
+progression.
+
 The **WEAPON** row in the same submenu cycles through `default`, `dagger`,
 `sword`, `greatsword`, `axe-mace`, `greataxe`, `staff`, `heavy-mace`, `polearm`,
 `crossbow` and `bare-hands`. Enter/Circle restores `default`. The main setup

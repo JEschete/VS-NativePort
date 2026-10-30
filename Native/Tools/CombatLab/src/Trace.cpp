@@ -461,6 +461,9 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
   if (setup.external_event) result["external_event"] = *setup.external_event;
   if (setup.story_progress) result["story_progress"] = *setup.story_progress;
   if (setup.attract_demo) result["attract_demo"] = *setup.attract_demo;
+  if (setup.inherited_music) {
+    result["inherited_music"] = *setup.inherited_music;
+  }
   return result;
 }
 
@@ -490,6 +493,14 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
       throw std::runtime_error("story_progress must be an integer in 0..255");
     }
     setup.story_progress = progress.get<int>();
+  }
+  if (json.contains("inherited_music")) {
+    const auto& music = json.at("inherited_music");
+    if (!music.is_number_integer() || music < 1 ||
+        music > Game::EncounterLimits::kLastMusic) {
+      throw std::runtime_error("inherited_music must be an integer in 1..199");
+    }
+    setup.inherited_music = music.get<int>();
   }
   setup.zone = json.at("zone").get<int>();
   setup.room = json.at("room").get<int>();
@@ -559,7 +570,7 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
         setup.profile != Game::EncounterProfile::kPrologue ||
         setup.weapon != Game::EncounterWeapon::kDefault ||
         setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
-        setup.external_event || setup.story_progress) {
+        setup.external_event || setup.story_progress || setup.inherited_music) {
       throw std::runtime_error(
           "attract_demo requires the original title-timeout door, entry "
           "tile and unmodified New Game production room");

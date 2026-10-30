@@ -17,6 +17,8 @@ struct EncounterLimits {
   static constexpr int kEnemyIdEnd = 127;
   static constexpr int kLastZone = 255;
   static constexpr int kLastExternalEvent = 9999;
+  // Last index of the original 200-entry music -> wave bank map.
+  static constexpr int kLastMusic = 199;
   static constexpr int kStatusTimers = 8;
   static constexpr int kPositionAxes = 3;
   static constexpr int kMinPlayerStat = 1;
@@ -71,6 +73,7 @@ struct EncounterRoom {
 struct EncounterZone {
   int id = 0;
   std::string asset;
+  int music = 0;
   std::vector<EncounterRoom> rooms;
   std::vector<EncounterEnemy> enemies;
 };
@@ -147,6 +150,10 @@ struct EncounterSetup {
   // Starts through the original Title_PrepareExit and entry mode, so the
   // original game loop returns to title when the demo ends or on any button.
   std::optional<int> attract_demo;
+  // Declared predecessor music id whose mapped wave bank the original route
+  // left loaded. Only valid for zones whose ZND music id is 0, which keep the
+  // previous zone's bank instead of loading one (_finishLoadZnd).
+  std::optional<int> inherited_music;
 };
 
 inline constexpr int kAttractDemoCutscene1 = 3;

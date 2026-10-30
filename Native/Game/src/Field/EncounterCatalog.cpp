@@ -22,6 +22,7 @@ extern "C" {
 #include "Actors/ActorLoading.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Spawning.h"
+#include "Audio/SoundBanks.h"
 #include "Field/CollisionSampling.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
@@ -203,6 +204,7 @@ EncounterZone ReadZone(const Content::DataStore& store,
   const auto bytes = store.ReadAll(entry);
   if (!bytes) throw std::runtime_error(bytes.error());
   const auto header = Read<Field_ZndHeader>(*bytes);
+  zone.music = header.musicId;
   const auto rooms = Section(*bytes, header.mpdListOffset, header.mpdListSize);
   constexpr std::size_t kFileRecordBytes = 8;
   if (rooms.size() % kFileRecordBytes != 0) {
@@ -543,6 +545,12 @@ std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
           "overrides");
     }
   }
+  if (setup.inherited_music &&
+      (*setup.inherited_music < 1 ||
+       *setup.inherited_music > EncounterLimits::kLastMusic ||
+       Audio_waveBankFileMap[*setup.inherited_music] == 0)) {
+    errors.emplace_back("inherited music has no mapped wave bank");
+  }
   if (!setup.stat_overrides.Valid()) {
     errors.emplace_back("ASHLEY STAT OVERRIDES MUST BE IN 1..999");
   }
@@ -562,6 +570,10 @@ std::vector<std::string> ValidateEncounter(const EncounterSetup& setup,
                                            const EncounterZone& zone) {
   auto errors = ValidateEncounterOptions(setup);
   if (setup.zone != zone.id) errors.emplace_back("zone does not match catalog");
+  if (setup.inherited_music && zone.music != 0) {
+    errors.emplace_back(
+        "inherited music requires a zone that keeps the previous wave bank");
+  }
   const auto room =
       std::ranges::find(zone.rooms, setup.room, &EncounterRoom::index);
   if (room == zone.rooms.end()) return {"room is not in the selected zone"};

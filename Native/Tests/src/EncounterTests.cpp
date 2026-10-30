@@ -708,6 +708,38 @@ TEST_CASE("Production room presets retain original actors and event policy",
   CHECK_THROWS(VS::combat_lab::DecodeSetup(invalid));
 }
 
+TEST_CASE("Inherited music is limited to mapped banks in zones without music",
+          "[combat][encounter][production][inherited-music]") {
+  auto setup = TestSetup(0);
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  const auto original = VS::combat_lab::EncodeSetup(setup);
+  CHECK_FALSE(original.contains("inherited_music"));
+  CHECK_FALSE(VS::combat_lab::DecodeSetup(original).inherited_music);
+
+  // Music 16 (Zone 1) and 17 (prologue load-sound-file) map to WAVE0069.
+  for (const int music : {16, 17}) {
+    setup.inherited_music = music;
+    CHECK(ValidateEncounter(setup, TestZone()).empty());
+    const auto encoded = VS::combat_lab::EncodeSetup(setup);
+    CHECK(encoded.at("inherited_music") == music);
+    CHECK(VS::combat_lab::DecodeSetup(encoded).inherited_music == music);
+  }
+  auto with_music = TestZone();
+  with_music.music = 16;
+  CHECK_FALSE(ValidateEncounter(setup, with_music).empty());
+  for (const int unmapped : {0, 12, 15, 200}) {
+    setup.inherited_music = unmapped;
+    CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  }
+  auto preset = original;
+  for (const auto& invalid :
+       {nlohmann::json(0), nlohmann::json(200), nlohmann::json(16.5),
+        nlohmann::json("16"), nlohmann::json(true), nlohmann::json(nullptr)}) {
+    preset["inherited_music"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(preset));
+  }
+}
+
 TEST_CASE("External event components roundtrip without changing older presets",
           "[combat][encounter][event-component]") {
   auto setup = TestSetup(0);

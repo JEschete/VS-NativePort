@@ -28,6 +28,7 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Seq/Channel.h"
+#include "Audio/SoundBanks.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
@@ -153,6 +154,18 @@ int EnterOrFinishEncounter() {
                         static_cast<char>(*configuration.story_progress));
     VS_LOG_INFO("encounter", "declared story progress={}",
                 *configuration.story_progress);
+  }
+  if (configuration.inherited_music) {
+    // Zones whose ZND music id is 0 keep the wave bank an earlier zone or
+    // event left loaded (_finishLoadZnd, BATTLE.PRG 146C.c:14826). Load the
+    // declared predecessor's mapped bank with the original
+    // vs_main_loadAndWaitSoundSlot (SLUS main.c:10439); no music slot is
+    // loaded or played.
+    Audio_LoadWaveBankBlocking(*configuration.inherited_music);
+    VS_LOG_INFO("encounter", "declared inherited music={} wave bank={}",
+                *configuration.inherited_music,
+                static_cast<int>(
+                    Audio_waveBankFileMap[*configuration.inherited_music]));
   }
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.
