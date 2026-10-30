@@ -2070,6 +2070,27 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(controller.unreachable_hostiles(
             self.frame(tick + CombatController.unreachable_window + 10)), [])
 
+    def test_exhausted_terrain_route_marks_hostile_unreachable_without_ending_the_run(self):
+        from vs_player.navigation import NO_OUTGOING_EDGE, TERRAIN_EXHAUSTED
+        self.assertIn(NO_OUTGOING_EDGE, TERRAIN_EXHAUSTED)
+        controller = CombatController()
+        start = self.frame(0)
+        controller.accept(self.decision(0), start, start)
+        slot = start.enemies[0].slot
+        self.assertFalse(controller.mark_terrain_unreachable(start, slot + 9))
+        self.assertTrue(controller.mark_terrain_unreachable(start, slot))
+        self.assertIsNone(controller.decision)
+        self.assertEqual(controller.feedback[-1]["kind"], "terrain_unreachable")
+        current = self.frame(30)
+        verdicts = controller.unreachable_hostiles(current)
+        self.assertEqual([row["slot"] for row in verdicts], [slot])
+        intents = {(row["intent"], row["target_slot"])
+                   for row in available_choices(current, {"unreachable_hostiles": verdicts}).values()}
+        self.assertNotIn(("attack", slot), intents)
+        self.assertNotIn(("approach", slot), intents)
+        self.assertEqual(controller.unreachable_hostiles(
+            self.frame(CombatController.unreachable_window + 10)), [])
+
     def test_unlisted_attack_target_also_requires_reposition(self):
         controller = CombatController()
         original = self.frame()
@@ -2566,8 +2587,22 @@ class RunnerTests(unittest.TestCase):
             self.assertEqual(native_lab_script(options, Path("owned.json"),
                                                {"room_events": "production"})["scene"]["event_source"], 0)
             path.write_text(json.dumps(expectation | {"event_source": 1}), encoding="utf-8")
-            with self.assertRaisesRegex(ValueError, "exactly one original room-triggered event"):
+            with self.assertRaisesRegex(ValueError, "one original room-triggered event"):
                 native_lab_script(options, Path("owned.json"), {"room_events": "production"})
+            # A second event may follow natively (timer) or through an explicit follow tile.
+            path.write_text(json.dumps(expectation | {"events": [1, 2]}), encoding="utf-8")
+            native_lab_script(options, Path("owned.json"), {"room_events": "production"})
+            path.write_text(json.dumps(expectation | {"events": [1, 2, 3]}), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "one original room-triggered event"):
+                native_lab_script(options, Path("owned.json"), {"room_events": "production"})
+            follow = PlayOptions(*basic, scene_expectation=path, scene_target_tile=(6, 12),
+                                 scene_examine_quadrant=1, scene_follow_tile=(3, 13))
+            path.write_text(json.dumps(expectation), encoding="utf-8")
+            with self.assertRaisesRegex(ValueError, "or two when a follow tile"):
+                native_lab_script(follow, Path("owned.json"), {"room_events": "production"})
+            path.write_text(json.dumps(expectation | {"events": [1, 4]}), encoding="utf-8")
+            native_lab_script(follow, Path("owned.json"), {"room_events": "production"})
+            follow.validate_scene_expectation()
             path.write_text(json.dumps(expectation), encoding="utf-8")
             with self.assertRaises(ValueError):
                 native_lab_script(options, Path("owned.json"), {"room_events": "isolated"})
@@ -2585,6 +2620,11 @@ class RunnerTests(unittest.TestCase):
         PlayOptions(**arrival, door_route=("z038-r000-d000",)).validate_scene_expectation()
         with self.assertRaisesRegex(ValueError, "no single door case"):
             PlayOptions(**arrival, door_case="z038-r000-d000").validate_scene_expectation()
+        with self.assertRaisesRegex(ValueError, "follow tile requires a first scene tile in the same room"):
+            PlayOptions(**arrival, door_route=("z038-r000-d000",),
+                        scene_follow_tile=(3, 13)).validate_scene_expectation()
+        with self.assertRaisesRegex(ValueError, "follow examine quadrant"):
+            PlayOptions(**arrival, scene_follow_examine_quadrant=1).validate_scene_expectation()
 
     def test_cli_forwards_the_explicit_native_scene_expectation(self):
         from vs_player import cli

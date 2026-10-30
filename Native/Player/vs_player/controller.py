@@ -79,6 +79,8 @@ class CombatController:
         self.rejected_positions: dict[tuple[int, int, int, int, int], tuple[int, int, int]] = {}
         self.rejection_history: dict[tuple[int, int, int, int, int],
                                      list[tuple[int, tuple[int, int, int], tuple[int, int, int]]]] = {}
+        # Hostiles whose observed terrain offered no supported route: (tick, hostile position).
+        self.terrain_blocked: dict[tuple[int, int, int, int, int], tuple[int, tuple[int, int, int]]] = {}
         self.decision_scene: tuple[int, int, int] | None = None
         self.area_target_confirmations = 0
         self.area_target_confirmation_tick: int | None = None
@@ -338,13 +340,36 @@ class CombatController:
                        if frame.tick - row[0] <= self.unreachable_window
                        and math.dist(row[2], actor.position) <= 192]
             self.rejection_history[identity] = history
+            blocked = self.terrain_blocked.get(identity)
+            if blocked is not None and (frame.tick - blocked[0] > self.unreachable_window
+                                        or math.dist(blocked[1], actor.position) > 192):
+                del self.terrain_blocked[identity]
+                blocked = None
             if len(history) >= self.unreachable_rejections:
                 verdicts.append({
                     "slot": actor.slot, "native_target_rejections": len(history),
                     "claim": ("Native attack targeting refused this hostile from several nearby "
                               "positions; terrain such as a wall or ledge likely separates it."),
                 })
+            elif blocked is not None:
+                verdicts.append({
+                    "slot": actor.slot, "terrain_route_exhausted_tick": blocked[0],
+                    "claim": ("Observed runtime terrain offers no further supported route toward this "
+                              "hostile (high walls or ledges); approach it again only after it moves."),
+                })
         return verdicts
+
+    def mark_terrain_unreachable(self, frame: Frame, slot: int) -> bool:
+        """Record that terrain navigation exhausted every supported route toward this hostile."""
+        actor = next((actor for actor in frame.enemies if actor.slot == slot), None)
+        if actor is None or frame.player is None:
+            return False
+        self.terrain_blocked[self.target_identity(frame, actor)] = (frame.tick, actor.position)
+        self.feedback.append({"kind": "terrain_unreachable", "tick": frame.tick, "target": slot,
+                              "player_position": frame.player.position, "target_position": actor.position})
+        if self.decision is not None and self.decision.target_slot == slot and not self.preparing:
+            self.decision = None
+        return True
 
     def attack_reposition_required(self, frame: Frame) -> bool:
         decision = self.decision

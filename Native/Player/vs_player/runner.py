@@ -17,7 +17,7 @@ from .controller import (CombatController, InputAction, StaleDecision, input_lea
                          strategy_planning_ready)
 from .doors import PhysicalDoor, PhysicalRoute
 from .model import Decision, ModelResponseError, NavigationDecision
-from .navigation import SceneTileGoal, TerrainNavigator, field_navigation_ready
+from .navigation import TERRAIN_EXHAUSTED, SceneTileGoal, TerrainNavigator, field_navigation_ready
 from .choices import reward_menu_ready, urgent_recovery_needed
 from .observations import Frame
 from .processes import (ProcessJob, freeze_game, game_environment, model_budget, model_server,
@@ -131,6 +131,9 @@ class PlayOptions:
     scene_expectation: Path | None = None
     scene_target_tile: tuple[int, int] | None = None
     scene_examine_quadrant: int | None = None
+    # Second trigger tile, bound after the first scene event returns control (MAP020 local1 -> local3/4).
+    scene_follow_tile: tuple[int, int] | None = None
+    scene_follow_examine_quadrant: int | None = None
     # Type-8 triggers such as MAP203 local2 test several defeats in one evaluation (Triggers.c cases 7/16).
     simultaneous_defeat: tuple[int, ...] = ()
     # Type-8 rows such as MAP003 local1 need one hostile defeated while an earlier-listed slot lives.
@@ -156,6 +159,15 @@ class PlayOptions:
                 self.scene_target_tile is None or type(self.scene_examine_quadrant) is not int
                 or not 0 <= self.scene_examine_quadrant <= 3):
             raise ValueError("A scene examine quadrant requires a scene stand tile and a native quadrant 0-3")
+        if self.scene_follow_tile is not None and (
+                self.scene_target_tile is None or self.door_route
+                or not isinstance(self.scene_follow_tile, tuple) or len(self.scene_follow_tile) != 2
+                or any(type(value) is not int or not 0 <= value <= 255 for value in self.scene_follow_tile)):
+            raise ValueError("A scene follow tile requires a first scene tile in the same room and a native tile")
+        if self.scene_follow_examine_quadrant is not None and (
+                self.scene_follow_tile is None or type(self.scene_follow_examine_quadrant) is not int
+                or not 0 <= self.scene_follow_examine_quadrant <= 3):
+            raise ValueError("A follow examine quadrant requires a follow tile and a native quadrant 0-3")
         if self.simultaneous_defeat and (
                 self.scene_expectation is None or len(self.simultaneous_defeat) < 2
                 or len(set(self.simultaneous_defeat)) != len(self.simultaneous_defeat)
@@ -343,11 +355,15 @@ def native_lab_script(options: PlayOptions, scenario: Path, setup: dict) -> dict
         if options.setup_interaction and expectation.get("event_source") not in (0, 2):
             raise ValueError("Setup interaction pulses require an original room-local or external event")
         # A room trigger tile can start a room-local event or an external EVENT/*.EVT script.
+        # A second event is either reached through the follow tile or raised by native triggers alone
+        # (MAP020 local2 is the timer that local1's talk starts).
         if options.scene_target_tile is not None and (
                 expectation.get("event_source") not in (0, 2)
                 or not isinstance(expectation.get("events"), list)
-                or len(expectation["events"]) != 1):
-            raise ValueError("Scene-tile navigation requires exactly one original room-triggered event")
+                or len(expectation["events"]) not in (1, 2)
+                or (options.scene_follow_tile is not None and len(expectation["events"]) != 2)):
+            raise ValueError("Scene-tile navigation requires one original room-triggered event, "
+                             "or two when a follow tile reaches the second")
     return script
 
 
@@ -585,6 +601,8 @@ def _play_game(store: RunStore, run_id: str,
         "native_scene_expectation": scene_expectation,
         "scene_target_tile": options.scene_target_tile,
         "scene_examine_quadrant": options.scene_examine_quadrant,
+        "scene_follow_tile": options.scene_follow_tile,
+        "scene_follow_examine_quadrant": options.scene_follow_examine_quadrant,
         "simultaneous_defeat": options.simultaneous_defeat,
         "defeat_order": options.defeat_order,
         "model_control_from_tick": setup_control_tick,
@@ -605,6 +623,8 @@ def _play_game(store: RunStore, run_id: str,
                         if options.scene_target_tile is not None and scene_expectation is not None
                         and not scene_tile_after_route else None)
     scene_hold = SceneReturnHold(scene_expectation) if scene_expectation is not None else None
+    scene_follow: SceneTileGoal | None = None
+    scene_completed: list[dict] = []
     route_checkpoint_offset = 0
     latest: Frame | None = None
     reader: TraceReader | None = None
@@ -716,6 +736,22 @@ def _play_game(store: RunStore, run_id: str,
                         audit.event("scene_navigation.bound", {
                             "tick": latest.tick, "zone": latest.zone, "room": latest.room,
                             "tile": options.scene_target_tile,
+                        })
+                        scene_navigation.observe(latest)
+                    if (options.scene_follow_tile is not None and scene_navigation is not None
+                            and scene_follow is None and scene_navigation.activation_tick is not None
+                            and navigation_future is None and latest.ready and latest.event_phase == 0
+                            and not latest.dialogue_waiting and latest.control in (1, 2)
+                            and (latest.zone, latest.room) == (scene_navigation.zone, scene_navigation.room)):
+                        scene_completed.append(scene_navigation.result())
+                        scene_follow = SceneTileGoal(options.scene_follow_tile, latest.zone, latest.room,
+                                                     scene_expectation["events"][1],
+                                                     options.scene_follow_examine_quadrant,
+                                                     scene_expectation.get("event_source", 2))
+                        scene_navigation = scene_follow
+                        audit.event("scene_navigation.follow_bound", {
+                            "tick": latest.tick, "zone": latest.zone, "room": latest.room,
+                            "tile": options.scene_follow_tile, "selector": scene_expectation["events"][1],
                         })
                         scene_navigation.observe(latest)
                     if isinstance(goal.door, PhysicalRoute):
@@ -986,10 +1022,22 @@ def _play_game(store: RunStore, run_id: str,
                                         pursuit.feedback[-1]["tick"] == latest.tick)
                         if (not pursuit.path and future is None and navigation_future is None
                                 and latest.control == 1 and latest.event_phase == 0 and not just_reached):
-                            context = pursuit.request(
-                                latest, (pursuit_actor.position[0], pursuit_actor.position[2]),
-                                pursuit_actor.slot,
-                            )
+                            try:
+                                context = pursuit.request(
+                                    latest, (pursuit_actor.position[0], pursuit_actor.position[2]),
+                                    pursuit_actor.slot,
+                                )
+                            except ValueError as error:
+                                if str(error) not in TERRAIN_EXHAUSTED:
+                                    raise
+                                # Walls/ledges separate this hostile; the model must choose another way.
+                                controller.mark_terrain_unreachable(latest, pursuit_actor.slot)
+                                audit.event("navigation.target_unreachable", {
+                                    "tick": latest.tick, "target": pursuit_actor.slot,
+                                    "reason": str(error),
+                                })
+                                pursuit, pursuit_scope = TerrainNavigator(), None
+                                context = None
                             if context is not None:
                                 navigation_owner = pursuit
                                 key = f"actor:{pursuit_actor.model}:{pursuit_actor.spawn_index}"
@@ -1194,6 +1242,7 @@ def _play_game(store: RunStore, run_id: str,
         "source_setup_presses": options.setup_presses,
         "native_scene_expectation": scene_expectation,
         "scene_navigation": scene_navigation.result() if scene_navigation is not None else None,
+        "scene_navigation_completed": scene_completed,
         "model_control_from_tick": setup_control_tick,
     }
 

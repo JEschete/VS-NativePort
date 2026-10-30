@@ -83,6 +83,12 @@ class Terrain:
         )
 
 
+NO_TERRAIN_SAMPLES = "No supported runtime terrain samples remain near the player"
+NO_OUTGOING_EDGE = "Runtime geometry has no supported outgoing navigation edge"
+# Route exhaustion toward a moving target is a terrain verdict, not a broken observation.
+TERRAIN_EXHAUSTED = frozenset((NO_TERRAIN_SAMPLES, NO_OUTGOING_EDGE))
+
+
 class TerrainNavigator:
     def __init__(self) -> None:
         self.offered: dict[str, dict] = {}
@@ -160,7 +166,7 @@ class TerrainNavigator:
         valid = [index for index in range(len(terrain.samples)) if terrain.supported(index)
                  and (terrain.point(index)[0], terrain.point(index)[2]) not in self.failed_points]
         if not valid:
-            raise ValueError("No supported runtime terrain samples remain near the player")
+            raise ValueError(NO_TERRAIN_SAMPLES)
         position = frame.player.position
         start = min(valid, key=lambda index: sum(
             (terrain.point(index)[axis] - position[axis])**2 for axis in (0, 1, 2)
@@ -250,7 +256,7 @@ class TerrainNavigator:
             if self.offered:
                 break
         if not self.offered:
-            raise ValueError("Runtime geometry has no supported outgoing navigation edge")
+            raise ValueError(NO_OUTGOING_EDGE)
         context = {
             "destination_world_xz": destination,
             "player_world": position, "candidates": self.offered,
