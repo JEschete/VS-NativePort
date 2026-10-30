@@ -22,7 +22,7 @@
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Images.h"
-#include "Render/TextureAnimation.h"
+#include "Render/TextureRegionDraw.h"
 #include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -478,8 +478,8 @@ void Menu_Results_DrawEvolveOrDie(int x, int y, int step)
         x -= (Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie].w + Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie + 1].w)
           >> 1;
 
-        Render_DrawTextureFlashFade(x, y, Menu_Results_DisIndex_Iq0EvolveOrDie, Menu_Results_evolveOrDieColors);
-        Render_DrawTextureFlashFade(x + Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie].w, y,
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Iq0EvolveOrDie, Menu_Results_evolveOrDieColors);
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Iq0EvolveOrDie].w, y,
             Menu_Results_DisIndex_Iq0EvolveOrDie + 1, &Menu_Results_evolveOrDieColors[1]);
     }
 }
@@ -501,9 +501,8 @@ void Menu_Results_DrawFoodChain(int x, int y, int timer)
         Menu_Results_foodChainColors[1].cd = timer;
         x -= (Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain].w + Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain + 1].w) >> 1;
 
-        Render_DrawTextureFlashFade(x, y, Menu_Results_DisIndex_Iq0Foodchain, Menu_Results_foodChainColors);
-        Render_DrawTextureFlashFade(
-            x + Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain].w, y, Menu_Results_DisIndex_Iq0Foodchain + 1, &Menu_Results_foodChainColors[1]);
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Iq0Foodchain, Menu_Results_foodChainColors);
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Iq0Foodchain].w, y, Menu_Results_DisIndex_Iq0Foodchain + 1, &Menu_Results_foodChainColors[1]);
     }
 }
 
@@ -549,7 +548,7 @@ void Menu_Results_DrawCubePuzzleRank(int x, int y, int timer, int rank)
     if (timer > 0) {
         Menu_Results_cubePuzzleRankColors[0].cd = timer;
 
-        Render_DrawTextureFlashFade(x - (Menu_Results_disMap[rank + Menu_Results_DisIndex_Iq1GameDesigner].w >> 1), y,
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x - (Menu_Results_disMap[rank + Menu_Results_DisIndex_Iq1GameDesigner].w >> 1), y,
             rank + Menu_Results_DisIndex_Iq1GameDesigner, Menu_Results_cubePuzzleRankColors);
     }
 }

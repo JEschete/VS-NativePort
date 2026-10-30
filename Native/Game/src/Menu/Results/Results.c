@@ -28,7 +28,7 @@
 #include "Render/Images.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
+#include "Render/TextureRegionDraw.h"
 #include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -664,8 +664,8 @@ void Menu_Results_DrawCongratulations(int x, int y, int timer)
                  + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Congratulations + 1].w)
           >> 1;
 
-        Render_DrawTextureFlashFade(x, y, Menu_Results_DisIndex_Rank0Congratulations, Menu_Results_congratulationsColors);
-        Render_DrawTextureFlashFade(x + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Congratulations].w, y,
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Congratulations, Menu_Results_congratulationsColors);
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Congratulations].w, y,
             Menu_Results_DisIndex_Rank0Congratulations + 1, &Menu_Results_congratulationsColors[1]);
     }
 }
@@ -697,28 +697,28 @@ void Menu_Results_DrawScore(int x, int y, int timer, int arg3 __attribute__((unu
                  + 116)
           >> 1;
 
-        Render_DrawTextureTintFade(x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_scoreColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_scoreColors);
 
         x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w;
 
-        Render_DrawTextureTintFade(x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_scoreColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_scoreColors);
 
         i = 2;
         x = (x + i) + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
 
         for (i = 0; i < 9; ++i) {
-            Render_DrawTextureTintFade(x, y + 3, buf[i] - '0', Menu_Results_scoreColors);
+            Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 3, buf[i] - '0', Menu_Results_scoreColors);
 
             x += 0xC;
 
             if ((i == 2) || (i == 5)) {
-                Render_DrawTextureTintFade(x, y + 14, 10, Menu_Results_scoreColors);
+                Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 14, 10, Menu_Results_scoreColors);
 
                 x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w + 3;
             }
         }
 
-        Render_DrawTextureTintFade(x, y + 8, Menu_Results_DisIndex_Rank0Pts, Menu_Results_scoreColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 8, Menu_Results_DisIndex_Rank0Pts, Menu_Results_scoreColors);
     }
 }
 
@@ -775,28 +775,28 @@ void Menu_Results_DrawCountingScore(int x, int y, int timer, int arg3 __attribut
       + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Pts].w;
     x -= (((Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w * 2) + v) + 116) >> 1;
 
-    Render_DrawTextureWipe(x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_countingScoreColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Score, Menu_Results_countingScoreColors, wipe_edge_x);
 
     x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0Score].w;
 
-    Render_DrawTextureWipe(x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingScoreColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, x, y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingScoreColors, wipe_edge_x);
 
     i = 2;
     x = x + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
 
     for (i = 0; i < 9; ++i) {
-        Render_DrawTextureWipe(x, y + 3, buf[i] - '0', Menu_Results_countingScoreColors, wipe_edge_x);
+        Render_DrawTextureWipe(Menu_Results_disMap, x, y + 3, buf[i] - '0', Menu_Results_countingScoreColors, wipe_edge_x);
 
         x += 12;
 
         if ((i == 2) || (i == 5)) {
-            Render_DrawTextureWipe(x, y + 14, Menu_Results_DisIndex_Rank0Comma, Menu_Results_countingScoreColors, wipe_edge_x);
+            Render_DrawTextureWipe(Menu_Results_disMap, x, y + 14, Menu_Results_DisIndex_Rank0Comma, Menu_Results_countingScoreColors, wipe_edge_x);
 
             x += 3 + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Comma].w;
         }
     }
 
-    Render_DrawTextureWipe(x, y + 8, 0x14, Menu_Results_countingScoreColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, x, y + 8, 0x14, Menu_Results_countingScoreColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderMapCompletion (src/MENU/MENUF.PRG/3B8.c:1486)
@@ -822,21 +822,21 @@ void Menu_Results_DrawMapCompletion(int x, int y, int timer, int arg3 __attribut
         x -= (Menu_Results_disMap[21].w + Menu_Results_disMap[26].w + Menu_Results_disMap[19].w + 0x26) >> 1;
         i = 2;
 
-        Render_DrawTextureTintFade(x, y, 0x15, Menu_Results_mapCompletionColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y, 0x15, Menu_Results_mapCompletionColors);
 
         x += Menu_Results_disMap[21].w;
 
-        Render_DrawTextureTintFade(x, y + 7, 0x1A, Menu_Results_mapCompletionColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 7, 0x1A, Menu_Results_mapCompletionColors);
 
         x = x + i + Menu_Results_disMap[26].w;
 
         for (i = 0; i < 3; ++i) {
-            Render_DrawTextureTintFade(x, y + 3, buf[i] - '0', Menu_Results_mapCompletionColors);
+            Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 3, buf[i] - '0', Menu_Results_mapCompletionColors);
 
             x += 0xC;
         }
 
-        Render_DrawTextureTintFade(x, y + 8, 0x13, Menu_Results_mapCompletionColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y + 8, 0x13, Menu_Results_mapCompletionColors);
     }
 }
 
@@ -894,21 +894,21 @@ void Menu_Results_DrawCountingMapCompletion(
                 + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Percent].w + 38)
          >> 1;
 
-    Render_DrawTextureWipe(draw_x, draw_y, Menu_Results_DisIndex_Rank0MapCompleted, Menu_Results_countingMapCompletionColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, draw_x, draw_y, Menu_Results_DisIndex_Rank0MapCompleted, Menu_Results_countingMapCompletionColors, wipe_edge_x);
 
     draw_x += Menu_Results_disMap[Menu_Results_DisIndex_Rank0MapCompleted].w;
     i = 2;
 
-    Render_DrawTextureWipe(draw_x, draw_y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingMapCompletionColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, draw_x, draw_y + 7, Menu_Results_DisIndex_Rank0Colon, Menu_Results_countingMapCompletionColors, wipe_edge_x);
     draw_x = draw_x + i + Menu_Results_disMap[Menu_Results_DisIndex_Rank0Colon].w;
 
     for (i = 0; i < 3; ++i) {
-        Render_DrawTextureWipe(draw_x, draw_y + 3, buf[i] - '0', Menu_Results_countingMapCompletionColors, wipe_edge_x);
+        Render_DrawTextureWipe(Menu_Results_disMap, draw_x, draw_y + 3, buf[i] - '0', Menu_Results_countingMapCompletionColors, wipe_edge_x);
 
         draw_x += 12;
     }
 
-    Render_DrawTextureWipe(draw_x, draw_y + 8, Menu_Results_DisIndex_Rank0Percent, Menu_Results_countingMapCompletionColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, draw_x, draw_y + 8, Menu_Results_DisIndex_Rank0Percent, Menu_Results_countingMapCompletionColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderRiskbreakerRankHeader (src/MENU/MENUF.PRG/3B8.c:1598)
@@ -926,7 +926,7 @@ void Menu_Results_DrawRiskbreakerRankHeading(int x, int y, int timer)
     if (timer > 0) {
         Menu_Results_riskbreakerRankHeadingColors[0].cd = timer;
 
-        Render_DrawTextureTintFade(x - (Menu_Results_disMap[Menu_Results_DisIndex_Rank0RiskbreakerRank].w >> 1), y,
+        Render_DrawTextureTintFade(Menu_Results_disMap, x - (Menu_Results_disMap[Menu_Results_DisIndex_Rank0RiskbreakerRank].w >> 1), y,
             Menu_Results_DisIndex_Rank0RiskbreakerRank, Menu_Results_riskbreakerRankHeadingColors);
     }
 }
@@ -960,7 +960,7 @@ void Menu_Results_DrawRiskbreakerRank(int x, int y, int timer)
         x -= xInset;
 
         for (i = 0; i < Menu_Results_riskbreakerRanks[Menu_Results_rank][0]; ++i) {
-            Render_DrawTextureFlashFade(x, y, Menu_Results_riskbreakerRanks[Menu_Results_rank][i + 1], Menu_Results_riskbreakerRankColors);
+            Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_riskbreakerRanks[Menu_Results_rank][i + 1], Menu_Results_riskbreakerRankColors);
 
             x += Menu_Results_disMap[Menu_Results_riskbreakerRanks[Menu_Results_rank][i + 1]].w;
         }
@@ -1115,11 +1115,11 @@ void Menu_Results_DrawBonusReel(int x, int y, int timer, int results_screen_stat
         Menu_Results_bonusReelColors[0].cd = timer;
         x -= (Menu_Results_disMap[11].w + Menu_Results_disMap[26].w + Menu_Results_disMap[14].w + Menu_Results_disMap[24].w + 0xE) >> 1;
 
-        Render_DrawTextureTintFade(x, y, Menu_Results_DisIndex_Rank0Bonus, Menu_Results_bonusReelColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Bonus, Menu_Results_bonusReelColors);
 
         x += Menu_Results_disMap[11].w;
 
-        Render_DrawTextureTintFade(x, y, Menu_Results_DisIndex_Rank0Colon, Menu_Results_bonusReelColors);
+        Render_DrawTextureTintFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Rank0Colon, Menu_Results_bonusReelColors);
 
         x += 2 + Menu_Results_disMap[26].w;
         reel_base_clip_height = 16;

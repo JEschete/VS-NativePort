@@ -21,9 +21,6 @@ void Render_UploadPackedRectangle(int xy, void* pixels, int wh);
 void Render_ReadPackedRectangle(int xy, void* buffer, int wh);
 void Render_DrawImmediateSprite(int xy, int uvClut, int wh, int tpage);
 u_int Render_BlendRgb(u_int colour1, u_int colour2, u_int factor);
-void Render_DrawTextureTintFade(int x, int y, int texId, CVECTOR colors[]);
 int Render_BlendFlashComponent(int component, int weight);
-void Render_DrawTextureFlashFade(int x, int y, int texId, CVECTOR colors[]);
-void Render_DrawTextureWipe(int x, int y, int texId, CVECTOR colors[], int wipe_edge_x);
 
 #endif // VS_RENDER_TEXTUREANIMATION_H_DECLS

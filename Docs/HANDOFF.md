@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-29. This is a short entry point, not another work tracker.
+Updated 2026-10-30. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -9,7 +9,31 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
-- Current follow-up base is `a05b0baf` with unrelated dirty Save/title,
+- #244 follow-up from base `d18ba477`: the owner's MAP038 clear
+  screenshot lacked the food-chain heading and puzzle rank, not ordinary
+  message-box text. F03675/F03677/F03678 were merged from per-overlay
+  `renderTextures.h` copies into helpers bound to the shorter ENDING atlas.
+  They are now owned in `Render/TextureRegionDraw.c` with an explicit atlas
+  parameter; generator bindings preserve MENUF G01780 versus ENDING G00805.
+  Initial Debug solution build (`/m:2`) and
+  `build\Debug\VS.Tests.exe "[menu],[ending-art],[ending-results]"` pass
+  (60 cases/53,870 assertions); copier tests pass171, repeat generation is
+  stable and preserves all owned sources, changed-source quality has zero
+  findings. The fixed Desktop executable was written at17:32:13, before
+  the owner started game PID46180 at17:33:28. Final revalidation rebuilt
+  Engine/Game/Tests and passed the same60 cases; Desktop relinking was
+  blocked by that running executable. The owner's process was not stopped.
+  Logs under `build\quality`: `issue244-build-debug.log` (final relink
+  lock), `issue244-tests-debug.log`, `issue244-generator-tests.log`,
+  `issue244-generation.log`, `issue244-quality.log`.
+  No game or Combat Lab was launched for this fix. The owner subsequently
+  confirmed "resolved": the 0:30.81 screenshot shows both "YOUR PLACE ON THE
+  FOODCHAIN:" and "LITTLE GREEN MAN". Checklist item5 is now checked
+  (5/46 verified,41 remaining); #244's visual acceptance is satisfied.
+  See #244 for the fixing revision, successful exact-revision CI and closure
+  evidence; local tests alone do not establish publication. This is not C++
+  promotion or compatibility retirement.
+- Previous follow-up base was `a05b0baf` with unrelated dirty Save/title,
   generator, project and documentation changes preserved. No new runtime
   repair or acceptance-gate change was made in this investigation.
   #233 clean normal1x Release run1793323847980193-0 executes MAP214's

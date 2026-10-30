@@ -133,6 +133,7 @@
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
+    <ClCompile Include="src\ResultsTextureTests.cpp" />
     <ClCompile Include="src\RoomLightingTests.cpp" />
     <ClCompile Include="src\RoomPolygonLinkTests.cpp" />
     <ClCompile Include="src\RoomSubdivisionTests.cpp" />

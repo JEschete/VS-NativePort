@@ -470,6 +470,12 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\TextureRegionDraw.c">
+      <TreatWarningAsError>false</TreatWarningAsError>
+      <WarningLevel>Level1</WarningLevel>
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
     <ClCompile Include="src\Render\Textures.c">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -603,6 +609,7 @@
     <ClInclude Include="src\Render\Text\CompactFont.h" />
     <ClInclude Include="src\Render\Text\VariableFont.h" />
     <ClInclude Include="src\Render\TextureAnimation.h" />
+    <ClInclude Include="src\Render\TextureRegionDraw.h" />
     <ClInclude Include="src\Render\Textures.h" />
     <ClInclude Include="src\Render\UiPrimitives.h" />
     <ClInclude Include="src\Render\Upload.h" />

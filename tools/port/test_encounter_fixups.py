@@ -16,6 +16,27 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
+    def test_texture_animations_use_the_callers_overlay_atlas(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        for namespace, atlas in (
+            ("Ending::", "Ending_resultAtlasRegions"),
+            ("Menu::Results::", "Menu_Results_disMap"),
+        ):
+            for animation in ("TintFade", "FlashFade", "Wipe"):
+                with self.subTest(namespace=namespace, animation=animation):
+                    name = f"Render_DrawTexture{animation}"
+                    arguments = "x, y, texId, colors"
+                    if animation == "Wipe":
+                        arguments += ", wipe_edge_x"
+                    row = {"id": "test", "final_name": namespace + "DrawHeading"}
+                    for whitespace in ("", "\n    "):
+                        source = f"{name}({whitespace}{arguments});"
+                        self.assertEqual(
+                            copier.apply_fixups(row, source),
+                            f"{name}({atlas}, {arguments});",
+                        )
+
     def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
         for fixup_id in ("F01425", "F01433", "F01438"):
             self.assertNotIn(fixup_id, copy_fixups.FIXES)

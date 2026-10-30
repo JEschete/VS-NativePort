@@ -1,6 +1,7 @@
 # Cutscenes still to check (issue #149)
 
-46 scenes are still unverified out of the 292 catalogued room and event scripts.
+This checklist retains the 46 scenes originally unverified out of the 292 catalogued room and event scripts.
+Owner follow-up has verified 5; 41 remain unchecked.
 They are listed in rough story order: by the campaign progress value (flag 0x82) that their trigger
 checks or that their room writes, otherwise by when their area is first entered. Areas whose scripts
 never write flag 0x82 (Forgotten Pathway, Iron Maiden, City Walls South/North, Great Cathedral
@@ -128,18 +129,20 @@ Many of these are not story cutscenes. They are short system scripts:
 - Trigger (step on tile): flag 285 (time-trial running) == 1; Ashley on tile 14,3; Ashley idle (not mid-action)
 - Automated result: trigger never fired in the automated run
 - What you should see (from the original script, not from a run):
-  - The room timer stops and its display goes away.
+  - The room timer stops. The cube-puzzle results show the completion time, the food-chain heading and the rank name. The frozen timer HUD remains visible until the results close; script op90 then clears it.
   - Message: "Solve the cube puzzles and beat your record time! To turn puzzles off, open the Puzzle Mode menu under Options, and select "OFF." This will save any solved puzzle routes."
   - Ashley leaves for one of: Faith Overcame Fear (MAP039, zone 13 room 11); Hall of Dying Hope (MAP036, zone 13 room 8) (depends on the exit or branch).
   - Scale: 1 scripted actor move.
   - The script branches on flags, so only some of the messages/destinations above appear.
-- Owner playtest (2026-10-30, Debug run `1793394014536781-0`): owner reported that something did not load right after the clear; the visual symptom is not yet described. Log check of that run:
+- Owner playtest (2026-10-30, Debug run `1793394014536781-0`): owner reported that something did not load right after the clear. A subsequent screenshot confirms the food-chain heading and rank name are missing, while the completion time and following message render correctly (#244). Log check of that run:
   - Tick 7233: east exit (tile 14,3) fired; the script ran op31, cleared flag 285 and opened the cube-puzzle results screen (op89 / 12). MAINMENU, MENUBG, MENUF.PRG and IQ.DIS all loaded.
   - The results screen read the stopped time 0:36.23. The timer HUD stays drawn, frozen, until script op90 runs after the results screen closes; the original does the same (`_renderTimer` gated by `vs_battle_lowerScreenUiState`).
   - Message box shown and closed (tick 7927), fade, then MAP039 loaded at tick 7999 and its entry script ran to the end.
   - MAP039 showed a different enemy than on the first visit (Z013U20 instead of Z013U07/U14). This is correct: the MPD enemy table picks enemy 20 at 175 HP or more and enemy 14 at 174 HP or less (Ashley had 174 HP before, 197 after); enemy 7 was already killed.
-  - No warnings or errors in `vs-native.log` or `events.jsonl`; no defect found in the log or in the results-screen code compared with MENUF.PRG `_renderCubePuzzleEnd`.
-- [ ] Plays and returns control (awaiting the owner's description or a screenshot of the visual problem)
+  - No warnings or errors in `vs-native.log` or `events.jsonl`. Successful asset loading did not prove correct drawing: the shared texture-animation helpers were bound to the 69-entry ENDING atlas, but MENUF passes indices 105/106 for the food-chain heading and 107..122 for ranks.
+- #244 fix: the three shared tint/flash/wipe helpers now take the caller's atlas explicitly. Generator-owned MENUF callers pass `Menu_Results_disMap`; ENDING callers retain `Ending_resultAtlasRegions`. Debug build and menu/ending regression selection pass (60 cases, 53,870 assertions), generator regression tests pass (171), repeat generation preserves owned sources, and changed-source quality reports zero new findings. These packet/source checks do not replace the owner's in-game replay.
+- Post-fix owner replay (2026-10-30): owner confirmed "resolved." The screenshot shows time 0:30.81, "YOUR PLACE ON THE FOODCHAIN:" and the rank "LITTLE GREEN MAN" rendered correctly. Combined with the earlier message/exit evidence, this resolves checklist item 5.
+- [x] Plays and returns control (owner confirmed the corrected results screen)
 
 ### 6. Tircolas Flow (MAP150.MPD, zone 32 room 3)
 

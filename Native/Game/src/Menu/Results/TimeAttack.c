@@ -16,7 +16,7 @@
 #include "Menu/Results/TimeAttack.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
-#include "Render/TextureAnimation.h"
+#include "Render/TextureRegionDraw.h"
 #include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -489,8 +489,8 @@ void Menu_Results_DrawTimeAttackHeading(int x, int y, int timer)
                  + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack + 1].w)
           >> 1;
 
-        Render_DrawTextureFlashFade(x, y, 100, Menu_Results_timeAttackHeadingColors);
-        Render_DrawTextureFlashFade(x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack].w, y,
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, 100, Menu_Results_timeAttackHeadingColors);
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack].w, y,
             Menu_Results_DisIndex_Attack0TimeAttack + 1, &Menu_Results_timeAttackHeadingColors[1]);
     }
 }
@@ -635,8 +635,8 @@ void Menu_Results_DrawTimeAttackResultsHeading(int x, int y, int timer)
                  + Menu_Results_disMap[Menu_Results_DisIndex_Time0TimeAttackResults + 1].w)
           >> 1;
 
-        Render_DrawTextureFlashFade(x, y, Menu_Results_DisIndex_Time0TimeAttackResults, Menu_Results_timeAttackResultsHeadingColors);
-        Render_DrawTextureFlashFade(x + Menu_Results_disMap[Menu_Results_DisIndex_Time0TimeAttackResults].w, y,
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Time0TimeAttackResults, Menu_Results_timeAttackResultsHeadingColors);
+        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Time0TimeAttackResults].w, y,
             Menu_Results_DisIndex_Time0TimeAttackResults + 1, Menu_Results_timeAttackResultsHeadingColors);
     }
 }
@@ -704,7 +704,7 @@ void Menu_Results_DrawTimeAttackRatingWipe(int x, int y, int arg2)
         arg2 = 4;
     }
 
-    Render_DrawTextureWipe(x, y, arg2 + Menu_Results_DisIndex_Time0Excellent, Menu_Results_timeAttackRatingWipeColors, wipe_edge_x);
+    Render_DrawTextureWipe(Menu_Results_disMap, x, y, arg2 + Menu_Results_DisIndex_Time0Excellent, Menu_Results_timeAttackRatingWipeColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1743)

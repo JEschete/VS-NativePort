@@ -2457,6 +2457,12 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
+     r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
+     "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),
+    (r"^Menu::Results::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
+     r"Render_DrawTexture\1(Menu_Results_disMap, ",
+     "MENUF uses its own _disMap G01780 (3B8.c:26), not the shorter ENDING table; issue #244."),
     (r"^Actors::", r"\bField_gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
      r"Field_FindGimmickForActorSlot(\1)",
      "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
