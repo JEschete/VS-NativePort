@@ -406,7 +406,9 @@ class SceneReturnHold:
         self.events = list(expectation["events"])
         self.source = expectation.get("event_source", 0)
         self.room = (expectation.get("return_zone"), expectation.get("return_room"))
-        self.enabled = not (expectation.get("ending_to_title") or expectation.get("attract_to_title"))
+        # Title-return terminals have no post-scene field interval to protect.
+        self.enabled = "terminal" not in expectation and not (
+            expectation.get("ending_to_title") or expectation.get("attract_to_title"))
         self.matched = 0
         self.active = False
         self.last: int | None = None

@@ -1668,6 +1668,27 @@ class ControllerTests(unittest.TestCase):
         ending = SceneReturnHold({"events": [0], "ending_to_title": True})
         ending.matched = 1
         self.assertFalse(ending.holding(frame))
+        # Fixtures and the Lab decoder declare title-return goals through "terminal".
+        for terminal in ("ending_to_title", "attract_to_title", "game_over_to_title"):
+            declared = SceneReturnHold({"events": [0], "event_source": 2, "terminal": terminal})
+            self.assertFalse(declared.enabled)
+
+    def test_closing_a_window_the_game_already_destroyed_is_not_an_ownership_change(self):
+        from vs_player.windows import WindowInput
+        driver = WindowInput.__new__(WindowInput)
+        driver.process_id = 42
+        driver.window = 7
+        driver.verify_process = lambda: None
+        driver.user = mock.Mock()
+        driver.user.IsWindow.return_value = False
+        driver.close_window()
+        self.assertIsNone(driver.window)
+        driver.user.PostMessageW.assert_not_called()
+        driver.window = 7
+        driver.user.IsWindow.return_value = True
+        driver.user.GetWindowThreadProcessId.side_effect = lambda window, owner: None
+        with self.assertRaisesRegex(RuntimeError, "changed ownership"):
+            driver.close_window()
 
     def test_stat_override_scenarios_require_the_explicit_assist_flag(self):
         from vs_player import runner

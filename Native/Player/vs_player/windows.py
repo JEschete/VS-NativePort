@@ -110,6 +110,10 @@ class WindowInput:
     def close_window(self) -> None:
         self.verify_process()
         if self.window is not None:
+            if not self.user.IsWindow(self.window):
+                # The game already destroyed its window while exiting on its own.
+                self.window = None
+                return
             owner = wintypes.DWORD()
             self.user.GetWindowThreadProcessId(self.window, ctypes.byref(owner))
             if owner.value != self.process_id:
