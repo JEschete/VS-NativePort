@@ -18,7 +18,8 @@ from .model import Decision, ModelResponseError, NavigationDecision
 from .navigation import SceneTileGoal, TerrainNavigator, field_navigation_ready
 from .choices import reward_menu_ready, urgent_recovery_needed
 from .observations import Frame
-from .processes import ProcessJob, freeze_game, game_environment, model_server, verify_installed_model, warm_model
+from .processes import (ProcessJob, freeze_game, game_environment, model_budget, model_server,
+                        shared_model, verify_installed_model, warm_model)
 from .store import Retention, RunStore, owned_tree_size
 from .trace import ObservationFreshness, TraceReader, find_trace
 from .windows import WindowInput
@@ -130,7 +131,9 @@ class PlayOptions:
     allow_stat_overrides: bool = False
     allow_story_progress: bool = False
     claim_room_chests: bool = False
-
+    setup_interaction: bool = False
+    shared_model: bool = False
+    model_parallel: int = 1
     def validate_scene_expectation(self) -> None:
         if self.claim_room_chests and not self.door_route:
             raise ValueError("Room-chest claims require a physical door route from the source room")
@@ -179,13 +182,17 @@ class PlayOptions:
             raise ValueError("Source setup movement requires a Combat Lab scenario")
         if self.door_case or self.door_route or self.clear_enemies_first:
             raise ValueError("Source setup movement cannot modify physical-door objectives")
+        if self.setup_interaction and self.scene_expectation is None:
+            raise ValueError("Setup interaction pulses require an original scene expectation")
         previous = -2
         for pulse in self.setup_presses.split(","):
             tick_text, separator, keys_text = pulse.partition(":")
             keys = keys_text.split("+")
+            # A lone Cross is the ordinary field action that activates original type-4 triggers.
+            interaction = self.setup_interaction and keys == ["Cross"]
             if (not separator or not tick_text.isascii() or not tick_text.isdecimal()
                     or not keys or len(set(keys)) != len(keys)
-                    or not set(keys) <= {"Up", "Down", "Left", "Right"}
+                    or not (interaction or set(keys) <= {"Up", "Down", "Left", "Right"})
                     or {"Up", "Down"} <= set(keys) or {"Left", "Right"} <= set(keys)):
                 raise ValueError("Source setup pulses require decimal ticks and ordinary directions only")
             tick = int(tick_text)
@@ -309,6 +316,8 @@ def native_lab_script(options: PlayOptions, scenario: Path, setup: dict) -> dict
         if not isinstance(expectation, dict):
             raise ValueError("Native scene expectation must be a JSON object")
         script["scene"] = expectation
+        if options.setup_interaction and expectation.get("event_source") not in (0, 2):
+            raise ValueError("Setup interaction pulses require an original room-local or external event")
         if options.scene_target_tile is not None and (
                 expectation.get("event_source") != 2
                 or not isinstance(expectation.get("events"), list)
@@ -1008,6 +1017,9 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
         "allow_stat_overrides": options.allow_stat_overrides,
         "allow_story_progress": options.allow_story_progress,
         "claim_room_chests": options.claim_room_chests,
+        "setup_interaction": options.setup_interaction,
+        "shared_model": options.shared_model,
+        "model_port": options.model_port,
         "retention": asdict(retention),
         "model": runtime_manifest()["model"],
     })
@@ -1020,8 +1032,12 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
     result: dict | None = None
     status = "failed"
     try:
-        with model_server(paths, options.model_port, store.directory(run_id) / "model") as client:
-            memory = warm_model(client)
+        server = (shared_model(options.model_port) if options.shared_model else
+                  model_server(paths, options.model_port, store.directory(run_id) / "model"))
+        with server as client:
+            memory = warm_model(client, model_budget(options.model_parallel)
+                                if options.shared_model else model_budget(1))
+            memory["shared_server"] = options.shared_model
             audit.event("model.ready", memory)
             result = _play_game(store, run_id, options, client, audit, maintenance, retention)
             summary = result

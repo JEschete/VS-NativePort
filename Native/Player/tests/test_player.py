@@ -27,7 +27,8 @@ from vs_player.model import Decision, LocalModel, ModelResponseError, Navigation
 from vs_player.navigation import SceneTileGoal, Terrain, TerrainNavigator, field_navigation_ready
 from vs_player.observations import Frame
 from vs_player.reaction import ReactionController
-from vs_player.runtime import download, validate_archive
+from vs_player.processes import model_budget
+from vs_player.runtime import download, server_environment, validate_archive
 from vs_player.runner import CombatGoal, PlayOptions, native_lab_script, native_outcome, play
 from vs_player.store import RUN_MARKER, Retention, RunStore
 from vs_player.trace import ObservationFreshness, TraceReader
@@ -974,6 +975,31 @@ class StorageTests(unittest.TestCase):
                 self.assertEqual(unrelated.read_text(), "owner content")
             finally:
                 store.close()
+
+    def test_parallel_players_do_not_share_one_cleanup_pass(self):
+        with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
+            paths = PlayerPaths(Path(directory) / "state")
+            first, second = RunStore(paths), RunStore(paths)
+            try:
+                with mock.patch("vs_player.store.time.time", return_value=100.0):
+                    run = first.create("passed", {})
+                    first.finish(run, "passed", {})
+                observed = {}
+                original = RunStore._cleanup
+
+                def nested(store, retention, now=None):
+                    observed["concurrent"] = second.cleanup(retention, now)
+                    return original(store, retention, now)
+
+                with mock.patch.object(RunStore, "_cleanup", nested):
+                    report = first.cleanup(Retention(successful_days=1), now=100.0 + 86401)
+                self.assertEqual(report["deleted"], [run])
+                self.assertEqual(observed["concurrent"]["deleted"], [])
+                self.assertTrue(observed["concurrent"]["concurrent_cleanup"])
+                self.assertEqual(second.cleanup(Retention(successful_days=1), now=10**12)["deleted"], [])
+            finally:
+                first.close()
+                second.close()
 
     def test_cleanup_rejects_an_ownership_mismatch(self):
         with tempfile.TemporaryDirectory(prefix="vs-player-test-") as directory:
@@ -1977,6 +2003,50 @@ class RunnerTests(unittest.TestCase):
                                       frames=300, setup_presses=pulses)
                 with self.assertRaises(ValueError):
                     options.setup_control_tick()
+
+    def test_setup_interaction_accepts_only_lone_cross_for_a_declared_scene(self):
+        basic = (Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))
+        with self.assertRaisesRegex(ValueError, "scene expectation"):
+            PlayOptions(*basic, frames=300, setup_presses="120:Cross",
+                        setup_interaction=True).setup_control_tick()
+        options = PlayOptions(*basic, frames=300, setup_presses="120:Up,122:Cross",
+                              setup_interaction=True, scene_expectation=Path("goal.json"))
+        self.assertEqual(options.setup_control_tick(), 126)
+        for pulses in ("120:Cross+Up", "120:Circle", "120:Start", "120:Triangle"):
+            with self.subTest(pulses=pulses):
+                with self.assertRaises(ValueError):
+                    PlayOptions(*basic, frames=300, setup_presses=pulses, setup_interaction=True,
+                                scene_expectation=Path("goal.json")).setup_control_tick()
+
+    def test_setup_interaction_rejects_room_entry_scene_goals(self):
+        with tempfile.TemporaryDirectory() as directory:
+            goal = Path(directory) / "goal.json"
+            fixture = Path(directory) / "fixture.json"
+            basic = (Path("VS.CombatLab.exe"), Path("data"), fixture)
+            setup = {"room_events": "production"}
+            for source, accepted in ((0, True), (2, True), (1, False)):
+                with self.subTest(source=source):
+                    goal.write_text(json.dumps({"events": [3], "event_source": source}),
+                                    encoding="utf-8")
+                    options = PlayOptions(*basic, frames=300, setup_presses="120:Cross",
+                                          setup_interaction=True, scene_expectation=goal)
+                    if accepted:
+                        self.assertEqual(native_lab_script(options, fixture, setup)["press"],
+                                         "120:Cross")
+                    else:
+                        with self.assertRaisesRegex(ValueError, "room-local or external"):
+                            native_lab_script(options, fixture, setup)
+
+    def test_shared_model_slots_are_bounded_and_budgeted(self):
+        paths = PlayerPaths(Path("state"))
+        self.assertEqual(server_environment(paths)["OLLAMA_NUM_PARALLEL"], "1")
+        self.assertEqual(server_environment(paths, 11561, 4)["OLLAMA_NUM_PARALLEL"], "4")
+        for parallel in (0, 5, True):
+            with self.subTest(parallel=parallel):
+                with self.assertRaises(ValueError):
+                    server_environment(paths, 11561, parallel)
+        self.assertEqual(model_budget(1), 4 * 1024**3)
+        self.assertEqual(model_budget(4), 7 * 1024**3)
 
     def test_source_setup_cannot_relax_physical_doors_or_replace_desktop_progression(self):
         basic = (Path("VS.CombatLab.exe"), Path("data"), Path("fixture.json"))

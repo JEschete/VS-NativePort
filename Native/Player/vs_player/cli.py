@@ -1,10 +1,11 @@
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
 from .config import PlayerPaths
-from .processes import model_server, prepare_model, verify_installed_model, warm_model
+from .processes import model_budget, model_server, prepare_model, verify_installed_model, warm_model
 from .runner import PlayOptions, play
 from .store import Retention, RunStore
 
@@ -18,6 +19,9 @@ def main() -> int:
     commands.add_parser("cleanup", help="Prune only eligible owned logs; preserve pinned failures")
     pin = commands.add_parser("pin", help="Preserve a specific acceptance/failure run across cleanup")
     pin.add_argument("--run-id", required=True)
+    serve = commands.add_parser("serve", help="Hold one warmed local model for up to four parallel games")
+    serve.add_argument("--model-port", type=int, default=11551)
+    serve.add_argument("--parallel", type=int, choices=(1, 2, 3, 4), default=4)
     run = commands.add_parser("play", help="Control one managed game with authoritative observations")
     run.add_argument("--game-exe", type=Path, required=True)
     run.add_argument("--data", type=Path, required=True)
@@ -48,6 +52,11 @@ def main() -> int:
                      help="Accept a declared Lab story_progress (flag 0x82) as a recorded owner-approved assist")
     run.add_argument("--claim-room-chests", action="store_true",
                      help="Open and claim the source room's unlocked original chest before the door route")
+    run.add_argument("--setup-interaction", action="store_true",
+                     help="Also accept lone ordinary Cross setup pulses for an original local/external trigger")
+    run.add_argument("--model-port", type=int, default=11551)
+    run.add_argument("--shared-model", type=int, choices=(1, 2, 3, 4), metavar="PARALLEL",
+                     help="Borrow a running `serve` model with this many slots instead of owning one")
     doors = run.add_mutually_exclusive_group()
     doors.add_argument("--door-case", default="", help="Physically traverse original zNNN-rNNN-dNNN record")
     doors.add_argument("--door-route", nargs="+", help="Traverse these original records in one continuous game")
@@ -60,6 +69,18 @@ def main() -> int:
         verify_installed_model(paths)
         with model_server(paths) as client:
             print(json.dumps(warm_model(client), indent=2))
+    elif args.command == "serve":
+        verify_installed_model(paths)
+        with model_server(paths, args.model_port, parallel=args.parallel) as client:
+            print(json.dumps(warm_model(client, model_budget(args.parallel)) | {
+                "port": args.model_port, "parallel": args.parallel}), flush=True)
+            try:
+                while True:
+                    time.sleep(240)
+                    # Keep the shared weights resident between game runs.
+                    warm_model(client, model_budget(args.parallel))
+            except KeyboardInterrupt:
+                pass
     elif args.command == "cleanup":
         store = RunStore(paths)
         try:
@@ -92,6 +113,10 @@ def main() -> int:
             allow_stat_overrides=args.allow_stat_overrides,
             allow_story_progress=args.allow_story_progress,
             claim_room_chests=args.claim_room_chests,
+            setup_interaction=args.setup_interaction,
+            model_port=args.model_port,
+            shared_model=args.shared_model is not None,
+            model_parallel=args.shared_model or 1,
         ))
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 2

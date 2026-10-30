@@ -107,8 +107,9 @@ def verify_installed_model(paths: PlayerPaths) -> Path:
 
 @contextmanager
 def model_server(paths: PlayerPaths, port: int = 11551,
-                 log_directory: Path | None = None):
+                 log_directory: Path | None = None, parallel: int = 1):
     executable = prepare_runtime(paths)
+    environment = server_environment(paths, port, parallel)
     with socket.socket() as probe:
         probe.settimeout(0.25)
         result = probe.connect_ex(("127.0.0.1", port))
@@ -120,7 +121,7 @@ def model_server(paths: PlayerPaths, port: int = 11551,
     stderr_path = logs / "server.stderr.log"
     with stdout_path.open("ab") as stdout, stderr_path.open("ab") as stderr:
         process = subprocess.Popen(
-            [str(executable), "serve"], env=server_environment(paths, port),
+            [str(executable), "serve"], env=environment,
             stdout=stdout, stderr=stderr,
             creationflags=subprocess.CREATE_NO_WINDOW | subprocess.BELOW_NORMAL_PRIORITY_CLASS,
         )
@@ -144,6 +145,25 @@ def model_server(paths: PlayerPaths, port: int = 11551,
                 process.terminate()
                 process.wait(timeout=10)
             job.close()
+
+
+@contextmanager
+def shared_model(port: int):
+    """Borrow a running `serve` model; the borrowing game never owns or stops it."""
+    client = LocalModel(f"http://127.0.0.1:{port}")
+    try:
+        client.request("/api/version")
+    except (urllib.error.URLError, TimeoutError) as error:
+        raise RuntimeError(f"No shared local model is serving on port {port}") from error
+    yield client
+
+
+SHARED_MODEL_SLOT_BYTES = 1024**3
+
+
+def model_budget(parallel: int) -> int:
+    """One game keeps the conservative 4 GiB budget; extra slots add bounded KV cache."""
+    return 4 * 1024**3 + (parallel - 1) * SHARED_MODEL_SLOT_BYTES
 
 
 def prepare_model(paths: PlayerPaths) -> Path:
@@ -173,7 +193,10 @@ def warm_model(client: LocalModel, maximum_vram_bytes: int = 4 * 1024**3) -> dic
         text=True,
     )
     free = int(output.splitlines()[0].strip()) * 1024 * 1024
-    if free < maximum_vram_bytes + 2 * 1024**3:
+    already_resident = any(model["name"] == client.model["name"]
+                           for model in client.request("/api/ps").get("models", []))
+    # A resident shared model already holds its budget; only a fresh load needs headroom.
+    if not already_resident and free < maximum_vram_bytes + 2 * 1024**3:
         raise RuntimeError("Insufficient GPU headroom for the configured conservative model budget")
     client.ready()
     started = time.monotonic()

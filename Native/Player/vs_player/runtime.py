@@ -88,12 +88,14 @@ def prepare_runtime(paths: PlayerPaths) -> Path:
     return executable
 
 
-def server_environment(paths: PlayerPaths, port: int = 11551) -> dict[str, str]:
+def server_environment(paths: PlayerPaths, port: int = 11551, parallel: int = 1) -> dict[str, str]:
+    if type(parallel) is not int or not 1 <= parallel <= 4:
+        raise ValueError("A shared local model supports one to four parallel games")
     environment = dict(os.environ)
     environment.update({
         "OLLAMA_HOST": f"127.0.0.1:{port}",
         "OLLAMA_MODELS": str(paths.models),
-        "OLLAMA_NUM_PARALLEL": "1",
+        "OLLAMA_NUM_PARALLEL": str(parallel),
         "OLLAMA_MAX_LOADED_MODELS": "1",
         "OLLAMA_CONTEXT_LENGTH": str(runtime_manifest()["model"]["context_tokens"]),
         "OLLAMA_FLASH_ATTENTION": "1",

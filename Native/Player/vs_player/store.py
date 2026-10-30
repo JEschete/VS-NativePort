@@ -1,4 +1,5 @@
 import json
+import msvcrt
 import shutil
 import sqlite3
 import time
@@ -175,6 +176,21 @@ class RunStore:
         self.database.commit()
 
     def cleanup(self, retention: Retention, now: float | None = None) -> dict:
+        lock_path = self.paths.root / "cleanup.lock"
+        with lock_path.open("a+b") as lock:
+            try:
+                msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
+            except OSError:
+                # Another parallel Player owns this pass; its result covers the shared store.
+                return {"deleted": [], "remaining_bytes": None,
+                        "over_budget_pinned_evidence": False, "concurrent_cleanup": True}
+            try:
+                return self._cleanup(retention, now)
+            finally:
+                lock.seek(0)
+                msvcrt.locking(lock.fileno(), msvcrt.LK_UNLCK, 1)
+
+    def _cleanup(self, retention: Retention, now: float | None = None) -> dict:
         now = time.time() if now is None else now
         rows = self.database.execute(
             "SELECT id,created,status,pinned FROM runs ORDER BY created DESC"

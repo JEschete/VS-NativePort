@@ -256,6 +256,22 @@ The default budget is 4 GiB model VRAM plus 2 GiB free headroom; one model,
 one inference request, an 8K context and bounded batches avoid unbounded
 competition with other applications. A readiness check is not a gameplay test.
 
+Up to four games may share one warmed model instead of each loading its own:
+
+```powershell
+.\.venv-3\Scripts\python.exe Native\Player\player.py serve --model-port 11561 --parallel 4
+.\.venv-3\Scripts\python.exe Native\Player\player.py play --model-port 11561 --shared-model 4 ...
+```
+
+`serve` owns the runtime with `OLLAMA_NUM_PARALLEL` slots (budget 4 GiB plus
+1 GiB per extra slot; measured 5.2 GB for four slots) and keeps the weights
+resident until Ctrl+C. `--shared-model` borrows that server and fails if it is
+not serving; each game still has its own window, input target and run folder.
+
+`--setup-interaction` additionally permits lone ordinary `Cross` setup pulses,
+only with a room-local or external `--scene-expectation`; it never applies to
+room-entry scenes and still rejects Circle, Start, Triangle and mixed buttons.
+
 ## OODA and source of truth
 
 * **Observe:** read complete, ordered native JSONL frames. Shared read-only
@@ -386,6 +402,9 @@ Cleanup runs at startup and every 15 minutes while playing:
   outside cleanup scope.
 * A run reaching 512 MiB stops explicitly rather than dropping diagnostics.
   If pinned evidence exceeds the total budget, further tests refuse to start.
+* Parallel Players share the store. A cross-process `cleanup.lock` gives one
+  process each cleanup pass; the others skip it instead of deleting the same
+  folders concurrently.
 
 ```powershell
 .\.venv-3\Scripts\python.exe Native\Player\player.py cleanup
