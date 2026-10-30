@@ -1,4 +1,4 @@
-# Cutscenes still to check (issue #149)
+﻿# Cutscenes still to check (issue #149)
 
 46 scenes are still unverified out of the 292 catalogued room and event scripts.
 They are listed in rough story order: by the campaign progress value (flag 0x82) that their trigger
@@ -76,7 +76,8 @@ Many of these are not story cutscenes. They are short system scripts:
   - Ashley leaves for one of: Ashley's flashback (MAP212, zone 19 room 0); Room of Rotten Grapes (MAP021, zone 9 room 12) (depends on the exit or branch).
   - Scale: 1 scripted actor move.
   - The script branches on flags, so only some of the messages/destinations above appear.
-- [ ] Plays and returns control
+- Manual result (owner playtest, 2026-10-30): works. The room timer is started by the raised lever; the owner has records of clearing the room and reaching the exit with no issue.
+- [x] Plays and returns control
 
 ### 3. The Gallows (MAP026.MPD, zone 12 room 0)
 
@@ -94,7 +95,8 @@ Many of these are not story cutscenes. They are short system scripts:
   - Scale: 9 camera commands, 1 sound effect.
   - No dialogue text in this script.
   - The script branches on flags, so only some of the messages/destinations above appear.
-- [ ] Plays and returns control
+- Manual result (owner playtest, 2026-10-30): works; the scene plays when the Minotaur is killed.
+- [x] Plays and returns control
 
 ### 4. The Gallows (MAP026.MPD, zone 12 room 0)
 
@@ -114,7 +116,8 @@ Many of these are not story cutscenes. They are short system scripts:
   - Scale: 73 camera commands, 4 animations, 158 scripted actor moves, 6 sound effects, at least 5 s of scripted waits.
   - No dialogue text in this script.
   - The script branches on flags, so only some of the messages/destinations above appear.
-- [ ] Plays and returns control
+- Manual result (owner playtest, 2026-10-30): works; plays after the Minotaur scene and hands off as expected.
+- [x] Plays and returns control
 
 ### 5. The Bloody Hallway (MAP038.MPD, zone 13 room 10)
 
