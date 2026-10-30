@@ -435,7 +435,8 @@ void InspectRoomChests(PlayerObservationState& state) {
   int count = 0;
   const auto* chests = Items_RoomTreasureChests(&count);
   if (chests == nullptr) return;
-  if (Field_roomData.header.containersLength % sizeof(Items_TreasureChest) != 0) {
+  if (Field_roomData.header.containersLength % sizeof(Items_TreasureChest) !=
+      0) {
     throw std::runtime_error(
         "observed room container storage has an incomplete record");
   }
@@ -450,12 +451,13 @@ void InspectRoomChests(PlayerObservationState& state) {
     snapshot.facing = chest.facing;
     snapshot.lock_level = chest.lockLevel;
     snapshot.opened_flag = chest.openedFlag + kChestOpenedFlagBase;
-    snapshot.opened = State_ScriptFlag(static_cast<std::int16_t>(
-                          snapshot.opened_flag)) != 0;
+    snapshot.opened =
+        State_ScriptFlag(static_cast<std::int16_t>(snapshot.opened_flag)) != 0;
     for (std::size_t slot = 0; slot < std::size(chest.loot.misc); ++slot) {
       const auto& item = chest.loot.misc[slot];
       if (item.itemId != 0 && item.count != 0) {
-        snapshot.misc.push_back({static_cast<int>(slot), item.itemId, item.count});
+        snapshot.misc.push_back(
+            {static_cast<int>(slot), item.itemId, item.count});
       }
     }
     state.chests.push_back(std::move(snapshot));

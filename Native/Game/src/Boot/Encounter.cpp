@@ -4,6 +4,7 @@
 #include <array>
 #include <atomic>
 #include <bit>
+#include <cstdint>
 #include <cstdlib>
 #include <format>
 #include <ranges>
@@ -140,7 +141,7 @@ int EnterOrFinishEncounter() {
     // placements (Field_SpawnRoomActors, BATTLE.PRG func_80089114,
     // 146C.c:14901). Declared Lab fixture state, written before any room
     // loads; never changed during play.
-    constexpr short kStoryProgressFlag = 0x82;
+    constexpr std::int16_t kStoryProgressFlag = 0x82;
     State_SetScriptFlag(kStoryProgressFlag,
                         static_cast<char>(*configuration.story_progress));
     VS_LOG_INFO("encounter", "declared story progress={}",
