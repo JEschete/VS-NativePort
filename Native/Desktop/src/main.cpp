@@ -407,7 +407,8 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
   const auto handle_event = [&input](const SDL_Event& event) {
     input.HandleEvent(event);
   };
-  while (app.PumpEvents(handle_event)) {
+  bool running = true;
+  while (running && app.PumpEvents(handle_event)) {
     const double now = app.NowSeconds();
     const u32 ticks = clock.Advance(now - last) * settings.speed;
     last = now;
@@ -415,6 +416,13 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
     for (u32 index = 0; index < ticks && (settings.max_ticks == 0 ||
                                           game.Ticks() < settings.max_ticks);
          ++index) {
+      // The PS1 samples the pad every vertical blank. Catch-up and accelerated
+      // batches pump events before each tick so a short press or release is
+      // sampled on the next tick rather than at the end of the whole batch.
+      if (index != 0 && !app.PumpEvents(handle_event)) {
+        running = false;
+        break;
+      }
       watchdog.Pulse(game.Ticks() + 1);
       BeginLogicalTick(game.Ticks() + 1);
       input.Inject(settings.script.MaskAt(game.Ticks() + 1));
