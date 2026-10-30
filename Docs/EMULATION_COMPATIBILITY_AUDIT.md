@@ -57,8 +57,8 @@ and a dependency boundary. No such new approval is implied by this audit.
 | EC-05 | Scratchpad and overlapping overlay storage | Memory-layout compatibility | Engine/Core, Game/Boot and resource owners | M1, M3, M7, M9, M10 |
 | EC-06 | VSync, callbacks and root-counter behavior | Scheduling adapter plus hardware-shaped timing | Engine/Core, Platform, Game/Boot | M2, M3, M5, M10 |
 | EC-07 | Original controller receive buffers | Protocol compatibility adapter | Engine/Input, Game/Title | M3, M9, M10 |
-| EC-08 | Movie backend and MDEC-shaped presentation | Partial interface migration; missing decoder | Engine/Movie, Content | M6, M10 |
-| EC-09 | Memory-card API and native save helpers | Predominantly unfinished | Engine/Save, Game/State | M9, M10 |
+| EC-08 | Movie backend and MDEC-shaped presentation | Native AV1/FLAC decoding connected; page-space presentation and lifecycle retirement remain | Engine/Movie, Content | M6, M10 |
+| EC-09 | Memory-card API and native persistence | Initial schema3 save/load milestone delivered; imports, clear saves, campaign and final adapter retirement remain | Engine/Save, Game/State | M9, M10 |
 
 ### EC-01: GPU packet interpreter and page-image renderer
 
@@ -222,29 +222,38 @@ This is a protocol adapter, not a full controller hardware emulator. Actuator ca
 **Retirement gate:** title and gameplay use native input APIs; tests cover keyboard/gamepad equivalence, edges, repeat,
 analog axes, hot-plug and rumble cancellation. The legacy receive-buffer writer can be removed after its last consumer.
 
-### EC-08: Movie interface migration without decoding
+### EC-08: Native decoding with compatibility-backed presentation
 
 **Evidence:** `Native/Engine/src/Movie/Intro/Player.c`, `Native/Engine/src/Movie/MoviePlayer.cpp`,
 `Native/Engine/Legacy/Movie/LibPress.cpp`, and `Native/Tools/Extract/src/main.cpp`.
 
-The owned intro path calls a new player API, but `Movie_PlayerOpen` reports that playback is unavailable and frame
-rendering is a stub. Intro control still uses VSync and alternating page-space display rectangles. The old MDEC-facing
-functions remain unimplemented. The existence of the new interface does not establish working conversion or playback.
+The current player opens converted Matroska assets through DataStore, decodes AV1 with dav1d and FLAC with dr_flac,
+and submits native audio. Frame advancement uses movie ticks converted to nanoseconds. Rendering still uploads RGB
+data through page space; the global player and intro's existing scheduling/display contracts remain migration debt.
+The old MDEC-facing functions are still present. This source audit corrects the earlier missing-decoder description;
+it is not fresh frame-count, A/V-clock, skip, re-entry or soundtrack-tail acceptance.
 
 **Retain:** picture duration, skip rules, attract-loop behavior and the soundtrack tail continuing under the title.
-**Replace:** unavailable decoder and page-coordinate outputs with converted-movie decoding, explicit frame/audio
-ownership, a native presentation contract and one defined synchronization clock.
+**Replace:** remaining page-coordinate outputs and implicit session lifecycle with explicit frame/audio ownership,
+a native presentation contract and one defined synchronization clock.
 
 **Retirement gate:** verified frame count/duration, A/V synchronization, skip, re-entry and audio-tail behavior. Missing
 or invalid converted assets fail explicitly. Black placeholder frames do not pass movie parity.
 
 ### EC-09: Memory-card stubs versus native persistence
 
-**Evidence:** `Native/Engine/Legacy/Save/LibCard.cpp`, `Native/Engine/src/Save/SaveStore.cpp`, and
-`Native/Engine/src/Save/Snapshot.c`.
+**Evidence:** `Native/Engine/Legacy/Save/LibCard.cpp`, `Native/Engine/src/Save/SaveStore.cpp`,
+`Native/Game/src/Save/NativeSnapshot.cpp`, `RuntimeSnapshot.cpp`, `NativeMenu.cpp` and `NativeResume.cpp`.
 
-The native helper creates a save directory, names slots and checks existence; the legacy file/card operations still
-contain stubs. Neither constitutes a completed native save pipeline or a working memory-card emulator.
+Production Save/Load/Continue menus now use the native file store, schema3 semantic JSON, validated staged resume,
+explicit backup recovery/replacement consent and session cancellation. The initial native-only milestone has
+production-controller evidence recorded on #18; the former directory-helper-only description is obsolete.
+Legacy file/card operations still contain stubs and have not been retired.
+
+The schema rejects unsupported versions rather than migrating them. Clear-save conversion still explicitly reports
+unavailable without changing files. PS1 import, old-schema migration, full-story/NG+ round trips, unsupported
+transient/support states and final card-adapter retirement remain open. Component tests or successful Continue
+checks do not establish those separate gates; no memory-card emulator is required or introduced.
 
 **Retain:** semantic game state and import compatibility with user-supplied PS1 saves.
 **Replace:** hardware/card events with versioned serialization, stable IDs, validation and recoverable file operations.

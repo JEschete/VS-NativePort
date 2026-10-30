@@ -1021,6 +1021,9 @@
     <Filter Include="tools\test">
       <UniqueIdentifier>{CFC2A27F-C605-5647-897F-AF632ED41495}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tools\test\scenarios">
+      <UniqueIdentifier>{106DAA84-C6C8-5C1D-8AD2-D45E806B7913}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tools\vcpkg">
       <UniqueIdentifier>{22DA2905-33B5-5A0E-A704-DFAE90A21354}</UniqueIdentifier>
     </Filter>
@@ -1189,6 +1192,9 @@
       <Filter>tools\naming</Filter>
     </None>
     <None Include="..\..\naming\merge_symbols.py">
+      <Filter>tools\naming</Filter>
+    </None>
+    <None Include="..\..\naming\native_symbol_inventory.py">
       <Filter>tools\naming</Filter>
     </None>
     <None Include="..\..\naming\out\BATTLE_01.csv">
@@ -1866,6 +1872,12 @@
     <None Include="..\..\naming\test_merge_symbols.py">
       <Filter>tools\naming</Filter>
     </None>
+    <None Include="..\..\naming\test_native_symbol_inventory.py">
+      <Filter>tools\naming</Filter>
+    </None>
+    <None Include="..\..\naming\test_sym_gen.py">
+      <Filter>tools\naming</Filter>
+    </None>
     <None Include="..\..\naming\trace_queue.py">
       <Filter>tools\naming</Filter>
     </None>
@@ -1936,6 +1948,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_encounter_fixups.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\test_scene_trace_fixups.py">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\understood.py">
@@ -5320,6 +5335,15 @@
       <Filter>tools\test</Filter>
     </None>
     <None Include="..\..\test\run_native.ps1">
+      <Filter>tools\test</Filter>
+    </None>
+    <None Include="..\..\test\scenarios\first_lever_handoff.json">
+      <Filter>tools\test\scenarios</Filter>
+    </None>
+    <None Include="..\..\test\scenarios\first_lever_room.json">
+      <Filter>tools\test\scenarios</Filter>
+    </None>
+    <None Include="..\..\test\verify_first_lever.py">
       <Filter>tools\test</Filter>
     </None>
     <None Include="..\..\vcpkg\ports\sfizz\portfile.cmake">

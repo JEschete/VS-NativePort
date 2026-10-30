@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-28. This is a short entry point, not another work tracker.
+Updated 2026-10-29. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -9,17 +9,68 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
-- New original local proofs: Release1793278293922782-0 verifies MAP088 local0
-  and MAP360 local0 through their entry-earned flag40 and real interactions;
-  Release1793278925894121-0 verifies MAP199 local1 through its original
-  ungated facing-tile trigger. The other native outcomes and eight measured
-  survival replays remain nonpasses. A25-case longer original lock-producer
-  batch1793279234029838-0 adds no verified identity; do not repeat it unchanged.
-  Explicit standalone components cannot substitute: the native fixture
-  intentionally requires isolated entry for direct requests, while the strict
-  production-room source contract rejects isolated cases. That failed setup
-  was not reclassified or used to weaken the804 matrix. Full current native
-  suites pass1144 cases/9,589,968 assertions in each configuration.
+- Current follow-up base is `a05b0baf` with unrelated dirty Save/title,
+  generator, project and documentation changes preserved. No new runtime
+  repair or acceptance-gate change was made in this investigation.
+  #233 clean normal1x Release run1793323847980193-0 executes MAP214's
+  final commands3046..3054 at15852, then blocks through30000 with
+  transition6; zero engine errors and teardown30012. The retained PC3044
+  in the final snapshot is not proof of an ongoing music wait: the raw
+  command/result stream shows the later terminal commands. The separate
+  accelerated debugger diagnostic also observes musicId0, no active
+  channels and freed slots. No music-wait exception is justified. Original
+  source ends with fade-out and no terminal fade-in; establish its intended
+  native return context before changing the transition or control gate.
+- #232 original-parent control: MAP100 sets story130=79 and enters MAP101
+  through its authored27/0,22/15/elevation1 transition, not the standalone
+  MAP101 fixture. Normal1x Debug1793324229282562-0 and
+  Release1793324229232254-0 cross the old fault with zero engine errors,
+  then genuinely lose Ashley; teardown12295/12293. First exploration is
+  about10461 and the hostile starts an action64 ticks later. Bounded actual
+  direction, sheathing and running-jump probes did not establish120-tick
+  living control; they remain failures, not completion certificates.
+  Root bounds repair2cf601aa and its green CI remain published; do not
+  weaken survival, edit HP or disable the enemy to close the issue.
+- #223 isolated normal1x Release1793324372973483-0 reproduces the error
+  at2409 and tears down2421. Native Debug error-site observation confirms
+  MUSIC019/sequence20, requested sample bank69, both loaded music-bank IDs0,
+  and empty instrument107 metadata. Bank69/instrument43's imported asset
+  exists. Original Zone1 music16 imports bank69; Zones2,3,4,5,8 have music0.
+  Next required observation is the actual inherited prologue bank context,
+  followed by complete Debug/Release playback/reentry, not a replacement
+  program. Session-local diagnostic captures are not teardown acceptance.
+  The source-backed audio prerequisites are published as47524b00 with
+  successful exact Source Quality run40988508440. No runtime change or
+  issue closure accompanies that documentation checkpoint.
+- #225 follow-up: published `943fd39e` has successful Source Quality
+  run40983155864. The assisted MAP259 route reported in issue225 remains
+  assisted evidence, separate from the original viewer acceptance.
+  Original viewer506 still lacks flag910. A fresh normal1x Debug
+  viewer504/reentry run1793323036963507-0 also fails E298/selector0x1002
+  with actual teardown: its original setup writes911, not910.
+  Release1793323245638082-0 reproduces the same first/reentry failures,
+  each1114 ticks, one explicit error and complete teardown.
+  An exploratory E298 exception was removed: although the package proves
+  target independence, Debug1793322642238477-0 then stalls at E073 offset350
+  waiting for actor0x1002 state0x80 through its8000-tick budget.
+  All runtime changes from that experiment are reverted; retain the explicit
+  missing-actor gate. Next required observation is E073 with original actor
+  prerequisites, full source/control/teardown proof in Debug and Release.
+  No new issue closure or runtime-definition promotion is justified.
+
+- Exact runtime progress is now509/804, with99 verified in both configurations
+  and295 still unverified (119 unrun/176 attempted-unverified).123 of the
+  owner's418 outstanding definitions now have demonstrated runtime paths.
+  #149 remains open; queues, blocked labels and cancelled cases are not passes.
+  The original MAP506/ZONE250 NPC/type4 viewer producers and source-derived
+  ordinary textbox selections establish documented debug playback contexts,
+  not earned campaign progression. Six original viewer exits and19 additional
+  gallery-produced identities are verified. Explicit Lab v5 reports now retain
+  actual instance ownership, original operands/branches/cleanup/handoffs,
+  pre-stop living control and native per-case footer/teardown;14 Lab controls,
+  11 shared Desktop controls and six unchanged cleanup controls pass.
+  A cancelled model run with earlier source activity is retained as a nonpass,
+  not promoted. Old549-trace and subsequent new-only scans are not to be repeated.
 
 - #225's E068 branch now has a genuine normal1x Release pass:
   model `e278ecabc4b44f719bafd33573444c8d`, native1793281890141797-0,
@@ -112,59 +163,17 @@ verification of the current worktree.
   prerequisites/runtime limits. No unrelated Save/title, solution, browsing
   project, architecture or customization edits were included.
 
-- #233's nullable camera consumer is locally repaired: original MAP214 has
-  collision width13/height25, but source-driven motion reaches tile4,31.
-  The existing cell lookup returns null; camera occlusion now explicitly warns
-  and uses its normal geometry-clearing path when no authored cell exists.
-  No collision, actor position, source flag, geometry constraint record or
-  valid view-trigger behavior changes. New tests cover missing cells, ordinary
-  clearing and the valid authored occlusion branch. Original Release
-  1793278757543012-0 crosses the old AV with zero errors and real teardown,
-  but still fails the120-tick living-control goal; no runtime identity is added
-  and #233 stays open. Published as `d9b79fa0`, exact CI40878539856 passes.
-  This is native fault progress, not scene completion.
-
-- Native source-goal completion is now optional in the external player:
-  `--scene-expectation` embeds the existing original Lab scene/control contract
-  and lets the native observer finish the case, rather than WM_CLOSE/cancel
-  or a needless full-budget continuation. Defaults and physical-door behavior
-  are unchanged.105 player tests and scoped quality pass. Original MAP121 run
-  `491bdb7a823446da9499efd6dbe2bbd7` genuinely defeats its hostile, completes
-  rewards/local2 and native source/control/teardown at5789 of12000:109 entry
-  commands,119 local2 commands, living control5657..5777, zero native errors.
-  Its one unconfirmed defense retains the overall player nonpass. The earlier
-  `116544bfaeb342e5afcfafc8aa55f419` wins that fight and walks the actual door,
-  but dies in the next room and cancels; it is not accepted Lab completion.
-  Normal1x MAP316 run88c681b67b034854b42dab892204d008 genuinely wins and
-  passes:104 entry/84 local0 commands, control5137..5257, teardown5269.
-  Despite its spell-probe intent, the actual actions are Herakles and ordinary
-  chains, not an offensive-spell victory or proof of spell adaptation.
-  Four-times-speed MAP316/336 attempts genuinely lose and remain failures;
-  MAP333 has no original type8 death producer and was not launched under an
-  invented target. One normal1x MAP316 variant follows measured planning latency.
-  #223 retains original inherited-audio failures. #225 remains unresolved:
-  genuine retained Iron Golem defeat in2b0ad063c7bf4b138a0024b92c49bda3
-  still leaves original effect239 selector101 unavailable. Independent
-  source-disc inspection confirms the authored Golem model/effects ID100 and
-  E068 operand101; a secondary-body explanation is rejected. No actor
-  substitution, asset patch or error downgrade was made. E073 also needs its
-  original Aster Sigil-used flag910 and retained Neesa/Tieger prerequisites;
-  stage130 alone is not sufficient.
-
-- External source-tile navigation is opt-in and has115 tests/clean scoped
-  quality. It uses actual post-entry camera/geometry, native activation and
-  the unchanged completion gate; only this objective can explore supported
-  patch frontiers after nearest endpoints are exhausted. Cinematic control
-  now rejects new/stale strategic preparations while preserving event-owned
-  rewards and the unchanged transaction timeout. Spatial/model attempts remain
-  nonpasses: MAP153 `dbd373c12dac4c658dd9d70940299031` never activates local0;
-  MAP203 basic/all-spell runs genuinely lose, and the all-ability run hits the
-  original512MiB budget after16091 ticks rather than proving victory. The
-  measured duplicate238MiB root/per-script traces prompted explicit
-  verification-only shared rich-frame references: every base actor/control/
-  scene frame remains scoped; full schema2 data stays in the root. Actual600-
-  tick control saves22.29% total bytes without sampling, deletion or a raised
-  budget. The model's goal/reason is not proof of actual spell execution.
+- New original local proofs: Release1793278293922782-0 verifies MAP088 local0
+  and MAP360 local0 through their entry-earned flag40 and real interactions;
+  Release1793278925894121-0 verifies MAP199 local1 through its original
+  ungated facing-tile trigger. The other native outcomes and eight measured
+  survival replays remain nonpasses. A25-case longer original lock-producer
+  batch1793279234029838-0 adds no verified identity; do not repeat it unchanged.
+  Explicit standalone components cannot substitute: the native fixture
+  intentionally requires isolated entry for direct requests, while the strict
+  production-room source contract rejects isolated cases. That failed setup
+  was not reclassified or used to weaken the804 matrix. Full current native
+  suites pass1144 cases/9,589,968 assertions in each configuration.
 
 - Two resumed source batches add16 exact identities through35 independently
   verified original instances. The new-only scans take5.38 and3.93 seconds;
@@ -176,32 +185,6 @@ verification of the current worktree.
   and `verified-resumed-entry-instances-1793261820396309-0.json`.
   Interrupted MAP100/MAP101 effect-bone faults are #232; MAP214 camera
   constraints are #233. Neither suspected cause is patched or promoted.
-
-- Exact runtime progress is now509/804, with99 verified in both configurations
-  and295 still unverified (119 unrun/176 attempted-unverified).123 of the
-  owner's418 outstanding definitions now have demonstrated runtime paths.
-  #149 remains open; queues, blocked labels and cancelled cases are not passes.
-  The original MAP506/ZONE250 NPC/type4 viewer producers and source-derived
-  ordinary textbox selections establish documented debug playback contexts,
-  not earned campaign progression. Six original viewer exits and19 additional
-  gallery-produced identities are verified. Explicit Lab v5 reports now retain
-  actual instance ownership, original operands/branches/cleanup/handoffs,
-  pre-stop living control and native per-case footer/teardown;14 Lab controls,
-  11 shared Desktop controls and six unchanged cleanup controls pass.
-  A cancelled model run with earlier source activity is retained as a nonpass,
-  not promoted. Old549-trace and subsequent new-only scans are not to be repeated.
-
-- #232's exact native AV is traced to the distinct slot domains: absent valid
-  renderer16 fell through to out-of-bounds `Field_gimmickInstances[16]`, not a
-  corrupted renderer registration. Bounded shared lookup preserves existing
-  missing-owner query results; missing world matrices leave caller outputs
-  untouched. Existing renderer16 models and valid gimmicks remain supported.
-  Temporary argument logging is removed. Related62 cases/17,091 assertions
-  pass per configuration. Original MAP101 now crosses3194 and completes3767
-  entry commands with zero errors, but passive cases still fail: a real enemy
-  starts at5304, only64 ticks after restored control, and later kills Ashley.
-  Published bounds repair `2cf601aa` has exact green CI40876371035. This is
-  not a120-tick live-control certificate or issue completion; #232 stays open.
 
 - Ending blockers #228/#230/#231 are locally repaired: typed native OT
   consumers preserve original buckets, all12 full embedded TIMs own their
@@ -222,21 +205,6 @@ verification of the current worktree.
   relaxed. Published as `ad8a3c8a`, exact CI40876133291 passes and
   #228/#230/#231 are closed. Campaign/fidelity/promotion/retirement remain
   separate; subsequent audio integration also has fresh unskipped replays.
-
-- #226/#227 now pass the complete original viewer504/E078/E026/E038 chain:
-  Debug1793255056114631-0 and Release1793255464212292-0 validate all seven
-  original instances, control12024..12144 and native teardown12156 with zero
-  errors. Unwind/retirement uses the actual owned bound animation bank;
-  new-clip selection still uses the current selector. The separate retention
-  ABI fix calls the declared char-returning predicate directly, preventing
-  stale upper-register bits from entering an absent actor's HP query.
-  Debug/Release each pass123 related cases/57,352 assertions;160 copier
-  tests,179 VM dispatch targets and1874/1874 naming checks pass. Scoped
-  quality/changed-TU tidy has zero new findings; the all-owned tidy fanout was
-  stopped and is not claimed complete. #226 is now published as `1080de58`,
-  exact CI40875836489 passes; #227 is `7971c4d9`, CI40875783132 passes.
-  Both are closed. These results remain distinct from promotion or
-  compatibility-retirement acceptance.
 
 - #224's real hidden-platform placement crash is locally repaired and verified:
   isolated fresh1x original event31 replay formerly faults entering22/7 at7104.
@@ -271,7 +239,346 @@ verification of the current worktree.
   integration;168 copier controls pass. Published as `96a6515c`, exact
   CI40875509110 passes and #229 is closed.
 
-- #149 final acceptance reconciliation: semantic implementation
+- #232's exact native AV is traced to the distinct slot domains: absent valid
+  renderer16 fell through to out-of-bounds `Field_gimmickInstances[16]`, not a
+  corrupted renderer registration. Bounded shared lookup preserves existing
+  missing-owner query results; missing world matrices leave caller outputs
+  untouched. Existing renderer16 models and valid gimmicks remain supported.
+  Temporary argument logging is removed. Related62 cases/17,091 assertions
+  pass per configuration. Original MAP101 now crosses3194 and completes3767
+  entry commands with zero errors, but passive cases still fail: a real enemy
+  starts at5304, only64 ticks after restored control, and later kills Ashley.
+  Published bounds repair `2cf601aa` has exact green CI40876371035. This is
+  not a120-tick live-control certificate or issue completion; #232 stays open.
+
+- #233's nullable camera consumer is locally repaired: original MAP214 has
+  collision width13/height25, but source-driven motion reaches tile4,31.
+  The existing cell lookup returns null; camera occlusion now explicitly warns
+  and uses its normal geometry-clearing path when no authored cell exists.
+  No collision, actor position, source flag, geometry constraint record or
+  valid view-trigger behavior changes. New tests cover missing cells, ordinary
+  clearing and the valid authored occlusion branch. Original Release
+  1793278757543012-0 crosses the old AV with zero errors and real teardown,
+  but still fails the120-tick living-control goal; no runtime identity is added
+  and #233 stays open. Published as `d9b79fa0`, exact CI40878539856 passes.
+  This is native fault progress, not scene completion.
+
+- External source-tile navigation is opt-in and has115 tests/clean scoped
+  quality. It uses actual post-entry camera/geometry, native activation and
+  the unchanged completion gate; only this objective can explore supported
+  patch frontiers after nearest endpoints are exhausted. Cinematic control
+  now rejects new/stale strategic preparations while preserving event-owned
+  rewards and the unchanged transaction timeout. Spatial/model attempts remain
+  nonpasses: MAP153 `dbd373c12dac4c658dd9d70940299031` never activates local0;
+  MAP203 basic/all-spell runs genuinely lose, and the all-ability run hits the
+  original512MiB budget after16091 ticks rather than proving victory. The
+  measured duplicate238MiB root/per-script traces prompted explicit
+  verification-only shared rich-frame references: every base actor/control/
+  scene frame remains scoped; full schema2 data stays in the root. Actual600-
+  tick control saves22.29% total bytes without sampling, deletion or a raised
+  budget. The model's goal/reason is not proof of actual spell execution.
+
+- Native source-goal completion is now optional in the external player:
+  `--scene-expectation` embeds the existing original Lab scene/control contract
+  and lets the native observer finish the case, rather than WM_CLOSE/cancel
+  or a needless full-budget continuation. Defaults and physical-door behavior
+  are unchanged.105 player tests and scoped quality pass. Original MAP121 run
+  `491bdb7a823446da9499efd6dbe2bbd7` genuinely defeats its hostile, completes
+  rewards/local2 and native source/control/teardown at5789 of12000:109 entry
+  commands,119 local2 commands, living control5657..5777, zero native errors.
+  Its one unconfirmed defense retains the overall player nonpass. The earlier
+  `116544bfaeb342e5afcfafc8aa55f419` wins that fight and walks the actual door,
+  but dies in the next room and cancels; it is not accepted Lab completion.
+  Normal1x MAP316 run88c681b67b034854b42dab892204d008 genuinely wins and
+  passes:104 entry/84 local0 commands, control5137..5257, teardown5269.
+  Despite its spell-probe intent, the actual actions are Herakles and ordinary
+  chains, not an offensive-spell victory or proof of spell adaptation.
+  Four-times-speed MAP316/336 attempts genuinely lose and remain failures;
+  MAP333 has no original type8 death producer and was not launched under an
+  invented target. One normal1x MAP316 variant follows measured planning latency.
+  #223 retains original inherited-audio failures. #225 remains unresolved:
+  genuine retained Iron Golem defeat in2b0ad063c7bf4b138a0024b92c49bda3
+  still leaves original effect239 selector101 unavailable. Independent
+  source-disc inspection confirms the authored Golem model/effects ID100 and
+  E068 operand101; a secondary-body explanation is rejected. No actor
+  substitution, asset patch or error downgrade was made. E073 also needs its
+  original Aster Sigil-used flag910 and retained Neesa/Tieger prerequisites;
+  stage130 alone is not sufficient.
+
+- #226/#227 now pass the complete original viewer504/E078/E026/E038 chain:
+  Debug1793255056114631-0 and Release1793255464212292-0 validate all seven
+  original instances, control12024..12144 and native teardown12156 with zero
+  errors. Unwind/retirement uses the actual owned bound animation bank;
+  new-clip selection still uses the current selector. The separate retention
+  ABI fix calls the declared char-returning predicate directly, preventing
+  stale upper-register bits from entering an absent actor's HP query.
+  Debug/Release each pass123 related cases/57,352 assertions;160 copier
+  tests,179 VM dispatch targets and1874/1874 naming checks pass. Scoped
+  quality/changed-TU tidy has zero new findings; the all-owned tidy fanout was
+  stopped and is not claimed complete. #226 is now published as `1080de58`,
+  exact CI40875836489 passes; #227 is `7971c4d9`, CI40875783132 passes.
+  Both are closed. These results remain distinct from promotion or
+  compatibility-retirement acceptance.
+
+- Earlier ordinary-input batches add16 paths after the completed Desktop instance
+  recovery: five entries in1793244075047574-0, eight entries in
+  1793245115600135-0, and external11/84 plus MAP265 local0 in
+  1793245457958291-0. All retain unchanged v3 original-byte/branch/completion,
+  living rendered120-tick pre-stop control and native teardown gates. Movement
+  continues through actual enemy actions rather than ending during the first
+  attack; original actors/stats/flags/RNG/collision remain unchanged. Other
+  outcomes remain nonpasses. Speeds above1 are semantic investigation only.
+  The exact prerequisite queue must follow the301-identity current matrix,
+  not the earlier418 planning snapshot.
+
+- Completed normal-speed Desktop evidence
+  `bad76450a03b4ed3a0a6a9c8911a7789` independently verifies24 original script
+  instances,23 previously uncovered identities. The v4 verifier binds actual
+  script/buffer instances through original247/104/trigger handoffs rather than
+  mutable pending event IDs, with explicit Desktop finalization/fiber lifetime
+  proof and11 positive/counterfactual controls. All six unchanged v2/v3 cleanup
+  controls still pass. This does not claim `game_finished`, complete campaign
+  shutdown, fidelity or C++ promotion.549 eligible old Lab traces were scanned
+  once in about109 seconds; they yielded no further new identities. Do not
+  repeat that corpus scan or another full prologue. The separately tested Lab
+  v5 candidates are not automatically accepted progress reports; only the
+  explicit source/lifecycle-validated reports described above are accepted.
+
+- Owner correction2026-10-28: the serial full-prologue workflow is retired.
+  Prioritize source-ready persistent batches and shared prerequisite groups;
+  use the model only for necessary earned combat/progression, not to inspect a
+  scene already present in completed evidence. New `--verification-log` retains
+  all source/control/error evidence while removing Trace chatter, structured
+  engine echoes and non-player run/script frame duplication. The player requests
+  this profile too. Full tracing remains available for targeted fidelity work.
+  The measured same9-path control batch passes all unchanged source gates in
+  9.39 seconds,57.5 paths/minute, with56.45% smaller logs. These are previously
+  verified controls, not9 new paths. Remaining prerequisites are grouped in
+  `build\quality\scene804\batched-verification-queue.json`; its categories are
+  planning information, never passes. Final validation: Debug/Release each
+  pass74 native cases/47,617 assertions; all102 player tests pass, scoped tidy/
+  format/lint has0 new findings and naming1874/1874 is covered. The new MAP147
+  producer attempt did not activate and remains unverified; five other
+  first-try candidates lack a demonstrated field camera and were not guessed.
+  Model-required Lab scenes now have explicit2x/4x investigation rates; normal
+  1x strict-reaction behavior is unchanged. Rates above1 reject reaction-count
+  certification, Desktop/save/New Game and physical-door objectives. The4x
+  MAP042 control `0e1ae5fec0744566a2b8a95ba37c985a` passes its original scene
+  source contract (85 commands/control4540..4660), while3 unconfirmed chains
+  retain its overall player nonpass and timing eligibility is false.
+  MAP106 `36eed3eb0e46448faba3de21fd0c4d44` and MAP382
+  `6589b4f357984aa795472056d42b0990` end in genuine defeat. No new definition
+  is promoted from these controls or failures.
+
+- Owner-authorized heavy log pruning is complete:2300 generated logs,
+  42.951GiB raw ->1.102GiB lossless cold storage outside the workspace at
+  `%LOCALAPPDATA%\VS-NativePort\evidence-archive\20261028`. Every file was fully
+  decompressed and SHA-256 checked before unlinking its original. The indexed
+  original path/digest permits exact restoration; inventories, case reports,
+  manifests, source/assets and saves were not removed. Small/recent logs remain
+  live. `.vscode` excludes generated build output from watching/searching.
+  Session `archive_session_logs.py --restore <original-absolute-path>` restores
+  one indexed file without overwriting an existing file; `archived_scene_logs.py`
+  streams verified cold logs for camera/source inspection. This explicit owner
+  instruction supersedes the earlier preserve-all-raw/pinning policy. Do not
+  regenerate gigabytes of logs or treat archived paths as absent evidence.
+
+- The original normal-speed model playthrough is now complete:
+  `bad76450a03b4ed3a0a6a9c8911a7789` passes its production New Game combat/control
+  goal at59737, with3 observed hostile deaths, no death/skip/reaction failures,
+  zero native errors and finalized host diagnostics. Its independently proven
+  per-definition v4 instances are recorded above; Desktop lifecycle evidence
+  remains explicitly distinct from Lab teardown and campaign completion.
+  No further full-prologue replay is warranted without a specific regression.
+
+- Current owner focus remains actual runtime verification of all804 definitions,
+  using the existing external model for real combat prerequisites. #149 stays
+  open. At this checkpoint the exact-identity matrix has454 verified paths,
+  80 in both Debug/Release,350 outstanding (144 unrun/206 attempted-unverified).
+  All referenced room-entry definitions have had native attempts; an attempt,
+  completed host budget or unverified label is not a pass. No all-branch,
+  campaign, pixel or listening certification is implied. Source remains dirty
+  `a6cbaab48b6c98c7f176183e491f0ab116394dc3`; no new commit/push.
+
+- The external limb/reward OODA gaps are repaired without ordinary gameplay
+  changes. Ready multi-part targets offer explicit native actor/limb choices
+  and cached forecasts, with no recalculation or RNG consumption. Actual
+  event-owned loot/ability menus are visible under native control3; only their
+  legitimate ready-menu keys are leased. Original MAP032 victory/rewards run
+  `1e95c7846c02429fa1e72deb25bd3c36` verifies local2 with324 matching commands
+  and living control2772..2892. MAP042
+  `5f68618952cb4a75ba46288697d6c79f` defeats both original hostiles, completes
+  rewards and verifies local1 with85 matching commands/control2962..3082.
+  These use the existing declared post-minotaur representative action profile,
+  not an earned campaign/save claim. Earlier stock-action failures are retained.
+  The seven other cases in the eight-case batch remain nonpasses.
+  Python100 tests and scoped quality pass; native Debug/Release selections each
+  pass67 cases/47,570 assertions. Naming1874/1874 exact occurrences and39 naming
+  regression tests pass. No baseline was refreshed.
+
+- A MAP360 model HTTP400 is now causally reproduced and repaired, not retried
+  blindly. The preserved run is `6e2645b36aef4371a2c83f9708207701`.
+  The exact prompt required8218 tokens against8192. Lossless JSON compaction
+  preserves all prompt facts and completes at6732 prompt tokens; local evidence
+  is `build\quality\scene804\prompt-context-replay-01`. HTTP failures now persist
+  bounded server details. Two focused regressions first failed, then passed.
+  Extended MAP051 run `d46db4cdab2f467695e2ed25d638a665` genuinely defeats both
+  original hostiles, completes real rewards and verifies local1 (116 matching
+  commands/control10532..10652). Extended MAP358/MAP362 end in genuine defeat.
+  Native Release1793234635260661-0 verifies9 additional original entries from
+  supported alternative starts: MAP017/244/336/345/386/389/391/394/398.
+  All39 source nonpasses and the native batch exit2 are retained; speed8 is
+  semantic-only, not listening acceptance.
+
+- Extending MAP015/010/005 to18000 ticks did not establish acceptance.
+  MAP005 produces a native missing-program error at2409; isolated speed1
+  reproduces voice5/instrument107. #223 tracks this confirmed symptom, not
+  a guessed engine cause. Original external2 loads mapped WAVE0069, which
+  later music17/18/19 share; jumping directly to later rooms omits predecessor
+  context. Actual Desktop New Game `a3dff5450aaa46269a186d250848ed70` imports
+  bank69 at1399 without an audio change, then reaches room3/0 at7490.
+  Its external parser abort on nonhostile script actor6/model-1/action byte128
+  is fixed: preserve the unsigned native byte and expose unclassified values
+  without inventing physical/spell semantics. Both red regressions and all7490
+  retained frames now pass. Explicit external `--new-game` uses ordinary title
+  keys and private saves, not a Lab action grant or story skip; Continue and
+  Lab sources stay mutually exclusive. The next actual replay
+  `5cb6f06375d54c289224c4d9286fc0bc` reaches1/0 ->2/0 ->3/0 ->4/0 ->5/0 at
+  1415/5158/7478/14167/16922, with zero native errors through18000 and finalized
+  host diagnostics. It remains a failed external run because the new source
+  mode incorrectly selected Lab finalization when no save was supplied.
+  Completion now selects the actual host, preserving Desktop's separately
+  labeled host-observation contract and all Lab teardown/error/status gates.
+  Dedicated New Game/Continue/Lab controls pass.
+  Release `317d926d4cab4a44b438c0e2d7795a65` reaches actual external4
+  MUSIC019 load/play18902/18906 and a successful instrument107 note18911,
+  plus180 later notes. All2049 recorded external4 commands before its chained
+  request pair with native results and match full original opcodes/operands.
+  Debug `b05be49c5df54258ad5381c0ca7b6f7e` repeats MUSIC019 at19204 and181
+  subsequent107 notes, with zero native errors and finalized host diagnostics.
+  Missing inherited context, not an unavailable program or a required silent
+  substitute, explains the direct fixture symptom. No audio change was made.
+  Both runs retain their blocked outcomes rather than gaining a prologue pass.
+  Debug genuinely observes all3 hostiles at zero HP (last room6 death31272),
+  then original7/0 ->8/0 ->18/0 story handoffs. Late dialogue is advancing:
+  main-thread offsets760 ->978 ->1312 ->1574 ->1737 over40000..42000 and actual
+  Circle32 at41971..41972 refute a controller softlock. Fresh normal-speed
+  Release `aec3427247184c44a023bf2eb95b59a7` ends at54000 in original9/14,
+  MAP023, with all3 hostile deaths, no native errors/skip/death, but no settled
+  field-control goal. Actual main cursor309 ->663 ->863 ->1349 ->1489 ->1760
+  proves continued progress; its original terminal room handoff is1953.
+  Recognizing every dialogue box and acknowledged Circle input is already
+  correct, so no speculative controller fix was made. The failed/blocked
+  outcomes stay unchanged. Current bounded normal-speed Release replay
+  `bad76450a03b4ed3a0a6a9c8911a7789` permits72000 ticks and stops early only
+  after real goal/control acceptance. Active shell:
+  `scene149-original-story-terminal-handoff`; local native session
+  `1793239002398582-0`. No acceptance or #223 closure is claimed yet.
+  Reviewed raw evidence15.584GiB/free C1120GiB supports its explicitly recorded
+  2GiB/run,20GiB investigation cap. Defaults remain512MiB/10GiB; nothing pinned
+  was deleted.
+
+- Further source proof must follow native chained-event ownership, not mutable
+  event IDs alone: original opcode247 changes `Event_eventId` and queues a new
+  asset before the old script tail finishes. Release external4 requests5 at
+  21628; old yield/finish bytes can consequently carry ID5 before the actual
+  EVENT/0005 read21630 and replacement. Preserve exact PC/base/operands and
+  source load/init boundaries. Do not count those old tail bytes as a new
+  definition, invent a return, or weaken the current v2/v3 lifecycle gates to
+  promote Desktop host observations.
+
+- Fight-to-door behavior is demonstrated, not merely unit-tested:
+  pinned81945558a2534341a97fb5ccec74b0fe defeats the3 original MAP018 hostiles
+  at952/1492/1862, earns native local1/flags96 and48 at2192 and control2194..2314.
+  Pinned c79537e8c52b4b589a846dc282b71ed1 additionally opens the actual door2642,
+  arrives9/8 at2843, follows the original redirect9/13 at3700, closes native
+  dialogue3994 and restores control4174 without skip/errors. Its MAP017 local0
+  and MAP022 entry proofs are registered, including control5862..5982.
+  Fixed authored9/8 door acceptance remains a nonpass after the original9/13
+  redirect. Never relabel that as an authored-door pass or grant flag180.
+
+- Re-entry diagnostic defect fixed narrowly in maintained Content code:
+  `Content_ReadDiscBytes` logged a path only once per process, suppressing fresh
+  source evidence on later actual reads. First-read Info is unchanged; later
+  successful reads are Debug. No byte, padding, failure or gameplay changes.
+  The new isolated regression first failed with1 record instead of2, then
+  passed. Final Debug/Release selections each pass61 cases/1,400,309 assertions.
+  Four normal-speed original MAP018 local2 reentries pass strict source/control
+  verification: Debug1793225869739765-0 and Release1793225237897085-0; first
+  actual MPD read is Info, second is Debug. Three unchanged formerly-unbound
+  handoffs now pass in Release1793226101572717-0. Scoped fixture/content tidy
+  and Python quality have0 new findings; naming1874/1874 occurrences covered.
+
+- Original type2 producers require a changed trigger tile
+  (`146C.c:5365`/`Field_CheckAshleyTileTriggers`), not spawning at a predicate.
+  Native crossings use supported neighboring starts, actual field cameras and
+  original point/rectangle predicates, including authored door tiles as targets.
+  Batch1793223546713737-0 verifies8/79 paths; all71 nonpasses are retained.
+  Directions-only opt-in player `--setup-press` establishes such a source
+  precondition before model strategy; combat/jump/interaction/skip keys are
+  rejected, pulses cannot overlap, and fixed-door/Desktop assertions cannot be
+  combined with it.85 player tests pass. Live Release
+  c2a75a48e2a74b428041789ddc395b81 executes MAP055 local0 at134 before first
+  model strategy209, after the explicit140 handoff; actual destination control
+  1627..1747 proves the source-defined handoff. Its overall defeat-all goal
+  remains blocked, not an all-hostiles victory or physical-door pass.
+
+- Native cleanup source binding is explicit, not an ignored mismatch:
+  G00118 `Event_specialSubroutineScript` is original BATTLE offset0x8135C;
+  original sizes0x81430 and imported dispatch0x81530 bind opcode0x48 to
+  `Event_ScriptReturnToSavedAddress` (0x800B8C44). Do not use the C initializer
+  placeholder as proof of the imported dispatch. Special16 enters original
+  bytecode and returns to exact caller PC+6; caller FF and pre-stop living
+  control must still occur. Six negative/boundary/baseline controls pass.
+  Explicit v3 proof verifies MAP147's actual second visit; fresh Release
+  1793229293186199-0 also verifies MAP148's real return, control4850..4970.
+  The original inventory and208 static unresolved prerequisites are unchanged.
+
+- All bounded native/model runs above are complete. Four additional original
+  enemy-clear model cases finished without earning their defeat-all goals:
+  MAP03260731e84cfa7408ea459e911cdb4a878 (0/1 deaths),
+  MAP358c060c227774042679faafc978b8c80c2 (0/3),
+  MAP36096089271d2164679864806bdac4d2a32 (0/3) and
+  MAP362e9dd33966b014b7bb11fbb90399a40ed (1/3).
+  Their enemy-clear selectors are NOT promoted. Actual model movement does
+  activate MAP032 local1;353 full commands and living control1420..1540 pass
+  separately. Raw native height/targeting/healing outcomes remain available;
+  no unsupported causal combat fix or victory is claimed.
+  Pinned raw evidence reached10.85GB against the default10GiB limit. It was
+  reviewed without deletion (over1TiB free on C:); this investigation uses the
+  existing API's bounded20GiB retention parameter for the current story replay,
+  recorded in each run, while
+  the default remains unchanged. Do not delete pinned raw proofs.
+
+- Owner correction: #149 is **reopened**. The804 remaining indexed definitions
+  need actual runtime verification; inventory/tool availability and explicit
+  unverified labels were not sufficient acceptance. Do not close this issue
+  again while that coverage remains outstanding. The earlier closure scope
+  below is superseded, not a gameplay certification.
+  Baseline remaining identities are389 room-entry/317 room-local/98 external.
+  Current authoritative progress is
+  `build\quality\scene804\runtime-status.json`, retaining all804 exact
+  asset/source/selector/offset identities and Debug/Release evidence separately.
+  Release pilot1793212709064667-0 verifies7 entries; normal-speed persistent
+  batch1793212959727645-0 verifies26 more,33 unique total/771 outstanding.
+  Thirteen entry bodies completed but enemy combat interrupted the required
+  120 consecutive live/rendered control ticks; they remain unverified, not
+  VM-hang or pass claims. MAP182's original600-tick budget did not pass:
+  teardown-grace frames were excluded and its later1200-tick replay does pass.
+  Verification requires actual native asset load, exact executed opcodes/full
+  operands/taken branches, native main return, living Ashley, field rendering,
+  and120 consecutive normal-control ticks before any stop request.
+  Session helpers `scene804_entries.py`/`scene804_status.py` generate immutable
+  batch plans and resumable reports; reports reject changed source operands
+  and stop-boundary threshold false positives. The normal-speed59-case Debug
+  and40-case medium-entry Release batches are completed historical evidence,
+  reconciled in the current matrix above. General player changes remain
+  frozen. No game/VM/Encounter implementation or reference file was changed.
+  Current scoped Tool changes only expose supported non-door source positions
+  from the existing native room catalog, reusing original door-fixture floor
+  selection; they do not grant story flags, HP, items or defeated actors.
+
+- #149 historical investigation checkpoint (superseded closure): semantic implementation
   `b3f68b46ca50a3aa3a04fa28ef1edd81f4cb0c64` has exact green Source Quality
   `40740895618`. Static inventory16e3d921 and diagnostic9db31b9c milestones
   also have exact green40733732970/40736486701. All1,311 definitions are
@@ -642,6 +949,50 @@ verification of the current worktree.
   retirement. The following resumed-work entry is historical #148 context:
   save, scene-catalog, owner guidance and the owner document deletion
   remain separate uncommitted work; do not stage them with #148.
+- Owner resumed #151/#167/#18/#148/#149 as continuing work, not a request to
+  stop after the checkpoint-resume feature. Local dirty-base804d1899 now has
+  two verified #148 naming batches:12 vibration functions/31 identifier pairs
+  and180 opcode-ledger rows/353 parameter bindings (177 unique native
+  names/347 unique pairs). Event instruction/thread names
+  follow the existing182-ID opcode contract; literal/type/operator tokens and
+  all121 owned paths are preserved, with stable repeat generation. Remaining
+  lexical candidates are24,835 occurrences/2,158 pairs/371 files, not a claim
+  of full semantic understanding or architectural retirement.
+  #149 adds `--catalog-only --scene-catalog`: all512 MPDs/512 EVTs/797
+  SEQ/ESQ banks/one movie, room gates and bounded branch/loop/thread graphs.
+  Debug/Release/repeated Debug produce identical1,822-asset inventories with
+  zero parse errors; playback/preconditions stay explicitly unverified.
+  Parser8/39, optional all-disc2/46,935, full Debug/Release1032/9,578,509
+  each and focused compilation-based quality0 new pass.
+  Validation also exposed #218: the dispatch audit omitted owned opcode
+  headers. Its declaration selection is repaired with red/green controls;
+  actual normal/skip audit179 unique targets now has0 errors.
+  These milestones remain local/unpublished; no issue closure is implied.
+  #148 additionally corrects F01099's misleading preload name to the actual
+  actor-cache clear; before/after1/22 controls preserve both room/zone keys.
+  F03463-F03467 now have10 source-backed allocator local/parameter names and
+  accurate native-header-unit descriptions, not an incorrect fixed16-byte
+  alignment promise; before/after Debug/Release heap2/22 and repeat generation
+  pass. These are names/contracts, not allocator or architecture changes.
+  #151 now accounts for every1,001 original ID: latest761 passed/238
+  blocked/2 failed,0 unrun. There are764 prior-or-latest positive proofs,
+  kept distinct from fresh execution; do not replay them routinely.
+  The two failures are known158's correct missing-required-actor guard:
+  profile3 cannot establish Minotaur stage8/scene1/flag187<=1.
+  Actual unchanged preboss/postboss native saves now verify production
+  Continue and physical9/17->12/0/return in both builds: real model53/E222,
+  first-entry gate4050..4267; postboss return3066/control through3900;
+  zero errors/forced skips, no HP/flag/actor edits. Later Debug idle defeat
+  is explicitly not combat success. Original failed fixture rows are unchanged.
+  #167's ACFD image is absent from31 local executables. A distinct private
+  Win32 debugger now fills the16MiB free arena twice withCD before allocator
+  initialization; current scene30 still passes13320/control and13452/teardown,
+  280 confirmations/0 errors. No causal producer fix is established.
+  #18 still requires its separate migration/import/clear/campaign gates;
+  its stale decoder/save audit descriptions are corrected, not retired.
+  A separate source-backed clear-save implementation is actively in progress;
+  do not overwrite its owned Save files or shared copier changes.
+  See [continued acceptance](HANDOFF_HISTORY.md#continued-non-ma-acceptance-2026-10-27).
 - Owner-directed #151 retry optimization now adds `--door-resume
   <sequence-results.json>`. Subsequent fix runs must reuse a checkpoint and
   select the broken case/from point, not replay the132-stage passed prefix.

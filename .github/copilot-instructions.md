@@ -3,7 +3,7 @@
 ## Project Guidelines
 - Never attribute changes to the assistant in commits. Do not add assistant authorship, co-author trailers, signatures, or AI attribution to commit messages or metadata.
 - When about to work on a new feature, do web research to understand how it should work and review any related existing code or documentation.
-
+- Do not treat a verified checkpoints as stopping points; always continue to validate subsequent changes and ensure overall consistencyun until the work is fully integrated and verified across all affected systems.
 ## Architecture and Sources of Truth
 - Follow owner decisions and implementation packages in [NATIVE_SOURCE_PORT_PLAN.md](../Docs/NATIVE_SOURCE_PORT_PLAN.md); use [HANDOFF.md](../Docs/HANDOFF.md) for recent evidence and remaining limits. Historical results are not fresh verification of the current worktree.
 - Keep `resources\rood-reverseWin` and the upstream reference read-only. Native implementations belong in the existing systems; do not include or link reference code from `resources\`.

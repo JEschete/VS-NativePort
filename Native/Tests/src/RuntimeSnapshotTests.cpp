@@ -27,6 +27,7 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
+#include "Actors/Ashley.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Driver/SoundDriver.h"
@@ -43,6 +44,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Boot/GameLoop.h"
 #include "Core/Random.h"
+#include "Ending/ClearResults.h"
 #include "Field/Camera.h"
 #include "Field/Doors.h"
 #include "Field/GameMode.h"
@@ -172,8 +174,8 @@ struct ContentFixture {
     const auto allocation =
         ((room.size() + sector_bytes - 1) / sector_bytes) * sector_bytes;
     Put(zone_bytes, sizeof(zone) + 4, static_cast<std::uint32_t>(allocation));
-    for (const auto name :
-         {"ZONE009.ZND", "ZONE010.ZND", "ZONE011.ZND", "ZONE012.ZND"}) {
+    for (const auto name : {"ZONE001.ZND", "ZONE009.ZND", "ZONE010.ZND",
+                            "ZONE011.ZND", "ZONE012.ZND"}) {
       Write(root / "disc" / "MAP" / name, zone_bytes);
     }
     const std::array<std::uint8_t, 4> model{1, 2, 3, 4};
@@ -184,8 +186,8 @@ struct ContentFixture {
     REQUIRE(manifest.good());
     manifest << "lba\tsize\tform\tpath\n";
     unsigned sector = 100;
-    for (const auto name :
-         {"ZONE009.ZND", "ZONE010.ZND", "ZONE011.ZND", "ZONE012.ZND"}) {
+    for (const auto name : {"ZONE001.ZND", "ZONE009.ZND", "ZONE010.ZND",
+                            "ZONE011.ZND", "ZONE012.ZND"}) {
       manifest << sector++ << '\t' << zone_bytes.size() << "\traw\tMAP/" << name
                << '\n';
     }
@@ -263,6 +265,7 @@ struct RuntimeFixture {
   unsigned frame_random = Battle_Ai_FrameState()->randomState;
   int current_cache = State_currentRoomStateSlot;
   int gameplay = Boot_isGameplayActive;
+  int clear_pending = Boot_isClearSavePending;
   int near_clip = Render_nearClip;
   int projection = Render_projectionDistance;
   int first_person = Field_isFirstPersonViewEnabled;
@@ -565,8 +568,31 @@ struct RuntimeFixture {
     return *result;
   }
 
+  Save::Document ClearGame() {
+    const auto state = Capture();
+    State_ashleySnapshot.stats = state.ashley;
+    State_savedEntryDoor = {};
+    State_savedEntryDoor.entryTileX = 3;
+    State_savedEntryDoor.entryTileZ = 2;
+    State_savedEntryDoor.entryElevation = 1;
+    State_savedEntryDoor.tileLocation.entryDirection = 1;
+    State_savedEntryDoor.requiredFlagId = 37;
+    Input_settings.currentGameSaveCount = 7;
+    Input_settings.cumulativeSaveCount = 19;
+    Input_settings.menuFlags = 0xFFFF;
+    Input_settings.reserved0Bit0 = 8;
+    Ending_CommitClearProgress();
+    Boot_isGameplayActive = 0;
+    Boot_isClearSavePending = 1;
+    const auto document = Save::CaptureClearGame();
+    INFO((document ? "" : document.error()));
+    REQUIRE(document);
+    return *document;
+  }
+
   ~RuntimeFixture() {
     Save::CancelResume();
+    Boot_isClearSavePending = clear_pending;
     Audio_Seq_unusedStateFlags = flags;
     Audio_Seq_unusedInventory = inventory;
     Audio_Seq_unusedInventoryIndices = order;
@@ -1528,4 +1554,126 @@ TEST_CASE("Wrong room or unfinished spawn cannot partially finish a resume",
   CHECK(LiveFingerprint(fixture) == before);
   Save::CancelResume();
   CHECK_FALSE(Save::ResumePending());
+}
+
+TEST_CASE("Ending component capture preserves carryover without live actors",
+          "[save][runtime-snapshot][save-clear]") {
+  RuntimeFixture fixture;
+  const auto document = fixture.ClearGame();
+  CHECK(document.new_game_entry);
+  CHECK(document.state.script_flags[0] == 1);
+  CHECK(document.state.script_flags[1] == 1);
+  CHECK(document.state.script_flags[64] == 0);
+  CHECK(document.state.ashley.currentHp == 123);
+  CHECK(document.state.ashley.currentMp == 31);
+  CHECK(document.state.settings.currentGameSaveCount == 0);
+  CHECK(document.state.settings.cumulativeSaveCount == 19);
+  CHECK(document.state.settings.menuFlags == 0xFFDF);
+  CHECK(document.state.play_ticks == 0);
+  CHECK(document.state.inventory.misc[0].id == 0);
+  CHECK(document.state.inventory_order.misc[0] == 0);
+  CHECK(document.state.inventory.weapons[0].blade == 1);
+  CHECK(document.state.score.completionTimeMinutes == 12 * 60 + 57);
+  CHECK(document.state.arts.kills.totalKills == 1234);
+  CHECK(document.state.learned_actions[0]);
+  // The packed original capture differs deliberately from the now-unavailable
+  // overlay's action-table view.
+  CHECK(document.state.learned_actions[1]);
+  Battle_characterState = nullptr;
+  Battle_actors[0] = nullptr;
+  Actors_actorRecords[0] = nullptr;
+  Field_roomData = {};
+  const auto before = LiveFingerprint(fixture);
+  const auto captured = Save::CaptureClearGame();
+  REQUIRE(captured);
+  CHECK(Save::SameDocument(document, *captured) == true);
+  CHECK(LiveFingerprint(fixture) == before);
+}
+
+TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
+          "[save][runtime-snapshot][save-clear]") {
+  RuntimeFixture fixture;
+  const auto document = fixture.ClearGame();
+  const auto encoded = Save::Encode(document);
+  REQUIRE(encoded);
+  const auto decoded = Save::Decode(*encoded);
+  REQUIRE(decoded);
+  const auto before = LiveFingerprint(fixture);
+  for (int iteration = 0; iteration < 2; ++iteration) {
+    REQUIRE(Save::PrepareResume(*decoded));
+    CHECK(State_savedEntryDoor.destinationZoneId == 1);
+    CHECK(State_savedEntryDoor.entryTileX == 3);
+    CHECK(State_savedEntryDoor.entryTileZ == 2);
+    CHECK(State_savedEntryDoor.tileLocation.entryDirection == 1);
+    CHECK(State_savedEntryDoor.requiredFlagId == 37);
+    CHECK(State_ashleySnapshot.stats.isPending == 1);
+    Save::CancelResume();
+    CHECK_FALSE(Save::ResumePending());
+    CHECK(LiveFingerprint(fixture) == before);
+  }
+  REQUIRE(Save::PrepareResume(*decoded));
+  // Component setup only: the production spawn restoration consumes the
+  // actual persistent Ashley data; this is not an ending playthrough.
+  Actors_RestoreAshleyRuntimeState();
+  CHECK(fixture.player_stats.currentHp == 123);
+  CHECK(fixture.player_stats.currentMp == 31);
+  CHECK(State_ashleySnapshot.stats.isPending == 0);
+  const auto staged = LiveFingerprint(fixture);
+  CHECK_FALSE(
+      Save::FinishResume());  // Old campaign room is not the start room.
+  CHECK(LiveFingerprint(fixture) == staged);
+  Boot_isGameplayActive = 1;
+  Field_zoneContext.zndId = 1;
+  State_recentRoomEnemyStates[0].nextSlot = 5;
+  State_playTime.t.frames = 8;
+  fixture.player_model.instance.position = {77, -88, 99, 0};
+  Field_sphericalCamera.values.yaw = 333;
+  Core_Random_Seed(777);
+  REQUIRE(Save::FinishResume());
+  CHECK_FALSE(Save::ResumePending());
+  CHECK(State_playTime.t.frames == 8);
+  CHECK(fixture.player_model.instance.position.vx == 77);
+  CHECK(fixture.player_model.instance.position.vy == -88);
+  CHECK(Field_sphericalCamera.values.yaw == 333);
+  CHECK(Core_Random_State() == 777);
+  CHECK(State_recentRoomEnemyStates[0].nextSlot == 5);
+  CHECK_FALSE(Save::FinishResume());
+}
+
+TEST_CASE("Original ending advances clear difficulty and saturates its count",
+          "[save][runtime-snapshot][save-clear]") {
+  RuntimeFixture fixture;
+  const auto previous_clears = GENERATE(0, 1, 98, 99);
+  Audio_Seq_unusedStateFlags.clearCount = static_cast<char>(previous_clears);
+  Audio_Seq_unusedStateFlags.difficulty = previous_clears == 0 ? 0 : 1;
+  const auto document = fixture.ClearGame();
+  CHECK(document.state.script_flags[0] == std::min(previous_clears + 1, 99));
+  CHECK(document.state.script_flags[1] == 1);
+  CHECK(document.state.script_flags[2] == (previous_clears == 0 ? 0 : 1));
+  CHECK(document.state.score.clearCount == previous_clears);
+}
+
+TEST_CASE("Clear-game validation rejects unreset state and missing content",
+          "[save][runtime-snapshot][save-clear]") {
+  RuntimeFixture fixture;
+  auto document = fixture.ClearGame();
+  const auto defect = GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8, 9);
+  if (defect == 0) document.state.script_flags[0] = 0;
+  if (defect == 1) document.state.script_flags[64] = 1;
+  if (defect == 2) document.state.settings.currentGameSaveCount = 1;
+  if (defect == 3) document.state.play_ticks = 1;
+  if (defect == 4) document.state.inventory.misc[0].id = 308;
+  if (defect == 5) document.new_game_entry->destinationZoneId = 9;
+  if (defect == 6) document.state.visits.roomFlags[0] = 1;
+  if (defect == 7) {
+    REQUIRE(std::filesystem::remove(fixture.content.root / "disc" / "MAP" /
+                                    "ZONE001.ZND"));
+  }
+  if (defect == 8) document.new_game_entry->entryTileX = 31;
+  if (defect == 9) document.new_game_entry->tileLocation.entryDirection = 2;
+  const auto before = LiveFingerprint(fixture);
+  CHECK_FALSE(Save::ValidateContent(document));
+  CHECK_FALSE(Save::PrepareResume(document));
+  CHECK_FALSE(Save::ResumePending());
+  CHECK(LiveFingerprint(fixture) == before);
 }

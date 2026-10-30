@@ -219,6 +219,17 @@ class EncounterFixupTests(unittest.TestCase):
             )
         )
 
+    def test_title_stages_clear_game_before_consuming_ending_provenance(self):
+        fixups = copy_fixups.FIXES["F03670"]
+        old, new, _ = next(
+            item for item in fixups if "Boot_isClearSavePending = 0;" in item[0]
+        )
+        self.assertIn("Boot_isClearSavePending = 0;", old)
+        self.assertLess(
+            new.index("Save_NativeStageClearGame();"),
+            new.index("Boot_isClearSavePending = 0;"),
+        )
+
     def test_event_dispatch_audit_includes_owned_opcode_headers(self):
         manifest = {
             r"Native\Game\src\Event\ScriptVm.h": "generated",

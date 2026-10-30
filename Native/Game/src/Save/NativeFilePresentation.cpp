@@ -473,9 +473,11 @@ void Stats(const Frontend& frontend, const Snapshot& state, int top) {
       kFourDigitDivisor);
   frontend.Label(AtRow(kClear, top), Menu_Files_FileMenuUiId_Clear);
   frontend.Label(AtRow(kClearColon, top), Menu_Files_FileMenuUiId_Colon);
-  Integer(AtRow(kClearDigits, top),
-          std::min(state.score.clearCount, kMaximumClearCount), kDecimalRadix);
-  if (state.score.clearCount != 0) {
+  // TITLE 22C.c:700 uses the current clear count, not the fastest-run record.
+  const unsigned clears = state.script_flags[0];
+  Integer(AtRow(kClearDigits, top), std::min(clears, kMaximumClearCount),
+          kDecimalRadix);
+  if (clears != 0) {
     frontend.Sprite(AtRow(kClearIcon, top), kClearSprite);
   }
   frontend.HpMp(AtRow(kHp, top), Menu_Files_StatType_HP, state.ashley.currentHp,
@@ -583,6 +585,20 @@ void Confirmation(const Frontend& frontend, bool affirmative) {
 
 std::expected<NativeFileSummary, std::string> DescribeNativeFile(
     const Document& document) {
+  if (document.new_game_entry) {
+    NativeFileSummary summary;
+    constexpr std::string_view kClearName = "CLEAR GAME";
+    for (std::size_t index = 0; index < kClearName.size(); ++index) {
+      const auto c = kClearName[index];
+      summary.room_name[index] = static_cast<char>(
+          c == ' ' ? Core_TextCode_Space : c - 'A' + kGlyphUppercase);
+    }
+    summary.room_name[kClearName.size()] =
+        static_cast<char>(Core_TextCode_Terminator);
+    // F03601 sets saveLocation=0x30, outside the ordinary save-point artwork.
+    summary.location_artwork = -1;
+    return summary;
+  }
   const auto* store = Content::DataStore::Get();
   if (store == nullptr) {
     return std::unexpected("save summary: extracted content is not open");

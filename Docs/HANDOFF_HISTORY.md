@@ -11,6 +11,217 @@ Use [HANDOFF.md](HANDOFF.md) for the current checkpoint and
 Keep the commands, revisions, limits and local evidence paths below; archival
 does not establish fresh verification or authorize deleting the referenced data.
 
+## Continued non-MA acceptance (2026-10-27)
+
+The owner explicitly resumed #151/#167/#18/#148/#149 after the bounded resume
+feature. The following is local dirty-base804d1899 evidence, not publication
+or issue completion. Unrelated deletion of Docs/ENEMY_DATA_SCHEME.md remains
+untouched. Full solution regeneration also reflects that deletion in the
+solution and refreshes existing tool inventory entries; those incidental
+project changes are separate from the scoped gameplay/tool implementation.
+
+### Semantic names and the owned dispatch audit
+
+#148 advances two source-backed batches:
+
+- F03449-F03460:12 vibration functions,31 identifier pairs,208 occurrences.
+  Original source/assembly and existing numerical/device tests establish
+  port/motor indices, pattern ownership, envelopes and Q8 intensity meanings.
+- The existing182-ID normal/skip opcode contract supplies instruction and
+  thread_index parameter meanings (573B8.c:67-142).180 ledger identities
+  cover177 unique native names and353 parameter bindings (347 unique pairs)
+  across16 C/header files. Original literals,
+  numeric/operator/type tokens and unrelated generated files are unchanged.
+  Registered C++ implementations, existing meaningful names and unknown
+  locals remain untouched; no behavior/C++/retirement status is promoted.
+
+Both generator batches are stable on repeat generation. All121 registered
+owned implementation/header paths remain byte-identical to their saved
+pre-batch hashes. Current lexical inventory reports24,835 candidate
+occurrences/2,158 file-identifier pairs/371 files; this is unresolved candidate
+work, not a semantic certification or a mass-rename target.
+
+The actual `tools\port\check_event_dispatch.py` initially fails on unchanged
+owned F01130: Event_ScriptSetAshleyBattleMode is missing from its declaration
+translation unit. #218 records this before repair. The audit previously
+included only copier-manifest headers, which exclude owned headers. It now
+includes registered owned opcode headers while retaining exact canonical ABI,
+all256 normal/skip slots and target-set checks. Missing owned headers fail
+explicitly. Two new selection tests fail before the helper exists and pass
+after repair; the actual audit changes from1 error to0 across179 unique
+canonical target names (182 registered IDs include aliases).
+
+Local naming/audit evidence:
+`build\quality\issue148-vibration-verification.json`,
+`issue148-event-token-verification.json`, `issue148-event-generation*.log`,
+`issue218-red.log`, `issue218-green.log`.
+Commands include two `tools\port\copy_to_native.py` runs, the actual
+`tools\port\check_event_dispatch.py`,123 encounter-fixup tests and32 naming
+tests. Neither #148 nor #218 is closed by this local checkpoint.
+
+### Static original scene inventory
+
+`--catalog-only --scene-catalog` writes the complete static scene inventory
+and revision/worktree/data-root manifest without opening a game window.
+The production opcode-size and dispatch tables drive bounded graph discovery.
+MPD entry/local scripts retain original offsets and all ZND zone/room aliases;
+variable-length trigger tables preserve masks, selectors and unevaluated
+conditions/negation. Both conditional edges, signed forward/backward targets,
+loops and child/parent threads are retained. Dynamic returns and special
+operation prerequisites remain explicitly unresolved. No story flags, HP,
+RNG, script completion or source assets are changed.
+
+Original assets are not conflated:512 MPDs,512 external EVTs,797 SEQ/ESQ
+actor-animation banks and one movie give1,822 unique asset records. There
+are807 indexed and504 empty script definitions,576 triggers,5,444 branch
+edges and30 loop edges. Every playback/precondition status remains unverified:
+static discovery does not demonstrate legitimate campaign setup, audiovisual
+fidelity, every dynamic path or return to player control. Missing/invalid
+sections, instructions or targets are reported in the inventory and cause
+command failure rather than omitted records.
+
+The initial parser incorrectly required a full32-byte trigger-offset table;
+the original evaluator stops at its firstFFFF sentinel. Real short tables
+exposed391 parse errors. Source-backed variable-length reading plus short/
+sentinel/condition regressions now indexes all assets with0 errors.
+This was a new parser assumption, not391 original-content defects.
+
+Actual catalog runs Debug1793100216430604-0, Release1793100223189335-0 and
+repeated Debug1793100227491059-0 produce identical inventory SHA256
+FD2B479A0D2D28B14F0C966DE13FF7C2B1F17B93A5C5E436B18390C26105A494.
+Exact command: `VS.CombatLab.exe --data <absolute Native\data>
+--catalog-only --scene-catalog`. Local verification:
+`build\quality\issue149-scene-inventory-verified.json`.
+
+Parser tests8/39; optional full-disc scene/door tests2/46,935 assertions in
+both configurations, with repeat output equality. Full Debug/Release each
+1032/9,578,509 pass after the naming changes. Focused `quality-native.cmd
+--files` covers SceneCatalog.cpp, main.cpp, SceneCatalogTests.cpp,
+VibrationTests.cpp, copy_fixups.py, test_encounter_fixups.py,
+check_event_dispatch.py and gen_solution.py with `--tidy`:0 findings/0 new,
+unchanged baselines. This is focused compilation-based quality, not a new
+whole-tree static-analysis certification.
+
+### Continuing door frontier and remaining limits
+
+The frozen Debug52B374E0174BE753382ECB8D9AE4EAC17BB53E7CE68CD9B975DD0CDE2A2CBFD9
+image retains the earlier96 passes, then executes only new frontier records
+with --door-resume, --frames36000, --speed64 and private saves:
+
+-1793097750475420-0:12 selected,10 passed/2 fixture-defeat blocks,0 errors.
+-1793097911107060-0:100 selected,74 passed/26 blocked,0 errors.25 blocks
+  are real fixture defeats; z048-r022-d003 has unavailable destination0/255.
+-1793099116963801-0:100 selected,74 passed/26 fixture-defeat blocks,0 errors.
+
+All212 records reach explicit outcomes/teardown, not fresh passes for the
+retained history. The next forward-tail batch carries254 passes and selects
+the remaining new tail. It subsequently completes197 records:144 passed/
+53 blocked/0 errors in1793100327166692-0. Exit2 for
+genuine blocks is not a crash, nor a passed physical/story gate. Evidence is
+under `build\quality\issue151-frontier-20261027` and the frozen runner's
+`combat-lab\runs` directory. Do not rerun these passed prefixes after repairs.
+
+A fresh hash scan of31 local frozen executables finds no original #167 ACFD
+image. Existing exact-state clean Debug/Release history does not identify a
+causal malformed-packet producer; #167 remains open. #18's source audit now
+accurately distinguishes working AV1/FLAC decoding and initial schema3 native
+persistence from still-open import/migration/clear-save/campaign/compatibility
+retirement gates. No local component or inventory result closes those gates.
+
+### Completed all-record reconciliation and actual prerequisites
+
+The final earlier-prefix run1793102211628943-0 preserves403 actual older
+Debug proofs, validated by the native planner, and executes only458
+never-passed earlier IDs. It completes361 passed/95 blocked/2 failed,
+with complete teardown and no unrun rows. Reconciled exact IDs cover all
+1,001 originals (1,003 observations include two deliberate repeat observations):
+latest761 passed/238 blocked/2 failed. There are764 distinct prior-or-latest
+positive proofs. Earlier passes for z040-r014-d003/z040-r008-d001/
+z040-r009-d005 also have later blocked rows; neither fact is concealed or
+relabeled fresh. Full local report:
+`build\quality\issue151-frontier-20261027\all-door-observations.json`.
+
+Both failed rows (z009-r017-d003/z012-r000-d000) stop on closed#158's explicit
+E222/model53 missing-binding diagnostic at12/0/event0/source1/PC143; only
+Ashley is present. Original MAP026 placement requires flag130=8,
+scene flag1=1 and flag187<=1. The fixed post-prologue fixture establishes3,
+not8. There is no evidence of a new spawning defect, and no fabricated actor,
+changed flag, effect skip or weakened acceptance is used to suppress it.
+
+Existing owner native saves provide actual source-aligned states without
+editing their contents: slot01 backup generation1 has8/1/1 for130/1/187;
+primary generation2 has10/1/2. Copies are private; original hashes are
+755961a8bd2c193c5fae5b01d6a35ef654636d702eb901ace5deeea5448417ef
+and dda977497fd0bdf9e7cf3bc52cc85509546a3f4e622e7d6f53588f3ee07e3946.
+These establish the documented component preconditions, not a newly verified
+full-story campaign.
+
+Production Continue uses real1000:Start,1300:Circle,1450:Circle,1510:Up,
+1570:Circle inputs. Preboss movement is Up2100..2114,Right2140..2206,
+Cross2240,Right2300..2329; scripts hold each entry3 ticks. Cross opens the
+door, then movement actually traverses it. Debug1793120300950490-0 and
+Release1793121146016243-0 both restore1610, enter12/0 at2388 with model53,
+play the original E222 entry, restore control3768, and hold the unchanged
+quiet predicate4050..4267 with0 errors/forced skips. Release stops4300/
+HP149. Debug continues6000 and later dies idle; no combat victory is claimed.
+
+Postboss movement is Up+Right2100..2116,Down+Right2140..2210,Cross2250,
+Down+Right2320..2349,Up+Left2850..2873,Cross2920,Up+Left2980..3019.
+Debug1793120889832308-0 and Release1793121158151381-0 both restore1615,
+enter12/0 at2402, physically return9/17 at3066 and retain normal control
+3104..3900 with0 errors/forced skips and HP250. Initial camera yaw512 is
+why these real diagonal inputs differ from the preboss yaw1024 route.
+No live position/HP/story/event writes occur. Local strict report:
+`build\quality\issue151-minotaur-legit\physical-door-source-preconditions-verified.json`.
+
+### Additional semantic contracts and independent packet experiment
+
+F01099 originally named ScriptPreloadRoom actually calls8007BBB8, then
+80069DEC (main cached-actor-state clear). It is now
+Event::ScriptClearRoomActorCache, with the original symbol/address retained.
+F00231's parameters are mapId/zoneId. Exact expected-output comparison
+restricts generation to one symbol rename and two wrapper parameters across
+six generated files; both generations are stable and121 owned paths stay
+unchanged. Native before/after1 case/22 assertions verify matching and
+nonmatching rooms/zones, duplicate cache entries, unchanged current slot,
+idempotence and absent-cache no-op.
+
+F03463-F03467 separately rename10 allocator bindings for insertion predecessor,
+following free block, selected allocation, remainder, native allocation units
+and arena byte extent. No arithmetic, width, link/reset order or behavior
+changes. The earlier purpose text incorrectly promised16-byte alignment;
+native blocks use sizeof(Core_HeapBlockHeader), which is24 bytes on this host.
+Before/after Debug/Release heap2/22 controls splitting/coalescing from both
+ends and verifies payloads are not implicitly zeroed. Exact two-file output
+comparison and stable second generation preserve all121 owned paths.
+Evidence: `issue148-room-name-verification.json`, `issue148-heap-verification.json`
+and corresponding generation/test logs under ignored build\quality.
+
+A distinct #167 experiment avoids guessing from the unavailable old image.
+The installed LLDB driver lacks python311.dll and then liblldb.dll; a private
+signed Python runtime resolves the first dependency, not the absent backend.
+No installed tool or global environment is modified. An ignored native Win32
+debugger is built instead, resolves the matching frozen PDB's real heap-init
+RVA3BF800, and fills only the complete free arena before its initializer runs.
+It does not edit an active actor, HP, flags, event state or completion.
+Debug41300/session1793119680872832-0 fills16MiB twice withCD and still
+completes the full current scene chain: control13320/pass gate13440/
+teardown13452,280 confirmations/0 errors. This is allocator-stress evidence,
+not normal gameplay certification or a causal historical #167 fix.
+Private harness/logs are under `build\quality\issue167-debugger` and
+`issue167-allocator-Debug`; no dumps or source assets are attached/committed.
+
+Final static inventory also annotates102 chained-event and443 room-handoff
+commands, preserving signed event IDs, current-zone0 versus explicit zones,
+all entry coordinates/flags and transition effect/speed. Parser12/50 and
+optional scene/door/cache3/46,957 pass; all1,822 assets parse with0 errors.
+Debug inventory1793121459722536-0 SHA256 is
+C3CB9272E0F86E9A23605D83C4D7D31E3BD36D68C4177A031D14CE8450C1B045.
+It supersedes the earlier static output hash only for the added semantic links.
+Full Debug/Release before the two added heap cases each1037/9,578,542 pass;
+125 copier controls and default/focused quality gates have0 new findings
+(the selected EventScriptTestCases file retains6 existing findings).
+
 ## Passed-stage checkpoint resume (2026-10-26)
 
 Owner observed that retrying an entire132-case prefix after each fix wastes

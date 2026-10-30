@@ -77,6 +77,7 @@
     <None Include="..\..\naming\make_symbol_batches.py" />
     <None Include="..\..\naming\merge_names.py" />
     <None Include="..\..\naming\merge_symbols.py" />
+    <None Include="..\..\naming\native_symbol_inventory.py" />
     <None Include="..\..\naming\out\BATTLE_01.csv" />
     <None Include="..\..\naming\out\BATTLE_02.csv" />
     <None Include="..\..\naming\out\BATTLE_03.csv" />
@@ -302,6 +303,8 @@
     <None Include="..\..\naming\sym_out\Shared\globals.csv" />
     <None Include="..\..\naming\sym_out\Shared\types.csv" />
     <None Include="..\..\naming\test_merge_symbols.py" />
+    <None Include="..\..\naming\test_native_symbol_inventory.py" />
+    <None Include="..\..\naming\test_sym_gen.py" />
     <None Include="..\..\naming\trace_queue.py" />
     <None Include="..\..\naming\upstream_layout.py" />
     <None Include="..\..\naming\upstream_prs.py" />
@@ -326,6 +329,7 @@
     <None Include="..\..\port\ref_index.py" />
     <None Include="..\..\port\test_assembly_gap_audit.py" />
     <None Include="..\..\port\test_encounter_fixups.py" />
+    <None Include="..\..\port\test_scene_trace_fixups.py" />
     <None Include="..\..\port\understood.py" />
     <None Include="..\..\Probe-Native.ps1" />
     <None Include="..\..\PSX\Asset-Tools\jpsxdec\.github\ISSUE_TEMPLATE\config.yml" />
@@ -1454,6 +1458,9 @@
     <None Include="..\..\test\duckstation_capture.ps1" />
     <None Include="..\..\test\duckstation_setup.ps1" />
     <None Include="..\..\test\run_native.ps1" />
+    <None Include="..\..\test\scenarios\first_lever_handoff.json" />
+    <None Include="..\..\test\scenarios\first_lever_room.json" />
+    <None Include="..\..\test\verify_first_lever.py" />
     <None Include="..\..\vcpkg\ports\sfizz\portfile.cmake" />
     <None Include="..\..\vcpkg\ports\sfizz\vcpkg.json" />
     <None Include="..\..\windows.py" />

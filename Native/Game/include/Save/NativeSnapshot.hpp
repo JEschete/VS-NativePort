@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <expected>
+#include <optional>
 #include <string>
 #include <string_view>
 
@@ -11,6 +12,7 @@
 
 extern "C" {
 #include "Actors/RoomActorCache.h"
+#include "Field/Mpd.h"
 #include "Items/Inventory.h"
 #include "State/Ashley.h"
 #include "State/Progress.h"
@@ -26,6 +28,8 @@ inline constexpr std::size_t kRandomShuffleEntries = 97;
 inline constexpr std::size_t kScriptFlagBytes = 0x440;
 inline constexpr std::size_t kLearnedActionCount = 256;
 inline constexpr std::size_t kCachedRooms = 4;
+// F03601 TITLE 80069cbc clears 0x100 bytes, not all container consumables.
+inline constexpr std::size_t kClearContainerResetStacks = 64;
 
 struct TileAddress {
   std::uint8_t x = 0;
@@ -105,6 +109,9 @@ struct Document {
   std::uint64_t generation = 0;
   std::uint64_t saved_unix_ms = 0;
   Snapshot state{};
+  // TITLE clear saves restart through the original door/spawn contract, not
+  // a captured field position. Schema3 checkpoints have no such entry.
+  std::optional<Field_MpdDoorRecord> new_game_entry{};
 };
 
 std::expected<std::string, std::string> Encode(const Document& document);

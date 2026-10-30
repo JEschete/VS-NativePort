@@ -20,10 +20,19 @@ std::expected<Snapshot, std::string> Capture(
 // No application/mutation. Requires stable DataStore and module-table lifetime;
 // concurrent DataStore::Open or module initialization is not synchronized here.
 std::expected<void, std::string> ValidateContent(const Snapshot& state);
+std::expected<void, std::string> ValidateContent(const Document& document);
+
+// TITLE 22C.c:616, after ENDING D4.c:1502 and the original Ashley capture.
+// Uses only persistent values; never follows actors left by the ending overlay.
+// Storage ownership remains per native file. No campaign completion is forged.
+std::expected<Document, std::string> CaptureClearGame();
 
 // After confirmation, before the C-only boot transition. Stages an owned copy
 // and installs the persistent inputs consumed by the original boot/spawn code.
 // Container ownership remains with the caller's per-file session manager.
+// Schema4 clear-game documents install their original entry door and persistent
+// carryover. They use natural starting-room placement/camera/RNG, not schema3's
+// checkpoint finalization. Cancellation restores either kind of staged input.
 std::expected<void, std::string> PrepareResume(const Document& document);
 bool ResumePending();
 // Also call on reset, return to title, shutdown and an abandoned boot. Restores

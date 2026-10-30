@@ -55,6 +55,7 @@ struct Picker {
   bool title = false;
   bool save = false;
   bool container = false;
+  bool clear_game = false;
   bool select_container = false;
   bool yes = false;
   bool ready = false;
@@ -71,8 +72,14 @@ Picker picker;
 std::optional<std::filesystem::path> directory;
 std::optional<Files> files;
 std::optional<Items_ContainerData> staged_storage;
+std::optional<Document> staged_clear;
 int last_slot = 0;
 std::array<char, kFooterTextLimit + 1> footer{};
+
+std::string& ClearError() {
+  static std::string error;
+  return error;
+}
 
 bool BankEmpty(const Items_ContainerData& bank) {
   const auto empty = [](const auto& item) { return item.id == 0; };
@@ -272,10 +279,10 @@ std::optional<FileInfo> ReadConfirmedSelection(const FileInfo& selected) {
 std::expected<void, std::string> WriteCurrent() {
   const auto opened = OpenFiles();
   if (!opened) return std::unexpected(opened.error());
-  if (!Boot_isGameplayActive) {
+  if (!picker.clear_game && !Boot_isGameplayActive) {
     return std::unexpected("No active gameplay checkpoint");
   }
-  if (!picker.container &&
+  if (!picker.clear_game && !picker.container &&
       (!Field_CurrentSavePointId() || Audio_Seq_unusedStateFlags.opaqueA7)) {
     return std::unexpected("Saving is available only at an enabled save point");
   }
@@ -289,19 +296,34 @@ std::expected<void, std::string> WriteCurrent() {
   } else if (selected.document) {
     bank = selected.document->state.storage;
   }
-  auto state = Capture(bank);
-  if (!state) return std::unexpected(state.error());
-  state->settings.containerEmpty = BankEmpty(bank);
-  if (state->settings.saveFileGeneration ==
+  Document document;
+  if (picker.clear_game) {
+    if (!staged_clear) {
+      return std::unexpected("No staged original ending clear save");
+    }
+    document = *staged_clear;
+    // F03601 TITLE 22C.c:698 preserves the source's partial container reset.
+    std::fill_n(std::begin(bank.misc), kClearContainerResetStacks,
+                Items_InventoryMisc{});
+    document.state.storage = bank;
+  } else {
+    auto captured = Capture(bank);
+    if (!captured) return std::unexpected(captured.error());
+    document.state = std::move(*captured);
+  }
+  auto& state = document.state;
+  state.settings.containerEmpty = BankEmpty(bank);
+  if (state.settings.saveFileGeneration ==
       std::numeric_limits<std::uint32_t>::max()) {
     return std::unexpected("Save generation has reached its limit");
   }
-  ++state->settings.saveFileGeneration;
-  if (state->settings.cumulativeSaveCount < kSaveCountLimit) {
-    ++state->settings.cumulativeSaveCount;
+  ++state.settings.saveFileGeneration;
+  if (state.settings.cumulativeSaveCount < kSaveCountLimit) {
+    ++state.settings.cumulativeSaveCount;
   }
-  if (state->settings.currentGameSaveCount < kSaveCountLimit) {
-    ++state->settings.currentGameSaveCount;
+  if (!picker.clear_game &&
+      state.settings.currentGameSaveCount < kSaveCountLimit) {
+    ++state.settings.currentGameSaveCount;
   }
   const auto previous = selected.document ? selected.document->generation : 0;
   if (previous == std::numeric_limits<std::uint64_t>::max()) {
@@ -311,8 +333,8 @@ std::expected<void, std::string> WriteCurrent() {
                        std::chrono::system_clock::now().time_since_epoch())
                        .count();
   if (now < 0) return std::unexpected("System clock precedes the save epoch");
-  Document document{previous + 1, static_cast<std::uint64_t>(now),
-                    std::move(*state)};
+  document.generation = previous + 1;
+  document.saved_unix_ms = static_cast<std::uint64_t>(now);
   const auto summary = DescribeNativeFile(document);
   if (!summary) return std::unexpected(summary.error());
   const auto consent = selected.status == FileStatus::kRecovered
@@ -548,9 +570,10 @@ int Update(int init, bool save, bool title, bool select_container = false) {
 int ClearSave(int init) {
   if (init) {
     Begin(init, true, true, false);
-    Notice("Native clear save unavailable", {}, -1);
-    VS_LOG_WARN("save",
-                "Clear-save conversion is not implemented; no files changed");
+    picker.clear_game = true;
+    if (!staged_clear) {
+      Notice("No ending clear save available", ClearError(), -1);
+    }
     return 0;
   }
   return Update(0, true, true);
@@ -569,6 +592,8 @@ void ConfigureDirectory(std::filesystem::path root) {
 void ResetFileMenuSession() {
   picker = {};
   staged_storage.reset();
+  staged_clear.reset();
+  ClearError().clear();
   last_slot = 0;
   if (Title_memoryCardMessage == footer.data()) {
     Title_memoryCardMessage = nullptr;
@@ -661,4 +686,19 @@ extern "C" Items_ContainerData* Save_NativeContainerData(void) {
 
 extern "C" void Save_NativeReleaseContainer(void) {
   VS::Game::Save::staged_storage.reset();
+}
+
+extern "C" void Save_NativeStageClearGame(void) {
+  namespace Save = VS::Game::Save;
+  Save::staged_clear.reset();
+  Save::ClearError().clear();
+  auto document = Save::CaptureClearGame();
+  if (!document) {
+    Save::ClearError() = document.error();
+    VS_LOG_ERROR("save", "Cannot stage ending clear save: {}",
+                 document.error());
+    return;
+  }
+  Save::staged_clear = std::move(*document);
+  VS_LOG_INFO("save", "Staged original ending clear save");
 }

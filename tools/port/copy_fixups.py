@@ -1815,6 +1815,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "22C.c:4698 New Game abandons any staged native resume"),
     ],
     "F03670": [
+        ("        Boot_isClearSavePending = 0;",
+         "        Save_NativeStageClearGame();\n"
+         "        Boot_isClearSavePending = 0;",
+         "22C.c:4508 stage original ending inputs before consuming clear-save provenance"),
         ("    menuItem = Save_MemoryCard_AnySaveFileExists();",
          "    menuItem = Save_NativeInitialTitleSelection();",
          "22C.c:4491 choose title focus from native slots without probing card BIOS"),

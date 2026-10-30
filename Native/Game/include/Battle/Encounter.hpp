@@ -17,6 +17,8 @@ struct EncounterLimits {
   static constexpr int kEnemyIdEnd = 127;
   static constexpr int kLastZone = 255;
   static constexpr int kLastExternalEvent = 9999;
+  // MPD local event table: 16 short offsets (Event_roomDoorEventData).
+  static constexpr int kLastRoomLocalEvent = 15;
   // Last index of the original 200-entry music -> wave bank map.
   static constexpr int kLastMusic = 199;
   static constexpr int kStatusTimers = 8;
@@ -145,6 +147,10 @@ struct EncounterSetup {
   EncounterWeapon weapon = EncounterWeapon::kDefault;
   EncounterRoomPolicy room_policy = EncounterRoomPolicy::kIsolatedCombat;
   std::optional<int> external_event;
+  // Room-local scene selector (0..15) started once at the first free-control
+  // frame in the configured production room, as a room trigger would queue it,
+  // without evaluating that trigger's gameplay conditions.
+  std::optional<int> room_local_event;
   // Declared campaign story-progress value (script flag 0x82), applied after
   // New Game initialization and before the first room load.
   std::optional<int> story_progress;

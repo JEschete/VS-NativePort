@@ -775,6 +775,32 @@ TEST_CASE(
   CHECK(ValidateEncounter(setup, TestZone()).empty());
 }
 
+TEST_CASE("Room-local event selectors require production room events",
+          "[combat][encounter][event-component]") {
+  auto setup = TestSetup(0);
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kOriginalRoom;
+  setup.enemies.clear();
+  setup.room_local_event = 3;
+  REQUIRE(ValidateEncounter(setup, TestZone()).empty());
+  const auto encoded = VS::combat_lab::EncodeSetup(setup);
+  CHECK(encoded.at("room_local_event") == 3);
+  CHECK(VS::combat_lab::DecodeSetup(encoded).room_local_event == 3);
+  for (const auto& invalid :
+       {nlohmann::json(-1), nlohmann::json(16), nlohmann::json("3")}) {
+    auto preset = encoded;
+    preset["room_local_event"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(preset));
+  }
+  auto isolated = encoded;
+  isolated["room_events"] = "isolated";
+  CHECK_THROWS(VS::combat_lab::DecodeSetup(isolated));
+  setup.room_local_event = 16;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  setup.room_local_event = 0;
+  setup.room_policy = VS::Game::EncounterRoomPolicy::kIsolatedCombat;
+  CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+}
+
 TEST_CASE("External event preset numbers are explicit integers",
           "[combat][encounter][event-component]") {
   auto preset = VS::combat_lab::EncodeSetup(TestSetup(0));

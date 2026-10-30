@@ -30,6 +30,7 @@ using Json = nlohmann::json;
 constexpr std::string_view kFormat = "vs-nativeport-save";
 constexpr std::string_view kSource = "SLUS-01040";
 constexpr std::uint32_t kVersion = 3;
+constexpr std::uint32_t kClearVersion = 4;
 constexpr int kMaximumDepth = 64;
 constexpr unsigned kWordBits = 32;
 constexpr std::int32_t kMaximumAngle = 4095;
@@ -453,6 +454,35 @@ void Fields(State_SceneTimer& r, V&& v) {
 }
 
 template <class V>
+void Fields(Field_MpdDoorRecord& r, V&& v) {
+#define VS_SAVE_DOOR_BITS(key, field, mask)          \
+  {                                                  \
+    Bits bits{static_cast<unsigned>(r.field), mask}; \
+    v(key, bits);                                    \
+    r.field = static_cast<u_short>(bits.value);      \
+  }
+  v("zone", r.destinationZoneId);
+  v("room", r.destinationRoomId);
+  VS_SAVE_DOOR_BITS("tile_x", tileLocation.tileX, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("tile_z", tileLocation.tileZ, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("floor_layer", tileLocation.floorLayer, kThreeBitMask);
+  VS_SAVE_DOOR_BITS("entry_direction", tileLocation.entryDirection,
+                    kThreeBitMask);
+  VS_SAVE_DOOR_BITS("required_flag_value", requiredFlagValue, 255);
+  VS_SAVE_DOOR_BITS("entry_tile_x", entryTileX, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("entry_elevation", entryElevation, kTwoBitMask);
+  VS_SAVE_DOOR_BITS("has_entry_step", hasEntryStep, 1);
+  VS_SAVE_DOOR_BITS("required_flag_id", requiredFlagId, kMaximumSceneId);
+  VS_SAVE_DOOR_BITS("entry_tile_z", entryTileZ, kFiveBitMask);
+  VS_SAVE_DOOR_BITS("reserved_bit", reserved06Bit15, 1);
+  v("door_id", r.doorId);
+  v("reserved_09", r.reserved09);
+  v("reserved_0a", r.reserved0A);
+  v("reserved_0b", r.reserved0B);
+#undef VS_SAVE_DOOR_BITS
+}
+
+template <class V>
 void Fields(Snapshot& r, V&& v) {
   v("script_flags", r.script_flags);
   IdSet learned{
@@ -721,6 +751,11 @@ std::expected<void, std::string> ValidateModel(const Document& document) {
   if (document.saved_unix_ms > kMaximumUnixMilliseconds) {
     return std::unexpected("/saved_unix_ms: timestamp is beyond year 9999");
   }
+  if (document.new_game_entry &&
+      (document.new_game_entry->destinationZoneId != 1 ||
+       document.new_game_entry->destinationRoomId != 0)) {
+    return std::unexpected("/new_game_entry: expected the original start room");
+  }
   if (state.location.zone == 0 || state.location.zone > kMaximumLocationId ||
       state.location.room > kMaximumLocationId ||
       state.location.scene > kMaximumSceneId || state.location.facing < 0 ||
@@ -758,9 +793,9 @@ std::expected<Json, std::string> ReadEnvelope(std::string_view data) {
   constexpr std::array kKeys{"format",     "version",       "source_game",
                              "generation", "saved_unix_ms", "state",
                              "checksum"};
-  if (!document->is_object() || document->size() != kKeys.size() ||
-      std::ranges::any_of(kKeys,
-                          [&](auto key) { return !document->contains(key); })) {
+  if (!document->is_object() || std::ranges::any_of(kKeys, [&](auto key) {
+        return !document->contains(key);
+      })) {
     return std::unexpected("/: incorrect save envelope fields");
   }
   if (!(*document)["format"].is_string() ||
@@ -773,8 +808,13 @@ std::expected<Json, std::string> ReadEnvelope(std::string_view data) {
   Reader reader;
   reader.Read((*document)["version"], version, "/version");
   if (!reader.Good()) return std::unexpected(reader.Error());
-  if (version != kVersion) {
+  if (version != kVersion && version != kClearVersion) {
     return std::unexpected("/version: unsupported version");
+  }
+  const bool clear = version == kClearVersion;
+  if (document->size() != kKeys.size() + (clear ? 1 : 0) ||
+      document->contains("new_game_entry") != clear) {
+    return std::unexpected("/: incorrect save envelope fields");
   }
   const auto checksum = document->find("checksum");
   if (!checksum->is_string()) {
@@ -793,11 +833,14 @@ std::expected<std::string, std::string> Encode(const Document& document) {
   const auto valid = ValidateModel(document);
   if (!valid) return std::unexpected(valid.error());
   Json encoded{{"format", kFormat},
-               {"version", kVersion},
+               {"version", document.new_game_entry ? kClearVersion : kVersion},
                {"source_game", kSource},
                {"generation", document.generation},
                {"saved_unix_ms", document.saved_unix_ms},
                {"state", EncodeValue(document.state)}};
+  if (document.new_game_entry) {
+    encoded["new_game_entry"] = EncodeValue(*document.new_game_entry);
+  }
   encoded["checksum"] = Checksum(encoded);
   auto text = encoded.dump(2);
   const auto checked = Decode(text);
@@ -814,6 +857,11 @@ std::expected<Document, std::string> Decode(std::string_view data) {
   reader.Read((*encoded)["saved_unix_ms"], document.saved_unix_ms,
               "/saved_unix_ms");
   reader.Read((*encoded)["state"], document.state, "/state");
+  if ((*encoded)["version"] == kClearVersion) {
+    document.new_game_entry.emplace();
+    reader.Read((*encoded)["new_game_entry"], *document.new_game_entry,
+                "/new_game_entry");
+  }
   if (!reader.Good()) return std::unexpected(reader.Error());
   const auto valid = ValidateModel(document);
   if (!valid) return std::unexpected(valid.error());
@@ -833,7 +881,12 @@ std::expected<bool, std::string> SameDocument(const Document& before,
   const auto current_valid = ValidateModel(current);
   if (!current_valid) return std::unexpected(current_valid.error());
   if (before.generation != current.generation ||
-      before.saved_unix_ms != current.saved_unix_ms) {
+      before.saved_unix_ms != current.saved_unix_ms ||
+      before.new_game_entry.has_value() != current.new_game_entry.has_value()) {
+    return false;
+  }
+  if (before.new_game_entry && EncodeValue(*before.new_game_entry) !=
+                                   EncodeValue(*current.new_game_entry)) {
     return false;
   }
   return EncodeValue(before.state) == EncodeValue(current.state);

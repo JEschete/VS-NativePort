@@ -16,7 +16,7 @@ std::expected<Document, std::string> DecodeFile(std::string_view data) {
   auto document = Decode(data);
   const auto decoded = std::chrono::steady_clock::now();
   if (!document) return std::unexpected(document.error());
-  const auto valid = ValidateContent(document->state);
+  const auto valid = ValidateContent(*document);
   const auto finished = std::chrono::steady_clock::now();
   VS_LOG_DEBUG(
       "save.perf", "Validate bytes={} decode_us={} content_us={} valid={}",
@@ -96,7 +96,7 @@ std::expected<FileInfo, std::string> Files::Inspect(int slot) const {
 
 std::expected<void, std::string> Files::Write(
     int slot, const Document& document, VS::Save::WriteConsent consent) const {
-  const auto valid = ValidateContent(document.state);
+  const auto valid = ValidateContent(document);
   if (!valid) return std::unexpected(valid.error());
   const auto encoded = Encode(document);
   if (!encoded) return std::unexpected(encoded.error());

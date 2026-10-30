@@ -102,6 +102,8 @@ constexpr unsigned kStereoCommand = 0x80;
 constexpr unsigned kMonoCommand = 0x81;
 constexpr unsigned kMonoOutput = 2;
 constexpr unsigned kOutputModeMask = 3;
+constexpr unsigned kClearMenuFlag = 0x20;
+constexpr unsigned kPuzzleSettingShift = 3;
 enum CategoryBoundary {
   kBladeEnd,
   kGripEnd,
@@ -126,11 +128,13 @@ struct PersistentInputs {
   std::array<char, std::size(State_learnedActionFlags)> learned;
   decltype(Snapshot::learned_actions) unlocked;
   std::uint32_t mix_behavior = 0;
+  decltype(State_playTime) play_time{};
 };
 
 struct PendingResume {
   Snapshot state;
   PersistentInputs previous;
+  bool new_game = false;
 };
 
 std::optional<PendingResume> pending;
@@ -869,14 +873,18 @@ void ApplyCaches(const Snapshot& source) {
   }
 }
 
-void CapturePersistent(Snapshot& state) {
+void CapturePersistent(Snapshot& state, bool packed_actions = false) {
   for (std::size_t index = 0; index < state.script_flags.size(); ++index) {
     state.script_flags[index] = static_cast<unsigned char>(
         State_ScriptFlag(static_cast<std::int16_t>(index)));
   }
   for (std::size_t index = 0; index < state.learned_actions.size(); ++index) {
     state.learned_actions[index] =
-        Battle_actionDefinitions[index].unlocked != 0;
+        packed_actions
+            ? (static_cast<unsigned char>(
+                   State_learnedActionFlags[index / kLearnedBitsPerByte]) &
+               (kLearnedFirstBit >> (index % kLearnedBitsPerByte))) != 0
+            : Battle_actionDefinitions[index].unlocked != 0;
   }
   state.inventory = Audio_Seq_unusedInventory;
   state.inventory_order = Audio_Seq_unusedInventoryIndices;
@@ -1245,13 +1253,19 @@ Result ValidateCaptureBoundary(const Actors_ActorRecord& actor) {
 }
 }  // namespace
 
-std::expected<void, std::string> ValidateContent(const Snapshot& state) {
+namespace {
+Result ValidateContentImpl(const Snapshot& state,
+                           const Field_MpdDoorRecord* new_game = nullptr) {
   auto valid = ValidateRuntimeValues(state);
   if (!valid) return valid;
-  valid = ValidateOrbitCamera(state);
-  if (!valid) return valid;
+  if (!new_game) {
+    valid = ValidateOrbitCamera(state);
+    if (!valid) return valid;
+  }
   const auto* store = Content::DataStore::Get();
-  if (store == nullptr) return std::unexpected("extracted content is not open");
+  if (store == nullptr) {
+    return std::unexpected("extracted content is not open");
+  }
   const auto bounds = ReadCategoryBounds(*store);
   if (!bounds) return std::unexpected(bounds.error());
   valid = ValidateInventory(state, *bounds);
@@ -1260,12 +1274,21 @@ std::expected<void, std::string> ValidateContent(const Snapshot& state) {
   if (!valid) return valid;
   const auto room = ReadRoom(*store, state.location.zone, state.location.room);
   if (!room) return std::unexpected(room.error());
-  valid = ValidateLocation(state.location, *room);
-  if (!valid) return valid;
-  const auto& current_cache = state.room_cache[state.room_cache_slot];
-  if (current_cache.recency == 0 || current_cache.zone != state.location.zone ||
-      current_cache.map != state.location.room) {
-    return std::unexpected("current cache does not identify the saved room");
+  if (new_game && (new_game->entryTileX >= room->collision.width ||
+                   new_game->entryTileZ >= room->collision.height ||
+                   new_game->tileLocation.entryDirection > 1)) {
+    return std::unexpected(
+        "clear-game entry requires an in-bounds static starting-room tile");
+  }
+  if (!new_game) {
+    valid = ValidateLocation(state.location, *room);
+    if (!valid) return valid;
+    const auto& current_cache = state.room_cache[state.room_cache_slot];
+    if (current_cache.recency == 0 ||
+        current_cache.zone != state.location.zone ||
+        current_cache.map != state.location.room) {
+      return std::unexpected("current cache does not identify the saved room");
+    }
   }
   std::set<std::pair<unsigned, unsigned>> cached_rooms;
   for (const auto& cache : state.room_cache) {
@@ -1301,6 +1324,84 @@ std::expected<void, std::string> ValidateContent(const Snapshot& state) {
     }
   }
   return {};
+}
+}  // namespace
+
+std::expected<void, std::string> ValidateContent(const Snapshot& state) {
+  return ValidateContentImpl(state);
+}
+
+std::expected<void, std::string> ValidateContent(const Document& document) {
+  if (!document.new_game_entry) return ValidateContent(document.state);
+  const auto& state = document.state;
+  const auto& entry = *document.new_game_entry;
+  constexpr auto kPuzzleMode = offsetof(State_StateFlags, puzzleMode);
+  constexpr auto kCampaignFlags = 0x10;
+  constexpr auto kMaximumClears = 99;
+  // ENDING resets 0x10..0x43f. TITLE sets only puzzleMode after that reset.
+  if (state.script_flags[0] == 0 || state.script_flags[0] > kMaximumClears ||
+      state.script_flags[1] != 1 || state.script_flags[2] > 1 ||
+      state.play_ticks != 0 || state.settings.currentGameSaveCount != 0 ||
+      (state.settings.menuFlags & kClearMenuFlag) != 0 ||
+      state.script_flags[kPuzzleMode] !=
+          ((~(state.settings.reserved0Bit0 >> kPuzzleSettingShift)) & 1) ||
+      entry.destinationZoneId != 1 || entry.destinationRoomId != 0 ||
+      state.location.zone != 1 || state.location.room != 0) {
+    return std::unexpected("invalid original clear-game restart state");
+  }
+  for (std::size_t index = kCampaignFlags; index < state.script_flags.size();
+       ++index) {
+    if (index != kPuzzleMode && state.script_flags[index] != 0) {
+      return std::unexpected("clear game retains per-campaign script flags");
+    }
+  }
+  const auto has_misc = [](const auto& item) { return item.id != 0; };
+  if (std::ranges::any_of(state.inventory.misc, has_misc) ||
+      std::ranges::any_of(state.inventory_order.misc,
+                          [](auto value) { return value != 0; }) ||
+      std::ranges::any_of(
+          std::span(state.storage.misc).first(kClearContainerResetStacks),
+          has_misc) ||
+      std::ranges::any_of(state.visits.roomFlags,
+                          [](auto value) { return value != 0; }) ||
+      std::ranges::any_of(state.visits.areaFlags,
+                          [](auto value) { return value != 0; })) {
+    return std::unexpected("clear game retains reset inventory or map visits");
+  }
+  return ValidateContentImpl(state, &entry);
+}
+
+std::expected<Document, std::string> CaptureClearGame() {
+  if (pending || Boot_isGameplayActive || !Boot_isClearSavePending ||
+      State_savedEntryDoor.destinationZoneId != 1 ||
+      State_savedEntryDoor.destinationRoomId != 0 ||
+      Audio_Seq_unusedStateFlags.clearCount <= 0) {
+    return std::unexpected("no original ending clear-save inputs are pending");
+  }
+  Document document;
+  document.generation = 1;
+  document.new_game_entry = State_savedEntryDoor;
+  auto& state = document.state;
+  CapturePersistent(state, true);
+  // The battle overlay has gone away: TITLE copies the already captured
+  // Ashley/learned-action values, not the current actor or action-table views.
+  state.ashley = State_ashleySnapshot.stats;
+  // F03601 TITLE _packageGameSaveData, 22C.c:632-700; original MIPS
+  // 800698dc/800698e8, 80069c34, 80069c94..80069cc0. Container clearing is
+  // exactly 0x100 bytes (64 stacks), NOT the entire 256-stack container.
+  state.settings.menuFlags &= static_cast<u_short>(~kClearMenuFlag);
+  state.settings.currentGameSaveCount = 0;
+  state.script_flags[offsetof(State_StateFlags, puzzleMode)] =
+      static_cast<std::uint8_t>(
+          (~(state.settings.reserved0Bit0 >> kPuzzleSettingShift)) & 1);
+  std::fill(std::begin(state.inventory.misc), std::end(state.inventory.misc),
+            Items_InventoryMisc{});
+  std::fill(std::begin(state.inventory_order.misc),
+            std::end(state.inventory_order.misc), 0);
+  state.location.zone = 1;
+  const auto valid = ValidateContent(document);
+  if (!valid) return std::unexpected(valid.error());
+  return document;
 }
 
 std::expected<Snapshot, std::string> Capture(
@@ -1391,12 +1492,24 @@ std::expected<Snapshot, std::string> Capture(
 
 std::expected<void, std::string> PrepareResume(const Document& document) {
   if (pending) return std::unexpected("a resume is already pending");
-  const auto valid = ValidateContent(document.state);
+  const auto valid = ValidateContent(document);
   if (!valid) return valid;
   const auto audio = ValidateAudioConsumer();
   if (!audio) return audio;
   PendingResume staged;
   staged.state = document.state;
+  staged.new_game = document.new_game_entry.has_value();
+  if (staged.new_game) {
+    const auto* store = Content::DataStore::Get();
+    if (store == nullptr) {
+      return std::unexpected("extracted content is not open");
+    }
+    const auto room = ReadRoom(*store, staged.state.location.zone,
+                               staged.state.location.room);
+    if (!room) return std::unexpected(room.error());
+    staged.state.location.scene =
+        static_cast<std::uint16_t>(room->environment.sceneId);
+  }
   CapturePersistent(staged.previous.state);
   staged.previous.ashley = State_ashleySnapshot;
   staged.previous.entry = State_savedEntryDoor;
@@ -1404,11 +1517,18 @@ std::expected<void, std::string> PrepareResume(const Document& document) {
               staged.previous.learned.begin());
   staged.previous.unlocked = staged.previous.state.learned_actions;
   staged.previous.mix_behavior = Audio_Driver_controlLatches.mixBehavior;
+  staged.previous.play_time = State_playTime;
   // All fallible work, including owning the staging copy, precedes mutation.
   pending.emplace(std::move(staged));
   ApplyPersistent(pending->state);
   State_ashleySnapshot.stats = pending->state.ashley;
   State_ashleySnapshot.stats.isPending = 1;
+  if (document.new_game_entry) {
+    State_savedEntryDoor = *document.new_game_entry;
+    ApplyClock(0);
+    SyncMonoOutput(pending->state.settings.monoSound == 1);
+    return {};
+  }
   State_savedEntryDoor = {};
   State_savedEntryDoor.destinationZoneId =
       static_cast<unsigned char>(pending->state.location.zone);
@@ -1448,6 +1568,7 @@ void CancelResume() {
         "CancelResume: audio consumer unavailable; restoring output latch");
   }
   Audio_Driver_controlLatches.mixBehavior = previous.mix_behavior;
+  if (pending->new_game) State_playTime = previous.play_time;
   pending.reset();
 }
 
@@ -1469,6 +1590,12 @@ std::expected<void, std::string> FinishResume() {
       Field_zoneContext.zndDiscRequest != nullptr ||
       State_ashleySnapshot.stats.isPending != 0) {
     return std::unexpected("the staged resume room/Ashley spawn is not ready");
+  }
+  if (pending->new_game) {
+    // The original loaded-save path lets the starting room allocate its cache,
+    // camera and RNG naturally. Never apply the old campaign's field placement.
+    pending.reset();
+    return {};
   }
   auto& actor = *Actors_actorRecords[0];
   auto& model = actor.instance;

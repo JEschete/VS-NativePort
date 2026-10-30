@@ -27,8 +27,10 @@ extern "C" {
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Playback/SoundPlayback.h"
+#include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Boot/GameLoop.h"
+#include "Ending/ClearResults.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
@@ -36,6 +38,10 @@ extern "C" {
 #include "Items/Categories.h"
 #include "Menu/Files.h"
 #include "Save/NativeContainer.h"
+#include "State/Ashley.h"
+#include "State/Location.h"
+#include "State/PlayTime.h"
+#include "State/RoomMemory.h"
 #include "Title/SaveFiles.h"
 }
 
@@ -162,6 +168,19 @@ struct MenuContentFixture {
     Put(zone, 28, std::uint32_t{200});
     Put(zone, 32, static_cast<std::uint32_t>(room.size()));
     Add("MAP/ZONE009.ZND", zone, 100);
+    std::vector<std::uint8_t> start;
+    lengths[1] = sizeof(Field_MpdCollisionHeader) + 8 * 8 * 4 + 16;
+    Put(start, sizeof(header), lengths);
+    Put(start, collision, Field_MpdCollisionHeader{8, 8, 0, 1});
+    start.resize(collision + lengths[1]);
+    environment.sceneId = 0;
+    Put(start, start.size(), environment);
+    header.enemySectionOffset = static_cast<int>(start.size());
+    Put(start, 0, header);
+    Add("MAP/MAP001.MPD", start, 201);
+    Put(zone, 28, std::uint32_t{201});
+    Put(zone, 32, static_cast<std::uint32_t>(start.size()));
+    Add("MAP/ZONE001.ZND", zone, 101);
 
     std::vector<std::uint8_t> arm;
     Put(arm, 0, std::uint32_t{1});
@@ -550,14 +569,239 @@ TEST_CASE("Native session reset clears borrowed presentation and footer",
   Save_NativeDrawFileOverlay(1);
 }
 
-TEST_CASE("Unmodeled native clear saves report the limit without card access",
+TEST_CASE("Native clear saves require staged original ending inputs",
           "[save-menu]") {
   MenuFixture fixture;
   REQUIRE(Menu_Files_UpdateSaveMenu(1) == 0);
-  CHECK(Text(Title_memoryCardMessage) == "Native clear save unavailable");
+  CHECK(Text(Title_memoryCardMessage) == "No ending clear save available");
   Buttons(PADRright);
   CHECK(Menu_Files_UpdateSaveMenu(0) == -1);
   CHECK(fs::is_empty(fixture.root));
+}
+
+namespace {
+struct ClearInputsFixture {
+  decltype(Audio_Seq_unusedStateFlags) flags = Audio_Seq_unusedStateFlags;
+  decltype(Audio_Seq_unusedInventory) inventory = Audio_Seq_unusedInventory;
+  decltype(Audio_Seq_unusedInventoryIndices) order =
+      Audio_Seq_unusedInventoryIndices;
+  State_AshleySnapshot ashley = State_ashleySnapshot;
+  Field_MpdDoorRecord entry = State_savedEntryDoor;
+  State_RoomVisitFlags visits = State_roomVisitProgress;
+  State_ScoreData score = Audio_Seq_unusedScoredata;
+  decltype(State_playTime) time = State_playTime;
+  decltype(std::to_array(State_recentRoomEnemyStates)) caches =
+      std::to_array(State_recentRoomEnemyStates);
+  decltype(std::to_array(State_learnedActionFlags)) learned =
+      std::to_array(State_learnedActionFlags);
+  int cache_slot = State_currentRoomStateSlot;
+  int clear_pending = Boot_isClearSavePending;
+
+  ClearInputsFixture() {
+    Audio_Seq_unusedStateFlags = {};
+    Audio_Seq_unusedInventory = {};
+    Audio_Seq_unusedInventoryIndices = {};
+    Audio_Seq_unusedInventory.misc[0].id = 308;
+    Audio_Seq_unusedInventory.misc[0].count = 2;
+    Audio_Seq_unusedInventoryIndices.misc[0] = 1;
+    State_ashleySnapshot.stats = MenuContentFixture::Document().state.ashley;
+    State_savedEntryDoor = {};
+    State_savedEntryDoor.entryTileX = 4;
+    State_savedEntryDoor.entryTileZ = 2;
+    State_roomVisitProgress = {};
+    Audio_Seq_unusedScoredata = {};
+    State_playTime.all = 0;
+    State_playTime.t.hours = 1;
+    State_currentRoomStateSlot = 0;
+    std::fill_n(State_recentRoomEnemyStates, caches.size(),
+                State_RoomEnemyStates{});
+    std::fill_n(State_learnedActionFlags, learned.size(), 0);
+    State_learnedActionFlags[0] = static_cast<char>(0x80);
+    Input_settings = {};
+    Input_settings.currentGameSaveCount = 7;
+    Input_settings.cumulativeSaveCount = 19;
+    Input_settings.saveFileGeneration = 3;
+    Ending_CommitClearProgress();
+    Boot_isClearSavePending = 1;
+    Save_NativeStageClearGame();
+    Boot_isClearSavePending = 0;
+  }
+
+  ~ClearInputsFixture() {
+    Audio_Seq_unusedStateFlags = flags;
+    Audio_Seq_unusedInventory = inventory;
+    Audio_Seq_unusedInventoryIndices = order;
+    State_ashleySnapshot = ashley;
+    State_savedEntryDoor = entry;
+    State_roomVisitProgress = visits;
+    Audio_Seq_unusedScoredata = score;
+    State_playTime = time;
+    std::copy(caches.begin(), caches.end(), State_recentRoomEnemyStates);
+    std::copy(learned.begin(), learned.end(), State_learnedActionFlags);
+    State_currentRoomStateSlot = cache_slot;
+    Boot_isClearSavePending = clear_pending;
+  }
+};
+
+std::string FileBytes(const fs::path& path) {
+  std::ifstream input(path, std::ios::binary);
+  REQUIRE(input.good());
+  return {std::istreambuf_iterator<char>(input), {}};
+}
+
+void ExecuteClearSave() {
+  BeginPicker(Menu_Files_UpdateSaveMenu, 1);
+  ChooseYes(Menu_Files_UpdateSaveMenu);
+  Buttons(0);
+  Tick(Menu_Files_UpdateSaveMenu);
+}
+}  // namespace
+
+TEST_CASE("Original ending component writes a distinct native clear save",
+          "[save-menu][save-clear]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  ClearInputsFixture ending;
+  ExecuteClearSave();
+  REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
+  auto files = Save::Files::Open(fixture.root);
+  REQUIRE(files);
+  const auto loaded = files->Load(0);
+  REQUIRE(loaded);
+  REQUIRE(loaded->document.new_game_entry);
+  CHECK(loaded->document.generation == 1);
+  CHECK(loaded->document.state.settings.cumulativeSaveCount == 20);
+  CHECK(loaded->document.state.settings.currentGameSaveCount == 0);
+  CHECK(loaded->document.state.settings.saveFileGeneration == 4);
+  CHECK(loaded->document.state.script_flags[0] == 1);
+  CHECK(loaded->document.state.ashley.currentHp == 250);
+  CHECK(loaded->document.state.ashley.currentMp == 50);
+  CHECK(loaded->document.state.inventory.misc[0].id == 0);
+  CHECK(loaded->document.state.learned_actions[0]);
+  CHECK(Input_settings.cumulativeSaveCount == 20);
+  CHECK(Input_settings.currentGameSaveCount == 0);
+  CHECK(Menu_Files_dataNotSaved == 1);
+  CHECK(Text(Screen().summaries[0].room_name.data()) == "CLEAR GAME");
+  Buttons(PADRright);
+  CHECK(Menu_Files_UpdateSaveMenu(0) == 1);
+  Save::ShutdownFileMenus();
+  Save::ConfigureDirectory(fixture.root);
+  CHECK(Save_NativeInitialTitleSelection() == 1);
+  BeginPicker(Menu_Files_UpdateLoadMenu, 1);
+  CHECK(Screen().files.front().document->new_game_entry.has_value());
+}
+
+TEST_CASE("Clear overwrite preserves per-file bank and exact original reset",
+          "[save-menu][save-clear]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  auto checkpoint = MenuContentFixture::Document();
+  checkpoint.state.storage.misc[0] = {308, 1, 0};
+  checkpoint.state.storage.misc[63] = {308, 1, 0};
+  checkpoint.state.storage.misc[64] = {308, 2, 0};
+  checkpoint.state.storage.misc[255] = {308, 3, 0};
+  content.Store(checkpoint);
+  const auto path = fixture.root / "slot00.vssave";
+  const auto original = FileBytes(path);
+  ClearInputsFixture ending;
+  ExecuteClearSave();
+  REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
+  CHECK(FileBytes(path.string() + ".bak") == original);
+  auto files = Save::Files::Open(fixture.root);
+  REQUIRE(files);
+  const auto loaded = files->Load(0);
+  REQUIRE(loaded);
+  CHECK(loaded->document.generation == 2);
+  CHECK(loaded->document.new_game_entry.has_value());
+  const auto& bank = loaded->document.state.storage;
+  CHECK(bank.misc[0].id == 0);
+  CHECK(bank.misc[63].id == 0);
+  CHECK(bank.misc[64].count == 2);
+  CHECK(bank.misc[255].count == 3);
+}
+
+TEST_CASE("Clear-save consent rejects changed content and reset releases input",
+          "[save-menu][save-clear]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  ClearInputsFixture ending;
+  BeginPicker(Menu_Files_UpdateSaveMenu, 1);
+  ChooseYes(Menu_Files_UpdateSaveMenu);
+  content.Store(MenuContentFixture::Document());
+  const auto original = FileBytes(fixture.root / "slot00.vssave");
+  Buttons(0);
+  Tick(Menu_Files_UpdateSaveMenu);
+  CHECK(Text(Title_memoryCardMessage) == "File changed - select again");
+  CHECK(FileBytes(fixture.root / "slot00.vssave") == original);
+  CHECK(Input_settings.cumulativeSaveCount == 19);
+  CHECK(Input_settings.currentGameSaveCount == 7);
+  Save::ResetFileMenuSession();
+  REQUIRE(Menu_Files_UpdateSaveMenu(1) == 0);
+  CHECK(Text(Title_memoryCardMessage) == "No ending clear save available");
+}
+
+TEST_CASE("Clear saves retain explicit recovered-file replacement consent",
+          "[save-menu][save-clear]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  const auto checkpoint = MenuContentFixture::Document();
+  content.Store(checkpoint, "slot00.vssave.bak");
+  const auto path = fixture.root / "slot00.vssave";
+  {
+    std::ofstream broken(path);
+    broken << "corrupt primary";
+  }
+  const auto original = FileBytes(path);
+  const auto backup = FileBytes(path.string() + ".bak");
+  ClearInputsFixture ending;
+  BeginPicker(Menu_Files_UpdateSaveMenu, 1);
+  REQUIRE(Screen().files[0].status == Save::FileStatus::kRecovered);
+  Press(PADRright, Menu_Files_UpdateSaveMenu);
+  CHECK(Text(Title_memoryCardMessage) == "Replace invalid original");
+  CHECK_FALSE(Screen().affirmative);
+  Press(PADRright, Menu_Files_UpdateSaveMenu);  // Default No.
+  CHECK_FALSE(Screen().confirmation);
+  CHECK(FileBytes(path) == original);
+  CHECK(FileBytes(path.string() + ".bak") == backup);
+  ChooseYes(Menu_Files_UpdateSaveMenu);
+  Press(0, Menu_Files_UpdateSaveMenu);
+  REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
+  CHECK(FileBytes(path.string() + ".bak") == backup);
+  const auto files = Save::Files::Open(fixture.root);
+  REQUIRE(files);
+  const auto loaded = files->Load(0);
+  REQUIRE(loaded);
+  CHECK_FALSE(loaded->recovered);
+  CHECK(loaded->document.new_game_entry.has_value());
+  CHECK(loaded->document.generation == 2);
+}
+
+TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
+          "[save-menu][save-clear]") {
+  MenuFixture fixture;
+  MenuContentFixture content(fixture);
+  content.Store(MenuContentFixture::Document());
+  const auto path = fixture.root / "slot00.vssave";
+  const auto original = FileBytes(path);
+  ClearInputsFixture ending;
+  BeginPicker(Menu_Files_UpdateSaveMenu, 1);
+  ChooseYes(Menu_Files_UpdateSaveMenu);
+  // The target preview remains identical, but replacement cannot reserve its
+  // lock. Exercise the same existing persistence failure as ordinary Save.
+  REQUIRE(fs::create_directory(path.string() + ".lock"));
+  Press(0, Menu_Files_UpdateSaveMenu);
+  CHECK(Text(Title_memoryCardMessage) == "Save failed - see log");
+  CHECK(Input_settings.cumulativeSaveCount == 19);
+  CHECK(Input_settings.currentGameSaveCount == 7);
+  CHECK(Input_settings.saveFileGeneration == 3);
+  CHECK(FileBytes(path) == original);
+  REQUIRE(fs::remove(path.string() + ".lock"));
+  Press(PADRright, Menu_Files_UpdateSaveMenu);
+  Press(0, Menu_Files_UpdateSaveMenu);
+  ChooseYes(Menu_Files_UpdateSaveMenu);
+  Press(0, Menu_Files_UpdateSaveMenu);
+  CHECK(Text(Title_memoryCardMessage) == "Save complete");
+  CHECK(Input_settings.cumulativeSaveCount == 20);
 }
 
 TEST_CASE(

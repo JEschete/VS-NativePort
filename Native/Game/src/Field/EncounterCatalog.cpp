@@ -545,6 +545,18 @@ std::vector<std::string> ValidateEncounterOptions(const EncounterSetup& setup) {
           "overrides");
     }
   }
+  if (setup.room_local_event) {
+    if (*setup.room_local_event < 0 ||
+        *setup.room_local_event > EncounterLimits::kLastRoomLocalEvent) {
+      errors.emplace_back("room-local event selector must be in 0..15");
+    }
+    if (setup.room_policy != EncounterRoomPolicy::kOriginalRoom ||
+        setup.external_event) {
+      errors.emplace_back(
+          "room-local events require production room events and no external "
+          "event");
+    }
+  }
   if (setup.inherited_music &&
       (*setup.inherited_music < 1 ||
        *setup.inherited_music > EncounterLimits::kLastMusic ||

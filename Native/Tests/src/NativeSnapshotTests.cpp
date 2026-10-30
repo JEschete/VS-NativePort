@@ -283,7 +283,7 @@ TEST_CASE("Native save corruption and unsupported formats fail explicitly",
     CheckRejected(document, "/checksum");
   }
   SECTION("future version") {
-    document["version"] = document.at("version").get<std::uint32_t>() + 1;
+    document["version"] = 5;
     CheckRejected(document, "/version");
   }
   SECTION("old schemas lack explicit layer and camera state") {
@@ -307,6 +307,56 @@ TEST_CASE("Native save corruption and unsupported formats fail explicitly",
   }
 }
 
+TEST_CASE("Clear saves have an explicit restart contract without schema3 drift",
+          "[native-snapshot][save-clear]") {
+  auto document = SampleDocument();
+  const auto checkpoint = Save::Encode(document);
+  REQUIRE(checkpoint);
+  auto normal = Json::parse(*checkpoint);
+  CHECK(normal.at("version") == 3);
+  CHECK_FALSE(normal.contains("new_game_entry"));
+  document.new_game_entry.emplace();
+  auto& entry = *document.new_game_entry;
+  entry.destinationZoneId = 1;
+  entry.tileLocation.tileX = 31;
+  entry.tileLocation.floorLayer = 7;
+  entry.tileLocation.entryDirection = 7;
+  entry.entryTileX = 4;
+  entry.entryTileZ = 2;
+  entry.entryElevation = 2;
+  entry.hasEntryStep = 1;
+  entry.requiredFlagId = 1023;
+  entry.requiredFlagValue = 255;
+  entry.doorId = 255;
+  entry.reserved06Bit15 = 1;
+  entry.reserved0B = 255;
+  const auto encoded = Save::Encode(document);
+  REQUIRE(encoded);
+  const auto decoded = Save::Decode(*encoded);
+  REQUIRE(decoded);
+  REQUIRE(decoded->new_game_entry);
+  CHECK(decoded->new_game_entry->requiredFlagId == 1023);
+  CHECK(decoded->new_game_entry->entryTileX == 4);
+  CHECK(decoded->new_game_entry->tileLocation.floorLayer == 7);
+  CHECK(decoded->new_game_entry->reserved0B == 255);
+  CHECK(Save::Encode(*decoded) == encoded);
+  CHECK(Save::SameDocument(document, *decoded) == true);
+  auto changed = *decoded;
+  ++changed.new_game_entry->entryTileX;
+  CHECK(Save::SameDocument(document, changed) == false);
+  changed.new_game_entry.reset();
+  CHECK(Save::SameDocument(document, changed) == false);
+  auto wire = Json::parse(*encoded);
+  CHECK(wire.at("version") == 4);
+  SECTION("missing entry") { wire.erase("new_game_entry"); }
+  SECTION("checkpoint cannot carry a restart entry") { wire["version"] = 3; }
+  SECTION("entry bit fields cannot truncate") {
+    wire["new_game_entry"]["entry_tile_x"] = 32;
+  }
+  SECTION("foreign start room") { wire["new_game_entry"]["zone"] = 9; }
+  Recheck(wire);
+  CHECK_FALSE(Save::Decode(wire.dump()));
+}
 TEST_CASE("Native save scalars reject booleans fractions and signed overflow",
           "[native-snapshot]") {
   auto document = EncodedSample();

@@ -1067,6 +1067,7 @@ int Title_Run(void)
     void* menuData;
 
     if (Boot_isClearSavePending != 0) {
+        Save_NativeStageClearGame();
         Boot_isClearSavePending = 0;
         Title_titleScreenVisitCount = 0;
         Title_ShowClearSaveScreen();

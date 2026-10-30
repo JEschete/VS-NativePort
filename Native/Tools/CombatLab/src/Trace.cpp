@@ -523,6 +523,9 @@ std::vector<EncounterScript> ReadScriptSequence(
                Game::EncounterRoomPolicy::kOriginalRoom) ||
           (script.setup.external_event &&
            script.scene->events.front() != *script.setup.external_event) ||
+          (script.setup.room_local_event &&
+           (script.scene->event_source != 2 ||
+            script.scene->events.front() != *script.setup.room_local_event)) ||
           std::ranges::any_of(script.presses, [](const auto& press) {
             return (press.buttons & VS::Input::Start) != 0;
           })) {
@@ -565,6 +568,9 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
            : "isolated"},
       {"position_units", "tiles; elevation steps of 64 native units"}};
   if (setup.external_event) result["external_event"] = *setup.external_event;
+  if (setup.room_local_event) {
+    result["room_local_event"] = *setup.room_local_event;
+  }
   if (setup.story_progress) result["story_progress"] = *setup.story_progress;
   if (setup.clear_count) result["clear_count"] = *setup.clear_count;
   if (!setup.crossed_puzzles.empty()) {
@@ -596,6 +602,18 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
           "external_event must be an integer asset number in 0..9999");
     }
     setup.external_event = event.get<int>();
+  }
+  if (json.contains("room_local_event")) {
+    const auto& event = json.at("room_local_event");
+    if (!event.is_number_integer() || event < 0 ||
+        event > Game::EncounterLimits::kLastRoomLocalEvent ||
+        setup.room_policy != Game::EncounterRoomPolicy::kOriginalRoom ||
+        setup.external_event) {
+      throw std::runtime_error(
+          "room_local_event must be a selector in 0..15 with production room "
+          "events and no external_event");
+    }
+    setup.room_local_event = event.get<int>();
   }
   if (json.contains("story_progress")) {
     const auto& progress = json.at("story_progress");
@@ -713,7 +731,8 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
         setup.profile != Game::EncounterProfile::kPrologue ||
         setup.weapon != Game::EncounterWeapon::kDefault ||
         setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
-        setup.external_event || setup.story_progress || setup.clear_count ||
+        setup.external_event || setup.room_local_event ||
+        setup.story_progress || setup.clear_count ||
         !setup.crossed_puzzles.empty() || setup.inherited_music) {
       throw std::runtime_error(
           "attract_demo requires the original title-timeout door, entry "

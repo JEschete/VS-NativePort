@@ -95,6 +95,7 @@ bool room_prepared = false;
 bool gameplay_inspection_ready = false;
 bool player_stats_initialized = false;
 bool external_event_started = false;
+bool room_local_event_started = false;
 
 std::optional<EncounterRouletteState> InspectRoulette(int menu) {
   constexpr int kResultsMenu = 15;
@@ -683,6 +684,7 @@ std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
   room_prepared = false;
   player_stats_initialized = false;
   external_event_started = false;
+  room_local_event_started = false;
   pending_door = -1;
   configured = true;
   return {};
@@ -735,6 +737,7 @@ void RunEncounter() {
   Battle_ResetTargetPages();
   active = false;
   external_event_started = false;
+  room_local_event_started = false;
   pending_door = -1;
   gameplay_inspection_ready = false;
   configured = false;
@@ -1114,6 +1117,32 @@ extern "C" void Boot_EncounterPollStop() {
                     "Starting external event {} in zone {} room {}; "
                     "component fixture, not story progression",
                     event, Field_zoneContext.zndId, Field_zoneContext.mapId);
+        Event_BeginQueuedCutscene();
+      } else if (VS::Game::configuration.room_local_event &&
+                 !VS::Game::room_local_event_started &&
+                 Event_playbackPhase == 0 && Field_controlMode == 1 &&
+                 Field_zoneContext.zndId == VS::Game::configuration.zone &&
+                 Field_zoneContext.mapId == VS::Game::configuration.room) {
+        const int selector = *VS::Game::configuration.room_local_event;
+        const auto* locals =
+            static_cast<const short*>(Event_roomDoorEventData);
+        if (locals == nullptr || locals[selector] == 0) {
+          Core_Errorf("encounter.event",
+                      "Room %d/%d has no local event %d", Field_zoneContext.zndId,
+                      Field_zoneContext.mapId, selector);
+          std::abort();
+        }
+        // Same queue state as a satisfied local room trigger (0x8000 event id)
+        // in func_800BEC58 (4A0A8.c:4302); the trigger conditions are skipped.
+        Event_eventId = static_cast<short>(selector);
+        Event_eventSource = 2;
+        Event_playbackPhase = 1;
+        Event_isDirectEventRequest = 0;
+        VS::Game::room_local_event_started = true;
+        VS_LOG_INFO("encounter.event",
+                    "Starting room-local event {} in zone {} room {}; "
+                    "trigger conditions not evaluated",
+                    selector, Field_zoneContext.zndId, Field_zoneContext.mapId);
         Event_BeginQueuedCutscene();
       }
     }
