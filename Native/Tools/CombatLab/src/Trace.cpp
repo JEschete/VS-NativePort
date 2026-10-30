@@ -556,6 +556,7 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
       {"position_units", "tiles; elevation steps of 64 native units"}};
   if (setup.external_event) result["external_event"] = *setup.external_event;
   if (setup.story_progress) result["story_progress"] = *setup.story_progress;
+  if (setup.clear_count) result["clear_count"] = *setup.clear_count;
   if (setup.attract_demo) result["attract_demo"] = *setup.attract_demo;
   if (setup.inherited_music) {
     result["inherited_music"] = *setup.inherited_music;
@@ -589,6 +590,14 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
       throw std::runtime_error("story_progress must be an integer in 0..255");
     }
     setup.story_progress = progress.get<int>();
+  }
+  if (json.contains("clear_count")) {
+    // ENDING.PRG caps the counter at 99 (ClearResults.c).
+    const auto& clears = json.at("clear_count");
+    if (!clears.is_number_integer() || clears < 1 || clears > 99) {
+      throw std::runtime_error("clear_count must be an integer in 1..99");
+    }
+    setup.clear_count = clears.get<int>();
   }
   if (json.contains("inherited_music")) {
     const auto& music = json.at("inherited_music");
@@ -666,7 +675,8 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
         setup.profile != Game::EncounterProfile::kPrologue ||
         setup.weapon != Game::EncounterWeapon::kDefault ||
         setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
-        setup.external_event || setup.story_progress || setup.inherited_music) {
+        setup.external_event || setup.story_progress || setup.clear_count ||
+        setup.inherited_music) {
       throw std::runtime_error(
           "attract_demo requires the original title-timeout door, entry "
           "tile and unmodified New Game production room");

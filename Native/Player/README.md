@@ -56,7 +56,10 @@ is recorded in the run metadata and result, and a passing run is not stored as
 learned experience. Use it only when original placements require campaign
 progress that a direct Lab start cannot earn. For example, MAP256's
 Neesa/Tieger placements need progress 58. The progress is declared fixture
-state, not earned progression.
+state, not earned progression. The same flag admits a declared `clear_count`
+(script flag 0, the completed-game count a cleared save carries into New
+Game+), which New-Game+-only room scripts such as the MAP029/MAP030 puzzle
+timers and MAP264 test.
 
 With a `--door-route`, `--claim-room-chests` first navigates to the source
 room's unlocked original chest. Ashley approaches from its authored facing,

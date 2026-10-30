@@ -165,6 +165,17 @@ int EnterOrFinishEncounter() {
     VS_LOG_INFO("encounter", "declared story progress={}",
                 *configuration.story_progress);
   }
+  if (configuration.clear_count) {
+    // New Game+ starts from a cleared save, whose stateFlags block (including
+    // clearCount, incremented by the ending at ENDING.PRG _clearCount) is
+    // restored wholesale. Room scripts test it as script flag 0, e.g. the
+    // MAP029 entry's jumpFwdIfFlag 0 >= 1. Declared Lab fixture state, written
+    // before any room loads; never changed during play.
+    Audio_Seq_unusedStateFlags.clearCount =
+        static_cast<char>(*configuration.clear_count);
+    VS_LOG_INFO("encounter", "declared clear count={}",
+                *configuration.clear_count);
+  }
   if (configuration.inherited_music) {
     // Zones whose ZND music id is 0 keep the wave bank an earlier zone or
     // event left loaded (_finishLoadZnd, BATTLE.PRG 146C.c:14826). Load the

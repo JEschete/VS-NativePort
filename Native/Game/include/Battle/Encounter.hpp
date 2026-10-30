@@ -148,6 +148,10 @@ struct EncounterSetup {
   // Declared campaign story-progress value (script flag 0x82), applied after
   // New Game initialization and before the first room load.
   std::optional<int> story_progress;
+  // Declared completed-game count (vs_main_flags_t.clearCount, script flag 0),
+  // the value a cleared save carries into New Game+. Applied after New Game
+  // initialization and before the first room load.
+  std::optional<int> clear_count;
   // Title idle-timeout exit cause (3 = attract cutscene 1, 4 = cutscene 2).
   // Starts through the original Title_PrepareExit and entry mode, so the
   // original game loop returns to title when the demo ends or on any button.

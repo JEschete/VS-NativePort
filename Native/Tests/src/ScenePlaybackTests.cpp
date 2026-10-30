@@ -236,6 +236,7 @@ TEST_CASE("Attract demos accept only the original title-timeout start",
     SECTION("stat assist") { setup["ashley_stats"] = {{"max_hp", 999}}; }
     SECTION("direct event") { setup["external_event"] = 20; }
     SECTION("story progress") { setup["story_progress"] = 1; }
+    SECTION("clear count") { setup["clear_count"] = 1; }
     SECTION("inherited music") { setup["inherited_music"] = 16; }
     CHECK_THROWS_AS(VS::combat_lab::DecodeSetup(setup), std::runtime_error);
   }

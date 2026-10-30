@@ -607,6 +607,27 @@ TEST_CASE("Lab story progress is optional, bounded and round-trips",
   }
 }
 
+TEST_CASE("Lab clear count is optional, bounded and round-trips",
+          "[combat][profile][story]") {
+  VS::Game::EncounterSetup setup;
+  auto json = VS::combat_lab::EncodeSetup(setup);
+  CHECK_FALSE(json.contains("clear_count"));
+  CHECK_FALSE(VS::combat_lab::DecodeSetup(json).clear_count.has_value());
+  for (const int value : {1, 2, 99}) {
+    json["clear_count"] = value;
+    const auto decoded = VS::combat_lab::DecodeSetup(json);
+    REQUIRE(decoded.clear_count == value);
+    CHECK(VS::combat_lab::EncodeSetup(decoded).at("clear_count") == value);
+  }
+  for (const auto& invalid :
+       {nlohmann::json(0), nlohmann::json(100), nlohmann::json(-1),
+        nlohmann::json(1.5), nlohmann::json("1"), nlohmann::json(true),
+        nlohmann::json(nullptr)}) {
+    json["clear_count"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(json));
+  }
+}
+
 TEST_CASE(
     "Lab weapon presets round-trip all families and preserve old defaults",
     "[combat][profile][weapon]") {
