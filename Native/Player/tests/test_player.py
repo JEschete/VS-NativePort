@@ -1259,6 +1259,250 @@ class ControllerTests(unittest.TestCase):
         )
         self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
 
+    def _positioning_area_controller(self):
+        record = sample_record(tick=1, active=False)
+        record["data"].update(control_mode=1, action_phase=0, action=0)
+        record["data"]["action_options"] = [
+            {"id": 130, "name": "Meteor", "family": "warlock", "cost": 40,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3),
+                            "Use Meteor on the observed hostile.", 1, 0, 130)
+        controller = CombatController()
+        controller.accept(decision, frame, frame)
+        controller.transaction.selected = True
+        record["data"].update(control_mode=2, action_phase=2, action=130,
+                              area_center=[0, 0, 0], area_positioning=True,
+                              target_previews=[
+                                  {"actor": 0, "limb": 0, "position": [0, 0, 0]},
+                                  {"actor": 2, "limb": -1, "position": [640, 0, 0]},
+                              ])
+        return controller, record
+
+    def test_area_positioning_steers_sphere_over_target_then_confirms(self):
+        controller, record = self._positioning_area_controller()
+        record["tick"] = 10
+        first = controller.step(Frame.decode(record))
+        self.assertTrue(first.buttons)
+        self.assertTrue(first.buttons <= {"Up", "Down", "Left", "Right"})
+
+        # The native sphere moved toward +x; the controller learns the sphere rotation from it.
+        record["tick"] = 20
+        record["data"]["area_center"] = [128, 0, 0]
+        second = controller.step(Frame.decode(record))
+        self.assertEqual(second.buttons, first.buttons)
+
+        # Within half a learned step of the target the next press could only overshoot.
+        record["tick"] = 30
+        record["data"]["area_center"] = [600, 0, 0]
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+
+    def test_area_phase3_without_target_returns_to_positioning_then_gives_up(self):
+        controller, record = self._positioning_area_controller()
+        record["tick"] = 10
+        record["data"]["area_center"] = [630, 0, 0]
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+        for retry in range(controller.max_area_retries + 1):
+            record["tick"] += 10
+            record["data"].update(action_phase=3, area_positioning=True,
+                                  target_previews=[{"actor": 0, "limb": 0, "position": [0, 0, 0]}])
+            record["data"]["target_page"].update(first=0, visible=1, selected=0, selection_step=19)
+            action = controller.step(Frame.decode(record))
+            self.assertEqual(action.buttons, frozenset({"Cross"}))
+            if retry == controller.max_area_retries:
+                break
+            self.assertFalse(controller.transaction.closing)
+            # Back in positioning, the retry takes one forced step past the target, then confirms.
+            record["tick"] += 10
+            record["data"].update(action_phase=2, target_previews=[
+                {"actor": 0, "limb": 0, "position": [0, 0, 0]},
+                {"actor": 2, "limb": -1, "position": [640, 0, 0]},
+            ])
+            step = controller.step(Frame.decode(record))
+            self.assertTrue(step.buttons <= {"Up", "Down", "Left", "Right"})
+            record["tick"] += 10
+            self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+        self.assertTrue(controller.transaction.closing)
+        self.assertEqual(controller.feedback[-1]["status"], "area_out_of_range")
+
+    def test_area_positioning_learns_sphere_rotation_from_observed_movement(self):
+        controller, record = self._positioning_area_controller()
+        record["tick"] = 10
+        first = controller.step(Frame.decode(record))
+        # Native moved the sphere away from the target: the next press must differ.
+        record["tick"] = 20
+        record["data"]["area_center"] = [-128, 0, 0]
+        second = controller.step(Frame.decode(record))
+        self.assertNotEqual(second.buttons, first.buttons)
+
+    def test_area_positioning_cancels_when_sphere_cannot_reach_target(self):
+        controller, record = self._positioning_area_controller()
+        action = None
+        for attempt in range(10):
+            record["tick"] = 10 + attempt * 10
+            action = controller.step(Frame.decode(record))
+            if action.buttons == frozenset({"Cross"}):
+                break
+        self.assertEqual(action.buttons, frozenset({"Cross"}))
+        self.assertTrue(controller.transaction.closing)
+        self.assertEqual(controller.feedback[-1]["status"], "area_out_of_range")
+
+    def test_area_positioning_gives_up_when_range_clamp_slides_sphere_without_progress(self):
+        controller, record = self._positioning_area_controller()
+        record["data"]["target_previews"][1]["position"] = [0, 0, 2000]
+        # The native range volume clamps the sphere near z=480 and slides it sideways.
+        centers = [[0, 0, 0], [0, 0, 240], [0, 0, 470]] + [[(-1) ** n * 40, 0, 475] for n in range(8)]
+        action = None
+        for attempt, center in enumerate(centers):
+            record["tick"] = 10 + attempt * 10
+            record["data"]["area_center"] = center
+            action = controller.step(Frame.decode(record))
+            if action.buttons == frozenset({"Cross"}):
+                break
+        self.assertEqual(action.buttons, frozenset({"Cross"}))
+        self.assertLess(attempt, len(centers) - 1)
+
+    def test_area_positioning_confirms_once_native_volume_covers_target(self):
+        controller, record = self._positioning_area_controller()
+        record["tick"] = 10
+        record["data"]["area_center"] = [500, 0, 0]
+        record["data"]["area_volumes"] = [
+            {"kind": 129, "half_x": 480, "half_z": 480, "angle": 0, "position": [0, 0, 0]},
+            {"kind": 1, "half_x": 192, "half_z": 192, "angle": 0, "position": [500, 0, 0]},
+        ]
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+
+    def test_area_positioning_ignores_range_volume_and_needs_area_coverage(self):
+        controller, record = self._positioning_area_controller()
+        # Only the range volume sits on the untouched cursor; the area volume is not yet placed.
+        record["tick"] = 10
+        record["data"]["area_center"] = [600, 0, 0]
+        record["data"]["area_volumes"] = [
+            {"kind": 129, "half_x": 480, "half_z": 480, "angle": 0, "position": [600, 0, 0]},
+            {"kind": 1, "half_x": 16, "half_z": 16, "angle": 0, "position": [600, 0, 0]},
+        ]
+        action = controller.step(Frame.decode(record))
+        self.assertTrue(action.buttons <= {"Up", "Down", "Left", "Right"})
+
+    def test_simultaneous_area_gives_up_when_required_slots_exceed_native_volume(self):
+        controller, record = self._positioning_area_controller()
+        controller.simultaneous_defeat = (2, 3)
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3, position=[1240, 0, 0])
+        record["data"]["actors"].append(second)
+        record["data"]["target_previews"].append({"actor": 3, "limb": -1, "position": [1240, 0, 0]})
+        record["data"]["area_volumes"] = [
+            {"kind": 129, "half_x": 480, "half_z": 480, "angle": 0, "position": [0, 0, 0]},
+            {"kind": 1, "half_x": 64, "half_z": 64, "angle": 0, "position": [0, 0, 0]},
+        ]
+        record["tick"] = 10
+        action = controller.step(Frame.decode(record))
+        self.assertEqual(action.buttons, frozenset({"Cross"}))
+        self.assertEqual(controller.feedback[-1]["status"], "area_spread")
+        self.assertEqual(controller.feedback[-1]["area_radius"], 64.0)
+        self.assertEqual(controller.area_radii, {130: 64.0})
+
+    def test_area_positioning_leaves_when_required_non_hostile_slot_is_not_previewed(self):
+        controller, record = self._positioning_area_controller()
+        controller.simultaneous_defeat = (2, 4)
+        dormant = copy.deepcopy(record["data"]["actors"][1])
+        dormant.update(slot=4, hostile_to_player=False, relation_to_player=0)
+        record["data"]["actors"].append(dormant)
+        record["tick"] = 10
+        action = controller.step(Frame.decode(record))
+        self.assertEqual(action.buttons, frozenset({"Cross"}))
+        self.assertEqual(controller.feedback[-1]["kind"], "area_target_unreachable")
+
+    def test_area_spread_feedback_waits_until_required_hostiles_cluster(self):
+        record = sample_record(active=False)
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3, position=[1240, 0, 0])
+        record["data"]["actors"].append(second)
+        record["data"]["action_options"] = [
+            {"id": 130, "name": "Meteor", "family": "warlock", "cost": 10,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        context = {"simultaneous_defeat_objective": {"slots": [2, 3], "claim": "",
+                                                     "area_radii": {"130": 64.0}},
+                   "controller_feedback": []}
+        self.assertNotIn("cast:2:130:1", available_choices(Frame.decode(record), context))
+        record["data"]["actors"][-1]["position"] = list(record["data"]["actors"][1]["position"])
+        record["data"]["actors"][-1]["position"][0] += 100
+        self.assertIn("cast:2:130:1", available_choices(Frame.decode(record), context))
+        # An unmeasured area spell may still be tried while the hostiles are apart.
+        context["simultaneous_defeat_objective"]["area_radii"] = {}
+        record["data"]["actors"][-1]["position"][0] += 1000
+        self.assertIn("cast:2:130:1", available_choices(Frame.decode(record), context))
+
+    def test_combined_area_objective_offers_highest_covering_rank_only(self):
+        record = sample_record(active=False)
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3)
+        second["position"] = list(record["data"]["actors"][1]["position"])
+        second["position"][0] += 300
+        record["data"]["actors"].append(second)
+        record["data"]["action_options"] = [
+            {"id": 106 + rank, "name": "Explosion", "family": "warlock", "cost": 10,
+             "restrictions": 0, "menu_order": 0, "rank": rank} for rank in range(4)
+        ]
+        context = {"simultaneous_defeat_objective": {
+            "slots": [2, 3], "claim": "", "area_radii": {"109": 128.0}},
+            "controller_feedback": []}
+        choices = available_choices(Frame.decode(record), context)
+        self.assertIn("cast:2:108:1", choices)
+        self.assertFalse({"cast:2:106:1", "cast:2:107:1", "cast:2:109:1"} & set(choices))
+        # Ordinary single-target choices keep the base rank.
+        ordinary = available_choices(Frame.decode(record), {"controller_feedback": []})
+        self.assertFalse(any(row["action_id"] in (107, 108, 109) for row in ordinary.values()))
+
+    def test_combined_objective_protects_required_slot_that_is_not_yet_hostile(self):
+        record = sample_record(active=False)
+        dormant = copy.deepcopy(record["data"]["actors"][1])
+        dormant.update(slot=4, hostile_to_player=False, relation_to_player=0)
+        record["data"]["actors"].append(dormant)
+        record["data"]["action_options"] = [
+            {"id": 118, "name": "GaeaStrike", "family": "warlock", "cost": 10,
+             "restrictions": 0, "menu_order": 0, "rank": 0}
+        ]
+        context = {"simultaneous_defeat_objective": {"slots": [2, 4], "claim": "", "area_radii": {}},
+                   "controller_feedback": []}
+        choices = available_choices(Frame.decode(record), context)
+        self.assertFalse(any(row["target_slot"] == 2 and row["intent"] in ("attack", "cast")
+                             for row in choices.values()))
+        self.assertIn("wait:-1:-1:1", choices)
+
+    def test_combined_objective_targets_other_hostile_past_protected_caster(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][1]["spell_action_ids"] = [111]
+        other = copy.deepcopy(record["data"]["actors"][1])
+        other.update(slot=3, spell_action_ids=[])
+        other["position"] = [value + 600 for value in other["position"]]
+        dormant = copy.deepcopy(record["data"]["actors"][1])
+        dormant.update(slot=4, hostile_to_player=False, relation_to_player=0)
+        record["data"]["actors"] += [other, dormant]
+        context = {"simultaneous_defeat_objective": {"slots": [2, 4], "claim": "", "area_radii": {}},
+                   "controller_feedback": []}
+        choices = available_choices(Frame.decode(record), context)
+        self.assertIn("attack:3:-1:1", choices)
+        self.assertFalse(any(row["target_slot"] == 2 and row["intent"] in ("attack", "cast")
+                             for row in choices.values()))
+
+    def test_area_out_of_range_feedback_suppresses_cast_only_near_failed_position(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": 130, "name": "Meteor", "family": "warlock", "cost": 10,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        frame = Frame.decode(record)
+        feedback = [{"status": "area_out_of_range", "action_id": 130, "target": 2,
+                     "player_position": frame.player.position, "tick": 1}]
+        choices = available_choices(frame, {"controller_feedback": feedback})
+        self.assertNotIn("cast:2:130:1", choices)
+        far = tuple(value + 512 for value in frame.player.position)
+        feedback[0]["player_position"] = far
+        self.assertIn("cast:2:130:1", available_choices(frame, {"controller_feedback": feedback}))
+
     def test_simultaneous_defeat_cancels_an_area_that_cannot_defeat_every_required_slot(self):
         record = sample_record(tick=1, active=False)
         second = copy.deepcopy(record["data"]["actors"][1])
@@ -2021,6 +2265,78 @@ class ControllerTests(unittest.TestCase):
         record["data"]["menu"].update(available=True, selected_menu=3,
                                       submenu_phase=7, assignment_phase=17)
         self.assertEqual(transaction.step(Frame.decode(record)).button, "Cross")
+
+    def test_levelled_warlock_spell_selects_rank_one_then_confirms(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": 130, "family": "warlock", "restrictions": 0, "menu_order": 15, "rank_count": 4}
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3), "meteor", 1, 1, 130, 1)
+        transaction = MenuTransaction(decision, frame)
+        transaction.selected = True
+        record["data"]["control_mode"] = 5
+        record["data"]["menu"].update(available=True, selected_menu=1, submenu_phase=7,
+                                      list_phase=17, rows=[], spell_level=2,
+                                      spell_level_count=4)
+        self.assertEqual(transaction.step(Frame.decode(record)).button, "Left")
+        record["data"]["menu"]["spell_level"] = 0
+        self.assertEqual(transaction.step(Frame.decode(record)).button, "Circle")
+        record["data"]["menu"]["spell_level"] = -1
+        self.assertIsNone(transaction.step(Frame.decode(record)))
+
+    def test_levelled_warlock_spell_raises_rank_to_requested_variant(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": 106, "family": "warlock", "restrictions": 0, "menu_order": 4, "rank": 0,
+             "rank_count": 4},
+            {"id": 109, "family": "warlock", "restrictions": 0, "menu_order": 4, "rank": 3,
+             "rank_count": 4},
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3), "explosion", 1, 1, 109, 1)
+        transaction = MenuTransaction(decision, frame)
+        transaction.selected = True
+        record["data"]["control_mode"] = 5
+        record["data"]["menu"].update(available=True, selected_menu=1, submenu_phase=7,
+                                      list_phase=17, rows=[], spell_level=1,
+                                      spell_level_count=4)
+        self.assertEqual(transaction.step(Frame.decode(record)).button, "Right")
+        record["data"]["menu"]["spell_level"] = 3
+        self.assertEqual(transaction.step(Frame.decode(record)).button, "Circle")
+
+    def test_unlevelled_spell_ignores_persisting_rank_cursor(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": 98, "family": "warlock", "restrictions": 0, "menu_order": 2, "rank": 0,
+             "rank_count": 1},
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3), "spell", 1, 1, 98, 1)
+        transaction = MenuTransaction(decision, frame)
+        transaction.selected = True
+        record["data"]["control_mode"] = 5
+        record["data"]["menu"].update(available=True, selected_menu=1, submenu_phase=7,
+                                      list_phase=17, rows=[], spell_level=3,
+                                      spell_level_count=4)
+        action = transaction.step(Frame.decode(record))
+        self.assertTrue(action is None or action.button not in {"Left", "Right"})
+
+    def test_cast_transaction_finishes_when_room_event_takes_control(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": 109, "family": "warlock", "restrictions": 0, "menu_order": 4, "rank": 3},
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3), "explosion", 1, 1, 109, 1)
+        transaction = MenuTransaction(decision, frame)
+        transaction.opened = transaction.selected = transaction.cast_seen = True
+        transaction.effect_seen = True
+        record["data"]["control_mode"] = 3
+        record["data"]["event_phase"] = 1
+        self.assertIsNone(transaction.step(Frame.decode(record)))
+        self.assertTrue(transaction.done)
+        self.assertEqual(transaction.result["status"], "accepted")
 
     def frame(self, tick=1, **fields):
         record = sample_record(tick, active=False)
@@ -2885,6 +3201,54 @@ class LedgeJumpTests(unittest.TestCase):
         jump = plan_ledge_jump(self.planner(), (), (0, 2), (0, 5))
         self.assertIsNone(plan_ledge_jump(self.planner(), (), (0, 2), (0, 5),
                                           frozenset({(jump.runup, jump.direction)})))
+
+    def test_run_stride_phase_must_reach_the_takeoff_window(self):
+        from vs_player.ledges import DIAGONAL_STEP, LedgeJump, LedgeJumpAssist
+        assist = LedgeJumpAssist((6, 12), None)
+        # MAP020: run-up (6,6), takeoff (6,7) toward +z; the platform edge is z=1024.
+        assist.jump = LedgeJump((6, 6), (6, 7), (6, 10), 2, -128, -512)
+        self.assertEqual(assist._edge(), 1024)
+        # Standing at 845 the strides take off at 1007 (too early) or 1025 (off the platform).
+        self.assertFalse(assist.phase_ok(845))
+        self.assertFalse(assist.in_press_window(1007))
+        # One diagonal step shifts the phase so a stride lands on 1013, inside the grab window.
+        self.assertTrue(assist.phase_ok(845 + DIAGONAL_STEP))
+        self.assertTrue(assist.phase_ok(845 + 2 * DIAGONAL_STEP))
+        self.assertTrue(assist.in_press_window(1012))
+        self.assertTrue(assist.phase_ok(850))
+
+
+class InputHandshakeTests(unittest.TestCase):
+    @staticmethod
+    def frame(tick, held=0, control=5):
+        from types import SimpleNamespace
+        return SimpleNamespace(tick=tick, held=held, control=control)
+
+    def test_press_is_held_until_native_samples_it_then_released_before_the_next_edge(self):
+        from vs_player.runner import InputHandshake
+        down = 16384
+        handshake = InputHandshake()
+        handshake.pressed(self.frame(100), frozenset({"Down"}), 4)
+        # The host batch has not pumped the key yet, so releasing now would lose the press.
+        handshake.observe(self.frame(110))
+        self.assertFalse(handshake.release_due(self.frame(110)))
+        handshake.observe(self.frame(111, down))
+        self.assertFalse(handshake.release_due(self.frame(113, down)))
+        self.assertTrue(handshake.release_due(self.frame(115, down)))
+        handshake.released(self.frame(115, down))
+        # Until native reports the release, another press would merge into one held key.
+        self.assertTrue(handshake.awaiting_release(self.frame(116, down)))
+        handshake.observe(self.frame(118))
+        self.assertFalse(handshake.awaiting_release(self.frame(118)))
+
+    def test_field_movement_leases_may_run_together(self):
+        from vs_player.runner import InputHandshake
+        handshake = InputHandshake()
+        handshake.pressed(self.frame(10, control=1), frozenset({"Up"}), 1)
+        handshake.observe(self.frame(11, 4096, control=1))
+        self.assertTrue(handshake.release_due(self.frame(12, 4096, control=1)))
+        handshake.released(self.frame(12, 4096, control=1))
+        self.assertFalse(handshake.awaiting_release(self.frame(12, 4096, control=1)))
 
 
 class CratePuzzleTests(unittest.TestCase):

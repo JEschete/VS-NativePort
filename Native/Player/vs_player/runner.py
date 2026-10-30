@@ -24,7 +24,7 @@ from .processes import (ProcessJob, freeze_game, game_environment, model_budget,
                         shared_model, verify_installed_model, warm_model)
 from .store import Retention, RunStore, owned_tree_size
 from .trace import ObservationFreshness, TraceReader, find_trace
-from .windows import WindowInput
+from .windows import BUTTON_KEYS, WindowInput
 
 
 @contextmanager
@@ -455,6 +455,59 @@ class SceneReturnHold:
         return None
 
 
+DIRECTION_BUTTONS = frozenset({"Up", "Down", "Left", "Right"})
+
+
+class InputHandshake:
+    """Release posted keys only after the native pad sampled them, and wait for the native release
+    before the next edge. Batched host ticks otherwise merge a press with its release (the press is
+    lost) or a release with the next press (no new edge), as MAP203 menu traces showed."""
+
+    LOST_INPUT_TICKS = 120
+
+    def __init__(self) -> None:
+        self.mask = 0
+        self.press_tick = 0
+        self.duration = 0
+        self.seen: int | None = None
+        self.release_mask = 0
+        self.release_tick = 0
+        self.continuous = False
+
+    @staticmethod
+    def bits(buttons: frozenset[str]) -> int:
+        return sum(BUTTON_KEYS[button][0] for button in buttons)
+
+    def pressed(self, frame: Frame, buttons: frozenset[str], duration: int) -> None:
+        self.mask, self.press_tick, self.duration, self.seen = self.bits(buttons), frame.tick, duration, None
+        # Field movement needs no new press edge, so consecutive direction leases may run together.
+        self.continuous = buttons <= DIRECTION_BUTTONS and frame.control == 1
+
+    def observe(self, frame: Frame) -> None:
+        if self.mask and self.seen is None and frame.held & self.mask == self.mask:
+            self.seen = frame.tick
+        if self.release_mask and not frame.held & self.release_mask:
+            self.release_mask = 0
+
+    def release_due(self, frame: Frame) -> bool:
+        if not self.mask:
+            return True
+        if self.seen is None:
+            return frame.tick - self.press_tick > self.LOST_INPUT_TICKS
+        return frame.tick >= max(self.press_tick, self.seen) + self.duration
+
+    def released(self, frame: Frame | None) -> None:
+        if self.mask and not self.continuous:
+            self.release_mask = self.mask
+            self.release_tick = frame.tick if frame is not None else 0
+        self.mask, self.seen = 0, None
+
+    def awaiting_release(self, frame: Frame) -> bool:
+        if self.release_mask and frame.tick - self.release_tick > self.LOST_INPUT_TICKS:
+            self.release_mask = 0
+        return bool(self.release_mask)
+
+
 def _play_game(store: RunStore, run_id: str,
                options: PlayOptions, client, audit: AuditWriter,
                maintenance: PeriodicCleanup, retention: Retention) -> dict:
@@ -542,6 +595,7 @@ def _play_game(store: RunStore, run_id: str,
     reader: TraceReader | None = None
     driver: WindowInput | None = None
     release_tick = 0
+    handshake = InputHandshake()
     held_deadline = 0.0
     future: Future[Decision] | None = None
     navigation_future: Future[NavigationDecision] | None = None
@@ -594,6 +648,8 @@ def _play_game(store: RunStore, run_id: str,
                             raise TimeoutError("Input lease expired without a fresh game frame")
                         time.sleep(0.001)
                         continue
+                    for observed_frame in frames:
+                        handshake.observe(observed_frame)
                     for historical in frames[:-1]:
                         controller.reactions.observe(historical, allow_input=False)
                         if historical.tick <= options.frames:
@@ -609,6 +665,8 @@ def _play_game(store: RunStore, run_id: str,
                         raise RuntimeError("Managed game still accepts a hardware gamepad")
                     was_stale = freshness.stale_since is not None
                     if not freshness.observe(age, now, latest.ready):
+                        if driver.held:
+                            handshake.released(latest)
                         driver.set_buttons(frozenset())
                         controller.reactions.observe(latest, allow_input=False)
                         if latest.tick <= options.frames:
@@ -651,10 +709,12 @@ def _play_game(store: RunStore, run_id: str,
                     if latest.game_over:
                         raise RuntimeError("The player was defeated")
                     if driver.held and (
-                        latest.tick >= release_tick
+                        handshake.release_due(latest)
                         or not input_lease_permitted(latest, driver.held)
                     ):
+                        handshake.released(latest)
                         driver.set_buttons(frozenset())
+                    input_busy = bool(driver.held) or handshake.awaiting_release(latest)
                     if future is not None and future.done():
                         decision = None
                         try:
@@ -786,6 +846,7 @@ def _play_game(store: RunStore, run_id: str,
                                 "slots": list(options.simultaneous_defeat),
                                 "claim": ("The original type-8 trigger needs these hostiles defeated in one "
                                           "native evaluation; one area spell must defeat all of them."),
+                                "area_radii": dict(controller.area_radii),
                             }
                         if options.defeat_order:
                             context["defeat_order_objective"] = {
@@ -880,7 +941,7 @@ def _play_game(store: RunStore, run_id: str,
                     )
                     action = controller.step(
                         latest,
-                        allow_strategy=(not driver.held
+                        allow_strategy=(not input_busy
                                         and (goal.accepted_tick is None or continue_after_route)
                                         and latest.tick >= setup_control_tick
                                         and not (pursuing and pursuit.path and field_navigation_ready(latest))
@@ -898,7 +959,7 @@ def _play_game(store: RunStore, run_id: str,
                         pursuing and pursuit_actor is not None
                         and latest.raw.get("navigation", {}).get("available")
                         and field_navigation_ready(latest)
-                        and not driver.held
+                        and not input_busy
                         and (goal.accepted_tick is None or continue_after_route)
                         and (pursuit.path or needs_geometry)
                     )
@@ -928,13 +989,13 @@ def _play_game(store: RunStore, run_id: str,
                                     f"Approach the observed hostile actor{pursuit_actor.slot} through "
                                     "real terrain until native attack targeting can select it.", context,
                                 )
-                    if (action is None and scene_navigation is not None and not driver.held
+                    if (action is None and scene_navigation is not None and not input_busy
                             and not controller.preparing
                             and not scene_combat_pending
                             and (not latest.enemies or (controller.decision is not None
                                                        and controller.decision.intent == "navigate"))):
                         action = scene_navigation.step(latest)
-                    if (action is None and goal.door is not None and not driver.held
+                    if (action is None and goal.door is not None and not input_busy
                             and not controller.preparing
                             and (not latest.enemies or (controller.decision is not None
                                                        and controller.decision.intent == "navigate"))
@@ -993,8 +1054,9 @@ def _play_game(store: RunStore, run_id: str,
                                 "image_sha256": hashes, "observation": observation,
                                 "claim": "Measured source-trigger approach; not native scene activation or completion",
                             })
-                    if action is not None and (not driver.held or action.reaction):
+                    if action is not None and (not input_busy or action.reaction):
                         driver.set_buttons(action.buttons)
+                        handshake.pressed(latest, action.buttons, action.duration)
                         release_tick = latest.tick + action.duration
                         held_deadline = now + max(0.25, action.duration / 30)
                         inputs += 1

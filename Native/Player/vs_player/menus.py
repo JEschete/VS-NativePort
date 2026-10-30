@@ -148,6 +148,15 @@ class MenuTransaction:
         self.observe(frame)
         if self.done or not frame.ready:
             return None
+        if self.cast_seen and frame.control == 3:
+            # The committed action's outcome (for example a defeat trigger) handed control to a
+            # room event, which never returns to free control within this transaction.
+            self._finish(
+                frame, "accepted" if self.effect_seen else "no_effect",
+                "Native action verified before a room event took control" if self.effect_seen
+                else "Native cast completed before a room event took control",
+            )
+            return None
         menu = frame.raw["menu"]
         if frame.control == 1 and frame.event_phase == 0:
             if self.closing:
@@ -239,6 +248,19 @@ class MenuTransaction:
             if phase == 5:
                 return self._row(frame, class_row, "select native spell class")
             if phase == list_phase:
+                level = menu.get("spell_level", -1)
+                if self.selected and self.option.get("rank_count", 1) > 1 and level >= 0:
+                    # Warlock rank selector: level N casts base action + N. The
+                    # menu ignores these presses until the selector has opened.
+                    rank = self.option.get("rank", 0)
+                    if level > rank:
+                        return MenuInput("Left", "select the requested native spell rank")
+                    if level < rank:
+                        if rank >= menu.get("spell_level_count", 0):
+                            self._finish(frame, "blocked", "Requested spell rank is not offered by the native menu")
+                            return None
+                        return MenuInput("Right", "select the requested native spell rank")
+                    return MenuInput("Circle", "confirm the requested native spell rank")
                 action = self._row(frame, self.option["menu_order"], "select learned native spell")
                 if action and action.button == "Circle":
                     self.selected = True

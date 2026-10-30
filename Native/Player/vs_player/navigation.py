@@ -348,7 +348,10 @@ class TerrainNavigator:
         airborne = native["jumping"] or native["movement_mode"] != 0
         arrival_radius = min(40, max(24, frame.player.run_speed * 2))
         approaching_takeoff = False
-        if target["jump"] and not target.get("jump_sent") and target.get("takeoff"):
+        # A native climb or fall already under way must not be steered back to the takeoff point;
+        # reversing the direction mid-climb cancels it and repeats the same climb indefinitely.
+        if (target["jump"] and not target.get("jump_sent") and target.get("takeoff")
+                and not airborne and not native["locomotion_state"]):
             takeoff = target["takeoff"]
             if sum((takeoff[i]-position[i])**2 for i in (0, 2)) > arrival_radius**2:
                 x, y, z = takeoff

@@ -1,4 +1,5 @@
 import json
+import math
 
 from .abilities import defensive_loadout_advice, item_recovery_bounds
 from .config import PROJECT
@@ -72,7 +73,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
 
     def unsuccessful(action: int, target: int) -> bool:
         return any(row.get("action_id") == action and row.get("target") == target
-                   and row.get("status") in ("blocked", "no_effect") for row in feedback)
+                   and (row.get("status") in ("blocked", "no_effect")
+                        or (row.get("status") == "area_out_of_range"
+                            and row.get("player_position") is not None
+                            and math.dist(row["player_position"], player.position) < 128))
+                   for row in feedback)
 
     def affordable_spell(option: dict) -> bool:
         cost = option.get("cost")
@@ -84,9 +89,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                 add("reward", action=row["index"])
         return choices
 
-    learned_spells = [option for option in options
-                      if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")
-                      and option["restrictions"] == 0]
+    ranked_spells = [option for option in options
+                     if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")
+                     and option["restrictions"] == 0]
+    # Higher warlock ranks only serve the combined-defeat objective's larger native areas.
+    learned_spells = [option for option in ranked_spells if option.get("rank", 0) == 0]
     combined = context.get("simultaneous_defeat_objective")
     living = {enemy.slot for enemy in frame.enemies}
     order = context.get("defeat_order_objective")
@@ -107,33 +114,60 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                 add("attack", first)
             add("approach", first)
         return kept | choices
-    if combined and set(combined["slots"]) <= living and living - set(combined["slots"]):
+    if combined:
+        # A required slot that is alive but not currently hostile still must not fall alone.
+        present = {actor.slot for actor in frame.actors if actor.slot != 0 and actor.hp > 0}
+        required = set(combined["slots"])
+    if combined and required <= present and (living - required or not required <= living):
         # Other hostiles fall first through ordinary single-target choices; their own defeat
         # triggers set the flags that keep earlier combined triggers from claiming this set.
         ordinary = available_choices(frame, {key: value for key, value in context.items()
-                                             if key != "simultaneous_defeat_objective"})
+                                             if key != "simultaneous_defeat_objective"}
+                                     | {"protected_slots": sorted(required)})
         area_ids = set(knowledge["area_damage_spells"]["action_ids"])
         kept = {key: row for key, row in ordinary.items()
-                if row["target_slot"] not in combined["slots"] and row["action_id"] not in area_ids}
-        return kept or {"wait:-1:-1:1": {"intent": "wait", "target_slot": -1, "target_limb": -1,
-                                         "action_id": -1, "equip_slot": 1, "item_id": -1}}
-    if combined and set(combined["slots"]) <= living:
+                if row["target_slot"] not in required and row["action_id"] not in area_ids}
+        if not kept:
+            add("wait")
+            for slot in required & living:
+                add("approach", slot)
+        return kept or choices
+    if combined and required <= living:
         # Any single defeat would satisfy the original single-defeat trigger first, so only area
         # spells may harm the set; failed previews wait for the hostiles to close in.
         area_ids = set(knowledge["area_damage_spells"]["action_ids"])
         settling = any(row.get("kind") == "area_incomplete" and frame.tick - row["tick"] < 180
                        for row in feedback)
+        # Observed native area radii per spell; a spell whose area cannot yet cover every
+        # required hostile at once waits for them to close in, while unmeasured spells may be tried.
+        radii = {row["action_id"]: row["area_radius"] for row in feedback
+                 if row.get("status") == "area_spread"} | {
+                     int(action): radius for action, radius in combined.get("area_radii", {}).items()}
+        spots = [(enemy.position[0], enemy.position[2]) for enemy in frame.enemies
+                 if enemy.slot in combined["slots"]]
+        mid = (sum(x for x, _ in spots) / len(spots), sum(z for _, z in spots) / len(spots))
+        spread = max(math.dist(spot, mid) for spot in spots)
         if not settling:
-            for option in learned_spells:
-                if option["id"] in area_ids and affordable_spell(option):
-                    for slot in combined["slots"]:
-                        add("cast", slot, option["id"])
+            # Per spell, offer only the highest affordable rank whose area may still cover the set.
+            best: dict[int, dict] = {}
+            for option in ranked_spells:
+                if (option["id"] in area_ids and affordable_spell(option)
+                        and spread <= radii.get(option["id"], math.inf) * 0.9):
+                    base = option["id"] - option.get("rank", 0)
+                    if option.get("rank", 0) >= best.get(base, {}).get("rank", -1):
+                        best[base] = option
+            for option in best.values():
+                for slot in combined["slots"]:
+                    add("cast", slot, option["id"])
         if not choices:
             add("wait")
             for slot in combined["slots"]:
                 add("approach", slot)
         return choices
-    caster_targets = [enemy for enemy in frame.enemies if enemy.spell_action_ids]
+    # Slots a combined-defeat objective reserves for one area cast are never single targets.
+    protected = set(context.get("protected_slots", ()))
+    caster_targets = [enemy for enemy in frame.enemies
+                      if enemy.spell_action_ids and enemy.slot not in protected]
     if caster_targets:
         dangerous_casters = [
             enemy for enemy in caster_targets
@@ -154,10 +188,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         previews = frame.raw["target_previews"]
         preferred_slots = {enemy.slot for enemy in caster_targets}
         previewed_slots = {target["actor"] for target in previews}
-        selected_slots = preferred_slots & previewed_slots or previewed_slots
+        selected_slots = (preferred_slots & previewed_slots or previewed_slots) - protected
         target_enemies = [enemy for enemy in frame.enemies if enemy.slot in selected_slots]
     else:
-        target_enemies = caster_targets or frame.enemies
+        target_enemies = caster_targets or [enemy for enemy in frame.enemies
+                                            if enemy.slot not in protected]
     incoming = context.get("max_incoming_hp_damage", 0)
     danger_threshold = min(player.max_hp, incoming * 2)
     urgent_recovery = urgent_recovery_needed(frame, context)

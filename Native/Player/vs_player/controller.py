@@ -60,7 +60,9 @@ def direction_buttons(dx: int, dz: int, yaw: int) -> frozenset[str]:
 
 
 class CombatController:
-    max_area_target_confirmations = 8
+    max_area_target_confirmations = 12
+    max_area_steps = 48
+    max_area_retries = 3
     unreachable_rejections = 3
     unreachable_window = 1800
 
@@ -80,12 +82,15 @@ class CombatController:
         self.decision_scene: tuple[int, int, int] | None = None
         self.area_target_confirmations = 0
         self.area_target_confirmation_tick: int | None = None
+        self.area_steer_reset()
         # Hostile slots an original type-8 trigger needs defeated by the same area action.
         self.simultaneous_defeat: tuple[int, ...] = ()
+        # Native area volume radius observed per action while positioning.
+        self.area_radii: dict[int, float] = {}
 
     def area_defeat_gaps(self, frame: Frame) -> list[int]:
         """Required living slots the native area preview misses or cannot defeat outright."""
-        living = {actor.slot: actor for actor in frame.enemies}
+        living = {actor.slot: actor for actor in frame.actors if actor.slot != 0 and actor.hp > 0}
         listed = {entry["actor"] for entry in frame.raw["target_previews"]}
         damage: dict[int, int] = {}
         for forecast in frame.raw.get("target_forecasts", []):
@@ -163,6 +168,140 @@ class CombatController:
             self.transaction = transaction
         self.area_target_confirmations = 0
         self.area_target_confirmation_tick = None
+        self.area_steer_reset()
+
+    def area_steer_reset(self) -> None:
+        self.area_steps = 0
+        self.area_stalls = 0
+        self.area_best = math.inf
+        self.area_yaw: int | None = None
+        self.area_quantum: float | None = None
+        self.area_last: tuple[tuple[int, int], tuple[int, int]] | None = None
+        self.area_retries = 0
+        self.area_force_step = False
+
+    def area_goal_slots(self, frame: Frame, decision: Decision) -> set[int]:
+        if decision.target_slot in self.simultaneous_defeat:
+            # A required slot that is alive but not hostile at this instant is still required.
+            living = {actor.slot for actor in frame.actors if actor.slot != 0 and actor.hp > 0}
+            required = {slot for slot in self.simultaneous_defeat if slot in living}
+            if required:
+                return required
+        return {decision.target_slot}
+
+    @staticmethod
+    def area_radius(frame: Frame) -> float | None:
+        """Horizontal radius of the native area volume on the cursor, if observed.
+
+        BATTLE.PRG D_800EB9B8 volumes[0] is the cast range around the caster; volumes[1]
+        follows the positioning cursor as the action area."""
+        center = frame.raw.get("area_center")
+        for volume in frame.raw.get("area_volumes", [])[1:]:
+            position = volume["position"]
+            if (center is not None and abs(position[0] - center[0]) <= 2
+                    and abs(position[2] - center[2]) <= 2 and volume["half_x"] > 0):
+                return float(min(volume["half_x"], volume["half_z"]))
+        return None
+
+    def _area_give_up(self, frame: Frame, decision: Decision, reason: str,
+                      status: str = "area_out_of_range", **details) -> InputAction:
+        player = frame.player
+        self.feedback.append({"kind": "area_target_unreachable", "status": status,
+                              "tick": frame.tick, "action_id": decision.action_id,
+                              "target": decision.target_slot,
+                              "area_center": list(frame.raw["area_center"][:3]),
+                              "player_position": player.position if player else None,
+                              "steps": self.area_steps, "retries": self.area_retries,
+                              **details})
+        if self.transaction is not None and self.preparing:
+            self.transaction.closing = True
+            self.transaction.result = {"reason": "Native area sphere cannot cover the target"}
+        else:
+            self.decision = None
+        return self._action(frame, ("Cross",), 2, reason)
+
+    def _retry_area(self, frame: Frame, decision: Decision) -> InputAction | None:
+        """Phase 3 omitted a goal slot; Cross returns to positioning for another lattice point."""
+        if self.area_target_confirmations == 0 or decision.intent != "cast":
+            return None
+        if self.area_retries >= self.max_area_retries:
+            return self._area_give_up(frame, decision, "leave area targeting that never covered the target")
+        self.area_retries += 1
+        self.area_force_step = True
+        self.area_stalls = 0
+        return self._action(frame, ("Cross",), 2, "return to area positioning after missed coverage")
+
+    def _steer_area(self, frame: Frame, decision: Decision) -> InputAction | None:
+        """Move the native positioning-mode sphere over the goal; phase 3 then confirms coverage."""
+        goals = self.area_goal_slots(frame, decision)
+        limbs = {slot: [(entry["position"][0], entry["position"][2])
+                        for entry in frame.raw["target_previews"] if entry["actor"] == slot]
+                 for slot in sorted(goals)}
+        center = frame.raw["area_center"]
+        cx, cz = center[0], center[2]
+        if not all(limbs.values()):
+            return self._area_give_up(frame, decision, "leave area positioning without an observed goal")
+        # Native filtering keeps an actor when any listed limb lies in the area volume, so aim at
+        # each actor's limb nearest the group's middle.
+        mx = sum(x for parts in limbs.values() for x, _ in parts) / sum(map(len, limbs.values()))
+        mz = sum(z for parts in limbs.values() for _, z in parts) / sum(map(len, limbs.values()))
+        points = [min(parts, key=lambda p: math.hypot(p[0] - mx, p[1] - mz)) for parts in limbs.values()]
+        tx = sum(p[0] for p in points) / len(points)
+        tz = sum(p[1] for p in points) / len(points)
+        distance = math.hypot(tx - cx, tz - cz)
+        radius = self.area_radius(frame)
+        if radius is not None:
+            self.area_radii[decision.action_id] = radius
+        if radius is not None and len(points) > 1:
+            spread = max(math.hypot(px - tx, pz - tz) for px, pz in points)
+            if spread > radius * 0.9:
+                # No cursor position covers every required slot; wait for the hostiles to close in.
+                return self._area_give_up(frame, decision, "leave an area too small for the required set",
+                                          "area_spread", area_radius=radius, spread=round(spread))
+        covered = (radius is not None
+                   and all(math.hypot(px - cx, pz - cz) <= radius * 0.8 for px, pz in points))
+        if self.area_last is not None:
+            (px, pz), (right, down) = self.area_last
+            mx, mz = cx - px, cz - pz
+            moved = math.hypot(mx, mz)
+            if self.area_yaw is None and moved >= 8:
+                # direction_buttons rotates screen (-right, down) by -yaw onto world (x, z).
+                # Learn only the first free move; later moves may slide along the range clamp.
+                turn = math.atan2(down, -right) - math.atan2(mz, mx)
+                self.area_yaw = round(turn * 4096 / math.tau) % 4096
+                self.area_quantum = moved
+            if distance + 16 < self.area_best:
+                self.area_stalls = 0
+            else:
+                # The range volume clamps the sphere; sliding along its edge is not progress.
+                self.area_stalls += 1
+        self.area_best = min(self.area_best, distance)
+        close = max(24.0, (self.area_quantum or 0.0) / 2)
+        arrived = covered if radius is not None else distance <= close
+        if arrived and not self.area_force_step:
+            self.area_last = None
+            return None
+        if self.area_steps >= self.max_area_steps or self.area_stalls >= 6:
+            reached = (all(math.hypot(px - cx, pz - cz) <= radius for px, pz in points)
+                       if radius is not None else self.area_best <= max(close, 96.0))
+            if reached and not self.area_force_step:
+                # Clamped near the goal: let the native phase-3 list decide coverage.
+                self.area_last = None
+                return None
+            return self._area_give_up(frame, decision, "leave area positioning that cannot cover the target")
+        yaw = self.area_yaw if self.area_yaw is not None else (frame.camera_yaw or 0)
+        buttons = direction_buttons(round(tx - cx), round(tz - cz), yaw)
+        self.area_force_step = False
+        if not buttons:
+            self.area_last = None
+            return None
+        right = (1 if "Right" in buttons else 0) - (1 if "Left" in buttons else 0)
+        down = (1 if "Down" in buttons else 0) - (1 if "Up" in buttons else 0)
+        self.area_last = ((cx, cz), (right, down))
+        self.area_steps += 1
+        # A full hold moves the cursor about 120 units; tap when the area is smaller than that.
+        fine = radius is not None and self.area_quantum is not None and distance < self.area_quantum
+        return self._action(frame, buttons, 1 if fine else 4, "steer the native area sphere toward the target")
 
     def _action(self, frame: Frame, buttons: tuple[str, ...] | frozenset[str],
                 duration: int, reason: str, reaction: bool = False) -> InputAction:
@@ -308,6 +447,10 @@ class CombatController:
                     or not all(isinstance(value, int) and not isinstance(value, bool)
                                for value in center[:3])):
                 raise ValueError("Native area targeting lacks a valid observed center")
+            if frame.raw.get("area_positioning"):
+                steer = self._steer_area(frame, decision)
+                if steer is not None:
+                    return steer
             if self.area_target_confirmations >= self.max_area_target_confirmations:
                 if (self.area_target_confirmation_tick is not None
                         and frame.tick - self.area_target_confirmation_tick > 60):
@@ -316,7 +459,7 @@ class CombatController:
             self.area_target_confirmations += 1
             self.area_target_confirmation_tick = frame.tick
             # BATTLE.PRG func_800C4794: Cross cancels the default sphere mode; Circle enters
-            # positioning mode, then a second Circle confirms the area.
+            # positioning mode, then a second Circle confirms the area once it covers the target.
             return self._action(frame, ("Circle",), 2,
                                 "advance or confirm native area targeting")
         if frame.control == 2 and frame.source_actor == 0 and frame.action_phase in (1, 3):
@@ -348,6 +491,10 @@ class CombatController:
                     and self.transaction is not None and self.preparing):
                 gaps = self.area_defeat_gaps(frame)
                 if gaps:
+                    if self.area_retries < self.max_area_retries:
+                        retry = self._retry_area(frame, decision)
+                        if retry is not None:
+                            return retry
                     # Defeating only part of the set fires the single-defeat trigger instead.
                     self.feedback.append({"kind": "area_incomplete", "status": "area_incomplete",
                                           "tick": frame.tick, "action_id": decision.action_id,
@@ -361,6 +508,9 @@ class CombatController:
                 and (decision.target_limb < 0 or entry["limb"] == decision.target_limb)
             ]
             if not desired:
+                retry = self._retry_area(frame, decision)
+                if retry is not None:
+                    return retry
                 self._reject_target("target_not_listed", decision, frame)
                 if self.transaction and self.preparing:
                     self.transaction.closing = True
