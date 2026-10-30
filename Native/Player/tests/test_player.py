@@ -1517,6 +1517,25 @@ class ControllerTests(unittest.TestCase):
         feedback[0]["player_position"] = far
         self.assertIn("cast:2:130:1", available_choices(frame, {"controller_feedback": feedback}))
 
+    def test_unlisted_spell_target_offers_approach_instead_of_other_spells_here(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": action, "name": name, "family": "sorcerer", "cost": 5,
+             "restrictions": 0, "menu_order": index}
+            for index, (action, name) in enumerate(((100, "Fire"), (102, "Wind")))
+        ]
+        frame = Frame.decode(record)
+        feedback = [{"kind": "target_not_listed", "intent": "cast", "target": 2,
+                     "player_position": frame.player.position, "tick": 1}]
+        choices = available_choices(frame, {"controller_feedback": feedback})
+        self.assertFalse(any(row["intent"] == "cast" and row["target_slot"] == 2
+                             for row in choices.values()))
+        self.assertIn("approach:2:-1:1", choices)
+        feedback[0]["intent"] = "attack"
+        self.assertIn("cast:2:102:1", available_choices(frame, {"controller_feedback": feedback}))
+        feedback[0].update(intent="cast", player_position=tuple(value + 512 for value in frame.player.position))
+        self.assertIn("cast:2:102:1", available_choices(frame, {"controller_feedback": feedback}))
+
     def test_combined_objective_approaches_after_area_preview_was_out_of_range_here(self):
         record = sample_record(active=False)
         second = copy.deepcopy(record["data"]["actors"][1])

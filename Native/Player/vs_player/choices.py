@@ -60,6 +60,12 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     feedback = context.get("controller_feedback", [])
     # Native targeting refused these hostiles from several positions; melee would loop against terrain.
     unreachable = {row["slot"] for row in context.get("unreachable_hostiles", [])}
+    # Native spell targeting listed no such hostile from here; other spells would be refused alike.
+    refused_here = {row["target"] for row in feedback
+                    if row.get("kind") == "target_not_listed" and row.get("intent") == "cast"
+                    and row.get("target", 0) > 0
+                    and row.get("player_position") is not None
+                    and math.dist(row["player_position"], player.position) < 128}
 
     def add(intent: str, target: int = -1, action: int = -1, slot: int = 1,
             item: int = -1, limb: int = -1) -> None:
@@ -72,7 +78,7 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                         "action_id": action, "equip_slot": slot, "item_id": item}
 
     def unsuccessful(action: int, target: int) -> bool:
-        return any(row.get("action_id") == action and row.get("target") == target
+        return target in refused_here or any(row.get("action_id") == action and row.get("target") == target
                    and (row.get("status") in ("blocked", "no_effect")
                         or (row.get("status") == "area_out_of_range"
                             and row.get("player_position") is not None

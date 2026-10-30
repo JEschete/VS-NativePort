@@ -318,7 +318,7 @@ class CombatController:
         if player is None:
             raise ValueError("Native target rejection lacks the observed player position")
         self.feedback.append({
-            "kind": kind, "tick": frame.tick, "target": decision.target_slot,
+            "kind": kind, "tick": frame.tick, "target": decision.target_slot, "intent": decision.intent,
             "target_identity": self.identity, "player_position": player.position,
         })
         if decision.intent == "attack" and self.identity is not None:
