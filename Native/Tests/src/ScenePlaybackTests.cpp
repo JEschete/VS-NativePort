@@ -419,6 +419,22 @@ TEST_CASE("Scene dialogue assistance confirms an active text-box choice",
   CHECK(trial.Input(60) == 0);
 }
 
+TEST_CASE(
+    "Scene dialogue assistance leaves producer choices before the expected "
+    "event to scripted setup",
+    "[scenes][playback]") {
+  auto trial = Trial();
+  auto producer = Event(507);
+  producer["event"]["choice_active"] = true;
+  trial.Observe(ReadyState(), producer, 29);
+  CHECK(trial.Input(30) == 0);
+  CHECK(trial.Result().at("dialogue_confirm_pulses") == 0);
+  producer["event"]["choice_active"] = false;
+  producer["event"]["dialogue_waits"] = {true};
+  trial.Observe(ReadyState(), producer, 59);
+  CHECK(trial.Input(60) == VS::Input::Circle);
+}
+
 namespace {
 nlohmann::json ExpectedGameOver() {
   return {{"events", {0}},

@@ -76,6 +76,7 @@ class SceneTrial {
   std::optional<std::uint64_t> control_tick_;
   std::uint64_t passed_tick_ = 0;
   bool dialogue_waiting_ = false;
+  bool dialogue_pulse_ = false;
   bool dialogue_held_ = false;
   bool event_active_ = false;
   std::uint64_t dialogue_pulses_ = 0;

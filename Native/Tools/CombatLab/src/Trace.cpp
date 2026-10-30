@@ -171,12 +171,13 @@ void SceneTrial::Observe(const Game::EncounterState& state,
            {"transition", state.transition},
            {"event", event},
            {"tick", tick}};
-  dialogue_waiting_ =
+  const bool text_waiting =
       available &&
-      (event.value("choice_active", false) ||
-       std::ranges::any_of(event.at("dialogue_waits"), [](const auto& wait) {
-         return wait.template get<bool>();
-       }));
+      std::ranges::any_of(event.at("dialogue_waits"), [](const auto& wait) {
+        return wait.template get<bool>();
+      });
+  const bool choice_active = available && event.value("choice_active", false);
+  dialogue_waiting_ = text_waiting || choice_active;
   const bool defeat_terminal = expected_.game_over_to_title;
   if ((state.game_over && !defeat_terminal) ||
       (state.native_pressed & VS::Input::Start) != 0 ||
@@ -206,6 +207,9 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   } else if (available) {
     event_active_ = false;
   }
+  // Producer menus before the first expected event belong to the scripted
+  // setup selection; confirming them would accept the default row instead.
+  dialogue_pulse_ = text_waiting || (choice_active && next_event_ > 0);
   if (defeat_terminal && state.game_over && !game_over_menu_tick_) {
     constexpr int kFilesMenu = 7;  // MENU7 hosts vs_menu7_gameOver
     const auto ashley =
@@ -332,7 +336,7 @@ std::uint32_t SceneTrial::Input(std::uint64_t tick) {
     return 0;
   }
   const bool held = !Finished() && expected_.confirm_dialogue &&
-                    dialogue_waiting_ &&
+                    dialogue_pulse_ &&
                     tick % kDialoguePulsePeriod < kDialogueHoldTicks;
   if (held && !dialogue_held_) ++dialogue_pulses_;
   dialogue_held_ = held;
