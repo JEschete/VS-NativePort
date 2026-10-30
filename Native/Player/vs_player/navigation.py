@@ -115,6 +115,82 @@ class TerrainNavigator:
         self.direct_best_distance = math.inf
         self.direct_attempt_ticks = 0
         self.avoid_hostiles = False
+        # Whole-room tile grid (PlayerObservation.cpp EncodeRoomTiles, resent every 120 frames).
+        self.grid = None
+        self.grid_scope: tuple[int, int] | None = None
+
+    def observe_grid(self, frame: Frame) -> None:
+        scope = (frame.zone, frame.room)
+        if scope != self.grid_scope:
+            self.grid, self.grid_scope = None, scope
+        raw = frame.raw.get("room_tiles")
+        if raw is not None:
+            from .crates import RoomGrid
+            self.grid = RoomGrid.decode(raw)
+
+    def room_subgoal(self, terrain: Terrain, position: tuple[int, int, int],
+                     destination: tuple[int, int]) -> tuple[int, int] | None:
+        """Farthest in-patch tile on a whole-room route, so walls cannot trap the local search."""
+        from .crates import CLIMB_UP, MAX_DROP, TILE
+        grid = self.grid
+        if grid is None:
+            return None
+        start = (position[0] // TILE, position[2] // TILE)
+        goal = (destination[0] // TILE, destination[1] // TILE)
+        if not grid.inside(*start) or not grid.inside(*goal) or start == goal:
+            return None
+
+        def standable(x: int, z: int) -> int | None:
+            index = z * grid.width + x
+            floor, ceiling = grid.floor[index], grid.ceiling[index]
+            if floor is None or not grid.passable[index]:
+                return None
+            if ceiling is not None and floor - ceiling < terrain.body_height:
+                return None
+            return floor
+
+        if standable(*start) is None:
+            return None
+        previous: dict[tuple[int, int], tuple[int, int] | None] = {start: None}
+        queue = [start]
+        for tile in queue:
+            if tile == goal:
+                break
+            height = standable(*tile)
+            for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1)):
+                neighbor = (tile[0] + dx, tile[1] + dz)
+                if neighbor in previous or not grid.inside(*neighbor):
+                    continue
+                if neighbor == goal:
+                    # Door and trigger cells may be closed or unsupported until reached.
+                    previous[neighbor] = tile
+                    queue.append(neighbor)
+                    continue
+                other = standable(*neighbor)
+                if other is None or height - other > CLIMB_UP or other - height > MAX_DROP:
+                    continue
+                previous[neighbor] = tile
+                queue.append(neighbor)
+        if goal not in previous:
+            return None
+        route = []
+        cursor: tuple[int, int] | None = goal
+        while cursor is not None:
+            route.append(cursor)
+            cursor = previous[cursor]
+        route.reverse()
+        low_x, low_z = terrain.origin
+        high_x = low_x + (terrain.width - 1) * terrain.spacing
+        high_z = low_z + (terrain.depth - 1) * terrain.spacing
+        chosen = None
+        for tile in route[1:]:
+            x, z = tile[0] * TILE + TILE // 2, tile[1] * TILE + TILE // 2
+            if not (low_x <= x <= high_x and low_z <= z <= high_z):
+                break
+            chosen = tile
+        if chosen is None or chosen == goal:
+            return None
+        return chosen[0] * TILE + TILE // 2, chosen[1] * TILE + TILE // 2
 
     def ordinary_approach_stalled(self, frame: Frame, target: Actor, duration: int) -> bool:
         if frame.player is None:
@@ -153,6 +229,7 @@ class TerrainNavigator:
             return None
         if frame.player is None:
             raise ValueError("Field navigation lost the observed player")
+        self.observe_grid(frame)
         target = next((actor for actor in frame.enemies if actor.slot == target_slot), None)
         if target_slot is not None and target is None:
             raise StaleDecision("Navigation target is no longer an observed living hostile")
@@ -168,6 +245,10 @@ class TerrainNavigator:
         if not valid:
             raise ValueError(NO_TERRAIN_SAMPLES)
         position = frame.player.position
+        final_destination = destination
+        subgoal = self.room_subgoal(terrain, position, destination)
+        if subgoal is not None:
+            destination = subgoal
         start = min(valid, key=lambda index: sum(
             (terrain.point(index)[axis] - position[axis])**2 for axis in (0, 1, 2)
         ))
@@ -260,6 +341,8 @@ class TerrainNavigator:
             raise ValueError(NO_OUTGOING_EDGE)
         context = {
             "destination_world_xz": destination,
+            "final_destination_world_xz": final_destination,
+            "room_route_subgoal": subgoal is not None,
             "player_world": position, "candidates": self.offered,
             "weapon_drawn": frame.player.weapon_drawn,
             "player_hp": frame.player.hp,
@@ -315,6 +398,7 @@ class TerrainNavigator:
         return rows
 
     def step(self, frame: Frame) -> InputAction | None:
+        self.observe_grid(frame)
         if ((frame.enemies and self.target_identity is None and not self.avoid_hostiles)
                 or (self.target_identity is not None and self.target(frame) is None)
                 or (frame.episode, frame.zone, frame.room) != self.scene):
@@ -490,6 +574,7 @@ class SceneTileGoal:
     def observe(self, frame: Frame) -> None:
         # The host exports room_tiles only periodically; keep it from any frame, not just the latest.
         self.crates.observe_grid(frame)
+        self.navigator.observe_grid(frame)
         scene = frame.raw["scene"]
         event = scene.get("event", {}) if scene["available"] else {}
         if not field_navigation_ready(frame) or frame.dialogue_waiting:

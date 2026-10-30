@@ -586,6 +586,27 @@ class NavigationTests(unittest.TestCase):
         }
         return record
 
+    def test_room_tile_route_sets_a_local_subgoal_around_walls_beyond_the_patch(self):
+        record = self.frame()
+        record["data"]["actors"][0]["position"] = [192, 0, 64]
+        navigation = record["data"]["navigation"]
+        navigation.update(origin=[32, 32], width=13, depth=13,
+                          samples=[[0, -2032, 5] for _ in range(169)])
+        width, depth = 9, 5
+        # A wall at tile column 4 leaves only the bottom row open; the door is behind it at 8,0.
+        flags = [0 if x == 4 and z < 4 else 1 for z in range(depth) for x in range(width)]
+        record["data"]["room_tiles"] = {"width": width, "depth": depth, "floor": [0] * (width * depth),
+                                        "ceiling": [-1] * (width * depth), "flags": flags}
+        navigator = TerrainNavigator()
+        context = navigator.request(Frame.decode(record), (8 * 128 + 64, 64))
+        self.assertTrue(context["room_route_subgoal"])
+        self.assertEqual(context["final_destination_world_xz"], (1088, 64))
+        self.assertEqual(context["destination_world_xz"][0], 5 * 128 + 64)
+        del record["data"]["room_tiles"]
+        context = TerrainNavigator().request(Frame.decode(record), (8 * 128 + 64, 64))
+        self.assertFalse(context["room_route_subgoal"])
+        self.assertEqual(context["destination_world_xz"], (1088, 64))
+
     def test_routes_go_around_blocked_terrain_instead_of_through_it(self):
         record = self.frame()
         record["data"]["navigation"]["samples"][4][2] = 0

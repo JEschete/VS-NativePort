@@ -103,6 +103,10 @@ class PhysicalDoor:
                 and self.face_attempts < 6)
 
     def observe(self, frame: Frame) -> None:
+        # room_tiles arrives only periodically; cache it even while no route is pending.
+        self.navigator.observe_grid(frame)
+        if self.chest is not None:
+            self.chest.navigator.observe_grid(frame)
         if self.contract is None:
             if not frame.ready:
                 return
