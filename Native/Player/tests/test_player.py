@@ -1359,6 +1359,7 @@ class ControllerTests(unittest.TestCase):
         hold = SceneReturnHold({"events": [0], "event_source": 2, "return_zone": 9, "return_room": 7})
         record = sample_record(tick=100)
         record["data"]["room"] = 7
+        record["data"]["actors"][1]["position"] = [1024, 0, 1024]
         self.assertFalse(hold.holding(Frame.decode(record)))
         record["data"]["scene"]["event"].update(phase=4, source=1, id=0)
         hold.observe(Frame.decode(record))
@@ -1375,6 +1376,14 @@ class ControllerTests(unittest.TestCase):
         record["data"]["actors"][0]["weapon_drawn"] = 0
         record["tick"] = record["sequence"] = 200
         self.assertIsNone(hold.step(Frame.decode(record)))
+        # A hostile in melee range (or a reaction aimed at Ashley) hands control back to combat.
+        record["data"]["actors"][1]["position"] = [300, 0, 64]
+        self.assertFalse(hold.holding(Frame.decode(record)))
+        record["data"]["actors"][1]["position"] = [300, -600, 64]
+        self.assertTrue(hold.holding(Frame.decode(record)))
+        record["data"]["reaction_timing"].update(source_actor=2, target_actor=0)
+        self.assertFalse(hold.holding(Frame.decode(record)))
+        record["data"]["reaction_timing"].update(source_actor=0, target_actor=2)
         record["data"]["room"] = 6
         self.assertFalse(hold.holding(Frame.decode(record)))
         ending = SceneReturnHold({"events": [0], "ending_to_title": True})

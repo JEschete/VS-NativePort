@@ -1,5 +1,6 @@
 import json
 import hashlib
+import math
 import queue
 import sqlite3
 import subprocess
@@ -427,7 +428,21 @@ class SceneReturnHold:
 
     def holding(self, frame: Frame) -> bool:
         return (self.enabled and self.matched == len(self.events) and frame.ready
-                and (frame.zone, frame.room) == self.room and frame.event_phase == 0)
+                and (frame.zone, frame.room) == self.room and frame.event_phase == 0
+                and not self.engaged(frame))
+
+    @staticmethod
+    def engaged(frame: Frame) -> bool:
+        """A hostile attacking Ashley keeps forcing battle control, so ordinary combat must end it
+        before native can observe a stable field interval; distant hostiles are left alone."""
+        player = frame.player
+        if player is None:
+            return False
+        if frame.reaction.active and frame.reaction.target_actor == 0:
+            return True
+        x, y, z = player.position
+        return any(math.hypot(enemy.position[0] - x, enemy.position[2] - z) <= 384
+                   and abs(enemy.position[1] - y) <= 256 for enemy in frame.enemies)
 
     def step(self, frame: Frame) -> InputAction | None:
         if self.hold_tick is None:
