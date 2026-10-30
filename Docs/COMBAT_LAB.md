@@ -371,6 +371,9 @@ target readers (`func_800A1C10`, `func_800A1108`, `func_800A0BE0`) return
 without writing, so the guarded colour track keeps its defaults. The earlier
 static package-requirement proof aborted MAP026's absent model 0x35 (#239) and
 was removed; `[effect-binding]` now checks empty-slot start and reader no-ops.
+Direct slot selectors (type 1) are returned unchecked by `func_800BFE50`, so
+an effect on an empty slot also starts: EVENT0014 (MAP219) plays E205 on slot 2
+at offset 2210 and spawns that slot at offset 2349.
 #239 re-verifies E068 with the declared max-stat assist in Release
 `146e6afba91344d9a5d8fad2a7545cb7` (control9953) and Debug
 `71481fbca8984bcdb528e808ab095dad` (control9273), zero errors. After the

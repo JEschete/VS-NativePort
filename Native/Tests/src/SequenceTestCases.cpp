@@ -396,8 +396,8 @@ TEST_CASE("Shared bank retirement preserves unrelated and failed borrowers",
 }
 
 TEST_CASE(
-    "Scripted effects retain required bindings and start an absent model "
-    "on empty slot 1",
+    "Scripted effects retain required bindings and start absent targets "
+    "on their empty slot",
     "[event][effects][effect-binding]") {
   for (int scenario = 0; scenario < 10; ++scenario) {
     CAPTURE(scenario);
@@ -405,7 +405,9 @@ TEST_CASE(
   }
 }
 
-TEST_CASE("E073 missing actor remains an explicit error on repeat entry",
+// EVENT0014 plays effect 205 on direct slot 2 (offset 2210) before spawning
+// slot 2 at offset 2349; the original starts the effect on the empty slot.
+TEST_CASE("Direct-slot effect starts on an empty slot on repeat entry",
           "[event][effects][effect-binding]") {
   for (int repeat = 0; repeat < 2; ++repeat) {
     CAPTURE(repeat);

@@ -53,8 +53,9 @@ intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
     const unsigned referenceType = selector >> 12;
     const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;
     const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;
-    const int unresolved_model = referenceType == 0 && actor == 1 &&
-        target == NULL && Actors_actorRecords[1] == NULL && Field_gimmickInstances[1] == NULL;
+    const int empty_slot = (unsigned)actor < 16 && target == NULL &&
+        Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL;
+    const int unresolved_model = empty_slot && (referenceType == 1 || actor == 1);
     if (!unresolved_model && ((unsigned)actor >= 16 ||
         (referenceType == 0 && (target == NULL || target->modelId != selector)) ||
         (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL))) {
@@ -63,11 +64,11 @@ intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
         return 1;
     }
     if (unresolved_model) {
-        // Actors_FindActorByModelId (146C.c) returns slot 1 for an absent model and
-        // Effects_StartScriptedActorEffect starts the effect at once. Empty-slot geometry
-        // reads (Actors_ActorBoneEndpointPosition, Actors_ActorPlacement, Actors_ActorStateFlags) return
-        // without writing, so target-dependent tracks keep defaults.
-        Core_Debugf("event", "effect=%d absent model selector=0x%04X targets empty slot 1", effect, (unsigned)selector);
+        // Actors_FindActorByModelId (146C.c) returns slot 1 for an absent model, Event_ResolveScriptActorReference
+        // returns a direct slot reference unchecked, and Effects_StartScriptedActorEffect starts the
+        // effect at once. Empty-slot geometry reads (Actors_ActorBoneEndpointPosition, Actors_ActorPlacement,
+        // Actors_ActorStateFlags) return without writing, so target-dependent tracks keep defaults.
+        Core_Debugf("event", "effect=%d absent actor selector=0x%04X targets empty slot %d", effect, (unsigned)selector, actor);
     }
     Effects_StartScriptedActorEffect(effect, actor);
     return 0;

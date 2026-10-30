@@ -1666,8 +1666,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    const unsigned referenceType = selector >> 12;\n"
          "    const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;\n"
          "    const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;\n"
-         "    const int unresolved_model = referenceType == 0 && actor == 1 &&\n"
-         "        target == NULL && Actors_actorRecords[1] == NULL && Field_gimmickInstances[1] == NULL;\n"
+         "    const int empty_slot = (unsigned)actor < 16 && target == NULL &&\n"
+         "        Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL;\n"
+         "    const int unresolved_model = empty_slot && (referenceType == 1 || actor == 1);\n"
          "    if (!unresolved_model && ((unsigned)actor >= 16 ||\n"
          "        (referenceType == 0 && (target == NULL || target->modelId != selector)) ||\n"
          "        (Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL))) {\n"
@@ -1676,16 +1677,16 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "        return 1;\n"
          "    }\n"
          "    if (unresolved_model) {\n"
-         "        // func_8007CF18 (146C.c) returns slot 1 for an absent model and\n"
-         "        // func_8007BE20 starts the effect at once. Empty-slot geometry\n"
-         "        // reads (func_800A1C10, func_800A1108, func_800A0BE0) return\n"
-         "        // without writing, so target-dependent tracks keep defaults.\n"
-         "        Core_Debugf(\"event\", \"effect=%d absent model selector=0x%04X targets empty slot 1\", effect, (unsigned)selector);\n"
+         "        // func_8007CF18 (146C.c) returns slot 1 for an absent model, func_800BFE50\n"
+         "        // returns a direct slot reference unchecked, and func_8007BE20 starts the\n"
+         "        // effect at once. Empty-slot geometry reads (func_800A1C10, func_800A1108,\n"
+         "        // func_800A0BE0) return without writing, so target-dependent tracks keep defaults.\n"
+         "        Core_Debugf(\"event\", \"effect=%d absent actor selector=0x%04X targets empty slot %d\", effect, (unsigned)selector, actor);\n"
          "    }\n"
          "    Effects_StartScriptedActorEffect(effect, actor);",
          "func_800BA8BC: preserve invalid-kind/literal/mismatched-owner waits; "
-         "an actually absent original model sentinel starts against empty "
-         "slot 1 like the original, whose actor readers tolerate the empty slot"),
+         "an actually absent original model sentinel or empty direct slot starts "
+         "against that empty slot like the original, whose actor readers tolerate it"),
     ],
     "F00536": [("Field_isRoomActorSpawnEnabled", "Field_zoneContext.mpdEnemyCount",
                  "D_800F18E0 aliases _zoneContext +0x60 (mpdEnemyCount), not an independent enable flag")],

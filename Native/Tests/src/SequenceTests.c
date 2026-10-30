@@ -936,7 +936,10 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Effects_primaryPhase = 3;
   const intptr_t result = Event_CommandPlayActorEffect(instruction, 0);
   memcpy(request_after, &Effects_actionRequest, sizeof request_after);
-  const int queued = present || scenario == 3;
+  // Absent model (3) and direct slot references to an empty slot (4, 10) start
+  // like the original: func_800BFE50 returns type-1 slots unchecked.
+  const int empty = scenario == 3 || scenario == 4 || scenario == 10;
+  const int queued = present || empty;
   int passed = result == (queued ? 0 : 1);
   if (queued) {
     passed &= Effects_primaryPhase == 6 &&
@@ -944,17 +947,18 @@ int TestScriptedEffectTargetBinding(int scenario) {
               Effects_actionRequest.count == 1 &&
               Effects_actionRequest.targets[0].type == 4 &&
               Effects_actionRequest.targets[0].value.actor.actor == slot;
-    if (scenario == 3) {
-      passed &= Battle_actors[1] == NULL && Actors_actorRecords[1] == NULL &&
-                Field_gimmickInstances[1] == NULL;
+    if (empty) {
+      passed &= Battle_actors[slot] == NULL &&
+                Actors_actorRecords[slot] == NULL &&
+                Field_gimmickInstances[slot] == NULL;
       // The started effect's emitTo readers must leave defaults untouched.
       SVECTOR bone = {11, 22, 33, 44};
       int placement[3] = {55, 66, 77};
-      passed &= Actors_ActorBonePosition(1, 0, &bone, 0) == -1 &&
+      passed &= Actors_ActorBonePosition(slot, 0, &bone, 0) == -1 &&
                 bone.vx == 11 && bone.vy == 22 && bone.vz == 33 &&
-                Actors_ActorPlacement(1, placement) == -1 &&
+                Actors_ActorPlacement(slot, placement) == -1 &&
                 placement[0] == 55 && placement[1] == 66 &&
-                placement[2] == 77 && Actors_ActorStateFlags(1) == 0;
+                placement[2] == 77 && Actors_ActorStateFlags(slot) == 0;
     }
   } else {
     passed &=

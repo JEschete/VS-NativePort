@@ -20,9 +20,9 @@ class EncounterFixupTests(unittest.TestCase):
         for fixup_id in ("F01425", "F01433", "F01438"):
             self.assertNotIn(fixup_id, copy_fixups.FIXES)
         command = copy_fixups.FIXES["F01170"][0][1]
-        self.assertIn("referenceType == 0 && actor == 1", command)
-        self.assertIn("target == NULL && Actors_actorRecords[1] == NULL", command)
-        self.assertIn("Field_gimmickInstances[1] == NULL", command)
+        self.assertIn("(unsigned)actor < 16 && target == NULL", command)
+        self.assertIn("Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL;", command)
+        self.assertIn("empty_slot && (referenceType == 1 || actor == 1)", command)
         self.assertIn("if (!unresolved_model && ", command)
         self.assertTrue(command.rstrip().endswith(
             "Effects_StartScriptedActorEffect(effect, actor);"))
@@ -1703,8 +1703,12 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertLess(
-            source.index("(unsigned)actor >= 16"),
+            source.index("(unsigned)actor < 16 && target == NULL"),
             source.index("Actors_actorRecords[actor]"),
+        )
+        self.assertLess(
+            source.index("(unsigned)actor >= 16"),
+            source.rindex("Actors_actorRecords[actor]"),
         )
         self.assertLess(
             source.index("return 1;"), source.index("Effects_StartScriptedActorEffect")
