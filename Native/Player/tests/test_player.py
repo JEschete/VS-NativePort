@@ -520,6 +520,30 @@ class NavigationTests(unittest.TestCase):
         turned, _ = lease(straight[:1] + [{"position": (x + 64, y, z - 64), "jump": False}])
         self.assertEqual(turned.duration, single.duration)
 
+    def test_passed_waypoints_are_not_steered_back_to(self):
+        navigator = TerrainNavigator()
+        record = self.frame()
+        frame = Frame.decode(record)
+        navigator.request(frame, (160, 96))
+        navigator.accept(NavigationDecision("route1", "advance", 1, 900), frame)
+        x, y, z = frame.player.position
+        ahead = {"position": (x, y, z - 128), "jump": False}
+        navigator.path = [{"position": (x, y, z + 64), "jump": False}, ahead]
+        action = navigator.step(frame)
+        self.assertEqual(navigator.path, [ahead])
+        direct = TerrainNavigator()
+        direct.request(frame, (160, 96))
+        direct.accept(NavigationDecision("route1", "advance", 1, 900), frame)
+        direct.path = [dict(ahead)]
+        self.assertEqual(action.buttons, direct.step(frame).buttons)
+        corner = {"position": (x + 128, y, z + 64), "jump": False}
+        navigator = TerrainNavigator()
+        navigator.request(frame, (160, 96))
+        navigator.accept(NavigationDecision("route1", "advance", 1, 900), frame)
+        navigator.path = [corner, {"position": (x + 128, y, z - 128), "jump": False}]
+        navigator.step(frame)
+        self.assertIs(navigator.path[0], corner)
+
     def test_corner_jitter_is_not_waypoint_progress(self):
         navigator = TerrainNavigator()
         frame = Frame.decode(self.frame())

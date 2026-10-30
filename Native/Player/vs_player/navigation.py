@@ -241,7 +241,8 @@ class TerrainNavigator:
                 first = (route[0]["position"][0], route[0]["position"][2])
                 if first in first_steps:
                     continue
-                route = route[:6]
+                # Long straight prefixes keep timed corridors from stalling on a model round-trip every 384 units.
+                route = route[:12]
                 last = route[-1]["position"]
                 if self.completed_positions.get((last[0], last[2]), 0) >= 2:
                     continue
@@ -348,6 +349,18 @@ class TerrainNavigator:
             self.sheath_sent_tick = self.last_tick = frame.tick
             self.progress_tick = frame.tick
             return InputAction(frozenset({"Cross"}), 4, "sheathe normally before a native-gated terrain transition")
+        # A held lease can carry Ashley past intermediate waypoints; turning back to them reverses the run.
+        while (len(self.path) > 1 and not self.path[0]["jump"] and not self.path[1]["jump"]
+               and abs(self.path[0]["position"][1]-position[1]) <= 64):
+            here, after = self.path[0]["position"], self.path[1]["position"]
+            along = (after[0]-here[0], after[2]-here[2])
+            offset = (position[0]-here[0], position[2]-here[2])
+            length = math.hypot(*along)
+            if (offset[0]*along[0] + offset[1]*along[1] <= 0
+                    or abs(offset[0]*along[1] - offset[1]*along[0]) > 40*length):
+                break
+            self.path.pop(0)
+            self.best_waypoint_distance = math.inf
         target = self.path[0]
         x, y, z = target["position"]
         native = frame.raw["navigation"]
