@@ -219,6 +219,13 @@ class CombatController:
         if reaction:
             return self._action(frame, (reaction.button,), 2,
                                 f"{reaction.kind}:slot{reaction.slot}", True)
+        if (frame.ready and frame.control == 11 and frame.event_phase == 0
+                and frame.tick - self.last_action_tick >= 6):
+            # Key/sigil unlock notices (Menu_ShowSceneNotification) pause the field until a button at
+            # their arrow; dismissing one is not a strategy choice, so settled combat cannot block it.
+            if frame.tick % 30 < 2:
+                return self._action(frame, ("Circle",), 2, "dismiss the native door/lock notification")
+            return None
         if not allow_strategy:
             return None
         if not frame.ready or frame.game_over or frame.player is None:
@@ -235,11 +242,6 @@ class CombatController:
         if frame.dialogue_waiting:
             if frame.tick % 30 < 2:
                 return self._action(frame, ("Circle",), 2, "visible dialogue confirmation")
-            return None
-        if frame.control == 11 and frame.event_phase == 0:
-            # Key/sigil unlock notices (Menu_ShowSceneNotification) wait for a button at their arrow.
-            if frame.tick % 30 < 2:
-                return self._action(frame, ("Circle",), 2, "dismiss the native door/lock notification")
             return None
         menu = frame.raw["menu"]
         if loot_menu_ready(frame):

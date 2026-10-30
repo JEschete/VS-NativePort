@@ -2258,6 +2258,10 @@ class RunnerTests(unittest.TestCase):
         self.assertFalse(input_lease_permitted(frame, frozenset({"Circle", "Up"})))
         record["tick"] = 45
         self.assertIsNone(CombatController().step(Frame.decode(record)))
+        # Settled clear-first combat withholds strategy, but the paused notice still needs its button.
+        record["tick"] = 60
+        held = CombatController().step(Frame.decode(record), allow_strategy=False)
+        self.assertEqual(held.buttons, frozenset({"Circle"}))
 
     def test_native_dialogue_circle_lease_survives_cutscene_control_only_while_visible(self):
         record = sample_record(active=False)
