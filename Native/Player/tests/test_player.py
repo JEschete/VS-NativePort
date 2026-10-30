@@ -1502,6 +1502,30 @@ class ControllerTests(unittest.TestCase):
         self.assertFalse(any(row["target_slot"] == 2 and row["intent"] in ("attack", "cast")
                              for row in choices.values()))
 
+    def test_combined_objective_never_fires_through_a_protected_hostile(self):
+        record = sample_record(active=False)
+        record["data"]["action_options"] = [
+            {"id": 102, "name": "Wind", "family": "sorcerer", "cost": 5,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        player, target = record["data"]["actors"][0], record["data"]["actors"][1]
+        target["position"] = [player["position"][0] + 600, player["position"][1], player["position"][2]]
+        blocker = copy.deepcopy(target)
+        blocker.update(slot=3, spell_action_ids=[])
+        blocker["position"] = [player["position"][0] + 300, player["position"][1], player["position"][2]]
+        dormant = copy.deepcopy(target)
+        dormant.update(slot=4, hostile_to_player=False, relation_to_player=0)
+        record["data"]["actors"] += [blocker, dormant]
+        context = {"simultaneous_defeat_objective": {"slots": [3, 4], "claim": "", "area_radii": {}},
+                   "controller_feedback": []}
+        choices = available_choices(Frame.decode(record), context)
+        self.assertFalse(any(row["intent"] == "cast" and row["target_slot"] in (2, 3)
+                             for row in choices.values()))
+        self.assertIn("approach:2:-1:1", choices)
+        blocker["position"][2] += 400
+        choices = available_choices(Frame.decode(record), context)
+        self.assertIn("cast:2:102:1", choices)
+
     def test_area_out_of_range_feedback_suppresses_cast_only_near_failed_position(self):
         record = sample_record(active=False)
         record["data"]["action_options"] = [

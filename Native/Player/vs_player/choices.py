@@ -36,6 +36,32 @@ def native_target_menu_ready(frame: Frame) -> bool:
             and frame.raw["target_page"]["selection_step"] == 19)
 
 
+# Horizontal clearance treated as inside an actor's collision when tracing a line of fire.
+FIRE_LINE_CLEARANCE = 96
+
+
+def fire_line_blocked(player, target, blockers) -> bool:
+    """True when a blocker stands on the horizontal segment from the player to the target."""
+    if player is None:
+        return False
+    px, pz = player.position[0], player.position[2]
+    tx, tz = target.position[0] - px, target.position[2] - pz
+    length = tx * tx + tz * tz
+    if length == 0:
+        return False
+    for blocker in blockers:
+        if blocker.slot == target.slot:
+            continue
+        bx, bz = blocker.position[0] - px, blocker.position[2] - pz
+        along = (bx * tx + bz * tz) / length
+        if not 0 < along < 1:
+            continue
+        cx, cz = bx - along * tx, bz - along * tz
+        if cx * cx + cz * cz <= FIRE_LINE_CLEARANCE ** 2:
+            return True
+    return False
+
+
 def urgent_recovery_needed(frame: Frame, context: dict) -> bool:
     player = frame.player
     if player is None:
@@ -66,9 +92,13 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                     and row.get("target", 0) > 0
                     and row.get("player_position") is not None
                     and math.dist(row["player_position"], player.position) < 128}
+    # Hostiles whose spell line of fire currently passes a protected hostile.
+    shielded: set[int] = set()
 
     def add(intent: str, target: int = -1, action: int = -1, slot: int = 1,
             item: int = -1, limb: int = -1) -> None:
+        if intent == "cast" and target in shielded:
+            return
         key = f"{intent}:{target}:{action}:{slot}"
         if item >= 0:
             key += f":{item}"
@@ -201,6 +231,12 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     else:
         target_enemies = caster_targets or [enemy for enemy in frame.enemies
                                             if enemy.slot not in protected]
+    # BATTLE.PRG func_80085B10 traces actor collision from the caster for resetsHitResults actions
+    # and redirects the hit to the first actor in the line (MAP150 local5: a spell at slot 2 killed
+    # protected slot 4 standing between). Protected slots must not shield a spell's single target.
+    shielded.update(enemy.slot for enemy in frame.enemies
+                    if fire_line_blocked(player, enemy, [other for other in frame.enemies
+                                                         if other.slot in protected]))
     incoming = context.get("max_incoming_hp_damage", 0)
     danger_threshold = min(player.max_hp, incoming * 2)
     urgent_recovery = urgent_recovery_needed(frame, context)
@@ -358,6 +394,11 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
             add("attack", enemy.slot)
         add("approach", enemy.slot)
         add("retreat", enemy.slot)
+    for slot in sorted(shielded - protected):
+        if slot not in unreachable:
+            # Moving changes the line of fire around the protected actor.
+            add("approach", slot)
+            add("retreat", slot)
     for option in learned_spells:
         details = semantics.get(str(option["id"]), {})
         role = details.get("role")
@@ -368,6 +409,8 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         if role == "banish":
             continue
         for enemy in frame.enemies:
+            if enemy.slot in protected:
+                continue
             if not unsuccessful(option["id"], enemy.slot):
                 add("cast", enemy.slot, option["id"])
     if not choices:
