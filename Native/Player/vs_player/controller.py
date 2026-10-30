@@ -25,6 +25,8 @@ def input_lease_permitted(frame: Frame, buttons: frozenset[str]) -> bool:
         frame.control in (1, 2, 5, 6)
         or (frame.control == 3 and frame.dialogue_waiting
             and buttons == frozenset({"Circle"}))
+        # GameLoop control 11 only polls Menu_IsSceneNotificationPending; a face button dismisses it.
+        or (frame.control == 11 and buttons == frozenset({"Circle"}))
         or (loot_menu_ready(frame) and buttons == frozenset({"Square"}))
         or (reward_menu_ready(frame) and buttons in (
             frozenset({"Circle"}), frozenset({"Up"}), frozenset({"Down"})))
@@ -220,6 +222,11 @@ class CombatController:
         if frame.dialogue_waiting:
             if frame.tick % 30 < 2:
                 return self._action(frame, ("Circle",), 2, "visible dialogue confirmation")
+            return None
+        if frame.control == 11 and frame.event_phase == 0:
+            # Key/sigil unlock notices (Menu_ShowSceneNotification) wait for a button at their arrow.
+            if frame.tick % 30 < 2:
+                return self._action(frame, ("Circle",), 2, "dismiss the native door/lock notification")
             return None
         menu = frame.raw["menu"]
         if loot_menu_ready(frame):

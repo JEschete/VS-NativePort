@@ -436,6 +436,8 @@ class SceneTileGoal:
         self.identity = f"scene:{zone}:{room}:local:{selector}:tile:{tile[0]}:{tile[1]}"
 
     def observe(self, frame: Frame) -> None:
+        # The host exports room_tiles only periodically; keep it from any frame, not just the latest.
+        self.crates.observe_grid(frame)
         scene = frame.raw["scene"]
         event = scene.get("event", {}) if scene["available"] else {}
         if not field_navigation_ready(frame) or frame.dialogue_waiting:
@@ -477,10 +479,12 @@ class SceneTileGoal:
         destination = (self.tile[0] * 128 + 64, self.tile[1] * 128 + 64)
         staging = (x // 128, z // 128) == self.tile
         last = self.navigator.feedback[-1] if self.navigator.feedback else {}
-        if (not staging and last.get("status") == "route_reached" and self.push_attempts < 3
+        door = not staging and self.door_tile(frame)
+        # A closed door cell never yields route_reached, so its push starts from any adjacent stand.
+        if (not staging and (last.get("status") == "route_reached" or door) and self.push_attempts < 3
                 and math.hypot(destination[0] - x, destination[1] - z) <= 224):
             self.push_attempts += 1
-            self.push_until = frame.tick + (240 if self.door_tile(frame) else 90)
+            self.push_until = frame.tick + (240 if door else 90)
             self.navigator.feedback.append({"status": "direct_tile_push", "tick": frame.tick,
                                             "player": frame.player.position, "tile": self.tile,
                                             "attempt": self.push_attempts})
@@ -501,6 +505,13 @@ class SceneTileGoal:
             if not candidates:
                 raise ValueError("No observed adjacent support can earn the scene's required tile change")
             destination = min(candidates, key=lambda point: math.hypot(point[0] - x, point[1] - z))
+        elif door and self.crates.grid is not None:
+            grid = self.crates.grid
+            stands = [(self.tile[0] + dx, self.tile[1] + dz) for dx, dz in ((1, 0), (-1, 0), (0, 1), (0, -1))]
+            stands = [t for t in stands if grid.inside(*t) and grid.passable[t[1] * grid.width + t[0]]]
+            if stands:
+                stand = min(stands, key=lambda t: math.hypot(t[0] * 128 + 64 - x, t[1] * 128 + 64 - z))
+                destination = (stand[0] * 128 + 64, stand[1] * 128 + 64)
         context = self.navigator.request(frame, destination, avoid_hostiles=avoid_hostiles,
                                          explore_frontier=True)
         if context is not None:
@@ -521,7 +532,15 @@ class SceneTileGoal:
         return (self.push_until is not None and frame.tick < self.push_until) or self.crates.active()
 
     def door_tile(self, frame: Frame) -> bool:
-        return any((door["tile_x"], door["tile_z"]) == self.tile for door in frame.raw.get("doors", []))
+        if any((door["tile_x"], door["tile_z"]) == self.tile for door in frame.raw.get("doors", [])):
+            return True
+        # Scripted exits sit on MPD lock-trigger cells whose passability 5 blocks collision
+        # until Cross opens them (Field_InteractWithLockedRoomObject, Interactions.c:125).
+        grid = self.crates.grid
+        if grid is None or not grid.inside(*self.tile):
+            return False
+        index = self.tile[1] * grid.width + self.tile[0]
+        return not grid.passable[index] and grid.floor[index] is not None
 
     def step(self, frame: Frame) -> InputAction | None:
         self.observe(frame)

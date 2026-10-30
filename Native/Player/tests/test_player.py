@@ -2165,6 +2165,18 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Combat Lab"):
             options.setup_control_tick()
 
+    def test_native_object_interaction_notice_is_dismissed_with_a_lone_circle(self):
+        record = sample_record(tick=30, active=False)
+        record["data"].update(control_mode=11, action_phase=0)
+        frame = Frame.decode(record)
+        action = CombatController().step(frame)
+        self.assertEqual(action.buttons, frozenset({"Circle"}))
+        self.assertTrue(input_lease_permitted(frame, frozenset({"Circle"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Up"})))
+        self.assertFalse(input_lease_permitted(frame, frozenset({"Circle", "Up"})))
+        record["tick"] = 45
+        self.assertIsNone(CombatController().step(Frame.decode(record)))
+
     def test_native_dialogue_circle_lease_survives_cutscene_control_only_while_visible(self):
         record = sample_record(active=False)
         record["data"]["control_mode"] = 3
@@ -2783,6 +2795,26 @@ class CratePuzzleTests(unittest.TestCase):
         self.assertEqual(goal.crates.actions_done, 1)
         # With the step in place the trigger is walkable, so ordinary navigation resumes.
         self.assertFalse(goal.crates.needed(self.frame(90, tile=(1, 1), crate_tile=(3, 1))))
+
+    def test_scene_goal_treats_a_blocked_floor_trigger_cell_as_a_lock_door(self):
+        frame = self.frame(10, tile=(1, 1), facing=(1, 0), crate_tile=(4, 1))
+        # Passability-5 lock cell: native collision blocks it but it keeps a real floor.
+        frame.raw["room_tiles"]["floor"][1] = 0
+        goal = SceneTileGoal((1, 0), 9, 6, 1)
+        goal.observe(frame)
+        # Later frames omit the periodic room_tiles export; the observed grid must persist.
+        frame = self.frame(10, tile=(1, 1), facing=(1, 0), crate_tile=(4, 1))
+        del frame.raw["room_tiles"]
+        self.assertTrue(goal.door_tile(frame))
+        wall = SceneTileGoal((2, 0), 9, 6, 1)
+        wall.observe(self.frame(10, tile=(1, 1), facing=(1, 0), crate_tile=(4, 1)))
+        self.assertFalse(wall.door_tile(frame))
+        # No route can reach a closed door cell, so the push starts from the adjacent stand.
+        self.assertIsNone(goal.request(frame))
+        self.assertEqual(goal.push_until, 250)
+        press = goal.step(frame)
+        self.assertEqual(press.buttons, frozenset({"Cross"}))
+        self.assertEqual(goal.navigator.feedback[-1]["status"], "door_open_press")
 
 
 if __name__ == "__main__":
