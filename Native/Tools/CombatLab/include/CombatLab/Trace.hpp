@@ -32,6 +32,10 @@ struct SceneExpectation {
   int event_source = 0;
   int return_zone = 0;
   int return_room = 0;
+  // Optional room that must be current while each expected event executes;
+  // room-local IDs (source 2) repeat across rooms along a door route.
+  int event_zone = -1;
+  int event_room = -1;
   std::string preconditions;
   bool confirm_dialogue = false;
   bool ending_to_title = false;

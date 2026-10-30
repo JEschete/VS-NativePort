@@ -2698,8 +2698,11 @@ class RunnerTests(unittest.TestCase):
         PlayOptions(**arrival, door_route=("z038-r000-d000",)).validate_scene_expectation()
         with self.assertRaisesRegex(ValueError, "no single door case"):
             PlayOptions(**arrival, door_case="z038-r000-d000").validate_scene_expectation()
+        # A route binds the first tile in its arrival room; the follow binds in that same room.
+        PlayOptions(**arrival, door_route=("z038-r000-d000",),
+                    scene_follow_tile=(3, 13)).validate_scene_expectation()
         with self.assertRaisesRegex(ValueError, "follow tile requires a first scene tile in the same room"):
-            PlayOptions(**arrival, door_route=("z038-r000-d000",),
+            PlayOptions(**(arrival | {"scene_target_tile": None}),
                         scene_follow_tile=(3, 13)).validate_scene_expectation()
         with self.assertRaisesRegex(ValueError, "follow examine quadrant"):
             PlayOptions(**arrival, scene_follow_examine_quadrant=1).validate_scene_expectation()

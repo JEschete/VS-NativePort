@@ -80,6 +80,11 @@ TEST_CASE(
     SECTION("negative room") { value["return_room"] = -1; }
     SECTION("boolean zone") { value["return_zone"] = true; }
     SECTION("undocumented conditions") { value["preconditions"] = ""; }
+    SECTION("unpaired event room") { value["event_room"] = 3; }
+    SECTION("negative event zone") {
+      value["event_zone"] = -1;
+      value["event_room"] = 0;
+    }
     CHECK_THROWS_AS(VS::combat_lab::DecodeSceneExpectation(value),
                     std::runtime_error);
   }
@@ -337,6 +342,27 @@ TEST_CASE(
   CHECK_FALSE(trial.Finished());
   trial.Observe(ReadyState(), Event(81, 0), 244);
   CHECK(trial.Result().at("status") == "passed");
+}
+
+TEST_CASE("Scene event room binds room-local IDs to the target room",
+          "[scenes][playback]") {
+  auto value = ExpectedScene();
+  value["events"] = {0};
+  value["event_source"] = 2;
+  value["event_zone"] = 12;
+  value["event_room"] = 1;
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(value));
+  auto local = Event(0);
+  local["event"]["source"] = 2;
+  // The same local ID executing in a route room does not match.
+  trial.Observe(ReadyState(), local, 1);
+  CHECK(trial.Result().at("matched_events") == 0);
+  trial.Observe(ReadyState(), Event(0, 0), 2);
+  auto target = ReadyState();
+  target.room = 1;
+  trial.Observe(target, local, 3);
+  CHECK(trial.Result().at("matched_events") == 1);
+  CHECK(trial.Result().at("event_room") == 1);
 }
 
 TEST_CASE("Repeated event IDs require an actual end and reentry",

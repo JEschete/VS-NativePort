@@ -76,7 +76,8 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     (void)unused;
     if (key != "events" && key != "event_source" && key != "return_zone" &&
         key != "return_room" && key != "preconditions" &&
-        key != "confirm_dialogue" && key != "terminal") {
+        key != "confirm_dialogue" && key != "terminal" &&
+        key != "event_zone" && key != "event_room") {
       throw std::runtime_error("unknown scene field: " + key);
     }
   }
@@ -117,6 +118,18 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     }
     expected.return_zone = value.at("return_zone").get<int>();
     expected.return_room = value.at("return_room").get<int>();
+  }
+  if (value.contains("event_zone") || value.contains("event_room")) {
+    for (const auto* key : {"event_zone", "event_room"}) {
+      if (!value.contains(key) || !value.at(key).is_number_integer() ||
+          value.at(key) < 0 ||
+          value.at(key) > std::numeric_limits<int>::max()) {
+        throw std::runtime_error(
+            "scene event zone/room must be paired nonnegative integers");
+      }
+    }
+    expected.event_zone = value.at("event_zone").get<int>();
+    expected.event_room = value.at("event_room").get<int>();
   }
   const auto source = value.value("event_source", nlohmann::json(0));
   if (!source.is_number_integer() || source < 0 || source > 2) {
@@ -193,8 +206,11 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   // Event_UpdateEventPlayback: phases1..3 prepare/load; only4 executes.
   // Source1 may retain an earlier external ID while running a room handoff.
   constexpr int kExecutingPhase = 4;
+  const bool event_room =
+      expected_.event_zone < 0 || (state.zone == expected_.event_zone &&
+                                   state.room == expected_.event_room);
   if (available && event.at("phase") == kExecutingPhase &&
-      event.at("source") == expected_.event_source) {
+      event.at("source") == expected_.event_source && event_room) {
     const int id = event.at("id").get<int>();
     if (!event_active_ || observed_.empty() || observed_.back() != id) {
       observed_.push_back(id);
@@ -390,6 +406,10 @@ nlohmann::json SceneTrial::Result() const {
     result["terminal"] = terminal_;
     result.erase("return_zone");
     result.erase("return_room");
+  }
+  if (expected_.event_zone >= 0) {
+    result["event_zone"] = expected_.event_zone;
+    result["event_room"] = expected_.event_room;
   }
   return result;
 }

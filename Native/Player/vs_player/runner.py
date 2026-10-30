@@ -160,7 +160,7 @@ class PlayOptions:
                 or not 0 <= self.scene_examine_quadrant <= 3):
             raise ValueError("A scene examine quadrant requires a scene stand tile and a native quadrant 0-3")
         if self.scene_follow_tile is not None and (
-                self.scene_target_tile is None or self.door_route
+                self.scene_target_tile is None
                 or not isinstance(self.scene_follow_tile, tuple) or len(self.scene_follow_tile) != 2
                 or any(type(value) is not int or not 0 <= value <= 255 for value in self.scene_follow_tile)):
             raise ValueError("A scene follow tile requires a first scene tile in the same room and a native tile")
