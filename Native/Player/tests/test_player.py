@@ -2037,6 +2037,11 @@ class RunnerTests(unittest.TestCase):
                          "scene_expectation": Path("scene.json")} | change
             with self.subTest(change=change), self.assertRaises(ValueError):
                 PlayOptions(**arguments).validate_scene_expectation()
+        arrival = {"executable": basic[0], "data": basic[1], "scenario": basic[2],
+                   "scene_expectation": Path("scene.json"), "scene_target_tile": (8, 11)}
+        PlayOptions(**arrival, door_route=("z038-r000-d000",)).validate_scene_expectation()
+        with self.assertRaisesRegex(ValueError, "no single door case"):
+            PlayOptions(**arrival, door_case="z038-r000-d000").validate_scene_expectation()
 
     def test_cli_forwards_the_explicit_native_scene_expectation(self):
         from vs_player import cli
@@ -2817,6 +2822,24 @@ class CratePuzzleTests(unittest.TestCase):
         press = goal.step(frame)
         self.assertEqual(press.buttons, frozenset({"Cross"}))
         self.assertEqual(goal.navigator.feedback[-1]["status"], "door_open_press")
+
+    def test_scene_goal_examines_from_its_stand_tile_after_turning_to_the_quadrant(self):
+        goal = SceneTileGoal((1, 1), 9, 6, 1, examine_quadrant=0)
+        self.assertEqual(goal.identity, "scene:9:6:local:1:tile:1:1:examine:0")
+        # Facing +X: on the stand tile the goal owns input and turns toward -Z before examining.
+        frame = self.frame(10, tile=(1, 1), facing=(2, 1), crate_tile=(4, 1))
+        self.assertIsNone(goal.request(frame))
+        self.assertTrue(goal.pushing(frame))
+        turn = goal.step(frame)
+        self.assertEqual(turn.reason, "turn toward the original examine quadrant")
+        self.assertNotIn("Cross", turn.buttons)
+        press = goal.step(self.frame(20, tile=(1, 1), facing=(1, 0), crate_tile=(4, 1)))
+        self.assertEqual(press.buttons, frozenset({"Cross"}))
+        self.assertEqual(goal.result()["examine_presses"], [20])
+        # Presses are spaced so native interaction playback can start before another Cross.
+        self.assertIsNone(goal.step(self.frame(40, tile=(1, 1), facing=(1, 0), crate_tile=(4, 1))))
+        with self.assertRaises(ValueError):
+            SceneTileGoal((1, 1), 9, 6, 1, examine_quadrant=4)
 
 
 if __name__ == "__main__":

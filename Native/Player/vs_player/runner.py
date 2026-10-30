@@ -128,6 +128,7 @@ class PlayOptions:
     simulation_speed: int = 1
     scene_expectation: Path | None = None
     scene_target_tile: tuple[int, int] | None = None
+    scene_examine_quadrant: int | None = None
     allow_stat_overrides: bool = False
     allow_story_progress: bool = False
     claim_room_chests: bool = False
@@ -138,12 +139,17 @@ class PlayOptions:
         if self.claim_room_chests and not self.door_route:
             raise ValueError("Room-chest claims require a physical door route from the source room")
         if self.scene_target_tile is not None and (
-                self.scene_expectation is None or self.door_case or self.door_route
+                self.scene_expectation is None or self.door_case
                 or not isinstance(self.scene_target_tile, tuple)
                 or len(self.scene_target_tile) != 2
                 or any(type(value) is not int or not 0 <= value <= 255
                        for value in self.scene_target_tile)):
-            raise ValueError("Scene-tile navigation requires an explicit local-scene goal, no door goal, and a native tile")
+            raise ValueError("Scene-tile navigation requires an explicit local-scene goal, no single door case, "
+                             "and a native tile")
+        if self.scene_examine_quadrant is not None and (
+                self.scene_target_tile is None or type(self.scene_examine_quadrant) is not int
+                or not 0 <= self.scene_examine_quadrant <= 3):
+            raise ValueError("A scene examine quadrant requires a scene stand tile and a native quadrant 0-3")
         if self.scene_expectation is not None and (
                 self.executable.name != "VS.CombatLab.exe" or self.scenario is None
                 or self.new_game or self.save_file is not None):
@@ -434,6 +440,7 @@ def _play_game(store: RunStore, run_id: str,
         "source_setup_presses": options.setup_presses,
         "native_scene_expectation": scene_expectation,
         "scene_target_tile": options.scene_target_tile,
+        "scene_examine_quadrant": options.scene_examine_quadrant,
         "model_control_from_tick": setup_control_tick,
     })
     controller = CombatController()
@@ -442,9 +449,12 @@ def _play_game(store: RunStore, run_id: str,
                       scene_handoff=options.scene_expectation is not None)
     # A native scene expectation is judged after the route reaches its room, so control stays open.
     continue_after_route = options.scene_expectation is not None and bool(options.door_route)
+    # After a physical door route the trigger belongs to the arrival room, bound once the route is accepted.
+    scene_tile_after_route = options.scene_target_tile is not None and bool(options.door_route)
     scene_navigation = (SceneTileGoal(options.scene_target_tile, setup["zone"], setup["room"],
-                                     scene_expectation["events"][0])
-                        if options.scene_target_tile is not None and scene_expectation is not None else None)
+                                     scene_expectation["events"][0], options.scene_examine_quadrant)
+                        if options.scene_target_tile is not None and scene_expectation is not None
+                        and not scene_tile_after_route else None)
     route_checkpoint_offset = 0
     latest: Frame | None = None
     reader: TraceReader | None = None
@@ -536,6 +546,16 @@ def _play_game(store: RunStore, run_id: str,
                         goal.observe(latest)
                         if scene_navigation is not None:
                             scene_navigation.observe(latest)
+                    if (scene_tile_after_route and scene_navigation is None and scene_expectation is not None
+                            and goal.accepted_tick is not None and latest.ready):
+                        scene_navigation = SceneTileGoal(options.scene_target_tile, latest.zone, latest.room,
+                                                         scene_expectation["events"][0],
+                                                         options.scene_examine_quadrant)
+                        audit.event("scene_navigation.bound", {
+                            "tick": latest.tick, "zone": latest.zone, "room": latest.room,
+                            "tile": options.scene_target_tile,
+                        })
+                        scene_navigation.observe(latest)
                     if isinstance(goal.door, PhysicalRoute):
                         for checkpoint in goal.door.checkpoints[route_checkpoint_offset:]:
                             audit.event("physical_door.accepted", checkpoint)

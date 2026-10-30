@@ -412,13 +412,25 @@ class TerrainNavigator:
         return InputAction(buttons, duration, "execute model-selected observed-terrain waypoint")
 
 
+# Field_TileInFrontOfActor (Interactions.c:466): quadrant 0 is -Z, 1 is -X, 2 is +Z, 3 is +X.
+FACING_QUADRANT_DELTA = ((0, -1), (-1, 0), (0, 1), (1, 0))
+
+
 class SceneTileGoal:
-    def __init__(self, tile: tuple[int, int], zone: int, room: int, selector: int) -> None:
+    def __init__(self, tile: tuple[int, int], zone: int, room: int, selector: int,
+                 examine_quadrant: int | None = None) -> None:
         if (not isinstance(tile, tuple) or len(tile) != 2
                 or any(type(value) is not int or not 0 <= value <= 255 for value in tile)
-                or any(type(value) is not int or value < 0 for value in (zone, room, selector))):
+                or any(type(value) is not int or value < 0 for value in (zone, room, selector))
+                or (examine_quadrant is not None
+                    and (type(examine_quadrant) is not int or not 0 <= examine_quadrant <= 3))):
             raise ValueError("A local-scene target requires native room/selector IDs and a byte-sized tile")
         self.tile = tile
+        # A type-4 trigger is examined with ordinary Cross from this stand tile while facing the quadrant;
+        # room-entry scripts can relocate Ashley after the fixture's setup pulses, so she walks back.
+        self.examine_quadrant = examine_quadrant
+        self.examine_ticks: list[int] = []
+        self.examine_turn_tick = -100
         self.zone, self.room, self.selector = zone, room, selector
         self.navigator = TerrainNavigator()
         self.navigator.require_sheathed = True
@@ -433,7 +445,8 @@ class SceneTileGoal:
         # Imported here: crates builds on TerrainNavigator from this module.
         from .crates import CrateAssist
         self.crates = CrateAssist(tile)
-        self.identity = f"scene:{zone}:{room}:local:{selector}:tile:{tile[0]}:{tile[1]}"
+        self.identity = f"scene:{zone}:{room}:local:{selector}:tile:{tile[0]}:{tile[1]}" + (
+            f":examine:{examine_quadrant}" if examine_quadrant is not None else "")
 
     def observe(self, frame: Frame) -> None:
         # The host exports room_tiles only periodically; keep it from any frame, not just the latest.
@@ -473,11 +486,13 @@ class SceneTileGoal:
         if frame.player is None:
             raise ValueError("Scene navigation lost the observed player")
         # Crates own movement while the tile grid shows the trigger needs them moved.
-        if self.crates.needed(frame):
+        if self.examine_quadrant is None and self.crates.needed(frame):
             return None
         x, _, z = frame.player.position
         destination = (self.tile[0] * 128 + 64, self.tile[1] * 128 + 64)
-        staging = (x // 128, z // 128) == self.tile
+        if self.examine_quadrant is not None and self.on_tile(frame):
+            return None
+        staging = self.examine_quadrant is None and (x // 128, z // 128) == self.tile
         last = self.navigator.feedback[-1] if self.navigator.feedback else {}
         door = not staging and self.door_tile(frame)
         # A closed door cell never yields route_reached, so its push starts from any adjacent stand.
@@ -529,7 +544,49 @@ class SceneTileGoal:
         self.navigator.accept(decision, frame)
 
     def pushing(self, frame: Frame) -> bool:
-        return (self.push_until is not None and frame.tick < self.push_until) or self.crates.active()
+        return ((self.push_until is not None and frame.tick < self.push_until) or self.crates.active()
+                or self.examining(frame))
+
+    def on_tile(self, frame: Frame) -> bool:
+        if frame.player is None:
+            return False
+        x, _, z = frame.player.position
+        return (x // 128, z // 128) == self.tile
+
+    def examining(self, frame: Frame) -> bool:
+        return (self.examine_quadrant is not None and self.activation_tick is None
+                and len(self.examine_ticks) < 6 and self.on_tile(frame))
+
+    def examine_step(self, frame: Frame) -> InputAction | None:
+        if frame.camera_yaw is None or frame.player is None:
+            return None
+        if frame.player.weapon_drawn:
+            if frame.tick - self.push_sheath_tick <= 30:
+                return None
+            self.push_sheath_tick = frame.tick
+            return InputAction(frozenset({"Cross"}), 4, "sheathe normally before examining the original trigger")
+        dx, dz = FACING_QUADRANT_DELTA[self.examine_quadrant]
+        face = (self.tile[0] + dx, self.tile[1] + dz)
+        x, _, z = frame.player.position
+        if frame.raw["navigation"].get("facing_tile", [])[:2] != list(face):
+            if frame.tick - self.examine_turn_tick < 8:
+                return None
+            self.examine_turn_tick = frame.tick
+            cx, cz = self.tile[0] * 128 + 64 - x, self.tile[1] * 128 + 64 - z
+            # Posted key messages shorter than one host frame are lost at speed 4, so turning taps
+            # last 4 ticks; centring first keeps that short step inside the stand tile.
+            if abs(cx) > 24 or abs(cz) > 24:
+                return InputAction(direction_buttons(cx, cz, frame.camera_yaw), 4,
+                                   "centre on the original examine stand tile")
+            return InputAction(direction_buttons(face[0] * 128 + 64 - x, face[1] * 128 + 64 - z,
+                                                 frame.camera_yaw), 4,
+                               "turn toward the original examine quadrant")
+        if self.examine_ticks and frame.tick - self.examine_ticks[-1] < 60:
+            return None
+        self.examine_ticks.append(frame.tick)
+        self.navigator.feedback.append({"status": "examine_press", "tick": frame.tick,
+                                        "tile": self.tile, "facing": face})
+        return InputAction(frozenset({"Cross"}), 4, "examine the original type-4 trigger with ordinary Cross")
 
     def door_tile(self, frame: Frame) -> bool:
         if any((door["tile_x"], door["tile_z"]) == self.tile for door in frame.raw.get("doors", [])):
@@ -544,10 +601,13 @@ class SceneTileGoal:
 
     def step(self, frame: Frame) -> InputAction | None:
         self.observe(frame)
-        if self.crates.active():
+        if self.examine_quadrant is None and self.crates.active():
             return self.crates.step(frame) if self.activation_tick is None else None
         if not self.ready(frame):
             return None
+        if self.examining(frame):
+            self.push_until = None
+            return self.examine_step(frame)
         if self.pushing(frame) and frame.player is not None:
             if frame.camera_yaw is None:
                 return None
@@ -574,4 +634,6 @@ class SceneTileGoal:
         return {"zone": self.zone, "room": self.room, "source": 2,
                 "selector": self.selector, "tile": self.tile,
                 "activation_tick": self.activation_tick,
+                "examine_quadrant": self.examine_quadrant,
+                "examine_presses": list(self.examine_ticks),
                 "crates": self.crates.result()}
