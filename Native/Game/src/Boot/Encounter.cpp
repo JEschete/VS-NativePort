@@ -129,6 +129,11 @@ int EnterOrFinishEncounter() {
   Boot_InitializeTitleSession();
   Boot_InitializePlayerSettings();
   Title_InitializeNewGameData();
+  // Title_Run follows _initGameData with _initEnvironment (TITLE.PRG
+  // 22C.c:4463, Title_InitializeSettings), whose state writes are applied
+  // here without its publisher screens or audio setup.
+  Audio_Seq_unusedStateFlags.difficulty = 1;
+  Audio_Seq_unusedStateFlags.puzzleMode = 1;
   State_savedEntryDoor.destinationZoneId = configuration.zone;
   State_savedEntryDoor.destinationRoomId = configuration.room;
   State_savedEntryDoor.entryTileX = configuration.player.x;
