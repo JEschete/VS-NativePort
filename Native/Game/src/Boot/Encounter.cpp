@@ -805,6 +805,9 @@ EncounterState InspectGameplay() {
     state.menu_highlighted_row = Menu_Framework_HighlightedRow();
   }
   state.roulette = InspectRoulette(state.menu_state);
+  if (constexpr int kResultsMenu = 15; state.menu_state == kResultsMenu) {
+    state.results_screen = Audio_Seq_unusedStateFlags.menuFSubmenu;
+  }
   state.frame_buffer = Render_frameBuf;
   state.transition = Field_screenTransitionStep;
   state.native_buttons = Input_buttonsState;

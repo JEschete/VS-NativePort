@@ -463,6 +463,27 @@ TEST_CASE(
   CHECK(trial.Input(60) == VS::Input::Circle);
 }
 
+TEST_CASE("Scene dialogue assistance confirms cube-puzzle result screens only",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  auto state = ReadyState();
+  state.menu_state = 15;
+  const nlohmann::json idle = {{"available", false}};
+  for (const int screen : {4, 5, 6}) {
+    state.results_screen = screen;
+    trial.Observe(state, idle, 29);
+    CHECK(trial.Input(30) == VS::Input::Circle);
+    CHECK(trial.Input(32) == 0);
+  }
+  SECTION("reward roulette") { state.results_screen = 0; }
+  SECTION("closed results menu") {
+    state.menu_state = 63;
+    state.results_screen = -1;
+  }
+  trial.Observe(state, idle, 59);
+  CHECK(trial.Input(60) == 0);
+}
+
 namespace {
 nlohmann::json ExpectedGameOver() {
   return {{"events", {0}},

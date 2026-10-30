@@ -225,7 +225,17 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   }
   // Producer menus before the first expected event belong to the scripted
   // setup selection; confirming them would accept the default row instead.
-  dialogue_pulse_ = text_waiting || (choice_active && next_event_ > 0);
+  // Room scripts open the MENUF cube-puzzle start/result/quit screens through
+  // Event_ScriptRunMenuTransition (op 0x59 10..12, ScriptField.c); each waits
+  // for Circle (CubePuzzle.c _renderCubePuzzleStart/End/Quit).
+  constexpr int kResultsMenu = 15;
+  constexpr int kCubePuzzleStart = 4;
+  constexpr int kCubePuzzleQuit = 6;
+  const bool puzzle_screen = state.menu_state == kResultsMenu &&
+                             state.results_screen >= kCubePuzzleStart &&
+                             state.results_screen <= kCubePuzzleQuit;
+  dialogue_pulse_ =
+      text_waiting || (choice_active && next_event_ > 0) || puzzle_screen;
   if (defeat_terminal && state.game_over && !game_over_menu_tick_) {
     constexpr int kFilesMenu = 7;  // MENU7 hosts vs_menu7_gameOver
     const auto ashley =

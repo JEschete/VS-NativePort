@@ -291,6 +291,8 @@ struct EncounterState {
   int menu_state = -1;
   int menu_highlighted_row = -1;
   std::optional<EncounterRouletteState> roulette;
+  // MENUF submenu (StateFlags 0xB6) while the Results menu is open, else -1.
+  int results_screen = -1;
   int frame_buffer = 0;
   std::uint32_t transition = 0;
   std::uint32_t native_buttons = 0;
