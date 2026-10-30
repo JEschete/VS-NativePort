@@ -191,6 +191,22 @@ controls cover the original E298 package and repeated rejection of its missing
 scene actor. A declared assisted route is separate evidence, not an unassisted
 campaign or original-viewer completion certificate.
 
+#### Inherited prologue audio
+
+A standalone original room entry does not reconstruct earlier zone audio.
+In isolated MAP005, E004 starts MUSIC019 (sequence ID 20), whose original
+header requests sample bank 69. The normal Zone1 load imports that bank
+through MUSIC016; Zones2,3,4,5 and8 have music ID zero and do not supply it
+to a fresh fixture. Instrument107 is bank69's instrument43 in the primary
+music range, and its imported asset exists.
+
+A fresh normal-speed isolated MAP005 run still reports the missing program.
+The native error-site observation has both music-bank IDs zero and the
+instrument107 metadata empty; it is not evidence that instrument43 failed
+extraction or that a generic replacement is appropriate. Establish the
+original inherited bank context and verify playback/reentry before claiming
+an audio repair. Do not silently import a substitute or waive the error.
+
 ### Bulk verification and log volume
 
 Use one persistent scene sequence for source-ready cases, not a New Game
