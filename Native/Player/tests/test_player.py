@@ -1517,6 +1517,27 @@ class ControllerTests(unittest.TestCase):
         feedback[0]["player_position"] = far
         self.assertIn("cast:2:130:1", available_choices(frame, {"controller_feedback": feedback}))
 
+    def test_combined_objective_approaches_after_area_preview_was_out_of_range_here(self):
+        record = sample_record(active=False)
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3)
+        record["data"]["actors"].append(second)
+        record["data"]["action_options"] = [
+            {"id": 130, "name": "Meteor", "family": "warlock", "cost": 10,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        frame = Frame.decode(record)
+        feedback = [{"status": "area_out_of_range", "action_id": 130, "target": slot,
+                     "player_position": frame.player.position, "tick": 1} for slot in (2, 3)]
+        context = {"simultaneous_defeat_objective": {"slots": [2, 3], "claim": "", "area_radii": {}},
+                   "controller_feedback": feedback}
+        choices = available_choices(frame, context)
+        self.assertFalse(any(row["intent"] == "cast" for row in choices.values()))
+        self.assertIn("approach:2:-1:1", choices)
+        for row in feedback:
+            row["player_position"] = tuple(value + 512 for value in frame.player.position)
+        self.assertIn("cast:2:130:1", available_choices(frame, context))
+
     def test_simultaneous_defeat_cancels_an_area_that_cannot_defeat_every_required_slot(self):
         record = sample_record(tick=1, active=False)
         second = copy.deepcopy(record["data"]["actors"][1])

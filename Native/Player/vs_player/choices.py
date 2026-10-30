@@ -158,7 +158,9 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                         best[base] = option
             for option in best.values():
                 for slot in combined["slots"]:
-                    add("cast", slot, option["id"])
+                    # A preview that never reached the set from here needs Ashley to move first.
+                    if not unsuccessful(option["id"], slot):
+                        add("cast", slot, option["id"])
         if not choices:
             add("wait")
             for slot in combined["slots"]:
