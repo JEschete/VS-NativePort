@@ -76,8 +76,8 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     (void)unused;
     if (key != "events" && key != "event_source" && key != "return_zone" &&
         key != "return_room" && key != "preconditions" &&
-        key != "confirm_dialogue" && key != "terminal" &&
-        key != "event_zone" && key != "event_room") {
+        key != "confirm_dialogue" && key != "terminal" && key != "event_zone" &&
+        key != "event_room") {
       throw std::runtime_error("unknown scene field: " + key);
     }
   }
