@@ -28,6 +28,8 @@ class PhysicalDoor:
         self.axis_attempts: list[dict] = []
         self.recovery_axis: int | None = None
         self.axis_until = 0
+        # Directional taps that turn Ashley toward a door already inside its opening radius.
+        self.face_attempts = 0
         self.navigator = TerrainNavigator()
         self.gate_hostiles_seen = False
         self.gate_quiet_tick: int | None = None
@@ -80,7 +82,25 @@ class PhysicalDoor:
                 or (frame.zone, frame.room) != (self.source_zone, self.source_room)):
             return None
         destination = (self.contract["tile_x"] * 128 + 64, self.contract["tile_z"] * 128 + 64)
+        # Inside the opening radius an unfaced door is turned toward directly; terrain may end at its threshold.
+        if self.opening_range(frame) and not self.facing(frame):
+            return None
         return self.navigator.request(frame, destination, avoid_hostiles=avoid_hostiles)
+
+    def facing(self, frame: Frame) -> bool:
+        navigation = frame.raw.get("navigation", {})
+        return (not navigation.get("available") or
+                navigation["facing_tile"] == [
+                    self.contract["tile_x"], self.contract["tile_z"], self.contract["layer"],
+                ])
+
+    def opening_range(self, frame: Frame) -> bool:
+        if self.contract is None or frame.player is None:
+            return False
+        dx = self.contract["tile_x"] * 128 + 64 - frame.player.position[0]
+        dz = self.contract["tile_z"] * 128 + 64 - frame.player.position[2]
+        return (dx*dx+dz*dz <= 192*192 and len(self.open_ticks) < 3 and not self.interaction_seen
+                and self.face_attempts < 6)
 
     def observe(self, frame: Frame) -> None:
         if self.contract is None:
@@ -150,17 +170,19 @@ class PhysicalDoor:
                 or sum((position[i]-self.progress_position[i])**2 for i in (0, 2)) >= 16**2):
             self.progress_position, self.progress_tick = position, frame.tick
         self.last_input_tick = frame.tick
-        navigation = frame.raw.get("navigation", {})
-        facing = (not navigation.get("available") or
-                  navigation["facing_tile"] == [
-                      self.contract["tile_x"], self.contract["tile_z"], self.contract["layer"],
-                  ])
+        facing = self.facing(frame)
         if dx*dx+dz*dz <= 192*192 and facing and len(self.open_ticks) < 3 and (
             not self.interaction_seen and
             (not self.open_ticks or frame.tick-self.open_ticks[-1] >= 90)
         ):
             self.open_ticks.append(frame.tick)
             return InputAction(frozenset({"Cross"}), 2, "physically open the authored door")
+        if (self.opening_range(frame) and not facing and not self.navigator.path
+                and (not self.open_ticks or frame.tick-self.open_ticks[-1] >= 90)):
+            buttons = direction_buttons(dx, dz, frame.camera_yaw)
+            if buttons:
+                self.face_attempts += 1
+                return InputAction(buttons, 2, "turn toward the authored door before opening it")
         if frame.raw.get("navigation", {}).get("available"):
             return self.navigator.step(frame)
         buttons = direction_buttons(dx, dz, frame.camera_yaw)

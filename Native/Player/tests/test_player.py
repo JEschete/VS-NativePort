@@ -2984,6 +2984,31 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(len(door.axis_attempts), 2)
         self.assertIn("bounded jump and axis recovery", door.blocked_reason)
 
+    def test_door_in_opening_range_is_faced_instead_of_navigated(self):
+        # MAP269 z050-r008-d001: terrain had no outgoing edge 164 units from the door, inside the
+        # Cross radius, while Ashley still faced a neighbouring tile.
+        door = PhysicalDoor("z009-r006-d000")
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 1, "tile_z": 1, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        record["data"]["navigation"] = {"available": True, "facing_tile": [0, 1, 0]}
+        door.observe(Frame.decode(record))
+        self.assertTrue(door.opening_range(Frame.decode(record)))
+        self.assertIsNone(door.navigation_request(Frame.decode(record)))
+        record["tick"] = 10
+        action = door.step(Frame.decode(record))
+        self.assertIsNotNone(action)
+        self.assertNotIn("Cross", action.buttons)
+        self.assertIn("turn toward", action.reason)
+        record["tick"] = 20
+        record["data"]["navigation"]["facing_tile"] = [1, 1, 0]
+        action = door.step(Frame.decode(record))
+        self.assertEqual(action.buttons, frozenset({"Cross"}))
+
     def test_continuous_route_requires_every_live_loading_and_quiet_gate(self):
         route = PhysicalRoute(("z009-r006-d000", "z009-r007-d001"))
         record = sample_record(active=False)
