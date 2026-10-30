@@ -1471,7 +1471,9 @@ class ControllerTests(unittest.TestCase):
     def test_pending_scene_tile_outranks_chasing_hostiles_unless_combat_gated(self):
         frame = self.frame()
         scene = {"zone": 1, "room": 6, "source": 2, "selector": 0, "tile": (3, 4), "activation_tick": None}
-        intents = lambda context: {row["intent"] for row in available_choices(frame, context).values()}
+        def intents(context):
+            return {row["intent"] for row in available_choices(frame, context).values()}
+
         pending = intents({"source_scene_navigation_objective": {**scene, "combat_clearance_required": False}})
         self.assertIn("navigate", pending)
         self.assertNotIn("attack", pending)
