@@ -299,6 +299,14 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                                {"limb", target.limb},
                                {"position", target.position}});
   }
+  auto area_volumes = nlohmann::json::array();
+  for (const auto& volume : state.area_volumes) {
+    area_volumes.push_back({{"kind", volume.kind},
+                            {"half_x", volume.half_x},
+                            {"half_z", volume.half_z},
+                            {"angle", volume.angle},
+                            {"position", volume.position}});
+  }
   nlohmann::json data{
       {"input",
        {{"held", input.held},
@@ -326,6 +334,8 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
       {"source_actor", state.source_actor},
       {"target_count", state.target_count},
       {"area_center", state.area_center},
+      {"area_positioning", state.area_positioning},
+      {"area_volumes", area_volumes},
       {"target_previews", target_previews},
       {"target_page",
        {{"total", state.target_page.total},

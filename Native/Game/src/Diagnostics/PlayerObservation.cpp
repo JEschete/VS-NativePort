@@ -143,6 +143,23 @@ std::string InspectGameText(std::span<const char> bytes) {
   return result;
 }
 
+// Ranks _warlockMagicMenu offers for a learned spell (MENU0.PRG 84.c:164,
+// HandleInput and LevelledSpellInit): a levelled spell with its LV2 action
+// unlocked opens the rank selector with 2..4 rows; anything else casts as is.
+int WarlockSpellRankCount(int action) {
+  constexpr std::array kLevelledSpells{
+      Battle_WarlockSpell_Explosion,   Battle_WarlockSpell_Thunderburst,
+      Battle_WarlockSpell_FlameSphere, Battle_WarlockSpell_GaeaStrike,
+      Battle_WarlockSpell_Avalanche,   Battle_WarlockSpell_RadialSurge,
+      Battle_WarlockSpell_Meteor};
+  if (std::ranges::find(kLevelledSpells, action) == kLevelledSpells.end() ||
+      !Battle_actionDefinitions[action + 1].unlocked) {
+    return 1;
+  }
+  if (!Battle_actionDefinitions[action + 2].unlocked) return 2;
+  return Battle_actionDefinitions[action + 3].unlocked ? 4 : 3;
+}
+
 void InspectActionOptions(PlayerObservationState& state) {
   const auto* player = Battle_actors[0];
   if (player == nullptr || player->stats == nullptr ||
@@ -158,13 +175,19 @@ void InspectActionOptions(PlayerObservationState& state) {
     for (std::size_t index = 0; index < count; ++index) {
       const auto id = static_cast<unsigned char>(ids[index]);
       if (id == 0 || !Battle_actionDefinitions[id].unlocked) continue;
-      const auto& definition = Battle_actionDefinitions[id];
-      state.action_options.push_back(
-          {id, InspectGameText(definition.name), std::string(family),
-           menu_order++, static_cast<int>(definition.type),
-           static_cast<int>(definition.cost),
-           Battle_ActorActionRestrictionFlags(0, id),
-           std::bit_cast<std::uint16_t>(definition.aiFlags)});
+      const int ranks =
+          family == "warlock" ? WarlockSpellRankCount(id) : 1;
+      for (int rank = 0; rank < ranks; ++rank) {
+        const int action = id + rank;
+        const auto& definition = Battle_actionDefinitions[action];
+        state.action_options.push_back(
+            {action, InspectGameText(definition.name), std::string(family),
+             menu_order, static_cast<int>(definition.type),
+             static_cast<int>(definition.cost),
+             Battle_ActorActionRestrictionFlags(0, action),
+             std::bit_cast<std::uint16_t>(definition.aiFlags), rank, ranks});
+      }
+      ++menu_order;
     }
   };
   // Counts are the original menu loops, not the overbroad SDK array extents.
@@ -267,6 +290,10 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
       static_cast<unsigned char>(Menu_BattleAbilities_selectedAbilityType);
   result.assignment_selected = Menu_BattleAbilities_highlightedAbility +
                                Menu_BattleAbilities_firstAbility;
+  // The rank selector's cursor and row count (menu memories 12 and 13) persist
+  // after the selector closes; consumers pair them with a levelled option.
+  result.spell_level = Menu_Framework_menuMemory.cursorMemories[12];
+  result.spell_level_count = Menu_Framework_menuMemory.cursorMemories[13];
   if (result.selected_menu == 0) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
       if ((Input_settings.menuFlags & (1u << index)) == 0) continue;
@@ -649,6 +676,8 @@ nlohmann::json EncodePlayerMenu(const EncounterMenuState& menu) {
           {"assignment_phase", menu.assignment_phase},
           {"assignment_type", menu.assignment_type},
           {"assignment_selected", menu.assignment_selected},
+          {"spell_level", menu.spell_level},
+          {"spell_level_count", menu.spell_level_count},
           {"shortcut", menu.shortcut},
           {"loot_input_ready", menu.loot_input_ready},
           {"loot_count", menu.loot_count},
@@ -784,7 +813,9 @@ nlohmann::json EncodePlayerOptions(const PlayerObservationState& state) {
                        {"type", option.type},
                        {"cost", option.cost},
                        {"restrictions", option.restrictions},
-                       {"ai_flags", option.ai_flags}});
+                       {"ai_flags", option.ai_flags},
+                       {"rank", option.rank},
+                       {"rank_count", option.rank_count}});
   }
   return options;
 }

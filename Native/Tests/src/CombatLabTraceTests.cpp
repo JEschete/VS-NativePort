@@ -524,9 +524,18 @@ TEST_CASE("Combat Lab trace preserves area targeting coordinates",
   auto state = SampleState();
   state.action_phase = 2;
   state.area_center = {512, -128, 768};
+  state.area_positioning = true;
+  state.area_volumes.push_back({1, 192, 160, 1024, {512, -128, 768}});
   state.target_previews.push_back({2, -1, {640, -144, 800}});
   const auto data = FlushedFrame(scope, state).at("data");
   CHECK(data.at("area_center") == nlohmann::json::array({512, -128, 768}));
+  CHECK(data.at("area_positioning") == true);
+  const auto volume = data.at("area_volumes").at(0);
+  CHECK(volume.at("kind") == 1);
+  CHECK(volume.at("half_x") == 192);
+  CHECK(volume.at("half_z") == 160);
+  CHECK(volume.at("angle") == 1024);
+  CHECK(volume.at("position") == nlohmann::json::array({512, -128, 768}));
   const auto target = data.at("target_previews").at(0);
   CHECK(target.at("actor") == 2);
   CHECK(target.at("limb") == -1);

@@ -69,6 +69,10 @@ struct EncounterActionOption {
   int cost = 0;
   int restrictions = 0;
   std::uint32_t ai_flags = 0;
+  // Warlock rank selector level (0 = LV1); rank rows reuse the base menu row.
+  int rank = 0;
+  // Rank rows the selector offers for this spell; 1 when it casts directly.
+  int rank_count = 1;
 };
 
 struct EncounterMenuRowState {
@@ -91,6 +95,8 @@ struct EncounterMenuState {
   int assignment_phase = 0;
   int assignment_type = 0;
   int assignment_selected = -1;
+  int spell_level = -1;
+  int spell_level_count = 0;
   int shortcut = 0;
   bool loot_input_ready = false;
   int loot_count = 0;

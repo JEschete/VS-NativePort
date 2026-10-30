@@ -244,6 +244,16 @@ struct EncounterTargetState {
   std::array<int, EncounterLimits::kPositionAxes> position{};
 };
 
+// BATTLE.PRG D_800EB9B8 volumes: each kind's horizontal semi-axis is
+// extents[axis] * 32 world units (func_800C1034..func_800C1384).
+struct EncounterTargetVolumeState {
+  int kind = 0;
+  int half_x = 0;
+  int half_z = 0;
+  int angle = 0;
+  std::array<int, EncounterLimits::kPositionAxes> position{};
+};
+
 struct EncounterTargetPageState {
   int total = 0;
   int page = 0;
@@ -282,6 +292,8 @@ struct EncounterState {
   int source_actor = 0;
   int target_count = 0;
   std::array<int, EncounterLimits::kPositionAxes> area_center{};
+  bool area_positioning = false;
+  std::vector<EncounterTargetVolumeState> area_volumes;
   std::vector<EncounterTargetState> target_previews;
   EncounterTargetPageState target_page;
   bool rewards_available = false;

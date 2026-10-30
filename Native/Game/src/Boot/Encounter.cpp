@@ -38,7 +38,9 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
+#include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
+#include "Battle/TargetVolume.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "Boot/PlayerSettings.h"
@@ -252,6 +254,22 @@ void InspectTargeting(EncounterState& state, const Battle_ActionState& action) {
   state.area_center = {center.vx, center.vy, center.vz};
   if (action.previewCount > std::size(action.previews)) {
     throw std::runtime_error("encounter target previews exceed storage");
+  }
+  // BATTLE.PRG func_800C4794 positioning mode (sphere +0x3E): D-pad moves the
+  // area cursor; a second Circle confirms it.
+  const auto* sphere =
+      reinterpret_cast<const Battle_TargetSphere*>(Battle_targetSphere);
+  state.area_positioning = sphere != nullptr && sphere->inputLocked != 0;
+  if (sphere != nullptr) {
+    constexpr int kExtentUnits = 32;
+    for (const auto& volume : sphere->volumes) {
+      state.area_volumes.push_back(
+          {volume.kind,
+           volume.scale.extents[0] * kExtentUnits,
+           volume.scale.extents[2] * kExtentUnits,
+           volume.angle,
+           {volume.position[0], volume.position[1], volume.position[2]}});
+    }
   }
   for (unsigned index = 0; index < action.previewCount; ++index) {
     const auto& target = action.previews[index];
