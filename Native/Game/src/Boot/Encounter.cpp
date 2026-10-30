@@ -1125,16 +1125,16 @@ extern "C" void Boot_EncounterPollStop() {
                  Field_zoneContext.mapId == VS::Game::configuration.room) {
         const int selector = *VS::Game::configuration.room_local_event;
         const auto* locals =
-            static_cast<const short*>(Event_roomDoorEventData);
+            static_cast<const int16_t*>(Event_roomDoorEventData);
         if (locals == nullptr || locals[selector] == 0) {
-          Core_Errorf("encounter.event",
-                      "Room %d/%d has no local event %d", Field_zoneContext.zndId,
-                      Field_zoneContext.mapId, selector);
+          Core_Errorf("encounter.event", "Room %d/%d has no local event %d",
+                      Field_zoneContext.zndId, Field_zoneContext.mapId,
+                      selector);
           std::abort();
         }
         // Same queue state as a satisfied local room trigger (0x8000 event id)
         // in func_800BEC58 (4A0A8.c:4302); the trigger conditions are skipped.
-        Event_eventId = static_cast<short>(selector);
+        Event_eventId = static_cast<int16_t>(selector);
         Event_eventSource = 2;
         Event_playbackPhase = 1;
         Event_isDirectEventRequest = 0;
