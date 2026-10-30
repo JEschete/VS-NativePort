@@ -494,6 +494,7 @@ class InputHandshake:
     lost) or a release with the next press (no new edge), as MAP203 menu traces showed."""
 
     LOST_INPUT_TICKS = 120
+    SUSTAIN_TICKS = 4
 
     def __init__(self) -> None:
         self.mask = 0
@@ -503,6 +504,9 @@ class InputHandshake:
         self.release_mask = 0
         self.release_tick = 0
         self.continuous = False
+        self.field = False
+        # Directions of a released field lease that stay held while its action buttons release.
+        self.sustained: frozenset[str] = frozenset()
 
     @staticmethod
     def bits(buttons: frozenset[str]) -> int:
@@ -511,7 +515,36 @@ class InputHandshake:
     def pressed(self, frame: Frame, buttons: frozenset[str], duration: int) -> None:
         self.mask, self.press_tick, self.duration, self.seen = self.bits(buttons), frame.tick, duration, None
         # Field movement needs no new press edge, so consecutive direction leases may run together.
-        self.continuous = buttons <= DIRECTION_BUTTONS and frame.control == 1
+        self.field = frame.control == 1
+        self.continuous = buttons <= DIRECTION_BUTTONS and self.field
+        self.sustained = frozenset()
+
+    def release_buttons(self, frame: Frame, held: frozenset[str], permitted: bool) -> frozenset[str]:
+        """Release the current lease and return the buttons that stay held.
+
+        A field lease that mixes a direction with an action button (running jump: Up+Square) keeps
+        the direction held. Native BATTLE.PRG field movement re-reads the d-pad every game frame
+        (Actors/Movement.c Actors_SetDirectMovement), so a released direction during the first
+        airborne frame halves the running-jump distance (MAP020 Lab replay: continuous Up grabs the
+        6,10 ledge; a one-frame gap lands short). Only the action buttons need a release edge.
+        """
+        if self.sustained:
+            # Keep the direction until the native pad shows the action buttons released, then for a
+            # short handover window so the next direction lease replaces it without a gap.
+            if permitted and frame.control == 1 and (
+                self.awaiting_release(frame) or frame.tick - self.release_tick <= self.SUSTAIN_TICKS
+            ):
+                return held
+            self.sustained = frozenset()
+            return frozenset()
+        keep = held & DIRECTION_BUTTONS if (
+            permitted and self.mask and self.field and not self.continuous and frame.control == 1
+        ) else frozenset()
+        self.released(frame)
+        if keep:
+            self.release_mask &= ~self.bits(keep)
+            self.sustained = keep
+        return keep
 
     def observe(self, frame: Frame) -> None:
         if self.mask and self.seen is None and frame.held & self.mask == self.mask:
@@ -702,6 +735,7 @@ def _play_game(store: RunStore, run_id: str,
                     if not freshness.observe(age, now, latest.ready):
                         if driver.held:
                             handshake.released(latest)
+                        handshake.sustained = frozenset()
                         driver.set_buttons(frozenset())
                         controller.reactions.observe(latest, allow_input=False)
                         if latest.tick <= options.frames:
@@ -764,9 +798,10 @@ def _play_game(store: RunStore, run_id: str,
                         handshake.release_due(latest)
                         or not input_lease_permitted(latest, driver.held)
                     ):
-                        handshake.released(latest)
-                        driver.set_buttons(frozenset())
-                    input_busy = bool(driver.held) or handshake.awaiting_release(latest)
+                        driver.set_buttons(handshake.release_buttons(
+                            latest, driver.held, input_lease_permitted(latest, driver.held)))
+                    input_busy = ((bool(driver.held) and driver.held != handshake.sustained)
+                                  or handshake.awaiting_release(latest))
                     if future is not None and future.done():
                         decision = None
                         try:

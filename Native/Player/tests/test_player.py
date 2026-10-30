@@ -3386,6 +3386,35 @@ class InputHandshakeTests(unittest.TestCase):
         handshake.released(self.frame(12, 4096, control=1))
         self.assertFalse(handshake.awaiting_release(self.frame(12, 4096, control=1)))
 
+    def test_running_jump_keeps_direction_held_while_square_releases(self):
+        # MAP020 Lab replay: a one-frame Up gap after Up+Square halved the airborne distance.
+        from vs_player.runner import InputHandshake
+        up, square = 4096, 128
+        handshake = InputHandshake()
+        jump = frozenset({"Up", "Square"})
+        handshake.pressed(self.frame(100, up, control=1), jump, 2)
+        handshake.observe(self.frame(101, up | square, control=1))
+        self.assertTrue(handshake.release_due(self.frame(103, up | square, control=1)))
+        held = handshake.release_buttons(self.frame(103, up | square, control=1), jump, True)
+        self.assertEqual(held, frozenset({"Up"}))
+        self.assertTrue(handshake.awaiting_release(self.frame(103, up | square, control=1)))
+        # Up stays held while the native pad still shows Square.
+        self.assertEqual(handshake.release_buttons(self.frame(104, up | square, control=1), held, True), held)
+        handshake.observe(self.frame(105, up, control=1))
+        self.assertFalse(handshake.awaiting_release(self.frame(105, up, control=1)))
+        # The handover window lets the next direction lease replace it without a gap.
+        self.assertEqual(handshake.release_buttons(self.frame(106, up, control=1), held, True), held)
+        self.assertEqual(handshake.release_buttons(self.frame(120, up, control=1), held, True), frozenset())
+        self.assertEqual(handshake.sustained, frozenset())
+
+    def test_menu_mixed_lease_still_releases_every_button(self):
+        from vs_player.runner import InputHandshake
+        handshake = InputHandshake()
+        lease = frozenset({"Up", "Square"})
+        handshake.pressed(self.frame(10), lease, 2)
+        self.assertEqual(handshake.release_buttons(self.frame(13), lease, True), frozenset())
+        self.assertEqual(handshake.sustained, frozenset())
+
 
 class CratePuzzleTests(unittest.TestCase):
     LEDGE = (-384) & 0x7FFF
