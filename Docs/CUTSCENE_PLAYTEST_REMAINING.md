@@ -133,7 +133,13 @@ Many of these are not story cutscenes. They are short system scripts:
   - Ashley leaves for one of: Faith Overcame Fear (MAP039, zone 13 room 11); Hall of Dying Hope (MAP036, zone 13 room 8) (depends on the exit or branch).
   - Scale: 1 scripted actor move.
   - The script branches on flags, so only some of the messages/destinations above appear.
-- [ ] Plays and returns control
+- Owner playtest (2026-10-30, Debug run `1793394014536781-0`): owner reported that something did not load right after the clear; the visual symptom is not yet described. Log check of that run:
+  - Tick 7233: east exit (tile 14,3) fired; the script ran op31, cleared flag 285 and opened the cube-puzzle results screen (op89 / 12). MAINMENU, MENUBG, MENUF.PRG and IQ.DIS all loaded.
+  - The results screen read the stopped time 0:36.23. The timer HUD stays drawn, frozen, until script op90 runs after the results screen closes; the original does the same (`_renderTimer` gated by `vs_battle_lowerScreenUiState`).
+  - Message box shown and closed (tick 7927), fade, then MAP039 loaded at tick 7999 and its entry script ran to the end.
+  - MAP039 showed a different enemy than on the first visit (Z013U20 instead of Z013U07/U14). This is correct: the MPD enemy table picks enemy 20 at 175 HP or more and enemy 14 at 174 HP or less (Ashley had 174 HP before, 197 after); enemy 7 was already killed.
+  - No warnings or errors in `vs-native.log` or `events.jsonl`; no defect found in the log or in the results-screen code compared with MENUF.PRG `_renderCubePuzzleEnd`.
+- [ ] Plays and returns control (awaiting the owner's description or a screenshot of the visual problem)
 
 ### 6. Tircolas Flow (MAP150.MPD, zone 32 room 3)
 
