@@ -35,6 +35,9 @@ struct SceneExpectation {
   std::string preconditions;
   bool confirm_dialogue = false;
   bool ending_to_title = false;
+  // Title idle-timeout demo: the original game loop's entry-mode 3/4 reset
+  // (vs_battle_exec, BATTLE 146C.c:7558) is the authored terminal.
+  bool attract_to_title = false;
 };
 
 SceneExpectation DecodeSceneExpectation(const nlohmann::json& value);
@@ -47,7 +50,10 @@ class SceneTrial {
   // Only a natural native fiber return, never a stop request, supplies this.
   void ObserveEndingReturn(bool credits_finished, bool credits_skipped,
                            bool clear_save_pending, std::uint64_t tick);
+  void ObserveAttractReturn(int entry_mode, bool credits_finished,
+                            bool clear_save_pending, std::uint64_t tick);
   bool ExpectsEndingReturn() const { return expected_.ending_to_title; }
+  bool ExpectsAttractReturn() const { return expected_.attract_to_title; }
   std::uint32_t Input(std::uint64_t tick);
   void Timeout();
   void Fail(std::string reason);

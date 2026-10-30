@@ -95,13 +95,16 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     expected.events.push_back(event.get<int>());
   }
   if (value.contains("terminal")) {
-    if (!value.at("terminal").is_string() ||
-        value.at("terminal") != "ending_to_title" ||
+    const auto& terminal = value.at("terminal");
+    if (!terminal.is_string() ||
+        (terminal != "ending_to_title" && terminal != "attract_to_title") ||
         value.contains("return_zone") || value.contains("return_room")) {
       throw std::runtime_error(
-          "scene terminal must be ending_to_title without a room-return goal");
+          "scene terminal must be ending_to_title or attract_to_title without "
+          "a room-return goal");
     }
-    expected.ending_to_title = true;
+    expected.ending_to_title = terminal == "ending_to_title";
+    expected.attract_to_title = terminal == "attract_to_title";
   } else {
     for (const auto* key : {"return_zone", "return_room"}) {
       if (!value.at(key).is_number_integer() || value.at(key) < 0 ||
@@ -127,6 +130,10 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
   }
   expected.preconditions = value.at("preconditions").get<std::string>();
   expected.confirm_dialogue = value.value("confirm_dialogue", false);
+  if (expected.attract_to_title && expected.confirm_dialogue) {
+    // Any button ends the original demo; it must not be confirmed.
+    throw std::runtime_error("attract_to_title scenes cannot confirm dialogue");
+  }
   if (expected.preconditions.empty()) {
     throw std::runtime_error(
         "scene requires documented source/save preconditions");
@@ -167,6 +174,10 @@ void SceneTrial::Observe(const Game::EncounterState& state,
     Fail(state.game_over ? "fixture defeated" : "target scene was skipped");
     return;
   }
+  if (expected_.attract_to_title && state.native_pressed != 0) {
+    Fail("attract demo received button input");
+    return;
+  }
   // Event_UpdateEventPlayback: phases1..3 prepare/load; only4 executes.
   // Source1 may retain an earlier external ID while running a room handoff.
   constexpr int kExecutingPhase = 4;
@@ -184,7 +195,7 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   } else if (available) {
     event_active_ = false;
   }
-  if (expected_.ending_to_title) return;
+  if (expected_.ending_to_title || expected_.attract_to_title) return;
   const bool returned =
       next_event_ == expected_.events.size() && state.ready && available &&
       event.at("phase") == 0 && state.zone == expected_.return_zone &&
@@ -225,6 +236,30 @@ void SceneTrial::ObserveEndingReturn(bool credits_finished,
   }
 }
 
+void SceneTrial::ObserveAttractReturn(int entry_mode, bool credits_finished,
+                                      bool clear_save_pending,
+                                      std::uint64_t tick) {
+  if (Finished() || !expected_.attract_to_title) return;
+  terminal_ = {{"kind", "attract_to_title"},
+               {"native_fiber_returned", true},
+               {"entry_mode", entry_mode},
+               {"credits_finished", credits_finished},
+               {"clear_save_pending", clear_save_pending},
+               {"title_host", "lab_encounter_finish_callback"},
+               {"tick", tick}};
+  if (entry_mode != Game::kAttractDemoCutscene1 &&
+      entry_mode != Game::kAttractDemoCutscene2) {
+    Fail("title return without an attract-demo entry mode");
+  } else if (credits_finished || clear_save_pending) {
+    Fail("attract demo returned through the ending handoff");
+  } else if (next_event_ != expected_.events.size()) {
+    Fail("attract demo returned without the expected source events");
+  } else {
+    status_ = "passed";
+    passed_tick_ = tick;
+  }
+}
+
 std::uint32_t SceneTrial::Input(std::uint64_t tick) {
   constexpr std::uint64_t kDialoguePulsePeriod = 30;
   constexpr std::uint64_t kDialogueHoldTicks = 2;
@@ -244,6 +279,8 @@ void SceneTrial::Timeout() {
                 ? "expected event handoff was not observed"
             : expected_.ending_to_title
                 ? "ending did not return to title before budget"
+            : expected_.attract_to_title
+                ? "attract demo did not return to title before budget"
                 : "scene did not restore stable player control before budget";
 }
 
@@ -270,8 +307,10 @@ nlohmann::json SceneTrial::Result() const {
       {"passed_tick", passed_tick_},
       {"last", last_},
       {"dialogue_confirm_pulses", dialogue_pulses_}};
-  if (expected_.ending_to_title) {
-    result["coverage"] = "scene_playback_ending_to_title";
+  if (expected_.ending_to_title || expected_.attract_to_title) {
+    result["coverage"] = expected_.ending_to_title
+                             ? "scene_playback_ending_to_title"
+                             : "scene_playback_attract_to_title";
     result["terminal"] = terminal_;
     result.erase("return_zone");
     result.erase("return_room");
@@ -386,6 +425,13 @@ std::vector<EncounterScript> ReadScriptSequence(
             "skips");
       }
     }
+    const bool attract_scene = script.scene && script.scene->attract_to_title;
+    if (script.setup.attract_demo.has_value() != attract_scene ||
+        (attract_scene && !script.presses.empty())) {
+      throw std::runtime_error(
+          "attract_demo setups require an attract_to_title scene without "
+          "scripted presses");
+    }
     scripts.push_back(std::move(script));
   }
   return scripts;
@@ -414,6 +460,7 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
       {"position_units", "tiles; elevation steps of 64 native units"}};
   if (setup.external_event) result["external_event"] = *setup.external_event;
   if (setup.story_progress) result["story_progress"] = *setup.story_progress;
+  if (setup.attract_demo) result["attract_demo"] = *setup.attract_demo;
   return result;
 }
 
@@ -492,6 +539,31 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
   for (const auto& enemy : enemies) {
     setup.enemies.push_back({enemy.at("definition").get<int>(),
                              DecodePosition(enemy.at("position"))});
+  }
+  if (json.contains("attract_demo")) {
+    const auto& cause = json.at("attract_demo");
+    if (!cause.is_number_integer() || (cause != Game::kAttractDemoCutscene1 &&
+                                       cause != Game::kAttractDemoCutscene2)) {
+      throw std::runtime_error(
+          "attract_demo must be title timeout cause 3 or 4");
+    }
+    setup.attract_demo = cause.get<int>();
+    // Original title-timeout state only: Title_InitializeNewGameData's entry
+    // tile/New Game kit and _setTitleExitFlags' door (TITLE 22C.c:4741).
+    const Game::EncounterStatOverrides no_stat_overrides;
+    const bool first = setup.attract_demo == Game::kAttractDemoCutscene1;
+    if (setup.zone != (first ? 20 : 2) || setup.room != (first ? 0 : 1) ||
+        setup.player.x != 4 || setup.player.z != 2 ||
+        setup.player.elevation != 2 || setup.player.direction != 0 ||
+        setup.room_policy != Game::EncounterRoomPolicy::kOriginalRoom ||
+        setup.profile != Game::EncounterProfile::kPrologue ||
+        setup.weapon != Game::EncounterWeapon::kDefault ||
+        setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
+        setup.external_event || setup.story_progress) {
+      throw std::runtime_error(
+          "attract_demo requires the original title-timeout door, entry "
+          "tile and unmodified New Game production room");
+    }
   }
   return setup;
 }

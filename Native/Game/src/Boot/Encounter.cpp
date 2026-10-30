@@ -132,6 +132,13 @@ int EnterOrFinishEncounter() {
   State_savedEntryDoor.tileLocation.entryDirection =
       configuration.player.direction;
   Boot_gameEntryMode = 0;
+  if (configuration.attract_demo) {
+    // Title_Run's idle timeout: _setTitleExitFlags (TITLE.PRG 22C.c:4741)
+    // sets the demo flags and door; its cause becomes vs_battle_exec's entry
+    // mode (SLUS main.c:8344), which returns to title (146C.c:7558).
+    Title_PrepareExit(*configuration.attract_demo);
+    Boot_gameEntryMode = *configuration.attract_demo;
+  }
   Boot_isClearSavePending = 0;
   Boot_LoadBattleOverlays();
   InitializeEncounterPlayerWeapon(configuration.weapon);

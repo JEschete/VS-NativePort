@@ -143,7 +143,14 @@ struct EncounterSetup {
   // Declared campaign story-progress value (script flag 0x82), applied after
   // New Game initialization and before the first room load.
   std::optional<int> story_progress;
+  // Title idle-timeout exit cause (3 = attract cutscene 1, 4 = cutscene 2).
+  // Starts through the original Title_PrepareExit and entry mode, so the
+  // original game loop returns to title when the demo ends or on any button.
+  std::optional<int> attract_demo;
 };
+
+inline constexpr int kAttractDemoCutscene1 = 3;
+inline constexpr int kAttractDemoCutscene2 = 4;
 
 // Reads the same extracted ZND/MPD definitions consumed by the room loader.
 // Does not initialize gameplay or modify content files.

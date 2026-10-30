@@ -698,18 +698,28 @@ class LiveSession {
   }
 
   void ObserveEndingReturn(std::uint64_t errors) {
-    if (!scene_trial_ || !scene_trial_->ExpectsEndingReturn() ||
+    if (!scene_trial_ ||
+        (!scene_trial_->ExpectsEndingReturn() &&
+         !scene_trial_->ExpectsAttractReturn()) ||
         sequence_cancelled_ || script_stopping_ || !script_initialized_ ||
         errors != 0 || fiber_) {
       return;
     }
-    scene_trial_->ObserveEndingReturn(
-        Ending_Credits_hasFinished != 0, Ending_Credits_wasSkipRequested != 0,
-        Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+    if (scene_trial_->ExpectsAttractReturn()) {
+      scene_trial_->ObserveAttractReturn(
+          Boot_gameEntryMode, Ending_Credits_hasFinished != 0,
+          Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+    } else {
+      scene_trial_->ObserveEndingReturn(
+          Ending_Credits_hasFinished != 0, Ending_Credits_wasSkipRequested != 0,
+          Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+    }
     const auto result = scene_trial_->Result();
     trace_.Event("scene.terminal", result.at("terminal"), ticks_);
     if (result.at("status") == "passed") {
-      script_stop_reason_ = "ending_to_title";
+      script_stop_reason_ = scene_trial_->ExpectsAttractReturn()
+                                ? "attract_to_title"
+                                : "ending_to_title";
     }
   }
 

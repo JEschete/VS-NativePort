@@ -165,6 +165,25 @@ the encounter; this is not retail title-UI or earned campaign verification.
 Original-byte/branch/terminal-invocation evidence remains a separate gate.
 Default field-control goals and isolated combat are unchanged.
 
+The title's idle-timeout attract demos also end at the title, not in field
+control. A preset that declares `"attract_demo": 3` (cutscene 1, door 20/0) or
+`4` (cutscene 2, door 2/1) runs the original `Title_PrepareExit` cause after
+New Game data initialization and starts the game loop in that entry mode. It
+must use the original title entry: tile 4,2, elevation 2, direction 0, the
+`prologue` profile, the `default` weapon, production room events, and no
+enemies, stat assist, story progress or direct event. Pair it with
+`"terminal": "attract_to_title"`, `confirm_dialogue: false` and no scripted
+presses. In entry modes 3 and 4 the original loop returns to title on any button
+press, or when the final cutscene ends (`vs_battle_exec`, BATTLE
+146C.c:7558). Acceptance therefore requires:
+- ordered source events;
+- no observed button input;
+- a natural fiber return in that entry mode, without credits or a clear-save
+  handoff;
+- zero errors and teardown.
+
+Results report `scene_playback_attract_to_title`.
+
 The manifest requires documented preconditions and production-room events or
 an aligned explicit external event. It does not grant story flags, HP, items or
 victories; scene results explicitly leave campaign progression unestablished.

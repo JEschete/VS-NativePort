@@ -186,6 +186,117 @@ TEST_CASE("Ordinary scene goals ignore terminal ending flags",
   CHECK_FALSE(trial.Result().contains("terminal"));
 }
 
+namespace {
+nlohmann::json ExpectedAttract() {
+  auto value = ExpectedEnding();
+  value["terminal"] = "attract_to_title";
+  value["confirm_dialogue"] = false;
+  return value;
+}
+
+nlohmann::json AttractSetup() {
+  return {{"version", 1},
+          {"zone", 20},
+          {"room", 0},
+          {"seed", 1},
+          {"player", {{"x", 4}, {"z", 2}, {"elevation", 2}, {"direction", 0}}},
+          {"enemies", nlohmann::json::array()},
+          {"room_events", "production"},
+          {"attract_demo", 3}};
+}
+}  // namespace
+
+TEST_CASE("Attract demos accept only the original title-timeout start",
+          "[scenes][playback][attract-goal]") {
+  auto setup = AttractSetup();
+  SECTION("valid cutscene 1") {
+    const auto decoded = VS::combat_lab::DecodeSetup(setup);
+    CHECK(decoded.attract_demo == 3);
+    CHECK(VS::combat_lab::EncodeSetup(decoded).at("attract_demo") == 3);
+  }
+  SECTION("valid cutscene 2") {
+    setup["attract_demo"] = 4;
+    setup["zone"] = 2;
+    setup["room"] = 1;
+    CHECK(VS::combat_lab::DecodeSetup(setup).attract_demo == 4);
+  }
+  SECTION("invalid") {
+    SECTION("unknown cause") { setup["attract_demo"] = 0; }
+    SECTION("boolean cause") { setup["attract_demo"] = true; }
+    SECTION("wrong door") { setup["zone"] = 21; }
+    SECTION("other cause door") { setup["attract_demo"] = 4; }
+    SECTION("moved entry") { setup["player"]["x"] = 0; }
+    SECTION("isolated room") { setup["room_events"] = "isolated"; }
+    SECTION("granted kit") { setup["ashley_profile"] = "post-prologue"; }
+    SECTION("stat assist") { setup["ashley_stats"] = {{"max_hp", 999}}; }
+    SECTION("direct event") { setup["external_event"] = 20; }
+    SECTION("story progress") { setup["story_progress"] = 1; }
+    CHECK_THROWS_AS(VS::combat_lab::DecodeSetup(setup), std::runtime_error);
+  }
+}
+
+TEST_CASE("Attract terminals reject dialogue confirmation",
+          "[scenes][playback][attract-goal]") {
+  auto value = ExpectedAttract();
+  CHECK(VS::combat_lab::DecodeSceneExpectation(value).attract_to_title);
+  value["confirm_dialogue"] = true;
+  CHECK_THROWS_AS(VS::combat_lab::DecodeSceneExpectation(value),
+                  std::runtime_error);
+}
+
+TEST_CASE("Attract demos pass only on an unpressed native title return",
+          "[scenes][playback][attract-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedAttract()));
+  PlayExpectedEvents(trial);
+  trial.Observe(ReadyState(), Event(81, 0), 124);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Input(120) == 0);
+  SECTION("passes") {
+    trial.ObserveAttractReturn(3, false, false, 140);
+    CHECK(trial.Result().at("status") == "passed");
+    CHECK(trial.Result().at("coverage") == "scene_playback_attract_to_title");
+    CHECK(trial.Result().at("terminal").at("entry_mode") == 3);
+    CHECK(trial.Result().at("passed_tick") == 140);
+  }
+  SECTION("ending handoff") {
+    trial.ObserveAttractReturn(3, true, true, 140);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("ordinary entry mode") {
+    trial.ObserveAttractReturn(0, false, false, 140);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("button interrupt") {
+    auto pressed = ReadyState();
+    pressed.native_pressed = 0x20;
+    trial.Observe(pressed, Event(81, 0), 130);
+    CHECK(trial.Result().at("status") == "failed");
+    trial.ObserveAttractReturn(3, false, false, 140);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("ending observer ignored") {
+    trial.ObserveEndingReturn(true, false, true, 140);
+    CHECK_FALSE(trial.Finished());
+  }
+}
+
+TEST_CASE("Attract returns cannot replace the expected source events",
+          "[scenes][playback][attract-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedAttract()));
+  trial.Observe(ReadyState(), Event(80), 1);
+  trial.ObserveAttractReturn(3, false, false, 140);
+  CHECK(trial.Result().at("status") == "failed");
+  CHECK(trial.Result().at("matched_events") == 1);
+}
+
+TEST_CASE("Field-control goals ignore attract returns",
+          "[scenes][playback][attract-goal]") {
+  auto trial = Trial();
+  PlayExpectedEvents(trial);
+  trial.ObserveAttractReturn(3, false, false, 140);
+  CHECK_FALSE(trial.Finished());
+}
+
 TEST_CASE(
     "Frame budgets and missing handoffs never constitute scene completion",
     "[scenes][playback]") {
