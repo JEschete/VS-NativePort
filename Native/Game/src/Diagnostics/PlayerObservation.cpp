@@ -175,8 +175,7 @@ void InspectActionOptions(PlayerObservationState& state) {
     for (std::size_t index = 0; index < count; ++index) {
       const auto id = static_cast<unsigned char>(ids[index]);
       if (id == 0 || !Battle_actionDefinitions[id].unlocked) continue;
-      const int ranks =
-          family == "warlock" ? WarlockSpellRankCount(id) : 1;
+      const int ranks = family == "warlock" ? WarlockSpellRankCount(id) : 1;
       for (int rank = 0; rank < ranks; ++rank) {
         const int action = id + rank;
         const auto& definition = Battle_actionDefinitions[action];

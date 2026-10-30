@@ -440,8 +440,7 @@ VS::Game::EncounterState GameOverState(int ashley_hp) {
 }
 
 SceneTrial GameOverTrial() {
-  return SceneTrial(
-      VS::combat_lab::DecodeSceneExpectation(ExpectedGameOver()));
+  return SceneTrial(VS::combat_lab::DecodeSceneExpectation(ExpectedGameOver()));
 }
 }  // namespace
 

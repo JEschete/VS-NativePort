@@ -722,11 +722,10 @@ class LiveSession {
     const auto result = scene_trial_->Result();
     trace_.Event("scene.terminal", result.at("terminal"), ticks_);
     if (result.at("status") == "passed") {
-      script_stop_reason_ = scene_trial_->ExpectsAttractReturn()
-                                ? "attract_to_title"
-                            : scene_trial_->ExpectsGameOverReturn()
-                                ? "game_over_to_title"
-                                : "ending_to_title";
+      script_stop_reason_ =
+          scene_trial_->ExpectsAttractReturn()    ? "attract_to_title"
+          : scene_trial_->ExpectsGameOverReturn() ? "game_over_to_title"
+                                                  : "ending_to_title";
     }
   }
 

@@ -269,9 +269,9 @@ void SceneTrial::ObserveGameOverReturn(bool credits_finished,
   if (Finished() || !expected_.game_over_to_title) return;
   terminal_ = {{"kind", "game_over_to_title"},
                {"native_fiber_returned", true},
-               {"game_over_menu_tick", game_over_menu_tick_
-                                           ? nlohmann::json(*game_over_menu_tick_)
-                                           : nlohmann::json{}},
+               {"game_over_menu_tick",
+                game_over_menu_tick_ ? nlohmann::json(*game_over_menu_tick_)
+                                     : nlohmann::json{}},
                {"title_choice_pressed", title_choice_pressed_},
                {"credits_finished", credits_finished},
                {"clear_save_pending", clear_save_pending},
@@ -379,11 +379,10 @@ nlohmann::json SceneTrial::Result() const {
       {"dialogue_confirm_pulses", dialogue_pulses_}};
   if (expected_.ending_to_title || expected_.attract_to_title ||
       expected_.game_over_to_title) {
-    result["coverage"] = expected_.ending_to_title
-                             ? "scene_playback_ending_to_title"
-                         : expected_.attract_to_title
-                             ? "scene_playback_attract_to_title"
-                             : "scene_playback_game_over_to_title";
+    result["coverage"] =
+        expected_.ending_to_title    ? "scene_playback_ending_to_title"
+        : expected_.attract_to_title ? "scene_playback_attract_to_title"
+                                     : "scene_playback_game_over_to_title";
     result["terminal"] = terminal_;
     result.erase("return_zone");
     result.erase("return_room");
