@@ -61,6 +61,8 @@ def main() -> int:
     run.add_argument("--setup-interaction", action="store_true",
                      help="Also accept lone ordinary Cross setup pulses for an original local/external trigger")
     run.add_argument("--model-port", type=int, default=11551)
+    run.add_argument("--run-log-mb", type=int, default=Retention.run_bytes // (1024 * 1024),
+                     help="Per-run log budget; actor-dense rooms log more frame data per tick")
     run.add_argument("--shared-model", type=int, choices=(1, 2, 3, 4), metavar="PARALLEL",
                      help="Borrow a running `serve` model with this many slots instead of owning one")
     doors = run.add_mutually_exclusive_group()
@@ -125,7 +127,7 @@ def main() -> int:
             model_port=args.model_port,
             shared_model=args.shared_model is not None,
             model_parallel=args.shared_model or 1,
-        ))
+        ), Retention(run_bytes=args.run_log_mb * 1024 * 1024))
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 2
     return 0
