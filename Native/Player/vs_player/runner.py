@@ -619,9 +619,17 @@ def _play_game(store: RunStore, run_id: str,
                                 "tick": latest.tick, "scene_trigger": scene_navigation.result(),
                                 "context": context,
                             })
-                            navigation_future = planner.submit(
-                                client.navigate, latest, options.goal, context,
-                            )
+                            if len(context["candidates"]) == 1:
+                                # A single observed route offers no choice; skip inference latency that lets combat reset it.
+                                navigation_future = Future()
+                                navigation_future.set_result(NavigationDecision(
+                                    next(iter(context["candidates"])), "only observed candidate route",
+                                    latest.tick, 0.0,
+                                ))
+                            else:
+                                navigation_future = planner.submit(
+                                    client.navigate, latest, options.goal, context,
+                                )
                     scene_pending = scene_navigation is not None and scene_navigation.pending(latest)
                     needs_plan = (controller.decision is None or now - last_request >= 2.0
                                   or urgent_recovery_needed(
@@ -661,6 +669,7 @@ def _play_game(store: RunStore, run_id: str,
                             "validation_error_to_correct": validation_feedback,
                             "recent_terrain_feedback": pursuit.feedback[-6:],
                             "max_incoming_hp_damage": goal.max_incoming_hp_damage,
+                            "unreachable_hostiles": controller.unreachable_hostiles(latest),
                         }
                         if scene_navigation is not None:
                             context["source_scene_navigation_objective"] = {
@@ -743,7 +752,7 @@ def _play_game(store: RunStore, run_id: str,
                             pursuit, pursuit_scope = TerrainNavigator(), scope
                     scene_movement = bool(
                         scene_navigation is not None and scene_navigation.ready(latest)
-                        and (scene_navigation.navigator.path
+                        and (scene_navigation.navigator.path or scene_navigation.pushing(latest)
                              or (navigation_future is not None
                                  and navigation_owner is scene_navigation))
                     )

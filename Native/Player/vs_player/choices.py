@@ -57,6 +57,8 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     damage_spell_ids = set(knowledge["damage_spells"]["action_ids"])
     options = frame.raw["action_options"]
     feedback = context.get("controller_feedback", [])
+    # Native targeting refused these hostiles from several positions; melee would loop against terrain.
+    unreachable = {row["slot"] for row in context.get("unreachable_hostiles", [])}
 
     def add(intent: str, target: int = -1, action: int = -1, slot: int = 1,
             item: int = -1, limb: int = -1) -> None:
@@ -161,7 +163,8 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     if confirmed < required:
         add("wait")
         for enemy in target_enemies:
-            add("approach", enemy.slot)
+            if enemy.slot not in unreachable:
+                add("approach", enemy.slot)
         return choices | healing_choices
 
     chains = {option["id"] for option in options if option["family"] == "chain"}
@@ -243,14 +246,21 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
 
     choices.update(healing_choices)
 
-    if context.get("physical_navigation_objective") and all(
+    scene = context.get("source_scene_navigation_objective") or {}
+    # A pending local scene that is not combat-gated must outrank chasing hostiles the player may never reach.
+    scene_navigation = (bool(scene) and scene.get("activation_tick") is None
+                        and not scene.get("combat_clearance_required"))
+    all_unreachable = bool(frame.enemies) and all(enemy.slot in unreachable for enemy in frame.enemies)
+    if (context.get("physical_navigation_objective") or scene_navigation) and (all_unreachable or all(
         context.get("confirmed_successes", {}).get(kind, 0) >= count
         for kind, count in context.get("required_successes", {}).items()
-    ):
+    )):
         add("navigate")
         return choices
 
     for enemy in target_enemies:
+        if enemy.slot in unreachable:
+            continue
         if native_target_menu_ready(frame):
             for target in frame.raw["target_previews"]:
                 if target["actor"] == enemy.slot:

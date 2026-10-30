@@ -221,6 +221,13 @@ class LocalModel:
                 "Leaving a hostile alive is not defeating it; all native story/lock gates still apply. "
                 "Heal or prepare when needed. Native combat and reward UI always take priority."
             )
+        elif any(choice["intent"] == "navigate" for choice in choices.values()) and (
+                (context or {}).get("source_scene_navigation_objective")):
+            prompt["current_milestone"] = (
+                "The objective is the pending original local scene trigger tile, not exterminating hostiles. "
+                "Choose navigate to walk there through normal terrain controls. The native trigger "
+                "evaluator must still activate the scene; heal when needed."
+            )
         started = time.monotonic()
         response = self.request("/api/chat", {
             "model": self.model["name"],
@@ -272,6 +279,8 @@ class LocalModel:
                     "When physical_navigation_objective is present, navigate means follow that "
                     "observed original door through normal terrain controls, not teleport or skip "
                     "a gate. It may be preferable to repeatedly attacking an unreachable enemy. "
+                    "unreachable_hostiles lists foes native targeting refused from several places "
+                    "because walls or ledges separate them; do not melee or approach them directly. "
                     "Item choices use a currently owned consumable through its normal menu. "
                     "The final choice-key component is the inventory item ID; the action ID "
                     "is its observed native effect, not a spell that needs to be learned. "

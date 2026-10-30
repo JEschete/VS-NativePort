@@ -246,6 +246,50 @@ class NavigationTests(unittest.TestCase):
                         Frame.decode(record))
         self.assertFalse(goal.navigator.path)
 
+    def test_scene_target_walks_directly_into_a_threshold_after_a_near_route(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        goal.navigator.feedback.append({"status": "route_reached", "tick": frame.tick,
+                                        "remaining_distance": 128})
+        self.assertIsNone(goal.request(frame))
+        self.assertTrue(goal.pushing(frame))
+        action = goal.step(frame)
+        self.assertIn("trigger tile", action.reason)
+        self.assertTrue(action.buttons)
+        record["tick"] += 91
+        self.assertFalse(goal.pushing(Frame.decode(record)))
+        self.assertEqual(goal.push_attempts, 1)
+
+    def test_scene_target_opens_an_authored_door_on_the_trigger_tile(self):
+        record = self.frame()
+        record["data"]["doors"] = [{"tile_x": 1, "tile_z": 0, "index": 0}]
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        goal.navigator.feedback.append({"status": "route_reached", "tick": frame.tick})
+        self.assertIsNone(goal.request(frame))
+        self.assertEqual(goal.push_until, frame.tick + 240)
+        self.assertEqual(goal.step(frame).buttons, frozenset({"Cross"}))
+        record["tick"] += 10
+        self.assertNotEqual(goal.step(Frame.decode(record)).buttons, frozenset({"Cross"}))
+        record["tick"] += 90
+        self.assertEqual(goal.step(Frame.decode(record)).buttons, frozenset({"Cross"}))
+        self.assertEqual(len(goal.door_open_ticks), 2)
+
+    def test_scene_target_keeps_a_route_across_transient_combat_control(self):
+        record = self.frame()
+        frame = Frame.decode(record)
+        goal = SceneTileGoal((1, 0), frame.zone, frame.room, 0)
+        context = goal.request(frame)
+        record["tick"] += 1
+        record["data"]["control_mode"] = 2
+        goal.observe(Frame.decode(record))
+        record["tick"] += 1
+        record["data"]["control_mode"] = 1
+        goal.accept(NavigationDecision(next(iter(context["candidates"])), "cross original tile", 1, frame.tick),
+                    Frame.decode(record))
+        self.assertTrue(goal.navigator.path)
+
     def test_scene_target_rejects_non_native_coordinates(self):
         for tile in ((-1, 0), (256, 0), (True, 0), (1,), [1, 0]):
             with self.subTest(tile=tile), self.assertRaises(ValueError):
@@ -364,6 +408,32 @@ class NavigationTests(unittest.TestCase):
         record["tick"] = 20
         record["data"]["actors"][0]["weapon_drawn"] = 0
         self.assertIn("Square", navigator.step(Frame.decode(record)).buttons)
+
+    def test_scene_navigation_sheathes_with_bounded_resends(self):
+        navigator = SceneTileGoal((1, 0), 9, 6, 0).navigator
+        record = self.frame()
+        record["data"]["actors"][0]["weapon_drawn"] = 1
+        navigator.request(Frame.decode(record), (160, 96))
+        navigator.accept(NavigationDecision("route1", "advance", 1, 900), Frame.decode(record))
+        navigator.path = [{"position": (160, 0, 96), "jump": False}]
+        sent = []
+        for tick in range(0, 200, 10):
+            record["tick"] = tick
+            action = navigator.step(Frame.decode(record)) if tick < 150 else None
+            if action is not None:
+                self.assertEqual(action.buttons, frozenset({"Cross"}))
+                sent.append(tick)
+        self.assertEqual(sent, [0, 40, 80, 120])
+        record["tick"] = 160
+        with self.assertRaises(RuntimeError):
+            navigator.step(Frame.decode(record))
+        ordinary = TerrainNavigator()
+        record = self.frame()
+        record["data"]["actors"][0]["weapon_drawn"] = 1
+        ordinary.request(Frame.decode(record), (160, 96))
+        ordinary.accept(NavigationDecision("route1", "advance", 1, 900), Frame.decode(record))
+        ordinary.path = [{"position": (160, 0, 96), "jump": False}]
+        self.assertNotEqual(ordinary.step(Frame.decode(record)).buttons, frozenset({"Cross"}))
 
     def test_jump_requires_observed_takeoff_alignment_and_native_ground_readiness(self):
         navigator = TerrainNavigator()
@@ -1398,6 +1468,20 @@ class ControllerTests(unittest.TestCase):
         self.assertIsNone(controller.decision)
         self.assertEqual(controller.feedback[-1]["kind"], "scene_changed")
 
+    def test_pending_scene_tile_outranks_chasing_hostiles_unless_combat_gated(self):
+        frame = self.frame()
+        scene = {"zone": 1, "room": 6, "source": 2, "selector": 0, "tile": (3, 4), "activation_tick": None}
+        intents = lambda context: {row["intent"] for row in available_choices(frame, context).values()}
+        pending = intents({"source_scene_navigation_objective": {**scene, "combat_clearance_required": False}})
+        self.assertIn("navigate", pending)
+        self.assertNotIn("attack", pending)
+        gated = intents({"source_scene_navigation_objective": {**scene, "combat_clearance_required": True}})
+        self.assertNotIn("navigate", gated)
+        self.assertIn("attack", gated)
+        activated = intents({"source_scene_navigation_objective": {
+            **scene, "activation_tick": 900, "combat_clearance_required": False}})
+        self.assertNotIn("navigate", activated)
+
     def test_active_terrain_path_never_suppresses_native_target_confirmation(self):
         controller = CombatController()
         original = self.frame()
@@ -1495,6 +1579,26 @@ class ControllerTests(unittest.TestCase):
                                  distance < 16)
         controller.accept(self.decision(20, intent="approach"), retry, retry)
         self.assertFalse(controller.attack_reposition_required(retry))
+
+    def test_repeated_native_refusals_mark_hostile_unreachable_for_choices(self):
+        controller = CombatController()
+        tick = 0
+        for _ in range(CombatController.unreachable_rejections):
+            start = self.frame(tick)
+            controller.accept(self.decision(tick), start, start)
+            refused = self.frame(tick + 5, control_mode=2, action_phase=1,
+                                 target_page={"selection_step": 16})
+            controller.step(refused)
+            tick += 20
+        current = self.frame(tick)
+        verdicts = controller.unreachable_hostiles(current)
+        self.assertEqual([row["slot"] for row in verdicts], [current.enemies[0].slot])
+        intents = {(row["intent"], row["target_slot"])
+                   for row in available_choices(current, {"unreachable_hostiles": verdicts}).values()}
+        self.assertNotIn(("attack", current.enemies[0].slot), intents)
+        self.assertNotIn(("approach", current.enemies[0].slot), intents)
+        self.assertEqual(controller.unreachable_hostiles(
+            self.frame(tick + CombatController.unreachable_window + 10)), [])
 
     def test_unlisted_attack_target_also_requires_reposition(self):
         controller = CombatController()
@@ -2590,6 +2694,95 @@ class RuntimeTests(unittest.TestCase):
                 buffer.seek(0)
                 with zipfile.ZipFile(buffer) as archive, self.assertRaises(ValueError):
                     validate_archive(archive)
+
+
+class CratePuzzleTests(unittest.TestCase):
+    LEDGE = (-384) & 0x7FFF
+
+    def grid(self, alcove=False):
+        # Row z=1 is a corridor whose east end is a ledge 384 units up; row z=0 is wall
+        # except an optional one-tile alcove at x=1.
+        width, depth = 5, 2
+        floor = [-1] * width + [0, 0, 0, 0, self.LEDGE]
+        flags = [0] * width + [1] * width
+        if alcove:
+            floor[1], flags[1] = 0, 1
+        return {"width": width, "depth": depth, "floor": floor,
+                "ceiling": [-1] * width * depth, "flags": flags}
+
+    def planner(self, alcove=False):
+        from vs_player.crates import CratePlanner, RoomGrid
+        return CratePlanner(RoomGrid.decode(self.grid(alcove)), [], 128)
+
+    def test_ledge_above_climb_limit_needs_a_pushed_crate_step(self):
+        from vs_player.crates import Crate
+        planner = self.planner()
+        self.assertIsNone(planner.plan((0, 1), (), (4, 1)))
+        plan = planner.plan((0, 1), (Crate(3, 2, 2, 1, 0),), (4, 1))
+        self.assertEqual(plan, [{"action": "push", "stand": (1, 1), "direction": 3, "slot": 3}])
+
+    def test_push_requires_a_far_tile_no_higher_than_the_crate_base(self):
+        from vs_player.crates import Crate
+        planner = self.planner()
+        # Pushing east from (2,1) would put the crate onto the ledge tile, which is above its base.
+        self.assertIsNone(planner.push_result((2, 1), 3, (Crate(3, 2, 3, 1, 0),)))
+        self.assertIsNone(planner.push_result((2, 1), 0, (Crate(3, 2, 3, 1, 0),)))
+
+    def test_wall_bound_liftable_crate_is_carried_and_placed_below_the_ledge(self):
+        from vs_player.crates import Crate
+        planner = self.planner(alcove=True)
+        crate = Crate(4, 5, 1, 0, 0)
+        self.assertIsNone(planner.push_result((1, 1), 0, (crate,)))
+        plan = planner.plan((0, 1), (crate,), (4, 1))
+        self.assertEqual(len(plan), 1)
+        self.assertEqual(plan[0]["action"], "lift")
+        self.assertEqual((plan[0]["stand"], plan[0]["direction"]), ((1, 1), 0))
+        place = plan[0]["place_stand"]
+        dx, dz = {0: (0, -1), 1: (-1, 0), 2: (0, 1), 3: (1, 0)}[plan[0]["place_direction"]]
+        self.assertEqual((place[0] + dx, place[1] + dz), (3, 1))
+
+    def frame(self, tick, tile=(0, 1), facing=(1, 1), crate_tile=(2, 1)):
+        record = sample_record(tick, active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["actors"] = record["data"]["actors"][:1]
+        record["data"]["actors"][0]["weapon_drawn"] = 0
+        record["data"]["actors"][0]["position"] = [tile[0] * 128 + 64, 0, tile[1] * 128 + 64]
+        record["data"]["navigation"] = {
+            "available": True, "origin": [0, 0], "width": 1, "depth": 1, "spacing": 64,
+            "collision_height": 128, "movement_mode": 0, "locomotion_state": 0,
+            "route_phase": 0, "jumping": False, "facing_tile": [*facing, 0],
+            "samples": [[0, -2032, 5]],
+        }
+        record["data"]["room_tiles"] = self.grid()
+        record["data"]["gimmicks"] = [{
+            "slot": 3, "object_id": 2, "interaction": 0, "falling": False,
+            "tile_x": crate_tile[0], "tile_z": crate_tile[1],
+            "position": [crate_tile[0] * 128 + 64, 0, crate_tile[1] * 128 + 64],
+            "mode": 0, "motion_state": 0, "skipped": False, "visible": True,
+            "parent": 255, "carrier": 0, "carried": False,
+        }]
+        return Frame.decode(record)
+
+    def test_scene_goal_executes_the_crate_push_before_trigger_navigation(self):
+        goal = SceneTileGoal((4, 1), 9, 6, 1)
+        frame = self.frame(10)
+        self.assertIsNone(goal.request(frame))
+        self.assertTrue(goal.pushing(frame))
+        self.assertEqual(goal.crates.plan[0]["stand"], (1, 1))
+        walk = goal.step(self.frame(20))
+        self.assertIsNotNone(walk)
+        self.assertEqual(walk.reason, "execute model-selected observed-terrain waypoint")
+        # On the stand tile already facing the crate: an ordinary Cross press starts the push.
+        press = goal.step(self.frame(30, tile=(1, 1), facing=(2, 1)))
+        press = press or goal.step(self.frame(40, tile=(1, 1), facing=(2, 1)))
+        self.assertEqual(press.buttons, frozenset({"Cross"}))
+        goal.step(self.frame(50, tile=(1, 1), facing=(2, 1), crate_tile=(3, 1)))
+        self.assertEqual(goal.crates.stage, "settle")
+        goal.step(self.frame(80, tile=(1, 1), facing=(2, 1), crate_tile=(3, 1)))
+        self.assertFalse(goal.crates.active())
+        self.assertEqual(goal.crates.actions_done, 1)
+        # With the step in place the trigger is walkable, so ordinary navigation resumes.
+        self.assertFalse(goal.crates.needed(self.frame(90, tile=(1, 1), crate_tile=(3, 1))))
 
 
 if __name__ == "__main__":

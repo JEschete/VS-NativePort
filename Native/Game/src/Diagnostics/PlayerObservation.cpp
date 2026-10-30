@@ -676,6 +676,83 @@ nlohmann::json EncodePlayerDoors(const PlayerObservationState& state) {
   return doors;
 }
 
+// Whole-room tile grid for crate planning; the navigation patch only spans
+// ~6 tiles. Floors exclude gimmicks (exported separately). Static per room, so
+// it is emitted on room change and periodically to bound frame size.
+nlohmann::json EncodeRoomTiles() {
+  static const void* last_map = nullptr;
+  static unsigned calls = 0;
+  const auto* map = Field_roomData.collisionMap;
+  if (map == nullptr || Field_roomData.tileCells == nullptr ||
+      map->width <= 0 || map->height <= 0 ||
+      map->width > EncounterLimits::kTiles ||
+      map->height > EncounterLimits::kTiles) {
+    last_map = nullptr;
+    return nullptr;
+  }
+  constexpr unsigned kResyncCalls = 120;
+  if (map == last_map && ++calls % kResyncCalls != 0) return nullptr;
+  last_map = map;
+  calls = 0;
+  constexpr int kTileSize = 128;
+  auto floors = nlohmann::json::array();
+  auto ceilings = nlohmann::json::array();
+  auto flags = nlohmann::json::array();
+  for (int z = 0; z < map->height; ++z) {
+    for (int x = 0; x < map->width; ++x) {
+      const int world_x = x * kTileSize + kTileSize / 2;
+      const int world_z = z * kTileSize + kTileSize / 2;
+      const auto* cell = Field_CollisionCellAt(x, z, 0);
+      SVECTOR point{static_cast<std::int16_t>(world_x), 0,
+                    static_cast<std::int16_t>(world_z), 0};
+      const bool passable =
+          cell->doorPassability <= kFullyBlockedPassability &&
+          Field_FindCollisionCellAtPosition(&point, 0) != nullptr;
+      floors.push_back(Field_FloorHeightAt(world_x, world_z));
+      ceilings.push_back(Field_CeilingHeightAt(world_x, world_z));
+      flags.push_back((passable ? 1 : 0) | (cell->isPit ? 2 : 0));
+    }
+  }
+  return {{"width", map->width},
+          {"depth", map->height},
+          {"floor", std::move(floors)},
+          {"ceiling", std::move(ceilings)},
+          {"flags", std::move(flags)}};
+}
+
+// Live Field_gimmickInstances (D_800F45E0). Reads fields only: the gameplay
+// queries Field_FindInteractableGimmickAhead (func_800A39F8) and
+// Field_GimmickSupportHeight write interaction/support globals.
+nlohmann::json EncodePlayerGimmicks() {
+  auto gimmicks = nlohmann::json::array();
+  const auto* ashley = Actors_actorRecords[0];
+  const int carried = ashley != nullptr && ashley->actionPoseActive
+                          ? ashley->instance.attachBone
+                          : -1;
+  for (int slot = 0; slot < static_cast<int>(std::size(Field_gimmickInstances));
+       ++slot) {
+    const auto* object = Field_gimmickInstances[slot];
+    if (object == nullptr) continue;
+    gimmicks.push_back(
+        {{"slot", slot},
+         {"object_id", object->objectInfo.objectId},
+         {"interaction", object->objectInfo.interaction},
+         {"falling", object->objectInfo.isFalling != 0},
+         {"tile_x", static_cast<int>(object->tileX)},
+         {"tile_z", static_cast<int>(object->tileZ)},
+         {"position",
+          {object->positionX, object->positionY, object->positionZ}},
+         {"mode", object->mode},
+         {"motion_state", object->motionState},
+         {"skipped", object->isSkipped != 0},
+         {"visible", object->isVisible != 0},
+         {"parent", object->parent},
+         {"carrier", object->objectInfo.carrier},
+         {"carried", slot == carried}});
+  }
+  return gimmicks;
+}
+
 nlohmann::json EncodePlayerChests(const PlayerObservationState& state) {
   auto chests = nlohmann::json::array();
   for (const auto& chest : state.chests) {
@@ -818,6 +895,10 @@ void AppendPlayerObservations(nlohmann::json& data,
   data["menu"] = EncodePlayerMenu(state.menu);
   data["doors"] = EncodePlayerDoors(state);
   data["chests"] = EncodePlayerChests(state);
+  data["gimmicks"] = EncodePlayerGimmicks();
+  if (auto tiles = EncodeRoomTiles(); !tiles.is_null()) {
+    data["room_tiles"] = std::move(tiles);
+  }
   data["navigation"] = EncodeNavigation(state.navigation);
   auto items = nlohmann::json::array();
   for (const auto& item : state.item_options) {

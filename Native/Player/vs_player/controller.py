@@ -59,6 +59,8 @@ def direction_buttons(dx: int, dz: int, yaw: int) -> frozenset[str]:
 
 class CombatController:
     max_area_target_confirmations = 8
+    unreachable_rejections = 3
+    unreachable_window = 1800
 
     def __init__(self) -> None:
         self.reactions = ReactionController()
@@ -69,6 +71,8 @@ class CombatController:
         self.feedback: list[dict] = []
         self.transaction: MenuTransaction | None = None
         self.rejected_positions: dict[tuple[int, int, int, int, int], tuple[int, int, int]] = {}
+        self.rejection_history: dict[tuple[int, int, int, int, int],
+                                     list[tuple[int, tuple[int, int, int], tuple[int, int, int]]]] = {}
         self.decision_scene: tuple[int, int, int] | None = None
         self.area_target_confirmations = 0
         self.area_target_confirmation_tick: int | None = None
@@ -158,6 +162,28 @@ class CombatController:
         })
         if decision.intent == "attack" and self.identity is not None:
             self.rejected_positions[self.identity] = player.position
+            target = next((actor for actor in frame.enemies
+                           if actor.slot == decision.target_slot), None)
+            if target is not None:
+                self.rejection_history.setdefault(self.identity, []).append(
+                    (frame.tick, player.position, target.position))
+
+    def unreachable_hostiles(self, frame: Frame) -> list[dict]:
+        """Hostiles native targeting repeatedly refused from distinct positions (walls, ledges)."""
+        verdicts = []
+        for actor in frame.enemies:
+            identity = self.target_identity(frame, actor)
+            history = [row for row in self.rejection_history.get(identity, [])
+                       if frame.tick - row[0] <= self.unreachable_window
+                       and math.dist(row[2], actor.position) <= 192]
+            self.rejection_history[identity] = history
+            if len(history) >= self.unreachable_rejections:
+                verdicts.append({
+                    "slot": actor.slot, "native_target_rejections": len(history),
+                    "claim": ("Native attack targeting refused this hostile from several nearby "
+                              "positions; terrain such as a wall or ledge likely separates it."),
+                })
+        return verdicts
 
     def attack_reposition_required(self, frame: Frame) -> bool:
         decision = self.decision

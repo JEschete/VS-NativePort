@@ -101,6 +101,9 @@ class TerrainNavigator:
         self.geometry_sha256 = ""
         self.feedback_offset = 0
         self.sheath_sent_tick: int | None = None
+        self.sheath_attempts = 0
+        # Scene goals cross original triggers whose condition 9 rejects the battle stance (Triggers.c case 9).
+        self.require_sheathed = False
         self.target_identity: tuple[int, int, int] | None = None
         self.direct_goal: tuple[int, int, int] | None = None
         self.direct_best_distance = math.inf
@@ -293,6 +296,7 @@ class TerrainNavigator:
         self.progress_tick = frame.tick
         self.best_waypoint_distance = math.inf
         self.sheath_sent_tick = None
+        self.sheath_attempts = 0
         self.feedback.append({"status": "model_plan", "tick": frame.tick,
                               "choice": decision.choice, "reason": decision.reason,
                               "latency_ms": decision.latency_ms})
@@ -323,19 +327,21 @@ class TerrainNavigator:
         if not field_navigation_ready(frame) or frame.tick-self.last_tick < 6:
             return None
         position = frame.player.position
-        needs_sheathe = any(
+        needs_sheathe = self.require_sheathed or any(
             (step["jump"] and step.get("takeoff")
              and step["position"][1] < step["takeoff"][1] - 64)
             or step.get("drop", 0) >= 128 for step in self.path
         )
         if needs_sheathe and frame.player.weapon_drawn:
-            if self.sheath_sent_tick is not None:
-                if frame.tick-self.sheath_sent_tick > 120:
-                    raise RuntimeError("Normal sheathe input was not acknowledged before a native-gated terrain transition")
+            if self.sheath_sent_tick is not None and frame.tick-self.sheath_sent_tick <= 30:
                 return None
+            # Accelerated play can drop a short press before native polling, so resend a bounded number of times.
+            self.sheath_attempts += 1
+            if self.sheath_attempts > 4:
+                raise RuntimeError("Normal sheathe input was not acknowledged before a native-gated terrain transition")
             self.sheath_sent_tick = self.last_tick = frame.tick
             self.progress_tick = frame.tick
-            return InputAction(frozenset({"Cross"}), 2, "sheathe normally before a native-gated terrain transition")
+            return InputAction(frozenset({"Cross"}), 4, "sheathe normally before a native-gated terrain transition")
         target = self.path[0]
         x, y, z = target["position"]
         native = frame.raw["navigation"]
@@ -415,16 +421,29 @@ class SceneTileGoal:
         self.tile = tile
         self.zone, self.room, self.selector = zone, room, selector
         self.navigator = TerrainNavigator()
+        self.navigator.require_sheathed = True
         self.activation_tick: int | None = None
         self.last_owned_tick = -1
+        # Trigger thresholds can fail the conservative footprint test yet admit native movement.
+        self.push_until: int | None = None
+        self.push_attempts = 0
+        self.push_sheath_tick = -100
+        # A trigger tile that is also an authored door opens with ordinary Cross (GameLoop.c door path).
+        self.door_open_ticks: list[int] = []
+        # Imported here: crates builds on TerrainNavigator from this module.
+        from .crates import CrateAssist
+        self.crates = CrateAssist(tile)
         self.identity = f"scene:{zone}:{room}:local:{selector}:tile:{tile[0]}:{tile[1]}"
 
     def observe(self, frame: Frame) -> None:
         scene = frame.raw["scene"]
         event = scene.get("event", {}) if scene["available"] else {}
-        if ((frame.zone, frame.room) != (self.zone, self.room)
-                or not field_navigation_ready(frame) or frame.dialogue_waiting):
+        if not field_navigation_ready(frame) or frame.dialogue_waiting:
             self.navigator.path.clear()
+        # Only scene ownership (room, script or dialogue) invalidates a pending route; transient
+        # combat control changes such as hit reactions leave the observed terrain plan valid.
+        if ((frame.zone, frame.room) != (self.zone, self.room)
+                or frame.event_phase != 0 or frame.dialogue_waiting):
             self.last_owned_tick = frame.tick
         if (self.activation_tick is None and (frame.zone, frame.room) == (self.zone, self.room)
                 and event.get("phase") == 4 and event.get("source") == 2
@@ -444,14 +463,28 @@ class SceneTileGoal:
 
     def request(self, frame: Frame, avoid_hostiles: bool = False) -> dict | None:
         self.observe(frame)
+        if self.push_until is not None and frame.tick < self.push_until:
+            return None
         if (not self.ready(frame) or self.navigator.path
                 or not frame.raw.get("navigation", {}).get("available")):
             return None
         if frame.player is None:
             raise ValueError("Scene navigation lost the observed player")
+        # Crates own movement while the tile grid shows the trigger needs them moved.
+        if self.crates.needed(frame):
+            return None
         x, _, z = frame.player.position
         destination = (self.tile[0] * 128 + 64, self.tile[1] * 128 + 64)
         staging = (x // 128, z // 128) == self.tile
+        last = self.navigator.feedback[-1] if self.navigator.feedback else {}
+        if (not staging and last.get("status") == "route_reached" and self.push_attempts < 3
+                and math.hypot(destination[0] - x, destination[1] - z) <= 224):
+            self.push_attempts += 1
+            self.push_until = frame.tick + (240 if self.door_tile(frame) else 90)
+            self.navigator.feedback.append({"status": "direct_tile_push", "tick": frame.tick,
+                                            "player": frame.player.position, "tile": self.tile,
+                                            "attempt": self.push_attempts})
+            return None
         if staging:
             terrain = Terrain.decode(frame.raw["navigation"])
             candidates = []
@@ -479,15 +512,47 @@ class SceneTileGoal:
 
     def accept(self, decision: NavigationDecision, frame: Frame) -> None:
         self.observe(frame)
-        if not self.ready(frame) or self.last_owned_tick >= self.navigator.request_tick:
+        if (self.activation_tick is not None or (frame.zone, frame.room) != (self.zone, self.room)
+                or self.last_owned_tick >= self.navigator.request_tick):
             raise StaleDecision("Native scene/control ownership changed during trigger navigation")
         self.navigator.accept(decision, frame)
 
+    def pushing(self, frame: Frame) -> bool:
+        return (self.push_until is not None and frame.tick < self.push_until) or self.crates.active()
+
+    def door_tile(self, frame: Frame) -> bool:
+        return any((door["tile_x"], door["tile_z"]) == self.tile for door in frame.raw.get("doors", []))
+
     def step(self, frame: Frame) -> InputAction | None:
         self.observe(frame)
-        return self.navigator.step(frame) if self.ready(frame) else None
+        if self.crates.active():
+            return self.crates.step(frame) if self.activation_tick is None else None
+        if not self.ready(frame):
+            return None
+        if self.pushing(frame) and frame.player is not None:
+            if frame.camera_yaw is None:
+                return None
+            if frame.player.weapon_drawn:
+                if frame.tick - self.push_sheath_tick <= 30:
+                    return None
+                self.push_sheath_tick = frame.tick
+                return InputAction(frozenset({"Cross"}), 4, "sheathe normally before the original trigger tile")
+            x, _, z = frame.player.position
+            dx = self.tile[0] * 128 + 64 - x
+            dz = self.tile[1] * 128 + 64 - z
+            facing = frame.raw["navigation"].get("facing_tile", [])[:2] == list(self.tile)
+            if (facing and self.door_tile(frame) and len(self.door_open_ticks) < 3
+                    and (not self.door_open_ticks or frame.tick - self.door_open_ticks[-1] >= 90)):
+                self.door_open_ticks.append(frame.tick)
+                self.navigator.feedback.append({"status": "door_open_press", "tick": frame.tick,
+                                                "tile": self.tile})
+                return InputAction(frozenset({"Cross"}), 2, "physically open the authored door on the trigger tile")
+            return InputAction(direction_buttons(dx, dz, frame.camera_yaw), 4,
+                               "walk directly into the observed original trigger tile")
+        return self.navigator.step(frame)
 
     def result(self) -> dict:
         return {"zone": self.zone, "room": self.room, "source": 2,
                 "selector": self.selector, "tile": self.tile,
-                "activation_tick": self.activation_tick}
+                "activation_tick": self.activation_tick,
+                "crates": self.crates.result()}
