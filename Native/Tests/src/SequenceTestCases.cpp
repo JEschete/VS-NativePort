@@ -405,6 +405,14 @@ TEST_CASE(
   }
 }
 
+TEST_CASE("E073 missing actor remains an explicit error on repeat entry",
+          "[event][effects][effect-binding]") {
+  for (int repeat = 0; repeat < 2; ++repeat) {
+    CAPTURE(repeat);
+    CHECK(TestScriptedEffectTargetBinding(10) == 1);
+  }
+}
+
 TEST_CASE(
     "Bone endpoints resolve actor and gimmick owners before reading models",
     "[actors][gimmick][model][bone-owner]") {

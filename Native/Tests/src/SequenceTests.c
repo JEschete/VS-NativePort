@@ -875,6 +875,8 @@ static u_short ScriptedEffectSelector(int scenario) {
       return kScriptedEffectModel;
     case 5:
       return 0x101F;
+    case 10:
+      return 0x1002;
     case 8:
       return 0x2000;
     case 9:
@@ -914,8 +916,10 @@ int TestScriptedEffectTargetBinding(int scenario) {
   memcpy(saved_bitmaps, Effects_tokenBitmaps, sizeof saved_bitmaps);
   memset(Effects_tokenBitmaps, 0, sizeof saved_bitmaps);
   const int present = scenario < 3 || scenario == 7;
-  const int slot =
-      scenario == 3 || scenario == 6 || scenario == 7 ? 1 : kScriptedEffectSlot;
+  const int slot = scenario == 10 ? 2
+                   : scenario == 3 || scenario == 6 || scenario == 7
+                       ? 1
+                       : kScriptedEffectSlot;
   if (present || scenario == 6) {
     Battle_actors[slot] = &battle_actor;
     battle_actor.modelId =
@@ -927,8 +931,9 @@ int TestScriptedEffectTargetBinding(int scenario) {
     }
   }
   const u_short selector = ScriptedEffectSelector(scenario);
-  u_char instruction[] = {0xA0, kEffect, 0, (u_char)selector,
-                          (u_char)(selector >> 8)};
+  const int effect = scenario == 10 ? 298 : kEffect;
+  u_char instruction[] = {0xA0, (u_char)effect, (u_char)(effect >> 8),
+                          (u_char)selector, (u_char)(selector >> 8)};
   Effects_primaryPhase = 3;
   const intptr_t result = Event_CommandPlayActorEffect(instruction, 0);
   memcpy(request_after, &Effects_actionRequest, sizeof request_after);
@@ -936,7 +941,7 @@ int TestScriptedEffectTargetBinding(int scenario) {
   int passed = result == (queued ? 0 : 1);
   if (queued) {
     passed &= Effects_primaryPhase == 6 &&
-              Effects_actionRequest.effectId == kEffect &&
+              Effects_actionRequest.effectId == effect &&
               Effects_actionRequest.count == 1 &&
               Effects_actionRequest.targets[0].type == 4 &&
               Effects_actionRequest.targets[0].value.actor.actor == slot;

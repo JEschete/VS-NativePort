@@ -806,3 +806,17 @@ TEST_CASE("Original Golem package proves only its optional target dependency",
   CHECK(Effects_ValidateDeferredScriptTarget(239, 42, -1, bytes.data(),
                                              bytes.size()) == 1);
 }
+
+TEST_CASE("Original E298 package proves it does not need the actor target",
+          "[.assets][effects][target-requirements-source]") {
+  Observation observation;
+  std::ifstream input("Native\\data\\disc\\EFFECT\\E298.P", std::ios::binary);
+  REQUIRE(input.is_open());
+  Bytes bytes((std::istreambuf_iterator<char>(input)),
+              std::istreambuf_iterator<char>());
+  REQUIRE_FALSE(input.bad());
+  REQUIRE_FALSE(bytes.empty());
+  CHECK(Effects_ScriptPackageAllowsAbsentTarget(bytes.data(), bytes.size()) ==
+        1);
+  CHECK(observation.errors.empty());
+}

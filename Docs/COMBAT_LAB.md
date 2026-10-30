@@ -175,6 +175,22 @@ Optional assistance presses only normal Circle while a visible dialogue wait
 is observed; it never presses Start or forces a skip. Source/command traces and
 aligned visual/audio evidence are still required for fidelity claims.
 
+#### E073 actor prerequisites
+
+The original debug viewer is a producer, not proof of complete prerequisites.
+MAP257's slots 2 and 3 require story flag `0x82 == 59` and flag `910 == 1`.
+Viewer506 prepares story progress; viewer504's corresponding branch also
+writes flag **911**, not 910. Neither establishes the missing Aster acquisition
+state in a fresh fixture. The original MAP259 chest acquisition earns flag 910.
+
+E298's package passes the bounded target-independent package proof, but E073
+later waits for actor `0x1002`'s animation. Package independence cannot waive
+that scene dependency. Keep the explicit unavailable-actor error rather than
+substituting an actor, fabricating a spawn, or advancing the wait. Regression
+controls cover the original E298 package and repeated rejection of its missing
+scene actor. A declared assisted route is separate evidence, not an unassisted
+campaign or original-viewer completion certificate.
+
 ### Bulk verification and log volume
 
 Use one persistent scene sequence for source-ready cases, not a New Game
