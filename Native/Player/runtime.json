@@ -11,7 +11,7 @@
     "manifest_url": "https://registry.ollama.ai/v2/library/qwen3/manifests/4b-instruct-2507-q4_K_M",
     "weights_sha256": "85e4a5b7b8ef0e48af0e8658f5aaab9c2324c76c1641493f4d1e25fce54b18b9",
     "weights_bytes": 2497280480,
-    "context_tokens": 8192,
+    "context_tokens": 16384,
     "batch_tokens": 128,
     "output_tokens": 384
   }

@@ -328,6 +328,8 @@ server HTTP failure includes its status, operation and bounded response detail
 in the persisted failure. The exact MAP360 request that exceeded the8192-token
 context at8218 tokens completes at6732 prompt tokens after compaction, with all
 prompt facts unchanged. This is a request repair, not combat or scene acceptance.
+Large rooms still exceeded 8192 tokens (MAP150 local5: 8277), so the pinned
+runtime context is 16384 tokens; the observation facts are not truncated.
 
 An attack target rejected by the native selector retains its scene/spawn
 identity and the actual player position in feedback. The controller must move
