@@ -49,6 +49,9 @@ def main() -> int:
     run.add_argument("--scene-examine-quadrant", type=int, choices=(0, 1, 2, 3),
                      help="Treat --scene-target-tile as a type-4 stand tile: face this native quadrant "
                           "(0 -Z, 1 -X, 2 +Z, 3 +X) and examine with ordinary Cross")
+    run.add_argument("--simultaneous-defeat", nargs="+", type=int, metavar="SLOT",
+                     help="Original type-8 trigger needs these hostile slots defeated in one evaluation: "
+                          "only cast observed area damage spells whose native preview contains all of them")
     run.add_argument("--allow-stat-overrides", action="store_true",
                      help="Accept declared Lab ashley_stats as a recorded owner-approved assist")
     run.add_argument("--allow-story-progress", action="store_true",
@@ -114,6 +117,7 @@ def main() -> int:
             scene_target_tile=(args.scene_target_tile[0], args.scene_target_tile[1])
             if args.scene_target_tile is not None else None,
             scene_examine_quadrant=args.scene_examine_quadrant,
+            simultaneous_defeat=tuple(args.simultaneous_defeat or ()),
             allow_stat_overrides=args.allow_stat_overrides,
             allow_story_progress=args.allow_story_progress,
             claim_room_chests=args.claim_room_chests,

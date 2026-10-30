@@ -1249,6 +1249,81 @@ class ControllerTests(unittest.TestCase):
         )
         self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
 
+    def test_simultaneous_defeat_cancels_an_area_that_cannot_defeat_every_required_slot(self):
+        record = sample_record(tick=1, active=False)
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3, hp=30, max_hp=30, position=[192, 0, 64])
+        record["data"]["actors"].append(second)
+        record["data"].update(control_mode=1, action_phase=0, action=0)
+        record["data"]["action_options"] = [
+            {"id": 106, "name": "Explosion", "family": "warlock", "cost": 30,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3),
+                            "Defeat both hostiles at once.", 1, 0, 106)
+        for forecasts, previews, expected in (
+            ([{"actor": 2, "limb": -1, "effect_id": 58, "amount": 50},
+              {"actor": 3, "limb": -1, "effect_id": 58, "amount": 50}], (2, 3), None),
+            ([{"actor": 2, "limb": -1, "effect_id": 58, "amount": 50}], (2,), [3]),
+            ([{"actor": 2, "limb": -1, "effect_id": 58, "amount": 50},
+              {"actor": 3, "limb": -1, "effect_id": 58, "amount": 10}], (2, 3), [3]),
+        ):
+            controller = CombatController()
+            controller.simultaneous_defeat = (2, 3)
+            controller.accept(decision, frame, frame)
+            controller.transaction.selected = True
+            record["tick"] = 30
+            record["data"].update(control_mode=2, action_phase=3, action=106,
+                                  target_forecasts=forecasts,
+                                  target_previews=[{"actor": slot, "limb": -1,
+                                                    "position": [128, 0, 64]}
+                                                   for slot in previews])
+            record["data"]["target_page"].update(first=0, visible=len(previews), selected=0,
+                                                 selection_step=19)
+            action = controller.step(Frame.decode(record))
+            if expected is None:
+                self.assertEqual(action.buttons, frozenset({"Circle"}))
+                self.assertFalse(controller.transaction.closing)
+            else:
+                self.assertEqual(action.buttons, frozenset({"Cross"}))
+                self.assertEqual(controller.feedback[-1]["missing"], expected)
+                record["tick"] = 40
+                self.assertEqual(controller.step(Frame.decode(record)).buttons,
+                                 frozenset({"Cross"}))
+
+    def test_simultaneous_defeat_objective_only_offers_area_spells(self):
+        record = sample_record(tick=500, active=False)
+        record["data"]["actors"][0]["mp"] = 40
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3, position=[192, 0, 64])
+        record["data"]["actors"].append(second)
+        record["data"]["action_options"] = [
+            {"id": 106, "name": "Explosion", "family": "warlock", "cost": 30,
+             "restrictions": 0, "menu_order": 0},
+            {"id": 97, "name": "Solid Shock", "family": "warlock", "cost": 5,
+             "restrictions": 0, "menu_order": 1},
+        ]
+        context = {"simultaneous_defeat_objective": {"slots": [2, 3]}}
+        third = copy.deepcopy(second)
+        third.update(slot=4, position=[256, 0, 64])
+        record["data"]["actors"].append(third)
+        rows = available_choices(Frame.decode(record), context).values()
+        self.assertTrue(rows)
+        self.assertTrue(all(row["target_slot"] in (-1, 4) and row["action_id"] != 106 for row in rows))
+        record["data"]["actors"].pop()
+        choices = available_choices(Frame.decode(record), context)
+        self.assertEqual({(row["intent"], row["target_slot"], row["action_id"])
+                          for row in choices.values()},
+                         {("cast", 2, 106), ("cast", 3, 106)})
+        context["controller_feedback"] = [{"kind": "area_incomplete", "tick": 400}]
+        intents = {row["intent"] for row in available_choices(Frame.decode(record), context).values()}
+        self.assertEqual(intents, {"wait", "approach"})
+        record["data"]["actors"].pop()
+        choices = available_choices(Frame.decode(record), context)
+        self.assertIn(("cast", 2, 97), {(row["intent"], row["target_slot"], row["action_id"])
+                                        for row in choices.values()})
+
     def test_stat_override_scenarios_require_the_explicit_assist_flag(self):
         from vs_player import runner
         with tempfile.TemporaryDirectory() as directory:

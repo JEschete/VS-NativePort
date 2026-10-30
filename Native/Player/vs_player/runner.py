@@ -129,6 +129,8 @@ class PlayOptions:
     scene_expectation: Path | None = None
     scene_target_tile: tuple[int, int] | None = None
     scene_examine_quadrant: int | None = None
+    # Type-8 triggers such as MAP203 local2 test several defeats in one evaluation (Triggers.c cases 7/16).
+    simultaneous_defeat: tuple[int, ...] = ()
     allow_stat_overrides: bool = False
     allow_story_progress: bool = False
     claim_room_chests: bool = False
@@ -150,6 +152,12 @@ class PlayOptions:
                 self.scene_target_tile is None or type(self.scene_examine_quadrant) is not int
                 or not 0 <= self.scene_examine_quadrant <= 3):
             raise ValueError("A scene examine quadrant requires a scene stand tile and a native quadrant 0-3")
+        if self.simultaneous_defeat and (
+                self.scene_expectation is None or len(self.simultaneous_defeat) < 2
+                or len(set(self.simultaneous_defeat)) != len(self.simultaneous_defeat)
+                or any(type(slot) is not int or not 1 <= slot <= 31 for slot in self.simultaneous_defeat)):
+            raise ValueError("A simultaneous defeat requires a local-scene goal and at least two distinct "
+                             "hostile slots")
         if self.scene_expectation is not None and (
                 self.executable.name != "VS.CombatLab.exe" or self.scenario is None
                 or self.new_game or self.save_file is not None):
@@ -441,9 +449,11 @@ def _play_game(store: RunStore, run_id: str,
         "native_scene_expectation": scene_expectation,
         "scene_target_tile": options.scene_target_tile,
         "scene_examine_quadrant": options.scene_examine_quadrant,
+        "simultaneous_defeat": options.simultaneous_defeat,
         "model_control_from_tick": setup_control_tick,
     })
     controller = CombatController()
+    controller.simultaneous_defeat = options.simultaneous_defeat
     goal = CombatGoal(options.door_case, options.door_route, options.clear_enemies_first,
                       options.claim_room_chests,
                       scene_handoff=options.scene_expectation is not None)
@@ -691,6 +701,12 @@ def _play_game(store: RunStore, run_id: str,
                             "max_incoming_hp_damage": goal.max_incoming_hp_damage,
                             "unreachable_hostiles": controller.unreachable_hostiles(latest),
                         }
+                        if options.simultaneous_defeat:
+                            context["simultaneous_defeat_objective"] = {
+                                "slots": list(options.simultaneous_defeat),
+                                "claim": ("The original type-8 trigger needs these hostiles defeated in one "
+                                          "native evaluation; one area spell must defeat all of them."),
+                            }
                         if scene_navigation is not None:
                             context["source_scene_navigation_objective"] = {
                                 **scene_navigation.result(),

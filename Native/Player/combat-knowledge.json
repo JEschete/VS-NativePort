@@ -14,6 +14,10 @@
     "action_ids": [97, 98, 99, 100, 101, 102, 103, 106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130],
     "source": "resources/rood-reverseWin/src/SLUS_010.40/main.c native action definitions: these actions use hit effect58 (HP damage). Actions104-105 use hit effect34 and are excluded."
   },
+  "area_damage_spells": {
+    "action_ids": [106, 107, 108, 109, 110, 111, 112, 113, 114, 115, 116, 117, 118, 119, 120, 121, 122, 123, 124, 125, 126, 127, 128, 129, 130],
+    "source": "Area Warlock tier (Explosion, Thunderburst, Flame Sphere, Gaea Strike, Avalanche, Radial Surge and their ranks, Meteor) with effect58. The Player only commits one after the native target preview lists every required actor with a lethal cached forecast."
+  },
   "controls": {
     "Circle": "Draw the equipped weapon from idle field; otherwise open attack targeting or confirm a target. Do not send ordinary confirms during an active timing window.",
     "Cross": "Interact with a nearby authored door or cancel a targeting/menu screen.",

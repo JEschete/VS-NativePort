@@ -87,6 +87,34 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
     learned_spells = [option for option in options
                       if option["family"] in ("shaman", "sorcerer", "enchanter", "warlock")
                       and option["restrictions"] == 0]
+    combined = context.get("simultaneous_defeat_objective")
+    living = {enemy.slot for enemy in frame.enemies}
+    if combined and set(combined["slots"]) <= living and living - set(combined["slots"]):
+        # Other hostiles fall first through ordinary single-target choices; their own defeat
+        # triggers set the flags that keep earlier combined triggers from claiming this set.
+        ordinary = available_choices(frame, {key: value for key, value in context.items()
+                                             if key != "simultaneous_defeat_objective"})
+        area_ids = set(knowledge["area_damage_spells"]["action_ids"])
+        kept = {key: row for key, row in ordinary.items()
+                if row["target_slot"] not in combined["slots"] and row["action_id"] not in area_ids}
+        return kept or {"wait:-1:-1:1": {"intent": "wait", "target_slot": -1, "target_limb": -1,
+                                         "action_id": -1, "equip_slot": 1, "item_id": -1}}
+    if combined and set(combined["slots"]) <= living:
+        # Any single defeat would satisfy the original single-defeat trigger first, so only area
+        # spells may harm the set; failed previews wait for the hostiles to close in.
+        area_ids = set(knowledge["area_damage_spells"]["action_ids"])
+        settling = any(row.get("kind") == "area_incomplete" and frame.tick - row["tick"] < 180
+                       for row in feedback)
+        if not settling:
+            for option in learned_spells:
+                if option["id"] in area_ids and affordable_spell(option):
+                    for slot in combined["slots"]:
+                        add("cast", slot, option["id"])
+        if not choices:
+            add("wait")
+            for slot in combined["slots"]:
+                add("approach", slot)
+        return choices
     caster_targets = [enemy for enemy in frame.enemies if enemy.spell_action_ids]
     if caster_targets:
         dangerous_casters = [

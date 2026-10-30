@@ -197,6 +197,15 @@ the original source-room hostiles have observed zero-HP transitions; removed
 actors alone do not qualify. The actual native gate, loading cycle and
 settled-control checks must still pass afterward. This opt-in does not change
 ordinary unlocked-route testing or defeat-all Lab goals.
+For an original combined-defeat trigger (several actors dead in the same
+trigger evaluation) add `--simultaneous-defeat SLOT SLOT...` to a scene
+expectation run. Other hostiles are fought first with ordinary single-target
+choices; while every required slot lives, only learned area damage spells
+targeting them are offered. The controller commits the area only when the
+native target preview lists every required slot with a cached HP-damage
+forecast at least its current HP, and otherwise cancels with Cross and waits
+or approaches before retrying. Learning those spells is a declared Lab profile
+assist (for example `all-spells`); no HP, flag or trigger is edited.
 After actual source-room deaths and native rewards/dialogue settle, the runner
 explicitly asks the model for the observed physical exit and records
 `goal.post_combat_exit`; empty enemy lists no longer suppress that planning

@@ -78,6 +78,19 @@ class CombatController:
         self.decision_scene: tuple[int, int, int] | None = None
         self.area_target_confirmations = 0
         self.area_target_confirmation_tick: int | None = None
+        # Hostile slots an original type-8 trigger needs defeated by the same area action.
+        self.simultaneous_defeat: tuple[int, ...] = ()
+
+    def area_defeat_gaps(self, frame: Frame) -> list[int]:
+        """Required living slots the native area preview misses or cannot defeat outright."""
+        living = {actor.slot: actor for actor in frame.enemies}
+        listed = {entry["actor"] for entry in frame.raw["target_previews"]}
+        damage: dict[int, int] = {}
+        for forecast in frame.raw.get("target_forecasts", []):
+            if forecast.get("effect_id") == 58 and isinstance(forecast.get("amount"), int):
+                damage[forecast["actor"]] = max(damage.get(forecast["actor"], 0), forecast["amount"])
+        return [slot for slot in self.simultaneous_defeat if slot in living
+                and (slot not in listed or damage.get(slot, 0) < living[slot].hp)]
 
     @property
     def preparing(self) -> bool:
@@ -279,6 +292,8 @@ class CombatController:
                 raise StaleDecision("Native area targeting began without a selected spell transaction")
             if frame.raw.get("action") != decision.action_id:
                 raise StaleDecision("Native area targeting changed to a different action")
+            if self.transaction.closing:
+                return self._action(frame, ("Cross",), 2, "leave rejected native area targeting")
             center = frame.raw.get("area_center")
             if (not isinstance(center, list) or len(center) < 3
                     or not all(isinstance(value, int) and not isinstance(value, bool)
@@ -315,9 +330,22 @@ class CombatController:
                 return self._action(frame, ("Cross",), 2, "cancel native no-target message")
             if selection_step != 19:
                 return None
+            if self.transaction is not None and self.transaction.closing:
+                return self._action(frame, ("Cross",), 2, "leave rejected native targeting")
             if self.needs_target_choice(frame):
                 return None
             previews = frame.raw["target_previews"]
+            if (decision.intent == "cast" and decision.target_slot in self.simultaneous_defeat
+                    and self.transaction is not None and self.preparing):
+                gaps = self.area_defeat_gaps(frame)
+                if gaps:
+                    # Defeating only part of the set fires the single-defeat trigger instead.
+                    self.feedback.append({"kind": "area_incomplete", "status": "area_incomplete",
+                                          "tick": frame.tick, "action_id": decision.action_id,
+                                          "target": decision.target_slot, "missing": gaps})
+                    self.transaction.closing = True
+                    self.transaction.result = {"reason": "Native area preview cannot defeat every required slot"}
+                    return self._action(frame, ("Cross",), 2, "cancel an area that misses a required defeat")
             desired = [
                 index for index, entry in enumerate(previews)
                 if entry["actor"] == decision.target_slot
