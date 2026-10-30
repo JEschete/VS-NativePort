@@ -1,4 +1,4 @@
-﻿# Cutscenes still to check (issue #149)
+# Cutscenes still to check (issue #149)
 
 46 scenes are still unverified out of the 292 catalogued room and event scripts.
 They are listed in rough story order: by the campaign progress value (flag 0x82) that their trigger
