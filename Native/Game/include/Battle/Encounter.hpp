@@ -97,6 +97,8 @@ enum class EncounterProfile {
 const char* EncounterProfileId(EncounterProfile profile);
 // Lab startup only, after normal New Game initialization and overlay loading.
 void InitializeEncounterPlayerProfile(EncounterProfile profile);
+// Lab script startup only: restores the event VM selector's fresh-boot value.
+void RestoreBootEventSelector();
 
 enum class EncounterWeapon {
   kDefault,

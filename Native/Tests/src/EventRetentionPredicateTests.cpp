@@ -4,6 +4,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Encounter.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -108,4 +109,20 @@ TEST_CASE("Room death predicates distinguish retained dead and living actors",
     CHECK(Event_EvaluateRoomEventTriggers(8, 0, nullptr, 0) == 0);
     CHECK(Event_playbackPhase == 0);
   }
+}
+
+TEST_CASE("Room-entry scenes keep the event id; Lab entry restores boot value",
+          "[events][retention-predicate][lab-reentry]") {
+  RetentionPredicateFixture fixture;
+  const auto saved_entry = Event_hasRoomEntryScript;
+  Event_eventId = 8;
+  Event_hasRoomEntryScript = 1;
+  CHECK(Event_EvaluateRoomEventTriggers(1, 0, nullptr, 0) == 1);
+  CHECK(Event_eventSource == 1);
+  CHECK(Event_eventId == 8);
+  VS::Game::RestoreBootEventSelector();
+  CHECK(Event_eventId == 0);
+  CHECK(Event_eventSource == 1);
+  CHECK(Event_playbackPhase == 1);
+  Event_hasRoomEntryScript = saved_entry;
 }

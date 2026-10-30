@@ -133,6 +133,7 @@ int EnterOrFinishEncounter() {
   State_savedEntryDoor.tileLocation.entryDirection =
       configuration.player.direction;
   Boot_gameEntryMode = 0;
+  RestoreBootEventSelector();
   if (configuration.attract_demo) {
     // Title_Run's idle timeout: _setTitleExitFlags (TITLE.PRG 22C.c:4741)
     // sets the demo flags and door; its cause becomes vs_battle_exec's entry
@@ -469,6 +470,15 @@ const char* EncounterProfileId(EncounterProfile profile) {
       break;
   }
   throw std::runtime_error("invalid encounter Ashley profile");
+}
+
+void RestoreBootEventSelector() {
+  // Room-entry triggers (Event_EvaluateRoomEventTriggers type 1, BATTLE.PRG
+  // func_800BEC58, 4A0A8.c:4302) select source 1 without writing the event
+  // id, so a fresh boot leaves its BSS zero. Restore that per Lab script
+  // instead of carrying the previous script's last event id into the next
+  // scene label.
+  Event_eventId = 0;
 }
 
 void InitializeEncounterPlayerProfile(EncounterProfile profile) {
