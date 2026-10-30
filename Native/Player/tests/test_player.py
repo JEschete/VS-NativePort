@@ -2675,6 +2675,16 @@ class RunnerTests(unittest.TestCase):
         record["data"]["ready"] = False
         self.assertFalse(input_lease_permitted(Frame.decode(record), frozenset({"Circle"})))
 
+    def test_native_text_choice_counts_as_a_visible_dialogue_wait(self):
+        record = sample_record(active=False)
+        record["data"]["control_mode"] = 3
+        record["data"]["scene"]["event"].update(phase=4, choice_active=True)
+        frame = Frame.decode(record)
+        self.assertTrue(frame.dialogue_waiting)
+        self.assertTrue(input_lease_permitted(frame, frozenset({"Circle"})))
+        record["data"]["scene"]["event"]["choice_active"] = False
+        self.assertFalse(Frame.decode(record).dialogue_waiting)
+
     def test_post_combat_handoff_requests_the_real_door_without_live_targets(self):
         record = sample_record(active=False)
         record["data"].update(control_mode=1, action_phase=0)

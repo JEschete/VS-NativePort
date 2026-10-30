@@ -220,6 +220,8 @@ class Frame:
             if not isinstance(waits, list) or len(waits) != 8:
                 raise ValueError("Expected the eight logical dialogue wait flags")
             waiting = any(boolean(value, "dialogue_wait") for value in waits)
+            # Event opcode 0x1C holds the script on a text-box choice until a face button confirms it.
+            waiting |= boolean(event.get("choice_active", False), "choice_active")
         return cls(
             integer(record["tick"], "tick", 0, 2**64 - 1),
             integer(record["elapsed_us"], "elapsed_us", 0, 2**63 - 1),

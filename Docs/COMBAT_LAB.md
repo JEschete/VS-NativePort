@@ -184,6 +184,22 @@ press, or when the final cutscene ends (`vs_battle_exec`, BATTLE
 
 Results report `scene_playback_attract_to_title`.
 
+Ashley's defeat is the only producer of external event 0
+(`Battle_ResolveActorDefeat`, BATTLE 146C.c:7421 requests trigger 0x40). Its
+script opens the MENU7 game-over screen (`vs_menu7_gameOver`, 260.c:3603),
+whose Title choice resets through `vs_overlay_jumpToTitle`. Declare it with
+`"events": [0]`, `"event_source": 0` and `"terminal": "game_over_to_title"`,
+in a production room where the original enemies defeat Ashley in play. Other
+scene goals still fail on any game over. Acceptance requires:
+- executing external event 0 before the game-over flag is observed;
+- Ashley's actor at 0 HP when the native game-over menu is observed;
+- the trial's one ordinary Down, then Circle, choosing Title after the menu
+  fade (no Start);
+- a natural fiber return without credits or a clear-save handoff;
+- zero errors and teardown.
+
+Results report `scene_playback_game_over_to_title`.
+
 The manifest requires documented preconditions and production-room events or
 an aligned explicit external event. It does not grant story flags, HP, items or
 victories; scene results explicitly leave campaign progression unestablished.
@@ -3243,7 +3259,9 @@ automated trials. F6/F7 still pause/step; F10 cancels the remaining sequence.
 Only an actual waiting dialogue box receives brief Circle confirmations
 (two ticks every 30); **Start/scene skipping is never injected**. Scene JSON
 contains exactly the event VM's eight logical `dialogue_waits` values, not the
-legacy declaration's overbroad 80-byte extent.
+legacy declaration's overbroad 80-byte extent. `choice_active` reports an event
+text-box choice (opcode 0x1C, `func_800B7398`) holding the script; it counts as
+a visible wait, and Circle confirms the original selector's initial row.
 Likewise, thread snapshots contain the four dispatched VM threads, using their
 four-entry wait-frame table rather than the six-entry legacy cursor extent.
 

@@ -700,7 +700,8 @@ class LiveSession {
   void ObserveEndingReturn(std::uint64_t errors) {
     if (!scene_trial_ ||
         (!scene_trial_->ExpectsEndingReturn() &&
-         !scene_trial_->ExpectsAttractReturn()) ||
+         !scene_trial_->ExpectsAttractReturn() &&
+         !scene_trial_->ExpectsGameOverReturn()) ||
         sequence_cancelled_ || script_stopping_ || !script_initialized_ ||
         errors != 0 || fiber_) {
       return;
@@ -709,6 +710,10 @@ class LiveSession {
       scene_trial_->ObserveAttractReturn(
           Boot_gameEntryMode, Ending_Credits_hasFinished != 0,
           Boot_isClearSavePending != 0, ticks_ - script_start_tick_);
+    } else if (scene_trial_->ExpectsGameOverReturn()) {
+      scene_trial_->ObserveGameOverReturn(Ending_Credits_hasFinished != 0,
+                                          Boot_isClearSavePending != 0,
+                                          ticks_ - script_start_tick_);
     } else {
       scene_trial_->ObserveEndingReturn(
           Ending_Credits_hasFinished != 0, Ending_Credits_wasSkipRequested != 0,
@@ -719,6 +724,8 @@ class LiveSession {
     if (result.at("status") == "passed") {
       script_stop_reason_ = scene_trial_->ExpectsAttractReturn()
                                 ? "attract_to_title"
+                            : scene_trial_->ExpectsGameOverReturn()
+                                ? "game_over_to_title"
                                 : "ending_to_title";
     }
   }

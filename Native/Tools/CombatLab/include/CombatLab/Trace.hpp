@@ -38,6 +38,10 @@ struct SceneExpectation {
   // Title idle-timeout demo: the original game loop's entry-mode 3/4 reset
   // (vs_battle_exec, BATTLE 146C.c:7558) is the authored terminal.
   bool attract_to_title = false;
+  // Ashley's defeat requests external event 0 (BATTLE 146C.c:7421); its
+  // script opens the MENU7 game-over screen, whose Title choice resets
+  // through vs_overlay_jumpToTitle (MENU7 260.c:3603).
+  bool game_over_to_title = false;
 };
 
 SceneExpectation DecodeSceneExpectation(const nlohmann::json& value);
@@ -52,8 +56,11 @@ class SceneTrial {
                            bool clear_save_pending, std::uint64_t tick);
   void ObserveAttractReturn(int entry_mode, bool credits_finished,
                             bool clear_save_pending, std::uint64_t tick);
+  void ObserveGameOverReturn(bool credits_finished, bool clear_save_pending,
+                             std::uint64_t tick);
   bool ExpectsEndingReturn() const { return expected_.ending_to_title; }
   bool ExpectsAttractReturn() const { return expected_.attract_to_title; }
+  bool ExpectsGameOverReturn() const { return expected_.game_over_to_title; }
   std::uint32_t Input(std::uint64_t tick);
   void Timeout();
   void Fail(std::string reason);
@@ -72,6 +79,8 @@ class SceneTrial {
   bool dialogue_held_ = false;
   bool event_active_ = false;
   std::uint64_t dialogue_pulses_ = 0;
+  std::optional<std::uint64_t> game_over_menu_tick_;
+  bool title_choice_pressed_ = false;
   nlohmann::json last_;
   nlohmann::json terminal_;
 };

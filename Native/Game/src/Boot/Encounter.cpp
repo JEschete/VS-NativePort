@@ -909,6 +909,9 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
     waits.push_back(Event_isTextBoxAwaitingClose[box] != 0);
   }
   scene["event"]["dialogue_waits"] = std::move(waits);
+  // func_800B7398 (event opcode 0x1C) holds the script until a face button
+  // confirms the highlighted text-box choice.
+  scene["event"]["choice_active"] = Event_isTextSelectionActive != 0;
   scene["camera"] = {{"yaw", camera.values.yaw},
                      {"pitch", camera.values.pitch},
                      {"distance", camera.values.distance},

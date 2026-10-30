@@ -97,14 +97,16 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
   if (value.contains("terminal")) {
     const auto& terminal = value.at("terminal");
     if (!terminal.is_string() ||
-        (terminal != "ending_to_title" && terminal != "attract_to_title") ||
+        (terminal != "ending_to_title" && terminal != "attract_to_title" &&
+         terminal != "game_over_to_title") ||
         value.contains("return_zone") || value.contains("return_room")) {
       throw std::runtime_error(
-          "scene terminal must be ending_to_title or attract_to_title without "
-          "a room-return goal");
+          "scene terminal must be ending_to_title, attract_to_title or "
+          "game_over_to_title without a room-return goal");
     }
     expected.ending_to_title = terminal == "ending_to_title";
     expected.attract_to_title = terminal == "attract_to_title";
+    expected.game_over_to_title = terminal == "game_over_to_title";
   } else {
     for (const auto* key : {"return_zone", "return_room"}) {
       if (!value.at(key).is_number_integer() || value.at(key) < 0 ||
@@ -121,6 +123,12 @@ SceneExpectation DecodeSceneExpectation(const nlohmann::json& value) {
     throw std::runtime_error("scene event_source must be a native source 0..2");
   }
   expected.event_source = source.get<int>();
+  if (expected.game_over_to_title &&
+      (expected.event_source != 0 || expected.events.front() != 0)) {
+    // Battle_ResolveActorDefeat requests only external event 0.
+    throw std::runtime_error(
+        "game_over_to_title scenes start with external event 0");
+  }
   if (expected.event_source == 0 &&
       std::ranges::any_of(expected.events, [](int id) {
         return id < 0 || id > Game::EncounterLimits::kLastExternalEvent;
@@ -165,10 +173,13 @@ void SceneTrial::Observe(const Game::EncounterState& state,
            {"tick", tick}};
   dialogue_waiting_ =
       available &&
-      std::ranges::any_of(event.at("dialogue_waits"), [](const auto& wait) {
-        return wait.template get<bool>();
-      });
-  if (state.game_over || (state.native_pressed & VS::Input::Start) != 0 ||
+      (event.value("choice_active", false) ||
+       std::ranges::any_of(event.at("dialogue_waits"), [](const auto& wait) {
+         return wait.template get<bool>();
+       }));
+  const bool defeat_terminal = expected_.game_over_to_title;
+  if ((state.game_over && !defeat_terminal) ||
+      (state.native_pressed & VS::Input::Start) != 0 ||
       (available &&
        (event.at("skip_state") == 2 || event.at("forced_skip").get<bool>()))) {
     Fail(state.game_over ? "fixture defeated" : "target scene was skipped");
@@ -195,7 +206,23 @@ void SceneTrial::Observe(const Game::EncounterState& state,
   } else if (available) {
     event_active_ = false;
   }
-  if (expected_.ending_to_title || expected_.attract_to_title) return;
+  if (defeat_terminal && state.game_over && !game_over_menu_tick_) {
+    constexpr int kFilesMenu = 7;  // MENU7 hosts vs_menu7_gameOver
+    const auto ashley =
+        std::ranges::find(state.actors, 0, &Game::EncounterActorState::slot);
+    if (next_event_ != expected_.events.size()) {
+      Fail("game over opened without the expected source events");
+    } else if (ashley == state.actors.end() || ashley->hp != 0) {
+      Fail("game over opened without Ashley's observed defeat");
+    } else if ((state.menu_state & 0x3F) == kFilesMenu) {
+      game_over_menu_tick_ = tick;
+    }
+    return;
+  }
+  if (expected_.ending_to_title || expected_.attract_to_title ||
+      defeat_terminal) {
+    return;
+  }
   const bool returned =
       next_event_ == expected_.events.size() && state.ready && available &&
       event.at("phase") == 0 && state.zone == expected_.return_zone &&
@@ -236,6 +263,32 @@ void SceneTrial::ObserveEndingReturn(bool credits_finished,
   }
 }
 
+void SceneTrial::ObserveGameOverReturn(bool credits_finished,
+                                       bool clear_save_pending,
+                                       std::uint64_t tick) {
+  if (Finished() || !expected_.game_over_to_title) return;
+  terminal_ = {{"kind", "game_over_to_title"},
+               {"native_fiber_returned", true},
+               {"game_over_menu_tick", game_over_menu_tick_
+                                           ? nlohmann::json(*game_over_menu_tick_)
+                                           : nlohmann::json{}},
+               {"title_choice_pressed", title_choice_pressed_},
+               {"credits_finished", credits_finished},
+               {"clear_save_pending", clear_save_pending},
+               {"title_host", "lab_encounter_finish_callback"},
+               {"tick", tick}};
+  if (!game_over_menu_tick_ || !title_choice_pressed_) {
+    Fail("title return without the observed game-over Title choice");
+  } else if (credits_finished || clear_save_pending) {
+    Fail("game over returned through the ending handoff");
+  } else if (next_event_ != expected_.events.size()) {
+    Fail("game over returned without the expected source events");
+  } else {
+    status_ = "passed";
+    passed_tick_ = tick;
+  }
+}
+
 void SceneTrial::ObserveAttractReturn(int entry_mode, bool credits_finished,
                                       bool clear_save_pending,
                                       std::uint64_t tick) {
@@ -263,6 +316,21 @@ void SceneTrial::ObserveAttractReturn(int entry_mode, bool credits_finished,
 std::uint32_t SceneTrial::Input(std::uint64_t tick) {
   constexpr std::uint64_t kDialoguePulsePeriod = 30;
   constexpr std::uint64_t kDialogueHoldTicks = 2;
+  if (!Finished() && game_over_menu_tick_) {
+    // vs_menu7_gameOver accepts choices after its asset load and 16-step
+    // fade (260.c:3475); one Down selects Title, then Circle confirms it.
+    constexpr std::uint64_t kSelectTitleTick = 180;
+    constexpr std::uint64_t kConfirmTick = 240;
+    const auto elapsed = tick - *game_over_menu_tick_;
+    if (elapsed >= kSelectTitleTick && elapsed < kSelectTitleTick + 2) {
+      return VS::Input::Down;
+    }
+    if (elapsed >= kConfirmTick && elapsed < kConfirmTick + 2) {
+      title_choice_pressed_ = true;
+      return VS::Input::Circle;
+    }
+    return 0;
+  }
   const bool held = !Finished() && expected_.confirm_dialogue &&
                     dialogue_waiting_ &&
                     tick % kDialoguePulsePeriod < kDialogueHoldTicks;
@@ -281,6 +349,8 @@ void SceneTrial::Timeout() {
                 ? "ending did not return to title before budget"
             : expected_.attract_to_title
                 ? "attract demo did not return to title before budget"
+            : expected_.game_over_to_title
+                ? "game over did not return to title before budget"
                 : "scene did not restore stable player control before budget";
 }
 
@@ -307,10 +377,13 @@ nlohmann::json SceneTrial::Result() const {
       {"passed_tick", passed_tick_},
       {"last", last_},
       {"dialogue_confirm_pulses", dialogue_pulses_}};
-  if (expected_.ending_to_title || expected_.attract_to_title) {
+  if (expected_.ending_to_title || expected_.attract_to_title ||
+      expected_.game_over_to_title) {
     result["coverage"] = expected_.ending_to_title
                              ? "scene_playback_ending_to_title"
-                             : "scene_playback_attract_to_title";
+                         : expected_.attract_to_title
+                             ? "scene_playback_attract_to_title"
+                             : "scene_playback_game_over_to_title";
     result["terminal"] = terminal_;
     result.erase("return_zone");
     result.erase("return_room");

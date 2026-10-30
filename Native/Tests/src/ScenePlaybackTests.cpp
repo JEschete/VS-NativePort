@@ -406,3 +406,109 @@ TEST_CASE(
   manual.Observe(ReadyState(), scene, 29);
   CHECK(manual.Input(30) == 0);
 }
+
+TEST_CASE("Scene dialogue assistance confirms an active text-box choice",
+          "[scenes][playback]") {
+  auto trial = Trial();
+  auto scene = Event(80);
+  scene["event"]["choice_active"] = true;
+  trial.Observe(ReadyState(), scene, 29);
+  CHECK(trial.Input(30) == VS::Input::Circle);
+  scene["event"]["choice_active"] = false;
+  trial.Observe(ReadyState(), scene, 59);
+  CHECK(trial.Input(60) == 0);
+}
+
+namespace {
+nlohmann::json ExpectedGameOver() {
+  return {{"events", {0}},
+          {"event_source", 0},
+          {"terminal", "game_over_to_title"},
+          {"preconditions", "Ashley defeated by original enemies in play"}};
+}
+
+VS::Game::EncounterState GameOverState(int ashley_hp) {
+  auto state = ReadyState();
+  state.control_mode = 3;
+  state.game_over = true;
+  state.menu_state = 7;
+  VS::Game::EncounterActorState ashley;
+  ashley.slot = 0;
+  ashley.hp = ashley_hp;
+  state.actors.push_back(ashley);
+  return state;
+}
+
+SceneTrial GameOverTrial() {
+  return SceneTrial(
+      VS::combat_lab::DecodeSceneExpectation(ExpectedGameOver()));
+}
+}  // namespace
+
+TEST_CASE("Game-over scenes accept only external defeat event 0",
+          "[scenes][playback][game-over-goal]") {
+  auto value = ExpectedGameOver();
+  SECTION("valid") {
+    CHECK(VS::combat_lab::DecodeSceneExpectation(value).game_over_to_title);
+  }
+  SECTION("invalid") {
+    SECTION("room-local source") { value["event_source"] = 2; }
+    SECTION("other external event") { value["events"] = {1}; }
+    SECTION("mixed room goal") { value["return_room"] = 0; }
+    CHECK_THROWS_AS(VS::combat_lab::DecodeSceneExpectation(value),
+                    std::runtime_error);
+  }
+}
+
+TEST_CASE("Game-over scenes choose Title after the observed defeat menu",
+          "[scenes][playback][game-over-goal]") {
+  auto trial = GameOverTrial();
+  trial.Observe(ReadyState(), Event(0), 10);
+  CHECK(trial.Input(20) == 0);
+  trial.Observe(GameOverState(0), Event(0), 100);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Input(279) == 0);
+  CHECK(trial.Input(280) == VS::Input::Down);
+  CHECK(trial.Input(281) == VS::Input::Down);
+  CHECK(trial.Input(282) == 0);
+  CHECK(trial.Input(340) == VS::Input::Circle);
+  CHECK(trial.Input(342) == 0);
+  trial.ObserveGameOverReturn(false, false, 400);
+  CHECK(trial.Result().at("status") == "passed");
+  CHECK(trial.Result().at("coverage") == "scene_playback_game_over_to_title");
+  CHECK(trial.Result().at("terminal").at("game_over_menu_tick") == 100);
+}
+
+TEST_CASE("Game-over scenes reject unproven defeats and other returns",
+          "[scenes][playback][game-over-goal]") {
+  auto trial = GameOverTrial();
+  SECTION("menu before event 0") {
+    trial.Observe(GameOverState(0), Event(0, 0), 100);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("Ashley alive") {
+    trial.Observe(ReadyState(), Event(0), 10);
+    trial.Observe(GameOverState(5), Event(0), 100);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("return without Title choice") {
+    trial.Observe(ReadyState(), Event(0), 10);
+    trial.Observe(GameOverState(0), Event(0), 100);
+    trial.ObserveGameOverReturn(false, false, 120);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("ending handoff") {
+    trial.Observe(ReadyState(), Event(0), 10);
+    trial.Observe(GameOverState(0), Event(0), 100);
+    (void)trial.Input(340);
+    trial.ObserveGameOverReturn(true, true, 400);
+    CHECK(trial.Result().at("status") == "failed");
+  }
+  SECTION("ordinary scenes still fail on defeat") {
+    auto ordinary = Trial();
+    ordinary.Observe(GameOverState(0), Event(80), 1);
+    CHECK(ordinary.Result().at("status") == "failed");
+    ordinary.ObserveGameOverReturn(false, false, 400);
+    CHECK(ordinary.Result().at("reason") == "fixture defeated");
+  }
+}
