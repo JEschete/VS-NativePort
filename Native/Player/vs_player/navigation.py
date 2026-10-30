@@ -444,7 +444,9 @@ class SceneTileGoal:
         self.door_open_ticks: list[int] = []
         # Imported here: crates builds on TerrainNavigator from this module.
         from .crates import CrateAssist
+        from .ledges import LedgeJumpAssist
         self.crates = CrateAssist(tile)
+        self.ledges = LedgeJumpAssist(tile, self.crates)
         self.identity = f"scene:{zone}:{room}:local:{selector}:tile:{tile[0]}:{tile[1]}" + (
             f":examine:{examine_quadrant}" if examine_quadrant is not None else "")
 
@@ -485,8 +487,11 @@ class SceneTileGoal:
             return None
         if frame.player is None:
             raise ValueError("Scene navigation lost the observed player")
-        # Crates own movement while the tile grid shows the trigger needs them moved.
-        if self.examine_quadrant is None and self.crates.needed(frame):
+        # Crates own movement while the tile grid shows the trigger or examine stand needs them moved.
+        if self.crates.needed(frame):
+            return None
+        # Ledges above walking climb height are reached with an original running jump.
+        if self.ledges.needed(frame):
             return None
         x, _, z = frame.player.position
         destination = (self.tile[0] * 128 + 64, self.tile[1] * 128 + 64)
@@ -545,7 +550,7 @@ class SceneTileGoal:
 
     def pushing(self, frame: Frame) -> bool:
         return ((self.push_until is not None and frame.tick < self.push_until) or self.crates.active()
-                or self.examining(frame))
+                or self.ledges.active() or self.examining(frame))
 
     def on_tile(self, frame: Frame) -> bool:
         if frame.player is None:
@@ -601,8 +606,10 @@ class SceneTileGoal:
 
     def step(self, frame: Frame) -> InputAction | None:
         self.observe(frame)
-        if self.examine_quadrant is None and self.crates.active():
+        if self.crates.active():
             return self.crates.step(frame) if self.activation_tick is None else None
+        if self.ledges.active():
+            return self.ledges.step(frame) if self.activation_tick is None else None
         if not self.ready(frame):
             return None
         if self.examining(frame):
@@ -636,4 +643,4 @@ class SceneTileGoal:
                 "activation_tick": self.activation_tick,
                 "examine_quadrant": self.examine_quadrant,
                 "examine_presses": list(self.examine_ticks),
-                "crates": self.crates.result()}
+                "crates": self.crates.result(), "ledges": self.ledges.result()}

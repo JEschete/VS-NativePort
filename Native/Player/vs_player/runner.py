@@ -12,7 +12,8 @@ from dataclasses import asdict, dataclass
 from pathlib import Path
 
 from .config import PROJECT, PlayerPaths, runtime_manifest
-from .controller import CombatController, StaleDecision, input_lease_permitted, strategy_planning_ready
+from .controller import (CombatController, InputAction, StaleDecision, input_lease_permitted,
+                         strategy_planning_ready)
 from .doors import PhysicalDoor, PhysicalRoute
 from .model import Decision, ModelResponseError, NavigationDecision
 from .navigation import SceneTileGoal, TerrainNavigator, field_navigation_ready
@@ -394,6 +395,51 @@ def native_outcome(options: PlayOptions, reader: TraceReader,
     return complete, scripts[0] if scripts else None
 
 
+class SceneReturnHold:
+    """Mirror Trace.cpp SceneTrial::Observe event matching. Once every expected event executed and
+    the return room is reached, only native stable-control observation remains, so ordinary play
+    (drawing the weapon at hostiles) must stop rather than keep resetting that interval."""
+
+    def __init__(self, expectation: dict) -> None:
+        self.events = list(expectation["events"])
+        self.source = expectation.get("event_source", 0)
+        self.room = (expectation.get("return_zone"), expectation.get("return_room"))
+        self.enabled = not (expectation.get("ending_to_title") or expectation.get("attract_to_title"))
+        self.matched = 0
+        self.active = False
+        self.last: int | None = None
+        self.sheath_tick = -100
+        self.hold_tick: int | None = None
+
+    def observe(self, frame: Frame) -> None:
+        scene = frame.raw.get("scene", {})
+        if not scene.get("available"):
+            return
+        event = scene["event"]
+        if event.get("phase") == 4 and event.get("source") == self.source:
+            if not self.active or self.last != event["id"]:
+                self.last = event["id"]
+                if self.matched < len(self.events) and event["id"] == self.events[self.matched]:
+                    self.matched += 1
+            self.active = True
+        else:
+            self.active = False
+
+    def holding(self, frame: Frame) -> bool:
+        return (self.enabled and self.matched == len(self.events) and frame.ready
+                and (frame.zone, frame.room) == self.room and frame.event_phase == 0)
+
+    def step(self, frame: Frame) -> InputAction | None:
+        if self.hold_tick is None:
+            self.hold_tick = frame.tick
+        if frame.player is not None and frame.player.weapon_drawn and frame.control in (1, 2):
+            if frame.tick - self.sheath_tick > 30:
+                self.sheath_tick = frame.tick
+                return InputAction(frozenset({"Cross"}), 4,
+                                   "sheathe normally while native observes restored scene control")
+        return None
+
+
 def _play_game(store: RunStore, run_id: str,
                options: PlayOptions, client, audit: AuditWriter,
                maintenance: PeriodicCleanup, retention: Retention) -> dict:
@@ -462,6 +508,7 @@ def _play_game(store: RunStore, run_id: str,
         "model_control_from_tick": setup_control_tick,
     })
     controller = CombatController()
+    controller.input_ticks = options.simulation_speed
     controller.simultaneous_defeat = options.simultaneous_defeat
     goal = CombatGoal(options.door_case, options.door_route, options.clear_enemies_first,
                       options.claim_room_chests,
@@ -474,6 +521,7 @@ def _play_game(store: RunStore, run_id: str,
                                      scene_expectation["events"][0], options.scene_examine_quadrant)
                         if options.scene_target_tile is not None and scene_expectation is not None
                         and not scene_tile_after_route else None)
+    scene_hold = SceneReturnHold(scene_expectation) if scene_expectation is not None else None
     route_checkpoint_offset = 0
     latest: Frame | None = None
     reader: TraceReader | None = None
@@ -537,6 +585,8 @@ def _play_game(store: RunStore, run_id: str,
                             goal.observe(historical)
                             if scene_navigation is not None:
                                 scene_navigation.observe(historical)
+                            if scene_hold is not None:
+                                scene_hold.observe(historical)
                     latest = frames[-1]
                     age = reader.age(latest)
                     max_age = max(max_age, age)
@@ -550,6 +600,8 @@ def _play_game(store: RunStore, run_id: str,
                             goal.observe(latest)
                             if scene_navigation is not None:
                                 scene_navigation.observe(latest)
+                            if scene_hold is not None:
+                                scene_hold.observe(latest)
                         if not was_stale:
                             audit.event("observation.stale", {
                                 "tick": latest.tick, "age_ms": age * 1000,
@@ -565,6 +617,8 @@ def _play_game(store: RunStore, run_id: str,
                         goal.observe(latest)
                         if scene_navigation is not None:
                             scene_navigation.observe(latest)
+                        if scene_hold is not None:
+                            scene_hold.observe(latest)
                     if (scene_tile_after_route and scene_navigation is None and scene_expectation is not None
                             and goal.accepted_tick is not None and latest.ready):
                         scene_navigation = SceneTileGoal(options.scene_target_tile, latest.zone, latest.room,
@@ -678,7 +732,9 @@ def _play_game(store: RunStore, run_id: str,
                                   or ((exit_ready or (scene_pending and not scene_combat_pending))
                                       and controller.decision.intent != "navigate"))
                     player = latest.player
+                    holding_scene = scene_hold is not None and scene_hold.holding(latest)
                     if (future is None and navigation_future is None
+                            and not holding_scene
                             and strategy_planning_ready(latest) and player
                             and latest.tick >= setup_control_tick
                             and (latest.enemies or reward_menu_ready(latest) or exit_ready or scene_pending)
@@ -883,6 +939,15 @@ def _play_game(store: RunStore, run_id: str,
                         break
                     if latest.tick >= options.frames:
                         action = None
+                    elif holding_scene and not (action and action.reaction):
+                        if scene_hold.hold_tick is None:
+                            audit.event("scene.return_hold", {
+                                "tick": latest.tick, "zone": latest.zone, "room": latest.room,
+                                "matched_events": scene_hold.matched,
+                                "claim": ("Every expected event executed; ordinary play stops so native "
+                                          "SceneTrial can observe restored control"),
+                            })
+                        action = scene_hold.step(latest)
                     for observation in pursuit.observations():
                         audit.event("navigation.outcome", {
                             "zone": latest.zone, "room": latest.room,

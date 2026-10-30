@@ -29,7 +29,8 @@ from vs_player.observations import Frame
 from vs_player.reaction import ReactionController
 from vs_player.processes import model_budget
 from vs_player.runtime import download, server_environment, validate_archive
-from vs_player.runner import CombatGoal, PlayOptions, native_lab_script, native_outcome, play
+from vs_player.runner import (CombatGoal, PlayOptions, SceneReturnHold, native_lab_script, native_outcome,
+                              play)
 from vs_player.store import RUN_MARKER, Retention, RunStore
 from vs_player.trace import ObservationFreshness, TraceReader
 
@@ -1096,6 +1097,15 @@ class StorageTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_accelerated_inputs_last_one_host_frame_with_a_released_frame_between(self):
+        controller = CombatController()
+        frame = Frame.decode(sample_record(100, active=False))
+        self.assertEqual(controller._action(frame, ("Down",), 2, "menu").duration, 2)
+        self.assertEqual(controller.input_gap, 6)
+        controller.input_ticks = 4
+        self.assertEqual(controller._action(frame, ("Down",), 2, "menu").duration, 4)
+        self.assertEqual(controller.input_gap, 12)
+
     def test_strategic_response_cannot_start_preparation_in_a_native_cinematic(self):
         record = sample_record(active=False)
         record["data"].update(control_mode=1, action_phase=0)
@@ -1344,6 +1354,32 @@ class ControllerTests(unittest.TestCase):
         record["data"]["actors"].pop()
         rows = list(available_choices(Frame.decode(record), context).values())
         self.assertTrue(any(row["target_slot"] == 2 for row in rows))
+
+    def test_scene_return_hold_waits_for_expected_events_then_sheathes(self):
+        hold = SceneReturnHold({"events": [0], "event_source": 2, "return_zone": 9, "return_room": 7})
+        record = sample_record(tick=100)
+        record["data"]["room"] = 7
+        self.assertFalse(hold.holding(Frame.decode(record)))
+        record["data"]["scene"]["event"].update(phase=4, source=1, id=0)
+        hold.observe(Frame.decode(record))
+        self.assertEqual(hold.matched, 0)
+        record["data"]["scene"]["event"].update(phase=4, source=2, id=0)
+        hold.observe(Frame.decode(record))
+        record["data"]["scene"]["event"]["phase"] = 0
+        frame = Frame.decode(record)
+        hold.observe(frame)
+        self.assertTrue(hold.holding(frame))
+        self.assertEqual(hold.step(frame).buttons, frozenset({"Cross"}))
+        record["tick"] = record["sequence"] = 110
+        self.assertIsNone(hold.step(Frame.decode(record)))
+        record["data"]["actors"][0]["weapon_drawn"] = 0
+        record["tick"] = record["sequence"] = 200
+        self.assertIsNone(hold.step(Frame.decode(record)))
+        record["data"]["room"] = 6
+        self.assertFalse(hold.holding(Frame.decode(record)))
+        ending = SceneReturnHold({"events": [0], "ending_to_title": True})
+        ending.matched = 1
+        self.assertFalse(ending.holding(frame))
 
     def test_stat_override_scenarios_require_the_explicit_assist_flag(self):
         from vs_player import runner
@@ -2813,6 +2849,33 @@ class RuntimeTests(unittest.TestCase):
                 buffer.seek(0)
                 with zipfile.ZipFile(buffer) as archive, self.assertRaises(ValueError):
                     validate_archive(archive)
+
+
+class LedgeJumpTests(unittest.TestCase):
+    @staticmethod
+    def planner(ledge=-512):
+        from vs_player.crates import CratePlanner, RoomGrid
+        # One column modelled on MAP020 x=6: a -128 platform (z0-1), floor (z2-3) and a ledge (z4-5).
+        heights = [-128, -128, 0, 0, ledge, ledge]
+        grid = {"width": 1, "depth": len(heights), "floor": [value & 0x7FFF for value in heights],
+                "ceiling": [-1] * len(heights), "flags": [1] * len(heights)}
+        return CratePlanner(RoomGrid.decode(grid), [], 128)
+
+    def test_running_jump_reaches_a_ledge_384_above_the_platform(self):
+        from vs_player.ledges import plan_ledge_jump
+        jump = plan_ledge_jump(self.planner(), (), (0, 2), (0, 5))
+        self.assertIsNotNone(jump)
+        self.assertEqual((jump.runup, jump.takeoff, jump.landing, jump.direction),
+                         ((0, 0), (0, 1), (0, 4), 2))
+        self.assertEqual((jump.takeoff_height, jump.landing_height), (-128, -512))
+
+    def test_ledges_beyond_jump_height_or_already_walkable_are_not_planned(self):
+        from vs_player.ledges import plan_ledge_jump
+        self.assertIsNone(plan_ledge_jump(self.planner(-640), (), (0, 2), (0, 5)))
+        self.assertIsNone(plan_ledge_jump(self.planner(-256), (), (0, 2), (0, 5)))
+        jump = plan_ledge_jump(self.planner(), (), (0, 2), (0, 5))
+        self.assertIsNone(plan_ledge_jump(self.planner(), (), (0, 2), (0, 5),
+                                          frozenset({(jump.runup, jump.direction)})))
 
 
 class CratePuzzleTests(unittest.TestCase):

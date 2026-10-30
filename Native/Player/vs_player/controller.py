@@ -69,6 +69,8 @@ class CombatController:
         self.decision: Decision | None = None
         self.identity: tuple[int, int, int, int, int] | None = None
         self.last_action_tick = -100
+        # Native ticks per host frame (--speed); posted keys shorter than one host frame are lost.
+        self.input_ticks = 1
         self.target_wait_started: int | None = None
         self.feedback: list[dict] = []
         self.transaction: MenuTransaction | None = None
@@ -165,7 +167,12 @@ class CombatController:
     def _action(self, frame: Frame, buttons: tuple[str, ...] | frozenset[str],
                 duration: int, reason: str, reaction: bool = False) -> InputAction:
         self.last_action_tick = frame.tick
-        return InputAction(frozenset(buttons), duration, reason, reaction)
+        return InputAction(frozenset(buttons), max(duration, self.input_ticks), reason, reaction)
+
+    @property
+    def input_gap(self) -> int:
+        # Menus act on press edges, so each press needs a held and a released host frame.
+        return max(6, 3 * self.input_ticks)
 
     def _reject_target(self, kind: str, decision: Decision, frame: Frame) -> None:
         player = frame.player
@@ -220,7 +227,7 @@ class CombatController:
             return self._action(frame, (reaction.button,), 2,
                                 f"{reaction.kind}:slot{reaction.slot}", True)
         if (frame.ready and frame.control == 11 and frame.event_phase == 0
-                and frame.tick - self.last_action_tick >= 6):
+                and frame.tick - self.last_action_tick >= self.input_gap):
             # Key/sigil unlock notices (Menu_ShowSceneNotification) pause the field until a button at
             # their arrow; dismissing one is not a strategy choice, so settled combat cannot block it.
             if frame.tick % 30 < 2:
@@ -237,7 +244,7 @@ class CombatController:
             self.decision = None
         if frame.reaction.active:
             return None
-        if frame.tick - self.last_action_tick < 6:
+        if frame.tick - self.last_action_tick < self.input_gap:
             return None
         if frame.dialogue_waiting:
             if frame.tick % 30 < 2:

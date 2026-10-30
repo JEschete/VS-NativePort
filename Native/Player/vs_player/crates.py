@@ -418,17 +418,31 @@ class CrateAssist:
         self.navigator.path.clear()
 
     def _walk(self, frame: Frame, target: tuple[int, int], carrying: bool) -> InputAction | None:
-        if self.player_tile(frame) == target:
-            self.navigator.path.clear()
+        if (self.player_tile(frame) != target and not self.navigator.path
+                and self._route(frame, target, carrying) is None):
+            self._abandon(frame, "observed crates left no tile path to the stand tile")
             return None
-        if not self.navigator.path:
-            planner = self._planner(frame)
-            movable, _, _ = observed_crates(frame)
-            route = planner.path(self.player_tile(frame), target, tuple(movable), carrying) if planner else None
-            if route is None:
-                self._abandon(frame, "observed crates left no tile path to the stand tile")
+        return self.walk_with(self.navigator, frame, target, carrying)
+
+    def _route(self, frame: Frame, target: tuple[int, int], carrying: bool):
+        planner = self._planner(frame)
+        movable, _, _ = observed_crates(frame)
+        crates = tuple(sorted(movable, key=lambda item: item.slot))
+        route = planner.path(self.player_tile(frame), target, crates, carrying) if planner else None
+        return (planner, crates, route) if route is not None else None
+
+    def walk_with(self, navigator: TerrainNavigator, frame: Frame, target: tuple[int, int],
+                  carrying: bool) -> InputAction | None:
+        """Walk the observed tile route with ordinary movement, climbing and drops."""
+        if self.player_tile(frame) == target:
+            navigator.path.clear()
+            return None
+        if not navigator.path:
+            found = self._route(frame, target, carrying)
+            if found is None:
                 return None
-            heights = [planner.standable(*tile, tuple(movable)) for tile in route]
+            planner, movable, route = found
+            heights = [planner.standable(*tile, movable) for tile in route]
             waypoints = []
             for previous, tile, height, before in zip(route, route[1:], heights[1:], heights):
                 up = before - height
@@ -438,15 +452,15 @@ class CrateAssist:
                     "takeoff": (previous[0] * TILE + 64, before, previous[1] * TILE + 64) if up > 64 else None,
                     "drop": max(0, height - before),
                 })
-            self.navigator.path = waypoints
-            self.navigator.scene = (frame.episode, frame.zone, frame.room)
-            self.navigator.destination = (target[0] * TILE + 64, target[1] * TILE + 64)
-            self.navigator.target_identity = None
-            self.navigator.progress_tick = frame.tick
-            self.navigator.best_waypoint_distance = math.inf
-            self.navigator.sheath_sent_tick = None
-            self.navigator.sheath_attempts = 0
-        return self.navigator.step(frame)
+            navigator.path = waypoints
+            navigator.scene = (frame.episode, frame.zone, frame.room)
+            navigator.destination = (target[0] * TILE + 64, target[1] * TILE + 64)
+            navigator.target_identity = None
+            navigator.progress_tick = frame.tick
+            navigator.best_waypoint_distance = math.inf
+            navigator.sheath_sent_tick = None
+            navigator.sheath_attempts = 0
+        return navigator.step(frame)
 
     def _face_and_press(self, frame: Frame, stand: tuple[int, int], direction: int,
                         reason: str) -> InputAction | None:
