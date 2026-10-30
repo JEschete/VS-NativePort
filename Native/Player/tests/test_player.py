@@ -501,6 +501,25 @@ class NavigationTests(unittest.TestCase):
         door.interaction_seen = True
         self.assertIsNotNone(door.navigation_request(frame))
 
+    def test_waypoint_lease_holds_through_collinear_steps_but_not_turns(self):
+        def lease(path):
+            navigator = TerrainNavigator()
+            frame = Frame.decode(self.frame())
+            navigator.request(frame, (160, 96))
+            navigator.accept(NavigationDecision("route1", "advance", 1, 900), frame)
+            navigator.path = path
+            return navigator.step(frame), frame.player
+        _, player = lease([{"position": (160, 0, 96), "jump": False}])
+        x, y, z = player.position
+        straight = [{"position": (x, y, z - 64 * step), "jump": False} for step in (1, 2, 3)]
+        single, _ = lease(straight[:1])
+        held, _ = lease(straight + [{"position": (x + 64, y, z - 192), "jump": False}])
+        self.assertEqual(held.buttons, single.buttons)
+        self.assertEqual(single.duration, max(1, int(64 / player.run_speed)))
+        self.assertEqual(held.duration, min(12, int(192 / player.run_speed)))
+        turned, _ = lease(straight[:1] + [{"position": (x + 64, y, z - 64), "jump": False}])
+        self.assertEqual(turned.duration, single.duration)
+
     def test_corner_jitter_is_not_waypoint_progress(self):
         navigator = TerrainNavigator()
         frame = Frame.decode(self.frame())

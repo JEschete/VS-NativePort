@@ -414,8 +414,20 @@ class TerrainNavigator:
             self.best_waypoint_distance = math.inf
             self.progress_tick = frame.tick
         self.last_tick = frame.tick
-        # Shorten the final lease so a fast run step cannot overshoot the waypoint.
-        duration = min(4, max(1, int(math.hypot(dx, dz) / max(1, frame.player.run_speed))))
+        # Hold through following waypoints that keep the same input so movement does not stall between
+        # 64-unit samples; the lease still ends before the last collinear waypoint so a turn is not overshot.
+        reach = math.hypot(dx, dz)
+        if not target["jump"] and not approaching_takeoff:
+            previous = target["position"]
+            for step in self.path[1:]:
+                if step["jump"] or abs(step["position"][1]-previous[1]) > 64:
+                    break
+                segment = (step["position"][0]-previous[0], step["position"][2]-previous[2])
+                if direction_buttons(*segment, frame.camera_yaw) != buttons:
+                    break
+                reach += math.hypot(*segment)
+                previous = step["position"]
+        duration = min(12, max(1, int(reach / max(1, frame.player.run_speed))))
         if airborne:
             duration = 8
         return InputAction(buttons, duration, "execute model-selected observed-terrain waypoint")
