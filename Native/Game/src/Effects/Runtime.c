@@ -1,20 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/StreamPlayback.h"
-#include "Battle/Actor.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
-#include "Core/Diagnostics.h"
 #include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Effects/Camera.h"
@@ -25,15 +14,10 @@
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/ScriptVm.h"
-#include "Effects/TargetRequirements.h"
 #include "Effects/Transforms.h"
-#include "Field/Gimmicks.h"
 #include "Input/Controller.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 #include "OverlayFiles.h"
 #include "OverlayWorkspace.h"
-#include "Render/Palette.h"
 
 // decomp: D_800EC2E4 (D_800EC2E4@BATTLE/BATTLE.PRG)
 u_char Effects_effectBufferIndex; /* contents: module image (ModuleData.c) */
@@ -285,11 +269,6 @@ int Effects_UpdatePrimaryEffects(void)
             Boot_WaitForOverlayReady();
             Effects_ConfigureEffectResources();
             if ((Effects_actionRequest.effectId != 0) && (Effects_packageFile.lba == 0)) {
-                if (!Effects_ValidateDeferredScriptTarget((unsigned)Effects_actionRequest.effectId,
-                        (unsigned char)Effects_primaryToken, -2, NULL, 0)) {
-                    Core_Errorf("effects", "effect=%d has no original package for deferred target proof", Effects_actionRequest.effectId);
-                    abort();
-                }
                 Effects_SetPrimaryEffectPhase(4);
                 Effects_trackCount = 0;
                 Effects_startedTrackCount = 0;
@@ -318,21 +297,6 @@ int Effects_UpdatePrimaryEffects(void)
 
     case 3:
         if (Effects_LoadEffectPackage() == 0) {
-            {
-                const unsigned target_slot = Effects_actionRequest.count > 0 &&
-                    Effects_actionRequest.targets[0].type == 4 ?
-                    Effects_actionRequest.targets[0].value.actor.actor : 16;
-                int owner_model = -2;
-                if (target_slot < 16) {
-                    const Battle_Actor* owner = Actors_ActorAtSlot(target_slot);
-                    const int has_geometry = Actors_actorRecords[target_slot] != NULL || Field_gimmickInstances[target_slot] != NULL;
-                    owner_model = owner != NULL && has_geometry ? owner->modelId :
-                        owner == NULL && !has_geometry ? -1 : -2;
-                }
-                if (!Effects_ValidateDeferredScriptTarget((unsigned)Effects_actionRequest.effectId,
-                        (unsigned char)Effects_primaryToken, owner_model,
-                        Effects_packageBuffer, Effects_packageFile.size)) abort();
-            }
             ((void (*)(void*))Effects_BindEffectPackageBlocks)(Effects_packageBuffer);
             Effects_SetPrimaryEffectPhase(5);
 
@@ -567,7 +531,6 @@ int Effects_UpdateEffectRuntime(void)
 // decomp: BATTLE.PRG func_800CF0E8 (src/BATTLE/BATTLE.PRG/5BF94.c:5444)
 int Effects_BeginActionEffect(Effects_ActionEffectRequest* effect_request, int action_variant, int variant_argument)
 {
-    Effects_ResetDeferredScriptTarget();
     Effects_actionRequest = *effect_request;
 
     if ((action_variant != 0) && (effect_request->source.type == 4)) {
@@ -673,10 +636,7 @@ int Effects_SpawnSecondaryEffectRequest(Effects_ActionEffectRequest* effect_requ
 }
 
 // decomp: BATTLE.PRG func_800CF478 (src/BATTLE/BATTLE.PRG/5BF94.c:5546)
-void Effects_SetPrimaryEffectPhase(int effect_phase) {
-    if (effect_phase == 0) Effects_ResetDeferredScriptTarget();
-    Effects_primaryPhase = effect_phase;
-}
+void Effects_SetPrimaryEffectPhase(int effect_phase) { Effects_primaryPhase = effect_phase; }
 
 // decomp: BATTLE.PRG func_800CF484 (src/BATTLE/BATTLE.PRG/5BF94.c:5548)
 void Effects_SetSecondaryEffectPhase(int effect_phase, Effects_EffectInstance* effect_instance) { effect_instance->context.phase = effect_phase; }

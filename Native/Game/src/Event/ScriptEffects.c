@@ -19,7 +19,6 @@
 #include "Effects/Runtime.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
-#include "Effects/TargetRequirements.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptField.h"
@@ -64,12 +63,13 @@ intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
         return 1;
     }
     if (unresolved_model) {
-        Core_Warnf("event", "effect=%d unresolved model selector=0x%04X; package target requirements must be proved before execution", effect, (unsigned)selector);
+        // Actors_FindActorByModelId (146C.c) returns slot 1 for an absent model and
+        // Effects_StartScriptedActorEffect starts the effect at once. Empty-slot geometry
+        // reads (Actors_ActorBoneEndpointPosition, Actors_ActorPlacement, Actors_ActorStateFlags) return
+        // without writing, so target-dependent tracks keep defaults.
+        Core_Debugf("event", "effect=%d absent model selector=0x%04X targets empty slot 1", effect, (unsigned)selector);
     }
     Effects_StartScriptedActorEffect(effect, actor);
-    if (unresolved_model) {
-        Effects_RecordDeferredScriptTarget((unsigned)effect, selector, (unsigned char)Effects_primaryToken);
-    }
     return 0;
 }
 

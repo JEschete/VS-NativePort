@@ -396,8 +396,8 @@ TEST_CASE("Shared bank retirement preserves unrelated and failed borrowers",
 }
 
 TEST_CASE(
-    "Scripted effects retain required bindings and defer only absent model "
-    "proof",
+    "Scripted effects retain required bindings and start an absent model "
+    "on empty slot 1",
     "[event][effects][effect-binding]") {
   for (int scenario = 0; scenario < 10; ++scenario) {
     CAPTURE(scenario);

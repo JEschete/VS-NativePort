@@ -74,7 +74,6 @@
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />
     <ClCompile Include="src\DoorTransitionTests.cpp" />
-    <ClCompile Include="src\EffectTargetRequirementsTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.c">
       <TreatWarningAsError>false</TreatWarningAsError>

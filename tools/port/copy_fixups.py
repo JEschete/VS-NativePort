@@ -26,13 +26,6 @@ NATIVE_SIGNATURE_REWRITES = {
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
-    **{name: r"Native\Game\src\Effects\TargetRequirements.h"
-       for name in (
-           "Effects_ScriptPackageAllowsAbsentTarget",
-           "Effects_ResetDeferredScriptTarget",
-           "Effects_RecordDeferredScriptTarget",
-           "Effects_ValidateDeferredScriptTarget",
-       )},
     "Field_FindGimmickForActorSlot":
         r"Native\Game\src\Field\GimmickLookup.h",
     **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
@@ -203,54 +196,6 @@ MODULE_FUNCTION_ENTRIES = (
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
-    "F01438": [
-        ("{ Effects_primaryPhase = arg0; }",
-         "{\n"
-         "    if (arg0 == 0) Effects_ResetDeferredScriptTarget();\n"
-         "    Effects_primaryPhase = arg0;\n"
-         "}",
-         "phase-zero cleanup and session reentry retire a pending target proof "
-         "before primary tokens or package ownership can be reused"),
-    ],
-    "F01433": [
-        ("    Effects_actionRequest = *arg0;",
-         "    Effects_ResetDeferredScriptTarget();\n"
-         "    Effects_actionRequest = *arg0;",
-         "every new primary request retires any old deferred proof before "
-         "its token/effect/source can be replaced; later scripted callers "
-         "record only their own original unresolved model reference"),
-    ],
-    "F01425": [
-        ("            ((void (*)(void*))Effects_BindEffectPackageBlocks)(Effects_packageBuffer);",
-         "            {\n"
-         "                const unsigned target_slot = Effects_actionRequest.count > 0 &&\n"
-         "                    Effects_actionRequest.targets[0].type == 4 ?\n"
-         "                    Effects_actionRequest.targets[0].value.actor.actor : 16;\n"
-         "                int owner_model = -2;\n"
-         "                if (target_slot < 16) {\n"
-         "                    const Battle_Actor* owner = Actors_ActorAtSlot(target_slot);\n"
-         "                    const int has_geometry = Actors_actorRecords[target_slot] != NULL || Field_gimmickInstances[target_slot] != NULL;\n"
-         "                    owner_model = owner != NULL && has_geometry ? owner->modelId :\n"
-         "                        owner == NULL && !has_geometry ? -1 : -2;\n"
-         "                }\n"
-         "                if (!Effects_ValidateDeferredScriptTarget((unsigned)Effects_actionRequest.effectId,\n"
-         "                        (unsigned char)Effects_primaryToken, owner_model,\n"
-         "                        Effects_packageBuffer, Effects_packageFile.size)) abort();\n"
-         "            }\n"
-         "            ((void (*)(void*))Effects_BindEffectPackageBlocks)(Effects_packageBuffer);",
-         "5BF94.c:5170 validates a deferred missing scripted target only after "
-         "the complete original package is loaded and before track execution. "
-         "Unknown/target-dependent packages fail explicitly; no actor is substituted."),
-        ("            if ((Effects_actionRequest.effectId != 0) && (Effects_packageFile.lba == 0)) {",
-         "            if ((Effects_actionRequest.effectId != 0) && (Effects_packageFile.lba == 0)) {\n"
-         "                if (!Effects_ValidateDeferredScriptTarget((unsigned)Effects_actionRequest.effectId,\n"
-         "                        (unsigned char)Effects_primaryToken, -2, NULL, 0)) {\n"
-         "                    Core_Errorf(\"effects\", \"effect=%d has no original package for deferred target proof\", Effects_actionRequest.effectId);\n"
-         "                    abort();\n"
-         "                }",
-         "the no-package lifecycle path cannot bypass a pending source proof; "
-         "ordinary requests without deferred state retain the original behavior"),
-    ],
     "F00157": [
         ("if (Field_CollisionCellAt(var_a0, var_a1, var_a2)->occlusionAndFloorFlags & 1)",
          "Field_MpdTileCell* camera_cell = Field_CollisionCellAt(var_a0, var_a1, var_a2);\n"
@@ -1731,15 +1676,16 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "        return 1;\n"
          "    }\n"
          "    if (unresolved_model) {\n"
-         "        Core_Warnf(\"event\", \"effect=%d unresolved model selector=0x%04X; package target requirements must be proved before execution\", effect, (unsigned)selector);\n"
+         "        // func_8007CF18 (146C.c) returns slot 1 for an absent model and\n"
+         "        // func_8007BE20 starts the effect at once. Empty-slot geometry\n"
+         "        // reads (func_800A1C10, func_800A1108, func_800A0BE0) return\n"
+         "        // without writing, so target-dependent tracks keep defaults.\n"
+         "        Core_Debugf(\"event\", \"effect=%d absent model selector=0x%04X targets empty slot 1\", effect, (unsigned)selector);\n"
          "    }\n"
-         "    Effects_StartScriptedActorEffect(effect, actor);\n"
-         "    if (unresolved_model) {\n"
-         "        Effects_RecordDeferredScriptTarget((unsigned)effect, selector, (unsigned char)Effects_primaryToken);\n"
-         "    }",
-         "func_800BA8BC: preserve invalid-kind/literal/mismatched-owner failures; "
-         "only an actually absent original model sentinel may wait for bounded "
-         "package dependency proof before any effect execution"),
+         "    Effects_StartScriptedActorEffect(effect, actor);",
+         "func_800BA8BC: preserve invalid-kind/literal/mismatched-owner waits; "
+         "an actually absent original model sentinel starts against empty "
+         "slot 1 like the original, whose actor readers tolerate the empty slot"),
     ],
     "F00536": [("Field_isRoomActorSpawnEnabled", "Field_zoneContext.mpdEnemyCount",
                  "D_800F18E0 aliases _zoneContext +0x60 (mpdEnemyCount), not an independent enable flag")],

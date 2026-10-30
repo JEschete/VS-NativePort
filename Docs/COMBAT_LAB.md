@@ -365,19 +365,17 @@ offensive-spell probe. #225's E068 now passes normal1x Release model
 `e278ecabc4b44f719bafd33573444c8d`: real retained Golem actor2/model100/HP0,
 Ashley250HP, original type8 producer,3193 matched E068 commands,
 control11235..11355, teardown11367, zero errors and no forced skip.
-The source model101 remains absent. Its original E239 package uses hard-coded
-actor2 transforms; only its guarded colour track optionally consumes that target.
-The native requirement proof conservatively validates source spans, definitions,
-dependencies and all reachable instructions of exactly one primary entry before
-execution. Unknown/malformed/multi-entry/mandatory-target packages still fail;
-no actor substitution or package-ID exception is allowed. Deferred proof is
-bound to the actual request/token, cleared on new requests/phase-zero cleanup,
-and cannot bypass validation through the no-package path.
-The hidden `[target-requirements-source]` selection reads local original E239,
-checks the absent-target proof and refuses a mandatory-target counterfactual;
-no disc-derived test payload is committed. Focused proof/binding selections
-pass27 cases/4153 assertions and complete native suites pass1169/9,594,085
-in both Debug and Release. Fresh normal1x Debug model
+The source model101 remains absent. Like the original, `func_800BA8BC` then
+starts E239 against empty slot 1 (`func_8007CF18`'s absent sentinel); its
+target readers (`func_800A1C10`, `func_800A1108`, `func_800A0BE0`) return
+without writing, so the guarded colour track keeps its defaults. The earlier
+static package-requirement proof aborted MAP026's absent model 0x35 (#239) and
+was removed; `[effect-binding]` now checks empty-slot start and reader no-ops.
+#239 re-verifies E068 with the declared max-stat assist in Release
+`146e6afba91344d9a5d8fad2a7545cb7` (control9953) and Debug
+`71481fbca8984bcdb528e808ab095dad` (control9273), zero errors. After the
+removal the Debug native suite passes1154 cases/9,590,063 assertions
+(previously1169 with the proof cases). Fresh normal1x Debug model
 `8d806ac3e5d244068d8f1d8917469960` also genuinely wins and completes3193
 E068 commands, control11559..11679 and native teardown11691 with zero errors
 and no skip. Accelerated observed-edge replays lose and are not equivalent

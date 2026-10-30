@@ -16,34 +16,18 @@ import native_views
 
 
 class EncounterFixupTests(unittest.TestCase):
-    def test_deferred_effect_target_validation_precedes_package_execution(self):
-        fixups = copy_fixups.FIXES["F01425"]
-        binding = fixups[0][1]
-        self.assertLess(binding.index("Effects_ValidateDeferredScriptTarget("),
-                        binding.index("Effects_BindEffectPackageBlocks"))
-        self.assertIn("Effects_packageBuffer, Effects_packageFile.size", binding)
-        self.assertIn("owner->modelId", binding)
-        self.assertIn("Effects_actionRequest.count > 0 &&", binding)
-        self.assertIn("Effects_actionRequest.targets[0].type == 4 ?", binding)
-        self.assertIn("abort();", binding)
-        no_package = fixups[1][1]
-        self.assertIn("Effects_packageFile.lba == 0", no_package)
-        self.assertIn("Effects_ValidateDeferredScriptTarget(", no_package)
-        self.assertIn("-2, NULL, 0", no_package)
-        self.assertIn("abort();", no_package)
-        reset = copy_fixups.FIXES["F01433"][0][1]
-        self.assertLess(reset.index("Effects_ResetDeferredScriptTarget();"),
-                        reset.index("Effects_actionRequest ="))
+    def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
+        for fixup_id in ("F01425", "F01433", "F01438"):
+            self.assertNotIn(fixup_id, copy_fixups.FIXES)
         command = copy_fixups.FIXES["F01170"][0][1]
         self.assertIn("referenceType == 0 && actor == 1", command)
         self.assertIn("target == NULL && Actors_actorRecords[1] == NULL", command)
         self.assertIn("Field_gimmickInstances[1] == NULL", command)
-        self.assertLess(command.index("Effects_StartScriptedActorEffect("),
-                        command.index("Effects_RecordDeferredScriptTarget("))
-        cleanup = copy_fixups.FIXES["F01438"][0][1]
-        self.assertIn("if (arg0 == 0) Effects_ResetDeferredScriptTarget();",
-                      cleanup)
-
+        self.assertIn("if (!unresolved_model && ", command)
+        self.assertTrue(command.rstrip().endswith(
+            "Effects_StartScriptedActorEffect(effect, actor);"))
+        self.assertNotIn("Deferred", command)
+        self.assertNotIn("Deferred", "".join(copy_fixups.NATIVE_HELPER_HEADERS))
 
     def test_camera_constraint_checks_the_nullable_collision_query(self):
         source = (

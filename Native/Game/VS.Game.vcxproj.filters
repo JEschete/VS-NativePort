@@ -1122,12 +1122,6 @@
     <ClInclude Include="src\Effects\ScriptVm.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
-    <ClCompile Include="src\Effects\TargetRequirements.cpp">
-      <Filter>src\Effects</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\TargetRequirements.h">
-      <Filter>src\Effects</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\ClosedRing.c">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>

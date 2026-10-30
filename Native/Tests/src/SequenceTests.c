@@ -4,6 +4,7 @@
 
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
+#include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
 #include "Actors/ModelDrawing.h"
@@ -24,7 +25,6 @@
 #include "CdDrive.h"
 #include "Effects/Camera.h"
 #include "Effects/Runtime.h"
-#include "Effects/TargetRequirements.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptEffects.h"
 #include "Event/ScriptVm.h"
@@ -888,7 +888,6 @@ static u_short ScriptedEffectSelector(int scenario) {
 
 int TestScriptedEffectTargetBinding(int scenario) {
   enum { kEffect = 222, kSlots = 16 };
-  Effects_ResetDeferredScriptTarget();
   Actors_ActorRecord actor = {0};
   Field_GimmickInstance object = {0};
   Battle_Actor battle_actor = {0};
@@ -948,10 +947,14 @@ int TestScriptedEffectTargetBinding(int scenario) {
     if (scenario == 3) {
       passed &= Battle_actors[1] == NULL && Actors_actorRecords[1] == NULL &&
                 Field_gimmickInstances[1] == NULL;
-      Effects_SetPrimaryEffectPhase(0);
-      passed &=
-          Effects_ValidateDeferredScriptTarget(
-              kEffect, (unsigned char)Effects_primaryToken, -2, NULL, 0) == 1;
+      // The started effect's emitTo readers must leave defaults untouched.
+      SVECTOR bone = {11, 22, 33, 44};
+      int placement[3] = {55, 66, 77};
+      passed &= Actors_ActorBonePosition(1, 0, &bone, 0) == -1 &&
+                bone.vx == 11 && bone.vy == 22 && bone.vz == 33 &&
+                Actors_ActorPlacement(1, placement) == -1 &&
+                placement[0] == 55 && placement[1] == 66 &&
+                placement[2] == 77 && Actors_ActorStateFlags(1) == 0;
     }
   } else {
     passed &=
@@ -974,7 +977,6 @@ int TestScriptedEffectTargetBinding(int scenario) {
   Effects_package = saved_package;
   Effects_primaryPhase = saved_phase;
   Effects_primaryToken = saved_token;
-  Effects_ResetDeferredScriptTarget();
   return passed;
 }
 

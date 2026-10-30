@@ -90,9 +90,6 @@
     <ClCompile Include="src\DoorTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\EffectTargetRequirementsTests.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
     <ClCompile Include="src\EffectTextureBindingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
