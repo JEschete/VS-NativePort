@@ -54,8 +54,12 @@ Many of these are not story cutscenes. They are short system scripts:
   - The music stops.
   - The music changes.
   - No dialogue text in this script.
-  - The script branches on flags, so only some of the messages/destinations above appear.
-- [ ] Plays and returns control
+  - The script has no branches; it ends on the game-over menu (opcode 89, menu 7), which handles Title or Load itself.
+- Manual result (2026-10-30, Debug, revision d1166531): Ashley died in MAP047 (zone 15 room 6). EVENT/0000 started at
+  tick 6155 and ran every command (offsets 16-108) in script order. GAMEOVER.GIM and MUSIC122 loaded, and the
+  game-over menu opened at tick 6317. Choosing Title at tick 6517 returned to the title at tick 6593, and loading
+  save slot 0 then resumed play. No warnings or errors were logged.
+- [x] Plays and returns control
 
 ### 2. The Rich Drown in Wine (MAP020.MPD, zone 9 room 11)
 
