@@ -1681,7 +1681,15 @@ class ControllerTests(unittest.TestCase):
         self.assertTrue(hold.holding(Frame.decode(record)))
         record["data"]["reaction_timing"].update(source_actor=2, target_actor=0)
         self.assertFalse(hold.holding(Frame.decode(record)))
+        # Once attacked in the return room, a hostile drifting away does not restore the hold.
         record["data"]["reaction_timing"].update(source_actor=0, target_actor=2)
+        self.assertFalse(hold.holding(Frame.decode(record)))
+        defeated = Frame.decode(record)
+        self.assertTrue(defeated.enemies)
+        record["data"]["actors"][1]["hp"] = 0
+        defeated = Frame.decode(record)
+        self.assertFalse(defeated.enemies)
+        self.assertTrue(hold.holding(defeated))
         record["data"]["room"] = 6
         self.assertFalse(hold.holding(Frame.decode(record)))
         ending = SceneReturnHold({"events": [0], "ending_to_title": True})

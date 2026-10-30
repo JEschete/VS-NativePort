@@ -414,6 +414,8 @@ class SceneReturnHold:
         self.last: int | None = None
         self.sheath_tick = -100
         self.hold_tick: int | None = None
+        # Return room where a hostile attacked Ashley after the scene; it must be cleared before holding.
+        self.contested: tuple[int, int] | None = None
 
     def observe(self, frame: Frame) -> None:
         scene = frame.raw.get("scene", {})
@@ -430,9 +432,18 @@ class SceneReturnHold:
             self.active = False
 
     def holding(self, frame: Frame) -> bool:
-        return (self.enabled and self.matched == len(self.events) and frame.ready
-                and (frame.zone, frame.room) == self.room and frame.event_phase == 0
-                and not self.engaged(frame))
+        if not (self.enabled and self.matched == len(self.events) and frame.ready
+                and (frame.zone, frame.room) == self.room and frame.event_phase == 0):
+            return False
+        if not frame.enemies:
+            self.contested = None
+        elif frame.reaction.active and frame.reaction.target_actor == 0:
+            # Attacks from below a ledge or across the room keep forcing battle control, and
+            # hostiles drifting in and out of melee range would otherwise toggle draw and sheathe.
+            self.contested = (frame.zone, frame.room)
+        if self.contested == (frame.zone, frame.room):
+            return False
+        return not self.engaged(frame)
 
     @staticmethod
     def engaged(frame: Frame) -> bool:
