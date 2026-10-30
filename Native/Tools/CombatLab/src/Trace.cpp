@@ -557,6 +557,9 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
   if (setup.external_event) result["external_event"] = *setup.external_event;
   if (setup.story_progress) result["story_progress"] = *setup.story_progress;
   if (setup.clear_count) result["clear_count"] = *setup.clear_count;
+  if (!setup.crossed_puzzles.empty()) {
+    result["crossed_puzzles"] = setup.crossed_puzzles;
+  }
   if (setup.attract_demo) result["attract_demo"] = *setup.attract_demo;
   if (setup.inherited_music) {
     result["inherited_music"] = *setup.inherited_music;
@@ -598,6 +601,31 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
       throw std::runtime_error("clear_count must be an integer in 1..99");
     }
     setup.clear_count = clears.get<int>();
+  }
+  if (json.contains("crossed_puzzles")) {
+    // Time-trial unlock flags tested by the puzzle-room entry scripts after
+    // puzzleMode/285/286 (e.g. MAP291 tests 223, set by the MAP241 entry when
+    // flag 286 == 2). Only these persistent flags may be declared; MAP370's
+    // 236 has no original writer, so it is excluded.
+    constexpr int kCrossedPuzzleFlags[] = {221, 222, 223, 224, 225, 226,
+                                           227, 228, 231, 232, 233, 234,
+                                           235, 237, 238, 239, 242};
+    const auto& crossed = json.at("crossed_puzzles");
+    if (!crossed.is_array() || crossed.empty()) {
+      throw std::runtime_error("crossed_puzzles must be a non-empty array");
+    }
+    for (const auto& flag : crossed) {
+      if (!flag.is_number_integer() ||
+          std::ranges::find(kCrossedPuzzleFlags, flag.get<int>()) ==
+              std::end(kCrossedPuzzleFlags) ||
+          std::ranges::find(setup.crossed_puzzles, flag.get<int>()) !=
+              setup.crossed_puzzles.end()) {
+        throw std::runtime_error(
+            "crossed_puzzles entries must be distinct puzzle time-trial "
+            "unlock flags");
+      }
+      setup.crossed_puzzles.push_back(flag.get<int>());
+    }
   }
   if (json.contains("inherited_music")) {
     const auto& music = json.at("inherited_music");
@@ -676,7 +704,7 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
         setup.weapon != Game::EncounterWeapon::kDefault ||
         setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
         setup.external_event || setup.story_progress || setup.clear_count ||
-        setup.inherited_music) {
+        !setup.crossed_puzzles.empty() || setup.inherited_music) {
       throw std::runtime_error(
           "attract_demo requires the original title-timeout door, entry "
           "tile and unmodified New Game production room");

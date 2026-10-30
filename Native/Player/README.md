@@ -59,7 +59,10 @@ Neesa/Tieger placements need progress 58. The progress is declared fixture
 state, not earned progression. The same flag admits a declared `clear_count`
 (script flag 0, the completed-game count a cleared save carries into New
 Game+), which New-Game+-only room scripts such as the MAP029/MAP030 puzzle
-timers and MAP264 test.
+timers and MAP264 test. It also admits `crossed_puzzles`, a list of the
+persistent time-trial unlock flags (221..242, excluding MAP370's unwritten
+236) that a puzzle room's far-side entry sets after a first pass. For example, MAP241's entry sets 223 when flag
+286 is 2, and MAP291 starts its puzzle timer only once 223 is set.
 
 With a `--door-route`, `--claim-room-chests` first navigates to the source
 room's unlocked original chest. Ashley approaches from its authored facing,

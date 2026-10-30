@@ -1893,19 +1893,20 @@ class ControllerTests(unittest.TestCase):
 
     def test_clear_count_scenarios_require_the_explicit_assist_flag(self):
         from vs_player import runner
-        with tempfile.TemporaryDirectory() as directory:
-            root = Path(directory)
-            scenario = root / "scenario.json"
-            scenario.write_text(json.dumps({
-                "ashley_profile": "all-abilities", "room_events": "production",
-                "enemies": [], "clear_count": 1,
-            }), encoding="utf-8")
-            store = mock.Mock()
-            store.directory.return_value = root / "run"
-            options = PlayOptions(root / "VS.CombatLab.exe", root / "missing-data", scenario)
-            with mock.patch.object(runner, "freeze_game", return_value={}):
-                with self.assertRaisesRegex(ValueError, "owner-approved assist"):
-                    runner._play_game(store, "0" * 32, options, None, None, None, None)
+        for declared in ({"clear_count": 1}, {"crossed_puzzles": [223]}):
+            with self.subTest(declared=declared), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                scenario = root / "scenario.json"
+                scenario.write_text(json.dumps({
+                    "ashley_profile": "all-abilities", "room_events": "production",
+                    "enemies": [], **declared,
+                }), encoding="utf-8")
+                store = mock.Mock()
+                store.directory.return_value = root / "run"
+                options = PlayOptions(root / "VS.CombatLab.exe", root / "missing-data", scenario)
+                with mock.patch.object(runner, "freeze_game", return_value={}):
+                    with self.assertRaisesRegex(ValueError, "owner-approved assist"):
+                        runner._play_game(store, "0" * 32, options, None, None, None, None)
 
     def test_area_spell_confirmation_retries_are_bounded(self):
         record = sample_record(tick=1, active=False)

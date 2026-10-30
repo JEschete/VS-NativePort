@@ -628,6 +628,27 @@ TEST_CASE("Lab clear count is optional, bounded and round-trips",
   }
 }
 
+TEST_CASE("Lab crossed puzzles accept only time-trial unlock flags",
+          "[combat][profile][story]") {
+  VS::Game::EncounterSetup setup;
+  auto json = VS::combat_lab::EncodeSetup(setup);
+  CHECK_FALSE(json.contains("crossed_puzzles"));
+  CHECK(VS::combat_lab::DecodeSetup(json).crossed_puzzles.empty());
+  json["crossed_puzzles"] = {223, 221, 242};
+  const auto decoded = VS::combat_lab::DecodeSetup(json);
+  REQUIRE(decoded.crossed_puzzles == std::vector<int>{223, 221, 242});
+  CHECK(VS::combat_lab::EncodeSetup(decoded).at("crossed_puzzles") ==
+        json.at("crossed_puzzles"));
+  for (const auto& invalid :
+       {nlohmann::json::array(), nlohmann::json(223),
+        nlohmann::json({130}), nlohmann::json({229}), nlohmann::json({236}),
+        nlohmann::json({284}),
+        nlohmann::json({223, 223}), nlohmann::json({"223"})}) {
+    json["crossed_puzzles"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(json));
+  }
+}
+
 TEST_CASE(
     "Lab weapon presets round-trip all families and preserve old defaults",
     "[combat][profile][weapon]") {

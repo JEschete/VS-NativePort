@@ -152,6 +152,10 @@ struct EncounterSetup {
   // the value a cleared save carries into New Game+. Applied after New Game
   // initialization and before the first room load.
   std::optional<int> clear_count;
+  // Declared puzzle rooms already crossed once (their time-trial unlock script
+  // flags, 221..242), which room scripts set when Ashley reaches the far room
+  // after a pass. Applied with the other declared start state.
+  std::vector<int> crossed_puzzles;
   // Title idle-timeout exit cause (3 = attract cutscene 1, 4 = cutscene 2).
   // Starts through the original Title_PrepareExit and entry mode, so the
   // original game loop returns to title when the demo ends or on any button.

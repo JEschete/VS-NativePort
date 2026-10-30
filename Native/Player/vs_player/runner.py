@@ -593,7 +593,8 @@ def _play_game(store: RunStore, run_id: str,
         raise ValueError("Source setup movement requires unchanged production-room events")
     if setup.get("ashley_stats") and not options.allow_stat_overrides:
         raise ValueError("Managed acceptance runs do not allow stat overrides")
-    if ("story_progress" in setup or "clear_count" in setup) and not options.allow_story_progress:
+    if (("story_progress" in setup or "clear_count" in setup or "crossed_puzzles" in setup)
+            and not options.allow_story_progress):
         raise ValueError("Declared story progress requires an explicit owner-approved assist")
     if setup.get("room_events") == "production" and setup.get("enemies"):
         raise ValueError("Production-room runs cannot replace original actors")
@@ -1274,6 +1275,7 @@ def _play_game(store: RunStore, run_id: str,
         "ashley_stats": setup.get("ashley_stats") or None,
         "story_progress": setup.get("story_progress"),
         "clear_count": setup.get("clear_count"),
+        "crossed_puzzles": setup.get("crossed_puzzles"),
         "inherited_music": setup.get("inherited_music"),
         "source_setup_presses": options.setup_presses,
         "native_scene_expectation": scene_expectation,
@@ -1370,7 +1372,8 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
                             raise RuntimeError("Passed run lost its verified result")
                         # Assisted runs must not teach the model unassisted matchups.
                         assisted = (result.get("ashley_stats") or result.get("story_progress") is not None
-                                    or result.get("clear_count") is not None)
+                                    or result.get("clear_count") is not None
+                                    or bool(result.get("crossed_puzzles")))
                         contexts = [] if assisted else result["experience_contexts"]
                         for context in contexts:
                             store.remember(run_id, context["model"], context["weapon"], {

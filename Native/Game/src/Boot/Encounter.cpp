@@ -176,6 +176,13 @@ int EnterOrFinishEncounter() {
     VS_LOG_INFO("encounter", "declared clear count={}",
                 *configuration.clear_count);
   }
+  for (const int flag : configuration.crossed_puzzles) {
+    // Persistent puzzle time-trial unlock flags (e.g. MAP241 entry sets 223
+    // when flag 286 == 2, after a MAP291 pass). Declared Lab fixture state,
+    // written before any room loads; never changed during play.
+    State_SetScriptFlag(static_cast<std::int16_t>(flag), 1);
+    VS_LOG_INFO("encounter", "declared crossed puzzle flag={}", flag);
+  }
   if (configuration.inherited_music) {
     // Zones whose ZND music id is 0 keep the wave bank an earlier zone or
     // event left loaded (_finishLoadZnd, BATTLE.PRG 146C.c:14826). Load the
