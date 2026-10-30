@@ -20,7 +20,23 @@ class StaleDecision(ValueError):
     pass
 
 
+def ending_results_waiting(frame: Frame) -> bool:
+    """ENDING.PRG _renderCongratulationsScreen holds after the unskipped credits until any button."""
+    ending = frame.raw.get("scene", {}).get("ending") or {}
+    return (not frame.game_over and ending.get("credits_finished") is True
+            and ending.get("credits_skip_requested") is False
+            and ending.get("results_leaving") is False
+            # Let the score, map-completion and rank counters finish drawing first.
+            and ending.get("results_frame", 0) >= ENDING_RESULTS_SETTLE_FRAMES)
+
+
+# _renderCongratulationsScreen draws the rank from animation frame 0xD0.
+ENDING_RESULTS_SETTLE_FRAMES = 0x120
+
+
 def input_lease_permitted(frame: Frame, buttons: frozenset[str]) -> bool:
+    if ending_results_waiting(frame) and buttons == frozenset({"Circle"}):
+        return True
     return frame.ready and (
         frame.control in (1, 2, 5, 6)
         or (frame.control == 3 and frame.dialogue_waiting
@@ -390,6 +406,11 @@ class CombatController:
         if reaction:
             return self._action(frame, (reaction.button,), 2,
                                 f"{reaction.kind}:slot{reaction.slot}", True)
+        if ending_results_waiting(frame) and frame.tick - self.last_action_tick >= self.input_gap:
+            # Never Start: Ending_Credits_RunFrames treats it as a credits skip request.
+            if frame.tick % 30 < 2:
+                return self._action(frame, ("Circle",), 2, "leave the native clear-results screen")
+            return None
         if (frame.ready and frame.control == 11 and frame.event_phase == 0
                 and frame.tick - self.last_action_tick >= self.input_gap):
             # Key/sigil unlock notices (Menu_ShowSceneNotification) pause the field until a button at

@@ -51,6 +51,8 @@ extern "C" {
 #include "Core/Random.h"
 #include "Core/Scratch.h"
 #include "Effects/Runtime.h"
+#include "Ending/ClearResults.h"
+#include "Ending/Credits/StaffRoll.h"
 #include "Event/Cutscene.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
@@ -890,6 +892,13 @@ nlohmann::json InspectGameplayScene(const EncounterState& state) {
                          Boot_isGameplayActive != 0 && Field_controlMode != 0;
   nlohmann::json scene{{"available", available},
                        {"in_game", Boot_isGameplayActive != 0}};
+  // ENDING.PRG staff roll (Start skips it) and _renderCongratulationsScreen,
+  // which holds until any pressed button once the credits have finished.
+  scene["ending"] = {
+      {"credits_finished", Ending_Credits_hasFinished != 0},
+      {"credits_skip_requested", Ending_Credits_wasSkipRequested != 0},
+      {"results_frame", Ending_resultsAnimationFrame},
+      {"results_leaving", Ending_isLeavingResults != 0}};
   if (!available) return scene;
   const auto& camera = Field_sphericalCamera;
   scene["id"] = Field_zoneContext.currentSceneId;

@@ -1111,6 +1111,26 @@ class StorageTests(unittest.TestCase):
 
 
 class ControllerTests(unittest.TestCase):
+    def test_clear_results_screen_is_left_with_circle_after_unskipped_credits(self):
+        def ending_frame(tick, **ending):
+            record = sample_record(tick, active=False)
+            state = {"credits_finished": True, "credits_skip_requested": False,
+                     "results_frame": 0x200, "results_leaving": False} | ending
+            record["data"].update(ready=False, control_mode=0,
+                                  scene={"available": False, "in_game": False, "ending": state})
+            return Frame.decode(record)
+
+        controller = CombatController()
+        self.assertIsNone(controller.step(ending_frame(60, results_frame=0x40)))
+        self.assertIsNone(controller.step(ending_frame(60, credits_skip_requested=True)))
+        self.assertIsNone(controller.step(ending_frame(60, credits_finished=False)))
+        action = controller.step(ending_frame(60))
+        self.assertEqual(action.buttons, frozenset({"Circle"}))
+        self.assertTrue(input_lease_permitted(ending_frame(61), frozenset({"Circle"})))
+        self.assertFalse(input_lease_permitted(ending_frame(61), frozenset({"Start"})))
+        self.assertFalse(input_lease_permitted(ending_frame(61, results_leaving=True),
+                                               frozenset({"Circle"})))
+
     def test_accelerated_inputs_last_one_host_frame_with_a_released_frame_between(self):
         controller = CombatController()
         frame = Frame.decode(sample_record(100, active=False))
