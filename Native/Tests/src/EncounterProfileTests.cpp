@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <tuple>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -640,9 +641,8 @@ TEST_CASE("Lab crossed puzzles accept only time-trial unlock flags",
   CHECK(VS::combat_lab::EncodeSetup(decoded).at("crossed_puzzles") ==
         json.at("crossed_puzzles"));
   for (const auto& invalid :
-       {nlohmann::json::array(), nlohmann::json(223),
-        nlohmann::json({130}), nlohmann::json({229}), nlohmann::json({236}),
-        nlohmann::json({284}),
+       {nlohmann::json::array(), nlohmann::json(223), nlohmann::json({130}),
+        nlohmann::json({229}), nlohmann::json({236}), nlohmann::json({284}),
         nlohmann::json({223, 223}), nlohmann::json({"223"})}) {
     json["crossed_puzzles"] = invalid;
     CHECK_THROWS(VS::combat_lab::DecodeSetup(json));
