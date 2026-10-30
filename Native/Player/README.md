@@ -410,6 +410,8 @@ Cleanup runs at startup and every 15 minutes while playing:
   deleted. Unrelated game logs, owner saves, models and runtime files are
   outside cleanup scope.
 * A run reaching 512 MiB stops explicitly rather than dropping diagnostics.
+  `play --run-log-mb N` declares a larger active-run limit for actor-dense
+  rooms whose frame trace legitimately exceeds it; the run metadata records it.
   If pinned evidence exceeds the total budget, further tests refuse to start.
 * Parallel Players share the store. A cross-process `cleanup.lock` gives one
   process each cleanup pass; the others skip it instead of deleting the same
