@@ -6,6 +6,7 @@ import json
 import sys
 import tempfile
 import threading
+import types
 import unittest
 import urllib.error
 import zipfile
@@ -2009,6 +2010,19 @@ class ControllerTests(unittest.TestCase):
         self.assertFalse(field_navigation_ready(frame))
         action = controller.step(frame, allow_strategy=not (path and field_navigation_ready(frame)))
         self.assertEqual(action.buttons, frozenset({"Circle"}))
+
+    def test_finished_rejected_spell_transaction_does_not_cancel_later_attack_targeting(self):
+        controller = CombatController()
+        controller.transaction = types.SimpleNamespace(done=True, closing=True, selected=True)
+        original = self.frame()
+        controller.accept(self.decision(), original, original)
+        self.assertIsNone(controller.transaction)
+        frame = self.frame(
+            10, control_mode=2, action_phase=1,
+            target_page={"first": 0, "visible": 1, "selected": 0, "selection_step": 19},
+            target_previews=[{"actor": 2, "limb": 0}],
+        )
+        self.assertEqual(controller.step(frame).buttons, frozenset({"Circle"}))
 
     def test_earned_reward_uses_enabled_native_rows_and_normal_confirmation(self):
         record = sample_record(active=False)

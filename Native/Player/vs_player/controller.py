@@ -182,8 +182,8 @@ class CombatController:
         self.decision_scene = (frame.episode, frame.zone, frame.room)
         self.identity = self.target_identity(frame, actor) if actor else None
         self.reactions.priorities(decision.chain_priority, decision.defense_priority)
-        if transaction is not None:
-            self.transaction = transaction
+        # A finished transaction must not leak its closing state into a later attack's targeting.
+        self.transaction = transaction
         self.area_target_confirmations = 0
         self.area_target_confirmation_tick = None
         self.area_steer_reset()
