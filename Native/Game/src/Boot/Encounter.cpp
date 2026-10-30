@@ -135,6 +135,17 @@ int EnterOrFinishEncounter() {
   Boot_LoadBattleOverlays();
   InitializeEncounterPlayerWeapon(configuration.weapon);
   InitializeEncounterPlayerProfile(configuration.profile);
+  if (configuration.story_progress) {
+    // Script flag 0x82 is the campaign progress counter tested by MPD enemy
+    // placements (Field_SpawnRoomActors, BATTLE.PRG func_80089114,
+    // 146C.c:14901). Declared Lab fixture state, written before any room
+    // loads; never changed during play.
+    constexpr short kStoryProgressFlag = 0x82;
+    State_SetScriptFlag(kStoryProgressFlag,
+                        static_cast<char>(*configuration.story_progress));
+    VS_LOG_INFO("encounter", "declared story progress={}",
+                *configuration.story_progress);
+  }
   // The original shuffle initialization always seeds with 1. Initialize that
   // same table from the requested seed; combat still calls its real RNG.
   Core_Random_Seed(configuration.seed);

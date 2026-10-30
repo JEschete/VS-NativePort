@@ -1,5 +1,6 @@
 import re
 
+from .chests import RoomChestClaim
 from .controller import InputAction, direction_buttons
 from .observations import Frame
 from .navigation import TerrainNavigator
@@ -31,7 +32,15 @@ class PhysicalDoor:
         self.gate_hostiles_seen = False
         self.gate_quiet_tick: int | None = None
         self.gate_observations: list[dict] = []
+        self.chest: RoomChestClaim | None = None
+        # Final route leg with a native scene contract: an original event that
+        # takes control on arrival completes the physical traversal.
+        self.scene_handoff = False
+        self.scene_handoff_tick: int | None = None
 
+    @property
+    def navigation_target(self) -> "PhysicalDoor | RoomChestClaim":
+        return self.chest if self.chest is not None and self.chest.pending else self
     @property
     def waiting_for_gate(self) -> bool:
         return (self.contract is not None and
@@ -83,6 +92,8 @@ class PhysicalDoor:
             if len(matches) != 1:
                 raise ValueError("Requested original door record is absent from the live room")
             self.contract = dict(matches[0])
+        if self.chest is not None and self.arrival_tick is None:
+            self.chest.observe(frame)
         self.refresh_gate(frame)
         if self.contract is not None and not self.waiting_for_gate and (
             frame.zone, frame.room
@@ -114,10 +125,17 @@ class PhysicalDoor:
                     self.accepted_tick = frame.tick
             else:
                 self.quiet_tick = None
+                if (self.scene_handoff and self.accepted_tick is None
+                        and frame.event_phase != 0 and frame.raw["scene"]["available"]
+                        and frame.player is not None and frame.player.hp > 0
+                        and not frame.game_over):
+                    self.scene_handoff_tick = self.accepted_tick = frame.tick
         elif self.accepted_tick is None:
             self.quiet_tick = None
 
     def step(self, frame: Frame) -> InputAction | None:
+        if self.chest is not None and self.chest.pending and self.arrival_tick is None:
+            return self.chest.step(frame)
         if (self.contract is None or self.waiting_for_gate or self.blocked_reason or self.arrival_tick is not None
                 or not frame.ready or frame.control != 1 or frame.event_phase != 0
                 or frame.player is None or frame.camera_yaw is None
@@ -194,6 +212,7 @@ class PhysicalDoor:
             "contract": self.contract, "open_ticks": self.open_ticks,
             "loading_observed": self.loading_seen, "arrival_tick": self.arrival_tick,
             "quiet_tick": self.quiet_tick, "acceptance_tick": self.accepted_tick,
+            "scene_handoff_tick": self.scene_handoff_tick,
             "blocked_reason": self.blocked_reason,
             "interaction_observed": self.interaction_seen,
             "jump_attempts": self.jump_attempts,
@@ -201,21 +220,30 @@ class PhysicalDoor:
             "navigation_feedback": self.navigator.feedback,
             "waiting_for_gate": self.waiting_for_gate,
             "gate_observations": self.gate_observations,
+            "chest": self.chest.result() if self.chest is not None else None,
         }
 
 
 class PhysicalRoute:
-    def __init__(self, identities: tuple[str, ...]) -> None:
+    def __init__(self, identities: tuple[str, ...], claim_source_chest: bool = False,
+                 scene_handoff: bool = False) -> None:
         if not identities:
             raise ValueError("A physical route needs at least one original door record")
         self.legs = tuple(PhysicalDoor(identity) for identity in identities)
+        if claim_source_chest:
+            source = self.legs[0]
+            source.chest = RoomChestClaim(source.source_zone, source.source_room)
+        self.legs[-1].scene_handoff = scene_handoff
         self.index = 0
         self.accepted_tick: int | None = None
         self.checkpoints: list[dict] = []
 
     @property
     def blocked_reason(self) -> str | None:
-        return self.legs[self.index].blocked_reason
+        leg = self.legs[self.index]
+        if leg.chest is not None and leg.chest.blocked_reason:
+            return leg.chest.blocked_reason
+        return leg.blocked_reason
 
     @property
     def active_leg(self) -> PhysicalDoor:

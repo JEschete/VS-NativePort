@@ -608,6 +608,17 @@ example `"ashley_stats": {"max_hp": 999, "max_mp": 999}`. Omitted fields preserv
 defaults, and older presets without this object still work. Invalid types,
 out-of-range values and unknown stat names are rejected explicitly.
 
+Presets may also declare an optional integer `story_progress` (0..255). It is
+written once to the campaign progress counter, script flag `0x82`, after New
+Game initialization and before the first room loads. Original MPD enemy
+placements and some combat checks read this counter. For example, MAP256's
+Neesa/Tieger placements require `0x82 == 58` (and flag 910 from the
+MAP259 Aster Sigil), so a direct MAP259 start at progress 0 reaches their boss
+intro without its actors. Play never changes the declared value afterwards.
+Omitting it leaves the New Game value. Values that are not integers, or are
+outside 0..255, are rejected.
+This is declared fixture state, not earned campaign progression.
+
 The **WEAPON** row in the same submenu cycles through `default`, `dagger`,
 `sword`, `greatsword`, `axe-mace`, `greataxe`, `staff`, `heavy-mace`, `polearm`,
 `crossbow` and `bare-hands`. Enter/Circle restores `default`. The main setup

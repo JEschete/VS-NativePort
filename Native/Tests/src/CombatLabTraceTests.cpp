@@ -1178,6 +1178,49 @@ TEST_CASE("Player observations retain native weapon geometry and hostility",
   CHECK(data.at("actors").at(1).at("hostile_to_player") == true);
 }
 
+TEST_CASE("Player observations expose original room chests and opened flags",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  struct RoomGuard {
+    decltype(Field_roomData) room = Field_roomData;
+    int flag = State_ScriptFlag(0x3C6);
+    ~RoomGuard() {
+      Field_roomData = room;
+      State_SetScriptFlag(0x3C6, flag);
+    }
+  } guard;
+  std::array<Items_TreasureChest, 2> chests{};
+  chests[0].tileX = 4;
+  chests[0].tileZ = 7;
+  chests[0].facing = 2;
+  chests[0].openedFlag = 5;
+  chests[0].loot.misc[2].itemId = 472;
+  chests[0].loot.misc[2].count = 1;
+  chests[1].tileX = 9;
+  chests[1].lockLevel = 3;
+  chests[1].openedFlag = 6;
+  Field_roomData.containers = chests.data();
+  Field_roomData.header.containersLength = sizeof(chests);
+  State_SetScriptFlag(0x3C6, 1);
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  REQUIRE(state.chests.size() == 2);
+  TraceScope scope;
+  const auto encoded = FlushedFrame(scope, state, true).at("data").at("chests");
+  REQUIRE(encoded.size() == 2);
+  CHECK(encoded.at(0).at("tile_x") == 4);
+  CHECK(encoded.at(0).at("tile_z") == 7);
+  CHECK(encoded.at(0).at("facing") == 2);
+  CHECK(encoded.at(0).at("opened_flag") == 0x3C5);
+  CHECK(encoded.at(0).at("opened") == false);
+  REQUIRE(encoded.at(0).at("misc").size() == 1);
+  CHECK(encoded.at(0).at("misc").at(0).at("slot") == 2);
+  CHECK(encoded.at(0).at("misc").at(0).at("id") == 472);
+  CHECK(encoded.at(1).at("lock_level") == 3);
+  CHECK(encoded.at(1).at("opened") == true);
+  CHECK(encoded.at(1).at("misc").empty());
+}
+
 TEST_CASE("Player timing observations use production eligibility without costs",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;

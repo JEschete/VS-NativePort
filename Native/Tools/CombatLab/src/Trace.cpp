@@ -413,6 +413,7 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
            : "isolated"},
       {"position_units", "tiles; elevation steps of 64 native units"}};
   if (setup.external_event) result["external_event"] = *setup.external_event;
+  if (setup.story_progress) result["story_progress"] = *setup.story_progress;
   return result;
 }
 
@@ -435,6 +436,13 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
           "external_event must be an integer asset number in 0..9999");
     }
     setup.external_event = event.get<int>();
+  }
+  if (json.contains("story_progress")) {
+    const auto& progress = json.at("story_progress");
+    if (!progress.is_number_integer() || progress < 0 || progress > 0xFF) {
+      throw std::runtime_error("story_progress must be an integer in 0..255");
+    }
+    setup.story_progress = progress.get<int>();
   }
   setup.zone = json.at("zone").get<int>();
   setup.room = json.at("room").get<int>();

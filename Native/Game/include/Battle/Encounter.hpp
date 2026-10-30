@@ -140,6 +140,9 @@ struct EncounterSetup {
   EncounterWeapon weapon = EncounterWeapon::kDefault;
   EncounterRoomPolicy room_policy = EncounterRoomPolicy::kIsolatedCombat;
   std::optional<int> external_event;
+  // Declared campaign story-progress value (script flag 0x82), applied after
+  // New Game initialization and before the first room load.
+  std::optional<int> story_progress;
 };
 
 // Reads the same extracted ZND/MPD definitions consumed by the room loader.

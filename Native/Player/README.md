@@ -44,6 +44,39 @@ music banks or other predecessor state.
 Desktop tick-limit observation is not claimed to finish a campaign or execute
 full in-game shutdown; its host/trace completion is reported separately.
 
+Lab scenarios that declare `ashley_stats` are rejected unless
+`--allow-stat-overrides` is passed. That owner-approved assist is recorded in
+the run metadata and result, and a passing assisted run is not stored as
+learned matchup experience. It gets the route through hard rooms; it is not
+evidence that an unassisted Ashley can win those fights.
+
+Lab scenarios that declare `story_progress` (campaign script flag `0x82`) are
+likewise rejected unless `--allow-story-progress` is passed. The declared value
+is recorded in the run metadata and result, and a passing run is not stored as
+learned experience. Use it only when original placements require campaign
+progress that a direct Lab start cannot earn. For example, MAP256's
+Neesa/Tieger placements need progress 58. The progress is declared fixture
+state, not earned progression.
+
+With a `--door-route`, `--claim-room-chests` first navigates to the source
+room's unlocked original chest. Ashley approaches from its authored facing,
+turns until the chest is on her front tile and presses Cross; the native
+loot screen is then claimed with the normal loot policy. Locked, opened or
+empty chests are skipped. A chest that stays unopened after three presses, or
+after 24 turn inputs, blocks the route with an explicit reason; the doors are
+not attempted. When a `--scene-expectation` is also set, accepting the route
+does not end the run. The Player keeps its normal combat policy in the
+destination room, so original encounters after a boss intro can be fought
+before the scene contract is checked.
+
+With a scene expectation, the final route leg is also accepted when an
+original event takes control immediately after the observed destination room
+load (an active event phase with Ashley alive). Its `scene_handoff_tick` is
+recorded, and the native scene contract remains the completion gate. A living
+hostile that an original event removes from its room while the event owns
+playback is recorded under `scripted_withdrawals`; it does not hold
+`--clear-enemies-first` open, and it is never counted as a defeat.
+
 For a bounded production-room scene investigation, optional
 `--scene-expectation <source-scene.json>` embeds the existing Combat Lab
 `events`, `event_source`, `return_zone`, `return_room`, `preconditions` and
@@ -90,6 +123,20 @@ when learned, unrestricted, affordable and targeted at an observed hostile.
 Actions104–105 are excluded from this set because their native hit effect is
 not HP damage. Blocked or no-effect feedback suppresses repeating a cast at
 that target; verify actual HP loss before treating a spell as effective.
+Against an observed hostile caster with a known HP-damage spell, eligible
+Action105 is prioritized before other offense when the target does not already
+have or resist native status29. A blocked or no-effect attempt falls back to
+other choices; verify its actual status or death effect rather than treating
+it as HP damage.
+Area-targeted spells now retry native Circle input, at most eight times, while
+the game is in area-selection phase 2. In original `func_800C4794`, Cross in
+the default sphere mode marks the area center cancelled and returns to the
+action menu; Circle first enters positioning mode, and a second Circle confirms
+it. The disc BATTLE.PRG disassembly matches this, and input is ignored while
+the sphere transition counter is nonzero. The controller does not reposition the
+current area center; native target filtering must still show the chosen actor
+before the cast can be claimed. A targeting phase that remains stuck surfaces a
+bounded timeout rather than waiting indefinitely.
 Recovery remains available above the low-health boundary only when its
 verified maximum can restore the observed two-hit margin. Below60% HP, or when
 one observed hit can be survived only after recovery within the native maximum

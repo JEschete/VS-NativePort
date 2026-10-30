@@ -587,6 +587,26 @@ TEST_CASE("Ashley stat presets retain defaults and reject invalid numbers",
   }
 }
 
+TEST_CASE("Lab story progress is optional, bounded and round-trips",
+          "[combat][profile][story]") {
+  VS::Game::EncounterSetup setup;
+  auto json = VS::combat_lab::EncodeSetup(setup);
+  CHECK_FALSE(json.contains("story_progress"));
+  CHECK_FALSE(VS::combat_lab::DecodeSetup(json).story_progress.has_value());
+  for (const int value : {0, 58, 255}) {
+    json["story_progress"] = value;
+    const auto decoded = VS::combat_lab::DecodeSetup(json);
+    REQUIRE(decoded.story_progress == value);
+    CHECK(VS::combat_lab::EncodeSetup(decoded).at("story_progress") == value);
+  }
+  for (const auto& invalid :
+       {nlohmann::json(-1), nlohmann::json(256), nlohmann::json(58.5),
+        nlohmann::json("58"), nlohmann::json(true), nlohmann::json(nullptr)}) {
+    json["story_progress"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(json));
+  }
+}
+
 TEST_CASE(
     "Lab weapon presets round-trip all families and preserve old defaults",
     "[combat][profile][weapon]") {

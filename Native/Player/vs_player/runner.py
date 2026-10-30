@@ -127,8 +127,13 @@ class PlayOptions:
     simulation_speed: int = 1
     scene_expectation: Path | None = None
     scene_target_tile: tuple[int, int] | None = None
+    allow_stat_overrides: bool = False
+    allow_story_progress: bool = False
+    claim_room_chests: bool = False
 
     def validate_scene_expectation(self) -> None:
+        if self.claim_room_chests and not self.door_route:
+            raise ValueError("Room-chest claims require a physical door route from the source room")
         if self.scene_target_tile is not None and (
                 self.scene_expectation is None or self.door_case or self.door_route
                 or not isinstance(self.scene_target_tile, tuple)
@@ -194,13 +199,16 @@ class PlayOptions:
 
 class CombatGoal:
     def __init__(self, door_case: str = "", door_route: tuple[str, ...] = (),
-                 clear_enemies_first: bool = False) -> None:
+                 clear_enemies_first: bool = False, claim_room_chests: bool = False,
+                 scene_handoff: bool = False) -> None:
         if door_case and door_route:
             raise ValueError("Choose a single physical door or a continuous route, not both")
-        self.door = (PhysicalRoute(door_route) if door_route else
+        self.door = (PhysicalRoute(door_route, claim_room_chests, scene_handoff) if door_route else
                      PhysicalDoor(door_case) if door_case else None)
         self.seen: set[tuple[int, int, int, int, int]] = set()
         self.dead: set[tuple[int, int, int, int, int]] = set()
+        # Living hostiles removed by an original event while it owned playback.
+        self.withdrawn: dict[tuple[int, int, int, int, int], int] = {}
         self.quiet_start: int | None = None
         self.accepted_tick: int | None = None
         self.player_dead = False
@@ -221,6 +229,7 @@ class CombatGoal:
         if (frame.zone, frame.room) == source and frame.enemies:
             return True
         return any(identity[1:3] == source and identity not in self.dead
+                   and identity not in self.withdrawn
                    for identity in self.seen)
 
     def exit_ready(self, frame: Frame) -> bool:
@@ -262,8 +271,15 @@ class CombatGoal:
             identity = self.identity(frame, actor)
             if identity in self.seen and actor.hp == 0:
                 self.dead.add(identity)
+            elif actor.hp > 0:
+                self.withdrawn.pop(identity, None)
+        if frame.event_phase != 0 and scene["available"]:
+            present = {self.identity(frame, actor) for actor in frame.actors}
+            for identity in self.seen - self.dead - present:
+                if identity[:3] == (frame.episode, frame.zone, frame.room):
+                    self.withdrawn.setdefault(identity, frame.tick)
         settled = (
-            self.seen and self.seen <= self.dead and not frame.enemies
+            self.seen and self.seen <= self.dead | set(self.withdrawn) and not frame.enemies
             and frame.player is not None and frame.player.hp > 0
             and frame.control == 1 and frame.raw["transition"] == 0
             and frame.event_phase == 0 and frame.raw["field_rendering_enabled"]
@@ -367,8 +383,10 @@ def _play_game(store: RunStore, run_id: str,
     setup_control_tick = options.setup_control_tick()
     if options.setup_presses and setup.get("room_events") != "production":
         raise ValueError("Source setup movement requires unchanged production-room events")
-    if setup.get("ashley_stats"):
+    if setup.get("ashley_stats") and not options.allow_stat_overrides:
         raise ValueError("Managed acceptance runs do not allow stat overrides")
+    if "story_progress" in setup and not options.allow_story_progress:
+        raise ValueError("Declared story progress requires an explicit owner-approved assist")
     if setup.get("room_events") == "production" and setup.get("enemies"):
         raise ValueError("Production-room runs cannot replace original actors")
     command = [str(game / options.executable.name),
@@ -410,7 +428,11 @@ def _play_game(store: RunStore, run_id: str,
         "model_control_from_tick": setup_control_tick,
     })
     controller = CombatController()
-    goal = CombatGoal(options.door_case, options.door_route, options.clear_enemies_first)
+    goal = CombatGoal(options.door_case, options.door_route, options.clear_enemies_first,
+                      options.claim_room_chests,
+                      scene_handoff=options.scene_expectation is not None)
+    # A native scene expectation is judged after the route reaches its room, so control stays open.
+    continue_after_route = options.scene_expectation is not None and bool(options.door_route)
     scene_navigation = (SceneTileGoal(options.scene_target_tile, setup["zone"], setup["room"],
                                      scene_expectation["events"][0])
                         if options.scene_target_tile is not None and scene_expectation is not None else None)
@@ -606,7 +628,7 @@ def _play_game(store: RunStore, run_id: str,
                             and (latest.enemies or reward_menu_ready(latest) or exit_ready or scene_pending)
                             and not controller.preparing
                             and needs_plan and now - last_request >= 0.5
-                            and goal.accepted_tick is None):
+                            and (goal.accepted_tick is None or continue_after_route)):
                         observed = latest
                         position = player.position
                         nearest = min(latest.enemies, key=lambda actor: sum(
@@ -642,12 +664,19 @@ def _play_game(store: RunStore, run_id: str,
                                     and not leg.blocked_reason and not leg.waiting_for_gate
                                     and not goal.combat_pending(latest)
                                     and (latest.zone, latest.room) == (leg.source_zone, leg.source_room)):
+                                target = leg.navigation_target
                                 context["physical_navigation_objective"] = {
                                     "id": leg.identity, "contract": leg.contract,
                                     "claim": "Original controller traversal; living foes are not declared defeated",
                                     "phase": "post_combat_exit" if exit_ready else "physical_traversal",
                                     "next_action": "Navigate to and interact with this observed original door.",
                                 }
+                                if target is not leg:
+                                    context["physical_navigation_objective"].update({
+                                        "chest": target.result(),
+                                        "next_action": ("Navigate to the observed original chest, open it and "
+                                                        "claim its contents before using this door."),
+                                    })
                             elif leg.waiting_for_gate:
                                 context["native_gate_prerequisite"] = {
                                     "id": leg.identity, "contract": leg.contract,
@@ -679,14 +708,15 @@ def _play_game(store: RunStore, run_id: str,
                             and goal.door is not None and not goal.combat_pending(latest)
                             and goal.accepted_tick is None):
                         leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
-                        navigation_context = leg.navigation_request(latest, avoid_hostiles=bool(latest.enemies))
+                        target = leg.navigation_target
+                        navigation_context = target.navigation_request(latest, avoid_hostiles=bool(latest.enemies))
                         if navigation_context is not None:
-                            navigation_owner = leg.navigator
+                            navigation_owner = target.navigator
                             navigation_context["retrieved_navigation_evidence"] = store.navigation_experience(
-                                latest.zone, latest.room, leg.identity, leg.navigator.geometry_sha256,
+                                latest.zone, latest.room, target.identity, target.navigator.geometry_sha256,
                             )
                             audit.event("model.navigation_request", {
-                                "tick": latest.tick, "door": leg.identity,
+                                "tick": latest.tick, "door": target.identity,
                                 "context": navigation_context,
                             })
                             navigation_future = planner.submit(
@@ -710,7 +740,8 @@ def _play_game(store: RunStore, run_id: str,
                     )
                     action = controller.step(
                         latest,
-                        allow_strategy=(not driver.held and goal.accepted_tick is None
+                        allow_strategy=(not driver.held
+                                        and (goal.accepted_tick is None or continue_after_route)
                                         and latest.tick >= setup_control_tick
                                         and not (pursuing and pursuit.path and field_navigation_ready(latest))
                                         and not scene_movement),
@@ -727,7 +758,8 @@ def _play_game(store: RunStore, run_id: str,
                         pursuing and pursuit_actor is not None
                         and latest.raw.get("navigation", {}).get("available")
                         and field_navigation_ready(latest)
-                        and not driver.held and goal.accepted_tick is None
+                        and not driver.held
+                        and (goal.accepted_tick is None or continue_after_route)
                         and (pursuit.path or needs_geometry)
                     )
                     if moving_to_hostile and pursuit_actor is not None and not (action and action.reaction):
@@ -770,7 +802,8 @@ def _play_game(store: RunStore, run_id: str,
                         action = goal.door.step(latest)
                     if goal.door is not None and (
                         goal.door.blocked_reason or
-                        (isinstance(goal.door, PhysicalRoute) and goal.accepted_tick is not None)
+                        (isinstance(goal.door, PhysicalRoute) and goal.accepted_tick is not None
+                         and not continue_after_route)
                     ):
                         audit.event("physical_route.finished", {
                             "tick": latest.tick, "blocked_reason": goal.door.blocked_reason,
@@ -791,13 +824,17 @@ def _play_game(store: RunStore, run_id: str,
                         })
                     if goal.door is not None:
                         leg = goal.door.active_leg if isinstance(goal.door, PhysicalRoute) else goal.door
-                        for observation in leg.navigator.observations():
-                            audit.event("navigation.outcome", {
-                                "zone": latest.zone, "room": latest.room, "door": leg.identity,
-                                "geometry_sha256": leg.navigator.geometry_sha256,
-                                "image_sha256": hashes, "observation": observation,
-                                "claim": "Measured local movement, not proof of whole-route passability",
-                            })
+                        owners = [(leg.identity, leg.navigator)]
+                        if leg.chest is not None:
+                            owners.append((leg.chest.identity, leg.chest.navigator))
+                        for identity, navigator in owners:
+                            for observation in navigator.observations():
+                                audit.event("navigation.outcome", {
+                                    "zone": latest.zone, "room": latest.room, "door": identity,
+                                    "geometry_sha256": navigator.geometry_sha256,
+                                    "image_sha256": hashes, "observation": observation,
+                                    "claim": "Measured local movement, not proof of whole-route passability",
+                                })
                     if scene_navigation is not None:
                         for observation in scene_navigation.navigator.observations():
                             audit.event("navigation.outcome", {
@@ -898,6 +935,10 @@ def _play_game(store: RunStore, run_id: str,
         "passed": passed, "native_completed": complete,
         "goal_tick": goal.accepted_tick, "seen_hostiles": len(goal.seen),
         "zero_hp_hostiles": len(goal.dead), "player_dead": goal.player_dead,
+        "scripted_withdrawals": [
+            {"zone": key[1], "room": key[2], "slot": key[3], "spawn_index": key[4], "tick": tick}
+            for key, tick in sorted(goal.withdrawn.items())
+        ],
         "forced_skip": goal.forced_skip, "accepted_reactions": accepted,
         "verified_reaction_effects": verified_effects,
         "reaction_effect_outcomes": controller.reactions.effect_results,
@@ -920,6 +961,8 @@ def _play_game(store: RunStore, run_id: str,
         ],
         "scenario_sha256": hashlib.sha256(scenario_bytes).hexdigest(),
         "ashley_profile": setup.get("ashley_profile"),
+        "ashley_stats": setup.get("ashley_stats") or None,
+        "story_progress": setup.get("story_progress"),
         "source_setup_presses": options.setup_presses,
         "native_scene_expectation": scene_expectation,
         "scene_navigation": scene_navigation.result() if scene_navigation is not None else None,
@@ -961,6 +1004,9 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
         "scene_expectation": (str(options.scene_expectation.resolve())
                               if options.scene_expectation else None),
         "model_control_from_tick": setup_control_tick,
+        "allow_stat_overrides": options.allow_stat_overrides,
+        "allow_story_progress": options.allow_story_progress,
+        "claim_room_chests": options.claim_room_chests,
         "retention": asdict(retention),
         "model": runtime_manifest()["model"],
     })
@@ -1002,7 +1048,10 @@ def play(paths: PlayerPaths, options: PlayOptions, retention: Retention = Retent
                     if status == "passed":
                         if result is None:
                             raise RuntimeError("Passed run lost its verified result")
-                        for context in result["experience_contexts"]:
+                        # Assisted runs must not teach the model unassisted matchups.
+                        assisted = result.get("ashley_stats") or result.get("story_progress") is not None
+                        contexts = [] if assisted else result["experience_contexts"]
+                        for context in contexts:
                             store.remember(run_id, context["model"], context["weapon"], {
                                 "run_id": run_id, "goal": options.goal,
                                 "coverage": ("physical_controller_route" if options.door_route else

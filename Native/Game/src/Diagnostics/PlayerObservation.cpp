@@ -41,6 +41,8 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/Controller.h"
+#include "Items/Loot.h"
+#include "Items/TreasureChests.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
@@ -231,6 +233,9 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   constexpr unsigned kCombatControl = 2, kAbilityUnlockPhase = 14,
                      kLootPhase = 12;
   constexpr unsigned kEventControl = 3;
+  // Field_BeginChestInteraction / Field_OpenChestContents (BATTLE.PRG
+  // func_80074050 / func_800743E0) open the same loot menu at mode 9, flow 3.
+  constexpr unsigned kChestControl = 9, kChestContentsPhase = 3;
   constexpr unsigned kSubmenuStateMask = 0xF;
   constexpr int kMainMenuEntries = 10;
   result.event_owned =
@@ -238,7 +243,9 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
   if ((state.control_mode != kMenuControl && !result.event_owned &&
        !(state.control_mode == kCombatControl &&
          (state.action_phase == kAbilityUnlockPhase ||
-          state.action_phase == kLootPhase))) ||
+          state.action_phase == kLootPhase)) &&
+       !(state.control_mode == kChestControl &&
+         state.action_phase == kChestContentsPhase)) ||
       Menu_Framework_menuItems == nullptr) {
     return result;
   }
@@ -419,6 +426,39 @@ void InspectRoomDoors(PlayerObservationState& state) {
          door.hasEntryStep != 0});
     state.door_flag_values.push_back(static_cast<unsigned char>(
         State_ScriptFlag(static_cast<std::int16_t>(door.requiredFlagId))));
+  }
+}
+
+// Mirrors Items_RoomTreasureChests (func_8008E370) and the opened-flag test in
+// Field_FindFacingUnlootedChest (func_80074950): openedFlag + 0x3C0.
+void InspectRoomChests(PlayerObservationState& state) {
+  int count = 0;
+  const auto* chests = Items_RoomTreasureChests(&count);
+  if (chests == nullptr) return;
+  if (Field_roomData.header.containersLength % sizeof(Items_TreasureChest) != 0) {
+    throw std::runtime_error(
+        "observed room container storage has an incomplete record");
+  }
+  constexpr int kChestOpenedFlagBase = 0x3C0;
+  for (int index = 0; index < count; ++index) {
+    const auto& chest = chests[index];
+    EncounterChestState snapshot;
+    snapshot.index = index;
+    snapshot.tile_x = chest.tileX;
+    snapshot.tile_z = chest.tileZ;
+    snapshot.layer = chest.layer;
+    snapshot.facing = chest.facing;
+    snapshot.lock_level = chest.lockLevel;
+    snapshot.opened_flag = chest.openedFlag + kChestOpenedFlagBase;
+    snapshot.opened = State_ScriptFlag(static_cast<std::int16_t>(
+                          snapshot.opened_flag)) != 0;
+    for (std::size_t slot = 0; slot < std::size(chest.loot.misc); ++slot) {
+      const auto& item = chest.loot.misc[slot];
+      if (item.itemId != 0 && item.count != 0) {
+        snapshot.misc.push_back({static_cast<int>(slot), item.itemId, item.count});
+      }
+    }
+    state.chests.push_back(std::move(snapshot));
   }
 }
 
@@ -634,6 +674,27 @@ nlohmann::json EncodePlayerDoors(const PlayerObservationState& state) {
   return doors;
 }
 
+nlohmann::json EncodePlayerChests(const PlayerObservationState& state) {
+  auto chests = nlohmann::json::array();
+  for (const auto& chest : state.chests) {
+    auto misc = nlohmann::json::array();
+    for (const auto& item : chest.misc) {
+      misc.push_back(
+          {{"slot", item.slot}, {"id", item.id}, {"count", item.count}});
+    }
+    chests.push_back({{"index", chest.index},
+                      {"tile_x", chest.tile_x},
+                      {"tile_z", chest.tile_z},
+                      {"layer", chest.layer},
+                      {"facing", chest.facing},
+                      {"lock_level", chest.lock_level},
+                      {"opened_flag", chest.opened_flag},
+                      {"opened", chest.opened},
+                      {"misc", std::move(misc)}});
+  }
+  return chests;
+}
+
 nlohmann::json EncodePlayerOptions(const PlayerObservationState& state) {
   auto options = nlohmann::json::array();
   for (const auto& option : state.action_options) {
@@ -701,6 +762,7 @@ PlayerObservationState InspectPlayerObservation(const EncounterState& base) {
   InspectItemOptions(state);
   state.menu = InspectPlayerMenu(base);
   InspectRoomDoors(state);
+  InspectRoomChests(state);
   state.navigation = InspectNavigation();
   state.target_selection_step = Battle_targetSelectionStep;
   for (const auto& actor : base.actors) {
@@ -753,6 +815,7 @@ void AppendPlayerObservations(nlohmann::json& data,
   data["action_options"] = EncodePlayerOptions(state);
   data["menu"] = EncodePlayerMenu(state.menu);
   data["doors"] = EncodePlayerDoors(state);
+  data["chests"] = EncodePlayerChests(state);
   data["navigation"] = EncodeNavigation(state.navigation);
   auto items = nlohmann::json::array();
   for (const auto& item : state.item_options) {

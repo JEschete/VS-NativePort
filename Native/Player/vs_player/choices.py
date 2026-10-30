@@ -15,6 +15,7 @@ def event_menu_ready(frame: Frame) -> bool:
 def loot_menu_ready(frame: Frame) -> bool:
     menu = frame.raw["menu"]
     return (((frame.control == 2 and frame.action_phase == 12)
+             or (frame.control == 9 and frame.action_phase == 3)
              or (event_menu_ready(frame) and frame.action_phase == 4))
             and menu["available"] and not menu["loading"] and menu["selected_menu"] == 12
             and menu["loot_input_ready"] and menu["loot_count"] > 0)
@@ -170,6 +171,23 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
             if action in chains and action not in mapped:
                 add("equip_chain", 0, action, mapped.index(0) + 1)
                 return choices | healing_choices
+    banish_mask = frame.raw["status_masks"][29]
+    dangerous_targets = [
+        enemy for enemy in target_enemies
+        if enemy.spell_action_ids and any(
+            action in damage_spell_ids for action in enemy.spell_action_ids
+        )
+    ]
+    for enemy in dangerous_targets:
+        if (enemy.statuses | enemy.status_immunities) & banish_mask:
+            continue
+        for option in learned_spells:
+            if (option["id"] == 105 and affordable_spell(option)
+                    and not unsuccessful(option["id"], enemy.slot)):
+                add("cast", enemy.slot, option["id"])
+    if choices:
+        return choices | healing_choices
+
     silence_mask = frame.raw["status_masks"][12]
     wants_silence = 35 in chains and any(
         not (enemy.statuses | enemy.status_immunities) & silence_mask
@@ -200,6 +218,14 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                     or unsuccessful(option["id"], enemy.slot)):
                 continue
             add("cast", enemy.slot, option["id"])
+
+    for enemy in target_enemies:
+        if (enemy.statuses | enemy.status_immunities) & banish_mask:
+            continue
+        for option in learned_spells:
+            if (option["id"] == 105 and affordable_spell(option)
+                    and not unsuccessful(option["id"], enemy.slot)):
+                add("cast", enemy.slot, option["id"])
 
     for option in learned_spells:
         details = semantics.get(str(option["id"]), {})
@@ -238,7 +264,9 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
         role = details.get("role")
         if role in ("heal", "buff", "cure"):
             continue
-        if role == "damage" and not affordable_spell(option):
+        if role in ("damage", "banish") and not affordable_spell(option):
+            continue
+        if role == "banish":
             continue
         for enemy in frame.enemies:
             if not unsuccessful(option["id"], enemy.slot):

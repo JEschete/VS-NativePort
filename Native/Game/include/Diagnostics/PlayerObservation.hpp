@@ -126,6 +126,19 @@ struct EncounterNavigationState {
   std::vector<std::array<int, 3>> samples;
 };
 
+// Original MPD section 13 container (Items_TreasureChest) plus its opened flag.
+struct EncounterChestState {
+  int index = 0;
+  int tile_x = 0;
+  int tile_z = 0;
+  int layer = 0;
+  int facing = 0;
+  int lock_level = 0;
+  int opened_flag = 0;
+  bool opened = false;
+  std::vector<EncounterItemState> misc;
+};
+
 struct PlayerObservationState : EncounterState {
   std::vector<PlayerActorObservation> player_actors;
   int target_selection_step = 0;
@@ -135,6 +148,7 @@ struct PlayerObservationState : EncounterState {
   std::array<std::uint32_t, 32> status_masks{};
   std::vector<EncounterDoor> doors;
   std::vector<int> door_flag_values;
+  std::vector<EncounterChestState> chests;
   EncounterNavigationState navigation;
   std::vector<EncounterItemOption> item_options;
 };

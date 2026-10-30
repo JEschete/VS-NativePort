@@ -42,6 +42,12 @@ def main() -> int:
                      help="Original Lab scene expectation JSON; native playback/control completes the case")
     run.add_argument("--scene-target-tile", nargs=2, type=int, metavar=("X", "Z"),
                      help="Use observed terrain to cross one original local-scene trigger tile")
+    run.add_argument("--allow-stat-overrides", action="store_true",
+                     help="Accept declared Lab ashley_stats as a recorded owner-approved assist")
+    run.add_argument("--allow-story-progress", action="store_true",
+                     help="Accept a declared Lab story_progress (flag 0x82) as a recorded owner-approved assist")
+    run.add_argument("--claim-room-chests", action="store_true",
+                     help="Open and claim the source room's unlocked original chest before the door route")
     doors = run.add_mutually_exclusive_group()
     doors.add_argument("--door-case", default="", help="Physically traverse original zNNN-rNNN-dNNN record")
     doors.add_argument("--door-route", nargs="+", help="Traverse these original records in one continuous game")
@@ -83,6 +89,9 @@ def main() -> int:
             scene_expectation=args.scene_expectation,
             scene_target_tile=(args.scene_target_tile[0], args.scene_target_tile[1])
             if args.scene_target_tile is not None else None,
+            allow_stat_overrides=args.allow_stat_overrides,
+            allow_story_progress=args.allow_story_progress,
+            claim_room_chests=args.claim_room_chests,
         ))
         print(json.dumps(result, indent=2))
         return 0 if result["passed"] else 2

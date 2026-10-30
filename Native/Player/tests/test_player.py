@@ -20,7 +20,7 @@ from vs_player.controller import (
     CombatController, StaleDecision, direction_buttons, input_lease_permitted,
     strategy_planning_ready,
 )
-from vs_player.choices import available_choices, urgent_recovery_needed
+from vs_player.choices import available_choices, loot_menu_ready, urgent_recovery_needed
 from vs_player.doors import PhysicalDoor, PhysicalRoute
 from vs_player.menus import MenuTransaction
 from vs_player.model import Decision, LocalModel, ModelResponseError, NavigationDecision
@@ -1121,6 +1121,107 @@ class ControllerTests(unittest.TestCase):
                                        "observed native limb", 10, 0),
                               Frame.decode(record), observed)
 
+    def test_area_spell_confirms_native_area_then_selects_observed_target(self):
+        record = sample_record(tick=1, active=False)
+        record["data"].update(control_mode=1, action_phase=0, action=0)
+        record["data"]["action_options"] = [
+            {"id": 105, "name": "Banish", "family": "warlock", "cost": 25,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3),
+                            "Use Banish on the observed hostile.", 1, 0, 105)
+        controller = CombatController()
+        controller.accept(decision, frame, frame)
+        controller.transaction.selected = True
+
+        record["tick"] = 10
+        record["data"].update(control_mode=2, action_phase=2, action=105,
+                              area_center=[256, 0, 64],
+                              target_previews=[
+                                  {"actor": 2, "limb": -1, "position": [640, 0, 64]},
+                              ])
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+
+        record["tick"] = 20
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+
+        record["tick"] = 30
+        record["data"].update(action_phase=3)
+        record["data"]["target_page"].update(
+            first=0, visible=1, selected=0, selection_step=19,
+        )
+        self.assertEqual(controller.step(Frame.decode(record)).buttons, frozenset({"Circle"}))
+
+    def test_stat_override_scenarios_require_the_explicit_assist_flag(self):
+        from vs_player import runner
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scenario = root / "scenario.json"
+            scenario.write_text(json.dumps({
+                "ashley_profile": "all-abilities", "room_events": "production",
+                "enemies": [], "ashley_stats": {"max_hp": 999},
+            }), encoding="utf-8")
+            store = mock.Mock()
+            store.directory.return_value = root / "run"
+            for allowed, error in ((False, "do not allow stat overrides"),
+                                   (True, "")):
+                options = PlayOptions(root / "VS.CombatLab.exe", root / "missing-data",
+                                      scenario, allow_stat_overrides=allowed)
+                with mock.patch.object(runner, "freeze_game", return_value={}):
+                    if allowed:
+                        with self.assertRaises(FileNotFoundError):
+                            runner._play_game(store, "0" * 32, options, None, None, None, None)
+                    else:
+                        with self.assertRaisesRegex(ValueError, error):
+                            runner._play_game(store, "0" * 32, options, None, None, None, None)
+
+    def test_story_progress_scenarios_require_the_explicit_assist_flag(self):
+        from vs_player import runner
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            scenario = root / "scenario.json"
+            scenario.write_text(json.dumps({
+                "ashley_profile": "all-abilities", "room_events": "production",
+                "enemies": [], "story_progress": 0,
+            }), encoding="utf-8")
+            store = mock.Mock()
+            store.directory.return_value = root / "run"
+            for allowed in (False, True):
+                options = PlayOptions(root / "VS.CombatLab.exe", root / "missing-data",
+                                      scenario, allow_story_progress=allowed)
+                with mock.patch.object(runner, "freeze_game", return_value={}):
+                    if allowed:
+                        with self.assertRaises(FileNotFoundError):
+                            runner._play_game(store, "0" * 32, options, None, None, None, None)
+                    else:
+                        with self.assertRaisesRegex(ValueError, "owner-approved assist"):
+                            runner._play_game(store, "0" * 32, options, None, None, None, None)
+
+    def test_area_spell_confirmation_retries_are_bounded(self):
+        record = sample_record(tick=1, active=False)
+        record["data"].update(control_mode=1, action_phase=0, action=0)
+        record["data"]["action_options"] = [
+            {"id": 105, "name": "Banish", "family": "warlock", "cost": 25,
+             "restrictions": 0, "menu_order": 0}
+        ]
+        frame = Frame.decode(record)
+        decision = Decision("cast", 2, -1, (1, 2, 3), (1, 2, 3),
+                            "Use Banish on the observed hostile.", 1, 0, 105)
+        controller = CombatController()
+        controller.accept(decision, frame, frame)
+        controller.transaction.selected = True
+        record["data"].update(control_mode=2, action_phase=2, action=105,
+                              area_center=[256, 0, 64])
+        for attempt in range(controller.max_area_target_confirmations):
+            record["tick"] = 10 + attempt * 8
+            action = controller.step(Frame.decode(record))
+            self.assertEqual(action.buttons, frozenset({"Circle"}))
+
+        record["tick"] += 61
+        with self.assertRaisesRegex(TimeoutError, "did not leave phase 2"):
+            controller.step(Frame.decode(record))
+
     def test_native_loot_claim_requires_the_actual_ready_loot_screen(self):
         record = sample_record(active=False)
         record["data"].update(control_mode=2, action_phase=12)
@@ -1442,10 +1543,9 @@ class ControllerTests(unittest.TestCase):
                 self.assertNotIn((0, 76), {(row["target_slot"], row["action_id"])
                                           for row in choices.values()})
 
-    def test_damage_spell_choices_require_verified_effect_affordable_mp_and_no_failure(self):
+    def test_hp_damage_spell_choices_require_verified_effect_affordable_mp_and_no_failure(self):
         record = sample_record(active=False)
         record["data"]["actors"][0]["mp"] = 50
-        record["data"]["actors"][1]["spell_action_ids"] = [130]
         record["data"]["action_options"] = [
             {"id": action, "family": "warlock", "cost": cost, "restrictions": 0}
             for action, cost in ((97, 25), (104, 22), (105, 25), (106, 36), (130, 38))
@@ -1454,13 +1554,13 @@ class ControllerTests(unittest.TestCase):
         choices = available_choices(Frame.decode(record), {})
         casts = {(row["target_slot"], row["action_id"]) for row in choices.values()
                  if row["intent"] == "cast"}
-        self.assertEqual(casts, {(2, 97), (2, 106), (2, 130)})
+        self.assertEqual(casts, {(2, 97), (2, 105), (2, 106), (2, 130)})
 
         record["data"]["actors"][0]["mp"] = 35
         choices = available_choices(Frame.decode(record), {})
         casts = {(row["target_slot"], row["action_id"]) for row in choices.values()
                  if row["intent"] == "cast"}
-        self.assertEqual(casts, {(2, 97)})
+        self.assertEqual(casts, {(2, 97), (2, 105)})
 
         record["data"]["actors"][0]["mp"] = 50
         choices = available_choices(Frame.decode(record), {
@@ -1470,7 +1570,64 @@ class ControllerTests(unittest.TestCase):
         })
         casts = {(row["target_slot"], row["action_id"]) for row in choices.values()
                  if row["intent"] == "cast"}
-        self.assertEqual(casts, {(2, 106), (2, 130)})
+        self.assertEqual(casts, {(2, 105), (2, 106), (2, 130)})
+
+    def test_banish_choice_respects_status_eligibility_and_mp(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][0]["mp"] = 50
+        record["data"]["action_options"] = [
+            {"id": 105, "family": "warlock", "cost": 25, "restrictions": 0}
+        ]
+        choices = available_choices(Frame.decode(record), {})
+        self.assertIn((2, 105), {(row["target_slot"], row["action_id"])
+                                 for row in choices.values() if row["intent"] == "cast"})
+
+        blocked = copy.deepcopy(record)
+        blocked["data"]["actors"][1]["status_immunities"] = blocked["data"]["status_masks"][29]
+        choices = available_choices(Frame.decode(blocked), {})
+        self.assertNotIn((2, 105), {(row["target_slot"], row["action_id"])
+                                   for row in choices.values() if row["intent"] == "cast"})
+
+        record["data"]["actors"][0]["mp"] = 24
+        choices = available_choices(Frame.decode(record), {})
+        self.assertNotIn((2, 105), {(row["target_slot"], row["action_id"])
+                                   for row in choices.values() if row["intent"] == "cast"})
+
+        record["data"]["actors"][0]["mp"] = 50
+        choices = available_choices(Frame.decode(record), {
+            "controller_feedback": [
+                {"action_id": 105, "target": 2, "status": "no_effect"}
+            ]
+        })
+        self.assertNotIn((2, 105), {(row["target_slot"], row["action_id"])
+                                   for row in choices.values() if row["intent"] == "cast"})
+
+    def test_banish_is_prioritized_against_a_dangerous_caster_then_falls_back(self):
+        record = sample_record(active=False)
+        record["data"]["actors"][0]["mp"] = 50
+        record["data"]["actors"][1]["spell_action_ids"] = [130]
+        record["data"]["action_options"] = [
+            {"id": 97, "family": "warlock", "cost": 25, "restrictions": 0},
+            {"id": 105, "family": "warlock", "cost": 25, "restrictions": 0},
+        ]
+
+        choices = available_choices(Frame.decode(record), {})
+        self.assertEqual(
+            {(row["target_slot"], row["action_id"]) for row in choices.values()
+             if row["intent"] == "cast"},
+            {(2, 105)},
+        )
+
+        choices = available_choices(Frame.decode(record), {
+            "controller_feedback": [
+                {"action_id": 105, "target": 2, "status": "no_effect"}
+            ]
+        })
+        self.assertEqual(
+            {(row["target_slot"], row["action_id"]) for row in choices.values()
+             if row["intent"] == "cast"},
+            {(2, 97)},
+        )
 
     def test_combat_choices_prioritize_damage_spell_caster_over_nearer_caster(self):
         record = sample_record(active=False)
@@ -2075,6 +2232,63 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(route.checkpoints[0]["acceptance_tick"], 123)
         self.assertIsNone(route.step(Frame.decode(record)))
 
+    def scene_handoff_route(self, scene_handoff: bool, loading: bool = True):
+        route = PhysicalRoute(("z009-r006-d000",), scene_handoff=scene_handoff)
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 1, "tile_z": 0, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        route.observe(Frame.decode(record))
+        route.step(Frame.decode(record))
+        if loading:
+            record["tick"] = 2
+            record["data"]["ready"] = False
+            route.observe(Frame.decode(record))
+        record["tick"] = 3
+        record["data"].update(ready=True, room=7, control_mode=3)
+        record["data"]["scene"]["event"]["phase"] = 4
+        route.observe(Frame.decode(record))
+        return route
+
+    def test_final_leg_accepts_an_original_event_taking_control_on_arrival(self):
+        route = self.scene_handoff_route(True)
+        self.assertEqual(route.accepted_tick, 3)
+        self.assertEqual(route.legs[0].result()["scene_handoff_tick"], 3)
+
+    def test_event_takeover_is_not_acceptance_without_a_scene_expectation(self):
+        route = self.scene_handoff_route(False)
+        self.assertIsNone(route.accepted_tick)
+        self.assertIsNone(route.legs[0].result()["scene_handoff_tick"])
+
+    def test_event_takeover_without_an_observed_room_load_is_not_arrival(self):
+        route = self.scene_handoff_route(True, loading=False)
+        self.assertIsNone(route.accepted_tick)
+
+    def test_hostile_removed_by_an_original_event_does_not_hold_combat_open(self):
+        goal = CombatGoal(clear_enemies_first=True)
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        goal.observe(Frame.decode(record))
+        self.assertTrue(goal.combat_pending(Frame.decode(record), (9, 6)))
+        record["tick"] = 50
+        record["data"]["actors"] = [actor for actor in record["data"]["actors"]
+                                    if actor["slot"] == 0]
+        goal.observe(Frame.decode(record))
+        self.assertTrue(goal.combat_pending(Frame.decode(record), (9, 6)))
+        record["tick"] = 51
+        record["data"].update(control_mode=3)
+        record["data"]["scene"]["event"]["phase"] = 4
+        goal.observe(Frame.decode(record))
+        self.assertFalse(goal.combat_pending(Frame.decode(record), (9, 6)))
+        self.assertEqual(set(goal.withdrawn.values()), {51})
+        record["tick"] = 52
+        record["data"]["actors"] = sample_record(active=False)["data"]["actors"]
+        goal.observe(Frame.decode(record))
+        self.assertTrue(goal.combat_pending(Frame.decode(record), (9, 6)))
+
     def test_disconnected_route_is_rejected_before_an_interaction(self):
         route = PhysicalRoute(("z009-r006-d000", "z009-r008-d000"))
         record = sample_record(active=False)
@@ -2086,6 +2300,91 @@ class RunnerTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "authored destination"):
             route.observe(Frame.decode(record))
         self.assertEqual(route.legs[0].open_ticks, [])
+
+    def chest_route_record(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=1, action_phase=0)
+        record["data"]["doors"] = [
+            {"index": 0, "destination_zone": 9, "destination_room": 7,
+             "tile_x": 1, "tile_z": 0, "layer": 0, "required_value": 0,
+             "current_flag_value": 0}
+        ]
+        record["data"]["chests"] = [
+            {"index": 0, "tile_x": 2, "tile_z": 2, "layer": 0, "facing": 0, "lock_level": 0,
+             "opened_flag": 6, "opened": False,
+             "misc": [{"slot": 2, "id": 472, "count": 1}]},
+        ]
+        return record
+
+    def test_route_claims_the_source_chest_from_its_authored_facing_before_the_door(self):
+        route = PhysicalRoute(("z009-r006-d000",), claim_source_chest=True)
+        record = self.chest_route_record()
+        route.observe(Frame.decode(record))
+        chest = route.legs[0].chest
+        self.assertEqual(chest.approach_tile(), (2, 3))
+        self.assertIs(route.legs[0].navigation_target, chest)
+        walk = route.step(Frame.decode(record))
+        self.assertIn("chest approach tile", walk.reason)
+        record["tick"] = 20
+        record["data"]["actors"][0]["position"] = [2 * 128 + 64, 0, 3 * 128 + 64]
+        turn = route.step(Frame.decode(record))
+        self.assertIn("turn toward", turn.reason)
+        record["tick"] = 40
+        record["data"]["navigation"] = {"available": False, "facing_tile": [2, 2, 0]}
+        self.assertEqual(route.step(Frame.decode(record)).buttons, frozenset({"Cross"}))
+        record["tick"] = 60
+        record["data"]["control_mode"] = 9
+        route.observe(Frame.decode(record))
+        self.assertIsNone(route.step(Frame.decode(record)))
+        record["tick"] = 80
+        record["data"]["control_mode"] = 1
+        record["data"]["chests"][0]["opened"] = True
+        route.observe(Frame.decode(record))
+        self.assertEqual(chest.opened_tick, 80)
+        self.assertTrue(chest.interaction_seen)
+        self.assertIs(route.legs[0].navigation_target, route.legs[0])
+        record["tick"] = 100
+        self.assertIn("door", route.step(Frame.decode(record)).reason)
+        self.assertEqual(route.result()["cases"][0]["chest"]["opened_tick"], 80)
+
+    def test_unopened_chest_blocks_the_route_after_three_facing_presses(self):
+        route = PhysicalRoute(("z009-r006-d000",), claim_source_chest=True)
+        record = self.chest_route_record()
+        record["data"]["actors"][0]["position"] = [2 * 128 + 64, 0, 3 * 128 + 64]
+        record["data"]["navigation"] = {"available": False, "facing_tile": [2, 2, 0]}
+        presses = 0
+        for tick in range(1, 400, 10):
+            record["tick"] = tick
+            route.observe(Frame.decode(record))
+            action = route.step(Frame.decode(record))
+            presses += action is not None and "Cross" in action.buttons
+        self.assertEqual(presses, 3)
+        self.assertIn("three facing Cross", route.blocked_reason)
+
+    def test_route_skips_locked_opened_or_empty_chests(self):
+        for change in ({"lock_level": 1}, {"opened": True}, {"misc": []}):
+            route = PhysicalRoute(("z009-r006-d000",), claim_source_chest=True)
+            record = self.chest_route_record()
+            record["data"]["chests"][0].update(change)
+            route.observe(Frame.decode(record))
+            self.assertIsNotNone(route.legs[0].chest.skipped)
+            self.assertIs(route.legs[0].navigation_target, route.legs[0])
+            self.assertIn("door", route.step(Frame.decode(record)).reason)
+
+    def test_chest_contents_screen_is_native_loot(self):
+        record = sample_record(active=False)
+        record["data"].update(control_mode=9, action_phase=3)
+        record["data"]["menu"].update(available=True, loading=False, selected_menu=12,
+                                      loot_input_ready=True, loot_count=1)
+        self.assertTrue(loot_menu_ready(Frame.decode(record)))
+        record["data"]["action_phase"] = 2
+        self.assertFalse(loot_menu_ready(Frame.decode(record)))
+
+    def test_room_chest_claims_require_a_door_route(self):
+        options = PlayOptions(Path("VS.CombatLab.exe"), Path("data"), Path("lab.json"),
+                              claim_room_chests=True)
+        with self.assertRaisesRegex(ValueError, "Room-chest claims"):
+            options.validate_scene_expectation()
 
     def test_physical_door_needs_a_live_loading_cycle_and_unbroken_quiet_gate(self):
         route = PhysicalDoor("z009-r006-d000")

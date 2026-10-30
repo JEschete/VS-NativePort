@@ -58,6 +58,8 @@ def direction_buttons(dx: int, dz: int, yaw: int) -> frozenset[str]:
 
 
 class CombatController:
+    max_area_target_confirmations = 8
+
     def __init__(self) -> None:
         self.reactions = ReactionController()
         self.decision: Decision | None = None
@@ -68,6 +70,8 @@ class CombatController:
         self.transaction: MenuTransaction | None = None
         self.rejected_positions: dict[tuple[int, int, int, int, int], tuple[int, int, int]] = {}
         self.decision_scene: tuple[int, int, int] | None = None
+        self.area_target_confirmations = 0
+        self.area_target_confirmation_tick: int | None = None
 
     @property
     def preparing(self) -> bool:
@@ -136,6 +140,8 @@ class CombatController:
         self.reactions.priorities(decision.chain_priority, decision.defense_priority)
         if transaction is not None:
             self.transaction = transaction
+        self.area_target_confirmations = 0
+        self.area_target_confirmation_tick = None
 
     def _action(self, frame: Frame, buttons: tuple[str, ...] | frozenset[str],
                 duration: int, reason: str, reaction: bool = False) -> InputAction:
@@ -234,6 +240,28 @@ class CombatController:
             self.feedback.append({"kind": "target_changed", "tick": frame.tick})
             self.decision = None
             return None
+        if (frame.control == 2 and frame.source_actor == 0
+                and frame.action_phase == 2 and decision.intent == "cast"):
+            if self.transaction is None or not self.transaction.selected:
+                raise StaleDecision("Native area targeting began without a selected spell transaction")
+            if frame.raw.get("action") != decision.action_id:
+                raise StaleDecision("Native area targeting changed to a different action")
+            center = frame.raw.get("area_center")
+            if (not isinstance(center, list) or len(center) < 3
+                    or not all(isinstance(value, int) and not isinstance(value, bool)
+                               for value in center[:3])):
+                raise ValueError("Native area targeting lacks a valid observed center")
+            if self.area_target_confirmations >= self.max_area_target_confirmations:
+                if (self.area_target_confirmation_tick is not None
+                        and frame.tick - self.area_target_confirmation_tick > 60):
+                    raise TimeoutError("Native area targeting did not leave phase 2 after confirmation")
+                return None
+            self.area_target_confirmations += 1
+            self.area_target_confirmation_tick = frame.tick
+            # BATTLE.PRG func_800C4794: Cross cancels the default sphere mode; Circle enters
+            # positioning mode, then a second Circle confirms the area.
+            return self._action(frame, ("Circle",), 2,
+                                "advance or confirm native area targeting")
         if frame.control == 2 and frame.source_actor == 0 and frame.action_phase in (1, 3):
             if decision.intent == "wait":
                 return None
