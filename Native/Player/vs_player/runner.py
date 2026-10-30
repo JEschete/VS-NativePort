@@ -131,6 +131,8 @@ class PlayOptions:
     scene_examine_quadrant: int | None = None
     # Type-8 triggers such as MAP203 local2 test several defeats in one evaluation (Triggers.c cases 7/16).
     simultaneous_defeat: tuple[int, ...] = ()
+    # Type-8 rows such as MAP003 local1 need one hostile defeated while an earlier-listed slot lives.
+    defeat_order: tuple[int, ...] = ()
     allow_stat_overrides: bool = False
     allow_story_progress: bool = False
     claim_room_chests: bool = False
@@ -158,6 +160,12 @@ class PlayOptions:
                 or any(type(slot) is not int or not 1 <= slot <= 31 for slot in self.simultaneous_defeat)):
             raise ValueError("A simultaneous defeat requires a local-scene goal and at least two distinct "
                              "hostile slots")
+        if self.defeat_order and (
+                self.scene_expectation is None or self.simultaneous_defeat
+                or len(set(self.defeat_order)) != len(self.defeat_order)
+                or any(type(slot) is not int or not 1 <= slot <= 31 for slot in self.defeat_order)):
+            raise ValueError("A defeat order requires a local-scene goal, distinct hostile slots and no "
+                             "simultaneous defeat")
         if self.scene_expectation is not None and (
                 self.executable.name != "VS.CombatLab.exe" or self.scenario is None
                 or self.new_game or self.save_file is not None):
@@ -450,6 +458,7 @@ def _play_game(store: RunStore, run_id: str,
         "scene_target_tile": options.scene_target_tile,
         "scene_examine_quadrant": options.scene_examine_quadrant,
         "simultaneous_defeat": options.simultaneous_defeat,
+        "defeat_order": options.defeat_order,
         "model_control_from_tick": setup_control_tick,
     })
     controller = CombatController()
@@ -706,6 +715,12 @@ def _play_game(store: RunStore, run_id: str,
                                 "slots": list(options.simultaneous_defeat),
                                 "claim": ("The original type-8 trigger needs these hostiles defeated in one "
                                           "native evaluation; one area spell must defeat all of them."),
+                            }
+                        if options.defeat_order:
+                            context["defeat_order_objective"] = {
+                                "slots": list(options.defeat_order),
+                                "claim": ("Earlier-listed type-8 rows claim other defeat orders; these "
+                                          "hostiles must fall one at a time in this order."),
                             }
                         if scene_navigation is not None:
                             context["source_scene_navigation_objective"] = {

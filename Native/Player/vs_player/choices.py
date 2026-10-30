@@ -89,6 +89,24 @@ def available_choices(frame: Frame, context: dict) -> dict[str, dict]:
                       and option["restrictions"] == 0]
     combined = context.get("simultaneous_defeat_objective")
     living = {enemy.slot for enemy in frame.enemies}
+    order = context.get("defeat_order_objective")
+    first = next((slot for slot in order["slots"] if slot in living), None) if order else None
+    if first is not None:
+        # Earlier type-8 rows claim the other defeat orders, so only the next listed slot may be harmed.
+        ordinary = available_choices(frame, {key: value for key, value in context.items()
+                                             if key != "defeat_order_objective"})
+        area_ids = set(knowledge["area_damage_spells"]["action_ids"])
+        kept = {key: row for key, row in ordinary.items()
+                if row["target_slot"] in (-1, 0, first) and row["action_id"] not in area_ids}
+        if not any(row["target_slot"] == first for row in kept.values()):
+            if native_target_menu_ready(frame):
+                for target in frame.raw["target_previews"]:
+                    if target["actor"] == first:
+                        add("attack", first, limb=target["limb"])
+            else:
+                add("attack", first)
+            add("approach", first)
+        return kept | choices
     if combined and set(combined["slots"]) <= living and living - set(combined["slots"]):
         # Other hostiles fall first through ordinary single-target choices; their own defeat
         # triggers set the flags that keep earlier combined triggers from claiming this set.

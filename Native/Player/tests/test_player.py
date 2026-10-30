@@ -1324,6 +1324,27 @@ class ControllerTests(unittest.TestCase):
         self.assertIn(("cast", 2, 97), {(row["intent"], row["target_slot"], row["action_id"])
                                         for row in choices.values()})
 
+    def test_defeat_order_objective_harms_only_the_next_listed_slot(self):
+        record = sample_record(tick=500, active=False)
+        record["data"]["actors"][0]["mp"] = 40
+        second = copy.deepcopy(record["data"]["actors"][1])
+        second.update(slot=3, position=[192, 0, 64])
+        record["data"]["actors"].append(second)
+        record["data"]["action_options"] = [
+            {"id": 106, "name": "Explosion", "family": "warlock", "cost": 30,
+             "restrictions": 0, "menu_order": 0},
+            {"id": 97, "name": "Solid Shock", "family": "warlock", "cost": 5,
+             "restrictions": 0, "menu_order": 1},
+        ]
+        context = {"defeat_order_objective": {"slots": [3, 2]}}
+        rows = list(available_choices(Frame.decode(record), context).values())
+        self.assertTrue(any(row["target_slot"] == 3 for row in rows))
+        self.assertTrue(all(row["target_slot"] in (-1, 0, 3) and row["action_id"] != 106
+                            for row in rows))
+        record["data"]["actors"].pop()
+        rows = list(available_choices(Frame.decode(record), context).values())
+        self.assertTrue(any(row["target_slot"] == 2 for row in rows))
+
     def test_stat_override_scenarios_require_the_explicit_assist_flag(self):
         from vs_player import runner
         with tempfile.TemporaryDirectory() as directory:

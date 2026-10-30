@@ -52,6 +52,9 @@ def main() -> int:
     run.add_argument("--simultaneous-defeat", nargs="+", type=int, metavar="SLOT",
                      help="Original type-8 trigger needs these hostile slots defeated in one evaluation: "
                           "only cast observed area damage spells whose native preview contains all of them")
+    run.add_argument("--defeat-order", nargs="+", type=int, metavar="SLOT",
+                     help="Original type-8 rows claim other defeat orders: harm only the first living "
+                          "listed hostile slot, one at a time, without area spells")
     run.add_argument("--allow-stat-overrides", action="store_true",
                      help="Accept declared Lab ashley_stats as a recorded owner-approved assist")
     run.add_argument("--allow-story-progress", action="store_true",
@@ -120,6 +123,7 @@ def main() -> int:
             if args.scene_target_tile is not None else None,
             scene_examine_quadrant=args.scene_examine_quadrant,
             simultaneous_defeat=tuple(args.simultaneous_defeat or ()),
+            defeat_order=tuple(args.defeat_order or ()),
             allow_stat_overrides=args.allow_stat_overrides,
             allow_story_progress=args.allow_story_progress,
             claim_room_chests=args.claim_room_chests,
