@@ -188,8 +188,7 @@ struct UpdateFixture {
       fs::remove_all(root, error);
     } catch (const std::exception& failure) {
       // A leftover temporary folder does not change any test's result.
-      std::fprintf(stderr, "update fixture left %s: %s\n",
-                   root.string().c_str(), failure.what());
+      std::fprintf(stderr, "update fixture left files: %s\n", failure.what());
     }
   }
   static std::vector<std::string> Required() {

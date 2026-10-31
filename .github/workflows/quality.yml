@@ -42,6 +42,16 @@ jobs:
         run: python -m unittest discover -s tools\ledger -p test_gates.py -v
       - name: Check ownership, promotion, quality, behavior and retirement gates
         run: python tools\ledger\gates.py --check
+      - name: Verify modernization, hazard and regression tool controls
+        run: |
+          python -m unittest discover -s tools\ledger -p test_modernization.py -v
+          python -m unittest discover -s tools\ledger -p test_hazards.py -v
+          python -m unittest discover -s tools\test -p test_regression.py -v
+      - name: Check the modernization ledger, hazard ledger and regression baseline
+        run: |
+          python tools\ledger\modernization.py --check
+          python tools\ledger\hazards.py --check
+          python tools\test\regression.py static
       - name: Reject new source-quality findings
         run: .\quality-native.cmd
       - name: Preserve reports

@@ -755,5 +755,24 @@ def slice_record(**values: str) -> dict[str, str]:
     }
 
 
+class DefinitionParserTests(unittest.TestCase):
+    @staticmethod
+    def names(text: str) -> list[str]:
+        return [item.qualified for item in gates.find_definitions(text)]
+
+    def test_a_c_style_tagged_return_type_is_a_function(self) -> None:
+        for head in ("enum Signal Poll(enum Group type)", "struct Thing* Find(int id)", "union Word Read(void)"):
+            self.assertEqual(self.names(f"{head} {{ return 0; }}\n"), [head.split("(")[0].split()[-1].lstrip("*")], head)
+
+    def test_a_type_declaration_is_still_not_a_function(self) -> None:
+        for text in (
+            "struct Thing { int value; };\n",
+            "enum class Kind : int { kOne };\n",
+            "struct alignas(8) Thing { int value; };\n",
+            "struct Thing : Base<int(*)()> { int value; };\n",
+        ):
+            self.assertEqual(self.names(text), [], text)
+
+
 if __name__ == "__main__":
     unittest.main()

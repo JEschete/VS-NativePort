@@ -1920,6 +1920,12 @@
     <None Include="..\..\port\copy_to_native.py">
       <Filter>tools\port</Filter>
     </None>
+    <None Include="..\..\port\cpp_adapt.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\cpp_adaptations.json">
+      <Filter>tools\port</Filter>
+    </None>
     <None Include="..\..\port\data_inventory.py">
       <Filter>tools\port</Filter>
     </None>
@@ -1951,6 +1957,9 @@
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\ref_index.py">
+      <Filter>tools\port</Filter>
+    </None>
+    <None Include="..\..\port\relaxed_sources.txt">
       <Filter>tools\port</Filter>
     </None>
     <None Include="..\..\port\test_assembly_gap_audit.py">

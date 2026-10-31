@@ -9,6 +9,17 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Modernization tracking on `imp/01-ma04-gates`: [MODERNIZATION.md](MODERNIZATION.md)
+  tracks all 3,760 port targets, and [PLATFORM_HAZARDS.md](PLATFORM_HAZARDS.md) logs
+  sites that may rely on what PS1 hardware tolerated, including the capacity limits
+  that block inventory expansion. CI fails on a new hazard site until it is fixed or
+  acknowledged. `tools\test\regression.py check` must pass locally before merging,
+  because CI does not build. Measured: tests or replays execute 1,600 functions;
+  2,160 need characterizing first. Replays step the frame counter, and two runs match
+  on every field, as do Debug and Release, once script addresses become offsets. Copied
+  code now keeps null and overflow checks in Release. Limits: replays cover only two
+  scenarios, carrying has none, and coverage shows a function ran, not that its result
+  was checked.
 - #252 carrying a box: finished steps, falls and reactions store `animationSet`
   0xFF to reinitialize the next clip, and the carry walk's morph events set
   `poseOverrideActive`. The bound lookup added for #226 compared that marker with

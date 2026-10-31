@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Shared settings for every project under Native\ (plan §0: x64, C++23, ClangCL). -->
+<!-- Shared settings for every project under Native\ (plan Â§0: x64, C++23, ClangCL). -->
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <VSRepositoryRoot>$(MSBuildThisFileDirectory)</VSRepositoryRoot>
@@ -11,11 +11,12 @@
     <VcpkgTriplet>x64-windows</VcpkgTriplet>
     <!-- Copied decomp code (plan Step 4): sees every project's src\ and include\ plus the Legacy SDK layer, and keeps
          its leniency as warnings. /J keeps plain char unsigned. -fno-finite-loops and -fno-strict-return keep the C
-         meaning of wait loops and of falling off a non-void function, which C++ would treat as undefined. The
+         meaning of wait loops and of falling off a non-void function, which C++ would treat as undefined.
+         -fno-delete-null-pointer-checks and -fwrapv keep null and overflow checks the optimizer would remove. The
          pointer/integer casting warnings stay on and are counted (PORTING_WATCHLIST.md section 2). -->
     <VSNative>$(VSRepositoryRoot)Native\</VSNative>
     <VSCopiedCIncludes>$(VSNative)Engine;$(VSNative)Content;$(VSNative)Engine\include;$(VSNative)Engine\src;$(VSNative)Content\include;$(VSNative)Content\src;$(VSNative)Game\include;$(VSNative)Game\src</VSCopiedCIncludes>
-    <VSCopiedCOptions>/J /clang:-Wno-error=int-conversion /clang:-Wno-error=incompatible-pointer-types /clang:-Wno-error=incompatible-function-pointer-types /clang:-Wno-error=implicit-function-declaration /clang:-Wno-error=implicit-int /clang:-Wno-error=return-type /clang:-Wno-error=int-to-pointer-cast /clang:-Wno-c2x-extensions /clang:-Wno-unused /clang:-Wno-parentheses /clang:-Wno-missing-braces /clang:-Wno-sign-compare /clang:-Wno-pointer-sign /clang:-Wno-switch /clang:-Wno-unknown-pragmas /clang:-Wno-microsoft-anon-tag /clang:-fms-extensions /clang:-fno-finite-loops /clang:-fno-strict-return /clang:-Wno-register /clang:-Wno-writable-strings</VSCopiedCOptions>
+    <VSCopiedCOptions>/J /clang:-Wno-error=int-conversion /clang:-Wno-error=incompatible-pointer-types /clang:-Wno-error=incompatible-function-pointer-types /clang:-Wno-error=implicit-function-declaration /clang:-Wno-error=implicit-int /clang:-Wno-error=return-type /clang:-Wno-error=int-to-pointer-cast /clang:-Wno-c2x-extensions /clang:-Wno-unused /clang:-Wno-parentheses /clang:-Wno-missing-braces /clang:-Wno-sign-compare /clang:-Wno-pointer-sign /clang:-Wno-switch /clang:-Wno-unknown-pragmas /clang:-Wno-microsoft-anon-tag /clang:-fms-extensions /clang:-fno-finite-loops /clang:-fno-strict-return /clang:-fno-delete-null-pointer-checks /clang:-fwrapv /clang:-Wno-register /clang:-Wno-writable-strings</VSCopiedCOptions>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
@@ -32,5 +33,20 @@
       <!-- libwebm's headers include each other relative to include\webm (mkvparser/mkvparser.h). -->
       <AdditionalIncludeDirectories>$(VcpkgInstalledDir)$(VcpkgTriplet)\include\webm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+  </ItemDefinitionGroup>
+  <!-- tools\test\regression.py coverage: one instrumented build, kept apart from Debug and Release, that also reports the extra
+       pointer-width and initialization warnings tools\ledger\hazards.py records. Warnings stay warnings so all of them are seen. -->
+  <PropertyGroup Condition="'$(VSCoverage)'=='true'">
+    <OutDir>$(VSRepositoryRoot)build\Coverage\</OutDir>
+    <IntDir>$(VSRepositoryRoot)build\Coverage\obj\$(MSBuildProjectName)\</IntDir>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(VSCoverage)'=='true'">
+    <ClCompile>
+      <AdditionalOptions>-fprofile-instr-generate -fcoverage-mapping -Wshorten-64-to-32 -Wconditional-uninitialized -Wno-error %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(LLVMInstallDir)\lib\clang\$(LLVMToolsVersion)\lib\windows;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>clang_rt.profile-x86_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
 </Project>

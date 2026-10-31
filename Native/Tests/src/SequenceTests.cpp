@@ -270,6 +270,65 @@ int TestSharedSequenceRetirementControl(int scenario) {
   return passed;
 }
 
+static void ArrangeUnwindScenario(MorphAnimationFixture* fixture, int scenario,
+                                  unsigned* wide_sequence) {
+  Actors_SeqAnimationBank* bank =
+      reinterpret_cast<Actors_SeqAnimationBank*>(fixture->sequence);
+  if (scenario == 10) {
+    memcpy(wide_sequence, fixture->sequence, sizeof fixture->sequence);
+    Actors_SeqAnimationBank* wide =
+        reinterpret_cast<Actors_SeqAnimationBank*>(wide_sequence);
+    (reinterpret_cast<u_char*>(wide))[wide->animationMap + 2] = 200;
+    wide->headers[static_cast<size_t>(5) * 200] = 16;
+    wide->headers[static_cast<size_t>(5) * 200 + 2] = 1;
+    fixture->actor.animationHeader = (intptr_t)wide;
+    fixture->actor.animationSet = 200;
+    fixture->actor.sharedSequences[2] = wide;
+  }
+  if (scenario == 2 || (scenario >= 6 && scenario <= 10)) {
+    fixture->actor.commonSequence = nullptr;
+  }
+  // Finished steps, falls and reactions leave this "reinitialize on next play"
+  // sentinel; it says nothing about which clip's pose is still bound (#252).
+  if (scenario >= 11 && scenario <= 13) fixture->actor.animationSet = 0xFF;
+  if (scenario == 14) fixture->actor.animationSet = 5;
+  if (scenario == 3) {
+    (reinterpret_cast<u_char*>(bank))[bank->animationMap + 1] = 0xFF;
+  }
+  if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
+  if (scenario == 4) fixture->actor.poseOverrideActive = 0;
+}
+
+static int UnwindScenarioPassed(const MorphAnimationFixture& fixture,
+                                int scenario, int result,
+                                const u_char* expected_script,
+                                int unchanged_frame) {
+  if (scenario == 13) {
+    return result != -1 && fixture.actor.animationSet == 0;
+  }
+  const SVECTOR* vertex =
+      VS_ONDISC(fixture.actor.instance.model, vertexSection, SVECTOR*);
+  const int successful = scenario < 2 || scenario == 8 || scenario == 9 ||
+                         scenario == 10 || scenario == 11 || scenario == 12;
+  int passed = vertex->vx == (successful ? 10 : 11);
+  if (successful) {
+    passed &= result == 0 && fixture.actor.blendPose.nextEventFrame == 510;
+    if (scenario == 8 || scenario == 9 || scenario == 10) {
+      passed &= Actors_sharedSequenceBankIndex == 1;
+    }
+    if (scenario == 10) {
+      passed &= (u_char)Actors_lastResolvedSequenceIndex == 200;
+    }
+  } else {
+    passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
+              fixture.actor.poseOverrideActive == (scenario != 4) &&
+              fixture.actor.blendPose.nextEventFrame == unchanged_frame &&
+              fixture.actor.blendPose.eventScript == expected_script &&
+              fixture.actor.pose.frame == 9;
+  }
+  return passed;
+}
+
 int TestAnimationEventUnwind(int scenario) {
   enum { kMorphOpcode = 36, kSlot = 3, kUnchangedFrame = 77 };
   MorphAnimationFixture fixture;
@@ -299,31 +358,7 @@ int TestAnimationEventUnwind(int scenario) {
   fixture.actor.blendPose.nextEventFrame = kUnchangedFrame;
   fixture.actor.pose.frame = 9;
   u_char* expected_script = fixture.actor.blendPose.eventScript;
-  Actors_SeqAnimationBank* bank =
-      reinterpret_cast<Actors_SeqAnimationBank*>(fixture.sequence);
-  if (scenario == 10) {
-    memcpy(wide_sequence, fixture.sequence, sizeof fixture.sequence);
-    Actors_SeqAnimationBank* wide =
-        reinterpret_cast<Actors_SeqAnimationBank*>(wide_sequence);
-    (reinterpret_cast<u_char*>(wide))[wide->animationMap + 2] = 200;
-    wide->headers[static_cast<size_t>(5) * 200] = 16;
-    wide->headers[static_cast<size_t>(5) * 200 + 2] = 1;
-    fixture.actor.animationHeader = (intptr_t)wide;
-    fixture.actor.animationSet = 200;
-    fixture.actor.sharedSequences[2] = wide;
-  }
-  if (scenario == 2 || (scenario >= 6 && scenario <= 10)) {
-    fixture.actor.commonSequence = nullptr;
-  }
-  // Finished steps, falls and reactions leave this "reinitialize on next play"
-  // sentinel; it says nothing about which clip's pose is still bound (#252).
-  if (scenario >= 11 && scenario <= 13) fixture.actor.animationSet = 0xFF;
-  if (scenario == 14) fixture.actor.animationSet = 5;
-  if (scenario == 3) {
-    (reinterpret_cast<u_char*>(bank))[bank->animationMap + 1] = 0xFF;
-  }
-  if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
-  if (scenario == 4) fixture.actor.poseOverrideActive = 0;
+  ArrangeUnwindScenario(&fixture, scenario, wide_sequence);
   int result = 0;
   if (scenario == 6 || scenario == 13) {
     result = Actors_PlayActorAnimation(kSlot, 1, 0, 0);
@@ -332,28 +367,8 @@ int TestAnimationEventUnwind(int scenario) {
   } else {
     result = Actors_RestartActorAnimationEvents(&fixture.actor);
   }
-  const SVECTOR* vertex =
-      VS_ONDISC(fixture.actor.instance.model, vertexSection, SVECTOR*);
-  const int successful = scenario < 2 || scenario == 8 || scenario == 9 ||
-                         scenario == 10 || scenario == 11 || scenario == 12;
-  int passed = scenario == 13 || vertex->vx == (successful ? 10 : 11);
-  if (scenario == 13) {
-    passed = result != -1 && fixture.actor.animationSet == 0;
-  } else if (successful) {
-    passed &= result == 0 && fixture.actor.blendPose.nextEventFrame == 510;
-    if (scenario == 8 || scenario == 9 || scenario == 10) {
-      passed &= Actors_sharedSequenceBankIndex == 1;
-    }
-    if (scenario == 10) {
-      passed &= (u_char)Actors_lastResolvedSequenceIndex == 200;
-    }
-  } else {
-    passed &= result == (scenario == 4 || scenario == 7 ? 0 : -1) &&
-              fixture.actor.poseOverrideActive == (scenario != 4) &&
-              fixture.actor.blendPose.nextEventFrame == kUnchangedFrame &&
-              fixture.actor.blendPose.eventScript == expected_script &&
-              fixture.actor.pose.frame == 9;
-  }
+  const int passed = UnwindScenarioPassed(fixture, scenario, result,
+                                          expected_script, kUnchangedFrame);
   Actors_actorRecords[kSlot] = saved_actor;
   Actors_sharedSequenceBankIndex = saved_bank;
   Actors_animationEventLengths[kMorphOpcode] = saved_length;

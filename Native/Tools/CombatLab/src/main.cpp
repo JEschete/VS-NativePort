@@ -22,6 +22,7 @@
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
 #include "Core/FrameClock.hpp"
+#include "Core/FrameTiming.h"
 #include "Core/Log.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
@@ -76,6 +77,7 @@ struct Options {
   std::uint64_t door_limit = 0;
   std::vector<ScriptPress> presses;
   std::optional<Render::EffectPathTraceRange> effect_paths;
+  int frame_tick_step = 0;
 };
 
 struct PhaseTiming {
@@ -166,6 +168,13 @@ void ParseValue(Options& options, std::string_view argument,
     const auto presses = DecodePresses(value);
     options.presses.insert(options.presses.end(), presses.begin(),
                            presses.end());
+  } else if (argument == "--fixed-frame-ticks") {
+    const auto step = ParseTick(value);
+    constexpr std::uint64_t kFrameUnits = 262;
+    if (step < 1 || step > kFrameUnits) {
+      throw std::runtime_error("--fixed-frame-ticks must be 1-262");
+    }
+    options.frame_tick_step = static_cast<int>(step);
   } else if (argument == "--trace-effect-paths") {
     const auto range = Render::EffectPathTraceRange::Parse(value);
     if (!range) throw std::runtime_error(range.error());
@@ -1121,6 +1130,19 @@ class LiveSession {
   }
 };
 
+void ConfigureSession(const Options& options) {
+  if (!options.save_directory.empty()) {
+    Game::Save::ConfigureDirectory(options.save_directory);
+  } else {
+    const auto root = Platform::UserDataDir();
+    if (!root) throw std::runtime_error(root.error());
+    Game::Save::ConfigureDirectory(*root / "combat-lab-saves");
+  }
+  if (options.frame_tick_step != 0) {
+    Core_StepFrameCounterTicks(options.frame_tick_step);
+  }
+}
+
 int Run(int argc, char** argv) {
   const bool player_observations =
       std::any_of(argv + 1, argv + argc, [](const char* argument) {
@@ -1156,13 +1178,7 @@ int Run(int argc, char** argv) {
     Platform::App app;
     Render::Device gpu;
     InitializeWindow(app, gpu, trace);
-    if (!options.save_directory.empty()) {
-      Game::Save::ConfigureDirectory(options.save_directory);
-    } else {
-      const auto root = Platform::UserDataDir();
-      if (!root) throw std::runtime_error(root.error());
-      Game::Save::ConfigureDirectory(*root / "combat-lab-saves");
-    }
+    ConfigureSession(options);
     Input::InputSystem input;
     input.SetDevicesEnabled(options.devices);
     Canvas canvas;

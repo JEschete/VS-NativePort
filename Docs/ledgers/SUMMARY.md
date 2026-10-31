@@ -102,6 +102,11 @@ A record is a reference, not a fresh run.
 their #18 evidence is prose plus an uncommitted local artifact, retained in each row's note.
 The owner accepted these removals on 2026-10-31.
 
+### Per-function work and platform hazards
+
+[MODERNIZATION.md](../MODERNIZATION.md) tracks each port target through promotion and its regression cover.
+[PLATFORM_HAZARDS.md](../PLATFORM_HAZARDS.md) logs each site that may rely on something PS1 hardware tolerated.
+
 ### Slices and retirement
 
 [GATE_SLICES.csv](GATE_SLICES.csv) records migrated slices. The first is F01829,

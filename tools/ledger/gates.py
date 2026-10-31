@@ -210,7 +210,9 @@ def parse_definition(head: str, body: str, scopes: list[tuple[list[str], bool]])
     opening = cleaned.find("(")
     if opening < 0 or "=" in cleaned[:opening]:
         return None
-    if re.match(r"\s*(?:template\s*<[^()]*>\s*)?(?:struct|class|union|enum)\b[^()]*$", cleaned[:opening]):
+    # One name after the keyword declares a type. A second is a function with a C-style return type: `enum X Poll(`.
+    if re.match(r"\s*(?:template\s*<[^()]*>\s*)?(?:struct|class|union|enum)(?:\s+(?:struct|class))?\s*[\w:]*\s*(?::[^()]*)?$",
+                cleaned[:opening]):
         return None
     name = QUALIFIED_NAME.search(cleaned[:opening])
     if not name or name.group(1) in {"if", "for", "while", "switch", "return"}:

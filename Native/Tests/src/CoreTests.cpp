@@ -355,6 +355,22 @@ TEST_CASE("Frame work timing preserves source units and halfword wrap",
   CHECK(Core::FrameCounterTicks(Nanoseconds{maximum}) == expected);
 }
 
+TEST_CASE("A stepped frame counter replaces the clock until released",
+          "[core][clock][frame-budget]") {
+  constexpr int kStep = 7;
+  Core_StepFrameCounterTicks(kStep);
+  Core_ResetFrameTimingBaseline();
+  std::this_thread::sleep_for(std::chrono::milliseconds{2});
+  CHECK(Core_ElapsedFrameCounterTicks() == kStep);
+  CHECK(Core_ElapsedFrameCounterTicks() == kStep * 2);
+  Core_ResetFrameTimingBaseline();
+  CHECK(Core_ElapsedFrameCounterTicks() == kStep);
+  Core_StepFrameCounterTicks(0);
+  Core_ResetFrameTimingBaseline();
+  std::this_thread::sleep_for(std::chrono::milliseconds{2});
+  CHECK(Core_ElapsedFrameCounterTicks() >= 1);
+}
+
 TEST_CASE("Frame work baseline resets at actual logical frame boundaries",
           "[core][clock][frame-budget]") {
   Core_ResetFrameTimingBaseline();

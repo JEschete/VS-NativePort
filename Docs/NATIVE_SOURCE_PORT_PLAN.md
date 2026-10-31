@@ -699,7 +699,8 @@ it covers everything. A `.cpp` suffix, renamed function, forwarding wrapper or d
 any remaining consumer of the old symbol blocks it, including one in generated code. Compiling as C++ is not promotion:
 generated code keeps C linkage and untyped signatures, so a function with generated callers cannot reach `cpp=x` until
 those callers migrate; see
-[the ledger summary](ledgers/SUMMARY.md) for the current inventory.
+[the ledger summary](ledgers/SUMMARY.md) for the current inventory, [MODERNIZATION.md](MODERNIZATION.md) for the
+per-function work and regression rules, and [PLATFORM_HAZARDS.md](PLATFORM_HAZARDS.md) for what PS1 hardware tolerated.
 
 ---
 
