@@ -3,6 +3,7 @@
 
 #include <stdlib.h>
 
+#include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -90,7 +91,11 @@ void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
                                      &Battle_actionState->rangeOrigin);
       break;
     case kReactionBlock:
-      Battle_PlayDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
+      // Gimmick actors have no actor record. func_8009DDF4 has no NULL check:
+      // on PS1 it reads low RAM, on x64 it faults (#251).
+      if (Actors_actorRecords[actor_id] != NULL) {
+        Battle_PlayDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
+      }
       break;
     case kReactionRecover:
       if (actor_id == 0) Actors_PlayActorActionPose(0, NULL, kRecoveryPose);

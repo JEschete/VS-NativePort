@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-30. This is a short entry point, not another work tracker.
+Updated 2026-10-31. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -9,6 +9,16 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #251 indestructible block crash: gimmick actors have no `Actors_actorRecords`
+  entry, and F00818 reads through that NULL record on an impact4 hit. The owned
+  `Battle_ApplyActionTargetEffects` now skips the defense pose when the record is
+  NULL. The live preset is zone9/room11, production room events, Ashley1,2, with
+  `--press 104:Circle,140:Circle,175:Circle,300:Circle,335:Circle,370:Circle`.
+  Before the fix, Debug run 1793448318598283-0 faults at tick222. After it, Debug
+  1793448357564932-0 and Release 1793448623687406-0 resolve both block strikes
+  (222, 382) and return control. Crate control 1793448405042444-0 still destroys
+  box6 and drops box7. Single-target spells and blocks in other rooms were not
+  driven live.
 - Publication checkpoint: first-use CUE/save/FFmpeg fields are now all blank;
   only user-selected paths in that user's local configuration are restored.
   Detection is explicit. Packager rejects personal configuration/logs and any
