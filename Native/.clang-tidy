@@ -18,13 +18,13 @@ CheckOptions:
   bugprone-easily-swappable-parameters.MinimumLength: 3
   bugprone-easily-swappable-parameters.ModelImplicitConversions: false
   readability-identifier-naming.NamespaceCase: lower_case
-  readability-identifier-naming.NamespaceIgnoredRegexp: '^(VS|Core|Content|Platform|Render|Input|Audio|Movie|Save|Boot|Battle|Game|Legacy)$'
+  readability-identifier-naming.NamespaceIgnoredRegexp: '^(VS|Core|Content|Platform|Render|Input|Audio|Movie|Save|Boot|Battle|Game|Legacy|Launcher)$'
   readability-identifier-naming.ClassCase: CamelCase
   readability-identifier-naming.StructCase: CamelCase
-  readability-identifier-naming.StructIgnoredRegexp: '^(Actors|Audio|Battle|Content|Core|Effects|Event|Field|Input|Items|Menu|Render|Save|State|Title)_[A-Za-z0-9_]+$'
+  readability-identifier-naming.StructIgnoredRegexp: '^(Actors|Audio|Battle|Content|Core|Effects|Ending|Event|Field|Input|Items|Menu|Render|Save|State|Title)_[A-Za-z0-9_]+$'
   readability-identifier-naming.EnumCase: CamelCase
   readability-identifier-naming.FunctionCase: CamelCase
-  readability-identifier-naming.FunctionIgnoredRegexp: '^(Actors|Audio|Battle|Boot|Content|Core|Effects|Event|Field|Input|Items|Menu|Movie|Platform|Render|Save|State|Title)_[A-Za-z0-9_]+$'
+  readability-identifier-naming.FunctionIgnoredRegexp: '^((Actors|Audio|Battle|Boot|Content|Core|Diagnostics|Effects|Ending|Event|Field|Input|Items|Menu|Movie|Platform|Render|Save|State|Title)_[A-Za-z0-9_]+|wmain)$'
   readability-identifier-naming.MethodCase: CamelCase
   readability-identifier-naming.VariableCase: lower_case
   readability-identifier-naming.ParameterCase: lower_case

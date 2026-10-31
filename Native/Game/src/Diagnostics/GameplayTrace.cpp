@@ -8,6 +8,7 @@
 #include <stdexcept>
 #include <string>
 #include <utility>
+#include <vector>
 
 #include "Diagnostics/PlayerObservation.hpp"
 
@@ -263,28 +264,34 @@ nlohmann::json EncodeActor(const EncounterActorState& actor) {
           {"position", {actor.x, actor.y, actor.z}}};
 }
 
-void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
-                          const EncounterState& state,
-                          const nlohmann::json& scene) {
+namespace {
+nlohmann::json EncodeInventory(const std::vector<EncounterItemState>& items) {
+  auto result = nlohmann::json::array();
+  for (const auto& item : items) {
+    result.push_back(
+        {{"slot", item.slot}, {"id", item.id}, {"count", item.count}});
+  }
+  return result;
+}
+
+nlohmann::json EncodeActors(const EncounterState& state) {
   auto actors = nlohmann::json::array();
   for (const auto& actor : state.actors) {
     actors.push_back(EncodeActor(actor));
   }
+  return actors;
+}
+
+nlohmann::json EncodePendingLoot(const EncounterState& state) {
   auto pending_loot = nlohmann::json::array();
   for (const auto& loot : state.pending_loot) {
-    auto dropped_items = nlohmann::json::array();
-    for (const auto& item : loot.items) {
-      dropped_items.push_back(
-          {{"slot", item.slot}, {"id", item.id}, {"count", item.count}});
-    }
-    pending_loot.push_back(
-        {{"source_actor", loot.source_actor}, {"items", dropped_items}});
+    pending_loot.push_back({{"source_actor", loot.source_actor},
+                            {"items", EncodeInventory(loot.items)}});
   }
-  auto items = nlohmann::json::array();
-  for (const auto& item : state.items) {
-    items.push_back(
-        {{"slot", item.slot}, {"id", item.id}, {"count", item.count}});
-  }
+  return pending_loot;
+}
+
+nlohmann::json EncodeFloorTriggers(const EncounterState& state) {
   auto floor_triggers = nlohmann::json::array();
   for (const auto& trigger : state.floor_triggers) {
     floor_triggers.push_back({{"kind", trigger.kind},
@@ -293,12 +300,20 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                               {"activation", trigger.activation},
                               {"marker_fade", trigger.marker_fade}});
   }
+  return floor_triggers;
+}
+
+nlohmann::json EncodeTargetPreviews(const EncounterState& state) {
   auto target_previews = nlohmann::json::array();
   for (const auto& target : state.target_previews) {
     target_previews.push_back({{"actor", target.actor},
                                {"limb", target.limb},
                                {"position", target.position}});
   }
+  return target_previews;
+}
+
+nlohmann::json EncodeAreaVolumes(const EncounterState& state) {
   auto area_volumes = nlohmann::json::array();
   for (const auto& volume : state.area_volumes) {
     area_volumes.push_back({{"kind", volume.kind},
@@ -307,16 +322,26 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
                             {"angle", volume.angle},
                             {"position", volume.position}});
   }
+  return area_volumes;
+}
+
+nlohmann::json EncodeInput(const Input::PadState& input) {
+  return {
+      {"held", input.held},
+      {"pressed", input.pressed},
+      {"released", input.released},
+      {"repeat", input.repeat},
+      {"analog", input.analog},
+      {"sticks",
+       {input.sticks.lx, input.sticks.ly, input.sticks.rx, input.sticks.ry}}};
+}
+}  // namespace
+
+void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
+                          const EncounterState& state,
+                          const nlohmann::json& scene) {
   nlohmann::json data{
-      {"input",
-       {{"held", input.held},
-        {"pressed", input.pressed},
-        {"released", input.released},
-        {"repeat", input.repeat},
-        {"analog", input.analog},
-        {"sticks",
-         {input.sticks.lx, input.sticks.ly, input.sticks.rx,
-          input.sticks.ry}}}},
+      {"input", EncodeInput(input)},
       {"ready", state.ready},
       {"zone", state.zone},
       {"room", state.room},
@@ -335,8 +360,8 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
       {"target_count", state.target_count},
       {"area_center", state.area_center},
       {"area_positioning", state.area_positioning},
-      {"area_volumes", area_volumes},
-      {"target_previews", target_previews},
+      {"area_volumes", EncodeAreaVolumes(state)},
+      {"target_previews", EncodeTargetPreviews(state)},
       {"target_page",
        {{"total", state.target_page.total},
         {"page", state.target_page.page},
@@ -345,11 +370,11 @@ void GameplayTrace::Frame(std::uint64_t tick, const Input::PadState& input,
         {"visible", state.target_page.visible},
         {"selected", state.target_page.selected}}},
       {"rewards_available", state.rewards_available},
-      {"pending_loot", pending_loot},
-      {"items", items},
+      {"pending_loot", EncodePendingLoot(state)},
+      {"items", EncodeInventory(state.items)},
       {"learned_actions", state.learned_actions},
-      {"floor_triggers", floor_triggers},
-      {"actors", actors}};
+      {"floor_triggers", EncodeFloorTriggers(state)},
+      {"actors", EncodeActors(state)}};
   if (state.roulette) {
     const auto& reel = *state.roulette;
     data["roulette"] = {{"entry_phase", reel.entry_phase},

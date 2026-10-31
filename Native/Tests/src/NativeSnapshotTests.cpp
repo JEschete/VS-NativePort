@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <format>
 #include <limits>
+#include <stdexcept>
 #include <string>
 #include <string_view>
 
@@ -307,16 +308,15 @@ TEST_CASE("Native save corruption and unsupported formats fail explicitly",
   }
 }
 
-TEST_CASE("Clear saves have an explicit restart contract without schema3 drift",
-          "[native-snapshot][save-clear]") {
-  auto document = SampleDocument();
-  const auto checkpoint = Save::Encode(document);
-  REQUIRE(checkpoint);
-  auto normal = Json::parse(*checkpoint);
-  CHECK(normal.at("version") == 3);
-  CHECK_FALSE(normal.contains("new_game_entry"));
-  document.new_game_entry.emplace();
-  auto& entry = *document.new_game_entry;
+namespace {
+// The value of an optional a test has established must be present.
+template <class Optional>
+auto& Engaged(Optional& optional) {
+  if (!optional.has_value()) throw std::runtime_error("expected a value");
+  return *optional;
+}
+
+void FillClearEntry(auto& entry) {
   entry.destinationZoneId = 1;
   entry.tileLocation.tileX = 31;
   entry.tileLocation.floorLayer = 7;
@@ -330,22 +330,44 @@ TEST_CASE("Clear saves have an explicit restart contract without schema3 drift",
   entry.doorId = 255;
   entry.reserved06Bit15 = 1;
   entry.reserved0B = 255;
+}
+
+void CheckClearEntryIdentity(const Save::Document& document,
+                             const Save::Document& decoded) {
+  const auto& entry = Engaged(decoded.new_game_entry);
+  CHECK(entry.requiredFlagId == 1023);
+  CHECK(entry.entryTileX == 4);
+  CHECK(entry.tileLocation.floorLayer == 7);
+  CHECK(entry.reserved0B == 255);
+  CHECK(Save::SameDocument(document, decoded) == true);
+  auto changed = decoded;
+  ++Engaged(changed.new_game_entry).entryTileX;
+  CHECK(Save::SameDocument(document, changed) == false);
+  changed.new_game_entry.reset();
+  CHECK(Save::SameDocument(document, changed) == false);
+}
+
+void CheckCheckpointHasNoRestartEntry(const Save::Document& document) {
+  const auto checkpoint = Save::Encode(document);
+  REQUIRE(checkpoint);
+  auto normal = Json::parse(*checkpoint);
+  CHECK(normal.at("version") == 3);
+  CHECK_FALSE(normal.contains("new_game_entry"));
+}
+}  // namespace
+
+TEST_CASE("Clear saves have an explicit restart contract without schema3 drift",
+          "[native-snapshot][save-clear]") {
+  auto document = SampleDocument();
+  CheckCheckpointHasNoRestartEntry(document);
+  FillClearEntry(document.new_game_entry.emplace());
   const auto encoded = Save::Encode(document);
   REQUIRE(encoded);
   const auto decoded = Save::Decode(*encoded);
   REQUIRE(decoded);
   REQUIRE(decoded->new_game_entry);
-  CHECK(decoded->new_game_entry->requiredFlagId == 1023);
-  CHECK(decoded->new_game_entry->entryTileX == 4);
-  CHECK(decoded->new_game_entry->tileLocation.floorLayer == 7);
-  CHECK(decoded->new_game_entry->reserved0B == 255);
   CHECK(Save::Encode(*decoded) == encoded);
-  CHECK(Save::SameDocument(document, *decoded) == true);
-  auto changed = *decoded;
-  ++changed.new_game_entry->entryTileX;
-  CHECK(Save::SameDocument(document, changed) == false);
-  changed.new_game_entry.reset();
-  CHECK(Save::SameDocument(document, changed) == false);
+  CheckClearEntryIdentity(document, *decoded);
   auto wire = Json::parse(*encoded);
   CHECK(wire.at("version") == 4);
   SECTION("missing entry") { wire.erase("new_game_entry"); }

@@ -40,6 +40,15 @@ struct PlatformPlacementFixture {
 };
 }  // namespace
 
+namespace {
+void CheckAuthoredPlacement(const Field_PlatformContactPoint& contact) {
+  CHECK(contact.x == 1216);
+  CHECK(contact.height == -768);
+  CHECK(contact.z == 448);
+  CHECK(contact.platformIndex == 1);
+}
+}  // namespace
+
 TEST_CASE(
     "Scripted placement reads a hidden authored platform without making "
     "it collide or render",
@@ -47,10 +56,7 @@ TEST_CASE(
   PlatformPlacementFixture fixture;
   Field_PlatformContactPoint contact{};
   REQUIRE(Field_CopyMovingPlatformPlacement(3, &contact) == 1);
-  CHECK(contact.x == 1216);
-  CHECK(contact.height == -768);
-  CHECK(contact.z == 448);
-  CHECK(contact.platformIndex == 1);
+  CheckAuthoredPlacement(contact);
   CHECK(fixture.platforms[0].isHidden == 1);
   CHECK(fixture.platforms[1].isHidden == 1);
   std::array<Field_PlatformContactPoint, 4> visible{};

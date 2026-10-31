@@ -124,8 +124,9 @@ std::expected<int, std::string> RunProcess(
     return std::unexpected("Cannot open process output " + PathText(output) +
                            ": " + SDL_GetError());
   }
-  bool configured = SDL_SetPointerProperty(
-      properties, SDL_PROP_PROCESS_CREATE_ARGS_POINTER, pointers.data());
+  bool configured =
+      SDL_SetPointerProperty(properties, SDL_PROP_PROCESS_CREATE_ARGS_POINTER,
+                             static_cast<void*>(pointers.data()));
   if (file) {
     configured =
         configured &&

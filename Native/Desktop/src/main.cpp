@@ -376,6 +376,54 @@ void BeginLogicalTick(u64 tick) {
   VS_LOG_TRACE("frame", "begin tick");
 }
 
+void ReportStartupFailure(const char* title, const std::string& message,
+                          SDL_Window* window) {
+  VS_LOG_ERROR("boot", "{}", message);
+  if constexpr (!kEnableDetailedGameLogging) {
+    SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, title, message.c_str(),
+                             window);
+  }
+}
+
+struct PresentedFrame {
+  std::vector<u32> pixels;
+  i32 width = 0;
+  i32 height = 0;
+};
+
+// Advances one logical tick; returns whether it produced an image.
+bool RunLogicalTick(Game::GameApp& game, Input::InputSystem& input,
+                    Platform::ProgressWatchdog& watchdog,
+                    const RunSettings& settings, Game::GameplayTrace* trace,
+                    PresentedFrame& frame) {
+  watchdog.Pulse(game.Ticks() + 1);
+  BeginLogicalTick(game.Ticks() + 1);
+  input.Inject(settings.script.MaskAt(game.Ticks() + 1));
+  const auto& pad = input.Update();
+  if (pad.pressed) {
+    VS_LOG_INFO("input", "pressed {}", Input::DescribeButtons(pad.pressed));
+  }
+  game.Tick(pad, true);
+  if (trace != nullptr) {
+    const auto state = Game::InspectGameplay();
+    trace->Frame(game.Ticks(), pad, state, Game::InspectGameplayScene(state));
+    if (trace->Failed()) {
+      throw std::runtime_error("detailed gameplay trace failed");
+    }
+  }
+  const bool shown =
+      Render::GamePages().Present(frame.pixels, frame.width, frame.height);
+  VS_LOG_TRACE("frame", "end tick; presented={}, image={}x{}", shown,
+               frame.width, frame.height);
+  if (shown) {
+    settings.capture.Write(game.Ticks(), frame.pixels, frame.width,
+                           frame.height);
+  } else {
+    settings.capture.WriteClear(game.Ticks());
+  }
+  return shown;
+}
+
 int RunGame(const Content::Disc* disc, const RunSettings& settings,
             Game::GameplayTrace* trace) {
   ConfigureEffectPathTrace(settings, trace);
@@ -385,22 +433,13 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
 
   Platform::App app;
   if (auto r = app.Init({}); !r) {
-    VS_LOG_ERROR("boot", "{}", r.error());
-    if constexpr (!kEnableDetailedGameLogging) {
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                               "Window initialization failed",
-                               r.error().c_str(), nullptr);
-    }
+    ReportStartupFailure("Window initialization failed", r.error(), nullptr);
     return 1;
   }
   Render::Device gpu;
   if (auto r = gpu.Init(app.Window(), true); !r) {
-    VS_LOG_ERROR("boot", "{}", r.error());
-    if constexpr (!kEnableDetailedGameLogging) {
-      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
-                               "Graphics initialization failed",
-                               r.error().c_str(), app.Window());
-    }
+    ReportStartupFailure("Graphics initialization failed", r.error(),
+                         app.Window());
     return 1;
   }
   Audio::AudioDevice audio(settings.speed == 1);
@@ -420,8 +459,7 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
   Platform::ProgressWatchdog watchdog(settings.max_ticks != 0);
   Core::FrameClock clock;
   double last = app.NowSeconds();
-  std::vector<u32> frame;
-  i32 frame_w = 0, frame_h = 0;
+  PresentedFrame frame;
 
   const auto handle_event = [&input](const SDL_Event& event) {
     input.HandleEvent(event);
@@ -442,36 +480,14 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
         running = false;
         break;
       }
-      watchdog.Pulse(game.Ticks() + 1);
-      BeginLogicalTick(game.Ticks() + 1);
-      input.Inject(settings.script.MaskAt(game.Ticks() + 1));
-      const auto& pad = input.Update();
-      if (pad.pressed) {
-        VS_LOG_INFO("input", "pressed {}", Input::DescribeButtons(pad.pressed));
-      }
-      game.Tick(pad, true);
-      if (trace != nullptr) {
-        const auto state = Game::InspectGameplay();
-        trace->Frame(game.Ticks(), pad, state,
-                     Game::InspectGameplayScene(state));
-        if (trace->Failed()) {
-          throw std::runtime_error("detailed gameplay trace failed");
-        }
-      }
-      shown = Render::GamePages().Present(frame, frame_w, frame_h);
-      VS_LOG_TRACE("frame", "end tick; presented={}, image={}x{}", shown,
-                   frame_w, frame_h);
-      if (shown) {
-        settings.capture.Write(game.Ticks(), frame, frame_w, frame_h);
-      } else {
-        settings.capture.WriteClear(game.Ticks());
-      }
+      shown = RunLogicalTick(game, input, watchdog, settings, trace, frame);
     }
     if (ticks == 0) {
-      shown = Render::GamePages().Present(frame, frame_w, frame_h);
+      shown =
+          Render::GamePages().Present(frame.pixels, frame.width, frame.height);
     }
     if (shown) {
-      gpu.PresentImage(frame.data(), frame_w, frame_h);
+      gpu.PresentImage(frame.pixels.data(), frame.width, frame.height);
     } else {
       gpu.PresentClear({0.0f, 0.0f, 0.0f, 1.0f});
     }

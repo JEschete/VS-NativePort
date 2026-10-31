@@ -4,6 +4,7 @@
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
@@ -364,6 +365,33 @@ TEST_CASE(
   CHECK_FALSE(open_image().has_value());
 }
 
+namespace {
+struct MovieScope {
+  std::vector<u16> pixels;
+  std::filesystem::path temporary;
+  ~MovieScope() {
+    try {
+      Restore();
+    } catch (const std::exception& error) {
+      std::fputs(error.what(), stderr);
+    }
+  }
+  void Restore() {
+    Movie_PlayerClose();
+    Render::GamePages().Upload(
+        {0, 0, Render::PageSpace::Width, Render::PageSpace::Height},
+        pixels.data());
+    if (!temporary.empty()) {
+      std::error_code error;
+      std::filesystem::remove_all(temporary, error);
+      if (error) {
+        VS_LOG_ERROR("test", "Movie fixture cleanup: {}", error.message());
+      }
+    }
+  }
+};
+}  // namespace
+
 TEST_CASE("Converted intro movie decodes without changing page ownership",
           "[content][movie][disc]") {
   const auto cue = FindRepoDisc();
@@ -374,25 +402,9 @@ TEST_CASE("Converted intro movie decodes without changing page ownership",
   }
   const bool unicode_path = GENERATE(false, true);
   Content::DataStore::ScopedOverride restore;
-  struct MovieScope {
-    std::vector<u16> pixels;
-    std::filesystem::path temporary;
-    ~MovieScope() {
-      Movie_PlayerClose();
-      Render::GamePages().Upload(
-          {0, 0, Render::PageSpace::Width, Render::PageSpace::Height},
-          pixels.data());
-      if (!temporary.empty()) {
-        std::error_code error;
-        std::filesystem::remove_all(temporary, error);
-        if (error) {
-          VS_LOG_ERROR("test", "Movie fixture cleanup: {}", error.message());
-        }
-      }
-    }
-  } scope{{Render::GamePages().Pixels().begin(),
-           Render::GamePages().Pixels().end()},
-          {}};
+  MovieScope scope{{Render::GamePages().Pixels().begin(),
+                    Render::GamePages().Pixels().end()},
+                   {}};
   auto selected_root = root;
   if (unicode_path) {
     scope.temporary =

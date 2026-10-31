@@ -8,6 +8,7 @@
 #include <memory>
 #include <stdexcept>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -518,6 +519,22 @@ TEST_CASE("Combat Lab trace records floor trigger visibility",
   CHECK(state.floor_triggers.front().marker_fade == 128);
 }
 
+namespace {
+void CheckAreaVolume(const nlohmann::json& volume) {
+  CHECK(volume.at("kind") == 1);
+  CHECK(volume.at("half_x") == 192);
+  CHECK(volume.at("half_z") == 160);
+  CHECK(volume.at("angle") == 1024);
+  CHECK(volume.at("position") == nlohmann::json::array({512, -128, 768}));
+}
+
+void CheckTargetPreview(const nlohmann::json& target) {
+  CHECK(target.at("actor") == 2);
+  CHECK(target.at("limb") == -1);
+  CHECK(target.at("position") == nlohmann::json::array({640, -144, 800}));
+}
+}  // namespace
+
 TEST_CASE("Combat Lab trace preserves area targeting coordinates",
           "[combat][encounter][trace][items]") {
   TraceScope scope;
@@ -530,16 +547,8 @@ TEST_CASE("Combat Lab trace preserves area targeting coordinates",
   const auto data = FlushedFrame(scope, state).at("data");
   CHECK(data.at("area_center") == nlohmann::json::array({512, -128, 768}));
   CHECK(data.at("area_positioning") == true);
-  const auto volume = data.at("area_volumes").at(0);
-  CHECK(volume.at("kind") == 1);
-  CHECK(volume.at("half_x") == 192);
-  CHECK(volume.at("half_z") == 160);
-  CHECK(volume.at("angle") == 1024);
-  CHECK(volume.at("position") == nlohmann::json::array({512, -128, 768}));
-  const auto target = data.at("target_previews").at(0);
-  CHECK(target.at("actor") == 2);
-  CHECK(target.at("limb") == -1);
-  CHECK(target.at("position") == nlohmann::json::array({640, -144, 800}));
+  CheckAreaVolume(data.at("area_volumes").at(0));
+  CheckTargetPreview(data.at("target_previews").at(0));
   CHECK(state.target_previews.front().position[1] == -144);
 }
 
@@ -1187,6 +1196,19 @@ TEST_CASE("Player observations retain native weapon geometry and hostility",
   CHECK(data.at("actors").at(1).at("hostile_to_player") == true);
 }
 
+namespace {
+void CheckFirstEncodedChest(const nlohmann::json& chest) {
+  CHECK(chest.at("tile_x") == 4);
+  CHECK(chest.at("tile_z") == 7);
+  CHECK(chest.at("facing") == 2);
+  CHECK(chest.at("opened_flag") == 0x3C5);
+  CHECK(chest.at("opened") == false);
+  REQUIRE(chest.at("misc").size() == 1);
+  CHECK(chest.at("misc").at(0).at("slot") == 2);
+  CHECK(chest.at("misc").at(0).at("id") == 472);
+}
+}  // namespace
+
 TEST_CASE("Player observations expose original room chests and opened flags",
           "[player][diagnostics][inspection]") {
   ReactionInspectionFixture fixture;
@@ -1195,7 +1217,7 @@ TEST_CASE("Player observations expose original room chests and opened flags",
     int flag = State_ScriptFlag(0x3C6);
     ~RoomGuard() {
       Field_roomData = room;
-      State_SetScriptFlag(0x3C6, flag);
+      State_SetScriptFlag(0x3C6, static_cast<char>(flag));
     }
   } guard;
   std::array<Items_TreasureChest, 2> chests{};
@@ -1217,17 +1239,43 @@ TEST_CASE("Player observations expose original room chests and opened flags",
   TraceScope scope;
   const auto encoded = FlushedFrame(scope, state, true).at("data").at("chests");
   REQUIRE(encoded.size() == 2);
-  CHECK(encoded.at(0).at("tile_x") == 4);
-  CHECK(encoded.at(0).at("tile_z") == 7);
-  CHECK(encoded.at(0).at("facing") == 2);
-  CHECK(encoded.at(0).at("opened_flag") == 0x3C5);
-  CHECK(encoded.at(0).at("opened") == false);
-  REQUIRE(encoded.at(0).at("misc").size() == 1);
-  CHECK(encoded.at(0).at("misc").at(0).at("slot") == 2);
-  CHECK(encoded.at(0).at("misc").at(0).at("id") == 472);
+  CheckFirstEncodedChest(encoded.at(0));
   CHECK(encoded.at(1).at("lock_level") == 3);
   CHECK(encoded.at(1).at("opened") == true);
   CHECK(encoded.at(1).at("misc").empty());
+}
+
+TEST_CASE("Gameplay inspection reads copied plain chars as unsigned bytes",
+          "[player][diagnostics][inspection]") {
+  ReactionInspectionFixture fixture;
+  struct MenuGuard {
+    decltype(Menu_Framework_menuState) state = Menu_Framework_menuState;
+    decltype(Menu_Framework_menuMemory) memory = Menu_Framework_menuMemory;
+    decltype(Audio_Seq_unusedStateFlags) flags = Audio_Seq_unusedStateFlags;
+    decltype(Menu_Framework_menuItems) items = Menu_Framework_menuItems;
+    ~MenuGuard() {
+      Menu_Framework_menuItems = items;
+      Menu_Framework_menuState = state;
+      Menu_Framework_menuMemory = memory;
+      Audio_Seq_unusedStateFlags = flags;
+    }
+  } guard;
+  // Copied code compiles with an unsigned char; C++ readers must agree with it.
+  constexpr int kMenuControl = 5;
+  constexpr int kResultsMenu = 15;
+  std::array<std::remove_pointer_t<decltype(Menu_Framework_menuItems)>, 1>
+      rows{};
+  Menu_Framework_menuItems = rows.data();
+  Field_controlMode = kMenuControl;
+  Menu_Framework_menuState.currentMenu = kResultsMenu;
+  Audio_Seq_unusedStateFlags.menuFSubmenu = static_cast<char>(200);
+  Menu_Framework_menuMemory.cursorMemories[12] = static_cast<char>(200);
+  Menu_Framework_menuMemory.cursorMemories[13] = static_cast<char>(201);
+  const auto state =
+      VS::Game::InspectPlayerObservation(VS::Game::InspectGameplay());
+  CHECK(state.results_screen == 200);
+  CHECK(state.menu.spell_level == 200);
+  CHECK(state.menu.spell_level_count == 201);
 }
 
 TEST_CASE("Player timing observations use production eligibility without costs",

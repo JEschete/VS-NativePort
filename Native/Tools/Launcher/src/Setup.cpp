@@ -27,6 +27,8 @@ using Platform::PathText;
 using Platform::Utf8Path;
 constexpr int kPipelineVersion = 2;
 constexpr auto kReadyFile = "launcher-assets.json";
+constexpr std::string_view kUtf8ByteOrderMark = "\xEF\xBB\xBF";
+constexpr std::size_t kLongestPathCharacters = 32768;
 
 std::string Upper(std::string text) {
   std::ranges::transform(text, text.begin(), [](unsigned char value) {
@@ -107,8 +109,9 @@ Result SealAssets(const fs::path& data, const VerifiedDisc& source_disc,
     }
   }
   if (auto result = RegularFile(data / "audio" / "streams" / "index.json");
-      !result)
+      !result) {
     return result;
+  }
   bool bank = false;
   nlohmann::json files = nlohmann::json::array();
   for (const auto& entry : fs::recursive_directory_iterator(data)) {
@@ -121,8 +124,9 @@ Result SealAssets(const fs::path& data, const VerifiedDisc& source_disc,
     files.push_back({{"path", PathText(fs::relative(entry.path(), data))},
                      {"bytes", entry.file_size()}});
   }
-  if (!bank)
+  if (!bank) {
     return std::unexpected("Audio bank import did not produce any banks");
+  }
   return WriteJson(
       data / kReadyFile,
       {{"version", kPipelineVersion},
@@ -155,6 +159,132 @@ Result WritableSaves(const fs::path& path) {
   }
   return {};
 }
+
+struct CueSheet {
+  fs::path image;
+  int tracks = 0;
+  int indices = 0;
+
+  Result ReadFile(const fs::path& cue, std::istringstream& words) {
+    if (!image.empty()) {
+      return std::unexpected(
+          "Only a single-BIN USA SLUS-01040 dump is supported.");
+    }
+    std::string name;
+    std::string type;
+    words >> std::quoted(name, '"', '\0') >> type;
+    if (name.empty() || Upper(type) != "BINARY") {
+      return std::unexpected("The CUE must contain FILE \"image.bin\" BINARY.");
+    }
+    image = cue.parent_path() / Utf8Path(name);
+    if (Upper(PathText(image.extension())) != ".BIN") {
+      return std::unexpected("The CUE must reference a .bin file.");
+    }
+    if (auto result = RegularFile(image); !result) {
+      return std::unexpected(
+          "The BIN referenced by the CUE is missing or "
+          "unreadable. Keep it beside the CUE with its "
+          "original name.\n" +
+          result.error());
+    }
+    return {};
+  }
+
+  Result ReadTrack(std::istringstream& words) {
+    int number = 0;
+    std::string mode;
+    if (!(words >> number >> mode) || image.empty() || ++tracks != 1 ||
+        number != 1 || Upper(mode) != "MODE2/2352") {
+      return std::unexpected(
+          "Use a single-track MODE2/2352 USA SLUS-01040 dump.");
+    }
+    return {};
+  }
+
+  Result ReadIndex(std::istringstream& words) {
+    int number = 0;
+    std::string time;
+    if (!(words >> number >> time) || tracks != 1 || ++indices != 1 ||
+        number != 1 || time != "00:00:00") {
+      return std::unexpected(
+          "Unsupported CUE index; expected INDEX 01 00:00:00.");
+    }
+    return {};
+  }
+
+  Result Read(const fs::path& cue, std::string line) {
+    if (line.starts_with(kUtf8ByteOrderMark)) {
+      line.erase(0, kUtf8ByteOrderMark.size());
+    }
+    if (line.find('\0') != std::string::npos) {
+      return std::unexpected("Save the CUE as UTF-8 text, not UTF-16.");
+    }
+    std::istringstream words(line);
+    std::string command;
+    words >> command;
+    command = Upper(command);
+    if (command.empty() || command == "REM" || command == "TITLE" ||
+        command == "PERFORMER" || command == "SONGWRITER" ||
+        command == "CATALOG") {
+      return {};
+    }
+    Result result;
+    if (command == "FILE") {
+      result = ReadFile(cue, words);
+    } else if (command == "TRACK") {
+      result = ReadTrack(words);
+    } else if (command == "INDEX") {
+      result = ReadIndex(words);
+    } else if (command == "PREGAP" || command == "POSTGAP") {
+      return std::unexpected(
+          "CUE gaps are not supported by this tester build.");
+    } else {
+      return std::unexpected(
+          "Unsupported CUE directive: " + command +
+          ". Use the standard single-track descriptor for the supported dump.");
+    }
+    if (!result) return result;
+    std::string extra;
+    if (words >> extra) {
+      return std::unexpected("Unexpected data after CUE " + command + ".");
+    }
+    return {};
+  }
+};
+
+Result ProbeFfmpeg(const fs::path& ffmpeg, const fs::path& log) {
+  if (auto result = RegularFile(ffmpeg); !result) {
+    return std::unexpected(
+        "FFmpeg is required for first-time setup. Select "
+        "ffmpeg.exe, use Install with winget, or Download FFmpeg.");
+  }
+  const auto probe = Platform::RunProcess(
+      std::vector<std::string>{PathText(ffmpeg), "-version"}, log);
+  if (!probe || *probe != 0) {
+    return std::unexpected("FFmpeg could not run. See " + PathText(log));
+  }
+  return {};
+}
+
+Result ActivateAssets(const fs::path& staging, const fs::path& data,
+                      const fs::path& previous) {
+  const bool replacing = fs::exists(data);
+  if (replacing) fs::rename(data, previous);
+  std::error_code error;
+  fs::rename(staging, data, error);
+  if (!error) return {};
+  if (replacing) {
+    std::error_code rollback;
+    fs::rename(previous, data, rollback);
+    if (rollback) {
+      return std::unexpected(
+          "Cannot activate assets: " + error.message() +
+          "; cannot restore previous assets: " + rollback.message() +
+          ". Previous assets remain at " + PathText(previous));
+    }
+  }
+  return std::unexpected("Cannot activate prepared assets: " + error.message());
+}
 }  // namespace
 
 std::expected<fs::path, std::string> ValidateCue(const fs::path& cue) {
@@ -164,93 +294,34 @@ std::expected<fs::path, std::string> ValidateCue(const fs::path& cue) {
   if (auto result = RegularFile(cue); !result) {
     return std::unexpected(result.error());
   }
-  std::ifstream input(cue, std::ios::binary);
-  std::string line;
-  fs::path image;
-  int tracks = 0;
-  int indices = 0;
-  constexpr std::size_t kMaximumCueBytes = 64 * 1024;
+  constexpr std::size_t kMaximumCueBytes = std::size_t{64} * 1024;
   if (fs::file_size(cue) > kMaximumCueBytes) {
     return std::unexpected(
         "The selected CUE is too large to be a supported descriptor.");
   }
+  std::ifstream input(cue, std::ios::binary);
+  std::string line;
+  CueSheet sheet;
   while (std::getline(input, line)) {
-    if (line.starts_with("\xEF\xBB\xBF")) line.erase(0, 3);
-    if (line.find('\0') != std::string::npos) {
-      return std::unexpected("Save the CUE as UTF-8 text, not UTF-16.");
-    }
-    std::istringstream words(line);
-    std::string command;
-    words >> command;
-    command = Upper(command);
-    if (command.empty() || command == "REM") continue;
-    if (command == "FILE") {
-      if (!image.empty()) {
-        return std::unexpected(
-            "Only a single-BIN USA SLUS-01040 dump is supported.");
-      }
-      std::string name;
-      std::string type;
-      words >> std::quoted(name, '"', '\0') >> type;
-      if (name.empty() || Upper(type) != "BINARY") {
-        return std::unexpected(
-            "The CUE must contain FILE \"image.bin\" BINARY.");
-      }
-      image = cue.parent_path() / Utf8Path(name);
-      if (Upper(PathText(image.extension())) != ".BIN") {
-        return std::unexpected("The CUE must reference a .bin file.");
-      }
-      if (auto result = RegularFile(image); !result) {
-        return std::unexpected(
-            "The BIN referenced by the CUE is missing or "
-            "unreadable. Keep it beside the CUE with its "
-            "original name.\n" +
-            result.error());
-      }
-    } else if (command == "TRACK") {
-      int number = 0;
-      std::string mode;
-      if (!(words >> number >> mode) || image.empty() || ++tracks != 1 ||
-          number != 1 || Upper(mode) != "MODE2/2352") {
-        return std::unexpected(
-            "Use a single-track MODE2/2352 USA SLUS-01040 dump.");
-      }
-    } else if (command == "INDEX") {
-      int number = 0;
-      std::string time;
-      if (!(words >> number >> time) || tracks != 1 || ++indices != 1 ||
-          number != 1 || time != "00:00:00") {
-        return std::unexpected(
-            "Unsupported CUE index; expected INDEX 01 00:00:00.");
-      }
-    } else if (command == "PREGAP" || command == "POSTGAP") {
-      return std::unexpected(
-          "CUE gaps are not supported by this tester build.");
-    } else if (command == "TITLE" || command == "PERFORMER" ||
-               command == "SONGWRITER" || command == "CATALOG") {
-      continue;
-    } else {
-      return std::unexpected(
-          "Unsupported CUE directive: " + command +
-          ". Use the standard single-track descriptor for the supported dump.");
-    }
-    std::string extra;
-    if (words >> extra) {
-      return std::unexpected("Unexpected data after CUE " + command + ".");
+    if (auto result = sheet.Read(cue, line); !result) {
+      return std::unexpected(result.error());
     }
   }
   if (!input.eof()) return std::unexpected("Cannot read the CUE file.");
-  if (image.empty())
+  if (sheet.image.empty()) {
     return std::unexpected("The CUE has no FILE entry for its BIN.");
-  if (tracks != 1)
+  }
+  if (sheet.tracks != 1) {
     return std::unexpected("The CUE has no supported TRACK entry.");
-  if (indices != 1)
+  }
+  if (sheet.indices != 1) {
     return std::unexpected("The CUE has no supported INDEX entry.");
-  return fs::absolute(image).lexically_normal();
+  }
+  return fs::absolute(sheet.image).lexically_normal();
 }
 
 fs::path FindFfmpeg() {
-  std::vector<wchar_t> buffer(32768);
+  std::vector<wchar_t> buffer(kLongestPathCharacters);
   const DWORD length =
       SearchPathW(nullptr, L"ffmpeg.exe", nullptr,
                   static_cast<DWORD>(buffer.size()), buffer.data(), nullptr);
@@ -264,8 +335,9 @@ fs::path FindFfmpeg() {
   const auto packages = winget / "Packages";
   if (!fs::is_directory(packages)) return {};
   for (const auto& package : fs::directory_iterator(packages)) {
-    if (!PathText(package.path().filename()).starts_with("Gyan.FFmpeg_"))
+    if (!PathText(package.path().filename()).starts_with("Gyan.FFmpeg_")) {
       continue;
+    }
     for (const auto& entry : fs::recursive_directory_iterator(package.path())) {
       if (entry.path().filename() == "ffmpeg.exe" && entry.is_regular_file()) {
         return entry.path();
@@ -374,23 +446,16 @@ std::expected<fs::path, std::string> Prepare(const Settings& settings,
   const auto data = state / "assets";
   const auto ready = CheckAssets(data, verified->image);
   if (ready) {
-    progress({SetupStage::kReady, "Assets ready. No extraction needed.", 100});
+    progress({SetupStage::kReady, "Assets ready. No extraction needed.",
+              kPercentComplete});
     return data;
   }
   progress(
       {SetupStage::kCache,
        "Preparing verified game assets. The game will start when complete."});
-  if (auto result = RegularFile(settings.ffmpeg); !result) {
-    return std::unexpected(
-        "FFmpeg is required for first-time setup. Select "
-        "ffmpeg.exe, use Install with winget, or Download FFmpeg.");
-  }
-  const auto probe = Platform::RunProcess(
-      std::vector<std::string>{PathText(settings.ffmpeg), "-version"},
-      state / "setup.log");
-  if (!probe || *probe != 0) {
-    return std::unexpected("FFmpeg could not run. See " +
-                           PathText(state / "setup.log"));
+  if (auto result = ProbeFfmpeg(settings.ffmpeg, state / "setup.log");
+      !result) {
+    return std::unexpected(result.error());
   }
   const auto suffix = std::to_string(
       std::chrono::steady_clock::now().time_since_epoch().count());
@@ -429,26 +494,12 @@ std::expected<fs::path, std::string> Prepare(const Settings& settings,
     return std::unexpected(result.error() +
                            "\nIncomplete assets: " + PathText(staging));
   }
-  const auto previous = state / ("assets-previous-" + suffix);
-  const bool replacing = fs::exists(data);
-  if (replacing) fs::rename(data, previous);
-  std::error_code error;
-  fs::rename(staging, data, error);
-  if (error) {
-    if (replacing) {
-      std::error_code rollback;
-      fs::rename(previous, data, rollback);
-      if (rollback) {
-        return std::unexpected(
-            "Cannot activate assets: " + error.message() +
-            "; cannot restore previous assets: " + rollback.message() +
-            ". Previous assets remain at " + PathText(previous));
-      }
-    }
-    return std::unexpected("Cannot activate prepared assets: " +
-                           error.message());
+  if (auto result =
+          ActivateAssets(staging, data, state / ("assets-previous-" + suffix));
+      !result) {
+    return std::unexpected(result.error());
   }
-  progress({SetupStage::kReady, "Assets ready.", 100});
+  progress({SetupStage::kReady, "Assets ready.", kPercentComplete});
   return data;
 }
 

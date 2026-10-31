@@ -60,6 +60,26 @@ void PlayExpectedEvents(SceneTrial& trial) {
 }
 }  // namespace
 
+namespace {
+void BreakSceneExpectation(nlohmann::json& value) {
+  SECTION("empty events") { value["events"] = nlohmann::json::array(); }
+  SECTION("unknown option") { value["force_flags"] = true; }
+  SECTION("boolean ID") { value["events"] = {true}; }
+  SECTION("out of range ID") { value["events"] = {32768}; }
+  SECTION("invalid source") { value["event_source"] = 3; }
+  SECTION("negative external ID") { value["events"] = {-1}; }
+  SECTION("overflowing room") { value["return_room"] = 2147483648LL; }
+  SECTION("negative room") { value["return_room"] = -1; }
+  SECTION("boolean zone") { value["return_zone"] = true; }
+  SECTION("undocumented conditions") { value["preconditions"] = ""; }
+  SECTION("unpaired event room") { value["event_room"] = 3; }
+  SECTION("negative event zone") {
+    value["event_zone"] = -1;
+    value["event_room"] = 0;
+  }
+}
+}  // namespace
+
 TEST_CASE(
     "Scene expectations require explicit source conditions and native IDs",
     "[scenes][playback]") {
@@ -70,21 +90,7 @@ TEST_CASE(
     CHECK(decoded.confirm_dialogue);
   }
   SECTION("invalid") {
-    SECTION("empty events") { value["events"] = nlohmann::json::array(); }
-    SECTION("unknown option") { value["force_flags"] = true; }
-    SECTION("boolean ID") { value["events"] = {true}; }
-    SECTION("out of range ID") { value["events"] = {32768}; }
-    SECTION("invalid source") { value["event_source"] = 3; }
-    SECTION("negative external ID") { value["events"] = {-1}; }
-    SECTION("overflowing room") { value["return_room"] = 2147483648LL; }
-    SECTION("negative room") { value["return_room"] = -1; }
-    SECTION("boolean zone") { value["return_zone"] = true; }
-    SECTION("undocumented conditions") { value["preconditions"] = ""; }
-    SECTION("unpaired event room") { value["event_room"] = 3; }
-    SECTION("negative event zone") {
-      value["event_zone"] = -1;
-      value["event_room"] = 0;
-    }
+    BreakSceneExpectation(value);
     CHECK_THROWS_AS(VS::combat_lab::DecodeSceneExpectation(value),
                     std::runtime_error);
   }
@@ -211,6 +217,24 @@ nlohmann::json AttractSetup() {
 }
 }  // namespace
 
+namespace {
+void BreakAttractSetup(nlohmann::json& setup) {
+  SECTION("unknown cause") { setup["attract_demo"] = 0; }
+  SECTION("boolean cause") { setup["attract_demo"] = true; }
+  SECTION("wrong door") { setup["zone"] = 21; }
+  SECTION("other cause door") { setup["attract_demo"] = 4; }
+  SECTION("moved entry") { setup["player"]["x"] = 0; }
+  SECTION("isolated room") { setup["room_events"] = "isolated"; }
+  SECTION("granted kit") { setup["ashley_profile"] = "post-prologue"; }
+  SECTION("stat assist") { setup["ashley_stats"] = {{"max_hp", 999}}; }
+  SECTION("direct event") { setup["external_event"] = 20; }
+  SECTION("story progress") { setup["story_progress"] = 1; }
+  SECTION("clear count") { setup["clear_count"] = 1; }
+  SECTION("crossed puzzles") { setup["crossed_puzzles"] = {223}; }
+  SECTION("inherited music") { setup["inherited_music"] = 16; }
+}
+}  // namespace
+
 TEST_CASE("Attract demos accept only the original title-timeout start",
           "[scenes][playback][attract-goal]") {
   auto setup = AttractSetup();
@@ -226,19 +250,7 @@ TEST_CASE("Attract demos accept only the original title-timeout start",
     CHECK(VS::combat_lab::DecodeSetup(setup).attract_demo == 4);
   }
   SECTION("invalid") {
-    SECTION("unknown cause") { setup["attract_demo"] = 0; }
-    SECTION("boolean cause") { setup["attract_demo"] = true; }
-    SECTION("wrong door") { setup["zone"] = 21; }
-    SECTION("other cause door") { setup["attract_demo"] = 4; }
-    SECTION("moved entry") { setup["player"]["x"] = 0; }
-    SECTION("isolated room") { setup["room_events"] = "isolated"; }
-    SECTION("granted kit") { setup["ashley_profile"] = "post-prologue"; }
-    SECTION("stat assist") { setup["ashley_stats"] = {{"max_hp", 999}}; }
-    SECTION("direct event") { setup["external_event"] = 20; }
-    SECTION("story progress") { setup["story_progress"] = 1; }
-    SECTION("clear count") { setup["clear_count"] = 1; }
-    SECTION("crossed puzzles") { setup["crossed_puzzles"] = {223}; }
-    SECTION("inherited music") { setup["inherited_music"] = 16; }
+    BreakAttractSetup(setup);
     CHECK_THROWS_AS(VS::combat_lab::DecodeSetup(setup), std::runtime_error);
   }
 }
@@ -252,20 +264,8 @@ TEST_CASE("Attract terminals reject dialogue confirmation",
                   std::runtime_error);
 }
 
-TEST_CASE("Attract demos pass only on an unpressed native title return",
-          "[scenes][playback][attract-goal]") {
-  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedAttract()));
-  PlayExpectedEvents(trial);
-  trial.Observe(ReadyState(), Event(81, 0), 124);
-  CHECK_FALSE(trial.Finished());
-  CHECK(trial.Input(120) == 0);
-  SECTION("passes") {
-    trial.ObserveAttractReturn(3, false, false, 140);
-    CHECK(trial.Result().at("status") == "passed");
-    CHECK(trial.Result().at("coverage") == "scene_playback_attract_to_title");
-    CHECK(trial.Result().at("terminal").at("entry_mode") == 3);
-    CHECK(trial.Result().at("passed_tick") == 140);
-  }
+namespace {
+void CheckAttractReturnFailures(SceneTrial& trial) {
   SECTION("ending handoff") {
     trial.ObserveAttractReturn(3, true, true, 140);
     CHECK(trial.Result().at("status") == "failed");
@@ -282,6 +282,24 @@ TEST_CASE("Attract demos pass only on an unpressed native title return",
     trial.ObserveAttractReturn(3, false, false, 140);
     CHECK(trial.Result().at("status") == "failed");
   }
+}
+}  // namespace
+
+TEST_CASE("Attract demos pass only on an unpressed native title return",
+          "[scenes][playback][attract-goal]") {
+  SceneTrial trial(VS::combat_lab::DecodeSceneExpectation(ExpectedAttract()));
+  PlayExpectedEvents(trial);
+  trial.Observe(ReadyState(), Event(81, 0), 124);
+  CHECK_FALSE(trial.Finished());
+  CHECK(trial.Input(120) == 0);
+  SECTION("passes") {
+    trial.ObserveAttractReturn(3, false, false, 140);
+    CHECK(trial.Result().at("status") == "passed");
+    CHECK(trial.Result().at("coverage") == "scene_playback_attract_to_title");
+    CHECK(trial.Result().at("terminal").at("entry_mode") == 3);
+    CHECK(trial.Result().at("passed_tick") == 140);
+  }
+  CheckAttractReturnFailures(trial);
   SECTION("ending observer ignored") {
     trial.ObserveEndingReturn(true, false, true, 140);
     CHECK_FALSE(trial.Finished());
@@ -524,6 +542,17 @@ TEST_CASE("Game-over scenes accept only external defeat event 0",
   }
 }
 
+namespace {
+void CheckGameOverChoosesTitle(SceneTrial& trial) {
+  CHECK(trial.Input(279) == 0);
+  CHECK(trial.Input(280) == VS::Input::Down);
+  CHECK(trial.Input(281) == VS::Input::Down);
+  CHECK(trial.Input(282) == 0);
+  CHECK(trial.Input(340) == VS::Input::Circle);
+  CHECK(trial.Input(342) == 0);
+}
+}  // namespace
+
 TEST_CASE("Game-over scenes choose Title after the observed defeat menu",
           "[scenes][playback][game-over-goal]") {
   auto trial = GameOverTrial();
@@ -531,12 +560,7 @@ TEST_CASE("Game-over scenes choose Title after the observed defeat menu",
   CHECK(trial.Input(20) == 0);
   trial.Observe(GameOverState(0), Event(0), 100);
   CHECK_FALSE(trial.Finished());
-  CHECK(trial.Input(279) == 0);
-  CHECK(trial.Input(280) == VS::Input::Down);
-  CHECK(trial.Input(281) == VS::Input::Down);
-  CHECK(trial.Input(282) == 0);
-  CHECK(trial.Input(340) == VS::Input::Circle);
-  CHECK(trial.Input(342) == 0);
+  CheckGameOverChoosesTitle(trial);
   trial.ObserveGameOverReturn(false, false, 400);
   CHECK(trial.Result().at("status") == "passed");
   CHECK(trial.Result().at("coverage") == "scene_playback_game_over_to_title");

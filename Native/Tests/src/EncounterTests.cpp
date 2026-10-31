@@ -708,6 +708,25 @@ TEST_CASE("Production room presets retain original actors and event policy",
   CHECK_THROWS(VS::combat_lab::DecodeSetup(invalid));
 }
 
+namespace {
+void CheckInheritedMusicRejected(VS::Game::EncounterSetup setup,
+                                 nlohmann::json preset) {
+  auto with_music = TestZone();
+  with_music.music = 16;
+  CHECK_FALSE(ValidateEncounter(setup, with_music).empty());
+  for (const int unmapped : {0, 12, 15, 200}) {
+    setup.inherited_music = unmapped;
+    CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
+  }
+  for (const auto& invalid :
+       {nlohmann::json(0), nlohmann::json(200), nlohmann::json(16.5),
+        nlohmann::json("16"), nlohmann::json(true), nlohmann::json(nullptr)}) {
+    preset["inherited_music"] = invalid;
+    CHECK_THROWS(VS::combat_lab::DecodeSetup(preset));
+  }
+}
+}  // namespace
+
 TEST_CASE("Inherited music is limited to mapped banks in zones without music",
           "[combat][encounter][production][inherited-music]") {
   auto setup = TestSetup(0);
@@ -724,20 +743,7 @@ TEST_CASE("Inherited music is limited to mapped banks in zones without music",
     CHECK(encoded.at("inherited_music") == music);
     CHECK(VS::combat_lab::DecodeSetup(encoded).inherited_music == music);
   }
-  auto with_music = TestZone();
-  with_music.music = 16;
-  CHECK_FALSE(ValidateEncounter(setup, with_music).empty());
-  for (const int unmapped : {0, 12, 15, 200}) {
-    setup.inherited_music = unmapped;
-    CHECK_FALSE(ValidateEncounter(setup, TestZone()).empty());
-  }
-  auto preset = original;
-  for (const auto& invalid :
-       {nlohmann::json(0), nlohmann::json(200), nlohmann::json(16.5),
-        nlohmann::json("16"), nlohmann::json(true), nlohmann::json(nullptr)}) {
-    preset["inherited_music"] = invalid;
-    CHECK_THROWS(VS::combat_lab::DecodeSetup(preset));
-  }
+  CheckInheritedMusicRejected(setup, original);
 }
 
 TEST_CASE("External event components roundtrip without changing older presets",

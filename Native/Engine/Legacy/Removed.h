@@ -45,8 +45,6 @@ static inline u_long* FntFlush(int id) {
   return NULL;
 }
 static inline void InitGeom(void) {}
-static inline void __main(void) {
-}  // GCC runtime start-up (static constructors): nothing to run natively
 static inline int ResetCallback(void) { return 0; }
 static inline int EnterCriticalSection(void) { return 0; }
 static inline void ExitCriticalSection(void) {}

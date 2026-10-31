@@ -294,8 +294,8 @@ int TestAnimationEventUnwind(int scenario) {
     memcpy(wide_sequence, fixture.sequence, sizeof fixture.sequence);
     Actors_SeqAnimationBank* wide = (void*)wide_sequence;
     ((u_char*)wide)[wide->animationMap + 2] = 200;
-    wide->headers[5 * 200] = 16;
-    wide->headers[5 * 200 + 2] = 1;
+    wide->headers[(size_t)5 * 200] = 16;
+    wide->headers[(size_t)5 * 200 + 2] = 1;
     fixture.actor.animationHeader = (intptr_t)wide;
     fixture.actor.animationSet = 200;
     fixture.actor.sharedSequences[2] = wide;
@@ -1038,7 +1038,8 @@ int TestBoneEndpointOwner(int owner, int endpoint) {
                                              &Actors_boneMatrixScratch) == NULL;
     passed &=
         Actors_ActorBoneWorldMatrix(slot, 0, &untouched, &bone_length) == -1;
-    passed &= memcmp(&untouched, &original, sizeof untouched) == 0 &&
+    passed &= memcmp(untouched.m, original.m, sizeof untouched.m) == 0 &&
+              memcmp(untouched.t, original.t, sizeof untouched.t) == 0 &&
               bone_length == 777;
   }
   Actors_actorRecords[slot] = saved_actor;

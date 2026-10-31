@@ -791,6 +791,57 @@ EncounterState InspectEncounter() {
   return InspectGameplay();
 }
 
+namespace {
+void InspectLearnedActions(EncounterState& state) {
+  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
+       ++action) {
+    if (Battle_actionDefinitions[action].unlocked) {
+      state.learned_actions.push_back(static_cast<int>(action));
+    }
+  }
+}
+
+void InspectInventory(EncounterState& state) {
+  for (std::size_t slot = 0; slot < std::size(Audio_Seq_unusedInventory.misc);
+       ++slot) {
+    const auto& item = Audio_Seq_unusedInventory.misc[slot];
+    if (item.id != 0) {
+      state.items.push_back({static_cast<int>(slot), item.id, item.count});
+    }
+  }
+}
+
+void InspectPendingLoot(EncounterState& state) {
+  for (const auto* node = Items_lootListHead; node != nullptr;
+       node = node->next) {
+    if (state.pending_loot.size() >= EncounterLimits::kActorSlots) {
+      throw std::runtime_error("encounter loot list exceeds actor storage");
+    }
+    EncounterLootState loot;
+    loot.source_actor = node->droppedMask;
+    for (std::size_t slot = 0; slot < std::size(node->loot.misc); ++slot) {
+      const auto& item = node->loot.misc[slot];
+      if (item.itemId != 0 && item.count != 0) {
+        loot.items.push_back({static_cast<int>(slot), item.itemId, item.count});
+      }
+    }
+    state.pending_loot.push_back(std::move(loot));
+  }
+}
+
+void InspectFloorTriggers(EncounterState& state) {
+  if (Field_roomData.floorTriggers == nullptr) return;
+  const auto count = Field_roomData.header.floorTriggersLength /
+                     sizeof(*Field_roomData.floorTriggers);
+  for (std::size_t i = 0; i < count; ++i) {
+    const auto& trigger = Field_roomData.floorTriggers[i];
+    state.floor_triggers.push_back(
+        {trigger.kind, trigger.tileX, trigger.tileZ, trigger.activation,
+         static_cast<unsigned char>(trigger.markerFade)});
+  }
+}
+}  // namespace
+
 EncounterState InspectGameplay() {
   EncounterState state;
   state.ready = gameplay_inspection_ready && Boot_isGameplayActive != 0 &&
@@ -809,19 +860,15 @@ EncounterState InspectGameplay() {
   }
   state.roulette = InspectRoulette(state.menu_state);
   if (constexpr int kResultsMenu = 15; state.menu_state == kResultsMenu) {
-    state.results_screen = Audio_Seq_unusedStateFlags.menuFSubmenu;
+    state.results_screen =
+        static_cast<unsigned char>(Audio_Seq_unusedStateFlags.menuFSubmenu);
   }
   state.frame_buffer = Render_frameBuf;
   state.transition = Field_screenTransitionStep;
   state.native_buttons = Input_buttonsState;
   state.native_pressed = Input_buttonsPressed.allButtons;
   state.action_phase = Battle_actionFlowMode;
-  for (unsigned action = 0; action < std::size(Battle_actionDefinitions);
-       ++action) {
-    if (Battle_actionDefinitions[action].unlocked) {
-      state.learned_actions.push_back(static_cast<int>(action));
-    }
-  }
+  InspectLearnedActions(state);
   constexpr int kLootFlag = 0xAB;
   constexpr int kLootAvailable = 3;
   state.rewards_available = State_ScriptFlag(kLootFlag) >= kLootAvailable;
@@ -833,38 +880,9 @@ EncounterState InspectGameplay() {
     if (actor == nullptr || actor->stats == nullptr) continue;
     state.actors.push_back(InspectActor(slot, *actor));
   }
-  for (std::size_t slot = 0; slot < std::size(Audio_Seq_unusedInventory.misc);
-       ++slot) {
-    const auto& item = Audio_Seq_unusedInventory.misc[slot];
-    if (item.id != 0) {
-      state.items.push_back({static_cast<int>(slot), item.id, item.count});
-    }
-  }
-  for (const auto* node = Items_lootListHead; node != nullptr;
-       node = node->next) {
-    if (state.pending_loot.size() >= EncounterLimits::kActorSlots) {
-      throw std::runtime_error("encounter loot list exceeds actor storage");
-    }
-    EncounterLootState loot;
-    loot.source_actor = node->droppedMask;
-    for (std::size_t slot = 0; slot < std::size(node->loot.misc); ++slot) {
-      const auto& item = node->loot.misc[slot];
-      if (item.itemId != 0 && item.count != 0) {
-        loot.items.push_back({static_cast<int>(slot), item.itemId, item.count});
-      }
-    }
-    state.pending_loot.push_back(std::move(loot));
-  }
-  if (Field_roomData.floorTriggers != nullptr) {
-    const auto count = Field_roomData.header.floorTriggersLength /
-                       sizeof(*Field_roomData.floorTriggers);
-    for (std::size_t i = 0; i < count; ++i) {
-      const auto& trigger = Field_roomData.floorTriggers[i];
-      state.floor_triggers.push_back(
-          {trigger.kind, trigger.tileX, trigger.tileZ, trigger.activation,
-           static_cast<unsigned char>(trigger.markerFade)});
-    }
-  }
+  InspectInventory(state);
+  InspectPendingLoot(state);
+  InspectFloorTriggers(state);
   return state;
 }
 

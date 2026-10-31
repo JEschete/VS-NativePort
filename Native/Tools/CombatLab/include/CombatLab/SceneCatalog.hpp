@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <cstddef>
 #include <cstdint>
 #include <span>
 #include <vector>
@@ -30,7 +31,8 @@ struct SceneOpcode {
   SceneOperation operation = SceneOperation::kNone;
 };
 
-using SceneOpcodes = std::array<SceneOpcode, 256>;
+inline constexpr std::size_t kSceneOpcodeCount = 256;
+using SceneOpcodes = std::array<SceneOpcode, kSceneOpcodeCount>;
 
 nlohmann::json DecodeSceneScript(std::span<const std::uint8_t> bytes,
                                  const SceneOpcodes& opcodes);

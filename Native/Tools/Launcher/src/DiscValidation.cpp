@@ -34,11 +34,18 @@ struct CryptoHandles {
   BCRYPT_ALG_HANDLE algorithm = nullptr;
   BCRYPT_HASH_HANDLE hash = nullptr;
   ~CryptoHandles() {
-    if (hash && BCryptDestroyHash(hash) < 0) {
-      VS_LOG_WARN("launcher.verify", "Cannot release SHA-256 hash handle");
-    }
-    if (algorithm && BCryptCloseAlgorithmProvider(algorithm, 0) < 0) {
-      VS_LOG_WARN("launcher.verify", "Cannot release SHA-256 provider");
+    const bool hash_failed = hash && BCryptDestroyHash(hash) < 0;
+    const bool provider_failed =
+        algorithm && BCryptCloseAlgorithmProvider(algorithm, 0) < 0;
+    try {
+      if (hash_failed) {
+        VS_LOG_WARN("launcher.verify", "Cannot release SHA-256 hash handle");
+      }
+      if (provider_failed) {
+        VS_LOG_WARN("launcher.verify", "Cannot release SHA-256 provider");
+      }
+    } catch (...) {
+      OutputDebugStringW(L"Cannot log the SHA-256 handle release failure");
     }
   }
 };
@@ -67,7 +74,7 @@ std::expected<std::string, std::string> Hash(HANDLE handle,
     return std::unexpected(std::format("Cannot initialize SHA-256 (0x{:08X}).",
                                        static_cast<std::uint32_t>(status)));
   }
-  constexpr std::size_t kChunkBytes = 1024 * 1024;
+  constexpr std::size_t kChunkBytes = std::size_t{1024} * 1024;
   std::vector<unsigned char> buffer(kChunkBytes);
   std::uint64_t total = 0;
   int previous_percent = 0;
@@ -86,27 +93,35 @@ std::expected<std::string, std::string> Hash(HANDLE handle,
     }
     total += count;
     const int percent =
-        bytes == 0 ? 100
-                   : static_cast<int>(static_cast<double>(total) / bytes * 100);
+        bytes == 0
+            ? kPercentComplete
+            : static_cast<int>(static_cast<double>(total) /
+                               static_cast<double>(bytes) * kPercentComplete);
     if (progress && percent != previous_percent) {
       progress(percent);
       previous_percent = percent;
     }
   }
-  if (total != bytes)
+  if (total != bytes) {
     return std::unexpected("The disc file changed while being read.");
-  std::array<unsigned char, 32> digest{};
+  }
+  constexpr std::size_t kDigestBytes = 32;
+  std::array<unsigned char, kDigestBytes> digest{};
   status = BCryptFinishHash(crypto.hash, digest.data(),
                             static_cast<ULONG>(digest.size()), 0);
   if (status < 0) return std::unexpected("Cannot finish the SHA-256 checksum.");
   constexpr char kHex[] = "0123456789ABCDEF";
+  constexpr int kNibbleBits = 4;
+  constexpr int kNibbleMask = 0xF;
   std::string result;
   result.reserve(digest.size() * 2);
   for (const auto value : digest) {
-    result.push_back(kHex[value >> 4]);
-    result.push_back(kHex[value & 15]);
+    result.push_back(kHex[value >> kNibbleBits]);
+    result.push_back(kHex[value & kNibbleMask]);
   }
-  if (progress && previous_percent != 100) progress(100);
+  if (progress && previous_percent != kPercentComplete) {
+    progress(kPercentComplete);
+  }
   return result;
 }
 }  // namespace

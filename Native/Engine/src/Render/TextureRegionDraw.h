@@ -11,14 +11,14 @@
 
 // decomp: renderTextures.h _renderTextureFadeInTint (src/renderTextures.h:3)
 void Render_DrawTextureTintFade(const Render_TextureRegion regions[], int x,
-                                int y, int texId, CVECTOR colors[]);
+                                int y, int tex_id, CVECTOR colors[]);
 
 // decomp: renderTextures.h _renderTexturePopIn (src/renderTextures.h:60)
 void Render_DrawTextureFlashFade(const Render_TextureRegion regions[], int x,
-                                 int y, int texId, CVECTOR colors[]);
+                                 int y, int tex_id, CVECTOR colors[]);
 
 // decomp: renderTextures.h _renderTextureWipe (src/renderTextures.h:130)
 void Render_DrawTextureWipe(const Render_TextureRegion regions[], int x, int y,
-                            int texId, CVECTOR colors[], int wipe_edge_x);
+                            int tex_id, CVECTOR colors[], int wipe_edge_x);
 
 #endif  // VS_OWNED_RENDER_TEXTUREREGIONDRAW_H

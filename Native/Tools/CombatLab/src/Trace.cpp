@@ -238,13 +238,14 @@ void SceneTrial::Observe(const Game::EncounterState& state,
       text_waiting || (choice_active && next_event_ > 0) || puzzle_screen;
   if (defeat_terminal && state.game_over && !game_over_menu_tick_) {
     constexpr int kFilesMenu = 7;  // MENU7 hosts vs_menu7_gameOver
+    constexpr int kMenuIndexMask = 0x3F;
     const auto ashley =
         std::ranges::find(state.actors, 0, &Game::EncounterActorState::slot);
     if (next_event_ != expected_.events.size()) {
       Fail("game over opened without the expected source events");
     } else if (ashley == state.actors.end() || ashley->hp != 0) {
       Fail("game over opened without Ashley's observed defeat");
-    } else if ((state.menu_state & 0x3F) == kFilesMenu) {
+    } else if ((state.menu_state & kMenuIndexMask) == kFilesMenu) {
       game_over_menu_tick_ = tick;
     }
     return;
@@ -583,11 +584,67 @@ nlohmann::json EncodeSetup(const Game::EncounterSetup& setup) {
   return result;
 }
 
-Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
-  if (json.at("version").get<int>() != 1) {
-    throw std::runtime_error("unsupported encounter preset version or policy");
+namespace {
+void DecodeCrossedPuzzles(const nlohmann::json& crossed,
+                          Game::EncounterSetup& setup) {
+  // Time-trial unlock flags tested by the puzzle-room entry scripts after
+  // puzzleMode/285/286 (e.g. MAP291 tests 223, set by the MAP241 entry when
+  // flag 286 == 2). Only these persistent flags may be declared; MAP370's
+  // 236 has no original writer, so it is excluded.
+  constexpr int kCrossedPuzzleFlags[] = {221, 222, 223, 224, 225, 226,
+                                         227, 228, 231, 232, 233, 234,
+                                         235, 237, 238, 239, 242};
+  if (!crossed.is_array() || crossed.empty()) {
+    throw std::runtime_error("crossed_puzzles must be a non-empty array");
   }
-  Game::EncounterSetup setup;
+  for (const auto& flag : crossed) {
+    if (!flag.is_number_integer() ||
+        std::ranges::find(kCrossedPuzzleFlags, flag.get<int>()) ==
+            std::end(kCrossedPuzzleFlags) ||
+        std::ranges::find(setup.crossed_puzzles, flag.get<int>()) !=
+            setup.crossed_puzzles.end()) {
+      throw std::runtime_error(
+          "crossed_puzzles entries must be distinct puzzle time-trial "
+          "unlock flags");
+    }
+    setup.crossed_puzzles.push_back(flag.get<int>());
+  }
+}
+
+void DecodeProgression(const nlohmann::json& json,
+                       Game::EncounterSetup& setup) {
+  if (json.contains("story_progress")) {
+    constexpr int kLastStoryProgress = 0xFF;
+    const auto& progress = json.at("story_progress");
+    if (!progress.is_number_integer() || progress < 0 ||
+        progress > kLastStoryProgress) {
+      throw std::runtime_error("story_progress must be an integer in 0..255");
+    }
+    setup.story_progress = progress.get<int>();
+  }
+  if (json.contains("clear_count")) {
+    // ENDING.PRG caps the counter at 99 (ClearResults.c).
+    constexpr int kLastClearCount = 99;
+    const auto& clears = json.at("clear_count");
+    if (!clears.is_number_integer() || clears < 1 || clears > kLastClearCount) {
+      throw std::runtime_error("clear_count must be an integer in 1..99");
+    }
+    setup.clear_count = clears.get<int>();
+  }
+  if (json.contains("crossed_puzzles")) {
+    DecodeCrossedPuzzles(json.at("crossed_puzzles"), setup);
+  }
+  if (json.contains("inherited_music")) {
+    const auto& music = json.at("inherited_music");
+    if (!music.is_number_integer() || music < 1 ||
+        music > Game::EncounterLimits::kLastMusic) {
+      throw std::runtime_error("inherited_music must be an integer in 1..199");
+    }
+    setup.inherited_music = music.get<int>();
+  }
+}
+
+void DecodeRoomEvents(const nlohmann::json& json, Game::EncounterSetup& setup) {
   const auto policy = json.value("room_events", "isolated");
   if (policy == "production") {
     setup.room_policy = Game::EncounterRoomPolicy::kOriginalRoom;
@@ -615,54 +672,55 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     }
     setup.room_local_event = event.get<int>();
   }
-  if (json.contains("story_progress")) {
-    const auto& progress = json.at("story_progress");
-    if (!progress.is_number_integer() || progress < 0 || progress > 0xFF) {
-      throw std::runtime_error("story_progress must be an integer in 0..255");
-    }
-    setup.story_progress = progress.get<int>();
+}
+
+Game::EncounterProfile DecodeProfile(const std::string& profile) {
+  if (profile == "prologue") return Game::EncounterProfile::kPrologue;
+  if (profile == "post-prologue") return Game::EncounterProfile::kPostPrologue;
+  if (profile == "post-minotaur") return Game::EncounterProfile::kPostMinotaur;
+  if (profile == "all-items-a") return Game::EncounterProfile::kAllItemsA;
+  if (profile == "all-items-b") return Game::EncounterProfile::kAllItemsB;
+  if (profile == "all-spells") return Game::EncounterProfile::kAllSpells;
+  if (profile == "all-abilities") return Game::EncounterProfile::kAllAbilities;
+  if (profile == "all-break-arts") {
+    return Game::EncounterProfile::kAllBreakArts;
   }
-  if (json.contains("clear_count")) {
-    // ENDING.PRG caps the counter at 99 (ClearResults.c).
-    const auto& clears = json.at("clear_count");
-    if (!clears.is_number_integer() || clears < 1 || clears > 99) {
-      throw std::runtime_error("clear_count must be an integer in 1..99");
-    }
-    setup.clear_count = clears.get<int>();
+  throw std::runtime_error("unknown encounter Ashley profile");
+}
+
+void CheckAttractDemo(const Game::EncounterSetup& setup) {
+  // Original title-timeout state only: Title_InitializeNewGameData's entry
+  // tile/New Game kit and _setTitleExitFlags' door (TITLE 22C.c:4741).
+  constexpr int kFirstDemoZone = 20;
+  constexpr int kEntryTileX = 4;
+  const Game::EncounterStatOverrides no_stat_overrides;
+  const bool first = setup.attract_demo == Game::kAttractDemoCutscene1;
+  if (setup.zone != (first ? kFirstDemoZone : 2) ||
+      setup.room != (first ? 0 : 1) || setup.player.x != kEntryTileX ||
+      setup.player.z != 2 || setup.player.elevation != 2 ||
+      setup.player.direction != 0 ||
+      setup.room_policy != Game::EncounterRoomPolicy::kOriginalRoom ||
+      setup.profile != Game::EncounterProfile::kPrologue ||
+      setup.weapon != Game::EncounterWeapon::kDefault ||
+      setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
+      setup.external_event || setup.room_local_event || setup.story_progress ||
+      setup.clear_count || !setup.crossed_puzzles.empty() ||
+      setup.inherited_music) {
+    throw std::runtime_error(
+        "attract_demo requires the original title-timeout door, entry "
+        "tile and unmodified New Game production room");
   }
-  if (json.contains("crossed_puzzles")) {
-    // Time-trial unlock flags tested by the puzzle-room entry scripts after
-    // puzzleMode/285/286 (e.g. MAP291 tests 223, set by the MAP241 entry when
-    // flag 286 == 2). Only these persistent flags may be declared; MAP370's
-    // 236 has no original writer, so it is excluded.
-    constexpr int kCrossedPuzzleFlags[] = {221, 222, 223, 224, 225, 226,
-                                           227, 228, 231, 232, 233, 234,
-                                           235, 237, 238, 239, 242};
-    const auto& crossed = json.at("crossed_puzzles");
-    if (!crossed.is_array() || crossed.empty()) {
-      throw std::runtime_error("crossed_puzzles must be a non-empty array");
-    }
-    for (const auto& flag : crossed) {
-      if (!flag.is_number_integer() ||
-          std::ranges::find(kCrossedPuzzleFlags, flag.get<int>()) ==
-              std::end(kCrossedPuzzleFlags) ||
-          std::ranges::find(setup.crossed_puzzles, flag.get<int>()) !=
-              setup.crossed_puzzles.end()) {
-        throw std::runtime_error(
-            "crossed_puzzles entries must be distinct puzzle time-trial "
-            "unlock flags");
-      }
-      setup.crossed_puzzles.push_back(flag.get<int>());
-    }
+}
+
+}  // namespace
+
+Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
+  if (json.at("version").get<int>() != 1) {
+    throw std::runtime_error("unsupported encounter preset version or policy");
   }
-  if (json.contains("inherited_music")) {
-    const auto& music = json.at("inherited_music");
-    if (!music.is_number_integer() || music < 1 ||
-        music > Game::EncounterLimits::kLastMusic) {
-      throw std::runtime_error("inherited_music must be an integer in 1..199");
-    }
-    setup.inherited_music = music.get<int>();
-  }
+  Game::EncounterSetup setup;
+  DecodeRoomEvents(json, setup);
+  DecodeProgression(json, setup);
   setup.zone = json.at("zone").get<int>();
   setup.room = json.at("room").get<int>();
   const auto seed = json.at("seed").get<std::int64_t>();
@@ -670,26 +728,7 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
     throw std::runtime_error("seed is outside uint32 range");
   }
   setup.seed = static_cast<std::uint32_t>(seed);
-  const auto profile = json.value("ashley_profile", "prologue");
-  if (profile == "prologue") {
-    setup.profile = Game::EncounterProfile::kPrologue;
-  } else if (profile == "post-prologue") {
-    setup.profile = Game::EncounterProfile::kPostPrologue;
-  } else if (profile == "post-minotaur") {
-    setup.profile = Game::EncounterProfile::kPostMinotaur;
-  } else if (profile == "all-items-a") {
-    setup.profile = Game::EncounterProfile::kAllItemsA;
-  } else if (profile == "all-items-b") {
-    setup.profile = Game::EncounterProfile::kAllItemsB;
-  } else if (profile == "all-spells") {
-    setup.profile = Game::EncounterProfile::kAllSpells;
-  } else if (profile == "all-abilities") {
-    setup.profile = Game::EncounterProfile::kAllAbilities;
-  } else if (profile == "all-break-arts") {
-    setup.profile = Game::EncounterProfile::kAllBreakArts;
-  } else {
-    throw std::runtime_error("unknown encounter Ashley profile");
-  }
+  setup.profile = DecodeProfile(json.value("ashley_profile", "prologue"));
   setup.player = DecodePosition(json.at("player"));
   const auto weapon = json.value("ashley_weapon", "default");
   setup.weapon = Game::EncounterWeapon::kCount;
@@ -720,24 +759,7 @@ Game::EncounterSetup DecodeSetup(const nlohmann::json& json) {
           "attract_demo must be title timeout cause 3 or 4");
     }
     setup.attract_demo = cause.get<int>();
-    // Original title-timeout state only: Title_InitializeNewGameData's entry
-    // tile/New Game kit and _setTitleExitFlags' door (TITLE 22C.c:4741).
-    const Game::EncounterStatOverrides no_stat_overrides;
-    const bool first = setup.attract_demo == Game::kAttractDemoCutscene1;
-    if (setup.zone != (first ? 20 : 2) || setup.room != (first ? 0 : 1) ||
-        setup.player.x != 4 || setup.player.z != 2 ||
-        setup.player.elevation != 2 || setup.player.direction != 0 ||
-        setup.room_policy != Game::EncounterRoomPolicy::kOriginalRoom ||
-        setup.profile != Game::EncounterProfile::kPrologue ||
-        setup.weapon != Game::EncounterWeapon::kDefault ||
-        setup.stat_overrides != no_stat_overrides || !setup.enemies.empty() ||
-        setup.external_event || setup.room_local_event ||
-        setup.story_progress || setup.clear_count ||
-        !setup.crossed_puzzles.empty() || setup.inherited_music) {
-      throw std::runtime_error(
-          "attract_demo requires the original title-timeout door, entry "
-          "tile and unmodified New Game production room");
-    }
+    CheckAttractDemo(setup);
   }
   return setup;
 }

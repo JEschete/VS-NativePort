@@ -58,8 +58,8 @@ struct ResultsTextureFixture {
   }
 };
 
-void CheckRegion(const POLY_GT4& packet, const Render_TextureRegion& region,
-                 int x, int y, bool fading) {
+void CheckRegionPlacement(const POLY_GT4& packet,
+                          const Render_TextureRegion& region, int x, int y) {
   // Copied C uses unsigned plain char, unlike the C++ test translation unit.
   const int width = static_cast<unsigned char>(region.w);
   const int height = static_cast<unsigned char>(region.h);
@@ -67,6 +67,11 @@ void CheckRegion(const POLY_GT4& packet, const Render_TextureRegion& region,
   CHECK(packet.y0 == y);
   CHECK(packet.x1 == x + width);
   CHECK(packet.y2 == y + height);
+}
+
+void CheckRegion(const POLY_GT4& packet, const Render_TextureRegion& region,
+                 int x, int y, bool fading) {
+  CheckRegionPlacement(packet, region, x, y);
   CHECK(packet.u0 == static_cast<unsigned char>(region.x));
   CHECK(packet.v0 == static_cast<unsigned char>(region.y));
   CHECK(packet.u1 == static_cast<unsigned char>(region.x + region.w));
@@ -113,6 +118,37 @@ TEST_CASE("Hidden cube results emit no textures",
   CHECK(fixture.ordering == original_ordering);
 }
 
+namespace {
+void CheckFadedPacket(const POLY_GT4& packet,
+                      const std::array<CVECTOR, 2>& colors, int fade,
+                      bool flash) {
+  const auto expected_component = [fade, flash](int value) {
+    if (fade < 8) return value * fade / 8;
+    if (flash && fade == 8) return 192;
+    if (flash && fade == 9) return 224;
+    if (flash && fade < 14) {
+      return (value * (fade - 10) + (14 - fade) * 192) / 4;
+    }
+    return value;
+  };
+  CHECK(packet.r0 == expected_component(colors[0].r));
+  CHECK(packet.g0 == expected_component(colors[0].g));
+  CHECK(packet.b0 == expected_component(colors[0].b));
+  CHECK(packet.r1 == expected_component(colors[1].r));
+  CHECK(packet.g1 == expected_component(colors[1].g));
+  CHECK(packet.b1 == expected_component(colors[1].b));
+}
+
+void CheckGradientCorners(const POLY_GT4& packet) {
+  CHECK(packet.r2 == packet.r0);
+  CHECK(packet.g2 == packet.g0);
+  CHECK(packet.b2 == packet.b0);
+  CHECK(packet.r3 == packet.r1);
+  CHECK(packet.g3 == packet.g1);
+  CHECK(packet.b3 == packet.b1);
+}
+}  // namespace
+
 TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
           "[menu][ending][render][results-texture]") {
   const int fade = GENERATE(0, 1, 7, 8, 9, 10, 11, 12, 13, 14, 64);
@@ -132,31 +168,34 @@ TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
   CheckRegion(fixture.Packets()[1], Ending_resultAtlasRegions[12], 30, 40,
               fading);
   CheckRegion(fixture.Packets()[2], Menu_Results_disMap[12], 50, 60, fading);
-  const auto expected_component = [fade, flash](int value) {
-    if (fade < 8) return value * fade / 8;
-    if (flash && fade == 8) return 192;
-    if (flash && fade == 9) return 224;
-    if (flash && fade < 14) {
-      return (value * (fade - 10) + (14 - fade) * 192) / 4;
-    }
-    return value;
-  };
   for (int index = 0; index < 3; ++index) {
-    const auto& packet = fixture.Packets()[index];
-    CHECK(packet.r0 == expected_component(colors[0].r));
-    CHECK(packet.g0 == expected_component(colors[0].g));
-    CHECK(packet.b0 == expected_component(colors[0].b));
-    CHECK(packet.r1 == expected_component(colors[1].r));
-    CHECK(packet.g1 == expected_component(colors[1].g));
-    CHECK(packet.b1 == expected_component(colors[1].b));
-    CHECK(packet.r2 == packet.r0);
-    CHECK(packet.g2 == packet.g0);
-    CHECK(packet.b2 == packet.b0);
-    CHECK(packet.r3 == packet.r1);
-    CHECK(packet.g3 == packet.g1);
-    CHECK(packet.b3 == packet.b1);
+    CheckFadedPacket(fixture.Packets()[index], colors, fade, flash);
+    CheckGradientCorners(fixture.Packets()[index]);
   }
 }
+
+namespace {
+void CheckWipeStripGeometry(const POLY_GT4& packet,
+                            const Render_TextureRegion& region, int offset,
+                            int width) {
+  CHECK(packet.x0 == 10 + offset);
+  CHECK(packet.x1 == 10 + offset + width);
+  CHECK(packet.y0 == 20);
+  CHECK(packet.y2 == 20 + region.h);
+  CHECK(packet.u0 == static_cast<unsigned char>(region.x + offset));
+  CHECK(packet.u1 == static_cast<unsigned char>(region.x + offset + width));
+}
+
+void CheckWipeStripFade(const POLY_GT4& packet,
+                        const Render_TextureRegion& region, int offset,
+                        int width) {
+  CHECK(packet.v0 == static_cast<unsigned char>(region.y));
+  CHECK(packet.clut == region.clut + 1);
+  CHECK(packet.tpage == (region.tpage | 0x20));
+  CHECK(packet.r0 == 128 * std::clamp(8 - offset, 0, 64) / 64);
+  CHECK(packet.r1 == 128 * std::clamp(8 - offset - width, 0, 64) / 64);
+}
+}  // namespace
 
 TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
           "[menu][render][results-texture]") {
@@ -178,17 +217,8 @@ TEST_CASE("Time-attack rating wipes use MENUF for full and partial strips",
     const auto& packet = fixture.Packets()[index];
     const int offset = index * 12;
     const int width = std::min(12, region.w - offset);
-    CHECK(packet.x0 == 10 + offset);
-    CHECK(packet.x1 == 10 + offset + width);
-    CHECK(packet.y0 == 20);
-    CHECK(packet.y2 == 20 + region.h);
-    CHECK(packet.u0 == static_cast<unsigned char>(region.x + offset));
-    CHECK(packet.u1 == static_cast<unsigned char>(region.x + offset + width));
-    CHECK(packet.v0 == static_cast<unsigned char>(region.y));
-    CHECK(packet.clut == region.clut + 1);
-    CHECK(packet.tpage == (region.tpage | 0x20));
-    CHECK(packet.r0 == 128 * std::clamp(8 - offset, 0, 64) / 64);
-    CHECK(packet.r1 == 128 * std::clamp(8 - offset - width, 0, 64) / 64);
+    CheckWipeStripGeometry(packet, region, offset, width);
+    CheckWipeStripFade(packet, region, offset, width);
   }
 }
 

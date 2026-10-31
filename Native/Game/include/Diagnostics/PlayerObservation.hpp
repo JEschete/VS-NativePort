@@ -114,22 +114,26 @@ struct EncounterItemOption {
   int stat_factor = 0;
 };
 
+inline constexpr int kTileWorldUnits = 64;
+inline constexpr std::size_t kTileSampleFields = 3;
+inline constexpr std::size_t kStatusMaskCount = 32;
+
 struct EncounterNavigationState {
   bool available = false;
   int origin_x = 0;
   int origin_z = 0;
   int width = 0;
   int depth = 0;
-  int spacing = 64;
+  int spacing = kTileWorldUnits;
   int collision_radius = 0;
   int collision_height = 0;
   int movement_mode = 0;
   int locomotion_state = 0;
   int route_phase = 0;
   bool jumping = false;
-  std::array<int, 3> facing_tile{};
+  std::array<int, kTileSampleFields> facing_tile{};
   // Packed heights; flags: point passable=1, pit=2, footprint clear=4.
-  std::vector<std::array<int, 3>> samples;
+  std::vector<std::array<int, kTileSampleFields>> samples;
 };
 
 // Original MPD section 13 container (Items_TreasureChest) plus its opened flag.
@@ -151,7 +155,7 @@ struct PlayerObservationState : EncounterState {
   EncounterReactionTimingState reaction_timing;
   std::vector<EncounterActionOption> action_options;
   EncounterMenuState menu;
-  std::array<std::uint32_t, 32> status_masks{};
+  std::array<std::uint32_t, kStatusMaskCount> status_masks{};
   std::vector<EncounterDoor> doors;
   std::vector<int> door_flag_values;
   std::vector<EncounterChestState> chests;

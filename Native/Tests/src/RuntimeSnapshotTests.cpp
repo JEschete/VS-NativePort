@@ -11,6 +11,7 @@
 #include <limits>
 #include <memory>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <system_error>
 #include <type_traits>
@@ -1556,20 +1557,21 @@ TEST_CASE("Wrong room or unfinished spawn cannot partially finish a resume",
   CHECK_FALSE(Save::ResumePending());
 }
 
-TEST_CASE("Ending component capture preserves carryover without live actors",
-          "[save][runtime-snapshot][save-clear]") {
-  RuntimeFixture fixture;
-  const auto document = fixture.ClearGame();
+namespace {
+void CheckClearProgress(const Save::Document& document) {
   CHECK(document.new_game_entry);
   CHECK(document.state.script_flags[0] == 1);
   CHECK(document.state.script_flags[1] == 1);
   CHECK(document.state.script_flags[64] == 0);
-  CHECK(document.state.ashley.currentHp == 123);
-  CHECK(document.state.ashley.currentMp == 31);
   CHECK(document.state.settings.currentGameSaveCount == 0);
   CHECK(document.state.settings.cumulativeSaveCount == 19);
   CHECK(document.state.settings.menuFlags == 0xFFDF);
   CHECK(document.state.play_ticks == 0);
+}
+
+void CheckClearCarryover(const Save::Document& document) {
+  CHECK(document.state.ashley.currentHp == 123);
+  CHECK(document.state.ashley.currentMp == 31);
   CHECK(document.state.inventory.misc[0].id == 0);
   CHECK(document.state.inventory_order.misc[0] == 0);
   CHECK(document.state.inventory.weapons[0].blade == 1);
@@ -1579,6 +1581,24 @@ TEST_CASE("Ending component capture preserves carryover without live actors",
   // The packed original capture differs deliberately from the now-unavailable
   // overlay's action-table view.
   CHECK(document.state.learned_actions[1]);
+}
+
+void CheckResumeStaged() {
+  CHECK(State_savedEntryDoor.destinationZoneId == 1);
+  CHECK(State_savedEntryDoor.entryTileX == 3);
+  CHECK(State_savedEntryDoor.entryTileZ == 2);
+  CHECK(State_savedEntryDoor.tileLocation.entryDirection == 1);
+  CHECK(State_savedEntryDoor.requiredFlagId == 37);
+  CHECK(State_ashleySnapshot.stats.isPending == 1);
+}
+}  // namespace
+
+TEST_CASE("Ending component capture preserves carryover without live actors",
+          "[save][runtime-snapshot][save-clear]") {
+  RuntimeFixture fixture;
+  const auto document = fixture.ClearGame();
+  CheckClearProgress(document);
+  CheckClearCarryover(document);
   Battle_characterState = nullptr;
   Battle_actors[0] = nullptr;
   Actors_actorRecords[0] = nullptr;
@@ -1590,28 +1610,27 @@ TEST_CASE("Ending component capture preserves carryover without live actors",
   CHECK(LiveFingerprint(fixture) == before);
 }
 
-TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
-          "[save][runtime-snapshot][save-clear]") {
-  RuntimeFixture fixture;
-  const auto document = fixture.ClearGame();
-  const auto encoded = Save::Encode(document);
-  REQUIRE(encoded);
-  const auto decoded = Save::Decode(*encoded);
-  REQUIRE(decoded);
+namespace {
+// The value of an optional a test has established must be present.
+template <class Optional>
+auto& Engaged(Optional& optional) {
+  if (!optional.has_value()) throw std::runtime_error("expected a value");
+  return *optional;
+}
+
+void CheckResumeCancels(RuntimeFixture& fixture,
+                        const Save::Document& decoded) {
   const auto before = LiveFingerprint(fixture);
   for (int iteration = 0; iteration < 2; ++iteration) {
-    REQUIRE(Save::PrepareResume(*decoded));
-    CHECK(State_savedEntryDoor.destinationZoneId == 1);
-    CHECK(State_savedEntryDoor.entryTileX == 3);
-    CHECK(State_savedEntryDoor.entryTileZ == 2);
-    CHECK(State_savedEntryDoor.tileLocation.entryDirection == 1);
-    CHECK(State_savedEntryDoor.requiredFlagId == 37);
-    CHECK(State_ashleySnapshot.stats.isPending == 1);
+    REQUIRE(Save::PrepareResume(decoded));
+    CheckResumeStaged();
     Save::CancelResume();
     CHECK_FALSE(Save::ResumePending());
     CHECK(LiveFingerprint(fixture) == before);
   }
-  REQUIRE(Save::PrepareResume(*decoded));
+}
+
+void CheckResumeRestoresAshley(RuntimeFixture& fixture) {
   // Component setup only: the production spawn restoration consumes the
   // actual persistent Ashley data; this is not an ending playthrough.
   Actors_RestoreAshleyRuntimeState();
@@ -1622,6 +1641,29 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   CHECK_FALSE(
       Save::FinishResume());  // Old campaign room is not the start room.
   CHECK(LiveFingerprint(fixture) == staged);
+}
+
+void CheckResumeKeptLiveState(const RuntimeFixture& fixture) {
+  CHECK(State_playTime.t.frames == 8);
+  CHECK(fixture.player_model.instance.position.vx == 77);
+  CHECK(fixture.player_model.instance.position.vy == -88);
+  CHECK(Field_sphericalCamera.values.yaw == 333);
+  CHECK(Core_Random_State() == 777);
+  CHECK(State_recentRoomEnemyStates[0].nextSlot == 5);
+}
+}  // namespace
+
+TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
+          "[save][runtime-snapshot][save-clear]") {
+  RuntimeFixture fixture;
+  const auto document = fixture.ClearGame();
+  const auto encoded = Save::Encode(document);
+  REQUIRE(encoded);
+  const auto decoded = Save::Decode(*encoded);
+  REQUIRE(decoded);
+  CheckResumeCancels(fixture, *decoded);
+  REQUIRE(Save::PrepareResume(*decoded));
+  CheckResumeRestoresAshley(fixture);
   Boot_isGameplayActive = 1;
   Field_zoneContext.zndId = 1;
   State_recentRoomEnemyStates[0].nextSlot = 5;
@@ -1631,12 +1673,7 @@ TEST_CASE("Clear resume uses original spawn and is cancelable and repeatable",
   Core_Random_Seed(777);
   REQUIRE(Save::FinishResume());
   CHECK_FALSE(Save::ResumePending());
-  CHECK(State_playTime.t.frames == 8);
-  CHECK(fixture.player_model.instance.position.vx == 77);
-  CHECK(fixture.player_model.instance.position.vy == -88);
-  CHECK(Field_sphericalCamera.values.yaw == 333);
-  CHECK(Core_Random_State() == 777);
-  CHECK(State_recentRoomEnemyStates[0].nextSlot == 5);
+  CheckResumeKeptLiveState(fixture);
   CHECK_FALSE(Save::FinishResume());
 }
 
@@ -1663,14 +1700,16 @@ TEST_CASE("Clear-game validation rejects unreset state and missing content",
   if (defect == 2) document.state.settings.currentGameSaveCount = 1;
   if (defect == 3) document.state.play_ticks = 1;
   if (defect == 4) document.state.inventory.misc[0].id = 308;
-  if (defect == 5) document.new_game_entry->destinationZoneId = 9;
+  if (defect == 5) Engaged(document.new_game_entry).destinationZoneId = 9;
   if (defect == 6) document.state.visits.roomFlags[0] = 1;
   if (defect == 7) {
     REQUIRE(std::filesystem::remove(fixture.content.root / "disc" / "MAP" /
                                     "ZONE001.ZND"));
   }
-  if (defect == 8) document.new_game_entry->entryTileX = 31;
-  if (defect == 9) document.new_game_entry->tileLocation.entryDirection = 2;
+  if (defect == 8) Engaged(document.new_game_entry).entryTileX = 31;
+  if (defect == 9) {
+    Engaged(document.new_game_entry).tileLocation.entryDirection = 2;
+  }
   const auto before = LiveFingerprint(fixture);
   CHECK_FALSE(Save::ValidateContent(document));
   CHECK_FALSE(Save::PrepareResume(document));

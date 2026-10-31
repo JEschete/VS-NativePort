@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <chrono>
+#include <cstdio>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -37,8 +38,12 @@ struct LauncherFixture {
         " TRACK 01 MODE2/2352\n INDEX 01 00:00:00\n");
   }
   ~LauncherFixture() {
-    std::error_code error;
-    fs::remove_all(root.parent_path(), error);
+    try {
+      std::error_code error;
+      fs::remove_all(root.parent_path(), error);
+    } catch (const std::exception& error) {
+      std::fputs(error.what(), stderr);
+    }
   }
   void Cue(const std::string& text) const { std::ofstream(cue) << text; }
   void Ready() const {
@@ -139,10 +144,9 @@ TEST_CASE("Launcher rejects unsupported or incomplete CUE layouts",
   CHECK_FALSE(Launcher::ValidateCue(fixture.cue).has_value());
 }
 
-TEST_CASE("Disc SHA-256 streams known inputs with progress and a read lock",
-          "[launcher][disc-identity]") {
-  LauncherFixture fixture;
-  std::ofstream(fixture.image, std::ios::binary) << "abc";
+namespace {
+// Every progress report tries to write the file, which the read lock must deny.
+void CheckHashHoldsReadLock(const LauncherFixture& fixture) {
   std::vector<int> progress;
   bool attempted_write = false;
   const auto hash = Launcher::Sha256File(fixture.image, [&](int percent) {
@@ -163,6 +167,14 @@ TEST_CASE("Disc SHA-256 streams known inputs with progress and a read lock",
   CHECK(progress.front() == 0);
   CHECK(progress.back() == 100);
   CHECK(std::ranges::is_sorted(progress));
+}
+}  // namespace
+
+TEST_CASE("Disc SHA-256 streams known inputs with progress and a read lock",
+          "[launcher][disc-identity]") {
+  LauncherFixture fixture;
+  std::ofstream(fixture.image, std::ios::binary) << "abc";
+  CheckHashHoldsReadLock(fixture);
   std::ofstream(fixture.image, std::ios::binary).close();
   const auto empty = Launcher::Sha256File(fixture.image);
   REQUIRE(empty.has_value());

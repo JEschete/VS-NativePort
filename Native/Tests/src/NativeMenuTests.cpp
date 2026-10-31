@@ -9,6 +9,7 @@
 #include <fstream>
 #include <iterator>
 #include <span>
+#include <stdexcept>
 #include <string>
 #include <system_error>
 #include <vector>
@@ -146,6 +147,20 @@ struct MenuContentFixture {
     std::copy_n(Items_itemCategoryUpperIds, previous_bounds.size(),
                 previous_bounds.begin());
     std::copy(kBounds.begin(), kBounds.end(), Items_itemCategoryUpperIds);
+    AddMaps();
+    AddAreaMap();
+    AddBattleBounds(kBounds);
+    {
+      std::ofstream output(root / "files.tsv");
+      output << manifest;
+      REQUIRE(output.good());
+    }
+    const auto opened = VS::Content::DataStore::Open(root);
+    INFO((opened ? "content open" : opened.error()));
+    REQUIRE(opened.has_value());
+  }
+
+  void AddMaps() {
     std::vector<std::uint8_t> room;
     Field_MpdHeader header{};
     header.roomSectionOffset = sizeof(header);
@@ -169,7 +184,7 @@ struct MenuContentFixture {
     Put(zone, 32, static_cast<std::uint32_t>(room.size()));
     Add("MAP/ZONE009.ZND", zone, 100);
     std::vector<std::uint8_t> start;
-    lengths[1] = sizeof(Field_MpdCollisionHeader) + 8 * 8 * 4 + 16;
+    lengths[1] = sizeof(Field_MpdCollisionHeader) + std::size_t{8} * 8 * 4 + 16;
     Put(start, sizeof(header), lengths);
     Put(start, collision, Field_MpdCollisionHeader{8, 8, 0, 1});
     start.resize(collision + lengths[1]);
@@ -181,7 +196,9 @@ struct MenuContentFixture {
     Put(zone, 28, std::uint32_t{201});
     Put(zone, 32, static_cast<std::uint32_t>(start.size()));
     Add("MAP/ZONE001.ZND", zone, 101);
+  }
 
+  void AddAreaMap() {
     std::vector<std::uint8_t> arm;
     Put(arm, 0, std::uint32_t{1});
     Put(arm, 4, Field_MapRoom{0, 24, 9, 1});
@@ -191,26 +208,20 @@ struct MenuContentFixture {
     name.name[1] = static_cast<char>(0xE7);
     Put(arm, arm.size(), name);
     Add("SMALL/SCEN001.ARM", arm, 300);
+  }
 
+  void AddBattleBounds(const std::array<unsigned, 8>& bounds) {
     bool found = false;
     for (unsigned index = 0; index < Content_moduleDataCount; ++index) {
       const auto& slice = Content_moduleData[index];
       if (slice.target != &Items_itemCategoryUpperIds) continue;
       std::vector<std::uint8_t> battle;
-      Put(battle, slice.offset, kBounds);
+      Put(battle, slice.offset, bounds);
       Add(slice.module, battle, 10000);
       found = true;
       break;
     }
     REQUIRE(found);
-    {
-      std::ofstream output(root / "files.tsv");
-      output << manifest;
-      REQUIRE(output.good());
-    }
-    const auto opened = VS::Content::DataStore::Open(root);
-    INFO((opened ? "content open" : opened.error()));
-    REQUIRE(opened.has_value());
   }
 
   ~MenuContentFixture() {
@@ -657,6 +668,39 @@ void ExecuteClearSave() {
 }
 }  // namespace
 
+namespace {
+void CheckClearSaveProgress(const Save::Document& document) {
+  CHECK(document.generation == 1);
+  CHECK(document.state.settings.cumulativeSaveCount == 20);
+  CHECK(document.state.settings.currentGameSaveCount == 0);
+  CHECK(document.state.settings.saveFileGeneration == 4);
+  CHECK(document.state.script_flags[0] == 1);
+}
+
+void CheckClearSaveCarryover(const Save::Document& document) {
+  CHECK(document.state.ashley.currentHp == 250);
+  CHECK(document.state.ashley.currentMp == 50);
+  CHECK(document.state.inventory.misc[0].id == 0);
+  CHECK(document.state.learned_actions[0]);
+}
+
+void CheckClearSaveSession() {
+  CHECK(Input_settings.cumulativeSaveCount == 20);
+  CHECK(Input_settings.currentGameSaveCount == 0);
+  CHECK(Menu_Files_dataNotSaved == 1);
+  CHECK(Text(Screen().summaries[0].room_name.data()) == "CLEAR GAME");
+}
+}  // namespace
+
+namespace {
+// The value of an optional a test has established must be present.
+template <class Optional>
+auto& Engaged(Optional& optional) {
+  if (!optional.has_value()) throw std::runtime_error("expected a value");
+  return *optional;
+}
+}  // namespace
+
 TEST_CASE("Original ending component writes a distinct native clear save",
           "[save-menu][save-clear]") {
   MenuFixture fixture;
@@ -669,27 +713,52 @@ TEST_CASE("Original ending component writes a distinct native clear save",
   const auto loaded = files->Load(0);
   REQUIRE(loaded);
   REQUIRE(loaded->document.new_game_entry);
-  CHECK(loaded->document.generation == 1);
-  CHECK(loaded->document.state.settings.cumulativeSaveCount == 20);
-  CHECK(loaded->document.state.settings.currentGameSaveCount == 0);
-  CHECK(loaded->document.state.settings.saveFileGeneration == 4);
-  CHECK(loaded->document.state.script_flags[0] == 1);
-  CHECK(loaded->document.state.ashley.currentHp == 250);
-  CHECK(loaded->document.state.ashley.currentMp == 50);
-  CHECK(loaded->document.state.inventory.misc[0].id == 0);
-  CHECK(loaded->document.state.learned_actions[0]);
-  CHECK(Input_settings.cumulativeSaveCount == 20);
-  CHECK(Input_settings.currentGameSaveCount == 0);
-  CHECK(Menu_Files_dataNotSaved == 1);
-  CHECK(Text(Screen().summaries[0].room_name.data()) == "CLEAR GAME");
+  CheckClearSaveProgress(loaded->document);
+  CheckClearSaveCarryover(loaded->document);
+  CheckClearSaveSession();
   Buttons(PADRright);
   CHECK(Menu_Files_UpdateSaveMenu(0) == 1);
   Save::ShutdownFileMenus();
   Save::ConfigureDirectory(fixture.root);
   CHECK(Save_NativeInitialTitleSelection() == 1);
   BeginPicker(Menu_Files_UpdateLoadMenu, 1);
-  CHECK(Screen().files.front().document->new_game_entry.has_value());
+  CHECK(Engaged(Screen().files.front().document).new_game_entry.has_value());
 }
+
+namespace {
+void CheckOverwrittenBank(const fs::path& root) {
+  auto files = Save::Files::Open(root);
+  REQUIRE(files);
+  const auto loaded = files->Load(0);
+  REQUIRE(loaded);
+  CHECK(loaded->document.generation == 2);
+  CHECK(loaded->document.new_game_entry.has_value());
+  const auto& bank = loaded->document.state.storage;
+  CHECK(bank.misc[0].id == 0);
+  CHECK(bank.misc[63].id == 0);
+  CHECK(bank.misc[64].count == 2);
+  CHECK(bank.misc[255].count == 3);
+}
+
+void CheckReplacedRecoveredFile(const fs::path& root) {
+  const auto files = Save::Files::Open(root);
+  REQUIRE(files);
+  const auto loaded = files->Load(0);
+  REQUIRE(loaded);
+  CHECK_FALSE(loaded->recovered);
+  CHECK(loaded->document.new_game_entry.has_value());
+  CHECK(loaded->document.generation == 2);
+}
+
+void CheckFailedClearSaveChangedNothing(const fs::path& path,
+                                        const std::string& bytes) {
+  CHECK(Text(Title_memoryCardMessage) == "Save failed - see log");
+  CHECK(Input_settings.cumulativeSaveCount == 19);
+  CHECK(Input_settings.currentGameSaveCount == 7);
+  CHECK(Input_settings.saveFileGeneration == 3);
+  CHECK(FileBytes(path) == bytes);
+}
+}  // namespace
 
 TEST_CASE("Clear overwrite preserves per-file bank and exact original reset",
           "[save-menu][save-clear]") {
@@ -707,17 +776,7 @@ TEST_CASE("Clear overwrite preserves per-file bank and exact original reset",
   ExecuteClearSave();
   REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
   CHECK(FileBytes(path.string() + ".bak") == original);
-  auto files = Save::Files::Open(fixture.root);
-  REQUIRE(files);
-  const auto loaded = files->Load(0);
-  REQUIRE(loaded);
-  CHECK(loaded->document.generation == 2);
-  CHECK(loaded->document.new_game_entry.has_value());
-  const auto& bank = loaded->document.state.storage;
-  CHECK(bank.misc[0].id == 0);
-  CHECK(bank.misc[63].id == 0);
-  CHECK(bank.misc[64].count == 2);
-  CHECK(bank.misc[255].count == 3);
+  CheckOverwrittenBank(fixture.root);
 }
 
 TEST_CASE("Clear-save consent rejects changed content and reset releases input",
@@ -767,13 +826,7 @@ TEST_CASE("Clear saves retain explicit recovered-file replacement consent",
   Press(0, Menu_Files_UpdateSaveMenu);
   REQUIRE(Text(Title_memoryCardMessage) == "Save complete");
   CHECK(FileBytes(path.string() + ".bak") == backup);
-  const auto files = Save::Files::Open(fixture.root);
-  REQUIRE(files);
-  const auto loaded = files->Load(0);
-  REQUIRE(loaded);
-  CHECK_FALSE(loaded->recovered);
-  CHECK(loaded->document.new_game_entry.has_value());
-  CHECK(loaded->document.generation == 2);
+  CheckReplacedRecoveredFile(fixture.root);
 }
 
 TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
@@ -790,11 +843,7 @@ TEST_CASE("Clear-save failure leaves counters and original bytes unchanged",
   // lock. Exercise the same existing persistence failure as ordinary Save.
   REQUIRE(fs::create_directory(path.string() + ".lock"));
   Press(0, Menu_Files_UpdateSaveMenu);
-  CHECK(Text(Title_memoryCardMessage) == "Save failed - see log");
-  CHECK(Input_settings.cumulativeSaveCount == 19);
-  CHECK(Input_settings.currentGameSaveCount == 7);
-  CHECK(Input_settings.saveFileGeneration == 3);
-  CHECK(FileBytes(path) == original);
+  CheckFailedClearSaveChangedNothing(path, original);
   REQUIRE(fs::remove(path.string() + ".lock"));
   Press(PADRright, Menu_Files_UpdateSaveMenu);
   Press(0, Menu_Files_UpdateSaveMenu);

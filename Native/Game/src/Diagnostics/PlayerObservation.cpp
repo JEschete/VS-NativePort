@@ -157,7 +157,10 @@ int WarlockSpellRankCount(int action) {
     return 1;
   }
   if (!Battle_actionDefinitions[action + 2].unlocked) return 2;
-  return Battle_actionDefinitions[action + 3].unlocked ? 4 : 3;
+  constexpr int kThirdRank = 3;
+  constexpr int kFourthRank = 4;
+  return Battle_actionDefinitions[action + kThirdRank].unlocked ? kFourthRank
+                                                                : kThirdRank;
 }
 
 void InspectActionOptions(PlayerObservationState& state) {
@@ -291,8 +294,12 @@ EncounterMenuState InspectPlayerMenu(const EncounterState& state) {
                                Menu_BattleAbilities_firstAbility;
   // The rank selector's cursor and row count (menu memories 12 and 13) persist
   // after the selector closes; consumers pair them with a levelled option.
-  result.spell_level = Menu_Framework_menuMemory.cursorMemories[12];
-  result.spell_level_count = Menu_Framework_menuMemory.cursorMemories[13];
+  constexpr int kRankCursorMemory = 12;
+  constexpr int kRankCountMemory = 13;
+  result.spell_level = static_cast<unsigned char>(
+      Menu_Framework_menuMemory.cursorMemories[kRankCursorMemory]);
+  result.spell_level_count = static_cast<unsigned char>(
+      Menu_Framework_menuMemory.cursorMemories[kRankCountMemory]);
   if (result.selected_menu == 0) {
     for (int index = 0; index < kMainMenuEntries; ++index) {
       if ((Input_settings.menuFlags & (1u << index)) == 0) continue;

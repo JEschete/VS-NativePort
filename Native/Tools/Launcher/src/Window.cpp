@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <array>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <thread>
@@ -36,6 +37,42 @@ constexpr UINT kUpdate = WM_APP + 1;
 constexpr UINT kFinished = WM_APP + 2;
 constexpr UINT kAutoVerify = WM_APP + 3;
 constexpr int kLogicalHeight = 660;
+constexpr int kInitialLogicalWidth = 900;
+constexpr int kBaseDpi = 96;
+constexpr int kPointsPerInch = 72;
+constexpr std::array kFontPoints{28, 13, 11, 9};
+constexpr int kCaptionFont = 3;
+constexpr COLORREF kGoldPressed = RGB(190, 151, 78);
+constexpr COLORREF kGoldHover = RGB(243, 208, 146);
+constexpr COLORREF kCardHover = RGB(41, 58, 78);
+constexpr UINT kLeftAligned = DT_LEFT | DT_VCENTER | DT_SINGLELINE;
+constexpr UINT kRightAligned = DT_RIGHT | DT_VCENTER | DT_SINGLELINE;
+constexpr UINT kCentered = DT_CENTER | DT_VCENTER | DT_SINGLELINE;
+constexpr int kEditMargin = 9;
+constexpr int kCardRadius = 14;
+constexpr int kBadgeRadius = 7;
+constexpr int kFieldRadius = 8;
+constexpr int kFocusInset = 4;
+constexpr int kFieldPadding = 5;
+constexpr int kMarqueeMilliseconds = 40;
+constexpr int kContentInset = 44;
+constexpr int kCardInset = 24;
+constexpr int kFooterHeight = 110;
+constexpr int kFooterGap = 20;
+constexpr int kFocusScrollMargin = 8;
+constexpr int kScrollLine = 28;
+constexpr int kScrollPage = 160;
+constexpr int kScrollWheel = 48;
+constexpr int kMinimumWidth = 800;
+constexpr int kMinimumHeight = 450;
+constexpr int kWindowWidth = 940;
+constexpr int kWindowHeight = 710;
+constexpr int kWorkAreaMargin = 24;
+constexpr INT_PTR kShellExecuteLastError = 32;
+constexpr int kBadgeLeft = 44;
+constexpr int kBadgeSize = 25;
+constexpr int kSectionTitleLeft = 80;
+constexpr int kSectionTitleInset = 240;
 enum Control {
   kCue = 101,
   kSaves,
@@ -57,6 +94,81 @@ enum Control {
   kProgress
 };
 enum class Job { kNone, kVerify, kPlay };
+
+// How a control follows the window width: a fixed box, a box that ends at the
+// content's right edge, or one that fills to `extent` before that edge.
+enum class Span { kFixed, kFromRight, kStretch };
+struct Slot {
+  int id;
+  Span span;
+  int x;
+  int y;
+  int extent;
+  int height;
+  bool in_footer = false;
+};
+constexpr std::array<Slot, 18> kSlots{{
+    {kCue, Span::kStretch, 45, 154, 169, 26},
+    {kCueBrowse, Span::kFromRight, 0, 149, 112, 36},
+    {kDiscState, Span::kStretch, 44, 197, 232, 24},
+    {kVerify, Span::kFromRight, 0, 192, 168, 34},
+    {kProgress, Span::kStretch, 44, 237, 44, 8},
+    {kSaves, Span::kStretch, 45, 340, 169, 26},
+    {kSaveBrowse, Span::kFromRight, 0, 335, 112, 36},
+    {kFfmpeg, Span::kStretch, 45, 443, 169, 26},
+    {kFfmpegBrowse, Span::kFromRight, 0, 438, 112, 36},
+    {kMediaState, Span::kFromRight, 0, 409, 230, 22},
+    {kDetect, Span::kFixed, 44, 486, 110, 32},
+    {kInstall, Span::kFixed, 166, 486, 176, 32},
+    {kDownload, Span::kFixed, 354, 486, 122, 32},
+    {kDetails, Span::kFromRight, 0, 486, 120, 32},
+    {kFooterTitle, Span::kStretch, 44, 16, 260, 25, true},
+    {kFooterDetail, Span::kStretch, 44, 45, 260, 38, true},
+    {kPlay, Span::kFromRight, 0, 21, 176, 48, true},
+    {kSetupLog, Span::kFromRight, 0, 28, 120, 32},
+}};
+
+struct CardRows {
+  int top;
+  int bottom;
+};
+constexpr std::array<CardRows, 3> kCards{{{96, 274}, {286, 380}, {392, 536}}};
+
+struct Section {
+  const wchar_t* number;
+  const wchar_t* title;
+  int y;
+};
+constexpr std::array<Section, 3> kSections{{
+    {L"01", L"Game disc", 112},
+    {L"02", L"Save location", 302},
+    {L"03", L"First-time media setup", 408},
+}};
+
+// A left edge is measured from the window's left when `left_inset` is zero and
+// from its right otherwise.
+struct Caption {
+  const wchar_t* text;
+  int left;
+  int left_inset;
+  int top;
+  int right_inset;
+  int bottom;
+  int font;
+  COLORREF color;
+  UINT flags;
+};
+constexpr std::array<Caption, 5> kCaptions{{
+    {L"Vagrant Story", 24, 0, 13, 190, 62, 0, kText, kLeftAligned},
+    {L"NATIVE PORT  /  PLAYTEST EDITION", 26, 0, 66, 100, 84, kCaptionFont,
+     kGold, kLeftAligned},
+    {L"USA / SLUS-01040", 0, 260, 115, 44, 137, kCaptionFont, kMuted,
+     kRightAligned},
+    {L"Whole-file checksum verification. Renaming a file cannot bypass it.", 44,
+     0, 250, 44, 266, kCaptionFont, kMuted, kLeftAligned},
+    {L"Your existing saves are never moved or deleted.", 0, 450, 306, 44, 326,
+     kCaptionFont, kMuted, kRightAligned},
+}};
 
 std::wstring Wide(const std::string& value) {
   return Platform::Utf8Path(value).wstring();
@@ -98,15 +210,15 @@ struct App {
   fs::path installation;
   fs::path state;
   std::vector<Widget> widgets;
-  std::array<HFONT, 4> fonts{};
+  std::array<HFONT, kFontPoints.size()> fonts{};
   HBRUSH card_brush = CreateSolidBrush(kCard);
   HBRUSH input_brush = CreateSolidBrush(kInput);
   std::thread worker;
-  UINT dpi = 96;
+  UINT dpi = kBaseDpi;
   int scroll = 0;
   int hover = 0;
   int focus = 0;
-  int logical_width = 900;
+  int logical_width = kInitialLogicalWidth;
   int content_height = kLogicalHeight;
   bool built = false;
   bool verified = false;
@@ -116,14 +228,15 @@ struct App {
 
   ~App() {
     if (worker.joinable()) worker.join();
-    for (auto font : fonts)
+    for (auto font : fonts) {
       if (font) DeleteObject(font);
+    }
     if (card_brush) DeleteObject(card_brush);
     if (input_brush) DeleteObject(input_brush);
   }
   bool Busy() const { return job != Job::kNone; }
   int Scale(int value) const {
-    return MulDiv(value, static_cast<int>(dpi), 96);
+    return MulDiv(value, static_cast<int>(dpi), kBaseDpi);
   }
   HWND Find(int id) const {
     const auto found = std::ranges::find(widgets, id, &Widget::id);
@@ -134,17 +247,17 @@ struct App {
   }
 
   void Fonts() {
-    std::array<HFONT, 4> replacement{};
-    constexpr std::array sizes{28, 13, 11, 9};
+    std::array<HFONT, kFontPoints.size()> replacement{};
     for (std::size_t index = 0; index < replacement.size(); ++index) {
-      replacement[index] =
-          CreateFontW(-MulDiv(sizes[index], static_cast<int>(dpi), 72), 0, 0, 0,
-                      index < 2 ? FW_SEMIBOLD : FW_NORMAL, FALSE, FALSE, FALSE,
-                      DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                      CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
+      replacement[index] = CreateFontW(
+          -MulDiv(kFontPoints[index], static_cast<int>(dpi), kPointsPerInch), 0,
+          0, 0, index < 2 ? FW_SEMIBOLD : FW_NORMAL, FALSE, FALSE, FALSE,
+          DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
+          CLEARTYPE_QUALITY, DEFAULT_PITCH, L"Segoe UI");
       if (!replacement[index]) {
-        for (auto font : replacement)
+        for (auto font : replacement) {
           if (font) DeleteObject(font);
+        }
         throw std::runtime_error("Cannot create the launcher fonts.");
       }
     }
@@ -155,8 +268,9 @@ struct App {
           reinterpret_cast<WPARAM>(fonts[widget.id == kFooterTitle ? 1 : 2]),
           TRUE);
     }
-    for (auto font : replacement)
+    for (auto font : replacement) {
       if (font) DeleteObject(font);
+    }
   }
 
   static LRESULT CALLBACK ButtonProcedure(HWND control, UINT message,
@@ -196,13 +310,14 @@ struct App {
     }
     if (std::wstring_view(type) == L"EDIT") {
       SendMessageW(control, EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN,
-                   MAKELPARAM(Scale(9), Scale(9)));
+                   MAKELPARAM(Scale(kEditMargin), Scale(kEditMargin)));
     }
   }
 
   void Build(const Settings& settings) {
-    if (!card_brush || !input_brush)
+    if (!card_brush || !input_brush) {
       throw std::runtime_error("Cannot initialize launcher colors.");
+    }
     dpi = GetDpiForWindow(window);
     Fonts();
     const auto edit = WS_TABSTOP | ES_AUTOHSCROLL;
@@ -238,7 +353,7 @@ struct App {
     SendMessageW(Find(kSaves), EM_SETCUEBANNER, TRUE,
                  reinterpret_cast<LPARAM>(
                      L"Choose where your game saves will be stored"));
-    SendMessageW(Find(kProgress), PBM_SETRANGE32, 0, 100);
+    SendMessageW(Find(kProgress), PBM_SETRANGE32, 0, kPercentComplete);
     if (FAILED(SetWindowTheme(Find(kProgress), L"", L""))) {
       throw std::runtime_error("Cannot initialize the progress display.");
     }
@@ -261,8 +376,8 @@ struct App {
     if (!built) return;
     RECT client{};
     GetClientRect(window, &client);
-    logical_width = MulDiv(client.right, 96, static_cast<int>(dpi));
-    const int height = MulDiv(client.bottom, 96, static_cast<int>(dpi));
+    logical_width = MulDiv(client.right, kBaseDpi, static_cast<int>(dpi));
+    const int height = MulDiv(client.bottom, kBaseDpi, static_cast<int>(dpi));
     content_height = std::max(kLogicalHeight, height);
     scroll = std::clamp(scroll, 0, std::max(0, content_height - height));
     SCROLLINFO info{sizeof info, SIF_RANGE | SIF_PAGE | SIF_POS, 0, 0, 0, 0, 0};
@@ -271,35 +386,25 @@ struct App {
     info.nPage = static_cast<UINT>(height);
     info.nPos = scroll;
     SetScrollInfo(window, SB_VERT, &info, TRUE);
-    const int right = logical_width - 44;
-    const auto path_row = [&](int field, int browse, int top) {
-      Place(field, 45, top + 5, right - 169, 26);
-      Place(browse, right - 112, top, 112, 36);
-    };
-    path_row(kCue, kCueBrowse, 149);
-    Place(kDiscState, 44, 197, right - 232, 24);
-    Place(kVerify, right - 168, 192, 168, 34);
-    Place(kProgress, 44, 237, right - 44, 8);
-    path_row(kSaves, kSaveBrowse, 335);
-    path_row(kFfmpeg, kFfmpegBrowse, 438);
-    Place(kMediaState, right - 230, 409, 230, 22);
-    Place(kDetect, 44, 486, 110, 32);
-    Place(kInstall, 166, 486, 176, 32);
-    Place(kDownload, 354, 486, 122, 32);
-    Place(kDetails, right - 120, 486, 120, 32);
-    const int footer = content_height - 110;
-    Place(kFooterTitle, 44, footer + 16, right - 260, 25);
-    Place(kFooterDetail, 44, footer + 45, right - 260, 38);
-    Place(kPlay, right - 176, footer + 21, 176, 48);
-    Place(kSetupLog, logical_width - 164, 28, 120, 32);
+    const int right = logical_width - kContentInset;
+    const int footer = content_height - kFooterHeight;
+    for (const auto& slot : kSlots) {
+      const int x =
+          slot.span == Span::kFromRight ? right - slot.extent : slot.x;
+      const int width =
+          slot.span == Span::kStretch ? right - slot.extent : slot.extent;
+      Place(slot.id, x, slot.y + (slot.in_footer ? footer : 0), width,
+            slot.height);
+    }
     InvalidateRect(window, nullptr, FALSE);
   }
 
   void Enable() {
     for (const auto& widget : widgets) {
       if (!widget.button && widget.id != kCue && widget.id != kSaves &&
-          widget.id != kFfmpeg)
+          widget.id != kFfmpeg) {
         continue;
+      }
       const bool utility = widget.id == kSetupLog || widget.id == kDetails;
       EnableWindow(widget.window, utility || !Busy());
     }
@@ -326,8 +431,7 @@ struct App {
   }
 
   void DrawTextAt(HDC dc, const wchar_t* text, RECT logical, int font,
-                  COLORREF color,
-                  UINT flags = DT_LEFT | DT_VCENTER | DT_SINGLELINE) {
+                  COLORREF color, UINT flags = kLeftAligned) {
     const auto previous = SelectObject(dc, fonts[font]);
     SetTextColor(dc, color);
     SetBkMode(dc, TRANSPARENT);
@@ -342,45 +446,44 @@ struct App {
     SetDCBrushColor(dc, kCanvas);
     FillRect(dc, &client, static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
     if (!built) return;
-    const int right = logical_width - 24;
-    for (const RECT card :
-         {RECT{24, 96, right, 274}, RECT{24, 286, right, 380},
-          RECT{24, 392, right, 536},
-          RECT{24, content_height - 110, right, content_height - 20}}) {
-      Round(dc, Pixels(card), kCard, kBorder, Scale(14));
+    const int right = logical_width - kCardInset;
+    for (const auto& card : kCards) {
+      Round(dc, Pixels({kCardInset, card.top, right, card.bottom}), kCard,
+            kBorder, Scale(kCardRadius));
     }
-    DrawTextAt(dc, L"Vagrant Story", {24, 13, logical_width - 190, 62}, 0,
-               kText);
-    DrawTextAt(dc, L"NATIVE PORT  /  PLAYTEST EDITION",
-               {26, 66, logical_width - 100, 84}, 3, kGold);
-    const auto section = [&](const wchar_t* number, const wchar_t* title,
-                             int y) {
-      Round(dc, Pixels({44, y, 69, y + 25}), kInput, kBorder, Scale(7));
-      DrawTextAt(dc, number, {44, y, 69, y + 25}, 3, kGold,
-                 DT_CENTER | DT_VCENTER | DT_SINGLELINE);
-      DrawTextAt(dc, title, {80, y - 1, logical_width - 240, y + 26}, 1, kText);
-    };
-    section(L"01", L"Game disc", 112);
-    section(L"02", L"Save location", 302);
-    section(L"03", L"First-time media setup", 408);
-    DrawTextAt(dc, L"USA / SLUS-01040",
-               {logical_width - 260, 115, logical_width - 44, 137}, 3, kMuted,
-               DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
-    DrawTextAt(
-        dc,
-        L"Whole-file checksum verification. Renaming a file cannot bypass it.",
-        {44, 250, logical_width - 44, 266}, 3, kMuted);
-    DrawTextAt(dc, L"Your existing saves are never moved or deleted.",
-               {logical_width - 450, 306, logical_width - 44, 326}, 3, kMuted,
-               DT_RIGHT | DT_VCENTER | DT_SINGLELINE);
+    Round(dc,
+          Pixels({kCardInset, content_height - kFooterHeight, right,
+                  content_height - kFooterGap}),
+          kCard, kBorder, Scale(kCardRadius));
+    for (const auto& caption : kCaptions) {
+      const int left = caption.left_inset != 0
+                           ? logical_width - caption.left_inset
+                           : caption.left;
+      DrawTextAt(dc, caption.text,
+                 {left, caption.top, logical_width - caption.right_inset,
+                  caption.bottom},
+                 caption.font, caption.color, caption.flags);
+    }
+    for (const auto& section : kSections) {
+      const RECT badge{kBadgeLeft, section.y, kBadgeLeft + kBadgeSize,
+                       section.y + kBadgeSize};
+      Round(dc, Pixels(badge), kInput, kBorder, Scale(kBadgeRadius));
+      DrawTextAt(dc, section.number, badge, kCaptionFont, kGold, kCentered);
+      DrawTextAt(
+          dc, section.title,
+          {kSectionTitleLeft, section.y - 1, logical_width - kSectionTitleInset,
+           section.y + kBadgeSize + 1},
+          1, kText);
+    }
     for (const int id : {kCue, kSaves, kFfmpeg}) {
       const auto found = std::ranges::find(widgets, id, &Widget::id);
       auto rect = found->logical;
       rect.left -= 1;
-      rect.top -= 5;
+      rect.top -= kFieldPadding;
       rect.right += 1;
-      rect.bottom += 5;
-      Round(dc, Pixels(rect), kInput, focus == id ? kGold : kBorder, Scale(8));
+      rect.bottom += kFieldPadding;
+      Round(dc, Pixels(rect), kInput, focus == id ? kGold : kBorder,
+            Scale(kFieldRadius));
     }
   }
 
@@ -394,24 +497,23 @@ struct App {
       fill = kInput;
       text = kMuted;
     } else if (pressed) {
-      fill = id == kPlay ? RGB(190, 151, 78) : kInput;
+      fill = id == kPlay ? kGoldPressed : kInput;
     } else if (hover == id) {
-      fill = id == kPlay ? RGB(243, 208, 146) : RGB(41, 58, 78);
+      fill = id == kPlay ? kGoldHover : kCardHover;
     }
     SetDCBrushColor(item.hDC, kCard);
     FillRect(item.hDC, &item.rcItem,
              static_cast<HBRUSH>(GetStockObject(DC_BRUSH)));
     Round(item.hDC, item.rcItem, fill,
-          id == kPlay && !disabled ? fill : kBorder, Scale(8));
+          id == kPlay && !disabled ? fill : kBorder, Scale(kFieldRadius));
     const auto font = SelectObject(item.hDC, fonts[id == kPlay ? 1 : 2]);
     SetBkMode(item.hDC, TRANSPARENT);
     SetTextColor(item.hDC, text);
     auto rect = item.rcItem;
     const auto label = Text(item.hwndItem);
-    DrawTextW(item.hDC, label.c_str(), -1, &rect,
-              DT_CENTER | DT_VCENTER | DT_SINGLELINE);
+    DrawTextW(item.hDC, label.c_str(), -1, &rect, kCentered);
     if (item.itemState & ODS_FOCUS) {
-      InflateRect(&rect, -Scale(4), -Scale(4));
+      InflateRect(&rect, -Scale(kFocusInset), -Scale(kFocusInset));
       DrawFocusRect(item.hDC, &rect);
     }
     SelectObject(item.hDC, font);
@@ -430,14 +532,62 @@ struct App {
       SetWindowLongPtrW(
           Find(kProgress), GWL_STYLE,
           GetWindowLongPtrW(Find(kProgress), GWL_STYLE) | PBS_MARQUEE);
-      SendMessageW(Find(kProgress), PBM_SETMARQUEE, TRUE, 40);
+      SendMessageW(Find(kProgress), PBM_SETMARQUEE, TRUE, kMarqueeMilliseconds);
     } else {
       SendMessageW(Find(kProgress), PBM_SETMARQUEE, FALSE, 0);
       SetWindowLongPtrW(
           Find(kProgress), GWL_STYLE,
           GetWindowLongPtrW(Find(kProgress), GWL_STYLE) & ~PBS_MARQUEE);
-      SendMessageW(Find(kProgress), PBM_SETPOS, std::clamp(percent, 0, 100), 0);
+      SendMessageW(Find(kProgress), PBM_SETPOS,
+                   std::clamp(percent, 0, kPercentComplete), 0);
     }
+  }
+
+  void VerifyJob(const Settings& settings, Completion& completion) const {
+    const auto result = VerifyDisc(settings.cue, [this](int percent) {
+      Post(kUpdate,
+           UiUpdate{SetupStage::kDisc, "Verifying BIN checksum...", percent});
+    });
+    completion.verified = result.has_value();
+    if (!result) completion.error = result.error();
+  }
+
+  void PlayJob(const Settings& settings, Completion& completion) const {
+    const auto data = Prepare(
+        settings, installation, state,
+        [this, &completion](const ProgressUpdate& update) {
+          if (update.stage != SetupStage::kDisc) {
+            completion.verified = true;
+          }
+          Post(kUpdate, UiUpdate{update.stage, update.message, update.percent});
+        });
+    if (!data) {
+      completion.error = data.error();
+      return;
+    }
+    Post(kUpdate, UiUpdate{SetupStage::kReady,
+                           "Close the game window to return to the launcher.",
+                           kPercentComplete});
+    const auto result =
+        Platform::RunProcess(GameArguments(installation, *data, settings));
+    if (!result || *result != 0) {
+      completion.error = "The game did not exit normally: " +
+                         (result ? std::to_string(*result) : result.error());
+    }
+  }
+
+  void Work(const Settings& settings, Job requested) const {
+    Completion completion{requested, false, {}};
+    try {
+      if (requested == Job::kVerify) {
+        VerifyJob(settings, completion);
+      } else {
+        PlayJob(settings, completion);
+      }
+    } catch (const std::exception& error) {
+      completion.error = error.what();
+    }
+    Post(kFinished, std::move(completion));
   }
 
   template <class T>
@@ -468,46 +618,7 @@ struct App {
         return;
       }
     }
-    worker = std::thread([this, settings, requested] {
-      Completion completion{requested, false, {}};
-      try {
-        if (requested == Job::kVerify) {
-          const auto result = VerifyDisc(settings.cue, [this](int percent) {
-            Post(kUpdate, UiUpdate{SetupStage::kDisc,
-                                   "Verifying BIN checksum...", percent});
-          });
-          completion.verified = result.has_value();
-          if (!result) completion.error = result.error();
-        } else {
-          const auto data = Prepare(
-              settings, installation, state,
-              [this, &completion](const ProgressUpdate& update) {
-                if (update.stage != SetupStage::kDisc)
-                  completion.verified = true;
-                Post(kUpdate,
-                     UiUpdate{update.stage, update.message, update.percent});
-              });
-          if (!data) {
-            completion.error = data.error();
-          } else {
-            Post(kUpdate,
-                 UiUpdate{SetupStage::kReady,
-                          "Close the game window to return to the launcher.",
-                          100});
-            const auto result = Platform::RunProcess(
-                GameArguments(installation, *data, settings));
-            if (!result || *result != 0) {
-              completion.error =
-                  "The game did not exit normally: " +
-                  (result ? std::to_string(*result) : result.error());
-            }
-          }
-        }
-      } catch (const std::exception& error) {
-        completion.error = error.what();
-      }
-      Post(kFinished, std::move(completion));
-    });
+    worker = std::thread(&App::Work, this, settings, requested);
     job = requested;
     verified = false;
     last_error.clear();
@@ -544,7 +655,7 @@ struct App {
     job = Job::kNone;
     verified = completion.verified;
     last_error = completion.error;
-    Bar(verified ? 100 : 0);
+    Bar(verified ? kPercentComplete : 0);
     if (!last_error.empty()) {
       disc_color = verified ? kGreen : kRed;
       Set(kDiscState, verified ? L"USA disc verified - setup needs attention"
@@ -587,28 +698,33 @@ struct App {
     HRESULT result =
         CoCreateInstance(CLSID_FileOpenDialog, nullptr, CLSCTX_INPROC_SERVER,
                          IID_PPV_ARGS(&dialog));
-    if (FAILED(result))
+    if (FAILED(result)) {
       throw std::runtime_error("Cannot open the Windows file picker.");
+    }
     DWORD options = 0;
     result = dialog->GetOptions(&options);
-    if (SUCCEEDED(result))
+    if (SUCCEEDED(result)) {
       result =
           dialog->SetOptions(options | FOS_FORCEFILESYSTEM |
                              (folder ? FOS_PICKFOLDERS : FOS_FILEMUSTEXIST));
+    }
     const COMDLG_FILTERSPEC filter{pattern, pattern};
     if (SUCCEEDED(result) && !folder) result = dialog->SetFileTypes(1, &filter);
-    if (FAILED(result))
+    if (FAILED(result)) {
       throw std::runtime_error("Cannot configure the file picker.");
+    }
     result = dialog->Show(window);
     if (result == HRESULT_FROM_WIN32(ERROR_CANCELLED)) return;
     if (FAILED(result)) throw std::runtime_error("The file picker failed.");
     ComPtr<IShellItem> selection;
     PWSTR path = nullptr;
     result = dialog->GetResult(&selection);
-    if (SUCCEEDED(result))
+    if (SUCCEEDED(result)) {
       result = selection->GetDisplayName(SIGDN_FILESYSPATH, &path);
-    if (FAILED(result))
+    }
+    if (FAILED(result)) {
       throw std::runtime_error("Cannot read the selected path.");
+    }
     Set(id, path);
     CoTaskMemFree(path);
     if (id == kCue) Begin(Job::kVerify);
@@ -619,8 +735,9 @@ struct App {
         ShellExecuteW(window, L"open", path.c_str(),
                       arguments.empty() ? nullptr : arguments.c_str(), nullptr,
                       SW_SHOWNORMAL));
-    if (result <= 32)
+    if (result <= kShellExecuteLastError) {
       throw std::runtime_error("Windows could not open the requested item.");
+    }
   }
 
   void Details() const {
@@ -663,10 +780,12 @@ struct App {
       if (found != widgets.end()) {
         RECT client{};
         GetClientRect(window, &client);
-        const int visible = MulDiv(client.bottom, 96, static_cast<int>(dpi));
+        const int visible =
+            MulDiv(client.bottom, kBaseDpi, static_cast<int>(dpi));
         if (found->logical.top < scroll) scroll = found->logical.top;
-        if (found->logical.bottom > scroll + visible)
-          scroll = found->logical.bottom - visible + 8;
+        if (found->logical.bottom > scroll + visible) {
+          scroll = found->logical.bottom - visible + kFocusScrollMargin;
+        }
         Layout();
       }
       return;
@@ -696,9 +815,10 @@ struct App {
         Set(kFfmpeg, path.wstring());
         Set(kMediaState,
             path.empty() ? L"FFmpeg not found" : L"FFmpeg detected");
-        if (path.empty())
+        if (path.empty()) {
           Error(window,
                 "Choose ffmpeg.exe, use Download, or Install with winget.");
+        }
         break;
       }
       case kDownload:
@@ -706,9 +826,10 @@ struct App {
         break;
       case kInstall: {
         const auto script = installation / "Check-Dependencies.ps1";
-        if (!fs::is_regular_file(script))
+        if (!fs::is_regular_file(script)) {
           throw std::runtime_error(
               "Check-Dependencies.ps1 is missing. Extract the entire ZIP.");
+        }
         Open(L"powershell.exe", L"-NoProfile -ExecutionPolicy Bypass -File \"" +
                                     script.wstring() +
                                     L"\" -InstallFfmpeg -Pause");
@@ -716,18 +837,124 @@ struct App {
         break;
       }
       case kSetupLog:
-        if (fs::exists(state / "setup.log"))
+        if (fs::exists(state / "setup.log")) {
           Open(state / "setup.log");
-        else
+        } else {
           Error(window,
                 "No setup log yet. Setup output appears here after preparation "
                 "starts.");
+        }
         break;
       default:
         break;
     }
   }
+
+  LRESULT ColorControl(HDC dc, HWND control) const {
+    const int id = GetDlgCtrlID(control);
+    const bool edit = id == kCue || id == kSaves || id == kFfmpeg;
+    SetTextColor(dc, control == Find(kDiscState) ? disc_color : kText);
+    SetBkColor(dc, edit ? kInput : kCard);
+    return reinterpret_cast<LRESULT>(edit ? input_brush : card_brush);
+  }
+
+  void DpiChanged(UINT changed, const RECT& rect) {
+    dpi = changed;
+    Fonts();
+    SetWindowPos(window, nullptr, rect.left, rect.top, rect.right - rect.left,
+                 rect.bottom - rect.top, SWP_NOZORDER | SWP_NOACTIVATE);
+    Layout();
+  }
+
+  void VerticalScroll(int action) {
+    SCROLLINFO info{sizeof info, SIF_TRACKPOS, 0, 0, 0, 0, 0};
+    GetScrollInfo(window, SB_VERT, &info);
+    if (action == SB_THUMBTRACK) {
+      scroll = info.nTrackPos;
+    } else if (action == SB_LINEUP) {
+      scroll -= kScrollLine;
+    } else if (action == SB_LINEDOWN) {
+      scroll += kScrollLine;
+    } else if (action == SB_PAGEUP) {
+      scroll -= kScrollPage;
+    } else if (action == SB_PAGEDOWN) {
+      scroll += kScrollPage;
+    }
+    Layout();
+  }
 };
+
+// Returns the result of a message the launcher handled itself.
+std::optional<LRESULT> Dispatch(App& app, HWND window, UINT message,
+                                WPARAM wparam, LPARAM lparam) {
+  switch (message) {
+    case WM_COMMAND:
+      app.Command(LOWORD(wparam), HIWORD(wparam));
+      return 0;
+    case WM_DRAWITEM:
+      if (app.built) {
+        app.DrawButton(*reinterpret_cast<DRAWITEMSTRUCT*>(lparam));
+      }
+      return TRUE;
+    case WM_ERASEBKGND:
+      return 1;
+    case WM_PAINT: {
+      PAINTSTRUCT paint{};
+      const auto dc = BeginPaint(window, &paint);
+      app.Paint(dc);
+      EndPaint(window, &paint);
+      return 0;
+    }
+    case WM_CTLCOLOREDIT:
+    case WM_CTLCOLORSTATIC:
+      return app.ColorControl(reinterpret_cast<HDC>(wparam),
+                              reinterpret_cast<HWND>(lparam));
+    case WM_SIZE:
+      app.Layout();
+      return 0;
+    case WM_DPICHANGED:
+      app.DpiChanged(HIWORD(wparam), *reinterpret_cast<RECT*>(lparam));
+      return 0;
+    case WM_GETMINMAXINFO: {
+      auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
+      info->ptMinTrackSize = {app.Scale(kMinimumWidth),
+                              app.Scale(kMinimumHeight)};
+      return 0;
+    }
+    case WM_VSCROLL:
+      app.VerticalScroll(LOWORD(wparam));
+      return 0;
+    case WM_MOUSEWHEEL:
+      app.scroll -= GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA * kScrollWheel;
+      app.Layout();
+      return 0;
+    case kAutoVerify:
+      if (!Text(app.Find(kCue)).empty()) app.Begin(Job::kVerify);
+      return 0;
+    case kUpdate: {
+      const std::unique_ptr<UiUpdate> update(
+          reinterpret_cast<UiUpdate*>(lparam));
+      app.Update(*update);
+      return 0;
+    }
+    case kFinished: {
+      const std::unique_ptr<Completion> completion(
+          reinterpret_cast<Completion*>(lparam));
+      app.Finish(*completion);
+      return 0;
+    }
+    case WM_CLOSE:
+      if (app.Busy()) {
+        Error(window,
+              "A disc check, setup or game session is active. Wait for "
+              "setup or close the game first.");
+        return 0;
+      }
+      return std::nullopt;
+    default:
+      return std::nullopt;
+  }
+}
 
 LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wparam,
                                  LPARAM lparam) {
@@ -740,99 +967,9 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wparam,
   }
   if (app) {
     try {
-      switch (message) {
-        case WM_COMMAND:
-          app->Command(LOWORD(wparam), HIWORD(wparam));
-          return 0;
-        case WM_DRAWITEM:
-          if (app->built)
-            app->DrawButton(*reinterpret_cast<DRAWITEMSTRUCT*>(lparam));
-          return TRUE;
-        case WM_ERASEBKGND:
-          return 1;
-        case WM_PAINT: {
-          PAINTSTRUCT paint{};
-          const auto dc = BeginPaint(window, &paint);
-          app->Paint(dc);
-          EndPaint(window, &paint);
-          return 0;
-        }
-        case WM_CTLCOLOREDIT:
-        case WM_CTLCOLORSTATIC: {
-          const auto dc = reinterpret_cast<HDC>(wparam);
-          const auto control = reinterpret_cast<HWND>(lparam);
-          const int id = GetDlgCtrlID(control);
-          const bool edit = id == kCue || id == kSaves || id == kFfmpeg;
-          SetTextColor(
-              dc, control == app->Find(kDiscState) ? app->disc_color : kText);
-          SetBkColor(dc, edit ? kInput : kCard);
-          return reinterpret_cast<LRESULT>(edit ? app->input_brush
-                                                : app->card_brush);
-        }
-        case WM_SIZE:
-          app->Layout();
-          return 0;
-        case WM_DPICHANGED: {
-          app->dpi = HIWORD(wparam);
-          app->Fonts();
-          const auto* rect = reinterpret_cast<RECT*>(lparam);
-          SetWindowPos(window, nullptr, rect->left, rect->top,
-                       rect->right - rect->left, rect->bottom - rect->top,
-                       SWP_NOZORDER | SWP_NOACTIVATE);
-          app->Layout();
-          return 0;
-        }
-        case WM_GETMINMAXINFO: {
-          auto* info = reinterpret_cast<MINMAXINFO*>(lparam);
-          info->ptMinTrackSize = {app->Scale(800), app->Scale(450)};
-          return 0;
-        }
-        case WM_VSCROLL: {
-          const int action = LOWORD(wparam);
-          SCROLLINFO info{sizeof info, SIF_TRACKPOS, 0, 0, 0, 0, 0};
-          GetScrollInfo(window, SB_VERT, &info);
-          if (action == SB_THUMBTRACK)
-            app->scroll = info.nTrackPos;
-          else if (action == SB_LINEUP)
-            app->scroll -= 28;
-          else if (action == SB_LINEDOWN)
-            app->scroll += 28;
-          else if (action == SB_PAGEUP)
-            app->scroll -= 160;
-          else if (action == SB_PAGEDOWN)
-            app->scroll += 160;
-          app->Layout();
-          return 0;
-        }
-        case WM_MOUSEWHEEL:
-          app->scroll -= GET_WHEEL_DELTA_WPARAM(wparam) / WHEEL_DELTA * 48;
-          app->Layout();
-          return 0;
-        case kAutoVerify:
-          if (!Text(app->Find(kCue)).empty()) app->Begin(Job::kVerify);
-          return 0;
-        case kUpdate: {
-          const std::unique_ptr<UiUpdate> update(
-              reinterpret_cast<UiUpdate*>(lparam));
-          app->Update(*update);
-          return 0;
-        }
-        case kFinished: {
-          const std::unique_ptr<Completion> completion(
-              reinterpret_cast<Completion*>(lparam));
-          app->Finish(*completion);
-          return 0;
-        }
-        case WM_CLOSE:
-          if (app->Busy()) {
-            Error(window,
-                  "A disc check, setup or game session is active. Wait for "
-                  "setup or close the game first.");
-            return 0;
-          }
-          break;
-        default:
-          break;
+      if (const auto handled =
+              Dispatch(*app, window, message, wparam, lparam)) {
+        return *handled;
       }
     } catch (const std::exception& error) {
       Error(window, error.what());
@@ -851,8 +988,9 @@ int ShowLauncher(const Settings& settings, const fs::path& installation,
                  const fs::path& state, int show) {
   INITCOMMONCONTROLSEX common{sizeof common,
                               ICC_STANDARD_CLASSES | ICC_PROGRESS_CLASS};
-  if (!InitCommonControlsEx(&common))
+  if (!InitCommonControlsEx(&common)) {
     throw std::runtime_error("Cannot initialize Windows controls.");
+  }
   App app;
   app.installation = installation;
   app.state = state;
@@ -862,15 +1000,19 @@ int ShowLauncher(const Settings& settings, const fs::path& installation,
   type.hInstance = GetModuleHandleW(nullptr);
   type.hCursor = LoadCursor(nullptr, IDC_ARROW);
   type.lpszClassName = L"VSNativePortLauncher";
-  if (!RegisterClassW(&type))
+  if (!RegisterClassW(&type)) {
     throw std::runtime_error("Cannot register launcher window.");
+  }
   RECT work{};
-  if (!SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0))
+  if (!SystemParametersInfoW(SPI_GETWORKAREA, 0, &work, 0)) {
     throw std::runtime_error("Cannot read screen work area.");
+  }
   const LONG width =
-      std::min<LONG>(app.Scale(940), work.right - work.left - app.Scale(24));
+      std::min<LONG>(app.Scale(kWindowWidth),
+                     work.right - work.left - app.Scale(kWorkAreaMargin));
   const LONG height =
-      std::min<LONG>(app.Scale(710), work.bottom - work.top - app.Scale(24));
+      std::min<LONG>(app.Scale(kWindowHeight),
+                     work.bottom - work.top - app.Scale(kWorkAreaMargin));
   const HWND window =
       CreateWindowExW(0, type.lpszClassName, L"Vagrant Story Native - Launcher",
                       WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_VSCROLL,

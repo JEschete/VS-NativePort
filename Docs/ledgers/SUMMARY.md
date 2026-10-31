@@ -110,12 +110,15 @@ and EC-04 original-address module symbol have zero consumers. That is one leaf f
 promotion or EC retirement; its callers remain C ABI, and generated `ActionPlanning.c` still drives it.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
-### Full tidy result for the slice (#248)
+### Full tidy result (#248)
 
-`quality-native.cmd --tidy` at clean `18be0e17` **exited 1 with 272 new findings**; the fast CI job does not
-run this analysis. One was in this slice's `CorePointerSortTests.cpp`, fixed in `0808350a` and confirmed by a
-focused tidy run there; the slice's production files had none. The other 271 are in 30 files unchanged since
-`b6f46900`, 144 of them in `Native/Tools/Launcher/src/Window.cpp`. They remain open: the baseline was not refreshed.
+`quality-native.cmd --tidy` first **exited 1 with 272 new findings** at `18be0e17`; the fast CI job does not run this
+analysis. All 272 are now fixed and the full run exits 0 with 0 new findings, with `tools/lint/baseline.json` unchanged.
+The fixes behave the same as before: the Launcher window is pixel-identical at 940x710, and both test suites pass.
+
+One finding was a real defect. `char` is unsigned in copied code (`/J`) but signed in strict C++, so readers of
+`menuFSubmenu` and `cursorMemories` saw negative values; a regression test covers it. `.clang-tidy` gained the
+`Launcher` namespace, the `Diagnostics_` and `Ending_` C-interface prefixes, and the required `wmain` entry name.
 
 | Gate | Evidence needed |
 | --- | --- |
