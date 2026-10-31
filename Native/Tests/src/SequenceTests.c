@@ -268,7 +268,8 @@ int TestAnimationEventUnwind(int scenario) {
   MorphAnimationFixture selected;
   unsigned wide_sequence[1024] = {0};
   InitializeMorphAnimation(&fixture, scenario == 1 || scenario == 8 ||
-                                             scenario == 9 || scenario == 10
+                                             scenario == 9 || scenario == 10 ||
+                                             scenario == 12
                                          ? 222
                                          : 1);
   if (scenario == 9) {
@@ -300,12 +301,18 @@ int TestAnimationEventUnwind(int scenario) {
     fixture.actor.animationSet = 200;
     fixture.actor.sharedSequences[2] = wide;
   }
-  if (scenario == 2 || scenario >= 6) fixture.actor.commonSequence = NULL;
+  if (scenario == 2 || (scenario >= 6 && scenario <= 10)) {
+    fixture.actor.commonSequence = NULL;
+  }
+  // Finished steps, falls and reactions leave this "reinitialize on next play"
+  // sentinel; it says nothing about which clip's pose is still bound (#252).
+  if (scenario >= 11 && scenario <= 13) fixture.actor.animationSet = 0xFF;
+  if (scenario == 14) fixture.actor.animationSet = 5;
   if (scenario == 3) ((u_char*)bank)[bank->animationMap + 1] = 0xFF;
   if (scenario == 4 || scenario == 5) bank->headers[2] = 0;
   if (scenario == 4) fixture.actor.poseOverrideActive = 0;
   int result = 0;
-  if (scenario == 6) {
+  if (scenario == 6 || scenario == 13) {
     result = Actors_PlayActorAnimation(kSlot, 1, 0, 0);
   } else if (scenario == 7) {
     Actors_InitializeActorAnimationPose(&fixture.actor, &fixture.actor.pose);
@@ -314,10 +321,12 @@ int TestAnimationEventUnwind(int scenario) {
   }
   const SVECTOR* vertex =
       VS_ONDISC(fixture.actor.instance.model, vertexSection, SVECTOR*);
-  const int successful =
-      scenario < 2 || scenario == 8 || scenario == 9 || scenario == 10;
-  int passed = vertex->vx == (successful ? 10 : 11);
-  if (successful) {
+  const int successful = scenario < 2 || scenario == 8 || scenario == 9 ||
+                         scenario == 10 || scenario == 11 || scenario == 12;
+  int passed = scenario == 13 || vertex->vx == (successful ? 10 : 11);
+  if (scenario == 13) {
+    passed = result != -1 && fixture.actor.animationSet == 0;
+  } else if (successful) {
     passed &= result == 0 && fixture.actor.blendPose.nextEventFrame == 510;
     if (scenario == 8 || scenario == 9 || scenario == 10) {
       passed &= Actors_sharedSequenceBankIndex == 1;
