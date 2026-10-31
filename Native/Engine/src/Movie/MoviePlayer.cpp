@@ -10,6 +10,8 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstdio>
+#include <filesystem>
 #include <limits>
 #include <memory>
 #include <string>
@@ -19,6 +21,7 @@
 #include "Audio/AudioDevice.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
+#include "Platform/Paths.hpp"
 #include "Render/PageSpace.hpp"
 
 // Plays a movie VS.Extract converted (Matroska: AV1 video, FLAC audio). Both
@@ -70,12 +73,15 @@ class Player {
  public:
   ~Player() { Close(); }
 
-  bool Open(const std::string& file) {
-    mkvparser::MkvReader reader;
-    if (reader.Open(file.c_str()) != 0) {
+  bool Open(const std::filesystem::path& path) {
+    const auto file = VS::Platform::PathText(path);
+    const std::unique_ptr<std::FILE, decltype(&std::fclose)> input(
+        _wfopen(path.c_str(), L"rb"), std::fclose);
+    if (!input) {
       VS_LOG_ERROR("movie", "cannot open {}", file);
       return false;
     }
+    mkvparser::MkvReader reader(input.get());
     i64 pos = 0;
     mkvparser::EBMLHeader ebml;
     if (ebml.Parse(&reader, pos) < 0) {
@@ -343,7 +349,7 @@ extern "C" int Movie_PlayerOpen(const char* disc_path) {
     return 0;
   }
   auto player = std::make_unique<Player>();
-  if (!player->Open(store->FileOf(*e).string())) {
+  if (!player->Open(store->FileOf(*e))) {
     return 0;
   }
   g_player = std::move(player);

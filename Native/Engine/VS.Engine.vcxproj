@@ -648,6 +648,7 @@
     <ClInclude Include="include\Platform\App.hpp" />
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />
+    <ClInclude Include="include\Platform\Paths.hpp" />
     <ClInclude Include="include\Render\Device.hpp" />
     <ClInclude Include="include\Render\ModelWorkspace.h" />
     <ClInclude Include="include\Render\PageSpace.hpp" />

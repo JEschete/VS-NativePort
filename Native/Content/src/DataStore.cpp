@@ -13,6 +13,7 @@
 #include "Content/DataAccess.h"
 #include "Core/Log.hpp"
 #include "Platform/CrashHandler.hpp"
+#include "Platform/Paths.hpp"
 
 namespace fs = std::filesystem;
 
@@ -66,7 +67,7 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   std::ifstream in(root / ManifestName);
   if (!in) {
     return std::unexpected("no extracted data at " +
-                           (root / ManifestName).string() +
+                           Platform::PathText(root / ManifestName) +
                            " (run VS.Extract extract <disc> <dir>)");
   }
   auto store = std::make_unique<DataStore>();
@@ -83,16 +84,18 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
     for (usize column = 0; column < kColumnCount; ++column) {
       const usize tab = column < kPathColumn ? v.find('\t') : v.size();
       if (tab == std::string_view::npos) {
-        return std::unexpected("bad line in " + (root / ManifestName).string() +
-                               ": " + line);
+        return std::unexpected("bad line in " +
+                               Platform::PathText(root / ManifestName) + ": " +
+                               line);
       }
       cols[column] = v.substr(0, tab);
       v = column < kPathColumn ? v.substr(tab + 1) : std::string_view{};
     }
     if (!ParseU32(cols[kLbaColumn], e.lba) ||
         !ParseU32(cols[kSizeColumn], e.size)) {
-      return std::unexpected("bad line in " + (root / ManifestName).string() +
-                             ": " + line);
+      return std::unexpected("bad line in " +
+                             Platform::PathText(root / ManifestName) + ": " +
+                             line);
     }
     e.form = cols[kFormColumn];
     e.path = cols[kPathColumn];
@@ -100,7 +103,7 @@ std::expected<void, std::string> DataStore::Open(const fs::path& root) {
   }
   std::ranges::sort(store->m_entries_, {}, &Entry::lba);
   VS_LOG_INFO("content", "extracted data: {} files from {}",
-              store->m_entries_.size(), root.string());
+              store->m_entries_.size(), Platform::PathText(root));
   Instance() = std::move(store);
   return {};
 }
@@ -129,7 +132,9 @@ fs::path DataStore::FileOf(const Entry& e) const {
   // a converted file keeps the disc name with its form as the extension
   // (MOV/TITLE.STR.mkv)
   const fs::path disc = m_root_ / "disc" / fs::path(e.path);
-  return e.form == "raw" ? disc : fs::path(disc.string() + "." + e.form);
+  fs::path result = disc;
+  if (e.form != "raw") result += "." + e.form;
+  return result;
 }
 
 bool DataStore::Read(const Entry& e, u64 offset, std::span<u8> out) const {
@@ -147,7 +152,7 @@ std::expected<std::vector<u8>, std::string> DataStore::ReadAll(
     const Entry& e) const {
   std::vector<u8> data(e.size);
   if (!Read(e, 0, data)) {
-    return std::unexpected("cannot read " + FileOf(e).string());
+    return std::unexpected("cannot read " + Platform::PathText(FileOf(e)));
   }
   return data;
 }

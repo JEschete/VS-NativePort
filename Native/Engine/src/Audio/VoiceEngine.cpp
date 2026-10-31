@@ -15,6 +15,7 @@
 #include <utility>
 
 #include "Core/Log.hpp"
+#include "Platform/Paths.hpp"
 namespace VS::Audio {
 namespace {
 constexpr int kEnvelopeMaximum = 32767;
@@ -229,15 +230,15 @@ std::expected<Synth, std::string> LoadProgram(const std::filesystem::path& path,
   sfizz_set_num_voices(synth.get(), 1);
   sfizz_set_preload_size(synth.get(), kPreloadFrames);
   sfizz_set_volume(synth.get(), 0);
-  if (!sfizz_load_file(synth.get(), path.string().c_str())) {
-    return std::unexpected("sfizz cannot load " + path.string());
+  if (!sfizz_load_file(synth.get(), Platform::PathText(path).c_str())) {
+    return std::unexpected("sfizz cannot load " + Platform::PathText(path));
   }
   VS_LOG_DEBUG("audio", "instrument load: voice={} duration_ms={} path={}",
                voice,
                std::chrono::duration<double, std::milli>(
                    std::chrono::steady_clock::now() - started)
                    .count(),
-               path.string());
+               Platform::PathText(path));
   return synth;
 }
 }  // namespace

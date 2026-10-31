@@ -26,6 +26,7 @@
 #include "Movie/MoviePlayer.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
+#include "Platform/Paths.hpp"
 #include "Render/Device.hpp"
 #include "Render/PageSpace.hpp"
 
@@ -44,8 +45,11 @@ namespace Render = VS::Render;
 
 namespace {
 
-// Set false and rebuild to retain normal, lightweight Desktop logging.
+#ifdef VS_RELEASE_BUILD
+constexpr bool kEnableDetailedGameLogging = false;
+#else
 constexpr bool kEnableDetailedGameLogging = true;
+#endif
 
 bool ConfigureLogging(int argc, char** argv, Game::GameplayTrace* trace) {
   const auto reject = [trace](const std::string& message) {
@@ -75,6 +79,11 @@ bool ConfigureLogging(int argc, char** argv, Game::GameplayTrace* trace) {
       return reject(
           "--log-channels expects comma-separated names (no spaces), or *");
     }
+  }
+  if constexpr (!kEnableDetailedGameLogging) {
+    Core::SetLogLevel(Core::LogLevel::Off);
+    Core::SetConsoleLogLevel(Core::LogLevel::Off);
+    return true;
   }
   if (trace == nullptr &&
       !Core::SetLogFile(
@@ -115,10 +124,10 @@ std::optional<fs::path> FindUp(const fs::path& relative) {
 // repo copy).
 std::optional<fs::path> LocateDisc(int argc, char** argv) {
   if (auto opt = Option(argc, argv, "--disc")) {
-    return fs::path(*opt);
+    return Platform::Utf8Path(*opt);
   }
   if (const char* env = SDL_getenv("VS_DISC")) {
-    return fs::path(env);
+    return Platform::Utf8Path(env);
   }
   if (auto p = FindUp(fs::path("disks") / "SLUS-01040.cue")) {
     return p;
@@ -129,7 +138,7 @@ std::optional<fs::path> LocateDisc(int argc, char** argv) {
 // --data <dir>, else Native\data found walking up from the executable.
 std::optional<fs::path> LocateData(int argc, char** argv) {
   if (auto opt = Option(argc, argv, "--data")) {
-    return fs::path(*opt);
+    return Platform::Utf8Path(*opt);
   }
   return FindUp(fs::path("Native") / "data" / Content::DataStore::ManifestName)
       .transform([](const fs::path& p) { return p.parent_path(); });
@@ -377,11 +386,21 @@ int RunGame(const Content::Disc* disc, const RunSettings& settings,
   Platform::App app;
   if (auto r = app.Init({}); !r) {
     VS_LOG_ERROR("boot", "{}", r.error());
+    if constexpr (!kEnableDetailedGameLogging) {
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                               "Window initialization failed",
+                               r.error().c_str(), nullptr);
+    }
     return 1;
   }
   Render::Device gpu;
   if (auto r = gpu.Init(app.Window(), true); !r) {
     VS_LOG_ERROR("boot", "{}", r.error());
+    if constexpr (!kEnableDetailedGameLogging) {
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR,
+                               "Graphics initialization failed",
+                               r.error().c_str(), app.Window());
+    }
     return 1;
   }
   Audio::AudioDevice audio(settings.speed == 1);
@@ -476,7 +495,7 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
     if (auto opened = Content::Disc::Open(*disc_path)) {
       disc = std::move(*opened);
       VS_LOG_INFO("boot", "disc '{}' ({} entries) from {}", disc->Label(),
-                  disc->Files().size(), disc_path->string());
+                  disc->Files().size(), Platform::PathText(*disc_path));
     } else {
       VS_LOG_WARN("boot", "{}", opened.error());
     }
@@ -486,10 +505,20 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
     VS_LOG_ERROR("boot",
                  "no extracted data; run VS.Extract extract <disc> "
                  "Native\\data, or pass --data <dir>");
+    if constexpr (!kEnableDetailedGameLogging) {
+      SDL_ShowSimpleMessageBox(
+          SDL_MESSAGEBOX_ERROR, "Game data not prepared",
+          "Open VS.Launcher.exe and press Play to prepare your own game disc.",
+          nullptr);
+    }
     return 1;
   }
   if (auto result = Content::DataStore::Open(*data_root); !result) {
     VS_LOG_ERROR("boot", "{}", result.error());
+    if constexpr (!kEnableDetailedGameLogging) {
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Game data unavailable",
+                               result.error().c_str(), nullptr);
+    }
     return 1;
   }
   if (trace != nullptr) {
@@ -502,6 +531,10 @@ int RunDesktop(int argc, char** argv, Game::GameplayTrace* trace) {
 }  // namespace
 
 int main(int argc, char** argv) try {
+  if constexpr (!kEnableDetailedGameLogging) {
+    Core::SetLogLevel(Core::LogLevel::Off);
+    Core::SetConsoleLogLevel(Core::LogLevel::Off);
+  }
   std::unique_ptr<Game::GameplayTrace> trace;
   const bool player_observations =
       std::any_of(argv + 1, argv + argc, [](const char* argument) {
@@ -547,6 +580,10 @@ int main(int argc, char** argv) try {
     }
   } catch (const std::exception& error) {
     VS_LOG_ERROR("boot", "{}", error.what());
+    if constexpr (!kEnableDetailedGameLogging) {
+      SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, "Game startup failed",
+                               error.what(), nullptr);
+    }
     if (trace != nullptr) trace->Event("fatal", {{"message", error.what()}});
   }
   if (trace != nullptr) {

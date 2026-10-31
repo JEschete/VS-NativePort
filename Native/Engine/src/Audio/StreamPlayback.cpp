@@ -11,6 +11,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
+#include "Platform/Paths.hpp"
 
 extern "C" {
 #include "Audio/Cutscene/Stream.h"
@@ -122,9 +123,8 @@ int Audio_BindRoomCutsceneStream(void* data, size_t byte_count) {
   BoundStream binding{data, *info, {}};
   for (VS::usize channel = 0; channel < binding.instruments.size(); ++channel) {
     binding.instruments[channel] =
-        VS::Content::AudioStreamInstrumentPath(store->Root(), *info,
-                                               channel % info->channels)
-            .string();
+        VS::Platform::PathText(VS::Content::AudioStreamInstrumentPath(
+            store->Root(), *info, channel % info->channels));
   }
   g_bound = std::move(binding);
   Audio_soundState.sfxStreamData[kRoomSlot] = data;

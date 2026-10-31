@@ -1015,6 +1015,9 @@
     <Filter Include="tools\port">
       <UniqueIdentifier>{70376229-6E65-5EF4-B9D7-769299972C0F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tools\release">
+      <UniqueIdentifier>{E77D5123-84E8-53BE-AD7D-F49CFEDFA4BB}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tools\scaffold">
       <UniqueIdentifier>{D4DB6B31-5A30-53A7-A78F-C29A47B722CB}</UniqueIdentifier>
     </Filter>
@@ -5309,6 +5312,15 @@
     </None>
     <None Include="..\..\PSX\VagrantStory\VSViewer\README.md">
       <Filter>tools\PSX\VagrantStory\VSViewer</Filter>
+    </None>
+    <None Include="..\..\release\Check-Dependencies.ps1">
+      <Filter>tools\release</Filter>
+    </None>
+    <None Include="..\..\release\package-release.ps1">
+      <Filter>tools\release</Filter>
+    </None>
+    <None Include="..\..\release\Start-Game.cmd">
+      <Filter>tools\release</Filter>
     </None>
     <None Include="..\..\requirements.txt">
       <Filter>tools</Filter>

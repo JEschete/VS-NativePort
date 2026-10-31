@@ -372,17 +372,45 @@ TEST_CASE("Converted intro movie decodes without changing page ownership",
       !std::filesystem::exists(root / "disc/MOV/TITLE.STR.mkv")) {
     SKIP("Converted intro movie is unavailable");
   }
-  REQUIRE(Content::DataStore::Open(root).has_value());
+  const bool unicode_path = GENERATE(false, true);
+  Content::DataStore::ScopedOverride restore;
   struct MovieScope {
     std::vector<u16> pixels;
+    std::filesystem::path temporary;
     ~MovieScope() {
       Movie_PlayerClose();
       Render::GamePages().Upload(
           {0, 0, Render::PageSpace::Width, Render::PageSpace::Height},
           pixels.data());
+      if (!temporary.empty()) {
+        std::error_code error;
+        std::filesystem::remove_all(temporary, error);
+        if (error) {
+          VS_LOG_ERROR("test", "Movie fixture cleanup: {}", error.message());
+        }
+      }
     }
   } scope{{Render::GamePages().Pixels().begin(),
-           Render::GamePages().Pixels().end()}};
+           Render::GamePages().Pixels().end()},
+          {}};
+  auto selected_root = root;
+  if (unicode_path) {
+    scope.temporary =
+        std::filesystem::temp_directory_path() /
+        ("vs-movie-" +
+         std::to_string(
+             std::chrono::steady_clock::now().time_since_epoch().count()));
+    scope.temporary += L" spaces-\u6E2C\u8A66";
+    std::filesystem::create_directories(scope.temporary / "disc" / "MOV");
+    std::filesystem::copy_file(
+        root / Content::DataStore::ManifestName,
+        scope.temporary / Content::DataStore::ManifestName);
+    std::filesystem::copy_file(
+        root / "disc" / "MOV" / "TITLE.STR.mkv",
+        scope.temporary / "disc" / "MOV" / "TITLE.STR.mkv");
+    selected_root = scope.temporary;
+  }
+  REQUIRE(Content::DataStore::Open(selected_root).has_value());
   Render::GamePages().Fill(
       {0, 0, Render::PageSpace::Width, Render::PageSpace::Height}, 255, 0, 255);
   const u16 before = Render::GamePages().At(0, 0);

@@ -20,6 +20,7 @@
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
+#include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/AudioDevice.hpp"
 #include "Audio/SequencerOutput.h"
@@ -311,7 +312,8 @@ struct AudioFixture {
            std::chrono::steady_clock::now().time_since_epoch().count()));
   Content::AudioBank bank;
 
-  AudioFixture() {
+  explicit AudioFixture(bool unicode_path = false) {
+    if (unicode_path) root += L"-\u6E2C\u8A66";
     bank.instruments.push_back({0, 0, 0, 60, 0x00FF, 0x5FC4});
     Content::AudioSample sample;
     sample.repeat = true;
@@ -348,7 +350,9 @@ struct StreamFixture {
   AudioFixture files;
   std::vector<u8> package;
 
-  explicit StreamFixture(bool stereo = false, bool repeat = false) {
+  explicit StreamFixture(bool stereo = false, bool repeat = false,
+                         bool unicode_path = false)
+      : files(unicode_path) {
     auto bytes = StreamBytes(stereo);
     if (repeat) Put32(bytes, 24, stereo ? 3 : 2);
     for (usize offset = 64; offset < bytes.size(); offset += 16) {
@@ -388,7 +392,8 @@ struct XaFixture {
   std::filesystem::path asset =
       Content::XaAudioPath(files.root, "ENDING/ENDING.XA");
 
-  explicit XaFixture(bool stereo) {
+  explicit XaFixture(bool stereo, bool unicode_path = false)
+      : files(unicode_path) {
     const auto source = std::filesystem::path(SDL_GetBasePath()) / ".." / ".." /
                         "Native" / "Tests" / "data" / "audio" /
                         (stereo ? "stereo-tone.flac" : "mono-tone.flac");
@@ -573,7 +578,8 @@ TEST_CASE("XA import rejects invalid sectors and timing",
 TEST_CASE("XA native output preserves stereo and mono volume controls",
           "[audio][xa-playback]") {
   AudioDeviceFixture device;
-  XaFixture fixture(true);
+  const bool unicode_path = GENERATE(false, true);
+  XaFixture fixture(true, unicode_path);
   auto capture = [&](int volume, bool mono, unsigned mix) {
     TestsNativeMonoOutput(mono ? 1 : 0);
     XaFixture::Start(volume);
@@ -1024,7 +1030,8 @@ TEST_CASE("Stream fades reach exact targets and reset releases borrowed data",
 TEST_CASE("Production stream pan and Mono settings reach actual device samples",
           "[audio][stream-playback][device]") {
   AudioDeviceFixture device;
-  StreamFixture fixture(false, true);
+  const bool unicode_path = GENERATE(false, true);
+  StreamFixture fixture(false, true, unicode_path);
   fixture.BindAndPlay(0);
   StreamFixture::Tick();
   Audio_Native_SetReverbDepth(0, 0);
@@ -1632,7 +1639,8 @@ TEST_CASE("Native reverb sends survive note stops but never playback reset",
 
 TEST_CASE("sfizz preserves measured pitch, loop playback and the output clock",
           "[audio][synth]") {
-  AudioFixture fixture;
+  const bool unicode_path = GENERATE(false, true);
+  AudioFixture fixture(unicode_path);
   REQUIRE(Content::ExportAudioBank(fixture.bank, fixture.root));
   Audio::VoiceEngine engine;
   StartStereoPair(engine, fixture);

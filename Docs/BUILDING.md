@@ -31,7 +31,7 @@ step must update this file in the same commit (plan D19).
 
 | Requirement | Version | Notes |
 |---|---|---|
-| Windows | 10 or 11, x64 | x64 only (plan D4) |
+| Windows | 10 version 1903+ or 11, x64 | x64 only (plan D4); embedded UTF-8 process manifests support non-ASCII asset paths |
 | Visual Studio | **2026 (18.x)**, any edition | The VS 2022 Clang toolset is not tested. |
 | VS workload | **Desktop development with C++** | |
 | VS components | **C++ Clang Compiler for Windows**, **MSBuild support for LLVM (clang-cl) toolset**, **vcpkg package manager** | All projects use the `ClangCL` toolset. vcpkg is the copy bundled with VS (`$(VCInstallDir)vcpkg`); you do not need a separate vcpkg install or `vcpkg integrate`. |
@@ -85,6 +85,39 @@ git clone https://github.com/JEschete/VS-NativePort.git
 cd VS-NativePort
 ```
 
+### Tester ZIP (no build tools required)
+
+The Windows tester package includes `VS.Launcher.exe`, the Release game and
+extractor, app-local MSVC/runtime DLLs, dependency checks and license notices.
+See [TESTER_RELEASE.md](TESTER_RELEASE.md) for the complete first-run flow.
+The launcher has CUE, save-folder and FFmpeg pickers, a Play button, a download
+link and an optional winget installation action. The referenced BIN is checked
+before setup. Unsupported editions/layouts fail explicitly.
+First-launch path fields are blank; detection and selections are user actions.
+Only that user's own local settings are restored on later launches.
+
+Play prepares assets in SDL's per-user VagrantStory directory, not beside the
+executable. It runs the existing C++ `extract` (including movie/streams) and
+`audio` bank stages, then checks the manifest/output files and writes a
+versioned completion inventory. Later plays check source identity and all
+inventoried file sizes before reuse. This is the current extraction pipeline,
+not the deferred all-format native conversion described in section 5.
+Failed staging/replaced asset directories are retained for diagnosis/recovery.
+Selected saves remain separate and are passed to the game with `--save-dir`.
+
+Build Release, then create the local ZIP:
+
+```powershell
+.\tools\release\package-release.ps1 -Version 'alpha-example'
+```
+
+The packager refuses existing output names, uses an explicit binary whitelist
+and includes no disc images, extracted assets, captures or BIOS. Its
+`release.json` records source revision, dirty state and packaged-file hashes.
+FFmpeg remains external; the package does not require Visual Studio, Python,
+Node.js or developer-specific paths. Movie conversion is limited to two SVT
+logical processors to avoid unbounded first-run encoder parallelism.
+
 ---
 
 ## 3. Provide the game disc
@@ -105,7 +138,14 @@ The dump this project is developed against has `SLUS-01040.bin` **SHA-1 `38C63DB
 Get-FileHash disks\SLUS-01040.bin -Algorithm SHA1
 ```
 
-Other dumps of the same release should work. The extractor warns, but does not stop, if the hash differs.
+The tester launcher requires that exact dump, additionally checking SHA-256
+`25221D7F8FDB2C4490AF12D9E82F0E58BDD6ACB43387F9082B3C5E79DFE090C0`.
+It verifies every BIN byte before extraction or Play, even for an existing cache,
+and denies concurrent writes/deletion while setup uses the image. CUE names may
+vary, but their single-track layout and BIN reference must be correct. Wrong
+size, checksum, region or layout is a blocking error, not a warning.
+The developer extractor remains a general offline tool; using it directly does
+not certify compatibility with this tester build.
 A `.bin` containing only cooked 2048-byte sectors, or an extracted file folder, is **not** enough: the intro movie and
 the ending audio live in raw form-2 sectors.
 
@@ -152,6 +192,7 @@ Everything goes to `build\<Config>\` (git-ignored):
 |---|---|
 | `VS.Desktop.exe` + `SDL3.dll`, `dav1d.dll`, `webm.dll`, `sfizz.dll` | the game |
 | `VS.Extract.exe` | the asset extractor (§5) |
+| `VS.Launcher.exe` | native Windows tester setup, asset verification and Play |
 | `VS.Tests.exe` | unit tests |
 | `VS.CombatLab.exe` | standalone live encounter editor and production combat host |
 | `vs-native.log` | the log written by `VS.Desktop` at run time |
@@ -301,6 +342,12 @@ build\Release\VS.Desktop.exe
 | `--log-level <level>` | Minimum severity: `trace`, `debug`, `info` (default), `warn`, `error`, or `off`. `off` suppresses all normal logging, including crash messages. Invalid/missing values fail startup. |
 | `--log-channels <names>` | Exact, case-sensitive comma-separated channels, without spaces; default `*` selects all. Filters trace/debug/info only; warnings/errors remain visible unless excluded by severity or `off`. |
 | `--player-observations` | Explicitly enable read-only external-player observations in detailed traces. Off by default in Desktop and Combat Lab; collectors live under Diagnostics, not normal gameplay inspection. The external [player runner](../Native/Player/README.md) supplies this flag itself. No inference or navigation policy runs in the game. |
+
+Release `VS.Desktop` disables normal gameplay logs and detailed trace creation,
+including `vs-native.log` and `game-logs`. Logging options are validated but
+cannot enable Release logging; observation/verification logging requires a
+Debug build. Extractor/launcher setup output is separate and remains available
+for actionable first-run failures. Debug diagnostic behavior is unchanged.
 
 Native file-menu integration remains under verification in #18. Native slots
 are `slot00.vssave` through `slot99.vssave`, with recoverable `.bak` files;

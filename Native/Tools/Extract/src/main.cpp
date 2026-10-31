@@ -19,6 +19,7 @@
 #include "Content/Disc.hpp"
 #include "Core/Log.hpp"
 #include "Platform/App.hpp"
+#include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 
 namespace fs = std::filesystem;
@@ -55,7 +56,7 @@ int Usage() {
 std::optional<fs::path> FindFfmpeg(int argc, char** argv) {
   for (int i = 1; i + 1 < argc; ++i) {
     if (std::string_view(argv[i]) == "--ffmpeg") {
-      return fs::path(argv[i + 1]);
+      return Platform::Utf8Path(argv[i + 1]);
     }
   }
   const char* path = std::getenv("PATH");
@@ -100,7 +101,7 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
                static_cast<std::streamsize>(raw.size()));
   stream.close();
   if (!stream) {
-    VS_LOG_ERROR("extract", "cannot write {}", tmp.string());
+    VS_LOG_ERROR("extract", "cannot write {}", Platform::PathText(tmp));
     return false;
   }
   return true;
@@ -109,9 +110,10 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
 // Preserve the movie's decoded audio losslessly; video uses AV1 CRF 18.
 bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
                   const Content::DiscFile& file, const fs::path& mkv) {
-  const fs::path tmp = fs::path(mkv.string() + ".raw");
+  fs::path tmp = mkv;
+  tmp += L".raw";
   if (!WriteRawStream(disc, file, tmp)) return false;
-  const auto arguments = std::to_array<std::string>({ffmpeg.string(),
+  const auto arguments = std::to_array<std::string>({Platform::PathText(ffmpeg),
                                                      "-hide_banner",
                                                      "-loglevel",
                                                      "error",
@@ -119,7 +121,7 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
                                                      "-f",
                                                      "psxstr",
                                                      "-i",
-                                                     tmp.string(),
+                                                     Platform::PathText(tmp),
                                                      "-map",
                                                      "0:v",
                                                      "-map",
@@ -128,6 +130,8 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
                                                      "libsvtav1",
                                                      "-preset",
                                                      "6",
+                                                     "-svtav1-params",
+                                                     "lp=2",
                                                      "-crf",
                                                      "18",
                                                      "-pix_fmt",
@@ -138,7 +142,7 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
                                                      "bt470bg",
                                                      "-c:a",
                                                      "flac",
-                                                     mkv.string()});
+                                                     Platform::PathText(mkv)});
   const auto result = Platform::RunProcess(arguments);
   std::error_code ec;
   fs::remove(tmp, ec);
@@ -147,19 +151,20 @@ bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
                  result ? std::to_string(*result) : result.error());
     return false;
   }
-  VS_LOG_INFO("extract", "{} -> {} ({} bytes)", file.path, mkv.string(),
-              fs::file_size(mkv, ec));
+  VS_LOG_INFO("extract", "{} -> {} ({} bytes)", file.path,
+              Platform::PathText(mkv), fs::file_size(mkv, ec));
   return true;
 }
 
 bool ConvertXa(const Content::Disc& disc, const fs::path& ffmpeg,
                const Content::DiscFile& file, const fs::path& flac) {
-  const fs::path tmp = fs::path(flac.string() + ".raw");
+  fs::path tmp = flac;
+  tmp += L".raw";
   if (!WriteRawStream(disc, file, tmp, true)) return false;
   const auto arguments = std::to_array<std::string>(
-      {ffmpeg.string(), "-hide_banner", "-loglevel", "error", "-y", "-f",
-       "psxstr", "-i", tmp.string(), "-map", "0:a:0", "-c:a", "flac",
-       flac.string()});
+      {Platform::PathText(ffmpeg), "-hide_banner", "-loglevel", "error", "-y",
+       "-f", "psxstr", "-i", Platform::PathText(tmp), "-map", "0:a:0", "-c:a",
+       "flac", Platform::PathText(flac)});
   const auto result = Platform::RunProcess(arguments);
   std::error_code error;
   fs::remove(tmp, error);
@@ -169,7 +174,7 @@ bool ConvertXa(const Content::Disc& disc, const fs::path& ffmpeg,
     return false;
   }
   VS_LOG_INFO("extract", "{} -> {} (lossless decoded XA FLAC)", file.path,
-              flac.string());
+              Platform::PathText(flac));
   return true;
 }
 
@@ -212,7 +217,8 @@ int ConvertAudio(const Content::Disc& disc, int argc, char** argv) {
       VS_LOG_ERROR("extract", "{}: {}", file.path, bank.error());
       return 1;
     }
-    if (auto result = Content::ExportAudioBank(*bank, argv[kOutputArgument]);
+    if (auto result = Content::ExportAudioBank(
+            *bank, Platform::Utf8Path(argv[kOutputArgument]));
         !result) {
       VS_LOG_ERROR("extract", "{}: {}", file.path, result.error());
       return 1;
@@ -336,12 +342,12 @@ bool ValidStreamArguments(int argc, char** argv) {
 
 }  // namespace
 
-int main(int argc, char** argv) try {
+int Run(int argc, char** argv) {
   if (argc < kMinimumArguments) {
     return Usage();
   }
   const std::string cmd = argv[1];
-  auto disc = Content::Disc::Open(argv[2]);
+  auto disc = Content::Disc::Open(Platform::Utf8Path(argv[2]));
   if (!disc) {
     VS_LOG_ERROR("extract", "{}", disc.error());
     return 1;
@@ -353,20 +359,20 @@ int main(int argc, char** argv) try {
     return ConvertAudio(**disc, argc, argv);
   }
   if (cmd == "streams" && ValidStreamArguments(argc, argv)) {
-    return ConvertStreams(**disc, argv[kOutputArgument],
+    return ConvertStreams(**disc, Platform::Utf8Path(argv[kOutputArgument]),
                           FindFfmpeg(argc, argv));
   }
   if (cmd == "extract" && argc >= kExtractArguments) {
     // <outdir>\disc\<path> for each file, and the manifest Content::DataStore
     // reads (sector, size, form, path). Interleaved files (movies, XA audio)
     // are listed with form "stream" until their converters write them.
-    const fs::path out = argv[kOutputArgument];
+    const fs::path out = Platform::Utf8Path(argv[kOutputArgument]);
     fs::create_directories(out);
     std::ofstream manifest(out / Content::DataStore::ManifestName,
                            std::ios::binary);
     if (!manifest) {
       VS_LOG_ERROR("extract", "cannot create the data manifest in {}",
-                   out.string());
+                   Platform::PathText(out));
       return 1;
     }
     manifest << "lba\tsize\tform\tpath\n";
@@ -384,8 +390,8 @@ int main(int argc, char** argv) try {
       }
       if (f.interleaved) {
         const bool movie = f.path.ends_with(".STR");
-        const fs::path mkv =
-            fs::path(out / "disc" / fs::path(f.path)).string() + ".mkv";
+        fs::path mkv = out / "disc" / fs::path(f.path);
+        mkv += L".mkv";
         if (movie && ffmpeg && ConvertMovie(**disc, *ffmpeg, f, mkv)) {
           manifest << f.lba << '\t' << f.size << "\tmkv\t" << f.path << '\n';
           ++written;
@@ -407,7 +413,7 @@ int main(int argc, char** argv) try {
                    static_cast<std::streamsize>(data->size()));
       output.close();
       if (!output) {
-        VS_LOG_ERROR("extract", "cannot write {}", dst.string());
+        VS_LOG_ERROR("extract", "cannot write {}", Platform::PathText(dst));
         return 1;
       }
       manifest << f.lba << '\t' << f.size << "\traw\t" << f.path << '\n';
@@ -416,17 +422,27 @@ int main(int argc, char** argv) try {
     manifest.close();
     if (!manifest) {
       VS_LOG_ERROR("extract", "cannot finish the data manifest in {}",
-                   out.string());
+                   Platform::PathText(out));
       return 1;
     }
     VS_LOG_INFO("extract",
                 "wrote {} files to {} ({} interleaved listed, not converted)",
-                written, out.string(), skipped);
+                written, Platform::PathText(out), skipped);
     return ConvertStreams(**disc, out, ffmpeg);
   }
   return Usage();
-}  // namespace
-catch (const std::exception& error) {
+}
+
+int wmain(int argc, wchar_t** argv) try {
+  std::vector<std::string> values;
+  values.reserve(argc);
+  for (int index = 0; index < argc; ++index) {
+    values.push_back(Platform::PathText(fs::path(argv[index])));
+  }
+  std::vector<char*> arguments;
+  for (auto& value : values) arguments.push_back(value.data());
+  return Run(argc, arguments.data());
+} catch (const std::exception& error) {
   std::fprintf(stderr, "extract: %s\n", error.what());
   return 1;
 } catch (...) {

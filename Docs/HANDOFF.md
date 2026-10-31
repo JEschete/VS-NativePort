@@ -9,6 +9,96 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Publication checkpoint: first-use CUE/save/FFmpeg fields are now all blank;
+  only user-selected paths in that user's local configuration are restored.
+  Detection is explicit. Packager rejects personal configuration/logs and any
+  payload containing the builder's profile path. No developer profile path was
+  found in the runtime executables or bundled libraries.
+  Final Debug/Release selections each pass56 cases/217,169 assertions.
+  #245's production Unicode synth, streams, XA and movie controls pass without
+  changed expectations; the game binary remains the same as the r2 packaged
+  startup/exit control. Close #245 only with the fixing revision and green
+  exact-revision CI; do not convert the separate r3 GPU-health limit into a pass.
+  Owner authorized scoped commit/push and then creation/switch to
+  `imp/01-ma04-gates`. IMP01/#46 implementation has NOT started; do not claim
+  or edit its acceptance as part of this launcher checkpoint.
+- Launcher r3 follow-up from base `e103a044`: release input is now
+  fail-closed against the exact approved750,643,152-byte USA BIN SHA256
+  `25221D7F8FDB2C4490AF12D9E82F0E58BDD6ACB43387F9082B3C5E79DFE090C0`.
+  CUE order/layout/reference and complete BIN bytes are checked before cache,
+  extraction or Play; image write/delete sharing is denied through setup.
+  Cache provenance is now version2 with the verified hash; old caches rebuild
+  once. A forged cache marker, wrong size and correctly sized wrong bytes have
+  explicit negative controls. SHA256 primitives use known-vector/read-lock tests.
+  The GUI is a DPI-aware dark/gold three-card setup flow with inline errors,
+  verification progress, disabled Play until verified, keyboard focus, resize/
+  scroll behavior and native pickers. 100/150-percent layouts and invalidation
+  after changing the CUE were visually/control checked. No game assets are used
+  in the launcher design.
+  Debug and Release focused selections each pass55 cases/217,164 assertions;
+  source quality is zero findings. Candidate:
+  `build\releases\VS-NativePort-alpha-2026-10-30-r3-win-x64.zip`,
+  SHA256 `94BDB315C95D4ECE6905185503B7DF3846E00347BAE5E5FC36F1F612512BA2B5`.
+  Actual packaged verification and extraction produced11,405 assets with the
+  approved hash in version2 provenance; bank import completed83 banks.
+  Subsequent game-window smoke is NOT accepted: its initial input-idle check
+  saw no visible game window, and the harness stopped only its owned processes.
+  Windows recorded NVIDIA TDR resets at20:37:34..36 and Nexus.exe/nvml.dll crash
+  at20:37:40. Cause is unproven; do not blame or change the game/driver from this.
+  The game binary is identical to r2 (SHA256
+  `59821119CF5DA6184767554D4BB772A5541273851F2D5358878EDD3574E77AC1`).
+  Further game launches are paused rather than ignoring the health event.
+  Owner was unavailable; finish the local ZIP with this limit explicit, then
+  observe a stable driver session and a bounded visible-window startup before
+  claiming fresh game-smoke acceptance. Do not retry launches in a loop.
+  Evidence: `build\quality\launcher-r3-*.log`,
+  `build\launcher-design-check\*.png`. Publication evidence is tracked on #245;
+  no GitHub release was published.
+- Local tester-launcher delivery from `e103a044` plus uncommitted changes:
+  `VS.Launcher` uses native Windows CUE/save-folder/FFmpeg pickers and Play,
+  remembers paths in per-user `launcher.json`, validates referenced BIN and
+  USA/raw-track compatibility, and invokes the existing C++ extract/streams
+  plus audio-bank stages. Unique staging, output verification and a versioned
+  inventory prevent partial setup from launching the game; previous assets
+  are preserved. No deferred IMP asset formats or player-bot work was added.
+  Release Desktop explicitly disables normal/detailed gameplay logs; Debug
+  logging remains available. Setup errors/output remain separate.
+  Windows10 1903+/11 x64 is required: embedded UTF-8 process manifests repair
+  sfizz's narrow-file dependency, alongside native/wide path handling for
+  movie/XA/streams. #245 records the failing Unicode production-audio control
+  before repair; it remains open pending authorized publication and CI.
+  Debug and Release focused selections each pass50 cases/217,134 assertions, covering launcher,
+  saves, logging, synth, XA, effect streams and movie playback, including
+  ASCII/Unicode controls. Source quality is zero findings; tooling controls
+  pass29 tests and repeated project generation is byte-stable across24 paths.
+  Selection: `[launcher],[save-store],[log],[synth],[xa-playback],[stream-playback],[movie]`.
+  Actual first setup prepared11,405 files; cached verification reused them
+  without FFmpeg in0.106s. Fresh GUI Play also completed real extraction and
+  automatic game startup while its window stayed responsive. Native CUE/folder
+  dialogs open/cancel correctly; automated filename selection was not exposed
+  by this machine's UI Automation provider, so acceptance fields were seeded
+  through launcher arguments, not a bypass of Prepare or Play.
+  An unpacked ZIP outside the repository, under Unicode/space-containing paths
+  and a Windows-only PATH, boots and shuts down without gameplay log files or
+  console output even with trace-level arguments. Missing BIN/FFmpeg/runtime
+  files and damaged cached assets have explicit failing controls.
+  Package entrypoint: `tools\release\package-release.ps1`; tester instructions:
+  `TESTER_RELEASE.md`. Final local ZIP candidate is under `build\releases`
+  (`alpha-2026-10-30-r2`); source remains uncommitted and no GitHub release was
+  published. The ZIP includes only whitelisted Release binaries, app-local CRT/
+  DLLs, scripts and notices, never game assets or BIOS. Actual winget installation
+  and a clean Windows VM were not exercised; dependency discovery, download
+  alternatives and missing-winget errors were checked without installing.
+  Final ZIP SHA256:
+  `6130E01C1EB547610E1417578AE8C8A71CC839DA7686DC892BEA170000A493BD`.
+  Archive inspection confirms29 entries,28 matching payload hashes and no
+  disc-derived data. Final packaged Play exits normally with code0.
+  Evidence: `build\quality\launcher-*.log` and
+  `build\launcher-acceptance\acceptance.json`; native test fixtures and captures
+  were never distributed. Setup summaries/logs and the launcher screenshot are
+  retained; temporary package copies and disc-derived test fixtures were removed
+  after verification. The original disc and `Native\data` were not changed.
+  This is launcher/setup acceptance, not campaign parity.
 - #244 follow-up from base `d18ba477`: the owner's MAP038 clear
   screenshot lacked the food-chain heading and puzzle rank, not ordinary
   message-box text. F03675/F03677/F03678 were merged from per-overlay

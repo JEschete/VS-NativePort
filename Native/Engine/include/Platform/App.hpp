@@ -56,6 +56,7 @@ std::filesystem::path ExecutableDir();
 std::expected<std::filesystem::path, std::string> UserDataDir();
 
 std::expected<int, std::string> RunProcess(
-    std::span<const std::string> arguments);
+    std::span<const std::string> arguments,
+    const std::filesystem::path& output = {});
 
 }  // namespace VS::Platform

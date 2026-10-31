@@ -17,6 +17,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
+#include "Platform/Paths.hpp"
 
 extern "C" {
 #include "Audio/Cutscene/Stream.h"
@@ -290,7 +291,7 @@ int Audio_Native_StartStreamVoice(unsigned voice, const char* instrument,
                                   int reverb) {
   auto& controls = g_controls[CheckedVoice(voice)];
   controls = {};
-  controls.instrument = instrument;
+  controls.instrument = VS::Platform::Utf8Path(instrument);
   controls.rate = rate;
   controls.left = Gain(left, 0);
   controls.right = Gain(right, 0);

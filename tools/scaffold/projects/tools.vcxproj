@@ -1449,6 +1449,9 @@
     <None Include="..\..\PSX\VagrantStory\vstrack\LICENSE.md" />
     <None Include="..\..\PSX\VagrantStory\vstrack\README.md" />
     <None Include="..\..\PSX\VagrantStory\VSViewer\README.md" />
+    <None Include="..\..\release\Check-Dependencies.ps1" />
+    <None Include="..\..\release\package-release.ps1" />
+    <None Include="..\..\release\Start-Game.cmd" />
     <None Include="..\..\requirements.txt" />
     <None Include="..\..\ruff.toml" />
     <None Include="..\gen_solution.py" />

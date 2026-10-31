@@ -762,6 +762,9 @@
     <ClInclude Include="include\Platform\GameFiber.hpp">
       <Filter>include\Platform</Filter>
     </ClInclude>
+    <ClInclude Include="include\Platform\Paths.hpp">
+      <Filter>include\Platform</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\Device.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>

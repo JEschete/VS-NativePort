@@ -16,6 +16,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
+#include "Platform/Paths.hpp"
 
 extern "C" {
 #include "Audio/Control/SoundControl.h"
@@ -53,10 +54,10 @@ class XaPlayback {
     }
     const auto path = VS::Content::XaAudioPath(store.Root(), entry.path);
     const std::unique_ptr<drflac, decltype(&drflac_close)> decoder(
-        drflac_open_file(path.string().c_str(), nullptr), drflac_close);
+        drflac_open_file_w(path.c_str(), nullptr), drflac_close);
     if (!decoder) {
       VS_LOG_ERROR("audio", "cannot decode XA FLAC {}; run VS.Extract streams",
-                   path.string());
+                   VS::Platform::PathText(path));
       return false;
     }
     const auto frames = decoder->totalPCMFrameCount;
@@ -68,7 +69,7 @@ class XaPlayback {
         frames >
             std::numeric_limits<int>::max() / (channels * sizeof(VS::i16))) {
       VS_LOG_ERROR("audio", "XA asset must be nonempty mono/stereo PCM16: {}",
-                   path.string());
+                   VS::Platform::PathText(path));
       return false;
     }
     m_channels_ = channels;
@@ -77,14 +78,14 @@ class XaPlayback {
                              VS::Content::kXaSectorsPerSecond;
     if (first_frame >= m_frames_) {
       VS_LOG_ERROR("audio", "XA sector {} is past decoded EOF: {}", sector,
-                   path.string());
+                   VS::Platform::PathText(path));
       return false;
     }
     m_samples_.resize(frames * channels);
     if (drflac_read_pcm_frames_s16(decoder.get(), frames, m_samples_.data()) !=
         frames) {
       VS_LOG_ERROR("audio", "XA FLAC ended before its declared frame count: {}",
-                   path.string());
+                   VS::Platform::PathText(path));
       Stop();
       return false;
     }
@@ -103,7 +104,8 @@ class XaPlayback {
       return false;
     }
     VS_LOG_INFO("audio", "XA start: {} sector={} rate={} channels={} frames={}",
-                path.string(), sector, rate, m_channels_, m_frames_);
+                VS::Platform::PathText(path), sector, rate, m_channels_,
+                m_frames_);
     return true;
   }
 

@@ -13,6 +13,12 @@
     <Filter Include="..\Tools\CombatLab\src">
       <UniqueIdentifier>{1E5165DB-8EC7-5511-A167-D460786D1005}</UniqueIdentifier>
     </Filter>
+    <Filter Include="..\Tools\Launcher">
+      <UniqueIdentifier>{CB4D3062-002C-5C94-99D0-9D1D55ED6A87}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="..\Tools\Launcher\src">
+      <UniqueIdentifier>{6F373C63-7391-52AB-9E19-6ABE6714ADA8}</UniqueIdentifier>
+    </Filter>
     <Filter Include="src">
       <UniqueIdentifier>{E2D8E2BE-A836-5D76-87F0-1B39A67C9A1B}</UniqueIdentifier>
     </Filter>
@@ -145,6 +151,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\JumpEntryTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\LauncherTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\LayoutAsserts.c">
@@ -287,6 +296,12 @@
     </ClCompile>
     <ClCompile Include="src\VignetteRenderTests.cpp">
       <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">
+      <Filter>..\Tools\Launcher\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp">
+      <Filter>..\Tools\Launcher\src</Filter>
     </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp">
       <Filter>..\Tools\CombatLab\src</Filter>

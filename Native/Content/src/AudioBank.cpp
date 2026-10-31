@@ -9,6 +9,7 @@
 #include <utility>
 #include <vector>
 
+#include "Platform/Paths.hpp"
 #include "nlohmann/json.hpp"
 namespace VS::Content {
 namespace {
@@ -283,7 +284,8 @@ std::expected<void, std::string> ExportAudioSample(
   auto wave_path = instrument_path;
   wave_path.replace_extension(".wav");
   if (!WriteWave(wave_path, sample.pcm, sample_rate)) {
-    return std::unexpected("writing audio sample " + wave_path.string());
+    return std::unexpected("writing audio sample " +
+                           Platform::PathText(wave_path));
   }
   std::ofstream sfz(instrument_path);
   sfz << "<region> sample=" << wave_path.filename().string()
@@ -300,7 +302,7 @@ std::expected<void, std::string> ExportAudioSample(
   sfz.close();
   if (!sfz) {
     return std::unexpected("writing SFZ instrument " +
-                           instrument_path.string());
+                           Platform::PathText(instrument_path));
   }
   return {};
 }
