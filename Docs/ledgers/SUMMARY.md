@@ -110,6 +110,13 @@ and EC-04 original-address module symbol have zero consumers. That is one leaf f
 promotion or EC retirement; its callers remain C ABI, and generated `ActionPlanning.c` still drives it.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
+### Full tidy result for the slice (#248)
+
+`quality-native.cmd --tidy` at clean `18be0e17` **exited 1 with 272 new findings**; the fast CI job does not
+run this analysis. One was in this slice's `CorePointerSortTests.cpp`, fixed in `0808350a` and confirmed by a
+focused tidy run there; the slice's production files had none. The other 271 are in 30 files unchanged since
+`b6f46900`, 144 of them in `Native/Tools/Launcher/src/Window.cpp`. They remain open: the baseline was not refreshed.
+
 | Gate | Evidence needed |
 | --- | --- |
 | Ownership | Registered implementation/header and exclusion from generated output |
