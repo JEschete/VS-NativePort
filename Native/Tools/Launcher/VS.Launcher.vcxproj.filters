@@ -21,10 +21,16 @@
     <ClCompile Include="src\Setup.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Updates.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Window.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="include\Launcher\Setup.hpp">
+      <Filter>include\Launcher</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Launcher\Updates.hpp">
       <Filter>include\Launcher</Filter>
     </ClInclude>
     <ClInclude Include="include\Launcher\Window.hpp">

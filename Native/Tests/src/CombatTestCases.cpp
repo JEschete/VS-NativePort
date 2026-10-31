@@ -1535,6 +1535,39 @@ TEST_CASE("Every matching limb result contributes once to its actor",
   CHECK(fixture.stats[0].currentMp == 120);
 }
 
+TEST_CASE("Indestructible gimmick hit applies without an actor record",
+          "[combat][sandbox][gimmick]") {
+  AbilityFixture fixture;
+  auto& hit = fixture.Request().targets[0];
+  hit.target.impactKind = 4;
+  fixture.actors[1].roomSpawnIndex = 0x80;
+  auto& target = fixture.stats[1];
+  target.actorId = 0x80;
+  target.cancelsHitResults = 1;
+  target.currentHp = target.maxHp = 1;
+  // Field_CreateGimmickInstance registers Field_gimmickInstances only.
+  Actors_actorRecords[1] = nullptr;
+
+  Battle_ApplyActionTargetEffects(1, nullptr);
+
+  CHECK(target.currentHp == 1);
+  CHECK(Battle_floatingLabelCount == 0);
+}
+
+TEST_CASE("Blocked hit still plays the defense reaction on a real actor",
+          "[combat][sandbox][gimmick]") {
+  AbilityFixture fixture;
+  fixture.Request().targets[0].target.impactKind = 4;
+  auto& instance = fixture.records[1].instance;
+  instance.movementMode = 1;
+  instance.jumpCountdown = 5;
+
+  Battle_ApplyActionTargetEffects(1, nullptr);
+
+  CHECK(static_cast<int>(instance.movementMode) == 0);
+  CHECK(static_cast<int>(instance.jumpCountdown) == 0);
+}
+
 TEST_CASE("Stat item effects bind plugin-local renderers, not EFFPURGE",
           "[combat][items][effects][item-plugin]") {
   const auto count = Effects_effectEntryPointIndices

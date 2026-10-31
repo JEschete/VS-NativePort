@@ -1,6 +1,6 @@
 # Current handoff
 
-Updated 2026-10-30. This is a short entry point, not another work tracker.
+Updated 2026-10-31. This is a short entry point, not another work tracker.
 Detailed checkpoint evidence, commands and replay paths are preserved in
 [HANDOFF_HISTORY.md](HANDOFF_HISTORY.md). Historical results are not fresh
 verification of the current worktree.
@@ -9,6 +9,31 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Launcher updates: the launcher checks GitHub's latest release on open and from
+  **Check for updates**, then asks before installing. Installs need a numeric
+  `release.json` version, GitHub's SHA-256 for the exact
+  `VS-NativePort-<tag>-win-x64.zip` asset, a matching file manifest and a staged
+  `--self-check`. Swaps are journalled in `update-backup` and roll back on failure
+  or at the next launch. Copies older than the first updater release, including
+  0.0.8, must update by hand once. Releases need numeric tags and unrenamed ZIPs.
+  Published as 0.0.9 from `fae5e12c`. The live UI against the published release
+  passes on disposable copies of the package marked 0.0.8: full update and restart
+  (28 of 28 files match), a locked file rolling back, retry after that failure, and
+  rollback of a simulated interrupted swap. A build without a numeric version is
+  only offered the page link. Limits: tested on the development PC only, and no
+  true release-to-release update has run yet; 0.0.9 to the next release is the
+  first. A power loss between the two renames of a file the launcher needs to start
+  cannot self-recover, so the tester guide says to re-extract the ZIP.
+- #251 indestructible block crash: gimmick actors have no `Actors_actorRecords`
+  entry, and F00818 reads through that NULL record on an impact4 hit. The owned
+  `Battle_ApplyActionTargetEffects` now skips the defense pose when the record is
+  NULL. The live preset is zone9/room11, production room events, Ashley1,2, with
+  `--press 104:Circle,140:Circle,175:Circle,300:Circle,335:Circle,370:Circle`.
+  Before the fix, Debug run 1793448318598283-0 faults at tick222. After it, Debug
+  1793448357564932-0 and Release 1793448623687406-0 resolve both block strikes
+  (222, 382) and return control. Crate control 1793448405042444-0 still destroys
+  box6 and drops box7. Single-target spells and blocks in other rooms were not
+  driven live.
 - Publication checkpoint: first-use CUE/save/FFmpeg fields are now all blank;
   only user-selected paths in that user's local configuration are restored.
   Detection is explicit. Packager rejects personal configuration/logs and any

@@ -13,6 +13,7 @@
 #include <vector>
 
 #include "Launcher/Setup.hpp"
+#include "Launcher/Updates.hpp"
 #include "Launcher/Window.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
@@ -29,6 +30,15 @@ void Report(const std::string& message) {
     MessageBoxW(nullptr, text.c_str(), L"Vagrant Story Native",
                 MB_OK | MB_ICONERROR);
   }
+}
+
+// The updating launcher holds the single-instance lock and its old files
+// until it exits, moments after starting this one.
+void WaitForPreviousLauncher(DWORD process_id) {
+  constexpr DWORD kExitWaitMilliseconds = 30000;
+  const std::unique_ptr<void, decltype(&CloseHandle)> process(
+      OpenProcess(SYNCHRONIZE, FALSE, process_id), CloseHandle);
+  if (process) WaitForSingleObject(process.get(), kExitWaitMilliseconds);
 }
 
 std::vector<std::wstring> ReadArguments() {
@@ -52,7 +62,9 @@ void SetOption(Options& options, const std::wstring& option,
   if (value.empty()) {
     throw std::runtime_error("Launcher option paths must not be empty.");
   }
-  if (option == L"--state-dir") {
+  if (option == L"--finish-update") {
+    WaitForPreviousLauncher(std::stoul(value.wstring()));
+  } else if (option == L"--state-dir") {
     options.state = fs::absolute(value);
   } else if (option == L"--cue") {
     options.overrides.cue = fs::absolute(value);
@@ -145,6 +157,11 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int show) try {
   if (!root) throw std::runtime_error(root.error());
   const auto installation = VS::Platform::ExecutableDir();
   const auto arguments = ReadArguments();
+  // Reaching this point proves an update's launcher and libraries can load.
+  if (std::find(arguments.begin(), arguments.end(), L"--self-check") !=
+      arguments.end()) {
+    return 0;
+  }
   g_console_mode = std::find(arguments.begin(), arguments.end(),
                              L"--prepare-only") != arguments.end() ||
                    std::find(arguments.begin(), arguments.end(),
@@ -157,6 +174,12 @@ int WINAPI wWinMain(HINSTANCE, HINSTANCE, PWSTR, int show) try {
   if (!single) throw std::runtime_error("Cannot initialize launcher lock.");
   if (GetLastError() == ERROR_ALREADY_EXISTS) {
     throw std::runtime_error("The launcher is already open.");
+  }
+  if (const auto recovered = Launcher::RecoverInterruptedUpdate(installation);
+      recovered) {
+    Launcher::CleanUpdateLeftovers(installation);
+  } else {
+    Report("An interrupted update could not be undone: " + recovered.error());
   }
   const auto loaded = LoadOrResetSettings(options.state);
   if (!loaded) return 1;

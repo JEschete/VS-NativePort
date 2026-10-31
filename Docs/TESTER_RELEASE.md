@@ -52,6 +52,30 @@ prepared assets already exist. The image is held read-only during setup.
    Assets from the earlier unverified-checksum launcher require one preparation
    update; previous assets are retained rather than silently trusted.
 
+## Updates
+
+Each time the launcher opens, it asks GitHub for the latest release. **Check for
+updates** at the top of the launcher does the same on demand. No account or
+personal data is sent. If the check fails, for example when you are offline, the
+launcher opens normally and does not interrupt you.
+
+If a newer version exists, the launcher asks before downloading anything. If you
+choose **Yes**, it downloads the update, replaces the program files in this
+folder and restarts itself. It cannot run while a disc check or game session is
+active, and asks once that has finished.
+
+Before changing anything, it checks the download against the SHA-256 checksum
+GitHub publishes, checks every unpacked file, and confirms the new launcher can
+start. If replacing the files fails, the previous version is restored. If your PC
+loses power partway through, the next launch restores it. If the launcher itself
+will not start after an interruption, extract the release ZIP over this folder.
+
+Only program files listed in the release are replaced. Saves, settings and
+prepared assets are not touched, and anything else you keep in this folder is
+left alone. The folder must be writable, so install the game somewhere other
+than `Program Files`. Updates come from this project's GitHub releases. These
+builds are not code-signed.
+
 ## Data, saves and failures
 
 - Settings and prepared assets are stored in the per-user
