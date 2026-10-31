@@ -5,7 +5,8 @@
 Moves the item's current generated text into the owned file (created if needed, never a generated file), with its
 declaration in the owned file's sibling header, records it in tools\\port\\owned.csv, then reruns the copy so the
 generated files stop emitting it and include the owned header where the name is used. From then on the copy tool
-never regenerates that item; its ledger `modernized` column reads `wip` until the rewrite tool approves it (`x`).
+never regenerates that item. Ownership alone sets no status: `modernized`, `cpp` and `verified` are separate gates
+that tools\\ledger\\gates.py checks.
 
 Owned C files compile with the copied-C settings; promoting one to .cpp is a later, separate step (plan §8.2).
 """

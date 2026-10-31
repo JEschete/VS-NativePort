@@ -266,7 +266,9 @@ PS1 imports and repeated Continue operations are tested. Serialization contains 
 
 Each implementation change updates the relevant issue with: revision, migrated consumers, remaining dependencies,
 verification artifact, required/optional failure policy and retirement evidence. A zero SDK-name count alone cannot close
-an issue if the same hardware model has merely moved behind a different name or outside `Legacy`.
+an issue if the same hardware model has merely moved behind a different name or outside `Legacy`. Per-EC consumer counts
+come from [EC_BRIDGES.csv](ledgers/EC_BRIDGES.csv) through `tools\ledger\gates.py`; a listed bridge that disappears fails
+that check. Counts report consumers; they do not close an EC.
 
 Code is **integrated** when exercised through its real caller. It is **verified** only when a reproducible test/replay or
 reference comparison passes. Compatibility-backed behavior may be verified before it is architecturally modernized;

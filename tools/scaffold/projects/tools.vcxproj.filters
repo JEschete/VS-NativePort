@@ -1053,7 +1053,13 @@
     <None Include="..\..\ledger\build_symbol_ledgers.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\ledger\gates.py">
+      <Filter>tools\ledger</Filter>
+    </None>
     <None Include="..\..\ledger\reconcile_locations.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_gates.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\lint\.gitignore">
@@ -5354,6 +5360,9 @@
     </None>
     <None Include="..\..\test\scenarios\first_lever_room.json">
       <Filter>tools\test\scenarios</Filter>
+    </None>
+    <None Include="..\..\test\slice-ai-ranking-wolves.json">
+      <Filter>tools\test</Filter>
     </None>
     <None Include="..\..\test\verify_first_lever.py">
       <Filter>tools\test</Filter>

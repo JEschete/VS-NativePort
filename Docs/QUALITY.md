@@ -88,6 +88,54 @@ These tests use isolated fixtures, not disc data, reference indexes or live
 ledgers. Actual generator-output correctness, ownership preservation and repeat
 generation are separate required checks when changing generator behavior.
 
+## What a green run establishes
+
+A green Source Quality run establishes only that, at that exact revision, the
+default scope has no findings beyond the reviewed baseline, the synthetic tool
+controls pass, and the ledgers satisfy the gate check below.
+
+It does **not** establish that:
+
+- generated copied C is clean: it is outside the default quality scope;
+- maintained `.c` code is strict: it is in scope but compiles relaxed;
+- any code is modernized, C++-promoted or behaviorally verified: those are
+  separate gates, and this job builds nothing and runs no native test;
+- `--tidy` analysis passed: the fast CI job does not run it;
+- gameplay works: no game data is available to CI.
+
+## Separately reported gates
+
+`tools/ledger/gates.py` reports five gates that do not read each other's result
+as evidence (#46):
+
+```powershell
+.\.venv-3\Scripts\python.exe tools\ledger\gates.py          # write build\quality\gates.{json,md}, gates-rows.csv
+.\.venv-3\Scripts\python.exe tools\ledger\gates.py --check  # also exit 1 on any violation (runs in CI)
+.\.venv-3\Scripts\python.exe tools\ledger\gates.py --sync   # refresh machine columns, catalog cpp and the summary
+.\.venv-3\Scripts\python.exe -m unittest discover -s tools\ledger -p test_gates.py -v
+```
+
+| Gate | Inputs | `--check` rejects |
+| --- | --- | --- |
+| Ownership | catalog, `owned.csv`, copy manifest | unknown/duplicate owned IDs, missing paths, owned paths in the manifest, location mismatches, unregistered rows in owned files, invalid `copied`, `retired` without `copy=no` and `retired-by:` |
+| C++ promotion | `CPP_PROMOTION.csv`, source, projects | a §8.2 claim that does not verify, a missing record for an owned C++ function, catalog `cpp` differing from the derived value, remaining consumers of the old symbol |
+| Quality | generated `.vcxproj` files, `baseline.json` | owned C++ or any promotion claim compiled relaxed, `strict_clean` on a file with baseline debt |
+| Behavior | `VERIFY_LEDGER.csv`, Catch2 sources | `verified=x` without a passing record, unresolved references, missing revision, configuration or limits, invalid values |
+| Retirement | `EC_BRIDGES.csv`, `GATE_SLICES.csv`, include graph | `modernized` on unowned rows, `modernized=x` reaching a bridge directly or indirectly, a listed bridge that no longer exists, a slice whose measured consumers differ from its record |
+
+Source classes come from each file's actual compiler settings in the generated
+projects, not its extension: `generated-c` (relaxed, outside quality scope),
+`maintained-c` (relaxed, in scope), `strict-cpp` and `replacement-legacy`
+(`RETIRING_NATIVE` and `Legacy/`). The report lists maintained relaxation as debt
+per file, with owned-function and baseline-finding counts. Whether maintained C
+should compile more strictly before promotion remains an owner decision.
+
+The tool reads the baseline and never writes it. Moving or renaming a bridge
+without updating `EC_BRIDGES.csv` fails the check instead of lowering a consumer
+count. Include-graph consumers are a static measure over every preprocessor
+branch, so they can overcount a conditional include. Stored records are
+references, not fresh runs; rerun what a closure claim depends on.
+
 ## Event dispatch contract audit
 
 After generation, validate the event-handler C ABI and both 256-entry dispatch
@@ -230,9 +278,9 @@ tool or category to conceal native behavior or layout problems.
 - Fix copied-code defects in the copier or a registered owned implementation.
 - Keep behavior tests, native-layout checks, and build verification alongside lint.
 
-The CI workflow runs the fast gate and tool positive controls without game data.
-Run the full `--tidy` gate locally for native changes; the fast CI job is not a
-substitute for compilation-based analysis or game testing.
+The CI workflow runs the fast gate, the ledger gate check and tool positive
+controls without game data. Run the full `--tidy` gate locally for native changes;
+the fast CI job is not a substitute for compilation-based analysis or game testing.
 
 ```powershell
 python -m unittest discover -s tools/lint -p test_quality.py -v

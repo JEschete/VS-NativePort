@@ -1,0 +1,2 @@
+slice,ids,old_bridges,ec,before,after,before_revision,evidence,notes
+AI-candidate-ranking,F01829,symbol:Core_SortPointersByDescendingKey;header:Core/PointerSort.h,EC-04,5,0,b6f469008129ef589e97ca549ac3b122a36ef279,gates.py report at 29a2b3a76bb371113de908e8b9baa6e63ec1ce5a,"before: PointerSort.h, PointerSort.cpp, PlanningPrimitives.cpp, ModulePointers.c, CorePointerSortTests.cpp; the old bridge is this slice's void** C ABI and original-address symbol, not all of EC-04"

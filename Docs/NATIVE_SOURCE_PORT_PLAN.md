@@ -267,8 +267,11 @@ Current counts and separate status gates are reported in the linked summary.
 | `named` | `final_name` is set and used in code, all parameters and locals have meaningful names, no `argN`/`varN`/`unk` remain |
 | `understood` | `purpose` is filled, and every struct field it touches is named in the type ledger |
 | `modernized` | It has no direct or indirect hardware-shaped bridge dependency, no hazards, no globals owned by another system, and uses typed data; evidence closes its applicable EC requirements |
-| `cpp` | It lives in a `.cpp` file that passes the promotion checklist (§8.2) |
-| `verified` | A reproducible test, canonical-state replay or reference comparison passes; record revision, input/assets, expected result and artifact, including any remaining compatibility dependency |
+| `cpp` | Derived, not hand-set: `x` only when every §8.2 step in [CPP_PROMOTION.csv](ledgers/CPP_PROMOTION.csv) verifies and no consumer of the old symbol remains; `wip` while a record exists but is incomplete; blank with no record |
+| `verified` | A reproducible test, canonical-state replay or reference comparison passes; a record in [VERIFY_LEDGER.csv](ledgers/VERIFY_LEDGER.csv) holds revision, input/assets, expected result and artifact, including any remaining compatibility dependency |
+
+`tools\ledger\gates.py --check` enforces these definitions and the ownership registry in CI; see
+[QUALITY.md](QUALITY.md#separately-reported-gates). A marker is a stored claim, not a fresh build or run.
 
 ### 4.2 SDK_API_LEDGER.md
 
@@ -321,7 +324,10 @@ Each row gets a `disposition`:
 | `TYPE_LEDGER.csv` ✅ | `build_symbol_ledgers.py` over every struct/union/enum/typedef in the index | One row (`T#####`) per distinct type layout (822; typedef aliases folded into their struct; repeated `*_t.h` copies deduplicated, differing layouts of one name kept apart and flagged in `layouts`; 25 layouts merged with upstream main via `UPSTREAM_LAYOUTS.csv`). Final C++ name, owner system, `role` (Def / Instance / State / OnDisc / Packet / Enum), field naming % |
 | `FIELD_LEDGER.csv` ✅ | same | One row (`T#####.NNN`) per field or enumerator (6,870; 2,983 generic `unk*`). Seeded with the `fields:` hints the function-naming agents left in `FUNCTION_CATALOG.csv` notes; fields taken from upstream carry `layout:upstream` |
 | `CONTENT_LEDGER.csv` | ISO9660 listing of the disc (all files, sizes, types) | Every disc file → format → decoder → catalog/asset → tests. Includes the 192 zero-byte placeholder files, marked `n/a` |
-| `VERIFY_LEDGER.csv` | hand + replay system | Parity checkpoints (screen, scene, replay), reference capture, last pass |
+| `VERIFY_LEDGER.csv` ✅ | hand + replay system | One record per verification: covered IDs, kind (unit test, replay, reference capture, device, visual, output), references, revision, configurations, command, dirty state, expected result, outcome and limits. Every `verified=x` must resolve to a passing record. Records are references; a record is not a fresh run |
+| `CPP_PROMOTION.csv` ✅ | `gates.py --sync` + reviewed claims | One row per owned C++ function with one column per §8.2 step; the catalog's `cpp` column derives from it |
+| `EC_BRIDGES.csv` ✅ | hand | Bridge headers and sources per EC ID; consumer counts in the gate report come from the include graph |
+| `GATE_SLICES.csv` ✅ | hand, measured by `gates.py` | Migrated slices with their old bridges and old-bridge consumer counts before and after |
 | `SHIM_USES` (auto) | `tools\ledger\scan_native.py` over `Native\` | Fills `copied`/`compiles` and the live shim use counts automatically; CI fails if the ledgers disagree with the code |
 
 ### 4.6 Coverage facts (verified)
@@ -684,6 +690,15 @@ Costs: compile times (mitigated by PCH and static libs), and the temptation to o
 4. No remaining shim calls (`modernized = yes` is a prerequisite).
 5. Full warning set (`-Wall -Wextra`, warnings as errors) is clean.
 6. Passes a test or canonical-state replay/reference check for the migrated behavior; attach evidence before closure.
+
+Each step is one column of [CPP_PROMOTION.csv](ledgers/CPP_PROMOTION.csv), re-verified by `tools\ledger\gates.py --check`.
+Steps 1, 2 and 5 are measured and synchronized by the tool from the generated projects, source and quality baseline.
+Steps 3, 4 and 6 are explicit reviewed claims that the tool can only falsify: a signature free of SDK integer typedefs
+and `void*` is necessary for a typed interface but does not prove one, and a linked record proves a test exists, not that
+it covers everything. A `.cpp` suffix, renamed function, forwarding wrapper or declaration cannot produce `cpp=x`, and
+any remaining consumer of the old symbol blocks it, including one in generated C. Because generated C cannot call into a
+namespace, a function with generated callers cannot reach `cpp=x` until those callers migrate; see
+[the ledger summary](ledgers/SUMMARY.md) for the current inventory.
 
 ---
 

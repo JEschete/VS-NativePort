@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "zone": 9,
+  "room": 0,
+  "seed": 1,
+  "ashley_profile": "post-prologue",
+  "player": {"x": 4, "z": 9, "elevation": 0, "direction": 0},
+  "enemies": [
+    {"definition": 4, "position": {"x": 2, "z": 12, "elevation": 0, "direction": 0}},
+    {"definition": 4, "position": {"x": 3, "z": 12, "elevation": 0, "direction": 0}},
+    {"definition": 4, "position": {"x": 4, "z": 12, "elevation": 0, "direction": 0}},
+    {"definition": 4, "position": {"x": 5, "z": 12, "elevation": 0, "direction": 0}}
+  ]
+}

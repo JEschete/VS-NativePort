@@ -78,9 +78,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "PhaseIdeas", "PhaseIdeas", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1CF7E-C648-5E57-9EEB-347208BDD4B1}"
 	ProjectSection(SolutionItems) = preProject
+		Docs\ledgers\CPP_PROMOTION.csv = Docs\ledgers\CPP_PROMOTION.csv
 		Docs\ledgers\DATA_LEDGER.csv = Docs\ledgers\DATA_LEDGER.csv
+		Docs\ledgers\EC_BRIDGES.csv = Docs\ledgers\EC_BRIDGES.csv
 		Docs\ledgers\FIELD_LEDGER.csv = Docs\ledgers\FIELD_LEDGER.csv
 		Docs\ledgers\FUNCTION_CATALOG.csv = Docs\ledgers\FUNCTION_CATALOG.csv
+		Docs\ledgers\GATE_SLICES.csv = Docs\ledgers\GATE_SLICES.csv
 		Docs\ledgers\NATIVE_SYMBOL_REVIEW.csv = Docs\ledgers\NATIVE_SYMBOL_REVIEW.csv
 		Docs\ledgers\SDK_API_LEDGER.md = Docs\ledgers\SDK_API_LEDGER.md
 		Docs\ledgers\SOURCE_FILE_LEDGER.md = Docs\ledgers\SOURCE_FILE_LEDGER.md
@@ -88,6 +91,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ledgers", "ledgers", "{B9B1
 		Docs\ledgers\TRACE_QUEUE.csv = Docs\ledgers\TRACE_QUEUE.csv
 		Docs\ledgers\TYPE_LEDGER.csv = Docs\ledgers\TYPE_LEDGER.csv
 		Docs\ledgers\UPSTREAM_LAYOUTS.csv = Docs\ledgers\UPSTREAM_LAYOUTS.csv
+		Docs\ledgers\VERIFY_LEDGER.csv = Docs\ledgers\VERIFY_LEDGER.csv
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{225CA01A-31F1-5259-BE2E-F958BC82010A}"

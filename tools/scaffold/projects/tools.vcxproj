@@ -29,7 +29,9 @@
     <None Include="..\..\ledger\add_missing_functions.py" />
     <None Include="..\..\ledger\build_ledgers.py" />
     <None Include="..\..\ledger\build_symbol_ledgers.py" />
+    <None Include="..\..\ledger\gates.py" />
     <None Include="..\..\ledger\reconcile_locations.py" />
+    <None Include="..\..\ledger\test_gates.py" />
     <None Include="..\..\lint\.gitignore" />
     <None Include="..\..\lint\baseline.json" />
     <None Include="..\..\lint\native_boundary.py" />
@@ -1463,6 +1465,7 @@
     <None Include="..\..\test\run_native.ps1" />
     <None Include="..\..\test\scenarios\first_lever_handoff.json" />
     <None Include="..\..\test\scenarios\first_lever_room.json" />
+    <None Include="..\..\test\slice-ai-ranking-wolves.json" />
     <None Include="..\..\test\verify_first_lever.py" />
     <None Include="..\..\vcpkg\ports\sfizz\portfile.cmake" />
     <None Include="..\..\vcpkg\ports\sfizz\vcpkg.json" />
