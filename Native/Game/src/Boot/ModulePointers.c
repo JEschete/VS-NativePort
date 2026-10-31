@@ -131,7 +131,6 @@
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Core/Overlays.h"
-#include "Core/PointerSort.h"
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
@@ -2122,7 +2121,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E6898u, 0u, (void*)&Battle_Ai_AddAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68A0u, 0u, (void*)&Battle_Ai_RemoveAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68ECu, 0u, (void*)&Battle_Ai_MarkAiTileDynamicObstacle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6974u, 0u, (void*)&Core_SortPointersByDescendingKey, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6A6Cu, 0u, (void*)&Battle_Ai_MinimumAiGroundHeightAlongSegment, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B24u, 0u, (void*)&Battle_Ai_ClearActorAiNavigationReset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},

@@ -15,7 +15,7 @@
 #include <type_traits>
 
 #include "Battle/Ai/PlanningSort.hpp"
-#include "Core/PointerSort.h"
+#include "Core/PointerSort.hpp"
 
 extern "C" {
 #include "Actors/ActorState.h"
@@ -26,7 +26,6 @@ extern "C" {
 }
 
 namespace {
-static_assert(offsetof(Battle_Ai_CandidateEntryView, reserved0) == 0);
 static_assert(std::is_same_v<decltype(Battle_Ai_CandidateEntryView::reserved0),
                              std::int32_t>);
 constexpr int kLimbCount = 6;
@@ -71,16 +70,20 @@ void SortCandidatePointers(std::span<Battle_Ai_CandidateEntryView*> entries) {
   constexpr std::size_t kMaximumCandidates = 16;
   Require(entries.size() <= kMaximumCandidates,
           "AI candidate sort exceeds the native candidate list");
-  std::array<void*, kMaximumCandidates> pointers{};
+  std::array<Core::SortKey, kMaximumCandidates> keys{};
+  std::array<Battle_Ai_CandidateEntryView*, kMaximumCandidates> sorted{};
   for (std::size_t index = 0; index < entries.size(); ++index) {
-    pointers[index] = entries[index];
+    Require(entries[index] != nullptr,
+            "AI candidate sort contains a null entry");
+    keys[index] = {entries[index]->reserved0, index};
   }
-  Core_SortPointersByDescendingKey(pointers.data(), 0,
-                                   static_cast<int>(entries.size() - 1));
+  const auto ranked = std::span(keys).first(entries.size());
+  Require(Core::SortPointersByDescendingKey(ranked),
+          "AI candidate sort exceeds the shared key sort");
   for (std::size_t index = 0; index < entries.size(); ++index) {
-    entries[index] =
-        static_cast<Battle_Ai_CandidateEntryView*>(pointers[index]);
+    sorted[index] = entries[ranked[index].position];
   }
+  std::ranges::copy(std::span(sorted).first(entries.size()), entries.begin());
 }
 }  // namespace VS::Battle::ai
 

@@ -720,7 +720,7 @@
     <ClInclude Include="include\Core\Log.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
-    <ClInclude Include="include\Core\PointerSort.h">
+    <ClInclude Include="include\Core\PointerSort.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Random.hpp">

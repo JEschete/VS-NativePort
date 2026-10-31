@@ -22,6 +22,7 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/PlanningPrimitives.h"
+#include "Battle/Damage.h"
 #include "Core/Random.h"
 }
 
@@ -216,6 +217,74 @@ TEST_CASE(
   for (std::size_t index = 0; index < expected.size(); ++index) {
     CHECK(plan.candidateOrder[index] == &plan.candidates[expected[index]]);
   }
+}
+
+TEST_CASE(
+    "AI ranking lifecycle produces, consumes, resets and repeats real plans",
+    "[ai][planning][pointer-sort]") {
+  PlanningFixture fixture;
+  auto saved_actor = Battle_actors[0];
+  Battle_Actor listed{};
+  listed.id = 3;
+  Battle_actors[0] = &listed;
+  auto& state = fixture.state;
+  auto& plan = reinterpret_cast<Battle_Ai_ActionPlanView&>(state);
+  const std::array<int, 6> scores{2, -3, 2, 9, 9, 0};
+  const std::array<std::size_t, 6> expected{4, 3, 2, 0, 5, 1};
+
+  for (int entry = 0; entry < 2; ++entry) {
+    CAPTURE(entry);
+    for (std::size_t index = 0; index < scores.size(); ++index) {
+      Battle_Ai_ActionCandidate candidate{};
+      candidate.opaque0 = scores[index];
+      candidate.weight = 1;
+      candidate.targetId = 3;
+      candidate.action = static_cast<unsigned>(40 + index);
+      fixture.stats.limbActions[index][0].actionId =
+          static_cast<u_short>(candidate.action);
+      Battle_Ai_AppendActionCandidate(&state, &candidate);
+      CHECK(fixture.exclusions[3][candidate.action] == 1);
+    }
+    REQUIRE(state.candidateCount == 6);
+    Battle_Ai_SortActionCandidates(&plan);
+    for (std::size_t index = 0; index < expected.size(); ++index) {
+      CHECK(state.candidateOrder[index] == &state.candidates[expected[index]]);
+    }
+
+    // state.actorId == 0 takes the planner's real reset-only path.
+    state.actorId = 0;
+    Battle_Ai_BuildActorActionPlan(&plan);
+    state.actorId = 1;
+    CHECK(state.candidateCount == 0);
+    for (std::size_t index = 0; index < scores.size(); ++index) {
+      CHECK(fixture.exclusions[3][40 + index] == 0);
+    }
+  }
+  Battle_actors[0] = saved_actor;
+}
+
+TEST_CASE("AI ranking producer refuses zero weights and a full candidate list",
+          "[ai][planning][pointer-sort]") {
+  PlanningFixture fixture;
+  auto& state = fixture.state;
+  Battle_Ai_ActionCandidate candidate{};
+  candidate.targetId = 3;
+  candidate.action = 42;
+  Battle_Ai_AppendActionCandidate(&state, &candidate);
+  CHECK(state.candidateCount == 0);
+  CHECK(fixture.exclusions[3][42] == 0);
+
+  candidate.weight = 1;
+  for (int index = 0; index < 16; ++index) {
+    candidate.opaque0 = index;
+    Battle_Ai_AppendActionCandidate(&state, &candidate);
+  }
+  REQUIRE(state.candidateCount == 16);
+  const auto ordered = std::to_array(state.candidateOrder);
+  candidate.opaque0 = 99;
+  Battle_Ai_AppendActionCandidate(&state, &candidate);
+  CHECK(state.candidateCount == 16);
+  CHECK(std::to_array(state.candidateOrder) == ordered);
 }
 
 TEST_CASE("AI simulated stat deltas clamp add and subtract at real bounds",

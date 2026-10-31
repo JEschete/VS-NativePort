@@ -937,7 +937,7 @@ class EncounterFixupTests(unittest.TestCase):
                     bodies = [
                         body
                         for body in definitions[paths[row["id"]]]
-                        if body.name == row["final_name"].replace("::", "_")
+                        if body.name == audit_assembly_gaps.native_symbol(row, owned)
                     ]
                     self.assertEqual(len(bodies), 1)
                     status = audit_assembly_gaps.native_status(bodies[0].body)
@@ -1018,8 +1018,20 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Core_SortPointersByDescendingKey(pointers.data()", source)
+        self.assertIn("Core::SortPointersByDescendingKey(ranked)", source)
+        self.assertNotIn("Core_SortPointersByDescendingKey", source)
         self.assertNotIn("SortCandidatePointers(entries.first(", source)
+
+    def test_promoted_pointer_sort_has_no_original_address_entry(self):
+        owned = self.owned_items()
+        self.assertEqual(owned["F01829"]["name"], "VS::Core::SortPointersByDescendingKey")
+        self.assertEqual(
+            owned["F01829"]["header"], r"Native\Engine\include\Core\PointerSort.hpp"
+        )
+        root = Path(__file__).resolve().parents[2]
+        table = (root / r"Native\Game\src\Boot\ModulePointers.c").read_text(encoding="utf-8")
+        self.assertNotIn("SortPointersByDescendingKey", table)
+        self.assertNotIn("0x800E6974u", table)
 
     def test_ai_lifecycle_leaves_share_the_native_persistence_projection(self):
         owned = self.owned_items()

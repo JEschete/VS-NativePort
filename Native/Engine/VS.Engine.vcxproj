@@ -634,7 +634,7 @@
     <ClInclude Include="include\Core\Gte.h" />
     <ClInclude Include="include\Core\Handle.hpp" />
     <ClInclude Include="include\Core\Log.hpp" />
-    <ClInclude Include="include\Core\PointerSort.h" />
+    <ClInclude Include="include\Core\PointerSort.hpp" />
     <ClInclude Include="include\Core\Random.hpp" />
     <ClInclude Include="include\Core\Scratch.h" />
     <ClInclude Include="include\Core\Text\TextCode.h" />

@@ -277,7 +277,7 @@
 "Native\\Game\\src\\Boot\\Lifecycle.c": "7ea367e4c1cf4fb72f70b2681ecee1907374526d04a1fbcb9933c9ee1983e7e6",
 "Native\\Game\\src\\Boot\\Lifecycle.h": "47820913f23a392105f2da5a0da79152c991381ddd10fa20a63a857922961e6d",
 "Native\\Game\\src\\Boot\\ModuleData.c": "6d3c5d02b0d4ca137615eb15e07fcab92e7b9d9f0d7f8f55787306ef4d87d221",
-"Native\\Game\\src\\Boot\\ModulePointers.c": "d701ef3997271b8f220f92d4fe4f2e33fc3543dbc037be056417e7ff662b99a8",
+"Native\\Game\\src\\Boot\\ModulePointers.c": "039869e9ee8642f04f768c82e81244444d7610553950108dbc98b8e9b8a82343",
 "Native\\Game\\src\\Boot\\OverlayReset.c": "fcbacf9742fb66f86d8456675a597e227703d872ab07077908f64b797f63215d",
 "Native\\Game\\src\\Boot\\OverlayReset.h": "2134509b711a21ca29b8d83a01fe0c81f57ef262fcfa241badd8d59bea2435fe",
 "Native\\Game\\src\\Effects\\ActionEffects.c": "eabd5696c598d810342274a81fed795bfbbadd5ee06eb21cf498685a23d42e50",

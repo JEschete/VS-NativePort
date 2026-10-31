@@ -224,6 +224,14 @@ def assembly_index(root: Path, names: set[str]) -> dict[tuple[str | None, str], 
     return result
 
 
+def native_symbol(row: dict[str, str], owned: dict[str, dict[str, str]]) -> str:
+    """The spelling of a definition: promoted rows live in a VS namespace, others keep the flat C symbol."""
+    registered = owned.get(row["id"], {}).get("name", "")
+    if registered.startswith("VS::"):
+        return registered.rsplit("::", 1)[1]
+    return row["final_name"].replace("::", "_")
+
+
 def native_definitions(rows: list[dict[str, str]], owned: dict[str, dict[str, str]]
                        ) -> tuple[dict[str, list[Definition]], dict[str, str]]:
     names_by_file: dict[str, set[str]] = collections.defaultdict(set)
@@ -233,7 +241,7 @@ def native_definitions(rows: list[dict[str, str]], owned: dict[str, dict[str, st
         path = item["path"] if item else row["final_location"]
         paths[row["id"]] = path
         if row["copy"] == "yes":
-            names_by_file[path].add(row["final_name"].replace("::", "_"))
+            names_by_file[path].add(native_symbol(row, owned))
     found: dict[str, list[Definition]] = {}
     for path, names in names_by_file.items():
         file = REPO / path
@@ -325,7 +333,7 @@ def audit(output: Path, publish: bool = False) -> dict:
         if redirected is not None:
             states[row["id"]] = redirected
             continue
-        name = row["final_name"].replace("::", "_")
+        name = native_symbol(row, owned)
         bodies = [item for item in native[paths[row["id"]]] if item.name == name]
         if len(bodies) > 1:
             raise ValueError(f"Multiple native definitions for {row['id']} {name}")

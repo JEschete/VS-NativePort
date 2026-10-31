@@ -2,107 +2,143 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <cstring>
 #include <limits>
+#include <numeric>
+#include <span>
 #include <type_traits>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/PointerSort.hpp"
+
 extern "C" {
-#include "Core/PointerSort.h"
+#include "Content/ModuleData.h"
 }
 
-static_assert(std::is_same_v<decltype(&Core_SortPointersByDescendingKey),
-                             void (*)(void**, int, int)>);
+static_assert(std::is_same_v<decltype(&VS::Core::SortPointersByDescendingKey),
+                             bool (*)(std::span<VS::Core::SortKey>)>);
 
 namespace {
-struct KeyRecord {
-  std::int32_t key = 0;
-  std::uint64_t tag = 0;
-  bool operator==(const KeyRecord&) const = default;
-};
-static_assert(offsetof(KeyRecord, key) == 0);
+using VS::Core::SortKey;
+using VS::Core::SortPointersByDescendingKey;
 
-bool Descending(void* left, void* right) {
-  return static_cast<KeyRecord*>(left)->key >
-         static_cast<KeyRecord*>(right)->key;
+bool Descending(const SortKey& left, const SortKey& right) {
+  return left.key > right.key;
+}
+
+template <std::size_t kCount>
+std::array<SortKey, kCount> KeysFrom(
+    const std::array<std::int32_t, kCount>& values) {
+  std::array<SortKey, kCount> keys{};
+  for (std::size_t index = 0; index < kCount; ++index) {
+    keys[index] = {values[index], index};
+  }
+  return keys;
 }
 }  // namespace
 
 TEST_CASE(
     "Pointer key sorting retains signed priorities and original tie order",
     "[core][pointer-sort]") {
-  std::array<KeyRecord, 6> records{};
-  constexpr std::array kKeys{2, -3, 2, 9, 9, 0};
-  constexpr std::array kExpected{4, 3, 2, 0, 5, 1};
-  std::array<void*, 8> pointers{};
-  pointers.front() = &records.front();
-  pointers.back() = &records.back();
-  for (std::size_t index = 0; index < records.size(); ++index) {
-    records[index] = {kKeys[index], index + 100};
-    pointers[index + 1] = &records[index];
-  }
-  const auto before = records;
-  Core_SortPointersByDescendingKey(pointers.data(), 1, 6);
-  CHECK(pointers.front() == &records.front());
-  CHECK(pointers.back() == &records.back());
+  auto keys = KeysFrom<6>({2, -3, 2, 9, 9, 0});
+  constexpr std::array<std::size_t, 6> kExpected{4, 3, 2, 0, 5, 1};
+  REQUIRE(SortPointersByDescendingKey(keys));
   for (std::size_t index = 0; index < kExpected.size(); ++index) {
-    CHECK(pointers[index + 1] == &records[kExpected[index]]);
+    CHECK(keys[index].position == kExpected[index]);
   }
-  CHECK(records == before);
 }
 
 TEST_CASE("Pointer key sorting accepts original empty and single ranges",
           "[core][pointer-sort]") {
-  Core_SortPointersByDescendingKey(nullptr, 0, -1);
-  void* single = nullptr;
-  Core_SortPointersByDescendingKey(&single, 0, 0);
-  CHECK(single == nullptr);
+  CHECK(SortPointersByDescendingKey({}));
+  std::array<SortKey, 1> single{{{7, 3}}};
+  CHECK(SortPointersByDescendingKey(single));
+  CHECK(single[0].key == 7);
+  CHECK(single[0].position == 3);
 }
 
 TEST_CASE(
     "Pointer key sorting covers full byte-index bounds and signed extrema",
     "[core][pointer-sort]") {
   const int pattern = GENERATE(0, 1, 2, 3);
-  std::array<KeyRecord, 256> records{};
-  std::array<void*, 256> pointers{};
-  for (std::size_t index = 0; index < records.size(); ++index) {
+  std::array<SortKey, 256> keys{};
+  for (std::size_t index = 0; index < keys.size(); ++index) {
     const int value = static_cast<int>(index) - 128;
-    records[index] = {pattern == 0 ? 7 : pattern == 1 ? value : -value, index};
-    pointers[index] = &records[index];
+    keys[index] = {pattern == 0 ? 7 : pattern == 1 ? value : -value, index};
   }
   if (pattern == 3) {
-    records.front().key = std::numeric_limits<std::int32_t>::min();
-    records.back().key = std::numeric_limits<std::int32_t>::max();
+    keys.front().key = std::numeric_limits<std::int32_t>::min();
+    keys.back().key = std::numeric_limits<std::int32_t>::max();
   }
-  const auto before = records;
-  Core_SortPointersByDescendingKey(pointers.data(), 0, 255);
-  CHECK(std::ranges::is_sorted(pointers, Descending));
-  CHECK(records == before);
-  for (auto& record : records) {
-    CHECK(std::ranges::count(pointers, &record) == 1);
+  REQUIRE(SortPointersByDescendingKey(keys));
+  CHECK(std::ranges::is_sorted(keys, Descending));
+  std::array<bool, 256> seen{};
+  for (const auto& key : keys) {
+    CHECK_FALSE(seen[key.position]);
+    seen[key.position] = true;
   }
 }
 
-TEST_CASE("Pointer key sorting preserves every outside-range pointer",
+TEST_CASE("Pointer key sorting preserves every outside-range entry",
           "[core][pointer-sort]") {
-  std::array<KeyRecord, 16> records{};
-  for (std::size_t index = 0; index < records.size(); ++index) {
-    records[index] = {static_cast<int>(index), index};
-  }
-  for (int left = 0; left <= 16; ++left) {
-    for (int right = left - 1; right < 16; ++right) {
-      std::array<void*, 16> pointers{};
-      for (std::size_t index = 0; index < records.size(); ++index) {
-        pointers[index] = &records[index];
+  std::array<std::int32_t, 16> values{};
+  std::iota(values.begin(), values.end(), 0);
+  for (std::size_t left = 0; left <= 16; ++left) {
+    for (std::size_t right = left; right <= 16; ++right) {
+      auto keys = KeysFrom<16>(values);
+      auto expected = keys;
+      std::sort(expected.begin() + static_cast<std::ptrdiff_t>(left),
+                expected.begin() + static_cast<std::ptrdiff_t>(right),
+                Descending);
+      REQUIRE(SortPointersByDescendingKey(
+          std::span(keys).subspan(left, right - left)));
+      for (std::size_t index = 0; index < keys.size(); ++index) {
+        CHECK(keys[index].position == expected[index].position);
       }
-      auto expected = pointers;
-      if (left < right) {
-        std::sort(expected.begin() + left, expected.begin() + right + 1,
-                  Descending);
-      }
-      Core_SortPointersByDescendingKey(pointers.data(), left, right);
-      CHECK(pointers == expected);
     }
+  }
+}
+
+TEST_CASE("Pointer key sorting refuses ranges beyond its byte index unchanged",
+          "[core][pointer-sort]") {
+  std::vector<SortKey> keys(257);
+  for (std::size_t index = 0; index < keys.size(); ++index) {
+    keys[index] = {static_cast<std::int32_t>(index), index};
+  }
+  const auto before = keys;
+  CHECK_FALSE(SortPointersByDescendingKey(keys));
+  for (std::size_t index = 0; index < keys.size(); ++index) {
+    CHECK(keys[index].key == before[index].key);
+    CHECK(keys[index].position == before[index].position);
+  }
+  CHECK(SortPointersByDescendingKey(std::span(keys).first(256)));
+}
+
+TEST_CASE("Pointer key sorting repeats deterministically on the same input",
+          "[core][pointer-sort]") {
+  const auto input = KeysFrom<8>({5, 5, -1, 9, 5, 0, 9, -1});
+  auto first = input;
+  auto second = input;
+  REQUIRE(SortPointersByDescendingKey(first));
+  REQUIRE(SortPointersByDescendingKey(second));
+  for (std::size_t index = 0; index < input.size(); ++index) {
+    CHECK(first[index].position == second[index].position);
+  }
+}
+
+TEST_CASE("Pointer key sorting has no original-address module entry",
+          "[core][pointer-sort][retirement]") {
+  // No disc module stores 0x800E6974 or its 0x800E6958 entry as data; the
+  // original's only references are three jal instructions in BATTLE.PRG.
+  constexpr std::array<unsigned, 2> kOriginalEntries{0x800E6974u, 0x800E6958u};
+  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK_FALSE(symbols.empty());
+  for (const auto& symbol : symbols) {
+    if (std::strcmp(symbol.module, "BATTLE/BATTLE.PRG") != 0) continue;
+    CHECK(std::ranges::find(kOriginalEntries, symbol.address) ==
+          kOriginalEntries.end());
   }
 }
