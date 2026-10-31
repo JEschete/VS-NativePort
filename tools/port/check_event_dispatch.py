@@ -76,7 +76,7 @@ def main() -> int:
             errors.append(f'normal opcode {opcode:02X}: unresolved address {address:08X}')
         else:
             normal.add(name)
-    vm = (ct.NATIVE / 'Game/src/Event/ScriptVm.c').read_text()
+    vm = (ct.NATIVE / 'Game/src/Event/ScriptVm.cpp').read_text()
     skip_match = re.search(r'Event_kSkipOpcodeHandlers\[256\][^=]*=\s*\{([^}]+)\}', vm)
     if skip_match is None:
         errors.append('skip table initializer not found')

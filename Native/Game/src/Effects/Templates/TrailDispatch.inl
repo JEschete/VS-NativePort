@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Memory/Heap.h"
 #include "Effects/Package.h"
@@ -8,7 +9,7 @@
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
 
-// Template body: Effects::Templates::TrailDispatch (decomp src/EFFECT/trails5.h:677). Included once per instance by Effects/Templates/TrailDispatch.c with that plugin's bindings.
+// Template body: Effects::Templates::TrailDispatch (decomp src/EFFECT/trails5.h:677). Included once per instance by Effects/Templates/TrailDispatch.cpp with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 5
 
 int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
@@ -20,13 +21,13 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
     Effects_TrailQuadSet* new_trail_set;
 
     Effects_ParticleEmitterScratch* emitter_scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
-    Effects_TrailQuadSet* trail_set = renderer_slot->rendererState;
+    Effects_TrailQuadSet* trail_set = (Effects_TrailQuadSet *)(renderer_slot->rendererState);
     Effects_EffectInstance* effect_instance = Effects_currentInstance;
     int renderer_alive = 1;
 
     switch (lifecycle_command) {
     case 1:
-        new_trail_set = Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 8);
+        new_trail_set = (Effects_TrailQuadSet *)(Core_Memory_AllocateFromHighEnd(sizeof *new_trail_set + 8));
         renderer_slot->rendererState = new_trail_set;
         new_trail_set->definitionIndex = packed_parameters >> 8;
         new_trail_set->opaque0 = packed_parameters;
@@ -38,7 +39,7 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
             trail = 16;
         }
 
-        new_trail_set->trails = Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails);
+        new_trail_set->trails = (Effects_Trail *)(Core_Memory_AllocateFromHighEnd(trail * sizeof *new_trail_set->trails));
         new_trail_set->trailcount = trail;
         new_trail_set->opaque3 = 0;
 
@@ -156,3 +157,4 @@ int VS_TRAIL_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
 }
 #undef TRAIL_SAMPLE_COUNT
 
+}  // extern "C"

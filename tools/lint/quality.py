@@ -28,7 +28,7 @@ NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl"}
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
-    "Native/Engine/src/Audio/Driver/PlaybackReset.c": "EC-02",
+    "Native/Engine/src/Audio/Driver/PlaybackReset.cpp": "EC-02",
     "Native/Engine/src/Audio/Driver/PlaybackReset.h": "EC-02",
     "Native/Engine/include/Core/Gte.h": "EC-03",
     "Native/Engine/src/Core/Gte.cpp": "EC-03",
@@ -358,10 +358,11 @@ def compile_commands(files: list[str]) -> Path:
             "/D_CRT_SECURE_NO_WARNINGS",
         ]
         arguments += [f"/I{directory}" for directory in includes]
-        if path.endswith(".c"):
-            arguments += ["/TC", "/std:c17", *copied_options.split()]
-        else:
-            arguments += ["/TP", "/std:c++latest", "/EHsc"]
+        arguments += ["/TP", "/std:c++latest", "/EHsc"]
+        if project and scaffold["uses_copied_settings"](
+            project, str(source.relative_to(project.dir))
+        ):
+            arguments += copied_options.split()
         arguments.append(str(ROOT / path))
         commands.append(
             {"directory": str(ROOT), "file": str(ROOT / path), "arguments": arguments}
@@ -602,12 +603,16 @@ def fixed_interface_advisory(item: Finding, interfaces: set[tuple[str, str]]) ->
     return bool(function and (item.path, function[1]) in interfaces)
 
 
+def relaxed_sources() -> set[str]:
+    listed = (ROOT / "tools/port/relaxed_sources.txt").read_text(encoding="utf-8").split()
+    return {path.replace("\\", "/") for path in listed}
+
+
 def inapplicable_cpp_header_advice(item: Finding) -> bool:
     return (
         item.tool == "cpplint"
         and item.rule == "build/include_what_you_use"
-        and item.path.startswith("Native/")
-        and item.path.endswith(".c")
+        and item.path in relaxed_sources()
         and item.message == "Add #include <string> for string"
         and re.match(r"(?:[A-Za-z_]\w*\s*(?:\.|->)\s*)+string\s*=", item.context)
         is not None

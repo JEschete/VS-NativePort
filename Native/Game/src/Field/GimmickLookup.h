@@ -13,7 +13,7 @@ static inline Field_GimmickInstance* Field_FindGimmickForActorSlot(
   };
   return actor_slot >= 0 && actor_slot < kGimmickSlotCount
              ? Field_gimmickInstances[actor_slot]
-             : NULL;
+             : nullptr;
 }
 
 #endif  // NATIVE_GAME_SRC_FIELD_GIMMICKLOOKUP_H_

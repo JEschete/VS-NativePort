@@ -15,6 +15,7 @@ Re-run after adding or removing files (the copy tool runs it after writing):
 """
 from __future__ import annotations
 
+import json
 import os
 import uuid
 from dataclasses import dataclass, field
@@ -24,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 NATIVE = ROOT / "Native"
 NS = uuid.UUID("6f1c2a52-3c1e-4c55-9a43-56d0a1f0b7e1")  # deterministic GUIDs
 SOURCE_ROOTS = ("src", "include", "Legacy")
-CODE = {".cpp": "ClCompile", ".c": "ClCompile", ".hpp": "ClInclude", ".h": "ClInclude", ".inl": "ClInclude"}
+CODE = {".cpp": "ClCompile", ".hpp": "ClInclude", ".h": "ClInclude", ".inl": "ClInclude"}
 
 
 @dataclass
@@ -116,9 +117,25 @@ def files_of(p: Project) -> list[tuple[str, str]]:
     return out
 
 
+def copied_settings_sources() -> frozenset[str]:
+    """Sources compiled with the copied-code settings: everything the copy tool writes, plus hand-maintained sources
+    not yet promoted (tools\\port\\relaxed_sources.txt). Promotion removes a file from the list (plan §8.2)."""
+    port = ROOT / "tools" / "port"
+    generated = json.loads((port / "copy_manifest.json").read_text(encoding="utf-8"))
+    listed = (port / "relaxed_sources.txt").read_text(encoding="utf-8").split()
+    return frozenset(path for path in (*generated, *listed) if path.endswith(".cpp"))
+
+
+COPIED_SETTINGS = copied_settings_sources()
+
+
+def uses_copied_settings(p: Project, path: str) -> bool:
+    return rel(ROOT, p.dir / path) in COPIED_SETTINGS
+
+
 def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
-    return (path.endswith(".c") or "\\Legacy\\" in "\\" + path
+    return (uses_copied_settings(BY_NAME[project], path) or "\\Legacy\\" in "\\" + path
             or project == "VS.Engine" and path in (
                 r"src\Core\Math\TileDistance.cpp",
                 r"src\Audio\SequencerOutput.cpp",
@@ -177,11 +194,12 @@ def vcxproj(p: Project, files: list[tuple[str, str]]) -> str:
     for kind, path in files:
         if kind == "ClInclude":
             header_items.append(f'    <ClInclude Include="{path}" />')
-        elif path.endswith(".c"):
-            # Copied decomp code (.c) gets a relaxed warning set until promoted to .cpp (plan Â§8.2).
+        elif uses_copied_settings(p, path):
+            # Copied decomp code gets a relaxed warning set until promoted (plan Â§8.2).
             compile_items.append(f'    <ClCompile Include="{path}">\n'
                                  f'      <TreatWarningAsError>false</TreatWarningAsError>\n'
                                  f'      <WarningLevel>Level1</WarningLevel>\n'
+                                 f'      <ConformanceMode>false</ConformanceMode>\n'
                                  f'      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)'
                                  f'</AdditionalIncludeDirectories>\n'
                                  f'      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>\n'

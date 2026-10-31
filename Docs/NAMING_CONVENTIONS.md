@@ -59,7 +59,7 @@ to `.cpp` later.
   a file per function, and do not create a 400-function dumping ground.
 - The namespace in `final_name` and the folder path must agree. Either the sub-namespaces equal the folders below
   the root (`Battle::Ai::*` lives in `Game\src\Battle\Ai\*.c`), or the sub-namespace is the file name
-  (`Menu::Files::*` lives in `Game\src\Menu\Files.c`, `Effects::Plg074::*` in `Game\src\Effects\Plugins\Plg074.c`,
+  (`Menu::Files::*` lives in `Game\src\Menu\Files.cpp`, `Effects::Plg074::*` in `Game\src\Effects\Plugins\Plg074.c`,
   one grouping folder allowed). Root-namespace functions live directly in the root folder. `merge_names.py` enforces
   this.
 - One concept, one namespace. Don't create near-synonyms (`Seq` / `Sequence` / `Driver\Sequencer`,
@@ -419,7 +419,7 @@ names, locations and collisions; it does not prove semantics or close migration 
   tables have inventory sizes that overlap the next symbol; their capacities come from address gaps (noted per row).
 - Final locations of data rows and the function catalog disagreed in places (`Input\src\Controllers.c` vs
   `Controller.c`, `Graphics\src\ScreenTransition.c` vs `FramebufferEffects.c`, `Core\src\Memory.c` vs
-  `Memory\Heap.c`, `Content\src\DiscQueue.c` vs `CdDrive.c`, `Video\src\Intro.c` vs `Intro\Playback.c`).
+  `Memory\Heap.c`, `Content\src\DiscQueue.cpp` vs `CdDrive.c`, `Video\src\Intro.c` vs `Intro\Playback.c`).
   Resolved 2026-10-17 by `tools\ledger\reconcile_locations.py` (run by `sanity_fixes.py`): 232 `state`/`constexpr`
   globals in files no function lives in moved to the catalog file their users live in, within the same namespace
   root. 62 stay in data-only files on purpose: per-plugin effect state (`Effects::PlgNNN`, see §6.8 templates),

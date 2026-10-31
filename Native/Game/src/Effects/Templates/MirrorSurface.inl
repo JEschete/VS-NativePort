@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -14,7 +15,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::MirrorSurface (decomp src/EFFECT/mirroredSurfaces.h:34). Included once per instance by Effects/Templates/MirrorSurface.c with that plugin's bindings.
+// Template body: Effects::Templates::MirrorSurface (decomp src/EFFECT/mirroredSurfaces.h:34). Included once per instance by Effects/Templates/MirrorSurface.cpp with that plugin's bindings.
 #ifndef VS_MIRROR_SURFACE_TYPES
 #define VS_MIRROR_SURFACE_TYPES
 #endif
@@ -53,11 +54,11 @@ int VS_MIRROR_SURFACE_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
     Effects_PackageTexture* texture;
 
     alive = 1;
-    state = renderer_slot->rendererState;
+    state = (Effects_MirrorSurfaceState *)(renderer_slot->rendererState);
     battle = Effects_currentInstance;
     switch (lifecycle_command) {
     case 1:
-        state = Core_Memory_AllocateFromHighEnd(sizeof *state);
+        state = (Effects_MirrorSurfaceState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));
         renderer_slot->rendererState = state;
         state->effect = packed_parameters >> 8;
         state->lifetime = packed_parameters;
@@ -196,8 +197,8 @@ int VS_MIRROR_SURFACE_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
             for (column = 0; column < 16; ++column) {
                 Core_Gte_LoadV0(&vertices[row][column]);
                 Core_Gte_Rtps();
-                Core_Gte_StoreSxy2(&screen[row][column]);
-                Core_Gte_StoreSz3Otz(&depths[row][column]);
+                Core_Gte_StoreSxy2((long *)(&screen[row][column]));
+                Core_Gte_StoreSz3Otz((long *)(&depths[row][column]));
             }
         }
         Effects_AdvanceParticleTextureAnimation(&state->texture);
@@ -214,7 +215,7 @@ int VS_MIRROR_SURFACE_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
                             + depths[row + 1][column] + depths[row + 1][column + 1])
                       / 4;
                 if (depth < 0x800 && Render_nearClip < depth) {
-                    prim = Render_frameScratch.primitiveCursor;
+                    prim = (Render_MirrorSurfacePacket *)(Render_frameScratch.primitiveCursor);
                     Render_frameScratch.primitiveCursor = prim + 1;
                     prim->poly.tag = 0xE1000000;
                     prim->drawMode = 0xE1000200;
@@ -243,7 +244,7 @@ int VS_MIRROR_SURFACE_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
                         + depths[row + 1][0])
                   / 4;
             if (depth < 0x800 && Render_nearClip < depth) {
-                prim = Render_frameScratch.primitiveCursor;
+                prim = (Render_MirrorSurfacePacket *)(Render_frameScratch.primitiveCursor);
                 Render_frameScratch.primitiveCursor = prim + 1;
                 prim->poly.tag = 0xE1000000;
                 prim->drawMode = 0xE1000200;
@@ -287,3 +288,4 @@ int VS_MIRROR_SURFACE_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecy
 #undef VS_MIRROR_SURFACE_U_SEGMENTS
 #undef VS_MIRROR_SURFACE_U_INDEX
 
+}  // extern "C"

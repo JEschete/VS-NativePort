@@ -23,7 +23,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
     int affinity, int equipment_label_id, int suppressNotification);
 void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unused)),
-    Items_EquipmentPartStats* equipment, int class, int equipment_label_id, int actorId);
+    Items_EquipmentPartStats* equipment, int class_, int equipment_label_id, int actorId);
 void Items_GrowDefenderEquipmentRatings(
     Battle_ActionDefinition* action, Battle_ActorStats* defender_stats, int attacker_class_id, int attacker_affinity_id, int hit_limb_index);
 void Items_GrowAttackerWeaponRatings(Battle_ActionDefinition* action, Battle_ActorStats* attacker_stats, int defender_class_id, int defender_affinity_id);

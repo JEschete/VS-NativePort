@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -14,7 +15,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::Ring (decomp src/EFFECT/rings.h:26). Included once per instance by Effects/Templates/Ring.c with that plugin's bindings.
+// Template body: Effects::Templates::Ring (decomp src/EFFECT/rings.h:26). Included once per instance by Effects/Templates/Ring.cpp with that plugin's bindings.
 #ifndef VS_RING_TYPES
 #define VS_RING_TYPES
 #endif
@@ -60,11 +61,11 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
     Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
 
     alive = 1;
-    state = renderer_slot->rendererState;
+    state = (Effects_RingState *)(renderer_slot->rendererState);
     battle = Effects_currentInstance;
     switch (lifecycle_command) {
     case 1:
-        state = Core_Memory_AllocateFromHighEnd(sizeof *state);
+        state = (Effects_RingState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));
         renderer_slot->rendererState = state;
         state->effect = packed_parameters >> 8;
         state->lifetime = packed_parameters;
@@ -207,8 +208,8 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
             for (drawColumn = 0; drawColumn < 9; ++drawColumn) {
                 Core_Gte_LoadV0(&vertices[drawRow][drawColumn]);
                 Core_Gte_Rtps();
-                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);
-                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);
+                Core_Gte_StoreSxy2((long *)(&screen[drawRow][drawColumn]));
+                Core_Gte_StoreSz3Otz((long *)(&depths[drawRow][drawColumn]));
             }
         }
         Effects_AdvanceParticleTextureAnimation(&state->texture);
@@ -235,7 +236,7 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
                             + depths[drawRow + 1][drawColumn + 1])
                       / 4;
                 if (depth < 0x800 && Render_nearClip < depth) {
-                    prim = Render_frameScratch.primitiveCursor;
+                    prim = (Render_RingPacket *)(Render_frameScratch.primitiveCursor);
                     Render_frameScratch.primitiveCursor = prim + 1;
                     prim->poly.tag = 0xE1000000;
                     prim->drawMode = 0xE1000200;
@@ -315,3 +316,4 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
 }
 #undef VS_RING_TYPES
 
+}  // extern "C"

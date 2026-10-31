@@ -93,8 +93,8 @@ PNG alone also does not preserve palette animation or PS1 blending behavior. Kee
 
 The native code already exposes why a simple “attack → clip 12” table is insufficient:
 
-- [Battle animation selection](Native/Game/src/Battle/ActionAnimation.c#L336) chooses variants using animation group, target pitch, and side.
-- [Actor animation playback](Native/Game/src/Actors/Animation.c#L669) further changes selection according to weapon-drawn and movement state.
+- [Battle animation selection](Native/Game/src/Battle/ActionAnimation.cpp#L336) chooses variants using animation group, target pitch, and side.
+- [Actor animation playback](Native/Game/src/Actors/Animation.cpp#L669) further changes selection according to weapon-drawn and movement state.
 
 The replacement should express:
 

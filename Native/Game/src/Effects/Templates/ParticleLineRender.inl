@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
@@ -11,7 +12,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::ParticleLineRender (decomp src/EFFECT/particleLineRender.h:13). Included once per instance by Effects/Templates/ParticleLineRender.c with that plugin's bindings.
+// Template body: Effects::Templates::ParticleLineRender (decomp src/EFFECT/particleLineRender.h:13). Included once per instance by Effects/Templates/ParticleLineRender.cpp with that plugin's bindings.
 #ifndef VS_PARTICLE_LINE_TYPE
 #define VS_PARTICLE_LINE_TYPE
 #endif
@@ -73,21 +74,21 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
         controlPoints = &particle_set->controlPoints[particleIndex * 4];
         Core_Gte_LoadV0(controlPoints);
         Core_Gte_Rtps();
-        Core_Gte_StoreSxy2(&screenPoints[0]);
-        Core_Gte_StoreSz3Otz(&depths[0]);
+        Core_Gte_StoreSxy2((long *)(&screenPoints[0]));
+        Core_Gte_StoreSz3Otz((long *)(&depths[0]));
         for (segment = 1; segment < 8; ++segment) {
             Core_Math_InterpolateLagrangeShortVector(controlPoints, controlPoints + 1,
                 controlPoints + 2, controlPoints + 3,
                 (segment * 0x600) - 0x1000 + Core_Random_Rand() % width - width / 2, &emitter_scratch->vector);
             Core_Gte_LoadV0(&emitter_scratch->vector);
             Core_Gte_Rtps();
-            Core_Gte_StoreSxy2(&screenPoints[segment]);
-            Core_Gte_StoreSz3Otz(&depths[segment]);
+            Core_Gte_StoreSxy2((long *)(&screenPoints[segment]));
+            Core_Gte_StoreSz3Otz((long *)(&depths[segment]));
         }
         Core_Gte_LoadV0(controlPoints + 3);
         Core_Gte_Rtps();
-        Core_Gte_StoreSxy2(&screenPoints[segment]);
-        Core_Gte_StoreSz3Otz(&depths[segment]);
+        Core_Gte_StoreSxy2((long *)(&screenPoints[segment]));
+        Core_Gte_StoreSz3Otz((long *)(&depths[segment]));
         for (renderSegment = 0; renderSegment < 8; ++renderSegment) {
             depth = (depths[renderSegment] + depths[renderSegment + 1]) / 2;
             if (depth < 0x800 && Render_nearClip < depth) {
@@ -112,7 +113,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                     }
                     break;
                 }
-                prim = Render_frameScratch.primitiveCursor;
+                prim = (Render_ParticleLinePacket *)(Render_frameScratch.primitiveCursor);
                 Render_frameScratch.primitiveCursor = prim + 1;
                 prim->wordCount = 5;
                 prim->line.code = 0x42;
@@ -129,10 +130,11 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                 *(int*)&prim->line.x0 = *(int*)((char*)screenPoints + screenOffset);
                 endpoint = &screenPoints[renderSegment + endpointStep];
                 *(int*)&prim->line.x1 = *endpoint;
-                Effects_StepParticleEndpointTowardStart(prim);
+                Effects_StepParticleEndpointTowardStart((Effects_ParticleEndpointView *)(prim));
             }
         }
     }
 }
 #undef VS_PARTICLE_LINE_TYPE
 
+}  // extern "C"

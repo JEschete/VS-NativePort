@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Random.h"
@@ -9,7 +10,7 @@
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
 
-// Template body: Effects::Templates::TrailInit (decomp src/EFFECT/trails5.h:380). Included once per instance by Effects/Templates/TrailInit.c with that plugin's bindings.
+// Template body: Effects::Templates::TrailInit (decomp src/EFFECT/trails5.h:380). Included once per instance by Effects/Templates/TrailInit.cpp with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 5
 
 void VS_TRAIL_INIT_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
@@ -40,3 +41,4 @@ void VS_TRAIL_INIT_FUNCTION(Effects_ParticleDefinition* particle_definition, Eff
 }
 #undef TRAIL_SAMPLE_COUNT
 
+}  // extern "C"

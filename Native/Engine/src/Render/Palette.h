@@ -37,28 +37,30 @@ typedef struct Render_ColorCode {
 _Static_assert(sizeof(Render_ColorCode) == 0x4, "Render_ColorCode must keep its PS1 layout");
 
 // decomp: _clutSlot (src/SLUS_010.40/main.c:57)
+struct Render_PaletteTransitionTimer {
+    u_char active;
+    u_char frame;
+    u_char tick;
+    u_char speed;
+    u_char mode;
+    signed char pulseRed;
+    signed char pulseGreen;
+    signed char pulseBlue;
+};
+struct Render_PaletteEntryFade {
+    char red;
+    char green;
+    char blue;
+    char maskBit;
+    u_char redStepRow;
+    u_char greenStepRow;
+    u_char blueStepRow;
+};
 typedef struct Render_PaletteSlot {
     char reserved0;
     char locked;
-    struct Render_PaletteTransitionTimer {
-        u_char active;
-        u_char frame;
-        u_char tick;
-        u_char speed;
-        u_char mode;
-        signed char pulseRed;
-        signed char pulseGreen;
-        signed char pulseBlue;
-    } transition;
-    struct Render_PaletteEntryFade {
-        char red;
-        char green;
-        char blue;
-        char maskBit;
-        u_char redStepRow;
-        u_char greenStepRow;
-        u_char blueStepRow;
-    } entries[256];
+    struct Render_PaletteTransitionTimer transition;
+    struct Render_PaletteEntryFade entries[256];
     u_short baseColors[256];
 } Render_PaletteSlot;
 _Static_assert(sizeof(Render_PaletteSlot) == 0x90A, "Render_PaletteSlot must keep its PS1 layout");

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -14,7 +15,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::ClosedRing (decomp src/EFFECT/closedRings.h:41). Included once per instance by Effects/Templates/ClosedRing.c with that plugin's bindings.
+// Template body: Effects::Templates::ClosedRing (decomp src/EFFECT/closedRings.h:41). Included once per instance by Effects/Templates/ClosedRing.cpp with that plugin's bindings.
 #ifdef VS_CLOSED_RING_TEXTURE_COLUMNS
 #define VS_CLOSED_RING_TEXTURE_COLUMN(column)                                            \
     ((column) & (VS_CLOSED_RING_TEXTURE_COLUMNS - 1))
@@ -36,7 +37,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle
     u_char v[3];
     MATRIX _;
     Effects_PluginEffectState child;
-    Effects_ClosedRingState* state = renderer_slot->rendererState;
+    Effects_ClosedRingState* state = (Effects_ClosedRingState *)(renderer_slot->rendererState);
     Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
     Effects_ParticleDefinition* effect;
     Effects_EffectInstance* battle = Effects_currentInstance;
@@ -57,7 +58,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle
 
     switch (lifecycle_command) {
     case 1:
-        state = Core_Memory_AllocateFromHighEnd(sizeof *state);
+        state = (Effects_ClosedRingState *)(Core_Memory_AllocateFromHighEnd(sizeof *state));
         renderer_slot->rendererState = state;
         state->lifetime = packed_parameters;
         state->effect = packed_parameters >> 8;
@@ -221,8 +222,8 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle
             for (drawColumn = 0; drawColumn < 16; ++drawColumn) {
                 Core_Gte_LoadV0(&vertices[drawRow][drawColumn]);
                 Core_Gte_Rtps();
-                Core_Gte_StoreSxy2(&screen[drawRow][drawColumn]);
-                Core_Gte_StoreSz3Otz(&depths[drawRow][drawColumn]);
+                Core_Gte_StoreSxy2((long *)(&screen[drawRow][drawColumn]));
+                Core_Gte_StoreSz3Otz((long *)(&depths[drawRow][drawColumn]));
             }
         }
 
@@ -252,7 +253,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle
                     continue;
                 }
 
-                prim = Render_frameScratch.primitiveCursor;
+                prim = (Render_ClosedRingPacket *)(Render_frameScratch.primitiveCursor);
                 Render_frameScratch.primitiveCursor = prim + 1;
                 prim->poly.tag = _get_mode(0, 0, 0);
                 prim->drawMode = _get_mode(0, 1, 0);
@@ -285,7 +286,7 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle
                 continue;
             }
 
-            prim = Render_frameScratch.primitiveCursor;
+            prim = (Render_ClosedRingPacket *)(Render_frameScratch.primitiveCursor);
             Render_frameScratch.primitiveCursor = prim + 1;
             prim->poly.tag = _get_mode(0, 0, 0);
             prim->drawMode = _get_mode(0, 1, 0);
@@ -353,3 +354,4 @@ int VS_CLOSED_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle
 #undef VS_CLOSED_RING_TEXTURE_COLUMN
 #undef VS_CLOSED_RING_TEXTURE_COLUMNS
 
+}  // extern "C"

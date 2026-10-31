@@ -137,7 +137,7 @@ actor and room:
   formerly omitted arguments; changing the return type alone is not enough.
 - **Type text fixes.** `TYPE_FIXES` corrects copied type text (pointer slots in `Field::RoomRecord`, padding in
   `T00634`); the layout writer uses the field ledger's scalar type when it fits the gap.
-  `Native\Tests\src\LayoutAsserts.c` statically asserts the layouts code depends on (actor allocation span, stats
+  `Native\Tests\src\LayoutAsserts.cpp` statically asserts the layouts code depends on (actor allocation span, stats
   placement, SHP/SEQ headers).
 - **Partial runtime views.** `native_views.py` exposes reviewed pointer slots hidden inside byte padding for
   actor/AI/model views. `check_native_views.py` compares 532 selected field offsets against canonical native

@@ -1,0 +1,964 @@
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
+#include "Legacy/Psx.h"
+#include "Actors/Skeleton.h"
+#include "Core/Diagnostics.h"
+#include "Core/Math/Interpolation.h"
+#include "Core/Math/Matrix.h"
+#include "Core/Math/ScalarMath.h"
+#include "Core/Math/Vector.h"
+#include "Core/Memory/Heap.h"
+#include "Core/Random.h"
+#include "Effects/Package.h"
+#include "Effects/ParticleRender.h"
+#include "Effects/Particles.h"
+#include "Effects/Runtime.h"
+#include "Effects/Transforms.h"
+
+// decomp: D_800EC328 (D_800EC328@BATTLE/BATTLE.PRG)
+int Effects_emissionCounter; /* contents: module image (ModuleData.cpp) */
+
+// decomp: D_800EC330 (D_800EC330@BATTLE/BATTLE.PRG)
+u_char Effects_pairedParticleColorPresets[2727][2][4]; /* contents: module image (ModuleData.cpp) */
+
+// decomp: D_800EC368 (D_800EC368@BATTLE/BATTLE.PRG)
+u_char Effects_particleColorPresetTable[1088][5][4]; /* contents: module image (ModuleData.cpp) */
+
+// decomp: D_800F55F0 (D_800F55F0@BATTLE/BATTLE.PRG)
+int Effects_particleCapacity;
+
+// decomp: D_800F55F4 (D_800F55F4@BATTLE/BATTLE.PRG)
+Effects_Particle* Effects_freeParticles;
+
+// decomp: D_800F55F8 (D_800F55F8@BATTLE/BATTLE.PRG)
+int Effects_usedParticleCount;
+
+// decomp: D_800F55FC (D_800F55FC@BATTLE/BATTLE.PRG)
+Effects_Particle* Effects_particlePool;
+
+// decomp: D_800F5600 (D_800F5600@BATTLE/BATTLE.PRG)
+int Effects_particlePoolReferences;
+
+// decomp: D_800F5618 (D_800F5618@BATTLE/BATTLE.PRG)
+int Effects_particleDrag;
+
+// decomp: D_800F5620 (D_800F5620@BATTLE/BATTLE.PRG)
+Effects_ParticleGravity Effects_particleGravity;
+
+// decomp: BATTLE.PRG func_800CFAAC (src/BATTLE/BATTLE.PRG/5BF94.c:5770)
+void Effects_StepParticleEndpointTowardStart(Effects_ParticleEndpointView* particle_endpoints)
+{
+    int dx;
+    int dy;
+    int sx;
+    int sy;
+
+    if (*(int*)&particle_endpoints->endX == *(int*)&particle_endpoints->startX) {
+        return;
+    }
+    sx = -1;
+    sy = -1;
+    dx = particle_endpoints->startX - particle_endpoints->endX;
+    dy = particle_endpoints->startY - particle_endpoints->endY;
+    if (dx < 0) {
+        dx = -dx;
+        sx = 1;
+    }
+    if (dy < 0) {
+        dy = -dy;
+        sy = 1;
+    }
+    if (dy < dx) {
+        particle_endpoints->startX += sx;
+        if (dx < dy * 2) {
+            particle_endpoints->startY += sy;
+        }
+    } else {
+        particle_endpoints->startY += sy;
+        if (dy < dx * 2) {
+            particle_endpoints->startX += sx;
+        }
+    }
+}
+
+// decomp: BATTLE.PRG func_800D268C (src/BATTLE/BATTLE.PRG/5BF94.c:6777)
+void Effects_ResetParticlePoolReferences(void) { Effects_particlePoolReferences = 0; }
+
+// decomp: BATTLE.PRG func_800D2698 (src/BATTLE/BATTLE.PRG/5BF94.c:6779)
+void Effects_AcquireParticlePool(int count)
+{
+    int i;
+
+    if (Effects_particlePoolReferences != 0) {
+        ++Effects_particlePoolReferences;
+        return;
+    }
+
+    Effects_particlePool = (Effects_Particle *)(Core_Memory_AllocateFromHighEnd(sizeof *Effects_particlePool * count));
+    Effects_particlePool[0].previous = NULL;
+    Effects_particlePool[0].next = &Effects_particlePool[1];
+
+    for (i = 1; i < count - 1; ++i) {
+        Effects_particlePool[i].previous = &Effects_particlePool[i - 1];
+        Effects_particlePool[i].next = &Effects_particlePool[i + 1];
+    }
+
+    Effects_usedParticleCount = 0;
+    Effects_particleCapacity = count;
+    Effects_particlePoolReferences = 1;
+    Effects_particlePool[i].previous = &Effects_particlePool[i - 1];
+    Effects_particlePool[i].next = NULL;
+    Effects_freeParticles = Effects_particlePool;
+}
+
+// decomp: BATTLE.PRG func_800D278C (src/BATTLE/BATTLE.PRG/5BF94.c:6805)
+void Effects_ReleaseParticlePool(void)
+{
+    if (Effects_particlePoolReferences == 1) {
+        if (Effects_particlePool != NULL) {
+            Core_Memory_FreeFromHighEnd(Effects_particlePool);
+            Effects_particlePool = NULL;
+        }
+        Effects_particlePoolReferences = 0;
+        return;
+    }
+    --Effects_particlePoolReferences;
+}
+
+// decomp: BATTLE.PRG func_800D27F0 (src/BATTLE/BATTLE.PRG/5BF94.c:6818)
+Effects_Particle* Effects_AllocateEffectParticle(Effects_EffectInstance* effect_instance)
+{
+    Effects_Particle* node = Effects_freeParticles;
+
+    if (node == NULL) {
+        Effects_IgnoreRuntimeDiagnostic(0x14);
+    }
+
+    Effects_ClearParticleTextureState((int*)&node->textureAnimation);
+
+    node->age = 0xFF;
+    node->previous = NULL;
+    ++Effects_usedParticleCount;
+    Effects_freeParticles = node->next;
+    node->next = effect_instance->particles;
+
+    if (effect_instance->particles != NULL) {
+        effect_instance->particles->previous = node;
+    }
+
+    effect_instance->particles = node;
+    ++effect_instance->particleCount;
+
+    do {
+    } while (0);
+
+    return node;
+}
+
+// decomp: BATTLE.PRG func_800D2888 (src/BATTLE/BATTLE.PRG/5BF94.c:6847)
+void Effects_ReleaseEffectParticle(Effects_Particle* particle_node, Effects_EffectInstance* effect_instance)
+{
+    if (particle_node->next != NULL) {
+        particle_node->next->previous = particle_node->previous;
+    }
+
+    if (particle_node->previous != NULL) {
+        particle_node->previous->next = particle_node->next;
+    } else {
+        effect_instance->particles = particle_node->next;
+    }
+
+    particle_node->next = Effects_freeParticles;
+    Effects_freeParticles = particle_node;
+    --Effects_usedParticleCount;
+    --effect_instance->particleCount;
+}
+
+// decomp: BATTLE.PRG func_800D2904 (src/BATTLE/BATTLE.PRG/5BF94.c:6865)
+void Effects_ReleaseAllEffectParticles(Effects_EffectInstance* effect_instance)
+{
+    Effects_Particle* particle_list_head;
+    Effects_Particle* particle_list_tail;
+
+    particle_list_head = effect_instance->particles;
+    particle_list_tail = particle_list_head;
+
+    if (particle_list_head == 0) {
+        return;
+    }
+
+    while (particle_list_tail->next != 0) {
+        particle_list_tail = particle_list_tail->next;
+    }
+
+    particle_list_tail->next = Effects_freeParticles;
+    Effects_freeParticles = particle_list_head;
+    Effects_usedParticleCount -= effect_instance->particleCount;
+    effect_instance->particleCount = 0;
+}
+
+// decomp: BATTLE.PRG func_800D2A38 (src/BATTLE/BATTLE.PRG/5BF94.c:6915)
+void Effects_SetParticleSpawnPosition(Effects_ParticleEmitterScratch* emitter_scratch, Effects_Particle* particle_node)
+{
+    if (emitter_scratch->flags & 0x40000) {
+        Core_Gte_ApplyRotMatrix(&emitter_scratch->vector, &emitter_scratch->aimPoint);
+    } else {
+        emitter_scratch->aimPoint.vx = emitter_scratch->vector.vx;
+        emitter_scratch->aimPoint.vy = emitter_scratch->vector.vy;
+        emitter_scratch->aimPoint.vz = emitter_scratch->vector.vz;
+    }
+    particle_node->motion.position.vx = emitter_scratch->position.vx + emitter_scratch->aimPoint.vx * ONE;
+    particle_node->motion.position.vy = emitter_scratch->position.vy + emitter_scratch->aimPoint.vy * ONE;
+    particle_node->motion.position.vz = emitter_scratch->position.vz + emitter_scratch->aimPoint.vz * ONE;
+}
+
+// decomp: src/BATTLE/BATTLE.PRG/5BF94.c:6930
+#define RAND_UNIFORM_WIDE(a, b)                                                    \
+    ((a) == (b)  ? (a)                                                             \
+     : (b) < (a) ? (Core_Random_Rand() + (Core_Random_Rand() << 16)) % ((a) - (b) + 1) + (b)               \
+                 : (Core_Random_Rand() + (Core_Random_Rand() << 16)) % ((b) - (a) + 1) + (a))
+// decomp: BATTLE.PRG func_800D2ADC (src/BATTLE/BATTLE.PRG/5BF94.c:6935)
+void Effects_EmitParticleEvent(
+    Effects_EffectInstance* effect_instance, int event, int transparency_override, int particle_variant, Effects_PluginEffectState* parent)
+{
+    int _[4] __attribute__((unused));
+    int frame;
+    int count;
+    int i;
+    int sample;
+    int step;
+    int angle;
+    int x;
+    int z;
+    int value;
+    Effects_Particle* node;
+    Effects_Particle* first;
+    MATRIX* matrix;
+    int prevX;
+    int prevZ;
+    int range;
+    Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch*)((uintptr_t)Core_ScratchBase() + 0x1D0);
+    Effects_ParticleDefinition* def = &Effects_package->block5Data->definitions[event];
+
+    scratch->flags = def->flags;
+    scratch->savedFlags = scratch->flags;
+    scratch->transformIndex = def->transformIndex;
+    scratch->attractionTransform = def->attractionTransform;
+
+    if (transparency_override != 0) {
+        scratch->transparency = transparency_override;
+    } else if (def->transparencyCurve != 0) {
+        scratch->transparency = def->transparencyCurve;
+    } else if (parent != NULL) {
+        scratch->transparency = parent->transparency;
+    } else {
+        scratch->transparency = 4;
+    }
+
+    if (parent != NULL && particle_variant == 0) {
+        particle_variant = parent->variant & 0xF;
+    }
+
+    frame = effect_instance->frame;
+    sample = def->intervalCurve;
+    if (frame % Core_Math_InterpolateShortPair(def->intervalRange, Effects_curveSamples[sample]) != 0) {
+        return;
+    }
+
+    Core_Gte_ClearTranslation();
+
+    matrix = &effect_instance->transforms[scratch->transformIndex].world;
+    sample = def->countCurve;
+    count = Core_Math_InterpolateShortPair(def->countRange, Effects_curveSamples[sample]);
+    if (count + Effects_usedParticleCount >= Effects_particleCapacity) {
+        count = Effects_particleCapacity - Effects_usedParticleCount;
+    }
+
+    if (count <= 0) {
+        Core_Debugf("effects", "particle emission skipped: count=%d used=%d capacity=%d",
+            count, Effects_usedParticleCount, Effects_particleCapacity);
+        return;
+    }
+
+    for (i = 0; i < count; ++i) {
+        node = Effects_AllocateEffectParticle(effect_instance);
+        node->transformIndex = scratch->transformIndex;
+        node->attractionTransform = scratch->attractionTransform;
+        Effects_InitializeParticleTextureAnimation(&node->textureAnimation, def->textureIndex, def->animationId);
+    }
+
+    sample = def->positionCurve;
+    Core_Math_InterpolatePairsToWideVector(def->positionRange, Effects_curveSamples[sample], &scratch->position);
+    first = node;
+
+    switch (scratch->flags & 7) {
+    case 0:
+        break;
+    case 1:
+        Core_Math_AddWideAndShortVectors(&scratch->position, Effects_effectOrigin, &scratch->position);
+        break;
+    case 2:
+        scratch->position.vx += matrix->t[0];
+        scratch->position.vy += matrix->t[1];
+        scratch->position.vz += matrix->t[2];
+        break;
+    case 4:
+        if (parent != NULL) {
+            scratch->position.vx += parent->position.vx >> 12;
+            scratch->position.vy += parent->position.vy >> 12;
+            scratch->position.vz += parent->position.vz >> 12;
+        }
+        break;
+    }
+
+    scratch->position.vx <<= 12;
+    scratch->position.vy <<= 12;
+    scratch->position.vz <<= 12;
+
+    sample = def->extentCurve;
+    Core_Math_InterpolatePairsToWideVector(def->extentRange, Effects_curveSamples[sample], &scratch->extent);
+    node = first;
+    sample = def->innerExtentCurve;
+    sample = Core_Math_InterpolateShortPair(def->innerExtentRange, Effects_curveSamples[sample]);
+    Core_Gte_SetRotMatrix(matrix);
+    Core_Gte_ClearTranslation();
+
+    switch (scratch->flags & 0x38) {
+    case 0:
+        scratch->innerExtent.vx = (scratch->extent.vx * sample) >> 12;
+        scratch->innerExtent.vy = (scratch->extent.vy * sample) >> 12;
+        scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
+        for (i = 0; i < count; ++i) {
+            angle = Core_Random_Rand();
+            scratch->sinAngle0 = Core_Gte_Sin(angle);
+            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            angle = Core_Random_Rand();
+            scratch->sinAngle1 = Core_Gte_Sin(angle);
+            scratch->cosAngle1 = Core_Gte_Cos(angle);
+            switch (scratch->flags & 0x1800) {
+            case 0:
+                scratch->vector.vx =
+                    Core_Random_RandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
+                scratch->vector.vy =
+                    Core_Random_RandomRangeExclusive(scratch->extent.vy, scratch->innerExtent.vy);
+                scratch->vector.vz =
+                    Core_Random_RandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
+                goto scale0;
+            case 0x800:
+            case 0x1000:
+                Core_Math_NarrowWideVector(&scratch->extent, &scratch->vector);
+            scale0:
+                scratch->vector.vx =
+                    (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->cosAngle1)
+                    >> 12;
+                scratch->vector.vy =
+                    (((scratch->vector.vy * scratch->cosAngle0) >> 12) * scratch->sinAngle1)
+                    >> 12;
+                scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
+                break;
+            }
+            Effects_SetParticleSpawnPosition(scratch, node);
+            node = node->next;
+        }
+        break;
+
+    case 8:
+        scratch->innerExtent.vx = (scratch->extent.vx * sample) >> 12;
+        scratch->innerExtent.vy = (scratch->extent.vy * sample) >> 12;
+        scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
+        for (i = 0; i < count; ++i) {
+            switch (scratch->flags & 0x1800) {
+            case 0:
+                angle = Core_Random_Rand();
+                if (angle & 1) {
+                    scratch->vector.vx =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
+                } else {
+                    scratch->vector.vx =
+                        Core_Random_RandomRangeExclusive(-scratch->extent.vx, -scratch->innerExtent.vx);
+                }
+                if (angle & 2) {
+                    scratch->vector.vy =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vy, scratch->innerExtent.vy);
+                } else {
+                    scratch->vector.vy =
+                        Core_Random_RandomRangeExclusive(-scratch->extent.vy, -scratch->innerExtent.vy);
+                }
+                if (angle & 4) {
+                    scratch->vector.vz =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
+                } else {
+                    scratch->vector.vz =
+                        Core_Random_RandomRangeExclusive(-scratch->extent.vz, -scratch->innerExtent.vz);
+                }
+                break;
+            case 0x800:
+                switch (Core_Random_Rand() % 6) {
+                case 0:
+                    scratch->vector.vx = scratch->extent.vx;
+                    goto face_x;
+                case 1:
+                    scratch->vector.vx = -scratch->extent.vx;
+                face_x:
+                    scratch->vector.vy =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vy, -scratch->extent.vy);
+                    scratch->vector.vz =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vz, -scratch->extent.vz);
+                    break;
+                case 2:
+                    scratch->vector.vy = scratch->extent.vy;
+                    goto face_y;
+                case 3:
+                    scratch->vector.vy = -scratch->extent.vy;
+                face_y:
+                    scratch->vector.vx =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vx, -scratch->extent.vx);
+                    scratch->vector.vz =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vz, -scratch->extent.vz);
+                    break;
+                case 4:
+                    scratch->vector.vz = scratch->extent.vz;
+                    goto face_z;
+                case 5:
+                    scratch->vector.vz = -scratch->extent.vz;
+                face_z:
+                    scratch->vector.vx =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vx, -scratch->extent.vx);
+                    scratch->vector.vy =
+                        Core_Random_RandomRangeExclusive(scratch->extent.vy, -scratch->extent.vy);
+                    break;
+                }
+                break;
+            case 0x1000:
+                Effects_emissionCounter = (Effects_emissionCounter + 1) & 7;
+                scratch->vector.vx =
+                    (Effects_emissionCounter & 1) ? scratch->extent.vx : -scratch->extent.vx;
+                scratch->vector.vy =
+                    (Effects_emissionCounter & 2) ? scratch->extent.vy : -scratch->extent.vy;
+                scratch->vector.vz =
+                    (Effects_emissionCounter & 4) ? scratch->extent.vz : -scratch->extent.vz;
+                break;
+            }
+            Effects_SetParticleSpawnPosition(scratch, node);
+            node = node->next;
+        }
+        break;
+
+    case 16:
+        scratch->innerExtent.vx = (scratch->extent.vx * sample) >> 12;
+        scratch->innerExtent.vy = scratch->extent.vy;
+        scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
+        for (i = 0; i < count; ++i) {
+            angle = Core_Random_Rand();
+            scratch->sinAngle0 = Core_Gte_Sin(angle);
+            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            switch (scratch->flags & 0x1800) {
+            case 0:
+                scratch->vector.vx =
+                    Core_Random_RandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
+                scratch->vector.vz =
+                    Core_Random_RandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
+                goto scale16;
+            case 0x800:
+            case 0x1000:
+                scratch->vector.vx = scratch->extent.vx;
+                scratch->vector.vz = scratch->extent.vz;
+            scale16:
+                scratch->vector.vy = Core_Math_SquareRootInteger(
+                    RAND_UNIFORM_WIDE(scratch->extent.vy * scratch->extent.vy, 0));
+                if (scratch->extent.vy == 0) {
+                    // BATTLE.PRG, DIV at 0x800D34BC/0x800D34F8:
+                    // zero height makes both dividends zero; the original LO is -1.
+                    scratch->vector.vx = scratch->vector.vz = -1;
+                } else {
+                    scratch->vector.vx =
+                        (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->vector.vy)
+                        / scratch->extent.vy;
+                    scratch->vector.vz =
+                        (((scratch->vector.vz * scratch->sinAngle0) >> 12) * scratch->vector.vy)
+                        / scratch->extent.vy;
+                }
+                break;
+            }
+            Effects_SetParticleSpawnPosition(scratch, node);
+            node = node->next;
+        }
+        break;
+
+    case 24:
+        scratch->innerExtent.vx = (scratch->extent.vx * sample) >> 12;
+        scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
+        for (i = 0; i < count; ++i) {
+            angle = Core_Random_Rand();
+            scratch->sinAngle0 = Core_Gte_Sin(angle);
+            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            switch (scratch->flags & 0x1800) {
+            case 0:
+                scratch->vector.vx =
+                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vx * scratch->extent.vx,
+                        scratch->innerExtent.vx * scratch->innerExtent.vx));
+                scratch->vector.vz =
+                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vz * scratch->extent.vz,
+                        scratch->innerExtent.vz * scratch->innerExtent.vz));
+                goto scale24;
+            case 0x800:
+            case 0x1000:
+                scratch->vector.vx = scratch->extent.vx;
+                scratch->vector.vz = scratch->extent.vz;
+            scale24:
+                scratch->vector.vx = (scratch->vector.vx * scratch->cosAngle0) >> 12;
+                scratch->vector.vy = Core_Random_RandomRangeExclusive(scratch->extent.vy, 0);
+                scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
+                break;
+            }
+            Effects_SetParticleSpawnPosition(scratch, node);
+            node = node->next;
+        }
+        break;
+
+    case 32:
+        scratch->innerExtent.vx = (scratch->extent.vx * sample) >> 12;
+        scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
+        for (i = 0; i < count; ++i) {
+            angle = Core_Random_Rand();
+            scratch->sinAngle0 = Core_Gte_Sin(angle);
+            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            switch (scratch->flags & 0x1800) {
+            case 0:
+                scratch->vector.vx =
+                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vx * scratch->extent.vx,
+                        scratch->innerExtent.vx * scratch->innerExtent.vx));
+                scratch->vector.vz =
+                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vz * scratch->extent.vz,
+                        scratch->innerExtent.vz * scratch->innerExtent.vz));
+                goto scale32;
+            case 0x800:
+            case 0x1000:
+                scratch->vector.vx = scratch->extent.vx;
+                scratch->vector.vz = scratch->extent.vz;
+            scale32:
+                scratch->vector.vy = 0;
+                scratch->vector.vx = (scratch->vector.vx * scratch->cosAngle0) >> 12;
+                scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
+                break;
+            }
+            Effects_SetParticleSpawnPosition(scratch, node);
+            node = node->next;
+        }
+        break;
+
+    case 40:
+        scratch->ringSegments = 4;
+        scratch->ringPositions = 4;
+        goto ring;
+
+    case 48:
+        scratch->ringSegments = def->ringSegments;
+        if (scratch->ringSegments == 0) {
+            scratch->ringSegments = 1;
+        }
+        scratch->ringPositions = def->ringPositions;
+        if (scratch->ringPositions == 0) {
+            scratch->ringPositions = scratch->ringSegments;
+        }
+    ring:
+        step = ONE / scratch->ringSegments;
+        if ((scratch->flags & 0x1800) != 0x1000) {
+            Effects_emissionCounter %= scratch->ringPositions;
+            angle = Effects_emissionCounter * step + 0x200;
+            prevX = (Core_Gte_Cos(angle) * scratch->extent.vx) >> 12;
+            prevZ = (Core_Gte_Sin(angle) * scratch->extent.vz) >> 12;
+        }
+        for (i = 0; i < count; ++i) {
+            range = 0x1194 - sample;
+            Effects_emissionCounter = (Effects_emissionCounter + 1) % scratch->ringPositions;
+            angle = Effects_emissionCounter * step + 0x200;
+            x = (Core_Gte_Cos(angle) * scratch->extent.vx) >> 12;
+            z = (Core_Gte_Sin(angle) * scratch->extent.vz) >> 12;
+            if ((scratch->flags & 0x1800) == 0x1000) {
+                scratch->vector.vx = x;
+                scratch->vector.vz = z;
+            } else {
+                value = Core_Random_Rand() >> 3;
+                scratch->vector.vx = (((x - prevX) * value) >> 12) + prevX;
+                scratch->vector.vz = (((z - prevZ) * value) >> 12) + prevZ;
+                prevX = x;
+                prevZ = z;
+                if ((scratch->flags & 0x1800) != 0x800) {
+                    value = Core_Gte_SquareRoot12(((Core_Random_Rand() * range) >> 15) + sample);
+                    if (value > ONE) {
+                        value = ONE;
+                    }
+                    scratch->vector.vx = (scratch->vector.vx * value) >> 12;
+                    scratch->vector.vz = (scratch->vector.vz * value) >> 12;
+                }
+            }
+            scratch->vector.vy = 0;
+            Effects_SetParticleSpawnPosition(scratch, node);
+            node = node->next;
+        }
+        break;
+    }
+
+    sample = def->speedCurve;
+    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[2], Effects_curveSamples[sample], scratch->speedRange);
+    scratch->speedRange[0] <<= 5;
+    scratch->speedRange[1] <<= 5;
+    sample = def->directionJitterCurve;
+    Core_Math_InterpolatePairsToWideVector(def->vectorRanges[1], Effects_curveSamples[sample], &scratch->directionJitter);
+    sample = def->directionCurve;
+    Core_Math_InterpolatePairsToWideVector(def->vectorRanges[0], Effects_curveSamples[sample], &scratch->baseDirection);
+    node = first;
+
+    switch (scratch->flags & 0xE000) {
+    case 0x4000:
+        if (effect_instance->context.emitFrom.type == 4) {
+            Actors_ActorBonePosition(((u_char*)&effect_instance->context.emitFrom.value)[0],
+                ((u_char*)&effect_instance->context.emitFrom.value)[2], &scratch->vector, 0);
+        } else {
+            scratch->vector = effect_instance->context.emitFrom.value.position;
+        }
+        goto aim;
+    case 0x6000:
+        if (effect_instance->context.emitTo.type == 4) {
+            Actors_ActorBonePosition(((u_char*)&effect_instance->context.emitTo.value)[0],
+                ((u_char*)&effect_instance->context.emitTo.value)[2], &scratch->vector, 0);
+        } else {
+            scratch->vector = effect_instance->context.emitTo.value.position;
+        }
+    aim:
+        Core_Math_WidenShortVector(&scratch->vector, &scratch->aimPoint);
+        scratch->spawnPoint.vx = scratch->position.vx >> 12;
+        scratch->spawnPoint.vy = scratch->position.vy >> 12;
+        scratch->spawnPoint.vz = scratch->position.vz >> 12;
+        Core_Math_BuildLookAtOrientation(&scratch->spawnPoint, &scratch->aimPoint, &scratch->aimMatrix);
+        matrix = &scratch->aimMatrix;
+    case 0:
+        for (i = 0; i < count; ++i) {
+            scratch->vector.vx =
+                scratch->baseDirection.vx
+                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vx, -scratch->directionJitter.vx);
+            scratch->vector.vy =
+                scratch->baseDirection.vy
+                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vy, -scratch->directionJitter.vy);
+            scratch->vector.vz =
+                scratch->baseDirection.vz
+                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
+            Core_Gte_RotMatrix(&scratch->vector, (MATRIX*)scratch);
+            Core_Gte_SetRotMatrix((const MATRIX *)(scratch));
+            *(int*)&scratch->vector = 0;
+            scratch->vector.vz = ONE;
+            Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
+            if (scratch->flags & 0x40000) {
+                Core_Math_NarrowWideVector(&scratch->direction, &scratch->vector);
+                Core_Gte_SetRotMatrix(matrix);
+                Core_Gte_ApplyRotMatrix(&scratch->vector, &scratch->direction);
+            }
+            scratch->speed =
+                Core_Random_RandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
+            node->motion.velocity.vx = (scratch->direction.vx * scratch->speed) >> 12;
+            node->motion.velocity.vy = (scratch->direction.vy * scratch->speed) >> 12;
+            node->motion.velocity.vz = (scratch->direction.vz * scratch->speed) >> 12;
+            node = node->next;
+        }
+        break;
+    case 0x8000:
+        for (i = 0; i < count; ++i) {
+            scratch->vector.vx =
+                scratch->baseDirection.vx
+                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vx, -scratch->directionJitter.vx);
+            scratch->vector.vy =
+                scratch->baseDirection.vy
+                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vy, -scratch->directionJitter.vy);
+            scratch->vector.vz =
+                scratch->baseDirection.vz
+                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
+            Core_Gte_RotMatrix(&scratch->vector, (MATRIX*)scratch);
+            Core_Gte_SetRotMatrix((const MATRIX *)(scratch));
+            *(int*)&scratch->vector = 0;
+            scratch->vector.vz = ONE;
+            Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
+            Core_Gte_SetRotMatrix(matrix);
+            Core_Math_NarrowWideVector(&scratch->direction, &scratch->vector);
+            Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
+            scratch->speed =
+                Core_Random_RandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
+            node->motion.velocity.vx = (scratch->direction.vx * scratch->speed) >> 12;
+            node->motion.velocity.vy = (scratch->direction.vy * scratch->speed) >> 12;
+            node->motion.velocity.vz = (scratch->direction.vz * scratch->speed) >> 12;
+            node = node->next;
+        }
+        break;
+    case 0x2000:
+        for (i = 0; i < count; ++i) {
+            scratch->direction.vx = (scratch->position.vx - node->motion.position.vx) >> 12;
+            scratch->direction.vy = (scratch->position.vy - node->motion.position.vy) >> 12;
+            scratch->direction.vz = (scratch->position.vz - node->motion.position.vz) >> 12;
+            scratch->speed =
+                Core_Random_RandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
+            if (scratch->direction.vx != 0 || scratch->direction.vy != 0
+                || scratch->direction.vz != 0) {
+                Core_Gte_VectorNormal(&scratch->direction, &scratch->direction);
+                node->motion.velocity.vx = (scratch->direction.vx * scratch->speed) >> 12;
+                node->motion.velocity.vy = (scratch->direction.vy * scratch->speed) >> 12;
+                node->motion.velocity.vz = (scratch->direction.vz * scratch->speed) >> 12;
+            } else {
+                node->motion.velocity.vy = scratch->speed;
+                node->motion.velocity.vz = 0;
+                node->motion.velocity.vx = 0;
+            }
+            node = node->next;
+        }
+        break;
+    }
+
+    sample = def->forceCurve;
+    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[2], Effects_curveSamples[sample], &scratch->forceMin);
+    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[3], Effects_curveSamples[sample], &scratch->forceMax);
+    sample = def->accelerationCurve;
+    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[4], Effects_curveSamples[sample], &scratch->accelerationMin);
+    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[5], Effects_curveSamples[sample], &scratch->accelerationMax);
+    node = first;
+    for (i = 0; i < count; ++i) {
+        node->motion.force.vx = Core_Random_RandomRangeExclusive(scratch->forceMin.vx, scratch->forceMax.vx);
+        node->motion.force.vy = Core_Random_RandomRangeExclusive(scratch->forceMin.vy, scratch->forceMax.vy);
+        node->motion.force.vz = Core_Random_RandomRangeExclusive(scratch->forceMin.vz, scratch->forceMax.vz);
+        node->motion.acceleration.vx = Core_Random_RandomRangeExclusive(scratch->accelerationMin.vx, scratch->accelerationMax.vx);
+        node->motion.acceleration.vy = Core_Random_RandomRangeExclusive(scratch->accelerationMin.vy, scratch->accelerationMax.vy);
+        node->motion.acceleration.vz = Core_Random_RandomRangeExclusive(scratch->accelerationMin.vz, scratch->accelerationMax.vz);
+        node = node->next;
+    }
+
+    sample = def->massCurve;
+    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[0], Effects_curveSamples[sample], scratch->massRange);
+    sample = def->gravityScaleCurve;
+    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[1], Effects_curveSamples[sample], scratch->gravityScaleRange);
+    sample = def->lifetimeCurve;
+    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[4], Effects_curveSamples[sample], scratch->lifetimeRange);
+    node = first;
+    for (i = 0; i < count; ++i) {
+        node->motion.mass = Core_Random_RandomRangeExclusive(scratch->massRange[0], scratch->massRange[1]);
+        node->motion.gravityScale = Core_Random_RandomRangeExclusive(scratch->gravityScaleRange[0], scratch->gravityScaleRange[1]);
+        node->lifetime = Core_Random_RandomRangeExclusive(scratch->lifetimeRange[0], scratch->lifetimeRange[1]);
+        node = node->next;
+    }
+
+    sample = def->attractionOffsetCurve;
+    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[6], Effects_curveSamples[sample], &scratch->attractionOffset);
+    sample = def->attractionJitterCurve;
+    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[7], Effects_curveSamples[sample], &scratch->attractionJitter);
+    node = first;
+
+    switch (scratch->flags & 0x1C0) {
+    case 0:
+    case 0x40:
+        for (i = 0; i < count; ++i) {
+            node->attractionTarget[0] = scratch->attractionOffset.vx;
+            node->attractionTarget[1] = scratch->attractionOffset.vy;
+            node->attractionTarget[2] = scratch->attractionOffset.vz;
+            node = node->next;
+        }
+        break;
+    case 0xC0:
+        for (i = 0; i < count; ++i) {
+            node->attractionTarget[0] =
+                effect_instance->transforms[scratch->attractionTransform].world.t[0] + scratch->attractionOffset.vx
+                + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vx, -scratch->attractionJitter.vy);
+            node->attractionTarget[1] =
+                effect_instance->transforms[scratch->attractionTransform].world.t[1] + scratch->attractionOffset.vy
+                + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vy, -scratch->attractionJitter.vy);
+            node->attractionTarget[2] =
+                effect_instance->transforms[scratch->attractionTransform].world.t[2] + scratch->attractionOffset.vz
+                + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vz, -scratch->attractionJitter.vz);
+            node = node->next;
+        }
+        break;
+    case 0x80:
+    case 0x140:
+        for (i = 0; i < count; ++i) {
+            node->attractionTarget[2] = 0;
+            node->attractionTarget[1] = 0;
+            node->attractionTarget[0] = 0;
+            node = node->next;
+        }
+        break;
+    }
+
+    sample = def->attractionCurve;
+    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[3], Effects_curveSamples[sample], scratch->attractionRange);
+    node = first;
+    scratch->colorCurves.word = *(int*)&def->rCurve;
+    scratch->colorCurves.fields.age = node->age;
+    for (i = 0; i < count; ++i) {
+        node->emitFlags = scratch->flags;
+        value = Core_Random_RandomRangeExclusive(scratch->attractionRange[0], scratch->attractionRange[1]);
+        *(int*)node->colorCurves = scratch->colorCurves.word;
+        node->attraction = value;
+        *(u_short*)&node->endEvent = *(u_short*)&def->endEvent;
+        node->transparency = scratch->transparency;
+        node->opaque61Bit0 = particle_variant;
+        node = node->next;
+    }
+}
+#undef RAND_UNIFORM_WIDE
+
+// decomp: BATTLE.PRG func_800D4C18 (src/BATTLE/BATTLE.PRG/5BF94.c:7658)
+int Effects_TickEffectParticles(Effects_EffectInstance* effect_instance)
+{
+    Effects_Particle* next = effect_instance->particles;
+    Effects_Particle* node;
+
+    Effects_IntegrateParticleMotion(next);
+    Effects_DrawEffectParticleList(effect_instance->particles);
+    node = next;
+    while (next != NULL) {
+        next = node->next;
+        ++node->age;
+        Effects_PluginEffectState parent = {0};
+        parent.position.vx = node->motion.position.vx;
+        parent.position.vy = node->motion.position.vy;
+        parent.position.vz = node->motion.position.vz;
+        parent.transparency = node->transparency;
+        parent.variant = node->opaque61Bit0;
+        if (node->tickEvent != 0) {
+            Effects_EmitParticleEvent(effect_instance, node->tickEvent - 1, 0, 0, &parent);
+        }
+        if (node->lifetime == -1) {
+            if (node->textureAnimation.frameTimer == 0) {
+                if (node->endEvent != 0) {
+                    Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
+                }
+                Effects_ReleaseEffectParticle(node, effect_instance);
+            }
+        } else if (--node->lifetime == 0) {
+            if (node->endEvent != 0) {
+                Effects_EmitParticleEvent(effect_instance, node->endEvent - 1, 0, 0, &parent);
+            }
+            Effects_ReleaseEffectParticle(node, effect_instance);
+        }
+        node = next;
+    }
+    return 1;
+}
+
+// decomp: BATTLE.PRG func_800D5260 (src/BATTLE/BATTLE.PRG/5BF94.c:7826)
+void Effects_SetParticleGravity(Effects_ParticleGravity* gravity_vector) { Effects_particleGravity = *gravity_vector; }
+
+// decomp: BATTLE.PRG func_800D5294 (src/BATTLE/BATTLE.PRG/5BF94.c:7828)
+void Effects_SetParticleDrag(int* drag_value) { Effects_particleDrag = *drag_value; }
+
+// decomp: BATTLE.PRG func_800D52A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7830)
+void Effects_IntegrateParticleMotion(Effects_Particle* node)
+{
+    VECTOR direction;
+    Effects_ParticleMotionView* state;
+    int damping;
+    int drag = Effects_particleDrag;
+    int gravityX = Effects_particleGravity.x;
+    int gravityY = Effects_particleGravity.y;
+    int gravityZ = Effects_particleGravity.z;
+
+    for (; node != NULL; node = node->next) {
+        state = (Effects_ParticleMotionView*)&node->motion.mass;
+        damping = node->motion.mass - drag;
+        state->vx = (state->vx * damping + (state->fx << 12)) / node->motion.mass
+                  + ((gravityX * state->gravityScale) >> 12);
+        state->x += state->vx;
+        state->vy = (state->vy * damping + (state->fy << 12)) / node->motion.mass
+                  + ((gravityY * state->gravityScale) >> 12);
+        state->y += state->vy;
+        state->vz = (state->vz * damping + (state->fz << 12)) / node->motion.mass
+                  + ((gravityZ * state->gravityScale) >> 12);
+        state->z += state->vz;
+        damping = node->attraction;
+        if (damping != 0) {
+            direction.vx = node->attractionTarget[0] - (state->x >> 12);
+            direction.vy = node->attractionTarget[1] - (state->y >> 12);
+            direction.vz = node->attractionTarget[2] - (state->z >> 12);
+            if (direction.vx != 0 || direction.vy != 0 || direction.vz != 0) {
+                Core_Gte_VectorNormal(&direction, &direction);
+                direction.vx = (direction.vx * damping) >> 12;
+                direction.vy = (direction.vy * damping) >> 12;
+                direction.vz = (direction.vz * damping) >> 12;
+            }
+            state->fx += state->ax + direction.vx;
+            state->fy += state->ay + direction.vy;
+            state->fz += state->az + direction.vz;
+        } else {
+            state->fx += state->ax;
+            state->fy += state->ay;
+            state->fz += state->az;
+        }
+    }
+}
+
+// decomp: BATTLE.PRG func_800D6CCC (src/BATTLE/BATTLE.PRG/5BF94.c:8501)
+void Effects_ClearParticleTextureState(int* storage)
+{
+    Effects_ParticleTextureAnimation* state = (Effects_ParticleTextureAnimation*)storage;
+    *state = (Effects_ParticleTextureAnimation){0};
+}
+
+// decomp: BATTLE.PRG func_800D6CF0 (src/BATTLE/BATTLE.PRG/5BF94.c:8513)
+void Effects_InitializeParticleTextureAnimation(Effects_ParticleTextureAnimation* animation, int textureIndex, int programIndex)
+{
+    if (textureIndex < 0 || textureIndex >= Effects_package->block1TableCount ||
+        textureIndex >= 4 || Effects_package->textureInfoTable[textureIndex] == NULL) {
+        Core_Debugf("effects.texture", "unbound texture=%d tables=%d program=%d context=%s request_effect=%u",
+            textureIndex, Effects_package->block1TableCount, programIndex,
+            Effects_package == &Effects_actionPackage ? "primary" : "secondary",
+            (unsigned)(Effects_package == &Effects_actionPackage ?
+                Effects_actionRequest.effectId : Effects_secondaryRequest.effectId));
+    }
+    animation->textureIndex = textureIndex;
+    animation->program = (u_char*)Effects_package->block2Data + Effects_package->block2Data[programIndex + 2];
+    animation->cursor = 0;
+    animation->frameTimer = 0;
+}
+
+// decomp: BATTLE.PRG func_800D6D24 (src/BATTLE/BATTLE.PRG/5BF94.c:8521)
+void Effects_AdvanceParticleTextureAnimation(Effects_ParticleTextureAnimation* animation)
+{
+    if (animation->frameTimer != 0) {
+        animation->frameTimer -= 2;
+        if (animation->frameTimer != 0) {
+            return;
+        }
+    }
+
+    while (1) {
+        int command = *(int*)(animation->program + animation->cursor);
+
+        switch (command & 0xF0000000) {
+        case 0:
+            if (animation->textureIndex >= 4 ||
+                animation->textureIndex >= Effects_package->block1TableCount ||
+                Effects_package->textureInfoTable[animation->textureIndex] == NULL) {
+                Core_Warnf("effects.texture", "unbound frame table=%u tables=%d cursor=%u word=0x%08X context=%s request_effect=%u program=%p previous=%p",
+                    (unsigned)animation->textureIndex, Effects_package->block1TableCount,
+                    (unsigned)animation->cursor, (unsigned)command,
+                    Effects_package == &Effects_actionPackage ? "primary" : "secondary",
+                    (unsigned)(Effects_package == &Effects_actionPackage ?
+                        Effects_actionRequest.effectId : Effects_secondaryRequest.effectId),
+                    (void*)animation->program, (void*)animation->textureInfo);
+            }
+            animation->textureInfo =
+                Effects_package->textureInfoTable[animation->textureIndex] + (command & 0xFFFF);
+            *(short*)&animation->frameTimer = (command >> 16) & 0x3FFF;
+            animation->cursor += 4;
+            return;
+        case 0x10000000:
+            animation->frameOffsetX = (command << 18) >> 18;
+            animation->frameOffsetY = (command << 4) >> 18;
+            animation->cursor += 4;
+            break;
+        case 0x20000000:
+            animation->cursor = 0;
+            break;
+        case 0x30000000:
+            return;
+        }
+    }
+}
+
+}  // extern "C"

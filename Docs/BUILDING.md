@@ -198,7 +198,7 @@ Everything goes to `build\<Config>\` (git-ignored):
 | `vs-native.log` | the log written by `VS.Desktop` at run time |
 
 C++ sources use warnings as errors (`/W4 /WX`). The solution generator currently overrides `.c` items
-to warning level 1 with non-fatal warnings, including hand-maintained C ports. Compatibility options are in
+to warning level 1 with non-fatal warnings, including hand-maintained sources listed in `tools\port\relaxed_sources.txt`. Compatibility options are in
 [Directory.Build.props](../Directory.Build.props). A successful build is therefore not necessarily
 warning-free: pointer/ABI, bounds, and uninitialized-value warnings still need source and runtime review.
 

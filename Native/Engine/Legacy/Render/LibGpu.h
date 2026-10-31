@@ -351,6 +351,8 @@ void SetTile(TILE* p);
 #ifdef __cplusplus
 }
 
+// Copied sources include this header inside their extern "C" block.
+extern "C++" {
 #include <type_traits>
 
 template <class T>
@@ -361,4 +363,5 @@ inline u_long LegacyGpu_LinkOf(T x) {
     return static_cast<u_long>(x) & 0xFFFFFF;
   }
 }
+}  // extern "C++"
 #endif

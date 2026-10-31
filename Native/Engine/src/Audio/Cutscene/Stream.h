@@ -59,11 +59,11 @@ void Audio_Cutscene_UploadSecondMonoBuffer(void);
 void Audio_Cutscene_InitializeStreamVoice(
     int in_Voice, int in_PanMode, int in_StartAddr, int in_RepeatAddr);
 void Audio_Cutscene_BeginStreamPlayback(
-    int in_SomeIndex, int in_SampleAddr, void (*in_Callback)());
+    int in_SomeIndex, int in_SampleAddr, void (*in_Callback)(...));
 void Audio_Cutscene_BeginMonoPlayback(void);
 void Audio_Cutscene_BeginStereoPlayback(void);
 void Audio_Cutscene_RefillStreamBuffer(
-    int in_RepeatAddressL, int in_RepeatAddressR, int in_Param3, void (*in_IrqCallback)());
+    int in_RepeatAddressL, int in_RepeatAddressR, int in_Param3, void (*in_IrqCallback)(...));
 void Audio_Cutscene_RefillMonoFirstBuffer(void);
 void Audio_Cutscene_RefillMonoSecondBuffer(void);
 void Audio_Cutscene_RefillStereoFirstBuffer(void);

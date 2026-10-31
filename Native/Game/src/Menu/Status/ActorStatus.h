@@ -32,7 +32,7 @@ extern char Menu_Status_renderBasicStatsState;
 extern int Menu_Status_selectedActor;
 extern u_char Menu_Status_selectedElement;;
 extern char Menu_Status_selectedStatRow;;
-extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.c) */;
+extern u_short Menu_Status_statusStrings[1760]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Status_xPos;
 extern int Menu_Status_yPos;
 void Menu_Status_BeginVitalsTransition(int actor);

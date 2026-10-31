@@ -45,7 +45,7 @@ def catalog_row(identifier: str, **values: str) -> dict[str, str]:
     return {
         "id": identifier, "name": f"func_{identifier}", "copy": "yes",
         "final_name": f"Gen::Item{identifier}",
-        "final_location": r"Native\Game\src\Gen\Generated.c",
+        "final_location": r"Native\Game\src\Gen\Generated.cpp",
         "copied": "x", "compiles": "x", "modernized": "", "cpp": "",
         "verified": "", "notes": "", **values,
     }
@@ -60,7 +60,7 @@ class Fixture:
             catalog_row("F00001"),
             catalog_row(
                 "F00002", final_name="Sys::OwnedC",
-                final_location=r"Native\Game\src\Sys\OwnedC.c",
+                final_location=r"Native\Game\src\Sys\OwnedC.cpp",
             ),
             catalog_row(
                 "F00003", final_name="Sys::Thing",
@@ -68,19 +68,19 @@ class Fixture:
             ),
             catalog_row(
                 "F00004", copy="no", copied="retired", final_name="Sys::Old",
-                final_location=r"Native\Game\src\Sys\OwnedC.c",
+                final_location=r"Native\Game\src\Sys\OwnedC.cpp",
                 notes="retired-by:Sys_OwnedC;replaced",
             ),
             catalog_row("F00005", copy="no", copied="", final_name="", final_location=""),
         ]
         self.owned = [
-            owned_row("F00002", "Sys_OwnedC", r"Native\Game\src\Sys\OwnedC.c"),
+            owned_row("F00002", "Sys_OwnedC", r"Native\Game\src\Sys\OwnedC.cpp"),
             owned_row("F00003", "Sys_Thing", r"Native\Game\src\Sys\Thing.cpp",
                       header=r"Native\Game\src\Sys\Thing.hpp"),
         ]
-        self.manifest = {r"Native\Game\src\Gen\Generated.c": "hash"}
+        self.manifest = {r"Native\Game\src\Gen\Generated.cpp": "hash"}
         self.baseline: list[dict[str, object]] = []
-        self.promotion = [promotion_row(
+        self.promotion = [transitional_record(), promotion_row(
             typed_interface="", no_bridge="", vs_namespace="", behavior_evidence="", evidence="", reviewed="",
         )]
         self.verify: list[dict[str, str]] = []
@@ -89,10 +89,12 @@ class Fixture:
             {"ec": "EC-03", "path": "Native/Engine/include/Core/Gte.h", "kind": "header"},
             {"ec": "EC-03", "path": "Native/Engine/src/Core/Gte.cpp", "kind": "source"},
         ]
-        self.relaxed = {"src\\Gen\\Generated.c", "src\\Sys\\OwnedC.c"}
+        self.relaxed = {"src\\Gen\\Generated.cpp", "src\\Sys\\OwnedC.cpp"}
+        self.relaxed_list = ["Native\\Game\\src\\Sys\\OwnedC.cpp"]
+        self.catalog[1]["cpp"] = "wip"
         self.files = {
-            "Native/Game/src/Gen/Generated.c": '#include "Legacy/Psx.h"\nint a;\n',
-            "Native/Game/src/Sys/OwnedC.c": '#include "Legacy/Psx.h"\nint Sys_OwnedC(void) { return 1; }\n',
+            "Native/Game/src/Gen/Generated.cpp": '#include "Legacy/Psx.h"\nint a;\n',
+            "Native/Game/src/Sys/OwnedC.cpp": '#include "Legacy/Psx.h"\nint Sys_OwnedC(void) { return 1; }\n',
             "Native/Game/src/Sys/OwnedC.h": "#pragma once\n",
             "Native/Game/src/Sys/Thing.cpp": (
                 '#include "Sys/Thing.hpp"\nextern "C" int Sys_Thing(void) { return 2; }\n'
@@ -115,7 +117,7 @@ class Fixture:
         self.owned[1]["name"] = "Sys_Thing"
         self.catalog[2]["modernized"] = "x"
         self.catalog[2]["cpp"] = "x"
-        self.promotion = [promotion_row(**claims)]
+        self.promotion = [transitional_record(), promotion_row(**claims)]
 
     def relax(self, relative: str) -> None:
         self.relaxed.add(relative)
@@ -133,6 +135,8 @@ class Fixture:
         write_csv(self.root / "Docs/ledgers/EC_BRIDGES.csv", gates.BRIDGE_FIELDS, self.bridges)
         manifest = self.root / "tools/port/copy_manifest.json"
         manifest.write_text(json.dumps(self.manifest), encoding="utf-8")
+        relaxed = self.root / "tools/port/relaxed_sources.txt"
+        relaxed.write_text("".join(item + chr(10) for item in self.relaxed_list), encoding="utf-8")
         baseline = self.root / "tools/lint/baseline.json"
         baseline.parent.mkdir(parents=True, exist_ok=True)
         baseline.write_text(json.dumps({"schema": 1, "findings": self.baseline}), encoding="utf-8")
@@ -144,7 +148,7 @@ class Fixture:
     def write_project(self) -> None:
         items = []
         for path in self.files:
-            if not path.startswith("Native/Game/src/") or Path(path).suffix not in {".c", ".cpp"}:
+            if not path.startswith("Native/Game/src/") or Path(path).suffix != ".cpp":
                 continue
             relative = path.removeprefix("Native/Game/").replace("/", "\\")
             if relative in self.relaxed:
@@ -176,6 +180,14 @@ def promotion_row(**values: str) -> dict[str, str]:
     }
 
 
+def transitional_record() -> dict[str, str]:
+    """F00002: owned, already C++, compiled relaxed, with no step beyond the suffix claimed."""
+    return promotion_row(
+        id="F00002", path=r"Native\Game\src\Sys\OwnedC.cpp", source_cpp="", vs_namespace="", typed_interface="",
+        no_bridge="", strict_clean="", behavior_evidence="", evidence="", reviewed="",
+    )
+
+
 def write_csv(path: Path, fields: list[str], rows: list[dict[str, str]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", encoding="utf-8", newline="") as stream:
@@ -205,13 +217,13 @@ class OwnershipGateTests(GateTestCase):
     def test_each_row_has_one_ownership_state(self) -> None:
         states = self.report().ownership_states
         self.assertEqual(states["F00001"], "generated")
-        self.assertEqual(states["F00002"], "owned-c")
+        self.assertEqual(states["F00002"], "owned-cpp")
         self.assertEqual(states["F00003"], "owned-cpp")
         self.assertEqual(states["F00004"], "retired")
         self.assertEqual(states["F00005"], "excluded")
 
     def test_owned_id_must_exist_in_the_catalog(self) -> None:
-        self.fixture.owned.append(owned_row("F09999", "Sys_Ghost", r"Native\Game\src\Sys\OwnedC.c"))
+        self.fixture.owned.append(owned_row("F09999", "Sys_Ghost", r"Native\Game\src\Sys\OwnedC.cpp"))
         self.assertIn("owned-id-missing", self.rules("ownership"))
 
     def test_duplicate_owned_id_is_rejected(self) -> None:
@@ -223,16 +235,16 @@ class OwnershipGateTests(GateTestCase):
         self.assertIn("owned-path-missing", self.rules("ownership"))
 
     def test_owned_path_cannot_be_generated_output(self) -> None:
-        self.fixture.manifest[r"Native\Game\src\Sys\OwnedC.c"] = "hash"
+        self.fixture.manifest[r"Native\Game\src\Sys\OwnedC.cpp"] = "hash"
         self.assertIn("owned-path-generated", self.rules("ownership"))
 
     def test_catalog_location_must_equal_owned_path(self) -> None:
-        self.fixture.catalog[1]["final_location"] = r"Native\Game\src\Sys\Elsewhere.c"
+        self.fixture.catalog[1]["final_location"] = r"Native\Game\src\Sys\Elsewhere.cpp"
         self.assertIn("owned-location-mismatch", self.rules("ownership"))
 
     def test_unregistered_row_in_an_owned_file_is_rejected(self) -> None:
         self.fixture.catalog.append(
-            catalog_row("F00006", final_location=r"Native\Game\src\Sys\OwnedC.c")
+            catalog_row("F00006", final_location=r"Native\Game\src\Sys\OwnedC.cpp")
         )
         self.assertIn("unregistered-row-in-owned-file", self.rules("ownership"))
 
@@ -253,8 +265,8 @@ class OwnershipGateTests(GateTestCase):
 
     def test_ownership_alone_never_implies_cpp_modernized_or_verified(self) -> None:
         report = self.report()
-        self.assertEqual(report.ownership_states["F00002"], "owned-c")
-        self.assertEqual(report.row_status["F00002"], {"cpp": "", "modernized": "", "verified": ""})
+        self.assertEqual(report.ownership_states["F00002"], "owned-cpp")
+        self.assertEqual(report.row_status["F00002"], {"cpp": "wip", "modernized": "", "verified": ""})
         self.assertEqual(report.ownership_states["F00003"], "owned-cpp")
         self.assertEqual(report.derived_cpp["F00003"], "wip")
         self.assertEqual(report.row_status["F00003"]["modernized"], "")
@@ -296,9 +308,9 @@ class PromotionGateTests(GateTestCase):
         self.assertNotEqual(report.derived_cpp["F00003"], "x")
 
     def test_c_source_cannot_claim_source_cpp(self) -> None:
-        self.fixture.promote(path=r"Native\Game\src\Sys\OwnedC.c")
-        self.fixture.catalog[2]["final_location"] = r"Native\Game\src\Sys\OwnedC.c"
-        self.fixture.owned[1]["path"] = r"Native\Game\src\Sys\OwnedC.c"
+        self.fixture.promote(path=r"Native\Game\src\Sys\OwnedC.cpp")
+        self.fixture.catalog[2]["final_location"] = r"Native\Game\src\Sys\OwnedC.cpp"
+        self.fixture.owned[1]["path"] = r"Native\Game\src\Sys\OwnedC.cpp"
         self.expect_failure("claim-source_cpp")
 
     def test_relaxed_compilation_cannot_claim_source_cpp(self) -> None:
@@ -403,7 +415,7 @@ class PromotionGateTests(GateTestCase):
 
     def test_unadopted_callers_block_cpp_x_even_with_complete_claims(self) -> None:
         self.fixture.promote()
-        self.fixture.files["Native/Game/src/Gen/Generated.c"] = (
+        self.fixture.files["Native/Game/src/Gen/Generated.cpp"] = (
             "extern int Sys_Thing(void);\nint a(void) { return Sys_Thing(); }\n"
         )
         self.expect_failure("legacy-symbol-consumers")
@@ -418,11 +430,11 @@ class PromotionGateTests(GateTestCase):
         workspace = self.fixture.write()
         gates.sync(workspace)
         rows = {row["id"]: row for row in gates.read_csv(workspace.promotion)}
-        self.assertEqual(set(rows), {"F00003"})
+        self.assertEqual(set(rows), {"F00002", "F00003"})
         self.assertEqual(rows["F00003"]["source_cpp"], "x")
         catalog = {row["id"]: row for row in gates.read_csv(workspace.catalog)}
         self.assertEqual(catalog["F00003"]["cpp"], "wip")
-        self.assertEqual(catalog["F00002"]["cpp"], "")
+        self.assertEqual(catalog["F00002"]["cpp"], "wip")
         self.assertEqual(gates.build_report(workspace).issues, [])
 
     def test_sync_corrects_an_overclaim_to_wip(self) -> None:
@@ -439,7 +451,7 @@ class PromotionGateTests(GateTestCase):
         first = workspace.promotion.read_bytes(), workspace.catalog.read_bytes()
         gates.sync(workspace)
         self.assertEqual((workspace.promotion.read_bytes(), workspace.catalog.read_bytes()), first)
-        row = gates.read_csv(workspace.promotion)[0]
+        row = {item["id"]: item for item in gates.read_csv(workspace.promotion)}["F00003"]
         self.assertEqual(row["notes"], "kept note")
         self.assertEqual(row["evidence"], "test:Thing adds one;extra:keep")
         self.assertEqual(row["typed_interface"], "x")
@@ -464,35 +476,75 @@ class QualityGateTests(GateTestCase):
     def source_class(self, path: str) -> str:
         return self.report().source_classes[path]["class"]
 
+    def test_c_source_in_the_port_is_rejected(self) -> None:
+        for name in ("Native/Game/src/Sys/Leftover.c", "Native/Game/include/Sys/Leftover.c"):
+            with self.subTest(name=name):
+                self.setUp()
+                self.fixture.files[name] = "int leftover;\n"
+                self.assertIn("non-cpp-source", self.rules("language"))
+
+    def test_assembly_source_in_the_port_is_rejected(self) -> None:
+        for suffix in (".s", ".S", ".asm"):
+            with self.subTest(suffix=suffix):
+                self.setUp()
+                self.fixture.files[f"Native/Game/src/Sys/Routine{suffix}"] = "nop\n"
+                self.assertIn("non-cpp-source", self.rules("language"))
+
+    def test_inline_assembly_is_rejected(self) -> None:
+        for body in ('__asm { nop }', '__asm__("nop");', 'asm("nop");', '_asm nop'):
+            with self.subTest(body=body):
+                self.setUp()
+                self.fixture.files["Native/Game/src/Sys/Inline.cpp"] = f"void Sys_Inline(void) {{ {body} }}\n"
+                self.assertIn("inline-assembly", self.rules("language"))
+
+    def test_assembly_named_only_in_comments_or_text_is_allowed(self) -> None:
+        self.fixture.files["Native/Game/src/Sys/Note.cpp"] = (
+            '// decomp: func_8001369C as INCLUDE_ASM, asm(), __asm\nconst char* note = "asm(nop)";\n'
+        )
+        self.assertNotIn("inline-assembly", self.rules("language"))
+
+    def test_resources_may_keep_reference_c_and_assembly(self) -> None:
+        self.fixture.files["resources/decomp/src/main.c"] = "int original;\n"
+        self.fixture.files["resources/decomp/asm/func.s"] = "nop\n"
+        self.assertNotIn("non-cpp-source", self.rules("language"))
+
+    def test_relaxed_list_entry_for_a_missing_file_is_rejected(self) -> None:
+        self.fixture.relaxed_list.append("Native\\Game\\src\\Sys\\Gone.cpp")
+        self.assertIn("relaxed-list-stale", self.rules("quality"))
+
+    def test_relaxed_list_entry_compiled_strict_is_rejected(self) -> None:
+        self.fixture.relaxed.discard("src\\Sys\\OwnedC.cpp")
+        self.assertIn("relaxed-list-stale", self.rules("quality"))
+
     def test_relaxed_owned_cpp_is_rejected(self) -> None:
         self.fixture.relax("src\\Sys\\Thing.cpp")
         self.assertIn("owned-cpp-relaxed", self.rules("quality"))
 
     def test_owned_c_is_reported_as_maintained_relaxed_debt(self) -> None:
         report = self.report()
-        entry = report.source_classes["Native/Game/src/Sys/OwnedC.c"]
-        self.assertEqual(entry["class"], "maintained-c")
+        entry = report.source_classes["Native/Game/src/Sys/OwnedC.cpp"]
+        self.assertEqual(entry["class"], "transitional-cpp")
         self.assertEqual(entry["compile"], "relaxed")
-        self.assertEqual(report.relaxation_debt[0]["path"], "Native/Game/src/Sys/OwnedC.c")
+        self.assertEqual(report.relaxation_debt[0]["path"], "Native/Game/src/Sys/OwnedC.cpp")
         self.assertEqual(report.relaxation_debt[0]["owned_functions"], 1)
 
     def test_owned_relaxed_replacement_code_stays_on_the_debt_list(self) -> None:
-        report = gates.build_report(self.fixture.write(), retiring={"Native/Game/src/Sys/OwnedC.c": "EC-02"})
-        entry = report.source_classes["Native/Game/src/Sys/OwnedC.c"]
+        report = gates.build_report(self.fixture.write(), retiring={"Native/Game/src/Sys/OwnedC.cpp": "EC-02"})
+        entry = report.source_classes["Native/Game/src/Sys/OwnedC.cpp"]
         self.assertEqual(entry["class"], "replacement-legacy")
-        self.assertEqual([item["path"] for item in report.relaxation_debt], ["Native/Game/src/Sys/OwnedC.c"])
+        self.assertEqual([item["path"] for item in report.relaxation_debt], ["Native/Game/src/Sys/OwnedC.cpp"])
         self.assertEqual(report.relaxation_debt[0]["class"], "replacement-legacy")
 
     def test_unowned_relaxed_legacy_code_is_not_maintained_debt(self) -> None:
-        self.fixture.files["Native/Game/src/Sys/Shim.c"] = "int shim;\n"
-        self.fixture.relax("src\\Sys\\Shim.c")
-        report = gates.build_report(self.fixture.write(), retiring={"Native/Game/src/Sys/Shim.c": "EC-02"})
-        self.assertNotIn("Native/Game/src/Sys/Shim.c", [item["path"] for item in report.relaxation_debt])
+        self.fixture.files["Native/Game/src/Sys/Shim.cpp"] = "int shim;\n"
+        self.fixture.relax("src\\Sys\\Shim.cpp")
+        report = gates.build_report(self.fixture.write(), retiring={"Native/Game/src/Sys/Shim.cpp": "EC-02"})
+        self.assertNotIn("Native/Game/src/Sys/Shim.cpp", [item["path"] for item in report.relaxation_debt])
 
     def test_generated_output_is_outside_quality_scope(self) -> None:
         report = self.report()
-        entry = report.source_classes["Native/Game/src/Gen/Generated.c"]
-        self.assertEqual(entry["class"], "generated-c")
+        entry = report.source_classes["Native/Game/src/Gen/Generated.cpp"]
+        self.assertEqual(entry["class"], "generated-cpp")
         self.assertFalse(entry["quality_scope"])
 
     def test_strict_cpp_comes_from_project_settings_not_the_extension(self) -> None:
@@ -511,8 +563,8 @@ class QualityGateTests(GateTestCase):
 
     def test_baseline_debt_is_counted_per_file(self) -> None:
         self.fixture.baseline += [
-            {"key": "a", "count": 2, "tool": "tidy", "rule": "r", "path": "Native/Game/src/Sys/OwnedC.c"},
-            {"key": "b", "count": 1, "tool": "tidy", "rule": "s", "path": "Native/Game/src/Sys/OwnedC.c"},
+            {"key": "a", "count": 2, "tool": "tidy", "rule": "r", "path": "Native/Game/src/Sys/OwnedC.cpp"},
+            {"key": "b", "count": 1, "tool": "tidy", "rule": "s", "path": "Native/Game/src/Sys/OwnedC.cpp"},
         ]
         self.assertEqual(self.report().relaxation_debt[0]["baseline_findings"], 3)
 
@@ -532,7 +584,7 @@ class QualityGateTests(GateTestCase):
     def test_gate_tool_never_modifies_the_baseline(self) -> None:
         self.fixture.baseline.append(
             {"key": "k", "count": 1, "tool": "tidy", "rule": "r",
-             "path": "Native/Game/src/Sys/OwnedC.c"}
+             "path": "Native/Game/src/Sys/OwnedC.cpp"}
         )
         workspace = self.fixture.write()
         before = hashlib.sha256(workspace.baseline.read_bytes()).hexdigest()
@@ -648,24 +700,24 @@ class RetirementGateTests(GateTestCase):
         self.assertIn("invalid-modernized", self.rules("retirement"))
 
     def test_consumers_are_counted_per_ec_by_ownership(self) -> None:
-        self.fixture.files["Native/Game/src/Sys/OwnedC.c"] = '#include "Core/Gte.h"\nint Sys_OwnedC(void) { return 1; }\n'
+        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = '#include "Core/Gte.h"\nint Sys_OwnedC(void) { return 1; }\n'
         entry = self.report().bridge_consumers["EC-03"]
-        self.assertEqual(entry["direct"]["owned"], ["Native/Game/src/Sys/OwnedC.c"])
-        self.assertEqual(entry["transitive"]["generated"], ["Native/Game/src/Gen/Generated.c"])
+        self.assertEqual(entry["direct"]["owned"], ["Native/Game/src/Sys/OwnedC.cpp"])
+        self.assertEqual(entry["transitive"]["generated"], ["Native/Game/src/Gen/Generated.cpp"])
 
     def test_legacy_sdk_consumers_are_reported(self) -> None:
         legacy = self.report().legacy_consumers["Native/Engine/Legacy/Psx.h"]
-        self.assertEqual(legacy["generated"], ["Native/Game/src/Gen/Generated.c"])
-        self.assertEqual(legacy["owned"], ["Native/Game/src/Sys/OwnedC.c"])
+        self.assertEqual(legacy["generated"], ["Native/Game/src/Gen/Generated.cpp"])
+        self.assertEqual(legacy["owned"], ["Native/Game/src/Sys/OwnedC.cpp"])
 
     def test_renamed_bridge_listed_in_the_map_keeps_its_consumer_count(self) -> None:
-        self.fixture.files["Native/Game/src/Sys/OwnedC.c"] = '#include "Core/Gte.h"\nint Sys_OwnedC(void) { return 1; }\n'
+        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = '#include "Core/Gte.h"\nint Sys_OwnedC(void) { return 1; }\n'
         before = self.report().bridge_consumers["EC-03"]
         del self.fixture.files["Native/Engine/include/Core/Gte.h"]
         self.fixture.files["Native/Engine/include/Modern/Transform.h"] = "#pragma once\n"
         self.fixture.files["Native/Engine/src/Core/Gte.cpp"] = '#include "Modern/Transform.h"\n'
         self.fixture.files["Native/Engine/Legacy/Psx.h"] = '#include "Modern/Transform.h"\n'
-        self.fixture.files["Native/Game/src/Sys/OwnedC.c"] = (
+        self.fixture.files["Native/Game/src/Sys/OwnedC.cpp"] = (
             '#include "Modern/Transform.h"\nint Sys_OwnedC(void) { return 1; }\n'
         )
         self.fixture.bridges[0]["path"] = "Native/Engine/include/Modern/Transform.h"
@@ -680,7 +732,7 @@ class RetirementGateTests(GateTestCase):
 
     def test_slice_after_count_must_match_the_measured_consumers(self) -> None:
         self.fixture.slices = [slice_record(after="0")]
-        self.fixture.files["Native/Game/src/Gen/Generated.c"] = "int a(void) { return Sys_OldBridge(); }\n"
+        self.fixture.files["Native/Game/src/Gen/Generated.cpp"] = "int a(void) { return Sys_OldBridge(); }\n"
         self.assertIn("slice-consumer-mismatch", self.rules("retirement"))
 
     def test_slice_with_zero_consumers_passes_and_reports_before_and_after(self) -> None:

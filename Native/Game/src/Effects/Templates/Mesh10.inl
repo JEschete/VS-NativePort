@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -14,7 +15,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::Mesh10 (decomp src/EFFECT/meshes10.h:29). Included once per instance by Effects/Templates/Mesh10.c with that plugin's bindings.
+// Template body: Effects::Templates::Mesh10 (decomp src/EFFECT/meshes10.h:29). Included once per instance by Effects/Templates/Mesh10.cpp with that plugin's bindings.
 #ifndef VS_MESH10_TYPES
 #define VS_MESH10_TYPES
 #endif
@@ -28,7 +29,7 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
     Render_Mesh10TexCoord uv[6];
     Effects_PluginEffectState child;
     Effects_Mesh10State* state;
-    Effects_ParticleEmitterScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x1D0);
+    Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch *)((void*)((uintptr_t)Core_ScratchBase() + 0x1D0));
     Effects_ParticleDefinition* effect;
     Effects_EffectInstance* battle;
     int alive;
@@ -38,11 +39,11 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
     u_char* face;
     Render_Mesh10Packet* prim;
     alive = 1;
-    state = renderer_slot->rendererState;
+    state = (Effects_Mesh10State *)(renderer_slot->rendererState);
     battle = Effects_currentInstance;
     switch (lifecycle_command) {
     case 1:
-        state = Core_Memory_AllocateFromHighEnd(sizeof *state);
+        state = (Effects_Mesh10State *)(Core_Memory_AllocateFromHighEnd(sizeof *state));
         renderer_slot->rendererState = state;
         state->effect = packed_parameters >> 8;
         state->lifetime = packed_parameters;
@@ -183,8 +184,8 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
         for (index = 0; index < 10; ++index) {
             Core_Gte_LoadV0(&vertices[index]);
             Core_Gte_Rtps();
-            Core_Gte_StoreSxy2(&screen[index]);
-            Core_Gte_StoreSz3Otz(&depths[index]);
+            Core_Gte_StoreSxy2((long *)(&screen[index]));
+            Core_Gte_StoreSz3Otz((long *)(&depths[index]));
         }
         Effects_AdvanceParticleTextureAnimation(&state->texture);
         texture = &Effects_package->textures[state->texture.textureInfo->dataIndex];
@@ -201,7 +202,7 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
                         + depths[VS_MESH10_FACES[index][2]])
                   / 3;
             if (depth < 0x800 && Render_nearClip < depth) {
-                prim = Render_frameScratch.primitiveCursor;
+                prim = (Render_Mesh10Packet *)(Render_frameScratch.primitiveCursor);
                 Render_frameScratch.primitiveCursor = prim + 1;
                 prim->poly.tag = 0xE1000000;
                 prim->drawMode = 0xE1000200;
@@ -266,3 +267,4 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
 }
 #undef VS_MESH10_TYPES
 
+}  // extern "C"

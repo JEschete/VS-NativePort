@@ -1,70 +1,91 @@
-#include "Core/Random.hpp"  // NOLINT(build/include): native C++ interface.
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
+#include "Legacy/Psx.h"
+#include "Core/Random.h"
 
-#include <bit>
+// decomp: _keystreamState (_keystreamState@BATTLE/BATTLE.PRG)
+u_int Core_interfaceRandomState; /* contents: module image (ModuleData.cpp) */
 
-#include "Core/BiosRand.h"
-#include "Core/Log.hpp"
+// decomp: randArr (randArr@SLUS_010.40)
+int Core_randomShuffleTable[97];
 
-namespace VS::Core {
+// decomp: randIndex (randIndex@SLUS_010.40)
+int Core_randomShuffleIndex;
+
+// decomp: BATTLE.PRG vs_battle_keystreamBits (src/BATTLE/BATTLE.PRG/5BF94.c:4496)
+u_int Core_Random_NextInterfaceRandomBits(int bit_count)
+{
+    u_int previous_state = Core_interfaceRandomState;
+    Core_interfaceRandomState = previous_state * 0x19660D;
+    return previous_state >> (32 - bit_count);
+}
+
+// decomp: BATTLE.PRG vs_battle_randUniformInt (src/BATTLE/BATTLE.PRG/5BF94.c:5810)
+int Core_Random_RandomRangeExclusive(int bound_a, int bound_b)
+{
+    if (bound_a != bound_b) {
+        int offset;
+
+        if (bound_b < bound_a) {
+            offset = Core_Random_Rand() % (bound_a - bound_b);
+            return offset + bound_b;
+        }
+
+        offset = Core_Random_Rand() % (bound_b - bound_a);
+        return offset + bound_a;
+    }
+
+    return bound_a;
+}
 
 // decomp: SLUS_010.40 _initRand (src/SLUS_010.40/main.c:8239)
-void Random::Reset(u32 seed) {
-  m_rand_.Seed(seed);
-  for (auto& v : m_table_) {
-    v = m_rand_.Next();
-  }
-  m_index_ = static_cast<i32>(TableSize) - 1;
+void Core_Random_InitializeShuffleTable(void)
+{
+    int i;
+
+    Core_Random_Seed(1);
+
+    for (i = 0; i < (int)(sizeof Core_randomShuffleTable / sizeof Core_randomShuffleTable[0]); ++i) {
+        Core_randomShuffleTable[i] = Core_Random_Rand();
+    }
+    Core_randomShuffleIndex = (sizeof Core_randomShuffleTable / sizeof Core_randomShuffleTable[0]) - 1;
 }
 
 // decomp: SLUS_010.40 vs_main_getRand (src/SLUS_010.40/main.c:8251)
-i32 Random::Next(i32 max) {
-  i32 scaled =
-      m_table_[static_cast<usize>(m_index_)] * static_cast<i32>(TableSize);
-  if (scaled < 0) {
-    scaled += Rand15::kMaximum;
-  }
-  m_index_ = scaled >> Rand15::kValueBits;
+int Core_Random_NextBounded(int max)
+{
+    int picked_sample;
+    int scaled_result;
+    int scaled_index;
 
-  const i32 picked = Rand15::kMaximum - m_table_[static_cast<usize>(m_index_)];
-  m_table_[static_cast<usize>(m_index_)] = m_rand_.Next();
+    scaled_index = Core_randomShuffleTable[Core_randomShuffleIndex] * (sizeof Core_randomShuffleTable / sizeof Core_randomShuffleTable[0]);
 
-  const u32 product = static_cast<u32>(picked) * static_cast<u32>(max);
-  i32 result = std::bit_cast<i32>(product);
-  if (result < 0) {
-    result += Rand15::kMaximum;
-  }
-  return result >> Rand15::kValueBits;
+    if (scaled_index < 0) {
+        scaled_index += 0x7FFF;
+    }
+
+    Core_randomShuffleIndex = scaled_index >> 0xF;
+
+    picked_sample = 0x7FFF - Core_randomShuffleTable[Core_randomShuffleIndex];
+    Core_randomShuffleTable[Core_randomShuffleIndex] = Core_Random_Rand();
+
+    scaled_result = picked_sample * max;
+
+    if (scaled_result < 0) {
+        scaled_result += 0x7FFF;
+    }
+
+    return scaled_result >> 0xF;
 }
 
 // decomp: SLUS_010.40 vs_main_getRandSmoothed (src/SLUS_010.40/main.c:8277)
-i32 Random::NextSmoothed(i32 max) {
-  constexpr int kSampleCount = 12;
-  i32 sum = 0;
-  for (int index = 0; index < kSampleCount; ++index) {
-    sum += Next(max);
-  }
-  return sum / kSampleCount;
+int Core_Random_NextAveraged(int max)
+{
+    return (Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max)
+               + Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max)
+               + Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max)
+               + Core_Random_NextBounded(max) + Core_Random_NextBounded(max) + Core_Random_NextBounded(max))
+         / 12;
 }
 
-}  // namespace VS::Core
-
-namespace {
-// The BIOS rand() state shared by every copied caller of rand()/srand(); seeded
-// with 1 at boot like the original.
-constinit VS::Core::Rand15 g_bios_rand;
-}  // namespace
-
-extern "C" int Core_Random_Rand(void) {
-  const auto before = g_bios_rand.State();
-  const int value = g_bios_rand.Next();
-  VS_LOG_TRACE("rng", "raw before={} after={} value={}", before,
-               g_bios_rand.State(), value);
-  return value;
-}
-
-extern "C" void Core_Random_Seed(unsigned int seed) {
-  g_bios_rand.Seed(seed);
-  VS_LOG_TRACE("rng", "seed={}", seed);
-}
-
-extern "C" unsigned int Core_Random_State(void) { return g_bios_rand.State(); }
+}  // extern "C"

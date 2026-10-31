@@ -96,7 +96,7 @@ controls pass, and the ledgers satisfy the gate check below.
 
 It does **not** establish that:
 
-- generated copied C is clean: it is outside the default quality scope;
+- generated copied code is clean: it is outside the default quality scope;
 - maintained `.c` code is strict: it is in scope but compiles relaxed;
 - any code is modernized, C++-promoted or behaviorally verified: those are
   separate gates, and this job builds nothing and runs no native test;
@@ -124,10 +124,10 @@ as evidence (#46):
 | Retirement | `EC_BRIDGES.csv`, `GATE_SLICES.csv`, include graph | `modernized` on unowned rows, `modernized=x` reaching a bridge directly or indirectly, a listed bridge that no longer exists, a slice whose measured consumers differ from its record |
 
 Source classes come from each file's actual compiler settings in the generated
-projects, not its extension: `generated-c` (relaxed, outside quality scope),
-`maintained-c` (relaxed, in scope), `strict-cpp` and `replacement-legacy`
+projects and `tools\port\relaxed_sources.txt`: `generated-cpp` (relaxed, outside quality scope),
+`transitional-cpp` (relaxed, in scope), `strict-cpp` and `replacement-legacy`
 (`RETIRING_NATIVE` and `Legacy/`). The report lists maintained relaxation as debt
-per file, with owned-function and baseline-finding counts. Whether maintained C
+per file, with owned-function and baseline-finding counts. Whether transitional C++
 should compile more strictly before promotion remains an owner decision.
 
 The tool reads the baseline and never writes it. Moving or renaming a bridge

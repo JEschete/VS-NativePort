@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -14,7 +15,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::Grid (decomp src/EFFECT/grids.h:23). Included once per instance by Effects/Templates/Grid.c with that plugin's bindings.
+// Template body: Effects::Templates::Grid (decomp src/EFFECT/grids.h:23). Included once per instance by Effects/Templates/Grid.cpp with that plugin's bindings.
 int VS_GRID_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_command, int packed_parameters)
 {
     int x[9];
@@ -43,16 +44,16 @@ int VS_GRID_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
     int scroll;
     int depth;
     Effects_GridState* state;
-    Effects_ParticleEmitterScratch* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x1D0);
+    Effects_ParticleEmitterScratch* scratch = (Effects_ParticleEmitterScratch *)((void*)((uintptr_t)Core_ScratchBase() + 0x1D0));
     Effects_ParticleDefinition* effect;
     MATRIX* matrix;
     Render_GridPacket* prim;
     alive = 1;
-    state = renderer_slot->rendererState;
+    state = (Effects_GridState *)(renderer_slot->rendererState);
     battle = Effects_currentInstance;
     switch (lifecycle_command) {
     case 1:
-        state = renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state));
+        state = (Effects_GridState *)(renderer_slot->rendererState = Core_Memory_AllocateFromHighEnd(sizeof(*state)));
         state->effect = packed_parameters >> 8;
         state->lifetime = packed_parameters;
         state->age = 0;
@@ -198,8 +199,8 @@ int VS_GRID_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
             for (column = 0; column < 9; ++column) {
                 Core_Gte_LoadV0(&vertices[row][column]);
                 Core_Gte_Rtps();
-                Core_Gte_StoreSxy2(&screen[row][column]);
-                Core_Gte_StoreSz3Otz(&depths[row][column]);
+                Core_Gte_StoreSxy2((long *)(&screen[row][column]));
+                Core_Gte_StoreSz3Otz((long *)(&depths[row][column]));
             }
         }
         for (row = 0; row < 8; ++row) {
@@ -230,7 +231,7 @@ int VS_GRID_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
                         }
                         break;
                     }
-                    prim = Render_frameScratch.primitiveCursor;
+                    prim = (Render_GridPacket *)(Render_frameScratch.primitiveCursor);
                     Render_frameScratch.primitiveCursor = prim + 1;
                     prim->poly.tag = 0xE1000000;
                     prim->drawMode = 0xE1000200;
@@ -271,3 +272,4 @@ int VS_GRID_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
     return alive;
 }
 
+}  // extern "C"

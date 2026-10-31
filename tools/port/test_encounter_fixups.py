@@ -15,6 +15,11 @@ import copy_to_native
 import native_views
 
 
+def flat(source: str) -> str:
+    """Source text regardless of how the formatter wrapped it."""
+    return " ".join(source.split())
+
+
 class EncounterFixupTests(unittest.TestCase):
     def test_texture_animations_use_the_callers_overlay_atlas(self):
         copier = object.__new__(copy_to_native.Copier)
@@ -254,7 +259,7 @@ class EncounterFixupTests(unittest.TestCase):
     def test_event_dispatch_audit_includes_owned_opcode_headers(self):
         manifest = {
             r"Native\Game\src\Event\ScriptVm.h": "generated",
-            r"Native\Game\src\Event\ScriptVm.c": "not-a-header",
+            r"Native\Game\src\Event\ScriptVm.cpp": "not-a-header",
         }
         owned = {
             "F01130": {"header": r"Native\Game\src\Event\WeaponMode.h"},
@@ -304,7 +309,7 @@ class EncounterFixupTests(unittest.TestCase):
         header = (root / r"Native\Game\src\Effects\Runtime.h").read_text(
             encoding="utf-8"
         )
-        source = (root / r"Native\Game\src\Effects\Runtime.c").read_text(
+        source = (root / r"Native\Game\src\Effects\Runtime.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn(
@@ -473,16 +478,16 @@ class EncounterFixupTests(unittest.TestCase):
         owned = self.owned_items()
         for identity in ("F01681", "F01682"):
             self.assertEqual(
-                owned[identity]["path"], r"Native\Game\src\Battle\Ai\Relations.c"
+                owned[identity]["path"], r"Native\Game\src\Battle\Ai\Relations.cpp"
             )
-        source = (root / r"Native\Game\src\Battle\Ai\Relations.c").read_text(
+        source = (root / r"Native\Game\src\Battle\Ai\Relations.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("(unsigned)state->allianceReactionCount + 1", source)
         self.assertIn("state->allianceReactionCount = (u_char)reactions;", source)
         self.assertIn("if (reactions < kRequiredReactions) return;", source)
         self.assertIn("Battle_Ai_UpdateEngagementApproachBehavior", source)
-        self.assertIn("settings->savedDecisionCallback = NULL;", source)
+        self.assertIn("settings->savedDecisionCallback = nullptr;", source)
         self.assertNotIn("VS_UNPORTED", source)
 
     def test_plg074_reuses_identical_code_without_merging_overlay_state(self):
@@ -522,7 +527,7 @@ class EncounterFixupTests(unittest.TestCase):
             if blob[4] == "Content_plg074TrailEmissionCounter"
         )
         self.assertEqual(cursor[:4], ("EFFECT/PLG074.BIN", 0x577C, 0x800FEF7C, 4))
-        source = (root / r"Native\Game\src\Effects\Templates\RadialSurge.c").read_text(
+        source = (root / r"Native\Game\src\Effects\Templates\RadialSurge.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn(
@@ -540,33 +545,33 @@ class EncounterFixupTests(unittest.TestCase):
     def test_room_packet_linking_reuses_shared_depth_resolution_and_native_handles(self):
         self.assertEqual(
             self.owned_items()["F00752"]["path"],
-            r"Native\Engine\src\Render\RoomDraw.c",
+            r"Native\Engine\src\Render\RoomDraw.cpp",
         )
         self.assertIn(
             ("BATTLE/BATTLE.PRG", 0x800980F8, "F00752"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertEqual(source.count("Render_LinkRoomPolygonByDepth("), 2)
         self.assertIn("ResolveRoomPolygonDepth(", source)
         self.assertIn("biased < 0", source)
-        self.assertIn("AddPrim((u_long*)Render_frameScratch.orderingTable + depth, packet)", source)
+        self.assertIn("AddPrim(reinterpret_cast<u_long*>(Render_frameScratch.orderingTable) + depth, packet)", flat(source))
 
     def test_room_subdivision_entries_share_the_existing_bounded_recursion(self):
         owned = self.owned_items()
         for identity, address in (("F00748", 0x80097AEC), ("F00749", 0x80097CF0)):
             self.assertEqual(
-                owned[identity]["path"], r"Native\Engine\src\Render\RoomDraw.c"
+                owned[identity]["path"], r"Native\Engine\src\Render\RoomDraw.cpp"
             )
             self.assertIn(
                 ("BATTLE/BATTLE.PRG", address, identity),
                 copy_fixups.MODULE_FUNCTION_ENTRIES,
             )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("RoomSubdivisionLimit(", source)
@@ -577,14 +582,14 @@ class EncounterFixupTests(unittest.TestCase):
     def test_room_coordinate_decoder_uses_the_live_owned_polygon_pipeline(self):
         self.assertEqual(
             self.owned_items()["F00746"]["path"],
-            r"Native\Engine\src\Render\RoomDraw.c",
+            r"Native\Engine\src\Render\RoomDraw.cpp",
         )
         self.assertIn(
             ("BATTLE/BATTLE.PRG", 0x8009797C, "F00746"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertEqual(source.count("Render_DecodeRoomPolygonVertices("), 2)
@@ -611,7 +616,7 @@ class EncounterFixupTests(unittest.TestCase):
         for identity in ("F03405", "F03414"):
             self.assertEqual(
                 owned[identity]["path"],
-                r"Native\Engine\src\Core\Math\ScalarMath.c",
+                r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             )
         for address, identity in ((0x80041A1C, "F03405"), (0x80041AF4, "F03414")):
             self.assertIn(
@@ -628,7 +633,7 @@ class EncounterFixupTests(unittest.TestCase):
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03399"],
             (
                 "Core_Math_LookupRotationSineCosine",
-                r"Native\Engine\src\Core\Math\ScalarMath.c",
+                r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             ),
         )
         self.assertIn(
@@ -752,7 +757,7 @@ class EncounterFixupTests(unittest.TestCase):
             (row["address"], row["size"], row["type"]),
             ("0x800F4ED8", "16", "short[8]"),
         )
-        symbols = (root / r"Native\Game\src\Boot\ModulePointers.c").read_text(
+        symbols = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
             encoding="utf-8"
         )
         for address, size, name in (
@@ -775,10 +780,10 @@ class EncounterFixupTests(unittest.TestCase):
             self.assertEqual(blob[:4], ("BATTLE/BATTLE.PRG", *values))
         owned = self.owned_items()
         self.assertEqual(
-            owned["F01268"]["path"], r"Native\Engine\src\Render\ModelGeometry.c"
+            owned["F01268"]["path"], r"Native\Engine\src\Render\ModelGeometry.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Game\src\Actors\ModelDrawing.c").read_text(
+        source = (root / r"Native\Game\src\Actors\ModelDrawing.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("companion == 0 && actor->instance.soundEnabled", source)
@@ -789,17 +794,17 @@ class EncounterFixupTests(unittest.TestCase):
         owned = self.owned_items()
         for identity in ("F00761", "F00762"):
             self.assertEqual(
-                owned[identity]["path"], r"Native\Engine\src\Core\Math\ScalarMath.c"
+                owned[identity]["path"], r"Native\Engine\src\Core\Math\ScalarMath.cpp"
             )
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F01017"],
             (
                 "Core_Math_LookupRotationSineCosine",
-                r"Native\Engine\src\Core\Math\ScalarMath.c",
+                r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             ),
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("Core_Math_BuildEulerRotationMatrix(&rotation, output);", source)
@@ -808,14 +813,14 @@ class EncounterFixupTests(unittest.TestCase):
     def test_core_idle_and_matrix_entries_reuse_native_leaf_implementations(self):
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03568"],
-            ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.c"),
+            ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.cpp"),
         )
         owned = self.owned_items()
         self.assertEqual(
-            owned["F03406"]["path"], r"Native\Engine\src\Core\Math\ScalarMath.c"
+            owned["F03406"]["path"], r"Native\Engine\src\Core\Math\ScalarMath.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Core\Math\ScalarMath.c").read_text(
+        source = (root / r"Native\Engine\src\Core\Math\ScalarMath.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("MultiplyRotationMatrices(left, right, right);", source)
@@ -824,10 +829,10 @@ class EncounterFixupTests(unittest.TestCase):
     def test_weapon_override_reads_a_typed_matrix_member_not_native_guest_offset(self):
         owned = self.owned_items()
         self.assertEqual(
-            owned["F01269"]["path"], r"Native\Engine\src\Render\ModelGeometry.c"
+            owned["F01269"]["path"], r"Native\Engine\src\Render\ModelGeometry.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\ModelGeometry.c").read_text(
+        source = (root / r"Native\Engine\src\Render\ModelGeometry.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("weapon->boneWorldMatrices[kWeaponPaletteMatrix]", source)
@@ -836,10 +841,10 @@ class EncounterFixupTests(unittest.TestCase):
     def test_gimmick_override_uses_the_existing_model_kernel_and_typed_state(self):
         owned = self.owned_items()
         self.assertEqual(
-            owned["F01270"]["path"], r"Native\Engine\src\Render\ModelGeometry.c"
+            owned["F01270"]["path"], r"Native\Engine\src\Render\ModelGeometry.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\ModelGeometry.c").read_text(
+        source = (root / r"Native\Engine\src\Render\ModelGeometry.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("AppearanceMaterial(object->motionState)", source)
@@ -851,10 +856,10 @@ class EncounterFixupTests(unittest.TestCase):
         for identity in ("F00769", "F00770"):
             self.assertEqual(
                 owned[identity]["path"],
-                r"Native\Engine\src\Render\RoomDraw.c",
+                r"Native\Engine\src\Render\RoomDraw.cpp",
             )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertEqual(source.count("Render_TintRoomPrimitiveColor("), 2)
@@ -869,14 +874,14 @@ class EncounterFixupTests(unittest.TestCase):
     def test_room_light_triangle_shares_the_existing_owned_sampler_kernel(self):
         owned = self.owned_items()
         self.assertEqual(
-            owned["F00768"]["path"], r"Native\Engine\src\Render\RoomLighting.c"
+            owned["F00768"]["path"], r"Native\Engine\src\Render\RoomLighting.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomLighting.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomLighting.cpp").read_text(
             encoding="utf-8"
         )
         self.assertEqual(source.count("Render_InterpolateRoomLightTriangle("), 2)
-        self.assertIn("return SignedWord((uint32_t)area);", source)
+        self.assertIn("return SignedWord(static_cast<uint32_t>(area));", source)
 
     def test_script_weapon_mode_owns_its_original_opcode_and_named_wait_state(self):
         owned = self.owned_items()
@@ -902,7 +907,7 @@ class EncounterFixupTests(unittest.TestCase):
             encoding="utf-8-sig", newline=""
         ) as handle:
             self.assertNotIn("G00473", {item["id"] for item in csv.DictReader(handle)})
-        source = (root / r"Native\Game\src\Event\ScriptVm.c").read_text(
+        source = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("Event_weaponTransitionPending = 0;", source)
@@ -977,26 +982,26 @@ class EncounterFixupTests(unittest.TestCase):
     def test_room_screen_bounds_share_the_original_predicate(self):
         owned = self.owned_items()
         self.assertEqual(
-            owned["F00756"]["path"], r"Native\Engine\src\Render\RoomDraw.c"
+            owned["F00756"]["path"], r"Native\Engine\src\Render\RoomDraw.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertEqual(source.count("OutsideScreenBounds(&projected)"), 2)
         for edge in ("left", "top", "right", "bottom"):
             self.assertIn(
-                f"room_screen_bounds.{edge} = Core_Math_WrapSigned16((uint32_t){edge});",
-                source,
+                f"room_screen_bounds.{edge} = Core_Math_WrapSigned16(static_cast<uint32_t>({edge}));",
+                flat(source),
             )
 
     def test_room_far_depth_owns_both_packet_emission_paths(self):
         owned = self.owned_items()
         self.assertEqual(
-            owned["F00754"]["path"], r"Native\Engine\src\Render\RoomDraw.c"
+            owned["F00754"]["path"], r"Native\Engine\src\Render\RoomDraw.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.c").read_text(
+        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
         self.assertEqual(source.count("biased >= room_far_depth"), 1)
@@ -1006,7 +1011,7 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertEqual(source.count("return WriteRoomPolygon(&polygon, limit);"), 2)
         self.assertIn(
-            "room_far_depth = Core_Math_WrapSigned16((uint32_t)depth);", source
+            "room_far_depth = Core_Math_WrapSigned16(static_cast<uint32_t>(depth));", source
         )
 
     def test_native_pointer_sort_is_owned_and_shared_with_ai_ranking(self):
@@ -1029,7 +1034,7 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01829"]["header"], r"Native\Engine\include\Core\PointerSort.hpp"
         )
         root = Path(__file__).resolve().parents[2]
-        table = (root / r"Native\Game\src\Boot\ModulePointers.c").read_text(encoding="utf-8")
+        table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("SortPointersByDescendingKey", table)
         self.assertNotIn("0x800E6974u", table)
 
@@ -1061,7 +1066,7 @@ class EncounterFixupTests(unittest.TestCase):
             encoding="utf-8", newline=""
         ) as stream:
             rows = {row["id"]: row for row in csv.DictReader(stream)}
-        source = (root / r"Native\Game\src\Boot\ModulePointers.c").read_text(
+        source = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
             encoding="utf-8"
         )
         for identifier in copy_fixups.NATIVE_FUNCTION_REDIRECTS:
@@ -1091,7 +1096,7 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_tile_translation_callers_preserve_the_full_actor_id_abi(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Game\src\Actors\Movement.c").read_text(
+        source = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
         self.assertFalse(
@@ -1120,7 +1125,7 @@ class EncounterFixupTests(unittest.TestCase):
                 r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
             )
         root = Path(__file__).resolve().parents[2]
-        caller = (root / r"Native\Game\src\Actors\Movement.c").read_text(
+        caller = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("Battle_Ai_ActorNavigationOverrideStatus(actor_id);", caller)
@@ -1159,7 +1164,7 @@ class EncounterFixupTests(unittest.TestCase):
             "F04186": "Actors_BeginTimedTravel",
         }
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Game\src\Actors\Movement.c").read_text(
+        source = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
         for identifier, name in names.items():
@@ -1179,7 +1184,7 @@ class EncounterFixupTests(unittest.TestCase):
                 owned[identifier]["path"], r"Native\Game\src\Actors\SoundOverrides.cpp"
             )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Game\src\Actors\ModelRendering.c").read_text(
+        source = (root / r"Native\Game\src\Actors\ModelRendering.cpp").read_text(
             encoding="utf-8"
         )
         self.assertIn("Audio_UpdateActorSoundTransition(actor);", source)
@@ -1381,7 +1386,7 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
             with self.subTest(fid=fid):
                 self.assertEqual(
                     owned[fid]["path"],
-                    r"Native\Game\src\Field\RoomTriggerMarkers.c",
+                    r"Native\Game\src\Field\RoomTriggerMarkers.cpp",
                 )
                 self.assertEqual(
                     owned[fid]["header"],
@@ -2899,10 +2904,10 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         action = (root / "Native/Game/include/Battle/Action.h").read_text()
         self.assertIn("Battle_TargetPreview previews[255];", action)
         self.assertIn("Battle_HitResult targets[255];", action)
-        boot = (root / "Native/Game/src/Boot/GameLoop.c").read_text()
+        boot = (root / "Native/Game/src/Boot/GameLoop.cpp").read_text()
         self.assertIn("AllocateFromHighEnd(sizeof *Battle_actionState)", boot)
         self.assertNotIn("0x2C10", boot)
-        targeting = (root / "Native/Game/src/Battle/Targeting.c").read_text()
+        targeting = (root / "Native/Game/src/Battle/Targeting.cpp").read_text()
         self.assertIn("sizeof Battle_actionState->selection", targeting)
         self.assertNotIn("0x84C", targeting)
         self.assertIn("Battle_ValidateTargetPreviewIndex(count)", targeting)
@@ -2918,11 +2923,11 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
             owned["F01718"]["path"],
             r"Native\Game\src\Battle\Ai\PlanningWorkspace.cpp",
         )
-        source = (root / "Native/Game/src/Battle/Ai/ActionPlanning.c").read_text()
+        source = (root / "Native/Game/src/Battle/Ai/ActionPlanning.cpp").read_text()
         self.assertNotIn("int Battle_Ai_RebuildActorActionPlans(", source)
         for offset in ("0x1ECC", "0x9CC", "0xD8C", "0x1D8C"):
             self.assertNotIn(offset, source)
-        spawning = (root / "Native/Game/src/Actors/ActorLoading.c").read_text()
+        spawning = (root / "Native/Game/src/Actors/ActorLoading.cpp").read_text()
         self.assertNotIn("spawn137", spawning)
 
     def test_particle_attraction_uses_native_fields_after_pointer_widening(self):
@@ -2952,8 +2957,8 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
                 self.assertEqual(
                     owned[item]["header"], r"Native\Game\src\Field\DoorMatches.h"
                 )
-        source = (root / "Native/Game/src/Field/Doors.c").read_text()
-        caller = (root / "Native/Game/src/Field/Interactions.c").read_text()
+        source = (root / "Native/Game/src/Field/Doors.cpp").read_text()
+        caller = (root / "Native/Game/src/Field/Interactions.cpp").read_text()
         self.assertIn('"Field/DoorMatches.h"', caller)
         self.assertNotIn("Field_DoorMatchList Field_matchingDoorRecords;", source)
         self.assertNotIn("Field_TransitionDoorsAtTile(int", source)
@@ -2963,7 +2968,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_weapon_naming_draw_links_use_native_handles(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Rename.c").read_text()
+        source = (root / "Native/Game/src/Menu/Rename.cpp").read_text()
         for function, variable in (
             ("DrawFrame", "prim"),
             ("DrawSelectionBox", "selection_box_primitive"),
@@ -2978,12 +2983,12 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         root = Path(__file__).resolve().parents[2]
         root = root / "Native" / "Game" / "src" / "Menu" / "Setup"
         selectors = (
-            ("Assembly.c", "SelectAssemblyBlade", "menuText", 17),
-            ("Assembly.c", "SelectAssemblyGrip", "menuText", 17),
-            ("Assembly.c", "SelectGem", "menuText", 49),
-            ("Combination.c", "SelectCombinationBlade", "menuText", 17),
-            ("Combination.c", "SelectCombinationShield", "menuText", 9),
-            ("Combination.c", "SelectCombinationArmor", "armor_row_text", 17),
+            ("Assembly.cpp", "SelectAssemblyBlade", "menuText", 17),
+            ("Assembly.cpp", "SelectAssemblyGrip", "menuText", 17),
+            ("Assembly.cpp", "SelectGem", "menuText", 49),
+            ("Combination.cpp", "SelectCombinationBlade", "menuText", 17),
+            ("Combination.cpp", "SelectCombinationShield", "menuText", 9),
+            ("Combination.cpp", "SelectCombinationArmor", "armor_row_text", 17),
         )
         for filename, function, variable, rows in selectors:
             with self.subTest(function=function):
@@ -3001,7 +3006,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_loot_staging_uses_last_slots_and_preflights_composites(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
+        source = (root / "Native/Game/src/Menu/Loot/LootInventory.cpp").read_text()
         reviewed_arguments = {
             "F02849": "looted_weapon",
             "F02851": "looted_shield",
@@ -3027,7 +3032,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_loot_overflow_never_appends_a_failed_staging_index(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Loot/LootInventory.c").read_text()
+        source = (root / "Native/Game/src/Menu/Loot/LootInventory.cpp").read_text()
         stage = source.split("void Menu_Loot_StageDropRecord(", 1)[1]
         stage = stage.split("// decomp:", 1)[0]
         self.assertNotIn("Menu_Loot_AppendLootRow(", stage)
@@ -3041,13 +3046,13 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_loot_pages_share_row_capacity_and_reset_before_source_release(self):
         root = Path(__file__).resolve().parents[2]
-        screen = (root / "Native/Game/src/Menu/Loot/LootScreen.c").read_text()
+        screen = (root / "Native/Game/src/Menu/Loot/LootScreen.cpp").read_text()
         self.assertNotIn("160 * sizeof", screen)
         self.assertNotIn("sizeof *Menu_Loot_lootList * 160", screen)
         self.assertEqual(screen.count("kMenuLootRowCapacity"), 6)
         selection = screen.split("int Menu_Loot_UpdateLootSelection(", 1)[1]
         self.assertIn("} else if (Menu_Loot_AdvanceStagedInventory()) {", selection)
-        cleanup = (root / "Native/Game/src/Items/Loot.c").read_text()
+        cleanup = (root / "Native/Game/src/Items/Loot.cpp").read_text()
         cleanup = cleanup.split("void Items_ClearRoomLootList(", 1)[1]
         self.assertLess(
             cleanup.index("Menu_Loot_ResetPaging();"),
@@ -3058,7 +3063,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         old, new, _ = copy_fixups.FIXES["F02511"][0]
         root = Path(__file__).resolve().parents[2]
         source = (
-            root / "Native" / "Game" / "src" / "Items" / "Inventory.c"
+            root / "Native" / "Game" / "src" / "Items" / "Inventory.cpp"
         ).read_text()
         self.assertIn(new, source)
         self.assertNotIn(old, source)
@@ -3070,7 +3075,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
     def test_particle_cone_preserves_original_zero_height_quotient(self):
         _, new, _ = copy_fixups.FIXES["F01515"][1]
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Effects/Particles.c").read_text()
+        source = (root / "Native/Game/src/Effects/Particles.cpp").read_text()
         self.assertTrue(
             new in source, "cone fix missing from generated particle emitter"
         )
@@ -3093,7 +3098,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_ashley_spawn_initializes_materials_for_empty_equipment_slots(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Actors/Ashley.c").read_text()
+        source = (root / "Native/Game/src/Actors/Ashley.cpp").read_text()
         spawn = source.split("void Actors_SpawnAshleyWithEquipment(void)", 1)[1]
         spawn = spawn.split("\n}\n", 1)[0]
         self.assertIn("int bladeMaterial = 0;", spawn)
@@ -3109,7 +3114,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_generated_label_and_reload_initializer_both_terminate(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
+        source = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
         label = r'"\x16\x12\x1C\x0C\xE7\x00\x00\xF8"'
         self.assertIn(
             "static char Menu_Inventory_miscItemShortcutMisc[] = " + label, source
@@ -3127,17 +3132,17 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_misc_shortcut_reserves_all_native_text_pointers(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
+        source = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
         self.assertIn(
             "Core_Memory_AllocateFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText))",
             source,
         )
-        self.assertIn("menuText = buf + 0x1900;", source)
+        self.assertIn("menuText = (char **)(((u_char*)(buf)) + 0x1900);", source)
         self.assertNotIn("Core_Memory_AllocateFromHighEnd(0x1B00)", source)
 
     def test_plugin_table_never_binds_the_development_dispatcher(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Effects/PurgeTables.c").read_text()
+        source = (root / "Native/Game/src/Effects/PurgeTables.cpp").read_text()
         table = source.split(
             "Effects_EffectRenderer Effects_effectEntryPoints[] = {", 1
         )[1]
@@ -3147,7 +3152,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_rank_menu_preserves_native_packet_link(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/Magic.c").read_text()
+        source = (root / "Native/Game/src/Menu/Magic.cpp").read_text()
         menu = source.split("int Menu_Magic_UpdateWarlockMenu(", 1)[1]
         menu = menu.split("int Menu_Magic_UpdateShamanMenu(", 1)[0]
         self.assertIn("*spell_level_ordering_table = LegacyGpu_Handle(prim);", menu)
@@ -3155,11 +3160,11 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_break_art_menu_reserves_navigation_and_matching_reset_storage(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Menu/BreakArts.c").read_text()
+        source = (root / "Native/Game/src/Menu/BreakArts.cpp").read_text()
         self.assertIn("static u_short Menu_BreakArts_artListActionIds[5];", source)
         reset = source.split("void Menu_BreakArts_ResetMenu1Statics(", 1)[1]
-        self.assertIn("static const u_short initial[5];", reset)
-        self.assertNotIn("static const u_short initial[4];", reset)
+        self.assertIn("static const u_short initial[5] = {};", reset)
+        self.assertNotIn("static const u_short initial[4] = {};", reset)
 
     def test_encounter_trace_uses_action_actor_not_targeting_mode(self):
         root = Path(__file__).resolve().parents[2]
@@ -3173,7 +3178,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_secondary_body_uses_the_live_zone_character_table(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / "Native/Game/src/Actors/ActorLoading.c").read_text()
+        source = (root / "Native/Game/src/Actors/ActorLoading.cpp").read_text()
         spawn = source.split("Battle_Actor* Actors_SpawnRoomEnemy(", 1)[1]
         spawn = spawn.split("\n}\n", 1)[0]
         self.assertIn(
@@ -3184,13 +3189,13 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
 
     def test_preview_weapon_alias_uses_real_model_slots(self):
         root = Path(__file__).resolve().parents[2]
-        preview = (root / "Native/Game/src/Menu/Framework/ActorPreview.c").read_text()
+        preview = (root / "Native/Game/src/Menu/Framework/ActorPreview.cpp").read_text()
         reset = preview.split("void Menu_Framework_ResetActorPreviewPose(", 1)[1]
         reset = reset.split("void Menu_Framework_ReleaseActorPreview(", 1)[0]
         self.assertIn("Actors_weaponModels[i + 2] != NULL", reset)
         self.assertIn("Actors_weaponModels[i + 2]->reserved08Bit4 = 1;", reset)
         self.assertNotIn("Battle_unusedGlobal1", reset)
-        inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.c").read_text()
+        inventory = (root / "Native/Game/src/Menu/Inventory/Inventory.cpp").read_text()
         self.assertIn("Actors_weaponModels[i + 2]->reserved11 = 0;", inventory)
         self.assertNotIn("Battle_unusedGlobal1", inventory)
         self.assertIn(
@@ -3213,13 +3218,13 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         fixes = copy_fixups.FIXES["F03192"]
         self.assertEqual(len(fixes), 4)
         root = Path(__file__).resolve().parents[2]
-        mixer = (root / "Native/Engine/src/Audio/Mixer/VoiceMixer.c").read_text()
+        mixer = (root / "Native/Engine/src/Audio/Mixer/VoiceMixer.cpp").read_text()
         self.assertEqual(mixer.count("Audio_Native_ConfigureChannel("), 3)
         self.assertNotIn("Audio_Driver_WriteDirtyVoiceParameters(", mixer)
         self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
         self.assertIn("Audio_Native_Envelope(i)", mixer)
         self.assertIn("Audio_Seq_secondaryMusicConfig != NULL ?", mixer)
-        sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.c").read_text()
+        sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.cpp").read_text()
         self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
 
 

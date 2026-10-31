@@ -1,0 +1,15 @@
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
+#include "Legacy/Psx.h"
+#include "Effects/Plugins/Plg166.h"
+
+// decomp: D_800FCEC0 (D_800FCEC0@EFFECT/PLG166.BIN)
+SVECTOR Effects_Plg166_mirrorSurfaceVertices[5][16]; /* contents: module image (ModuleData.cpp) */
+
+// decomp: D_800FD140 (D_800FD140@EFFECT/PLG166.BIN)
+CVECTOR Effects_Plg166_closedRingColorFactors[1]; /* contents: module image (ModuleData.cpp) */
+
+// decomp: D_800FD160 (D_800FD160@EFFECT/PLG166.BIN)
+u_char Effects_Plg166_ringColorFactors[1][4]; /* contents: module image (ModuleData.cpp) */
+
+}  // extern "C"

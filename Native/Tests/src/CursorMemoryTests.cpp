@@ -573,7 +573,8 @@ struct WorkshopRecipeFixture {
                                 : 3 * 128 + 3 * 32 + second_material * 4 + 2;
     bytes[kCombinations + combination] = 12;
     bytes[kMaterials + material] = 5;
-    const Menu_Setup_CombinedArmorRecord record{0, 9, 4, 3, 10, -5, 2, 0};
+    const Menu_Setup_CombinedArmorRecord record{
+        0, 9, 4, 3, 10, static_cast<char>(-5), 2, 0};
     std::memcpy(bytes.data() + kRecords + 12 * sizeof(record), &record,
                 sizeof(record));
   }

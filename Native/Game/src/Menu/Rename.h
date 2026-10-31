@@ -14,7 +14,7 @@ extern char Menu_Rename_layoutPadding2;;
 extern u_char Menu_Rename_animStep;;
 extern char* Menu_Rename_charTable;;
 extern char Menu_Rename_nameNavIconAnim;
-extern u_short Menu_Rename_renderRenameMenuStrings[208]; /* contents: disc string table (ModuleData.c) */;
+extern u_short Menu_Rename_renderRenameMenuStrings[208]; /* contents: disc string table (ModuleData.cpp) */;
 extern u_char Menu_Rename_selectedControllerAction;
 extern char Menu_Rename_showRenameInterface;;
 extern char Menu_Rename_stringBuf[20];;

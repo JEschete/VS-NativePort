@@ -27,6 +27,9 @@ from quality import RETIRING_NATIVE  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[2]
 SOURCE_SUFFIXES = {".c", ".cpp"}
+# The owner's rule (2026-10-31): the port is C++. The disc's original C and assembly stay under resources\ as reference.
+FORBIDDEN_SUFFIXES = {".c", ".s", ".asm"}
+INLINE_ASSEMBLY = re.compile(r"\b(?:__asm__|__asm|_asm|asm)\b\s*(?:volatile\s*)?[({]|\b(?:__asm|_asm)\b\s+\w")
 NATIVE_SUFFIXES = SOURCE_SUFFIXES | {".h", ".hpp", ".inl"}
 
 COPIED_VALUES = {"", "x", "stub", "retired"}
@@ -118,6 +121,7 @@ class Workspace:
         self.summary = ledgers / "SUMMARY.md"
         self.owned = self.root / "tools" / "port" / "owned.csv"
         self.manifest = self.root / "tools" / "port" / "copy_manifest.json"
+        self.relaxed_sources = self.root / "tools" / "port" / "relaxed_sources.txt"
         self.baseline = self.root / "tools" / "lint" / "baseline.json"
         self.native = self.root / "Native"
         self.props = self.root / "Directory.Build.props"
@@ -384,6 +388,10 @@ class Gates:
         self.verify = read_csv(workspace.verify)
         self.bridges = read_csv(workspace.bridges)
         self.slices = read_csv(workspace.slices)
+        self.relaxed_list = (
+            {slash(entry) for entry in workspace.relaxed_sources.read_text(encoding="utf-8").split()}
+            if workspace.relaxed_sources.is_file() else set()
+        )
         self.manifest = {slash(path) for path in json.loads(workspace.manifest.read_text(encoding="utf-8"))}
         self.owned_paths = {slash(row[column]) for row in self.owned for column in ("path", "header") if row[column]}
         baseline = json.loads(workspace.baseline.read_text(encoding="utf-8"))
@@ -462,7 +470,7 @@ class Gates:
     def ownership_state(self, row: dict[str, str]) -> str:
         owned = self.owned_by_id.get(row["id"])
         if owned:
-            return "owned-cpp" if owned["path"].lower().endswith(".cpp") else "owned-c"
+            return "owned-cpp"
         if row["copied"] == "retired":
             return "retired"
         return "excluded" if row["copy"] == "no" else "generated"
@@ -572,14 +580,28 @@ class Gates:
             "cpp": dict(sorted(Counter(report.derived_cpp.values()).items())),
         }
 
+    # Language: no C or assembly in the port --------------------------------------------------------------------------
+
+    def language_gate(self) -> None:
+        for path in sorted(self.workspace.native.rglob("*")):
+            relative = path.relative_to(self.workspace.root).as_posix()
+            if not path.is_file() or "data" in path.relative_to(self.workspace.native).parts:
+                continue
+            if path.suffix.lower() in FORBIDDEN_SUFFIXES:
+                self.report.add("language", "non-cpp-source", relative, "the port is C++: no C or assembly source files")
+            elif path.suffix.lower() in {".cpp", ".hpp", ".h", ".inl"}:
+                code = strip_source(path.read_text(encoding="utf-8", errors="replace"))
+                if INLINE_ASSEMBLY.search(code):
+                    self.report.add("language", "inline-assembly", relative, "the port is C++: no inline assembly")
+
     # Quality and strict compilation (#248) -------------------------------------------------------------------------
 
     def source_class(self, path: str) -> str:
         if path in self.retiring or "/Legacy/" in path:
             return "replacement-legacy"
         if path in self.manifest and path not in self.owned_paths:
-            return "generated-c"
-        return "maintained-c" if path.endswith(".c") else "strict-cpp"
+            return "generated-cpp"
+        return "transitional-cpp" if path in self.relaxed_list else "strict-cpp"
 
     def quality_gate(self) -> None:
         report = self.report
@@ -588,16 +610,21 @@ class Gates:
             source_class = self.source_class(path)
             report.source_classes[path] = {
                 "class": source_class, "compile": entry["compile"], "projects": sorted(set(entry["projects"])),
-                "quality_scope": source_class != "generated-c", "baseline_findings": self.debt[path],
+                "quality_scope": source_class != "generated-cpp", "baseline_findings": self.debt[path],
             }
-            maintained = source_class == "maintained-c" or (source_class == "replacement-legacy" and owned_functions[path])
+            maintained = source_class == "transitional-cpp" or (source_class == "replacement-legacy" and owned_functions[path])
             if maintained and entry["compile"] == "relaxed":
                 report.relaxation_debt.append({
                     "path": path, "class": source_class, "owned_functions": owned_functions[path],
                     "baseline_findings": self.debt[path],
                 })
-            if path in self.owned_paths and path.endswith(".cpp") and entry["compile"] == "relaxed":
+            if (path in self.owned_paths and path.endswith(".cpp") and entry["compile"] == "relaxed"
+                    and path not in self.relaxed_list):
                 report.add("quality", "owned-cpp-relaxed", path, "owned C++ source is compiled with relaxed settings")
+        for path in sorted(self.relaxed_list):
+            if self.compile.get(path, {}).get("compile") != "relaxed":
+                report.add("quality", "relaxed-list-stale", path,
+                           "relaxed_sources.txt names a file that is missing or no longer compiled relaxed")
         report.class_counts = dict(sorted(Counter(item["class"] for item in report.source_classes.values()).items()))
         for record in self.promotion:
             owned = self.owned_by_id.get(record["id"])
@@ -788,7 +815,6 @@ class Gates:
             "| Count | Ownership state |", "| ---: | --- |",
             f"| {len(owned)} | owned functions |",
             f"| {states.get('owned-cpp', 0)} | owned functions in C++ sources |",
-            f"| {states.get('owned-c', 0)} | owned functions in maintained C sources |",
             f"| {states.get('generated', 0)} | generated function rows |",
             f"| {states.get('retired', 0)} | retired function rows |",
             f"| {states.get('excluded', 0)} | excluded function rows |",
@@ -817,6 +843,7 @@ class Gates:
     def run(self) -> Report:
         self.collect_verification()
         self.ownership()
+        self.language_gate()
         self.promotion_gate()
         self.quality_gate()
         self.behavior_gate()
@@ -962,7 +989,7 @@ def main() -> int:
     inventory = report.promotion_inventory
     print(f"ownership {report.ownership_counts}")
     print(f"promotion {inventory['cpp']} steps {inventory['steps']}")
-    print(f"quality {report.class_counts}; {len(report.relaxation_debt)} relaxed maintained C files")
+    print(f"quality {report.class_counts}; {len(report.relaxation_debt)} relaxed transitional C++ files")
     print(f"behavior {report.behavior}")
     print(f"retirement {[(ec, entry['direct_counts']) for ec, entry in report.bridge_consumers.items()]}")
     print(f"{len(report.issues)} violations; reports in build/quality")

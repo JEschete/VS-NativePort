@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -11,7 +12,7 @@
 #include "Effects/Templates/TemplateState.h"
 #include "Effects/Transforms.h"
 
-// Template body: Effects::Templates::TrailNineOrigin (decomp src/EFFECT/trails9.h:27). Included once per instance by Effects/Templates/TrailNineOrigin.c with that plugin's bindings.
+// Template body: Effects::Templates::TrailNineOrigin (decomp src/EFFECT/trails9.h:27). Included once per instance by Effects/Templates/TrailNineOrigin.cpp with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 9
 
 void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
@@ -231,3 +232,4 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
 }
 #undef TRAIL_SAMPLE_COUNT
 
+}  // extern "C"

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
@@ -13,7 +14,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::TrailNineRender (decomp src/EFFECT/trails9.h:456). Included once per instance by Effects/Templates/TrailNineRender.c with that plugin's bindings.
+// Template body: Effects::Templates::TrailNineRender (decomp src/EFFECT/trails9.h:456). Included once per instance by Effects/Templates/TrailNineRender.cpp with that plugin's bindings.
 #define TRAIL_SAMPLE_COUNT 9
 
 void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, Effects_ParticleEmitterScratch* emitter_scratch,
@@ -88,8 +89,8 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
             for (j = 0; j < trail->splineSampleCount; ++j) {
                 Core_Gte_LoadV0(&temp[temp_s3]);
                 Core_Gte_Rtps();
-                Core_Gte_StoreSxy2(&screen_points[j]);
-                Core_Gte_StoreSz3Otz(&projected_depths[j]);
+                Core_Gte_StoreSxy2((long *)(&screen_points[j]));
+                Core_Gte_StoreSz3Otz((long *)(&projected_depths[j]));
                 temp_s3 = (temp_s3 + 8) % 9;
             }
 
@@ -165,7 +166,7 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
                 temp_s0 = (projected_depths[j] + projected_depths[j + 1]) / 2;
 
                 if ((temp_s0 < 0x800) && (Render_nearClip < temp_s0)) {
-                    output_packet = Render_frameScratch.primitiveCursor;
+                    output_packet = (Render_Trail9Packet *)(Render_frameScratch.primitiveCursor);
                     Render_frameScratch.primitiveCursor = output_packet + 1;
                     output_packet->wordCount = 0xE;
                     output_packet->poly.code = Render_LegacyPrimitiveCode_PolyGt4SemiTrans;
@@ -214,7 +215,7 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
             temp_s0 = (projected_depths[j] + projected_depths[j + 1]) / 2;
 
             if ((temp_s0 < 0x800) && (Render_nearClip < temp_s0)) {
-                output_packet = Render_frameScratch.primitiveCursor;
+                output_packet = (Render_Trail9Packet *)(Render_frameScratch.primitiveCursor);
                 Render_frameScratch.primitiveCursor = output_packet + 1;
                 output_packet->wordCount = 0xE;
                 output_packet->poly.code = Render_LegacyPrimitiveCode_PolyGt4SemiTrans;
@@ -245,3 +246,4 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
 }
 #undef TRAIL_SAMPLE_COUNT
 
+}  // extern "C"

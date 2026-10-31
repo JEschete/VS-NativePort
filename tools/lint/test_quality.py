@@ -64,9 +64,12 @@ class BaselineTests(unittest.TestCase):
 
     def test_cpp_header_advice_requires_an_exact_c_member_assignment(self) -> None:
         advice = quality.Finding(
-            "cpplint", "build/include_what_you_use", "Native/Tests/Fixture.c", 1,
+            "cpplint", "build/include_what_you_use", "Native/Tests/Fixture.cpp", 1,
             "Add #include <string> for string", "box.string = text;",
         )
+        relaxed = patch.object(quality, "relaxed_sources", return_value={advice.path})
+        relaxed.start()
+        self.addCleanup(relaxed.stop)
         self.assertTrue(quality.inapplicable_cpp_header_advice(advice))
         pointer = quality.Finding(
             advice.tool, advice.rule, advice.path, 1, advice.message,
@@ -74,7 +77,7 @@ class BaselineTests(unittest.TestCase):
         )
         self.assertTrue(quality.inapplicable_cpp_header_advice(pointer))
         for path, rule, message, context in (
-            ("Native/Tests/Fixture.cpp", advice.rule, advice.message, advice.context),
+            ("Native/Tests/Strict.cpp", advice.rule, advice.message, advice.context),
             ("Native/Tests/Fixture.h", advice.rule, advice.message, advice.context),
             (advice.path, "clang-analyzer-core.NullDereference", advice.message, advice.context),
             (advice.path, advice.rule, "Add #include <vector> for vector", advice.context),
@@ -117,7 +120,7 @@ class BaselineTests(unittest.TestCase):
     def test_interface_policy_requires_registered_name_path_and_advisory_rule(
         self,
     ) -> None:
-        path = "Native/Game/src/Actors/MovementCommands.c"
+        path = "Native/Game/src/Actors/MovementCommands.cpp"
         name = "Actors_QueueNavigationTileTarget"
         interfaces = {(path, name)}
         message = f"3 adjacent parameters of '{name}' of similar type ('int')"
@@ -162,7 +165,7 @@ class BaselineTests(unittest.TestCase):
         gameplay = quality.Finding(
             style.tool,
             style.rule,
-            "Native/Game/src/Actors/SequencePlayback.c",
+            "Native/Game/src/Actors/SequencePlayback.cpp",
             style.line,
             style.message,
             style.context,
@@ -181,7 +184,7 @@ class BaselineTests(unittest.TestCase):
         audio_adapter = quality.Finding(
             style.tool,
             style.rule,
-            "Native/Engine/src/Audio/Driver/PlaybackReset.c",
+            "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
             style.line,
             style.message,
             style.context,
@@ -201,7 +204,7 @@ class BaselineTests(unittest.TestCase):
         production = quality.Finding(
             fixture.tool,
             fixture.rule,
-            "Native/Game/src/Battle/ActionResults.c",
+            "Native/Game/src/Battle/ActionResults.cpp",
             fixture.line,
             fixture.message,
             fixture.context,
@@ -222,7 +225,7 @@ class BaselineTests(unittest.TestCase):
         for path, expected in (
             ("Native/Engine/Legacy/Render/LibGpu.h", "legacy"),
             ("Native/Tests/src/LegacyGpuTests.cpp", "tests"),
-            ("Native/Game/src/Battle/ActionResults.c", "native"),
+            ("Native/Game/src/Battle/ActionResults.cpp", "native"),
             ("Native/Engine/src/Core/Gte.cpp", "native"),
             ("tools/port/copy_fixups.py", "tooling"),
             ("Native/Player/vs_player/controller.py", "tooling"),
@@ -360,7 +363,7 @@ class BaselineTests(unittest.TestCase):
         self.assertIn("tools/test/verify_first_lever.py", python)
         self.assertIn("Native/Player/player.py", python)
         self.assertIn("Native/Player/vs_player/reaction.py", python)
-        self.assertNotIn("Native/Game/src/Battle/Targeting.c", native)
+        self.assertNotIn("Native/Game/src/Battle/Targeting.cpp", native)
         self.assertTrue(all(path.startswith("Native/") for path in native))
         self.assertFalse(
             any(
@@ -427,14 +430,15 @@ class ToolControlTests(unittest.TestCase):
     def test_real_c_member_advice_is_preserved_as_language_advice(self) -> None:
         self.source("member_control.h", "typedef struct { char* string; } Message;\n")
         path = self.source(
-            "member_control.c",
+            "member_control.cpp",
             '#include "member_control.h"\n'
             "void Example(char* text) {\n  Message box;\n  box.string = text;\n}\n",
         )
         findings = quality.check_cpplint([path])
         advice = [item for item in findings if item.rule == "build/include_what_you_use"]
         self.assertTrue(advice)
-        self.assertTrue(any(quality.inapplicable_cpp_header_advice(item) for item in advice))
+        with patch.object(quality, "relaxed_sources", return_value={path}):
+            self.assertTrue(any(quality.inapplicable_cpp_header_advice(item) for item in advice))
 
     def test_clang_tidy_detects_an_unnamed_gameplay_number(self) -> None:
         path = self.source("number_control.cc", "int CalculateValue() { return 37; }\n")

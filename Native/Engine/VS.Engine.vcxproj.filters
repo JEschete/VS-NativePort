@@ -120,7 +120,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\Audio\ActorSound.c">
+    <ClCompile Include="src\Audio\ActorSound.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\ActorSound.h">
@@ -129,7 +129,7 @@
     <ClInclude Include="src\Audio\Akao.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Ambience.c">
+    <ClCompile Include="src\Audio\Ambience.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Ambience.h">
@@ -138,55 +138,55 @@
     <ClCompile Include="src\Audio\AudioDevice.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\Audio\Control\SoundControl.c">
+    <ClCompile Include="src\Audio\Control\SoundControl.cpp">
       <Filter>src\Audio\Control</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Control\SoundControl.h">
       <Filter>src\Audio\Control</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Cutscene\Stream.c">
+    <ClCompile Include="src\Audio\Cutscene\Stream.cpp">
       <Filter>src\Audio\Cutscene</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Cutscene\Stream.h">
       <Filter>src\Audio\Cutscene</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Driver\PlaybackReset.c">
+    <ClCompile Include="src\Audio\Driver\PlaybackReset.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Driver\PlaybackReset.h">
       <Filter>src\Audio\Driver</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Driver\SoundDriver.c">
+    <ClCompile Include="src\Audio\Driver\SoundDriver.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Driver\SoundDriver.h">
       <Filter>src\Audio\Driver</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Legacy.c">
+    <ClCompile Include="src\Audio\Legacy.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Legacy.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\LegacyFiles.c">
+    <ClCompile Include="src\Audio\LegacyFiles.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\LegacyFiles.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Mixer\MixControl.c">
+    <ClCompile Include="src\Audio\Mixer\MixControl.cpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Mixer\MixControl.h">
       <Filter>src\Audio\Mixer</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Mixer\VoiceMixer.c">
+    <ClCompile Include="src\Audio\Mixer\VoiceMixer.cpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Mixer\VoiceMixer.h">
       <Filter>src\Audio\Mixer</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Music.c">
+    <ClCompile Include="src\Audio\Music.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Music.h">
@@ -195,7 +195,7 @@
     <ClCompile Include="src\Audio\MusicState.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\Audio\Playback\SoundPlayback.c">
+    <ClCompile Include="src\Audio\Playback\SoundPlayback.cpp">
       <Filter>src\Audio\Playback</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Playback\SoundPlayback.h">
@@ -204,7 +204,7 @@
     <ClCompile Include="src\Audio\Reverb.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\Audio\Samples\SampleBanks.c">
+    <ClCompile Include="src\Audio\Samples\SampleBanks.cpp">
       <Filter>src\Audio\Samples</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Samples\SampleBanks.h">
@@ -213,37 +213,37 @@
     <ClInclude Include="src\Audio\Seq\AkaoFormat.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Seq\Channel.c">
+    <ClCompile Include="src\Audio\Seq\Channel.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\Channel.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Seq\Control.c">
+    <ClCompile Include="src\Audio\Seq\Control.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\Control.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Seq\Envelope.c">
+    <ClCompile Include="src\Audio\Seq\Envelope.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\Envelope.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Seq\Modulation.c">
+    <ClCompile Include="src\Audio\Seq\Modulation.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\Modulation.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Seq\MusicSequence.c">
+    <ClCompile Include="src\Audio\Seq\MusicSequence.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\MusicSequence.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Seq\Sequencer.c">
+    <ClCompile Include="src\Audio\Seq\Sequencer.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\Sequencer.h">
@@ -252,25 +252,25 @@
     <ClCompile Include="src\Audio\SequencerOutput.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
-    <ClCompile Include="src\Audio\Sfx.c">
+    <ClCompile Include="src\Audio\Sfx.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Sfx.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\SoundBanks.c">
+    <ClCompile Include="src\Audio\SoundBanks.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\SoundBanks.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\SoundEffects\SoundEffects.c">
+    <ClCompile Include="src\Audio\SoundEffects\SoundEffects.cpp">
       <Filter>src\Audio\SoundEffects</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\SoundEffects\SoundEffects.h">
       <Filter>src\Audio\SoundEffects</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\Stream.c">
+    <ClCompile Include="src\Audio\Stream.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Stream.h">
@@ -291,13 +291,13 @@
     <ClCompile Include="src\Core\Arena.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Callbacks.c">
+    <ClCompile Include="src\Core\Callbacks.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Callbacks.h">
       <Filter>src\Core</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Compatibility.c">
+    <ClCompile Include="src\Core\Compatibility.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Compatibility.h">
@@ -315,7 +315,7 @@
     <ClCompile Include="src\Core\Gte.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Legacy.c">
+    <ClCompile Include="src\Core\Legacy.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Legacy.h">
@@ -324,25 +324,25 @@
     <ClCompile Include="src\Core\Log.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Math\FixedPoint.c">
+    <ClCompile Include="src\Core\Math\FixedPoint.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\FixedPoint.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Math\Interpolation.c">
+    <ClCompile Include="src\Core\Math\Interpolation.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\Interpolation.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Math\Matrix.c">
+    <ClCompile Include="src\Core\Math\Matrix.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\Matrix.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Math\ScalarMath.c">
+    <ClCompile Include="src\Core\Math\ScalarMath.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\ScalarMath.h">
@@ -354,43 +354,43 @@
     <ClInclude Include="src\Core\Math\TileDistance.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Math\Trig.c">
+    <ClCompile Include="src\Core\Math\Trig.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\Trig.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Math\Vector.c">
+    <ClCompile Include="src\Core\Math\Vector.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\Vector.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Memory\Copy.c">
+    <ClCompile Include="src\Core\Memory\Copy.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Memory\Copy.h">
       <Filter>src\Core\Memory</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Memory\Heap.c">
+    <ClCompile Include="src\Core\Memory\Heap.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Memory\Heap.h">
       <Filter>src\Core\Memory</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Memory\WordCopy.c">
+    <ClCompile Include="src\Core\Memory\WordCopy.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Memory\WordCopy.h">
       <Filter>src\Core\Memory</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Memory.c">
+    <ClCompile Include="src\Core\Memory.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Memory.h">
       <Filter>src\Core</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Overlays.c">
+    <ClCompile Include="src\Core\Overlays.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Overlays.h">
@@ -399,16 +399,16 @@
     <ClCompile Include="src\Core\PointerSort.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Random.c">
-      <Filter>src\Core</Filter>
-    </ClCompile>
     <ClCompile Include="src\Core\Random.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Random.h">
       <Filter>src\Core</Filter>
     </ClInclude>
-    <ClCompile Include="src\Core\Runtime.c">
+    <ClCompile Include="src\Core\RandomGenerator.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Runtime.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Runtime.h">
@@ -417,7 +417,7 @@
     <ClCompile Include="src\Core\Scratch.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\String\GameText.c">
+    <ClCompile Include="src\Core\String\GameText.cpp">
       <Filter>src\Core\String</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\String\GameText.h">
@@ -429,13 +429,13 @@
     <ClInclude Include="src\Input\Buttons.h">
       <Filter>src\Input</Filter>
     </ClInclude>
-    <ClCompile Include="src\Input\Controller.c">
+    <ClCompile Include="src\Input\Controller.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
     <ClInclude Include="src\Input\Controller.h">
       <Filter>src\Input</Filter>
     </ClInclude>
-    <ClCompile Include="src\Input\Controllers.c">
+    <ClCompile Include="src\Input\Controllers.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
     <ClInclude Include="src\Input\Controllers.h">
@@ -444,25 +444,25 @@
     <ClCompile Include="src\Input\Pad.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
-    <ClCompile Include="src\Input\Vibration.c">
+    <ClCompile Include="src\Input\Vibration.cpp">
       <Filter>src\Input</Filter>
     </ClCompile>
     <ClInclude Include="src\Input\Vibration.h">
       <Filter>src\Input</Filter>
     </ClInclude>
-    <ClCompile Include="src\Movie\Intro\Playback.c">
+    <ClCompile Include="src\Movie\Intro\Playback.cpp">
       <Filter>src\Movie\Intro</Filter>
     </ClCompile>
     <ClInclude Include="src\Movie\Intro\Playback.h">
       <Filter>src\Movie\Intro</Filter>
     </ClInclude>
-    <ClCompile Include="src\Movie\Intro\Player.c">
+    <ClCompile Include="src\Movie\Intro\Player.cpp">
       <Filter>src\Movie\Intro</Filter>
     </ClCompile>
     <ClInclude Include="src\Movie\Intro\Player.h">
       <Filter>src\Movie\Intro</Filter>
     </ClInclude>
-    <ClCompile Include="src\Movie\Intro.c">
+    <ClCompile Include="src\Movie\Intro.cpp">
       <Filter>src\Movie</Filter>
     </ClCompile>
     <ClInclude Include="src\Movie\Intro.h">
@@ -483,7 +483,7 @@
     <ClCompile Include="src\Platform\GameFiber.cpp">
       <Filter>src\Platform</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Camera.c">
+    <ClCompile Include="src\Render\Camera.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Camera.h">
@@ -492,31 +492,31 @@
     <ClCompile Include="src\Render\Device.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Display.c">
+    <ClCompile Include="src\Render\Display.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Display.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Font.c">
+    <ClCompile Include="src\Render\Font.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Font.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Frame.c">
+    <ClCompile Include="src\Render\Frame.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Frame.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\FramebufferEffects.c">
+    <ClCompile Include="src\Render\FramebufferEffects.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\FramebufferEffects.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Images.c">
+    <ClCompile Include="src\Render\Images.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Images.h">
@@ -528,13 +528,13 @@
     <ClInclude Include="src\Render\Lighting.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Loading.c">
+    <ClCompile Include="src\Render\Loading.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Loading.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Model.c">
+    <ClCompile Include="src\Render\Model.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Model.h">
@@ -543,19 +543,19 @@
     <ClInclude Include="src\Render\ModelDraw.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\ModelGeometry.c">
+    <ClCompile Include="src\Render\ModelGeometry.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\ModelGeometry.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\ModelWorkspace.c">
+    <ClCompile Include="src\Render\ModelWorkspace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClCompile Include="src\Render\PageSpace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Palette.c">
+    <ClCompile Include="src\Render\Palette.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Palette.h">
@@ -567,91 +567,91 @@
     <ClInclude Include="src\Render\Render.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\ResultAtlas.c">
+    <ClCompile Include="src\Render\ResultAtlas.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\ResultAtlas.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\RoomDraw.c">
+    <ClCompile Include="src\Render\RoomDraw.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\RoomDraw.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\RoomLighting.c">
+    <ClCompile Include="src\Render\RoomLighting.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\RoomLighting.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\ScaledFont.c">
+    <ClCompile Include="src\Render\ScaledFont.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\ScaledFont.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\ScreenTransition.c">
+    <ClCompile Include="src\Render\ScreenTransition.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\ScreenTransition.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Sprites.c">
+    <ClCompile Include="src\Render\Sprites.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Sprites.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Text\CompactFont.c">
+    <ClCompile Include="src\Render\Text\CompactFont.cpp">
       <Filter>src\Render\Text</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Text\CompactFont.h">
       <Filter>src\Render\Text</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Text\VariableFont.c">
+    <ClCompile Include="src\Render\Text\VariableFont.cpp">
       <Filter>src\Render\Text</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Text\VariableFont.h">
       <Filter>src\Render\Text</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\TextureAnimation.c">
+    <ClCompile Include="src\Render\TextureAnimation.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\TextureAnimation.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\TextureRegionDraw.c">
+    <ClCompile Include="src\Render\TextureRegionDraw.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\TextureRegionDraw.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Textures.c">
+    <ClCompile Include="src\Render\Textures.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Textures.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\UiPrimitives.c">
+    <ClCompile Include="src\Render\UiPrimitives.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\UiPrimitives.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Upload.c">
+    <ClCompile Include="src\Render\Upload.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Upload.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Save\MemoryCard\GameFiles.c">
+    <ClCompile Include="src\Save\MemoryCard\GameFiles.cpp">
       <Filter>src\Save\MemoryCard</Filter>
     </ClCompile>
     <ClInclude Include="src\Save\MemoryCard\GameFiles.h">
       <Filter>src\Save\MemoryCard</Filter>
     </ClInclude>
-    <ClCompile Include="src\Save\MemoryCard\Resources.c">
+    <ClCompile Include="src\Save\MemoryCard\Resources.cpp">
       <Filter>src\Save\MemoryCard</Filter>
     </ClCompile>
     <ClInclude Include="src\Save\MemoryCard\Resources.h">
@@ -660,7 +660,7 @@
     <ClCompile Include="src\Save\SaveStore.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
-    <ClCompile Include="src\Save\Snapshot.c">
+    <ClCompile Include="src\Save\Snapshot.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
     <ClInclude Include="src\Save\Snapshot.h">

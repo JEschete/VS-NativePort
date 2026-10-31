@@ -15,7 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\ActorAssets.c">
+    <ClCompile Include="src\ActorAssets.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\ActorAssets.h">
@@ -27,7 +27,7 @@
     <ClCompile Include="src\AudioStream.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\CdDrive.c">
+    <ClCompile Include="src\CdDrive.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\CdDrive.h">
@@ -39,25 +39,25 @@
     <ClCompile Include="src\Disc.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\DiscQueue.c">
+    <ClCompile Include="src\DiscQueue.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\DiscQueue.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClCompile Include="src\DiscReader.c">
+    <ClCompile Include="src\DiscReader.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\DiscReader.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClCompile Include="src\LegacyFiles.c">
+    <ClCompile Include="src\LegacyFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\LegacyFiles.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClCompile Include="src\ModelLoading.c">
+    <ClCompile Include="src\ModelLoading.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\ModelLoading.h">
@@ -66,25 +66,25 @@
     <ClCompile Include="src\ModuleLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\OverlayFiles.c">
+    <ClCompile Include="src\OverlayFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\OverlayFiles.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClCompile Include="src\OverlayWorkspace.c">
+    <ClCompile Include="src\OverlayWorkspace.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\OverlayWorkspace.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClCompile Include="src\PFile.c">
+    <ClCompile Include="src\PFile.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\PFile.h">
       <Filter>src</Filter>
     </ClInclude>
-    <ClCompile Include="src\SystemResources.c">
+    <ClCompile Include="src\SystemResources.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\SystemResources.h">

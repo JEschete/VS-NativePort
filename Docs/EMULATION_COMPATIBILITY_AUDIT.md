@@ -145,7 +145,7 @@ contexts do not interfere with one another.
 ### EC-04: Original resource addresses and module relocation
 
 **Evidence:** `Native/Content/src/DataStore.cpp` (`FindBySector`, `Content_ReadDiscBytes`), `ModuleLoader.cpp`
-(`LoadData`, `SymbolMap::ResolveIn`, `RelocatePointers`), `Native/Game/src/Boot/ModuleData.c`, `ModulePointers.c`,
+(`LoadData`, `SymbolMap::ResolveIn`, `RelocatePointers`), `Native/Game/src/Boot/ModuleData.cpp`, `ModulePointers.c`,
 `Native/Tools/Extract/src/main.cpp`, and `Native/Desktop/src/main.cpp`.
 
 Regular disc files are extracted into a file tree and indexed by original LBA/size. The game still requests sectors;
@@ -170,8 +170,8 @@ has no module-image copying, sector arithmetic or original-address relocation de
 ### EC-05: Scratchpad and overlay-offset preservation
 
 **Evidence:** `Native/Engine/src/Core/Scratch.cpp` (`g_scratch[1024]`), `Native/Engine/include/Core/Arena.h`
-(`Core_overlayArena`, `Core_OverlayAddress`), `Native/Engine/src/Core/Overlays.c`, and
-`Native/Game/src/Boot/OverlayReset.c`.
+(`Core_overlayArena`, `Core_OverlayAddress`), `Native/Engine/src/Core/Overlays.cpp`, and
+`Native/Game/src/Boot/OverlayReset.cpp`.
 
 Scratch users share a byte block; overlay slots retain original relative addresses and overlaps inside native storage.
 The modules execute as native code, but their original loading/memory relationships still influence behavior.
@@ -224,7 +224,7 @@ analog axes, hot-plug and rumble cancellation. The legacy receive-buffer writer 
 
 ### EC-08: Native decoding with compatibility-backed presentation
 
-**Evidence:** `Native/Engine/src/Movie/Intro/Player.c`, `Native/Engine/src/Movie/MoviePlayer.cpp`,
+**Evidence:** `Native/Engine/src/Movie/Intro/Player.cpp`, `Native/Engine/src/Movie/MoviePlayer.cpp`,
 `Native/Engine/Legacy/Movie/LibPress.cpp`, and `Native/Tools/Extract/src/main.cpp`.
 
 The current player opens converted Matroska assets through DataStore, decodes AV1 with dav1d and FLAC with dr_flac,

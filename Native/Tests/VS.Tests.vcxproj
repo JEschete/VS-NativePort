@@ -65,9 +65,10 @@
     <ClCompile Include="src\CombatLabCanvasTests.cpp" />
     <ClCompile Include="src\CombatLabTraceTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />
-    <ClCompile Include="src\CombatTests.c">
+    <ClCompile Include="src\CombatTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -78,9 +79,10 @@
     <ClCompile Include="src\DataMenuTests.cpp" />
     <ClCompile Include="src\DoorTransitionTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
-    <ClCompile Include="src\EffectTimelineTests.c">
+    <ClCompile Include="src\EffectTimelineTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -91,9 +93,10 @@
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
     <ClCompile Include="src\EventScriptTestCases.cpp" />
-    <ClCompile Include="src\EventScriptTests.c">
+    <ClCompile Include="src\EventScriptTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -101,9 +104,10 @@
     <ClCompile Include="src\EventWeaponModeTests.cpp" />
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
-    <ClCompile Include="src\GimRenderTests.c">
+    <ClCompile Include="src\GimRenderTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -112,9 +116,10 @@
     <ClCompile Include="src\InputTests.cpp" />
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />
-    <ClCompile Include="src\LayoutAsserts.c">
+    <ClCompile Include="src\LayoutAsserts.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
@@ -153,9 +158,10 @@
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SegmentCollisionTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />
-    <ClCompile Include="src\SequenceTests.c">
+    <ClCompile Include="src\SequenceTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
+      <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>

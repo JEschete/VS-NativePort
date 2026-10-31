@@ -64,7 +64,7 @@ extern Content_DiscQueueSlot* Menu_Manual_helpTextCdQueue;;
 extern int Menu_Manual_lineCount;;
 extern Menu_Manual_BackgroundChunkWidths const Menu_Manual_kMenuBgChunkWidths;
 extern Menu_Manual_BackgroundTransparencies const Menu_Manual_kMenuBgTransparencies[];
-extern u_short Menu_Manual_menuText[516]; /* contents: disc string table (ModuleData.c) */;
+extern u_short Menu_Manual_menuText[516]; /* contents: disc string table (ModuleData.cpp) */;
 extern int Menu_Manual_pageArrowAnimState;;
 extern int Menu_Manual_scrollPosition;;
 extern int Menu_Manual_selectedRow;;

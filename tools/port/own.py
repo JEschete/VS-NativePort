@@ -1,6 +1,6 @@
 """Take ownership of a generated item, so it can be modernized by hand or by the rewrite tool.
 
-  python tools\\port\\own.py <F#####|G#####|T#####> --to Native\\<Project>\\src\\<Area>\\<File>.c [--no-copy]
+  python tools\\port\\own.py <F#####|G#####|T#####> --to Native\\<Project>\\src\\<Area>\\<File>.cpp [--no-copy]
 
 Moves the item's current generated text into the owned file (created if needed, never a generated file), with its
 declaration in the owned file's sibling header, records it in tools\\port\\owned.csv, then reruns the copy so the
@@ -8,7 +8,8 @@ generated files stop emitting it and include the owned header where the name is 
 never regenerates that item. Ownership alone sets no status: `modernized`, `cpp` and `verified` are separate gates
 that tools\\ledger\\gates.py checks.
 
-Owned C files compile with the copied-C settings; promoting one to .cpp is a later, separate step (plan §8.2).
+A newly owned file is listed in tools\\port\\relaxed_sources.txt and keeps the copied-code compiler settings until it
+is promoted, a later and separate step (plan §8.2).
 """
 from __future__ import annotations
 
@@ -47,12 +48,12 @@ def includes_of(text: str) -> list[str]:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("id")
-    ap.add_argument("--to", required=True, help="owned .c file (repository-relative, Windows separators)")
+    ap.add_argument("--to", required=True, help="owned .cpp file (repository-relative, Windows separators)")
     ap.add_argument("--no-copy", action="store_true", help="do not rerun copy_to_native.py afterwards")
     a = ap.parse_args()
     to = a.to.replace("/", "\\")
-    if not to.startswith("Native\\") or not to.endswith(".c"):
-        raise SystemExit("--to must be a Native\\...\\File.c path")
+    if not to.startswith("Native\\") or not to.endswith(".cpp"):
+        raise SystemExit("--to must be a Native\\...\\File.cpp path")
     header = to[:-2] + ".h"
     cp = ct.Copier()
     if a.id in cp.owned:

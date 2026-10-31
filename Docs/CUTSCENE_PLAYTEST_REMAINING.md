@@ -9,7 +9,7 @@ B1-L3) are placed by estimate.
 
 Each entry gives the location and the original trigger, decoded from the room's trigger table
 (`Event_EvaluateRoomEventTriggers`, BATTLE.PRG `func_800BEC58`, ported in
-`Native/Game/src/Event/Triggers.c`). Tiles are `x,z`. "Facing tile" means press Cross while facing
+`Native/Game/src/Event/Triggers.cpp`). Tiles are `x,z`. "Facing tile" means press Cross while facing
 that tile. Zone and room numbers are the engine's (0-based); room names are from the Data Crystal room
 list. Flags 32-63 are room-local and are cleared on room entry, so the room's own scripts must set them.
 

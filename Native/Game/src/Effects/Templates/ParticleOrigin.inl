@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
@@ -9,7 +10,7 @@
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
 
-// Template body: Effects::Templates::ParticleOrigin (decomp src/EFFECT/particleSetup.h:36). Included once per instance by Effects/Templates/ParticleOrigin.c with that plugin's bindings.
+// Template body: Effects::Templates::ParticleOrigin (decomp src/EFFECT/particleSetup.h:36). Included once per instance by Effects/Templates/ParticleOrigin.cpp with that plugin's bindings.
 #ifndef VS_PARTICLE_SETUP_TYPES
 #define VS_PARTICLE_SETUP_TYPES
 #endif
@@ -241,3 +242,4 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
 }
 #undef VS_PARTICLE_SETUP_TYPES
 
+}  // extern "C"

@@ -59,7 +59,7 @@ def overlay_of(src_file: str) -> str:
 
 
 def system_of(location: str) -> str:
-    # Native\Game\src\Battle\Ai\Navigation.c -> Game.Battle
+    # Native\Game\src\Battle\Ai\Navigation.cpp -> Game.Battle
     p = location.replace("/", "\\").split("\\")
     if len(p) >= 4 and p[0] == "Native":
         sub = p[3] if not p[3].endswith((".c", ".cpp", ".h")) else ""

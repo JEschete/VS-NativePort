@@ -112,7 +112,7 @@ extern char Menu_Files_layoutPadding3[8];;
 extern char Menu_Files_backupMainSetting;;
 extern char Menu_Files_containerDataEmpty;;
 extern u_short Menu_Files_containerItemCapacities[];
-extern u_short Menu_Files_containerStrings[895]; /* contents: disc string table (ModuleData.c) */;
+extern u_short Menu_Files_containerStrings[895]; /* contents: disc string table (ModuleData.cpp) */;
 extern signed char Menu_Files_cursorFileOpSaturation[];
 extern char Menu_Files_dataNotSaved;;
 extern Menu_Files_FileMenuElement Menu_Files_fileMenuElements[10];;

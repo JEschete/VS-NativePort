@@ -75,7 +75,7 @@
     <ClCompile Include="src\CombatTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\CombatTests.c">
+    <ClCompile Include="src\CombatTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ContentTests.cpp">
@@ -99,7 +99,7 @@
     <ClCompile Include="src\EffectTextureBindingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\EffectTimelineTests.c">
+    <ClCompile Include="src\EffectTimelineTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EncounterProfileTests.cpp">
@@ -123,7 +123,7 @@
     <ClCompile Include="src\EventScriptTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\EventScriptTests.c">
+    <ClCompile Include="src\EventScriptTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\EventSessionTests.cpp">
@@ -138,7 +138,7 @@
     <ClCompile Include="src\GimRenderTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\GimRenderTests.c">
+    <ClCompile Include="src\GimRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\GroundNavigationTests.cpp">
@@ -156,7 +156,7 @@
     <ClCompile Include="src\LauncherTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\LayoutAsserts.c">
+    <ClCompile Include="src\LayoutAsserts.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\LegacyGpuTests.cpp">
@@ -264,7 +264,7 @@
     <ClCompile Include="src\SequenceTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClCompile Include="src\SequenceTests.c">
+    <ClCompile Include="src\SequenceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\SfxBankSelectionTests.cpp">

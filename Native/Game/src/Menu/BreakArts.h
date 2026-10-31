@@ -14,7 +14,7 @@ typedef enum Menu_BreakArts_ArtListOption Menu_BreakArts_ArtListOption;
 #define VS_MENU_BREAKARTS_H_DECLS
 
 extern char Menu_BreakArts_layoutPadding1;;
-extern u_short Menu_BreakArts_strings[2151]; /* contents: disc string table (ModuleData.c) */;
+extern u_short Menu_BreakArts_strings[2151]; /* contents: disc string table (ModuleData.cpp) */;
 void Menu_BreakArts_SetHpCost(int id);
 void Menu_BreakArts_DrawNextUnlockPoints(int xOffset, int weaponCategory, int row);
 int Menu_BreakArts_UpdateArtList(int typeCursorMem);

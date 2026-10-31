@@ -11,7 +11,7 @@
 
 extern char Menu_Options_layoutPadding1[2];;
 extern char Menu_Options_layoutPadding2[8];;
-extern u_short Menu_Options_menuStrings[1070]; /* contents: disc string table (ModuleData.c) */;
+extern u_short Menu_Options_menuStrings[1070]; /* contents: disc string table (ModuleData.cpp) */;
 extern char Menu_Options_simpleMapValues[];
 int Menu_Options_UpdateSimpleMapChoice(int init);
 int Menu_Options_UpdateAbilityTimingChoice(int init);

@@ -35,8 +35,7 @@ generator-managed output.
 | Count | Ownership state |
 | ---: | --- |
 | 280 | owned functions |
-| 165 | owned functions in C++ sources |
-| 115 | owned functions in maintained C sources |
+| 280 | owned functions in C++ sources |
 | 3480 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
@@ -48,7 +47,7 @@ generator-managed output.
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
 | `modernized` | 1 | 29 (`wip`) | 4,177 |
-| `cpp` | 1 | 164 (`wip`) | 4,042 |
+| `cpp` | 1 | 279 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
@@ -60,7 +59,7 @@ generator-managed output.
 | `strict_clean` | 165 |
 | `behavior_evidence` | 1 |
 
-Promotion records: 165; derived `cpp=x`: 1, `cpp=wip`: 164. Verification records: 46; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 1, `cpp=wip`: 279. Verification records: 46; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -88,8 +87,8 @@ and 5 menu rows in `Menu/Sounds.cpp`. All were global C-ABI symbols with blank `
 in files including `Legacy/Psx.h`, so they failed §8.2 steps 2 and 4. They now read `wip`,
 as does every other owned C++ function with an incomplete record.
 
-**Limit:** a function with generated C callers cannot reach `cpp=x` until those callers
-migrate, because generated C cannot call into a namespace. Most owned C++ functions are in that position.
+**Limit:** a function with generated callers cannot reach `cpp=x` until those callers migrate, because generated code
+keeps C linkage and untyped signatures. Most owned C++ functions are in that position.
 
 ### Behavior verification
 
@@ -101,6 +100,7 @@ A record is a reference, not a fresh run.
 **Explicit corrections (#249):** `verified=x` was removed from F02737, F02738, F03604 and F03605
 (`Save::MemoryCard` menu resource lifecycle). No test, replay or committed capture exercises them;
 their #18 evidence is prose plus an uncommitted local artifact, retained in each row's note.
+The owner accepted these removals on 2026-10-31.
 
 ### Slices and retirement
 
@@ -109,6 +109,16 @@ their #18 evidence is prose plus an uncommitted local artifact, retained in each
 and EC-04 original-address module symbol have zero consumers. That is one leaf function, not whole-AI
 promotion or EC retirement; its callers remain C ABI, and generated `ActionPlanning.c` still drives it.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
+
+### All native code compiles as C++ (owner decision, 2026-10-31)
+
+`Native\` holds no `.c` file, assembly file or inline assembly, and `gates.py --check` fails if one returns. The 324
+generated and 38 hand-written C sources compile as C++23. This is language migration, not promotion: they keep C
+linkage and the relaxed settings, so their functions stay `wip` and none gains `cpp=x`, `modernized` or `verified`.
+
+Generated files remain reproducible: `tools\port\cpp_adapt.py` derives the conversions C performed implicitly from
+compiler diagnostics, `tools\port\cpp_adaptations.json` records them, and the copy tool replays them. Copied code keeps
+C's meaning through `/J`, `-fno-finite-loops` and `-fno-strict-return`.
 
 ### Full tidy result (#248)
 

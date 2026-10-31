@@ -2,7 +2,9 @@
 
 Every function, global, type and macro is moved by byte range (build/port/decls.json) to its ledger
 `final_location`, and every identifier inside it is renamed by position (build/port/refs.json), never by text
-search. The output is plain C17 (`.c`/`.h`); it is promoted to C++ later (plan §8).
+search. The output is C++23 with C linkage and the copied-code compiler settings (`.cpp`/`.h`); each item is then
+modernized separately (plan §8). tools\\port\\cpp_adaptations.json records the edits C++ requires, replayed after
+rendering so the output stays reproducible (tools\\port\\cpp_adapt.py).
 
   functions  FUNCTION_CATALOG.csv rows with copy = yes. dup-of rows are copied once (the row they point at).
              Rows with no C body (asm-only, INCLUDE_ASM, inline asm) become stubs that call VS_UNPORTED
@@ -16,8 +18,8 @@ search. The output is plain C17 (`.c`/`.h`); it is promoted to C++ later (plan �
              structs get the tag). same-as rows are written once, as the row they point at.
   macros     game macros the copied text uses, written to the header of the file that uses them most.
 
-Each `X.c` gets a sibling `X.h` with its prototypes and extern declarations. Headers forward-declare the structs
-they only point to and include the headers of everything else they use; `.c` files include every header that
+Each `X.cpp` gets a sibling `X.h` with its prototypes and extern declarations. Headers forward-declare the structs
+they only point to and include the headers of everything else they use; `.cpp` files include every header that
 provides a name they use. Includes are spelled relative to a project's `src\\` or `include\\` folder.
 
 The output is regenerated from the decomp until each item is modernized. Two safeguards keep hand work safe:
@@ -58,6 +60,7 @@ PORT = REPO / "build" / "port"
 MANIFEST = REPO / "tools" / "port" / "copy_manifest.json"
 OLD_MANIFEST = PORT / "copy_manifest.json"
 OWNED = REPO / "tools" / "port" / "owned.csv"
+ADAPTATIONS = REPO / "tools" / "port" / "cpp_adaptations.json"
 NATIVE = REPO / "Native"
 LEGACY_HEADER = "Legacy/Psx.h"
 IDENT = re.compile(r"[A-Za-z_]\w*")
@@ -225,7 +228,7 @@ def include_spelling(path: str) -> str:
 
 
 def sibling_header(path: str) -> str:
-    return path[:-2] + ".h" if path.endswith(".c") else path
+    return path[:-4] + ".h" if path.endswith(".cpp") else path
 
 
 def splat_asset_extents(known: set[tuple[str, str]] | None = None) -> dict[tuple[str, str], tuple[int, int]]:
@@ -1187,7 +1190,7 @@ class Copier:
                         raise ValueError(f"{r['id']}: unexpected disc string declaration {decl}")
                     decl = re.sub(rf"\b{re.escape(name)}\s*\[[^\]]*\]",
                                   f"{name}[{(extent[1] + 1) // 2}]", decl, count=1)
-                    text = f"{decl}; /* contents: disc string table (ModuleData.c) */"
+                    text = f"{decl}; /* contents: disc string table (ModuleData.cpp) */"
                     self.string_asset_sources[r["id"]] = (module, extent[0])
                     self.module_data.append((r, name, extent[1]))
                 elif init is not None and "#include" in init:
@@ -1229,14 +1232,14 @@ class Copier:
                     decl = f"u_char {name}[{max(int(r['size'] or 0), 1)}]"
                 tag = {"bss": "", "unknown": ""}.get(r["segment"], f" /* {r['segment']}: contents loaded in Step 5 */")
                 if self.module_data_source(r, decl) is not None:
-                    tag = " /* contents: module image (ModuleData.c) */"
+                    tag = " /* contents: module image (ModuleData.cpp) */"
                     # filled at start-up, so it cannot live in read-only memory (pointer-free: const is top-level)
                     decl = re.sub(r"\bconst\s+", "", decl)
                     # an array the copy could not size: the ledger's byte count stands in for sizeof
                     self.module_data.append((r, name, int(r["size"] or 0) if re.search(r"\[\s*\]", decl) else None))
                 elif self.module_data_source(r, pointers=True) is not None and \
                         (count := self.pointer_array_count(decl, name)):
-                    tag = " /* contents: module image, relocated (ModulePointers.c) */"
+                    tag = " /* contents: module image, relocated (ModulePointers.cpp) */"
                     # filled at start-up: the elements (pointers) cannot be const
                     decl = re.sub(r"\*\s*const\b\s*", "*", decl)
                     if any(i in self._ptr_typedefs for i in IDENT.findall(decl)):
@@ -1619,7 +1622,7 @@ class Copier:
 
     def copy_templates(self) -> None:
         """Effect templates (plan Step 4 item 8): one shared body per template, each plugin instance a binding.
-        Templates\\<Name>.inl holds the template header's own preprocessor setup and the body; Templates\\<Name>.c
+        Templates\\<Name>.inl holds the template header's own preprocessor setup and the body; Templates\\<Name>.cpp
         has one block per instance that defines that plugin's bindings (renamed), includes the body and undefines
         them again. The body text is shared, so a fix to a template is made once."""
         bodies = {}
@@ -1653,11 +1656,11 @@ class Copier:
             fn = self.drop_storage(self.renamed(hdr, d["start"], d["end"], "EFFECT"))
             fn = self.apply_fixups(r, fn)
             macro = r["name"]
-            stem = r["final_location"].strip()[:-2]
+            stem = r["final_location"].strip()[:-4]
             inl = stem + ".inl"
             self.out(inl).items.append(Item(
                 "function", f"// Template body: {r['final_name']} (decomp {hdr}:{r['line']}). Included once per "
-                f"instance by {include_spelling(stem + '.h')[:-2]}.c with that plugin's bindings.\n"
+                f"instance by {include_spelling(stem + '.h')[:-2]}.cpp with that plugin's bindings.\n"
                 + ("\n".join(setup) + "\n\n" if setup else "") + fn + "\n"
                 + "".join(f"#undef {n}\n" for n in names), macro, r["id"], d["need"], (2, r["file"], int(r["line"]))))
             bodies[(r["file"], macro)] = (inl, d, self.head_of(fn))
@@ -1768,7 +1771,7 @@ class Copier:
         return twins
 
     # ------------------------------------------------------------------------------------------------- reset on load
-    RESET_FILE = r"Native\Game\src\Boot\OverlayReset.c"
+    RESET_FILE = r"Native\Game\src\Boot\OverlayReset.cpp"
 
     def reset_rows(self) -> dict[str, str]:
         """Statics with an initial value in modules the original loads again (menu screens, title, ending, effect
@@ -1860,7 +1863,7 @@ class Copier:
 
     # ------------------------------------------------------------------------------------------------- macros
     DISC_LAYOUT = r"Native\Content\include\Content\DiscLayout.h"
-    MODULE_DATA = r"Native\Game\src\Boot\ModuleData.c"
+    MODULE_DATA = r"Native\Game\src\Boot\ModuleData.cpp"
 
     def module_data_source(self, r: dict, decl: str = "", pointers: bool = False) -> tuple[str, int] | None:
         """Where a global with no C initializer gets its contents: (module file on the disc, byte offset). Only
@@ -1913,7 +1916,7 @@ class Copier:
         return 0
 
     SPLAT_ARTIFACTS = dx.DECOMP / "build" / "splat-artifacts"
-    MODULE_POINTERS = r"Native\Game\src\Boot\ModulePointers.c"
+    MODULE_POINTERS = r"Native\Game\src\Boot\ModulePointers.cpp"
 
     @staticmethod
     def module_blob_declaration(name: str, size: int) -> tuple[str, int]:
@@ -2203,13 +2206,14 @@ class Copier:
             own = {i.name for i in f.items}
             if not f.is_header:
                 includes = self.providers_of(f.items, path, own, None, type_by_cname)[0]
-                if path.endswith(".c") and self.norm_header(sibling_header(path)) in self.files:
+                if path.endswith(".cpp") and self.norm_header(sibling_header(path)) in self.files:
                     includes.add(self.norm_header(sibling_header(path)))
                 lines = ["// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.\n",
-                         f'#include "{LEGACY_HEADER}"\n']
+                         'extern "C" {\n', f'#include "{LEGACY_HEADER}"\n']
                 lines += [f'#include "{h}"\n' for h in sorted(include_spelling(x) for x in includes - {path})]
                 lines.append("\n")
                 lines += [i.text + "\n" for i in self.ordered(f)]
+                lines.append('}  // extern "C"\n')
                 rendered[path] = "".join(lines)
                 continue
             # Headers have a types section (macros, types) and a declarations section (externs, prototypes). Type
@@ -2400,6 +2404,31 @@ def content_hash(data: bytes) -> str:
     return hashlib.sha256(data.replace(b"\r\n", b"\n")).hexdigest()
 
 
+def apply_cpp_adaptations(rendered: dict[str, str]) -> dict[str, str]:
+    """Replay the recorded C++ edits: each hunk must still match, or the run stops and asks for them to be rederived."""
+    if not ADAPTATIONS.exists():
+        return rendered
+    table = json.loads(ADAPTATIONS.read_text(encoding="utf-8"))
+    result = dict(rendered)
+    for path, hunks in table.items():
+        if path not in result:
+            raise SystemExit(f"cpp_adaptations.json names a file the copy no longer writes: {path}")
+        lines = result[path].split("\n")
+        cursor = shift = 0
+        output = []
+        for index, old, new in hunks:
+            found = index + shift
+            if found < cursor or lines[found:found + len(old)] != old:  # earlier lines moved: find this hunk again
+                found = next((i for i in range(cursor, len(lines) - len(old) + 1) if lines[i:i + len(old)] == old), None)
+            if found is None:
+                raise SystemExit(f"{path}: a recorded C++ edit no longer matches: {old[:1]}. Rerun tools\\port\\cpp_adapt.py.")
+            output += lines[cursor:found] + new
+            cursor = found + len(old)
+            shift = found - index
+        result[path] = "\n".join(output + lines[cursor:])
+    return result
+
+
 def write_output(cp: Copier, rendered: dict[str, str]) -> None:
     """Write the generated files, refusing to touch hand work (see the module docstring)."""
     if MANIFEST.exists():
@@ -2438,12 +2467,8 @@ def write_output(cp: Copier, rendered: dict[str, str]) -> None:
     MANIFEST.write_text(json.dumps(manifest, indent=0, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def main() -> int:
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--report", action="store_true", help="print the full report lists")
-    ap.add_argument("--mark", action="store_true", help="after a successful build: fill copied/compiles")
-    a = ap.parse_args()
-    cp = Copier()
+def render(cp: Copier) -> dict[str, str]:
+    """The generated files as the copy produces them, before the recorded C++ edits."""
     cp.load_string_ids()
     cp.load_plugin_slots()
     cp.copy_types()
@@ -2456,11 +2481,20 @@ def main() -> int:
     cp.copy_module_pointers()
     cp.copy_string_tables()
     cp.copy_macros()
-    rendered = cp.finish()
+    return cp.finish()
+
+
+def main() -> int:
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--report", action="store_true", help="print the full report lists")
+    ap.add_argument("--mark", action="store_true", help="after a successful build: fill copied/compiles")
+    a = ap.parse_args()
+    cp = Copier()
+    rendered = apply_cpp_adaptations(render(cp))
     cp.report_type_cycles()
     write_output(cp, rendered)
     kinds = collections.Counter(i.kind for f in cp.files.values() for i in f.items)
-    print(f"{len(rendered)} files ({sum(p.endswith('.c') for p in rendered)} .c), items {dict(kinds)}")
+    print(f"{len(rendered)} files ({sum(p.endswith('.cpp') for p in rendered)} .cpp), items {dict(kinds)}")
     for k, v in cp.report.items():
         print(f"  {k}: {len(v)}" + ("" if a.report else f"  e.g. {v[:3]}"))
         if a.report:

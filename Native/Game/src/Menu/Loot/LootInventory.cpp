@@ -1,0 +1,437 @@
+// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
+#include "Legacy/Psx.h"
+#include "Audio/Seq/Channel.h"
+#include "Core/Memory/Copy.h"
+#include "Core/Memory/WordCopy.h"
+#include "Items/Inventory.h"
+#include "Items/Loot.h"
+#include "Items/Weapons.h"
+#include "Menu/Framework/Framework.h"
+#include "Menu/Loot/LootInventory.h"
+#include "Menu/Loot/LootScreen.h"
+#include "Menu/Loot/Paging.h"
+#include "State/Flags.h"
+#include "State/StateFlags.h"
+
+// decomp: MENUB.PRG _copyBladeToInventory (src/MENU/MENUB.PRG/260.c:712)
+int Menu_Loot_StageBlade(Items_InventoryBlade* source, int weapon)
+{
+    int index = 1;
+    Items_InventoryBlade* blade = Menu_Loot_inventory->blades;
+
+    while (blade->id != 0) {
+        ++blade;
+        ++index;
+        if (index > 16) {
+            return 0;
+        }
+    }
+
+    Core_Memory_CopyHalfwords(blade, source, sizeof *blade);
+
+    blade->assembledWeaponIndex = weapon;
+    blade->index = index;
+    return index;
+}
+
+// decomp: MENUB.PRG _copyGripToInventory (src/MENU/MENUB.PRG/260.c:739)
+int Menu_Loot_StageGrip(Items_InventoryGrip* source, int weaponIndex)
+{
+    int index = 1;
+    Items_InventoryGrip* grip = Menu_Loot_inventory->grips;
+
+    while (grip->id != 0) {
+        ++grip;
+        ++index;
+        if (index > 16) {
+            return 0;
+        }
+    }
+
+    Core_Memory_CopyHalfwords(grip, source, sizeof *grip);
+
+    grip->assembledWeaponIndex = weaponIndex;
+    grip->index = index;
+    return index;
+}
+
+// decomp: MENUB.PRG _copyGemToInventory (src/MENU/MENUB.PRG/260.c:766)
+int Menu_Loot_StageGem(Items_InventoryGem* source, int item)
+{
+    int index = 1;
+    Items_InventoryGem* gem = Menu_Loot_inventory->gems;
+
+    while (gem->id != 0) {
+        ++gem;
+        ++index;
+        if (index > 0x30) {
+            return 0;
+        }
+    }
+
+    Core_Memory_CopyHalfwords(gem, source, sizeof *gem);
+
+    gem->setItemIndex = item;
+    gem->index = index;
+    return index;
+}
+
+// decomp: MENUB.PRG _copyWeaponToInventory (src/MENU/MENUB.PRG/260.c:792)
+int Menu_Loot_StageWeapon(Items_LootedWeapon* looted_weapon)
+{
+    int i;
+    Items_InventoryWeapon* slot = Menu_Loot_inventory->weapons;
+    int index = 1;
+    int gems = 0;
+
+    for (i = 0; i < 3; ++i) {
+        gems += looted_weapon->gems[i].id != 0;
+    }
+    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Weapon, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Blade, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Grip, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
+        return 0;
+    }
+
+    while (slot->blade != 0) {
+        ++slot;
+        if (++index > 8) {
+            return 0;
+        }
+    }
+
+    Core_Memory_ZeroWordsBackward(slot, sizeof *slot);
+
+    slot->index = index;
+    slot->blade = Menu_Loot_StageBlade(&looted_weapon->blade, index);
+    slot->grip = Menu_Loot_StageGrip(&looted_weapon->grip, index);
+
+    for (i = 0; i < 3; i++) {
+        if (looted_weapon->gems[i].id != 0) {
+            slot->gems[i] = Menu_Loot_StageGem(&looted_weapon->gems[i], index);
+        }
+    }
+
+    Core_Memory_CopyBytesBackward(slot->name, looted_weapon->name, sizeof slot->name);
+
+    return index;
+}
+
+// decomp: MENUB.PRG _copyArmorToInventory (src/MENU/MENUB.PRG/260.c:827)
+int Menu_Loot_StageArmor(Items_InventoryArmor* source)
+{
+    int index = 1;
+    Items_InventoryArmor* armor = Menu_Loot_inventory->armor;
+
+    while (armor->id != 0) {
+        ++armor;
+        ++index;
+        if (index > 16) {
+            return 0;
+        }
+    }
+
+    Core_Memory_CopyHalfwords(armor, source, sizeof *armor);
+
+    armor->index = index;
+    return index;
+}
+
+// decomp: MENUB.PRG _copyShieldToInventory (src/MENU/MENUB.PRG/260.c:852)
+int Menu_Loot_StageShield(Items_LootedShield* looted_shield)
+{
+    int i;
+
+    Items_InventoryShield* shield = Menu_Loot_inventory->shields;
+    int index = 1;
+    int gems = 0;
+
+    for (i = 0; i < 3; ++i) {
+        gems += looted_shield->gems[i].id != 0;
+    }
+    if (!Menu_Loot_HasStagingSpace(Items_ItemCategory_Shield, 1)
+        || !Menu_Loot_HasStagingSpace(Items_ItemCategory_Gem, gems)) {
+        return 0;
+    }
+
+    while (shield->base.id != 0) {
+        ++shield;
+        ++index;
+        if (index > 8) {
+            return 0;
+        }
+    }
+
+    Core_Memory_ZeroWordsBackward(shield, sizeof *shield);
+    Core_Memory_CopyHalfwords(&shield->base, &looted_shield->shield, sizeof shield->base);
+
+    shield->base.limb = index;
+
+    for (i = 0; i < 3; ++i) {
+        if (looted_shield->gems[i].id != 0) {
+            shield->gems[i] = Menu_Loot_StageGem(&looted_shield->gems[i], index | 0x80);
+        }
+    }
+
+    return index;
+}
+
+// decomp: MENUB.PRG _copyMiscToInventory (src/MENU/MENUB.PRG/260.c:886)
+int Menu_Loot_StageMiscItem(Items_LootedItem* looted_item)
+{
+    int index = 1;
+    Items_InventoryMisc* item = Menu_Loot_inventory->misc;
+
+    while (item->id != 0) {
+        ++index;
+        ++item;
+        if (index > 64) {
+            return 0;
+        }
+    }
+
+    item->id = looted_item->itemId;
+    item->count = looted_item->count;
+    return index;
+}
+
+// decomp: MENUB.PRG _updateLootList (src/MENU/MENUB.PRG/260.c:907)
+void Menu_Loot_RefreshClaimableRows(void)
+{
+    int i;
+    int newOffset;
+    Menu_Loot_LootListItem* loot = Menu_Loot_lootList;
+
+    for (i = 0; i < Menu_Loot_lootListCount; ++i, ++loot) {
+        loot->state = Items_Inventory_CopyItem(loot->itemCategory, &Audio_Seq_unusedInventory,
+                          loot->itemIndex, Menu_Loot_inventory)
+                   != 0;
+    }
+
+    i = Menu_Loot_selectedLoot + Menu_Loot_lootListOffset;
+
+    if (i >= Menu_Loot_lootListCount) {
+        i = Menu_Loot_lootListCount - 1;
+        Menu_Loot_lootListOffset = Menu_Loot_lootListCount - 8;
+        Menu_Loot_selectedLoot = 7;
+    }
+
+    if (Menu_Loot_lootListCount < 9) {
+        Menu_Loot_selectedLoot = i;
+        Menu_Loot_lootListOffset = 0;
+        return;
+    }
+
+    newOffset = Menu_Loot_lootListCount - 8;
+    if (newOffset < Menu_Loot_lootListOffset) {
+        Menu_Loot_lootListOffset = newOffset;
+        Menu_Loot_selectedLoot = i - newOffset;
+    }
+
+    if ((Menu_Loot_selectedLoot == 7) && (i != (Menu_Loot_lootListCount - 1))) {
+        Menu_Loot_selectedLoot -= 1;
+        Menu_Loot_lootListOffset = Menu_Loot_lootListOffset + 1;
+    }
+}
+
+// decomp: MENUB.PRG _addLootToList (src/MENU/MENUB.PRG/260.c:950)
+void Menu_Loot_AppendLootRow(int itemCategory, int itemIndex)
+{
+    Menu_Loot_LootListItem* item = &Menu_Loot_lootList[Menu_Loot_lootListCount++];
+    item->itemCategory = itemCategory;
+    item->itemIndex = itemIndex - 1;
+    item->opaque2 = 0;
+}
+
+// decomp: MENUB.PRG _itemIncludesItemsInCategory (src/MENU/MENUB.PRG/260.c:968)
+int Menu_Loot_CountContainedCategory(int counted_category, Menu_Loot_LootListItem* loot_list_item)
+{
+    int i;
+    Items_InventoryShield* shield;
+    Items_InventoryWeapon* weapon;
+
+    int category = loot_list_item->itemCategory;
+    int count = 0;
+
+    switch (counted_category) {
+    case Items_ItemCategory_Blade:
+    case Items_ItemCategory_Grip:
+        count += category == Items_ItemCategory_Weapon;
+        // Fallthrough
+
+    case Items_ItemCategory_Weapon:
+    case Items_ItemCategory_Shield:
+    case Items_ItemCategory_Armor:
+    case Items_ItemCategory_Misc:
+        count += category == counted_category;
+        break;
+
+    case Items_ItemCategory_Gem:
+        count += category == Items_ItemCategory_Gem;
+
+        if (category == Items_ItemCategory_Weapon) {
+            weapon = &Menu_Loot_inventory->weapons[loot_list_item->itemIndex];
+            for (i = 0; i < Menu_Loot_inventory->grips[weapon->grip - 1].gemSlots; ++i) {
+                count += weapon->gems[i] != 0;
+            }
+        }
+
+        if (category == Items_ItemCategory_Shield) {
+            shield = &Menu_Loot_inventory->shields[loot_list_item->itemIndex];
+            for (i = 0; i < shield->base.gemSlots; ++i) {
+                count += shield->gems[i] != 0;
+            }
+        }
+
+        break;
+    }
+    return count;
+}
+
+// decomp: MENUB.PRG _droppableUnderCurrentDifficulty (src/MENU/MENUB.PRG/260.c:1113)
+int Menu_Loot_IsDropAllowed(int drop_difficulty_flags)
+{
+    return drop_difficulty_flags & (Audio_Seq_unusedStateFlags.difficulty + 1);
+}
+
+// decomp: MENUB.PRG _applyLootList (src/MENU/MENUB.PRG/260.c:1124)
+void Menu_Loot_StageDropRecord(Items_BattleLoot* drop_record)
+{
+    int i;
+
+    if (Menu_Loot_CanStageDrop(&drop_record->weapon.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->weapon.difficultyFlags, Items_ItemCategory_Weapon, Menu_Loot_StageWeapon(&drop_record->weapon));
+    }
+
+    if (Menu_Loot_CanStageDrop(&drop_record->blade.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->blade.difficultyFlags, Items_ItemCategory_Blade, Menu_Loot_StageBlade(&drop_record->blade.blade, 0));
+    }
+
+    if (Menu_Loot_CanStageDrop(&drop_record->grip.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->grip.difficultyFlags, Items_ItemCategory_Grip, Menu_Loot_StageGrip(&drop_record->grip.grip, 0));
+    }
+
+    if (Menu_Loot_CanStageDrop(&drop_record->shield.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->shield.difficultyFlags, Items_ItemCategory_Shield, Menu_Loot_StageShield(&drop_record->shield));
+    }
+
+    for (i = 0; i < 2; ++i) {
+        if (Menu_Loot_CanStageDrop(&drop_record->armor[i].difficultyFlags) != 0) {
+            Menu_Loot_AppendStagedDrop(&drop_record->armor[i].difficultyFlags,
+                Items_ItemCategory_Armor, Menu_Loot_StageArmor(&drop_record->armor[i].armor));
+        }
+    }
+
+    if (Menu_Loot_CanStageDrop(&drop_record->accessory.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->accessory.difficultyFlags,
+            Items_ItemCategory_Armor, Menu_Loot_StageArmor(&drop_record->accessory.accessory));
+    }
+
+    if (Menu_Loot_CanStageDrop(&drop_record->gem.difficultyFlags) != 0) {
+        Menu_Loot_AppendStagedDrop(&drop_record->gem.difficultyFlags, Items_ItemCategory_Gem, Menu_Loot_StageGem(&drop_record->gem.gem, 0));
+    }
+
+    for (i = 0; i < 3; ++i) {
+        if ((Menu_Loot_CanStageDrop(&drop_record->misc[i].difficultyFlags) != 0)
+            && (drop_record->misc[i].itemId != 0) && (drop_record->misc[i].count != 0)) {
+            Menu_Loot_AppendStagedDrop(&drop_record->misc[i].difficultyFlags, Items_ItemCategory_Misc, Menu_Loot_StageMiscItem(&drop_record->misc[i]));
+        }
+    }
+
+    Menu_Loot_RefreshClaimableRows();
+}
+
+// decomp: MENUB.PRG _applyAllLootLists (src/MENU/MENUB.PRG/260.c:1174)
+void Menu_Loot_BuildStagedInventory(Items_LootListNode* node)
+{
+    Menu_Loot_BeginPaging(node);
+    Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
+
+    if (node != NULL) {
+        while (node != NULL) {
+            Menu_Loot_StageDropRecord(&node->loot);
+            node = node->next;
+        }
+    } else {
+        Menu_Loot_StageDropRecord(Menu_Framework_lootEntry);
+    }
+}
+
+/* Native batching for MENUB 260.c:1124/1174; original bag capacities remain unchanged. */
+static struct {
+    Items_LootListNode* nodes;
+    char* stagedFlags[kMenuLootRowCapacity];
+    int count;
+    int deferred;
+} Menu_Loot_paging;
+
+void Menu_Loot_ResetPaging(void)
+{
+    Core_Memory_ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
+}
+
+void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
+{
+    Menu_Loot_ResetPaging();
+    Menu_Loot_paging.nodes = nodes;
+    Menu_Loot_lootListCount = 0;
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+}
+
+int Menu_Loot_HasStagingSpace(int category, int quantity)
+{
+    return Items_Inventory_CountItems(category, Menu_Loot_inventory) + quantity
+        <= Items_Inventory_inventoryItemCapacities[category];
+}
+
+int Menu_Loot_CanStageDrop(char* difficulty_flags)
+{
+    if (Menu_Loot_IsDropAllowed(*difficulty_flags) == 0) {
+        return 0;
+    }
+    if (Menu_Loot_paging.count == kMenuLootRowCapacity) {
+        Menu_Loot_paging.deferred = 1;
+        return 0;
+    }
+    return 1;
+}
+
+void Menu_Loot_AppendStagedDrop(char* difficulty_flags, int category, int index)
+{
+    if (index == 0) {
+        Menu_Loot_paging.deferred = 1;
+        return;
+    }
+    Menu_Loot_AppendLootRow(category, index);
+    Menu_Loot_paging.stagedFlags[Menu_Loot_paging.count++] = difficulty_flags;
+}
+
+int Menu_Loot_AdvanceStagedInventory(void)
+{
+    int i;
+    Items_LootListNode* nodes = Menu_Loot_paging.nodes;
+    if (Menu_Loot_paging.deferred == 0) {
+        return 0;
+    }
+    /* Called only after claims finish or the existing leave confirmation accepts this batch. */
+    for (i = 0; i < Menu_Loot_paging.count; ++i) {
+        *Menu_Loot_paging.stagedFlags[i] = 0;
+    }
+    Menu_Loot_BuildStagedInventory(nodes);
+    Menu_Loot_lootListOffset = 0;
+    Menu_Loot_selectedLoot = 0;
+    return Menu_Loot_lootListCount != 0;
+}
+
+// decomp: MENUB.PRG _setKeyFlag (src/MENU/MENUB.PRG/260.c:2108)
+void Menu_Loot_RecordClaimedKey(int item_id)
+{
+    if (item_id > 457) {
+        State_SetScriptFlag(item_id + 438, 1);
+    }
+}
+
+}  // extern "C"

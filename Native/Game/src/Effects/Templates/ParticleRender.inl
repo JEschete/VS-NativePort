@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
@@ -11,7 +12,7 @@
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
-// Template body: Effects::Templates::ParticleRender (decomp src/EFFECT/particleRender.h:17). Included once per instance by Effects/Templates/ParticleRender.c with that plugin's bindings.
+// Template body: Effects::Templates::ParticleRender (decomp src/EFFECT/particleRender.h:17). Included once per instance by Effects/Templates/ParticleRender.cpp with that plugin's bindings.
 #ifndef VS_PARTICLE_PRIM_TYPE
 #define VS_PARTICLE_PRIM_TYPE
 #endif
@@ -87,8 +88,8 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
         controlPoints = &particle_set->controlPoints[particleIndex * 4];
         Core_Gte_LoadV0(controlPoints);
         Core_Gte_Rtps();
-        Core_Gte_StoreSxy2(&screenPoints[0]);
-        Core_Gte_StoreSz3Otz(&depths[0]);
+        Core_Gte_StoreSxy2((long *)(&screenPoints[0]));
+        Core_Gte_StoreSz3Otz((long *)(&depths[0]));
         curveSamples[0] = 0;
         for (segment = 1; segment < 8; ++segment) {
             int sampleJitter = Core_Random_Rand();
@@ -102,13 +103,13 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                 &emitter_scratch->vector);
             Core_Gte_LoadV0(&emitter_scratch->vector);
             Core_Gte_Rtps();
-            Core_Gte_StoreSxy2(&screenPoints[segment]);
-            Core_Gte_StoreSz3Otz(&depths[segment]);
+            Core_Gte_StoreSxy2((long *)(&screenPoints[segment]));
+            Core_Gte_StoreSz3Otz((long *)(&depths[segment]));
         }
         Core_Gte_LoadV0(controlPoints + 3);
         Core_Gte_Rtps();
-        Core_Gte_StoreSxy2(&screenPoints[segment]);
-        Core_Gte_StoreSz3Otz(&depths[segment]);
+        Core_Gte_StoreSxy2((long *)(&screenPoints[segment]));
+        Core_Gte_StoreSz3Otz((long *)(&depths[segment]));
         curveSamples[segment] = 0x3000;
 
         for (segment = 0; segment < 8; ++segment) {
@@ -176,7 +177,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                     }
                     break;
                 }
-                prim = Render_frameScratch.primitiveCursor;
+                prim = (Render_ParticleQuadPacket *)(Render_frameScratch.primitiveCursor);
                 Render_frameScratch.primitiveCursor = prim + 1;
                 prim->wordCount = 0xE;
                 prim->opaque4.code = Render_LegacyPrimitiveCode_PolyGt4SemiTrans;
@@ -245,7 +246,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                 }
                 break;
             }
-            prim = Render_frameScratch.primitiveCursor;
+            prim = (Render_ParticleQuadPacket *)(Render_frameScratch.primitiveCursor);
             Render_frameScratch.primitiveCursor = prim + 1;
             prim->wordCount = 0xE;
             prim->opaque4.code = Render_LegacyPrimitiveCode_PolyGt4SemiTrans;
@@ -275,3 +276,4 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
 }
 #undef VS_PARTICLE_PRIM_TYPE
 
+}  // extern "C"
