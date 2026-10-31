@@ -16,6 +16,14 @@ verification of the current worktree.
   `--self-check`. Swaps are journalled in `update-backup` and roll back on failure
   or at the next launch. Copies older than the first updater release, including
   0.0.8, must update by hand once. Releases need numeric tags and unrenamed ZIPs.
+  Published as 0.0.9 from `fae5e12c`. The live UI against the published release
+  passes on disposable copies of the package marked 0.0.8: full update and restart
+  (28 of 28 files match), a locked file rolling back, retry after that failure, and
+  rollback of a simulated interrupted swap. A build without a numeric version is
+  only offered the page link. Limits: tested on the development PC only, and no
+  true release-to-release update has run yet; 0.0.9 to the next release is the
+  first. A power loss between the two renames of a file the launcher needs to start
+  cannot self-recover, so the tester guide says to re-extract the ZIP.
 - #251 indestructible block crash: gimmick actors have no `Actors_actorRecords`
   entry, and F00818 reads through that NULL record on an impact4 hit. The owned
   `Battle_ApplyActionTargetEffects` now skips the defense pose when the record is
