@@ -38,6 +38,20 @@ std::array<SortKey, kCount> KeysFrom(
   }
   return keys;
 }
+
+void CheckOnlyRangeIsOrdered(std::size_t left, std::size_t right) {
+  std::array<std::int32_t, 16> values{};
+  std::iota(values.begin(), values.end(), 0);
+  auto keys = KeysFrom<16>(values);
+  auto expected = keys;
+  std::sort(expected.begin() + static_cast<std::ptrdiff_t>(left),
+            expected.begin() + static_cast<std::ptrdiff_t>(right), Descending);
+  REQUIRE(
+      SortPointersByDescendingKey(std::span(keys).subspan(left, right - left)));
+  for (std::size_t index = 0; index < keys.size(); ++index) {
+    CHECK(keys[index].position == expected[index].position);
+  }
+}
 }  // namespace
 
 TEST_CASE(
@@ -84,20 +98,9 @@ TEST_CASE(
 
 TEST_CASE("Pointer key sorting preserves every outside-range entry",
           "[core][pointer-sort]") {
-  std::array<std::int32_t, 16> values{};
-  std::iota(values.begin(), values.end(), 0);
   for (std::size_t left = 0; left <= 16; ++left) {
     for (std::size_t right = left; right <= 16; ++right) {
-      auto keys = KeysFrom<16>(values);
-      auto expected = keys;
-      std::sort(expected.begin() + static_cast<std::ptrdiff_t>(left),
-                expected.begin() + static_cast<std::ptrdiff_t>(right),
-                Descending);
-      REQUIRE(SortPointersByDescendingKey(
-          std::span(keys).subspan(left, right - left)));
-      for (std::size_t index = 0; index < keys.size(); ++index) {
-        CHECK(keys[index].position == expected[index].position);
-      }
+      CheckOnlyRangeIsOrdered(left, right);
     }
   }
 }
