@@ -39,8 +39,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;ole32.lib;shell32.lib;uuid.lib;comctl32.lib;uxtheme.lib;bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;ole32.lib;shell32.lib;uuid.lib;comctl32.lib;uxtheme.lib;bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;ole32.lib;shell32.lib;uuid.lib;comctl32.lib;uxtheme.lib;bcrypt.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;ole32.lib;shell32.lib;uuid.lib;comctl32.lib;uxtheme.lib;bcrypt.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>$(VSNative)Windows.manifest;$(MSBuildThisFileDirectory)Launcher.manifest;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -50,10 +50,12 @@
     <ClCompile Include="src\DiscValidation.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Setup.cpp" />
+    <ClCompile Include="src\Updates.cpp" />
     <ClCompile Include="src\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Launcher\Setup.hpp" />
+    <ClInclude Include="include\Launcher\Updates.hpp" />
     <ClInclude Include="include\Launcher\Window.hpp" />
   </ItemGroup>
   <ItemGroup>

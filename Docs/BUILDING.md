@@ -108,12 +108,21 @@ Selected saves remain separate and are passed to the game with `--save-dir`.
 Build Release, then create the local ZIP:
 
 ```powershell
-.\tools\release\package-release.ps1 -Version 'alpha-example'
+.\tools\release\package-release.ps1 -Version '0.0.9'
 ```
 
 The packager refuses existing output names, uses an explicit binary whitelist
 and includes no disc images, extracted assets, captures or BIOS. Its
 `release.json` records source revision, dirty state and packaged-file hashes.
+Use the release's numeric Git tag as `-Version` and upload the ZIP unrenamed.
+The launcher compares its `release.json` version with GitHub's latest release
+tag, and only installs the exact asset `VS-NativePort-<tag>-win-x64.zip`. Any
+other release shows a link to its page instead. Builds without a numeric
+`release.json` version, including `build\<Config>`, are never replaced.
+
+Opt-in update checks: `VS.Tests.exe "[.network]"` downloads the published 0.0.8
+package from GitHub, and `VS.Tests.exe "[.package]"` stages the ZIP named by the
+`VS_UPDATE_TEST_ZIP` environment variable.
 FFmpeg remains external; the package does not require Visual Studio, Python,
 Node.js or developer-specific paths. Movie conversion is limited to two SVT
 logical processors to avoid unbounded first-run encoder parallelism.

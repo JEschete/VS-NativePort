@@ -10,12 +10,14 @@
 #include <algorithm>
 #include <array>
 #include <memory>
+#include <optional>
 #include <stdexcept>
 #include <string>
 #include <thread>
 #include <utility>
 #include <vector>
 
+#include "Launcher/Updates.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
 
@@ -35,6 +37,7 @@ constexpr COLORREF kRed = RGB(247, 151, 151);
 constexpr UINT kUpdate = WM_APP + 1;
 constexpr UINT kFinished = WM_APP + 2;
 constexpr UINT kAutoVerify = WM_APP + 3;
+constexpr UINT kUpdateChecked = WM_APP + 4;
 constexpr int kLogicalHeight = 660;
 enum Control {
   kCue = 101,
@@ -54,9 +57,10 @@ enum Control {
   kFooterTitle,
   kFooterDetail,
   kMediaState,
-  kProgress
+  kProgress,
+  kCheckUpdates
 };
-enum class Job { kNone, kVerify, kPlay };
+enum class Job { kNone, kVerify, kPlay, kUpdate };
 
 std::wstring Wide(const std::string& value) {
   return Platform::Utf8Path(value).wstring();
@@ -86,6 +90,7 @@ struct Completion {
   bool verified = false;
   std::string error;
 };
+using UpdateCheck = std::expected<LatestRelease, std::string>;
 struct Widget {
   int id;
   HWND window;
@@ -102,6 +107,10 @@ struct App {
   HBRUSH card_brush = CreateSolidBrush(kCard);
   HBRUSH input_brush = CreateSolidBrush(kInput);
   std::thread worker;
+  std::thread update_worker;
+  bool checking_updates = false;
+  bool silent_update_check = false;
+  std::optional<LatestRelease> pending_update;
   UINT dpi = 96;
   int scroll = 0;
   int hover = 0;
@@ -116,6 +125,7 @@ struct App {
 
   ~App() {
     if (worker.joinable()) worker.join();
+    if (update_worker.joinable()) update_worker.join();
     for (auto font : fonts)
       if (font) DeleteObject(font);
     if (card_brush) DeleteObject(card_brush);
@@ -229,6 +239,7 @@ struct App {
         SS_LEFT);
     Add(kPlay, L"BUTTON", L"Play", button, true);
     Add(kSetupLog, L"BUTTON", L"Setup log", button, true);
+    Add(kCheckUpdates, L"BUTTON", L"Check for updates", button, true);
     SendMessageW(
         Find(kCue), EM_SETCUEBANNER, TRUE,
         reinterpret_cast<LPARAM>(L"Select the CUE that belongs to your BIN"));
@@ -292,6 +303,7 @@ struct App {
     Place(kFooterDetail, 44, footer + 45, right - 260, 38);
     Place(kPlay, right - 176, footer + 21, 176, 48);
     Place(kSetupLog, logical_width - 164, 28, 120, 32);
+    Place(kCheckUpdates, logical_width - 328, 28, 152, 32);
     InvalidateRect(window, nullptr, FALSE);
   }
 
@@ -306,6 +318,7 @@ struct App {
     EnableWindow(Find(kPlay),
                  !Busy() && verified && !Text(Find(kSaves)).empty());
     EnableWindow(Find(kVerify), !Busy() && !Text(Find(kCue)).empty());
+    EnableWindow(Find(kCheckUpdates), !checking_updates && job != Job::kUpdate);
     InvalidateRect(window, nullptr, FALSE);
   }
 
@@ -522,7 +535,9 @@ struct App {
 
   void Update(const UiUpdate& update) {
     Bar(update.percent);
-    if (update.stage == SetupStage::kDisc) {
+    if (job == Job::kUpdate) {
+      Set(kFooterDetail, Wide(update.message));
+    } else if (update.stage == SetupStage::kDisc) {
       Set(kDiscState, L"Verifying BIN: " +
                           std::to_wstring(std::max(update.percent, 0)) + L"%");
       Set(kFooterDetail,
@@ -542,6 +557,10 @@ struct App {
   void Finish(const Completion& completion) {
     if (worker.joinable()) worker.join();
     job = Job::kNone;
+    if (completion.job == Job::kUpdate) {
+      FinishUpdate(completion);
+      return;
+    }
     verified = completion.verified;
     last_error = completion.error;
     Bar(verified ? 100 : 0);
@@ -564,6 +583,10 @@ struct App {
       Set(kDetails, L"Disc details");
     }
     Enable();
+    if (pending_update) {
+      const auto release = *std::exchange(pending_update, std::nullopt);
+      OfferUpdate(release);
+    }
   }
 
   void InvalidateDisc() {
@@ -640,6 +663,137 @@ struct App {
             .c_str(),
         L"Disc verification details",
         MB_OK | (last_error.empty() ? MB_ICONINFORMATION : MB_ICONERROR));
+  }
+
+  // Runs apart from the disc/game job, so a slow network never blocks Play.
+  // A silent check only speaks up when there is a newer version to offer.
+  void CheckForUpdates(bool silent) {
+    if (checking_updates || job == Job::kUpdate) return;
+    if (update_worker.joinable()) update_worker.join();
+    update_worker = std::thread([this] {
+      auto check = std::make_unique<UpdateCheck>(std::unexpected(""));
+      try {
+        *check = FetchLatestRelease();
+      } catch (const std::exception& error) {
+        *check = std::unexpected(error.what());
+      }
+      // The window may already be closed; the result is then not needed.
+      if (PostMessageW(window, kUpdateChecked, 0,
+                       reinterpret_cast<LPARAM>(check.get()))) {
+        check.release();
+      }
+    });
+    checking_updates = true;
+    silent_update_check = silent;
+    Set(kCheckUpdates, L"Checking...");
+    Enable();
+  }
+
+  void FinishUpdateCheck(const UpdateCheck& check) {
+    if (update_worker.joinable()) update_worker.join();
+    checking_updates = false;
+    Set(kCheckUpdates, L"Check for updates");
+    Enable();
+    if (!check) {
+      if (!silent_update_check) {
+        Error(window, "Cannot check for updates.\n\n" + check.error());
+      }
+      return;
+    }
+    const auto installed = InstalledVersion(installation);
+    switch (CompareRelease(installed, check->version)) {
+      case UpdateStatus::kCurrent:
+        if (!silent_update_check) {
+          MessageBoxW(
+              window,
+              Wide("You have the latest version (" + installed + ").").c_str(),
+              L"Check for updates", MB_OK | MB_ICONINFORMATION);
+        }
+        return;
+      case UpdateStatus::kUnknownInstalled:
+        // Only a packaged release can be replaced, never a development build.
+        if (!silent_update_check) {
+          OfferReleasePage(*check,
+                           "The latest release is " + check->version +
+                               ". This copy has no comparable version number.");
+        }
+        return;
+      case UpdateStatus::kAvailable:
+        // Waits for a disc check or game session; files must not change then.
+        if (Busy()) {
+          pending_update = *check;
+        } else {
+          OfferUpdate(*check);
+        }
+        return;
+    }
+  }
+
+  void OfferReleasePage(const LatestRelease& release,
+                        const std::string& message) {
+    const auto prompt = message + "\n\nOpen the release page to download it?";
+    if (MessageBoxW(window, Wide(prompt).c_str(), L"Check for updates",
+                    MB_YESNO | MB_ICONINFORMATION) == IDYES) {
+      Open(Wide(release.url));
+    }
+  }
+
+  void OfferUpdate(const LatestRelease& release) {
+    const auto available = "Version " + release.version +
+                           " is available. You have " +
+                           InstalledVersion(installation) + ".";
+    if (release.asset_url.empty()) {
+      OfferReleasePage(release, available);
+      return;
+    }
+    const auto prompt =
+        available +
+        "\n\nDownload and install it now? The launcher restarts when it "
+        "finishes. Your saves, settings and prepared game files are kept.";
+    if (MessageBoxW(window, Wide(prompt).c_str(), L"Update available",
+                    MB_YESNO | MB_ICONINFORMATION) == IDYES) {
+      BeginUpdate(release);
+    }
+  }
+
+  void BeginUpdate(const LatestRelease& release) {
+    if (Busy()) return;
+    worker = std::thread([this, release] {
+      Completion completion{Job::kUpdate, false, {}};
+      try {
+        const auto result = InstallRelease(
+            release, installation,
+            [this](const std::string& text, int percent) {
+              Post(kUpdate, UiUpdate{SetupStage::kDisc, text, percent});
+            });
+        if (!result) completion.error = result.error();
+      } catch (const std::exception& error) {
+        completion.error = error.what();
+      }
+      Post(kFinished, std::move(completion));
+    });
+    job = Job::kUpdate;
+    Set(kFooterTitle, Wide("Updating to version " + release.version));
+    Set(kFooterDetail, L"Starting the download...");
+    Bar(0);
+    Enable();
+  }
+
+  void FinishUpdate(const Completion& completion) {
+    if (!completion.error.empty()) {
+      Bar(verified ? 100 : 0);
+      Set(kFooterTitle, L"Update not installed");
+      Set(kFooterDetail,
+          Wide(completion.error.substr(0, completion.error.find('\n'))));
+      Enable();
+      Error(window, "The update was not installed.\n\n" + completion.error);
+      return;
+    }
+    Bar(100);
+    Open(installation / "VS.Launcher.exe",
+         L"--finish-update " + std::to_wstring(GetCurrentProcessId()) +
+             L" --state-dir \"" + state.wstring() + L"\"");
+    DestroyWindow(window);
   }
 
   void Command(int id, int notification) {
@@ -722,6 +876,9 @@ struct App {
           Error(window,
                 "No setup log yet. Setup output appears here after preparation "
                 "starts.");
+        break;
+      case kCheckUpdates:
+        CheckForUpdates(false);
         break;
       default:
         break;
@@ -823,11 +980,17 @@ LRESULT CALLBACK WindowProcedure(HWND window, UINT message, WPARAM wparam,
           app->Finish(*completion);
           return 0;
         }
+        case kUpdateChecked: {
+          const std::unique_ptr<UpdateCheck> check(
+              reinterpret_cast<UpdateCheck*>(lparam));
+          app->FinishUpdateCheck(*check);
+          return 0;
+        }
         case WM_CLOSE:
           if (app->Busy()) {
             Error(window,
-                  "A disc check, setup or game session is active. Wait for "
-                  "setup or close the game first.");
+                  "A disc check, setup, update or game session is active. "
+                  "Wait for it to finish or close the game first.");
             return 0;
           }
           break;
@@ -881,6 +1044,7 @@ int ShowLauncher(const Settings& settings, const fs::path& installation,
   app.Build(settings);
   ShowWindow(window, show);
   PostMessageW(window, kAutoVerify, 0, 0);
+  app.CheckForUpdates(true);
   MSG message{};
   int result = 0;
   while ((result = GetMessageW(&message, nullptr, 0, 0)) > 0) {

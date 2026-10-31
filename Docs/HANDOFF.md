@@ -9,6 +9,13 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Launcher updates: the launcher checks GitHub's latest release on open and from
+  **Check for updates**, then asks before installing. Installs need a numeric
+  `release.json` version, GitHub's SHA-256 for the exact
+  `VS-NativePort-<tag>-win-x64.zip` asset, a matching file manifest and a staged
+  `--self-check`. Swaps are journalled in `update-backup` and roll back on failure
+  or at the next launch. Copies older than the first updater release, including
+  0.0.8, must update by hand once. Releases need numeric tags and unrenamed ZIPs.
 - #251 indestructible block crash: gimmick actors have no `Actors_actorRecords`
   entry, and F00818 reads through that NULL record on an impact4 hit. The owned
   `Battle_ApplyActionTargetEffects` now skips the defense pose when the record is

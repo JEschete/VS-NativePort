@@ -39,8 +39,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/WHOLEARCHIVE:$(OutDir)VS.Engine.lib /WHOLEARCHIVE:$(OutDir)VS.Content.lib /WHOLEARCHIVE:$(OutDir)VS.Game.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
@@ -171,6 +171,7 @@
     <ClCompile Include="src\VignetteRenderTests.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp" />
+    <ClCompile Include="..\Tools\Launcher\src\Updates.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\DoorTests.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp" />

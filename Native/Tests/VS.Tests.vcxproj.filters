@@ -303,6 +303,9 @@
     <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp">
       <Filter>..\Tools\Launcher\src</Filter>
     </ClCompile>
+    <ClCompile Include="..\Tools\Launcher\src\Updates.cpp">
+      <Filter>..\Tools\Launcher\src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\CombatLab\src\Canvas.cpp">
       <Filter>..\Tools\CombatLab\src</Filter>
     </ClCompile>
