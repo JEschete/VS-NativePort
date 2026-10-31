@@ -18,6 +18,13 @@ constexpr unsigned kSharedBankCount = 3;
 constexpr unsigned kMissingAnimation = 255;
 constexpr unsigned kHeaderWords = 5;
 constexpr unsigned kBoneHeaderWords = 2;
+// Finished steps, falls and reactions store this to reinitialize the next clip.
+// The old pose stays bound, so it must still unwind (#252).
+constexpr unsigned kReinitializeSet = 0xFF;
+
+bool MatchesBoundSet(unsigned physical, unsigned bound_set) {
+  return bound_set == kReinitializeSet || physical == bound_set;
+}
 }  // namespace
 
 // F00998/44F14.c:610 and F00279/146C.c:9008 must undo the bound old pose.
@@ -36,8 +43,8 @@ intptr_t Actors_FindBoundAnimationHeader(Actors_ActorRecord* actor,
     const auto bank =
         Actors_FindActorAnimationHeader(actor, animation, header_out);
     if (bank != actor->animationHeader ||
-        static_cast<u_char>(Actors_lastResolvedSequenceIndex) !=
-            actor->animationSet) {
+        !MatchesBoundSet(static_cast<u_char>(Actors_lastResolvedSequenceIndex),
+                         actor->animationSet)) {
       *header_out = nullptr;
       return 0;
     }
@@ -53,7 +60,8 @@ intptr_t Actors_FindBoundAnimationHeader(Actors_ActorRecord* actor,
   if (!owned) return 0;
   const auto* map = VS_ONDISC(bound, animationMap, const u_char*);
   const unsigned physical = map[animation - kSharedAnimationFirst];
-  if (physical == kMissingAnimation || physical != actor->animationSet) {
+  if (physical == kMissingAnimation ||
+      !MatchesBoundSet(physical, actor->animationSet)) {
     return 0;
   }
   const std::size_t stride =

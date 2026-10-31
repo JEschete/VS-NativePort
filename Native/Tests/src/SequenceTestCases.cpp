@@ -382,6 +382,22 @@ TEST_CASE("Shared-bank retirement retains borrowers across selector changes",
   CHECK(TestSharedSequenceRetirementControl(6) == 1);
 }
 
+TEST_CASE("Pose unwind accepts the reinitialize sentinel on a bound clip",
+          "[actors][animation][sequence-retirement]") {
+  CHECK(TestAnimationEventUnwind(11) == 1);
+  CHECK(TestAnimationEventUnwind(12) == 1);
+}
+
+TEST_CASE("A new animation replaces the reinitialize sentinel while carrying",
+          "[actors][animation][sequence-retirement]") {
+  CHECK(TestAnimationEventUnwind(13) == 1);
+}
+
+TEST_CASE("Pose unwind still rejects a clip bound to another sequence",
+          "[actors][animation][sequence-retirement]") {
+  CHECK(TestAnimationEventUnwind(14) == 1);
+}
+
 TEST_CASE("Bound shared clips preserve the full native physical-index byte",
           "[actors][animation][sequence-retirement]") {
   CHECK(TestAnimationEventUnwind(10) == 1);

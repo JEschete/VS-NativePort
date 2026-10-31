@@ -9,6 +9,17 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- #252 carrying a box: finished steps, falls and reactions store `animationSet`
+  0xFF to reinitialize the next clip, and the carry walk's morph events set
+  `poseOverrideActive`. The bound lookup added for #226 compared that marker with
+  the resolved set, so the unwind failed and `Actors_PlayActorAnimation` refused
+  every later animation. Ashley stayed in the carry walk until he stopped
+  responding (504 `cannot unwind` errors at the reported log). The marker now
+  counts as still bound; a clip bound to another set is still rejected. The owner's
+  live zone9/room11 Debug playtest on the fix: 2,034 carrying frames, 7 recoveries
+  from the marker, including the carry-fall clip, 0 errors, still responsive.
+  Limits: neither log shows Ashley below floor level, so the reported fall is
+  closed on the owner's playtest, not on a measured depth.
 - Launcher updates: the launcher checks GitHub's latest release on open and from
   **Check for updates**, then asks before installing. Installs need a numeric
   `release.json` version, GitHub's SHA-256 for the exact
