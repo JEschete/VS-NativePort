@@ -56,7 +56,7 @@ F01268,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
 F01269,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
 F01270,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
 F01288,Native\Game\src\Battle\TargetingDraw.cpp,,,,,,,,,
-F01296,Native\Game\src\Battle\TargetPages.cpp,x,,,,x,,,,
+F01296,Native\Game\src\Battle\TargetPages.cpp,x,x,x,x,x,x,verify:VR-BATTLE-TARGET-PAGES,faa20036e41eb438854cc84c0affdbaf47cf2868,"#46 slice: VS::Battle::SetSphereTargets partitions candidates by actor ID into a TargetPageBook and shows the first page through TargetSphere, with no legacy header in its closure; SetLiveSphereTargets in TargetPagesLive.cpp binds the battle sphere and the action previews as a span; generated Targeting.cpp callers use it through CheckedTargetPreviews by copier fixup; no data word stores 0x800C1664"
 F01309,Native\Game\src\Battle\SphereTerrain.cpp,x,,,,x,,,,
 F01593,Native\Game\src\Effects\ParticleRender.cpp,x,,,,x,,,,
 F01594,Native\Game\src\Effects\ParticleRender.cpp,x,,,,x,,,,

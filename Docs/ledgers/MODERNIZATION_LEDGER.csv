@@ -1294,7 +1294,7 @@ F01292,Battle_IsPointInTargetCylinder,Battle::IsPointInTargetCylinder,Native\Gam
 F01293,Battle_IsPointInTargetCone,Battle::IsPointInTargetCone,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,47,relaxed,found,x,,,,,,,0,0,0,x,,x,ptr_cast,no,no,0,,characterize-first,
 F01294,Battle_IsPointInTargetPrism,Battle::IsPointInTargetPrism,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,61,relaxed,found,x,,,,,,,0,0,0,x,,x,inline_asm,no,no,0,,characterize-first,
 F01295,Battle_IsPointInTargetVolume,Battle::IsPointInTargetVolume,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,33,relaxed,found,x,,,,,,,2,0,0,x,,x,,no,yes,33,,executed,
-F01296,Battle_SetSphereTargets,Battle::SetSphereTargets,Native\Game\src\Battle\TargetPages.cpp,owned,todo,56,24,22,strict,found,x,x,,,,x,,1,0,1,x,,,,yes,no,87,,executed,
+F01296,VS::Battle::SetSphereTargets,Battle::SetSphereTargets,Native\Game\src\Battle\TargetPages.cpp,owned,done,56,24,22,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,no,87,VR-BATTLE-TARGET-PAGES,recorded,
 F01297,Battle_ClearSphereTargets,Battle::ClearSphereTargets,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,5,relaxed,found,x,,,,,,,3,0,0,x,,,,no,yes,75,,executed,
 F01298,Battle_DrawRightTargetLabelLink,Battle::DrawRightTargetLabelLink,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,82,relaxed,found,x,,,,,,,0,0,0,x,,,scratchpad,yes,no,95,,executed,
 F01299,Battle_DrawLeftTargetLabelLink,Battle::DrawLeftTargetLabelLink,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,82,relaxed,found,x,,,,,,,0,0,0,x,,,scratchpad,yes,no,87,,executed,

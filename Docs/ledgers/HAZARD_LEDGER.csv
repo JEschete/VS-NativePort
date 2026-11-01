@@ -395,7 +395,7 @@ f8f11c15795e,DIV-ZERO,medium,pattern,F01287,Battle_DrawSphereWireLine,Native/Gam
 58adfaccd6e6,DIV-ZERO,medium,pattern,,Slope,Native/Game/src/Battle/SphereTerrain.cpp,90,height,56,24,open,
 1dea544e7639,DIV-ZERO,medium,pattern,,OccludeCorners,Native/Game/src/Battle/SphereTerrain.cpp,309,points.size(),56,24,open,
 2ab572068425,DIV-ZERO,medium,pattern,,CircleRows,Native/Game/src/Battle/SphereTerrain.cpp,340,points.size(),56,24,open,
-4ba47347fc08,DIV-ZERO,medium,pattern,,Battle_AdvanceTargetPage,Native/Game/src/Battle/TargetPages.cpp,120,pages.size(),56,24,open,
+7fc763d843c0,DIV-ZERO,medium,pattern,,Battle_AdvanceTargetPage,Native/Game/src/Battle/TargetPagesLive.cpp,122,book.pages.size(),56,24,open,
 70671f15c8d2,DIV-ZERO,medium,pattern,F01313,Battle_UpdateSphereTargetPosition,Native/Game/src/Battle/Targeting.cpp,917,scale,56,24,open,
 e10085046dcf,DIV-ZERO,medium,pattern,F01313,Battle_UpdateSphereTargetPosition,Native/Game/src/Battle/Targeting.cpp,917,scale,56,24,open,
 5ba2a79371bd,DIV-ZERO,medium,pattern,F01313,Battle_UpdateSphereTargetPosition,Native/Game/src/Battle/Targeting.cpp,971,flags.opaque1Bit0,56,24,open,
