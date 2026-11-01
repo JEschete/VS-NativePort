@@ -33,8 +33,8 @@ F00773,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00774,Native\Game\src\Field\MinimapScene.cpp,x,,,,x,,,,
 F00775,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00878,Native\Game\src\Actors\ModelDrawing.cpp,,,,,,,,,
-F00920,Native\Game\src\Field\PlatformPlacement.cpp,x,,,,x,,,,
-F00938,Native\Game\src\Field\PlatformPlacement.cpp,x,,,,x,,,,
+F00920,Native\Game\src\Field\PlatformPlacement.cpp,x,x,x,x,x,x,verify:VR-FIELD-PLATFORM-LOOKUP-SLICE,c74a7967ba2b12eb3d9cd8d96062eda8c24c2026,"#46 slice: VS::Field::FindMovingPlatformById and MovingPlatformPlacement read MovingPlatformPose spans and bounce offsets with no legacy header in their closure and return std::optional<PlatformContact> by value (no thread-local snapshot or out-pointer); FindLiveMovingPlatformById/LiveMovingPlatformPlacement in PlatformPlacementLive.cpp bind the room platforms, bounce frames and D_80068BEC; generated ActorState/Movement/Collision callers hold the contact in std::optional locals by copier fixup; the ModulePointers entry is dropped since no data word stores 0x800A4A24"
+F00938,Native\Game\src\Field\PlatformPlacement.cpp,x,x,x,x,x,x,verify:VR-FIELD-PLATFORM-LOOKUP-SLICE,c74a7967ba2b12eb3d9cd8d96062eda8c24c2026,"#46 slice: VS::Field::FindMovingPlatformById and MovingPlatformPlacement read MovingPlatformPose spans and bounce offsets with no legacy header in their closure and return std::optional<PlatformContact> by value (no thread-local snapshot or out-pointer); FindLiveMovingPlatformById/LiveMovingPlatformPlacement in PlatformPlacementLive.cpp bind the room platforms, bounce frames and D_80068BEC; generated ActorState/Movement/Collision callers hold the contact in std::optional locals by copier fixup; the ModulePointers entry is dropped since no data word stores 0x800A4A24"
 F00979,Native\Game\src\Actors\AppearanceTransition.cpp,,,,,,,,,
 F00980,Native\Game\src\Actors\AppearanceTransition.cpp,,,,,,,,,
 F00989,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,

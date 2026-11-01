@@ -13,7 +13,7 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Roadmap step and issue | Owned left | Generated left | Original lines | Under test | Characterize first | Unmeasured |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 3: #45 Owned game, session and scene state | 20 | 335 | 9,301 | 172 | 186 | 0 |
+| 3: #45 Owned game, session and scene state | 18 | 335 | 9,268 | 172 | 186 | 0 |
 | 4: #44 Runtime modes and logical ticks | 5 | 22 | 893 | 11 | 16 | 0 |
 | 5: #52 Logical input and typed settings | 0 | 20 | 403 | 19 | 1 | 0 |
 | 6: #47 Stable asset IDs and decoded records | 0 | 28 | 1,734 | 26 | 2 | 0 |
@@ -32,22 +32,22 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 4 | 7 | 216 | 0 | 11 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 638 | 36,178 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 228 | 3480 | 107,772 | 1600 | 2160 | 0 |
+| **Total** | 226 | 3480 | 107,739 | 1600 | 2160 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 52 |
-| todo | 3,708 |
+| done | 54 |
+| todo | 3,706 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 179 | 1,896 |
-| Referenced by the original-address module table | 178 | 2,120 |
+| Called from generated code | 177 | 1,896 |
+| Referenced by the original-address module table | 176 | 2,120 |
 | Calls an SDK shim | 10 | 461 |
 | Signature uses SDK integer types or `void*` | 41 | 862 |
 | Compiled with relaxed settings | 86 | 3,478 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 179 of 228 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 177 of 226 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 
