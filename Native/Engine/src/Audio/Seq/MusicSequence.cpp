@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/MusicVoiceConflicts.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -357,7 +358,7 @@ void Audio_Seq_StartMusicLayer(Audio_CommandParams* command)
     Audio_Seq_activeMusicConfig->masterVolume = (command->extParam1 & 0x7F) << 0x10;
     Audio_Seq_activeMusicConfig->masterVolumeSlideLength = 0;
     Audio_Seq_activeMusicConfig->musicId = command->param3;
-    Audio_Seq_ReleaseSavedVoiceConflicts();
+    VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts();
     Audio_Driver_controlLatches.mixBehavior &= ~0x100;
 }
 
@@ -390,7 +391,7 @@ void Audio_Seq_CrossfadeMusicLayers(Audio_CommandParams* command)
     Audio_Seq_activeMusicConfig->masterVolume = 0;
     Audio_Seq_activeMusicConfig->masterVolumeSlideLength = command->extParam1;
     Audio_Seq_activeMusicConfig->masterVolumeStep = ((command->extParam2 & 0x7F) << 0x10) / command->extParam1;
-    Audio_Seq_ReleaseSavedVoiceConflicts();
+    VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts();
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_12_unk (src/SLUS_010.40/25AC.c:3034)

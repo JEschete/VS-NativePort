@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Audio/MusicVoiceConflicts.hpp"
 #include "Field/CollisionSampling.hpp"
 
 extern "C" {
@@ -117,7 +118,7 @@ int TestsSavedMusicVoiceConflicts(void) {
         Audio_Mixer_voiceScheduler.activeVoices = reservation & 1 ? bit : 0;
         Audio_Cutscene_streamVoices = reservation & 2 ? bit : 0;
         Audio_Mixer_voiceScheduler.pendingKeyOff = 1U << 25;
-        Audio_Seq_ReleaseSavedVoiceConflicts();
+        VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts();
         for (channel = 0; channel < 32; ++channel) {
           const unsigned expected = channel < 2 && !conflict ? voice : 24;
           failures += channels[channel].voice.assignedVoice != expected;
@@ -129,7 +130,7 @@ int TestsSavedMusicVoiceConflicts(void) {
   }
   Audio_Seq_secondaryMusicConfig = nullptr;
   Audio_Mixer_voiceScheduler.pendingKeyOff = 1;
-  Audio_Seq_ReleaseSavedVoiceConflicts();
+  VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts();
   failures += Audio_Mixer_voiceScheduler.pendingKeyOff != 1;
   Audio_Seq_activeMusicConfig = original_current;
   Audio_Seq_secondaryMusicConfig = original_saved;

@@ -117,9 +117,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Audio\MusicState.cpp">
+    <ClCompile Include="src\Audio\MusicLayers.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
+    <ClCompile Include="src\Audio\MusicState.cpp" />
     <ClCompile Include="src\Audio\Playback\SoundPlayback.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -681,6 +682,7 @@
     <ClInclude Include="include\Audio\AudioDevice.hpp" />
     <ClInclude Include="include\Audio\LfoWaveforms.h" />
     <ClInclude Include="include\Audio\MusicState.h" />
+    <ClInclude Include="include\Audio\MusicVoiceConflicts.hpp" />
     <ClInclude Include="include\Audio\Reverb.hpp" />
     <ClInclude Include="include\Audio\SequencerOutput.h" />
     <ClInclude Include="include\Audio\StreamPlayback.h" />

@@ -195,6 +195,9 @@
     <ClInclude Include="src\Audio\Music.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\MusicLayers.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\MusicState.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -667,6 +670,9 @@
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\MusicState.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\MusicVoiceConflicts.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\Reverb.hpp">

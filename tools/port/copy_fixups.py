@@ -33,6 +33,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Actors::ActorRecordMovementRequests": r"Native\Game\include\Actors\MovementCommand.hpp",
     "VS::Battle::Ai::CaptureBattleActorConditions": r"Native\Game\src\Battle\Ai\ConditionSnapshotBinding.hpp",
     "VS::Field::LiveRoomCollisionMap": r"Native\Game\include\Field\CollisionSampling.hpp",
+    "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2572,6 +2573,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Field::SampleCollisionHeightCode\(",
      r"VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), ",
      "F00772 #46 typed promotion: height samples read the live room collision map as checked bytes"),
+    (r"", r"\bVS::Audio::Seq::ReleaseSavedVoiceConflicts\(\)",
+     r"VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts()",
+     "F03198 #46 typed promotion: the sequencer binding supplies the live music layers and keys off "
+     "the released voices"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

@@ -37,7 +37,6 @@ extern "C" {
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Music.h"
-#include "Audio/MusicState.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
@@ -2735,7 +2734,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80015970u, 0u, (void*)&Audio_Mixer_BuildVoiceModeMask, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80015AFCu, 0u, (void*)&Audio_Samples_MapInstrumentToAlternateBank, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80015B54u, 0u, (void*)&Audio_Samples_MapInstrumentToBaseBank, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80015BACu, 0u, (void*)&Audio_Seq_ReleaseSavedVoiceConflicts, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80015C9Cu, 0u, (void*)&Audio_Seq_ResetSoundEffectChannel, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80015D38u, 0u, (void*)&Audio_Seq_AssignedVoiceMask, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80015D84u, 0u, (void*)&Audio_Seq_LoadMusicSequence, 0u, 0u, 0u},

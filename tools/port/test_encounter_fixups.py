@@ -1279,6 +1279,18 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("Field_SampleCollisionHeightCode(", collision)
 
+    def test_saved_music_voice_release_uses_the_live_sequencer_binding(self):
+        owned = self.owned_items()
+        self.assertEqual(owned["F03198"]["name"], "VS::Audio::Seq::ReleaseSavedVoiceConflicts")
+        root = Path(__file__).resolve().parents[2]
+        sequence = (root / r"Native\Engine\src\Audio\Seq\MusicSequence.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('#include "Audio/MusicVoiceConflicts.hpp"', sequence)
+        self.assertEqual(sequence.count("VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts();"), 2)
+        self.assertNotIn("ReleaseSavedVoiceConflicts()", sequence.replace(
+            "ReleaseLiveSavedVoiceConflicts()", ""))
+
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
             fix
