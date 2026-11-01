@@ -1767,7 +1767,7 @@ F01765,Battle_Ai_TickActorDecisionTimers,Battle::Ai::TickActorDecisionTimers,Nat
 F01766,Battle_Ai_TargetFacingCosine,Battle::Ai::TargetFacingCosine,Native\Game\src\Battle\Ai\MovementBehavior.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,0,1,,,x,,yes,yes,100,,executed,
 F01767,VS::Field::IsPositionAboveGround,Field::IsPositionAboveGround,Native\Game\src\Field\TerrainHeight.cpp,owned,done,57,23,0,strict,found,x,x,x,x,x,x,x,0,0,1,,,,,yes,yes,100,VR-F01767,recorded,
 F01768,VS::Field::IsTerrainSegmentBlocked,Field::IsTerrainSegmentBlocked,Native\Game\src\Field\TerrainHeight.cpp,owned,done,57,23,0,strict,found,x,x,x,x,x,x,x,1,0,1,,,,,yes,yes,91,VR-F01768,recorded,
-F01769,Core_ElapsedFrameCounterTicks,Core::ElapsedFrameCounterTicks,Native\Engine\src\Core\FrameTiming.cpp,owned,todo,45,3,0,strict,found,x,x,,,,x,,3,1,1,x,,,,yes,yes,100,,executed,
+F01769,VS::Core::ElapsedFrameCounterTicks,Core::ElapsedFrameCounterTicks,Native\Engine\src\Core\FrameTiming.cpp,owned,done,45,3,0,strict,found,x,x,x,x,x,x,x,3,1,2,,,,,yes,yes,100,VR-CORE-FRAME-TIMING,recorded,
 F01770,Battle_Ai_NextActorRandomMasked,Battle::Ai::NextActorRandomMasked,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,3,2,1,x,,,,yes,yes,100,,executed,
 F01771,VS::Core::Math::SquaredTileDistance,Core::Math::SquaredTileDistance,Native\Engine\src\Core\Math\Distance.cpp,owned,done,51,9,0,strict,found,x,x,x,x,x,x,x,1,1,1,,,,,yes,yes,100,VR-AI-DISTANCE,recorded,
 F01772,VS::Core::Math::SquaredTileDistanceFromComponents,Core::Math::SquaredTileDistanceFromComponents,Native\Engine\src\Core\Math\Distance.cpp,owned,done,51,9,0,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,yes,100,VR-AI-DISTANCE,recorded,

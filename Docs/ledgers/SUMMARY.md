@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 32 | 21 (`wip`) | 4,154 |
-| `cpp` | 32 | 248 (`wip`) | 3,927 |
+| `modernized` | 33 | 20 (`wip`) | 4,154 |
+| `cpp` | 33 | 247 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 186 |
-| `vs_namespace` | 32 |
-| `typed_interface` | 32 |
-| `no_bridge` | 32 |
+| `vs_namespace` | 33 |
+| `typed_interface` | 33 |
+| `no_bridge` | 33 |
 | `strict_clean` | 186 |
-| `behavior_evidence` | 32 |
+| `behavior_evidence` | 33 |
 
-Promotion records: 280; derived `cpp=x`: 32, `cpp=wip`: 248. Verification records: 51; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 33, `cpp=wip`: 247. Verification records: 52; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -144,6 +144,9 @@ the in-place destinations for SDK records. The reciprocal-root table is computed
 192 disc entries; non-positive input returns no root and squared lengths of 2^31 and above stay in the table,
 where the original read neighbouring tables. The module entries retire; `Core_Gte_Sin`/`Cos` stay C. A full clang-tidy scan then cleared the findings the
 promotion slices had introduced and pruned the stale ScalarMath baseline entries (37b30cde), so `strict_clean` holds.
+The seventh is frame-work timing (F01769): `VS::Core::ElapsedFrameCounterTicks` and its replay step and baseline hooks
+(`Core/FrameTiming.hpp`) replace the C ABI. Stepped replay reads now wrap at 16 bits like the clock path, and the jal-only
+BATTLE module entry retires.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
