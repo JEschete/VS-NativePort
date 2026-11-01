@@ -285,6 +285,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Battle\Ai\CurrentTerrain.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\DecisionCallbacks.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -1593,9 +1596,7 @@
     <ClCompile Include="src\Field\SegmentCollision.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\TerrainHeight.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
+    <ClCompile Include="src\Field\TerrainHeight.cpp" />
     <ClCompile Include="src\Field\Transitions.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2114,6 +2115,7 @@
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h" />
+    <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\Engagement.h" />
@@ -2357,7 +2359,6 @@
     <ClInclude Include="src\Field\RoomState.h" />
     <ClInclude Include="src\Field\RoomTriggerMarkers.h" />
     <ClInclude Include="src\Field\SegmentCollision.h" />
-    <ClInclude Include="src\Field\TerrainHeight.h" />
     <ClInclude Include="src\Field\Transitions.h" />
     <ClInclude Include="src\Field\Traps.h" />
     <ClInclude Include="src\Field\TriggerMarkers.h" />
@@ -2444,6 +2445,7 @@
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />
+    <ClInclude Include="include\Field\TerrainHeight.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />
     <ClInclude Include="include\Items\KeyItems.h" />

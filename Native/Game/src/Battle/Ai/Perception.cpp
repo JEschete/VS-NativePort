@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -33,7 +35,6 @@ extern "C" {
 #include "Core/FrameTiming.h"
 #include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
-#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -68,7 +69,7 @@ int Battle_Ai_IsTargetOccludedAtExtent(
     } else {
         extent = 128;
     }
-    return Field_IsTerrainSegmentBlocked(from, to, extent, state->bodyHeight);
+    return VS::Field::IsTerrainSegmentBlocked(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::PositionOf(*from), VS::Core::Math::PositionOf(*to), extent, state->bodyHeight);
 }
 #undef RELATION_STATES
 
@@ -91,7 +92,7 @@ int Battle_Ai_IsTargetOccludedAtHeight(
     if (own < 0) {
         own = -own;
     }
-    return Field_IsTerrainSegmentBlocked(from, to, height, own);
+    return VS::Field::IsTerrainSegmentBlocked(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::PositionOf(*from), VS::Core::Math::PositionOf(*to), height, own);
 }
 #undef RELATION_STATES
 

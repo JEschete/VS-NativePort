@@ -10,6 +10,7 @@
 #include <cstdlib>
 #include <limits>
 
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -23,7 +24,6 @@ extern "C" {
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
-#include "Field/TerrainHeight.h"
 }
 
 #include "Core/Math/Distance.hpp"
@@ -306,7 +306,10 @@ void Battle_Ai_MoveToTile(Battle_Ai_CandidateMovementView* view,
   const int z = cell.z * kTileSize + kTileCenter;
   const auto distance = VS::Core::Math::SquaredVectorLength(
       x - state.position.vx,
-      Field_GroundHeightAtPackedTile(tile) - state.position.vy,
+      VS::Field::GroundHeightAtPackedTile(
+          VS::Battle::Ai::CurrentTerrain(),
+          VS::Core::Math::UnpackTileCoordinate(tile)) -
+          state.position.vy,
       z - state.position.vz);
   const auto limit =
       static_cast<unsigned>(radius) * static_cast<unsigned>(radius);

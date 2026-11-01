@@ -16,6 +16,9 @@
     <Filter Include="include\Diagnostics">
       <UniqueIdentifier>{BA6EB3B9-90AD-5335-8089-7F3CE11BFBBA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Field">
+      <UniqueIdentifier>{1E0884FE-22B7-578E-BCE0-52CBAEFF5982}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Items">
       <UniqueIdentifier>{1D41767F-4F50-54FF-BE39-1D5F1897B58C}</UniqueIdentifier>
     </Filter>
@@ -388,6 +391,12 @@
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h">
+      <Filter>src\Battle\Ai</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Battle\Ai\CurrentTerrain.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\DecisionCallbacks.cpp">
@@ -1728,9 +1737,6 @@
     <ClCompile Include="src\Field\TerrainHeight.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\TerrainHeight.h">
-      <Filter>src\Field</Filter>
-    </ClInclude>
     <ClCompile Include="src\Field\Transitions.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2198,6 +2204,9 @@
     </ClInclude>
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\TerrainHeight.hpp">
+      <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Equipment.h">
       <Filter>include\Items</Filter>

@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 9796016,
+  "assertions": 9796033,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -943,6 +943,7 @@
    "Prologue Lab profiles preserve normal starting restrictions",
    "Prologue progression suppresses presentation without losing loot",
    "Promoted distance helpers have no original module addresses",
+   "Promoted terrain queries have no original module addresses",
    "Prompt and action-cost panels retain the lower menu chain",
    "Pursuit behavior clears six approach bytes but not adjacent options",
    "Pursuit refresh preserves coordinates when the cached target is gone",
@@ -1220,7 +1221,9 @@
    "Teleport companion propagation respects busy state and cyclic links",
    "Teleport requests admit only idle reactions and clear the whole state byte",
    "Temper damages the target and restores weapon DP",
+   "Terrain API takes decoded values instead of register words",
    "Terrain lookup preserves full grid row stride and final cell bounds",
+   "Terrain queries read only the grid they are given",
    "Terrain ray advances before testing its first point",
    "Terrain ray keeps arithmetic step rounding and endpoint quantization",
    "Terrain ray preserves the original zero-ground flag semantics",

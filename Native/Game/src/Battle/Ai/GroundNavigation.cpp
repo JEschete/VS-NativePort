@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
-#include "Field/TerrainHeight.h"
 }
 
 #include "Core/Math/Distance.hpp"
@@ -242,7 +242,8 @@ int Blocker(Battle_Ai_ActorAiState& state, int direction) {
             : -1;
     const int height = RegionBlocked(state, lookup)
                            ? state.position.vy
-                           : Field_GroundHeightAtWorldPosition(x, z);
+                           : VS::Field::GroundHeightAtWorldPosition(
+                                 VS::Battle::Ai::CurrentTerrain(), x, z);
     result = FirstBlockingActor(state, [&](const Bounds& other) {
       const int dx = other.x - x, dz = other.z - z;
       if ((delta.x > 0 && dx < 0) || (delta.x < 0 && dx > 0) ||
@@ -273,7 +274,8 @@ int Occupancy(Battle_Ai_ActorAiState& state, unsigned packed) {
   if ((Cell(tile) & blocked) != 0) return 0;
   const int x = tile.x * (1 << kTileShift) + kTileCenter;
   const int z = tile.z * (1 << kTileShift) + kTileCenter;
-  const int height = Field_GroundHeightAtTile(tile.x, tile.z);
+  const int height = VS::Field::GroundHeightAtTile(
+      VS::Battle::Ai::CurrentTerrain(), tile.x, tile.z);
   return FirstBlockingActor(
              state,
              [&](const Bounds& other) {
@@ -313,8 +315,10 @@ int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
   int dz = target.z - source.z;
   if (dx < 0) dz = -dz;
   if (dz < 0) dz = -dz;
-  const int rise = Field_GroundHeightAtTile(target.x, target.z) -
-                   Field_GroundHeightAtTile(source.x, source.z);
+  const int rise = VS::Field::GroundHeightAtTile(
+                       VS::Battle::Ai::CurrentTerrain(), target.x, target.z) -
+                   VS::Field::GroundHeightAtTile(
+                       VS::Battle::Ai::CurrentTerrain(), source.x, source.z);
   bool checked = false;
   if (dx < 2 && dz < 2) {
     if (Blocker(state, direction) != 0) return result(0, "actor-blocker");
@@ -775,15 +779,23 @@ unsigned int Battle_Ai_FindAiDescentTile(Battle_Ai_ActorAiState* view,
   const auto delta = Delta(direction);
   auto tile = Unpack(packed);
   if (!InGrid(tile)) return 0;
-  const int raw = Field_GroundHeightFlagsAtPackedTile(packed);
+  const int raw = VS::Field::GroundHeightFlagsAtPackedTile(
+      VS::Battle::Ai::CurrentTerrain(),
+      VS::Core::Math::UnpackTileCoordinate(packed));
   if (raw < 0) return 0;
-  const int floor = Field_GroundHeightAtPackedTile(packed);
-  if (Field_GroundHeightAtPackedTile(state.tile.word) >= floor) return 0;
+  const int floor = VS::Field::GroundHeightAtPackedTile(
+      VS::Battle::Ai::CurrentTerrain(),
+      VS::Core::Math::UnpackTileCoordinate(packed));
+  if (VS::Field::GroundHeightAtPackedTile(
+          VS::Battle::Ai::CurrentTerrain(),
+          VS::Core::Math::UnpackTileCoordinate(state.tile.word)) >= floor)
+    return 0;
   for (int taken = 0; taken < kAiFrameGridSide; ++taken) {
     tile.x += delta.x;
     tile.z += delta.z;
     if (!InGrid(tile)) return 0;
-    if (Field_GroundHeightAtTile(tile.x, tile.z) < floor) {
+    if (VS::Field::GroundHeightAtTile(VS::Battle::Ai::CurrentTerrain(), tile.x,
+                                      tile.z) < floor) {
       const unsigned target = (packed & ~kTileMask) | Pack(tile);
       return Step(state, state.tile.word, target, direction) > 0 &&
                      Occupancy(state, target) > 0

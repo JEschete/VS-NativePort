@@ -2223,7 +2223,9 @@ class Copier:
                     includes.add(self.norm_header(sibling_header(path)))
                 spelled = sorted(include_spelling(x) for x in includes - {path})
                 body = strip_code("".join(i.text for i in f.items if i.kind != "macro"))
-                promoted = {include_spelling(self.provider[n]) for n in QUALIFIED_VS.findall(body) if n in self.provider}
+                promoted = {include_spelling(self.provider.get(n) or cf.NATIVE_HELPER_HEADERS[n])
+                            for n in QUALIFIED_VS.findall(body)
+                            if n in self.provider or n in cf.NATIVE_HELPER_HEADERS}
                 cpp_headers = [h for h in spelled if h in promoted]  # promoted C++ APIs keep C++ linkage
                 lines = ["// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.\n"]
                 lines += [f'#include "{h}"\n' for h in cpp_headers]

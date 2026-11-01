@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -30,7 +32,6 @@ extern "C" {
 #include "Core/FrameTiming.h"
 #include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
-#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -97,7 +98,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
         if (entry->opaque10Bit1) {
             point[0] = (state->plannedTile.bytes[0] << 7) + 64;
             point[2] = (state->plannedTile.bytes[2] << 7) + 64;
-            point[1] = Field_GroundHeightAtWorldPosition(point[0], point[2]);
+            point[1] = VS::Field::GroundHeightAtWorldPosition(VS::Battle::Ai::CurrentTerrain(), point[0], point[2]);
             distance =
                 Core_Math_SquareRootInteger(VS::Core::Math::SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(point), VS::Core::Math::PositionOf(Actors_actorRecords[id]->instance.position),
                     state->pointHeight, ((Battle_Ai_CandidateMovementView*)Battle_Ai_actorAiStates[id])->pointHeight));
@@ -109,7 +110,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
         }
         x = (state->destination.bytes[0] << 7) + 64;
         z = (state->destination.bytes[2] << 7) + 64;
-        y = Field_GroundHeightAtWorldPosition(x, z);
+        y = VS::Field::GroundHeightAtWorldPosition(VS::Battle::Ai::CurrentTerrain(), x, z);
         if (VS::Core::Math::SquaredVectorLength(
                 x - state->position[0], y - state->position[1], z - state->position[2])
             <= 0xFFFF) {

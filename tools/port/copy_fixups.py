@@ -26,6 +26,7 @@ NATIVE_SIGNATURE_REWRITES = {
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
 NATIVE_HELPER_HEADERS = {
+    "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "Field_FindGimmickForActorSlot":
         r"Native\Game\src\Field\GimmickLookup.h",
     **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
@@ -2501,6 +2502,18 @@ FIXES["F00798"] += [
 ]
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    (r"^Battle::Ai::", r"\bVS::Field::GroundHeight(Flags)?AtPackedTile\(((?:[^()]|\([^()]*\))*)\)",
+     r"VS::Field::GroundHeight\1AtPackedTile(VS::Battle::Ai::CurrentTerrain(), "
+     r"VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(\2)))",
+     "F01760/F01762 #46 typed promotion: the AI tile word is decoded by the caller and the frame's terrain grid "
+     "is passed explicitly instead of read from a hidden global"),
+    (r"^Battle::Ai::", r"\bVS::Field::(GroundHeight(?:Flags)?At(?:Tile|WorldPosition)|IsPositionAboveGround)\(",
+     r"VS::Field::\1(VS::Battle::Ai::CurrentTerrain(), ",
+     "F01759/F01761/F01763/F01764/F01767 #46 typed promotion: the frame's terrain grid is passed explicitly"),
+    (r"^Battle::Ai::", r"\bVS::Field::IsTerrainSegmentBlocked\((\w+), (\w+), ",
+     r"VS::Field::IsTerrainSegmentBlocked(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::PositionOf(*\1), "
+     r"VS::Core::Math::PositionOf(*\2), ",
+     "F01768 #46 typed promotion: endpoints are read as Position3 values instead of SVECTOR pointers"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

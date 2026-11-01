@@ -11,13 +11,14 @@
 #include <iterator>
 #include <optional>
 
+#include "Battle/Ai/CurrentTerrain.hpp"
+
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
-#include "Field/TerrainHeight.h"
 }
 
 namespace {
@@ -295,7 +296,8 @@ int TileCommandZ(unsigned tile) {
 
 void StageTilePosition(Battle_Ai_ActorAiState& state, int x, int z) {
   state.nextPosition.vx = Half(x);
-  state.nextPosition.vy = Half(Field_GroundHeightAtWorldPosition(x, z));
+  state.nextPosition.vy = Half(VS::Field::GroundHeightAtWorldPosition(
+      VS::Battle::Ai::CurrentTerrain(), x, z));
   state.nextPosition.vz = Half(z);
 }
 
@@ -320,8 +322,13 @@ void WalkToTile(Battle_Ai_ActorAiState& state, Battle_Actor& actor) {
 
 void StepToTile(Battle_Ai_ActorAiState& state, Battle_Actor& actor) {
   const auto tile = state.nextTile.word;
-  const int rise = std::abs(Field_GroundHeightAtPackedTile(tile) -
-                            Field_GroundHeightAtPackedTile(state.tile.word));
+  const int rise =
+      std::abs(VS::Field::GroundHeightAtPackedTile(
+                   VS::Battle::Ai::CurrentTerrain(),
+                   VS::Core::Math::UnpackTileCoordinate(tile)) -
+               VS::Field::GroundHeightAtPackedTile(
+                   VS::Battle::Ai::CurrentTerrain(),
+                   VS::Core::Math::UnpackTileCoordinate(state.tile.word)));
   std::uint16_t threshold = 0;
   std::memcpy(&threshold, state.step_height_bytes, sizeof(threshold));
   Core_Debugf("ai.move",
@@ -474,8 +481,9 @@ void Battle_Ai_IssueActorCommand(Battle_Ai_ActorAiState* state, int action) {
       actor->commandArg1.word =
           Packed(z, actor->commandArg1.word >> kHalfWordBits);
       actor->commandArg0 =
-          Packed(x + kTileCenter,
-                 Field_GroundHeightAtWorldPosition(x, z) + state->flightHeight);
+          Packed(x + kTileCenter, VS::Field::GroundHeightAtWorldPosition(
+                                      VS::Battle::Ai::CurrentTerrain(), x, z) +
+                                      state->flightHeight);
       break;
     }
     case Intent::kWalkToTile:

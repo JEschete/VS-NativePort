@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory>
 
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/Math/Distance.hpp"
 #include "Legacy/Psx.h"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
-#include "Field/TerrainHeight.h"
 }
 
 namespace {
@@ -360,10 +360,13 @@ int Battle_Ai_IsAdjacentTileStepBlocked(unsigned int tile, int direction) {
       next_z >= kAiFrameGridSide) {
     return 1;
   }
-  const int raw = Field_GroundHeightFlagsAtTile(next_x, next_z);
+  const int raw = VS::Field::GroundHeightFlagsAtTile(
+      VS::Battle::Ai::CurrentTerrain(), next_x, next_z);
   if (raw < 0) return 1;
-  return std::abs(Field_GroundHeightAtTile(x, z) -
-                  Field_GroundHeightAtTile(next_x, next_z)) >=
+  return std::abs(VS::Field::GroundHeightAtTile(
+                      VS::Battle::Ai::CurrentTerrain(), x, z) -
+                  VS::Field::GroundHeightAtTile(
+                      VS::Battle::Ai::CurrentTerrain(), next_x, next_z)) >=
          kMaximumGroundStep;
 }
 

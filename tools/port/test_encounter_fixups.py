@@ -1289,8 +1289,14 @@ class EncounterFixupTests(unittest.TestCase):
         with registry.open(encoding="utf-8", newline="") as stream:
             owned = {row["id"]: row for row in csv.DictReader(stream)}
         for fid, name in (
-            ("F01767", "Field_IsPositionAboveGround"),
-            ("F01768", "Field_IsTerrainSegmentBlocked"),
+            ("F01759", "VS::Field::GroundHeightAtWorldPosition"),
+            ("F01760", "VS::Field::GroundHeightAtPackedTile"),
+            ("F01761", "VS::Field::GroundHeightAtTile"),
+            ("F01762", "VS::Field::GroundHeightFlagsAtPackedTile"),
+            ("F01763", "VS::Field::GroundHeightFlagsAtWorldPosition"),
+            ("F01764", "VS::Field::GroundHeightFlagsAtTile"),
+            ("F01767", "VS::Field::IsPositionAboveGround"),
+            ("F01768", "VS::Field::IsTerrainSegmentBlocked"),
         ):
             with self.subTest(fid=fid):
                 self.assertEqual(owned[fid]["name"], name)
@@ -1300,8 +1306,38 @@ class EncounterFixupTests(unittest.TestCase):
                 )
                 self.assertEqual(
                     owned[fid]["header"],
-                    r"Native\Game\src\Field\TerrainHeight.h",
+                    r"Native\Game\include\Field\TerrainHeight.hpp",
                 )
+
+    def test_promoted_terrain_callers_pass_the_grid_and_decoded_values(self):
+        fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
+                 if "VS::Field::" in pat]
+        self.assertEqual(len(fixes), 3)
+        self.assertTrue(all(re.search(row, "Battle::Ai::Movement") for row, _, _ in fixes))
+        text = "\n".join((
+            "a = VS::Field::GroundHeightAtPackedTile(state->tile.word);",
+            "b = VS::Field::GroundHeightFlagsAtPackedTile(state->tile);",
+            "c = VS::Field::GroundHeightAtTile(x, z);",
+            "d = VS::Field::GroundHeightAtWorldPosition(x, z);",
+            "e = VS::Field::GroundHeightFlagsAtTile(nx, nz);",
+            "f = VS::Field::IsTerrainSegmentBlocked(from, to, extent, own);",
+        ))
+        for _, pat, rep in fixes:
+            text = re.sub(pat, rep, text)
+        terrain = "VS::Battle::Ai::CurrentTerrain()"
+        self.assertEqual(text.splitlines(), [
+            f"a = VS::Field::GroundHeightAtPackedTile({terrain}, "
+            "VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile.word)));",
+            f"b = VS::Field::GroundHeightFlagsAtPackedTile({terrain}, "
+            "VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile)));",
+            f"c = VS::Field::GroundHeightAtTile({terrain}, x, z);",
+            f"d = VS::Field::GroundHeightAtWorldPosition({terrain}, x, z);",
+            f"e = VS::Field::GroundHeightFlagsAtTile({terrain}, nx, nz);",
+            f"f = VS::Field::IsTerrainSegmentBlocked({terrain}, VS::Core::Math::PositionOf(*from), "
+            "VS::Core::Math::PositionOf(*to), extent, own);",
+        ])
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["VS::Battle::Ai::CurrentTerrain"],
+                         r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp")
 
     def test_palette_pulse_uses_the_native_gimmick_owner(self):
         registry = Path(__file__).resolve().with_name("owned.csv")

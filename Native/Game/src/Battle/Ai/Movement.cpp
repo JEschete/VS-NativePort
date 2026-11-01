@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -31,7 +33,6 @@ extern "C" {
 #include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
-#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -259,7 +260,7 @@ int Battle_Ai_CanFlyInDirection(Battle_Ai_DirectionCacheView* state, int directi
         goto invalid;
     }
     if (Battle_Ai_roomAiState->flightCeiling
-        && Field_GroundHeightAtTile(x, z) + state->flightHeight < Battle_Ai_roomAiState->flightCeiling) {
+        && VS::Field::GroundHeightAtTile(VS::Battle::Ai::CurrentTerrain(), x, z) + state->flightHeight < Battle_Ai_roomAiState->flightCeiling) {
         return 0;
     }
     MOVEMENT_CHECK_CACHE->tested |= 1 << direction;
@@ -292,7 +293,7 @@ int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, i
                 return 1;
             }
         } else if (Battle_Ai_roomAiState->flightCeiling) {
-            if (Field_GroundHeightAtPackedTile(state->tile) + state->flightHeight < Battle_Ai_roomAiState->flightCeiling) {
+            if (VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile))) + state->flightHeight < Battle_Ai_roomAiState->flightCeiling) {
                 if (state->model->opaque8 & 0x200000) {
                     if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {
                         Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
@@ -362,7 +363,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         int offsetZ;
         int actorY;
         actorY = ((Battle_Ai_StepActorView*)Actors_actorRecords[state->actorId])->y;
-        rise = Field_GroundHeightAtPackedTile(state->tile.word);
+        rise = VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile.word)));
         if (actorY >= rise) {
             selectedHeight = rise + state->flightHeight;
         } else if (Battle_Ai_roomAiState->flightCeiling && Battle_Ai_roomAiState->flightCeiling >= actorY) {
@@ -413,7 +414,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         actor = (Battle_Ai_StepActorView*)Actors_actorRecords[state->actorId];
         if (!(MOVEMENT_STEP_TILES[state->destination.tile.tileZ][state->destination.tile.tileX]
                 & 0x20)) {
-            floorY += Field_GroundHeightAtPackedTile(state->destination.word);
+            floorY += VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination.word)));
         }
         tileX = state->destination.tile.tileX * 128;
         deltaX = state->position.tile.positionX - 64;
@@ -457,7 +458,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         return;
     case 7:
-        height = Field_GroundHeightAtPackedTile(state->destination.word) + state->flightHeight;
+        height = VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination.word))) + state->flightHeight;
         px = state->position.word & 0xFFFF;
         py = (int)state->position.word >> 16;
         pz = state->z;
@@ -693,7 +694,7 @@ u_char Battle_Ai_FilterDirectionsByGroundHeight(u_char direction_mask, u_int pac
 
     for (i = 0; i < 8; ++i) {
         if ((direction_mask >> i) & 1) {
-            if (Field_GroundHeightAtTile(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dx,
+            if (VS::Field::GroundHeightAtTile(VS::Battle::Ai::CurrentTerrain(), x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dx,
                     z + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i].dz)
                 > maximum_ground_height) {
                 direction_mask &= ~(1 << i);
@@ -1270,7 +1271,7 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
             nx = (unsigned char)(x + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx);
             nz = (unsigned char)(z + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz);
             if (nx < bounds[0] && nz < bounds[1]) {
-                height = (Field_GroundHeightFlagsAtTile(nx, nz) << 17) >> 17;
+                height = (VS::Field::GroundHeightFlagsAtTile(VS::Battle::Ai::CurrentTerrain(), nx, nz) << 17) >> 17;
                 if (height > bestHeight) {
                     bestDirection = direction;
                     bestHeight = height;

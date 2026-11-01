@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Battle/Ai/FlightTerrain.h"
+#include "Battle/Ai/CurrentTerrain.hpp"
 
+extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -18,6 +18,7 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitives.h"
+#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
-#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Legacy/Psx.h"
@@ -72,7 +72,8 @@ int Battle_Ai_LowestReachableGroundHeight(Battle_Ai_ActorAiState* state,
               Battle_Ai_FrameState()->directions);
       int tile_x = state->tile.tile.tileX + direction_deltas[direction].dx;
       int tile_z = state->tile.tile.tileZ + direction_deltas[direction].dz;
-      int ground_height = Field_GroundHeightAtTile(tile_x, tile_z);
+      int ground_height = VS::Field::GroundHeightAtTile(
+          VS::Battle::Ai::CurrentTerrain(), tile_x, tile_z);
       if (ground_height < minimum_height) {
         minimum_height = ground_height;
       }
@@ -101,7 +102,8 @@ int Battle_Ai_MinimumAiGroundHeightAlongSegment(int start_x, int start_z,
     start_x += step_x;
     start_z += step_z;
     int ground_height = SignedNavigationGroundHeight(
-        Field_GroundHeightFlagsAtWorldPosition(start_x, start_z));
+        VS::Field::GroundHeightFlagsAtWorldPosition(
+            VS::Battle::Ai::CurrentTerrain(), start_x, start_z));
     if (ground_height < minimum_height) {
       minimum_height = ground_height;
     }

@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -20,7 +22,6 @@ extern "C" {
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
-#include "Field/TerrainHeight.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 
@@ -149,7 +150,7 @@ void Battle_Ai_FindNearestActiveWaypoint(Battle_Ai_WaypointSearchView* state, Ba
             z = ((packed * 4) & 0xF80) + 0x40;
             dx = state->x - x;
             dz = state->z - z;
-            distance = VS::Core::Math::SquaredVectorLength(dx, state->y - Field_GroundHeightAtWorldPosition(x, z), dz);
+            distance = VS::Core::Math::SquaredVectorLength(dx, state->y - VS::Field::GroundHeightAtWorldPosition(VS::Battle::Ai::CurrentTerrain(), x, z), dz);
             if (distance < closest) {
                 destination->x =
                     (signed char)(Battle_Ai_WaypointValue(Battle_Ai_roomWaypoints, index) & 0x1F);

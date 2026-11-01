@@ -1,4 +1,4 @@
-﻿"""Generate VagrantStory.Native.sln and every Native\\*.vcxproj (+ .vcxproj.filters) from one declarative table.
+"""Generate VagrantStory.Native.sln and every Native\\*.vcxproj (+ .vcxproj.filters) from one declarative table.
 
 Layout (owner decision 2026-10-17, "hybrid"):
   Native\\Engine   VS.Engine   engine systems, one folder each: src\\<System>\\, include\\<System>\\, Legacy\\<System>\\
@@ -155,6 +155,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\SphereTerrain.cpp",
                 r"src\Battle\TargetPages.cpp",
                 r"src\Battle\Ai\PlanningWorkspace.cpp",
+                r"src\Battle\Ai\CurrentTerrain.cpp",
                 r"src\Field\EncounterCatalog.cpp",
                 r"src\Field\DoorMatches.cpp",
                 r"src\Field\SegmentCollision.cpp",
@@ -177,7 +178,6 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\ParticleRender.cpp",
                 r"src\Effects\TextureBindings.cpp",
                 r"src\Battle\Ai\GroundNavigation.cpp",
-                r"src\Field\TerrainHeight.cpp",
                 r"src\Menu\Sounds.cpp",
                 r"src\Save\NativeSnapshot.cpp",
                 r"src\Save\RuntimeSnapshot.cpp",
