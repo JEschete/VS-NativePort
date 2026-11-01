@@ -714,3 +714,55 @@ TEST_CASE("Promoted distance helpers have no original module addresses",
                                             address) == nullptr);
   }
 }
+
+namespace {
+using RotationRows = std::array<std::array<std::int64_t, 3>, 3>;
+
+RotationRows ReferenceAxis(int axis, int angle) {
+  const std::int64_t sine = static_cast<std::int16_t>(Math::Sine(angle));
+  const std::int64_t cosine = static_cast<std::int16_t>(Math::Cosine(angle));
+  const std::int64_t negative = static_cast<std::int16_t>(-sine);
+  RotationRows rows{{{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}}};
+  const int first = axis == 0 ? 1 : 0;
+  const int second = axis == 2 ? 1 : 2;
+  rows[first][first] = cosine;
+  rows[second][second] = cosine;
+  rows[first][second] = axis == 1 ? sine : negative;
+  rows[second][first] = axis == 1 ? negative : sine;
+  return rows;
+}
+
+RotationRows ReferenceProduct(const RotationRows& left,
+                              const RotationRows& right) {
+  RotationRows product{};
+  for (int row = 0; row < 3; ++row) {
+    for (int column = 0; column < 3; ++column) {
+      std::int64_t sum = 0;
+      for (int k = 0; k < 3; ++k) sum += left[row][k] * right[k][column];
+      product[row][column] = static_cast<std::int16_t>(sum >> 12);
+    }
+  }
+  return product;
+}
+}  // namespace
+
+TEST_CASE("YXZ rotation multiplies Ry, Rx and Rz with truncated products",
+          "[core][math]") {
+  const int x = GENERATE(0, 1, 512, 1024, 1365, 2048, 3000, 4095, -700);
+  const int y = GENERATE(0, 3, 777, 2048, -1024);
+  const int z = GENERATE(0, 64, 1536, 4000);
+  const auto expected = ReferenceProduct(
+      ReferenceProduct(ReferenceAxis(1, y), ReferenceAxis(0, x)),
+      ReferenceAxis(2, z));
+  const Math::Mat3 typed = Math::BuildRotationMatrixYXZ({x, y, z});
+  SVECTOR angles = {static_cast<std::int16_t>(x), static_cast<std::int16_t>(y),
+                    static_cast<std::int16_t>(z), 0};
+  MATRIX bridged{};
+  CHECK(Core_Gte_RotMatrixYXZ(&angles, &bridged) == &bridged);
+  for (int row = 0; row < 3; ++row) {
+    for (int column = 0; column < 3; ++column) {
+      CHECK(typed.m[row][column] == expected[row][column]);
+      CHECK(bridged.m[row][column] == expected[row][column]);
+    }
+  }
+}

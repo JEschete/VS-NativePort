@@ -85,6 +85,23 @@ std::int16_t SaturateToHalfword(std::int64_t value) noexcept {
                                std::numeric_limits<std::int16_t>::max()));
 }
 
+// Q12 matrix product; `narrow` reduces each shifted 64-bit sum to a halfword.
+template <typename Narrow>
+Mat3 MultiplyQ12(const Mat3& left, const Mat3& right, Narrow narrow) noexcept {
+  Mat3 product;
+  for (int row = 0; row < kDimensions; ++row) {
+    for (int column = 0; column < kDimensions; ++column) {
+      std::int64_t sum = 0;
+      for (int component = 0; component < kDimensions; ++component) {
+        sum +=
+            std::int64_t{left.m[row][component]} * right.m[component][column];
+      }
+      product.m[row][column] = narrow(sum >> kFixedFractionBits);
+    }
+  }
+  return product;
+}
+
 double AngleRadians(std::int32_t angle) noexcept {
   return static_cast<double>(static_cast<std::uint32_t>(angle) & kAngleMask) *
          kRadiansPerAngleUnit;
@@ -125,18 +142,7 @@ Vec3 SquareVectorComponents(Vec3 input) noexcept {
 
 // decomp: SLUS_010.40 func_80041C68 (src/SLUS_010.40/32154.s:280).
 Mat3 MultiplyMatrixIntoRight(const Mat3& left, const Mat3& right) noexcept {
-  Mat3 product;
-  for (int row = 0; row < kDimensions; ++row) {
-    for (int column = 0; column < kDimensions; ++column) {
-      std::int64_t sum = 0;
-      for (int component = 0; component < kDimensions; ++component) {
-        sum +=
-            std::int64_t{left.m[row][component]} * right.m[component][column];
-      }
-      product.m[row][column] = SaturateToHalfword(sum >> kFixedFractionBits);
-    }
-  }
-  return product;
+  return MultiplyQ12(left, right, SaturateToHalfword);
 }
 
 // decomp: SLUS_010.40 MulMatrix (src/SLUS_010.40/32154.s:275).
@@ -247,6 +253,49 @@ Mat3 BuildEulerRotationMatrixQuadrant(Angles3 rotation) noexcept {
   output.m[2][2] =
       static_cast<std::int16_t>((cos_y * cos_x) >> kFixedFractionBits);
   return output;
+}
+
+namespace {
+enum class RotationAxis { kX, kY, kZ };
+constexpr std::int16_t kUnitElement = 1 << kFixedFractionBits;
+
+Mat3 AxisRotation(RotationAxis axis, std::int32_t angle) noexcept {
+  const auto sine = static_cast<std::int16_t>(Sine(angle));
+  const auto cosine = static_cast<std::int16_t>(Cosine(angle));
+  const auto negative_sine = static_cast<std::int16_t>(-sine);
+  Mat3 output;
+  for (int index = 0; index < kDimensions; ++index) {
+    output.m[index][index] = kUnitElement;
+  }
+  switch (axis) {
+    case RotationAxis::kX:
+      output.m[1][1] = cosine, output.m[1][2] = negative_sine;
+      output.m[2][1] = sine, output.m[2][2] = cosine;
+      break;
+    case RotationAxis::kY:
+      output.m[0][0] = cosine, output.m[0][2] = sine;
+      output.m[2][0] = negative_sine, output.m[2][2] = cosine;
+      break;
+    case RotationAxis::kZ:
+      output.m[0][0] = cosine, output.m[0][1] = negative_sine;
+      output.m[1][0] = sine, output.m[1][1] = cosine;
+      break;
+  }
+  return output;
+}
+
+Mat3 MultiplyTruncated(const Mat3& left, const Mat3& right) noexcept {
+  return MultiplyQ12(left, right, [](std::int64_t value) noexcept {
+    return static_cast<std::int16_t>(value);
+  });
+}
+}  // namespace
+
+// libgte RotMatrixYXZ as the native GTE bridge has always computed it.
+Mat3 BuildRotationMatrixYXZ(Angles3 rotation) noexcept {
+  const Mat3 yx = MultiplyTruncated(AxisRotation(RotationAxis::kY, rotation.y),
+                                    AxisRotation(RotationAxis::kX, rotation.x));
+  return MultiplyTruncated(yx, AxisRotation(RotationAxis::kZ, rotation.z));
 }
 
 // decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s); BATTLE 4B16C.s:8

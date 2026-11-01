@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "Actors/MovementCommand.hpp"
+#include "Battle/TargetingDrawLive.hpp"
 
 extern "C" {
 #include "ActorAssets.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
-#include "Battle/TargetingDraw.h"
 #include "CdDrive.h"
 #include "Effects/Camera.h"
 #include "Effects/Runtime.h"
@@ -481,18 +481,18 @@ int Tests_TargetSphereWireframe(void) {
   volume.kind = 1;
   volume.scale.extents[0] = volume.scale.extents[1] = volume.scale.extents[2] =
       4;
-  Battle_DrawSphereVolumeWireframe(&volume, 0x010401);
+  VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   int passed = frame->primitiveCursor == packets + 6 &&
                (ordering[128] & 0xFFFFFF) == LegacyGpu_Handle(packets + 1) &&
                (packets[1] >> 24) == 4 && packets[3] == 0x42208020u &&
                packets[5] == 0x007800A0u && packets[0] == 0xA5A5A5A5u &&
                packets[6] == 0xA5A5A5A5u;
   sphere.wireVertices[1].opaque6 = 2;
-  Battle_DrawSphereVolumeWireframe(&volume, 0x010401);
+  VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   passed = passed && frame->primitiveCursor == packets + 11 &&
            packets[8] == 0x40208020u && packets[11] == 0xA5A5A5A5u;
   sphere.vertexCount = 0;
-  Battle_DrawSphereVolumeWireframe(&volume, 0x010401);
+  VS::Battle::DrawLiveSphereVolumeWireframe(&volume, 0x010401);
   passed = passed && frame->primitiveCursor == packets + 11;
   Battle_targetSphere = savedSphere;
   *frame = savedFrame;

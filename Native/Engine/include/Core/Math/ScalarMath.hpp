@@ -113,6 +113,10 @@ struct NormalizedVector {
 // Rotation built in the actor-model Euler order.
 [[nodiscard]] Mat3 BuildEulerRotationMatrixQuadrant(Angles3 rotation) noexcept;
 
+// The libgte RotMatrixYXZ rotation Ry * Rx * Rz, each axis matrix built from
+// truncated Q12 sine and cosine and each product truncated to a halfword.
+[[nodiscard]] Mat3 BuildRotationMatrixYXZ(Angles3 rotation) noexcept;
+
 // Multiplies each column by the matching scale component, truncated to a
 // signed halfword, with each element saturated to a signed halfword.
 [[nodiscard]] Mat3 ScaleMatrixColumns(const Mat3& matrix, Vec3 scale) noexcept;

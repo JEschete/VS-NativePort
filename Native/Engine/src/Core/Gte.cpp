@@ -305,12 +305,8 @@ MATRIX* Core_Gte_RotMatrix(SVECTOR* r, MATRIX* m) {
 }
 
 MATRIX* Core_Gte_RotMatrixYXZ(SVECTOR* r, MATRIX* m) {
-  short rx[3][3], ry[3][3], rz[3][3];
-  AxisRotation(0, r->vx, rx);
-  AxisRotation(1, r->vy, ry);
-  AxisRotation(2, r->vz, rz);
-  Multiply(ry, rx, m->m);
-  Multiply(m->m, rz, m->m);
+  VS::Core::Math::StoreMatrix(
+      *m, VS::Core::Math::BuildRotationMatrixYXZ({r->vx, r->vy, r->vz}));
   return m;
 }
 

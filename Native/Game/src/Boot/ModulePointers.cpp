@@ -99,7 +99,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
-#include "Battle/TargetingDraw.h"
 #include "Battle/TextBoxes.h"
 #include "Battle/ValueLabels.h"
 #include "Boot/GameLoop.h"
@@ -1606,7 +1605,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C0758u, 0u, (void*)&Battle_AppendSphereArcVertices, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C085Cu, 0u, (void*)&Battle_BuildSphereVolumeTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0990u, 0u, (void*)&Battle_DrawSphereWireLine, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0B50u, 0u, (void*)&Battle_DrawSphereVolumeWireframe, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0D78u, 0u, (void*)&Battle_DrawSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0FA8u, 0u, (void*)&Battle_BuildTargetVolumeTestTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1034u, 0u, (void*)&Battle_IsPointInTargetEllipsoid, 0u, 0u, 0u},

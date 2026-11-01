@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/TargetingDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
-#include "Battle/TargetingDraw.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
@@ -410,7 +410,7 @@ void Battle_DrawSphere(void)
             continue;
         }
         Battle_BuildSphereWireframe(type);
-        Battle_DrawSphereVolumeWireframe(shape, color);
+        VS::Battle::DrawLiveSphereVolumeWireframe(shape, color);
     }
     Battle_UpdateSphereTargetLabels();
     Battle_DrawTargetPageHint();

@@ -1,89 +1,76 @@
 // Hand-maintained (tools/port/owned.csv).
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include "Battle/TargetingDraw.hpp"
+
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
 
 #include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Battle/BattleTypes.h"
-#include "Battle/Sphere.h"
-#include "Battle/TargetVolume.h"
-#include "Battle/TargetingDraw.h"
-#include "Core/Gte.h"
-#include "Legacy/Psx.h"
-#include "Render/Sprites.h"
+
+namespace VS::Battle {
+namespace {
+namespace math = Core::Math;
+
+constexpr std::size_t kSpatialDimensions = 3;
+constexpr unsigned kFixedFractionBits = 12;
+constexpr std::int64_t kFixedOne = std::int64_t{1} << kFixedFractionBits;
+constexpr int kPulseAngleStep = 64;
+constexpr int kIntensityMaximum = 32;
+constexpr std::uint32_t kWireCommand = 0x44000000;
+constexpr unsigned kSegmentFlagShift = 25;
+
+std::array<std::int16_t, kSpatialDimensions> WorldPoint(
+    const TargetWireVolume& volume, const math::Mat3& rotation,
+    const TargetWireVertex& vertex) {
+  std::array<std::int16_t, kSpatialDimensions> world{};
+  for (std::size_t axis = 0; axis < kSpatialDimensions; ++axis) {
+    std::int64_t sum = std::int64_t{volume.position[axis]} * kFixedOne;
+    for (std::size_t component = 0; component < kSpatialDimensions;
+         ++component) {
+      sum += std::int64_t{rotation.m[axis][component]} *
+             vertex.position[component];
+    }
+    world[axis] = static_cast<std::int16_t>(std::clamp<std::int64_t>(
+        sum >> kFixedFractionBits, std::numeric_limits<std::int16_t>::min(),
+        std::numeric_limits<std::int16_t>::max()));
+  }
+  return world;
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_800C0B50 (src/BATTLE/BATTLE.PRG/58350.s:8).
-void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
-  enum {
-    kSpatialDimensions = 3,
-    kFixedFractionBits = 12,
-    kFixedOne = 1 << kFixedFractionBits,
-    kPulseAngleStep = 64,
-    kIntensityMaximum = 32,
-    kWireCommand = 0x44000000,
-    kSegmentFlagShift = 25,
-    kCoordinateBits = sizeof(int16_t) * CHAR_BIT
-  };
-  Battle_TargetSphere* sphere =
-      reinterpret_cast<Battle_TargetSphere*>(Battle_targetSphere);
-  if (sphere == nullptr || shape == nullptr || sphere->vertexCount < 2) return;
-  if ((unsigned)sphere->vertexCount >
-      sizeof sphere->wireVertices / sizeof sphere->wireVertices[0]) {
-    Core_Debugf("targeting", "Invalid wireframe vertex count %d",
-                sphere->vertexCount);
-    abort();
-  }
-  const int extent = shape->scale.extents[0] > shape->scale.extents[2]
-                         ? shape->scale.extents[0]
-                         : shape->scale.extents[2];
+void DrawSphereVolumeWireframe(const TargetWireState& wire,
+                               const TargetWireVolume& volume,
+                               std::uint32_t color, TargetWireCanvas& canvas) {
+  if (wire.vertices.size() < 2) return;
+  const int extent = std::max(volume.extents[0], volume.extents[2]);
   if (extent == 0) return;
-  MATRIX volume =
-      *Battle_BuildSphereVolumeTransform(shape->scale.extents, shape->angle);
-  MATRIX rotation = {0};
-  SVECTOR angles = {sphere->wirePhaseA, sphere->wirePhaseB, sphere->wirePhaseC,
-                    0};
-  Core_Gte_RotMatrixYXZ(&angles, &rotation);
-  const int pulse = Core_Gte_Cos(sphere->wireShape * kPulseAngleStep);
-  VECTOR scale = {pulse, pulse, pulse, 0};
-  Core_Gte_ScaleMatrix(&rotation, &scale);
-  VS::Core::Math::ApplyMultiplyMatrixIntoRight(volume, rotation);
-  Render_LoadFrameViewMatrix();
-  SVECTOR previous = {0};
-  for (int index = 0; index < sphere->vertexCount; ++index) {
-    const Battle_ShapeVertex* vertex = &sphere->wireVertices[index];
-    int16_t coordinates[kSpatialDimensions];
-    for (unsigned axis = 0; axis < kSpatialDimensions; ++axis) {
-      int64_t sum = static_cast<int64_t>(shape->position[axis]) * kFixedOne;
-      for (unsigned component = 0; component < kSpatialDimensions;
-           ++component) {
-        sum += static_cast<int64_t>(rotation.m[axis][component]) *
-               vertex->xyz[component];
-      }
-      const int64_t value = sum >> kFixedFractionBits;
-      coordinates[axis] = static_cast<int16_t>(value < INT16_MIN   ? INT16_MIN
-                                               : value > INT16_MAX ? INT16_MAX
-                                                                   : value);
-    }
-    SVECTOR world = {coordinates[0], coordinates[1], coordinates[2], 0};
-    Core_GteWord screen, depth;
-    Core_Gte_LoadV0(&world);
-    Core_Gte_Rtps();
-    Core_Gte_StoreSxy2(&screen);
-    Core_Gte_StoreSz3Otz(&depth);
-    SVECTOR projected = {static_cast<int16_t>(screen),
-                         static_cast<int16_t>((u_int)screen >> kCoordinateBits),
-                         static_cast<int16_t>(depth), 0};
-    if (index != 0 && vertex->opaque6 != 0) {
+  const math::Mat3 transform =
+      canvas.VolumeTransform(volume.extents, volume.angle);
+  const std::int32_t pulse = math::Cosine(wire.pulse * kPulseAngleStep);
+  const math::Mat3 rotation = math::MultiplyMatrixIntoRight(
+      transform,
+      math::ScaleMatrixColumns(math::BuildRotationMatrixYXZ(
+                                   {wire.phase_a, wire.phase_b, wire.phase_c}),
+                               {pulse, pulse, pulse}));
+  canvas.BeginProjection();
+  TargetWirePoint previous;
+  for (std::size_t index = 0; index < wire.vertices.size(); ++index) {
+    const TargetWireVertex& vertex = wire.vertices[index];
+    const TargetWirePoint projected =
+        canvas.Project(WorldPoint(volume, rotation, vertex));
+    if (index != 0 && vertex.segment != 0) {
       const int intensity =
           kIntensityMaximum -
-          (projected.vz + previous.vz - sphere->depth * 2) / extent;
-      const u_int command_color = ((u_int)kWireCommand | (u_int)color) -
-                                  ((u_int)vertex->opaque6 << kSegmentFlagShift);
-      Battle_DrawSphereWireLine(&projected, &previous, command_color,
-                                intensity);
+          ((projected.depth + previous.depth - wire.depth * 2) / extent);
+      const std::uint32_t command_color =
+          (kWireCommand | color) -
+          (static_cast<std::uint32_t>(vertex.segment) << kSegmentFlagShift);
+      canvas.DrawLine(projected, previous, command_color, intensity);
     }
     previous = projected;
   }
 }
-}  // extern "C"
+}  // namespace VS::Battle

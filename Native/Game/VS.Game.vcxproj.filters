@@ -609,9 +609,9 @@
     <ClCompile Include="src\Battle\TargetingDraw.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\TargetingDraw.h">
+    <ClCompile Include="src\Battle\TargetingDrawLive.cpp">
       <Filter>src\Battle</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Battle\TargetPages.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2245,6 +2245,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\TargetingDraw.hpp">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\TargetingDrawLive.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\TargetPages.h">

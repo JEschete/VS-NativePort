@@ -447,12 +447,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\TargetingDraw.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Battle\TargetingDraw.cpp" />
+    <ClCompile Include="src\Battle\TargetingDrawLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\TargetPages.cpp" />
     <ClCompile Include="src\Battle\TargetPagesLive.cpp">
@@ -2133,7 +2130,6 @@
     <ClInclude Include="src\Battle\Sphere.h" />
     <ClInclude Include="src\Battle\StatusEffects.h" />
     <ClInclude Include="src\Battle\Targeting.h" />
-    <ClInclude Include="src\Battle\TargetingDraw.h" />
     <ClInclude Include="src\Battle\TargetVolume.h" />
     <ClInclude Include="src\Battle\TextBoxes.h" />
     <ClInclude Include="src\Battle\ValueLabels.h" />
@@ -2432,6 +2428,8 @@
     <ClInclude Include="include\Battle\Enemy.h" />
     <ClInclude Include="include\Battle\SphereTerrain.hpp" />
     <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
+    <ClInclude Include="include\Battle\TargetingDraw.hpp" />
+    <ClInclude Include="include\Battle\TargetingDrawLive.hpp" />
     <ClInclude Include="include\Battle\TargetPages.h" />
     <ClInclude Include="include\Battle\TargetPages.hpp" />
     <ClInclude Include="include\Boot\GameApp.hpp" />

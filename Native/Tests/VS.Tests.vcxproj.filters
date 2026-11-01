@@ -327,6 +327,9 @@
     <ClCompile Include="src\StatusBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TargetingDrawSliceTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TargetPagePartitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

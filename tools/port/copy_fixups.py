@@ -42,6 +42,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
     "VS::Effects::ScreenDistortion::WarpLivePolygonVertices":
         r"Native\Game\include\Effects\ScreenDistortion\RadialWarpLive.hpp",
+    "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2606,6 +2607,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Effects::ScreenDistortion::WarpLivePolygonVertices()",
      "F02458 #46 typed promotion: the warp binding supplies the overlay warp words, the resident root table and a "
      "checked ordering-table packet cursor"),
+    (r"", r"\bVS::Battle::DrawSphereVolumeWireframe\(",
+     r"VS::Battle::DrawLiveSphereVolumeWireframe(",
+     "F01288 #46 typed promotion: the wireframe binding supplies the target sphere wire state, the volume transform, "
+     "the frame view projection and the wire line primitive"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

@@ -3177,6 +3177,22 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800DEEFCu", table)
 
+    def test_sphere_wireframe_routes_through_the_live_binding(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        self.assertEqual(owned["F01288"]["name"], "VS::Battle::DrawSphereVolumeWireframe")
+        self.assertFalse((root / "Native/Game/src/Battle/TargetingDraw.h").exists())
+        text = (root / "Native/Game/src/Battle/Sphere.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Battle_DrawSphereVolumeWireframe(", text)
+        self.assertIn("VS::Battle::DrawLiveSphereVolumeWireframe(shape, color);", text)
+        self.assertIn('#include "Battle/TargetingDrawLive.hpp"', text)
+        core = (root / "Native/Game/src/Battle/TargetingDraw.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Legacy/", core)
+        self.assertNotIn("Core_Gte", core)
+        table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("0x800C0B50u", table)
+
     def test_particle_attraction_uses_native_fields_after_pointer_widening(self):
         source = """damping = ((Effects_ParticleAttractionView*)node)->attraction;
 direction.vx = ((Effects_ParticleAttractionView*)node)->targetX - (state->x >> 12);
