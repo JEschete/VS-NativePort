@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/Distance.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -46,7 +47,6 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
     int angle;
     state->candidateCount = 0;
     context->active = motion->pathStep < 14;
-    Core_Math_SquaredVectorLength(0x7C0 - state->x, 0, 0x7C0 - state->z);
     switch (motion->phase) {
     case 0:
         motion->isOrbiting = 1;
@@ -119,7 +119,7 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
         motion->started = 1;
     }
     if (!motion->distanceCached) {
-        motion->distanceSquared = Core_Math_SquaredVectorLength(0x7C0 - state->x, 0, 0x7C0 - state->z);
+        motion->distanceSquared = VS::Core::Math::SquaredVectorLength(0x7C0 - state->x, 0, 0x7C0 - state->z);
         motion->distanceCached++;
     }
     state->model->active = 0;

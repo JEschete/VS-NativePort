@@ -184,7 +184,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("SLUS_010.40", 0x80041A1C, "F03405"),
     ("SLUS_010.40", 0x80041AF4, "F03414"),
     ("SLUS_010.40", 0x80041104, "F03399"),
-    ("BATTLE/BATTLE.PRG", 0x800E4604, "F01772"),
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
     ("BATTLE/BATTLE.PRG", 0x800E6BA0, "F01833"),
     ("BATTLE/BATTLE.PRG", 0x800E6C34, "F01834"),
@@ -1721,6 +1720,51 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];",
          "Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)actor->model;",
          "resolve auxiliary occluders through the current Battle_Actor owner like distance/FOV paths"),
+        ("SquaredDistanceWithHeightOffsets((short*)&state->position,",
+         "SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(state->position),",
+         "F01773 is promoted C++: read the observer's SVECTOR as a Position3 instead of aliasing it as short*"),
+        ("(short*)&((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position, state->pointHeight,",
+         "VS::Core::Math::PositionOf(((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position),"
+         " state->pointHeight,",
+         "F01773 is promoted C++: read the target model's SVECTOR as a Position3 instead of aliasing it as short*"),
+    ],
+    "F01649": [
+        ("SquaredDistanceWithHeightOffsets(point, (short*)&Actors_actorRecords[id]->instance.position,",
+         "SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(point),"
+         " VS::Core::Math::PositionOf(Actors_actorRecords[id]->instance.position),",
+         "F01773 is promoted C++: pass the planned point and target instance as Position3 values, not short*"),
+    ],
+    "F01659": [
+        ("SquaredDistanceWithHeightOffsets(state->position,",
+         "SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(state->position),",
+         "F01773 is promoted C++: pass the deciding actor's short[3] position as a Position3 value"),
+        ("((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position,",
+         "VS::Core::Math::PositionOf(((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position),",
+         "F01773 is promoted C++: pass the player model's short[3] position as a Position3 value"),
+    ],
+    "F01732": [
+        ("SquaredTileDistance(state->destination, state->tile)",
+         "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination)),"
+         " VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile)))",
+         "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
+    ],
+    "F01733": [
+        ("SquaredTileDistance(state->tile.word, state->destination.word)",
+         "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->tile.word),"
+         " VS::Core::Math::UnpackTileCoordinate(state->destination.word))",
+         "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
+    ],
+    "F01736": [
+        ("SquaredTileDistance(state->destination.word, state->tile.word)",
+         "SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->destination.word),"
+         " VS::Core::Math::UnpackTileCoordinate(state->tile.word))",
+         "F01771 is promoted C++: decode both packed tile words at the call instead of passing raw words"),
+    ],
+    "F01846": [
+        ("    VS::Core::Math::SquaredVectorLength(0x7C0 - state->x, 0, 0x7C0 - state->z);\n",
+         "",
+         "7EE98.c:506 discards this result; the original call only left GTE MAC registers that nothing reads, "
+         "and the promoted pure function has no native effect"),
     ],
     "F03515": [
         ("    case 0xFF000:\n"

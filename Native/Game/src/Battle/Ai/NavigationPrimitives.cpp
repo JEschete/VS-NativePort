@@ -12,6 +12,7 @@
 #include <memory>
 
 #include "Core/Diagnostics.h"
+#include "Core/Math/Distance.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -28,7 +29,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/FrameTiming.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
@@ -135,9 +135,10 @@ bool ScriptedRouteReached(Battle_Ai_ActorAiState& route) {
   if (route.locomotionMode == 0) {
     const int x = static_cast<int>(target & kCoordinateHalfwordMask);
     const int z = static_cast<int>(target >> kCoordinateHalfwordBits);
-    const unsigned squared = Core_Math_SquaredVectorLength(
-        x - static_cast<u_short>(route.position.vx), 0,
-        z - static_cast<u_short>(route.position.vz));
+    // SquaredVectorLength keeps each delta's low 16 bits, so the original
+    // unsigned halfword reads of the position need no separate cast.
+    const unsigned squared = VS::Core::Math::SquaredVectorLength(
+        x - route.position.vx, 0, z - route.position.vz);
     if (std::bit_cast<std::int32_t>(squared) < kScriptedArrivalSquared) {
       return true;
     }

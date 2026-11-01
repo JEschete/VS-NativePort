@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/Distance.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Math/TileDistance.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Field/TerrainHeight.h"
@@ -285,7 +285,7 @@ int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, i
         callback = (void (*)(Battle_Ai_MovementCheckView*, int))Battle_Ai_BeginAiGroundMovement;
     }
     if (state->movementFlags & 6) {
-        distance = Core_Math_SquaredTileDistance(state->destination, state->tile);
+        distance = VS::Core::Math::SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination)), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile)));
         if (mode && distance < 16) {
             if (!(state->model->opaque8 & 0x200000)) {
                 callback(state, action);
@@ -351,7 +351,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
     z = state->destination.tile.tileZ * 128 + 64;
     angle = Core_Gte_Atan2(state->position.tile.positionX - x, state->z - z);
     angle &= 0xFFF;
-    if (state->opaque0 && Core_Math_SquaredTileDistance(state->tile.word, state->destination.word) < 2
+    if (state->opaque0 && VS::Core::Math::SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->tile.word), VS::Core::Math::UnpackTileCoordinate(state->destination.word)) < 2
         && (MOVEMENT_STEP_TILES[state->destination.tile.tileZ][state->destination.tile.tileX] & 0x40)) {
         int centerZ;
         int centerAngle;
@@ -467,7 +467,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         }
         top = Battle_Ai_LowestReachableGroundHeight((Battle_Ai_ActorAiState *)((void*)state), angle) + state->flightHeight;
         ground = top > ground ? ground : top;
-        distance = Core_Math_SquareRootInteger(Core_Math_SquaredVectorLength(x - px, 0, z - pz));
+        distance = Core_Math_SquareRootInteger(VS::Core::Math::SquaredVectorLength(x - px, 0, z - pz));
         value = height + ground;
         denom = Core_Math_SquareRootInteger(((value << 12) / value) << 12) + ONE;
         if (!denom) {
@@ -626,14 +626,14 @@ void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state,
     }
     angle = Core_Gte_Atan2(state->x - state->destination.tile.tileX * 128 - 64,
         state->z - state->destination.tile.tileZ * 128 - 64);
-    if (Core_Math_SquaredVectorLength(state->destination.tile.tileX * 128 - state->x + 64, 0,
+    if (VS::Core::Math::SquaredVectorLength(state->destination.tile.tileX * 128 - state->x + 64, 0,
             state->destination.tile.tileZ * 128 - state->z + 64)
         > (unsigned int)(distance * distance)) {
         Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, angle, distance);
     }
     if ((state->movementFlags & 6)
         && (state->opaqueD
-            || Core_Math_SquaredTileDistance(state->destination.word, state->tile.word) < 16)) {
+            || VS::Core::Math::SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->destination.word), VS::Core::Math::UnpackTileCoordinate(state->tile.word)) < 16)) {
         if ((int)(state->savedDestination.word << 8) >= 0) {
             state->destination = state->savedDestination;
         }
@@ -674,10 +674,10 @@ void Battle_Ai_MoveAwayFromReference(Battle_Ai_MovementDestinationView* state, i
     Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, angle, state->moveDistance);
     previous[0] = state->destination.word;
     Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), state->tile, opposite, state->moveDistance);
-    distance = Core_Math_SquaredVectorLength(state->destination.tile.tileX * 128 - state->moveX + 64, 0,
+    distance = VS::Core::Math::SquaredVectorLength(state->destination.tile.tileX * 128 - state->moveX + 64, 0,
         state->destination.tile.tileZ * 128 - state->moveZ + 64);
     if (distance
-        < Core_Math_SquaredVectorLength(((unsigned char*)&previous)[0] * 128 - state->moveX + 64, 0,
+        < VS::Core::Math::SquaredVectorLength(((unsigned char*)&previous)[0] * 128 - state->moveX + 64, 0,
             ((unsigned char*)&previous)[2] * 128 - state->moveZ + 64)) {
         state->destination.word = previous[0];
     }
@@ -1073,7 +1073,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                 angle = Core_Gte_Atan2(s->x - (s->destination.bytes[0] << 7) - 64,
                             s->z - (s->destination.bytes[2] << 7) - 64)
                       & 4095;
-                distance = Core_Math_SquaredVectorLength(s->x - (s->destination.bytes[0] << 7) - 64, 0,
+                distance = VS::Core::Math::SquaredVectorLength(s->x - (s->destination.bytes[0] << 7) - 64, 0,
                     s->z - (s->destination.bytes[2] << 7) - 64);
                 s->savedDestination.word = oldPosition;
                 distance = Core_Math_SquareRootInteger(distance);

@@ -64,6 +64,7 @@ ADAPTATIONS = REPO / "tools" / "port" / "cpp_adaptations.json"
 NATIVE = REPO / "Native"
 LEGACY_HEADER = "Legacy/Psx.h"
 IDENT = re.compile(r"[A-Za-z_]\w*")
+QUALIFIED_VS = re.compile(r"\bVS(?:::[A-Za-z_]\w*)+")
 IDENTIFIER_FIXUP = re.compile(r"\\b[A-Za-z_]\w*\\b")
 
 # Strategy R (SDK_API_LEDGER.md): SDK calls rewritten to the native API at copy time.
@@ -621,9 +622,19 @@ class Copier:
         if not (REPO / hdr).exists():
             raise SystemExit(f"owned.csv: {rid} {name}: header {hdr} does not exist")
         self.provide(name, hdr)
+        promoted = self.promoted_name(rid)
+        if promoted:
+            self.provide(promoted, hdr)
         self.item_row[name] = rid
         self.report["owned"].append(f"{rid} {name} -> {o['path']}")
         return True
+
+    def promoted_name(self, rid: str) -> str | None:
+        """The qualified C++ name of a function promoted into the VS namespace (plan §8.2). Generated callers use
+        it directly: it has no C symbol, no per-file decomp view and no module address."""
+        o = self.owned.get(rid)
+        name = o["name"].strip() if o is not None and o["kind"].strip() == "function" else ""
+        return name if name.startswith("VS::") else None
 
     # ------------------------------------------------------------------------------------------------- naming
     def canon_type(self, tid: str) -> str:
@@ -664,7 +675,8 @@ class Copier:
             r = self.cat_by_id[target]
             if r["copy"] not in ("yes", "data"):
                 return r["name"]  # SDK/runtime code the decomp carries (copy = no): provided by Legacy
-            return c_name(r["final_name"])
+            promoted = self.promoted_name(target)
+            return promoted or c_name(r["final_name"])
         if target.startswith("G"):
             return c_name(self.data_by_id[target]["final_name"])
         if re.fullmatch(r"T\d{5}", target):
@@ -710,7 +722,8 @@ class Copier:
             if new is None:
                 self.report["unrenamed"].append(f"{rel}@{off}: {target}")
                 continue
-            if tu and kind.split("@")[0] in ("func", "var") and t != own and re.fullmatch(r"[FG]\d{5}", t):
+            if (tu and kind.split("@")[0] in ("func", "var") and t != own and re.fullmatch(r"[FG]\d{5}", t)
+                    and not new.startswith("VS::")):
                 ls = b.rfind(b"\n", 0, off) + 1
                 if not re.match(rb"\s*extern\b", b[ls:off]):
                     new = self.view_cast(t, tu, new) or new
@@ -2208,9 +2221,14 @@ class Copier:
                 includes = self.providers_of(f.items, path, own, None, type_by_cname)[0]
                 if path.endswith(".cpp") and self.norm_header(sibling_header(path)) in self.files:
                     includes.add(self.norm_header(sibling_header(path)))
-                lines = ["// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.\n",
-                         'extern "C" {\n', f'#include "{LEGACY_HEADER}"\n']
-                lines += [f'#include "{h}"\n' for h in sorted(include_spelling(x) for x in includes - {path})]
+                spelled = sorted(include_spelling(x) for x in includes - {path})
+                body = strip_code("".join(i.text for i in f.items if i.kind != "macro"))
+                promoted = {include_spelling(self.provider[n]) for n in QUALIFIED_VS.findall(body) if n in self.provider}
+                cpp_headers = [h for h in spelled if h in promoted]  # promoted C++ APIs keep C++ linkage
+                lines = ["// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.\n"]
+                lines += [f'#include "{h}"\n' for h in cpp_headers]
+                lines += ['extern "C" {\n', f'#include "{LEGACY_HEADER}"\n']
+                lines += [f'#include "{h}"\n' for h in spelled if h not in cpp_headers]
                 lines.append("\n")
                 lines += [i.text + "\n" for i in self.ordered(f)]
                 lines.append('}  // extern "C"\n')
@@ -2268,6 +2286,7 @@ class Copier:
                 if dep in self.macro_body:
                     stack.append(dep)
         names -= own
+        names |= set(QUALIFIED_VS.findall(strip_code(body)))  # promoted C++ functions resolve by qualified name
         includes, forwards = set(), set()
         for n in sorted(names):
             h = self.provider.get(n) or cf.NATIVE_HELPER_HEADERS.get(n)

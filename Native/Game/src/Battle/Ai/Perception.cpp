@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/Distance.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -134,8 +135,8 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
             height = -64;
         }
     }
-    state->distancesSquared[id] = Core_Math_SquaredDistanceWithHeightOffsets((short*)&state->position,
-        (short*)&((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position, state->pointHeight,
+    state->distancesSquared[id] = VS::Core::Math::SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(state->position),
+        VS::Core::Math::PositionOf(((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position), state->pointHeight,
         height);
 
     if (Field_gimmickInstances[id]

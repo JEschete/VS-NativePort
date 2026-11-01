@@ -36,12 +36,6 @@ void Core_Math_PremultiplyRotationMatrix(MATRIX* left, MATRIX* right);
 
 MATRIX* Core_Math_ScaleMatrixColumns(MATRIX* matrix, VECTOR* scale);
 
-int Core_Math_SquaredDistanceWithHeightOffsets(int16_t* source, int16_t* target,
-                                               int source_height,
-                                               int target_height);
-
-unsigned int Core_Math_SquaredVectorLength(int delta_x, int delta_y,
-                                           int delta_z);
 void Core_Math_InverseSquareRootParts(int value, int* mantissa, int* exponent);
 unsigned int Core_Math_NormalizeVectorRegisters(const VECTOR* input,
                                                 VECTOR* output);

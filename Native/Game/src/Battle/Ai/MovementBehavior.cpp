@@ -22,10 +22,11 @@ extern "C" {
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Field/TerrainHeight.h"
 }
+
+#include "Core/Math/Distance.hpp"
 
 namespace {
 enum class MovementMode {
@@ -298,17 +299,15 @@ void Battle_Ai_MoveToTile(Battle_Ai_CandidateMovementView* view,
   state.destination.word = tile;
   Battle_Ai_SetMovementBehavior(&state,
                                 static_cast<int>(MovementMode::kDestination));
-  constexpr unsigned kTileMask = 0xFF;
   constexpr int kTileSize = 128;
   constexpr int kTileCenter = 64;
-  const int x = static_cast<int>(tile & kTileMask) * kTileSize + kTileCenter;
-  const int z =
-      static_cast<int>((tile >> kTileZShift) & kTileMask) * kTileSize +
-      kTileCenter;
-  const auto distance = static_cast<unsigned>(Core_Math_SquaredVectorLength(
+  const auto cell = VS::Core::Math::UnpackTileCoordinate(tile);
+  const int x = cell.x * kTileSize + kTileCenter;
+  const int z = cell.z * kTileSize + kTileCenter;
+  const auto distance = VS::Core::Math::SquaredVectorLength(
       x - state.position.vx,
       Field_GroundHeightAtPackedTile(tile) - state.position.vy,
-      z - state.position.vz));
+      z - state.position.vz);
   const auto limit =
       static_cast<unsigned>(radius) * static_cast<unsigned>(radius);
   if (distance < limit) {

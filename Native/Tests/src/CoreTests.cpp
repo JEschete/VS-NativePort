@@ -5,12 +5,14 @@
 #include <cstdint>
 #include <limits>
 #include <thread>
+#include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/BiosRand.h"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.h"
+#include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.h"
 #include "Core/Random.hpp"
 #include "Legacy/Core/LibEtc.h"
@@ -64,13 +66,53 @@ struct OriginalRandomState {
 
 TEST_CASE("AI distances preserve signed GTE components and vertical offsets",
           "[core][math][distance]") {
-  CHECK(Core_Math_SquaredVectorLength(-3, 4, 12) == 169);
-  CHECK(Core_Math_SquaredVectorLength(0x10003, 0x10004, -0x1000C) == 169);
-  CHECK(Core_Math_SquaredVectorLength(-32768, -32768, -32768) == 0xC0000000u);
-  std::int16_t source[3] = {10, 20, 30};
-  std::int16_t target[3] = {13, 24, 30};
-  CHECK(Core_Math_SquaredDistanceWithHeightOffsets(source, target, 0, 0) == 25);
-  CHECK(Core_Math_SquaredDistanceWithHeightOffsets(source, target, 9, 3) == 13);
+  using Core::Math::Position3;
+  using Core::Math::SquaredDistanceWithHeightOffsets;
+  using Core::Math::SquaredVectorLength;
+  STATIC_REQUIRE(noexcept(SquaredVectorLength(0, 0, 0)));
+  STATIC_REQUIRE(std::is_same_v<decltype(SquaredDistanceWithHeightOffsets(
+                                    Position3{}, Position3{}, 0, 0)),
+                                std::int32_t>);
+  CHECK(SquaredVectorLength(-3, 4, 12) == 169);
+  CHECK(SquaredVectorLength(0x10003, 0x10004, -0x1000C) == 169);
+  CHECK(SquaredVectorLength(-32768, -32768, -32768) == 0xC0000000u);
+  CHECK(SquaredVectorLength(32768, 0, 0) == 0x40000000u);
+  const Position3 source{10, 20, 30};
+  const Position3 target{13, 24, 30};
+  CHECK(SquaredDistanceWithHeightOffsets(source, target, 0, 0) == 25);
+  CHECK(SquaredDistanceWithHeightOffsets(source, target, 9, 3) == 13);
+  CHECK(SquaredDistanceWithHeightOffsets(target, source, 3, 9) == 13);
+  // Height-raised components keep the 16-bit GTE reduction.
+  CHECK(SquaredDistanceWithHeightOffsets(Position3{0, 0, 0}, Position3{0, 0, 0},
+                                         0x10000, 0) == 0);
+  // Three maximal deltas wrap the 32-bit sum and read back as signed.
+  CHECK(SquaredDistanceWithHeightOffsets(Position3{-32768, -32768, -32768},
+                                         Position3{}, 0, 0) ==
+        std::bit_cast<std::int32_t>(0xC0000000u));
+}
+
+TEST_CASE("Vector-like records convert to positions without aliasing",
+          "[core][math][distance]") {
+  struct HalfwordVector {
+    std::int16_t vx;
+    std::int16_t vy;
+    std::int16_t vz;
+    std::int16_t pad;
+  };
+  constexpr HalfwordVector kVector{-32768, 7, 32767, 99};
+  constexpr auto kFromRecord = Core::Math::PositionOf(kVector);
+  STATIC_REQUIRE(kFromRecord.x == -32768);
+  STATIC_REQUIRE(kFromRecord.y == 7);
+  STATIC_REQUIRE(kFromRecord.z == 32767);
+  constexpr std::int16_t kHalfwords[3] = {1, -2, 3};
+  constexpr auto kFromArray = Core::Math::PositionOf(kHalfwords);
+  STATIC_REQUIRE(kFromArray.x == 1);
+  STATIC_REQUIRE(kFromArray.y == -2);
+  STATIC_REQUIRE(kFromArray.z == 3);
+  // dx = 32769 reduces to -32767 as a GTE halfword.
+  CHECK(Core::Math::SquaredDistanceWithHeightOffsets(
+            Core::Math::PositionOf(kHalfwords), kFromRecord, 0, 0) ==
+        32767 * 32767 + 81 + 32764 * 32764);
 }
 
 TEST_CASE("Rand15 reproduces the BIOS rand() sequence for seed 1",

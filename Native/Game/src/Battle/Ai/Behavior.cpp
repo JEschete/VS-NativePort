@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/Distance.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -98,7 +99,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
             point[2] = (state->plannedTile.bytes[2] << 7) + 64;
             point[1] = Field_GroundHeightAtWorldPosition(point[0], point[2]);
             distance =
-                Core_Math_SquareRootInteger(Core_Math_SquaredDistanceWithHeightOffsets(point, (short*)&Actors_actorRecords[id]->instance.position,
+                Core_Math_SquareRootInteger(VS::Core::Math::SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(point), VS::Core::Math::PositionOf(Actors_actorRecords[id]->instance.position),
                     state->pointHeight, ((Battle_Ai_CandidateMovementView*)Battle_Ai_actorAiStates[id])->pointHeight));
             distance =
                 (int)distance < Core_Math_SquareRootInteger(entry->distanceSquared) - entry->range;
@@ -109,7 +110,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
         x = (state->destination.bytes[0] << 7) + 64;
         z = (state->destination.bytes[2] << 7) + 64;
         y = Field_GroundHeightAtWorldPosition(x, z);
-        if (Core_Math_SquaredVectorLength(
+        if (VS::Core::Math::SquaredVectorLength(
                 x - state->position[0], y - state->position[1], z - state->position[2])
             <= 0xFFFF) {
             state->movementTarget = id;
@@ -534,8 +535,8 @@ void Battle_Ai_UpdateActorDecisions(void)
                     } else {
                         height = -64;
                     }
-                    state->distance = Core_Math_SquaredDistanceWithHeightOffsets(state->position,
-                        ((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position,
+                    state->distance = VS::Core::Math::SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(state->position),
+                        VS::Core::Math::PositionOf(((Battle_Ai_DispatchActorView*)Battle_actors[0])->model->position),
                         state->pointHeight, height);
                     Battle_Ai_TryExecutePlannedActions((Battle_Ai_ActorAiState *)((void*)state));
                 } else {

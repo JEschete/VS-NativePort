@@ -34,6 +34,9 @@
     <Filter Include="include\Core\Core">
       <UniqueIdentifier>{F7C013F6-BBD9-58F9-AE32-6D6917D435EA}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Core\Math">
+      <UniqueIdentifier>{2C2E5BC5-B9D0-5B0A-87D9-5789538031ED}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Core\Text">
       <UniqueIdentifier>{EE72470B-3E88-5B60-BCD1-8CB388B0E83F}</UniqueIdentifier>
     </Filter>
@@ -324,6 +327,9 @@
     <ClCompile Include="src\Core\Log.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Math\Distance.cpp">
+      <Filter>src\Core\Math</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\Math\FixedPoint.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
@@ -346,12 +352,6 @@
       <Filter>src\Core\Math</Filter>
     </ClCompile>
     <ClInclude Include="src\Core\Math\ScalarMath.h">
-      <Filter>src\Core\Math</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Core\Math\TileDistance.cpp">
-      <Filter>src\Core\Math</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Math\TileDistance.h">
       <Filter>src\Core\Math</Filter>
     </ClInclude>
     <ClCompile Include="src\Core\Math\Trig.cpp">
@@ -719,6 +719,9 @@
     </ClInclude>
     <ClInclude Include="include\Core\Log.hpp">
       <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\Distance.hpp">
+      <Filter>include\Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\PointerSort.hpp">
       <Filter>include\Core</Filter>

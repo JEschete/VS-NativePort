@@ -11,6 +11,7 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
+#include "Core/Math/Distance.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 
@@ -18,7 +19,6 @@ extern "C" {
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Runtime.h"
@@ -695,37 +695,52 @@ TEST_CASE(
     "Packed tile distance covers unsigned coordinate bytes and ignores "
     "metadata",
     "[math][sdk-gaps]") {
+  using VS::Core::Math::SquaredTileDistance;
+  using VS::Core::Math::UnpackTileCoordinate;
   for (unsigned x = 0; x < 256; ++x) {
     for (unsigned z = 0; z < 256; ++z) {
       const auto packed = 0xA5005A00u | x | (z << 16);
-      CHECK(Core_Math_SquaredTileDistance(packed, 0xAB00CD00) == x * x + z * z);
+      const auto cell = UnpackTileCoordinate(packed);
+      CHECK(cell.x == x);
+      CHECK(cell.z == z);
+      CHECK(SquaredTileDistance(cell, UnpackTileCoordinate(0xAB00CD00)) ==
+            x * x + z * z);
     }
   }
-  CHECK(Core_Math_SquaredTileDistance(0x00FF0000, 0x000000FF) == 130050);
+  CHECK(SquaredTileDistance(UnpackTileCoordinate(0x00FF0000),
+                            UnpackTileCoordinate(0x000000FF)) == 130050);
 }
 
-TEST_CASE("Tile component distance exposes its former register inputs",
+TEST_CASE("Tile distance API takes decoded cells instead of register words",
           "[math][tile-components]") {
-  using NativeEntry = unsigned int (*)(int, int, unsigned int);
-  CHECK((std::is_same_v<decltype(&Core_Math_SquaredTileDistanceFromComponents),
-                        NativeEntry>));
+  using VS::Core::Math::TileCoordinate;
+  STATIC_REQUIRE(std::is_same_v<
+                 decltype(&VS::Core::Math::SquaredTileDistanceFromComponents),
+                 std::uint32_t (*)(std::int32_t, std::int32_t,
+                                   TileCoordinate) noexcept>);
+  STATIC_REQUIRE(std::is_same_v<decltype(&VS::Core::Math::SquaredTileDistance),
+                                std::uint32_t (*)(TileCoordinate,
+                                                  TileCoordinate) noexcept>);
+  constexpr auto cell = VS::Core::Math::UnpackTileCoordinate(0xFF34FF12u);
+  STATIC_REQUIRE(cell.x == 0x12);
+  STATIC_REQUIRE(cell.z == 0x34);
 }
 
 TEST_CASE("Tile component entry shares every signed byte-distance result",
           "[math][tile-components]") {
+  using VS::Core::Math::TileCoordinate;
   for (int dx = -255; dx <= 255; ++dx) {
     for (int dz = -255; dz <= 255; ++dz) {
       const int first_x = dx < 0 ? 0 : dx;
       const int first_z = dz < 0 ? 0 : dz;
-      const auto second_x = static_cast<unsigned>(dx < 0 ? -dx : 0);
-      const auto second_z = static_cast<unsigned>(dz < 0 ? -dz : 0);
-      const auto first = 0xA5005A00u | static_cast<unsigned>(first_x) |
-                         (static_cast<unsigned>(first_z) << 16);
-      const auto second = 0xC3007E00u | second_x | (second_z << 16);
+      const TileCoordinate first{static_cast<std::uint8_t>(first_x),
+                                 static_cast<std::uint8_t>(first_z)};
+      const TileCoordinate second{static_cast<std::uint8_t>(dx < 0 ? -dx : 0),
+                                  static_cast<std::uint8_t>(dz < 0 ? -dz : 0)};
       const auto expected = static_cast<unsigned>(dx * dx + dz * dz);
-      CHECK(Core_Math_SquaredTileDistanceFromComponents(first_x, first_z,
-                                                        second) == expected);
-      CHECK(Core_Math_SquaredTileDistance(first, second) == expected);
+      CHECK(VS::Core::Math::SquaredTileDistanceFromComponents(
+                first_x, first_z, second) == expected);
+      CHECK(VS::Core::Math::SquaredTileDistance(first, second) == expected);
     }
   }
 }
@@ -741,7 +756,8 @@ unsigned ReferenceTileComponentSquare(int first, unsigned second) {
 void CheckTileComponentWidths(int x, int z, unsigned target) {
   const auto expected = ReferenceTileComponentSquare(x, target & 0xFF) +
                         ReferenceTileComponentSquare(z, (target >> 16) & 0xFF);
-  CHECK(Core_Math_SquaredTileDistanceFromComponents(x, z, target) == expected);
+  CHECK(VS::Core::Math::SquaredTileDistanceFromComponents(
+            x, z, VS::Core::Math::UnpackTileCoordinate(target)) == expected);
 }
 }  // namespace
 
@@ -760,19 +776,18 @@ TEST_CASE("Tile component arithmetic retains the shared GTE halfword inputs",
   }
 }
 
-TEST_CASE("Tile component entry retains its original typed module address",
+TEST_CASE("Promoted distance helpers have no original module addresses",
           "[math][tile-components][redirect-binding]") {
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", 0x800E4604u);
-  REQUIRE(resolved != nullptr);
-  const auto distance =
-      reinterpret_cast<unsigned int (*)(int, int, unsigned int)>(resolved);
-  CHECK(distance == Core_Math_SquaredTileDistanceFromComponents);
-  CHECK(distance(3, 4, 0xA5005A00u) == 25);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800E4605u) == nullptr);
+  // BATTLE.PRG only reached these through direct jal instructions, so the
+  // promoted API is called by name and no address resolves to it.
+  for (const unsigned address :
+       {0x800E45F4u, 0x800E4604u, 0x800E4624u, 0x800E4660u}) {
+    CAPTURE(address);
+    CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                            address) == nullptr);
+  }
 }
 
 TEST_CASE("Resident octant entry returns an explicit sine and cosine pair",

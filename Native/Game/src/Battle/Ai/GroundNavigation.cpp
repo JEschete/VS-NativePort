@@ -24,9 +24,10 @@ extern "C" {
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
-#include "Core/Math/TileDistance.h"
 #include "Field/TerrainHeight.h"
 }
+
+#include "Core/Math/Distance.hpp"
 
 namespace {
 constexpr unsigned kByteMask = 0xFF;
@@ -349,10 +350,14 @@ int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
       return result(-1, "target-approach-radius");
     }
   }
-  return result(Core_Math_SquaredTileDistanceFromComponents(
-                    target.x, target.z, state.destination.word) <
-                    Core_Math_SquaredTileDistance(from, state.destination.word),
-                "destination-distance");
+  const auto destination =
+      VS::Core::Math::UnpackTileCoordinate(state.destination.word);
+  return result(
+      VS::Core::Math::SquaredTileDistanceFromComponents(target.x, target.z,
+                                                        destination) <
+          VS::Core::Math::SquaredTileDistance(
+              VS::Core::Math::UnpackTileCoordinate(from), destination),
+      "destination-distance");
 }
 }  // namespace
 

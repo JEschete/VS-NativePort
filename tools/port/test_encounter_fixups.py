@@ -642,26 +642,46 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("F03399", self.owned_items())
 
-    def test_tile_component_entry_shares_native_width_helpers_and_callers(self):
-        self.assertEqual(
-            self.owned_items()["F01772"]["path"],
-            r"Native\Engine\src\Core\Math\TileDistance.cpp",
-        )
-        self.assertIn(
-            ("BATTLE/BATTLE.PRG", 0x800E4604, "F01772"),
-            copy_fixups.MODULE_FUNCTION_ENTRIES,
+    def test_promoted_distance_slice_has_typed_callers_and_no_address_entries(self):
+        owned = self.owned_items()
+        for rid, name in {
+            "F01771": "SquaredTileDistance",
+            "F01772": "SquaredTileDistanceFromComponents",
+            "F01773": "SquaredDistanceWithHeightOffsets",
+            "F01774": "SquaredVectorLength",
+        }.items():
+            self.assertEqual(owned[rid]["name"], f"VS::Core::Math::{name}")
+            self.assertEqual(owned[rid]["path"], r"Native\Engine\src\Core\Math\Distance.cpp")
+            self.assertEqual(
+                owned[rid]["header"], r"Native\Engine\include\Core\Math\Distance.hpp"
+            )
+        self.assertFalse(
+            [entry for entry in copy_fixups.MODULE_FUNCTION_ENTRIES
+             if entry[2] in {"F01771", "F01772", "F01773", "F01774"}]
         )
         root = Path(__file__).resolve().parents[2]
-        source = (
-            root / r"Native\Engine\src\Core\Math\TileDistance.cpp"
-        ).read_text(encoding="utf-8")
-        self.assertEqual(source.count("Core_Math_SquaredTileDistanceFromComponents("), 2)
-        self.assertIn("Core_Math_WrapSigned16", source)
-        self.assertIn("Core_Math_SquaredVectorLength(dx, 0, dz)", source)
-        caller = (
-            root / r"Native\Game\src\Battle\Ai\GroundNavigation.cpp"
-        ).read_text(encoding="utf-8")
-        self.assertIn("Core_Math_SquaredTileDistanceFromComponents(", caller)
+        table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        for address in ("0x800E45F4u", "0x800E4604u", "0x800E4624u", "0x800E4660u"):
+            self.assertNotIn(address, table)
+        self.assertNotIn("Core_Math_Squared", table)
+        ai = root / r"Native\Game\src\Battle\Ai"
+        caller = (ai / "GroundNavigation.cpp").read_text(encoding="utf-8")
+        self.assertIn("UnpackTileCoordinate(state.destination.word)", caller)
+        perception = (ai / "Perception.cpp").read_text(encoding="utf-8")
+        self.assertIn("VS::Core::Math::PositionOf(state->position)", perception)
+        self.assertNotIn("(short*)&state->position", perception)
+        for path in ai.glob("*.cpp"):
+            text = path.read_text(encoding="utf-8")
+            self.assertNotIn("Core_Math_SquaredVectorLength", text, path.name)
+            self.assertNotIn("Core_Math_SquaredTileDistance", text, path.name)
+            self.assertNotIn("Core_Math_SquaredDistanceWithHeightOffsets", text, path.name)
+        for name in ("Behavior", "Movement", "Navigation", "OrbitingBoss", "Perception"):
+            text = (ai / f"{name}.cpp").read_text(encoding="utf-8")
+            self.assertLess(
+                text.index('#include "Core/Math/Distance.hpp"'),
+                text.index('extern "C" {'),
+                name,
+            )
 
     def test_native_terrain_envelope_calls_the_existing_builder_without_guest_stack(self):
         self.assertEqual(
@@ -1832,6 +1852,8 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
     def test_perception_uses_owned_model_prefixes_for_auxiliary_targets(self):
         source = """targetObject = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[id];
 Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_actorRecords[candidate];
+d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
+    (short*)&((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position, state->pointHeight,
 """
         for old, new, _ in copy_fixups.FIXES["F01640"]:
             self.assertIn(old, source)
@@ -1839,6 +1861,8 @@ Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)Actors_a
         self.assertIn("Battle_actors[id]->model", source)
         self.assertIn("actor->model", source)
         self.assertNotIn("Actors_actorRecords", source)
+        self.assertNotIn("(short*)", source)
+        self.assertEqual(source.count("VS::Core::Math::PositionOf("), 2)
 
     def test_optional_actor_wrappers_diagnose_and_return_before_dereferencing(self):
         for key in (

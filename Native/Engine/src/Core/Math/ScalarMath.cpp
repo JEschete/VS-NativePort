@@ -1,13 +1,14 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Core/Math/ScalarMath.h"
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "Core/Math/Distance.hpp"
+
+extern "C" {
 #include "Core/Math/FixedPoint.h"
+#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Legacy/Psx.h"
 
@@ -242,29 +243,6 @@ MATRIX* Core_Math_ScaleMatrixColumns(MATRIX* matrix, VECTOR* scale) {
   return matrix;
 }
 
-// decomp: BATTLE.PRG func_800E4624 (src/BATTLE/BATTLE.PRG/7BDD4.s:49).
-int Core_Math_SquaredDistanceWithHeightOffsets(int16_t* source, int16_t* target,
-                                               int source_height,
-                                               int target_height) {
-  return static_cast<int>(Core_Math_SquaredVectorLength(
-      source[0] - target[0],
-      source[1] + source_height - target[1] - target_height,
-      source[2] - target[2]));
-}
-
-// decomp: BATTLE.PRG func_800E4660 (src/BATTLE/BATTLE.PRG/7BDD4.s:68).
-unsigned int Core_Math_SquaredVectorLength(int delta_x, int delta_y,
-                                           int delta_z) {
-  const int components[kVectorDimensions] = {static_cast<int16_t>(delta_x),
-                                             static_cast<int16_t>(delta_y),
-                                             static_cast<int16_t>(delta_z)};
-  unsigned int squared = 0;
-  for (unsigned axis = 0; axis < kVectorDimensions; ++axis) {
-    squared += (unsigned int)(components[axis] * components[axis]);
-  }
-  return squared;
-}
-
 static int32_t SignedWord(uint32_t bits) {
   int32_t value;
   memcpy(&value, &bits, sizeof value);
@@ -345,7 +323,7 @@ unsigned int Core_Math_NormalizeVectorRegisters(const VECTOR* input,
   const int x = Core_Math_WrapSigned16(static_cast<uint32_t>(input->vx));
   const int y = Core_Math_WrapSigned16(static_cast<uint32_t>(input->vy));
   const int z = Core_Math_WrapSigned16(static_cast<uint32_t>(input->vz));
-  const unsigned squared = Core_Math_SquaredVectorLength(x, y, z);
+  const unsigned squared = VS::Core::Math::SquaredVectorLength(x, y, z);
   if (squared == 0) {
     output->vx = output->vy = output->vz = 0;
     return 0;

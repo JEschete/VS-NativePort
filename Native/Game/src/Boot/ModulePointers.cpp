@@ -124,7 +124,6 @@ extern "C" {
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
 #include "Core/Math/ScalarMath.h"
-#include "Core/Math/TileDistance.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory.h"
@@ -2080,10 +2079,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E4180u, 0u, (void*)&Battle_Ai_UpdateHesitationTurn, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E45B4u, 0u, (void*)&Core_ElapsedFrameCounterTicks, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E45D4u, 0u, (void*)&Battle_Ai_NextActorRandomMasked, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E45F4u, 0u, (void*)&Core_Math_SquaredTileDistance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4604u, 0u, (void*)&Core_Math_SquaredTileDistanceFromComponents, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4624u, 0u, (void*)&Core_Math_SquaredDistanceWithHeightOffsets, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4660u, 0u, (void*)&Core_Math_SquaredVectorLength, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4690u, 0u, (void*)&Battle_Ai_IsAdjacentTileStepBlocked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4764u, 0u, (void*)&Battle_Ai_SelectActorVerticalMovementStep, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E47E4u, 0u, (void*)&Battle_Ai_IsTileBehindActorTarget, 0u, 0u, 0u},
@@ -3306,7 +3301,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80041A1Cu, 0u, (void*)&Core_Math_InverseSquareRootParts, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041AF4u, 0u, (void*)&Core_Math_NormalizeVectorRegisters, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041104u, 0u, (void*)&Core_Math_LookupSineCosinePair, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4604u, 0u, (void*)&Core_Math_SquaredTileDistanceFromComponents, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&Field_IsPointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&Field_TraceActorAndTerrainCollision, 0u, 0u, 0u},

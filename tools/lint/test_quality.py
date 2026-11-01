@@ -96,7 +96,7 @@ class BaselineTests(unittest.TestCase):
         ):
             database = quality.compile_commands(
                 [
-                    "Native/Engine/src/Core/Math/TileDistance.cpp",
+                    "Native/Engine/src/Audio/SequencerOutput.cpp",
                     "Native/Game/src/Field/MinimapScene.cpp",
                     "Native/Game/src/Field/SegmentCollision.cpp",
                     "Native/Game/src/Actors/SoundOverrides.cpp",
