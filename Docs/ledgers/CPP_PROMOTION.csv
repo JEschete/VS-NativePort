@@ -108,7 +108,7 @@ F01695,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01696,Native\Game\src\Battle\Ai\MovementBehavior.cpp,x,,,,x,,,,
 F01718,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,x,,,,x,,,,
 F01720,Native\Game\src\Battle\Ai\ActorCommands.cpp,x,,,,x,,,,
-F01731,Native\Game\src\Battle\Ai\FlightTerrain.cpp,,,,,,,,,
+F01731,Native\Game\src\Battle\Ai\FlightTerrain.cpp,x,x,x,x,x,x,verify:VR-AI-FLIGHT-TERRAIN,8e439b230f313fb43c05e1d0cd9c055bb6882ae1,#46 slice: explicit FlightNeighborhood (terrain grid; origin tile; direction steps; flight test) instead of frame globals and the scratchpad direction table
 F01752,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01753,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01754,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
@@ -174,7 +174,7 @@ F01826,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01827,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01828,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01829,Native\Engine\src\Core\PointerSort.cpp,x,x,x,x,x,x,verify:VR-F01829,0808350a57c7ed011ecf1696eeb8660814307198,#46 slice: span of SortKey replaces void** and the record-layout assumption; only production caller adopted
-F01830,Native\Game\src\Battle\Ai\FlightTerrain.cpp,,,,,,,,,
+F01830,Native\Game\src\Battle\Ai\FlightTerrain.cpp,x,x,x,x,x,x,verify:VR-AI-FLIGHT-TERRAIN,8e439b230f313fb43c05e1d0cd9c055bb6882ae1,#46 slice: explicit terrain grid and world positions instead of the frame height map global
 F01831,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01832,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01833,Native\Game\src\Field\SegmentCollision.cpp,x,,,,x,,,,
@@ -187,7 +187,7 @@ F01839,Native\Game\src\Battle\Ai\TileHeightSampling.cpp,x,x,x,x,x,x,verify:VR-AI
 F01840,Native\Game\src\Battle\Ai\Relations.cpp,,,,,,,,,
 F01841,Native\Game\src\Battle\Ai\Relations.cpp,,,,,,,,,
 F01842,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
-F01843,Native\Game\src\Battle\Ai\FlightTerrain.cpp,,,,,,,,,
+F01843,Native\Game\src\Battle\Ai\FlightTerrain.cpp,x,x,x,x,x,x,verify:VR-AI-FLIGHT-TERRAIN,8e439b230f313fb43c05e1d0cd9c055bb6882ae1,#46 slice: reads the published settings through RoomAiRuntime instead of Battle_Ai_roomAiState
 F01844,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01845,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01988,Native\Game\src\Effects\Templates\RadialSurge.cpp,,,,,,,,,

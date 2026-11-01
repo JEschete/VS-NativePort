@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 16 | 21 (`wip`) | 4,170 |
-| `cpp` | 16 | 264 (`wip`) | 3,927 |
+| `modernized` | 19 | 21 (`wip`) | 4,167 |
+| `cpp` | 19 | 261 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 170 |
-| `vs_namespace` | 16 |
-| `typed_interface` | 16 |
-| `no_bridge` | 16 |
-| `strict_clean` | 170 |
-| `behavior_evidence` | 16 |
+| `source_cpp` | 173 |
+| `vs_namespace` | 19 |
+| `typed_interface` | 19 |
+| `no_bridge` | 19 |
+| `strict_clean` | 173 |
+| `behavior_evidence` | 19 |
 
-Promotion records: 280; derived `cpp=x`: 16, `cpp=wip`: 264. Verification records: 49; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 19, `cpp=wip`: 261. Verification records: 50; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -129,6 +129,13 @@ The fourth is the AI room-map slice, F01837-F01839 in `VS::Battle::Ai` (`Battle/
 publishes and releases the result through a `RoomAiRuntime` interface. `BattleRoomAiRuntime` still binds the
 map to the C AI frame globals that generated AI code reads, so this retires the inline `Field_roomData`
 reads and the old C entry points, not the frame bindings.
+The fifth is the AI flight-terrain slice, F01731, F01830 and F01843 in `VS::Battle::Ai`
+(`Battle/Ai/FlightTerrain.hpp`): the lowest reachable ground takes a `FlightNeighborhood` (terrain grid, origin
+tile, direction steps and a flight test called once per direction in order), the segment minimum takes the grid
+and world positions, and the ceiling reads the published settings through `RoomAiRuntime`, instead of the AI frame
+height map, the scratchpad direction table and `Battle_Ai_roomAiState`. Both module symbols retire (BATTLE.PRG
+reaches them by `jal` only). `ActorFlightNeighborhood` still reads the frame terrain, direction table and the C
+`Battle_Ai_CanFlyInDirection` cache, so the frame state stays C.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
