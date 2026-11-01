@@ -25,7 +25,6 @@ extern "C" {
 #include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SoundOverrides.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
@@ -1322,7 +1321,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AE980u, 0u, (void*)&Actors_BlendActorPoseHalfway, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AEAE8u, 0u, (void*)&Actors_PrepareActorRootTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AECA0u, 0u, (void*)&Render_PrepareActorCameraMatrices, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AEEC4u, 0u, (void*)&Audio_UpdateActorSoundTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AEF94u, 0u, (void*)&Actors_UpdateAndDrawRoomActors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF6E8u, 0u, (void*)&Actors_UpdateActorAnimationBlend, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF844u, 0u, (void*)&Actors_AlignPoseRotationBranches, 0u, 0u, 0u},

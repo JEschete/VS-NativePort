@@ -4,6 +4,9 @@
     <Filter Include="include">
       <UniqueIdentifier>{F4EF33CB-87D8-555A-80F8-49814F54F4E4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Actors">
+      <UniqueIdentifier>{F8F63F54-4963-5BC9-A2C9-E5312AFD9984}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Battle">
       <UniqueIdentifier>{D01075AB-3FA6-535F-AAEC-111A4A297F29}</UniqueIdentifier>
     </Filter>
@@ -246,7 +249,10 @@
     <ClCompile Include="src\Actors\SoundOverrides.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\SoundOverrides.h">
+    <ClCompile Include="src\Actors\SoundTransitionBinding.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\SoundTransitionBinding.hpp">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClInclude Include="src\Actors\Spawn.h">
@@ -2174,6 +2180,9 @@
     </ClCompile>
     <ClInclude Include="src\Title\TitleScreen.h">
       <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\SoundTransition.hpp">
+      <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Action.h">
       <Filter>include\Battle</Filter>

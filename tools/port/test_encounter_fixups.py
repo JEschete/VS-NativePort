@@ -1203,7 +1203,7 @@ class EncounterFixupTests(unittest.TestCase):
         owned = self.owned_items()
         for identifier in ("F00995", "F01007"):
             self.assertEqual(
-                owned[identifier]["name"], "Audio_UpdateActorSoundTransition"
+                owned[identifier]["name"], "VS::Actors::StepSoundTransition"
             )
             self.assertEqual(
                 owned[identifier]["path"], r"Native\Game\src\Actors\SoundOverrides.cpp"
@@ -1212,8 +1212,9 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Game\src\Actors\ModelRendering.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Audio_UpdateActorSoundTransition(actor);", source)
-        self.assertIn("Audio_UpdateActorSoundTransition(attached);", source)
+        self.assertIn("VS::Actors::UpdateActorSoundTransition(*actor);", source)
+        self.assertIn("VS::Actors::UpdateActorSoundTransition(*attached);", source)
+        self.assertIn('#include "Actors/SoundTransitionBinding.hpp"', source)
         self.assertNotIn("soundEffect.parameter -= step;", source)
         header = (root / r"Native\Engine\src\Audio\ActorSound.h").read_text(
             encoding="utf-8"

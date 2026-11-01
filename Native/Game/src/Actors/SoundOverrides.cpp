@@ -1,28 +1,25 @@
-#include "Actors/SoundOverrides.h"
-
+// Hand-maintained (tools/port/owned.csv).
 #include <algorithm>
 #include <cstdint>
-#include <cstdlib>
 
-#include "Legacy/Psx.h"
+#include "Actors/SoundTransition.hpp"
 
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "State/Timers.h"
+namespace VS::Actors {
+// decomp: BATTLE.PRG func_800AEEC4 (src/BATTLE/BATTLE.PRG/44F14.c:886; MIPS
+// 800AEEC4-800AEF90).
+SoundTransition StepSoundTransition(SoundTransition current,
+                                    SoundTransition target, int tick_speed) {
+  const int remaining = current.frames_remaining;
+  if (current.mode != kSoundTransitionGliding || remaining == 0) {
+    return current;
+  }
+  const int step = std::min(tick_speed / 2, remaining);
+  const auto glide = [step, remaining](std::uint8_t from, std::uint8_t to) {
+    return static_cast<std::uint8_t>(from + ((to - from) * step / remaining));
+  };
+  current.volume = glide(current.volume, target.volume);
+  current.pan = glide(current.pan, target.pan);
+  current.frames_remaining = static_cast<std::uint8_t>(remaining - step);
+  return current;
 }
-
-// func_800AEEC4, src/BATTLE/BATTLE.PRG/44F14.c:886; MIPS 800AEEC4-800AEF90.
-void Audio_UpdateActorSoundTransition(Actors_ActorRecord* actor) {
-  if (actor == nullptr) std::abort();
-  auto& current = actor->soundEffect;
-  const auto& target = actor->soundEffectTarget;
-  const int remaining = current.parameter;
-  if (current.kind != 1 || remaining == 0) return;
-
-  const int step = std::min(State_tickSpeed / 2, remaining);
-  current.flags = static_cast<std::uint8_t>(
-      current.flags + (target.flags - current.flags) * step / remaining);
-  current.level = static_cast<std::uint8_t>(
-      current.level + (target.level - current.level) * step / remaining);
-  current.parameter = static_cast<std::uint8_t>(remaining - step);
-}
+}  // namespace VS::Actors

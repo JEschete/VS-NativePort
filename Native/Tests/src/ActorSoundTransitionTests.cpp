@@ -1,22 +1,18 @@
 #include <array>
 #include <cstddef>
-#include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Actors/SoundTransitionBinding.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/SoundOverrides.h"
 #include "Audio/ActorSound.h"
 #include "State/Timers.h"
 }
-
-static_assert(std::is_same_v<decltype(&Audio_UpdateActorSoundTransition),
-                             void (*)(Actors_ActorRecord*)>);
 
 namespace {
 std::array<u_char, 4> SoundValues(const Actors_ModelEffectSlot& state) {
@@ -31,7 +27,7 @@ struct SoundTransitionFixture {
 
   void Tick(int speed) {
     State_tickSpeed = speed;
-    Audio_UpdateActorSoundTransition(&actor);
+    VS::Actors::UpdateActorSoundTransition(actor);
   }
 
   void CheckCurrent(Actors_ModelEffectSlot expected) const {

@@ -285,6 +285,9 @@
     <ClCompile Include="src\SfxBankSelectionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SoundTransitionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SourceNormalizationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

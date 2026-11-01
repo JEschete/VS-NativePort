@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SoundTransitionBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Actors/Palette.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
-#include "Actors/SoundOverrides.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
@@ -108,7 +108,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
             }
             actor->instance.wasDrawn = 0;
             if (actor->instance.isFrozen) {
-                Audio_UpdateActorSoundTransition(actor);
+                VS::Actors::UpdateActorSoundTransition(*actor);
                 step = 0;
                 if (i > 0) {
                     int texture = actor->modelId;
@@ -155,7 +155,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                             Actors_UpdateActorAppearanceTransition(attached);
                         }
                         if (actor->instance.isFrozen) {
-                            Audio_UpdateActorSoundTransition(attached);
+                            VS::Actors::UpdateActorSoundTransition(*attached);
                             step = 0;
                             if (i > 0) {
                                 int texture = attached->modelId;

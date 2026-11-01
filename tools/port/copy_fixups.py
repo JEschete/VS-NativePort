@@ -29,6 +29,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
     "VS::Battle::Ai::BattleActorReactionDelays": r"Native\Game\include\Battle\Ai\ReactionDelay.hpp",
+    "VS::Actors::UpdateActorSoundTransition": r"Native\Game\src\Actors\SoundTransitionBinding.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -54,7 +55,6 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Battle_Ai_ActorNavigationOverrideStatus":
         r"Native\Game\src\Battle\Ai\NavigationPrimitives.h",
-    "Audio_UpdateActorSoundTransition": r"Native\Game\src\Actors\SoundOverrides.h",
     "Actors_ResolveAttachmentParentMatrix": r"Native\Game\src\Actors\ModelDrawing.h",
     "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
@@ -2790,8 +2790,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"(?s)if \(\((actor|attached)->soundEffect\.kind == 1\)\s*"
      r"&& \1->soundEffect\.parameter != 0\) \{.*?"
      r"\1->soundEffect\.parameter -= step;\s*\}",
-     r"Audio_UpdateActorSoundTransition(\1);",
-     "44F14.c:923 actor and companion inline copies share the source-backed typed sound transition"),
+     r"VS::Actors::UpdateActorSoundTransition(*\1);",
+     "44F14.c:923 actor and companion inline copies share the source-backed typed sound transition; "
+     "F00995/F01007 #46 typed promotion binds the actor record and tick speed to the pure glide"),
     (r"^Field::(?:Find|Show|Hide|Disable)RoomGeometryGroup$|^Field::AddRoomGeometryDepthBias$",
      r"\barg0\b", "group_index",
      "2842C.c:550-606 verified geometry group index from event/gimmick/render callers"),
