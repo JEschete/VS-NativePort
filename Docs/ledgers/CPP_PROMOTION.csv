@@ -271,7 +271,7 @@ F04195,Native\Game\src\Menu\Sounds.cpp,x,,,,x,,,,
 F04196,Native\Game\src\Menu\Sounds.cpp,x,,,,x,,,,
 F04197,Native\Game\src\Menu\Sounds.cpp,x,,,,x,,,,
 F04198,Native\Game\src\Menu\Sounds.cpp,x,,,,x,,,,
-F04199,Native\Engine\src\Render\ScaledFont.cpp,,,,,,,,,
+F04199,Native\Engine\src\Render\ScaledFont.cpp,x,x,x,x,x,x,verify:VR-RENDER-SCALED-FONT-GLYPH,b82dc8888e7dd77da08c942feb3946f109991436,"#46 slice: VS::Render::DrawScaledFontChar reads ScaledFontStyle (glyph width span, table, palette, colour) and draws through ScaledGlyphTarget; DrawLiveScaledFontChar in ScaledFontLive.cpp binds the live font state, the active text box ordering table and the bounded primitive buffer; the generated Font.cpp caller uses the binding by copier fixup; no data word stores 0x800C79D8"
 F04200,Native\Game\src\Boot\Session.cpp,,,,,,,,,
 F04201,Native\Game\src\Boot\Session.cpp,,,,,,,,,
 F04202,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,

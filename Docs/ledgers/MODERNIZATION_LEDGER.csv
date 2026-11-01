@@ -3751,7 +3751,7 @@ F04195,Menu_PlayInvalidSound,Menu::PlayInvalidSound,Native\Game\src\Menu\Sounds.
 F04196,Menu_PlayLeaveSound,Menu::PlayLeaveSound,Native\Game\src\Menu\Sounds.cpp,owned,todo,60,34,4,strict,found,x,x,,,,x,,17,1,1,x,,,,yes,no,100,VR-F04196,recorded,
 F04197,Menu_PlaySelectSound,Menu::PlaySelectSound,Native\Game\src\Menu\Sounds.cpp,owned,todo,60,34,4,strict,found,x,x,,,,x,,14,1,1,x,,,,yes,no,100,VR-F04197,recorded,
 F04198,Menu_PlayChangeSound,Menu::PlayChangeSound,Native\Game\src\Menu\Sounds.cpp,owned,todo,60,34,12,strict,found,x,x,,,,x,,18,2,1,x,,,,yes,no,100,VR-F04198,recorded,
-F04199,Render_DrawScaledFontChar,Render::DrawScaledFontChar,Native\Engine\src\Render\ScaledFont.cpp,owned,todo,54,25,117,relaxed,found,x,,,,,,,1,0,1,x,AddPrim,,scratchpad;kseg_literal;inline_asm,yes,no,92,,executed,
+F04199,VS::Render::DrawScaledFontChar,Render::DrawScaledFontChar,Native\Engine\src\Render\ScaledFont.cpp,owned,done,54,25,117,strict,found,x,x,x,x,x,x,x,0,1,1,,,,scratchpad;kseg_literal;inline_asm,yes,no,92,VR-RENDER-SCALED-FONT-GLYPH,recorded,
 F04200,Boot_JumpToTitle,Boot::JumpToTitle,Native\Game\src\Boot\Session.cpp,owned,todo,44,4,1,relaxed,found,x,,,,,,,2,0,2,x,,,,yes,no,100,,executed,
 F04201,Boot_JumpToGameLoop,Boot::JumpToGameLoop,Native\Game\src\Boot\Session.cpp,owned,todo,44,4,1,relaxed,found,x,,,,,,,1,0,2,x,,,,yes,no,100,,executed,
 F04202,Battle_Ai_CanWalkInDirection,Battle::Ai::CanWalkInDirection,Native\Game\src\Battle\Ai\GroundNavigation.cpp,owned,todo,57,23,166,strict,found,x,x,,,,x,,1,0,1,x,,,scratchpad,yes,yes,97,,executed,

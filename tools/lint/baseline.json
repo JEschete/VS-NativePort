@@ -730,13 +730,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "042a9e25a29e5f63ba9ed7aedf1b30d06db19e75190894d3b3dfb1d59358267b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "044912a03d63f1c71a3bdc642bb19197d4bb272ad0fd82be3c127f72727876f2",
       "count": 1,
       "tool": "tidy",
@@ -1122,13 +1115,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "06acc960dfd47507408ca38a321c457ab0eae0b0454c9106e126c141a038536c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "06b0740836ecacaaa06739de7f2412974bb50444ba0028547ea84403bcd065f9",
       "count": 1,
       "tool": "cpplint",
@@ -1148,13 +1134,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "06e568d81f4e080ed6c7f3c5d6378f1e0684554f16b854d7b017b32988d6b567",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/ScaledFont.h",
-      "rule": "google"
     },
     {
       "key": "06e64c25b4c37ab700aa0d3988057e0535dc21e91ff79463274c7a786701fb80",
@@ -1204,13 +1183,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "06ff47874a47657872fa21947e3bc0a94d94f423436dc4b5ed7d7ba0ca2c1831",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "070319a0aa55732709ea80d97d80304c5ccdd7c8367bf53295c2a283e5abb718",
@@ -1343,13 +1315,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "07ff420258ce06926c7ae46fc61941719c5a81d5f05f081c61d74b14e7dadf34",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -2228,13 +2193,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "0c684115260d461ec21fd4a8ca779a7e2e5a65de063d2bc304d5e3433ed428e4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0c6b094d2944ba4da54e908de148f3ca7a61b67c7577510a8adefe289ce9980e",
       "count": 1,
       "tool": "tidy",
@@ -2744,13 +2702,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "0f14e23097f551c987285b3d1737bcbc132a1a07545f9e56c82bf8ef9409a340",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "0f16369726b7f2e5382a9f8a9a1a1f0a87894251a38e21201b8caa69d915bc09",
@@ -4923,13 +4874,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "1b093d667832c443810f85e79042be9312d951ebc99e87ed9ddc7ae7a2588365",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "1b0e2868f3239dcee0127ffd0fc647a8057f88e86b9dd48786c635bc395c562f",
       "count": 1,
       "tool": "tidy",
@@ -5518,13 +5462,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "1e105c44259d6b0537620a124ed1ab62cb83326b140c0497a3db8875ccc93750",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "1e1ce21923aa98c7a16ba528af7658366001bae571f1cd69b3c0a1f36160b206",
       "count": 1,
       "tool": "tidy",
@@ -5740,13 +5677,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "1f53a84cdbf550da2c2efc32565f803c0ad7a1a9c82d3d6f37476422e0f88dc9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "1f5bed7e24f89922e744b54a8d91762bdc3908d8b3d0508b3fea5780310781e7",
@@ -8071,13 +8001,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "2b251e89e6423d77930f247ea0f3b8111ce782df08cdb7592a18f4a0d108486a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2b3b16f9a904852100b38a85c83639f2b52f1151daf5bc765b2c82e1493bab51",
@@ -10873,13 +10796,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "3b204859dd8efafb6affdcd5a247cece2fda1fc10f773642bac0355b447bb1a8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "3b2898bfeefc3f346fbc71258cee1cfacabf8230ee1a68e271d6c7492e11d6e1",
       "count": 1,
       "tool": "cpplint",
@@ -12595,13 +12511,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "4478cf2df24e1a692090c693a7d12d2775d444120ed5e423672794d463d58f2e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "447d6f4e3d9e893b7f9f9d767c46417aa4304948b5516bf58eb3f74d565a26fd",
       "count": 1,
       "tool": "cpplint",
@@ -13006,13 +12915,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "46918fad54b84acbba8b088357fa85865857b47631485a9afd5403296b0f06d4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "46952e076241680443b2c51b4306f2da961ecb11326b969ac043e9de89356c6e",
@@ -14077,13 +13979,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "4c92e81389aff7c42a60166c8778960151ba661d06e3ad44b5710b536b56f8ca",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "4c95f9300cba671421b066533a45165277ffc804f4321e211226c94ecd36a061",
@@ -16606,13 +16501,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "5b5de551e87bf4e18dcdbf483630bee2b5ac1247ee0bc6f2a8e11b75290d3a16",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "5b654450b906f26872474ba335a05886615330279ecbea3ef803ac7f2846175b",
       "count": 1,
       "tool": "cpplint",
@@ -17544,13 +17432,6 @@
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
     },
     {
-      "key": "5ffbc870308dc8f08d4b1934a3da1cc0e020c2fbc1063c4018120a7cfc059815",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "google"
-    },
-    {
       "key": "5ffc0fb719d536578ab98e0feddcc5e11b0d3db2141cc697006678fcc3c13d98",
       "count": 1,
       "tool": "cpplint",
@@ -18354,13 +18235,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "64312aebbd302b4e16cbb9e0eb3375a7f4270a8e6cd95fd3f5041a345319dd05",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "643335534f050b11c184ed2f6ae083ae6a120c58ad4246355e54c09cfaa5265d",
@@ -20181,13 +20055,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Audio/LibSpu.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "6e4cf9c8a0d544644d391f6b779b2776a8f3faa5959cbd2e455aaa8e5e82490a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "6e5042881a91ffc3d073b11833bf9363c3310f0b5cc2b4b41df00661bac93e65",
@@ -23179,13 +23046,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "7eb5feb9d69635d2e397175f6d9ef2acb9fff658aaf8a519d939fbf79329b312",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "7eb77356d2df17f738edd30af37989df1f78525580835d7660abe01d2e12a2ff",
       "count": 1,
       "tool": "cpplint",
@@ -23814,13 +23674,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "82732f0eca980ce83f02c1170b9bab0d4cc4f9851c744db726dba7f2a0dba352",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "8275a95394d913fe633cb2912ed172de6fc5a29f2f290820a10b67cc50813bed",
@@ -25622,13 +25475,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "8b95584196e704ed169c891538addfe3e12db5340aacefa248ffdb6f2d392b86",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
       "key": "8b95841762046990c7d6473df9d2c15e60b6d1d48232e8f1ca034abc771bb95d",
       "count": 1,
       "tool": "tidy",
@@ -27428,13 +27274,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "95691a0145c9626f05cf89046e40138c494749d8f8426316ac2d213c42506440",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "956cddaf5d2eca4ed50f3b6966b672de839d1159395406fe7fd2d16ccf9a6195",
       "count": 1,
       "tool": "tidy",
@@ -29073,13 +28912,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "9ec2c2f92626e560038d42607b98b71773af5cb10b16394d8b154ff21096e194",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9ecac545192f144b67d49029e3d43537a8b3dc9a9bad0d9f5279247b85621cee",
       "count": 1,
       "tool": "tidy",
@@ -29106,13 +28938,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "9edfb52f81af9be8f1a8675c18569355cc4fa46eacb83e0eb3a4fe400325c954",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "9ee0cd4a2e51c0a3c976273aa7daece8e0f0c8dcc7a733a80540f6e2fe752b9e",
@@ -29631,13 +29456,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "a1a856dcb80e21aa8426a53a4c1bf0a0f39d6d9c5d4c77b4071b9b470146a0b9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "a1b4daa35c1f0630f81f73ac3926889c23b668a8d16e30c254efea0e6528c375",
@@ -35163,13 +34981,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c1af17d04d2049a584d41523fcc2516569a62f41285b03c15bcb9f790bf2b129",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c1bb02765accad22fa58cf49390196d1d28ba98b6dd9158044009e832ed9bec5",
       "count": 1,
       "tool": "tidy",
@@ -35555,13 +35366,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "c3a0e953004ed1d60230a52aca3b1ad49ece4c6fe4b218f3540819ae5efaee01",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c3b6edf0221a021953b650ac044aea71bbeaece26335db20d3d782920cc1f969",
       "count": 1,
       "tool": "cpplint",
@@ -35574,13 +35378,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c3d6bf4c0829074dc28e92861522e1618455bf15aa87641b221dfc3162c15032",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "c3decb9292e400d38a74ce258c04da8902d96fadfb91654ac5126ab063b1feea",
@@ -36043,13 +35840,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c65f2964cf1d71cb9a76bbd7b39b8d318c52a0163bf25a660cafdf5aac3f75c8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "c669680928506478f2f350894e0cd58bb4c974f485c977d74ada3465a0d1306d",
@@ -38026,13 +37816,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "d05b4a16605f32a47758437e89e439c3efad19177369792c515e639bd8767bda",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "d05cf576f588849af8db8fd4495d1bdc7bcb13eca593bf4fa682098ec89dbbed",
       "count": 1,
       "tool": "cpplint",
@@ -38360,13 +38143,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "d243daef9f1c4913d58946ef27aa6ee66dde86916efd8a8fa21c4867d489cb4d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "d245d724d8ede7cbf897ed1625e84da06d0e5166a85b1fa3db8fb323d7b4ae70",
@@ -38969,13 +38745,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d5f357cbc55b1e5498ae2b6e13e1ecb22067996a47ac8492799f57fa0d113420",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "d5f6e9cac247da68bc8d2e5bbad1f8af51b219b9915922c7dbe099decedee5ef",
@@ -45941,13 +45710,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "fda19ea20ce0b1b871126b405774d51700e05ee55b5ba02cdac96d5e343fa502",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ScaledFont.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "fdaa41d3ad8763d919f8e2876a38db1aaed3fc3ae86ff3dd61d2febde892dba9",

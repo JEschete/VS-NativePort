@@ -25,29 +25,29 @@ architecture changes rather than per-function work, so this ledger is what track
 | 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
 | 23: #57 AI, navigation and collision contexts | 111 | 122 | 6,229 | 194 | 56 | 0 |
 | 24: #56 Combat intents and results | 4 | 355 | 10,216 | 181 | 178 | 0 |
-| 25: #54 Text IDs, layout and rendering | 4 | 29 | 1,279 | 23 | 10 | 0 |
+| 25: #54 Text IDs, layout and rendering | 3 | 29 | 1,162 | 23 | 10 | 0 |
 | 26: #59 Event VM results and execution | 1 | 236 | 3,830 | 59 | 178 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 23 | 374 | 6,523 | 198 | 200 | 0 |
 | 31: #61 Typed effects and playback sessions | 5 | 761 | 11,775 | 180 | 587 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 4 | 7 | 216 | 0 | 11 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 638 | 36,178 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 238 | 3480 | 107,986 | 1600 | 2160 | 0 |
+| **Total** | 237 | 3480 | 107,869 | 1600 | 2160 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 42 |
-| todo | 3,718 |
+| done | 43 |
+| todo | 3,717 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 189 | 1,896 |
-| Referenced by the original-address module table | 188 | 2,120 |
-| Calls an SDK shim | 11 | 461 |
+| Called from generated code | 188 | 1,896 |
+| Referenced by the original-address module table | 187 | 2,120 |
+| Calls an SDK shim | 10 | 461 |
 | Signature uses SDK integer types or `void*` | 43 | 862 |
-| Compiled with relaxed settings | 89 | 3,478 |
+| Compiled with relaxed settings | 88 | 3,478 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 189 of 238 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 188 of 237 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 
