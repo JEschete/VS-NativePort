@@ -61,7 +61,7 @@ F00058,Effects_QueueActionHitEffect,Effects::QueueActionHitEffect,Native\Game\sr
 F00059,Battle_PlayWeaponHitSounds,Battle::PlayWeaponHitSounds,Native\Game\src\Battle\ActionFlow.cpp,generated,todo,56,24,87,relaxed,found,x,,,,,,,1,0,0,x,,,,no,yes,54,,executed,
 F00060,Effects_QueueActionImpactEffects,Effects::QueueActionImpactEffects,Native\Game\src\Effects\ActionEffects.cpp,generated,todo,61,31,60,relaxed,found,x,,,,,,,2,0,0,x,,,,no,yes,80,,executed,
 F00061,Battle_ApplyActionSourceEffects,Battle::ApplyActionSourceEffects,Native\Game\src\Battle\ActionFlow.cpp,generated,todo,56,24,33,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
-F00062,Battle_ApplyActionTargetEffects,Battle::ApplyActionTargetEffects,Native\Game\src\Battle\ActionResults.cpp,owned,todo,56,24,0,relaxed,found,x,,,,,,,1,0,2,x,,,,yes,yes,77,,executed,
+F00062,VS::Battle::ApplyActionTargetEffects,Battle::ApplyActionTargetEffects,Native\Game\src\Battle\ActionResults.cpp,owned,done,56,24,0,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,yes,77,VR-BATTLE-ACTION-TARGET-EFFECTS-SLICE,recorded,
 F00063,Audio_PlayRandomActorImpactSound,Audio::PlayRandomActorImpactSound,Native\Engine\src\Audio\ActorSound.cpp,generated,todo,253,30A,3,relaxed,found,x,,,,,,,0,0,0,x,,x,,no,yes,100,,executed,
 F00064,Effects_SignalActorEffectAnimation,Effects::SignalActorEffectAnimation,Native\Game\src\Effects\ActionEffects.cpp,generated,todo,61,31,1,relaxed,found,x,,,,,,,2,0,0,x,,,,no,no,0,,characterize-first,
 F00065,Field_DisableTrapAtPosition,Field::DisableTrapAtPosition,Native\Game\src\Field\Gimmicks.cpp,generated,todo,45,3,8,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,

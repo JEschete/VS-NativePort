@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 49 | 19 (`wip`) | 4,139 |
-| `cpp` | 49 | 231 (`wip`) | 3,927 |
+| `modernized` | 50 | 19 (`wip`) | 4,138 |
+| `cpp` | 50 | 230 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 193 |
-| `vs_namespace` | 49 |
-| `typed_interface` | 49 |
-| `no_bridge` | 49 |
-| `strict_clean` | 193 |
-| `behavior_evidence` | 49 |
+| `source_cpp` | 194 |
+| `vs_namespace` | 50 |
+| `typed_interface` | 50 |
+| `no_bridge` | 50 |
+| `strict_clean` | 194 |
+| `behavior_evidence` | 50 |
 
-Promotion records: 280; derived `cpp=x`: 49, `cpp=wip`: 231. Verification records: 66; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 50, `cpp=wip`: 230. Verification records: 67; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -175,6 +175,8 @@ The twentieth is the radial screen warp (F02458): VS::Effects::ScreenDistortion:
 coordinates through a packet cursor and a root-table span; WarpLivePolygonVertices walks the frame ordering table.
 The twenty-first is the target sphere wireframe (F01288): VS::Battle::DrawSphereVolumeWireframe draws the pulsing wire
 through a TargetWireCanvas; DrawLiveSphereVolumeWireframe copies the live sphere wire state and binds the GTE projection.
+The twenty-second is the action target effects (F00062): VS::Battle::ApplyActionTargetEffects picks the reaction
+through ActionTargetEffects; ApplyLiveActionTargetEffects validates and binds the live action queue.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

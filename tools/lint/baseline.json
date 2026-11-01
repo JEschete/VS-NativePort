@@ -3712,13 +3712,6 @@
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
     },
     {
-      "key": "14c8fe5a76efc00c384732d400b7101e3ec86f912967766bebf1650a5f3f5903",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "14ca64bc29b2599b9226bded1933a43206c618d16cb36ae54df372afd935d098",
       "count": 1,
       "tool": "tidy",
@@ -3766,13 +3759,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "153944b0101fec6b0225d0dba4c33ae0777552462c411c1db6588eb5c1357135",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "15454fd87985aea490d953dcde7dcfcb78d9251ae5cdcb1b2b8b7532774f6a79",
@@ -6463,13 +6449,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "24ae758b827245a2e9eb9fdb35d43442673237f6551cfd7fec7794e9c610b92d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "24c8c8359f2842358778ee2bcbec43710e4eb8b3f2ba697a3342aab250cbf99b",
       "count": 1,
       "tool": "cpplint",
@@ -9088,13 +9067,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "333c7c5d59206932ee16642144b1639c0a9208c871a4cf0a8e2ca8f77b97b7f6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "4398e2fdc02ddbdb917db6c0e638e9a8533852b5f7ddae84e46a8674c652d485",
       "count": 1,
       "tool": "tidy",
@@ -10409,13 +10381,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "readability/casting"
-    },
-    {
-      "key": "3ba4b97f9f982195b22a252dce0ede2504ee5c817a7d849f0248a6cc2fdc5024",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "3ba70d0c54f5fdc570900378646f24e587a8901524a169a047148cde0a5c6578",
@@ -12497,13 +12462,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "46dd5fbb8bce375971d8fc41b461aac2b6173ff94b3f8a925e88c1bc401ba0bc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "46f0cf790d803102e89cad8824b997894fcaba3d9b58877676ddaa74488c591d",
       "count": 1,
       "tool": "cpplint",
@@ -14399,13 +14357,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "52bf08fd4a030b867b7e67d9c97a5f7a963157ca685bba99cca10b7dec6cb1d0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "52d0e66d187d67b81c5c5f9ca2b6b75fded235fdfaf40eca87ddbd277835e46e",
@@ -18720,13 +18671,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6b1a62bc20b5e036b506b56c38b31dea039ff550d892ab0f2aa3def1faeab755",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6b1baed72d652179013508733573e4e91ceb7bd8636be75500f6a810273a0f78",
       "count": 1,
       "tool": "cpplint",
@@ -20666,13 +20610,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "75f75705412fde7ae1323df1e7105ad2d19e3670af33b549ac2a23b705bd0a55",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "76005ea1e3d901b5a0c6dd9eecd8d47cff9a506c722f182f0fce95c82c0cb96e",
       "count": 1,
       "tool": "tidy",
@@ -20818,13 +20755,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "76f4cc93ee2d271f2c5c11313e0ba80693dfedaf3c55752461eb075974ba2970",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "76f64d5e5c12c4543f46f63c0a83b8ba51a7b38b7ae3814aee6ede191624d36c",
@@ -21224,13 +21154,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "790ef7f3f8caa7bb78f9f165c588fc558eb47c34c5666193e87a755ad63e536e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "79142c6ec1eb70993d9043b896f1312ceac2f05c18cb5d7f80a9c4c395c41367",
@@ -23639,13 +23562,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "87c1ce2cdb19df410c38403b8ab31f43fe7ce5bc633983bb36b5292d3dca6b94",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "87ce51716f896ec06960e5dd0aeed35c1a8be478b1d7c0c0f02ce6e64e4fdb9c",
@@ -27652,13 +27568,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "9e51bfc851c431bb98d07cf2e77b0a5fac1c8f6d5b057577472acb4b2255f526",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9e6b64bccd8f193ef6de71a620cd7843e620e53e2ea2481fde28344eee54755e",
       "count": 1,
       "tool": "cpplint",
@@ -29570,13 +29479,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "aa12a1a68d5cf62a5a4285230c5c4baed88c7e11e0cac7bb3daa88836cac9c19",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "aa2a6b884dbb94783deeeef061f93c87dd2cdd2b5eea4f2f6ab9a9d7e3429c34",
       "count": 1,
       "tool": "cpplint",
@@ -29990,13 +29892,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "acb2acb0391475d8347e6a500e703b5742ae7e9d713ad15f7f98af98b1306504",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "acb3a0aa5c15a29bd7238af2c75256b9bd40b749bf8cba11f21b73151cd5efb7",
       "count": 1,
       "tool": "cpplint",
@@ -30380,13 +30275,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "af18270ef15ec792361346edb9116941ace928c6ebeb601ebceb6ab77c52eaf3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "af260272c5543ab6919ebc50a325d459aa7914232f6dbc9a1afa4cac5cb31571",
@@ -30998,13 +30886,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b28dc2bd037f42e62c2d60992f945be4dee18d9661fc62df9db57863c92cecca",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "b28fcb4a6efc02bce584516cdcb7f74ce90d69ca2fb22ea160267849bcbe11c9",
       "count": 2,
       "tool": "tidy",
@@ -31331,13 +31212,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Desktop/src/main.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "b4c367bd7c41d5293d7edcb98d5138105652b59849ff149641e66539ab243ec9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -31801,13 +31675,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Boot/Session.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "b78286b93b5f6f9ddeec90994e31fba2e59820022b931aaa339c0c8197579e30",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "b78ea9ca87543ac360758396679360356fbb1d22121f500792ee691b7d371034",
@@ -34232,13 +34099,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "c5f088d0203c80a229aaf08f5ed392c2dddea800627bdfc30a3261a9c132dadd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c5f27c344c83582a72970613e3b8e7464cb6d37dc2f75fa24adfadf32fadaade",
       "count": 1,
       "tool": "cpplint",
@@ -36640,13 +36500,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "d2ee8ff62b980ce4956029575de8b910d9f1623e2ad90db0edec58b0b14263fb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "bugprone-switch-missing-default-case"
-    },
-    {
       "key": "d3091a849e28fe2ed9884f4280f15766c0e12c239a56e48d6262088162156a5c",
       "count": 1,
       "tool": "cpplint",
@@ -36729,13 +36582,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
-      "key": "d366d5bc0167cba6d4a8c7c7ea30269858f59bf88af4e9aae7db24427740c8d8",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/ActionResults.h",
-      "rule": "google"
     },
     {
       "key": "d36817972132f5ea943771c1b22becd26f0bf41a5b6268e1a51932b988f6cebf",
@@ -37270,13 +37116,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "d69daad3c212f5cfa68406caba6177db3e40bd7940eca2df8073d700dee08e37",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "d69e77f0f7847982212b99e6b519f9d10355b608d763d1898bd103d63e1e402d",
       "count": 1,
       "tool": "cpplint",
@@ -37289,13 +37128,6 @@
       "tool": "ruff",
       "path": "tools/naming/resolve_dups.py",
       "rule": "I001"
-    },
-    {
-      "key": "d6b2e50716ab8410da25aff2be7420ad20e8b37c2ac3c79626fabc7478f8c48d",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "google"
     },
     {
       "key": "d6bc70154d374c15c34252f660823fce365e60c26297dac5c03d3c5fd100a1f5",
@@ -38782,13 +38614,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "dfdce09d24f27d6754a8806198339acd44b614b5dae1c5c314fbbcbb4e72508e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "dfef17c6c506e7267484180ca74eb5f31521f5f245ff2cc5d1cdd5d4a1feebda",
       "count": 1,
       "tool": "cpplint",
@@ -39773,13 +39598,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e5cfbe006e2a5e5bb841c4e1b1ee56559811e8ec9d292d394d2846715d575050",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -41484,13 +41302,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ef9b2e3f26d8385d0ca7a496999de659f9f98ebd780acb82b5ca0c62463a21a3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "efaaceb7e5962096ea59230bf505e7f778b3cdaf3e3ce95da4b28a8122564f59",
       "count": 1,
       "tool": "tidy",
@@ -41736,13 +41547,6 @@
       "rule": "google"
     },
     {
-      "key": "f109b54ec433b4b6ebb0c4e6827a1145c22ff5db59b9bd589d0b625d78ead81f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f1281fa33af721010c92bed07ca586e59f5d41c3436727cd5d3c356025a4f95a",
       "count": 1,
       "tool": "cpplint",
@@ -41818,13 +41622,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Input/LibPad.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "f1a9b0729664fae1f31200ea39bd4852581c229e05e7e55f371f0f455df397c1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f1c4e2ad548e642f9f6801e867465bb4bc5a2fb0898b191255871c1d9c081a30",
@@ -41937,13 +41734,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f231d0bdd81994fb3272259cb37f28c8aa0fd68d0026349bcafa946598473ab3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/ActionResults.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f23cf75c2d73083349825350ae669230b4fe85f93241b26c6f7f2dc1d4ce14f1",

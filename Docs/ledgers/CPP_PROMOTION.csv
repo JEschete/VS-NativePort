@@ -1,5 +1,5 @@
 id,path,source_cpp,vs_namespace,typed_interface,no_bridge,strict_clean,behavior_evidence,evidence,reviewed,notes
-F00062,Native\Game\src\Battle\ActionResults.cpp,,,,,,,,,
+F00062,Native\Game\src\Battle\ActionResults.cpp,x,x,x,x,x,x,verify:VR-BATTLE-ACTION-TARGET-EFFECTS-SLICE,ef17925036e374dac74157159a2d84d38203b18c,"#46 slice: VS::Battle::ApplyActionTargetEffects reads hits and plays reactions through ActionTargetEffects with no legacy header in its closure; ApplyLiveActionTargetEffects in ActionResultsLive.cpp validates the action state, queue entry, hit count and action id, copies the label position instead of reinterpreting the SVECTOR as u_short, and binds hit application, the reaction animations and world labels; generated callers use it by copier fixup; ActionResults.cpp leaves relaxed_sources and the ModulePointers entry is dropped since no data word stores 0x8006CB04"
 F00579,Native\Game\src\Field\DoorMatches.cpp,x,,,,x,,,,
 F00617,Native\Game\src\Field\RoomTriggerMarkers.cpp,,,,,,,,,
 F00618,Native\Game\src\Field\RoomTriggerMarkers.cpp,,,,,,,,,
