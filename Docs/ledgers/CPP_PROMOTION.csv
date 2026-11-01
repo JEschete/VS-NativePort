@@ -98,7 +98,7 @@ F01685,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01686,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01687,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01688,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
-F01689,Native\Game\src\Battle\Ai\ConditionSnapshot.cpp,,,,,,,,,
+F01689,Native\Game\src\Battle\Ai\ConditionSnapshot.cpp,x,x,x,x,x,x,verify:VR-AI-CONDITION-SNAPSHOT,03b41481c18f2d1b5f297eea52957eea542a9f7e,#46 slice: VS::Battle::Ai::CaptureActorConditionTable writes ActorConditionReadings through an ActorConditionTable; CaptureBattleActorConditions in ConditionSnapshotBinding.cpp reads the live battle actor list and binds a 16-slot planner row span; the generated ActionPlanning caller passes an explicit-extent span by copier fixup; no data word stores 0x800DC424
 F01690,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01691,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01692,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,

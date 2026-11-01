@@ -1687,7 +1687,7 @@ F01685,Battle_Ai_ApplySimulatedStatDelta,Battle::Ai::ApplySimulatedStatDelta,Nat
 F01686,Battle_Ai_AppendActionCandidate,Battle::Ai::AppendActionCandidate,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,0,1,x,,,,yes,yes,100,,executed,
 F01687,Battle_Ai_SortActionCandidates,Battle::Ai::SortActionCandidates,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,0,1,,,,,yes,yes,100,,executed,
 F01688,Battle_Ai_CopyPlanningActorStats,Battle::Ai::CopyPlanningActorStats,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,0,1,,,,,yes,yes,83,,executed,
-F01689,Battle_Ai_CaptureActorConditionTable,Battle::Ai::CaptureActorConditionTable,Native\Game\src\Battle\Ai\ConditionSnapshot.cpp,owned,todo,57,23,0,relaxed,found,x,,,,,,,1,0,1,x,,,,yes,yes,83,,executed,
+F01689,VS::Battle::Ai::CaptureActorConditionTable,Battle::Ai::CaptureActorConditionTable,Native\Game\src\Battle\Ai\ConditionSnapshot.cpp,owned,done,57,23,0,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,yes,83,VR-AI-CONDITION-SNAPSHOT,recorded,
 F01690,Battle_Ai_IsActionHarmfulToActor,Battle::Ai::IsActionHarmfulToActor,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,2,0,1,x,,,,yes,yes,100,,executed,
 F01691,Battle_Ai_IsActionBeneficialToActor,Battle::Ai::IsActionBeneficialToActor,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,2,0,1,x,,,,yes,yes,100,,executed,
 F01692,Battle_Ai_CacheFallbackActionCandidate,Battle::Ai::CacheFallbackActionCandidate,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,0,1,x,,,,yes,yes,100,,executed,

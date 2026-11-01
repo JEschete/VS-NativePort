@@ -4244,13 +4244,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "16b9ed89748e637a6060b58cbe8e405c7c390c333f6bc331031b30e68185b233",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "16bf3fded07c284edd9085a48466f119d26c7a5beed17961805a891ca3f81256",
       "count": 1,
       "tool": "tidy",
@@ -8647,13 +8640,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2dbce0c5594c57537ec594b4b777e7c885d5ae96d1e8a29e01c951fe65ed4982",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "2dc31f54bc0cdef7cec9037bdff6297df0ca9c31de24daa2c9c8ab30213c2c18",
       "count": 1,
       "tool": "cpplint",
@@ -9107,13 +9093,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "306406e605143256223cad3ee78b1987a4c4a11e14f1883c81cbd578dbd8d9e2",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.h",
-      "rule": "google"
     },
     {
       "key": "306f62f68c411ea237edc341553b295e43e75a4febabc0db7f605097a85ff004",
@@ -9989,13 +9968,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/Sprites.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "354b5aadf310ae712602dd756fca2b91eecf13fc39abd01c3304510f7fcf0a9e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "73b2f3c675859d99dfa5fb31d00bf0b66305b60477560849846bca772eb5b3a3",
@@ -18216,13 +18188,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "62f78a78bcbc8523d00d4a6b908d604b7d0009dea935b8fbe9bd488ac9ef8425",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "62fbc1f24ba18d4c8959f68bd64841b478b5cee2c4d2f763595f401f85eb88dc",
       "count": 2,
       "tool": "cpplint",
@@ -20064,13 +20029,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6d13d7ac466a8b23518f46cc9c9e1408edff97b77929ca2438d58e057da51a3a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "6d16dba6bb4bdb132aee61048fb94270db4da371b3540190076f9a4c8c6a5753",
       "count": 1,
       "tool": "tidy",
@@ -20888,13 +20846,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "71e8686c5b4ba9bd69dc96c10c53505834a89da5d854ee48586095e60d914e6f",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "google"
     },
     {
       "key": "71f1a2a4a75d70a2d19606943917e109380d8ebc30b99bfdf347a75867784c54",
@@ -21896,13 +21847,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "769459744929c7aaf759fa1fb2ddb42c86972b6ebf3e25f2c45d7d70f0bc8f38",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "76a11fdfc6841b063dd4320ecee77181c6faece82d9f7e1e44c8959c8089c627",
@@ -24726,13 +24670,6 @@
       "rule": "google"
     },
     {
-      "key": "8682c21667f2f7a5e438f1b9163d46454c867cb1fda0968910dbec5c17a996e3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "868360a9268459bd9759bf4e1da128cd193173721b30383f337daaf6e06cb0f1",
       "count": 1,
       "tool": "tidy",
@@ -26236,13 +26173,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Handle.hpp",
       "rule": "whitespace/indent"
-    },
-    {
-      "key": "8e36b4f6d587d933f2325aedb248d0cb2adc414e3500c1045e8df550416a94b5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "8e4b659926fe12ec5a81c8b702c250487c8cd60259146641f66e68ffb2b29694",
@@ -32979,13 +32909,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "b43689f8339b6dc20385d0ac7d5f34735bfa01f96b7e1663d1e1a6803edc7666",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "b43d3416aa70cd77d8438018ef20bcb20870686cfc01e0ced30c50c2d9fb3783",
       "count": 1,
       "tool": "tidy",
@@ -34594,13 +34517,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "bd1fef02834c1e33e808be652649439cbcab362027df8eaefc74c7e1937e0d2f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "bd2ab03decf5dbc5ac1109a3b61b9669da259a4df18e072cb7d2ad0b2ce9c80b",
@@ -44079,13 +43995,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "f176daebe47aebff125989bd83e5edbfa26108307162c6bf36d325bed3268d09",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/ConditionSnapshot.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "f17eda50f2919c9bc8aa90865b4d7a255f03b328c3e58697bc5c7cfebed76574",

@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 38 | 20 (`wip`) | 4,149 |
-| `cpp` | 38 | 242 (`wip`) | 3,927 |
+| `modernized` | 39 | 20 (`wip`) | 4,148 |
+| `cpp` | 39 | 241 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 189 |
-| `vs_namespace` | 38 |
-| `typed_interface` | 38 |
-| `no_bridge` | 38 |
-| `strict_clean` | 189 |
-| `behavior_evidence` | 38 |
+| `source_cpp` | 190 |
+| `vs_namespace` | 39 |
+| `typed_interface` | 39 |
+| `no_bridge` | 39 |
+| `strict_clean` | 190 |
+| `behavior_evidence` | 39 |
 
-Promotion records: 280; derived `cpp=x`: 38, `cpp=wip`: 242. Verification records: 55; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 39, `cpp=wip`: 241. Verification records: 56; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -153,6 +153,8 @@ The ninth is the actor sound glide (F00995/F01007): `VS::Actors::StepSoundTransi
 `SoundTransition` values and an explicit tick speed; `UpdateActorSoundTransition` binds it to the actor record.
 The tenth is the actor movement commands (F04180/F01025): `VS::Actors::SetDirectMovement` and `QueueNavigationTileTarget`
 write a `MovementCommand` through an `ActorMovementRequests` table, which `ActorRecordMovementRequests` adapts for the actor records.
+The eleventh is the AI condition snapshot (F01689): `VS::Battle::Ai::CaptureActorConditionTable` writes
+actor condition readings through an `ActorConditionTable`; `CaptureBattleActorConditions` binds the battle actor list and a 16-slot planner row span.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
