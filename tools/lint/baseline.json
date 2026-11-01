@@ -86,13 +86,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "00eece1e37f1276282597a5731bfcbe3f5bc96b6a81e4b2fb23981ef479bc613",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "00f209d75f7048a3545a336830e0b803a73e7a36d5482063e4620b20ad960b7e",
       "count": 2,
       "tool": "cpplint",
@@ -300,13 +293,6 @@
       "count": 2,
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "020a49c5858f0e3e93e979123ad9b7a2e485d6e2bf5ab74e3018e62b6c7e632f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -643,13 +629,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "03cadec89b9bf00e069379e281d0b8501302c0aa7701d1d072898635b0ca1996",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -1164,13 +1143,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "06f193abcdeb89350614dc654641f4b3ec55a1b85d83c8da541c085f3e363c86",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "06f49f3a420b1d3149bb524fddd817f2394ad1eb194782c54205bdc0b2201768",
       "count": 1,
       "tool": "cpplint",
@@ -1374,13 +1346,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "084513d9e4d26685bd17a9784ffaa19aa5d1839eacbe6a1af58ab97d56f59ea5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "085168a062a2af06d74fdcec620ab4c7db99e7eea3ab3d97331239349977be3a",
       "count": 2,
       "tool": "cpplint",
@@ -1430,13 +1395,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "08ba18f0a23d357cf817a082d3a8b643d464016a31a0a54cc37a97f0b365f827",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "08ba899b1ca3f2d050073128b5f85d00a69d92f03298da957e26073cb14d9025",
       "count": 1,
       "tool": "tidy",
@@ -1479,25 +1437,11 @@
       "rule": "build/include_order"
     },
     {
-      "key": "0909921cc739228f0349f8635e540a2c2f716f2574df9fb30595a70494366b80",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "50c1fd9937c2430beeb16b2fae4b5b0393eae4f3fde4bbb6964f9ee7d795dd92",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "091cd2efe3ba26a54784c6babe54d7a0bf2833eb724629ec0e9c488f85d5e2a1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "09200093206fa813224a20ea2de803a4fc9f85c20cab2b27a6cb96a90cba0756",
@@ -1540,13 +1484,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "095c2d07e75779bc9e5c017eda1475a0e0a6f9e31cb1fe7650636c8e6d0c6dc6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "096e81c970e93f9ede90ac75242770ff45084e92e7f5fa21347597aacd058bd8",
@@ -1717,25 +1654,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "0a2a136763c645001b9dbc3b16a34071784636ef0fda6883160ab83a2b3e9b57",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "0a31e16e1c357887e94202f2fcae1fa3215e0627f07bc386de938cb9269be503",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "0a355ad6dc159a1589517ee0e3079d042ed4c5564debd42e4415abcc4276e2ac",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "45b2c5a1e35fd51b65f84cea3352674dc501f1ef24e0520f5da058159f34c820",
@@ -2011,13 +1934,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "0b69067e75e3c4dc8488b2bd9f04d40441efc7bc3f34bdbe4e33450e04427a8d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "0b6e90774f585a1f4962f00598d7853a2c6c13b269a4241bcfa11fd77ca9c5db",
       "count": 1,
       "tool": "tidy",
@@ -2079,13 +1995,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "0bdf54ceb5bfcf36d2e2a10c0db2503ef209ee2b601e5858c7b25720098e8402",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "0be356717b7dbbd2afe0e8676457a69b5e5654b54a78601e932ee72b0627b2c1",
@@ -2564,13 +2473,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "0e49b16f38917221c391acacefa66fa9bc5430d3f42451fddca1420bf90161fb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0e510e21283a07f3f0978612b89a5fd547fcae2acf3708188b61269f82544988",
       "count": 1,
       "tool": "cpplint",
@@ -2674,13 +2576,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "0edab8138fef83ba62e53402a0b6dd7c8e1a46a152fde3c8766c3cedddfe9351",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "0ede2b6daa66a21c360d3ec63d4a642290c57a85957b44d47732c838d0556dd5",
@@ -2907,13 +2802,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "10423f2daa0fbdbef89a914f5c8a5b4b44d76b8b8cc9d714e96c1265ebfa4b0d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "10441f870d643d63faf2f383c10617f4b9b64aecc051e5f152a08662dd0997ca",
       "count": 1,
       "tool": "tidy",
@@ -3010,13 +2898,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "10adabc7dac6820e4390372bd6c10ab4845592bdd08f74bdd348ef4eb2243bea",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "google"
     },
     {
       "key": "10b0d76287afa45e3494e7f12fd1199674284269be60237fa2760ac0bb9bcb29",
@@ -3163,13 +3044,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "11a916a9e5fe27dfb3102b098398c0b936f0aadac88fcef1f576d1c165a5d1be",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -3586,13 +3460,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "13685d6d96a651f0d42263804d7b71d3a9d6a65b0342cc96876a6f9c4ac8283f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "136fcaf0fcef6b916712c6b8430ecb777177f8478cee130b3c72e768a64690da",
       "count": 1,
       "tool": "tidy",
@@ -3675,13 +3542,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "13e0878d765ad4db07e79130f41795807a3c685a483fa80b59f7083cd8316b88",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "13ed373091bebebb16a0cce40e3553b1d14adfdf45679835c4dd2c498860785e",
@@ -3873,25 +3733,11 @@
       "rule": "readability/check"
     },
     {
-      "key": "14e6e992985f67a3ded68e4e0c4cf48a953039e4465b4a2947ce1ca712d664e5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "14ed66b8d91cc099af4d7b5a1723ddd4ab019ced688da05ae7244ff576770205",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "150fb954346f47cc051a996b5ec1b11c5bec9ceafc800ac54ebddcfa7beafe28",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "1516d8f57d45636f1d747b060ff288efc68bccc68e1a8d71e98b3a12730b038b",
@@ -3934,13 +3780,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "15508d9c86b2686303e038fd1bc5b7881966f26cfe853b9d399d83798225fa78",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "155b9e397a070c73669f327cc82405cb9445bc74a88fcd1735378277ffb27424",
@@ -4104,13 +3943,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "163c2bddfb7cb7ef8c5bdca1fac66c090225ea4b8d1827d828ab758b5ef51572",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "164ca5d274cfc1d243e9c32329e048e3c4c9630d482a55bb2d91810cae9adcb7",
       "count": 1,
       "tool": "tidy",
@@ -4158,13 +3990,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "169dc597dbedc65ccefa321ad778a649820b485e6d3e68300534f5c369fa2c11",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "16a8b910a5549a0c8c1d72bec593c6456260746f3427943d3ff38b20eaa85aa0",
@@ -4342,13 +4167,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "17da420b8b2e0c5b29305f0c98443390480ab5f68838a9237c49ee04126054f8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "17dc89e88533bc7ca122468a594e237c6933126dca7b998a226c215dbf86b182",
       "count": 4,
       "tool": "cpplint",
@@ -4417,13 +4235,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "182045d4da777c66acf34b2a973daf30e29de6af829b296f4eef6577498597e5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "1828f74aab0a223d854211790a041fa1a42d4be1174b693cac3d155f10edb57b",
@@ -4746,13 +4557,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1a4a997ca0ec45ab7ae323211e44b68e383fc15ec134cf2de7914eb4a2d8de0e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "1a617c6cad40aa8be0e4a344814c878ca3b1ad7ec881b4771a1a8ca5ce5fa2eb",
@@ -5147,13 +4951,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "1c6157851027acea5c93c7f3915eec4b354ca8f8c6e0f847da0e7a7969a1efd6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "1c6368d93a2bfe1ee4f49d8f733ef186f22a239bcbb79a411be0d9d2158e6d40",
       "count": 1,
       "tool": "cpplint",
@@ -5165,13 +4962,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Input/Pad.hpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1c770b8d8a74075d10048f8b089861dbe15b38e36e3c86d114bd12fcf711607a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -5215,13 +5005,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1cbcd446ffc8a7fbbf0b246693c5ea96af397f236e4d5196b1cd014def85bd79",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "1ccb8157a6c22e44adfdd057bd65d5b3b3ea6ad3e9360922a0678d7baca2d3e1",
@@ -5343,13 +5126,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "1d34b873d23e44efb755f8fad19617713d6959b9e7861a997eee31f20cc12316",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "1d35e1867297b4b259b2c660fecabd1dc9af93d0e76a3d48d774c6201fd4828f",
       "count": 1,
       "tool": "tidy",
@@ -5390,13 +5166,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "1d851adcdb044507d37b15515ef7012f5044ad8443c09723e76b0b23d5243d15",
-      "count": 1,
-      "tool": "clones",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "cpp"
     },
     {
       "key": "07319fb2f7ab3553c8b7033fb11276e7d8614026cda24143995accc37cd17154",
@@ -5467,13 +5236,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1e1f5886ee25bc20339c8ab8a770f3805c4f77ad06c690ad93d176653cc1daf3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "1e227374e6363397be82cc6404f896cd096a8eef7ade0d93f8ed5aa5e9d4e8b5",
@@ -5910,13 +5672,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "20ba19821d128ddad5865ae5f196b1d92b885b3d7bbe6150379dbef7a211468e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "20c6b7dc3e818c2955b8d90a330ebddc985046e8a62e18f093d8d0fc110bed06",
       "count": 1,
       "tool": "cpplint",
@@ -6253,13 +6008,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "22c7c70727daf8f38a85ac7312b647a53972d363de2f98e89309d9bd986efeb5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "22c8d0717df93e123a62d0e6337ce9bde560756b8af30edb25feafbde81e9c38",
       "count": 1,
       "tool": "tidy",
@@ -6379,13 +6127,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "231e027aac055ea7e5971a42af4402f732a9cdca92b78044ea3cabde368f6ddf",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "231ff6f1fabdb05dc2204644dd1e03f1ab9987cb18bb6d98d077c66f90d15c4b",
       "count": 1,
       "tool": "cpplint",
@@ -6467,13 +6208,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "2387c2cd9effcd5c1b27928d2b10b6829ecc98bf2fe361bfc1cfe9162399d9b8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "runtime/int"
     },
     {
@@ -6883,13 +6617,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "25377f6b45417b67b7aed8cac42af3c0d5c162eea32bc51524e83a722f0a479d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "253c95ff57dfc3cdd0e18ba5607eea0a010317d59fd029a7627f6a1f11f600cb",
       "count": 1,
       "tool": "cpplint",
@@ -6930,13 +6657,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "25736b3f7e7ae7767ecb1b40fd857f866fb276593521d3cc124515003d2325e9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2576f03adc95a5e7e55d9bc186024f6913c080693f80dc550e30fa54b90870fd",
@@ -7086,13 +6806,6 @@
       "rule": "B905"
     },
     {
-      "key": "25f29aae63cc83e149a0dc334d1e35a0078d521825e81582081c8180308a2c49",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "25f89a9c966451be6c3d157287b0be39629c038da22f9099f0013ac613b811d4",
       "count": 1,
       "tool": "cpplint",
@@ -7196,13 +6909,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "26a86774cce6fc44da70af625f8338c7d3a0a32e0832454fd9970df4fbc0f8e6",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "26b8c7c6d34d6511852457b76c2eac01aa6a08f6c525728e8926d117d8d2f2be",
@@ -7380,13 +7086,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "27bb9059e91173eb36f320f5427b329791badd8fb311068dd64d568264a7ad5e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "27def0577f583a5bdb1b7c3dbd8aaa7f7416fb149e207d2c6e7b8431e4c88e48",
       "count": 1,
       "tool": "cpplint",
@@ -7511,13 +7210,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "28a5749a2a89ad5b0b05e1d1f6d652a548ad4c672497b1b18790bb6ebbf166f0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "28ba8fc33814523f4562fcf64aabca14e91fe22a5838396e548f613d15581834",
@@ -7884,13 +7576,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "2a7c32176294fb2b914f4f9273cf85cb3287f46203ec38c24bd60d49c4e0c04a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2a82112bda02fd8eade0174cb7d7159ed45cb829cf1a7dde3706ba2135545a77",
       "count": 2,
       "tool": "cpplint",
@@ -7966,13 +7651,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/ModuleLoader.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "2b16273fc245d7a72572ab791c76c7373be18d8244cf5a15651bb0af335ee155",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2b172b69a9a4afc8ede76e8529b3591041a93ffae24ef22f8aedf131f2b1c2ea",
@@ -8148,13 +7826,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "2befa67d52741974312ba38016f2aff454e3e15f9c9f9d535a9b9fe8793dc66b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "2bfbf413cbd7e4d3bbd16466cfaf89bb966f1e67ec287f8287dad88f9c8e8886",
@@ -8374,13 +8045,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "2d16b54406a0baa1d2d6a2b72069ff7d99a2247bd796227bb4e72dc65ba80815",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2d172f53918047ecd169820a76d5c1c3b7465e40a164066570fcef0558b34ce0",
       "count": 1,
       "tool": "cpplint",
@@ -8514,13 +8178,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "2d9cb1c0fa2a10353fb8643ea8feffb3bc09d42cdb373a63fe67c2f046c1ba64",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "2da028afdc4ae9175013e560bcb7e4c396f4d440b024fe873124ec5eed30a51f",
       "count": 1,
       "tool": "tidy",
@@ -8533,13 +8190,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "2da8c41c228abd401f4b363ba2970e0bb162c8f0ca4bf697974126905efe406b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "2dab54f80553822b28649602ce6ce37ecaf46a72f3e0b14c4e4e859201d21b18",
@@ -8652,13 +8302,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "2e48f2b82c66719fd26a08b668480f44dd1d5f12a4fe9cc7905d410686df2a0f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2e5f9bda490fbc60ed6b2187891e659c11d5973f1d9c36da5317213d6bff3454",
@@ -9032,13 +8675,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "3080d679c36fc4d31f285678a3d62dc59855b50b9969bc33c295e3954a92f27a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "308ad6394fbf134f629ff6f5d3644ea88192961e9ae26b9f1276dbce7877b6f3",
       "count": 1,
       "tool": "tidy",
@@ -9093,13 +8729,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "310f7caea9fbd9d2193fb84181ae2213329ff6e85990de27eb95871228d45dad",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "31123462bd962609f9ab81223cea4a601786e8c1923eeee543893ea0c416c38e",
@@ -9184,13 +8813,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "31704c711cf8a7c2b1d45c417d4f29fa7091c21b5581c02de9c2048f52445632",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "318470840cc6e83d19cd20ff5c512b6a74e9a2c1fb103154601bd17064c41dfb",
@@ -9345,13 +8967,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "326a8d727df1a8e109e5404c3bf1f8cefc8ca6b03e04cebd0fe0d41e43462c06",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "326ef7a8388580eccbe9603c0ed8f243bd9575cf8232074bda0f05723f21bc58",
@@ -9571,25 +9186,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "33c57b478d995017752dd21f4edfb71221e3e68ce8051f893ecfe1663841b438",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "33c772a0bc9b9be7faf0c3bd6dfb9a1e15e4d74574290669101b58a34d68ab94",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "33db8e391cd02da4ae2e3b63802480b62feaa3f6f72649c72dd03151119ace00",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "33dc1d6e67cc99259cc6f17041fe47ca89a2c0e5df2524368306eaa5ee7c611b",
@@ -9631,13 +9232,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "34439adccc7e36a5edb5ac35c8ba0583751d5e7501af0cfb72c598eb2d85b5fb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -9942,13 +9536,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "35abcaf9c264fec2578c6f46d83fccf74d33c478a7a0337dea5eef1e8aa8bf3c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "35b4780d39fed518cab7644908895824f96c44e99e55b876a5325a59991d59a0",
       "count": 1,
       "tool": "tidy",
@@ -10201,13 +9788,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "371c5f5f0c7877a87d16baf936daac6c9b8c091da111bbef5bdd890979a13bea",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "373b9b9a28ca7ab477d6507e972183cd98a2b34256eac2e79f61b1dcfedb979b",
       "count": 1,
       "tool": "cpplint",
@@ -10383,13 +9963,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "3830258b83c8e12630b8ae540ba9bc1852ce852bb6a08834e97406b0a8741c38",
-      "count": 53,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "383515f0123dc5998184047276ce38eb5e36e202d00194764d132f09c0368c2e",
       "count": 1,
       "tool": "cpplint",
@@ -10422,13 +9995,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "385bd3339c66a8c9d19cbd7d3addf4a3145d545dc59511c9a628a0c9b4d22161",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -10500,13 +10066,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "38d81e45af96ac9c321bca70668a5d242bf7e7837d77e15e351217888ea93cce",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "06356bc8423ff321f8bab38d54b612eb19b3946af651a9eca991db4097de0dfb",
@@ -10684,20 +10243,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "3a3fcceb946e676e45cc30920c833a4d6bc1e1aca98daff28c9db5325b097a81",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "3a48c7e0297c676afedd67e85ff3be9d66f4a41b41bbb6525074d82ad6ad6346",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "3a5a8e0fedaa1f504de1cc4983dc655a0b94f6b0ea27dc54772128154cc508b3",
       "count": 1,
       "tool": "tidy",
@@ -10852,13 +10397,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "3b758e8dda601675f5d909a95648bd3227bc1c0944ce260b731922e3ffec78d6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "3b8bc47e0fa00409252c760857139c3da1b1a1f61e1e9a78d96c3dd3b3e2a9f1",
       "count": 1,
       "tool": "cpplint",
@@ -10885,13 +10423,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "3badf299ba7a4ebd163e448470b83daf358abb7f8e203ffa320c8c21fb6b2f1b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "3bba6229b46afa0f10bb37eb3796610597a02a20c2a7fc4ae908f6d24f8dd97b",
@@ -11972,13 +11503,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "41d91d6c885e4f59cbaba332a4c33118990745dfe893f7a9c99da5d2c6f700ff",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "41dfe9ea5186d441a8cfa3ea3248a9415916a23a95a49540c5080d43bb8d3928",
       "count": 1,
       "tool": "tidy",
@@ -11998,13 +11522,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CoreTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "41fe4e55599211fe7d942d93111f0c5cebfff68d497fffae2c1403959635f1b9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "41ff0e2e2ea3cd1c97caa503ed76459ffc70abc4bcf6e24f3ff807aa5c603c06",
@@ -12103,13 +11620,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomLighting.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "429d1c9bcd46c5de4d7de46f496183c042efe7fbfc4e42487711b71190736a1c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "42a46ea08d72a89d2799bbf4f2a5b59ea3394a2980001e1a43431d9cc34df16e",
@@ -12392,13 +11902,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "43f2e67e7354dfd960040599f70ca16d43301752bb2e4be40021fac740a2b74d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "43f72a395701a5eb49d9ccb786c9aad2ccecb2809b91edb30028cef90039e497",
       "count": 1,
       "tool": "cpplint",
@@ -12642,13 +12145,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "451b141cc6bed37d9ee4e60278e7037285e5c88905424274766eac7e295c3bf4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "4529d5f2e64b631932ce107454a08a6871eef3c757efee9fd559e62fadbcc1d6",
@@ -13106,13 +12602,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "47a93b574f2c93ab0b1b3ea38940ce76038ffed62cb47ff38eb302bf3b6ee2c3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "47b5ef0ff9df8adb664de78e677eb2afd407c151502abb9c28feac185ecc90cd",
       "count": 1,
       "tool": "cpplint",
@@ -13405,13 +12894,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Input/Pad.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "495c2d1addfe4903347bed2e681d926d6e88cd42d3580b914859ca5408c22ce2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "49654f2fc5e3f7ab00555863c8ac668ed71a22db2a601edc64845651f1208ed3",
@@ -13883,13 +13365,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "4c2010071ac29e94e5808962cd3d93f9e84c6212ba325476ded39d0e72ebc2c2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "4c3f7b3a66190736cff0f3e50b0639ce999ddaf0c95c2592199c7111250ebbd9",
       "count": 1,
       "tool": "cpplint",
@@ -13958,13 +13433,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4c7ba2a6f17f3d84ff49f1e59853bdd3f170435c9840d9299ae552723cd87de1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "4c7fc20e4edb1180412071e3290ad022db4edd87c848a15c57372659c40e21e0",
@@ -14310,13 +13778,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "4e1d2cf61acf4613080b9a3e49751efc6d1ce795858011c688dfb2a9e7d9d510",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "4e28f25318be4fc513aa0d779f37c89a9ef73c0c1a2d8c2fb170d15a51c81c5d",
       "count": 1,
       "tool": "tidy",
@@ -14357,13 +13818,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.h",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "4e7af8db8bf1a50af77c1d6862a3b1bdafad6baa10b5e9714f893a33cde43b16",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4e8a4b81178e96b541cd6198c5ac44e13337290ce05342946d7c28ae7981b1c1",
@@ -14497,20 +13951,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4fda4eb64ba05658f6644cc2b9587ab24ca83a55e3686dabc561e0b493dd1808",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "4fe489befd54877a356b32f3dc51e6f8ac07a653a12e80bc357141ec74175dcf",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "4fea731474625e400455b40dd1b657490e82d89f4e3acb16fc95cba0fd8c7151",
@@ -14723,13 +14163,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "515e3ed9a49dab2533751641b0226f4253a86f8564662f02d12edd9c3e7665c1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "515f533ce374a4a31acb740beeafcd577628ebc1e19785368356feba200b3750",
       "count": 1,
       "tool": "ruff",
@@ -14931,13 +14364,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "5282cf3123c99b4ccab57af978af1ac99255e50d5866001e866841fbab517fc9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "52884653532f02d9ccb6ef6285354acb2c56f0df12e208316834d3c2b74d6051",
@@ -15353,13 +14779,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "54e55237aa4caadb18d208416188f5c1d72ee03ab92736cab76052cdddf2e595",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "54e7b26c9e276b5b661cdfcaead150d8b946f1742fedff5f976935ab21274fbd",
       "count": 1,
       "tool": "tidy",
@@ -15465,13 +14884,6 @@
       "rule": "B905"
     },
     {
-      "key": "55b6d62451fc52807fac6fb5f7c86ef229b0b94dcd415a56e8474f083d197a25",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "55b93983b1b16bc1bb7d570ae4bdf1feff987e824d198544bac940f4bd3e8457",
       "count": 1,
       "tool": "tidy",
@@ -15568,20 +14980,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/Unported.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "565007822e3db7c0c96c4442ab2d2d9f913fb08820cc23fa72fb15fbd8d74828",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
-      "key": "5662c7bb4b7e433bba1ced289415d8b007325bc7b8f11307428d980463a30dab",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "5672b45fa2c2335b422e4c92b0f51c6301e7ac4404ee9b8142ea9de4e3914428",
@@ -15773,13 +15171,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "574ab31f58c7c917df17578b325c2db81b2b524e8403701071aeec58e6455e5b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "574c336e95aba081903dbffd705fad43d1b331bab6142f8282279e9b9ef012eb",
       "count": 1,
       "tool": "cpplint",
@@ -15876,20 +15267,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "57c1910cd28f367a6e5f92981240445b72d8eed0ce02fa0dbe1459c6d7ea311a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "57c4718d1312387944159259bf6186ebeff753a48b7b328cbf2ce3967da5ab0e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "57c60155ba506a2061e56c94178b46eeaaa2cc3ca451f9885a5c0a83f3425b2c",
@@ -16158,13 +15535,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "59447fb8aedea07ae066e49ee8231106af5076630c0b796b108cd08be6496941",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "59490cd296549e79b7c24fe91d273c3dadf04660429763a35ef714ac1898aa46",
       "count": 1,
       "tool": "tidy",
@@ -16298,13 +15668,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "59ed669d9c9f96c79bfef3339093654d607a564f6192450a855c4ad55c6cdcfc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "59f26b53bd9793a4841a74821b8a9b54623ae9ea63f95ab684136b81b5a46dab",
       "count": 1,
       "tool": "cpplint",
@@ -16338,13 +15701,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5a1e34266a1927b89c61f50236cd33d69aa49f8e4e9ba549c037e554b5cc06f4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "5a26756b8d75a52c8f75ceb5737046df9160d950cc921c3e5ccffc1d8409d2fc",
@@ -16697,13 +16053,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "5c82c00cf8b4956ccd681fa79f693988c2738470c94d4e2c29a8977f3757a53d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "5c877268732ef3d6d33d2400a4dd2f89b0789ed717be07465fb05c49b7d975ee",
       "count": 1,
       "tool": "tidy",
@@ -16977,13 +16326,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "5de4153e07aaa35991d8d829d790862cafa5dad39a78507ef1340594b42a9afd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5ded1fda65267d3c4669812880e60c2497e8a9567409e5ddb75c660008c0eacc",
       "count": 1,
       "tool": "cpplint",
@@ -16996,13 +16338,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "5e04e7ed29494e21489e9e5f1cdb0fd4507e1deeaa283698da98ca8aa05e0b65",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "5e07e05cd6baa769a998aed1449efb42fcd612cc4725322b248c185d41d33f0f",
@@ -17059,13 +16394,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5e35da2fd8073e8cb4e95005ee2b3211eec77e09bf804dbb7096032df3d98c91",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "5e3e1801f75f6e1659a0715e377895f0c72e3446295326fab9ded344a6c76ec8",
@@ -17145,13 +16473,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5e77f4e77c2f3ce8ee78816edbb7e9cf32314517950cf365a02c73630fa112a3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "5e7fc31d18897c784f4a8317c428a96948a23c93186a789d5bd8c6be623dcbf6",
       "count": 1,
       "tool": "tidy",
@@ -17159,25 +16480,11 @@
       "rule": "bugprone-easily-swappable-parameters"
     },
     {
-      "key": "5e8357729a75563a9ca0b630bf7c566262db986d484af9637e593537b662acb7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2c293cab5df925c554f7429824cf51df8a8e007abe4592c7b8bd3a503c35a8db",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "5e99fea34843811e63195ab15231dfa82cc0befc331e067da5c15913e98e8e23",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "5e9e9e57251b2d6dba03a7f308190164d0b22c65cdaba85dc3d0477502a8051e",
@@ -17320,13 +16627,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5f781ca99c930498f63ab426949647d2398e8caaf45bf6b099b0764f849dc6b0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5f7cbd7e4fa8bbc66466716fd5f9baf8bc49781f18e51fc373816aef0ce0d9a6",
       "count": 1,
       "tool": "ruff",
@@ -17369,13 +16669,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "5f9fafba90bc5fe9881485f510d1c82e6f5550627cf7708ff40bd4f439db8b65",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5fa1c44ad0d0e23618b9502f4bdc2a469b2e901343ca845b879556b944cde311",
       "count": 1,
       "tool": "tidy",
@@ -17388,13 +16681,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "5fb0541f7b479248332ad3f67b546e81f24a46813b4b3e453cd656caf7798b6d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "5fb2519e77570da4afcb38a0136812bb3aaf635979a191c5d6da2d357763ef10",
@@ -17446,13 +16732,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "6013782d63315528879bac0c963888ae697964ab96ca589edfbc5e20973bf14c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "601e2ef3963fdbc9544e21005cda5efcbb3d1f5fbd813f8ddc356c63cb635dd9",
       "count": 1,
       "tool": "cpplint",
@@ -17472,13 +16751,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "602ab44d435b8b6c3eb97a9b6a27693ff726303cbb4113bddbfa34bc775e7306",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "602dcaa00368c53d1b575cfb4c75aadfa2ff0bebc12a7b0e159001f943df496a",
@@ -17542,13 +16814,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "6092fc6248a29248600ca4213a95edb5bec221076cdf709cf4855c653e2743e5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "60a26213c0bac520f92231d10e80bedf632ce84a2b4650a536eed984782baadc",
@@ -17817,13 +17082,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "61d6f210a237f7266b51514bb8da9891a14b87489e7555dac18f8003721f8b54",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "61d904aa57d5467877bf0fb99938582c297d5fe364980f341b10d68c59950724",
       "count": 1,
       "tool": "cpplint",
@@ -17957,13 +17215,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "629956ce6bf4aeebc7d4d4fa5d410116f93d1284f3848ec036a415451afba3ae",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "62aee92b2984748bbf01659504761764e9e6fdf906e8d14614dfdb499591179e",
       "count": 2,
       "tool": "cpplint",
@@ -18053,13 +17304,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Audio/AudioDevice.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "633f62921dea75d09e505ea5e92a848983cbc9ebb1cd46d73385ea86053a73a8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "63476285509be08107d2165e8bd437f6205259bf0bb5f81ba91943354ff9bacb",
@@ -18286,13 +17530,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "64742d5d0c26f0e1fe2ed4be03e819dcb25e6fa135e9de3474976e6577bba0bd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6474c420433d9561f8066cb04453e2e81049a57da99ca73d8e23085c64c6d332",
       "count": 1,
       "tool": "tidy",
@@ -18489,13 +17726,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "6585f38389cc7af2d23a117baea5b63818e01bc987619d59a8c811ba43cd172e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6587192b7184bf0d0075d097037facfbb1bc40144517a57672c77fdce3892f18",
       "count": 1,
       "tool": "cpplint",
@@ -18545,13 +17775,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "65ea8a00f56e72187d70b0f30e66927a3ce22e904cbdc35d8561b5e028af3262",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "65eb05d1c549cdb59ee0e68113ac14e2974672a4b0dbcc0fec39a82542fa0a1b",
       "count": 1,
       "tool": "tidy",
@@ -18577,13 +17800,6 @@
       "count": 2,
       "tool": "tidy",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6608aec3eba354b4823bcd75f07c227615320a7a5a2c04bc9aaba56f38decbf0",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -18762,13 +17978,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "66f4126178212625ce0c4810ab905b36dee369de3b04f58b11a544c723fabf98",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "66fadb4f678dfabf42fb35dff9aaf004855ca5404831e0ba1bcfcc6616170ac4",
       "count": 1,
       "tool": "cpplint",
@@ -18788,13 +17997,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "671db29dcd9761ea957df8a121bd9c4f132efde27e899433761a13abef78726f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "6720ed573c60cc20855edb3e745aea4c10e48eed6aca3b6f64b1ae4c687ca2a0",
@@ -18865,13 +18067,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "676b75f2c08dac56fb682dec4ad283e8e34dabc933246a7c2e1acaa020837f85",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "6776538cc61548c7ce613b85db28fc58ee6e59c3915774d79f11ee8bd00ff331",
@@ -19252,13 +18447,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "695b316283fd920c34be9343d640c1069e586fedbe4bad752e37b4dd8d183e3e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6961366200fa4e4cf91e91e447f946ed954a5fd389bc3183cdd2448d2de1e32d",
       "count": 1,
       "tool": "tidy",
@@ -19341,13 +18529,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "69c7856f6f8aa140b7f36286973b45d2a3fb6397602634d1c20e70705d8734de",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "69caf0dd023d57eeff92a96566825207730882980b13bb3e864c5866ed927f7b",
@@ -19525,13 +18706,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6ae2cef6e7da7c4e76fe313ca57420a80c19e650503c71a7cf2e70c7b31e6abb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "6ae652acab0bc5c01bd28b1c4716ff959e47fd3bd4fe5cfac007afa665f28d1f",
       "count": 1,
       "tool": "cpplint",
@@ -19642,13 +18816,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Render/Device.hpp",
       "rule": "whitespace/indent"
-    },
-    {
-      "key": "6bc1cad60720eaf2e6ced1122c12361c52671230d4a6d4f11e45ce35d10bb908",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "6bdcb0228ba23d5acc51d85e78d4d0ec1c45c8d5832330f3602d49c976b5a5d1",
@@ -20106,13 +19273,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6e8d1a29614dbb567775a015830de351fbaf48621c7a0d889643fb55e5bba1af",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "6e916ef8a4c19107389a34dff2ad15465c5e302ffbca4fdfa0bf69c50315605a",
       "count": 1,
       "tool": "tidy",
@@ -20512,13 +19672,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "71162771d8d5a23729a3d7d1e94792fac280737a3aa67ae5903c2b6fd9dfea04",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "713a664fc41c71216a20c96f631c9f07762ed3988598dd362b9a4a599164d504",
       "count": 1,
       "tool": "cpplint",
@@ -20722,13 +19875,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "72760744e9e80579cceb1cacd1b52274f83647b8fa6b6d7251899102b182849a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "72775cd9ed2a18646de34574af78c699466e052c3494e7e576b761705cf1a42c",
       "count": 1,
       "tool": "tidy",
@@ -20855,25 +20001,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "72c709858751a7e55daba7285de9f61cf29064efec86663eb93fc9916be010ac",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "72cbe4f879f8c3280605a89e8754091c343b5f06354fa6c69c4801dcc9138186",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/include/Save/SaveStore.hpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "72cf77b50f8b9c5854fe8ddc51f7e23c96326e78a92d250f218fab0868213f84",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "72d51ee7bb0b4de3a31e3aa9cd6b96e5c04db1de2a2b41195f546f185da1cf9b",
@@ -21394,13 +20526,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "756bfb868e9f013cd5cde53999c48738825d60cdec46f5be9c27b88b75849227",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "757582eb2ca9ad1e9d10e23dea55f3d3b96b8c7d6a1143cb8b9f83c62cdd02b7",
       "count": 1,
       "tool": "tidy",
@@ -21667,13 +20792,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "76caba90fd5ef821a94ef82c4da476860c68b0686b6348dca49bd8fbafa3026e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "76d0a54cf120a1fdf92ccaa097fa64a4ea7650cc892290719067611add507ef6",
       "count": 1,
       "tool": "cpplint",
@@ -21912,13 +21030,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "77ff790958bffba3d000271cdfba4d78da12832e8cd9ba36a967fe2d0b5da59b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "780116fef16f7f8fbd0e291e00a9fcff3a26d9326e1e84b757157972e23cf9d1",
       "count": 1,
       "tool": "cpplint",
@@ -21989,13 +21100,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "785c79994041d5e7e47880e067beb6059740f7aee077a61568229f62a6af4808",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "786048fa3557e7e8b4cb67460a348d196fcfd874831d191ee7b6c03dd0f63a49",
       "count": 1,
       "tool": "tidy",
@@ -22064,13 +21168,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "78a60ac8b08b1a169212a33c674a1dd25afe70c6559779bc5fc54c50a10cc2f0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "78abec4c353189c4afb055b72a12e85eea6752d4dd18cc1d4e1957913398fb1f",
@@ -22218,13 +21315,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "79ba5fc0c4ea58e8d143c8f9d3b3220a39d00dbc30c6f60211a9fa310fb444ed",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "79bb0edd6183773bf2a6ecb9e9cd268902254ac90c2d1995620c2b00f8982edb",
@@ -22738,13 +21828,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7cb2b13db0caddad961295d75404fb4f23ead81a2692ab51c847ab6907cd362d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7cb33d2d9adb970c6f5e21e72a32cad493451aa73b0c2c29e51afa00e774ed50",
       "count": 1,
       "tool": "tidy",
@@ -22890,13 +21973,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "7db11dcb52aeb2ec63df4e0aa58d38710af345f5050492886f1d73dbcd61905c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "7db19d6a3771c85da19a7fa92f010666f622f184cc3b57620183ce39dc34ff8b",
@@ -23081,13 +22157,6 @@
       "rule": "B905"
     },
     {
-      "key": "7ed15254f2803ab52c62b3607d8e22068cb1c9510dfa2ac7da77edfb71ac77ef",
-      "count": 3,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7ed31385b5a43726b07a0f4c1632b052cb6558975cb276cc3f6be8cf6c96e83e",
       "count": 1,
       "tool": "tidy",
@@ -23177,13 +22246,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7f828ddf03c2a2e339059137298cfa20df0724a3a7f9e0c247430a11f6f054bd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "7f8b768f96469dea8b865972a2717a083f38908ba2be7131b8507917b49d66d2",
@@ -23480,13 +22542,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "81417ba95f6ce309bbf18916ad273be9f3997f9fdaf0a91f90fa4e9d2bac5d0c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "8145e6f1cc924c78953ede92241bc6674d4eba3d6f9682d261a308bd8d806102",
       "count": 1,
       "tool": "format",
@@ -23527,13 +22582,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "819100bafb829d940c81e64a56211cc09bbb35d5db3e77d07a17437914a881f9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "bdf924dbcd761a66e45c5bdb94e254043b2f398298a3a16f083b7bdca39a87cf",
@@ -23774,13 +22822,6 @@
       "rule": "google-readability-casting"
     },
     {
-      "key": "82e00a26d5ac98ce4f990a971661b49823390e500a02abcf0ad3b5989c7ab0ff",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "82e0da4bbc0e067c000b20919c5c514c9a57eea67f4b40d0ea7b5a076a8cc96e",
       "count": 1,
       "tool": "tidy",
@@ -23793,13 +22834,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "82f082b00af76b439d252d5e9d1413201a34a2ca055129c2fe77a2191e2a7745",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "830899a9315a26500264f962d5ffa43ab8724151dc7bb14e8e01f117c74d3edb",
@@ -23823,25 +22857,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "83257f2152e1b56afb3cda07c7677cd413d16a7c817ef30f76773631f0047ed2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "83364182ad36a57f776f26a8326f14152ac3abc52f49fa7943ba5085058a97bf",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/MemoryTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "833720c2453f77c5d8848c955f5b0fbc9d0a3a5cd0661484f629f3aef6046ba2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "83394eff12bcefa50136822ae082668ab1581c74ab8eb71bb726c58fd25b0099",
@@ -24131,13 +23151,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "8499f92e071df69bb19dfac0f0aaa7e55fa8b12441b38e466e1e0c4979baa118",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "84b02c9071b8be1c6d41ee3ddee249736a25031e5a12bc6d1cf77498cfef841d",
       "count": 1,
       "tool": "tidy",
@@ -24191,13 +23204,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "851489ff7024e9c036c3e92b4b30920c0fd4b97080fbf9cf7c8ecb104de85bf6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -24467,13 +23473,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "86ba587c1a5e539b587673d82358a9ae689ab4646927077d80ab07f26b5a7291",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "86bcdc9fcbb2339a1c491730747f36a0ee2b0718e5d38694c70f37554f079d0e",
       "count": 1,
       "tool": "cpplint",
@@ -24544,13 +23543,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "87405d170e3a31b2ce18877bd824567537f566df506fff1200c4d783d8df07d1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "874114948f93f393d315ddc34c0dee1ea84081046798deb05bcbf9c9348004c1",
       "count": 1,
       "tool": "cpplint",
@@ -24563,13 +23555,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "8747339ab23015bef2e5fb48ed59bebbde5b7205cb4bb344821acb5675744a48",
-      "count": 9,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "87585c93574712b104f8a915f52202332a9ae20b0c07bb01db54279ea779b7ee",
@@ -24759,13 +23744,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Movie/MoviePlayer.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "8854fcc69c76846d87cd27580151afc95e82372c7d1be0ffcdb5f762661911c4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "8859cccffcb0b4abc4035c62aad7519308a9749f0caf6936d0e611713c298991",
@@ -25179,13 +24157,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.h",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8a1f74b42850baa2a95f2ec9623ebb20fe2593f3121167477c271cac8b4d0cd9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "8a1f98921dfd579a42541ed394e38d448be79a6a2aec3adc9ad047cbf8f58475",
@@ -25713,13 +24684,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8d3b8d9892df8604ada4da86edb94a679c69a1ca080591e4428bda117980a76e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "8d3f4ccd11dc8155c78282df2464f36cd2bb13c73f37b4bd821696a3d30f2f19",
       "count": 1,
       "tool": "tidy",
@@ -25773,13 +24737,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8d95bec04d505bb5a458343a034ea0851839334bf2135116d3152e580879ba2c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -25851,13 +24808,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8de7255937534887ac003989db396a3a2e74b5085565117b659f2f784b853525",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "8df8cc33a8cb633677326c7feadf04330218a5ec94fc168ee6e0cb8feed03e24",
@@ -25997,13 +24947,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "8e8f11b45b7fa26dc3bb5877cfcd2d0599a56a10a9fabae66f55878561370552",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -26166,13 +25109,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8f6b91eb495aabc830dba6a69163e8cb8b0dcec8e5864eff448488abe26d2cb9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "8f6f76f4f3559cd9264c4fab8c4459f092d41260f40f75db914a178b438ce2b1",
@@ -26490,13 +25426,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "913562eecb8965375b53957a545a0f9dd3a221a97a63564d9332e5d6991238e9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "913b6d13e306b161f95f7208d4993fc8dcbc656709ca057e502db2691063447d",
       "count": 1,
       "tool": "cpplint",
@@ -26679,13 +25608,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "92af26228c55dc23d25b4da9f74e3e936412263538d237f0786a1d95248c8364",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "92bbd1cd4da941fa8efb5a3ac5700ccf408bb043ae4dfdf00bb9128f20d614d6",
       "count": 1,
       "tool": "tidy",
@@ -26768,13 +25690,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "93179238d8d05d9cd3d263b400594411328cef03728063a32d21b6e5ace0d32c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "931bbb8b6a2587e17a51f0625830aef1c9032f5675a08546d18ea335c02c271c",
@@ -26887,13 +25802,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "9381ed0a0d02cad836a4daa513edb0cdc3621f102de4042524d5d05f56807fca",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "9383bff81be9a96d1708ca95b53a8a05b608646476c70d5f5dca9ea798efc5be",
@@ -27078,13 +25986,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "9441f60db2d2dad47e31586fdbfb4a9f39de91ba05bec59795a1ad5b34af6a9b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9451102da76f33a4fd462efa542dce46253e816b486d59ee1b4320b287a3e7e9",
       "count": 1,
       "tool": "tidy",
@@ -27246,13 +26147,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "950e155b25609af6b75a37f4d86aaa3dd16c650f6372dea63e7cca7e99985e53",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "95283ec24fc05da93849780b6d7432b300932dad2f4d46779ca0b09ceb124758",
       "count": 3,
       "tool": "cpplint",
@@ -27379,13 +26273,6 @@
       "rule": "bugprone-easily-swappable-parameters"
     },
     {
-      "key": "95f219cb8321696412a937e5304ddc817f878df43ef9a21cf323020c933c5652",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "95f83e1edd5b417fe8549855b17a86d1e457645531cf674fb1a91221d30c216b",
       "count": 1,
       "tool": "tidy",
@@ -27433,13 +26320,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "964752962d2259319c7715bb984955dfea643d1dd764c3e4d417a80006eca107",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "96485cc4541e5d99a7a7de785be2a0b500788f162de4ab42bd0dbddc3b5a2697",
@@ -27495,13 +26375,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "9689fbb6c826e9b5b29f445be15a27f3396dc77dc8178cee572fc7dc60fb4208",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -27811,13 +26684,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "98882a472dff37515bcf2e5a13e9d3f0f8996cb66bb1941637c075cf2a9a5ac7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "0d32b89be8a4d38759f22478b654475d5b81c5587bca1aa6586cd17567299474",
@@ -28233,13 +27099,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "9b134ddcb446a6ad6116403ca0f623900c7888830af31ce0bf3d6500d376d002",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9b1c08aca52a2f383e24c880c7d1ed3f5e12a4922eb992e4defe19382736d463",
       "count": 1,
       "tool": "tidy",
@@ -28261,13 +27120,6 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "9b3183edccc69c409983bf61dc378890f76cd12269a5885c7084d2fa94ed870a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "9b31d5cf548bcd072f0208769143571954ba8acee62ad32a903bacb20afe46cc",
       "count": 1,
       "tool": "cpplint",
@@ -28279,13 +27131,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/ContentTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "9b3a5ee6fd4d6951fe0685d88470d21796267ac895fb49b9c9b0b9d4c91a7610",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -28329,13 +27174,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "9b990e802491c7586c16866f792fe9fab1abf1f6533575a9f90d7038b69f2aa1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "9bb7e2d9cd36176f43eaa7456e7ead3b8031e2cdc13327feeabc230984d2527f",
@@ -28674,13 +27512,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "9d9e8ce2564e444fd30b3809c06efe9ec162ad445254feb322bd04667cb9ea9d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9d9fe12e31ed3d4f1aeeed12414a9c7040789395972b824fa5b91498c6e33b1f",
       "count": 1,
       "tool": "cpplint",
@@ -28749,13 +27580,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "9dc8272504799af92c841f447be21625c3bbcbb3a0326ec94707cb4022f51b7b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "9df527ae17ccf013879df8e7ab592906dd96b7472834e4c974939980a8a36ee1",
@@ -28903,13 +27727,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "9ebdc9aa7d21182ef9d23298f67df94e52c3ebd5b085a9d86b4af7e9ac2ed539",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "9ecac545192f144b67d49029e3d43537a8b3dc9a9bad0d9f5279247b85621cee",
@@ -29143,13 +27960,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a01bf93f3c3940f45430b1357b11f71ad1ad027432a48ee5cac9e72614d654e0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a02180be23834b17b0e1d9abd0a90e0ddfc6871c326f32645c73fa9c7eece5e1",
       "count": 1,
       "tool": "cpplint",
@@ -29176,13 +27986,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a03314976c5dec9e3fed1233958cd5ced64e2e50c39d4efde3a5ba7efa23d784",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "a034100404798624f52df1393910f9a296566f6d04babca127b18b9f90a12f78",
@@ -29556,13 +28359,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a26238e49501d8023bedff0441e5de02d33a9074f42d1078718a4bbaafd1c77b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "a26f6b9493944f6154e129f951f0cc2723ab7206fa94404ad27e72cf25c3ef3a",
       "count": 1,
       "tool": "tidy",
@@ -29715,13 +28511,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a36ee5d47aa40c07033a4224bc006da3209272fdee44d119c3d8f06330fe0670",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a373c61d528db187f2b6db1fcf62bbec49fc978597d33870c9b90e5176f500d0",
@@ -30004,13 +28793,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a5412d0f0dc826c709eaba0522e2f6929e8474901fe705d4f05b22430fb248b3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a54305b7685480499a04fefd4f10e84e5e5e425c821b2b9c00364c165892e92b",
       "count": 1,
       "tool": "tidy",
@@ -30067,13 +28849,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a588cbd921ed32ba35c77a148eaff4905893b107668471ebebabb554e31f69d2",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a595d4a0638702ba042725182dc86e670215c7f8442137c0256db53163260493",
       "count": 1,
       "tool": "cpplint",
@@ -30093,13 +28868,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a5c3abd7c0567e7b7e169aacc17fb83b69e2089ed912def9ddb059b1a14c1689",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "a5d3069fe36695a741c9826db5ba0e9f8e7be81036ea89a5814b20e4efad1822",
@@ -30184,13 +28952,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a62c94bdbce0b37ed5bf3d3a50b9a2a5afbfd4568b453106b0c25003d08f547f",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/TargetingDraw.h",
-      "rule": "google"
     },
     {
       "key": "a640b30648e1c17f8b6036fc9a26f20850d402955e1bb5f21aef2e1dda72d72d",
@@ -30361,25 +29122,11 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "a78610e15c3338f97dc29071a3854f7a69003e14753e06d2dd0acfcc23eb72fa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "a789a935a3151cc0930b5f446edc32f1b934881f5eeede7a3f0364e56c820934",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "a79b032babc07e354cf7f8dcc31eb4399d4cf2311f36f7e6da7fa7f55406b84c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a79d2f4d75ec8e364e2ff2c38ae382c0672d0398e49218a98791d57427b2a912",
@@ -30487,13 +29234,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a7fbed30b2ddedc4decf5e72bae96cc89c8c4cb0c4ca272345e98d9eed63d15c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "a81f36522375228ee1fa81e73759504b05ce9e471f28b2f556d602adf35d6092",
       "count": 1,
       "tool": "tidy",
@@ -30555,13 +29295,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Save/SaveStore.hpp",
       "rule": "whitespace/indent"
-    },
-    {
-      "key": "a872077be59f07ce10297644df0c4dcd39e9f8479bec9c6930e34f22f5970e6c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a8733d8094242d0037e171fcde452ee90a5592d903dcd6fdadd43a7bf77d56e6",
@@ -30631,13 +29364,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a8eaa486a7c7b4a69b0a0a8eb8f1e707a99a8063a4749b62ce8eca5ebee3d9da",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -30802,13 +29528,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a9ee5fc8843b988c8469fe16cb94ccaf1c37b8572f96bd033e7a822784b3ef06",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "a9f30bddd30c72bdaf28d42fa2cffd9ca9faab8a124e81464ca067ebef2e912b",
       "count": 1,
       "tool": "cpplint",
@@ -30963,13 +29682,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "aadc6d29be191a7c3770392110034d298cf117905b6abe3d0811f5a8015dfd65",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "aae4c654b150592cdb7b6b4db27ad883237458826b7bc2e973cdbd5845214067",
       "count": 1,
       "tool": "cpplint",
@@ -31016,13 +29728,6 @@
       "count": 2,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "ab0fb2aec50caf469fba9f6dab9b53ea5e165cf9d19154e05da651802b7c8249",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -31243,13 +29948,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ac8682e5bab982681721e871649b6d91139b306ba3c54178e92a5c4bd1589c80",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ac87a5f3117cf5dd5f70cedad2164a580e25be0b15b0c79c96422d7ff9c9d2b3",
       "count": 1,
       "tool": "cpplint",
@@ -31283,13 +29981,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "acadfbd3febef4839983cc0935b27d0dff00d3cc3fb207c8ccf98c57a12b8d76",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/comments"
     },
     {
       "key": "acb1f487cdd0df36066e5628eb4a75a476ca788dd69a7b76b4622a01689fb626",
@@ -31348,13 +30039,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "acf5318f591c7aa16649e3d35f2d9caae49ae06648bd50ed881d4d671de14167",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "acfbbdb969cebffb75924d6382a9eb687a04c8f10a9bf84c39360fb9ca1949f9",
       "count": 1,
       "tool": "tidy",
@@ -31395,13 +30079,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Log.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "ad338a5b4d999fa41b1b66b01c79d49ebbb5a69c08bf2a4d1522562ff1a4fd66",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "ad39729f940dc493d5c01359abcae04f0ad6fe7ef445e87b70b08850c77a59a7",
@@ -31556,13 +30233,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ae059d5af7894d0e538c408bd5df6ee7520e3af288b6c8fc189b63491ccb9b5c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "ae107852e29d4be2adb242f880e434c108f6ba42db58a0acad638dc9ca71d8bb",
@@ -31759,13 +30429,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "af458bc77a456db3c4839615065f3ed7094db9232ceaddc27928254ba7aa4d2d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "af4bb7d7cbe8fe4d8c879f52627053562228e0904b38ef65929963279ffffd6e",
@@ -32013,13 +30676,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b0dd9c91ac0e4b490bed95c627351dc4d072ed7620aaccb83228c4d067105d98",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b0e28b8b6d7ed35ce2302282b0bd73b25cc22e43bb22e9276930b5993e3ebce6",
       "count": 1,
       "tool": "tidy",
@@ -32171,13 +30827,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b1c8e5c2c7040e47a4946e734f5e1bb60bd3bdc01b5976a57e1ff07e7b2934e6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -32340,13 +30989,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "b27eaeb27dec269fcfe0991b648578f339b018793462d32f51200307846930b1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "b28ad0b48bd3568680cb7a04983cbe7e7a3e9d0ee2623b5c33d859dda89af790",
@@ -32571,13 +31213,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "b3e60d0dbcdf024850902a4ea69e56354076de0748379e66612556d99d1de055",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b3fb3f566ee58b6bee06d1ee6220797f7eb5495451b3284c62016ffde7a18646",
@@ -33133,13 +31768,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "b73d077480beffb728a6edd5ca95ecb96b229a0222789e3bb3d8ba7a96474098",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b742494e90b0d353f49c7e1e00f915daac9dc6211edaf98118e1e6016f1bd940",
       "count": 1,
       "tool": "cpplint",
@@ -33187,20 +31815,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "b79209cc0de7cd81b8cca67adae628d22081c77f969fddbff06272d6f25fcedd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "b794113336ccb64ed66908ca81be21afc74d3af50ab892b6f5067b6d572b81d9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "b7a48632dca8b950f10353afcff781356088fdc0e98e802e4aa445c35a847b65",
@@ -33264,13 +31878,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b7c738bd9e40e874d4fe9b31ec353e54060d87e8242312de8259b088290b909e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "b7cb801350efad7fa3b30187709734988a53176090e4514bfd9570c6f50648b4",
@@ -33455,13 +32062,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b8d0ff96c3dd7cc16a8ecc40616bb557418e3336c49af4aa90c629170beacc1d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b8d285dbd57cad25a8eb18ae31fab913a27dac90c902d34f436248d565e90135",
       "count": 1,
       "tool": "tidy",
@@ -33616,13 +32216,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b9d70a5f280f9cb0fb6d8690a755444fd40cee562edab108a1bc511d3b22284c",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "b9e44a8d08d3d8a39c4fcb216b9a0db8ae59516380252c6ffcf358aa78bfabeb",
       "count": 1,
       "tool": "tidy",
@@ -33739,13 +32332,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ba9660cb55a813db203ab9087345d7ed58d82b82e372e2daf07d9cde2c2a4492",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -33889,13 +32475,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "bb447273b95c8c132609bdab5be3ea08a61d0490fc71e0fdbd8d7e74ed4ae4fa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "bb4df399fc445e635512bcda511d82b046de748fd443b9b5bc05ec486d5c12fd",
       "count": 1,
       "tool": "cpplint",
@@ -33908,13 +32487,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/CombatTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bb5201a403d80b7a9fa626960a8aea22056b29081c56b6bd48d263b68c2c3b49",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "bb5f92e5148e5ac8a8e60dd7e9049b9715077cb3a2effb5663f0d6910aeffa9a",
@@ -33987,24 +32559,10 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "bbb7e2eccc89cd997c7dba687a804f4a78e26b2974f43f3b75e2cfa1b0bf42d7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bbbe24066697ac08ec97c1fa2fc28f6c8892f450a4f4c2957b5c8e415c651b1f",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bbdf6d47d8140b2be91ec2e6e3a992b3e0554828eab282b893f35fe3f98df4d3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -34715,13 +33273,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "c04015b254cdc4c360bde6792ac6c79a1d33f921eb1d8b3afa9a7d467dc4514b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "c0448b275ab51f78450492f424a245a719fd6cb46dd603b671f4155c5735a891",
       "count": 1,
       "tool": "tidy",
@@ -34897,13 +33448,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "c14699bf0cfc5c733059ac3d534a6d9a6b55cbbd5bd76226e3a4d85fb8346597",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "c1523813326c7c8fcb6e7a0f216f93e18ecf757b3c77c95109011fea6e332f82",
       "count": 1,
       "tool": "cpplint",
@@ -34958,13 +33502,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "c18d1ef9b68f6733753b99954a48493fec45453ec595959c4fe4afa862f43663",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c19a34474dfcd798f5e0f45a3a450d0d811adec748a7df5c9a6f960afaecee81",
@@ -35063,13 +33600,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c2294c1c08420f76554f073249a02f1d3bd58845fe11fd4d9a93404c7a900f40",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "c2450295dc676ac7a24b4dd077259c05811ca39f6869a2bdb571d3d74d25e354",
@@ -35203,13 +33733,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/RandomGenerator.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c2dedcee2a0a36e5420114d807229231e656d349c01ba174dbbbbe94662cfb4f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "c2e2045bba11c821f07985437fd9148ddad3e2dc70b1d95fabefd6f3fdc90939",
@@ -35506,13 +34029,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "c4a51db648a3959f53ca7dd38142767e1fe3ea3ecc46ea33cfcea9dc732f6bca",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google"
-    },
-    {
       "key": "c4ac595444cfc4830337e39cb4d04565e95f5474b5b95785714bd2566155d39f",
       "count": 1,
       "tool": "tidy",
@@ -35532,13 +34048,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "c4e3bfad2ad17ce8112e91df8e46de335f04adeb3fb9e5d074ba409d584300f7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "c4ebea0deb9eb1bf593c80f04b9da004cdcdd3ffde5c8a504a833fd52115af7b",
@@ -35630,13 +34139,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c59904fc33b578c94a751efcff64f2e783cde5f7cad6627d687df4b444405034",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "c599cfcd6fab0f4b33ba62d58ab78d528b762ddea41398b27fb0fd1637fc6fde",
@@ -35812,13 +34314,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c6519536fe13199240457bd44d86b97859bdfaa918d37a473fe1f4d267b06163",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "c653031e2de94299cb133def226696df1d0cebfa88c23d093f29c8d3a941de3c",
@@ -36066,13 +34561,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c7d17f5cd0c646fe1370b82830ab9a0861f711b69ed8245bb593646602e5851e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "c7d2b156de048a511a555a0df694a916c311b391d5a400b9de079058de0d22f5",
       "count": 1,
       "tool": "tidy",
@@ -36269,13 +34757,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "c8f69b0a1925a32338e548b005280935a64bde80443772306dc9e51c8ceb626c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c8f7e0b7ab4d0c06a0cbf99de8ef66f72232372734dff030c55f70e5de3dcc2e",
       "count": 2,
       "tool": "ruff",
@@ -36381,13 +34862,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c97ddc45d290a1963abbd873e325923573d77f4b0cd9b4ab1ee974ba9d1e4684",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "c9835912d4e23e0a4381b2d31ef9af7e95cf1a39ab8cec9101dcbd484be66996",
       "count": 1,
       "tool": "cpplint",
@@ -36479,13 +34953,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ca04f0e2b6a1d695f131efa76a113b76e7de901c1737a75d838678a93118850f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ca0bf8a38ece6052112844c8d6939c4c3077d5f2e32aa4c5be1f4e28976d76e5",
       "count": 1,
       "tool": "tidy",
@@ -36498,13 +34965,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ca11e4d0e4a09cd36389da7f9cc3365e3d0752a18289186f5dab16a3735f97b1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "ca12d95d3a5526196477fa2ce4802f970e3d75c91009d751b4fe75083be75809",
@@ -36577,13 +35037,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ca9fe9e8bbf2dd046237adf9c852e107bec2708a8a4ec3714b6f8ac0bd583e43",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "caa93362686337040bc27e81b7f095d7f3d0c3e3fbec2fb3c891c717ba2331aa",
       "count": 1,
       "tool": "tidy",
@@ -36630,13 +35083,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/include/Movie/MoviePlayer.h",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cadf1ae19acf11b8aa7c0c4f710ae4cd8c9ae80f928271b50c77e9b9320bf330",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -37256,13 +35702,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "cdc97a2caca5adf4a710d51e3b06ba4adc647cdf7b1407ea4b8cff7f830aac02",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "cdcdd725c1c6a0e7083b79511a29ebb20bf6a6538b625d9709bcfbd4fe296e55",
       "count": 1,
       "tool": "tidy",
@@ -37303,13 +35742,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "cdda7f72c2dac97599a5aef49aeafe0defecce86c187c354d3c9e6e460457d6c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "cddb9ac5103b330e3004b7aa5de336695324b06fe5f208e6231fd51d9c1df335",
@@ -37697,13 +36129,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "cff2f344bf65a639ae568da2d2a5b7c48ea7f3a44d01f99f640db8246045bc13",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "cff40ce3d22223dfd816416e4e5c43ba7603dc2fb3546a9400f62ff215ab7463",
       "count": 1,
       "tool": "cpplint",
@@ -37891,13 +36316,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Removed.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "d0e365d36c087fc4b3748240b583039e4b24b061cd6f19cc6f444a8e82a3a021",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d103647bbae2a0a82cf0eeaf9772db89d46ba5341420e87236d34a8c32de3a58",
@@ -38171,13 +36589,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "d260e0970ddd52d0c71dc15c54b3be408377267cc92bd876ac0135cf0cfa462b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "d263cdb339d22838a0f3ae19d113c92ed1d2ec78e633049db0849b9271067053",
@@ -38670,13 +37081,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "d553c55ade749ac26b73dc8dbcec71fd3ccc4dd80d109226cbb0e8623a988791",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d5700edee46ff3eb60c5f054708e47a963245c0fd80a39ef4477f722366a54e8",
       "count": 1,
       "tool": "cpplint",
@@ -38702,13 +37106,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d5782f50b4fc458eebdfc74e864a2bed2f5aa81dc2d114d2bca9f3054da43ccf",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -38772,13 +37169,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Desktop/src/main.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d6102ef5d163478d17d7503216f7a8665ceac99c9039e2f3ffbe052b0c1f9772",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -39188,13 +37578,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "d83d8da097935742425c3ae1060ec968cd23a7653ab792a02b85f8689fc28222",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d85bdfe81da9f25999343dc1f485df9a7552759ba9d40baa05388442585b6d9f",
       "count": 2,
       "tool": "cpplint",
@@ -39326,13 +37709,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "d8d1998a1dc2fa94141a6f6368602cffeea7ebe13cf6ac051ecb5d0505412721",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d8d4d44629aa80cb80988fb929e9247a5a7ddd0b3d58378582164850ce441bc7",
@@ -39727,13 +38103,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "db4d032bf726b631818c412f946149c89fe085cfc2865df5a2017536dd4011e0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "db4f38eb87d1d03eb91a026a58407d90cab8852f2f2a131f3c87c5ca0f9f559d",
       "count": 1,
       "tool": "tidy",
@@ -39823,13 +38192,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "dc011e05dac51723aaeba87cc5e3653528c345ca93c18ef332460cb0d23b7d0d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "dc02cd54e1e1cbb2b3446e25936efa8a16810924103f6021e3ce6c74af73ccaf",
@@ -39949,13 +38311,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "dc80168bca65c905466bfd81c6d56974bcf9f6adff86133f388180b97f80e97b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "dc97eed5b5268db91932870c7dff950bda563a5018d815fc6b8f2d98e8c6427b",
@@ -40637,13 +38992,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "e0d456de0181e2b02fc2a9ea4b53b9724530c8c9ad7dba744180362449c620a4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "e0e3508660c91ac1cdbd6d7d94e7671415e834c1156d9e732bff0b7cbe7a76d9",
       "count": 1,
       "tool": "tidy",
@@ -40691,13 +39039,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "e127d9d0ce0641ff17946a6c63f4911325ab0d76f0b780ae1cc7248f541a5a60",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "e1298b56b48128dd1576dd4f222c65cd1b24a3edf9f4ef130f6af1077c556f1f",
@@ -40812,13 +39153,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e1f062587b8800b5a219517b74983418aea5a2d26c9f520d04e4e182086c54ec",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e1f1eb002d5ca48938398895079e3b9e6b62d6bbca1bd2f79061f44fd60f4697",
       "count": 2,
       "tool": "cpplint",
@@ -40838,13 +39172,6 @@
       "tool": "ruff",
       "path": "tools/ledger/reconcile_locations.py",
       "rule": "SIM115"
-    },
-    {
-      "key": "e203db0eca9304bd6078ba0fe7ea257b697e9fb7de68f881405baea16ede4561",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "e21731dad40d59a17612de03d95f76f54ca2477f7dbc91fe6bdde6bf0176642e",
@@ -40910,13 +39237,6 @@
       "rule": "B007"
     },
     {
-      "key": "e2988140918491265f5bce2012b3e888e9e4e2e0b1409049b73e469a8d8ed674",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "e2a2d465c3401e276c3d1cd19ce87dd3d1e2ad0808f6ab2c27b146d08a728dc0",
       "count": 3,
       "tool": "tidy",
@@ -40943,13 +39263,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "e2e428069f9c303f21c75c36377618a086905e3280a9de50c0584d3c0e906957",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "e2ec3eee63d409e4b40337c6be95d58f4b00eb0d645bc128579e3b32ab7010b7",
@@ -41022,13 +39335,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "e36dd0ab877265661653fd8796eff95db879846bdb4551314a770d2e2ade4a46",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "e371a34b7c364de29d728b5c303aae80793cd788dfd7bb70914f86d1bde3a7f1",
       "count": 1,
       "tool": "cpplint",
@@ -41097,20 +39403,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e3c20d41681c034481ece8090ac0cad8e55d06680bb21af79e2134f979698aa2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e3cde9e99b38f34236ec007bf41ff496a67a27508f6550f1888cd167b096b197",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "e3d6639450fbf74f1c197ff6a263449182031eb6a2157d6c95e6117df7224efb",
@@ -41300,13 +39592,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e5106a9f84899d8cb1a22a5a9749f09eda355aefada26c89abf058a147d2397f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "e510990f58bc99073db37e47f9d0563ae9798061b36671e491798f599a8fa1c3",
@@ -41538,13 +39823,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e60bef908597565aaa82e418e763087c69d5bb27f3435ea4f2a0b714b0d89589",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "e60bf9d56b0fb296784776d06b80075051188ff23e0c3ec0c6594b9baacafc12",
@@ -41862,13 +40140,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "e7d31659cca3b6610089cfa11ce61376c605895397c8b1009c319c32639de19e",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "e7d5cb966546b5b81a3692796edd7955a6658137015ec660769dbff762968b5f",
       "count": 1,
       "tool": "cpplint",
@@ -41972,13 +40243,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Audio/AudioDevice.hpp",
       "rule": "whitespace/indent"
-    },
-    {
-      "key": "e87f7f3f5a9b1578c3422eaef827e5811e77b4c2b3235a123100a41c1989c95f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "03949d25ab048b388c17eeb94a40f3c53250f32753cbf9b6a692a4d34ed5f8eb",
@@ -42196,13 +40460,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "e9ab0baeee1c727eec38977b7cbc5cddf96373d4db87a3699ce3934c16d2f15b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "e9b038129787c1e9ff82207c78ef4e633f22e25a3ca1a4aa44ea24877f32a0ae",
@@ -42569,13 +40826,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ebb574f751b24eb523fffe6933d21fe0e7b25317221fe28b6d6f55474df788c4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ebc6acbe2ddb86fa11f16ef9cf0d0e0e290f87220ef63375728b4c73b818de59",
       "count": 2,
       "tool": "cpplint",
@@ -42681,13 +40931,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "ec35f3fc46f600e8d339f794ca85305013682d3e30b5a6aacfa64de97735e04f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "ec392f2de21cdaaec6c6c6a5d2f6c9a5859bf074b98f851b87e4a5f9e9c4145d",
       "count": 2,
       "tool": "cpplint",
@@ -42737,13 +40980,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ec97faf8f7b9dea15fc2cacb099c35bdd2ae6d6adaa2d855f493e196e26c041e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "ec9ef8c6e82c45461f04ce6f6cf53bfaa8c71f72ae0b96ed853488794af08071",
       "count": 13,
       "tool": "cpplint",
@@ -42770,13 +41006,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ecd6f2b425ffdcc4704f2765a8ab50713e7381f09b2a24efca761aee06e06856",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "ece8df47b8c145b3687b521c9b7c8d2c26e70d2357fb747baeeb6012195ba1ac",
@@ -42870,13 +41099,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "ed5cd26b3c6bfdb2117dcaae36f1d7b23268bdc655c020203f2a50a2208eb4d4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ed5ff9a496150f96d1dc817386fb05e2926e58a65098fda77bb5c226ef9827b9",
       "count": 1,
       "tool": "cpplint",
@@ -42924,13 +41146,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ed9f5822004dfde5548c27fac7ac049d3221a234f10b708a819bd0d5d7c4364d",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "edae7938bf1b615d911692785075260a6218948294c7828f611954164092e4ce",
@@ -43057,13 +41272,6 @@
       "tool": "cpplint",
       "path": "Native/Content/include/Content/ModuleData.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ee5dda3b4b689a2e79b13720df7015f2bebf5e24bf2371d38855f4289315e01d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ee6d4d24eadc66ace29d0233e136785439132462e4c78d6fdfff1a9dbc34705c",
@@ -43556,13 +41764,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f136a4ecfdc22e9b7c4adfe19c48f227fe23469123d8df68f9bed24bf475c136",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f1376ce235a11f864a6dac7ec0e88a4b367f829ec52454c3da4beccf2eac2b65",
       "count": 1,
       "tool": "tidy",
@@ -43596,13 +41797,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Platform/App.hpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "f166fbea4f166eb8f355f961eed757e2f56717c6f209fd43bf01ec86bdf3918e",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b9900910ebc4520ee7d43c838e82b5f6ed9027f0473434da3808e9d20d25bfc7",
@@ -43689,25 +41883,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f1fc874b5e891203935445bfd715cca01b92132a37b1925c3e71d3734ce076a3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f20d5f38a80ca04edeb51a577663bfb7acde66b4359b7ab8b7ee6657a9350ae4",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "f20f8493cc4bff2b5d1aa21c1bcd2e90d381a74b41a0561c4169ae3f0f7a4679",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f211c93053de3eeb3ecae54e55abebe2a0328c2a8a9fa502f75f9763bb454ab4",
@@ -43757,13 +41937,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f22966299b9ff9d25fe9c83aafe5e5e5062a04706da279012b75922ede3ec0f3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f231d0bdd81994fb3272259cb37f28c8aa0fd68d0026349bcafa946598473ab3",
@@ -44060,13 +42233,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f46a2d7489957c4d3e8964905e8f37ee9a7405f049622e420ca33f9a8e5e9a3e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f471b456439b1bbb545070a5cd1cc4b83c4b0604d28affce1cdb90cefefd9340",
       "count": 1,
       "tool": "tidy",
@@ -44361,13 +42527,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f650d9d8f2f4c65755f3b1610c442e12290be8189be5089ade43162ed315b240",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f6605a17e4077616ec574320660ac14bf18cc570993f33b15111d30e4b1e83f0",
       "count": 1,
       "tool": "tidy",
@@ -44508,13 +42667,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "f739e95191e86f1acca10898e4dff3f3c8e8ee5996bd05e2b50386da181265c4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f7645761faa1f9b04e826b552ecb862156c31d7e0f4696a3021cb91399b12361",
       "count": 3,
       "tool": "cpplint",
@@ -44568,13 +42720,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f7bb729cc41616941fcb88916ecd805d803829e06eabbb5aed29c51e94401b32",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -44879,13 +43024,6 @@
       "rule": "B905"
     },
     {
-      "key": "f9790c8e2fb08421dab5835707c05d2abec03905e5fd19a1c483a4796a5c0da1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f97c706db6345bfc78bd26bd34b8f0cec8211581a4ece4d19f16790b992386eb",
       "count": 1,
       "tool": "tidy",
@@ -44914,13 +43052,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f99c08c92a5b7e9c1ff4e630633e24a5fe9c4d29500d47c042d6179b46ddabde",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f99c785e6109d4e8893547be6bea8c795a56da42a59f175188c9ea7e4d8325db",
       "count": 1,
       "tool": "cpplint",
@@ -44947,13 +43078,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f9add97366a45eb0aff6c6db4af0c103f55b3519aee40cad3921485da60e6a82",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "f9b43f28675eae2cbf31673c4ac9cf4ba8cc3bc039ae67793e47caf2178d4deb",
@@ -45052,13 +43176,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f9f869cf348e7aaeca0310570fb4b40e54326e0d7d076b37982200f81ce22094",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "f9fae4e0ffb0c2dcd318873a3780afbf98e48d486cad331dc3c979e260cd454e",
@@ -45306,13 +43423,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "fb33d7da4b89601b5c6635acd6b6d6708a6c747fefc71cf34f0718dcdad79775",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "fb3ae246470700d4e94c08058f1d842e31773951d681b04422f9cd8fb9cf2021",
       "count": 1,
       "tool": "tidy",
@@ -45423,13 +43533,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "fbc808156188c55194a9d9e5823022a4ec59eec2b66c09bc41e69520e261b643",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "fbcd36e08b71fa38af5de7d290485b705b670c73379fa3b4ac15188f39bef56f",
@@ -45619,13 +43722,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "fd1bdd5890004d8538a8ce375a7bc73563819b42bb9e3309ade5d60cfe41100b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/TargetingDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "fd32cc8d7996bf4a4f0d2b01174b7b3474ef515c697998308de04d772af1c9b3",
@@ -45913,13 +44009,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "fe6c79afe640eacc978ec888226f93ae59042686fd484c4d082e4118eac8a9f2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Gte.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "fe81a8588d469e5de566b52daa7fd9157538c1b50edc7b49b306b397b282a7c6",

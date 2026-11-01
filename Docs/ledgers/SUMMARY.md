@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 48 | 19 (`wip`) | 4,140 |
-| `cpp` | 48 | 232 (`wip`) | 3,927 |
+| `modernized` | 49 | 19 (`wip`) | 4,139 |
+| `cpp` | 49 | 231 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 192 |
-| `vs_namespace` | 48 |
-| `typed_interface` | 48 |
-| `no_bridge` | 48 |
-| `strict_clean` | 192 |
-| `behavior_evidence` | 48 |
+| `source_cpp` | 193 |
+| `vs_namespace` | 49 |
+| `typed_interface` | 49 |
+| `no_bridge` | 49 |
+| `strict_clean` | 193 |
+| `behavior_evidence` | 49 |
 
-Promotion records: 280; derived `cpp=x`: 48, `cpp=wip`: 232. Verification records: 65; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 49, `cpp=wip`: 231. Verification records: 66; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -173,6 +173,8 @@ The nineteenth is the actor command dispatcher (F01720): VS::Battle::Ai::IssueAc
 typed snapshot through an ActorCommandRoom; IssueLiveActorCommand binds the AI state, battle actor and frame terrain.
 The twentieth is the radial screen warp (F02458): VS::Effects::ScreenDistortion::WarpPolygonVertices rewrites polygon
 coordinates through a packet cursor and a root-table span; WarpLivePolygonVertices walks the frame ordering table.
+The twenty-first is the target sphere wireframe (F01288): VS::Battle::DrawSphereVolumeWireframe draws the pulsing wire
+through a TargetWireCanvas; DrawLiveSphereVolumeWireframe copies the live sphere wire state and binds the GTE projection.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
