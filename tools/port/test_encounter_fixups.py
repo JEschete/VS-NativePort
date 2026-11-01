@@ -1265,6 +1265,20 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("0x800DC424u", pointers)
 
+    def test_collision_samples_read_the_live_room_map_as_bytes(self):
+        owned = self.owned_items()
+        self.assertEqual(owned["F00772"]["name"], "VS::Field::SampleCollisionHeightCode")
+        root = Path(__file__).resolve().parents[2]
+        collision = (root / r"Native\Game\src\Field\Collision.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('#include "Field/CollisionSampling.hpp"', collision)
+        self.assertEqual(
+            collision.count("VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), "),
+            7,
+        )
+        self.assertNotIn("Field_SampleCollisionHeightCode(", collision)
+
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
             fix
@@ -1361,7 +1375,7 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_promoted_terrain_callers_pass_the_grid_and_decoded_values(self):
         fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
-                 if "VS::Field::" in pat]
+                 if "VS::Field::" in pat and "SampleCollisionHeightCode" not in pat]
         self.assertEqual(len(fixes), 3)
         self.assertTrue(all(re.search(row, "Battle::Ai::Movement") for row, _, _ in fixes))
         text = "\n".join((

@@ -181,7 +181,6 @@ extern "C" {
 #include "Field/Background.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
-#include "Field/CollisionSampling.h"
 #include "Field/DoorMatches.h"
 #include "Field/Doors.h"
 #include "Field/Environment.h"
@@ -1094,7 +1093,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80098F8Cu, 0u, (void*)&Field_DrawMinimapScene, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800994D4u, 0u, (void*)&Render_GetProjectionScreenOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800994F4u, 0u, (void*)&Render_SetProjectionScreenOffset, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80099514u, 0u, (void*)&Field_SampleCollisionHeightCode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800995B0u, 0u, (void*)&Content_FindFreeActorAssetRequest, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800995E8u, 0u, (void*)&Content_QueueActorAssetRequest, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009967Cu, 0u, (void*)&Content_UpdateActorAssetQueue, 0u, 0u, 0u},

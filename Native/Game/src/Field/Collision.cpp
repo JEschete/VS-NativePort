@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Field/CollisionSampling.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Field/Collision.h"
-#include "Field/CollisionSampling.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
@@ -140,7 +140,7 @@ short Field_InterpolatedFloorHeight(int world_x_or_sample_x, int world_z_or_samp
             return -0x8000;
         }
 
-        height_code_or_packed_height = Field_SampleCollisionHeightCode(world_x_or_sample_x, world_z_or_sample_z, 0);
+        height_code_or_packed_height = VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), world_x_or_sample_x, world_z_or_sample_z, 0);
         base_or_interpolated_height = (collisionMap->heightOrigin - ((height_code_or_packed_height & 0x7F) * 2)) * 8;
 
         neighbor_sample_x_or_height = sample_offset_x < 0x10 ? world_x_or_sample_x - 1 : world_x_or_sample_x + 1;
@@ -152,7 +152,7 @@ short Field_InterpolatedFloorHeight(int world_x_or_sample_x, int world_z_or_samp
 
         if ((neighbor_sample_x_or_height >> 2) < (u_int)collisionMap->width) {
             neighbor_sample_x_or_height =
-                (collisionMap->heightOrigin - ((Field_SampleCollisionHeightCode(neighbor_sample_x_or_height, world_z_or_sample_z, 0) & 0x7F) * 2)) * 8;
+                (collisionMap->heightOrigin - ((VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), neighbor_sample_x_or_height, world_z_or_sample_z, 0) & 0x7F) * 2)) * 8;
             neighbor_height_delta = neighbor_sample_x_or_height - base_or_interpolated_height;
             if (ABS(neighbor_height_delta) >= 0x40) {
                 neighbor_sample_x_or_height = base_or_interpolated_height;
@@ -163,7 +163,7 @@ short Field_InterpolatedFloorHeight(int world_x_or_sample_x, int world_z_or_samp
 
         if ((neighbor_sample_z_or_height >> 2) < (u_int)collisionMap->height) {
             neighbor_sample_z_or_height =
-                (collisionMap->heightOrigin - ((Field_SampleCollisionHeightCode(world_x_or_sample_x, neighbor_sample_z_or_height, 0) & 0x7F) * 2)) * 8;
+                (collisionMap->heightOrigin - ((VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), world_x_or_sample_x, neighbor_sample_z_or_height, 0) & 0x7F) * 2)) * 8;
             neighbor_height_delta = neighbor_sample_z_or_height - base_or_interpolated_height;
             if (ABS(neighbor_height_delta) >= 0x40) {
                 neighbor_sample_z_or_height = base_or_interpolated_height;
@@ -200,7 +200,7 @@ short Field_FloorHeightAt(int world_x, int world_z)
 
     if ((collisionMap != NULL) && ((u_int)(world_x >> 7) < collisionMap->width)
         && ((u_int)(world_z >> 7) < collisionMap->height)) {
-        height_code_or_packed_floor = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 0);
+        height_code_or_packed_floor = VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), world_x >> 5, world_z >> 5, 0);
         height_code_or_packed_floor = (((collisionMap->heightOrigin - ((height_code_or_packed_floor & 0x7F) * 2)) * 8) & 0x7FFF)
                | ((height_code_or_packed_floor & 0x80) << 8);
     }
@@ -218,7 +218,7 @@ short Field_CeilingHeightAt(int world_x, int world_z)
     if ((Field_roomData.collisionMap != NULL)
         && ((world_x >> 7) < (u_int)collisionMap->width)
         && ((world_z >> 7) < (u_int)collisionMap->height)) {
-        height_code_or_packed_ceiling = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 1);
+        height_code_or_packed_ceiling = VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), world_x >> 5, world_z >> 5, 1);
         decoded_ceiling_height = (collisionMap->heightOrigin - ((height_code_or_packed_ceiling & 0x7F) * 2)) * new_var;
         if (decoded_ceiling_height > 0) {
             height_code_or_packed_ceiling = 0xF810;
@@ -240,11 +240,11 @@ int Field_FloorAndCeilingHeightsAt(int world_x, int world_z)
     if ((collisionMap != NULL) && ((u_int)(world_x >> 7) < collisionMap->width)) {
         if ((u_int)(world_z >> 7) < collisionMap->height) {
             int ceiling_height_work;
-            int height_code_or_packed_plane = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 0);
+            int height_code_or_packed_plane = VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), world_x >> 5, world_z >> 5, 0);
             height_code_or_packed_plane = (((collisionMap->heightOrigin - ((height_code_or_packed_plane & 0x7F) * 2)) * 8) & 0x7FFF)
                     | ((height_code_or_packed_plane & 0x80) << 8);
             height_halfwords[0] = height_code_or_packed_plane;
-            height_code_or_packed_plane = Field_SampleCollisionHeightCode(world_x >> 5, world_z >> 5, 1);
+            height_code_or_packed_plane = VS::Field::SampleCollisionHeightCode(VS::Field::LiveRoomCollisionMap(), world_x >> 5, world_z >> 5, 1);
             ceiling_height_work = collisionMap->heightOrigin - (height_code_or_packed_plane & 0x7F) * 2;
             ceiling_height_work *= 8;
             if (ceiling_height_work > 0) {

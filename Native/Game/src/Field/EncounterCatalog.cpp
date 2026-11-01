@@ -15,6 +15,7 @@
 #include "Battle/Encounter.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
+#include "Field/CollisionSampling.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 #include "Legacy/Psx.h"
 
@@ -23,7 +24,6 @@ extern "C" {
 #include "Actors/CharacterInit.h"
 #include "Actors/Spawning.h"
 #include "Audio/SoundBanks.h"
-#include "Field/CollisionSampling.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 }
@@ -280,7 +280,6 @@ EncounterZone ReadZone(const Content::DataStore& store,
 EncounterFloor ClassifyFloor(Bytes collision, const Field_MpdTileCell& tile,
                              int x, int z) {
   constexpr int kSamplesPerTile = 4;
-  constexpr int kInvalidHeight = 0x80;
   // func_800A8D64 (40564.c:139) checks passability; func_800A6EE8
   // (3A1A0.c:2175) handles pits. The lab conservatively requires full tiles,
   // excluding diagonal partial cells and dynamic platform/gimmick support.
@@ -288,10 +287,13 @@ EncounterFloor ClassifyFloor(Bytes collision, const Field_MpdTileCell& tile,
   if (tile.isPit != 0) return EncounterFloor::kPit;
   for (int sample_z = 0; sample_z < kSamplesPerTile; ++sample_z) {
     for (int sample_x = 0; sample_x < kSamplesPerTile; ++sample_x) {
-      const auto code = Field_SampleCollisionHeightCodeFromData(
-          collision.data(), collision.size(), x * kSamplesPerTile + sample_x,
-          z * kSamplesPerTile + sample_z, 0);
-      if ((code & kInvalidHeight) != 0) return EncounterFloor::kNoFloor;
+      const auto code = VS::Field::SampleCollisionHeightCode(
+          std::as_bytes(collision),
+          static_cast<std::uint32_t>(x * kSamplesPerTile + sample_x),
+          z * kSamplesPerTile + sample_z, VS::Field::kCollisionFloorLayer);
+      if ((code & VS::Field::kCollisionHeightInvalid) != 0) {
+        return EncounterFloor::kNoFloor;
+      }
     }
   }
   return EncounterFloor::kSupported;

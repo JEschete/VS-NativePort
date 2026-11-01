@@ -66,6 +66,9 @@
     <ClCompile Include="src\CameraConstraintTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\CollisionSamplingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CombatLabCanvasTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -14,6 +14,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/BiosRand.h"
 #include "Core/Random.hpp"
+#include "Field/CollisionSampling.hpp"
 #include "Field/DoorMatches.h"
 #include "Field/EncounterSpawnProfile.hpp"
 
@@ -21,7 +22,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/EncounterHooks.h"
 #include "Boot/PlayerSettings.h"
-#include "Field/CollisionSampling.h"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Input/Controller.h"
@@ -614,17 +614,13 @@ TEST_CASE("Isolated collision sampling preserves layer bias and invalid bits",
   const std::uint16_t biased = 0x800;
   std::memcpy(fixture.collision.data() + 8, &biased, sizeof(biased));
   fixture.collision[FloorFixture::kPatterns] = 0x82;
-  CHECK(Field_SampleCollisionHeightCodeFromData(fixture.collision.data(),
-                                                fixture.collision.size(), 0, 0,
-                                                0) == 0x86);
-  CHECK(Field_SampleCollisionHeightCodeFromData(
-            fixture.collision.data(), fixture.collision.size(), 1, 0, 0) == 4);
-  CHECK(Field_SampleCollisionHeightCodeFromData(
-            fixture.collision.data(), fixture.collision.size(), 1, 0, 1) == 0);
-  CHECK(Field_SampleCollisionHeightCodeFromData(fixture.collision.data(),
-                                                fixture.collision.size(), 8, 0,
-                                                0) == 0x80);
-  CHECK(Field_SampleCollisionHeightCodeFromData(nullptr, 0, 0, 0, 0) == 0x80);
+  const auto map = std::as_bytes(std::span(fixture.collision));
+  using VS::Field::SampleCollisionHeightCode;
+  CHECK(SampleCollisionHeightCode(map, 0, 0, 0) == 0x86);
+  CHECK(SampleCollisionHeightCode(map, 1, 0, 0) == 4);
+  CHECK(SampleCollisionHeightCode(map, 1, 0, 1) == 0);
+  CHECK(SampleCollisionHeightCode(map, 8, 0, 0) == 0x80);
+  CHECK(SampleCollisionHeightCode({}, 0, 0, 0) == 0x80);
 }
 
 TEST_CASE("Encounter validation identifies unsafe actor tiles before spawning",

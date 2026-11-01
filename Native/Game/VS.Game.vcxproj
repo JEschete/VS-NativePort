@@ -1440,12 +1440,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Field\CollisionSampling.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Field\CollisionSampling.cpp" />
+    <ClCompile Include="src\Field\CollisionSamplingBinding.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Field\DoorMatches.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2313,7 +2310,6 @@
     <ClInclude Include="src\Field\Background.h" />
     <ClInclude Include="src\Field\Camera.h" />
     <ClInclude Include="src\Field\Collision.h" />
-    <ClInclude Include="src\Field\CollisionSampling.h" />
     <ClInclude Include="src\Field\DoorMatches.h" />
     <ClInclude Include="src\Field\Doors.h" />
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
@@ -2434,6 +2430,7 @@
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />
+    <ClInclude Include="include\Field\CollisionSampling.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />

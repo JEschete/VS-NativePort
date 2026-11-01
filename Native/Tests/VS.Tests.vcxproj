@@ -62,6 +62,7 @@
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />
+    <ClCompile Include="src\CollisionSamplingTests.cpp" />
     <ClCompile Include="src\CombatLabCanvasTests.cpp" />
     <ClCompile Include="src\CombatLabTraceTests.cpp" />
     <ClCompile Include="src\CombatTestCases.cpp" />

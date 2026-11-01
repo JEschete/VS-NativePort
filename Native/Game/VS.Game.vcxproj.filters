@@ -1593,9 +1593,9 @@
     <ClCompile Include="src\Field\CollisionSampling.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\CollisionSampling.h">
+    <ClCompile Include="src\Field\CollisionSamplingBinding.cpp">
       <Filter>src\Field</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Field\DoorMatches.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2234,6 +2234,9 @@
     </ClInclude>
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\CollisionSampling.hpp">
+      <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\TerrainHeight.hpp">
       <Filter>include\Field</Filter>

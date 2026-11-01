@@ -21,7 +21,6 @@ Native\Game\src\Battle\TargetingDraw.cpp
 Native\Game\src\Boot\PlayerSettings.cpp
 Native\Game\src\Boot\Session.cpp
 Native\Game\src\Effects\Templates\RadialSurge.cpp
-Native\Game\src\Field\CollisionSampling.cpp
 Native\Game\src\Field\RoomTriggerMarkers.cpp
 Native\Game\src\Save\MenuAssets.cpp
 Native\Game\src\Save\NativeContainer.cpp

@@ -1,8 +1,11 @@
-extern "C" {
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "Field/CollisionSampling.hpp"
+
+extern "C" {
 
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
@@ -32,7 +35,6 @@ extern "C" {
 #include "Event/Script.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
-#include "Field/CollisionSampling.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
@@ -686,19 +688,18 @@ int Tests_CollisionHeightPatterns(void) {
   memset(&Field_roomData, 0, sizeof Field_roomData);
   Field_roomData.collisionMap = &collision.header;
   Field_roomData.header.collisionMapLength = sizeof collision;
-  int passed = Field_SampleCollisionHeightCode(0, 0, 0) == 0x82 &&
-               Field_SampleCollisionHeightCode(1, 0, 0) == 9 &&
-               Field_SampleCollisionHeightCode(0, 1, 0) == 11 &&
-               Field_SampleCollisionHeightCode(4, 0, 0) == 20 &&
-               Field_SampleCollisionHeightCode(7, 3, 0) == 0xFC &&
-               Field_SampleCollisionHeightCode(0, 0, 1) == 48 &&
-               Field_SampleCollisionHeightCode(4, 0, 1) == 0xFA &&
-               Field_SampleCollisionHeightCode(8, 0, 0) == 0x80 &&
-               Field_SampleCollisionHeightCode(0, 4, 0) == 0x80 &&
-               Field_SampleCollisionHeightCode(0, -1, 0) == 0x80 &&
-               Field_SampleCollisionHeightCode(0, 0, 2) == 0x80;
+  const auto sample = [](uint32_t x, int z, int layer) {
+    return VS::Field::SampleCollisionHeightCode(
+        VS::Field::LiveRoomCollisionMap(), x, z, layer);
+  };
+  int passed = sample(0, 0, 0) == 0x82 && sample(1, 0, 0) == 9 &&
+               sample(0, 1, 0) == 11 && sample(4, 0, 0) == 20 &&
+               sample(7, 3, 0) == 0xFC && sample(0, 0, 1) == 48 &&
+               sample(4, 0, 1) == 0xFA && sample(8, 0, 0) == 0x80 &&
+               sample(0, 4, 0) == 0x80 && sample(0, -1, 0) == 0x80 &&
+               sample(0, 0, 2) == 0x80;
   Field_roomData.header.collisionMapLength--;
-  passed = passed && Field_SampleCollisionHeightCode(7, 3, 0) == 0x80;
+  passed = passed && sample(7, 3, 0) == 0x80;
   Field_roomData = saved;
   return passed;
 }
