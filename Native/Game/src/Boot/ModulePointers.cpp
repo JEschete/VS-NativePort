@@ -73,7 +73,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
@@ -2013,7 +2012,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DC2E0u, 0u, (void*)&Battle_Ai_CopyActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC30Cu, 0u, (void*)&Battle_Ai_ApplySimulatedStatDelta, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC344u, 0u, (void*)&Battle_Ai_AppendActionCandidate, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DC424u, 0u, (void*)&Battle_Ai_CaptureActorConditionTable, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC484u, 0u, (void*)&Battle_Ai_IsActionHarmfulToActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC48Cu, 0u, (void*)&Battle_Ai_IsActionBeneficialToActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC4F0u, 0u, (void*)&Battle_Ai_CacheFallbackActionCandidate, 0u, 0u, 0u},

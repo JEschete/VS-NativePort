@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
@@ -284,7 +284,7 @@ void Battle_Ai_EvaluateActionCandidate(
     candidate->opaque0 = 0;
     candidate->weight = 128;
     stats = (Battle_Ai_ActionTiming*)((uintptr_t)Core_ScratchBase() + 0x18C);
-    Battle_Ai_CaptureActorConditionTable(stats);
+    VS::Battle::Ai::CaptureBattleActorConditions(std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>(stats, VS::Battle::Ai::kBattleActorSlotCount));
 
     if (ai_state->settingsModeLow && flags.opaque0Bit4) {
         special = 1;

@@ -393,7 +393,10 @@
     <ClCompile Include="src\Battle\Ai\ConditionSnapshot.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h">
+    <ClCompile Include="src\Battle\Ai\ConditionSnapshotBinding.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
     <ClCompile Include="src\Battle\Ai\CurrentTerrain.cpp">
@@ -2189,6 +2192,9 @@
     </ClInclude>
     <ClInclude Include="include\Battle\Action.h">
       <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp">
+      <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp">
       <Filter>include\Battle\Ai</Filter>

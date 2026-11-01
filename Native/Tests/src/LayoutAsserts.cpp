@@ -1,11 +1,13 @@
 // Compile-time checks of the x64 layout decisions the copy depends on
 // (tools/port/copy_fixups.py TYPE_FIXES and FIXES). A failure here means a fix
 // no longer holds after a ledger or decomp change.
-extern "C" {
 #include <stddef.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "Battle/Ai/ConditionSnapshotBinding.hpp"
+
+extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorLoading.h"
 #include "Actors/ActorRecord.h"
@@ -16,7 +18,6 @@ extern "C" {
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/ConditionSnapshot.h"
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
@@ -511,7 +512,7 @@ int Tests_ActorConditionSnapshot(void) {
   Battle_actors[0] = &first;
   Battle_Ai_actorAiStates[2] = &firstAi;
   Battle_Ai_actorAiStates[5] = &secondAi;
-  Battle_Ai_CaptureActorConditionTable(output.rows);
+  VS::Battle::Ai::CaptureBattleActorConditions(output.rows);
   const int passed =
       output.rows[2].opaque0Bit0 == 2 && output.rows[5].opaque0Bit0 == 5 &&
       output.rows[2].opaque4 == 20 && output.rows[2].opaque6 == 100 &&

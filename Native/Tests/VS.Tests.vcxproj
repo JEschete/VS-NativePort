@@ -72,6 +72,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\ConditionSnapshotTests.cpp" />
     <ClCompile Include="src\ContentTests.cpp" />
     <ClCompile Include="src\CorePointerSortTests.cpp" />
     <ClCompile Include="src\CoreTests.cpp" />

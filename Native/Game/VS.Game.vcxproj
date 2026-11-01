@@ -270,12 +270,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\ConditionSnapshot.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Battle\Ai\ConditionSnapshot.cpp" />
+    <ClCompile Include="src\Battle\Ai\ConditionSnapshotBinding.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\CurrentTerrain.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2100,7 +2097,7 @@
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
-    <ClInclude Include="src\Battle\Ai\ConditionSnapshot.h" />
+    <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
     <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
@@ -2423,6 +2420,7 @@
     <ClInclude Include="include\Actors\MovementCommand.hpp" />
     <ClInclude Include="include\Actors\SoundTransition.hpp" />
     <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />

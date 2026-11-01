@@ -1243,6 +1243,28 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertIn("VS::Actors::QueueNavigationTileTarget(" + adapter, movement)
 
+    def test_condition_snapshot_binds_an_explicit_planner_row_span(self):
+        owned = self.owned_items()
+        self.assertEqual(
+            owned["F01689"]["name"], "VS::Battle::Ai::CaptureActorConditionTable"
+        )
+        root = Path(__file__).resolve().parents[2]
+        planning = (root / r"Native\Game\src\Battle\Ai\ActionPlanning.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn('#include "Battle/Ai/ConditionSnapshotBinding.hpp"', planning)
+        self.assertIn(
+            "VS::Battle::Ai::CaptureBattleActorConditions("
+            "std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>("
+            "stats, VS::Battle::Ai::kBattleActorSlotCount));",
+            planning,
+        )
+        self.assertNotIn("Battle_Ai_CaptureActorConditionTable(", planning)
+        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("0x800DC424u", pointers)
+
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
             fix
