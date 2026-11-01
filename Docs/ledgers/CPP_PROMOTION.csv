@@ -148,7 +148,7 @@ F01787,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01788,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01789,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01790,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
-F01791,Native\Game\src\Battle\Ai\ActorStateHelpers.cpp,,,,,,,,,
+F01791,Native\Game\src\Battle\Ai\ActorStateHelpers.cpp,x,x,x,x,x,x,verify:VR-AI-REACTION-DELAY,cb4b278d62a33586152ca59f929d8839155163da,#46 slice: VS::Battle::Ai function writing through an ActorReactionDelays table; BattleActorReactionDelays adapts Battle_Ai_actorAiStates in RoomState; the generated ActionFlow caller passes the adapter by copier fixup; no module stores 0x800E4C64
 F01792,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01794,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01795,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,

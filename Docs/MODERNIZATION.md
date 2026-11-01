@@ -23,7 +23,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 10: #50 Render submission and frame ownership | 33 | 96 | 2,685 | 87 | 42 | 0 |
 | 14: #55 Actor identity and teardown | 23 | 213 | 8,990 | 158 | 78 | 0 |
 | 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
-| 23: #57 AI, navigation and collision contexts | 114 | 122 | 6,229 | 194 | 56 | 0 |
+| 23: #57 AI, navigation and collision contexts | 113 | 122 | 6,229 | 194 | 56 | 0 |
 | 24: #56 Combat intents and results | 4 | 355 | 10,216 | 181 | 178 | 0 |
 | 25: #54 Text IDs, layout and rendering | 4 | 29 | 1,279 | 23 | 10 | 0 |
 | 26: #59 Event VM results and execution | 1 | 236 | 3,830 | 59 | 178 | 0 |
@@ -32,22 +32,22 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 4 | 7 | 216 | 0 | 11 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 638 | 36,178 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 247 | 3480 | 108,028 | 1600 | 2160 | 0 |
+| **Total** | 246 | 3480 | 108,028 | 1600 | 2160 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 33 |
-| todo | 3,727 |
+| done | 34 |
+| todo | 3,726 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 198 | 1,896 |
+| Called from generated code | 197 | 1,896 |
 | Referenced by the original-address module table | 196 | 2,120 |
 | Calls an SDK shim | 11 | 461 |
 | Signature uses SDK integer types or `void*` | 45 | 862 |
-| Compiled with relaxed settings | 94 | 3,478 |
+| Compiled with relaxed settings | 93 | 3,478 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 198 of 247 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 197 of 246 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 

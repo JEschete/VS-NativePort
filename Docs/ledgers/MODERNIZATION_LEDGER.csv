@@ -1789,7 +1789,7 @@ F01787,Battle_Ai_ClearAiContactOccupancy,Battle::Ai::ClearAiContactOccupancy,Nat
 F01788,Battle_Ai_SetAiContactOccupancy,Battle::Ai::SetAiContactOccupancy,Native\Game\src\Battle\Ai\GroundNavigation.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,2,0,1,,,,,yes,no,100,,executed,
 F01789,Battle_Ai_ReserveAiDestinationTile,Battle::Ai::ReserveAiDestinationTile,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,1,1,,,,,yes,no,100,,executed,
 F01790,Battle_Ai_ReleaseAiDestinationTile,Battle::Ai::ReleaseAiDestinationTile,Native\Game\src\Battle\Ai\ActorCleanup.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,3,0,0,,,,,yes,no,90,,executed,
-F01791,Battle_Ai_ResetActorAiReactionDelay,Battle::Ai::ResetActorAiReactionDelay,Native\Game\src\Battle\Ai\ActorStateHelpers.cpp,owned,todo,57,23,0,relaxed,found,x,,,,,,,1,0,1,,,,,yes,no,88,,executed,
+F01791,VS::Battle::Ai::ResetActorAiReactionDelay,Battle::Ai::ResetActorAiReactionDelay,Native\Game\src\Battle\Ai\ActorStateHelpers.cpp,owned,done,57,23,0,strict,found,x,x,x,x,x,x,x,1,0,2,,,,,yes,no,88,VR-AI-REACTION-DELAY,recorded,
 F01792,Battle_Ai_RememberAiActionTarget,Battle::Ai::RememberAiActionTarget,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,2,0,1,,,,,yes,yes,100,VR-F01792,recorded,
 F01793,Battle_Ai_ForgetAiActionTarget,Battle::Ai::ForgetAiActionTarget,Native\Game\src\Battle\Ai\ActionSelection.cpp,generated,todo,57,23,1,relaxed,found,x,,,,,,,3,0,0,x,,,,no,yes,100,,executed,
 F01794,Battle_Ai_CanAiActionAffectActor,Battle::Ai::CanAiActionAffectActor,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,1,0,1,x,,,,yes,yes,92,,executed,
