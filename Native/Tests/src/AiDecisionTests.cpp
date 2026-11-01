@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/ReactionDelay.hpp"
 #include "Core/Random.hpp"
 #include "Legacy/Psx.h"
 
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/ActorStateHelpers.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
@@ -125,10 +125,12 @@ TEST_CASE("AI reaction-delay reset updates only existing non-player states",
   }
   Battle_Ai_actorAiStates[3] = nullptr;
 
-  Battle_Ai_ResetActorAiReactionDelay(0);
+  VS::Battle::Ai::ResetActorAiReactionDelay(
+      VS::Battle::Ai::BattleActorReactionDelays(), 0);
   CHECK(states[0].minActionDelay == 1);
   for (int id = 1; id < 16; ++id) {
-    Battle_Ai_ResetActorAiReactionDelay(id);
+    VS::Battle::Ai::ResetActorAiReactionDelay(
+        VS::Battle::Ai::BattleActorReactionDelays(), id);
     if (id == 3) {
       CHECK(states[id].minActionDelay == id + 1);
     } else {

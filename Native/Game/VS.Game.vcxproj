@@ -264,13 +264,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\ActorStateHelpers.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\ActorStateHelpers.cpp" />
     <ClCompile Include="src\Battle\Ai\Behavior.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2106,7 +2100,6 @@
     <ClInclude Include="src\Battle\Ai\ActorCleanup.h" />
     <ClInclude Include="src\Battle\Ai\ActorCommands.h" />
     <ClInclude Include="src\Battle\Ai\ActorState.h" />
-    <ClInclude Include="src\Battle\Ai\ActorStateHelpers.h" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
@@ -2433,6 +2426,7 @@
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
+    <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />

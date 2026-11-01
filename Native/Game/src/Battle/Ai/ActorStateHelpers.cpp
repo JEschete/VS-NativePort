@@ -1,24 +1,18 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Battle/Ai/ActorStateHelpers.h"
+#include <cstdlib>
 
-#include <stdlib.h>
+#include "Battle/Ai/ReactionDelay.hpp"
+#include "Core/Diagnostics.h"
 
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/AiState.h"
-#include "Legacy/Psx.h"
-
-enum { kReactionDelayFrames = 30 };
-
+namespace VS::Battle::Ai {
 // decomp: BATTLE.PRG func_800E4C64 (src/BATTLE/BATTLE.PRG/7BDD4.s:571).
-void Battle_Ai_ResetActorAiReactionDelay(int actor_id) {
-  if ((unsigned)actor_id >=
-      sizeof Battle_Ai_actorAiStates / sizeof Battle_Ai_actorAiStates[0]) {
-    Core_Debugf("ai", "reaction delay actor ID is out of bounds: %d", actor_id);
-    abort();
+void ResetActorAiReactionDelay(ActorReactionDelays& actors, int actor_id) {
+  if (actor_id < 0 || actor_id >= kAiActorSlotCount) {
+    Core_Errorf("ai", "reaction delay actor ID is out of bounds: %d", actor_id);
+    std::abort();
   }
   if (actor_id == 0) return;
-  Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[actor_id];
-  if (state != nullptr) state->minActionDelay = kReactionDelayFrames;
+  static_cast<void>(
+      actors.SetMinimumActionDelay(actor_id, kReactionDelayFrames));
 }
-}  // extern "C"
+}  // namespace VS::Battle::Ai

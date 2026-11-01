@@ -144,6 +144,7 @@
     <ClCompile Include="src\PlatformPlacementTests.cpp" />
     <ClCompile Include="src\PursuitTargetsTests.cpp" />
     <ClCompile Include="src\RasterBoundsTests.cpp" />
+    <ClCompile Include="src\ReactionDelayTests.cpp" />
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\ResultsTextureTests.cpp" />
     <ClCompile Include="src\RoomAiMapTests.cpp" />

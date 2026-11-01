@@ -28,6 +28,7 @@ NATIVE_POINTER_FIELDS = {"T00278.012"}
 NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
+    "VS::Battle::Ai::BattleActorReactionDelays": r"Native\Game\include\Battle\Ai\ReactionDelay.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2553,6 +2554,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"^Actors::", r"\bVS::Battle::Ai::RoomNavigationCeilingHeight\(\)",
      r"VS::Battle::Ai::RoomNavigationCeilingHeight(VS::Battle::Ai::BattleRoomAiRuntime())",
      "F01843 #46 typed promotion: the ceiling is read from the runtime that publishes the room AI map"),
+    (r"^Battle::", r"\bVS::Battle::Ai::ResetActorAiReactionDelay\(",
+     r"VS::Battle::Ai::ResetActorAiReactionDelay(VS::Battle::Ai::BattleActorReactionDelays(), ",
+     "F01791 #46 typed promotion: the delay is written through the battle actor AI table adapter"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

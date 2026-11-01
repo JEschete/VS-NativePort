@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ReactionDelay.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorStateHelpers.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"
@@ -361,7 +361,7 @@ void Battle_CommitSelectedAction(int target_selection_mode)
         if (selected_preview == 0xFF) {
             if (Battle_actionState->selection.primaryTarget.target.targetActor != 0) {
                 Menu_Framework_ReleaseMenuRows();
-                Battle_Ai_ResetActorAiReactionDelay(Battle_actionState->selection.primaryTarget.target.targetActor);
+                VS::Battle::Ai::ResetActorAiReactionDelay(VS::Battle::Ai::BattleActorReactionDelays(), Battle_actionState->selection.primaryTarget.target.targetActor);
                 Battle_actionState->selection.actionId = 0;
                 Battle_BeginPostActionRecovery(0);
                 return;

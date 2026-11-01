@@ -372,9 +372,6 @@
     <ClCompile Include="src\Battle\Ai\ActorStateHelpers.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\ActorStateHelpers.h">
-      <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
     <ClInclude Include="src\Battle\Ai\AiState.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
@@ -2185,6 +2182,9 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp">

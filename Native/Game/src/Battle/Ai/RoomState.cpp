@@ -8,9 +8,11 @@ extern "C" {
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
+#include <iterator>
 #include <optional>
 #include <span>
 
+#include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 
@@ -215,11 +217,32 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     ClearRoomAiBindings();
   }
 };
+
+class BattleReactionDelays final : public VS::Battle::Ai::ActorReactionDelays {
+ public:
+  bool SetMinimumActionDelay(int actor_id, std::uint8_t frames) override {
+    static_assert(std::size(Battle_Ai_actorAiStates) ==
+                  VS::Battle::Ai::kAiActorSlotCount);
+    if (actor_id < 0 || actor_id >= VS::Battle::Ai::kAiActorSlotCount) {
+      return false;
+    }
+    Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[actor_id];
+    if (state == nullptr) return false;
+    state->minActionDelay = frames;
+    return true;
+  }
+};
 }  // namespace
 
 VS::Battle::Ai::RoomAiRuntime& VS::Battle::Ai::BattleRoomAiRuntime() {
   static BattleRuntime runtime;
   return runtime;
+}
+
+VS::Battle::Ai::ActorReactionDelays&
+VS::Battle::Ai::BattleActorReactionDelays() {
+  static BattleReactionDelays delays;
+  return delays;
 }
 
 extern "C" {
