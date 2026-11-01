@@ -181,6 +181,7 @@
     <ClCompile Include="src\SpecialTerrainTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
+    <ClCompile Include="src\TargetPagePartitionTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />

@@ -36,6 +36,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
     "VS::Effects::BindLiveEffectTextureTables": r"Native\Game\include\Effects\TextureBindings.hpp",
     "VS::Render::DrawLiveScaledFontChar": r"Native\Engine\include\Render\ScaledFont.hpp",
+    "VS::Battle::CheckedTargetPreviews": r"Native\Game\include\Battle\TargetPages.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2583,6 +2584,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Render::DrawScaledFontChar\(",
      r"VS::Render::DrawLiveScaledFontChar(",
      "F04199 #46 typed promotion: the font binding supplies the live font style and text box layer"),
+    (r"^Battle::", r"\bVS::Battle::SetSphereTargets\((\w+), (Battle_actionState->previews), ",
+     r"VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(\2, \1), ",
+     "F01296 #46 typed promotion: the action previews are bound to the live sphere as a span checked against their capacity"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

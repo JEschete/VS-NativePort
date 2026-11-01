@@ -15,8 +15,6 @@ typedef struct Battle_TargetPageInfo {
 extern "C" {
 #endif
 
-void Battle_SetSphereTargets(int count, Battle_TargetPreview* entries,
-                             int mode);
 void Battle_ResetTargetPages(void);
 int Battle_AdvanceTargetPage(int direction);
 int Battle_HandleTargetPageButtons(void);

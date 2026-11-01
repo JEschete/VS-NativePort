@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/SphereTerrain.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/TargetPages.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
@@ -228,7 +228,7 @@ void Battle_FilterAreaActionTargets(void)
     }
 
     Battle_actionState->previewCount = kept;
-    Battle_SetSphereTargets(kept, Battle_actionState->previews, 1);
+    VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, kept), 1);
     Battle_actionFlowMode = 3;
 }
 
@@ -448,7 +448,7 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
         }
     }
     Battle_actionState->previewCount = count;
-    Battle_SetSphereTargets(count, Battle_actionState->previews, 1);
+    VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, count), 1);
     Battle_actionState->selectedPreview = 240;
     Battle_actionFlowMode = 3;
 }
@@ -579,7 +579,7 @@ void Battle_CollectDirectActionTargets(int source_actor_slot)
     Battle_actionState->previewCount = count;
 
     if (Battle_actionState->isPlayerAction) {
-        Battle_SetSphereTargets(count, Battle_actionState->previews, 0);
+        VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, count), 0);
     }
 
     if (Battle_actionState->selection.primaryTarget.target.targetActor) {
@@ -742,7 +742,7 @@ void Battle_InitializeActionTargeting(int action)
             }
         }
         Battle_actionState->previewCount = count;
-        Battle_SetSphereTargets(count, Battle_actionState->previews, 0);
+        VS::Battle::SetLiveSphereTargets(VS::Battle::CheckedTargetPreviews(Battle_actionState->previews, count), 0);
         Battle_actionFlowMode = 1;
         return;
     }

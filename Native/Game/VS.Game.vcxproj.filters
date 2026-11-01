@@ -606,6 +606,9 @@
     <ClCompile Include="src\Battle\TargetPages.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
+    <ClCompile Include="src\Battle\TargetPagesLive.cpp">
+      <Filter>src\Battle</Filter>
+    </ClCompile>
     <ClInclude Include="src\Battle\TargetVolume.h">
       <Filter>src\Battle</Filter>
     </ClInclude>
@@ -2224,6 +2227,9 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\TargetPages.h">
+      <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\TargetPages.hpp">
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">

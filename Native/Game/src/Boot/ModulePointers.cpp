@@ -100,7 +100,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/SphereTerrain.h"
 #include "Battle/StatusEffects.h"
-#include "Battle/TargetPages.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
 #include "Battle/TargetingDraw.h"
@@ -1619,7 +1618,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C123Cu, 0u, (void*)&Battle_IsPointInTargetCone, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1384u, 0u, (void*)&Battle_IsPointInTargetPrism, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1564u, 0u, (void*)&Battle_IsPointInTargetVolume, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C1664u, 0u, (void*)&Battle_SetSphereTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C16DCu, 0u, (void*)&Battle_ClearSphereTargets, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C16FCu, 0u, (void*)&Battle_DrawRightTargetLabelLink, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C1A40u, 0u, (void*)&Battle_DrawLeftTargetLabelLink, 0u, 0u, 0u},

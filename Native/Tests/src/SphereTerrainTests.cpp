@@ -10,7 +10,7 @@
 
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/SphereTerrain.h"
-#include "Battle/TargetPages.h"
+#include "Battle/TargetPages.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -191,8 +191,7 @@ struct ExtendedPageFixture : SliceFixture {
       entries[index].actorId = static_cast<char>(2 + index / 5);
       entries[index].limb = static_cast<char>(index % 5);
     }
-    Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(),
-                            0);
+    VS::Battle::SetLiveSphereTargets(entries, 0);
   }
 };
 
@@ -259,7 +258,7 @@ TEST_CASE("Six-part target groups retain every candidate beyond one page",
     entries[index].actorId = static_cast<char>(2 + index / 6);
     entries[index].limb = static_cast<char>(index % 6);
   }
-  Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(), 0);
+  VS::Battle::SetLiveSphereTargets(entries, 0);
   CHECK(Battle_GetTargetPageInfo().total == 36);
   CHECK(Battle_GetTargetPageInfo().visible == 24);
   REQUIRE(Battle_AdvanceTargetPage(1) == 1);
@@ -325,12 +324,12 @@ TEST_CASE("Small target lists preserve the original single visible page",
   for (std::size_t index = 0; index < entries.size(); ++index) {
     entries[index].actorId = static_cast<char>(index / 6);
   }
-  Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(), 0);
+  VS::Battle::SetLiveSphereTargets(entries, 0);
   CHECK(Battle_GetTargetPageInfo().pages == 1);
   CHECK(Battle_GetTargetPageInfo().visible == 24);
   CHECK(Battle_MapTargetPageIndex(23) == 23);
   CHECK(Battle_AdvanceTargetPage(1) == 0);
-  Battle_SetSphereTargets(0, nullptr, 0);
+  VS::Battle::SetLiveSphereTargets({}, 0);
   CHECK(Battle_GetTargetPageInfo().total == 0);
   CHECK(Battle_GetTargetPageInfo().selected == -1);
 }
@@ -342,7 +341,7 @@ TEST_CASE("Paged target lists own shoulders only during target selection",
   for (std::size_t index = 0; index < entries.size(); ++index) {
     entries[index].actorId = static_cast<char>(index / 5);
   }
-  Battle_SetSphereTargets(static_cast<int>(entries.size()), entries.data(), 0);
+  VS::Battle::SetLiveSphereTargets(entries, 0);
   Field_controlMode = 2;
   Battle_actionFlowMode = 1;
   CHECK(Battle_TargetPagesUseShoulders() == 1);
