@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 1 | 29 (`wip`) | 4,177 |
-| `cpp` | 1 | 279 (`wip`) | 3,927 |
+| `modernized` | 5 | 29 (`wip`) | 4,173 |
+| `cpp` | 5 | 275 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 165 |
-| `vs_namespace` | 1 |
-| `typed_interface` | 1 |
-| `no_bridge` | 1 |
-| `strict_clean` | 165 |
-| `behavior_evidence` | 1 |
+| `source_cpp` | 167 |
+| `vs_namespace` | 5 |
+| `typed_interface` | 5 |
+| `no_bridge` | 5 |
+| `strict_clean` | 167 |
+| `behavior_evidence` | 5 |
 
-Promotion records: 280; derived `cpp=x`: 1, `cpp=wip`: 279. Verification records: 46; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 5, `cpp=wip`: 275. Verification records: 47; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -113,6 +113,11 @@ The owner accepted these removals on 2026-10-31.
 `VS::Core::SortPointersByDescendingKey`, in the AI candidate ranking path: its old `void**` C ABI
 and EC-04 original-address module symbol have zero consumers. That is one leaf function, not whole-AI
 promotion or EC retirement; its callers remain C ABI, and generated `ActionPlanning.c` still drives it.
+The second is the AI squared-distance slice, F01771-F01774 in `VS::Core::Math` (`Core/Math/Distance.hpp`):
+callers pass `Position3` and `TileCoordinate` values instead of `short*` aliases, packed tile words and the
+shared assembly entry's register inputs, and the four original-address module symbols are removed (no disc
+module stores those addresses as data). Nine AI caller files, five of them generated, are adopted through
+the copier; they remain C ABI functions, so this is four leaves, not AI promotion or EC-04 retirement.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

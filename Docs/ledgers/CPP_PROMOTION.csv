@@ -128,10 +128,10 @@ F01767,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
 F01768,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
 F01769,Native\Engine\src\Core\FrameTiming.cpp,x,,,,x,,,,
 F01770,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
-F01771,Native\Engine\src\Core\Math\TileDistance.cpp,x,,,,x,,,,
-F01772,Native\Engine\src\Core\Math\TileDistance.cpp,x,,,,x,,,,
-F01773,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F01774,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
+F01771,Native\Engine\src\Core\Math\Distance.cpp,x,x,x,x,x,x,verify:VR-AI-DISTANCE,80ca966db7bc7637fdd49579635c70e636b394fb,#46 slice: two decoded TileCoordinate values replace packed tile words; metadata bits never reach the math
+F01772,Native\Engine\src\Core\Math\Distance.cpp,x,x,x,x,x,x,verify:VR-AI-DISTANCE,80ca966db7bc7637fdd49579635c70e636b394fb,#46 slice: explicit first-tile components and a TileCoordinate replace the shared assembly entry's t0/t1 registers
+F01773,Native\Engine\src\Core\Math\Distance.cpp,x,x,x,x,x,x,verify:VR-AI-DISTANCE,80ca966db7bc7637fdd49579635c70e636b394fb,#46 slice: Position3 values replace short* aliasing of SVECTOR and short[3] records
+F01774,Native\Engine\src\Core\Math\Distance.cpp,x,x,x,x,x,x,verify:VR-AI-DISTANCE,80ca966db7bc7637fdd49579635c70e636b394fb,#46 slice: signed 32-bit deltas with the GTE halfword reduction documented in the API; no register state
 F01775,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01776,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01777,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
