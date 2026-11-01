@@ -37,8 +37,9 @@ template <VectorRecord Vector>
 }
 
 // Reads a point stored as three consecutive halfwords (x, y, z).
+inline constexpr int kPositionAxes = 3;
 [[nodiscard]] constexpr Position3 PositionOf(
-    const std::int16_t (&components)[3]) noexcept {
+    const std::int16_t (&components)[kPositionAxes]) noexcept {
   return Position3{components[0], components[1], components[2]};
 }
 

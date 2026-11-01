@@ -185,6 +185,19 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
   rotation->vz &= kActorRotationMask;
 }
 
+// Unattached actors take their uniform scale, then every actor takes its
+// per-axis instance scale (stored y, z, x).
+static void ScaleActorRoot(const Actors_ActorRecord& actor, MATRIX& root) {
+  VECTOR scale = {actor.scale, actor.scale, actor.scale, 0};
+  if (!actor.instance.isAttached) {
+    VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
+  }
+  scale.vx = actor.instance.scaleY;
+  scale.vy = actor.instance.scaleZ;
+  scale.vz = actor.instance.scaleX;
+  VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
+}
+
 // decomp: BATTLE.PRG func_800B28A8, bone loop 0x800B2938..0x800B34CC
 // (49268/func_800B28A8.s).
 int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
@@ -225,13 +238,8 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
   VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, root);
   VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, root);
   TransformBonePosition(camera, &workspace->rootOffset, &root);
-  VECTOR scale = {actor->scale, actor->scale, actor->scale, 0};
-  if (!actor->instance.isAttached)
-    VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
-  scale.vx = actor->instance.scaleY;
-  scale.vy = actor->instance.scaleZ;
-  scale.vz = actor->instance.scaleX;
-  VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
+  ScaleActorRoot(*actor, root);
+  VECTOR scale = {0};
   int cumulative[kPoseBoneCount][kSpatialDimensions] = {0};
   for (unsigned bone = 0; bone < actor->instance.boneCount; ++bone) {
     const Actors_ShpBone* joint = &model->bones[bone];

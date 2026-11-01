@@ -646,9 +646,9 @@ TEST_CASE("Tile distance API takes decoded cells instead of register words",
   STATIC_REQUIRE(std::is_same_v<decltype(&VS::Core::Math::SquaredTileDistance),
                                 std::uint32_t (*)(TileCoordinate,
                                                   TileCoordinate) noexcept>);
-  constexpr auto cell = VS::Core::Math::UnpackTileCoordinate(0xFF34FF12u);
-  STATIC_REQUIRE(cell.x == 0x12);
-  STATIC_REQUIRE(cell.z == 0x34);
+  constexpr auto kCell = VS::Core::Math::UnpackTileCoordinate(0xFF34FF12u);
+  STATIC_REQUIRE(kCell.x == 0x12);
+  STATIC_REQUIRE(kCell.z == 0x34);
 }
 
 TEST_CASE("Tile component entry shares every signed byte-distance result",

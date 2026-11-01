@@ -6,6 +6,7 @@
 #include <limits>
 #include <thread>
 #include <type_traits>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -73,22 +74,43 @@ TEST_CASE("AI distances preserve signed GTE components and vertical offsets",
   STATIC_REQUIRE(std::is_same_v<decltype(SquaredDistanceWithHeightOffsets(
                                     Position3{}, Position3{}, 0, 0)),
                                 std::int32_t>);
-  CHECK(SquaredVectorLength(-3, 4, 12) == 169);
-  CHECK(SquaredVectorLength(0x10003, 0x10004, -0x1000C) == 169);
-  CHECK(SquaredVectorLength(-32768, -32768, -32768) == 0xC0000000u);
-  CHECK(SquaredVectorLength(32768, 0, 0) == 0x40000000u);
-  const Position3 source{10, 20, 30};
-  const Position3 target{13, 24, 30};
-  CHECK(SquaredDistanceWithHeightOffsets(source, target, 0, 0) == 25);
-  CHECK(SquaredDistanceWithHeightOffsets(source, target, 9, 3) == 13);
-  CHECK(SquaredDistanceWithHeightOffsets(target, source, 3, 9) == 13);
-  // Height-raised components keep the 16-bit GTE reduction.
-  CHECK(SquaredDistanceWithHeightOffsets(Position3{0, 0, 0}, Position3{0, 0, 0},
-                                         0x10000, 0) == 0);
-  // Three maximal deltas wrap the 32-bit sum and read back as signed.
-  CHECK(SquaredDistanceWithHeightOffsets(Position3{-32768, -32768, -32768},
-                                         Position3{}, 0, 0) ==
-        std::bit_cast<std::int32_t>(0xC0000000u));
+  struct LengthCase {
+    int x;
+    int y;
+    int z;
+    std::uint32_t expected;
+  };
+  for (const auto& [x, y, z, expected] : std::array<LengthCase, 4>{{
+           {-3, 4, 12, 169},
+           {0x10003, 0x10004, -0x1000C, 169},
+           {-32768, -32768, -32768, 0xC0000000u},
+           {32768, 0, 0, 0x40000000u},
+       }}) {
+    CHECK(SquaredVectorLength(x, y, z) == expected);
+  }
+  struct DistanceCase {
+    Position3 source;
+    Position3 target;
+    int source_height;
+    int target_height;
+    std::int32_t expected;
+  };
+  const Position3 near{10, 20, 30};
+  const Position3 far{13, 24, 30};
+  // Height-raised components keep the 16-bit GTE reduction, and three maximal
+  // deltas wrap the 32-bit sum and read back as signed.
+  for (const auto& [source, target, source_height, target_height, expected] :
+       std::array<DistanceCase, 5>{{
+           {near, far, 0, 0, 25},
+           {near, far, 9, 3, 13},
+           {far, near, 3, 9, 13},
+           {Position3{}, Position3{}, 0x10000, 0, 0},
+           {Position3{-32768, -32768, -32768}, Position3{}, 0, 0,
+            std::bit_cast<std::int32_t>(0xC0000000u)},
+       }}) {
+    CHECK(SquaredDistanceWithHeightOffsets(source, target, source_height,
+                                           target_height) == expected);
+  }
 }
 
 TEST_CASE("Vector-like records convert to positions without aliasing",
@@ -166,25 +188,26 @@ TEST_CASE(
     return 0L;
   });
   REQUIRE(event == 1);
-  Legacy_AdvanceCounter2(70560);
-  CHECK(calls == 0);
+  std::vector<int> observed;
+  const auto advance = [&observed](int cycles) {
+    Legacy_AdvanceCounter2(cycles);
+    observed.push_back(calls);
+  };
+  advance(70560);
   EnableEvent(event);
-  Legacy_AdvanceCounter2(70560);
-  CHECK(calls == 4);
+  advance(70560);
   DisableEvent(event);
-  Legacy_AdvanceCounter2(70560);
-  CHECK(calls == 4);
+  advance(70560);
   EnableEvent(event);
-  Legacy_AdvanceCounter2(35280);
-  CHECK(calls == 6);
+  advance(35280);
   StopRCnt(RCntCNT2);
-  Legacy_AdvanceCounter2(70560);
-  CHECK(calls == 6);
+  advance(70560);
   StartRCnt(RCntCNT2);
   CloseEvent(event);
-  Legacy_AdvanceCounter2(70560);
-  CHECK(calls == 6);
+  advance(70560);
   StopRCnt(RCntCNT2);
+  // Disabled, stopped and closed events stop the 240 Hz callbacks.
+  CHECK(observed == std::vector<int>{0, 4, 4, 6, 6, 6});
 }
 
 TEST_CASE("VSync keeps the sound counter at 240 Hz across NTSC fields",

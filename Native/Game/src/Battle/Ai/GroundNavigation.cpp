@@ -788,8 +788,9 @@ unsigned int Battle_Ai_FindAiDescentTile(Battle_Ai_ActorAiState* view,
       VS::Core::Math::UnpackTileCoordinate(packed));
   if (VS::Field::GroundHeightAtPackedTile(
           VS::Battle::Ai::CurrentTerrain(),
-          VS::Core::Math::UnpackTileCoordinate(state.tile.word)) >= floor)
+          VS::Core::Math::UnpackTileCoordinate(state.tile.word)) >= floor) {
     return 0;
+  }
   for (int taken = 0; taken < kAiFrameGridSide; ++taken) {
     tile.x += delta.x;
     tile.z += delta.z;

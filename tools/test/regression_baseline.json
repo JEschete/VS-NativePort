@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8676311,
+  "assertions": 8676307,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -987,8 +987,10 @@
    "Reverb depth is signed stereo gain and preset changes clear tails",
    "Room AI collision flags gather the original bit fields",
    "Room AI lifecycle publishes and releases through its runtime",
-   "Room AI maps build only from the source they are given",
    "Room AI maps read settings from the auxiliary section",
+   "Room AI maps reject short or oversized room headers",
+   "Room AI maps take settings only from the source they are given",
+   "Room AI maps take tiles only from the source they are given",
    "Room Euler rotation keeps its original golden element",
    "Room SFX bank absence and tagged routing remain explicit",
    "Room SFX binding preserves native pointers and adjacent music tables",

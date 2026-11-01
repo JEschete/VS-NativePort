@@ -4,6 +4,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <optional>
+#include <stdexcept>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
@@ -26,6 +28,17 @@ extern "C" {
 }
 
 namespace {
+// Catch2's REQUIRE throws, but clang-tidy cannot see that; the explicit throw
+// lets bugprone-unchecked-optional-access prove the access below.
+template <typename T>
+const T& Required(const std::optional<T>& value) {
+  REQUIRE(value);
+  if (!value) {
+    throw std::logic_error("REQUIRE did not stop the test");
+  }
+  return *value;
+}
+
 struct CommandFixture {
   Battle_Ai_FrameContext saved_frame = *Battle_Ai_FrameState();
   decltype(Battle_Ai_tileFlagMap) saved_flags = Battle_Ai_tileFlagMap;
@@ -365,10 +378,10 @@ TEST_CASE("Original cutscene rooms allow shorter AI direction payloads",
   const auto original = auxiliary;
   const auto grid = VS::Battle::Ai::BuildRoomAiMap(
       VS::Battle::Ai::BattleRoomAiRuntime().CurrentRoom());
-  REQUIRE(grid);
-  CHECK(grid->settings.maxTileX == 17);
-  CHECK(grid->settings.maxTileZ == 16);
-  CHECK(grid->flags[31][31] == 0x8000);
+  const VS::Battle::Ai::RoomAiGrid& map = Required(grid);
+  CHECK(map.settings.max_tile_x == 17);
+  CHECK(map.settings.max_tile_z == 16);
+  CHECK(map.flags[31][31] == 0x8000);
   CHECK(auxiliary == original);
 }
 

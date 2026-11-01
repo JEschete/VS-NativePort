@@ -28,36 +28,36 @@ struct RoomCollisionExtent {
 // The floor trigger on a tile, as stored in the room (both fields unchecked).
 struct RoomFloorTrigger {
   std::uint16_t kind = 0;
-  std::uint16_t switchValue = 0;
+  std::uint16_t switch_value = 0;
 };
 
 // Everything the room AI map reads about the current room.
 struct RoomAiSource {
   // Collision grid size, absent when the room has no collision map.
-  std::optional<RoomCollisionExtent> collisionExtent;
+  std::optional<RoomCollisionExtent> collision_extent;
   // Raw 32-bit collision cell of a tile; absent outside the collision grid.
   std::function<std::optional<std::uint32_t>(Core::Math::TileCoordinate)>
-      collisionCell;
-  FloorHeightQuery floorHeight;
+      collision_cell;
+  FloorHeightQuery floor_height;
   std::function<std::optional<RoomFloorTrigger>(Core::Math::TileCoordinate)>
-      floorTrigger;
+      floor_trigger;
   // Room environment height parameter, absent when the room has none.
-  std::optional<int> environmentParameter;
+  std::optional<int> environment_parameter;
   // The room's auxiliary AI section, absent when the room has none.
   std::optional<std::span<const std::byte>> auxiliary;
 };
 
 struct RoomAiSettings {
-  std::uint8_t maxTileX = 0;
-  std::uint8_t maxTileZ = 0;
-  std::uint8_t minTileX = 0;
-  std::uint8_t minTileZ = 0;
+  std::uint8_t max_tile_x = 0;
+  std::uint8_t max_tile_z = 0;
+  std::uint8_t min_tile_x = 0;
+  std::uint8_t min_tile_z = 0;
   // The collision grid size, kept beside the bounds as the original does.
-  std::array<std::uint8_t, 2> collisionExtent{};
-  std::uint8_t defaultActionDelay = kDefaultActionDelay;
-  bool allowsNonSpellActions = false;
-  std::uint8_t engagementLimit = 0;
-  int flightCeiling = 0;
+  std::array<std::uint8_t, 2> collision_extent{};
+  std::uint8_t default_action_delay = kDefaultActionDelay;
+  bool allows_non_spell_actions = false;
+  std::uint8_t engagement_limit = 0;
+  int flight_ceiling = 0;
 };
 
 using RoomAiRow = std::array<std::uint16_t, kRoomGridSide>;

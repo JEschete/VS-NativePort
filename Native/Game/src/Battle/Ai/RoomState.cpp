@@ -109,22 +109,24 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
   [[nodiscard]] RoomAiSource CurrentRoom() const override {
     RoomAiSource source;
     if (const Field_MpdCollisionHeader* extent = Field_roomData.collisionMap) {
-      source.collisionExtent =
+      source.collision_extent =
           VS::Battle::Ai::RoomCollisionExtent{extent->width, extent->height};
     }
-    source.collisionCell = CollisionCell;
-    source.floorHeight = [](int world_x, int world_z) {
+    source.collision_cell = CollisionCell;
+    source.floor_height = [](int world_x, int world_z) {
       return static_cast<int>(Field_FloorHeightAt(world_x, world_z));
     };
-    source.floorTrigger = FloorTrigger;
+    source.floor_trigger = FloorTrigger;
     if (Field_roomData.environment != nullptr) {
-      source.environmentParameter = Field_RoomEnvironmentParameter();
+      source.environment_parameter = Field_RoomEnvironmentParameter();
     }
     if (Field_roomData.section6 != nullptr) {
       source.auxiliary = std::span<const std::byte>(
           static_cast<const std::byte*>(Field_roomData.section6),
           Field_roomData.header.section6Length);
     }
+    // std::function keeps its small target inline; NRVO or the move rebinds it.
+    // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
     return source;
   }
 
@@ -139,16 +141,16 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     memset(storage, 0, sizeof *storage);
     const VS::Battle::Ai::RoomAiSettings& settings = grid.settings;
     Battle_Ai_RoomAiState& state = storage->state;
-    state.maxTileX = settings.maxTileX;
-    state.maxTileZ = settings.maxTileZ;
-    state.minTileX = settings.minTileX;
-    state.minTileZ = settings.minTileZ;
-    state.reserved4[0] = static_cast<char>(settings.collisionExtent[0]);
-    state.reserved4[1] = static_cast<char>(settings.collisionExtent[1]);
-    state.defaultActionDelay = settings.defaultActionDelay;
-    state.allowsNonSpellActions = settings.allowsNonSpellActions ? 1 : 0;
-    state.engagementLimit = settings.engagementLimit;
-    state.flightCeiling = settings.flightCeiling;
+    state.maxTileX = settings.max_tile_x;
+    state.maxTileZ = settings.max_tile_z;
+    state.minTileX = settings.min_tile_x;
+    state.minTileZ = settings.min_tile_z;
+    state.reserved4[0] = static_cast<char>(settings.collision_extent[0]);
+    state.reserved4[1] = static_cast<char>(settings.collision_extent[1]);
+    state.defaultActionDelay = settings.default_action_delay;
+    state.allowsNonSpellActions = settings.allows_non_spell_actions ? 1 : 0;
+    state.engagementLimit = settings.engagement_limit;
+    state.flightCeiling = settings.flight_ceiling;
     for (std::size_t z = 0; z < grid.flags.size(); ++z) {
       for (std::size_t x = 0; x < grid.flags[z].size(); ++x) {
         storage->flags[z][x] = grid.flags[z][x];
@@ -180,16 +182,17 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     const Battle_Ai_RoomAiState* state = Battle_Ai_roomAiState;
     if (state == nullptr) return std::nullopt;
     VS::Battle::Ai::RoomAiSettings settings;
-    settings.maxTileX = state->maxTileX;
-    settings.maxTileZ = state->maxTileZ;
-    settings.minTileX = state->minTileX;
-    settings.minTileZ = state->minTileZ;
-    settings.collisionExtent = {static_cast<std::uint8_t>(state->reserved4[0]),
-                                static_cast<std::uint8_t>(state->reserved4[1])};
-    settings.defaultActionDelay = state->defaultActionDelay;
-    settings.allowsNonSpellActions = state->allowsNonSpellActions != 0;
-    settings.engagementLimit = state->engagementLimit;
-    settings.flightCeiling = state->flightCeiling;
+    settings.max_tile_x = state->maxTileX;
+    settings.max_tile_z = state->maxTileZ;
+    settings.min_tile_x = state->minTileX;
+    settings.min_tile_z = state->minTileZ;
+    settings.collision_extent = {
+        static_cast<std::uint8_t>(state->reserved4[0]),
+        static_cast<std::uint8_t>(state->reserved4[1])};
+    settings.default_action_delay = state->defaultActionDelay;
+    settings.allows_non_spell_actions = state->allowsNonSpellActions != 0;
+    settings.engagement_limit = state->engagementLimit;
+    settings.flight_ceiling = state->flightCeiling;
     return settings;
   }
 

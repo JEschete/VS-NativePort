@@ -217,7 +217,7 @@ TEST_CASE(
   CHECK_FALSE(VS::Field::TryGroundHeightAtTile(Grid(), 32, 9).has_value());
 
   Battle_Ai_FrameState()->heightMap = nullptr;
-  CHECK(Grid().empty());
+  CHECK(Grid().Empty());
   CHECK_FALSE(VS::Field::TryGroundHeightAtTile(Grid(), 17, 9).has_value());
 }
 
@@ -245,7 +245,7 @@ TEST_CASE("Terrain queries read only the grid they are given",
   CHECK(VS::Field::IsPositionAboveGround(first_grid, 2240, -65, 1216));
   CHECK_FALSE(VS::Field::IsPositionAboveGround(first_grid, 2240, -64, 1216));
   CHECK(VS::Field::IsPositionAboveGround(second_grid, 2240, 63, 1216));
-  CHECK(VS::Field::TerrainGrid{}.empty());
+  CHECK(VS::Field::TerrainGrid{}.Empty());
   CHECK_FALSE(VS::Field::TerrainGrid{}.Contains(0, 0));
 }
 

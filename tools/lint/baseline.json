@@ -58,13 +58,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "0099b09dfc06a0ea9fdf5ccdf2e51121a0017503af8f2e51cc25117c7f479542",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "00b4c91451fee532667ed2383cc94a0a2960ed6912511eec9a892469e91994e9",
       "count": 1,
       "tool": "cpplint",
@@ -744,13 +737,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "0443e0697072c9941788a99a572d7d712a5d63da8bc09ac2363a5eeb46d6fc1b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "044912a03d63f1c71a3bdc642bb19197d4bb272ad0fd82be3c127f72727876f2",
       "count": 1,
       "tool": "tidy",
@@ -1010,13 +996,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "05e2e30c311e441cd13daa42934aeefc8dc9ec08fb6ae71a2babda061edb142f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "05ea8188caaa201c0c814c8129553651fb387b6b4734293cb3c071f9942c66be",
       "count": 1,
       "tool": "cpplint",
@@ -1192,13 +1171,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "06e7bbfc7de70bc45e60094e15b44c4b0b2e2cd75b474ea3568b17b8f27446c0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "06eac373dd21d977293257462b450495ee6a0cd35ab518ce0b73a91f31eabe7c",
       "count": 1,
       "tool": "cpplint",
@@ -1281,13 +1253,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "07333756e13c03bb3e4ddee00981fdcf64a90b1da80f268c74a6bd15ba027a78",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "073fb3212a37379dd555e2e76f8abe086f6c91ebb4049e13057f96c7f1836e8a",
@@ -2011,13 +1976,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "0afb1a93bb677c6ace91991e470a9da3e087b5c6b8f779d6411bd4706aef7a11",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "0b030235881b916ae26e4d0a25f85bc11cfddb23aa736d790a637b831b769a3b",
       "count": 1,
       "tool": "tidy",
@@ -2632,13 +2590,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "0e22c7a980452e2e0ee6fc6779d7042e67bf2660a5d82c0d80497199d749ef03",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "0e254076c3b767283c03e1a711329daa2c699b04bea154e6eb2ef9650a4f3b2e",
@@ -4678,13 +4629,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "18e5f28c5eafc12d41abd5f79e7f60ff9fa9c41784e1b97b89113a2afe7e6407",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "18fa34f82d9af458839ec040a39b38dd053240059db20d1fb4d81c50c21f6ff1",
       "count": 1,
       "tool": "tidy",
@@ -5138,13 +5082,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "1bb02ab9c43b05278501d426027f867d2e9438e04a0e7189dc3a4cd7f8739b29",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "google"
     },
     {
       "key": "1bb0e1d2136011d4034adc3ee1b272a2f21769fc209e7eb3d41dc4d8cc052250",
@@ -5952,13 +5889,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "1fdccb385ce93a4913a616b125a09a2197605ab0a6e6ce87106e6a8c63468f08",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1fe19319334a55ad1dd21a76ad70ced6c1b3d3278c87cbb68ee9ce1e1e10c19a",
       "count": 1,
       "tool": "ruff",
@@ -6376,13 +6306,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "22399a49619ab709f9a58e8f664d4e634317195fd70f2a8bf1defc398e2f289f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -7576,13 +7499,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "27c328bc2e0a2765be91c74deaa3825558d0605dd82bf22230432b198ef8af01",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "27def0577f583a5bdb1b7c3dbd8aaa7f7416fb149e207d2c6e7b8431e4c88e48",
       "count": 1,
       "tool": "cpplint",
@@ -7903,13 +7819,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "2992aa0074e64d971b7816f3f25b7a6d7505277483988e75505f33e54cf82352",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "299c6a667664723c86e519f89505e11cf2240cac196cb6f62991468b0770af01",
@@ -8647,13 +8556,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2d5653121abfd152a96201523bdf9d3b37af6b5a6ac6034fdfc316f3ef5c7390",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "2d5eb129304e9e73e55a53a99d8ea824e2ad340abdba0e8aa29c7d594af0b36d",
       "count": 1,
       "tool": "cpplint",
@@ -9170,13 +9072,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "300e788e2c4ad883589a61583bbbed38aa4bb29ee32c6a0823ff59c3dcdb805b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "300f0a2499210cbf6507065c9b4f7e73d2c8366c892f5aa319a067ca51947180",
@@ -9830,13 +9725,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "33d6f29fc094994df4239354c2b71bf4a9c8a8ce91ed646774ffc92d2da31726",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "33db8e391cd02da4ae2e3b63802480b62feaa3f6f72649c72dd03151119ace00",
       "count": 2,
       "tool": "tidy",
@@ -10213,13 +10101,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "35b4895de49655581610ede0287d7281d23dad2e4ef8f14c2db8dfa7f939a1ce",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "35c0385da287036e84201c17936c3c32423b45a2e0f2c24b38eb020b93b0f569",
@@ -11531,13 +11412,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "3dedcd3f65a8ed1895476c70c871c5db3431a20c6a294364849056a6ce40fbb7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "3df5ba8349de32568731c9815d2e9ccf372d1d30b1ef5114f01254bef4c2bcc8",
       "count": 1,
       "tool": "cpplint",
@@ -11675,13 +11549,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "3eec2c670494e4aa082b1a1e5e05d887c94815dacf0f55c9a47ec9c8151ab129",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
       "rule": "readability-identifier-naming"
     },
     {
@@ -12301,13 +12168,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "421c454548f8d7ed2e31bba34aebaa8fa430c1dc2355b80995ac8e6d6886e9aa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "423bee13ebcc0b35a765f9efa905650522f9440c04af7d7514e55700fd4cc5ef",
       "count": 1,
       "tool": "tidy",
@@ -12791,13 +12651,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "444af06f86b6d2c1b17b306e47bf609622c50271f4334f803a7659e71fb5df71",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "445249041e3e26f4e0f276857eca8383dc17ff5815d7bad1d96120c97fa3385a",
       "count": 1,
       "tool": "cpplint",
@@ -12971,13 +12824,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "452dbd131465368bee8ab721f44265337798327d21e5d40db10a17b5a6693bb8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "454282d97845beb163ff84e0873bc95456d87364f2feabf8a84a24c9ea73669c",
@@ -15486,13 +15332,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "53c46e1a78022ee416d791a710ea503da8c9ab74c723d7e3514da9195eec0688",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "53d836d0e3dce77301a447f2067516cc76334bbdbcb009756ce8fb7f40783a0a",
       "count": 1,
       "tool": "cpplint",
@@ -15547,13 +15386,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/ModuleLoader.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "54370ab597e79fd22425e9315601400bb6ce55dc9be711dbdd5ad877a64b83b6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "google-runtime-int"
     },
     {
       "key": "5445640d5ed4e469d9c36627076b96f41ddf0be64f68d98140206a1121f24e73",
@@ -15743,13 +15575,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "551a158fa40f05dbb1822e2ab5565fe073f92c5aa9b4a7620e1def61b729c2d4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "5522f58c492c10c20b792fe9ee2472f29d3dd47ab45d85b3b77314d4dc557b17",
@@ -16415,13 +16240,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "589e61cb3ae45675cc702e8e97d6841cd0e965f3ac219c130cb0687306c9e865",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "58a4c3655d51859e06a77537396bc0665d6c22cbe5ae1a3c9029fb4488c75766",
@@ -18132,13 +17950,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "6156318d3162a62290800edd364101a9621d4d031782f6e4c6d90622ebac82fd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "615b6507ad7d5c037a0299f27997dfe24a401bac83203a61468255bc96971211",
       "count": 1,
       "tool": "cpplint",
@@ -18389,13 +18200,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "62abec5a76b934288a232f86abb45dd40cc968106728c9cc896be477c9c5e73b",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "google"
     },
     {
       "key": "62aee92b2984748bbf01659504761764e9e6fdf906e8d14614dfdb499591179e",
@@ -19679,13 +19483,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "69099e65e81dbe76fe8652b9cc2b5c4f886235c82a67ca80efa9be00f748581a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6911ab3573dc37e4c99967626bfca9942d8e7f2ebbe58d79bbe412bc6c436c7b",
       "count": 1,
       "tool": "cpplint",
@@ -19971,20 +19768,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6ac5a248e5b46a9599d5cb154f47f5cd33b66f42746be142e0e45083915d8562",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "6ac8f64ec4fad8a69f77f6834664fe40f87f33f577a36e7488fe4813672ea4f5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "6acfc7aac9791b962c8a1ea26a97795af8ca477c810effee6652be401eded25b",
@@ -21835,13 +21618,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "75034ac882c7985c8e595631d081f8ee7258944d2464baa247da766b5713041b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "750f0be137998c19e22b79435a2ce4c10b3b50a865eb250793bdd70db5e71c37",
       "count": 1,
       "tool": "cpplint",
@@ -23004,13 +22780,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7b1bfc9ec1be5b5a28777927823be1960667b2859cf0b6d6f5696fc9255a598f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7b1d085de384222cfb2a8d2fdb77e1f3e75c58e1e1d706f9cfaaf06b1a1b929e",
       "count": 1,
       "tool": "tidy",
@@ -23681,13 +23450,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "7efed74017a49c77d08ba077b2f156af0847a1feb72720eb4f9267233a10ac52",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "7f0d1376dd712d60d035ff88dada74a006bc16eaf46bba776d109cb80e886283",
@@ -25097,13 +24859,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "86f5a97dc9e0da72366a6cb30b679303a15faea27610896028f2dce4c0cf6be7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "86f962b17177056d911bd61a0a0e87dfcf6f05636990036088448ce332454d05",
       "count": 1,
       "tool": "tidy",
@@ -25515,13 +25270,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "89015d9f4788c3e8cd8878dc740970b02706aa80b99212f164ef3c30ad860d3f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "890689498adb69b3a3e9477963b4619e473af54476b6501f60c1765fdb2e8bca",
@@ -26189,13 +25937,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "8c1652dbf63400bf236da9a302bd2007468c6d41403093b87fb36e83a36243a3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "8c1e888692f07d83107cabb7a227422ef709f364f2ee54ca824876b96cc956dd",
       "count": 1,
       "tool": "cpplint",
@@ -26355,13 +26096,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
-      "key": "8d3de091a9474be9ab8259a6eee7bfb738e4aed1ca9cfb71b31d848afaba94d6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "8d3f4ccd11dc8155c78282df2464f36cd2bb13c73f37b4bd821696a3d30f2f19",
@@ -27673,13 +27407,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "93fd7009d1f59d79e69be65ba5176c041cbf2a0259ee672faf6dffab3a6a08f4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "93ffdcf1439aedbe7dc6c4b0295a3d50b99506f19cbbf8f3b37411b3dd28a355",
       "count": 2,
       "tool": "cpplint",
@@ -28226,13 +27953,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "96c64d738ac2edccfd0b1ee98f9d724eab82561774365c98a4140d1022802fe5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "96c8938769239d3419fd1776e3212d0d8edcd0b8aa577a3d68e3fe76aa4c590d",
       "count": 1,
       "tool": "cpplint",
@@ -28707,13 +28427,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "whitespace/braces"
-    },
-    {
-      "key": "99d0f0d612307f7af3f5c25f92d6e49fc848897473c6d62d3e803ba67b8f616b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "99d14e58946c6da179c7d84cd7cf86e28cbf23596c645c40894452909e3a0da3",
@@ -29773,13 +29486,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9f7770b367a3d37be6fc60cc879bf941dfd4436bf53386fe6540c35ffbeaaa87",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9f7c99400cf59c9267367427dbdcdaf3aa789349214bf70d91be2cac2d9bdb33",
       "count": 1,
       "tool": "tidy",
@@ -30403,13 +30109,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a2e6744f81246699359dd6f3d266791d14aa356e6914379c65041f3f63082f83",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a2fdbe002d859353fd97236cf333fd1ffdc99cf537cbf978dabdbd7db2347f20",
       "count": 1,
       "tool": "cpplint",
@@ -30844,13 +30543,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a5bc1d4eaa203e79253862dc255067154cc0ca1b57c3beb0ceb96770928849a6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "a5c1fac4d0357bbfc5d3308380f71d99a934f0e2efd70cea5ebcbf108a1df3c4",
       "count": 1,
       "tool": "cpplint",
@@ -31110,13 +30802,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a76e27da1574d11401f41dda9414c65ef47f3b5078df5e288ff320779c5b7a0b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "a777770ea6f77378678dfc9856a47547c8cf5349566e9d67ad2ed2ba148c7a66",
       "count": 3,
       "tool": "cpplint",
@@ -31276,13 +30961,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "a83730587f9d95be3c2d7be2667c5e93acb0db2f582db3a78085bd05fbbacbd5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a839d6bb15e127b5baafcab631f42a78911e628dd2d009e47a80ee36b231b852",
@@ -31789,13 +31467,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "aaffa353177a67e794e0c6dfc671c564e932aca7c2c40ba1972946a8096a73ab",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ab0438b189050a5b2ea17d5711d032dc404028a6c81a57826b35a1e0c636d162",
       "count": 2,
       "tool": "tidy",
@@ -32027,13 +31698,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ac7d274fecd72b0d6a7a23d07191e0614d965b061d0e04e87001d7c0761288cb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "ac8682e5bab982681721e871649b6d91139b306ba3c54178e92a5c4bd1589c80",
       "count": 1,
       "tool": "tidy",
@@ -32116,13 +31780,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Platform/CrashHandler.hpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "acdb9dca9df7630cdaf6bb9090b4d03f77113faeb9d3cd2c1aeb165929e42f38",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "acec75ff7c785057201234e09c6ed312159479a633cbe0fa7583bb6405bac2c7",
@@ -32440,13 +32097,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ae9f7d08565ffdc3671d3f7746a5df436e09e133ea19adbd3964e90f9c321f59",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "aeac672be93cb9568c488815b5d09b8d10318c3fbbbcd55c27f84a8673ae1b6d",
       "count": 1,
       "tool": "cpplint",
@@ -32545,13 +32195,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "af35a83d949ca1371f5943751aebdc107c5110eecf9a3c46b324377734bc3755",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "af38a0ad1d263de1dc19ce4c16d96b273dd7ffa97022990f4b487e7aac75c09d",
       "count": 1,
       "tool": "cpplint",
@@ -32578,13 +32221,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "af47f7f227c894b41ea88cab3622911f629de8aa1ad2a174abd79e794561c426",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "af4bb7d7cbe8fe4d8c879f52627053562228e0904b38ef65929963279ffffd6e",
@@ -32739,13 +32375,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "b05c45e5798a1a026f16e4383c374e614fcd50b0224037495867e90cfa0baf55",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "b068d36ddd24152b6da746322df85a0e1b7129b2aaa5c1b613d57cf9590c8b71",
@@ -33264,13 +32893,6 @@
       "tool": "cpplint",
       "path": "Native/Content/include/Content/Disc.hpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "b30e6ca48522976df778d8249a448951292b9b2a33c1d4be9761453d83540ca5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b3136e27ff1b0de68fa6285f4f5a6259842d02ab4bd124ee1af9c39d30446f95",
@@ -34407,13 +34029,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b940026ae92d193ffd432dc425b07d83bcc1fcbac1525bf5416dae2263112fbf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b94071a3421da314c7202e836622b2b9a1afca1a8f6e03228ac7d57d2ec1e717",
       "count": 11,
       "tool": "cpplint",
@@ -34449,24 +34064,10 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "b9a17ea92618e17cad332b612a3c4cc0114803bf62ca6439834728b0a57de932",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "b9afc435a9aeb4821f1889e61b36d56a51a24cc265038fd3af9ed4df664a5aab",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b9ba1c17276aec81ec885c4f881fb8ce2af0c09b9d8edc7e8e7c2a623545703e",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -34638,13 +34239,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "baa74d618ab45976d2c90eecfaf02894ce09b8813bbaad481a52f380690d655d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "bababfe20dcfbef12898e30e4ae22a2b57c99b1ebca7d7d4297fb05bddb8f548",
       "count": 1,
       "tool": "cpplint",
@@ -34678,13 +34272,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "bacecc94b0eff632984b90af30630f0686358c31ed53f6306cb89773cf77601c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "bad1fccad28b53c6e6a93fb1f54c08a6fda909fbcf2504eb2fe8ee0ea12873ad",
@@ -35380,13 +34967,6 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "be994410422b9f5e7b440bde1425ac5d4b95cf01dcbf0b0ff269c137d9dd058b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "bea733c709dfb04a49067e816fb3b2ce42133dc1abdb3628c72c6e033623da22",
       "count": 1,
       "tool": "cpplint",
@@ -35511,13 +35091,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bfb3a2c24f3817a607f59a24b202375c15fb7e61aaf5d156457f510922e6283b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "bfba8b5bda1643aca5ae9217a45ff1ea6ea558e566b7429dbd8df6dd58b7285c",
@@ -36465,13 +36038,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "c4e8c8b6b945a501d4a074e083a7a8566653e39596c236aac136f373cb8325f8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c4ebea0deb9eb1bf593c80f04b9da004cdcdd3ffde5c8a504a833fd52115af7b",
       "count": 1,
       "tool": "tidy",
@@ -36591,13 +36157,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "c5a2e1e1e3f9c3c7e34a70409b74bab910ff4547d6865311f370cd25ef7678a3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "c5aadeea8b1884be60f95056f22210950869e7c7d141f5ee21fbcd6de1d40cb5",
       "count": 1,
       "tool": "cpplint",
@@ -36645,13 +36204,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "c5ce426f2524ee362f4bf3b8ea060e50579565d63f259a64050281b00a2accc6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "c5dc0e54e5b10a3728e555b281ce4acdbf57875650b73170f468f892ee40151e",
@@ -36997,13 +36549,6 @@
       "rule": "bugprone-reserved-identifier"
     },
     {
-      "key": "c7ac07ca4799ec8ca4577c53ffe07b26801a21353acbabca2a8b590dcfe010b5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c7b2785ab8dbcb3356d999ee7f18bc8cb124ac3e45d785e1b3ff7d87ac39e585",
       "count": 1,
       "tool": "cpplint",
@@ -37078,13 +36623,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Desktop/src/main.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c7efb0f6450591481dda5676d7b8746ecc5d3ef31a96210dccc7cee0abbd8f17",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
       "rule": "readability-identifier-naming"
     },
     {
@@ -37226,13 +36764,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Log.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c8bfb8ee25985deddd249ad2e9465dc5d1fc0ba46304bf7a5c60dddd9267190b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "c8c4f056b35e66f7753483ee82262672a2ec5789800b7808a754201e09949c1a",
@@ -37792,13 +37323,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/src/DataStore.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cbba3010ca88f43a936c1153c7354a867430ef15b11bc254c59a7f62ee79b349",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -38397,13 +37921,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "ce63fffee2e01949308e3957b7deeb5336f8721c6158d4d0ffe0b66d4faf9d52",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "ce6a2d41be5a111831e9d65e24277cb6e6fb8ef85c166ca5a5c28f12151e57a1",
       "count": 2,
       "tool": "tidy",
@@ -38901,13 +38418,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "d0d1cb830a840407c5f826ad98320ae632a8a17e86d2de750e8d0a387a3d3091",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "d0de25f256b72a3841c008dbeaf75b186c96ae135df8824d327d94a9232e01a2",
       "count": 1,
       "tool": "tidy",
@@ -39115,13 +38625,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d1f5b3d75351c8b42a421e95f8f14e7b1457251db665a0561c9e13ee042ffdd8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -39405,13 +38908,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "d3a127c23603f9997a1d2a277d7f00a05f1d143356cf92a9cc63cfc2bd7aab4f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "d3b194b32b54a9d75dd639ef803465ddae3c635125b3a9352a14eec013a1c5b2",
       "count": 1,
       "tool": "tidy",
@@ -39657,13 +39153,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "d4f184301642a2c7f802e02912fe2d2309fc9143042675ec674a8775ac9d266d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d4f9c907252c6d0f679137ab1575f7e46c818b6bf833e3e83021043287be8fc9",
       "count": 1,
       "tool": "cpplint",
@@ -39732,13 +39221,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/App.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d54af97c3b4e059e72b8343c70a943030e6b28dc7b90c4f3c6366274a4f34a10",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d553c55ade749ac26b73dc8dbcec71fd3ccc4dd80d109226cbb0e8623a988791",
@@ -39864,13 +39346,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d638dd2f02f06ac7a1aa45625dab36f64a668451e46d054a4d170ee73740ced5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
       "rule": "whitespace/line_length"
     },
     {
@@ -40021,13 +39496,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d6e35dea79118176146873b061fa1a8bacc93311a54b85ee3c379b7ae7045526",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "d6e73613f05ced1b66d2d86055457f8789e6eda3b315e90043abfae21c7347cf",
       "count": 1,
       "tool": "tidy",
@@ -40168,13 +39636,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "d7a7ea4575ab44fa525799c3c5b2d9ae73f391c8a202244ad747a4733c65b060",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d7ad6b4660052cf38bcfbb68f5f4f1dfee0cdbab533b6721e2d3beb0fc74cf82",
       "count": 1,
       "tool": "cpplint",
@@ -40292,13 +39753,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d841a1f2d666ac564c8f330ef03395e3e7a7fbd6b36dd410540ce9ebb5e6c3ab",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "d85bdfe81da9f25999343dc1f485df9a7552759ba9d40baa05388442585b6d9f",
@@ -41204,13 +40658,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "dd5e8a01ebc21b9d73eee86da9999c476cca5ef0e1abb065326a899d996923d7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "dd65fa3ae888c3738bfe5059b0d4a716df5f005413ba3836575407b6b661a876",
       "count": 1,
       "tool": "cpplint",
@@ -41995,13 +41442,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e250b84455162f2e610d45ce886f498534e23f4609e26119cdb315975da80d28",
-      "count": 9,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "e255c5573f2ce270e07a0a0ac931f5215c5ee5e44f305fb5a0f9779f1b58bcec",
       "count": 1,
       "tool": "cpplint",
@@ -42716,13 +42156,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e63c90c662942dfe77027a66db3a368513f85d2ba4c3becb360179b2025ccfcf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e64e46fb19ae2be5994eaf8e8d57c5c9d6d21341cab3d2ccbd21d731e33c9d8c",
       "count": 1,
       "tool": "cpplint",
@@ -42812,13 +42245,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Render/Device.hpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e6c0702d236891257dc2e097b66cd73ce17682aab8c91908f9cd8ae302b51481",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "e6c757d0c50eb67e17366819c2680d3d2560683ff1b9ec80a2a7488e2dce9941",
@@ -43577,13 +43003,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "eaede5946220e13676fd9bf873445209b9266dc1f6dea451d3405ecfca810571",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "eaf99c7248738a39f0128768ad2b481b75c6e6a0199a1da2d79f7b5ac172390f",
       "count": 1,
       "tool": "tidy",
@@ -43864,13 +43283,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ec4c7cfba73818c13296f1a54a0bba3789eca40773e98668561aac414f66a352",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "ec4fb8fccf18d317e7739a046a29f55633f1b8ae97f443c331f67dc43047bd4b",
       "count": 1,
       "tool": "cpplint",
@@ -44002,13 +43414,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ed196ee36627b213711d1d22e6f7fceef87765171d508a2e0fba8866620a140d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "ed1bcfc37e27f1aa8898546d2e603920acc96f5cd9006ecd4317b3dc95bbac97",
@@ -44662,20 +44067,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "f0ab3fccf9d4d70a4470fcef71b57937e00644e770b9af50c556af6f7304e31d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "f0af589ff6a4f04a472c4066b77514592c0dd84efc0c923d04061ffeab19f282",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "f0b914f37cb219acf986106f84994ae06a2ce2916c4714dbc414f81e5f9ee10f",
       "count": 1,
       "tool": "tidy",
@@ -44905,13 +44296,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "f20abe8c9c741554a30f10be53576335a25a44a99a4950b90404a017c44da5ee",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "f20d5f38a80ca04edeb51a577663bfb7acde66b4359b7ab8b7ee6657a9350ae4",
@@ -45565,13 +44949,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "f625ab52f735f40ad1a2b645c2e37975adc9a4fb0a8230e946d88d0d9fa82f20",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f632310ca27ad3af4b4a0973a4fbe4c49e01497c1182a0ec062868ba5a7682c9",
       "count": 1,
       "tool": "cpplint",
@@ -45773,13 +45150,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f77dedbe33f51d387753f0a1dac52bfaf8d7eec2d725c948f169814847b39f11",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "f793956ebd1f791462b807d4671f49ed31d3644b9766b42efac6e6d4db4a8696",
@@ -46704,13 +46074,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "fbeabd331e1197059cd6f44dd4098c5589859cf26ad9e46c37b42aee6f8c43e5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Math/ScalarMath.h",
-      "rule": "runtime/int"
     },
     {
       "key": "fbebb91926f869fa9b057f147fbd555c31554d87ca1355568a21543bf4e08073",

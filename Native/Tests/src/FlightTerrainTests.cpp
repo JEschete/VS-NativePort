@@ -39,7 +39,7 @@ FlightNeighborhood Around(const Terrain& terrain, std::vector<int>& asked,
   neighborhood.terrain = terrain.Grid();
   neighborhood.origin = {10, 10};
   neighborhood.steps = CompassSteps();
-  neighborhood.canFly = [&asked, flyable_mask](int direction) {
+  neighborhood.can_fly = [&asked, flyable_mask](int direction) {
     asked.push_back(direction);
     return ((flyable_mask >> direction) & 1) != 0;
   };
@@ -129,7 +129,7 @@ TEST_CASE("Segment ground samples sixteen steps past the start",
 TEST_CASE("Room navigation ceiling comes from the published settings",
           "[ai][flight][room]") {
   VS::Battle::Ai::RoomAiSettings settings;
-  settings.flightCeiling = 640;
+  settings.flight_ceiling = 640;
   CHECK(VS::Battle::Ai::RoomNavigationCeilingHeight(
             SettingsRuntime(settings)) == 640);
   CHECK(VS::Battle::Ai::RoomNavigationCeilingHeight(

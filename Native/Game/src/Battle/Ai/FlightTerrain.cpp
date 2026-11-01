@@ -39,7 +39,7 @@ int LowestReachableGroundHeight(const FlightNeighborhood& neighborhood,
   int direction = static_cast<int>((movement_angle >> kDirectionShift) &
                                    kCardinalDirectionMask);
   for (int checked = 0; checked < direction_count; ++checked) {
-    if (neighborhood.canFly && neighborhood.canFly(direction)) {
+    if (neighborhood.can_fly && neighborhood.can_fly(direction)) {
       const DirectionStep step =
           neighborhood.steps[static_cast<std::size_t>(direction)];
       const int ground_height = Field::GroundHeightAtTile(
@@ -73,6 +73,6 @@ int MinimumAiGroundHeightAlongSegment(Field::TerrainGrid terrain, int start_x,
 // decomp: BATTLE.PRG func_800E75EC (src/BATTLE/BATTLE.PRG/7E05C.s:1041).
 int RoomNavigationCeilingHeight(const RoomAiRuntime& runtime) {
   const std::optional<RoomAiSettings> settings = runtime.PublishedSettings();
-  return settings ? settings->flightCeiling : 0;
+  return settings ? settings->flight_ceiling : 0;
 }
 }  // namespace VS::Battle::Ai

@@ -50,9 +50,11 @@ FlightNeighborhood ActorFlightNeighborhood(Battle_Ai_ActorAiState& state) {
   }
   // The flight test caches its answers in the actor's AI state.
   auto* cache = reinterpret_cast<Battle_Ai_DirectionCacheView*>(&state);
-  neighborhood.canFly = [cache](int direction) {
+  neighborhood.can_fly = [cache](int direction) {
     return Battle_Ai_CanFlyInDirection(cache, direction) != 0;
   };
+  // std::function keeps its small target inline; NRVO or the move rebinds it.
+  // NOLINTNEXTLINE(clang-analyzer-core.StackAddressEscape)
   return neighborhood;
 }
 }  // namespace VS::Battle::Ai

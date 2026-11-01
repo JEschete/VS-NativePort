@@ -33,7 +33,7 @@ struct FlightNeighborhood {
   Field::TerrainGrid terrain;
   Core::Math::TileCoordinate origin{};
   FlightDirectionSteps steps{};
-  FlightDirectionTest canFly;
+  FlightDirectionTest can_fly;
 };
 
 // Lowest ground height (never above 0) among the flyable neighbours in the

@@ -49,16 +49,20 @@ constexpr std::uint32_t IntegerSquareRoot(std::uint32_t value) noexcept {
 // D_80040D98 (SLUS_010.40 0x80040D98): floor(32768 / sqrt(index)) for
 // index 64..255, equivalently the largest v with v * v * index <= 2^30. Built
 // here rather than read from the loaded executable.
+constexpr std::uint32_t kReciprocalRootNumerator = std::uint32_t{1} << 30;
 constexpr std::array<std::int16_t, kRootIndexCount> kReciprocalRoots = [] {
   std::array<std::int16_t, kRootIndexCount> table{};
   for (std::uint32_t index = 0; index < kRootIndexCount; ++index) {
     table[index] = static_cast<std::int16_t>(IntegerSquareRoot(
-        (std::uint32_t{1} << 30) / (index + kFirstRootIndex)));
+        kReciprocalRootNumerator / (index + kFirstRootIndex)));
   }
   return table;
 }();
-static_assert(kReciprocalRoots.front() == 4096);
-static_assert(kReciprocalRoots.back() == 2052);
+// First and last D_80040D98 entries on the disc.
+constexpr std::int16_t kDiscFirstRoot = 4096;
+constexpr std::int16_t kDiscLastRoot = 2052;
+static_assert(kReciprocalRoots.front() == kDiscFirstRoot);
+static_assert(kReciprocalRoots.back() == kDiscLastRoot);
 
 // Shared by the reciprocal-root entries: positive (or unsigned) value in,
 // table mantissa and the exponent restoring its scale out.

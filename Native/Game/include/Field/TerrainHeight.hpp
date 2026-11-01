@@ -26,7 +26,7 @@ class TerrainGrid {
       std::span<const TerrainRow, kTerrainGridSide> rows) noexcept
       : rows_(rows) {}
 
-  [[nodiscard]] constexpr bool empty() const noexcept { return rows_.empty(); }
+  [[nodiscard]] constexpr bool Empty() const noexcept { return rows_.empty(); }
 
   [[nodiscard]] constexpr bool Contains(int x, int z) const noexcept {
     return !rows_.empty() && x >= 0 && z >= 0 && x < kTerrainGridSide &&

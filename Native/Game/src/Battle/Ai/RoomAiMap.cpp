@@ -24,11 +24,16 @@ constexpr unsigned kTriggerFlag = 0x100;
 constexpr unsigned kActionDelayShift = 21;
 constexpr unsigned kNonSpellActionsShift = 20;
 constexpr unsigned kEngagementLimitShift = 29;
+constexpr unsigned kBitsPerByte = 8;
+constexpr unsigned kMaxTileZShift = 8;
+constexpr unsigned kMinTileXShift = 16;
+constexpr unsigned kMinTileZShift = 24;
 
 std::uint32_t ReadWord(std::span<const std::byte> bytes, std::size_t offset) {
   std::uint32_t value = 0;
   for (std::size_t index = 0; index < sizeof value; ++index) {
-    value |= static_cast<std::uint32_t>(bytes[offset + index]) << (8 * index);
+    value |= static_cast<std::uint32_t>(bytes[offset + index])
+             << (kBitsPerByte * index);
   }
   return value;
 }
@@ -42,10 +47,10 @@ std::uint16_t TileFlags(const RoomAiSource& source,
                         Core::Math::TileCoordinate tile, std::uint32_t cell) {
   unsigned flags = DecodeCollisionFlags(cell);
   const std::optional<RoomFloorTrigger> trigger =
-      source.floorTrigger ? source.floorTrigger(tile) : std::nullopt;
+      source.floor_trigger ? source.floor_trigger(tile) : std::nullopt;
   if (trigger && trigger->kind < kTriggerKindCount &&
-      trigger->switchValue < kTriggerSwitchCount) {
-    flags |= kTriggerFlag << trigger->switchValue;
+      trigger->switch_value < kTriggerSwitchCount) {
+    flags |= kTriggerFlag << trigger->switch_value;
   }
   return static_cast<std::uint16_t>(flags);
 }
@@ -54,7 +59,7 @@ std::uint16_t TileFlags(const RoomAiSource& source,
 std::uint16_t DecodeCollisionFlags(std::uint32_t cell) noexcept {
   struct Field {
     unsigned shift;
-    unsigned outputMask;
+    unsigned output_mask;
   };
   static constexpr std::array<Field, 6> kFields{{{23, 0x1F},
                                                  {12, 0x20},
@@ -64,7 +69,7 @@ std::uint16_t DecodeCollisionFlags(std::uint32_t cell) noexcept {
                                                  {16, 0x2000}}};
   unsigned flags = 0;
   for (const Field& field : kFields) {
-    flags |= (cell >> field.shift) & field.outputMask;
+    flags |= (cell >> field.shift) & field.output_mask;
   }
   return static_cast<std::uint16_t>(flags);
 }
@@ -74,7 +79,7 @@ std::uint16_t DecodeCollisionFlags(std::uint32_t cell) noexcept {
 std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
   if ((source.auxiliary &&
        source.auxiliary->size() < kRoomAuxiliaryHeaderBytes) ||
-      !ExtentFits(source.collisionExtent)) {
+      !ExtentFits(source.collision_extent)) {
     Core_Errorf("ai", "Invalid room AI header: auxiliary_bytes=%zu",
                 source.auxiliary ? source.auxiliary->size() : std::size_t{0});
     return std::nullopt;
@@ -82,17 +87,17 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
   std::optional<RoomAiGrid> result{std::in_place};
   RoomAiGrid& grid = *result;
   RoomAiSettings& settings = grid.settings;
-  if (source.collisionExtent) {
-    settings.maxTileX =
-        static_cast<std::uint8_t>(source.collisionExtent->width);
-    settings.maxTileZ =
-        static_cast<std::uint8_t>(source.collisionExtent->height);
+  if (source.collision_extent) {
+    settings.max_tile_x =
+        static_cast<std::uint8_t>(source.collision_extent->width);
+    settings.max_tile_z =
+        static_cast<std::uint8_t>(source.collision_extent->height);
   }
-  settings.collisionExtent[0] = settings.maxTileX;
-  settings.collisionExtent[1] = settings.maxTileZ;
-  if (source.environmentParameter) {
-    settings.flightCeiling =
-        -*source.environmentParameter * (1 << kHeightFractionBits);
+  settings.collision_extent[0] = settings.max_tile_x;
+  settings.collision_extent[1] = settings.max_tile_z;
+  if (source.environment_parameter) {
+    settings.flight_ceiling =
+        -*source.environment_parameter * (1 << kHeightFractionBits);
   }
   for (int tile_z = 0; tile_z < kRoomGridSide; ++tile_z) {
     for (int tile_x = 0; tile_x < kRoomGridSide; ++tile_x) {
@@ -101,7 +106,7 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
       std::uint16_t& flags = grid.flags[static_cast<std::size_t>(tile_z)]
                                        [static_cast<std::size_t>(tile_x)];
       const std::optional<std::uint32_t> cell =
-          source.collisionCell ? source.collisionCell(tile) : std::nullopt;
+          source.collision_cell ? source.collision_cell(tile) : std::nullopt;
       if (!cell) {
         flags = kBlockedTileFlag;
         continue;
@@ -110,7 +115,7 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
       grid.heights[static_cast<std::size_t>(tile_z)]
                   [static_cast<std::size_t>(tile_x)] =
           static_cast<std::uint16_t>(
-              (SampleAiTileGroundHeight(source.floorHeight, tile) >>
+              (SampleAiTileGroundHeight(source.floor_height, tile) >>
                kHeightFractionBits) &
               kStoredHeightMask);
     }
@@ -120,15 +125,16 @@ std::optional<RoomAiGrid> BuildRoomAiMap(const RoomAiSource& source) {
     const std::uint32_t room_settings =
         ReadWord(auxiliary, kRoomSettingsOffset);
     const std::uint32_t bounds = ReadWord(auxiliary, kRoomBoundsOffset);
-    settings.maxTileX = static_cast<std::uint8_t>(bounds);
-    settings.maxTileZ = static_cast<std::uint8_t>(bounds >> 8);
-    settings.minTileX = static_cast<std::uint8_t>(bounds >> 16);
-    settings.minTileZ = static_cast<std::uint8_t>(bounds >> 24);
-    settings.defaultActionDelay =
+    // The bounds word packs max x, max z, min x and min z, one per byte.
+    settings.max_tile_x = static_cast<std::uint8_t>(bounds);
+    settings.max_tile_z = static_cast<std::uint8_t>(bounds >> kMaxTileZShift);
+    settings.min_tile_x = static_cast<std::uint8_t>(bounds >> kMinTileXShift);
+    settings.min_tile_z = static_cast<std::uint8_t>(bounds >> kMinTileZShift);
+    settings.default_action_delay =
         static_cast<std::uint8_t>(room_settings >> kActionDelayShift);
-    settings.allowsNonSpellActions =
+    settings.allows_non_spell_actions =
         ((room_settings >> kNonSpellActionsShift) & 1) != 0;
-    settings.engagementLimit =
+    settings.engagement_limit =
         static_cast<std::uint8_t>(room_settings >> kEngagementLimitShift);
   }
   return result;

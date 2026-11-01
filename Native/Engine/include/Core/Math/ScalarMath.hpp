@@ -13,9 +13,12 @@
 // nothing reads module-loaded tables, emulated GTE registers or raw pointers,
 // and none of these routines is reachable through a module address.
 namespace VS::Core::Math {
+// Rows and columns in a rotation or scale matrix.
+inline constexpr int kMatrixOrder = 3;
+
 // A 3x3 rotation or scale matrix with Q12 elements, indexed [row][column].
 struct Mat3 {
-  std::array<std::array<std::int16_t, 3>, 3> m{};
+  std::array<std::array<std::int16_t, kMatrixOrder>, kMatrixOrder> m{};
 
   friend bool operator==(const Mat3&, const Mat3&) = default;
 };
@@ -129,8 +132,8 @@ concept MatrixRecord = requires(Matrix& matrix) {
 template <MatrixRecord Matrix>
 [[nodiscard]] constexpr Mat3 MatrixOf(const Matrix& record) noexcept {
   Mat3 matrix;
-  for (int row = 0; row < 3; ++row) {
-    for (int column = 0; column < 3; ++column) {
+  for (int row = 0; row < kMatrixOrder; ++row) {
+    for (int column = 0; column < kMatrixOrder; ++column) {
       matrix.m[row][column] = record.m[row][column];
     }
   }
@@ -139,8 +142,8 @@ template <MatrixRecord Matrix>
 
 template <MatrixRecord Matrix>
 constexpr void StoreMatrix(Matrix& record, const Mat3& matrix) noexcept {
-  for (int row = 0; row < 3; ++row) {
-    for (int column = 0; column < 3; ++column) {
+  for (int row = 0; row < kMatrixOrder; ++row) {
+    for (int column = 0; column < kMatrixOrder; ++column) {
       record.m[row][column] = matrix.m[row][column];
     }
   }
