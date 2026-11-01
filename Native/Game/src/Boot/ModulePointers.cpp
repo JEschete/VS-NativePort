@@ -150,7 +150,6 @@ extern "C" {
 #include "Effects/Templates/TrailRender.h"
 #include "Effects/Templates/TrailTarget.h"
 #include "Effects/Templates/TrailUpdate.h"
-#include "Effects/TextureBindings.h"
 #include "Effects/Timeline.h"
 #include "Effects/Trails.h"
 #include "Effects/Transforms.h"
@@ -1935,7 +1934,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D79E4u, 0u, (void*)&Effects_BindEffectPrograms, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D79F4u, 0u, (void*)&Effects_BindEffectPackageParameters, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D7A04u, 0u, (void*)&Effects_BindEffectTransformDefinitions, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D7A14u, 0u, (void*)&Effects_BindEffectTextureTables, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D7A74u, 0u, (void*)&Effects_BindParticleAnimationTable, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D7A90u, 0u, (void*)&Effects_ParticleAnimationData, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D7AB4u, 0u, (void*)&Effects_BindEffectSoundSequences, 0u, 0u, 0u},

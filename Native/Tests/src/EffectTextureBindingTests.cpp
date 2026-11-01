@@ -12,7 +12,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
-#include "Effects/TextureBindings.h"
+#include "Effects/TextureBindings.hpp"
 #include "Legacy/Psx.h"
 #include "Platform/App.hpp"
 #include "Platform/CrashHandler.hpp"
@@ -61,7 +61,10 @@ struct TextureBindingFixture {
     Effects_package = saved_package;
   }
 
-  void Bind() { Effects_BindEffectTextureTables(bytes.data(), sizeof bytes); }
+  void Bind() {
+    VS::Effects::BindLiveEffectTextureTables(
+        std::as_writable_bytes(std::span(bytes)));
+  }
 
   static void CheckFirstFrame(const Effects_ParticleTextureAnimation& state) {
     REQUIRE(state.textureInfo != nullptr);
@@ -93,7 +96,8 @@ void CheckSourceTextureBlocks(const std::filesystem::path& path) {
     REQUIRE(header[0] <= bytes.size() - offset);
     if (header[1] == 1) {
       Effects_actionRequest.effectId = path.filename() == "E084.P" ? 84 : 53;
-      Effects_BindEffectTextureTables(bytes.data() + offset + 4, header[0] - 4);
+      VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(
+          std::span(bytes).subspan(offset + 4, header[0] - 4)));
       if (path.filename() == "E084.P") {
         CheckGravityBinding();
       }
@@ -173,7 +177,8 @@ TEST_CASE("Material channels preserve distinct authored multi-table bindings",
   bytes[3] = 24;
   bytes[4] = bytes[6] = 1;
   bytes[5] = 0x00010001;
-  Effects_BindEffectTextureTables(bytes.data(), sizeof bytes);
+  VS::Effects::BindLiveEffectTextureTables(
+      std::as_writable_bytes(std::span(bytes)));
   CHECK(Effects_actionPackage.block1TableCount == 3);
   CHECK(Effects_actionPackage.textureInfoTable[0] !=
         Effects_actionPackage.textureInfoTable[1]);
@@ -234,8 +239,9 @@ TEST_CASE("Truncated effect texture blocks are diagnosed before publication",
           "[.texture-block-short]") {
   VS::Platform::InstallCrashHandler();
   TextureBindingFixture fixture;
-  Effects_BindEffectTextureTables(fixture.bytes.data(),
-                                  sizeof fixture.bytes - 1);
+  VS::Effects::BindLiveEffectTextureTables(
+      std::as_writable_bytes(std::span(fixture.bytes))
+          .first(sizeof fixture.bytes - 1));
   FAIL("Truncated texture descriptor was accepted");
 }
 

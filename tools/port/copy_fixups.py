@@ -34,6 +34,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CaptureBattleActorConditions": r"Native\Game\src\Battle\Ai\ConditionSnapshotBinding.hpp",
     "VS::Field::LiveRoomCollisionMap": r"Native\Game\include\Field\CollisionSampling.hpp",
     "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
+    "VS::Effects::BindLiveEffectTextureTables": r"Native\Game\include\Effects\TextureBindings.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -585,10 +586,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "bind native stream assets instead of a PS1 array-offset alias"),
     ],
     "F01626": [
-        ("Effects_BindEffectTextureTables((Effects_PackageBlock1*)arg0->blocks);",
-         "Effects_BindEffectTextureTables(arg0->blocks, "
-         "(unsigned)(meta & 0xFFFF) - sizeof(arg0->meta));",
-         "pass the actual block payload extent to the native material binding validator"),
+        ("VS::Effects::BindEffectTextureTables((Effects_PackageBlock1*)arg0->blocks);",
+         "VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(std::span<u_char>(\n"
+         "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
+         "F01606 #46 typed promotion: the live binding validates the actual block payload extent "
+         "as bytes before publishing the package's material tables"),
         ("Effects_BindEffectAuxiliarySoundBank(arg0->blocks);",
          "Effects_BindEffectAuxiliarySoundBank(\n"
          "                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));",

@@ -323,8 +323,8 @@ class EncounterFixupTests(unittest.TestCase):
     def test_texture_binding_receives_its_payload_extent(self):
         fixups = copy_fixups.FIXES["F01626"]
         self.assertTrue(any(
-            "Effects_BindEffectTextureTables(arg0->blocks," in new
-            and "sizeof(arg0->meta)" in new
+            "VS::Effects::BindLiveEffectTextureTables(" in new
+            and "arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta)" in new
             for _, new, _ in fixups
         ))
         self.assertTrue(any(

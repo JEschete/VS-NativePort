@@ -1,8 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
-#include "Effects/TextureBindings.h"
+#include "Effects/TextureBindings.hpp"
 
-#include <algorithm>
-#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
@@ -10,18 +8,12 @@
 #include <span>
 
 #include "Core/Log.hpp"
-#include "Legacy/Psx.h"
 
-extern "C" {
-#include "Effects/Package.h"
-#include "Effects/Runtime.h"
-}
-
+namespace VS::Effects {
 namespace {
 constexpr std::size_t kHeaderBytes = 4;
-constexpr std::size_t kTableCapacity = 4;
-constexpr unsigned kGravityEffect = 84;
-using Bytes = std::span<std::byte>;
+constexpr std::size_t kTableOffsetBytes = sizeof(std::uint32_t);
+using Bytes = std::span<const std::byte>;
 
 void Require(bool condition, const char* message) {
   if (!condition) {
@@ -40,77 +32,64 @@ T Read(Bytes bytes, std::size_t offset) {
   return value;
 }
 
-struct TextureBinding {
-  std::array<Effects_PackageTextureInfo*, kTableCapacity> tables{};
-  Effects_PackageTexture* textures = nullptr;
-  int count = 0;
-};
+std::size_t TableOffset(Bytes bytes, std::size_t table) {
+  return Read<std::uint32_t>(bytes, kHeaderBytes + table * kTableOffsetBytes);
+}
 
-TextureBinding ValidateTextureBlock(Bytes bytes) {
-  const auto count = Read<std::uint16_t>(bytes, 0);
-  const auto geometry = Read<std::uint16_t>(bytes, sizeof(std::uint16_t));
-  const std::size_t header = kHeaderBytes + count * sizeof(std::uint32_t);
-  Require(count <= kTableCapacity, "too many source tables");
-  Require(geometry >= header && geometry <= bytes.size(),
-          "texture descriptor offset is outside the block");
-  Require((bytes.size() - geometry) % sizeof(Effects_PackageTexture) == 0,
-          "truncated texture descriptor");
-  Require(reinterpret_cast<std::uintptr_t>(bytes.data()) %
-                  alignof(Effects_PackageTexture) ==
-              0,
-          "unaligned texture storage");
-  const auto texture_count =
-      (bytes.size() - geometry) / sizeof(Effects_PackageTexture);
-  TextureBinding result;
-  result.count = count;
-  result.textures =
-      reinterpret_cast<Effects_PackageTexture*>(bytes.data() + geometry);
-  for (std::size_t table = 0; table < count; ++table) {
-    const auto offset = Read<std::uint32_t>(
-        bytes, kHeaderBytes + table * sizeof(std::uint32_t));
-    const auto end =
-        table + 1 == count
-            ? geometry
-            : Read<std::uint32_t>(
-                  bytes, kHeaderBytes + (table + 1) * sizeof(std::uint32_t));
-    Require(offset >= header && end >= offset && end <= geometry,
-            "texture table offset is outside the block");
-    Require(offset % alignof(Effects_PackageTextureInfo) == 0 &&
-                (end - offset) % sizeof(Effects_PackageTextureInfo) == 0,
-            "truncated texture frame record");
-    for (std::size_t frame = offset; frame < end;
-         frame += sizeof(Effects_PackageTextureInfo)) {
-      const auto record = Read<Effects_PackageTextureInfo>(bytes, frame);
-      Require(record.dataIndex <= texture_count &&
-                  record.reserved0 <= texture_count - record.dataIndex,
-              "frame references unavailable texture descriptors");
-    }
-    result.tables[table] =
-        reinterpret_cast<Effects_PackageTextureInfo*>(bytes.data() + offset);
+// A frame record: frame count, then the first descriptor index.
+void ValidateFrames(Bytes bytes, std::size_t begin, std::size_t end,
+                    std::size_t descriptor_count) {
+  for (std::size_t frame = begin; frame < end;
+       frame += kTextureFrameRecordBytes) {
+    const auto frames = Read<std::uint16_t>(bytes, frame);
+    const auto first =
+        Read<std::uint16_t>(bytes, frame + sizeof(std::uint16_t));
+    Require(first <= descriptor_count && frames <= descriptor_count - first,
+            "frame references unavailable texture descriptors");
   }
-  return result;
 }
 }  // namespace
 
 // decomp: _parsePfileBlock1 (src/BATTLE/BATTLE.PRG/6F014.c:512);
 // original binder independently checked in BATTLE.PRG at 0x800D7A14.
-void Effects_BindEffectTextureTables(void* data, size_t byte_count) {
-  Require(data != nullptr && Effects_package != nullptr,
-          "missing package or source block");
-  auto binding =
-      ValidateTextureBlock(Bytes(static_cast<std::byte*>(data), byte_count));
-  if (Effects_package == &Effects_actionPackage &&
-      Effects_actionRequest.effectId == kGravityEffect && binding.count == 1) {
+TextureBlockLayout BindEffectTextureTables(Bytes block,
+                                           const EffectTextureOwner& owner) {
+  const std::size_t count = Read<std::uint16_t>(block, 0);
+  const std::size_t descriptors =
+      Read<std::uint16_t>(block, sizeof(std::uint16_t));
+  const std::size_t header = kHeaderBytes + count * kTableOffsetBytes;
+  Require(count <= kTextureTableCapacity, "too many source tables");
+  Require(descriptors >= header && descriptors <= block.size(),
+          "texture descriptor offset is outside the block");
+  Require((block.size() - descriptors) % kTextureDescriptorBytes == 0,
+          "truncated texture descriptor");
+  const std::size_t descriptor_count =
+      (block.size() - descriptors) / kTextureDescriptorBytes;
+  TextureBlockLayout layout;
+  layout.table_count = count;
+  layout.descriptor_offset = descriptors;
+  for (std::size_t table = 0; table < count; ++table) {
+    const std::size_t begin = TableOffset(block, table);
+    const std::size_t end =
+        table + 1 == count ? descriptors : TableOffset(block, table + 1);
+    Require(begin >= header && end >= begin && end <= descriptors,
+            "texture table offset is outside the block");
+    Require(begin % kTextureFrameRecordAlignment == 0 &&
+                (end - begin) % kTextureFrameRecordBytes == 0,
+            "truncated texture frame record");
+    ValidateFrames(block, begin, end, descriptor_count);
+    layout.table_offsets.at(table) = begin;
+  }
+  if (owner.is_action_package && owner.action_effect_id == kGravityEffectId &&
+      count == 1) {
     // E084 authors channel 1 for its grid/rings but supplies only table 0.
     // Native material channels explicitly share that same authored table;
     // original assets, frame numbers, UVs and descriptor contents stay intact.
-    binding.tables[1] = binding.tables[0];
-    binding.count = 2;
+    layout.table_offsets[1] = layout.table_offsets[0];
+    layout.table_count = 2;
     VS_LOG_DEBUG("effects.material",
                  "E084 material channel 1 shares authored source table 0");
   }
-  std::copy(binding.tables.begin(), binding.tables.end(),
-            Effects_package->textureInfoTable);
-  Effects_package->textures = binding.textures;
-  Effects_package->block1TableCount = binding.count;
+  return layout;
 }
+}  // namespace VS::Effects

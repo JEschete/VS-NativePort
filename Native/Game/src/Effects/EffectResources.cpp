@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Effects/TextureBindings.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Effects/Templates/TiledRing.h"
 #include "Effects/Templates/TrailDispatch.h"
 #include "Effects/Templates/TrailNineDispatch.h"
-#include "Effects/TextureBindings.h"
 #include "Effects/Transforms.h"
 #include "OverlayWorkspace.h"
 #include "Render/Textures.h"
@@ -399,7 +399,8 @@ void Effects_BindEffectPackageBlocks(Effects_PackageFile* package_block)
             return;
 
         case 0x10000:
-            Effects_BindEffectTextureTables(package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta));
+            VS::Effects::BindLiveEffectTextureTables(std::as_writable_bytes(std::span<u_char>(
+                package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta))));
             break;
 
         case 0x20000:

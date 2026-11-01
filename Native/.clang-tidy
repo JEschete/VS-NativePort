@@ -18,7 +18,7 @@ CheckOptions:
   bugprone-easily-swappable-parameters.MinimumLength: 3
   bugprone-easily-swappable-parameters.ModelImplicitConversions: false
   readability-identifier-naming.NamespaceCase: lower_case
-  readability-identifier-naming.NamespaceIgnoredRegexp: '^(VS|Core|Content|Platform|Render|Input|Audio|Movie|Save|Boot|Battle|Game|Legacy|Launcher|Math|Ai|Field|Actors|Seq)$'
+  readability-identifier-naming.NamespaceIgnoredRegexp: '^(VS|Core|Content|Platform|Render|Input|Audio|Movie|Save|Boot|Battle|Game|Legacy|Launcher|Math|Ai|Field|Actors|Seq|Effects)$'
   readability-identifier-naming.ClassCase: CamelCase
   readability-identifier-naming.StructCase: CamelCase
   readability-identifier-naming.StructIgnoredRegexp: '^(Actors|Audio|Battle|Content|Core|Effects|Ending|Event|Field|Input|Items|Menu|Render|Save|State|Title)_[A-Za-z0-9_]+$'
