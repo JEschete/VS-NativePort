@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 19 | 21 (`wip`) | 4,167 |
-| `cpp` | 19 | 261 (`wip`) | 3,927 |
+| `modernized` | 32 | 21 (`wip`) | 4,154 |
+| `cpp` | 32 | 248 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 173 |
-| `vs_namespace` | 19 |
-| `typed_interface` | 19 |
-| `no_bridge` | 19 |
-| `strict_clean` | 173 |
-| `behavior_evidence` | 19 |
+| `source_cpp` | 186 |
+| `vs_namespace` | 32 |
+| `typed_interface` | 32 |
+| `no_bridge` | 32 |
+| `strict_clean` | 186 |
+| `behavior_evidence` | 32 |
 
-Promotion records: 280; derived `cpp=x`: 19, `cpp=wip`: 261. Verification records: 50; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 32, `cpp=wip`: 248. Verification records: 51; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -136,6 +136,14 @@ and world positions, and the ceiling reads the published settings through `RoomA
 height map, the scratchpad direction table and `Battle_Ai_roomAiState`. Both module symbols retire (BATTLE.PRG
 reaches them by `jal` only). `ActorFlightNeighborhood` still reads the frame terrain, direction table and the C
 `Battle_Ai_CanFlyInDirection` cache, so the frame state stays C.
+The sixth is the scalar math slice, 13 rows in `VS::Core::Math` (`Core/Math/ScalarMath.hpp`): the four Q12
+matrix products, Euler and quadrant rotation builders, column scaling, vector square, octant sine and cosine,
+fixed multiply, integer square root, reciprocal root and source normalization take and return `Mat3`, `Vec3`,
+`Angles3` and `SineCosine` values instead of MATRIX and VECTOR pointers or register pairs. `Apply*` adapters keep
+the in-place destinations for SDK records. The reciprocal-root table is computed at compile time and matches all
+192 disc entries; non-positive input returns no root and squared lengths of 2^31 and above stay in the table,
+where the original read neighbouring tables. The module entries retire; `Core_Gte_Sin`/`Cos` stay C. A full clang-tidy scan then cleared the findings the
+promotion slices had introduced and pruned the stale ScalarMath baseline entries (37b30cde), so `strict_clean` holds.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

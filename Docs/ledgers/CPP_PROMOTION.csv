@@ -20,9 +20,9 @@ F00757,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00758,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00759,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00760,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
-F00761,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F00762,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F00763,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
+F00761,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Angles3 in and Mat3 out instead of SVECTOR and MATRIX pointers; ApplyBuildEulerRotationMatrix keeps the in-place record destination
+F00762,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: returns a SineCosine value instead of the register pair; F03399 and F01017 redirect here and the resident module entry retires
+F00763,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Mat3 values instead of MATRIX pointers; the Apply adapter writes the right record after both operands are read
 F00767,Native\Engine\src\Render\RoomLighting.cpp,,,,,,,,,
 F00768,Native\Engine\src\Render\RoomLighting.cpp,,,,,,,,,
 F00769,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
@@ -41,14 +41,14 @@ F00989,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F00995,Native\Game\src\Actors\SoundOverrides.cpp,x,,,,x,,,,
 F01007,Native\Game\src\Actors\SoundOverrides.cpp,x,,,,x,,,,
 F01016,Native\Game\src\Actors\SequencePlayback.cpp,,,,,,,,,
-F01018,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F01019,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
+F01018,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Angles3 in and Mat3 out with the quadrant-staged trig; the Apply adapter keeps the record destination
+F01019,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Mat3 values instead of MATRIX pointers; the Apply adapter writes the right record after both operands are read
 F01023,Native\Game\src\Actors\ModelDrawing.cpp,,,,,,,,,
 F01024,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F01025,Native\Game\src\Actors\MovementCommands.cpp,,,,,,,,,
 F01026,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F01130,Native\Game\src\Event\WeaponMode.cpp,x,,,,x,,,,
-F01248,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
+F01248,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: pure int32 Q12 product with no GTE register state
 F01265,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
 F01266,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
 F01267,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
@@ -220,13 +220,13 @@ F03393,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03394,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03395,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03396,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
-F03403,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F03405,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F03406,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F03409,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F03414,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F03415,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
-F03416,Native\Engine\src\Core\Math\ScalarMath.cpp,,,,,,,,,
+F03403,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Mat3 and Vec3 values instead of MATRIX and VECTOR pointers; the BATTLE duplicate F01264 shares it and its module entry retires
+F03405,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: optional ReciprocalRoot instead of two output pointers; non-positive input gives nullopt (the original left outputs untouched for 0 and -1 and read neighbouring resident tables for other negatives); the compile-time table matches all 192 D_80040D98 entries
+F03406,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Mat3 values instead of MATRIX pointers; the Apply adapter writes the left record after both operands are read
+F03409,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Vec3 value in and out instead of VECTOR pointers
+F03414,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: NormalizedVector value instead of an output pointer; squared lengths of 2^31 and above are unsigned and use the in-table root instead of indexing past it
+F03415,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: the shared Q12 kernel behind all four matrix products
+F03416,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: pure integer square root through the normalized lookup with no GTE register state
 F03438,Native\Game\src\Boot\Session.cpp,,,,,,,,,
 F03439,Native\Game\src\Boot\Session.cpp,,,,,,,,,
 F03474,Native\Content\src\DiscReader.cpp,,,,,,,,,
