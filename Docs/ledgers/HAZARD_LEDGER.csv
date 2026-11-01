@@ -314,7 +314,7 @@ f9f4ed7bac34,DIV-ZERO,medium,pattern,F03233,Audio_SoundEffects_FadeProgramPan,Na
 08a8ecc392fb,DIV-ZERO,medium,pattern,F03235,Audio_SoundEffects_FadeScenePan,Native/Engine/src/Audio/SoundEffects/SoundEffects.cpp,595,fade_ticks,253,30A,open,
 453adf9fad79,DIV-ZERO,medium,pattern,F03545,Audio_BindRoomCutsceneStream,Native/Engine/src/Audio/StreamPlayback.cpp,127,info->channels,253,30A,open,
 50fb4333ee62,DIV-ZERO,medium,pattern,F03395,Audio_Cutscene_SlideStreamVolume,Native/Engine/src/Audio/StreamPlayback.cpp,240,ticks,253,30A,open,
-9f8e816f6356,DIV-ZERO,medium,pattern,,Core_Gte_SetFogNear,Native/Engine/src/Core/Gte.cpp,195,std,51,9,open,
+9f8e816f6356,DIV-ZERO,medium,pattern,,Core_Gte_SetFogNear,Native/Engine/src/Core/Gte.cpp,194,std,51,9,open,
 0c5d8274023a,DIV-ZERO,medium,pattern,F03402,Core_Math_ArcTangent2,Native/Engine/src/Core/Math/FixedPoint.cpp,93,ay,51,9,open,
 8d2faa64d79a,DIV-ZERO,medium,pattern,F03402,Core_Math_ArcTangent2,Native/Engine/src/Core/Math/FixedPoint.cpp,98,ax,51,9,open,
 068406895119,DIV-ZERO,medium,pattern,F01457,Core_Math_InterpolateCosineScalar,Native/Engine/src/Core/Math/Interpolation.cpp,19,total_steps,51,9,open,
