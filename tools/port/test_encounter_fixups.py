@@ -1339,6 +1339,26 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["VS::Battle::Ai::CurrentTerrain"],
                          r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp")
 
+    def test_promoted_room_ai_lifecycle_callers_pass_the_runtime(self):
+        fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
+                 if "InitializeRoomAiMap" in pat]
+        self.assertEqual(len(fixes), 1)
+        row, pat, rep = fixes[0]
+        self.assertTrue(re.search(row, "Battle::Ai::InitializeRoomNavigation"))
+        self.assertTrue(re.search(row, "Field::FreeRoom"))
+        runtime = "VS::Battle::Ai::BattleRoomAiRuntime()"
+        self.assertEqual(re.sub(pat, rep, "VS::Battle::Ai::InitializeRoomAiMap();"),
+                         f"VS::Battle::Ai::InitializeRoomAiMap({runtime});")
+        self.assertEqual(re.sub(pat, rep, "    VS::Battle::Ai::FreeRoomAiState();"),
+                         f"    VS::Battle::Ai::FreeRoomAiState({runtime});")
+        owned = {row["id"]: row for row in csv.DictReader(
+            Path(__file__).resolve().with_name("owned.csv").open(encoding="utf-8"))}
+        self.assertEqual(owned["F01837"]["name"], "VS::Battle::Ai::FreeRoomAiState")
+        self.assertEqual(owned["F01838"]["name"], "VS::Battle::Ai::InitializeRoomAiMap")
+        self.assertEqual(owned["F01839"]["name"], "VS::Battle::Ai::SampleAiTileGroundHeight")
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["VS::Battle::Ai::BattleRoomAiRuntime"],
+                         owned["F01838"]["header"])
+
     def test_palette_pulse_uses_the_native_gimmick_owner(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
         with registry.open(encoding="utf-8", newline="") as stream:

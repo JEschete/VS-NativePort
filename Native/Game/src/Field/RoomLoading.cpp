@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/RoomAiMap.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
@@ -883,7 +883,7 @@ void Field_UnloadCurrentRoom(void)
         Battle_Ai_FreeActorAiState(Field_auxiliaryActor);
     }
     Field_RemoveRoomActors();
-    Battle_Ai_FreeRoomAiState();
+    VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     Battle_SetActorMarker(0, 0);
     Actors_ResetAllActorMovement();
     Items_ClearRoomLootList();

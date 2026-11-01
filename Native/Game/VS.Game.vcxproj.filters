@@ -492,12 +492,18 @@
     <ClInclude Include="src\Battle\Ai\Relations.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\RoomAiMap.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\RoomState.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
     <ClInclude Include="src\Battle\Ai\RoomState.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\TileHeightSampling.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\AttackPrerequisites.cpp">
       <Filter>src\Battle</Filter>
     </ClCompile>
@@ -2179,6 +2185,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Encounter.hpp">

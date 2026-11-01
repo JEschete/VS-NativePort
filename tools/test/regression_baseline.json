@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 9796033,
+  "assertions": 9796118,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -984,7 +984,10 @@
    "Retired SDK math entries are the canonical native implementations",
    "Retired stack capture and room code jumps have no native bindings",
    "Reverb depth is signed stereo gain and preset changes clear tails",
-   "Room AI maps preserve native storage and collision metadata",
+   "Room AI collision flags gather the original bit fields",
+   "Room AI lifecycle publishes and releases through its runtime",
+   "Room AI maps build only from the source they are given",
+   "Room AI maps read settings from the auxiliary section",
    "Room SFX bank absence and tagged routing remain explicit",
    "Room SFX binding preserves native pointers and adjacent music tables",
    "Room actor spawning uses the owning MPD count rather than a detached alias",
@@ -1231,6 +1234,7 @@
    "Textured ribbon dispatchers allocate and initialize native textures",
    "The approved BIN passes without a CUE",
    "The approved local dump passes exact identity verification",
+   "The battle runtime reads the current room as a bounded source",
    "The complete bounded special region builds on the native game fiber",
    "The encoder check ignores an earlier answer",
    "The extractor records a movie it did convert",
@@ -1247,6 +1251,8 @@
    "Tile distance API takes decoded cells instead of register words",
    "Tile goals inside their radius stop through the real command API",
    "Tile height decoding covers every 16-bit cell value",
+   "Tile height sampling queries the tile's center and lattice",
+   "Tile heights keep the highest sample unless floor is missing",
    "Tile steps enforce configured gaps, slopes and movement disable",
    "Tile steps use typed target positions for the approach radius",
    "Time-attack rating wipes use MENUF for full and partial strips",

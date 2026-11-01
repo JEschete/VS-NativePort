@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/RoomState.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
@@ -700,6 +700,6 @@ void Battle_Ai_BuildAiSpecialTerrainHeights(void)
 }
 
 // decomp: BATTLE.PRG func_800E6158 (src/BATTLE/BATTLE.PRG/7CD68.c:814)
-void Battle_Ai_InitializeRoomNavigation(void) { Battle_Ai_InitializeRoomAiMap(); }
+void Battle_Ai_InitializeRoomNavigation(void) { VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime()); }
 
 }  // extern "C"

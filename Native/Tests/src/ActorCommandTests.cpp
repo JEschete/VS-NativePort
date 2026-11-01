@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/RoomAiMap.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/RoomState.h"
 #include "Battle/Damage.h"
 #include "Core/Memory.h"
 #include "Core/Memory/Heap.h"
@@ -253,7 +253,7 @@ struct RoomCommandFixture : CommandFixture {
   }
 
   ~RoomCommandFixture() {
-    Battle_Ai_FreeRoomAiState();
+    VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     Core_legacyHeapList = saved_heap;
     Core_legacySecondaryHeapList = saved_secondary;
     std::copy(saved_actors.begin(), saved_actors.end(), Battle_actors);
@@ -296,13 +296,13 @@ TEST_CASE(
         static_cast<signed char>(kZ[index]);
   }
   for (int entry = 0; entry < 2; ++entry) {
-    Battle_Ai_InitializeRoomAiMap();
+    VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
     REQUIRE(Battle_Ai_specialTerrainHeights != nullptr);
     CHECK(Battle_Ai_tileFlagMap[1][1] == 0x20);
     CHECK(Battle_Ai_specialTerrainHeights[1][1] == 0x2002);
     CHECK(Battle_Ai_specialTerrainHeights[0][0] == 2);
     CHECK(Battle_Ai_FrameState()->heightMap == Battle_Ai_specialTerrainHeights);
-    Battle_Ai_FreeRoomAiState();
+    VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     CHECK(Battle_Ai_FrameState()->heightMap == nullptr);
     CHECK(Battle_Ai_specialTerrainHeights == nullptr);
   }
@@ -311,7 +311,7 @@ TEST_CASE(
 TEST_CASE("Room terrain supports hover before the first AI update",
           "[ai][actor-commands][room-context]") {
   RoomCommandFixture fixture;
-  Battle_Ai_InitializeRoomAiMap();
+  VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
   auto* frame = Battle_Ai_FrameState();
   REQUIRE(frame->heightMap != nullptr);
   CHECK(frame->heightMap == Battle_Ai_specialTerrainHeights);
@@ -330,7 +330,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
           "[ai][actor-commands][room-context]") {
   RoomCommandFixture fixture;
   for (int world = 1; world <= 2; ++world) {
-    Battle_Ai_InitializeRoomAiMap();
+    VS::Battle::Ai::InitializeRoomAiMap(VS::Battle::Ai::BattleRoomAiRuntime());
     auto* frame = Battle_Ai_FrameState();
     REQUIRE(frame->heightMap == Battle_Ai_specialTerrainHeights);
     REQUIRE(frame->heightMap != nullptr);
@@ -340,7 +340,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
     CHECK((fixture.actor.commandArg0 >> 16) == world * 64 + 16);
     frame->actors[0] = &fixture.state;
     frame->walk_valid = 1;
-    Battle_Ai_FreeRoomAiState();
+    VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     const std::array retired{
         frame->heightMap == nullptr, frame->tileFlags == nullptr,
         frame->room == nullptr, frame->actors[0] == nullptr,
@@ -363,11 +363,12 @@ TEST_CASE("Original cutscene rooms allow shorter AI direction payloads",
   Field_roomData.section6 = auxiliary.data();
   Field_roomData.header.section6Length = auxiliary.size();
   const auto original = auxiliary;
-  Battle_Ai_RoomAiMap map{};
-  REQUIRE(Battle_Ai_BuildRoomAiMap(&map) == 1);
-  CHECK(map.state.maxTileX == 17);
-  CHECK(map.state.maxTileZ == 16);
-  CHECK(map.flags[31][31] == 0x8000);
+  const auto grid = VS::Battle::Ai::BuildRoomAiMap(
+      VS::Battle::Ai::BattleRoomAiRuntime().CurrentRoom());
+  REQUIRE(grid);
+  CHECK(grid->settings.maxTileX == 17);
+  CHECK(grid->settings.maxTileZ == 16);
+  CHECK(grid->flags[31][31] == 0x8000);
   CHECK(auxiliary == original);
 }
 

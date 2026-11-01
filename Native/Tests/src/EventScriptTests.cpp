@@ -23,7 +23,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
-#include "Battle/Ai/RoomState.h"
 #include "Boot/Session.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
@@ -700,53 +699,6 @@ int Tests_CollisionHeightPatterns(void) {
                Field_SampleCollisionHeightCode(0, 0, 2) == 0x80;
   Field_roomData.header.collisionMapLength--;
   passed = passed && Field_SampleCollisionHeightCode(7, 3, 0) == 0x80;
-  Field_roomData = saved;
-  return passed;
-}
-
-int Tests_RoomAiMapStorage(void) {
-  const Field_RoomRecord saved = Field_roomData;
-  Field_MpdCollisionHeader dimensions = {2, 3, 0, 6};
-  Battle_Ai_RoomAiMap map;
-  memset(&Field_roomData, 0, sizeof Field_roomData);
-  Field_roomData.collisionMap = &dimensions;
-  int passed = Battle_Ai_BuildRoomAiMap(&map) == 1 && map.state.maxTileX == 2 &&
-               map.state.maxTileZ == 3 && map.state.defaultActionDelay == 150 &&
-               map.flags[0][0] == 0x8000 && map.flags[31][31] == 0x8000 &&
-               (unsigned char*)map.flags >= (unsigned char*)(&map.state + 1) &&
-               Battle_Ai_DecodeCollisionFlags(0xFFFFFFFFu) == 0x387F;
-  for (unsigned bit = 0; bit < 32; ++bit) {
-    const unsigned input = 1u << bit;
-    const unsigned expected =
-        ((input >> 23) & 15) | ((input >> 23) & 0x10) | ((input >> 12) & 0x20) |
-        ((input >> 22) & 0x40) | ((input >> 20) & 0x800) |
-        ((input >> 18) & 0x1000) | ((input >> 16) & 0x2000);
-    passed = passed && Battle_Ai_DecodeCollisionFlags(input) == expected;
-  }
-  unsigned auxiliary[(0x498 + 6 + 3) / 4] = {0};
-  auxiliary[0x450 / 4] = (2u << 29) | (99u << 21) | (1u << 20);
-  auxiliary[0x494 / 4] = 0x03020A09;
-  Field_roomData.section6 = auxiliary;
-  Field_roomData.header.section6Length = 0x498 + 6;
-  passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 1 &&
-           map.state.maxTileX == 9 && map.state.maxTileZ == 10 &&
-           map.state.minTileX == 2 && map.state.minTileZ == 3 &&
-           map.state.defaultActionDelay == 99 &&
-           map.state.allowsNonSpellActions == 1;
-  Field_roomData.header.section6Length--;
-  passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 1;
-  Field_roomData.header.section6Length = 0x497;
-  passed = passed && Battle_Ai_BuildRoomAiMap(&map) == 0;
-  int samples[16];
-  for (unsigned index = 0; index < 16; ++index) samples[index] = 128;
-  samples[5] = 192;
-  passed = passed && Battle_Ai_SelectTileHeight(samples, 128) == 192;
-  const int invalid_sample = static_cast<int>(0x80000080u);
-  for (size_t index = 0; index < sizeof samples / sizeof samples[0]; ++index) {
-    samples[index] = invalid_sample;
-  }
-  samples[0] = 256;
-  passed = passed && Battle_Ai_SelectTileHeight(samples, 128) == samples[10];
   Field_roomData = saved;
   return passed;
 }
