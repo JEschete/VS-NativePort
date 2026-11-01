@@ -1532,7 +1532,8 @@
     <ClCompile Include="src\Field\MinimapScene.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\PlatformPlacement.cpp">
+    <ClCompile Include="src\Field\PlatformPlacement.cpp" />
+    <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Field\Room.cpp">
@@ -2325,7 +2326,6 @@
     <ClInclude Include="src\Field\Minimap.h" />
     <ClInclude Include="src\Field\MinimapScene.h" />
     <ClInclude Include="src\Field\Mpd.h" />
-    <ClInclude Include="src\Field\PlatformPlacement.h" />
     <ClInclude Include="src\Field\Platforms.h" />
     <ClInclude Include="src\Field\Room.h" />
     <ClInclude Include="src\Field\RoomEffects.h" />
@@ -2443,6 +2443,9 @@
     <ClInclude Include="include\Field\CollisionSampling.hpp" />
     <ClInclude Include="include\Field\DoorMatches.hpp" />
     <ClInclude Include="include\Field\DoorMatchesLive.hpp" />
+    <ClInclude Include="include\Field\PlatformLayers.hpp" />
+    <ClInclude Include="include\Field\PlatformPlacement.hpp" />
+    <ClInclude Include="include\Field\PlatformPlacementLive.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />

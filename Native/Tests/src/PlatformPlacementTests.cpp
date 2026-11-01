@@ -1,14 +1,17 @@
 #include <algorithm>
 #include <array>
-#include <cstring>
+#include <cstdint>
+#include <span>
 #include <string>
+#include <tuple>
 #include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Core/Log.hpp"
-#include "Field/PlatformPlacement.h"
+#include "Field/PlatformPlacement.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -62,16 +65,14 @@ TEST_CASE(
     "it collide or render",
     "[field][platform-placement]") {
   PlatformPlacementFixture fixture;
-  Field_PlatformContactPoint contact{};
-  REQUIRE(Field_CopyMovingPlatformPlacement(3, &contact) == 1);
-  CheckAuthoredPlacement(contact);
+  const auto contact = VS::Field::LiveMovingPlatformPlacement(3);
+  REQUIRE(contact.has_value());
+  CheckAuthoredPlacement(*contact);
   CHECK(fixture.platforms[0].isHidden == 1);
   CHECK(fixture.platforms[1].isHidden == 1);
   std::array<Field_PlatformContactPoint, 4> visible{};
   CHECK(Field_CollectMovingPlatformPositions(visible.data()) == 0);
-  CHECK(Field_FindMovingPlatformById(3) == nullptr);
-  fixture.platforms[1].positionX += ONE;
-  CHECK(contact.x == 1216);
+  CHECK_FALSE(VS::Field::FindLiveMovingPlatformById(3).has_value());
 }
 
 TEST_CASE(
@@ -83,42 +84,89 @@ TEST_CASE(
     Field_platformBounceFrames[1] = static_cast<char>(frame);
     std::array<Field_PlatformContactPoint, 4> visible{};
     REQUIRE(Field_CollectMovingPlatformPositions(visible.data()) == 1);
-    Field_PlatformContactPoint placement{};
-    REQUIRE(Field_CopyMovingPlatformPlacement(3, &placement) == 1);
-    CHECK(placement.x == visible[0].x);
-    CHECK(placement.height == visible[0].height);
-    CHECK(placement.z == visible[0].z);
-    CHECK(placement.platformIndex == visible[0].platformIndex);
+    const auto placement = VS::Field::LiveMovingPlatformPlacement(3);
+    const auto found = VS::Field::FindLiveMovingPlatformById(3);
+    REQUIRE(placement.has_value());
+    REQUIRE(found.has_value());
+    for (const auto& contact : {*placement, *found}) {
+      CHECK(contact.x == visible[0].x);
+      CHECK(contact.height == visible[0].height);
+      CHECK(contact.z == visible[0].z);
+      CHECK(contact.platformIndex == visible[0].platformIndex);
+    }
   }
 }
 
-TEST_CASE("Borrowed visible-platform lookup outlives the lookup stack frame",
+TEST_CASE("Visible-platform lookup returns its contact by value",
           "[field][platform-placement]") {
   PlatformPlacementFixture fixture;
   fixture.platforms[1].isHidden = 0;
-  const auto* contact = Field_FindMovingPlatformById(3);
-  REQUIRE(contact != nullptr);
-  Field_PlatformContactPoint independent{};
-  REQUIRE(Field_CopyMovingPlatformPlacement(2, &independent) == 1);
-  CHECK(contact->x == 1216);
-  CHECK(contact->height == -768);
-  CHECK(contact->z == 448);
-  CHECK(contact->platformIndex == 1);
+  const auto contact = VS::Field::FindLiveMovingPlatformById(3);
+  REQUIRE(contact.has_value());
+  REQUIRE(VS::Field::LiveMovingPlatformPlacement(2).has_value());
+  fixture.platforms[1].positionX += 64 * ONE;
+  CheckAuthoredPlacement(*contact);
 }
 
-TEST_CASE("Invalid platform placement reports failure and preserves output",
+TEST_CASE("Invalid platform placement reports no contact",
           "[field][platform-placement]") {
   PlatformPlacementFixture fixture;
-  Field_PlatformContactPoint contact{1, 2, 3, 4};
-  CHECK(Field_CopyMovingPlatformPlacement(1, &contact) == 0);
-  CHECK(Field_CopyMovingPlatformPlacement(4, &contact) == 0);
-  CHECK(Field_CopyMovingPlatformPlacement(3, nullptr) == 0);
+  CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(1).has_value());
+  CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(4).has_value());
+  Field_roomData.header.movingPlatformsLength = 1;
+  CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(3).has_value());
+  Field_roomData.header.movingPlatformsLength = sizeof(fixture.platforms);
   Field_platformBounceFrames[1] = 8;
-  CHECK(Field_CopyMovingPlatformPlacement(3, &contact) == 0);
-  CHECK(contact.x == 1);
-  CHECK(contact.height == 2);
-  CHECK(contact.z == 3);
-  CHECK(contact.platformIndex == 4);
+  CHECK_FALSE(VS::Field::LiveMovingPlatformPlacement(3).has_value());
+}
+
+namespace {
+using VS::Field::MovingPlatformPose;
+
+constexpr std::array<std::int16_t, 7> kBounce{8, 14, 16, 11, 7, 3, 1};
+
+VS::Field::MovingPlatformRoom Room(std::span<const MovingPlatformPose> poses) {
+  return {.platforms = poses, .bounce_offsets = kBounce};
+}
+}  // namespace
+
+TEST_CASE("Typed platform lookup finds a visible platform by support layer",
+          "[field][platform-placement]") {
+  const std::array<MovingPlatformPose, 1> poses{MovingPlatformPose{
+      .x = 64 * ONE, .y = 32 * ONE, .z = 16 * ONE, .bounce_frame = 7}};
+  CHECK(VS::Field::FindMovingPlatformById(Room(poses), 2) ==
+        VS::Field::PlatformContact{
+            .x = 64, .height = -32, .z = 16, .platform_index = 0});
+}
+
+TEST_CASE("Typed platform placement reads a platform the lookup hides",
+          "[field][platform-placement]") {
+  const std::array<MovingPlatformPose, 2> poses{
+      MovingPlatformPose{},
+      MovingPlatformPose{
+          .x = -4097, .y = -ONE, .bounce_frame = 2, .hidden = true}};
+  CHECK_FALSE(VS::Field::FindMovingPlatformById(Room(poses), 3).has_value());
+  // C division truncates toward zero: -4097 / 4096 is -1.
+  CHECK(VS::Field::MovingPlatformPlacement(Room(poses), 3) ==
+        VS::Field::PlatformContact{
+            .x = -1, .height = 17, .z = 0, .platform_index = 1});
+}
+
+TEST_CASE("Typed platform lookup rejects absent layers and bad frames",
+          "[field][platform-placement]") {
+  std::array<MovingPlatformPose, 1> poses{};
+  const auto room = Room(poses);
+  for (const int layer : {0, 1, 3, 6}) {
+    CHECK_FALSE(VS::Field::FindMovingPlatformById(room, layer).has_value());
+  }
+  poses[0].bounce_frame = 8;
+  CHECK_FALSE(VS::Field::MovingPlatformPlacement(room, 2).has_value());
+  poses[0].bounce_frame = -1;
+  CHECK_FALSE(VS::Field::MovingPlatformPlacement(room, 2).has_value());
+  poses[0] = {.x = 40000 * ONE, .bounce_frame = 7};
+  CHECK_FALSE(VS::Field::FindMovingPlatformById(room, 2).has_value());
+  const std::array<MovingPlatformPose, 5> crowded{};
+  CHECK_FALSE(VS::Field::FindMovingPlatformById(Room(crowded), 2).has_value());
 }
 
 // #257: callers of the moving-platform lookup must not read through the null
@@ -160,8 +208,19 @@ Actors_ActorRecord OnPlatform() {
   return actor;
 }
 
+// The fields the jump, contact and ledge paths write.
+auto Observed(const Actors_ActorRecord& actor) {
+  const auto& position = actor.instance.position;
+  const auto& anchor = actor.platformAnchor;
+  return std::tuple(position.vx, position.vy, position.vz, anchor.vx, anchor.vy,
+                    anchor.vz, actor.platformOffsetX, actor.platformOffsetZ,
+                    actor.moveFacing, actor.instance.jumpCountdown,
+                    actor.landingPending, actor.destinationX,
+                    actor.destinationZ);
+}
+
 bool Same(const Actors_ActorRecord& a, const Actors_ActorRecord& b) {
-  return std::memcmp(&a, &b, sizeof(a)) == 0;
+  return Observed(a) == Observed(b);
 }
 }  // namespace
 

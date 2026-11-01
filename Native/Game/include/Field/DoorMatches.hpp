@@ -5,13 +5,12 @@
 #include <span>
 #include <vector>
 
+#include "Field/PlatformLayers.hpp"
+
 // Transition door lookup by tile. Doors are passed as their tile locations and
 // matches come back as indices, so the query reads no room global or PS1
 // address.
 namespace VS::Field {
-// Floor layers from this one up are moving-platform surfaces.
-inline constexpr int kFirstPlatformLayer = 2;
-
 struct DoorTile {
   std::uint8_t x = 0;
   std::uint8_t z = 0;

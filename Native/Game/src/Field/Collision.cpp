@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Field/CollisionSampling.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/Zone.h"
@@ -1821,11 +1821,11 @@ int Field_CalcActorLedgeOffset(Actors_ActorRecord* actor, SVECTOR* offset)
     int surface;
     int distance;
 
-    Field_PlatformContactPoint* platform = NULL;
+    std::optional<Field_PlatformContactPoint> platform;
 
     if (actor->instance.supportLayer) {
-        platform = Field_FindMovingPlatformById(actor->instance.supportLayer);
-        if (platform == NULL) {
+        platform = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);
+        if (!platform) {
             Core_Errorf("field.platform", "ledge probe on invisible platform layer %d",
                         actor->instance.supportLayer);
             return 0;

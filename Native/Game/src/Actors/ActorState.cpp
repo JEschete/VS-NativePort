@@ -2,6 +2,7 @@
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Field/Collision.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
-#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -628,7 +628,7 @@ void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int h
 
     int value;
     u_char tileType;
-    Field_PlatformContactPoint platform_contact;
+    std::optional<Field_PlatformContactPoint> platform_contact;
 
     actor = Actors_actorRecords[actorId];
     *(int*)&actor->instance.currentTileX = *(int*)placement;
@@ -666,16 +666,17 @@ void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int h
             actor->instance.movementMode = 3;
         } else {
             if (tileType >= 2U) {
-                if (!Field_CopyMovingPlatformPlacement((u_char)placement->direction, &platform_contact)) {
+                platform_contact = VS::Field::LiveMovingPlatformPlacement((u_char)placement->direction);
+                if (!platform_contact) {
                     abort();
                 }
-                actor->instance.position.vx = platform_contact.x;
-                actor->instance.position.vy = platform_contact.height;
-                actor->instance.position.vz = platform_contact.z;
-                actor->instance.position.pad = platform_contact.platformIndex;
-                actor->platformAnchor.vx = platform_contact.x;
-                actor->platformAnchor.vy = platform_contact.height;
-                actor->platformAnchor.vz = platform_contact.z;
+                actor->instance.position.vx = platform_contact->x;
+                actor->instance.position.vy = platform_contact->height;
+                actor->instance.position.vz = platform_contact->z;
+                actor->instance.position.pad = platform_contact->platformIndex;
+                actor->platformAnchor.vx = platform_contact->x;
+                actor->platformAnchor.vy = platform_contact->height;
+                actor->platformAnchor.vz = platform_contact->z;
 
                 actor->platformAnchor.pad = (u_char)placement->direction;
 

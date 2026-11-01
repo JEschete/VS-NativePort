@@ -188,7 +188,6 @@ extern "C" {
 #include "Field/Minimap.h"
 #include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
@@ -1223,7 +1222,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800A47C4u, 0u, (void*)&Field_AreGimmicksMoving, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A4828u, 0u, (void*)&Actors_BuildActorPoseAtMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A48CCu, 0u, (void*)&Actors_BeginActorJumpMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A4A24u, 0u, (void*)&Field_FindMovingPlatformById, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A4A88u, 0u, (void*)&Actors_UpdateActorPlatformContact, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A4D8Cu, 0u, (void*)&Actors_UpdateRoomActorMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A4E68u, 0u, (void*)&Actors_UpdateActorMovement, 0u, 0u, 0u},

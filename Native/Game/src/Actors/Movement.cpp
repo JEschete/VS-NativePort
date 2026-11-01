@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MovementCommand.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/PlatformPlacementLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -36,7 +37,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Field/PlatformPlacement.h"
 #include "Field/Platforms.h"
 #include "Field/Transitions.h"
 #include "Input/Buttons.h"
@@ -776,7 +776,7 @@ void Actors_BeginActorJumpToTile(Actors_ActorRecord* actor, u_char* target, int 
     int frames;
     int fall;
     int velocity;
-    Field_PlatformContactPoint* platform = NULL;
+    std::optional<Field_PlatformContactPoint> platform;
     int _[2] __attribute__((unused));
 
     if (*(u_int*)((char*)actor + 8) & 0x70000) {
@@ -784,8 +784,8 @@ void Actors_BeginActorJumpToTile(Actors_ActorRecord* actor, u_char* target, int 
     }
 
     if (target[1] >= 2) {
-        platform = Field_FindMovingPlatformById(target[1]);
-        if (platform == NULL) {
+        platform = VS::Field::FindLiveMovingPlatformById(target[1]);
+        if (!platform) {
             Core_Errorf("field.platform", "jump target platform layer %d is not visible", target[1]);
             return;
         }
@@ -1227,7 +1227,7 @@ void Actors_BeginActorJumpMovement(int index, int direction, int distance)
 // decomp: BATTLE.PRG func_800A4A88 (src/BATTLE/BATTLE.PRG/3A1A0.c:1107)
 void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
 {
-    Field_PlatformContactPoint* contact;
+    std::optional<Field_PlatformContactPoint> contact;
     int contactId;
     int current;
     int previous;
@@ -1238,8 +1238,8 @@ void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
             return;
         }
 
-        contact = Field_FindMovingPlatformById(actor->instance.supportLayer);
-        if (contact == NULL) {
+        contact = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);
+        if (!contact) {
             Core_Errorf("field.platform", "actor %d rides invisible platform layer %d", actor->instance.slot,
                         actor->instance.supportLayer);
             return;
@@ -1270,8 +1270,8 @@ void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
             return;
         }
 
-        contact = Field_FindMovingPlatformById(actor->instance.supportLayer);
-        if (contact == NULL) {
+        contact = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);
+        if (!contact) {
             Core_Errorf("field.platform", "actor %d anchors to invisible platform layer %d",
                         actor->instance.slot, actor->instance.supportLayer);
             return;

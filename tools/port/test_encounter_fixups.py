@@ -225,7 +225,7 @@ class EncounterFixupTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         movement = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(encoding="utf-8")
         collision = (root / r"Native\Game\src\Field\Collision.cpp").read_text(encoding="utf-8")
-        self.assertNotIn("(SVECTOR* (*)(int))Field_FindMovingPlatformById", movement)
+        self.assertNotIn("Field_FindMovingPlatformById", movement + collision)
         for source, name, guards in (
             (movement, "Actors_BeginActorJumpToTile", 1),
             (movement, "Actors_UpdateActorPlatformContact", 2),
@@ -234,31 +234,37 @@ class EncounterFixupTests(unittest.TestCase):
             with self.subTest(name=name):
                 start = source.index(f"\n{name}(") if f"\n{name}(" in source else source.index(f" {name}(")
                 body = source[start:source.index("\n}\n", start)]
-                lookups = re.findall(r"(\w+) = Field_FindMovingPlatformById\(", body)
+                lookups = re.findall(r"(\w+) = VS::Field::FindLiveMovingPlatformById\(", body)
                 self.assertEqual(len(lookups), guards)
                 for variable in lookups:
-                    self.assertIn(f"if ({variable} == NULL)", body)
+                    self.assertIn(f"std::optional<Field_PlatformContactPoint> {variable};", body)
+                    self.assertIn(f"if (!{variable})", body)
                 self.assertEqual(body.count('Core_Errorf("field.platform"'), guards)
 
     def test_platform_placement_uses_an_owned_authored_contact(self):
         fixups = copy_fixups.FIXES["F00901"]
         declaration = next(new for old, new, _ in fixups if "int* anchor" in old)
         body = next(new for old, new, _ in fixups if "anchor =" in old)
-        self.assertIn("Field_PlatformContactPoint platform_contact", declaration)
-        self.assertIn("Field_CopyMovingPlatformPlacement", body)
+        self.assertIn("std::optional<Field_PlatformContactPoint> platform_contact", declaration)
+        self.assertIn("VS::Field::LiveMovingPlatformPlacement", body)
         self.assertIn("abort();", body)
         self.assertNotIn("anchor[", body)
         self.assertNotIn("isHidden =", body)
         self.assertNotIn("State_SetScriptFlag", body)
         self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Field_CopyMovingPlatformPlacement"],
-            r"Native\Game\src\Field\PlatformPlacement.h",
+            copy_fixups.NATIVE_HELPER_HEADERS["VS::Field::LiveMovingPlatformPlacement"],
+            r"Native\Game\include\Field\PlatformPlacementLive.hpp",
         )
         scaffold = runpy.run_path(
             str(Path(__file__).resolve().parents[1] / "scaffold" / "gen_solution.py"),
             run_name="scaffold_platform_test",
         )
         self.assertTrue(
+            scaffold["needs_c_headers"](
+                "VS.Game", r"src\Field\PlatformPlacementLive.cpp"
+            )
+        )
+        self.assertFalse(
             scaffold["needs_c_headers"](
                 "VS.Game", r"src\Field\PlatformPlacement.cpp"
             )
@@ -1467,7 +1473,7 @@ class EncounterFixupTests(unittest.TestCase):
     def test_promoted_terrain_callers_pass_the_grid_and_decoded_values(self):
         fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
                  if "VS::Field::" in pat and "SampleCollisionHeightCode" not in pat
-                 and "TransitionDoorsAtTile" not in pat]
+                 and "TransitionDoorsAtTile" not in pat and "FindMovingPlatformById" not in pat]
         self.assertEqual(len(fixes), 3)
         self.assertTrue(all(re.search(row, "Battle::Ai::Movement") for row, _, _ in fixes))
         text = "\n".join((

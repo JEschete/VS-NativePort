@@ -45,6 +45,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
+    **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
+       for name in ("VS::Field::LiveMovingPlatformPlacement", "VS::Field::FindLiveMovingPlatformById")},
     "Event_ScriptSetAshleyBattleModeOpcode": r"Native\Game\src\Event\WeaponModeOpcode.h",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
@@ -62,8 +64,6 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Actors_FindBoundAnimationHeader":
         r"Native\Game\src\Actors\AnimationBindings.h",
-    "Field_CopyMovingPlatformPlacement":
-        r"Native\Game\src\Field\PlatformPlacement.h",
     **{name: r"Native\Game\include\Diagnostics\SceneTrace.h"
        for name in (
            "Diagnostics_RecordSceneCommand", "Diagnostics_RecordSceneResult",
@@ -1916,33 +1916,34 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     "F00901": [
         ("    int* anchor;",
-         "    Field_PlatformContactPoint platform_contact;",
+         "    std::optional<Field_PlatformContactPoint> platform_contact;",
          "3A1A0.c:274 platform placement owns its contact value instead of borrowing a returned stack address"),
-        ("                anchor = (int*)Field_FindMovingPlatformById((u_char)placement->direction);\n"
+        ("                anchor = (int*)VS::Field::FindMovingPlatformById((u_char)placement->direction);\n"
          "                *(int*)&actor->instance.position.vx = anchor[0];\n"
          "                *(int*)&actor->instance.position.vz = anchor[1];\n"
          "                *(int*)&actor->platformAnchor.vx = anchor[0];\n"
          "                *(int*)&actor->platformAnchor.vz = anchor[1];",
-         "                if (!Field_CopyMovingPlatformPlacement((u_char)placement->direction, &platform_contact)) {\n"
+         "                platform_contact = VS::Field::LiveMovingPlatformPlacement((u_char)placement->direction);\n"
+         "                if (!platform_contact) {\n"
          "                    abort();\n"
          "                }\n"
-         "                actor->instance.position.vx = platform_contact.x;\n"
-         "                actor->instance.position.vy = platform_contact.height;\n"
-         "                actor->instance.position.vz = platform_contact.z;\n"
-         "                actor->instance.position.pad = platform_contact.platformIndex;\n"
-         "                actor->platformAnchor.vx = platform_contact.x;\n"
-         "                actor->platformAnchor.vy = platform_contact.height;\n"
-         "                actor->platformAnchor.vz = platform_contact.z;",
+         "                actor->instance.position.vx = platform_contact->x;\n"
+         "                actor->instance.position.vy = platform_contact->height;\n"
+         "                actor->instance.position.vz = platform_contact->z;\n"
+         "                actor->instance.position.pad = platform_contact->platformIndex;\n"
+         "                actor->platformAnchor.vx = platform_contact->x;\n"
+         "                actor->platformAnchor.vy = platform_contact->height;\n"
+         "                actor->platformAnchor.vz = platform_contact->z;",
          "800A3224 and event31/104:402 request an authored platform before its visibility command; read its actual transform without changing visibility or collision, and surface absent/invalid support instead of dereferencing null"),
     ],
     "F00889": [
         ("    SVECTOR* anchor;",
-         "    Field_PlatformContactPoint* platform = NULL;",
+         "    std::optional<Field_PlatformContactPoint> platform;",
          "38C1C.c:450 a platform jump target is the typed contact, not an SVECTOR read through a retyped call (#257)"),
         ("    actor->instance.jumpCountdown = 6;\n",
          "    if (target[1] >= 2) {\n"
-         "        platform = Field_FindMovingPlatformById(target[1]);\n"
-         "        if (platform == NULL) {\n"
+         "        platform = VS::Field::FindMovingPlatformById(target[1]);\n"
+         "        if (!platform) {\n"
          "            Core_Errorf(\"field.platform\", \"jump target platform layer %d is not visible\", target[1]);\n"
          "            return;\n"
          "        }\n"
@@ -1951,7 +1952,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    actor->instance.jumpCountdown = 6;\n",
          "38C1C.c:526 the original reads a missing platform through NULL (PS1 address 0); refuse the jump before any "
          "actor state changes (#257)"),
-        ("        anchor = ((SVECTOR* (*)(int))Field_FindMovingPlatformById)(target[1]);\n"
+        ("        anchor = VS::Field::FindMovingPlatformById(target[1]);\n"
          "        x = anchor->vx;\n"
          "        y = anchor->vy;\n"
          "        z = anchor->vz;",
@@ -1961,10 +1962,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "38C1C.c:526 SVECTOR vx/vy/vz are the contact x/height/z (#257)"),
     ],
     "F00921": [
+        ("    Field_PlatformContactPoint* contact;\n",
+         "    std::optional<Field_PlatformContactPoint> contact;\n",
+         "3A1A0.c:1107 the platform contact is a value; the original borrowed func_800A4A24's stack array"),
         ("        contact = func_800A4A24(actor->instance.supportLayer);\n"
          "        actor->platformOffsetX",
-         "        contact = func_800A4A24(actor->instance.supportLayer);\n"
-         "        if (contact == NULL) {\n"
+         "        contact = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);\n"
+         "        if (!contact) {\n"
          "            Core_Errorf(\"field.platform\", \"actor %d rides invisible platform layer %d\", actor->instance.slot,\n"
          "                        actor->instance.supportLayer);\n"
          "            return;\n"
@@ -1973,8 +1977,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "3A1A0.c:1107 mode 0 follows the platform; a missing one leaves the actor in place instead of reading NULL (#257)"),
         ("        contact = func_800A4A24(actor->instance.supportLayer);\n"
          "        break;",
-         "        contact = func_800A4A24(actor->instance.supportLayer);\n"
-         "        if (contact == NULL) {\n"
+         "        contact = VS::Field::FindLiveMovingPlatformById(actor->instance.supportLayer);\n"
+         "        if (!contact) {\n"
          "            Core_Errorf(\"field.platform\", \"actor %d anchors to invisible platform layer %d\",\n"
          "                        actor->instance.slot, actor->instance.supportLayer);\n"
          "            return;\n"
@@ -1986,13 +1990,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("    actor->moveFacing = direction * (ONE / 4);\n"
          "\n"
          "    if (actor->instance.supportLayer) {\n"
-         "        Field_PlatformContactPoint* platform = Field_FindMovingPlatformById(actor->instance.supportLayer);\n"
+         "        Field_PlatformContactPoint* platform = VS::Field::FindMovingPlatformById(actor->instance.supportLayer);\n"
          "\n",
-         "    Field_PlatformContactPoint* platform = NULL;\n"
+         "    std::optional<Field_PlatformContactPoint> platform;\n"
          "\n"
          "    if (actor->instance.supportLayer) {\n"
-         "        platform = Field_FindMovingPlatformById(actor->instance.supportLayer);\n"
-         "        if (platform == NULL) {\n"
+         "        platform = VS::Field::FindMovingPlatformById(actor->instance.supportLayer);\n"
+         "        if (!platform) {\n"
          "            Core_Errorf(\"field.platform\", \"ledge probe on invisible platform layer %d\",\n"
          "                        actor->instance.supportLayer);\n"
          "            return 0;\n"
@@ -2698,6 +2702,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Field::TransitionLiveDoorsAtTile(",
      "F00579 #46 typed promotion: the door binding supplies the room door records, the raw RNG byte and the borrowed "
      "query list"),
+    (r"", r"\bVS::Field::FindMovingPlatformById\(",
+     r"VS::Field::FindLiveMovingPlatformById(",
+     "F00920/F00938 #46 typed promotion: the platform binding supplies the room platforms, bounce frames and "
+     "offsets and returns the contact by value"),
     (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
      r"Event_ScriptSetAshleyBattleModeOpcode",
      "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),

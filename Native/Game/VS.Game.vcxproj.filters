@@ -1719,9 +1719,9 @@
     <ClCompile Include="src\Field\PlatformPlacement.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\PlatformPlacement.h">
+    <ClCompile Include="src\Field\PlatformPlacementLive.cpp">
       <Filter>src\Field</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Field\Platforms.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -2305,6 +2305,15 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\DoorMatchesLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\PlatformLayers.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\PlatformPlacement.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\PlatformPlacementLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\TerrainHeight.hpp">
