@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/ActionResultsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Audio/Stream.h"
 #include "Battle/Abilities.h"
 #include "Battle/ActionFlow.h"
-#include "Battle/ActionResults.h"
 #include "Core/Memory/Heap.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Camera.h"
@@ -374,9 +374,9 @@ int Effects_TickBackgroundColorTrack(Effects_EffectInstance* effect_instance, Ef
 void Effects_ApplyTargetActionImpact(Effects_EffectInstance* effect_instance)
 {
     if (effect_instance->context.target.type == 4) {
-        Battle_ApplyActionTargetEffects(effect_instance->context.target.value.actor.actor, NULL);
+        VS::Battle::ApplyLiveActionTargetEffects(effect_instance->context.target.value.actor.actor, NULL);
     } else {
-        Battle_ApplyActionTargetEffects(
+        VS::Battle::ApplyLiveActionTargetEffects(
             effect_instance->context.target.value.position.pad, &effect_instance->context.target.value.position);
     }
 }

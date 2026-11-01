@@ -1,108 +1,74 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Battle/ActionResults.h"
+#include "Battle/ActionResults.hpp"
 
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdint>
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Battle/Action.h"
-#include "Battle/ActionAnimation.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Feedback.h"
-#include "Battle/Hit.h"
-#include "Battle/StatusEffects.h"
-#include "Battle/Targeting.h"
-#include "Core/Unported.h"
-#include "Legacy/Psx.h"
+namespace VS::Battle {
+namespace {
+constexpr unsigned kWorldLabelIdMask = 0x1F0;
+constexpr unsigned kWorldLabelIdTag = 0x80;
+
+enum class ImpactKind : std::uint8_t {
+  kHit = 0,
+  kAlternateHit = 1,
+  kBlock = 3,
+  kAlternateBlock = 4,
+  kRecovery = 5,
+};
+
+enum class Reaction : std::uint8_t { kHit, kBlock, kRecover, kNone };
+
+Reaction NextReaction(Reaction current, std::uint8_t impact_kind,
+                      ActionTargetEffects& effects) {
+  switch (static_cast<ImpactKind>(impact_kind)) {
+    case ImpactKind::kHit:
+    case ImpactKind::kAlternateHit:
+      return Reaction::kHit;
+    case ImpactKind::kRecovery:
+      return Reaction::kRecover;
+    case ImpactKind::kBlock:
+    case ImpactKind::kAlternateBlock:
+      return current == Reaction::kNone && !effects.IsAreaAction()
+                 ? Reaction::kBlock
+                 : current;
+    default:
+      return current;
+  }
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_8006CB04 (146C/func_8006CB04.s); compared with
 // rood-boi's PC 146C.c callback.
-void Battle_ApplyActionTargetEffects(int actor_id, SVECTOR* position) {
-  enum {
-    kActorSlotCount = 16,
-    kWorldLabelIdMask = 0x1F0,
-    kWorldLabelIdTag = 0x80,
-    kRecoveryPose = 6,
-    kBlockImpact = 3,
-    kAlternateBlockImpact = 4,
-    kRecoveryImpact = 5,
-    kActionQueueMask =
-        sizeof Battle_actionState->queue / sizeof Battle_actionState->queue[0] -
-        1
-  };
-  if (actor_id >= kActorSlotCount) {
-    if ((actor_id & kWorldLabelIdMask) == kWorldLabelIdTag) {
-      Battle_QueueWorldLockedLabel(reinterpret_cast<u_short*>(position));
+void ApplyActionTargetEffects(int actor_id, ActionTargetEffects& effects) {
+  if (actor_id >= kActionActorSlots) {
+    if ((static_cast<unsigned>(actor_id) & kWorldLabelIdMask) ==
+        kWorldLabelIdTag) {
+      effects.QueueWorldLabel();
     }
     return;
   }
-  if (actor_id < 0 || Battle_actionState == nullptr) abort();
-  Battle_ActionRequest* action =
-      &Battle_actionState
-           ->queue[Battle_actionState->queueIndex & kActionQueueMask];
-  if (action->targetCount >
-          sizeof action->targets / sizeof action->targets[0] ||
-      action->actionId >= sizeof Battle_actionDefinitions /
-                              sizeof Battle_actionDefinitions[0]) {
-    abort();
-  }
-  enum {
-    kReactionHit,
-    kReactionBlock = 4,
-    kReactionRecover = 5,
-    kReactionNone = 6
-  } reaction = kReactionNone;
-  for (unsigned index = 0; index < action->targetCount; ++index) {
-    Battle_HitResult* hit = &action->targets[index];
-    if (hit->targetsPosition != 0 || hit->target.targetActor != actor_id) {
-      continue;
-    }
-    Core_Debugf("combat.result",
-                "action=%u target=%d limb=%u impact=%u hp=%d mp=%d "
-                "hp_effect=%u mp_effect=%u",
-                action->actionId, actor_id, hit->target.targetLimb,
-                hit->target.impactKind, hit->target.hp, hit->target.mp,
-                hit->hpEffect, hit->mpEffect);
-    switch (hit->target.impactKind) {
-      case 0:
-      case 1:
-        reaction = kReactionHit;
-        break;
-      case kRecoveryImpact:
-        reaction = kReactionRecover;
-        break;
-      case kBlockImpact:
-      case kAlternateBlockImpact:
-        if (reaction == kReactionNone &&
-            !Battle_categoryIsAreaTarget
-                [Battle_actionDefinitions[action->actionId].category]) {
-          reaction = kReactionBlock;
-        }
-        break;
-      default:
-        break;
-    }
-    Battle_ApplyActorActionResult(hit);
+  Reaction reaction = Reaction::kNone;
+  for (std::size_t index = 0; index < effects.HitCount(); ++index) {
+    const ActionTargetHit hit = effects.Hit(index);
+    if (hit.targets_position || hit.target_actor != actor_id) continue;
+    reaction = NextReaction(reaction, hit.impact_kind, effects);
+    effects.ApplyHit(index);
   }
   switch (reaction) {
-    case kReactionHit:
-      Battle_PlayActorDamageReaction(actor_id,
-                                     &Battle_actionState->rangeOrigin);
+    case Reaction::kHit:
+      effects.PlayDamageReaction(actor_id);
       break;
-    case kReactionBlock:
+    case Reaction::kBlock:
       // Gimmick actors have no actor record. func_8009DDF4 has no NULL check:
       // on PS1 it reads low RAM, on x64 it faults (#251).
-      if (Actors_actorRecords[actor_id] != nullptr) {
-        Battle_PlayDefenseAnimation(actor_id, &Battle_actionState->rangeOrigin);
-      }
+      if (effects.HasActorRecord(actor_id)) effects.PlayDefense(actor_id);
       break;
-    case kReactionRecover:
-      if (actor_id == 0) Actors_PlayActorActionPose(0, nullptr, kRecoveryPose);
+    case Reaction::kRecover:
+      if (actor_id == 0) effects.PlayRecoveryPose();
       break;
-    default:
+    case Reaction::kNone:
       break;
   }
 }
-}  // extern "C"
+}  // namespace VS::Battle

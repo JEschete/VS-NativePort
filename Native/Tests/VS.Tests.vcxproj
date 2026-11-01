@@ -48,6 +48,7 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\ActionResultsSliceTests.cpp" />
     <ClCompile Include="src\ActorAttachmentTests.cpp" />
     <ClCompile Include="src\ActorCleanupTests.cpp" />
     <ClCompile Include="src\ActorCommandSliceTests.cpp" />

@@ -1,11 +1,11 @@
-extern "C" {
 #include <stdint.h>
 
+#include "Battle/ActionResultsLive.hpp"
+extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
-#include "Battle/ActionResults.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -50,21 +50,21 @@ int Tests_CombatTargetResults(void) {
   action->targets[1].target.targetActor = 3;
   action->targets[2] = *hit;
   action->targets[2].targetsPosition = 1;
-  Battle_ApplyActionTargetEffects(2, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(2, nullptr);
   int passed = stats.currentHp == 51 && stats.limbs[0].hp == 16 &&
                stats.limbs[1].hp == 20;
   hit->target.hp = 100;
-  Battle_ApplyActionTargetEffects(2, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(2, nullptr);
   passed = passed && stats.currentHp == 0;
   hit->target.impactKind = 2;
   hit->hpEffect = 2;
   hit->mpEffect = 1;
   hit->target.mp = 50;
-  Battle_ApplyActionTargetEffects(2, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(2, nullptr);
   passed = passed && stats.currentHp == 63 && stats.currentMp == 0;
   hit->hpEffect = 0;
   hit->mpEffect = 2;
-  Battle_ApplyActionTargetEffects(2, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(2, nullptr);
   passed = passed && stats.currentMp == 40;
   Battle_actionState = savedAction;
   Battle_actors[2] = savedTarget;

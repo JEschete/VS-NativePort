@@ -10,9 +10,9 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Battle/ActionResultsLive.hpp"
 #include "Core/Random.hpp"
 #include "Legacy/Psx.h"
-
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
@@ -23,7 +23,6 @@ extern "C" {
 #include "Battle/ActionEffects.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
-#include "Battle/ActionResults.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorState.h"
@@ -1520,7 +1519,7 @@ TEST_CASE("Every matching limb result contributes once to its actor",
   AbilityFixture fixture;
   fixture.PrepareLimbResults(limb_count, queue_index, filtered_entries);
   auto& target = fixture.stats[1];
-  Battle_ApplyActionTargetEffects(1, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
   const int total = limb_count * (limb_count + 1) / 2;
   CHECK(target.currentHp == 63 - total);
@@ -1548,7 +1547,7 @@ TEST_CASE("Indestructible gimmick hit applies without an actor record",
   // Field_CreateGimmickInstance registers Field_gimmickInstances only.
   Actors_actorRecords[1] = nullptr;
 
-  Battle_ApplyActionTargetEffects(1, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
   CHECK(target.currentHp == 1);
   CHECK(Battle_floatingLabelCount == 0);
@@ -1562,7 +1561,7 @@ TEST_CASE("Blocked hit still plays the defense reaction on a real actor",
   instance.movementMode = 1;
   instance.jumpCountdown = 5;
 
-  Battle_ApplyActionTargetEffects(1, nullptr);
+  VS::Battle::ApplyLiveActionTargetEffects(1, nullptr);
 
   CHECK(static_cast<int>(instance.movementMode) == 0);
   CHECK(static_cast<int>(instance.jumpCountdown) == 0);

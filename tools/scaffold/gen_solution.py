@@ -180,6 +180,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\ScreenEffectState.cpp",
                 r"src\Effects\ScreenDistortion\RadialWarpLive.cpp",
                 r"src\Battle\TargetingDrawLive.cpp",
+                r"src\Battle\ActionResultsLive.cpp",
                 r"src\Effects\ParticleRender.cpp",
                 r"src\Effects\TextureBindingsLive.cpp",
                 r"src\Battle\Ai\GroundNavigation.cpp",

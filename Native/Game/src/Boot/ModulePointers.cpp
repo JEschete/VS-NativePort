@@ -61,7 +61,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionMenu.h"
 #include "Battle/ActionResolution.h"
-#include "Battle/ActionResults.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
@@ -370,7 +369,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006C5ACu, 0u, (void*)&Battle_PlayWeaponHitSounds, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C84Cu, 0u, (void*)&Effects_QueueActionImpactEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CA20u, 0u, (void*)&Battle_ApplyActionSourceEffects, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006CB04u, 0u, (void*)&Battle_ApplyActionTargetEffects, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CD60u, 0u, (void*)&Audio_PlayRandomActorImpactSound, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDB8u, 0u, (void*)&Effects_SignalActorEffectAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006CDD8u, 0u, (void*)&Field_DisableTrapAtPosition, 0u, 0u, 0u},

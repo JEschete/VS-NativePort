@@ -11,7 +11,6 @@ Native\Engine\src\Render\TextureRegionDraw.cpp
 Native\Game\src\Actors\AppearanceTransition.cpp
 Native\Game\src\Actors\ModelDrawing.cpp
 Native\Game\src\Actors\SequencePlayback.cpp
-Native\Game\src\Battle\ActionResults.cpp
 Native\Game\src\Battle\Ai\DecisionCallbacks.cpp
 Native\Game\src\Battle\Ai\FrameUpdate.cpp
 Native\Game\src\Battle\Ai\Relations.cpp

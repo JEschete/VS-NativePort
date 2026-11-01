@@ -221,12 +221,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\ActionResults.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Battle\ActionResults.cpp" />
+    <ClCompile Include="src\Battle\ActionResultsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\ActionTable.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2086,7 +2083,6 @@
     <ClInclude Include="src\Battle\ActionFlow.h" />
     <ClInclude Include="src\Battle\ActionMenu.h" />
     <ClInclude Include="src\Battle\ActionResolution.h" />
-    <ClInclude Include="src\Battle\ActionResults.h" />
     <ClInclude Include="src\Battle\ActionTable.h" />
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.h" />
@@ -2415,6 +2411,8 @@
     <ClInclude Include="include\Actors\MovementCommand.hpp" />
     <ClInclude Include="include\Actors\SoundTransition.hpp" />
     <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\ActionResults.hpp" />
+    <ClInclude Include="include\Battle\ActionResultsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommands.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
