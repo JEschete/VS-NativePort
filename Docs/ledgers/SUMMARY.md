@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 50 | 19 (`wip`) | 4,138 |
-| `cpp` | 50 | 230 (`wip`) | 3,927 |
+| `modernized` | 51 | 19 (`wip`) | 4,137 |
+| `cpp` | 51 | 229 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 194 |
-| `vs_namespace` | 50 |
-| `typed_interface` | 50 |
-| `no_bridge` | 50 |
+| `vs_namespace` | 51 |
+| `typed_interface` | 51 |
+| `no_bridge` | 51 |
 | `strict_clean` | 194 |
-| `behavior_evidence` | 50 |
+| `behavior_evidence` | 51 |
 
-Promotion records: 280; derived `cpp=x`: 50, `cpp=wip`: 230. Verification records: 67; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 51, `cpp=wip`: 229. Verification records: 68; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -177,6 +177,8 @@ The twenty-first is the target sphere wireframe (F01288): VS::Battle::DrawSphere
 through a TargetWireCanvas; DrawLiveSphereVolumeWireframe copies the live sphere wire state and binds the GTE projection.
 The twenty-second is the action target effects (F00062): VS::Battle::ApplyActionTargetEffects picks the reaction
 through ActionTargetEffects; ApplyLiveActionTargetEffects validates and binds the live action queue.
+The twenty-third is the door tile lookup (F00579): VS::Field::TransitionDoorsAtTile matches door tiles
+by index; TransitionLiveDoorsAtTile binds the room door records and the borrowed query list.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

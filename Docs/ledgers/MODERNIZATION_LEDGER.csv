@@ -578,7 +578,7 @@ F00575,Field_CollisionCellAt,Field::CollisionCellAt,Native\Game\src\Field\Collis
 F00576,Field_SetCollisionCellBlocked,Field::SetCollisionCellBlocked,Native\Game\src\Field\Collision.cpp,generated,todo,57,23,26,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
 F00577,Field_SetEntranceDoorRecord,Field::SetEntranceDoorRecord,Native\Game\src\Field\Doors.cpp,generated,todo,45,3,11,relaxed,found,x,,,,,,,2,1,0,x,,,,no,no,0,,characterize-first,
 F00578,Field_FindEntranceDoorNearTile,Field::FindEntranceDoorNearTile,Native\Game\src\Field\Doors.cpp,generated,todo,45,3,43,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
-F00579,Field_TransitionDoorsAtTile,Field::TransitionDoorsAtTile,Native\Game\src\Field\DoorMatches.cpp,owned,todo,45,3,28,strict,found,x,x,,,,x,,1,0,1,x,,,,yes,no,100,,executed,
+F00579,VS::Field::TransitionDoorsAtTile,Field::TransitionDoorsAtTile,Native\Game\src\Field\DoorMatches.cpp,owned,done,45,3,28,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,no,100,VR-FIELD-DOOR-MATCHES-SLICE,recorded,
 F00580,Field_InteractiveDoorAtTile,Field::InteractiveDoorAtTile,Native\Game\src\Field\Doors.cpp,generated,todo,45,3,45,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
 F00581,Field_ToggleDoorCollision,Field::ToggleDoorCollision,Native\Game\src\Field\Doors.cpp,generated,todo,45,3,26,relaxed,found,x,,,,,,,0,0,0,x,,,,no,no,0,,characterize-first,
 F00582,Field_BeginDoorToggle,Field::BeginDoorToggle,Native\Game\src\Field\Doors.cpp,generated,todo,45,3,17,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
