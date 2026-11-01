@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -265,10 +265,10 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
             && (Battle_Ai_tileFlagMap[model->tile.tile.tileZ][model->tile.tile.tileX] & 0x10)
             && !(model->opaque8 & 0x200000)) {
             state->nextTile = model->tile.word;
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 12);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 12);
         } else if ((short)options < 0 || !(((int)(short)options << 26) < 0)) {
             if (actor->startCommandFlag) {
-                Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 1);
+                VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 1);
                 state->behaviorMode = 1;
             }
         }

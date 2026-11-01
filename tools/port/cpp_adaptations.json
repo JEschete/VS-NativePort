@@ -2481,19 +2481,19 @@
 [
 267,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, 12);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 12);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 12);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 12);"
 ]
 ],
 [
 270,
 [
-"                Battle_Ai_IssueActorCommand((void*)state, 1);"
+"                VS::Battle::Ai::IssueLiveActorCommand((void*)state, 1);"
 ],
 [
-"                Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 1);"
+"                VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 1);"
 ]
 ]
 ],
@@ -2748,10 +2748,10 @@
 [
 520,
 [
-"                Battle_Ai_IssueActorCommand((void*)state, 17);"
+"                VS::Battle::Ai::IssueLiveActorCommand((void*)state, 17);"
 ],
 [
-"                Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 17);"
+"                VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 17);"
 ]
 ],
 [
@@ -2833,10 +2833,10 @@
 [
 388,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, 8);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
 ]
 ],
 [
@@ -2851,10 +2851,10 @@
 [
 397,
 [
-"        Battle_Ai_IssueActorCommand((void*)state, mode);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
 ]
 ],
 [
@@ -2878,10 +2878,10 @@
 [
 436,
 [
-"        Battle_Ai_IssueActorCommand((void*)state, mode);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
 ]
 ],
 [
@@ -2896,19 +2896,19 @@
 [
 456,
 [
-"        Battle_Ai_IssueActorCommand((void*)state, mode);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
 ]
 ],
 [
 487,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, mode);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
 ]
 ],
 [
@@ -2923,19 +2923,19 @@
 [
 517,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, mode);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
 ]
 ],
 [
 522,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, 8);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
 ]
 ],
 [
@@ -2995,10 +2995,10 @@
 [
 661,
 [
-"    Battle_Ai_IssueActorCommand((void*)state, 13);"
+"    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 13);"
 ],
 [
-"    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 13);"
+"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 13);"
 ]
 ],
 [
@@ -3040,10 +3040,10 @@
 [
 997,
 [
-"        Battle_Ai_IssueActorCommand((void*)s, 0);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)s), 0);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)s), 0);"
 ]
 ],
 [
@@ -3085,19 +3085,19 @@
 [
 1178,
 [
-"        Battle_Ai_IssueActorCommand((void*)context, 0);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)context), 0);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 0);"
 ]
 ],
 [
 1217,
 [
-"    Battle_Ai_IssueActorCommand((void*)context, 4);"
+"    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
 ],
 [
-"    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)context), 4);"
+"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 4);"
 ]
 ],
 [
@@ -3114,37 +3114,37 @@
 [
 1246,
 [
-"        Battle_Ai_IssueActorCommand((void*)state, 4);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
 ]
 ],
 [
 1251,
 [
-"        Battle_Ai_IssueActorCommand((void*)state, 3);"
+"        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 3);"
 ],
 [
-"        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);"
+"        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);"
 ]
 ],
 [
 1280,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, 0);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 0);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 0);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 0);"
 ]
 ],
 [
 1284,
 [
-"            Battle_Ai_IssueActorCommand((void*)state, 4);"
+"            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
 [
-"            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
+"            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);"
 ]
 ]
 ],
@@ -3152,10 +3152,10 @@
 [
 467,
 [
-"                    Battle_Ai_IssueActorCommand((void*)state, mode);"
+"                    VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
 [
-"                    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
+"                    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
 ]
 ],
 [
@@ -3181,10 +3181,10 @@
 [
 82,
 [
-"    Battle_Ai_IssueActorCommand((void*)state, 8);"
+"    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
 [
-"    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
+"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
 ]
 ],
 [
@@ -3199,10 +3199,10 @@
 [
 255,
 [
-"    Battle_Ai_IssueActorCommand((void*)state, 8);"
+"    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
 [
-"    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
+"    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);"
 ]
 ],
 [

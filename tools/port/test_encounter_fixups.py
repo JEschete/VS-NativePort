@@ -3141,6 +3141,21 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
         self.assertNotIn("0x800DEC88u", table)
 
+    def test_actor_commands_route_through_the_live_binding(self):
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        self.assertEqual(owned["F01720"]["name"], "VS::Battle::Ai::IssueActorCommand")
+        self.assertFalse((root / "Native/Game/src/Battle/Ai/ActorCommands.h").exists())
+        for path in ("ActorState.cpp", "Behavior.cpp", "Movement.cpp", "Navigation.cpp", "OrbitingBoss.cpp"):
+            text = (root / "Native/Game/src/Battle/Ai" / path).read_text(encoding="utf-8")
+            self.assertNotIn("Battle_Ai_IssueActorCommand(", text, path)
+            self.assertNotIn("Battle/Ai/ActorCommands.h", text, path)
+            self.assertIn("VS::Battle::Ai::IssueLiveActorCommand(", text, path)
+            self.assertIn('#include "Battle/Ai/ActorCommandsLive.hpp"', text, path)
+        table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("0x800DEEFCu", table)
+
     def test_particle_attraction_uses_native_fields_after_pointer_widening(self):
         source = """damping = ((Effects_ParticleAttractionView*)node)->attraction;
 direction.vx = ((Effects_ParticleAttractionView*)node)->targetX - (state->x >> 12);

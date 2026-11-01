@@ -369,9 +369,9 @@
     <ClCompile Include="src\Battle\Ai\ActorCommands.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\ActorCommands.h">
+    <ClCompile Include="src\Battle\Ai\ActorCommandsLive.cpp">
       <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorState.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2204,6 +2204,12 @@
     </ClInclude>
     <ClInclude Include="include\Battle\Action.h">
       <Filter>include\Battle</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ActorCommands.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp">
       <Filter>include\Battle\Ai</Filter>

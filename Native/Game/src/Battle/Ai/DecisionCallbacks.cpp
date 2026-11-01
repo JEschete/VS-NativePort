@@ -1,4 +1,5 @@
 // Hand-maintained (tools/port/owned.csv).
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Actors/ActorAllocation.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -149,12 +149,12 @@ void Battle_Ai_UpdateActorLocomotionMode(Battle_Ai_DecisionDispatchView* view) {
   if (state->behaviorMode == 1 &&
       (reinterpret_cast<Battle_Actor*>(state->actor))->commandOpcode <
           kFirstNonLocomotionCommand) {
-    Battle_Ai_IssueActorCommand(state, 1);
+    VS::Battle::Ai::IssueLiveActorCommand(state, 1);
     return;
   }
   Battle_Ai_ReleaseActorAiReservations(state);
   state->behaviorMode = 0;
-  Battle_Ai_IssueActorCommand(state, 2);
+  VS::Battle::Ai::IssueLiveActorCommand(state, 2);
 }
 
 // decomp: BATTLE.PRG func_800DB820 (src/BATTLE/BATTLE.PRG/72B70.s:390).

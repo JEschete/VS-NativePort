@@ -50,6 +50,7 @@
   <ItemGroup>
     <ClCompile Include="src\ActorAttachmentTests.cpp" />
     <ClCompile Include="src\ActorCleanupTests.cpp" />
+    <ClCompile Include="src\ActorCommandSliceTests.cpp" />
     <ClCompile Include="src\ActorCommandTests.cpp" />
     <ClCompile Include="src\ActorShadowTests.cpp" />
     <ClCompile Include="src\ActorSoundTransitionTests.cpp" />

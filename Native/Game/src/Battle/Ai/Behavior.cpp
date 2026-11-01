@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -459,7 +459,7 @@ int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* ai_state, Battle
             candidate->opaqueCBit7 = 217;
         }
 
-        Battle_Ai_IssueActorCommand(ai_state, 15);
+        VS::Battle::Ai::IssueLiveActorCommand(ai_state, 15);
 
         if (Battle_Ai_DoesActionRequireCooldown(ai_state, candidate)) {
             ai_state->minActionDelay = ai_state->usesRoomActionDelay == 0 ? Battle_Ai_roomAiState->defaultActionDelay : 50;
@@ -520,7 +520,7 @@ void Battle_Ai_UpdateActorDecisions(void)
         if (!state->opaque14 || state->opaque1D) {
             value = VS::Core::ElapsedFrameCounterTicks();
             if (Battle_Ai_frameTickBudget < value) {
-                Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 17);
+                VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 17);
             } else {
                 *(int*)((uintptr_t)&Battle_Ai_FrameState()->lastBudgetTick) = value;
                 if (state->opaque14 && state->opaque1D) {

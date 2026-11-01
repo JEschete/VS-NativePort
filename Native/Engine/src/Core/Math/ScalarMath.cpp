@@ -22,6 +22,7 @@ constexpr unsigned kNormalizedIndexShift = 24;
 constexpr unsigned kRootLookupFractionBits = 18;
 constexpr unsigned kAngleMask = 0xFFF;
 constexpr double kRadiansPerAngleUnit = 2.0 * std::numbers::pi / 4096.0;
+constexpr double kAngleUnitsPerRadian = 2048.0 / std::numbers::pi;
 constexpr double kFixedOne = 4096.0;
 
 // Normalized reciprocal-root inputs are 64..255.
@@ -98,6 +99,13 @@ std::int32_t Sine(std::int32_t angle) noexcept {
 std::int32_t Cosine(std::int32_t angle) noexcept {
   return static_cast<std::int32_t>(
       std::lround(std::cos(AngleRadians(angle)) * kFixedOne));
+}
+
+std::int32_t Arctangent2(std::int32_t y, std::int32_t x) noexcept {
+  if (x == 0 && y == 0) return 0;
+  return static_cast<std::int32_t>(
+      std::lround(std::atan2(static_cast<double>(y), static_cast<double>(x)) *
+                  kAngleUnitsPerRadian));
 }
 
 // decomp: BATTLE.PRG _fixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4163).

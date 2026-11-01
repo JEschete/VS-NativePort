@@ -67,7 +67,6 @@ extern "C" {
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -2016,7 +2015,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DE3E4u, 0u, (void*)&Battle_Ai_BuildActorActionPlan, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEB10u, 0u, (void*)&Battle_Ai_ReconcileCompletedActionPlan, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEEA4u, 0u, (void*)&Battle_Ai_NotifyActionRelationshipChanges, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DEEFCu, 0u, (void*)&Battle_Ai_IssueActorCommand, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DF9A8u, 0u, (void*)&Battle_Ai_ResolveRouteGateExit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DFA54u, 0u, (void*)&Battle_Ai_FindNearestRouteGateEntry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DFAF8u, 0u, (void*)&Battle_Ai_FindRouteGateAtTile, 0u, 0u, 0u},

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ModelInstance.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -466,7 +466,7 @@ void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
                 if (mode == 5) {
                     Battle_Ai_BeginAiGroundMovement(state, state->angle << 9);
                 } else {
-                    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
+                    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
                 }
                 return;
             }

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
@@ -12,7 +13,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -80,7 +80,7 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
     angle = Core_Gte_Sin(motion->orbitAngle);
     state->moveZ = (state->z << 12) + Battle_Ai_radialRetreatPath[motion->pathStep][0] * angle;
     state->moveY = (state->y + Battle_Ai_radialRetreatPath[motion->pathStep][1]) << 12;
-    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
+    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
     motion->distanceCached = 0;
     motion->pathStep++;
     return 0;
@@ -253,7 +253,7 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     if (state->moveY >= 0xFF000) {
         state->moveY = 0xFF000;
     }
-    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
+    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
 }
 
 // decomp: BATTLE.PRG func_800E7F8C (src/BATTLE/BATTLE.PRG/7EE98.c:753)

@@ -39,6 +39,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::CheckedTargetPreviews": r"Native\Game\include\Battle\TargetPages.hpp",
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
+    "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2596,6 +2597,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Battle::Ai::RebuildLiveActorActionPlans(",
      "F01718 #46 typed promotion: the planning binding supplies call-local storage, the live actor list and the "
      "queued Battle_ActionRequest (#255)"),
+    (r"", r"\bVS::Battle::Ai::IssueActorCommand\(",
+     r"VS::Battle::Ai::IssueLiveActorCommand(",
+     "F01720 #46 typed promotion: the command binding snapshots the AI state and supplies the frame terrain, actor model, "
+     "selected candidate and tile reservations"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

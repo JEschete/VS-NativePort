@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory>
 
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/FrameTiming.hpp"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -478,7 +478,7 @@ void Battle_Ai_UpdateActorNavigationOverrides(void) {
     // The source clears guest pointer tag bits at actor byte3, not native
     // links.
     if (ScriptedRouteReached(*route)) {
-      Battle_Ai_IssueActorCommand(route, 0);
+      VS::Battle::Ai::IssueLiveActorCommand(route, 0);
       Battle_Ai_FreeActorNavigationOverride(route->actorId);
     }
   }

@@ -10,11 +10,11 @@
 #include <cstdlib>
 #include <limits>
 
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/Behavior.h"
@@ -314,7 +314,7 @@ void Battle_Ai_MoveToTile(Battle_Ai_CandidateMovementView* view,
   const auto limit =
       static_cast<unsigned>(radius) * static_cast<unsigned>(radius);
   if (distance < limit) {
-    Battle_Ai_IssueActorCommand(&state, 0);
+    VS::Battle::Ai::IssueLiveActorCommand(&state, 0);
   } else {
     Battle_Ai_DispatchAiLocomotionMode(&state, 0, 0);
   }

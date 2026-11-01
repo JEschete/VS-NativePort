@@ -10,13 +10,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Legacy/Psx.h"
-
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Movement.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
@@ -112,7 +111,7 @@ TEST_CASE("AI dispatch covers all eighteen actor command intents",
   const std::array<int, 18> opcodes{2,  1,  20, 3,  4,  9,  9,  9, 19,
                                     16, 17, 21, 22, 23, 11, 24, 6, 8};
   CommandFixture fixture;
-  Battle_Ai_IssueActorCommand(&fixture.state, intent);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, intent);
   CHECK(fixture.actor.commandState == 0x80);
   CHECK(fixture.actor.commandOpcode == opcodes[intent]);
   CHECK(fixture.actor.commandTarget == 3);
@@ -125,7 +124,7 @@ TEST_CASE(
   const auto intent = GENERATE(3, 8, 9, 10, 16);
   CommandFixture fixture;
   fixture.state.heading = 0x2345;
-  Battle_Ai_IssueActorCommand(&fixture.state, intent);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, intent);
   if (intent == 3) {
     CHECK(fixture.actor.commandArg0 == 0x00070345);
   } else if (intent == 8) {
@@ -148,7 +147,7 @@ TEST_CASE("AI turning keeps strict rate boundaries and upper-body selection",
   CommandFixture fixture;
   fixture.state.angle = static_cast<int16_t>(target);
   fixture.state.hasTaggedBone3 = static_cast<char>(upper_body);
-  Battle_Ai_IssueActorCommand(&fixture.state, 4);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 4);
   const bool reached = target == 0 || target == 31 || target == 4095;
   CHECK(fixture.actor.commandOpcode == (reached ? 4 : (upper_body ? 7 : 3)));
   CHECK((static_cast<uint32_t>(fixture.actor.commandArg0) >> 16) == 32);
@@ -159,14 +158,14 @@ TEST_CASE(
     "AI tile commands stage native positions and reserve only their target",
     "[ai][actor-commands]") {
   CommandFixture fixture;
-  Battle_Ai_IssueActorCommand(&fixture.state, 13);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 13);
   CHECK(fixture.state.nextPosition.vx == 448);
   CHECK(fixture.state.nextPosition.vy == 0);
   CHECK(fixture.state.nextPosition.vz == 448);
   CHECK(fixture.state.nextPosition.pad == 0x5555);
   CHECK(fixture.actor.commandArg0 == 0x00030003);
   CHECK(fixture.flags[3][3] == 0x80);
-  Battle_Ai_IssueActorCommand(&fixture.state, 12);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
   CHECK(fixture.actor.commandArg0 == 0x001001C0);
   CHECK((fixture.actor.commandArg1.word & 0xFFFF) == 448);
 }
@@ -180,7 +179,7 @@ TEST_CASE(
   const uint16_t threshold = 10;
   std::memcpy(fixture.state.step_height_bytes, &threshold, sizeof(threshold));
   fixture.state.movementFlags = static_cast<u_short>(flags);
-  Battle_Ai_IssueActorCommand(&fixture.state, 14);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 14);
   const auto expected =
       flags == 8 ? 23 : (flags == 0x30 ? 18 : (flags == 0xC0 ? 14 : 11));
   CHECK(fixture.actor.commandOpcode == expected);
@@ -195,7 +194,7 @@ TEST_CASE(
   const auto kind = GENERATE(0, 1, 2, 3);
   CommandFixture fixture;
   fixture.state.actionSlots[2][1].kind = kind;
-  Battle_Ai_IssueActorCommand(&fixture.state, 15);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 15);
   CHECK(fixture.actor.commandOpcode == 24);
   CHECK(fixture.actor.commandArg0 == 0x00010002);
   if (kind == 1 || kind == 2) {
@@ -215,11 +214,11 @@ TEST_CASE(
   fixture.state.position.vx = 264;
   fixture.state.heading = 1024;
   fixture.heights[2][1] = 1;
-  Battle_Ai_IssueActorCommand(&fixture.state, 7);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 7);
   CHECK(fixture.actor.commandOpcode == 13);
   CHECK(fixture.actor.commandArg0 == 32768);
   CHECK(fixture.actor.commandArg1.word == 192512);
-  Battle_Ai_IssueActorCommand(&fixture.state, 7);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 7);
   CHECK(fixture.actor.commandOpcode == 9);
 }
 
@@ -332,7 +331,7 @@ TEST_CASE("Room terrain supports hover before the first AI update",
   CHECK(frame->room == Battle_Ai_roomAiState);
   frame->heightMap[1][1] = 2;
   frame->randomState = 0x87654321;
-  Battle_Ai_IssueActorCommand(&fixture.state, 12);
+  VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
   CHECK(fixture.actor.commandArg0 == (144 << 16 | 192));
   CHECK((fixture.actor.commandArg1.word & 0xFFFF) == 192);
   CHECK(frame->randomState == 0x87654321);
@@ -349,7 +348,7 @@ TEST_CASE("Room teardown retires frame pointers before another room",
     REQUIRE(frame->heightMap != nullptr);
     CHECK(frame->randomState == 0x12345678);
     frame->heightMap[1][1] = static_cast<u_short>(world);
-    Battle_Ai_IssueActorCommand(&fixture.state, 12);
+    VS::Battle::Ai::IssueLiveActorCommand(&fixture.state, 12);
     CHECK((fixture.actor.commandArg0 >> 16) == world * 64 + 16);
     frame->actors[0] = &fixture.state;
     frame->walk_valid = 1;

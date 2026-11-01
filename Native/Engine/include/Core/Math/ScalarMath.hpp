@@ -77,6 +77,10 @@ struct NormalizedVector {
 [[nodiscard]] std::int32_t Sine(std::int32_t angle) noexcept;
 [[nodiscard]] std::int32_t Cosine(std::int32_t angle) noexcept;
 
+// Angle of (x, y) in 4096-per-turn units, rounded to the nearest unit and in
+// [-2048, 2048]; the origin gives 0 (ratan2's argument order).
+[[nodiscard]] std::int32_t Arctangent2(std::int32_t y, std::int32_t x) noexcept;
+
 // (left * right) >> 12 computed in 64 bits and truncated to a word.
 [[nodiscard]] std::int32_t MultiplyFixed(std::int32_t left,
                                          std::int32_t right) noexcept;

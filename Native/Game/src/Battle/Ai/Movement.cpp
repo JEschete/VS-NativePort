@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Core/Math/Distance.hpp"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -387,7 +387,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
             offsetZ = state->z - centerZ;
             state->moveZ = ABS(offsetZ) < step ? centerZ << 12
                                                : (state->z << 12) + step * Core_Gte_Sin(heading);
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
             return;
         }
         state->moveY = rise;
@@ -396,7 +396,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         if (state->moveY > 0 && Battle_Ai_IsFlightDirectionObstructed((Battle_Ai_ObstructionView *)((void*)state), 0, 0)) {
             state->moveY = 0;
         }
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         return;
     }
     if ((state->tile.word & 0xFF00FF) == (state->destination.word & 0xFF00FF)) {
@@ -435,7 +435,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         if (ABS(state->moveZ) < step) {
             state->moveZ = 0;
         }
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         return;
     }
     Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state), angle, 2);
@@ -455,7 +455,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
             state->moveX = Core_Gte_Cos(angle);
             state->moveZ = Core_Gte_Sin(angle);
         }
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         return;
     case 7:
         height = VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination.word))) + state->flightHeight;
@@ -486,7 +486,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
             }
             state->moveX = x - px;
             state->moveZ = z - pz;
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
             state->stallCounter = 0;
             return;
         }
@@ -516,12 +516,12 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
             state->moveX = (x >> 12) - px;
             state->moveZ = (z >> 12) - pz;
             state->moveY = dy;
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         } else {
             state->moveX = x;
             state->moveY = height << 12;
             state->moveZ = z;
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
         }
         return;
     }
@@ -578,7 +578,7 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
         Battle_Ai_BeginAiAlternateTerrainMovement(ai_state);
     } else {
         ai_state->stallCounter = 0;
-        Battle_Ai_IssueActorCommand(ai_state, movement_command);
+        VS::Battle::Ai::IssueLiveActorCommand(ai_state, movement_command);
     }
 }
 
@@ -660,7 +660,7 @@ void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state,
 begin:
     state->moveAttempts = 0;
     state->nextTile = state->destination;
-    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 13);
+    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 13);
     return;
 fallback:
     Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)state));
@@ -996,7 +996,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
     unsigned int oldPosition;
     Battle_Ai_ApproachTargetRecordView* model;
     if (target == s->actorId) {
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)s), 0);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)s), 0);
         goto done;
     }
     model = (Battle_Ai_ApproachTargetRecordView*)Actors_actorRecords[target];
@@ -1177,7 +1177,7 @@ int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int ta
     Actors_ActorRecord* actor = context->model;
     int angle;
     if (targetId == context->actorId) {
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)context), 0);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 0);
         return 1;
     }
     if (context->facingDelay == 0) {
@@ -1216,7 +1216,7 @@ int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int ta
         context->angle = angle & 0xFFF;
         context->previousFacingTile = context->destination;
     }
-    Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)context), 4);
+    VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)context), 4);
     return 1;
 failed:
     return 0;
@@ -1245,12 +1245,12 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
         direction = Core_Gte_Atan2(state->x - actor->x, state->z - actor->z) & 0xFFF;
         state->angle = direction;
         state->opaque13A = state->duration;
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
     } else if (state->opaque9) {
         direction = Core_Gte_Atan2(state->x - state->targetX, state->z - state->targetZ) & 0xFFF;
         state->heading = direction;
         state->opaque13A = state->duration;
-        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);
+        VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);
     } else {
         bestHeight = (-2147483647 - 1);
         bestDirection = -1;
@@ -1279,11 +1279,11 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
             }
         }
         if (bestDirection < 0) {
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 0);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 0);
         } else {
             state->angle = bestDirection << 9;
             state->opaque13A = state->duration;
-            Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
+            VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
         }
     }
 }

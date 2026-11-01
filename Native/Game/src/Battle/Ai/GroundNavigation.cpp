@@ -11,12 +11,12 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Battle/Ai/ActorCommands.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/DecisionPrimitives.h"
@@ -493,7 +493,7 @@ void Recover(Battle_Ai_ActorAiState& state) {
 }
 
 void Command(Battle_Ai_ActorAiState& state, int action) {
-  Battle_Ai_IssueActorCommand(&state, action);
+  VS::Battle::Ai::IssueLiveActorCommand(&state, action);
 }
 
 unsigned ReadTile(const u_char* bytes) {

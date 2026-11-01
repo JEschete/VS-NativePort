@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <numbers>
 
 #include "Core/Math/ScalarMath.hpp"
 
@@ -445,12 +444,8 @@ int Core_Gte_Sin(int a) { return VS::Core::Math::Sine(a); }
 int Core_Gte_Cos(int a) { return VS::Core::Math::Cosine(a); }
 
 long Core_Gte_Atan2(long y, long x) {
-  if (x == 0 && y == 0) {
-    return 0;
-  }
-  return std::lround(
-      std::atan2(static_cast<double>(y), static_cast<double>(x)) *
-      (2048.0 / std::numbers::pi));
+  return VS::Core::Math::Arctangent2(static_cast<std::int32_t>(y),
+                                     static_cast<std::int32_t>(x));
 }
 
 }  // extern "C"
