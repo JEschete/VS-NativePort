@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 45 | 19 (`wip`) | 4,143 |
-| `cpp` | 45 | 235 (`wip`) | 3,927 |
+| `modernized` | 46 | 19 (`wip`) | 4,142 |
+| `cpp` | 46 | 234 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 192 |
-| `vs_namespace` | 45 |
-| `typed_interface` | 45 |
-| `no_bridge` | 45 |
+| `vs_namespace` | 46 |
+| `typed_interface` | 46 |
+| `no_bridge` | 46 |
 | `strict_clean` | 192 |
-| `behavior_evidence` | 45 |
+| `behavior_evidence` | 46 |
 
-Promotion records: 280; derived `cpp=x`: 45, `cpp=wip`: 235. Verification records: 62; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 46, `cpp=wip`: 234. Verification records: 63; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -167,6 +167,8 @@ The sixteenth is the target page binding (F01296): `VS::Battle::SetSphereTargets
 through `TargetSphere`; `SetLiveSphereTargets` binds the battle sphere and the checked action previews.
 The seventeenth is the sphere terrain slice (F01309): `VS::Battle::DrawSphereTerrainIntersection` clips the elevation circle
 against `SphereTerrainTables` and draws through `SphereTerrainCanvas`; `DrawLiveSphereTerrainIntersection` binds the GTE and packets.
+The eighteenth is the AI plan rebuild (F01718): VS::Battle::Ai::RebuildActorActionPlans runs the original passes through
+an ActionPlanningRoom; RebuildLiveActorActionPlans binds call-local storage and reads the queued Battle_ActionRequest (#255).
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

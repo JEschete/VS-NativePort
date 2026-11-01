@@ -1716,7 +1716,7 @@ F01714,Battle_Ai_SnapshotPlanningActorStats,Battle::Ai::SnapshotPlanningActorSta
 F01715,Battle_Ai_RestorePlanningActorStats,Battle::Ai::RestorePlanningActorStats,Native\Game\src\Battle\Ai\ActionPlanning.cpp,generated,todo,57,23,8,relaxed,found,x,,,,,,,0,0,0,,,,,no,yes,100,,executed,
 F01716,Battle_Ai_BuildActorActionPlan,Battle::Ai::BuildActorActionPlan,Native\Game\src\Battle\Ai\ActionPlanning.cpp,generated,todo,57,23,134,relaxed,found,x,,,,,,,0,1,1,x,,,ptr_cast,yes,yes,66,,executed,
 F01717,Battle_Ai_ReconcileCompletedActionPlan,Battle::Ai::ReconcileCompletedActionPlan,Native\Game\src\Battle\Ai\ActionPlanning.cpp,generated,todo,57,23,49,relaxed,found,x,,,,,,,0,1,0,x,,,,no,yes,80,,executed,
-F01718,Battle_Ai_RebuildActorActionPlans,Battle::Ai::RebuildActorActionPlans,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,owned,todo,57,23,47,strict,found,x,x,,,,x,,5,0,0,x,,x,,no,yes,100,,executed,
+F01718,VS::Battle::Ai::RebuildActorActionPlans,Battle::Ai::RebuildActorActionPlans,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,owned,done,57,23,47,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,no,yes,100,VR-AI-PLAN-REBUILD-SLICE,recorded,
 F01719,Battle_Ai_NotifyActionRelationshipChanges,Battle::Ai::NotifyActionRelationshipChanges,Native\Game\src\Battle\Ai\Perception.cpp,generated,todo,57,23,13,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
 F01720,Battle_Ai_IssueActorCommand,Battle::Ai::IssueActorCommand,Native\Game\src\Battle\Ai\ActorCommands.cpp,owned,todo,57,23,0,strict,found,x,x,,,,x,,5,4,1,x,,,,yes,yes,95,,executed,
 F01721,Battle_Ai_ResolveRouteGateExit,Battle::Ai::ResolveRouteGateExit,Native\Game\src\Battle\Ai\Navigation.cpp,generated,todo,57,23,19,relaxed,found,x,,,,,,,0,0,0,x,,,,no,no,0,,characterize-first,

@@ -106,7 +106,7 @@ F01693,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01694,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01695,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01696,Native\Game\src\Battle\Ai\MovementBehavior.cpp,x,,,,x,,,,
-F01718,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,x,,,,x,,,,
+F01718,Native\Game\src\Battle\Ai\PlanningWorkspace.cpp,x,x,x,x,x,x,verify:VR-AI-PLAN-REBUILD-SLICE,8ce91e488ade77a7c00fc26f3a0cc98fa75572ed,"#46 slice: VS::Battle::Ai::RebuildActorActionPlans runs the original pass order through an ActionPlanningRoom with an optional PlanningRequest and no legacy header in its closure; RebuildLiveActorActionPlans in PlanningWorkspaceLive.cpp binds call-local planning storage, Battle_Actor, the canonical actor AI state and the queued Battle_ActionRequest; generated callers use it by copier fixup; T00380 is no longer rebased as an actor view (#255); no data word stores 0x800DEC88"
 F01720,Native\Game\src\Battle\Ai\ActorCommands.cpp,x,,,,x,,,,
 F01731,Native\Game\src\Battle\Ai\FlightTerrain.cpp,x,x,x,x,x,x,verify:VR-AI-FLIGHT-TERRAIN,8e439b230f313fb43c05e1d0cd9c055bb6882ae1,#46 slice: explicit FlightNeighborhood (terrain grid; origin tile; direction steps; flight test) instead of frame globals and the scratchpad direction table
 F01752,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
