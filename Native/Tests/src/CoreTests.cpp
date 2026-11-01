@@ -12,7 +12,7 @@
 
 #include "Core/BiosRand.h"
 #include "Core/FrameClock.hpp"
-#include "Core/FrameTiming.h"
+#include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
@@ -424,27 +424,27 @@ TEST_CASE("Frame work timing preserves source units and halfword wrap",
 TEST_CASE("A stepped frame counter replaces the clock until released",
           "[core][clock][frame-budget]") {
   constexpr int kStep = 7;
-  Core_StepFrameCounterTicks(kStep);
-  Core_ResetFrameTimingBaseline();
+  Core::StepFrameCounterTicks(kStep);
+  Core::ResetFrameTimingBaseline();
   std::this_thread::sleep_for(std::chrono::milliseconds{2});
-  CHECK(Core_ElapsedFrameCounterTicks() == kStep);
-  CHECK(Core_ElapsedFrameCounterTicks() == kStep * 2);
-  Core_ResetFrameTimingBaseline();
-  CHECK(Core_ElapsedFrameCounterTicks() == kStep);
-  Core_StepFrameCounterTicks(0);
-  Core_ResetFrameTimingBaseline();
+  CHECK(Core::ElapsedFrameCounterTicks() == kStep);
+  CHECK(Core::ElapsedFrameCounterTicks() == kStep * 2);
+  Core::ResetFrameTimingBaseline();
+  CHECK(Core::ElapsedFrameCounterTicks() == kStep);
+  Core::StepFrameCounterTicks(0);
+  Core::ResetFrameTimingBaseline();
   std::this_thread::sleep_for(std::chrono::milliseconds{2});
-  CHECK(Core_ElapsedFrameCounterTicks() >= 1);
+  CHECK(Core::ElapsedFrameCounterTicks() >= 1);
 }
 
 TEST_CASE("Frame work baseline resets at actual logical frame boundaries",
           "[core][clock][frame-budget]") {
-  Core_ResetFrameTimingBaseline();
+  Core::ResetFrameTimingBaseline();
   std::this_thread::sleep_for(std::chrono::milliseconds{2});
-  CHECK(Core_ElapsedFrameCounterTicks() >= 1);
+  CHECK(Core::ElapsedFrameCounterTicks() >= 1);
   const auto before = std::chrono::steady_clock::now();
   VSync(0);
-  const auto ticks = Core_ElapsedFrameCounterTicks();
+  const auto ticks = Core::ElapsedFrameCounterTicks();
   const auto duration = std::chrono::steady_clock::now() - before;
   CHECK(ticks >= 0);
   CHECK(ticks <=

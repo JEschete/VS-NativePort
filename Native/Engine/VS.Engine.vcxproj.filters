@@ -312,9 +312,6 @@
     <ClCompile Include="src\Core\FrameTiming.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\FrameTiming.h">
-      <Filter>src\Core</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\Gte.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -706,6 +703,9 @@
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\FrameClock.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\FrameTiming.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Gte.h">

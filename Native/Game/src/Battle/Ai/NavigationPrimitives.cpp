@@ -13,9 +13,9 @@
 
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Diagnostics.h"
+#include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Legacy/Psx.h"
-
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
@@ -29,7 +29,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/FrameTiming.h"
 #include "Core/Memory/Heap.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
@@ -461,7 +460,7 @@ void Battle_Ai_UpdateActorNavigationOverrides(void) {
         base != nullptr
             ? static_cast<Battle_Ai_ActorAiState*>(base->nativePointer18C)
             : nullptr;
-    frame.lastBudgetTick = Core_ElapsedFrameCounterTicks();
+    frame.lastBudgetTick = VS::Core::ElapsedFrameCounterTicks();
     if (route == nullptr) continue;
     const auto* model = Actors_actorRecords[actor->id];
     RequireScriptedNavigation(

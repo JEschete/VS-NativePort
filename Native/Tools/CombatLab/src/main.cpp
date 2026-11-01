@@ -22,7 +22,7 @@
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
 #include "Core/FrameClock.hpp"
-#include "Core/FrameTiming.h"
+#include "Core/FrameTiming.hpp"
 #include "Core/Log.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
@@ -1139,7 +1139,7 @@ void ConfigureSession(const Options& options) {
     Game::Save::ConfigureDirectory(*root / "combat-lab-saves");
   }
   if (options.frame_tick_step != 0) {
-    Core_StepFrameCounterTicks(options.frame_tick_step);
+    VS::Core::StepFrameCounterTicks(options.frame_tick_step);
   }
 }
 

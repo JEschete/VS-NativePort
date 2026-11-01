@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/FrameTiming.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -36,7 +37,6 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/GameplayInit.h"
 #include "Boot/Lifecycle.h"
-#include "Core/FrameTiming.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
@@ -584,7 +584,7 @@ void Boot_RunGameLoop(void)
                         SetDrawStp(&Render_legacyMaskBitOnPackets[Render_frameBuf], 0);
                         AddPrim(ot + 0x820, &Render_legacyMaskBitOnPackets[Render_frameBuf]);
                     }
-                    Core_ElapsedFrameCounterTicks();
+                    VS::Core::ElapsedFrameCounterTicks();
                     Render_PresentFieldFrame(ot + 0x821);
                     Render_AdvanceTexturePageRetirements();
                 } while (!(((Field_screenTransitionStep == 1)

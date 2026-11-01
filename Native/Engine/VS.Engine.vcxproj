@@ -626,7 +626,6 @@
     <ClInclude Include="src\Audio\Voices.h" />
     <ClInclude Include="src\Core\Callbacks.h" />
     <ClInclude Include="src\Core\Compatibility.h" />
-    <ClInclude Include="src\Core\FrameTiming.h" />
     <ClInclude Include="src\Core\Legacy.h" />
     <ClInclude Include="src\Core\Math\FixedPoint.h" />
     <ClInclude Include="src\Core\Math\Interpolation.h" />
@@ -694,6 +693,7 @@
     <ClInclude Include="include\Core\Core\WordPair.h" />
     <ClInclude Include="include\Core\Diagnostics.h" />
     <ClInclude Include="include\Core\FrameClock.hpp" />
+    <ClInclude Include="include\Core\FrameTiming.hpp" />
     <ClInclude Include="include\Core\Gte.h" />
     <ClInclude Include="include\Core\Handle.hpp" />
     <ClInclude Include="include\Core\Log.hpp" />

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
-#include "Core/FrameTiming.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -341,7 +341,7 @@ void Battle_Ai_UpdateActorPerception(void)
             goto skip;
         }
 
-        arg = Core_ElapsedFrameCounterTicks();
+        arg = VS::Core::ElapsedFrameCounterTicks();
         if (Battle_Ai_frameTickBudget < arg) {
             goto idle;
         }

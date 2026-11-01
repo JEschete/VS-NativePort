@@ -1,5 +1,5 @@
 // Hand-maintained (tools/port/owned.csv).
-#include "Core/FrameTiming.h"
+#include "Core/FrameTiming.hpp"
 
 #include <chrono>
 #include <cstdint>
@@ -32,14 +32,13 @@ int FrameCounterTicks(std::chrono::nanoseconds elapsed) {
                      remainder * kCounterUnitsPerSecond / kNanosecondsPerSecond;
   return static_cast<int>(units % kCounterModulus);
 }
-}  // namespace VS::Core
 
-void Core_ResetFrameTimingBaseline(void) {
+void ResetFrameTimingBaseline() {
   frame_start = Clock::now();
   stepped_ticks = 0;
 }
 
-void Core_StepFrameCounterTicks(int step) {
+void StepFrameCounterTicks(int step) {
   tick_step = step;
   stepped_ticks = 0;
 }
@@ -47,12 +46,15 @@ void Core_StepFrameCounterTicks(int step) {
 // decomp: func_800E45B4 (src/BATTLE/BATTLE.PRG/7BDB4.s:7-16).
 // Preserve the elapsed-unit/16-bit-wrap contract using native monotonic time;
 // no hardware register, guest counter, or frame-wait time is represented.
-int Core_ElapsedFrameCounterTicks(void) {
+// Stepped replays wrap the same way, so the sum cannot overflow.
+int ElapsedFrameCounterTicks() {
   if (tick_step != 0) {
-    stepped_ticks += tick_step;
+    stepped_ticks = static_cast<int>(
+        (static_cast<std::int64_t>(stepped_ticks) + tick_step) %
+        kCounterModulus);
     return stepped_ticks;
   }
-  return VS::Core::FrameCounterTicks(
-      std::chrono::duration_cast<std::chrono::nanoseconds>(Clock::now() -
-                                                           frame_start));
+  return FrameCounterTicks(std::chrono::duration_cast<std::chrono::nanoseconds>(
+      Clock::now() - frame_start));
 }
+}  // namespace VS::Core

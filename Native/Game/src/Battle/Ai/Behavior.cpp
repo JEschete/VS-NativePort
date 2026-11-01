@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/FrameTiming.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -518,7 +518,7 @@ void Battle_Ai_UpdateActorDecisions(void)
         actor = actor->next) {
         state = ((Battle_Ai_DecisionDispatchView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[actor->id];
         if (!state->opaque14 || state->opaque1D) {
-            value = Core_ElapsedFrameCounterTicks();
+            value = VS::Core::ElapsedFrameCounterTicks();
             if (Battle_Ai_frameTickBudget < value) {
                 Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), 17);
             } else {

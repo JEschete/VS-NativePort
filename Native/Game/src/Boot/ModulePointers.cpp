@@ -117,7 +117,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Core/Callbacks.h"
 #include "Core/Compatibility.h"
-#include "Core/FrameTiming.h"
 #include "Core/Legacy.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Interpolation.h"
@@ -2066,7 +2065,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E3D5Cu, 0u, (void*)&Battle_Ai_CardinalPassabilityMask, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E3DDCu, 0u, (void*)&Battle_Ai_InitializeObstacleDetour, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4180u, 0u, (void*)&Battle_Ai_UpdateHesitationTurn, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E45B4u, 0u, (void*)&Core_ElapsedFrameCounterTicks, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E45D4u, 0u, (void*)&Battle_Ai_NextActorRandomMasked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4690u, 0u, (void*)&Battle_Ai_IsAdjacentTileStepBlocked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4764u, 0u, (void*)&Battle_Ai_SelectActorVerticalMovementStep, 0u, 0u, 0u},

@@ -4,7 +4,7 @@
 #include <cstdint>
 
 #include "Core/FrameClock.hpp"
-#include "Core/FrameTiming.h"
+#include "Core/FrameTiming.hpp"
 #include "Core/Unported.h"
 #include "Platform/GameFiber.hpp"
 
@@ -31,7 +31,7 @@ constexpr double Rcnt2Hz = 33868800.0 / 8.0;
 
 void WaitOneFrame() {
   VS::Platform::GameFiber::YieldToHost();
-  Core_ResetFrameTimingBaseline();
+  VS::Core::ResetFrameTimingBaseline();
   ++g_ticks;
   if (g_rcnt2Running && g_rcnt2Target != 0) {
     // Carry fractional clocks at the host's field rate, not an assumed 60 Hz.
