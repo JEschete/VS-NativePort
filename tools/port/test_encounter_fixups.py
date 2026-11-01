@@ -295,6 +295,14 @@ class EncounterFixupTests(unittest.TestCase):
             [header],
         )
 
+    def test_event_dispatch_audit_names_unpromoted_handlers_by_catalog(self):
+        self.assertEqual(
+            check_event_dispatch.opcode_symbol("F01131", "Event::ScriptWaitForActor"), "Event_ScriptWaitForActor"
+        )
+        self.assertTrue(set(copy_fixups.EVENT_OPCODE_BINDINGS) <= copy_fixups.EVENT_OPCODE_HANDLERS)
+        for binding in copy_fixups.EVENT_OPCODE_BINDINGS.values():
+            self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
+
     def test_effect_origin_aliases_the_primary_request_position(self):
         root = Path(__file__).resolve().parents[2]
         with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(

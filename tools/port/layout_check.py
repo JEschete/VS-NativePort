@@ -10,6 +10,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -23,6 +25,28 @@ K = ci.CursorKind
 NATIVE = ct.REPO / "Native"
 INCLUDES = ["Engine", "Content", "Engine/include", "Engine/src", "Content/include", "Content/src", "Game/include",
             "Game/src"]
+# Every native source is C++ (#256): parse the generated C declarations as the copied .cpp files include them.
+CXX_ARGS = ["-x", "c++", "-std=c++20", "--target=x86_64-pc-windows-msvc", "-fms-extensions", "-fms-compatibility",
+            "-Wno-everything"]
+
+
+def use_toolchain_libclang() -> None:
+    """Prefer the latest Visual Studio LLVM libclang: the MSVC STL the native headers reach needs a current Clang."""
+    if ci.Config.loaded:
+        return
+    vswhere = Path(os.environ.get("PROGRAMFILES(X86)", "C:/Program Files (x86)")) / \
+        "Microsoft Visual Studio/Installer/vswhere.exe"
+    if not vswhere.is_file():
+        return
+    found = subprocess.run([str(vswhere), "-latest", "-products", "*", "-property", "installationPath"],
+                           capture_output=True, text=True, check=False).stdout.strip()
+    library = Path(found) / "VC/Tools/Llvm/x64/bin/libclang.dll" if found else None
+    if library is not None and library.is_file():
+        ci.Config.set_library_file(str(library))
+
+
+def c_includes(headers: list[str]) -> str:
+    return 'extern "C" {\n' + "".join(f'#include "{ct.include_spelling(h)}"\n' for h in headers) + "}\n"
 
 
 def main() -> int:
@@ -31,10 +55,10 @@ def main() -> int:
     a = ap.parse_args()
     manifest = json.loads(ct.MANIFEST.read_text(encoding="utf-8"))
     headers = [p for p in manifest if p.endswith(".h")]
-    src = "".join(f'#include "{ct.include_spelling(h)}"\n' for h in sorted(headers))
-    args = ["-x", "c", "-std=c17", "--target=x86_64-pc-windows-msvc", "-fms-extensions", "-fms-compatibility",
-            "-Wno-everything"] + [f"-I{NATIVE / i}" for i in INCLUDES]
-    tu = ci.Index.create().parse("all_headers.c", args=args, unsaved_files=[("all_headers.c", src)])
+    src = c_includes(sorted(headers))
+    args = CXX_ARGS + [f"-I{NATIVE / i}" for i in INCLUDES]
+    use_toolchain_libclang()
+    tu = ci.Index.create().parse("all_headers.cpp", args=args, unsaved_files=[("all_headers.cpp", src)])
     errors = [d.spelling for d in tu.diagnostics if d.severity >= 3]
     cp = ct.Copier()
     by_name = {ct.c_name(r["final_name"]): r for r in cp.types if cp.canon_type(r["id"]) == r["id"]}

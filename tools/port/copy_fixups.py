@@ -3283,6 +3283,9 @@ EVENT_OPCODE_HANDLERS = frozenset(
     {f"F{i:05}" for i in range(1027, 1208)} - {"F01033", "F01039", "F01186"}
     | {"F01221", "F01226", "F01229", "F01232"})
 SIG_RETYPE.update({fid: {"ret": "intptr_t"} for fid in EVENT_OPCODE_HANDLERS})
+# Opcode handlers promoted to typed VS:: C++ (#46) keep their table slot as a C binding with the dispatch ABI; its
+# header is in NATIVE_HELPER_HEADERS and MODULE_BINDING_ENTRIES maps the module-image address to it.
+EVENT_OPCODE_BINDINGS: dict[str, str] = {}
 
 # These normal-only handlers omit their unused thread argument in 4A0A8.c. They have no direct C callers,
 # but the dispatch ABI still requires both arguments (check_event_dispatch.py checks all table targets).
