@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 5 | 29 (`wip`) | 4,173 |
-| `cpp` | 5 | 275 (`wip`) | 3,927 |
+| `modernized` | 13 | 21 (`wip`) | 4,173 |
+| `cpp` | 13 | 267 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 167 |
-| `vs_namespace` | 5 |
-| `typed_interface` | 5 |
-| `no_bridge` | 5 |
+| `vs_namespace` | 13 |
+| `typed_interface` | 13 |
+| `no_bridge` | 13 |
 | `strict_clean` | 167 |
-| `behavior_evidence` | 5 |
+| `behavior_evidence` | 13 |
 
-Promotion records: 280; derived `cpp=x`: 5, `cpp=wip`: 275. Verification records: 47; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 13, `cpp=wip`: 267. Verification records: 48; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -118,6 +118,11 @@ callers pass `Position3` and `TileCoordinate` values instead of `short*` aliases
 shared assembly entry's register inputs, and the four original-address module symbols are removed (no disc
 module stores those addresses as data). Nine AI caller files, five of them generated, are adopted through
 the copier; they remain C ABI functions, so this is four leaves, not AI promotion or EC-04 retirement.
+The third is the AI terrain-height slice, F01759-F01764, F01767 and F01768 in `VS::Field`
+(`Field/TerrainHeight.hpp`): queries take an explicit read-only `TerrainGrid` view, decoded tiles and
+`Position3` endpoints instead of the hidden AI frame height map, packed tile words and `SVECTOR` pointers, so
+the file compiles as strict C++ without the C SDK headers. AI callers fetch the frame grid through
+`VS::Battle::Ai::CurrentTerrain`; the frame map itself is still a C struct field, so this is eight leaves.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

@@ -116,16 +116,16 @@ F01755,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01756,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01757,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01758,Native\Engine\src\Core\Memory\WordCopy.cpp,,,,,,,,,
-F01759,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
-F01760,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
-F01761,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
-F01762,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
-F01763,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
-F01764,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
+F01759,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: explicit TerrainGrid view and world coordinates replace the hidden AI frame height map
+F01760,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: a decoded TileCoordinate replaces the packed AI tile register word
+F01761,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: explicit TerrainGrid view; out-of-grid or missing terrain still aborts with a diagnostic
+F01762,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: a decoded TileCoordinate replaces the packed AI tile register word
+F01763,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: explicit TerrainGrid view and world coordinates replace the hidden AI frame height map
+F01764,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: bounds-checked TerrainGrid::Cell replaces direct indexing of the frame height map
 F01765,Native\Game\src\Battle\Ai\FrameUpdate.cpp,,,,,,,,,
 F01766,Native\Game\src\Battle\Ai\MovementBehavior.cpp,x,,,,x,,,,
-F01767,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
-F01768,Native\Game\src\Field\TerrainHeight.cpp,x,,,,x,,,,
+F01767,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: explicit TerrainGrid view; returns bool
+F01768,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: Position3 endpoints replace SVECTOR pointers; returns bool
 F01769,Native\Engine\src\Core\FrameTiming.cpp,x,,,,x,,,,
 F01770,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01771,Native\Engine\src\Core\Math\Distance.cpp,x,x,x,x,x,x,verify:VR-AI-DISTANCE,80ca966db7bc7637fdd49579635c70e636b394fb,#46 slice: two decoded TileCoordinate values replace packed tile words; metadata bits never reach the math
