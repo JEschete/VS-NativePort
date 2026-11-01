@@ -38,8 +38,8 @@ F00938,Native\Game\src\Field\PlatformPlacement.cpp,x,,,,x,,,,
 F00979,Native\Game\src\Actors\AppearanceTransition.cpp,,,,,,,,,
 F00980,Native\Game\src\Actors\AppearanceTransition.cpp,,,,,,,,,
 F00989,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
-F00995,Native\Game\src\Actors\SoundOverrides.cpp,x,,,,x,,,,
-F01007,Native\Game\src\Actors\SoundOverrides.cpp,x,,,,x,,,,
+F00995,Native\Game\src\Actors\SoundOverrides.cpp,x,x,x,x,x,x,verify:VR-ACTOR-SOUND-TRANSITION,5ecf36c871e8db3676838e17b36546b0dca2c157,#46 slice: VS::Actors pure value step over SoundTransition states and an explicit tick speed; VS::Actors::UpdateActorSoundTransition binds the actor record and State_tickSpeed; the generated room-actor update calls it by copier fixup; no data word stores 0x800AEEC4
+F01007,Native\Game\src\Actors\SoundOverrides.cpp,x,x,x,x,x,x,verify:VR-ACTOR-SOUND-TRANSITION,5ecf36c871e8db3676838e17b36546b0dca2c157,#46 slice: VS::Actors pure value step over SoundTransition states and an explicit tick speed; VS::Actors::UpdateActorSoundTransition binds the actor record and State_tickSpeed; the generated room-actor update calls it by copier fixup; no data word stores 0x800AEEC4
 F01016,Native\Game\src\Actors\SequencePlayback.cpp,,,,,,,,,
 F01018,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Angles3 in and Mat3 out with the quadrant-staged trig; the Apply adapter keeps the record destination
 F01019,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Mat3 values instead of MATRIX pointers; the Apply adapter writes the right record after both operands are read
