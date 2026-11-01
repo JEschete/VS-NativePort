@@ -47,7 +47,7 @@ F01023,Native\Game\src\Actors\ModelDrawing.cpp,,,,,,,,,
 F01024,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F01025,Native\Game\src\Actors\MovementCommands.cpp,x,x,x,x,x,x,verify:VR-ACTOR-MOVEMENT-COMMANDS,62c2875b2b1ae3d4214652d95009a0a6239f224b,#46 slice: VS::Actors functions building a MovementCommand and writing it through an ActorMovementRequests table; ActorRecordMovementRequests adapts Actors_actorRecords in MovementCommandBinding.cpp; generated Movement and GameLoop callers pass the adapter by copier fixup; no data word stores 0x800B64A8 or 0x800B64CC
 F01026,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
-F01130,Native\Game\src\Event\WeaponMode.cpp,x,,,,x,,,,
+F01130,Native\Game\src\Event\WeaponMode.cpp,x,x,x,x,x,x,verify:VR-EVENT-WEAPON-MODE-SLICE,9a9787f83a98ec93ef26277d3c4dcffcf6958d01,"#46 slice: VS::Event::ScriptSetAshleyBattleMode decides the VM step from a WeaponModeCommand through WeaponModeHost with no legacy header in its closure; WeaponModeLive.cpp binds the event VM, Ashley's actor and model helpers and keeps the opcode ABI in the C adapter Event_ScriptSetAshleyBattleModeOpcode; ScriptVm.cpp opcode tables use the adapter by copier fixup and MODULE_BINDING_ENTRIES keeps the BATTLE.PRG module word 0x800B9DB4 bound to it (#256 audit)"
 F01248,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: pure int32 Q12 product with no GTE register state
 F01265,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,
 F01266,Native\Engine\src\Render\ModelGeometry.cpp,,,,,,,,,

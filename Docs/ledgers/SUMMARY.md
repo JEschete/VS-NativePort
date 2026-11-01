@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 51 | 19 (`wip`) | 4,137 |
-| `cpp` | 51 | 229 (`wip`) | 3,927 |
+| `modernized` | 52 | 19 (`wip`) | 4,136 |
+| `cpp` | 52 | 228 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 194 |
-| `vs_namespace` | 51 |
-| `typed_interface` | 51 |
-| `no_bridge` | 51 |
+| `vs_namespace` | 52 |
+| `typed_interface` | 52 |
+| `no_bridge` | 52 |
 | `strict_clean` | 194 |
-| `behavior_evidence` | 51 |
+| `behavior_evidence` | 52 |
 
-Promotion records: 280; derived `cpp=x`: 51, `cpp=wip`: 229. Verification records: 68; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 52, `cpp=wip`: 228. Verification records: 69; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -179,6 +179,8 @@ The twenty-second is the action target effects (F00062): VS::Battle::ApplyAction
 through ActionTargetEffects; ApplyLiveActionTargetEffects validates and binds the live action queue.
 The twenty-third is the door tile lookup (F00579): VS::Field::TransitionDoorsAtTile matches door tiles
 by index; TransitionLiveDoorsAtTile binds the room door records and the borrowed query list.
+The twenty-fourth is the weapon-mode opcode (F01130): VS::Event::ScriptSetAshleyBattleMode decides the VM step
+through WeaponModeHost; the opcode table keeps a C adapter bound to the module image.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
