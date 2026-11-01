@@ -12,13 +12,13 @@
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Runtime.h"
@@ -32,18 +32,19 @@ static_assert(
     std::is_same_v<decltype(&Core_Math_CosineFixedPoint), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&Core_Math_Sine), int (*)(int)>);
 static_assert(std::is_same_v<decltype(&Core_Math_Cosine), int (*)(int)>);
-static_assert(std::is_same_v<decltype(&Core_Math_MultiplyMatrixIntoLeft),
-                             MATRIX* (*)(MATRIX*, MATRIX*)>);
-static_assert(std::is_same_v<decltype(&Core_Math_MultiplyRotationMatrixInPlace),
-                             MATRIX* (*)(MATRIX*, MATRIX*)>);
-static_assert(std::is_same_v<decltype(&Core_Math_SquareVectorComponents),
-                             VECTOR* (*)(const VECTOR*, VECTOR*)>);
-static_assert(std::is_same_v<decltype(&Core_Math_BuildEulerRotationMatrix),
-                             MATRIX* (*)(const SVECTOR*, MATRIX*)>);
-static_assert(std::is_same_v<decltype(&Core_Math_LookupRotationSineCosine),
-                             Core_Math_RotationTrigPair (*)(int)>);
-static_assert(std::is_same_v<decltype(&Core_Math_LookupRotationTrigQuadrant),
-                             Core_Math_RotationTrigPair (*)(int)>);
+namespace Math = VS::Core::Math;
+using MatrixProduct = Math::Mat3 (*)(const Math::Mat3&,
+                                     const Math::Mat3&) noexcept;
+static_assert(
+    std::is_same_v<decltype(&Math::MultiplyMatrixIntoLeft), MatrixProduct>);
+static_assert(std::is_same_v<decltype(&Math::MultiplyRotationMatrixInPlace),
+                             MatrixProduct>);
+static_assert(std::is_same_v<decltype(&Math::SquareVectorComponents),
+                             Math::Vec3 (*)(Math::Vec3) noexcept>);
+static_assert(std::is_same_v<decltype(&Math::BuildEulerRotationMatrix),
+                             Math::Mat3 (*)(Math::Angles3) noexcept>);
+static_assert(std::is_same_v<decltype(&Math::LookupRotationSineCosine),
+                             Math::SineCosine (*)(std::int32_t) noexcept>);
 
 namespace {
 auto MatrixBytes(const MATRIX& matrix) {
@@ -95,15 +96,15 @@ void CheckMatrixDestinations(const MATRIX& first, const MATRIX& second) {
   std::memcpy(&right, &second, sizeof right);
   const auto left_expected = ReferenceProduct(first, second, first);
   const auto right_expected = ReferenceProduct(first, second, second);
-  REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&left, &right) == &left);
+  Math::ApplyMultiplyMatrixIntoLeft(left, right);
   CHECK(MatrixBytes(left) == MatrixBytes(left_expected));
   CHECK(MatrixBytes(right) == MatrixBytes(second));
   std::memcpy(&left, &first, sizeof left);
-  Core_Math_MultiplyMatrixIntoRight(&left, &right);
+  Math::ApplyMultiplyMatrixIntoRight(left, right);
   CHECK(MatrixBytes(right) == MatrixBytes(right_expected));
   CHECK(MatrixBytes(left) == MatrixBytes(first));
   std::memcpy(&right, &second, sizeof right);
-  REQUIRE(Core_Math_MultiplyRotationMatrixInPlace(&left, &right) == &right);
+  Math::ApplyMultiplyRotationMatrixInPlace(left, right);
   CHECK(MatrixBytes(right) == MatrixBytes(right_expected));
   CHECK(MatrixBytes(left) == MatrixBytes(first));
 }
@@ -133,25 +134,9 @@ void CheckVectorSquare(std::uint32_t bits) {
   VECTOR input{std::bit_cast<std::int32_t>(0x5A5A0000u | bits),
                std::bit_cast<std::int32_t>(0xA5A50000u | second),
                std::bit_cast<std::int32_t>(0xFFFF0000u | third), 123456789};
-  const auto before = input;
-  struct GuardedVector {
-    std::uint32_t prefix;
-    VECTOR value;
-    std::uint32_t suffix;
-  };
-  GuardedVector actual{0x1234ABCDu, {11, 22, 33, -987654321}, 0xCDEF5678u};
-  const GuardedVector expected{actual.prefix,
-                               {SquareHalfword(bits), SquareHalfword(second),
-                                SquareHalfword(third), actual.value.pad},
-                               actual.suffix};
-  REQUIRE(Core_Math_SquareVectorComponents(&input, &actual.value) ==
-          &actual.value);
-  CHECK(std::memcmp(&actual, &expected, sizeof actual) == 0);
-  CHECK(std::memcmp(&input, &before, sizeof input) == 0);
-  VECTOR self_expected = expected.value;
-  self_expected.pad = input.pad;
-  REQUIRE(Core_Math_SquareVectorComponents(&input, &input) == &input);
-  CHECK(std::memcmp(&input, &self_expected, sizeof input) == 0);
+  CHECK(Math::SquareVectorComponents(Math::VectorOf(input)) ==
+        Math::Vec3{SquareHalfword(bits), SquareHalfword(second),
+                   SquareHalfword(third)});
 }
 
 int FloorDivide(std::int64_t value, int divisor) {
@@ -201,8 +186,7 @@ void CheckRoomEuler(const SVECTOR& rotation) {
   std::memcpy(&expected, &actual, sizeof expected);
   ReferenceRoomEuler(rotation, expected.value);
   const auto input = rotation;
-  REQUIRE(Core_Math_BuildEulerRotationMatrix(&rotation, &actual.value) ==
-          &actual.value);
+  Math::ApplyBuildEulerRotationMatrix(rotation, actual.value);
   std::array<std::byte, sizeof actual> actual_bytes{}, expected_bytes{};
   std::memcpy(actual_bytes.data(), &actual, actual_bytes.size());
   std::memcpy(expected_bytes.data(), &expected, expected_bytes.size());
@@ -230,21 +214,6 @@ void ReferenceRoomView(const MATRIX& view, int scale, bool compensated,
     }
     output.t[row] = FloorDivide(sum, 4096) + view.t[row];
   }
-}
-
-void CheckRotationPairBinding(unsigned address) {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* entry =
-      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG", address);
-  REQUIRE(entry != nullptr);
-  const auto pair =
-      reinterpret_cast<Core_Math_RotationTrigPair (*)(int)>(entry);
-  CHECK(pair == Core_Math_LookupRotationSineCosine);
-  CHECK(pair(1536).sine == 2896);
-  CHECK(pair(1536).cosine == -2896);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          address + 1) == nullptr);
 }
 
 struct RestoreRoomCamera {
@@ -279,7 +248,7 @@ TEST_CASE("Left matrix multiply returns its destination and preserves its tail",
   MATRIX right{{{0, -4096, 0}, {4096, 0, 0}, {0, 0, 4096}}, {-44, 55, -66}};
   const auto before_right = MatrixBytes(right);
   const auto before_tail = MatrixBytes(left);
-  REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&left, &right) == &left);
+  Math::ApplyMultiplyMatrixIntoLeft(left, right);
   const std::array<std::int16_t, 9> expected{0,     -4096, 0, 0, 0,
                                              -4096, 4096,  0, 0};
   CHECK(std::memcmp(left.m, expected.data(), sizeof(left.m)) == 0);
@@ -300,10 +269,10 @@ TEST_CASE(
     MATRIX self;
     std::memcpy(&self, &first, sizeof self);
     const auto expected = ReferenceProduct(first, first, first);
-    REQUIRE(Core_Math_MultiplyMatrixIntoLeft(&self, &self) == &self);
+    Math::ApplyMultiplyMatrixIntoLeft(self, self);
     CHECK(MatrixBytes(self) == MatrixBytes(expected));
     std::memcpy(&self, &first, sizeof self);
-    REQUIRE(Core_Math_MultiplyRotationMatrixInPlace(&self, &self) == &self);
+    Math::ApplyMultiplyRotationMatrixInPlace(self, self);
     CHECK(MatrixBytes(self) == MatrixBytes(expected));
   }
   MATRIX positive{}, negative{};
@@ -317,37 +286,26 @@ TEST_CASE(
   CheckMatrixDestinations(positive, negative);
 }
 
-TEST_CASE("Left matrix entry retains its original resident module binding",
-          "[math][core-leaves]") {
+TEST_CASE("Promoted scalar math has no original module addresses",
+          "[math][core-leaves][redirect-binding]") {
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved =
-      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041C60u);
-  REQUIRE(resolved != nullptr);
-  using Product = MATRIX* (*)(MATRIX*, MATRIX*);
-  const auto product = reinterpret_cast<Product>(resolved);
-  CHECK(product == Core_Math_MultiplyMatrixIntoLeft);
-  MATRIX left{}, right{};
-  CHECK(product(&left, &right) == &left);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
-                                          0x80041C61u) == nullptr);
-}
-
-TEST_CASE(
-    "BATTLE rotation product returns its right destination through its binding",
-    "[math][core-leaves]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", 0x800989B8u);
-  REQUIRE(resolved != nullptr);
-  using Product = MATRIX* (*)(MATRIX*, MATRIX*);
-  const auto product = reinterpret_cast<Product>(resolved);
-  CHECK(product == Core_Math_MultiplyRotationMatrixInPlace);
-  MATRIX left{}, right{};
-  CHECK(product(&left, &right) == &right);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800989B9u) == nullptr);
+  // These entries were only reached by direct jal instructions (or not at
+  // all), so callers use the typed API by name and no address resolves.
+  for (const unsigned address :
+       {0x80041104u, 0x8004140Cu, 0x80041980u, 0x80041A1Cu, 0x80041AF4u,
+        0x80041B94u, 0x80041C60u, 0x80041C68u}) {
+    CAPTURE(address);
+    CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", address) ==
+          nullptr);
+  }
+  for (const unsigned address :
+       {0x8009874Cu, 0x800988BCu, 0x800989B8u, 0x800B16F4u, 0x800B17F0u,
+        0x800B196Cu, 0x800B396Cu, 0x800BE858u}) {
+    CAPTURE(address);
+    CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                            address) == nullptr);
+  }
 }
 
 TEST_CASE("Vector square keeps full products of every signed input halfword",
@@ -357,26 +315,11 @@ TEST_CASE("Vector square keeps full products of every signed input halfword",
   }
 }
 
-TEST_CASE(
-    "Vector square retains its typed resident entry and low-halfword golden",
-    "[math][core-leaves]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved =
-      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041980u);
-  REQUIRE(resolved != nullptr);
-  using Square = VECTOR* (*)(const VECTOR*, VECTOR*);
-  const auto square = reinterpret_cast<Square>(resolved);
-  CHECK(square == Core_Math_SquareVectorComponents);
-  VECTOR input{65539, -65540, INT32_MIN, 321};
-  VECTOR output{1, 2, 3, -123};
-  CHECK(square(&input, &output) == &output);
-  CHECK(output.vx == 9);
-  CHECK(output.vy == 16);
-  CHECK(output.vz == 0);
-  CHECK(output.pad == -123);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
-                                          0x80041981u) == nullptr);
+TEST_CASE("Vector square keeps its low-halfword golden",
+          "[math][core-leaves]") {
+  const VECTOR input{65539, -65540, INT32_MIN, 321};
+  CHECK(Math::SquareVectorComponents(Math::VectorOf(input)) ==
+        Math::Vec3{9, 16, 0});
 }
 
 TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",
@@ -436,16 +379,13 @@ TEST_CASE("Both rotation octant entries retain signed pairs for every halfword",
   for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
     const int angle =
         std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
-    const auto pair = Core_Math_LookupRotationSineCosine(angle);
+    const auto pair = Math::LookupRotationSineCosine(angle);
     CHECK(pair.sine == Core_Gte_Sin(angle));
     CHECK(pair.cosine == Core_Gte_Cos(angle));
     const int wide = std::bit_cast<std::int32_t>(bits | 0xA5A50000u);
-    const auto wrapped = Core_Math_LookupRotationTrigQuadrant(wide);
-    CHECK(wrapped.sine == pair.sine);
-    CHECK(wrapped.cosine == pair.cosine);
+    CHECK(Math::LookupRotationSineCosine(wide) == pair);
   }
-  CHECK(&Core_Math_LookupRotationTrigQuadrant ==
-        &Core_Math_LookupRotationSineCosine);
+  CHECK(Math::LookupRotationSineCosine(1536) == Math::SineCosine{2896, -2896});
 }
 
 TEST_CASE("Room view producers retain source stages with camera and scale",
@@ -478,25 +418,10 @@ TEST_CASE("Room view producers retain source stages with camera and scale",
   CHECK(angles.pad == -2);
 }
 
-TEST_CASE("Native room rotation entries retain their original module bindings",
-          "[math][room-rotation][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", 0x8009874Cu);
-  REQUIRE(resolved != nullptr);
-  const auto build =
-      reinterpret_cast<MATRIX* (*)(const SVECTOR*, MATRIX*)>(resolved);
-  CHECK(build == Core_Math_BuildEulerRotationMatrix);
-  const SVECTOR angles{123, 234, 345, 0};
-  MATRIX output{};
-  CHECK(build(&angles, &output) == &output);
+TEST_CASE("Room Euler rotation keeps its original golden element",
+          "[math][room-rotation]") {
+  const auto output = Math::BuildEulerRotationMatrix({123, 234, 345});
   CHECK(output.m[0][1] == -1704);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x8009874Du) == nullptr);
-  for (const auto address : {0x800988BCu, 0x800B16F4u}) {
-    CheckRotationPairBinding(address);
-  }
 }
 
 TEST_CASE(
@@ -788,43 +713,4 @@ TEST_CASE("Promoted distance helpers have no original module addresses",
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             address) == nullptr);
   }
-}
-
-TEST_CASE("Resident octant entry returns an explicit sine and cosine pair",
-          "[math][resident-pair]") {
-  using NativePair = Core_Math_RotationTrigPair (*)(int);
-  CHECK(
-      (std::is_same_v<decltype(&Core_Math_LookupSineCosinePair), NativePair>));
-}
-
-TEST_CASE("Resident rotation pair shares every signed halfword and wide angle",
-          "[math][resident-pair]") {
-  for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
-    const int angle =
-        std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
-    const auto pair = Core_Math_LookupSineCosinePair(angle);
-    CHECK(pair.sine == Core_Gte_Sin(angle));
-    CHECK(pair.cosine == Core_Gte_Cos(angle));
-    const int wide = std::bit_cast<std::int32_t>(bits | 0xA5A50000u);
-    const auto wrapped = Core_Math_LookupSineCosinePair(wide);
-    CHECK(wrapped.sine == pair.sine);
-    CHECK(wrapped.cosine == pair.cosine);
-  }
-  CHECK(&Core_Math_LookupSineCosinePair == &Core_Math_LookupRotationSineCosine);
-}
-
-TEST_CASE("Resident rotation pair retains its original typed entry address",
-          "[math][resident-pair][redirect-binding]") {
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved =
-      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041104u);
-  REQUIRE(resolved != nullptr);
-  const auto pair =
-      reinterpret_cast<Core_Math_RotationTrigPair (*)(int)>(resolved);
-  CHECK(pair == Core_Math_LookupRotationSineCosine);
-  CHECK(pair(1536).sine == 2896);
-  CHECK(pair(1536).cosine == -2896);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
-                                          0x80041105u) == nullptr);
 }

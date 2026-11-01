@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/ActionAnimation.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Gimmicks.h"
@@ -257,7 +257,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
                         distance_z_squared = -distance_z_squared;
                     }
 
-                    var_s0 = Core_Math_SquareRootInteger(var_s0 + distance_z_squared);
+                    var_s0 = VS::Core::Math::SquareRootInteger(var_s0 + distance_z_squared);
                     Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
                     source_pitch = Core_Gte_Atan2(source_position->vy - bone_position.vy, var_s0);
                 }
@@ -371,7 +371,7 @@ void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, 
             zz = -zz;
         }
 
-        dist = Core_Math_SquareRootInteger(dist + zz);
+        dist = VS::Core::Math::SquareRootInteger(dist + zz);
         Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
         pitch = Core_Gte_Atan2(target_position->vy - bone_position.vy, dist);
     }
@@ -548,7 +548,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                 if (verticalAngle < 0) {
                     verticalAngle = -verticalAngle;
                 }
-                value = Core_Math_SquareRootInteger(value + verticalAngle);
+                value = VS::Core::Math::SquareRootInteger(value + verticalAngle);
                 Actors_ActorBonePosition(actor->instance.slot, 0, &origin, 0);
                 verticalAngle = Core_Gte_Atan2(target->vy - origin.vy, value);
             }

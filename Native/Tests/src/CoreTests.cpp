@@ -13,7 +13,7 @@
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.h"
 #include "Core/Math/Distance.hpp"
-#include "Core/Math/ScalarMath.h"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
 #include "Legacy/Core/LibEtc.h"
 
@@ -228,22 +228,23 @@ TEST_CASE("Fixed multiply preserves the original signed product bits",
           static_cast<std::uint64_t>(static_cast<std::int64_t>(left) * right);
       const auto expected =
           std::bit_cast<int>(static_cast<std::uint32_t>(product >> 12));
-      CHECK(Core_Math_MultiplyFixed(left, right) == expected);
+      CHECK(VS::Core::Math::MultiplyFixed(left, right) == expected);
     }
   }
 }
 
 TEST_CASE("Integer square root retains the original normalized lookup rounding",
           "[core][math]") {
-  CHECK(Core_Math_SquareRootInteger(-1) == 0);
-  CHECK(Core_Math_SquareRootInteger(0) == 0);
-  CHECK(Core_Math_SquareRootInteger(1) == 1);
-  CHECK(Core_Math_SquareRootInteger(4) == 2);
-  CHECK(Core_Math_SquareRootInteger(255) == 15);
-  CHECK(Core_Math_SquareRootInteger(257) == 16);
-  CHECK(Core_Math_SquareRootInteger(65025) == 254);
-  CHECK(Core_Math_SquareRootInteger(65536) == 256);
-  CHECK(Core_Math_SquareRootInteger(std::numeric_limits<int>::max()) == 46152);
+  CHECK(VS::Core::Math::SquareRootInteger(-1) == 0);
+  CHECK(VS::Core::Math::SquareRootInteger(0) == 0);
+  CHECK(VS::Core::Math::SquareRootInteger(1) == 1);
+  CHECK(VS::Core::Math::SquareRootInteger(4) == 2);
+  CHECK(VS::Core::Math::SquareRootInteger(255) == 15);
+  CHECK(VS::Core::Math::SquareRootInteger(257) == 16);
+  CHECK(VS::Core::Math::SquareRootInteger(65025) == 254);
+  CHECK(VS::Core::Math::SquareRootInteger(65536) == 256);
+  CHECK(VS::Core::Math::SquareRootInteger(std::numeric_limits<int>::max()) ==
+        46152);
 }
 
 TEST_CASE("Rotation multiplication preserves translation and supports aliasing",
@@ -253,7 +254,7 @@ TEST_CASE("Rotation multiplication preserves translation and supports aliasing",
   left.m[1][1] = 4096;
   left.m[2][0] = -4096;
   left.t[0] = 17;
-  Core_Math_MultiplyMatrixIntoRight(&left, &left);
+  VS::Core::Math::ApplyMultiplyMatrixIntoRight(left, left);
   CHECK(left.m[0][0] == -4096);
   CHECK(left.m[1][1] == 4096);
   CHECK(left.m[2][2] == -4096);
@@ -264,7 +265,7 @@ TEST_CASE("Rotation multiplication preserves translation and supports aliasing",
   left.m[1][1] = -32768;
   right.m[0][0] = right.m[1][1] = 32767;
   right.t[2] = -81;
-  Core_Math_MultiplyMatrixIntoRight(&left, &right);
+  VS::Core::Math::ApplyMultiplyMatrixIntoRight(left, right);
   CHECK(right.m[0][0] == 32767);
   CHECK(right.m[1][1] == -32768);
   CHECK(right.t[2] == -81);
@@ -277,12 +278,12 @@ TEST_CASE("Actor Euler rotation and column scaling preserve translation",
   SVECTOR rotation{0, 1024, 1024, 0};
   MATRIX matrix{};
   matrix.t[0] = 17;
-  Core_Math_BuildEulerRotationMatrixQuadrant(&rotation, &matrix);
+  VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, matrix);
   const std::array rotated{matrix.m[0][0], matrix.m[0][1], matrix.m[0][2],
                            matrix.m[1][2], matrix.m[2][0]};
   CHECK(rotated == kRotated);
   VECTOR scale{8192, -4096, 2048, 0};
-  CHECK(Core_Math_ScaleMatrixColumns(&matrix, &scale) == &matrix);
+  VS::Core::Math::ApplyScaleMatrixColumns(matrix, scale);
   const std::array scaled{matrix.m[0][1], matrix.m[1][2], matrix.m[2][0]};
   CHECK(scaled == kScaled);
   CHECK(matrix.t[0] == 17);
@@ -344,7 +345,7 @@ TEST_CASE("Signed vector components preserve their low sixteen bits",
        {0u, 0x7FFFu, 0x8000u, 0xFFFFu, 0x12348001u, UINT32_MAX}) {
     const auto expected =
         std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(value));
-    CHECK(Core_Math_WrapSigned16(value) == expected);
+    CHECK(VS::Core::Math::WrapSigned16(value) == expected);
   }
 }
 

@@ -37,7 +37,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"

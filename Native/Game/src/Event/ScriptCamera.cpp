@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Copy.h"
@@ -524,7 +524,7 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         s->distance = Core_Math_FixedVectorMagnitude(
             Core_Math_SubtractVectors((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), &c->partnerPosition, &c->destination));
         s->value = c->motionScalar
-                 + Core_Math_MultiplyFixed(s->distance - c->motionScalar,
+                 + VS::Core::Math::MultiplyFixed(s->distance - c->motionScalar,
                      ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingPrimary, c->elapsedFrames, c->durationFrames));
         Core_Math_ScaleFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), s->value);
         Core_Math_AddVectors(&c->computedPosition, &c->partnerPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
@@ -540,12 +540,12 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         Core_Gte_RotMatrix((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         s->currentOffset.vz =
             c->motionScalar
-            + Core_Math_MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
+            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
         s->currentOffset.vx = 0;
         s->currentOffset.vy = 0;
         Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         s->currentOffset.vy = c->heightOffset.vy
-                 + Core_Math_MultiplyFixed(
+                 + VS::Core::Math::MultiplyFixed(
                      c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
         Core_Math_AddVectors(&c->computedPosition, &c->startPosition, (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         break;
@@ -560,14 +560,14 @@ void Event_UpdateEventCameraTrack(Event_CameraTrack* c, Event_CameraTrack* other
         Core_Gte_RotMatrix((SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), (MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8));
         s->currentOffset.vz =
             c->motionScalar
-            + Core_Math_MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
+            + VS::Core::Math::MultiplyFixed(c->motionScalarDelta, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingSecondary, c->elapsedFrames, c->durationFrames));
         s->currentOffset.vx = 0;
         s->currentOffset.vy = 0;
         Core_Gte_ApplyMatrixLV((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x0F8), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         c->computedPosition.vx = c->destination.vx + s->currentOffset.vx;
         c->computedPosition.vz = c->destination.vz + s->currentOffset.vz;
         c->computedPosition.vy = c->startPosition.vy
-                       + Core_Math_MultiplyFixed(
+                       + VS::Core::Math::MultiplyFixed(
                            c->displacement.vy, ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(c->easingTertiary, c->elapsedFrames, c->durationFrames));
         break;
     }

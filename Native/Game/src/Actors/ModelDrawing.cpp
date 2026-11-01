@@ -1,15 +1,15 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Actors/ModelDrawing.h"
-
 #include <stdint.h>
 #include <string.h>
 
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
 #include "Actors/ModelDraw.h"
+#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -20,7 +20,6 @@ extern "C" {
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
@@ -134,18 +133,18 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
   const unsigned yaw = workspace->angleX;
   const unsigned pitch = workspace->angleY;
   if (tag == 1 || tag == 2) {
-    rotation->vx = Core_Math_WrapSigned16(static_cast<uint32_t>(rotation->vx) -
-                                          (yaw >> 1));
-    rotation->vz = Core_Math_WrapSigned16(static_cast<uint32_t>(rotation->vz) +
-                                          (yaw >> kAuxiliaryAngleShift));
+    rotation->vx = VS::Core::Math::WrapSigned16(
+        static_cast<uint32_t>(rotation->vx) - (yaw >> 1));
+    rotation->vz = VS::Core::Math::WrapSigned16(
+        static_cast<uint32_t>(rotation->vz) + (yaw >> kAuxiliaryAngleShift));
     if (tag == 2) {
-      rotation->vy = Core_Math_WrapSigned16(
+      rotation->vy = VS::Core::Math::WrapSigned16(
           static_cast<uint32_t>(rotation->vy) - (yaw >> 1));
-      rotation->vy = Core_Math_WrapSigned16(
+      rotation->vy = VS::Core::Math::WrapSigned16(
           static_cast<uint32_t>(rotation->vy) +
           (yaw != 0 ? pitch >> kAuxiliaryAngleShift
                     : 0u - (pitch >> kAuxiliaryAngleShift)));
-      rotation->vz = Core_Math_WrapSigned16(
+      rotation->vz = VS::Core::Math::WrapSigned16(
           static_cast<uint32_t>(rotation->vz) + (pitch >> 2));
     }
   } else if (tag >= kFirstFrozenJointTag && tag <= kLastFrozenJointTag &&
@@ -174,7 +173,7 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
     if (tag == kCameraHeightTag) {
       const int64_t squared = static_cast<int64_t>(delta_x) * delta_x +
                               static_cast<int64_t>(delta_z) * delta_z;
-      const int distance = Core_Math_SquareRootInteger(
+      const int distance = VS::Core::Math::SquareRootInteger(
           squared > INT32_MAX ? INT32_MAX : static_cast<int>(squared));
       rotation->vz = static_cast<int16_t>(Core_Gte_Atan2(
           camera->position.vy / kActorFixedOne - workspace->rootOffset.vy,
@@ -218,20 +217,21 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
                            actor->instance.rotationZ),
       0};
   if (actor->paletteFadeActive) {
-    rotation.vy = Core_Math_WrapSigned16(
+    rotation.vy = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(rotation.vy) +
         static_cast<uint32_t>(actor->paletteFadeState[0] >> 1));
   }
   MATRIX root = {0};
-  Core_Math_BuildEulerRotationMatrixQuadrant(&rotation, &root);
-  Core_Math_PremultiplyRotationMatrix(camera, &root);
+  VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, root);
+  VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, root);
   TransformBonePosition(camera, &workspace->rootOffset, &root);
   VECTOR scale = {actor->scale, actor->scale, actor->scale, 0};
-  if (!actor->instance.isAttached) Core_Math_ScaleMatrixColumns(&root, &scale);
+  if (!actor->instance.isAttached)
+    VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
   scale.vx = actor->instance.scaleY;
   scale.vy = actor->instance.scaleZ;
   scale.vz = actor->instance.scaleX;
-  Core_Math_ScaleMatrixColumns(&root, &scale);
+  VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
   int cumulative[kPoseBoneCount][kSpatialDimensions] = {0};
   for (unsigned bone = 0; bone < actor->instance.boneCount; ++bone) {
     const Actors_ShpBone* joint = &model->bones[bone];
@@ -258,13 +258,13 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       if (joint->auxiliaryTag >= kFirstCameraFacingTag &&
           joint->auxiliaryTag <= kLastCameraFacingTag) {
         Core_Gte_RotMatrixYXZ(&rotation, &matrix);
-        Core_Math_PremultiplyRotationMatrix(camera, &matrix);
+        VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, matrix);
         scale.vx = scale.vy = scale.vz = actor->scale;
-        Core_Math_ScaleMatrixColumns(&matrix, &scale);
+        VS::Core::Math::ApplyScaleMatrixColumns(matrix, scale);
       } else {
-        Core_Math_BuildEulerRotationMatrixQuadrant(&rotation, &matrix);
-        Core_Math_PremultiplyRotationMatrix(
-            &Actors_skeletonPose.boneMatrices[parent], &matrix);
+        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, matrix);
+        VS::Core::Math::ApplyPremultiplyRotationMatrix(
+            Actors_skeletonPose.boneMatrices[parent], matrix);
       }
     }
     Actors_skeletonPose.boneMatrices[bone] = matrix;
@@ -283,7 +283,7 @@ int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
     scale.vx = cumulative[bone][0] * kPoseScaleOne;
     scale.vy = cumulative[bone][1] * kPoseScaleOne;
     scale.vz = cumulative[bone][2] * kPoseScaleOne;
-    Core_Math_ScaleMatrixColumns(&matrix, &scale);
+    VS::Core::Math::ApplyScaleMatrixColumns(matrix, scale);
     actor->boneMatrices[bone] = matrix;
   }
   return 1;

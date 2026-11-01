@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -198,7 +198,7 @@ void Effects_BuildTransformSplineControls(Effects_TransformDefinition* transform
 
     setVector(&delta, end.vx - start.vx, end.vy - start.vy, end.vz - start.vz);
     distance =
-        Core_Math_SquareRootInteger(delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz);
+        VS::Core::Math::SquareRootInteger(delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz);
     control0.vz = distance * (((transform_definition->shape12 >> 8) & 15) - 8) / 8;
     control1.vz = distance + distance * ((transform_definition->shape12 >> 12) - 8) / 8;
     radius1 = transform_definition->radius * 32;
@@ -252,7 +252,7 @@ void Effects_BuildCameraAttachment(Effects_EffectInstance* effect_instance, Effe
     if (offset_toward_camera) {
         setVector(&delta, end.vx - start.vx, end.vy - start.vy, end.vz - start.vz);
         distance =
-            Core_Math_SquareRootInteger(delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz);
+            VS::Core::Math::SquareRootInteger(delta.vx * delta.vx + delta.vy * delta.vy + delta.vz * delta.vz);
         offset.vx = offset.vy = 0;
         offset.vz = distance - 0x600;
         Core_Gte_SetRotMatrix(&transform_motion->attachment);

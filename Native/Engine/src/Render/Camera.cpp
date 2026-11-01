@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/ScalarMath.h"
 #include "Render/Camera.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
@@ -61,7 +61,7 @@ void Render_BuildCameraViewMatrix(void)
     roll.m[0][2] = roll.m[1][2] = roll.m[2][0] = roll.m[2][1] = 0;
     setVector(&delta, ONE * 9 / 8, ONE, ONE);
     Core_Gte_ScaleMatrix(&roll, &delta);
-    Core_Math_MultiplyMatrixIntoRight(&roll, &scratch->viewMatrix);
+    VS::Core::Math::ApplyMultiplyMatrixIntoRight(roll, scratch->viewMatrix);
     setVector(&negativePosition, -scratch->camera.position.vx / ONE,
         -scratch->camera.position.vy / ONE, -scratch->camera.position.vz / ONE);
     Core_Gte_ApplyMatrix(&scratch->viewMatrix, &negativePosition, (VECTOR*)scratch->viewMatrix.t);

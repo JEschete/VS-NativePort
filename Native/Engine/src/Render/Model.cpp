@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
-#include "Core/Math/ScalarMath.h"
 #include "Render/Camera.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
@@ -30,7 +30,7 @@ void Render_PrepareActorCameraMatrices(MATRIX* source)
     roll.m[0][2] = roll.m[1][2] = roll.m[2][0] = roll.m[2][1] = 0;
     setVector(&scratch->scale, 3640, ONE, ONE);
     Core_Gte_ScaleMatrix(&scratch->matrix, &scratch->scale);
-    Core_Math_MultiplyMatrixIntoRight(&scratch->matrix, &roll);
+    VS::Core::Math::ApplyMultiplyMatrixIntoRight(scratch->matrix, roll);
     scratch->matrix = roll;
     i = ONE * ONE / view->camera.farClip;
     setVector(&scratch->scale, i, i, i);

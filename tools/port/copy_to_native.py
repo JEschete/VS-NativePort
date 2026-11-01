@@ -676,6 +676,8 @@ class Copier:
             if r["copy"] not in ("yes", "data"):
                 return r["name"]  # SDK/runtime code the decomp carries (copy = no): provided by Legacy
             promoted = self.promoted_name(target)
+            if promoted is None and note(r, "dup-of"):
+                promoted = self.promoted_name(note(r, "dup-of"))  # an identical copy calls the promoted row
             return promoted or c_name(r["final_name"])
         if target.startswith("G"):
             return c_name(self.data_by_id[target]["final_name"])
@@ -1957,9 +1959,11 @@ class Copier:
             modules.add("SLUS_010.40")  # the resident module, reachable from every overlay
         emitted_fns = {i.name for f in self.files.values() for i in f.items if i.kind == "function"}
         emitted_fns |= {o["name"].strip() for o in self.owned.values() if o["kind"].strip() == "function"}
+        # Redirects to promoted VS:: functions have no C symbol or module address (plan §8.2).
         emitted_fns |= {
             c_name(self.cat_by_id[fid]["final_name"])
-            for fid in cf.NATIVE_FUNCTION_REDIRECTS
+            for fid, (target, _source) in cf.NATIVE_FUNCTION_REDIRECTS.items()
+            if not target.startswith("VS::")
         }
         fn_by_key = {(r["overlay"], r["name"]): r for r in self.cat_by_id.values()}
         fn_overlay = lambda m: m.split("/")[-1]  # noqa: E731  (catalog: "BATTLE.PRG"; ledger/splat: "BATTLE/BATTLE.PRG")
@@ -2228,7 +2232,11 @@ class Copier:
                             if n in self.provider or n in cf.NATIVE_HELPER_HEADERS}
                 cpp_headers = [h for h in spelled if h in promoted]  # promoted C++ APIs keep C++ linkage
                 lines = ["// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.\n"]
-                lines += [f'#include "{h}"\n' for h in cpp_headers]
+                if cpp_headers and path.endswith(".inl"):
+                    # templates are included from inside their host file's extern "C" block
+                    lines += ['extern "C++" {\n', *[f'#include "{h}"\n' for h in cpp_headers], '}\n']
+                else:
+                    lines += [f'#include "{h}"\n' for h in cpp_headers]
                 lines += ['extern "C" {\n', f'#include "{LEGACY_HEADER}"\n']
                 lines += [f'#include "{h}"\n' for h in spelled if h not in cpp_headers]
                 lines.append("\n")

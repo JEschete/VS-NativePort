@@ -29,6 +29,13 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
+    # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
+    **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
+       for name in (
+           "MultiplyMatrixIntoRight", "MultiplyMatrixIntoLeft", "MultiplyRotationMatrixInPlace",
+           "PremultiplyRotationMatrix", "BuildEulerRotationMatrix",
+           "BuildEulerRotationMatrixQuadrant", "ScaleMatrixColumns",
+       )},
     "Field_FindGimmickForActorSlot":
         r"Native\Game\src\Field\GimmickLookup.h",
     **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
@@ -99,9 +106,9 @@ NATIVE_HELPER_HEADERS = {
 NATIVE_FUNCTION_REDIRECTS = {
     "F03404": ("Core_Gte_DpqColor", r"Native\Engine\src\Core\Gte.cpp"),
     "F03408": ("Core_Gte_SetFogNear", r"Native\Engine\src\Core\Gte.cpp"),
-    "F03399": ("Core_Math_LookupRotationSineCosine",
+    "F03399": ("VS::Core::Math::LookupRotationSineCosine",
                r"Native\Engine\src\Core\Math\ScalarMath.cpp"),
-    "F01017": ("Core_Math_LookupRotationSineCosine",
+    "F01017": ("VS::Core::Math::LookupRotationSineCosine",
                r"Native\Engine\src\Core\Math\ScalarMath.cpp"),
     "F03568": ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.cpp"),
     "F00764": ("Core_Gte_Cos", r"Native\Engine\src\Core\Gte.cpp"),
@@ -184,9 +191,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x8009797C, "F00746"),
     ("SLUS_010.40", 0x80041A00, "F03404"),
     ("SLUS_010.40", 0x80041954, "F03408"),
-    ("SLUS_010.40", 0x80041A1C, "F03405"),
-    ("SLUS_010.40", 0x80041AF4, "F03414"),
-    ("SLUS_010.40", 0x80041104, "F03399"),
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
     ("BATTLE/BATTLE.PRG", 0x800E6BA0, "F01833"),
     ("BATTLE/BATTLE.PRG", 0x800E6C34, "F01834"),
@@ -2503,7 +2507,22 @@ FIXES["F00798"] += [
      "shared sequence entries already point into the payload"),
 ]
 
+_SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
+                        "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
+
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
+    *(
+        (r"", rf"\bVS::Core::Math::({_SCALAR_MATRIX_CALLS})\({first}, {second}\);",
+         rf"VS::Core::Math::Apply\1({first_out}, {second_out});",
+         "F00761/F00763/F01018/F01019/F03403/F03406/F03415 #46 typed promotion: matrix records are passed by "
+         "reference to the Mat3 adapters instead of as raw MATRIX/SVECTOR/VECTOR pointers")
+        for first, first_out, second, second_out in (
+            (r"&([^,;]+)", r"\2", r"&([^;]+)", r"\3"),
+            (r"&([^,;]+)", r"\2", r"([^&;][^;]*)", r"*\3"),
+            (r"([^&,;][^,;]*)", r"*\2", r"&([^;]+)", r"\3"),
+            (r"([^&,;][^,;]*)", r"*\2", r"([^&;][^;]*)", r"*\3"),
+        )
+    ),
     (r"^Battle::Ai::", r"\bVS::Field::GroundHeight(Flags)?AtPackedTile\(((?:[^()]|\([^()]*\))*)\)",
      r"VS::Field::GroundHeight\1AtPackedTile(VS::Battle::Ai::CurrentTerrain(), "
      r"VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(\2)))",

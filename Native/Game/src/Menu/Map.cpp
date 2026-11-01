@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
@@ -953,7 +953,7 @@ void Menu_Map_ApplyCamera(void)
 
     Menu_Framework_BuildYawMatrix(&view_rotation, Menu_Map_cameraAngles.vy);
     Menu_Framework_BuildPitchMatrix(&sp38, Menu_Map_cameraAngles.vx);
-    Core_Math_MultiplyMatrixIntoRight(&sp38, &view_rotation);
+    VS::Core::Math::ApplyMultiplyMatrixIntoRight(sp38, view_rotation);
 
     applyVector(&negative_camera_position, Menu_Map_cameraPos.vx, Menu_Map_cameraPos.vy, Menu_Map_cameraPos.vz, = -);
 

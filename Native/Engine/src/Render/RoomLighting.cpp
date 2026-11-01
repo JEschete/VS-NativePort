@@ -1,17 +1,16 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Render/RoomLighting.h"
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
-#include "Core/Math/ScalarMath.h"
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 #include "Render/Render.h"
+#include "Render/RoomLighting.h"
 
 enum { kLightingHeaderWords = 3, kNeutralLight = 0x808080, kColorChannels = 3 };
 
@@ -39,8 +38,9 @@ int Render_InterpolateRoomLightTriangle(
     abort();
   }
   const int16_t point[2] = {
-      Core_Math_WrapSigned16(packed_position),
-      Core_Math_WrapSigned16(packed_position >> (sizeof(int16_t) * CHAR_BIT))};
+      VS::Core::Math::WrapSigned16(packed_position),
+      VS::Core::Math::WrapSigned16(packed_position >>
+                                   (sizeof(int16_t) * CHAR_BIT))};
   const int32_t area = TriangleArea(triangle->points[0], triangle->points[2],
                                     triangle->points[1]);
   if (area <= 0) return 0;
@@ -94,9 +94,9 @@ void Render_SampleRoomLighting(int packed_position, int layer,
     return;
   }
   const int16_t point[2] = {
-      Core_Math_WrapSigned16(static_cast<uint32_t>(packed_position)),
-      Core_Math_WrapSigned16(static_cast<uint32_t>(packed_position) >>
-                             (sizeof(int16_t) * CHAR_BIT))};
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(packed_position)),
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(packed_position) >>
+                                   (sizeof(int16_t) * CHAR_BIT))};
   for (unsigned index = 0; index < count; ++index) {
     Render_RoomLightTriangle triangle;
     memcpy(&triangle, data + offset + index * sizeof triangle, sizeof triangle);

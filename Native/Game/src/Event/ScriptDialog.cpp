@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Copy.h"
 #include "Event/Dialog.h"
 #include "Event/ScriptActors.h"
@@ -128,7 +128,7 @@ int Event_CalcDialogAnchorPlacement(
     if (dx == 0 && dy == 0) {
         return 1;
     }
-    result->clampDistance = Core_Math_SquareRootInteger(dx * dx + dy * dy);
+    result->clampDistance = VS::Core::Math::SquareRootInteger(dx * dx + dy * dy);
     return 0;
 }
 

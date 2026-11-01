@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Runtime.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Camera.h"
@@ -2502,7 +2502,7 @@ void Actors_SetActorTileTranslation(int actor_id, Actors_TileTarget* tile_target
         if (temp < 0) {
             temp = -temp;
         }
-        dist = Core_Math_SquareRootInteger(dist + temp) * move_steps_per_tile;
+        dist = VS::Core::Math::SquareRootInteger(dist + temp) * move_steps_per_tile;
         temp = dist / 128;
         actor->instance.currentAnimation = temp;
         if (dist & 0x7F) {
@@ -2649,7 +2649,7 @@ void Actors_SetActorTranslation(int actor_id, SVECTOR* translation, int move_ste
         if (temp < 0) {
             temp = -temp;
         }
-        dist = Core_Math_SquareRootInteger(dist + temp) * actor->moveRate;
+        dist = VS::Core::Math::SquareRootInteger(dist + temp) * actor->moveRate;
         actor->instance.currentAnimation = dist / 128;
         if (dist & 0x7F) {
             actor->instance.currentAnimation = dist / 128 + 1;

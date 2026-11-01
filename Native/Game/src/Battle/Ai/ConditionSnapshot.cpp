@@ -30,7 +30,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"

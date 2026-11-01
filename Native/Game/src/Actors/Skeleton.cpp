@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
 #include "Render/Model.h"
@@ -58,7 +58,7 @@ int Actors_ActorPitchToPoint(Actors_ActorRecord* actor, SVECTOR* target_point)
         z_distance_squared = -z_distance_squared;
     }
 
-    horizontal_distance_work = Core_Math_SquareRootInteger(horizontal_distance_work + z_distance_squared);
+    horizontal_distance_work = VS::Core::Math::SquareRootInteger(horizontal_distance_work + z_distance_squared);
     Actors_ActorBonePosition(actor->instance.slot, 0, &root_bone_position, 0);
     return Core_Gte_Atan2(target_point->vy - root_bone_position.vy, horizontal_distance_work);
 }
@@ -543,7 +543,7 @@ MATRIX* Actors_ActorBoneWorldTransform(int actorId, int bone, MATRIX* unused)
         scratch->matrix = actor->boneMatrices[bone];
     }
 
-    Core_Math_MultiplyMatrixIntoRight(&Actors_boneMatrixScratch, &scratch->matrix);
+    VS::Core::Math::ApplyMultiplyMatrixIntoRight(Actors_boneMatrixScratch, scratch->matrix);
     Core_Gte_SetRotMatrix(&Actors_boneMatrixScratch);
     zeroTranslation.t[0] = 0;
     zeroTranslation.t[1] = 0;

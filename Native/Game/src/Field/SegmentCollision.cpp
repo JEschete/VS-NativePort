@@ -7,13 +7,12 @@
 #include <vector>
 
 #include "Core/Log.hpp"
-
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ModelRendering.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
@@ -179,9 +178,12 @@ extern "C" SVECTOR* Field_TraceActorAndTerrainCollision(const SVECTOR* from,
         continue;
       }
     }
-    output->vx = Core_Math_WrapSigned16(static_cast<std::uint32_t>(point.vx));
-    output->vy = Core_Math_WrapSigned16(static_cast<std::uint32_t>(point.vy));
-    output->vz = Core_Math_WrapSigned16(static_cast<std::uint32_t>(point.vz));
+    output->vx =
+        VS::Core::Math::WrapSigned16(static_cast<std::uint32_t>(point.vx));
+    output->vy =
+        VS::Core::Math::WrapSigned16(static_cast<std::uint32_t>(point.vy));
+    output->vz =
+        VS::Core::Math::WrapSigned16(static_cast<std::uint32_t>(point.vz));
     output->pad = static_cast<std::int16_t>(hit);
     return output;
   }

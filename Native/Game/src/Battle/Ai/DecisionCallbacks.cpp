@@ -1,7 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
-#include "Battle/Ai/DecisionCallbacks.h"
-
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
@@ -18,6 +17,7 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
+#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
@@ -27,7 +27,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Core/FrameTiming.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -95,7 +94,7 @@ int Battle_Ai_UpdateAdaptivePursuitBehavior(Battle_Ai_ActorAiState* state) {
                                            : kDefaultPursuitDistance;
   if ((mode & 1) != 0) {
     const int candidate_distance =
-        Core_Math_SquareRootInteger(candidate->distanceSquared);
+        VS::Core::Math::SquareRootInteger(candidate->distanceSquared);
     if (candidate_distance < distance) {
       distance = candidate_distance;
     }

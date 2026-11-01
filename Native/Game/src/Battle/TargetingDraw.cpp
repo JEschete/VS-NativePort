@@ -1,16 +1,15 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Battle/TargetingDraw.h"
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
+#include "Battle/TargetingDraw.h"
 #include "Core/Gte.h"
-#include "Core/Math/ScalarMath.h"
 #include "Legacy/Psx.h"
 #include "Render/Sprites.h"
 
@@ -48,7 +47,7 @@ void Battle_DrawSphereVolumeWireframe(Battle_TargetVolume* shape, int color) {
   const int pulse = Core_Gte_Cos(sphere->wireShape * kPulseAngleStep);
   VECTOR scale = {pulse, pulse, pulse, 0};
   Core_Gte_ScaleMatrix(&rotation, &scale);
-  Core_Math_MultiplyMatrixIntoRight(&volume, &rotation);
+  VS::Core::Math::ApplyMultiplyMatrixIntoRight(volume, rotation);
   Render_LoadFrameViewMatrix();
   SVECTOR previous = {0};
   for (int index = 0; index < sphere->vertexCount; ++index) {

@@ -14,7 +14,7 @@
 
 // decomp: SLUS_010.40 func_80041104 (src/SLUS_010.40/31724.s)
 // Native replacement: shared SDK implementation, not a second legacy body.
-#define Core_Math_LookupSineCosinePair Core_Math_LookupRotationSineCosine
+#define Core_Math_LookupSineCosinePair VS::Core::Math::LookupRotationSineCosine
 
 // decomp: SLUS_010.40 rcos (src/SLUS_010.40/31724.s)
 // Native replacement: shared SDK implementation, not a second legacy body.

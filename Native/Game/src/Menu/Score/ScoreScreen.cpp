@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"
@@ -1406,7 +1406,7 @@ void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix)
 
     Menu_Framework_BuildYawMatrix(cameraMatrix, Menu_Score_cameraAngles.vy);
     Menu_Framework_BuildPitchMatrix(&pitchMatrix, Menu_Score_cameraAngles.vx);
-    Core_Math_MultiplyMatrixIntoRight(&pitchMatrix, cameraMatrix);
+    VS::Core::Math::ApplyMultiplyMatrixIntoRight(pitchMatrix, *cameraMatrix);
 
     applyVector(&negPosition, position.vx, position.vy, position.vz, = -);
 

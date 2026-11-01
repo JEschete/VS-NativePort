@@ -9,11 +9,10 @@
 #include <span>
 
 #include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
-
 extern "C" {
 #include "Core/Math/FixedPoint.h"
-#include "Core/Math/ScalarMath.h"
 #include "Effects/ScreenEffects.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -69,9 +68,9 @@ RadialScales BuildScales(std::uint16_t base, std::int16_t growth) {
 
 unsigned RadiusIndex(std::int32_t x, std::int32_t y) {
   const std::int32_t ir_x =
-      Core_Math_WrapSigned16(static_cast<std::uint32_t>(x));
+      VS::Core::Math::WrapSigned16(static_cast<std::uint32_t>(x));
   const std::int32_t ir_y =
-      Core_Math_WrapSigned16(static_cast<std::uint32_t>(y));
+      VS::Core::Math::WrapSigned16(static_cast<std::uint32_t>(y));
   const auto square = static_cast<std::uint32_t>(ir_x * ir_x) +
                       static_cast<std::uint32_t>(ir_y * ir_y);
   if (square == 0) return 0;
@@ -105,9 +104,9 @@ unsigned RadiusIndex(std::int32_t x, std::int32_t y) {
 }
 
 u_long WarpPoint(u_long packed, const RadialScales& scales) {
-  const std::int32_t x = Core_Math_WrapSigned16(packed) - kCenterX;
+  const std::int32_t x = VS::Core::Math::WrapSigned16(packed) - kCenterX;
   const std::int32_t y =
-      Core_Math_WrapSigned16(packed >> kCoordinateBits) - kCenterY;
+      VS::Core::Math::WrapSigned16(packed >> kCoordinateBits) - kCenterY;
   const auto scale = scales[RadiusIndex(x, y)];
   const auto scaled_x =
       SignedWord(static_cast<std::uint32_t>(std::int64_t{x} * scale)) >>

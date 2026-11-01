@@ -1,20 +1,19 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Render/RoomDraw.h"
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Room.h"
 #include "Legacy/Psx.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
+#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 
 enum {
@@ -205,13 +204,13 @@ static void BuildRoomView(VECTOR* position, VECTOR* angles, MATRIX* output,
     MATRIX inverse = {0};
     inverse.m[0][0] = inverse.m[1][1] = inverse.m[2][2] =
         static_cast<int16_t>(kFixedOneSquared / scale);
-    Core_Math_MultiplyMatrixIntoRight(&inverse, &camera);
+    VS::Core::Math::ApplyMultiplyMatrixIntoRight(inverse, camera);
   }
   SVECTOR rotation = {static_cast<int16_t>(angles->vx),
                       static_cast<int16_t>(angles->vy),
                       static_cast<int16_t>(angles->vz), 0};
-  Core_Math_BuildEulerRotationMatrix(&rotation, output);
-  Core_Math_MultiplyMatrixIntoRight(&camera, output);
+  VS::Core::Math::ApplyBuildEulerRotationMatrix(rotation, *output);
+  VS::Core::Math::ApplyMultiplyMatrixIntoRight(camera, *output);
   const int16_t coordinates[kRoomSpatialDimensions] = {
       static_cast<int16_t>(position->vx), static_cast<int16_t>(position->vy),
       static_cast<int16_t>(position->vz)};
@@ -240,9 +239,9 @@ void Render_UpdateRoomGroupTransforms(void* data) {
       reinterpret_cast<Render_RoomGeometryGroup*>(
           ((unsigned char*)data + sizeof count));
   const int scale = Render_frameScratch.camera.farClip;
-  const int sine = Core_Math_MultiplyFixed(
+  const int sine = VS::Core::Math::MultiplyFixed(
       Core_Gte_Sin(Render_frameScratch.camera.angles.vz), scale);
-  const int cosine = Core_Math_MultiplyFixed(
+  const int cosine = VS::Core::Math::MultiplyFixed(
       Core_Gte_Cos(Render_frameScratch.camera.angles.vz), scale);
   for (unsigned index = 0; index < count; ++index) {
     Render_RoomGeometryGroup* group = &groups[index];
@@ -354,8 +353,9 @@ typedef struct ProjectedRoomPolygon {
 static Core_GteWord ResolveRoomPolygonDepth(Core_GteWord projected_depth,
                                             unsigned flags) {
   if (projected_depth < room_near_depth) return -1;
-  const int64_t biased = static_cast<int64_t>(projected_depth) +
-                         Core_Math_WrapSigned16(flags >> kPackedCoordinateBits);
+  const int64_t biased =
+      static_cast<int64_t>(projected_depth) +
+      VS::Core::Math::WrapSigned16(flags >> kPackedCoordinateBits);
   if (biased < 0 || biased < room_near_depth || biased >= room_far_depth ||
       biased >= kLastOrderingSlot) {
     return -1;
@@ -609,7 +609,7 @@ void Render_DecodeRoomPolygonVertices(
       const uint32_t shifted =
           static_cast<uint32_t>(static_cast<int32_t>(delta))
           << coordinate_shift;
-      coordinates[axis] = Core_Math_WrapSigned16(
+      coordinates[axis] = VS::Core::Math::WrapSigned16(
           static_cast<uint32_t>(static_cast<int32_t>(base[axis])) + shifted);
     }
     vertices[vertex].position.vx = coordinates[0];
@@ -853,18 +853,20 @@ void Render_SetRoomPolygonNearClip(int depth) {
 
 // decomp: func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1078).
 void Render_SetRoomPolygonFarClip(int depth) {
-  room_far_depth = Core_Math_WrapSigned16(static_cast<uint32_t>(depth));
+  room_far_depth = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(depth));
 }
 
 // decomp: func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1101).
 void Render_SetRoomPolygonScreenBounds(int left, int top, int right,
                                        int bottom) {
-  room_screen_bounds.left = Core_Math_WrapSigned16(static_cast<uint32_t>(left));
-  room_screen_bounds.top = Core_Math_WrapSigned16(static_cast<uint32_t>(top));
+  room_screen_bounds.left =
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(left));
+  room_screen_bounds.top =
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(top));
   room_screen_bounds.right =
-      Core_Math_WrapSigned16(static_cast<uint32_t>(right));
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(right));
   room_screen_bounds.bottom =
-      Core_Math_WrapSigned16(static_cast<uint32_t>(bottom));
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(bottom));
 }
 
 // decomp: BATTLE.PRG func_80098194 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:

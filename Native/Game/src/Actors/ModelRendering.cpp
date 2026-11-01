@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Actors/WeaponModel.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Field/Actors.h"
@@ -314,17 +314,17 @@ void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera)
         setVector(&scratch->rotation, object->rotationOffset.vx + object->rotationX,
             object->rotationOffset.vy + object->rotationY, object->rotationOffset.vz + object->rotationZ);
         Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-        Core_Math_BuildEulerRotationMatrixQuadrant(&scratch->rotation, &scratch->matrix);
+        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, scratch->matrix);
         setVector(&scratch->rotation, holder->instance.rotationX, holder->instance.facing,
             holder->instance.rotationZ);
-        Core_Math_BuildEulerRotationMatrixQuadrant(&scratch->rotation, &holderRotation);
-        Core_Math_PremultiplyRotationMatrix(&holderRotation, &scratch->matrix);
+        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, holderRotation);
+        VS::Core::Math::ApplyPremultiplyRotationMatrix(holderRotation, scratch->matrix);
     } else if (attachment < 2) {
         if (object->mode != 0) {
             setVector(&scratch->rotation, object->rotationX, object->rotationY, object->rotationZ);
             Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
             Core_Gte_RotMatrixYXZ(&scratch->rotation, &scratch->matrix);
-            Core_Math_PremultiplyRotationMatrix(camera, &scratch->matrix);
+            VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, scratch->matrix);
             Core_Gte_MulMatrix(&scratch->matrix, &object->matrices[4]);
             goto composed;
         }
@@ -338,19 +338,19 @@ void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera)
         applyVector(&scratch->rotation, object->rotationX, object->rotationY, object->rotationZ, +=);
         *(int*)&scratch->rotation &= 0x0FFF0FFF;
         *(int*)&scratch->rotation.vz &= 0xFFF;
-        Core_Math_BuildEulerRotationMatrixQuadrant(&scratch->rotation, &scratch->matrix);
+        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, scratch->matrix);
     }
 
-    Core_Math_PremultiplyRotationMatrix(camera, &scratch->matrix);
+    VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, scratch->matrix);
 composed:
-    Core_Math_ScaleMatrixColumns(&scratch->matrix, &Actors_roomActorScale);
+    VS::Core::Math::ApplyScaleMatrixColumns(scratch->matrix, Actors_roomActorScale);
     Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
     object->matrices[0] = scratch->matrix;
 
     if (object->scaleX != 64 || object->scaleY != 64 || object->scaleZ != 64) {
         setVector(&scratch->scale, object->scaleX, object->scaleY, object->scaleZ);
         applyVector(&scratch->scale, 64, 64, 64, *=);
-        Core_Math_ScaleMatrixColumns(&scratch->matrix, &scratch->scale);
+        VS::Core::Math::ApplyScaleMatrixColumns(scratch->matrix, scratch->scale);
         Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
         object->matrices[0] = scratch->matrix;
     }
@@ -415,7 +415,7 @@ void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
         value = weapon->reserved11;
         value *= 64;
         setVector(&scratch->scale, value, value, value);
-        Core_Math_ScaleMatrixColumns(&scratch->matrix, &scratch->scale);
+        VS::Core::Math::ApplyScaleMatrixColumns(scratch->matrix, scratch->scale);
     }
 
     Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
@@ -437,8 +437,8 @@ void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
         Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
         *(int*)&scratch->rotation &= 0x0FFF0FFF;
         *(int*)&scratch->rotation.vz &= 0xFFF;
-        Core_Math_BuildEulerRotationMatrixQuadrant(&scratch->rotation, &scratch->matrix);
-        Core_Math_PremultiplyRotationMatrix(&Actors_skeletonPose.boneMatrices[parentBone], &scratch->matrix);
+        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, scratch->matrix);
+        VS::Core::Math::ApplyPremultiplyRotationMatrix(Actors_skeletonPose.boneMatrices[parentBone], scratch->matrix);
         Actors_skeletonPose.boneMatrices[i] = scratch->matrix;
         weapon->boneWorldMatrices[i] = scratch->matrix;
     }

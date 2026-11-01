@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 
 // decomp: BATTLE.PRG vs_battle_lookAt (src/BATTLE/BATTLE.PRG/146C.c:8209)
 void Core_Math_BuildLookAtOrientation(VECTOR* from, VECTOR* to, MATRIX* mat)
@@ -43,7 +43,7 @@ void Core_Math_DirectionRotationMatrix(VECTOR* direction_q12, MATRIX* rotation)
     integer_direction.vy = direction_q12->vy >> 0xC;
     integer_direction.vz = direction_q12->vz >> 0xC;
     angles.vy = Core_Gte_Atan2(integer_direction.vx, integer_direction.vz);
-    angles.vx = Core_Gte_Atan2(integer_direction.vy, Core_Math_SquareRootInteger((integer_direction.vx * integer_direction.vx) + (integer_direction.vz * integer_direction.vz)));
+    angles.vx = Core_Gte_Atan2(integer_direction.vy, VS::Core::Math::SquareRootInteger((integer_direction.vx * integer_direction.vx) + (integer_direction.vz * integer_direction.vz)));
     angles.vz = 0;
     Core_Gte_RotMatrix(&angles, rotation);
 }

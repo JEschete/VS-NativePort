@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 
 // decomp: D_80040A14 (D_80040A14@SLUS_010.40)
@@ -33,8 +33,8 @@ short Core_Math_ClampSignedShort(short value, int bound_a, int bound_b)
 // decomp: BATTLE.PRG _vectorFixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4118)
 VECTOR* Core_Math_ScaleFixedVector(VECTOR* destination, VECTOR* source, int scale_q12)
 {
-    setVector(destination, Core_Math_MultiplyFixed(source->vx, scale_q12), Core_Math_MultiplyFixed(source->vy, scale_q12),
-        Core_Math_MultiplyFixed(source->vz, scale_q12));
+    setVector(destination, VS::Core::Math::MultiplyFixed(source->vx, scale_q12), VS::Core::Math::MultiplyFixed(source->vy, scale_q12),
+        VS::Core::Math::MultiplyFixed(source->vz, scale_q12));
     return destination;
 }
 
@@ -53,7 +53,7 @@ int Core_Math_FixedVectorMagnitude(VECTOR* source)
     components.vx = components.vx >> 0xC;
     components.vy = components.vy >> 0xC;
     components.vz = components.vz >> 0xC;
-    return Core_Math_SquareRootInteger(x_squared + y_squared + z_squared) * ONE;
+    return VS::Core::Math::SquareRootInteger(x_squared + y_squared + z_squared) * ONE;
 }
 
 // decomp: BATTLE.PRG _sVectorToFixedPointVector (src/BATTLE/BATTLE.PRG/4A0A8.c:4155)

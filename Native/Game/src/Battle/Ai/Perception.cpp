@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Core/FrameTiming.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -239,7 +239,7 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
         if (Core_Gte_Cos(angle) < 0) {
             continue;
         }
-        root = Core_Math_SquareRootInteger(state->distancesSquared[candidate]);
+        root = VS::Core::Math::SquareRootInteger(state->distancesSquared[candidate]);
         distance = (int)(root * Core_Gte_Sin(angle)) >> 12;
         if (distance < 0) {
             distance = -distance;

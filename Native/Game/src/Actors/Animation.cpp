@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -2058,7 +2058,7 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int skip_motion_upd
             if (dz < 0) {
                 dz = -dz;
             }
-            dx = Core_Math_SquareRootInteger(dx + dz);
+            dx = VS::Core::Math::SquareRootInteger(dx + dz);
             if (actor->headTrackTarget == -1) {
                 dz = actor->headTracking.vy - actor->instance.position.vy;
             } else {
@@ -2127,7 +2127,7 @@ void Actors_ApplyLockedBoneTransform(Actors_ActorRecord* actor, MATRIX* parent, 
     Render_ModelScratchpad* scratch = Render_ModelWorkspace();
 
     scratch->matrix = *(actor->lockedBoneMatrices + saved - 1);
-    Core_Math_PremultiplyRotationMatrix(parent, &scratch->matrix);
+    VS::Core::Math::ApplyPremultiplyRotationMatrix(*parent, scratch->matrix);
     Core_Gte_SetRotMatrix(parent);
     Core_Gte_SetTransMatrix(parent);
     --saved;

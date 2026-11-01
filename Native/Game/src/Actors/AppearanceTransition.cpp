@@ -1,16 +1,15 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Actors/AppearanceTransition.h"
-
 #include <stdint.h>
 
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "Actors/Animation.h"
+#include "Actors/AppearanceTransition.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Collision.h"
 #include "Render/Palette.h"
 #include "State/Timers.h"
@@ -235,8 +234,8 @@ static void ReleaseCarriedGimmick(Actors_ActorRecord* actor) {
   Actors_ActorTaggedBonePosition(object->parent, kCarrySecondBone, &second, 1);
   object->positionX = actor->instance.position.vx;
   object->positionZ = actor->instance.position.vz;
-  object->positionY = Core_Math_WrapSigned16((first.vy + second.vy) / 2 +
-                                             kReleasedGimmickHeight);
+  object->positionY = VS::Core::Math::WrapSigned16((first.vy + second.vy) / 2 +
+                                                   kReleasedGimmickHeight);
   object->mode = kReleasedGimmickMode;
   object->slideX = object->velocityY = 0;
   object->parent = kDetachedParent;

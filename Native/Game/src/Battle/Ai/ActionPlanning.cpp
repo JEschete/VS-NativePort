@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"
@@ -173,7 +173,7 @@ void Battle_Ai_SimulateActionCandidate(
         target_position.vz = actor->instance.position.vz;
         target_position.vy = actor->instance.position.vy - candidate->opaqueCBit7;
         *(int*)&simulated_source_position.vx = *(int*)&target_position.vx;
-        simulated_source_position.vz = target_position.vz + Core_Math_SquareRootInteger(candidate->distanceSquared);
+        simulated_source_position.vz = target_position.vz + VS::Core::Math::SquareRootInteger(candidate->distanceSquared);
         action_available = ((int (*)(int, int, int, int, SVECTOR*, SVECTOR*, void*))Battle_PreviewActionAgainstActor)(
             candidate->action, ai_state->actorId, target_actor_slot, candidate->targetLimb, &simulated_source_position, &target_position, Battle_Ai_planningWorkspace);
     }

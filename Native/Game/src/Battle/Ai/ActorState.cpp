@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
 #include "Items/Inventory.h"
@@ -250,7 +250,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     Battle_Ai_InitializeActorAiRelations(state);
     temp = state->moveDistance - 64;
     if (state->farDistanceSquared < (unsigned int)(temp * temp)) {
-        state->moveDistance = Core_Math_SquareRootInteger(state->farDistanceSquared) - 64;
+        state->moveDistance = VS::Core::Math::SquareRootInteger(state->farDistanceSquared) - 64;
     }
     state->groundClearance = -256;
     state->flightHeight = -128;

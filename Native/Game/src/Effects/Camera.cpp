@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Math/ScalarMath.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
 #include "Effects/Particles.h"
@@ -75,7 +75,7 @@ void Effects_ApplyEffectCamera(Effects_EffectCamera* camera)
     offset.vx = Core_Gte_Cos(yaw) * (camera->shakeLateral >> 12);
     offset.vz = -Core_Gte_Sin(yaw) * (camera->shakeLateral >> 12);
     pitch = Core_Gte_Atan2(
-        (camera->position.vy - camera->lookAt.vy) >> 12, Core_Math_SquareRootInteger(dx * dx + dz * dz));
+        (camera->position.vy - camera->lookAt.vy) >> 12, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz));
     offset.vy = -Core_Gte_Sin(pitch) * (camera->shakeDepth >> 12);
     horizontal = -Core_Gte_Cos(pitch) * (camera->shakeDepth >> 12);
     offset.vy += Core_Gte_Cos(pitch) * (camera->shakeVertical >> 12);

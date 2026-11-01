@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/FrameTiming.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -56,7 +56,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
     normal:
         limit = 0x1F80;
         if (!(state->movementFlags & 8)) {
-            limit = Core_Math_SquareRootInteger(entry->distanceSquared) + (state->maxRange << 5);
+            limit = VS::Core::Math::SquareRootInteger(entry->distanceSquared) + (state->maxRange << 5);
         }
         limit = limit * limit;
         if ((state->relations[id].bytes[0] >> 6) == 2) {
@@ -78,7 +78,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
             }
             flag = 1;
         }
-        distance = Core_Math_SquareRootInteger(distance);
+        distance = VS::Core::Math::SquareRootInteger(distance);
         if (active) {
             Battle_Ai_roomAiState->approachMoves++;
             if (state->distancesSquared[id] < limit
@@ -100,10 +100,10 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
             point[2] = (state->plannedTile.bytes[2] << 7) + 64;
             point[1] = VS::Field::GroundHeightAtWorldPosition(VS::Battle::Ai::CurrentTerrain(), point[0], point[2]);
             distance =
-                Core_Math_SquareRootInteger(VS::Core::Math::SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(point), VS::Core::Math::PositionOf(Actors_actorRecords[id]->instance.position),
+                VS::Core::Math::SquareRootInteger(VS::Core::Math::SquaredDistanceWithHeightOffsets(VS::Core::Math::PositionOf(point), VS::Core::Math::PositionOf(Actors_actorRecords[id]->instance.position),
                     state->pointHeight, ((Battle_Ai_CandidateMovementView*)Battle_Ai_actorAiStates[id])->pointHeight));
             distance =
-                (int)distance < Core_Math_SquareRootInteger(entry->distanceSquared) - entry->range;
+                (int)distance < VS::Core::Math::SquareRootInteger(entry->distanceSquared) - entry->range;
             if (distance) {
                 goto normal;
             }
@@ -190,7 +190,7 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
             }
 
             flag = 0;
-            distance = Core_Math_SquareRootInteger(ai_state->candidateOrder[1]->distanceSquared);
+            distance = VS::Core::Math::SquareRootInteger(ai_state->candidateOrder[1]->distanceSquared);
         }
 
         if (Battle_Ai_ApproachActor(ai_state, id, distance, flag)) {
@@ -243,7 +243,7 @@ int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* ai_state, Battle_
 {
     if (Battle_Ai_CanApproachEngagedTarget(ai_state, candidate)) {
         int id = candidate->targetId;
-        int distance = Core_Math_SquareRootInteger(candidate->distanceSquared);
+        int distance = VS::Core::Math::SquareRootInteger(candidate->distanceSquared);
         int range = distance + ai_state->maxRange * 32;
 
         range *= range;

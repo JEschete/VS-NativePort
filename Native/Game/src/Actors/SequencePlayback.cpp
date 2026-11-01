@@ -1,10 +1,9 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Actors/SequencePlayback.h"
-
 #include <limits.h>
 #include <stdint.h>
 
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorRecord.h"
@@ -15,6 +14,7 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
+#include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -28,7 +28,6 @@ extern "C" {
 #include "Core/Core/IntPair.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -50,8 +49,8 @@ static int16_t SignedTrackByte(u_char value) {
 }
 
 static int16_t SignedTrackWord(const u_char* data) {
-  return Core_Math_WrapSigned16((static_cast<uint32_t>(data[0]) << CHAR_BIT) |
-                                data[1]);
+  return VS::Core::Math::WrapSigned16(
+      (static_cast<uint32_t>(data[0]) << CHAR_BIT) | data[1]);
 }
 
 enum { kRootPoseKey = 41 };
@@ -61,20 +60,20 @@ static void AdvanceShadowBlend(Actors_ShadowBlend* shadow) {
   if (shadow->levelFrames != 0) {
     const int delta = shadow->levelDelta / shadow->levelFrames;
     shadow->levelDelta =
-        Core_Math_WrapSigned16(static_cast<uint32_t>(shadow->levelDelta) -
-                               static_cast<uint32_t>(delta));
+        VS::Core::Math::WrapSigned16(static_cast<uint32_t>(shadow->levelDelta) -
+                                     static_cast<uint32_t>(delta));
     shadow->level += delta;
     --shadow->levelFrames;
   }
   shadow->level &= kShadowLevelMask;
   if (shadow->radiusFrames != 0) {
     const int expand = shadow->radiusExpandDelta / shadow->radiusFrames;
-    shadow->radiusExpandDelta = Core_Math_WrapSigned16(
+    shadow->radiusExpandDelta = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(shadow->radiusExpandDelta) -
         static_cast<uint32_t>(expand));
     shadow->radiusExpandRate += expand;
     const int shrink = shadow->radiusShrinkDelta / shadow->radiusFrames;
-    shadow->radiusShrinkDelta = Core_Math_WrapSigned16(
+    shadow->radiusShrinkDelta = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(shadow->radiusShrinkDelta) -
         static_cast<uint32_t>(shrink));
     shadow->radiusShrinkRate += shrink;
@@ -105,13 +104,13 @@ static void ApplyPoseTracks(Actors_ActorRecord* actor,
                                 &state->scaleKeys[kRootPoseKey],
                                 &state->trackStates[kRootPoseKey], 0);
     const SVECTOR* delta = &state->scaleKeys[kRootPoseKey];
-    actor->instance.position.vx = Core_Math_WrapSigned16(
+    actor->instance.position.vx = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(actor->instance.position.vx) +
         static_cast<uint32_t>(delta->vx / kRootTranslationDivisor));
-    actor->instance.position.vy = Core_Math_WrapSigned16(
+    actor->instance.position.vy = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(actor->instance.position.vy) +
         static_cast<uint32_t>(delta->vy / kRootTranslationDivisor));
-    actor->instance.position.vz = Core_Math_WrapSigned16(
+    actor->instance.position.vz = VS::Core::Math::WrapSigned16(
         static_cast<uint32_t>(actor->instance.position.vz) +
         static_cast<uint32_t>(delta->vz / kRootTranslationDivisor));
   }
@@ -198,7 +197,7 @@ static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
     data += sizeof(int16_t);
     int value = packed >> kPackedAxisBits;
     if (packed & kPackedX) {
-      delta->vx = Core_Math_WrapSigned16(static_cast<uint32_t>(value));
+      delta->vx = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value));
       flags &= kByteDeltaY | kByteDeltaZ;
       if (packed & (kPackedY | kPackedZ)) {
         value = SignedTrackWord(data);
@@ -206,7 +205,7 @@ static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
       }
     }
     if (packed & kPackedY) {
-      delta->vy = Core_Math_WrapSigned16(static_cast<uint32_t>(value));
+      delta->vy = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value));
       flags &= kByteDeltaX | kByteDeltaZ;
       if (packed & kPackedZ) {
         value = SignedTrackWord(data);
@@ -214,7 +213,7 @@ static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
       }
     }
     if (packed & kPackedZ) {
-      delta->vz = Core_Math_WrapSigned16(static_cast<uint32_t>(value));
+      delta->vz = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value));
       flags &= kByteDeltaX | kByteDeltaY;
     }
   }
@@ -239,12 +238,12 @@ void Actors_DecodeAnimationTrack(const Actors_AnimationTrackContext* context,
       data = DecodeTrackCommand(data, &next_frame, delta);
       if (data == nullptr) return;
     }
-    value->vx = Core_Math_WrapSigned16(static_cast<uint32_t>(value->vx) +
-                                       static_cast<uint32_t>(delta->vx));
-    value->vy = Core_Math_WrapSigned16(static_cast<uint32_t>(value->vy) +
-                                       static_cast<uint32_t>(delta->vy));
-    value->vz = Core_Math_WrapSigned16(static_cast<uint32_t>(value->vz) +
-                                       static_cast<uint32_t>(delta->vz));
+    value->vx = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value->vx) +
+                                             static_cast<uint32_t>(delta->vx));
+    value->vy = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value->vy) +
+                                             static_cast<uint32_t>(delta->vy));
+    value->vz = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value->vz) +
+                                             static_cast<uint32_t>(delta->vz));
     if (rotation) {
       value->vx = static_cast<int16_t>(static_cast<uint16_t>(value->vx) &
                                        kRotationMask);
@@ -254,8 +253,9 @@ void Actors_DecodeAnimationTrack(const Actors_AnimationTrackContext* context,
                                        kRotationMask);
     }
   }
-  value->pad = Core_Math_WrapSigned16(static_cast<uint32_t>(data - start));
-  delta->pad = Core_Math_WrapSigned16(static_cast<uint32_t>(next_frame));
+  value->pad =
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(data - start));
+  delta->pad = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(next_frame));
 }
 
 static int16_t BlendComponent(int16_t from, int16_t to, int weight,

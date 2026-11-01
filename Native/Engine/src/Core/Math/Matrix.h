@@ -6,7 +6,7 @@
 
 // decomp: BATTLE.PRG func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s)
 // Native replacement: shared SDK implementation, not a second legacy body.
-#define Core_Math_LookupRotationTrigQuadrant Core_Math_LookupRotationSineCosine
+#define Core_Math_LookupRotationTrigQuadrant VS::Core::Math::LookupRotationSineCosine
 
 #endif // VS_CORE_MATH_MATRIX_H_TYPES
 

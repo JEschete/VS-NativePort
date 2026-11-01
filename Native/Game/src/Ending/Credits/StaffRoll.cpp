@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Stream.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
@@ -101,7 +101,7 @@ void Ending_Credits_DrawPhantomPainRipple(Ending_Credits_Element* element)
             for (j = 0; j < 16; ++j) {
                 dx = 8 - j;
                 dx = ABS(dx) * 18;
-                Ending_Credits_rippleDistanceGrid[i][j] = Core_Math_SquareRootInteger(dx * dx + dy);
+                Ending_Credits_rippleDistanceGrid[i][j] = VS::Core::Math::SquareRootInteger(dx * dx + dy);
             }
         }
         /* fallthrough */
@@ -324,7 +324,7 @@ int Ending_Credits_DistanceFromScreenCenter(int x, int y)
 {
     x -= 160;
     y -= 112;
-    return Core_Math_SquareRootInteger(x * x + y * y);
+    return VS::Core::Math::SquareRootInteger(x * x + y * y);
 }
 
 // decomp: ENDING.PRG func_80069388 (src/ENDING/ENDING.PRG/D4.c:475)

@@ -2,6 +2,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
 #include "Items/Inventory.h"
@@ -468,9 +468,9 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         }
         top = VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood(*(Battle_Ai_ActorAiState *)((void*)state)), angle) + state->flightHeight;
         ground = top > ground ? ground : top;
-        distance = Core_Math_SquareRootInteger(VS::Core::Math::SquaredVectorLength(x - px, 0, z - pz));
+        distance = VS::Core::Math::SquareRootInteger(VS::Core::Math::SquaredVectorLength(x - px, 0, z - pz));
         value = height + ground;
-        denom = Core_Math_SquareRootInteger(((value << 12) / value) << 12) + ONE;
+        denom = VS::Core::Math::SquareRootInteger(((value << 12) / value) << 12) + ONE;
         if (!denom) {
             goto fallback;
         }
@@ -1077,7 +1077,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                 distance = VS::Core::Math::SquaredVectorLength(s->x - (s->destination.bytes[0] << 7) - 64, 0,
                     s->z - (s->destination.bytes[2] << 7) - 64);
                 s->savedDestination.word = oldPosition;
-                distance = Core_Math_SquareRootInteger(distance);
+                distance = VS::Core::Math::SquareRootInteger(distance);
                 radius = s->range - 96;
                 Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)s), s->tile, angle,
                     distance - (radius >= 0 ? radius : -radius));

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/SegmentCollision.h"
 #include "Items/Equipment.h"
@@ -688,7 +688,7 @@ int Battle_PreviewActionAgainstActor(int action_id, int source_actor_slot, int t
         target_volume.angle = Core_Gte_Atan2(delta_x, delta_z);
         delta_y = target_position->vy - source_position->vy;
         target_volume.scale.extents[3] =
-            (Core_Gte_Atan2(delta_y, Core_Math_SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)))
+            (Core_Gte_Atan2(delta_y, VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)))
                 / 16)
             + 0x40;
         *(SVECTOR*)target_volume.position = *source_position;

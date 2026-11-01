@@ -1,9 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Math/ScalarMath.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -36,7 +38,7 @@ void VS_TRAIL_CONTROL_FUNCTION(Effects_ParticleDefinition* particle_definition, 
             setVector(&emitter_scratch->aimPoint, spline_control_points[3].vx - spline_control_points[0].vx,
                 spline_control_points[3].vy - spline_control_points[0].vy, spline_control_points[3].vz - spline_control_points[0].vz);
 
-            spline_span_length = Core_Math_SquareRootInteger((emitter_scratch->aimPoint.vx * emitter_scratch->aimPoint.vx)
+            spline_span_length = VS::Core::Math::SquareRootInteger((emitter_scratch->aimPoint.vx * emitter_scratch->aimPoint.vx)
                                    + (emitter_scratch->aimPoint.vy * emitter_scratch->aimPoint.vy)
                                    + (emitter_scratch->aimPoint.vz * emitter_scratch->aimPoint.vz));
             Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[0],

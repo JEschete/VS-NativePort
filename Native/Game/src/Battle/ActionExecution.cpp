@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/ScalarMath.h"
 #include "Effects/Runtime.h"
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"
@@ -72,10 +72,10 @@ int Battle_ActionTargetDistance(void)
     }
     delta_x = target_position.vx - source_position.vx;
     delta_z = target_position.vz - source_position.vz;
-    horizontal_distance = Core_Math_SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z));
+    horizontal_distance = VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z));
     delta_y = target_position.vy - source_position.vy;
 
-    return Core_Math_SquareRootInteger((delta_y * delta_y) + (horizontal_distance * horizontal_distance));
+    return VS::Core::Math::SquareRootInteger((delta_y * delta_y) + (horizontal_distance * horizontal_distance));
 }
 
 // decomp: BATTLE.PRG func_800780A8 (src/BATTLE/BATTLE.PRG/146C.c:6863)

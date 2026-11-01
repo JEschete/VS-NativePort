@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Targeting.h"
-#include "Core/Math/ScalarMath.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 
@@ -38,7 +38,7 @@ void Battle_Ai_BuildAiActionMetadata(Battle_Ai_ActionMetadataView* state)
             mask = 1 << ((action->opaque0.word >> 20) & 15);
             entry->rangeSquared = Battle_CalculateActionRangeSquared((Battle_Ai_ActionRangeView *)((void*)state), id);
             entry->radius =
-                Battle_CalculateActionAreaReach((intptr_t)state, id, Core_Math_SquareRootInteger(entry->rangeSquared));
+                Battle_CalculateActionAreaReach((intptr_t)state, id, VS::Core::Math::SquareRootInteger(entry->rangeSquared));
             entry->longRange =
                 entry->rangeSquared > 0x51000 && !(action->opaqueC & 0x20000000);
             if (mask & 0x4198) {

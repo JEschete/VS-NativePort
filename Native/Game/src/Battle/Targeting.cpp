@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/WordCopy.h"
 #include "Field/Camera.h"
@@ -390,7 +390,7 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
         dz = Battle_actionState->selection.focusPosition.vz - origin.vz;
         Battle_actionState->areaFacing = Core_Gte_Atan2(dx, dz);
         dy = Battle_actionState->selection.focusPosition.vy - origin.vy;
-        Battle_actionState->areaAngle = Core_Gte_Atan2(dy, Core_Math_SquareRootInteger(dx * dx + dz * dz)) / 16 + 64;
+        Battle_actionState->areaAngle = Core_Gte_Atan2(dy, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz)) / 16 + 64;
         Battle_actionState->areaOrigin =
             *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
     } else {
@@ -909,7 +909,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
 
         offset.vx += (-stickX * Core_Gte_Cos(angle) - stickY * Core_Gte_Sin(angle) + ONE / 8) >> 10;
         offset.vz += (-stickX * Core_Gte_Sin(angle) + stickY * Core_Gte_Cos(angle) + ONE / 8) >> 10;
-        scale = Core_Math_SquareRootInteger(offset.vx * offset.vx + offset.vz * offset.vz);
+        scale = VS::Core::Math::SquareRootInteger(offset.vx * offset.vx + offset.vz * offset.vz);
 
         if (scale > ONE) {
             stickX = offset.vx - oldX;

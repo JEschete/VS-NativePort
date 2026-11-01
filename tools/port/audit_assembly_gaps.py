@@ -298,7 +298,7 @@ def redirect_status(row: dict[str, str]) -> tuple[str, str] | None:
     macro = rf"^\s*#\s*define\s+{re.escape(name)}\s+{re.escape(target)}\s*$"
     if not re.search(macro, mask_literals(header.read_text(encoding="utf-8")), re.MULTILINE):
         return "missing-definition", ""
-    bodies = definitions(body_file.read_text(encoding="utf-8"), {target})
+    bodies = definitions(body_file.read_text(encoding="utf-8"), {target.rsplit("::", 1)[-1]})
     if len(bodies) > 1:
         raise ValueError(f"Multiple native redirect definitions for {row['id']} {target}")
     if not bodies:

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Core/Math/ScalarMath.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -123,7 +123,7 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
         motion->distanceCached++;
     }
     state->model->active = 0;
-    radius = Core_Math_SquareRootInteger(motion->distanceSquared);
+    radius = VS::Core::Math::SquareRootInteger(motion->distanceSquared);
     if (radius < 1024) {
         radius += 32;
     }

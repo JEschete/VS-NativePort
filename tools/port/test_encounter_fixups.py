@@ -618,11 +618,10 @@ class EncounterFixupTests(unittest.TestCase):
                 owned[identity]["path"],
                 r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             )
-        for address, identity in ((0x80041A1C, "F03405"), (0x80041AF4, "F03414")):
-            self.assertIn(
-                ("SLUS_010.40", address, identity),
-                copy_fixups.MODULE_FUNCTION_ENTRIES,
-            )
+        self.assertFalse(
+            [entry for entry in copy_fixups.MODULE_FUNCTION_ENTRIES
+             if entry[2] in {"F03405", "F03414"}]
+        )
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03411"],
             ("Core_Gte_VectorNormal", r"Native\Engine\src\Core\Gte.cpp"),
@@ -632,11 +631,11 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03399"],
             (
-                "Core_Math_LookupRotationSineCosine",
+                "VS::Core::Math::LookupRotationSineCosine",
                 r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             ),
         )
-        self.assertIn(
+        self.assertNotIn(
             ("SLUS_010.40", 0x80041104, "F03399"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
@@ -819,7 +818,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(
             copy_fixups.NATIVE_FUNCTION_REDIRECTS["F01017"],
             (
-                "Core_Math_LookupRotationSineCosine",
+                "VS::Core::Math::LookupRotationSineCosine",
                 r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             ),
         )
@@ -827,7 +826,9 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Core_Math_BuildEulerRotationMatrix(&rotation, output);", source)
+        self.assertIn(
+            "VS::Core::Math::ApplyBuildEulerRotationMatrix(rotation, *output);", source
+        )
         self.assertNotIn("Core_Gte_RotMatrixYXZ(", source)
 
     def test_core_idle_and_matrix_entries_reuse_native_leaf_implementations(self):
@@ -843,8 +844,7 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Engine\src\Core\Math\ScalarMath.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("MultiplyRotationMatrices(left, right, right);", source)
-        self.assertIn("MultiplyRotationMatrices(left, right, left);", source)
+        self.assertEqual(source.count("return MultiplyMatrixIntoRight(left, right);"), 3)
 
     def test_weapon_override_reads_a_typed_matrix_member_not_native_guest_offset(self):
         owned = self.owned_items()
@@ -1011,7 +1011,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(source.count("OutsideScreenBounds(&projected)"), 2)
         for edge in ("left", "top", "right", "bottom"):
             self.assertIn(
-                f"room_screen_bounds.{edge} = Core_Math_WrapSigned16(static_cast<uint32_t>({edge}));",
+                f"room_screen_bounds.{edge} = VS::Core::Math::WrapSigned16(static_cast<uint32_t>({edge}));",
                 flat(source),
             )
 
@@ -1031,7 +1031,8 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertEqual(source.count("return WriteRoomPolygon(&polygon, limit);"), 2)
         self.assertIn(
-            "room_far_depth = Core_Math_WrapSigned16(static_cast<uint32_t>(depth));", source
+            "room_far_depth = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(depth));",
+            source,
         )
 
     def test_native_pointer_sort_is_owned_and_shared_with_ai_ranking(self):
@@ -1089,7 +1090,11 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
             encoding="utf-8"
         )
-        for identifier in copy_fixups.NATIVE_FUNCTION_REDIRECTS:
+        for identifier, (target, _) in copy_fixups.NATIVE_FUNCTION_REDIRECTS.items():
+            if target.startswith("VS::"):
+                # Promoted C++ targets are reached only by name; no address resolves.
+                self.assertNotIn(target.rsplit("::", 1)[-1] + ",", source)
+                continue
             name = rows[identifier]["final_name"].replace("::", "_")
             self.assertTrue(
                 f"(void*)&{name}," in source,

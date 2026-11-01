@@ -31,7 +31,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
 #include "Core/FrameTiming.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"

@@ -1,12 +1,11 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Render/ModelGeometry.h"
-
 #include <limits.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "Core/Math/ScalarMath.hpp"
+extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelDraw.h"
@@ -17,7 +16,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Gte.h"
-#include "Core/Math/ScalarMath.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Legacy/Psx.h"
@@ -25,6 +23,7 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/ModelDraw.h"
+#include "Render/ModelGeometry.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -621,14 +620,14 @@ static MATRIX BuildActorShadowMatrix(Actors_ActorRecord* actor,
   MATRIX terrain = {0}, rotation = {0};
   Core_Gte_RotMatrixYXZ(&slope, &terrain);
   MATRIX view = *camera;
-  Core_Math_MultiplyMatrixIntoRight(&view, &terrain);
-  SVECTOR angles = {
-      actor->instance.rotationX,
-      Core_Math_WrapSigned16(static_cast<uint32_t>(actor->instance.facing) +
-                             actor->shadowBlend.level),
-      actor->instance.rotationZ, 0};
+  VS::Core::Math::ApplyMultiplyMatrixIntoRight(view, terrain);
+  SVECTOR angles = {actor->instance.rotationX,
+                    VS::Core::Math::WrapSigned16(
+                        static_cast<uint32_t>(actor->instance.facing) +
+                        actor->shadowBlend.level),
+                    actor->instance.rotationZ, 0};
   Core_Gte_RotMatrixYXZ(&angles, &rotation);
-  Core_Math_MultiplyMatrixIntoRight(&terrain, &rotation);
+  VS::Core::Math::ApplyMultiplyMatrixIntoRight(terrain, rotation);
   int extent =
       ((root_offset->vy - floor) >> kShadowHeightShift) + actor->shadowRadius;
   if (extent < kShadowMinimumExtent) extent = kShadowMinimumExtent;
@@ -639,9 +638,9 @@ static MATRIX BuildActorShadowMatrix(Actors_ActorRecord* actor,
                   ShadowColumnScale(size, actor->instance.scaleX,
                                     actor->shadowBlend.radiusExpandRate),
                   0};
-  Core_Math_ScaleMatrixColumns(&rotation, &scale);
+  VS::Core::Math::ApplyScaleMatrixColumns(rotation, scale);
   SVECTOR anchor = *root_offset;
-  anchor.vy = Core_Math_WrapSigned16(static_cast<uint32_t>(floor));
+  anchor.vy = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(floor));
   VECTOR translated;
   Core_GteWord flags;
   Core_Gte_SetRotMatrix(camera);
@@ -733,8 +732,9 @@ void Render_DrawActorGroundShadow(Actors_ActorRecord* actor,
   ShadowProjection projected;
   for (unsigned vertex = 0; vertex < kShadowVertices; ++vertex) {
     const uint32_t packed = Content_battleShadowVertices[vertex];
-    SVECTOR position = {Core_Math_WrapSigned16(packed), 0,
-                        Core_Math_WrapSigned16(packed >> kCoordinateBits), 0};
+    SVECTOR position = {VS::Core::Math::WrapSigned16(packed), 0,
+                        VS::Core::Math::WrapSigned16(packed >> kCoordinateBits),
+                        0};
     Core_GteWord fog, flags;
     VECTOR transformed;
     Core_Gte_RotTransPers(&position, &projected.screen[vertex], &fog, &flags);
@@ -745,10 +745,10 @@ void Render_DrawActorGroundShadow(Actors_ActorRecord* actor,
                                                  : transformed.vz);
   }
   actor->soundPosition.vx =
-      Core_Math_WrapSigned16(static_cast<uint32_t>(projected.screen[0]));
-  actor->soundPosition.vy = Core_Math_WrapSigned16(
+      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(projected.screen[0]));
+  actor->soundPosition.vy = VS::Core::Math::WrapSigned16(
       static_cast<uint32_t>(projected.screen[0]) >> kCoordinateBits);
-  actor->soundPosition.vz = Core_Math_WrapSigned16(projected.depth[0]);
+  actor->soundPosition.vz = VS::Core::Math::WrapSigned16(projected.depth[0]);
   actor->soundPosition.pad = 0;
   const unsigned rgb = (unsigned)actor->shadowBlend.reserved0;
   // The original blue addend is the upper halfword, not a masked byte.

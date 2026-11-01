@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/BattleMode.h"
 #include "Battle/Rewards.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Memory/Copy.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActors.h"
@@ -721,7 +721,7 @@ intptr_t Event_CommandStoreActorRangeBearing(u_char* instruction, short thread_i
     Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &second_actor_location);
     delta_x = first_actor_location.location.position.vx - second_actor_location.location.position.vx;
     delta_z = first_actor_location.location.position.vz - second_actor_location.location.position.vz;
-    scaled_distance = Core_Math_SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)) / instruction[5];
+    scaled_distance = VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)) / instruction[5];
     State_SetScriptFlag(result_flag_id, scaled_distance < 0x100 ? scaled_distance & 0xFF : -1);
     State_SetScriptFlag(result_flag_id + 1, (Core_Gte_Atan2(delta_x, delta_z) >> 4) & 0xFF);
     return 0;
@@ -782,7 +782,7 @@ intptr_t Event_CommandStoreActorDistance(u_char* instruction, short thread_index
     delta_x = first_actor_location.location.position.vx - second_actor_location.location.position.vx;
     delta_z = first_actor_location.location.position.vz - second_actor_location.location.position.vz;
     distance_flag_id = Core_Memory_ReadUnalignedShort(instruction + 5);
-    horizontal_distance = Core_Math_SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z));
+    horizontal_distance = VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z));
     if (horizontal_distance < 0) {
         horizontal_distance += 0x7F;
     }

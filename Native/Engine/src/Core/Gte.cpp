@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <numbers>
 
+#include "Core/Math/ScalarMath.hpp"
+
 // Fixed-point math replacing the GTE (plan §6.1). Arithmetic follows the
 // documented GTE behaviour: 4.12 matrices, 64-bit accumulation, >>12 scaling,
 // saturation of the 16-bit results and the projection divide. Rounding and flag
@@ -438,15 +440,9 @@ void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1) {
   v1->r = out[0], v1->g = out[1], v1->b = out[2], v1->cd = v0->cd;
 }
 
-int Core_Gte_Sin(int a) {
-  return static_cast<int>(std::lround(
-      std::sin((a & 0xFFF) * (2.0 * std::numbers::pi / 4096.0)) * 4096.0));
-}
+int Core_Gte_Sin(int a) { return VS::Core::Math::Sine(a); }
 
-int Core_Gte_Cos(int a) {
-  return static_cast<int>(std::lround(
-      std::cos((a & 0xFFF) * (2.0 * std::numbers::pi / 4096.0)) * 4096.0));
-}
+int Core_Gte_Cos(int a) { return VS::Core::Math::Cosine(a); }
 
 long Core_Gte_Atan2(long y, long x) {
   if (x == 0 && y == 0) {

@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
 #include "Core/Diagnostics.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Matrix.h"
-#include "Core/Math/ScalarMath.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Random.h"
@@ -464,7 +464,7 @@ void Effects_EmitParticleEvent(
                 scratch->vector.vx = scratch->extent.vx;
                 scratch->vector.vz = scratch->extent.vz;
             scale16:
-                scratch->vector.vy = Core_Math_SquareRootInteger(
+                scratch->vector.vy = VS::Core::Math::SquareRootInteger(
                     RAND_UNIFORM_WIDE(scratch->extent.vy * scratch->extent.vy, 0));
                 if (scratch->extent.vy == 0) {
                     // BATTLE.PRG, DIV at 0x800D34BC/0x800D34F8:
@@ -495,10 +495,10 @@ void Effects_EmitParticleEvent(
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
-                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vx * scratch->extent.vx,
+                    VS::Core::Math::SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vx * scratch->extent.vx,
                         scratch->innerExtent.vx * scratch->innerExtent.vx));
                 scratch->vector.vz =
-                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vz * scratch->extent.vz,
+                    VS::Core::Math::SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vz * scratch->extent.vz,
                         scratch->innerExtent.vz * scratch->innerExtent.vz));
                 goto scale24;
             case 0x800:
@@ -526,10 +526,10 @@ void Effects_EmitParticleEvent(
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
-                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vx * scratch->extent.vx,
+                    VS::Core::Math::SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vx * scratch->extent.vx,
                         scratch->innerExtent.vx * scratch->innerExtent.vx));
                 scratch->vector.vz =
-                    Core_Math_SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vz * scratch->extent.vz,
+                    VS::Core::Math::SquareRootInteger(RAND_UNIFORM_WIDE(scratch->extent.vz * scratch->extent.vz,
                         scratch->innerExtent.vz * scratch->innerExtent.vz));
                 goto scale32;
             case 0x800:
