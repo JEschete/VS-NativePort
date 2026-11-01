@@ -725,28 +725,49 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertIn("!= NULL;", copy_fixups.FIXES["F00514"][1][1])
 
-    def test_screen_warp_owns_native_geometry_and_original_entry(self):
+    def test_screen_warp_routes_through_the_live_binding(self):
         root = Path(__file__).resolve().parents[2]
         scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))
         self.assertTrue(
             scaffold["needs_c_headers"](
-                "VS.Game", r"src\Effects\ScreenDistortion\RadialWarp.cpp"
+                "VS.Game", r"src\Effects\ScreenDistortion\RadialWarpLive.cpp"
             )
         )
         self.assertEqual(
             self.owned_items()["F02458"]["path"],
             r"Native\Game\src\Effects\ScreenDistortion\RadialWarp.cpp",
         )
-        self.assertIn(
+        self.assertNotIn(
             ("GIM/SCREFF2.PRG", 0x800F9BD8, "F02458"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
-        source = (
+        self.assertFalse(
+            (root / r"Native\Game\src\Effects\ScreenDistortion\RadialWarp.h").exists()
+        )
+        caller = (root / r"Native\Game\src\Effects\ScreenEffects.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "VS::Effects::ScreenDistortion::WarpLivePolygonVertices();", caller
+        )
+        self.assertIn(
+            '#include "Effects/ScreenDistortion/RadialWarpLive.hpp"', caller
+        )
+        table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertNotIn("0x800F9BD8u", table)
+        core = (
             root / r"Native\Game\src\Effects\ScreenDistortion\RadialWarp.cpp"
         ).read_text(encoding="utf-8")
-        self.assertNotIn("Core_ScratchBase", source)
-        self.assertNotIn("0x1F800", source)
-        self.assertIn("Core_Math_kArcTangentTable", source)
+        self.assertNotIn("Legacy/", core)
+        self.assertNotIn("u_long", core)
+        live = (
+            root / r"Native\Game\src\Effects\ScreenDistortion\RadialWarpLive.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("Core_ScratchBase", live)
+        self.assertNotIn("0x1F800", live)
+        self.assertIn("Core_Math_kArcTangentTable", live)
 
     def test_screen_effect_defaults_own_native_state_and_use_typed_access(self):
         root = Path(__file__).resolve().parents[2]

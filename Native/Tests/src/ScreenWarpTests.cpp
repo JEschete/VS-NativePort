@@ -12,11 +12,11 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.h"
+#include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Core/Math/FixedPoint.h"
-#include "Effects/ScreenDistortion/RadialWarp.h"
 #include "Effects/ScreenEffects.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -161,7 +161,7 @@ void CheckWarpPoints(WarpFixture& fixture, const std::array<u_long, 3>& points,
   for (unsigned vertex = 0; vertex < points.size(); ++vertex) {
     fixture.triangle[2 + vertex] = points[vertex];
   }
-  Effects_ScreenDistortion_WarpPolygonVertices();
+  VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   for (unsigned vertex = 0; vertex < points.size(); ++vertex) {
     CHECK(fixture.triangle[2 + vertex] ==
           ReferencePoint(points[vertex], scales));
@@ -201,7 +201,7 @@ TEST_CASE(
     expected[index] = ReferencePoint(expected[index], scales);
   }
   const auto ordering = fixture.ordering;
-  Effects_ScreenDistortion_WarpPolygonVertices();
+  VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   CHECK(packet == expected);
   CHECK(fixture.ordering == ordering);
 }
@@ -250,7 +250,7 @@ TEST_CASE(
   for (const int distance : {0, 1, 2, 3, 4, 7, 8, 15, 16, 443, 444, 1023}) {
     const auto original = Point(160 + distance, 112);
     fixture.triangle[2] = original;
-    Effects_ScreenDistortion_WarpPolygonVertices();
+    VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
     CHECK(fixture.triangle[2] == ReferencePoint(original, scales));
   }
 }
@@ -264,25 +264,20 @@ TEST_CASE(
   const auto before = sky;
   std::array<u_char, 1296> lookup{};
   std::copy_n(Core_Math_kArcTangentTable, lookup.size(), lookup.begin());
-  Effects_ScreenDistortion_WarpPolygonVertices();
+  VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   CHECK(sky == before);
   CHECK(std::equal(lookup.begin(), lookup.end(), Core_Math_kArcTangentTable));
 }
 
-TEST_CASE("Screen warp remains callable through its original overlay entry",
+TEST_CASE("Screen warp no longer publishes an original overlay entry",
           "[effects][screen-warp][redirect-binding]") {
   WarpFixture fixture;
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(symbols, "GIM/SCREFF2.PRG",
-                                                     0x800F9BD8u);
-  REQUIRE(resolved != nullptr);
-  const auto warp = reinterpret_cast<void (*)(void)>(resolved);
-  CHECK(warp == Effects_ScreenDistortion_WarpPolygonVertices);
-  warp();
-  CHECK(fixture.triangle[2] == Point(96, 88));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "GIM/SCREFF2.PRG",
-                                          0x800F9BD9u) == nullptr);
+                                          0x800F9BD8u) == nullptr);
+  Effects_DrawScreenEffectOverlay();
+  CHECK(fixture.triangle[2] == Point(96, 88));
 }
 
 TEST_CASE(
@@ -297,7 +292,7 @@ TEST_CASE(
   const auto expected_mode = mode;
   std::array<std::byte, sizeof(Render_FrameScratch)> before{}, after{};
   std::memcpy(before.data(), &Render_frameScratch, before.size());
-  Effects_ScreenDistortion_WarpPolygonVertices();
+  VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   std::memcpy(after.data(), &Render_frameScratch, after.size());
   CHECK(mode == expected_mode);
   CHECK(fixture.triangle[2] == Point(96, 88));
@@ -317,6 +312,6 @@ TEST_CASE("Identity screen warp preserves all signed coordinate words",
   fixture.triangle[3] = Point(32767, -32768);
   fixture.triangle[4] = Point(-32608, -32656);
   const auto before = fixture.triangle;
-  Effects_ScreenDistortion_WarpPolygonVertices();
+  VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
   CHECK(fixture.triangle == before);
 }

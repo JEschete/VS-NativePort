@@ -133,7 +133,6 @@ extern "C" {
 #include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
-#include "Effects/ScreenDistortion/RadialWarp.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Effects/ScriptVm.h"
@@ -3256,7 +3255,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&Field_IsPointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&Field_TraceActorAndTerrainCollision, 0u, 0u, 0u},
-    {"GIM/SCREFF2.PRG", 0x800F9BD8u, 0u, (void*)&Effects_ScreenDistortion_WarpPolygonVertices, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBA4Cu, 0u, (void*)&Battle_Ai_UpdateFleeOrWanderBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},

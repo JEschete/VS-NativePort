@@ -22,6 +22,9 @@
     <Filter Include="include\Effects">
       <UniqueIdentifier>{9071A53F-D4E1-5F56-812B-DA257B8749BD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Effects\ScreenDistortion">
+      <UniqueIdentifier>{82C05CD2-F240-59F0-A0D1-317CD68B16FD}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Field">
       <UniqueIdentifier>{1E0884FE-22B7-578E-BCE0-52CBAEFF5982}</UniqueIdentifier>
     </Filter>
@@ -1125,9 +1128,9 @@
     <ClCompile Include="src\Effects\ScreenDistortion\RadialWarp.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\ScreenDistortion\RadialWarp.h">
+    <ClCompile Include="src\Effects\ScreenDistortion\RadialWarpLive.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\ScreenDistortion\ScreenDistortion.cpp">
       <Filter>src\Effects\ScreenDistortion</Filter>
     </ClCompile>
@@ -2261,6 +2264,12 @@
     </ClInclude>
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScreenDistortion\RadialWarp.hpp">
+      <Filter>include\Effects\ScreenDistortion</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ScreenDistortion\RadialWarpLive.hpp">
+      <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TextureBindings.hpp">
       <Filter>include\Effects</Filter>

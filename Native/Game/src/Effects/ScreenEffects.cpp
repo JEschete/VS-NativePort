@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Effects/ScreenDistortion/RadialWarpLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/Lifecycle.h"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
-#include "Effects/ScreenDistortion/RadialWarp.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
@@ -58,7 +58,7 @@ void Effects_DrawScreenEffectOverlay(void)
             return;
         }
         if (screen_effect_state->radialWarpArg0 != 0x1000 || screen_effect_state->radialWarpArg1 != 0) {
-            Effects_ScreenDistortion_WarpPolygonVertices();
+            VS::Effects::ScreenDistortion::WarpLivePolygonVertices();
         }
         if (screen_effect_state->feedbackLayer != 0) {
             Effects_ScreenDistortion_DrawFeedbackTiles();

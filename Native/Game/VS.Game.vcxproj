@@ -1030,7 +1030,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Effects\ScreenDistortion\RadialWarp.cpp">
+    <ClCompile Include="src\Effects\ScreenDistortion\RadialWarp.cpp" />
+    <ClCompile Include="src\Effects\ScreenDistortion\RadialWarpLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Effects\ScreenDistortion\ScreenDistortion.cpp">
@@ -2216,7 +2217,6 @@
     <ClInclude Include="src\Effects\Plugins\Plg301.h" />
     <ClInclude Include="src\Effects\PurgeTables.h" />
     <ClInclude Include="src\Effects\Runtime.h" />
-    <ClInclude Include="src\Effects\ScreenDistortion\RadialWarp.h" />
     <ClInclude Include="src\Effects\ScreenDistortion\ScreenDistortion.h" />
     <ClInclude Include="src\Effects\ScreenEffects.h" />
     <ClInclude Include="src\Effects\ScreenEffectState.h" />
@@ -2438,6 +2438,8 @@
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />
+    <ClInclude Include="include\Effects\ScreenDistortion\RadialWarp.hpp" />
+    <ClInclude Include="include\Effects\ScreenDistortion\RadialWarpLive.hpp" />
     <ClInclude Include="include\Effects\TextureBindings.hpp" />
     <ClInclude Include="include\Field\CollisionSampling.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />

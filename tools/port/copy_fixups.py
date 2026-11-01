@@ -40,6 +40,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
+    "VS::Effects::ScreenDistortion::WarpLivePolygonVertices":
+        r"Native\Game\include\Effects\ScreenDistortion\RadialWarpLive.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -205,7 +207,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
     ("BATTLE/BATTLE.PRG", 0x800E6BA0, "F01833"),
     ("BATTLE/BATTLE.PRG", 0x800E6C34, "F01834"),
-    ("GIM/SCREFF2.PRG", 0x800F9BD8, "F02458"),
     ("BATTLE/BATTLE.PRG", 0x800DBA4C, "F04203"),
     ("BATTLE/BATTLE.PRG", 0x800DBA88, "F04204"),
     ("BATTLE/BATTLE.PRG", 0x800DBB98, "F04205"),
@@ -2601,6 +2602,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Battle::Ai::IssueLiveActorCommand(",
      "F01720 #46 typed promotion: the command binding snapshots the AI state and supplies the frame terrain, actor model, "
      "selected candidate and tile reservations"),
+    (r"", r"\bVS::Effects::ScreenDistortion::WarpPolygonVertices\(\s*\)",
+     r"VS::Effects::ScreenDistortion::WarpLivePolygonVertices()",
+     "F02458 #46 typed promotion: the warp binding supplies the overlay warp words, the resident root table and a "
+     "checked ordering-table packet cursor"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),
