@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 13 | 21 (`wip`) | 4,173 |
-| `cpp` | 13 | 267 (`wip`) | 3,927 |
+| `modernized` | 16 | 21 (`wip`) | 4,170 |
+| `cpp` | 16 | 264 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 167 |
-| `vs_namespace` | 13 |
-| `typed_interface` | 13 |
-| `no_bridge` | 13 |
-| `strict_clean` | 167 |
-| `behavior_evidence` | 13 |
+| `source_cpp` | 170 |
+| `vs_namespace` | 16 |
+| `typed_interface` | 16 |
+| `no_bridge` | 16 |
+| `strict_clean` | 170 |
+| `behavior_evidence` | 16 |
 
-Promotion records: 280; derived `cpp=x`: 13, `cpp=wip`: 267. Verification records: 48; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 16, `cpp=wip`: 264. Verification records: 49; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -123,6 +123,12 @@ The third is the AI terrain-height slice, F01759-F01764, F01767 and F01768 in `V
 `Position3` endpoints instead of the hidden AI frame height map, packed tile words and `SVECTOR` pointers, so
 the file compiles as strict C++ without the C SDK headers. AI callers fetch the frame grid through
 `VS::Battle::Ai::CurrentTerrain`; the frame map itself is still a C struct field, so this is eight leaves.
+The fourth is the AI room-map slice, F01837-F01839 in `VS::Battle::Ai` (`Battle/Ai/RoomAiMap.hpp`,
+`Battle/Ai/TileHeightSampling.hpp`): `BuildRoomAiMap` is a pure function of an explicit `RoomAiSource`
+(collision cells, a floor-height query, triggers and a bounded auxiliary span), and the room lifecycle
+publishes and releases the result through a `RoomAiRuntime` interface. `BattleRoomAiRuntime` still binds the
+map to the C AI frame globals that generated AI code reads, so this retires the inline `Field_roomData`
+reads and the old C entry points, not the frame bindings.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
