@@ -99,7 +99,7 @@ class BaselineTests(unittest.TestCase):
                     "Native/Engine/src/Audio/SequencerOutput.cpp",
                     "Native/Game/src/Field/MinimapScene.cpp",
                     "Native/Game/src/Field/SegmentCollision.cpp",
-                    "Native/Game/src/Actors/SoundOverrides.cpp",
+                    "Native/Game/src/Actors/SoundTransitionBinding.cpp",
                     "Native/Game/src/Effects/ScreenEffectState.cpp",
                     "Native/Game/src/Effects/ScreenDistortion/RadialWarp.cpp",
                 ]
