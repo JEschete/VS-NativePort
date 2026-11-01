@@ -1221,6 +1221,28 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertNotIn("int Audio_UpdateActorSoundTransition()", header)
 
+    def test_movement_commands_write_through_the_actor_table_adapter(self):
+        owned = self.owned_items()
+        self.assertEqual(owned["F04180"]["name"], "VS::Actors::SetDirectMovement")
+        self.assertEqual(
+            owned["F01025"]["name"], "VS::Actors::QueueNavigationTileTarget"
+        )
+        root = Path(__file__).resolve().parents[2]
+        adapter = "VS::Actors::ActorRecordMovementRequests(), "
+        for path in (
+            r"Native\Game\src\Actors\Movement.cpp",
+            r"Native\Game\src\Boot\GameLoop.cpp",
+        ):
+            source = (root / path).read_text(encoding="utf-8")
+            self.assertIn('#include "Actors/MovementCommand.hpp"', source)
+            self.assertIn("VS::Actors::SetDirectMovement(" + adapter, source)
+            self.assertNotIn("Actors_SetDirectMovement(", source)
+            self.assertNotIn("Actors_QueueNavigationTileTarget(", source)
+        movement = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("VS::Actors::QueueNavigationTileTarget(" + adapter, movement)
+
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
             fix

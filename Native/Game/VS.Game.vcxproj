@@ -115,13 +115,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Actors\MovementCommands.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Actors\MovementCommandBinding.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\MovementCommands.cpp" />
     <ClCompile Include="src\Actors\RoomState.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2071,7 +2068,6 @@
     <ClInclude Include="src\Actors\ModelRendering.h" />
     <ClInclude Include="src\Actors\MotionRequests.h" />
     <ClInclude Include="src\Actors\Movement.h" />
-    <ClInclude Include="src\Actors\MovementCommands.h" />
     <ClInclude Include="src\Actors\Palette.h" />
     <ClInclude Include="src\Actors\RoomActorCache.h" />
     <ClInclude Include="src\Actors\RoomState.h" />
@@ -2424,6 +2420,7 @@
     <ClInclude Include="src\Title\SaveFiles.h" />
     <ClInclude Include="src\Title\TitleMenu.h" />
     <ClInclude Include="src\Title\TitleScreen.h" />
+    <ClInclude Include="include\Actors\MovementCommand.hpp" />
     <ClInclude Include="include\Actors\SoundTransition.hpp" />
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />

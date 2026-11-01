@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/MovementCommand.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
-#include "Actors/MovementCommands.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -119,9 +119,9 @@ int Actors_UpdateAshleyMovementInput(void)
     if (((Field_screenTransitionStep - 1) < 2U)
         || (Field_screenTransitionStep == 4)) {
         if (Field_pendingDestinationDoor.reserved06Bit15) {
-            Actors_SetDirectMovement(0, Field_pendingDestinationDoor.entryElevation << 10, stats->walkSpeed * ONE / 2);
+            VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0, Field_pendingDestinationDoor.entryElevation << 10, stats->walkSpeed * ONE / 2);
         } else {
-            Actors_SetDirectMovement(0, 0, 0);
+            VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0, 0, 0);
         }
     } else {
 
@@ -186,7 +186,7 @@ int Actors_UpdateAshleyMovementInput(void)
 
         if ((Actors_ashleyMoveInput[1] != 0) || (Actors_ashleyMoveInput[3] != 0)) {
             if (state_flags & 0x80000) {
-                Actors_SetDirectMovement(0,
+                VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0,
                     (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
@@ -199,7 +199,7 @@ int Actors_UpdateAshleyMovementInput(void)
                             & 0xFFF,
                         stats->walkSpeed * ONE);
                 } else {
-                    Actors_SetDirectMovement(0,
+                    VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0,
                         (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                             + Field_sphericalCamera.values.yaw + ONE / 2)
                             & 0xFFF,
@@ -212,7 +212,7 @@ int Actors_UpdateAshleyMovementInput(void)
                         & 0xFFF,
                     stats->runSpeed * ONE);
             } else {
-                Actors_SetDirectMovement(0,
+                VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0,
                     (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
@@ -224,7 +224,7 @@ int Actors_UpdateAshleyMovementInput(void)
                     & 0xFFF,
                 0);
         } else {
-            Actors_SetDirectMovement(0, Core_Gte_Atan2(0, 0) & 0xFFF, 0);
+            VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0, Core_Gte_Atan2(0, 0) & 0xFFF, 0);
         }
     }
 
@@ -397,13 +397,13 @@ int Actors_ExecuteQueuedActorCommands(void)
         case 15:
             Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
             if (actor->commandTarget >= 16) {
-                Actors_QueueNavigationTileTarget(actorId, ((short*)&actor->commandArg0)[0],
+                VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0],
                     ((short*)&actor->commandArg0)[1] * ONE, ((short*)&actor->commandArg0)[0]);
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
-                Actors_QueueNavigationTileTarget(actorId, ((short*)&actor->commandArg0)[0],
+                VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0],
                     ((short*)&actor->commandArg0)[1] * ONE, angle);
             }
             state = ((Actors_ActorStateFlags(actorId) & 0x4000) != 0) << 6;
@@ -418,12 +418,12 @@ int Actors_ExecuteQueuedActorCommands(void)
                 movementSpeed = actor->stats->walkSpeed << 12;
             }
             if (actor->commandTarget >= 16) {
-                Actors_QueueNavigationTileTarget(actorId, ((short*)&actor->commandArg0)[0], movementSpeed, ((short*)&actor->commandArg0)[0]);
+                VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0], movementSpeed, ((short*)&actor->commandArg0)[0]);
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
-                Actors_QueueNavigationTileTarget(actorId, ((short*)&actor->commandArg0)[0], movementSpeed, angle);
+                VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0], movementSpeed, angle);
             }
             state = ((Actors_ActorStateFlags(actorId) & 0x4000) != 0) << 6;
             break;
@@ -436,7 +436,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             } else {
                 movementSpeed = actor->stats->walkSpeed << 12;
             }
-            Actors_QueueNavigationTileTarget(actorId, ((short*)&actor->commandArg0)[0], movementSpeed, ((short*)&actor->commandArg0)[0]);
+            VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0], movementSpeed, ((short*)&actor->commandArg0)[0]);
             state = ((Actors_ActorStateFlags(actorId) & 0x4000) != 0) << 6;
             break;
         case 11:
@@ -531,7 +531,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = 0;
             break;
         case 6:
-            Actors_QueueNavigationTileTarget(actorId, position.position.pad, 0, position.position.pad);
+            VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, position.position.pad, 0, position.position.pad);
             queuedFrame = ((u_short*)&actor->commandArg0)[0];
             step.vx = 0;
             step.vy = queuedFrame;
@@ -539,7 +539,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             state = 0;
             break;
         case 7:
-            Actors_QueueNavigationTileTarget(actorId, position.position.pad, 0, position.position.pad);
+            VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, position.position.pad, 0, position.position.pad);
             queuedFrame = ((u_short*)&actor->commandArg0)[0];
             step.vx = 0;
             step.vy = queuedFrame;
@@ -1188,7 +1188,7 @@ void Actors_BeginActorJumpMovement(int index, int direction, int distance)
     }
 
     if (actor->instance.movementMode != 0) {
-        Actors_SetDirectMovement(index, direction, distance);
+        VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), index, direction, distance);
         return;
     }
 

@@ -524,7 +524,7 @@ class InputHandshake:
 
         A field lease that mixes a direction with an action button (running jump: Up+Square) keeps
         the direction held. Native BATTLE.PRG field movement re-reads the d-pad every game frame
-        (Actors/Movement.c Actors_SetDirectMovement), so a released direction during the first
+        (Actors/Movement.cpp VS::Actors::SetDirectMovement), so a released direction during the first
         airborne frame halves the running-jump distance (MAP020 Lab replay: continuous Up grabs the
         6,10 ledge; a one-frame gap lands short). Only the action buttons need a release edge.
         """

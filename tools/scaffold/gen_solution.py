@@ -172,6 +172,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Actors\AnimationBindings.cpp",
                 r"src\Ending\Credits\EmbeddedArt.cpp",
                 r"src\Actors\SoundTransitionBinding.cpp",
+                r"src\Actors\MovementCommandBinding.cpp",
                 r"src\Event\WeaponMode.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
                 r"src\Effects\ScreenDistortion\RadialWarp.cpp",

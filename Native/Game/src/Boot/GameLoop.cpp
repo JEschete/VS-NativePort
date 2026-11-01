@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/MovementCommand.hpp"
 #include "Core/FrameTiming.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
-#include "Actors/MovementCommands.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
@@ -425,7 +425,7 @@ void Boot_RunGameLoop(void)
                             break;
 
                         case 10:
-                            Actors_SetDirectMovement(0, 0, 0);
+                            VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0, 0, 0);
                             if (!((u_int (*)(int))Actors_IsActorActionAnimationBusy)(0)) {
                                 Battle_EndAshleyWeaponToggle();
                             }

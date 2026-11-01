@@ -30,6 +30,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
     "VS::Battle::Ai::BattleActorReactionDelays": r"Native\Game\include\Battle\Ai\ReactionDelay.hpp",
     "VS::Actors::UpdateActorSoundTransition": r"Native\Game\src\Actors\SoundTransitionBinding.hpp",
+    "VS::Actors::ActorRecordMovementRequests": r"Native\Game\include\Actors\MovementCommand.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2557,6 +2558,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"^Battle::", r"\bVS::Battle::Ai::ResetActorAiReactionDelay\(",
      r"VS::Battle::Ai::ResetActorAiReactionDelay(VS::Battle::Ai::BattleActorReactionDelays(), ",
      "F01791 #46 typed promotion: the delay is written through the battle actor AI table adapter"),
+    (r"", r"\bVS::Actors::(SetDirectMovement|QueueNavigationTileTarget)\(",
+     r"VS::Actors::\1(VS::Actors::ActorRecordMovementRequests(), ",
+     "F04180/F01025 #46 typed promotion: movement commands are written through the actor table adapter"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

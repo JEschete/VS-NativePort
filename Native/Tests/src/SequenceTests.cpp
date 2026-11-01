@@ -1,8 +1,10 @@
-extern "C" {
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "Actors/MovementCommand.hpp"
+
+extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
@@ -11,7 +13,6 @@ extern "C" {
 #include "Actors/ModelDrawing.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
-#include "Actors/MovementCommands.h"
 #include "Actors/SequencePlayback.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -504,18 +505,20 @@ int Tests_DirectMovementCommand(void) {
   memset(&actor, 0xA5, sizeof actor);
   Actors_ActorRecord* saved = Actors_actorRecords[3];
   Actors_actorRecords[3] = &actor;
-  Actors_SetDirectMovement(3, 0xC00, 1536);
+  VS::Actors::ActorMovementRequests& requests =
+      VS::Actors::ActorRecordMovementRequests();
+  VS::Actors::SetDirectMovement(requests, 3, 0xC00, 1536);
   int passed =
       actor.turnState.mode == 0 && actor.turnState.reserved1 == 0 &&
       actor.turnState.reserved2 == 0 && actor.turnState.reserved3 == 0 &&
       actor.turnState.direction == 0xC00 && actor.turnState.facing == 0xC00 &&
       actor.turnState.distance == 1536 &&
       (unsigned)actor.turnState.reservedC == 0xA5A5A5A5u;
-  Actors_SetDirectMovement(3, 0, 0);
+  VS::Actors::SetDirectMovement(requests, 3, 0, 0);
   passed = passed && actor.turnState.mode == 0 &&
            actor.turnState.distance == 0 && actor.turnState.direction == 0 &&
            actor.turnState.facing == 0;
-  Actors_QueueNavigationTileTarget(3, 0x300, 1024, 0x800);
+  VS::Actors::QueueNavigationTileTarget(requests, 3, 0x300, 1024, 0x800);
   passed = passed && actor.turnState.mode == 1 &&
            actor.turnState.direction == 0x300 &&
            actor.turnState.facing == 0x800 &&

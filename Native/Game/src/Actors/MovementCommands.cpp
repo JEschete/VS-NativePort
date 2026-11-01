@@ -1,41 +1,46 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Actors/MovementCommands.h"
+#include <cstdint>
+#include <cstdlib>
 
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
+#include "Actors/MovementCommand.hpp"
+#include "Core/Diagnostics.h"
 
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Legacy/Psx.h"
+namespace VS::Actors {
+namespace {
+constexpr int kOrientationBits = 16;
 
-// decomp: BATTLE.PRG func_800B64A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:415).
-void Actors_SetDirectMovement(int actor_id, int direction, int speed) {
-  Actors_QueueNavigationTileTarget(actor_id, direction, speed, direction);
-  Actors_actorRecords[actor_id]->turnState.mode = 0;
+void Store(ActorMovementRequests& requests, int actor_id,
+           const MovementCommand& command) {
+  if (!requests.StoreMovementRequest(actor_id, command)) {
+    Core_Errorf("actors", "Movement command references missing actor %d",
+                actor_id);
+    std::abort();
+  }
+}
+}  // namespace
+
+MovementCommand MakeTileTargetCommand(int direction, int distance, int facing) {
+  const auto orientation =
+      static_cast<std::uint32_t>(direction) |
+      (static_cast<std::uint32_t>(facing) << kOrientationBits);
+  return {kMovementRequestTileTarget, static_cast<std::int16_t>(orientation),
+          static_cast<std::int16_t>(orientation >> kOrientationBits),
+          static_cast<std::uint32_t>(distance)};
 }
 
 // decomp: BATTLE.PRG func_800B64CC (src/BATTLE/BATTLE.PRG/4A0A8.c:428).
-void Actors_QueueNavigationTileTarget(int actor_id, int direction, int distance,
-                                      int facing) {
-  if ((unsigned)actor_id >=
-          sizeof Actors_actorRecords / sizeof Actors_actorRecords[0] ||
-      Actors_actorRecords[actor_id] == nullptr) {
-    Core_Debugf("actors", "Movement command references missing actor %d",
-                actor_id);
-    abort();
-  }
-  Actors_MovementRequest* request = &Actors_actorRecords[actor_id]->turnState;
-  enum { kOrientationBits = sizeof(int16_t) * CHAR_BIT };
-  const u_int orientation =
-      (u_int)direction | ((u_int)facing << kOrientationBits);
-  request->mode = 1;
-  request->reserved1 = 0;
-  request->reserved2 = 0;
-  request->reserved3 = 0;
-  request->direction = static_cast<int16_t>(orientation);
-  request->facing = static_cast<int16_t>(orientation >> kOrientationBits);
-  request->distance = (u_int)distance;
+void QueueNavigationTileTarget(ActorMovementRequests& requests, int actor_id,
+                               int direction, int distance, int facing) {
+  Store(requests, actor_id, MakeTileTargetCommand(direction, distance, facing));
 }
-}  // extern "C"
+
+// decomp: BATTLE.PRG func_800B64A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:415). The
+// original queues a tile target and then clears its mode; nothing observes the
+// request in between, so one idle write is equivalent.
+void SetDirectMovement(ActorMovementRequests& requests, int actor_id,
+                       int direction, int speed) {
+  MovementCommand command = MakeTileTargetCommand(direction, speed, direction);
+  command.mode = kMovementRequestIdle;
+  Store(requests, actor_id, command);
+}
+}  // namespace VS::Actors

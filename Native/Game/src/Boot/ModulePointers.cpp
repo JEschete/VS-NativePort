@@ -19,7 +19,6 @@ extern "C" {
 #include "Actors/ModelRendering.h"
 #include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
-#include "Actors/MovementCommands.h"
 #include "Actors/Palette.h"
 #include "Actors/RoomState.h"
 #include "Actors/SequencePlayback.h"
@@ -1346,8 +1345,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B63ACu, 0u, (void*)&Actors_BeginTileJump, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6404u, 0u, (void*)&Actors_BeginAirborneTileJump, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6438u, 0u, (void*)&Actors_BeginNavigationJump, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B64A8u, 0u, (void*)&Actors_SetDirectMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B64CCu, 0u, (void*)&Actors_QueueNavigationTileTarget, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6500u, 0u, (void*)&Actors_QueueGroundOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6530u, 0u, (void*)&Actors_QueueMovementVector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B653Cu, 0u, (void*)&Actors_QueueFlightMovement, 0u, 0u, 0u},

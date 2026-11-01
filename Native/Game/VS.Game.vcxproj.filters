@@ -213,12 +213,12 @@
     <ClInclude Include="src\Actors\Movement.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\MovementCommandBinding.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Actors\MovementCommands.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\MovementCommands.h">
-      <Filter>src\Actors</Filter>
-    </ClInclude>
     <ClInclude Include="src\Actors\Palette.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
@@ -2180,6 +2180,9 @@
     </ClCompile>
     <ClInclude Include="src\Title\TitleScreen.h">
       <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\MovementCommand.hpp">
+      <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\SoundTransition.hpp">
       <Filter>include\Actors</Filter>
