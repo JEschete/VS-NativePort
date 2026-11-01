@@ -427,7 +427,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\SphereTerrain.cpp">
+    <ClCompile Include="src\Battle\SphereTerrain.cpp" />
+    <ClCompile Include="src\Battle\SphereTerrainLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\StatusEffects.cpp">
@@ -2425,7 +2426,8 @@
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />
     <ClInclude Include="include\Battle\Enemy.h" />
-    <ClInclude Include="include\Battle\SphereTerrain.h" />
+    <ClInclude Include="include\Battle\SphereTerrain.hpp" />
+    <ClInclude Include="include\Battle\SphereTerrainLive.hpp" />
     <ClInclude Include="include\Battle\TargetPages.h" />
     <ClInclude Include="include\Battle\TargetPages.hpp" />
     <ClInclude Include="include\Boot\GameApp.hpp" />

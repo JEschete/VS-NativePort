@@ -179,6 +179,7 @@
     <ClCompile Include="src\SoundTransitionTests.cpp" />
     <ClCompile Include="src\SourceNormalizationTests.cpp" />
     <ClCompile Include="src\SpecialTerrainTests.cpp" />
+    <ClCompile Include="src\SphereTerrainSliceTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\TargetPagePartitionTests.cpp" />

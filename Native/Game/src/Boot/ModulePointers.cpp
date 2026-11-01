@@ -98,7 +98,6 @@ extern "C" {
 #include "Battle/Recovery.h"
 #include "Battle/Rewards.h"
 #include "Battle/Sphere.h"
-#include "Battle/SphereTerrain.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
@@ -1630,7 +1629,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C282Cu, 0u, (void*)&Battle_BuildSphereCameraBasis, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C28ACu, 0u, (void*)&Battle_DrawSpherePositionCursor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C2B0Cu, 0u, (void*)&Battle_CacheSphereTerrainRow, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C2E24u, 0u, (void*)&Battle_DrawSphereTerrainIntersection, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4650u, 0u, (void*)&Battle_UpdateSphereTargetHighlights, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4708u, 0u, (void*)&Input_MapStickDeadZone, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4734u, 0u, (void*)&Battle_SphereInteractionMode, 0u, 0u, 0u},

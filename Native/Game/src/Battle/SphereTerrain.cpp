@@ -1,31 +1,31 @@
-#include "Battle/SphereTerrain.h"
+#include "Battle/SphereTerrain.hpp"
 
 #include <algorithm>
 #include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
 #include <stdexcept>
 #include <utility>
 #include <vector>
 
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Battle/Sphere.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
-}
+#include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 
 // BATTLE.PRG func_800C2E24, src/BATTLE/BATTLE.PRG/5A624.s.
 // The original scanline workspace was in scratch RAM and the target sphere.
 // Keep its terrain/occlusion passes, but own the interval storage here.
 namespace {
-constexpr int kRows = 224;
+using VS::Battle::SphereScreenPoint;
+using VS::Battle::SphereTerrainCanvas;
+using VS::Battle::SphereTerrainTables;
+using VS::Battle::SphereVector;
+
+constexpr int kRows = VS::Battle::kSphereSliceRows;
 constexpr int kCells = 9;
-constexpr std::size_t kCellCount = static_cast<std::size_t>(kCells) * kCells;
+constexpr std::size_t kCellCount = VS::Battle::kSphereTerrainCells;
 constexpr int kCellWidth = 128;
+constexpr int kCellShift = 7;
 constexpr int kEdgesPerRow = 19;
 constexpr int kEdges = 180;
 constexpr int kCirclePoints = 32;
@@ -35,22 +35,21 @@ constexpr int kFixedHalf = kFixedOne / 2;
 constexpr int kSpanOne = 65536;
 constexpr int kSpanBits = 16;
 constexpr int kSpanHalf = kSpanOne / 2;
-constexpr int kDepthCount = 2048;
 constexpr int kMaximumWall = 48;
 constexpr int kFlatEdge = 0x7F;
 constexpr int kReverseEdge = 0x80;
-constexpr int kCoordinateBits = 16;
 constexpr int kEdgeCoordinateBits = 4;
 constexpr unsigned kEdgeCoordinateMask = 15;
 constexpr int kCornerBits = 6;
 constexpr int kCornerOrientations = 4;
 constexpr int kTrianglePoints = 3;
+constexpr int kQuadrantShift = 10;
+constexpr int kQuadrants = 4;
+static_assert(static_cast<std::size_t>(kCells) * kCells == kCellCount);
+static_assert(static_cast<std::size_t>(kEdges) * kQuadrants ==
+              VS::Battle::kSphereWireEdges);
 
-struct Point {
-  int x;
-  int y;
-  int depth;
-};
+using Point = SphereScreenPoint;
 
 struct Span {
   int left;
@@ -67,23 +66,8 @@ using Rows = std::array<std::vector<Span>, kRows>;
 using Crossings = std::array<std::vector<Point>, kRows>;
 
 [[noreturn]] void Invalid(const char* message) {
-  Core_Debugf("sphere", "%s", message);
+  VS_LOG_ERROR("sphere", "{}", message);
   throw std::runtime_error(message);
-}
-
-Point Project(int x, int y, int z) {
-  const SVECTOR vertex{static_cast<std::int16_t>(x),
-                       static_cast<std::int16_t>(y),
-                       static_cast<std::int16_t>(z), 0};
-  Core_GteWord xy = 0;
-  Core_GteWord depth = 0;
-  Core_Gte_LoadV0(&vertex);
-  Core_Gte_Rtps();
-  Core_Gte_StoreSxy2(&xy);
-  Core_Gte_StoreSz3Otz(&depth);
-  return {static_cast<std::int16_t>(xy),
-          static_cast<std::int16_t>(xy >> kCoordinateBits),
-          static_cast<int>(depth)};
 }
 
 std::int64_t Slope(int from, int to, int height) {
@@ -155,13 +139,13 @@ int RotatedCell(int row, int column, int quadrant) {
   }
 }
 
-std::array<int, kCellCount> Heights(const Battle_TargetSphere& sphere,
+std::array<int, kCellCount> Heights(const SphereTerrainTables& tables,
                                     int elevation, int quadrant) {
   std::array<int, kCellCount> heights{};
   for (int row = 0; row < kCells; ++row) {
     for (int column = 0; column < kCells; ++column) {
       heights[row * kCells + column] = TerrainHeight(
-          sphere.terrainHeights[RotatedCell(row, column, quadrant)], elevation);
+          tables.heights[RotatedCell(row, column, quadrant)], elevation);
     }
   }
   return heights;
@@ -181,224 +165,214 @@ int WallHeight(const std::array<int, kCellCount>& heights, int index) {
   return at(row, x - 1) + at(row, x);
 }
 
-std::array<Point, 2> ProjectEdge(unsigned coordinates, const SVECTOR& center,
-                                 int elevation) {
-  const int x = ((center.vx >> 7) - kCells / 2) * kCellWidth;
-  const int z = ((center.vz >> 7) - kCells / 2) * kCellWidth;
-  const auto vertex = [x, z, elevation](unsigned packed) {
-    return Project(
-        x + static_cast<int>(packed & kEdgeCoordinateMask) * kCellWidth,
-        elevation,
-        z + static_cast<int>((packed >> kEdgeCoordinateBits) &
-                             kEdgeCoordinateMask) *
-                kCellWidth);
-  };
-  return {vertex(coordinates),
-          vertex(coordinates >> (kEdgeCoordinateBits * 2))};
-}
+class Slice {
+ public:
+  Slice(SphereVector center, const SphereTerrainTables& tables,
+        SphereTerrainCanvas& canvas)
+      : center_(center), tables_(tables), canvas_(canvas) {}
 
-Rows TerrainRows(const Battle_TargetSphere& sphere, const SVECTOR& center,
-                 int quadrant, const std::array<int, kCellCount>& heights,
-                 std::array<Edge, kEdges>& edges) {
-  std::array<bool, kEdges> boundary{};
-  for (int row = 0; row < kCells; ++row) {
-    for (int column = 0; column < kCells; ++column) {
-      if (heights[row * kCells + column] != 0) continue;
-      const int edge = row * kEdgesPerRow + column;
-      for (const int offset : {0, kCells, kCells + 1, kEdgesPerRow}) {
-        boundary[edge + offset] = !boundary[edge + offset];
-      }
-    }
+  void Draw(const VS::Battle::SphereShape& shape, int scale) {
+    const int quadrant =
+        ((tables_.camera_yaw - kFixedOne / 8) >> kQuadrantShift) & 3;
+    const auto heights = Heights(tables_, center_.y, quadrant);
+    std::array<Edge, kEdges> edges{};
+    auto rows = TerrainRows(quadrant, heights, edges);
+    OccludeWalls(rows, heights, edges);
+    OccludeCorners(rows);
+    DrawRows(rows, CircleRows(shape, scale));
   }
 
-  Crossings crossings;
-  for (int index = 0; index < kEdges; ++index) {
-    if (!boundary[index]) continue;
-    auto& edge = edges[index];
-    std::uint16_t coordinates = 0;
-    std::memcpy(
-        &coordinates,
-        sphere.wireEdges + (quadrant * kEdges + index) * sizeof coordinates,
-        sizeof coordinates);
-    edge.coordinates = coordinates;
-    auto [from, to] = ProjectEdge(coordinates, center, center.vy);
-    edge.end_y = std::clamp(std::max(from.y, to.y), 0, kRows);
-    if (std::abs(from.y - to.y) <= 2) {
-      edge.flags = kFlatEdge | (to.x < from.x ? kReverseEdge : 0);
-    } else {
-      const bool reverse = from.y > to.y;
-      if (reverse) std::swap(from, to);
-      const int begin = std::max(from.y, 0);
-      if (begin < std::min(to.y, kRows)) {
-        const auto count = static_cast<unsigned>(crossings[begin].size());
-        if ((to.x >= from.x && (count & 1) == 0) ||
-            (to.x < from.x && (count & 1) != 0)) {
-          edge.flags = count + 1 + (reverse ? kReverseEdge : 0);
+ private:
+  std::array<Point, 2> ProjectEdge(unsigned coordinates, int elevation) {
+    const int x = ((center_.x >> kCellShift) - kCells / 2) * kCellWidth;
+    const int z = ((center_.z >> kCellShift) - kCells / 2) * kCellWidth;
+    const auto vertex = [this, x, z, elevation](unsigned packed) {
+      return canvas_.Project(
+          x + static_cast<int>(packed & kEdgeCoordinateMask) * kCellWidth,
+          elevation,
+          z + static_cast<int>((packed >> kEdgeCoordinateBits) &
+                               kEdgeCoordinateMask) *
+                  kCellWidth);
+    };
+    return {vertex(coordinates),
+            vertex(coordinates >> (kEdgeCoordinateBits * 2))};
+  }
+
+  Rows TerrainRows(int quadrant, const std::array<int, kCellCount>& heights,
+                   std::array<Edge, kEdges>& edges) {
+    std::array<bool, kEdges> boundary{};
+    for (int row = 0; row < kCells; ++row) {
+      for (int column = 0; column < kCells; ++column) {
+        if (heights[row * kCells + column] != 0) continue;
+        const int edge = row * kEdgesPerRow + column;
+        for (const int offset : {0, kCells, kCells + 1, kEdgesPerRow}) {
+          boundary[edge + offset] = !boundary[edge + offset];
         }
       }
     }
-    ScanEdge(from, to, [&crossings](Point point) {
-      crossings[point.y].push_back(point);
-    });
+
+    Crossings crossings;
+    for (int index = 0; index < kEdges; ++index) {
+      if (!boundary[index]) continue;
+      auto& edge = edges[index];
+      edge.coordinates = tables_.wire_edges[quadrant * kEdges + index];
+      auto [from, to] = ProjectEdge(edge.coordinates, center_.y);
+      edge.end_y = std::clamp(std::max(from.y, to.y), 0, kRows);
+      if (std::abs(from.y - to.y) <= 2) {
+        edge.flags = kFlatEdge | (to.x < from.x ? kReverseEdge : 0);
+      } else {
+        const bool reverse = from.y > to.y;
+        if (reverse) std::swap(from, to);
+        const int begin = std::max(from.y, 0);
+        if (begin < std::min(to.y, kRows)) {
+          const auto count = static_cast<unsigned>(crossings[begin].size());
+          if ((to.x >= from.x && (count & 1) == 0) ||
+              (to.x < from.x && (count & 1) != 0)) {
+            edge.flags = count + 1 + (reverse ? kReverseEdge : 0);
+          }
+        }
+      }
+      ScanEdge(from, to, [&crossings](Point point) {
+        crossings[point.y].push_back(point);
+      });
+    }
+
+    Rows result;
+    for (int y = 0; y < kRows; ++y) {
+      auto& row = crossings[y];
+      std::sort(row.begin(), row.end(),
+                [](Point left, Point right) { return left.x < right.x; });
+      if ((row.size() & 1) != 0) {
+        Invalid("sphere terrain boundary is not closed");
+      }
+      for (std::size_t index = 0; index < row.size(); index += 2) {
+        result[y].push_back({row[index].x, row[index + 1].x});
+      }
+    }
+    return result;
   }
 
-  Rows result;
-  for (int y = 0; y < kRows; ++y) {
-    auto& row = crossings[y];
-    std::sort(row.begin(), row.end(),
-              [](Point left, Point right) { return left.x < right.x; });
-    if ((row.size() & 1) != 0) Invalid("sphere terrain boundary is not closed");
-    for (std::size_t index = 0; index < row.size(); index += 2) {
-      result[y].push_back({row[index].x, row[index + 1].x});
-    }
-  }
-  return result;
-}
-
-void OccludeWalls(Rows& rows, const SVECTOR& center,
-                  const std::array<int, kCellCount>& heights,
-                  const std::array<Edge, kEdges>& edges) {
-  for (int index = kCells + 1; index < kEdges - kCells - 1; ++index) {
-    const auto& edge = edges[index];
-    const int height = WallHeight(heights, index);
-    if (edge.flags == 0 || height < 2) continue;
-    auto [from, to] = ProjectEdge(edge.coordinates, center, center.vy - height);
-    if ((edge.flags & kReverseEdge) != 0) std::swap(from, to);
-    if ((edge.flags & kFlatEdge) == kFlatEdge) {
-      for (int y = std::max(from.y, 0); y < edge.end_y; ++y) {
-        Subtract(rows[y], from.x, to.x);
+  void OccludeWalls(Rows& rows, const std::array<int, kCellCount>& heights,
+                    const std::array<Edge, kEdges>& edges) {
+    for (int index = kCells + 1; index < kEdges - kCells - 1; ++index) {
+      const auto& edge = edges[index];
+      const int height = WallHeight(heights, index);
+      if (edge.flags == 0 || height < 2) continue;
+      auto [from, to] = ProjectEdge(edge.coordinates, center_.y - height);
+      if ((edge.flags & kReverseEdge) != 0) std::swap(from, to);
+      if ((edge.flags & kFlatEdge) == kFlatEdge) {
+        for (int y = std::max(from.y, 0); y < edge.end_y; ++y) {
+          Subtract(rows[y], from.x, to.x);
+        }
+        continue;
       }
-      continue;
-    }
-    if (to.y <= from.y) Invalid("sphere wall edge has inverted projection");
-    const auto step = Slope(from.x, to.x, to.y - from.y);
-    const int begin = std::max(from.y, 0);
-    const int end = std::min(std::max(to.y, edge.end_y), kRows);
-    for (int y = begin; y < end; ++y) {
-      const auto x_fixed = static_cast<std::int64_t>(from.x) * kSpanOne +
-                           kSpanHalf + step * (std::min(y, to.y) - from.y);
-      const int x = static_cast<int>(x_fixed >> kSpanBits);
-      Subtract(rows[y], std::min(from.x, x), std::max(from.x, x));
-    }
-  }
-}
-
-void OccludeCorners(Rows& rows, const Battle_TargetSphere& sphere,
-                    const SVECTOR& center) {
-  constexpr unsigned kCornerVertices = 0x38847780;
-  for (int row = 0; row < kCells; ++row) {
-    for (int column = 0; column < kCells; ++column) {
-      const unsigned flags = sphere.terrainRowFlags[row * kCells + column];
-      if (flags == 0) continue;
-      if (flags > kCornerOrientations * kCornerBits ||
-          flags % kCornerBits != 0) {
-        Invalid("sphere terrain corner has invalid orientation");
-      }
-      const unsigned corners = kCornerVertices >> flags;
-      std::array<Point, kTrianglePoints> points{};
-      for (int vertex = 0; vertex < kTrianglePoints; ++vertex) {
-        const int x = (center.vx >> 7) + column - kCells / 2 +
-                      static_cast<int>((corners >> (vertex * 2)) & 1);
-        const int z = (center.vz >> 7) + row - kCells / 2 +
-                      static_cast<int>((corners >> (vertex * 2 + 1)) & 1);
-        points[vertex] = Project(x * kCellWidth, center.vy, z * kCellWidth);
-      }
-      Crossings crossings;
-      for (std::size_t edge = 0; edge < points.size(); ++edge) {
-        ScanEdge(
-            points[edge], points[(edge + 1) % points.size()],
-            [&crossings](Point point) { crossings[point.y].push_back(point); });
-      }
-      for (int y = 0; y < kRows; ++y) {
-        const auto& line = crossings[y];
-        if (line.empty()) continue;
-        if (line.size() != 2) Invalid("sphere corner boundary is not closed");
-        Subtract(rows[y], std::min(line[0].x, line[1].x),
-                 std::max(line[0].x, line[1].x));
+      if (to.y <= from.y) Invalid("sphere wall edge has inverted projection");
+      const auto step = Slope(from.x, to.x, to.y - from.y);
+      const int begin = std::max(from.y, 0);
+      const int end = std::min(std::max(to.y, edge.end_y), kRows);
+      for (int y = begin; y < end; ++y) {
+        const auto x_fixed = static_cast<std::int64_t>(from.x) * kSpanOne +
+                             kSpanHalf + step * (std::min(y, to.y) - from.y);
+        const int x = static_cast<int>(x_fixed >> kSpanBits);
+        Subtract(rows[y], std::min(from.x, x), std::max(from.x, x));
       }
     }
   }
-}
 
-Crossings CircleRows(const SVECTOR& center, const MATRIX& shape, int scale) {
-  const int xx = (shape.m[0][0] * scale + kFixedHalf) >> kFixedBits;
-  const int zx = (shape.m[2][0] * scale + kFixedHalf) >> kFixedBits;
-  const int xz = (shape.m[0][2] * scale + kFixedHalf) >> kFixedBits;
-  const int zz = (shape.m[2][2] * scale + kFixedHalf) >> kFixedBits;
-  std::array<Point, kCirclePoints> points{};
-  for (int index = 0; index < kCirclePoints; ++index) {
-    const int angle = index * kFixedOne / kCirclePoints;
-    const int sine = Core_Gte_Sin(angle);
-    const int cosine = Core_Gte_Cos(angle);
-    points[index] = Project(
-        center.vx + ((xx * cosine + zx * sine + kFixedHalf) >> kFixedBits),
-        center.vy,
-        center.vz + ((xz * cosine + zz * sine + kFixedHalf) >> kFixedBits));
-  }
-  Crossings result;
-  for (std::size_t index = 0; index < points.size(); ++index) {
-    ScanEdge(points[index], points[(index + 1) % points.size()],
-             [&result](Point point) { result[point.y].push_back(point); });
-  }
-  return result;
-}
-
-std::uint32_t ScreenPosition(int x, int y) {
-  return static_cast<std::uint16_t>(x) |
-         (static_cast<std::uint32_t>(y) << kCoordinateBits);
-}
-
-void DrawRows(const Rows& terrain, const Crossings& circle) {
-  constexpr std::uint32_t kPacketSize = 4U << 24;
-  constexpr std::uint32_t kAdditiveDrawMode = 0xE1000220;
-  constexpr std::uint32_t kTranslucentLine = 0x42000000;
-  constexpr std::uint32_t kLinkMask = 0xFFFFFF;
-  constexpr int kGreenShift = 8;
-  constexpr std::size_t kLinePacketWords = 5;
-  for (int y = 0; y < kRows; ++y) {
-    const auto& points = circle[y];
-    if (points.empty()) continue;
-    const auto [left, right] =
-        std::minmax_element(points.begin(), points.end(),
-                            [](Point a, Point b) { return a.x < b.x; });
-    if (left->depth < 0 || left->depth >= kDepthCount) continue;
-    for (const auto span : terrain[y]) {
-      const int begin = std::max(span.left, left->x);
-      const int end = std::min(span.right, right->x);
-      if (begin >= end) continue;
-      auto* packet = static_cast<u_long*>(Render_frameScratch.primitiveCursor);
-      auto* ordering =
-          static_cast<u_long*>(Render_frameScratch.orderingTable) + left->depth;
-      const std::array<u_long, kLinePacketWords> words{
-          (*ordering & kLinkMask) | kPacketSize, kAdditiveDrawMode,
-          kTranslucentLine | (static_cast<unsigned>(y / 2) << kGreenShift),
-          ScreenPosition(begin, y), ScreenPosition(end, y)};
-      std::copy(words.begin(), words.end(), packet);
-      *ordering = LegacyGpu_Handle(packet);
-      Render_frameScratch.primitiveCursor = packet + words.size();
+  void OccludeCorner(Rows& rows, int row, int column, unsigned flags) {
+    constexpr unsigned kCornerVertices = 0x38847780;
+    if (flags > kCornerOrientations * kCornerBits || flags % kCornerBits != 0) {
+      Invalid("sphere terrain corner has invalid orientation");
+    }
+    const unsigned corners = kCornerVertices >> flags;
+    std::array<Point, kTrianglePoints> points{};
+    for (int vertex = 0; vertex < kTrianglePoints; ++vertex) {
+      const int x = (center_.x >> kCellShift) + column - kCells / 2 +
+                    static_cast<int>((corners >> (vertex * 2)) & 1);
+      const int z = (center_.z >> kCellShift) + row - kCells / 2 +
+                    static_cast<int>((corners >> (vertex * 2 + 1)) & 1);
+      points[vertex] =
+          canvas_.Project(x * kCellWidth, center_.y, z * kCellWidth);
+    }
+    Crossings crossings;
+    for (std::size_t edge = 0; edge < points.size(); ++edge) {
+      ScanEdge(
+          points[edge], points[(edge + 1) % points.size()],
+          [&crossings](Point point) { crossings[point.y].push_back(point); });
+    }
+    for (int y = 0; y < kRows; ++y) {
+      const auto& line = crossings[y];
+      if (line.empty()) continue;
+      if (line.size() != 2) Invalid("sphere corner boundary is not closed");
+      Subtract(rows[y], std::min(line[0].x, line[1].x),
+               std::max(line[0].x, line[1].x));
     }
   }
-}
+
+  void OccludeCorners(Rows& rows) {
+    for (int row = 0; row < kCells; ++row) {
+      for (int column = 0; column < kCells; ++column) {
+        const unsigned flags = tables_.corner_flags[row * kCells + column];
+        if (flags != 0) OccludeCorner(rows, row, column, flags);
+      }
+    }
+  }
+
+  Crossings CircleRows(const VS::Battle::SphereShape& shape, int scale) {
+    const int xx = (shape.x_x * scale + kFixedHalf) >> kFixedBits;
+    const int zx = (shape.z_x * scale + kFixedHalf) >> kFixedBits;
+    const int xz = (shape.x_z * scale + kFixedHalf) >> kFixedBits;
+    const int zz = (shape.z_z * scale + kFixedHalf) >> kFixedBits;
+    std::array<Point, kCirclePoints> points{};
+    for (int index = 0; index < kCirclePoints; ++index) {
+      const int angle = index * kFixedOne / kCirclePoints;
+      const int sine = VS::Core::Math::Sine(angle);
+      const int cosine = VS::Core::Math::Cosine(angle);
+      points[index] = canvas_.Project(
+          center_.x + ((xx * cosine + zx * sine + kFixedHalf) >> kFixedBits),
+          center_.y,
+          center_.z + ((xz * cosine + zz * sine + kFixedHalf) >> kFixedBits));
+    }
+    Crossings result;
+    for (std::size_t index = 0; index < points.size(); ++index) {
+      ScanEdge(points[index], points[(index + 1) % points.size()],
+               [&result](Point point) { result[point.y].push_back(point); });
+    }
+    return result;
+  }
+
+  void DrawRows(const Rows& terrain, const Crossings& circle) {
+    for (int y = 0; y < kRows; ++y) {
+      const auto& points = circle[y];
+      if (points.empty()) continue;
+      const auto [left, right] =
+          std::minmax_element(points.begin(), points.end(),
+                              [](Point a, Point b) { return a.x < b.x; });
+      if (left->depth < 0 || left->depth >= VS::Battle::kSphereSliceDepths) {
+        continue;
+      }
+      for (const auto span : terrain[y]) {
+        const int begin = std::max(span.left, left->x);
+        const int end = std::min(span.right, right->x);
+        if (begin < end) canvas_.DrawLine(y, begin, end, left->depth);
+      }
+    }
+  }
+
+  SphereVector center_;
+  const SphereTerrainTables& tables_;
+  SphereTerrainCanvas& canvas_;
+};
 }  // namespace
 
-extern "C" void Battle_DrawSphereTerrainIntersection(SVECTOR* position,
-                                                     MATRIX* shape, int scale) {
-  if (position == nullptr || shape == nullptr ||
-      Battle_targetSphere == nullptr ||
-      Render_frameScratch.primitiveCursor == nullptr ||
-      Render_frameScratch.orderingTable == nullptr || scale < 0 ||
-      scale > kFixedOne) {
-    Invalid("sphere terrain drawing requires initialized targeting state");
+namespace VS::Battle {
+void DrawSphereTerrainIntersection(SphereVector position,
+                                   const SphereShape& shape, int scale,
+                                   const SphereTerrainTables& tables,
+                                   SphereTerrainCanvas& canvas) {
+  if (scale < 0 || scale > kFixedOne) {
+    Invalid("sphere terrain scale is outside 0 to 4096");
   }
-  static_assert(offsetof(Battle_TargetSphere, wireEdges) ==
-                offsetof(Battle_TargetSphereSetupView, wireEdges));
-  const auto& sphere =
-      *reinterpret_cast<const Battle_TargetSphere*>(Battle_targetSphere);
-  const int quadrant = ((sphere.cameraYaw - kFixedOne / 8) >> 10) & 3;
-  const auto heights = Heights(sphere, position->vy, quadrant);
-  std::array<Edge, kEdges> edges{};
-  auto rows = TerrainRows(sphere, *position, quadrant, heights, edges);
-  OccludeWalls(rows, *position, heights, edges);
-  OccludeCorners(rows, sphere, *position);
-  DrawRows(rows, CircleRows(*position, *shape, scale));
+  Slice(position, tables, canvas).Draw(shape, scale);
 }
+}  // namespace VS::Battle

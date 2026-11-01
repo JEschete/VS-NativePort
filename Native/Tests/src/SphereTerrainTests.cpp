@@ -9,7 +9,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/PlanningWorkspace.hpp"
-#include "Battle/SphereTerrain.h"
+#include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Legacy/Psx.h"
 
@@ -86,7 +86,7 @@ struct SliceFixture {
     std::fill(packets.begin(), packets.end(), kGuard);
     Render_frameScratch.orderingTable = ordering.data() + 1;
     Render_frameScratch.primitiveCursor = packets.data() + 1;
-    Battle_DrawSphereTerrainIntersection(&center, &shape, scale);
+    VS::Battle::DrawLiveSphereTerrainIntersection(center, shape, scale);
     REQUIRE(ordering.front() == kGuard);
     REQUIRE(ordering.back() == kGuard);
     REQUIRE(packets.front() == kGuard);

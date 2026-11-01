@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/Hud.h"
 #include "Battle/Sphere.h"
-#include "Battle/SphereTerrain.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
@@ -994,7 +994,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
         (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy = -(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].position[1] - 2;
     }
 
-    Battle_DrawSphereTerrainIntersection(target_position, m, scale);
+    VS::Battle::DrawLiveSphereTerrainIntersection(*target_position, *m, scale);
     stickX = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vx * scale + ONE / 2) >> 12;
     stickY = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vz * scale + ONE / 2) >> 12;
     target_position->vx += (stickX * m->m[0][0] + stickY * m->m[2][0] + ONE / 2) >> 12;
