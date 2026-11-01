@@ -1935,6 +1935,76 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "                actor->platformAnchor.vz = platform_contact.z;",
          "800A3224 and event31/104:402 request an authored platform before its visibility command; read its actual transform without changing visibility or collision, and surface absent/invalid support instead of dereferencing null"),
     ],
+    "F00889": [
+        ("    SVECTOR* anchor;",
+         "    Field_PlatformContactPoint* platform = NULL;",
+         "38C1C.c:450 a platform jump target is the typed contact, not an SVECTOR read through a retyped call (#257)"),
+        ("    actor->instance.jumpCountdown = 6;\n",
+         "    if (target[1] >= 2) {\n"
+         "        platform = Field_FindMovingPlatformById(target[1]);\n"
+         "        if (platform == NULL) {\n"
+         "            Core_Errorf(\"field.platform\", \"jump target platform layer %d is not visible\", target[1]);\n"
+         "            return;\n"
+         "        }\n"
+         "    }\n"
+         "\n"
+         "    actor->instance.jumpCountdown = 6;\n",
+         "38C1C.c:526 the original reads a missing platform through NULL (PS1 address 0); refuse the jump before any "
+         "actor state changes (#257)"),
+        ("        anchor = ((SVECTOR* (*)(int))Field_FindMovingPlatformById)(target[1]);\n"
+         "        x = anchor->vx;\n"
+         "        y = anchor->vy;\n"
+         "        z = anchor->vz;",
+         "        x = platform->x;\n"
+         "        y = platform->height;\n"
+         "        z = platform->z;",
+         "38C1C.c:526 SVECTOR vx/vy/vz are the contact x/height/z (#257)"),
+    ],
+    "F00921": [
+        ("        contact = func_800A4A24(actor->instance.supportLayer);\n"
+         "        actor->platformOffsetX",
+         "        contact = func_800A4A24(actor->instance.supportLayer);\n"
+         "        if (contact == NULL) {\n"
+         "            Core_Errorf(\"field.platform\", \"actor %d rides invisible platform layer %d\", actor->instance.slot,\n"
+         "                        actor->instance.supportLayer);\n"
+         "            return;\n"
+         "        }\n"
+         "        actor->platformOffsetX",
+         "3A1A0.c:1107 mode 0 follows the platform; a missing one leaves the actor in place instead of reading NULL (#257)"),
+        ("        contact = func_800A4A24(actor->instance.supportLayer);\n"
+         "        break;",
+         "        contact = func_800A4A24(actor->instance.supportLayer);\n"
+         "        if (contact == NULL) {\n"
+         "            Core_Errorf(\"field.platform\", \"actor %d anchors to invisible platform layer %d\",\n"
+         "                        actor->instance.slot, actor->instance.supportLayer);\n"
+         "            return;\n"
+         "        }\n"
+         "        break;",
+         "3A1A0.c:1107 mode 1 anchors to the platform; a missing one keeps the previous anchor (#257)"),
+    ],
+    "F00945": [
+        ("    actor->moveFacing = direction * (ONE / 4);\n"
+         "\n"
+         "    if (actor->instance.supportLayer) {\n"
+         "        Field_PlatformContactPoint* platform = Field_FindMovingPlatformById(actor->instance.supportLayer);\n"
+         "\n",
+         "    Field_PlatformContactPoint* platform = NULL;\n"
+         "\n"
+         "    if (actor->instance.supportLayer) {\n"
+         "        platform = Field_FindMovingPlatformById(actor->instance.supportLayer);\n"
+         "        if (platform == NULL) {\n"
+         "            Core_Errorf(\"field.platform\", \"ledge probe on invisible platform layer %d\",\n"
+         "                        actor->instance.supportLayer);\n"
+         "            return 0;\n"
+         "        }\n"
+         "    }\n"
+         "\n"
+         "    actor->moveFacing = direction * (ONE / 4);\n"
+         "\n"
+         "    if (actor->instance.supportLayer) {\n",
+         "40564.c:432 the ledge edge comes from the support platform; a missing one reports no ledge (0, as for a wall) "
+         "before the facing changes, instead of reading NULL (#257)"),
+    ],
     "F01261": [
         ("((int (*)(int))Actors_IsActorRetainedAfterDefeat)(actorId)",
          "Actors_IsActorRetainedAfterDefeat(actorId)",

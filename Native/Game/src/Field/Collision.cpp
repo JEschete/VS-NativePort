@@ -9,6 +9,7 @@ extern "C" {
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
+#include "Core/Diagnostics.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -1820,11 +1821,20 @@ int Field_CalcActorLedgeOffset(Actors_ActorRecord* actor, SVECTOR* offset)
     int surface;
     int distance;
 
+    Field_PlatformContactPoint* platform = NULL;
+
+    if (actor->instance.supportLayer) {
+        platform = Field_FindMovingPlatformById(actor->instance.supportLayer);
+        if (platform == NULL) {
+            Core_Errorf("field.platform", "ledge probe on invisible platform layer %d",
+                        actor->instance.supportLayer);
+            return 0;
+        }
+    }
+
     actor->moveFacing = direction * (ONE / 4);
 
     if (actor->instance.supportLayer) {
-        Field_PlatformContactPoint* platform = Field_FindMovingPlatformById(actor->instance.supportLayer);
-
         edge = 65;
 
         if (direction < 2) {

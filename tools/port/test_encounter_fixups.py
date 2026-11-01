@@ -221,6 +221,25 @@ class EncounterFixupTests(unittest.TestCase):
             r"Native\Game\src\Actors\AnimationBindings.h",
         )
 
+    def test_platform_lookup_callers_check_for_a_missing_platform(self):
+        root = Path(__file__).resolve().parents[2]
+        movement = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(encoding="utf-8")
+        collision = (root / r"Native\Game\src\Field\Collision.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("(SVECTOR* (*)(int))Field_FindMovingPlatformById", movement)
+        for source, name, guards in (
+            (movement, "Actors_BeginActorJumpToTile", 1),
+            (movement, "Actors_UpdateActorPlatformContact", 2),
+            (collision, "Field_CalcActorLedgeOffset", 1),
+        ):
+            with self.subTest(name=name):
+                start = source.index(f"\n{name}(") if f"\n{name}(" in source else source.index(f" {name}(")
+                body = source[start:source.index("\n}\n", start)]
+                lookups = re.findall(r"(\w+) = Field_FindMovingPlatformById\(", body)
+                self.assertEqual(len(lookups), guards)
+                for variable in lookups:
+                    self.assertIn(f"if ({variable} == NULL)", body)
+                self.assertEqual(body.count('Core_Errorf("field.platform"'), guards)
+
     def test_platform_placement_uses_an_owned_authored_contact(self):
         fixups = copy_fixups.FIXES["F00901"]
         declaration = next(new for old, new, _ in fixups if "int* anchor" in old)

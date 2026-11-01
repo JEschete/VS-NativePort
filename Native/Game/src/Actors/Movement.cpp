@@ -26,6 +26,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
+#include "Core/Diagnostics.h"
 #include "Core/Runtime.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Camera.h"
@@ -775,11 +776,19 @@ void Actors_BeginActorJumpToTile(Actors_ActorRecord* actor, u_char* target, int 
     int frames;
     int fall;
     int velocity;
-    SVECTOR* anchor;
+    Field_PlatformContactPoint* platform = NULL;
     int _[2] __attribute__((unused));
 
     if (*(u_int*)((char*)actor + 8) & 0x70000) {
         return;
+    }
+
+    if (target[1] >= 2) {
+        platform = Field_FindMovingPlatformById(target[1]);
+        if (platform == NULL) {
+            Core_Errorf("field.platform", "jump target platform layer %d is not visible", target[1]);
+            return;
+        }
     }
 
     actor->instance.jumpCountdown = 6;
@@ -793,10 +802,9 @@ void Actors_BeginActorJumpToTile(Actors_ActorRecord* actor, u_char* target, int 
     }
 
     if (target[1] >= 2) {
-        anchor = ((SVECTOR* (*)(int))Field_FindMovingPlatformById)(target[1]);
-        x = anchor->vx;
-        y = anchor->vy;
-        z = anchor->vz;
+        x = platform->x;
+        y = platform->height;
+        z = platform->z;
     } else {
         x = target[0] * 128 + 64;
         z = target[2] * 128 + 64;
@@ -1231,6 +1239,11 @@ void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
         }
 
         contact = Field_FindMovingPlatformById(actor->instance.supportLayer);
+        if (contact == NULL) {
+            Core_Errorf("field.platform", "actor %d rides invisible platform layer %d", actor->instance.slot,
+                        actor->instance.supportLayer);
+            return;
+        }
         actor->platformOffsetX = contact->x - actor->platformAnchor.vx;
         actor->platformOffsetZ = contact->z - actor->platformAnchor.vz;
         actor->instance.position.vx += actor->platformOffsetX;
@@ -1258,6 +1271,11 @@ void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
         }
 
         contact = Field_FindMovingPlatformById(actor->instance.supportLayer);
+        if (contact == NULL) {
+            Core_Errorf("field.platform", "actor %d anchors to invisible platform layer %d",
+                        actor->instance.slot, actor->instance.supportLayer);
+            return;
+        }
         break;
 
     case 2:
