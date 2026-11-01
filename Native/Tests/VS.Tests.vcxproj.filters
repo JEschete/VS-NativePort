@@ -225,6 +225,9 @@
     <ClCompile Include="src\ParticleRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\PlanningWorkspaceSliceTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\PlatformPlacementTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

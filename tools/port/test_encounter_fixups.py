@@ -3123,6 +3123,24 @@ AddPrim(*(void**)Core_ScratchAddr(2), poly++);
         spawning = (root / "Native/Game/src/Actors/ActorLoading.cpp").read_text()
         self.assertNotIn("spawn137", spawning)
 
+    def test_ai_plan_rebuild_reads_the_queued_action_request(self):
+        # #255: actorEvaluationContext views func_800DEEA4_t, so no actor pointer slots may shift it.
+        self.assertNotIn("T00380", native_views.ACTOR_VIEWS)
+        self.assertEqual(native_views.pointer_slots("T00380"), ())
+        root = Path(__file__).resolve().parents[2]
+        with (root / "tools/port/owned.csv").open(newline="") as file:
+            owned = {row["id"]: row for row in csv.DictReader(file)}
+        self.assertEqual(owned["F01718"]["name"], "VS::Battle::Ai::RebuildActorActionPlans")
+        execution = (root / "Native/Game/src/Battle/ActionExecution.cpp").read_text(encoding="utf-8")
+        self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[", execution)
+        self.assertIn('#include "Battle/Ai/PlanningWorkspaceLive.hpp"', execution)
+        for path in ("Actors/ActorState.cpp", "Battle/Ai/ActorState.cpp", "Boot/GameLoop.cpp", "Event/Cutscene.cpp"):
+            text = (root / "Native/Game/src" / path).read_text(encoding="utf-8")
+            self.assertNotIn("Battle_Ai_RebuildActorActionPlans(", text, path)
+            self.assertIn("VS::Battle::Ai::RebuildLiveActorActionPlans(", text, path)
+        table = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("0x800DEC88u", table)
+
     def test_particle_attraction_uses_native_fields_after_pointer_widening(self):
         source = """damping = ((Effects_ParticleAttractionView*)node)->attraction;
 direction.vx = ((Effects_ParticleAttractionView*)node)->targetX - (state->x >> 12);

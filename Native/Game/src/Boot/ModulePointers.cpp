@@ -84,7 +84,6 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitives.h"
-#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Ai/Relations.h"
 #include "Battle/AttackPrerequisites.h"
 #include "Battle/BattleMode.h"
@@ -2016,7 +2015,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DE030u, 0u, (void*)&Battle_Ai_AdvancePlanningSimulation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DE3E4u, 0u, (void*)&Battle_Ai_BuildActorActionPlan, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEB10u, 0u, (void*)&Battle_Ai_ReconcileCompletedActionPlan, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DEC88u, 0u, (void*)&Battle_Ai_RebuildActorActionPlans, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEEA4u, 0u, (void*)&Battle_Ai_NotifyActionRelationshipChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DEEFCu, 0u, (void*)&Battle_Ai_IssueActorCommand, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DF9A8u, 0u, (void*)&Battle_Ai_ResolveRouteGateExit, 0u, 0u, 0u},

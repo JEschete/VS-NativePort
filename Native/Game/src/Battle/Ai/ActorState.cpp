@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Core/Memory/Heap.h"
@@ -281,7 +281,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     state->options = (short)options;
     Battle_Ai_ApplySavedActorAiRelations();
     if (state->actorId) {
-        while (Battle_Ai_RebuildActorActionPlans(0))
+        while (VS::Battle::Ai::RebuildLiveActorActionPlans(0))
             ;
     }
     Core_Debugf("ai", "initialized actor=%d state=%p bytes=%u radius=%u height=%u",

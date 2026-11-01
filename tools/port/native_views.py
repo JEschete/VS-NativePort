@@ -56,7 +56,8 @@ NATIVE_FIELD_ALIASES = {
 }
 
 # Views of vs_battle_actor (146C.h), including the engagement data used by the canonical AI state.
-ACTOR_VIEWS = frozenset(["T00358", "T00379", "T00380", "T00383", "T00388", "T00390", "T00396", "T00408", "T00522", "T00610", "T00614"])
+# T00380 actorEvaluationContext views the queued action request (func_800DEEA4_t), not an actor (#255).
+ACTOR_VIEWS = frozenset(["T00358", "T00379", "T00383", "T00388", "T00390", "T00396", "T00408", "T00522", "T00610", "T00614"])
 ACTOR_POINTERS = (0, 0x3C, 0x44, 0x48, 0x4C)
 
 # D_800F4538_t / D_800F4538_unk0 (3A1A0.h). More distant model fields are validated against ActorRecord.

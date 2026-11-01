@@ -321,13 +321,12 @@ typedef struct Battle_Ai_EvaluationActorView {
 
 // decomp: actorEvaluationContext (src/BATTLE/BATTLE.PRG/74088.c:1544)
 typedef struct Battle_Ai_EvaluationContextView {
-    void* nativePointer0; /* PS1 pointer slot 0x0 */
+    char reserved0[4];
     unsigned char id;
-    char reserved5_5[55];
-    void* nativePointer3C; /* PS1 pointer slot 0x3C */
-    char reserved5_40[4];
-    void* opaque44;
+    char reserved5[63];
+    int opaque44;
 } Battle_Ai_EvaluationContextView;
+_Static_assert(sizeof(Battle_Ai_EvaluationContextView) == 0x48, "Battle_Ai_EvaluationContextView must keep its PS1 layout");
 
 // decomp: actorEvaluationStats (src/BATTLE/BATTLE.PRG/74088.c:1516)
 typedef struct Battle_Ai_EvaluationStatsView {

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MovementCommand.hpp"
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/FrameTiming.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/NavigationPrimitives.h"
-#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
@@ -384,7 +384,7 @@ void Boot_RunGameLoop(void)
                             case 4:
                                 Field_TrackInteractionCameraToAshley();
                                 if (Field_IsCameraLookAtOnAshley()) {
-                                    Battle_Ai_RebuildActorActionPlans(&Battle_actionState->queue[0]);
+                                    VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[0]);
                                     Battle_BeginPostActionRecovery(0);
                                     Field_controlMode = 2;
                                 }

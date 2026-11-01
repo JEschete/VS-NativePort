@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
-#include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -279,7 +279,7 @@ void Battle_StartFollowupActionEffects(void) { Battle_StartActionPresentation();
 // decomp: BATTLE.PRG func_80079050 (src/BATTLE/BATTLE.PRG/146C.c:7356)
 void Battle_WaitForActionResolution(void)
 {
-    if (Battle_Ai_RebuildActorActionPlans(&Battle_actionState->queue[Battle_actionState->queueIndex & 3]) == 0) {
+    if (VS::Battle::Ai::RebuildLiveActorActionPlans(&Battle_actionState->queue[Battle_actionState->queueIndex & 3]) == 0) {
         Battle_ReleaseQueuedActorAttacks();
         Battle_BeginActionTrailFade();
     }

@@ -338,7 +338,8 @@
     <ClCompile Include="src\Battle\Ai\PlanningPrimitives.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\PlanningWorkspace.cpp">
+    <ClCompile Include="src\Battle\Ai\PlanningWorkspace.cpp" />
+    <ClCompile Include="src\Battle\Ai\PlanningWorkspaceLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Relations.cpp">
@@ -2421,6 +2422,7 @@
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
+    <ClInclude Include="include\Battle\Ai\PlanningWorkspaceLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />

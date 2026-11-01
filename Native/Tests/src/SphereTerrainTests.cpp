@@ -8,7 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/PlanningWorkspace.hpp"
+#include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Legacy/Psx.h"
@@ -299,7 +299,7 @@ TEST_CASE("Native action result clearing covers the entire native capacity",
 
 TEST_CASE("AI planning result clearing preserves every adjacent native buffer",
           "[combat][targeting][capacity][ai]") {
-  VS::Game::ai::PlanningWorkspace workspace;
+  VS::Battle::Ai::PlanningWorkspace workspace;
   std::memset(&workspace.result, 0xA5, sizeof workspace.result);
   std::memset(workspace.candidates, 0xA5, sizeof workspace.candidates);
   std::memset(workspace.exclusions, 0xA5, sizeof workspace.exclusions);
