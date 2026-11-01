@@ -192,7 +192,7 @@ F01844,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01845,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01988,Native\Game\src\Effects\Templates\RadialSurge.cpp,,,,,,,,,
 F01994,Native\Game\src\Effects\Templates\RadialSurge.cpp,,,,,,,,,
-F02458,Native\Game\src\Effects\ScreenDistortion\RadialWarp.cpp,x,,,,x,,,,
+F02458,Native\Game\src\Effects\ScreenDistortion\RadialWarp.cpp,x,x,x,x,x,x,verify:VR-EFFECTS-RADIAL-WARP-SLICE,a5c6e8a070212000b161a45e71d6b800a6c8f285,"#46 slice: VS::Effects::ScreenDistortion::WarpPolygonVertices reads packets through a PrimitivePacketCursor and the root table as a std::span with no legacy header in its closure; WarpLivePolygonVertices in RadialWarpLive.cpp binds the screen effect overlay warp words and Core_Math_kArcTangentTable and walks the frame ordering table with cycle detection, converting u_long words at the cursor boundary; the generated caller uses it by copier fixup; the reviewed SCREFF2.PRG module entry is removed and no data word stores 0x800F9BD8"
 F02737,Native\Game\src\Save\MenuAssets.cpp,,,,,,,,,
 F02738,Native\Game\src\Save\MenuAssets.cpp,,,,,,,,,
 F02764,Native\Game\src\Save\NativeMenu.cpp,x,,,,x,,,,

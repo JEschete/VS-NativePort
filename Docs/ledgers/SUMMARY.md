@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 47 | 19 (`wip`) | 4,141 |
-| `cpp` | 47 | 233 (`wip`) | 3,927 |
+| `modernized` | 48 | 19 (`wip`) | 4,140 |
+| `cpp` | 48 | 232 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 192 |
-| `vs_namespace` | 47 |
-| `typed_interface` | 47 |
-| `no_bridge` | 47 |
+| `vs_namespace` | 48 |
+| `typed_interface` | 48 |
+| `no_bridge` | 48 |
 | `strict_clean` | 192 |
-| `behavior_evidence` | 47 |
+| `behavior_evidence` | 48 |
 
-Promotion records: 280; derived `cpp=x`: 47, `cpp=wip`: 233. Verification records: 64; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 48, `cpp=wip`: 232. Verification records: 65; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -171,6 +171,8 @@ The eighteenth is the AI plan rebuild (F01718): VS::Battle::Ai::RebuildActorActi
 an ActionPlanningRoom; RebuildLiveActorActionPlans binds call-local storage and reads the queued Battle_ActionRequest (#255).
 The nineteenth is the actor command dispatcher (F01720): VS::Battle::Ai::IssueActorCommand builds the command packet from a
 typed snapshot through an ActorCommandRoom; IssueLiveActorCommand binds the AI state, battle actor and frame terrain.
+The twentieth is the radial screen warp (F02458): VS::Effects::ScreenDistortion::WarpPolygonVertices rewrites polygon
+coordinates through a packet cursor and a root-table span; WarpLivePolygonVertices walks the frame ordering table.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
