@@ -66,6 +66,9 @@
     <ClCompile Include="src\ModuleLoader.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\MovieEncoder.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\OverlayFiles.c">
       <Filter>src</Filter>
     </ClCompile>
@@ -109,6 +112,9 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ModuleData.h">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\MovieEncoder.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\StringTables.h">

@@ -1,9 +1,12 @@
 #include "Content/Disc.hpp"
 
+#include <libchdr/chd.h>
+
 #include <algorithm>
 #include <array>
 #include <bit>
 #include <cctype>
+#include <charconv>
 #include <format>
 #include <fstream>
 #include <memory>
@@ -11,6 +14,8 @@
 #include <string>
 #include <utility>
 #include <vector>
+
+#include "Platform/Paths.hpp"
 
 namespace VS::Content {
 
@@ -33,6 +38,13 @@ constexpr usize kXaAttributeOffset = 4;
 constexpr usize kXaSignatureOffset = 6;
 constexpr u16 kXaInterleavedFlags = 0x6000;
 constexpr int kDirectoryDepthLimit = 16;
+constexpr u32 kChdFrameBytes = 2448;  // a raw sector and its subcode
+constexpr usize kChdTrackTextBytes = 256;
+constexpr u32 kNoChdHunk = UINT32_MAX;
+
+struct CloseChd {
+  void operator()(chd_file* chd) const { chd_close(chd); }
+};
 }  // namespace
 
 struct Disc::Impl {
@@ -42,6 +54,35 @@ struct Disc::Impl {
   u32 data_offset = kMode2DataOffset;
   u64 sector_count = 0;
   fs::path folder;  // extracted-folder mode
+  std::unique_ptr<chd_file, CloseChd> chd;
+  std::vector<u8>
+      chd_hunk;  // the last hunk decoded, as sectors are read in runs
+  u32 chd_loaded_hunk = kNoChdHunk;
+  u32 chd_frames_per_hunk = 0;
+
+  std::expected<void, std::string> ReadChdSectors(u32 lba, u32 count,
+                                                  std::span<u8> out) {
+    for (u32 index = 0; index < count; ++index) {
+      const u32 sector = lba + index;
+      const u32 hunk = sector / chd_frames_per_hunk;
+      if (hunk != chd_loaded_hunk) {
+        chd_loaded_hunk = kNoChdHunk;
+        const chd_error error = chd_read(chd.get(), hunk, chd_hunk.data());
+        if (error != CHDERR_NONE) {
+          return std::unexpected(std::format("CHD read failed at sector {}: {}",
+                                             sector, chd_error_string(error)));
+        }
+        chd_loaded_hunk = hunk;
+      }
+      const usize frame = sector % chd_frames_per_hunk;
+      std::copy_n(chd_hunk.begin() +
+                      static_cast<std::ptrdiff_t>(frame * kChdFrameBytes),
+                  SectorRaw,
+                  out.begin() + static_cast<std::ptrdiff_t>(
+                                    static_cast<usize>(index) * SectorRaw));
+    }
+    return {};
+  }
 };
 
 namespace {
@@ -71,6 +112,29 @@ std::string Upper(std::string_view s) {
   return out;
 }
 
+// The metadata text of a CHD's track, for example "TRACK:1 TYPE:MODE2_RAW
+// SUBTYPE:NONE FRAMES:319151 PREGAP:0 PGTYPE:MODE1 PGSUB:NONE POSTGAP:0".
+std::optional<std::string> ChdTrackText(chd_file* chd, u32 index) {
+  std::array<char, kChdTrackTextBytes> text{};
+  for (const u32 tag : {CDROM_TRACK_METADATA2_TAG, CDROM_TRACK_METADATA_TAG}) {
+    if (chd_get_metadata(chd, tag, index, text.data(),
+                         static_cast<u32>(text.size() - 1), nullptr, nullptr,
+                         nullptr) == CHDERR_NONE) {
+      return std::string(text.data());
+    }
+  }
+  return std::nullopt;
+}
+
+std::string ChdTrackField(const std::string& track, std::string_view name) {
+  const std::string text = " " + track;
+  const std::string key = std::format(" {}:", name);
+  const auto start = text.find(key);
+  if (start == std::string::npos) return {};
+  const auto value = start + key.size();
+  return text.substr(value, text.find(' ', value) - value);
+}
+
 }  // namespace
 
 std::string NormalizeDiscPath(std::string_view path) {
@@ -86,6 +150,8 @@ std::string NormalizeDiscPath(std::string_view path) {
 }
 
 Disc::~Disc() = default;
+
+u64 Disc::SectorCount() const { return m_impl_->sector_count; }
 
 std::expected<std::unique_ptr<Disc>, std::string> Disc::Open(
     const fs::path& path) {
@@ -107,6 +173,12 @@ std::expected<std::unique_ptr<Disc>, std::string> Disc::Open(
   u32 sector_size = SectorRaw;
   u32 data_offset = kMode2DataOffset;
   std::string ext = Upper(path.extension().string());
+  if (ext == ".CHD") {
+    if (auto r = disc->OpenChd(path); !r) {
+      return std::unexpected(r.error());
+    }
+    return disc;
+  }
   if (ext == ".CUE") {
     std::ifstream cue(path);
     std::string line;
@@ -163,6 +235,54 @@ std::expected<void, std::string> Disc::OpenImage(const fs::path& bin,
   return ParseIso9660();
 }
 
+std::expected<void, std::string> Disc::OpenChd(const fs::path& path) {
+  const std::string name = Platform::PathText(path);
+  chd_file* opened = nullptr;
+  const chd_error error =
+      chd_open(name.c_str(), CHD_OPEN_READ, nullptr, &opened);
+  if (error != CHDERR_NONE) {
+    return std::unexpected(
+        std::format("cannot open CHD {}: {}", name, chd_error_string(error)));
+  }
+  m_impl_->chd.reset(opened);
+  const chd_header* header = chd_get_header(opened);
+  const auto track = ChdTrackText(opened, 0);
+  if (header->unitbytes != kChdFrameBytes || header->hunkbytes == 0 ||
+      header->hunkbytes % kChdFrameBytes != 0 || !track) {
+    return std::unexpected(std::format("{} is not a CD image", name));
+  }
+  if (ChdTrackText(opened, 1)) {
+    return std::unexpected(
+        std::format("{} has more than one track; one is supported", name));
+  }
+  const std::string type = ChdTrackField(*track, "TYPE");
+  if (type != "MODE2_RAW" && type != "MODE1_RAW") {
+    return std::unexpected(
+        std::format("{}: unsupported CHD track type '{}'", name, type));
+  }
+  const std::string gap = ChdTrackField(*track, "PREGAP");
+  if (!gap.empty() && gap != "0") {
+    return std::unexpected(std::format("{}: CHD gaps are not supported", name));
+  }
+  const std::string frames = ChdTrackField(*track, "FRAMES");
+  u64 sectors = 0;
+  const auto parsed =
+      std::from_chars(frames.data(), frames.data() + frames.size(), sectors);
+  if (parsed.ec != std::errc() || parsed.ptr != frames.data() + frames.size() ||
+      sectors == 0 || sectors > header->logicalbytes / kChdFrameBytes) {
+    return std::unexpected(
+        std::format("{}: invalid CHD track length '{}'", name, frames));
+  }
+  m_impl_->sector_size = SectorRaw;
+  m_impl_->data_offset =
+      type == "MODE2_RAW" ? kMode2DataOffset : kMode1DataOffset;
+  m_impl_->sector_count = sectors;
+  m_impl_->chd_frames_per_hunk = header->hunkbytes / kChdFrameBytes;
+  m_impl_->chd_hunk.resize(header->hunkbytes);
+  m_is_image_ = true;
+  return ParseIso9660();
+}
+
 std::expected<void, std::string> Disc::ReadRawSectors(u32 lba, u32 count,
                                                       std::span<u8> out) const {
   if (!m_is_image_) {
@@ -177,6 +297,9 @@ std::expected<void, std::string> Disc::ReadRawSectors(u32 lba, u32 count,
         std::format("sector {}+{} beyond end of disc", lba, count));
   }
   std::lock_guard lock(m_impl_->mutex);
+  if (m_impl_->chd) {
+    return m_impl_->ReadChdSectors(lba, count, out);
+  }
   m_impl_->bin.clear();
   m_impl_->bin.seekg(static_cast<std::streamoff>(static_cast<u64>(lba) * size));
   m_impl_->bin.read(

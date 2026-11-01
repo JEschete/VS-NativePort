@@ -9,6 +9,21 @@ verification of the current worktree.
 
 ### Latest source and next observation
 
+- Published: 0.0.10 from `157f9303`. 0.0.11 follows it with the two changes below.
+  0.0.11 adds `chdr.dll`; no real self-update to it has run yet.
+- #254 first-time setup: `Asset conversion did not complete: MOV/TITLE.STR` meant
+  the selected FFmpeg had no `libsvtav1`, usually Gyan's "essentials" build; two
+  reporters confirmed that a different build fixed it. Setup now checks for an AV1
+  encoder before extracting, falls back to `libaom-av1`, and the extractor stops if a
+  conversion fails. `RunProcess` now appends: each setup step used to overwrite
+  `setup.log`, which hid the reason. Testers' guidance is in
+  [TESTER_RELEASE.md](TESTER_RELEASE.md). Limit: the fallback was tested with a
+  stand-in that hides `libsvtav1` from FFmpeg 8.1.1, not with an essentials build.
+- Disc images: the launcher and `VS.Extract` accept a single-track CHD through
+  libchdr, verified by hashing the decoded sectors. The launcher also accepts a BIN
+  without a CUE and a CUE whose BIN name is stale; the checksum alone decides. CHD and
+  BIN extractions match file for file, apart from the movie's random container ID
+  and the recorded source path.
 - #252 carrying a box: finished steps, falls and reactions store `animationSet`
   0xFF to reinitialize the next clip, and the carry walk's morph events set
   `poseOverrideActive`. The bound lookup added for #226 compared that marker with

@@ -36,9 +36,9 @@ step must update this file in the same commit (plan D19).
 | VS workload | **Desktop development with C++** | |
 | VS components | **C++ Clang Compiler for Windows**, **MSBuild support for LLVM (clang-cl) toolset**, **vcpkg package manager** | All projects use the `ClangCL` toolset. vcpkg is the copy bundled with VS (`$(VCInstallDir)vcpkg`); you do not need a separate vcpkg install or `vcpkg integrate`. |
 | Git | any recent | |
-| Internet on the first build | | vcpkg downloads and builds the dependencies (SDL3, Catch2, nlohmann-json, dav1d, libwebm, dr_libs, sfizz). This takes several minutes the first time and is cached after that. |
+| Internet on the first build | | vcpkg downloads and builds the dependencies (SDL3, Catch2, nlohmann-json, dav1d, libwebm, dr_libs, sfizz, libchdr). This takes several minutes the first time and is cached after that. |
 | **Your own copy of the game** | Vagrant Story (USA), **SLUS-01040** | See §3. No game data is in this repository. |
-| FFmpeg | 6.0+ with `libsvtav1` and the `psxstr` demuxer | Needed only by the extractor, to convert the intro movie (ASSET_PIPELINE §6.7); found on `PATH` or given with `--ffmpeg`. `winget install Gyan.FFmpeg` gives a suitable build. It is never linked or shipped. |
+| FFmpeg | 6.0+ with the `psxstr` demuxer and `libsvtav1` (preferred) or `libaom-av1` | Needed only by the extractor, to convert the intro movie (ASSET_PIPELINE §6.7); found on `PATH` or given with `--ffmpeg`. `winget install Gyan.FFmpeg` gives a suitable build. Gyan's "essentials" build has no `libsvtav1`, so it uses the slower `libaom-av1`. It is never linked or shipped. |
 
 Tested configuration: VS 2026 Community 18.10, MSVC 14.51, Windows SDK 10.0.28000, ffmpeg 8.1.1.
 
@@ -90,9 +90,9 @@ cd VS-NativePort
 The Windows tester package includes `VS.Launcher.exe`, the Release game and
 extractor, app-local MSVC/runtime DLLs, dependency checks and license notices.
 See [TESTER_RELEASE.md](TESTER_RELEASE.md) for the complete first-run flow.
-The launcher has CUE, save-folder and FFmpeg pickers, a Play button, a download
-link and an optional winget installation action. The referenced BIN is checked
-before setup. Unsupported editions/layouts fail explicitly.
+The launcher has disc (`.cue`, `.bin` or `.chd`), save-folder and FFmpeg pickers,
+a Play button, a download link and an optional winget installation action. The
+disc is checked before setup. Unsupported editions/layouts fail explicitly.
 First-launch path fields are blank; detection and selections are user actions.
 Only that user's own local settings are restored on later launches.
 
@@ -124,14 +124,16 @@ Opt-in update checks: `VS.Tests.exe "[.network]"` downloads the published 0.0.8
 package from GitHub, and `VS.Tests.exe "[.package]"` stages the ZIP named by the
 `VS_UPDATE_TEST_ZIP` environment variable.
 FFmpeg remains external; the package does not require Visual Studio, Python,
-Node.js or developer-specific paths. Movie conversion is limited to two SVT
-logical processors to avoid unbounded first-run encoder parallelism.
+Node.js or developer-specific paths. Setup checks that the selected FFmpeg has an
+AV1 encoder before extracting. Movie conversion is limited to two encoder threads
+to avoid unbounded first-run encoder parallelism.
 
 ---
 
 ## 3. Provide the game disc
 
 You need a 1:1 dump of **Vagrant Story (USA), SLUS-01040**: one `.bin` (MODE2/2352, raw sectors) plus its `.cue`.
+A single-track CHD of that dump also works with the launcher and with `VS.Extract`.
 Put both files here (the folder is git-ignored):
 
 ```
@@ -150,9 +152,12 @@ Get-FileHash disks\SLUS-01040.bin -Algorithm SHA1
 The tester launcher requires that exact dump, additionally checking SHA-256
 `25221D7F8FDB2C4490AF12D9E82F0E58BDD6ACB43387F9082B3C5E79DFE090C0`.
 It verifies every BIN byte before extraction or Play, even for an existing cache,
-and denies concurrent writes/deletion while setup uses the image. CUE names may
-vary, but their single-track layout and BIN reference must be correct. Wrong
-size, checksum, region or layout is a blocking error, not a warning.
+and denies concurrent writes/deletion while setup uses the image. File names may
+vary, and a BIN can be selected without a CUE. A CUE's single-track layout must be
+correct; if the BIN it names is missing, the BIN with the CUE's own name is used,
+or else the only BIN in that folder. A CHD is decompressed and its sectors must
+match the same size and checksums. Wrong size, checksum, region or layout is a
+blocking error, not a warning.
 The developer extractor remains a general offline tool; using it directly does
 not certify compatibility with this tester build.
 A `.bin` containing only cooked 2048-byte sectors, or an extracted file folder, is **not** enough: the intro movie and
@@ -199,7 +204,7 @@ Everything goes to `build\<Config>\` (git-ignored):
 
 | File | What it is |
 |---|---|
-| `VS.Desktop.exe` + `SDL3.dll`, `dav1d.dll`, `webm.dll`, `sfizz.dll` | the game |
+| `VS.Desktop.exe` + `SDL3.dll`, `dav1d.dll`, `webm.dll`, `sfizz.dll`, `chdr.dll` | the game |
 | `VS.Extract.exe` | the asset extractor (§5) |
 | `VS.Launcher.exe` | native Windows tester setup, asset verification and Play |
 | `VS.Tests.exe` | unit tests |
@@ -284,6 +289,8 @@ build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
   FLAC, form `mkv`). Effect and ending audio are imported separately under `audio\streams`;
   the ending's legacy sector-data row remains `stream`, not a raw readable disc file.
 - Takes about a minute. Run it again after an extractor change; the converters replace one `raw` form at a time.
+- With FFmpeg available, it stops with an error if FFmpeg has no AV1 encoder or the movie conversion fails.
+  Without FFmpeg, it lists the movie unconverted and warns.
 - The separate `audio` command imports all 83 nonempty wave banks into versioned JSON, mono PCM16 WAV
   and SFZ under `Native\data\audio\banks`. Use it after the ordinary extraction, including for an existing
   data directory. WAVE0069 supplies MUSIC016, WAVE0091 supplies MUSIC110, and WAVE0011 supplies MUSIC054
@@ -301,6 +308,9 @@ build\Debug\VS.Extract.exe streams disks\SLUS-01040.cue Native\data
 - sfizz 1.2.3 is pinned in `tools\vcpkg\ports\sfizz`. vcpkg builds its DLL with MSVC; native projects retain
   ClangCL and consume the C API. The overlay statically includes its bundled WavPack dependency.
   No separate sfizz checkout or standalone dependency-build experiment is required.
+- libchdr is pinned to a commit in `tools\vcpkg\ports\libchdr` and built as a DLL, so its bundled dr_flac and
+  zstd stay out of the game's own symbols. After changing a port's files, touch `vcpkg.json`; MSBuild otherwise
+  skips the vcpkg restore.
 
 ### 5.1 Native audio assets
 
@@ -340,7 +350,7 @@ build\Release\VS.Desktop.exe
 
 | Option | Meaning |
 |---|---|
-| `--disc <path>` | Use this disc (`.cue` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
+| `--disc <path>` | Use this disc (`.cue`, `.chd` or extracted folder). By default the exe looks for the `VS_DISC` environment variable, then for `disks\SLUS-01040.cue` (or `SLUS-01040\`) in its own folder or any parent folder, which finds the repo copy in a dev build. |
 | `--data <dir>` | The extracted data (§5). By default `Native\data` in the exe's folder or any parent folder. |
 | `--save-dir <dir>` | Override the native save directory. Use a dedicated ignored directory for tests; the default is `saves` inside SDL's per-user VagrantStory directory. Failure to obtain that directory is an explicit error, never a current-directory fallback. |
 | `--frames <n>` | Stop after `n` logical ticks (NTSC fields: 60000/1001, approximately 59.94 per second). |
@@ -482,6 +492,8 @@ earlier, abandoned emulator-style port (VS 2022/CMake, `vagrant-native.exe`). Th
 | `no disc found` in `vs-native.log` | Put the files at `disks\SLUS-01040.cue/.bin`, or pass `--disc`. |
 | `no extracted data` in `vs-native.log` | Run the extractor (§5) into `Native\data`, or pass `--data`. |
 | The intro is black, `no converted movie` in the log | FFmpeg was not found during extraction; install it (§1.1) and extract again. |
+| `Asset conversion did not complete: MOV/TITLE.STR` (launcher up to 0.0.10) | That FFmpeg has no `libsvtav1`, usually Gyan's "essentials" build. The disc is fine. Use a full or BtbN build (#254). |
+| `This FFmpeg cannot convert the game's intro movie` | That FFmpeg has neither `libsvtav1` nor `libaom-av1`. Use a full or BtbN build. |
 | `cue sheet has no FILE entry` / the bin cannot be opened | The `.cue` must reference the `.bin` by a name that exists next to it. |
 | The window opens and closes | Read `build\<Config>\vs-native.log`. |
 

@@ -536,7 +536,7 @@ Result VerifyStagedRelease(const fs::path& stage, std::string_view version) {
   }
   constexpr std::array kRequired{kLauncher,  "VS.Desktop.exe", "VS.Extract.exe",
                                  "SDL3.dll", "dav1d.dll",      "sfizz.dll",
-                                 "webm.dll"};
+                                 "webm.dll", "chdr.dll"};
   for (const auto* required : kRequired) {
     if (!listed.contains(required)) {
       return std::unexpected(std::string("The update is missing ") + required);

@@ -25,7 +25,8 @@ struct DiscFile {
 };
 
 // Read-only access to the user's disc: a .cue/.bin image (MODE2/2352 or
-// MODE1/2352 or 2048-byte ISO) or an extracted folder (e.g. SLUS-01040\).
+// MODE1/2352 or 2048-byte ISO), a single-track .chd of the same raw sectors, or
+// an extracted folder (e.g. SLUS-01040\).
 // Replaces libcd/libds sector reads (plan §6.6).
 class Disc {
  public:
@@ -37,11 +38,13 @@ class Disc {
   Disc(const Disc&) = delete;
   Disc& operator=(const Disc&) = delete;
 
-  // Accepts a .cue, .bin/.iso, or a directory.
+  // Accepts a .cue, .bin/.iso, .chd, or a directory.
   static std::expected<std::unique_ptr<Disc>, std::string> Open(
       const std::filesystem::path& path);
 
   bool IsImage() const { return m_is_image_; }
+  // Sectors on the disc image; 0 for an extracted folder.
+  u64 SectorCount() const;
   std::string_view Label() const { return m_label_; }
   const std::vector<DiscFile>& Files() const { return m_files_; }
 
@@ -68,6 +71,7 @@ class Disc {
   Disc() = default;
   std::expected<void, std::string> OpenImage(const std::filesystem::path& bin,
                                              u32 sector_size, u32 data_offset);
+  std::expected<void, std::string> OpenChd(const std::filesystem::path& path);
   std::expected<void, std::string> ParseIso9660();
   std::expected<void, std::string> ScanFolder(
       const std::filesystem::path& root);

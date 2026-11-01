@@ -183,7 +183,7 @@ struct UpdateFixture {
   }
   static std::vector<std::string> Required() {
     return {"VS.Launcher.exe", "VS.Desktop.exe", "VS.Extract.exe", "SDL3.dll",
-            "dav1d.dll",       "sfizz.dll",      "webm.dll"};
+            "dav1d.dll",       "sfizz.dll",      "webm.dll",       "chdr.dll"};
   }
   // Writes each file as `tag path` and a matching release.json manifest.
   static void Package(const fs::path& directory, const std::string& version,
@@ -506,6 +506,54 @@ TEST_CASE("Launcher explains missing BIN files before extraction",
   CHECK(result.error().find("game image.bin") != std::string::npos);
 }
 
+namespace {
+struct StaleCueFixture : LauncherFixture {
+  StaleCueFixture() {
+    Cue("FILE \"old name.bin\" BINARY\n"
+        " TRACK 01 MODE2/2352\n INDEX 01 00:00:00\n");
+  }
+};
+}  // namespace
+
+TEST_CASE("A stale CUE falls back to the only BIN in its folder",
+          "[launcher][content]") {
+  const StaleCueFixture fixture;
+  const auto image = Launcher::ValidateCue(fixture.cue);
+  REQUIRE(image.has_value());
+  CHECK(*image == fs::absolute(fixture.image));
+}
+
+TEST_CASE("A stale CUE prefers the BIN with its own name",
+          "[launcher][content]") {
+  const StaleCueFixture fixture;
+  const auto same_name = fixture.root / "game.bin";
+  std::ofstream(same_name, std::ios::binary) << "synthetic disc";
+  const auto image = Launcher::ValidateCue(fixture.cue);
+  REQUIRE(image.has_value());
+  CHECK(*image == fs::absolute(same_name));
+}
+
+TEST_CASE("The name inside a CUE still wins while that file exists",
+          "[launcher][content]") {
+  const StaleCueFixture fixture;
+  const auto named = fixture.root / "old name.bin";
+  std::ofstream(named, std::ios::binary) << "synthetic disc";
+  std::ofstream(fixture.root / "game.bin", std::ios::binary) << "other";
+  const auto image = Launcher::ValidateCue(fixture.cue);
+  REQUIRE(image.has_value());
+  CHECK(*image == fs::absolute(named));
+}
+
+TEST_CASE("A stale CUE does not guess between several BINs",
+          "[launcher][content]") {
+  const StaleCueFixture fixture;
+  std::ofstream(fixture.root / "another.bin", std::ios::binary) << "other";
+  const auto image = Launcher::ValidateCue(fixture.cue);
+  REQUIRE_FALSE(image.has_value());
+  CHECK(image.error().find("old name.bin") != std::string::npos);
+  CHECK(image.error().find("Choose the .bin itself") != std::string::npos);
+}
+
 TEST_CASE("Launcher accepts UTF-8 BOMs and preserves CUE backslashes",
           "[launcher][content]") {
   LauncherFixture fixture;
@@ -607,7 +655,7 @@ TEST_CASE("Prepared-cache metadata cannot bypass source-disc verification",
   REQUIRE(Launcher::CheckAssets(fixture.root / "assets", fixture.image)
               .has_value());
   for (const auto* name : {"VS.Desktop.exe", "VS.Extract.exe", "SDL3.dll",
-                           "dav1d.dll", "sfizz.dll", "webm.dll"}) {
+                           "dav1d.dll", "sfizz.dll", "webm.dll", "chdr.dll"}) {
     std::ofstream(fixture.root / name) << "synthetic installation";
   }
   const auto saves = fixture.root / "uncreated saves";
@@ -752,4 +800,23 @@ TEST_CASE("Setup subprocesses retain both output streams and their exit code",
   const std::vector<std::string> missing{
       VS::Platform::PathText(fixture.root / "missing.exe")};
   CHECK_FALSE(VS::Platform::RunProcess(missing, output).has_value());
+}
+
+TEST_CASE("Setup subprocesses add to the log instead of overwriting it",
+          "[launcher][platform]") {
+  LauncherFixture fixture;
+  const auto output = fixture.root / "setup output.log";
+  const std::vector<std::string> first{"cmd.exe", "/d", "/c",
+                                       "echo first step, a longer line"};
+  const std::vector<std::string> second{"cmd.exe", "/d", "/c", "echo second"};
+  REQUIRE(VS::Platform::RunProcess(first, output) == 0);
+  REQUIRE(VS::Platform::RunProcess(second, output) == 0);
+  std::ifstream input(output);
+  const std::string text((std::istreambuf_iterator<char>(input)),
+                         std::istreambuf_iterator<char>());
+  const auto earlier = text.find("first step, a longer line");
+  const auto later = text.find("second");
+  REQUIRE(earlier != std::string::npos);
+  REQUIRE(later != std::string::npos);
+  CHECK(earlier < later);
 }

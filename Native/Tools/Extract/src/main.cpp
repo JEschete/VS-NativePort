@@ -17,6 +17,7 @@
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
+#include "Content/MovieEncoder.hpp"
 #include "Core/Log.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
@@ -39,11 +40,12 @@ constexpr int kOutputArgument = 3;
 int Usage() {
   std::puts(
       "usage:\n"
-      "  VS.Extract list    <disc.cue|folder>\n"
-      "  VS.Extract audio   <disc.cue|folder> <outdir> [wave-file-id ...]\n"
-      "  VS.Extract streams <disc.cue|folder> <outdir> [--ffmpeg "
+      "  VS.Extract list    <disc.cue|disc.chd|folder>\n"
+      "  VS.Extract audio   <disc.cue|disc.chd|folder> <outdir> "
+      "[wave-file-id ...]\n"
+      "  VS.Extract streams <disc.cue|disc.chd|folder> <outdir> [--ffmpeg "
       "<ffmpeg.exe>]\n"
-      "  VS.Extract extract <disc.cue|folder> <outdir> [--ffmpeg "
+      "  VS.Extract extract <disc.cue|disc.chd|folder> <outdir> [--ffmpeg "
       "<ffmpeg.exe>]\n"
       "      Form 1 files are copied as they are; movies (*.STR) are converted "
       "to Matroska (AV1 + FLAC)\n"
@@ -109,40 +111,33 @@ bool WriteRawStream(const Content::Disc& disc, const Content::DiscFile& file,
 
 // Preserve the movie's decoded audio losslessly; video uses AV1 CRF 18.
 bool ConvertMovie(const Content::Disc& disc, const fs::path& ffmpeg,
+                  const Content::Av1Encoder& encoder,
                   const Content::DiscFile& file, const fs::path& mkv) {
   fs::path tmp = mkv;
   tmp += L".raw";
   if (!WriteRawStream(disc, file, tmp)) return false;
-  const auto arguments = std::to_array<std::string>({Platform::PathText(ffmpeg),
-                                                     "-hide_banner",
-                                                     "-loglevel",
-                                                     "error",
-                                                     "-y",
-                                                     "-f",
-                                                     "psxstr",
-                                                     "-i",
-                                                     Platform::PathText(tmp),
-                                                     "-map",
-                                                     "0:v",
-                                                     "-map",
-                                                     "0:a?",
-                                                     "-c:v",
-                                                     "libsvtav1",
-                                                     "-preset",
-                                                     "6",
-                                                     "-svtav1-params",
-                                                     "lp=2",
-                                                     "-crf",
-                                                     "18",
-                                                     "-pix_fmt",
-                                                     "yuv420p",
-                                                     "-color_range",
-                                                     "pc",
-                                                     "-colorspace",
-                                                     "bt470bg",
-                                                     "-c:a",
-                                                     "flac",
-                                                     Platform::PathText(mkv)});
+  std::vector<std::string> arguments{Platform::PathText(ffmpeg),
+                                     "-hide_banner",
+                                     "-loglevel",
+                                     "error",
+                                     "-y",
+                                     "-f",
+                                     "psxstr",
+                                     "-i",
+                                     Platform::PathText(tmp),
+                                     "-map",
+                                     "0:v",
+                                     "-map",
+                                     "0:a?",
+                                     "-c:v",
+                                     encoder.name};
+  arguments.insert(arguments.end(), encoder.options.begin(),
+                   encoder.options.end());
+  for (const auto* setting : {"-pix_fmt", "yuv420p", "-color_range", "pc",
+                              "-colorspace", "bt470bg", "-c:a", "flac"}) {
+    arguments.emplace_back(setting);
+  }
+  arguments.push_back(Platform::PathText(mkv));
   const auto result = Platform::RunProcess(arguments);
   std::error_code ec;
   fs::remove(tmp, ec);
@@ -382,6 +377,17 @@ int Run(int argc, char** argv) {
                   "FFmpeg not found (PATH or --ffmpeg): movies are listed, not "
                   "converted");
     }
+    std::optional<Content::Av1Encoder> encoder;
+    if (ffmpeg && (*disc)->IsImage()) {
+      auto found =
+          Content::FindAv1Encoder(*ffmpeg, out / "ffmpeg-encoders.txt");
+      if (!found) {
+        VS_LOG_ERROR("extract", "{}", found.error());
+        return 1;
+      }
+      encoder = std::move(*found);
+      VS_LOG_INFO("extract", "movies use the FFmpeg encoder {}", encoder->name);
+    }
     int written = 0;
     int skipped = 0;
     for (const auto& f : (*disc)->Files()) {
@@ -392,7 +398,8 @@ int Run(int argc, char** argv) {
         const bool movie = f.path.ends_with(".STR");
         fs::path mkv = out / "disc" / fs::path(f.path);
         mkv += L".mkv";
-        if (movie && ffmpeg && ConvertMovie(**disc, *ffmpeg, f, mkv)) {
+        if (movie && encoder) {
+          if (!ConvertMovie(**disc, *ffmpeg, *encoder, f, mkv)) return 1;
           manifest << f.lba << '\t' << f.size << "\tmkv\t" << f.path << '\n';
           ++written;
         } else {

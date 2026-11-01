@@ -11,7 +11,7 @@ try {
         throw 'This tester build requires 64-bit Windows 10 version 1903 or later, or Windows 11.'
     }
     foreach ($name in @('VS.Launcher.exe', 'VS.Desktop.exe', 'VS.Extract.exe',
-            'SDL3.dll', 'dav1d.dll', 'sfizz.dll', 'webm.dll',
+            'SDL3.dll', 'dav1d.dll', 'sfizz.dll', 'webm.dll', 'chdr.dll',
             'msvcp140.dll', 'vcruntime140.dll', 'vcruntime140_1.dll')) {
         if (-not (Test-Path -LiteralPath (Join-Path $PSScriptRoot $name) -PathType Leaf)) {
             throw "Missing $name. Extract the entire ZIP into one folder; do not run inside the ZIP."

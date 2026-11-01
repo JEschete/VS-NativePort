@@ -218,7 +218,7 @@ struct App {
     const auto edit = WS_TABSTOP | ES_AUTOHSCROLL;
     const auto button = WS_TABSTOP | BS_OWNERDRAW | BS_NOTIFY;
     Add(kCue, L"EDIT", settings.cue.wstring(), edit);
-    Add(kCueBrowse, L"BUTTON", L"Choose CUE...", button, true);
+    Add(kCueBrowse, L"BUTTON", L"Choose disc...", button, true);
     Add(kDiscState, L"STATIC", L"No disc selected", SS_LEFT);
     Add(kVerify, L"BUTTON", L"Verify disc", button, true);
     Add(kProgress, PROGRESS_CLASSW, L"", PBS_SMOOTH);
@@ -240,9 +240,8 @@ struct App {
     Add(kPlay, L"BUTTON", L"Play", button, true);
     Add(kSetupLog, L"BUTTON", L"Setup log", button, true);
     Add(kCheckUpdates, L"BUTTON", L"Check for updates", button, true);
-    SendMessageW(
-        Find(kCue), EM_SETCUEBANNER, TRUE,
-        reinterpret_cast<LPARAM>(L"Select the CUE that belongs to your BIN"));
+    SendMessageW(Find(kCue), EM_SETCUEBANNER, TRUE,
+                 reinterpret_cast<LPARAM>(L"Select your .cue, .chd or .bin"));
     SendMessageW(Find(kFfmpeg), EM_SETCUEBANNER, TRUE,
                  reinterpret_cast<LPARAM>(
                      L"Click Detect, or choose your own ffmpeg.exe"));
@@ -468,7 +467,7 @@ struct App {
     if (Busy()) return;
     const auto settings = CurrentSettings();
     if (settings.cue.empty()) {
-      Error(window, "Choose the CUE file for your game disc first.");
+      Error(window, "Choose the .cue, .chd or .bin for your game disc first.");
       return;
     }
     if (requested == Job::kPlay && !verified) {
@@ -528,7 +527,7 @@ struct App {
     Set(kDiscState, L"Checking disc identity...");
     Set(kFooterTitle, L"Verifying your disc");
     Set(kFooterDetail,
-        L"The whole BIN is checked before any assets or game code are used.");
+        L"The whole disc is checked before any assets or game code are used.");
     Bar(0);
     Enable();
   }
@@ -656,7 +655,8 @@ struct App {
         "\nSHA-256: " + std::string(kSupportedDiscSha256) +
         "\n\nA different region, modified image or incomplete dump is "
         "rejected. "
-        "The CUE filename may differ; its referenced BIN must match exactly.";
+        "File names do not matter: only the BIN must match exactly, and a CHD "
+        "must decode to that exact BIN.";
     MessageBoxW(
         window,
         Wide(last_error.empty() ? supported : last_error + "\n\n" + supported)
@@ -828,7 +828,7 @@ struct App {
     if (notification != BN_CLICKED) return;
     switch (id) {
       case kCueBrowse:
-        Browse(kCue, false, L"*.cue");
+        Browse(kCue, false, L"*.cue;*.chd;*.bin");
         break;
       case kSaveBrowse:
         Browse(kSaves, true, L"");
