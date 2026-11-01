@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 39 | 20 (`wip`) | 4,148 |
-| `cpp` | 39 | 241 (`wip`) | 3,927 |
+| `modernized` | 40 | 20 (`wip`) | 4,147 |
+| `cpp` | 40 | 240 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 190 |
-| `vs_namespace` | 39 |
-| `typed_interface` | 39 |
-| `no_bridge` | 39 |
-| `strict_clean` | 190 |
-| `behavior_evidence` | 39 |
+| `source_cpp` | 191 |
+| `vs_namespace` | 40 |
+| `typed_interface` | 40 |
+| `no_bridge` | 40 |
+| `strict_clean` | 191 |
+| `behavior_evidence` | 40 |
 
-Promotion records: 280; derived `cpp=x`: 39, `cpp=wip`: 241. Verification records: 56; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 40, `cpp=wip`: 240. Verification records: 57; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -155,6 +155,8 @@ The tenth is the actor movement commands (F04180/F01025): `VS::Actors::SetDirect
 write a `MovementCommand` through an `ActorMovementRequests` table, which `ActorRecordMovementRequests` adapts for the actor records.
 The eleventh is the AI condition snapshot (F01689): `VS::Battle::Ai::CaptureActorConditionTable` writes
 actor condition readings through an `ActorConditionTable`; `CaptureBattleActorConditions` binds the battle actor list and a 16-slot planner row span.
+The twelfth is the collision height sampler (F00772): `VS::Field::SampleCollisionHeightCode` decodes a bounded byte span of the
+MPD collision section; `LiveRoomCollisionMap` binds the loaded room section for the generated collision callers.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

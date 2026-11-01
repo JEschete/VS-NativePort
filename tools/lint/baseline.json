@@ -2788,13 +2788,6 @@
       "rule": "google"
     },
     {
-      "key": "0f5e3e33c5d975f26ca15d0952cdc6e59515cc82cb630cd01e2ab765a2a15eb4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0f5eb68c769778b12258b595497c397d932755141d8e3e884d7efab5b326bbbc",
       "count": 1,
       "tool": "tidy",
@@ -3808,13 +3801,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "1437b19e0591bdcdbdbc68839e7e6221731e8060bfa7ac35ffcd7f65b468cad4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "146dde6043da52703120fd92168be9242339f297cfe01d69bdf0be2c7cc2f713",
@@ -12455,13 +12441,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "43a0d0f7e4f33e4c4b0f7c84dbe88b90ad476f820d1bcebe2972510313bc892b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "43b4ca18d09be9c7094ec696c1ce2c1d6acd23aa1a2cfa3071eedfbbfef81439",
       "count": 1,
       "tool": "cpplint",
@@ -16697,13 +16676,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "5bcf0276d9928ce3eea63f2690ca00ba7e58994a8233dceb5ed3ef14a099f007",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5bd77a112259f915de2b021b0a41094a32ae6c10ecbd4c34c742b450f6b1e06b",
       "count": 1,
       "tool": "cpplint",
@@ -16998,13 +16970,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "5d53d0b4b5cf64aa7c0ec1e565af88e2caee00a8c0c072060f4e90a00cf7e9f1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "5d694f2115d126e5dd55ebb9978ab5d9f42e26311d5b393f5a30a4392267c5ee",
       "count": 1,
       "tool": "cpplint",
@@ -17173,13 +17138,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "5e18956fc1b19f88425225670146fef3c09c0c4882e10a99c87c89d306197e64",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "5e1a331d255aa4420221bd134a4c4af946e6979b551fcb235ed0ba6a3979d2e7",
       "count": 1,
       "tool": "cpplint",
@@ -17346,13 +17304,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "5eaad39a15d715d3b0584cbef9b185fd12adc573a1836a7752c0d895b459dc71",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "5eb76d69a01a859da4954486822a26dc47953f219f13879ea4ce1142c077edef",
@@ -18986,13 +18937,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "67349b805929fde46ab984cf8d06af570946babea43d9f9bec127de7acf05b61",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "67388cec64a69ca368ab2596b4a1e8e54f55869335ef2e18ce808b73a15e2b97",
       "count": 1,
       "tool": "tidy",
@@ -19187,13 +19131,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "680eae1866bb00f520dbc227844ed3de6eefae520a735a766d2a4a1c3cad0730",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "681710b1a9895a20fcf295a3085db7da46de9222133597c860d8d7f9855a76c2",
@@ -21002,13 +20939,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "729b90aab8449b848e399975b8848e144f98e29889bc6e12962ea00d06414a92",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "729ed3379c65fcb9cd0e5ff6249319f086d13e7314611f199da19b3443d63f98",
       "count": 1,
       "tool": "cpplint",
@@ -22171,13 +22101,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "784c27c0437c5e45a778566b47e52987eba7607950dd4fb1f78ba8ed7af1ba40",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "78546bfe51ab101fa374317976a0ef1bb18f16efc5c3fba446656dec68075ae2",
       "count": 1,
       "tool": "cpplint",
@@ -22470,13 +22393,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "79dfdddf464340e9b356e6b05a8d75fef2d7b3ceda9c2a07df6c1f33bbbf07b8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "79e23a03c5e548276180854f2e627e7f5a3128f8eb6708869a1e9e5558e5728f",
@@ -24866,13 +24782,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "87ae53ca35a10ba5415e968544e651db7ea5d9da6d36c2e9232927dacde874df",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Field/CollisionSampling.h",
-      "rule": "google"
-    },
-    {
       "key": "87b615b1f7114b45dc89d8e30ab5585a4e8d352c929eb8bef139bd6a8de3724e",
       "count": 1,
       "tool": "cpplint",
@@ -26623,13 +26532,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9083b856014ec20821fe8f4c0db0afa7ade537a557d84e7355e89f8fce036c8d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
       "key": "90995408616d489f5ae559e7f2cc09d2b139fbdaebba15fcde62a8178960ed53",
       "count": 1,
       "tool": "tidy",
@@ -27505,13 +27407,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "952262ff10f452ea0dd3b5e0ccf02f525b1a7dadf947ea312872d4d96a33e889",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "95283ec24fc05da93849780b6d7432b300932dad2f4d46779ca0b09ceb124758",
       "count": 3,
       "tool": "cpplint",
@@ -27699,13 +27594,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "963a9c3e34c9d12123289c7605a8cb54cd5c2460f2f99400c85772c7fb9d13f8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "964752962d2259319c7715bb984955dfea643d1dd764c3e4d417a80006eca107",
@@ -35611,13 +35499,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c35448bbad3c86ff5870d454da197bf1103b6d6f765c7f71f2dc5d6a879228ec",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "c35fb0025fdff5d73f970af3152234668974354b9bff26baa11561d881df1783",
       "count": 1,
       "tool": "tidy",
@@ -35898,13 +35779,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c52ba9cb4ab7fd094e7f79fffc2e7aee86d49ff6608e22f1202ed37eb8b05edb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "c54bc789e1b06d71a099813d8b426f39e1a518ab641a87737c3a1266bbd208da",
       "count": 1,
       "tool": "cpplint",
@@ -36141,13 +36015,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c632221d0c687af136e864a6d296a1a2d852b5676f3a8e39dae97edb6954917f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "c6519536fe13199240457bd44d86b97859bdfaa918d37a473fe1f4d267b06163",
@@ -37844,13 +37711,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ceb938ce19b3ab1460a63ebd64521ca3ef62b90b19a37652ea4528202a313956",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "google"
-    },
-    {
       "key": "ceb987520a2676613dd232301b4d8fbd8da8ecae3cbc9f94630acc721e75b140",
       "count": 1,
       "tool": "tidy",
@@ -38773,13 +38633,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d3ec5c0048bd72c8c6971a17780c2fc6fea24ca6c5de5c8dfbd255f3653656e9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "d3f0e802f8509f044b686adb079adcf06089d84132cbca612ac1629ca79af076",
@@ -43248,13 +43101,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "ed595f60ebba559b4ed900a44e8da456bca087ff076909592a3c81d4ba4eed4e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "ed5cd26b3c6bfdb2117dcaae36f1d7b23268bdc655c020203f2a50a2208eb4d4",
       "count": 1,
       "tool": "tidy",
@@ -45689,13 +45535,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "fb29a982f9540d97f421f1716dc9e945bc1241b6e484d020403517fa78af9aae",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Field/CollisionSampling.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "fb33d7da4b89601b5c6635acd6b6d6708a6c747fefc71cf34f0718dcdad79775",

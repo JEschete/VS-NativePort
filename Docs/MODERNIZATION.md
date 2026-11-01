@@ -23,7 +23,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 10: #50 Render submission and frame ownership | 33 | 96 | 2,685 | 87 | 42 | 0 |
 | 14: #55 Actor identity and teardown | 19 | 213 | 8,958 | 158 | 78 | 0 |
 | 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
-| 23: #57 AI, navigation and collision contexts | 112 | 122 | 6,229 | 194 | 56 | 0 |
+| 23: #57 AI, navigation and collision contexts | 111 | 122 | 6,229 | 194 | 56 | 0 |
 | 24: #56 Combat intents and results | 4 | 355 | 10,216 | 181 | 178 | 0 |
 | 25: #54 Text IDs, layout and rendering | 4 | 29 | 1,279 | 23 | 10 | 0 |
 | 26: #59 Event VM results and execution | 1 | 236 | 3,830 | 59 | 178 | 0 |
@@ -32,22 +32,22 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 4 | 7 | 216 | 0 | 11 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 638 | 36,178 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 241 | 3480 | 107,996 | 1600 | 2160 | 0 |
+| **Total** | 240 | 3480 | 107,996 | 1600 | 2160 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 39 |
-| todo | 3,721 |
+| done | 40 |
+| todo | 3,720 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 192 | 1,896 |
-| Referenced by the original-address module table | 191 | 2,120 |
+| Called from generated code | 191 | 1,896 |
+| Referenced by the original-address module table | 190 | 2,120 |
 | Calls an SDK shim | 11 | 461 |
-| Signature uses SDK integer types or `void*` | 45 | 862 |
-| Compiled with relaxed settings | 90 | 3,478 |
+| Signature uses SDK integer types or `void*` | 44 | 862 |
+| Compiled with relaxed settings | 89 | 3,478 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 192 of 241 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 191 of 240 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 

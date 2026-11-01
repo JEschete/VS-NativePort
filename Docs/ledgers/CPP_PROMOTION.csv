@@ -28,7 +28,7 @@ F00768,Native\Engine\src\Render\RoomLighting.cpp,,,,,,,,,
 F00769,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00770,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00771,Native\Game\src\Field\MinimapScene.cpp,x,,,,x,,,,
-F00772,Native\Game\src\Field\CollisionSampling.cpp,,,,,,,,,
+F00772,Native\Game\src\Field\CollisionSampling.cpp,x,x,x,x,x,x,verify:VR-FIELD-COLLISION-SAMPLING,dda002c81880459713a806d52bbd6d0e3e82453b,#46 slice: VS::Field::SampleCollisionHeightCode decodes a bounded std::span<const std::byte> MPD collision section; LiveRoomCollisionMap in CollisionSamplingBinding.cpp spans the loaded room section; the seven generated Collision.cpp callers pass the live span by copier fixup; no data word stores 0x80099514
 F00773,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
 F00774,Native\Game\src\Field\MinimapScene.cpp,x,,,,x,,,,
 F00775,Native\Engine\src\Render\RoomDraw.cpp,,,,,,,,,
