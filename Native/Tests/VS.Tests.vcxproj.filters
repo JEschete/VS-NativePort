@@ -357,6 +357,9 @@
     <ClCompile Include="src\VignetteRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\WeaponModeSliceTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">
       <Filter>..\Tools\Launcher\src</Filter>
     </ClCompile>

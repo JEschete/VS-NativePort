@@ -166,7 +166,7 @@ extern "C" {
 #include "Event/Sound.h"
 #include "Event/Splash.h"
 #include "Event/Triggers.h"
-#include "Event/WeaponMode.h"
+#include "Event/WeaponModeOpcode.h"
 #include "Event/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Background.h"
@@ -1441,7 +1441,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B9C18u, 0u, (void*)&Event_ScriptTogglePaletteHook, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9C58u, 0u, (void*)&Event_ScriptTransformPalettes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9D74u, 0u, (void*)&Event_ScriptSetActorRenderMode, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleMode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9F28u, 0u, (void*)&Event_ScriptSetRoomBackgroundVisible, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9F4Cu, 0u, (void*)&Event_ScriptLoadRoomBackground, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9F70u, 0u, (void*)&Event_ScriptWaitForRoomBackground, 0u, 0u, 0u},
@@ -3254,6 +3253,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&Battle_Ai_UpdateEngagementApproachBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

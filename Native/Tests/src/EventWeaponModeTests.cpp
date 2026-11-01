@@ -10,7 +10,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.h"
-#include "Event/WeaponMode.h"
+#include "Event/WeaponModeOpcode.h"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -210,7 +210,7 @@ struct WeaponModeFixture {
         symbols, "BATTLE/BATTLE.PRG", 0x800B9DB4u);
     REQUIRE(resolved != nullptr);
     const auto handler = reinterpret_cast<Handler>(resolved);
-    CHECK(handler == Event_ScriptSetAshleyBattleMode);
+    CHECK(handler == Event_ScriptSetAshleyBattleModeOpcode);
     CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                             0x800B9DB5u) == nullptr);
     return handler;
@@ -232,7 +232,7 @@ TEST_CASE("Script weapon mode honors its story gate without changing actors",
   State_SetScriptFlag(0xAC, 0);
   const auto before = RecordBytes(fixture.record);
   std::array<u_char, 3> command{0, 1, 1};
-  CHECK(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 0);
+  CHECK(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
   CHECK((fixture.actor.weaponDrawn & 1) == 0);
   CHECK(RecordBytes(fixture.record) == before);
@@ -247,7 +247,7 @@ TEST_CASE("Script weapon mode applies immediate and skipped final visibility",
   Event_skipState = static_cast<char>(skip);
   std::array<u_char, 3> command{0, static_cast<u_char>(mode),
                                 static_cast<u_char>(skip ? 3 : 0)};
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 0);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckImmediate(mode);
 }
 
@@ -262,12 +262,12 @@ TEST_CASE("Script weapon mode waits for real skeletal animation completion",
   Event_playbackPhase = static_cast<char>(phase);
   std::array<u_char, 3> command{0, static_cast<u_char>(mode),
                                 static_cast<u_char>(variant)};
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 1);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   fixture.CheckAnimatedStart(mode, variant, phase);
-  CHECK(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 1);
+  CHECK(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   CHECK(fixture.record.pose.frame == 0);
   fixture.FinishAnimation(phase == 0 && variant == 2 ? 10 : 5);
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 0);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckAnimatedFinish(mode, phase == 0 && variant == 2 && mode == 1);
 }
 
@@ -278,16 +278,16 @@ TEST_CASE("Script weapon mode also waits for the original queued idle",
   fixture.Prepare(mode);
   Event_playbackPhase = 0;
   std::array<u_char, 3> command{0, static_cast<u_char>(mode), 2};
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 1);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   CHECK(fixture.record.queuedAnimation == 1);
   fixture.AdvanceFrames(5);
   CHECK(fixture.record.animationId == (mode ? 101 : 1));
   CHECK(fixture.record.queuedAnimation == 0);
   CHECK(fixture.record.pose.frame == 0);
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 1);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   CHECK(fixture.pending == 1);
   fixture.FinishAnimation();
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 0);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckAnimatedFinish(mode, mode == 1);
 }
 
@@ -297,11 +297,11 @@ TEST_CASE("Skipping an active weapon transition clears its wait without replay",
   WeaponModeFixture fixture;
   fixture.Prepare(mode);
   std::array<u_char, 3> command{0, static_cast<u_char>(mode), 1};
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 1);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 1);
   const auto animation = fixture.record.animationId;
   Event_skipState = 2;
   State_SetScriptFlag(0xAC, 0);
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 0);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   fixture.CheckImmediate(mode);
   CHECK(fixture.record.animationId == animation);
 }
@@ -314,7 +314,7 @@ TEST_CASE("Production event dispatch holds then advances the weapon opcode",
   fixture.Prepare(mode);
   Event_skipState = static_cast<char>(skip);
   const auto weapon =
-      WeaponModeFixture::Opcode(Event_ScriptSetAshleyBattleMode);
+      WeaponModeFixture::Opcode(Event_ScriptSetAshleyBattleModeOpcode);
   const auto stop = WeaponModeFixture::Opcode(Event_CommandStopScriptContext);
   Event_kOpcodeHandlers[weapon] = WeaponModeFixture::ResolveHandler();
   Event_kOpcodeHandlers[stop] = Event_CommandStopScriptContext;
@@ -344,7 +344,7 @@ TEST_CASE(
   Event_weaponDrawStates[kOperand] = 0;
   Event_skipState = 2;
   std::array<u_char, 3> command{0, static_cast<u_char>(kOperand), 255};
-  REQUIRE(Event_ScriptSetAshleyBattleMode(command.data(), 0) == 0);
+  REQUIRE(Event_ScriptSetAshleyBattleModeOpcode(command.data(), 0) == 0);
   CHECK(fixture.pending == 0);
   CHECK((fixture.actor.weaponDrawn & 1) == 0);
   CHECK(fixture.record.instance.weaponDrawn == 0);

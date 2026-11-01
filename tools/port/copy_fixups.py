@@ -45,6 +45,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
+    "Event_ScriptSetAshleyBattleModeOpcode": r"Native\Game\src\Event\WeaponModeOpcode.h",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -185,6 +186,12 @@ MODULE_DATA_BLOB_TYPES = {
     "Content_plg074TrailEmissionCounter": ("int", 4),
 }
 MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
+
+# Module-image function addresses held by a promoted function's C binding rather than a catalog name (#46): the
+# image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
+MODULE_BINDING_ENTRIES = (
+    ("BATTLE/BATTLE.PRG", 0x800B9DB4, "Event_ScriptSetAshleyBattleModeOpcode"),  # F01130 opcode table
+)
 
 MODULE_FUNCTION_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E527C, "F01805"),
@@ -2621,6 +2628,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Field::TransitionLiveDoorsAtTile(",
      "F00579 #46 typed promotion: the door binding supplies the room door records, the raw RNG byte and the borrowed "
      "query list"),
+    (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
+     r"Event_ScriptSetAshleyBattleModeOpcode",
+     "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),
@@ -3285,7 +3295,9 @@ EVENT_OPCODE_HANDLERS = frozenset(
 SIG_RETYPE.update({fid: {"ret": "intptr_t"} for fid in EVENT_OPCODE_HANDLERS})
 # Opcode handlers promoted to typed VS:: C++ (#46) keep their table slot as a C binding with the dispatch ABI; its
 # header is in NATIVE_HELPER_HEADERS and MODULE_BINDING_ENTRIES maps the module-image address to it.
-EVENT_OPCODE_BINDINGS: dict[str, str] = {}
+EVENT_OPCODE_BINDINGS: dict[str, str] = {
+    "F01130": "Event_ScriptSetAshleyBattleModeOpcode",
+}
 
 # These normal-only handlers omit their unused thread argument in 4A0A8.c. They have no direct C callers,
 # but the dispatch ABI still requires both arguments (check_event_dispatch.py checks all table targets).

@@ -262,7 +262,7 @@ class EncounterFixupTests(unittest.TestCase):
             r"Native\Game\src\Event\ScriptVm.cpp": "not-a-header",
         }
         owned = {
-            "F01130": {"header": r"Native\Game\src\Event\WeaponMode.h"},
+            "F01131": {"header": r"Native\Game\src\Event\WeaponStub.h"},
             "T00001": {"header": r"Native\Game\include\CppOnly.hpp"},
             "F01033": {},
         }
@@ -270,7 +270,7 @@ class EncounterFixupTests(unittest.TestCase):
             check_event_dispatch.event_headers(manifest, owned),
             [
                 r"Native\Game\src\Event\ScriptVm.h",
-                r"Native\Game\src\Event\WeaponMode.h",
+                r"Native\Game\src\Event\WeaponStub.h",
             ],
         )
 
@@ -278,21 +278,34 @@ class EncounterFixupTests(unittest.TestCase):
         for row in ({}, {"header": ""}, {"header": " \t "}):
             with (
                 self.subTest(row=row),
-                self.assertRaisesRegex(ValueError, "F01130.*header"),
+                self.assertRaisesRegex(ValueError, "F01131.*header"),
             ):
-                check_event_dispatch.event_headers({}, {"F01130": row})
+                check_event_dispatch.event_headers({}, {"F01131": row})
 
     def test_event_dispatch_audit_deduplicates_shared_and_generated_headers(self):
-        header = r"Native\Game\src\Event\WeaponMode.h"
+        header = r"Native\Game\src\Event\WeaponStub.h"
         self.assertEqual(
             check_event_dispatch.event_headers(
                 {header: "generated"},
                 {
-                    "F01130": {"header": f" \t{header}\t "},
+                    "F01131": {"header": f" \t{header}\t "},
                     "F01027": {"header": header},
                 },
             ),
             [header],
+        )
+
+    def test_event_dispatch_audit_uses_promoted_opcode_bindings(self):
+        binding = copy_fixups.EVENT_OPCODE_BINDINGS["F01130"]
+        self.assertEqual(binding, "Event_ScriptSetAshleyBattleModeOpcode")
+        self.assertEqual(
+            check_event_dispatch.event_headers(
+                {}, {"F01130": {"header": r"Native\Game\include\Event\WeaponMode.hpp"}}
+            ),
+            [r"Native\Game\src\Event\WeaponModeOpcode.h"],
+        )
+        self.assertEqual(
+            check_event_dispatch.opcode_symbol("F01130", "Event::ScriptSetAshleyBattleMode"), binding
         )
 
     def test_event_dispatch_audit_names_unpromoted_handlers_by_catalog(self):
@@ -937,7 +950,25 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(
             owned["F01130"]["path"], r"Native\Game\src\Event\WeaponMode.cpp"
         )
+        self.assertEqual(owned["F01130"]["name"], "VS::Event::ScriptSetAshleyBattleMode")
+        self.assertEqual(owned["F01130"]["header"], r"Native\Game\include\Event\WeaponMode.hpp")
+        self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800B9DB4, "Event_ScriptSetAshleyBattleModeOpcode"),
+            copy_fixups.MODULE_BINDING_ENTRIES,
+        )
         root = Path(__file__).resolve().parents[2]
+        vm = (root / r"Native\Game\src\Event\ScriptVm.cpp").read_text(encoding="utf-8")
+        self.assertIn('#include "Event/WeaponModeOpcode.h"', vm)
+        self.assertIn("Event_ScriptSetAshleyBattleModeOpcode,", vm)
+        self.assertNotIn("VS::Event::ScriptSetAshleyBattleMode", vm)
+        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        self.assertIn(
+            '{"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u}',
+            pointers,
+        )
+        core = (root / r"Native\Game\src\Event\WeaponMode.cpp").read_text(encoding="utf-8")
+        self.assertNotIn("Legacy/", core)
+        self.assertNotIn("u_char", core)
         with (root / r"Docs\ledgers\DATA_LEDGER.csv").open(
             encoding="utf-8-sig", newline=""
         ) as handle:

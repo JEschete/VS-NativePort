@@ -2027,6 +2027,10 @@ class Copier:
             if name not in emitted_fns or name not in self.provider:
                 raise ValueError(f"Missing reviewed module entry {fid}: {name}")
             symbols.append(f'    {{"{module}", 0x{address:08X}u, 0u, (void*)&{name}, 0u, 0u, 0u}},')
+        for module, address, name in cf.MODULE_BINDING_ENTRIES:
+            if name not in cf.NATIVE_HELPER_HEADERS:
+                raise ValueError(f"Missing module binding header {name}")
+            symbols.append(f'    {{"{module}", 0x{address:08X}u, 0u, (void*)&{name}, 0u, 0u, 0u}},')
         declarations, sample_sources = [], []
         for module, _, address, size, name, _ in cf.MODULE_DATA_BLOBS:
             declaration, width = self.module_blob_declaration(name, size)

@@ -35,7 +35,7 @@ extern "C" {
 #include "Event/ScriptVm.h"
 #include "Event/Splash.h"
 #include "Event/Triggers.h"
-#include "Event/WeaponMode.h"
+#include "Event/WeaponModeOpcode.h"
 #include "Event/Weather.h"
 #include "Field/Camera.h"
 #include "Field/Gimmicks.h"
@@ -185,7 +185,7 @@ intptr_t (*Event_kSkipOpcodeHandlers[256])(u_char*, short) = { Event_ScriptRepor
     Event_ScriptClearAshleyStatusEffects, Event_ScriptShowGeometryGroup, Event_ScriptHideGeometryGroup, Event_ScriptSwapGeometryGroupFlags, Event_ScriptSetCollisionTileMode,
     Event_ScriptChangeRoom, Event_ScriptNoOperation, Event_ScriptNoOperation, Event_ScriptSetWipeAngle, Event_ScriptConfigureScreenTransition,
     Event_ScriptNoOperation, Event_ScriptYieldFrame, Event_ScriptTogglePaletteHook, Event_ScriptTransformPalettes, Event_ScriptSetActorRenderMode,
-    Event_ScriptSetAshleyBattleMode, Event_ScriptSetRoomBackgroundVisible, Event_ScriptLoadRoomBackground, Event_ScriptWaitForRoomBackground, Event_ScriptFreeRoomBackground,
+    Event_ScriptSetAshleyBattleModeOpcode, Event_ScriptSetRoomBackgroundVisible, Event_ScriptLoadRoomBackground, Event_ScriptWaitForRoomBackground, Event_ScriptFreeRoomBackground,
     Event_ScriptSetEnvironmentParticles, Event_ScriptSetParticleVariationEnabled, Event_ScriptControlRoomAnimation, Event_ScriptMuteEnvironmentSound, Event_ScriptSetBackgroundOffset,
     Event_ScriptSetFirstPersonView, Event_ScriptAdjustGeometryDepthBias, Event_ScriptSetBackgroundParallax, Event_ScriptReportInvalidOpcode, Event_ScriptNoOperation,
     Event_ScriptNoOperation, Event_ScriptNoOperation, Event_CommandStopAllSfx, Event_CommandStopSfx,

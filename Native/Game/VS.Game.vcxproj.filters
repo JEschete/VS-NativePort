@@ -25,6 +25,9 @@
     <Filter Include="include\Effects\ScreenDistortion">
       <UniqueIdentifier>{82C05CD2-F240-59F0-A0D1-317CD68B16FD}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Event">
+      <UniqueIdentifier>{4411CC77-D65D-53D6-B88B-DFE1F0B4D2AD}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Field">
       <UniqueIdentifier>{1E0884FE-22B7-578E-BCE0-52CBAEFF5982}</UniqueIdentifier>
     </Filter>
@@ -1578,7 +1581,10 @@
     <ClCompile Include="src\Event\WeaponMode.cpp">
       <Filter>src\Event</Filter>
     </ClCompile>
-    <ClInclude Include="src\Event\WeaponMode.h">
+    <ClCompile Include="src\Event\WeaponModeLive.cpp">
+      <Filter>src\Event</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Event\WeaponModeOpcode.h">
       <Filter>src\Event</Filter>
     </ClInclude>
     <ClInclude Include="src\Event\Weather.h">
@@ -2288,6 +2294,9 @@
     </ClInclude>
     <ClInclude Include="include\Effects\TextureBindings.hpp">
       <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Event\WeaponMode.hpp">
+      <Filter>include\Event</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\CollisionSampling.hpp">
       <Filter>include\Field</Filter>

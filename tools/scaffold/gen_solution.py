@@ -175,7 +175,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Actors\MovementCommandBinding.cpp",
                 r"src\Battle\Ai\ConditionSnapshotBinding.cpp",
                 r"src\Field\CollisionSamplingBinding.cpp",
-                r"src\Event\WeaponMode.cpp",
+                r"src\Event\WeaponModeLive.cpp",
                 r"src\Effects\ScreenEffectState.cpp",
                 r"src\Effects\ScreenDistortion\RadialWarpLive.cpp",
                 r"src\Battle\TargetingDrawLive.cpp",
