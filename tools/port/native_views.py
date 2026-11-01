@@ -104,11 +104,6 @@ def rebase(tid: str, text: str, fields: list[tuple[str, dict]]) -> str:
         text, count = re.subn(r'(?:int|short) linkedActor\s*:\s*8;', 'signed char linkedActor;', text)
         if count != 1:
             raise ValueError(f'{tid}: linkedActor byte not found')
-    # 74088.c:1547 tests the actor's model slot through a partial integer view.
-    if tid == 'T00380':
-        text, count = re.subn(r'int opaque44;', 'void* opaque44;', text)
-        if count != 1:
-            raise ValueError('T00380: model slot not found')
     # 7C7E0.s:196 frees the navigation override; perception only tests its presence.
     if tid == 'T00399':
         text, count = re.subn(r'int opaque18C;', 'void* opaque18C;', text)
