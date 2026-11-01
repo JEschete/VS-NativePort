@@ -13,8 +13,8 @@ typedef struct Field_DoorMatchList {
 extern "C" {
 #endif
 
+// Filled by VS::Field::TransitionLiveDoorsAtTile (Field/DoorMatchesLive.hpp).
 extern Field_DoorMatchList Field_matchingDoorRecords;
-Field_DoorMatchList* Field_TransitionDoorsAtTile(int x, int z, int layer);
 
 #ifdef __cplusplus
 }

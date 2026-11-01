@@ -1444,7 +1444,8 @@
     <ClCompile Include="src\Field\CollisionSamplingBinding.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\DoorMatches.cpp">
+    <ClCompile Include="src\Field\DoorMatches.cpp" />
+    <ClCompile Include="src\Field\DoorMatchesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Field\Doors.cpp">
@@ -2305,7 +2306,7 @@
     <ClInclude Include="src\Field\Background.h" />
     <ClInclude Include="src\Field\Camera.h" />
     <ClInclude Include="src\Field\Collision.h" />
-    <ClInclude Include="src\Field\DoorMatches.h" />
+    <ClInclude Include="src\Field\DoorMatchList.h" />
     <ClInclude Include="src\Field\Doors.h" />
     <ClInclude Include="src\Field\EncounterSpawnProfile.hpp" />
     <ClInclude Include="src\Field\Environment.h" />
@@ -2438,6 +2439,8 @@
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarpLive.hpp" />
     <ClInclude Include="include\Effects\TextureBindings.hpp" />
     <ClInclude Include="include\Field\CollisionSampling.hpp" />
+    <ClInclude Include="include\Field\DoorMatches.hpp" />
+    <ClInclude Include="include\Field\DoorMatchesLive.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />

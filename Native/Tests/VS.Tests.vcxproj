@@ -82,6 +82,7 @@
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />
     <ClCompile Include="src\DiscImageTests.cpp" />
+    <ClCompile Include="src\DoorMatchesSliceTests.cpp" />
     <ClCompile Include="src\DoorTransitionTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.cpp">

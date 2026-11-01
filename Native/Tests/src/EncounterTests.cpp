@@ -15,7 +15,7 @@
 #include "Core/BiosRand.h"
 #include "Core/Random.hpp"
 #include "Field/CollisionSampling.hpp"
-#include "Field/DoorMatches.h"
+#include "Field/DoorMatchesLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
 
 extern "C" {
@@ -91,14 +91,14 @@ struct DoorQueryFixture {
 
   ~DoorQueryFixture() {
     Field_roomData.doors = nullptr;
-    Field_TransitionDoorsAtTile(0, 0, 0);
+    VS::Field::TransitionLiveDoorsAtTile(0, 0, 0);
     Field_roomData = saved_room;
     Audio_Seq_unusedStateFlags.opaqueAC[7] = saved_random;
     Core_Random_Seed(1);
   }
 
   void Check(int x, int z, int layer, std::span<const int> expected) {
-    auto* result = Field_TransitionDoorsAtTile(x, z, layer);
+    auto* result = VS::Field::TransitionLiveDoorsAtTile(x, z, layer);
     REQUIRE(result == &Field_matchingDoorRecords);
     REQUIRE(result->count == static_cast<int>(expected.size()));
     for (std::size_t index = 0; index < expected.size(); ++index) {
@@ -196,12 +196,12 @@ TEST_CASE("Door queries retain raw RNG semantics and reject malformed data",
   }
   SECTION("absent room consumes no raw draw") {
     Field_roomData.doors = nullptr;
-    CHECK(Field_TransitionDoorsAtTile(0, 0, 0) == nullptr);
+    CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
     CHECK(Field_matchingDoorRecords.count == 0);
   }
   SECTION("partial record bytes are rejected before traversal") {
     --Field_roomData.header.doorsLength;
-    CHECK(Field_TransitionDoorsAtTile(0, 0, 0) == nullptr);
+    CHECK(VS::Field::TransitionLiveDoorsAtTile(0, 0, 0) == nullptr);
     CHECK(Field_matchingDoorRecords.count == 0);
   }
   CHECK(Core_Random_Rand() == expected.Next());

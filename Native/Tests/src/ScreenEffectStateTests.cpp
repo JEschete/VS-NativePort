@@ -19,7 +19,7 @@ extern "C" {
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
-#include "Field/DoorMatches.h"
+#include "Field/DoorMatchList.h"
 #include "OverlayWorkspace.h"
 }
 

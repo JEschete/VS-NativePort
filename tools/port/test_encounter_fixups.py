@@ -1408,7 +1408,8 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_promoted_terrain_callers_pass_the_grid_and_decoded_values(self):
         fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
-                 if "VS::Field::" in pat and "SampleCollisionHeightCode" not in pat]
+                 if "VS::Field::" in pat and "SampleCollisionHeightCode" not in pat
+                 and "TransitionDoorsAtTile" not in pat]
         self.assertEqual(len(fixes), 3)
         self.assertTrue(all(re.search(row, "Battle::Ai::Movement") for row, _, _ in fixes))
         text = "\n".join((
@@ -3230,18 +3231,26 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         root = Path(__file__).resolve().parents[2]
         with (root / "tools/port/owned.csv").open(newline="") as file:
             owned = {row["id"]: row for row in csv.DictReader(file)}
-        for item in ("T00232", "G00330", "F00579"):
+        for item in ("T00232", "G00330"):
             with self.subTest(item=item):
                 self.assertIn(item, owned)
                 self.assertEqual(
-                    owned[item]["header"], r"Native\Game\src\Field\DoorMatches.h"
+                    owned[item]["header"], r"Native\Game\src\Field\DoorMatchList.h"
                 )
+        self.assertEqual(owned["F00579"]["name"], "VS::Field::TransitionDoorsAtTile")
+        self.assertEqual(owned["F00579"]["header"], r"Native\Game\include\Field\DoorMatches.hpp")
         source = (root / "Native/Game/src/Field/Doors.cpp").read_text()
         caller = (root / "Native/Game/src/Field/Interactions.cpp").read_text()
-        self.assertIn('"Field/DoorMatches.h"', caller)
+        self.assertIn('"Field/DoorMatchList.h"', caller)
+        self.assertIn('#include "Field/DoorMatchesLive.hpp"', caller)
+        self.assertNotIn("Field_TransitionDoorsAtTile(", caller)
+        self.assertEqual(caller.count("VS::Field::TransitionLiveDoorsAtTile("), 2)
+        core = (root / "Native/Game/src/Field/DoorMatches.cpp").read_text()
+        self.assertNotIn("Legacy/", core)
+        self.assertNotIn("Field_roomData", core)
         self.assertNotIn("Field_DoorMatchList Field_matchingDoorRecords;", source)
         self.assertNotIn("Field_TransitionDoorsAtTile(int", source)
-        owned_header = (root / "Native/Game/src/Field/DoorMatches.h").read_text()
+        owned_header = (root / "Native/Game/src/Field/DoorMatchList.h").read_text()
         self.assertIn("Field_MpdDoorRecord** records;", owned_header)
         self.assertNotIn("records[0]", owned_header)
 

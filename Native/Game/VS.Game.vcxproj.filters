@@ -1614,7 +1614,10 @@
     <ClCompile Include="src\Field\DoorMatches.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\DoorMatches.h">
+    <ClCompile Include="src\Field\DoorMatchesLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Field\DoorMatchList.h">
       <Filter>src\Field</Filter>
     </ClInclude>
     <ClCompile Include="src\Field\Doors.cpp">
@@ -2287,6 +2290,12 @@
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\CollisionSampling.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\DoorMatches.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\DoorMatchesLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\TerrainHeight.hpp">

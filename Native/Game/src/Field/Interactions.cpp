@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Field/DoorMatchesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -26,7 +27,7 @@ extern "C" {
 #include "Event/Triggers.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
-#include "Field/DoorMatches.h"
+#include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
 #include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
@@ -627,10 +628,10 @@ int Field_CheckAshleyTileTriggers(int actorId, u_char* inputPosition)
                     if (phaseValue & 0x20000000) {
                         doors = NULL;
                     } else {
-                        doors = Field_TransitionDoorsAtTile(0, 0, floorOverride >> 16);
+                        doors = VS::Field::TransitionLiveDoorsAtTile(0, 0, floorOverride >> 16);
                     }
                 } else {
-                    doors = Field_TransitionDoorsAtTile(position[0],
+                    doors = VS::Field::TransitionLiveDoorsAtTile(position[0],
                         position[2], position[1]);
                 }
 

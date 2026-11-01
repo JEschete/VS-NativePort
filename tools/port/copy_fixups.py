@@ -44,6 +44,7 @@ NATIVE_HELPER_HEADERS = {
         r"Native\Game\include\Effects\ScreenDistortion\RadialWarpLive.hpp",
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
+    "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2616,6 +2617,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Battle::ApplyLiveActionTargetEffects(",
      "F00062 #46 typed promotion: the target effects binding supplies the action queue, hit application, reaction "
      "animations and world labels"),
+    (r"", r"\bVS::Field::TransitionDoorsAtTile\(",
+     r"VS::Field::TransitionLiveDoorsAtTile(",
+     "F00579 #46 typed promotion: the door binding supplies the room door records, the raw RNG byte and the borrowed "
+     "query list"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

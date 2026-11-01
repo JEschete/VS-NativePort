@@ -172,7 +172,7 @@ extern "C" {
 #include "Field/Background.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
-#include "Field/DoorMatches.h"
+#include "Field/DoorMatchList.h"
 #include "Field/Doors.h"
 #include "Field/Environment.h"
 #include "Field/GameMode.h"
@@ -891,7 +891,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008B808u, 0u, (void*)&Field_SetCollisionCellBlocked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008B8F8u, 0u, (void*)&Field_SetEntranceDoorRecord, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008B960u, 0u, (void*)&Field_FindEntranceDoorNearTile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008BAC8u, 0u, (void*)&Field_TransitionDoorsAtTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008BC04u, 0u, (void*)&Field_InteractiveDoorAtTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008BD74u, 0u, (void*)&Field_ToggleDoorCollision, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008BEBCu, 0u, (void*)&Field_BeginDoorToggle, 0u, 0u, 0u},
