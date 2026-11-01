@@ -7,6 +7,7 @@
 #include <chrono>
 #include <fstream>
 #include <iomanip>
+#include <optional>
 #include <sstream>
 #include <string>
 #include <string_view>
@@ -15,6 +16,7 @@
 
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
+#include "Content/MovieEncoder.hpp"
 #include "Platform/App.hpp"
 #include "Platform/Paths.hpp"
 #include "Save/SaveStore.hpp"
@@ -134,6 +136,25 @@ Result SealAssets(const fs::path& data, const VerifiedDisc& source_disc,
        {"files", files}});
 }
 
+// Renaming a dump leaves the name inside its CUE stale. The BIN's bytes are
+// what identify the disc, so a BIN that is unambiguously the CUE's own will do.
+std::optional<fs::path> BinBesideCue(const fs::path& cue) {
+  std::error_code error;
+  auto same_name = cue;
+  same_name.replace_extension(".bin");
+  if (fs::is_regular_file(same_name, error)) return same_name;
+  std::optional<fs::path> only;
+  for (const auto& entry : fs::directory_iterator(cue.parent_path(), error)) {
+    if (!entry.is_regular_file(error) ||
+        Upper(PathText(entry.path().extension())) != ".BIN") {
+      continue;
+    }
+    if (only) return std::nullopt;
+    only = entry.path();
+  }
+  return only;
+}
+
 Result WritableSaves(const fs::path& path) {
   const auto store = Save::SaveStore::Open(path);
   if (!store) return std::unexpected(store.error());
@@ -181,11 +202,15 @@ struct CueSheet {
       return std::unexpected("The CUE must reference a .bin file.");
     }
     if (auto result = RegularFile(image); !result) {
-      return std::unexpected(
-          "The BIN referenced by the CUE is missing or "
-          "unreadable. Keep it beside the CUE with its "
-          "original name.\n" +
-          result.error());
+      const auto beside = BinBesideCue(cue);
+      if (!beside) {
+        return std::unexpected(
+            "The BIN referenced by the CUE is missing or unreadable, and the "
+            "folder has no single .bin to use instead. Choose the .bin itself."
+            "\n" +
+            result.error());
+      }
+      image = *beside;
     }
     return {};
   }
@@ -289,7 +314,7 @@ Result ActivateAssets(const fs::path& staging, const fs::path& data,
 
 std::expected<fs::path, std::string> ValidateCue(const fs::path& cue) {
   if (Upper(PathText(cue.extension())) != ".CUE") {
-    return std::unexpected("Select a .cue file, not the .bin image.");
+    return std::unexpected("Select a .cue, .chd or .bin file.");
   }
   if (auto result = RegularFile(cue); !result) {
     return std::unexpected(result.error());
@@ -377,7 +402,7 @@ Result SaveSettings(const fs::path& state, const Settings& settings) {
 
 Result CheckInstallation(const fs::path& installation) {
   for (const auto* file : {"VS.Desktop.exe", "VS.Extract.exe", "SDL3.dll",
-                           "dav1d.dll", "sfizz.dll", "webm.dll"}) {
+                           "dav1d.dll", "sfizz.dll", "webm.dll", "chdr.dll"}) {
     if (auto result = RegularFile(installation / file); !result) {
       return result;
     }
@@ -456,6 +481,11 @@ std::expected<fs::path, std::string> Prepare(const Settings& settings,
   if (auto result = ProbeFfmpeg(settings.ffmpeg, state / "setup.log");
       !result) {
     return std::unexpected(result.error());
+  }
+  if (const auto encoder = Content::FindAv1Encoder(
+          settings.ffmpeg, state / "ffmpeg-encoders.txt");
+      !encoder) {
+    return std::unexpected(encoder.error());
   }
   const auto suffix = std::to_string(
       std::chrono::steady_clock::now().time_since_epoch().count());

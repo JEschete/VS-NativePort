@@ -1033,6 +1033,9 @@
     <Filter Include="tools\vcpkg\ports">
       <UniqueIdentifier>{EDA80DE0-2138-517B-867A-6DACFE614EE0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="tools\vcpkg\ports\libchdr">
+      <UniqueIdentifier>{4C82A2DF-FFD2-5AEC-94DB-4CE1AC6B3D5E}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tools\vcpkg\ports\sfizz">
       <UniqueIdentifier>{7A93475D-3363-5013-BF4E-E32FC670A11C}</UniqueIdentifier>
     </Filter>
@@ -1056,10 +1059,22 @@
     <None Include="..\..\ledger\gates.py">
       <Filter>tools\ledger</Filter>
     </None>
+    <None Include="..\..\ledger\hazards.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\modernization.py">
+      <Filter>tools\ledger</Filter>
+    </None>
     <None Include="..\..\ledger\reconcile_locations.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\ledger\test_gates.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_hazards.py">
+      <Filter>tools\ledger</Filter>
+    </None>
+    <None Include="..\..\ledger\test_modernization.py">
       <Filter>tools\ledger</Filter>
     </None>
     <None Include="..\..\lint\.gitignore">
@@ -5361,6 +5376,12 @@
     <None Include="..\..\test\duckstation_setup.ps1">
       <Filter>tools\test</Filter>
     </None>
+    <None Include="..\..\test\regression.py">
+      <Filter>tools\test</Filter>
+    </None>
+    <None Include="..\..\test\regression_baseline.json">
+      <Filter>tools\test</Filter>
+    </None>
     <None Include="..\..\test\run_native.ps1">
       <Filter>tools\test</Filter>
     </None>
@@ -5370,11 +5391,26 @@
     <None Include="..\..\test\scenarios\first_lever_room.json">
       <Filter>tools\test\scenarios</Filter>
     </None>
+    <None Include="..\..\test\scenarios\silver_wolves.json">
+      <Filter>tools\test\scenarios</Filter>
+    </None>
     <None Include="..\..\test\slice-ai-ranking-wolves.json">
+      <Filter>tools\test</Filter>
+    </None>
+    <None Include="..\..\test\test_regression.py">
       <Filter>tools\test</Filter>
     </None>
     <None Include="..\..\test\verify_first_lever.py">
       <Filter>tools\test</Filter>
+    </None>
+    <None Include="..\..\vcpkg\ports\libchdr\bundled-notices.txt">
+      <Filter>tools\vcpkg\ports\libchdr</Filter>
+    </None>
+    <None Include="..\..\vcpkg\ports\libchdr\portfile.cmake">
+      <Filter>tools\vcpkg\ports\libchdr</Filter>
+    </None>
+    <None Include="..\..\vcpkg\ports\libchdr\vcpkg.json">
+      <Filter>tools\vcpkg\ports\libchdr</Filter>
     </None>
     <None Include="..\..\vcpkg\ports\sfizz\portfile.cmake">
       <Filter>tools\vcpkg\ports\sfizz</Filter>

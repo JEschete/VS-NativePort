@@ -437,12 +437,13 @@ navigation/listening, every effect/track in context, bit-exact DSP parity and
 - **Pipeline** (extract time only):
   1. `VS.Extract` writes the raw 2352-byte sectors of the movie to a temporary file.
   2. ffmpeg decodes it with its `psxstr` demuxer and `mdec` decoder, and encodes:
-     - video with **SVT-AV1** (`libsvtav1`), near-lossless at the source resolution and frame rate (no upscaling in Phase 1);
+     - video with **SVT-AV1** (`libsvtav1`), or **libaom** (`libaom-av1`) in FFmpeg builds without it, at the source resolution and frame rate (no upscaling in Phase 1);
      - audio as **FLAC**.
 
-     Fixed settings make the output reproducible: `-c:v libsvtav1 -preset 4 -crf 12 -pix_fmt yuv420p -g <fps*2> -c:a flac`.
+     The settings are `-c:v libsvtav1 -preset 6 -svtav1-params lp=2 -crf 18` or `-c:v libaom-av1 -cpu-used 6 -row-mt 1 -threads 2 -crf 18 -b:v 0`, each with `-pix_fmt yuv420p -color_range pc -colorspace bt470bg -c:a flac` (`Content/MovieEncoder`). The encoder writes a random container ID, so two conversions differ as files while decoding to identical frames.
   3. The result is muxed into Matroska: `movies\<name>.mkv`. WebM cannot carry FLAC, so the container is MKV.
-- **Encoder dependency:** ffmpeg is an **extract-time tool only**. It is never linked or shipped. `VS.Extract` finds it on `PATH` or through `--ffmpeg <path>`, and fails clearly if it is missing or lacks `libsvtav1`. Verified on the dev machine: ffmpeg 8.1.1 (winget Gyan.FFmpeg) has `libsvtav1` and `flac`.
+- **Encoder dependency:** ffmpeg is an **extract-time tool only**. It is never linked or shipped. `VS.Extract` finds it on `PATH` or through `--ffmpeg <path>`. The launcher and `VS.Extract` both stop with an error naming the FFmpeg if it has neither encoder, and `VS.Extract` stops if a conversion fails. Verified on the dev machine: ffmpeg 8.1.1 (winget Gyan.FFmpeg) has `libsvtav1`, `libaom-av1` and `flac`. Gyan's "essentials" 9.0.2 build has `libaom-av1` but no `libsvtav1` (#254).
+- **Encoder comparison** (ffmpeg 8.1.1, whole intro, against a lossless decode of the same source): `libsvtav1` 44.5 dB, 10.2 MB, about 1 s; `libaom-av1` 44.0 dB, 9.3 MB, about 9 s. Both have 593 frames and identical audio, and both play through the game's dav1d path.
 - **Runtime (`Engine\Movie`):**
   - Matroska demux: libwebm `mkvparser`, BSD.
   - AV1 decode: **dav1d**, BSD.
@@ -529,6 +530,7 @@ Record source revision/dirty state, disc identity, tool/converter/schema version
 | PNG read/write | lodepng (or libspng) | zlib / BSD | VS.Content, VS.Extract |
 | AV1 decode | dav1d | BSD-2 | Engine\Movie |
 | Matroska demux | libwebm | BSD-3 | Engine\Movie |
+| CHD disc images | libchdr (overlay port) | BSD-3, with bundled LZMA SDK, miniz and zstd | Content\Disc |
 | FLAC encode/decode | libFLAC (or dr_flac for decode) | BSD-3 / public domain | VS.Extract, Engine\Audio |
 | AV1 encode, STR decode | ffmpeg (external executable, extract time only) | LGPL/GPL build. Not linked, not shipped | user machine |
 

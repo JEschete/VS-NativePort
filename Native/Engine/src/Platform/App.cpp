@@ -124,6 +124,12 @@ std::expected<int, std::string> RunProcess(
     return std::unexpected("Cannot open process output " + PathText(output) +
                            ": " + SDL_GetError());
   }
+  // SDL appends only on its own writes. The child shares this file position, so
+  // without this each process would overwrite the output of the one before it.
+  if (file && SDL_SeekIO(file.get(), 0, SDL_IO_SEEK_END) < 0) {
+    return std::unexpected("Cannot append to process output " +
+                           PathText(output) + ": " + SDL_GetError());
+  }
   bool configured =
       SDL_SetPointerProperty(properties, SDL_PROP_PROCESS_CREATE_ARGS_POINTER,
                              static_cast<void*>(pointers.data()));

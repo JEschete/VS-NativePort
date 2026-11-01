@@ -1,0 +1,14 @@
+{
+  "name": "libchdr",
+  "version": "0.3.0",
+  "description": "Reads CHD disc images, so a compressed copy of the player's disc can be used",
+  "homepage": "https://github.com/rtissera/libchdr",
+  "license": "BSD-3-Clause",
+  "supports": "windows & x64",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    }
+  ]
+}

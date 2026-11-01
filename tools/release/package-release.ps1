@@ -22,7 +22,7 @@ if ((Test-Path -LiteralPath $stage) -or (Test-Path -LiteralPath $archive)) {
     throw "Output already exists: $stage. Choose a new version or output directory."
 }
 $files = @('VS.Launcher.exe', 'VS.Desktop.exe', 'VS.Extract.exe',
-    'SDL3.dll', 'dav1d.dll', 'sfizz.dll', 'webm.dll')
+    'SDL3.dll', 'dav1d.dll', 'sfizz.dll', 'webm.dll', 'chdr.dll')
 foreach ($file in $files) {
     if (-not (Test-Path -LiteralPath (Join-Path $binaries $file) -PathType Leaf)) {
         throw "Missing Release build file: $file. Build the Release solution first."
@@ -65,7 +65,7 @@ New-Item -ItemType Directory -Path $notices | Out-Null
 Copy-Item -LiteralPath (Join-Path $repo 'LICENSE') -Destination (Join-Path $notices 'VS-NativePort.txt')
 'Microsoft Visual C++ app-local runtime redistribution terms: https://visualstudio.microsoft.com/license-terms/vs2022-cruntime/' |
     Set-Content -LiteralPath (Join-Path $notices 'Microsoft-VC-Runtime.txt') -Encoding UTF8
-foreach ($dependency in @('sdl3', 'dav1d', 'libwebm', 'sfizz', 'drlibs', 'nlohmann-json')) {
+foreach ($dependency in @('sdl3', 'dav1d', 'libwebm', 'sfizz', 'drlibs', 'nlohmann-json', 'libchdr')) {
     $notice = Join-Path $repo "vcpkg_installed\x64-windows\share\$dependency\copyright"
     if (-not (Test-Path -LiteralPath $notice -PathType Leaf)) {
         throw "Missing redistribution notice for $dependency."

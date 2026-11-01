@@ -86,6 +86,7 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\ModuleLoader.cpp" />
+    <ClCompile Include="src\MovieEncoder.cpp" />
     <ClCompile Include="src\OverlayFiles.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -136,6 +137,7 @@
     <ClInclude Include="include\Content\Disc.hpp" />
     <ClInclude Include="include\Content\DiscLayout.h" />
     <ClInclude Include="include\Content\ModuleData.h" />
+    <ClInclude Include="include\Content\MovieEncoder.hpp" />
     <ClInclude Include="include\Content\StringTables.h" />
     <ClInclude Include="Legacy\LibDs.h" />
   </ItemGroup>

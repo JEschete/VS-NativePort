@@ -39,8 +39,8 @@
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Debug'">SDL3.lib;Catch2d.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies Condition="'$(Configuration)'=='Release'">SDL3.lib;Catch2.lib;dav1d.lib;webm.lib;sfizz.lib;bcrypt.lib;winhttp.lib;chdr.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions>/WHOLEARCHIVE:$(OutDir)VS.Engine.lib /WHOLEARCHIVE:$(OutDir)VS.Content.lib /WHOLEARCHIVE:$(OutDir)VS.Game.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <Manifest>
@@ -77,6 +77,7 @@
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />
+    <ClCompile Include="src\DiscImageTests.cpp" />
     <ClCompile Include="src\DoorTransitionTests.cpp" />
     <ClCompile Include="src\EffectTextureBindingTests.cpp" />
     <ClCompile Include="src\EffectTimelineTests.cpp">
