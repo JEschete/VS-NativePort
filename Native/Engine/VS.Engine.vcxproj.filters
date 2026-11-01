@@ -585,9 +585,9 @@
     <ClCompile Include="src\Render\ScaledFont.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\ScaledFont.h">
+    <ClCompile Include="src\Render\ScaledFontLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\ScreenTransition.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -781,6 +781,9 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\ScaledFont.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\SaveStore.hpp">

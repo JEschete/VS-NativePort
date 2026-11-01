@@ -35,6 +35,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Field::LiveRoomCollisionMap": r"Native\Game\include\Field\CollisionSampling.hpp",
     "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
     "VS::Effects::BindLiveEffectTextureTables": r"Native\Game\include\Effects\TextureBindings.hpp",
+    "VS::Render::DrawLiveScaledFontChar": r"Native\Engine\include\Render\ScaledFont.hpp",
     "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     # Reference adapters the scalar matrix REGEX_FIXES substitute for in-place matrix calls.
     **{f"VS::Core::Math::Apply{name}": r"Native\Engine\include\Core\Math\ScalarMath.hpp"
@@ -2579,6 +2580,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts()",
      "F03198 #46 typed promotion: the sequencer binding supplies the live music layers and keys off "
      "the released voices"),
+    (r"", r"\bVS::Render::DrawScaledFontChar\(",
+     r"VS::Render::DrawLiveScaledFontChar(",
+     "F04199 #46 typed promotion: the font binding supplies the live font style and text box layer"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

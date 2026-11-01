@@ -3,6 +3,9 @@ extern "C" {
 #include <stdlib.h>
 #include <string.h>
 
+extern "C++" {
+#include "Render/ScaledFont.hpp"
+}
 #include "Actors/Spawning.h"
 #include "Battle/Targeting.h"
 #include "Boot/OverlayReset.h"
@@ -23,7 +26,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
-#include "Render/ScaledFont.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
@@ -153,19 +155,19 @@ int Tests_ScaledDialogueGlyphs(void) {
   Render_activeTextBoxIndex = 2;
   Render_variableFontGlyphWidths[5] = 7;
   Render_variableFontGlyphWidths[0x8F] = 6;
-  int nextX = Render_DrawScaledFontChar(5, 10 << 16, 20 << 16, 12 << 16,
-                                        12 << 16, 1 << 16);
+  int next_x = VS::Render::DrawLiveScaledFontChar(5, 10 << 16, 20 << 16,
+                                                  12 << 16, 12 << 16, 1 << 16);
   POLY_FT4* glyph = reinterpret_cast<POLY_FT4*>((memory + 8));
-  int passed = nextX == 17 << 16 && glyph->x0 == 10 && glyph->y0 == 20 &&
+  int passed = next_x == 17 << 16 && glyph->x0 == 10 && glyph->y0 == 20 &&
                glyph->x3 == 22 && glyph->y3 == 32 && glyph->u0 == 60 &&
                glyph->v0 == 0 && glyph->u3 == 72 && glyph->v3 == 12 &&
                glyph->clut == 0x37B4 && glyph->tpage == 13 &&
                nextPrim(&ordering[11]) == glyph;
   void* end = Render_frameScratch.primitiveCursor;
-  passed =
-      passed &&
-      Render_DrawScaledFontChar(0x8F, nextX, 0, 0, 0, 1 << 16) == 23 << 16 &&
-      Render_frameScratch.primitiveCursor == end;
+  passed = passed &&
+           VS::Render::DrawLiveScaledFontChar(0x8F, next_x, 0, 0, 0, 1 << 16) ==
+               23 << 16 &&
+           Render_frameScratch.primitiveCursor == end;
   Menu_TextBoxState box = {0};
   char text[] = {5, static_cast<char>(0x8F), 5, static_cast<char>(0xE8),
                  5, static_cast<char>(0xE7)};

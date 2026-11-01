@@ -124,7 +124,7 @@ F01266,function,Render_DrawModelFlatPolygons,Native\Engine\src\Render\ModelGeome
 F01267,function,Render_DrawModelGouraudPolygons,Native\Engine\src\Render\ModelGeometry.cpp,Native\Engine\src\Render\ModelGeometry.h,2026-10-18,from Native\Engine\src\Render\Model.cpp
 F01023,function,Actors_DrawActorModel,Native\Game\src\Actors\ModelDrawing.cpp,Native\Game\src\Actors\ModelDrawing.h,2026-10-18,from Native\Game\src\Actors\ModelRendering.cpp
 F00878,function,Actors_ProjectActorBoneEndpoint,Native\Game\src\Actors\ModelDrawing.cpp,Native\Game\src\Actors\ModelDrawing.h,2026-10-18,from Native\Game\src\Actors\Skeleton.cpp
-F04199,function,Render_DrawScaledFontChar,Native\Engine\src\Render\ScaledFont.cpp,Native\Engine\src\Render\ScaledFont.h,2026-10-18,from Native\Engine\src\Render\Font.cpp
+F04199,function,VS::Render::DrawScaledFontChar,Native\Engine\src\Render\ScaledFont.cpp,Native\Engine\include\Render\ScaledFont.hpp,2026-10-18,from Native\Engine\src\Render\Font.cpp; #46 typed promotion: layout reads ScaledFontStyle and draws through ScaledGlyphTarget
 F03438,function,Boot_RunTitleAndBattle,Native\Game\src\Boot\Session.cpp,Native\Game\src\Boot\Session.h,2026-10-18,from Native\Game\src\Boot\Lifecycle.cpp
 F03439,function,Boot_RunGame,Native\Game\src\Boot\Session.cpp,Native\Game\src\Boot\Session.h,2026-10-18,from Native\Game\src\Boot\Lifecycle.cpp
 F04200,function,Boot_JumpToTitle,Native\Game\src\Boot\Session.cpp,Native\Game\src\Boot\Session.h,2026-10-18,from Native\Game\src\Boot\Lifecycle.cpp

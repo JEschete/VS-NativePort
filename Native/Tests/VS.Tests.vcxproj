@@ -160,6 +160,7 @@
     <ClCompile Include="src\RoomVertexDecodeTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />
+    <ClCompile Include="src\ScaledFontLayoutTests.cpp" />
     <ClCompile Include="src\SceneCatalogTests.cpp" />
     <ClCompile Include="src\ScenePlaybackTests.cpp" />
     <ClCompile Include="src\ScreenEffectStateTests.cpp" />

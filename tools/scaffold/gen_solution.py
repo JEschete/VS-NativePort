@@ -146,6 +146,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Audio\StreamPlayback.cpp",
                 r"src\Audio\XaPlayback.cpp",
                 r"src\Audio\MusicLayers.cpp",
+                r"src\Render\ScaledFontLive.cpp",
             )
             or project == "VS.Tests"
             or project == "VS.CombatLab"

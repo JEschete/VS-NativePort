@@ -258,7 +258,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
 #include "Render/RoomLighting.h"
-#include "Render/ScaledFont.h"
 #include "Render/ScreenTransition.h"
 #include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
@@ -1658,7 +1657,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C70F8u, 0u, (void*)&Render_DrawVariableWidthGlyph, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C7210u, 0u, (void*)&Render_SetMenuFontStyle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C7230u, 0u, (void*)&Render_DrawProgressiveTextBoxText, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C79D8u, 0u, (void*)&Render_DrawScaledFontChar, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C7BA4u, 0u, (void*)&Render_DrawScaledTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C7EBCu, 0u, (void*)&Render_BlendGlyphIntoPixels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C809Cu, 0u, (void*)&Render_BlendTextBoxIntoFramebuffer, 0u, 0u, 0u},

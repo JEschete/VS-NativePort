@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/ScaledFont.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/ScaledFont.h"
 #include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
@@ -588,7 +588,7 @@ void Render_DrawScaledTextBoxText(Menu_TextBoxState* ctx, int scale)
 
             if (currentChar < 0xEC) {
                 if (currentChar < 0xE5) {
-                    printX = Render_DrawScaledFontChar(
+                    printX = VS::Render::DrawLiveScaledFontChar(
                         currentChar, printX, printY, charWidth, charHeight, scale);
                     continue;
                 }

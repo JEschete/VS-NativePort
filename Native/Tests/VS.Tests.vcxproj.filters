@@ -270,6 +270,9 @@
     <ClCompile Include="src\SaveStoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ScaledFontLayoutTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SceneCatalogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

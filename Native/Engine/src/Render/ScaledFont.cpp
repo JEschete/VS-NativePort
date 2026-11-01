@@ -1,94 +1,50 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Render/ScaledFont.h"
+#include "Render/ScaledFont.hpp"
 
-#include <stdint.h>
+#include <cstddef>
+#include <cstdint>
 
-#include "Actors/TextureAnimation.h"
-#include "Audio/Sfx.h"
-#include "Battle/Targeting.h"
-#include "Battle/TextBoxes.h"
-#include "Core/Memory/Heap.h"
-#include "Core/Text/TextCode.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
-#include "Legacy/Psx.h"
-#include "Menu/Framework/TextBoxes.h"
-#include "Menu/TextBox.h"
-#include "Render/Display.h"
-#include "Render/Font.h"
-#include "Render/Frame.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Render.h"
-#include "Render/Sprites.h"
-#include "Render/Text/CompactFont.h"
-#include "Render/Text/VariableFont.h"
-#include "Render/UiPrimitives.h"
-#include "Save/MemoryCard/GameFiles.h"
-#include "State/Timers.h"
+namespace VS::Render {
+namespace {
+constexpr std::uint16_t kPaletteBaseCode = 0x3780;
+constexpr unsigned kFirstPaletteIndex = 0x34;
+constexpr unsigned kPaletteIndexMask = 0x3F;
+
+std::int16_t ScreenCoordinate(int fixed) {
+  return static_cast<std::int16_t>(fixed >> kScaledFontPositionFractionBits);
+}
+}  // namespace
 
 // decomp: BATTLE.PRG _printFixedWidthFontChar
 // (src/BATTLE/BATTLE.PRG/5BF94.c:1977).
-int Render_DrawScaledFontChar(int char_id, int x, int y, int width, int height,
-                              int scale) {
-  enum {
-    kPrimitiveBufferBytes = 0x20000,
-    kSpaceGlyph = 0x8F,
-    kSpaceAdvance = 6,
-    kGlyphsPerTable = 189,
-    kTextBoxCount = 8,
-    kPositionFractionBits = 16,
-    kGlyphsPerRow = 21,
-    kGlyphCellSize = 12,
-    kPaletteBaseCode = 0x3780,
-    kFirstPaletteIndex = 0x34,
-    kPaletteIndexMask = 0x3F,
-    kFontTexturePage = 13,
-    kTextBoxOrderStride = 4,
-    kTextForegroundLayer = 3
-  };
-  if (char_id == kSpaceGlyph) return x + kSpaceAdvance * scale;
-  const unsigned glyph =
-      (unsigned)char_id +
-      (unsigned char)Render_fontTableSelect * kGlyphsPerTable;
-  if (glyph >= sizeof Render_variableFontGlyphWidths ||
-      (unsigned)Render_activeTextBoxIndex >= kTextBoxCount ||
-      Menu_activeTextBoxOrderingTable == nullptr) {
-    return x;
+int DrawScaledFontChar(int char_id, int x, int y, int width, int height,
+                       int scale, const ScaledFontStyle& style,
+                       ScaledGlyphTarget& target) {
+  if (char_id == kScaledFontSpaceGlyph) {
+    return x + kScaledFontSpaceAdvance * scale;
   }
+  const unsigned glyph = static_cast<unsigned>(char_id) +
+                         style.table_select * kScaledFontGlyphsPerTable;
+  if (glyph >= style.glyph_widths.size() || !target.CanDraw()) return x;
   const int next_x =
-      x + (unsigned char)Render_variableFontGlyphWidths[glyph] * scale;
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (base == 0 || cursor < base ||
-      cursor - base > kPrimitiveBufferBytes - sizeof(POLY_FT4)) {
-    return next_x;
-  }
-  POLY_FT4* primitive = reinterpret_cast<POLY_FT4*>(cursor);
-  memset(primitive, 0, sizeof *primitive);
-  setPolyFT4(primitive);
-  memcpy(&primitive->r0, &Render_fontColor, sizeof Render_fontColor);
-  setXY4(primitive, x >> kPositionFractionBits, y >> kPositionFractionBits,
-         (x + width) >> kPositionFractionBits, y >> kPositionFractionBits,
-         x >> kPositionFractionBits, (y + height) >> kPositionFractionBits,
-         (x + width) >> kPositionFractionBits,
-         (y + height) >> kPositionFractionBits);
-  const unsigned column = glyph % kGlyphsPerRow * kGlyphCellSize;
-  const unsigned row = glyph / kGlyphsPerRow * kGlyphCellSize;
-  setUV4(primitive, column, row, column + kGlyphCellSize, row, column,
-         row + kGlyphCellSize, column + kGlyphCellSize, row + kGlyphCellSize);
-  primitive->clut = static_cast<uint16_t>(
+      x + std::to_integer<int>(style.glyph_widths[glyph]) * scale;
+  const unsigned column =
+      glyph % kScaledFontGlyphsPerRow * kScaledFontGlyphCellSize;
+  const unsigned row =
+      glyph / kScaledFontGlyphsPerRow * kScaledFontGlyphCellSize;
+  ScaledGlyphQuad quad;
+  quad.left = ScreenCoordinate(x);
+  quad.top = ScreenCoordinate(y);
+  quad.right = ScreenCoordinate(x + width);
+  quad.bottom = ScreenCoordinate(y + height);
+  quad.u = static_cast<std::uint8_t>(column);
+  quad.v = static_cast<std::uint8_t>(row);
+  quad.clut = static_cast<std::uint16_t>(
       kPaletteBaseCode |
-      (((unsigned char)Render_fontPaletteOffset + kFirstPaletteIndex) &
-       kPaletteIndexMask));
-  primitive->tpage = kFontTexturePage;
-  AddPrim(
-      Menu_activeTextBoxOrderingTable +
-          static_cast<size_t>(Render_activeTextBoxIndex) * kTextBoxOrderStride +
-          kTextForegroundLayer,
-      primitive);
-  Render_frameScratch.primitiveCursor = primitive + 1;
+      ((style.palette_offset + kFirstPaletteIndex) & kPaletteIndexMask));
+  quad.texture_page = kScaledFontTexturePage;
+  quad.color = style.color;
+  target.Draw(quad);
   return next_x;
 }
-}  // extern "C"
+}  // namespace VS::Render
