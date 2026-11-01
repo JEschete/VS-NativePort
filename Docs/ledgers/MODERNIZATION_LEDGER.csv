@@ -1307,7 +1307,7 @@ F01305,Battle_BuildSphereWireframe,Battle::BuildSphereWireframe,Native\Game\src\
 F01306,Battle_BuildSphereCameraBasis,Battle::BuildSphereCameraBasis,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,17,relaxed,found,x,,,,,,,1,0,0,x,,x,scratchpad,no,no,0,,characterize-first,
 F01307,Battle_DrawSpherePositionCursor,Battle::DrawSpherePositionCursor,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,50,relaxed,found,x,,,,,,,1,0,0,x,,,scratchpad;ptr_cast;inline_asm,no,no,0,,characterize-first,
 F01308,Battle_CacheSphereTerrainRow,Battle::CacheSphereTerrainRow,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,82,relaxed,found,x,,,,,,,1,0,0,x,,x,,no,no,0,,characterize-first,
-F01309,Battle_DrawSphereTerrainIntersection,Battle::DrawSphereTerrainIntersection,Native\Game\src\Battle\SphereTerrain.cpp,owned,todo,56,24,0,strict,found,x,x,,,,x,,1,0,1,x,,,,yes,no,94,,executed,
+F01309,VS::Battle::DrawSphereTerrainIntersection,Battle::DrawSphereTerrainIntersection,Native\Game\src\Battle\SphereTerrain.cpp,owned,done,56,24,0,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,no,94,VR-BATTLE-SPHERE-TERRAIN-SLICE,recorded,
 F01310,Battle_UpdateSphereTargetHighlights,Battle::UpdateSphereTargetHighlights,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,15,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
 F01311,Input_MapStickDeadZone,Input::MapStickDeadZone,Native\Engine\src\Input\Controller.cpp,generated,todo,52,5,9,relaxed,found,x,,,,,,,2,0,1,x,,,,yes,no,100,,executed,
 F01312,Battle_SphereInteractionMode,Battle::SphereInteractionMode,Native\Game\src\Battle\Sphere.cpp,generated,todo,56,24,9,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,

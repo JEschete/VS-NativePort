@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 44 | 19 (`wip`) | 4,144 |
-| `cpp` | 44 | 236 (`wip`) | 3,927 |
+| `modernized` | 45 | 19 (`wip`) | 4,143 |
+| `cpp` | 45 | 235 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 192 |
-| `vs_namespace` | 44 |
-| `typed_interface` | 44 |
-| `no_bridge` | 44 |
+| `vs_namespace` | 45 |
+| `typed_interface` | 45 |
+| `no_bridge` | 45 |
 | `strict_clean` | 192 |
-| `behavior_evidence` | 44 |
+| `behavior_evidence` | 45 |
 
-Promotion records: 280; derived `cpp=x`: 44, `cpp=wip`: 236. Verification records: 61; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 45, `cpp=wip`: 235. Verification records: 62; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -165,6 +165,8 @@ The fifteenth is the scaled font glyph (F04199): `VS::Render::DrawScaledFontChar
 through `ScaledGlyphTarget`; `DrawLiveScaledFontChar` binds the live font state and primitive buffer.
 The sixteenth is the target page binding (F01296): `VS::Battle::SetSphereTargets` pages candidates by actor ID and shows them
 through `TargetSphere`; `SetLiveSphereTargets` binds the battle sphere and the checked action previews.
+The seventeenth is the sphere terrain slice (F01309): `VS::Battle::DrawSphereTerrainIntersection` clips the elevation circle
+against `SphereTerrainTables` and draws through `SphereTerrainCanvas`; `DrawLiveSphereTerrainIntersection` binds the GTE and packets.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
