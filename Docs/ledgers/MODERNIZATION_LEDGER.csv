@@ -1604,7 +1604,7 @@ F01602,Effects_BindEffectCurves,Effects::BindEffectCurves,Native\Game\src\Effect
 F01603,Effects_BindEffectPrograms,Effects::BindEffectPrograms,Native\Game\src\Effects\EffectResources.cpp,generated,todo,61,31,1,relaxed,found,x,,,,,,,0,0,0,x,,x,,yes,yes,100,,executed,
 F01604,Effects_BindEffectPackageParameters,Effects::BindEffectPackageParameters,Native\Game\src\Effects\EffectResources.cpp,generated,todo,61,31,1,relaxed,found,x,,,,,,,0,0,0,x,,,,yes,yes,100,,executed,
 F01605,Effects_BindEffectTransformDefinitions,Effects::BindEffectTransformDefinitions,Native\Game\src\Effects\EffectResources.cpp,generated,todo,61,31,1,relaxed,found,x,,,,,,,0,0,0,x,,x,,yes,yes,100,,executed,
-F01606,Effects_BindEffectTextureTables,Effects::BindEffectTextureTables,Native\Game\src\Effects\TextureBindings.cpp,owned,todo,61,31,10,strict,found,x,x,,,,x,,1,0,1,x,,x,,yes,yes,100,,executed,
+F01606,VS::Effects::BindEffectTextureTables,Effects::BindEffectTextureTables,Native\Game\src\Effects\TextureBindings.cpp,owned,done,61,31,10,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,yes,100,VR-EFFECTS-TEXTURE-BINDING,recorded,
 F01607,Effects_BindParticleAnimationTable,Effects::BindParticleAnimationTable,Native\Game\src\Effects\EffectResources.cpp,generated,todo,61,31,4,relaxed,found,x,,,,,,,0,0,0,x,,,,yes,yes,100,,executed,
 F01608,Effects_ParticleAnimationData,Effects::ParticleAnimationData,Native\Game\src\Effects\EffectResources.cpp,generated,todo,61,31,3,relaxed,found,x,,,,,,,0,0,0,x,,x,,no,no,0,,characterize-first,
 F01609,Effects_BindEffectSoundSequences,Effects::BindEffectSoundSequences,Native\Game\src\Effects\EffectResources.cpp,generated,todo,61,31,1,relaxed,found,x,,,,,,,0,0,0,x,,x,,yes,yes,100,,executed,

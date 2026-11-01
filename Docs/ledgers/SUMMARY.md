@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 41 | 20 (`wip`) | 4,146 |
-| `cpp` | 41 | 239 (`wip`) | 3,927 |
+| `modernized` | 42 | 19 (`wip`) | 4,146 |
+| `cpp` | 42 | 238 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 191 |
-| `vs_namespace` | 41 |
-| `typed_interface` | 41 |
-| `no_bridge` | 41 |
+| `vs_namespace` | 42 |
+| `typed_interface` | 42 |
+| `no_bridge` | 42 |
 | `strict_clean` | 191 |
-| `behavior_evidence` | 41 |
+| `behavior_evidence` | 42 |
 
-Promotion records: 280; derived `cpp=x`: 41, `cpp=wip`: 239. Verification records: 58; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 42, `cpp=wip`: 238. Verification records: 59; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -159,6 +159,8 @@ The twelfth is the collision height sampler (F00772): `VS::Field::SampleCollisio
 MPD collision section; `LiveRoomCollisionMap` binds the loaded room section for the generated collision callers.
 The thirteenth is the saved music voice release (F03198): `VS::Audio::Seq::ReleaseSavedVoiceConflicts` reads layer voice masks and
 channel assignments through `MusicChannelVoices`; `ReleaseLiveSavedVoiceConflicts` binds the live sequencer and mixer.
+The fourteenth is the effect texture binder (F01606): `VS::Effects::BindEffectTextureTables` validates a texture block span and returns typed
+table offsets; `BindLiveEffectTextureTables` publishes them into the live package structs.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
