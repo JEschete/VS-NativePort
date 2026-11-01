@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 36 | 20 (`wip`) | 4,151 |
-| `cpp` | 36 | 244 (`wip`) | 3,927 |
+| `modernized` | 38 | 20 (`wip`) | 4,149 |
+| `cpp` | 38 | 242 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 187 |
-| `vs_namespace` | 36 |
-| `typed_interface` | 36 |
-| `no_bridge` | 36 |
-| `strict_clean` | 187 |
-| `behavior_evidence` | 36 |
+| `source_cpp` | 189 |
+| `vs_namespace` | 38 |
+| `typed_interface` | 38 |
+| `no_bridge` | 38 |
+| `strict_clean` | 189 |
+| `behavior_evidence` | 38 |
 
-Promotion records: 280; derived `cpp=x`: 36, `cpp=wip`: 244. Verification records: 54; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 38, `cpp=wip`: 242. Verification records: 55; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -151,6 +151,8 @@ The eighth is the AI reaction-delay reset (F01791): `VS::Battle::Ai::ResetActorA
 `ActorReactionDelays` table instead of the global actor AI array, which `BattleActorReactionDelays` adapts for battle code.
 The ninth is the actor sound glide (F00995/F01007): `VS::Actors::StepSoundTransition` is a pure step over
 `SoundTransition` values and an explicit tick speed; `UpdateActorSoundTransition` binds it to the actor record.
+The tenth is the actor movement commands (F04180/F01025): `VS::Actors::SetDirectMovement` and `QueueNavigationTileTarget`
+write a `MovementCommand` through an `ActorMovementRequests` table, which `ActorRecordMovementRequests` adapts for the actor records.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

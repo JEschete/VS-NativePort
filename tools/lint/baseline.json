@@ -835,13 +835,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "04fba6f0b1cc14ecb8939c4d3cddc7b78a8708bdf638a3b1ae7390b6a3456246",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "0502f0d7a84c3f0fc023c9f230cf2cde9462f62d7737eb3242d7abd09c5c6076",
       "count": 1,
       "tool": "cpplint",
@@ -1458,13 +1451,6 @@
       "rule": "google-readability-casting"
     },
     {
-      "key": "089188b02e9b39b08ef408445d696a9bfad5a8a375e87dc386138d6d53842492",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "08a05a81a1fa32f1713003ac875abb4e2109d383084459e4d6efac1366258f5f",
       "count": 1,
       "tool": "cpplint",
@@ -1603,13 +1589,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "096efdf0037d4660a0b4c7fba8566e30008f465c824462f71fb7686caf0f6917",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "097334f70747e3ab54eb8ffac9f9e60629c6b681311c348f0e53249623935813",
@@ -8906,13 +8885,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "2f2817d230b2492c6b9fcde01006de1e2286c89341e7abae6fda8e53076059c5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "2f2a03443db0f9a2c81f7cef1dd2f6e90bddb5c59b9e5e742b53a0ffeb6fc79c",
       "count": 1,
       "tool": "format",
@@ -15374,13 +15346,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "542d892fb207155a7682e2e265759bbc45172a579085324f99d9ecae17d0b727",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "54367a37c97044e79bbc497c8080c83f6ab40c814b6935768390a750f3827322",
       "count": 1,
       "tool": "cpplint",
@@ -16513,13 +16478,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Battle/Ai/RoomState.h",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "5a08a7360ea02aa8d9d31fc61f7b36e1a26c0c4a13ba17fe3698a76e1bb32c89",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "google"
     },
     {
       "key": "5a0b7049092a7fa7b9588f13fad53d68ab48d449d249f6d6ab60f22fad7adf49",
@@ -19005,13 +18963,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "66e283b48162dad1b3526655f43c7e7ef61143397dcda589793ae8677739afa9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "66f1b780a411bd4f6c269c0359dc630ed88d50faf0a880c373aaf3260f8448a0",
@@ -21688,13 +21639,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "75631dda4f352659963e6793fd521a7fb1a015210818fa83303e1d3911d5b9d8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "75665fa79cdb2931017739ff6ecf694ba325850912fca84f38def793ccda1553",
       "count": 2,
       "tool": "cpplint",
@@ -21889,13 +21833,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomLighting.cpp",
       "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
-      "key": "764ab4b9170754af4fc3a8b2a3a31f35864a325d7c02eddc129a7c80835677d8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "7650abf72e1866293aa332dc09fdd836309ddf73d73d7052186316582ef5e376",
@@ -24887,13 +24824,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "87290ccf989f8db4fbef5f9f32d77c214468491733b5aa1704d53aa48308189b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "872ada41f8d509a14800b3f199efa4716d1dde05d8ec661f5c3acdb098810d9f",
       "count": 1,
       "tool": "tidy",
@@ -26581,13 +26511,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "8fa17b72b1f27b6116dbee578a85997fb90292366c25fca4d69dfe640207bb5e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "8fa735f657f0666a64dd804c529f4f47879cf0460c838b2beba783667656c734",
       "count": 1,
       "tool": "tidy",
@@ -26908,13 +26831,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "915b1f4d2aad7db218c4a343ec4967be347bef8a9accaceffd5e6e26584f1512",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "9178c47409f32edeebaee0c0cf23b581fa058c32d91e3afba6a7613f4244ea65",
@@ -29715,13 +29631,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Input/Pad.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "a0a5cc79f2d66f2e8cc80d1f50351c58a8e642fe7bc7b912cf6c40c536d5d038",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "0cdd2b1f3ec7b34040eff24fd1a7727022826bd3a0a74040c7f6e79a7038356b",
@@ -37704,13 +37613,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "cd649a0fdc883bd8ebb9a7643c849cbe86fc5cc7d8169c09ffc9ae10f3cb47f8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "cd69034b2a83df2327bfc70bccc6aae423f644bf53340766d19860679f390d63",
       "count": 1,
       "tool": "tidy",
@@ -40952,13 +40854,6 @@
       "rule": "E731"
     },
     {
-      "key": "df83e94e244c48af1f79690b7d42237910a74fd5c2a1eed6e926cf17ec60b11f",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "df84527eceda0c2352132feac13bf867cdc0f0f60664eaa5f64dfdea88434ff2",
       "count": 1,
       "tool": "cpplint",
@@ -41736,13 +41631,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e46fd10b6037d9315ce4c3ecb530ac71459ebf023958d8bee090cf6549d71723",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "e4721d9874b5726df8cfa1135208a098d987b4817f99c8463a3387aa766dad76",
       "count": 1,
       "tool": "cpplint",
@@ -41804,13 +41692,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e4c284355afa50412000235f2bc0e5f7518e444ae418c2ba804dc0c619d64b64",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "e4c4c438355d9f3ea47f09f0d7b6633c03182ceaf4c19371c68affa7f119162a",
@@ -44214,13 +44095,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "f189af71f317e334fb53000e227e108819b5a29b823b3a32c9c2a7b5f18786aa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "f18d6d6b42698068c9362fcc81c7718aa6d8a8c5ca5a949bafdb2413e9bc3285",
       "count": 1,
       "tool": "cpplint",
@@ -45115,13 +44989,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/Gte.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "f74b76e23f7c96473c61addb3390f85688b1bc4b748b47be2b7dc58f660d81f8",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Actors/MovementCommands.h",
-      "rule": "google"
     },
     {
       "key": "f7645761faa1f9b04e826b552ecb862156c31d7e0f4696a3021cb91399b12361",

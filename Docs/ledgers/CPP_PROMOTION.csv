@@ -45,7 +45,7 @@ F01018,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCA
 F01019,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: Mat3 values instead of MATRIX pointers; the Apply adapter writes the right record after both operands are read
 F01023,Native\Game\src\Actors\ModelDrawing.cpp,,,,,,,,,
 F01024,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
-F01025,Native\Game\src\Actors\MovementCommands.cpp,,,,,,,,,
+F01025,Native\Game\src\Actors\MovementCommands.cpp,x,x,x,x,x,x,verify:VR-ACTOR-MOVEMENT-COMMANDS,62c2875b2b1ae3d4214652d95009a0a6239f224b,#46 slice: VS::Actors functions building a MovementCommand and writing it through an ActorMovementRequests table; ActorRecordMovementRequests adapts Actors_actorRecords in MovementCommandBinding.cpp; generated Movement and GameLoop callers pass the adapter by copier fixup; no data word stores 0x800B64A8 or 0x800B64CC
 F01026,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F01130,Native\Game\src\Event\WeaponMode.cpp,x,,,,x,,,,
 F01248,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: pure int32 Q12 product with no GTE register state
@@ -252,7 +252,7 @@ F04128,Native\Game\src\Actors\SequencePlayback.cpp,,,,,,,,,
 F04129,Native\Game\src\Actors\SequencePlayback.cpp,,,,,,,,,
 F04178,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F04179,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
-F04180,Native\Game\src\Actors\MovementCommands.cpp,,,,,,,,,
+F04180,Native\Game\src\Actors\MovementCommands.cpp,x,x,x,x,x,x,verify:VR-ACTOR-MOVEMENT-COMMANDS,62c2875b2b1ae3d4214652d95009a0a6239f224b,#46 slice: VS::Actors functions building a MovementCommand and writing it through an ActorMovementRequests table; ActorRecordMovementRequests adapts Actors_actorRecords in MovementCommandBinding.cpp; generated Movement and GameLoop callers pass the adapter by copier fixup; no data word stores 0x800B64A8 or 0x800B64CC
 F04181,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F04182,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
 F04183,Native\Game\src\Actors\MotionRequests.cpp,x,,,,x,,,,
