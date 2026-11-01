@@ -135,6 +135,9 @@
     <ClCompile Include="src\EventWeaponModeTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FlightTerrainTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FogTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

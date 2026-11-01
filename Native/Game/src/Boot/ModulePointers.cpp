@@ -79,7 +79,6 @@ extern "C" {
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
-#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -2054,7 +2053,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DFBCCu, 0u, (void*)&Battle_Ai_ResolveNavigationAreaRoute, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E02B4u, 0u, (void*)&Battle_Ai_IsFlightDirectionObstructed, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E0678u, 0u, (void*)&Battle_Ai_CanFlyInDirection, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E0850u, 0u, (void*)&Battle_Ai_LowestReachableGroundHeight, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E0918u, 0u, (void*)&Battle_Ai_UpdateFlightGroundTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E0A68u, 0u, (void*)&Battle_Ai_UpdateFlightMovement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E1238u, 0u, (void*)&Battle_Ai_UpdateFlightDirectionalMovement, 0u, 0u, 0u},
@@ -2117,7 +2115,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E6898u, 0u, (void*)&Battle_Ai_AddAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68A0u, 0u, (void*)&Battle_Ai_RemoveAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68ECu, 0u, (void*)&Battle_Ai_MarkAiTileDynamicObstacle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6A6Cu, 0u, (void*)&Battle_Ai_MinimumAiGroundHeightAlongSegment, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B24u, 0u, (void*)&Battle_Ai_ClearActorAiNavigationReset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&Battle_Ai_IsBossActionReady, 0u, 0u, 0u},

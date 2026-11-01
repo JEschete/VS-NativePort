@@ -7,7 +7,9 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/ActorCleanup.h"
+#include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitives.h"
+#include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Legacy/Psx.h"
@@ -16,7 +18,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Damage.h"
 }
@@ -176,24 +177,28 @@ TEST_CASE("Flight ground queries use tile coordinates and reject room edges",
   state.tile.word = Tile(8, 13) | 0x40000000u;
   state.previousTile = -1;
   fixture.heights[13][9] = 1023;
-  CHECK(Battle_Ai_LowestReachableGroundHeight(&state, 6 << 9) == -64);
+  CHECK(VS::Battle::Ai::LowestReachableGroundHeight(
+            VS::Battle::Ai::ActorFlightNeighborhood(state), 6 << 9) == -64);
 
   state.tile.word = Tile(31, 13) | 0x40000000u;
   fixture.ClearCache();
-  CHECK(Battle_Ai_LowestReachableGroundHeight(&state, 6 << 9) == 0);
+  CHECK(VS::Battle::Ai::LowestReachableGroundHeight(
+            VS::Battle::Ai::ActorFlightNeighborhood(state), 6 << 9) == 0);
 }
 
 TEST_CASE("Flight terrain helpers preserve sampled heights and room ceiling",
           "[ai][flight][terrain]") {
   GroundFixture fixture;
   fixture.heights[13][9] = 1023;
-  CHECK(Battle_Ai_MinimumAiGroundHeightAlongSegment(
-            8 * 128 + 64, 13 * 128 + 64, 10 * 128 + 64, 13 * 128 + 64) == -64);
+  CHECK(VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(
+            VS::Battle::Ai::CurrentTerrain(), 8 * 128 + 64, 13 * 128 + 64,
+            10 * 128 + 64, 13 * 128 + 64) == -64);
 
   fixture.room.flightCeiling = 512;
-  CHECK(Battle_Ai_RoomNavigationCeilingHeight() == 512);
+  auto& runtime = VS::Battle::Ai::BattleRoomAiRuntime();
+  CHECK(VS::Battle::Ai::RoomNavigationCeilingHeight(runtime) == 512);
   Battle_Ai_roomAiState = nullptr;
-  CHECK(Battle_Ai_RoomNavigationCeilingHeight() == 0);
+  CHECK(VS::Battle::Ai::RoomNavigationCeilingHeight(runtime) == 0);
 }
 
 TEST_CASE(

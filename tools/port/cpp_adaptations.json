@@ -2894,30 +2894,12 @@
 ]
 ],
 [
-443,
-[
-"        if (Battle_Ai_LowestReachableGroundHeight((void*)state, angle) + state->flightHeight < state->position.tile.positionY) {"
-],
-[
-"        if (Battle_Ai_LowestReachableGroundHeight((Battle_Ai_ActorAiState *)((void*)state), angle) + state->flightHeight < state->position.tile.positionY) {"
-]
-],
-[
 456,
 [
 "        Battle_Ai_IssueActorCommand((void*)state, mode);"
 ],
 [
 "        Battle_Ai_IssueActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);"
-]
-],
-[
-467,
-[
-"        top = Battle_Ai_LowestReachableGroundHeight((void*)state, angle) + state->flightHeight;"
-],
-[
-"        top = Battle_Ai_LowestReachableGroundHeight((Battle_Ai_ActorAiState *)((void*)state), angle) + state->flightHeight;"
 ]
 ],
 [

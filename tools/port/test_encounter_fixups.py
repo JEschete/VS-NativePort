@@ -1359,6 +1359,43 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["VS::Battle::Ai::BattleRoomAiRuntime"],
                          owned["F01838"]["header"])
 
+    def test_promoted_flight_terrain_callers_pass_explicit_inputs(self):
+        def apply(text, row_name):
+            for row, pat, rep, _ in copy_fixups.REGEX_FIXES:
+                if re.search(row, row_name):
+                    text = re.sub(pat, rep, text)
+            return text
+
+        neighborhood = "VS::Battle::Ai::ActorFlightNeighborhood"
+        self.assertEqual(
+            apply("VS::Battle::Ai::LowestReachableGroundHeight((void*)state, angle)",
+                  "Battle::Ai::UpdateFlightMovement"),
+            f"VS::Battle::Ai::LowestReachableGroundHeight({neighborhood}("
+            "*(Battle_Ai_ActorAiState *)((void*)state)), angle)")
+        self.assertEqual(
+            apply("VS::Battle::Ai::LowestReachableGroundHeight(ai_state, movement_angle)",
+                  "Battle::Ai::UpdateFlightDirectionalMovement"),
+            f"VS::Battle::Ai::LowestReachableGroundHeight({neighborhood}(*ai_state), movement_angle)")
+        self.assertEqual(
+            apply("VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(px, pz, x, z)",
+                  "Battle::Ai::UpdateFlightMovement"),
+            "VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(VS::Battle::Ai::CurrentTerrain(), px, pz, x, z)")
+        self.assertEqual(
+            apply("ceiling = VS::Battle::Ai::RoomNavigationCeilingHeight();", "Actors::PlaceActorAtTile"),
+            "ceiling = VS::Battle::Ai::RoomNavigationCeilingHeight(VS::Battle::Ai::BattleRoomAiRuntime());")
+        owned = {row["id"]: row for row in csv.DictReader(
+            Path(__file__).resolve().with_name("owned.csv").open(encoding="utf-8"))}
+        for fid, name in (("F01731", "LowestReachableGroundHeight"),
+                          ("F01830", "MinimumAiGroundHeightAlongSegment"),
+                          ("F01843", "RoomNavigationCeilingHeight")):
+            self.assertEqual(owned[fid]["name"], f"VS::Battle::Ai::{name}")
+            self.assertEqual(owned[fid]["header"], r"Native\Game\include\Battle\Ai\FlightTerrain.hpp")
+        self.assertEqual(copy_fixups.NATIVE_HELPER_HEADERS["VS::Battle::Ai::ActorFlightNeighborhood"],
+                         r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp")
+        self.assertNotIn(r"Native\Game\src\Battle\Ai\FlightTerrain.cpp",
+                         Path(__file__).resolve().with_name("relaxed_sources.txt").read_text(
+                             encoding="utf-8").split())
+
     def test_palette_pulse_uses_the_native_gimmick_owner(self):
         registry = Path(__file__).resolve().with_name("owned.csv")
         with registry.open(encoding="utf-8", newline="") as stream:

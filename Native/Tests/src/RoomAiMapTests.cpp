@@ -54,9 +54,17 @@ class RecordingRuntime final : public VS::Battle::Ai::RoomAiRuntime {
     calls.emplace_back("publish");
     published = grid;
   }
+  [[nodiscard]] std::optional<VS::Battle::Ai::RoomAiSettings>
+  PublishedSettings() const override {
+    if (!published) return std::nullopt;
+    return published->settings;
+  }
   void RefreshDerivedRoomState() override { calls.emplace_back("refresh"); }
   void FreeActorAiStates() override { calls.emplace_back("free-actors"); }
-  void ReleaseRoomAiMap() override { calls.emplace_back("release"); }
+  void ReleaseRoomAiMap() override {
+    calls.emplace_back("release");
+    published.reset();
+  }
 
   std::vector<std::string> calls;
   std::optional<RoomAiGrid> published;

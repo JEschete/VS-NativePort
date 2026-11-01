@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 9796118,
+  "assertions": 9796129,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -684,6 +684,9 @@
    "Loot menu take-all advances only after the current claims finish",
    "Loot staging filters difficulty and incomplete misc candidates",
    "Loot staging uses every slot of the original inventory capacities",
+   "Lowest reachable ground checks one cardinal direction",
+   "Lowest reachable ground never rises above zero",
+   "Lowest reachable ground spans three directions between cardinals",
    "MP damage abilities cannot drain more MP than the target has",
    "Magnitude selection retains signs and first-component ties",
    "Malformed map counts, payloads and indices fail without mutation",
@@ -1013,6 +1016,7 @@
    "Room lighting samples both layers and interpolates vertex colors",
    "Room link preserves configurable far cutoff and the physical OT bound",
    "Room midpoint binding exposes native vertices without register context",
+   "Room navigation ceiling comes from the published settings",
    "Room packet linking keeps native OT chains and does not emit body bytes",
    "Room polygon batches adopt the original entry and native materials",
    "Room polygon linking exposes packet span and explicit native depth",
@@ -1144,6 +1148,7 @@
    "Scripted route updates preserve strict source arrival boundaries",
    "Scripted route updates skip suspended and missing-AI actors safely",
    "Scripted world slides preserve optional actor bindings and rates",
+   "Segment ground samples sixteen steps past the start",
    "Segment sampling uses signed floor steps and exactly thirty-two samples",
    "Segment tracing preserves Gimmick priority and source mode byte",
    "Segment tracing preserves miss output and original actor eligibility",

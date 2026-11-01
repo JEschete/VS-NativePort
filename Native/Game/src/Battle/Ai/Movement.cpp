@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/FlightTerrain.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/DecisionPrimitives.h"
-#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -442,7 +442,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
     switch (MOVEMENT_STEP_RESULT) {
     case 5:
         angle = state->heading * (ONE / 8);
-        if (Battle_Ai_LowestReachableGroundHeight((Battle_Ai_ActorAiState *)((void*)state), angle) + state->flightHeight < state->position.tile.positionY) {
+        if (VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood(*(Battle_Ai_ActorAiState *)((void*)state)), angle) + state->flightHeight < state->position.tile.positionY) {
         fall:
             state->moveY = -ONE;
             state->moveZ = 0;
@@ -462,11 +462,11 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         px = state->position.word & 0xFFFF;
         py = (int)state->position.word >> 16;
         pz = state->z;
-        ground = Battle_Ai_MinimumAiGroundHeightAlongSegment(px, pz, x, z) + state->groundClearance;
+        ground = VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(VS::Battle::Ai::CurrentTerrain(), px, pz, x, z) + state->groundClearance;
         if (Battle_Ai_roomAiState->flightCeiling) {
             ground = ground < Battle_Ai_roomAiState->flightCeiling ? Battle_Ai_roomAiState->flightCeiling : ground;
         }
-        top = Battle_Ai_LowestReachableGroundHeight((Battle_Ai_ActorAiState *)((void*)state), angle) + state->flightHeight;
+        top = VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood(*(Battle_Ai_ActorAiState *)((void*)state)), angle) + state->flightHeight;
         ground = top > ground ? ground : top;
         distance = Core_Math_SquareRootInteger(VS::Core::Math::SquaredVectorLength(x - px, 0, z - pz));
         value = height + ground;
@@ -564,7 +564,7 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
     c = Core_Gte_Cos(angle);
     s = Core_Gte_Sin(angle);
 
-    if (Battle_Ai_LowestReachableGroundHeight(ai_state, movement_angle) + ai_state->flightHeight < ai_state->position.vy) {
+    if (VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood(*ai_state), movement_angle) + ai_state->flightHeight < ai_state->position.vy) {
         ai_state->moveY = -ONE;
         ai_state->moveZ = 0;
         ai_state->moveX = 0;

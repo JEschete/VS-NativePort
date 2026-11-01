@@ -103,6 +103,7 @@
     </ClCompile>
     <ClCompile Include="src\EventSessionTests.cpp" />
     <ClCompile Include="src\EventWeaponModeTests.cpp" />
+    <ClCompile Include="src\FlightTerrainTests.cpp" />
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\GimRenderTestCases.cpp" />
     <ClCompile Include="src\GimRenderTests.cpp">

@@ -84,6 +84,9 @@ class RoomAiRuntime {
   [[nodiscard]] virtual RoomAiSource CurrentRoom() const = 0;
   // Stores and publishes the map; aborts if storage cannot be allocated.
   virtual void PublishRoomAiMap(const RoomAiGrid& grid) = 0;
+  // Settings of the published map, absent while none is published.
+  [[nodiscard]] virtual std::optional<RoomAiSettings> PublishedSettings()
+      const = 0;
   // Rebuilds state derived from the published map: actor working state,
   // terrain heights and route gate availability.
   virtual void RefreshDerivedRoomState() = 0;

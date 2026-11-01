@@ -28,6 +28,7 @@ NATIVE_POINTER_FIELDS = {"T00278.012"}
 NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
+    "VS::Battle::Ai::ActorFlightNeighborhood": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "Field_FindGimmickForActorSlot":
         r"Native\Game\src\Field\GimmickLookup.h",
     **{name: r"Native\Game\src\Ending\Credits\EmbeddedArt.h"
@@ -2519,6 +2520,20 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Battle::Ai::\1(VS::Battle::Ai::BattleRoomAiRuntime())",
      "F01837/F01838 #46 typed promotion: the room AI lifecycle takes the runtime that owns the published map "
      "instead of reaching hidden room and actor globals"),
+    (r"^Battle::Ai::", r"\bVS::Battle::Ai::LowestReachableGroundHeight\(\(void\s*\*\)(\w+), ",
+     r"VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood("
+     r"*(Battle_Ai_ActorAiState *)((void*)\1)), ",
+     "F01731 #46 typed promotion: the flight-state view is bound once to the actor's neighbourhood (frame terrain, "
+     "direction steps and cached flight test) instead of the query reading frame globals"),
+    (r"^Battle::Ai::", r"\bVS::Battle::Ai::LowestReachableGroundHeight\((\w+), ",
+     r"VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood(*\1), ",
+     "F01731 #46 typed promotion: callers holding the actor AI state pass its neighbourhood explicitly"),
+    (r"^Battle::Ai::", r"\bVS::Battle::Ai::MinimumAiGroundHeightAlongSegment\(",
+     r"VS::Battle::Ai::MinimumAiGroundHeightAlongSegment(VS::Battle::Ai::CurrentTerrain(), ",
+     "F01830 #46 typed promotion: the frame's terrain grid is passed explicitly"),
+    (r"^Actors::", r"\bVS::Battle::Ai::RoomNavigationCeilingHeight\(\)",
+     r"VS::Battle::Ai::RoomNavigationCeilingHeight(VS::Battle::Ai::BattleRoomAiRuntime())",
+     "F01843 #46 typed promotion: the ceiling is read from the runtime that publishes the room AI map"),
     (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
      r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
      "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),

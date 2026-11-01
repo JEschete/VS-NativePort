@@ -176,6 +176,24 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
                                : nullptr;
   }
 
+  [[nodiscard]] std::optional<VS::Battle::Ai::RoomAiSettings>
+  PublishedSettings() const override {
+    const Battle_Ai_RoomAiState* state = Battle_Ai_roomAiState;
+    if (state == nullptr) return std::nullopt;
+    VS::Battle::Ai::RoomAiSettings settings;
+    settings.maxTileX = state->maxTileX;
+    settings.maxTileZ = state->maxTileZ;
+    settings.minTileX = state->minTileX;
+    settings.minTileZ = state->minTileZ;
+    settings.collisionExtent = {static_cast<std::uint8_t>(state->reserved4[0]),
+                                static_cast<std::uint8_t>(state->reserved4[1])};
+    settings.defaultActionDelay = state->defaultActionDelay;
+    settings.allowsNonSpellActions = state->allowsNonSpellActions != 0;
+    settings.engagementLimit = state->engagementLimit;
+    settings.flightCeiling = state->flightCeiling;
+    return settings;
+  }
+
   void RefreshDerivedRoomState() override {
     Battle_Ai_CacheActorAiWorkingState();
     Battle_Ai_BuildAiTerrainHeightsWithWorkspace();

@@ -18,7 +18,6 @@ Native\Game\src\Battle\ActionResults.cpp
 Native\Game\src\Battle\Ai\ActorStateHelpers.cpp
 Native\Game\src\Battle\Ai\ConditionSnapshot.cpp
 Native\Game\src\Battle\Ai\DecisionCallbacks.cpp
-Native\Game\src\Battle\Ai\FlightTerrain.cpp
 Native\Game\src\Battle\Ai\FrameUpdate.cpp
 Native\Game\src\Battle\Ai\Relations.cpp
 Native\Game\src\Battle\Ai\RoomState.cpp

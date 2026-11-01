@@ -301,13 +301,7 @@
     <ClCompile Include="src\Battle\Ai\Engagement.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\FlightTerrain.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\FlightTerrain.cpp" />
     <ClCompile Include="src\Battle\Ai\FrameUpdate.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2122,7 +2116,6 @@
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\Engagement.h" />
     <ClInclude Include="src\Battle\Ai\EngagementState.hpp" />
-    <ClInclude Include="src\Battle\Ai\FlightTerrain.h" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\GroundNavigation.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
@@ -2438,6 +2431,7 @@
     <ClInclude Include="src\Title\TitleMenu.h" />
     <ClInclude Include="src\Title\TitleScreen.h" />
     <ClInclude Include="include\Battle\Action.h" />
+    <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />

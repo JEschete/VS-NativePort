@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/FlightTerrain.hpp"
+#include "Battle/Ai/RoomAiMap.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -19,7 +21,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/FlightTerrain.h"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -637,7 +638,7 @@ void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int h
     actor->instance.position.vz = z;
     actor->instance.position.vy = Field_ActorSupportHeight(actor->instance.position.vx, z);
     if (mode == 0x10 || mode == 0x20) {
-        ceiling = Battle_Ai_RoomNavigationCeilingHeight();
+        ceiling = VS::Battle::Ai::RoomNavigationCeilingHeight(VS::Battle::Ai::BattleRoomAiRuntime());
         if (ceiling == 0) {
             value = -0x180;
         } else {
@@ -726,7 +727,7 @@ void Actors_SeparateActorFlightPlacement(int actor_id, SVECTOR* position)
     pos.vx = position->vx;
     pos.vz = position->vz;
     pos.vy = position->vy - 0xC0;
-    floor = Battle_Ai_RoomNavigationCeilingHeight();
+    floor = VS::Battle::Ai::RoomNavigationCeilingHeight(VS::Battle::Ai::BattleRoomAiRuntime());
     retried = 0;
 
     while (1) {
