@@ -12,6 +12,8 @@
 #include <vector>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/XaMix.hpp"
+#include "Audio/XaMixLive.hpp"
 #include "Content/AudioStream.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
@@ -26,21 +28,39 @@ extern "C" {
 
 namespace {
 constexpr unsigned kMaximumVolume = 0x7FFF;
-constexpr unsigned kDefaultMix = 0x7F;
 constexpr unsigned kMono = 2;
 constexpr unsigned kInactiveMarker = 128;
 constexpr unsigned kSampleBits = 16;
-constexpr unsigned kMixShift = 16;
-constexpr unsigned kMonoFlag = 1U << 24;
-constexpr unsigned kMaximumMix = 0xFF;
 constexpr unsigned kMinimumRate = 8000;
 constexpr unsigned kMaximumRate = 192000;
 constexpr VS::usize kBlockFrames = 1024;
 constexpr float kVolumeUnity = 32768;
 constexpr float kMixUnity = 128;
-constexpr unsigned kMonoMixMultiplier = 0xB570;
-constexpr unsigned kMonoMixShift = 17;
-unsigned g_mix = kDefaultMix;
+constexpr unsigned kRouteBits = 8;
+constexpr unsigned kRouteMask = 0xFF;
+constexpr unsigned kVolumeShift = 32;
+// Byte positions of the four routes in the packed controls.
+constexpr unsigned kLeftToLeft = 0;
+constexpr unsigned kLeftToRight = 1;
+constexpr unsigned kRightToLeft = 2;
+constexpr unsigned kRightToRight = 3;
+std::uint32_t g_mix = VS::Audio::kDefaultDiscMixVolume;
+
+// Volume in bits 32-47 and the four routes in bits 0-31, so the audio thread
+// reads one consistent set.
+std::uint64_t PackControls(std::int16_t volume,
+                           const VS::Audio::DiscMixMatrix& mix) {
+  return (static_cast<std::uint64_t>(static_cast<std::uint16_t>(volume))
+          << kVolumeShift) |
+         (static_cast<std::uint32_t>(mix.left_to_left)
+          << (kRouteBits * kLeftToLeft)) |
+         (static_cast<std::uint32_t>(mix.left_to_right)
+          << (kRouteBits * kLeftToRight)) |
+         (static_cast<std::uint32_t>(mix.right_to_left)
+          << (kRouteBits * kRightToLeft)) |
+         (static_cast<std::uint32_t>(mix.right_to_right)
+          << (kRouteBits * kRightToRight));
+}
 
 class XaPlayback {
  public:
@@ -129,37 +149,44 @@ class XaPlayback {
     return available != 0 || queued != 0 ? 1 : 0;
   }
 
-  void Configure(unsigned volume, unsigned mix, bool mono) {
-    m_controls_.store(volume | (mix << kMixShift) | (mono ? kMonoFlag : 0));
+  void Configure(std::int16_t volume, const VS::Audio::DiscMixMatrix& mix) {
+    m_controls_.store(PackControls(volume, mix));
   }
 
  private:
   void Supply(int additional) {
     std::array<VS::i16, kBlockFrames * 2> output{};
     const auto controls = m_controls_.load();
-    const unsigned mix = (controls >> kMixShift) & kMaximumMix;
-    const bool mono = (controls & kMonoFlag) != 0;
     const float gain =
-        static_cast<float>(static_cast<VS::i16>(controls & 0xFFFF)) /
-        kVolumeUnity *
-        static_cast<float>(mono ? (mix * kMonoMixMultiplier) >> kMonoMixShift
-                                : mix) /
-        kMixUnity;
+        static_cast<float>(static_cast<VS::i16>(controls >> kVolumeShift)) /
+        kVolumeUnity / kMixUnity;
+    const auto route = [&](unsigned index) {
+      return static_cast<float>((controls >> (kRouteBits * index)) &
+                                kRouteMask) *
+             gain;
+    };
+    const float left_to_left = route(kLeftToLeft);
+    const float left_to_right = route(kLeftToRight);
+    const float right_to_left = route(kRightToLeft);
+    const float right_to_right = route(kRightToRight);
     auto position = m_position_.load();
     while (additional > 0 && position < m_frames_ && !m_failed_.load()) {
       const auto frames =
           std::min<VS::u64>(output.size() / 2, m_frames_ - position);
       for (VS::u64 frame = 0; frame < frames; ++frame) {
         const auto source = (position + frame) * m_channels_;
-        float left = m_samples_[source];
-        float right = m_samples_[source + m_channels_ - 1];
-        if (mono) left = right = left + right;
+        const float input_left = m_samples_[source];
+        const float input_right = m_samples_[source + m_channels_ - 1];
+        const float left =
+            input_left * left_to_left + input_right * right_to_left;
+        const float right =
+            input_left * left_to_right + input_right * right_to_right;
         constexpr float kMinimumSample = std::numeric_limits<VS::i16>::min();
         constexpr float kMaximumSample = std::numeric_limits<VS::i16>::max();
         output[frame * 2] = static_cast<VS::i16>(
-            std::clamp(left * gain, kMinimumSample, kMaximumSample));
+            std::clamp(left, kMinimumSample, kMaximumSample));
         output[frame * 2 + 1] = static_cast<VS::i16>(
-            std::clamp(right * gain, kMinimumSample, kMaximumSample));
+            std::clamp(right, kMinimumSample, kMaximumSample));
       }
       const auto count = static_cast<int>(frames * 2 * sizeof(VS::i16));
       if (!SDL_PutAudioStreamData(m_stream_, output.data(), count)) {
@@ -181,7 +208,7 @@ class XaPlayback {
   VS::u64 m_frames_ = 0;
   unsigned m_channels_ = 0;
   std::atomic<VS::u64> m_position_{0};
-  std::atomic<unsigned> m_controls_{0};
+  std::atomic<std::uint64_t> m_controls_{0};
   std::atomic<bool> m_failed_{false};
 };
 
@@ -205,7 +232,7 @@ int Audio_Native_StartXaStream(int sector, int volume) {
     return 0;
   }
   Audio_Control_SetDiscVolume(volume);
-  Audio_Control_SetDiscMixVolume(kDefaultMix);
+  VS::Audio::Control::SetLiveDiscMixVolume(VS::Audio::kDefaultDiscMixVolume);
   return Playback().Start(*store, *entry, static_cast<unsigned>(sector)) ? 1
                                                                          : 0;
 }
@@ -234,22 +261,24 @@ int Audio_Native_XaStreamStatus(void) {
 }
 
 void Audio_Native_UpdateXaControls(void) {
-  const unsigned volume =
-      static_cast<unsigned>(Audio_Seq_discVolume) >> kSampleBits;
-  Playback().Configure(volume, g_mix,
-                       (Audio_Driver_controlLatches.mixBehavior & kMono) != 0);
+  const bool mono = (Audio_Driver_controlLatches.mixBehavior & kMono) != 0;
+  Playback().Configure(VS::Audio::Seq::WriteDiscVolume(Audio_Seq_discVolume),
+                       VS::Audio::Control::SetDiscMixVolume(g_mix, mono)
+                           .value_or(VS::Audio::DiscMixMatrix{}));
 }
 
-// decomp: vs_sound_setCdVol (SLUS_010.40/25AC.c:913).
-int Audio_Control_SetDiscMixVolume(unsigned int volume) {
-  if (volume > kMaximumMix) {
+namespace VS::Audio::Control {
+bool SetLiveDiscMixVolume(std::uint32_t volume) {
+  if (!SetDiscMixVolume(volume, false)) {
     VS_LOG_ERROR("audio", "invalid XA mix attenuation: {}", volume);
-    return -1;
+    return false;
   }
   g_mix = volume;
   Audio_Native_UpdateXaControls();
-  return 0;
+  return true;
 }
+}  // namespace VS::Audio::Control
 
-// decomp: UpdateCdVolume (SLUS_010.40/25AC.c:3958).
-void Audio_Seq_WriteDiscVolume(void) { Audio_Native_UpdateXaControls(); }
+namespace VS::Audio::Seq {
+void WriteLiveDiscVolume() { Audio_Native_UpdateXaControls(); }
+}  // namespace VS::Audio::Seq

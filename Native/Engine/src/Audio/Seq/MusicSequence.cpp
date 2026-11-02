@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/MusicVoiceConflicts.hpp"
+#include "Audio/XaMixLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
-#include "Audio/XaPlayback.h"
 
 // decomp: SLUS_010.40 func_80015C9C (src/SLUS_010.40/25AC.c:2330)
 void Audio_Seq_ResetSoundEffectChannel(Audio_SeqChannel* channel, char* program_start)
@@ -508,7 +508,7 @@ void Audio_Seq_SetDiscVolume(Audio_CommandParams* command)
 {
     Audio_Seq_discVolumeFadeLength = 0;
     Audio_Seq_discVolume = (u_short)command->param1 << 0x10;
-    Audio_Seq_WriteDiscVolume();
+    VS::Audio::Seq::WriteLiveDiscVolume();
 }
 
 // decomp: SLUS_010.40 Sound_Cmd_C9_unk (src/SLUS_010.40/25AC.c:3223)

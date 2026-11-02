@@ -213,6 +213,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\VoiceEngine.cpp" />
+    <ClCompile Include="src\Audio\XaMix.cpp" />
     <ClCompile Include="src\Audio\XaPlayback.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -683,6 +684,8 @@
     <ClInclude Include="include\Audio\SequencerOutput.h" />
     <ClInclude Include="include\Audio\StreamPlayback.h" />
     <ClInclude Include="include\Audio\VoiceEngine.hpp" />
+    <ClInclude Include="include\Audio\XaMix.hpp" />
+    <ClInclude Include="include\Audio\XaMixLive.hpp" />
     <ClInclude Include="include\Audio\XaPlayback.h" />
     <ClInclude Include="include\Core\Arena.h" />
     <ClInclude Include="include\Core\Assert.hpp" />

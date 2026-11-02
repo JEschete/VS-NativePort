@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/XaMixLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
-#include "Audio/XaPlayback.h"
 #include "Battle/Feedback.h"
 #include "Boot/GameLoop.h"
 #include "Boot/PlayerSettings.h"
@@ -959,7 +959,7 @@ void Title_ShowSoundSettings(void)
             soundSetting = (soundSetting + 1) & 1;
             Input_settings.monoSound = soundSetting;
             Audio_SetMonoOutput(soundSetting);
-            Audio_Control_SetDiscMixVolume(0x7F);
+            VS::Audio::Control::SetLiveDiscMixVolume(0x7F);
             break;
         } else if (Input_buttonsState & PADRdown) {
             Title_PlayMenuLeaveSound();
@@ -1043,7 +1043,7 @@ void Title_InitializeSettings(void)
     Input_settings.monoSound = monoSound != 0;
     Input_settings.vibrationOn = vibrationOn != 0;
     Audio_SetMonoOutput(Input_settings.monoSound);
-    Audio_Control_SetDiscMixVolume(0x7F);
+    VS::Audio::Control::SetLiveDiscMixVolume(0x7F);
     memset(&Audio_Seq_unusedInventoryIndices, 0, sizeof Audio_Seq_unusedInventoryIndices);
     Audio_Seq_unusedStateFlags.difficulty = 1;
     Audio_Seq_unusedStateFlags.puzzleMode = 1;

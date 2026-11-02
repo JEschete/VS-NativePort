@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/XaMixLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
-#include "Audio/XaPlayback.h"
 #include "Core/Memory/Copy.h"
 
 // decomp: D_8002F54C (D_8002F54C@SLUS_010.40)
@@ -74,7 +74,7 @@ void Audio_Seq_UpdateGlobalSlides(void)
     if (Audio_Seq_discVolumeFadeLength != 0) {
         --Audio_Seq_discVolumeFadeLength;
         Audio_Seq_discVolume += Audio_Seq_discVolumeFadeStep;
-        Audio_Seq_WriteDiscVolume();
+        VS::Audio::Seq::WriteLiveDiscVolume();
     }
     Audio_Native_UpdateCutsceneStream();
     if (Audio_Mixer_tempoScaleSlideLength != 0) {

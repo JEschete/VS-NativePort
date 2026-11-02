@@ -291,6 +291,9 @@
     <ClInclude Include="src\Audio\Voices.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\XaMix.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\XaPlayback.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -685,6 +688,12 @@
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\VoiceEngine.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\XaMix.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\XaMixLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\XaPlayback.h">

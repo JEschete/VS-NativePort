@@ -52,7 +52,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
-#include "Audio/XaPlayback.h"
 #include "Battle/Abilities.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -2659,7 +2658,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80012F10u, 0u, (void*)&Audio_Samples_UploadBankChunk, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013188u, 0u, (void*)&Audio_Samples_LoadMusicBank, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800131DCu, 0u, (void*)&Audio_Samples_LoadSoundEffectBank, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013230u, 0u, (void*)&Audio_Control_SetDiscMixVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800132C4u, 0u, (void*)&Audio_Control_StartCutsceneStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013328u, 0u, (void*)&Audio_Control_StopCutsceneStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013348u, 0u, (void*)&Audio_Control_SetCutsceneVolume, 0u, 0u, 0u},
@@ -2776,7 +2774,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80018BD8u, 0u, (void*)&Audio_Mixer_IgnoreCommand, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018BE0u, 0u, (void*)&Audio_Mixer_SetReverbMode, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018C30u, 0u, (void*)&Audio_Mixer_DispatchCommand, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80019134u, 0u, (void*)&Audio_Seq_WriteDiscVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80019154u, 0u, (void*)&Core_Memory_CopyWords, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800191D4u, 0u, (void*)&Core_Memory_SwapWords, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001924Cu, 0u, (void*)&Audio_Seq_UpdateGlobalSlides, 0u, 0u, 0u},

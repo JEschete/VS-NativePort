@@ -196,6 +196,7 @@
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="src\VignetteRenderTests.cpp" />
     <ClCompile Include="src\WeaponModeSliceTests.cpp" />
+    <ClCompile Include="src\XaMixTests.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\DiscValidation.cpp" />
     <ClCompile Include="..\Tools\Launcher\src\Updates.cpp" />

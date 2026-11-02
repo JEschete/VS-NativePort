@@ -45,6 +45,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
+    **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
+       for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
        for name in ("VS::Field::LiveMovingPlatformPlacement", "VS::Field::FindLiveMovingPlatformById")},
     "Event_ScriptSetAshleyBattleModeOpcode": r"Native\Game\src\Event\WeaponModeOpcode.h",
@@ -2706,6 +2708,13 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Field::FindLiveMovingPlatformById(",
      "F00920/F00938 #46 typed promotion: the platform binding supplies the room platforms, bounce frames and "
      "offsets and returns the contact by value"),
+    (r"", r"\bVS::Audio::Control::SetDiscMixVolume\(",
+     r"VS::Audio::Control::SetLiveDiscMixVolume(",
+     "F03144 #46 typed promotion: the XA binding supplies the live output mode and publishes the CdlATV routes to the "
+     "native XA source"),
+    (r"", r"\bVS::Audio::Seq::WriteDiscVolume\(\s*\)",
+     r"VS::Audio::Seq::WriteLiveDiscVolume()",
+     "F03262 #46 typed promotion: the XA binding reads the sequencer disc volume and publishes it with the mix"),
     (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
      r"Event_ScriptSetAshleyBattleModeOpcode",
      "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),

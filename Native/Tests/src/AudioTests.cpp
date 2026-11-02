@@ -26,6 +26,7 @@
 #include "Audio/SequencerOutput.h"
 #include "Audio/StreamPlayback.h"
 #include "Audio/VoiceEngine.hpp"
+#include "Audio/XaMixLive.hpp"
 #include "Audio/XaPlayback.h"
 #include "Content/AudioBank.hpp"
 #include "Content/AudioStream.hpp"
@@ -583,7 +584,7 @@ TEST_CASE("XA native output preserves stereo and mono volume controls",
   auto capture = [&](int volume, bool mono, unsigned mix) {
     TestsNativeMonoOutput(mono ? 1 : 0);
     XaFixture::Start(volume);
-    REQUIRE(Audio_Control_SetDiscMixVolume(mix) == 0);
+    REQUIRE(VS::Audio::Control::SetLiveDiscMixVolume(mix));
     OutputProbe probe(device.source.get());
     probe.Wait();
     XaFixture::Stop();

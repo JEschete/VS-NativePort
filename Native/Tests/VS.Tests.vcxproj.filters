@@ -360,6 +360,9 @@
     <ClCompile Include="src\WeaponModeSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\XaMixTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="..\Tools\Launcher\src\Setup.cpp">
       <Filter>..\Tools\Launcher\src</Filter>
     </ClCompile>

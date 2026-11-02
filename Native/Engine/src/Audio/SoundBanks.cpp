@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/XaMixLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/LegacyFiles.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/StreamPlayback.h"
-#include "Audio/XaPlayback.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
@@ -277,7 +277,7 @@ void Audio_InitializeMenuSoundBanks(void)
     void* buf;
 
     Audio_Playback_Initialize();
-    Audio_Control_SetDiscMixVolume(0x7F);
+    VS::Audio::Control::SetLiveDiscMixVolume(0x7F);
     buf = Core_Memory_AllocateFromHighEnd(VS_WAVE0000_DAT_SIZE);
     Content_ReadDiscFileBlocking(VS_WAVE0000_DAT_LBA, VS_WAVE0000_DAT_SIZE, buf);
     Audio_Samples_LoadBank(buf, 1);
