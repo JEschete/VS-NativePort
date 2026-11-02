@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 78 | 19 (`wip`) | 4,110 |
-| `cpp` | 78 | 202 (`wip`) | 3,927 |
+| `modernized` | 82 | 17 (`wip`) | 4,108 |
+| `cpp` | 82 | 198 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 205 |
-| `vs_namespace` | 78 |
-| `typed_interface` | 78 |
-| `no_bridge` | 78 |
-| `strict_clean` | 205 |
-| `behavior_evidence` | 78 |
+| `source_cpp` | 209 |
+| `vs_namespace` | 82 |
+| `typed_interface` | 82 |
+| `no_bridge` | 82 |
+| `strict_clean` | 209 |
+| `behavior_evidence` | 82 |
 
-Promotion records: 280; derived `cpp=x`: 78, `cpp=wip`: 202. Verification records: 79; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 82, `cpp=wip`: 198. Verification records: 80; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -201,6 +201,8 @@ The thirty-third is the intro movie player (F03650-F03653): `VS::Movie::Intro::P
 and the title menu calls the live binding; the old `Movie_Intro_*` C entry points and `Movie/Intro/Player.h` are retired.
 The thirty-fourth is the disc drive commands (F03474, F03475, F03479): `VS::Content::UpdateDiscCommands` serves armed reads and XA streams through a typed `DiscDriveHost`,
 and the copied queue and `_sysReinit` call the live binding; the old `Content_*Disc*` C entry points and `DiscReader.h` are retired.
+The thirty-fifth is the AI relations and Ashley alliance (F01841, F01840, F01681, F01682): VS::Battle::Ai::InitializeActorAiRelations walks a typed ActorRelationTable and the alliance policies drive an AshleyAllianceActor,
+and the copied creation and perception callers use the live binding; the old Battle_Ai_* C entry points, Relations.h and their module pointer entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

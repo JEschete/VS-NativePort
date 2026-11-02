@@ -5980,13 +5980,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "23088f375a1e60a64de07a4c987a2cd1d56b6634aefaf13efad427d98a249564",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "230f02298f765f1d9d40b01e0b9abf5c752b92d97eb233401716e79285de91ad",
       "count": 1,
       "tool": "tidy",
@@ -6727,13 +6720,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/braces"
-    },
-    {
-      "key": "263ca4dd8c1f5f1a6b4e1c83e73bca73f6f2c35bc867b8d7466b2301a62238d1",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/Relations.h",
-      "rule": "google"
     },
     {
       "key": "265935910b1b75f0a3afc84c1af6c743db310ef65eea2a24ddc27431b9499300",
@@ -9599,13 +9585,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "36fadb0c2a433e8cf63bd2eeb8d35cd7b4ff988fa77b681c70e6ab8ef56b9b58",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "3707d09a9b56f17ab483881e9b40d12b9ef857b3fd07d1f4b9072e226a5a1524",
       "count": 1,
       "tool": "tidy",
@@ -12376,13 +12355,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "47b7a65246ded7c7e304eb17de71d6a8176d7574c5766bfa307cfc12c57b79f9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "47caf68fb3141acd3cc83ae794247dfbf2df91fb95a341401e72266b827c5b57",
@@ -16340,13 +16312,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5f948cece32a71af8a75575d7a6f1633fe4593c65873a3e9a3e6cfee933f0b57",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5f960e17db2034c626cf9f9e34a64bf660c2c56f1d3e7aa5f432a9057265e3b3",
       "count": 1,
       "tool": "tidy",
@@ -17964,13 +17929,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "688a7122a862c615ca1d430ad0c73a4aa35b40ce5a50e21e0e4eae95ea530943",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "google"
-    },
-    {
       "key": "689291cda3cbfae068cdf2173c8dee856682a78eee976634db768b225b9c1946",
       "count": 1,
       "tool": "cpplint",
@@ -19159,13 +19117,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "703055f9d87d7adbe3fec94099c3fd811304b190d1165886e74cc15c4df6084b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "703ac29150d2b2ff6d43ff174b0d174622aabedc5af78e03658a8d5db1dc470e",
@@ -20547,13 +20498,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "776a73de2e218302638fe977f66b0b0ceb9ecdab845d37c65aee751576814250",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "7774e102878fd21a17d982b870c2e0e03bcb46d41c0b32e703a7e6bdb58776a3",
       "count": 1,
       "tool": "tidy",
@@ -20797,13 +20741,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "78c3a6100c5e15f1772c3d0ec78b8daadc0e7bc0d0129d337ccc2cec1ee2ef3c",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "78df9665183520de6748975469554853841eaff76e77d8de54e4926658060302",
@@ -21336,13 +21273,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
-      "key": "7c3ca772dc8cb70d1032fb930a9264999c91df2d4b37de8fdfd09aa3295d9ecd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "7c3feaca89aa2615d33f3ce0338408bdec2fff582088b0fe92c4ce9e1855e3e5",
@@ -23109,13 +23039,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8725e0c5e8c5f187d13c09a4bd1ba719d9856dc060980026e3f3f7f778ce5917",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "872ada41f8d509a14800b3f199efa4716d1dde05d8ec661f5c3acdb098810d9f",
       "count": 1,
       "tool": "tidy",
@@ -24289,13 +24212,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8d9795400541249e3fc644efab88c06dff1fe75a9da90bb651dae18c5f088ed6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -29773,13 +29689,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "aee5aa57aa4a53efa5cc5e2b59daf049b8ffafb7e96473e42f700cf430bd50b7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "aeea1524016962fa60377291f820c0ae73c78d22cc65d11d9721ebfb2fc185ea",
       "count": 1,
       "tool": "cpplint",
@@ -30760,13 +30669,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "b4d4104fbb8586bc1648642e1a88554ef8efd1ca1f0eb5110f5c670d1d1a181a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "b4d583ccbf91e21d9a62436ed7bbe0dffebde3ef518267ed1cd2c7b49bb584c5",
       "count": 1,
       "tool": "cpplint",
@@ -30820,13 +30722,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "b5263752545fe56c1af17ef039e650f6ddbfe51e58baee0205804717548d6f37",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -31528,13 +31423,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "b92fc60ca8bcb06f62df40a86db4fffc2164885210f5f7c77eabc9b5e92ae07f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "b92fdc48db45284880cd0ae24ec3185e08bcdb78beaeb6815c90870dfb9f3060",
@@ -34715,13 +34603,6 @@
       "rule": "bugprone-reserved-identifier"
     },
     {
-      "key": "cc66042f3e51653397736dd0295ea42f761f458fd0331c54e9517c9941dc00b4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "cc6b369f4a41f11f5d4e3184fd9cb3d1810299dc147f3b7e650a6d061513da1d",
       "count": 1,
       "tool": "cpplint",
@@ -35168,13 +35049,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "ce6bc442bf799281709ae00bab595451c150e47141357de7067e2e62a16101b1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "ce71712507ee655f939e9ff5c482699a09ec6a4de9a02d41b90893e633292955",
@@ -38397,13 +38271,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e1f1eb002d5ca48938398895079e3b9e6b62d6bbca1bd2f79061f44fd60f4697",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "33ce8c77c97f43307f7d61fa94306521208280de7b0d9457b8d6421c87a5df10",
       "count": 1,
       "tool": "tidy",
@@ -38513,13 +38380,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e2ecbf9c6642d3d2a0a28a1291d549fa3b76dc9bcc8696bd4dd14b5cc7595845",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -41470,13 +41330,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "f4c57d1bff5d6e1f25a82bc4273362349ec4cab8055f84d283724b1f81769045",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f4da2a4e37d13a86f2456829edfdfbbbcc743d22dabba8eccbfe1d6a29833415",
       "count": 1,
       "tool": "cpplint",
@@ -41664,13 +41517,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f6025330aa31f01927053b1d425f1011a729b4898a4b985a058f42fcc890cd31",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "f604497355bfaaf4588ee6a38cd173d24f9097f4037af4f263019772c93d09ce",
@@ -42651,13 +42497,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "fb7f4189b8c87e792a62d1e244fe480a0b82a24dd11fccadbcc3081683eaf963",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/Relations.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "fb83ed93df6cfb6b41e481ebfaf7f5e22564ebcae539a213f07be5a805523922",

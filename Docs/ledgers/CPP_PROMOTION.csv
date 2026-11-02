@@ -90,8 +90,8 @@ F01674,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01675,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01676,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01677,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
-F01681,Native\Game\src\Battle\Ai\Relations.cpp,,,,,,,,,
-F01682,Native\Game\src\Battle\Ai\Relations.cpp,,,,,,,,,
+F01681,Native\Game\src\Battle\Ai\Relations.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-RELATIONS-SLICE,12a6b8b6cee37a515608027ffe73ccdc38cfe341,"#46 slice: VS::Battle::Ai::{InitializeActorAiRelations, ApplySavedActorAiRelations, EndAshleyAlliance, TryBeginAshleyAlliance} drive ActorRelationTable, SavedRelationActors and AshleyAllianceActor hosts in the legacy-free Battle/Ai/Relations.cpp; Battle/Ai/RelationsLive.cpp binds the battle actor list, the registered AI state table, the BIOS RNG and the decision callback swap; the copier routes the generated creation (F01818) and perception (F01705) callers to the live bindings"
+F01682,Native\Game\src\Battle\Ai\Relations.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-RELATIONS-SLICE,12a6b8b6cee37a515608027ffe73ccdc38cfe341,"#46 slice: VS::Battle::Ai::{InitializeActorAiRelations, ApplySavedActorAiRelations, EndAshleyAlliance, TryBeginAshleyAlliance} drive ActorRelationTable, SavedRelationActors and AshleyAllianceActor hosts in the legacy-free Battle/Ai/Relations.cpp; Battle/Ai/RelationsLive.cpp binds the battle actor list, the registered AI state table, the BIOS RNG and the decision callback swap; the copier routes the generated creation (F01818) and perception (F01705) callers to the live bindings"
 F01683,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01684,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01685,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
@@ -184,8 +184,8 @@ F01836,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01837,Native\Game\src\Battle\Ai\RoomAiMap.cpp,x,x,x,x,x,x,verify:VR-AI-ROOM-MAP,9d6617f6c3f1dda9067f16e751441e02d0e1c46b,#46 slice: explicit RoomAiRuntime frees actor AI states and the published map
 F01838,Native\Game\src\Battle\Ai\RoomAiMap.cpp,x,x,x,x,x,x,verify:VR-AI-ROOM-MAP,9d6617f6c3f1dda9067f16e751441e02d0e1c46b,#46 slice: pure BuildRoomAiMap over an explicit RoomAiSource; publication through RoomAiRuntime
 F01839,Native\Game\src\Battle\Ai\TileHeightSampling.cpp,x,x,x,x,x,x,verify:VR-AI-ROOM-MAP,9d6617f6c3f1dda9067f16e751441e02d0e1c46b,#46 slice: explicit floor-height query and decoded TileCoordinate replace the global room collision
-F01840,Native\Game\src\Battle\Ai\Relations.cpp,,,,,,,,,
-F01841,Native\Game\src\Battle\Ai\Relations.cpp,,,,,,,,,
+F01840,Native\Game\src\Battle\Ai\Relations.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-RELATIONS-SLICE,12a6b8b6cee37a515608027ffe73ccdc38cfe341,"#46 slice: VS::Battle::Ai::{InitializeActorAiRelations, ApplySavedActorAiRelations, EndAshleyAlliance, TryBeginAshleyAlliance} drive ActorRelationTable, SavedRelationActors and AshleyAllianceActor hosts in the legacy-free Battle/Ai/Relations.cpp; Battle/Ai/RelationsLive.cpp binds the battle actor list, the registered AI state table, the BIOS RNG and the decision callback swap; the copier routes the generated creation (F01818) and perception (F01705) callers to the live bindings"
+F01841,Native\Game\src\Battle\Ai\Relations.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-RELATIONS-SLICE,12a6b8b6cee37a515608027ffe73ccdc38cfe341,"#46 slice: VS::Battle::Ai::{InitializeActorAiRelations, ApplySavedActorAiRelations, EndAshleyAlliance, TryBeginAshleyAlliance} drive ActorRelationTable, SavedRelationActors and AshleyAllianceActor hosts in the legacy-free Battle/Ai/Relations.cpp; Battle/Ai/RelationsLive.cpp binds the battle actor list, the registered AI state table, the BIOS RNG and the decision callback swap; the copier routes the generated creation (F01818) and perception (F01705) callers to the live bindings"
 F01842,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01843,Native\Game\src\Battle\Ai\FlightTerrain.cpp,x,x,x,x,x,x,verify:VR-AI-FLIGHT-TERRAIN,8e439b230f313fb43c05e1d0cd9c055bb6882ae1,#46 slice: reads the published settings through RoomAiRuntime instead of Battle_Ai_roomAiState
 F01844,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
