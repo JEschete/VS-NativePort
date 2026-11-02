@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 174 | 10 (`wip`) | 4,023 |
-| `cpp` | 174 | 107 (`wip`) | 3,926 |
+| `modernized` | 202 | 10 (`wip`) | 3,995 |
+| `cpp` | 202 | 79 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 281 |
-| `vs_namespace` | 174 |
-| `typed_interface` | 174 |
-| `no_bridge` | 174 |
+| `vs_namespace` | 202 |
+| `typed_interface` | 202 |
+| `no_bridge` | 202 |
 | `strict_clean` | 281 |
-| `behavior_evidence` | 174 |
+| `behavior_evidence` | 202 |
 
-Promotion records: 281; derived `cpp=x`: 174, `cpp=wip`: 107. Verification records: 96; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 202, `cpp=wip`: 79. Verification records: 97; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -235,6 +235,8 @@ The fiftieth is the room geometry renderer (F00744-F00760, F00769, F00770, F0077
 and the live binding owns the room clip state and bounds every packet by the current frame buffer; RoomDraw.cpp leaves the relaxed copied-code settings and RoomDraw.h and the twenty-one Render_ room symbols are retired.
 The fifty-first is the SPU voice output and cutscene stream control (F03159, F03163-F03169, F03178, F03257, F03258, F03379, F03382, F03392-F03396, F03545, F03546): VS::Audio voice key, mode, volume, rate and release writes, bank uploads and the stream commands are C++ over voice, bank and stream hosts that refuse voices, values and banks outside their bounds,
 and stream commands name their source by an opaque StreamSourceId that is compared, never dereferenced; SequencerOutput.cpp and StreamPlayback.cpp and the twenty Audio_ voice and stream symbols are retired.
+The fifty-second is the AI decision, planning and engagement primitives (F01628, F01629, F01631-F01635, F01671, F01674-F01677, F01683-F01688, F01690-F01693, F01770, F01792, F01794-F01797): VS::Battle::Ai candidate packing, usability, targeting, scoring, ranking, promotion, target memory, simulated stats and engagement are C++ over typed views that refuse slots, actions, counts and actor IDs outside their tables,
+and the five legacy headers and twenty-eight Battle_Ai_ symbols are retired; the same commit zero-initializes the action plan selection counts (#274).
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
