@@ -353,7 +353,7 @@ f9c77029f621,DIV-ZERO,low,pattern,F04175,Render_TransformModelTint,Native/Engine
 f5860b78b33d,DIV-ZERO,medium,pattern,F03559,Render_UpdateClutTransitions,Native/Engine/src/Render/Palette.cpp,1320,frame_divisor,50,10,open,
 23d0ae3040ff,DIV-ZERO,medium,pattern,F00770,Render_TintRoomPrimitiveColor,Native/Engine/src/Render/RoomDraw.cpp,98,blend_scale,50,10,open,
 79f82673fb19,DIV-ZERO,medium,pattern,,BuildRoomView,Native/Engine/src/Render/RoomDraw.cpp,206,scale,50,10,open,
-1a9c82af2fe8,DIV-ZERO,medium,pattern,F00768,Render_InterpolateRoomLightTriangle,Native/Engine/src/Render/RoomLighting.cpp,64,static_cast,50,10,open,
+cc3c38c87b36,DIV-ZERO,medium,pattern,F00768,InterpolateRoomLightTriangle,Native/Engine/src/Render/RoomLighting.cpp,111,static_cast,50,10,open,
 bfd551329210,DIV-ZERO,medium,pattern,F02735,Save_MemoryCard_ReadSaveStep,Native/Engine/src/Save/MemoryCard/GameFiles.cpp,652,Title_transferProgressTarget,45,3,open,
 c03c0121e479,DIV-ZERO,medium,pattern,F02736,Save_MemoryCard_WriteSaveStep,Native/Engine/src/Save/MemoryCard/GameFiles.cpp,747,Title_transferProgressTarget,45,3,open,
 91c0d980925c,DIV-ZERO,medium,pattern,F00252,Actors_ActorHpPercentage,Native/Game/src/Actors/ActorState.cpp,100,stats->maxHp,55,14,open,

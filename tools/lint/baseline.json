@@ -877,13 +877,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "05580eaad1eca517d72b32dd4f7261aa9b878782ec3407c0d0356194084fca5e",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "google"
-    },
-    {
       "key": "09cb2fff17d74ed4dd9aab65b216e479747386b45b00221be954b9f107251c69",
       "count": 1,
       "tool": "tidy",
@@ -1099,13 +1092,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "06d1db3dd11dbe3257499ee6f1cd12f9ca16e077d591b432ada0d552892fca28",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "06d694162d0c41ba577c8e8e4a504dc2b7bbda1ee44f4df34fa07a6af1ba1f2c",
@@ -1624,13 +1610,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Movie/MoviePlayer.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "09fc63ca39b0451d568bfca5f9b1e07678656e474b686076316f0ea1c8ff6cf2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "0a01bb21420274876739ecc7e25d666f317fa9e9d01fe6ea1ed5a075a23eee4a",
@@ -3390,13 +3369,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "1304962bf6c92b555fe0901e6a657980e3c933a681a04440d5fdc7f6811315dd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "130a132dd00785592d537f47dfe720f994905d5fe874f096dfd0e8be855e95b8",
       "count": 1,
       "tool": "cpplint",
@@ -3843,13 +3815,6 @@
       "tool": "cpplint",
       "path": "Native/Content/include/Content/Disc.hpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "15dc10ce06e85268877ced1a530fa693c6024d73c4da704c80b9af76f1f5f950",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "493b0850b389ef07cd68bc664406e5b8c314f4ef6e35b6c070c62ca2d7ba9f3a",
@@ -4739,13 +4704,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "1b8535d74312ca529a3277b698d19f7995b09c043cd632945ed431f94b912e09",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "1b85ef739efabe0b0366769559d5872fe7665635d2b9a5ef1b10c90ec0752605",
@@ -5999,13 +5957,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "22d61cecc59feb4acbdbb787a3f3bef10b6bd987a7fd935674d322ffe2b4cb80",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "22d9497c26df3c2e1f6867e5f7404f8586517958864155a45baca7186aaac0f4",
@@ -8010,13 +7961,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2ce4e11b5a45c192edef037ea46bbaaae0b147b16265ae33ba57d9204249f9db",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "2cf4b92018c468cf7d0b070e3926ae71c56b5c5827ba6912c2c90edaf0513d84",
       "count": 1,
       "tool": "cpplint",
@@ -9191,13 +9135,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/Sprites.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3437c71757a6f656d889c0f6b28b86430b20564b5e884c4322612c1e493e4190",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "34435bec52b5a19706c2094f69d1b467e2ffcdc9f2b77fba9191dadd6c392cac",
@@ -11580,13 +11517,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "429c549302d51046565ef58e8484ceb92542da6a547506425342870c2a54c028",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "42a46ea08d72a89d2799bbf4f2a5b59ea3394a2980001e1a43431d9cc34df16e",
       "count": 1,
       "tool": "tidy",
@@ -11767,13 +11697,6 @@
       "tool": "format",
       "path": "Native/Tests/src/InputTests.cpp",
       "rule": "google"
-    },
-    {
-      "key": "4344c85d51cdd2b7508ab53fe0e9738454e4ba558b68ef825726875325310306",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4345dc322a31db3241d14fb29aa78c1fd1e1906f8912d7bfcf435fc5b37142b5",
@@ -12623,13 +12546,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "47f7f2b4f92df566f00dc891a6626fe37e3b3c0a85817cb13e64f1fc7e27e55a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "47f8926748a637264f5890b6b1a96074be70af7bfdc33ed9430a154188ed2752",
       "count": 1,
       "tool": "cpplint",
@@ -13176,13 +13092,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "4b51fd21f663d25a961c5f3a367099a87bd940f6d4e77cc7c0946fdd1cb00a19",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "4b56421fe7cd4dd0a370ae9467ae18458e1d998f6326d81f489f8086a0d5a8a0",
       "count": 1,
       "tool": "ruff",
@@ -13300,13 +13209,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Platform/App.hpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4bfe64b75558a8701aed1425568e8e38bfc725e7bba075a8074de59fd106341a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "4c12a12ea375a5160b47c49dd553c2338070a03ddfc7507d35681651e1e4bd2a",
@@ -16172,13 +16074,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "5d8914625474b1722f9c449fa5addd99959b1b10340e52fe1fa4da01f43233eb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5d8ff23e8781b173c6ecbc33888114395089bf6069ef1584d871204d74206a4d",
       "count": 1,
       "tool": "cpplint",
@@ -16886,13 +16781,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "6138e0de28b63a38464f9144e98709f7aa4da32d2724dd41f19dceaacd6a166f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6139f16984f07c761ad95af508f5e6cd83ef822264a61061a0353dd1d64a207a",
       "count": 1,
       "tool": "tidy",
@@ -16918,13 +16806,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "61508e75c061267fab9a33aa25e68c7fa8d8450d224649d88a1db1b1fd54a0a2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -17740,13 +17621,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "65f142f0a7ad4b3ac2aad7d8db2cb907cffacdf053ccc568dbbca302b24e58fc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "65fd8eb91b64fdc56857b9dc228e98897499ec64a511cf0f065352ff1f80de3f",
       "count": 2,
       "tool": "tidy",
@@ -17765,13 +17639,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6623bb863f75f40e6afbabfb669ec6c16ebf8ae28015b5818ee82fa001a3d2d3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -19756,13 +19623,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "71ff637bc53454bcb2f1589f5a9e01e1f6a94dff6d1d46298cf396757e20ae94",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/RoomLighting.h",
-      "rule": "google"
-    },
-    {
       "key": "7205825ad9e5a64c23f02ae2ae3acbfa8f7c45660ccb0bd964b041cf6d156aab",
       "count": 1,
       "tool": "tidy",
@@ -19831,13 +19691,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/Device.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "72840b24c34f17878c0ebc6dd9fc950615a8e73e835b1c893ae2712416f2063c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "72870981cb18753cdfbaa68324469230dacc7a372e5c5c5b2eb73e32587db76b",
@@ -20638,13 +20491,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "7640e5e686c59bab025b0a97ced1e3f8ba71d12872bdde0701d3b764e541944b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "7650abf72e1866293aa332dc09fdd836309ddf73d73d7052186316582ef5e376",
       "count": 1,
       "tool": "cpplint",
@@ -20741,13 +20587,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "76e41d2fc4efd334cea83a77ec0058254ddabf6acc8d350d4898aee7bab13e79",
-      "count": 3,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "76ed69b31dc00955cf8a664858a7460c03473c5795b1413b21769ab82693558f",
@@ -23564,13 +23403,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "87ce51716f896ec06960e5dd0aeed35c1a8be478b1d7c0c0f02ce6e64e4fdb9c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "87eb11d3520190e1b79e963aec73360894bd2be368043a10bcb1e329f6663fc7",
       "count": 1,
       "tool": "tidy",
@@ -23681,13 +23513,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "8885507018077611199ce53bdae025fc44a50edf54bafc788d227eb36305f5bd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "888890cfb03dc59bd9ba346a87d530124b1d04f6887fb6b5b3c7d29e46f52013",
@@ -23912,13 +23737,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8970af6c8b8b372510d348bec815cf76f570c8a3d0ac97b12380ea43c9625d24",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "8972ca53397f46aa85e7bf74b0bffeddb2af1dd6ed88f0e292194ddd6dac3085",
@@ -24908,13 +24726,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8ec8f9f59e65a218d38b462193bf47770235982fe0fe7a69071ea42828856492",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "8ed8f7fa0940f7a989cde545c6669fd6c265cd2d7bcb04d933e3e153006b85b4",
       "count": 19,
       "tool": "cpplint",
@@ -25067,13 +24878,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Input/Pad.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "8fc870c18501ec01d687457b667c13eb36a18185e2ef16753f52ebabf1d7d423",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "8fd16ddcd0ad56504596c68625f6ff02a639398a33af8eb559ca7f7613f326eb",
@@ -25333,13 +25137,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "9124368f115f90892e67ec6418a4a28b2fdf844dfc1a2f7318dbf14c46bbbccd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "913b6d13e306b161f95f7208d4993fc8dcbc656709ca057e502db2691063447d",
@@ -28023,13 +27820,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a0f9a0a2ae8eabe0dd9845cb3492d28c5a1f82df98de9470c86abcb100d13160",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "a10350a396d22fcbb3d86395db052759503df149d99c467b48b7ccb67705b9c9",
       "count": 1,
       "tool": "tidy",
@@ -28182,13 +27972,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a2084efc4cd5280cbc6656482b490693c9fc42008ce17abb2f8fb63211d62efa",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "a20b7aeec06b4f068217c1971e1233bb5ce20227cc92126080c2e1590c420921",
@@ -28454,13 +28237,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "a3c8310986827e50fbfae5910ebbf99782ea953e141fea45ab7e651fe940ffbd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -29512,13 +29288,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
-      "key": "aa61767a9829d5d93e10cd30127dd31f7aa56b25c11a324588f771f62c0d0942",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "aa6551ee8948ba2f2b81cb47ac7d139271faa377cfce242ddf501a82388b6db5",
@@ -31831,13 +31600,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b837314fe33e76db12ec8750aad49f380421beb6282223b727e59b37e700b7cb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "b84d374d743991f6d6b46fab2af490d7e4b41cd02c9515f18939424465ef588c",
       "count": 1,
       "tool": "cpplint",
@@ -31850,13 +31612,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "b85d7fa09d78ae5622d66a66dd1bcecc7fa11ef1c251e59f9b7c21973d057cb0",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "b864ea1abdb2bc10956ebcd0ad200528841768f3805716d666e395f8cb78df81",
@@ -31976,13 +31731,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/RandomGenerator.cpp",
       "rule": "whitespace/braces"
-    },
-    {
-      "key": "b8fd278c1e39fd35c48f897663181e3f18ce6dd12eaeaa5c04ef717e433d1248",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "b91023bf4c6eb1623395bbc62a17102e5974339e2fb7554a284ab1a1f1527d03",
@@ -34265,13 +34013,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "c6e087827d9f3dd79a5b82763bc8dc12c6ac3a7bab19abbcadb2896067a5f1bb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "c6e58608ecbe4c791fd11014486789f2ab90e4171f4d5336059a4c968a6986b5",
@@ -37669,13 +37410,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d999dcdf2910eab5afdd2ee0b7afad6131f1c14a75687ec4f8f6a4d2fd53fd6c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "d9a24eaa307c0e248739ddbdec612314031f662085c092d1518116437aade231",
       "count": 1,
       "tool": "tidy",
@@ -37883,13 +37617,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "dafd3f00849d9459481fd5ec5851a934f69a7dccdaabdce6a3229de5629d5afd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -40266,13 +39993,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "e9a449e4fef9e85fa8490fc64b46bdeeff93ea1633323019d29614880be822bf",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "e9aac4baa7b38283553d9cce18e0f7e7ebfbf938e2e819c34b17088bb484d178",
       "count": 1,
       "tool": "cpplint",
@@ -41155,13 +40875,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "eecea662a526c17e36ce8d7d152852236c6c73800d630104af53c30d857d8cd2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "eed2f979b8e83d7fbe415818feb829f0ed3d139f620ee6837e53232458bdd24e",
       "count": 1,
       "tool": "tidy",
@@ -41986,13 +41699,6 @@
       "tool": "ruff",
       "path": "tools/naming/sym_gen/Game_Menu_02.py",
       "rule": "I001"
-    },
-    {
-      "key": "f42cb4f0996845a5e6e337d5509d6b76d9e6e2380c9ca61de5a15f00f26c4ac1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomLighting.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "f43e07181ae778a85631d193331c53dd275792e9f7441d3923477c24a3175ad1",

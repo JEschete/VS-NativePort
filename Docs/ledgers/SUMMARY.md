@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 58 | 19 (`wip`) | 4,130 |
-| `cpp` | 58 | 222 (`wip`) | 3,927 |
+| `modernized` | 60 | 19 (`wip`) | 4,128 |
+| `cpp` | 60 | 220 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 196 |
-| `vs_namespace` | 58 |
-| `typed_interface` | 58 |
-| `no_bridge` | 58 |
-| `strict_clean` | 196 |
-| `behavior_evidence` | 58 |
+| `source_cpp` | 198 |
+| `vs_namespace` | 60 |
+| `typed_interface` | 60 |
+| `no_bridge` | 60 |
+| `strict_clean` | 198 |
+| `behavior_evidence` | 60 |
 
-Promotion records: 280; derived `cpp=x`: 58, `cpp=wip`: 222. Verification records: 72; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 60, `cpp=wip`: 220. Verification records: 73; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -187,6 +187,8 @@ The twenty-sixth is the XA disc mix (F03144/F03262): `VS::Audio::Control::SetDis
 `VS::Audio::Seq::WriteDiscVolume` the signed CD level; `XaPlayback.cpp` binds the output mode and sequencer volume and mixes the four routes.
 The twenty-seventh is the room trigger markers (F00617/F00618): `VS::Field::DrawRoomTriggerMarkers` fades typed triggers and steps the
 marker animation and `VS::Field::DrawRoomTriggerMarker` places a marker through an abstract renderer; `RoomTriggerMarkersLive.cpp` binds the room state and GPU.
+The twenty-eighth is the room lighting (F00767/F00768): `VS::Render::SampleRoomLighting` samples a bounded lighting span and
+`VS::Render::InterpolateRoomLightTriangle` returns the original-width colour; `RoomLightingLive.cpp` binds the loaded room and the caller colour code.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
