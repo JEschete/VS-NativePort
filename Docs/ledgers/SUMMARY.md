@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 95 | 14 (`wip`) | 4,098 |
-| `cpp` | 95 | 186 (`wip`) | 3,926 |
+| `modernized` | 99 | 14 (`wip`) | 4,094 |
+| `cpp` | 99 | 182 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 222 |
-| `vs_namespace` | 95 |
-| `typed_interface` | 95 |
-| `no_bridge` | 95 |
-| `strict_clean` | 222 |
-| `behavior_evidence` | 95 |
+| `source_cpp` | 226 |
+| `vs_namespace` | 99 |
+| `typed_interface` | 99 |
+| `no_bridge` | 99 |
+| `strict_clean` | 226 |
+| `behavior_evidence` | 99 |
 
-Promotion records: 281; derived `cpp=x`: 95, `cpp=wip`: 186. Verification records: 86; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 99, `cpp=wip`: 182. Verification records: 87; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -215,6 +215,8 @@ The fortieth is skeletal SEQ playback (F04128, F04129, F01016): VS::Actors::Adva
 clamp bone counts to the pose arrays and skip zero-length blends (#261); the three Actors_ symbols and SequencePlayback.h are retired.
 The forty-first is actor model drawing (F01023, F00878): VS::Actors::DrawActorModel and ProjectActorBoneEndpoint order the model, overlay and shadow draws and project bone endpoints over abstract hosts,
 and the live projection bounds bones by the pose matrices and loaded bone table (#263); the two Actors_ symbols and ModelDrawing.h are retired.
+The forty-second is the save menu assets (F02737, F02738, F03604, F03605): VS::Save::MemoryCard steps the memory-card image and text load over an abstract host with an explicit load state,
+so a release during a pending read keeps the buffer and ready steps no longer touch a released request (#264); the four Save_MemoryCard_ symbols and MenuAssets.h are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
