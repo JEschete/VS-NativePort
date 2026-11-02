@@ -396,6 +396,9 @@
     <ClCompile Include="src\TextureRegionDrawTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TrailEmitterTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\VibrationTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

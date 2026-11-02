@@ -1761,7 +1761,7 @@ class Copier:
             if row is None:
                 self.report["plugin-entry-unresolved"].append(f"{name} ({ov})")
                 continue
-            cname = c_name(row["final_name"])
+            cname = self.promoted_name(row["id"]) or c_name(row["final_name"])
             self.plugin_ref[off] = cname
             if call:
                 self.plugin_ref[call[0]] = cname

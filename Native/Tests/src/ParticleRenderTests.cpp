@@ -17,7 +17,9 @@
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
 #include "Core/Random.hpp"
+#include "Effects/PackageExtents.hpp"
 #include "Effects/ParticleRenderLive.hpp"
+#include "Effects/TrailEmitterLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
 #include "nlohmann/json.hpp"
@@ -37,7 +39,6 @@ extern "C" {
 #include "Effects/Templates/ClosedRing.h"
 #include "Effects/Templates/ParticleDispatch.h"
 #include "Effects/Templates/ParticleRender.h"
-#include "Effects/Templates/RadialSurge.h"
 #include "Effects/Templates/Ring.h"
 #include "Effects/Templates/RotatingSurface.h"
 #include "Effects/Templates/TiledRing.h"
@@ -1286,9 +1287,13 @@ struct Plg074Fixture : EmissionFixture {
     instance.transforms[0].world.t[2] = 900;
     trail_state.trails = trails.data();
     trail_state.trailcount = 8;
+    VS::Effects::ForgetLivePackageExtents();
+    VS::Effects::RecordLiveParticleDefinitions(
+        std::as_bytes(std::span{&definitions, 1}));
   }
 
   ~Plg074Fixture() {
+    VS::Effects::ForgetLivePackageExtents();
     Effects_curveSamples[0] = saved_sample;
     Effects_Plg073_trailEmissionCounter = saved_corner;
     Content_plg074TrailEmissionCounter[0] = saved_plg074_corner;
@@ -1456,8 +1461,6 @@ TEST_CASE("PLG074 F01987 draws an eight-segment arc with continuous UVs",
 
 TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
           "[effects][plg074][f01988]") {
-  const auto entry =
-      Plg074Entry(0x800FB414, Effects_Plg074_GenerateTrailOrigins);
   const int anchor = GENERATE(0, 1, 2);
   Plg074Fixture fixture;
   Effects_actionRequest.position = {100, -200, 300, 0};
@@ -1469,8 +1472,8 @@ TEST_CASE("PLG074 F01988 cycles all box corners in each anchor space",
   const std::array offsets{std::array{0, 0, 0}, std::array{100, -200, 300},
                            std::array{700, -800, 900}};
   for (int cycle = 0; cycle < 2; ++cycle) {
-    entry(&definition, &fixture.scratch, &fixture.instance,
-          &fixture.trail_state);
+    VS::Effects::GenerateLivePlg074TrailOrigins(
+        definition, fixture.scratch, fixture.instance, fixture.trail_state);
     for (int index = 0; index < 8; ++index) {
       const auto& point = fixture.trails[index].splinePoints[0];
       const int corner = index + 1;
@@ -1632,7 +1635,8 @@ TEST_CASE(
 
 TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
           "[effects][plg074][f01994]") {
-  const auto entry = Plg074Entry(0x800FCFEC, Effects_Plg074_UpdateTrailEmitter);
+  const Effects_EffectRenderer entry =
+      &VS::Effects::UpdateLivePlg074TrailEmitter;
   REQUIRE(Effects_effectEntryPoints[89] == entry);
   const std::int16_t count = GENERATE(0, 1, 16, 20);
   const bool cancel = GENERATE(false, true);
@@ -1654,6 +1658,155 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
     CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
     fixture.ResetPackets();
   }
+}
+
+namespace {
+struct LogCapture {
+  std::vector<std::string> messages;
+  VS::Core::LogObserver previous;
+
+  LogCapture()
+      : previous(
+            VS::Core::SetLogObserver([this](const VS::Core::LogRecord& record) {
+              if (record.channel == "effects") {
+                messages.emplace_back(record.message);
+              }
+            })) {}
+  LogCapture(const LogCapture&) = delete;
+  LogCapture& operator=(const LogCapture&) = delete;
+  LogCapture(LogCapture&&) = delete;
+  LogCapture& operator=(LogCapture&&) = delete;
+  ~LogCapture() { VS::Core::SetLogObserver(std::move(previous)); }
+
+  [[nodiscard]] bool Contains(std::string_view text) const {
+    return std::ranges::any_of(messages, [text](const std::string& message) {
+      return message.find(text) != std::string::npos;
+    });
+  }
+};
+
+// Three curves of one, four and two entries after a four-byte header and
+// three size bytes.
+struct CurveBlockStorage {
+  alignas(4) std::array<u_char, 16> bytes{3,  0,  8,  0,  1,  4, 2, 0,
+                                          90, 10, 20, 30, 40, 5, 6, 0};
+
+  void Bind() {
+    Effects_BindEffectCurves(
+        reinterpret_cast<Effects_CurveBlock*>(bytes.data()));
+    VS::Effects::RecordLiveEffectCurves(
+        std::as_bytes(std::span(bytes).first(15)));
+  }
+};
+
+std::array<u_char, 5> CreatedTransparency(Plg074Fixture& fixture,
+                                          u_char curve) {
+  fixture.Definition().transparencyCurve = curve;
+  Effects_RendererSlot slot{};
+  REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
+  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  std::array<u_char, 5> samples{};
+  std::memcpy(samples.data(),
+              reinterpret_cast<const u_char*>(state) +
+                  offsetof(Effects_TrailQuadSet, sampledTransparencyCurve),
+              samples.size());
+  REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
+  Core_Memory_FreeFromHighEnd(state);
+  return samples;
+}
+}  // namespace
+
+TEST_CASE("PLG074 promoted trail functions no longer resolve as module code",
+          "[effects][plg074][trail-emitter]") {
+  for (const unsigned address : {0x800FB414u, 0x800FCFECu}) {
+    CHECK(VS::Content::ResolveModuleAddress(
+              {Content_moduleSymbols, Content_moduleSymbolCount},
+              "EFFECT/PLG074.BIN", address) == nullptr);
+  }
+}
+
+TEST_CASE("PLG074 trail emitter refuses definitions the package lacks",
+          "[effects][plg074][trail-emitter]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  Effects_RendererSlot slot{};
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0x102) == 1);
+  CHECK(slot.rendererState == nullptr);
+  CHECK(log.Contains("definition 1 is outside"));
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+}
+
+TEST_CASE("PLG074 trail emitter refuses negative trail counts",
+          "[effects][plg074][trail-emitter]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  Effects_RendererSlot slot{};
+  fixture.Definition().intervalRange[0] = -1;
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
+  CHECK(slot.rendererState == nullptr);
+  CHECK(log.Contains("negative trail count"));
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+}
+
+TEST_CASE("PLG074 trail emitter stops when its package is replaced",
+          "[effects][plg074][trail-emitter]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  Effects_RendererSlot slot{};
+  fixture.Definition().intervalRange[0] = 2;
+  REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
+  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  VS::Effects::ForgetLivePackageExtents();
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
+  CHECK(state->trails == nullptr);
+  CHECK(log.Contains("no longer holds definition 0"));
+  Core_Memory_FreeFromHighEnd(state);
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+}
+
+TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
+          "[effects][plg074][trail-emitter]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  CurveBlockStorage curves;
+  curves.Bind();
+  fixture.Definition().intervalRange[0] = 1;
+  CHECK(CreatedTransparency(fixture, 0) ==
+        std::array<u_char, 5>{128, 128, 128, 128, 128});
+  CHECK(CreatedTransparency(fixture, 1) ==
+        std::array<u_char, 5>{10, 10, 20, 30, 40});
+  CHECK(CreatedTransparency(fixture, 2) ==
+        std::array<u_char, 5>{5, 5, 5, 5, 6});
+  CHECK(CreatedTransparency(fixture, 3) ==
+        std::array<u_char, 5>{128, 128, 128, 128, 128});
+  CHECK(log.Contains("transparency curve 3 is outside"));
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+}
+
+TEST_CASE("PLG074 trail tick events stay within the package's definitions",
+          "[effects][plg074][trail-emitter]") {
+  Plg074Fixture fixture;
+  DispatchHeap heap;
+  LogCapture log;
+  fixture.Definition().intervalRange[0] = 1;
+  fixture.Definition().tickEvent = 2;
+  Effects_RendererSlot slot{};
+  REQUIRE(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
+  auto* state = static_cast<Effects_TrailQuadSet*>(slot.rendererState);
+  REQUIRE(state != nullptr);
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 1);
+  CHECK(log.Contains("tick event 1 is outside"));
+  CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
+  Core_Memory_FreeFromHighEnd(state);
+  CHECK(Core_legacyHeapList.next->blockSize == heap.free_units);
+  fixture.ResetPackets();
 }
 
 TEST_CASE("PLG074 F01995 draws five accelerating surface rows",

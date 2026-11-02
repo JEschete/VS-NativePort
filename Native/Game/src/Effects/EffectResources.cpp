@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Effects/PackageExtents.hpp"
 #include "Effects/TextureBindings.hpp"
+#include "Effects/TrailEmitterLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
@@ -26,7 +28,6 @@ extern "C" {
 #include "Effects/Templates/Mesh10.h"
 #include "Effects/Templates/MirrorSurface.h"
 #include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/RadialSurge.h"
 #include "Effects/Templates/Ring.h"
 #include "Effects/Templates/RotatingSurface.h"
 #include "Effects/Templates/Surface.h"
@@ -391,6 +392,7 @@ void Effects_SetEffectPluginLoadState(int load_state) { Effects_pluginLoadState 
 // decomp: BATTLE.PRG func_800D8060 (src/BATTLE/BATTLE.PRG/6F014.c:746)
 void Effects_BindEffectPackageBlocks(Effects_PackageFile* package_block)
 {
+    VS::Effects::ForgetLivePackageExtents();
     while (1) {
         int meta = package_block->meta;
 
@@ -413,10 +415,14 @@ void Effects_BindEffectPackageBlocks(Effects_PackageFile* package_block)
 
         case 0x40000:
             Effects_BindEffectCurves((Effects_CurveBlock*)package_block->blocks);
+            VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span<const u_char>(
+                package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta))));
             break;
 
         case 0x50000:
             Effects_BindParticleDefinitions((Effects_PackageBlock5*)package_block->blocks);
+            VS::Effects::RecordLiveParticleDefinitions(std::as_bytes(std::span<const u_char>(
+                package_block->blocks, (unsigned)(meta & 0xFFFF) - sizeof(package_block->meta))));
             break;
 
         case 0x80000:
@@ -536,7 +542,7 @@ int Effects_InvokeAllPluginUpdates(Effects_RendererSlot* arg0, u_int arg1, int a
     Effects_Plg073_Grid(NULL, 2, 0);
     Effects_Plg073_TiledRing(NULL, 2, 0);
     Effects_Plg073_Ring(NULL, 2, 0);
-    Effects_Plg074_UpdateTrailEmitter(NULL, 2, 0);
+    VS::Effects::UpdateLivePlg074TrailEmitter(NULL, 2, 0);
     Effects_Plg073_RotatingSurface(NULL, 2, 0);
     Effects_Plg005_UpdateAnalyzeGrid(NULL, 2, 0);
     Effects_Plg073_TiledRing(NULL, 2, 0);

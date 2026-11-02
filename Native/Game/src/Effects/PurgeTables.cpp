@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Effects/TrailEmitterLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Content/DiscLayout.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Effects/Templates/Mesh10.h"
 #include "Effects/Templates/MirrorSurface.h"
 #include "Effects/Templates/ParticleDispatch.h"
-#include "Effects/Templates/RadialSurge.h"
 #include "Effects/Templates/Ring.h"
 #include "Effects/Templates/RotatingSurface.h"
 #include "Effects/Templates/Surface.h"
@@ -94,7 +94,7 @@ Effects_EffectRenderer Effects_effectEntryPoints[] = { Effects_Plg005_UpdateAnal
     Effects_Plg069_TrailNineDispatch, Effects_Plg069_TiledRing, Effects_Plg069_Mesh10, Effects_Plg069_TrailNineDispatch, Effects_Plg069_TiledRing,
     Effects_Plg069_Mesh10, Effects_Plg069_TrailNineDispatch, Effects_Plg069_TiledRing, Effects_Plg069_Mesh10, Effects_Plg069_TrailNineDispatch,
     Effects_Plg069_TiledRing, Effects_Plg073_TiledRing, Effects_Plg073_Ring, Effects_Plg073_TrailDispatch, Effects_Plg073_RotatingSurface,
-    Effects_Plg073_Grid, Effects_Plg073_TiledRing, Effects_Plg073_Ring, Effects_Plg074_UpdateTrailEmitter, Effects_Plg073_RotatingSurface,
+    Effects_Plg073_Grid, Effects_Plg073_TiledRing, Effects_Plg073_Ring, VS::Effects::UpdateLivePlg074TrailEmitter, Effects_Plg073_RotatingSurface,
     Effects_Plg005_UpdateAnalyzeGrid, Effects_Plg073_TiledRing, Effects_Plg073_Ring, Effects_Plg073_TrailDispatch, Effects_Plg073_RotatingSurface,
     Effects_Plg073_Grid, Effects_Plg073_TiledRing, Effects_Plg073_Ring, Effects_Plg073_TrailDispatch, Effects_Plg073_RotatingSurface,
     Effects_Plg073_Grid, Effects_Plg077_Mesh10, Effects_Plg052_UpdateRepeatingRing, Effects_Plg077_Grid, Effects_Plg077_Surface,

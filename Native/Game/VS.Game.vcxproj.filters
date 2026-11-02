@@ -723,6 +723,12 @@
     <ClInclude Include="src\Effects\Package.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\PackageExtents.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\PackageExtentsLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\ParticleRender.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -1251,12 +1257,6 @@
     <ClInclude Include="src\Effects\Templates\ParticleTarget.inl">
       <Filter>src\Effects\Templates</Filter>
     </ClInclude>
-    <ClCompile Include="src\Effects\Templates\RadialSurge.cpp">
-      <Filter>src\Effects\Templates</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Effects\Templates\RadialSurge.h">
-      <Filter>src\Effects\Templates</Filter>
-    </ClInclude>
     <ClCompile Include="src\Effects\Templates\Ring.cpp">
       <Filter>src\Effects\Templates</Filter>
     </ClCompile>
@@ -1434,6 +1434,12 @@
     <ClInclude Include="src\Effects\Timeline.h">
       <Filter>src\Effects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Effects\TrailEmitter.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Effects\TrailEmitterLive.cpp">
+      <Filter>src\Effects</Filter>
+    </ClCompile>
     <ClCompile Include="src\Effects\Trails.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -2325,6 +2331,9 @@
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
     </ClInclude>
+    <ClInclude Include="include\Effects\PackageExtents.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
     <ClInclude Include="include\Effects\ParticleRender.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
@@ -2338,6 +2347,12 @@
       <Filter>include\Effects\ScreenDistortion</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\TextureBindings.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TrailEmitter.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\TrailEmitterLive.hpp">
       <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Event\WeaponMode.hpp">

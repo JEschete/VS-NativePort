@@ -124,7 +124,6 @@ extern "C" {
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Effects/ScriptVm.h"
-#include "Effects/Templates/RadialSurge.h"
 #include "Effects/Templates/Ring.h"
 #include "Effects/Templates/RotatingSurface.h"
 #include "Effects/Templates/TiledRing.h"
@@ -3166,13 +3165,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E6EB0u, 0u, (void*)&Battle_Ai_ReleaseActorAiContactOccupancy, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&Effects_Plg073_TiledRing, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FA7F0u, 0u, (void*)&Effects_Plg073_Ring, 0u, 0u, 0u},
-    {"EFFECT/PLG074.BIN", 0x800FB414u, 0u, (void*)&Effects_Plg074_GenerateTrailOrigins, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FBBB0u, 0u, (void*)&Effects_Plg073_TrailTarget, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FBDC8u, 0u, (void*)&Effects_Plg073_TrailControl, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FC28Cu, 0u, (void*)&Effects_Plg073_TrailInit, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FC404u, 0u, (void*)&Effects_Plg073_TrailUpdate, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FC590u, 0u, (void*)&Effects_Plg073_TrailRender, 0u, 0u, 0u},
-    {"EFFECT/PLG074.BIN", 0x800FCFECu, 0u, (void*)&Effects_Plg074_UpdateTrailEmitter, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&Effects_Plg073_RotatingSurface, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800980F8u, 0u, (void*)&Render_LinkRoomPolygonByDepth, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80097AECu, 0u, (void*)&Render_SubdivideRoomTriangle, 0u, 0u, 0u},

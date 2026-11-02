@@ -91,6 +91,9 @@ NATIVE_HELPER_HEADERS = {
     "VS::Field::TraceLiveActorAndTerrainCollision": r"Native\Game\include\Field\SegmentCollisionLive.hpp",
     "VS::Effects::DrawLiveEffectParticleList": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
     "VS::Effects::DrawLiveAnimatedSpriteParticles": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
+    "VS::Effects::UpdateLivePlg074TrailEmitter": r"Native\Game\include\Effects\TrailEmitterLive.hpp",
+    **{f"VS::Effects::{name}": r"Native\Game\include\Effects\PackageExtents.hpp"
+       for name in ("ForgetLivePackageExtents", "RecordLiveParticleDefinitions", "RecordLiveEffectCurves")},
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
        for name in ("VS::Movie::Intro::StartLive", "VS::Movie::Intro::StopLive",
                     "VS::Movie::Intro::StopLiveAfterAudioTail", "VS::Movie::Intro::PlayLive")},
@@ -258,13 +261,11 @@ MODULE_FUNCTION_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E6EB0, "F01836"),
     ("EFFECT/PLG074.BIN", 0x800F98F8, "F01986"),
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "F01987"),
-    ("EFFECT/PLG074.BIN", 0x800FB414, "F01988"),
     ("EFFECT/PLG074.BIN", 0x800FBBB0, "F01989"),
     ("EFFECT/PLG074.BIN", 0x800FBDC8, "F01990"),
     ("EFFECT/PLG074.BIN", 0x800FC28C, "F01991"),
     ("EFFECT/PLG074.BIN", 0x800FC404, "F01992"),
     ("EFFECT/PLG074.BIN", 0x800FC590, "F01993"),
-    ("EFFECT/PLG074.BIN", 0x800FCFEC, "F01994"),
     ("EFFECT/PLG074.BIN", 0x800FD534, "F01995"),
     ("BATTLE/BATTLE.PRG", 0x800980F8, "F00752"),
     ("BATTLE/BATTLE.PRG", 0x80097AEC, "F00748"),
@@ -670,6 +671,19 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Effects_BindEffectAuxiliarySoundBank(\n"
          "                arg0->blocks, (meta & 0xFFFF) - sizeof(u_int));",
          "the stream payload excludes the four-byte package block header"),
+        ("{\n    while (1) {\n        int meta = arg0->meta;",
+         "{\n    VS::Effects::ForgetLivePackageExtents();\n    while (1) {\n        int meta = arg0->meta;",
+         "F01994 #271: a rebound package starts without recorded definition and curve extents"),
+        ("Effects_BindEffectCurves((Effects_CurveBlock*)arg0->blocks);",
+         "Effects_BindEffectCurves((Effects_CurveBlock*)arg0->blocks);\n"
+         "            VS::Effects::RecordLiveEffectCurves(std::as_bytes(std::span<const u_char>(\n"
+         "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
+         "F01994 #271: record how many curves the curve block's payload actually contains"),
+        ("Effects_BindParticleDefinitions((Effects_PackageBlock5*)arg0->blocks);",
+         "Effects_BindParticleDefinitions((Effects_PackageBlock5*)arg0->blocks);\n"
+         "            VS::Effects::RecordLiveParticleDefinitions(std::as_bytes(std::span<const u_char>(\n"
+         "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
+         "F01994 #271: record how many particle definitions the block's payload holds"),
     ],
     "F03265": [
         ("""    if ((Audio_Cutscene_streamState.voiceMask != 0)
@@ -2807,6 +2821,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Audio::Driver::ResetPlaybackState\(\)",
      r"VS::Audio::Driver::ResetLivePlaybackState()",
      "F03160 #46 typed promotion: the driver binding applies the reset to the live sequencer, mixer, stream and channel tables"),
+    (r"", r"\bVS::Effects::UpdateTrailEmitter\b", r"VS::Effects::UpdateLivePlg074TrailEmitter",
+     "F01994 #46 typed promotion: the renderer table and plugin update bind PLG074's slot entry, which checks "
+     "the emitter against the current package's recorded extents before running the typed lifecycle (#271)"),
     (r"", r"\bVS::Actors::AdvanceSkeletalAnimation\((\w+), &\1->pose, ",
      r"VS::Actors::AdvanceLiveSkeletalAnimation(*\1, ",
      "F04128 #46 typed promotion: the actor binding steps the actor's own pose and bounds its SEQ reads by the "

@@ -208,6 +208,7 @@
     <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
+    <ClCompile Include="src\TrailEmitterTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />
     <ClCompile Include="src\ViewportBoundsTests.cpp" />
     <ClCompile Include="src\VignetteRenderTests.cpp" />

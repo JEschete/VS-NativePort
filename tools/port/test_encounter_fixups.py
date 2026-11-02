@@ -582,20 +582,24 @@ class EncounterFixupTests(unittest.TestCase):
             identity = f"F{1986 + offset:05}"
             with self.subTest(id=identity):
                 row = catalog[identity]
-                self.assertIn(
-                    ("EFFECT/PLG074.BIN", address, identity),
-                    copy_fixups.MODULE_FUNCTION_ENTRIES,
-                )
                 self.assertEqual(row["copied"], "x")
                 if offset in (2, 8):
+                    # #46/#271: PLG074's origin and emitter are typed VS::Effects code; the overlay image
+                    # stores neither address, so no module entry resolves to them.
+                    self.assertNotIn(
+                        ("EFFECT/PLG074.BIN", address, identity),
+                        copy_fixups.MODULE_FUNCTION_ENTRIES,
+                    )
                     self.assertEqual(
                         audit_assembly_gaps.canonical_id(row, catalog), identity
                     )
-                    self.assertEqual(
-                        audit_assembly_gaps.template_status(row)[0],
-                        "template-instance",
-                    )
+                    self.assertTrue(self.owned_items()[identity]["name"].startswith("VS::Effects::"))
+                    self.assertNotIn("native-template:", row["notes"])
                 else:
+                    self.assertIn(
+                        ("EFFECT/PLG074.BIN", address, identity),
+                        copy_fixups.MODULE_FUNCTION_ENTRIES,
+                    )
                     self.assertEqual(
                         audit_assembly_gaps.canonical_id(row, catalog),
                         f"F{1975 + offset:05}",
@@ -605,19 +609,10 @@ class EncounterFixupTests(unittest.TestCase):
             if blob[4] == "Content_plg074TrailEmissionCounter"
         )
         self.assertEqual(cursor[:4], ("EFFECT/PLG074.BIN", 0x577C, 0x800FEF7C, 4))
-        source = (root / r"Native\Game\src\Effects\Templates\RadialSurge.cpp").read_text(
+        source = (root / r"Native\Game\src\Effects\TrailEmitterLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn(
-            "#define VS_TRAIL_CORNER_STATE Content_plg074TrailEmissionCounter[0]",
-            source,
-        )
-        self.assertEqual(
-            source.count(
-                "#define VS_TRAIL_ORIGIN_FUNCTION Effects_Plg074_GenerateTrailOrigins"
-            ),
-            2,
-        )
+        self.assertIn("Content_plg074TrailEmissionCounter[0]", source)
         self.assertNotIn("Effects_Plg073_trailEmissionCounter", source)
 
     def test_room_packet_linking_reuses_shared_depth_resolution_and_native_handles(self):
