@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Content/DiscReaderLive.hpp"
 
 extern "C" {
 #include "Actors/ActorAllocation.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
 #include "Core/Memory/WordCopy.h"
-#include "DiscReader.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
 #include "Field/GimmickMotion.h"
@@ -79,17 +79,17 @@ int TestsDiscReadSizeContract(void) {
   Content_discDriveState = (Content_DiscDrive){0};
   Content_discDriveState.byteCount = 7;
   unsigned char destination[2049];
-  int passed = Content_BeginDiscRead(1, UINT32_MAX, destination) == 0 &&
+  int passed = !VS::Content::BeginLiveDiscRead(1, UINT32_MAX, destination) &&
                Content_discDriveState.state == Content_DiscDriveState_Idle &&
                Content_discDriveState.byteCount == 7 &&
                Content_discDriveState.destination == nullptr;
   passed = passed &&
-           Content_BeginDiscRead(1, sizeof destination, destination) == 1 &&
+           VS::Content::BeginLiveDiscRead(1, sizeof destination, destination) &&
            Content_discDriveState.state == Content_DiscDriveState_ReadInit &&
            Content_discDriveState.byteCount == sizeof destination &&
            Content_discDriveState.sectorCount == 2 &&
            Content_discDriveState.destination == destination;
-  passed = passed && Content_BeginDiscRead(2, 0, nullptr) == 0 &&
+  passed = passed && !VS::Content::BeginLiveDiscRead(2, 0, nullptr) &&
            Content_discDriveState.startSector == 1;
   Content_discDriveState = saved;
   return passed;

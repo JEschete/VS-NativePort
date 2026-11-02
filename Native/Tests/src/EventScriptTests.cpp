@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "Audio/MusicVoiceConflicts.hpp"
+#include "Content/DiscReaderLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Boot/Session.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
-#include "DiscReader.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
 #include "Event/Script.h"
@@ -380,7 +380,7 @@ int TestsXaCommand(int command, int first, int second, int third) {
     case 0:
       return Audio_BeginXaStream(first, second);
     case 1:
-      Content_UpdateDiscCommands();
+      VS::Content::UpdateLiveDiscCommands();
       return Content_discDriveState.state;
     case 2:
       return Audio_RequestXaStreamStop();
@@ -400,7 +400,7 @@ int TestsXaCommand(int command, int first, int second, int third) {
       Audio_Native_Reset();
       break;
     case 8:
-      Content_ResetDiscDrive();
+      VS::Content::ResetLiveDiscDrive();
       break;
     case 9:
       return Content_discDriveState.failureCount;

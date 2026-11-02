@@ -1,104 +1,102 @@
 // Hand-maintained (tools/port/owned.csv).
-// The disc drive, modernized: a read the copied queue starts
-// (Content_BeginDiscRead) is served from the extracted game data
-// (Content/DataStore.hpp) on the next queue update, with the state transitions
-// the queue and the blocking reader poll for. No drive, seek or sector
-// callbacks remain.
-extern "C" {
-#include "DiscReader.h"
+// The disc drive, modernized: a read the request queue starts is served from
+// the extracted game data on the next command update, with the phase
+// transitions the queue and the blocking reader poll for. No drive, seek or
+// sector callbacks remain; the live binding is DiscReaderLive.cpp.
+#include "Content/DiscReader.hpp"
 
-#include <limits.h>
+#include <cstdint>
+#include <limits>
+#include <optional>
 
-#include "Audio/XaPlayback.h"
-#include "Content/DataAccess.h"
-#include "DiscQueue.h"
-#include "Legacy/Psx.h"
+namespace VS::Content {
 
-enum { kInactiveXaMarker = 128 };
-
-// decomp: SLUS_010.40 _diskInitRead (src/SLUS_010.40/main.c:9140)
-int Content_BeginDiscRead(int sector, u_int bytes, void* vram) {
-  enum { kDataSectorBytes = 2048 };
-  if (Content_discDriveState.state != Content_DiscDriveState_Idle ||
-      bytes > INT_MAX) {
-    return 0;
+std::optional<DiscReadPlan> PlanDiscRead(std::int32_t sector,
+                                         std::uint32_t bytes) {
+  if (bytes >
+      static_cast<std::uint32_t>(std::numeric_limits<std::int32_t>::max())) {
+    return std::nullopt;
   }
-  Content_discDriveState.startSector = sector;
-  Content_discDriveState.byteCount = static_cast<int>(bytes);
-  Content_discDriveState.destination = vram;
-  Content_discDriveState.ringReadIndex = 0;
-  Content_discDriveState.ringWriteIndex = 0;
-  Content_discDriveState.destinationSector = 0;
-  Content_discDriveState.bufferedSectors = 0;
-  Content_discDriveState.sectorsReceived = 0;
-  Content_discDriveState.failureCount = 0;
-  Content_discDriveState.ringSectorsWritten = 0;
-  Content_discDriveState.sectorCount = bytes / kDataSectorBytes;
-  if (bytes % kDataSectorBytes) {
-    ++Content_discDriveState.sectorCount;
-  }
-  Content_discDriveState.state = Content_DiscDriveState_ReadInit;
-  return 1;
+  const std::uint32_t partial = bytes % kDiscDataSectorBytes != 0 ? 1U : 0U;
+  return DiscReadPlan{
+      .start_sector = sector,
+      .byte_count = static_cast<std::int32_t>(bytes),
+      .sector_count = (bytes / kDiscDataSectorBytes) + partial,
+  };
 }
 
+// decomp: SLUS_010.40 _diskInitRead (src/SLUS_010.40/main.c:9140)
+bool BeginDiscRead(DiscDriveHost& host, std::int32_t sector,
+                   std::uint32_t bytes) {
+  if (host.Phase() != DiscDrivePhase::kIdle) {
+    return false;
+  }
+  const std::optional<DiscReadPlan> plan = PlanDiscRead(sector, bytes);
+  if (!plan.has_value()) {
+    return false;
+  }
+  host.ArmRead(*plan);
+  host.SetPhase(DiscDrivePhase::kReadInit);
+  return true;
+}
+
+namespace {
+
+void FailCommand(DiscDriveHost& host) {
+  host.CountFailure();
+  host.SetPhase(DiscDrivePhase::kReadError);
+}
+
+}  // namespace
+
 // decomp: SLUS_010.40 func_800443CC (src/SLUS_010.40/main.c:9164)
-void Content_UpdateDiscCommands(void) {
-  switch (Content_discDriveState.state) {
-    case Content_DiscDriveState_ReadInit:
-      if (Content_discDriveState.byteCount != 0 &&
-          !Content_ReadDiscBytes(Content_discDriveState.startSector,
-                                 Content_discDriveState.byteCount,
-                                 Content_discDriveState.destination)) {
-        ++Content_discDriveState.failureCount;
-        Content_discDriveState.state = Content_DiscDriveState_ReadError;
-        break;
+void UpdateDiscCommands(DiscDriveHost& host) {
+  switch (host.Phase()) {
+    case DiscDrivePhase::kReadInit: {
+      const DiscReadPlan plan = host.PendingRead();
+      if (plan.byte_count != 0 && !host.ReadPendingData()) {
+        FailCommand(host);
+        return;
       }
-      Content_discDriveState.sectorsReceived =
-          Content_discDriveState.sectorCount;
-      Content_discDriveState.destinationSector =
-          Content_discDriveState.sectorCount;
-      Content_discDriveState.state = Content_DiscDriveState_Idle;
-      break;
-    case Content_DiscDriveState_ReadXaInit:
-      if (!Audio_Native_StartXaStream(Content_discDriveState.startSector,
-                                      Content_discDriveState.byteCount)) {
-        ++Content_discDriveState.failureCount;
-        Content_discDriveState.state = Content_DiscDriveState_ReadError;
-        break;
-      }
-      Content_discDriveState.xaModeMarker = 0;
-      Content_discDriveState.position.minute = 0;
-      Content_discDriveState.state = Content_DiscDriveState_StreamXa;
-      break;
-    case Content_DiscDriveState_StreamXa: {
-      const int status = Audio_Native_XaStreamStatus();
-      if (status < 0) {
-        ++Content_discDriveState.failureCount;
-        Content_discDriveState.state = Content_DiscDriveState_ReadError;
-      } else if (status == 0) {
-        Audio_Native_StopXaStream();
-      }
-      break;
+      host.MarkSectorsDelivered(plan.sector_count);
+      host.SetPhase(DiscDrivePhase::kIdle);
+      return;
     }
-    case Content_DiscDriveState_StreamXaEnd:
-      Audio_Native_StopXaStream();
-      break;
+    case DiscDrivePhase::kReadXaInit:
+      if (!host.StartXaStream(host.PendingXaRequest())) {
+        FailCommand(host);
+        return;
+      }
+      host.MarkXaStreamStarted();
+      host.SetPhase(DiscDrivePhase::kStreamXa);
+      return;
+    case DiscDrivePhase::kStreamXa:
+      switch (host.PollXaStream()) {
+        case XaStreamStatus::kFailed:
+          FailCommand(host);
+          return;
+        case XaStreamStatus::kFinished:
+          host.StopXaStream();
+          return;
+        case XaStreamStatus::kPlaying:
+          return;
+      }
+      return;
+    case DiscDrivePhase::kStreamXaEnd:
+      host.StopXaStream();
+      return;
     default:
-      break;
+      return;
   }
 }
 
 // decomp: SLUS_010.40 _diskReset (src/SLUS_010.40/main.c:9385)
-void Content_ResetDiscDrive(void) {
-  enum { kModeChangeTicks = 3 };
-  Audio_Native_StopXaStream();
-  Content_discDriveState.xaModeMarker = kInactiveXaMarker;
-  Content_discDriveState.position.minute = kInactiveXaMarker;
-  Content_discDriveState.reserved2 = 0;
-  Content_discDriveState.state = Content_DiscDriveState_Idle;
-  Content_discDriveState.bufferMode = Content_DiscBufferMode_Direct;
-  Content_legacyDiscReadBuffer = nullptr;
-  VSync(kModeChangeTicks);  // the drive's mode change took three frames; kept
-                            // so start-up timing matches
+void ResetDiscDrive(DiscDriveHost& host) {
+  host.StopXaStream();
+  host.ClearXaMarkers();
+  host.SetPhase(DiscDrivePhase::kIdle);
+  host.UseDirectBuffer();
+  host.WaitFrames(kDiscModeChangeFrames);
 }
-}  // extern "C"
+
+}  // namespace VS::Content

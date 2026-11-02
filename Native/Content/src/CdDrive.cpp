@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/DiscReaderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
-#include "DiscReader.h"
 #include "State/PlayTime.h"
 
 // decomp: SLUS_010.40 _diskReadCallback (src/SLUS_010.40/main.c:9021)
@@ -130,7 +130,7 @@ void Content_ClearDiscReadError(void)
 // decomp: SLUS_010.40 vs_main_diskLoadFile (src/SLUS_010.40/main.c:9334)
 int Content_ReadDiscFileBlocking(int sector, int bytes, void* vram)
 {
-    int result = Content_BeginDiscRead(sector, bytes, vram);
+    int result = VS::Content::BeginLiveDiscRead(sector, bytes, vram);
     if (result != 0) {
         int seekReady = Content_DiscDriveState_SeekReady;
         int readReady = Content_DiscDriveState_ReadReady;
@@ -228,7 +228,7 @@ void Content_UpdateDiscQueue(void)
                 if (slot->state == Content_DiscRequestState_Enqueued) {
                     if (slot->priority == 0) {
                         slot->state = Content_DiscRequestState_Reading;
-                        Content_BeginDiscRead(slot->cdFile.lba, slot->cdFile.size, slot->vram);
+                        VS::Content::BeginLiveDiscRead(slot->cdFile.lba, slot->cdFile.size, slot->vram);
                         Content_discDriveState.framesSinceLastRead = 0;
                         --Content_discRequestCounts.waiting;
                         ++Content_discRequestCounts.reading;
@@ -242,7 +242,7 @@ void Content_UpdateDiscQueue(void)
             }
         }
     }
-    Content_UpdateDiscCommands();
+    VS::Content::UpdateLiveDiscCommands();
 }
 
 }  // extern "C"

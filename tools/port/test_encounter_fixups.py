@@ -2104,6 +2104,7 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
 {
     Core_Memory_InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
     Content_InitializeDiscQueue();
+    VS::Content::ResetDiscDrive();
 }
 """
         for old, new, _ in copy_fixups.FIXES["F03437"]:

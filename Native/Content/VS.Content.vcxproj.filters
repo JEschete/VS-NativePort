@@ -48,9 +48,9 @@
     <ClCompile Include="src\DiscReader.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\DiscReader.h">
+    <ClCompile Include="src\DiscReaderLive.cpp">
       <Filter>src</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\LegacyFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -109,6 +109,12 @@
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DiscLayout.h">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\DiscReader.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\DiscReaderLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\ModuleData.h">

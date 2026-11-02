@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/DiscReaderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
-#include "DiscReader.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
@@ -190,7 +190,7 @@ void Boot_InitializeTitleSession(void)
     Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
     Battle_Ai_InvalidateSessionBindings();
     Content_InitializeDiscQueue();
-    Content_ResetDiscDrive();
+    VS::Content::ResetLiveDiscDrive();
     Audio_InitializeMenuSoundBanks();
     Input_ResetVibrationPatterns();
     Boot_isGameplayActive = 0;

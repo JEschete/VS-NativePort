@@ -121,7 +121,6 @@ extern "C" {
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
-#include "DiscReader.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
@@ -3007,7 +3006,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x800441C4u, 0u, (void*)&Content_SeekCommandCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044224u, 0u, (void*)&Content_XaReadyCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044310u, 0u, (void*)&Content_DiscState, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800443CCu, 0u, (void*)&Content_UpdateDiscCommands, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004493Cu, 0u, (void*)&Content_ReadDiscFileBlocking, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800449E8u, 0u, (void*)&Audio_BeginXaStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044A38u, 0u, (void*)&Audio_RequestXaStreamStop, 0u, 0u, 0u},

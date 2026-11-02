@@ -22,7 +22,6 @@ extern "C" {
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
-#include "DiscReader.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Event/ScriptVm.h"
 #include "Input/Controller.h"

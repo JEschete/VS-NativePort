@@ -56,6 +56,9 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
        for name in ("VS::Movie::Intro::StartLive", "VS::Movie::Intro::StopLive",
                     "VS::Movie::Intro::StopLiveAfterAudioTail", "VS::Movie::Intro::PlayLive")},
+    **{name: r"Native\Content\include\Content\DiscReaderLive.hpp"
+       for name in ("VS::Content::BeginLiveDiscRead", "VS::Content::UpdateLiveDiscCommands",
+                    "VS::Content::ResetLiveDiscDrive")},
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -3357,10 +3360,22 @@ FIXES["F03437"] = FIXES["F03437"] + [
     ("    Content_InitializeDiscQueue();",
      "    Battle_Ai_InvalidateSessionBindings();\n    Content_InitializeDiscQueue();",
      "native AI bindings must not outlive the game-arena reset in _sysReinit"),
+    ("VS::Content::ResetDiscDrive();", "VS::Content::ResetLiveDiscDrive();",
+     "F03479 typed core takes a DiscDriveHost; the generated caller uses the live binding"),
     ("void Boot_InitializeTitleSession(void)\n{",
      "void Boot_InitializeTitleSession(void)\n{\n    Save_NativeResetSession();",
      "main.c:8309 discard staged native state before heap/module initialization"),
 ]
+
+FIXES.setdefault("F03476", []).append(
+    ("VS::Content::BeginDiscRead(", "VS::Content::BeginLiveDiscRead(",
+     "F03474 typed core takes a DiscDriveHost; the generated caller uses the live binding"))
+FIXES.setdefault("F03486", []).extend([
+    ("VS::Content::BeginDiscRead(", "VS::Content::BeginLiveDiscRead(",
+     "F03474 typed core takes a DiscDriveHost; the generated caller uses the live binding"),
+    ("VS::Content::UpdateDiscCommands();", "VS::Content::UpdateLiveDiscCommands();",
+     "F03475 typed core takes a DiscDriveHost; the generated caller uses the live binding"),
+])
 
 for _row, _variable in (
     ("F00946", "actor"),
