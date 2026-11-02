@@ -198,7 +198,7 @@ F02738,Native\Game\src\Save\MenuAssets.cpp,,,,,,,,,
 F02764,Native\Game\src\Save\NativeMenu.cpp,x,,,,x,,,,
 F02767,Native\Game\src\Save\NativeMenu.cpp,x,,,,x,,,,
 F02776,Native\Game\src\Save\NativeContainer.cpp,,,,,,,,,
-F03144,Native\Engine\src\Audio\XaPlayback.cpp,x,,,,x,,,,
+F03144,Native\Engine\src\Audio\XaMix.cpp,x,x,x,x,x,x,verify:VR-AUDIO-XA-DISC-MIX-SLICE,8a380aced00f04c34222dce6a03f36ddfa9b6b14,#46 slice: VS::Audio::Control::SetDiscMixVolume returns the CdlATV routes as DiscMixMatrix and VS::Audio::Seq::WriteDiscVolume returns the signed CD level in the legacy-free XaMix.cpp; SetLiveDiscMixVolume and WriteLiveDiscVolume in XaPlayback.cpp bind the output mode and sequencer volume and publish to the native XA source; generated callers use the bindings by copier fixup; no data word stores 0x80013230 or 0x80019134
 F03159,Native\Engine\src\Audio\SequencerOutput.cpp,x,,,,x,,,,
 F03160,Native\Engine\src\Audio\Driver\PlaybackReset.cpp,,,,,,,,,
 F03163,Native\Engine\src\Audio\SequencerOutput.cpp,x,,,,x,,,,
@@ -212,7 +212,7 @@ F03178,Native\Engine\src\Audio\SequencerOutput.cpp,x,,,,x,,,,
 F03198,Native\Engine\src\Audio\MusicState.cpp,x,x,x,x,x,x,verify:VR-AUDIO-SAVED-VOICE-RELEASE,fe067abda22f3829bac8a031e4a387c5938bce2a,"#46 slice: VS::Audio::Seq::ReleaseSavedVoiceConflicts reads MusicLayerVoices and the saved channels through MusicChannelVoices and returns the voices to key off; ReleaseLiveSavedVoiceConflicts in MusicLayers.cpp binds the live configurations, the secondary channel table and the mixer key-off mask; the generated MusicSequence.cpp callers use the binding by copier fixup; no data word stores 0x80015BAC"
 F03257,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03258,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
-F03262,Native\Engine\src\Audio\XaPlayback.cpp,x,,,,x,,,,
+F03262,Native\Engine\src\Audio\XaMix.cpp,x,x,x,x,x,x,verify:VR-AUDIO-XA-DISC-MIX-SLICE,8a380aced00f04c34222dce6a03f36ddfa9b6b14,#46 slice: VS::Audio::Control::SetDiscMixVolume returns the CdlATV routes as DiscMixMatrix and VS::Audio::Seq::WriteDiscVolume returns the signed CD level in the legacy-free XaMix.cpp; SetLiveDiscMixVolume and WriteLiveDiscVolume in XaPlayback.cpp bind the output mode and sequencer volume and publish to the native XA source; generated callers use the bindings by copier fixup; no data word stores 0x80013230 or 0x80019134
 F03379,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03382,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03392,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,

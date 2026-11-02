@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 54 | 19 (`wip`) | 4,134 |
-| `cpp` | 54 | 226 (`wip`) | 3,927 |
+| `modernized` | 56 | 19 (`wip`) | 4,132 |
+| `cpp` | 56 | 224 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 194 |
-| `vs_namespace` | 54 |
-| `typed_interface` | 54 |
-| `no_bridge` | 54 |
+| `vs_namespace` | 56 |
+| `typed_interface` | 56 |
+| `no_bridge` | 56 |
 | `strict_clean` | 194 |
-| `behavior_evidence` | 54 |
+| `behavior_evidence` | 56 |
 
-Promotion records: 280; derived `cpp=x`: 54, `cpp=wip`: 226. Verification records: 70; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 56, `cpp=wip`: 224. Verification records: 71; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -183,6 +183,8 @@ The twenty-fourth is the weapon-mode opcode (F01130): VS::Event::ScriptSetAshley
 through WeaponModeHost; the opcode table keeps a C adapter bound to the module image.
 The twenty-fifth is the moving-platform lookup (F00920/F00938): `VS::Field::FindMovingPlatformById` returns a platform contact by value
 from typed platform poses instead of a pointer to a thread-local snapshot, and `PlatformPlacementLive.cpp` binds the room platforms.
+The twenty-sixth is the XA disc mix (F03144/F03262): `VS::Audio::Control::SetDiscMixVolume` returns the original CdlATV routes by value and
+`VS::Audio::Seq::WriteDiscVolume` the signed CD level; `XaPlayback.cpp` binds the output mode and sequencer volume and mixes the four routes.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

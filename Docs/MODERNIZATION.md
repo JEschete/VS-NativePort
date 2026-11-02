@@ -27,27 +27,27 @@ architecture changes rather than per-function work, so this ledger is what track
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
 | 25: #54 Text IDs, layout and rendering | 3 | 29 | 1,162 | 23 | 10 | 0 |
 | 26: #59 Event VM results and execution | 0 | 236 | 3,830 | 59 | 178 | 0 |
-| 30A: #253 Typed voices and owned audio playback | 23 | 374 | 6,523 | 198 | 200 | 0 |
+| 30A: #253 Typed voices and owned audio playback | 21 | 374 | 6,505 | 198 | 200 | 0 |
 | 31: #61 Typed effects and playback sessions | 4 | 761 | 11,775 | 180 | 587 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 4 | 7 | 216 | 0 | 11 | 0 |
 | 34: #60 Menu screens and workspaces | 5 | 638 | 36,178 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 226 | 3480 | 107,739 | 1600 | 2160 | 0 |
+| **Total** | 224 | 3480 | 107,721 | 1600 | 2160 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 54 |
-| todo | 3,706 |
+| done | 56 |
+| todo | 3,704 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 177 | 1,896 |
-| Referenced by the original-address module table | 176 | 2,120 |
+| Called from generated code | 175 | 1,896 |
+| Referenced by the original-address module table | 174 | 2,120 |
 | Calls an SDK shim | 10 | 461 |
 | Signature uses SDK integer types or `void*` | 41 | 862 |
 | Compiled with relaxed settings | 86 | 3,478 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 177 of 226 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 175 of 224 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 
