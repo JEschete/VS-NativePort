@@ -30,7 +30,6 @@ extern "C" {
 #include "Audio/Ambience.h"
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/PlaybackReset.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/LegacyFiles.h"
 #include "Audio/Mixer/MixControl.h"
@@ -2647,7 +2646,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8001355Cu, 0u, (void*)&Audio_Driver_WaitForSampleTransfer, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013588u, 0u, (void*)&Audio_Samples_LoadDeclaredBank, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800135D8u, 0u, (void*)&Audio_Samples_UploadBank, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001369Cu, 0u, (void*)&Audio_Driver_ResetPlaybackState, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013938u, 0u, (void*)&Audio_Driver_Start, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013A28u, 0u, (void*)&Audio_Driver_Stop, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013ACCu, 0u, (void*)&Audio_Driver_KeyOnVoices, 0u, 0u, 0u},

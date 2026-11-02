@@ -34,6 +34,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CaptureBattleActorConditions": r"Native\Game\src\Battle\Ai\ConditionSnapshotBinding.hpp",
     "VS::Field::LiveRoomCollisionMap": r"Native\Game\include\Field\CollisionSampling.hpp",
     "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
+    "VS::Audio::Driver::ResetLivePlaybackState": r"Native\Engine\include\Audio\PlaybackResetLive.hpp",
     "VS::Effects::BindLiveEffectTextureTables": r"Native\Game\include\Effects\TextureBindings.hpp",
     "VS::Render::DrawLiveScaledFontChar": r"Native\Engine\include\Render\ScaledFont.hpp",
     **{f"VS::Render::DrawLiveTexture{kind}": r"Native\Engine\include\Render\TextureRegionDrawLive.hpp"
@@ -2721,6 +2722,9 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts()",
      "F03198 #46 typed promotion: the sequencer binding supplies the live music layers and keys off "
      "the released voices"),
+    (r"", r"\bVS::Audio::Driver::ResetPlaybackState\(\)",
+     r"VS::Audio::Driver::ResetLivePlaybackState()",
+     "F03160 #46 typed promotion: the driver binding applies the reset to the live sequencer, mixer, stream and channel tables"),
     (r"", r"\bVS::Render::DrawScaledFontChar\(",
      r"VS::Render::DrawLiveScaledFontChar(",
      "F04199 #46 typed promotion: the font binding supplies the live font style and text box layer"),

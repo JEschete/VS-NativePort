@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8676795,
+  "assertions": 8677101,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -737,6 +737,10 @@
    "Lethal chain credit preserves failure story and capacity gates",
    "Linked particles retain independent native attraction state",
    "Live actor pose retains hierarchy and independent accumulated scale",
+   "Live playback reset frees the music channels",
+   "Live playback reset leaves effect slots past the twelve voices",
+   "Live playback reset makes the primary music layer active",
+   "Live playback reset restores the mixer and driver controls",
    "Live region draws reject out-of-range regions and short colors",
    "Live region draws stop at a missing primitive buffer",
    "Live registered actuator bytes reach actual SDL rumble output",
@@ -993,6 +997,12 @@
    "Plan rebuild keeps the original pass order",
    "Platform contact update follows and anchors a visible platform",
    "Platform contact update keeps the actor when its platform is hidden",
+   "Playback reset frees every music channel's voice",
+   "Playback reset maps sound effects to the upper voices",
+   "Playback reset rejects channel slots outside its tables",
+   "Playback reset resets output first and enables reverb last",
+   "Playback reset uses the original driver defaults",
+   "Playback reset visits each channel slot once in order",
    "Player observations expose original room chests and opened flags",
    "Player observations retain native weapon geometry and hostility",
    "Player reads actual learned spell data without granting an action",

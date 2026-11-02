@@ -184,7 +184,7 @@ class BaselineTests(unittest.TestCase):
         audio_adapter = quality.Finding(
             style.tool,
             style.rule,
-            "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
+            "Native/Engine/Legacy/Audio/LibSpu.cpp",
             style.line,
             style.message,
             style.context,

@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/PlaybackResetLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/PlaybackReset.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
 #include "Audio/Seq/Envelope.h"
@@ -74,7 +74,7 @@ void Audio_Driver_Start(void)
 {
     int event;
 
-    Audio_Driver_ResetPlaybackState();
+    VS::Audio::Driver::ResetLivePlaybackState();
     while (SetRCnt(RCntCNT2, 0x44E8, RCntMdINTR) == 0)
         ;
     while (StartRCnt(RCntCNT2) == 0)

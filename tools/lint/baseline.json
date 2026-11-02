@@ -2837,13 +2837,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "1096383372396ac0404daf1b7270dc81e9e20091bf6d9dd1213fe29ad87cf4ac",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "10a3d64fd7ae0a1406519a351acc13ad9d62476945d54f0d3f5cd7fc442a25fe",
       "count": 1,
       "tool": "cpplint",
@@ -2877,13 +2870,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "bugprone-reserved-identifier"
-    },
-    {
-      "key": "10c2ba1cc700376503cb51f1bed787daef7d2f6ed68ac7376f04e11d907c06be",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "10c2f84afa73a49cc07ec3847ed0747868b1bee60ebaae6e9a72214cd6676733",
@@ -4251,13 +4237,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "18bc30e1b7a8b8421f75d92370d2f2d96869408bde7978138295a06e386c5ec6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "18d1c121088bc188cf50014e6e1510f7fd76ac3863a0b0d78828d0a3ef7759c6",
       "count": 1,
       "tool": "cpplint",
@@ -5236,13 +5215,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1ea20ff6b55210bb24ba4822cede235ac5e6a6906a8af62034c42515a9680969",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "1eb3c1c2dd3c5f9b996a57d56dfe8694cdbb12aade0b6f8e271eb8556c160152",
@@ -8815,13 +8787,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "328ee0aef1630ffc5eefc4e94eceb1016d7c5d4deaee9a4bb9280582dc085cbd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "329218189434b7c0c51cfe3649f7e9c77844ca7d84145d2f57517471ad6661bc",
       "count": 1,
       "tool": "tidy",
@@ -11062,13 +11027,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "4071239d9b70d921ee894e44696a5c05eb983c9055d6a447a5712bc0241dc72e",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.h",
-      "rule": "google"
-    },
-    {
       "key": "407aa0727779e1c52ee02b0cdfc6078b07da655174ba85b201b2b8c7c770027b",
       "count": 1,
       "tool": "tidy",
@@ -12406,13 +12364,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "47f8926748a637264f5890b6b1a96074be70af7bfdc33ed9430a154188ed2752",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "480978858673c184ab90e989234624823c7e1210a44513f08c0d99f2ac0a98a6",
       "count": 1,
       "tool": "tidy",
@@ -12670,13 +12621,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Psx.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4997edda0ab560a88490814bf0fb997e24f24c4f54c562129cafd4e481f564fe",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "49be81a70a4868f1e6878c65ed0698a25117edd784b7eb6ec60c32a47b6e7d4d",
@@ -13477,13 +13421,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "4e14a5d3b979d1fc10df39217d2c9eac8e2ee26c4ff87f8407b6bc683ead2854",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "4e1ba9019efc8d667b4ce0f13f33f988c32517450271bbdc71516106395410dd",
       "count": 1,
       "tool": "cpplint",
@@ -13930,13 +13867,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "519b6f43fe33f5296d32970a003fba5d5ae04cac42326065971aa4322120b0cd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "51ab9b62e8f28e96da2f2ad84650cdc89163a1dcaec365131822ac14e071c67a",
@@ -15913,13 +15843,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5d9e4c2f9f599595aca3db97574a75a208fd1552d348fdf1bf62974bc24f7751",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "5d9eb41849a641524cb09276941ffbcd2358ff906a37d2fd65c7260b2798da8c",
       "count": 1,
       "tool": "tidy",
@@ -15967,13 +15890,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Render/PageSpace.hpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "5dc5fa2a7f76532945a9c9227738d434edbf4b5eed7b32c9bbb6b9b9ec6c6fb2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "5dc78fde03e392463c298861f9cea481c866f9345678cfd80aef267dfa42773f",
@@ -16942,13 +16858,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "6334b4e8a2f3b53fe19e5257897504db606af6fee11db71b6face818dc5d1918",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6339e17bb56e1720056737436c24e916024936423127251f4ee62605a4744e19",
       "count": 1,
       "tool": "cpplint",
@@ -17030,13 +16939,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "63ba43e2eebeb9730df7ef25adbd9dfec53efd80582dde19bf071c56af96af9f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -17262,13 +17164,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6503d44fac76d0b43ac905c26aaaae26637b628e4bfb1199ede3703c29435284",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "6509dd10a66a3e6f28791360198c904fc669f19d52b61deca691559b5cd15b0c",
@@ -18662,13 +18557,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Input/Pad.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6d5915235d5652a7b112e0dc17bdbb0c904ac6d9c45de18e6dd982295a3995e5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-function-size"
     },
     {
       "key": "6d5b4fa9ac4b85488fb950f8d685515382fd1dede78b97a76bb499bfde5f5516",
@@ -20764,13 +20652,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "78f7a073a44eff17ccb6da917c23a5c674ad8ccc02982dfd03e152c27a516a0f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "78fc9e2f885f7a154729f02e8865e2c5f4fe9168b4639cc8e422996b579d57a4",
       "count": 1,
       "tool": "cpplint",
@@ -21755,13 +21636,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7f71f968ec55339b9623768e61df4bfbdce57141f43ba3b2bf8dbf0eff5089aa",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -27344,13 +27218,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "9ff8c1a0cd1c6e77b1a2f81f535c81db91186d8f52c57b3f3865c64d28fd63f7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a00b3684ac69624df0fc2dcb83e6b81e169cfc425f7b706578754e1808b09993",
       "count": 1,
       "tool": "tidy",
@@ -27607,13 +27474,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "a17e02c21e0ee4172b0f542153c8e564617abd101ceaa21b5a5f9dd951b1ddf8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -30011,13 +29871,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b0e28b8b6d7ed35ce2302282b0bd73b25cc22e43bb22e9276930b5993e3ebce6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7e33ffee1bff893a4ecc42d6cc437a42709e7d6b614d86b695562cbb4235b67c",
       "count": 1,
       "tool": "tidy",
@@ -30156,13 +30009,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Removed.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "b1c4771c159bc95a91d847b3472ff3965c527b31914e04058aa94fbc7c723a20",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b1e27ff090b0a8669ab044a8de2bda5777669edf19ee612108af987ba0a43fd4",
@@ -30414,13 +30260,6 @@
       "count": 2,
       "tool": "tidy",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b31ae516c8c03cf1ba0cde886e823c047ab20076a662b23ba370bc95cd5c170a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -31325,13 +31164,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Platform/GameFiber.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "b89eeb0092e6967e4e85b502441315d92974fd8f1cb4cc2446ce99be8739144a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b8a4b104105b8d42381125c5467d0970e99be60854f3ab6c18e0e054b887ac00",
@@ -33854,13 +33686,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "c806d94ab34ded346e13ccea89980caba20410e6293415e7b1bed2075503a061",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c80ab853ea7a232d9bdca3158d0478f0cbb71a95f98dd095a1b5387c1190de4b",
       "count": 1,
       "tool": "format",
@@ -34153,13 +33978,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "c9c6639d7b83ce57f22781d207d9ffa1de6732edd27641757456d042a91c5a77",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c9caf4711e7e8fe513a9a95e03cc8eeea20c1ffb712ecbee6305ec45018921e4",
@@ -34741,13 +34559,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/BiosRand.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "cce698f467be3bef3ff09b202dbceeb4e3137bc69d02b321040a6ff4e89ddb95",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "cce83785cfe267e85ee78b0cb19979f698d2d5c8adec02fb099e3f6ce008e2fa",
@@ -36402,13 +36213,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "d652f4799f24d2f73c6635ba4089df2f199ec0a30a990125485d5076495da7fe",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "google"
-    },
-    {
       "key": "d66a90c304a8ff4ca28349fe5eddfd29ad764de87e04eeeb2a2dea003d0e11cf",
       "count": 1,
       "tool": "cpplint",
@@ -36490,13 +36294,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d6e73613f05ced1b66d2d86055457f8789e6eda3b315e90043abfae21c7347cf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -40392,13 +40189,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "eeaff44074dc01355ffc37dced78a8cdb4c50843d8bc77e2f8688b1aaefc22a5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "eeb1d53316bad066d2075ba6d580a796f508e3515793325ade9a10da21fc2bca",
       "count": 1,
       "tool": "tidy",
@@ -40684,13 +40474,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f0380cee46f4d081a25ea445876680af2c2740df48e602f9dc59f165c39430ca",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f070098878c40a628cbf1de0b88c53aa4995022b1bf6e5340dbc32567270d2f5",
@@ -41412,13 +41195,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "f55b92b06fac73f429c6aec20e077a575d5bff08bbe76a2aaa7820f7f20a2454",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f55fe955a4b8d95f1294b75d8d76c58eb5042645252d333382642ef65ef33ba7",
@@ -42266,13 +42042,6 @@
       "tool": "ruff",
       "path": "tools/naming/sym_gen/Audio.py",
       "rule": "B007"
-    },
-    {
-      "key": "fa6113113e169cf6b0bfe08318a99efb549ac05d0f04f46b755518aff864dacb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Audio/Driver/PlaybackReset.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "fa7c30d0b11a8847c55db35525136dd72665ef33f9588b9db58965446f49a7fe",

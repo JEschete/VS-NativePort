@@ -261,6 +261,9 @@
     <ClCompile Include="src\PlatformPlacementTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\PlaybackResetTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\PursuitTargetsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

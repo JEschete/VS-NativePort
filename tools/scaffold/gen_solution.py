@@ -150,6 +150,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Render\TextureRegionDrawLive.cpp",
                 r"src\Audio\SoundEffectsLive.cpp",
                 r"src\Movie\Intro\PlayerLive.cpp",
+                r"src\Audio\Driver\PlaybackResetLive.cpp",
             )
             or project == "VS.Content" and path == r"src\DiscReaderLive.cpp"
             or project == "VS.Tests"

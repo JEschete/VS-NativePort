@@ -85,7 +85,7 @@ backend, if later approved, must not make the modern path depend on it.
 ### EC-02: SPU register and sample-memory model
 
 **Evidence:** `Native/Engine/Legacy/Audio/LibSpu.cpp` (`g_registers`, `g_ram`, `SpuWrite`, `SpuRead`),
-`Native/Engine/src/Audio/Driver/SoundDriver.h`, `Driver/PlaybackReset.c`, `SoundEffects/SoundEffects.c`, and
+`Native/Engine/src/Audio/Driver/SoundDriver.h`, `Driver/PlaybackResetLive.cpp` (the live binding of the typed reset), `SoundEffects/SoundEffects.c`, and
 `Native/Engine/src/Audio/AudioDevice.cpp`.
 
 Remaining compatibility operations redirect register offsets into an ordinary memory block and use a 512 KiB

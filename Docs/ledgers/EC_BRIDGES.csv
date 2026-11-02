@@ -6,8 +6,6 @@ EC-01,Native/Engine/src/Render/PageSpace.cpp,source
 EC-02,Native/Engine/Legacy/Audio/LibSpu.h,header
 EC-02,Native/Engine/Legacy/Audio/LibSpu.cpp,source
 EC-02,Native/Engine/src/Audio/Driver/SoundDriver.h,header
-EC-02,Native/Engine/src/Audio/Driver/PlaybackReset.h,header
-EC-02,Native/Engine/src/Audio/Driver/PlaybackReset.cpp,source
 EC-03,Native/Engine/include/Core/Gte.h,header
 EC-03,Native/Engine/src/Core/Gte.cpp,source
 EC-04,Native/Content/Legacy/LibDs.h,header

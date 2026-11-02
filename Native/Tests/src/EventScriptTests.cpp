@@ -4,6 +4,7 @@
 #include <string.h>
 
 #include "Audio/MusicVoiceConflicts.hpp"
+#include "Audio/PlaybackResetLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
@@ -12,7 +13,6 @@ extern "C" {
 
 #include "Audio/Control/SoundControl.h"
 #include "Audio/Cutscene/Stream.h"
-#include "Audio/Driver/PlaybackReset.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/MixControl.h"
 #include "Audio/Mixer/VoiceMixer.h"
@@ -307,7 +307,7 @@ int TestsPendingModulationSlides(int effect, int kind) {
   memcpy(saved_effects, Audio_SoundEffects_channels, sizeof(saved_effects));
   memset(Audio_Seq_musicChannels, 0, sizeof(saved_music));
   memset(Audio_SoundEffects_channels, 0, sizeof(saved_effects));
-  Audio_Driver_ResetPlaybackState();
+  VS::Audio::Driver::ResetLivePlaybackState();
   for (index = 0; index < 44; ++index) {
     channel = index < 32 ? &Audio_Seq_musicChannels[index]
                          : &Audio_SoundEffects_channels[index - 32];
@@ -328,7 +328,7 @@ int TestsPendingModulationSlides(int effect, int kind) {
     channel->vibratoRateCounter = 4;
     channel->tremoloRateCounter = 5;
     channel->autoPanRateCounter = 6;
-    Audio_Driver_ResetPlaybackState();
+    VS::Audio::Driver::ResetLivePlaybackState();
     failures |=
         (channel->vibratoWave != wave + 1 || channel->tremoloWave != wave + 1 ||
          channel->autoPanWave != wave + 1 || channel->vibratoRateCounter != 4 ||
@@ -340,7 +340,7 @@ int TestsPendingModulationSlides(int effect, int kind) {
     channel->vibratoRateCounter = 0;
     channel->tremoloRateCounter = 0;
     channel->autoPanRateCounter = 0;
-    Audio_Driver_ResetPlaybackState();
+    VS::Audio::Driver::ResetLivePlaybackState();
     failures |=
         (channel->vibratoRateCounter != 1 || channel->tremoloRateCounter != 1 ||
          channel->autoPanRateCounter != 1)
@@ -358,7 +358,7 @@ void TestsPrepareXaPlayback(void) {
                                            Audio_Seq_FadeDiscVolumeFrom};
   int index;
   savedXaDrive = Content_discDriveState;
-  Audio_Driver_ResetPlaybackState();
+  VS::Audio::Driver::ResetLivePlaybackState();
   memset(&Content_discDriveState, 0, sizeof(Content_discDriveState));
   for (index = 0; index < 3; ++index) {
     savedXaCommands[index] = Audio_Mixer_kCommandHandlers[0xC8 + index];
@@ -418,7 +418,7 @@ void TestsPrepareStreamPlayback(void) {
       Audio_Cutscene_SetStreamPan,    Audio_Cutscene_ResumeStream,
       Audio_Cutscene_PauseStream};
   int index;
-  Audio_Driver_ResetPlaybackState();
+  VS::Audio::Driver::ResetLivePlaybackState();
   memcpy(savedStreamPan, Audio_Mixer_kPanGains, sizeof(savedStreamPan));
   memset(Audio_Mixer_kPanGains, 0, sizeof(savedStreamPan));
   Audio_Mixer_kPanGains[0] = 32767;
@@ -479,7 +479,7 @@ void TestsStreamControl(int command, int value, int target) {
       Audio_Control_StopCutsceneStream();
       break;
     case 5:
-      Audio_Driver_ResetPlaybackState();
+      VS::Audio::Driver::ResetLivePlaybackState();
       break;
     case 6:
       Audio_ResetSoundSlots();
@@ -553,7 +553,7 @@ void TestsNativeNoiseChannel(void) {
   channel.voice.volume.right = 0x1000;
   channel.voice.adsrLower = 0x00FF;
   channel.voice.adsrUpper = 0x5FC4;
-  Audio_Driver_ResetPlaybackState();
+  VS::Audio::Driver::ResetLivePlaybackState();
   Audio_Native_ConfigureChannel(&channel);
   Audio_Native_SetNoiseClock(63);
   Audio_Driver_SetVoiceNoiseMask(1);

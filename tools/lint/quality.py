@@ -28,8 +28,6 @@ NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl"}
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
-    "Native/Engine/src/Audio/Driver/PlaybackReset.cpp": "EC-02",
-    "Native/Engine/src/Audio/Driver/PlaybackReset.h": "EC-02",
     "Native/Engine/include/Core/Gte.h": "EC-03",
     "Native/Engine/src/Core/Gte.cpp": "EC-03",
     "Native/Engine/include/Core/Scratch.h": "EC-05",

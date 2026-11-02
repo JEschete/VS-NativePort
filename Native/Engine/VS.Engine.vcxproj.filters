@@ -156,9 +156,9 @@
     <ClCompile Include="src\Audio\Driver\PlaybackReset.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Driver\PlaybackReset.h">
+    <ClCompile Include="src\Audio\Driver\PlaybackResetLive.cpp">
       <Filter>src\Audio\Driver</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Audio\Driver\SoundDriver.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
@@ -676,6 +676,12 @@
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\MusicVoiceConflicts.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\PlaybackReset.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\PlaybackResetLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\Reverb.hpp">
