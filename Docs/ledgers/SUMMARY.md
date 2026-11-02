@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 56 | 19 (`wip`) | 4,132 |
-| `cpp` | 56 | 224 (`wip`) | 3,927 |
+| `modernized` | 58 | 19 (`wip`) | 4,130 |
+| `cpp` | 58 | 222 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 194 |
-| `vs_namespace` | 56 |
-| `typed_interface` | 56 |
-| `no_bridge` | 56 |
-| `strict_clean` | 194 |
-| `behavior_evidence` | 56 |
+| `source_cpp` | 196 |
+| `vs_namespace` | 58 |
+| `typed_interface` | 58 |
+| `no_bridge` | 58 |
+| `strict_clean` | 196 |
+| `behavior_evidence` | 58 |
 
-Promotion records: 280; derived `cpp=x`: 56, `cpp=wip`: 224. Verification records: 71; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 58, `cpp=wip`: 222. Verification records: 72; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -185,6 +185,8 @@ The twenty-fifth is the moving-platform lookup (F00920/F00938): `VS::Field::Find
 from typed platform poses instead of a pointer to a thread-local snapshot, and `PlatformPlacementLive.cpp` binds the room platforms.
 The twenty-sixth is the XA disc mix (F03144/F03262): `VS::Audio::Control::SetDiscMixVolume` returns the original CdlATV routes by value and
 `VS::Audio::Seq::WriteDiscVolume` the signed CD level; `XaPlayback.cpp` binds the output mode and sequencer volume and mixes the four routes.
+The twenty-seventh is the room trigger markers (F00617/F00618): `VS::Field::DrawRoomTriggerMarkers` fades typed triggers and steps the
+marker animation and `VS::Field::DrawRoomTriggerMarker` places a marker through an abstract renderer; `RoomTriggerMarkersLive.cpp` binds the room state and GPU.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
