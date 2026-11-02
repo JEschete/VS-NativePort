@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 60 | 19 (`wip`) | 4,128 |
-| `cpp` | 60 | 220 (`wip`) | 3,927 |
+| `modernized` | 62 | 19 (`wip`) | 4,126 |
+| `cpp` | 62 | 218 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 198 |
-| `vs_namespace` | 60 |
-| `typed_interface` | 60 |
-| `no_bridge` | 60 |
+| `vs_namespace` | 62 |
+| `typed_interface` | 62 |
+| `no_bridge` | 62 |
 | `strict_clean` | 198 |
-| `behavior_evidence` | 60 |
+| `behavior_evidence` | 62 |
 
-Promotion records: 280; derived `cpp=x`: 60, `cpp=wip`: 220. Verification records: 73; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 62, `cpp=wip`: 218. Verification records: 74; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -189,6 +189,8 @@ The twenty-seventh is the room trigger markers (F00617/F00618): `VS::Field::Draw
 marker animation and `VS::Field::DrawRoomTriggerMarker` places a marker through an abstract renderer; `RoomTriggerMarkersLive.cpp` binds the room state and GPU.
 The twenty-eighth is the room lighting (F00767/F00768): `VS::Render::SampleRoomLighting` samples a bounded lighting span and
 `VS::Render::InterpolateRoomLightTriangle` returns the original-width colour; `RoomLightingLive.cpp` binds the loaded room and the caller colour code.
+The twenty-ninth is the minimap scene (F00771/F00774): `VS::Field::ResolveSceneRoomData` resolves a bounded scene span and returns the name offset and
+`VS::Field::DrawMinimapScene` draws through a `MinimapRenderer`; `MinimapSceneLive.cpp` binds the frame packets, GTE and door flags.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
