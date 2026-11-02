@@ -23,17 +23,17 @@ struct DecisionTimers {
   std::uint8_t decision_delay = 0;
   std::uint8_t min_action_delay = 0;
 };
-void TickDecisionTimers(DecisionTimers& timers);
+void TickActorDecisionTimers(DecisionTimers& timers);
 
 // BATTLE.PRG func_800E6828 (7E028.s:8): the movement flags fold the high
 // locomotion byte into the low one; bits 0x30 select mode 1, else bit 8
 // selects mode 2, else mode 0.
-struct LocomotionSelection {
+struct LocomotionState {
+  std::uint16_t locomotion_flags = 0;
   std::uint16_t movement_flags = 0;
   std::uint8_t mode = 0;
 };
-[[nodiscard]] LocomotionSelection SelectLocomotion(
-    std::uint16_t locomotion_flags);
+void InitializeActorLocomotionMode(LocomotionState& state);
 
 // BATTLE.PRG func_800E685C (7E05C.s:16): the walk and run steps are stored
 // as the two low bytes of walk | run << 8, and the range is the larger step.
@@ -42,8 +42,8 @@ struct VerticalMovementSteps {
   std::uint8_t run_step = 0;
   std::uint8_t max_range = 0;
 };
-[[nodiscard]] VerticalMovementSteps MakeVerticalMovementSteps(int walk_step,
-                                                              int run_step);
+void SetActorVerticalMovementSteps(VerticalMovementSteps& steps, int walk_step,
+                                   int run_step);
 
 // The second perception target advances to the next actor slot in
 // `attribute_mask` after `previous`, wrapping at kFrameActorSlots; it is 0
@@ -65,6 +65,22 @@ struct TerrainRegionWindow {
 // the next), read little-endian as the original's lw.
 [[nodiscard]] std::uint32_t PackRoomBounds(
     const std::array<std::uint8_t, kRoomExtentBytes>& extent);
+
+// BATTLE.PRG func_800E65DC (7DDDC.s:8): the room half of the frame's working
+// state. With auxiliary room data the terrain region window must fit its
+// section; the bounds are the room state's extent word, or 0 without a room.
+struct WorkingStateSource {
+  bool has_room_data = false;
+  std::size_t auxiliary_bytes = 0;
+  std::optional<std::array<std::uint8_t, kRoomExtentBytes>> room_extent;
+};
+struct WorkingStateWindow {
+  std::optional<TerrainRegionWindow> terrain_regions;
+  std::uint32_t room_bounds = 0;
+};
+// Nothing when the auxiliary section cannot hold the terrain region header.
+[[nodiscard]] std::optional<WorkingStateWindow> CacheActorAiWorkingState(
+    const WorkingStateSource& source);
 
 // The battle runtime's per-frame AI stages.
 class ActorAiFrame {

@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8677416,
+  "assertions": 8677425,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -609,6 +609,7 @@
    "Forced Ashley alliance draws nothing and keeps the count",
    "Four learned Break Arts preserve their navigation row and cursor policy",
    "Frame budgets and missing handoffs never constitute scene completion",
+   "Frame update caches the room working-state window",
    "Frame update locates the terrain region bitmap",
    "Frame update packs the room extent little-endian",
    "Frame update packs vertical steps as the original byte pair",

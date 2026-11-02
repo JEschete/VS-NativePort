@@ -5,6 +5,7 @@
 #include <array>
 #include <cstdlib>
 #include <cstring>
+#include <optional>
 
 extern "C" {
 
@@ -120,31 +121,35 @@ int CacheLiveActorAiWorkingState() {
   frame_context.heightMap = Battle_Ai_specialTerrainHeights;
   frame_context.tileFlags = Battle_Ai_tileFlagMap;
   frame_context.roomData = Battle_Ai_roomHasWaypoints;
+  WorkingStateSource source;
+  source.has_room_data = frame_context.roomData != nullptr;
+  source.auxiliary_bytes = Field_roomData.header.section6Length;
+  if (frame_context.room != nullptr) {
+    std::array<std::uint8_t, kRoomExtentBytes> extent{};
+    static_assert(sizeof frame_context.room->reserved4 == extent.size());
+    memcpy(extent.data(), frame_context.room->reserved4, extent.size());
+    source.room_extent = extent;
+  }
+  const std::optional<WorkingStateWindow> window =
+      CacheActorAiWorkingState(source);
+  if (!window) {
+    Core_Errorf("ai", "AI terrain bitmap header is truncated: bytes=%zu",
+                source.auxiliary_bytes);
+    abort();
+  }
   frame_context.terrainRegions = nullptr;
   frame_context.terrain_region_count = 0;
-  if (frame_context.roomData != nullptr) {
-    const auto window =
-        LocateTerrainRegions(Field_roomData.header.section6Length);
-    if (!window) {
-      Core_Errorf("ai", "AI terrain bitmap header is truncated: bytes=%u",
-                  static_cast<unsigned>(Field_roomData.header.section6Length));
-      abort();
-    }
+  if (window->terrain_regions) {
     frame_context.terrainRegions =
-        static_cast<u_char*>(frame_context.roomData) + window->offset;
-    frame_context.terrain_region_count = window->count;
+        static_cast<u_char*>(frame_context.roomData) +
+        window->terrain_regions->offset;
+    frame_context.terrain_region_count = window->terrain_regions->count;
   }
   frame_context.randomState =
       static_cast<u_int>(Battle_Ai_savedMovementRandomState);
   memcpy(frame_context.directions, Battle_Ai_directionDeltas,
          sizeof frame_context.directions);
-  frame_context.roomBounds = 0;
-  if (frame_context.room != nullptr) {
-    std::array<std::uint8_t, kRoomExtentBytes> extent{};
-    static_assert(sizeof frame_context.room->reserved4 == extent.size());
-    memcpy(extent.data(), frame_context.room->reserved4, extent.size());
-    frame_context.roomBounds = PackRoomBounds(extent);
-  }
+  frame_context.roomBounds = window->room_bounds;
   return static_cast<int>(frame_context.roomBounds);
 }
 
@@ -162,7 +167,7 @@ void RunLiveActorAiUpdateStages() {
 void TickLiveActorDecisionTimers(Battle_Ai_PerceptionUpdateView* view) {
   Battle_Ai_ActorAiState* state = AsActorAiState(view);
   DecisionTimers timers{state->decisionDelay, state->minActionDelay};
-  TickDecisionTimers(timers);
+  TickActorDecisionTimers(timers);
   state->decisionDelay = timers.decision_delay;
   state->minActionDelay = timers.min_action_delay;
 }
@@ -170,10 +175,11 @@ void TickLiveActorDecisionTimers(Battle_Ai_PerceptionUpdateView* view) {
 // decomp: BATTLE.PRG func_800E6828 (src/BATTLE/BATTLE.PRG/7E028.s:8).
 void InitializeLiveActorLocomotionMode(Battle_Ai_AiCreationView* view) {
   Battle_Ai_ActorAiState* state = AsActorAiState(view);
-  const LocomotionSelection selection =
-      SelectLocomotion(state->locomotionFlags);
-  state->movementFlags = selection.movement_flags;
-  state->locomotionMode = selection.mode;
+  LocomotionState locomotion{state->locomotionFlags, state->movementFlags,
+                             state->locomotionMode};
+  InitializeActorLocomotionMode(locomotion);
+  state->movementFlags = locomotion.movement_flags;
+  state->locomotionMode = locomotion.mode;
 }
 
 // decomp: BATTLE.PRG func_800E685C (src/BATTLE/BATTLE.PRG/7E05C.s:16).
@@ -185,8 +191,8 @@ void SetLiveActorVerticalMovementSteps(int actor_id, int walk_step,
   }
   Battle_Ai_ActorAiState* state = Battle_Ai_actorAiStates[actor_id];
   if (state == nullptr) return;
-  const VerticalMovementSteps steps =
-      MakeVerticalMovementSteps(walk_step, run_step);
+  VerticalMovementSteps steps;
+  SetActorVerticalMovementSteps(steps, walk_step, run_step);
   state->walkStep = steps.walk_step;
   state->runStep = steps.run_step;
   state->maxRange = steps.max_range;

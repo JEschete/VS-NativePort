@@ -44,44 +44,54 @@ class RecordingFrame final : public ActorAiFrame {
 TEST_CASE("Frame update ticks decision timers down to zero",
           "[ai][frame-update]") {
   VS::Battle::Ai::DecisionTimers timers{2, 0};
-  VS::Battle::Ai::TickDecisionTimers(timers);
+  VS::Battle::Ai::TickActorDecisionTimers(timers);
   CHECK(timers.decision_delay == 1);
   CHECK(timers.min_action_delay == 0);
   timers = {0, 1};
-  VS::Battle::Ai::TickDecisionTimers(timers);
+  VS::Battle::Ai::TickActorDecisionTimers(timers);
   CHECK(timers.decision_delay == 0);
   CHECK(timers.min_action_delay == 0);
 }
 
 TEST_CASE("Frame update selects locomotion from the folded flags",
           "[ai][frame-update]") {
-  using VS::Battle::Ai::SelectLocomotion;
-  CHECK(SelectLocomotion(0x0000).mode == 0);
-  CHECK(SelectLocomotion(0x0010).mode == 1);
-  CHECK(SelectLocomotion(0x2000).mode == 1);
-  CHECK(SelectLocomotion(0x0800).mode == 2);
-  CHECK(SelectLocomotion(0x0838).mode == 1);
-  const auto folded = SelectLocomotion(0x1203);
+  const auto mode = [](std::uint16_t flags) {
+    VS::Battle::Ai::LocomotionState state{flags, 0xFFFF, 9};
+    VS::Battle::Ai::InitializeActorLocomotionMode(state);
+    return state;
+  };
+  CHECK(mode(0x0000).mode == 0);
+  CHECK(mode(0x0000).movement_flags == 0);
+  CHECK(mode(0x0010).mode == 1);
+  CHECK(mode(0x2000).mode == 1);
+  CHECK(mode(0x0800).mode == 2);
+  CHECK(mode(0x0838).mode == 1);
+  const auto folded = mode(0x1203);
   CHECK(folded.movement_flags == (0x1203 | 0x12));
+  CHECK(folded.locomotion_flags == 0x1203);
   CHECK(folded.mode == 1);
 }
 
 TEST_CASE("Frame update packs vertical steps as the original byte pair",
           "[ai][frame-update]") {
-  using VS::Battle::Ai::MakeVerticalMovementSteps;
-  auto steps = MakeVerticalMovementSteps(8, 12);
-  CHECK(steps.walk_step == 8);
-  CHECK(steps.run_step == 12);
-  CHECK(steps.max_range == 12);
-  steps = MakeVerticalMovementSteps(16, 6);
-  CHECK(steps.max_range == 16);
+  const auto steps = [](int walk, int run) {
+    VS::Battle::Ai::VerticalMovementSteps result;
+    VS::Battle::Ai::SetActorVerticalMovementSteps(result, walk, run);
+    return result;
+  };
+  auto packed = steps(8, 12);
+  CHECK(packed.walk_step == 8);
+  CHECK(packed.run_step == 12);
+  CHECK(packed.max_range == 12);
+  packed = steps(16, 6);
+  CHECK(packed.max_range == 16);
   // A walk step above a byte carries into the run byte, as the packed store.
-  steps = MakeVerticalMovementSteps(0x1FF, 2);
-  CHECK(steps.walk_step == 0xFF);
-  CHECK(steps.run_step == 3);
-  CHECK(steps.max_range == 0xFF);
-  steps = MakeVerticalMovementSteps(-1, 4);
-  CHECK(steps.max_range == 4);
+  packed = steps(0x1FF, 2);
+  CHECK(packed.walk_step == 0xFF);
+  CHECK(packed.run_step == 3);
+  CHECK(packed.max_range == 0xFF);
+  packed = steps(-1, 4);
+  CHECK(packed.max_range == 4);
 }
 
 TEST_CASE("Frame update rotates the second perception target",
@@ -114,6 +124,33 @@ TEST_CASE("Frame update packs the room extent little-endian",
           "[ai][frame-update]") {
   CHECK(VS::Battle::Ai::PackRoomBounds({0x20, 0x18, 0x00, 0x00}) == 0x1820u);
   CHECK(VS::Battle::Ai::PackRoomBounds({1, 2, 3, 4}) == 0x04030201u);
+}
+
+TEST_CASE("Frame update caches the room working-state window",
+          "[ai][frame-update]") {
+  using VS::Battle::Ai::CacheActorAiWorkingState;
+  using VS::Battle::Ai::kTerrainRegionOffset;
+  using VS::Battle::Ai::WorkingStateSource;
+  using VS::Battle::Ai::WorkingStateWindow;
+  WorkingStateSource source;
+  source.auxiliary_bytes = 0;
+  const auto bare = CacheActorAiWorkingState(source);
+  REQUIRE(bare.has_value());
+  CHECK_FALSE(bare.value_or(WorkingStateWindow{}).terrain_regions.has_value());
+  CHECK(bare.value_or(WorkingStateWindow{{}, 1}).room_bounds == 0);
+
+  source.has_room_data = true;
+  source.auxiliary_bytes = kTerrainRegionOffset + 0x40;
+  source.room_extent = std::array<std::uint8_t, 4>{0x20, 0x18, 0, 0};
+  const auto room =
+      CacheActorAiWorkingState(source).value_or(WorkingStateWindow{});
+  REQUIRE(room.terrain_regions.has_value());
+  CHECK(room.terrain_regions.value_or(VS::Battle::Ai::TerrainRegionWindow{})
+            .count == 0x40);
+  CHECK(room.room_bounds == 0x1820u);
+
+  source.auxiliary_bytes = kTerrainRegionOffset - 1;
+  CHECK_FALSE(CacheActorAiWorkingState(source).has_value());
 }
 
 TEST_CASE("Frame update runs the AI stages in order", "[ai][frame-update]") {
