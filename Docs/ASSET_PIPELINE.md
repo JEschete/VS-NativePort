@@ -383,7 +383,7 @@ The game plays music and sound effects by sequencing sampled instruments at runt
 | Actor clips, weapon sounds and footsteps | Actor animation/movement commands -> actor/model/surface SFX helpers -> `Audio/Sfx.c` | Prologue and combat recordings use these production routes; no new speech synthesis or claim of voiced text dialogue. |
 | Room, weather, doors and interactions | `Field/Environment.c`, `RoomEffects.c`, `Doors.c`, `Interactions.c` -> ordinary/bank SFX, pan and fades | Existing producer paths retain the common renderer; every weather/room variant has not been replayed. |
 | Event sound commands | `Event/ScriptAudio.c` -> bank loading, play/stop, pitch/pan/volume slides and saved music | Native-width stream parameters and typed callbacks preserve the shared dispatcher; no second sequencer. |
-| Effect-package streams | Block 13 -> room slot 3 -> effect timeline -> `StreamPlayback.cpp` | All 113 payloads import; real E044 Solid Shock binds/starts/stops; pause, EOF, reset, unbind and re-entry have regressions. |
+| Effect-package streams | Block 13 -> room slot 3 -> effect timeline -> `StreamControl.cpp` / `StreamControlLive.cpp` | All 113 payloads import; real E044 Solid Shock binds/starts/stops; pause, EOF, reset, unbind and re-entry have regressions. |
 | Movies | Matroska/FLAC -> existing `MoviePlayer` -> independent SDL source | Native-mix clear/reset leaves independent sources intact; primary-mix capture is not movie-output evidence. |
 | Ending credits | Credits start/stop -> disc queue -> `XaPlayback.cpp` -> independent SDL source | Source duration/lossless import, installed-asset postmix start/seek/EOF and synthetic lifecycle tests; full credits navigation/listening is not established. |
 

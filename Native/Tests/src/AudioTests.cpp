@@ -24,7 +24,7 @@
 
 #include "Audio/AudioDevice.hpp"
 #include "Audio/SequencerOutput.h"
-#include "Audio/StreamPlayback.h"
+#include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceEngine.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Audio/XaPlayback.h"
@@ -1002,7 +1002,7 @@ TEST_CASE(
     TestsStreamControl(4, 0, 0);
     StreamFixture::Tick(5);
     CheckStreamVoicesStopped();
-    CHECK(Audio_UnbindRoomCutsceneStream() == 1);
+    CHECK(VS::Audio::UnbindLiveRoomCutsceneStream() == 1);
     CHECK(TestsStreamSlotIsEmpty());
     CHECK(TestsPlayStreamSlot(3, 128, 127) == 0);
   }
@@ -1018,7 +1018,7 @@ TEST_CASE("Stream fades reach exact targets and reset releases borrowed data",
   SECTION("slot reset") { TestsStreamControl(6, 0, 0); }
   SECTION("unbind while paused") {
     TestsStreamControl(3, 1, 0);
-    CHECK(Audio_UnbindRoomCutsceneStream() == 1);
+    CHECK(VS::Audio::UnbindLiveRoomCutsceneStream() == 1);
   }
   StreamFixture::Tick(10);
   CheckStreamVoicesStopped();

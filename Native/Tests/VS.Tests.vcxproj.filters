@@ -372,6 +372,9 @@
     <ClCompile Include="src\StatusBehaviorTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\StreamControlTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TargetingDrawSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -400,6 +403,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\VignetteRenderTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\VoiceOutputTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\WeaponModeSliceTests.cpp">

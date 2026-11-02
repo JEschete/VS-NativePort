@@ -142,8 +142,8 @@ def needs_c_headers(project: str, path: str) -> bool:
     path = path.replace("/", "\\")
     return (uses_copied_settings(BY_NAME[project], path) or "\\Legacy\\" in "\\" + path
             or project == "VS.Engine" and path in (
-                r"src\Audio\SequencerOutput.cpp",
-                r"src\Audio\StreamPlayback.cpp",
+                r"src\Audio\Driver\VoiceOutputLive.cpp",
+                r"src\Audio\Cutscene\StreamControlLive.cpp",
                 r"src\Audio\XaPlayback.cpp",
                 r"src\Audio\MusicLayers.cpp",
                 r"src\Render\ScaledFontLive.cpp",

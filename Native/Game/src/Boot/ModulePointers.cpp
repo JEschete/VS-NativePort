@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/StreamControlLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
@@ -44,12 +45,10 @@ extern "C" {
 #include "Audio/Seq/Modulation.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
-#include "Audio/StreamPlayback.h"
 #include "Battle/Abilities.h"
 #include "Battle/Action.h"
 #include "Battle/ActionAnimation.h"
@@ -2590,16 +2589,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80013520u, 0u, (void*)&Audio_Driver_ReadSampleMemory, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001355Cu, 0u, (void*)&Audio_Driver_WaitForSampleTransfer, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013588u, 0u, (void*)&Audio_Samples_LoadDeclaredBank, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800135D8u, 0u, (void*)&Audio_Samples_UploadBank, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013938u, 0u, (void*)&Audio_Driver_Start, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013A28u, 0u, (void*)&Audio_Driver_Stop, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013ACCu, 0u, (void*)&Audio_Driver_KeyOnVoices, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013AE8u, 0u, (void*)&Audio_Driver_KeyOffVoices, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013B04u, 0u, (void*)&Audio_Driver_SetVoiceReverbMask, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013B20u, 0u, (void*)&Audio_Driver_SetVoiceNoiseMask, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013B3Cu, 0u, (void*)&Audio_Driver_SetVoiceFrequencyModulationMask, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013B58u, 0u, (void*)&Audio_Driver_SetVoiceVolume, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013BA0u, 0u, (void*)&Audio_Driver_SetVoiceSampleRate, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013BB8u, 0u, (void*)&Audio_Driver_SetVoiceStartAddress, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013BD4u, 0u, (void*)&Audio_Driver_SetVoiceLoopAddress, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013BF0u, 0u, (void*)&Audio_Driver_SetVoiceEnvelopeLower, 0u, 0u, 0u},
@@ -2608,7 +2599,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80013C50u, 0u, (void*)&Audio_Driver_SetVoiceDecayRate, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013C78u, 0u, (void*)&Audio_Driver_SetVoiceSustainLevel, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013CA0u, 0u, (void*)&Audio_Driver_SetVoiceSustainRateAndMode, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80013CD4u, 0u, (void*)&Audio_Driver_SetVoiceReleaseRateAndMode, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013D04u, 0u, (void*)&Audio_Driver_WriteVoiceParameters, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013DB0u, 0u, (void*)&Audio_Driver_WriteDirtyVoiceParameters, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80013ECCu, 0u, (void*)&Audio_Mixer_UpdateChannelSlidesAndDelays, 0u, 0u, 0u},
@@ -2686,8 +2676,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x800188E8u, 0u, (void*)&Audio_Mixer_ResumeMusic, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018984u, 0u, (void*)&Audio_Mixer_PauseWorldSoundEffects, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018AA0u, 0u, (void*)&Audio_Mixer_ResumeWorldSoundEffects, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80018B34u, 0u, (void*)&Audio_Cutscene_PauseStream, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80018B84u, 0u, (void*)&Audio_Cutscene_ResumeStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018BD8u, 0u, (void*)&Audio_Mixer_IgnoreCommand, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018BE0u, 0u, (void*)&Audio_Mixer_SetReverbMode, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018C30u, 0u, (void*)&Audio_Mixer_DispatchCommand, 0u, 0u, 0u},
@@ -2807,10 +2795,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8001CD08u, 0u, (void*)&Audio_Seq_SetRandomPitchDepth, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001CD24u, 0u, (void*)&Audio_Seq_ResetRandomPitchDepth, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001CD2Cu, 0u, (void*)&Audio_Seq_StopOnInvalidInstruction, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001CD4Cu, 0u, (void*)&Audio_Cutscene_StopStreamVoices, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001CDD0u, 0u, (void*)&Audio_Cutscene_FindFreeVoicePair, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001CE60u, 0u, (void*)&Audio_Cutscene_UploadSecondMonoBuffer, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001CEA8u, 0u, (void*)&Audio_Cutscene_StartStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D0E4u, 0u, (void*)&Audio_Cutscene_InitializeStreamVoice, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D2A0u, 0u, (void*)&Audio_Cutscene_BeginStreamPlayback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D370u, 0u, (void*)&Audio_Cutscene_BeginMonoPlayback, 0u, 0u, 0u},
@@ -2820,11 +2806,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8001D5B4u, 0u, (void*)&Audio_Cutscene_RefillMonoSecondBuffer, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D5E4u, 0u, (void*)&Audio_Cutscene_RefillStereoFirstBuffer, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D614u, 0u, (void*)&Audio_Cutscene_RefillStereoSecondBuffer, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001D644u, 0u, (void*)&Audio_Cutscene_ReplaceStream, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001D698u, 0u, (void*)&Audio_Cutscene_StopStream, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001D6B8u, 0u, (void*)&Audio_Cutscene_SetStreamVolume, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001D728u, 0u, (void*)&Audio_Cutscene_SlideStreamVolume, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8001D7A8u, 0u, (void*)&Audio_Cutscene_SetStreamPan, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8002F544u, 4u, (void*)&Audio_Driver_legacySpuEvent, sizeof Audio_Driver_legacySpuEvent, 1u, 1u},
     {"SLUS_010.40", 0x8002F548u, 4u, (void*)&Audio_Driver_recentTickCostTotal, sizeof Audio_Driver_recentTickCostTotal, 1u, 1u},
     {"SLUS_010.40", 0x8002F54Cu, 4u, (void*)&Audio_Seq_tickCounter, sizeof Audio_Seq_tickCounter, 1u, 1u},
@@ -3008,8 +2989,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x800464FCu, 0u, (void*)&Audio_PlayCutsceneStreamSlot, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80046578u, 0u, (void*)&Audio_PlayCutsceneStreamSlotCentered, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004659Cu, 0u, (void*)&Audio_FreeCutsceneStreamSlot, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80046608u, 0u, (void*)&Audio_BindRoomCutsceneStream, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80046634u, 0u, (void*)&Audio_UnbindRoomCutsceneStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80046678u, 0u, (void*)&Audio_LoadWaveBankFile, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80046770u, 0u, (void*)&Audio_LoadMappedWaveBank, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800467A0u, 0u, (void*)&Audio_UpdateWaveBankLoad, 0u, 0u, 0u},
@@ -3162,6 +3141,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&VS::Battle::Ai::UpdateLiveAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&VS::Battle::Ai::UpdateLiveSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveEngagementApproachBehavior, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8001D698u, 0u, (void*)&VS::Audio::Cutscene::StopLiveStream, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8001D6B8u, 0u, (void*)&VS::Audio::Cutscene::SetLiveStreamVolume, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8001D728u, 0u, (void*)&VS::Audio::Cutscene::SlideLiveStreamVolume, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8001D7A8u, 0u, (void*)&VS::Audio::Cutscene::SetLiveStreamPan, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

@@ -166,6 +166,30 @@ NATIVE_HELPER_HEADERS = {
            "Audio_Native_ReverbMode", "Audio_Native_SetReverbMode",
            "Audio_Native_SetReverbDepth", "Audio_Native_EnableReverb",
        )},
+    **{name: r"Native\Engine\include\Audio\VoiceOutputLive.hpp"
+       for name in (
+           "VS::Audio::Driver::KeyOnLiveVoices",
+           "VS::Audio::Driver::KeyOffLiveVoices",
+           "VS::Audio::Driver::SetLiveVoiceReverbMask",
+           "VS::Audio::Driver::SetLiveVoiceNoiseMask",
+           "VS::Audio::Driver::SetLiveVoiceFrequencyModulationMask",
+           "VS::Audio::Driver::SetLiveVoiceVolume",
+           "VS::Audio::Driver::SetLiveVoiceSampleRate",
+           "VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode",
+           "VS::Audio::Samples::UploadLiveBank",
+       )},
+    **{name: r"Native\Engine\include\Audio\StreamControlLive.hpp"
+       for name in (
+           "VS::Audio::Cutscene::PauseLiveStream",
+           "VS::Audio::Cutscene::ResumeLiveStream",
+           "VS::Audio::Cutscene::ReplaceLiveStream",
+           "VS::Audio::Cutscene::StopLiveStream",
+           "VS::Audio::Cutscene::SetLiveStreamVolume",
+           "VS::Audio::Cutscene::SlideLiveStreamVolume",
+           "VS::Audio::Cutscene::SetLiveStreamPan",
+           "VS::Audio::BindLiveRoomCutsceneStream",
+           "VS::Audio::UnbindLiveRoomCutsceneStream",
+       )},
     **{name: r"Native\Game\src\Battle\EncounterHooks.h"
        for name in (
            "Boot_EncounterRoomPlacements",
@@ -269,6 +293,14 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DBA88, "VS::Battle::Ai::UpdateLiveAdaptivePursuitBehavior"),  # F04204
     ("BATTLE/BATTLE.PRG", 0x800DBB98, "VS::Battle::Ai::UpdateLiveSupportFollowBehavior"),  # F04205
     ("BATTLE/BATTLE.PRG", 0x800DBC0C, "VS::Battle::Ai::UpdateLiveEngagementApproachBehavior"),  # F04206
+    # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
+    ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
+    ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
+    ("SLUS_010.40", 0x8001D644, "VS::Audio::Cutscene::ReplaceLiveStream"),  # F03392 command 0xE0
+    ("SLUS_010.40", 0x8001D698, "VS::Audio::Cutscene::StopLiveStream"),  # F03393 command 0xE2
+    ("SLUS_010.40", 0x8001D6B8, "VS::Audio::Cutscene::SetLiveStreamVolume"),  # F03394 command 0xE4
+    ("SLUS_010.40", 0x8001D728, "VS::Audio::Cutscene::SlideLiveStreamVolume"),  # F03395 command 0xE5
+    ("SLUS_010.40", 0x8001D7A8, "VS::Audio::Cutscene::SetLiveStreamPan"),  # F03396 command 0xE6
 )
 
 MODULE_FUNCTION_ENTRIES = (
@@ -666,9 +698,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F01611": [
         ("(void* arg0)", "(void* arg0, size_t byte_count)",
          "carry the containing effect block extent into stream validation"),
-        ("Audio_BindRoomCutsceneStream((uintptr_t)arg0)",
-         "Audio_BindRoomCutsceneStream(arg0, byte_count)",
-         "bind native stream assets instead of a PS1 array-offset alias"),
+        ("VS::Audio::BindRoomCutsceneStream((uintptr_t)arg0)",
+         "VS::Audio::BindLiveRoomCutsceneStream(arg0, byte_count)",
+         "bind native stream assets instead of a PS1 array-offset alias; F03545 #46 typed promotion: the "
+         "stream binding validates the block's AKAO stream and exported channel assets"),
     ],
     "F01626": [
         ("VS::Effects::BindEffectTextureTables((Effects_PackageBlock1*)arg0->blocks);",
@@ -703,14 +736,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
         if ((temp_s1 & 0xFF00) != (Audio_Cutscene_streamState.volume & 0xFF00)) {
             if (Audio_Driver_mixBehavior & 2) {
                 int temp_s0 = (Audio_Cutscene_streamState.volume * Audio_Mixer_kCenterPanGain) >> 0x10;
-                Audio_Driver_SetVoiceVolume(
+                VS::Audio::Driver::SetVoiceVolume(
                     Audio_Cutscene_streamState.voiceIndex, temp_s0, temp_s0, 0);
-                Audio_Driver_SetVoiceVolume(
+                VS::Audio::Driver::SetVoiceVolume(
                     Audio_Cutscene_streamState.voiceIndex + 1, temp_s0, temp_s0, 0);
             } else {
                 int temp_s0 = (temp_s1 << 0xF) >> 0x10;
-                Audio_Driver_SetVoiceVolume(Audio_Cutscene_streamState.voiceIndex, temp_s0, 0, 0);
-                Audio_Driver_SetVoiceVolume(
+                VS::Audio::Driver::SetVoiceVolume(Audio_Cutscene_streamState.voiceIndex, temp_s0, 0, 0);
+                VS::Audio::Driver::SetVoiceVolume(
                     Audio_Cutscene_streamState.voiceIndex + 1, 0, temp_s0, 0);
             }
         }
@@ -737,7 +770,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "        Audio_Driver_WaitForSampleTransfer();\n"
          "    }\n", "",
          "native bank loads are synchronous asset bindings, not hardware transfers"),
-        ("    Audio_Driver_KeyOffVoices(0xFFFFFF);", "    Audio_Native_Reset();",
+        ("    VS::Audio::Driver::KeyOffVoices(0xFFFFFF);", "    Audio_Native_Reset();",
          "teardown must clear release tails and queued native output"),
     ],
     "F03186": [
@@ -2830,6 +2863,31 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Audio::Driver::ResetPlaybackState\(\)",
      r"VS::Audio::Driver::ResetLivePlaybackState()",
      "F03160 #46 typed promotion: the driver binding applies the reset to the live sequencer, mixer, stream and channel tables"),
+    (r"", r"\bVS::Audio::Driver::KeyOnVoices\(", r"VS::Audio::Driver::KeyOnLiveVoices(",
+     "F03163 #46 typed promotion: the voice binding keys on the native voice engine's voices in the 24-voice mask"),
+    (r"", r"\bVS::Audio::Driver::KeyOffVoices\(", r"VS::Audio::Driver::KeyOffLiveVoices(",
+     "F03164 #46 typed promotion: the voice binding keys off the native voice engine's voices in the 24-voice mask"),
+    (r"", r"\bVS::Audio::Driver::SetVoiceReverbMask\(", r"VS::Audio::Driver::SetLiveVoiceReverbMask(",
+     "F03165 #46 typed promotion: the voice binding routes the masked voices to the native reverb"),
+    (r"", r"\bVS::Audio::Driver::SetVoiceNoiseMask\(", r"VS::Audio::Driver::SetLiveVoiceNoiseMask(",
+     "F03166 #46 typed promotion: the voice binding switches the masked voices to the native noise source"),
+    (r"", r"\bVS::Audio::Driver::SetVoiceFrequencyModulationMask\(",
+     r"VS::Audio::Driver::SetLiveVoiceFrequencyModulationMask(",
+     "F03167 #46 typed promotion: the voice binding modulates the masked voices except voice 0"),
+    (r"", r"\bVS::Audio::Driver::SetVoiceVolume\(", r"VS::Audio::Driver::SetLiveVoiceVolume(",
+     "F03168 #46 typed promotion: the voice binding refuses a voice outside the 24 SPU voices"),
+    (r"", r"\bVS::Audio::Driver::SetVoiceSampleRate\(", r"VS::Audio::Driver::SetLiveVoiceSampleRate(",
+     "F03169 #46 typed promotion: the voice binding refuses a voice outside the 24 SPU voices or a rate outside "
+     "the 16-bit pitch register"),
+    (r"", r"\bVS::Audio::Driver::SetVoiceReleaseRateAndMode\(",
+     r"VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode(",
+     "F03178 #46 typed promotion: the voice binding refuses a voice outside the 24 SPU voices or a release rate "
+     "or mode outside its ADSR field"),
+    (r"", r"\bVS::Audio::Samples::UploadBank\(", r"VS::Audio::Samples::UploadLiveBank(",
+     "F03159 #46 typed promotion: the bank binding reads the 32-byte AKAO header and binds the decoded bank "
+     "assets to the validated instrument run"),
+    (r"", r"\bVS::Audio::UnbindRoomCutsceneStream\(\s*\)", r"VS::Audio::UnbindLiveRoomCutsceneStream()",
+     "F03546 #46 typed promotion: the stream binding stops the room stream's voices before clearing its slot"),
     (r"", r"\bVS::Effects::UpdateTrailEmitter\b", r"VS::Effects::UpdateLivePlg074TrailEmitter",
      "F01994 #46 typed promotion: the renderer table and plugin update bind PLG074's slot entry, which checks "
      "the emitter against the current package's recorded extents before running the typed lifecycle (#271)"),
@@ -3852,7 +3910,7 @@ REGEX_FIXES += [
          "F03131 25AC.c:707 dispatches 0xDA; dispatcher 3818 forwards duration/start/target to tempo ramp 0xD2 and pitch ramp 0xD6 without changing either handler's existing behavior."),
         ("Audio::Control::StartCutsceneStream",
          (('arg0', 'stream_data'), ('arg1', 'pan'), ('arg2', 'reverb_enabled')),
-         "F03145 25AC.c:928 checks AKAO magic and sends the stream pointer, pan byte shifted by 8 and third argument to 0xE0. Original StartStream at 6294 and native StreamPlayback.cpp:185 prove the third argument controls reverb, not looping or stereo format."),
+         "F03145 25AC.c:928 checks AKAO magic and sends the stream pointer, pan byte shifted by 8 and third argument to 0xE0. Original StartStream at 6294 and native Cutscene::StartStream in Audio/Cutscene/StreamControl.cpp prove the third argument controls reverb, not looping or stereo format."),
         ("Audio::Control::SetCutsceneVolume",
          (('arg0', 'volume'),),
          "F03147 25AC.c:940 sends 7-bit volume shifted by 8 to 0xE4; original consumer 6513 and native SetStreamVolume assign the stream volume and cancel its fade."),

@@ -68,6 +68,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\Cutscene\StreamControl.cpp" />
+    <ClCompile Include="src\Audio\Cutscene\StreamControlLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Audio\Driver\PlaybackReset.cpp" />
     <ClCompile Include="src\Audio\Driver\PlaybackResetLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -78,6 +82,10 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Driver\VoiceOutput.cpp" />
+    <ClCompile Include="src\Audio\Driver\VoiceOutputLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\Legacy.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -175,9 +183,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Audio\SequencerOutput.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
     <ClCompile Include="src\Audio\Sfx.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -208,9 +213,6 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Audio\StreamPlayback.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\VoiceEngine.cpp" />
     <ClCompile Include="src\Audio\XaMix.cpp" />
@@ -651,8 +653,12 @@
     <ClInclude Include="include\Audio\Reverb.hpp" />
     <ClInclude Include="include\Audio\SequencerOutput.h" />
     <ClInclude Include="include\Audio\SoundEffects.hpp" />
+    <ClInclude Include="include\Audio\StreamControl.hpp" />
+    <ClInclude Include="include\Audio\StreamControlLive.hpp" />
     <ClInclude Include="include\Audio\StreamPlayback.h" />
     <ClInclude Include="include\Audio\VoiceEngine.hpp" />
+    <ClInclude Include="include\Audio\VoiceOutput.hpp" />
+    <ClInclude Include="include\Audio\VoiceOutputLive.hpp" />
     <ClInclude Include="include\Audio\XaMix.hpp" />
     <ClInclude Include="include\Audio\XaMixLive.hpp" />
     <ClInclude Include="include\Audio\XaPlayback.h" />

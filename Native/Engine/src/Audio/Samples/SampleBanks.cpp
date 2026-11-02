@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/SequencerOutput.h"
 #include "Core/Memory/Copy.h"
 
 // decomp: D_80036770 (D_80036770@SLUS_010.40)
@@ -214,7 +214,7 @@ int Audio_Samples_LoadMusicBank(void* bank_data, int wait_for_transfer)
     int first_instrument;
     int sample_address;
     int alternate_bank_selected = Audio_Samples_ChooseMusicBankDestination((int *)(bank_data), &first_instrument, &sample_address);
-    Audio_Samples_UploadBank(bank_data, wait_for_transfer, first_instrument, sample_address);
+    VS::Audio::Samples::UploadLiveBank(bank_data, wait_for_transfer, first_instrument, sample_address);
     return alternate_bank_selected;
 }
 
@@ -225,7 +225,7 @@ int Audio_Samples_LoadSoundEffectBank(void* bank_data, int bank_slot, int wait_f
     int sample_address;
 
     Audio_Samples_ChooseSoundEffectBankDestination((int*)bank_data, &first_instrument, &sample_address, bank_slot);
-    Audio_Samples_UploadBank(bank_data, wait_for_transfer, first_instrument, sample_address);
+    VS::Audio::Samples::UploadLiveBank(bank_data, wait_for_transfer, first_instrument, sample_address);
     return 0;
 }
 
@@ -254,7 +254,7 @@ int Audio_Samples_SequenceMagicDifference(int* data)
 int Audio_Samples_LoadDeclaredBank(void* bank_data, int wait_for_transfer)
 {
     if (Audio_Samples_SequenceMagicDifference((int *)(bank_data)) == 0) {
-        Audio_Samples_UploadBank(bank_data, wait_for_transfer, ((int*)bank_data)[6], ((int*)bank_data)[4]);
+        VS::Audio::Samples::UploadLiveBank(bank_data, wait_for_transfer, ((int*)bank_data)[6], ((int*)bank_data)[4]);
         return 0;
     }
     return -1;

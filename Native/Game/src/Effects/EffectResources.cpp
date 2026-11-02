@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/StreamControlLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
-#include "Audio/StreamPlayback.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/Interpolation.h"
@@ -176,7 +176,7 @@ void Effects_BindEffectSoundBank(void* sound_bank_data)
 void Effects_BindEffectAuxiliarySoundBank(void* stream_data, size_t byte_count)
 {
     Effects_package->block13Data = stream_data;
-    Effects_package->auxiliarySoundHandle = Audio_BindRoomCutsceneStream(stream_data, byte_count);
+    Effects_package->auxiliarySoundHandle = VS::Audio::BindLiveRoomCutsceneStream(stream_data, byte_count);
 }
 
 // decomp: BATTLE.PRG _loadfile (src/BATTLE/BATTLE.PRG/6F014.c:549)

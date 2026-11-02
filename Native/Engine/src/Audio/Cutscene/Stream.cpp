@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 
@@ -94,15 +94,15 @@ void Audio_Cutscene_InitializeStreamVoice(
                     >> 0x10);
         }
     }
-    Audio_Driver_SetVoiceVolume(in_Voice, VolL, VolR, 0);
-    Audio_Driver_SetVoiceSampleRate(in_Voice, Audio_Cutscene_streamState.sampleRate);
+    VS::Audio::Driver::SetLiveVoiceVolume(in_Voice, VolL, VolR, 0);
+    VS::Audio::Driver::SetLiveVoiceSampleRate(in_Voice, Audio_Cutscene_streamState.sampleRate);
     Audio_Driver_SetVoiceStartAddress(in_Voice, in_StartAddr);
     Audio_Driver_SetVoiceLoopAddress(in_Voice, in_RepeatAddr);
     Audio_Driver_SetVoiceAttackRateAndMode(in_Voice, 0, 1);
     Audio_Driver_SetVoiceDecayRate(in_Voice, 0xF);
     Audio_Driver_SetVoiceSustainLevel(in_Voice, 0xF);
     Audio_Driver_SetVoiceSustainRateAndMode(in_Voice, 0x7F, 3);
-    Audio_Driver_SetVoiceReleaseRateAndMode(in_Voice, 6, 3);
+    VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode(in_Voice, 6, 3);
 }
 #undef PAN_CENTER_INDEX
 #undef SPU_PAN_TABLE_SIZE
@@ -122,7 +122,7 @@ void Audio_Cutscene_BeginStreamPlayback(
             irq_sample_address = 0x1030;
             Audio_Cutscene_streamState.totalPages = 0;
         }
-        Audio_Driver_KeyOnVoices(Audio_Cutscene_streamState.voiceMask);
+        VS::Audio::Driver::KeyOnLiveVoices(Audio_Cutscene_streamState.voiceMask);
     }
 }
 

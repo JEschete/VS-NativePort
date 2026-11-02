@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Akao.h"
@@ -286,8 +287,8 @@ void Audio_Mixer_PauseMusic(Audio_CommandParams* unused_command __attribute__((u
             voice_index = 0;
             while (voices_to_pause != 0) {
                 if (voices_to_pause & voice_bit) {
-                    Audio_Driver_SetVoiceVolume(voice_index, 0, 0, 0);
-                    Audio_Driver_SetVoiceSampleRate(voice_index, 0);
+                    VS::Audio::Driver::SetLiveVoiceVolume(voice_index, 0, 0, 0);
+                    VS::Audio::Driver::SetLiveVoiceSampleRate(voice_index, 0);
                     Audio_Driver_SetVoiceAttackRateAndMode(voice_index, 0x7F, 1);
                     Audio_Driver_SetVoiceSustainRateAndMode(voice_index, 0x7F, 3);
                     voices_to_pause &= ~voice_bit;
@@ -355,8 +356,8 @@ void Audio_Mixer_PauseWorldSoundEffects(Audio_CommandParams* in_Params __attribu
 
         while (voices_to_pause != 0) {
             if (voices_to_pause & voice_bit) {
-                Audio_Driver_SetVoiceVolume(voice_index, 0, 0, 0);
-                Audio_Driver_SetVoiceSampleRate(voice_index, 0);
+                VS::Audio::Driver::SetLiveVoiceVolume(voice_index, 0, 0, 0);
+                VS::Audio::Driver::SetLiveVoiceSampleRate(voice_index, 0);
                 Audio_Driver_SetVoiceAttackRateAndMode(voice_index, 0x7F, 1);
                 Audio_Driver_SetVoiceSustainRateAndMode(voice_index, 0x7F, 3);
                 voices_to_pause &= ~voice_bit;

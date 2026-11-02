@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
@@ -816,13 +817,13 @@ void Audio_Mixer_CommitPlaybackVoices(void)
         Audio_Mixer_BuildVoiceModeMask(&Audio_Mixer_voiceModes.fm, (Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->fmChannels : 0),
             Audio_Seq_activeMusicConfig->fmChannels,
             Audio_Mixer_voiceScheduler.fmVoices);
-        Audio_Driver_SetVoiceReverbMask(Audio_Mixer_voiceModes.reverb);
-        Audio_Driver_SetVoiceNoiseMask(Audio_Mixer_voiceModes.noise);
-        Audio_Driver_SetVoiceFrequencyModulationMask(Audio_Mixer_voiceModes.fm);
+        VS::Audio::Driver::SetLiveVoiceReverbMask(Audio_Mixer_voiceModes.reverb);
+        VS::Audio::Driver::SetLiveVoiceNoiseMask(Audio_Mixer_voiceModes.noise);
+        VS::Audio::Driver::SetLiveVoiceFrequencyModulationMask(Audio_Mixer_voiceModes.fm);
         Audio_Driver_controlLatches.updateFlags &= ~0x100;
     }
     if (KeyOnFlags != 0) {
-        Audio_Driver_KeyOnVoices(KeyOnFlags);
+        VS::Audio::Driver::KeyOnLiveVoices(KeyOnFlags);
     }
 }
 
@@ -900,7 +901,7 @@ void Audio_Mixer_ReleasePendingVoices(void)
     Audio_Mixer_voiceScheduler.pendingKeyOff = 0;
 
     if (VoiceMask != 0) {
-        Audio_Driver_KeyOffVoices(VoiceMask);
+        VS::Audio::Driver::KeyOffLiveVoices(VoiceMask);
     }
 }
 

@@ -156,6 +156,12 @@
     <ClInclude Include="src\Audio\Cutscene\Stream.h">
       <Filter>src\Audio\Cutscene</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Cutscene\StreamControl.cpp">
+      <Filter>src\Audio\Cutscene</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Cutscene\StreamControlLive.cpp">
+      <Filter>src\Audio\Cutscene</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Driver\PlaybackReset.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
@@ -168,6 +174,12 @@
     <ClInclude Include="src\Audio\Driver\SoundDriver.h">
       <Filter>src\Audio\Driver</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Driver\VoiceOutput.cpp">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Driver\VoiceOutputLive.cpp">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Legacy.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -258,9 +270,6 @@
     <ClInclude Include="src\Audio\Seq\Sequencer.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\SequencerOutput.cpp">
-      <Filter>src\Audio</Filter>
-    </ClCompile>
     <ClCompile Include="src\Audio\Sfx.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -288,9 +297,6 @@
     <ClInclude Include="src\Audio\Stream.h">
       <Filter>src\Audio</Filter>
     </ClInclude>
-    <ClCompile Include="src\Audio\StreamPlayback.cpp">
-      <Filter>src\Audio</Filter>
-    </ClCompile>
     <ClCompile Include="src\Audio\VoiceEngine.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -696,10 +702,22 @@
     <ClInclude Include="include\Audio\SoundEffects.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\StreamControl.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\StreamControlLive.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\StreamPlayback.h">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\VoiceEngine.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\VoiceOutput.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\VoiceOutputLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\XaMix.hpp">

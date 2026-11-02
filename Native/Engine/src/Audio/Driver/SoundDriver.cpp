@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/PlaybackResetLive.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
@@ -266,7 +267,7 @@ void Audio_Driver_WriteDirtyVoiceParameters(u_int in_VoiceIndex, Audio_VoicePara
 
     if (flags & VOICE_PARAM_SAMPLE_RATE) {
         flags &= ~VOICE_PARAM_SAMPLE_RATE;
-        Audio_Driver_SetVoiceSampleRate(in_VoiceIndex, in_VoiceParams->sampleRate);
+        VS::Audio::Driver::SetLiveVoiceSampleRate(in_VoiceIndex, in_VoiceParams->sampleRate);
         if (flags == 0) {
             return;
         }
@@ -274,7 +275,7 @@ void Audio_Driver_WriteDirtyVoiceParameters(u_int in_VoiceIndex, Audio_VoicePara
 
     if (flags & VOICE_PARAM_VOLUME) {
         flags &= ~VOICE_PARAM_VOLUME;
-        Audio_Driver_SetVoiceVolume(in_VoiceIndex, in_VoiceParams->volume.left,
+        VS::Audio::Driver::SetLiveVoiceVolume(in_VoiceIndex, in_VoiceParams->volume.left,
             in_VoiceParams->volume.right, in_VoiceParams->volumeScale);
         if (flags == 0) {
             return;

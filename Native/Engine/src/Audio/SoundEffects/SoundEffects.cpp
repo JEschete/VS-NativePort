@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 
@@ -147,7 +147,7 @@ void Audio_SoundEffects_StartChannelProgram(Audio_SeqChannel* in_Channel, Audio_
     in_Channel->effectPitchScaleSlideLength = 0;
     Audio_Seq_ResetSoundEffectChannel(in_Channel, in_ProgramCounter);
     Audio_Mixer_voiceOwners[in_Channel->voice.assignedVoice] = NULL;
-    Audio_Driver_SetVoiceReleaseRateAndMode(in_Channel->voice.assignedVoice, 5, 3);
+    VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode(in_Channel->voice.assignedVoice, 5, 3);
 
     Audio_Mixer_voiceScheduler.activeVoices |= in_VoiceBit;
     Audio_Mixer_voiceScheduler.pendingKeyOff |= in_VoiceBit;

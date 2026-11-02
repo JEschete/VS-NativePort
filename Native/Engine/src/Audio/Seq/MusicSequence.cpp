@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/MusicVoiceConflicts.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Audio/XaMixLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
-#include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 
@@ -223,7 +223,7 @@ void Audio_Seq_ReleaseMusicConfiguration(
         for (Count = 0; Count < VOICE_COUNT; Count++) {
             if (*ppThisChannelConfig == in_Config) {
                 *ppThisChannelConfig = NULL;
-                Audio_Driver_SetVoiceReleaseRateAndMode(Count, 5, 3U);
+                VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode(Count, 5, 3U);
             }
             ppThisChannelConfig++;
         };

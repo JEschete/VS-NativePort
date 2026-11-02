@@ -22,18 +22,6 @@ int Audio_Native_StartStreamVoice(unsigned voice, const char* instrument,
                                   int reverb);
 void Audio_Native_PauseVoice(unsigned voice, int paused);
 int Audio_Native_VoiceActive(unsigned voice);
-int Audio_Samples_UploadBank(void* data, int wait, int first_instrument,
-                             int source_destination);
-void Audio_Driver_KeyOnVoices(unsigned voices);
-void Audio_Driver_KeyOffVoices(unsigned voices);
-void Audio_Driver_SetVoiceReleaseRateAndMode(int voice, int rate,
-                                             unsigned mode);
-void Audio_Driver_SetVoiceVolume(int voice, unsigned left, unsigned right,
-                                 unsigned scale);
-void Audio_Driver_SetVoiceSampleRate(int voice, int rate);
-void Audio_Driver_SetVoiceReverbMask(unsigned voices);
-void Audio_Driver_SetVoiceNoiseMask(unsigned voices);
-void Audio_Driver_SetVoiceFrequencyModulationMask(unsigned voices);
 
 #ifdef __cplusplus
 }

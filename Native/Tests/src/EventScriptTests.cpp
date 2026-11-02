@@ -5,6 +5,8 @@
 
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
+#include "Audio/StreamControlLive.hpp"
+#include "Audio/VoiceOutputLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -31,7 +33,6 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
-#include "Audio/StreamPlayback.h"
 #include "DiscQueue.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
@@ -413,11 +414,13 @@ int TestsXaCommand(int command, int first, int second, int third) {
 }
 
 void TestsPrepareStreamPlayback(void) {
-  Audio_CommandHandler handlers[] = {
-      Audio_Cutscene_ReplaceStream,   Audio_Cutscene_StopStream,
-      Audio_Cutscene_SetStreamVolume, Audio_Cutscene_SlideStreamVolume,
-      Audio_Cutscene_SetStreamPan,    Audio_Cutscene_ResumeStream,
-      Audio_Cutscene_PauseStream};
+  Audio_CommandHandler handlers[] = {VS::Audio::Cutscene::ReplaceLiveStream,
+                                     VS::Audio::Cutscene::StopLiveStream,
+                                     VS::Audio::Cutscene::SetLiveStreamVolume,
+                                     VS::Audio::Cutscene::SlideLiveStreamVolume,
+                                     VS::Audio::Cutscene::SetLiveStreamPan,
+                                     VS::Audio::Cutscene::ResumeLiveStream,
+                                     VS::Audio::Cutscene::PauseLiveStream};
   int index;
   VS::Audio::Driver::ResetLivePlaybackState();
   memcpy(savedStreamPan, Audio_Mixer_kPanGains, sizeof(savedStreamPan));
@@ -557,12 +560,12 @@ void TestsNativeNoiseChannel(void) {
   VS::Audio::Driver::ResetLivePlaybackState();
   Audio_Native_ConfigureChannel(&channel);
   Audio_Native_SetNoiseClock(63);
-  Audio_Driver_SetVoiceNoiseMask(1);
+  VS::Audio::Driver::SetLiveVoiceNoiseMask(1);
   Audio_Native_SetReverbMode(4);
   Audio_Native_SetReverbDepth(0x3FFF, 0x3FFF);
   Audio_Native_EnableReverb(1);
-  Audio_Driver_SetVoiceReverbMask(1);
-  Audio_Driver_KeyOnVoices(1);
+  VS::Audio::Driver::SetLiveVoiceReverbMask(1);
+  VS::Audio::Driver::KeyOnLiveVoices(1);
   Audio_Native_Tick();
 }
 
@@ -730,9 +733,9 @@ int Tests_AudioModesWithoutSavedMusic(void) {
   Audio_Mixer_voiceScheduler = savedScheduler;
   Audio_Mixer_voiceModes = savedModes;
   Audio_Cutscene_streamVoices = savedStream;
-  Audio_Driver_SetVoiceReverbMask(savedModes.reverb);
-  Audio_Driver_SetVoiceNoiseMask(savedModes.noise);
-  Audio_Driver_SetVoiceFrequencyModulationMask(savedModes.fm);
+  VS::Audio::Driver::SetLiveVoiceReverbMask(savedModes.reverb);
+  VS::Audio::Driver::SetLiveVoiceNoiseMask(savedModes.noise);
+  VS::Audio::Driver::SetLiveVoiceFrequencyModulationMask(savedModes.fm);
   Audio_Driver_controlLatches = savedDriver;
   return passed;
 }
