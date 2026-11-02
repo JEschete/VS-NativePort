@@ -122,7 +122,7 @@ F01761,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,
 F01762,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: a decoded TileCoordinate replaces the packed AI tile register word
 F01763,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: explicit TerrainGrid view and world coordinates replace the hidden AI frame height map
 F01764,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: bounds-checked TerrainGrid::Cell replaces direct indexing of the frame height map
-F01765,Native\Game\src\Battle\Ai\FrameUpdate.cpp,,,,,,,,,
+F01765,Native\Game\src\Battle\Ai\FrameUpdate.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-FRAMEUPDATE-SLICE,67561da7063f1e23b59c1bc098bfe5386c42ac02,"#46 slice: VS::Battle::Ai::TickActorDecisionTimers, InitializeActorLocomotionMode, SetActorVerticalMovementSteps, CacheActorAiWorkingState and RunActorAiUpdateStages run in the legacy-free FrameUpdate.cpp over typed state records and an ActorAiFrame host; FrameUpdateLive.cpp binds the battle tables and owns the BATTLE.PRG module entries 0x800E65DC, 0x800E6828 and 0x800E685C"
 F01766,Native\Game\src\Battle\Ai\MovementBehavior.cpp,x,,,,x,,,,
 F01767,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: explicit TerrainGrid view; returns bool
 F01768,Native\Game\src\Field\TerrainHeight.cpp,x,x,x,x,x,x,verify:VR-AI-TERRAIN,00baeba8af734a182dd5e57a0776dbb1d8d45516,#46 slice: Position3 endpoints replace SVECTOR pointers; returns bool
@@ -156,20 +156,20 @@ F01796,Native\Game\src\Battle\Ai\PlanningPrimitives.cpp,x,,,,x,,,,
 F01797,Native\Game\src\Battle\Ai\DecisionPrimitives.cpp,x,,,,x,,,,
 F01798,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
 F01799,Native\Game\src\Battle\Ai\GroundNavigation.cpp,x,,,,x,,,,
-F01800,Native\Game\src\Battle\Ai\FrameUpdate.cpp,,,,,,,,,
+F01800,Native\Game\src\Battle\Ai\FrameUpdate.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-FRAMEUPDATE-SLICE,67561da7063f1e23b59c1bc098bfe5386c42ac02,"#46 slice: VS::Battle::Ai::TickActorDecisionTimers, InitializeActorLocomotionMode, SetActorVerticalMovementSteps, CacheActorAiWorkingState and RunActorAiUpdateStages run in the legacy-free FrameUpdate.cpp over typed state records and an ActorAiFrame host; FrameUpdateLive.cpp binds the battle tables and owns the BATTLE.PRG module entries 0x800E65DC, 0x800E6828 and 0x800E685C"
 F01801,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01802,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01803,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01804,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01805,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01806,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
-F01819,Native\Game\src\Battle\Ai\FrameUpdate.cpp,,,,,,,,,
+F01819,Native\Game\src\Battle\Ai\FrameUpdate.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-FRAMEUPDATE-SLICE,67561da7063f1e23b59c1bc098bfe5386c42ac02,"#46 slice: VS::Battle::Ai::TickActorDecisionTimers, InitializeActorLocomotionMode, SetActorVerticalMovementSteps, CacheActorAiWorkingState and RunActorAiUpdateStages run in the legacy-free FrameUpdate.cpp over typed state records and an ActorAiFrame host; FrameUpdateLive.cpp binds the battle tables and owns the BATTLE.PRG module entries 0x800E65DC, 0x800E6828 and 0x800E685C"
 F01820,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01821,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01822,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
 F01823,Native\Game\src\Battle\Ai\ActorCleanup.cpp,x,,,,x,,,,
-F01824,Native\Game\src\Battle\Ai\FrameUpdate.cpp,,,,,,,,,
-F01825,Native\Game\src\Battle\Ai\FrameUpdate.cpp,,,,,,,,,
+F01824,Native\Game\src\Battle\Ai\FrameUpdate.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-FRAMEUPDATE-SLICE,67561da7063f1e23b59c1bc098bfe5386c42ac02,"#46 slice: VS::Battle::Ai::TickActorDecisionTimers, InitializeActorLocomotionMode, SetActorVerticalMovementSteps, CacheActorAiWorkingState and RunActorAiUpdateStages run in the legacy-free FrameUpdate.cpp over typed state records and an ActorAiFrame host; FrameUpdateLive.cpp binds the battle tables and owns the BATTLE.PRG module entries 0x800E65DC, 0x800E6828 and 0x800E685C"
+F01825,Native\Game\src\Battle\Ai\FrameUpdate.cpp,x,x,x,x,x,x,verify:VR-BATTLE-AI-FRAMEUPDATE-SLICE,67561da7063f1e23b59c1bc098bfe5386c42ac02,"#46 slice: VS::Battle::Ai::TickActorDecisionTimers, InitializeActorLocomotionMode, SetActorVerticalMovementSteps, CacheActorAiWorkingState and RunActorAiUpdateStages run in the legacy-free FrameUpdate.cpp over typed state records and an ActorAiFrame host; FrameUpdateLive.cpp binds the battle tables and owns the BATTLE.PRG module entries 0x800E65DC, 0x800E6828 and 0x800E685C"
 F01826,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01827,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
 F01828,Native\Game\src\Battle\Ai\NavigationPrimitives.cpp,x,,,,x,,,,
