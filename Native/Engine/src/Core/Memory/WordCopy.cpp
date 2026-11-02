@@ -1,82 +1,108 @@
 // Hand-maintained (tools/port/owned.csv).
-// The SLUS word copy and clear, written in MIPS assembly in the original
-// (main.c:11669, 11699). Both move whole 32-bit words: a size's low two bits
-// are ignored, and the clear only reads the low 16 bits of its size.
-extern "C" {
-#include "Core/Memory/WordCopy.h"
+#include "Core/Memory/WordCopy.hpp"
 
-#include <stdint.h>
-#include <string.h>
+#include <algorithm>
+#include <array>
+#include <cstring>
 
-#include "Core/Memory.h"
-#include "Legacy/Psx.h"
+namespace VS::Core::Memory {
+namespace {
+constexpr std::size_t kWordBytes = 4;
+constexpr std::size_t kHalfwordBytes = 2;
+constexpr std::size_t kHalfwordBlockBytes = 8;
+constexpr std::uint32_t kZeroSizeMask = 0xFFFFu;
 
-enum {
-  kWordRemainderMask = sizeof(uint32_t) - 1,
-  kHalfwordBlockElements = 4,
-  kHalfwordBlockBytes = kHalfwordBlockElements * sizeof(uint16_t)
-};
-
-// decomp: SLUS_010.40 vs_main_memcpy (src/SLUS_010.40/main.c:11669)
-void Core_Memory_CopyAlignedWords(void* dest, void* src, u_int sz) {
-  memcpy(dest, src, sz & ~(u_int)kWordRemainderMask);
+constexpr std::size_t RoundDown(std::size_t bytes, std::size_t unit) {
+  return bytes - bytes % unit;
 }
 
-// decomp: SLUS_010.40 vs_main_bzero (src/SLUS_010.40/main.c:11699)
-void Core_Memory_ZeroAlignedWords(void* dest, int sz) {
-  memset(dest, 0, (u_int)sz & (UINT16_MAX & ~(u_int)kWordRemainderMask));
+std::size_t Bounded(std::size_t bytes, std::size_t unit,
+                    std::size_t destination_bytes,
+                    std::size_t source_bytes = SIZE_MAX) {
+  return RoundDown(std::min({bytes, destination_bytes, source_bytes}), unit);
 }
 
-// decomp: BATTLE.PRG func_800E4288 (F01758,
-// src/BATTLE/BATTLE.PRG/7B5DC.s:344-367). Assembly clears size >> 4
-// sixteen-byte blocks, then (size & 12) bytes in words. Unlike vs_main_bzero,
-// the size is not truncated to 16 bits. Native extension: nonpositive sizes are
-// a no-op instead of entering the assembly's invalid-size loop; any trailing
-// sub-word bytes are left untouched.
-void Core_Memory_ClearAlignedWords(void* destination, int size) {
-  if (size > 0) {
-    memset(destination, 0, (unsigned int)size & ~(unsigned)kWordRemainderMask);
+// Moves `bytes` (a multiple of Unit) forward one unit at a time; each unit is
+// loaded whole before it is stored, as the assembly's register copies are.
+template <std::size_t Unit>
+void CopyForward(std::byte* destination, const std::byte* source,
+                 std::size_t bytes) {
+  for (std::size_t offset = 0; offset < bytes; offset += Unit) {
+    std::array<std::byte, Unit> unit{};
+    std::memcpy(unit.data(), source + offset, Unit);
+    std::memcpy(destination + offset, unit.data(), Unit);
   }
+}
+}  // namespace
+
+std::size_t AlignedWordBytes(std::uint32_t size) {
+  return RoundDown(size, kWordBytes);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyAligned (src/BATTLE/BATTLE.PRG/573B8.c:242)
-// The assembly copies leading halfwords before entering vs_battle_memcpy.
-// Native extension: nonpositive sizes do nothing; incomplete halfwords are
-// ignored.
-void Core_Memory_CopyHalfwords(void* dst, const void* src, int num_bytes) {
-  if (num_bytes <= 0) {
-    return;
-  }
-  unsigned char* destination = (unsigned char*)(dst);
-  const unsigned char* source = (const unsigned char*)(src);
-  const unsigned int bytes =
-      (unsigned int)num_bytes & ~(unsigned int)(sizeof(uint16_t) - 1);
-  const unsigned int leading = bytes & (kHalfwordBlockBytes - 1);
-  for (unsigned int offset = 0; offset < leading; offset += sizeof(uint16_t)) {
-    uint16_t halfword;
-    memcpy(&halfword, source + offset, sizeof halfword);
-    memcpy(destination + offset, &halfword, sizeof halfword);
-  }
-  Core_Memory_CopyHalfwordBlocks(destination + leading, source + leading,
-                                 static_cast<int>(bytes - leading));
+std::size_t CopyAlignedWords(std::span<std::byte> destination,
+                             std::span<const std::byte> source,
+                             std::uint32_t size) {
+  const std::size_t bytes = Bounded(AlignedWordBytes(size), kWordBytes,
+                                    destination.size(), source.size());
+  CopyForward<kWordBytes>(destination.data(), source.data(), bytes);
+  return bytes;
 }
 
-// decomp: BATTLE.PRG vs_battle_memcpy (src/BATTLE/BATTLE.PRG/573B8.c:253)
-// All four halfwords are loaded before the block is stored, preserving forward
-// overlap. Native extension: nonpositive sizes and incomplete eight-byte blocks
-// are ignored.
-void Core_Memory_CopyHalfwordBlocks(void* dst, const void* src, int num_bytes) {
-  if (num_bytes <= 0) {
-    return;
-  }
-  unsigned char* destination = (unsigned char*)(dst);
-  const unsigned char* source = (const unsigned char*)(src);
-  const unsigned int bytes =
-      (unsigned int)num_bytes & ~(unsigned int)(kHalfwordBlockBytes - 1);
-  for (unsigned int offset = 0; offset < bytes; offset += kHalfwordBlockBytes) {
-    uint16_t block[kHalfwordBlockElements];
-    memcpy(block, source + offset, sizeof block);
-    memcpy(destination + offset, block, sizeof block);
-  }
+std::size_t ZeroAlignedWordBytes(std::int32_t size) {
+  return RoundDown(static_cast<std::uint32_t>(size) & kZeroSizeMask,
+                   kWordBytes);
 }
-}  // extern "C"
+
+std::size_t ZeroAlignedWords(std::span<std::byte> destination,
+                             std::int32_t size) {
+  const std::size_t bytes =
+      Bounded(ZeroAlignedWordBytes(size), kWordBytes, destination.size());
+  std::fill_n(destination.begin(), bytes, std::byte{});
+  return bytes;
+}
+
+std::size_t ClearAlignedWordBytes(std::int32_t size) {
+  return size > 0 ? RoundDown(static_cast<std::size_t>(size), kWordBytes) : 0;
+}
+
+std::size_t ClearAlignedWords(std::span<std::byte> destination,
+                              std::int32_t size) {
+  const std::size_t bytes =
+      Bounded(ClearAlignedWordBytes(size), kWordBytes, destination.size());
+  std::fill_n(destination.begin(), bytes, std::byte{});
+  return bytes;
+}
+
+std::size_t HalfwordBytes(std::int32_t size) {
+  return size > 0 ? RoundDown(static_cast<std::size_t>(size), kHalfwordBytes)
+                  : 0;
+}
+
+std::size_t CopyHalfwords(std::span<std::byte> destination,
+                          std::span<const std::byte> source,
+                          std::int32_t size) {
+  const std::size_t bytes = Bounded(HalfwordBytes(size), kHalfwordBytes,
+                                    destination.size(), source.size());
+  const std::size_t leading = bytes % kHalfwordBlockBytes;
+  CopyForward<kHalfwordBytes>(destination.data(), source.data(), leading);
+  CopyForward<kHalfwordBlockBytes>(destination.data() + leading,
+                                   source.data() + leading, bytes - leading);
+  return bytes;
+}
+
+std::size_t HalfwordBlockBytes(std::int32_t size) {
+  return size > 0
+             ? RoundDown(static_cast<std::size_t>(size), kHalfwordBlockBytes)
+             : 0;
+}
+
+std::size_t CopyHalfwordBlocks(std::span<std::byte> destination,
+                               std::span<const std::byte> source,
+                               std::int32_t size) {
+  const std::size_t bytes =
+      Bounded(HalfwordBlockBytes(size), kHalfwordBlockBytes, destination.size(),
+              source.size());
+  CopyForward<kHalfwordBlockBytes>(destination.data(), source.data(), bytes);
+  return bytes;
+}
+}  // namespace VS::Core::Memory

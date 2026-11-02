@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/WordCopy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -47,9 +47,9 @@ void Menu_Status_PopulateWeaponStats(Items_WeaponLoadout* weapon)
     if (weapon->blade.id != 0) {
         int i;
 
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats, &weapon->classAffinityCurrent,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &weapon->classAffinityCurrent,
             sizeof weapon->classAffinityCurrent);
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats + 48, &weapon->classAffinityBaseline,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats + 48, &weapon->classAffinityBaseline,
             sizeof weapon->classAffinityBaseline);
 
         Menu_Framework_equipmentStats[63] =
@@ -86,9 +86,9 @@ void Menu_Status_PopulateShieldStats(Items_ShieldLoadout* shield)
     if (shield->base.id != 0) {
         int i;
 
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats, &shield->classAffinityCurrent,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &shield->classAffinityCurrent,
             sizeof shield->classAffinityCurrent);
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats + 48, &shield->classAffinityBaseline,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats + 48, &shield->classAffinityBaseline,
             sizeof shield->classAffinityBaseline);
 
         Menu_Framework_equipmentStats[63] =
@@ -120,9 +120,9 @@ void Menu_Status_PopulateArmorStats(Items_ArmorLoadout* armor)
     if (armor->armor.id != 0) {
         int i;
 
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats, &armor->classAffinityCurrent,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &armor->classAffinityCurrent,
             sizeof armor->classAffinityCurrent);
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats + 48, &armor->classAffinityBaseline,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats + 48, &armor->classAffinityBaseline,
             sizeof armor->classAffinityBaseline);
 
         Menu_Framework_equipmentStats[63] = 0;
@@ -271,7 +271,7 @@ void Menu_Status_FormatGripDescription(
 void Menu_Status_CopyGemDescription(
     Items_EquipmentPartStats* gem, char* menuText[], int rowTypes[] __attribute__((unused)))
 {
-    Core_Memory_CopyHalfwordBlocks(Menu_Framework_stringBuf,
+    VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_stringBuf,
         &Menu_Framework_itemHelp[Menu_Framework_itemHelp[gem->id - 261
                                                    + Text_Menu_ITEMHELP_BIN_Index_gemFeldspar]],
         96);

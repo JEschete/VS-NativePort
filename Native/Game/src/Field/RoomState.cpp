@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/RoomState.h"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/ValueLabels.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -82,11 +82,11 @@ int Field_CurrentRoomId(void)
 // decomp: INITBTL.PRG func_800FA6B8 (src/BATTLE/INITBTL.PRG/18.c:595)
 void Field_InitializeRoomRuntimeState(void)
 {
-    Core_Memory_ZeroAlignedWords(Field_backgroundReferenceVectors, sizeof Field_backgroundReferenceVectors);
-    Core_Memory_ZeroAlignedWords(&Field_roomData, sizeof Field_roomData);
-    Core_Memory_ZeroAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
-    Core_Memory_ZeroAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
-    Core_Memory_ZeroAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
+    VS::Core::Memory::ZeroLiveAlignedWords(Field_backgroundReferenceVectors, sizeof Field_backgroundReferenceVectors);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof Field_roomData);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
     Field_roomPalettes = (u_short *)(Core_Memory_AllocateFromLowEnd(0x800));
     Battle_floatingLabels = (Battle_FloatingLabel (*)[32])(Core_Memory_AllocateFromLowEnd(sizeof *Battle_floatingLabels));
     Battle_placedLabelPositions = (DVECTOR *)(Core_Memory_AllocateFromLowEnd(0x80));

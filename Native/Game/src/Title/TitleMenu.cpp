@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
@@ -12,7 +13,6 @@ extern "C" {
 #include "Boot/PlayerSettings.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Event/ScriptAudio.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
@@ -1270,13 +1270,13 @@ void Title_InitializeNewGameData(void)
         *state_flags_cursor-- = 0;
     } while (--i >= 0);
 
-    Core_Memory_CopyAlignedWords(State_learnedActionFlags, Title_initialLearnedActionBits, sizeof Title_initialLearnedActionBits);
-    Core_Memory_ZeroAlignedWords(&State_roomVisitProgress, sizeof State_roomVisitProgress);
-    Core_Memory_ZeroAlignedWords(&State_playTime, sizeof State_playTime);
-    Core_Memory_ZeroAlignedWords(&Audio_Seq_unusedScoredata, sizeof Audio_Seq_unusedScoredata);
+    VS::Core::Memory::CopyLiveAlignedWords(State_learnedActionFlags, Title_initialLearnedActionBits, sizeof Title_initialLearnedActionBits);
+    VS::Core::Memory::ZeroLiveAlignedWords(&State_roomVisitProgress, sizeof State_roomVisitProgress);
+    VS::Core::Memory::ZeroLiveAlignedWords(&State_playTime, sizeof State_playTime);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Audio_Seq_unusedScoredata, sizeof Audio_Seq_unusedScoredata);
     State_currentRoomStateSlot = 0;
-    Core_Memory_ZeroAlignedWords(State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
-    Core_Memory_ZeroAlignedWords(&Audio_Seq_unusedArtsStatus, sizeof Audio_Seq_unusedArtsStatus);
+    VS::Core::Memory::ZeroLiveAlignedWords(State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Audio_Seq_unusedArtsStatus, sizeof Audio_Seq_unusedArtsStatus);
 
     for (i = 0; i < 8; ++i) {
         for (j = 0; j < 3; ++j) {
@@ -1287,11 +1287,11 @@ void Title_InitializeNewGameData(void)
     }
 
     for (i = 0; i < 1; ++i) {
-        Core_Memory_ZeroAlignedWords((char*)&State_ashleySnapshot + i * sizeof State_ashleySnapshot, 0x50);
+        VS::Core::Memory::ZeroLiveAlignedWords((char*)&State_ashleySnapshot + i * sizeof State_ashleySnapshot, 0x50);
     }
 
-    Core_Memory_ZeroAlignedWords(&State_savedEntryDoor, sizeof State_savedEntryDoor);
-    Core_Memory_CopyAlignedWords(&Audio_Seq_unusedInventory, Title_newGameInventoryTemplate, sizeof Audio_Seq_unusedInventory);
+    VS::Core::Memory::ZeroLiveAlignedWords(&State_savedEntryDoor, sizeof State_savedEntryDoor);
+    VS::Core::Memory::CopyLiveAlignedWords(&Audio_Seq_unusedInventory, Title_newGameInventoryTemplate, sizeof Audio_Seq_unusedInventory);
 
     State_tickSpeed = 2;
     State_savedEntryDoor.entryTileX = 4;

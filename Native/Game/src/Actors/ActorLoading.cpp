@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Core/Callbacks.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Random.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
@@ -77,7 +77,7 @@ Battle_Actor* Actors_CreateAuxiliaryActor(
 
     if (Battle_actors[index] == NULL) {
         actor_core = (Actors_ActorCore *)(Core_Memory_AllocateFromLowEnd(sizeof *actor_core));
-        Core_Memory_ZeroAlignedWords(actor_core, sizeof actor_core->actor);
+        VS::Core::Memory::ZeroLiveAlignedWords(actor_core, sizeof actor_core->actor);
         actor_core->actor.actor.stats = &actor_core->actor.stats;
         actor_core->actor.actor.model = &actor_core->model;
         actor_core->actor.actor.modelId = 0xFE;
@@ -477,7 +477,7 @@ Actors_ActorAllocation* Actors_AllocateActorWithEquipment(int actor_id, int mode
     }
     if (actor_id < 0xA) {
         allocation = (Actors_ActorAllocation *)(Core_Memory_AllocateFromLowEnd(sizeof *allocation));
-        Core_Memory_ZeroAlignedWords(allocation, sizeof allocation->core.actor);
+        VS::Core::Memory::ZeroLiveAlignedWords(allocation, sizeof allocation->core.actor);
         i = 0xA;
         allocation->core.actor.actor.stats = &allocation->core.actor.stats;
         allocation->core.actor.actor.allocationKind = 1;

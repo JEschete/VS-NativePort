@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
 #include "Input/Controller.h"
@@ -129,7 +129,7 @@ void Battle_ResetFloatingLabels(void)
     Battle_floatingLabelCount = 0;
     Battle_statusLabelStepTimer = 0;
     Battle_ashleyStatusLabelsSuppressed = 0;
-    Core_Memory_ZeroAlignedWords(Battle_floatingLabels, sizeof *Battle_floatingLabels);
+    VS::Core::Memory::ZeroLiveAlignedWords(Battle_floatingLabels, sizeof *Battle_floatingLabels);
 }
 
 // decomp: BATTLE.PRG func_80093B04 (src/BATTLE/BATTLE.PRG/2842C.c:1475)
@@ -1221,10 +1221,10 @@ void* Battle_ReserveFloatingLabel(void)
         p = &(*Battle_floatingLabels)[Battle_floatingLabelCount];
     } else {
         for (i = 0; i < 31; ++i) {
-            Core_Memory_CopyAlignedWords(
+            VS::Core::Memory::CopyLiveAlignedWords(
                 &(*Battle_floatingLabels)[i], &(*Battle_floatingLabels)[i + 1], sizeof(*Battle_floatingLabels)[i]);
         }
-        Core_Memory_ZeroAlignedWords(&(*Battle_floatingLabels)[31], sizeof(*Battle_floatingLabels)[31]);
+        VS::Core::Memory::ZeroLiveAlignedWords(&(*Battle_floatingLabels)[31], sizeof(*Battle_floatingLabels)[31]);
         p = &(*Battle_floatingLabels)[31];
     }
     return p;
@@ -1254,11 +1254,11 @@ void Battle_RemoveFloatingLabel(int label_index)
     --Battle_floatingLabelCount;
     if (label_index != Battle_floatingLabelCount) {
         for (i = label_index; i < Battle_floatingLabelCount; ++i) {
-            Core_Memory_CopyAlignedWords(
+            VS::Core::Memory::CopyLiveAlignedWords(
                 &(*Battle_floatingLabels)[i], &(*Battle_floatingLabels)[i + 1], sizeof(*Battle_floatingLabels)[i]);
         }
     }
-    Core_Memory_ZeroAlignedWords(&(*Battle_floatingLabels)[Battle_floatingLabelCount], sizeof(*Battle_floatingLabels)[Battle_floatingLabelCount]);
+    VS::Core::Memory::ZeroLiveAlignedWords(&(*Battle_floatingLabels)[Battle_floatingLabelCount], sizeof(*Battle_floatingLabels)[Battle_floatingLabelCount]);
 }
 
 // decomp: BATTLE.PRG func_8009651C (src/BATTLE/BATTLE.PRG/2842C.c:2642)

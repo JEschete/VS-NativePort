@@ -294,13 +294,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Core\Memory\WordCopy.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Core\Memory\WordCopy.cpp" />
+    <ClCompile Include="src\Core\Memory\WordCopyLive.cpp" />
     <ClCompile Include="src\Core\Memory.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -617,7 +612,6 @@
     <ClInclude Include="src\Core\Math\Vector.h" />
     <ClInclude Include="src\Core\Memory\Copy.h" />
     <ClInclude Include="src\Core\Memory\Heap.h" />
-    <ClInclude Include="src\Core\Memory\WordCopy.h" />
     <ClInclude Include="src\Core\Memory.h" />
     <ClInclude Include="src\Core\Overlays.h" />
     <ClInclude Include="src\Core\Random.h" />
@@ -683,6 +677,8 @@
     <ClInclude Include="include\Core\Log.hpp" />
     <ClInclude Include="include\Core\Math\Distance.hpp" />
     <ClInclude Include="include\Core\Math\ScalarMath.hpp" />
+    <ClInclude Include="include\Core\Memory\WordCopy.hpp" />
+    <ClInclude Include="include\Core\Memory\WordCopyLive.hpp" />
     <ClInclude Include="include\Core\PointerSort.hpp" />
     <ClInclude Include="include\Core\Random.hpp" />
     <ClInclude Include="include\Core\Scratch.h" />

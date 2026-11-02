@@ -4993,13 +4993,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "1ede665bbcac89e13715bb9873cf12e4d6b45f92d72d52501d795a523097d7f1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "1ee300b84884d73ef244712f681e851087371d54e1c4ef2563199fdc11ff9b31",
       "count": 1,
       "tool": "tidy",
@@ -5033,13 +5026,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "1f3ee483d79fdeaa39564152348bc17a90b426018306db5e75de8b9666bded19",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "1f4179af0cf434b134167a5055c7ee0f4fd1f501f9df8c9e8a5b030e9aef3b83",
@@ -5763,13 +5749,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2399970af8a6d696e2ba954c760b4af87966f368e001ceec66a9287bb97451a7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "23a708271133a1c4d6eda667cfe42b83752f4ccf09583efe17ba5ee659d7e108",
       "count": 1,
       "tool": "cpplint",
@@ -5914,13 +5893,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Log.hpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "2463e80de6622b50d410c9f570666697a0ea425e395bbd4425f5a31e8875fd6c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
       "rule": "readability-identifier-naming"
     },
     {
@@ -6349,13 +6321,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/CombatTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "269cf6c0e8a44b122c0600c67b2b16c3a4de60e03d28d01d4647e1c937894607",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "26b8c7c6d34d6511852457b76c2eac01aa6a08f6c525728e8926d117d8d2f2be",
@@ -8535,13 +8500,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "347c0f940045491ee038f917b2b692639b11fed0eb2473c9615632daf762b28a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "347db862f758966e5815b793fc1daa3189a6b4f180ac2b3fa987def2157c7f6d",
       "count": 1,
       "tool": "cpplint",
@@ -10674,13 +10632,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/ContentTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "42533324430fa666c85f324d146dd427d4a0ffaf767cad90819389f7f798d106",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -13141,13 +13092,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "51ab9b62e8f28e96da2f2ad84650cdc89163a1dcaec365131822ac14e071c67a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "51ad02b37c22a11f7d443068147c848693deb67d93480f2c71d824632393348d",
       "count": 1,
       "tool": "tidy",
@@ -14429,13 +14373,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "59da764f1a4e2262524c42f13dc45ee3a1fa70b54366556538781fcbcdcf5b25",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "59dc80932f85d2faab125f9c092b400f348e611860a7a8562d7bb827e7a9b14f",
       "count": 2,
       "tool": "tidy",
@@ -14721,13 +14658,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "5c187092e6faa28736cf686baa6dd4e9728926c5da88b84938177b62ed71355d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "5c1aeba95db2fd4b06356dffdf8b6ead5c7a523f4cada69d3ea7b99beeb86393",
@@ -15899,13 +15829,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "62f0741b42a9f917de4fa8d24427fa533feaaabd47e964f40596c284e35e0a0e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "62fbc1f24ba18d4c8959f68bd64841b478b5cee2c4d2f763595f401f85eb88dc",
       "count": 2,
       "tool": "cpplint",
@@ -16310,13 +16233,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "6587192b7184bf0d0075d097037facfbb1bc40144517a57672c77fdce3892f18",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "b4cd68a968670d7051c00de553acfd9ae9eb3175268775ddd453519873bee3ba",
@@ -17080,13 +16996,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6a28b9a6bc59d4cdd5400f2efed5fd09a09103103b0fb3a33d50646c938f7d76",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "6a44582d54ee02f7a68de820442773f31b5fbf740601e4dc4f3ec8691ad33747",
@@ -17929,13 +17838,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6ff9ba449c6d1eb3bdd2f919ad2827428b47c856f056eadb5945bd532a59e13c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "6ffa1032a772d83c6312b123c695cd1aec9f38445a45e48bf6e313cc31d22a98",
       "count": 1,
       "tool": "tidy",
@@ -18403,13 +18305,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "7304cd2b6d471f51ec9f5ae6880b784229bc42693320b8c2a8d8f14bd1c251fc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "730a1870801b4c2c4c58574a5b0edf1f0137719b2232dd32f642f50aa4060d36",
@@ -19553,13 +19448,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "79e23a03c5e548276180854f2e627e7f5a3128f8eb6708869a1e9e5558e5728f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "79e4b13c63ab94ac1c45bac988dc113189bb8c9556706788c69c4cfc598740af",
       "count": 1,
       "tool": "tidy",
@@ -20013,13 +19901,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "7cd523bd5bbc4e149e1bbf91bf3f1359e9b56f9a5b43797ca500b8a39610d4fc",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "google"
     },
     {
       "key": "7ceafed28eaf98546f376be01cbaf2937ba5d9d32bfd6f1f92175da290915372",
@@ -23536,13 +23417,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "932140fcf9ed484ccd4b344e62e70c2c7b7ed882d22b35aea76f8e73c6a4a00c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "9325156c581e1bb4ba521052d7b66e8a3678a5f1597fda061b8490850ef4d855",
       "count": 1,
       "tool": "cpplint",
@@ -23618,13 +23492,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "9386e4ff0ba25c53b2954b05b15999700d5bdb342777295875b46b789f5bb711",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "9395266449c52ab7c2a4da4e26b977f5775849f0d6b8ecbf3f1126474b99199a",
@@ -25405,13 +25272,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9ecc0fb94f43377fa90c0a7688cbed1ec66ac0f0d575784b59e517ed00310a0c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "9ed5ec840a97188799c2bbde7a3b0ac09e74eb80536099e62d61e866bf0a9ae4",
       "count": 1,
       "tool": "cpplint",
@@ -26522,13 +26382,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a62818aff5682df746175e4bac221b2763a3d4ed813de760afc3a3f27962345e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -27993,13 +27846,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "b0090ad96c79fa600e0bcf6a8b71f24f914e9551389a107c267f683048c6565a",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "google"
     },
     {
       "key": "b0294299523173e4e8a7438309f0e1caba926bfda953433380a680baf6943b56",
@@ -29836,13 +29682,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "bbe0b089b0ad92324cd95d0f91f4c47b1b851ce6bf384881235a377c22295ba2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "bbe5697b67c09e18b925db52ac089059ff1d91ac185c891f618be9c759fe98da",
       "count": 1,
       "tool": "tidy",
@@ -30312,13 +30151,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "bef03fbadb664a3364d0f230018563ca58a6e091b86123fed55b3ccdc2b11078",
-      "count": 5,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "bef5e131859322ba4281d3770119cf10bcea5afda91a9a7e348689e59bc49ab5",
       "count": 1,
       "tool": "tidy",
@@ -30638,13 +30470,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Render/Device.hpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c117455fa3c86c9df2b0e6e4b6c17d0c44a73bfe8b4e651d01bf311410f10308",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
       "rule": "readability-identifier-naming"
     },
     {
@@ -34617,13 +34442,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "d9492b5fa99ff912f5d7c6a58f75aea33a6ff237a08a48830cb773c80929ac41",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "d9538641745c4cd8e37b4f4279cceb387f59165dc90e61fd7c31bf036e5d21a0",
       "count": 1,
       "tool": "cpplint",
@@ -34874,13 +34692,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "db41016edd7a698455d3ab7fc040d0bce878630cb8b7d729f2e48fb530d5bfc7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "db42b2e7eac614673a21d08da3415c2720487982079388ec572c85c63ac6a844",
@@ -35924,13 +35735,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e2e175e0b752a68af4312df1649d4d7a5737b157248f07a6c5c92faee99c8cfb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "e2ec3eee63d409e4b40337c6be95d58f4b00eb0d645bc128579e3b32ab7010b7",
@@ -37515,13 +37319,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "eca114d57aef1b3f648e5267b2ceb484ec47de021dced9aae539a9d10ad6a4bb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "ecb20daceb5ad55c07b3fc7dc6808903fbe48d56f92a59f12d7c513d5dce8443",
       "count": 1,
       "tool": "tidy",
@@ -38955,13 +38752,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CombatTestCases.cpp",
       "rule": "whitespace/braces"
-    },
-    {
-      "key": "f6dba44b95d35246497e12dbf66ad32c47a5931a471c3df78d276dc1f3353b1c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/Memory/WordCopy.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f6de58b9820d1b79d2050491572e1f112b8676fec33202ed6a98db8b0c517e98",

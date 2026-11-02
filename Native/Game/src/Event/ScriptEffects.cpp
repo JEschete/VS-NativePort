@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Core/Compatibility.h"
 #include "Core/Diagnostics.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -141,7 +141,7 @@ intptr_t Event_CommandPlayVibrationPattern(u_char* instruction, short thread_ind
         Input_StopVibrationPatterns(0, 2);
     } else {
         if (pattern_selector & 8) {
-            Core_Memory_CopyAlignedWords(Event_vibrationPatternBuffer, Event_vibrationPatterns[pattern_selector & 7], 0x80);
+            VS::Core::Memory::CopyLiveAlignedWords(Event_vibrationPatternBuffer, Event_vibrationPatterns[pattern_selector & 7], 0x80);
             Input_StartVibrationPattern((char *)(((u_char*)(Event_vibrationPatternBuffer)) + 8), 0xFF, 2);
         } else {
             if (Event_vibrationPatterns[pattern_selector] != 0) {

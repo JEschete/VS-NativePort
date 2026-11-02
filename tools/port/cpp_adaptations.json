@@ -7228,10 +7228,10 @@
 [
 969,
 [
-"    Core_Memory_CopyAlignedWords(room_section_allocation, data + 0x60, dataSz);"
+"    VS::Core::Memory::CopyLiveAlignedWords(room_section_allocation, data + 0x60, dataSz);"
 ],
 [
-"    Core_Memory_CopyAlignedWords(room_section_allocation, ((u_char*)(data)) + 0x60, dataSz);"
+"    VS::Core::Memory::CopyLiveAlignedWords(room_section_allocation, ((u_char*)(data)) + 0x60, dataSz);"
 ]
 ],
 [

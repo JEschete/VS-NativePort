@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Boot/SessionLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -34,7 +35,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Core/Compatibility.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
@@ -128,7 +128,7 @@ void Field_LoadZoneRoomFileTable(void* room_file_table_data, int size)
         Core_IgnoreDiagnostic(0x8B, 0);
     }
     Field_zoneContext.mpdFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(size));
-    Core_Memory_CopyAlignedWords(Field_zoneContext.mpdFiles, room_file_table_data, size);
+    VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdFiles, room_file_table_data, size);
 }
 
 // decomp: BATTLE.PRG _loadZndEnemies (src/BATTLE/BATTLE.PRG/146C.c:14783)
@@ -138,11 +138,11 @@ void Field_LoadZoneEnemyTemplates(long* data, int arg1 __attribute__((unused)))
 
     if (Field_zoneContext.zndEnemyCount != 0) {
         Field_zoneContext.zudFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(Field_zoneContext.zndEnemyCount * 8));
-        Core_Memory_CopyAlignedWords(Field_zoneContext.zudFiles, data + 1,
+        VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.zudFiles, data + 1,
             Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zudFiles);
         Field_zoneContext.zndEnemies = (Field_ZndEnemyRecord *)(Core_Memory_AllocateFromLowEnd(
             Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies));
-        Core_Memory_CopyAlignedWords(Field_zoneContext.zndEnemies,
+        VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.zndEnemies,
             data + ((Field_zoneContext.zndEnemyCount * 2) + 1),
             Field_zoneContext.zndEnemyCount * sizeof *Field_zoneContext.zndEnemies);
         return;
@@ -582,7 +582,7 @@ void Field_RestoreRoomEnemyCache(void)
             }
         }
         State_currentRoomStateSlot = i;
-        Core_Memory_ZeroAlignedWords(&State_recentRoomEnemyStates[i], sizeof State_recentRoomEnemyStates[i]);
+        VS::Core::Memory::ZeroLiveAlignedWords(&State_recentRoomEnemyStates[i], sizeof State_recentRoomEnemyStates[i]);
     }
 
     for (i = 0; i < 4; ++i) {
@@ -602,7 +602,7 @@ void Field_LoadRoomEnemyPlacements(void* data, u_int dataLen)
     Boot_EncounterRoomPlacements(&data, &dataLen);
     if (dataLen != 0) {
         Field_zoneContext.mpdEnemies = (Field_MpdEnemySpawn *)(Core_Memory_AllocateFromLowEnd(dataLen));
-        Core_Memory_CopyAlignedWords(Field_zoneContext.mpdEnemies, data, dataLen);
+        VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdEnemies, data, dataLen);
         Field_zoneContext.mpdEnemyCount = dataLen / sizeof(Field_MpdEnemySpawn);
         return;
     }
@@ -965,9 +965,9 @@ int Field_LoadRoomSections(int owner_room_index, void* data)
         return 0;
     }
 
-    Core_Memory_CopyAlignedWords(&Field_roomData.header, data, 0x60);
+    VS::Core::Memory::CopyLiveAlignedWords(&Field_roomData.header, data, 0x60);
     room_section_allocation = Core_Memory_AllocateFromLowEnd(dataSz);
-    Core_Memory_CopyAlignedWords(room_section_allocation, ((u_char*)(data)) + 0x60, dataSz);
+    VS::Core::Memory::CopyLiveAlignedWords(room_section_allocation, ((u_char*)(data)) + 0x60, dataSz);
 
     dataSz = 0;
     room_record = &Field_roomData;
@@ -1046,7 +1046,7 @@ int Field_ReleaseOwnedRoomSections(int owner_room_index)
             if (Field_roomData.geometry != 0) {
                 Core_Memory_FreeFromLowEnd((void*)Field_roomData.geometry);
             }
-            Core_Memory_ZeroAlignedWords(&Field_roomData, sizeof(Field_RoomRecord));
+            VS::Core::Memory::ZeroLiveAlignedWords(&Field_roomData, sizeof(Field_RoomRecord));
             return 1;
         }
     }

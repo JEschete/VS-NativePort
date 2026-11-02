@@ -37,6 +37,9 @@
     <Filter Include="include\Core\Math">
       <UniqueIdentifier>{2C2E5BC5-B9D0-5B0A-87D9-5789538031ED}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Core\Memory">
+      <UniqueIdentifier>{86FEC68F-54CD-5F6E-953B-430D05A35144}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Core\Text">
       <UniqueIdentifier>{EE72470B-3E88-5B60-BCD1-8CB388B0E83F}</UniqueIdentifier>
     </Filter>
@@ -384,9 +387,9 @@
     <ClCompile Include="src\Core\Memory\WordCopy.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Memory\WordCopy.h">
+    <ClCompile Include="src\Core\Memory\WordCopyLive.cpp">
       <Filter>src\Core\Memory</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Core\Memory.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -746,6 +749,12 @@
     </ClInclude>
     <ClInclude Include="include\Core\Math\ScalarMath.hpp">
       <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Memory\WordCopy.hpp">
+      <Filter>include\Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Memory\WordCopyLive.hpp">
+      <Filter>include\Core\Memory</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\PointerSort.hpp">
       <Filter>include\Core</Filter>

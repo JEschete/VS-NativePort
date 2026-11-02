@@ -109,7 +109,6 @@ extern "C" {
 #include "Core/Memory.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Overlays.h"
 #include "Core/Random.h"
 #include "Core/Runtime.h"
@@ -1551,8 +1550,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurve, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C00E8u, 0u, (void*)&Event_QueueEventScriptLoad, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0150u, 0u, (void*)&Event_ResetCutsceneActorsToIdle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C01C0u, 0u, (void*)&Core_Memory_CopyHalfwords, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C01E0u, 0u, (void*)&Core_Memory_CopyHalfwordBlocks, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&Battle_InitSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05B4u, 0u, (void*)&Battle_FreeSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05ECu, 0u, (void*)&Battle_SetSphereVolumes, 0u, 0u, 0u},
@@ -3084,8 +3081,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80049098u, 0u, (void*)&Core_IgnoreDiagnostic, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800490A0u, 0u, (void*)&Core_IgnoreDiagnostic, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800490A8u, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800490B0u, 0u, (void*)&Core_Memory_CopyAlignedWords, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80049110u, 0u, (void*)&Core_Memory_ZeroAlignedWords, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80049130u, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80049138u, 4u, (void*)&Core_legacyRamSize, sizeof Core_legacyRamSize, 1u, 1u},
     {"SLUS_010.40", 0x8004913Cu, 4u, (void*)&Core_legacyStackSize, sizeof Core_legacyStackSize, 1u, 1u},

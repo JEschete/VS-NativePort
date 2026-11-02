@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -138,7 +138,7 @@ void Menu_Inventory_SortWeapons(int stat)
         }
     }
 
-    Core_Memory_CopyHalfwordBlocks(indices, sortedIndices, 8);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(indices, sortedIndices, 8);
 }
 
 // decomp: MENU _sortShields (src/MENU/items1.h:827)
@@ -195,7 +195,7 @@ void Menu_Inventory_SortShields(int stat)
         }
     }
 
-    Core_Memory_CopyHalfwordBlocks(indices, sortedIndices, 8);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(indices, sortedIndices, 8);
 }
 
 // decomp: MENU _sortMisc (src/MENU/items1.h:899)
@@ -241,7 +241,7 @@ void Menu_Inventory_SortMisc(int stat)
         }
     }
 
-    Core_Memory_CopyHalfwordBlocks(indices, sortedIndices, sizeof sortedIndices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(indices, sortedIndices, sizeof sortedIndices);
 }
 
 // decomp: MENU _copyEquipment (src/MENU/items1.h:994)
@@ -317,7 +317,7 @@ void Menu_Inventory_SortEquipment(int itemCategory, int stat)
             }
         }
 
-        Core_Memory_CopyHalfwordBlocks(indices, sortedIndices, capacity);
+        VS::Core::Memory::CopyLiveHalfwordBlocks(indices, &sortedIndices[0], capacity);
     }
 }
 

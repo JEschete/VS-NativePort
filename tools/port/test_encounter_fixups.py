@@ -2466,7 +2466,7 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertEqual(len(definition), 1)
         self.assertEqual(
             definition[0].body.strip(),
-            "Core_Memory_CopyAlignedWords(destination, source, 0x7800);\n"
+            "VS::Core::Memory::CopyLiveAlignedWords(destination, source, 0x7800);\n"
             "    VS::Actors::RegisterSequenceBankCopy(destination, source, 0x7800);",
         )
 
@@ -3148,7 +3148,7 @@ int arg01 = arg0;'''
 
     def test_gimmick_copy_uses_only_the_native_owned_runtime_prefix(self):
         source = """memset(s1, 0, 0x178);
-Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);
+VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);
 """
         for old, new, _ in copy_fixups.FIXES["F00782"]:
             self.assertIn(old, source)

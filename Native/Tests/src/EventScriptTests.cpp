@@ -7,6 +7,7 @@
 #include "Audio/PlaybackResetLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
@@ -800,8 +800,8 @@ int Tests_EventScriptNativeBranches(int skip) {
   u_char* cursor = script;
   int passed;
   memcpy(savedNormal, Event_kOpcodeHandlers, sizeof savedNormal);
-  Core_Memory_CopyAlignedWords(skipCopy, Event_kSkipOpcodeHandlers,
-                               sizeof skipCopy);
+  VS::Core::Memory::CopyLiveAlignedWords(skipCopy, Event_kSkipOpcodeHandlers,
+                                         sizeof skipCopy);
   passed = memcmp(skipCopy, Event_kSkipOpcodeHandlers, sizeof skipCopy) == 0;
   skipCopy[0] = Event_kOpcodeHandlers[0] = Event_ScriptJumpForward;
   skipCopy[1] = Event_kOpcodeHandlers[1] = Event_ScriptReturnToSavedAddress;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -184,7 +184,7 @@ void Menu_Setup_PreviewBladeCombination(int preview_selection)
 
     case 1:
     case 2:
-        Core_Memory_CopyHalfwords(
+        VS::Core::Memory::CopyLiveHalfwords(
             &Menu_Setup_bladeBuf, &Audio_Seq_unusedInventory.blades[i + second_blade_id - 1], sizeof Menu_Setup_bladeBuf);
         break;
 
@@ -697,7 +697,7 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
             itemId = Menu_Setup_combiningBladeIds[0];
             blade = &Audio_Seq_unusedInventory.blades[itemId - 1];
 
-            Core_Memory_CopyHalfwords(blade, &Menu_Setup_bladeBuf, sizeof *blade);
+            VS::Core::Memory::CopyLiveHalfwords(blade, &Menu_Setup_bladeBuf, sizeof *blade);
 
             blade->index = itemId;
 
@@ -774,7 +774,7 @@ void Menu_Setup_PreviewShieldCombination(int preview_selection)
 
     case 1:
     case 2:
-        Core_Memory_CopyHalfwords(&Menu_Setup_shieldBuf, &Audio_Seq_unusedInventory.shields[first + second - 1],
+        VS::Core::Memory::CopyLiveHalfwords(&Menu_Setup_shieldBuf, &Audio_Seq_unusedInventory.shields[first + second - 1],
             sizeof Menu_Setup_shieldBuf);
         break;
 
@@ -1289,7 +1289,7 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
             temp_s2 = Menu_Setup_itemsToCombine[0];
             shield1 = &Audio_Seq_unusedInventory.shields[temp_s2 - 1];
 
-            Core_Memory_CopyHalfwords(shield1, &Menu_Setup_shieldBuf, 0x30);
+            VS::Core::Memory::CopyLiveHalfwords(shield1, &Menu_Setup_shieldBuf, 0x30);
 
             shield1->index = temp_s2;
 
@@ -1341,7 +1341,7 @@ void Menu_Setup_PreviewArmorCombination(int preview_selection)
 
     case 1:
     case 2:
-        Core_Memory_CopyHalfwords(
+        VS::Core::Memory::CopyLiveHalfwords(
             &Menu_Setup_armorBuf, &Audio_Seq_unusedInventory.armor[i + second_armor_id - 1], sizeof Menu_Setup_armorBuf);
         break;
 
@@ -1767,7 +1767,7 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
             }
             itemId = Menu_Setup_combiningArmorIds[0];
             armor = &Audio_Seq_unusedInventory.armor[itemId - 1];
-            Core_Memory_CopyHalfwords(armor, &Menu_Setup_armorBuf, sizeof *armor);
+            VS::Core::Memory::CopyLiveHalfwords(armor, &Menu_Setup_armorBuf, sizeof *armor);
             armor->index = itemId;
             Items_Inventory_RebuildDisplayIndices(4);
             return 1;
@@ -2065,7 +2065,7 @@ Items_InventoryBlade* Menu_Setup_BuildCombinedBlade(Items_InventoryBlade* first,
     Menu_Setup_materialResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->materialsOffset);
     Menu_Setup_bladeCombinationInitData = ((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->initDataOffset;
 
-    Core_Memory_CopyAlignedWords(result, first, sizeof *result);
+    VS::Core::Memory::CopyLiveAlignedWords(result, first, sizeof *result);
 
     result->material = Menu_Setup_materialResults[(first->material - 3) * 500 + first->category * 50
                                         + (second->material - 3) * 10 + second->category];
@@ -2109,7 +2109,7 @@ Items_InventoryArmor* Menu_Setup_BuildCombinedShield(Items_InventoryArmor* first
     Menu_Setup_materialResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->materialsOffset);
     Menu_Setup_shieldCombinationInitData = (Menu_Setup_CombinedArmorRecord *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->initDataOffset);
 
-    Core_Memory_CopyAlignedWords(result, first, sizeof *result);
+    VS::Core::Memory::CopyLiveAlignedWords(result, first, sizeof *result);
 
     result->material = Menu_Setup_materialResults[(first->material * 8) + second->material];
     result->subId = Menu_Setup_combinationResults[(first->subId * 17) + second->subId];
@@ -2149,7 +2149,7 @@ Items_InventoryArmor* Menu_Setup_BuildCombinedArmor(Items_InventoryArmor* first,
     Menu_Setup_materialResults = (char *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->materialsOffset);
     Menu_Setup_combinationInitData = (Menu_Setup_CombinedArmorRecord *)(((u_char*)(sydData)) + ((Menu_Setup_SydHeader*)sydData)->initDataOffset);
 
-    Core_Memory_CopyAlignedWords(result, first, sizeof *result);
+    VS::Core::Memory::CopyLiveAlignedWords(result, first, sizeof *result);
 
     result->material = Menu_Setup_materialResults[first->material * 128 + (first->category - 2) * 32
                                         + second->material * 4 + (second->category - 2)];

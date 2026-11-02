@@ -43,6 +43,9 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Game\include\Boot\SessionLive.hpp"
        for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},
     "VS::Boot::DelayAfterOverlayLoad": r"Native\Game\include\Boot\Session.hpp",
+    **{f"VS::Core::Memory::{name}": r"Native\Engine\include\Core\Memory\WordCopyLive.hpp"
+       for name in ("CopyLiveAlignedWords", "ZeroLiveAlignedWords", "ClearLiveAlignedWords", "CopyLiveHalfwords",
+                    "CopyLiveHalfwordBlocks")},
     **{f"VS::Render::DrawLiveTexture{kind}": r"Native\Engine\include\Render\TextureRegionDrawLive.hpp"
        for kind in ("TintFade", "FlashFade", "Wipe")},
     "VS::Battle::CheckedTargetPreviews": r"Native\Game\include\Battle\TargetPages.hpp",
@@ -399,8 +402,8 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("memset(s1, 0, 0x178);",
          "memset(s1, 0, offsetof(Field_GimmickInstance, reserved178));",
          "Clear the native runtime prefix, not the PS1 prefix or the larger actor-compatibility view"),
-        ("Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);",
-         "Core_Memory_CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
+        ("VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);",
+         "VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], "
          "offsetof(Field_GimmickInstance, reserved178));",
          "Shared gimmicks copy their complete native prefix including the object-info tail"),
     ],
@@ -488,7 +491,7 @@ static struct {
 
 void Menu_Loot_ResetPaging(void)
 {
-    Core_Memory_ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
+    VS::Core::Memory::ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
 }
 
 void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
@@ -2361,7 +2364,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("= (int)actor;", "= (Battle_Actor*)actor;", "preserve special actor pointer"),
         ("Core_Memory_AllocateFromLowEnd(0x484)", "Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState))",
          "allocate full native state, never sizeof the partial initialization view"),
-        ("Core_Memory_ClearAlignedWords(state, 0x484)", "Core_Memory_ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState))",
+        ("VS::Core::Memory::ClearAlignedWords(state, 0x484)", "VS::Core::Memory::ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState))",
          "clear full native state including candidate pointer array"),
         ("((void (*)(unsigned char, int, void*, int))Actors_ActorTaggedBonePosition)(state->actorId, 250, result, 0)",
          "Actors_ActorTaggedBonePosition(state->actorId, 0xFA, &result, 0)", "use actual int/SVECTOR signature"),
@@ -2540,8 +2543,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    Event_playbackPhase = 0;\n"
          "    Event_isStartConfirmed = 0;\n"
          "    Event_isMainThreadFinished = 0;\n"
-         "    Core_Memory_ZeroAlignedWords(Event_threadCursors, sizeof Event_threadCursors);\n"
-         "    Core_Memory_ZeroAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);",
+         "    VS::Core::Memory::ZeroAlignedWords(Event_threadCursors, sizeof Event_threadCursors);\n"
+         "    VS::Core::Memory::ZeroAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);",
          "native globals survive overlay loads; a new gameplay session must not resume old event threads"),
     ],
     # BATTLE 4A0A8.c:2110 is called only through the opcode table; it ignores both dispatch arguments.
@@ -2672,8 +2675,8 @@ FIXES["F00798"] += [
      "shared sequence entries already point into the payload"),
     # #261: record every bank's extent so playback can bound its SEQ reads. The copied banks hold `size` bytes;
     # in-place shared banks carry their extent in the SEQ size word at file+4.
-    ("Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);",
-     "Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);\n"
+    ("VS::Core::Memory::CopyAlignedWords(seq, Content_legacySequenceParseData, size);",
+     "VS::Core::Memory::CopyAlignedWords(seq, Content_legacySequenceParseData, size);\n"
      "        VS::Actors::RegisterSequenceBank(seq, size);",
      "30DB0.c:1719 the copied bank holds the size read from its SEQ header"),
     ("seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);",
@@ -2683,8 +2686,8 @@ FIXES["F00798"] += [
 ]
 
 FIXES["F00797"] += [
-    ("Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);",
-     "Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);\n"
+    ("VS::Core::Memory::CopyAlignedWords(arg0, arg1, 0x7800);",
+     "VS::Core::Memory::CopyAlignedWords(arg0, arg1, 0x7800);\n"
      "    VS::Actors::RegisterSequenceBankCopy(arg0, arg1, 0x7800);",
      "30DB0.c:1610 #261: the clone keeps its source bank's extent, limited to the 0x7800-byte copy"),
 ]
@@ -2770,6 +2773,30 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      "F04191 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
     (r"", r"\bVS::Render::QueueSprite\(", r"VS::Render::QueueLiveSprite(",
      "F04192 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
+    (r"", r"\bVS::Core::Memory::CopyAlignedWords\(", r"VS::Core::Memory::CopyLiveAlignedWords(",
+     "F03572 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
+     "forward without memcpy overlap (#268)"),
+    (r"", r"\bVS::Core::Memory::ZeroAlignedWords\(", r"VS::Core::Memory::ZeroLiveAlignedWords(",
+     "F03573 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
+     "forward without memcpy overlap (#268)"),
+    (r"", r"\bVS::Core::Memory::ClearAlignedWords\(", r"VS::Core::Memory::ClearLiveAlignedWords(",
+     "F01758 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
+     "forward without memcpy overlap (#268)"),
+    (r"", r"\bVS::Core::Memory::CopyHalfwords\(", r"VS::Core::Memory::CopyLiveHalfwords(",
+     "F04188 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
+     "forward without memcpy overlap (#268)"),
+    (r"", r"\bVS::Core::Memory::CopyHalfwordBlocks\(", r"VS::Core::Memory::CopyLiveHalfwordBlocks(",
+     "F04189 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
+     "forward without memcpy overlap (#268)"),
+    (r"^Menu::(Container|Inventory)::SortEquipment$",
+     r"CopyLiveHalfwordBlocks\((\w+), (\w+), (\w+( \* 2)?)\)",
+     r"CopyLiveHalfwordBlocks(\1, &\2[0], \3)",
+     "F04189 #46 typed promotion: the sort buffers are variable-length arrays sized to cover the copy, which a "
+     "template cannot deduce"),
+    (r"^Content(::|_)ParseActorModel$", r"CopyLiveAlignedWords\(actor->textureOverlays, data, 0xE8\)",
+     r"CopyLiveAlignedWords(VS::Core::Memory::RecordTail(*actor, actor->textureOverlays), data, 0xE8)",
+     "F03572 #46 typed promotion: the SHP header block fills the texture overlays and the fields after them "
+     "in one copy, so it is bounded by the actor record rather than the first array (#268)"),
     (r"", r"\bVS::Boot::JumpToTitle\([^()]*\)", r"VS::Boot::JumpToLiveTitle()",
      "F04200 #46 typed promotion: the session binding owns the transition boundary and refuses transitions "
      "while a stack-bound scope is live (#266)"),
@@ -3455,8 +3482,8 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
 # 30DB0.c:1026 clears and copies actor records as 0x1900 bytes (the PS1 slot size).
 FIXES["F00793"] = FIXES["F00793"] + [
     ("memset(actor, 0, 0x1900);", "memset(actor, 0, sizeof(Actors_ActorRecord));", "record size"),
-    ("Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], 0x1900);",
-     "Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));",
+    ("VS::Core::Memory::CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], 0x1900);",
+     "VS::Core::Memory::CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));",
      "record size"),
     ("    model = Core_Memory_AllocateFromLowEnd(size);\n"
      "    memcpy(model, data, size);\n"

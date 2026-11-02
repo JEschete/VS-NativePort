@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/ActionAnimation.h"
-#include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
@@ -143,7 +143,7 @@ void Battle_SetEnemyCombatPose(int actor_slot, int pose_mode)
 
     Actors_PlayActorAnimation(actor_slot, animation_id, 0, blend_frames);
     if (pose_mode < 3) {
-        Core_Memory_CopyAlignedWords(&actor->blendPose, &actor->pose, sizeof actor->blendPose);
+        VS::Core::Memory::CopyLiveAlignedWords(&actor->blendPose, &actor->pose, sizeof actor->blendPose);
     }
 }
 

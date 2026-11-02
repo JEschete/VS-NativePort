@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
-#include "Core/Memory/WordCopy.h"
 #include "Effects/Weather.h"
 #include "Field/Camera.h"
 #include "Field/Doors.h"
@@ -252,7 +252,7 @@ void Field_SetRoomRenderingEnabled(int enabled)
 // decomp: BATTLE.PRG func_8008B2E0 (src/BATTLE/BATTLE.PRG/146C.c:15953)
 void Field_CopyZonePaletteRow(void* source_colors, int palette_row, int first_color, int color_count)
 {
-    Core_Memory_CopyAlignedWords(Field_roomPalettes + (((palette_row * 256) + first_color)), source_colors, color_count * 2);
+    VS::Core::Memory::CopyLiveAlignedWords(Field_roomPalettes + (((palette_row * 256) + first_color)), source_colors, color_count * 2);
 }
 
 // decomp: BATTLE.PRG func_8008B320 (src/BATTLE/BATTLE.PRG/146C.c:15958)

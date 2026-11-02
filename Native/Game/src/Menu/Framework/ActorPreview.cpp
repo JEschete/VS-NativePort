@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -312,7 +312,7 @@ void Menu_Framework_ResetAshleyEquipmentPose(void)
 
     Actors_InitializeActorAnimationPose(ashley_actor, &ashley_actor->pose);
     VS::Actors::AdvanceLiveSkeletalAnimation(*ashley_actor, 1);
-    Core_Memory_CopyAlignedWords(&ashley_actor->blendPose, &ashley_actor->pose, sizeof ashley_actor->blendPose);
+    VS::Core::Memory::CopyLiveAlignedWords(&ashley_actor->blendPose, &ashley_actor->pose, sizeof ashley_actor->blendPose);
 
     ashley_actor->pose.frame = 0;
     ashley_actor->queuedAnimation = 0;

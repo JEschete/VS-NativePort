@@ -1,4 +1,3 @@
-Native\Engine\src\Core\Memory\WordCopy.cpp
 Native\Engine\src\Render\ModelGeometry.cpp
 Native\Engine\src\Render\ModelWorkspace.cpp
 Native\Engine\src\Render\RoomDraw.cpp

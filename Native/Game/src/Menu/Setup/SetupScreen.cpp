@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/RoomLoading.h"
 #include "Input/Buttons.h"
@@ -127,7 +127,7 @@ void Menu_Setup_InitializeEquipmentHeader(int textOffset, int icon)
 void Menu_Setup_MoveMenuRow(int source, int target)
 {
     if (source != target) {
-        Core_Memory_CopyHalfwords(&Menu_Framework_menuItems[target], &Menu_Framework_menuItems[source],
+        VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_menuItems[target], &Menu_Framework_menuItems[source],
             sizeof Menu_Framework_menuItems[target]);
         Menu_Framework_DeactivateRow(source);
     }

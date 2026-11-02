@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Random.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -2211,7 +2211,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->weapons[i];
         if (sourceIndex != 0) {
             Items_InventoryWeapon* weapon = &target->weapons[i];
-            Core_Memory_CopyHalfwords(
+            VS::Core::Memory::CopyLiveHalfwords(
                 weapon, &source->weapons[sourceIndex - 1], sizeof *weapon);
             weapon->index = i + 1;
             weapon->blade = targetIndices->blades[weapon->blade - 1];
@@ -2229,7 +2229,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->blades[i];
         if (sourceIndex != 0) {
             Items_InventoryBlade* blade = &target->blades[i];
-            Core_Memory_CopyHalfwords(blade, &source->blades[sourceIndex - 1], sizeof *blade);
+            VS::Core::Memory::CopyLiveHalfwords(blade, &source->blades[sourceIndex - 1], sizeof *blade);
             blade->index = i + 1;
             if (blade->assembledWeaponIndex != 0) {
                 blade->assembledWeaponIndex =
@@ -2242,7 +2242,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->grips[i];
         if (sourceIndex != 0) {
             Items_InventoryGrip* grip = &target->grips[i];
-            Core_Memory_CopyHalfwords(grip, &source->grips[sourceIndex - 1], sizeof *grip);
+            VS::Core::Memory::CopyLiveHalfwords(grip, &source->grips[sourceIndex - 1], sizeof *grip);
             grip->index = i + 1;
             if (grip->assembledWeaponIndex != 0) {
                 grip->assembledWeaponIndex =
@@ -2255,7 +2255,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->shields[i];
         if (sourceIndex != 0) {
             Items_InventoryShield* shield = &target->shields[i];
-            Core_Memory_CopyHalfwords(
+            VS::Core::Memory::CopyLiveHalfwords(
                 shield, &source->shields[sourceIndex - 1], sizeof *shield);
             shield->index = i + 1;
             for (j = 0; j < 4; ++j) {
@@ -2270,7 +2270,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->armor[i];
         if (sourceIndex != 0) {
             Items_InventoryArmor* armor = &target->armor[i];
-            Core_Memory_CopyHalfwords(armor, &source->armor[sourceIndex - 1], sizeof *armor);
+            VS::Core::Memory::CopyLiveHalfwords(armor, &source->armor[sourceIndex - 1], sizeof *armor);
             armor->index = i + 1;
         }
     }
@@ -2279,7 +2279,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->gems[i];
         if (sourceIndex != 0) {
             Items_InventoryGem* gem = &target->gems[i];
-            Core_Memory_CopyHalfwords(gem, &source->gems[sourceIndex - 1], sizeof *gem);
+            VS::Core::Memory::CopyLiveHalfwords(gem, &source->gems[sourceIndex - 1], sizeof *gem);
             gem->index = i + 1;
             if (gem->setItemIndex != 0) {
                 if (gem->setItemIndex & 0x80) {

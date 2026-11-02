@@ -3,6 +3,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Palette.h"
@@ -194,7 +194,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     }
     state = (Battle_Ai_AiCreationView *)(Core_Memory_AllocateFromLowEnd(sizeof(Battle_Ai_ActorAiState)));
     Battle_Ai_actorAiStates[id] = (Battle_Ai_ActorAiState *)((void*)state);
-    Core_Memory_ClearAlignedWords(state, sizeof(Battle_Ai_ActorAiState));
+    VS::Core::Memory::ClearLiveAlignedWords(state, sizeof(Battle_Ai_ActorAiState));
     state->actorId = id;
     state->actor = actor;
     model = actor->model;

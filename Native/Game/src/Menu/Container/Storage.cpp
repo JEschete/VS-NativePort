@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -49,7 +49,7 @@ void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_Inventor
 {
     int i;
     Items_WeaponSpawnLoadout* temp = (Items_WeaponSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *temp));
-    Core_Memory_ZeroAlignedWords(temp, sizeof *temp);
+    VS::Core::Memory::ZeroLiveAlignedWords(temp, sizeof *temp);
 
     if (source != NULL) {
         temp->index = source->index;
@@ -86,7 +86,7 @@ void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_Inventor
 {
     int i;
     Items_ShieldSpawnLoadout* temp = (Items_ShieldSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *temp));
-    Core_Memory_ZeroAlignedWords(temp, sizeof *temp);
+    VS::Core::Memory::ZeroLiveAlignedWords(temp, sizeof *temp);
 
     if (source != NULL) {
         temp->index = source->index;
@@ -279,7 +279,7 @@ void Menu_Container_PreviewTransferredMisc(void)
     int packed_transfer_item;
     Items_ContainerData* container = &Menu_Framework_unusedInventoryStorage->transferPreview;
 
-    Core_Memory_CopyHalfwordBlocks(&container->misc, Menu_Container_otherStorage->items.misc, sizeof container->misc);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&container->misc, Menu_Container_otherStorage->items.misc, sizeof container->misc);
 
     for (packed_transfer_item = Menu_Framework_unusedInventoryStorage->itemsToTransfer[0], i = 0; packed_transfer_item != 0;
         ++i, packed_transfer_item = Menu_Framework_unusedInventoryStorage->itemsToTransfer[i]) {
@@ -373,7 +373,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
         index = targetSlot + 1;
 
         if (copyFlag != 0) {
-            Core_Memory_CopyHalfwords(target, source, sizeof *target);
+            VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
             target->index = index;
             target->assembledWeaponIndex = parentIndex;
         }
@@ -390,7 +390,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
         index = targetSlot + 1;
 
         if (copyFlag != 0) {
-            Core_Memory_CopyHalfwords(target, source, sizeof *target);
+            VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
             target->index = index;
             target->assembledWeaponIndex = parentIndex;
         }
@@ -421,7 +421,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
 
         if (copyFlag != 0) {
             Core_Memory_ZeroWordsBackward(target, sizeof *target);
-            Core_Memory_CopyHalfwords(&target->base, &source->base, sizeof target->base);
+            VS::Core::Memory::CopyLiveHalfwords(&target->base, &source->base, sizeof target->base);
             target->index = index;
             for (i = 0; i < 3; ++i) {
                 if (source->gems[i] != 0) {
@@ -445,7 +445,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
         index = targetSlot + 1;
 
         if (copyFlag != 0) {
-            Core_Memory_CopyHalfwords(target, source, sizeof *target);
+            VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
             target->index = index;
         }
         break;
@@ -461,7 +461,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
         index = targetSlot + 1;
 
         if (copyFlag != 0) {
-            Core_Memory_CopyHalfwords(target, source, sizeof *target);
+            VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
             target->index = index;
             target->setItemIndex = parentIndex;
         }
@@ -594,19 +594,19 @@ void Menu_Container_SnapshotGadgetBag(void)
         }
     }
 
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.weapons, inventory->weapons, sizeof container->items.weapons / 4);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.blades, inventory->blades, sizeof container->items.blades / 4);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.grips, inventory->grips, sizeof container->items.grips / 4);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.shields, inventory->shields, sizeof container->items.shields / 4);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.armor, inventory->armor, sizeof container->items.armor / 4);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.gems, inventory->gems, sizeof container->items.gems / 4);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         container->items.misc, inventory->misc, sizeof container->items.misc / 4);
 }
 
@@ -633,15 +633,15 @@ void Menu_Container_CommitGadgetBag(void)
         }
     }
 
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         inventory->weapons, container->items.weapons, sizeof inventory->weapons);
-    Core_Memory_CopyHalfwordBlocks(inventory->blades, container->items.blades, sizeof inventory->blades);
-    Core_Memory_CopyHalfwordBlocks(inventory->grips, container->items.grips, sizeof inventory->grips);
-    Core_Memory_CopyHalfwordBlocks(
+    VS::Core::Memory::CopyLiveHalfwordBlocks(inventory->blades, container->items.blades, sizeof inventory->blades);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(inventory->grips, container->items.grips, sizeof inventory->grips);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
         inventory->shields, container->items.shields, sizeof inventory->shields);
-    Core_Memory_CopyHalfwordBlocks(inventory->armor, container->items.armor, sizeof inventory->armor);
-    Core_Memory_CopyHalfwordBlocks(inventory->gems, container->items.gems, sizeof inventory->gems);
-    Core_Memory_CopyHalfwordBlocks(inventory->misc, container->items.misc, sizeof inventory->misc);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(inventory->armor, container->items.armor, sizeof inventory->armor);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(inventory->gems, container->items.gems, sizeof inventory->gems);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(inventory->misc, container->items.misc, sizeof inventory->misc);
 }
 
 // decomp: MENUD.PRG _getParentItemIndex (src/MENU/MENUD.PRG/234.c:625)
@@ -730,7 +730,7 @@ void Menu_Container_SortWeapons(int stat)
             }
         }
     }
-    Core_Memory_CopyHalfwordBlocks(targetIndices, &sortedIndices, sizeof sortedIndices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(targetIndices, &sortedIndices, sizeof sortedIndices);
 }
 
 // decomp: MENUD.PRG _sortShieldsByStat (src/MENU/MENUD.PRG/234.c:1388)
@@ -780,7 +780,7 @@ void Menu_Container_SortShields(int sort_stat_id)
             }
         }
     }
-    Core_Memory_CopyHalfwordBlocks(shield_indices, &sorted_shield_indices, sizeof sorted_shield_indices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(shield_indices, &sorted_shield_indices, sizeof sorted_shield_indices);
 }
 
 // decomp: MENUD.PRG _sortItemsByStat (src/MENU/MENUD.PRG/234.c:1445)
@@ -825,7 +825,7 @@ void Menu_Container_SortMisc(int sort_stat_id)
             }
         }
     }
-    Core_Memory_CopyHalfwordBlocks(misc_indices, &sorted_misc_indices, sizeof sorted_misc_indices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(misc_indices, &sorted_misc_indices, sizeof sorted_misc_indices);
 }
 
 // decomp: MENUD.PRG _sortEquipment (src/MENU/MENUD.PRG/234.c:1528)
@@ -899,7 +899,7 @@ void Menu_Container_SortEquipment(int category_id, int sort_stat_id)
                 }
             }
         }
-        Core_Memory_CopyHalfwordBlocks(category_indices, sorted_equipment_indices, category_capacity * 2);
+        VS::Core::Memory::CopyLiveHalfwordBlocks(category_indices, &sorted_equipment_indices[0], category_capacity * 2);
     }
 }
 

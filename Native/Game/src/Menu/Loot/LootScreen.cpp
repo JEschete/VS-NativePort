@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/RoomRendering.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -287,7 +287,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
 
     if (itemIndex != 0) {
 
-        Core_Memory_CopyHalfwordBlocks(
+        VS::Core::Memory::CopyLiveHalfwordBlocks(
             Menu_Loot_lootListWorkingCopy, Menu_Loot_lootList, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
 
         Menu_Loot_showLoot = 0;
@@ -458,7 +458,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
 
         Menu_Loot_lootListCount = Menu_Loot_disassemblyLootCount;
 
-        Core_Memory_CopyHalfwordBlocks(
+        VS::Core::Memory::CopyLiveHalfwordBlocks(
             Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
         Menu_Loot_RefreshClaimableRows();
 
@@ -497,9 +497,9 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
 
     if (lootIndex != 0) {
 
-        Core_Memory_CopyHalfwordBlocks(
+        VS::Core::Memory::CopyLiveHalfwordBlocks(
             Menu_Loot_lootListWorkingCopy, Menu_Loot_lootList, kMenuLootRowCapacity * sizeof *Menu_Loot_lootListWorkingCopy);
-        Core_Memory_CopyHalfwordBlocks(Menu_Loot_inventoryBackup, Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Loot_inventoryBackup, Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
 
         Menu_Loot_showLoot = 0;
         Menu_Loot_stackConsolidationLootCount = Menu_Loot_lootListCount;
@@ -706,8 +706,8 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
 
             Menu_Loot_lootListCount = Menu_Loot_stackConsolidationLootCount;
 
-            Core_Memory_CopyHalfwordBlocks(Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, sizeof *Menu_Loot_lootList * kMenuLootRowCapacity);
-            Core_Memory_CopyHalfwordBlocks(Menu_Loot_inventory, Menu_Loot_inventoryBackup, sizeof *Menu_Loot_inventory);
+            VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Loot_lootList, Menu_Loot_lootListWorkingCopy, sizeof *Menu_Loot_lootList * kMenuLootRowCapacity);
+            VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Loot_inventory, Menu_Loot_inventoryBackup, sizeof *Menu_Loot_inventory);
 
             Menu_Loot_lootLeftEdge = 10;
             Menu_Loot_showLoot = 1;
@@ -949,8 +949,8 @@ void Menu_Loot_ShowLootDescription(int lootIndex)
     int rowType;
     int itemIndex = Menu_Loot_lootList[lootIndex].itemIndex;
 
-    Core_Memory_CopyHalfwordBlocks(Menu_Loot_inventoryBackup, &Audio_Seq_unusedInventory, sizeof *Menu_Loot_inventoryBackup);
-    Core_Memory_CopyHalfwordBlocks(&Audio_Seq_unusedInventory, Menu_Loot_inventory, sizeof Audio_Seq_unusedInventory);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Loot_inventoryBackup, &Audio_Seq_unusedInventory, sizeof *Menu_Loot_inventoryBackup);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory, Menu_Loot_inventory, sizeof Audio_Seq_unusedInventory);
 
     switch (Menu_Loot_lootList[lootIndex].itemCategory) {
     case Items_ItemCategory_Weapon:
@@ -990,7 +990,7 @@ void Menu_Loot_ShowLootDescription(int lootIndex)
     }
 
     Menu_Framework_SetInformationMessage(menuText[1]);
-    Core_Memory_CopyHalfwordBlocks(&Audio_Seq_unusedInventory, Menu_Loot_inventoryBackup, sizeof Audio_Seq_unusedInventory);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory, Menu_Loot_inventoryBackup, sizeof Audio_Seq_unusedInventory);
 }
 
 // decomp: MENUB.PRG _discardItems (src/MENU/MENUB.PRG/260.c:1377)

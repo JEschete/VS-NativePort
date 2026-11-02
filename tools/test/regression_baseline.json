@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8677353,
+  "assertions": 8677377,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -270,6 +270,7 @@
    "Actual Map room triangles keep their color at the fog near plane",
    "Adjacent scaled atlas tiles never sample neighboring atlas storage",
    "Ailment policy respects immunity and the training dummy exclusion",
+   "Aligned word copies move forward through overlap",
    "All LFO enables preserve unsigned byte selectors and timing",
    "All battle abilities charge original Risk with chain growth and cap",
    "All forty Break Arts require surviving their original HP cost",
@@ -751,6 +752,8 @@
    "Linked particles retain independent native attraction state",
    "Live actor pose retains hierarchy and independent accumulated scale",
    "Live bone projection bounds the bone by the pose and bone table",
+   "Live copies across consecutive fields use the record tail",
+   "Live copies bound array arguments by their extent",
    "Live playback decodes registered banks",
    "Live playback reset frees the music channels",
    "Live playback reset leaves effect slots past the twelve voices",
@@ -1541,6 +1544,8 @@
    "Wide-vector interpolation preserves units and destination padding",
    "Windows processes use UTF-8 for narrow multimedia APIs",
    "Wipes preserve ENDING selection after MENUF and skip unreached edges",
+   "Word copies keep the original size rules",
+   "Word copies stop at the span extents",
    "Workshop armor recipes retain original ownership and result rules",
    "Workshop blade recipes use ordered IDs materials and native stats",
    "Workshop combination choices enforce original material masks",
@@ -1566,6 +1571,7 @@
    "ZND room requests accept exact or sector-rounded MPD byte counts",
    "Zero room tint and an empty primitive range have no side effects",
    "Zero-length normalization gives a zero direction",
+   "Zeroed words read only the low sixteen size bits",
    "Zone music consumers share the initialized canonical state",
    "a live sprite past the buffer end gets discard storage",
    "a live sprite that exactly fits the buffer end is queued",

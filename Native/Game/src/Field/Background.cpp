@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -148,7 +148,7 @@ void Field_SetRoomBackgroundColors(int* gradient_color_cursor)
     int i;
     int* gradient_packet_word_cursor;
 
-    Core_Memory_CopyAlignedWords(Field_backgroundGradientColors, gradient_color_cursor, sizeof Field_backgroundGradientColors);
+    VS::Core::Memory::CopyLiveAlignedWords(Field_backgroundGradientColors, gradient_color_cursor, sizeof Field_backgroundGradientColors);
 
     gradient_packet_word_cursor = Field_legacyBackgroundGradientPackets;
 

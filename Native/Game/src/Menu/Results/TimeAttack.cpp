@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -94,7 +94,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
                 tim.caddr[0] = 0;
 
                 LoadImage(tim.crect, tim.caddr);
-                Core_Memory_CopyAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
+                VS::Core::Memory::CopyLiveAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
             }
 
             Content_ReleaseDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot);

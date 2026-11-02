@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
-#include "Core/Memory/WordCopy.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -280,12 +280,12 @@ void Battle_ApplyActionHitEffect(
 }
 
 // decomp: BATTLE.PRG func_800856F8 (src/BATTLE/BATTLE.PRG/146C.c:13058)
-void Battle_ClearActionResult(void* action_result) { Core_Memory_ZeroAlignedWords(action_result, sizeof(Battle_ActionRequest)); }
+void Battle_ClearActionResult(void* action_result) { VS::Core::Memory::ZeroLiveAlignedWords(action_result, sizeof(Battle_ActionRequest)); }
 
 // decomp: BATTLE.PRG func_80085718 (src/BATTLE/BATTLE.PRG/146C.c:13060)
 void Battle_InitializeHitResult(Battle_HitResult* hit_result)
 {
-    Core_Memory_ZeroAlignedWords(hit_result, sizeof *hit_result);
+    VS::Core::Memory::ZeroLiveAlignedWords(hit_result, sizeof *hit_result);
     hit_result->target.impactKind = 6;
     *(&hit_result->inflictStatuses + 1) = 0;
 }

@@ -8,6 +8,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -19,7 +20,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"
 #include "Event/ScriptVm.h"
 #include "Menu/Framework/EquipmentDetails.h"
@@ -407,9 +407,9 @@ TEST_CASE("Actor equipment slots contain complete aligned native models",
   std::memcpy(expected.data() + offset, &model, sizeof model);
   auto* slot = &allocation.actor.modelSlots[index];
   if (clear) {
-    Core_Memory_ZeroAlignedWords(slot, sizeof model);
+    VS::Core::Memory::ZeroLiveAlignedWords(slot, sizeof model);
   } else {
-    Core_Memory_CopyAlignedWords(slot, &model, sizeof model);
+    VS::Core::Memory::CopyLiveAlignedWords(slot, &model, sizeof model);
   }
   std::array<unsigned char, sizeof allocation> actual{};
   std::memcpy(actual.data(), &allocation, sizeof allocation);

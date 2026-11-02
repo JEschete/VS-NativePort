@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -1741,7 +1741,7 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         Menu_Framework_LoadItemText(1);
         Menu_Framework_InitializeInformationBox();
         Menu_Container_SetPanelVisibility(0);
-        Core_Memory_CopyHalfwordBlocks(&Menu_Framework_unusedInventoryStorage->container.items,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(&Menu_Framework_unusedInventoryStorage->container.items,
             &Menu_Framework_unusedInventoryStorage->storedContainer,
             sizeof Menu_Framework_unusedInventoryStorage->container.items);
         Menu_Container_SnapshotGadgetBag();

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
@@ -887,7 +887,7 @@ int Event_UpdateEventPlayback(void)
         if (*Event_eventFileDiscRequest == 4) {
             Content_ReleaseDiscRequest((Content_DiscQueueSlot*)Event_eventFileDiscRequest);
             if (Event_isChainedEventLoaded != 0) {
-                Core_Memory_CopyAlignedWords(Event_scriptBuffer, Event_chainedEventBuffer, 0x1800);
+                VS::Core::Memory::CopyLiveAlignedWords(Event_scriptBuffer, Event_chainedEventBuffer, 0x1800);
                 Core_Memory_FreeFromHighEnd(Event_chainedEventBuffer);
                 Event_isChainedEventLoaded = 0;
             }
@@ -1126,13 +1126,13 @@ void Event_InitializeScriptOpcodeTable(void)
     Event_playbackPhase = 0;
     Event_isStartConfirmed = 0;
     Event_isMainThreadFinished = 0;
-    Core_Memory_ZeroAlignedWords(Event_threadCursors, sizeof Event_threadCursors);
-    Core_Memory_ZeroAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);
+    VS::Core::Memory::ZeroLiveAlignedWords(Event_threadCursors, sizeof Event_threadCursors);
+    VS::Core::Memory::ZeroLiveAlignedWords(Event_threadWaitFrames, sizeof Event_threadWaitFrames);
     Event_roomChangeState = 0;
     Event_scriptBuffer = Core_Memory_AllocateFromLowEnd(0x1800);
     Event_vibrationPatternBuffer = Core_Memory_AllocateFromLowEnd(0x80);
     Event_legacySkipHandlerCopy = (intptr_t (**)(u_char *, short))(Core_Memory_AllocateFromLowEnd(sizeof(Event_kSkipOpcodeHandlers)));
-    Core_Memory_CopyAlignedWords(Event_legacySkipHandlerCopy, Event_kSkipOpcodeHandlers, sizeof(Event_kSkipOpcodeHandlers));
+    VS::Core::Memory::CopyLiveAlignedWords(Event_legacySkipHandlerCopy, Event_kSkipOpcodeHandlers, sizeof(Event_kSkipOpcodeHandlers));
 }
 
 }  // extern "C"

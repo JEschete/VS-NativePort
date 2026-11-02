@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
-#include "Core/Memory/WordCopy.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -24,7 +24,7 @@ extern "C" {
 void Actors_ClearRoomActorStateCache(void)
 {
     State_currentRoomStateSlot = 0;
-    Core_Memory_ZeroAlignedWords(State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
+    VS::Core::Memory::ZeroLiveAlignedWords(State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
 }
 
 // decomp: BATTLE.PRG func_80069DEC (src/BATTLE/BATTLE.PRG/146C.c:789)
@@ -34,7 +34,7 @@ void Actors_ClearCachedRoomActorStates(int mapId, int zndId)
 
     for (i = 0; i < 4; ++i) {
         if ((State_recentRoomEnemyStates[i].mapId == mapId) && (State_recentRoomEnemyStates[i].zoneId == zndId)) {
-            Core_Memory_ZeroAlignedWords(State_recentRoomEnemyStates[i].actorStates, sizeof State_recentRoomEnemyStates[i].actorStates);
+            VS::Core::Memory::ZeroLiveAlignedWords(State_recentRoomEnemyStates[i].actorStates, sizeof State_recentRoomEnemyStates[i].actorStates);
         }
     }
 }

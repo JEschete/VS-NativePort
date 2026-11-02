@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Save/NativeContainerLive.hpp"
@@ -35,7 +36,6 @@ extern "C" {
 #include "Core/Math/FixedPoint.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Overlays.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -1051,7 +1051,7 @@ void Menu_Framework_CreateActionRows(
         ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].menuRowFlags = rowTypes[i];
 
         if (menuText[i * 2] != NULL) {
-            Core_Memory_CopyHalfwords(&Menu_Framework_sortItemsTextBuf[i * 64], menuText[i * 2], 26);
+            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_sortItemsTextBuf[i * 64], menuText[i * 2], 26);
 
             Menu_Framework_sortItemsTextBuf[(i * 64) + 13] =
                 Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
@@ -1064,7 +1064,7 @@ void Menu_Framework_CreateActionRows(
         if (text != NULL) {
             ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].description[0] = Core_TextCode_ChunkSize;
 
-            Core_Memory_CopyHalfwords(&Menu_Framework_sortItemsTextBuf[(i * 64) + 17], text, 92);
+            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_sortItemsTextBuf[(i * 64) + 17], text, 92);
 
             ((Menu_Framework_ItemText*)Menu_Framework_sortItemsTextBuf)[i].description[47] =
                 Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
@@ -1401,7 +1401,7 @@ void Menu_Framework_SetInformationMessage(char* message)
           [99] = Core_TextCode_Terminator, [100] = 0 };
 #pragma vsstring(end)
 
-    Core_Memory_CopyHalfwordBlocks(&Menu_Framework_setInformationMessageInfoMessage[2], message, 96);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&Menu_Framework_setInformationMessageInfoMessage[2], message, 96);
     Menu_textBoxes[7].flags.speakerTexture = 32;
     Menu_SetTextBoxText(7, Menu_Framework_setInformationMessageInfoMessage);
 }
@@ -1779,7 +1779,7 @@ void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], i
         ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].menuRowFlags = rowTypes[i];
 
         if (strings[i * 2] != NULL) {
-            Core_Memory_CopyHalfwords(&Menu_Framework_itemsText[i * 64], strings[i * 2], 26);
+            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_itemsText[i * 64], strings[i * 2], 26);
 
             Menu_Framework_itemsText[(i * 64) + 13] = Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;
         } else {
@@ -1791,7 +1791,7 @@ void Menu_Framework_CreateMenuRows(int rowCount, int rowInfo, char* strings[], i
         if (text != NULL) {
             ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].description[0] = Core_TextCode_ChunkSize;
 
-            Core_Memory_CopyHalfwords(&Menu_Framework_itemsText[(i * 64) + 17], text, 92);
+            VS::Core::Memory::CopyLiveHalfwords(&Menu_Framework_itemsText[(i * 64) + 17], text, 92);
 
             ((Menu_Framework_ItemText*)Menu_Framework_itemsText)[i].description[47] =
                 Core_TextCode_Terminator << 8 | Core_TextCode_Terminator;

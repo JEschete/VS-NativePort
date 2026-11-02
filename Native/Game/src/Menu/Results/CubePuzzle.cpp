@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -136,7 +136,7 @@ int Menu_Results_InitializeCubePuzzleStart(void)
                         tim.caddr[0] = 0;
 
                         LoadImage(tim.crect, tim.caddr);
-                        Core_Memory_CopyAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
+                        VS::Core::Memory::CopyLiveAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
                     }
                 }
             }
@@ -232,7 +232,7 @@ int Menu_Results_InitializeCubePuzzleQuit(void)
                     *tim.caddr = 0;
 
                     LoadImage(tim.crect, tim.caddr);
-                    Core_Memory_CopyAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
+                    VS::Core::Memory::CopyLiveAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
                 }
             }
 

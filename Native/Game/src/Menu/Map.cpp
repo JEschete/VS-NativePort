@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -14,7 +15,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
 #include "Field/Doors.h"
@@ -470,8 +470,8 @@ int Menu_Map_LoadSceneMap(void)
         Menu_Map_triggerHideUi = 0;
         Menu_Map_hideUi = 0;
 
-        Core_Memory_ZeroAlignedWords(&Menu_Map_cameraAngles, sizeof Menu_Map_cameraAngles);
-        Core_Memory_ZeroAlignedWords(&Menu_Map_cameraPos, sizeof Menu_Map_cameraPos);
+        VS::Core::Memory::ZeroLiveAlignedWords(&Menu_Map_cameraAngles, sizeof Menu_Map_cameraAngles);
+        VS::Core::Memory::ZeroLiveAlignedWords(&Menu_Map_cameraPos, sizeof Menu_Map_cameraPos);
 
         Menu_Map_cameraAngles.vx = 568;
         Menu_Map_currentRoomIndex = 0;
@@ -858,7 +858,7 @@ int Menu_Map_UpdateMapMenu(void)
             Battle_unusedSceneBuffer =
                 Core_Memory_AllocateFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
-            Core_Memory_CopyAlignedWords(
+            VS::Core::Memory::CopyLiveAlignedWords(
                 Battle_unusedSceneBuffer, Menu_Map_armFileBuff, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
             Core_Memory_FreeFromHighEnd(Menu_Map_armFileBuff);
 

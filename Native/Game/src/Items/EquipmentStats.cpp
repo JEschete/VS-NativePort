@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Core/Callbacks.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
 #include "Items/EquipmentStats.h"
@@ -26,11 +26,11 @@ void Items_BuildWeaponStatsFromParts(
 {
     int i;
 
-    Core_Memory_CopyAlignedWords(&target->blade, &source->blade, sizeof target->blade);
-    Core_Memory_CopyAlignedWords(&target->grip, &source->grip, sizeof target->grip);
+    VS::Core::Memory::CopyLiveAlignedWords(&target->blade, &source->blade, sizeof target->blade);
+    VS::Core::Memory::CopyLiveAlignedWords(&target->grip, &source->grip, sizeof target->grip);
 
     for (i = 0; i < 3; ++i) {
-        Core_Memory_CopyAlignedWords(&target->gems[i], &source->gems[i], sizeof source->gems[i]);
+        VS::Core::Memory::CopyLiveAlignedWords(&target->gems[i], &source->gems[i], sizeof source->gems[i]);
     }
 
     target->wepId = source->blade.weaponModelId;
@@ -87,10 +87,10 @@ void Items_BuildShieldStatsFromParts(
 {
     int i;
 
-    Core_Memory_CopyAlignedWords(&target->base, &source->base, sizeof source->base);
+    VS::Core::Memory::CopyLiveAlignedWords(&target->base, &source->base, sizeof source->base);
 
     for (i = 0; i < 3; ++i) {
-        Core_Memory_CopyAlignedWords(&target->gems[i], &source->gems[i], sizeof target->gems[i]);
+        VS::Core::Memory::CopyLiveAlignedWords(&target->gems[i], &source->gems[i], sizeof target->gems[i]);
     }
 
     target->wepId = source->base.weaponModelId;
@@ -139,7 +139,7 @@ void Items_BuildAccessoryStatsFromPart(Items_AccessorySpawnLoadout* target, Item
 {
     int i;
 
-    Core_Memory_CopyAlignedWords(target, &source->equipment, sizeof target->accessory);
+    VS::Core::Memory::CopyLiveAlignedWords(target, &source->equipment, sizeof target->accessory);
 
     target->currentStr = source->equipment.strength;
     target->currentInt = source->equipment.intelligence;
@@ -165,7 +165,7 @@ void Items_BuildArmorStatsFromPart(Items_ArmorLoadout* target, Items_ArmorInit* 
 {
     int i;
 
-    Core_Memory_CopyAlignedWords(&target->armor, &source->equipment, sizeof target->armor);
+    VS::Core::Memory::CopyLiveAlignedWords(&target->armor, &source->equipment, sizeof target->armor);
 
     target->armor.material = source->material;
     target->currentDp = source->equipment.currentDp;
@@ -323,7 +323,7 @@ void Items_LoadInventoryWeaponStats(Items_WeaponLoadout* target, Items_Inventory
     int i;
 
     Items_WeaponSpawnLoadout* tempWeapon = (Items_WeaponSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *tempWeapon));
-    Core_Memory_ZeroAlignedWords(tempWeapon, sizeof *tempWeapon);
+    VS::Core::Memory::ZeroLiveAlignedWords(tempWeapon, sizeof *tempWeapon);
 
     if (source != NULL) {
 
@@ -360,7 +360,7 @@ void Items_LoadInventoryWeaponStats(Items_WeaponLoadout* target, Items_Inventory
 void Items_LoadInventoryShieldStats(Items_ShieldLoadout* target, Items_InventoryShield* source)
 {
     Items_ShieldSpawnLoadout* tempShield = (Items_ShieldSpawnLoadout *)(Core_Memory_AllocateFromHighEnd(sizeof *tempShield));
-    Core_Memory_ZeroAlignedWords(tempShield, sizeof *tempShield);
+    VS::Core::Memory::ZeroLiveAlignedWords(tempShield, sizeof *tempShield);
 
     if (source != NULL) {
         int i;
@@ -387,7 +387,7 @@ void Items_LoadInventoryShieldStats(Items_ShieldLoadout* target, Items_Inventory
 void Items_LoadInventoryArmorStats(Items_ArmorLoadout* target, Items_InventoryArmor* source)
 {
     Items_ArmorInit* tempArmor = (Items_ArmorInit *)(Core_Memory_AllocateFromHighEnd(sizeof *tempArmor));
-    Core_Memory_ZeroAlignedWords(tempArmor, sizeof *tempArmor);
+    VS::Core::Memory::ZeroLiveAlignedWords(tempArmor, sizeof *tempArmor);
 
     if (source != NULL) {
         tempArmor->index = source->index;
@@ -406,7 +406,7 @@ void Items_LoadInventoryAccessoryStats(
     Items_AccessorySpawnLoadout* target, Items_InventoryArmor* source)
 {
     Items_AccessoryInit* tempAccessory = (Items_AccessoryInit *)(Core_Memory_AllocateFromHighEnd(sizeof *tempAccessory));
-    Core_Memory_ZeroAlignedWords(tempAccessory, sizeof *tempAccessory);
+    VS::Core::Memory::ZeroLiveAlignedWords(tempAccessory, sizeof *tempAccessory);
 
     if (source != NULL) {
         tempAccessory->index = source->index;

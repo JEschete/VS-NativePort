@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/WordCopy.h"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
@@ -464,7 +464,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
 
             if (write != 0) {
 
-                Core_Memory_CopyHalfwords(target, source, sizeof *target);
+                VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
 
                 target->index = index;
                 target->assembledWeaponIndex = parentIndex;
@@ -481,7 +481,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
             index = emptySlot + 1;
             if (write != 0) {
 
-                Core_Memory_CopyHalfwords(target, source, sizeof *target);
+                VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
 
                 target->index = index;
                 target->assembledWeaponIndex = parentIndex;
@@ -507,7 +507,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
 
                 if (write != 0) {
                     Core_Memory_ZeroWordsBackward(source, 0x30);
-                    Core_Memory_CopyHalfwords(
+                    VS::Core::Memory::CopyLiveHalfwords(
                         &source->base, &target->base, sizeof source->base);
 
                     source->index = index;
@@ -536,7 +536,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
 
             if (write != 0) {
 
-                Core_Memory_CopyHalfwords(target, source, sizeof *target);
+                VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
 
                 target->index = index;
             }
@@ -552,7 +552,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
             index = emptySlot + 1;
             if (write != 0) {
 
-                Core_Memory_CopyHalfwords(target, source, sizeof *target);
+                VS::Core::Memory::CopyLiveHalfwords(target, source, sizeof *target);
 
                 target->index = index;
                 target->setItemIndex = parentIndex;

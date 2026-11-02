@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits/StaffRoll.h"
@@ -104,7 +104,7 @@ void Ending_CommitClearProgress(void)
     }
 
     Ending_AwardClearTitles();
-    Core_Memory_ZeroAlignedWords(&State_roomVisitProgress, sizeof State_roomVisitProgress);
+    VS::Core::Memory::ZeroLiveAlignedWords(&State_roomVisitProgress, sizeof State_roomVisitProgress);
 
     for (i = 0x10; i < 0x440; ++i) {
         ((u_char*)&Audio_Seq_unusedStateFlags)[i] = 0;

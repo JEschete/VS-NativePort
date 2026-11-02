@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/Gimmicks.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -374,7 +374,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
     Battle_Actor* actor;
     Battle_Ai_ActorAiState* target;
 
-    Core_Memory_ClearAlignedWords(list, sizeof *list);
+    VS::Core::Memory::ClearLiveAlignedWords(list, sizeof *list);
     list[0].distanceSquared = 256;
     list[0].threshold = readiness_threshold;
     Battle_Ai_EvaluateActionCandidate(ai_state, list, 0, NULL);

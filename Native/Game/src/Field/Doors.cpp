@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -45,11 +45,11 @@ void Field_SetEntranceDoorRecord(char (*entrance_record)[12])
 {
     if (entrance_record != NULL) {
         int doorId;
-        Core_Memory_CopyAlignedWords(&Field_entranceDoorRecord, entrance_record, sizeof Field_entranceDoorRecord);
+        VS::Core::Memory::CopyLiveAlignedWords(&Field_entranceDoorRecord, entrance_record, sizeof Field_entranceDoorRecord);
         doorId = Field_SceneDoorId((*entrance_record)[8]);
         Field_enteredDoorId = doorId;
     } else {
-        Core_Memory_ZeroAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
+        VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
         Field_enteredDoorId = -1;
     }
 }
@@ -91,11 +91,11 @@ void Field_FindEntranceDoorNearTile(int query_tile_x, int query_tile_z, int quer
     }
 
     if (entrance_door_cursor != NULL) {
-        Core_Memory_CopyAlignedWords(&Field_entranceDoorRecord, entrance_door_cursor, sizeof Field_entranceDoorRecord);
+        VS::Core::Memory::CopyLiveAlignedWords(&Field_entranceDoorRecord, entrance_door_cursor, sizeof Field_entranceDoorRecord);
         door_count_or_scene_door_id = Field_SceneDoorId(entrance_door_cursor->doorId);
         Field_enteredDoorId = door_count_or_scene_door_id;
     } else {
-        Core_Memory_ZeroAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
+        VS::Core::Memory::ZeroLiveAlignedWords(&Field_entranceDoorRecord, sizeof Field_entranceDoorRecord);
         Field_enteredDoorId = -1;
     }
 }

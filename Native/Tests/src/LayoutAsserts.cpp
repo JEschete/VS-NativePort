@@ -8,6 +8,7 @@
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 
 extern "C" {
 #include "Actors/ActorAllocation.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
-#include "Core/Memory/WordCopy.h"
 #include "Effects/EffectResources.h"
 #include "Effects/Runtime.h"
 #include "Field/GimmickMotion.h"
@@ -577,7 +577,7 @@ int Tests_AiViewsRoundTrip(void) {
       reinterpret_cast<Battle_Ai_CreationModelView*>(&model);
   unsigned int i;
   memset(&guarded, 0xA5, sizeof guarded);
-  Core_Memory_ClearAlignedWords(&guarded.state, sizeof guarded.state);
+  VS::Core::Memory::ClearLiveAlignedWords(&guarded.state, sizeof guarded.state);
   if (guarded.before != guard_pattern || guarded.after != guard_pattern) {
     return 0;
   }

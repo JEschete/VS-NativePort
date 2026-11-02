@@ -41,7 +41,6 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"

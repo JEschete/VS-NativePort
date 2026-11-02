@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
@@ -135,7 +135,7 @@ int Content_UpdateActorAssetQueue(void)
         slot->targetSlot < 17 ? (void*)Actors_actorRecords[slot->targetSlot] : NULL);
 
     for (i = 1; i < 15; ++i) {
-        Core_Memory_CopyAlignedWords(&Content_legacyActorAssetRequests[i - 1], &Content_legacyActorAssetRequests[i],
+        VS::Core::Memory::CopyLiveAlignedWords(&Content_legacyActorAssetRequests[i - 1], &Content_legacyActorAssetRequests[i],
             sizeof Content_legacyActorAssetRequests[i]);
     }
 
@@ -374,7 +374,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
         if ((uintptr_t)data < 20) {
         copySlot:
             /* copy model from an already-loaded slot */
-            Core_Memory_CopyAlignedWords(model, Actors_weaponModels[(u_long)data], sizeof *model);
+            VS::Core::Memory::CopyLiveAlignedWords(model, Actors_weaponModels[(u_long)data], sizeof *model);
 
             if (model->textureSlot != 0xFF) {
                 ++Render_legacyWeaponTextureSlots[model->textureSlot].referenceCount;
@@ -394,7 +394,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
                     model->sectionOffsets = buf;
                 }
 
-                Core_Memory_CopyAlignedWords(buf, data, sizeof *buf);
+                VS::Core::Memory::CopyLiveAlignedWords(buf, data, sizeof *buf);
 
                 /* dst doubles as the relocation delta for the copied pointers */
                 dst = (Actors_WeaponModelData*)((uintptr_t)buf - (uintptr_t)data);
@@ -523,12 +523,12 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
         model->paletteColorCount = 48;
     }
 
-    Core_Memory_CopyAlignedWords(model->workingPalette, data, w * 2);
+    VS::Core::Memory::CopyLiveAlignedWords(model->workingPalette, data, w * 2);
 
     data += w * 2;
 
     for (i = 0; i < 7; i++) {
-        Core_Memory_CopyAlignedWords(model->palettes[i], data, count * 2);
+        VS::Core::Memory::CopyLiveAlignedWords(model->palettes[i], data, count * 2);
         data += count * 2;
     }
 
@@ -604,8 +604,8 @@ void Content_LoadWeaponMaterialPalette(int index, int material)
         count = 32;
     }
 
-    Core_Memory_CopyAlignedWords(&model->workingPalette[offset], &model->palettes[palette], count * 2);
-    Core_Memory_CopyAlignedWords(&model->uploadPalette, model->workingPalette, sizeof model->uploadPalette);
+    VS::Core::Memory::CopyLiveAlignedWords(&model->workingPalette[offset], &model->palettes[palette], count * 2);
+    VS::Core::Memory::CopyLiveAlignedWords(&model->uploadPalette, model->workingPalette, sizeof model->uploadPalette);
     Render_LoadClutColors(model->uploadPalette, (model->paletteSlotOffset >> 1) + 4,
         ((model->paletteSlotOffset & 1) * 48) + 160, offset + count);
 }
@@ -802,7 +802,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
             Content_legacyShpTextureHeight = 0x80;
             data += i + 4;
             data += 8;
-            Core_Memory_CopyAlignedWords(actor->palettes, data, Content_legacyShpCopiedWordCount * 4);
+            VS::Core::Memory::CopyLiveAlignedWords(actor->palettes, data, Content_legacyShpCopiedWordCount * 4);
             originX = *(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4) << 6;
             rect.x = originX;
             originY = (*(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4 + 2) << 8)
@@ -842,7 +842,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
 
         if ((u_long)object->dataAddress < 17) {
         copyShared:
-            Core_Memory_CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));
+            VS::Core::Memory::CopyLiveAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));
             if (actor->holdsTextureSlots && actor->textureSlot != 0xFF) {
                 for (i = 0; i < actor->instance.textureSlotCountMinusOne + 1; ++i) {
                     ++Render_legacyActorTextureSlots[actor->textureSlot + i].referenceCount;
@@ -872,7 +872,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
     *(int*)&actor->instance.boneCount = *(int*)data;
     *(int*)&actor->instance.quadCount = *(int*)(data + 4);
     data += 8;
-    Core_Memory_CopyAlignedWords(actor->textureOverlays, data, 0xE8);
+    VS::Core::Memory::CopyLiveAlignedWords(VS::Core::Memory::RecordTail(*actor, actor->textureOverlays), data, 0xE8);
     data += 0xE8;
     size = *(int*)data;
     data += 4;
@@ -912,7 +912,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
             }
         }
         Content_legacyShpCopiedWordCount = actor->instance.copiedWordCount = other->instance.copiedWordCount;
-        Core_Memory_CopyAlignedWords(actor->palettes, other->palettes, Content_legacyShpCopiedWordCount * 4);
+        VS::Core::Memory::CopyLiveAlignedWords(actor->palettes, other->palettes, Content_legacyShpCopiedWordCount * 4);
         actor->textureSlot = other->textureSlot;
         actor->instance.uvLayout = other->instance.uvLayout;
         actor->holdsTextureSlots = 0;
@@ -1003,7 +1003,7 @@ found:
         Render_legacyActorTextureSlots[actor->textureSlot].texturePage &= ~0x180;
     }
 
-    Core_Memory_CopyAlignedWords(actor->palettes, data, Content_legacyShpCopiedWordCount * 4);
+    VS::Core::Memory::CopyLiveAlignedWords(actor->palettes, data, Content_legacyShpCopiedWordCount * 4);
     data += Content_legacyShpCopiedWordCount * 4;
     x = *(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4) << 6;
     rect.x = x;
@@ -1058,10 +1058,10 @@ fixUVs:
     }
 
 setupPalettes:
-    Core_Memory_CopyAlignedWords(actor->basePalette, (u_short*)actor->palettes + object->variant * 0xA0,
+    VS::Core::Memory::CopyLiveAlignedWords(actor->basePalette, (u_short*)actor->palettes + object->variant * 0xA0,
         Content_legacyShpCopiedWordCount * 2);
-    Core_Memory_CopyAlignedWords(actor->basePalette + 0xA0, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
-    Core_Memory_CopyAlignedWords(actor->currentPalette, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
+    VS::Core::Memory::CopyLiveAlignedWords(actor->basePalette + 0xA0, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
+    VS::Core::Memory::CopyLiveAlignedWords(actor->currentPalette, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
 
     if (object->targetSlot == 16) {
         Render_LoadClutColors(actor->basePalette, 0x17, 0, Content_legacyShpCopiedWordCount);
@@ -1324,7 +1324,7 @@ parse:
 // decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1608)
 void Content_CopyWeaponSequence(Content_SequenceBuffer* destination, Content_SequenceBuffer* source)
 {
-    Core_Memory_CopyAlignedWords(destination, source, 0x7800);
+    VS::Core::Memory::CopyLiveAlignedWords(destination, source, 0x7800);
     VS::Actors::RegisterSequenceBankCopy(destination, source, 0x7800);
 }
 
@@ -1432,7 +1432,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         actor->battleSequence = seq;
         actor->sequenceModelId = object->modelId;
     copy:
-        Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);
+        VS::Core::Memory::CopyLiveAlignedWords(seq, Content_legacySequenceParseData, size);
         VS::Actors::RegisterSequenceBank(seq, size);
                 return 0;
     } else if (object->subKind == 3) {

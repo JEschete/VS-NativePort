@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
 #include "Field/Collision.h"
@@ -206,7 +206,7 @@ void Field_ResetGimmickAnimationQueue(void)
 {
     Field_pendingGimmickAnimationCount = 0;
     Field_triggerMarkerFrameTicks = 0;
-    Core_Memory_ZeroAlignedWords(Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue);
+    VS::Core::Memory::ZeroLiveAlignedWords(Field_gimmickAnimationQueue, sizeof Field_gimmickAnimationQueue);
 }
 
 // decomp: BATTLE.PRG func_8008C070 (src/BATTLE/BATTLE.PRG/146C.c:16338)
@@ -795,7 +795,7 @@ int Field_FindSharedGimmickModel(Content_ActorAssetRequest* asset_request)
 }
 
 // decomp: BATTLE.PRG func_80099960 (src/BATTLE/BATTLE.PRG/30DB0.c:288)
-void Field_SetGimmickPaletteTable(void* palette_data) { Core_Memory_CopyAlignedWords(&Field_gimmickPaletteColors, palette_data, 0xE0); }
+void Field_SetGimmickPaletteTable(void* palette_data) { VS::Core::Memory::CopyLiveAlignedWords(&Field_gimmickPaletteColors, palette_data, 0xE0); }
 
 // decomp: BATTLE.PRG func_8009998C (src/BATTLE/BATTLE.PRG/30DB0.c:290)
 int Field_CreateGimmickInstance(Content_ActorAssetRequest* asset_request)
@@ -832,7 +832,7 @@ int Field_CreateGimmickInstance(Content_ActorAssetRequest* asset_request)
     has_shared_model = 0;
 exit:
     if (has_shared_model != 0) {
-        Core_Memory_CopyAlignedWords(created_gimmick, Field_gimmickInstances[asset_request->dataAddress], offsetof(Field_GimmickInstance, reserved178));
+        VS::Core::Memory::CopyLiveAlignedWords(created_gimmick, Field_gimmickInstances[asset_request->dataAddress], offsetof(Field_GimmickInstance, reserved178));
     } else {
         template_or_polygon_section = (Field_GimmickTemplate *)(Field_gimmickModelTemplates[Field_gimmickTemplateIndices[asset_request->subKind]]);
         *(int*)&created_gimmick->boneCount = template_or_polygon_section->instanceFlags;
@@ -859,7 +859,7 @@ exit:
     created_gimmick->slot = asset_request->targetSlot;
     created_gimmick->objectInfo.objectId = asset_request->subKind;
 
-    Core_Memory_CopyAlignedWords(base_palette_colors, (created_gimmick->objectInfo.objectId * 32) + Field_gimmickPaletteColors, sizeof created_gimmick->basePalette);
+    VS::Core::Memory::CopyLiveAlignedWords(base_palette_colors, (created_gimmick->objectInfo.objectId * 32) + Field_gimmickPaletteColors, sizeof created_gimmick->basePalette);
     Render_LoadClutColors(base_palette_colors, 0xD, created_gimmick->slot * 0x10, 0x10);
 
     created_gimmick->objectInfo.carrier = 0xFF;
@@ -1846,7 +1846,7 @@ int Field_UpdateGimmickReactionAnimation(Field_GimmickMotionView* object)
         if (frame >= 9) {
             object->y += 3;
             if (frame == 9) {
-                Core_Memory_CopyAlignedWords(object->state, object->savedState, 32);
+                VS::Core::Memory::CopyLiveAlignedWords(object->state, object->savedState, 32);
                 object->flags = (object->flags & ~0xF00) | 0xC00;
             }
             if (frame == 40) {

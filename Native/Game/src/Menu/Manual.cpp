@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Sfx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
@@ -215,7 +215,7 @@ int Menu_Manual_UpdateScreen(u_char* state)
 int Menu_Manual_InitHelpState(void)
 {
     if (Input_settings.cursorMemory == 0) {
-        Core_Memory_ZeroAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
+        VS::Core::Memory::ZeroLiveAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
     }
     Render_ReserveTexturePageRange(0x1D, 3, 5);
     Menu_Manual_showMenuState = 0;

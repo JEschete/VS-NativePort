@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/WordCopy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -186,7 +186,7 @@ void Menu_Framework_SetWeaponStats(int weaponIndex)
                 &Menu_Container_containerData->items);
         }
 
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats, &weapon->classAffinityCurrent,
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &weapon->classAffinityCurrent,
             sizeof weapon->classAffinityCurrent);
 
         for (i = 0; i < 4; ++i) {
@@ -273,7 +273,7 @@ void Menu_Framework_SetShieldStats(int shieldIndex)
                 &Menu_Container_containerData->items);
         }
 
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats, &shield->classAffinityCurrent, 0x40);
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &shield->classAffinityCurrent, 0x40);
 
         for (i = 0; i < 4; ++i) {
             Menu_Framework_equipmentStats[32 + i] = shield->types[i];
@@ -317,7 +317,7 @@ void Menu_Framework_SetArmorStats(int armorIndex)
 
         isAccessory = armor->armor.category == 7;
 
-        Core_Memory_CopyHalfwordBlocks(Menu_Framework_equipmentStats, &armor->classAffinityCurrent, 0x40);
+        VS::Core::Memory::CopyLiveHalfwordBlocks(Menu_Framework_equipmentStats, &armor->classAffinityCurrent, 0x40);
 
         for (i = 0; i < 4; ++i) {
             Menu_Framework_equipmentStats[32 + i] = armor->types[i];
@@ -1078,7 +1078,7 @@ void Menu_Framework_SetPrimaryStats(
     Menu_Framework_strIntAgi[2] = agility;
     Menu_Framework_strIntAgi[3] = valuesKnown;
     Menu_Framework_SetRangeAndRisk(0, 0, 0, 0);
-    Core_Memory_CopyHalfwordBlocks(&Menu_Framework_strIntAgi[4], &Menu_Framework_strIntAgi[0], 8);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&Menu_Framework_strIntAgi[4], &Menu_Framework_strIntAgi[0], 8);
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_populateBaseStats (src/MENU/MAINMENU.PRG/C48.c:992)

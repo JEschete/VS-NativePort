@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/Weather.h"
@@ -430,7 +430,7 @@ int Menu_Score_CalculateProgress(void)
     Menu_Score_hideUi = 0;
 
     if (Input_settings.cursorMemory == 0) {
-        Core_Memory_ZeroAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
+        VS::Core::Memory::ZeroLiveAlignedWords(&Battle_unusedMenu9CursorMemory, sizeof Battle_unusedMenu9CursorMemory);
     }
 
     Menu_Score_mapCompletion = 0;
@@ -462,10 +462,10 @@ int Menu_Score_CalculateProgress(void)
         Audio_Seq_unusedScoredata.openedChestCount = Menu_Score_openedChestCount;
     }
 
-    Core_Memory_CopyAlignedWords(&Menu_Score_cameraPositionBackup,
+    VS::Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraPositionBackup,
         &((Render_FrameScratch*)Core_ScratchAddr(0))->camera.position,
         sizeof Menu_Score_cameraPositionBackup);
-    Core_Memory_CopyAlignedWords(&Menu_Score_cameraAnglesBackup,
+    VS::Core::Memory::CopyLiveAlignedWords(&Menu_Score_cameraAnglesBackup,
         &((Render_FrameScratch*)Core_ScratchAddr(0))->camera.angles.vx,
         sizeof Menu_Score_cameraAnglesBackup);
     Menu_Score_AwardTitles();
@@ -1330,9 +1330,9 @@ int Menu_Score_Update(void)
 // decomp: MENU9.PRG _restoreCamera (src/MENU/MENU9.PRG/238.c:1402)
 void Menu_Score_RestoreCamera(void)
 {
-    Core_Memory_CopyAlignedWords(&((Render_FrameScratch*)Core_ScratchAddr(0))->camera.position,
+    VS::Core::Memory::CopyLiveAlignedWords(&((Render_FrameScratch*)Core_ScratchAddr(0))->camera.position,
         &Menu_Score_cameraPositionBackup, sizeof Menu_Score_cameraPositionBackup);
-    Core_Memory_CopyAlignedWords(&((Render_FrameScratch*)Core_ScratchAddr(0))->camera.angles.vx,
+    VS::Core::Memory::CopyLiveAlignedWords(&((Render_FrameScratch*)Core_ScratchAddr(0))->camera.angles.vx,
         &Menu_Score_cameraAnglesBackup, sizeof Menu_Score_cameraAnglesBackup);
 }
 

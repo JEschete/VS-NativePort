@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
@@ -366,7 +366,7 @@ void Menu_Framework_FormatInventoryArmorRow(
 void Menu_Framework_FormatGemRow(
     Items_InventoryGem* gem, char* menuText[], int* rowType, void* buf)
 {
-    Core_Memory_CopyHalfwordBlocks(buf,
+    VS::Core::Memory::CopyLiveHalfwordBlocks(buf,
         Menu_Framework_itemHelp
             + Menu_Framework_itemHelp[gem->id - 261 + Text_Menu_ITEMHELP_BIN_Index_gemFeldspar],
         96);
@@ -380,7 +380,7 @@ void Menu_Framework_FormatGemRow(
 void Menu_Framework_FormatMiscItemRow(
     Items_InventoryMisc* misc, char* menuText[], int* rowType, void* buf)
 {
-    Core_Memory_CopyHalfwordBlocks(buf,
+    VS::Core::Memory::CopyLiveHalfwordBlocks(buf,
         Menu_Framework_itemHelp
             + Menu_Framework_itemHelp[misc->id - 323 + Text_Menu_ITEMHELP_BIN_Index_cureRootDesc],
         96);

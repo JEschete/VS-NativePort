@@ -2,6 +2,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -38,7 +39,6 @@ extern "C" {
 #include "Boot/GameplayInit.h"
 #include "Boot/Lifecycle.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -685,7 +685,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
 
     Actors_SpawnAshleyWithEquipment();
     (*(void* (*))&Battle_actionState) = Core_Memory_AllocateFromHighEnd(sizeof *Battle_actionState);
-    Core_Memory_ZeroAlignedWords((*(void* (*))&Battle_actionState), sizeof *Battle_actionState);
+    VS::Core::Memory::ZeroLiveAlignedWords((*(void* (*))&Battle_actionState), sizeof *Battle_actionState);
     Field_isFieldRenderingEnabled = 1;
     Boot_gameplayResetWordTwo = 0;
     Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);

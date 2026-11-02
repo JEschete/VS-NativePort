@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/WordCopy.h"
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
@@ -28,7 +28,7 @@ int Menu_Loot_StageBlade(Items_InventoryBlade* source, int weapon)
         }
     }
 
-    Core_Memory_CopyHalfwords(blade, source, sizeof *blade);
+    VS::Core::Memory::CopyLiveHalfwords(blade, source, sizeof *blade);
 
     blade->assembledWeaponIndex = weapon;
     blade->index = index;
@@ -49,7 +49,7 @@ int Menu_Loot_StageGrip(Items_InventoryGrip* source, int weaponIndex)
         }
     }
 
-    Core_Memory_CopyHalfwords(grip, source, sizeof *grip);
+    VS::Core::Memory::CopyLiveHalfwords(grip, source, sizeof *grip);
 
     grip->assembledWeaponIndex = weaponIndex;
     grip->index = index;
@@ -70,7 +70,7 @@ int Menu_Loot_StageGem(Items_InventoryGem* source, int item)
         }
     }
 
-    Core_Memory_CopyHalfwords(gem, source, sizeof *gem);
+    VS::Core::Memory::CopyLiveHalfwords(gem, source, sizeof *gem);
 
     gem->setItemIndex = item;
     gem->index = index;
@@ -133,7 +133,7 @@ int Menu_Loot_StageArmor(Items_InventoryArmor* source)
         }
     }
 
-    Core_Memory_CopyHalfwords(armor, source, sizeof *armor);
+    VS::Core::Memory::CopyLiveHalfwords(armor, source, sizeof *armor);
 
     armor->index = index;
     return index;
@@ -165,7 +165,7 @@ int Menu_Loot_StageShield(Items_LootedShield* looted_shield)
     }
 
     Core_Memory_ZeroWordsBackward(shield, sizeof *shield);
-    Core_Memory_CopyHalfwords(&shield->base, &looted_shield->shield, sizeof shield->base);
+    VS::Core::Memory::CopyLiveHalfwords(&shield->base, &looted_shield->shield, sizeof shield->base);
 
     shield->base.limb = index;
 
@@ -369,7 +369,7 @@ static struct {
 
 void Menu_Loot_ResetPaging(void)
 {
-    Core_Memory_ZeroAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Menu_Loot_paging, sizeof Menu_Loot_paging);
 }
 
 void Menu_Loot_BeginPaging(Items_LootListNode* nodes)

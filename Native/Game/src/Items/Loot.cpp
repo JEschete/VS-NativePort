@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Rewards.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Core/Random.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
@@ -51,7 +51,7 @@ int Items_RollEnemyWeaponDrop(Items_LootedWeapon* looted, Items_WeaponLoadout* b
             }
         }
 
-        Core_Memory_CopyAlignedWords(looted->name, base->name, sizeof looted->name);
+        VS::Core::Memory::CopyLiveAlignedWords(looted->name, base->name, sizeof looted->name);
 
         looted->difficultyFlags = 3;
 
@@ -165,7 +165,7 @@ void Items_QueueEnemyLoot(Battle_Actor* enemy)
         return;
     }
 
-    Core_Memory_ZeroAlignedWords(lootList, sizeof *lootList);
+    VS::Core::Memory::ZeroLiveAlignedWords(lootList, sizeof *lootList);
 
     lootList->droppedMask |= Items_RollEnemyWeaponDrop(&lootList->loot.weapon, &enemy_stats->weapon);
     lootList->droppedMask |= Items_RollEnemyShieldDrop(&lootList->loot.shield, &enemy_stats->shield);
@@ -232,7 +232,7 @@ void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
 
     scripted_loot = (Items_LootListNode *)(Core_Memory_AllocateFromHighEnd(sizeof *scripted_loot));
     if (scripted_loot != NULL) {
-        Core_Memory_ZeroAlignedWords(scripted_loot, sizeof *scripted_loot);
+        VS::Core::Memory::ZeroLiveAlignedWords(scripted_loot, sizeof *scripted_loot);
         scripted_loot->loot.misc[0].itemId = id0;
         if (id0 & 0xFFFF) {
             scripted_loot->loot.misc[0].count = count0;
@@ -352,7 +352,7 @@ Items_TreasureChest* Items_RoomTreasureChests(int* chest_count_out)
 void Items_LoadRoomChestLoot(void* data)
 {
     if (Field_roomData.containers != NULL) {
-        Core_Memory_CopyAlignedWords(&Field_roomData.containers->loot, data,
+        VS::Core::Memory::CopyLiveAlignedWords(&Field_roomData.containers->loot, data,
             sizeof Field_roomData.containers->loot);
     }
 }

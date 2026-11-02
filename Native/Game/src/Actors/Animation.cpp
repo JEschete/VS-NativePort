@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/WordCopy.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
 #include "Event/ScriptVm.h"
@@ -1877,7 +1877,7 @@ void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* actor)
     }
 
 tail:
-    Core_Memory_CopyAlignedWords(&actor->blendPose, &actor->pose, sizeof(actor->blendPose));
+    VS::Core::Memory::CopyLiveAlignedWords(&actor->blendPose, &actor->pose, sizeof(actor->blendPose));
     Actors_UpdateMotionAndLookAt(actor, 0);
 }
 

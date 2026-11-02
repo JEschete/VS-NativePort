@@ -2,6 +2,7 @@
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -33,7 +34,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Copy.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/GameMode.h"
@@ -205,7 +205,7 @@ void Battle_FilterAreaActionTargets(void)
         if (Battle_categoryTargetsBodyParts[Battle_actionDefinitions[action].category]) {
             if (Battle_IsPointInTargetVolume(
                     (Battle_TargetVolume *)((void*)&Battle_actionState->areaShape), (u_short *)((void*)&Battle_actionState->previews[i]))) {
-                Core_Memory_CopyAlignedWords(&Battle_actionState->previews[kept], &Battle_actionState->previews[i],
+                VS::Core::Memory::CopyLiveAlignedWords(&Battle_actionState->previews[kept], &Battle_actionState->previews[i],
                     sizeof(Battle_TargetPreview));
                 Battle_PreviewActionAgainstLimb(action, Battle_actionState->selection.primaryTarget.target.targetActor,
                     Battle_actionState->previews[kept].actorId, Battle_actionState->previews[kept].limb,
@@ -775,7 +775,7 @@ void Battle_BeginActorActionSelection(int source_actor_slot, u_short action_id)
     Battle_Actor* source_actor;
 
     Field_controlMode = 2;
-    Core_Memory_ZeroAlignedWords(&Battle_actionState->selection, sizeof Battle_actionState->selection);
+    VS::Core::Memory::ZeroLiveAlignedWords(&Battle_actionState->selection, sizeof Battle_actionState->selection);
     Battle_actionState->selection.primaryTarget.targetsPosition = 0;
     Battle_actionState->selection.primaryTarget.target.targetActor = source_actor_slot;
     Battle_actionState->selection.actionId = action_id;

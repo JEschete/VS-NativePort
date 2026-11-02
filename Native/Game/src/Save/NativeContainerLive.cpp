@@ -4,9 +4,11 @@
 #include <cstdint>
 #include <cstdlib>
 
+#include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeContainer.hpp"
+
 extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Hud.h"
@@ -14,7 +16,6 @@ extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Memory/WordCopy.h"
 #include "Field/RoomRendering.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
@@ -132,15 +133,15 @@ class LiveContainerSave final : public ContainerSaveHost {
 
   void OpenContainerScreen() override {
     Menu_Container_InventoryStorage& storage = Storage();
-    Core_Memory_CopyHalfwordBlocks(storage.savedInventory,
-                                   &Audio_Seq_unusedInventory,
-                                   sizeof storage.savedInventory);
-    Core_Memory_CopyHalfwordBlocks(&storage.savedInventoryIndices,
-                                   &Audio_Seq_unusedInventoryIndices,
-                                   sizeof storage.savedInventoryIndices);
-    Core_Memory_CopyHalfwordBlocks(&storage.storedContainer,
-                                   Save_NativeContainerData(),
-                                   sizeof storage.storedContainer);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(storage.savedInventory,
+                                             &Audio_Seq_unusedInventory,
+                                             sizeof storage.savedInventory);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
+        &storage.savedInventoryIndices, &Audio_Seq_unusedInventoryIndices,
+        sizeof storage.savedInventoryIndices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&storage.storedContainer,
+                                             Save_NativeContainerData(),
+                                             sizeof storage.storedContainer);
     VS::Save::MemoryCard::ReleaseLiveMenuResources();
     Menu_Framework_menuState.returnState = Menu_Framework_menuState.currentMenu;
     Menu_Framework_menuState.currentMenu = kContainerInventoryMenu;
@@ -172,12 +173,12 @@ class LiveContainerSave final : public ContainerSaveHost {
   void RestoreInventory() override {
     Menu_Container_InventoryStorage& storage = Storage();
     Input_settings.containerEmpty = Menu_Framework_unusedContainerEmptyBackup;
-    Core_Memory_CopyHalfwordBlocks(&Audio_Seq_unusedInventory,
-                                   storage.savedInventory,
-                                   sizeof storage.savedInventory);
-    Core_Memory_CopyHalfwordBlocks(&Audio_Seq_unusedInventoryIndices,
-                                   &storage.savedInventoryIndices,
-                                   sizeof storage.savedInventoryIndices);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(&Audio_Seq_unusedInventory,
+                                             storage.savedInventory,
+                                             sizeof storage.savedInventory);
+    VS::Core::Memory::CopyLiveHalfwordBlocks(
+        &Audio_Seq_unusedInventoryIndices, &storage.savedInventoryIndices,
+        sizeof storage.savedInventoryIndices);
   }
 
   void CloseFilePicker() override {
