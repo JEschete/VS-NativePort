@@ -21,7 +21,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 8: #49 Bounded P-file and effect views | 0 | 2 | 7 | 2 | 0 | 0 |
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 57 | 341 | 70 | 4 | 0 |
 | 10: #50 Render submission and frame ownership | 31 | 96 | 2,685 | 87 | 42 | 0 |
-| 14: #55 Actor identity and teardown | 19 | 213 | 8,958 | 158 | 78 | 0 |
+| 14: #55 Actor identity and teardown | 17 | 213 | 8,610 | 158 | 78 | 0 |
 | 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
 | 23: #57 AI, navigation and collision contexts | 103 | 122 | 6,182 | 194 | 56 | 0 |
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
@@ -32,22 +32,22 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 7 | 132 | 4 | 7 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 195 | 3479 | 107,105 | 1604 | 2156 | 0 |
+| **Total** | 193 | 3479 | 106,757 | 1604 | 2156 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 86 |
-| todo | 3,674 |
+| done | 88 |
+| todo | 3,672 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 150 | 1,896 |
-| Referenced by the original-address module table | 156 | 2,120 |
+| Called from generated code | 148 | 1,896 |
+| Referenced by the original-address module table | 154 | 2,120 |
 | Calls an SDK shim | 2 | 461 |
 | Signature uses SDK integer types or `void*` | 37 | 862 |
-| Compiled with relaxed settings | 68 | 3,477 |
+| Compiled with relaxed settings | 66 | 3,477 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 150 of 195 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 148 of 193 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 

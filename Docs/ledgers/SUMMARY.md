@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 86 | 14 (`wip`) | 4,107 |
-| `cpp` | 86 | 195 (`wip`) | 3,926 |
+| `modernized` | 88 | 14 (`wip`) | 4,105 |
+| `cpp` | 88 | 193 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 213 |
-| `vs_namespace` | 86 |
-| `typed_interface` | 86 |
-| `no_bridge` | 86 |
-| `strict_clean` | 213 |
-| `behavior_evidence` | 86 |
+| `source_cpp` | 215 |
+| `vs_namespace` | 88 |
+| `typed_interface` | 88 |
+| `no_bridge` | 88 |
+| `strict_clean` | 215 |
+| `behavior_evidence` | 88 |
 
-Promotion records: 281; derived `cpp=x`: 86, `cpp=wip`: 195. Verification records: 81; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 88, `cpp=wip`: 193. Verification records: 82; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -205,6 +205,8 @@ The thirty-fifth is the AI relations and Ashley alliance (F01841, F01840, F01681
 and the copied creation and perception callers use the live binding; the old Battle_Ai_* C entry points, Relations.h and their module pointer entries are retired.
 The thirty-sixth is the results texture-region draws (F03675, F03676, F03677, F03678): VS::Render::DrawTextureTintFade, DrawTextureFlashFade and DrawTextureWipe build typed RegionQuads for a RegionQuadTarget,
 and the copied ENDING and MENUF results callers use span-checked live bindings; the old Render_DrawTexture* C entry points, Render_BlendFlashComponent and TextureRegionDraw.h are retired, and the congratulations tint regains the third color it reads (#259).
+The thirty-seventh is the actor appearance transitions (F00979, F00980): VS::Actors::UpdatePalettePulse and UpdateActorAppearanceTransition advance typed pulse and transition state for an AppearanceSubject,
+and the copied ModelRendering callers use bounded live actor and gimmick bindings; the old Actors_Update*/Field_UpdateGimmickAppearanceTransition entry points and AppearanceTransition.h are retired, and actor slots 10-16 no longer read past the weapon-model table (#260).
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
