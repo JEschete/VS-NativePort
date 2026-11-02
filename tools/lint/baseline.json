@@ -233,13 +233,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "01c4657997918f19d8543a82238e0b31cdf1af98e8304bddc9a1114d0b306447",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "01c6c120c51541674d69bc25114de9559153a90e4b0c15afeeed2fba057c03d7",
       "count": 1,
       "tool": "tidy",
@@ -2758,13 +2751,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Save/SaveStore.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "102b66ccdf6d0d5660d6bc73465f4f3d5404ed95e5b091e6d97d82f02d5934f9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "102e1fc35bc491f20c2d48c5356453440ea1ab3247d0959945a088170a40ff61",
@@ -8024,13 +8010,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2d83762514b0ab73be337bd906a42dd1ef8c569995f940408bcfdb5eabe38ace",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "2d8630049a6c155e148d638a59728c2e6accf6b3ee03d47cd6f4fee801465a5b",
       "count": 1,
       "tool": "tidy",
@@ -9676,13 +9655,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "376c7747d79755c81bda8326004f72f3a9ed8cc962370fb371a8dd979d877275",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "377acacc0987e3fa5602efc587a940c5297956a9b5f681621fbb302317b3a0f7",
       "count": 1,
       "tool": "tidy",
@@ -10408,13 +10380,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/MemoryTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3c964109d42d8a80795dfdd29555ce2e607491ef7e9bb9aa5aaa9ca8f9930f1d",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -11753,13 +11718,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "440d1105a693f181aba62ff320adaae322c0b703797cb9dc1cb97d68419e9ca7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "441ac798c1d0be2c0a2a16fff4e2520396b4a3e940ef9aa587c52d3b58136c61",
@@ -13953,13 +13911,6 @@
       "rule": "UP034"
     },
     {
-      "key": "5165ee0b904b79115c3db60100d36aedcdff1346a8dc3151aa9a763c1539f7f0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "516bd74641f1949b7db3f293c291eb23453fdd84289587e2ab0384cf658058c1",
       "count": 1,
       "tool": "tidy",
@@ -14609,13 +14560,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "5570afc7d1ebf33dfdaf7fb78e4e116a4bdc8ea455226d8a608370363e5bce22",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "55719e50316192d800f701f1aec0fea74c5002fe7edc4fcf2487aeeb3b0c91ff",
@@ -17710,13 +17654,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "66fb998ce122a3a8d7d0cb54e126b5ae9f9a165ecd544a5307e6f87765ff4277",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "66ff4815ac7590ceb8c576b17194acf63aea527cbb77103be1c92e67064b04f2",
@@ -21681,13 +21618,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "7dd72adadd0b46f8d56a72c6bcb8723bb9f1ea225c5ed4599074992cd28d54b0",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "google"
-    },
-    {
       "key": "eed533d056adf3bc12e64adbaebbe1195cf5b431ffc3ea1513e67d82c07429b3",
       "count": 1,
       "tool": "tidy",
@@ -21847,13 +21777,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "7f0d1376dd712d60d035ff88dada74a006bc16eaf46bba776d109cb80e886283",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "7f1f237306a7f303e43a3ae5e2bccc15a4a1d4321f870cd1bf474ea6e9a64ac5",
@@ -23576,13 +23499,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "892aa5596ee22892f92116e6a58576949eedfe2c336669c62f31141c39d0e5d3",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Content/src/DiscReader.h",
-      "rule": "google"
     },
     {
       "key": "89350a39b9639eededf2a174f3a8af5de273176250b4098b6e547e6d5b7f9765",
@@ -25727,13 +25643,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "94d7083d30cce7436d3470e176aacafa3847f7e7dde94d053aae3608e3c79c09",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "94d9d7de5d429159838ba1886aeb1c81be5305a6ea530adc84da5b51108d6476",
       "count": 1,
       "tool": "cpplint",
@@ -25907,13 +25816,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Save/LibCard.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "9601c547545c26659ba6c44ea8068d7f77c2c7061437f6949cbaeb42330a81bd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "9607325091085a9778bf847cc2c173a92908636416baf9487340c1ccb1c79a3d",
@@ -27160,13 +27062,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "9db93c2ddf3c89808fb8e3ba91e4d8eccbea11f6c06542e7523f9e71fb21d604",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "9dc0a7cada5c3bc5193c1e882d63bd197b0ec626fbdcd3cab2a7b1d3a6f3e172",
@@ -28679,13 +28574,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a777770ea6f77378678dfc9856a47547c8cf5349566e9d67ad2ed2ba148c7a66",
-      "count": 3,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "a77b766dc44be1dfcc155939ff1c26ea161e4dca64ddd851230c7fce966e42a1",
@@ -32153,13 +32041,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "bc713c7d4161ccd28fea0833e5c038e2976bf2878b5f31b746a269231581d317",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bc736c871a46eac7cbfbf43cb917b0542568a6e80a759a11bd379f57576fb20a",
       "count": 1,
       "tool": "tidy",
@@ -33161,13 +33042,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "c29808baabe01171fd4e9911d2321957c6fa4655b1a808fb621894cc127e3664",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c2aa2a5042b330c6f8c9d3ac032cdc873e2509a98b60d281202e9bb34fafa6de",
       "count": 1,
       "tool": "cpplint",
@@ -33742,13 +33616,6 @@
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
     },
     {
-      "key": "c607a825abb4f5fa211a0019e27a7db865312bc6f2daa021fc80e0d138afc8dc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "c6090d8b04023379dbbf44630df798d174ebe163ffc79ce8f6dc91a3a5a46847",
       "count": 1,
       "tool": "tidy",
@@ -34167,13 +34034,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "c859fe9838d375d5977122c211c0b53acc48dfc28ae5ef34644673ddee42aa82",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c861d81a6e6c1538f364aa700b2883e6ef984c2e634ab0f974adb84f1a64431c",
@@ -38234,13 +38094,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "e0187c8322626b564b3c7e4b48841699a1ad2e22710d88996dfdb043e476bdd4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Content/src/DiscReader.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "e01a866f6a8698c9826c7679375d68a75cd70d815e01dab2c253ce9cf2ebda02",

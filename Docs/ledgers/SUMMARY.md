@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 75 | 19 (`wip`) | 4,113 |
-| `cpp` | 75 | 205 (`wip`) | 3,927 |
+| `modernized` | 78 | 19 (`wip`) | 4,110 |
+| `cpp` | 78 | 202 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 202 |
-| `vs_namespace` | 75 |
-| `typed_interface` | 75 |
-| `no_bridge` | 75 |
-| `strict_clean` | 202 |
-| `behavior_evidence` | 75 |
+| `source_cpp` | 205 |
+| `vs_namespace` | 78 |
+| `typed_interface` | 78 |
+| `no_bridge` | 78 |
+| `strict_clean` | 205 |
+| `behavior_evidence` | 78 |
 
-Promotion records: 280; derived `cpp=x`: 75, `cpp=wip`: 205. Verification records: 78; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 78, `cpp=wip`: 202. Verification records: 79; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -199,6 +199,8 @@ The thirty-second is menu sounds (F04194-F04198): `VS::Menu::PlayMenuSound` play
 and every generated and hand-maintained caller uses the `VS::Menu` helpers; the five unreferenced BATTLE.PRG module-pointer entries are retired.
 The thirty-third is the intro movie player (F03650-F03653): `VS::Movie::Intro::Play` drives a typed `Intro::Host` with page alternation, late display enable and the 0x8F5-tick picture limit,
 and the title menu calls the live binding; the old `Movie_Intro_*` C entry points and `Movie/Intro/Player.h` are retired.
+The thirty-fourth is the disc drive commands (F03474, F03475, F03479): `VS::Content::UpdateDiscCommands` serves armed reads and XA streams through a typed `DiscDriveHost`,
+and the copied queue and `_sysReinit` call the live binding; the old `Content_*Disc*` C entry points and `DiscReader.h` are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

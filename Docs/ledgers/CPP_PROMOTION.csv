@@ -229,9 +229,9 @@ F03415,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCA
 F03416,Native\Engine\src\Core\Math\ScalarMath.cpp,x,x,x,x,x,x,verify:VR-CORE-SCALAR-MATH,4cd141b067295b9b0081ab9b2794c2c3d3f006cb,#46 slice: pure integer square root through the normalized lookup with no GTE register state
 F03438,Native\Game\src\Boot\Session.cpp,,,,,,,,,
 F03439,Native\Game\src\Boot\Session.cpp,,,,,,,,,
-F03474,Native\Content\src\DiscReader.cpp,,,,,,,,,
-F03475,Native\Content\src\DiscReader.cpp,,,,,,,,,
-F03479,Native\Content\src\DiscReader.cpp,,,,,,,,,
+F03474,Native\Content\src\DiscReader.cpp,x,x,x,x,x,x,verify:VR-CONTENT-DISC-DRIVE-SLICE,5d70e5f696ff88fc47f3c71824e052b65f449a76,"#46 slice: VS::Content::{BeginDiscRead, UpdateDiscCommands, ResetDiscDrive} drive an abstract DiscDriveHost in the legacy-free Content/DiscReader.cpp; Content/DiscReaderLive.cpp binds the drive record, Content_ReadDiscBytes, native XA playback, the legacy read buffer and VSync; the copier routes the CdDrive queue and _sysReinit callers to the BeginLiveDiscRead/UpdateLiveDiscCommands/ResetLiveDiscDrive binding"
+F03475,Native\Content\src\DiscReader.cpp,x,x,x,x,x,x,verify:VR-CONTENT-DISC-DRIVE-SLICE,5d70e5f696ff88fc47f3c71824e052b65f449a76,"#46 slice: VS::Content::{BeginDiscRead, UpdateDiscCommands, ResetDiscDrive} drive an abstract DiscDriveHost in the legacy-free Content/DiscReader.cpp; Content/DiscReaderLive.cpp binds the drive record, Content_ReadDiscBytes, native XA playback, the legacy read buffer and VSync; the copier routes the CdDrive queue and _sysReinit callers to the BeginLiveDiscRead/UpdateLiveDiscCommands/ResetLiveDiscDrive binding"
+F03479,Native\Content\src\DiscReader.cpp,x,x,x,x,x,x,verify:VR-CONTENT-DISC-DRIVE-SLICE,5d70e5f696ff88fc47f3c71824e052b65f449a76,"#46 slice: VS::Content::{BeginDiscRead, UpdateDiscCommands, ResetDiscDrive} drive an abstract DiscDriveHost in the legacy-free Content/DiscReader.cpp; Content/DiscReaderLive.cpp binds the drive record, Content_ReadDiscBytes, native XA playback, the legacy read buffer and VSync; the copier routes the CdDrive queue and _sysReinit callers to the BeginLiveDiscRead/UpdateLiveDiscCommands/ResetLiveDiscDrive binding"
 F03545,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03546,Native\Engine\src\Audio\StreamPlayback.cpp,x,,,,x,,,,
 F03572,Native\Engine\src\Core\Memory\WordCopy.cpp,,,,,,,,,
