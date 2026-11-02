@@ -14,12 +14,13 @@
 #include <vector>
 
 #include "Content/DataStore.hpp"
-#include "Field/MinimapScene.h"
+#include "Field/MinimapScene.hpp"
 
 extern "C" {
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
+#include "Field/Map.h"
 #include "Field/MapProgress.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
@@ -163,17 +164,16 @@ std::expected<EncodedRoomName, std::string> RoomName(
 
   // F00774 vs_battle_initSceneAndGetRoomNames, BATTLE/2EA3C.s:2085-2103;
   // MENU5/4D8.c consumes the resulting ARM names by matching zone/map records.
-  Field_MapRoomName* names = nullptr;
+  std::size_t names_offset = 0;
   try {
-    names = Field_ResolveSceneRoomData(bytes->data(), bytes->size());
+    names_offset = VS::Field::ResolveSceneRoomData(
+        std::as_writable_bytes(std::span(bytes->data(), bytes->size())));
   } catch (const std::runtime_error& error) {
     return std::unexpected(
         std::format("save summary: {}: {}", path, error.what()));
   }
-  const auto names_offset =
-      reinterpret_cast<const std::uint8_t*>(names) - bytes->data();
   const auto table =
-      Slice(*bytes, static_cast<std::size_t>(names_offset),
+      Slice(*bytes, names_offset,
             static_cast<std::size_t>(*count) * sizeof(Field_MapRoomName));
   if (!table) return std::unexpected(table.error());
   EncodedRoomName name{};

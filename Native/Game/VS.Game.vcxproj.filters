@@ -1710,9 +1710,9 @@
     <ClCompile Include="src\Field\MinimapScene.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\MinimapScene.h">
+    <ClCompile Include="src\Field\MinimapSceneLive.cpp">
       <Filter>src\Field</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Field\Mpd.h">
       <Filter>src\Field</Filter>
     </ClInclude>
@@ -2308,6 +2308,12 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\DoorMatchesLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\MinimapScene.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\MinimapSceneLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\PlatformLayers.hpp">

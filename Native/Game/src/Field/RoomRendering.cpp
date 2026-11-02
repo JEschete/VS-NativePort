@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 extern "C" {
@@ -17,7 +18,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
 #include "Field/Minimap.h"
-#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
@@ -164,7 +164,7 @@ void Field_DrawRoomScene(void)
     mapOffset.x = 392 - (Field_minimapSlideFrame << 4);
     Render_GetProjectionScreenOffset(&originalOffset);
     Render_SetProjectionScreenOffset(&mapOffset);
-    Field_DrawMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
+    VS::Field::DrawLiveMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
     Render_SetProjectionScreenOffset(&originalOffset);
     Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
     Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);

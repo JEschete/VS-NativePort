@@ -47,6 +47,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
     "VS::Field::DrawLiveRoomTriggerMarkers": r"Native\Game\include\Field\RoomTriggerMarkersLive.hpp",
     "VS::Field::SampleLiveRoomLighting": r"Native\Game\include\Field\RoomLightingLive.hpp",
+    "VS::Field::ResolveLiveSceneRoomData": r"Native\Game\include\Field\MinimapSceneLive.hpp",
+    "VS::Field::DrawLiveMinimapScene": r"Native\Game\include\Field\MinimapSceneLive.hpp",
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -1180,13 +1182,13 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "58EC.c:475 pragma vsstring encodes |!0| as F8 00; retain 96-byte payload and both E7 guards"),
     ],
     "F00551": [
-        ("Field_ResolveSceneRoomData(Field_roomData.minimapScene);",
-         "Field_ResolveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
+        ("VS::Field::ResolveSceneRoomData(Field_roomData.minimapScene);",
+         "VS::Field::ResolveLiveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
          "bound scene decoding to its MPD subsection, retaining 12-byte room records"),
     ],
     "F00556": [
-        ("Field_DrawMinimapScene(Field_roomData.minimapScene);",
-         "Field_DrawMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
+        ("VS::Field::DrawMinimapScene(Field_roomData.minimapScene);",
+         "VS::Field::DrawLiveMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);",
          "bound minimap vertices and primitive tables to the loaded scene"),
         ("    Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n    drawArea =",
          "    Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);\n"
@@ -1194,8 +1196,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "restore the field transform after the minimap's explicit translation"),
     ],
     **{fid: [
-        ("Field_ResolveSceneRoomData(Battle_unusedSceneBuffer)",
-         "Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
+        ("VS::Field::ResolveSceneRoomData(Battle_unusedSceneBuffer)",
+         "VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size)",
          "bound ARM scene decoding to its loaded file extent"),
         ("*(u_short*)Core_ScratchAddr(22)",
          "(u_short)Render_frameScratch.camera.angles.vy",

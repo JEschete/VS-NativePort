@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/MinimapSceneLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
 #include "Field/Map.h"
-#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomLoading.h"
@@ -510,7 +510,7 @@ int Menu_Map_LoadSceneMap(void)
 
     Content_ReleaseDiscRequest(Menu_Map_sceneCdQueueSlot);
 
-    Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+    Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
     Field_RestoreSceneRoomVisits((Field_MapScene *)(Battle_unusedSceneBuffer));
     Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));
@@ -862,7 +862,7 @@ int Menu_Map_UpdateMapMenu(void)
                 Battle_unusedSceneBuffer, Menu_Map_armFileBuff, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
             Core_Memory_FreeFromHighEnd(Menu_Map_armFileBuff);
 
-            Menu_Map_roomNamesTable = Field_ResolveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
+            Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
             Field_RestoreSceneRoomVisits((Field_MapScene *)(Battle_unusedSceneBuffer));
             Menu_Map_ScaleRoomVertices((Field_MapScene *)(Battle_unusedSceneBuffer), sizeof(Field_MapScene));

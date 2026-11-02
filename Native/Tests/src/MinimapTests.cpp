@@ -1,8 +1,10 @@
 #include <array>
+#include <cstddef>
 #include <cstring>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -10,12 +12,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Field/MinimapScene.h"
+#include "Field/MinimapScene.hpp"
+#include "Field/MinimapSceneLive.hpp"
 #include "Render/RoomDraw.h"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Field/Gimmicks.h"
+#include "Field/Map.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -24,6 +28,10 @@ extern "C" {
 }
 
 namespace {
+std::span<const std::byte> SceneBytes(const void* data, size_t size) {
+  return {static_cast<const std::byte*>(data), size};
+}
+
 std::vector<u_long> Scene() {
   return {2,
           1,
@@ -150,9 +158,10 @@ TEST_CASE(
     "Map scenes retain packed records and resolve bounded relative offsets",
     "[content][minimap][layout]") {
   auto bytes = Scene();
-  REQUIRE(Field_ValidateMapScene(bytes.data(), bytes.size() * sizeof(u_long)));
-  auto* end =
-      Field_ResolveSceneRoomData(bytes.data(), bytes.size() * sizeof(u_long));
+  REQUIRE(VS::Field::IsValidMapScene(
+      SceneBytes(bytes.data(), bytes.size() * sizeof(u_long))));
+  auto* end = VS::Field::ResolveLiveSceneRoomData(
+      bytes.data(), bytes.size() * sizeof(u_long));
   CHECK(reinterpret_cast<void*>(end) ==
         reinterpret_cast<unsigned char*>(bytes.data()) +
             bytes.size() * sizeof(u_long));
@@ -169,29 +178,30 @@ TEST_CASE("Malformed map counts, payloads and indices fail without mutation",
           "[content][minimap][bounds]") {
   const auto valid = Scene();
   for (size_t length = 0; length < valid.size() * sizeof(u_long); ++length) {
-    CHECK_FALSE(Field_ValidateMapScene(valid.data(), length));
+    CHECK_FALSE(VS::Field::IsValidMapScene(SceneBytes(valid.data(), length)));
   }
   for (const size_t index : {0, 2, 7, 16, 17}) {
     auto bad = valid;
     bad[index] = UINT32_MAX;
     const auto saved = bad;
-    CHECK_FALSE(
-        Field_ValidateMapScene(bad.data(), bad.size() * sizeof(u_long)));
+    CHECK_FALSE(VS::Field::IsValidMapScene(
+        SceneBytes(bad.data(), bad.size() * sizeof(u_long))));
     CHECK(bad == saved);
-    CHECK_THROWS_AS(
-        Field_ResolveSceneRoomData(bad.data(), bad.size() * sizeof(u_long)),
-        std::runtime_error);
+    CHECK_THROWS_AS(VS::Field::ResolveLiveSceneRoomData(
+                        bad.data(), bad.size() * sizeof(u_long)),
+                    std::runtime_error);
     CHECK(bad == saved);
   }
-  CHECK_FALSE(Field_ValidateMapScene(nullptr, valid.size() * sizeof(u_long)));
+  CHECK_FALSE(VS::Field::IsValidMapScene({}));
 }
 
 TEST_CASE("Minimap geometry, visited connections and markers use native links",
           "[render][minimap]") {
   RenderFixture fixture(GENERATE(0, 1));
   auto bytes = Scene();
-  Field_ResolveSceneRoomData(bytes.data(), bytes.size() * sizeof(u_long));
-  Field_DrawMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));
+  VS::Field::ResolveLiveSceneRoomData(bytes.data(),
+                                      bytes.size() * sizeof(u_long));
+  VS::Field::DrawLiveMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));
   const auto packets = fixture.Commands();
   REQUIRE(packets.size() == 9);
   const std::array<int, 9> commands{0xE1, 0x42, 0x42, 0x42, 0x2A,
@@ -223,8 +233,9 @@ TEST_CASE(
   bytes[25] = door;
   Field_roomAnimationTicks = ticks;
   Audio_Seq_unusedStateFlags.opaque33F[1] = gate;
-  Field_ResolveSceneRoomData(bytes.data(), bytes.size() * sizeof(u_long));
-  Field_DrawMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));
+  VS::Field::ResolveLiveSceneRoomData(bytes.data(),
+                                      bytes.size() * sizeof(u_long));
+  VS::Field::DrawLiveMinimapScene(bytes.data(), bytes.size() * sizeof(u_long));
   const auto packets = fixture.Commands();
   const bool locked = door == 0x01000000u && gate == 0;
   const bool hidden = door == 0x00100000u && ticks == 0;
@@ -237,13 +248,14 @@ TEST_CASE("Minimap capacity errors do not overwrite packets or ordering links",
           "[render][minimap][bounds]") {
   RenderFixture fixture;
   auto bytes = Scene();
-  Field_ResolveSceneRoomData(bytes.data(), bytes.size() * sizeof(u_long));
+  VS::Field::ResolveLiveSceneRoomData(bytes.data(),
+                                      bytes.size() * sizeof(u_long));
   Render_frameScratch.primitiveCursor =
       fixture.packets.data() + 0x20000 / 4 - 1;
   const auto saved = fixture.ordering;
-  CHECK_THROWS_AS(
-      Field_DrawMinimapScene(bytes.data(), bytes.size() * sizeof(u_long)),
-      std::runtime_error);
+  CHECK_THROWS_AS(VS::Field::DrawLiveMinimapScene(
+                      bytes.data(), bytes.size() * sizeof(u_long)),
+                  std::runtime_error);
   CHECK(fixture.ordering == saved);
   CHECK(fixture.packets.back() == 0xDEADBEEF);
 }
@@ -293,8 +305,9 @@ TEST_CASE("Every extracted ARM scene decodes packed rooms and its name table",
     }
     auto bytes = FileBytes(entry.path());
     CAPTURE(entry.path().filename().string());
-    REQUIRE(Field_ValidateMapScene(bytes.data(), bytes.size()));
-    auto* names = Field_ResolveSceneRoomData(bytes.data(), bytes.size());
+    REQUIRE(VS::Field::IsValidMapScene(SceneBytes(bytes.data(), bytes.size())));
+    auto* names =
+        VS::Field::ResolveLiveSceneRoomData(bytes.data(), bytes.size());
     const auto name_offset = static_cast<size_t>(
         reinterpret_cast<const unsigned char*>(names) - bytes.data());
     REQUIRE(name_offset <= bytes.size());
@@ -327,14 +340,139 @@ TEST_CASE("Every extracted MPD minimap decodes and draws within packet bounds",
     CAPTURE(entry.path().filename().string(), offset, size);
     REQUIRE(offset <= bytes.size());
     REQUIRE(size <= bytes.size() - offset);
-    REQUIRE(Field_ValidateMapScene(bytes.data() + offset, size));
-    Field_ResolveSceneRoomData(bytes.data() + offset, size);
+    REQUIRE(
+        VS::Field::IsValidMapScene(SceneBytes(bytes.data() + offset, size)));
+    VS::Field::ResolveLiveSceneRoomData(bytes.data() + offset, size);
     RenderFixture fixture;
     auto* scene = reinterpret_cast<Field_MapScene*>(bytes.data() + offset);
     scene->rooms[0].visited = 1;
-    Field_DrawMinimapScene(scene, size);
+    VS::Field::DrawLiveMinimapScene(scene, size);
     CHECK(fixture.packets.back() == 0xDEADBEEF);
     ++scene_count;
   }
   CHECK(scene_count > 0);
+}
+
+namespace {
+using VS::Field::MinimapColor;
+using VS::Field::MinimapPrimitiveCounts;
+using VS::Field::MinimapScreenPoint;
+using VS::Field::MinimapVertex;
+
+struct RecordingMinimapRenderer final : VS::Field::MinimapRenderer {
+  MinimapPrimitiveCounts counts;
+  std::vector<std::string> calls;
+  std::vector<MinimapColor> colors;
+  std::vector<std::array<MinimapScreenPoint, 4>> quads;
+  std::vector<MinimapScreenPoint> markers;
+  bool locked = false;
+  int begins = 0;
+
+  void Begin(const MinimapPrimitiveCounts& reserved) override {
+    counts = reserved;
+    ++begins;
+  }
+  MinimapScreenPoint Project(const MinimapVertex& vertex) override {
+    return {vertex.x, vertex.y};
+  }
+  bool IsDoorGateLocked(std::uint8_t /*gate*/) override { return locked; }
+  void DrawTriangle(const std::array<MinimapScreenPoint, 3>& /*corners*/,
+                    MinimapColor color) override {
+    calls.emplace_back("triangle");
+    colors.push_back(color);
+  }
+  void DrawQuad(const std::array<MinimapScreenPoint, 4>& corners,
+                MinimapColor color) override {
+    calls.emplace_back("quad");
+    colors.push_back(color);
+    quads.push_back(corners);
+  }
+  void DrawLine(MinimapScreenPoint /*from*/, MinimapScreenPoint /*to*/,
+                MinimapColor color) override {
+    calls.emplace_back("line");
+    colors.push_back(color);
+  }
+  void DrawLockedDoor(MinimapScreenPoint position) override {
+    calls.emplace_back("locked");
+    markers.push_back(position);
+  }
+  void DrawDoorCross(MinimapScreenPoint position, MinimapColor color) override {
+    calls.emplace_back("cross");
+    colors.push_back(color);
+    markers.push_back(position);
+  }
+  void Finish() override { calls.emplace_back("finish"); }
+};
+
+std::vector<std::byte> ResolvedScene(std::vector<u_long> words) {
+  const auto view = std::as_bytes(std::span(words));
+  std::vector<std::byte> bytes(view.begin(), view.end());
+  CHECK(VS::Field::ResolveSceneRoomData(bytes) == bytes.size());
+  return bytes;
+}
+}  // namespace
+
+TEST_CASE("Typed minimap scenes draw rooms in order through a renderer",
+          "[render][minimap][typed]") {
+  const auto bytes = ResolvedScene(Scene());
+  RecordingMinimapRenderer renderer;
+  VS::Field::DrawMinimapScene(bytes, false, renderer);
+  CHECK(renderer.begins == 1);
+  CHECK(renderer.counts == MinimapPrimitiveCounts{1, 1, 3, 1});
+  const std::vector<std::string> calls{"triangle", "quad", "line",  "line",
+                                       "cross",    "line", "finish"};
+  CHECK(renderer.calls == calls);
+  const std::vector<MinimapColor> colors{{0, 127, 63},    {0, 127, 63},
+                                         {0, 127, 255},   {0, 95, 47},
+                                         {127, 127, 127}, {0, 127, 255}};
+  CHECK(renderer.colors == colors);
+  REQUIRE(renderer.quads.size() == 1);
+  const std::array<MinimapScreenPoint, 4> strip{
+      {{-16, -16}, {16, -16}, {-16, 16}, {16, 16}}};
+  CHECK(renderer.quads[0] == strip);
+}
+
+TEST_CASE("Typed minimap doors follow gates, entry pulses and special flags",
+          "[render][minimap][typed][doors]") {
+  auto words = Scene();
+  words[25] = 0x01000000u;
+  auto bytes = ResolvedScene(words);
+  RecordingMinimapRenderer locked;
+  locked.locked = true;
+  VS::Field::DrawMinimapScene(bytes, false, locked);
+  REQUIRE(locked.markers.size() == 1);
+  CHECK(locked.markers[0] == MinimapScreenPoint{-16 - 3, -16 - 4});
+
+  words[25] = 0x00100000u;
+  bytes = ResolvedScene(words);
+  RecordingMinimapRenderer hidden;
+  VS::Field::DrawMinimapScene(bytes, false, hidden);
+  CHECK(hidden.markers.empty());
+  RecordingMinimapRenderer pulsing;
+  VS::Field::DrawMinimapScene(bytes, true, pulsing);
+  REQUIRE(pulsing.markers.size() == 1);
+  CHECK(pulsing.colors[4] == MinimapColor{255, 0, 127});
+
+  words[25] = 0x00040000u;
+  bytes = ResolvedScene(words);
+  RecordingMinimapRenderer special;
+  VS::Field::DrawMinimapScene(bytes, false, special);
+  CHECK(special.colors[4] == MinimapColor{0, 127, 255});
+
+  words[25] = 0x00010000u;
+  bytes = ResolvedScene(words);
+  RecordingMinimapRenderer other;
+  VS::Field::DrawMinimapScene(bytes, false, other);
+  CHECK(other.markers.empty());
+}
+
+TEST_CASE("Typed minimap draws reject unresolved scenes before rendering",
+          "[render][minimap][typed][bounds]") {
+  const auto words = Scene();
+  RecordingMinimapRenderer renderer;
+  CHECK_THROWS_AS(VS::Field::DrawMinimapScene(std::as_bytes(std::span(words)),
+                                              false, renderer),
+                  std::runtime_error);
+  CHECK(renderer.begins == 0);
+  CHECK(renderer.calls.empty());
 }

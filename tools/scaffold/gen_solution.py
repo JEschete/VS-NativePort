@@ -162,7 +162,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Field\PlatformPlacementLive.cpp",
                 r"src\Field\RoomTriggerMarkersLive.cpp",
                 r"src\Field\RoomLightingLive.cpp",
-                r"src\Field\MinimapScene.cpp",
+                r"src\Field\MinimapSceneLive.cpp",
                 r"src\Battle\Ai\PlanningPrimitives.cpp",
                 r"src\Battle\Ai\DecisionPrimitives.cpp",
                 r"src\Battle\Ai\NavigationPrimitives.cpp",

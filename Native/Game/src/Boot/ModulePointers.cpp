@@ -185,7 +185,6 @@ extern "C" {
 #include "Field/Map.h"
 #include "Field/MapProgress.h"
 #include "Field/Minimap.h"
-#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Platforms.h"
 #include "Field/Room.h"
@@ -1069,8 +1068,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80098AB8u, 0u, (void*)&Core_Math_SineFixedPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098D6Cu, 0u, (void*)&Render_TintRoomGeometryPrimitives, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098E50u, 0u, (void*)&Render_TintRoomPrimitiveColor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098F4Cu, 0u, (void*)&Field_ResolveSceneRoomData, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098F8Cu, 0u, (void*)&Field_DrawMinimapScene, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800994D4u, 0u, (void*)&Render_GetProjectionScreenOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800994F4u, 0u, (void*)&Render_SetProjectionScreenOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800995B0u, 0u, (void*)&Content_FindFreeActorAssetRequest, 0u, 0u, 0u},

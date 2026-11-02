@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Field/MinimapSceneLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -51,7 +52,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Locations.h"
 #include "Field/Map.h"
-#include "Field/MinimapScene.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
@@ -1007,7 +1007,7 @@ int Field_LoadRoomSections(int owner_room_index, void* data)
     }
 
     if (Field_roomData.minimapScene != NULL) {
-        Field_ResolveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
+        VS::Field::ResolveLiveSceneRoomData(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
         Field_RestoreSceneRoomVisits(Field_roomData.minimapScene);
         Field_roomData.minimapScene->rooms[0].visited = 1;
         if (Audio_Seq_unusedStateFlags.doorEntered == 0) {

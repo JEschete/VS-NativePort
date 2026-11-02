@@ -1,14 +1,18 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <span>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Field/MinimapScene.h"
+#include "Field/MinimapScene.hpp"
+#include "Field/MinimapSceneLive.hpp"
 
 extern "C" {
+#include "Field/Map.h"
 #include "Menu/Map.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -17,6 +21,10 @@ extern "C" {
 }
 
 namespace {
+std::span<const std::byte> SceneBytes(const void* data, size_t size) {
+  return {static_cast<const std::byte*>(data), size};
+}
+
 struct MapFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   std::array<void*, 2> saved_buffers{Render_legacyPrimitiveBuffers[0],
@@ -127,8 +135,10 @@ TEST_CASE("Full Map projection handles all byte-indexed vertices off scratch",
   std::vector<u_long> scene{
       1, 1, static_cast<u_long>(room.size() * sizeof(u_long)), 0x00010001};
   scene.insert(scene.end(), room.begin(), room.end());
-  REQUIRE(Field_ValidateMapScene(scene.data(), scene.size() * sizeof(u_long)));
-  Field_ResolveSceneRoomData(scene.data(), scene.size() * sizeof(u_long));
+  REQUIRE(VS::Field::IsValidMapScene(
+      SceneBytes(scene.data(), scene.size() * sizeof(u_long))));
+  VS::Field::ResolveLiveSceneRoomData(scene.data(),
+                                      scene.size() * sizeof(u_long));
   auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
   CHECK(Menu_Map_DrawRoom(1, VS_ONDISC(&map->rooms[0], dataAddress, void*), 1,
                           1) == 1);
@@ -157,8 +167,10 @@ TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
   std::vector<u_long> scene{
       1, 1, static_cast<u_long>(room.size() * sizeof(u_long)), 0x00010001};
   scene.insert(scene.end(), room.begin(), room.end());
-  REQUIRE(Field_ValidateMapScene(scene.data(), scene.size() * sizeof(u_long)));
-  Field_ResolveSceneRoomData(scene.data(), scene.size() * sizeof(u_long));
+  REQUIRE(VS::Field::IsValidMapScene(
+      SceneBytes(scene.data(), scene.size() * sizeof(u_long))));
+  VS::Field::ResolveLiveSceneRoomData(scene.data(),
+                                      scene.size() * sizeof(u_long));
   const auto* map = reinterpret_cast<Field_MapScene*>(scene.data());
   auto* data = VS_ONDISC(&map->rooms[0], dataAddress, void*);
   constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
