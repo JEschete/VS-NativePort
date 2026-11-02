@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Music.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Menu/Files.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
@@ -1184,7 +1184,7 @@ int Menu_Files_UpdateSaveFiles(int initPort)
                     Menu_Files_saveFilesState = Menu_Files_SaveFilesState_SlotSelected;
                     break;
                 } else {
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
                 }
             }
             if (Input_buttonRepeat & PADLup) {
@@ -1903,13 +1903,13 @@ int Menu_Files_UpdateGameOverChoices(int init)
         Menu_Files_gameOverChoicesColor1 += 8;
     } else {
         if (Input_buttonsPressed.allButtons & (PADstart | PADRright)) {
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             Audio_FadeMusicSlotVolume(1, 0, 60);
             Menu_Files_gameOverChoicesColor1 = -128;
             return 0;
         }
         if (Input_buttonsPressed.allButtons & (PADselect | PADLup | PADLdown)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Files_gameOverChoicesSelectedOption = 1 - Menu_Files_gameOverChoicesSelectedOption;
         }
         if (Menu_Files_gameOverChoicesSelectedOption == 0) {
@@ -2139,16 +2139,16 @@ int Menu_Files_UpdateContainerConfirmation(int initParams)
         if (Menu_Files_containerConfirmationCancelWithMenuButton == 0) {
             if (buttons & PADRup) {
                 buttons -= PADRup;
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
         }
         if (buttons & (PADRup | PADRright | PADRdown)) {
             if ((Menu_Files_containerConfirmationSelectedOption != 0) || (buttons & (PADRup | PADRdown))) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
                 Menu_Files_containerConfirmationSelectedOption = -1;
             } else {
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
                 Menu_Files_containerConfirmationSelectedOption = 1;
             }
@@ -2156,7 +2156,7 @@ int Menu_Files_UpdateContainerConfirmation(int initParams)
         } else {
             Menu_Files_containerConfirmationCursorAnimation = Menu_Framework_DrawMainMenuCursor(Menu_Files_containerConfirmationCursorAnimation, Menu_Files_containerConfirmationSelectedOption + 8);
             if (Input_buttonRepeat & (PADLup | PADLdown)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Files_containerConfirmationSelectedOption = 1 - Menu_Files_containerConfirmationSelectedOption;
             }
         }

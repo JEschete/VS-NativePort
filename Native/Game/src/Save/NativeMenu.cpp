@@ -15,13 +15,13 @@
 #include <utility>
 
 #include "Core/Log.hpp"
+#include "Menu/Sounds.hpp"
 #include "Platform/App.hpp"
 #include "Save/NativeFilePresentation.hpp"
 #include "Save/NativeFiles.hpp"
 #include "Save/NativeMenu.h"
 #include "Save/NativeResume.h"
 #include "Save/RuntimeSnapshot.hpp"
-
 extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
@@ -30,7 +30,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Input/Controller.h"
 #include "Menu/Files.h"
-#include "Menu/Sounds.h"
 #include "Title/SaveFiles.h"
 }
 
@@ -390,7 +389,7 @@ void Execute() {
   if (picker.save) {
     const auto written = WriteCurrent();
     if (!written) {
-      Menu_PlayInvalidSound();
+      VS::Menu::PlayInvalidSound();
       Notice("Save failed - see log", written.error());
     } else {
       Audio_PlaySfxCentered(kMenuChannelGroup, VS_SFX_FILEOPCOMPLETE);
@@ -459,31 +458,31 @@ void Confirm(std::uint32_t buttons) {
   // F02759/F03629 _promptConfirm: affirmative Circle selects; No or Cross
   // leaves. Dispatch before Execute's next frame and the C-only load jump.
   if (buttons & PADRdown) {
-    Menu_PlayLeaveSound();
+    VS::Menu::PlayLeaveSound();
     picker.phase = Phase::kPick;
     PickStatus();
   } else if (buttons & PADRright) {
     if (picker.yes) {
-      Menu_PlaySelectSound();
+      VS::Menu::PlaySelectSound();
       picker.phase = Phase::kExecute;
       Status(picker.select_container ? "Opening container"
              : picker.save           ? "Saving game"
                                      : "Loading game");
     } else {
-      Menu_PlayLeaveSound();
+      VS::Menu::PlayLeaveSound();
       picker.phase = Phase::kPick;
       PickStatus();
     }
   } else if (Input_buttonRepeat & (PADLup | PADLdown)) {
     picker.yes = !picker.yes;
-    Menu_PlayChangeSound();
+    VS::Menu::PlayChangeSound();
   }
 }
 
 int Pick(std::uint32_t buttons) {
   if (buttons & PADRdown) {
     picker.phase = Phase::kInactive;
-    Menu_PlayLeaveSound();
+    VS::Menu::PlayLeaveSound();
     return -1;
   }
   if (Input_buttonRepeat & (PADLup | PADLdown)) {
@@ -506,18 +505,18 @@ int Pick(std::uint32_t buttons) {
     } else {
       PickStatus();
     }
-    Menu_PlayChangeSound();
+    VS::Menu::PlayChangeSound();
   } else if (buttons & PADRright) {
     const auto& selected = picker.files[picker.row];
     if (selected.status == FileStatus::kInvalid ||
         (!picker.save && !picker.select_container &&
          selected.status == FileStatus::kEmpty)) {
-      Menu_PlayInvalidSound();
+      VS::Menu::PlayInvalidSound();
       Notice("No usable native save", selected.message);
     } else {
       // F02765/F03626 _showLoadFilesMenu and F02762/F03632 _showSaveFilesMenu
       // play MENUSELECT on the accepted file, not just after a save succeeds.
-      Menu_PlaySelectSound();
+      VS::Menu::PlaySelectSound();
       picker.yes = false;
       picker.phase = Phase::kConfirm;
       Status(
@@ -547,7 +546,7 @@ int Update(int init, bool save, bool title, bool select_container = false) {
       break;
     case Phase::kNotice:
       if (buttons & (PADRright | PADRdown)) {
-        Menu_PlayLeaveSound();
+        VS::Menu::PlayLeaveSound();
         const int result = picker.notice_result;
         picker.phase = result ? Phase::kInactive : Phase::kRead;
         return result;

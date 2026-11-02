@@ -6,7 +6,7 @@
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
-
+#include "Menu/Sounds.hpp"
 extern "C" {
 
 #include "Audio/Control/SoundControl.h"
@@ -42,7 +42,6 @@ extern "C" {
 #include "Field/RoomEffects.h"
 #include "Field/RoomLoading.h"
 #include "Legacy/Psx.h"
-#include "Menu/Sounds.h"
 #include "Render/Palette.h"
 
 static int sessionTitleCalls;
@@ -515,9 +514,10 @@ int TestsMenuSoundDispatch(void) {
   const Audio_CommandArguments saved_arguments = Audio_Driver_commandArguments;
   const Audio_CommandParams saved_params = Audio_Mixer_commandParams;
   const int saved_group = Audio_nextSfxChannelGroup7E;
-  void (*const play[])(void) = {Menu_PlayOpenSound, Menu_PlayInvalidSound,
-                                Menu_PlayLeaveSound, Menu_PlaySelectSound,
-                                Menu_PlayChangeSound};
+  void (*const play[])(void) = {
+      VS::Menu::PlayOpenSound, VS::Menu::PlayInvalidSound,
+      VS::Menu::PlayLeaveSound, VS::Menu::PlaySelectSound,
+      VS::Menu::PlayChangeSound};
   const int ids[] = {10, 7, 6, 5, 4};
   int result = 0;
   int index;

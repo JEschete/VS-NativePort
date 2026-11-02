@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Menu/Setup/Assembly.h"
 #include "Menu/Setup/Combination.h"
 #include "Menu/Setup/SetupScreen.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
@@ -177,7 +177,7 @@ int Menu_Setup_UpdateConfirmationPrompt(int initialize_confirmation)
             action = Menu_Setup_confirmationPromptSelectedOption + 1;
         } else {
             if (Input_buttonRepeat & (PADLup | PADLdown)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Setup_confirmationPromptSelectedOption = 1 - Menu_Setup_confirmationPromptSelectedOption;
             }
             Menu_Setup_confirmationPromptCursorState = Menu_Framework_DrawMainMenuCursor(Menu_Setup_confirmationPromptCursorState, Menu_Setup_confirmationPromptSelectedOption + 8);
@@ -187,7 +187,7 @@ int Menu_Setup_UpdateConfirmationPrompt(int initialize_confirmation)
 
     if (action != 0) {
         if (action == 2) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
         }
         for (i = 29; i < 31; ++i) {
             Menu_Framework_FlyOutRowRight(i);
@@ -259,7 +259,7 @@ int Menu_Setup_UpdateThreeChoicePrompt(int cancel_combine_row)
                 i -= 3;
             }
             if (i != Menu_Setup_threeChoicePromptSelectedOption) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Setup_threeChoicePromptSelectedOption = i;
             }
             Menu_Setup_threeChoicePromptCursorState = Menu_Framework_DrawMainMenuCursor(Menu_Setup_threeChoicePromptCursorState, Menu_Setup_threeChoicePromptSelectedOption + 7);
@@ -269,7 +269,7 @@ int Menu_Setup_UpdateThreeChoicePrompt(int cancel_combine_row)
 
     if (action != 0) {
         if (action == 2) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
         }
         for (i = 29; i < 32; ++i) {
             Menu_Framework_FlyOutRowRight(i);
@@ -282,7 +282,7 @@ int Menu_Setup_UpdateThreeChoicePrompt(int cancel_combine_row)
 int Menu_Setup_LeaveItemSelection(int hide_equipment_panels)
 {
 
-    Menu_PlayLeaveSound();
+    VS::Menu::PlayLeaveSound();
     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
     Menu_Framework_FlyOutRowLeft(0);
 
@@ -414,7 +414,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
         case 17:
             if (Input_buttonsPressed.allButtons & PADRup) {
                 if (!(list_update_flags & 2)) {
-                    Menu_PlayLeaveSound();
+                    VS::Menu::PlayLeaveSound();
                 }
 
                 Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
@@ -426,7 +426,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
 
             if (Input_buttonsPressed.allButtons & PADRright) {
                 if (menuItem->unselectable != 0) {
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
                 } else {
                     Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
 
@@ -448,7 +448,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
 
             if (Input_buttonsPressed.allButtons & PADRdown) {
 
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Core_Memory_FreeFromHighEnd(Menu_Setup_itemsList);
 
                 Menu_Setup_itemsList = NULL;
@@ -490,7 +490,7 @@ void Menu_Setup_UpdateItemList(int list_update_flags)
 
             if (previousSelection != (Menu_Setup_itemsListSelection + Menu_Setup_itemsListWindow)) {
 
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
 
                 if (Menu_Setup_itemsListWindow != previousWindow) {
 
@@ -942,7 +942,7 @@ int Menu_Setup_UpdateWeaponRename(int initialize_weapon_rename)
             Menu_Framework_UpdateDpPpBars(4);
             switch (i) {
             case 1:
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(10));
                 Menu_Framework_MenuItem(10)->backgroundWidth = i;
                 Menu_Setup_weaponRenameState = 6;
@@ -1007,7 +1007,7 @@ int Menu_Setup_UpdateRepair(int initialize_repair)
             Menu_Setup_repairState = 2;
         } else {
             if (i == 3) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 return -2;
             }
             Menu_Framework_InitializeInformationBox();
@@ -1094,7 +1094,7 @@ int Menu_Setup_UpdateRepair(int initialize_repair)
         break;
     case 3:
         if (Input_buttonsPressed.ports[0].lowByte != 0) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_FlyOutRowRight(0xE);
             if (Input_buttonsPressed.allButtons & PADRup) {
                 return -2;

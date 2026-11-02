@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -49,7 +50,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Sounds.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "State/Settings.h"
@@ -279,11 +279,11 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
             if (Input_buttonsPressed.allButtons & (PADRup | PADRright | PADRdown)) {
                 if (Input_buttonsPressed.allButtons & PADRright) {
 
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
 
                 } else {
 
-                    Menu_PlayLeaveSound();
+                    VS::Menu::PlayLeaveSound();
                     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
                     Menu_Framework_DismissInformationBox();
 
@@ -455,7 +455,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
 
             // Pointless check, value is always 0 in practice
             if (!(hasSfx & 2)) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
 
             Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
@@ -468,7 +468,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
 
         if (Input_buttonsPressed.allButtons & PADRright) {
             if (menuItem->unselectable) {
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             } else {
 
                 Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
@@ -491,7 +491,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Core_Memory_FreeFromHighEnd(Menu_Inventory_itemsText);
 
             Menu_Inventory_itemsText = NULL;
@@ -529,7 +529,7 @@ void Menu_Inventory_UpdateEquipmentChoices(int hasSfx)
         }
 
         if (selected_absolute_row != (Menu_Inventory_selectedItemRow + Menu_Inventory_itemsFirstRow)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
 
             if (Menu_Inventory_itemsFirstRow != previous_first_row) {
                 char buf[Menu_Inventory_menuRowCount];
@@ -1410,7 +1410,7 @@ int Menu_Inventory_UpdateEquipmentMenu(int initialize)
 
     case Menu_Inventory_EquipmentMenuState_TopMenu:
         if (Input_buttonsPressed.allButtons & PADRleft) {
-            Menu_PlayInvalidSound();
+            VS::Menu::PlayInvalidSound();
         }
 
         Menu_Inventory_equipmentMenuSelectedRow = Menu_Framework_GetSelectedRow() + 1;

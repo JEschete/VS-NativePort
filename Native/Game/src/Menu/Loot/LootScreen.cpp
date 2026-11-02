@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Menu/Loot/LootInventory.h"
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "State/Settings.h"
@@ -393,7 +393,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
             Menu_Framework_FlyOutRowRight(31);
             Menu_Loot_showLoot = 0;
             if ((Menu_Loot_disassemblyYesNoChoice != 0) || (Input_buttonsPressed.allButtons & PADRdown)) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Menu_Loot_disassemblyState = Menu_Loot_DisassemblyState_Finalize;
             } else {
                 Audio_PlaySfxCentered(0x7E, 0x19);
@@ -406,7 +406,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
         }
 
         if (Input_buttonRepeat & (PADLup | PADLdown)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Loot_disassemblyYesNoChoice = (1 - Menu_Loot_disassemblyYesNoChoice);
         }
 
@@ -631,10 +631,10 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
             Menu_Loot_showLoot = 0;
 
             if ((Menu_Loot_stackConsolidationYesNoChoice != 0) || (Input_buttonsPressed.allButtons & PADRdown)) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Menu_Loot_stackConsolidationState = 6;
             } else {
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 Menu_Loot_stackConsolidationState = 5;
             }
 
@@ -648,7 +648,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
         }
 
         if (Input_buttonRepeat & (PADLup | PADLdown)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Loot_stackConsolidationYesNoChoice = 1 - Menu_Loot_stackConsolidationYesNoChoice;
         }
 
@@ -1080,13 +1080,13 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
                 return leave_confirmation_result;
             }
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
 
             return -1;
         }
 
         if (Input_buttonRepeat & (PADLup | PADLdown)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Loot_leaveConfirmationYesNoChoice = (1 - Menu_Loot_leaveConfirmationYesNoChoice);
         }
 
@@ -1109,7 +1109,7 @@ int Menu_Loot_UpdateLeaveConfirmation(int init)
 
     case 7:
         if (Input_buttonsPressed.ports[0].lowByte != 0) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             return -1;
         }
         break;
@@ -1181,11 +1181,11 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
             Menu_Framework_FlyOutRowRight(31);
 
             if (Input_buttonsPressed.allButtons & PADRdown) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 return -1;
             }
 
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
 
             if (Menu_Loot_organizationMenuSelectedRow == 0) {
                 Menu_Loot_organizationMenuSelectedRow = Menu_Loot_organizationMenuAvailableAction + 1;
@@ -1196,7 +1196,7 @@ int Menu_Loot_UpdateOrganizationMenu(Menu_Loot_LootListItem* loot)
 
         if (Menu_Loot_organizationMenuAvailableAction != 0) {
             if (Input_buttonRepeat & (PADLup | PADLdown)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Loot_organizationMenuSelectedRow = 1 - Menu_Loot_organizationMenuSelectedRow;
             }
         }
@@ -1266,7 +1266,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
 
             Menu_Loot_controlsEnabled = 0;
 
@@ -1308,7 +1308,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
                 break;
             }
 
-            Menu_PlayInvalidSound();
+            VS::Menu::PlayInvalidSound();
         }
 
         lootIndex = Menu_Loot_selectedLoot + Menu_Loot_lootListOffset;
@@ -1317,7 +1317,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
         if (Input_buttonsPressed.allButtons & PADRright) {
             if (loot->state == 0) {
 
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
 
                 Menu_Loot_controlsEnabled = 0;
 
@@ -1399,7 +1399,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
             }
 
             if (i != (Menu_Loot_selectedLoot + Menu_Loot_lootListOffset)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
             }
 
             Menu_Loot_ShowLootDescription(Menu_Loot_selectedLoot + Menu_Loot_lootListOffset);
@@ -1559,7 +1559,7 @@ int Menu_Loot_Update(u_char* state)
     switch (*state) {
     case 0:
 
-        Menu_PlayOpenSound();
+        VS::Menu::PlayOpenSound();
         Menu_Framework_SetActorComparisonStats(16);
 
         for (i = 0; i < 7; ++i) {

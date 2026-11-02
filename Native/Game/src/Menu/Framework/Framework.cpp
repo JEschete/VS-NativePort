@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -72,7 +73,6 @@ extern "C" {
 #include "Menu/Results/Results.h"
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/Setup/SetupScreen.h"
-#include "Menu/Sounds.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "OverlayWorkspace.h"
@@ -592,7 +592,7 @@ int Menu_Framework_UpdateMainMenuSelection(int mode)
     }
 
     if (Input_buttonsPressed.allButtons & PADRright) {
-        Menu_PlaySelectSound();
+        VS::Menu::PlaySelectSound();
         items[selected].backgroundWidth = items[selected].selected = 1;
         Menu_textBoxes[7].state = 0;
         return selected + 1;
@@ -601,7 +601,7 @@ int Menu_Framework_UpdateMainMenuSelection(int mode)
     items[selected].selected = 0;
 
     if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-        Menu_PlayLeaveSound();
+        VS::Menu::PlayLeaveSound();
         Menu_textBoxes[7].state = 0;
         return -1;
     }
@@ -620,7 +620,7 @@ int Menu_Framework_UpdateMainMenuSelection(int mode)
     }
 
     if (selected != Menu_Framework_submenuStates[0]) {
-        Menu_PlayChangeSound();
+        VS::Menu::PlayChangeSound();
         Menu_Framework_submenuStates[0] = selected;
     }
 
@@ -835,7 +835,7 @@ int Menu_Framework_OpenGameMenu(int menuState, int menu_invocation_mode)
         Menu_Framework_actionSelection.menuStatus = 1;
 
         if (menu_invocation_mode == 0) {
-            Menu_PlayOpenSound();
+            VS::Menu::PlayOpenSound();
         }
 
         if (Menu_Framework_menuItems == 0) {
@@ -871,7 +871,7 @@ int Menu_Framework_OpenGameMenu(int menuState, int menu_invocation_mode)
         return 1;
     }
 
-    Menu_PlayInvalidSound();
+    VS::Menu::PlayInvalidSound();
     return 0;
 }
 
@@ -904,7 +904,7 @@ int Menu_Framework_OpenShortcutMenu(int shortcut)
     }
 
     if (noneUnlocked) {
-        Menu_PlayInvalidSound();
+        VS::Menu::PlayInvalidSound();
         menuState = 0;
         Menu_Framework_actionSelection.selectionKind = 0;
         Menu_Framework_actionSelection.menuStatus = 2;
@@ -1179,7 +1179,7 @@ void Menu_Framework_UpdateActionMenu(void)
                     Menu_Framework_selectedItemAction = selectedAction;
                     break;
                 }
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
 
             menuItem->selected = 0;
@@ -1241,7 +1241,7 @@ void Menu_Framework_UpdateActionMenu(void)
             }
 
             if (selectedAction != (Menu_Framework_selectedItemAction + Menu_Framework_itemActionListOffset)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
 
                 if (Menu_Framework_itemActionListOffset != previousOffset) {
                     int actionCount;
@@ -1919,7 +1919,7 @@ void Menu_Framework_UpdateRowSelection(void)
 
             if (Input_buttonsPressed.allButtons & PADRup) {
 
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
 
                 Menu_Framework_itemsText = NULL;
@@ -1935,7 +1935,7 @@ void Menu_Framework_UpdateRowSelection(void)
 
                     menuItem->selected = 1;
 
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
                     Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
 
                     Menu_Framework_itemsText = NULL;
@@ -1946,14 +1946,14 @@ void Menu_Framework_UpdateRowSelection(void)
                     return;
                 }
 
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
 
             menuItem->selected = 0;
 
             if (Input_buttonsPressed.allButtons & PADRdown) {
 
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Core_Memory_FreeFromHighEnd(Menu_Framework_itemsText);
 
                 Menu_Framework_itemsText = NULL;
@@ -2024,7 +2024,7 @@ void Menu_Framework_UpdateRowSelection(void)
 
             if (absRow != (Menu_Framework_selectedRow + Menu_Framework_subMenuPage)) {
 
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
 
                 if (Menu_Framework_subMenuPage != page) {
 
@@ -3118,7 +3118,7 @@ void Menu_Framework_UpdateItemDetailsSelection(int row, char* text[], u_int rowT
 {
     Menu_Framework_MenuRow* menuItem;
 
-    Menu_PlayChangeSound();
+    VS::Menu::PlayChangeSound();
 
     menuItem = Menu_Framework_SetMenuItem(row, 155, 18, 165, 0, text[0]);
     menuItem->selected = 1;

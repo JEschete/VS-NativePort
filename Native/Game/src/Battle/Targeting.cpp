@@ -2,6 +2,7 @@
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -51,7 +52,6 @@ extern "C" {
 #include "Items/Weapons.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
@@ -934,18 +934,18 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
 
     if (offset.pad == 0) {
         if (Input_buttonsPressed.allButtons & PADRdown) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             target_position->pad = 1;
             return 1;
         }
         if (Input_buttonsPressed.allButtons & PADRright) {
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.pad = 1;
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind |= 0x80;
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].kind &= 0x7F;
         }
     } else if (Input_buttonsPressed.allButtons & PADRdown) {
-        Menu_PlayLeaveSound();
+        VS::Menu::PlayLeaveSound();
         (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind &= 0x7F;
         (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[1].kind |= 0x80;
         (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.pad = 0;
@@ -958,7 +958,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
             }
         }
     } else if (Input_buttonsPressed.allButtons & PADRright) {
-        Menu_PlaySelectSound();
+        VS::Menu::PlaySelectSound();
         result = 1;
     }
 
@@ -1314,7 +1314,7 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
             Menu_textBoxes[7].flags.frameShape = 1;
             Menu_SetTextBoxText(7, (char*)&Battle_doorStrings[Battle_doorStrings[0]]);
             if (Input_buttonsPressed.allButtons & 0x60) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Battle_targetSelectionStep = 17;
             }
             break;
@@ -1337,7 +1337,7 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
             }
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[0] = 0;
             if (Input_buttonsPressed.allButtons & 0x40) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 Battle_DismissTargetSelectionRows();
                 (*(char (*))&Battle_reuseSphereVolumes) = (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].opaque1 == 2;
                 Battle_targetSelectionStep = 21;
@@ -1456,7 +1456,7 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
             (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[0] = 1;
             if (value != (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D) {
                 (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D].opaque1[2] = 0;
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Battle_UpdateTargetSelectionHighlight(3);
             }
             entry = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque2D];

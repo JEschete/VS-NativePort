@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
@@ -958,7 +958,7 @@ int Menu_Container_UpdateSortMenu(int category_selection)
         i = Menu_Framework_ActionSelectionResult();
         if ((i + 1) != 0) {
             if (i >= 0) {
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 switch (Menu_Container_sortCategory) {
                 case 0:
                     Menu_Container_SortWeapons(Menu_Container_kWeaponSortStats[i]);
@@ -974,7 +974,7 @@ int Menu_Container_UpdateSortMenu(int category_selection)
                     break;
                 }
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
             return i + 1;
         }
@@ -1083,7 +1083,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
                 Menu_Container_ClearItem(
                     Menu_Container_discardMenuItemCategory, Menu_Container_discardMenuSelectedItem, &Menu_Container_containerData->items);
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
             return i;
         }
@@ -1111,17 +1111,17 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
             Menu_Container_discardMenuCountTemplate[2] = i >> 4;
             Menu_Framework_SetMenuItem(0x22, 0, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
             if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 if ((Input_buttonsPressed.allButtons & PADRup)) {
                     return -2;
                 }
                 return -1;
             }
             if (Menu_Container_discardCount == 0) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 return -1;
             }
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             Menu_Container_discardMenuState = Menu_Inventory_DiscardMenuState_DiscardMultipleConfirm;
             break;
         }
@@ -1170,7 +1170,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
             }
         }
         if ((a0 != Menu_Container_discardStep) || (previous_discard_count != Menu_Container_discardCount)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
         }
         Render_SetMenuFontStyle(5);
         packed_discard_digits = Core_Math_SplitDecimalDigit(Menu_Container_discardCount);
@@ -1213,7 +1213,7 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
                     Menu_Container_containerData->items.misc[Menu_Container_discardMenuSelectedItem].count -= Menu_Container_discardCount;
                 }
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
             return i;
         }

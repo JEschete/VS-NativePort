@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Sounds.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/Sprites.h"
@@ -58,7 +58,7 @@ int Menu_Inventory_PollDetailsPaging(int items, int page)
         }
 
         if ((Input_buttonsPressed.allButtons & (PADL1 | PADR1)) && (page == previousPage)) {
-            Menu_PlayInvalidSound();
+            VS::Menu::PlayInvalidSound();
         }
     }
 
@@ -146,7 +146,7 @@ int Menu_Inventory_SelectDetailsItem(int itemCategory, int itemId)
 // decomp: MENU _exitStatusView (src/MENU/items1.h:74)
 void Menu_Inventory_ExitDetailsView(int clearDpPp)
 {
-    Menu_PlayLeaveSound();
+    VS::Menu::PlayLeaveSound();
     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
     Menu_Framework_FlyOutRowLeft(-1);
     Menu_Framework_UpdateEquipmentStatPages(-1);

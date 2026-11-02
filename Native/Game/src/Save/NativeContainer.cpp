@@ -1,7 +1,6 @@
 // Hand-maintained (tools/port/owned.csv).
+#include "Menu/Sounds.hpp"
 extern "C" {
-#include "Save/NativeContainer.h"
-
 #include "Audio/Music.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
@@ -35,7 +34,6 @@ extern "C" {
 #include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
@@ -49,6 +47,7 @@ extern "C" {
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/MenuAssets.h"
+#include "Save/NativeContainer.h"
 #include "Save/NativeMenu.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
@@ -92,7 +91,7 @@ enum {
 };
 
 static void InitializeContainerSave(u_char* state) {
-  Menu_PlayOpenSound();
+  VS::Menu::PlayOpenSound();
   Menu_Framework_unusedContainerEmptyBackup = Input_settings.containerEmpty;
   Menu_Framework_unusedInventoryStorage =
       reinterpret_cast<Menu_Container_InventoryStorage*>(

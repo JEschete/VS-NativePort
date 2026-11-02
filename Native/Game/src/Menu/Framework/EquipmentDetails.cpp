@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/Menus.h"
-#include "Menu/Sounds.h"
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
@@ -649,7 +649,7 @@ void Menu_Framework_UpdateItemDetails(void)
 
     if (Menu_Framework_itemDetailsPreviousItem == Menu_Framework_currentStatusViewItem) {
         if (i != Menu_Framework_selectedStatusViewElement) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
         }
     } else {
         Menu_Framework_itemDetailsPreviousItem = Menu_Framework_currentStatusViewItem;
@@ -1043,7 +1043,7 @@ void Menu_Framework_UpdateEquipmentStatPages(int stat_page_panel_command)
             if (statPage != Menu_Framework_itemStatPage) {
                 Audio_PlaySfxCentered(0x7E, 14);
             } else {
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
         }
     } else {

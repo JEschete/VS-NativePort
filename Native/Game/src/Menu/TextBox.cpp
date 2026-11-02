@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
@@ -126,7 +126,7 @@ int Menu_SelectTextBoxChoice(u_char boxMask)
         if (Input_buttonsPressed.allButtons
             & (PADL2 | PADR2 | PADL1 | PADR1 | PADRup | PADRright | PADRdown
                 | PADRleft)) {
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             Menu_textBoxSelector.count = 0;
             return selectedIndex + 1;
         }
@@ -144,7 +144,7 @@ int Menu_SelectTextBoxChoice(u_char boxMask)
     }
 
     if (selectedIndex != Menu_textBoxSelector.selectedIndex) {
-        Menu_PlayChangeSound();
+        VS::Menu::PlayChangeSound();
         Menu_textBoxSelector.selectedIndex = selectedIndex;
     }
 

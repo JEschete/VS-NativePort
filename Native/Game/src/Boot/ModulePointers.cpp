@@ -225,7 +225,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Magic.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
 #include "Movie/Intro.h"
@@ -1574,11 +1573,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C0224u, 0u, (void*)&Render_QueueSpriteWithTexturePage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C0230u, 0u, (void*)&Render_QueueSprite, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C02A8u, 0u, (void*)&Render_LoadFrameViewMatrix, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C02D8u, 0u, (void*)&Menu_PlayOpenSound, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C02E0u, 0u, (void*)&Menu_PlayInvalidSound, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C02E8u, 0u, (void*)&Menu_PlayLeaveSound, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C02F0u, 0u, (void*)&Menu_PlaySelectSound, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C02F8u, 0u, (void*)&Menu_PlayChangeSound, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&Battle_InitSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05B4u, 0u, (void*)&Battle_FreeSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05ECu, 0u, (void*)&Battle_SetSphereVolumes, 0u, 0u, 0u},

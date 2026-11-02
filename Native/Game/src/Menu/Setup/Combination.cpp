@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Menu/Setup/Assembly.h"
 #include "Menu/Setup/Combination.h"
 #include "Menu/Setup/SetupScreen.h"
-#include "Menu/Sounds.h"
 #include "State/Settings.h"
 
 // decomp: local static of _combineBladeMenu, at file scope so the module reset reaches it
@@ -454,7 +454,7 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 
                 if (temp_v0_2 != 0) {
 
-                    Menu_PlayLeaveSound();
+                    VS::Menu::PlayLeaveSound();
 
                     Menu_Setup_bladeCombinationRow = temp_v0_2;
                     Menu_Setup_combiningBladeIds[temp_v0_2 - 1] = 0;
@@ -483,7 +483,7 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 
             if ((Input_buttonsPressed.allButtons & PADstart) && (var_s1 != 0)) {
 
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 Menu_Framework_MenuItem(Menu_Setup_bladeCombinationRow + 10)->selected = 0;
 
                 Menu_Setup_bladeCombinationRow = 3;
@@ -497,10 +497,10 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 
             if (Input_buttonsPressed.allButtons & PADRright) {
                 if (i_2 == 0) {
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
                 } else {
 
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
 
                     if (i_2 == 3) {
                         Menu_Setup_bladeCombinationState = 4;
@@ -532,7 +532,7 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 
             if (i_2 != Menu_Setup_bladeCombinationRow) {
 
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
 
                 Menu_Setup_bladeCombinationRow = i_2;
 
@@ -706,7 +706,7 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
             return Menu_Setup_bladeCombinationState != 6;
 
         case 2:
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_UpdatePrimaryStatPanel(1);
 
             Menu_Setup_bladeCombinationState = 2;
@@ -1050,7 +1050,7 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
 
                     if (temp_s2 != 0) {
 
-                        Menu_PlayLeaveSound();
+                        VS::Menu::PlayLeaveSound();
 
                         Menu_Setup_shieldCombinationRow = temp_s2;
                         Menu_Setup_itemsToCombine[temp_s2 - 1] = 0;
@@ -1077,7 +1077,7 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
                 }
 
                 if ((Input_buttonsPressed.allButtons & PADstart) && (var_s1 != 0)) {
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
                     Menu_Framework_MenuItem(Menu_Setup_shieldCombinationRow + 0xA)->selected = 0;
 
                     Menu_Setup_shieldCombinationRow = 3;
@@ -1092,10 +1092,10 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
                 if (Input_buttonsPressed.allButtons & PADRright) {
 
                     if (temp_s2 == 0) {
-                        Menu_PlayInvalidSound();
+                        VS::Menu::PlayInvalidSound();
                     } else {
 
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
 
                         if (temp_s2 == 3) {
                             Menu_Setup_shieldCombinationState = 4;
@@ -1126,7 +1126,7 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
                 }
 
                 if (temp_s2 != Menu_Setup_shieldCombinationRow) {
-                    Menu_PlayChangeSound();
+                    VS::Menu::PlayChangeSound();
 
                     Menu_Setup_shieldCombinationRow = temp_s2;
 
@@ -1298,7 +1298,7 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
             return Menu_Setup_shieldCombinationState != 6;
 
         case 2:
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_UpdatePrimaryStatPanel(1);
 
             Menu_Setup_shieldCombinationState = temp_s2;
@@ -1583,7 +1583,7 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
                 if (Input_buttonsPressed.allButtons & PADRdown) {
                     int restored_ingredient_slot = Menu_Setup_PopSlotSelection(5);
                     if (restored_ingredient_slot != 0) {
-                        Menu_PlayLeaveSound();
+                        VS::Menu::PlayLeaveSound();
                         Menu_Setup_armorCombinationRow = restored_ingredient_slot;
                         Menu_Setup_combiningArmorIds[restored_ingredient_slot - 1] = 0;
                         Menu_Setup_PreviewArmorCombination(restored_ingredient_slot);
@@ -1603,7 +1603,7 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
                 }
                 if (Input_buttonsPressed.allButtons & PADstart) {
                     if (var_s1 != 0) {
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
                         Menu_Framework_MenuItem(Menu_Setup_armorCombinationRow + 10)->selected = 0;
                         Menu_Setup_armorCombinationRow = 3;
                         Menu_Setup_armorCombinationState = 4;
@@ -1614,9 +1614,9 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
                 i_2 = Menu_Setup_armorCombinationRow;
                 if (Input_buttonsPressed.allButtons & PADRright) {
                     if (i_2 == 0) {
-                        Menu_PlayInvalidSound();
+                        VS::Menu::PlayInvalidSound();
                     } else {
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
                         if (i_2 == 3) {
                             Menu_Setup_armorCombinationState = 4;
                         } else {
@@ -1643,7 +1643,7 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
                 }
 
                 if (i_2 != Menu_Setup_armorCombinationRow) {
-                    Menu_PlayChangeSound();
+                    VS::Menu::PlayChangeSound();
                     Menu_Setup_armorCombinationRow = i_2;
                     Menu_Setup_PreviewArmorCombination(Menu_Setup_armorCombinationRow);
                 }
@@ -1772,7 +1772,7 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
             Items_Inventory_RebuildDisplayIndices(4);
             return 1;
         case 2:
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_UpdatePrimaryStatPanel(1);
             Menu_Setup_armorCombinationState = confirmation_result;
             break;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
@@ -126,7 +126,7 @@ int Menu_Container_PollDetailsPaging(int itemCategory, int currentSelection)
 
         if ((Input_buttonsPressed.allButtons & (PADL1 | PADR1))
             && (currentSelection == previousSelection)) {
-            Menu_PlayInvalidSound();
+            VS::Menu::PlayInvalidSound();
         }
     }
     return currentSelection;
@@ -208,7 +208,7 @@ int Menu_Container_SelectDetailsItem(int category_id, int category_item_index)
 // decomp: MENUD.PRG func_80104170 (src/MENU/MENUD.PRG/234.c:796)
 void Menu_Container_ExitDetailsView(int hide_dp_pp_bars)
 {
-    Menu_PlayLeaveSound();
+    VS::Menu::PlayLeaveSound();
     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
     Menu_Framework_FlyOutRowLeft(-1);
     Menu_Framework_UpdateEquipmentStatPages(-1);
@@ -958,11 +958,11 @@ int Menu_Container_UpdateTransferConfirmation(int initialize_confirmation)
             Menu_Framework_FlyOutRowLeft(0);
             Menu_Framework_FlyOutRowLeft(1);
             if (Menu_Container_transferConfirmationSelectedAction == confirmation_step) {
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(0));
                 Menu_Container_SetPanelVisibility(0);
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 if (Menu_Container_transferConfirmationSelectedAction == 2) {
                     Menu_Container_transferConfirmationSelectedAction = -1;
                 }
@@ -1075,11 +1075,11 @@ loop_1:
         Menu_Container_controlsPanelMode = 1;
         if (Menu_Container_categoryEmpty != 0) {
             if (Input_buttonsPressed.allButtons & 0x10) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 return -2;
             }
             if (Input_buttonsPressed.allButtons & 0x40) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 if (Menu_Framework_unusedInventoryStorage->itemsToTransfer[0] == 0) {
                     return -1;
                 }
@@ -1094,7 +1094,7 @@ loop_1:
                 break;
             }
             if (Input_buttonsPressed.allButtons & 0xA0) {
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
         } else {
             int details_index_bias = 1;
@@ -1104,7 +1104,7 @@ loop_1:
             if (Menu_Container_itemListSelectedRow == 0) {
                 if (Input_buttonsPressed.allButtons & 0x80) {
                     if ((temp_s0 != 0) && (Menu_Framework_AreMenuRowsIdle() != 0)) {
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
                         temp_s0 = Menu_Framework_CloseRowsAndRememberCursor();
                         Menu_Framework_MenuItem(temp_s0 >> 8)->outsetIcon = 0;
                         Menu_Container_UpdateItemDetails(selected_category_id | ((temp_s0 + details_index_bias) * 0x10));
@@ -1112,7 +1112,7 @@ loop_1:
                         Menu_Container_itemListStep = 7;
                         break;
                     }
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
                 }
             } else if (Menu_Container_itemListSelectedRow > 0) {
                 if (selected_category_id == 7) {
@@ -1182,7 +1182,7 @@ loop_1:
                 selected_category_id = (selected_category_id + 1) & 7;
             }
             if (selected_category_id != ((Menu_Framework_menuMemory.opaqueA0[0] - 1) & 7)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Framework_menuMemory.opaqueA0[0] = (selected_category_id + 1) & 7;
                 if (Menu_Container_itemListStep == 2) {
                     if (Menu_Container_categoryEmpty == 0) {
@@ -1218,7 +1218,7 @@ loop_1:
         break;
     case 6:
         if (Input_buttonsPressed.allButtons & 0x80) {
-            Menu_PlayInvalidSound();
+            VS::Menu::PlayInvalidSound();
         }
         temp_s3 = Menu_Framework_GetSelectedRow() + 1;
         if (temp_s3 != 0) {
@@ -1450,7 +1450,7 @@ loop_1:
         if (temp_s3 != 0) {
             Menu_Framework_FlyOutRowsLeftExcept(0x28);
             if (temp_s3 > 0) {
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 switch (Menu_Container_itemActionIds[temp_s3]) {
                 case 1:
                     Menu_Framework_InitializeInformationBox();
@@ -1488,7 +1488,7 @@ loop_1:
                 }
                 break;
             }
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             if (temp_s3 == -2) {
                 Menu_Framework_DismissInformationBox();
                 return -2;
@@ -1668,16 +1668,16 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
             Menu_Framework_MenuItem(i + 0xA)->selected = i == selected_direction;
         }
         if (Input_buttonsPressed.allButtons & 0x10) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
             return -2;
         }
         if (Input_buttonsPressed.allButtons & 0x40) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             return -1;
         }
         if (Input_buttonsPressed.allButtons & 0x20) {
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             return selected_direction + 1;
         }
         Menu_Container_transferDirectionOkBlink += 16;
@@ -1696,7 +1696,7 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
             selected_direction -= 3;
         }
         if (selected_direction != ((u_short*)&Menu_Framework_menuMemory)[0x4F]) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             ((u_short*)&Menu_Framework_menuMemory)[0x4F] = selected_direction;
         }
         if (selected_direction != 2) {

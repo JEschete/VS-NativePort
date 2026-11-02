@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Sounds.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
 #include "Render/Font.h"
@@ -635,7 +635,7 @@ void Menu_Status_SetShieldGemRow(int row, Items_ShieldLoadout* shield, int init)
 // decomp: MENU4.PRG _exitEquipmentDetail (src/MENU/MENU4.PRG/120.c:1463)
 void Menu_Status_ExitEquipmentDetails(int clearDpPp)
 {
-    Menu_PlayLeaveSound();
+    VS::Menu::PlayLeaveSound();
     Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
     Menu_Framework_FlyOutRowLeft(0);
     Menu_Framework_UpdateEquipmentStatPages(-1);
@@ -814,7 +814,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
 
             if (selected_equipment_row != Menu_Status_equipmentDetailsSelectedEquipmentRow) {
 
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
 
                 for (i = 10; i < 26; ++i) {
                     Menu_Framework_DeactivateRow(i);
@@ -942,7 +942,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
         }
 
         if (newSelection != Menu_Status_equipmentDetailSelectedElement) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Status_equipmentDetailSelectedElement = newSelection;
         }
 

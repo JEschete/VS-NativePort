@@ -147,6 +147,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Audio\XaPlayback.cpp",
                 r"src\Audio\MusicLayers.cpp",
                 r"src\Render\ScaledFontLive.cpp",
+                r"src\Audio\SoundEffectsLive.cpp",
             )
             or project == "VS.Tests"
             or project == "VS.CombatLab"
@@ -186,7 +187,6 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Effects\ParticleRenderLive.cpp",
                 r"src\Effects\TextureBindingsLive.cpp",
                 r"src\Battle\Ai\GroundNavigation.cpp",
-                r"src\Menu\Sounds.cpp",
                 r"src\Save\NativeSnapshot.cpp",
                 r"src\Save\RuntimeSnapshot.cpp",
                 r"src\Save\NativeFiles.cpp",

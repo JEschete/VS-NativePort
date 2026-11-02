@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
@@ -654,7 +654,7 @@ void Menu_BattleAbilities_ToggleButtonAssignment(int abilityType, int button, in
         abilityId = Menu_BattleAbilities_unlockedChainAbilities[abilityId];
 
         if (Input_settings.mappedChainAbilities[button] == abilityId) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Input_settings.mappedChainAbilities[button] = 0;
             return;
         }
@@ -674,7 +674,7 @@ void Menu_BattleAbilities_ToggleButtonAssignment(int abilityType, int button, in
         abilityId = Menu_BattleAbilities_unlockedDefenseAbilities[abilityId];
 
         if (Input_settings.mappedDefenseAbilities[button] == abilityId) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Input_settings.mappedDefenseAbilities[button] = 0;
             return;
         }
@@ -841,7 +841,7 @@ int Menu_BattleAbilities_UpdateAssignments(void)
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Core_Memory_FreeFromHighEnd(Menu_BattleAbilities_abilityText);
 
             Menu_BattleAbilities_abilityText = NULL;
@@ -904,7 +904,7 @@ int Menu_BattleAbilities_UpdateAssignments(void)
         }
 
         if (selectedAbility != (Menu_BattleAbilities_highlightedAbility + Menu_BattleAbilities_firstAbility)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             if (Menu_BattleAbilities_firstAbility != previousFirstAbility) {
                 char abilityBuf[Menu_BattleAbilities_abilityCount];
 

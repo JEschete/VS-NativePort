@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
@@ -375,7 +375,7 @@ int Menu_Inventory_UpdateSortMenu(int initItemCategory)
 
         if ((i + 1) != 0) {
             if (i >= 0) {
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
 
                 switch (Menu_Inventory_sortMenuItemCategory) {
                 case Items_ItemCategory_Weapon:
@@ -395,7 +395,7 @@ int Menu_Inventory_UpdateSortMenu(int initItemCategory)
                     break;
                 }
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
 
             return i + 1;
@@ -513,7 +513,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
                 Audio_PlaySfxCentered(0x7E, 28);
                 Items_Inventory_ClearItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
             return i;
         }
@@ -550,7 +550,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
 
             if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
 
                 if (Input_buttonsPressed.allButtons & PADRup) {
                     return -2;
@@ -559,12 +559,12 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
                 return -1;
             }
             if (Menu_Inventory_discardCount == 0) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
 
                 return -1;
             }
 
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
 
             Menu_Inventory_discardMenuState = Menu_Inventory_DiscardMenuState_DiscardMultipleConfirm;
             break;
@@ -623,7 +623,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         }
 
         if ((nextStep != Menu_Inventory_discardStep) || (nextCount != Menu_Inventory_discardCount)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
         }
 
         Render_SetMenuFontStyle(5);
@@ -674,7 +674,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
                         Audio_Seq_unusedInventory.misc[Menu_Inventory_discardMenuSelectedItem - 1].count - Menu_Inventory_discardCount;
                 }
             } else {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
             }
 
             return i;
@@ -1010,17 +1010,17 @@ loop_1:
 
         if (Menu_Inventory_itemListNoItems) {
             if (Input_buttonsPressed.allButtons & PADRup) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 return -2;
             }
 
             if (Input_buttonsPressed.allButtons & PADRdown) {
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
                 return -1;
             }
 
             if (Input_buttonsPressed.allButtons & (PADRright | PADRleft)) {
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
         } else {
 
@@ -1038,7 +1038,7 @@ loop_1:
                 if (Input_buttonsPressed.allButtons & PADRleft) {
                     if ((Menu_Inventory_statusCommandState >= 2) && Menu_Framework_AreMenuRowsIdle()) {
 
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
 
                         row = Menu_Framework_CloseRowsAndRememberCursor();
 
@@ -1050,7 +1050,7 @@ loop_1:
                         break;
                     }
 
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
                 }
             } else {
                 void* textBuf;
@@ -1126,7 +1126,7 @@ loop_1:
 
             if (itemCategory != ((Menu_Framework_menuMemory.opaque3A.currentCategory - 1) & 7)) {
 
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
 
                 Menu_Framework_menuMemory.opaque3A.currentCategory = (itemCategory + 1) & 7;
 
@@ -1177,7 +1177,7 @@ loop_1:
 
     case 6:
         if (Input_buttonsPressed.allButtons & PADRleft) {
-            Menu_PlayInvalidSound();
+            VS::Menu::PlayInvalidSound();
         }
 
         i = Menu_Framework_GetSelectedRow() + 1;
@@ -1399,7 +1399,7 @@ loop_1:
 
             if (index > 0) {
 
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
 
 
                 switch (Menu_Inventory_itemListAvailableActions[index]) {
@@ -1451,7 +1451,7 @@ loop_1:
                 }
             } else {
 
-                Menu_PlayLeaveSound();
+                VS::Menu::PlayLeaveSound();
 
 
                 if (index == -2) {

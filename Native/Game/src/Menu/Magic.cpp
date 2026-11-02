@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
-#include "Menu/Sounds.h"
 #include "Render/Font.h"
 #include "Render/Images.h"
 #include "Render/LegacyPackets.h"
@@ -869,7 +869,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
         if (Input_buttonsPressed.allButtons & PADRup) {
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
 
             Menu_Framework_displayActionCost = 0;
 
@@ -884,7 +884,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
         if (Input_buttonsPressed.allButtons & PADRdown) {
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
 
             for (i = 20; i < 30; ++i) {
                 Menu_Framework_FlyOutRowRight(i);
@@ -897,7 +897,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         if (Input_buttonsPressed.allButtons & PADRright) {
             if (Battle_ActorActionRestrictionFlags(0, Menu_Magic_warlockMenuSelectedRow + i) == 0) {
 
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
 
                 Menu_Framework_displayActionCost = 0;
 
@@ -910,7 +910,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                 break;
 
             } else {
-                Menu_PlayInvalidSound();
+                VS::Menu::PlayInvalidSound();
             }
         }
 
@@ -927,7 +927,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
         }
 
         if (i != Menu_Framework_menuMemory.cursorMemories[0xC]) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Framework_menuMemory.cursorMemories[0xC] = i;
         }
 

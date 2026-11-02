@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Menu/Sounds.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
 #include "Render/Camera.h"
@@ -174,7 +174,7 @@ int Menu_Status_AnimateActorSwitch(int init)
         if (Menu_Status_selectedActor == 0) {
             Menu_Status_animateActorSwitchState = Menu_Status_ActorSwitchState_MenuLoading;
         } else {
-            Menu_PlayOpenSound();
+            VS::Menu::PlayOpenSound();
             Menu_Status_animateActorSwitchState = Menu_Status_ActorSwitchState_MenuLoaded;
         }
 
@@ -607,7 +607,7 @@ int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_ac
 
         if (Input_buttonRepeat & PADLup) {
             if (yPos < 8) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Status_selectedElement = 11;
                 return 1;
             }
@@ -632,7 +632,7 @@ int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_ac
         if (Input_buttonRepeat & PADLright) {
 
             if (((yPos & 7) == 7) || (yPos == Menu_Status_navigateStatusEffectsStatusModifierCount - 1)) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Status_selectedElement = 6;
                 return 1;
             }
@@ -643,7 +643,7 @@ int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_ac
         }
 
         if (yPos != Menu_Status_navigateStatusEffectsSelectedStatusModifier) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Status_navigateStatusEffectsSelectedStatusModifier = yPos;
         }
     }
@@ -1141,14 +1141,14 @@ int Menu_Status_Update(u_char* state)
             if (Menu_Status_UpdateLimbPanel(-3) == 2) {
                 if (Input_buttonsPressed.allButtons & PADRup) {
 
-                    Menu_PlayLeaveSound();
+                    VS::Menu::PlayLeaveSound();
 
                     *state = Menu_Status_StatusMenuState_WaitQuitToBattle;
                     break;
 
                 } else if (Input_buttonsPressed.allButtons & PADRdown) {
 
-                    Menu_PlayLeaveSound();
+                    VS::Menu::PlayLeaveSound();
 
                     *state = Menu_Status_StatusMenuState_WaitQuitToMenu;
                     break;
@@ -1157,7 +1157,7 @@ int Menu_Status_Update(u_char* state)
                            && ((Menu_Status_selectedElement < Menu_Status_LimbCount(Menu_Status_selectedActor - 1))
                                != 0)) {
 
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
                     Menu_Framework_UpdatePrimaryStatPanel(2);
                     Menu_Status_UpdateLimbPanel(-2);
 
@@ -1176,7 +1176,7 @@ int Menu_Status_Update(u_char* state)
                 if (Input_buttonsPressed.allButtons & PADRleft) {
                     if (limb_status_available != 0) {
 
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
                         Menu_Status_PopulateSelectedLimbDefense();
                         Menu_Framework_UpdateEquipmentStatPages(6);
 
@@ -1185,7 +1185,7 @@ int Menu_Status_Update(u_char* state)
                         *state = 9;
                         break;
                     }
-                    Menu_PlayInvalidSound();
+                    VS::Menu::PlayInvalidSound();
                 }
 
                 if (Input_buttonsState & PADL2) {
@@ -1245,7 +1245,7 @@ int Menu_Status_Update(u_char* state)
                         if (Menu_Status_NavigateStatusEffects(
                                 Battle_actors[Menu_Status_selectedActor - 1]->stats, 1)
                             == 0) {
-                            Menu_PlayChangeSound();
+                            VS::Menu::PlayChangeSound();
                             *state = 6;
                             break;
                         }
@@ -1276,7 +1276,7 @@ int Menu_Status_Update(u_char* state)
 
                     if (userInput != Menu_Status_selectedElement) {
 
-                        Menu_PlayChangeSound();
+                        VS::Menu::PlayChangeSound();
 
                         if (userInput != 13) {
                             Menu_Status_selectedElement = userInput;
@@ -1351,11 +1351,11 @@ int Menu_Status_Update(u_char* state)
                         *state = 5;
                         break;
                     case 2:
-                        Menu_PlayLeaveSound();
+                        VS::Menu::PlayLeaveSound();
                         *state = 13;
                         break;
                     case 3:
-                        Menu_PlayLeaveSound();
+                        VS::Menu::PlayLeaveSound();
                         *state = 11;
                         break;
                     }
@@ -1419,7 +1419,7 @@ int Menu_Status_Update(u_char* state)
             Menu_Status_animationStep = 128 - Menu_Framework_rowAnimationSteps[--Menu_Status_updateAnimWait];
         } else if (Input_buttonsPressed.allButtons & (PADRup | PADRdown)) {
 
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_UpdateEquipmentStatPages(-1);
 
             if (Input_buttonsPressed.allButtons & PADRup) {
@@ -1450,7 +1450,7 @@ int Menu_Status_Update(u_char* state)
 
                 if (userInput != Menu_Status_selectedElement) {
 
-                    Menu_PlayChangeSound();
+                    VS::Menu::PlayChangeSound();
 
                     Menu_Status_selectedElement = userInput;
 
@@ -1479,7 +1479,7 @@ int Menu_Status_Update(u_char* state)
             }
 
             if (userInput != Menu_Status_selectedStatRow) {
-                Menu_PlayChangeSound();
+                VS::Menu::PlayChangeSound();
                 Menu_Status_selectedStatRow = userInput;
             }
 

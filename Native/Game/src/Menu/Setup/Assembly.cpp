@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Setup/Assembly.h"
 #include "Menu/Setup/SetupScreen.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "State/Settings.h"
@@ -749,7 +749,7 @@ int Menu_Setup_UpdateAssembly(int initialize_assembly)
                         break;
                     }
 
-                    Menu_PlayLeaveSound();
+                    VS::Menu::PlayLeaveSound();
                     Menu_Setup_assemblySelectedOption = itemSlot - 1;
                     menuItem = Menu_Framework_SetMenuItem(itemSlot + 10,
                         itemSlot < 3 ? 162 : 169, (itemSlot * 16) + 18, 151, 0,
@@ -761,7 +761,7 @@ int Menu_Setup_UpdateAssembly(int initialize_assembly)
                 }
 
                 if ((Input_buttonsPressed.allButtons & PADstart) && (itemInfo != 0)) {
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
                     Menu_Framework_MenuItem(Menu_Setup_assemblySelectedOption + 11)->selected = 0;
                     Menu_Setup_assemblySelectedOption = gemSlots + 2;
                     Menu_Setup_assemblyState = 6;
@@ -771,7 +771,7 @@ int Menu_Setup_UpdateAssembly(int initialize_assembly)
                 i = Menu_Setup_assemblySelectedOption;
 
                 if (Input_buttonsPressed.allButtons & PADRright) {
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
                     if (i == (gemSlots + 2)) {
                         Menu_Setup_assemblyState = 6;
                     } else {
@@ -817,7 +817,7 @@ int Menu_Setup_UpdateAssembly(int initialize_assembly)
                     }
                 }
                 if (i != Menu_Setup_assemblySelectedOption) {
-                    Menu_PlayChangeSound();
+                    VS::Menu::PlayChangeSound();
                     Menu_Setup_assemblySelectedOption = i;
                 }
 
@@ -991,7 +991,7 @@ int Menu_Setup_UpdateAssembly(int initialize_assembly)
 
         switch (itemSlot) {
         case 1:
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(10));
             Menu_Framework_UpdateEquipmentStatPages(-1);
             Menu_Framework_UpdateDpPpBars(4);
@@ -1248,7 +1248,7 @@ int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
                     Menu_Setup_gemAttachmentState = 0;
                 } else if (Input_buttonsPressed.allButtons & PADstart) {
                     int gem_row_base_id = 11;
-                    Menu_PlaySelectSound();
+                    VS::Menu::PlaySelectSound();
                     Menu_Framework_MenuItem(((1 - Menu_Setup_gemAttachmentIsShield) * 2) + (Menu_Setup_selectedGemSlot + gem_row_base_id))
                         ->selected = 0;
                     Menu_Setup_gemAttachmentState = 7;
@@ -1256,7 +1256,7 @@ int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
                 } else {
                     itemInfo = Menu_Setup_selectedGemSlot;
                     if (Input_buttonsPressed.allButtons & PADRright) {
-                        Menu_PlaySelectSound();
+                        VS::Menu::PlaySelectSound();
                         if (itemInfo == Menu_Setup_gemAttachmentGemSlots) {
                             Menu_Setup_gemAttachmentState = 7;
                         } else {
@@ -1283,7 +1283,7 @@ int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
                             }
                         }
                         if (itemInfo != Menu_Setup_selectedGemSlot) {
-                            Menu_PlayChangeSound();
+                            VS::Menu::PlayChangeSound();
                             Menu_Setup_selectedGemSlot = itemInfo;
                         }
 
@@ -1403,7 +1403,7 @@ int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
             Menu_Framework_FlyOutRowLeft(0);
             return 1;
         case 2:
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Framework_UpdatePrimaryStatPanel(1);
             Menu_Setup_gemAttachmentState = 5;
             break;

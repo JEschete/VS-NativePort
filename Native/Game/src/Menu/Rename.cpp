@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Rename.h"
-#include "Menu/Sounds.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Images.h"
@@ -82,7 +82,7 @@ int Menu_Rename_EditNameAtCursor(int bufPos)
 
     if (Input_buttonRepeat & PADRup) {
 
-        Menu_PlayChangeSound();
+        VS::Menu::PlayChangeSound();
 
         for (i = 19; bufPos < i; --i) {
             Menu_Rename_stringBuf[i] = Menu_Rename_stringBuf[i - 1];
@@ -92,7 +92,7 @@ int Menu_Rename_EditNameAtCursor(int bufPos)
 
     } else if (Input_buttonRepeat & PADRleft) {
 
-        Menu_PlayChangeSound();
+        VS::Menu::PlayChangeSound();
 
         for (i = bufPos; i < 19; ++i) {
             Menu_Rename_stringBuf[i] = Menu_Rename_stringBuf[i + 1];
@@ -124,7 +124,7 @@ int Menu_Rename_EditNameAtCursor(int bufPos)
     }
 
     if (bufPos != previousPos) {
-        Menu_PlayChangeSound();
+        VS::Menu::PlayChangeSound();
     }
 
     return bufPos;
@@ -446,7 +446,7 @@ int Menu_Rename_UpdateConfirmation(int init)
         }
 
         if (i != Menu_Rename_confirmationSelectedRow) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Rename_confirmationSelectedRow = i;
         }
 
@@ -519,7 +519,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         Menu_Rename_nameEditorCurrentPos = Menu_Rename_EditNameAtCursor(Menu_Rename_nameEditorCurrentPos);
 
         if (Input_buttonsPressed.allButtons & PADstart) {
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             Menu_Rename_SetCommandHighlight(255);
 
             Menu_Rename_nameEditorState = Menu_Rename_NameEditorState_LeaveRenameScreen;
@@ -527,7 +527,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         }
 
         if (Input_buttonRepeat & (1 << 6)) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
 
             if (Menu_Rename_nameEditorCurrentPos != 0) {
 
@@ -545,7 +545,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
 
         if (Input_buttonsPressed.allButtons & (1 << 13)) {
 
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Rename_SetCommandHighlight(255);
 
             if (var_s1 == 3) {
@@ -564,7 +564,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
 
             switch (var_s1) {
             case 0:
-                Menu_PlaySelectSound();
+                VS::Menu::PlaySelectSound();
                 Menu_Rename_SetCommandHighlight(255);
                 Menu_Rename_nameEditorState = 3;
                 break;
@@ -604,7 +604,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
                 break;
             }
 
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
         }
 
         if (Input_buttonRepeat & (1 << 12)) {
@@ -628,7 +628,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         }
 
         if (var_s1 != Menu_Rename_nameEditorCharTableRow) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
             Menu_Rename_nameEditorCharTableRow = var_s1;
         }
 
@@ -642,14 +642,14 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         Menu_Rename_nameEditorCurrentPos = Menu_Rename_EditNameAtCursor(Menu_Rename_nameEditorCurrentPos);
 
         if (Input_buttonsPressed.allButtons & (1 << 11)) {
-            Menu_PlaySelectSound();
+            VS::Menu::PlaySelectSound();
             Menu_Rename_nameEditorState = 3;
             break;
         }
 
         if (Input_buttonsPressed.allButtons & (1 << 5)) {
 
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
 
             var_s1 = Menu_Rename_charTable[Menu_Rename_nameEditorCharTableColumn + (Menu_Rename_nameEditorCharTableRow * 15)];
             Menu_Rename_stringBuf[Menu_Rename_nameEditorCurrentPos] = var_s1;
@@ -661,7 +661,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
 
         if (Input_buttonRepeat & (1 << 6)) {
 
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
 
             if (Menu_Rename_nameEditorCurrentPos != 0) {
                 --Menu_Rename_nameEditorCurrentPos;
@@ -697,7 +697,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
             if (Menu_Rename_nameEditorCharTableColumn == 0) {
                 if (Input_buttonsPressed.allButtons & (1 << 15)) {
 
-                    Menu_PlayChangeSound();
+                    VS::Menu::PlayChangeSound();
 
                     if (Menu_Rename_nameEditorCharTableRow == 0) {
                         Menu_Rename_nameEditorCharTableRow = 2;
@@ -724,7 +724,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         }
 
         if (var_a1 != (Menu_Rename_nameEditorCharTableColumn + (Menu_Rename_nameEditorCharTableRow * 14))) {
-            Menu_PlayChangeSound();
+            VS::Menu::PlayChangeSound();
         }
 
         break;
@@ -773,7 +773,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         Menu_DismissTextBox(7);
 
         if (selectedRow == 2) {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
             Menu_Rename_showRenameInterface = 1;
             Menu_Rename_nameEditorState = Menu_Rename_NameEditorState_ReturnToRenameScreen;
             break;
@@ -789,7 +789,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
                 Items_EquipAshleyWeapon(weapon);
             }
         } else {
-            Menu_PlayLeaveSound();
+            VS::Menu::PlayLeaveSound();
 
             if (weapon->name[0] == Core_TextCode_Terminator) {
                 Core_Memory_CopyBytesBackward(weapon->name,

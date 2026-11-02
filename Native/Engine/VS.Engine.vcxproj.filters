@@ -276,6 +276,9 @@
     <ClInclude Include="src\Audio\SoundEffects\SoundEffects.h">
       <Filter>src\Audio\SoundEffects</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\SoundEffectsLive.cpp">
+      <Filter>src\Audio</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Stream.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -679,6 +682,9 @@
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\SequencerOutput.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SoundEffects.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\StreamPlayback.h">

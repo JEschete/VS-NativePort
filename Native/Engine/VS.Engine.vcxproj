@@ -202,6 +202,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\SoundEffectsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Audio\Stream.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -675,6 +678,7 @@
     <ClInclude Include="include\Audio\MusicVoiceConflicts.hpp" />
     <ClInclude Include="include\Audio\Reverb.hpp" />
     <ClInclude Include="include\Audio\SequencerOutput.h" />
+    <ClInclude Include="include\Audio\SoundEffects.hpp" />
     <ClInclude Include="include\Audio\StreamPlayback.h" />
     <ClInclude Include="include\Audio\VoiceEngine.hpp" />
     <ClInclude Include="include\Audio\XaMix.hpp" />

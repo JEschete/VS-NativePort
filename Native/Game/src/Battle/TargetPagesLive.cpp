@@ -11,7 +11,7 @@
 #include "Battle/TargetPages.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
-
+#include "Menu/Sounds.hpp"
 extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
@@ -19,7 +19,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Field/Interactions.h"
 #include "Input/Controller.h"
-#include "Menu/Sounds.h"
 #include "Render/Font.h"
 }
 
@@ -137,7 +136,7 @@ int Battle_HandleTargetPageButtons(void) {
   int changed = 0;
   if (pressed == PADL1) changed = Battle_AdvanceTargetPage(-1);
   if (pressed == PADR1) changed = Battle_AdvanceTargetPage(1);
-  if (changed) Menu_PlayChangeSound();
+  if (changed) VS::Menu::PlayChangeSound();
   return changed;
 }
 
