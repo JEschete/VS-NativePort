@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 66 | 19 (`wip`) | 4,122 |
-| `cpp` | 66 | 214 (`wip`) | 3,927 |
+| `modernized` | 71 | 19 (`wip`) | 4,117 |
+| `cpp` | 71 | 209 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 198 |
-| `vs_namespace` | 66 |
-| `typed_interface` | 66 |
-| `no_bridge` | 66 |
+| `vs_namespace` | 71 |
+| `typed_interface` | 71 |
+| `no_bridge` | 71 |
 | `strict_clean` | 198 |
-| `behavior_evidence` | 66 |
+| `behavior_evidence` | 71 |
 
-Promotion records: 280; derived `cpp=x`: 66, `cpp=wip`: 214. Verification records: 76; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 71, `cpp=wip`: 209. Verification records: 77; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -195,6 +195,8 @@ The thirtieth is segment collision (F01833/F01834): `VS::Field::TraceActorAndTer
 `VS::Field::IsPointOutsideSolidVolumes` tests typed volume spans; `SegmentCollisionLive.cpp` binds the actor, Gimmick, platform and floor globals and the original module entries.
 The thirty-first is particle rendering (F01593/F01594): `VS::Effects::DrawAnimatedSpriteParticles` draws a span of particle-pool indices through a `ParticleRenderer` with typed depth buckets,
 colours and quads; `ParticleRenderLive.cpp` validates the native pool list and binds the GTE, frame packets, ordering table, curves and effect-path traces.
+The thirty-second is menu sounds (F04194-F04198): `VS::Menu::PlayMenuSound` plays a typed `MenuSound` id on the menu channel group through `VS::Audio::PlayCenteredSoundEffect`,
+and every generated and hand-maintained caller uses the `VS::Menu` helpers; the five unreferenced BATTLE.PRG module-pointer entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
