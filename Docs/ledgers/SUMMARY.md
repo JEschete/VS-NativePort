@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 124 | 14 (`wip`) | 4,069 |
-| `cpp` | 124 | 157 (`wip`) | 3,926 |
+| `modernized` | 126 | 12 (`wip`) | 4,069 |
+| `cpp` | 126 | 155 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 251 |
-| `vs_namespace` | 124 |
-| `typed_interface` | 124 |
-| `no_bridge` | 124 |
-| `strict_clean` | 251 |
-| `behavior_evidence` | 124 |
+| `source_cpp` | 253 |
+| `vs_namespace` | 126 |
+| `typed_interface` | 126 |
+| `no_bridge` | 126 |
+| `strict_clean` | 253 |
+| `behavior_evidence` | 126 |
 
-Promotion records: 281; derived `cpp=x`: 124, `cpp=wip`: 157. Verification records: 92; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 126, `cpp=wip`: 155. Verification records: 93; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -227,6 +227,8 @@ The forty-sixth is the battle AI frame update (F01765, F01800, F01819, F01824, F
 and the live binding refuses a frame without a room or linked actors, a truncated auxiliary section and an out-of-table actor with a diagnostic; the five Battle_Ai_ frame-update symbols are retired.
 The forty-seventh is SHP model geometry (F01265-F01270): VS::Render::ProjectModelVertices, the four polygon draws and DrawActorGroundShadow are C++ over model spans, a ModelTransformer and a ModelPacketQueue,
 and the live binding reads gimmick and weapon models only through extents their loaders record (#269), refusing unrecorded models with a diagnostic; the six Render_ model symbols are retired.
+The forty-eighth is the PLG074 trail emitter (F01988, F01994): VS::Effects::GenerateTrailOrigins and UpdateTrailEmitter are C++ over origin services and an emitter host,
+and the live binding checks definitions, tick events and transparency curves against the extents the package binder records (#271), refusing or stopping emitters with a diagnostic; the RadialSurge template and both Effects_Plg074_ symbols are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
