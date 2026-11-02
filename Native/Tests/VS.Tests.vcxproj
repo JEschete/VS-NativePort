@@ -147,6 +147,7 @@
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />
     <ClCompile Include="src\NavigationOverrideTests.cpp" />
+    <ClCompile Include="src\ParticleRenderCoreTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
     <ClCompile Include="src\PlanningWorkspaceSliceTests.cpp" />
     <ClCompile Include="src\PlatformPlacementTests.cpp" />

@@ -17,7 +17,7 @@
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
 #include "Core/Random.hpp"
-#include "Effects/ParticleRender.h"
+#include "Effects/ParticleRenderLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
 #include "nlohmann/json.hpp"
@@ -272,7 +272,7 @@ TEST_CASE("Particle paths join local world projection and emitted primitives",
   fixture.instance.transforms[0].view.t[0] = 16;
   fixture.texture.clut = std::bit_cast<std::int16_t>(std::uint16_t{0x9234});
   const auto motion = fixture.particle.motion;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   REQUIRE(scope.records.size() == 2);
   const auto particle = nlohmann::json::parse(scope.records.back().second);
   fixture.CheckPathPositions(particle);
@@ -344,7 +344,7 @@ TEST_CASE("Culled particle paths explain absent screen geometry",
   pages.SetEffectPathTraceTick(10);
   fixture.particle.emitFlags = 0x80000;
   fixture.particle.motion.position.vy = 4 << 12;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   REQUIRE(scope.records.size() == 2);
   const auto record = nlohmann::json::parse(scope.records.back().second);
   CHECK(record.at("outcome") == "below-ground");
@@ -375,7 +375,7 @@ TEST_CASE("Particle texture reset clears native pointer tails without overflow",
 TEST_CASE("Particle wrappers forward the real native list and texture program",
           "[effects][particle-render]") {
   ParticleFixture fixture;
-  Effects_DrawEffectParticleList(&fixture.particle);
+  VS::Effects::DrawLiveEffectParticleList(&fixture.particle);
   CHECK(fixture.particle.textureAnimation.cursor == 4);
   CHECK(fixture.particle.textureAnimation.frameTimer == 8);
   CHECK(fixture.particle.textureAnimation.textureInfo == &fixture.info);
@@ -387,7 +387,7 @@ TEST_CASE("Particles retain each original depth override and native link",
   const int mode = GENERATE(0, 1, 2, 3, 4, 5, 6, 7, 8);
   ParticleFixture fixture;
   fixture.particle.opaque61Bit0 = static_cast<unsigned>(mode);
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   constexpr std::array<int, 9> kDepths{256,  264, 272, 248, 240,
                                        2046, -15, -13, -11};
   const auto* start = fixture.storage.data() + 1;
@@ -406,7 +406,7 @@ TEST_CASE("Particle colors sample the next wrapped age through shared curves",
   fixture.particle.colorCurves[1] = 1;
   fixture.particle.colorCurves[2] = 1;
   fixture.particle.age = 255;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(fixture.storage[5] == 0x2C3F3F3F);
 }
 
@@ -416,7 +416,7 @@ TEST_CASE("Particle culling preserves texture advancement without emitting",
   ParticleFixture fixture;
   fixture.particle.emitFlags = 0x80000 | (attached ? 0x20000 : 0);
   fixture.particle.motion.position.vy = 4096;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(fixture.particle.textureAnimation.cursor == 4);
   CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 1);
 }
@@ -426,7 +426,7 @@ TEST_CASE("Attached particles project through their own native effect matrix",
   ParticleFixture fixture;
   fixture.particle.emitFlags = 0x20000;
   fixture.instance.transforms[0].view.t[0] = 128;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   const auto* quad = fixture.storage.data() + 4;
   CHECK((quad[2] & 0xFFFF) == 188);
   CHECK((quad[8] & 0xFFFF) == 196);
@@ -438,7 +438,7 @@ TEST_CASE(
   ParticleFixture fixture;
   fixture.particle.textureAnimation.reserved14 = 1024;
   fixture.texture.clut = static_cast<std::int16_t>(-28108);
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   const auto* quad = fixture.storage.data() + 4;
   CHECK(quad[1] == 0x2E808080);
   CHECK(quad[2] == static_cast<u_long>(164 | (116 << 16)));
@@ -448,8 +448,8 @@ TEST_CASE(
 TEST_CASE("Particle texture timers advance once per render without resetting",
           "[effects][particle-render]") {
   ParticleFixture fixture;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(fixture.particle.textureAnimation.frameTimer == 6);
   CHECK(fixture.particle.textureAnimation.cursor == 4);
   CHECK(Render_frameScratch.primitiveCursor == fixture.storage.data() + 33);
@@ -460,7 +460,7 @@ TEST_CASE("Particle rendering fits exactly at the native frame buffer boundary",
   ParticleFixture fixture;
   Render_frameScratch.primitiveCursor =
       fixture.storage.data() + 1 + 0x8000 - 16;
-  Effects_DrawAnimatedSpriteParticles(&fixture.particle);
+  VS::Effects::DrawLiveAnimatedSpriteParticles(&fixture.particle);
   CHECK(Render_frameScratch.primitiveCursor ==
         fixture.storage.data() + 1 + 0x8000);
   CHECK(fixture.storage.front() == 0xDEADBEEF);

@@ -231,6 +231,9 @@
     <ClCompile Include="src\NavigationOverrideTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ParticleRenderCoreTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ParticleRenderTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

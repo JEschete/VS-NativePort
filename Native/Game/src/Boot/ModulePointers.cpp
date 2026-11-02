@@ -128,7 +128,6 @@ extern "C" {
 #include "Effects/EffectResources.h"
 #include "Effects/Loading.h"
 #include "Effects/Package.h"
-#include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/ScreenEffectState.h"
@@ -1894,8 +1893,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D6CCCu, 0u, (void*)&Effects_ClearParticleTextureState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6CF0u, 0u, (void*)&Effects_InitializeParticleTextureAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D6D24u, 0u, (void*)&Effects_AdvanceParticleTextureAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6E24u, 0u, (void*)&Effects_DrawEffectParticleList, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D6E44u, 0u, (void*)&Effects_DrawAnimatedSpriteParticles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D7814u, 0u, (void*)&Effects_InitializeEffectResources, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D7890u, 0u, (void*)&Effects_SelectEffectResourceContext, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D78B8u, 0u, (void*)&Effects_SaveEffectResourceContext, 0u, 0u, 0u},

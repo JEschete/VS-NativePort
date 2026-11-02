@@ -51,6 +51,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Field::DrawLiveMinimapScene": r"Native\Game\include\Field\MinimapSceneLive.hpp",
     "VS::Field::IsLivePointOutsideSolidVolumes": r"Native\Game\include\Field\SegmentCollisionLive.hpp",
     "VS::Field::TraceLiveActorAndTerrainCollision": r"Native\Game\include\Field\SegmentCollisionLive.hpp",
+    "VS::Effects::DrawLiveEffectParticleList": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
+    "VS::Effects::DrawLiveAnimatedSpriteParticles": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -744,9 +746,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
     "F01535": [
         ("    /* The original caller supplies arguments to this argument-free wrapper. */\n", "",
          "the retained assembly renderer now has an explicit native particle-list contract"),
-        ("((void (*)())Effects_DrawEffectParticleList)(arg0->particles, (void*)((uintptr_t)Core_ScratchBase() + 0x15C));",
-         "Effects_DrawEffectParticleList(arg0->particles);",
-         "forward native particle ownership through a type-checked call"),
+        ("((void (*)())VS::Effects::DrawEffectParticleList)(arg0->particles, (void*)((uintptr_t)Core_ScratchBase() + 0x15C));",
+         "VS::Effects::DrawLiveEffectParticleList(arg0->particles);",
+         "F01593 typed core takes pool indices and a renderer; the generated caller uses the live binding"),
         ("        ++node->age;\n",
          "        ++node->age;\n"
          "        Effects_PluginEffectState parent = {0};\n"

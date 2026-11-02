@@ -723,9 +723,9 @@
     <ClCompile Include="src\Effects\ParticleRender.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
-    <ClInclude Include="src\Effects\ParticleRender.h">
+    <ClCompile Include="src\Effects\ParticleRenderLive.cpp">
       <Filter>src\Effects</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Effects\Particles.cpp">
       <Filter>src\Effects</Filter>
     </ClCompile>
@@ -2288,6 +2288,12 @@
     </ClInclude>
     <ClInclude Include="include\Diagnostics\SceneTrace.h">
       <Filter>include\Diagnostics</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticleRender.hpp">
+      <Filter>include\Effects</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Effects\ParticleRenderLive.hpp">
+      <Filter>include\Effects</Filter>
     </ClInclude>
     <ClInclude Include="include\Effects\ScreenDistortion\RadialWarp.hpp">
       <Filter>include\Effects\ScreenDistortion</Filter>

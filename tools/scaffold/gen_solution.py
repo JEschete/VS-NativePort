@@ -183,7 +183,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\TargetingDrawLive.cpp",
                 r"src\Battle\ActionResultsLive.cpp",
                 r"src\Field\DoorMatchesLive.cpp",
-                r"src\Effects\ParticleRender.cpp",
+                r"src\Effects\ParticleRenderLive.cpp",
                 r"src\Effects\TextureBindingsLive.cpp",
                 r"src\Battle\Ai\GroundNavigation.cpp",
                 r"src\Menu\Sounds.cpp",

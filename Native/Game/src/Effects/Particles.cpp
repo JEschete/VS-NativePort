@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Effects/ParticleRenderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Core/Memory/Heap.h"
 #include "Core/Random.h"
 #include "Effects/Package.h"
-#include "Effects/ParticleRender.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Transforms.h"
@@ -809,7 +809,7 @@ int Effects_TickEffectParticles(Effects_EffectInstance* effect_instance)
     Effects_Particle* node;
 
     Effects_IntegrateParticleMotion(next);
-    Effects_DrawEffectParticleList(effect_instance->particles);
+    VS::Effects::DrawLiveEffectParticleList(effect_instance->particles);
     node = next;
     while (next != NULL) {
         next = node->next;
