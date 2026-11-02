@@ -30,7 +30,8 @@ class EncounterFixupTests(unittest.TestCase):
         ):
             for animation in ("TintFade", "FlashFade", "Wipe"):
                 with self.subTest(namespace=namespace, animation=animation):
-                    name = f"Render_DrawTexture{animation}"
+                    name = f"VS::Render::DrawTexture{animation}"
+                    live = f"VS::Render::DrawLiveTexture{animation}"
                     arguments = "x, y, texId, colors"
                     if animation == "Wipe":
                         arguments += ", wipe_edge_x"
@@ -39,8 +40,33 @@ class EncounterFixupTests(unittest.TestCase):
                         source = f"{name}({whitespace}{arguments});"
                         self.assertEqual(
                             copier.apply_fixups(row, source),
-                            f"{name}({atlas}, {arguments});",
+                            f"{live}({atlas}, {arguments});",
                         )
+
+    def test_texture_pop_ins_pass_bounded_color_pairs(self):
+        copier = object.__new__(copy_to_native.Copier)
+        copier.used_fixups = set()
+        for namespace, colors in (
+            ("Ending::", "Ending_congratulationsTint"),
+            ("Menu::Results::", "Menu_Results_foodChainColors"),
+            ("Menu::Results::", "Menu_Results_timeAttackHeadingColors"),
+        ):
+            with self.subTest(colors=colors):
+                row = {"id": "test", "final_name": namespace + "DrawHeading"}
+                self.assertEqual(
+                    copier.apply_fixups(row, f"Draw(x, &{colors}[1]);"),
+                    f"Draw(x, std::span({colors}).subspan(1));",
+                )
+        row = {"id": "test", "final_name": "Menu::Results::DrawStart"}
+        self.assertEqual(
+            copier.apply_fixups(row, "Tint(&Menu_Results_timeAttackStartColors[1]);"),
+            "Tint(&Menu_Results_timeAttackStartColors[1]);",
+        )
+        row = {"id": "test", "final_name": "Ending::DrawScore"}
+        self.assertEqual(
+            copier.apply_fixups(row, "{\n    extern CVECTOR Ending_scoreTint[];\n    x();\n}"),
+            "{\n    x();\n}",
+        )
 
     def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
         for fixup_id in ("F01425", "F01433", "F01438"):

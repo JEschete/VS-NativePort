@@ -91,11 +91,4 @@ u_int Render_BlendRgb(u_int colour1, u_int colour2, u_int factor)
     return colourOut;
 }
 
-// decomp: renderTextures.h _adjust (src/renderTextures.h:54)
-int Render_BlendFlashComponent(int component, int weight)
-{
-    int ret = (component * weight) + ((4 - weight) * 192);
-    return ret / 4;
-}
-
 }  // extern "C"

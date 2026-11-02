@@ -147,6 +147,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Audio\XaPlayback.cpp",
                 r"src\Audio\MusicLayers.cpp",
                 r"src\Render\ScaledFontLive.cpp",
+                r"src\Render\TextureRegionDrawLive.cpp",
                 r"src\Audio\SoundEffectsLive.cpp",
                 r"src\Movie\Intro\PlayerLive.cpp",
             )

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Music.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Menu/Results/TimeAttack.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
-#include "Render/TextureRegionDraw.h"
 #include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
@@ -490,9 +490,9 @@ void Menu_Results_DrawTimeAttackHeading(int x, int y, int timer)
                  + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack + 1].w)
           >> 1;
 
-        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, 100, Menu_Results_timeAttackHeadingColors);
-        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack].w, y,
-            Menu_Results_DisIndex_Attack0TimeAttack + 1, &Menu_Results_timeAttackHeadingColors[1]);
+        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, 100, Menu_Results_timeAttackHeadingColors);
+        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Attack0TimeAttack].w, y,
+            Menu_Results_DisIndex_Attack0TimeAttack + 1, std::span(Menu_Results_timeAttackHeadingColors).subspan(1));
     }
 }
 
@@ -636,8 +636,8 @@ void Menu_Results_DrawTimeAttackResultsHeading(int x, int y, int timer)
                  + Menu_Results_disMap[Menu_Results_DisIndex_Time0TimeAttackResults + 1].w)
           >> 1;
 
-        Render_DrawTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Time0TimeAttackResults, Menu_Results_timeAttackResultsHeadingColors);
-        Render_DrawTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Time0TimeAttackResults].w, y,
+        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x, y, Menu_Results_DisIndex_Time0TimeAttackResults, Menu_Results_timeAttackResultsHeadingColors);
+        VS::Render::DrawLiveTextureFlashFade(Menu_Results_disMap, x + Menu_Results_disMap[Menu_Results_DisIndex_Time0TimeAttackResults].w, y,
             Menu_Results_DisIndex_Time0TimeAttackResults + 1, Menu_Results_timeAttackResultsHeadingColors);
     }
 }
@@ -705,7 +705,7 @@ void Menu_Results_DrawTimeAttackRatingWipe(int x, int y, int arg2)
         arg2 = 4;
     }
 
-    Render_DrawTextureWipe(Menu_Results_disMap, x, y, arg2 + Menu_Results_DisIndex_Time0Excellent, Menu_Results_timeAttackRatingWipeColors, wipe_edge_x);
+    VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, x, y, arg2 + Menu_Results_DisIndex_Time0Excellent, Menu_Results_timeAttackRatingWipeColors, wipe_edge_x);
 }
 
 // decomp: MENUF.PRG _renderHeaderAndTime (src/MENU/MENUF.PRG/3B8.c:1743)

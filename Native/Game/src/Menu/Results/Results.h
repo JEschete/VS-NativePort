@@ -108,7 +108,7 @@ extern int Menu_Results_buffReelIndex;;
 extern u_int Menu_Results_buffReelSelection;;
 extern Menu_Results_BuffReel Menu_Results_buffReels[][16];
 extern int Menu_Results_clearCount;;
-extern Render_TextureRegion Menu_Results_disMap[];
+extern Render_TextureRegion Menu_Results_disMap[127];
 extern u_int Menu_Results_elementAnimationState;;
 extern int Menu_Results_incrementingMapCompletion;;
 extern int Menu_Results_incrementingScore;;

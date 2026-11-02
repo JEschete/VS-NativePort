@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <span>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -8,20 +9,24 @@
 #include <catch2/generators/catch_generators_range.hpp>
 
 #include "Legacy/Psx.h"
+#include "Render/TextureRegionDrawLive.hpp"
 
 extern "C" {
 #include "Ending/Results.h"
 #include "Menu/Results/CubePuzzle.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
 #include "Render/Render.h"
-#include "Render/TextureRegionDraw.h"
 #include "Render/UiPrimitives.h"
 }
 
 namespace {
 struct ResultsTextureFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
+  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  int saved_framebuffer = Render_frameBuf;
   Render_TextureRegion saved_ending_region = Ending_resultAtlasRegions[12];
   int saved_time = Menu_Results_timeTrialTime;
   std::vector<u_long> storage = std::vector<u_long>(
@@ -30,6 +35,8 @@ struct ResultsTextureFixture {
 
   ResultsTextureFixture() {
     ClearOTagR(ordering.data(), static_cast<int>(ordering.size()));
+    Render_frameBuf = 0;
+    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
     Render_frameScratch.primitiveCursor = storage.data() + 1;
     Render_frameScratch.orderingTable = ordering.data() + 16;
     Ending_resultAtlasRegions[12] = {23, 45, 26, 19, 0x15, 0x345};
@@ -37,6 +44,8 @@ struct ResultsTextureFixture {
 
   ~ResultsTextureFixture() {
     Render_frameScratch = saved_frame;
+    Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_frameBuf = saved_framebuffer;
     Ending_resultAtlasRegions[12] = saved_ending_region;
     Menu_Results_timeTrialTime = saved_time;
   }
@@ -156,10 +165,11 @@ TEST_CASE("Shared tint and flash fades retain each explicitly selected atlas",
   ResultsTextureFixture fixture;
   std::array<CVECTOR, 2> colors{{{128, 96, 64, 0}, {200, 180, 160, 0}}};
   colors[0].cd = static_cast<u_char>(fade);
-  auto draw = flash ? Render_DrawTextureFlashFade : Render_DrawTextureTintFade;
-  draw(Menu_Results_disMap, 10, 20, 12, colors.data());
-  draw(Ending_resultAtlasRegions, 30, 40, 12, colors.data());
-  draw(Menu_Results_disMap, 50, 60, 12, colors.data());
+  auto draw = flash ? VS::Render::DrawLiveTextureFlashFade
+                    : VS::Render::DrawLiveTextureTintFade;
+  draw(Menu_Results_disMap, 10, 20, 12, colors);
+  draw(Ending_resultAtlasRegions, 30, 40, 12, colors);
+  draw(Menu_Results_disMap, 50, 60, 12, colors);
   fixture.CheckCount(fade == 0 ? 0 : 3);
   if (fade == 0) return;
 
@@ -228,11 +238,12 @@ TEST_CASE(
   const int edge = GENERATE(10, 18, 600);
   ResultsTextureFixture fixture;
   std::array<CVECTOR, 2> colors{{{128, 96, 64, 0}, {200, 180, 160, 0}}};
-  Render_DrawTextureWipe(Menu_Results_disMap, 10, 20, 12, colors.data(), edge);
+  VS::Render::DrawLiveTextureWipe(Menu_Results_disMap, 10, 20, 12, colors,
+                                  edge);
   const auto* ending_begin =
       static_cast<const POLY_GT4*>(Render_frameScratch.primitiveCursor);
-  Render_DrawTextureWipe(Ending_resultAtlasRegions, 10, 20, 12, colors.data(),
-                         edge);
+  VS::Render::DrawLiveTextureWipe(Ending_resultAtlasRegions, 10, 20, 12, colors,
+                                  edge);
   if (edge == 10) {
     fixture.CheckCount(0);
   } else if (edge == 600) {

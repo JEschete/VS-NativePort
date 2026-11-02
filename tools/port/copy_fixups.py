@@ -36,6 +36,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
     "VS::Effects::BindLiveEffectTextureTables": r"Native\Game\include\Effects\TextureBindings.hpp",
     "VS::Render::DrawLiveScaledFontChar": r"Native\Engine\include\Render\ScaledFont.hpp",
+    **{f"VS::Render::DrawLiveTexture{kind}": r"Native\Engine\include\Render\TextureRegionDrawLive.hpp"
+       for kind in ("TintFade", "FlashFade", "Wipe")},
     "VS::Battle::CheckedTargetPreviews": r"Native\Game\include\Battle\TargetPages.hpp",
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
@@ -2059,6 +2061,14 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
                  "5BF94.c:4044-4046; three 34-word textbox ordering tables")],
+    # D4.c:1955 declares two colors, but D4.c:1970 draws from &D_800DBA7C[1], which reads a third. The data
+    # runs 12 bytes to D_800DBA88 (G00810) and holds {128,96,64} there; issue #259.
+    "G00809": [("CVECTOR Ending_congratulationsTint[2]", "CVECTOR Ending_congratulationsTint[3]",
+                 "D4.c:1970 reads D_800DBA7C[2]; 12 bytes to G00810 (issue #259)")],
+    "F02445": [("extern CVECTOR Ending_congratulationsTint[2]", "extern CVECTOR Ending_congratulationsTint[3]",
+                 "D4.c:1955 block declaration; the pop-in draw reads three colors (issue #259)")],
+    "G01780": [("Render_TextureRegion Menu_Results_disMap[]", "Render_TextureRegion Menu_Results_disMap[127]",
+                 "3B8.c:1162 _texture_t[127]; the typed texture draws take bounds-checked atlas spans")],
     "F01331": [
         ("c < '\\f'", "c < 0xE5", "vs_battle_getTextLineLength.s:0x800C702C"),
         ("c == '\\f'", "c == 0xE5", "encoded page boundary"),
@@ -2763,12 +2773,22 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
      r"Event_ScriptSetAshleyBattleModeOpcode",
      "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),
-    (r"^Ending::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
-     r"Render_DrawTexture\1(Ending_resultAtlasRegions, ",
-     "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6)."),
-    (r"^Menu::Results::", r"\bRender_DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
-     r"Render_DrawTexture\1(Menu_Results_disMap, ",
+    (r"^Ending::", r"\bVS::Render::DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
+     r"VS::Render::DrawLiveTexture\1(Ending_resultAtlasRegions, ",
+     "F03675/F03677/F03678 were included per overlay; ENDING uses its own _disMap G00805 (D4.c:6). "
+     "#46 typed promotion: the binding takes the atlas and colors as spans."),
+    (r"^Menu::Results::", r"\bVS::Render::DrawTexture(TintFade|FlashFade|Wipe)\(\s*",
+     r"VS::Render::DrawLiveTexture\1(Menu_Results_disMap, ",
      "MENUF uses its own _disMap G01780 (3B8.c:26), not the shorter ENDING table; issue #244."),
+    (r"^(Ending|Menu::Results)::",
+     r"&(Ending_congratulationsTint|Menu_Results_(?:foodChain|evolveOrDie|congratulations|timeAttackHeading)Colors)"
+     r"\[1\]",
+     r"std::span(\1).subspan(1)",
+     "D4.c:1970 and the MENUF pop-ins pass the second of three colors onward; a subspan keeps the pair's extent "
+     "checked (issue #259)"),
+    (r"^Ending::", r"[ \t]*extern CVECTOR Ending_\w+Tint\[\];[ \t]*\n",
+     r"",
+     "D4.c block declarations without a bound hide the sized ClearResults.h arrays from the span draws"),
     (r"^Actors::", r"\bField_gimmickInstances\[([A-Za-z_]\w*)\](?!\s*=(?!=))",
      r"Field_FindGimmickForActorSlot(\1)",
      "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
@@ -6808,8 +6828,8 @@ REGEX_FIXES += [
 # Separate shadowed locals and cast-prototype parameters before naming outer bindings.
 for identifier, old, new, evidence in (
     ("F02446",
-     "            if ((i == 2) || (i == 5)) {\n                int v0;\n                Render_DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);\n                v0 = arg0 + 3;\n                arg0 = v0 + Ending_resultAtlasRegions[10].w;\n            }",
-     "            if ((i == 2) || (i == 5)) {\n                int padded_separator_x;\n                Render_DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);\n                padded_separator_x = arg0 + 3;\n                arg0 = padded_separator_x + Ending_resultAtlasRegions[10].w;\n            }",
+     "            if ((i == 2) || (i == 5)) {\n                int v0;\n                VS::Render::DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);\n                v0 = arg0 + 3;\n                arg0 = v0 + Ending_resultAtlasRegions[10].w;\n            }",
+     "            if ((i == 2) || (i == 5)) {\n                int padded_separator_x;\n                VS::Render::DrawTextureTintFade(arg0, arg1 + 0xE, 0xA, Ending_scoreTint);\n                padded_separator_x = arg0 + 3;\n                arg0 = padded_separator_x + Ending_resultAtlasRegions[10].w;\n            }",
      "Original _renderScore at D4.c:1983-1987 declares a new int v0 inside the thousands-separator branch, shadowing outer v0. This exact native block has three occurrences of the inner binding; rename those first, before outer v0/arg0/arg1 mappings. The replacement changes identifier tokens only."),
 ):
     FIXES.setdefault(identifier, []).append((old, new, evidence))

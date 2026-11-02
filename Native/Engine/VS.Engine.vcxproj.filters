@@ -624,9 +624,9 @@
     <ClCompile Include="src\Render\TextureRegionDraw.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\TextureRegionDraw.h">
+    <ClCompile Include="src\Render\TextureRegionDrawLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\Textures.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -805,6 +805,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ScaledFont.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\TextureRegionDraw.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\TextureRegionDrawLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\SaveStore.hpp">
