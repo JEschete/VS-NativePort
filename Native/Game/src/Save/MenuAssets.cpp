@@ -1,99 +1,91 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Save/MenuAssets.h"
+#include "Save/MenuAssets.hpp"
 
-#include "Battle/Feedback.h"
-#include "Boot/Lifecycle.h"
-#include "CdDrive.h"
-#include "Content/DiscLayout.h"
-#include "Core/Memory/Heap.h"
-#include "DiscQueue.h"
-#include "Menu/Files.h"
-#include "Render/Font.h"
-#include "Render/TextureAnimation.h"
-#include "Render/Textures.h"
-#include "Save/MemoryCard/GameFiles.h"
-#include "Save/MemoryCard/Resources.h"
-#include "Title/SaveCard.h"
-#include "Title/SaveFiles.h"
-
-enum AssetPhase { kAssetImage, kAssetTextQueue, kAssetText };
-enum { kSaveImageCount = 3, kSaveTexturePage = 0x1D, kSaveTextureOwner = 6 };
-static enum AssetPhase phase;
-static Content_DiscQueueSlot* request;
-
-// _initMemcard: MENU7.PRG/260.c:1080 and TITLE.PRG/22C.c:940.
-// Retain the original font/text assets, not the card BIOS event transport.
-static int InitializeAssets(int init, int menu) {
-  Content_DiscFile file;
-  if (init) {
-    if (menu) {
-      Render_ReserveTexturePageRange(kSaveTexturePage, kSaveImageCount,
-                                     kSaveTextureOwner);
-    }
-    Title_memoryCardUiResource = reinterpret_cast<char*>(
-        Core_Memory_AllocateFromLowEnd(VS_SPMCIMG_BIN_SIZE));
-    Save_MemoryCard_uiResources = reinterpret_cast<Save_CardUiResources*>(
-        Title_memoryCardUiResource +
-        sizeof(Save_GameSaveImage) * kSaveImageCount);
-    if (menu) {
-      Menu_Files_textTable = Save_MemoryCard_uiResources->textTable;
-    } else {
-      Title_saveMenuText = Save_MemoryCard_uiResources->textTable;
-    }
-    Title_saveFileSummaries = Save_MemoryCard_uiResources->fileHeaders;
-    Title_cardDirectoryEntryBuffer =
-        &Save_MemoryCard_uiResources->directoryEntry;
-    file.lba = VS_SPMCIMG_BIN_LBA;
-    file.size = VS_SPMCIMG_BIN_SIZE;
-    request = Content_AllocateDiscRequest(&file);
-    Content_EnqueueDiscRequest(request, Title_memoryCardUiResource);
-    phase = kAssetImage;
-    return 0;
+namespace VS::Save::MemoryCard {
+namespace {
+bool Begin(MenuAssetLoad& load, MenuAssetHost& host, MenuAssetOwner owner) {
+  if (load.phase != MenuAssetPhase::kIdle) {
+    host.ReportMisuse(MenuAssetMisuse::kAlreadyActive);
+    return false;
   }
-  if (phase == kAssetImage) {
-    if (request->state == Content_DiscRequestState_Loaded) {
-      Content_ReleaseDiscRequest(request);
-      Render_UploadPackedRectangle(
-          vs_getXY(800, 256), Title_memoryCardUiResource, vs_getWH(224, 256));
-      phase = kAssetTextQueue;
-    }
-    return 0;
-  }
-  if (phase == kAssetTextQueue) {
-    file.lba = VS_MCDATA_BIN_LBA;
-    file.size = VS_MCDATA_BIN_SIZE + VS_MCMAN_BIN_SIZE;
-    request = Content_AllocateDiscRequest(&file);
-    Content_EnqueueDiscRequest(request, Save_MemoryCard_uiResources);
-    phase = kAssetText;
-  }
-  if (request->state != Content_DiscRequestState_Loaded) return 0;
-  Content_ReleaseDiscRequest(request);
-  Boot_SetSoftResetEnabled(0);
-  return 1;
+  if (owner == MenuAssetOwner::kDataMenu) host.ReserveTexturePages();
+  host.AllocateAssets(owner);
+  host.RequestImage();
+  load.owner = owner;
+  load.phase = MenuAssetPhase::kLoadingImage;
+  return false;
 }
 
-static void ReleaseAssets(int menu) {
-  Boot_SetSoftResetEnabled(1);
-  Core_Memory_FreeFromLowEnd(Title_memoryCardUiResource);
-  Title_memoryCardUiResource = nullptr;
-  Save_MemoryCard_uiResources = nullptr;
-  if (menu) {
-    Render_RetireTexturePageRange(kSaveTexturePage, kSaveImageCount,
-                                  kSaveTextureOwner);
+// MENU7.PRG/260.c:1080 and TITLE.PRG/22C.c:940 _initMemcard: the image upload,
+// then the MCDATA/MCMAN text read into the same buffer. The card BIOS event
+// setup of the original is not part of the native load.
+bool Step(MenuAssetLoad& load, MenuAssetHost& host) {
+  switch (load.phase) {
+    case MenuAssetPhase::kIdle:
+      host.ReportMisuse(MenuAssetMisuse::kNotStarted);
+      return false;
+    case MenuAssetPhase::kLoadingImage:
+      if (host.RequestLoaded()) {
+        host.ReleaseRequest();
+        host.UploadImage();
+        load.phase = MenuAssetPhase::kQueueText;
+      }
+      return false;
+    case MenuAssetPhase::kQueueText:
+      host.RequestText();
+      load.phase = MenuAssetPhase::kLoadingText;
+      [[fallthrough]];
+    case MenuAssetPhase::kLoadingText:
+      if (!host.RequestLoaded()) return false;
+      host.ReleaseRequest();
+      host.SetSoftResetEnabled(false);
+      load.phase = MenuAssetPhase::kReady;
+      return true;
+    case MenuAssetPhase::kReady:
+      // The request was released when the text arrived; its slot may now
+      // belong to another loader (#264).
+      return true;
   }
+  return false;
 }
 
-int Save_MemoryCard_InitializeMenuResourcesStep(int init) {
-  return InitializeAssets(init, 1);
+// MENU7.PRG/260.c:1161 and TITLE.PRG/22C.c:1017 _shutdownMemcard.
+void Release(MenuAssetLoad& load, MenuAssetHost& host) {
+  if (load.phase == MenuAssetPhase::kIdle) {
+    host.ReportMisuse(MenuAssetMisuse::kNotLoaded);
+    return;
+  }
+  if (load.phase != MenuAssetPhase::kReady) {
+    host.ReportMisuse(MenuAssetMisuse::kReleaseWhileLoading);
+    return;
+  }
+  host.SetSoftResetEnabled(true);
+  host.FreeAssets();
+  if (load.owner == MenuAssetOwner::kDataMenu) host.RetireTexturePages();
+  load.phase = MenuAssetPhase::kIdle;
 }
 
-// _shutdownMemcard: MENU7.PRG/260.c:1161, TITLE.PRG/22C.c:1017.
-void Save_MemoryCard_ReleaseMenuResources(void) { ReleaseAssets(1); }
+bool InitializeStep(MenuAssetLoad& load, MenuAssetHost& host, bool begin,
+                    MenuAssetOwner owner) {
+  return begin ? Begin(load, host, owner) : Step(load, host);
+}
+}  // namespace
 
-int Save_MemoryCard_InitializeResourcesStep(int init) {
-  return InitializeAssets(init, 0);
+bool InitializeMenuResourcesStep(MenuAssetLoad& load, MenuAssetHost& host,
+                                 bool begin) {
+  return InitializeStep(load, host, begin, MenuAssetOwner::kDataMenu);
 }
 
-void Save_MemoryCard_ReleaseResources(void) { ReleaseAssets(0); }
-}  // extern "C"
+void ReleaseMenuResources(MenuAssetLoad& load, MenuAssetHost& host) {
+  Release(load, host);
+}
+
+bool InitializeResourcesStep(MenuAssetLoad& load, MenuAssetHost& host,
+                             bool begin) {
+  return InitializeStep(load, host, begin, MenuAssetOwner::kTitle);
+}
+
+void ReleaseResources(MenuAssetLoad& load, MenuAssetHost& host) {
+  Release(load, host);
+}
+}  // namespace VS::Save::MemoryCard

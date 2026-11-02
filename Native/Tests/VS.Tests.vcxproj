@@ -142,6 +142,7 @@
     <ClCompile Include="src\ManualRenderTests.cpp" />
     <ClCompile Include="src\MapRenderTests.cpp" />
     <ClCompile Include="src\MemoryTests.cpp" />
+    <ClCompile Include="src\MenuAssetsTests.cpp" />
     <ClCompile Include="src\MenuSoundTests.cpp" />
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\ModelDrawingTests.cpp" />

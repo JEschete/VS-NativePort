@@ -5,6 +5,7 @@
 #include <cstdlib>
 
 #include "Menu/Sounds.hpp"
+#include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeContainer.hpp"
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
-#include "Save/MenuAssets.h"
 #include "Save/NativeMenu.h"
 #include "Title/SaveFiles.h"
 }
@@ -94,7 +94,7 @@ class LiveContainerSave final : public ContainerSaveHost {
   }
 
   void ShowContainerHeading() override {
-    Save_MemoryCard_InitializeMenuResourcesStep(1);
+    VS::Save::MemoryCard::StepLiveMenuResources(1);
     Menu_Framework_SetBackgroundFade(1);
     Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_Menu);
     Menu_Framework_MenuRow* row = Menu_Framework_SetMenuItem(
@@ -109,11 +109,11 @@ class LiveContainerSave final : public ContainerSaveHost {
   bool MenuRowsIdle() override { return Menu_Framework_AreMenuRowsIdle() != 0; }
 
   void BeginResourceLoad() override {
-    Save_MemoryCard_InitializeMenuResourcesStep(1);
+    VS::Save::MemoryCard::StepLiveMenuResources(1);
   }
 
   bool ResourcesReady() override {
-    return Save_MemoryCard_InitializeMenuResourcesStep(0) != 0;
+    return VS::Save::MemoryCard::StepLiveMenuResources(0) != 0;
   }
 
   void OpenFilePicker() override {
@@ -141,7 +141,7 @@ class LiveContainerSave final : public ContainerSaveHost {
     Core_Memory_CopyHalfwordBlocks(&storage.storedContainer,
                                    Save_NativeContainerData(),
                                    sizeof storage.storedContainer);
-    Save_MemoryCard_ReleaseMenuResources();
+    VS::Save::MemoryCard::ReleaseLiveMenuResources();
     Menu_Framework_menuState.returnState = Menu_Framework_menuState.currentMenu;
     Menu_Framework_menuState.currentMenu = kContainerInventoryMenu;
   }
@@ -195,7 +195,9 @@ class LiveContainerSave final : public ContainerSaveHost {
     Menu_Framework_SetBackgroundFade(0);
   }
 
-  void ReleaseResources() override { Save_MemoryCard_ReleaseMenuResources(); }
+  void ReleaseResources() override {
+    VS::Save::MemoryCard::ReleaseLiveMenuResources();
+  }
 
   bool InformationBoxClosed() override {
     return Menu_DismissTextBox(kContainerInformationBox) == 0 &&

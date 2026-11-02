@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Music.h"
@@ -43,7 +44,6 @@ extern "C" {
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
-#include "Save/MenuAssets.h"
 #include "Save/NativeMenu.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
@@ -2041,7 +2041,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         }
         break;
     case Menu_Files_GameOverState_InitFileMenu:
-        Save_MemoryCard_InitializeMenuResourcesStep(1);
+        VS::Save::MemoryCard::StepLiveMenuResources(1);
         Menu_Files_ResetElements();
         setRECT(&rect, 640, 511, 256, 1);
         StoreImage(&rect, (u_long*)Menu_Files_gameOverClutBuf);
@@ -2049,7 +2049,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         *state = Menu_Files_GameOverState_DisplayFileMenu;
         break;
     case Menu_Files_GameOverState_DisplayFileMenu:
-        if (Save_MemoryCard_InitializeMenuResourcesStep(0) != 0) {
+        if (VS::Save::MemoryCard::StepLiveMenuResources(0) != 0) {
             Menu_Files_UpdateDataLoadMenu(2);
             *state = Menu_Files_GameOverState_SelectFile;
             Menu_Files_DrawBackground();
@@ -2060,7 +2060,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         SetDispMask(1);
         option = Menu_Files_UpdateDataLoadMenu(0);
         if (option != 0) {
-            Save_MemoryCard_ReleaseMenuResources();
+            VS::Save::MemoryCard::ReleaseLiveMenuResources();
             SetDispMask(0);
             if (option < 0) {
                 Menu_Files_gameOverResetDelay = 1;
@@ -2354,12 +2354,12 @@ int Menu_Files_UpdateDataMenu(u_char* state)
 
     switch (*state) {
     case Menu_Files_DataMenuState_Init:
-        Save_MemoryCard_InitializeMenuResourcesStep(1);
+        VS::Save::MemoryCard::StepLiveMenuResources(1);
         *state = Menu_Files_DataMenuState_LoadWait;
         break;
 
     case Menu_Files_DataMenuState_LoadWait:
-        if ((Menu_Framework_AreMenuRowsIdle() == 0) || (Save_MemoryCard_InitializeMenuResourcesStep(0) == 0)) {
+        if ((Menu_Framework_AreMenuRowsIdle() == 0) || (VS::Save::MemoryCard::StepLiveMenuResources(0) == 0)) {
             break;
         }
     // Fallthrough
@@ -2452,7 +2452,7 @@ int Menu_Files_UpdateDataMenu(u_char* state)
             }
             setRECT(&rect, 0, 0, 640, 240);
             ClearImage(&rect, 0, 0, 0);
-            Save_MemoryCard_ReleaseMenuResources();
+            VS::Save::MemoryCard::ReleaseLiveMenuResources();
             *state = 0;
             Boot_EnterBattle();
             break;
@@ -2479,7 +2479,7 @@ int Menu_Files_UpdateDataMenu(u_char* state)
         if (Menu_Framework_backgroundFadeStep != 0) {
             break;
         }
-        Save_MemoryCard_ReleaseMenuResources();
+        VS::Save::MemoryCard::ReleaseLiveMenuResources();
         if (*state == 14) {
             Menu_Framework_menuState.currentMenu = 7;
         }

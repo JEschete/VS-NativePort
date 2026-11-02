@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
+#include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
-#include "Save/MenuAssets.h"
 #include "Save/NativeMenu.h"
 #include "Save/NativeResume.h"
 #include "State/Ashley.h"
@@ -153,12 +153,12 @@ int Title_ShowContinueScreen(void)
         switch (Title_loadScreenPhase) {
         case Title_LoadScreenPhase_Initialize:
             if (Title_loadScreenPhase == 0) {
-                Save_MemoryCard_InitializeResourcesStep(1);
+                VS::Save::MemoryCard::StepLiveTitleResources(1);
                 Title_loadScreenPhase = Title_LoadScreenPhase_LoadCardResources;
             }
             break;
         case Title_LoadScreenPhase_LoadCardResources:
-            if (Save_MemoryCard_InitializeResourcesStep(0) != 0) {
+            if (VS::Save::MemoryCard::StepLiveTitleResources(0) != 0) {
                 Title_SaveFiles_ResetElements();
                 Menu_Files_UpdateLoadMenu(2);
                 Title_loadScreenPhase = Title_LoadScreenPhase_RunFileMenu;
@@ -167,7 +167,7 @@ int Title_ShowContinueScreen(void)
         case Title_LoadScreenPhase_RunFileMenu:
             exit = Menu_Files_UpdateLoadMenu(0);
             if (exit != 0) {
-                Save_MemoryCard_ReleaseResources();
+                VS::Save::MemoryCard::ReleaseLiveTitleResources();
                 SetDispMask(0);
                 return exit;
             }
@@ -213,11 +213,11 @@ void Title_ShowClearSaveScreen(void)
 
         switch (Title_clearSaveScreenPhase) {
         case Title_ClearSaveScreenPhase_Initialize:
-            Save_MemoryCard_InitializeResourcesStep(1);
+            VS::Save::MemoryCard::StepLiveTitleResources(1);
             Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Loading;
             continue;
         case Title_ClearSaveScreenPhase_Loading:
-            if (Save_MemoryCard_InitializeResourcesStep(0) != 0) {
+            if (VS::Save::MemoryCard::StepLiveTitleResources(0) != 0) {
                 Title_SaveFiles_ResetElements();
                 Menu_Files_UpdateSaveMenu(1);
                 Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Ready;
@@ -232,7 +232,7 @@ void Title_ShowClearSaveScreen(void)
                     Menu_Files_UpdateClearSaveReminder(1);
                     Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Confirmation;
                 } else {
-                    Save_MemoryCard_ReleaseResources();
+                    VS::Save::MemoryCard::ReleaseLiveTitleResources();
                     Menu_Files_DrawExitFade();
                     Title_clearSaveFadeTimerFrames = 30;
                     Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Exit;
@@ -246,7 +246,7 @@ void Title_ShowClearSaveScreen(void)
             val = Menu_Files_UpdateClearSaveReminder(0);
             if (val != 0) {
                 if (val != 1) {
-                    Save_MemoryCard_ReleaseResources();
+                    VS::Save::MemoryCard::ReleaseLiveTitleResources();
                     Menu_Files_DrawExitFade();
                     Title_clearSaveFadeTimerFrames = 30;
                     Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Exit;

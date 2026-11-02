@@ -2082,9 +2082,9 @@
     <ClCompile Include="src\Save\MenuAssets.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
-    <ClInclude Include="src\Save\MenuAssets.h">
+    <ClCompile Include="src\Save\MenuAssetsLive.cpp">
       <Filter>src\Save</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Save\NativeContainer.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
@@ -2387,6 +2387,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Sounds.hpp">
       <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\MenuAssets.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\MenuAssetsLive.hpp">
+      <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\NativeContainer.hpp">
       <Filter>include\Save</Filter>

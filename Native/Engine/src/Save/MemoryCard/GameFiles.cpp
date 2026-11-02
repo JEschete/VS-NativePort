@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
-#include "Save/MenuAssets.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/GameTime.h"
@@ -996,11 +996,11 @@ int Save_MemoryCard_AnySaveFileExists(void)
     int i;
     int ret = 0;
 
-    Save_MemoryCard_InitializeResourcesStep(1);
+    VS::Save::MemoryCard::StepLiveTitleResources(1);
 
     do {
         State_UpdatePlayTimeAndLoading(2);
-    } while (Save_MemoryCard_InitializeResourcesStep(0) == 0);
+    } while (VS::Save::MemoryCard::StepLiveTitleResources(0) == 0);
 
     for (i = 1; i <= 2; ++i) {
         Title_SaveCard_AdvanceCardReadiness(i);
@@ -1021,7 +1021,7 @@ int Save_MemoryCard_AnySaveFileExists(void)
             }
         }
     }
-    Save_MemoryCard_ReleaseResources();
+    VS::Save::MemoryCard::ReleaseLiveTitleResources();
     return ret;
 }
 
