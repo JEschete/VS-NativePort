@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 154 | 10 (`wip`) | 4,043 |
-| `cpp` | 154 | 127 (`wip`) | 3,926 |
+| `modernized` | 174 | 10 (`wip`) | 4,023 |
+| `cpp` | 174 | 107 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 281 |
-| `vs_namespace` | 154 |
-| `typed_interface` | 154 |
-| `no_bridge` | 154 |
+| `vs_namespace` | 174 |
+| `typed_interface` | 174 |
+| `no_bridge` | 174 |
 | `strict_clean` | 281 |
-| `behavior_evidence` | 154 |
+| `behavior_evidence` | 174 |
 
-Promotion records: 281; derived `cpp=x`: 154, `cpp=wip`: 127. Verification records: 95; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 174, `cpp=wip`: 107. Verification records: 96; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -233,6 +233,8 @@ The forty-ninth is the AI decision behaviours (F01655, F01669, F01670, F04203-F0
 and the live selection bounds the spawn settings index to the nine-entry behaviour table (#272), wandering with a diagnostic instead of calling past it; DecisionCallbacks.cpp/.h and the seven Battle_Ai_ symbols are retired.
 The fiftieth is the room geometry renderer (F00744-F00760, F00769, F00770, F00773, F00775): VS::Render room group records, transforms, packed decoding, projection, subdivision, depth links, tint and the sky dome are C++ over transformer and packet queue hosts with bounded spans,
 and the live binding owns the room clip state and bounds every packet by the current frame buffer; RoomDraw.cpp leaves the relaxed copied-code settings and RoomDraw.h and the twenty-one Render_ room symbols are retired.
+The fifty-first is the SPU voice output and cutscene stream control (F03159, F03163-F03169, F03178, F03257, F03258, F03379, F03382, F03392-F03396, F03545, F03546): VS::Audio voice key, mode, volume, rate and release writes, bank uploads and the stream commands are C++ over voice, bank and stream hosts that refuse voices, values and banks outside their bounds,
+and stream commands name their source by an opaque StreamSourceId that is compared, never dereferenced; SequencerOutput.cpp and StreamPlayback.cpp and the twenty Audio_ voice and stream symbols are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
