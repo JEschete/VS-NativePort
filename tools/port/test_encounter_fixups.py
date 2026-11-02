@@ -1615,18 +1615,18 @@ class EncounterFixupTests(unittest.TestCase):
             owned = {row["id"]: row for row in csv.DictReader(stream)}
         self.assertEqual(
             owned["F00979"]["header"],
-            r"Native\Game\src\Actors\AppearanceTransition.h",
+            r"Native\Game\include\Actors\AppearanceTransition.hpp",
         )
-        source = """((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(actor, NULL, 0);
-((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(attached, NULL, 0);
-((void (*)(void*, void*, int))Actors_UpdateActorPalettePulse)(NULL, (Actors_ActorRecord*)object, 0);"""
+        source = """VS::Actors::UpdatePalettePulse(actor, NULL, 0);
+VS::Actors::UpdatePalettePulse(attached, NULL, 0);
+VS::Actors::UpdatePalettePulse(NULL, (Actors_ActorRecord*)object, 0);"""
         for old, new, _ in copy_fixups.FIXES["F01008"]:
             source = source.replace(old, new)
         self.assertEqual(
             source,
-            """Actors_UpdateActorPalettePulse(actor, NULL, 0);
-Actors_UpdateActorPalettePulse(attached, NULL, 0);
-Actors_UpdateActorPalettePulse(NULL, object, 0);""",
+            """VS::Actors::UpdateLiveActorPalettePulse(*actor);
+VS::Actors::UpdateLiveActorPalettePulse(*attached);
+VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
         )
 
     def test_transition_text_uses_original_encoded_controls_not_ascii(self):
@@ -2248,16 +2248,16 @@ d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
         self.assertEqual(source, "u_short pulsedPalette[16];")
 
     def test_room_rendering_dispatches_typed_appearance_owners(self):
-        source = """((void (*)(void*))Actors_UpdateActorAppearanceTransition)(actor);
-((void (*)(void*))Actors_UpdateActorAppearanceTransition)(attached);
-((void (*)(void*))Actors_UpdateActorAppearanceTransition)((Actors_ActorRecord*)object);
+        source = """VS::Actors::UpdateActorAppearanceTransition(actor);
+VS::Actors::UpdateActorAppearanceTransition(attached);
+VS::Actors::UpdateActorAppearanceTransition((Actors_ActorRecord*)object);
 """
         for old, new, _ in copy_fixups.FIXES["F01008"]:
             source = source.replace(old, new)
-        self.assertIn("Actors_UpdateActorAppearanceTransition(actor);", source)
-        self.assertIn("Actors_UpdateActorAppearanceTransition(attached);", source)
-        self.assertIn("Field_UpdateGimmickAppearanceTransition(object);", source)
-        self.assertNotIn("void (*)(void*)", source)
+        self.assertIn("VS::Actors::UpdateLiveActorAppearanceTransition(*actor);", source)
+        self.assertIn("VS::Actors::UpdateLiveActorAppearanceTransition(*attached);", source)
+        self.assertIn("VS::Actors::UpdateLiveGimmickAppearanceTransition(*object);", source)
+        self.assertNotIn("Actors_ActorRecord*", source)
 
     def test_effect_register_consumers_preserve_original_operand_order(self):
         for function_id, function_name in (

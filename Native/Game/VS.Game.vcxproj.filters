@@ -171,9 +171,9 @@
     <ClCompile Include="src\Actors\AppearanceTransition.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\AppearanceTransition.h">
+    <ClCompile Include="src\Actors\AppearanceTransitionLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Actors\Ashley.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -2207,6 +2207,12 @@
     </ClCompile>
     <ClInclude Include="src\Title\TitleScreen.h">
       <Filter>src\Title</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AppearanceTransition.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\AppearanceTransitionLive.hpp">
+      <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\MovementCommand.hpp">
       <Filter>include\Actors</Filter>

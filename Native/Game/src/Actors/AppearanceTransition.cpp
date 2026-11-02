@@ -1,393 +1,242 @@
 // Hand-maintained (tools/port/owned.csv).
-#include <stdint.h>
+// Palette pulse and appearance transitions over typed palette subjects
+// (BATTLE.PRG 40564.c).
+#include "Actors/AppearanceTransition.hpp"
 
-#include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Actors/Animation.h"
-#include "Actors/AppearanceTransition.h"
-#include "Actors/ModelRendering.h"
-#include "Actors/Movement.h"
-#include "Actors/Skeleton.h"
-#include "Actors/WeaponModel.h"
-#include "Core/Math/FixedPoint.h"
-#include "Field/Collision.h"
-#include "Render/Palette.h"
-#include "State/Timers.h"
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <span>
 
-enum {
-  kEquipmentSlotsPerActor = 2,
-  kPaletteColors = 160,
-  kSmallPaletteColors = 16,
-  kGimmickClutRow = 31,
-  kActorClutRowBase = 4,
-  kEquipmentClutStride = 48,
-  kRed = 0,
-  kGreen = 1,
-  kBlue = 2,
-  kColorCounter = 3,
-  kColorStep = 4,
-  kReturnColorStep = 8,
-  kFadeMaximum = 64,
-  kMaximumColor = 255,
-  kDelayFrames = 15,
-  kCarryFirstBone = 0xF0,
-  kCarrySecondBone = 0xF1,
-  kReleasedGimmickHeight = 60,
-  kReleasedGimmickMode = 0xFC,
-  kDetachedParent = 0xFF,
-  kFacingMask = 0xFFF,
-  kCollisionDiagonalAngle = 0x200,
-  kFallingMovementMode = 4,
-  kDeathAnimationProbe = 0xAB,
-  kFallingDeathAnimation = 0x47,
-  kDeathBlendFrames = 8,
-  kDeathFade = 2,
-  kDeathDarken = 3,
-  kDisappearance = 4,
-  kAppearanceDelay = 6,
-  kAppearanceDarken = 7,
-  kAppearanceWhite = 9,
-  kAppearanceRestore = 10,
-  kAppearanceRestoreDone = 11,
-  kAppearanceSlowDarken = 12,
-  kAppearanceBlack = 14,
-  kPaletteRemoveRedGreen = 0,
-  kPaletteDarken = 1,
-  kPaletteWhite = 2,
-  kPaletteBrightenGreenBlue = 3,
-  kPaletteRestore = 4,
-  kPaletteSlowDarken = 5,
-  kPaletteBlack = 6,
-  kPulseActorClutRowBase = 22,
-  kPulsePeak = 16,
-  kPulseStep = 2,
-  kPulseDescending = 2,
-  kPulseDoubleTickSpeed = 4,
-  kPaletteChannelMaximum = 31,
-  kPaletteGreenShift = 5,
-  kPaletteBlueShift = 10,
-  kPaletteOpaqueBit = 0x8000,
-  kPulsePeakRed = 8,
-  kPulsePeakGreen = 18,
-  kPulsePeakBlue = 30
-};
+namespace VS::Actors {
+namespace {
+constexpr int kPulseStep = 2;
+constexpr std::uint8_t kPulseDescending = 2;
+constexpr int kDoubleTickSpeed = 4;
+constexpr int kChannelMaximum = 31;
+constexpr int kGreenShift = 5;
+constexpr int kBlueShift = 10;
+constexpr std::uint16_t kOpaqueBit = 0x8000;
+constexpr int kPeakRed = 8;
+constexpr int kPeakGreen = 18;
+constexpr int kPeakBlue = 30;
+constexpr int kColorStep = 4;
+constexpr int kReturnColorStep = 8;
+constexpr int kMaximumColor = 255;
+constexpr int kDelayFrames = 15;
+constexpr int kByteRange = 256;
+constexpr int kSignedByteMaximum = 127;
 
-static int SignedByte(u_char value) {
-  return value <= INT8_MAX ? value : static_cast<int>(value) - (UINT8_MAX + 1);
+int SignedByte(std::uint8_t value) {
+  return value <= kSignedByteMaximum ? value : value - kByteRange;
 }
 
-typedef struct AppearanceTarget {
-  Actors_ActorRecord* actor;
-  u_short* colors;
-  u_short* reference;
-  u_char* color;
-  u_char* fade_level;
-  const u_char* fade_target;
-  Render_ColorCode* tint;
-  int state;
-  int slot;
-  int speed;
-  int count;
-  int skip;
-} AppearanceTarget;
+std::uint8_t Byte(int value) { return static_cast<std::uint8_t>(value); }
 
-static int AdvancePalettePulse(Actors_ModelEffectSlot* pulse) {
-  int level = pulse->level;
-  const int steps = State_tickSpeed == kPulseDoubleTickSpeed ? 2 : 1;
+int ClampChannel(int channel) {
+  return std::clamp(channel, 0, kChannelMaximum);
+}
+
+void SetRgb(AppearanceColors& colors, int value) {
+  colors.rgb.fill(Byte(value));
+}
+
+bool IncreaseFade(AppearanceTransition& transition) {
+  const int level =
+      std::min(SignedByte(transition.colors.fade_level) + transition.speed * 2,
+               kAppearanceFadeMaximum);
+  transition.colors.fade_level = Byte(level);
+  return level != kAppearanceFadeMaximum;
+}
+
+void FinishPaletteStep(AppearanceTransition& transition,
+                       AppearanceSubject& subject, bool changed) {
+  subject.UploadPalettes(transition.state);
+  if (!changed) {
+    ++transition.state;
+    subject.PublishState(transition.state);
+  }
+}
+
+bool Apply(AppearanceTransition& transition, AppearanceSubject& subject,
+           PaletteTransition mode) {
+  return subject.ApplyPalettes(mode, transition.speed);
+}
+
+// func_800AB9A4 state 4: the model darkens to black while its fade rises.
+void AdvanceDisappearance(AppearanceTransition& transition,
+                          AppearanceSubject& subject) {
+  subject.ReleaseCarriedGimmick();
+  const int value =
+      std::max(transition.colors.rgb[0] - transition.speed * kColorStep, 0);
+  SetRgb(transition.colors, value);
+  bool changed = value != 0;
+  changed |= IncreaseFade(transition);
+  FinishPaletteStep(transition, subject, changed);
+}
+
+// func_800AB9A4 state 10: the fade and color return to the saved tint.
+void AdvanceRestore(AppearanceTransition& transition,
+                    AppearanceSubject& subject) {
+  AppearanceColors& colors = transition.colors;
+  const int target = SignedByte(colors.fade_target);
+  const int level =
+      std::max(SignedByte(colors.fade_level) - transition.speed * 2, target);
+  colors.fade_level = Byte(level);
+  bool changed = level != target;
+  changed |= StepRgbTowardTarget(colors.rgb, colors.tint,
+                                 -transition.speed * kReturnColorStep);
+  changed |= Apply(transition, subject, PaletteTransition::kRestore);
+  FinishPaletteStep(transition, subject, changed);
+}
+
+void AdvanceDeathDarken(AppearanceTransition& transition,
+                        AppearanceSubject& subject) {
+  const bool changed = Apply(transition, subject, PaletteTransition::kDarken);
+  if (!changed) {
+    SetRgb(transition.colors, kAppearanceFadeMaximum);
+    transition.colors.delay = 0;
+    (void)Apply(transition, subject, PaletteTransition::kWhite);
+  }
+  FinishPaletteStep(transition, subject, changed);
+}
+
+void AdvanceDelay(AppearanceTransition& transition,
+                  AppearanceSubject& subject) {
+  ++transition.colors.delay;
+  bool changed = transition.colors.delay < kDelayFrames;
+  (void)IncreaseFade(transition);
+  changed |= Apply(transition, subject, PaletteTransition::kBrightenGreenBlue);
+  FinishPaletteStep(transition, subject, changed);
+}
+}  // namespace
+
+int AdvancePalettePulse(PalettePulse& pulse, int tick_speed) {
+  int level = pulse.level;
+  const int steps = tick_speed == kDoubleTickSpeed ? 2 : 1;
   for (int step = 0; step < steps; ++step) {
-    if ((pulse->flags & kPulseDescending) == 0) {
+    if ((pulse.flags & kPulseDescending) == 0) {
       level += kPulseStep;
-      if (level >= kPulsePeak) pulse->flags |= kPulseDescending;
+      if (level >= kPalettePulsePeak) {
+        pulse.flags |= kPulseDescending;
+      }
     } else {
       level -= kPulseStep;
-      if (level <= 0) pulse->flags &= ~kPulseDescending;
+      if (level <= 0) {
+        pulse.flags &= static_cast<std::uint8_t>(~kPulseDescending);
+      }
     }
   }
-  pulse->level = (u_char)level;
+  pulse.level = Byte(level);
   return level;
 }
 
-static int ClampPaletteChannel(int channel) {
-  if (channel < 0) return 0;
-  return channel > kPaletteChannelMaximum ? kPaletteChannelMaximum : channel;
+std::uint16_t PulsePaletteColor(std::uint16_t color, int level) {
+  const int red = color & kChannelMaximum;
+  const int green = (color >> kGreenShift) & kChannelMaximum;
+  const int blue = (color >> kBlueShift) & kChannelMaximum;
+  const bool peak = level == kPalettePulsePeak;
+  const int r = ClampChannel(red + (peak ? kPeakRed : -level / 2));
+  const int g = ClampChannel(green + (peak ? kPeakGreen : level / 2));
+  const int b = ClampChannel(blue + (peak ? kPeakBlue : level));
+  return static_cast<std::uint16_t>((color & kOpaqueBit) | r |
+                                    (g << kGreenShift) | (b << kBlueShift));
 }
 
-static u_short PulsePaletteColor(u_short color, int level) {
-  const int red = color & kPaletteChannelMaximum;
-  const int green = (color >> kPaletteGreenShift) & kPaletteChannelMaximum;
-  const int blue = (color >> kPaletteBlueShift) & kPaletteChannelMaximum;
-  const int peak = level == kPulsePeak;
-  const int r = ClampPaletteChannel(red + (peak ? kPulsePeakRed : -level / 2));
-  const int g =
-      ClampPaletteChannel(green + (peak ? kPulsePeakGreen : level / 2));
-  const int b = ClampPaletteChannel(blue + (peak ? kPulsePeakBlue : level));
-  return (u_short)((color & kPaletteOpaqueBit) | r | (g << kPaletteGreenShift) |
-                   (b << kPaletteBlueShift));
-}
-
-// func_800AB788, BATTLE/40564.c:1651. PS1 palette offsets are not native
-// offsets after the gimmick's model pointer widens.
-void Actors_UpdateActorPalettePulse(Actors_ActorRecord* actor,
-                                    Field_GimmickInstance* object, int unused) {
-  (void)unused;
-  Actors_ModelEffectSlot* pulse =
-      actor != nullptr ? &actor->instance.palettePulse : &object->palettePulse;
-  const u_short* source =
-      actor != nullptr ? actor->basePalette : object->basePalette;
-  u_short* destination =
-      actor != nullptr ? actor->currentPalette : object->pulsedPalette;
-  const int count = actor != nullptr && actor->textureHeaderBit
-                        ? kPaletteColors
-                        : kSmallPaletteColors;
-  const int level = AdvancePalettePulse(pulse);
-  for (int index = 0; index < count; ++index) {
+int UpdatePalettePulse(PalettePulse& pulse, int tick_speed,
+                       std::span<const std::uint16_t> source,
+                       std::span<std::uint16_t> destination) {
+  const int level = AdvancePalettePulse(pulse, tick_speed);
+  const std::size_t count = std::min(source.size(), destination.size());
+  for (std::size_t index = 0; index < count; ++index) {
     if (source[index] != 0) {
       destination[index] = PulsePaletteColor(source[index], level);
     }
   }
-  if (actor != nullptr) {
-    Render_LoadClutColors(
-        destination, actor->instance.slot + kPulseActorClutRowBase, 0, count);
-  } else {
-    Render_LoadClutColors(destination, kGimmickClutRow,
-                          object->slot * kSmallPaletteColors, count);
-  }
+  return level;
 }
 
-static int ApplyPalettes(AppearanceTarget* target, int mode) {
-  int changed = Render_ApplyPaletteTransition(
-      target->colors + target->skip, target->count - target->skip,
-      target->speed, mode, target->reference + target->skip);
-  if (target->actor != nullptr) {
-    for (int index = 0; index < kEquipmentSlotsPerActor; ++index) {
-      Actors_WeaponModel* weapon =
-          Actors_weaponModels[target->slot * kEquipmentSlotsPerActor + index];
-      if (weapon != nullptr) {
-        changed |= Render_ApplyPaletteTransition(
-            weapon->uploadPalette, weapon->paletteColorCount, target->speed,
-            mode, weapon->workingPalette);
-      }
+// Render_StepRgbTowardTarget (SLUS_010.40): the channels are bytes, so a step
+// past zero wraps before the clamp compares them.
+bool StepRgbTowardTarget(std::span<std::uint8_t, kRgbChannels> current,
+                         std::span<const std::uint8_t, kRgbChannels> target,
+                         int signed_step) {
+  bool changed = false;
+  for (std::size_t channel = 0; channel < current.size(); ++channel) {
+    const std::uint8_t goal = target[channel];
+    std::uint8_t& value = current[channel];
+    const bool short_of_goal = signed_step < 0 ? goal < value : value < goal;
+    if (!short_of_goal) {
+      continue;
+    }
+    changed = true;
+    value = Byte(value + signed_step);
+    if (signed_step < 0 ? value < goal : goal < value) {
+      value = goal;
     }
   }
   return changed;
 }
 
-static void UploadPalettes(AppearanceTarget* target) {
-  if (target->actor == nullptr) {
-    Render_LoadClutColors(target->colors, kGimmickClutRow,
-                          target->slot * kSmallPaletteColors,
-                          kSmallPaletteColors);
-    return;
-  }
-  Render_LoadClutColors(target->colors, target->slot + kActorClutRowBase, 0,
-                        target->count);
-  for (int index = 0; index < kEquipmentSlotsPerActor; ++index) {
-    Actors_WeaponModel* weapon =
-        Actors_weaponModels[target->slot * kEquipmentSlotsPerActor + index];
-    if (weapon != nullptr) {
-      weapon->ownerMotionState = target->state;
-      Render_LoadClutColors(weapon->uploadPalette,
-                            target->slot + kActorClutRowBase,
-                            kPaletteColors + kEquipmentClutStride * index,
-                            weapon->paletteColorCount);
-    }
-  }
-}
-
-static void FinishPaletteStep(AppearanceTarget* target, int changed) {
-  UploadPalettes(target);
-  if (changed == 0) {
-    ++target->state;
-    if (target->actor != nullptr) {
-      for (int index = 0; index < kEquipmentSlotsPerActor; ++index) {
-        Actors_WeaponModel* weapon =
-            Actors_weaponModels[target->slot * kEquipmentSlotsPerActor + index];
-        if (weapon != nullptr) {
-          weapon->ownerMotionState = target->state;
-        }
-      }
-    }
-  }
-}
-
-static void SetRgb(AppearanceTarget* target, int value) {
-  target->color[kRed] = target->color[kGreen] = target->color[kBlue] = value;
-}
-
-static int IncreaseFade(AppearanceTarget* target) {
-  int level = SignedByte(*target->fade_level) + target->speed * 2;
-  if (level > kFadeMaximum) {
-    level = kFadeMaximum;
-  }
-  *target->fade_level = level;
-  return level != kFadeMaximum;
-}
-
-static void ReleaseCarriedGimmick(Actors_ActorRecord* actor) {
-  if (actor == nullptr || !actor->actionPoseActive) {
-    return;
-  }
-  Field_GimmickInstance* object = Field_gimmickInstances[actor->supportGimmick];
-  SVECTOR first;
-  SVECTOR second;
-  Actors_ActorTaggedBonePosition(object->parent, kCarryFirstBone, &first, 1);
-  Actors_ActorTaggedBonePosition(object->parent, kCarrySecondBone, &second, 1);
-  object->positionX = actor->instance.position.vx;
-  object->positionZ = actor->instance.position.vz;
-  object->positionY = VS::Core::Math::WrapSigned16((first.vy + second.vy) / 2 +
-                                                   kReleasedGimmickHeight);
-  object->mode = kReleasedGimmickMode;
-  object->slideX = object->velocityY = 0;
-  object->parent = kDetachedParent;
-  object->rotationY =
-      (object->rotationY + (u_short)actor->instance.facing) & kFacingMask;
-  actor->actionPoseActive = 0;
-  Actors_pushedGimmickIndex = actor->supportGimmick;
-}
-
-static void UpdateDeathMotion(Actors_ActorRecord* actor) {
-  if (actor->instance.actionAnimationState >= kAppearanceDelay ||
-      actor->instance.movementMode == 0) {
-    return;
-  }
-  int diagonal =
-      Core_Gte_Sin(kCollisionDiagonalAngle) * actor->collisionRadius / ONE;
-  Field_SampleActorCollisionPerimeter(actor, diagonal);
-  Field_ApplyActorWallRepulsion(actor, &actor->instance.rootMotion);
-  actor->instance.rootMotion.vx /= 2;
-  actor->instance.rootMotion.vz /= 2;
-  Actors_UpdateActorJumpAndFall(actor->instance.slot, actor);
-  if (actor->instance.movementMode >= kFallingMovementMode &&
-      actor->instance.slot != 0) {
-    u_short* header;
-    Actors_FindActorAnimationHeader(actor, kDeathAnimationProbe, &header);
-    if (header != nullptr) {
-      actor->animationLocked = 0;
-      Actors_PlayActorAnimation(actor->instance.slot, kFallingDeathAnimation, 0,
-                                kDeathBlendFrames);
-      actor->animationLocked = 1;
-    }
-  }
-}
-
-static void AdvanceDisappearance(AppearanceTarget* target) {
-  ReleaseCarriedGimmick(target->actor);
-  int value = target->color[kRed] - target->speed * kColorStep;
-  if (value < 0) {
-    value = 0;
-  }
-  SetRgb(target, value);
-  int changed = value != 0;
-  changed |= IncreaseFade(target);
-  FinishPaletteStep(target, changed);
-}
-
-static void AdvanceReturnTint(AppearanceTarget* target) {
-  int level = SignedByte(*target->fade_level) - target->speed * 2;
-  int destination = SignedByte(*target->fade_target);
-  if (level < destination) {
-    level = destination;
-  }
-  *target->fade_level = level;
-  int changed = level != destination;
-  changed |= Render_StepRgbTowardTarget(target->color,
-                                        reinterpret_cast<u_char*>(target->tint),
-                                        -target->speed * kReturnColorStep);
-  changed |= ApplyPalettes(target, kPaletteRestore);
-  FinishPaletteStep(target, changed);
-}
-
-static void AdvanceAppearance(AppearanceTarget* target) {
-  int changed;
-  switch (target->state) {
-    case kDeathFade:
-      FinishPaletteStep(target, ApplyPalettes(target, kPaletteRemoveRedGreen));
+// func_800AB9A4 (BATTLE.PRG 40564.c:1769) after the death motion.
+void AdvanceAppearanceTransition(AppearanceTransition& transition,
+                                 AppearanceSubject& subject) {
+  switch (transition.state) {
+    case kAppearanceDeathFade:
+      FinishPaletteStep(
+          transition, subject,
+          Apply(transition, subject, PaletteTransition::kRemoveRedGreen));
       break;
-    case kDeathDarken:
-      changed = ApplyPalettes(target, kPaletteDarken);
-      if (changed == 0) {
-        SetRgb(target, kFadeMaximum);
-        target->color[kColorCounter] = 0;
-        ApplyPalettes(target, kPaletteWhite);
-      }
-      FinishPaletteStep(target, changed);
+    case kAppearanceDeathDarken:
+      AdvanceDeathDarken(transition, subject);
       break;
-    case kDisappearance:
-      AdvanceDisappearance(target);
+    case kAppearanceDisappearance:
+      AdvanceDisappearance(transition, subject);
       break;
     case kAppearanceDelay:
-      ++target->color[kColorCounter];
-      changed = target->color[kColorCounter] < kDelayFrames;
-      IncreaseFade(target);
-      changed |= ApplyPalettes(target, kPaletteBrightenGreenBlue);
-      FinishPaletteStep(target, changed);
+      AdvanceDelay(transition, subject);
       break;
     case kAppearanceDarken:
-      IncreaseFade(target);
-      FinishPaletteStep(target, ApplyPalettes(target, kPaletteDarken));
+      (void)IncreaseFade(transition);
+      FinishPaletteStep(transition, subject,
+                        Apply(transition, subject, PaletteTransition::kDarken));
       break;
     case kAppearanceWhite:
-      SetRgb(target, kMaximumColor);
-      FinishPaletteStep(target, ApplyPalettes(target, kPaletteWhite));
+      SetRgb(transition.colors, kMaximumColor);
+      FinishPaletteStep(transition, subject,
+                        Apply(transition, subject, PaletteTransition::kWhite));
       break;
     case kAppearanceRestore:
-      AdvanceReturnTint(target);
+      AdvanceRestore(transition, subject);
       break;
     case kAppearanceRestoreDone:
-      target->state = 0;
+      transition.state = 0;
       break;
     case kAppearanceSlowDarken:
-      FinishPaletteStep(target, ApplyPalettes(target, kPaletteSlowDarken));
+      FinishPaletteStep(
+          transition, subject,
+          Apply(transition, subject, PaletteTransition::kSlowDarken));
       break;
     case kAppearanceBlack:
-      *target->fade_level = kFadeMaximum;
-      FinishPaletteStep(target, ApplyPalettes(target, kPaletteBlack));
+      transition.colors.fade_level = Byte(kAppearanceFadeMaximum);
+      FinishPaletteStep(transition, subject,
+                        Apply(transition, subject, PaletteTransition::kBlack));
       break;
     default:
       break;
   }
 }
 
-// decomp: BATTLE.PRG func_800AB9A4 (src/BATTLE/BATTLE.PRG/40564.c:1769).
-// Native actors own both selected palette rows; currentPalette is a separate
-// pulse buffer and must not be substituted for the transition row.
-void Actors_UpdateActorAppearanceTransition(Actors_ActorRecord* actor) {
-  UpdateDeathMotion(actor);
-  AppearanceTarget target = {
-      .actor = actor,
-      .colors = actor->basePalette + kPaletteColors,
-      .reference = actor->basePalette,
-      .color = reinterpret_cast<u_char*>(&actor->instance.baseColor),
-      .fade_level = &actor->fadeRed,
-      .fade_target = &actor->fadeGreen,
-      .tint = &actor->instance.tint,
-      .state = actor->instance.actionAnimationState,
-      .slot = actor->instance.slot,
-      .speed = State_tickSpeed / 2,
-      .count = actor->textureHeaderBit ? kPaletteColors : kSmallPaletteColors,
-      .skip = actor->textureHeaderBit ? 1 : 0};
-  AdvanceAppearance(&target);
-  actor->instance.actionAnimationState = target.state;
-}
-
-// Gimmick callers retain their existing state contract; no actor pointer or
-// actor palette is resolved through the hardware-shaped gimmick view.
-void Field_UpdateGimmickAppearanceTransition(Field_GimmickInstance* object) {
-  AppearanceTarget target = {
-      .colors = object->pulsedPalette,
-      .reference = object->basePalette,
-      .color = reinterpret_cast<u_char*>(&object->baseColor),
-      .fade_level = &object->fadeRed,
-      .fade_target = &object->fadeGreen,
-      .tint = &object->tint,
-      .state = object->motionState,
-      .slot = object->slot,
-      .speed = State_tickSpeed / 2,
-      .count = kSmallPaletteColors};
-  if (target.state == kDeathFade) {
-    target.speed *= 2;
+void UpdateActorAppearanceTransition(ActorAppearance& actor) {
+  if (actor.TransitionState() < kAppearanceDelay && actor.MovementMode() != 0) {
+    actor.SettleDeathMotion();
+    constexpr int kFallingMovementMode = 4;
+    if (actor.MovementMode() >= kFallingMovementMode && !actor.IsPlayer()) {
+      actor.PlayFallingDeathAnimation();
+    }
   }
-  AdvanceAppearance(&target);
-  object->motionState = target.state;
+  AppearanceTransition transition = actor.LoadTransition();
+  AdvanceAppearanceTransition(transition, actor);
+  actor.StoreTransition(transition);
 }
-}  // extern "C"
+}  // namespace VS::Actors

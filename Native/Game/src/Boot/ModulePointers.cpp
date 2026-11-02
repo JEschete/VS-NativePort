@@ -10,7 +10,6 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
-#include "Actors/AppearanceTransition.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
@@ -20,7 +19,6 @@ extern "C" {
 #include "Actors/ModelRendering.h"
 #include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
-#include "Actors/Palette.h"
 #include "Actors/RoomState.h"
 #include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
@@ -1263,8 +1261,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AB2ACu, 0u, (void*)&Actors_ResetActorTextureFrames, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AB358u, 0u, (void*)&Actors_UploadActorTextureOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AB4F0u, 0u, (void*)&Actors_UpdateActorTextureScrolling, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AB788u, 0u, (void*)&Actors_UpdateActorPalettePulse, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AB9A4u, 0u, (void*)&Actors_UpdateActorAppearanceTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC0D4u, 0u, (void*)&Render_StepRgbTowardTarget, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC168u, 0u, (void*)&Render_ApplyPaletteTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC37Cu, 0u, (void*)&Actors_StartActorAppearanceTransition, 0u, 0u, 0u},

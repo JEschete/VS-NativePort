@@ -62,6 +62,7 @@
     <ClCompile Include="src\AiPlanningTests.cpp" />
     <ClCompile Include="src\AiRelationsTests.cpp" />
     <ClCompile Include="src\AiSessionResetTests.cpp" />
+    <ClCompile Include="src\AppearanceTransitionTests.cpp" />
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />
     <ClCompile Include="src\CameraConstraintTests.cpp" />

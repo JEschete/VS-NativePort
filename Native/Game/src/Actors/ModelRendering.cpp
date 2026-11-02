@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
@@ -7,13 +8,11 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
-#include "Actors/AppearanceTransition.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
-#include "Actors/Palette.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -101,10 +100,10 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
             && (actor->instance.attachBone != 0xFC)) {
             ((void (*)(void*))Actors_UpdateActorTextureAnimations)(actor);
             if (actor->instance.palettePulse.kind != 0) {
-                Actors_UpdateActorPalettePulse(actor, NULL, 0);
+                VS::Actors::UpdateLiveActorPalettePulse(*actor);
             }
             if (actor->instance.actionAnimationState) {
-                Actors_UpdateActorAppearanceTransition(actor);
+                VS::Actors::UpdateLiveActorAppearanceTransition(*actor);
             }
             actor->instance.wasDrawn = 0;
             if (actor->instance.isFrozen) {
@@ -149,10 +148,10 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                         attached = entries[actor->companionSlot];
                         ((void (*)(void*))Actors_UpdateActorTextureAnimations)(attached);
                         if (attached->instance.palettePulse.kind != 0) {
-                            Actors_UpdateActorPalettePulse(attached, NULL, 0);
+                            VS::Actors::UpdateLiveActorPalettePulse(*attached);
                         }
                         if (attached->instance.actionAnimationState) {
-                            Actors_UpdateActorAppearanceTransition(attached);
+                            VS::Actors::UpdateLiveActorAppearanceTransition(*attached);
                         }
                         if (actor->instance.isFrozen) {
                             VS::Actors::UpdateActorSoundTransition(*attached);
@@ -239,10 +238,10 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
             *(int*)&objectScratch->rootOffset = packedPosition;
             objectScratch->rootOffset.vy += modelHeight / 2;
             if (object->palettePulse.kind != 0) {
-                Actors_UpdateActorPalettePulse(NULL, object, 0);
+                VS::Actors::UpdateLiveGimmickPalettePulse(*object);
             }
             if (object->motionState) {
-                Field_UpdateGimmickAppearanceTransition(object);
+                VS::Actors::UpdateLiveGimmickAppearanceTransition(*object);
             }
             Actors_DrawGimmickModel(object, camera);
         }

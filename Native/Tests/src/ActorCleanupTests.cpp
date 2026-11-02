@@ -9,12 +9,14 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/AppearanceTransitionLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/Appearance.h"
-#include "Actors/AppearanceTransition.h"
+#include "Actors/Skeleton.h"
+#include "Actors/WeaponModel.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
@@ -376,7 +378,7 @@ void CheckPulseCycle(Field_GimmickInstance& object,
   CHECK(object.palettePulse.kind == 128);
   CHECK(object.palettePulse.level == 0);
   CHECK(PulseClut<16>(31, slot * 16) == kPulseColors);
-  Actors_UpdateActorPalettePulse(nullptr, &object, 0);
+  VS::Actors::UpdateLiveGimmickPalettePulse(object);
   const auto offset = static_cast<std::size_t>(slot) * kPulseColors.size();
   for (std::size_t color = 0; color < kPulseColors.size(); ++color) {
     expected_row[offset + color] =
@@ -399,7 +401,7 @@ TEST_CASE("Actor disappearance changes the owning fade byte, not a legacy view",
                      offsetof(Actors_ModelInstance, baseColor);
   expected[color] = expected[color + 1] = expected[color + 2] = 124;
   expected[offsetof(Actors_ActorRecord, fadeRed)] = 32;
-  Actors_UpdateActorAppearanceTransition(&fixture.actor);
+  VS::Actors::UpdateLiveActorAppearanceTransition(fixture.actor);
   std::array<u_char, sizeof(Actors_ActorRecord)> actual;
   std::memcpy(actual.data(), &fixture.actor, actual.size());
   CHECK(fixture.actor.fadeRed == 32);
@@ -435,7 +437,7 @@ TEST_CASE("Actor appearance palettes use their owning selected rows",
     Render_ApplyPaletteTransition(expected.data() + skip, count - skip, 1, 2,
                                   actor.basePalette + skip);
   }
-  Actors_UpdateActorAppearanceTransition(&actor);
+  VS::Actors::UpdateLiveActorAppearanceTransition(actor);
   for (int index = 0; index < 160; ++index) {
     CHECK(actor.basePalette[index] == 0x1234);
     CHECK(actor.basePalette[index + 160] == expected[index]);
@@ -463,7 +465,7 @@ TEST_CASE("Gimmick palette fades stay on their own typed path",
     Render_ApplyPaletteTransition(expected.data(), 16, speed, 2,
                                   object.basePalette);
   }
-  Field_UpdateGimmickAppearanceTransition(&object);
+  VS::Actors::UpdateLiveGimmickAppearanceTransition(object);
   for (int index = 0; index < 16; ++index) {
     CHECK(object.pulsedPalette[index] == expected[index]);
     CHECK(object.basePalette[index] == 0x1234);
@@ -499,7 +501,7 @@ TEST_CASE("Gimmick targeting pulses preserve native ownership and CLUT indices",
       expected.pulsedPalette[i] = PulseColor(kPulseColors[i], level);
     }
   }
-  Actors_UpdateActorPalettePulse(nullptr, &object, 0);
+  VS::Actors::UpdateLiveGimmickPalettePulse(object);
   CHECK(ObjectBytes(object) == ObjectBytes(expected));
   CHECK(
       std::equal(kPulseColors.begin(), kPulseColors.end(), object.basePalette));
@@ -533,7 +535,7 @@ TEST_CASE(
   }
   auto expected_row = PulseClut<256>(24, 0);
   std::copy_n(expected.currentPalette, count, expected_row.begin());
-  Actors_UpdateActorPalettePulse(&actor, nullptr, 0);
+  VS::Actors::UpdateLiveActorPalettePulse(actor);
   CHECK(ObjectBytes(actor) == ObjectBytes(expected));
   CHECK(PulseClut<256>(24, 0) == expected_row);
 }
@@ -604,4 +606,51 @@ TEST_CASE("Non-AI slots outside the perception mask do not retire live peers",
   CHECK(Battle_Ai_actorAiStates[2] == peer);
   CHECK(Battle_Ai_attributeActorMask == (1 << 2));
   Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+}
+
+TEST_CASE("Actors past the equipment table fade without equipment",
+          "[actors][appearance][equipment]") {
+  const int slot = GENERATE(9, 10, 16);
+  AppearanceFixture fixture;
+  auto weapons = std::make_unique<std::array<Actors_WeaponModel, 2>>();
+  for (auto& weapon : *weapons) {
+    weapon.paletteColorCount = 16;
+    weapon.ownerMotionState = 1;
+    std::fill_n(weapon.uploadPalette, 96, 0x7FFF);
+    std::fill_n(weapon.workingPalette, 96, 0x1234);
+  }
+  Actors_weaponModels[18] = &(*weapons)[0];
+  Actors_weaponModels[19] = &(*weapons)[1];
+  auto& actor = fixture.actor;
+  actor.instance.slot = static_cast<u_char>(slot);
+  actor.instance.actionAnimationState = 2;
+  std::fill_n(actor.basePalette, 320, 0x1234);
+  VS::Actors::UpdateLiveActorAppearanceTransition(actor);
+  for (const auto& weapon : *weapons) {
+    const bool owned = slot == 9;
+    CHECK((weapon.uploadPalette[0] != 0x7FFF) == owned);
+    CHECK((weapon.ownerMotionState == 2) == owned);
+  }
+}
+
+TEST_CASE("Equipment palette counts stop at their palette storage",
+          "[actors][appearance][equipment]") {
+  AppearanceFixture fixture;
+  auto weapon = std::make_unique<Actors_WeaponModel>();
+  weapon->paletteColorCount = 200;
+  std::fill_n(weapon->uploadPalette, 96, 0x7FFF);
+  std::fill_n(weapon->workingPalette, 96, 0x1234);
+  weapon->reserved5C0 = 0xA5;
+  weapon->reserved5C1 = 0x5A;
+  weapon->reserved5C2 = 0xBEEF;
+  Actors_weaponModels[0] = weapon.get();
+  auto& actor = fixture.actor;
+  actor.instance.slot = 0;
+  actor.instance.actionAnimationState = 2;
+  std::fill_n(actor.basePalette, 320, 0x1234);
+  VS::Actors::UpdateLiveActorAppearanceTransition(actor);
+  CHECK(weapon->uploadPalette[95] != 0x7FFF);
+  CHECK(weapon->reserved5C0 == 0xA5);
+  CHECK(weapon->reserved5C1 == 0x5A);
+  CHECK(weapon->reserved5C2 == 0xBEEF);
 }
