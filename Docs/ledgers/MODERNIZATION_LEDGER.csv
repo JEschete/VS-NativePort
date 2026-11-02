@@ -3155,7 +3155,7 @@ F03156,Audio_Driver_ReadSampleMemory,Audio::Driver::ReadSampleMemory,Native\Engi
 F03157,Audio_Driver_WaitForSampleTransfer,Audio::Driver::WaitForSampleTransfer,Native\Engine\src\Audio\Driver\SoundDriver.cpp,generated,todo,253,30A,7,relaxed,found,x,,,,,,,1,0,0,x,,,,no,no,0,,characterize-first,
 F03158,Audio_Samples_LoadDeclaredBank,Audio::Samples::LoadDeclaredBank,Native\Engine\src\Audio\Samples\SampleBanks.cpp,generated,todo,253,30A,7,relaxed,found,x,,,,,,,0,0,0,x,,x,,no,yes,75,,executed,
 F03159,Audio_Samples_UploadBank,Audio::Samples::UploadBank,Native\Engine\src\Audio\SequencerOutput.cpp,owned,todo,253,30A,22,strict,found,x,x,,,,x,,1,0,0,x,,x,,no,yes,77,,executed,
-F03160,Audio_Driver_ResetPlaybackState,Audio::Driver::ResetPlaybackState,Native\Engine\src\Audio\Driver\PlaybackReset.cpp,owned,todo,253,30A,0,relaxed,found,x,,,,,,,1,0,1,x,,,,yes,yes,100,,executed,
+F03160,VS::Audio::Driver::ResetPlaybackState,Audio::Driver::ResetPlaybackState,Native\Engine\src\Audio\Driver\PlaybackReset.cpp,owned,done,253,30A,0,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,yes,100,VR-AUDIO-PLAYBACK-RESET-SLICE,recorded,
 F03161,Audio_Driver_Start,Audio::Driver::Start,Native\Engine\src\Audio\Driver\SoundDriver.cpp,generated,todo,253,30A,23,relaxed,found,x,,,,,,,1,0,0,x,EnableEvent;OpenEvent;SetRCnt;StartRCnt,,,no,yes,83,,executed,
 F03162,Audio_Driver_Stop,Audio::Driver::Stop,Native\Engine\src\Audio\Driver\SoundDriver.cpp,generated,todo,253,30A,15,relaxed,found,x,,,,,,,1,0,0,x,CloseEvent;DisableEvent;StopRCnt,,,no,no,0,,characterize-first,
 F03163,Audio_Driver_KeyOnVoices,Audio::Driver::KeyOnVoices,Native\Engine\src\Audio\SequencerOutput.cpp,owned,todo,253,30A,4,strict,found,x,x,,,,x,,2,0,1,x,,,,yes,yes,83,,executed,

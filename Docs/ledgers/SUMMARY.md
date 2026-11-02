@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 89 | 14 (`wip`) | 4,104 |
-| `cpp` | 89 | 192 (`wip`) | 3,926 |
+| `modernized` | 90 | 14 (`wip`) | 4,103 |
+| `cpp` | 90 | 191 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 216 |
-| `vs_namespace` | 89 |
-| `typed_interface` | 89 |
-| `no_bridge` | 89 |
-| `strict_clean` | 216 |
-| `behavior_evidence` | 89 |
+| `source_cpp` | 217 |
+| `vs_namespace` | 90 |
+| `typed_interface` | 90 |
+| `no_bridge` | 90 |
+| `strict_clean` | 217 |
+| `behavior_evidence` | 90 |
 
-Promotion records: 281; derived `cpp=x`: 89, `cpp=wip`: 192. Verification records: 83; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 90, `cpp=wip`: 191. Verification records: 84; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -209,6 +209,8 @@ The thirty-seventh is the actor appearance transitions (F00979, F00980): VS::Act
 and the copied ModelRendering callers use bounded live actor and gimmick bindings; the old Actors_Update*/Field_UpdateGimmickAppearanceTransition entry points and AppearanceTransition.h are retired, and actor slots 10-16 no longer read past the weapon-model table (#260).
 The thirty-eighth is the container save submenu (F02776): VS::Menu::Files::UpdateContainerSave advances a typed ContainerSaveState over a ContainerSaveHost,
 and the copied main menu calls its live binding with the submenu byte; Menu_Files_UpdateContainerSave, NativeContainer.h and the u_char cast adaptation are retired.
+The thirty-ninth is the sound driver playback reset (F03160): VS::Audio::Driver::ResetPlaybackState applies the original reset values over a PlaybackResetHost,
+and the copied driver start calls its live binding; Audio_Driver_ResetPlaybackState, PlaybackReset.h and their EC-02 bridge entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
