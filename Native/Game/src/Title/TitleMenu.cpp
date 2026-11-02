@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
+#include "Movie/IntroPlayerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Items/Weapons.h"
 #include "Menu/Files.h"
 #include "Movie/Intro/Playback.h"
-#include "Movie/Intro/Player.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
@@ -796,7 +796,7 @@ void Title_DrawMenu(void)
             VSync(0);
             Input_UpdateVibrationPatterns();
         } else {
-            Movie_Intro_StopAfterAudioTail();
+            VS::Movie::StopLiveIntroMovieAfterAudioTail();
         }
     }
 }
@@ -1085,8 +1085,8 @@ int Title_Run(void)
         }
 
         Title_LoadBackgroundTextures();
-        Movie_Intro_Start();
-        Movie_Intro_Play();
+        VS::Movie::StartLiveIntroMovie();
+        VS::Movie::PlayLiveIntroMovie();
         Title_InitializeTitleDisplay();
         SetDispMask(1);
         menuData = Title_InitializeMenu(menuItem);
@@ -1179,7 +1179,7 @@ int Title_Run(void)
         }
         if (selectedOption >= Title_MenuItemId_NewGame) {
             if (Movie_Intro_isPlaying != 0) {
-                Movie_Intro_Stop();
+                VS::Movie::StopLiveIntroMovie();
             }
             if (selectedOption == Title_MenuItemId_Continue) {
                 Title_PlayMenuSelectSound();

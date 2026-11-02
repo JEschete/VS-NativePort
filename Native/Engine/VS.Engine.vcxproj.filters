@@ -462,9 +462,9 @@
     <ClCompile Include="src\Movie\Intro\Player.cpp">
       <Filter>src\Movie\Intro</Filter>
     </ClCompile>
-    <ClInclude Include="src\Movie\Intro\Player.h">
+    <ClCompile Include="src\Movie\Intro\PlayerLive.cpp">
       <Filter>src\Movie\Intro</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Movie\Intro.cpp">
       <Filter>src\Movie</Filter>
     </ClCompile>
@@ -767,6 +767,12 @@
     </ClInclude>
     <ClInclude Include="include\Input\Pad.hpp">
       <Filter>include\Input</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Movie\IntroPlayer.hpp">
+      <Filter>include\Movie</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Movie\IntroPlayerLive.hpp">
+      <Filter>include\Movie</Filter>
     </ClInclude>
     <ClInclude Include="include\Movie\Movie.hpp">
       <Filter>include\Movie</Filter>

@@ -122,6 +122,7 @@
     <ClCompile Include="src\GroundNavigationTests.cpp" />
     <ClCompile Include="src\InformationTests.cpp" />
     <ClCompile Include="src\InputTests.cpp" />
+    <ClCompile Include="src\IntroPlayerTests.cpp" />
     <ClCompile Include="src\JumpEntryTests.cpp" />
     <ClCompile Include="src\LauncherTests.cpp" />
     <ClCompile Include="src\LayoutAsserts.cpp">

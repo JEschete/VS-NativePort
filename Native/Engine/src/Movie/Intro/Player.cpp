@@ -1,101 +1,82 @@
 // Hand-maintained (tools/port/owned.csv).
 // The intro movie (TITLE.STR), modernized. The original streamed the STR from
 // the disc and decoded it with the MDEC into the page space; natively the
-// converted movie (VS.Extract) is decoded by Engine\Movie. These keep the
-// original's control flow and timing (22C.c:3649-3730): Play shows the picture
-// until 0x8F5 ticks after the start or until Start/Circle skips it; the
-// soundtrack runs on under the title screen until StopAfterAudioTail, 4401
-// ticks after the start.
-extern "C" {
-#include "Movie/Intro/Player.h"
+// converted movie (VS.Extract) is decoded by Engine\Movie behind the
+// IntroMovieHost. These keep the original's control flow and timing
+// (22C.c:3649-3730): Play shows the picture until 0x8F5 ticks after the start
+// or until Start/Circle skips it; the soundtrack runs on under the title
+// screen until StopAfterAudioTail, 4401 ticks after the start.
+#include <bit>
+#include <cstdint>
 
-#include <stdint.h>
-#include <string.h>
+#include "Movie/IntroPlayer.hpp"
 
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
-#include "Legacy/Psx.h"
-#include "Movie/Intro.h"
-#include "Movie/Intro/Playback.h"
-#include "Movie/MoviePlayer.h"
+namespace VS::Movie {
+namespace {
 
-#define VS_INTRO_PICTURE_TICKS 0x8F5
-#define VS_INTRO_SOUNDTRACK_TICKS 4401
+std::uint32_t ElapsedTicks(const IntroMovieHost& host) {
+  return host.Tick() - host.StartTick();
+}
 
-enum {
-  kPictureWidth = 320,
-  kPictureHeight = 224,
-  kScreenHeight = 240,
-  kRgbChannels = 3,
-  kPageWidth = kPictureWidth * kRgbChannels / static_cast<int>(sizeof(uint16_t))
-};
+IntroPicturePage OtherPage(IntroPicturePage page) {
+  return page == IntroPicturePage::kUpper ? IntroPicturePage::kLower
+                                          : IntroPicturePage::kUpper;
+}
+
+}  // namespace
 
 // decomp: TITLE.PRG _initIntroMovie (src/TITLE/TITLE.PRG/22C.c:3649)
-void Movie_Intro_Start(void) {
-  RECT rect;
-
-  // the original cleared both picture buffers when the first frame's size
-  // became known
-  setRECT(&rect, 0, 0, kPageWidth, 2 * kPictureHeight);
-  ClearImage(&rect, 0, 0, 0);
-  Movie_Intro_legacyMdecState.frameRectIndex = 0;
-  Movie_PlayerOpen("MOV/TITLE.STR");
-  Movie_Intro_isPlaying = 1;
-  Movie_Intro_playbackStartTick = VSync(-1);
+// The original cleared both picture pages when the first frame's size became
+// known.
+void StartIntroMovie(IntroMovieHost& host) {
+  host.ClearPicturePages();
+  host.SetDrawPage(IntroPicturePage::kUpper);
+  host.OpenMovie();
+  host.SetPlaying(true);
+  host.SetStartTick(host.Tick());
 }
 
 // decomp: TITLE.PRG _stopIntroMovie (src/TITLE/TITLE.PRG/22C.c:3670)
-void Movie_Intro_Stop(void) {
-  Movie_Intro_isPlaying = 0;
-  Movie_PlayerClose();
+void StopIntroMovie(IntroMovieHost& host) {
+  host.SetPlaying(false);
+  host.CloseMovie();
 }
 
 // decomp: TITLE.PRG _stopMovieIfComplete (src/TITLE/TITLE.PRG/22C.c:3686)
-void Movie_Intro_StopAfterAudioTail(void) {
-  if ((Movie_Intro_isPlaying != 0) &&
-      ((VSync(-1) - Movie_Intro_playbackStartTick) >=
-       VS_INTRO_SOUNDTRACK_TICKS)) {
-    Movie_Intro_Stop();
+void StopIntroMovieAfterAudioTail(IntroMovieHost& host) {
+  if (host.IsPlaying() && ElapsedTicks(host) >= kIntroSoundtrackTicks) {
+    StopIntroMovie(host);
   }
 }
 
 // decomp: TITLE.PRG _playIntroMovie (src/TITLE/TITLE.PRG/22C.c:3693)
-int Movie_Intro_Play(void) {
-  DISPENV disp;
-  int frames = 0;
+// Each pass draws into the current page, flips the draw page, waits for the
+// vertical blank and polls the pads; the drawn page is shown and the display
+// enabled from the second shown frame. Elapsed ticks wrap like the original's
+// unsigned VSync difference.
+IntroMovieResult PlayIntroMovie(IntroMovieHost& host) {
+  bool shown_first = false;
+  while (true) {
+    const IntroPicturePage page = host.DrawPage();
+    host.DrawFrame(std::bit_cast<std::int32_t>(ElapsedTicks(host)), page);
+    host.SetDrawPage(OtherPage(page));
+    host.WaitForVerticalBlank();
+    host.UpdateControllers();
 
-  while (1) {
-    // the picture alternates between two 480x224 halves of the page space,
-    // 24-bit
-    const u_int target = Movie_Intro_legacyMdecState.frameRectIndex;
-    const uint32_t elapsed_bits = VSync(-1) - Movie_Intro_playbackStartTick;
-    int32_t elapsed;
-    memcpy(&elapsed, &elapsed_bits, sizeof elapsed);
-    Movie_PlayerDrawFrame(elapsed, 0, target == 0 ? 0 : kPictureHeight);
-    Movie_Intro_legacyMdecState.frameRectIndex = target == 0;
-    VSync(0);
-    Input_UpdateControllers();
-
-    if ((VSync(-1) - Movie_Intro_playbackStartTick) >= VS_INTRO_PICTURE_TICKS) {
-      return 0;
+    if (ElapsedTicks(host) >= kIntroPictureTicks) {
+      return IntroMovieResult::kFinished;
     }
 
-    SetDefDispEnv(&disp, 0, target == 0 ? 0 : kPictureHeight, kPageWidth,
-                  kPictureHeight);
-    disp.screen.h = kPictureHeight;
-    disp.screen.y = (kScreenHeight - kPictureHeight) / 2;
-    disp.isrgb24 = 1;
-    disp.disp.w = static_cast<int16_t>((disp.disp.w * 2) / kRgbChannels);
-    PutDispEnv(&disp);
-
-    if (++frames != 1) {
-      SetDispMask(1);
+    host.ShowPage(page);
+    if (shown_first) {
+      host.EnableDisplay();
     }
+    shown_first = true;
 
-    if ((Input_buttonsPressed.allButtons & (PADRright | PADstart))) {
-      return 1;
+    if (host.SkipRequested()) {
+      return IntroMovieResult::kSkipped;
     }
   }
-  return 0;
 }
-}  // extern "C"
+
+}  // namespace VS::Movie
