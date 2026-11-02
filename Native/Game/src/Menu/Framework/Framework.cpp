@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 #include "Save/NativeContainerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -84,7 +85,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/TextureAnimation.h"
 #include "Render/Textures.h"
@@ -972,7 +972,7 @@ Menu_Framework_ActionSelection* Menu_Framework_ActionSelectionState(void) { retu
 // decomp: BATTLE.PRG vs_battle_drawCursor (src/BATTLE/BATTLE.PRG/5BF94.c:4523)
 int Menu_Framework_DrawMainMenuCursor(int animStep, int position)
 {
-    Render_QueueSpriteWithTexturePage(Menu_Framework_cursorBrightnessAnimation[animStep],
+    VS::Render::QueueLiveSpriteWithTexturePage(Menu_Framework_cursorBrightnessAnimation[animStep],
         (((position * 0x10) + 0xA) << 0x10) | 0xB4, 0x100010, (u_long *)(Render_frameScratch.overlayOrderingTable))[4] =
         0x37F83020;
     return (animStep + 1) & 0xF;
@@ -1352,7 +1352,7 @@ void Menu_Framework_DrawCommandLabel(void)
     Menu_Framework_commandLabelActionYPos = y;
 
     if (action != 0) {
-        prim = Render_QueueSprite((1 << 8) | 128,
+        prim = VS::Render::QueueLiveSprite((1 << 8) | 128,
             (312 - (Menu_Framework_commandLabelMenuActionRenderPostitions[action] & 0xFF))
                 | ((Menu_Framework_commandLabelActionYPos - 4) << 16),
             Menu_Framework_commandLabelMenuActionRenderPostitions[action], (u_long *)(Render_frameScratch.overlayOrderingTable));
@@ -1414,7 +1414,7 @@ void Menu_Framework_DrawButtonIcon(
         before = (u_long *)(Render_frameScratch.overlayOrderingTable);
     }
 
-    Render_QueueSpriteWithTexturePage(
+    VS::Render::QueueLiveSpriteWithTexturePage(
         128, vs_getXY_2(x, y), vs_getWH(16, 16), before)[4] =
         vs_getUV0Clut((buttonId & 3) * 16, ((buttonId & 4) * 4) + 128, 944, 223);
 }
@@ -1425,7 +1425,7 @@ int Menu_Framework_DrawCursor(u_int animStep, int xy)
     int clut;
     int cursorAnimStep = animStep >> (Menu_Framework_cursorColor * 8);
 
-    u_long* prim = Render_QueueSpriteWithTexturePage(
+    u_long* prim = VS::Render::QueueLiveSpriteWithTexturePage(
         Menu_Framework_cursorBrightnessAnimation[cursorAnimStep], xy, vs_getWH(16, 16),
         (u_long *)(Render_frameScratch.overlayOrderingTable));
 
@@ -1504,7 +1504,7 @@ void Menu_Framework_DrawFeatheredRowIcon(int direction, int xy, int uvClut, u_lo
     do {
         ++i;
 
-        Render_QueueSpriteWithTexturePage(
+        VS::Render::QueueLiveSpriteWithTexturePage(
             (i * 8) | (1 << 8), xy, vs_getWH(16, 1), before)[4] = uvClut;
 
         xy += vs_getXY(0, direction);
@@ -1515,7 +1515,7 @@ void Menu_Framework_DrawFeatheredRowIcon(int direction, int xy, int uvClut, u_lo
 // decomp: MAINMENU.PRG _renderItemMaterial (src/MENU/MAINMENU.PRG/58EC.c:594)
 void Menu_Framework_DrawMaterialIndicator(int materialId, int xy)
 {
-    u_long* prim = Render_QueueDefaultSprite(vs_getWH(7, 7), xy);
+    u_long* prim = VS::Render::QueueLiveDefaultSprite(vs_getWH(7, 7), xy);
     int uv = (((materialId / 3) * 8) + 216) | ((((materialId % 3) * 8) + 200) << 8);
 
     if (materialId == 2) {
@@ -1528,7 +1528,7 @@ void Menu_Framework_DrawMaterialIndicator(int materialId, int xy)
 // decomp: MAINMENU.PRG _renderOutsetIcon (src/MENU/MAINMENU.PRG/58EC.c:609)
 void Menu_Framework_DrawEquipmentStateIcon(int icon, int xy)
 {
-    Render_QueueDefaultSprite(vs_getWH(16, 16), xy)[4] =
+    VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), xy)[4] =
         vs_getUV0Clut(96 - (icon * 16), 128, 976, 223);
 }
 
@@ -1550,7 +1550,7 @@ void Menu_Framework_DrawRowIcon(int icon, int x, int y)
     icon = (icon - 1) & 0xFF;
 
     if (fade == 0) {
-        u_long* prim = Render_QueueSpriteWithTexturePage(
+        u_long* prim = VS::Render::QueueLiveSpriteWithTexturePage(
             64 << brightness, vs_getXY_2(x, y), vs_getWH(16, 16), (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) + 4));
 
         prim[4] = vs_getUV0Clut(Menu_Framework_rowIconUvs[icon], 0, 992, 223);
@@ -2099,11 +2099,11 @@ void Menu_Framework_DrawBackground(int brightness)
         brightness |= 256;
     }
 
-    prim = Render_QueueSprite(brightness, 256, vs_getWH(64, 240), before);
+    prim = VS::Render::QueueLiveSprite(brightness, 256, vs_getWH(64, 240), before);
     prim[1] = vs_getTpage(768, 256, Render_TextureFormat_Palette8Bit, Render_BlendMode_Add, Render_Dithering_Off);
     prim[4] = vs_getUV0Clut(0, 0, 768, 227);
 
-    prim = Render_QueueSprite(brightness, 0, vs_getWH(256, 240), before);
+    prim = VS::Render::QueueLiveSprite(brightness, 0, vs_getWH(256, 240), before);
     prim[1] = vs_getTpage(640, 256, Render_TextureFormat_Palette8Bit, Render_BlendMode_Add, Render_Dithering_Off);
     prim[4] = vs_getUV0Clut(0, 0, 768, 227);
 
@@ -2111,10 +2111,10 @@ void Menu_Framework_DrawBackground(int brightness)
         int background_texture_page_flags = 288;
         brightness = (256 | 128) - brightness;
 
-        Render_QueueSprite(brightness, 0, vs_getWH(256, 240), before)[1] =
+        VS::Render::QueueLiveSprite(brightness, 0, vs_getWH(256, 240), before)[1] =
             (((u_int)uCoord >> 6) | background_texture_page_flags
                 | vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off));
-        Render_QueueSprite(brightness, 256, vs_getWH(64, 240), before)[1] =
+        VS::Render::QueueLiveSprite(brightness, 256, vs_getWH(64, 240), before)[1] =
             (((uCoord + 256) >> 6) | background_texture_page_flags
                 | vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off));
     }
@@ -2152,7 +2152,7 @@ int Menu_Framework_DrawFeatheredRowCharacter(
 
     for (i = 0; i < 12; ++i) {
 
-        prim = Render_QueueSprite(scroll_direction_sign == 0 ? (i * 8) + 264 : 352 - (i * 8),
+        prim = VS::Render::QueueLiveSprite(scroll_direction_sign == 0 ? (i * 8) + 264 : 352 - (i * 8),
             vs_getXY_2(x, menuItem->y + i), vs_getWH(12, 1), before);
         prim[4] = uvClut;
         prim[1] = vs_getTpage(832, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0);
@@ -2196,7 +2196,7 @@ void Menu_Framework_DrawTabNavigation(int mode)
         i = vs_getXY(16, 16);
     }
 
-    Render_QueueDefaultSprite(vs_getWH(16, 16), i - xy)[4] = clut | vs_getUV(0, 48);
+    VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), i - xy)[4] = clut | vs_getUV(0, 48);
 
     i = vs_getXY(162, 17);
 
@@ -2204,7 +2204,7 @@ void Menu_Framework_DrawTabNavigation(int mode)
         i = vs_getXY(292, 6);
     }
 
-    Render_QueueDefaultSprite(vs_getWH(16, 16), i + xy)[4] = clut | vs_getUV(16, 48);
+    VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), i + xy)[4] = clut | vs_getUV(16, 48);
 }
 
 // decomp: MAINMENU.PRG _renderScrollableRow (src/MENU/MAINMENU.PRG/58EC.c:1309)
@@ -2261,7 +2261,7 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
 
         if (i == 40) {
             prim = before - 2;
-            Render_QueueSpriteWithTexturePage(128, vs_getXY_2(126, menuItem->y + var_s3),
+            VS::Render::QueueLiveSpriteWithTexturePage(128, vs_getXY_2(126, menuItem->y + var_s3),
                 vs_getWH(16, 16), prim)[4] = vs_getUV0Clut(scroll * 16, 48, 912, 223);
         }
 
@@ -2274,7 +2274,7 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
         }
 
         if (i == 32) {
-            Render_QueueSpriteWithTexturePage(128,
+            VS::Render::QueueLiveSpriteWithTexturePage(128,
                 vs_getXY_2(menuItem->x - 14, menuItem->y + var_s3), vs_getWH(16, 16),
                 before - 2)[4] = vs_getUV0Clut(scroll * 16, 48, 912, 223);
         }
@@ -2337,7 +2337,7 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
         var_s3 = ((menuItem->x < 0x80) ^ 1) << 7;
 
         for (i = 0; i < 12; ++i) {
-            prim = Render_QueueSprite(
+            prim = VS::Render::QueueLiveSprite(
                 scroll == 0 ? 120 - i * 8 : i * 8 + 32, xy, wh, before);
             texture_u = (xy - var_s3);
             texture_v = xy >> 0x10;

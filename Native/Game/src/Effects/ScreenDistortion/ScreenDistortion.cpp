@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Effects/ScreenEffects.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 
@@ -43,11 +43,11 @@ void Effects_ScreenDistortion_DrawFeedbackTiles(void)
             for (x = 0x40; x >= 0; x -= 0x20) {
                 int texture_page_mode;
                 if (x == 0x40) {
-                    packet_words = Render_QueueSprite(
+                    packet_words = VS::Render::QueueLiveSprite(
                         0x160, (tile_strip_x + 2) | ((y + 30) << 16), 0x40000 | 0x40, ordering_table);
                     var_s0 = (y + 0x1C) << 8;
                 } else {
-                    packet_words = Render_QueueSprite(
+                    packet_words = VS::Render::QueueLiveSprite(
                         0x160, (tile_strip_x + x + 0x1E) | ((y + 2) << 16), 0x1C0004, ordering_table);
                     var_s0 = (x + 0x1C) | (y << 8);
                 }
@@ -65,16 +65,16 @@ void Effects_ScreenDistortion_DrawFeedbackTiles(void)
             for (var_s0 = 0; var_s0 < 3; ++var_s0) {
                 switch (var_s0) {
                 case 0:
-                    packet_words = Render_QueueSprite(
+                    packet_words = VS::Render::QueueLiveSprite(
                         0x160, (x + 2) | ((y + 2) << 16), 0x1C001C, ordering_table);
                     break;
                 case 1:
-                    packet_words = Render_QueueSprite(
+                    packet_words = VS::Render::QueueLiveSprite(
                         0x160, ((x - 2) & 0xFFFF) | ((y - 2) << 16), 0x200020, ordering_table);
                     break;
                 case 2:
                     packet_words =
-                        Render_QueueSprite(0x60, x | (y << 0x10), 0x200020, ordering_table);
+                        VS::Render::QueueLiveSprite(0x60, x | (y << 0x10), 0x200020, ordering_table);
                     break;
                 }
 

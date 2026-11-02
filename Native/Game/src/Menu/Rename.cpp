@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: D_80105DB0 (D_80105DB0@src/MENU/MENU8.PRG/21A0.c)
@@ -187,7 +187,7 @@ void Menu_Rename_DrawFrame(int xOffset)
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, (-xOffset + 16), 50, 0);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, (-xOffset + 16), 66, 0);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Triangle, (-xOffset + 16), 82, 0);
-    prim = Render_QueueDefaultSprite(
+    prim = VS::Render::QueueLiveDefaultSprite(
         vs_getWH(16, 16), ((-xOffset + 16) & 0xFFFF) | (34 << 16));
     prim[4] = vs_getUV0Clut(176, 112, 944, 223);
 
@@ -281,11 +281,11 @@ void Menu_Rename_DrawFrame(int xOffset)
 
         Render_DrawCompactTextColor("1", vs_getXY(152, 51), color, 0);
         Render_DrawCompactTextColor("L", vs_getXY(146, 51), color, 0);
-        Render_QueueDefaultSprite(vs_getWH(16, 16), (136 - j) | (48 << 16))[4] =
+        VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), (136 - j) | (48 << 16))[4] =
             (x << 0x10) | vs_getUV(0, 48);
         Render_DrawCompactTextColor("1", vs_getXY(292, 51), color, 0);
         Render_DrawCompactTextColor("R", vs_getXY(286, 51), color, 0);
-        Render_QueueDefaultSprite(vs_getWH(16, 16), (j + 296) | (48 << 16))[4] =
+        VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), (j + 296) | (48 << 16))[4] =
             (x << 0x10) | vs_getUV(16, 48);
 
         frame_overlay_ordering_table = (u_long *)(Render_frameScratch.overlayOrderingTable);

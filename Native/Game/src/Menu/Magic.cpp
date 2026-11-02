@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
@@ -945,7 +945,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                 Render_DrawCompactText(
                     Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
 
-                prim = Render_QueueSpriteWithTexturePage(
+                prim = VS::Render::QueueLiveSpriteWithTexturePage(
                     Menu_Framework_cursorBrightnessAnimation[Menu_Magic_warlockLevelCursorBlink],
                     (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
                 prim[4] = vs_getUV0Clut(192, 112, 976, 223);
@@ -964,7 +964,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                 Render_DrawCompactText(
                     Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
 
-                prim = Render_QueueSpriteWithTexturePage(
+                prim = VS::Render::QueueLiveSpriteWithTexturePage(
                     64, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
                 prim[4] = vs_getUV0Clut(192, 112, 992, 223);
 
@@ -975,7 +975,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
                 Render_DrawCompactText(
                     Menu_Magic_warlockMenuSpellLevels[4], (102 + level * 32) | vs_getXY(0, 103), NULL);
 
-                prim = Render_QueueSpriteWithTexturePage(
+                prim = VS::Render::QueueLiveSpriteWithTexturePage(
                     0, (96 + level * 32) | vs_getXY(0, 100), vs_getWH(32, 16), spell_level_ordering_table);
                 prim[1] = 0x64602000;
                 prim[4] = vs_getUV0Clut(192, 112, 992, 223);
@@ -997,7 +997,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
             }
         }
 
-        prim = Render_QueueSpriteWithTexturePage(
+        prim = VS::Render::QueueLiveSpriteWithTexturePage(
             128, vs_getXY(80, 100), vs_getWH(16, 16), spell_level_ordering_table);
         prim[4] = vs_getUV0Clut(80, 48, 976, 223);
 

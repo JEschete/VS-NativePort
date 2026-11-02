@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "State/SceneTimer.h"
 #include "State/StateFlags.h"
@@ -482,7 +482,7 @@ int Menu_DismissTextBox(int id)
 void Menu_DrawInformationBoxHeader(int header_y, u_int header_kind)
 {
     if (header_kind < 3) {
-        Render_QueueDefaultSprite(Menu_informationHeaderPositions[header_kind], (header_y << 0x10) | 0xA)[4] =
+        VS::Render::QueueLiveDefaultSprite(Menu_informationHeaderPositions[header_kind], (header_y << 0x10) | 0xA)[4] =
             Menu_kInformationHeaderSpriteWords[header_kind];
     }
 }
@@ -512,11 +512,11 @@ void Menu_DrawInformationBoxBackdrop(int id)
     for (i = 0; i < count; ++i) {
         u_int brightness = ((count - i) * 128) / (count + 1);
         u_long* prim =
-            Render_QueueSprite(brightness, vs_getXY(256, y), vs_getWH(64, 1), ot);
+            VS::Render::QueueLiveSprite(brightness, vs_getXY(256, y), vs_getWH(64, 1), ot);
         u_int page = ((u_int)(offset + 256) >> 6) | 0x100;
         prim[1] = _get_mode(0, 0, page);
         prim[4] = y << 8;
-        prim = Render_QueueSprite(brightness, vs_getXY(0, y), vs_getWH(256, 1), ot);
+        prim = VS::Render::QueueLiveSprite(brightness, vs_getXY(0, y), vs_getWH(256, 1), ot);
         brightness = ((u_int)offset >> 6) | 0x100;
         prim[1] = _get_mode(0, 0, brightness);
         prim[4] = y << 8;

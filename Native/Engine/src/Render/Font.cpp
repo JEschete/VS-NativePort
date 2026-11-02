@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Render/ScaledFont.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
@@ -268,7 +268,7 @@ int Render_DrawVariableWidthGlyph(u_int glyphId, int x, int y, u_long* ot)
 
     glyphId += Render_fontTableSelect * 0xBD;
     sprite =
-        Render_QueueSprite(Render_fontColor, (x & 0xFFFF) | (y << 0x10), 0xC000C, ot + 3);
+        VS::Render::QueueLiveSprite(Render_fontColor, (x & 0xFFFF) | (y << 0x10), 0xC000C, ot + 3);
     sprite[1] = 0xE100002D;
     glyphRow = glyphId / 21;
     glyphCol = glyphId % 21;

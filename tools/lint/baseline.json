@@ -163,13 +163,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "016da46a09d7426c556cf25c76841c9faf47a36ae42d779fe5d23e5055114fe8",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "google"
-    },
-    {
       "key": "01763d019add104eb7f91872816eaf5747178c6503544a92a55b7ccc763737b5",
       "count": 1,
       "tool": "tidy",
@@ -2963,13 +2956,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "12039f5222b5b7413edbe638ae9934833a1c042bcd6a189942c910773df421a6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1207301e5cadef6bb3a1e9cd7a0c05504c2744a478131b22a03f24bf3c6880aa",
       "count": 2,
       "tool": "cpplint",
@@ -3768,13 +3754,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "16bf3fded07c284edd9085a48466f119d26c7a5beed17961805a891ca3f81256",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "16db3c3eb34c362d8fd10576b71c1ce27e0e83447968b62434107aca716c46ad",
       "count": 1,
       "tool": "cpplint",
@@ -3822,13 +3801,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "17358ee0d513161b701ea0f066b18d4a39c49688c939b1c6b5cf7a6e9f3e2bb0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "173dd413e37a0ebddd008157a605fc03979c775abefddff01f9ace0c302447a8",
@@ -5287,13 +5259,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "207bfc492841691be9df582fd245b55388873c72e738e09d9ee4fd5f6c9c0c50",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "20878d1761531bca8db970b90d7c1680f28c071c62324419c9e67e3c2bdef33b",
       "count": 1,
       "tool": "tidy",
@@ -5327,13 +5292,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/MemoryTests.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "20b25d31f206a94c85e5fc686c19eaa5b53f091cb36875fb4b91b186a12ef4e8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "20c6b7dc3e818c2955b8d90a330ebddc985046e8a62e18f093d8d0fc110bed06",
@@ -5441,13 +5399,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "215e7809adb3bc4ebc33d9977115ac6bee4b0b62aa66d1161f457bbcbd5008db",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "2168fe996b9084046d5ffed18bbf785fd48bf5af00367860bfebfc6061852e89",
       "count": 1,
       "tool": "tidy",
@@ -5460,13 +5411,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "21709dd8dcfcfb570a43719fe562245d80efa9633096fdfc5e611a869eb473ef",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "2188f7a58a62f03082caab3cddda010410918724377dda7ebaeaab8832c52aac",
@@ -5889,13 +5833,6 @@
       "rule": "google"
     },
     {
-      "key": "23c2cc76b6dccbbcbfa36031811c5fcaaedb44d026a8f7e6787fff5b87c36d2b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "23c2d31393182d2e13ffcaff5182e991c99b99c47062f80d8ba810a43186594e",
       "count": 1,
       "tool": "cpplint",
@@ -6246,13 +6183,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2576f03adc95a5e7e55d9bc186024f6913c080693f80dc550e30fa54b90870fd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2580e228e9560b466104bc48e96232f1b07922455f25b7bdd8bee39635e2bbf5",
       "count": 1,
       "tool": "cpplint",
@@ -6328,13 +6258,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "25c3c178e47e738fcf654335f6ea4492ea8c5ea9dd9ac9e2c9706ca7b1295020",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "25ccfc8690c55df0fda298bf2d7a70f07addc7ac5f9016788ca9f00371c50d45",
@@ -6538,13 +6461,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "2740ab8ea50828cd56f8f646b9f3a8ff1da82feee30cd40d48e68e5849b0691b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "27507745582138f178f37bec9c3d55456caea79ffef357a788d3ba85e1fa2a5a",
@@ -7240,13 +7156,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2b5271de7a2ef2d368a6ca0358d720ba95523fce4bd9a2330c9b3d39a1bcbb5a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "2b53cae93b81100c0d0d6ce5ad4f2e85584d9294dc5dc5d77b4bda28f822ea9c",
       "count": 1,
       "tool": "tidy",
@@ -7469,13 +7378,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "2c8ed3deeac16ef8f4010e8f098e9ff10dcc733ae214f401e540916b93203cca",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "google"
     },
     {
       "key": "2c9446468cdcae725b8b7714838e4826e516d906427a7698ac8e48b378cb9034",
@@ -7758,13 +7660,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2e254e13401f6a269603363d777079f16889d3c1d518aa68bea77d3deab5ec03",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2e310ec8a3d3b82acb2bba803b62ec864c7e0fde8cc8245d7694ba4fd790977b",
       "count": 10,
       "tool": "cpplint",
@@ -7833,13 +7728,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "2e91092a3bf9c0187fccd0978605a69164cfd5cc5ce87efe9960dd48ed5e0e71",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "f90a0fbf55abd48ae21848b5a2029460b8580e552a703623adcf2c402bd1fd4d",
@@ -8675,13 +8563,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "3431c55e8b3208b9174bbe3268787b153e7042f06b97a274a8cc29e92dfcc6ba",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "34435bec52b5a19706c2094f69d1b467e2ffcdc9f2b77fba9191dadd6c392cac",
       "count": 1,
       "tool": "tidy",
@@ -8694,13 +8575,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "346921669a0ecf53f1f6eaab2720dcc7ca500d5da6ad711df6b5c0c1bde06426",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "347c0f940045491ee038f917b2b692639b11fed0eb2473c9615632daf762b28a",
@@ -8736,13 +8610,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "34ad69f7047888e1ced930adf3b31e36e722a6dd2695b9373651336e5f995b42",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "34b141ce807056eac10c048ceec2f4f05017c6c1ee801512a804897515a125be",
@@ -8897,13 +8764,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "35499c034a51f4904b971d15a24974adca4d4b56e3e9e10b67ef669c9559d836",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "73b2f3c675859d99dfa5fb31d00bf0b66305b60477560849846bca772eb5b3a3",
@@ -9289,13 +9149,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "37b1c94e76eb1ebc4ab451e7a2e0e1f01fd59eb2a39b67ea30a788063e041e27",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "37b64ab3234c09187fabba9e5f0b9c5dd5a4790020e9fa8e7e1ac65289b1e412",
@@ -9984,13 +9837,6 @@
       "rule": "bugprone-narrowing-conversions"
     },
     {
-      "key": "3cb41406be3cc23bc4aee5bc0612be5aaf976c36c264a0b77c34f9375580bf75",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "3cba0f1f9e63ec3de2d3229122bc004eb6859b9d1fcd2d3a094007a88221ae94",
       "count": 1,
       "tool": "cpplint",
@@ -10460,13 +10306,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "3f864215722cb1ff2a7b978017f49e921af261e7e8096d04566c00336877fd82",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "3f8657ae3adca6b45c19565b91b5b18a32e494a05742918015cf770f245d5402",
       "count": 1,
       "tool": "cpplint",
@@ -10682,13 +10521,6 @@
       "tool": "ruff",
       "path": "tools/naming/sym_gen/Audio.py",
       "rule": "B007"
-    },
-    {
-      "key": "40ae7f7e415dda72c70041e2235cfacf2c7fe1409254b191d3dcc0c69d6e0969",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "40af01c6fccd275789a0a4e452f75fb1ece739fca5e98d50b9912b4a526dc6af",
@@ -11265,13 +11097,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "441fa9cf8454b248d1f742282f546144f3d06b35c4ed9e441de6e7fae9ed136f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "442763734212dc5694120b7ed78022780457e81b72aec037c3488ecd7853cc9c",
       "count": 1,
       "tool": "cpplint",
@@ -11293,13 +11118,6 @@
       "rule": "bugprone-narrowing-conversions"
     },
     {
-      "key": "4444d92c8b54cbe3843e8032f2f93c6774a043ef26d90b43e7f443e51a4d1c07",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "4447c056c43f129e3fb44e07e7d3e079b13322d16bb79f5d24ab10d7dd6c703b",
       "count": 1,
       "tool": "tidy",
@@ -11319,13 +11137,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "446cf184e4cf408864091e80fd8fd91cf8051fce97b16533f77f651bf88f8d5c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "447d6f4e3d9e893b7f9f9d767c46417aa4304948b5516bf58eb3f74d565a26fd",
@@ -11361,13 +11172,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "44aee3d73caab815b4fbb05ee1fbf17f42b2bf161a142225c904e0de626a6408",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "44be1e602554517ecfab4f7704df194e059ea70677e68b2477a0e504659604fe",
@@ -12439,13 +12243,6 @@
       "tool": "tidy",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4b49d4320c19e8434e032f0875adc3a21257699b23af493516d2e6a27a510711",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "4b56421fe7cd4dd0a370ae9467ae18458e1d998f6326d81f489f8086a0d5a8a0",
@@ -14030,13 +13827,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "560dfbb9a6cfa982098e984cad85a14c6e0da43d13ab64f761d9c951b5ea63dd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "425dbe37a06ad8af70f90f518ee45b2d9459fe33bb5f06982b8653d590ad2dcb",
       "count": 1,
       "tool": "tidy",
@@ -14818,13 +14608,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EffectTimelineTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5a91232e68db30420ad7ac1511d873d0dbbb996d9937395c0d7901cf4f8a5e4d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -15850,13 +15633,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "60ed3c15c6df6025b9f22b106ba3e32a956e4e25da3d4a7ae5a38143dc18487d",
-      "count": 5,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "60f3acc6da9c1b918536eca8af5e3cb1d373eada68670ff8e64eb42a3199d374",
       "count": 1,
       "tool": "tidy",
@@ -16002,13 +15778,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Random.hpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6194268b8f66dfc67cf7fbbd2098b58dc73970405bf906670085206dc6535247",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "61a3fc3816a58b0d6f72213a293f49866856700a328469d851323bac9505ab3e",
@@ -16191,13 +15960,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Input/LibPad.cpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "62de503efe844dc2fdd95526df831dd5f3166028614840819c521407bad1929b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "62eb8d914fa11752a8a091965b72e3ac52d5903476c1ca6f308aaae4ba47e08b",
@@ -16942,13 +16704,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6776538cc61548c7ce613b85db28fc58ee6e59c3915774d79f11ee8bd00ff331",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "677f4c5908d609eaf8d12b51f995e62d78e76cfbd9d5360951a04062d0098e39",
       "count": 1,
       "tool": "tidy",
@@ -17206,13 +16961,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTestCases.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "68c3b65d7e6abc80ec1dd563f4b095f434994290a67c442632d8412d8a7b5bc3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "68cc994ed5799e8137b2e932b83f108f6c9f9be21bcb159ed4e1eb7e20d6b1b4",
@@ -18769,13 +18517,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7332b94416a88b0fc2eee268e1c2b4261681bb1a13b622a0a125f02b6a3a5a92",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "733578ba913c52c37c1f3143228a846e454c62adfbf2d11cddc7e191519bed20",
       "count": 1,
       "tool": "tidy",
@@ -18844,13 +18585,6 @@
       "tool": "ruff",
       "path": "tools/naming/cite_globals.py",
       "rule": "B023"
-    },
-    {
-      "key": "73a9266f08a1fb2a1f18cad8775b23cb438438c303f1a6e58009578cde611c73",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "73b628134637945b361f4794dee7cb09fcc9c7e0495c9ea6ff76f45cfac7c775",
@@ -19077,13 +18811,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "74de8030701a3ac5f00fb858aabad73c40cd57f78a44653fb22a330352764437",
-      "count": 6,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "74e09f387829414a313cf10608bee1945f22118173fbe91bf9ed0fd993c1e495",
       "count": 1,
       "tool": "cpplint",
@@ -19110,13 +18837,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "750034f973e0e481b780b05208938ab3e9c9e17f44904218e85beae1fbb428df",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "7502982990bbf4061b56cd51b9a05de1dcb116f2617f50ca837ce5e28a66978c",
@@ -19553,13 +19273,6 @@
       "rule": "readability/casting"
     },
     {
-      "key": "775e126c799c8c09f7276e04aee377051423fb791b95ad302d057faaea98bd61",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "7774e102878fd21a17d982b870c2e0e03bcb46d41c0b32e703a7e6bdb58776a3",
       "count": 1,
       "tool": "tidy",
@@ -19740,13 +19453,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "787ed76dc6c3a96c924607fa76d21454aecd29deed5b13952fc1bcffd4d6fb4e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "787f79415de950831c9d8a43c890e07515157927ab46f776e23839a6eec9cae2",
@@ -20020,13 +19726,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "7a642e453ccb69995f1da59f8378b61139da3a73a399a70157659ccf28adb111",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "7a6cc310884c0e58635b274c4758a8db8892332e46442e02226589b652d6563c",
@@ -20393,13 +20092,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "7cb5da939324328433ecdbf1b881e1325bbe5f6fc730dae55b0788fa91b85d35",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "7cc93b59593ca88a9be1c6852eefd3e0ea6eb0352b51cac426b9708ae580e88d",
       "count": 1,
       "tool": "cpplint",
@@ -20433,13 +20125,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7d0ab28308f7e9d2d7cb9ed5eec910c788ea5f8bb53d800cb5d62d4b3a33c5c4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "7d0bb13b99aecdd82abf311c4a30d87237de2dcffe6d8a0043c79b29abb6c229",
@@ -21357,13 +21042,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Input/Pad.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "8360fd254fa8f824768eb2b806c78934c97c8f3f17fe9fa61d35247e9cfd0dfa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8363ffd80d9be4854eb715c7237869c1b7f793515c387aae58ef2f4faec195a6",
@@ -22339,25 +22017,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8945dcad42d946626f74dba0bd725e64c47af22b5e133621d25bcbc5845d85a7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "894a0b8c2fb6d45459a0ee9252e0c011cf48fa25e35cb98bfc2b57bbfd1d6e2b",
       "count": 2,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "895c48265ac7031e159fb9cd5a6f3911681a30b751203731dbcff79ef4d7fb8f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "895d1f4fe0a0bc6c290c8ddef0913004acd1c0494e1c8041596ca6167c0ec3fd",
@@ -23093,13 +22757,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Removed.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "8dbc1df25dd42b6bf92834d97552607bc6ccf6a6c1f3bbbe4d3ccfe7a4620241",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "e50d992b0d14116170f8e074f95b72ecb65b6718088c4906bc36306956b21bcf",
@@ -23998,20 +23655,6 @@
       "rule": "B007"
     },
     {
-      "key": "93363035e16d06d1be066289fa7c64ca42902a7228636a5f8901457a21d2de00",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "933c1baf8e7c3bbe385b396e04d69468e280dcbb3e6b492ae195694dcc70c6e4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "934b1483b5944ac906b76ea8fd9bf01b0b3fb97f359d419301575e501ca075d6",
       "count": 1,
       "tool": "ruff",
@@ -24873,13 +24516,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9865ccbf0df617dab546e6112e0f66a931adb328f978ed36468fcb91a67e3889",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "987305b59f41f50ffa5bd7672ec18fa4b9d215edac5ac1f851c7381eab310433",
       "count": 1,
       "tool": "tidy",
@@ -25489,13 +25125,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "9c56eb88a746485ee26027d9882e48a7abae352b50c97b6cc79998e5b52de330",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "3bd2c22dea3ce21a8e4a2c34adccf38a4a502f609fdcbfc7e89cec23e79f0f67",
       "count": 1,
       "tool": "tidy",
@@ -26011,13 +25640,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "9fadf2e163985a9629cb168084d628ef3ac62e42f47edd1daad81247229e847e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -27827,13 +27449,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ab8487bb6a3f3311e017555d9a98e73268b708a4624880ea0f4ac503dfc3461a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "ab917fdadc545209f33a1d3ce2ab38907eb5ca7e00b645f7513f941f184fb409",
       "count": 1,
       "tool": "tidy",
@@ -27881,13 +27496,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "abc87fc5653a85df6f3b069ca0efecad8efe57afaad25d6d6c5532cf712a1f0a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "abcd9c8e2c503ad96a207a388fa4c6d38c527641d26938c6ae27cc2753c6b211",
@@ -29094,13 +28702,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "b3d01552dd85462ff093a659337d864d12ba3b9312770800181e7f8f4e7e772e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b3e1f5e1402c337b03c89386d1d4c825214f1546c10d86c5b7a69a9cbf95e6cd",
       "count": 1,
       "tool": "cpplint",
@@ -29402,13 +29003,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "b5efdfd995f4828b2833536f7b6b6f8e42260b47697cddd63c4cbc812f9f9ede",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "b5f1f5e95f41352d4ade92aaba6864c95d93d32427a351da0c79d7921279ea0e",
       "count": 1,
       "tool": "cpplint",
@@ -29512,13 +29106,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Input/Pad.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "b6d43aff1d02179dc425d629e87f15cd4eb6ad862b9613c874752a851a628b6e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "b6dc069ff8c8f61776b95b1175269ea8fac3a1c53af936bf347dfe151b87faa9",
@@ -30058,13 +29645,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ba172d560d99da251817e7155eb2639ce30f6b4d219a06c463ffd3ece2a48675",
-      "count": 5,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "ba28044849e2dbd18a5286e2e4694691e227f4ab96cb7aef14d2a22afa4b7fff",
@@ -31019,13 +30599,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "c03de0d72300d79de15a43f8de21e4b56e15207acb369d45c8a18b5a8ac866a4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "c0448b275ab51f78450492f424a245a719fd6cb46dd603b671f4155c5735a891",
       "count": 1,
       "tool": "tidy",
@@ -31572,13 +31145,6 @@
       "rule": "bugprone-easily-swappable-parameters"
     },
     {
-      "key": "c3724d3549e94326fa8ebe4d2054d545ee032003d4b27c60985c4d5a201ee605",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "c3761dd939d5e1c7e9e29f4d0a4238ecad327d6ee55a4207637624f61551d633",
       "count": 1,
       "tool": "cpplint",
@@ -31656,25 +31222,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c42420f6f99b4814d7018abb646bb4be4fec0a1c80a7d8abdd11f5b726b279df",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "c424803f0e8a4ae30419f1649e50704f0568cbf69071cebe38ec84735198cedb",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/include/Content/Disc.hpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "c43338c807a0509ef8a78bcb4426f91df2fb635c0637a79729bc4f64610029f9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "c43b8c29ec917085b56975f65e7403238084ca8dc8faa1131138a92849cfe85a",
@@ -31766,13 +31318,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c4f4f759f03729dac543f6261a074b776131609f4a8fbe4af31728fca27dea6a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "c4feeedbc3bfee9264b9a1d2857ea3a20771852a0fbdf208686286b74562d827",
@@ -32153,13 +31698,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c741a2b16d92628ad233922e2c1013996cddc6e2628ae41069a18fcd803aef5f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c7437727cfc8c8620dcc1245d001c23b557a1f6d2d1181723c95e796d3730cb5",
       "count": 1,
       "tool": "cpplint",
@@ -32277,13 +31815,6 @@
       "tool": "tidy",
       "path": "Native/Game/include/Boot/GameApp.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c7fadb648e14e2e4e2830cdcb75209fd7919ad3d4e8965b9e2058200c8ecc06d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "c80ab853ea7a232d9bdca3158d0478f0cbb71a95f98dd095a1b5387c1190de4b",
@@ -33413,13 +32944,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "ce4ee3606d3b8666e96b95b398d3efb0145cdd417d5bd817410a9cda8842c2bc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "ce6a2d41be5a111831e9d65e24277cb6e6fb8ef85c166ca5a5c28f12151e57a1",
       "count": 2,
       "tool": "tidy",
@@ -33474,13 +32998,6 @@
       "tool": "ruff",
       "path": "tools/naming/evidence.py",
       "rule": "B007"
-    },
-    {
-      "key": "ceaeb2154eb0c168dba3540949e74331b6af0fdb48fe8193bcf1b1a268341d97",
-      "count": 5,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "ceb214060aaca60e422f6e7307045a5286c52b36043ba6f08f6136e903d9cebc",
@@ -34400,13 +33917,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "d44323088034b8d423ed92004a36e347afe76a18f2dd80f9e087a933516d129e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d44ac3ae742548fc667969c068b192a3aaaf625873e52f501a2fe30217c33b37",
       "count": 1,
       "tool": "tidy",
@@ -34694,13 +34204,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "d63ad9c88c9eb591dd28296439d049fc925f2be2bd8f6281ffeacb5e3f0aa5a8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "d649e854a257a7d62745ecb3644ab0d727d9953fb1c44968b656341b5b754f54",
       "count": 1,
       "tool": "cpplint",
@@ -34813,13 +34316,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d6ecd3971cc250aaa84b834a83e0518bdb45d6be9031caf2f5b610b2495368e6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d6f27e78605e7dd7ad8e159c9f8c0ead9d3fbfa4808d24e09157f57238acc130",
       "count": 1,
       "tool": "cpplint",
@@ -34853,13 +34349,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "d732dbd52b3c7b8f03ed9c85579a8c577201e50b15842d9c8518538e82428435",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
     },
     {
       "key": "d733b5abe76205a9f6907dee3ca0354c427b3063dfa0e703546765ad316e584e",
@@ -35224,20 +34713,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Render/Device.hpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "d92eedbb2180968fb6e1197db73a2063de2f549c0af4533ab3a8e4da087b7bf5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
-      "key": "d92f01fa062051b3c2d0631b2a8e9a39bef9672f4ca9f3d6a0903e7f48697c5b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "d93d5c7362d17c32b8a53ed83caad6603013811bbd7ce9b5b5639f3f3f4d12cd",
@@ -36479,13 +35954,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e1e4e2a5f2258dba0a88335fe90ae0cbd9b45aab221f9066c59380af75477cf5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "e1e926e5d6166036a9ad114744e90eb60e62774c42310d5cdf3bbbd0c63e9a13",
       "count": 1,
       "tool": "tidy",
@@ -37046,13 +36514,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "e5bce383b72f9ce6acf49127c222f9def4a2baf39d24cfd016622d381b49a651",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/newline"
-    },
-    {
       "key": "e5c1ebe27a34c846f39a2451cd1758f1d90d8afa6260f2f7747a40ca6f5b8f2d",
       "count": 1,
       "tool": "format",
@@ -37135,13 +36596,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e63a4ba96a086bbab59463f96070d96d1f18f0940fb4390e4a9e658931cac34e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "e63b5194ed9cc27883f139b34651c5627c112ab0d9ccebbab782e36cb7039e36",
@@ -37326,13 +36780,6 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "e7433cd5256a5e7722febab6435b0fb6e7b3b5833834a7a704f0a76282615442",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "e749189f035287e0137474412f3eb144a9a638538bb6aeb4d70f7b182ebb5ddb",
       "count": 1,
       "tool": "format",
@@ -37394,13 +36841,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e79d2a39bda02062693bd508c73718f18cb22f6de34499fc726bab4beffb8f61",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "e7b52e941e701b61a9558adb17c2796076244eca4ba0b40ed05c154ac4cb2bee",
@@ -37788,13 +37228,6 @@
       "rule": "B905"
     },
     {
-      "key": "e9ea126c826a17f63922748626373241ac9cf0c76882a634aa7d5c62dd165353",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e9f3ce2a0ed0e2f957a9fe1f7078be75133ba4e9bfd4d6a4553b94d8ad381a2a",
       "count": 1,
       "tool": "cpplint",
@@ -37898,13 +37331,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Input/Pad.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "eacec466333d80b71f83d0715eb0ea87064679209774bf47a7ad32ac26c629c3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ead00ae4904907b68fcafd04d47bec93722622112579822af7f77c740e558907",
@@ -39538,13 +38964,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f604497355bfaaf4588ee6a38cd173d24f9097f4037af4f263019772c93d09ce",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f61188602f2c2f6a57e43bf8749343c0a021229a383940be17b77cb3907dfc06",
       "count": 1,
       "tool": "cpplint",
@@ -39872,13 +39291,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f857ca9acfb61abe4c9c68efb9fbbf1d46a75a61deb56cb09ac0942c188062f1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f85e83adf234aa4b1708bc31b3b086364d62847646a5c0423c0a4ad787f7e947",

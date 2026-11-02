@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Feedback.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 
@@ -397,7 +397,7 @@ void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot)
                     ((image->vramPage - 18) * 64) + ((tile >> 2) & 0x1C0), 256);
 
                 if (scale == ONE) {
-                    prim = Render_QueueSprite(
+                    prim = VS::Render::QueueLiveSprite(
                         alpha, left | (top << 16), vs_getWH(64, 15), ot);
                 } else {
                     int x0 = left & 0xFFFF;
@@ -451,9 +451,9 @@ void Render_DrawGimFramebufferFade(Render_GimLayer* image, int clut, u_long* ord
     }
 
     blend_texture_mode = 0x120;
-    Render_QueueSprite(0x80 - brightness, 0, 0xF00100, ordering_table)[1] =
+    VS::Render::QueueLiveSprite(0x80 - brightness, 0, 0xF00100, ordering_table)[1] =
         ((u_int)other_framebuffer_x >> 6) | blend_texture_mode | 0xE1000000;
-    Render_QueueSprite(0x80 - brightness, 0x100, 0xF00040, ordering_table)[1] =
+    VS::Render::QueueLiveSprite(0x80 - brightness, 0x100, 0xF00040, ordering_table)[1] =
         ((other_framebuffer_x + 0x100) >> 6) | blend_texture_mode | 0xE1000000;
 }
 
@@ -536,7 +536,7 @@ void Render_DrawGimScanlineWipe(Render_GimLayer* image, int clut, u_long* ot)
 
             draw:
                 do {
-                    u_long* prim = Render_QueueSprite(128, x | (y << 16),
+                    u_long* prim = VS::Render::QueueLiveSprite(128, x | (y << 16),
                         (x & 1) ? vs_getWH(1, 1) : ((end - x) | 0x10000), ot);
 
                     prim[1] = tpage | _get_mode(0, 0, 0);
@@ -608,7 +608,7 @@ void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot)
     top = image->offsetY + 120 - (height >> 1);
 
     for (column = 0; column < columns; ++column) {
-        u_long* prim = Render_QueueSprite(
+        u_long* prim = VS::Render::QueueLiveSprite(
             384, (column * 64) | (top << 16), 64 | (height << 16), ot);
 
         prim[1] = _get_mode(0, 0, getTPage(2, 1, page, 256));
@@ -616,11 +616,11 @@ void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot)
 
         for (y = height - 15; y >= 0; y -= 15) {
             for (x = 32; x >= 0; x -= 32) {
-                prim = Render_QueueSprite(384, x | (y << 16), vs_getWH(32, 15), ot);
+                prim = VS::Render::QueueLiveSprite(384, x | (y << 16), vs_getWH(32, 15), ot);
                 prim[1] = _get_mode(0, 0, getTPage(2, 2, page, 256));
                 prim[4] = vs_getUV(x, y);
                 Render_SetGimWorkspaceDrawArea(ot, page);
-                prim = Render_QueueSprite(
+                prim = VS::Render::QueueLiveSprite(
                     alpha, (x + column * 64) | ((top + y) << 16), vs_getWH(32, 15), ot);
                 prim[1] = _get_mode(0, 0, getTPage(2, 1, page, 256));
                 prim[4] = vs_getUV(x, y);
@@ -641,7 +641,7 @@ void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot)
             }
 
             atlas = tile >> 2;
-            prim = Render_QueueSprite(
+            prim = VS::Render::QueueLiveSprite(
                 128, (((y * 30 - height) >> 1) + x - top) << 16, vs_getWH(64, 15), ot);
             uv = ((tile * 64) & 192) | ((atlas & 31) * 15 << 8) | clut;
             tx = ((image->vramPage - 18) * 64) + (atlas & 448);
@@ -653,12 +653,12 @@ void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot)
 
         for (y = 0; y < height; y += 15) {
             for (x = 0; x < 64; x += 32) {
-                prim = Render_QueueSprite(
+                prim = VS::Render::QueueLiveSprite(
                     inverse, (x + column * 64) | ((top + y) << 16), vs_getWH(32, 15), ot);
                 prim[1] = _get_mode(0, 0, getTPage(2, 0, fb + column * 64, 0));
                 prim[4] = vs_getUV(x, top + y);
                 Render_SetGimFramebufferDrawArea(ot, fb);
-                prim = Render_QueueSprite(128, x | (y << 16), vs_getWH(32, 15), ot);
+                prim = VS::Render::QueueLiveSprite(128, x | (y << 16), vs_getWH(32, 15), ot);
                 prim[1] = _get_mode(0, 0, getTPage(2, 0, fb + column * 64, 0));
                 prim[4] = vs_getUV(x, top + y);
                 Render_SetGimWorkspaceDrawArea(ot, page);

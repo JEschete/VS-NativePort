@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -38,7 +39,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
@@ -1963,21 +1963,21 @@ int Menu_Files_UpdateGameOverChoices(int init)
     Menu_Files_BlendGameOverTextClut(Menu_Files_gameOverChoicesClut[1], Menu_Files_gameOverChoicesBlendFactor2, Menu_Files_menuItemTextClut[0], Menu_Files_menuItemTextClut[3]);
     Render_UploadImageRectangle(vs_getXY(832, 384), &Menu_Files_gameOverChoicesClut, vs_getWH(32, 1));
 
-    prim = Render_QueueSprite(Menu_Files_gameOverChoicesColor1, vs_getXY(112, 128), vs_getWH(96, 32), nextPrim);
+    prim = VS::Render::QueueLiveSprite(Menu_Files_gameOverChoicesColor1, vs_getXY(112, 128), vs_getWH(96, 32), nextPrim);
     prim[1] = vs_getTpage(832, 256, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
     prim[4] = vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 52);
 
-    prim = Render_QueueSprite(Menu_Files_gameOverChoicesColor1, vs_getXY(112, 160), vs_getWH(96, 32), nextPrim);
+    prim = VS::Render::QueueLiveSprite(Menu_Files_gameOverChoicesColor1, vs_getXY(112, 160), vs_getWH(96, 32), nextPrim);
     prim[1] = vs_getTpage(832, 256, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
     prim[4] = vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 32, 53);
 
     prim =
-        Render_QueueSprite(Menu_Files_gameOverChoicesColor2 | 256, vs_getXY(112, 128), vs_getWH(96, 32), nextPrim);
+        VS::Render::QueueLiveSprite(Menu_Files_gameOverChoicesColor2 | 256, vs_getXY(112, 128), vs_getWH(96, 32), nextPrim);
     prim[1] = vs_getTpage(832, 256, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
     prim[4] = vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 64, 54);
 
     prim =
-        Render_QueueSprite(Menu_Files_gameOverChoicesColor3 | 256, vs_getXY(112, 160), vs_getWH(96, 32), nextPrim);
+        VS::Render::QueueLiveSprite(Menu_Files_gameOverChoicesColor3 | 256, vs_getXY(112, 160), vs_getWH(96, 32), nextPrim);
     prim[1] = vs_getTpage(832, 256, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);
     prim[4] = vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 96, 54);
 

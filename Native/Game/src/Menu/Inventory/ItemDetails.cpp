@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Menu/Inventory/ItemList.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: local static of _itemStatusDispatcher, at file scope so the module reset reaches it
@@ -90,10 +90,10 @@ void Menu_Inventory_DrawCategoryIcons(int animationStep, int highlightSelected)
                 continue;
             }
 
-            texPage = Render_QueueDefaultSprite(vs_getWH(16, 16), x | (16 << 16));
+            texPage = VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), x | (16 << 16));
 
         } else {
-            texPage = Render_QueueSpriteWithTexturePage(
+            texPage = VS::Render::QueueLiveSpriteWithTexturePage(
                 128, x | (animationStep << 0x10), vs_getWH(16, 16), (u_long *)(Render_frameScratch.orderingTable));
         }
 

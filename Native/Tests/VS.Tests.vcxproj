@@ -197,6 +197,7 @@
     <ClCompile Include="src\SpecialTerrainTests.cpp" />
     <ClCompile Include="src\SphereTerrainSliceTests.cpp" />
     <ClCompile Include="src\SphereTerrainTests.cpp" />
+    <ClCompile Include="src\SpritesTests.cpp" />
     <ClCompile Include="src\StatusBehaviorTests.cpp" />
     <ClCompile Include="src\TargetingDrawSliceTests.cpp" />
     <ClCompile Include="src\TargetPagePartitionTests.cpp" />

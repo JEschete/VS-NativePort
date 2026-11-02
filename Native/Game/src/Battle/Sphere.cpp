@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/TargetingDrawLive.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 
@@ -370,7 +370,7 @@ void Battle_DrawSphere(void)
         int j;
 
         *shape = (*(Battle_TargetSphere* (*))&Battle_targetSphere)->volumes[i];
-        Render_LoadFrameViewMatrix();
+        VS::Render::LoadLiveFrameViewMatrix();
         Core_Gte_LoadV0((const SVECTOR *)(shape->position));
         Core_Gte_Rtps();
         Core_Gte_StoreSz3Otz((long *)(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->depth));
@@ -962,7 +962,7 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* label)
         int ringXy;
 
         y += 4;
-        Render_LoadFrameViewMatrix();
+        VS::Render::LoadLiveFrameViewMatrix();
         Core_Gte_LoadV0(&label->worldPosition);
         Core_Gte_Rtps();
         Core_Gte_StoreSxy2((long *)(&sxy));
@@ -1270,7 +1270,7 @@ void Battle_DrawSpherePositionCursor(SVECTOR* position, int lock_pitch)
     for (i = 0; i < 3; ++i) {
         int index = i + lock_pitch * 2;
 
-        prim = Render_QueueSpriteWithTexturePage(
+        prim = VS::Render::QueueLiveSpriteWithTexturePage(
             index == 2 ? Menu_Framework_cursorBrightnessAnimation[Battle_positionCursorBlinkFrame] : 0x80,
             xy + Battle_positionCursorSpriteOffsets[index], Battle_positionCursorSpriteSizes[index], ot);
         prim[4] = Battle_positionCursorSpriteTexCoords[index];

@@ -3,6 +3,7 @@
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -55,7 +56,6 @@ extern "C" {
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
-#include "Render/Sprites.h"
 
 // decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
 char Battle_categoryNeedsTargetSelection[96]; /* contents: module image (ModuleData.cpp) */
@@ -963,7 +963,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
     }
 
     m = Battle_BuildSphereVolumeTransform((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].scale.extents, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].angle);
-    Render_LoadFrameViewMatrix();
+    VS::Render::LoadLiveFrameViewMatrix();
 
     for (;;) {
         switch ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind & 0x7F) {

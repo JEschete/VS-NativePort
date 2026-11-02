@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 
@@ -157,10 +157,10 @@ void Menu_Container_DrawCategoryIcons(int arg0, int details_view_phase)
                 details_menu_row->rowIcon = i + 0x18;
                 continue;
             } else {
-                icon_sprite_packet = Render_QueueDefaultSprite(0x100010, icon_x | 0x100000);
+                icon_sprite_packet = VS::Render::QueueLiveDefaultSprite(0x100010, icon_x | 0x100000);
             }
         } else {
-            icon_sprite_packet = Render_QueueSpriteWithTexturePage(
+            icon_sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(
                 0x80, icon_x | (arg0 << 0x10), 0x100010, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
         }
 

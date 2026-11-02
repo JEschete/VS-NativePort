@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
@@ -215,7 +215,7 @@ void Menu_Map_DrawAshleyMarker(int id, int xy, int brightness, u_long* nextPrim)
         nextPrim = (u_long *)(Render_frameScratch.overlayOrderingTable);
     }
 
-    Render_QueueSpriteWithTexturePage(128, xy, vs_getWH(16, 16), nextPrim)[4] =
+    VS::Render::QueueLiveSpriteWithTexturePage(128, xy, vs_getWH(16, 16), nextPrim)[4] =
         ((id + 4) << 4) | (getClut(976, 223) << 16) | 0x8000;
 
     ((u_long*)Render_frameScratch.primitiveCursor)[-4] = (int)(brightness | 0x64000000);

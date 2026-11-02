@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Feedback.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "Render/Upload.h"
@@ -53,7 +53,7 @@ u_int Render_BlendRgbWithBrightness(u_int color0, u_int color1, int brightness, 
 // decomp: BATTLE.PRG _renderDigit (src/BATTLE/BATTLE.PRG/5BF94.c:3021)
 void Render_DrawNumericGlyph(int font, int xy, int digit, u_long* before)
 {
-    u_long* prim = Render_QueueSpriteWithTexturePage(
+    u_long* prim = VS::Render::QueueLiveSpriteWithTexturePage(
         128, xy + ((font & 2) << 0x10), (0x05CA0576 >> (font * 4)) & 0xF000F, before);
 
     prim[4] = vs_getUV0Clut(32, 11, 832, 223);

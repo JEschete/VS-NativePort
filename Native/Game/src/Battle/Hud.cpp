@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "State/SceneTimer.h"
 #include "State/StateFlags.h"
@@ -160,7 +160,7 @@ void Battle_DrawHudStatGauge(int colorIndex, int current, int max)
             xy += (u_short)-7 | ((u_short)-2 << 0x10);
         }
         Render_DrawIntegerRightAligned(1, xy, current, NULL);
-        Render_QueueSpriteWithTexturePage(0x180, Battle_hudGaugeLabelPositions[colorIndex] - Battle_hudSlideOffset,
+        VS::Render::QueueLiveSpriteWithTexturePage(0x180, Battle_hudGaugeLabelPositions[colorIndex] - Battle_hudSlideOffset,
             Battle_hudGaugeLabelWidths[colorIndex] | 0x90000, prim)[4] =
             Battle_hudGaugeLabelTexU[colorIndex] | 0x37F60000;
     }
@@ -186,7 +186,7 @@ void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2
             clipped_width = 0x10 - slide_offset;
         }
 
-        sprite_packet = Render_QueueSpriteWithTexturePage(
+        sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(
             0x80, arg2 | 0x80000, clipped_width | 0x100000, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4));
 
         sprite_packet[4] = (texture_offset | (((0x0F0F906A >> status_icon_id) & 1) ? 0x37F90000 : 0x37F80000));
@@ -207,7 +207,7 @@ void Battle_DrawSlidingStatusIcon(int status_icon_id, int slide_offset, int arg2
                 texture_offset = overlay_texture_end - clipped_width;
             }
 
-            Render_QueueSpriteWithTexturePage(0x80, arg2 | 0x80000, clipped_width | 0x80000,
+            VS::Render::QueueLiveSpriteWithTexturePage(0x80, arg2 | 0x80000, clipped_width | 0x80000,
                 (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 4))[4] = texture_offset | 0x37FF0000;
         }
     }
@@ -304,7 +304,7 @@ void Battle_ShowShortcutHud(void) { Battle_shortcutHudRequested = 1; }
 void Battle_DrawShortcutButtonMarker(int packed_screen_position, int brightness_transparency)
 {
     u_long* sprite_packet =
-        Render_QueueSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, (u_long *)(Render_frameScratch.overlayOrderingTable));
+        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, (u_long *)(Render_frameScratch.overlayOrderingTable));
     sprite_packet[1] = 0xE1000017;
     sprite_packet[4] = 0x373D80C0;
 }
@@ -335,7 +335,7 @@ void Battle_DrawShortcutHud(void)
                 Battle_DrawShortcutButtonMarker(
                     ((panel_x_offset + Battle_secondShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_secondShortcutMarkerPositions[i + 4] << 0x10),
                     icon_brightness_transparency);
-                sprite_packet = Render_QueueSpriteWithTexturePage(icon_brightness_transparency,
+                sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(icon_brightness_transparency,
                     ((panel_x_offset + Battle_secondShortcutIconPositions[i]) & 0xFFFF) | (Battle_secondShortcutIconPositions[i + 4] << 0x10),
                     Battle_secondShortcutIconSizes[i], (u_long *)(Render_frameScratch.overlayOrderingTable));
                 sprite_packet[1] = 0xE1000017;
@@ -343,7 +343,7 @@ void Battle_DrawShortcutHud(void)
             }
         }
 
-        Render_QueueSpriteWithTexturePage(0x180, ((panel_x_offset + 0x48) & 0xFFFF) | 0x660000,
+        VS::Render::QueueLiveSpriteWithTexturePage(0x180, ((panel_x_offset + 0x48) & 0xFFFF) | 0x660000,
             0x1E001E, (u_long *)(Render_frameScratch.overlayOrderingTable))[4] = 0x37FBA0B8;
         panel_x_offset = (0xA0 - panel_x_offset);
 
@@ -353,14 +353,14 @@ void Battle_DrawShortcutHud(void)
                 Battle_DrawShortcutButtonMarker(
                     ((panel_x_offset + Battle_firstShortcutMarkerPositions[i]) & 0xFFFF) | (Battle_firstShortcutMarkerPositions[i + 4] << 0x10),
                     icon_brightness_transparency);
-                sprite_packet = Render_QueueSpriteWithTexturePage(icon_brightness_transparency,
+                sprite_packet = VS::Render::QueueLiveSpriteWithTexturePage(icon_brightness_transparency,
                     (((panel_x_offset + Battle_firstShortcutIconPositions[i]) - 2) & 0xFFFF)
                         | (Battle_firstShortcutIconPositions[i + 4] << 0x10),
                     Battle_firstShortcutIconSizes[i], (u_long *)(Render_frameScratch.overlayOrderingTable));
                 sprite_packet[1] = 0xE1000017;
                 sprite_packet[4] = Battle_firstShortcutIconTexCoords[i] | 0x373D0000;
             }
-            Render_QueueSpriteWithTexturePage(0x80, panel_x_offset + Battle_firstShortcutDigitOffsets[3 - i], 0x100010,
+            VS::Render::QueueLiveSpriteWithTexturePage(0x80, panel_x_offset + Battle_firstShortcutDigitOffsets[3 - i], 0x100010,
                 (u_long *)(Render_frameScratch.overlayOrderingTable))[4] = (((3 - i) * 0x10) | 0x37FB8000);
         }
     }
@@ -395,7 +395,7 @@ void Battle_DrawBattleHud(void)
     }
 
     if (Battle_battleModeIndicatorStep != 0) {
-        prim = Render_QueueSprite(0x140,
+        prim = VS::Render::QueueLiveSprite(0x140,
             ((((u_char)Battle_battleModeIndicatorStep * 3 - 4) << 16) - Battle_hudSlideOffset) | 0xEC, 0xA0049,
             (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
         prim[1] = 0xE1000017;
@@ -417,7 +417,7 @@ void Battle_DrawBattleHud(void)
             k = 0xB80008;
             for (i = 0; i < 5; ++i) {
                 j = i + (Battle_hudBattleMode & 1) * 5;
-                prim = Render_QueueSpriteWithTexturePage(
+                prim = VS::Render::QueueLiveSpriteWithTexturePage(
                     0, k + Battle_limbDisplaySpriteOffsets[j], Battle_limbDisplaySpriteSizes[j], (u_long *)(ot));
                 prim[2] = Battle_limbStatusColors[Battle_LimbCondition(
                               &Battle_characterState->stats->limbs[i])]
@@ -515,7 +515,7 @@ void Battle_DrawBattleHud(void)
     if (count < 3) {
         for (i = 0; i < count; ++i) {
             prim =
-                Render_QueueSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, (u_long *)(ot));
+                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, (u_long *)(ot));
             prim[4] = 0x37F40C1A;
         }
         return;
@@ -523,7 +523,7 @@ void Battle_DrawBattleHud(void)
 
     j = k + 0x30000;
     if (selected != 0xFF) {
-        prim = Render_QueueSprite(
+        prim = VS::Render::QueueLiveSprite(
             0x80, ((selected & 7) * 3 + 0x94) | (!(selected & 8) ? k : j), 0x40004, (u_long *)(ot));
         prim[4] = 0x37F40C1A;
     }
@@ -531,10 +531,10 @@ void Battle_DrawBattleHud(void)
     if (count < 9) {
         i = count * 3 + 1;
     } else {
-        prim = Render_QueueSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, (u_long *)(ot));
+        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, (u_long *)(ot));
         prim[4] = 0x37F40C00;
     }
-    prim = Render_QueueSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, (u_long *)(ot));
+    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, (u_long *)(ot));
     prim[4] = 0x37F40C00;
 }
 

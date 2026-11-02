@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -42,7 +43,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
@@ -200,7 +200,7 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
             var_s0 = state - var_s0;
         }
 
-        Render_QueueSpriteWithTexturePage(128,
+        VS::Render::QueueLiveSpriteWithTexturePage(128,
             (menuItem->x - 14) | ((menuItem->y + var_s0) << 0x10), vs_getWH(16, 16),
             before - 1)[4] = (isScrollable << 4) | vs_getUV0Clut(0, 48, 912, 223);
     }
@@ -267,7 +267,7 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
             brightness = i * 8 + 32;
         }
 
-        prim = Render_QueueSprite(brightness, xy, w, before);
+        prim = VS::Render::QueueLiveSprite(brightness, xy, w, before);
 
         texture_u = xy - var_s0;
         texture_v = xy >> 0x10;

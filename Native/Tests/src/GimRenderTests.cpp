@@ -261,6 +261,8 @@ int Tests_GimTilePackets(int columns, int rows, int scale, int offsetX,
   u_long* previous = nullptr;
   u_long ot = 0xFFFFFF;
   int savedFrameBuf = Render_frameBuf;
+  void* saved_buffers[2] = {Render_legacyPrimitiveBuffers[0],
+                            Render_legacyPrimitiveBuffers[1]};
   char savedBlend = Render_gimBlendSelect;
   int failedLine = 0;
   int blend = routine == 1 && brightness != 128;
@@ -289,6 +291,7 @@ int Tests_GimTilePackets(int columns, int rows, int scale, int offsetX,
   Render_frameScratch.primitiveCursor = packets;
   memcpy(expectedScratch, Core_ScratchBase(), sizeof expectedScratch);
   Render_frameBuf = framebuffer;
+  Render_legacyPrimitiveBuffers[framebuffer & 1] = packets;
   Render_gimBlendSelect = 0;
 
   switch (routine) {
@@ -389,6 +392,8 @@ int Tests_GimTilePackets(int columns, int rows, int scale, int offsetX,
 cleanup:
   memcpy(Core_ScratchBase(), savedScratch, sizeof savedScratch);
   Render_frameBuf = savedFrameBuf;
+  Render_legacyPrimitiveBuffers[0] = saved_buffers[0];
+  Render_legacyPrimitiveBuffers[1] = saved_buffers[1];
   Render_gimBlendSelect = savedBlend;
   return failedLine;
 }
@@ -411,6 +416,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   u_long dialogue[] = {0, 0x60000000, 0, 0x00010001};
   const Render_FrameScratch saved_frame = Render_frameScratch;
   const int saved_framebuffer = Render_frameBuf;
+  void* const saved_buffer = Render_legacyPrimitiveBuffers[framebuffer & 1];
   Effects_ScreenEffectOverlay* saved_effect = Effects_screenEffectOverlay;
   Effects_ScreenEffectOverlay effect = {0};
   effect.feedbackLayer = feedback_layer;
@@ -424,6 +430,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   }
   Render_frameScratch.orderingTable = ordering + kSceneOrderingEntry;
   Render_frameScratch.primitiveCursor = storage + 1;
+  Render_legacyPrimitiveBuffers[framebuffer & 1] = storage + 1;
 
   Effects_ScreenDistortion_DrawFeedbackTiles();
 
@@ -451,6 +458,7 @@ int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
   passed = passed && saw_dialogue && packet == nullptr &&
            visited == expected_packets;
   Render_frameScratch = saved_frame;
+  Render_legacyPrimitiveBuffers[framebuffer & 1] = saved_buffer;
   Render_frameBuf = saved_framebuffer;
   Effects_screenEffectOverlay = saved_effect;
   return passed;
@@ -466,6 +474,8 @@ int CheckMenuRowNativeLinks(int scrolling) {
   };
   const u_long guard = 0xDEADBEEF;
   const Render_FrameScratch saved_frame = Render_frameScratch;
+  const int saved_framebuffer = Render_frameBuf;
+  void* const saved_buffer = Render_legacyPrimitiveBuffers[0];
   const int saved_color = Render_fontColor;
   const char saved_palette = Render_fontPaletteOffset;
   const char saved_table = Render_fontTableSelect;
@@ -493,6 +503,8 @@ int CheckMenuRowNativeLinks(int scrolling) {
   Render_frameScratch.overlayOrderingTable = overlay + 4;
   Render_frameScratch.orderingTable = scene + 4;
   Render_frameScratch.primitiveCursor = storage + 1;
+  Render_frameBuf = 0;
+  Render_legacyPrimitiveBuffers[0] = storage + 1;
   Render_variableFontGlyphWidths[5] = 7;
   Menu_Framework_menuItems = rows;
 
@@ -527,6 +539,8 @@ int CheckMenuRowNativeLinks(int scrolling) {
              memcmp(scene, expected_scene, sizeof scene) == 0;
   }
   Render_frameScratch = saved_frame;
+  Render_frameBuf = saved_framebuffer;
+  Render_legacyPrimitiveBuffers[0] = saved_buffer;
   Render_fontColor = saved_color;
   Render_fontPaletteOffset = saved_palette;
   Render_fontTableSelect = saved_table;

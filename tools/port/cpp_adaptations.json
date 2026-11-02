@@ -3634,10 +3634,10 @@
 [
 306,
 [
-"        Render_QueueSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, Render_frameScratch.overlayOrderingTable);"
+"        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, Render_frameScratch.overlayOrderingTable);"
 ],
 [
-"        Render_QueueSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, (u_long *)(Render_frameScratch.overlayOrderingTable));"
+"        VS::Render::QueueLiveSpriteWithTexturePage(brightness_transparency, packed_screen_position, 0x60006, (u_long *)(Render_frameScratch.overlayOrderingTable));"
 ]
 ],
 [
@@ -3724,10 +3724,10 @@
 [
 517,
 [
-"                Render_QueueSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, ot);"
+"                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, ot);"
 ],
 [
-"                Render_QueueSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, (u_long *)(ot));"
+"                VS::Render::QueueLiveSpriteWithTexturePage(0x80, (0x94 + i * 3) | k, 0x40004, (u_long *)(ot));"
 ]
 ],
 [
@@ -3742,19 +3742,19 @@
 [
 533,
 [
-"        prim = Render_QueueSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, ot);"
+"        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, ot);"
 ],
 [
-"        prim = Render_QueueSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, (u_long *)(ot));"
+"        prim = VS::Render::QueueLiveSprite(0x80, j | 0x94, ((count - 8) * 3 + 1) | 0x40000, (u_long *)(ot));"
 ]
 ],
 [
 536,
 [
-"    prim = Render_QueueSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, ot);"
+"    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, ot);"
 ],
 [
-"    prim = Render_QueueSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, (u_long *)(ot));"
+"    prim = VS::Render::QueueLiveSpriteWithTexturePage(0x80, k | 0x94, i | 0x40000, (u_long *)(ot));"
 ]
 ],
 [

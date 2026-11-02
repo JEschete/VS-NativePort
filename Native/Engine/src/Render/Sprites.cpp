@@ -1,106 +1,66 @@
 // Hand-maintained (tools/port/owned.csv).
-extern "C" {
-#include "Render/Sprites.h"
+#include "Render/Sprites.hpp"
 
-#include <limits.h>
+#include <climits>
 
-#include "Core/Gte.h"
-#include "Legacy/Psx.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+namespace VS::Render {
+namespace {
+constexpr std::uint32_t kLinkMask = 0xFFFFFF;
+constexpr int kCommandShift = 24;
+constexpr int kTransparencyShift = 7;
 
-enum {
-  kSpriteCommand = 0x64,
-  kSemiTransparentFlag = 2,
-  kTransparencyShift = 7,
-  kDefaultBrightness = 0x80,
-  kCommandShift = 24,
-  kLinkMask = 0xFFFFFF
-};
+void Queue(SpriteQueue& queue, const SpriteRequest& request) {
+  queue.Emit(BuildSpritePacket(request, queue.ChainLink()));
+}
+}  // namespace
 
-static const u_int kDefaultDrawMode = 0xE100000Cu;
-
-enum {
-  kPacketTag,
-  kPacketDrawMode,
-  kPacketColor,
-  kPacketPosition,
-  kPacketTexture,
-  kPacketSize,
-  kPacketWords
-};
-
-typedef struct SpriteRequest {
-  u_int draw_mode;
-  int brightness_transparency;
-  int packed_position;
-  int packed_size;
-} SpriteRequest;
-
-// Packet: tag (length 5), draw mode, colour + code, xy, uv/clut, wh. Code 0x64
-// is a textured sprite, 0x66 the semi-transparent one (bit 8 of
-// brightnessTransparency). The packet is linked in front of nextPrim's chain.
-static u_long* QueueSpritePacket(const SpriteRequest* request,
-                                 u_long* next_prim) {
-  u_long* prim = reinterpret_cast<u_long*>(Render_frameScratch.primitiveCursor);
-  const u_int brightness = (u_int)request->brightness_transparency & UCHAR_MAX;
-  const u_int code =
+SpritePacket BuildSpritePacket(const SpriteRequest& request,
+                               std::uint32_t next_link) {
+  const auto brightness_word =
+      static_cast<std::uint32_t>(request.brightness_transparency);
+  const std::uint32_t brightness = brightness_word & UCHAR_MAX;
+  const std::uint32_t code =
       kSpriteCommand +
-      (((u_int)request->brightness_transparency >> kTransparencyShift) &
-       kSemiTransparentFlag);
-
-  prim[kPacketTag] =
-      (*next_prim & kLinkMask) | ((kPacketWords - 1) << kCommandShift);
-  prim[kPacketDrawMode] = request->draw_mode;
-  prim[kPacketColor] = brightness | (brightness << CHAR_BIT) |
-                       (brightness << (2 * CHAR_BIT)) | (code << kCommandShift);
-  prim[kPacketPosition] = (u_long)request->packed_position;
-  prim[kPacketTexture] = 0;
-  prim[kPacketSize] = (u_long)request->packed_size;
-  *next_prim = LegacyGpu_Handle(prim);
-  Render_frameScratch.primitiveCursor = prim + kPacketWords;
-  return prim;
+      ((brightness_word >> kTransparencyShift) & kSemiTransparentSpriteFlag);
+  SpritePacket packet{};
+  packet[kSpriteTagWord] =
+      (next_link & kLinkMask) |
+      (static_cast<std::uint32_t>(kSpritePacketWords - 1) << kCommandShift);
+  packet[kSpriteDrawModeWord] = request.draw_mode;
+  packet[kSpriteColorWord] = brightness | (brightness << CHAR_BIT) |
+                             (brightness << (2 * CHAR_BIT)) |
+                             (code << kCommandShift);
+  packet[kSpritePositionWord] =
+      static_cast<std::uint32_t>(request.packed_position);
+  packet[kSpriteSizeWord] = static_cast<std::uint32_t>(request.packed_size);
+  return packet;
 }
 
-// decomp: BATTLE.PRG vs_battle_setSpriteDefault
-// (src/BATTLE/BATTLE.PRG/573B8.c:270)
-u_long* Render_QueueDefaultSprite(int wh, int xy) {
-  const SpriteRequest request = {.draw_mode = kDefaultDrawMode,
-                                 .brightness_transparency = kDefaultBrightness,
-                                 .packed_position = xy,
-                                 .packed_size = wh};
-  return QueueSpritePacket(
-      &request,
-      reinterpret_cast<u_long*>(Render_frameScratch.overlayOrderingTable));
+void QueueDefaultSprite(SpriteQueue& queue, int wh, int xy) {
+  Queue(queue, {.draw_mode = kDefaultSpriteDrawMode,
+                .brightness_transparency = kDefaultSpriteBrightness,
+                .packed_position = xy,
+                .packed_size = wh});
 }
 
-// decomp: BATTLE.PRG vs_battle_setSpriteDefaultTexPage
-// (src/BATTLE/BATTLE.PRG/573B8.c:275)
-u_long* Render_QueueSpriteWithTexturePage(int brightness_transparency, int xy,
-                                          int wh, u_long* next_prim) {
-  const SpriteRequest request = {
-      .draw_mode = kDefaultDrawMode,
-      .brightness_transparency = brightness_transparency,
-      .packed_position = xy,
-      .packed_size = wh};
-  return QueueSpritePacket(&request, next_prim);
+void QueueSpriteWithTexturePage(SpriteQueue& queue, int brightness_transparency,
+                                int xy, int wh) {
+  Queue(queue, {.draw_mode = kDefaultSpriteDrawMode,
+                .brightness_transparency = brightness_transparency,
+                .packed_position = xy,
+                .packed_size = wh});
 }
 
-// decomp: BATTLE.PRG vs_battle_setSprite (src/BATTLE/BATTLE.PRG/573B8.c:281)
-u_long* Render_QueueSprite(int brightness_transparency, int xy, int wh,
-                           u_long* next_prim) {
-  const SpriteRequest request = {
-      .draw_mode = 0,
-      .brightness_transparency = brightness_transparency,
-      .packed_position = xy,
-      .packed_size = wh};
-  return QueueSpritePacket(&request, next_prim);
+void QueueSprite(SpriteQueue& queue, int brightness_transparency, int xy,
+                 int wh) {
+  Queue(queue, {.draw_mode = 0,
+                .brightness_transparency = brightness_transparency,
+                .packed_position = xy,
+                .packed_size = wh});
 }
 
-// decomp: BATTLE.PRG func_800C02A8 (src/BATTLE/BATTLE.PRG/573B8.c:315)
-void Render_LoadFrameViewMatrix(void) {
-  Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
-  Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
+void LoadFrameViewMatrix(FrameViewTarget& target) {
+  target.LoadViewRotation();
+  target.LoadViewTranslation();
 }
-}  // extern "C"
+}  // namespace VS::Render

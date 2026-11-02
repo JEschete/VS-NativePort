@@ -600,9 +600,9 @@
     <ClCompile Include="src\Render\Sprites.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Sprites.h">
+    <ClCompile Include="src\Render\SpritesLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\Text\CompactFont.cpp">
       <Filter>src\Render\Text</Filter>
     </ClCompile>
@@ -811,6 +811,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ScaledFont.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\Sprites.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\SpritesLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\TextureRegionDraw.hpp">

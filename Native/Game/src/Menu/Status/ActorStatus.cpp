@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -42,7 +43,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: local static of vs_menu4_exec, at file scope so the module reset reaches it
@@ -271,7 +271,7 @@ void Menu_Status_DrawUnanalyzedValue(int xy, int withMax, u_long* before)
 
     if (withMax != 0) {
         for (i = 0; i < 3; ++i) {
-            Render_QueueSprite(128, xy, vs_getWH(6, 9), before)[4] =
+            VS::Render::QueueLiveSprite(128, xy, vs_getWH(6, 9), before)[4] =
                 vs_getUV0Clut(228, 0, 832, 223);
             xy -= 5;
         }
@@ -282,7 +282,7 @@ void Menu_Status_DrawUnanalyzedValue(int xy, int withMax, u_long* before)
     xy += -1 << 16;
 
     for (i = 0; i < 3; ++i) {
-        Render_QueueSprite(128, xy, vs_getWH(7, 10), before)[4] =
+        VS::Render::QueueLiveSprite(128, xy, vs_getWH(7, 10), before)[4] =
             vs_getUV0Clut(234, 0, 832, 223);
         xy -= 6;
     }
@@ -392,7 +392,7 @@ void Menu_Status_DrawVitals(void)
     }
 
     for (i = 0; i < 3; ++i) {
-        Render_QueueSpriteWithTexturePage(384,
+        VS::Render::QueueLiveSpriteWithTexturePage(384,
             Battle_hudGaugeLabelPositions[i] + ((Menu_Status_basicStatsAnimState - 4) << 0x13), Battle_hudGaugeLabelWidths[i] | 0x90000,
             insertBefore)[4] = Battle_hudGaugeLabelTexU[i] | 0x37F60000;
     }
@@ -493,13 +493,13 @@ void Menu_Status_DrawStatusEffectIcons(Battle_ActorStats* actor, int animationSt
 
             if (i >= new_var) {
                 // Element indicator
-                Render_QueueSpriteWithTexturePage(
+                VS::Render::QueueLiveSpriteWithTexturePage(
                     128, ((x + 8) & 0xFFFF) | y, vs_getWH(8, 8), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 8))[4] =
                     ((((i & 3) * 8) + 0x3068) | (getClut(1008, 223) << 16));
             }
 
             // Nasty match hack
-            actor = (Battle_ActorStats*)Render_QueueSpriteWithTexturePage(
+            actor = (Battle_ActorStats*)VS::Render::QueueLiveSpriteWithTexturePage(
                 128, (x & 0xFFFF) | y, vs_getWH(16, 16), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 8));
 
             // 0x0F0F906A = Flags for toggling the icon palette

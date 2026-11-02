@@ -12,12 +12,12 @@
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Legacy/Psx.h"
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Sphere.h"
 #include "Battle/TargetVolume.h"
 #include "Core/Gte.h"
-#include "Render/Sprites.h"
 }
 
 namespace VS::Battle {
@@ -38,7 +38,7 @@ class LiveWireCanvas final : public TargetWireCanvas {
         *Battle_BuildSphereVolumeTransform(scale.data(), angle));
   }
 
-  void BeginProjection() override { Render_LoadFrameViewMatrix(); }
+  void BeginProjection() override { VS::Render::LoadLiveFrameViewMatrix(); }
 
   TargetWirePoint Project(const TargetWorldPoint& world) override {
     SVECTOR point = {world[0], world[1], world[2], 0};

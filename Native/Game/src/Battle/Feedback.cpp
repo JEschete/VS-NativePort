@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"
-#include "Render/Sprites.h"
 #include "Render/TextureAnimation.h"
 #include "State/Settings.h"
 #include "State/Timers.h"
@@ -1076,7 +1076,7 @@ void Battle_DrawActorMarker(int actor, int kind)
         case 3:
             while (kind) {
                 --kind;
-                Render_QueueSprite(128, xy + kind * 6 + Battle_kMarkerIconOffsets[side], vs_getWH(5, 5),
+                VS::Render::QueueLiveSprite(128, xy + kind * 6 + Battle_kMarkerIconOffsets[side], vs_getWH(5, 5),
                     ot)[4] = vs_getUV0Clut(90, 18, 992, 220);
             }
             break;
@@ -1110,18 +1110,18 @@ void Battle_DrawActorMarker(int actor, int kind)
             }
 
             side += 2;
-            Render_QueueSprite(128, xy + Battle_kMarkerIconOffsets[side], vs_getWH(7, 12), ot)[4] =
+            VS::Render::QueueLiveSprite(128, xy + Battle_kMarkerIconOffsets[side], vs_getWH(7, 12), ot)[4] =
                 vs_getUV0Clut(152, 17, 992, 220);
             break;
         case 5:
-            Render_QueueSprite(128, xy + Battle_kMarkerIconOffsets[side] + vs_getXY(2, -3),
+            VS::Render::QueueLiveSprite(128, xy + Battle_kMarkerIconOffsets[side] + vs_getXY(2, -3),
                 vs_getWH(16, 16), ot)[4] = vs_getUV0Clut(152, 32, 992, 220);
             break;
         case 6:
             side += 4;
             break;
         case 7:
-            prim = Render_QueueSprite(128, xy + vs_getXY(0, -22), vs_getWH(7, 12), ot);
+            prim = VS::Render::QueueLiveSprite(128, xy + vs_getXY(0, -22), vs_getWH(7, 12), ot);
             prim[1] = _get_mode(0, 0, getTPage(0, 0, 448, 256));
             prim[4] = vs_getUV0Clut(183, 17, 992, 220);
             return;
@@ -1186,7 +1186,7 @@ void Battle_DrawActorMarker(int actor, int kind)
                     }
                 }
 
-                prim = Render_QueueSprite(128, xy, vs_getWH(16, 16), ot);
+                prim = VS::Render::QueueLiveSprite(128, xy, vs_getWH(16, 16), ot);
                 prim[1] = _get_mode(0, 0, getTPage(0, 0, 768, 0));
                 prim[4] = ((depth << 4) + 96) | vs_getUV0Clut(0, 32, 976, 223);
                 return;

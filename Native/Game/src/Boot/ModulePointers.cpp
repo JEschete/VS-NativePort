@@ -238,7 +238,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
 #include "Render/ScreenTransition.h"
-#include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/Textures.h"
@@ -1555,10 +1554,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C0150u, 0u, (void*)&Event_ResetCutsceneActorsToIdle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C01C0u, 0u, (void*)&Core_Memory_CopyHalfwords, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C01E0u, 0u, (void*)&Core_Memory_CopyHalfwordBlocks, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0214u, 0u, (void*)&Render_QueueDefaultSprite, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0224u, 0u, (void*)&Render_QueueSpriteWithTexturePage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C0230u, 0u, (void*)&Render_QueueSprite, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C02A8u, 0u, (void*)&Render_LoadFrameViewMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C031Cu, 0u, (void*)&Battle_InitSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05B4u, 0u, (void*)&Battle_FreeSphere, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C05ECu, 0u, (void*)&Battle_SetSphereVolumes, 0u, 0u, 0u},
