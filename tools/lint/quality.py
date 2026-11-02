@@ -8,15 +8,17 @@ import hashlib
 import importlib.util
 import json
 import os
+import posixpath
 import re
 import runpy
 import shutil
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
-from collections import Counter
+from collections import Counter, defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from dataclasses import asdict, dataclass
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 import yaml
 
@@ -26,6 +28,8 @@ BASELINE = HERE / "baseline.json"
 OUTPUT = ROOT / "build" / "quality"
 NATIVE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx", ".h", ".hpp", ".hxx", ".inl"}
 SOURCE_SUFFIXES = {".c", ".cc", ".cpp", ".cxx"}
+INCLUDE_DIRECTIVE = re.compile(r'^[ \t]*#[ \t]*include[ \t]*[<"]([^">]+)[">]', re.M)
+TIDY_TIMEOUT = 600
 PYTHON_FOLDERS = ("lint", "port", "scaffold", "ledger", "naming", "test")
 RETIRING_NATIVE = {
     "Native/Engine/include/Core/Gte.h": "EC-03",
@@ -64,14 +68,16 @@ class Finding:
         return hashlib.sha256(json.dumps(identity).encode()).hexdigest()
 
 
-def run(arguments: list[str], *, allowed: tuple[int, ...] = (0,)) -> str:
+def run(
+    arguments: list[str], *, allowed: tuple[int, ...] = (0,), timeout: int = 120
+) -> str:
     result = subprocess.run(
         arguments,
         cwd=ROOT,
         capture_output=True,
         encoding="utf-8",
         errors="replace",
-        timeout=120,
+        timeout=timeout,
         env={**os.environ, "NO_COLOR": "1"},
         check=False,
     )
@@ -373,30 +379,88 @@ def compile_commands(files: list[str]) -> Path:
     return directory
 
 
-def tidy_sources(native: list[str], selected: set[str]) -> list[str]:
-    headers_changed = any(
-        Path(path).suffix in NATIVE_SUFFIXES - SOURCE_SUFFIXES for path in selected
-    )
+def native_includes() -> dict[str, list[str]]:
+    """Map every native file, including copied sources, to its include names."""
+    return {
+        relative(path): INCLUDE_DIRECTIVE.findall(
+            path.read_text(encoding="utf-8", errors="replace")
+        )
+        for path in (ROOT / "Native").rglob("*")
+        if path.is_file()
+        and path.suffix.lower() in NATIVE_SUFFIXES
+        and "data" not in path.relative_to(ROOT / "Native").parts
+    }
+
+
+def including_files(headers: set[str], includes: dict[str, list[str]]) -> set[str]:
+    """Return files that include any header directly or transitively.
+
+    Include names resolve by path suffix, so an ambiguous name over-selects
+    translation units rather than skipping one.
+    """
+    by_name: dict[str, list[str]] = defaultdict(list)
+    for path in includes:
+        by_name[PurePosixPath(path).name.lower()].append(path)
+    includers: dict[str, set[str]] = defaultdict(set)
+    for path, names in includes.items():
+        for name in names:
+            suffix = "/" + posixpath.normpath(name.replace("\\", "/")).lstrip("./")
+            for candidate in by_name.get(PurePosixPath(name).name.lower(), ()):
+                if candidate.lower().endswith(suffix.lower()):
+                    includers[candidate].add(path)
+    reached: set[str] = set()
+    pending = list(headers)
+    while pending:
+        for parent in includers.get(pending.pop(), ()):
+            if parent not in reached:
+                reached.add(parent)
+                pending.append(parent)
+    return reached
+
+
+def tidy_sources(
+    native: list[str],
+    selected: set[str],
+    includes: dict[str, list[str]] | None = None,
+) -> list[str]:
+    headers = {
+        path
+        for path in selected
+        if Path(path).suffix in NATIVE_SUFFIXES - SOURCE_SUFFIXES
+    }
+    affected = set(selected)
+    if headers:
+        graph = native_includes() if includes is None else includes
+        affected |= including_files(headers, graph)
     return [
         path
         for path in native
-        if Path(path).suffix in SOURCE_SUFFIXES
-        and (headers_changed or path in selected)
+        if Path(path).suffix in SOURCE_SUFFIXES and path in affected
     ]
 
 
-def check_tidy(files: list[str], scope: set[str]) -> list[Finding]:
+def tidy_report(executable: str, database: Path, path: str) -> tuple[str, Path]:
+    report = OUTPUT / (hashlib.sha256(path.encode()).hexdigest()[:16] + ".yaml")
+    report.unlink(missing_ok=True)
+    text = run(
+        [executable, path, "-p", str(database), f"--export-fixes={report}"],
+        timeout=TIDY_TIMEOUT,
+    )
+    return text, report
+
+
+def check_tidy(
+    files: list[str], scope: set[str], jobs: int | None = None
+) -> list[Finding]:
     executable = llvm_tool("clang-tidy")
     database = compile_commands(files)
-    findings = []
-    for path in files:
-        if Path(path).suffix not in SOURCE_SUFFIXES:
-            continue
-        report = OUTPUT / (hashlib.sha256(path.encode()).hexdigest()[:16] + ".yaml")
-        report.unlink(missing_ok=True)
-        text = run(
-            [executable, path, "-p", str(database), f"--export-fixes={report}"],
+    sources = [path for path in files if Path(path).suffix in SOURCE_SUFFIXES]
+    with ThreadPoolExecutor(max_workers=jobs or os.cpu_count() or 1) as pool:
+        reports = list(
+            pool.map(lambda path: tidy_report(executable, database, path), sources)
         )
+    findings = []
+    for path, (text, report) in zip(sources, reports, strict=True):
         if not report.is_file():
             if "error:" in text:
                 raise RuntimeError(f"clang-tidy failed for {path}:\n{text[-5000:]}")
@@ -631,6 +695,12 @@ def main() -> int:
         help="include compilation-based clang-tidy analysis",
     )
     parser.add_argument(
+        "--jobs",
+        type=int,
+        default=os.cpu_count() or 1,
+        help="parallel clang-tidy translation units (default: logical processors)",
+    )
+    parser.add_argument(
         "--update-baseline",
         action="store_true",
         help="explicitly accept current findings after review",
@@ -678,7 +748,9 @@ def main() -> int:
         "clones": lambda: check_clones(native + python),
     }
     if args.tidy:
-        checks["tidy"] = lambda: check_tidy(tidy_sources(native, selected), scope)
+        checks["tidy"] = lambda: check_tidy(
+            tidy_sources(native, selected), scope, args.jobs
+        )
     findings = []
     for name, check in checks.items():
         print(f"Checking {name}...", flush=True)

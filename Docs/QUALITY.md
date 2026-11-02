@@ -49,8 +49,11 @@ quality-native.cmd --tidy
 ```
 
 The default command runs formatting, cpplint, Ruff, and clone detection. `--tidy`
-adds compilation-based analysis. Header changes trigger analysis of all owned
-translation units. Clone detection always scans the complete first-party scope
+adds compilation-based analysis. A header change analyzes the owned translation
+units that include it directly or transitively (resolved over all native sources,
+including copied ones); ambiguous include names over-select rather than skip.
+Translation units run in parallel; `--jobs N` limits the worker count (default:
+logical processors). Clone detection always scans the complete first-party scope
 so duplication with an unchanged file is still caught.
 
 The runner generates compile commands from the solution generator's project table

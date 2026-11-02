@@ -376,10 +376,32 @@ class BaselineTests(unittest.TestCase):
         files = [
             "Native/Engine/src/first.cpp",
             "Native/Engine/src/second.c",
+            "Native/Engine/src/third.cpp",
             "Native/Engine/include/api.h",
+            "Native/Engine/include/wrapper.h",
         ]
-        self.assertEqual(quality.tidy_sources(files, {files[2]}), files[:2])
-        self.assertEqual(quality.tidy_sources(files, {files[0]}), [files[0]])
+        includes = {
+            files[0]: ["Engine/api.h"],
+            files[1]: ["unrelated.h"],
+            files[2]: ["../include/wrapper.h"],
+            "Native/Engine/include/Engine/api.h": [],
+            files[3]: [],
+            files[4]: ["../include/api.h"],
+        }
+        self.assertEqual(quality.tidy_sources(files, {files[3]}, includes), [files[2]])
+        self.assertEqual(quality.tidy_sources(files, {files[4]}, includes), [files[2]])
+        self.assertEqual(quality.tidy_sources(files, {files[0]}, includes), [files[0]])
+        self.assertEqual(
+            quality.tidy_sources(files, {"Native/Engine/include/Engine/api.h"}, includes),
+            [files[0]],
+        )
+
+    def test_real_header_includers_are_found_transitively(self) -> None:
+        graph = quality.native_includes()
+        dependents = quality.including_files(
+            {"Native/Engine/include/Core/FrameClock.hpp"}, graph
+        )
+        self.assertIn("Native/Engine/src/Core/FrameClock.cpp", dependents)
 
 
 class ToolControlTests(unittest.TestCase):
