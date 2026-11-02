@@ -1737,6 +1737,9 @@
     <ClInclude Include="src\Field\RoomEffects.h">
       <Filter>src\Field</Filter>
     </ClInclude>
+    <ClCompile Include="src\Field\RoomLightingLive.cpp">
+      <Filter>src\Field</Filter>
+    </ClCompile>
     <ClCompile Include="src\Field\RoomLoading.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2314,6 +2317,9 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\PlatformPlacementLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomLightingLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\RoomTriggerMarkers.hpp">

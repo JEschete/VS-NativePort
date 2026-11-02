@@ -5,7 +5,6 @@ Native\Engine\src\Movie\Intro\Player.cpp
 Native\Engine\src\Render\ModelGeometry.cpp
 Native\Engine\src\Render\ModelWorkspace.cpp
 Native\Engine\src\Render\RoomDraw.cpp
-Native\Engine\src\Render\RoomLighting.cpp
 Native\Engine\src\Render\Sprites.cpp
 Native\Engine\src\Render\TextureRegionDraw.cpp
 Native\Game\src\Actors\AppearanceTransition.cpp

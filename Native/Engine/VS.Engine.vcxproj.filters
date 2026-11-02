@@ -582,9 +582,6 @@
     <ClCompile Include="src\Render\RoomLighting.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\RoomLighting.h">
-      <Filter>src\Render</Filter>
-    </ClInclude>
     <ClCompile Include="src\Render\ScaledFont.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -790,6 +787,9 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\RoomLighting.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ScaledFont.hpp">

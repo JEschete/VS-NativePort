@@ -5,6 +5,7 @@
 
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Field/CollisionSampling.hpp"
+#include "Field/RoomLightingLive.hpp"
 
 extern "C" {
 
@@ -42,7 +43,7 @@ extern "C" {
 #include "Field/RoomLoading.h"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.h"
-#include "Render/RoomLighting.h"
+#include "Render/Palette.h"
 
 static int sessionTitleCalls;
 static int sessionBattleCalls;
@@ -625,16 +626,16 @@ int Tests_RoomLightingSamples(void) {
   Field_roomData.lighting = &lighting;
   Field_roomData.header.lightingLength = sizeof lighting;
   Render_ColorCode color = {0, 0, 0, 0x5A};
-  Render_SampleRoomLighting((32 << 16) | 32, 0, &color);
+  VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
   int passed = color.red == 127 && color.green == 63 && color.blue == 63 &&
                color.code == 0x5A;
-  Render_SampleRoomLighting((32 << 16) | 32, 1, &color);
+  VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 1, &color);
   passed = passed && color.red == 64 && color.green == 96 && color.blue == 128;
-  Render_SampleRoomLighting((200 << 16) | 200, 0, &color);
+  VS::Field::SampleLiveRoomLighting((200 << 16) | 200, 0, &color);
   passed = passed && color.red == 17 && color.green == 34 && color.blue == 51 &&
            color.code == 0;
   Field_roomData.lighting = nullptr;
-  Render_SampleRoomLighting(0, 0, &color);
+  VS::Field::SampleLiveRoomLighting(0, 0, &color);
   passed =
       passed && color.red == 128 && color.green == 128 && color.blue == 128;
   Field_roomData = saved;

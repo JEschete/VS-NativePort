@@ -46,6 +46,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
     "VS::Field::DrawLiveRoomTriggerMarkers": r"Native\Game\include\Field\RoomTriggerMarkersLive.hpp",
+    "VS::Field::SampleLiveRoomLighting": r"Native\Game\include\Field\RoomLightingLive.hpp",
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -1447,9 +1448,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Effects_BindEffectPackageBlocks((Effects_PackageFile*)Effects_emptyPackage);",
          "bind the full embedded package stored at original address 0x800EC4BC"),
     ],
-    "F00589": [("void Field_SampleRoomGroundColor(int arg0) { Render_SampleRoomLighting(arg0, 0); }",
+    "F00589": [("void Field_SampleRoomGroundColor(int arg0) { VS::Render::SampleRoomLighting(arg0, 0); }",
                  "void Field_SampleRoomGroundColor(int arg0, int layer, Render_ColorCode* color)\n"
-                 "{\n    (void)layer;\n    Render_SampleRoomLighting(arg0, 0, color);\n}",
+                 "{\n    (void)layer;\n    VS::Field::SampleLiveRoomLighting(arg0, 0, color);\n}",
                  "preserve the output-color argument consumed by the original assembly")],
     "G00582": [("int Battle_Ai_roomHasWaypoints", "void* Battle_Ai_roomHasWaypoints",
                  "func_800E6F9C stores the room auxiliary-data pointer, not a boolean")],

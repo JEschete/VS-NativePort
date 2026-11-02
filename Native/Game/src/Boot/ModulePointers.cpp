@@ -247,7 +247,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomLighting.h"
 #include "Render/ScreenTransition.h"
 #include "Render/Sprites.h"
 #include "Render/Text/CompactFont.h"
@@ -1068,8 +1067,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80098648u, 0u, (void*)&Render_BuildScaleCompensatedRoomView, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098AB4u, 0u, (void*)&Core_Math_CosineFixedPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098AB8u, 0u, (void*)&Core_Math_SineFixedPoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098B38u, 0u, (void*)&Render_SampleRoomLighting, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098C3Cu, 0u, (void*)&Render_InterpolateRoomLightTriangle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098D6Cu, 0u, (void*)&Render_TintRoomGeometryPrimitives, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098E50u, 0u, (void*)&Render_TintRoomPrimitiveColor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098F4Cu, 0u, (void*)&Field_ResolveSceneRoomData, 0u, 0u, 0u},

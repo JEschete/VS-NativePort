@@ -967,8 +967,11 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Engine\src\Render\RoomLighting.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(source.count("Render_InterpolateRoomLightTriangle("), 2)
-        self.assertIn("return SignedWord(static_cast<uint32_t>(area));", source)
+        self.assertEqual(owned["F00768"]["name"], "VS::Render::InterpolateRoomLightTriangle")
+        self.assertEqual(owned["F00767"]["name"], "VS::Render::SampleRoomLighting")
+        self.assertEqual(source.count("InterpolateRoomLightTriangle("), 2)
+        self.assertIn("return std::bit_cast<std::int32_t>(static_cast<std::uint32_t>(area));", source)
+        self.assertNotIn("Legacy/", source)
 
     def test_script_weapon_mode_owns_its_original_opcode_and_named_wait_state(self):
         owned = self.owned_items()

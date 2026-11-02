@@ -1,76 +1,63 @@
 #include <array>
 #include <bit>
+#include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <initializer_list>
+#include <optional>
 #include <span>
-#include <type_traits>
 #include <utility>
+#include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Content/ModuleData.h"
+#include "Field/RoomLightingLive.hpp"
 #include "Legacy/Psx.h"
+#include "Render/RoomLighting.hpp"
 
 extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
-#include "Render/RoomLighting.h"
+#include "Render/Palette.h"
 }
 
 namespace {
-using Interpolator = int (*)(std::uint32_t, Render_ColorCode*,
-                             const Render_RoomLightTriangle*);
-static_assert(std::is_same_v<decltype(&Render_InterpolateRoomLightTriangle),
-                             Interpolator>);
+using VS::Render::RoomLightColor;
+using VS::Render::RoomLightLayer;
+using VS::Render::RoomLightPoint;
+using VS::Render::RoomLightRgb;
+using VS::Render::RoomLightTriangle;
 
-constexpr std::uint32_t Pack(int x, int z) {
-  return static_cast<std::uint16_t>(x) |
-         (std::uint32_t{static_cast<std::uint16_t>(z)} << 16);
+RoomLightTriangle PrimaryTriangle() {
+  return {
+      {0, 0},
+      {128, 128},
+      {RoomLightPoint{0, 0}, RoomLightPoint{0, 128}, RoomLightPoint{128, 0}},
+      {0x0000FF, 0xFF0000, 0x00FF00}};
 }
 
-Render_RoomLightTriangle PrimaryTriangle() {
-  return {0,
-          0,
-          128,
-          128,
-          {{0, 0}, {0, 128}, {128, 0}},
-          {0x0000FF, 0xFF0000, 0x00FF00}};
-}
-
-auto TriangleBytes(const Render_RoomLightTriangle& triangle) {
-  std::array<std::byte, sizeof(triangle)> bytes{};
-  std::memcpy(bytes.data(), &triangle, bytes.size());
-  return bytes;
-}
-
-std::int32_t ReferenceArea(const std::int16_t first[2],
-                           const std::int16_t second[2],
-                           const std::int16_t third[2]) {
+std::int32_t ReferenceArea(RoomLightPoint first, RoomLightPoint second,
+                           RoomLightPoint third) {
   const std::int64_t expanded =
-      std::int64_t{first[0]} * second[1] + std::int64_t{second[0]} * third[1] +
-      std::int64_t{third[0]} * first[1] - std::int64_t{first[0]} * third[1] -
-      std::int64_t{second[0]} * first[1] - std::int64_t{third[0]} * second[1];
+      std::int64_t{first.x} * second.z + std::int64_t{second.x} * third.z +
+      std::int64_t{third.x} * first.z - std::int64_t{first.x} * third.z -
+      std::int64_t{second.x} * first.z - std::int64_t{third.x} * second.z;
   return std::bit_cast<std::int32_t>(static_cast<std::uint32_t>(expanded));
 }
 
-bool OriginalColor(std::uint32_t position,
-                   const Render_RoomLightTriangle& triangle,
-                   Render_ColorCode* color) {
-  const std::int16_t point[]{
-      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(position)),
-      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(position >> 16))};
-  const auto area =
-      ReferenceArea(triangle.points[0], triangle.points[2], triangle.points[1]);
-  const auto first =
-      ReferenceArea(point, triangle.points[2], triangle.points[1]);
-  const auto second =
-      ReferenceArea(point, triangle.points[1], triangle.points[0]);
+std::optional<RoomLightRgb> OriginalColor(RoomLightPoint point,
+                                          const RoomLightTriangle& triangle) {
+  const auto& c = triangle.corners;
+  const auto area = ReferenceArea(c[0], c[2], c[1]);
+  const auto first = ReferenceArea(point, c[2], c[1]);
+  const auto second = ReferenceArea(point, c[1], c[0]);
   const auto third = std::bit_cast<std::int32_t>(
       static_cast<std::uint32_t>(area) - static_cast<std::uint32_t>(first) -
       static_cast<std::uint32_t>(second));
-  if (area <= 0 || first < 0 || second < 0 || third < 0) return false;
-  auto bytes = std::bit_cast<std::array<unsigned char, 4>>(*color);
+  if (area <= 0 || first < 0 || second < 0 || third < 0) return std::nullopt;
+  std::array<std::uint8_t, 3> bytes{};
   for (std::size_t channel = 0; channel < 3; ++channel) {
     const auto shift = channel * 8;
     const std::uint64_t expanded =
@@ -83,11 +70,9 @@ bool OriginalColor(std::uint32_t position,
     auto quotient =
         static_cast<std::uint32_t>(expanded) / static_cast<std::uint32_t>(area);
     if ((quotient & 0x80000000u) != 0) quotient = 0;
-    bytes[channel] =
-        static_cast<unsigned char>(quotient > 255 ? 255 : quotient);
+    bytes[channel] = static_cast<std::uint8_t>(quotient > 255 ? 255 : quotient);
   }
-  *color = std::bit_cast<Render_ColorCode>(bytes);
-  return true;
+  return RoomLightRgb{bytes[0], bytes[1], bytes[2]};
 }
 
 std::uint32_t NextWord(std::uint32_t& state) {
@@ -95,43 +80,89 @@ std::uint32_t NextWord(std::uint32_t& state) {
   return state;
 }
 
-struct LightingTriangleImage {
-  std::array<std::int16_t, 4> bounds{};
-  std::array<std::array<std::int16_t, 2>, 3> points{};
-  std::array<std::uint32_t, 3> colors{};
-};
-static_assert(sizeof(LightingTriangleImage) == 32);
+void PutWord(std::vector<std::byte>& out, std::uint32_t value) {
+  for (int index = 0; index < 4; ++index) {
+    out.push_back(static_cast<std::byte>(value >> (index * 8)));
+  }
+}
 
-struct LightingFixture {
+void PutHalf(std::vector<std::byte>& out, std::int16_t value) {
+  const auto bits = std::bit_cast<std::uint16_t>(value);
+  out.push_back(static_cast<std::byte>(bits));
+  out.push_back(static_cast<std::byte>(bits >> 8));
+}
+
+void PutTriangle(std::vector<std::byte>& out, const RoomLightTriangle& t) {
+  PutHalf(out, t.minimum.x);
+  PutHalf(out, t.minimum.z);
+  PutHalf(out, t.maximum.x);
+  PutHalf(out, t.maximum.z);
+  for (const auto& corner : t.corners) {
+    PutHalf(out, corner.x);
+    PutHalf(out, corner.z);
+  }
+  for (const auto color : t.colors) PutWord(out, color);
+}
+
+std::vector<std::byte> LightingBlock(
+    std::uint32_t ambient, std::uint32_t floor_count,
+    std::uint32_t ceiling_count,
+    std::initializer_list<RoomLightTriangle> triangles) {
+  std::vector<std::byte> out;
+  PutWord(out, ambient);
+  PutWord(out, floor_count);
+  PutWord(out, ceiling_count);
+  for (const auto& triangle : triangles) PutTriangle(out, triangle);
+  return out;
+}
+
+struct LiveLightingFixture {
   Field_RoomRecord saved = Field_roomData;
-  struct {
-    std::uint32_t ambient = 0x00332211;
-    std::uint32_t floor_count = 1;
-    std::uint32_t ceiling_count = 0;
-    LightingTriangleImage triangle{};
-  } image;
+  std::vector<std::byte> image;
 
-  LightingFixture() {
+  explicit LiveLightingFixture(std::vector<std::byte> block)
+      : image(std::move(block)) {
     Field_roomData.isLoaded = 1;
-    Field_roomData.lighting = &image;
-    Field_roomData.header.lightingLength = sizeof(image);
+    Field_roomData.lighting = image.data();
+    Field_roomData.header.lightingLength =
+        static_cast<std::uint32_t>(image.size());
   }
 
-  ~LightingFixture() { Field_roomData = saved; }
+  ~LiveLightingFixture() { Field_roomData = saved; }
 };
 }  // namespace
 
+TEST_CASE("Room light records decode little-endian bounds, corners and colours",
+          "[render][room-lighting]") {
+  const RoomLightTriangle triangle{
+      {-2, 3},
+      {300, -400},
+      {RoomLightPoint{-32768, 1}, RoomLightPoint{2, 32767},
+       RoomLightPoint{-5, -6}},
+      {0x00112233, 0xFFEEDDCC, 0x01020304}};
+  const auto bytes = LightingBlock(0, 0, 0, {triangle});
+  REQUIRE(bytes.size() == VS::Render::kRoomLightingHeaderBytes +
+                              VS::Render::kRoomLightTriangleBytes);
+  const auto record = std::span(bytes)
+                          .subspan(VS::Render::kRoomLightingHeaderBytes)
+                          .first<VS::Render::kRoomLightTriangleBytes>();
+  CHECK(VS::Render::DecodeRoomLightTriangle(record) == triangle);
+  CHECK(VS::Render::UnpackRoomLightPoint(0x8001FFFFu) ==
+        RoomLightPoint{-1, -32767});
+}
+
 TEST_CASE("Room lighting rejects the original signed32 area overflow",
           "[render][room-lighting]") {
-  LightingFixture fixture;
-  fixture.image.triangle.bounds = {-32768, -32768, 32767, 32767};
-  fixture.image.triangle.points = {std::array<std::int16_t, 2>{-32768, -32768},
-                                   std::array<std::int16_t, 2>{-32768, 32767},
-                                   std::array<std::int16_t, 2>{32767, -32768}};
-  fixture.image.triangle.colors.fill(0x00776655);
+  RoomLightTriangle triangle{
+      {-32768, -32768},
+      {32767, 32767},
+      {RoomLightPoint{-32768, -32768}, RoomLightPoint{-32768, 32767},
+       RoomLightPoint{32767, -32768}},
+      {0x00776655, 0x00776655, 0x00776655}};
+  LiveLightingFixture fixture(LightingBlock(0x00332211, 1, 0, {triangle}));
   Render_ColorCode color{0, 0, 0, 0x5A};
   // Original NCLIP MAC0: 65535 * 65535 wraps to signed -131071.
-  Render_SampleRoomLighting(-1, 0, &color);
+  VS::Field::SampleLiveRoomLighting(-1, 0, &color);
   CHECK(color.red == 0x11);
   CHECK(color.green == 0x22);
   CHECK(color.blue == 0x33);
@@ -145,62 +176,43 @@ TEST_CASE("Room light triangles interpolate corners and inclusive edges",
       std::array{128, 0, 0, 255, 0}, std::array{64, 0, 127, 127, 0},
       std::array{32, 32, 127, 63, 63}, std::array{64, 64, 0, 127, 127});
   const auto triangle = PrimaryTriangle();
-  const auto before = TriangleBytes(triangle);
-  struct {
-    std::uint32_t before = 0x12345678;
-    Render_ColorCode color{0, 0, 0, 0xA5};
-    std::uint32_t after = 0x87654321;
-  } output;
-  REQUIRE(Render_InterpolateRoomLightTriangle(Pack(sample[0], sample[1]),
-                                              &output.color, &triangle) == 1);
-  CHECK(output.color.red == sample[2]);
-  CHECK(output.color.green == sample[3]);
-  CHECK(output.color.blue == sample[4]);
-  CHECK(output.color.code == 0xA5);
-  CHECK(output.before == 0x12345678);
-  CHECK(output.after == 0x87654321);
-  CHECK(TriangleBytes(triangle) == before);
+  const auto rgb = VS::Render::InterpolateRoomLightTriangle(
+      {static_cast<std::int16_t>(sample[0]),
+       static_cast<std::int16_t>(sample[1])},
+      triangle);
+  REQUIRE(rgb.has_value());
+  CHECK(*rgb == RoomLightRgb{static_cast<std::uint8_t>(sample[2]),
+                             static_cast<std::uint8_t>(sample[3]),
+                             static_cast<std::uint8_t>(sample[4])});
+  CHECK(triangle == PrimaryTriangle());
 }
 
-TEST_CASE("Rejected room light triangles leave the complete output untouched",
+TEST_CASE("Rejected room light triangles yield no colour",
           "[render][room-lighting]") {
   const auto point = GENERATE(std::array{-1, 0}, std::array{0, -1},
                               std::array{129, 0}, std::array{80, 80});
   auto triangle = PrimaryTriangle();
-  Render_ColorCode color{17, 34, 51, 0xA5};
-  const auto before = std::bit_cast<std::array<unsigned char, 4>>(color);
-  CHECK(Render_InterpolateRoomLightTriangle(Pack(point[0], point[1]), &color,
-                                            &triangle) == 0);
-  CHECK(std::bit_cast<std::array<unsigned char, 4>>(color) == before);
-  std::swap(triangle.points[1], triangle.points[2]);
-  CHECK(Render_InterpolateRoomLightTriangle(Pack(0, 0), &color, &triangle) ==
-        0);
-  CHECK(std::bit_cast<std::array<unsigned char, 4>>(color) == before);
-  triangle.points[1][0] = 64;
-  triangle.points[1][1] = 0;
-  triangle.points[2][0] = 128;
-  triangle.points[2][1] = 0;
-  CHECK(Render_InterpolateRoomLightTriangle(Pack(0, 0), &color, &triangle) ==
-        0);
-  CHECK(std::bit_cast<std::array<unsigned char, 4>>(color) == before);
+  CHECK_FALSE(VS::Render::InterpolateRoomLightTriangle(
+      {static_cast<std::int16_t>(point[0]),
+       static_cast<std::int16_t>(point[1])},
+      triangle));
+  std::swap(triangle.corners[1], triangle.corners[2]);
+  CHECK_FALSE(VS::Render::InterpolateRoomLightTriangle({0, 0}, triangle));
+  triangle.corners[1] = {64, 0};
+  triangle.corners[2] = {128, 0};
+  CHECK_FALSE(VS::Render::InterpolateRoomLightTriangle({0, 0}, triangle));
 }
 
 TEST_CASE("Room light color weights retain the original unsigned32 overflow",
           "[render][room-lighting]") {
-  Render_RoomLightTriangle triangle{
-      -16000,
-      -16000,
-      16000,
-      16000,
-      {{-16000, -16000}, {-16000, 16000}, {16000, -16000}},
+  const RoomLightTriangle triangle{
+      {-16000, -16000},
+      {16000, 16000},
+      {RoomLightPoint{-16000, -16000}, RoomLightPoint{-16000, 16000},
+       RoomLightPoint{16000, -16000}},
       {0xFFFFFF, 0xFFFFFF, 0xFFFFFF}};
-  Render_ColorCode color{0, 0, 0, 0xA5};
-  REQUIRE(Render_InterpolateRoomLightTriangle(Pack(-1, -1), &color,
-                                              &triangle) == 1);
-  CHECK(color.red == 3);
-  CHECK(color.green == 3);
-  CHECK(color.blue == 3);
-  CHECK(color.code == 0xA5);
+  CHECK(VS::Render::InterpolateRoomLightTriangle({-1, -1}, triangle) ==
+        RoomLightRgb{3, 3, 3});
 }
 
 TEST_CASE(
@@ -210,46 +222,89 @@ TEST_CASE(
   unsigned accepted = 0;
   unsigned rejected = 0;
   for (int iteration = 0; iteration < 4096; ++iteration) {
-    Render_RoomLightTriangle triangle{};
-    for (auto& point : triangle.points) {
-      for (auto& coordinate : point) {
-        coordinate = std::bit_cast<std::int16_t>(
-            static_cast<std::uint16_t>(NextWord(random) >> 16));
-      }
+    RoomLightTriangle triangle{};
+    for (auto& corner : triangle.corners) {
+      corner.x = std::bit_cast<std::int16_t>(
+          static_cast<std::uint16_t>(NextWord(random) >> 16));
+      corner.z = std::bit_cast<std::int16_t>(
+          static_cast<std::uint16_t>(NextWord(random) >> 16));
     }
     for (auto& color : triangle.colors) color = NextWord(random);
-    const auto input = TriangleBytes(triangle);
-    const auto position = NextWord(random);
-    Render_ColorCode actual{17, 34, 51, 0xA5};
-    auto expected = actual;
-    const bool hit = OriginalColor(position, triangle, &expected);
-    hit ? ++accepted : ++rejected;
-    REQUIRE(Render_InterpolateRoomLightTriangle(position, &actual, &triangle) ==
-            hit);
-    CHECK(std::bit_cast<std::array<unsigned char, 4>>(actual) ==
-          std::bit_cast<std::array<unsigned char, 4>>(expected));
-    CHECK(TriangleBytes(triangle) == input);
+    const auto point = VS::Render::UnpackRoomLightPoint(NextWord(random));
+    const auto expected = OriginalColor(point, triangle);
+    expected ? ++accepted : ++rejected;
+    REQUIRE(VS::Render::InterpolateRoomLightTriangle(point, triangle) ==
+            expected);
   }
   CHECK(accepted > 128);
   CHECK(rejected > 128);
 }
 
-TEST_CASE("Original room light entry resolves to the typed shared kernel",
+TEST_CASE("Room lighting keeps the code byte only for interpolated samples",
+          "[render][room-lighting]") {
+  auto ceiling = PrimaryTriangle();
+  ceiling.colors = {0x806040, 0x806040, 0x806040};
+  const auto block =
+      LightingBlock(0x44332211, 1, 1, {PrimaryTriangle(), ceiling});
+  const RoomLightColor current{9, 9, 9, 0x5A};
+  CHECK(VS::Render::SampleRoomLighting(block, {32, 32}, RoomLightLayer::kFloor,
+                                       current) ==
+        RoomLightColor{127, 63, 63, 0x5A});
+  CHECK(VS::Render::SampleRoomLighting(block, {32, 32},
+                                       RoomLightLayer::kCeiling, current) ==
+        RoomLightColor{64, 96, 128, 0x5A});
+  CHECK(VS::Render::SampleRoomLighting(block, {200, 200},
+                                       RoomLightLayer::kFloor, current) ==
+        RoomLightColor{0x11, 0x22, 0x33, 0x44});
+  CHECK(VS::Render::SampleRoomLighting({}, {0, 0}, RoomLightLayer::kFloor,
+                                       current) ==
+        RoomLightColor{128, 128, 128, 0});
+}
+
+TEST_CASE("Room lighting bounds counts to the complete records present",
+          "[render][room-lighting]") {
+  const RoomLightColor current{1, 2, 3, 4};
+  const RoomLightColor ambient{0x11, 0x22, 0x33, 0};
+  auto block = LightingBlock(0x00332211, 2, 0, {PrimaryTriangle()});
+  CHECK(VS::Render::SampleRoomLighting(block, {32, 32}, RoomLightLayer::kFloor,
+                                       current) == ambient);
+  block = LightingBlock(0x00332211, 1, 1, {PrimaryTriangle()});
+  CHECK(VS::Render::SampleRoomLighting(
+            block, {32, 32}, RoomLightLayer::kCeiling, current) == ambient);
+  block = LightingBlock(0x00332211, 0xFFFFFFFFu, 1, {PrimaryTriangle()});
+  CHECK(VS::Render::SampleRoomLighting(
+            block, {32, 32}, RoomLightLayer::kCeiling, current) == ambient);
+  block = LightingBlock(0x00332211, 1, 0, {PrimaryTriangle()});
+  block.pop_back();
+  CHECK(VS::Render::SampleRoomLighting(block, {32, 32}, RoomLightLayer::kFloor,
+                                       current) == ambient);
+  block.resize(VS::Render::kRoomLightingHeaderBytes - 1);
+  CHECK(VS::Render::SampleRoomLighting(block, {32, 32}, RoomLightLayer::kFloor,
+                                       current) ==
+        RoomLightColor{128, 128, 128, 0});
+}
+
+TEST_CASE("Live room lighting ignores unloaded rooms and null colours",
+          "[render][room-lighting]") {
+  LiveLightingFixture fixture(
+      LightingBlock(0x00332211, 1, 0, {PrimaryTriangle()}));
+  VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, nullptr);
+  Render_ColorCode color{0, 0, 0, 0xA5};
+  VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
+  CHECK((color.red == 127 && color.green == 63 && color.blue == 63 &&
+         color.code == 0xA5));
+  Field_roomData.isLoaded = 0;
+  VS::Field::SampleLiveRoomLighting((32 << 16) | 32, 0, &color);
+  CHECK((color.red == 128 && color.green == 128 && color.blue == 128 &&
+         color.code == 0));
+}
+
+TEST_CASE("Original room light entries have no module address",
           "[render][room-lighting]") {
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", 0x80098C3Cu);
-  REQUIRE(resolved != nullptr);
-  const auto function = reinterpret_cast<Interpolator>(resolved);
-  CHECK(function == Render_InterpolateRoomLightTriangle);
-  const auto triangle = PrimaryTriangle();
-  Render_ColorCode color{0, 0, 0, 0xA5};
-  REQUIRE(function(Pack(32, 32), &color, &triangle) == 1);
-  CHECK(color.red == 127);
-  CHECK(color.green == 63);
-  CHECK(color.blue == 63);
-  CHECK(color.code == 0xA5);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x80098C3Du) == nullptr);
+                                          0x80098B38u) == nullptr);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          0x80098C3Cu) == nullptr);
 }

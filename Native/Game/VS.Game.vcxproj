@@ -1550,6 +1550,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Field\RoomLightingLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Field\RoomLoading.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2442,6 +2445,7 @@
     <ClInclude Include="include\Field\PlatformLayers.hpp" />
     <ClInclude Include="include\Field\PlatformPlacement.hpp" />
     <ClInclude Include="include\Field\PlatformPlacementLive.hpp" />
+    <ClInclude Include="include\Field\RoomLightingLive.hpp" />
     <ClInclude Include="include\Field\RoomTriggerMarkers.hpp" />
     <ClInclude Include="include\Field\RoomTriggerMarkersLive.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />

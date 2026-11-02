@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Field/RoomLightingLive.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
-#include "Render/RoomLighting.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 #include "State/Timers.h"
@@ -373,7 +373,7 @@ void Field_ClearGeometryOcclusion(void)
 void Field_SampleRoomGroundColor(int packed_world_position, int layer, Render_ColorCode* color)
 {
     (void)layer;
-    Render_SampleRoomLighting(packed_world_position, 0, color);
+    VS::Field::SampleLiveRoomLighting(packed_world_position, 0, color);
 }
 
 }  // extern "C"
