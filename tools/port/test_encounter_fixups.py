@@ -1473,7 +1473,8 @@ class EncounterFixupTests(unittest.TestCase):
     def test_promoted_terrain_callers_pass_the_grid_and_decoded_values(self):
         fixes = [(row, pat, rep) for row, pat, rep, _ in copy_fixups.REGEX_FIXES
                  if "VS::Field::" in pat and "SampleCollisionHeightCode" not in pat
-                 and "TransitionDoorsAtTile" not in pat and "FindMovingPlatformById" not in pat]
+                 and "TransitionDoorsAtTile" not in pat and "FindMovingPlatformById" not in pat
+                 and "DrawRoomTriggerMarkers" not in pat]
         self.assertEqual(len(fixes), 3)
         self.assertTrue(all(re.search(row, "Battle::Ai::Movement") for row, _, _ in fixes))
         text = "\n".join((
@@ -1665,8 +1666,12 @@ Actors_UpdateActorPalettePulse(NULL, object, 0);""",
                 )
                 self.assertEqual(
                     owned[fid]["header"],
-                    r"Native\Game\src\Field\RoomTriggerMarkers.h",
+                    r"Native\Game\include\Field\RoomTriggerMarkers.hpp",
                 )
+        self.assertEqual(
+            copy_fixups.NATIVE_HELPER_HEADERS["VS::Field::DrawLiveRoomTriggerMarkers"],
+            r"Native\Game\include\Field\RoomTriggerMarkersLive.hpp",
+        )
 
     def test_native_resume_hooks_precede_event_and_reset_mutation(self):
         finishes = [

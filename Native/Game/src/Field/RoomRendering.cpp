@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Field/RoomTriggerMarkersLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Field/Room.h"
 #include "Field/RoomEffects.h"
 #include "Field/RoomRendering.h"
-#include "Field/RoomTriggerMarkers.h"
 #include "Field/Zone.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
@@ -92,7 +92,7 @@ void Field_DrawRoomScene(void)
 
     Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
     Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
-    Field_DrawRoomTriggerMarkers();
+    VS::Field::DrawLiveRoomTriggerMarkers();
     Battle_DrawActorMarkers();
     Field_UpdateGimmickAnimationQueue();
 

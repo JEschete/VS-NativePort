@@ -1758,9 +1758,9 @@
     <ClCompile Include="src\Field\RoomTriggerMarkers.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
-    <ClInclude Include="src\Field\RoomTriggerMarkers.h">
+    <ClCompile Include="src\Field\RoomTriggerMarkersLive.cpp">
       <Filter>src\Field</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Field\SegmentCollision.cpp">
       <Filter>src\Field</Filter>
     </ClCompile>
@@ -2314,6 +2314,12 @@
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\PlatformPlacementLive.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomTriggerMarkers.hpp">
+      <Filter>include\Field</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Field\RoomTriggerMarkersLive.hpp">
       <Filter>include\Field</Filter>
     </ClInclude>
     <ClInclude Include="include\Field\TerrainHeight.hpp">

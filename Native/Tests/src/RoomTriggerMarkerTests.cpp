@@ -2,11 +2,14 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Field/RoomTriggerMarkers.hpp"
+#include "Field/RoomTriggerMarkersLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
 
@@ -15,7 +18,6 @@ extern "C" {
 #include "Field/Camera.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
-#include "Field/RoomTriggerMarkers.h"
 #include "Field/TriggerMarkers.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -205,7 +207,7 @@ TEST_CASE("Room trigger markers use the native view and preserve quad material",
   TriggerMarkerFixture fixture;
   REQUIRE(Render_ValidateRoomGeometry(&fixture.definition,
                                       sizeof fixture.definition));
-  Field_DrawRoomTriggerMarker(0, 0, 0, 73);
+  VS::Field::DrawLiveRoomTriggerMarker(0, 0, 0, 73);
   fixture.CheckPackets(1);
   fixture.CheckMaterial();
   const auto* packet = fixture.Packet();
@@ -251,7 +253,7 @@ TEST_CASE("Room trigger marker definitions reject incomplete or unsafe shapes",
       FAIL("Unexpected malformed marker case");
   }
   fixture.StoreDefinition();
-  Field_DrawRoomTriggerMarker(0, 0, 0, 128);
+  VS::Field::DrawLiveRoomTriggerMarker(0, 0, 0, 128);
   fixture.CheckPackets(0);
 }
 
@@ -285,7 +287,7 @@ TEST_CASE(
   State_tickSpeed = sample.ticks;
   Audio_Seq_unusedStateFlags.opaque20 = static_cast<char>(sample.gate20);
   Audio_Seq_unusedStateFlags.opaque40 = static_cast<char>(sample.gate40);
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(static_cast<unsigned char>(trigger.markerFade) == sample.expected);
   CHECK(Field_triggerMarkerFrameTicks == 0);
   fixture.CheckPackets(0);
@@ -299,14 +301,14 @@ TEST_CASE("Room trigger marker iteration ignores absent and partial records",
     trigger.kind = 16;
   }
   Field_roomData.floorTriggers = nullptr;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(fixture.triggers[0].markerFade == 0);
   Field_roomData.floorTriggers = fixture.triggers.data();
   Field_roomData.header.floorTriggersLength = sizeof(Field_MpdFloorTrigger) - 1;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(fixture.triggers[0].markerFade == 0);
   Field_roomData.header.floorTriggersLength = sizeof fixture.triggers - 1;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   CHECK(fixture.triggers[0].markerFade == 2);
   CHECK(fixture.triggers[1].markerFade == 0);
   fixture.CheckPackets(0);
@@ -322,12 +324,12 @@ TEST_CASE("Visible room trigger markers share the original animation update",
   Field_triggerMarkerFrameTicks = 7;
   State_tickSpeed = 3;
   for (auto& trigger : fixture.triggers) trigger.activation = 1;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(2);
   pixels.CheckAnimation(2, 3);
   Field_roomAnimationTicks = 32;
   fixture.ResetPackets();
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(2);
   pixels.CheckAnimation(5, 3);
 }
@@ -335,11 +337,11 @@ TEST_CASE("Visible room trigger markers share the original animation update",
 TEST_CASE("Room trigger marker entry uses fresh placement shade and view",
           "[field][render][trigger-marker]") {
   TriggerMarkerFixture fixture;
-  Field_DrawRoomTriggerMarker(0, 0, 0, 128);
+  VS::Field::DrawLiveRoomTriggerMarker(0, 0, 0, 128);
   fixture.CheckPackets(1);
   fixture.ResetPackets();
   Render_frameScratch.viewMatrix.t[0] = 64;
-  Field_DrawRoomTriggerMarker(128, 128, 0, 7);
+  VS::Field::DrawLiveRoomTriggerMarker(128, 128, 0, 7);
   fixture.CheckPackets(1);
   const auto* packet = fixture.Packet();
   CHECK(static_cast<std::int16_t>(packet[2]) == 240);
@@ -349,12 +351,12 @@ TEST_CASE("Room trigger marker entry uses fresh placement shade and view",
   }
   fixture.ResetPackets();
   Field_roomData.floorTriggers = nullptr;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(0);
   Field_roomData.floorTriggers = fixture.triggers.data();
   Field_triggerMarkerFrameTicks = 0;
   fixture.triggers[0].activation = 1;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);
   CHECK(fixture.triggers[0].markerFade == 2);
   CHECK(Field_triggerMarkerFrameTicks == 1);
@@ -367,7 +369,7 @@ TEST_CASE("Room trigger marker height is applied before camera projection",
           "[field][render][trigger-marker]") {
   const auto height = GENERATE(std::int16_t{-64}, std::int16_t{64});
   TriggerMarkerFixture fixture;
-  Field_DrawRoomTriggerMarker(0, 0, height, 128);
+  VS::Field::DrawLiveRoomTriggerMarker(0, 0, height, 128);
   fixture.CheckPackets(1);
   const unsigned depth = static_cast<unsigned>((1024 + height) / 4);
   CHECK(nextPrim(&fixture.ordering[depth]) == fixture.Packet());
@@ -382,14 +384,94 @@ TEST_CASE("Room trigger marker animation retains wrap and single-step timing",
   fixture.triggers[1].activation = 1;
   Field_roomAnimationTicks = 40;
   State_tickSpeed = 17;
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);
   pixels.CheckAnimation(9, 0);
   Field_triggerMarkerFrameTicks = UINT16_MAX;
   State_tickSpeed = 1;
   Field_roomAnimationTicks = 32;
   fixture.ResetPackets();
-  Field_DrawRoomTriggerMarkers();
+  VS::Field::DrawLiveRoomTriggerMarkers();
   fixture.CheckPackets(1);
   pixels.CheckAnimation(0, 0);
+}
+
+namespace {
+class RecordingMarkerRenderer final
+    : public VS::Field::RoomTriggerMarkerRenderer {
+ public:
+  std::uint16_t floor_code = 0;
+  std::vector<VS::Field::TriggerMarkerAnimationFrame> frames;
+  std::vector<VS::Field::TriggerMarkerPlacement> markers;
+  std::vector<std::pair<int, int>> queries;
+
+  [[nodiscard]] std::uint16_t FloorHeightCode(int world_x,
+                                              int world_z) override {
+    queries.emplace_back(world_x, world_z);
+    return floor_code;
+  }
+  void ShowAnimationFrame(
+      const VS::Field::TriggerMarkerAnimationFrame& frame) override {
+    frames.push_back(frame);
+  }
+  void DrawMarker(const VS::Field::TriggerMarkerPlacement& placement) override {
+    markers.push_back(placement);
+  }
+};
+}  // namespace
+
+TEST_CASE("Typed trigger markers place one shaded corner a tile beyond",
+          "[field][trigger-marker]") {
+  RecordingMarkerRenderer renderer;
+  VS::Field::DrawRoomTriggerMarker(256, -128, -40, 0x1A5, renderer);
+  REQUIRE(renderer.markers.size() == 1);
+  CHECK(renderer.markers[0] ==
+        VS::Field::TriggerMarkerPlacement{384, -40, 0, 0xA5});
+  CHECK(renderer.frames.empty());
+  CHECK(renderer.queries.empty());
+}
+
+TEST_CASE("Typed trigger markers decode the signed floor and skip hidden kinds",
+          "[field][trigger-marker]") {
+  RecordingMarkerRenderer renderer;
+  renderer.floor_code = 0xFFC0;  // flag bit set above a 15-bit height of -64
+  std::array<VS::Field::FloorTriggerMarker, 3> triggers{{
+      {2, 3, 15, true, 0},
+      {4, 5, 16, true, 0},
+      {6, 7, 0, false, 0},
+  }};
+  VS::Field::TriggerMarkerAnimation animation{7};
+  VS::Field::DrawRoomTriggerMarkers(triggers, {1, false, 16}, animation,
+                                    renderer);
+  CHECK(triggers[0].fade == 2);
+  CHECK(triggers[1].fade == 2);
+  CHECK(triggers[2].fade == 0);
+  REQUIRE(renderer.markers.size() == 1);
+  CHECK(renderer.markers[0] ==
+        VS::Field::TriggerMarkerPlacement{384, -64, 512, 2});
+  CHECK(renderer.queries == std::vector<std::pair<int, int>>{{256, 384}});
+  CHECK(animation.pending_ticks == 0);
+  CHECK(renderer.frames ==
+        std::vector<VS::Field::TriggerMarkerAnimationFrame>{{88, 12}});
+}
+
+TEST_CASE("Typed trigger markers suppress reveals and step animation once",
+          "[field][trigger-marker]") {
+  RecordingMarkerRenderer renderer;
+  std::array<VS::Field::FloorTriggerMarker, 2> triggers{{
+      {0, 0, 0, true, 10},
+      {1, 1, 0, true, 3},
+  }};
+  VS::Field::TriggerMarkerAnimation animation{};
+  VS::Field::DrawRoomTriggerMarkers(triggers, {4, true, 0}, animation,
+                                    renderer);
+  CHECK(triggers[0].fade == 6);
+  CHECK(triggers[1].fade == 0);
+  CHECK(renderer.markers.size() == 1);
+  CHECK(animation.pending_ticks == 4);
+  CHECK(renderer.frames.empty());
+  VS::Field::DrawRoomTriggerMarkers(triggers, {0, false, 0}, animation,
+                                    renderer);
+  CHECK(triggers[0].fade == 6);
+  CHECK(animation.pending_ticks == 4);
 }

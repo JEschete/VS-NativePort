@@ -45,6 +45,7 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
     "VS::Battle::ApplyLiveActionTargetEffects": r"Native\Game\include\Battle\ActionResultsLive.hpp",
     "VS::Field::TransitionLiveDoorsAtTile": r"Native\Game\include\Field\DoorMatchesLive.hpp",
+    "VS::Field::DrawLiveRoomTriggerMarkers": r"Native\Game\include\Field\RoomTriggerMarkersLive.hpp",
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -2715,6 +2716,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Audio::Seq::WriteDiscVolume\(\s*\)",
      r"VS::Audio::Seq::WriteLiveDiscVolume()",
      "F03262 #46 typed promotion: the XA binding reads the sequencer disc volume and publishes it with the mix"),
+    (r"", r"\bVS::Field::DrawRoomTriggerMarkers\(\s*\)",
+     r"VS::Field::DrawLiveRoomTriggerMarkers()",
+     "F00617 #46 typed promotion: the marker binding supplies the room floor triggers, frame timers, collision "
+     "floor, VRAM animation moves and the BATTLE.PRG marker definition"),
     (r"", r"\bVS::Event::ScriptSetAshleyBattleMode\b",
      r"Event_ScriptSetAshleyBattleModeOpcode",
      "F01130 #46 typed promotion: the event VM opcode slot holds the adapter that decodes the command bytes"),

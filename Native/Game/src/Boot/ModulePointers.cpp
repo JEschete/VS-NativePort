@@ -193,7 +193,6 @@ extern "C" {
 #include "Field/RoomLoading.h"
 #include "Field/RoomRendering.h"
 #include "Field/RoomState.h"
-#include "Field/RoomTriggerMarkers.h"
 #include "Field/SegmentCollision.h"
 #include "Field/Transitions.h"
 #include "Field/Traps.h"
@@ -926,8 +925,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008DD0Cu, 0u, (void*)&Field_CeilingHeightAt, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DDA8u, 0u, (void*)&Field_FloorAndCeilingHeightsAt, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DEACu, 0u, (void*)&Field_SetRoomTriggerEnabled, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008DF14u, 0u, (void*)&Field_DrawRoomTriggerMarkers, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E19Cu, 0u, (void*)&Field_DrawRoomTriggerMarker, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E224u, 0u, (void*)&Field_SetMovingPlatformVisibility, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E2D4u, 0u, (void*)&Field_MovingPlatformTargetWaypoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E320u, 0u, (void*)&Field_MovingPlatformDwellTicks, 0u, 0u, 0u},
