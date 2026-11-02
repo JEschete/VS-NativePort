@@ -4,7 +4,6 @@ Native\Engine\src\Render\ModelWorkspace.cpp
 Native\Engine\src\Render\RoomDraw.cpp
 Native\Engine\src\Render\Sprites.cpp
 Native\Game\src\Actors\ModelDrawing.cpp
-Native\Game\src\Actors\SequencePlayback.cpp
 Native\Game\src\Battle\Ai\DecisionCallbacks.cpp
 Native\Game\src\Battle\Ai\FrameUpdate.cpp
 Native\Game\src\Battle\Ai\RoomState.cpp

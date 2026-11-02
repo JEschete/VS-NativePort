@@ -1,173 +1,86 @@
 // Hand-maintained (tools/port/owned.csv).
-#include <limits.h>
-#include <stdint.h>
+// Skeletal SEQ playback over typed poses and bounded SEQ bytes
+// (BATTLE.PRG 44F14.c and 48C7C.s).
+#include "Actors/SequencePlayback.hpp"
+
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <span>
 
 #include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "ActorAssets.h"
-#include "Actors/ActorAllocation.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/Appearance.h"
-#include "Actors/ModelDraw.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
-#include "Actors/Movement.h"
-#include "Actors/SequencePlayback.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/WeaponModel.h"
-#include "Audio/ActorSound.h"
-#include "Audio/Sfx.h"
-#include "Battle/ActionAnimation.h"
-#include "Battle/Actor.h"
-#include "Battle/Ai/Navigation.h"
-#include "Battle/Damage.h"
-#include "Core/Core/IntPair.h"
-#include "Core/Math/FixedPoint.h"
-#include "Core/Math/Matrix.h"
-#include "Core/Memory/WordCopy.h"
-#include "Effects/ActionEffects.h"
-#include "Effects/Runtime.h"
-#include "Event/ScriptVm.h"
-#include "Field/Actors.h"
-#include "Field/Collision.h"
-#include "Field/Gimmicks.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Legacy/Psx.h"
-#include "Render/ModelDraw.h"
-#include "Render/Palette.h"
-#include "State/Timers.h"
 
-static int16_t SignedTrackByte(u_char value) {
-  return value <= INT8_MAX
-             ? static_cast<int16_t>(value)
-             : static_cast<int16_t>(static_cast<int>(value) - (UINT8_MAX + 1));
-}
+namespace VS::Actors {
+namespace {
+using VS::Core::Math::WrapSigned16;
 
-static int16_t SignedTrackWord(const u_char* data) {
-  return VS::Core::Math::WrapSigned16(
-      (static_cast<uint32_t>(data[0]) << CHAR_BIT) | data[1]);
-}
+constexpr int kOne = 4096;
+constexpr int kFixedFractionBits = 12;
+constexpr std::uint16_t kRotationMask = 0x1FFF;
+constexpr std::uint16_t kShadowLevelMask = 0xFFF;
 
-enum { kRootPoseKey = 41 };
+constexpr std::size_t kRootRotationTrack = 3;
+constexpr std::size_t kRootTranslationTrack = 4;
+constexpr std::size_t kFirstBoneTrack = 5;
+constexpr std::size_t kScaleFlagsByte = 3;
+constexpr std::uint8_t kHasScaleTracks = 2;
+constexpr int kRootTranslationDivisor = 4;
+constexpr int kBitsPerByte = 8;
+constexpr int kByteSignBit = 0x80;
+constexpr int kByteRange = 0x100;
 
-static void AdvanceShadowBlend(Actors_ShadowBlend* shadow) {
-  enum { kShadowLevelMask = 0xFFF };
-  if (shadow->levelFrames != 0) {
-    const int delta = shadow->levelDelta / shadow->levelFrames;
-    shadow->levelDelta =
-        VS::Core::Math::WrapSigned16(static_cast<uint32_t>(shadow->levelDelta) -
-                                     static_cast<uint32_t>(delta));
-    shadow->level += delta;
-    --shadow->levelFrames;
-  }
-  shadow->level &= kShadowLevelMask;
-  if (shadow->radiusFrames != 0) {
-    const int expand = shadow->radiusExpandDelta / shadow->radiusFrames;
-    shadow->radiusExpandDelta = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(shadow->radiusExpandDelta) -
-        static_cast<uint32_t>(expand));
-    shadow->radiusExpandRate += expand;
-    const int shrink = shadow->radiusShrinkDelta / shadow->radiusFrames;
-    shadow->radiusShrinkDelta = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(shadow->radiusShrinkDelta) -
-        static_cast<uint32_t>(shrink));
-    shadow->radiusShrinkRate += shrink;
-    --shadow->radiusFrames;
-  }
-}
+enum class Command : std::uint8_t { kApplied, kEnded, kOverrun };
 
-static void ApplyPoseTracks(Actors_ActorRecord* actor,
-                            Actors_AnimationPose* state, int first_frame,
-                            int last_frame) {
-  enum {
-    kRootScaleTrack = 4,
-    kRootRotationTrack = 3,
-    kFirstBoneTrack = 5,
-    kScaleFlagsByte = 3,
-    kRootTranslationDivisor = 4
-  };
-  u_short* header;
-  Actors_SeqAnimationBank* bank = reinterpret_cast<Actors_SeqAnimationBank*>(
-      Actors_FindActorAnimationHeader(actor, actor->animationId, &header));
-  if (bank == nullptr || header == nullptr) return;
-  Actors_AnimationTrackContext context = {
-      .data = VS_ONDISC(bank, animationData, const u_char*),
-      .firstFrame = first_frame,
-      .lastFrame = last_frame};
-  if (header[kRootScaleTrack] != 0) {
-    Actors_DecodeAnimationTrack(&context, header[kRootScaleTrack],
-                                &state->scaleKeys[kRootPoseKey],
-                                &state->trackStates[kRootPoseKey], 0);
-    const SVECTOR* delta = &state->scaleKeys[kRootPoseKey];
-    actor->instance.position.vx = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(actor->instance.position.vx) +
-        static_cast<uint32_t>(delta->vx / kRootTranslationDivisor));
-    actor->instance.position.vy = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(actor->instance.position.vy) +
-        static_cast<uint32_t>(delta->vy / kRootTranslationDivisor));
-    actor->instance.position.vz = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(actor->instance.position.vz) +
-        static_cast<uint32_t>(delta->vz / kRootTranslationDivisor));
-  }
-  Actors_DecodeAnimationTrack(&context, header[kRootRotationTrack],
-                              &state->boneKeys[kRootPoseKey],
-                              &state->reserved2A0[kRootPoseKey], 0);
-  for (int bone = 0; bone < actor->instance.boneCount; ++bone) {
-    Actors_DecodeAnimationTrack(&context, header[bone + kFirstBoneTrack],
-                                &state->boneKeys[bone],
-                                &state->reserved2A0[bone], 1);
-    if ((reinterpret_cast<u_char*>(header))[kScaleFlagsByte] & 2) {
-      Actors_DecodeAnimationTrack(
-          &context, header[bone + actor->instance.boneCount + kFirstBoneTrack],
-          &state->scaleKeys[bone], &state->trackStates[bone], 0);
+// A cursor over one track's bytes that refuses to read past them.
+class TrackReader {
+ public:
+  TrackReader(std::span<const std::uint8_t> bytes, std::size_t at)
+      : bytes_(bytes), at_(at) {}
+
+  [[nodiscard]] std::size_t At() const { return at_; }
+
+  bool Byte(std::uint8_t& out) {
+    if (at_ >= bytes_.size()) {
+      return false;
     }
+    out = bytes_[at_++];
+    return true;
   }
-}
 
-// decomp: BATTLE.PRG func_800AFA28 (src/BATTLE/BATTLE.PRG/44F14.c:1252)
-// Native frame ranges are local; no pointer-bearing context is placed at the
-// PS1 scratchpad's end.
-void Actors_AdvanceSkeletalAnimation(Actors_ActorRecord* actor,
-                                     Actors_AnimationPose* state, int mode) {
-  state->reachedEnd = 0;
-  int first_frame = state->frame;
-  for (int step = 0; step < actor->framesPerStep; ++step) {
-    AdvanceShadowBlend(&actor->shadowBlend);
-    if (state->frame >= static_cast<int>((u_short)actor->animationLength)) {
-      state->reachedEnd = -1;
-      if (actor->queuedAnimation != 0) {
-        Actors_PlayActorAnimationAtFrame(
-            actor->instance.slot, actor->queuedAnimation,
-            actor->queuedParameterA, actor->queuedParameterB);
-        actor->queuedAnimation = 0;
-        return;
-      }
+  bool SignedByte(std::int16_t& out) {
+    std::uint8_t value = 0;
+    if (!Byte(value)) {
+      return false;
     }
-    if (actor->instance.isFrozen && state->nextEventFrame == state->frame) {
-      Actors_RunAnimationEvents(actor, state, mode);
-    }
-    if (state->frame >= static_cast<int>((u_short)actor->animationLength)) {
-      --state->frame;
-      state->holdingLastFrame = -1;
-    }
-    ++state->frame;
+    const int byte = value;
+    out = static_cast<std::int16_t>(
+        (byte & kByteSignBit) != 0 ? byte - kByteRange : byte);
+    return true;
   }
-  if (state->frame == 1 || state->holdingLastFrame || state->eventWait != 0) {
-    return;
-  }
-  const int last_frame = state->frame - 1;
-  if (last_frame < first_frame || first_frame == 0) first_frame = 1;
-  ApplyPoseTracks(actor, state, first_frame, last_frame);
-}
 
-static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
-                                        SVECTOR* delta) {
-  enum {
+  // Track words are stored big-endian.
+  bool Word(int& out) {
+    std::uint8_t high = 0;
+    std::uint8_t low = 0;
+    if (at_ >= bytes_.size() || bytes_.size() - at_ < sizeof(std::int16_t)) {
+      return false;
+    }
+    Byte(high);
+    Byte(low);
+    out =
+        WrapSigned16((static_cast<std::uint32_t>(high) << kBitsPerByte) | low);
+    return true;
+  }
+
+ private:
+  std::span<const std::uint8_t> bytes_;
+  std::size_t at_;
+};
+
+// Decodes one keyframe command: its frame run and the delta axes it sets.
+// The delta is committed only when the whole command lies inside the track.
+Command DecodeCommand(TrackReader& reader, int& next_frame, PoseVector& delta) {
+  enum : int {
     kByteDeltaX = 0x80,
     kByteDeltaY = 0x40,
     kByteDeltaZ = 0x20,
@@ -179,130 +92,291 @@ static const u_char* DecodeTrackCommand(const u_char* data, int* next_frame,
     kPackedY = 2,
     kPackedZ = 1
   };
-  int flags = *data;
-  if (flags == 0) return nullptr;
+  std::uint8_t first = 0;
+  if (!reader.Byte(first)) {
+    return Command::kOverrun;
+  }
+  int flags = first;
+  if (flags == 0) {
+    return Command::kEnded;
+  }
   const int frame_mask =
       (flags & kByteDeltaAxes) != 0 ? kLongRunMask : kShortRunMask;
   const int run = flags & frame_mask;
-  *next_frame += run + 1;
+  int frame = next_frame + run + 1;
   if (run == frame_mask) {
-    *next_frame += data[1];
-    data += 2;
-  } else {
-    ++data;
+    std::uint8_t extra = 0;
+    if (!reader.Byte(extra)) {
+      return Command::kOverrun;
+    }
+    frame += extra;
   }
+  PoseVector next = delta;
   if ((flags & kByteDeltaAxes) == 0) {
     flags <<= kPackedAxisBits;
-    const int packed = SignedTrackWord(data);
-    data += sizeof(int16_t);
+    int packed = 0;
+    if (!reader.Word(packed)) {
+      return Command::kOverrun;
+    }
     int value = packed >> kPackedAxisBits;
-    if (packed & kPackedX) {
-      delta->vx = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value));
+    if ((packed & kPackedX) != 0) {
+      next.x = WrapSigned16(static_cast<std::uint32_t>(value));
       flags &= kByteDeltaY | kByteDeltaZ;
-      if (packed & (kPackedY | kPackedZ)) {
-        value = SignedTrackWord(data);
-        data += sizeof(int16_t);
+      if ((packed & (kPackedY | kPackedZ)) != 0 && !reader.Word(value)) {
+        return Command::kOverrun;
       }
     }
-    if (packed & kPackedY) {
-      delta->vy = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value));
+    if ((packed & kPackedY) != 0) {
+      next.y = WrapSigned16(static_cast<std::uint32_t>(value));
       flags &= kByteDeltaX | kByteDeltaZ;
-      if (packed & kPackedZ) {
-        value = SignedTrackWord(data);
-        data += sizeof(int16_t);
+      if ((packed & kPackedZ) != 0 && !reader.Word(value)) {
+        return Command::kOverrun;
       }
     }
-    if (packed & kPackedZ) {
-      delta->vz = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value));
+    if ((packed & kPackedZ) != 0) {
+      next.z = WrapSigned16(static_cast<std::uint32_t>(value));
       flags &= kByteDeltaX | kByteDeltaY;
     }
   }
-  if (flags & kByteDeltaX) delta->vx = SignedTrackByte(*data++);
-  if (flags & kByteDeltaY) delta->vy = SignedTrackByte(*data++);
-  if (flags & kByteDeltaZ) delta->vz = SignedTrackByte(*data++);
-  return data;
-}
-
-// decomp: BATTLE.PRG func_800AFDE8 (src/BATTLE/BATTLE.PRG/44F14.c:1373)
-// The original delta was value + 84 SVECTORs; callers now pass the matching
-// pose array explicitly.
-void Actors_DecodeAnimationTrack(const Actors_AnimationTrackContext* context,
-                                 int offset, SVECTOR* value, SVECTOR* delta,
-                                 int rotation) {
-  enum { kRotationMask = 0x1FFF };
-  const u_char* start = context->data + offset;
-  const u_char* data = start + (u_short)value->pad;
-  int next_frame = (u_short)delta->pad;
-  for (int frame = context->firstFrame; frame <= context->lastFrame; ++frame) {
-    while (next_frame < frame) {
-      data = DecodeTrackCommand(data, &next_frame, delta);
-      if (data == nullptr) return;
-    }
-    value->vx = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value->vx) +
-                                             static_cast<uint32_t>(delta->vx));
-    value->vy = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value->vy) +
-                                             static_cast<uint32_t>(delta->vy));
-    value->vz = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(value->vz) +
-                                             static_cast<uint32_t>(delta->vz));
-    if (rotation) {
-      value->vx = static_cast<int16_t>(static_cast<uint16_t>(value->vx) &
-                                       kRotationMask);
-      value->vy = static_cast<int16_t>(static_cast<uint16_t>(value->vy) &
-                                       kRotationMask);
-      value->vz = static_cast<int16_t>(static_cast<uint16_t>(value->vz) &
-                                       kRotationMask);
-    }
+  if ((flags & kByteDeltaX) != 0 && !reader.SignedByte(next.x)) {
+    return Command::kOverrun;
   }
-  value->pad =
-      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(data - start));
-  delta->pad = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(next_frame));
+  if ((flags & kByteDeltaY) != 0 && !reader.SignedByte(next.y)) {
+    return Command::kOverrun;
+  }
+  if ((flags & kByteDeltaZ) != 0 && !reader.SignedByte(next.z)) {
+    return Command::kOverrun;
+  }
+  delta = next;
+  next_frame = frame;
+  return Command::kApplied;
 }
 
-static int16_t BlendComponent(int16_t from, int16_t to, int weight,
-                              int rotation) {
-  enum { kFixedFractionBits = 12 };
+std::int16_t AddWrapped(std::int16_t value, std::int16_t delta) {
+  return WrapSigned16(static_cast<std::uint32_t>(value) +
+                      static_cast<std::uint32_t>(delta));
+}
+
+std::int16_t MaskRotation(std::int16_t value) {
+  return static_cast<std::int16_t>(static_cast<std::uint16_t>(value) &
+                                   kRotationMask);
+}
+
+// The header word at `index`, stored in the bank's little-endian layout.
+bool HeaderWord(std::span<const std::uint8_t> header, std::size_t index,
+                std::size_t& out) {
+  const std::size_t at = index * sizeof(std::uint16_t);
+  if (header.size() < sizeof(std::uint16_t) ||
+      at > header.size() - sizeof(std::uint16_t)) {
+    return false;
+  }
+  out = static_cast<std::size_t>(header[at]) |
+        (static_cast<std::size_t>(header[at + 1]) << kBitsPerByte);
+  return true;
+}
+
+// Decodes the track the header word at `index` points to. Returns false when
+// the word or its track lies past the clip.
+bool DecodeClipTrack(const AnimationClip& clip, std::size_t index,
+                     TrackFrames frames, PoseVector& value, PoseVector& delta,
+                     TrackKind kind) {
+  std::size_t offset = 0;
+  if (!HeaderWord(clip.header, index, offset) || offset > clip.motion.size()) {
+    return false;
+  }
+  return DecodeAnimationTrack(clip.motion.subspan(offset), frames, value, delta,
+                              kind) != TrackDecode::Overrun;
+}
+
+std::int16_t BlendComponent(std::int16_t from, std::int16_t to, int weight,
+                            TrackKind kind) {
   int delta = static_cast<int>(to) - from;
-  if (rotation) {
-    if (delta >= ONE) {
-      delta -= ONE * 2;
-    } else if (delta < -ONE) {
-      delta += ONE * 2;
+  if (kind == TrackKind::Rotation) {
+    if (delta >= kOne) {
+      delta -= kOne * 2;
+    } else if (delta < -kOne) {
+      delta += kOne * 2;
     }
   }
   // GPF loads a signed 16-bit IR component, then shifts its product
   // arithmetically by 12.
-  return static_cast<int16_t>(
-      from + ((static_cast<int>(static_cast<int16_t>(delta)) * weight) >>
+  return static_cast<std::int16_t>(
+      from + ((static_cast<int>(static_cast<std::int16_t>(delta)) * weight) >>
               kFixedFractionBits));
 }
 
-static void BlendVector(SVECTOR* dst, const SVECTOR* src, int weight,
-                        int rotation) {
-  dst->vx = BlendComponent(dst->vx, src->vx, weight, rotation);
-  dst->vy = BlendComponent(dst->vy, src->vy, weight, rotation);
-  dst->vz = BlendComponent(dst->vz, src->vz, weight, rotation);
+void BlendVector(PoseVector& destination, const PoseVector& source, int weight,
+                 TrackKind kind) {
+  destination.x = BlendComponent(destination.x, source.x, weight, kind);
+  destination.y = BlendComponent(destination.y, source.y, weight, kind);
+  destination.z = BlendComponent(destination.z, source.z, weight, kind);
+}
+
+std::uint16_t AddRate(std::uint16_t rate, int step) {
+  return static_cast<std::uint16_t>(rate + step);
+}
+
+std::int16_t SubtractStep(std::int16_t remaining, int step) {
+  return WrapSigned16(static_cast<std::uint32_t>(remaining) -
+                      static_cast<std::uint32_t>(step));
+}
+}  // namespace
+
+std::size_t PoseBoneCount(int bones) {
+  return static_cast<std::size_t>(
+      std::clamp(bones, 0, static_cast<int>(kMaxPoseBones)));
+}
+
+// decomp: BATTLE.PRG func_800AFDE8 (src/BATTLE/BATTLE.PRG/44F14.c:1373)
+// The original delta was value + 84 SVECTORs; callers now pass the matching
+// pose key explicitly, and the track is bounded by its bank (#261).
+TrackDecode DecodeAnimationTrack(std::span<const std::uint8_t> track,
+                                 TrackFrames frames, PoseVector& value,
+                                 PoseVector& delta, TrackKind kind) {
+  TrackReader reader(track, value.word);
+  int next_frame = delta.word;
+  for (int frame = frames.first; frame <= frames.last; ++frame) {
+    while (next_frame < frame) {
+      const Command command = DecodeCommand(reader, next_frame, delta);
+      if (command == Command::kEnded) {
+        return TrackDecode::Ended;
+      }
+      if (command == Command::kOverrun) {
+        return TrackDecode::Overrun;
+      }
+    }
+    value.x = AddWrapped(value.x, delta.x);
+    value.y = AddWrapped(value.y, delta.y);
+    value.z = AddWrapped(value.z, delta.z);
+    if (kind == TrackKind::Rotation) {
+      value.x = MaskRotation(value.x);
+      value.y = MaskRotation(value.y);
+      value.z = MaskRotation(value.z);
+    }
+  }
+  value.word = static_cast<std::uint16_t>(reader.At());
+  delta.word = static_cast<std::uint16_t>(next_frame);
+  return TrackDecode::Complete;
+}
+
+PoseTrackResult ApplyPoseTracks(const AnimationClip& clip, int bones,
+                                TrackFrames frames, SkeletalPose& pose) {
+  PoseTrackResult result;
+  auto decode = [&](std::size_t index, PoseVector& value, PoseVector& delta,
+                    TrackKind kind) {
+    if (!DecodeClipTrack(clip, index, frames, value, delta, kind)) {
+      result.overrun = true;
+    }
+  };
+  std::size_t translation = 0;
+  if (!HeaderWord(clip.header, kRootTranslationTrack, translation)) {
+    result.overrun = true;
+    return result;
+  }
+  if (translation != 0) {
+    PoseVector& root = pose.keys.scales[kRootPoseKey];
+    decode(kRootTranslationTrack, root, pose.scaleDeltas[kRootPoseKey],
+           TrackKind::Linear);
+    result.moved = true;
+    result.step = {root.x / kRootTranslationDivisor,
+                   root.y / kRootTranslationDivisor,
+                   root.z / kRootTranslationDivisor};
+  }
+  decode(kRootRotationTrack, pose.keys.rotations[kRootPoseKey],
+         pose.rotationDeltas[kRootPoseKey], TrackKind::Linear);
+  const bool scaled = clip.header.size() > kScaleFlagsByte &&
+                      (clip.header[kScaleFlagsByte] & kHasScaleTracks) != 0;
+  // Scale track words follow every bone the header describes, even ones
+  // past the pose's capacity.
+  const std::size_t header_bones = static_cast<std::size_t>(std::max(bones, 0));
+  const std::size_t pose_bones = PoseBoneCount(bones);
+  for (std::size_t bone = 0; bone < pose_bones; ++bone) {
+    decode(kFirstBoneTrack + bone, pose.keys.rotations[bone],
+           pose.rotationDeltas[bone], TrackKind::Rotation);
+    if (scaled) {
+      decode(kFirstBoneTrack + header_bones + bone, pose.keys.scales[bone],
+             pose.scaleDeltas[bone], TrackKind::Linear);
+    }
+  }
+  return result;
+}
+
+void AdvanceShadowBlend(ShadowBlend& shadow) {
+  if (shadow.levelFrames != 0) {
+    const int delta = shadow.levelDelta / shadow.levelFrames;
+    shadow.levelDelta = SubtractStep(shadow.levelDelta, delta);
+    shadow.level = AddRate(shadow.level, delta);
+    --shadow.levelFrames;
+  }
+  shadow.level &= kShadowLevelMask;
+  if (shadow.radiusFrames != 0) {
+    const int expand = shadow.radiusExpandDelta / shadow.radiusFrames;
+    shadow.radiusExpandDelta = SubtractStep(shadow.radiusExpandDelta, expand);
+    shadow.radiusExpandRate = AddRate(shadow.radiusExpandRate, expand);
+    const int shrink = shadow.radiusShrinkDelta / shadow.radiusFrames;
+    shadow.radiusShrinkDelta = SubtractStep(shadow.radiusShrinkDelta, shrink);
+    shadow.radiusShrinkRate = AddRate(shadow.radiusShrinkRate, shrink);
+    --shadow.radiusFrames;
+  }
+}
+
+// decomp: BATTLE.PRG func_800AFA28 (src/BATTLE/BATTLE.PRG/44F14.c:1252)
+// Native frame ranges are local; no pointer-bearing context is placed at the
+// PS1 scratchpad's end.
+void AdvanceSkeletalAnimation(SkeletalAnimationHost& host) {
+  host.SetReachedEnd(false);
+  int first_frame = host.Frame();
+  for (int step = 0; step < host.FramesPerStep(); ++step) {
+    host.AdvanceShadow();
+    if (host.Frame() >= host.AnimationLength()) {
+      host.SetReachedEnd(true);
+      if (host.PlayQueuedAnimation()) {
+        return;
+      }
+    }
+    if (host.EventsDue()) {
+      host.RunEvents();
+    }
+    if (host.Frame() >= host.AnimationLength()) {
+      host.SetFrame(host.Frame() - 1);
+      host.HoldLastFrame();
+    }
+    host.SetFrame(host.Frame() + 1);
+  }
+  if (host.Frame() == 1 || host.HoldingLastFrame() || host.WaitingForEvent()) {
+    return;
+  }
+  const int last_frame = host.Frame() - 1;
+  if (last_frame < first_frame || first_frame == 0) {
+    first_frame = 1;
+  }
+  host.ApplyPoseTracks({.first = first_frame, .last = last_frame});
 }
 
 // decomp: BATTLE.PRG func_800B147C (src/BATTLE/BATTLE.PRG/48C7C.s:10-184).
 // Full copies use the native pose extent, not the assembly's fixed byte count.
-void Actors_BlendActorPose(Actors_AnimationPose* dst, Actors_AnimationPose* src,
-                           int count, int frame, int frames) {
-  int i;
-  int weight;
+// A zero-length blend no longer divides by zero (#261).
+PoseBlend BlendActorPose(PoseKeys& destination, const PoseKeys& source,
+                         int bones, int frame, int frames) {
   if (frame == frames) {
-    *dst = *src;
-    return;
+    return PoseBlend::CopySource;
   }
   if (frame == (frames >> 1)) {
-    Actors_BlendActorPoseHalfway(dst, src, count);
-    return;
+    return PoseBlend::Halfway;
   }
-  weight = (frame * ONE) / frames;
-  BlendVector(&dst->boneKeys[kRootPoseKey], &src->boneKeys[kRootPoseKey],
-              weight, 0);
-  for (i = 0; i < count; ++i) {
-    BlendVector(&dst->boneKeys[i], &src->boneKeys[i], weight, 1);
-    BlendVector(&dst->scaleKeys[i], &src->scaleKeys[i], weight, 0);
+  if (frames == 0) {
+    return PoseBlend::Skipped;
   }
+  const int weight = (frame * kOne) / frames;
+  BlendVector(destination.rotations[kRootPoseKey],
+              source.rotations[kRootPoseKey], weight, TrackKind::Linear);
+  const std::size_t count = PoseBoneCount(bones);
+  for (std::size_t bone = 0; bone < count; ++bone) {
+    BlendVector(destination.rotations[bone], source.rotations[bone], weight,
+                TrackKind::Rotation);
+    BlendVector(destination.scales[bone], source.scales[bone], weight,
+                TrackKind::Linear);
+  }
+  return PoseBlend::Weighted;
 }
-}  // extern "C"
+}  // namespace VS::Actors

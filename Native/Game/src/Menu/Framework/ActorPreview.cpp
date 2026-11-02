@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SequencePlaybackLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
-#include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -311,7 +311,7 @@ void Menu_Framework_ResetAshleyEquipmentPose(void)
     ashley_actor->animationLength = *animation_length_address;
 
     Actors_InitializeActorAnimationPose(ashley_actor, &ashley_actor->pose);
-    Actors_AdvanceSkeletalAnimation(ashley_actor, &ashley_actor->pose, 1);
+    VS::Actors::AdvanceLiveSkeletalAnimation(*ashley_actor, 1);
     Core_Memory_CopyAlignedWords(&ashley_actor->blendPose, &ashley_actor->pose, sizeof ashley_actor->blendPose);
 
     ashley_actor->pose.frame = 0;

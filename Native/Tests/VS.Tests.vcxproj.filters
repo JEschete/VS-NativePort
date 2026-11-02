@@ -330,6 +330,9 @@
     <ClCompile Include="src\SegmentCollisionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SequencePlaybackTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SequenceTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

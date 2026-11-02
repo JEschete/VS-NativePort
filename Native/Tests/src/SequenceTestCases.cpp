@@ -7,7 +7,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Actors/SequencePlayback.h"
+#include "Actors/SequencePlayback.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 
@@ -156,74 +156,60 @@ TEST_CASE(
 
 TEST_CASE("Animation tracks retain delta cursors across frame ranges",
           "[actors][sequence]") {
-  const unsigned char data[] = {0xE2, 1, 254, 3, 0xE1, 255, 2, 253, 0};
-  Actors_AnimationTrackContext context{data, 1, 3};
-  SVECTOR value{}, delta{};
-  Actors_DecodeAnimationTrack(&context, 0, &value, &delta, 0);
-  CHECK(value.vx == 3);
-  CHECK(value.vy == -6);
-  CHECK(value.vz == 9);
-  CHECK(value.pad == 4);
-  CHECK(delta.pad == 3);
-  context.firstFrame = 4;
-  context.lastFrame = 5;
-  Actors_DecodeAnimationTrack(&context, 0, &value, &delta, 0);
-  CHECK(value.vx == 1);
-  CHECK(value.vy == -2);
-  CHECK(value.vz == 3);
-  CHECK(value.pad == 8);
-  CHECK(delta.pad == 5);
+  using VS::Actors::TrackDecode;
+  using VS::Actors::TrackKind;
+  const std::uint8_t data[] = {0xE2, 1, 254, 3, 0xE1, 255, 2, 253, 0};
+  VS::Actors::PoseVector value{}, delta{};
+  CHECK(VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 3}, value,
+                                         delta, TrackKind::Linear) ==
+        TrackDecode::Complete);
+  CHECK(value.x == 3);
+  CHECK(value.y == -6);
+  CHECK(value.z == 9);
+  CHECK(value.word == 4);
+  CHECK(delta.word == 3);
+  CHECK(VS::Actors::DecodeAnimationTrack(data, {.first = 4, .last = 5}, value,
+                                         delta, TrackKind::Linear) ==
+        TrackDecode::Complete);
+  CHECK(value.x == 1);
+  CHECK(value.y == -2);
+  CHECK(value.z == 3);
+  CHECK(value.word == 8);
+  CHECK(delta.word == 5);
 }
 
 TEST_CASE("Animation track rotation wrapping and packed deltas match SEQ rules",
           "[actors][sequence]") {
+  using VS::Actors::TrackKind;
   SECTION("rotations wrap to thirteen bits") {
-    const unsigned char data[] = {0xE0, 1, 255, 1, 0};
-    Actors_AnimationTrackContext context{data, 1, 1};
-    SVECTOR value{8191, 0, 8191, 0}, delta{};
-    Actors_DecodeAnimationTrack(&context, 0, &value, &delta, 1);
-    CHECK(value.vx == 0);
-    CHECK(value.vy == 8191);
-    CHECK(value.vz == 0);
+    const std::uint8_t data[] = {0xE0, 1, 255, 1, 0};
+    VS::Actors::PoseVector value{8191, 0, 8191, 0}, delta{};
+    VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 1}, value,
+                                     delta, TrackKind::Rotation);
+    CHECK(value.x == 0);
+    CHECK(value.y == 8191);
+    CHECK(value.z == 0);
+    CHECK(value.word == 4);
+    CHECK(delta.word == 1);
   }
   SECTION("signed packed delta") {
-    const unsigned char data[] = {0x10, 0xFF, 0xF4, 0};
-    Actors_AnimationTrackContext context{data, 1, 1};
-    SVECTOR value{}, delta{};
-    Actors_DecodeAnimationTrack(&context, 0, &value, &delta, 0);
-    CHECK(value.vx == -2);
-    CHECK(value.vy == 0);
-    CHECK(value.vz == 0);
-    CHECK(value.pad == 3);
+    const std::uint8_t data[] = {0x10, 0xFF, 0xF4, 0};
+    VS::Actors::PoseVector value{}, delta{};
+    VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 1}, value,
+                                     delta, TrackKind::Linear);
+    CHECK(value.x == -2);
+    CHECK(value.y == 0);
+    CHECK(value.z == 0);
+    CHECK(value.word == 3);
   }
   SECTION("extended frame count") {
-    const unsigned char data[] = {0xFF, 2, 2, 255, 0, 0};
-    Actors_AnimationTrackContext context{data, 1, 34};
-    SVECTOR value{}, delta{};
-    Actors_DecodeAnimationTrack(&context, 0, &value, &delta, 0);
-    CHECK(value.vx == 68);
-    CHECK(value.vy == -34);
-    CHECK(delta.pad == 34);
-  }
-  SECTION("halfword-aligned vector is sufficient") {
-    alignas(std::int32_t)
-        std::array<std::byte, sizeof(SVECTOR) + sizeof(std::int32_t)>
-            storage{};
-    auto* value = std::construct_at(
-        reinterpret_cast<SVECTOR*>(storage.data() + sizeof(std::int16_t)),
-        SVECTOR{8191, 0, 8191, 0});
-    REQUIRE(reinterpret_cast<std::uintptr_t>(value) % alignof(std::int32_t) !=
-            0);
-    const unsigned char data[] = {0xE0, 1, 255, 1, 0};
-    Actors_AnimationTrackContext context{data, 1, 1};
-    SVECTOR delta{};
-    Actors_DecodeAnimationTrack(&context, 0, value, &delta, 1);
-    CHECK(value->vx == 0);
-    CHECK(value->vy == 8191);
-    CHECK(value->vz == 0);
-    CHECK(value->pad == 4);
-    CHECK(delta.pad == 1);
-    std::destroy_at(value);
+    const std::uint8_t data[] = {0xFF, 2, 2, 255, 0, 0};
+    VS::Actors::PoseVector value{}, delta{};
+    VS::Actors::DecodeAnimationTrack(data, {.first = 1, .last = 34}, value,
+                                     delta, TrackKind::Linear);
+    CHECK(value.x == 68);
+    CHECK(value.y == -34);
+    CHECK(delta.word == 34);
   }
 }
 

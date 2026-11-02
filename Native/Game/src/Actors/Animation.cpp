@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Actors/ModelRendering.h"
 #include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
-#include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -863,7 +863,7 @@ int Actors_PlayActorAnimationAtFrame(int actor_id, int animation_id, int blend_f
 
     if (start_frame > 0) {
         actor->framesPerStep = start_frame;
-        Actors_AdvanceSkeletalAnimation(actor, &actor->pose, 1);
+        VS::Actors::AdvanceLiveSkeletalAnimation(*actor, 1);
     }
 
     actor->framesPerStep = 1;
@@ -1838,7 +1838,7 @@ void Actors_BlendActorPoseHalfway(Actors_AnimationPose* dst, Actors_AnimationPos
 // decomp: BATTLE.PRG func_800AF6E8 (src/BATTLE/BATTLE.PRG/44F14.c:1146)
 void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* actor)
 {
-    Actors_AdvanceSkeletalAnimation(actor, &actor->pose, 0);
+    VS::Actors::AdvanceLiveSkeletalAnimation(*actor, 0);
 
     if (actor->blendFrame != 0) {
         int frames_per_step;
@@ -1860,8 +1860,7 @@ void Actors_UpdateActorAnimationBlend(Actors_ActorRecord* actor)
             }
         }
 
-        Actors_BlendActorPose(
-            &actor->blendPose, &actor->pose, actor->instance.boneCount, actor->blendFrame, actor->blendFrames);
+        VS::Actors::BlendLiveActorPose(actor->blendPose, actor->pose, actor->instance.boneCount, actor->blendFrame, actor->blendFrames);
 
         actor->blendPose.holdingLastFrame = actor->pose.holdingLastFrame;
         actor->blendPose.reachedEnd = actor->pose.reachedEnd;

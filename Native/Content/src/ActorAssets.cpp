@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SequencePlaybackLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -1324,6 +1325,7 @@ parse:
 void Content_CopyWeaponSequence(Content_SequenceBuffer* destination, Content_SequenceBuffer* source)
 {
     Core_Memory_CopyAlignedWords(destination, source, 0x7800);
+    VS::Actors::RegisterSequenceBankCopy(destination, source, 0x7800);
 }
 
 // decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
@@ -1431,6 +1433,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         actor->sequenceModelId = object->modelId;
     copy:
         Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);
+        VS::Actors::RegisterSequenceBank(seq, size);
                 return 0;
     } else if (object->subKind == 3) {
         Content_legacySequenceParseData += 4;
@@ -1481,6 +1484,7 @@ int Content_ParseActorSequence(Content_ActorAssetRequest* object)
         }
         for (i = 0; i < count; ++i) {
             seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);
+            VS::Actors::RegisterEmbeddedSequenceBank(Actors_sharedSequenceAnimationData[slot][i]);
                         }
         Actors_sharedSequenceAnimationData[slot][i] = (char*)-1;
         for (i = 0; i < 17; ++i) {

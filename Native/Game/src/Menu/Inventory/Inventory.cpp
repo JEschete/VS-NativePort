@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
-#include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -1852,7 +1852,7 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
         preview_actor->instance.weaponDrawn = 0;
 
         Actors_PlayActorAnimation(1, 1, 0, 0);
-        Actors_AdvanceSkeletalAnimation(preview_actor, &preview_actor->pose, 1);
+        VS::Actors::AdvanceLiveSkeletalAnimation(*preview_actor, 1);
         Core_Memory_CopyAlignedWords(&preview_actor->blendPose, &preview_actor->pose, sizeof preview_actor->blendPose);
 
         for (i = 0; i < 2; ++i) {

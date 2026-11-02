@@ -317,13 +317,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "02396c3f172bae4b740ef1581d2b28facf05326762e195ed52253108247cd8e3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "023f0ec828a76d86b3b30037e750eb41768763a3e2556dcaca26f33bfdef4bc1",
       "count": 1,
       "tool": "cpplint",
@@ -1115,13 +1108,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "06ee8d05c4ebc10f56f672f16cf207e7779107d260fecb97b83fa9a4da9525a1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "06f49f3a420b1d3149bb524fddd817f2394ad1eb194782c54205bdc0b2201768",
       "count": 1,
       "tool": "cpplint",
@@ -1134,13 +1120,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "070319a0aa55732709ea80d97d80304c5ccdd7c8367bf53295c2a283e5abb718",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "0704ad3f36419fb389ddba1c8fdc82883ecac76e1e086b7eb9e7fe45a4ae13be",
@@ -1239,13 +1218,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "07a1590ce47b288ba2ae2b0f6727a45ffa3d86006b2fde4c6514ea560e8ea7cc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "07cd8e190cc1ac3ab76c377b1f1adb1b3ae783b1ea839c0100ea4b80725b37fd",
@@ -1598,13 +1570,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "0a01bb21420274876739ecc7e25d666f317fa9e9d01fe6ea1ed5a075a23eee4a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0a09f87d3f43cf9451ea078960ddd7a18e9dcd22f62d67651ad35ea0c4c9b657",
       "count": 1,
       "tool": "ruff",
@@ -1861,13 +1826,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Render/PageSpace.hpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "0b425643ef169f7cfe43ef400378ee31ad245041d8bfb7af5258a574371c52ef",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "readability-identifier-naming"
     },
     {
@@ -2620,13 +2578,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "0f780f84a4accd172f035d022c9311e7392a30aca6b16567ebca966088f6dabb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0f8f1750198e03dcd0629024f84dfe34c28650af71365e63dc9162549d05b93a",
       "count": 1,
       "tool": "cpplint",
@@ -2816,13 +2767,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "10914730574db4e43d27e5b74cee809be7fee04bad9ee84ff3a5167b7466a215",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "1093a95bfd0f2cfd31b8209bc3dc7e9227c6608b4f4c4bb7ae6dc9869ec36eea",
       "count": 1,
       "tool": "cpplint",
@@ -2842,13 +2786,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "10a7c2ca264751f2ed58fa3c0a44dde01431eea15fbf04cfeb642f5b82d8ee9e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "10b0d76287afa45e3494e7f12fd1199674284269be60237fa2760ac0bb9bcb29",
@@ -3964,13 +3901,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "16ffca883bcc7ee93ed1833883dfc6316b3b49fc04cfb094a2b8b453e08efb48",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "170e93ffd7faea29ed38eebef90104383b9dbaeefa4cb2a08682e39b6d082810",
       "count": 1,
       "tool": "cpplint",
@@ -4454,13 +4384,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "1a43f28c1f89ab63cc25bd4b8ee3eb0873a5514953d92890a1935798ad342e4b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "1a458df7aee63d092fd9cd61e8231a772d0244a0d4a85c82019472beed129fa3",
       "count": 1,
       "tool": "tidy",
@@ -4916,13 +4839,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "1cdbf01fd90f086fced4efaed6a7cf1d1ab092741e156f76d684fa208f23416e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "google-readability-casting"
-    },
-    {
       "key": "1cdbf552cc67014c38664099e24ac1214a63faabd644dbfcc74425c5c2660987",
       "count": 1,
       "tool": "cpplint",
@@ -5033,13 +4949,6 @@
       "tool": "tidy",
       "path": "Native/Content/src/ModuleLoader.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1d3b0e13348ac6d9140cf57e95881c0ea8e99d10b564d4d23dfc50058829d089",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "google-readability-casting"
     },
     {
       "key": "1d4d1e742153566ab55adf4512bb8033e7a4b12f3993f0e63fde65eed1e236f6",
@@ -5271,13 +5180,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1eefca5530c71a267ae7de20d7e8b817ea966a08bd011438b2df453c53e723a9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "google-readability-casting"
     },
     {
       "key": "1ef1dae93fc36543b7bfe042e76ab01ad6c1dfcaa4d7056301c775ea591a12f4",
@@ -5763,13 +5665,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "21e8b06da68faa1972816efcf0556d080fad5802b8c8ddd7aea21bea54d3cd5b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "21ea918ab8dcec12fdb7d39bae9d4f4c63b940852cf2e9039f6a0a7b149284ab",
       "count": 1,
       "tool": "tidy",
@@ -6197,13 +6092,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "23eec26ca6fc14e8d98b30dc11e4e47bfc2d8d1d888c7c01d588fbfa012322cb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "23f0ec832157822c75667d8298d2150539fbbfee0b9d6278fe5e43dc78c215cc",
       "count": 1,
       "tool": "tidy",
@@ -6554,13 +6442,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "259caafe384df4b20896d73e7de9c50fd970b7ef7782c75b8392c9bcb6388d75",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "259eae2e8bade252f20921ae67fe26227425f4613dd4d47f2b5cd795bf282345",
       "count": 1,
       "tool": "cpplint",
@@ -6601,13 +6482,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/Sprites.cpp",
       "rule": "whitespace/newline"
-    },
-    {
-      "key": "25c74d16b8b34198e3e26f05dd9db02e103a3c05040157f88c49fb572d73b232",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-signed-char-misuse"
     },
     {
       "key": "25ccfc8690c55df0fda298bf2d7a70f07addc7ac5f9016788ca9f00371c50d45",
@@ -6890,25 +6764,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2791be4b2b7c92470802b052c8feb606a73e22f33beeff6868c75259103fc1fa",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "279608e573dd30160263e19a1344cb62f7d7f143b9efe1c56591ada057c3f29e",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/ContentTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "279b0eb173cead8a4f6a15f4ace6fd7c602f90e0c253dbd7d23b10e486f6a4a4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "27a85c6cc8c376baf2151647ee00ff8dc851b8975e44cf70e25b5317985d3388",
@@ -8157,13 +8017,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "2eb60d2e77db875d5f4c5a5800825411be9441d11bf5c0d83a6d2c03ca4b8fdd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f90a0fbf55abd48ae21848b5a2029460b8580e552a703623adcf2c402bd1fd4d",
       "count": 2,
       "tool": "tidy",
@@ -8554,13 +8407,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3117a63a4e1c9d0b88d7731f6c1a263eed8ffa6314455e5be7ae39530d95e07d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "311deaf5ee056c7ae7bf94d90d9d5feed5b200e7eb0b0a2f78193a55089dfd9d",
@@ -10740,13 +10586,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "3f25ef4a380748210d46fa4216c1f9ff03e2212a6e337ba8274005918a36eab6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "3f34fa8e1725ddb46b33bc054d69def5b6f8698bb0224a98ba26e41b6cdd6f53",
       "count": 1,
       "tool": "cpplint",
@@ -10814,13 +10653,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3f6400c7eacba8ecb09fc42842185c7554fbece483d857a896b6e49240d9e7e8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -12490,13 +12322,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "48b0388b60324298dee4fd27037a292109d08339ebdcd01b9e4d2a361606f3dc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "48c03c462d41b3f1f0d34831c0067fe15d6de285c4783d7ac3bb368d3eabb7d7",
       "count": 1,
       "tool": "cpplint",
@@ -12586,13 +12411,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "496eb5ffbbee81c8a58fe3b212a2758951370dc62f399334084e402fc7325406",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "49711be499bf26eeb4565e5ed6d1197c63df3426d21ed9111426c7edefde225e",
@@ -12775,13 +12593,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4abd171d57fd72b4158eb64cabd85b0b71b4e783a51de0cc4f296d58ecf2942b",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "google"
     },
     {
       "key": "4accff26f618c77451297fa03552841e1ce9d5763aced108cf42debc0052b736",
@@ -13272,13 +13083,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "4d8da796c21e6231250bc54ddc59cee08cbdf22d41e6307c13eb08824552a6d0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4da68f3bd6969b513e189b3f2e4da64ce5fd9f45e27d3ab990c3c2e1f0339af8",
@@ -13911,13 +13715,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "5207afedfda47a6b9abad466335c11cb5e6a6ee7d32ea6865f6398a426f59ec1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5209d751ac500515c6e6e966d2cc006acf648be356a3a89f0290380cc6636d33",
       "count": 2,
       "tool": "cpplint",
@@ -14069,13 +13866,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/include/Content/DataStore.hpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "5303c4d447b125ada1b7403b024404b5c9ff53dee3b73b9c6ec4970bcbac7b2b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -14419,13 +14209,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "550085c20b0497d2ad4754a3e66ccfb4461194d7db7844fea2f993f7d5f3af0c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "runtime/int"
     },
     {
@@ -15199,13 +14982,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "59977bddab9268c25fac4054aab4a34726bc9da6283bf124e84b34824d7fd37e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "59a89d525eef08b7ced0a2c1a059662f8a87efca0c06f58df86392a3b0ba9cba",
       "count": 1,
       "tool": "cpplint",
@@ -15486,13 +15262,6 @@
       "rule": "B023"
     },
     {
-      "key": "5b84bab642fe9936f038a4a7c535ba65e598edc5da0a715f5362adc4686701e2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "5b8874ad1788ecbb1cc057f513129bfa5b9becda49da1e7aa88bbdedb91460d4",
       "count": 1,
       "tool": "cpplint",
@@ -15668,13 +15437,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "5c8792899d8c5c3314391ddd03b6c2da1c8b429ac76c507c9affce21bf24b61f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5c8dc329a9e3941a823a4a79e2141eac653781445d29b3c175ece6a6cf638537",
       "count": 1,
       "tool": "cpplint",
@@ -15686,13 +15448,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5c9dc3b1ce924136234b80d0cecb3f5c9f0b9ee5268b12031dc5c1c13631faa0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -16072,13 +15827,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "5e9e9e57251b2d6dba03a7f308190164d0b22c65cdaba85dc3d0477502a8051e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "5e9fa5ad7b0da7f922f090a159e6e369b823d2d72a29032ec7a9b0f2562f1bef",
@@ -16578,13 +16326,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "616394c745c29c2686994202e298428f5014f260ffa04db20063045fa2174245",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "616b8ff7958391a5696cc97173cebc124a5f025484306cbd6dc36393949a3ccf",
       "count": 1,
       "tool": "tidy",
@@ -16774,13 +16515,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "62976d4cd81f3d5c98ab42f57df2b9e43aa893997697c67989b2419b6a453032",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "62aee92b2984748bbf01659504761764e9e6fdf906e8d14614dfdb499591179e",
       "count": 2,
       "tool": "cpplint",
@@ -16954,13 +16688,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Audio/AudioDevice.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "63dc001ac525377e982ece51cc7b8a7477c95ed38b19ab4d4b216b65bc35ee26",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "63dcc3730e360a44ccd6b58b7c54282f9350ddace801285d9de486ccbcc9d19f",
@@ -17985,13 +17712,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "697aece82826c270ccbaf1e381849f061f317f0f6f36abffd09713069f8144cc",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "google"
-    },
-    {
       "key": "697c2b270dfc1b15bacdfa81b6c21c8b7462b3698f9567d1ef3b17ca77a38f34",
       "count": 1,
       "tool": "cpplint",
@@ -18748,13 +18468,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6e79b354675308ba48d2facc0b0bed3ea99c8dcd91f4fba4e0a442ae6616b53b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6e81ae936a296acf953bfed4554d23af572dab4ee397c6bdba0593bd40138f1c",
       "count": 1,
       "tool": "tidy",
@@ -18809,13 +18522,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6ebc7e758a5f4c5cef39fe6d20b5a36a4672ea1203470f2ced49b6b1c0844232",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "6ec4663323c94f51119c4c4b5292fb5888cf9d17ab838d2f5e51e6bb6c3761fc",
@@ -19042,13 +18748,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "7079e7de55c2fa6ba60f5241fe7f71fa88568ad7d2f04ed2a8dec2469765d78a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "70926c4d06eae223c89637a5cf6cbd453adec22d116c8c6db23ec8daaeb849de",
       "count": 1,
       "tool": "tidy",
@@ -19098,13 +18797,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "70c14f59d5f5a9048e29f84c8404b7be1d06bf5901b232d14e08da57ea0fb96c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "70c3d9cd19f9a2c8e6e5bbc19f7ea9d40a945db021ea67617bb514791309d179",
       "count": 1,
       "tool": "tidy",
@@ -19124,13 +18816,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Removed.h",
       "rule": "modernize-use-nullptr"
-    },
-    {
-      "key": "70d769c491cd396695e33dc5504e664c51ba2ea0a6e2f67fc4da1b12fd689386",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "70dd42bf3bd75d8174705231f70307a8676b238a7745aa1dc65dc34c01c90a3e",
@@ -19236,13 +18921,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Audio/LibSpu.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "7193d7146afabf2bf17a719edcb0beee1dc7871384f57dc472b5ac3fbbe1af3f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "719da69dadecaabd674932f063992664fbc351d18b827fa77567f1aad1cc9dc5",
@@ -19390,13 +19068,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "728b60aa2cc638b0fe86628e9142089ddcb5f3e6d2b2fd8624365c310420ba99",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-signed-char-misuse"
     },
     {
       "key": "728d2e2042b484b1b6ade3cd3fa224ab4f0dba16527f564398923df2a9fbc7fc",
@@ -19649,13 +19320,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/Sprites.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "73aff1503a67c12d2773a990a61ebfc403bae626553cdebff8c2683e81dc7912",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "73b628134637945b361f4794dee7cb09fcc9c7e0495c9ea6ff76f45cfac7c775",
@@ -20624,13 +20288,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "78b23ec07f158c6b1f1102b70d18e76a49e04b9b9772580d57c9cec8a1b6fd0c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "78df9665183520de6748975469554853841eaff76e77d8de54e4926658060302",
       "count": 1,
       "tool": "tidy",
@@ -21042,13 +20699,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7b944da0bbb11bc14d7ad7dc4d7e7420d99d8d01640499bd04d94b7ffcbba823",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-signed-char-misuse"
     },
     {
       "key": "7ba51941ba9e92cff8202a82e0c9f56bd7668a2c5eb396ee03d27ffc812d7236",
@@ -21996,13 +21646,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "81ac767a8e0dc0036933bf1974069b810088e416bc28e4a42fcf72ee08b13bb4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "81b30e8408b4bbb870a5f0098a9184ffb62df344c6aa8998e145bca205078fdf",
       "count": 1,
       "tool": "cpplint",
@@ -22206,24 +21849,10 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "82da45fc3d6aedab38162ea109a86287cf1656a87d013ed24ed121365c8da0fa",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "google-readability-casting"
-    },
-    {
       "key": "82e0da4bbc0e067c000b20919c5c514c9a57eea67f4b40d0ea7b5a076a8cc96e",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "82e3710c8be53cddc6b1a7270b2ca9437699500aceb8192688d36082881b8550",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "readability-identifier-naming"
     },
     {
@@ -22302,13 +21931,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "836704147972e25bfcededc89807f71d8c234a61906fad3f5911aa925861b4db",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "83840cda0498ef93cfdb88ca813aeb8d05a6ff9c211d34bdeb05cd5937889872",
@@ -23018,13 +22640,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "87bfd00bfb75f0dcad6dc1bc0f8e2a57c079867ca5505438458b5700474d09b2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "87eb11d3520190e1b79e963aec73360894bd2be368043a10bcb1e329f6663fc7",
       "count": 1,
       "tool": "tidy",
@@ -23163,13 +22778,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "88a55442fc2077141d68658158e3313190caee802635cf9489e3f94bd302defd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "88acad7a536367a52ff9caaa6e13f0d1ead17cce3b929ce4f4dd30f4d17c0135",
@@ -23438,13 +23046,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "89b23b90e706a834e10e3d4cc37c6058daacb27c4faf284230419900383551d1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "89b9d82ba8539dc562535b35ede7f884718c422ca09a4eee480937bad4af412b",
       "count": 1,
       "tool": "tidy",
@@ -23711,13 +23312,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "8b10232b17b48b6bf95ac821722497944eafc20da8e6144cd6ac1a9cc20cc1da",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "8b12b3832127fec631cf71e8a5fd9e0315776c6a60cd58df0f44726209dfcd09",
       "count": 3,
       "tool": "tidy",
@@ -23821,13 +23415,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8bc0e57df4446b7b16cd88e984ffdf4d327d7ba62dcc0ad8329eedc1a034d6d4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8bcc8e11da00e64d4fafcbb7540776c0e3b399075e8f9f41bcf2c6aee2399f13",
@@ -24033,13 +23620,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8d3f4ccd11dc8155c78282df2464f36cd2bb13c73f37b4bd821696a3d30f2f19",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "8d478a3c493e594684ef10c25504c6833362551135ca5cb28e043877dfdc5259",
       "count": 1,
       "tool": "ruff",
@@ -24143,13 +23723,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "8dd1204e008cd11103da365201c2a4bb6313ae21e87e9e09aaaefb9f686f5d2f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "8df8cc33a8cb633677326c7feadf04330218a5ec94fc168ee6e0cb8feed03e24",
@@ -24444,13 +24017,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8f6f76f4f3559cd9264c4fab8c4459f092d41260f40f75db914a178b438ce2b1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "8f92a168673e23330c133db9c665688ef2aa40f600739af68fe4cbe6d6835801",
@@ -25888,13 +25454,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "97e52d8a0ef885562099a42448f2faf3e32fd422a155971b94513d8355463d07",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "97f1ed0d975a112eded2c73f6373390a1d3f1974e44e68ab60138941cf1293c6",
       "count": 1,
       "tool": "tidy",
@@ -26399,13 +25958,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "9b1c08aca52a2f383e24c880c7d1ed3f5e12a4922eb992e4defe19382736d463",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9b22aa9454517236eba667c1d8d31c146f7eb1b200fafc62f4f0b79e88397470",
       "count": 1,
       "tool": "cpplint",
@@ -26693,13 +26245,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "9cd6d7c33ff3b8d544502a483bd52713c097648009887d1658ad5589ecb58a22",
-      "count": 5,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "9ceb849cc261747108e3ac74f1888fc483a4c12cc6ed73c6bd7b92a3fc88ff6c",
       "count": 1,
       "tool": "tidy",
@@ -26824,13 +26369,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "9da1ef5f001387f4df2136cf9b9a45f47282763e6fcbec95ab3ab917579d7794",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "9da449862eee02456c399cd0a54614237886ba3c71a1bca00f23ee7c00d97354",
@@ -27236,13 +26774,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "a02180be23834b17b0e1d9abd0a90e0ddfc6871c326f32645c73fa9c7eece5e1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "whitespace/line_length"
     },
     {
@@ -28086,13 +27617,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a58172f9d3d9310f82d8622eddd9fd6854587b0423b4eb454a73ce6d678ce462",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "a581d4024ebb76779fd0d66eca4fe646d1b697e9248e8422741a72b7730d9d85",
       "count": 1,
       "tool": "cpplint",
@@ -28469,13 +27993,6 @@
       "tool": "cpplint",
       "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "a81f36522375228ee1fa81e73759504b05ce9e471f28b2f556d602adf35d6092",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a82ce71083134d115df471665cd7d593a75630af0e47bfbb85ec57edde482a33",
@@ -29017,13 +28534,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "ab5bb23d69e66dffdb0a68401d82778988773d6daae6ebd9c272043ed812b690",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "ab5caa0d27b99abccc11d91aff9965ec70a92d24fb0c61015a5995f140d2ddcb",
       "count": 1,
       "tool": "tidy",
@@ -29220,13 +28730,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "acbc9229ad1608efdd43457cf296a18b47d786f3c9f1b999b99357f30aa34257",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "acc77f19b10152451d47f6d817d4992b84271a51fd67f80cb808ef31196bf098",
       "count": 1,
       "tool": "cpplint",
@@ -29372,13 +28875,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ada9a3d1113817fad5927b5e4bfa14a74ca43823924005e3e84da592f5a20e6a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "adabe7df2da57a248bb3f065b7c375acf13111c6b89430ab3ff7efd260baaaf5",
@@ -30823,13 +30319,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b6f19dd999c89d54bfa35defcb3f50819da2aa83426482490f2aae150b58e388",
-      "count": 3,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b6f2e22616bcd8b485c392b01e85de2d7eead0c1e000a91d99803c418b6a422e",
       "count": 1,
       "tool": "tidy",
@@ -31313,13 +30802,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b9c81ee4357c0ffca3e9a2beb987118fa19151e862214b1a4c368331d28b69f2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b9e44a8d08d3d8a39c4fcb216b9a0db8ae59516380252c6ffcf358aa78bfabeb",
       "count": 1,
       "tool": "tidy",
@@ -31726,13 +31208,6 @@
       "rule": "E741"
     },
     {
-      "key": "bc503400a73fd57c93608f563a2f2cd98c4e0509b5ded9ede5041f48509b4c44",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "bc53481c4dcc9f9aba2b1878a1f0e2ad6cc4152f0ef0c8bbe0861e01b6ebc88f",
       "count": 1,
       "tool": "tidy",
@@ -31752,20 +31227,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bc6530c8dc11645225676d25aa5510dbd42ad32c96b3e846d51561f70a913ecb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "bc736c871a46eac7cbfbf43cb917b0542568a6e80a759a11bd379f57576fb20a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "bc86dbcd8818311f5ec082b08233b4c02e60889e624c7367fe33c4cdd1f98782",
@@ -32559,13 +32020,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c15d4806b6a0d7b298be69ae1d2daf4e69b85cc7cbd35847b9c639ce146e5254",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c170f72d2d8297a13119976842cd3716323680434695590de8a9faf593c876f6",
       "count": 1,
       "tool": "cpplint",
@@ -32718,13 +32172,6 @@
       "tool": "tidy",
       "path": "Native/Content/include/Content/Disc.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c2544fd5d90c45d9bcb775fcd3a125d438ab11bc9535d55499f7a10f1833cc67",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "c259024fdcf00092d6dbe212d1b3e136a79739535dc1331031e3505bf30113c4",
@@ -33595,13 +33042,6 @@
       "rule": "bugprone-reserved-identifier"
     },
     {
-      "key": "c7b2785ab8dbcb3356d999ee7f18bc8cb124ac3e45d785e1b3ff7d87ac39e585",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "c7b9f923aca22ae2bdde0506d04e0bed9f3ce31c625d99506fc6d69f93264a0f",
       "count": 1,
       "tool": "cpplint",
@@ -33649,13 +33089,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c7e26e22b9f61cc17636741ec0cc120d752ce200d07ab7b368c1a51a3aa7b776",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "c7eddd8c2fa74ff2bb433b48a3bef8e42e7f2264a1f2bf516f69deba0e48073d",
@@ -33768,13 +33201,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "c8b7839c318d0609f95317e4448d63c7051dd03da9d7222cac04e93ac23b536a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "c8be45e9a3ab44b9ec8f172e36985e995d8d1afbf89b3c06cee9d19c3b44a412",
@@ -34974,13 +34400,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ced2dfb0cb426a542f5a7487cc12f18b1eacbe385070b98270cba0a2b50b19e2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "cee0cb401b84e77a176b6f58f7e70fa224b4c5808de288832cc58c1d0d8af718",
       "count": 1,
       "tool": "tidy",
@@ -35181,13 +34600,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/include/Input/Pad.hpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d00af2c652bd72d696f47941511452666a950bc6badf6a14b1b69151b9cfc99b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -35807,13 +35219,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d3e692cf61a653a5e342e0c0b0a162ea25236b7af409c88aae770ea14f05d34d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-function-size"
-    },
-    {
       "key": "d3e8098693acf088cff204bb2a8eb8f531fd3c2173b8b04b1ffb9e5f5c95cfdc",
       "count": 1,
       "tool": "tidy",
@@ -35902,13 +35307,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d46b07052de1260552f7f243698eafb1d82b6c72dec48c69505b6e4b2b13446a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -36801,13 +36199,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d9b96f6d8e79a4212aa49f98de312f3b3e296fa8901b38c7027c8ffcfe9db023",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d9d78cb3976014c49bbc8fa4e8f6f07cbe1baa38a9c6d701ed8a4f787c6198a3",
       "count": 1,
       "tool": "tidy",
@@ -37214,13 +36605,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "dc4a9365d1bfd7226835b15333c1f669a17b4d4c275bd1a6fb21dfdcada59a35",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "dc4dae28fb17656c1461336253b9be8c1ede8dc705884c2edc0b77f02953aa9a",
       "count": 2,
       "tool": "cpplint",
@@ -37410,13 +36794,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "dda502108797f0d13e10e57a8472fbbbc3bdd75609fc90ab1c0ef34f50a77b33",
-      "count": 3,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-signed-char-misuse"
-    },
-    {
       "key": "ddc50e9b08272a527bb326d41f2c7b4499573e179bfb7966210125eee7fe1844",
       "count": 1,
       "tool": "cpplint",
@@ -37464,13 +36841,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "ddfda97414eeee637b1b04e1f9b7dc7f30452f58576d548ec75401b98a8a3d53",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "de055683956970951ed052da4aba271877fb7e887662e36aef7d59a1d770da6b",
@@ -37697,20 +37067,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "df9108edf129fb6bbf62485e14ca9c6b7f8116dbc38dc79e2b3d4306b64bab12",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "df9eb47fa0852b2e79e0dc3ffc06253a96d9a2fac6636a09ecd1f8302b26331f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "dfd357036d5467d982df55be4e689902fc90e1a103f1458fff3320224b475057",
       "count": 1,
       "tool": "tidy",
@@ -37911,13 +37267,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "e0e3508660c91ac1cdbd6d7d94e7671415e834c1156d9e732bff0b7cbe7a76d9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
       "rule": "readability-identifier-naming"
     },
     {
@@ -38157,13 +37506,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e2ca5754850219917a9f918829a75e8ab0db2b3e29d9d1e64561474df15cba8c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-function-size"
     },
     {
       "key": "e2e175e0b752a68af4312df1649d4d7a5737b157248f07a6c5c92faee99c8cfb",
@@ -38698,13 +38040,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "e5edfdffbd8b3b7ad42e8074a1b793eef19bf9ab9870179a4f9235556bf74adb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e601bf125db7fd222c4da7c70f68bac0dc1a09de20a112703ae00435eb37c656",
       "count": 1,
       "tool": "cpplint",
@@ -38824,13 +38159,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "e6b13246aaa2e6791d32f39bfee182593b9ba1eca30a02ab031e28459dbdc745",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "e6b84c13a1f50079fa22a3328a63d7e549473c5251286b6ad8b923e4ea6c0368",
       "count": 1,
       "tool": "tidy",
@@ -38843,13 +38171,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "e6d3811656fe1c8c677f63971ac0940dc0760aca3fdea4756625588aba4d7b28",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "e6de9876c2e70f5a3b7f362ca70ae3b3d8c593871e3abd744d596d18a9e9c214",
@@ -39025,13 +38346,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e7cb1ee935d56fe339cb3e673d8a7967bcb6c700bcdf9524f892cebd2173513d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "e7d5cb966546b5b81a3692796edd7955a6658137015ec660769dbff762968b5f",
@@ -39438,13 +38752,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Platform/CrashHandler.hpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ea1e57c741edf5b201e66e432d3859b959930966157e9aef93d4df236041299c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ea3650d55aaacb07dde4dba01dd7ed6704a9d490cc210b8533b9fa8d72ec6e9d",
@@ -40210,13 +39517,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "eed2f979b8e83d7fbe415818feb829f0ed3d139f620ee6837e53232458bdd24e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "eed321f93499d4265f3f3b673f61f3e59e39af06219fa2ae35f9b7169d6eb734",
       "count": 1,
       "tool": "cpplint",
@@ -40334,13 +39634,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "ef835f54ef4d2f3a3be3b9de4012ae4a5784f370030cfda66def2635cc506bcd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ef8a36ba3f4347cc0505afd3b05ca5d9922d0bfcb550a4b5db04bba761768ab6",
@@ -40721,13 +40014,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f20d5f38a80ca04edeb51a577663bfb7acde66b4359b7ab8b7ee6657a9350ae4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "f211c93053de3eeb3ecae54e55abebe2a0328c2a8a9fa502f75f9763bb454ab4",
       "count": 1,
       "tool": "ruff",
@@ -40861,25 +40147,11 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "f29ad74fb3401321ad312af2a23ed80b201ef65af12bfd2f6ef0a70ad0cf3f31",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f29d5babbabc277d8ea32a2f9371093206f982ee891d1e6353a224a69ce9cd64",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Random.hpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "f2a07605aa5989fcfd84e53078ded8f917dfe12f13406409ae2ea3d9f376285a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f2b993eb455ab9e9e0b562ddbf5ceb42aa28ba6815da50da466d1d43624eacd5",
@@ -41188,13 +40460,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f558c25e41767d4777140e25fdceb8015974bfb5fc1e907eef584b9a8b5dd33e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "f55fe955a4b8d95f1294b75d8d76c58eb5042645252d333382642ef65ef33ba7",
@@ -41841,13 +41106,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "f993767cd5d9f3158eb5a56325465f5861211eb8d7d44de23d47554e9c3eaa96",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f99c785e6109d4e8893547be6bea8c795a56da42a59f175188c9ea7e4d8325db",
       "count": 1,
       "tool": "cpplint",
@@ -42056,13 +41314,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "fa95ee67fcef3b19fb45e8b5c5096680119cd7d62d27034d70ebe305c0149797",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "faa44a30c76105404280d99418e296e67d88234f8a8050bfadaff03d04b93da9",
@@ -42784,13 +42035,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "fe81a8588d469e5de566b52daa7fd9157538c1b50edc7b49b306b397b282a7c6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/SequencePlayback.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "fe89900ae6a9225bf78ce83ce245e72664dd958c2b1118dac42277e02f8eb7ba",

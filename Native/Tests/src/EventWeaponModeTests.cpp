@@ -9,6 +9,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Content/ModuleData.h"
 #include "Event/WeaponModeOpcode.h"
 #include "Legacy/Psx.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/SequencePlayback.h"
 #include "Actors/WeaponModel.h"
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
@@ -111,11 +111,14 @@ struct WeaponModeFixture {
     Actors_lastResolvedSequenceIndex = saved_sequence;
     Battle_hudBattleMode = saved_hud;
     Actors_stateFlagsScratch = saved_flags;
+    VS::Actors::ForgetSequenceBanks(common.data(), sizeof common);
+    VS::Actors::ForgetSequenceBanks(battle.data(), sizeof battle);
   }
 
   static Actors_SeqAnimationBank* MakeBank(
       std::array<std::uint32_t, 512>& storage) {
     auto* bank = reinterpret_cast<Actors_SeqAnimationBank*>(storage.data());
+    VS::Actors::RegisterSequenceBank(bank, sizeof storage);
     bank->animationMap = 1536;
     bank->animationData = 1792;
     auto* map = reinterpret_cast<u_char*>(bank) + bank->animationMap;
@@ -158,7 +161,7 @@ struct WeaponModeFixture {
 
   void AdvanceFrames(int count) {
     for (int frame = 0; frame < count; ++frame) {
-      Actors_AdvanceSkeletalAnimation(&record, &record.pose, 0);
+      VS::Actors::AdvanceLiveSkeletalAnimation(record, 0);
     }
   }
 
@@ -166,7 +169,7 @@ struct WeaponModeFixture {
     REQUIRE(record.animationLength == 4);
     for (int frame = 0; frame < count; ++frame) {
       CHECK(record.pose.holdingLastFrame == 0);
-      Actors_AdvanceSkeletalAnimation(&record, &record.pose, 0);
+      VS::Actors::AdvanceLiveSkeletalAnimation(record, 0);
     }
     CAPTURE(record.animationId, record.queuedAnimation, record.pose.frame);
     REQUIRE(record.pose.holdingLastFrame != 0);

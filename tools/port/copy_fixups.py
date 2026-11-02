@@ -44,6 +44,10 @@ NATIVE_HELPER_HEADERS = {
        for kind in ("ActorPalettePulse", "GimmickPalettePulse", "ActorAppearanceTransition",
                     "GimmickAppearanceTransition")},
     "VS::Menu::Files::UpdateLiveContainerSave": r"Native\Game\include\Save\NativeContainerLive.hpp",
+    **{name: r"Native\Game\include\Actors\SequencePlaybackLive.hpp"
+       for name in ("VS::Actors::AdvanceLiveSkeletalAnimation", "VS::Actors::BlendLiveActorPose",
+                    "VS::Actors::RegisterSequenceBank", "VS::Actors::RegisterSequenceBankCopy",
+                    "VS::Actors::RegisterEmbeddedSequenceBank")},
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
@@ -2655,6 +2659,23 @@ FIXES["F00798"] += [
      "read one 32-bit file offset and resolve it relative to the shared sequence payload"),
     ("            Actors_sharedSequenceAnimationData[slot][i] += (intptr_t)Content_legacySequenceParseData;\n", "",
      "shared sequence entries already point into the payload"),
+    # #261: record every bank's extent so playback can bound its SEQ reads. The copied banks hold `size` bytes;
+    # in-place shared banks carry their extent in the SEQ size word at file+4.
+    ("Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);",
+     "Core_Memory_CopyAlignedWords(seq, Content_legacySequenceParseData, size);\n"
+     "        VS::Actors::RegisterSequenceBank(seq, size);",
+     "30DB0.c:1719 the copied bank holds the size read from its SEQ header"),
+    ("seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);",
+     "seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);\n"
+     "            VS::Actors::RegisterEmbeddedSequenceBank(Actors_sharedSequenceAnimationData[slot][i]);",
+     "30DB0.c:1771 the in-place bank's extent is its SEQ size word"),
+]
+
+FIXES["F00797"] += [
+    ("Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);",
+     "Core_Memory_CopyAlignedWords(arg0, arg1, 0x7800);\n"
+     "    VS::Actors::RegisterSequenceBankCopy(arg0, arg1, 0x7800);",
+     "30DB0.c:1610 #261: the clone keeps its source bank's extent, limited to the 0x7800-byte copy"),
 ]
 
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
@@ -2725,6 +2746,13 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Audio::Driver::ResetPlaybackState\(\)",
      r"VS::Audio::Driver::ResetLivePlaybackState()",
      "F03160 #46 typed promotion: the driver binding applies the reset to the live sequencer, mixer, stream and channel tables"),
+    (r"", r"\bVS::Actors::AdvanceSkeletalAnimation\((\w+), &\1->pose, ",
+     r"VS::Actors::AdvanceLiveSkeletalAnimation(*\1, ",
+     "F04128 #46 typed promotion: the actor binding steps the actor's own pose and bounds its SEQ reads by the "
+     "bank's recorded extent (#261)"),
+    (r"", r"\bVS::Actors::BlendActorPose\(\s*&(\w+)->blendPose, &\1->pose, ",
+     r"VS::Actors::BlendLiveActorPose(\1->blendPose, \1->pose, ",
+     "F01016 #46 typed promotion: the pose binding blends typed keys and skips zero-length blends (#261)"),
     (r"", r"\bVS::Render::DrawScaledFontChar\(",
      r"VS::Render::DrawLiveScaledFontChar(",
      "F04199 #46 typed promotion: the font binding supplies the live font style and text box layer"),

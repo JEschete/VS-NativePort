@@ -20,7 +20,6 @@ extern "C" {
 #include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/RoomState.h"
-#include "Actors/SequencePlayback.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -1288,14 +1287,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AF6E8u, 0u, (void*)&Actors_UpdateActorAnimationBlend, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF844u, 0u, (void*)&Actors_AlignPoseRotationBranches, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF960u, 0u, (void*)&Actors_UpdateActorAuxiliaryMotion, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AFA28u, 0u, (void*)&Actors_AdvanceSkeletalAnimation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AFDE8u, 0u, (void*)&Actors_DecodeAnimationTrack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B002Cu, 0u, (void*)&Actors_UpdateMotionAndLookAt, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B07DCu, 0u, (void*)&Actors_TransformActorRootOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&Field_UpdateGimmickReactionAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B13CCu, 0u, (void*)&Field_GimmickSupportHeightBelow, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B147Cu, 0u, (void*)&Actors_BlendActorPose, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B1A68u, 0u, (void*)&Actors_DrawGimmickModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B217Cu, 0u, (void*)&Actors_DrawActorWeaponModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B26B8u, 0u, (void*)&Actors_ApplyLockedBoneTransform, 0u, 0u, 0u},

@@ -243,9 +243,9 @@
     <ClCompile Include="src\Actors\SequencePlayback.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\SequencePlayback.h">
+    <ClCompile Include="src\Actors\SequencePlaybackLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Actors\Shadow.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
@@ -2215,6 +2215,12 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\MovementCommand.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\SequencePlayback.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\SequencePlaybackLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\SoundTransition.hpp">

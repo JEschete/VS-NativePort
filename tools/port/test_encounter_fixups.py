@@ -2446,8 +2446,12 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                        if item["id"] == "F00797")
         self.assertEqual(row["name"], "func_8009C378")
         self.assertEqual(row["final_name"], "Content::CopyWeaponSequence")
-        self.assertEqual(len(copy_fixups.FIXES["F00797"]), 4)
-        self.assertTrue(all(not new for _, new, _ in copy_fixups.FIXES["F00797"]))
+        offsets = [fix for fix in copy_fixups.FIXES["F00797"] if "VS_ONDISC" in fix[0]]
+        self.assertEqual(len(offsets), 4)
+        self.assertTrue(all(not new for _, new, _ in offsets))
+        hooks = [fix for fix in copy_fixups.FIXES["F00797"] if fix not in offsets]
+        self.assertEqual(len(hooks), 1)
+        self.assertIn("RegisterSequenceBankCopy(arg0, arg1, 0x7800)", hooks[0][1])
         source = (root / row["final_location"]).read_text(encoding="utf-8")
         definition = audit_assembly_gaps.definitions(
             source, {"Content_CopyWeaponSequence"}
@@ -2455,7 +2459,8 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
         self.assertEqual(len(definition), 1)
         self.assertEqual(
             definition[0].body.strip(),
-            "Core_Memory_CopyAlignedWords(destination, source, 0x7800);",
+            "Core_Memory_CopyAlignedWords(destination, source, 0x7800);\n"
+            "    VS::Actors::RegisterSequenceBankCopy(destination, source, 0x7800);",
         )
 
     def test_audio_names_preserve_distinct_bank_and_output_bindings(self):

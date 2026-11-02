@@ -180,6 +180,7 @@
     <ClCompile Include="src\ScreenWarpTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SegmentCollisionTests.cpp" />
+    <ClCompile Include="src\SequencePlaybackTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />
     <ClCompile Include="src\SequenceTests.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>

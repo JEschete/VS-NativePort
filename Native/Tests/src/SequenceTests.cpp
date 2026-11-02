@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "Actors/MovementCommand.hpp"
+#include "Actors/SequencePlaybackLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 
 extern "C" {
@@ -14,7 +15,6 @@ extern "C" {
 #include "Actors/ModelDrawing.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
-#include "Actors/SequencePlayback.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
@@ -1640,6 +1640,7 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
   bank->headers[3] = 4;
   bank->headers[5] = 8;
   memcpy(reinterpret_cast<u_char*>(file) + 68, tracks, sizeof tracks);
+  VS::Actors::RegisterSequenceBank(bank, sizeof file);
   actor.ownedSequence = bank;
   actor.instance.boneCount = 1;
   actor.framesPerStep = 1;
@@ -1648,7 +1649,8 @@ int Tests_AdvanceSequenceWithoutScratch(void) {
   actor.pose.boneKeys[0].vx = 8191;
   memcpy(scratch, Core_ScratchBase(), sizeof scratch);
 
-  Actors_AdvanceSkeletalAnimation(&actor, &actor.pose, 0);
+  VS::Actors::AdvanceLiveSkeletalAnimation(actor, 0);
+  VS::Actors::ForgetSequenceBanks(bank, sizeof file);
   passed = actor.pose.frame == 2 && actor.pose.boneKeys[41].vx == 1 &&
            actor.pose.boneKeys[41].vy == 2 && actor.pose.boneKeys[41].vz == 3 &&
            actor.pose.boneKeys[0].vx == 0 && actor.pose.boneKeys[0].vy == 1 &&
@@ -1675,16 +1677,16 @@ int Tests_BlendSequencePose(int mode) {
   src.frame = 19;
   src.reachedEnd = 1;
   if (mode == 0) {
-    Actors_BlendActorPose(&dst, &src, 1, 1, 4);
+    VS::Actors::BlendLiveActorPose(dst, src, 1, 1, 4);
     return dst.boneKeys[0].vx == 8191 && dst.boneKeys[41].vy == 6 &&
            dst.scaleKeys[0].vx == 80 && dst.eventScript == nullptr;
   }
   if (mode == 1) {
-    Actors_BlendActorPose(&dst, &src, 1, 2, 4);
+    VS::Actors::BlendLiveActorPose(dst, src, 1, 2, 4);
     return dst.boneKeys[0].vx == 8192 && dst.boneKeys[41].vy == 3 &&
            dst.scaleKeys[0].vx == 96 && dst.eventScript == nullptr;
   }
-  Actors_BlendActorPose(&dst, &src, 1, 4, 4);
+  VS::Actors::BlendLiveActorPose(dst, src, 1, 4, 4);
   return memcmp(&dst, &src, sizeof src) == 0 && dst.eventScript == events;
 }
 }  // extern "C"
