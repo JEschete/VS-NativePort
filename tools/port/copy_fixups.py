@@ -48,6 +48,11 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Game\include\Boot\SessionLive.hpp"
        for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},
     "VS::Boot::DelayAfterOverlayLoad": r"Native\Game\include\Boot\Session.hpp",
+    **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\DecisionsLive.hpp"
+       for name in ("UpdateLivePatrolCombatBehavior", "UpdateLiveFleeOrWanderBehavior",
+                    "UpdateLiveAdaptivePursuitBehavior", "UpdateLiveSupportFollowBehavior",
+                    "UpdateLiveEngagementApproachBehavior", "UpdateLiveActorLocomotionMode",
+                    "DispatchLiveMovementBehavior", "SelectLiveDecisionBehavior")},
     **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\FrameUpdateLive.hpp"
        for name in ("CacheLiveActorAiWorkingState", "RunLiveActorAiUpdateStages", "TickLiveActorDecisionTimers",
                     "InitializeLiveActorLocomotionMode", "SetLiveActorVerticalMovementSteps")},
@@ -252,6 +257,13 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E65DC, "VS::Battle::Ai::CacheLiveActorAiWorkingState"),  # F01819
     ("BATTLE/BATTLE.PRG", 0x800E6828, "VS::Battle::Ai::InitializeLiveActorLocomotionMode"),  # F01824
     ("BATTLE/BATTLE.PRG", 0x800E685C, "VS::Battle::Ai::SetLiveActorVerticalMovementSteps"),  # F01825
+    ("BATTLE/BATTLE.PRG", 0x800DAA6C, "VS::Battle::Ai::UpdateLivePatrolCombatBehavior"),  # F01655
+    ("BATTLE/BATTLE.PRG", 0x800DB7B4, "VS::Battle::Ai::UpdateLiveActorLocomotionMode"),  # F01669
+    ("BATTLE/BATTLE.PRG", 0x800DB820, "VS::Battle::Ai::DispatchLiveMovementBehavior"),  # F01670
+    ("BATTLE/BATTLE.PRG", 0x800DBA4C, "VS::Battle::Ai::UpdateLiveFleeOrWanderBehavior"),  # F04203
+    ("BATTLE/BATTLE.PRG", 0x800DBA88, "VS::Battle::Ai::UpdateLiveAdaptivePursuitBehavior"),  # F04204
+    ("BATTLE/BATTLE.PRG", 0x800DBB98, "VS::Battle::Ai::UpdateLiveSupportFollowBehavior"),  # F04205
+    ("BATTLE/BATTLE.PRG", 0x800DBC0C, "VS::Battle::Ai::UpdateLiveEngagementApproachBehavior"),  # F04206
 )
 
 MODULE_FUNCTION_ENTRIES = (
@@ -274,10 +286,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("SLUS_010.40", 0x80041A00, "F03404"),
     ("SLUS_010.40", 0x80041954, "F03408"),
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
-    ("BATTLE/BATTLE.PRG", 0x800DBA4C, "F04203"),
-    ("BATTLE/BATTLE.PRG", 0x800DBA88, "F04204"),
-    ("BATTLE/BATTLE.PRG", 0x800DBB98, "F04205"),
-    ("BATTLE/BATTLE.PRG", 0x800DBC0C, "F04206"),
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
@@ -2877,6 +2885,10 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"CopyLiveAlignedWords(VS::Core::Memory::RecordTail(*actor, actor->textureOverlays), data, 0xE8)",
      "F03572 #46 typed promotion: the SHP header block fills the texture overlays and the fields after them "
      "in one copy, so it is bounded by the actor record rather than the first array (#268)"),
+    (r"", r"\bVS::Battle::Ai::DispatchMovementBehavior\(", r"VS::Battle::Ai::DispatchLiveMovementBehavior(",
+     "F01670 #46 typed promotion: the decision binding runs the actor's behaviour through its AI state"),
+    (r"", r"\bVS::Battle::Ai::UpdateActorLocomotionMode\(", r"VS::Battle::Ai::UpdateLiveActorLocomotionMode(",
+     "F01669 #46 typed promotion: the decision binding issues the actor's locomotion command"),
     (r"", r"\bVS::Battle::Ai::TickActorDecisionTimers\(", r"VS::Battle::Ai::TickLiveActorDecisionTimers(",
      "F01765 #46 typed promotion: the frame-update binding ticks the actor's decision delays"),
     (r"", r"\bVS::Battle::Ai::InitializeActorLocomotionMode\(", r"VS::Battle::Ai::InitializeLiveActorLocomotionMode(",
@@ -3598,6 +3610,11 @@ FIXES["F03437"] = FIXES["F03437"] + [
      "main.c:8309 discard staged native state before heap/module initialization"),
 ]
 
+FIXES.setdefault("F01813", []).append(
+    ("Battle_Ai_decisionCallbacks[(actor->opaque30.word >> 4) & 31]",
+     "VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word)",
+     "7CD68.c decision behaviour selection: the five-bit spawn index can name slots past the nine-entry table; "
+     "the binding refuses them with a warning instead of reading the AI constants that follow (#272)"))
 FIXES.setdefault("F03476", []).append(
     ("VS::Content::BeginDiscRead(", "VS::Content::BeginLiveDiscRead(",
      "F03474 typed core takes a DiscDriveHost; the generated caller uses the live binding"))

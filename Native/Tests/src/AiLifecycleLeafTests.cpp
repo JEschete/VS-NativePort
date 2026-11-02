@@ -18,13 +18,13 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 }
 
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 
 static_assert(std::is_same_v<decltype(&Battle_Ai_ClearActorAiNavigationReset),
@@ -141,7 +141,7 @@ struct AshleyAllianceFixture {
     CHECK(Reaction()->temporaryAshleyAlliance == 1);
     CHECK(Settings()->savedDecisionCallback == saved_callback);
     CHECK(Settings()->decisionCallback ==
-          Battle_Ai_UpdateEngagementApproachBehavior);
+          VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
     CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
   }
 
@@ -481,7 +481,7 @@ TEST_CASE(
   fixture.CheckEntered(0, nullptr);
 
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
-  fixture.CheckRestored(Battle_Ai_UpdateEngagementApproachBehavior);
+  fixture.CheckRestored(VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
   CHECK(Battle_actorMarkers[1] == 0x05);
 }
 
@@ -498,7 +498,7 @@ TEST_CASE("AI Ashley alliance compares before truncating the reaction count",
   CHECK(fixture.Settings()->savedDecisionCallback ==
         AshleyAllianceTestCallback);
   CHECK(fixture.Settings()->decisionCallback ==
-        Battle_Ai_UpdateEngagementApproachBehavior);
+        VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
 }
 
 TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
@@ -523,7 +523,7 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
             static_cast<u_char>(counter + (favorable ? 1 : 0)));
       CHECK(fixture.Reaction()->temporaryAshleyAlliance == entered);
       CHECK(settings->decisionCallback ==
-            (entered ? Battle_Ai_UpdateEngagementApproachBehavior
+            (entered ? VS::Battle::Ai::UpdateLiveEngagementApproachBehavior
                      : AshleyAllianceTestCallback));
       CHECK(settings->savedDecisionCallback ==
             (entered ? AshleyAllianceTestCallback : nullptr));
@@ -581,7 +581,7 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
   AshleyAllianceFixture fixture;
   fixture.Settings()->decisionCallback = AshleyAllianceTestCallback;
   fixture.Settings()->savedDecisionCallback =
-      Battle_Ai_UpdateEngagementApproachBehavior;
+      VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
   Battle_actorMarkers[1] = static_cast<char>(0xA5);
   const auto random = Core_Random_State();
   const auto frame_random = Battle_Ai_FrameState()->randomState;
@@ -605,7 +605,8 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   const bool saved_callback = GENERATE(false, true);
   AshleyAllianceFixture fixture;
   auto* settings = fixture.Settings();
-  settings->decisionCallback = Battle_Ai_UpdateEngagementApproachBehavior;
+  settings->decisionCallback =
+      VS::Battle::Ai::UpdateLiveEngagementApproachBehavior;
   settings->savedDecisionCallback =
       saved_callback ? AshleyAllianceTestCallback : nullptr;
   fixture.state.settingsBit25 = static_cast<u_char>(settings_bit);
@@ -622,9 +623,9 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   frame.randomState = 0x2000;
   frame.lastBudgetTick = 2;
   VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
-  fixture.CheckRestored(saved_callback
-                            ? AshleyAllianceTestCallback
-                            : Battle_Ai_UpdateEngagementApproachBehavior);
+  fixture.CheckRestored(
+      saved_callback ? AshleyAllianceTestCallback
+                     : VS::Battle::Ai::UpdateLiveEngagementApproachBehavior);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x25);
   CHECK(fixture.state.relations[0].classification == 3);
   fixture.CheckRecovery(settings_bit, busy, random);

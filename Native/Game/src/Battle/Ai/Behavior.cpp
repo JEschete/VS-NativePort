@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -555,8 +555,8 @@ void Battle_Ai_UpdateActorDecisions(void)
                     state->opaque154 = value;
                     state->opaque132 = value;
                     *(int*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
-                    Battle_Ai_DispatchMovementBehavior(state);
-                    Battle_Ai_UpdateActorLocomotionMode(state);
+                    VS::Battle::Ai::DispatchLiveMovementBehavior(state);
+                    VS::Battle::Ai::UpdateLiveActorLocomotionMode(state);
                 }
             }
         }

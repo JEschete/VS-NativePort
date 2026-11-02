@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
@@ -155,7 +156,7 @@ void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_Set
         state->settingsConstant19 = 1;
         Battle_Ai_AllocateOrbitingBossState(state);
     } else {
-        state->decisionCallback = Battle_Ai_decisionCallbacks[(actor->opaque30.word >> 4) & 31];
+        state->decisionCallback = VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word);
     }
     state->linkedActor = 16;
     Battle_Ai_ResolveAiLinkedActors();

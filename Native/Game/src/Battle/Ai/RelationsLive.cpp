@@ -9,13 +9,14 @@
 #include <iterator>
 #include <span>
 
+#include "Battle/Ai/DecisionsLive.hpp"
+
 extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -123,7 +124,7 @@ class LiveAllianceActor final : public AshleyAllianceActor {
   void RecomputeRelations() override { InitializeRelations(state_); }
   void SaveDecisionAndApproach() override {
     settings_.savedDecisionCallback = settings_.decisionCallback;
-    settings_.decisionCallback = Battle_Ai_UpdateEngagementApproachBehavior;
+    settings_.decisionCallback = UpdateLiveEngagementApproachBehavior;
   }
   void RestoreSavedDecision() override {
     if (settings_.savedDecisionCallback != nullptr) {

@@ -1346,13 +1346,6 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "09881e8bc9a587b2a0fba2a96d13b47c48936cf309f66a4a883cf6e016a574b3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "0989c33b0c5674ea551e48bf8835f03435200e6c6613305d0a4a221e8692cdba",
       "count": 1,
       "tool": "tidy",
@@ -2816,13 +2809,6 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "120165f681bc6386e5196bb54beb2c77fdbaa510b8489f308817161789e52e2f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "1203768a940427bc68fa96dea5116f9082ed2ad186dc28dda0b1564f565010bd",
       "count": 1,
       "tool": "cpplint",
@@ -2856,13 +2842,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "123167c190869d064f97ac393b5c681d37ef2680807e8a194463be2c5a11f3b8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "123192639802a82b1faf6c2ecc03196d22dba6c3a61f57a6404ecb9082fc9674",
@@ -3544,13 +3523,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "1636e388f665984e36c21e26eb35c5a50d6fb893087aae559aff1298e5599f3a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "164ca5d274cfc1d243e9c32329e048e3c4c9630d482a55bb2d91810cae9adcb7",
       "count": 1,
       "tool": "tidy",
@@ -4081,13 +4053,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "1a1759a7d5f03cb92058d48f0295ce4f7b648a7bbad976b7b7f1c815847cbaf3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "1a194d7d266a11c8c8da3440239fdba7f5e8b27911ae203d9b70878b5d67c642",
@@ -4935,13 +4900,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Removed.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "1fc71a7ef76c1524c14228d7e34f7ce8dbfc402dfba0d754df924bfa2827e95b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "1fcd77f8b3af693fc04993a15a51b70f3f597c6d8c738969ab2273eb3ec861c0",
@@ -7135,13 +7093,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2cf4b92018c468cf7d0b070e3926ae71c56b5c5827ba6912c2c90edaf0513d84",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "2d172f53918047ecd169820a76d5c1c3b7465e40a164066570fcef0558b34ce0",
       "count": 1,
       "tool": "cpplint",
@@ -9030,13 +8981,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "39f1652e3c858a408a2ac053cbdbe04e4dacd18e1485a3b987091be50422e34d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "39f83ef37a2b0b5950e219d80c454ec984ef57b42252ce8078f9866e3f6750e6",
@@ -11895,13 +11839,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "4cd5a7c873bf4a7b705fd5622fe10b107d5f33c9b3688a21f8121f7f8b772d74",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "4cdc1c399880af368e9d3d71c8a7ee8cca3f6daa98debeed0ec72b7030d104da",
       "count": 1,
       "tool": "cpplint",
@@ -13785,13 +13722,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "59d87be0b3076d0eebc32cd527eee233ee510d28744e45877ad8cee1603a4fb7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "59da1306af9f6e4fa68eaf1b84a5000bc28c5a154c38539b1ec0ca24af398dea",
       "count": 1,
       "tool": "tidy",
@@ -15610,13 +15540,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "656d90442363674644bf316d1fb4e833cc0aec901c49defbc382967c2e0e484b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "6577baa0178947145643f33da160f41be8ef6ef28b48f95f397b163ce13244ff",
@@ -19343,13 +19266,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "7ebfd1884f1622c1258439f7a694cf54178da293e69c99363d3e0022277a0240",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "google"
-    },
-    {
       "key": "7ec46da6f4df8b13047d09bdd88cdf027be7f2b20ca243688f65ec073685242c",
       "count": 1,
       "tool": "cpplint",
@@ -19460,13 +19376,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "7fc89ba478975b46e3185c5acdc30eab0aba9cd057d1f940e457091283e9f99d",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "google"
     },
     {
       "key": "7fca5cd39d334af0ea1b5471cbe61ff8d03f49145bd0da9dc288ce6b19b4fcc2",
@@ -20216,13 +20125,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8490322f82f30c1f31103d04c19f6c0d5592bf98f26f929e3640ee850983f03e",
-      "count": 6,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "8492cf924ae662331b91cf0ad4930db036eda6aaaa3107abb7f0c4906c5af2a1",
@@ -22402,13 +22304,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "926c98a25d8c029761da115aa1e10ff46b9cc6b92a9ddc447d785914e6ddb3ed",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "92760451470f0e070e9ce37a399e0b993573cc43e86a02769e41264c9b457050",
       "count": 1,
       "tool": "tidy",
@@ -23193,13 +23088,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "97207b531b95a90b9ff2a5a3e385c99159b4de540fb8b8933ab7dfbe6505253c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9721be4f12d01813c63fa50feb51ba2e4e36531b05a3f9dd5f15b200573198c4",
       "count": 1,
       "tool": "cpplint",
@@ -23212,13 +23100,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "97496ca59c67b40b3f808158e895e36cb983913632bc854210cbcfe99d3ca073",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "9758e7725eec2e5fe0cf540b9e171d1250b6fef0cd411d468b9be09b85639a19",
@@ -23625,13 +23506,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/App.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "9a14ec3442640bd2448ab317ad64a3a1179fae3aa319c70776ec19a12a06736a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "9a1b0c68e631f71abf9773ad18fa07461f98281fe0df1a7fcf4b0c2182e74b62",
@@ -24752,13 +24626,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a19685e38172907fc80c5453acf0643be723caf326606b191d7c0e434cca684a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a1a0ea89c135a20d3a4e8c7003e203a3a416eec1ae848e7e59f4e81a77afb960",
@@ -25993,13 +25860,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "aa7af75001a9faf18f19b33e66bd4c521503ab7dafeb007ab485b54b496c2181",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "aa849f09ad2c06aaedfa65f7aa056541b860456d4496e969fe26f69551c731de",
       "count": 1,
       "tool": "cpplint",
@@ -26607,13 +26467,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "aedbcb99e7e10d923cd31e1e87454a7e2bdf855f0216010b3901d9f0a433dcaf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "aeea1524016962fa60377291f820c0ae73c78d22cc65d11d9721ebfb2fc185ea",
@@ -29843,13 +29696,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c51b73c4c9eec550c3d0112fe40ec4fa13e49000e86ea05e57c969837bf0b496",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c54bc789e1b06d71a099813d8b426f39e1a518ab641a87737c3a1266bbd208da",
       "count": 1,
       "tool": "cpplint",
@@ -30225,13 +30071,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c7a28aa1ec09bfef9dac1d8dbd172ded7e5b41f602fd2db9bfde15c151cc1d5c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -32046,13 +31885,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "d245d724d8ede7cbf897ed1625e84da06d0e5166a85b1fa3db8fb323d7b4ae70",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d24fe507f532ddd5654bc47bac210dd78c403cd54b262b149783230458c61194",
@@ -33957,13 +33789,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CoreTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "df808a3359c8accf4535fe6a433f0cbdf79db5ed757b3818db292305f71b8e53",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "df80d91725cdb9893a2af206bbca6c2b5dd839f57f149a084b06d74fedb34130",
@@ -37564,13 +37389,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "f844f0f1355a00cc5f71e015f7bfe4ec262f2155742167552498a37f2cd4de6e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f85e83adf234aa4b1708bc31b3b086364d62847646a5c0423c0a4ad787f7e947",
       "count": 1,
       "tool": "tidy",
@@ -37590,13 +37408,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "f8b5993234c1bd14fb389e8216c88f356d039e19c3682b25e76f2d21b07d1e52",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f8d1e7da6269d657af674fac423da709a0b561bc494f415d64349fdda30746da",
@@ -38577,13 +38388,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Scratch.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "fe4017e6292fe349896c7ee5ca85c98b9a4ad41f161aabdd97c7e9e9e2c014c8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/DecisionCallbacks.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "fe403c559411407665626fecba4d5103ed9af1f268d78f5cbc266ad0a42f5fe7",

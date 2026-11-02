@@ -564,7 +564,7 @@ class EncounterFixupTests(unittest.TestCase):
         binding = (root / r"Native\Game\src\Battle\Ai\RelationsLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Battle_Ai_UpdateEngagementApproachBehavior", binding)
+        self.assertIn("UpdateLiveEngagementApproachBehavior", binding)
         self.assertIn("settings_.savedDecisionCallback = nullptr;", binding)
         self.assertNotIn("VS_UNPORTED", binding)
 

@@ -266,14 +266,11 @@
     <ClCompile Include="src\Battle\Ai\CurrentTerrain.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\DecisionCallbacks.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Battle\Ai\DecisionPrimitives.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Battle\Ai\Decisions.cpp" />
+    <ClCompile Include="src\Battle\Ai\DecisionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Engagement.cpp">
@@ -2072,7 +2069,6 @@
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
-    <ClInclude Include="src\Battle\Ai\DecisionCallbacks.h" />
     <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\Engagement.h" />
     <ClInclude Include="src\Battle\Ai\EngagementState.hpp" />
@@ -2389,6 +2385,8 @@
     <ClInclude Include="include\Battle\Ai\ActorCommands.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
+    <ClInclude Include="include\Battle\Ai\Decisions.hpp" />
+    <ClInclude Include="include\Battle\Ai\DecisionsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdate.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp" />

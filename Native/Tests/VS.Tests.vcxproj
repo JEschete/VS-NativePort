@@ -56,6 +56,7 @@
     <ClCompile Include="src\ActorShadowTests.cpp" />
     <ClCompile Include="src\ActorSoundTransitionTests.cpp" />
     <ClCompile Include="src\AiAuxiliaryPerceptionTests.cpp" />
+    <ClCompile Include="src\AiDecisionsTests.cpp" />
     <ClCompile Include="src\AiDecisionTests.cpp" />
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiLifecycleLeafTests.cpp" />

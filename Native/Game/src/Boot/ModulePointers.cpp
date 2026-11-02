@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 extern "C" {
@@ -66,7 +67,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/GroundNavigation.h"
@@ -1909,7 +1909,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DA5CCu, 0u, (void*)&Battle_Ai_UpdateCloseFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA6A4u, 0u, (void*)&Battle_Ai_UpdateEnemyPursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA738u, 0u, (void*)&Battle_Ai_UpdateGuardMovementBehavior, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DAA6Cu, 0u, (void*)&Battle_Ai_UpdatePatrolCombatBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAAD8u, 0u, (void*)&Battle_Ai_UpdateEscortCombatBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAC80u, 0u, (void*)&Battle_Ai_TryExecuteActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAD9Cu, 0u, (void*)&Battle_Ai_TryExecutePlannedActions, 0u, 0u, 0u},
@@ -1923,8 +1922,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DB5FCu, 0u, (void*)&Battle_Ai_PatrolWaypoints, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DB61Cu, 0u, (void*)&Battle_Ai_FleeVisibleEnemies, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DB74Cu, 0u, (void*)&Battle_Ai_TrackActorPosition, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DB7B4u, 0u, (void*)&Battle_Ai_UpdateActorLocomotionMode, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DB820u, 0u, (void*)&Battle_Ai_DispatchMovementBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DB8ACu, 0u, (void*)&Battle_Ai_CanApproachEngagedTarget, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DB93Cu, 0u, (void*)&Battle_Ai_FindGapLandingTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC60u, 0u, (void*)&Battle_Ai_DoesActionRequireCooldown, 0u, 0u, 0u},
@@ -3178,16 +3175,19 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DBA4Cu, 0u, (void*)&Battle_Ai_UpdateFleeOrWanderBehavior, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&Battle_Ai_UpdateEngagementApproachBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&VS::Field::IsLivePointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&VS::Field::TraceLiveActorAndTerrainCollision, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E65DCu, 0u, (void*)&VS::Battle::Ai::CacheLiveActorAiWorkingState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6828u, 0u, (void*)&VS::Battle::Ai::InitializeLiveActorLocomotionMode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E685Cu, 0u, (void*)&VS::Battle::Ai::SetLiveActorVerticalMovementSteps, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DAA6Cu, 0u, (void*)&VS::Battle::Ai::UpdateLivePatrolCombatBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DB7B4u, 0u, (void*)&VS::Battle::Ai::UpdateLiveActorLocomotionMode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DB820u, 0u, (void*)&VS::Battle::Ai::DispatchLiveMovementBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DBA4Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveFleeOrWanderBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&VS::Battle::Ai::UpdateLiveAdaptivePursuitBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&VS::Battle::Ai::UpdateLiveSupportFollowBehavior, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveEngagementApproachBehavior, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

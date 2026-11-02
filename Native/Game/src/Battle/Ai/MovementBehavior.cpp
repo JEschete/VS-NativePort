@@ -12,13 +12,13 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -455,7 +455,8 @@ void Battle_Ai_SelectActionMovementMode(
   Require(view != nullptr, "AI action movement selection requires state");
   auto& state = *reinterpret_cast<Battle_Ai_ActorAiState*>(view);
   const auto& settings = *reinterpret_cast<Battle_Ai_SettingsView*>(view);
-  if (settings.decisionCallback == Battle_Ai_UpdatePatrolCombatBehavior ||
+  if (settings.decisionCallback ==
+          VS::Battle::Ai::UpdateLivePatrolCombatBehavior ||
       settings.opaque2D == 0) {
     state.planMode = 1;
     return;

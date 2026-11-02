@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/DiscReaderLive.hpp"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Damage.h"
@@ -220,10 +220,10 @@ int Tests_AiMovementDispatch(void) {
       reinterpret_cast<Battle_Ai_SettingsView*>(&state);
   state.previousTile = -1;
   settings->decisionCallback = TestMovementDecision;
-  Battle_Ai_DispatchMovementBehavior(
+  VS::Battle::Ai::DispatchLiveMovementBehavior(
       reinterpret_cast<Battle_Ai_DecisionDispatchView*>(&state));
   const int passed = state.opaque44 == 1 && state.detourStep == 0;
-  Battle_Ai_UpdateActorLocomotionMode(
+  VS::Battle::Ai::UpdateLiveActorLocomotionMode(
       reinterpret_cast<Battle_Ai_DecisionDispatchView*>(&state));
   return passed && state.behaviorMode == 0;
 }
