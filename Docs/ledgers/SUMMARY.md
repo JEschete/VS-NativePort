@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 280 | owned functions |
-| 280 | owned functions in C++ sources |
-| 3480 | generated function rows |
+| 281 | owned functions |
+| 281 | owned functions in C++ sources |
+| 3479 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 82 | 17 (`wip`) | 4,108 |
-| `cpp` | 82 | 198 (`wip`) | 3,927 |
+| `modernized` | 86 | 14 (`wip`) | 4,107 |
+| `cpp` | 86 | 195 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 209 |
-| `vs_namespace` | 82 |
-| `typed_interface` | 82 |
-| `no_bridge` | 82 |
-| `strict_clean` | 209 |
-| `behavior_evidence` | 82 |
+| `source_cpp` | 213 |
+| `vs_namespace` | 86 |
+| `typed_interface` | 86 |
+| `no_bridge` | 86 |
+| `strict_clean` | 213 |
+| `behavior_evidence` | 86 |
 
-Promotion records: 280; derived `cpp=x`: 82, `cpp=wip`: 198. Verification records: 80; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 86, `cpp=wip`: 195. Verification records: 81; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -203,6 +203,8 @@ The thirty-fourth is the disc drive commands (F03474, F03475, F03479): `VS::Cont
 and the copied queue and `_sysReinit` call the live binding; the old `Content_*Disc*` C entry points and `DiscReader.h` are retired.
 The thirty-fifth is the AI relations and Ashley alliance (F01841, F01840, F01681, F01682): VS::Battle::Ai::InitializeActorAiRelations walks a typed ActorRelationTable and the alliance policies drive an AshleyAllianceActor,
 and the copied creation and perception callers use the live binding; the old Battle_Ai_* C entry points, Relations.h and their module pointer entries are retired.
+The thirty-sixth is the results texture-region draws (F03675, F03676, F03677, F03678): VS::Render::DrawTextureTintFade, DrawTextureFlashFade and DrawTextureWipe build typed RegionQuads for a RegionQuadTarget,
+and the copied ENDING and MENUF results callers use span-checked live bindings; the old Render_DrawTexture* C entry points, Render_BlendFlashComponent and TextureRegionDraw.h are retired, and the congratulations tint regains the third color it reads (#259).
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
