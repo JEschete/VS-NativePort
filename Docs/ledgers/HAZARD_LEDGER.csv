@@ -331,6 +331,7 @@ b60a05795f48,DIV-ZERO,medium,pattern,F01485,Core_Math_InterpolateTimedWideVector
 83555b70e9f4,DIV-ZERO,medium,pattern,F02428,Core_Math_EvaluateEase,Native/Engine/src/Core/Math/Interpolation.cpp,213,totalSteps,51,9,open,
 8af11a3971eb,DIV-ZERO,medium,pattern,F02428,Core_Math_EvaluateEase,Native/Engine/src/Core/Math/Interpolation.cpp,213,totalSteps,51,9,open,
 b13b22260df8,DIV-ZERO,medium,pattern,F02428,Core_Math_EvaluateEase,Native/Engine/src/Core/Math/Interpolation.cpp,213,totalSteps,51,9,open,
+d1211083e39c,DIV-ZERO,medium,pattern,,RoundDown,Native/Engine/src/Core/Memory/WordCopy.cpp,16,unit,45,3,open,
 114e74eb9c1f,DIV-ZERO,low,pattern,F01455,Core_Random_RandomRangeExclusive,Native/Engine/src/Core/Random.cpp,30,(bound_a - bound_b),45,3,open,
 1b6b58752a83,DIV-ZERO,low,pattern,F01455,Core_Random_RandomRangeExclusive,Native/Engine/src/Core/Random.cpp,34,(bound_b - bound_a),45,3,open,
 c546d9985b38,DIV-ZERO,medium,pattern,F01328,Render_FormatEncodedText,Native/Engine/src/Render/Font.cpp,165,divisor,54,25,open,

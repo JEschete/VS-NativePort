@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 108 | 14 (`wip`) | 4,085 |
-| `cpp` | 108 | 173 (`wip`) | 3,926 |
+| `modernized` | 113 | 14 (`wip`) | 4,080 |
+| `cpp` | 113 | 168 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 235 |
-| `vs_namespace` | 108 |
-| `typed_interface` | 108 |
-| `no_bridge` | 108 |
-| `strict_clean` | 235 |
-| `behavior_evidence` | 108 |
+| `source_cpp` | 240 |
+| `vs_namespace` | 113 |
+| `typed_interface` | 113 |
+| `no_bridge` | 113 |
+| `strict_clean` | 240 |
+| `behavior_evidence` | 113 |
 
-Promotion records: 281; derived `cpp=x`: 108, `cpp=wip`: 173. Verification records: 89; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 113, `cpp=wip`: 168. Verification records: 90; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -221,6 +221,8 @@ The forty-third is the sprite packets (F04190-F04193): VS::Render builds the six
 so a packet past the frame primitive buffer is refused with discard storage instead of overrunning it (#265); the four Render_ sprite symbols and Sprites.h are retired.
 The forty-fourth is the native session transitions (F03438, F03439, F03576, F04200, F04201): VS::Boot decides session begin/end and title/game-loop transitions over abstract hosts,
 so a transition requested with no session or while a stack-bound scope holds a barrier is refused before it can strand globals on a dead frame (#266); the five Boot_ session symbols, Boot_RunSessionLoop and Session.h are retired.
+The forty-fifth is the native word copies (F01758, F03572, F03573, F04188, F04189): VS::Core::Memory copies over byte spans forward without memcpy overlap,
+and the live binding bounds array destinations and sources by their declared extent so a data-driven SHP palette count can no longer write past the actor palette arrays (#268); the five Core_Memory_ symbols and WordCopy.h are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
