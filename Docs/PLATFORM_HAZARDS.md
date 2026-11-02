@@ -57,7 +57,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 84 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
-| `BYTE-OFFSET` | Field reached by a literal byte offset | 148 | 0 | 0 | 148 | 0 | 148 |
+| `BYTE-OFFSET` | Field reached by a literal byte offset | 147 | 0 | 0 | 147 | 0 | 147 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 1 | 0 | 0 | 1 | 0 | 1 |
 | `PS1-ADDRESS` | Original memory address used as a value | 1 | 0 | 0 | 0 | 1 | 1 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 4 | 0 | 0 | 4 | 0 | 4 |
@@ -66,7 +66,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 71 | 0 | 0 | 71 | 0 | 71 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 1,147 | 239 | 239 | 800 | 108 | 1,147 |
+| **Total** | | 1,146 | 239 | 239 | 799 | 108 | 1,146 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -102,7 +102,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | #62 | 25 |
 | #59 | 25 |
 | #47 | 24 |
-| #50 | 22 |
+| #50 | 21 |
 | #51 | 19 |
 | #48 | 7 |
 | #54 | 7 |

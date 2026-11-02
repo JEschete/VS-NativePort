@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 133 | 12 (`wip`) | 4,062 |
-| `cpp` | 133 | 148 (`wip`) | 3,926 |
+| `modernized` | 154 | 10 (`wip`) | 4,043 |
+| `cpp` | 154 | 127 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 260 |
-| `vs_namespace` | 133 |
-| `typed_interface` | 133 |
-| `no_bridge` | 133 |
-| `strict_clean` | 260 |
-| `behavior_evidence` | 133 |
+| `source_cpp` | 281 |
+| `vs_namespace` | 154 |
+| `typed_interface` | 154 |
+| `no_bridge` | 154 |
+| `strict_clean` | 281 |
+| `behavior_evidence` | 154 |
 
-Promotion records: 281; derived `cpp=x`: 133, `cpp=wip`: 148. Verification records: 94; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 154, `cpp=wip`: 127. Verification records: 95; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -231,6 +231,8 @@ The forty-eighth is the PLG074 trail emitter (F01988, F01994): VS::Effects::Gene
 and the live binding checks definitions, tick events and transparency curves against the extents the package binder records (#271), refusing or stopping emitters with a diagnostic; the RadialSurge template and both Effects_Plg074_ symbols are retired.
 The forty-ninth is the AI decision behaviours (F01655, F01669, F01670, F04203-F04206): VS::Battle::Ai patrol, flee, pursuit, support, engagement, locomotion and dispatch are C++ over a decision actor host,
 and the live selection bounds the spawn settings index to the nine-entry behaviour table (#272), wandering with a diagnostic instead of calling past it; DecisionCallbacks.cpp/.h and the seven Battle_Ai_ symbols are retired.
+The fiftieth is the room geometry renderer (F00744-F00760, F00769, F00770, F00773, F00775): VS::Render room group records, transforms, packed decoding, projection, subdivision, depth links, tint and the sky dome are C++ over transformer and packet queue hosts with bounded spans,
+and the live binding owns the room clip state and bounds every packet by the current frame buffer; RoomDraw.cpp leaves the relaxed copied-code settings and RoomDraw.h and the twenty-one Render_ room symbols are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
