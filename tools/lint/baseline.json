@@ -1591,13 +1591,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "09e4efeb35c3093ea2fd94b8408c9b26fc24dba47bf21b7230ac8323aa1f6a93",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "09ee804da4c5be50c9b96f1285775efd15f2fe6d82c78a9dd56cd2ef43ffd7cb",
       "count": 1,
       "tool": "cpplint",
@@ -5049,13 +5042,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "1d2c561df8d0dedb6cfe042b91500a35a584d87466beb7212761e76716412c84",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1d2fa4eec980923585bb32e8e05e48a29c864e1334c43fa14a5106230a8b0248",
       "count": 1,
       "tool": "tidy",
@@ -5152,13 +5138,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1dcd95854615a050907db2c85a0b034a222a9ff1ce293fd744187b449466b42c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "1dd919a826e847ca5136a53323f5ca3214d56c672952fda4fc09576b399d298c",
@@ -6057,13 +6036,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "231db642c9e70830ce11229428ffe1c27eb8af0149aaeac8e813bef1be87236e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "231ff6f1fabdb05dc2204644dd1e03f1ab9987cb18bb6d98d077c66f90d15c4b",
       "count": 1,
       "tool": "cpplint",
@@ -6573,13 +6545,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "256a9cfbf44743c7a3fcb3da8c5af86b5e8ea39b5e7b1b8c6d2f49118557d49b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "25707129b4305a82bd71ebef93081863759f48b59b5d96de418fdad77088f0fb",
@@ -7597,13 +7562,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "2b1dca2aeac908e8f7a7280084c80f32087db15cd1a60547b3f23a3c584efdd5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "2b1eabb2bf21a66307eb2e9d27930637c90552d643029f0559429a8f45066d14",
       "count": 1,
       "tool": "cpplint",
@@ -7994,13 +7952,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "2d3f6ae403b11691acc3d203ce851da279757d1268bb0886adb53b90c1233202",
-      "count": 4,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "2d411db30e3b8068be897270943036d933642793c944896c92a37ee143625d2b",
@@ -9387,13 +9338,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "355d6b3d273f4cc19f9bc10a76c3cbc6f0ac1de495dc3496ff4a24ce14d13e97",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "35635f9a0014df11ce9ad6ff28baa68150858b6249cbd638bdaaab8174789900",
@@ -11349,13 +11293,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "417731c527231329f4efce8f15b78adeecd781aa4f9166ddac10be7ac803a8aa",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "41862a33a2da2733aa1f6ee1599ea5815a5f0cc4e2eafc952b14f5dacb6c625e",
       "count": 1,
       "tool": "tidy",
@@ -12018,13 +11955,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4514eaec6a6568ee80813c8000822ff7d36202c3358707f6d9ee46c3708340a5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -12810,13 +12740,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Psx.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4993b01448f758980ceeaed9cea7d9b89d2ea5762615c586a851610aefa526ef",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "4997edda0ab560a88490814bf0fb997e24f24c4f54c562129cafd4e481f564fe",
@@ -14821,13 +14744,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "564a2ae13cd632701d6c0bc8a95fc9d74f8164bce23a00682b5716abb32cf32d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "564c57451ba75c9712ea52ba7daaef78d02bc78f6c06c9a66429a5b3a6c75631",
       "count": 1,
       "tool": "cpplint",
@@ -15386,13 +15302,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "59490cd296549e79b7c24fe91d273c3dadf04660429763a35ef714ac1898aa46",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "5953fdd17937b8d4784b20a2add8780ce2c428be434eaa181d544d9eda425c95",
@@ -22325,13 +22234,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "8165a4b32e226ee5c0757af212525ce30380ae2d3be6728bba22a5c33ded22c7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "8166d9caba68ae16f82a36475fbaa097d361394addb99fff5d6ad342379f8d0a",
       "count": 1,
       "tool": "tidy",
@@ -26546,13 +26448,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "9995b8b98e106b18339fe0569325d2ad94f61ce1473368d5519893fa24cd8d39",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "99b66db552c211953ee381ce26d4cf110d20307361c4f925622b697ae26bf325",
       "count": 1,
       "tool": "tidy",
@@ -28737,13 +28632,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a73046da2fc8a76b41160f311975b7401879e4b2758814b1c9347cd6a7414a1d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a73228d34bd18785d63c22d3de8422fe0bd9482d10de25f7ed789584e477a427",
       "count": 1,
       "tool": "cpplint",
@@ -29946,13 +29834,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "ae7fa6dbca0baa3eaa9d4816b0efc132146bf300823ff4c186b08c864b7cf9c2",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "google"
     },
     {
       "key": "ae8459980f4cb5d47532999b65acadece0c2c0b9e050735e3984aa405d0da212",
@@ -34477,13 +34358,6 @@
       "rule": "bugprone-easily-swappable-parameters"
     },
     {
-      "key": "c99d8b3e7ea7fc7d2681ab7102dc0cf945256c54f4c3602354e18c0812cc9ed0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "c9a5408a89fa52448d4c8c53194e4ee38942bd48bf749e40c90dc7186bbf3abf",
       "count": 1,
       "tool": "tidy",
@@ -35716,13 +35590,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "cfc8f9895f7f39cc7c1cc0124d8f6524ba5ff529e55eee9ab1948f32f6891207",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "cfce38878129a340b6b07acedf7c6f17fc42a433c60c1d0bd42c6ac157a1b419",
       "count": 1,
       "tool": "tidy",
@@ -36794,13 +36661,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d65008aa092cb90547fc28c4aca81e24a3be454eaac141ebc9422de7b7f95be8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "d650130b56d5120638bd6b53670f076e801182414232928f3d3989ff19ae3805",
       "count": 4,
       "tool": "tidy",
@@ -37191,13 +37051,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-function-size"
-    },
-    {
-      "key": "d87400c22b8881dd5eb01479a82398239897895e93536c52e7e71cc0ebe9ba82",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Movie/Intro/Player.h",
-      "rule": "google"
     },
     {
       "key": "d87ebd7d7dca38f09a2304929939157fc9ab1f176fec17083c26b40c4ff812f8",
@@ -38278,13 +38131,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "df01654a9b4a1be6df1d0b3cc7831da641c992d83a80e8219c16287efd0fcd85",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "df7816fc9658178f8952544cce0694d4db86d52e76b5bc4cf01af19a431c933f",
       "count": 1,
       "tool": "cpplint",
@@ -38675,13 +38521,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "e1d7396402d50b5db0e7df1a83c3e53dd4cc1b1518e627e54890b7708c3493ea",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "e1dc8fcd0e276f251f697dd17ff1d1f3d58c95f37a1a2f93bf2d9f43fd33a9ff",
@@ -40798,13 +40637,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ee3e3f527901c859c76659b084e5563246f46447c1251c76c0042c71b898aae0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "ee571af3f46ee2d87571e72f0348c89238acdb176da8a20622f24731a6ea4502",
       "count": 1,
       "tool": "cpplint",
@@ -42359,13 +42191,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "f888780d6634b08bb4163d93d3742b1d086f276613c2de7d19165e63804344e0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f8b5993234c1bd14fb389e8216c88f356d039e19c3682b25e76f2d21b07d1e52",
       "count": 1,
       "tool": "cpplint",
@@ -42903,13 +42728,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "fb19fd25fedb5d83d65c12f7a7d7f9c551ceaa7448632c57758d34d4410f9fe6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Movie/Intro/Player.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "fb1f01e9a6ab0f2338bd578d6b91767ee3694c8fa56731e1e71122348553db11",

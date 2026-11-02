@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 71 | 19 (`wip`) | 4,117 |
-| `cpp` | 71 | 209 (`wip`) | 3,927 |
+| `modernized` | 75 | 19 (`wip`) | 4,113 |
+| `cpp` | 75 | 205 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 198 |
-| `vs_namespace` | 71 |
-| `typed_interface` | 71 |
-| `no_bridge` | 71 |
-| `strict_clean` | 198 |
-| `behavior_evidence` | 71 |
+| `source_cpp` | 202 |
+| `vs_namespace` | 75 |
+| `typed_interface` | 75 |
+| `no_bridge` | 75 |
+| `strict_clean` | 202 |
+| `behavior_evidence` | 75 |
 
-Promotion records: 280; derived `cpp=x`: 71, `cpp=wip`: 209. Verification records: 77; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 75, `cpp=wip`: 205. Verification records: 78; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -197,6 +197,8 @@ The thirty-first is particle rendering (F01593/F01594): `VS::Effects::DrawAnimat
 colours and quads; `ParticleRenderLive.cpp` validates the native pool list and binds the GTE, frame packets, ordering table, curves and effect-path traces.
 The thirty-second is menu sounds (F04194-F04198): `VS::Menu::PlayMenuSound` plays a typed `MenuSound` id on the menu channel group through `VS::Audio::PlayCenteredSoundEffect`,
 and every generated and hand-maintained caller uses the `VS::Menu` helpers; the five unreferenced BATTLE.PRG module-pointer entries are retired.
+The thirty-third is the intro movie player (F03650-F03653): `VS::Movie::Intro::Play` drives a typed `Intro::Host` with page alternation, late display enable and the 0x8F5-tick picture limit,
+and the title menu calls the live binding; the old `Movie_Intro_*` C entry points and `Movie/Intro/Player.h` are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

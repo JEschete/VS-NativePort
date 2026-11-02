@@ -241,10 +241,10 @@ F03604,Native\Game\src\Save\MenuAssets.cpp,,,,,,,,,
 F03605,Native\Game\src\Save\MenuAssets.cpp,,,,,,,,,
 F03628,Native\Game\src\Save\NativeMenu.cpp,x,,,,x,,,,
 F03634,Native\Game\src\Save\NativeMenu.cpp,x,,,,x,,,,
-F03650,Native\Engine\src\Movie\Intro\Player.cpp,,,,,,,,,
-F03651,Native\Engine\src\Movie\Intro\Player.cpp,,,,,,,,,
-F03652,Native\Engine\src\Movie\Intro\Player.cpp,,,,,,,,,
-F03653,Native\Engine\src\Movie\Intro\Player.cpp,,,,,,,,,
+F03650,Native\Engine\src\Movie\Intro\Player.cpp,x,x,x,x,x,x,verify:VR-MOVIE-INTRO-PLAYER-SLICE,71e132a5d5889f1ba41834ab64ee45c25890a78e,"#46 slice: VS::Movie::Intro::{Start, Stop, StopAfterAudioTail, Play} drive an abstract Intro::Host in the legacy-free Movie/Intro/Player.cpp; Movie/Intro/PlayerLive.cpp binds VSync, the controllers, ClearImage, the native movie player, the display environment and the title globals; the copier routes the TitleMenu callers to the StartLive/StopLive/StopLiveAfterAudioTail/PlayLive binding"
+F03651,Native\Engine\src\Movie\Intro\Player.cpp,x,x,x,x,x,x,verify:VR-MOVIE-INTRO-PLAYER-SLICE,71e132a5d5889f1ba41834ab64ee45c25890a78e,"#46 slice: VS::Movie::Intro::{Start, Stop, StopAfterAudioTail, Play} drive an abstract Intro::Host in the legacy-free Movie/Intro/Player.cpp; Movie/Intro/PlayerLive.cpp binds VSync, the controllers, ClearImage, the native movie player, the display environment and the title globals; the copier routes the TitleMenu callers to the StartLive/StopLive/StopLiveAfterAudioTail/PlayLive binding"
+F03652,Native\Engine\src\Movie\Intro\Player.cpp,x,x,x,x,x,x,verify:VR-MOVIE-INTRO-PLAYER-SLICE,71e132a5d5889f1ba41834ab64ee45c25890a78e,"#46 slice: VS::Movie::Intro::{Start, Stop, StopAfterAudioTail, Play} drive an abstract Intro::Host in the legacy-free Movie/Intro/Player.cpp; Movie/Intro/PlayerLive.cpp binds VSync, the controllers, ClearImage, the native movie player, the display environment and the title globals; the copier routes the TitleMenu callers to the StartLive/StopLive/StopLiveAfterAudioTail/PlayLive binding"
+F03653,Native\Engine\src\Movie\Intro\Player.cpp,x,x,x,x,x,x,verify:VR-MOVIE-INTRO-PLAYER-SLICE,71e132a5d5889f1ba41834ab64ee45c25890a78e,"#46 slice: VS::Movie::Intro::{Start, Stop, StopAfterAudioTail, Play} drive an abstract Intro::Host in the legacy-free Movie/Intro/Player.cpp; Movie/Intro/PlayerLive.cpp binds VSync, the controllers, ClearImage, the native movie player, the display environment and the title globals; the copier routes the TitleMenu callers to the StartLive/StopLive/StopLiveAfterAudioTail/PlayLive binding"
 F03675,Native\Engine\src\Render\TextureRegionDraw.cpp,,,,,,,,,
 F03677,Native\Engine\src\Render\TextureRegionDraw.cpp,,,,,,,,,
 F03678,Native\Engine\src\Render\TextureRegionDraw.cpp,,,,,,,,,

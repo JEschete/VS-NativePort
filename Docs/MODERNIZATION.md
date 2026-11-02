@@ -29,25 +29,25 @@ architecture changes rather than per-function work, so this ledger is what track
 | 26: #59 Event VM results and execution | 0 | 236 | 3,830 | 59 | 178 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 21 | 374 | 6,505 | 198 | 200 | 0 |
 | 31: #61 Typed effects and playback sessions | 2 | 761 | 11,774 | 180 | 587 | 0 |
-| 33: #53 Movie sessions and A/V clocks | 4 | 7 | 216 | 0 | 11 | 0 |
+| 33: #53 Movie sessions and A/V clocks | 0 | 7 | 132 | 4 | 7 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 209 | 3480 | 107,617 | 1600 | 2160 | 0 |
+| **Total** | 205 | 3480 | 107,533 | 1604 | 2156 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 71 |
-| todo | 3,689 |
+| done | 75 |
+| todo | 3,685 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 164 | 1,896 |
+| Called from generated code | 160 | 1,896 |
 | Referenced by the original-address module table | 159 | 2,120 |
-| Calls an SDK shim | 9 | 461 |
+| Calls an SDK shim | 6 | 461 |
 | Signature uses SDK integer types or `void*` | 38 | 862 |
-| Compiled with relaxed settings | 82 | 3,478 |
+| Compiled with relaxed settings | 78 | 3,478 |
 
-Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 164 of 209 open owned functions have generated callers.
+Function bodies: 3,222 found, 14 macro aliases, 28 templates with 493 instances, 3 not located. 160 of 205 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 
