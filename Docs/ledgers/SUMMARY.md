@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 88 | 14 (`wip`) | 4,105 |
-| `cpp` | 88 | 193 (`wip`) | 3,926 |
+| `modernized` | 89 | 14 (`wip`) | 4,104 |
+| `cpp` | 89 | 192 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 215 |
-| `vs_namespace` | 88 |
-| `typed_interface` | 88 |
-| `no_bridge` | 88 |
-| `strict_clean` | 215 |
-| `behavior_evidence` | 88 |
+| `source_cpp` | 216 |
+| `vs_namespace` | 89 |
+| `typed_interface` | 89 |
+| `no_bridge` | 89 |
+| `strict_clean` | 216 |
+| `behavior_evidence` | 89 |
 
-Promotion records: 281; derived `cpp=x`: 88, `cpp=wip`: 193. Verification records: 82; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 89, `cpp=wip`: 192. Verification records: 83; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -207,6 +207,8 @@ The thirty-sixth is the results texture-region draws (F03675, F03676, F03677, F0
 and the copied ENDING and MENUF results callers use span-checked live bindings; the old Render_DrawTexture* C entry points, Render_BlendFlashComponent and TextureRegionDraw.h are retired, and the congratulations tint regains the third color it reads (#259).
 The thirty-seventh is the actor appearance transitions (F00979, F00980): VS::Actors::UpdatePalettePulse and UpdateActorAppearanceTransition advance typed pulse and transition state for an AppearanceSubject,
 and the copied ModelRendering callers use bounded live actor and gimmick bindings; the old Actors_Update*/Field_UpdateGimmickAppearanceTransition entry points and AppearanceTransition.h are retired, and actor slots 10-16 no longer read past the weapon-model table (#260).
+The thirty-eighth is the container save submenu (F02776): VS::Menu::Files::UpdateContainerSave advances a typed ContainerSaveState over a ContainerSaveHost,
+and the copied main menu calls its live binding with the submenu byte; Menu_Files_UpdateContainerSave, NativeContainer.h and the u_char cast adaptation are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

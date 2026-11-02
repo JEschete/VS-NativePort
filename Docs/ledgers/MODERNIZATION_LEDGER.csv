@@ -2771,7 +2771,7 @@ F02772,Menu_Files_UpdateGameOver,Menu::Files::UpdateGameOver,Native\Game\src\Men
 F02773,Menu_Files_UpdateContainerConfirmation,Menu::Files::UpdateContainerConfirmation,Native\Game\src\Menu\Files.cpp,generated,todo,60,34,70,relaxed,found,x,,,,,,,0,1,0,,,,,no,no,0,,characterize-first,
 F02774,Menu_Files_ContainerIndexSection,Menu::Files::ContainerIndexSection,Native\Game\src\Menu\Files.cpp,generated,todo,60,34,11,relaxed,found,x,,,,,,,0,0,0,,,x,,no,no,0,,characterize-first,
 F02775,Menu_Files_CopySelectedContainerItems,Menu::Files::CopySelectedContainerItems,Native\Game\src\Menu\Files.cpp,generated,todo,60,34,117,relaxed,found,x,,,,,,,0,1,0,,,,,no,no,0,,characterize-first,
-F02776,Menu_Files_UpdateContainerSave,Menu::Files::UpdateContainerSave,Native\Game\src\Save\NativeContainer.cpp,owned,todo,45,3,208,relaxed,found,x,,,,,,,1,0,1,,,x,,yes,no,9,VR-F02776,recorded,
+F02776,VS::Menu::Files::UpdateContainerSave,Menu::Files::UpdateContainerSave,Native\Game\src\Save\NativeContainer.cpp,owned,done,45,3,208,strict,found,x,x,x,x,x,x,x,0,1,1,,,,,yes,no,9,VR-F02776,recorded,
 F02777,Menu_Files_DrawPlayTime,Menu::Files::DrawPlayTime,Native\Game\src\Menu\Files.cpp,generated,todo,60,34,24,relaxed,found,x,,,,,,,0,0,1,,,,scratchpad,yes,no,100,,executed,
 F02778,Menu_Files_UpdateDataMenu,Menu::Files::UpdateDataMenu,Native\Game\src\Menu\Files.cpp,generated,todo,60,34,159,relaxed,found,x,,,,,,,1,0,0,,ClearImage,x,,no,no,0,,characterize-first,
 F02779,Menu_Rename_EditNameAtCursor,Menu::Rename::EditNameAtCursor,Native\Game\src\Menu\Rename.cpp,generated,todo,60,34,56,relaxed,found,x,,,,,,,0,0,0,,,,,no,no,0,,characterize-first,
