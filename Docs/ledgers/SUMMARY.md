@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 103 | 14 (`wip`) | 4,090 |
-| `cpp` | 103 | 178 (`wip`) | 3,926 |
+| `modernized` | 108 | 14 (`wip`) | 4,085 |
+| `cpp` | 108 | 173 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 230 |
-| `vs_namespace` | 103 |
-| `typed_interface` | 103 |
-| `no_bridge` | 103 |
-| `strict_clean` | 230 |
-| `behavior_evidence` | 103 |
+| `source_cpp` | 235 |
+| `vs_namespace` | 108 |
+| `typed_interface` | 108 |
+| `no_bridge` | 108 |
+| `strict_clean` | 235 |
+| `behavior_evidence` | 108 |
 
-Promotion records: 281; derived `cpp=x`: 103, `cpp=wip`: 178. Verification records: 88; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 108, `cpp=wip`: 173. Verification records: 89; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -219,6 +219,8 @@ The forty-second is the save menu assets (F02737, F02738, F03604, F03605): VS::S
 so a release during a pending read keeps the buffer and ready steps no longer touch a released request (#264); the four Save_MemoryCard_ symbols and MenuAssets.h are retired.
 The forty-third is the sprite packets (F04190-F04193): VS::Render builds the six-word sprite packet over an abstract queue and loads the view matrix through an abstract target,
 so a packet past the frame primitive buffer is refused with discard storage instead of overrunning it (#265); the four Render_ sprite symbols and Sprites.h are retired.
+The forty-fourth is the native session transitions (F03438, F03439, F03576, F04200, F04201): VS::Boot decides session begin/end and title/game-loop transitions over abstract hosts,
+so a transition requested with no session or while a stack-bound scope holds a barrier is refused before it can strand globals on a dead frame (#266); the five Boot_ session symbols, Boot_RunSessionLoop and Session.h are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

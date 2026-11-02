@@ -78,7 +78,7 @@ snapshot, not a fresh build/test result. Refresh it when closing a package; do n
 
 | Area | Implemented foundation | Still not established by that foundation |
 |---|---|---|
-| Execution/platform | Native `Boot_RunGame` on a Windows fiber; SDL event loop and crash diagnostics | Explicit module lifecycle, full title/gameplay parity |
+| Execution/platform | Native `VS::Boot::RunLiveGame` on a Windows fiber; SDL event loop and crash diagnostics | Explicit module lifecycle, full title/gameplay parity |
 | Graphics | GP0/ordering-table compatibility renderer and SDL GPU image presentation | Typed native draw queue, native geometry/material path |
 | Input/verification | Native pad state, legacy receive-buffer adapter, `--press`/`--scripted`, bounded captures | Complete recording/replay, canonical state comparison, input-adapter retirement |
 | Content | Extracted regular files, LBA manifest, module data/pointer initialization | Fully validated relocations, typed/versioned assets, disc-independent startup |
@@ -467,7 +467,7 @@ Confirm that the ledger percentages match §1, that the CI lint is clean and tha
 
 ### Phase 1b status (as built, 2026-10-17)
 
-The copied boot code (`Boot_RunGame` = `vs_main_exec`) runs unchanged on a game fiber (`Platform::GameFiber`):
+The boot code (`VS::Boot::RunLiveGame` over `VS::Boot::RunGame` = `vs_main_exec`) runs on a game fiber (`Platform::GameFiber`):
 `VSync` hands control to the host loop, which feeds the pad, resumes the game once per tick and presents the page
 space. Reached and compared with a DuckStation reference capture of each screen: NOW LOADING, the publisher and
 developer logos, the intro movie with its soundtrack (the opening music runs on under the title screen to tick
