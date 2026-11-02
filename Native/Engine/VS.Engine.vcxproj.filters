@@ -582,9 +582,9 @@
     <ClCompile Include="src\Render\RoomDraw.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\RoomDraw.h">
+    <ClCompile Include="src\Render\RoomDrawLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\RoomLighting.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -820,6 +820,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\PageSpace.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\RoomDraw.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\RoomDrawLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\RoomLighting.hpp">

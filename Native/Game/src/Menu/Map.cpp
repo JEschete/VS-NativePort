@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
@@ -1058,8 +1058,8 @@ void Menu_Map_DrawVisitedRooms(Field_MapScene* scene)
     tmpOffset.x = Menu_Map_geomOffsetX + 0x90;
     tmpOffset.y = Menu_Map_geomOffsetY + 0x88;
 
-    Render_GetProjectionScreenOffset(&prevOffset);
-    Render_SetProjectionScreenOffset(&tmpOffset);
+    prevOffset = VS::Render::GetLiveProjectionScreenOffset();
+    VS::Render::SetLiveProjectionScreenOffset(tmpOffset);
 
     Menu_Map_mapLabelCount = 0;
     room_count_address = &scene->roomCount;
@@ -1074,7 +1074,7 @@ void Menu_Map_DrawVisitedRooms(Field_MapScene* scene)
     }
 
     Menu_Map_DrawLabels();
-    Render_SetProjectionScreenOffset(&prevOffset);
+    VS::Render::SetLiveProjectionScreenOffset(prevOffset);
 }
 
 // decomp: MENU5.PRG _renderRoom (src/MENU/MENU5.PRG/4D8.c:1112)

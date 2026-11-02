@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Items/TreasureChests.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/Textures.h"
 
 // decomp: D_80068C1C (D_80068C1C@BATTLE/BATTLE.PRG)
@@ -239,13 +239,13 @@ void Field_DrawRoomBackground(VECTOR* background_rotation_override)
         Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
         Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
         if (((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.farClip != ONE) {
-            Render_BuildScaleCompensatedRoomView(&position, angles, &matrix);
+            VS::Render::BuildLiveScaleCompensatedRoomView(position, *angles, matrix);
         } else {
-            Render_BuildRoomGeometryViewMatrix(&position, angles, &matrix);
+            VS::Render::BuildLiveRoomGeometryViewMatrix(position, *angles, matrix);
         }
         Core_Gte_SetRotMatrix(&matrix);
         Core_Gte_SetTransMatrix(&matrix);
-        Render_DrawSkyDome(Field_legacyBackgroundGradientPackets);
+        VS::Render::DrawLiveSkyDome(Field_legacyBackgroundGradientPackets, sizeof Field_legacyBackgroundGradientPackets);
     }
 }
 

@@ -1,10 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Render/Camera.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800F4910 (D_800F4910@BATTLE/BATTLE.PRG)
@@ -76,7 +77,7 @@ void Render_BuildCameraViewMatrix(void)
 void Render_SetCameraNearClip(int near_clip)
 {
     Render_nearClip = near_clip;
-    Render_SetRoomPolygonNearClip(near_clip);
+    VS::Render::SetRoomPolygonNearClip(VS::Render::LiveRoomClipState(), near_clip);
 }
 
 // decomp: BATTLE.PRG vs_battle_setProjectionDistance (src/BATTLE/BATTLE.PRG/146C.c:9047)
@@ -101,7 +102,7 @@ void Render_SetCameraFarClip(int farClip, int preserve_texture_lod)
         } else if (farClip < 0) {
             farClip = 0;
         }
-        Render_SetRoomTextureLodDepth(farClip);
+        VS::Render::SetRoomTextureLodDepth(VS::Render::LiveRoomClipState(), farClip);
     }
 }
 

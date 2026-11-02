@@ -1,963 +1,1120 @@
 // Hand-maintained (tools/port/owned.csv).
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+// MPD room geometry drawing (BATTLE.PRG 2EA3C.s) over bounded spans. The GTE
+// and the frame's ordering table are reached only through RoomTransformer and
+// RoomPacketQueue; RoomDrawLive.cpp binds both to the running frame.
+#include "Render/RoomDraw.hpp"
 
-#include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Core/Diagnostics.h"
-#include "Core/Gte.h"
-#include "Field/Room.h"
-#include "Legacy/Psx.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/Render.h"
-#include "Render/RoomDraw.h"
-#include "Render/UiPrimitives.h"
+#include <algorithm>
+#include <climits>
+#include <cstring>
+#include <optional>
 
-enum {
-  kMaximumGeometryGroups = 4096,
-  kRoomTriangleBytes = 32,
-  kRoomQuadBytes = 40,
-  kFixedFractionBits = 12,
-  kFixedOneSquared = 1 << (2 * kFixedFractionBits),
-  kPackedCoordinateBits = sizeof(int16_t) * CHAR_BIT,
-  kViewportWidth = 320,
-  kViewportHeight = 224,
-  kDrawHeight = 240,
-  kTriangleCorners = kRoomTriangleVertexCount,
-  kQuadCorners = kRoomQuadVertexCount,
-  kQuadCommandFlag = 8,
-  kVertexPacketWords = 3,
-  kLastOrderingSlot = 2047,
-  kPrimitiveBufferBytes = 0x20000,
-  kRoomBatchBytes = 0x10000,
-  kMinimumSubdivisionArea = 512,
-  kSkyVertexCount = 34,
-  kSkyFaceCount = 64,
-  kSkyVertexBytes = 12,
-  kSkyFaceBytes = 4,
-  kColorMask = 0xFFFFFF,
-  kRoomCommandOffset = 15,
-  kPacketCommandMask = 0xFE,
-  kPacketCommandShift = 3 * CHAR_BIT,
-  kPalettePacketWord = 3,
-  kPagePacketWord = 6,
-  kDefaultNearDepth = 8,
-  kDefaultLodDepth = 512,
-  kSkipViewUpdateFlag = 0x100,
-  kCameraFacingFlag = 0x400,
-  kSkipGeometryFlags = 0x1100,
-  kAlternatePassShift = 15,
-  kProjectedCoordinateBound = 1024,
-  kTriangleSubdivisionCount = 7,
-  kRecursiveSubdivisionCount = 4,
-  kClutRecordOffset = 26,
-  kPageRecordOffset = 30,
-  kSkyGouraudCommand = 0x30000000,
-  kSkyPacketWords = sizeof(POLY_G3) / sizeof(u_long),
-  kTintChannels = 3,
-  kTintChannelFractionBits = 4,
-  kTintLuminanceRed = 5,
-  kTintLuminanceGreen = 9,
-  kTintLuminanceBlue = 2,
-  kTintOffsetScale = 4,
-  kTintPaddingFlag = 2,
-  kTintPaddingWords = 2
-};
+namespace VS::Render {
+namespace {
+namespace Math = VS::Core::Math;
 
-static uint32_t ClampTintChannel(int64_t value) {
-  if (value < 0) return 0;
-  if (value > UINT8_MAX) return UINT8_MAX;
-  return static_cast<uint32_t>(value);
+using TriangleVertices = std::array<RoomVertex, kRoomTriangleCorners>;
+using QuadVertices = std::array<RoomVertex, kRoomQuadCorners>;
+
+constexpr std::size_t kGroupCountBytes = sizeof(std::uint32_t);
+constexpr std::size_t kPolygonCountBytes = 2 * sizeof(std::uint32_t);
+constexpr std::size_t kVertexPacketWords = 3;
+constexpr int kFixedFractionBits = 12;
+constexpr std::int32_t kFixedOneSquared = 1 << (2 * kFixedFractionBits);
+constexpr int kHalfwordBits = 16;
+constexpr std::uint32_t kColorMask = 0xFFFFFF;
+
+// _mpdGeometryHeader group fields (146C.h:31).
+constexpr std::size_t kGroupBoundsOffset = 4;
+constexpr std::size_t kGroupAnglesOffset = 16;
+constexpr std::size_t kGroupPolygonOffset = 28;
+constexpr std::size_t kGroupRotationOffset = 32;
+constexpr std::size_t kGroupTranslationOffset = 52;
+static_assert(kGroupTranslationOffset + kRoomAxes * sizeof(std::int32_t) ==
+              kRoomGroupRecordBytes);
+
+// Triangle and quad record fields (2EA3C.s:104-500). The quad's fourth
+// corner delta and colour follow the triangle-sized prefix.
+constexpr std::size_t kCommandRecordOffset = 15;
+constexpr std::size_t kClutRecordOffset = 26;
+constexpr std::size_t kPageRecordOffset = 30;
+constexpr std::size_t kQuadDeltaRecordOffset = kRoomTriangleRecordBytes;
+using CornerOffsets = std::array<std::size_t, kRoomQuadCorners>;
+constexpr CornerOffsets kColorRecordOffsets{12, 16, 20, 36};
+constexpr CornerOffsets kURecordOffsets{24, 28, 19, 35};
+constexpr CornerOffsets kVRecordOffsets{25, 29, 23, 39};
+constexpr std::size_t kFourthCorner = kRoomQuadCorners - 1;
+
+constexpr std::uint32_t kFullPrecisionFlag = 0x800;
+constexpr std::uint32_t kPackedCoordinateShift = 3;
+constexpr std::uint32_t kCoordinateShiftMask = 31;
+constexpr std::uint32_t kNoBackfaceCullCommand = 1;
+constexpr std::uint32_t kQuadCommandFlag = 8;
+constexpr std::uint32_t kPacketCommandMask = 0xFE;
+constexpr int kPacketCommandShift = 24;
+constexpr std::size_t kPalettePacketWord = 3;
+constexpr std::size_t kPagePacketWord = 6;
+constexpr std::uint32_t kLowDetailUvMask = 0x7F7F;
+constexpr std::uint32_t kMinimumSubdivisionArea = 512;
+constexpr std::int32_t kProjectedCoordinateBound = 1024;
+constexpr std::uint32_t kSubdivisionMode = 1;
+constexpr int kSubdivisionLevelShift = 13;
+constexpr std::uint32_t kSubdivisionLevelMask = 3;
+constexpr int kSubdivisionDepthShift = 7;
+constexpr std::size_t kRecursiveTriangleChildren = 4;
+
+constexpr std::uint32_t kSkipViewUpdateFlag = 0x100;
+constexpr std::uint32_t kCameraFacingFlag = 0x400;
+constexpr std::uint32_t kHiddenGroupFlags = 0x1100;
+constexpr int kAlternatePassShift = 15;
+constexpr std::uint32_t kFacingMask = 0xFF;
+
+constexpr std::size_t kSkyColorOffset = 8;
+constexpr std::int32_t kSkyDrawHeight = 240;
+constexpr std::int64_t kSkyCenterX = kRoomViewportWidth / 2;
+constexpr std::int64_t kSkyCenterY = kSkyDrawHeight / 2;
+constexpr std::uint32_t kSkyGouraudCommand = 0x30000000;
+
+constexpr std::size_t kTintChannels = 3;
+constexpr int kTintChannelFractionBits = 4;
+constexpr std::int64_t kTintLuminanceRed = 5;
+constexpr std::int64_t kTintLuminanceGreen = 9;
+constexpr std::int64_t kTintLuminanceBlue = 2;
+constexpr int kTintOffsetScale = 4;
+constexpr std::uint32_t kTintPaddingFlag = 2;
+constexpr std::size_t kTintPaddingWords = 2;
+constexpr int kPacketLengthShift = 24;
+
+template <typename T>
+[[nodiscard]] T Read(std::span<const std::byte> bytes, std::size_t offset) {
+  T value{};
+  std::memcpy(&value, bytes.subspan(offset, sizeof(T)).data(), sizeof(T));
+  return value;
 }
 
-// decomp: func_80098E50 (src/BATTLE/BATTLE.PRG/2EA3C.s:2018).
-// Original t6/t8/t0-t2 operands are explicit native values, not saved
-// registers.
-uint32_t Render_TintRoomPrimitiveColor(uint32_t color, int16_t strength,
-                                       int16_t red_offset, int16_t green_offset,
-                                       int16_t blue_offset) {
-  const int16_t offsets[kTintChannels] = {red_offset, green_offset,
-                                          blue_offset};
-  const int64_t luminance =
-      (color & UINT8_MAX) * kTintLuminanceRed +
-      ((color >> CHAR_BIT) & UINT8_MAX) * kTintLuminanceGreen +
-      ((color >> (2 * CHAR_BIT)) & UINT8_MAX) * kTintLuminanceBlue;
-  const int64_t channel_scale = 1 << kTintChannelFractionBits;
-  const int64_t blend_scale =
-      1 << (kFixedFractionBits + kTintChannelFractionBits);
-  uint32_t result = color & ~static_cast<uint32_t>(kColorMask);
-  for (unsigned channel = 0; channel < kTintChannels; ++channel) {
-    const unsigned shift = channel * CHAR_BIT;
-    int64_t value = (color >> shift) & UINT8_MAX;
-    if (strength != 0) {
-      const int64_t numerator =
-          value * blend_scale + strength * (luminance - value * channel_scale);
-      value = ClampTintChannel(numerator <= 0 ? 0 : numerator / blend_scale);
+template <typename T>
+void Write(std::span<std::byte> bytes, std::size_t offset, const T& value) {
+  std::memcpy(bytes.subspan(offset, sizeof(T)).data(), &value, sizeof(T));
+}
+
+[[nodiscard]] std::uint32_t ReadByte(std::span<const std::byte> bytes,
+                                     std::size_t offset) {
+  return std::to_integer<std::uint32_t>(bytes[offset]);
+}
+
+[[nodiscard]] RoomPosition ReadPosition(std::span<const std::byte> bytes,
+                                        std::size_t offset) {
+  return {Read<std::int16_t>(bytes, offset),
+          Read<std::int16_t>(bytes, offset + sizeof(std::int16_t)),
+          Read<std::int16_t>(bytes, offset + 2 * sizeof(std::int16_t))};
+}
+
+[[nodiscard]] std::int32_t ScreenX(std::int32_t screen) {
+  return Math::WrapSigned16(static_cast<std::uint32_t>(screen));
+}
+
+[[nodiscard]] std::int32_t ScreenY(std::int32_t screen) {
+  return Math::WrapSigned16(static_cast<std::uint32_t>(screen) >>
+                            kHalfwordBits);
+}
+
+[[nodiscard]] std::int32_t Negate(std::int32_t value) {
+  return static_cast<std::int32_t>(0U - static_cast<std::uint32_t>(value));
+}
+
+// The stored group count when every group record fits in `geometry`.
+[[nodiscard]] std::optional<std::size_t> GroupCount(
+    std::span<const std::byte> geometry) {
+  if (geometry.size() < kGroupCountBytes) {
+    return std::nullopt;
+  }
+  const std::size_t count = Read<std::uint32_t>(geometry, 0);
+  if (count > kRoomGroupLimit ||
+      (geometry.size() - kGroupCountBytes) / kRoomGroupRecordBytes < count) {
+    return std::nullopt;
+  }
+  return count;
+}
+
+// Group `index`'s record, or nothing when it is past the stored count or
+// the span.
+[[nodiscard]] std::optional<std::size_t> GroupRecordOffset(
+    std::span<const std::byte> geometry, std::size_t index) {
+  if (geometry.size() < kGroupCountBytes ||
+      index >= Read<std::uint32_t>(geometry, 0) || index >= kRoomGroupLimit) {
+    return std::nullopt;
+  }
+  const std::size_t offset = kGroupCountBytes + index * kRoomGroupRecordBytes;
+  if (offset > geometry.size() ||
+      geometry.size() - offset < kRoomGroupRecordBytes) {
+    return std::nullopt;
+  }
+  return offset;
+}
+
+struct PolygonCounts {
+  std::uint32_t triangles = 0;
+  std::uint32_t quads = 0;
+};
+
+// The two counts at the start of `polygons` when every record they claim
+// fits after them.
+[[nodiscard]] std::optional<PolygonCounts> ReadPolygonCounts(
+    std::span<const std::byte> polygons) {
+  if (polygons.size() < kPolygonCountBytes) {
+    return std::nullopt;
+  }
+  const PolygonCounts counts{
+      Read<std::uint32_t>(polygons, 0),
+      Read<std::uint32_t>(polygons, sizeof(std::uint32_t))};
+  const std::uint64_t bytes =
+      std::uint64_t{counts.triangles} * kRoomTriangleRecordBytes +
+      std::uint64_t{counts.quads} * kRoomQuadRecordBytes;
+  if (bytes > polygons.size() - kPolygonCountBytes) {
+    return std::nullopt;
+  }
+  return counts;
+}
+
+[[nodiscard]] RoomView ReadView(std::span<const std::byte> record) {
+  RoomView view;
+  std::size_t offset = kGroupRotationOffset;
+  for (auto& row : view.rotation.m) {
+    for (auto& element : row) {
+      element = Read<std::int16_t>(record, offset);
+      offset += sizeof(std::int16_t);
     }
-    result |= ClampTintChannel(value + offsets[channel]) << shift;
+  }
+  constexpr std::size_t kWord = sizeof(std::int32_t);
+  view.translation = {
+      Read<std::int32_t>(record, kGroupTranslationOffset),
+      Read<std::int32_t>(record, kGroupTranslationOffset + kWord),
+      Read<std::int32_t>(record, kGroupTranslationOffset + 2 * kWord)};
+  return view;
+}
+
+void WriteView(std::span<std::byte> record, const RoomView& view) {
+  std::size_t offset = kGroupRotationOffset;
+  for (const auto& row : view.rotation.m) {
+    for (const std::int16_t element : row) {
+      Write(record, offset, element);
+      offset += sizeof(std::int16_t);
+    }
+  }
+  constexpr std::size_t kWord = sizeof(std::int32_t);
+  Write(record, kGroupTranslationOffset, view.translation.x);
+  Write(record, kGroupTranslationOffset + kWord, view.translation.y);
+  Write(record, kGroupTranslationOffset + 2 * kWord, view.translation.z);
+}
+
+// decomp: BATTLE.PRG func_800985AC / func_80098648 (2EA3C.s:1383, 1429).
+[[nodiscard]] RoomView BuildRoomView(const RoomCamera& camera,
+                                     const RoomPosition& position,
+                                     const Math::Angles3& angles,
+                                     bool inverse_scale) {
+  Math::Mat3 view = camera.view.rotation;
+  if (inverse_scale) {
+    if (camera.scale <= 0) {
+      return RoomView{};
+    }
+    Math::Mat3 inverse{};
+    const auto diagonal =
+        static_cast<std::int16_t>(kFixedOneSquared / camera.scale);
+    inverse.m[0][0] = inverse.m[1][1] = inverse.m[2][2] = diagonal;
+    view = Math::MultiplyMatrixIntoRight(inverse, view);
+  }
+  const Math::Angles3 rotation{
+      Math::WrapSigned16(static_cast<std::uint32_t>(angles.x)),
+      Math::WrapSigned16(static_cast<std::uint32_t>(angles.y)),
+      Math::WrapSigned16(static_cast<std::uint32_t>(angles.z))};
+  RoomView output;
+  output.rotation = Math::MultiplyMatrixIntoRight(
+      view, Math::BuildEulerRotationMatrix(rotation));
+  const std::array<std::int64_t, kRoomAxes> coordinates{position.x, position.y,
+                                                        position.z};
+  const std::array<std::int64_t, kRoomAxes> origin{camera.view.translation.x,
+                                                   camera.view.translation.y,
+                                                   camera.view.translation.z};
+  std::array<std::int32_t, kRoomAxes> translated{};
+  for (std::size_t row = 0; row < kRoomAxes; ++row) {
+    std::int64_t sum = 0;
+    for (std::size_t axis = 0; axis < kRoomAxes; ++axis) {
+      sum += std::int64_t{view.m[row][axis]} * coordinates[axis];
+    }
+    translated[row] =
+        static_cast<std::int32_t>((sum >> kFixedFractionBits) + origin[row]);
+  }
+  output.translation = {translated[0], translated[1], translated[2]};
+  return output;
+}
+
+// The rotation a camera-facing group (flag 0x400) draws with: the camera
+// roll in the screen plane, scaled by its zoom (2EA3C.s:1265).
+[[nodiscard]] Math::Mat3 CameraFacingRotation(const RoomCamera& camera) {
+  const std::int32_t sine =
+      Math::MultiplyFixed(Math::Sine(camera.roll), camera.scale);
+  const std::int32_t cosine =
+      Math::MultiplyFixed(Math::Cosine(camera.roll), camera.scale);
+  Math::Mat3 rotation{};
+  rotation.m[0][0] = rotation.m[1][1] =
+      Math::WrapSigned16(static_cast<std::uint32_t>(cosine));
+  rotation.m[0][1] =
+      Math::WrapSigned16(static_cast<std::uint32_t>(Negate(sine)));
+  rotation.m[1][0] = Math::WrapSigned16(static_cast<std::uint32_t>(sine));
+  rotation.m[2][2] =
+      Math::WrapSigned16(static_cast<std::uint32_t>(camera.scale));
+  return rotation;
+}
+
+// A polygon's corners after projection, in packet order.
+struct ProjectedPolygon {
+  QuadVertices vertices{};
+  std::array<std::int32_t, kRoomQuadCorners> screens{};
+  std::size_t corners = 0;
+  // The deepest corner.
+  std::int32_t depth = 0;
+  RoomScreenBounds bounds{kProjectedCoordinateBound, kProjectedCoordinateBound,
+                          -kProjectedCoordinateBound,
+                          -kProjectedCoordinateBound};
+};
+
+void AddCorner(ProjectedPolygon& polygon, const RoomVertex& vertex,
+               const RoomProjectedPoint& point) {
+  const std::size_t index = polygon.corners++;
+  polygon.vertices[index] = vertex;
+  polygon.screens[index] = point.screen;
+  polygon.depth = std::max(polygon.depth, point.depth);
+  const std::int32_t x = ScreenX(point.screen);
+  const std::int32_t y = ScreenY(point.screen);
+  polygon.bounds.left = std::min(polygon.bounds.left, x);
+  polygon.bounds.right = std::max(polygon.bounds.right, x);
+  polygon.bounds.top = std::min(polygon.bounds.top, y);
+  polygon.bounds.bottom = std::max(polygon.bounds.bottom, y);
+}
+
+// The record's corners decoded and projected, with the winding of the first
+// three and the deepest of those three.
+struct RecordProjection {
+  ProjectedPolygon polygon;
+  std::int32_t winding = 0;
+  std::int32_t subdivision_depth = 0;
+};
+
+// The quad's fourth corner: the first corner plus a signed byte delta per
+// axis at the packed coordinate scale.
+[[nodiscard]] RoomPosition QuadCorner(std::span<const std::byte> record,
+                                      const RoomPosition& origin,
+                                      std::uint32_t shift) {
+  const std::int32_t scale = 1 << shift;
+  const auto axis = [&](std::size_t index, std::int16_t base) {
+    const auto delta =
+        Read<std::int8_t>(record, kQuadDeltaRecordOffset + index);
+    return Math::WrapSigned16(static_cast<std::uint32_t>(base + delta * scale));
+  };
+  return {axis(0, origin.x), axis(1, origin.y), axis(2, origin.z)};
+}
+
+[[nodiscard]] std::uint32_t ReadColor(std::span<const std::byte> record,
+                                      std::size_t offset) {
+  return ReadByte(record, offset) | ReadByte(record, offset + 1) << CHAR_BIT |
+         ReadByte(record, offset + 2) << (2 * CHAR_BIT);
+}
+
+// decomp: BATTLE.PRG func_80097388 (2EA3C.s:104-500), the per-record
+// decode and projection ahead of the cull tests.
+[[nodiscard]] RecordProjection ProjectRecord(std::span<const std::byte> record,
+                                             std::size_t corners,
+                                             std::uint32_t flags,
+                                             RoomTransformer& transformer) {
+  const std::uint32_t shift =
+      (flags & kFullPrecisionFlag) != 0 ? 0 : kPackedCoordinateShift;
+  const RoomTriangleProjection triangle = ProjectAndDecodeRoomPolygon(
+      record.first<kRoomCoordinateBytes>(), shift, transformer);
+  RecordProjection projection;
+  projection.winding = triangle.winding;
+  for (std::size_t index = 0; index < corners; ++index) {
+    RoomVertex vertex;
+    vertex.color = ReadColor(record, kColorRecordOffsets[index]);
+    vertex.uv = static_cast<std::uint16_t>(
+        ReadByte(record, kURecordOffsets[index]) |
+        ReadByte(record, kVRecordOffsets[index]) << CHAR_BIT);
+    RoomProjectedPoint point;
+    if (index < kRoomTriangleCorners) {
+      vertex.position = triangle.positions[index];
+      point = triangle.points[index];
+    } else {
+      vertex.position = QuadCorner(record, triangle.positions[0], shift);
+      point = transformer.Project(vertex.position);
+    }
+    AddCorner(projection.polygon, vertex, point);
+    if (index == kRoomTriangleCorners - 1) {
+      projection.subdivision_depth = projection.polygon.depth;
+    }
+  }
+  return projection;
+}
+
+// Adds `part` to `total`; false once a part stopped on a full queue.
+bool Accumulate(RoomPolygonResult& total, const RoomPolygonResult& part) {
+  total.emitted += part.emitted;
+  total.status = part.status;
+  return part.status == RoomDrawStatus::kDrawn;
+}
+
+class RoomPolygonEmitter {
+ public:
+  RoomPolygonEmitter(const RoomClipState& clip, RoomTransformer& transformer,
+                     RoomPacketQueue& queue)
+      : clip_(clip), transformer_(transformer), queue_(queue) {}
+
+  RoomPolygonResult Queue(std::span<const std::byte> record,
+                          std::size_t corners, std::uint32_t flags,
+                          std::int32_t mode);
+  RoomPolygonResult SubdivideTriangle(const TriangleVertices& vertices,
+                                      int levels,
+                                      const RoomPolygonMaterial& material);
+  RoomPolygonResult SubdivideQuad(const QuadVertices& vertices, int levels,
+                                  const RoomPolygonMaterial& material);
+
+ private:
+  RoomPolygonResult EmitLeaf(std::span<const RoomVertex> vertices,
+                             const RoomPolygonMaterial& material);
+  RoomPolygonResult Write(const ProjectedPolygon& polygon,
+                          const RoomPolygonMaterial& material, bool low_detail);
+
+  const RoomClipState& clip_;
+  RoomTransformer& transformer_;
+  RoomPacketQueue& queue_;
+};
+
+// The packet write and link shared by whole and subdivided polygons
+// (2EA3C.s:395-470): Gouraud-textured, the half-resolution page past the
+// level-of-detail depth.
+RoomPolygonResult RoomPolygonEmitter::Write(const ProjectedPolygon& polygon,
+                                            const RoomPolygonMaterial& material,
+                                            bool low_detail) {
+  std::array<std::uint32_t, kRoomQuadPacketWords> packet{};
+  auto page = static_cast<std::uint16_t>(material.page);
+  if (low_detail) {
+    page = static_cast<std::uint16_t>(page - 1U);
+  }
+  for (std::size_t index = 0; index < polygon.corners; ++index) {
+    const RoomVertex& vertex = polygon.vertices[index];
+    const std::size_t word = 1 + index * kVertexPacketWords;
+    packet[word] = vertex.color & kColorMask;
+    packet[word + 1] = static_cast<std::uint32_t>(polygon.screens[index]);
+    packet[word + 2] = low_detail
+                           ? (std::uint32_t{vertex.uv} >> 1) & kLowDetailUvMask
+                           : std::uint32_t{vertex.uv};
+  }
+  packet[1] |= (material.command & kPacketCommandMask) << kPacketCommandShift;
+  packet[kPalettePacketWord] |= material.clut << kHalfwordBits;
+  packet[kPagePacketWord] |= std::uint32_t{page} << kHalfwordBits;
+  const std::size_t words = 1 + polygon.corners * kVertexPacketWords;
+  switch (LinkRoomPolygonByDepth(
+      std::span<const std::uint32_t>(packet).first(words), polygon.depth,
+      material.flags, clip_, queue_)) {
+    case RoomLinkStatus::kLinked:
+      return {RoomDrawStatus::kDrawn, 1};
+    case RoomLinkStatus::kBufferFull:
+      return {RoomDrawStatus::kBufferFull, 0};
+    case RoomLinkStatus::kRejected:
+    case RoomLinkStatus::kInvalidPacket:
+      break;
+  }
+  return {};
+}
+
+// A subdivision leaf: projected afresh, never culled by winding, and drawn
+// at full texture detail.
+RoomPolygonResult RoomPolygonEmitter::EmitLeaf(
+    std::span<const RoomVertex> vertices, const RoomPolygonMaterial& material) {
+  ProjectedPolygon polygon;
+  for (const RoomVertex& vertex : vertices) {
+    AddCorner(polygon, vertex, transformer_.Project(vertex.position));
+  }
+  if (!IsRoomPolygonOnScreen(polygon.bounds, clip_.screen) ||
+      polygon.depth < clip_.near_depth) {
+    return {};
+  }
+  RoomPolygonMaterial leaf = material;
+  if (vertices.size() == kRoomTriangleCorners) {
+    leaf.command &= ~kQuadCommandFlag;
+  }
+  return Write(polygon, leaf, false);
+}
+
+// decomp: BATTLE.PRG func_80097AEC (2EA3C.s:612).
+RoomPolygonResult RoomPolygonEmitter::SubdivideTriangle(
+    const TriangleVertices& vertices, int levels,
+    const RoomPolygonMaterial& material) {
+  if (levels == 0) {
+    return EmitLeaf(vertices, material);
+  }
+  const auto& [corner0, corner1, corner2] = vertices;
+  const RoomVertex first = InterpolateRoomVertexMidpoint(corner0, corner1);
+  const RoomVertex second = InterpolateRoomVertexMidpoint(corner1, corner2);
+  const RoomVertex third = InterpolateRoomVertexMidpoint(corner2, corner0);
+  constexpr std::size_t kChildren = 7;
+  const std::array<TriangleVertices, kChildren> children{
+      {{corner0, first, third},
+       {second, first, corner1},
+       {second, corner2, third},
+       {first, second, third},
+       {corner2, corner0, third},
+       {corner2, second, corner1},
+       {first, corner0, corner1}}};
+  RoomPolygonResult total;
+  for (std::size_t child = 0; child < children.size(); ++child) {
+    const int child_levels =
+        child < kRecursiveTriangleChildren ? levels - 1 : 0;
+    if (!Accumulate(total, SubdivideTriangle(children[child], child_levels,
+                                             material))) {
+      break;
+    }
+  }
+  return total;
+}
+
+// decomp: BATTLE.PRG func_80097CF0 (2EA3C.s:752).
+RoomPolygonResult RoomPolygonEmitter::SubdivideQuad(
+    const QuadVertices& vertices, int levels,
+    const RoomPolygonMaterial& material) {
+  if (levels == 0) {
+    return EmitLeaf(vertices, material);
+  }
+  const auto& [corner0, corner1, corner2, corner3] = vertices;
+  const RoomVertex top = InterpolateRoomVertexMidpoint(corner0, corner1);
+  const RoomVertex right = InterpolateRoomVertexMidpoint(corner1, corner3);
+  const RoomVertex bottom = InterpolateRoomVertexMidpoint(corner2, corner3);
+  const RoomVertex left = InterpolateRoomVertexMidpoint(corner0, corner2);
+  const RoomVertex center = InterpolateRoomVertexMidpoint(corner1, corner2);
+  const std::array<QuadVertices, kRoomQuadCorners> children{
+      {{corner0, top, left, center},
+       {corner1, top, right, center},
+       {corner3, bottom, right, center},
+       {corner2, bottom, left, center}}};
+  const std::array<TriangleVertices, kRoomQuadCorners> edges{
+      {{corner2, bottom, corner3},
+       {corner2, corner0, left},
+       {top, corner0, corner1},
+       {corner3, right, corner1}}};
+  RoomPolygonResult total;
+  for (const QuadVertices& child : children) {
+    if (!Accumulate(total, SubdivideQuad(child, levels - 1, material))) {
+      return total;
+    }
+  }
+  for (const TriangleVertices& edge : edges) {
+    if (!Accumulate(total, SubdivideTriangle(edge, 0, material))) {
+      return total;
+    }
+  }
+  return total;
+}
+
+// decomp: BATTLE.PRG func_80097388 (2EA3C.s:104-500), one record: screen and
+// near culling, backface culling unless command bit 0 is set, then either
+// subdivision or a single packet.
+RoomPolygonResult RoomPolygonEmitter::Queue(std::span<const std::byte> record,
+                                            std::size_t corners,
+                                            std::uint32_t flags,
+                                            std::int32_t mode) {
+  const RecordProjection projection =
+      ProjectRecord(record, corners, flags, transformer_);
+  const ProjectedPolygon& polygon = projection.polygon;
+  if (!IsRoomPolygonOnScreen(polygon.bounds, clip_.screen) ||
+      polygon.depth < clip_.near_depth) {
+    return {};
+  }
+  const std::uint32_t command = ReadByte(record, kCommandRecordOffset);
+  const bool culls_backfaces = (command & kNoBackfaceCullCommand) == 0;
+  const bool is_quad = corners == kRoomQuadCorners;
+  // The quad's second triangle: corners 1, 4 and 3.
+  const auto far_winding = [&polygon] {
+    return RoomPolygonWinding({polygon.screens[1],
+                               polygon.screens[kFourthCorner],
+                               polygon.screens[2]});
+  };
+  if (culls_backfaces && projection.winding <= 0 &&
+      (!is_quad || far_winding() <= 0)) {
+    return {};
+  }
+  const RoomPolygonMaterial material{
+      flags, command, Read<std::uint16_t>(record, kClutRecordOffset),
+      Read<std::uint16_t>(record, kPageRecordOffset)};
+  const int levels = static_cast<int>((flags >> kSubdivisionLevelShift) &
+                                      kSubdivisionLevelMask) -
+                     static_cast<int>(static_cast<std::uint32_t>(
+                                          projection.subdivision_depth) >>
+                                      kSubdivisionDepthShift);
+  std::int32_t area = projection.winding;
+  if (!is_quad && area < 0) {
+    area = Negate(area);
+  }
+  if (is_quad && projection.winding < 0 && culls_backfaces) {
+    area = far_winding();
+  }
+  if ((static_cast<std::uint32_t>(mode) & kSubdivisionMode) != 0 &&
+      static_cast<std::uint32_t>(area) >= kMinimumSubdivisionArea &&
+      levels > 0) {
+    if (is_quad) {
+      return SubdivideQuad(polygon.vertices, levels, material);
+    }
+    const TriangleVertices triangle{polygon.vertices[0], polygon.vertices[1],
+                                    polygon.vertices[2]};
+    return SubdivideTriangle(triangle, levels, material);
+  }
+  const auto depth = ResolveRoomPolygonDepth(polygon.depth, flags, clip_);
+  if (!depth) {
+    return {};
+  }
+  return Write(polygon, material, *depth >= clip_.lod_depth);
+}
+
+// Hidden (0x1100), the alternate pass while `mode` bit 0 is set, or facing
+// away from the first-person view.
+[[nodiscard]] bool IsGroupSkipped(std::uint32_t flags,
+                                  const RoomDrawPass& pass) {
+  const auto mode = static_cast<std::uint32_t>(pass.mode);
+  return (flags & kHiddenGroupFlags) != 0 ||
+         (((flags >> kAlternatePassShift) & 1U) & mode) != 0 ||
+         ((pass.view_facing >> kHalfwordBits) == 0 &&
+          (~flags & (pass.view_facing & kFacingMask)) != 0);
+}
+
+[[nodiscard]] bool SkyFacesValid(std::span<const std::byte> faces) {
+  for (std::size_t face = 0; face < kSkyDomeFaceCount; ++face) {
+    for (std::size_t corner = 0; corner < kRoomTriangleCorners; ++corner) {
+      if (ReadByte(faces, face * kSkyDomeFaceBytes + corner) >=
+          kSkyDomeVertexCount) {
+        return false;
+      }
+    }
+  }
+  return true;
+}
+
+using SkyPacket = std::array<std::uint32_t, kSkyDomePacketWords>;
+
+// One sky face as a Gouraud triangle centred on the 320x240 frame, or nothing
+// when it is behind the camera or off screen.
+[[nodiscard]] std::optional<SkyPacket> BuildSkyPacket(
+    const std::array<Math::Vec3, kSkyDomeVertexCount>& positions,
+    const std::array<std::uint32_t, kSkyDomeVertexCount>& colors,
+    const std::array<std::size_t, kRoomTriangleCorners>& indices) {
+  if (std::ranges::all_of(indices, [&positions](std::size_t index) {
+        return positions[index].z <= 0;
+      })) {
+    return std::nullopt;
+  }
+  SkyPacket packet{};
+  std::int64_t left = INT64_MAX;
+  std::int64_t right = INT64_MIN;
+  std::int64_t top = INT64_MAX;
+  std::int64_t bottom = INT64_MIN;
+  for (std::size_t corner = 0; corner < kRoomTriangleCorners; ++corner) {
+    const Math::Vec3& position = positions[indices[corner]];
+    const std::int64_t x = std::int64_t{position.x} + kSkyCenterX;
+    const std::int64_t y = std::int64_t{position.y} + kSkyCenterY;
+    left = std::min(left, x);
+    right = std::max(right, x);
+    top = std::min(top, y);
+    bottom = std::max(bottom, y);
+    packet[1 + corner * 2] = colors[indices[corner]] & kColorMask;
+    packet[2 + corner * 2] = static_cast<std::uint16_t>(x) |
+                             std::uint32_t{static_cast<std::uint16_t>(y)}
+                                 << kHalfwordBits;
+  }
+  if (right < 0 || left >= kRoomViewportWidth || bottom < 0 ||
+      top >= kRoomViewportHeight) {
+    return std::nullopt;
+  }
+  packet[1] |= kSkyGouraudCommand;
+  return packet;
+}
+}  // namespace
+
+bool ValidateRoomGeometry(std::span<const std::byte> geometry) {
+  const auto count = GroupCount(geometry);
+  if (!count) {
+    return false;
+  }
+  const std::size_t header_end =
+      kGroupCountBytes + *count * kRoomGroupRecordBytes;
+  for (std::size_t index = 0; index < *count; ++index) {
+    const std::size_t offset = Read<std::uint32_t>(
+        geometry,
+        kGroupCountBytes + index * kRoomGroupRecordBytes + kGroupPolygonOffset);
+    if (offset < header_end || offset > geometry.size() ||
+        !ReadPolygonCounts(geometry.subspan(offset))) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::optional<RoomGroup> ReadRoomGroup(std::span<const std::byte> geometry,
+                                       std::size_t index) {
+  const auto offset = GroupRecordOffset(geometry, index);
+  if (!offset) {
+    return std::nullopt;
+  }
+  const auto record = geometry.subspan(*offset, kRoomGroupRecordBytes);
+  RoomGroup group;
+  group.flags = Read<std::uint32_t>(record, 0);
+  std::size_t bound_offset = kGroupBoundsOffset;
+  for (auto& axis : group.bounds) {
+    for (auto& bound : axis) {
+      bound = Read<std::int16_t>(record, bound_offset);
+      bound_offset += sizeof(std::int16_t);
+    }
+  }
+  constexpr std::size_t kWord = sizeof(std::int32_t);
+  group.angles = {Read<std::int32_t>(record, kGroupAnglesOffset),
+                  Read<std::int32_t>(record, kGroupAnglesOffset + kWord),
+                  Read<std::int32_t>(record, kGroupAnglesOffset + 2 * kWord)};
+  group.polygon_offset = Read<std::uint32_t>(record, kGroupPolygonOffset);
+  group.view = ReadView(record);
+  return group;
+}
+
+bool WriteRoomGroup(std::span<std::byte> geometry, std::size_t index,
+                    const RoomGroup& group) {
+  const auto offset = GroupRecordOffset(geometry, index);
+  if (!offset) {
+    return false;
+  }
+  const auto record = geometry.subspan(*offset, kRoomGroupRecordBytes);
+  Write(record, 0, group.flags);
+  std::size_t bound_offset = kGroupBoundsOffset;
+  for (const auto& axis : group.bounds) {
+    for (const std::int16_t bound : axis) {
+      Write(record, bound_offset, bound);
+      bound_offset += sizeof(std::int16_t);
+    }
+  }
+  constexpr std::size_t kWord = sizeof(std::int32_t);
+  Write(record, kGroupAnglesOffset, group.angles.x);
+  Write(record, kGroupAnglesOffset + kWord, group.angles.y);
+  Write(record, kGroupAnglesOffset + 2 * kWord, group.angles.z);
+  Write(record, kGroupPolygonOffset, group.polygon_offset);
+  WriteView(record, group.view);
+  return true;
+}
+
+bool WriteRoomGroupView(std::span<std::byte> geometry, std::size_t index,
+                        const RoomView& view) {
+  const auto offset = GroupRecordOffset(geometry, index);
+  if (!offset) {
+    return false;
+  }
+  WriteView(geometry.subspan(*offset, kRoomGroupRecordBytes), view);
+  return true;
+}
+
+// decomp: BATTLE.PRG func_800985AC (src/BATTLE/BATTLE.PRG/2EA3C.s:1383).
+RoomView BuildRoomGeometryViewMatrix(const RoomCamera& camera,
+                                     const RoomPosition& position,
+                                     const Core::Math::Angles3& angles) {
+  return BuildRoomView(camera, position, angles, false);
+}
+
+// decomp: BATTLE.PRG func_80098648 (src/BATTLE/BATTLE.PRG/2EA3C.s:1429).
+RoomView BuildScaleCompensatedRoomView(const RoomCamera& camera,
+                                       const RoomPosition& position,
+                                       const Core::Math::Angles3& angles) {
+  return BuildRoomView(camera, position, angles, true);
+}
+
+// decomp: BATTLE.PRG func_800983F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1265).
+bool UpdateRoomGroupTransforms(std::span<std::byte> geometry,
+                               const RoomCamera& camera) {
+  const auto count = GroupCount(geometry);
+  if (!count) {
+    return false;
+  }
+  for (std::size_t index = 0; index < *count; ++index) {
+    const auto group = ReadRoomGroup(geometry, index);
+    if (!group) {
+      return false;
+    }
+    if ((group->flags & kSkipViewUpdateFlag) != 0) {
+      continue;
+    }
+    const RoomPosition origin{group->bounds[0][0], group->bounds[1][0],
+                              group->bounds[2][0]};
+    RoomView view = BuildRoomGeometryViewMatrix(camera, origin, group->angles);
+    if ((group->flags & kCameraFacingFlag) != 0) {
+      view.rotation = CameraFacingRotation(camera);
+    }
+    WriteRoomGroupView(geometry, index, view);
+  }
+  return true;
+}
+
+// decomp: BATTLE.PRG func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:506).
+std::array<RoomPosition, kRoomTriangleCorners> DecodeRoomPolygonVertices(
+    std::span<const std::byte, kRoomCoordinateBytes> coordinates,
+    std::uint32_t coordinate_shift) {
+  const std::span<const std::byte> bytes = coordinates;
+  const std::uint32_t shift = coordinate_shift & kCoordinateShiftMask;
+  const RoomPosition base = ReadPosition(bytes, 0);
+  const std::array<std::int16_t, kRoomAxes> origin{base.x, base.y, base.z};
+  constexpr std::size_t kDeltaOffset = kRoomAxes * sizeof(std::int16_t);
+  std::array<RoomPosition, kRoomTriangleCorners> positions{};
+  for (std::size_t vertex = 0; vertex < kRoomTriangleCorners; ++vertex) {
+    std::array<std::int16_t, kRoomAxes> axes{};
+    for (std::size_t axis = 0; axis < kRoomAxes; ++axis) {
+      const std::int8_t delta =
+          vertex == 0
+              ? std::int8_t{0}
+              : Read<std::int8_t>(
+                    bytes, kDeltaOffset + (vertex - 1) * kRoomAxes + axis);
+      const std::uint32_t shifted =
+          static_cast<std::uint32_t>(static_cast<std::int32_t>(delta)) << shift;
+      axes[axis] = Math::WrapSigned16(
+          static_cast<std::uint32_t>(static_cast<std::int32_t>(origin[axis])) +
+          shifted);
+    }
+    positions[vertex] = {axes[0], axes[1], axes[2]};
+  }
+  return positions;
+}
+
+std::int32_t RoomPolygonWinding(
+    const std::array<std::int32_t, kRoomTriangleCorners>& screens) {
+  std::array<std::int64_t, kRoomTriangleCorners> x{};
+  std::array<std::int64_t, kRoomTriangleCorners> y{};
+  for (std::size_t corner = 0; corner < kRoomTriangleCorners; ++corner) {
+    x[corner] = ScreenX(screens[corner]);
+    y[corner] = ScreenY(screens[corner]);
+  }
+  const std::int64_t cross = x[0] * y[1] + x[1] * y[2] + x[2] * y[0] -
+                             x[0] * y[2] - x[1] * y[0] - x[2] * y[1];
+  return static_cast<std::int32_t>(cross);
+}
+
+// decomp: BATTLE.PRG func_80097A10 (src/BATTLE/BATTLE.PRG/2EA3C.s:548).
+RoomTriangleProjection ProjectAndDecodeRoomPolygon(
+    std::span<const std::byte, kRoomCoordinateBytes> coordinates,
+    std::uint32_t coordinate_shift, RoomTransformer& transformer) {
+  RoomTriangleProjection projection;
+  projection.positions =
+      DecodeRoomPolygonVertices(coordinates, coordinate_shift);
+  std::array<std::int32_t, kRoomTriangleCorners> screens{};
+  for (std::size_t corner = 0; corner < kRoomTriangleCorners; ++corner) {
+    projection.points[corner] =
+        transformer.Project(projection.positions[corner]);
+    screens[corner] = projection.points[corner].screen;
+  }
+  projection.winding = RoomPolygonWinding(screens);
+  return projection;
+}
+
+// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:921).
+RoomVertex InterpolateRoomVertexMidpoint(const RoomVertex& first,
+                                         const RoomVertex& second) {
+  const auto half = [](std::int32_t left, std::int32_t right) {
+    return static_cast<std::int16_t>((left + right) >> 1);
+  };
+  RoomVertex midpoint;
+  midpoint.position = {half(first.position.x, second.position.x),
+                       half(first.position.y, second.position.y),
+                       half(first.position.z, second.position.z)};
+  for (std::size_t channel = 0; channel < kTintChannels; ++channel) {
+    const std::size_t shift = channel * CHAR_BIT;
+    const std::uint32_t sum = ((first.color >> shift) & UINT8_MAX) +
+                              ((second.color >> shift) & UINT8_MAX);
+    midpoint.color |= (sum >> 1) << shift;
+  }
+  const std::uint32_t u =
+      ((first.uv & UINT8_MAX) + (second.uv & UINT8_MAX)) >> 1;
+  const std::uint32_t v =
+      ((first.uv >> CHAR_BIT) + (second.uv >> CHAR_BIT)) >> 1;
+  midpoint.uv = static_cast<std::uint16_t>(u | v << CHAR_BIT);
+  return midpoint;
+}
+
+// decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:969).
+bool IsRoomPolygonOnScreen(const RoomScreenBounds& projected,
+                           const RoomScreenBounds& clip) {
+  if (projected.left > projected.right || projected.top > projected.bottom) {
+    return false;
+  }
+  return !(projected.right < clip.left || projected.bottom < clip.top ||
+           projected.left >= clip.right || projected.top >= clip.bottom);
+}
+
+std::optional<std::uint32_t> ResolveRoomPolygonDepth(
+    std::int32_t projected_depth, std::uint32_t flags,
+    const RoomClipState& clip) {
+  if (projected_depth < clip.near_depth) {
+    return std::nullopt;
+  }
+  const std::int64_t biased = std::int64_t{projected_depth} +
+                              Math::WrapSigned16(flags >> kHalfwordBits);
+  if (biased < 0 || biased < clip.near_depth || biased >= clip.far_depth ||
+      biased >= kRoomLastOrderingSlot) {
+    return std::nullopt;
+  }
+  return static_cast<std::uint32_t>(biased);
+}
+
+// decomp: BATTLE.PRG func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1036).
+RoomLinkStatus LinkRoomPolygonByDepth(std::span<const std::uint32_t> packet,
+                                      std::int32_t projected_depth,
+                                      std::uint32_t flags,
+                                      const RoomClipState& clip,
+                                      RoomPacketQueue& queue) {
+  if (packet.size() != kRoomTrianglePacketWords &&
+      packet.size() != kRoomQuadPacketWords) {
+    return RoomLinkStatus::kInvalidPacket;
+  }
+  const auto depth = ResolveRoomPolygonDepth(projected_depth, flags, clip);
+  if (!depth) {
+    return RoomLinkStatus::kRejected;
+  }
+  return queue.Emit(packet, *depth) ? RoomLinkStatus::kLinked
+                                    : RoomLinkStatus::kBufferFull;
+}
+
+// decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612).
+RoomPolygonResult SubdivideRoomTriangle(
+    std::span<const RoomVertex, kRoomTriangleCorners> vertices, int levels,
+    const RoomPolygonMaterial& material, const RoomClipState& clip,
+    RoomTransformer& transformer, RoomPacketQueue& queue) {
+  if (levels < 0 || levels > kRoomMaximumSubdivisionLevels) {
+    return {RoomDrawStatus::kInvalidLevels, 0};
+  }
+  TriangleVertices captured{};
+  std::ranges::copy(vertices, captured.begin());
+  const RoomPolygonMaterial captured_material = material;
+  return RoomPolygonEmitter(clip, transformer, queue)
+      .SubdivideTriangle(captured, levels, captured_material);
+}
+
+// decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:752).
+RoomPolygonResult SubdivideRoomQuad(
+    std::span<const RoomVertex, kRoomQuadCorners> vertices, int levels,
+    const RoomPolygonMaterial& material, const RoomClipState& clip,
+    RoomTransformer& transformer, RoomPacketQueue& queue) {
+  if (levels < 0 || levels > kRoomMaximumSubdivisionLevels) {
+    return {RoomDrawStatus::kInvalidLevels, 0};
+  }
+  QuadVertices captured{};
+  std::ranges::copy(vertices, captured.begin());
+  const RoomPolygonMaterial captured_material = material;
+  return RoomPolygonEmitter(clip, transformer, queue)
+      .SubdivideQuad(captured, levels, captured_material);
+}
+
+// decomp: BATTLE.PRG func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:104).
+RoomPolygonResult DrawRoomGeometryPolygons(std::span<const std::byte> polygons,
+                                           std::uint32_t flags,
+                                           std::int32_t mode,
+                                           const RoomClipState& clip,
+                                           RoomTransformer& transformer,
+                                           RoomPacketQueue& queue) {
+  const auto counts = ReadPolygonCounts(polygons);
+  if (!counts) {
+    return {RoomDrawStatus::kInvalidGeometry, 0};
+  }
+  RoomPolygonEmitter emitter(clip, transformer, queue);
+  RoomPolygonResult total;
+  std::size_t offset = kPolygonCountBytes;
+  for (std::uint32_t face = 0; face < counts->triangles; ++face) {
+    if (!Accumulate(total, emitter.Queue(polygons.subspan(
+                                             offset, kRoomTriangleRecordBytes),
+                                         kRoomTriangleCorners, flags, mode))) {
+      return total;
+    }
+    offset += kRoomTriangleRecordBytes;
+  }
+  for (std::uint32_t face = 0; face < counts->quads; ++face) {
+    if (!Accumulate(
+            total, emitter.Queue(polygons.subspan(offset, kRoomQuadRecordBytes),
+                                 kRoomQuadCorners, flags, mode))) {
+      return total;
+    }
+    offset += kRoomQuadRecordBytes;
+  }
+  return total;
+}
+
+// decomp: BATTLE.PRG func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:10).
+RoomDrawStatus DrawRoomGeometry(std::span<const std::byte> geometry,
+                                const RoomDrawPass& pass,
+                                const RoomClipState& clip,
+                                RoomTransformer& transformer,
+                                RoomPacketQueue& queue) {
+  if (!ValidateRoomGeometry(geometry)) {
+    return RoomDrawStatus::kInvalidGeometry;
+  }
+  const std::size_t count = Read<std::uint32_t>(geometry, 0);
+  for (std::size_t index = 0; index < count; ++index) {
+    const auto group = ReadRoomGroup(geometry, index);
+    if (!group) {
+      return RoomDrawStatus::kInvalidGeometry;
+    }
+    if (IsGroupSkipped(group->flags, pass)) {
+      continue;
+    }
+    transformer.LoadView(group->view);
+    const RoomPolygonResult result = DrawRoomGeometryPolygons(
+        geometry.subspan(group->polygon_offset), group->flags, pass.mode, clip,
+        transformer, queue);
+    if (result.status != RoomDrawStatus::kDrawn) {
+      return result.status;
+    }
+  }
+  return RoomDrawStatus::kDrawn;
+}
+
+// decomp: BATTLE.PRG func_80098160.
+void SetRoomPolygonNearClip(RoomClipState& clip, std::int32_t depth) {
+  clip.near_depth = Math::WrapSigned16(static_cast<std::uint32_t>(depth));
+}
+
+// decomp: BATTLE.PRG func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1078).
+void SetRoomPolygonFarClip(RoomClipState& clip, std::int32_t depth) {
+  clip.far_depth = Math::WrapSigned16(static_cast<std::uint32_t>(depth));
+}
+
+// decomp: BATTLE.PRG func_80098194.
+void SetRoomTextureLodDepth(RoomClipState& clip, std::int32_t depth) {
+  clip.lod_depth = static_cast<std::uint32_t>(static_cast<std::int32_t>(
+      Math::WrapSigned16(static_cast<std::uint32_t>(depth))));
+}
+
+// decomp: BATTLE.PRG func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1101).
+void SetRoomPolygonScreenBounds(RoomClipState& clip,
+                                const RoomScreenBounds& bounds) {
+  const auto wrap = [](std::int32_t edge) -> std::int32_t {
+    return Math::WrapSigned16(static_cast<std::uint32_t>(edge));
+  };
+  clip.screen = {wrap(bounds.left), wrap(bounds.top), wrap(bounds.right),
+                 wrap(bounds.bottom)};
+}
+
+// decomp: BATTLE.PRG func_8009820C.
+RoomDrawStatus DrawSkyDome(std::span<const std::byte> sky,
+                           RoomTransformer& transformer,
+                           RoomPacketQueue& queue) {
+  if (sky.size() < kSkyDomeBytes) {
+    return RoomDrawStatus::kInvalidGeometry;
+  }
+  const auto faces = sky.subspan(kSkyDomeVertexCount * kSkyDomeVertexBytes,
+                                 kSkyDomeFaceCount * kSkyDomeFaceBytes);
+  if (!SkyFacesValid(faces)) {
+    return RoomDrawStatus::kInvalidGeometry;
+  }
+  std::array<Math::Vec3, kSkyDomeVertexCount> positions{};
+  std::array<std::uint32_t, kSkyDomeVertexCount> colors{};
+  for (std::size_t vertex = 0; vertex < kSkyDomeVertexCount; ++vertex) {
+    const std::size_t offset = vertex * kSkyDomeVertexBytes;
+    positions[vertex] = transformer.Transform(ReadPosition(sky, offset));
+    colors[vertex] = Read<std::uint32_t>(sky, offset + kSkyColorOffset);
+  }
+  for (std::size_t face = 0; face < kSkyDomeFaceCount; ++face) {
+    const std::size_t offset = face * kSkyDomeFaceBytes;
+    const std::array<std::size_t, kRoomTriangleCorners> indices{
+        ReadByte(faces, offset), ReadByte(faces, offset + 1),
+        ReadByte(faces, offset + 2)};
+    const auto packet = BuildSkyPacket(positions, colors, indices);
+    if (packet && !queue.Emit(*packet, kRoomLastOrderingSlot)) {
+      return RoomDrawStatus::kBufferFull;
+    }
+  }
+  return RoomDrawStatus::kDrawn;
+}
+
+// decomp: BATTLE.PRG func_80098E50 (src/BATTLE/BATTLE.PRG/2EA3C.s:2018).
+std::uint32_t TintRoomPrimitiveColor(std::uint32_t color,
+                                     const RoomColorAdjustment& adjustment) {
+  const std::array<std::int16_t, kTintChannels> offsets{
+      adjustment.red, adjustment.green, adjustment.blue};
+  const auto channel_of = [color](std::size_t channel) {
+    return std::int64_t{(color >> (channel * CHAR_BIT)) & UINT8_MAX};
+  };
+  const auto clamp = [](std::int64_t value) {
+    return static_cast<std::uint32_t>(
+        std::clamp<std::int64_t>(value, 0, UINT8_MAX));
+  };
+  const std::int64_t luminance = channel_of(0) * kTintLuminanceRed +
+                                 channel_of(1) * kTintLuminanceGreen +
+                                 channel_of(2) * kTintLuminanceBlue;
+  constexpr std::int64_t kChannelScale = 1 << kTintChannelFractionBits;
+  constexpr std::int64_t kBlendScale =
+      std::int64_t{1} << (kFixedFractionBits + kTintChannelFractionBits);
+  std::uint32_t result = color & ~kColorMask;
+  for (std::size_t channel = 0; channel < kTintChannels; ++channel) {
+    std::int64_t value = channel_of(channel);
+    if (adjustment.strength != 0) {
+      const std::int64_t numerator =
+          value * kBlendScale +
+          adjustment.strength * (luminance - value * kChannelScale);
+      value = clamp(numerator <= 0 ? 0 : numerator / kBlendScale);
+    }
+    result |= clamp(value + offsets[channel]) << (channel * CHAR_BIT);
   }
   return result;
 }
 
-static void RequireTintSpan(int valid, const char* message) {
-  if (!valid) {
-    Core_Debugf("render", "%s", message);
-    abort();
-  }
-}
-
-// decomp: func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1944).
-void Render_TintRoomGeometryPrimitives(void* start, void* end,
-                                       Field_RoomTint* tint, int flags) {
-  if (start == end) return;
-  RequireTintSpan(start != nullptr && end != nullptr && tint != nullptr,
-                  "Room tint requires a primitive span and parameters");
-  const uintptr_t first = (uintptr_t)start;
-  const uintptr_t last = (uintptr_t)end;
-  RequireTintSpan(first <= last && (last - first) % sizeof(uint32_t) == 0,
-                  "Room tint primitive span is invalid");
-  const int16_t red = static_cast<int16_t>(tint->red * kTintOffsetScale);
-  const int16_t green = static_cast<int16_t>(tint->green * kTintOffsetScale);
-  const int16_t blue = static_cast<int16_t>(tint->blue * kTintOffsetScale);
-  const int16_t strength = tint->strength;
-  const size_t padding =
+// decomp: BATTLE.PRG func_80098D6C (src/BATTLE/BATTLE.PRG/2EA3C.s:1944).
+// The whole walk is measured before any colour changes, so a truncated span
+// is left untouched.
+RoomTintStatus TintRoomGeometryPrimitives(std::span<std::uint32_t> packets,
+                                          const RoomTint& tint,
+                                          std::uint32_t flags) {
+  const std::size_t padding =
       (flags & kTintPaddingFlag) != 0 ? kTintPaddingWords : 0;
-  unsigned char* cursor = (unsigned char*)(start);
-  size_t remaining = last - first;
-  while (remaining != 0) {
-    RequireTintSpan(remaining >= sizeof(uint32_t),
-                    "Room tint primitive header is truncated");
-    uint32_t header;
-    memcpy(&header, cursor, sizeof header);
-    const unsigned length = header >> kPacketCommandShift;
-    int corners;
-    if (length == kTriangleCorners * kVertexPacketWords) {
-      corners = kTriangleCorners;
-    } else if (length == kQuadCorners * kVertexPacketWords) {
-      corners = kQuadCorners;
-    } else {
-      return;
+  const auto corners_of = [](std::uint32_t tag) -> std::size_t {
+    const std::size_t length = tag >> kPacketLengthShift;
+    return length == kRoomTriangleCorners * kVertexPacketWords ||
+                   length == kRoomQuadCorners * kVertexPacketWords
+               ? length / kVertexPacketWords
+               : 0;
+  };
+  RoomTintStatus status = RoomTintStatus::kTinted;
+  std::size_t end = 0;
+  while (end < packets.size()) {
+    const std::size_t corners = corners_of(packets[end]);
+    if (corners == 0) {
+      status = RoomTintStatus::kStoppedAtForeignPacket;
+      break;
     }
-    const size_t bytes =
-        (1 + static_cast<size_t>(corners) * kVertexPacketWords + padding) *
-        sizeof(uint32_t);
-    RequireTintSpan(remaining >= bytes,
-                    "Room tint primitive payload is truncated");
-    for (int vertex = 0; vertex < corners; ++vertex) {
-      unsigned char* destination =
-          cursor + (1 + static_cast<size_t>(vertex) * kVertexPacketWords) *
-                       sizeof(uint32_t);
-      uint32_t color;
-      memcpy(&color, destination, sizeof color);
-      color = Render_TintRoomPrimitiveColor(color, strength, red, green, blue);
-      memcpy(destination, &color, sizeof color);
+    const std::size_t words = 1 + corners * kVertexPacketWords + padding;
+    if (words > packets.size() - end) {
+      return RoomTintStatus::kTruncated;
     }
-    cursor += bytes;
-    remaining -= bytes;
+    end += words;
   }
-}
-
-int Render_ValidateRoomGeometry(const void* data, size_t size) {
-  if (data == nullptr || size < sizeof(unsigned)) {
-    return 0;
-  }
-  unsigned count;
-  memcpy(&count, data, sizeof count);
-  const size_t header_end = sizeof count + static_cast<size_t>(count) *
-                                               sizeof(Render_RoomGeometryGroup);
-  if (count > kMaximumGeometryGroups || header_end > size) {
-    return 0;
-  }
-  for (unsigned index = 0; index < count; ++index) {
-    Render_RoomGeometryGroup group;
-    memcpy(&group,
-           (const unsigned char*)data + sizeof count + index * sizeof group,
-           sizeof group);
-    if (group.polygonOffset < header_end || group.polygonOffset > size ||
-        size - group.polygonOffset < 2 * sizeof(unsigned)) {
-      return 0;
+  const RoomColorAdjustment adjustment{
+      tint.strength, static_cast<std::int16_t>(tint.red * kTintOffsetScale),
+      static_cast<std::int16_t>(tint.green * kTintOffsetScale),
+      static_cast<std::int16_t>(tint.blue * kTintOffsetScale)};
+  for (std::size_t word = 0; word < end;) {
+    const std::size_t corners = corners_of(packets[word]);
+    for (std::size_t corner = 0; corner < corners; ++corner) {
+      std::uint32_t& color = packets[word + 1 + corner * kVertexPacketWords];
+      color = TintRoomPrimitiveColor(color, adjustment);
     }
-    unsigned counts[2];
-    memcpy(counts, (const unsigned char*)data + group.polygonOffset,
-           sizeof counts);
-    if (static_cast<uint64_t>(counts[0]) * kRoomTriangleBytes +
-            static_cast<uint64_t>(counts[1]) * kRoomQuadBytes >
-        size - group.polygonOffset - sizeof counts) {
-      return 0;
-    }
+    word += 1 + corners * kVertexPacketWords + padding;
   }
-  return 1;
-}
-
-static void BuildRoomView(VECTOR* position, VECTOR* angles, MATRIX* output,
-                          int inverse_scale) {
-  MATRIX camera = Render_frameScratch.viewMatrix;
-  if (inverse_scale) {
-    const int scale = Render_frameScratch.camera.farClip;
-    if (scale <= 0) {
-      memset(output, 0, sizeof *output);
-      return;
-    }
-    MATRIX inverse = {0};
-    inverse.m[0][0] = inverse.m[1][1] = inverse.m[2][2] =
-        static_cast<int16_t>(kFixedOneSquared / scale);
-    VS::Core::Math::ApplyMultiplyMatrixIntoRight(inverse, camera);
-  }
-  SVECTOR rotation = {static_cast<int16_t>(angles->vx),
-                      static_cast<int16_t>(angles->vy),
-                      static_cast<int16_t>(angles->vz), 0};
-  VS::Core::Math::ApplyBuildEulerRotationMatrix(rotation, *output);
-  VS::Core::Math::ApplyMultiplyMatrixIntoRight(camera, *output);
-  const int16_t coordinates[kRoomSpatialDimensions] = {
-      static_cast<int16_t>(position->vx), static_cast<int16_t>(position->vy),
-      static_cast<int16_t>(position->vz)};
-  for (int row = 0; row < kRoomSpatialDimensions; ++row) {
-    int64_t translated = 0;
-    for (int axis = 0; axis < kRoomSpatialDimensions; ++axis) {
-      translated +=
-          static_cast<int64_t>(camera.m[row][axis]) * coordinates[axis];
-    }
-    output->t[row] = (Core_GteWord)((translated >> kFixedFractionBits) +
-                                    Render_frameScratch.viewMatrix.t[row]);
-  }
-}
-
-// decomp: BATTLE.PRG func_800983F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1265).
-void Render_UpdateRoomGroupTransforms(void* data) {
-  if (data == nullptr) {
-    return;
-  }
-  unsigned count;
-  memcpy(&count, data, sizeof count);
-  if (count > kMaximumGeometryGroups) {
-    return;
-  }
-  Render_RoomGeometryGroup* groups =
-      reinterpret_cast<Render_RoomGeometryGroup*>(
-          ((unsigned char*)data + sizeof count));
-  const int scale = Render_frameScratch.camera.farClip;
-  const int sine = VS::Core::Math::MultiplyFixed(
-      Core_Gte_Sin(Render_frameScratch.camera.angles.vz), scale);
-  const int cosine = VS::Core::Math::MultiplyFixed(
-      Core_Gte_Cos(Render_frameScratch.camera.angles.vz), scale);
-  for (unsigned index = 0; index < count; ++index) {
-    Render_RoomGeometryGroup* group = &groups[index];
-    if ((group->flags & kSkipViewUpdateFlag) != 0) {
-      continue;
-    }
-    VECTOR position = {group->bounds[0][0], group->bounds[1][0],
-                       group->bounds[2][0], 0};
-    VECTOR angles = {group->angles[0], group->angles[1], group->angles[2], 0};
-    BuildRoomView(&position, &angles, &group->view, 0);
-    if ((group->flags & kCameraFacingFlag) != 0) {
-      memset(group->view.m, 0, sizeof group->view.m);
-      group->view.m[0][0] = group->view.m[1][1] = static_cast<int16_t>(cosine);
-      group->view.m[0][1] = static_cast<int16_t>(-sine);
-      group->view.m[1][0] = static_cast<int16_t>(sine);
-      group->view.m[2][2] = static_cast<int16_t>(scale);
-    }
-  }
-}
-
-// decomp: BATTLE.PRG func_800985AC (src/BATTLE/BATTLE.PRG/2EA3C.s:1383).
-void Render_BuildRoomGeometryViewMatrix(VECTOR* position, VECTOR* angles,
-                                        MATRIX* output) {
-  BuildRoomView(position, angles, output, 0);
-}
-
-// decomp: BATTLE.PRG func_80098648 (src/BATTLE/BATTLE.PRG/2EA3C.s:1429).
-void Render_BuildScaleCompensatedRoomView(VECTOR* position, VECTOR* angles,
-                                          MATRIX* output) {
-  BuildRoomView(position, angles, output, 1);
-}
-
-// decomp: BATTLE.PRG func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
-// not yet ported]
-typedef Render_RoomVertex RoomVertex;
-
-static int room_near_depth = kDefaultNearDepth;
-static int room_far_depth = kLastOrderingSlot;
-static unsigned room_lod_depth = kDefaultLodDepth;
-
-typedef Render_RoomScreenBounds RoomScreenBounds;
-
-static RoomScreenBounds room_screen_bounds = {0, 0, kViewportWidth,
-                                              kViewportHeight};
-
-// decomp: BATTLE.PRG func_80098014 (src/BATTLE/BATTLE.PRG/2EA3C.s:969).
-int Render_IsRoomPolygonOnScreen(const Render_RoomScreenBounds* projected) {
-  if (projected == nullptr || projected->left > projected->right ||
-      projected->top > projected->bottom) {
-    Core_Debugf("render",
-                "Room visibility requires normalized projected bounds");
-    abort();
-  }
-  return !(projected->right < room_screen_bounds.left ||
-           projected->bottom < room_screen_bounds.top ||
-           projected->left >= room_screen_bounds.right ||
-           projected->top >= room_screen_bounds.bottom);
-}
-
-static int OutsideScreenBounds(const RoomScreenBounds* projected) {
-  return !Render_IsRoomPolygonOnScreen(projected);
-}
-
-// decomp: BATTLE.PRG func_80097F70 (src/BATTLE/BATTLE.PRG/2EA3C.s:921).
-void Render_InterpolateRoomVertexMidpoint(const Render_RoomVertex* first,
-                                          const Render_RoomVertex* second,
-                                          Render_RoomVertex* output) {
-  if (first == nullptr || second == nullptr || output == nullptr) {
-    Core_Debugf("render", "Room midpoint requires two vertices and output");
-    abort();
-  }
-  const RoomVertex left = *first;
-  const RoomVertex right = *second;
-  output->position.vx = static_cast<int16_t>(
-      (static_cast<int>(left.position.vx) + right.position.vx) >> 1);
-  output->position.vy = static_cast<int16_t>(
-      (static_cast<int>(left.position.vy) + right.position.vy) >> 1);
-  output->position.vz = static_cast<int16_t>(
-      (static_cast<int>(left.position.vz) + right.position.vz) >> 1);
-  unsigned color = output->color & ~(unsigned)kColorMask;
-  for (unsigned channel = 0; channel < kRoomSpatialDimensions; ++channel) {
-    const unsigned value = ((left.color >> (channel * CHAR_BIT)) & UINT8_MAX) +
-                           ((right.color >> (channel * CHAR_BIT)) & UINT8_MAX);
-    color |= (value >> 1) << (channel * CHAR_BIT);
-  }
-  output->color = color;
-  output->uv = static_cast<uint16_t>(
-      (((left.uv & UINT8_MAX) + (right.uv & UINT8_MAX)) >> 1) |
-      ((((left.uv >> CHAR_BIT) + (right.uv >> CHAR_BIT)) >> 1) << CHAR_BIT));
-}
-
-static RoomVertex Midpoint(const RoomVertex* first, const RoomVertex* second) {
-  RoomVertex midpoint = {0};
-  Render_InterpolateRoomVertexMidpoint(first, second, &midpoint);
-  return midpoint;
-}
-
-typedef Render_RoomPolygonMaterial RoomPolygonMaterial;
-
-typedef struct ProjectedRoomPolygon {
-  const RoomVertex* vertices;
-  const Core_GteWord* screen;
-  int corners;
-  Core_GteWord depth;
-  RoomPolygonMaterial material;
-  int low_detail;
-} ProjectedRoomPolygon;
-
-static Core_GteWord ResolveRoomPolygonDepth(Core_GteWord projected_depth,
-                                            unsigned flags) {
-  if (projected_depth < room_near_depth) return -1;
-  const int64_t biased =
-      static_cast<int64_t>(projected_depth) +
-      VS::Core::Math::WrapSigned16(flags >> kPackedCoordinateBits);
-  if (biased < 0 || biased < room_near_depth || biased >= room_far_depth ||
-      biased >= kLastOrderingSlot) {
-    return -1;
-  }
-  return (Core_GteWord)biased;
-}
-
-// decomp: func_800980F8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1036-1064).
-// Native projection already returns quarter-depth; no guest SZ register input.
-int Render_LinkRoomPolygonByDepth(void* packet, size_t packet_words,
-                                  Core_GteWord projected_depth,
-                                  unsigned flags) {
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t address = (uintptr_t)packet;
-  if (packet == nullptr || base == 0 ||
-      Render_frameScratch.orderingTable == nullptr ||
-      (packet_words != 1 + kTriangleCorners * kVertexPacketWords &&
-       packet_words != 1 + kQuadCorners * kVertexPacketWords) ||
-      address < base || address - base > kPrimitiveBufferBytes ||
-      address % sizeof(u_long) != 0 ||
-      packet_words * sizeof(u_long) >
-          kPrimitiveBufferBytes - (address - base)) {
-    Core_Debugf("render",
-                "Room polygon linking requires a valid native packet span");
-    abort();
-  }
-  const Core_GteWord depth = ResolveRoomPolygonDepth(projected_depth, flags);
-  if (depth < 0) return 0;
-  setlen(packet, packet_words - 1);
-  AddPrim(reinterpret_cast<u_long*>(Render_frameScratch.orderingTable) + depth,
-          packet);
-  return 1;
-}
-
-static int WriteRoomPolygon(const ProjectedRoomPolygon* polygon,
-                            uintptr_t limit) {
-  enum { kLowDetailUvMask = 0x7F7F };
-  if (ResolveRoomPolygonDepth(polygon->depth, polygon->material.flags) < 0) {
-    return 0;
-  }
-  const size_t words =
-      1 + static_cast<size_t>(polygon->corners) * kVertexPacketWords;
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (cursor > limit || words * sizeof(u_long) > limit - cursor) return -1;
-  u_long* packet = reinterpret_cast<u_long*>(cursor);
-  memset(packet, 0, words * sizeof *packet);
-  uint16_t page = static_cast<uint16_t>(polygon->material.page);
-  if (polygon->low_detail) --page;
-  for (int index = 0; index < polygon->corners; ++index) {
-    const unsigned uv =
-        polygon->low_detail
-            ? (polygon->vertices[index].uv >> 1) & kLowDetailUvMask
-            : polygon->vertices[index].uv;
-    const size_t vertex_word =
-        1 + static_cast<size_t>(index) * kVertexPacketWords;
-    packet[vertex_word] = polygon->vertices[index].color;
-    packet[vertex_word + 1] = (u_long)polygon->screen[index];
-    packet[vertex_word + 2] = uv;
-  }
-  packet[1] |= (polygon->material.command & kPacketCommandMask)
-               << kPacketCommandShift;
-  packet[kPalettePacketWord] |= polygon->material.clut << kPackedCoordinateBits;
-  packet[kPagePacketWord] |= (unsigned)page << kPackedCoordinateBits;
-  if (!Render_LinkRoomPolygonByDepth(packet, words, polygon->depth,
-                                     polygon->material.flags)) {
-    return 0;
-  }
-  Render_frameScratch.primitiveCursor = packet + words;
-  return 1;
-}
-
-static int EmitSubdividedPolygon(const RoomVertex* vertices, int corners,
-                                 const RoomPolygonMaterial* material,
-                                 uintptr_t limit) {
-  Core_GteWord screen[kQuadCorners], depth = 0;
-  int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
-  int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
-  for (int index = 0; index < corners; ++index) {
-    SVECTOR position = vertices[index].position;
-    Core_GteWord fog, projection_flags;
-    const Core_GteWord current = Core_Gte_RotTransPers(
-        &position, &screen[index], &fog, &projection_flags);
-    if (current > depth) depth = current;
-    const int screen_x = static_cast<int16_t>(screen[index]),
-              screen_y =
-                  static_cast<int16_t>(static_cast<uint32_t>(screen[index]) >>
-                                       kPackedCoordinateBits);
-    if (screen_x < left) left = screen_x;
-    if (screen_x > right) right = screen_x;
-    if (screen_y < top) top = screen_y;
-    if (screen_y > bottom) bottom = screen_y;
-  }
-  const RoomScreenBounds projected = {left, top, right, bottom};
-  if (OutsideScreenBounds(&projected) || depth < room_near_depth) {
-    return 0;
-  }
-  ProjectedRoomPolygon polygon = {.vertices = vertices,
-                                  .screen = screen,
-                                  .corners = corners,
-                                  .depth = depth,
-                                  .material = *material,
-                                  .low_detail = 0};
-  if (corners == kTriangleCorners) {
-    polygon.material.command &= ~(unsigned)kQuadCommandFlag;
-  }
-  return WriteRoomPolygon(&polygon, limit);
-}
-
-// decomp: BATTLE.PRG func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612).
-static int SubdivideRoomTriangle(const RoomVertex vertices[kTriangleCorners],
-                                 int levels,
-                                 const RoomPolygonMaterial* material,
-                                 uintptr_t limit) {
-  if (levels == 0) {
-    return EmitSubdividedPolygon(vertices, kTriangleCorners, material, limit);
-  }
-  const RoomVertex first = Midpoint(&vertices[0], &vertices[1]);
-  const RoomVertex second = Midpoint(&vertices[1], &vertices[2]);
-  const RoomVertex third = Midpoint(&vertices[2], &vertices[0]);
-  const RoomVertex children[kTriangleSubdivisionCount][kTriangleCorners] = {
-      {vertices[0], first, third},       {second, first, vertices[1]},
-      {second, vertices[2], third},      {first, second, third},
-      {vertices[2], vertices[0], third}, {vertices[2], second, vertices[1]},
-      {first, vertices[0], vertices[1]}};
-  int emitted = 0;
-  for (unsigned child = 0; child < kTriangleSubdivisionCount; ++child) {
-    const int result = SubdivideRoomTriangle(
-        children[child], child < kRecursiveSubdivisionCount ? levels - 1 : 0,
-        material, limit);
-    if (result < 0) return result;
-    emitted += result;
-  }
-  return emitted;
-}
-
-// decomp: BATTLE.PRG func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:752).
-static int SubdivideRoomQuad(const RoomVertex vertices[kQuadCorners],
-                             int levels, const RoomPolygonMaterial* material,
-                             uintptr_t limit) {
-  if (levels == 0) {
-    return EmitSubdividedPolygon(vertices, kQuadCorners, material, limit);
-  }
-  const RoomVertex top = Midpoint(&vertices[0], &vertices[1]);
-  const RoomVertex right = Midpoint(&vertices[1], &vertices[3]);
-  const RoomVertex bottom = Midpoint(&vertices[2], &vertices[3]);
-  const RoomVertex left = Midpoint(&vertices[0], &vertices[2]);
-  const RoomVertex center = Midpoint(&vertices[1], &vertices[2]);
-  const RoomVertex children[kQuadCorners][kQuadCorners] = {
-      {vertices[0], top, left, center},
-      {vertices[1], top, right, center},
-      {vertices[3], bottom, right, center},
-      {vertices[2], bottom, left, center}};
-  const RoomVertex edges[kQuadCorners][kTriangleCorners] = {
-      {vertices[2], bottom, vertices[3]},
-      {vertices[2], vertices[0], left},
-      {top, vertices[0], vertices[1]},
-      {vertices[3], right, vertices[1]}};
-  int emitted = 0;
-  for (unsigned child = 0; child < kQuadCorners; ++child) {
-    const int result =
-        SubdivideRoomQuad(children[child], levels - 1, material, limit);
-    if (result < 0) return result;
-    emitted += result;
-  }
-  for (unsigned edge = 0; edge < kQuadCorners; ++edge) {
-    const int result = SubdivideRoomTriangle(edges[edge], 0, material, limit);
-    if (result < 0) return result;
-    emitted += result;
-  }
-  return emitted;
-}
-
-static uintptr_t RoomFrameLimit(size_t available_bytes) {
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (base == 0 || cursor < base || cursor - base > kPrimitiveBufferBytes ||
-      available_bytes > kPrimitiveBufferBytes - (cursor - base) ||
-      Render_frameScratch.orderingTable == nullptr) {
-    Core_Errorf("render", "Room polygons require a valid native frame span");
-    abort();
-  }
-  return cursor + available_bytes;
-}
-
-static uintptr_t RoomSubdivisionLimit(
-    const Render_RoomVertex* vertices, int levels,
-    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
-  if (vertices == nullptr || material == nullptr || levels < 0 ||
-      levels > kRoomMaximumSubdivisionLevels) {
-    Core_Errorf("render",
-                "Room subdivision requires valid vertices, material and depth");
-    abort();
-  }
-  return RoomFrameLimit(available_bytes);
-}
-
-// decomp: func_80097AEC (src/BATTLE/BATTLE.PRG/2EA3C.s:612-746).
-int Render_SubdivideRoomTriangle(
-    const Render_RoomVertex vertices[kRoomTriangleVertexCount], int levels,
-    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
-  const uintptr_t limit =
-      RoomSubdivisionLimit(vertices, levels, material, available_bytes);
-  RoomVertex captured[kTriangleCorners];
-  const RoomPolygonMaterial captured_material = *material;
-  memcpy(captured, vertices, sizeof captured);
-  return SubdivideRoomTriangle(captured, levels, &captured_material, limit);
-}
-
-// decomp: func_80097CF0 (src/BATTLE/BATTLE.PRG/2EA3C.s:752).
-int Render_SubdivideRoomQuad(
-    const Render_RoomVertex vertices[kRoomQuadVertexCount], int levels,
-    const Render_RoomPolygonMaterial* material, size_t available_bytes) {
-  const uintptr_t limit =
-      RoomSubdivisionLimit(vertices, levels, material, available_bytes);
-  RoomVertex captured[kQuadCorners];
-  const RoomPolygonMaterial captured_material = *material;
-  memcpy(captured, vertices, sizeof captured);
-  return SubdivideRoomQuad(captured, levels, &captured_material, limit);
-}
-
-// decomp: func_8009797C (src/BATTLE/BATTLE.PRG/2EA3C.s:506-544).
-// Capturing all three packed words preserves source loads under native
-// aliasing.
-void Render_DecodeRoomPolygonVertices(
-    const void* data, size_t size, unsigned coordinate_shift,
-    Render_RoomVertex vertices[kRoomTriangleVertexCount]) {
-  if (data == nullptr || vertices == nullptr ||
-      size < kRoomTriangleCoordinateBytes) {
-    Core_Debugf("render",
-                "Room vertex decoding requires a complete coordinate prefix");
-    abort();
-  }
-  unsigned char packed[kRoomTriangleCoordinateBytes];
-  int16_t base[kRoomSpatialDimensions];
-  memcpy(packed, data, sizeof packed);
-  memcpy(base, packed, sizeof base);
-  coordinate_shift &= sizeof(uint32_t) * CHAR_BIT - 1;
-  for (int vertex = 0; vertex < kTriangleCorners; ++vertex) {
-    int16_t coordinates[kRoomSpatialDimensions];
-    for (int axis = 0; axis < kRoomSpatialDimensions; ++axis) {
-      int8_t delta = 0;
-      if (vertex != 0) {
-        const size_t offset =
-            sizeof base +
-            static_cast<size_t>(vertex - 1) * kRoomSpatialDimensions +
-            static_cast<size_t>(axis);
-        memcpy(&delta, packed + offset, sizeof delta);
-      }
-      const uint32_t shifted =
-          static_cast<uint32_t>(static_cast<int32_t>(delta))
-          << coordinate_shift;
-      coordinates[axis] = VS::Core::Math::WrapSigned16(
-          static_cast<uint32_t>(static_cast<int32_t>(base[axis])) + shifted);
-    }
-    vertices[vertex].position.vx = coordinates[0];
-    vertices[vertex].position.vy = coordinates[1];
-    vertices[vertex].position.vz = coordinates[2];
-  }
-}
-
-// decomp: func_80097A10 (src/BATTLE/BATTLE.PRG/2EA3C.s:548-607).
-// Collapse the original register-pipelined lookahead onto one bounded record;
-// no read past the final polygon is needed. Native projection uses
-// quarter-depth.
-void Render_ProjectAndDecodeRoomPolygon(
-    const void* data, size_t size, unsigned coordinate_shift,
-    Render_RoomVertex vertices[kRoomTriangleVertexCount],
-    Render_RoomPolygonProjection* projection) {
-  if (projection == nullptr) {
-    Core_Errorf("render", "Room projection requires a native output");
-    abort();
-  }
-  Render_DecodeRoomPolygonVertices(data, size, coordinate_shift, vertices);
-  Render_RoomPolygonProjection captured;
-  for (int index = 0; index < kTriangleCorners; ++index) {
-    Core_GteWord fog, flags;
-    captured.depth[index] = Core_Gte_RotTransPers(
-        &vertices[index].position, &captured.screen[index], &fog, &flags);
-  }
-  captured.winding = Core_Gte_NormalClip(captured.screen[0], captured.screen[1],
-                                         captured.screen[2]);
-  *projection = captured;
-}
-
-static int QueueRoomPolygon(const unsigned char* data, unsigned flags,
-                            int corners, int mode, uintptr_t limit) {
-  RoomVertex vertices[kQuadCorners] = {0};
-  const unsigned coordinate_shift = (flags & 0x800) != 0 ? 0 : 3;
-  const int scale = 1 << coordinate_shift;
-  Render_RoomPolygonProjection triangle;
-  Render_ProjectAndDecodeRoomPolygon(
-      data, corners == kTriangleCorners ? kRoomTriangleBytes : kRoomQuadBytes,
-      coordinate_shift, vertices, &triangle);
-  const unsigned color_offsets[4] = {12, 16, 20, 36};
-  const unsigned u_offsets[4] = {24, 28, 19, 35};
-  const unsigned v_offsets[4] = {25, 29, 23, 39};
-  Core_GteWord screen[kQuadCorners];
-  Core_GteWord depth = 0;
-  Core_GteWord subdivision_depth = 0;
-  int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
-  int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
-  for (int index = 0; index < corners; ++index) {
-    if (index == kQuadCorners - 1) {
-      const signed char* delta = (const signed char*)data + kRoomTriangleBytes;
-      vertices[index].position.vx =
-          static_cast<int16_t>(vertices[0].position.vx + delta[0] * scale);
-      vertices[index].position.vy =
-          static_cast<int16_t>(vertices[0].position.vy + delta[1] * scale);
-      vertices[index].position.vz =
-          static_cast<int16_t>(vertices[0].position.vz + delta[2] * scale);
-    }
-    const unsigned char* color = data + color_offsets[index];
-    vertices[index].color = color[0] | ((unsigned)color[1] << CHAR_BIT) |
-                            ((unsigned)color[2] << (2 * CHAR_BIT));
-    vertices[index].uv =
-        data[u_offsets[index]] |
-        (static_cast<uint16_t>(data[v_offsets[index]]) << CHAR_BIT);
-    Core_GteWord fog, projection_flags;
-    Core_GteWord vertex_depth;
-    if (index < kTriangleCorners) {
-      screen[index] = triangle.screen[index];
-      vertex_depth = triangle.depth[index];
-    } else {
-      vertex_depth = Core_Gte_RotTransPers(
-          &vertices[index].position, &screen[index], &fog, &projection_flags);
-    }
-    if (vertex_depth > depth) {
-      depth = vertex_depth;
-    }
-    if (index == 2) subdivision_depth = depth;
-    const int x = static_cast<int16_t>(screen[index]);
-    const int y = static_cast<int16_t>(static_cast<uint32_t>(screen[index]) >>
-                                       kPackedCoordinateBits);
-    if (x < left) left = x;
-    if (x > right) right = x;
-    if (y < top) top = y;
-    if (y > bottom) bottom = y;
-  }
-  const RoomScreenBounds projected = {left, top, right, bottom};
-  if (OutsideScreenBounds(&projected) || depth < room_near_depth) {
-    return 0;
-  }
-  const Core_GteWord winding = triangle.winding;
-  if ((data[kRoomCommandOffset] & 1) == 0 && winding <= 0 &&
-      (corners == kTriangleCorners ||
-       Core_Gte_NormalClip(screen[1], screen[kQuadCorners - 1], screen[2]) <=
-           0)) {
-    return 0;
-  }
-  const int subdivision =
-      static_cast<int>((flags >> 13) & 3) -
-      static_cast<int>(static_cast<uint32_t>(subdivision_depth) >> 7);
-  Core_GteWord subdivision_area = winding;
-  if (corners == kTriangleCorners && subdivision_area < 0) {
-    subdivision_area = -subdivision_area;
-  }
-  if (corners == kQuadCorners && winding < 0 &&
-      (data[kRoomCommandOffset] & 1) == 0) {
-    subdivision_area =
-        Core_Gte_NormalClip(screen[1], screen[kQuadCorners - 1], screen[2]);
-  }
-  if ((mode & 1) != 0 &&
-      static_cast<uint32_t>(subdivision_area) >= kMinimumSubdivisionArea &&
-      subdivision > 0) {
-    uint16_t clut, page;
-    memcpy(&clut, data + kClutRecordOffset, sizeof clut);
-    memcpy(&page, data + kPageRecordOffset, sizeof page);
-    const RoomPolygonMaterial material = {.flags = flags,
-                                          .command = data[kRoomCommandOffset],
-                                          .clut = clut,
-                                          .page = page};
-    const size_t available_bytes = static_cast<size_t>(
-        limit - (uintptr_t)Render_frameScratch.primitiveCursor);
-    return corners == kTriangleCorners
-               ? Render_SubdivideRoomTriangle(vertices, subdivision, &material,
-                                              available_bytes)
-               : Render_SubdivideRoomQuad(vertices, subdivision, &material,
-                                          available_bytes);
-  }
-  const Core_GteWord linked_depth = ResolveRoomPolygonDepth(depth, flags);
-  if (linked_depth < 0) return 0;
-  uint16_t clut, page;
-  memcpy(&clut, data + kClutRecordOffset, sizeof clut);
-  memcpy(&page, data + kPageRecordOffset, sizeof page);
-  const ProjectedRoomPolygon polygon = {
-      .vertices = vertices,
-      .screen = screen,
-      .corners = corners,
-      .depth = depth,
-      .material = {.flags = flags,
-                   .command = data[kRoomCommandOffset],
-                   .clut = clut,
-                   .page = page},
-      .low_detail = static_cast<uint32_t>(linked_depth) >= room_lod_depth};
-  return WriteRoomPolygon(&polygon, limit);
-}
-
-// decomp: func_80097388 (src/BATTLE/BATTLE.PRG/2EA3C.s:104-500).
-int Render_DrawRoomGeometryPolygons(const void* data, size_t size,
-                                    unsigned flags, int mode,
-                                    size_t available_bytes) {
-  unsigned counts[2];
-  if (data == nullptr || size < sizeof counts) {
-    Core_Errorf("render", "Room polygon batch has no complete count header");
-    abort();
-  }
-  memcpy(counts, data, sizeof counts);
-  const uint64_t required =
-      sizeof counts + static_cast<uint64_t>(counts[0]) * kRoomTriangleBytes +
-      static_cast<uint64_t>(counts[1]) * kRoomQuadBytes;
-  if (required > size) {
-    Core_Errorf("render", "Room polygon counts exceed their native input span");
-    abort();
-  }
-  const uintptr_t limit = RoomFrameLimit(available_bytes);
-  const uintptr_t input = (uintptr_t)data;
-  const uintptr_t output = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (required > UINTPTR_MAX - input ||
-      (input < limit && output < input + (uintptr_t)required)) {
-    Core_Errorf("render", "Room polygon input overlaps its native output span");
-    abort();
-  }
-  const unsigned char* polygon = (const unsigned char*)data + sizeof counts;
-  int emitted = 0;
-  for (int kind = 0; kind < 2; ++kind) {
-    for (unsigned face = 0; face < counts[kind]; ++face) {
-      const int count = QueueRoomPolygon(
-          polygon, flags, kind == 0 ? kTriangleCorners : kQuadCorners, mode,
-          limit);
-      if (count < 0) return -1;
-      emitted += count;
-      polygon += kind == 0 ? kRoomTriangleBytes : kRoomQuadBytes;
-    }
-  }
-  return emitted;
-}
-
-// decomp: func_8009723C (src/BATTLE/BATTLE.PRG/2EA3C.s:10).
-void Render_DrawRoomGeometry(void* data, int mode) {
-  if (data == nullptr || Render_frameScratch.orderingTable == nullptr) {
-    return;
-  }
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t start = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (base == 0 || start < base || start - base > kPrimitiveBufferBytes) {
-    return;
-  }
-  uintptr_t limit = base + kPrimitiveBufferBytes;
-  if (limit - start > kRoomBatchBytes) {
-    limit = start + kRoomBatchBytes;
-  }
-  unsigned count;
-  memcpy(&count, data, sizeof count);
-  if (count > kMaximumGeometryGroups) {
-    return;
-  }
-  const Render_RoomGeometryGroup* groups =
-      reinterpret_cast<const Render_RoomGeometryGroup*>(
-          reinterpret_cast<unsigned char*>(data) + sizeof count);
-  for (unsigned index = 0; index < count; ++index) {
-    const Render_RoomGeometryGroup* group = &groups[index];
-    const unsigned facing = Render_frameScratch.firstPersonViewFacing;
-    if ((group->flags & kSkipGeometryFlags) != 0 ||
-        (((group->flags >> kAlternatePassShift) & 1) & (unsigned)mode) != 0 ||
-        ((facing >> kPackedCoordinateBits) == 0 &&
-         ((~group->flags) & (facing & UINT8_MAX)) != 0)) {
-      continue;
-    }
-    Core_Gte_SetRotMatrix(&group->view);
-    Core_Gte_SetTransMatrix(&group->view);
-    const unsigned char* polygon =
-        (const unsigned char*)data + group->polygonOffset;
-    unsigned counts[2];
-    memcpy(counts, polygon, sizeof counts);
-    const size_t polygon_bytes =
-        sizeof counts + static_cast<size_t>(counts[0]) * kRoomTriangleBytes +
-        static_cast<size_t>(counts[1]) * kRoomQuadBytes;
-    const size_t available = static_cast<size_t>(
-        limit - (uintptr_t)Render_frameScratch.primitiveCursor);
-    if (Render_DrawRoomGeometryPolygons(polygon, polygon_bytes, group->flags,
-                                        mode, available) < 0) {
-      return;
-    }
-  }
-}
-
-// decomp: BATTLE.PRG func_80098160 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
-// not yet ported]
-void Render_SetRoomPolygonNearClip(int depth) {
-  room_near_depth = static_cast<int16_t>(depth);
-}
-
-// decomp: func_8009817C (src/BATTLE/BATTLE.PRG/2EA3C.s:1078).
-void Render_SetRoomPolygonFarClip(int depth) {
-  room_far_depth = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(depth));
-}
-
-// decomp: func_800981B8 (src/BATTLE/BATTLE.PRG/2EA3C.s:1101).
-void Render_SetRoomPolygonScreenBounds(int left, int top, int right,
-                                       int bottom) {
-  room_screen_bounds.left =
-      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(left));
-  room_screen_bounds.top =
-      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(top));
-  room_screen_bounds.right =
-      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(right));
-  room_screen_bounds.bottom =
-      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(bottom));
-}
-
-// decomp: BATTLE.PRG func_80098194 (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
-// not yet ported]
-void Render_SetRoomTextureLodDepth(int depth) {
-  room_lod_depth =
-      static_cast<unsigned>(static_cast<int>(static_cast<int16_t>(depth)));
-}
-
-// decomp: BATTLE.PRG func_8009820C (src/BATTLE/BATTLE.PRG/2EA3C.s:0) [asm-file:
-// not yet ported]
-void Render_DrawSkyDome(void* data) {
-  if (data == nullptr || Render_frameScratch.orderingTable == nullptr) return;
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t start = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (base == 0 || start < base || start - base > kPrimitiveBufferBytes) return;
-  VECTOR positions[kSkyVertexCount];
-  unsigned colors[kSkyVertexCount];
-  const unsigned char* bytes = (const unsigned char*)(data);
-  for (unsigned vertex = 0; vertex < kSkyVertexCount; ++vertex) {
-    SVECTOR position;
-    Core_GteWord flags;
-    memcpy(&position, bytes + static_cast<size_t>(vertex) * kSkyVertexBytes,
-           sizeof position);
-    memcpy(
-        &colors[vertex],
-        bytes + static_cast<size_t>(vertex) * kSkyVertexBytes + sizeof position,
-        sizeof colors[vertex]);
-    Core_Gte_RotTrans(&position, &positions[vertex], &flags);
-  }
-  bytes += static_cast<size_t>(kSkyVertexCount) * kSkyVertexBytes;
-  for (unsigned face = 0; face < kSkyFaceCount; ++face) {
-    const unsigned char* indices =
-        bytes + static_cast<size_t>(face) * kSkyFaceBytes;
-    if (indices[0] >= kSkyVertexCount || indices[1] >= kSkyVertexCount ||
-        indices[2] >= kSkyVertexCount) {
-      return;
-    }
-    if (positions[indices[0]].vz <= 0 && positions[indices[1]].vz <= 0 &&
-        positions[indices[2]].vz <= 0) {
-      continue;
-    }
-    int left = INT32_MAX, right = INT32_MIN, top = INT32_MAX,
-        bottom = INT32_MIN;
-    Core_GteWord xy[kTriangleCorners];
-    for (int corner = 0; corner < kTriangleCorners; ++corner) {
-      const VECTOR* position = &positions[indices[corner]];
-      const int x = position->vx + kViewportWidth / 2;
-      const int y = position->vy + kDrawHeight / 2;
-      if (x < left) left = x;
-      if (x > right) right = x;
-      if (y < top) top = y;
-      if (y > bottom) bottom = y;
-      xy[corner] =
-          (Core_GteWord)(static_cast<uint16_t>(x) |
-                         (static_cast<unsigned>(static_cast<uint16_t>(y))
-                          << kPackedCoordinateBits));
-    }
-    if (right < 0 || left >= kViewportWidth || bottom < 0 ||
-        top >= kViewportHeight) {
-      continue;
-    }
-    const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-    if (cursor > base + kPrimitiveBufferBytes - sizeof(POLY_G3)) return;
-    u_long* packet = reinterpret_cast<u_long*>(cursor);
-    memset(packet, 0, sizeof(POLY_G3));
-    for (int corner = 0; corner < kTriangleCorners; ++corner) {
-      packet[1 + corner * 2] = colors[indices[corner]] & kColorMask;
-      packet[2 + corner * 2] = (u_long)xy[corner];
-    }
-    packet[1] |= kSkyGouraudCommand;
-    setlen(packet, kSkyPacketWords - 1);
-    AddPrim(reinterpret_cast<u_long*>(Render_frameScratch.orderingTable) +
-                kLastOrderingSlot,
-            packet);
-    Render_frameScratch.primitiveCursor = packet + kSkyPacketWords;
-  }
+  return status;
 }
 
 // decomp: BATTLE.PRG vs_battle_getGeomOffset (2EA3C.s:2470).
-void Render_GetProjectionScreenOffset(Render_ScreenOffset* offset) {
-  Core_GteWord x;
-  Core_GteWord y;
-  Core_Gte_GetGeomOffset(&x, &y);
-  offset->x = (u_short)x;
-  offset->y = (u_short)y;
+RoomScreenOffset GetProjectionScreenOffset(const RoomTransformer& transformer) {
+  const RoomScreenOffset offset = transformer.ScreenOffset();
+  return {static_cast<std::uint16_t>(offset.x),
+          static_cast<std::uint16_t>(offset.y)};
 }
 
 // decomp: BATTLE.PRG vs_battle_setGeomOffset (2EA3C.s:2482).
-void Render_SetProjectionScreenOffset(Render_ScreenOffset* offset) {
-  Core_Gte_SetGeomOffset(offset->x, offset->y);
+void SetProjectionScreenOffset(RoomTransformer& transformer,
+                               const RoomScreenOffset& offset) {
+  transformer.SetScreenOffset(offset);
 }
-}  // extern "C"
+}  // namespace VS::Render

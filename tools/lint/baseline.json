@@ -9,13 +9,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "002c6edf66e73646aa33c5cfe75aeec49953d3ff376d2a83b8bb48ee26664c11",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "003863358750c536374cce19515448ff23335f34fbb7e541f12a6fa0b57ec722",
       "count": 1,
       "tool": "tidy",
@@ -233,25 +226,11 @@
       "rule": "SIM115"
     },
     {
-      "key": "01f677672c13dbc6f9d6b7be9896b815c660ce37b364119c2fe4dd4c7be28b5a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "01f9b4909c31ea30b1e73118578cce0c51bde30dcba5d9010b67538280e9efd2",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Psx.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "01fac7f818828d980d525120e4db1ee498094304d8ff3b8a2554b09940e15160",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "0213c8c425f727e24db7e035aa89201c2f7bc9cc2888e4815eb6a469b310708e",
@@ -317,25 +296,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "0252f5b078b4356c1955a6540a60a5ead4b42a7ffc02a90ab7f824d0dd2fd4a6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0253b4ea687bf000bec60394cb9c634df11623114d75c2c34a5fc97d2e1ef0b9",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/include/Platform/GameFiber.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "027c2116acc8a1df12061549a95739427f184bcdadeb96fcdedcefc3d0c74f17",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "027cda42ee9396d44c7745c9f2e8ae71a590c596cede06d61d11cddcd71f72ba",
@@ -401,13 +366,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "02f23fd8ca6ca67dfa4ad001ff931885abe4136fa60659215f58374482683a95",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "02f56a4ed4568b6114dc493319a50ff1035e0c22ccc106d13d5799b8bfbbd680",
       "count": 1,
       "tool": "tidy",
@@ -441,13 +399,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "032bb48bfb0a6b20eafc534e3eaeb3399422bc02ddc66f70329f9c7cc839cc72",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "03412c7e07f29e4a097ea1a0f0eb0b35f2c69d7df03effedc84eeed2aac6a37a",
@@ -751,13 +702,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "05056c20254978708b04ce58cb64fb5f24aa62e562e9102ffd33e598b28f88b1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "050826d7c7799ce043e045a49102a7364930a0e04beccceee535564a35de0c33",
       "count": 1,
       "tool": "format",
@@ -814,13 +758,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "0576c29a794b690580a0542b5e2657a975aa4b96eed5c7423cb62af7eba8628b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "05773f68722c9843995922e4c61817cba212e7fdd0bbf4e3028bcd6bb4ff12c8",
       "count": 1,
       "tool": "cpplint",
@@ -854,13 +791,6 @@
       "tool": "tidy",
       "path": "Native/Game/include/Boot/GameApp.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "05a7feaa3637d15ffd4cb5728f28fb808ffc3b8b5ced64879cd2c44f6bb11b94",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "05a9bace0a96c6b166b0ad0d226154db15494655898d7dc73a760c2d08aad6da",
@@ -898,32 +828,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "05f5153ca288f38c8aba880344f04926b939991c28c2aa772a098c05cb7143fc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "05f9b68be054523454995ca9a663da907f6e0355705f5f43ebbab735051e96c6",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "0611a527f9910cc9433fc3af0a73cc298a3589d87bf853c3ae23c0881bd4f815",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "0621a70487a793076b16ef9427dbb041bbf7b12df2b59f48adeff058f0f8ce48",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "06263a75f5a25f75c6d87b8681a6faf523f48abc87fcaa92e5d1e3db82075aa9",
@@ -975,25 +884,11 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "0681d7a83a17d8e71d12fb9c0fcff197aa509d329d3131a972761cb0539d5dd4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "068ba32554091cf6932f4d96dcf7b9bc633d2c23f2d6da6a1aa49d961db0f339",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "0697c8b3651de6f85b4cbda3caf373f4fdf5a0cc5f66452e755640f1f4833f87",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "06a4988ed46f1c7afec3d4e84b31021115288e2aa3d77a9ed40c4b1840930388",
@@ -1021,13 +916,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "06e64c25b4c37ab700aa0d3988057e0535dc21e91ff79463274c7a786701fb80",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
     },
     {
@@ -1094,25 +982,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "076ffd679c5d80ce1a425ea0740a9e42a6d14f382d779d3715d7ba4405d5a8cb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "0771e5e1c9a724698811fde2eb67c5ee292144bbbe6bead8c03f9617dbea9e4d",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "07816118e9cbcd7837e83d3f085d61b65f121739f3e93065164aa5783d07538b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "0785aa472afc4f4e5bc0cbb9a8f699d58b01e3c9c7c9d8bf1ed44a7455dba66a",
@@ -1134,20 +1008,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "07cd8e190cc1ac3ab76c377b1f1adb1b3ae783b1ea839c0100ea4b80725b37fd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "07daf812cce8c2eb14c82dadbd8fbf207209a5ed2b03eb26b0af5c1c2d8b2ac3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "07f7761a46bf7f7d32211dac7ccc666ed80228ab6b5674216a2fe7abef59a194",
@@ -1325,13 +1185,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "096e81c970e93f9ede90ac75242770ff45084e92e7f5fa21347597aacd058bd8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "097334f70747e3ab54eb8ffac9f9e60629c6b681311c348f0e53249623935813",
       "count": 1,
       "tool": "tidy",
@@ -1393,13 +1246,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "09bf7f8df8c6e633440e26db78a7b22688561affff6b12579755f77f8a04a3f0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "09c87c800b2cfcfd1f8987a91d81c4fcafb1fc5db31eb771802548d120f5ba27",
@@ -1472,25 +1318,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "0a3cd0c1f3b905f56b41c606fbbafa4a30a9a65733fc75daf9266b430779e6b8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "0a4d7a031204b9b2e39a57e55f200db3c18c80ac0da3b3f546658a63f1a76280",
       "count": 1,
       "tool": "ruff",
       "path": "tools/naming/evidence.py",
       "rule": "B007"
-    },
-    {
-      "key": "0a5e330e664d0caee19cbc10ba976a0171b3d905da77ce834c514f6a18b98e4c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "0a63085d27eba67f6b667cff01bae1aecb988ed7a592e779925f5a5a01a64916",
@@ -1563,13 +1395,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "0aa35dff967e448dd4268205c2b1989a9e461ab79e0085f8d5684021672c0ab7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "006ae0ec3158b5a281f6f383aa011223d6899655b4336bf4d37485aac3c75ca1",
       "count": 2,
       "tool": "tidy",
@@ -1619,13 +1444,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "0af18e2e7a0d7d5f61015e7ed9029c2768126a919a110d03e19b38b729de92d2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "0b030235881b916ae26e4d0a25f85bc11cfddb23aa736d790a637b831b769a3b",
       "count": 1,
       "tool": "tidy",
@@ -1652,13 +1470,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "0b2d5805298f3f9309ab1a7d3c85e7d1a69c00e4c934e1fc17033534b8f92cf5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "0b2e63df9107422c954320a8c8191ddca89c84886d2080bc1e5c189a12e176ab",
@@ -1701,13 +1512,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EffectTimelineTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "0b66c9824a9fcfc28c38dbbf3270fda212fa2c9293c59e87d459a556f372f32d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "0b6e90774f585a1f4962f00598d7853a2c6c13b269a4241bcfa11fd77ca9c5db",
@@ -1819,13 +1623,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "0c1b9275816f6f80d5f204b4e8c13c5879c47c0ae91bf2657aabfed69b52f611",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
     },
     {
@@ -1983,13 +1780,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "0d4ad22f931951a5204053110c220b665d6b4727c0f62e5fa6ef7b97eb5f812f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "0d54e8c67f223cf2bc16171120c5ed5ceab85ffbf27f721666f4b672d74fd7b1",
       "count": 1,
       "tool": "tidy",
@@ -2009,13 +1799,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "0d5c5d3a45f0a3b078644a8702698d33ed4bcfb13a95c737cdbe8040fac49a2f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "0d68d739504c1ba6634d1a3bbfebc561e14fdaf80a086ab55255a1c29e07d662",
@@ -2079,13 +1862,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "0d955ccced36f09ba4a7a3373e72003e12d3f7fc524a3e4f1641cfbe7b3b46bb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "0d99dafa6731e0c17a8365b7357f0e2dc5c8ab0af57f930eb2caa5d8b6bee815",
@@ -2228,13 +2004,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "0e510e21283a07f3f0978612b89a5fd547fcae2acf3708188b61269f82544988",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "0e5790a47eef1af3483c9f7b70af49c769913a7957e8eda9e893c4a89b1ad95e",
       "count": 1,
       "tool": "cpplint",
@@ -2319,32 +2088,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "0ed428280fce6acf0e11ff85a25ca2d072dbadb6dcf6a0181bc7bb5e85fde96a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "0ede2b6daa66a21c360d3ec63d4a642290c57a85957b44d47732c838d0556dd5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0ee7c986d32f320c6548d6294129627a58f7e3c98ff7bd812bd4c4d5d5ee8af6",
       "count": 2,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "0f16369726b7f2e5382a9f8a9a1a1f0a87894251a38e21201b8caa69d915bc09",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "0f298f9409c1aa61357a8fe20e4d2f094616e1da3d66332746c8ac12715eb89f",
@@ -2606,13 +2354,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "10b1d6f89c29d5d6677cbeff1e026f2b8442ad50b4a936bea7cc099cc080d258",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "10c2b5793e9a5ff01701c16f68b5b2ac553bcfbb9edd0c9ef9a19808e0ce01c4",
       "count": 1,
       "tool": "tidy",
@@ -2795,13 +2536,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "11fd276d8491260cdf69d0d89295ec9b36510a1b0184174ebb377727fb0ccd42",
-      "count": 14,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "11fed73dc7d428ee35cfa8d69d91088c2ee8651e7447cdf799dda82c114fcaa7",
       "count": 1,
       "tool": "cpplint",
@@ -2949,13 +2683,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "12cda2c791abd3c3007c6b309445d70967a2930c2cc0837e0c89f63c6d1d2568",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "12d06eb4109029017af087dd4890235a56f25bb814a79c1fe22a3e91fba395d2",
       "count": 1,
       "tool": "cpplint",
@@ -3068,13 +2795,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "134d32f5d64338016e97666eae7b2e68762107d4bd714a178eed0d7832a1537a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "136fcaf0fcef6b916712c6b8430ecb777177f8478cee130b3c72e768a64690da",
       "count": 1,
       "tool": "tidy",
@@ -3157,13 +2877,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "13ed373091bebebb16a0cce40e3553b1d14adfdf45679835c4dd2c498860785e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "13f14d98afd6fc775affe65e3ade8cac2eecd472a3de5977c28d209e1a06c71d",
@@ -3299,13 +3012,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "149f3e411b97a4fb799bdeb41c5c642890a418b57eecec9c4c1f55b9e4ae80b2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "14a28dc096e3f076ce0a7e37e45b01a6300cb1ff0bb98e8f771b8147e66a2f2c",
       "count": 1,
       "tool": "cpplint",
@@ -3402,20 +3108,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "157ff3b89805cfe783fb39da7558f81bf2c9bdc2b2ed207aadc4d98388b1a709",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1598d4c20e160d408cef22a201b28e666795b2ce71d8283e5027a1abf5e49e6b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "159ae6b68b1a860befd5b68320b8eb7f5d38bd71cda23f326232ebf4f6ab7176",
@@ -3607,13 +3299,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "16f6898b1887e95a7e13cf104b66e925dbba2f6988d7af4d82aff9689361b903",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "16f7a409c0a59c62dcafa27d29e2aa8f1279290a8ad1c3a10635f1786d2ccdee",
       "count": 1,
       "tool": "tidy",
@@ -3768,13 +3453,6 @@
       "rule": "google"
     },
     {
-      "key": "180926db84e84a8e65ae558ab3c0b767847d147b17a39cb4f38d1299001cf22b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "180f0a72a5b1024a4d0c689bfd119ddd8ecad0314d2cc2376652801b2b3b2785",
       "count": 1,
       "tool": "cpplint",
@@ -3880,25 +3558,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "18d6b4713437e5dc547b3a2e42a89a557b011b8ba17b7aac16f0e89035337698",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "18fa34f82d9af458839ec040a39b38dd053240059db20d1fb4d81c50c21f6ff1",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "18ff783463ea124079405ff19ddbead5edb7ab1730abce6bf1bfdc189a944e19",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "19085f192b4bb70eaf8809bcc4149af76799dd108e2161b4557faba487c5fd2c",
@@ -3999,13 +3663,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "19c6f01beab820c33f3d018c6f1d2706983847a41d7cc6974634e1b468224abc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "19cbebba28c9e129e05ab4007a43e11f137df31c39e67e79c2b5b6f3612f1be0",
       "count": 1,
       "tool": "tidy",
@@ -4039,13 +3696,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "19e7e26d3bd13b323a2636643def292122c899eb2e6358eeb1630232c3483e79",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "1a07367cb47fd279e3002674842fb9072cb47ac611312655f6a9df8c286da66c",
@@ -4139,13 +3789,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "1afd584ed06f3b4acbfa963f97999de6b2c4ed9a34aa98cfee205e5f87c3bf78",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1afefa6f98d10225cc940c55ad3be851da8ad111282fe7546bdd89b8370ae397",
       "count": 1,
       "tool": "tidy",
@@ -4207,13 +3850,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "1b63e33c451bed11422ce2360352cbabeda59d60d17fd636622a4253dee10d81",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "1b70a69434ee7672297e6c9a5109899de866f155760e59d1d9dc6d445d6f4ef3",
@@ -4461,13 +4097,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "1caf7b726f530bbce7f904af9e5d3b2619af0d7d2eb5fd765b340940a5cef42e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1ccb8157a6c22e44adfdd057bd65d5b3b3ea6ad3e9360922a0678d7baca2d3e1",
       "count": 1,
       "tool": "tidy",
@@ -4552,20 +4181,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "1d263954e4699cc47374bea80fa2178ef9c671127eebce3c1882ef5690cbea41",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1d2fa4eec980923585bb32e8e05e48a29c864e1334c43fa14a5106230a8b0248",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1d2fe62c6f0e96e92d0f8a47b079f5c8c548a498d26c602ec7c5790e06d4b0bb",
       "count": 1,
       "tool": "cpplint",
@@ -4613,13 +4228,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "1d8a7a42edf4fd717ef6d3fbe45369b496853f272dea8caa63d36c838b22b32a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "1d8d39bb6d75366f2bade72e2acfd97738cf3ef8ab6306508f9d46dae27b449e",
@@ -4720,20 +4328,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "1e6128ea3dfd1e4fed02ef92db6ec92894146c9ed947ceee9ce3a90f62f2991b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
-      "key": "1e822229d772ea964576e5a6243481301a90a20931eda477c93dc5506f4c3ab3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "1e8ac1649493ca01528d93313a2f418b2df9dd6120f8eec598dd7eef93da5ed2",
       "count": 1,
       "tool": "cpplint",
@@ -4823,13 +4417,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "1f4179af0cf434b134167a5055c7ee0f4fd1f501f9df8c9e8a5b030e9aef3b83",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "1f472cfb527e2476da508d5624dea3b1b89ff797ffa9494e2a66543d0e240e24",
@@ -5168,13 +4755,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "21a215a4a491e73cfe39078db108a5cb7c451181b386fe227aa330e0534c06df",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "21bdad217e57f3d2aa0e1dd0a20e7742ea50408f858269d12cbf853e370351af",
       "count": 1,
       "tool": "tidy",
@@ -5259,20 +4839,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "222dba0556fddede1409a8cc26a3cb7eab9db75b85ac32884b759154c0bd3d58",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "224012bafddf75dd257d45ccfac8c963250390deb3259847cac7a83a2537f7e6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "22546fa27a225d2b742b7f07227b38c8ee983edbd8deeb19f558dcf1a03f3e8c",
       "count": 4,
       "tool": "cpplint",
@@ -5334,13 +4900,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "22da6b7abbb70d331fc7bd56efc0c33f142296a6fd762903fc02c5eaa4ca1469",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "22e1a4b02317f6ac64db1ed1084607bd713d738348cfab095c24d0526e6422e0",
@@ -5483,13 +5042,6 @@
       "rule": "build/namespaces"
     },
     {
-      "key": "237f1e229d7f4999c0e536f7d128f6012e97030fe529f35c08d998bf78d80696",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2380ce750c16228c0ec87590dd112e9f51407482672f75e09baa56c92b57526f",
       "count": 1,
       "tool": "cpplint",
@@ -5544,20 +5096,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "runtime/int"
-    },
-    {
-      "key": "23c64c8c0798aeb00bc9a05ab126055d74c59c95dc87609f04b77564b013c01c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
-      "key": "23c77088757663e8fcca9ab9dec9d1a96a33c62aaea1c9516782746aaaa7e4d5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "23c921af0692e99e2c5bf7a4859ca2947818b4c8cafaf5ccd6fcc9771ca262aa",
@@ -5721,13 +5259,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "24d84af1eb54da8e2dd5bffc8c856406745aaa9aa317c3ed2c4dff726a54e1bc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "24da13ee5df952278e3061925a59096dab1a0d06b396fb59f50b1b7abd15f150",
       "count": 1,
       "tool": "tidy",
@@ -5830,13 +5361,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Gte.h",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "253c95ff57dfc3cdd0e18ba5607eea0a010317d59fd029a7627f6a1f11f600cb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -5998,13 +5522,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "260cff13e1be908c3c5b5df88bfd54ea355400408fc7e3b9105ad627eb9d6f03",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -6288,13 +5805,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "2859316506be6f0536eb0e3c9bb08b7f32c7362e054277760c2fb718a5c23d5c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "285c5422e7987cd20f014fbd00642885659f8acd9aab3667c972692632c83621",
       "count": 1,
       "tool": "cpplint",
@@ -6330,25 +5840,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "28848c2742ea2dd747a111a076b21dbf186a80128a50293b136dbc9b143c30fe",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "28879eeab728192c99b064fd6acfa6cab0e0e332735b82f32f049c1b3b89d12f",
       "count": 1,
       "tool": "format",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "google"
-    },
-    {
-      "key": "2888b8e5b562cbd5e070edfa4dcb3911ce3d14cbcd920cfd80372cd5ea8b2559",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "28ba8fc33814523f4562fcf64aabca14e91fe22a5838396e548f613d15581834",
@@ -6405,13 +5901,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EffectTimelineTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "28e85d09a505340e2b8a3efa674e9e2bcf4a73656953b143451c89a05bf1a1c6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "28ea67e2b30481a229490e2fab140dca79caef4475d22a35595154fc6f11e03f",
@@ -6526,13 +6015,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "298facfce945aaf35d0936703e5a7749a3cfa2636fa9eca485b47d1f4cc6ca0f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "299c6a667664723c86e519f89505e11cf2240cac196cb6f62991468b0770af01",
       "count": 1,
       "tool": "tidy",
@@ -6645,13 +6127,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2a22ddece1d36b0ff5de3237d594486b287ef93a14c174acb04c08bd3b664fba",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2a2aea286ea4b5d438027908bbe58e2c7d74d04c75258fd7369af7eeb70f45e0",
       "count": 1,
       "tool": "tidy",
@@ -6678,13 +6153,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/RandomGenerator.cpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "2a5665bed2ce8fb34df17b6d3a6477325b5f871d929633e31767965c4e987344",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2a6bd4118b1090c375c09932fe975e506592225346d95a6686fecf4d2feed5ad",
@@ -6846,13 +6314,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "2ba396bc2dbdfdd86c88285af11f1a75bbd5d1fc7444f5561849fab6f99cbe89",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "2ba6ebf5e18fe5d6b9ab3f0bd2412810c3772ce83c5fba5c28a581e02196a478",
@@ -7065,13 +6526,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2cc4f7922353622ae12d9ae957525f74a593f6254f52990a0462a8cecc1b2ecf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7b04db4748f2ec91aac6037ce2e9f3907e48e003a5f219ea171fe433fd3bf9de",
       "count": 1,
       "tool": "tidy",
@@ -7198,13 +6652,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "2da028afdc4ae9175013e560bcb7e4c396f4d440b024fe873124ec5eed30a51f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2da8702f3192f1f050e43dc4d8decdc6fd5e91e0c71a7d4e481cb689c2f95336",
       "count": 1,
       "tool": "cpplint",
@@ -7308,13 +6755,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "2e5f9bda490fbc60ed6b2187891e659c11d5973f1d9c36da5317213d6bff3454",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "2e64fb7294fe96fb4bd183dfc9301956752d9f9c446ad9d92788c2627c193d59",
@@ -7590,13 +7030,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "30304ef8a620939e0da1d66d3a624c1a7e771fc03ef81cb467cb0da9d5be7140",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "3035b5b93d78fabdb576210de0fea16020bd09e2fef8296c7be4c6aaf11b259d",
       "count": 1,
       "tool": "cpplint",
@@ -7629,13 +7062,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "306f62f68c411ea237edc341553b295e43e75a4febabc0db7f605097a85ff004",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -7709,13 +7135,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "31123462bd962609f9ab81223cea4a601786e8c1923eeee543893ea0c416c38e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "31174a9469267c18c5999d91b8a65e0f5809a97fa4a3d64fd93f3248bc872836",
       "count": 1,
       "tool": "tidy",
@@ -7756,13 +7175,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "31375d2edbc95cf2c1168c96b0d0f6f9b9e439c56eec70d12ba59f75759c172f",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "31574986b06d1bcc32a8a613231ba51f1610ebee797670502ea7f71a31e32125",
@@ -7811,13 +7223,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "31b37c9e0cba67345646f8900e0bd107be571fd29ab55de3b35b19af5b84064c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -7931,13 +7336,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "329218189434b7c0c51cfe3649f7e9c77844ca7d84145d2f57517471ad6661bc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "3299c46617c3f9d075f3d2002bda86c4bb83d82d37d5399811da242a549f4f86",
@@ -8115,13 +7513,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "33be465c324b1df1baeaf66639cb5676c4d61ea2133b123bc479be06aa8fd659",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "33dc1d6e67cc99259cc6f17041fe47ca89a2c0e5df2524368306eaa5ee7c611b",
       "count": 1,
       "tool": "ruff",
@@ -8227,13 +7618,6 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "34e5732cf03e27050842725847c5dbdb8581365a0293d048c035de616790f717",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "34ed08c947746c1ea33e3215d6b550d95a1c7d4ca670362de18c6f6fd2cdad1f",
       "count": 1,
       "tool": "tidy",
@@ -8283,13 +7667,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "35217befd63e18537810a55b98b6df7bdfeb3eb61d2c3cbec71fb9cf3fd253f8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "35303c6d093fc39dae0534a8c19327103d445865272f218af34a5fc3dbf24111",
       "count": 1,
       "tool": "ruff",
@@ -8337,13 +7714,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "35635f9a0014df11ce9ad6ff28baa68150858b6249cbd638bdaaab8174789900",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "357298f0f1b6faa960a7b80bd589ee7f3c15000f42d74c19136b2b4be74ac8a2",
@@ -8500,13 +7870,6 @@
       "rule": "google-readability-casting"
     },
     {
-      "key": "3648cf1e96c05706093fdefa8ea7cd71a00bc26f7932ac261998c67556dd7334",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "36490ce73393669e2f992f189790eeb9a8e276be0fa02603fbe63978233ec5ed",
       "count": 1,
       "tool": "tidy",
@@ -8577,13 +7940,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "36d9d8532036d95c8f651924e218ba74966f7d95aa5fd46525a471960f15638b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "36e69834bb1db82001ea3f3747753c1be100cdfc127d4919ec246398eb29614c",
       "count": 2,
       "tool": "cpplint",
@@ -8596,13 +7952,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CoreTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "36eeb5c9cd0c9bc847d324a200284567f4951b4f2216645f4f84ed360dab7997",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "36f4aec0d111f5d3ba8ae5494d85612c29c57f72635aa9c999f02ec9ae296ffa",
@@ -8675,13 +8024,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "3781f807b2e252f271d15b1879ee35e7f742d07054b2f00d805dc0fd9d3755bd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "378a1fa1d010a56d04e165bb5c95f82a386984c8380772adf65a8dbe47ff9694",
       "count": 1,
       "tool": "cpplint",
@@ -8717,13 +8059,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "37c5d55c879b660aef3253972e4313e7722bb7dcae6220b98ab8dc81a8fe1159",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "google"
-    },
-    {
       "key": "37cb8270ba36a62787836d6654d453ef75c94d8724fc53dd1100de68c69f5e75",
       "count": 1,
       "tool": "tidy",
@@ -8743,13 +8078,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "37fbe750e7d20443e82f696f73fca7a86a99517b8607c3eca74fc150ab055151",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "google"
     },
     {
       "key": "38041902f5dab379783af35e3607d07614f824590551f8d373709b9c658e1756",
@@ -8843,13 +8171,6 @@
       "rule": "B007"
     },
     {
-      "key": "38a2ec605344666916a5d888bd972fe47115aa102b7f051a3654392059fa9c43",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "38a5c90a5cace0122c9457eced97aba532e07d9a40afc8c0eacdc854e5c8b460",
       "count": 1,
       "tool": "tidy",
@@ -8918,13 +8239,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "3979d68b9b0e53448aac44429a1bb1dc8afdd112d6d6bbe22d1a5ee5ac412fc5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "399ab8d3e641a6e46795f0fbf2a36ed313b05151bcb57397b357d250c9ff2e70",
@@ -9095,32 +8409,11 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "3af0bfdb30b284d660b0de37c5fe3f355d9948d979affae1719aab0be8532023",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "3b0315e45a111209c89062fa18d4032673d173894c7fa0b55d953fb5ddb10d24",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "3b042ef1f9f4f51d92667304e35edea1813d6660d09e107cba2847f13ed77c30",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3b044f48112b21da0ab210dfaaf477c843c817fa0f2f5b2be62dd2df55cc39ac",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "3b14149a589180cc8db8d29cfe2cd9a31652cb4686e1eb76c06ca4bddf825907",
@@ -9177,13 +8470,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "3b8bc47e0fa00409252c760857139c3da1b1a1f61e1e9a78d96c3dd3b3e2a9f1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "3b94dfdb4c9be0ebed7bcb5dcf849ad1d0a96c4f9da71e15a440282c42820561",
@@ -9263,27 +8549,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "3c2774a35f0ef5fb5f5fe3a6daa42457ae808108622a17395bb2b7b906505b6f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "3c292bcce847837aac94e2c2bda088b970ea21cb02d8503f335e65c605f102c3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "3c4071ada224fd5a382b3421334f2012d4ccae3c3b0f1c8ff833aa66e654e3c0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "3c465c141a0bb5e86865094de18bc5233aa7a23069d4a618a0f1410471acb32b",
       "count": 1,
       "tool": "tidy",
@@ -9361,13 +8626,6 @@
       "rule": "bugprone-narrowing-conversions"
     },
     {
-      "key": "3cba0f1f9e63ec3de2d3229122bc004eb6859b9d1fcd2d3a094007a88221ae94",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "392d65140abc7139c3e4028bf2c67e261111b2d29d12b7649e2359c26a4b5818",
       "count": 1,
       "tool": "tidy",
@@ -9403,13 +8661,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "3cf21362ccd76660353cf37ca2e2404d6342975746af10368735f08b3a65dd36",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "3cfb46a1f894b1aa339582f1f13db75b885fb16ba0b620176b0af12e80c7c275",
       "count": 1,
       "tool": "cpplint",
@@ -9422,13 +8673,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "3d12febbafa394ea73764a55cb70e2840b1ac9c8c4569a18902590bf1b8106bd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "3d22283016daf942593475ef20b90b3d589b8efe56be3c15886bab481d702058",
@@ -9506,13 +8750,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "3d9a4004e2607635f3afa1faffddb267cc3eea89730c840c62324633029092bf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "3da589927a49a4fc0d62f9722be8ed203f817ad417e1ba5ae409f245231ea226",
@@ -9851,25 +9088,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "3fd0652ece413d624c557d72d80135f05fcd04a174a44a6083a1b9f7f49497d6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "3fd06f0e3435e68092391312fff801d8f6323b501e226462d5aa9e442c195d99",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "3fe79bc6c46175fecf1f5d1c2bf1c58da829d3d2701426270c228e4ba6e24119",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "3ffd138130626afcead1b1cda215abd5ebbd70a2a27a8963b6bebbf3a5898ec2",
@@ -9928,25 +9151,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "402564d38509d97d563a2040121f9010e4475dfb5e25d097443b9f1cef1db71c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "4046ef585e78e264ebcff090efd9ac312b74aec3eacb12f3057bea2cae644e33",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tools/Extract/src/main.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "404d1cefb4eeef7665c1e6d0e18bff11e716b893b7635eb665d74f5931ca343e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "405de51b2745c0b86a7e1b38fa3475fac5ef3fbe35f6332fc8edad52799e73a4",
@@ -9974,13 +9183,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/Legacy/LibDs.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "408999ed5b216b1b64e5bc3a8ece69f94bef4aa992d7178d8c890dcf18b543c0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -10033,13 +9235,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "4105148abdb54db21dc2eded81d4c17f98ab191dd7231396cc7340ba5d067b36",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "410b0f50f1a3c847d546a03701cf8390e0df3a6aff2ca7b3bf890333529ab81c",
       "count": 1,
       "tool": "tidy",
@@ -10066,13 +9261,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "41339118a376edca4bf3a3fb6674580d441a15e2558ab74a7edb046491df15fe",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4133df9adbb01736e94e979f62ee7774e31a4f3f82c08d5a456284aad7fab7d5",
@@ -10138,20 +9326,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "41b5fa9e751091f07b976bfbe9bb8bc2eea86ce81ab566079624b0eb6bc8a4ce",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "41b7863dd3a63d4fa335fb82912419a3bb781993289356ec286f28fd891b5ce2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "41dfe9ea5186d441a8cfa3ea3248a9415916a23a95a49540c5080d43bb8d3928",
       "count": 1,
       "tool": "tidy",
@@ -10180,13 +9354,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "423bee13ebcc0b35a765f9efa905650522f9440c04af7d7514e55700fd4cc5ef",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "42412e5c7d19ce001b2d370f35b66970c37bc39c28a16971e5bc0c81c127845f",
       "count": 1,
       "tool": "tidy",
@@ -10199,13 +9366,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/ContentTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "42579167615924ab7a5846effe0f1795cdb9329d8ef66d74d088148818ec54d6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "425ed22e154cf181ba4989d6c41d5e9a0ff57193ef7287033ce4c0ec2275f429",
@@ -10236,13 +9396,6 @@
       "rule": "google-readability-casting"
     },
     {
-      "key": "427b1d074c9d829c83ed91c3be853b9363d707ca13ad17d092c81abc16f3b221",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "42867f667bdd628824ac6500ffb1886f54e158cfd393b3d05e2c13d2dc93166a",
       "count": 1,
       "tool": "ruff",
@@ -10269,13 +9422,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "42a5a7b4ae18060e43976a7da0b8d8b2136d8d87bef4c1bcfe58a7f1d16c220b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "42ab960b81c2e9511aa54e6a626a82100356414f4e5f8bd6c996f736f298d65f",
@@ -10317,13 +9463,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "42c9f8ce436fce3da3d6fd0fffccca3579a0f92e5f6b4a4533405939f030280c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -10502,13 +9641,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "43f183f852d6d099988f6f843d16156847abf554e51f06a05b33c13d0d3870c7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "43f72a395701a5eb49d9ccb786c9aad2ccecb2809b91edb30028cef90039e497",
       "count": 1,
       "tool": "cpplint",
@@ -10558,32 +9690,11 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "442e0f9015c319910bd7532355794789080b71bea3c0becc2969606feca3cb4d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "44335c9204642b668f0edc7ca009535323ebbd2a0b1a6fd7cef8d9effd76b2a6",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "bugprone-narrowing-conversions"
-    },
-    {
-      "key": "4447c056c43f129e3fb44e07e7d3e079b13322d16bb79f5d24ab10d7dd6c703b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "445249041e3e26f4e0f276857eca8383dc17ff5815d7bad1d96120c97fa3385a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "445eb57d6b025b01b2e858075c38b9e8285b4608cba76e39182c937609de9e8e",
@@ -10607,13 +9718,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "448c46ef55068530fc1e7f5805c5bd8f6c8f62f0e29f7d6093ec6f7ede88a1a1",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "google"
-    },
-    {
       "key": "448d9825e9c5a85ef41f194e3ee9508f039d466da43e5ab44ccf34b91b6fd6e9",
       "count": 1,
       "tool": "cpplint",
@@ -10632,13 +9736,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/include/Content/ModuleData.h",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "44dd75945b7d8ccceeecf2a9ca95d68f4b39a0755ec461b0b304fffbd381cdc6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -10716,13 +9813,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4560ede0d6d25083550ced050b672f493f4016345e08ce56ca4080e946c2bea0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -10880,13 +9970,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "4653f04356a2231d0b4ed3416f5ff0c612fff4ea0f8e9c8d0ac52ab7e57265a0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "46589ba2bb6d3ba9bcf69fa9fdc53cdc7db9e972d9398eb1194c402b77c81308",
       "count": 1,
       "tool": "cpplint",
@@ -11027,20 +10110,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "4701c1217cbe8189ca0358786e68d45c796a44879761c2391e4214937db98479",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "470b230023c0c38bb847831ee6cfa1a0eee7b9e5cd6029892adc8aead77b71b5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "47148692619ccb3fadf69eb144e5f090b16cc17bd16554e1bfef906d889419c4",
       "count": 1,
       "tool": "tidy",
@@ -11111,13 +10180,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "47caf68fb3141acd3cc83ae794247dfbf2df91fb95a341401e72266b827c5b57",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "47d7b010ad436e9cac7d65df96450652cb4a533bceb2ca93ac6bffc1e8a24717",
       "count": 1,
       "tool": "tidy",
@@ -11130,13 +10192,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "47de97e8510d676719a25feed5098484f79ac50710a9100ad839fbb88580b339",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "47e01c75a909fa7e1787b2454d4cf02c8c8922cbe6214aaa2316ec4e8470e042",
@@ -11244,25 +10299,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "4890b1b18f34486ec69e65b6aad7a737769f6485c17a2d70b1eb5a07a7576b05",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "48994d61693c945e0672e33f0200e4aaead194ec3e2755fdde914cdec077b03b",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "48a248868dea6073115ffafb543c238bea28433a9ef88710a9aa2827db92a6c0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "48ac4a17588df92b3d72953d9f4ad74249906d29bfa34b306eef7f4f4cbe623b",
@@ -11283,13 +10324,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "48cd89c57bf91b37cc83c357ce2f05ba39911be205da96eed6921f48c813a234",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
@@ -11452,13 +10486,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CoreTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "4a227590f00c7a873f84457ec0a810eb8ff91fd2ed84234985289cc12bc5b1b5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4a29448fd8688670bdc4596c48a5fa3c5076d06c882dcf52c324acef217af856",
@@ -11669,20 +10696,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "build/include_what_you_use"
-    },
-    {
-      "key": "4b9d2c38ad78cc690a3b644e45b6fedd81ee5de7731b053c3ee4851491944625",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4ba154d53f458f752e960934dfad9ec2f1cc27f7300abe32ef817ebd4c3b30bd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4bacee2ba7b5bcd51f8a4a551afcad19be44f707a2e4b2738be68a8fabbb0bdb",
@@ -11937,13 +10950,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "4d766c6584142851635fcc2864f2212d990812ceb2b894c07660d56f98cccf72",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "4d77970636fc5eaeebb7c2c1ed7dcf68adb5942b117ecf43f0af5ede3b7693f1",
       "count": 3,
       "tool": "tidy",
@@ -11998,13 +11004,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Input/LegacyPad.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "4db14d4778aaa90dc49b5041612d672ae79df51b22bfaa47b3218c2cdaa8c16a",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "4db4009b3122dacbc13317f52ba087344edccece09fe8d3c3ac8b585b3c6b1ef",
@@ -12138,13 +11137,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "4e4c2f17ed20a349101f7ee1faaa3ce2c73e9f666af6c07b43387b8d1f13b466",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "4e8a4b81178e96b541cd6198c5ac44e13337290ce05342946d7c28ae7981b1c1",
@@ -12350,13 +11342,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5059f5890214fe4aeb050f5778f094a369ff4a6a0093866f18e93e1da0f853ec",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "506279fa7ce48d9cc38b77a8ba48e27e7cf693cd5be59a9ac73c3ce1ac7e631f",
       "count": 1,
       "tool": "cpplint",
@@ -12448,13 +11433,6 @@
       "rule": "google"
     },
     {
-      "key": "51097e4f990414ee96d3c5ec341d14a60f24269ed382fe38970acfc7ae359891",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "fcef6b0a8c496787f563f2a9856b300fdd03e713f6efdce4c587bd788a6644de",
       "count": 1,
       "tool": "tidy",
@@ -12502,13 +11480,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "518b66ebe2214bd9919c5f94b6e5760c1d08fc14561f1b9eb3a08db3c112cf1d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "518f9f28fa8af015d06e540ce660985bfee7b1fa08ee3c09d516fe8126364157",
@@ -12572,13 +11543,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "520cb02e22c9adf9536bcae982f5fd95c516728f3a26bf7394e90ddfbb743ec4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "520db9ee3a363eeb23b4a3ecaec3489b66e748f2b344906ba9a8e7e8252517b7",
@@ -12684,13 +11648,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "52d96dbb0fa8b6111c0034f9e5f5cb83cc88e17621acde808484089ccc7f64d4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "52e54842172b6e91f5ce4881d3a1c8ff20a1f71fd36a1eec4427112bc04f413d",
@@ -12873,20 +11830,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5445e8d9c70a87276b052fc99c9e514b469ace61fd2b92f9fc81f71ac262e39f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
-      "key": "544cb7f46a3ce1c990d800c6098b6418d3a07220ed50980b7d780101235f0cb8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "545227f5ef1df1334657f18f03171172089e9bb91318a116b38c52817a21b583",
@@ -13302,13 +12245,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "573a30b7417afae64de420d3ee603899fb1f3ffae6066ad006cdee5fa3710c79",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5748bec42c9ba4a5836f618821497cbda01292ba4d139479804451657666ff5b",
       "count": 1,
       "tool": "tidy",
@@ -13470,13 +12406,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "581e4ea1656cd43df77803be4dc202ee68039d9839ba2a3080fed07e25732511",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "582065d895972da0dc83d5fc9777a6de09cdd834d3976b6871677df869a398cb",
       "count": 1,
       "tool": "cpplint",
@@ -13554,13 +12483,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "58bb933eaaac7d26d9af13650285cc2d0c2432599333ed7bbae3b2f9c23c1858",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
       "key": "58c1ab7198e13a974bcd386c9e973873a6e65435947c31971033370548294a03",
       "count": 1,
       "tool": "tidy",
@@ -13582,13 +12504,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "58e4261b048ac393fa030b9a65b27b6a90d026e11df3e87e72c0965f0ff04076",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "58ea7265587e1ae7626d609c8542861850b58e1f2d3c6c83dd4d72035a1091c5",
       "count": 1,
       "tool": "cpplint",
@@ -13600,13 +12515,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "58ebe38eeea4bf94053298bc94806190964fc0e0459aed98f1818fc60a7958c8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -13813,13 +12721,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "5a56a8361a07f5ee86f653f2d5776573900bd56cd52585b16bd8d9574dd2e7fc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5a6115340f988dfd3b74a99aee533e350e9b69d4a0843865e9c262001b416ad1",
       "count": 1,
       "tool": "tidy",
@@ -14016,13 +12917,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "5c1aeba95db2fd4b06356dffdf8b6ead5c7a523f4cada69d3ea7b99beeb86393",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5c1e29138d860782e36f72a811a0f224736210c33ae26a9ffb72eee66eabb9e7",
       "count": 1,
       "tool": "tidy",
@@ -14051,13 +12945,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "5c2d5e3e01dc3757d3b6c42379b9f8cd82d8f0c4ec666e3ea24169c3ca3f0fb8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5c48db3fafdfa22c082a3c8330a980715ac707ed7e97be68bc05dcb2cdf7f1c8",
       "count": 1,
       "tool": "tidy",
@@ -14070,13 +12957,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "5c5276ac1e4710d1f191ac2bb848d59d819f361ff3d8df02dbd306f9eb4ee84f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "5c651b96677f3f85e1d44fabf08d10b0275b3d2490b23e18f5feeda94dc1251e",
@@ -14140,13 +13020,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "5cb6f71f0627101d1e2cf751d30c7ff9463007e887779ba222c35a9a56f2714f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "5cc41be372154054eada82e0a0be07d684c01ce5bcfff0d4fb766f5e3dd44b0d",
@@ -14282,13 +13155,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "5db7799a0cfc5ddc2a287a237bef02acae41b5f0c977aa555f116d9616bb3f05",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5db8c4d9628f7b005d4247f9aa467bd1e6c7e4b1024b4dec45732cdbd536e41b",
       "count": 1,
       "tool": "tidy",
@@ -14315,13 +13181,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5dde5c53013ac36150ab3c75c170d619a2918d77198e38be8adc06cdc969e328",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "5de3ad200db5b0da5f1d0bb69570471c032df3390afc9460466f1d5720e09e78",
@@ -14394,13 +13253,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "5e346876faf3300c7e21dc6c1a8bd6eed1de39195c391bac4295c59314f22cdd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5e3e1801f75f6e1659a0715e377895f0c72e3446295326fab9ded344a6c76ec8",
       "count": 1,
       "tool": "ruff",
@@ -14427,13 +13279,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "5e521f271f5d904a5544869ec0efda23e341ca1b9606a88e5443abb06e9f917d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "5e5747d14a89d79ae789dfb8edebaff1d8d6bf09869402fc62a24ebbbc72893e",
@@ -14525,13 +13370,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5ef9ee34309c9b4fb9e6dc2a2be74f2312df890fb134f2fd4db4999ac09c0ae1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "5f0520f24280088b48e6b66c10e46617adcfbf977da1386e90f7ea6de0ebb2ad",
@@ -14653,13 +13491,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5f9ce106d0f1a066ce1787efaad04b8fa4b930122fd0469d802d2277419b7570",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "5fa1c44ad0d0e23618b9502f4bdc2a469b2e901343ca845b879556b944cde311",
       "count": 1,
       "tool": "tidy",
@@ -14765,39 +13596,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6080636a1056f6fd56a91f192b528ede5aef894b52735ad40bbb79a863ef727e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6080ca7f7da2b4eba05e144c6e8fade0df0ed028dd1ed3b6852a7a2226847b51",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "60892276b0dded7348764d7a47572ac42beb3781d8fab42f24d9d25b4fa21e64",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "608a32437ba854f729b8a994382b72f8723a21a0da9c4001164337a286acb36b",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "60a26213c0bac520f92231d10e80bedf632ce84a2b4650a536eed984782baadc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "60b1654dd391befca3878c73d0f5c6d817e57fe979322eb34b5ed400e208382e",
@@ -14812,13 +13615,6 @@
       "tool": "tidy",
       "path": "Native/Content/include/Content/DataStore.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "60c5aa82815edd4abdeea0a7a26cf859cdd0b1709f49467e355f8b6f15714dee",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "60cd0277313f27570377a14917ad3d1b30b9c810ec7e57f37f6ca76892e9a67d",
@@ -14875,13 +13671,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "61127cd7682790ed13ad6284cf011f271d1252d755817e056c61bdb813243f34",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "6118f351f780af136ad8f882b9e21fee32da2a887691e298dab8236233260aa2",
@@ -15043,13 +13832,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "620a3a2969faac030c321875c3379b2eb075da408c0c2d691a0db9bf5ae5c61b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "620ba549f2f421bfead68ffe0250022112d13f45f63ac2c47ea6e1b49725dda7",
@@ -15234,13 +14016,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "638485b22d9f22af6bce40a0d7286252bdd4ed9102500027c40db3443b18569f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "639599314a931d32755204798b788a1baef585945eec53748429744f127cad4c",
       "count": 1,
       "tool": "tidy",
@@ -15323,13 +14098,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "642c9c51202949ab65d270048fe3b9884f067f270361a25df5a331668c316909",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "6430685521fbf80acf447a536ed99e0d4b862574df83542faaac818dd90b2dd6",
@@ -15476,20 +14244,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "652310364220b0d06c3b2adb4126f0461b759341e1ec79a18b8481bcf2e3e0e6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "build/include_order"
-    },
-    {
-      "key": "652b3427af1c1f7a64356ccd2ed30c2af2c3266c3b04ab2b164078e676078181",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -15675,13 +14429,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "668ca24d9985b4b1ddb5caaba90e0089ad26e2e4a1b7e73d3aebefc7dcfc9c7a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "669c52395350f904746d167170d2091e3c2baef66a441a74c4d46573638d4bc7",
       "count": 1,
       "tool": "tidy",
@@ -15843,13 +14590,6 @@
       "rule": "google"
     },
     {
-      "key": "67a1b95a9bc6f0bc5c45a04d31c3caba196a6698329880d4e9722eb0ac526f45",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "67a41ef973562a02c38168ce4b3d9973a51bef365121f936b66d68a64a3870e7",
       "count": 1,
       "tool": "cpplint",
@@ -15939,13 +14679,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "681bfd995b0518a41a7f6c2ca0b664d46c731969465ebc11807729d4250433de",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "681cc7feece688c6593e902fd0c5836490bc22000806a451db9eba3ed206ffed",
@@ -16074,13 +14807,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "68cc994ed5799e8137b2e932b83f108f6c9f9be21bcb159ed4e1eb7e20d6b1b4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "68cfce0c5267ae49f205b760e70867308cf1097e7186aff26eaef3a84567d271",
       "count": 1,
       "tool": "cpplint",
@@ -16151,13 +14877,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "697568316ba022989675258d45a1cf80241f0121ec733fbba9ef7c0acdfe211e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "69782ca101679073c3bbd0211298fa54d59cab1e365289d6b681d6a4875291fb",
       "count": 1,
       "tool": "tidy",
@@ -16177,13 +14896,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "698e25c42b8674c0c9eb050245b9a0d98aff1a5bcb15781ea63cd3d61064c108",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "6996fde0c48d8fd2dcac025d34a2e69b2c9b1f3c305acf8f0f5ac774ff844ef3",
@@ -16228,25 +14940,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "69d5c54bf550821ecaac8f3e0305dc74f715ec3274c3de322a7cc4f983e5d0db",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "ccc9e4dcb492accf257a935e143a257c6043ff6476966c935388c7d93f3cc981",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "6a0b7f6e9bc38db30a1d0cf97f8ea84c9046b1ebd39ac3d092dcac4d19c6aeac",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "6a0cdc04f867eb86f6ef41650adc04224859613312f4f5b03790aa424662d679",
@@ -16361,20 +15059,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6acfc7aac9791b962c8a1ea26a97795af8ca477c810effee6652be401eded25b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6ad0113612e5cce08cdc11bddbe66f83842b2e1d2467775350fa193a4277b264",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "runtime/int"
-    },
-    {
       "key": "6ad4e719ad3e311ff3ac044fbbbd769e7f389f01b7c31c5aa941d85396bbdf9f",
       "count": 1,
       "tool": "cpplint",
@@ -16415,13 +15099,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "6b2b71907fea934964b9b9665baa2fb1131c6f7fab665da8cd2ed5435164c1b4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "6b2bf154a8a6fd8ca24874203b9c26e48da8f4dcc6ae3674538be39490031feb",
@@ -16627,20 +15304,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6d16dba6bb4bdb132aee61048fb94270db4da371b3540190076f9a4c8c6a5753",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6d223e93e4b85443de45981bbb08eb07d4274133e45dc255b790784cec3c0a96",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6d3544f5ea7de5a92d50e9543ba0e76e687c2ec20ebc657fc20a505c3d9a4a37",
       "count": 1,
       "tool": "tidy",
@@ -16781,13 +15444,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "6e16b8df52da556ff92be725b8224f17187bfeba05fdb7552b98a606a4b6f18f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6e26551498eb4a0aea29e244513c58c4d4d638050ab15b51ef7375eea24ec400",
       "count": 2,
       "tool": "cpplint",
@@ -16863,20 +15519,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6e916ef8a4c19107389a34dff2ad15465c5e302ffbca4fdfa0bf69c50315605a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6e91c507bdb3b6883c9936c8966afac7ee19d65aecee2e2c4f3ca5c276f67278",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "6e9b01b53e6515dc1724e9d3f36d199a5b1a0517b7bd581e6f2e14b87027a8b5",
@@ -17054,13 +15696,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "6ffa3a4c738ada74337193771332d763ffc22d1a9300082a85d120c10400f6f4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "703ac29150d2b2ff6d43ff174b0d174622aabedc5af78e03658a8d5db1dc470e",
       "count": 1,
       "tool": "tidy",
@@ -17222,13 +15857,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "719da69dadecaabd674932f063992664fbc351d18b827fa77567f1aad1cc9dc5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "719f3c455c9c31aa39b7f9201d2e7552c31cf6b86ee868540e40dcbaeba4a884",
       "count": 1,
       "tool": "tidy",
@@ -17276,13 +15904,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "721ecaa25dd3d65fce2b0ea2698cc9d733367555f97ade6ec9b69dbd66ed3f69",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "722dd340135461e4f1bcdbb551771af05de47094a4e3de4468c23917174f1830",
@@ -17600,13 +16221,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "73f1e15ea67ff531303d90a4c993f27ebca9449e5230f6bbb34bbb417b040efa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "73f1ed65ac9d8ed48a20289ebed51015aa027275b436a4490abc85a71d401afa",
       "count": 1,
       "tool": "cpplint",
@@ -17712,13 +16326,6 @@
       "rule": "I001"
     },
     {
-      "key": "749f28e65ad14e74ab6e652535c7d87617631e5e917b10489d115adf40e427b2",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "749fd1303567657f7ce001bcaaaba3071d81e370c1208d770ab20ed92a9862d3",
       "count": 31,
       "tool": "cpplint",
@@ -17745,13 +16352,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "74c586e7d813a9194aa656da23e4d45926832bdcca4c29aa612a7e93e1a3cf05",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "74ce2f5435404cb5e04a891dc4acec1acbbbe0f3497e375a0ed714992d9e2c1f",
@@ -17796,13 +16396,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "74f7ab4aa0f0e262bc25f89ea17d89f9157dedc2abe29c15b36b6957d3c3d162",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "74fa7e71fb24266ab2aa13b1c7e6b2ad2f95994379ec3d1386c879d32a16ac1b",
       "count": 1,
       "tool": "tidy",
@@ -17838,13 +16431,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "75224f6ae81946a76664cbfa0ba26607cabb9817288da561ddad1851007c8f08",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "75253f905d1230138b5ef5a2f1eba8f4d93b9745d7fc4b72d1c420238cd71d02",
       "count": 1,
       "tool": "ruff",
@@ -17864,13 +16450,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Log.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "7557c66f6b22dfcc959d54bb3c50071eee859811fd04c2dcc6b88d42daee6ec2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "755cf1e2c6f563a7d93f82852417057ffd74491c084a5408cb83ddecc79da702",
@@ -17971,13 +16550,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "75cc3e76927c492dd635eb619fe5799e3ec01f8a6c92f6724981b99f2599f59c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "75d88461146eab6ba184664b8887e32e42f0fac05177850baa5128ce15af0c70",
       "count": 1,
       "tool": "tidy",
@@ -18048,32 +16620,11 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "76371d254409858e7a51a722ef1fa37c6498ba96845ab6de31b0256e2a74ae20",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "7650abf72e1866293aa332dc09fdd836309ddf73d73d7052186316582ef5e376",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "7654a985bca3780002e58d3bf38be808d3b3912ea0027e814ef6b914005b67a1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "765d23f2368ee6e9e56275c1b78db02c79e1cdeb1617421ff48bff7fe3317990",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "040b46b3d9665d8a3bc7065a3dfbf0c39d531db80d014b8011a4547b1e38e826",
@@ -18116,13 +16667,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "76c9d4761ee41b2d0d396e308057f6c935ff51749c086c95e957eacfd802d7cd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "76d0a54cf120a1fdf92ccaa097fa64a4ea7650cc892290719067611add507ef6",
@@ -18181,13 +16725,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "772fdc44ddb7a47ec6c3d3ae2d8edad6c0818e391626255f53a685057b9d682c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "7737615dcf18c5dfe8b2c96e70297aa6a76cba4c8a22f02bb30dca30f1cb6380",
       "count": 1,
       "tool": "cpplint",
@@ -18221,13 +16758,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "77548e7c244a042746a593c8a557634908a92aaaccd20adb25f72810ddfad2f8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "7758681659c65b00c9152bb8bd984f34a8d23c67c5b82d928ce42550999a16d9",
@@ -18277,13 +16807,6 @@
       "tool": "tidy",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "77df8a732ed8b7be24005e8eef46cc8aa4a6c7dc583d0afe43813da080db307e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "77e548e982dcc6e05561686fe15dffe50ec74528deff47251d92cf899d9c717f",
@@ -18433,13 +16956,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7886efdfb5c51c8670f8ddf09f327ab032124857bbe92d7573da04175162b92e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "78a377626fd33143b0a305446c9684aff81e5bc9d72c8fae2a3ccaca9d3a9bc2",
       "count": 1,
       "tool": "cpplint",
@@ -18503,13 +17019,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7934f57968cf283909ace5890e5ee07e69635cb5adfc0b8121b10f807bd2c9e2",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "7938801e6df31d2ab64c0a1e43feae1fedb8a18b8b93e16266d364e7c5a05825",
       "count": 1,
       "tool": "cpplint",
@@ -18538,25 +17047,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "79b4825005da2c55de42c843e1436bb620d9ac006971553fe505e7a6bbff057a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "79b56c2643f55318c32ec57b66a0ded539e306de30a9f7577c92a871bc0b08e1",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "79bb0edd6183773bf2a6ecb9e9cd268902254ac90c2d1995620c2b00f8982edb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "79bb92ccdaccd15535290a2c1715edb24f8816fb3afe5a3c542a3a7ae9b5c67f",
@@ -18636,20 +17131,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7a34b5371f9369aacc6bea000ffeaed2c737291f9f0ace68fd775a9d25de3284",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7a396e3bd32e078f4539e89ef3654d9a8c8542c0bc76cdf7a1d651d6661c39a1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7a3e578f5b4d224586f5b36844ff0d6b5e6eddab992e9dc1a3d872c3ef816a61",
       "count": 1,
       "tool": "cpplint",
@@ -18713,13 +17194,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7adced1e37abf7fc2fd114f06e14516732ac7bfd1bde782f5b1e9b5f5cd30f82",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7ade797ed3c3c5cf3e4a5ab28716a3962d7af69a0ba0fb82b29c13f1339f1e30",
       "count": 1,
       "tool": "tidy",
@@ -18753,13 +17227,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7b25ec864978e67be98db0fc52b5575d49fde1081dfd9186938aff31e998d320",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "7b282fc8d1420b76c21c40edcb55ff08918e07ceac6b11eea694dd267d142647",
@@ -18972,20 +17439,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "7c8fd3d8c0d1640cd83407f5550f05d04a1dfb3f18e6ac698f454be1c88dcd87",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "7ca902f845090830d9693fed01efef17c9245fe57849b095941724649742ebec",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "google-runtime-int"
-    },
-    {
       "key": "7ca9052a4b732168a8a9b5914283c0fe62c9e17345a2d92dc2a494a5f88451a6",
       "count": 1,
       "tool": "tidy",
@@ -19028,13 +17481,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "7d027b1415df2f912b813a2efe0bf21f2b40717b2495d284ec67635e5cd733b4",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7d0bb13b99aecdd82abf311c4a30d87237de2dcffe6d8a0043c79b29abb6c229",
       "count": 1,
       "tool": "cpplint",
@@ -19047,13 +17493,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "7d476f3cbab67e55bd714b965e16ecd396da92908c1b44c46e70b157cc5507dd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "7d47adafdf1d9ab631c558a6c4ff59a40c25a77951bfbe073b28da5c4918738d",
@@ -19133,13 +17572,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7dbb13d3a6b6ff2dded885250934bd982e4b2e9456886c7bf9d15c4b37874559",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7dc308be62b978c73ff7da4f513d619856083cd034e111086d7248d603548f71",
       "count": 1,
       "tool": "cpplint",
@@ -19152,13 +17584,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Movie/LibPress.h",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7dd6405a077d06797dd4ef6afa1c9c56d51690f811f276bb5fe7aecf35d4967e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "eed533d056adf3bc12e64adbaebbe1195cf5b431ffc3ea1513e67d82c07429b3",
@@ -19245,25 +17670,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7e7fbd5b5ee1beabe45f8ebe7b303288baacb172553106f6fedf2eb4b65e9a9e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7e89858e6abbf7b618235ba7ab328e1fc4050e1781e73cad09cff6aa044e0ba1",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Input/Pad.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "7eb77356d2df17f738edd30af37989df1f78525580835d7660abe01d2e12a2ff",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "7ec46da6f4df8b13047d09bdd88cdf027be7f2b20ca243688f65ec073685242c",
@@ -19333,13 +17744,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7f51d09db6d1eb988b55711aeb80a72bbdc609bb4920a0be62d485e19194d9a5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -19483,13 +17887,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "80426115a985a69d492cac0df447cc898b6911fc7e8bec461ad4f0bcfa0c817a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "8058a464319793fa5c1a02c91453be131a28acb13442f6d0f0a5bdf6f82ea62f",
       "count": 1,
       "tool": "cpplint",
@@ -19529,13 +17926,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "80e88e264c055b1f3fb7c8ac89710b2843d5ea02cccc2b5b02bce780ebd076bb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -19579,13 +17969,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "812e3c515d2c7ce7a4929277c041583d979d1b82f60fa39deefc29953ae4890b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8137378afa2c0ec7323318e4244b589d9e813802f84959976d6fb6d69384ad64",
@@ -19658,13 +18041,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "81be91f9ba8828af9c62321774e2c8a0375d82a467d45cfafd3c2494ed2bc284",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "81c728de4ba4d826d86eb5f05ac9666bee5ca1f5fe09134db4b50b184e03c417",
       "count": 1,
       "tool": "cpplint",
@@ -19726,20 +18102,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "821d7dac83d7762b99c4a718c2c24d007b0798a0690a7e080a9a2c8b8b9de421",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8237776855dc0e647e8cd1dbaaf67ffc302a0b823a81d533cbba448ce10a3b26",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "8245b8d34857597fe6caa9ab22b1e3a9272216dc92243b15cc1c50d0090fa1d3",
@@ -19817,20 +18179,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "82c751f4c874fd89f1b38c3ab562c463fbd991a567e74da58bfef8cd3244be6e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "82cc87bbe97a7f378b1023c0e86795d21090e485f9ab45262932da226f684b68",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "82d6cc8128184555677179875019c1c23faf85329210edb6ca94b4576d5036bd",
@@ -19929,13 +18277,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "838eaaa307881a017ad4d42d7ce12ef5eff091ae0d58caf9b42d430e3cc17b1b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "8399747f910d3f34c2cd2bf89a48bbb645df1d78954810d9844a93a54d89698f",
@@ -20141,13 +18482,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "84b3fd85532a59d2e20a19603d47c6d62c184d893fc287f7080b1d2cda501c1b",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "84be58dcf79135faf4e184d06e08f17b70c0dcdd142f22d8a6e6d4a72961c711",
       "count": 1,
       "tool": "tidy",
@@ -20288,13 +18622,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "85ba6acba0db1977428e592988ee04ebd6a2404ce74ed51638890dae8214602c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "85c4e963a3b4c5c4ff3a48f6e2dc1a318570f1df25df43e184fb2a7d4ac561b6",
       "count": 1,
       "tool": "cpplint",
@@ -20421,13 +18748,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "86bcdc9fcbb2339a1c491730747f36a0ee2b0718e5d38694c70f37554f079d0e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "86bd93034f888279c36148711e44fb7524fc8414b8f06ee1625a35141aa1bf1d",
       "count": 1,
       "tool": "cpplint",
@@ -20440,13 +18760,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "86f5113ad7736ddbd0c93df989bc03a45b362fcf5d28b17b05454f4e7e610bd5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "86f962b17177056d911bd61a0a0e87dfcf6f05636990036088448ce332454d05",
@@ -20589,27 +18902,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "87ff2c17abdf5f03c8fea8ce07b74c5c193bea3e667d50621a012fa23e500148",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8814f82e36d33c0266df90792250b155e5a34fe27c199d7d6f21e5663fe97d8e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "88187c3bb02f95094e75a3b52bf44a54611e332706249c0bd244ffe29fb7c682",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "881b574659f43ee71f3d96760a97394a45f2c3f57ee9b5a04da52e1a96d63e85",
       "count": 1,
       "tool": "tidy",
@@ -20687,13 +18979,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "88985546e85b9e16b0e7714cfd5a93cdf147af43be4e8f5acea309f7b1581e51",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "88a4df6350fe0f2d18030829a8b1b7f62875dc1d6a04fdb9e85f58c220c66746",
       "count": 1,
       "tool": "cpplint",
@@ -20727,20 +19012,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "88d5a7d1cb67be55d3073daffeffa103763c1f7b5e10ad0e8735157ce94de3d6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "88d62a6d0c9fd784fbe96d7a0c5a4e9f9ff5fc5f377b4479edfca9073a8ba2b6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "88ed8d32b944d4a475dc48cdce171d0fda71ee79b99703b48231c827109da28f",
@@ -20841,13 +19112,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "894a0b8c2fb6d45459a0ee9252e0c011cf48fa25e35cb98bfc2b57bbfd1d6e2b",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "895d1f4fe0a0bc6c290c8ddef0913004acd1c0494e1c8041596ca6167c0ec3fd",
       "count": 1,
       "tool": "tidy",
@@ -20946,13 +19210,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "89b22c409071e9f69bbd4342a12f2ab750a8396c85138d6e6650ec39b4624439",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "89b9d82ba8539dc562535b35ede7f884718c422ca09a4eee480937bad4af412b",
       "count": 1,
       "tool": "tidy",
@@ -20972,13 +19229,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "89c1bda4443cb3852aee2e411ea0e5e009190d06bcaeae02f64546e640a041d5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "89f38914832d087a8baa277b57fb4e61e8c387c3320ada698393afa634ce1717",
@@ -21009,13 +19259,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8a037ab4757519c2a54559338f0c38750700631c480e3c53a427c65e6c7cf6b2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "8a2a2adada3990353f61e1dcff09d807377eed80cbddbdb8b3b11bdc00f74109",
       "count": 1,
       "tool": "tidy",
@@ -21037,13 +19280,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "8a3b880bd5e9812bdeb17035215edc56761e3a13ed3cda03520eabfd66a47854",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "8a3bdbd86dfa8077786eb132cad8a1d87635af1637f69c3defc9db55f585de87",
       "count": 1,
       "tool": "tidy",
@@ -21063,13 +19299,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8a66b26e739da19871734bcb8cfefe72fd475fbdd3169c04c658b5d4930a9879",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8a6f3ab26207d70329ea022d2bb289e84648e0dd441e957d9bd392191b64f0a0",
@@ -21191,13 +19420,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8b003f452db0c1976c56576cd7d4504100ebc0ef13fe1b9207b9e9b389b0b8a1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "8b0e6d4630f3d6a7e2cfba8f25a9af514ae39746422bdbf62d58f5a11c387ea8",
       "count": 1,
       "tool": "cpplint",
@@ -21245,13 +19467,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "8b672e0c4e282d1325a320373c9d549d75f6383fef8ed7ddeb030fdb62ea198a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "8b6b2f60b8c80132249b214db3c7cbfedd0a29b04cddc4e1d40dfb79537545f9",
@@ -21345,13 +19560,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8c0dc669c00be26eb662937188c1ff812b761e7e2a040387d041c54ce022ff97",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "8c1e888692f07d83107cabb7a227422ef709f364f2ee54ca824876b96cc956dd",
       "count": 1,
       "tool": "cpplint",
@@ -21420,13 +19628,6 @@
       "tool": "cpplint",
       "path": "Native/Game/include/Boot/GameApp.hpp",
       "rule": "whitespace/indent"
-    },
-    {
-      "key": "8cdeac9aa76546b3e1ed13180c7e88d5b6d1365b934fb95679eace003bd8e1f7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8ce1fb0f9f70e333257fd52a114a1693f7b5c2247c94323a9a14e2946476f179",
@@ -21513,13 +19714,6 @@
       "rule": "I001"
     },
     {
-      "key": "8d5a27cdf721798454f60b48a0be137bef39c17f656c4a7a371f72a5427192a0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "8d6483ada69d670140f22857887f49109a07b103c2bd17f75febc3746398c627",
       "count": 1,
       "tool": "tidy",
@@ -21553,13 +19747,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8d9f06c17f088d3bc1c34fbd2342a419bbc1af7b637c4dac9f8aae5262409b5b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8da5afd21a94d7d872eaa0ddcac0d2dae3d5c50c57fea5b40d0a137b7abe1366",
@@ -21793,13 +19980,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "8ee7f9ead21636288aac80f54553b38c4950b32adb476833ce623a9f172b195f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "8eea3b764dd21511102aa2f0e326ff4b9415d0a9d95c812ef4cfd72f30d54288",
       "count": 1,
       "tool": "tidy",
@@ -21812,13 +19992,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "8eef8c8c302a10318d0d6cdbec92582dbcca722f7b50aaaac21f7dcdeaa1b0eb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8f0007ffa3d52e81153772dbd3d3d6872d857116e14f91130beb1328cd0714df",
@@ -21840,13 +20013,6 @@
       "tool": "tidy",
       "path": "Native/Game/include/Boot/GameApp.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "8f3685c8352fbc1f2d6c039d745e67b0e8e139a5383cb1c4ff32ad6a73ba2aea",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "8f3bd5308b915a782cb56d1be7601427fd249a04d48abf69763da6f437fe9ad2",
@@ -21940,13 +20106,6 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "90097d629a4ee8a025b74815e85192edd6c0d11d316f267e07492f61f3869295",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "90099397722b9a7b889a04c81cfdcba0bc99becd439e622cf2408c51d03950e0",
       "count": 1,
       "tool": "cpplint",
@@ -21968,25 +20127,11 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "90171663e4b9885dd0c5f4bb00019d86183cc4c6e6f4dfcf9ae166bd049f9738",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "901ab8355c712c4336fcc9222269a774dd54ff188b6a46ecf01fc716f49f4447",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Desktop/src/main.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "902d8d8f5d2fd34223459f8e31e5098d37a39073f4484c8d5cbe1a00784f9745",
-      "count": 10,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/braces"
     },
     {
       "key": "90335ab9886f3072d1200a6e7d200355fe4b9b1ce5e48931071cf9e2f34c3c52",
@@ -22022,13 +20167,6 @@
       "tool": "cpplint",
       "path": "Native/Desktop/src/main.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "9058b8d12434c77235e1d8588909d3f0e2e2c7ce36e1b0b51ad5d10d3331d39e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "906afa845749c580091e5cb5e8ba9c9ac2326afdebaa5dbb8ac2b61d06f1496d",
@@ -22171,13 +20309,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "915470694004401284d08fcbc856e97924f81bd2d3753d6e92bb1365d4244969",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9178c47409f32edeebaee0c0cf23b581fa058c32d91e3afba6a7613f4244ea65",
       "count": 1,
       "tool": "tidy",
@@ -22304,13 +20435,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "92760451470f0e070e9ce37a399e0b993573cc43e86a02769e41264c9b457050",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "927969b0a1d01fa301d7d3a6c285c9ad3918916a3ba4a4ae62a03f79fbe73f28",
       "count": 1,
       "tool": "cpplint",
@@ -22402,13 +20526,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "930fb49cad499263efffe363193512d881a85ce143e827a303813fe524234dde",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "931bbb8b6a2587e17a51f0625830aef1c9032f5675a08546d18ea335c02c271c",
       "count": 1,
       "tool": "tidy",
@@ -22463,13 +20580,6 @@
       "tool": "tidy",
       "path": "Native/Desktop/src/main.cpp",
       "rule": "bugprone-suspicious-stringview-data-usage"
-    },
-    {
-      "key": "935975ff00af5094c27096a8d7127ba1a1e4beea77cfeb0deeda723c29977b8a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "936ba5fd572c8d66f9a5e582467623a52a63bf533762bf8cc70f1cc2f044576d",
@@ -22752,13 +20862,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "94a73b4f9631765e34766366be94367b1e2a18ddaad75fba95f7e77b0a630b64",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "94ad2d782910095d8e7125edb4e4d0e6ecd31989275530ea0ae9b6f3277e0a6b",
       "count": 1,
       "tool": "format",
@@ -22771,13 +20874,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Platform/GameFiber.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "94d6c1220f0acc2e115d5f759a0f203ff15006347f0066dd1de11a1749873130",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "94d9d7de5d429159838ba1886aeb1c81be5305a6ea530adc84da5b51108d6476",
@@ -22934,13 +21030,6 @@
       "rule": "bugprone-easily-swappable-parameters"
     },
     {
-      "key": "95f83e1edd5b417fe8549855b17a86d1e457645531cf674fb1a91221d30c216b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "95fe04df576b430d9bef1b992dcefab2113607997d02280d3129297de3c612f0",
       "count": 1,
       "tool": "cpplint",
@@ -22980,13 +21069,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "9673ce5b9f34763eae5eacd310f3214d4fbe4438b8b0e3c16972b9c0f1ee8cfc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -23121,13 +21203,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "976a127251e52547078ef21f8f2568b4a49962b269dd10118939877bcf244756",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "9775ff63d8fe542d4984153921a82f9aefaf68f388aa1846555d562ae062934f",
@@ -23354,13 +21429,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "98f38d902b79fb465c4d6b9adb0ef3c2329938b8e522831e3fbe347b332b9381",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "98f8a3b49f4f175fb11ad4ab4b17537d18c4bb2176b36ffe5e97ab276064955c",
       "count": 1,
       "tool": "cpplint",
@@ -23401,13 +21469,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "99482419f81d162cf90ab116601421e23d60859d581f772509c8675aaf2b6529",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "9956ec58f9197eab4b035fed2fc3aa8401042d20b62e3015c4c4db881dd8911b",
@@ -23921,20 +21982,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9cf351bc8b1c6f376ad58c811b890afe853d1a8ac9652450f4b1ae37cc957a9e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "9cf48acb27a55029a4425d1b813bc711804be2779939f7949361ad4c02d71d36",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9cfc71cfddaaa3189964a71862ae4a00cf3c56694e0323b079e9dc40eb312169",
       "count": 1,
       "tool": "cpplint",
@@ -23998,20 +22045,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "9d852a6d03b1bcc7b63276638fd52d337eefcbd7b7c2341d6b1317ae2118027f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "9d855618e9a3ca68559fc4343e1e4cb6ded68f836c795bcb3fa968ffd26896a5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "9d87266e350272e9b921ac9e4695db1d7e55104b5ab3f1c3fd55fb114468c0a4",
       "count": 1,
       "tool": "cpplint",
@@ -24052,13 +22085,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "9dc0a7cada5c3bc5193c1e882d63bd197b0ec626fbdcd3cab2a7b1d3a6f3e172",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/comments"
     },
     {
       "key": "9dc0eb580c4ebbe16818a9bd983b23f69bdc6e5d4fa44e129f4a32618dc76263",
@@ -24271,13 +22297,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "9f26a84c352a494b4fe00682e65992a52c8eea26d51366006dfcfdfcddbc7833",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "9f2a2ef665f5918121fa7f95b24e0eb8d35721edc26fcc465c593be09d6eab57",
       "count": 1,
       "tool": "cpplint",
@@ -24383,13 +22402,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a023d85bb51096ac5b746946c31545fd17f1c433238ed9c678a4aadc51c688c2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a025cda20c04a174216e6bffc1873cb2fe1ae31f81c432152f7d0e44de30df7e",
       "count": 1,
       "tool": "cpplint",
@@ -24453,13 +22465,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "a07505ec4c44a684bfb371af92b221b5531d3ebcebea0805533af1f1efca90ce",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a0808cd3fa3c90e52e5e57651714b6a0c5208812ea5adb4f2a2fe7ee6d2b0272",
       "count": 1,
       "tool": "tidy",
@@ -24514,13 +22519,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a0f31eeaa7440029e8c7887c57a6982620c2662bb8199bc871cda2f9e1746287",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a10350a396d22fcbb3d86395db052759503df149d99c467b48b7ccb67705b9c9",
@@ -24579,13 +22577,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a14674acf3c3cf7d4c8a266c58f2fbb957eb697e41ea129911d43f4946210f9f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "a156138c7defbf7e2d5a2cd548bf973b90a8d912c82f5741b4b5dbb1590c7dc4",
       "count": 1,
       "tool": "cpplint",
@@ -24619,20 +22610,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a195b13d42cd40765a5ea47e3970d9139c9fcc56e4953da6f8b08ed0e16cb3de",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a1a0ea89c135a20d3a4e8c7003e203a3a416eec1ae848e7e59f4e81a77afb960",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a1a79c07e9dac2828ffa7d0b2b7c873b5f91c7da770e343bcf47878230bdfe4f",
@@ -24682,13 +22659,6 @@
       "tool": "ruff",
       "path": "tools/naming/sym_gen/Engine_01.py",
       "rule": "B007"
-    },
-    {
-      "key": "a2321ff025b927f6f3707ffac1919083f7dc866bebed65c3c0e8154fd0cd0e54",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a23d6875349b375a2886ffa8e3f62e51a653d0bc4d4077f0cd6f5c6049f139c6",
@@ -24845,13 +22815,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a36b642447ee51d42223ecd61201ec43ce74a70d35439d5ce9e26b997c4519f7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "a36b738a9bf3a85883ccc90ecc332b1b33847bcb9b3d600d3f42793ff2131aee",
       "count": 1,
       "tool": "cpplint",
@@ -24880,13 +22843,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "a38e7685bd44e8a4d2925aef3430a4bb9aec854b9ac2b34688c5384d2ac86029",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a3973740c387750c875792b06818d97470e5ed22454a4f97db073419cf821757",
       "count": 1,
       "tool": "cpplint",
@@ -24899,13 +22855,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a3d3696de38c0c5e953c654955b73bde014dee1ad5d4ed3fa47fc61b85338f10",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a3d56ee0dc952e2bb3bccee596b6838c92b78b77217b2fbf5d2c74c11a2b9b9d",
@@ -25048,13 +22997,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a4b33e39668537daba4e1f0ec2db33a2f3c025c40f13be2ba5d512a7ca1bc385",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a4c782ea1f62a8cbe0c5013052183f85367dc9a88f5c2e333286eaa264ca1c8b",
       "count": 1,
       "tool": "tidy",
@@ -25181,13 +23123,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a5d3069fe36695a741c9826db5ba0e9f8e7be81036ea89a5814b20e4efad1822",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "a5d82f2d8f80a13f1928ef1bd9de8204b84052c50eb10cbd3e6c02012c61b19e",
       "count": 1,
       "tool": "tidy",
@@ -25214,13 +23149,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a5f09df988a7d6f13ec19e3c7e6d91344715f0b3f770dc45fd06a39be68a104f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a602513d6a907e25abd3f2a741aee56b02cd5a0d2f569b2f29cd9775da36313e",
@@ -25277,13 +23205,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a65a98bd1097099caa281a1fd92b9397643c52c6f70b8472271f369078d69a35",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "a66e4e554d79f93921caea5d2f7cf268e939b6c505361bee1a586b121e7864b2",
@@ -25573,13 +23494,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a8807c4eb810cd5d84ec132ebe9e6602792f3f24b3d0c2b5860da4bc9f448c38",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "a894b18e1cf6cdd93e5467e7bb78f99d545dd4ad50bebfb5cd0c3c56da1bd7f8",
       "count": 2,
       "tool": "tidy",
@@ -25655,13 +23569,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a92975bee5a5976d7a14a9caf7f9b89131152b4aa2d2798f33b4261fda82f689",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "a92b807a7b1cc6c0f4beb5db6a7124bc3c92dbf6e8b9d66c9c52c37d4489d2da",
@@ -25804,13 +23711,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "aa0a43f3903e8e847b4bcb3537923c87f5ac750bfe09023eaec1dd0d0f6f11bb",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "aa2a6b884dbb94783deeeef061f93c87dd2cdd2b5eea4f2f6ab9a9d7e3429c34",
       "count": 1,
       "tool": "cpplint",
@@ -25878,13 +23778,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "aace63b93825e5a6a499a3a849fded428df5053129b1e8700fb5597a9a0b1d94",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -25965,13 +23858,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "ab2dd8f461c7f2e4d195f4a51553b864af23d0ab6f306c77bbd474e214459754",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "ab307020371813d64badf001d8aa3dedbcc4fe6c4ac5a3746b0704a114d1921f",
       "count": 1,
       "tool": "tidy",
@@ -26026,13 +23912,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ab917fdadc545209f33a1d3ce2ab38907eb5ca7e00b645f7513f941f184fb409",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "aba17069810ba392096422b65fe732fa9ba3e03ef2f5f7e75269e91fc3175928",
@@ -26161,13 +24040,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "acb3a0aa5c15a29bd7238af2c75256b9bd40b749bf8cba11f21b73151cd5efb7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "acc77f19b10152451d47f6d817d4992b84271a51fd67f80cb808ef31196bf098",
       "count": 1,
       "tool": "cpplint",
@@ -26210,13 +24082,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ad142dd3b4a88cfbfbb647498f70bd8b9dd081107625715131a832c330456c58",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ad171d3c507be614178a1f1f7c4568018f129111b279ef306d84bd9ecd6e5d45",
       "count": 1,
       "tool": "tidy",
@@ -26243,13 +24108,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "ad3c55ea5b357daf69cbfd9499817d994a844716d88134b8f521a6eda2285e32",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "ad482ee52336fbcad0ff6670ab7a6d9358d2735f774f69c7d72b492d996ad8ff",
@@ -26294,13 +24152,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "ad7ad3bdcc3618aa2c61f485332dc7e69cf9522a1200d5492042599f1c7c6729",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ad8553161901bb264aba2c7761367c4f6be72f3f032da09ad1c179421ed88574",
       "count": 1,
       "tool": "cpplint",
@@ -26313,13 +24164,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "adabe7df2da57a248bb3f065b7c375acf13111c6b89430ab3ff7efd260baaaf5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "adb99fbaa5ceabe29a67024e74aec09bbec7c231cb724f695434edd0b82cf000",
@@ -26441,13 +24285,6 @@
       "rule": "F401"
     },
     {
-      "key": "ae97faa88e3826af791075846102fea2e9a4ba32e4f84b690fb932e95e6e3005",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "aeac672be93cb9568c488815b5d09b8d10318c3fbbbcd55c27f84a8673ae1b6d",
       "count": 1,
       "tool": "cpplint",
@@ -26480,13 +24317,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "aeefb663f7be64346c5442eff2bbc69ce57880a36e6a2c346163d2100901482d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -26530,13 +24360,6 @@
       "tool": "ruff",
       "path": "tools/ledger/build_ledgers.py",
       "rule": "E741"
-    },
-    {
-      "key": "af4bb7d7cbe8fe4d8c879f52627053562228e0904b38ef65929963279ffffd6e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "google-runtime-int"
     },
     {
       "key": "af50bc9662e3f195c379b09c2fc6855f1e48852b3f56b0ca560e3e5f8703a45c",
@@ -26628,13 +24451,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "afd41ff41eb571e321621f70b082f40512551a5efc3d3fb277d5f971e9500370",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "afdffe16fccae6ce9797f9c11ad0eb1b162857281c0954f2230bf58ce6109f9d",
@@ -26854,13 +24670,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "b17478ceab082acc8484dfdc2b3e038eb1560cbad0e94f55ed30ba99ec4c194d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "b186931966b4bbe6ef69368db9003ad8fe2ad29a94737822216d2bbddf561729",
       "count": 1,
       "tool": "cpplint",
@@ -26980,13 +24789,6 @@
       "rule": "bugprone-reserved-identifier"
     },
     {
-      "key": "b2412bdf51753d303ce2be6868fbda1246519335c78bc1613e7a1fbffa9f0748",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b24b2177f69aab7f153baf472725ab0f4f3d4563f41d119c9abec86f7edf82a8",
       "count": 1,
       "tool": "tidy",
@@ -27050,13 +24852,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b28fcb4a6efc02bce584516cdcb7f74ce90d69ca2fb22ea160267849bcbe11c9",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b2913252b005b3219f71aee13b1c954a87a8ad77830e187411e02f0cb3dd365f",
       "count": 2,
       "tool": "cpplint",
@@ -27076,13 +24871,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b2d5a56a380a34bd8c6c4955b10009bb76da255e0705a804abfb900e7bd72200",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "b2d7cfceddcc92a8b03d227f4f4f186a6a07f9bda3a4963f5e0b90434c074ccc",
@@ -27204,24 +24992,10 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "b39ad7b1361c6e1466311652d8bd6e8f2de46aa2acbf0be685e16a70dfcc2168",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b3a0bd66c57781080bc32ae837ef1752aa3f34a32e3c0b9d92546faa1933f0a5",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b3a38869280a30e9ed13c9e8caf8bfab6d7ec7da91016e88c3d6b9a11d532b9c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -27463,13 +25237,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b59e4ec411b7f2f2e5c5725d2e7b1f6d01bbd3fb4f548a775fe3eb48510b7df5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b5a7de3a03e00daeaa8aa9f175977a864d8313f73e4501e6454d651946fb533b",
       "count": 1,
       "tool": "tidy",
@@ -27589,13 +25356,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "b67431aa3b6a53fcc4a69db3e246cdb1fb129816d2e3677fbd3a515136014e80",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b67c96d4404b6a111786ca930c927ee5b6702182c5599472849b925a27376bad",
       "count": 1,
       "tool": "cpplint",
@@ -27657,13 +25417,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "b703df0f3379286cb07a85809e32c3678344c0ec774119f25d4754ae273a7afd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b706b610ddf1fc092caf155878940298182ad5d5aba5006d488f4c1d7afa86eb",
@@ -27904,20 +25657,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b84d374d743991f6d6b46fab2af490d7e4b41cd02c9515f18939424465ef588c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "b850e10e5c96283be81a641ab960833fd638f0224c330bcf74c1dd017be3262f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "b872f6099d85ca2013392d6f06456ea6cf5044f4dc6f082ccc5baa80c9144827",
       "count": 1,
       "tool": "tidy",
@@ -28121,13 +25860,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b9ef63ca2592471ac34cd7e929468efd0505198cff6a72a2892b93480f971681",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "ba1544674fdd21e06cbdf6c916faad12bf35e20bbb6ab23e4bbbc0644fd20853",
       "count": 1,
       "tool": "cpplint",
@@ -28219,13 +25951,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "baa6c9967926b8e1158e55698fe438c2af01ef6741b5595faf62b534b74e7aae",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "bababfe20dcfbef12898e30e4ae22a2b57c99b1ebca7d7d4297fb05bddb8f548",
       "count": 1,
       "tool": "cpplint",
@@ -28238,13 +25963,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "google-build-using-namespace"
-    },
-    {
-      "key": "bac8173edf61286a2d2b045e25d6eb12d875e5e72d0c10d3b9ba0868027e2904",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "baca283173c785a5d233330c584fe880d9da610d642f66f757e9004582b4dea0",
@@ -28308,20 +26026,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "bb3154cf02fdb5924904936e1a076786029ac7b589ab0348f9b530bb5cb83b21",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "bb3514d20ca84d5e90a149d5f01626db29685c9b0567944d04e80fe35b810c61",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "bb354861d0085019c6cd0ebe01290cd090f35745a91694894ea1b7f0e0970842",
@@ -28405,13 +26109,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bbb5ee5cb513519f81d0f7445680423a7ca5fce46c001934c7664ff3b141b010",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -28562,13 +26259,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "bd089ee46d13d48dd7cacd68e16a3a563fb5419762362f748bec6c70f86b0917",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "bd105a338e88ad616c5f08aeb35b7c93af84232177129df0be78cd85d726bab8",
       "count": 1,
       "tool": "tidy",
@@ -28665,13 +26355,6 @@
       "tool": "ruff",
       "path": "tools/port/copy_to_native.py",
       "rule": "B905"
-    },
-    {
-      "key": "bdb1fd7f30698442c61e80d7597c679395a4459d30d85cd9e0bf400203926fb1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "bdb821afd8e8261b3eeea79bb66edbdf14c1be2514521893498477f70ea2ffcd",
@@ -28821,13 +26504,6 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "bea733c709dfb04a49067e816fb3b2ce42133dc1abdb3628c72c6e033623da22",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bec257df0f68fa7396e9a296ec67a30d362286dc03b8f77ec5f82c985a45033b",
       "count": 1,
       "tool": "ruff",
@@ -28854,13 +26530,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bf0e4415fbf3755f5dbf7e6105b1013affc413512e17b621e968690d25b0979e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "bf2f3965d321b3088dc09bcac83d0274993146721874c3b7a4be94ec59ed7a45",
@@ -28912,13 +26581,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "bfa290359b4dd92f6a6d2fcfdd28e39772a8c27e2f7603a5318f047de08dff5f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "bfa851f7aa616fb29b78df872dbe9361d9b7c4052318b49beadbbad4b13df89a",
       "count": 1,
       "tool": "tidy",
@@ -28926,25 +26588,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "bfade4534c29722623267b560539c16567f8aca80e6674609875d29e01422b6a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "bfba8b5bda1643aca5ae9217a45ff1ea6ea558e566b7429dbd8df6dd58b7285c",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "bfc6bbf258c14f245b819d66947ae67e6b718a1876709cf2cb225c11414f4a29",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "bfd6ed75f23c9eca3cb6e0ba819de599e33be5ca565f8b2baadf12199a25fdeb",
@@ -29535,20 +27183,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "c38bf04bce474c128d5ee4077284da0e12e0344f7458b2be9cc81bb5674141a6",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c3a00d92147b8526b760b858c7c1650ca5107b0d696140e025ec30ef3ff4d8e0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c3b6edf0221a021953b650ac044aea71bbeaece26335db20d3d782920cc1f969",
       "count": 1,
       "tool": "cpplint",
@@ -29561,13 +27195,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c3decb9292e400d38a74ce258c04da8902d96fadfb91654ac5126ab063b1feea",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c3f535cea68245ed238b0715af94f974dbdaec6523229e03a035d02e2c9c1b0d",
@@ -29654,32 +27281,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "c49cba762b95e5af051a47ba88b4cc217e9e885206ad8d8587dd380c31839580",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
-      "key": "c4bbd7129013d1d3a5ac55efbf8d20f2f3a2df81c0251308c3650814d34a19c8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "c4d70636fa194b277634bd19ca3167e28b8818b51038e45155638884764a8edf",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "c4ebea0deb9eb1bf593c80f04b9da004cdcdd3ffde5c8a504a833fd52115af7b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c4feeedbc3bfee9264b9a1d2857ea3a20771852a0fbdf208686286b74562d827",
@@ -29717,13 +27323,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c57eac9ee76e4b12a1512f38988659bcde40b141c43b7e51daa903fb89b058bd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "c57f10092d709ffd6f48d0cb90cf52b37fa176c45a8148bae218e8b1406c242c",
       "count": 1,
       "tool": "cpplint",
@@ -29756,13 +27355,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "c59bd06c8930423c3f3a989a60f8ba273647346c049f717b4f0685cd3669504c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -29850,13 +27442,6 @@
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
     },
     {
-      "key": "c6090d8b04023379dbbf44630df798d174ebe163ffc79ce8f6dc91a3a5a46847",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c616fbd6b7db8b44c4c0083612b2b240ab6c89b8ba5d75cf99c50e68209a5ed3",
       "count": 1,
       "tool": "cpplint",
@@ -29911,13 +27496,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c669680928506478f2f350894e0cd58bb4c974f485c977d74ada3465a0d1306d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "c676bee1297a9d3e0d7d1a773fc3fe3ffbfe671e2a31b94f435bed15ce3b490f",
@@ -29981,13 +27559,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "c6e58608ecbe4c791fd11014486789f2ab90e4171f4d5336059a4c968a6986b5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c707dedf3d720cb989ad2e9caa42c66484b445ce4734b7e7bb616ca6fb84129d",
@@ -30158,13 +27729,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c81492d9d4c2434eb8bc2e7bf9ccdea15e7dbbb80768b407b4d99f3dc299e751",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c825ca3c370cf113100ac978fc0215589b11209227e97a483481254f9235ff03",
       "count": 1,
       "tool": "cpplint",
@@ -30184,13 +27748,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Render/ModelWorkspace.h",
       "rule": "whitespace/ending_newline"
-    },
-    {
-      "key": "c836ffa31a8db929ede0d555604a5dade560b3d8af1d05c991f2333f8806163c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "google-runtime-int"
     },
     {
       "key": "c83a52252d2aada1fd41e9c51df225707988419dc7178777f782bed63e30e04b",
@@ -30235,13 +27792,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c8c4f056b35e66f7753483ee82262672a2ec5789800b7808a754201e09949c1a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "c8d7bfe2f42f690b790dfb9d7b1714b6fe6aa73d5b5e16f8803d3a28062cc281",
       "count": 1,
       "tool": "cpplint",
@@ -30260,13 +27810,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "c904cf7ed0507e00b48aa065f547f5b4ecbb5880da485685546cdf1ffba93141",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -30382,13 +27925,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "c9b7c54db146851de8b549404a2d84f7b9196661bd4f76a900fa73dfd45a8921",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "c9b9dd9e29b6d7fa041e33cdd833c2a2e5531f7c627b1f3a98d0b78f23a1cfa8",
       "count": 1,
       "tool": "cpplint",
@@ -30436,13 +27972,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "ca12d95d3a5526196477fa2ce4802f970e3d75c91009d751b4fe75083be75809",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "ca16286601880c4d24db556feb9ff6763d77887e86400e87c9df0d0f6b6ed10e",
@@ -30508,13 +28037,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "cab0263481d91e9e531a9f3b43bb01378665d1d3eac22bc026492406bf08a3e9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "cac48500a30eef33dba40b9703ff32dd31ad86f9e29136a5421edec7a928c0b8",
       "count": 1,
       "tool": "format",
@@ -30527,13 +28049,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cacda157bc48ed6b0ff33ea3d8c03bbcd6de827dcf10d6f9b64545f419fa5f74",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "cad48b253e12df019f02455e8f1ae34174daff54013e26c762140c201d8efdc8",
@@ -30648,13 +28163,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "cb6e555ecf46c234312ab6fe9bfee223241397c63e0b62be3f6b08c25a4376d5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "cb7079b867aff27203112ca2645aa165b4cea890c9547c931b302a77f9f55525",
       "count": 1,
       "tool": "cpplint",
@@ -30753,13 +28261,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "cc1ee581cb0aeefd815542614fb20efb8c44f81096225de4b76ee0a2a819bea3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "cc213b479722e42f7dec7981e7d376b6cc0673af2d117e0a5299a2025f0c5de3",
       "count": 1,
       "tool": "tidy",
@@ -30772,13 +28273,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cc299d33e2c5dd92fea2d26d8bb7b33464a33314e17fae86958a9b8438210f18",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "cc2a89c04ac309b8a1fdeac8d524f294b2576bb0cb5cdc13b570da88a25b39a9",
@@ -30851,13 +28345,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "cc72655c85eb44796d5105fe8bfc2f21eeab268df339125438085d7eb5041e00",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "cc7465a02c82d8c1babba79314351b7d5fec5413fd22523b5cb5377f5e819df7",
       "count": 1,
       "tool": "cpplint",
@@ -30907,13 +28394,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "ccae2edbc14ee7441d50cf032e4db718940580429bc3485b34b4f11df0440127",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "ccaecd1f2fc680117ac577abe498a3d4fd60ce9ac472a1ac8274c3fd9c8d077f",
       "count": 2,
       "tool": "cpplint",
@@ -30933,13 +28413,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/ContentTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "ccc94829cb53fcb98e647d7f27634969d5a2629c572ed1f21d5af519fdaee24e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ccc99f29a89de1a6e16a9469bae4066162e77d03678f78242a2eb8ba32e058ba",
@@ -31040,13 +28513,6 @@
       "rule": "whitespace/newline"
     },
     {
-      "key": "cd5d2b4a1ffc5690c286b1c3235958e9d42d15a7b3ac7fa616f37a8bae8c3f21",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "cd69034b2a83df2327bfc70bccc6aae423f644bf53340766d19860679f390d63",
       "count": 1,
       "tool": "tidy",
@@ -31058,13 +28524,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tools/Extract/src/main.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cd9397220590a161b290cc1ed38678a9eb15cf9c42f5e9df0cf8eff99d039815",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -31143,13 +28602,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Core/Gte.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "cdd83b6eddfb02596d7c22494788fd4dd63a25b22bcaeb742aa6af1f2236859d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "cddf2c6ddafa06c93b00574085b0c281f015f63e346c4e2496cd12dd0fedf6ec",
@@ -31320,13 +28772,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "cee0cb401b84e77a176b6f58f7e70fa224b4c5808de288832cc58c1d0d8af718",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "cee8b178555362d8392813f16a0154e1689b4788c22731791caab0bd51387c39",
       "count": 1,
       "tool": "cpplint",
@@ -31439,13 +28884,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "cfbccc7038511f310f2b568246987bb6da1b9ed8bdca5882e8279a01b1d8ed76",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "cfbd04feb16821d894b012a1c55e9a9381a17759fabc453ec667bbae979cb194",
       "count": 1,
       "tool": "cpplint",
@@ -31523,13 +28961,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "d02bb3cb651e3a0c384de18728d2a14167f097df5d84274ad974fc4592532141",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d03eceb87083f7aee38957735d09ffacfec6f6dd0b9a368129f6fe6bb4dd5711",
       "count": 1,
       "tool": "ruff",
@@ -31572,25 +29003,11 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "d05cf576f588849af8db8fd4495d1bdc7bcb13eca593bf4fa682098ec89dbbed",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "d064044658cad2c064985be36a18c47b4b2bf062f834263988f304e48b857dc8",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "d06a3bc2b4f4524e1d3f2a63ff9f903a9846b9ec521553c2259391e258a59b64",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d06acbb32c0a43a5b77d07dc9b1480f109b74c937c570b9d438bee64c226de62",
@@ -31635,13 +29052,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "d0de25f256b72a3841c008dbeaf75b186c96ae135df8824d327d94a9232e01a2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d0e0ac053c146efb390189842aefa0199889ca0a56073d81e87233938b9f9316",
       "count": 1,
       "tool": "tidy",
@@ -31670,13 +29080,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "d12bd9d73a3c182dccf1df257d361f84fb11e84696a12780b72f933e9e7f21fc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "d1338e166d6df664556c8b29fee02473dd530020ce80018880fb31ba4291ab6b",
       "count": 1,
       "tool": "cpplint",
@@ -31696,13 +29099,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d1579a22482ed3ca9dd34d800dbf60b32bdd1673646b967fb1323bd74b63955d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "d159862bc43ac2dd6045ce43b074c83a6f04977a5a5fe2df97691337fc10c6c8",
@@ -31766,13 +29162,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "d19b090e6ca69f507a46e2f919f494f6a287ae694281dae7a2d29a78b6baafc3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d19ca33bcc5437c00c2ffb25ae0d597af066add99e1a8057edd54f2f8f4714a5",
@@ -31852,13 +29241,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "d20fd79f2ac217147d0a853cc83b5cd6cffc5e22f8b9c6385776e4a88e3ef2f3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "d210b1d99da8c7e8cb9a97315a5b6c3e2718eeb5635a123d2755893964d38ec2",
       "count": 1,
       "tool": "cpplint",
@@ -31885,20 +29267,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "d24fe507f532ddd5654bc47bac210dd78c403cd54b262b149783230458c61194",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d258f65e4fbbb6774de5d95540949ff69085fc3436435dd021506d5c6f56d384",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d260d574f8f18a10f72292fe0891e73aca2fd66da87e7b3179d15f1f6e813273",
@@ -31936,25 +29304,11 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "d2d478f838ff0fa1b92adc07c5a34e382de5fa6277f8f67eda2d40ea02810b01",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "d2d9a4fdcda130f60cdfaaf026057ed9079119b1869637031c67c939074ad3f7",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "d3091a849e28fe2ed9884f4280f15766c0e12c239a56e48d6262088162156a5c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "d30bd50d6eebd0b45830b0349bbee2c13b295b22378c0054d02eb1aa0cc6d6b0",
@@ -32111,13 +29465,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d3f0e802f8509f044b686adb079adcf06089d84132cbca612ac1629ca79af076",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "d3f984f2533f9f822a3cfebbadacda93e1f3c764d2635ac756c98872662b87f5",
       "count": 1,
       "tool": "cpplint",
@@ -32137,13 +29484,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Render/PageSpace.hpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d417fffc3861b99d373b608af3a0027699ffdf3a8542d3b4c46782347af8b3ed",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "d4282eff9f115ca71aeeedc0dd44d7a216cdf1bdfdc6c957769938433f2d4b20",
@@ -32207,20 +29547,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/MemoryTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "d4a1085c48af73fee80aa6d72750b9e1103fbd3adfcd1ed08a612505c37c8ee1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d4a8003a2f3f5bd9184455ad64b63af0592f38479fdbe6e12ae2b2cefbebbc05",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d4b49645988a3b12f4f6a5bd48f56e3ea7b9fdb7bac5ae68737f399c35fc95d1",
@@ -32552,13 +29878,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "d6da92097bbd3951243756d83eeaa62e076cbc11edfdb21356d2c96d2e636f73",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d6f27e78605e7dd7ad8e159c9f8c0ead9d3fbfa4808d24e09157f57238acc130",
       "count": 1,
       "tool": "cpplint",
@@ -32746,13 +30065,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
       "rule": "build/include_what_you_use"
-    },
-    {
-      "key": "d81a7bd4beb4b58f9fc7b83b300352be3ea3ba88000b8fc360d462e2e1ebe2e2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "d81e537f98b453ebc5190f7ad2541c097be10952238321dcfcca57661316b1f1",
@@ -33084,13 +30396,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "da3ec5fea76d52056ee08d6c0d1fd30441855ffd43c1a51c7d24545be03783a7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "da473c2ae472bff8f6a138e715ce9e78ed4912a16836eb1a8cc0295a766fb9e0",
       "count": 1,
       "tool": "tidy",
@@ -33189,13 +30494,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "dad6baf455c7b3682ea284e612323f2d12e74cab5bc1500a88fbffa159a65009",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "daf2788b9aba6b76814ae6c9ab5299cbf39ed038d9f8edc3b57580d8a5463758",
       "count": 1,
       "tool": "tidy",
@@ -33236,13 +30534,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Render/Device.hpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "db4f38eb87d1d03eb91a026a58407d90cab8852f2f2a131f3c87c5ca0f9f559d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "db57201461b707f1c4c26f143b3502e42fe48bec5ddda4ff8561065cdf9a06fc",
@@ -33371,13 +30662,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "dc2b4540386517ebb4b2c94694a54fdcc5d7085917cd94e859b236baef47116c",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "dc45c64648e493b568157ee766ab8f1b183c4ef898ad1ad5555ff4206689e0cd",
       "count": 1,
       "tool": "tidy",
@@ -33441,13 +30725,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "dc9eaffcb6ccf18e2128d5ad845d113b5a161ac5735e20f5e107b1254d46e7c1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "dca0c762b4c3b85d2f473be72e0df2285fa817a8fc072ddb2c9fb8a3ed2ecf2f",
       "count": 1,
       "tool": "cpplint",
@@ -33509,13 +30786,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "d4b68617238063179df2ec9e3c136ec2206eee63fb59046bc3288958e8933ecb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-function-size"
     },
     {
       "key": "dd0bb291f791c25ea3c269d193a761560d818aa645f1816540608927400416db",
@@ -33588,13 +30858,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "dde68102406686858b7e2299ee3e603f3bab1edf1323afdcc03a78838faafdaa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "ddef25863eb556d39bfe2ca9a886ff6e7910db881f2ce7c6aee394e32302018d",
       "count": 1,
       "tool": "cpplint",
@@ -33606,13 +30869,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "ddf7754a015cebf316bee97379547bc38217daed5e8f33bf2c512bbac1e532fb",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
     },
     {
@@ -33691,13 +30947,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "de518e308fbc220a959e2cfb6346d1a016f426cbc6bcbb71a5559f4ea3465d1c",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "de53e077213575208636abeaf9f10d38a7ce1fb90d687b11a4adacef364a4902",
@@ -34015,13 +31264,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "e0e39e4b38857a669f554e43315c25cf24ca94244e2263af3a897331293edbe8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e0ed3bd5034dc2ca1ba0b636b4921310ead6c50dcb67dddf771168b550eb0335",
       "count": 1,
       "tool": "cpplint",
@@ -34071,13 +31313,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "e16b32e60a8ff18e5624a35fb930cc62f039f696890ea0d00013bfe9f44861c9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e1741ca5b8ece1694384f7cae3b6e3f33796987488d0e0afa4be3c728784ffb1",
       "count": 1,
       "tool": "cpplint",
@@ -34125,13 +31360,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "e1dc8fcd0e276f251f697dd17ff1d1f3d58c95f37a1a2f93bf2d9f43fd33a9ff",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "e1e926e5d6166036a9ad114744e90eb60e62774c42310d5cdf3bbbd0c63e9a13",
@@ -34386,13 +31614,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "e40b3a2c289ca7c8faa0c04b3c73b9d836563188949d69f5244a54ca5fdd86db",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "e440f47e93a3e8f1c9abb81c6442dda3cecc0128721334acedfd34cfe4cbfb3f",
       "count": 1,
       "tool": "cpplint",
@@ -34505,13 +31726,6 @@
       "rule": "google"
     },
     {
-      "key": "e4f775f2346505127b19465c546dfabc0cc3e0d9a1fd06a6eba9d0fdcb10bc1b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "e50112a5e8533cca45ebee87ee7073f5c404378ee037b6f148db556ea77e8b5c",
       "count": 1,
       "tool": "cpplint",
@@ -34524,13 +31738,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e505e230658340e5e1463d91b4c223cc98c321b0908afc8ca5c8de513596afa6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "e509048fa6993772f8f0700152fdafb65bc9324439b197db48f16fabaee1816f",
@@ -34589,13 +31796,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "e53fcf5ea99536bb0dfd1903a4a4b9f0052b9aeeab13de070f7ab9a9dbbfe73b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e5434b79daa8593ce3fd10870740e7ee5407dd2a396b3df2d690489249b223de",
       "count": 1,
       "tool": "cpplint",
@@ -34636,13 +31836,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e5a8e989f68999bb07fd0c781dbc14963e4ead2dac5d9d32888e0e25a64b728e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
     },
     {
       "key": "e5abe3e9df7ac28f3e41681954267ef7612b2eee13f0638d4f28f09a9ed061f5",
@@ -34778,20 +31971,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "e67846ebade7d361a1fe5660609286d60b04a65ec4e889a5b0c48171e365320b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e67c756a60912fa66f49dbeae9da4234cf40ca3329e302f9a484fd22b43ea702",
-      "count": 3,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "8042f76c2fcce62c3d05073dbd76797956ac2c2e73bdd9a51fb2fa23acaa8912",
       "count": 1,
       "tool": "tidy",
@@ -34839,13 +32018,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "e6de9876c2e70f5a3b7f362ca70ae3b3d8c593871e3abd744d596d18a9e9c214",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "e6f21f5c889eca9352ba8aeebb142479dea974b76a60e80173f8cf40ae1f8aad",
@@ -35030,13 +32202,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "e7f0ea135b49bc1371e924ee0ed75281179e70e6608ac37381247c6383e3939c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e7f396306bb725ce4403cfef05c90aa404e3c853080145a248567f4630a39d01",
       "count": 1,
       "tool": "tidy",
@@ -35051,24 +32216,10 @@
       "rule": "google"
     },
     {
-      "key": "e80ff81783c008198c0824b7cb7a09135bb819b6776b430346675fa747516756",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "e82019e44e4e8ee107ade93dd04e8e97a9ce7e032c1977ed9a347495b2147ae2",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
-      "rule": "whitespace/tab"
-    },
-    {
-      "key": "e820a8f1d446e4b496d9b15157250ebbd6d1d84d4e9ea3f543db071ab44419e7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.h",
       "rule": "whitespace/tab"
     },
     {
@@ -35212,13 +32363,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "e9270072347b46ff11262479dd47e6a60523b8412e22840ba089f64dd19a84ec",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "e92d266a8bf032709930b27f24a200ece09a8921dc432022a23a45e4ac25a758",
       "count": 1,
       "tool": "cpplint",
@@ -35303,13 +32447,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "e9aac4baa7b38283553d9cce18e0f7e7ebfbf938e2e819c34b17088bb484d178",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "e9b038129787c1e9ff82207c78ef4e633f22e25a3ca1a4aa44ea24877f32a0ae",
       "count": 1,
       "tool": "tidy",
@@ -35336,13 +32473,6 @@
       "tool": "tidy",
       "path": "Native/Content/Legacy/LibDs.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e9c41f2a406228028cdac9635ac8724d23b230a19e7d2e268d763b48484ca587",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "e9cca18dbf290145c8ddcc7679375b06119d8196ac2051bd9f2120d2f6abc331",
@@ -35415,13 +32545,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "ea54e14e2ab5424f1478a639e9e4ef2e54e2cf0cf3d736be893a8d7098aaa864",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ea5c97d01e0416f73988f08342c1b6097de147544e1d7db0b780902f9c1720f8",
       "count": 1,
       "tool": "cpplint",
@@ -35450,24 +32573,10 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ea846552bac1bad971ee6e86942034dffc11311b21366fca50030c1d7eb437bc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "ea86545a4834f29ca084a66351a0fea1981712319090f6c4e84f7fa0705c1cdb",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "ea8b6b7838eef4b74f4823a9239bed15c47400a2048cdab4bedde83141f9f707",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -35567,13 +32676,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "eb7887409ffb3d9f57469511efeeee649227ed7374f1fecc359839aed8a644a7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "eb78f7752db0bedba888a724f6947747b0cc173df8cb4e0aa27116c2e8a992cf",
@@ -35779,25 +32881,11 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "ecb20daceb5ad55c07b3fc7dc6808903fbe48d56f92a59f12d7c513d5dce8443",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
       "key": "ecb272c4b99b1f67da75c7b7b2e43ac0a1e07004dd89418880b14badcb930e38",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ece8df47b8c145b3687b521c9b7c8d2c26e70d2357fb747baeeb6012195ba1ac",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ecf8015b72604c42eb909bfbd0d470ca7053c10524b6a5ddf1a716c88e395792",
@@ -36136,13 +33224,6 @@
       "rule": "I001"
     },
     {
-      "key": "ef1f8c65194171af0f0903df9e8a8f11887e700bf6061c509a496128341be16d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ef205807c21f01890281b3f103676011ea5f4e836b8b9fc78d9b42dfcdf1abb4",
       "count": 1,
       "tool": "cpplint",
@@ -36290,25 +33371,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f00fd708a51aa6005a8523582a32b009130899c63f410acb126bdbe63185d892",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f017ff331323bcf91792202b7979e477e65955bf3d22aa105280a2f240df1a59",
       "count": 1,
       "tool": "ruff",
       "path": "tools/naming/sym_gen/Game_Battle_01.py",
       "rule": "B905"
-    },
-    {
-      "key": "f018d4075ca3c58e710255a12dd7dea1920017169133ecb6e1a6e8ce128aa0a2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f01abb7c14df1565580f25ccdda7e41deb0c8847bd8d1f80b9d2135d092eeb36",
@@ -36388,13 +33455,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "f09946bf17a5566fc7292ef6138dffd71f2b5a9c07c0d062ce73458cce70811d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f0a29bff89c188f8cfe3bf2509792dedeed249dbc7192d37270068833dbbda48",
       "count": 1,
       "tool": "cpplint",
@@ -36435,13 +33495,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "f0ee90d206ecb460d3be5550b079c5f0b6f664f021a615010a6c9beb63c86c35",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
     },
     {
       "key": "f0f5887b427aad55c089ef055df15761d688d1ca67fd1f53ab83e1fa4d6dcb7a",
@@ -36521,13 +33574,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f1c4e2ad548e642f9f6801e867465bb4bc5a2fb0898b191255871c1d9c081a30",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability/check"
-    },
-    {
       "key": "f1c67e6c303174fe8da76f73bd6747c0b45bb6415fe14de95cc870b7ed2a05d0",
       "count": 1,
       "tool": "tidy",
@@ -36561,13 +33607,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/FrameClock.hpp",
       "rule": "whitespace/braces"
-    },
-    {
-      "key": "f1e52cd8a99ca3d1f08ecb89ca73f1f5b302f4309eb8011e6659fdf44b6bde5d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "f1f631e38e0e5ce4d27896a20b7d4099b6bf6f81e99976ddea541f5a2a0c189f",
@@ -36780,20 +33819,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "f39fcab496e0c1fc316efa6ed9b475e4ee81d513d5b97f2d05b0e04882cf752a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "f3d68e11b370bd5c0ae6b0f64a2009d0a986e0e83c4f051c1583b94e40e8f848",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f3d6906445fdf9de8d9cb27ac4f741e5196f1fe2bab7f37a0218cf08f12d0b36",
       "count": 1,
       "tool": "cpplint",
@@ -36899,13 +33924,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f48ec38218f7081bcde9987e3ae5c46f37d74ebe4bdcf8b8a03911dd1cfc95f0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f4a50a424339d4d5ce10755a39ff3f67d34e853c93d71a7b3f2edad8d2c4871f",
       "count": 1,
       "tool": "ruff",
@@ -36939,13 +33957,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "f4f539585bf3c1410d6f5c4b68d4eed180b1fc028657db7ccc1b271272329f7b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f4fd704df9410f26ed19dae61538401d4c5cbdf51fc6f5aeac539d4a531a2e69",
@@ -36990,25 +34001,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f54acf4b221d60274e46f658250e2eb431b01415951acaa4b9548518b51a4bc0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f55fe955a4b8d95f1294b75d8d76c58eb5042645252d333382642ef65ef33ba7",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f5648d41ffa167b22120a58beec4f2a474f2d50d8bba133aac6777f0ec0425f1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f570e8d265b172db675c42169e1a208aa5281361ca915f4e571227217ce25286",
@@ -37079,13 +34076,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f5ef10cf6513fef45d74d70ab30e8afac85013d474a447804d573738f0fb33ff",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f61188602f2c2f6a57e43bf8749343c0a021229a383940be17b77cb3907dfc06",
@@ -37410,13 +34400,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "f8d1e7da6269d657af674fac423da709a0b561bc494f415d64349fdda30746da",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f8f13259bd28d2b988f939eb8786e769f5d4421bec0a54e508e8ebb84f175f41",
       "count": 1,
       "tool": "cpplint",
@@ -37571,13 +34554,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "f99205e8440ad51dba509a6b35ac4982e50c05caa071a04991cb4f8df870cc72",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "f99c785e6109d4e8893547be6bea8c795a56da42a59f175188c9ea7e4d8325db",
       "count": 1,
       "tool": "cpplint",
@@ -37625,13 +34601,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Removed.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "f9cd2e61c02be5af76552820c1ee7cdaac988ce45e4c23be9233ca59a3da7ef4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f9d13e97fa4a0c227a6a5ac3d52f8a55798d53d2e4bc4f61264bde3d79fc1b50",
@@ -37723,13 +34692,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "fa29328eedb28403ed6d431e1213e6d69799b70e859167eea930d0193a280a70",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "fa333621b4ad7d7cfcab6be75f30c8f3fd212149f4e066ce8b784cc5f1440a3c",
@@ -37893,13 +34855,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "fb3bdc0a4a8e9da177ec18322706f97c2bcf1a9b6f3c741570b2566931f186b3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "fb3d58f99470acf25d7743ed3ade4319a05a9068f5e8f06dd3b87c83758e2232",
       "count": 1,
       "tool": "cpplint",
@@ -37940,13 +34895,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Arena.h",
       "rule": "readability/casting"
-    },
-    {
-      "key": "fb79ccc963df6cd36c6ff6b3f11991f79d68c8cd8c3afdd79986889f3b125a45",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "fb83ed93df6cfb6b41e481ebfaf7f5e22564ebcae539a213f07be5a805523922",
@@ -38059,20 +35007,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "fc879c3fd7ecf73d3316c3f00439bcb5d093ceba0468fce7441c955ae02428f2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "fc89fcab69ac6876a406dfc96cfda37bf0ad7561b946adf89126c91c3f9a6ab7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "fc8d5e383e1393f4701f8c2f1a6e44b149e4ff40751124875a2959a3191077ac",
@@ -38194,13 +35128,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "fd492c652e2a145bf13026a668d8a24f76901b79de10eb34942d4e7cbd649adf",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "fd4f14052f236004dcab25bf2f231beaaea6d0ec05a8288e8714e36bf20d9053",
       "count": 1,
       "tool": "tidy",
@@ -38229,13 +35156,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "fd8823d55af855ddb72f3a85442f7092276ece87d3c71822783f6ce053faf694",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/RoomDraw.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "fdaa41d3ad8763d919f8e2876a38db1aaed3fc3ae86ff3dd61d2febde892dba9",
       "count": 1,
       "tool": "cpplint",
@@ -38262,13 +35182,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "fdb99199fd23308019705999f834ea7563218af7297faeaf60c197a0b5a042bb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "fdb9eea04357173322c5f9149e2aeaa245f3a6737bdaae1b67d1032140843087",
@@ -38541,13 +35454,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/CombatTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "ffc066a78571db198b4803514c5a568d033c4584fc1e2fbd65675e7e8cd65bfe",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
     },
     {

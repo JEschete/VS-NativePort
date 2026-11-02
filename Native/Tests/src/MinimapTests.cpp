@@ -14,7 +14,7 @@
 
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
-#include "Render/RoomDraw.h"
+#include "Render/RoomDrawLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -263,19 +263,18 @@ TEST_CASE("Minimap capacity errors do not overwrite packets or ordering links",
 TEST_CASE(
     "Projection offsets restore the original center for independent draws",
     "[render][minimap][projection]") {
-  Render_ScreenOffset original{160, 112};
-  Render_ScreenOffset map{264, 196};
-  Render_ScreenOffset observed{};
-  Render_SetProjectionScreenOffset(&original);
-  Render_GetProjectionScreenOffset(&observed);
+  const Render_ScreenOffset original{160, 112};
+  const Render_ScreenOffset map{264, 196};
+  VS::Render::SetLiveProjectionScreenOffset(original);
+  Render_ScreenOffset observed = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == 160);
   CHECK(observed.y == 112);
-  Render_SetProjectionScreenOffset(&map);
-  Render_GetProjectionScreenOffset(&observed);
+  VS::Render::SetLiveProjectionScreenOffset(map);
+  observed = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == 264);
   CHECK(observed.y == 196);
-  Render_SetProjectionScreenOffset(&original);
-  Render_GetProjectionScreenOffset(&observed);
+  VS::Render::SetLiveProjectionScreenOffset(original);
+  observed = VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == 160);
   CHECK(observed.y == 112);
   Core_Gte_Reset();
@@ -284,10 +283,10 @@ TEST_CASE(
 TEST_CASE("Projection centers preserve the original high-halfword semantics",
           "[render][minimap][projection]") {
   const int x = GENERATE(-32768, -1, 0, 32767, 65535);
-  Render_ScreenOffset offset{x, 1 - x};
-  Render_ScreenOffset observed{};
-  Render_SetProjectionScreenOffset(&offset);
-  Render_GetProjectionScreenOffset(&observed);
+  const Render_ScreenOffset offset{x, 1 - x};
+  VS::Render::SetLiveProjectionScreenOffset(offset);
+  const Render_ScreenOffset observed =
+      VS::Render::GetLiveProjectionScreenOffset();
   CHECK(observed.x == static_cast<u_short>(offset.x));
   CHECK(observed.y == static_cast<u_short>(offset.y));
   Core_Gte_Reset();

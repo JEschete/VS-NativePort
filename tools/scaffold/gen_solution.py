@@ -150,6 +150,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Render\TextureRegionDrawLive.cpp",
                 r"src\Render\SpritesLive.cpp",
                 r"src\Render\ModelGeometryLive.cpp",
+                r"src\Render\RoomDrawLive.cpp",
                 r"src\Audio\SoundEffectsLive.cpp",
                 r"src\Movie\Intro\PlayerLive.cpp",
                 r"src\Audio\Driver\PlaybackResetLive.cpp",

@@ -3,6 +3,7 @@
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Field/RoomTriggerMarkersLive.hpp"
+#include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/Settings.h"
 #include "State/Timers.h"
@@ -162,10 +162,10 @@ void Field_DrawRoomScene(void)
     mapArea.h = 64;
     mapOffset.y = 196;
     mapOffset.x = 392 - (Field_minimapSlideFrame << 4);
-    Render_GetProjectionScreenOffset(&originalOffset);
-    Render_SetProjectionScreenOffset(&mapOffset);
+    originalOffset = VS::Render::GetLiveProjectionScreenOffset();
+    VS::Render::SetLiveProjectionScreenOffset(mapOffset);
     VS::Field::DrawLiveMinimapScene(Field_roomData.minimapScene, Field_roomData.header.minimapSceneLength);
-    Render_SetProjectionScreenOffset(&originalOffset);
+    VS::Render::SetLiveProjectionScreenOffset(originalOffset);
     Core_Gte_SetRotMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
     Core_Gte_SetTransMatrix(&((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->viewMatrix);
     drawArea = (DR_AREA *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);
@@ -218,18 +218,18 @@ void Field_DrawRoomScene(void)
 // decomp: BATTLE.PRG func_8008B1FC (src/BATTLE/BATTLE.PRG/146C.c:15926)
 void Field_DrawRoomGeometry(void* room_geometry)
 {
-    if (!Render_ValidateRoomGeometry(room_geometry, Field_roomData.header.geometryLength)) {
+    if (!VS::Render::ValidateLiveRoomGeometry(room_geometry, Field_roomData.header.geometryLength)) {
         Core_Debugf("render", "Invalid room geometry extent");
         return;
     }
     Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix); // _camera.viewMatrix
     Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix); // _camera.viewMatrix
-    Render_UpdateRoomGroupTransforms(room_geometry);
+    VS::Render::UpdateLiveRoomGroupTransforms(room_geometry, Field_roomData.header.geometryLength);
     Field_roomPrimitiveRangeStart = Render_frameScratch.primitiveCursor; // _camera.unk0
-    Render_DrawRoomGeometry(room_geometry, Field_roomGeometryDrawMode);
+    VS::Render::DrawLiveRoomGeometry(room_geometry, Field_roomData.header.geometryLength, Field_roomGeometryDrawMode);
     Field_roomPrimitiveRangeEnd = Render_frameScratch.primitiveCursor; // _camera.unk0
     if (Field_roomTint.isActive != 0) {
-        Render_TintRoomGeometryPrimitives(Field_roomPrimitiveRangeStart, Field_roomPrimitiveRangeEnd, &Field_roomTint, 0);
+        VS::Render::TintLiveRoomGeometryPrimitives(Field_roomPrimitiveRangeStart, Field_roomPrimitiveRangeEnd, Field_roomTint, 0);
     }
 }
 

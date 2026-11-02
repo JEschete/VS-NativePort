@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Music.h"
@@ -23,7 +25,6 @@ extern "C" {
 #include "Field/Transitions.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
-#include "Render/RoomDraw.h"
 #include "State/Flags.h"
 
 // decomp: D_800E9BF0 (D_800E9BF0@BATTLE/BATTLE.PRG)
@@ -127,7 +128,7 @@ intptr_t Event_ScriptOverrideDepthCueDistance(u_char* instruction, short thread_
     short depth_cue_operand = Core_Memory_ReadUnalignedShort(instruction + 1);
     Event_isScriptBackdropEnabled = (depth_cue_operand << 0x10) >> 0x1F;
     if (Event_isScriptBackdropEnabled) {
-        Render_SetRoomTextureLodDepth(depth_cue_operand & 0x7FF);
+        VS::Render::SetRoomTextureLodDepth(VS::Render::LiveRoomClipState(), depth_cue_operand & 0x7FF);
     }
     return 0;
 }

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 
@@ -417,7 +417,7 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 
     if (state != 3) {
 
-        Render_GetProjectionScreenOffset(&saved_projection_offset);
+        saved_projection_offset = VS::Render::GetLiveProjectionScreenOffset();
 
         if (state == 2) {
             viewer_projection_offset.x = ((8 - animState) << 5) + 160;
@@ -427,10 +427,10 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 
         viewer_projection_offset.y = 0x68;
 
-        Render_SetProjectionScreenOffset(&viewer_projection_offset);
+        VS::Render::SetLiveProjectionScreenOffset(viewer_projection_offset);
         Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
         Menu_Framework_DrawActorPreview(&viewer_camera_matrix);
-        Render_SetProjectionScreenOffset(&saved_projection_offset);
+        VS::Render::SetLiveProjectionScreenOffset(saved_projection_offset);
     }
 
     if (state > 0) {

@@ -615,59 +615,67 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("Content_plg074TrailEmissionCounter[0]", source)
         self.assertNotIn("Effects_Plg073_trailEmissionCounter", source)
 
-    def test_room_packet_linking_reuses_shared_depth_resolution_and_native_handles(self):
-        self.assertEqual(
-            self.owned_items()["F00752"]["path"],
-            r"Native\Engine\src\Render\RoomDraw.cpp",
-        )
-        self.assertIn(
-            ("BATTLE/BATTLE.PRG", 0x800980F8, "F00752"),
-            copy_fixups.MODULE_FUNCTION_ENTRIES,
-        )
+    def room_draw_sources(self):
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
+        core = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertEqual(source.count("Render_LinkRoomPolygonByDepth("), 2)
-        self.assertIn("ResolveRoomPolygonDepth(", source)
-        self.assertIn("biased < 0", source)
-        self.assertIn("AddPrim(reinterpret_cast<u_long*>(Render_frameScratch.orderingTable) + depth, packet)", flat(source))
+        live = (root / r"Native\Engine\src\Render\RoomDrawLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        return core, live
+
+    def assert_room_draw_owned_without_entry(self, identity, name):
+        owned = self.owned_items()[identity]
+        self.assertEqual(owned["path"], r"Native\Engine\src\Render\RoomDraw.cpp")
+        self.assertEqual(owned["name"], f"VS::Render::{name}")
+        # #247: the typed room renderer has no guest address; nothing resolves to it.
+        self.assertFalse(
+            [entry for entry in copy_fixups.MODULE_FUNCTION_ENTRIES
+             if entry[2] == identity]
+        )
+
+    def test_room_packet_linking_reuses_shared_depth_resolution_and_native_handles(self):
+        self.assert_room_draw_owned_without_entry("F00752", "LinkRoomPolygonByDepth")
+        core, live = self.room_draw_sources()
+        self.assertEqual(core.count("LinkRoomPolygonByDepth("), 2)
+        self.assertIn("ResolveRoomPolygonDepth(projected_depth, flags, clip)", core)
+        self.assertIn("biased < 0", core)
+        self.assertNotIn("Render_frameScratch", core)
+        self.assertIn(
+            "AddPrim(static_cast<u_long*>(Render_frameScratch.orderingTable) + depth,",
+            flat(live),
+        )
+        relaxed = (
+            Path(__file__).resolve().with_name("relaxed_sources.txt")
+            .read_text(encoding="utf-8").split()
+        )
+        self.assertNotIn(r"Native\Engine\src\Render\RoomDraw.cpp", relaxed)
 
     def test_room_subdivision_entries_share_the_existing_bounded_recursion(self):
-        owned = self.owned_items()
-        for identity, address in (("F00748", 0x80097AEC), ("F00749", 0x80097CF0)):
-            self.assertEqual(
-                owned[identity]["path"], r"Native\Engine\src\Render\RoomDraw.cpp"
-            )
-            self.assertIn(
-                ("BATTLE/BATTLE.PRG", address, identity),
-                copy_fixups.MODULE_FUNCTION_ENTRIES,
-            )
-        root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
-            encoding="utf-8"
+        for identity, name in (
+            ("F00748", "SubdivideRoomTriangle"),
+            ("F00749", "SubdivideRoomQuad"),
+        ):
+            self.assert_room_draw_owned_without_entry(identity, name)
+        core, _ = self.room_draw_sources()
+        self.assertEqual(
+            flat(core).count(
+                "if (levels < 0 || levels > kRoomMaximumSubdivisionLevels) {"
+            ),
+            2,
         )
-        self.assertIn("RoomSubdivisionLimit(", source)
-        self.assertIn("memcpy(captured, vertices, sizeof captured)", source)
-        self.assertIn("Render_SubdivideRoomTriangle(vertices, subdivision", source)
-        self.assertIn("Render_SubdivideRoomQuad(vertices, subdivision", source)
+        self.assertIn("std::ranges::copy(vertices, captured.begin());", core)
+        self.assertIn(".SubdivideTriangle(captured, levels, captured_material);", core)
+        self.assertIn(".SubdivideQuad(captured, levels, captured_material);", core)
 
     def test_room_coordinate_decoder_uses_the_live_owned_polygon_pipeline(self):
-        self.assertEqual(
-            self.owned_items()["F00746"]["path"],
-            r"Native\Engine\src\Render\RoomDraw.cpp",
-        )
-        self.assertIn(
-            ("BATTLE/BATTLE.PRG", 0x8009797C, "F00746"),
-            copy_fixups.MODULE_FUNCTION_ENTRIES,
-        )
-        root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
-            encoding="utf-8"
-        )
-        self.assertEqual(source.count("Render_DecodeRoomPolygonVertices("), 2)
-        self.assertIn("memcpy(packed, data, sizeof packed)", source)
-        self.assertIn("if (index == kQuadCorners - 1)", source)
+        self.assert_room_draw_owned_without_entry("F00746", "DecodeRoomPolygonVertices")
+        core, _ = self.room_draw_sources()
+        self.assertEqual(core.count("DecodeRoomPolygonVertices("), 2)
+        self.assertIn("const std::uint32_t shift = coordinate_shift & kCoordinateShiftMask;", core)
+        self.assertIn("ProjectAndDecodeRoomPolygon(", core)
+        self.assertIn("vertex.position = QuadCorner(record, triangle.positions[0], shift);", core)
 
     def test_fog_and_depth_cue_share_the_existing_typed_native_helpers(self):
         for identity, name, address in (
@@ -990,14 +998,10 @@ class EncounterFixupTests(unittest.TestCase):
                 r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             ),
         )
-        root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn(
-            "VS::Core::Math::ApplyBuildEulerRotationMatrix(rotation, *output);", source
-        )
-        self.assertNotIn("Core_Gte_RotMatrixYXZ(", source)
+        core, live = self.room_draw_sources()
+        self.assertIn("view, Math::BuildEulerRotationMatrix(rotation));", flat(core))
+        for source in (core, live):
+            self.assertNotIn("Core_Gte_RotMatrixYXZ(", source)
 
     def test_core_idle_and_matrix_entries_reuse_native_leaf_implementations(self):
         self.assertEqual(
@@ -1046,24 +1050,19 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("override ? ModelAppearanceMaterial(state) : 0", source)
 
     def test_room_tint_pass_shares_the_explicit_native_color_contract(self):
-        owned = self.owned_items()
-        for identity in ("F00769", "F00770"):
-            self.assertEqual(
-                owned[identity]["path"],
-                r"Native\Engine\src\Render\RoomDraw.cpp",
-            )
+        for identity, name in (
+            ("F00769", "TintRoomGeometryPrimitives"),
+            ("F00770", "TintRoomPrimitiveColor"),
+        ):
+            self.assert_room_draw_owned_without_entry(identity, name)
+        core, live = self.room_draw_sources()
+        self.assertEqual(core.count("TintRoomPrimitiveColor("), 2)
+        self.assertIn("tint.strength, static_cast<std::int16_t>(tint.red * kTintOffsetScale),", flat(core))
+        self.assertIn("return RoomTintStatus::kTruncated;", core)
+        self.assertNotIn("Field_RoomTint", core)
+        self.assertIn("const Field_RoomTint& tint", flat(live))
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
-            encoding="utf-8"
-        )
-        self.assertEqual(source.count("Render_TintRoomPrimitiveColor("), 2)
-        self.assertIn("const int16_t strength = tint->strength;", source)
-        header = (root / r"Native\Engine\src\Render\RoomDraw.h").read_text(
-            encoding="utf-8"
-        )
-        dependency = header.index('#include "Field/Room.h"')
-        self.assertLess(header.index('extern "C" {'), dependency)
-        self.assertLess(dependency, header.index("\n}\n#endif"))
+        self.assertFalse((root / r"Native\Engine\src\Render\RoomDraw.h").exists())
 
     def test_room_light_triangle_shares_the_existing_owned_sampler_kernel(self):
         owned = self.owned_items()
@@ -1195,39 +1194,31 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(owned["F01828"]["name"], "Battle_Ai_MarkAiTileDynamicObstacle")
 
     def test_room_screen_bounds_share_the_original_predicate(self):
-        owned = self.owned_items()
+        self.assert_room_draw_owned_without_entry("F00756", "SetRoomPolygonScreenBounds")
+        core, _ = self.room_draw_sources()
+        # Whole records and subdivision leaves share one on-screen predicate.
         self.assertEqual(
-            owned["F00756"]["path"], r"Native\Engine\src\Render\RoomDraw.cpp"
+            flat(core).count("if (!IsRoomPolygonOnScreen(polygon.bounds, clip_.screen) ||"),
+            2,
         )
-        root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
-            encoding="utf-8"
+        self.assertIn(
+            "clip.screen = {wrap(bounds.left), wrap(bounds.top), wrap(bounds.right), wrap(bounds.bottom)};",
+            flat(core),
         )
-        self.assertEqual(source.count("OutsideScreenBounds(&projected)"), 2)
-        for edge in ("left", "top", "right", "bottom"):
-            self.assertIn(
-                f"room_screen_bounds.{edge} = VS::Core::Math::WrapSigned16(static_cast<uint32_t>({edge}));",
-                flat(source),
-            )
+        self.assertIn("return Math::WrapSigned16(static_cast<std::uint32_t>(edge));", core)
 
     def test_room_far_depth_owns_both_packet_emission_paths(self):
-        owned = self.owned_items()
+        self.assert_room_draw_owned_without_entry("F00754", "SetRoomPolygonFarClip")
+        core, _ = self.room_draw_sources()
+        self.assertEqual(core.count("biased >= clip.far_depth"), 1)
+        # Whole records and subdivision leaves both resolve depth through it.
         self.assertEqual(
-            owned["F00754"]["path"], r"Native\Engine\src\Render\RoomDraw.cpp"
+            core.count("ResolveRoomPolygonDepth(polygon.depth, flags, clip_)"), 1
         )
-        root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\RoomDraw.cpp").read_text(
-            encoding="utf-8"
-        )
-        self.assertEqual(source.count("biased >= room_far_depth"), 1)
+        self.assertEqual(core.count("LinkRoomPolygonByDepth("), 2)
         self.assertIn(
-            "ResolveRoomPolygonDepth(polygon->depth, polygon->material.flags)",
-            source,
-        )
-        self.assertEqual(source.count("return WriteRoomPolygon(&polygon, limit);"), 2)
-        self.assertIn(
-            "room_far_depth = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(depth));",
-            source,
+            "clip.far_depth = Math::WrapSigned16(static_cast<std::uint32_t>(depth));",
+            core,
         )
 
     def test_native_pointer_sort_is_owned_and_shared_with_ai_ranking(self):

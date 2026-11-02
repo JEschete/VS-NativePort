@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <span>
 #include <utility>
 #include <vector>
 
@@ -12,6 +13,8 @@
 #include "Field/RoomTriggerMarkersLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
+#include "Render/RoomDraw.hpp"
+#include "Render/RoomDrawLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -21,7 +24,6 @@ extern "C" {
 #include "Field/TriggerMarkers.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 
@@ -31,7 +33,7 @@ extern unsigned int Content_battleTriggerMarkerBytes[29];
 namespace {
 struct MarkerDefinition {
   unsigned group_count = 1;
-  Render_RoomGeometryGroup group{};
+  std::array<std::byte, VS::Render::kRoomGroupRecordBytes> group{};
   unsigned triangle_count = 0;
   unsigned quad_count = 1;
   Field_MpdQuad quad{};
@@ -39,6 +41,21 @@ struct MarkerDefinition {
 static_assert(sizeof(MarkerDefinition) == 116);
 static_assert(offsetof(MarkerDefinition, triangle_count) == 68);
 static_assert(offsetof(MarkerDefinition, quad) == 76);
+
+// Rewrites the definition's group record through the typed accessors; the
+// stored count is forced to one while the record is written.
+template <typename Edit>
+void EditGroup(MarkerDefinition& definition, Edit edit) {
+  const auto count = definition.group_count;
+  definition.group_count = 1;
+  const auto bytes = std::as_writable_bytes(std::span(&definition, 1));
+  const auto stored = VS::Render::ReadRoomGroup(bytes, 0);
+  REQUIRE(stored.has_value());
+  auto group = stored.value_or(VS::Render::RoomGroup{});
+  edit(group);
+  REQUIRE(VS::Render::WriteRoomGroup(bytes, 0, group));
+  definition.group_count = count;
+}
 
 struct TriggerMarkerFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
@@ -63,9 +80,11 @@ struct TriggerMarkerFixture {
   TriggerMarkerFixture() {
     std::memcpy(saved_definition.data(), Content_battleTriggerMarkerBytes,
                 sizeof saved_definition);
-    definition.group.flags = 0x800;
-    definition.group.polygonOffset = offsetof(MarkerDefinition, triangle_count);
-    definition.group.view.t[0] = 12345;
+    EditGroup(definition, [](VS::Render::RoomGroup& group) {
+      group.flags = 0x800;
+      group.polygon_offset = offsetof(MarkerDefinition, triangle_count);
+      group.view.translation.x = 12345;
+    });
     definition.quad.vertex2OffsetZ = -64;
     definition.quad.vertex3OffsetX = -64;
     definition.quad.vertex4OffsetX = -64;
@@ -205,8 +224,8 @@ struct AnimationPixels {
 TEST_CASE("Room trigger markers use the native view and preserve quad material",
           "[field][render][trigger-marker]") {
   TriggerMarkerFixture fixture;
-  REQUIRE(Render_ValidateRoomGeometry(&fixture.definition,
-                                      sizeof fixture.definition));
+  REQUIRE(VS::Render::ValidateLiveRoomGeometry(&fixture.definition,
+                                               sizeof fixture.definition));
   VS::Field::DrawLiveRoomTriggerMarker(0, 0, 0, 73);
   fixture.CheckPackets(1);
   fixture.CheckMaterial();
@@ -232,14 +251,14 @@ TEST_CASE("Room trigger marker definitions reject incomplete or unsafe shapes",
       fixture.definition.group_count = 2;
       break;
     case 2:
-      fixture.definition.group.polygonOffset = 0;
-      break;
     case 3:
-      fixture.definition.group.polygonOffset = 72;
+    case 4: {
+      constexpr std::array<std::uint32_t, 3> kOffsets{0, 72, UINT32_MAX};
+      EditGroup(fixture.definition, [&](VS::Render::RoomGroup& group) {
+        group.polygon_offset = kOffsets[malformed - 2];
+      });
       break;
-    case 4:
-      fixture.definition.group.polygonOffset = UINT32_MAX;
-      break;
+    }
     case 5:
       fixture.definition.triangle_count = 1;
       break;

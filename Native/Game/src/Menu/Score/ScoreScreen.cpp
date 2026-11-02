@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -42,7 +43,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
 #include "State/Settings.h"
@@ -1540,15 +1540,15 @@ void Menu_Score_RenderOverview(int animStep)
         Menu_Score_DrawViewerEdgeFade();
     }
 
-    Render_GetProjectionScreenOffset(&saved_projection_offset);
+    saved_projection_offset = VS::Render::GetLiveProjectionScreenOffset();
 
     overview_projection_offset.x = 0x80 - ((8 - animStep) << 5);
     overview_projection_offset.y = 0xF0;
 
-    Render_SetProjectionScreenOffset(&overview_projection_offset);
+    VS::Render::SetLiveProjectionScreenOffset(overview_projection_offset);
     Menu_Score_BuildViewerCamera(&viewer_camera_matrix);
     Menu_Framework_DrawActorPreview(&viewer_camera_matrix);
-    Render_SetProjectionScreenOffset(&saved_projection_offset);
+    VS::Render::SetLiveProjectionScreenOffset(saved_projection_offset);
 
     sprintf(score_text, "#%ld", Menu_Score_score);
 

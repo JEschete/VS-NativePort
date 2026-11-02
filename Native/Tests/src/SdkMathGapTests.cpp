@@ -15,6 +15,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
+#include "Render/RoomDrawLive.hpp"
 
 extern "C" {
 #include "Core/Math/FixedPoint.h"
@@ -22,7 +23,7 @@ extern "C" {
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Runtime.h"
-#include "Render/RoomDraw.h"
+#include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 }
 
@@ -339,7 +340,7 @@ TEST_CASE("Room view rotation retains the original staged YXZ precision",
   }
   VECTOR position{}, angles{123, 234, 345, 0};
   MATRIX output{};
-  Render_BuildRoomGeometryViewMatrix(&position, &angles, &output);
+  VS::Render::BuildLiveRoomGeometryViewMatrix(position, angles, output);
   // Expanded original2EA3C.s:1499 stages, not successive matrix products.
   constexpr std::array<std::int16_t, 9> kExpected{3446, -1704, 1413, 2031, 3472,
                                                   -768, -880,  1347, 3766};
@@ -400,18 +401,20 @@ TEST_CASE("Room view producers retain source stages with camera and scale",
   Render_frameScratch.camera.farClip = scale;
   VECTOR position{0x12348001, -65413, 65539, -1};
   VECTOR angles{0x1234007B, -65302, 65881, -2};
-  MATRIX actual;
-  std::memset(&actual, 0xA5, sizeof actual);
-  MATRIX expected;
-  std::memcpy(&expected, &actual, sizeof expected);
+  MATRIX actual{};
+  MATRIX expected{};
   ReferenceRoomView(Render_frameScratch.viewMatrix, scale, compensated,
                     expected);
   if (compensated) {
-    Render_BuildScaleCompensatedRoomView(&position, &angles, &actual);
+    VS::Render::BuildLiveScaleCompensatedRoomView(position, angles, actual);
   } else {
-    Render_BuildRoomGeometryViewMatrix(&position, &angles, &actual);
+    VS::Render::BuildLiveRoomGeometryViewMatrix(position, angles, actual);
   }
-  CHECK(MatrixBytes(actual) == MatrixBytes(expected));
+  CHECK(Math::MatrixOf(actual) == Math::MatrixOf(expected));
+  for (int axis = 0; axis < 3; ++axis) {
+    CAPTURE(axis);
+    CHECK(actual.t[axis] == expected.t[axis]);
+  }
   CHECK(MatrixBytes(Render_frameScratch.viewMatrix) == before);
   CHECK(Render_frameScratch.camera.farClip == scale);
   CHECK(position.pad == -1);

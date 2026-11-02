@@ -232,7 +232,6 @@ extern "C" {
 #include "Render/Model.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/ScreenTransition.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
@@ -1033,29 +1032,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800970BCu, 0u, (void*)&Battle_DrawAbilityTimingCue, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800971D4u, 0u, (void*)&Battle_CommitEquipmentStatChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009722Cu, 0u, (void*)&Battle_SuppressAshleyStatusLabels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009723Cu, 0u, (void*)&Render_DrawRoomGeometry, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097388u, 0u, (void*)&Render_DrawRoomGeometryPolygons, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009797Cu, 0u, (void*)&Render_DecodeRoomPolygonVertices, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097A10u, 0u, (void*)&Render_ProjectAndDecodeRoomPolygon, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097AECu, 0u, (void*)&Render_SubdivideRoomTriangle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097CF0u, 0u, (void*)&Render_SubdivideRoomQuad, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097F70u, 0u, (void*)&Render_InterpolateRoomVertexMidpoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098014u, 0u, (void*)&Render_IsRoomPolygonOnScreen, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800980F8u, 0u, (void*)&Render_LinkRoomPolygonByDepth, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098160u, 0u, (void*)&Render_SetRoomPolygonNearClip, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009817Cu, 0u, (void*)&Render_SetRoomPolygonFarClip, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098194u, 0u, (void*)&Render_SetRoomTextureLodDepth, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800981B8u, 0u, (void*)&Render_SetRoomPolygonScreenBounds, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009820Cu, 0u, (void*)&Render_DrawSkyDome, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800983F8u, 0u, (void*)&Render_UpdateRoomGroupTransforms, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800985ACu, 0u, (void*)&Render_BuildRoomGeometryViewMatrix, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098648u, 0u, (void*)&Render_BuildScaleCompensatedRoomView, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098AB4u, 0u, (void*)&Core_Math_CosineFixedPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80098AB8u, 0u, (void*)&Core_Math_SineFixedPoint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098D6Cu, 0u, (void*)&Render_TintRoomGeometryPrimitives, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80098E50u, 0u, (void*)&Render_TintRoomPrimitiveColor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800994D4u, 0u, (void*)&Render_GetProjectionScreenOffset, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800994F4u, 0u, (void*)&Render_SetProjectionScreenOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800995B0u, 0u, (void*)&Content_FindFreeActorAssetRequest, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800995E8u, 0u, (void*)&Content_QueueActorAssetRequest, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009967Cu, 0u, (void*)&Content_UpdateActorAssetQueue, 0u, 0u, 0u},
@@ -3168,10 +3146,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG074.BIN", 0x800FC404u, 0u, (void*)&Effects_Plg073_TrailUpdate, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FC590u, 0u, (void*)&Effects_Plg073_TrailRender, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&Effects_Plg073_RotatingSurface, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800980F8u, 0u, (void*)&Render_LinkRoomPolygonByDepth, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097AECu, 0u, (void*)&Render_SubdivideRoomTriangle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80097CF0u, 0u, (void*)&Render_SubdivideRoomQuad, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009797Cu, 0u, (void*)&Render_DecodeRoomPolygonVertices, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},

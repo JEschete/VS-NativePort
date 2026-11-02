@@ -1,6 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Field/RoomTriggerMarkersLive.hpp"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -8,6 +9,7 @@
 #include <vector>
 
 #include "Field/RoomTriggerMarkers.hpp"
+#include "Render/RoomDrawLive.hpp"
 
 extern "C" {
 #include "Audio/Seq/Channel.h"
@@ -16,14 +18,12 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/TriggerMarkers.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 }
 
 namespace {
 constexpr std::size_t kMarkerRecordBytes = 116;
-constexpr std::size_t kMarkerViewOffset = 36;
 constexpr std::size_t kMarkerPolygonCountsOffset = 68;
 constexpr std::size_t kMarkerQuadOffset = 76;
 constexpr int kMarkerTextureTargetX = 64;
@@ -36,9 +36,11 @@ extern "C" unsigned int
     Content_battleTriggerMarkerBytes[kMarkerRecordBytes / sizeof(unsigned int)];
 
 namespace {
+// One-group room geometry: the count, the group record, the polygon counts
+// and the single marker quad.
 struct RoomTriggerMarkerGeometry {
   unsigned group_count;
-  Render_RoomGeometryGroup group;
+  std::array<std::byte, VS::Render::kRoomGroupRecordBytes> group;
   unsigned triangle_count;
   unsigned quad_count;
   Field_MpdQuad quad;
@@ -46,9 +48,8 @@ struct RoomTriggerMarkerGeometry {
 
 static_assert(sizeof(RoomTriggerMarkerGeometry) == kMarkerRecordBytes,
               "Complete original trigger marker definition");
-static_assert(offsetof(RoomTriggerMarkerGeometry, group.view) ==
-                  kMarkerViewOffset,
-              "Trigger marker view matrix");
+static_assert(offsetof(RoomTriggerMarkerGeometry, group) == sizeof(unsigned),
+              "Trigger marker group record");
 static_assert(offsetof(RoomTriggerMarkerGeometry, triangle_count) ==
                   kMarkerPolygonCountsOffset,
               "Trigger marker polygon counts");
@@ -76,14 +77,16 @@ class LiveTriggerMarkerRenderer final
   void DrawMarker(const VS::Field::TriggerMarkerPlacement& placement) override {
     RoomTriggerMarkerGeometry marker{};
     std::memcpy(&marker, Content_battleTriggerMarkerBytes, sizeof marker);
-    if (marker.group_count != 1 ||
-        marker.group.polygonOffset !=
+    const auto bytes = std::as_writable_bytes(std::span(&marker, 1));
+    const auto group = VS::Render::ReadRoomGroup(bytes, 0);
+    if (marker.group_count != 1 || !group ||
+        group->polygon_offset !=
             offsetof(RoomTriggerMarkerGeometry, triangle_count) ||
         marker.triangle_count != 0 || marker.quad_count != 1) {
       return;
     }
     // G00039/G00040/G00041 were aliases inside this record, not native storage.
-    marker.group.view = Render_frameScratch.viewMatrix;
+    VS::Render::WriteRoomGroupView(bytes, 0, VS::Render::LiveRoomCamera().view);
     marker.quad.vertex1X = placement.corner_x;
     marker.quad.vertex1Y = placement.corner_y;
     marker.quad.vertex1Z = placement.corner_z;
@@ -92,7 +95,8 @@ class LiveTriggerMarkerRenderer final
     marker.quad.red2 = marker.quad.green2 = marker.quad.blue2 = shade;
     marker.quad.red3 = marker.quad.green3 = marker.quad.blue3 = shade;
     marker.quad.red4 = marker.quad.green4 = marker.quad.blue4 = shade;
-    Render_DrawRoomGeometry(&marker, Field_roomGeometryDrawMode);
+    VS::Render::DrawLiveRoomGeometry(&marker, sizeof marker,
+                                     Field_roomGeometryDrawMode);
   }
 };
 }  // namespace

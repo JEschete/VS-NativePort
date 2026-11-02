@@ -45,6 +45,11 @@ NATIVE_HELPER_HEADERS = {
                     "DrawLiveGimmickGouraudPolygonsWithOverrides", "ProjectLiveWeaponModel",
                     "DrawLiveWeaponFlatPolygons", "DrawLiveWeaponFlatPolygonsWithOverrides", "RecordLiveModelExtent",
                     "RecordLiveModelCopy", "ForgetLiveModelExtent")},
+    **{f"VS::Render::{name}": r"Native\Engine\include\Render\RoomDrawLive.hpp"
+       for name in ("LiveRoomClipState", "ValidateLiveRoomGeometry", "UpdateLiveRoomGroupTransforms",
+                    "DrawLiveRoomGeometry", "BuildLiveRoomGeometryViewMatrix", "BuildLiveScaleCompensatedRoomView",
+                    "DrawLiveSkyDome", "TintLiveRoomGeometryPrimitives", "GetLiveProjectionScreenOffset",
+                    "SetLiveProjectionScreenOffset")},
     **{name: r"Native\Game\include\Boot\SessionLive.hpp"
        for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},
     "VS::Boot::DelayAfterOverlayLoad": r"Native\Game\include\Boot\Session.hpp",
@@ -279,10 +284,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("EFFECT/PLG074.BIN", 0x800FC404, "F01992"),
     ("EFFECT/PLG074.BIN", 0x800FC590, "F01993"),
     ("EFFECT/PLG074.BIN", 0x800FD534, "F01995"),
-    ("BATTLE/BATTLE.PRG", 0x800980F8, "F00752"),
-    ("BATTLE/BATTLE.PRG", 0x80097AEC, "F00748"),
-    ("BATTLE/BATTLE.PRG", 0x80097CF0, "F00749"),
-    ("BATTLE/BATTLE.PRG", 0x8009797C, "F00746"),
     ("SLUS_010.40", 0x80041A00, "F03404"),
     ("SLUS_010.40", 0x80041954, "F03408"),
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
@@ -2166,7 +2167,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     "F00557": [
         ("    Core_Gte_SetRotMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014));",
-         "    if (!Render_ValidateRoomGeometry(arg0, Field_roomData.header.geometryLength)) {\n"
+         "    if (!VS::Render::ValidateLiveRoomGeometry(arg0, Field_roomData.header.geometryLength)) {\n"
          '        Core_Debugf("render", "Invalid room geometry extent");\n'
          "        return;\n    }\n"
          "    Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);",
@@ -2861,6 +2862,35 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
           r"scratch->model\)",
      r"VS::Render::DrawLiveWeaponFlatPolygons\1(*weapon, color)",
      "F01266/F01269 #46 typed promotion: the weapon binding walks only the recorded model extent (#269)"),
+    (r"", r"\bVS::Render::UpdateRoomGroupTransforms\((\w+)\)",
+     r"VS::Render::UpdateLiveRoomGroupTransforms(\1, Field_roomData.header.geometryLength)",
+     "F00758 #46 typed promotion: the room binding rebuilds group views inside the geometry section's recorded "
+     "length from the frame camera"),
+    (r"", r"\bVS::Render::DrawRoomGeometry\((\w+), ",
+     r"VS::Render::DrawLiveRoomGeometry(\1, Field_roomData.header.geometryLength, ",
+     "F00744 #46 typed promotion: the room binding draws inside the geometry section's recorded length and a "
+     "64 KiB frame-buffer batch"),
+    (r"", r"\bVS::Render::TintRoomGeometryPrimitives\(([^,;]+), ([^,;]+), &(\w+), ",
+     r"VS::Render::TintLiveRoomGeometryPrimitives(\1, \2, \3, ",
+     "F00769 #46 typed promotion: the room binding tints only packets inside the current frame buffer"),
+    (r"", r"\bVS::Render::GetProjectionScreenOffset\(&(\w+)\);",
+     r"\1 = VS::Render::GetLiveProjectionScreenOffset();",
+     "F00773 #46 typed promotion: the screen offset is returned by value"),
+    (r"", r"\bVS::Render::SetProjectionScreenOffset\(&(\w+)\)",
+     r"VS::Render::SetLiveProjectionScreenOffset(\1)",
+     "F00775 #46 typed promotion: the screen offset is passed by reference"),
+    (r"", r"\bVS::Render::BuildScaleCompensatedRoomView\(&(\w+), (\w+), &(\w+)\)",
+     r"VS::Render::BuildLiveScaleCompensatedRoomView(\1, *\2, \3)",
+     "F00760 #46 typed promotion: the room binding builds the view from the frame camera"),
+    (r"", r"\bVS::Render::BuildRoomGeometryViewMatrix\(&(\w+), (\w+), &(\w+)\)",
+     r"VS::Render::BuildLiveRoomGeometryViewMatrix(\1, *\2, \3)",
+     "F00759 #46 typed promotion: the room binding builds the view from the frame camera"),
+    (r"", r"\bVS::Render::DrawSkyDome\((\w+)\)", r"VS::Render::DrawLiveSkyDome(\1, sizeof \1)",
+     "F00757 #46 typed promotion: the sky is read inside its declared module array"),
+    (r"", r"\bVS::Render::(SetRoomPolygonNearClip|SetRoomPolygonFarClip|SetRoomTextureLodDepth)\(",
+     r"VS::Render::\1(VS::Render::LiveRoomClipState(), ",
+     "F00753/F00754/F00755 #46 typed promotion: room clip settings live in the binding's clip state instead of "
+     "module statics"),
     (r"", r"\bVS::Core::Memory::CopyAlignedWords\(", r"VS::Core::Memory::CopyLiveAlignedWords(",
      "F03572 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
      "forward without memcpy overlap (#268)"),

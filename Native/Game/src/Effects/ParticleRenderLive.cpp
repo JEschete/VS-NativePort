@@ -19,6 +19,7 @@
 #include "Effects/ParticleRender.hpp"
 #include "Legacy/Psx.h"
 #include "Render/PageSpace.hpp"
+#include "Render/RoomDrawLive.hpp"
 #include "nlohmann/json.hpp"
 
 extern "C" {
@@ -31,7 +32,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
-#include "Render/RoomDraw.h"
 #include "Render/UiPrimitives.h"
 }
 
@@ -198,8 +198,8 @@ void TraceParticle(const Effects_Particle& node, SVECTOR point, Core_GteWord xy,
     commands.push_back(reinterpret_cast<std::uintptr_t>(
         first_quad + std::size_t{index} * kQuadWords + 1));
   }
-  Render_ScreenOffset offset{};
-  Render_GetProjectionScreenOffset(&offset);
+  const Render_ScreenOffset offset =
+      VS::Render::GetLiveProjectionScreenOffset();
   nlohmann::json record{
       {"kind", "particle"},
       {"pool", reinterpret_cast<std::uintptr_t>(Effects_particlePool)},

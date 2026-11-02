@@ -1,5 +1,4 @@
 Native\Engine\src\Render\ModelWorkspace.cpp
-Native\Engine\src\Render\RoomDraw.cpp
 Native\Game\src\Battle\Ai\RoomState.cpp
 Native\Game\src\Boot\PlayerSettings.cpp
 Native\Tests\src\CombatTests.cpp

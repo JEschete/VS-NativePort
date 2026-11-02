@@ -170,12 +170,9 @@
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\ResultsTextureTests.cpp" />
     <ClCompile Include="src\RoomAiMapTests.cpp" />
+    <ClCompile Include="src\RoomDrawTests.cpp" />
     <ClCompile Include="src\RoomLightingTests.cpp" />
-    <ClCompile Include="src\RoomPolygonLinkTests.cpp" />
-    <ClCompile Include="src\RoomSubdivisionTests.cpp" />
-    <ClCompile Include="src\RoomTintTests.cpp" />
     <ClCompile Include="src\RoomTriggerMarkerTests.cpp" />
-    <ClCompile Include="src\RoomVertexDecodeTests.cpp" />
     <ClCompile Include="src\RuntimeSnapshotTests.cpp" />
     <ClCompile Include="src\SaveStoreTests.cpp" />
     <ClCompile Include="src\ScaledFontLayoutTests.cpp" />
