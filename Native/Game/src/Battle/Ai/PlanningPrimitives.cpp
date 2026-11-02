@@ -1,268 +1,367 @@
 // Hand-maintained (tools/port/owned.csv).
 // C counterparts: rood-boi pc/src/battle_helpers.c and battle_movement.c,
 // revision 3be5ba38b008cad919a2b1ca196432c8d4817335 (CC0-1.0; THIRD_PARTY.md).
-#include "Battle/Ai/PlanningPrimitives.h"
+#include "Battle/Ai/PlanningPrimitives.hpp"
 
 #include <algorithm>
 #include <array>
 #include <bit>
 #include <cstddef>
 #include <cstdint>
-#include <cstdlib>
 #include <cstring>
-#include <iterator>
+#include <limits>
+#include <optional>
 #include <span>
-#include <type_traits>
 
-#include "Battle/Ai/PlanningSort.hpp"
+#include "Core/Diagnostics.h"
 #include "Core/PointerSort.hpp"
 
-extern "C" {
-#include "Actors/ActorState.h"
-#include "Actors/Location.h"
-#include "Battle/ActionTable.h"
-#include "Battle/Ai/ActionPlanning.h"
-#include "Battle/Ai/ActorState.h"
-}
-
+namespace VS::Battle::Ai {
 namespace {
-static_assert(std::is_same_v<decltype(Battle_Ai_CandidateEntryView::reserved0),
-                             std::int32_t>);
-constexpr int kLimbCount = 6;
-constexpr int kActionsPerLimb = 4;
-constexpr unsigned kRelationClassThree = 3;
-constexpr unsigned kUnconditionalTargetFlag = 0x100;
-constexpr int kTargetConditionShift = 9;
-constexpr int kSpellBlockingStatus = 0x1000;
-constexpr int kSpellsAndAbilitiesOnlyStatus = 0x2000;
-constexpr int kResourceRestrictingStatuses = 0xE2B0;
-constexpr unsigned kPpActionType = 4;
-constexpr unsigned kRememberedTileMask = 0xFFFFFF;
-constexpr int kRememberedTargetShift = 24;
-constexpr std::uint16_t kTargetMemoryFrames = 900;
+constexpr unsigned kRowShift = 0;
+constexpr unsigned kRowBits = 3;
+constexpr unsigned kColumnShift = 3;
+constexpr unsigned kColumnBits = 2;
+constexpr unsigned kActionShift = 5;
+constexpr unsigned kActionBits = 8;
+constexpr unsigned kThresholdShift = 13;
+constexpr unsigned kThresholdBits = 16;
+constexpr unsigned kTargetShift = 0;
+constexpr unsigned kTargetBits = 4;
+constexpr unsigned kWeightShift = 19;
+constexpr unsigned kWeightBits = 8;
+constexpr unsigned kRangeShift = 6;
+constexpr unsigned kRangeBits = 16;
+constexpr std::size_t kScoreWord = 0;
+constexpr std::size_t kSlotWord = 1;
+constexpr std::size_t kDistanceWord = 2;
+constexpr std::size_t kTargetWord = 3;
+constexpr std::size_t kOptionWord = 4;
 
-void Require(bool valid, const char* message) {
-  if (!valid) {
-    Core_Debugf("ai", "%s", message);
-    std::abort();
+constexpr unsigned kAlliedClassification = 2;
+constexpr unsigned kHostileClassification = 3;
+constexpr std::uint16_t kUnconditionalTargetFlag = 0x100;
+constexpr unsigned kTargetConditionShift = 9;
+constexpr std::int16_t kMinimumLimbHp = 2;
+constexpr std::uint32_t kSpellBlockingStatus = 0x1000;
+constexpr std::uint32_t kSpellsAndAbilitiesOnlyStatus = 0x2000;
+constexpr std::uint32_t kResourceRestrictingStatuses = 0xE2B0;
+constexpr unsigned kSpellAction = 1;
+constexpr unsigned kAbilityAction = 2;
+constexpr unsigned kBreakArtAction = 3;
+constexpr unsigned kWeaponPpAction = 4;
+constexpr unsigned kRememberedTargetShift = 24;
+constexpr std::uint32_t kRememberedTileMask = 0xFFFFFF;
+
+std::nullopt_t Refuse(const char* message) {
+  Core_Debugf("ai", "%s", message);
+  return std::nullopt;
+}
+
+constexpr std::uint32_t FieldMask(unsigned bits) {
+  return (std::uint32_t{1} << bits) - 1;
+}
+
+constexpr unsigned Field(std::uint32_t word, unsigned shift, unsigned bits) {
+  return (word >> shift) & FieldMask(bits);
+}
+
+constexpr std::uint32_t WithField(std::uint32_t word, unsigned shift,
+                                  unsigned bits, unsigned value) {
+  const std::uint32_t mask = FieldMask(bits) << shift;
+  return (word & ~mask) | ((std::uint32_t{value} << shift) & mask);
+}
+
+bool IsSlot(int row, int column) {
+  return row >= 0 && row < kLimbActionRows && column >= 0 &&
+         column < kLimbActionColumns;
+}
+
+std::optional<std::int32_t> CheckedInt32(std::int64_t value) {
+  if (value < std::numeric_limits<std::int32_t>::min() ||
+      value > std::numeric_limits<std::int32_t>::max()) {
+    return std::nullopt;
   }
+  return static_cast<std::int32_t>(value);
 }
 
-const Battle_ActorStats& ActorStats(const Battle_Ai_ActorAiState* state) {
-  Require(state != nullptr && state->actor != nullptr &&
-              state->actor->opaque3C != nullptr,
-          "AI planning requires an actor and its stats");
-  return *state->actor->opaque3C;
-}
-
-void RequireSlot(int row, int column) {
-  Require(
-      row >= 0 && row < kLimbCount && column >= 0 && column < kActionsPerLimb,
-      "AI planning action slot is out of bounds");
+bool IsActionUsable(const ActionCost& action, const ActorResources& resources) {
+  switch (action.type) {
+    case kSpellAction:
+      return std::bit_cast<std::int16_t>(resources.mp) >=
+                 static_cast<int>(action.cost) &&
+             (resources.statuses & kSpellBlockingStatus) == 0;
+    case kBreakArtAction:
+      return unsigned{resources.hp} >= action.cost + (resources.max_hp / 2u);
+    case kWeaponPpAction:
+      return std::bit_cast<std::int16_t>(resources.weapon_pp) >=
+             static_cast<int>(action.cost);
+    default:
+      return true;
+  }
 }
 }  // namespace
 
-namespace VS::Battle::ai {
-// decomp: func_800E6974 / L800E6958 (src/BATTLE/BATTLE.PRG/7E05C.s:114).
-// Equal scores must retain the original midpoint partition's tie ordering.
-void SortCandidatePointers(std::span<Battle_Ai_CandidateEntryView*> entries) {
-  if (entries.size() < 2) return;
-  constexpr std::size_t kMaximumCandidates = 16;
-  Require(entries.size() <= kMaximumCandidates,
-          "AI candidate sort exceeds the native candidate list");
-  std::array<Core::SortKey, kMaximumCandidates> keys{};
-  std::array<Battle_Ai_CandidateEntryView*, kMaximumCandidates> sorted{};
-  for (std::size_t index = 0; index < entries.size(); ++index) {
-    Require(entries[index] != nullptr,
-            "AI candidate sort contains a null entry");
-    keys[index] = {entries[index]->reserved0, index};
-  }
-  const auto ranked = std::span(keys).first(entries.size());
-  Require(Core::SortPointersByDescendingKey(ranked),
-          "AI candidate sort exceeds the shared key sort");
-  for (std::size_t index = 0; index < entries.size(); ++index) {
-    sorted[index] = entries[ranked[index].position];
-  }
-  std::ranges::copy(std::span(sorted).first(entries.size()), entries.begin());
+std::int32_t ActionCandidate::Score() const {
+  return std::bit_cast<std::int32_t>(words_[kScoreWord]);
 }
-}  // namespace VS::Battle::ai
+
+unsigned ActionCandidate::Row() const {
+  return Field(words_[kSlotWord], kRowShift, kRowBits);
+}
+
+unsigned ActionCandidate::Column() const {
+  return Field(words_[kSlotWord], kColumnShift, kColumnBits);
+}
+
+unsigned ActionCandidate::Action() const {
+  return Field(words_[kSlotWord], kActionShift, kActionBits);
+}
+
+unsigned ActionCandidate::Threshold() const {
+  return Field(words_[kSlotWord], kThresholdShift, kThresholdBits);
+}
+
+std::int32_t ActionCandidate::DistanceSquared() const {
+  return std::bit_cast<std::int32_t>(words_[kDistanceWord]);
+}
+
+unsigned ActionCandidate::TargetId() const {
+  return Field(words_[kTargetWord], kTargetShift, kTargetBits);
+}
+
+unsigned ActionCandidate::Weight() const {
+  return Field(words_[kTargetWord], kWeightShift, kWeightBits);
+}
+
+bool ActionCandidate::Option(CandidateOption option) const {
+  return Field(words_[kOptionWord], static_cast<unsigned>(option), 1) != 0;
+}
+
+unsigned ActionCandidate::Range() const {
+  return Field(words_[kOptionWord], kRangeShift, kRangeBits);
+}
+
+void ActionCandidate::SetScore(std::int32_t score) {
+  words_[kScoreWord] = std::bit_cast<std::uint32_t>(score);
+}
+
+void ActionCandidate::SetSlot(unsigned row, unsigned column) {
+  auto& word = words_[kSlotWord];
+  word = WithField(word, kRowShift, kRowBits, row);
+  word = WithField(word, kColumnShift, kColumnBits, column);
+}
+
+void ActionCandidate::SetAction(unsigned action) {
+  words_[kSlotWord] =
+      WithField(words_[kSlotWord], kActionShift, kActionBits, action);
+}
+
+void ActionCandidate::SetThreshold(unsigned threshold) {
+  words_[kSlotWord] =
+      WithField(words_[kSlotWord], kThresholdShift, kThresholdBits, threshold);
+}
+
+void ActionCandidate::SetDistanceSquared(std::int32_t distance_squared) {
+  words_[kDistanceWord] = std::bit_cast<std::uint32_t>(distance_squared);
+}
+
+void ActionCandidate::SetTargetId(unsigned target_id) {
+  words_[kTargetWord] =
+      WithField(words_[kTargetWord], kTargetShift, kTargetBits, target_id);
+}
+
+void ActionCandidate::SetWeight(unsigned weight) {
+  words_[kTargetWord] =
+      WithField(words_[kTargetWord], kWeightShift, kWeightBits, weight);
+}
+
+void ActionCandidate::SetOption(CandidateOption option, bool enabled) {
+  words_[kOptionWord] = WithField(
+      words_[kOptionWord], static_cast<unsigned>(option), 1, enabled ? 1 : 0);
+}
+
+void ActionCandidate::SetRange(unsigned range) {
+  words_[kOptionWord] =
+      WithField(words_[kOptionWord], kRangeShift, kRangeBits, range);
+}
 
 // decomp: func_800E4C8C (src/BATTLE/BATTLE.PRG/7BDD4.s:585).
 // C reference: rood-boi battle_movement.c:1749, revision e59320ca (CC0-1.0).
-void Battle_Ai_RememberAiActionTarget(Battle_Ai_ActorAiState* state) {
-  Require(state != nullptr, "AI target memory requires state");
-  if (state->candidateCount <= 0 || state->settingsConstant19 != 0) return;
-  Require(state->candidateCount <=
-              static_cast<int>(std::size(state->candidateOrder)),
-          "AI target memory candidate count is out of bounds");
-  const auto* candidate = state->candidateOrder[0];
-  Require(candidate != nullptr, "AI target memory requires a ranked candidate");
-  const unsigned target = candidate->targetId;
-  Require(Actors_actorRecords[target] != nullptr,
-          "AI target memory requires a loaded target model");
-  Actors_ActorLocationQuery placement{};
-  Require(Actors_ActorPlacement(static_cast<int>(target), &placement) == 0,
-          "AI target memory cannot read its target placement");
-  state->previousTile =
-      static_cast<int>((target << kRememberedTargetShift) |
-                       (state->tile.word & kRememberedTileMask));
-  state->rememberedTargetTile = placement.location.packedTile.word;
-  state->targetMemoryFrames = kTargetMemoryFrames;
-}
-
-// decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s).
-void Battle_Ai_CopyActionCandidate(Battle_Ai_ActionCandidate* destination,
-                                   Battle_Ai_ActionCandidate* source) {
-  Require(destination != nullptr && source != nullptr,
-          "AI candidate copy requires source and destination");
-  // The assembly reads all five words before writing any of them.
-  std::memmove(destination, source, sizeof(*destination));
-}
-
-// decomp: func_800DC30C (src/BATTLE/BATTLE.PRG/73B0C.s).
-void Battle_Ai_ApplySimulatedStatDelta(int16_t* value, int16_t* maximum,
-                                       int delta, int operation) {
-  Require(value != nullptr && maximum != nullptr && *maximum >= 0,
-          "AI simulated stat delta requires a nonnegative maximum");
-  const auto current = static_cast<std::int64_t>(*value);
-  const auto next = operation == 2 ? current + delta : current - delta;
-  *value = static_cast<int16_t>(
-      std::clamp(next, std::int64_t{0}, std::int64_t{*maximum}));
-}
-
-// decomp: func_800DC344 (src/BATTLE/BATTLE.PRG/73B0C.s).
-void Battle_Ai_AppendActionCandidate(Battle_Ai_ActorAiState* state,
-                                     Battle_Ai_ActionCandidate* candidate) {
-  Require(state != nullptr && candidate != nullptr,
-          "AI candidate append requires state and candidate");
-  auto candidates = std::span{state->candidates};
-  Require(state->candidateCount >= 0 &&
-              state->candidateCount <= static_cast<int>(candidates.size()),
-          "AI candidate count is out of bounds");
-  if (state->candidateCount == static_cast<int>(candidates.size()) ||
-      candidate->weight == 0) {
-    return;
+std::optional<bool> RememberAiActionTarget(TargetMemoryHost& host) {
+  const int count = host.CandidateCount();
+  if (count <= 0 || host.MemoryDisabled()) return false;
+  if (count > static_cast<int>(kCandidateCapacity)) {
+    return Refuse("AI target memory candidate count is past the list");
   }
-  Require(Battle_Ai_candidateExclusions != nullptr,
-          "AI candidate exclusion table is not initialized");
-  const auto index = static_cast<std::size_t>(state->candidateCount);
-  Battle_Ai_candidateExclusions[candidate->targetId][candidate->action] = 1;
-  Battle_Ai_CopyActionCandidate(&candidates[index], candidate);
-  state->candidateOrder[index] = &candidates[index];
-  ++state->candidateCount;
+  const std::optional<unsigned> target = host.FirstRankedTarget();
+  if (!target.has_value() ||
+      *target >= static_cast<unsigned>(kCandidateTargetSlots)) {
+    return Refuse("AI target memory requires a ranked candidate");
+  }
+  const std::optional<std::uint32_t> tile = host.TargetTile(*target);
+  if (!tile.has_value()) {
+    return Refuse("AI target memory requires a placed target model");
+  }
+  host.Remember({
+      .previous_tile = (*target << kRememberedTargetShift) |
+                       (host.OwnTile() & kRememberedTileMask),
+      .remembered_target_tile = *tile,
+      .frames = kTargetMemoryFrames,
+  });
+  return true;
 }
 
-// decomp: func_800DC3CC (src/BATTLE/BATTLE.PRG/73B0C.s);
-// partition: func_800E6974 / L800E6958 (src/BATTLE/BATTLE.PRG/7E05C.s).
-void Battle_Ai_SortActionCandidates(Battle_Ai_ActionPlanView* state) {
-  Require(state != nullptr, "AI candidate sort requires state");
-  std::span<Battle_Ai_CandidateEntryView*> order{state->candidateOrder};
-  Require(state->candidateCount >= 0 &&
-              state->candidateCount <= static_cast<int>(order.size()),
-          "AI candidate sort count is out of bounds");
-  order = order.first(static_cast<std::size_t>(state->candidateCount));
-  Require(std::ranges::all_of(
-              order, [](const auto* entry) { return entry != nullptr; }),
-          "AI candidate sort contains a null entry");
-  VS::Battle::ai::SortCandidatePointers(order);
+// decomp: func_800DC2E0 (src/BATTLE/BATTLE.PRG/73AE0.s:9).
+void CopyActionCandidate(ActionCandidate& destination,
+                         const ActionCandidate& source) {
+  destination = source;
 }
 
-// decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/73B0C.s).
-void Battle_Ai_CopyPlanningActorStats(Battle_ActorStats* source,
-                                      Battle_ActorStats* destination) {
-  Require(source != nullptr && destination != nullptr,
-          "AI stat snapshot requires source and destination");
-  if (source == destination) return;
-  destination->currentHp = source->currentHp;
-  destination->maxHp = source->maxHp;
-  destination->currentMp = source->currentMp;
-  destination->maxMp = source->maxMp;
-  destination->movementClass = source->movementClass;
-  destination->walkSpeed = source->walkSpeed;
-  destination->gaitClass = source->gaitClass;
-  destination->runSpeed = source->runSpeed;
-  destination->statuses = source->statuses;
-  std::copy_n(source->limbs, std::size(source->limbs), destination->limbs);
+// decomp: func_800DC30C (src/BATTLE/BATTLE.PRG/73B0C.s:9).
+std::optional<std::int16_t> ApplySimulatedStatDelta(std::int16_t value,
+                                                    std::int16_t maximum,
+                                                    std::int32_t delta,
+                                                    bool restores) {
+  const std::optional<std::int32_t> spent =
+      CheckedInt32(std::int64_t{value} - delta);
+  const std::optional<std::int32_t> restored =
+      CheckedInt32(std::int64_t{value} + delta);
+  if (!spent.has_value() || (restores && !restored.has_value())) {
+    return Refuse("AI simulated stat delta overflows");
+  }
+  const std::int32_t next = restores ? *restored : *spent;
+  if (next < 0) return std::int16_t{0};
+  if (maximum < next) return maximum;
+  return static_cast<std::int16_t>(next);
 }
 
-// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/7C4F4.s).
-int Battle_Ai_CanAiActionAffectActor(Battle_Ai_ActorAiState* state,
-                                     Battle_Ai_ActionCandidate* candidate,
-                                     int actor_id) {
-  Require(state != nullptr && candidate != nullptr,
-          "AI target eligibility requires state and candidate");
-  Require(actor_id >= 0 &&
-              actor_id < static_cast<int>(std::size(Battle_Ai_actorAiStates)),
-          "AI target actor ID is out of bounds");
-  RequireSlot(candidate->row, candidate->column);
-  const auto* peer = Battle_Ai_actorAiStates[actor_id];
-  const auto relation = state->relations[actor_id].classification;
-  if (peer == nullptr || relation < 2) return 0;
-  if (candidate->opaque10.opaque0Bit5 != 0) {
-    if (relation >= kRelationClassThree) return 0;
-    const auto conditions = (peer->resourceStatusRestricted & 1u) |
-                            ((peer->lowMp & 1u) << 1) |
-                            ((peer->lowHp & 1u) << 2);
-    const auto action_flags = std::bit_cast<std::uint16_t>(
-        Battle_actionDefinitions[candidate->action].aiFlags);
-    if ((action_flags & kUnconditionalTargetFlag) == 0 &&
-        ((action_flags >> kTargetConditionShift) & conditions) == 0) {
-      return 0;
+// decomp: func_800DC344 (src/BATTLE/BATTLE.PRG/73B0C.s:30).
+std::optional<bool> AppendActionCandidate(CandidateList& list,
+                                          const ActionCandidate& candidate) {
+  const int count = list.Count();
+  if (count < 0 || count > static_cast<int>(kCandidateCapacity)) {
+    return Refuse("AI candidate count is outside the list");
+  }
+  if (count == static_cast<int>(kCandidateCapacity) ||
+      candidate.Weight() == 0) {
+    return false;
+  }
+  if (!list.ExcludeTargetAction(candidate.TargetId(), candidate.Action())) {
+    return Refuse("AI candidate exclusion table is not allocated");
+  }
+  list.Store(static_cast<std::size_t>(count), candidate);
+  list.SetCount(count + 1);
+  return true;
+}
+
+// decomp: func_800DC3CC (src/BATTLE/BATTLE.PRG/73B0C.s:70);
+// partition: func_800E6974 / L800E6958 (src/BATTLE/BATTLE.PRG/7E05C.s:114).
+// Equal scores must retain the original midpoint partition's tie ordering.
+bool SortActionCandidates(std::span<RankedCandidate> ranking) {
+  if (ranking.size() > kCandidateCapacity) {
+    Refuse("AI candidate sort exceeds the candidate list");
+    return false;
+  }
+  std::array<Core::SortKey, kCandidateCapacity> keys{};
+  for (std::size_t index = 0; index < ranking.size(); ++index) {
+    keys.at(index) = {ranking[index].score, index};
+  }
+  const auto ranked = std::span(keys).first(ranking.size());
+  if (!Core::SortPointersByDescendingKey(ranked)) {
+    Refuse("AI candidate sort exceeds the shared key sort");
+    return false;
+  }
+  std::array<RankedCandidate, kCandidateCapacity> sorted{};
+  for (std::size_t index = 0; index < ranking.size(); ++index) {
+    sorted.at(index) = ranking[ranked[index].position];
+  }
+  std::ranges::copy(std::span(sorted).first(ranking.size()), ranking.begin());
+  return true;
+}
+
+// decomp: func_800DC3E8 (src/BATTLE/BATTLE.PRG/73B0C.s:81).
+void CopyPlanningActorStats(
+    std::span<const std::byte, kActorStatsRecordBytes> source,
+    std::span<std::byte, kActorStatsRecordBytes> destination) {
+  for (const StatsByteRange& range : kPlanningStatSnapshot) {
+    // The caller may pass the same record as source and destination.
+    std::memmove(destination.subspan(range.offset, range.size).data(),
+                 source.subspan(range.offset, range.size).data(), range.size);
+  }
+}
+
+// decomp: func_800E4CF4 (src/BATTLE/BATTLE.PRG/7C4F4.s:10).
+std::optional<bool> CanAiActionAffectActor(const ActionTargetingHost& host,
+                                           const ActionCandidate& candidate,
+                                           int actor_id) {
+  if (actor_id < 0 || actor_id >= kCandidateTargetSlots) {
+    return Refuse("AI target actor ID is outside the AI state table");
+  }
+  const std::optional<ActorResourceConditions> peer =
+      host.PeerConditions(actor_id);
+  const unsigned classification = host.Classification(actor_id);
+  if (!peer.has_value() || classification < kAlliedClassification) {
+    return false;
+  }
+  if (candidate.Option(CandidateOption::kBeneficial)) {
+    if (classification >= kHostileClassification) return false;
+    const unsigned conditions = (peer->status_restricted ? 1u : 0u) |
+                                (peer->low_mp ? 2u : 0u) |
+                                (peer->low_hp ? 4u : 0u);
+    const std::uint16_t flags = host.ActionAiFlags(candidate.Action());
+    if ((flags & kUnconditionalTargetFlag) == 0 &&
+        ((flags >> kTargetConditionShift) & conditions) == 0) {
+      return false;
     }
   }
-  if (candidate->opaque10.opaque0Bit4 != 0 && relation < kRelationClassThree) {
-    return 0;
+  if (candidate.Option(CandidateOption::kHarmful) &&
+      classification < kHostileClassification) {
+    return false;
   }
-  const auto& slot = state->actionSlots[candidate->row][candidate->column];
-  return !(slot.opaque0Bit1 != 0 && actor_id == state->actorId);
+  const auto row = static_cast<int>(candidate.Row());
+  const auto column = static_cast<int>(candidate.Column());
+  if (!IsSlot(row, column)) {
+    return Refuse("AI target eligibility action slot is outside the table");
+  }
+  return !(host.SlotExcludesSelf(row, column) && actor_id == host.ActorId());
 }
 
-// decomp: func_800E4DF8 (src/BATTLE/BATTLE.PRG/7C4F4.s).
-int Battle_Ai_RefreshAiActionUsability(Battle_Ai_ActorAiState* state, int row,
-                                       int column) {
-  RequireSlot(row, column);
-  const auto& stats = ActorStats(state);
-  const auto action_id = stats.limbActions[row][column].actionId;
-  Require(action_id < std::size(Battle_actionDefinitions),
-          "AI action ID is out of bounds");
-  const auto& action = Battle_actionDefinitions[action_id];
-  bool usable = stats.limbs[row].hp >= 2 &&
-                ((stats.statuses & kSpellsAndAbilitiesOnlyStatus) == 0 ||
-                 action.type == Battle_ActionType_Spell ||
-                 action.type == Battle_ActionType_Ability);
-  if (usable) {
-    switch (action.type) {
-      case Battle_ActionType_Spell:
-        usable = stats.currentMp >= action.cost &&
-                 (stats.statuses & kSpellBlockingStatus) == 0;
-        break;
-      case Battle_ActionType_BreakArt:
-        usable = static_cast<std::uint16_t>(stats.currentHp) >=
-                 action.cost + static_cast<std::uint16_t>(stats.maxHp) / 2;
-        break;
-      case kPpActionType:
-        usable =
-            std::bit_cast<std::int16_t>(stats.weapon.currentPp) >= action.cost;
-        break;
-      default:
-        break;
-    }
+// decomp: func_800E4DF8 (src/BATTLE/BATTLE.PRG/7C4F4.s:82).
+std::optional<bool> RefreshAiActionUsability(ActionUsabilityHost& host, int row,
+                                             int column) {
+  if (!IsSlot(row, column)) {
+    return Refuse("AI action usability slot is outside the table");
   }
-  state->actionSlots[row][column].opaque0Bit7 = usable;
+  const unsigned action_id = host.SlotAction(row, column);
+  if (action_id >= kActionDefinitionCount) {
+    return Refuse("AI action usability action ID is outside the table");
+  }
+  const ActionCost action = host.Action(action_id);
+  const ActorResources resources = host.Resources();
+  const bool status_allows =
+      (resources.statuses & kSpellsAndAbilitiesOnlyStatus) == 0 ||
+      action.type == kSpellAction || action.type == kAbilityAction;
+  const bool usable = host.LimbHp(row) >= kMinimumLimbHp && status_allows &&
+                      IsActionUsable(action, resources);
+  host.SetSlotUsable(row, column, usable);
   return usable;
 }
 
-// decomp: func_800E4F14 (src/BATTLE/BATTLE.PRG/7C4F4.s).
-void Battle_Ai_RefreshAiResourceRestrictions(Battle_Ai_ActorAiState* state) {
-  const auto& stats = ActorStats(state);
-  const auto hp = static_cast<std::uint16_t>(stats.currentHp);
-  const auto mp = static_cast<std::uint16_t>(stats.currentMp);
-  const auto threshold = state->actionCostEnabled;
-  state->lowHp = hp * 2 < static_cast<std::uint16_t>(stats.maxHp);
-  state->lowMp =
-      threshold != 0 &&
-      (mp < threshold || mp * 2 < static_cast<std::uint16_t>(stats.maxMp));
-  state->resourceStatusRestricted =
-      (stats.statuses & kResourceRestrictingStatuses) != 0 ||
-      (threshold != 0 && (stats.statuses & kSpellBlockingStatus) != 0);
+// decomp: func_800E4F14 (src/BATTLE/BATTLE.PRG/7C4F4.s:162).
+ActorResourceConditions RefreshAiResourceRestrictions(
+    const ActorResources& resources, std::uint8_t action_cost_threshold) {
+  const unsigned hp = resources.hp;
+  const unsigned mp = resources.mp;
+  const bool thresholds_enabled = action_cost_threshold != 0;
+  return {
+      .status_restricted =
+          (resources.statuses & kResourceRestrictingStatuses) != 0 ||
+          (thresholds_enabled &&
+           (resources.statuses & kSpellBlockingStatus) != 0),
+      .low_mp = thresholds_enabled && (mp < unsigned{action_cost_threshold} ||
+                                       mp * 2u < unsigned{resources.max_mp}),
+      .low_hp = hp * 2u < unsigned{resources.max_hp},
+  };
 }
+}  // namespace VS::Battle::Ai

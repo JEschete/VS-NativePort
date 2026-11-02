@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
@@ -389,7 +389,7 @@ void Battle_CommitSelectedAction(int target_selection_mode)
         }
         Battle_actionSelection->selectionKind = 0;
     } else {
-        Battle_Ai_DisengageActorById(Battle_actionState->selection.primaryTarget.target.targetActor);
+        VS::Battle::Ai::DisengageLiveActorById(Battle_actionState->selection.primaryTarget.target.targetActor);
     }
     Menu_Framework_ReleaseMenuRows();
     if (target_selection_mode == 0) {

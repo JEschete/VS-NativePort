@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
@@ -21,13 +23,11 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
@@ -76,8 +76,8 @@ int Battle_Ai_RefreshActionCandidateReadiness(Battle_Ai_CandidateReadinessView* 
     for (i = 0; i < state->candidateCount; i++) {
         entry = state->candidateOrder[i];
         if (entry->weight && entry->threshold <= Battle_Ai_roomAiState->readinessLevel) {
-            if (!Battle_Ai_CanAiActionAffectActor((Battle_Ai_ActorAiState *)(state), (Battle_Ai_ActionCandidate *)(entry), entry->targetId)
-                || !Battle_Ai_RefreshAiActionUsability((Battle_Ai_ActorAiState *)(state), entry->row, entry->column)) {
+            if (!VS::Battle::Ai::CanLiveAiActionAffectActor((Battle_Ai_ActorAiState *)(state), (Battle_Ai_ActionCandidate *)(entry), entry->targetId)
+                || !VS::Battle::Ai::RefreshLiveAiActionUsability((Battle_Ai_ActorAiState *)(state), entry->row, entry->column)) {
                 entry->weight = 0;
             }
         }
@@ -127,15 +127,15 @@ void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_act
 
         switch (action->type) {
         case Battle_ActionType_Spell:
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque8, &row->opaqueA, action->cost, 1);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque8, &row->opaqueA, action->cost, 1);
             break;
 
         case Battle_ActionType_BreakArt:
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque4, &row->opaque6, action->cost, 1);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque4, &row->opaque6, action->cost, 1);
             break;
 
         case Battle_ActionType_BaseAttack:
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque10, &row->opaque12, action->cost, 1);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque10, &row->opaque12, action->cost, 1);
             break;
         }
     }
@@ -145,10 +145,10 @@ void Battle_Ai_ApplySimulatedActionResults(Battle_Ai_ActionTiming* simulated_act
 
         if (entry->opaque40 == 0) {
             row = &simulated_actor_rows[entry->opaque0];
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque4, &row->opaque6, entry->opaque4, entry->opaque1CBit0);
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque8, &row->opaqueA, entry->opaque6, entry->opaque1CBit2);
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque10, &row->opaque12, entry->opaque38, entry->opaque1EBit2);
-            Battle_Ai_ApplySimulatedStatDelta(&row->opaque14, &row->opaque16, entry->opaque3C, entry->opaque1EBit6);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque4, &row->opaque6, entry->opaque4, entry->opaque1CBit0);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque8, &row->opaqueA, entry->opaque6, entry->opaque1CBit2);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque10, &row->opaque12, entry->opaque38, entry->opaque1EBit2);
+            VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&row->opaque14, &row->opaque16, entry->opaque3C, entry->opaque1EBit6);
             row->opaqueC |= entry->opaque14;
             row->opaqueC &= ~entry->opaque18;
         }
@@ -303,7 +303,7 @@ void Battle_Ai_EvaluateActionCandidate(
             continue;
         }
 
-        value = Battle_Ai_ScoreActorCondition(Battle_Ai_ActorStatusConditionScore(&stats[id]), Battle_Ai_ActorHpRatio(stats, id),
+        value = VS::Battle::Ai::ScoreLiveActorCondition(Battle_Ai_ActorStatusConditionScore(&stats[id]), Battle_Ai_ActorHpRatio(stats, id),
             Battle_Ai_ActorMpRatio(stats, id), Battle_Ai_ActorEquipmentDpRatio(stats, id));
 
         if (kind != 2) {
@@ -335,7 +335,7 @@ void Battle_Ai_SelectFallbackAction(Battle_Ai_ActorAiState* ai_state)
             Battle_Ai_ActionSlotMetadata* config = &ai_state->actionSlots[row][col];
             Battle_Ai_CandidateFlags flags;
 
-            if (!Battle_Ai_RefreshAiActionUsability(ai_state, row, col) || !config->special
+            if (!VS::Battle::Ai::RefreshLiveAiActionUsability(ai_state, row, col) || !config->special
                 || best >= config->rangeSquared) {
                 continue;
             }
@@ -378,7 +378,7 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
     list[0].distanceSquared = 256;
     list[0].threshold = readiness_threshold;
     Battle_Ai_EvaluateActionCandidate(ai_state, list, 0, NULL);
-    Battle_Ai_CopyActionCandidate(&list[1], list);
+    VS::Battle::Ai::CopyLiveActionCandidate(&list[1], list);
     list[1].threshold = readiness_threshold;
     candidate = &list[1];
 
@@ -411,28 +411,28 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
                 }
 
                 list[1].targetId = id;
-                list[1].opaque10.opaque0Bit4 = Battle_Ai_IsActionHarmfulToActor(action, id);
-                list[1].opaque10.opaque0Bit5 = Battle_Ai_IsActionBeneficialToActor(action, id);
+                list[1].opaque10.opaque0Bit4 = VS::Battle::Ai::IsLiveActionHarmfulToActor(action, id);
+                list[1].opaque10.opaque0Bit5 = VS::Battle::Ai::IsLiveActionBeneficialToActor(action, id);
                 list[1].opaque10.opaque0Bit0 = config->longRange && list[1].opaque10.opaque0Bit4;
 
-                if (!Battle_Ai_CanAiActionAffectActor(ai_state, candidate, id) || Battle_Ai_candidateExclusions[id][action]) {
+                if (!VS::Battle::Ai::CanLiveAiActionAffectActor(ai_state, candidate, id) || Battle_Ai_candidateExclusions[id][action]) {
                     continue;
                 }
 
                 switch (config->kind) {
                 case 1:
                     Battle_Ai_EvaluateActionCandidate(ai_state, candidate, 1, info);
-                    Battle_Ai_CacheFallbackActionCandidate(candidate, info);
+                    VS::Battle::Ai::CacheLiveFallbackActionCandidate(candidate, info);
 
                     if (list[1].opaque0 > list[0].opaque0) {
-                        Battle_Ai_AppendActionCandidate(ai_state, candidate);
+                        VS::Battle::Ai::AppendLiveActionCandidate(ai_state, candidate);
                     }
                     break;
 
                 case 2:
                     last = -1;
-                    Battle_Ai_CopyActionCandidate(&list[2], list);
-                    Battle_Ai_CopyActionCandidate(&list[3], list);
+                    VS::Battle::Ai::CopyLiveActionCandidate(&list[2], list);
+                    VS::Battle::Ai::CopyLiveActionCandidate(&list[3], list);
 
                     for (limb = 0; limb < 6; ++limb) {
                         int chance;
@@ -447,11 +447,11 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
                         chance = list[1].weight;
 
                         if ((Core_Random_Rand() & 0x7F) < chance && list[1].opaque0 > list[2].opaque0) {
-                            Battle_Ai_CopyActionCandidate(&list[2], candidate);
+                            VS::Battle::Ai::CopyLiveActionCandidate(&list[2], candidate);
                         }
 
                         if (list[1].opaque0 > list[3].opaque0) {
-                            Battle_Ai_CopyActionCandidate(&list[3], &list[1]);
+                            VS::Battle::Ai::CopyLiveActionCandidate(&list[3], &list[1]);
                         }
                     }
 
@@ -464,20 +464,20 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
 
                     if (part >= 0) {
                         list[1].targetLimb = part;
-                        Battle_Ai_CacheFallbackActionCandidate(&list[1], info);
+                        VS::Battle::Ai::CacheLiveFallbackActionCandidate(&list[1], info);
                     }
 
                     if (list[2].opaque0 > list[0].opaque0) {
-                        Battle_Ai_AppendActionCandidate(ai_state, &list[2]);
+                        VS::Battle::Ai::AppendLiveActionCandidate(ai_state, &list[2]);
                     } else if (list[0].opaque0 < list[3].opaque0) {
-                        Battle_Ai_AppendActionCandidate(ai_state, &list[3]);
+                        VS::Battle::Ai::AppendLiveActionCandidate(ai_state, &list[3]);
                     }
                     break;
 
                 case 3:
                     target = Battle_Ai_actorAiStates[actor->id];
-                    Battle_Ai_CopyActionCandidate(&list[2], list);
-                    Battle_Ai_CopyActionCandidate(&list[3], list);
+                    VS::Battle::Ai::CopyLiveActionCandidate(&list[2], list);
+                    VS::Battle::Ai::CopyLiveActionCandidate(&list[3], list);
                     list[1].opaqueCBit7 = 0;
 
                     for (pass = 0; pass < 1; ++pass) {
@@ -488,20 +488,20 @@ void Battle_Ai_EnumerateActionCandidates(Battle_Ai_ActorAiState* ai_state, int r
                         chance = list[1].weight;
 
                         if ((Core_Random_Rand() & 0x7F) < chance && list[1].opaque0 > list[2].opaque0) {
-                            Battle_Ai_CopyActionCandidate(&list[2], candidate);
+                            VS::Battle::Ai::CopyLiveActionCandidate(&list[2], candidate);
                         }
 
                         if (list[1].opaque0 > list[3].opaque0) {
-                            Battle_Ai_CopyActionCandidate(&list[3], &list[1]);
+                            VS::Battle::Ai::CopyLiveActionCandidate(&list[3], &list[1]);
                         }
                     }
 
-                    Battle_Ai_CacheFallbackActionCandidate(&list[1], info);
+                    VS::Battle::Ai::CacheLiveFallbackActionCandidate(&list[1], info);
 
                     if (list[2].opaque0 > list[0].opaque0) {
-                        Battle_Ai_AppendActionCandidate(ai_state, &list[2]);
+                        VS::Battle::Ai::AppendLiveActionCandidate(ai_state, &list[2]);
                     } else if (list[0].opaque0 < list[3].opaque0) {
-                        Battle_Ai_AppendActionCandidate(ai_state, &list[3]);
+                        VS::Battle::Ai::AppendLiveActionCandidate(ai_state, &list[3]);
                     }
                     break;
                 }
@@ -598,11 +598,11 @@ void Battle_Ai_AdvancePlanningSimulation(int simulation_time_step)
 
         stats->statuses = statuses;
         state = Battle_Ai_actorAiStates[actor->id];
-        Battle_Ai_RefreshAiResourceRestrictions(state);
+        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);
 
         for (row = 0; row < 6; ++row) {
             for (column = 0; column < 4; ++column) {
-                Battle_Ai_RefreshAiActionUsability(state, row, column);
+                VS::Battle::Ai::RefreshLiveAiActionUsability(state, row, column);
             }
         }
     }
@@ -618,7 +618,7 @@ int Battle_Ai_SnapshotPlanningActorStats(void)
         return 0;
     }
     for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-        Battle_Ai_CopyPlanningActorStats(actor->stats, &Battle_Ai_planningStatsSnapshot[actor->id]);
+        VS::Battle::Ai::CopyLivePlanningActorStats(actor->stats, &Battle_Ai_planningStatsSnapshot[actor->id]);
     }
     return 1;
 }
@@ -629,7 +629,7 @@ void Battle_Ai_RestorePlanningActorStats(void)
     Battle_Actor* actor;
 
     for (actor = Battle_actors[0]; actor != NULL; actor = actor->next) {
-        Battle_Ai_CopyPlanningActorStats(&Battle_Ai_planningStatsSnapshot[actor->id], actor->stats);
+        VS::Battle::Ai::CopyLivePlanningActorStats(&Battle_Ai_planningStatsSnapshot[actor->id], actor->stats);
     }
     Core_Memory_FreeFromHighEnd(Battle_Ai_planningStatsSnapshot);
 }
@@ -643,7 +643,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
 {
     int delays[3] = { 0, 455, 2900 };
     int quotas[3] = { 10, 3, 3 };
-    int selected[3];
+    int selected[3] = { 0, 0, 0 };
     int row;
     int column;
     int pass;
@@ -684,7 +684,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
             delay = MAX(delays[pass], minDelay);
             Battle_Ai_AdvancePlanningSimulation(delay);
             Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActorAiState *)((Battle_Ai_ActionChoiceView*)state), (short)delay);
-            Battle_Ai_SortActionCandidates(state);
+            VS::Battle::Ai::SortLiveActionCandidates(state);
 
             if (pass == 1) {
                 remaining = 16 - selected[0] - quotas[2];
@@ -698,7 +698,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
             }
 
             for (i = 0; i < selected[pass]; ++i) {
-                Battle_Ai_CopyActionCandidate((Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][i]), (Battle_Ai_ActionCandidate *)(state->candidateOrder[i]));
+                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][i]), (Battle_Ai_ActionCandidate *)(state->candidateOrder[i]));
             }
             for (i = selected[pass]; i < state->candidateCount; ++i) {
                 rejected = state->candidateOrder[i];
@@ -711,7 +711,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
             for (j = 0; j < selected[pass]; ++j) {
                 index = state->candidateCount;
                 entry = &state->candidates[index];
-                Battle_Ai_CopyActionCandidate((Battle_Ai_ActionCandidate *)(entry), (Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][j]));
+                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(entry), (Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][j]));
                 state->candidateOrder[index] = entry;
                 state->candidateCount = index + 1;
                 if (index + 1 >= 16) {
@@ -723,25 +723,25 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
         if (state->candidateCount == 0 && state->allowFallbackAction) {
             for (i = 0; i < Battle_Ai_fallbackCandidateCount; ++i) {
                 fallback = &state->candidates[i];
-                Battle_Ai_CopyActionCandidate((Battle_Ai_ActionCandidate *)(fallback), (Battle_Ai_ActionCandidate *)(&Battle_Ai_fallbackCandidates[i]));
+                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(fallback), (Battle_Ai_ActionCandidate *)(&Battle_Ai_fallbackCandidates[i]));
                 fallback->weight = 128;
                 state->candidateOrder[i] = fallback;
             }
             state->candidateCount = Battle_Ai_fallbackCandidateCount;
-            Battle_Ai_SortActionCandidates(state);
+            VS::Battle::Ai::SortLiveActionCandidates(state);
         }
     restore:
         Battle_Ai_RestorePlanningActorStats();
         Battle_Ai_roomAiState->readinessLevel = 0;
     } else {
         Battle_Ai_EnumerateActionCandidates((Battle_Ai_ActorAiState *)((Battle_Ai_ActionChoiceView*)state), 0);
-        Battle_Ai_SortActionCandidates(state);
+        VS::Battle::Ai::SortLiveActionCandidates(state);
     }
 
     if (state->candidateCount >= 2) {
         for (pass = 0; pass < 3; ++pass) {
             if (selected[pass] != 0) {
-                Battle_Ai_PromoteRandomizedActionCandidate(state, selected[pass]);
+                VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(state, selected[pass]);
                 break;
             }
         }
@@ -826,7 +826,7 @@ void Battle_Ai_ReconcileCompletedActionPlan(Battle_Ai_ReactionRecord* completed_
         }
     }
 
-    Battle_Ai_RememberAiActionTarget(entry);
+    VS::Battle::Ai::RememberLiveAiActionTarget(entry);
 }
 
 }  // extern "C"

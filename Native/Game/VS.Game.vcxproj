@@ -266,14 +266,16 @@
     <ClCompile Include="src\Battle\Ai\CurrentTerrain.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\DecisionPrimitives.cpp">
+    <ClCompile Include="src\Battle\Ai\DecisionPrimitives.cpp" />
+    <ClCompile Include="src\Battle\Ai\DecisionPrimitivesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Decisions.cpp" />
     <ClCompile Include="src\Battle\Ai\DecisionsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Engagement.cpp">
+    <ClCompile Include="src\Battle\Ai\Engagement.cpp" />
+    <ClCompile Include="src\Battle\Ai\EngagementLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\FlightTerrain.cpp" />
@@ -318,7 +320,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\PlanningPrimitives.cpp">
+    <ClCompile Include="src\Battle\Ai\PlanningPrimitives.cpp" />
+    <ClCompile Include="src\Battle\Ai\PlanningPrimitivesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\PlanningWorkspace.cpp" />
@@ -2069,9 +2072,6 @@
     <ClInclude Include="src\Battle\Ai\Behavior.h" />
     <ClInclude Include="src\Battle\Ai\ConditionSnapshotBinding.hpp" />
     <ClInclude Include="src\Battle\Ai\CurrentTerrain.hpp" />
-    <ClInclude Include="src\Battle\Ai\DecisionPrimitives.h" />
-    <ClInclude Include="src\Battle\Ai\Engagement.h" />
-    <ClInclude Include="src\Battle\Ai\EngagementState.hpp" />
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\GroundNavigation.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
@@ -2080,8 +2080,6 @@
     <ClInclude Include="src\Battle\Ai\NavigationPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
     <ClInclude Include="src\Battle\Ai\Perception.h" />
-    <ClInclude Include="src\Battle\Ai\PlanningPrimitives.h" />
-    <ClInclude Include="src\Battle\Ai\PlanningSort.hpp" />
     <ClInclude Include="src\Battle\Ai\RoomState.h" />
     <ClInclude Include="src\Battle\AttackPrerequisites.h" />
     <ClInclude Include="src\Battle\BattleMode.h" />
@@ -2385,11 +2383,17 @@
     <ClInclude Include="include\Battle\Ai\ActorCommands.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
+    <ClInclude Include="include\Battle\Ai\DecisionPrimitives.hpp" />
+    <ClInclude Include="include\Battle\Ai\DecisionPrimitivesLive.hpp" />
     <ClInclude Include="include\Battle\Ai\Decisions.hpp" />
     <ClInclude Include="include\Battle\Ai\DecisionsLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\Engagement.hpp" />
+    <ClInclude Include="include\Battle\Ai\EngagementLive.hpp" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdate.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\PlanningPrimitives.hpp" />
+    <ClInclude Include="include\Battle\Ai\PlanningPrimitivesLive.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspaceLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />

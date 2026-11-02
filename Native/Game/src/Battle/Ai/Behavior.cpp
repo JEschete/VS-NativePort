@@ -1,7 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -22,8 +24,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/DecisionPrimitives.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -64,7 +64,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
             flag = 0;
             active = 1;
         } else {
-            if (Battle_Ai_CanApproachEngagedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {
+            if (VS::Battle::Ai::CanApproachLiveEngagedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {
                 distance = entry->distanceSquared;
                 active = 1;
             } else {
@@ -83,7 +83,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
             Battle_Ai_roomAiState->approachMoves++;
             if (state->distancesSquared[id] < limit
                 && (state->relations[entry->targetId].word & 1)) {
-                Battle_Ai_TryEngageActor((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::TryEngageLiveActor((Battle_Ai_ActorAiState *)((void*)state));
             }
         }
     move:
@@ -92,7 +92,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
         }
         return Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), id) != 0;
     case 2:
-        if (!Battle_Ai_IsActionCooldownReady((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {
+        if (!VS::Battle::Ai::IsLiveActionCooldownReady((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {
             goto normal;
         }
         if (entry->opaque10Bit1) {
@@ -124,7 +124,7 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
     case 4:
         return Battle_Ai_FleeVisibleEnemies(state, 0);
     case 7:
-        Battle_Ai_DisengageActor((Battle_Ai_ActorAiState *)((void*)state));
+        VS::Battle::Ai::DisengageLiveActor((Battle_Ai_ActorAiState *)((void*)state));
         id = 0;
         flag = 1;
         if ((state->relations[id].bytes[0] >> 6) == 3) {
@@ -167,7 +167,7 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
         return 0;
 
     case 1:
-        Battle_Ai_DisengageActor(ai_state);
+        VS::Battle::Ai::DisengageLiveActor(ai_state);
 
         if (ai_state->relations[0].classification == 3) {
             if (Battle_Ai_ApproachActor(ai_state, 0, 640, 1)) {
@@ -203,7 +203,7 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
         // Fallthrough
 
     case 2:
-        Battle_Ai_DisengageActor(ai_state);
+        VS::Battle::Ai::DisengageLiveActor(ai_state);
 
         if (ai_state->relations[0].classification == 3) {
             if (Battle_Ai_ApproachActor(ai_state, 0, 640, 1)) {
@@ -241,7 +241,7 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
 // decomp: BATTLE.PRG func_800DA4BC (src/BATTLE/BATTLE.PRG/71618.c:788)
 int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate)
 {
-    if (Battle_Ai_CanApproachEngagedTarget(ai_state, candidate)) {
+    if (VS::Battle::Ai::CanApproachLiveEngagedTarget(ai_state, candidate)) {
         int id = candidate->targetId;
         int distance = VS::Core::Math::SquareRootInteger(candidate->distanceSquared);
         int range = distance + ai_state->maxRange * 32;
@@ -250,7 +250,7 @@ int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* ai_state, Battle_
         ++Battle_Ai_roomAiState->approachMoves;
 
         if (ai_state->distancesSquared[id] < range && ai_state->relations[candidate->targetId].active) {
-            Battle_Ai_TryEngageActor(ai_state);
+            VS::Battle::Ai::TryEngageLiveActor(ai_state);
         }
 
         if (Battle_Ai_ApproachActor(ai_state, id, distance, 1)) {
@@ -386,7 +386,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
 fallback:
     if (valid) {
         if (oldFlag) {
-            if ((unsigned int)Battle_Ai_NextActorRandomMasked(128) < 128) {
+            if ((unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(128) < 128) {
                 state->opaque18 = 1;
             }
             ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)state), 6, 0);
@@ -441,13 +441,13 @@ int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state)
 // decomp: BATTLE.PRG func_800DAC80 (src/BATTLE/BATTLE.PRG/71618.c:1006)
 int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* ai_state, Battle_Ai_ActionCandidate* candidate)
 {
-    if (!Battle_Ai_CanExecuteActionCandidate(ai_state, candidate)) {
+    if (!VS::Battle::Ai::CanExecuteLiveActionCandidate(ai_state, candidate)) {
         return 0;
     }
 
-    Battle_Ai_TryEngageActor(ai_state);
+    VS::Battle::Ai::TryEngageLiveActor(ai_state);
 
-    if (Battle_Ai_IsEngagementReady(ai_state)) {
+    if (VS::Battle::Ai::IsLiveEngagementReady(ai_state)) {
         Actors_ActorRecord* actor;
 
         ai_state->currentCandidate = candidate;
@@ -455,13 +455,13 @@ int Battle_Ai_TryExecuteActionCandidate(Battle_Ai_ActorAiState* ai_state, Battle
         actor = Actors_actorRecords[candidate->targetId];
 
         if (actor != NULL && actor->instance.locomotionState) {
-            candidate->targetLimb = Battle_Ai_NextActorRandomMasked(2);
+            candidate->targetLimb = VS::Battle::Ai::NextLiveActorRandomMasked(2);
             candidate->opaqueCBit7 = 217;
         }
 
         VS::Battle::Ai::IssueLiveActorCommand(ai_state, 15);
 
-        if (Battle_Ai_DoesActionRequireCooldown(ai_state, candidate)) {
+        if (VS::Battle::Ai::DoesLiveActionRequireCooldown(ai_state, candidate)) {
             ai_state->minActionDelay = ai_state->usesRoomActionDelay == 0 ? Battle_Ai_roomAiState->defaultActionDelay : 50;
         }
 

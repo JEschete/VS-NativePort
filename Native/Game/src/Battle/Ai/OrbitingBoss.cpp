@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
@@ -16,8 +18,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/DecisionPrimitives.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -93,7 +93,7 @@ int Battle_Ai_IsBossActionReady(Battle_Ai_ActorAiState* ai_state)
     int a;
     int b;
 
-    if (ai_state->candidateCount != 0 && Battle_Ai_IsActionCooldownReady(ai_state, ai_state->candidateOrder[0])) {
+    if (ai_state->candidateCount != 0 && VS::Battle::Ai::IsLiveActionCooldownReady(ai_state, ai_state->candidateOrder[0])) {
         a = ai_state->candidateOrder[0]->threshold;
         b = Battle_Ai_roomAiState->readinessLevel;
         r = a < b;
@@ -155,7 +155,7 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     playerAngle = Core_Gte_Atan2(0x7C0 - ((Battle_Ai_OrbitPlayerRecordView*)Actors_actorRecords[0])->x,
         0x7C0 - ((Battle_Ai_OrbitPlayerRecordView*)Actors_actorRecords[0])->z);
     currentAngle = Core_Gte_Atan2(0x7C0 - state->x, 0x7C0 - state->z);
-    if (Battle_Ai_IsBossActionReady((Battle_Ai_ActorAiState *)((void*)state)) && Battle_Ai_IsEngagementReady((Battle_Ai_ActorAiState *)((void*)state))) {
+    if (Battle_Ai_IsBossActionReady((Battle_Ai_ActorAiState *)((void*)state)) && VS::Battle::Ai::IsLiveEngagementReady((Battle_Ai_ActorAiState *)((void*)state))) {
         heading = playerAngle;
         tracking = 1;
     } else {
@@ -263,7 +263,7 @@ int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* ai_state)
     char state;
 
     if (Battle_Ai_IsBossActionReady(ai_state) != 0) {
-        Battle_Ai_TryEngageActor(ai_state);
+        VS::Battle::Ai::TryEngageLiveActor(ai_state);
     }
 
     state = State_ScriptFlag(0xA6);
@@ -296,7 +296,7 @@ int Battle_Ai_UpdateOrbitingBossBehavior(Battle_Ai_ActorAiState* ai_state)
 
     case 4:
         orbit_state->started = 0;
-        Battle_Ai_DisengageActor(ai_state);
+        VS::Battle::Ai::DisengageLiveActor(ai_state);
 
         if (Battle_Ai_UpdateBossRadialRetreat((Battle_Ai_RadialRetreatView *)((void*)ai_state)) != 0) {
             if (orbit_state->isOrbiting != 0) {

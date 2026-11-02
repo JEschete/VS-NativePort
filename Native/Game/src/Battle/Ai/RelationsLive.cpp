@@ -10,6 +10,7 @@
 #include <span>
 
 #include "Battle/Ai/DecisionsLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 
 extern "C" {
 #include "Battle/Actor.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/BiosRand.h"
@@ -119,7 +119,7 @@ class LiveAllianceActor final : public AshleyAllianceActor {
     reaction_.temporaryAshleyAlliance = active ? 1 : 0;
   }
   void SetAwarenessIndicator(int marker) override {
-    Battle_Ai_SetActorAwarenessIndicator(reaction_.actorId, marker);
+    SetLiveActorAwarenessIndicator(reaction_.actorId, marker);
   }
   void RecomputeRelations() override { InitializeRelations(state_); }
   void SaveDecisionAndApproach() override {

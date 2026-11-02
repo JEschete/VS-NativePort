@@ -7,11 +7,11 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -96,22 +96,22 @@ TEST_CASE("AI engagement becomes ready at exactly thirty-two buildup frames",
   const uint16_t timer = GENERATE(0, 1, 31, 32, 33, 65535);
   Battle_Ai_ActorAiState state{};
   state.engagementFrames = timer;
-  CHECK(Battle_Ai_IsEngagementReady(&state) == (timer >= 32));
+  CHECK(VS::Battle::Ai::IsLiveEngagementReady(&state) == (timer >= 32));
 }
 
 TEST_CASE(
     "AI joining owns membership, list links and repeat-request bookkeeping",
     "[ai][engagement]") {
   EngagementFixture fixture;
-  CHECK(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
+  CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   CHECK(fixture.states[1].engagementFrames == 1);
   CHECK(fixture.states[1].engagementRequest == 0);
   fixture.CheckSingleMember(1);
-  CHECK(Battle_Ai_TryEngageActor(&fixture.states[2]) == 1);
+  CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   fixture.CheckPair();
-  CHECK(Battle_Ai_TryEngageActor(&fixture.states[2]) == 1);
+  CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   fixture.CheckPair();
-  CHECK(Battle_Ai_TryEngageActor(&fixture.states[0]) == 0);
+  CHECK_FALSE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[0]));
   fixture.CheckPair();
 }
 
@@ -124,11 +124,11 @@ TEST_CASE(
   if (blocked == 1) Battle_Ai_candidateEngagedThisUpdate = 1;
   if (blocked == 2) {
     fixture.room.engagementLimit = 0;
-    REQUIRE(Battle_Ai_TryEngageActor(&fixture.states[2]) == 1);
+    REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
   }
   const auto count = fixture.room.engagedCount;
   const auto mask = fixture.Mask();
-  CHECK(Battle_Ai_TryEngageActor(&fixture.states[1]) == 0);
+  CHECK_FALSE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   CHECK(fixture.states[1].engagementFrames == 0);
   CHECK(fixture.states[1].engagementRequest == 7);
   CHECK(fixture.room.engagedCount == count);
@@ -140,22 +140,22 @@ TEST_CASE(
     "[ai][engagement]") {
   EngagementFixture fixture;
   fixture.states[1].reengagementGraceFrames = 1;
-  CHECK(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
+  CHECK(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   CHECK(fixture.states[1].engagementFrames == 32);
-  CHECK(Battle_Ai_IsEngagementReady(&fixture.states[1]) == 1);
+  CHECK(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
 }
 
 TEST_CASE("AI existing buildup consumer advances a real join to readiness",
           "[ai][engagement]") {
   EngagementFixture fixture;
-  REQUIRE(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
   for (int tick = 0; tick < 30; ++tick) {
     Battle_Ai_UpdateEngagementBuildup(&fixture.states[1]);
   }
   CHECK(fixture.states[1].engagementFrames == 31);
-  CHECK(Battle_Ai_IsEngagementReady(&fixture.states[1]) == 0);
+  CHECK_FALSE(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
   Battle_Ai_UpdateEngagementBuildup(&fixture.states[1]);
-  CHECK(Battle_Ai_IsEngagementReady(&fixture.states[1]) == 1);
+  CHECK(VS::Battle::Ai::IsLiveEngagementReady(&fixture.states[1]));
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x84);
 }
 
@@ -165,41 +165,51 @@ TEST_CASE(
   const bool two_actors = GENERATE(false, true);
   EngagementFixture fixture;
   if (two_actors) fixture.actors[1].next = nullptr;
-  REQUIRE(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
-  Battle_Ai_DisengageActor(&fixture.states[1]);
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
+  VS::Battle::Ai::DisengageLiveActor(&fixture.states[1]);
   CHECK(fixture.states[1].engagementFrames == 0);
   CHECK(fixture.states[1].engagementCooldownFrames == (two_actors ? 0 : 48));
   CHECK(fixture.states[1].reengagementGraceFrames == 90);
   fixture.CheckEmpty();
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
-  Battle_Ai_DisengageActor(&fixture.states[1]);
+  VS::Battle::Ai::DisengageLiveActor(&fixture.states[1]);
   fixture.CheckEmpty();
 }
 
 TEST_CASE("AI leaving the list head preserves the remaining encounter",
           "[ai][engagement]") {
   EngagementFixture fixture;
-  REQUIRE(Battle_Ai_TryEngageActor(&fixture.states[1]) == 1);
-  REQUIRE(Battle_Ai_TryEngageActor(&fixture.states[2]) == 1);
-  Battle_Ai_DisengageActorById(5);
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[2]));
+  VS::Battle::Ai::DisengageLiveActorById(5);
   CHECK(fixture.room.engagedHead == &fixture.states[1]);
   CHECK(fixture.room.engagedTail == &fixture.states[1]);
   CHECK(fixture.room.engagedCount == 1);
   CHECK(fixture.Mask() == 4);
-  Battle_Ai_DisengageActorById(0);
-  Battle_Ai_DisengageActorById(7);
+  VS::Battle::Ai::DisengageLiveActorById(0);
+  VS::Battle::Ai::DisengageLiveActorById(7);
   CHECK(fixture.room.engagedCount == 1);
+}
+
+TEST_CASE("AI disengagement by ID ignores IDs outside the AI state table",
+          "[ai][engagement]") {
+  const int actor_id = GENERATE(-1, 16, 255);
+  EngagementFixture fixture;
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(&fixture.states[1]));
+  VS::Battle::Ai::DisengageLiveActorById(actor_id);
+  fixture.CheckSingleMember(1);
+  CHECK(fixture.states[1].engagementFrames == 1);
 }
 
 TEST_CASE("AI marker wrappers never reset every actor through Ashley's index",
           "[ai][engagement]") {
   EngagementFixture fixture;
   const auto before = std::to_array(Battle_actorMarkers);
-  Battle_Ai_SetActorAwarenessIndicator(0, 0);
+  VS::Battle::Ai::SetLiveActorAwarenessIndicator(0, 0);
   CHECK(std::to_array(Battle_actorMarkers) == before);
-  Battle_Ai_SetActorAwarenessIndicator(2, 5);
+  VS::Battle::Ai::SetLiveActorAwarenessIndicator(2, 5);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x85);
-  Battle_Ai_ResetActorAwarenessIndicator(
+  VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
       reinterpret_cast<Battle_Ai_PlanEvaluationView*>(&fixture.states[1]));
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0);
 }
@@ -211,12 +221,12 @@ TEST_CASE(
   auto& state = fixture.states[1];
   Battle_Ai_SetTemporaryAwarenessIndicator(&state, 7, 2);
   auto* view = reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state);
-  Battle_Ai_UpdateTemporaryAwarenessIndicator(view);
+  VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awarenessFramesRemaining == 1);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x87);
-  Battle_Ai_UpdateTemporaryAwarenessIndicator(view);
+  VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awarenessFramesRemaining == 0);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[2]) == 0x80);
-  Battle_Ai_UpdateTemporaryAwarenessIndicator(view);
+  VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(view);
   CHECK(state.awarenessMarker == 7);
 }

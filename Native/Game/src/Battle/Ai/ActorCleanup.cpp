@@ -9,14 +9,13 @@
 #include <iterator>
 #include <memory>
 
-#include "Battle/Ai/EngagementState.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Core/BiosRand.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/DecisionPrimitives.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Navigation.h"
@@ -92,7 +91,7 @@ void ReleaseOrbitStorage(const Battle_Actor& actor) {
 void Battle_Ai_SetActorAiReactionWithDelay(Battle_Ai_PerceptionUpdateView* view,
                                            int value, int range) {
   Require(view != nullptr, "AI reaction request requires state");
-  const int roll = Battle_Ai_NextActorRandomMasked(range);
+  const int roll = VS::Battle::Ai::NextLiveActorRandomMasked(range);
   auto& state = *reinterpret_cast<Battle_Ai_ActorAiState*>(view);
   if (state.nativePointer18C != nullptr || state.decisionDelay != 0 ||
       roll >= range) {
@@ -173,7 +172,7 @@ void Battle_Ai_ClearActorAiLinksAndPlan(int actor_id) {
   RequireActorId(actor_id);
   ClearLinkedActorReferences(actor_id);
   auto* state = Battle_Ai_actorAiStates[actor_id];
-  if (state != nullptr) Battle_Ai_DisengageActor(state);
+  if (state != nullptr) VS::Battle::Ai::DisengageLiveActor(state);
 }
 
 // decomp: func_800E6694 (src/BATTLE/BATTLE.PRG/7DE94.s:9-40).
@@ -279,18 +278,18 @@ void Battle_Ai_FreeActorAiState(Battle_Actor* actor) {
   if (state != nullptr) Battle_Ai_ReleaseActorAiReservations(state);
   if (actor->id == 0) return;
   auto& room = *Battle_Ai_roomAiState;
-  const auto mask = VS::Battle::ai::EngagedMask(room);
+  const auto mask = VS::Battle::Ai::EngagedMask(room);
   const auto bit = 1u << actor->id;
   if ((mask & bit) != 0) {
     Require(room.engagedCount > 0 && state != nullptr,
             "AI teardown found inconsistent engagement membership");
-    VS::Battle::ai::StoreEngagedMask(room,
+    VS::Battle::Ai::StoreEngagedMask(room,
                                      static_cast<std::uint16_t>(mask & ~bit));
     --room.engagedCount;
   }
   actor->commandFlags &= kCommandModeMask;
   if (state != nullptr) {
-    Battle_Ai_ResetActorAwarenessIndicator(
+    VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
         reinterpret_cast<Battle_Ai_PlanEvaluationView*>(state));
     Battle_Ai_UnlinkEngagedActor(state);
   }

@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -515,7 +515,7 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
     if (hit) {
         if (!(((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->movementFlags & 0x30)
             && !((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->waitTimer) {
-            ((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->waitTimer = Battle_Ai_NextActorRandomMasked(4) + 4;
+            ((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->waitTimer = VS::Battle::Ai::NextLiveActorRandomMasked(4) + 4;
         }
     }
 
@@ -590,7 +590,7 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
     if (test(state, (path.bits.heading - turn * 2 - turn) & 7)
         && test(state, (path.bits.heading - turn * 2) & 7)) {
         if (!(state->movementFlags & 0x30) && !state->waitTimer) {
-            state->waitTimer = Battle_Ai_NextActorRandomMasked(4) + 4;
+            state->waitTimer = VS::Battle::Ai::NextLiveActorRandomMasked(4) + 4;
         }
         goto stop;
     }

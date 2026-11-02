@@ -13,6 +13,7 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/FrameTiming.hpp"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -429,8 +429,8 @@ void Battle_Ai_SetActorNavigationOverride(int actor_id, int x, int z) {
       "path request requires matching actor and room state");
   const unsigned target = static_cast<unsigned>(x) |
                           (static_cast<unsigned>(z) << kCoordinateHalfwordBits);
-  Battle_Ai_DisengageActor(state);
-  Battle_Ai_ResetActorAwarenessIndicator(
+  VS::Battle::Ai::DisengageLiveActor(state);
+  VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
       reinterpret_cast<Battle_Ai_PlanEvaluationView*>(state));
   Battle_Ai_UnlinkEngagedActor(state);
   auto* destination = state;

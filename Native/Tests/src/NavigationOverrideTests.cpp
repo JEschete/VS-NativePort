@@ -11,6 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/NavigationPrimitives.h"
@@ -808,9 +808,9 @@ TEST_CASE(
   fixture.room.engagementLimit = 1;
   const auto saved_busy = Battle_Ai_candidateEngagedThisUpdate;
   Battle_Ai_candidateEngagedThisUpdate = 0;
-  const auto engaged = Battle_Ai_TryEngageActor(&fixture.source);
+  const auto engaged = VS::Battle::Ai::TryEngageLiveActor(&fixture.source);
   Battle_Ai_candidateEngagedThisUpdate = saved_busy;
-  REQUIRE(engaged == 1);
+  REQUIRE(engaged);
   Battle_actorMarkers[1] = static_cast<char>(0x85);
   fixture.source.currentCandidate = &fixture.source.candidates[0];
   const u_int preserved = 0x11223344;

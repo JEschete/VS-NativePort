@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
@@ -88,7 +88,7 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
                     directions[0] = second;
                     directions[1] = first;
                 }
-                if (Battle_Ai_NextActorRandomMasked(2)) {
+                if (VS::Battle::Ai::NextLiveActorRandomMasked(2)) {
                     directions[2] = (first + 4) & 7;
                     directions[3] = (second + 4) & 7;
                 } else {
@@ -795,9 +795,9 @@ int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int til
     if (!count) {
         return -1;
     }
-    chosen = (unsigned int)Battle_Ai_NextActorRandomMasked(4096) % count;
+    chosen = (unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(4096) % count;
     if (state->wanderHeading > 0 && ((state->wanderHeading + 4) & 7) == choices[chosen]) {
-        chosen = (unsigned int)Battle_Ai_NextActorRandomMasked(4096) % count;
+        chosen = (unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(4096) % count;
     }
     state->goal.tile.tileX += WANDER_DIRECTIONS[choices[chosen]].dx;
     state->goal.tile.tileZ += WANDER_DIRECTIONS[choices[chosen]].dz;
@@ -811,7 +811,7 @@ int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int til
 // decomp: BATTLE.PRG wanderRandomHeading (src/BATTLE/BATTLE.PRG/771A8.c:1700)
 int Battle_Ai_RandomWanderHeading(int direction)
 {
-    int offset = Battle_Ai_NextActorRandomMasked(512);
+    int offset = VS::Battle::Ai::NextLiveActorRandomMasked(512);
     int angle = direction << 9;
     offset += 0xFF00;
     return angle + offset;
@@ -851,7 +851,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
         if (state->wanderTimer < 31) {
             return;
         }
-        if ((unsigned int)Battle_Ai_NextActorRandomMasked(128) < 44) {
+        if ((unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(128) < 44) {
             state->behaviorMode = 2;
         } else {
             state->wanderTimer = 0;
@@ -859,11 +859,11 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
         }
     }
     if (state->wanderTimer == move) {
-        if ((unsigned int)Battle_Ai_NextActorRandomMasked(128) < 44) {
+        if ((unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(128) < 44) {
             state->wanderTimer = 0;
         }
     } else if (state->wanderTimer >= rest + move) {
-        state->wanderTimer = (unsigned int)Battle_Ai_NextActorRandomMasked(128) < 44 ? move : 0;
+        state->wanderTimer = (unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(128) < 44 ? move : 0;
     }
     state->isStuck = 1;
     *(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
@@ -872,12 +872,12 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
         goto recover;
     }
     if (range >= 63) {
-        if (!state->wanderPhase || !Battle_Ai_NextActorRandomMasked(1 << rate) || !state->wanderCooldown) {
-            value = (unsigned int)Battle_Ai_NextActorRandomMasked(4096) % range + 128;
+        if (!state->wanderPhase || !VS::Battle::Ai::NextLiveActorRandomMasked(1 << rate) || !state->wanderCooldown) {
+            value = (unsigned int)VS::Battle::Ai::NextLiveActorRandomMasked(4096) % range + 128;
             state->wanderPhase = 1;
             state->wanderCooldown = 60;
             state->wanderRangeSquared = value * value;
-            heading = Battle_Ai_NextActorRandomMasked(4) * 2;
+            heading = VS::Battle::Ai::NextLiveActorRandomMasked(4) * 2;
             for (i = 0; i < 4; i++) {
                 int direction = (heading + i * 2) & 7;
                 if (check(state, direction)) {
@@ -886,7 +886,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
                 }
             }
             if (i == 4) {
-                state->wanderHeading = Battle_Ai_NextActorRandomMasked(4096);
+                state->wanderHeading = VS::Battle::Ai::NextLiveActorRandomMasked(4096);
             }
         }
         if (!state->opaque8) {
@@ -916,7 +916,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
         return;
     }
     state->opaque3 = 1;
-    if (!Battle_Ai_NextActorRandomMasked(1 << rate)) {
+    if (!VS::Battle::Ai::NextLiveActorRandomMasked(1 << rate)) {
         state->wanderPhase = 0;
     }
     switch (state->wanderPhase) {
@@ -973,7 +973,7 @@ void Battle_Ai_UpdateWaypointPatrol(Battle_Ai_PatrolView* state)
         if (state->opaque104) {
             state->opaque104--;
         }
-        if (Battle_Ai_NextActorRandomMasked(1 << state->rate) || state->opaque104) {
+        if (VS::Battle::Ai::NextLiveActorRandomMasked(1 << state->rate) || state->opaque104) {
             goto move;
         }
         state->direction = -state->direction;
@@ -1068,7 +1068,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                 s->opaque0 = one;
             }
             s->opaqueC = one;
-            s->opaque1 = Battle_Ai_IsAiTargetBeyondNearRadius(s, target, s->range);
+            s->opaque1 = VS::Battle::Ai::IsLiveAiTargetBeyondNearRadius(s, target, s->range);
             if (s->movementFlags & 8) {
                 oldPosition = s->destination.word;
                 angle = Core_Gte_Atan2(s->x - (s->destination.bytes[0] << 7) - 64,

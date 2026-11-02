@@ -84,6 +84,7 @@
     <ClCompile Include="src\CoreTests.cpp" />
     <ClCompile Include="src\CursorMemoryTests.cpp" />
     <ClCompile Include="src\DataMenuTests.cpp" />
+    <ClCompile Include="src\DecisionPrimitivesTests.cpp" />
     <ClCompile Include="src\DiscImageTests.cpp" />
     <ClCompile Include="src\DiscReaderTests.cpp" />
     <ClCompile Include="src\DoorMatchesSliceTests.cpp" />
@@ -99,6 +100,7 @@
     <ClCompile Include="src\EncounterProfileTests.cpp" />
     <ClCompile Include="src\EncounterTests.cpp" />
     <ClCompile Include="src\EndingArtTests.cpp" />
+    <ClCompile Include="src\EngagementCoreTests.cpp" />
     <ClCompile Include="src\EngagementTests.cpp" />
     <ClCompile Include="src\EquipmentDetailTests.cpp" />
     <ClCompile Include="src\EventRetentionPredicateTests.cpp" />
@@ -160,6 +162,7 @@
     <ClCompile Include="src\NavigationOverrideTests.cpp" />
     <ClCompile Include="src\ParticleRenderCoreTests.cpp" />
     <ClCompile Include="src\ParticleRenderTests.cpp" />
+    <ClCompile Include="src\PlanningPrimitivesTests.cpp" />
     <ClCompile Include="src\PlanningWorkspaceSliceTests.cpp" />
     <ClCompile Include="src\PlatformPlacementTests.cpp" />
     <ClCompile Include="src\PlaybackResetTests.cpp" />

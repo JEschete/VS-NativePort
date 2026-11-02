@@ -93,6 +93,14 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn('Core_Warnf("field.camera"', source)
         self.assertNotIn("Field_CollisionCellAt(var_a0, var_a1, var_a2)->", source)
 
+    def test_action_plan_selection_counts_start_at_zero(self):
+        source = "    int quotas[3] = { 10, 3, 3 };\n    int selected[3];\n    int row;\n"
+        for old, new, _ in copy_fixups.FIXES["F01716"]:
+            self.assertEqual(source.count(old), 1)
+            source = source.replace(old, new)
+        self.assertIn("    int selected[3] = { 0, 0, 0 };\n", source)
+        self.assertNotIn("int selected[3];", source)
+
     def test_actor_gimmick_read_adapter_preserves_registry_initialization_writes(self):
         source = (
             "Field_gimmickInstances[i] = NULL;\n"
@@ -1491,7 +1499,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(aliases["rememberedTargetTile"], 0x3C)
         self.assertEqual(aliases["targetMemoryFrames"], 0x40)
         owned = self.owned_items()
-        self.assertEqual(owned["F01792"]["name"], "Battle_Ai_RememberAiActionTarget")
+        self.assertEqual(owned["F01792"]["name"], "VS::Battle::Ai::RememberAiActionTarget")
         self.assertEqual(
             owned["F01792"]["path"],
             r"Native\Game\src\Battle\Ai\PlanningPrimitives.cpp",

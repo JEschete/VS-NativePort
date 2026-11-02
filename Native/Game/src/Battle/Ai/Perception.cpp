@@ -1,6 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -25,15 +28,12 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/DecisionPrimitives.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
@@ -318,14 +318,14 @@ void Battle_Ai_UpdateActorPerception(void)
         state->statusFlags = actor->stats->actionRecoveryTimer;
 
         if (flags & 0x20) {
-            Battle_Ai_DisengageActor((Battle_Ai_ActorAiState*)state);
-            Battle_Ai_ResetActorAwarenessIndicator((struct Battle_Ai_PlanEvaluationView*)state);
+            VS::Battle::Ai::DisengageLiveActor((Battle_Ai_ActorAiState*)state);
+            VS::Battle::Ai::ResetLiveActorAwarenessIndicator((struct Battle_Ai_PlanEvaluationView*)state);
             Battle_Ai_UnlinkEngagedActor((Battle_Ai_ActorAiState*)state);
         skip:
             state->opaque14 = 1;
             continue;
         }
-        Battle_Ai_UpdateTemporaryAwarenessIndicator(state);
+        VS::Battle::Ai::UpdateLiveTemporaryAwarenessIndicator(state);
         VS::Battle::Ai::TickLiveActorDecisionTimers(state);
         if (flags & 0x80) {
             goto skip;
@@ -427,7 +427,7 @@ void Battle_Ai_UpdateActorPerception(void)
             }
         }
 
-        Battle_Ai_RefreshAiResourceRestrictions((Battle_Ai_ActorAiState *)(state));
+        VS::Battle::Ai::RefreshLiveAiResourceRestrictions((Battle_Ai_ActorAiState *)(state));
         if (Battle_Ai_RefreshActionCandidateReadiness((Battle_Ai_CandidateReadinessView*)state)) {
             goto idle;
         }
@@ -522,19 +522,19 @@ void Battle_Ai_UpdateEngagementBuildup(Battle_Ai_ActorAiState* ai_state)
         }
 
         if (ai_state->engagementFrames <= 120) {
-            Battle_Ai_SetActorAwarenessIndicator(ai_state->actorId, frame + 1);
+            VS::Battle::Ai::SetLiveActorAwarenessIndicator(ai_state->actorId, frame + 1);
             return;
         }
 
-        Battle_Ai_RememberAiActionTarget(ai_state);
-        Battle_Ai_DisengageActor(ai_state);
+        VS::Battle::Ai::RememberLiveAiActionTarget(ai_state);
+        VS::Battle::Ai::DisengageLiveActor(ai_state);
     }
 
     if (ai_state->reengagementGraceFrames != 0) {
         if (--ai_state->reengagementGraceFrames != 0) {
-            Battle_Ai_SetActorAwarenessIndicator(ai_state->actorId, 4);
+            VS::Battle::Ai::SetLiveActorAwarenessIndicator(ai_state->actorId, 4);
         } else {
-            Battle_Ai_SetActorAwarenessIndicator(ai_state->actorId, 0);
+            VS::Battle::Ai::SetLiveActorAwarenessIndicator(ai_state->actorId, 0);
         }
     }
 
@@ -607,7 +607,7 @@ void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai
         if (state->behaviorMode == 1) {
             state->behaviorMode = 2;
         }
-        if (Battle_Ai_IsActionBeneficialToActor(action, state->actorId)) {
+        if (VS::Battle::Ai::IsLiveActionBeneficialToActor(action, state->actorId)) {
             if (source == 0 && state->usesRoomActionDelay == 0 && state->settingsBit27) {
                 VS::Battle::Ai::TryBeginLiveAshleyAlliance(state, 0);
             } else if ((other->relations[0].bytes.firstByte >> 6) == 3) {
@@ -615,7 +615,7 @@ void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai
             }
         }
         state->relations[source].reactionBits.timer = 28;
-        if (Battle_Ai_IsActionHarmfulToActor(action, state->actorId)) {
+        if (VS::Battle::Ai::IsLiveActionHarmfulToActor(action, state->actorId)) {
             if (Battle_Ai_arenaOrbit && source == 0 && (entry->modes & 3) != 2 && entry->hp > 0) {
                 ((Battle_Ai_ReactionOrbitView*)Battle_Ai_arenaOrbit)->isOrbiting = 0;
             }

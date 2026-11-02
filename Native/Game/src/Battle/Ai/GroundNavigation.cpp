@@ -13,13 +13,13 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
@@ -634,7 +634,7 @@ unsigned int Battle_Ai_RefreshDetourProgress(Battle_Ai_ActorAiState* view,
   state.movement_wait = 0;
   unsigned steps = kDetourSteps;
   if (state.movementEnabled == 0 &&
-      Battle_Ai_NextActorRandomMasked(kDetourRandomRange) == 0) {
+      VS::Battle::Ai::NextLiveActorRandomMasked(kDetourRandomRange) == 0) {
     steps >>= 2;
   }
   return (flags & ~kPathStepMask) | (steps << kPathStepShift);
@@ -663,7 +663,7 @@ unsigned int Battle_Ai_InitializeObstacleDetour(Battle_Ai_ActorAiState* view,
       state.opaque4 != 0) {
     flags &= ~kPathStop;
     flags = (flags & ~kPathTurn) |
-            (static_cast<unsigned>(Battle_Ai_NextActorRandomMasked(2))
+            (static_cast<unsigned>(VS::Battle::Ai::NextLiveActorRandomMasked(2))
              << kPathTurnShift);
     Battle_Ai_UpdateHesitationTurn(&state, kInitialHesitationChance, 1,
                                    state.requestedMovementMode);
@@ -697,7 +697,7 @@ int Battle_Ai_UpdateHesitationTurn(void* view, int chance, int kind, int slot) {
   int count = remaining;
   if (count == 0) {
     if (kind == kPollKind ||
-        chance < Battle_Ai_NextActorRandomMasked(kRandomRange)) {
+        chance < VS::Battle::Ai::NextLiveActorRandomMasked(kRandomRange)) {
       return 0;
     }
     count = std::bit_cast<std::array<std::uint8_t, kHesitationKindCount>>(

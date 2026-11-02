@@ -8,6 +8,7 @@
 #include <optional>
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 
 extern "C" {
 #include "Battle/Actor.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
 #include "Core/Diagnostics.h"
@@ -106,7 +106,7 @@ class LiveDecisionActor final : public DecisionActor {
         radius);
   }
   [[nodiscard]] bool EngagementReady() override {
-    return Battle_Ai_IsEngagementReady(&state_) != 0;
+    return IsLiveEngagementReady(&state_);
   }
   [[nodiscard]] int BehaviorMode() const override {
     return state_.behaviorMode;

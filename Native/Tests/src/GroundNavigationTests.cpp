@@ -8,7 +8,7 @@
 
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/DecisionPrimitives.h"
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/MovementBehavior.h"
@@ -581,7 +581,8 @@ TEST_CASE(
   fixture.room.approachMoves = branch == 3 ? 2 : 0;
   fixture.room.engagedCount = branch == 6 ? 1 : 2;
   fixture.room.engaged_mask_bytes[0] = branch == 4 ? 1 : 0;
-  CHECK(Battle_Ai_CanApproachEngagedTarget(&fixture.states[0], &candidate) ==
+  CHECK(VS::Battle::Ai::CanApproachLiveEngagedTarget(&fixture.states[0],
+                                                     &candidate) ==
         (branch == 0 || branch == 4 || branch == 6));
 }
 
@@ -591,8 +592,8 @@ TEST_CASE("Near target gating preserves the actual strict hundred cutoff",
   const int range = GENERATE(-1000, 0, 2048);
   GroundFixture fixture;
   fixture.states[0].distancesSquared[1] = distance;
-  CHECK(Battle_Ai_IsAiTargetBeyondNearRadius(&fixture.states[0], 1, range) ==
-        (distance > 100));
+  CHECK(VS::Battle::Ai::IsLiveAiTargetBeyondNearRadius(
+            &fixture.states[0], 1, range) == (distance > 100));
 }
 
 TEST_CASE("Actor contact release clears the reserved moving-platform bit",

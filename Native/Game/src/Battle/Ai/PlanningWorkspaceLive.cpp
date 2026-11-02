@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Boot/SessionLive.hpp"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
@@ -146,13 +146,13 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   }
 
   void ResetAwarenessIndicator(const PlanningActor& actor) override {
-    Battle_Ai_ResetActorAwarenessIndicator(
+    VS::Battle::Ai::ResetLiveActorAwarenessIndicator(
         reinterpret_cast<Battle_Ai_PlanEvaluationView*>(
             &AiStateOf(actor.slot)));
   }
 
   void SetAwarenessIndicator(const PlanningActor& actor, int frames) override {
-    Battle_Ai_SetActorAwarenessIndicator(actor.actor_id, frames);
+    VS::Battle::Ai::SetLiveActorAwarenessIndicator(actor.actor_id, frames);
   }
 
  private:

@@ -10,6 +10,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/AppearanceTransitionLive.hpp"
+#include "Battle/Ai/EngagementLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -20,7 +21,6 @@ extern "C" {
 #include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
-#include "Battle/Ai/Engagement.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
@@ -216,7 +216,7 @@ TEST_CASE(
   fixture.room.specialActors[0] = fixture.room.specialActors[3] =
       &fixture.actors[1];
   fixture.room.specialActors[1] = &fixture.actors[2];
-  REQUIRE(Battle_Ai_TryEngageActor(removed) == 1);
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   Battle_Ai_FreeActorAiState(&fixture.actors[1]);
   CHECK(Battle_Ai_actorAiStates[2] == nullptr);
   CHECK(Battle_Ai_actorAiStates[5] == peer);
@@ -233,7 +233,7 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
           "[ai][cleanup]") {
   CleanupFixture fixture;
   auto* state = fixture.AllocateState(1);
-  REQUIRE(Battle_Ai_TryEngageActor(state) == 1);
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(state));
   Battle_actorMarkers[2] = 0x47;
   Battle_Ai_FreeActorAiState(&fixture.actors[1]);
   CHECK(fixture.room.engagedCount == 0);
@@ -564,7 +564,7 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   peer->linkedActor = 2;
   removed->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
   REQUIRE(removed->nativePointer18C != nullptr);
-  REQUIRE(Battle_Ai_TryEngageActor(removed) == 1);
+  REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
   Battle_Ai_FrameState()->actors[2] = removed;
   Battle_Ai_FrameState()->actors[5] = peer;
   fixture.actors[1].kind = static_cast<u_short>(kind);

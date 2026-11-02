@@ -2356,12 +2356,12 @@
 [
 78,
 [
-"            if (!Battle_Ai_CanAiActionAffectActor(state, entry, entry->targetId)",
-"                || !Battle_Ai_RefreshAiActionUsability(state, entry->row, entry->column)) {"
+"            if (!VS::Battle::Ai::CanLiveAiActionAffectActor(state, entry, entry->targetId)",
+"                || !VS::Battle::Ai::RefreshLiveAiActionUsability(state, entry->row, entry->column)) {"
 ],
 [
-"            if (!Battle_Ai_CanAiActionAffectActor((Battle_Ai_ActorAiState *)(state), (Battle_Ai_ActionCandidate *)(entry), entry->targetId)",
-"                || !Battle_Ai_RefreshAiActionUsability((Battle_Ai_ActorAiState *)(state), entry->row, entry->column)) {"
+"            if (!VS::Battle::Ai::CanLiveAiActionAffectActor((Battle_Ai_ActorAiState *)(state), (Battle_Ai_ActionCandidate *)(entry), entry->targetId)",
+"                || !VS::Battle::Ai::RefreshLiveAiActionUsability((Battle_Ai_ActorAiState *)(state), entry->row, entry->column)) {"
 ]
 ],
 [
@@ -2385,28 +2385,28 @@
 [
 700,
 [
-"                Battle_Ai_CopyActionCandidate(&Battle_Ai_planningPassCandidates[pass][i], state->candidateOrder[i]);"
+"                VS::Battle::Ai::CopyLiveActionCandidate(&Battle_Ai_planningPassCandidates[pass][i], state->candidateOrder[i]);"
 ],
 [
-"                Battle_Ai_CopyActionCandidate((Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][i]), (Battle_Ai_ActionCandidate *)(state->candidateOrder[i]));"
+"                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][i]), (Battle_Ai_ActionCandidate *)(state->candidateOrder[i]));"
 ]
 ],
 [
 713,
 [
-"                Battle_Ai_CopyActionCandidate(entry, &Battle_Ai_planningPassCandidates[pass][j]);"
+"                VS::Battle::Ai::CopyLiveActionCandidate(entry, &Battle_Ai_planningPassCandidates[pass][j]);"
 ],
 [
-"                Battle_Ai_CopyActionCandidate((Battle_Ai_ActionCandidate *)(entry), (Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][j]));"
+"                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(entry), (Battle_Ai_ActionCandidate *)(&Battle_Ai_planningPassCandidates[pass][j]));"
 ]
 ],
 [
 725,
 [
-"                Battle_Ai_CopyActionCandidate(fallback, &Battle_Ai_fallbackCandidates[i]);"
+"                VS::Battle::Ai::CopyLiveActionCandidate(fallback, &Battle_Ai_fallbackCandidates[i]);"
 ],
 [
-"                Battle_Ai_CopyActionCandidate((Battle_Ai_ActionCandidate *)(fallback), (Battle_Ai_ActionCandidate *)(&Battle_Ai_fallbackCandidates[i]));"
+"                VS::Battle::Ai::CopyLiveActionCandidate((Battle_Ai_ActionCandidate *)(fallback), (Battle_Ai_ActionCandidate *)(&Battle_Ai_fallbackCandidates[i]));"
 ]
 ],
 [
@@ -2501,19 +2501,19 @@
 [
 66,
 [
-"            if (Battle_Ai_CanApproachEngagedTarget((void*)state, (void*)entry)) {"
+"            if (VS::Battle::Ai::CanApproachLiveEngagedTarget((void*)state, (void*)entry)) {"
 ],
 [
-"            if (Battle_Ai_CanApproachEngagedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
+"            if (VS::Battle::Ai::CanApproachLiveEngagedTarget((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
 ]
 ],
 [
 85,
 [
-"                Battle_Ai_TryEngageActor((void*)state);"
+"                VS::Battle::Ai::TryEngageLiveActor((void*)state);"
 ],
 [
-"                Battle_Ai_TryEngageActor((Battle_Ai_ActorAiState *)((void*)state));"
+"                VS::Battle::Ai::TryEngageLiveActor((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -2537,19 +2537,19 @@
 [
 94,
 [
-"        if (!Battle_Ai_IsActionCooldownReady((void*)state, (void*)entry)) {"
+"        if (!VS::Battle::Ai::IsLiveActionCooldownReady((void*)state, (void*)entry)) {"
 ],
 [
-"        if (!Battle_Ai_IsActionCooldownReady((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
+"        if (!VS::Battle::Ai::IsLiveActionCooldownReady((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {"
 ]
 ],
 [
 126,
 [
-"        Battle_Ai_DisengageActor((void*)state);"
+"        VS::Battle::Ai::DisengageLiveActor((void*)state);"
 ],
 [
-"        Battle_Ai_DisengageActor((Battle_Ai_ActorAiState *)((void*)state));"
+"        VS::Battle::Ai::DisengageLiveActor((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -3190,10 +3190,10 @@
 [
 157,
 [
-"    if (Battle_Ai_IsBossActionReady((void*)state) && Battle_Ai_IsEngagementReady((void*)state)) {"
+"    if (Battle_Ai_IsBossActionReady((void*)state) && VS::Battle::Ai::IsLiveEngagementReady((void*)state)) {"
 ],
 [
-"    if (Battle_Ai_IsBossActionReady((Battle_Ai_ActorAiState *)((void*)state)) && Battle_Ai_IsEngagementReady((Battle_Ai_ActorAiState *)((void*)state))) {"
+"    if (Battle_Ai_IsBossActionReady((Battle_Ai_ActorAiState *)((void*)state)) && VS::Battle::Ai::IsLiveEngagementReady((Battle_Ai_ActorAiState *)((void*)state))) {"
 ]
 ],
 [
@@ -3246,10 +3246,10 @@
 [
 429,
 [
-"        Battle_Ai_RefreshAiResourceRestrictions(state);"
+"        VS::Battle::Ai::RefreshLiveAiResourceRestrictions(state);"
 ],
 [
-"        Battle_Ai_RefreshAiResourceRestrictions((Battle_Ai_ActorAiState *)(state));"
+"        VS::Battle::Ai::RefreshLiveAiResourceRestrictions((Battle_Ai_ActorAiState *)(state));"
 ]
 ],
 [

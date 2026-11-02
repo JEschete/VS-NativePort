@@ -7,6 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Core/Random.hpp"
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -108,9 +108,10 @@ TEST_CASE(
   fixture.candidate.opaque10.opaque0Bit4 = target_flag;
   Field_gimmickInstances[3] = has_gimmick != 0 ? &fixture.gimmick : nullptr;
   const bool required = busy != 0 || (target_flag != 0 && has_gimmick == 0);
-  CHECK(Battle_Ai_DoesActionRequireCooldown(&fixture.state,
-                                            &fixture.candidate) == required);
-  CHECK(Battle_Ai_IsActionCooldownReady(&fixture.state, &fixture.candidate) ==
+  CHECK(VS::Battle::Ai::DoesLiveActionRequireCooldown(
+            &fixture.state, &fixture.candidate) == required);
+  CHECK(VS::Battle::Ai::IsLiveActionCooldownReady(&fixture.state,
+                                                  &fixture.candidate) ==
         (gate == 0 && (!required || timer == 0)));
 }
 
@@ -155,8 +156,8 @@ TEST_CASE("AI condition scoring uses the source's signed-halfword weights",
   }};
   const auto index = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   const auto& example = examples[index];
-  CHECK(Battle_Ai_ScoreActorCondition(example[0], example[1], example[2],
-                                      example[3]) == example[4]);
+  CHECK(VS::Battle::Ai::ScoreLiveActorCondition(
+            example[0], example[1], example[2], example[3]) == example[4]);
 }
 
 TEST_CASE("AI target action flags preserve the special class-two inversion",
@@ -170,9 +171,9 @@ TEST_CASE("AI target action flags preserve the special class-two inversion",
       std::bit_cast<Battle_ActionAiFlags>(flags);
   fixture.stats[2].enemyClass = actor_class;
   const bool special = action_id == 96 && actor_class == 2;
-  CHECK(Battle_Ai_IsActionHarmfulToActor(action_id, 3) ==
+  CHECK(VS::Battle::Ai::IsLiveActionHarmfulToActor(action_id, 3) ==
         (special ? ((flags >> 15) ^ 1) : ((flags >> 15) & 1)));
-  CHECK(Battle_Ai_IsActionBeneficialToActor(action_id, 3) ==
+  CHECK(VS::Battle::Ai::IsLiveActionBeneficialToActor(action_id, 3) ==
         (special ? ((flags >> 14) ^ 1) : ((flags >> 14) & 1)));
   Battle_actionDefinitions[action_id].aiFlags = previous;
 }
@@ -187,7 +188,8 @@ TEST_CASE(
     fixture.candidate.row = index / 4;
     fixture.candidate.column = index % 4;
     fixture.candidate.opaque0 = static_cast<int>(index);
-    Battle_Ai_CacheFallbackActionCandidate(&fixture.candidate, &action);
+    VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate,
+                                                     &action);
     REQUIRE(Battle_Ai_fallbackCandidateCount ==
             static_cast<int>(std::min(index + 1, 16u)));
     if (index < 16) {
@@ -198,7 +200,7 @@ TEST_CASE(
   CHECK(Battle_Ai_unusedPlanCounter == 0xFFFFFF);
   fixture.candidate.row = fixture.candidate.column = 0;
   fixture.candidate.opaque0 = 999;
-  Battle_Ai_CacheFallbackActionCandidate(&fixture.candidate, &action);
+  VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
   CHECK(fixture.fallback[0].reserved0 == 0);
 }
 
@@ -206,7 +208,7 @@ TEST_CASE("AI fallback caching ignores actions without the cache flag",
           "[ai][decisions]") {
   DecisionFixture fixture;
   Battle_ActionDefinition action{};
-  Battle_Ai_CacheFallbackActionCandidate(&fixture.candidate, &action);
+  VS::Battle::Ai::CacheLiveFallbackActionCandidate(&fixture.candidate, &action);
   CHECK(Battle_Ai_fallbackCandidateCount == 0);
   CHECK(Battle_Ai_unusedPlanCounter == 0);
 }
@@ -224,7 +226,7 @@ TEST_CASE(
     plan.candidateOrder[index] = &plan.candidates[index];
   }
   Core_Random_Seed(1);
-  Battle_Ai_PromoteRandomizedActionCandidate(&plan, 4);
+  VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(&plan, 4);
   const bool promoted = weight > 1;
   CHECK(plan.candidateOrder[0] == &plan.candidates[promoted ? 2 : 0]);
   CHECK(plan.candidateOrder[1] == &plan.candidates[promoted ? 0 : 1]);
@@ -240,9 +242,9 @@ TEST_CASE("AI actor RNG sign-extends the old halfword before adding its step",
   auto* frame = Battle_Ai_FrameState();
   frame->randomState = 0x7FFF;
   frame->lastBudgetTick = 2;
-  CHECK(Battle_Ai_NextActorRandomMasked(128) == 1);
+  CHECK(VS::Battle::Ai::NextLiveActorRandomMasked(128) == 1);
   CHECK(frame->randomState == 0x8001);
-  CHECK(Battle_Ai_NextActorRandomMasked(128) == 3);
+  CHECK(VS::Battle::Ai::NextLiveActorRandomMasked(128) == 3);
   CHECK(frame->randomState == 0xFFFF8003);
 }
 
@@ -276,9 +278,9 @@ TEST_CASE(
     default:
       break;
   }
-  CHECK(
-      Battle_Ai_CanExecuteActionCandidate(&fixture.state, &fixture.candidate) ==
-      (condition == 0 || condition == 7));
+  CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(&fixture.state,
+                                                      &fixture.candidate) ==
+        (condition == 0 || condition == 7));
 }
 
 TEST_CASE("AI execution applies visibility and obstruction option alternatives",
@@ -293,10 +295,10 @@ TEST_CASE("AI execution applies visibility and obstruction option alternatives",
   fixture.state.relations[3].blocked = blocked;
   fixture.candidate.opaque10.opaque0Bit2 = override_visibility;
   fixture.candidate.opaque10.opaque0Bit3 = override_obstruction;
-  CHECK(
-      Battle_Ai_CanExecuteActionCandidate(&fixture.state, &fixture.candidate) ==
-      ((visible != 0 || override_visibility != 0) &&
-       (blocked == 0 || override_obstruction != 0)));
+  CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(&fixture.state,
+                                                      &fixture.candidate) ==
+        ((visible != 0 || override_visibility != 0) &&
+         (blocked == 0 || override_obstruction != 0)));
 }
 
 TEST_CASE("AI execution observes Ashley's exact movement and locomotion bits",
@@ -306,9 +308,9 @@ TEST_CASE("AI execution observes Ashley's exact movement and locomotion bits",
   DecisionFixture fixture;
   fixture.records[0].instance.movementMode = movement;
   fixture.records[0].instance.locomotionState = locomotion;
-  CHECK(
-      Battle_Ai_CanExecuteActionCandidate(&fixture.state, &fixture.candidate) ==
-      (movement == 0 && locomotion != 1));
+  CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(&fixture.state,
+                                                      &fixture.candidate) ==
+        (movement == 0 && locomotion != 1));
 }
 
 TEST_CASE(
@@ -325,9 +327,9 @@ TEST_CASE(
   fixture.records[0].instance.currentTileLayer = 200;
   fixture.state.relations[0].classification = 3;
   const bool outside = x_offset * x_offset + z_offset * z_offset >= 3;
-  CHECK(Battle_Ai_HasNearbyEnemy(&fixture.state, 3) == outside);
-  CHECK(Battle_Ai_CanExecuteActionCandidate(&fixture.state,
-                                            &fixture.candidate) == !outside);
+  CHECK(VS::Battle::Ai::HasLiveNearbyEnemy(&fixture.state, 3) == !outside);
+  CHECK(VS::Battle::Ai::CanExecuteLiveActionCandidate(
+            &fixture.state, &fixture.candidate) == !outside);
 }
 
 TEST_CASE(
@@ -341,7 +343,8 @@ TEST_CASE(
   fixture.records[0].instance.currentTileX =
       fixture.records[0].instance.currentTileZ = 255;
   fixture.state.relations[0].classification = relation;
-  CHECK(Battle_Ai_HasNearbyEnemy(&fixture.state, 3) == (relation < 3));
+  CHECK(VS::Battle::Ai::HasLiveNearbyEnemy(&fixture.state, 3) ==
+        (relation >= 3));
 }
 
 TEST_CASE("AI randomized promotion handles empty and full zero-action lists",
@@ -354,7 +357,7 @@ TEST_CASE("AI randomized promotion handles empty and full zero-action lists",
   }
   const auto order = std::to_array(plan.candidateOrder);
   Core_Random_Seed(1234);
-  Battle_Ai_PromoteRandomizedActionCandidate(&plan, count);
+  VS::Battle::Ai::PromoteLiveRandomizedActionCandidate(&plan, count);
   CHECK(std::to_array(plan.candidateOrder) == order);
   VS::Core::Rand15 expected(1234);
   for (int index = 0; index < count; ++index) expected.Next();
@@ -422,7 +425,7 @@ struct PerceptionFixture : DecisionFixture {
   void Update() { Battle_Ai_UpdateTargetPerception(&View(), 0); }
 
   int CanExecute() {
-    return Battle_Ai_CanExecuteActionCandidate(&state, &candidate);
+    return VS::Battle::Ai::CanExecuteLiveActionCandidate(&state, &candidate);
   }
 };
 }  // namespace

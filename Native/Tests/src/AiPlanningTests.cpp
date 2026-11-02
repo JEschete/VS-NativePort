@@ -11,6 +11,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/Ai/ActionSelection.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/PlanningPrimitives.h"
 #include "Battle/Damage.h"
 #include "Core/Random.h"
 }
@@ -123,7 +123,7 @@ TEST_CASE(
   auto* memory = expected.data() + offsetof(Battle_Ai_ActorAiState, reserved3C);
   std::memcpy(memory, &destination, sizeof(destination));
   std::memcpy(memory + sizeof(destination), &frames, sizeof(frames));
-  Battle_Ai_RememberAiActionTarget(&fixture.state);
+  VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
 }
 
@@ -133,7 +133,7 @@ TEST_CASE("AI target memory leaves empty and negative candidate sets untouched",
   fixture.state.candidateCount = GENERATE(-1, 0);
   fixture.state.candidateOrder[0] = nullptr;
   const auto expected = fixture.Bytes();
-  Battle_Ai_RememberAiActionTarget(&fixture.state);
+  VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
 }
 
@@ -144,7 +144,7 @@ TEST_CASE("AI target memory preserves the original nonzero settings guard",
   fixture.state.candidateCount = GENERATE(1, 16);
   fixture.state.candidateOrder[0] = nullptr;
   const auto expected = fixture.Bytes();
-  Battle_Ai_RememberAiActionTarget(&fixture.state);
+  VS::Battle::Ai::RememberLiveAiActionTarget(&fixture.state);
   CHECK(fixture.Bytes() == expected);
 }
 
@@ -159,10 +159,11 @@ TEST_CASE("AI candidates copy the complete record including overlapping input",
   auto expected = bytes;
   std::memmove(expected.data() + destination_offset,
                expected.data() + source_offset, 20);
-  Battle_Ai_CopyActionCandidate(reinterpret_cast<Battle_Ai_ActionCandidate*>(
-                                    bytes.data() + destination_offset),
-                                reinterpret_cast<Battle_Ai_ActionCandidate*>(
-                                    bytes.data() + source_offset));
+  VS::Battle::Ai::CopyLiveActionCandidate(
+      reinterpret_cast<Battle_Ai_ActionCandidate*>(bytes.data() +
+                                                   destination_offset),
+      reinterpret_cast<Battle_Ai_ActionCandidate*>(bytes.data() +
+                                                   source_offset));
   CHECK(bytes == expected);
 }
 
@@ -177,7 +178,7 @@ TEST_CASE(
   candidate.threshold = 0xCAFE;
   for (int index = 0; index < 16; ++index) {
     candidate.opaque0 = index - 5;
-    Battle_Ai_AppendActionCandidate(&fixture.state, &candidate);
+    VS::Battle::Ai::AppendLiveActionCandidate(&fixture.state, &candidate);
     REQUIRE(fixture.state.candidateCount == index + 1);
     CHECK(fixture.state.candidateOrder[index] ==
           &fixture.state.candidates[index]);
@@ -187,7 +188,7 @@ TEST_CASE(
   CHECK(fixture.exclusions[15][255] == 1);
   candidate.targetId = 9;
   candidate.action = 81;
-  Battle_Ai_AppendActionCandidate(&fixture.state, &candidate);
+  VS::Battle::Ai::AppendLiveActionCandidate(&fixture.state, &candidate);
   CHECK(fixture.state.candidateCount == 16);
   CHECK(fixture.exclusions[9][81] == 0);
 }
@@ -198,7 +199,7 @@ TEST_CASE("AI rejects zero-weight candidates without side effects",
   Battle_Ai_ActionCandidate candidate{};
   candidate.targetId = 3;
   candidate.action = 42;
-  Battle_Ai_AppendActionCandidate(&fixture.state, &candidate);
+  VS::Battle::Ai::AppendLiveActionCandidate(&fixture.state, &candidate);
   CHECK(fixture.state.candidateCount == 0);
   CHECK(fixture.exclusions[3][42] == 0);
 }
@@ -214,7 +215,7 @@ TEST_CASE(
     plan.candidates[index].reserved0 = scores[index];
     plan.candidateOrder[index] = &plan.candidates[index];
   }
-  Battle_Ai_SortActionCandidates(&plan);
+  VS::Battle::Ai::SortLiveActionCandidates(&plan);
   for (std::size_t index = 0; index < expected.size(); ++index) {
     CHECK(plan.candidateOrder[index] == &plan.candidates[expected[index]]);
   }
@@ -243,11 +244,11 @@ TEST_CASE(
       candidate.action = static_cast<unsigned>(40 + index);
       fixture.stats.limbActions[index][0].actionId =
           static_cast<u_short>(candidate.action);
-      Battle_Ai_AppendActionCandidate(&state, &candidate);
+      VS::Battle::Ai::AppendLiveActionCandidate(&state, &candidate);
       CHECK(fixture.exclusions[3][candidate.action] == 1);
     }
     REQUIRE(state.candidateCount == 6);
-    Battle_Ai_SortActionCandidates(&plan);
+    VS::Battle::Ai::SortLiveActionCandidates(&plan);
     for (std::size_t index = 0; index < expected.size(); ++index) {
       CHECK(state.candidateOrder[index] == &state.candidates[expected[index]]);
     }
@@ -271,19 +272,19 @@ TEST_CASE("AI ranking producer refuses zero weights and a full candidate list",
   Battle_Ai_ActionCandidate candidate{};
   candidate.targetId = 3;
   candidate.action = 42;
-  Battle_Ai_AppendActionCandidate(&state, &candidate);
+  VS::Battle::Ai::AppendLiveActionCandidate(&state, &candidate);
   CHECK(state.candidateCount == 0);
   CHECK(fixture.exclusions[3][42] == 0);
 
   candidate.weight = 1;
   for (int index = 0; index < 16; ++index) {
     candidate.opaque0 = index;
-    Battle_Ai_AppendActionCandidate(&state, &candidate);
+    VS::Battle::Ai::AppendLiveActionCandidate(&state, &candidate);
   }
   REQUIRE(state.candidateCount == 16);
   const auto ordered = std::to_array(state.candidateOrder);
   candidate.opaque0 = 99;
-  Battle_Ai_AppendActionCandidate(&state, &candidate);
+  VS::Battle::Ai::AppendLiveActionCandidate(&state, &candidate);
   CHECK(state.candidateCount == 16);
   CHECK(std::to_array(state.candidateOrder) == ordered);
 }
@@ -293,9 +294,11 @@ TEST_CASE("AI simulated stat deltas clamp add and subtract at real bounds",
   const int operation = GENERATE(0, 1, 2, 3);
   int16_t current = 50;
   int16_t maximum = 100;
-  Battle_Ai_ApplySimulatedStatDelta(&current, &maximum, 20, operation);
+  VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&current, &maximum, 20,
+                                              operation);
   CHECK(current == (operation == 2 ? 70 : 30));
-  Battle_Ai_ApplySimulatedStatDelta(&current, &maximum, 1000, operation);
+  VS::Battle::Ai::ApplyLiveSimulatedStatDelta(&current, &maximum, 1000,
+                                              operation);
   CHECK(current == (operation == 2 ? 100 : 0));
   CHECK(maximum == 100);
 }
@@ -306,7 +309,7 @@ TEST_CASE("AI planning snapshots copy only the original simulation stat ranges",
   Battle_ActorStats destination;
   std::memset(&source, 0x5A, sizeof(source));
   std::memset(&destination, 0xA5, sizeof(destination));
-  Battle_Ai_CopyPlanningActorStats(&source, &destination);
+  VS::Battle::Ai::CopyLivePlanningActorStats(&source, &destination);
   const auto bytes = std::as_bytes(std::span{&destination, 1});
   for (std::size_t offset = 0; offset < bytes.size(); ++offset) {
     CAPTURE(offset);
@@ -332,12 +335,14 @@ TEST_CASE("AI action usability applies resource thresholds to every limb slot",
   fixture.stats.currentHp = 59;
   fixture.stats.currentMp = 9;
   fixture.stats.weapon.currentPp = 9;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, row, column) ==
-        (type == 1 || type == 3 || type == 4 ? 0 : 1));
+  CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
+                                                     column) ==
+        !(type == 1 || type == 3 || type == 4));
   fixture.stats.currentHp = 60;
   fixture.stats.currentMp = 10;
   fixture.stats.weapon.currentPp = 10;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, row, column) == 1);
+  CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, row,
+                                                     column));
   CHECK(slot.opaque0Bit7 == 1);
   CHECK(std::bit_cast<std::array<uint32_t, 2>>(slot) ==
         std::array<uint32_t, 2>{0xA5CAFE93, 0xDEADBEAF});
@@ -349,11 +354,12 @@ TEST_CASE("AI action usability applies status and damaged-limb restrictions",
   PlanningFixture fixture;
   Battle_actionDefinitions[42].type = static_cast<u_char>(type);
   fixture.stats.statuses = 0x2000;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, 2, 1) ==
-        (type == 1 || type == 2 ? 1 : 0));
+  CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1) ==
+        (type == 1 || type == 2));
   fixture.stats.statuses = 0;
   fixture.stats.limbs[2].hp = 1;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, 2, 1) == 0);
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   CHECK(fixture.state.actionSlots[2][1].opaque0Bit7 == 0);
 }
 
@@ -365,19 +371,19 @@ TEST_CASE(
   fixture.stats.currentHp = 49;
   fixture.stats.currentMp = 9;
   fixture.stats.statuses = 0x90000;
-  Battle_Ai_RefreshAiResourceRestrictions(&fixture.state);
+  VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.reserved10[0] == 0);
   CHECK(fixture.state.reserved10[1] == 1);
   CHECK(fixture.state.reserved10[2] == 1);
   fixture.stats.currentHp = 50;
   fixture.stats.currentMp = 50;
   fixture.stats.statuses = 0x1000;
-  Battle_Ai_RefreshAiResourceRestrictions(&fixture.state);
+  VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.reserved10[0] == 1);
   CHECK(fixture.state.reserved10[1] == 0);
   CHECK(fixture.state.reserved10[2] == 0);
   fixture.state.actionCostEnabled = 0;
-  Battle_Ai_RefreshAiResourceRestrictions(&fixture.state);
+  VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.reserved10[0] == 0);
 }
 
@@ -391,25 +397,31 @@ TEST_CASE(
   candidate.column = 1;
   candidate.action = 42;
   fixture.state.relations[3].classification = 2;
-  CHECK(Battle_Ai_CanAiActionAffectActor(&fixture.state, &candidate, 3) == 1);
+  CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
+                                                   3));
   candidate.opaque10.opaque0Bit4 = 1;
-  CHECK(Battle_Ai_CanAiActionAffectActor(&fixture.state, &candidate, 3) == 0);
+  CHECK_FALSE(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state,
+                                                         &candidate, 3));
   fixture.state.relations[3].classification = 3;
-  CHECK(Battle_Ai_CanAiActionAffectActor(&fixture.state, &candidate, 3) == 1);
+  CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
+                                                   3));
   candidate.opaque10.opaque0Bit4 = 0;
   candidate.opaque10.opaque0Bit5 = 1;
-  CHECK(Battle_Ai_CanAiActionAffectActor(&fixture.state, &candidate, 3) == 0);
+  CHECK_FALSE(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state,
+                                                         &candidate, 3));
   fixture.state.relations[3].classification = 2;
   fixture.peer.actor = &fixture.actor;
   fixture.peer.actionCostEnabled = 10;
   fixture.stats.currentMp = 9;
-  Battle_Ai_RefreshAiResourceRestrictions(&fixture.peer);
+  VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.peer);
   Battle_actionDefinitions[42].aiFlags =
       std::bit_cast<Battle_ActionAiFlags>(u_short{0x400});
-  CHECK(Battle_Ai_CanAiActionAffectActor(&fixture.state, &candidate, 3) == 1);
+  CHECK(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state, &candidate,
+                                                   3));
   fixture.stats.currentMp = 50;
-  Battle_Ai_RefreshAiResourceRestrictions(&fixture.peer);
-  CHECK(Battle_Ai_CanAiActionAffectActor(&fixture.state, &candidate, 3) == 0);
+  VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.peer);
+  CHECK_FALSE(VS::Battle::Ai::CanLiveAiActionAffectActor(&fixture.state,
+                                                         &candidate, 3));
 }
 
 TEST_CASE(
@@ -453,7 +465,7 @@ TEST_CASE("AI sorting covers empty/full lists and signed extremes without RNG",
     plan.candidates[count - 1].reserved0 = std::numeric_limits<int>::max();
   }
   const auto records = std::to_array(plan.candidates);
-  Battle_Ai_SortActionCandidates(&plan);
+  VS::Battle::Ai::SortLiveActionCandidates(&plan);
   for (int index = 1; index < count; ++index) {
     CHECK(plan.candidateOrder[index - 1]->reserved0 >=
           plan.candidateOrder[index]->reserved0);
@@ -473,17 +485,20 @@ TEST_CASE(
   action.cost = 10;
   action.type = 1;
   fixture.stats.currentMp = -1;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, 2, 1) == 0);
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   fixture.stats.currentMp = 10;
   fixture.stats.statuses = 0x1000;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, 2, 1) == 0);
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   fixture.stats.statuses = 0;
   action.type = 4;
   fixture.stats.weapon.currentPp = 0xFFFF;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, 2, 1) == 0);
+  CHECK_FALSE(
+      VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
   action.type = 3;
   fixture.stats.currentHp = -1;
-  CHECK(Battle_Ai_RefreshAiActionUsability(&fixture.state, 2, 1) == 1);
+  CHECK(VS::Battle::Ai::RefreshLiveAiActionUsability(&fixture.state, 2, 1));
 }
 
 TEST_CASE("AI condition status mask rejects only the documented source bits",
@@ -493,7 +508,7 @@ TEST_CASE("AI condition status mask rejects only the documented source bits",
                19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31);
   PlanningFixture fixture;
   fixture.stats.statuses = std::bit_cast<int>(uint32_t{1} << bit);
-  Battle_Ai_RefreshAiResourceRestrictions(&fixture.state);
+  VS::Battle::Ai::RefreshLiveAiResourceRestrictions(&fixture.state);
   CHECK(fixture.state.resourceStatusRestricted ==
         (((uint32_t{1} << bit) & 0xE2B0) != 0));
 }
