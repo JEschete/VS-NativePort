@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 64 | 19 (`wip`) | 4,124 |
-| `cpp` | 64 | 216 (`wip`) | 3,927 |
+| `modernized` | 66 | 19 (`wip`) | 4,122 |
+| `cpp` | 66 | 214 (`wip`) | 3,927 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 198 |
-| `vs_namespace` | 64 |
-| `typed_interface` | 64 |
-| `no_bridge` | 64 |
+| `vs_namespace` | 66 |
+| `typed_interface` | 66 |
+| `no_bridge` | 66 |
 | `strict_clean` | 198 |
-| `behavior_evidence` | 64 |
+| `behavior_evidence` | 66 |
 
-Promotion records: 280; derived `cpp=x`: 64, `cpp=wip`: 216. Verification records: 75; `verified=x` markers: 45.
+Promotion records: 280; derived `cpp=x`: 66, `cpp=wip`: 214. Verification records: 76; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -193,6 +193,8 @@ The twenty-ninth is the minimap scene (F00771/F00774): `VS::Field::ResolveSceneR
 `VS::Field::DrawMinimapScene` draws through a `MinimapRenderer`; `MinimapSceneLive.cpp` binds the frame packets, GTE and door flags.
 The thirtieth is segment collision (F01833/F01834): `VS::Field::TraceActorAndTerrainCollision` samples value endpoints through a `SegmentTraceWorld` and returns an optional hit and
 `VS::Field::IsPointOutsideSolidVolumes` tests typed volume spans; `SegmentCollisionLive.cpp` binds the actor, Gimmick, platform and floor globals and the original module entries.
+The thirty-first is particle rendering (F01593/F01594): `VS::Effects::DrawAnimatedSpriteParticles` draws a span of particle-pool indices through a `ParticleRenderer` with typed depth buckets,
+colours and quads; `ParticleRenderLive.cpp` validates the native pool list and binds the GTE, frame packets, ordering table, curves and effect-path traces.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
