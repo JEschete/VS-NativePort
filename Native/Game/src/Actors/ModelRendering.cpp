@@ -3,6 +3,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -24,10 +25,8 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
-#include "Render/Camera.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelGeometry.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -358,8 +357,7 @@ composed:
     object->matrices[1] = scratch->matrix;
 
     if (!object->isVisible
-        || !Render_ProjectModelVertices(
-            object, &object->matrices[0], -Render_nearClip * 4, object->model)) {
+        || !VS::Render::ProjectLiveGimmickModel(*object)) {
         return;
     }
 
@@ -378,9 +376,9 @@ composed:
     }
 
     if (value) {
-        Render_DrawModelGouraudPolygonsWithOverrides(&Actors_modelRenderContext, object, &object->baseColor, scratch->model);
+        VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);
     } else {
-        Render_DrawModelGouraudPolygons(&Actors_modelRenderContext, object, &object->baseColor, scratch->model);
+        VS::Render::DrawLiveGimmickGouraudPolygons(*object);
     }
 }
 
@@ -448,8 +446,7 @@ void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
         return;
     }
 
-    if (!Render_ProjectModelVertices(
-            weapon, &weapon->boneWorldMatrices[0], -Render_nearClip * 4, weapon->sectionOffsets)) {
+    if (!VS::Render::ProjectLiveWeaponModel(*weapon)) {
         return;
     }
 
@@ -470,9 +467,9 @@ void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
     }
 
     if (value) {
-        Render_DrawModelFlatPolygonsWithOverrides(&Actors_modelRenderContext, weapon, &color, scratch->model);
+        VS::Render::DrawLiveWeaponFlatPolygonsWithOverrides(*weapon, color);
     } else {
-        Render_DrawModelFlatPolygons(&Actors_modelRenderContext, weapon, &color, scratch->model);
+        VS::Render::DrawLiveWeaponFlatPolygons(*weapon, color);
     }
 }
 

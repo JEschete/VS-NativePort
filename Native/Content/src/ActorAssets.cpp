@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -395,6 +396,7 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
                 }
 
                 VS::Core::Memory::CopyLiveAlignedWords(buf, data, sizeof *buf);
+                VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);
 
                 /* dst doubles as the relocation delta for the copied pointers */
                 dst = (Actors_WeaponModelData*)((uintptr_t)buf - (uintptr_t)data);
@@ -466,6 +468,8 @@ int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
     memcpy(dst, data, size);
 
     model->sectionOffsets = dst;
+    VS::Render::RecordLiveModelExtent(
+        dst, (buf != NULL && (u_int)size > sizeof *buf) ? sizeof *buf : (u_int)size);
 
     if (dst == NULL) {
         return -2;
@@ -642,9 +646,11 @@ int Content_ReleaseWeaponModel(int index)
             shared_model_found = 0;
         exit:
             if (shared_model_found == 0) {
+                VS::Render::ForgetLiveModelExtent(model->sectionOffsets);
                 Core_Memory_FreeFromLowEnd(model->sectionOffsets);
             }
         } else {
+            VS::Render::ForgetLiveModelExtent(model->sectionOffsets);
             Core_Memory_FreeFromLowEnd(model->sectionOffsets);
         }
     }

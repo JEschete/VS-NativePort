@@ -552,9 +552,9 @@
     <ClCompile Include="src\Render\ModelGeometry.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\ModelGeometry.h">
+    <ClCompile Include="src\Render\ModelGeometryLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\ModelWorkspace.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -808,6 +808,12 @@
       <Filter>include\Platform</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\Device.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\ModelGeometry.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\ModelGeometryLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ModelWorkspace.h">

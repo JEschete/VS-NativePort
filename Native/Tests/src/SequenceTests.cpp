@@ -6,6 +6,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
+#include "Render/ModelGeometryLive.hpp"
 
 extern "C" {
 #include "ActorAssets.h"
@@ -41,7 +42,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelGeometry.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
@@ -1288,10 +1288,9 @@ static void DrawGimmickOverrideFixture(const Actors_ModelInstance* instance,
   memcpy(&object, instance, kSharedRendererHeaderBytes);
   object.motionState = appearance;
   object.palettePulse.kind = pulse_mask;
-  int packed_tint;
-  memcpy(&packed_tint, tint, sizeof packed_tint);
-  Render_DrawModelGouraudPolygonsWithOverrides(&Actors_modelRenderContext,
-                                               &object, &packed_tint, model);
+  object.model = model;
+  memcpy(&object.baseColor, tint, sizeof object.baseColor);
+  VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(object);
 }
 
 typedef struct SourceWeaponMatrixLayout {
@@ -1318,9 +1317,8 @@ static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
   const int mask = static_cast<int>(pulse_mask & UINT8_MAX);
   weapon.boneWorldMatrices[2].m[0][2] = static_cast<int16_t>(0x5A00 | mask);
   weapon.boneWorldMatrices[1].t[2] = mask ^ UINT8_MAX;
-  CVECTOR color = *tint;
-  Render_DrawModelFlatPolygonsWithOverrides(&Actors_modelRenderContext, &weapon,
-                                            &color, model);
+  weapon.sectionOffsets = reinterpret_cast<Actors_WeaponModelData*>(model);
+  VS::Render::DrawLiveWeaponFlatPolygonsWithOverrides(weapon, *tint);
 }
 
 static int ModelPolygonPackets(int colored, int split, int limb,
@@ -1364,20 +1362,24 @@ static int ModelPolygonPackets(int colored, int split, int limb,
   BuildModelPacketFixture(model, &instance, &options);
   instance.actionAnimationState = appearance;
   CVECTOR tint = {128, 96, 64, 0};
+  static Actors_ActorRecord actor;
+  actor = {};
+  actor.instance = instance;
+  actor.instance.model = model;
+  actor.modelDataSize = sizeof modelWords;
+  VS::Render::RecordLiveModelExtent(model, sizeof modelWords);
   if (override_kind == 1) {
     DrawGimmickOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
   } else if (override_kind == 2) {
     DrawWeaponOverrideFixture(&instance, &tint, model, appearance, pulse_mask);
   } else if (pulse_mask != 0 || appearance != 0) {
-    Render_DrawActorPolygons(&Actors_modelRenderContext, &instance, &tint,
-                             model);
+    VS::Render::DrawLiveActorPolygons(actor, tint);
   } else if (colored) {
-    Render_DrawModelGouraudPolygons(&Actors_modelRenderContext, &instance,
-                                    &tint, model);
+    VS::Render::DrawLiveActorGouraudPolygons(actor, tint);
   } else {
-    Render_DrawModelFlatPolygons(&Actors_modelRenderContext, &instance, &tint,
-                                 model);
+    VS::Render::DrawLiveActorFlatPolygons(actor, tint);
   }
+  VS::Render::ForgetLiveModelExtent(model);
   const u_long* packet = reinterpret_cast<const u_long*>(memory + 8);
   const unsigned palette =
       0x1234 +
@@ -1474,8 +1476,13 @@ int Tests_ModelProjectionGroups(void) {
   Core_Gte_Reset();
   Core_Gte_SetGeomOffset(160, 120);
   Core_Gte_SetGeomScreen(256);
+  static Actors_ActorRecord actor;
+  actor = {};
+  actor.instance = instance;
+  actor.instance.model = model;
+  actor.modelDataSize = sizeof file;
   int passed =
-      Render_ProjectModelVertices(&instance, matrices, -32, model) == 1024 &&
+      VS::Render::ProjectLiveActorModel(actor, matrices) &&
       Actors_modelRenderContext.projectedVertexCount == 3 &&
       static_cast<int16_t>(Actors_modelRenderContext.projectedVertices[0]) ==
           144 &&
@@ -1485,13 +1492,11 @@ int Tests_ModelProjectionGroups(void) {
           208 &&
       Actors_modelRenderContext.vertexDepths[2] == 1024;
   groups[2] = 2;
-  passed = passed &&
-           Render_ProjectModelVertices(&instance, matrices, -32, model) == 0 &&
+  passed = passed && !VS::Render::ProjectLiveActorModel(actor, matrices) &&
            Actors_modelRenderContext.projectedVertexCount == 0;
   groups[2] = 1;
   groups[3] = 769;
-  passed = passed &&
-           Render_ProjectModelVertices(&instance, matrices, -32, model) == 0;
+  passed = passed && !VS::Render::ProjectLiveActorModel(actor, matrices);
   Actors_modelRenderContext = saved;
   Core_Gte_Reset();
   return passed;

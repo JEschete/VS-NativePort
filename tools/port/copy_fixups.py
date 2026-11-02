@@ -40,6 +40,11 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Engine\include\Render\SpritesLive.hpp"
        for name in ("VS::Render::QueueLiveDefaultSprite", "VS::Render::QueueLiveSpriteWithTexturePage",
                     "VS::Render::QueueLiveSprite", "VS::Render::LoadLiveFrameViewMatrix")},
+    **{f"VS::Render::{name}": r"Native\Engine\include\Render\ModelGeometryLive.hpp"
+       for name in ("ProjectLiveGimmickModel", "DrawLiveGimmickGouraudPolygons",
+                    "DrawLiveGimmickGouraudPolygonsWithOverrides", "ProjectLiveWeaponModel",
+                    "DrawLiveWeaponFlatPolygons", "DrawLiveWeaponFlatPolygonsWithOverrides", "RecordLiveModelExtent",
+                    "RecordLiveModelCopy", "ForgetLiveModelExtent")},
     **{name: r"Native\Game\include\Boot\SessionLive.hpp"
        for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},
     "VS::Boot::DelayAfterOverlayLoad": r"Native\Game\include\Boot\Session.hpp",
@@ -2698,6 +2703,42 @@ FIXES["F00797"] += [
      "30DB0.c:1610 #261: the clone keeps its source bank's extent, limited to the 0x7800-byte copy"),
 ]
 
+# #269: model geometry projection and polygon walks read only a model's recorded extent. Each loader records the
+# bytes it placed; each release forgets them before the memory goes back to the heap.
+FIXES["F00782"] = FIXES.get("F00782", []) + [
+    ("        if (s1->model == NULL) {\n            return -2;\n        }\n",
+     "        if (s1->model == NULL) {\n            return -2;\n        }\n"
+     "        VS::Render::RecordLiveModelExtent(s1->model, temp_v1_2->modelDataSize);\n",
+     "#269: the copied gimmick SHP holds modelDataSize bytes"),
+]
+FIXES["F00783"] = FIXES.get("F00783", []) + [
+    ("        Core_Memory_FreeFromLowEnd(temp_s0->model);",
+     "        VS::Render::ForgetLiveModelExtent(temp_s0->model);\n"
+     "        Core_Memory_FreeFromLowEnd(temp_s0->model);",
+     "#269: the released SHP no longer has an extent"),
+]
+FIXES["F00788"] = FIXES.get("F00788", []) + [
+    ("                VS::Core::Memory::CopyAlignedWords(buf, data, sizeof *buf);",
+     "                VS::Core::Memory::CopyAlignedWords(buf, data, sizeof *buf);\n"
+     "                VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);",
+     "#269: the copied WEP keeps its source's extent, limited to the slot buffer"),
+    ("    model->sectionOffsets = dst;\n",
+     "    model->sectionOffsets = dst;\n"
+     "    VS::Render::RecordLiveModelExtent(\n"
+     "        dst, (buf != NULL && (u_int)size > sizeof *buf) ? sizeof *buf : (u_int)size);\n",
+     "#269: the loaded WEP holds `size` bytes, at most the slot buffer for slots 0 and 1 (#270 tracks the copy)"),
+]
+FIXES["F00790"] = FIXES.get("F00790", []) + [
+    ("                Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+     "                VS::Render::ForgetLiveModelExtent(model->sectionOffsets);\n"
+     "                Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+     "#269: the released WEP no longer has an extent"),
+    ("        } else {\n            Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+     "        } else {\n            VS::Render::ForgetLiveModelExtent(model->sectionOffsets);\n"
+     "            Core_Memory_FreeFromLowEnd(model->sectionOffsets);",
+     "#269: the released WEP no longer has an extent"),
+]
+
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
 
@@ -2779,6 +2820,22 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      "F04191 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
     (r"", r"\bVS::Render::QueueSprite\(", r"VS::Render::QueueLiveSprite(",
      "F04192 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
+    (r"", r"\bVS::Render::ProjectModelVertices\(\s*object, &object->matrices\[0\], -Render_nearClip \* 4, "
+          r"object->model\)",
+     r"VS::Render::ProjectLiveGimmickModel(*object)",
+     "F01265 #46 typed promotion: the gimmick binding projects within the model's recorded extent (#269)"),
+    (r"", r"\bVS::Render::ProjectModelVertices\(\s*weapon, &weapon->boneWorldMatrices\[0\], -Render_nearClip \* 4, "
+          r"weapon->sectionOffsets\)",
+     r"VS::Render::ProjectLiveWeaponModel(*weapon)",
+     "F01265 #46 typed promotion: the weapon binding projects within the model's recorded extent (#269)"),
+    (r"", r"\bVS::Render::DrawModelGouraudPolygons(WithOverrides)?\(&Actors_modelRenderContext, object, "
+          r"&object->baseColor, scratch->model\)",
+     r"VS::Render::DrawLiveGimmickGouraudPolygons\1(*object)",
+     "F01267/F01270 #46 typed promotion: the gimmick binding walks only the recorded model extent (#269)"),
+    (r"", r"\bVS::Render::DrawModelFlatPolygons(WithOverrides)?\(&Actors_modelRenderContext, weapon, &color, "
+          r"scratch->model\)",
+     r"VS::Render::DrawLiveWeaponFlatPolygons\1(*weapon, color)",
+     "F01266/F01269 #46 typed promotion: the weapon binding walks only the recorded model extent (#269)"),
     (r"", r"\bVS::Core::Memory::CopyAlignedWords\(", r"VS::Core::Memory::CopyLiveAlignedWords(",
      "F03572 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
      "forward without memcpy overlap (#268)"),
@@ -3473,9 +3530,10 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
          "event splash layers share the GIM renderer's native file/request pointer slots and array stride"),
     ],
     "T00237": [("u_char workArea[0x1FD0];",
-                 "long projectedVertices[768];\n    int vertexDepths[768];\n"
+                 "int projectedVertices[768];\n    int vertexDepths[768];\n"
                  "    unsigned projectedVertexCount;\n    u_char reserved1804[0x7CC];",
-                 "4B16C.s:func_800B3A68 screen/depth arrays; retain the surrounding context extent")],
+                 "4B16C.s:func_800B3A68 screen/depth arrays as 32-bit words the typed projection writes; retain "
+                 "the surrounding context extent")],
     "T00239": [
         ("    int animationHeader;", "    intptr_t animationHeader;", "native SEQ bank cache"),
         ("    u_char textureRowOffsets[2];\n    short momentumDistance;",

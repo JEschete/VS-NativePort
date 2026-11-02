@@ -13,6 +13,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
+#include "Render/ModelGeometryLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelGeometry.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -34,9 +34,9 @@ extern unsigned int Content_battleShadowVertices[18];
 extern unsigned int Content_battleShadowFaces[24];
 }
 
-static_assert(std::is_same_v<decltype(&Render_DrawActorGroundShadow),
-                             void (*)(Actors_ActorRecord*, const MATRIX*,
-                                      const SVECTOR*)>);
+static_assert(std::is_same_v<decltype(&VS::Render::DrawLiveActorGroundShadow),
+                             void (*)(Actors_ActorRecord&, const MATRIX&,
+                                      const SVECTOR&)>);
 
 namespace {
 struct ActorShadowFixture {
@@ -170,8 +170,8 @@ struct ActorShadowFixture {
   }
 
   void Draw() {
-    Render_DrawActorGroundShadow(&actor, &camera,
-                                 &Render_ModelWorkspace()->rootOffset);
+    VS::Render::DrawLiveActorGroundShadow(actor, camera,
+                                          Render_ModelWorkspace()->rootOffset);
   }
 
   void SetTerrain(bool along_z, bool steep) {
@@ -397,22 +397,16 @@ TEST_CASE("Actor shadow buffer exhaustion cannot overwrite adjacent storage",
 }
 
 TEST_CASE(
-    "Actor shadow native bindings expose mesh strides and a typed draw entry",
+    "Actor shadow native bindings expose mesh strides and no C draw entry",
     "[render][actor-shadow][redirect-binding]") {
   ActorShadowFixture fixture;
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* entry = VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                                  0x800B4B14u);
-  REQUIRE(entry != nullptr);
-  using DrawShadow =
-      void (*)(Actors_ActorRecord*, const MATRIX*, const SVECTOR*);
-  const auto draw = reinterpret_cast<DrawShadow>(entry);
-  CHECK(draw == Render_DrawActorGroundShadow);
-  draw(&fixture.actor, &fixture.camera, &Render_ModelWorkspace()->rootOffset);
-  CHECK(fixture.PacketCount() == 24);
+  // F01268 is typed C++ now; no module-image caller reaches 800B4B14.
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800B4B15u) == nullptr);
+                                          0x800B4B14u) == nullptr);
+  fixture.Draw();
+  CHECK(fixture.PacketCount() == 24);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E9A68u) ==
         Content_battleShadowVertices);

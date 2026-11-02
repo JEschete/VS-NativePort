@@ -947,7 +947,40 @@ class EncounterFixupTests(unittest.TestCase):
             core,
         )
         self.assertIn("return actor_.instance.soundEnabled != 0;", live)
-        self.assertIn("Render_DrawActorGroundShadow(&actor_,", live)
+        self.assertIn("VS::Render::DrawLiveActorGroundShadow(actor_,", live)
+
+    def test_model_geometry_reads_models_only_through_recorded_extents(self):
+        owned = self.owned_items()
+        for identity in ("F01265", "F01266", "F01267", "F01268", "F01269", "F01270"):
+            self.assertEqual(
+                owned[identity]["header"],
+                r"Native\Engine\include\Render\ModelGeometry.hpp",
+            )
+        root = Path(__file__).resolve().parents[2]
+
+        def generated(path):
+            return (root / path).read_text(encoding="utf-8")
+
+        gimmicks = generated(r"Native\Game\src\Field\Gimmicks.cpp")
+        rendering = generated(r"Native\Game\src\Actors\ModelRendering.cpp")
+        assets = generated(r"Native\Content\src\ActorAssets.cpp")
+        # Each loader records the bytes it owns and forgets them before release (#269).
+        self.assertIn("VS::Render::RecordLiveModelExtent(created_gimmick->model,", gimmicks)
+        self.assertIn("VS::Render::ForgetLiveModelExtent(released_gimmick->model);", gimmicks)
+        self.assertIn("VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);", assets)
+        self.assertEqual(assets.count("VS::Render::ForgetLiveModelExtent(model->sectionOffsets);"), 2)
+        for call in (
+            "VS::Render::ProjectLiveGimmickModel(*object)",
+            "VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);",
+            "VS::Render::DrawLiveGimmickGouraudPolygons(*object);",
+            "VS::Render::ProjectLiveWeaponModel(*weapon)",
+            "VS::Render::DrawLiveWeaponFlatPolygonsWithOverrides(*weapon, color);",
+            "VS::Render::DrawLiveWeaponFlatPolygons(*weapon, color);",
+        ):
+            self.assertIn(call, rendering)
+        for source in (gimmicks, rendering, assets):
+            self.assertNotIn("ProjectModelVertices(", source)
+            self.assertNotIn("Render_DrawModel", source)
 
     def test_room_euler_uses_the_source_staged_kernel_and_shared_octant_pair(self):
         owned = self.owned_items()
@@ -992,11 +1025,15 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01269"]["path"], r"Native\Engine\src\Render\ModelGeometry.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Engine\src\Render\ModelGeometry.cpp").read_text(
+        source = (root / r"Native\Engine\src\Render\ModelGeometryLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("weapon->boneWorldMatrices[kWeaponPaletteMatrix]", source)
-        self.assertIn("AppearanceMaterial(weapon->ownerMotionState)", source)
+        self.assertIn("weapon.boneWorldMatrices[kWeaponPaletteMatrix]", source)
+        self.assertIn("weapon.ownerMotionState};", source)
+        core = (root / r"Native\Engine\src\Render\ModelGeometry.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("ModelAppearanceMaterial(overrides.appearance_state)", core)
 
     def test_gimmick_override_uses_the_existing_model_kernel_and_typed_state(self):
         owned = self.owned_items()
@@ -1007,9 +1044,11 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Engine\src\Render\ModelGeometry.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("AppearanceMaterial(object->motionState)", source)
-        self.assertIn("object->palettePulse.kind", source)
-        self.assertIn("override ? AppearanceMaterial(state) : 0", source)
+        live = (root / r"Native\Engine\src\Render\ModelGeometryLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("return {object.palettePulse.kind, object.motionState};", live)
+        self.assertIn("override ? ModelAppearanceMaterial(state) : 0", source)
 
     def test_room_tint_pass_shares_the_explicit_native_color_contract(self):
         owned = self.owned_items()
@@ -3170,6 +3209,8 @@ int arg01 = arg0;'''
 VS::Core::Memory::CopyAlignedWords(s1, Field_gimmickInstances[arg0->dataAddress], 0x178);
 """
         for old, new, _ in copy_fixups.FIXES["F00782"]:
+            if "0x178" not in old:
+                continue
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertEqual(

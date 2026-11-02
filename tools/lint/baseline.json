@@ -142,13 +142,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "01461ab252aeaa5f3a737ab18561b96fb55e5883b2c8b4ce44267b4d8b752eda",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "google"
-    },
-    {
       "key": "015425333113fa4dcdea3a734f100fcb911aa6695bf50e04092ad7a9c1b130ff",
       "count": 1,
       "tool": "tidy",
@@ -427,13 +420,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "031417a47e6a912017383f0753916c53cd7a085dbf41db6565ed2859e07041d8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "03194902e1870df2798a9b98a2be1539c142b0f0d4bdd36a8b7be9956726b720",
@@ -1108,13 +1094,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "075a7132d98602a4ec1c69729b2eec0108ae438f2d4035e9124899da9678fc6c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "076ffd679c5d80ce1a425ea0740a9e42a6d14f382d779d3715d7ba4405d5a8cb",
       "count": 1,
       "tool": "tidy",
@@ -1276,13 +1255,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "08bdbc71e3428a562f27abfaf5a1809f94331b24cb14cb83fa8c36c0e7977ba2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "08bdfbf1ccd6abe79e83ab21b22a333865ecaaf7edd6243e61da30c429582baf",
       "count": 1,
       "tool": "ruff",
@@ -1407,13 +1379,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "0995aa84de0c8185dbf8f6734fc4c72d66912142b621299eed96841f815da977",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "0997cdf2e52237dc26515e7e41f783076db61be4d1aa01290a58794ca7eaddab",
@@ -1773,13 +1738,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "0b9bc20d46b03a8e4d6bff4dfb6cfed2ac51fb01ff6e109ceca24cb4ddf4c6fd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "0b9f58ab86e9f929fcc874c48c2291103b411f5917c2a6fbbef81185143abc3c",
       "count": 1,
       "tool": "cpplint",
@@ -1834,13 +1792,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Audio/AudioDevice.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "0bf37fd8fa625518d14a1989e531a37bb9d9c418cb97e60c63faede43bf8ad42",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "0bfc46ca9e2bf2933d75173c43fe382d9d8f010a64c793ee25a06b9a5ac33c2c",
@@ -2340,13 +2291,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "0e9531ac54c8425342d58c7c3f040d9e57b03e81bdceab733ca76b90b615db0f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0e9709fb51872b4d87480320815ed3af073e54ab74e8ce1217be97ceaa11fd21",
       "count": 1,
       "tool": "cpplint",
@@ -2669,13 +2613,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "10b0d76287afa45e3494e7f12fd1199674284269be60237fa2760ac0bb9bcb29",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "10b1d6f89c29d5d6677cbeff1e026f2b8442ad50b4a936bea7cc099cc080d258",
       "count": 1,
       "tool": "cpplint",
@@ -2758,13 +2695,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Audio/AudioDevice.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "1166295973d3974154f9b7480c04f302ebcc2866fed8a299c6c73dec5584bb3b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "1173a6362718a68a4abe2a577a1b6ef542321b894cc71b8f2d9ba64c82d39823",
@@ -2905,13 +2835,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "1212fe1a23e8e08bdb89aa89d6c66ccb263543fb77bb24c013b3f92d7af15316",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "121615ed18f7de267af429356191d3e2a79855ab79a948fcdf00595609642e36",
@@ -3978,13 +3901,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "18d1c121088bc188cf50014e6e1510f7fd76ac3863a0b0d78828d0a3ef7759c6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "18d3c85d9348ed563a24b62be992f4a9a9e4eb6af1285783d2622c47e520f97f",
       "count": 1,
       "tool": "cpplint",
@@ -4181,13 +4097,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "1a458df7aee63d092fd9cd61e8231a772d0244a0d4a85c82019472beed129fa3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1a617c6cad40aa8be0e4a344814c878ca3b1ad7ec881b4771a1a8ca5ce5fa2eb",
       "count": 1,
       "tool": "cpplint",
@@ -4221,20 +4130,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1a85897c42e8dbb9f8293ba552acdbe4debf8c17c31562321fee2d6d94fade3e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1aa166187e70a7eda7aac8214bcf925b19211440eb5e288e0d247b050d89112c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
     },
     {
       "key": "1ab9891be325f1ea77e40b75d5bcaa0d1eabab02072e1f314227206ecdee79f4",
@@ -4465,13 +4360,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1bef923e414ff8e03acf37272fc0ec155165098fc1645d6631a4257cc9fca03c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -4951,13 +4839,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "1eee233a5d35f80bf1f6e647bbe1b5b121696ea28ad5d9e38733fcb1e76682ba",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "1ef1dae93fc36543b7bfe042e76ab01ad6c1dfcaa4d7056301c775ea591a12f4",
       "count": 1,
       "tool": "cpplint",
@@ -5231,13 +5112,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "20e3aaf1e664d48b1591e2287c9dc79c627dd657bc08fc7717645c65b2c01a2f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "20e95952e2f165c950526973146e79aa7ef3a72e7a33bbc4c05a16e33f4cd7cf",
       "count": 1,
       "tool": "ruff",
@@ -5348,13 +5222,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "21be8513d075c225383264e43eac3dd53899aa35a72dab38f2c5bc89b4a01584",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "21bf87ebfd60afa78385900c6ee2a3fee974aaf1665a056ff34f88beae91b655",
@@ -5614,13 +5481,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "23594684f7e87d8b237873011f99dfb3e2ac16f6e1f740a0de0fbf7b33c4da44",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "235d88a8f52c6a3666b51f08d1bc56bd51420245ef687e00a63402d3dfd1925d",
@@ -5999,13 +5859,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "252cb207c6c2fdc49b7a3a7e18dfa9255263eae8c22f8a24d30c5c5787ffb58c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2531962d1d0aa9814d67b0eeade640f906e0e7c0b3977ffee5073d5696dfeec2",
@@ -6610,13 +6463,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "291552be624707164d038426e88464c6ff075028175cd1e48db98013f3f7330e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2916f43adf2b87ad40a226dedd6a3548e3769468237762646b37c3bb64922f46",
       "count": 1,
       "tool": "tidy",
@@ -6804,13 +6650,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "google-readability-braces-around-statements"
-    },
-    {
-      "key": "29f406812133e41358eaece3eda311a874da5bd0ffa7aed2bf44c920956beafe",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "6aa786395f3a7b344964ee58d40e624d6ce2a9f229584135278cdd0e39c80b86",
@@ -7044,13 +6883,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2b8fa5ef09d37c43d6270bb717298e1cd064dd17d979af5a00cb094cd1da10c3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2b9b12a13573ef7248e1cb9029869bc12eef9db9d520763ead6029c88201b187",
       "count": 1,
       "tool": "cpplint",
@@ -7114,13 +6946,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2be114883fd3445e7a32f10a4a8017faa42c67dfc827921461910d3c397aba48",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "2be48505b264237a09ecdfe421d0124090da766d5e54599020f91f25fe489fa4",
       "count": 1,
       "tool": "tidy",
@@ -7168,13 +6993,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "2c1e2e64522ef380f0f5a029d840d0abc76e8ca1e832798ee3ca15345e67b9ce",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "2c1ff9078fd2f47fe1f463c59029f3e33920fa46624ca284a394de896a832314",
@@ -7303,13 +7121,6 @@
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
     },
     {
-      "key": "2cc8e3aed7ead4c3b77be5b5263040ba8b2c0c67c1f2d2a2a53926da2395df84",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "2cd175221afcfdc25b846084a92d311c08872d49e24721b79a99d3a82d5788fc",
       "count": 1,
       "tool": "cpplint",
@@ -7322,13 +7133,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "2cdd27f2d3e6a37058e9077bcad0fb3fb427ebfebcb0b04395486624ea4fad8d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2cf4b92018c468cf7d0b070e3926ae71c56b5c5827ba6912c2c90edaf0513d84",
@@ -7744,13 +7548,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "2f8d462b2402d1cd450362a30c33796291c3044e8b559a39d9784aeaf270cf8a",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "2f9006e681196bd9d3f8c3abb9926891ad78b14f5dcb273b5fd8979d834632ef",
       "count": 1,
       "tool": "tidy",
@@ -8066,13 +7863,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "31a69087f979fa251ef251928785152cfc4fadfb9a543ecad0657befc6b31aa9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "31b37c9e0cba67345646f8900e0bd107be571fd29ab55de3b35b19af5b84064c",
       "count": 1,
       "tool": "cpplint",
@@ -8381,13 +8171,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "33c772a0bc9b9be7faf0c3bd6dfb9a1e15e4d74574290669101b58a34d68ab94",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "33dc1d6e67cc99259cc6f17041fe47ca89a2c0e5df2524368306eaa5ee7c611b",
       "count": 1,
       "tool": "ruff",
@@ -8577,13 +8360,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "353a0f83539f62e21a3dde553dd9e47c7caabc2dc17491314a911dad2caedbc0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "353aab4fa7522ec46cd0e60509e354578f5bfee8c3a01a0a98af85dcf867fa0c",
       "count": 1,
       "tool": "tidy",
@@ -8666,13 +8442,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "35c0385da287036e84201c17936c3c32423b45a2e0f2c24b38eb020b93b0f569",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "35c2dbb8ce7e60418901733c1ca878bc08c41707ef132783b011471ea61d2ecf",
@@ -8983,13 +8752,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "37b02b02462d77d510e3d8be9c8c78bb908178421545f1f2e69d068f13dc010d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "37b64ab3234c09187fabba9e5f0b9c5dd5a4790020e9fa8e7e1ac65289b1e412",
       "count": 1,
       "tool": "tidy",
@@ -9050,13 +8812,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "38260dfee31e98431e0e29fc46bd604b1e23157211f40b2b9e81642ec1da14b8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -9365,13 +9120,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3ae11c9708908bf621eeb3e3bd23a7567797f6584fed8700ab132bbcdb528267",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -9774,13 +9522,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "3d6873dc9b1bf18a39db7c23c01608ad550a41b48983b5765e70a36fcf5587da",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "3d709f45e45e1f1758d8df403038980952e449f9b95cb9665d50f802784482a6",
       "count": 1,
       "tool": "tidy",
@@ -9849,13 +9590,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "3dd8f51af3690f4eda192c93a9b20e01cd383c72bbb340501cf500d74827481e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "3df5ba8349de32568731c9815d2e9ccf372d1d30b1ef5114f01254bef4c2bcc8",
@@ -10068,13 +9802,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "3f37326e688f61fe8000d61df6420aacdadedc7cd38ee65d9902f3211d3c9ef6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "3f3a36e9ee5108f860635f4185b14d6c54668e4d2b1c3d71e073a211b2377782",
       "count": 1,
       "tool": "cpplint",
@@ -10094,13 +9821,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3f3ea0a4f5e229da9051405506e838c8dad0e88e3795cfde810ba3636d889653",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "3f632bea0dbf6891ae7a9ce9300495565c41a8a740f38334e8f20e3ba69c6344",
@@ -10178,13 +9898,6 @@
       "tool": "ruff",
       "path": "tools/port/check_native_views.py",
       "rule": "B905"
-    },
-    {
-      "key": "3fbe7b6db3941f140d57a987eb8e7bf7735b2fe73d1d6a375e514d97db280d57",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "3fc4cfc2b10ad42d513b01e402685877697da67f1d96cb3d78786b72ae3debe4",
@@ -10481,13 +10194,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "41ab8449d95c8e2e0fddf8aba71da90f1b75505489527b5e481e6760c64e1ec1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "41b5fa9e751091f07b976bfbe9bb8bc2eea86ce81ab566079624b0eb6bc8a4ce",
       "count": 1,
       "tool": "cpplint",
@@ -10719,13 +10425,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "4316a3e9787d704809c81ac64b3326a9b62665d95334b225fbf2cebaeafa4f1c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "431d90342989d3da781a074a733da8907a89689abc92970f0963d1374c6b00e1",
       "count": 1,
       "tool": "tidy",
@@ -10815,13 +10514,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "437f6e7bd17ded79b16179f9b98d4a2e887c51a9ff8ca07c5101263dcd4c7327",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4384e9d567098e2f3ec78e7728cb074841e1ba362b64f0865a23eb977d3840d2",
@@ -11160,13 +10852,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "45c887785546141e84f85603056143b8ac8b555b4bee7a2985fa61490dc7c2a1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "45ca294094fd96bcc50ece7c7315ae4b64b6013f8dfe9adb8a933fbfd13ff20a",
       "count": 3,
       "tool": "cpplint",
@@ -11356,20 +11041,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "46ad18687a14978144bfdbc5f4b0b62642d92364a404032589650dec59cb2c6e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "46b2bb7dc0785fb136e90d0168b46a1803739a30a3e6b42ae19b6faef19deca6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "46b6bba6a04d84764f216c5ffe12e171fa85e367e644d62970d2603b947c7d77",
       "count": 1,
       "tool": "tidy",
@@ -11438,13 +11109,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "4735472d4a4ad9373c98e7f45843e5b4b669b4f7e78e94b3e364970671451044",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "474222d00313d322a70a2b1b14323c381c3914dc088a632d000ec0ae7a29d415",
@@ -11620,13 +11284,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "486b570be6cbfab702855368f4140fdc97180f7531d14d918c9080d63082c306",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "488781a9b0f5d07d2c23482d4b2e6f3d75741c92d6c25fc254bbb330634bddd0",
@@ -11965,13 +11622,6 @@
       "rule": "SIM115"
     },
     {
-      "key": "4ad3df3fdfe47cfd552c7c87af3f4d862ea4a0ab01c1d6b6d686394a88ca892c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c77a3d904c1effa1a528971bc27344f3b8c6f827215b0b5c95977cf61d980d4a",
       "count": 1,
       "tool": "tidy",
@@ -12217,13 +11867,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "4c7fc20e4edb1180412071e3290ad022db4edd87c848a15c57372659c40e21e0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "4c89bf7ea8081cd43269a9184ec2bdcfbb667a51e39bea71111035cb96167c08",
       "count": 1,
       "tool": "tidy",
@@ -12334,13 +11977,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "4d41c6c9e2a0c78f1dd400852ae904e5274745dc9ffe71250f9d5b62b01dbf33",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "4d5962768820ce1289010dbf1b8aa922c664c347cf0a14d4f18a0959cb560399",
@@ -12460,13 +12096,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "build/include_what_you_use"
-    },
-    {
-      "key": "4dd36e95504f0ffc3d4b4b7a4fbb95fab7d2dcf48f3755bb8ac53a2e416a234a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "4dd3e61247cbd5493d536bb4451648a38a89d83cb54491a13e57ef14804c860d",
@@ -12861,13 +12490,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "50fc9e0715e0bbfb8532035d592c5bb668f25a682a9fcc60c7e724ab7a72bf7a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "50ffd77a955243a6156c8fafee4bc3c6bb90db04488fb32b04359949e85d74bb",
       "count": 1,
       "tool": "tidy",
@@ -13103,13 +12725,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "52a47537a813796d6e505d8ba09723ade6c4fb2f716934ca2a853648f915aadf",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -13393,13 +13008,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "5493aff4a73759ded82f7535a13e13e0ed89bcd27a9408a5575928e7bf14b45d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "54a33ffc5681c274b2f6498e391463b4b8d09e4f516867abbae473946daedcfd",
       "count": 1,
       "tool": "cpplint",
@@ -13463,13 +13071,6 @@
       "rule": "google"
     },
     {
-      "key": "54c816824f1d58d3d55b5e682140d3ad757d3700dd3e3e1a6a672db864a8833a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "54e7b26c9e276b5b661cdfcaead150d8b946f1742fedff5f976935ab21274fbd",
       "count": 1,
       "tool": "tidy",
@@ -13510,20 +13111,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "557ea504e072247ef26b4903830456b7de574965ab1191f46161349f658dc5a4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "558889e00e8c02bac3d781f5671a330951e49e6f1329ac0df9c3a03f5316f051",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "558af55893958d50a63847638762b8fd31754e7bea0c85331b7962c81ec686ae",
@@ -13848,13 +13435,6 @@
       "rule": "google"
     },
     {
-      "key": "578b9bbb99d760b9fd93f3c631aac2fb1f187a0591502d40db5fd414ce8b615c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "579dd475ef9dd472d689277b66770f8da8b19749e99fe7be8b11732b80d4d761",
       "count": 1,
       "tool": "tidy",
@@ -13867,13 +13447,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
-      "key": "57b848c800781d19baf906c9fe2f99a25b523fc5b07f47929cbbc1c6c33aba8c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "57ba19178aaaf18506a34746dc72245f4c6518ce0aa94887b42e57e070fa5777",
@@ -13944,13 +13517,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CoreTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "57ea773612887ba891c1e4f2bb0ffb7d1316a467a9af5ca0ccbed64b27715e3f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "57f58d30c1925c15af49f6fc138bc4323c488c1fa723458dab16906fa2c4ef88",
@@ -14182,13 +13748,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Render/PageSpace.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "59963f2a8d9c351f54dbddc4ab0f6442bf95bfaa148d8deaf85c6ebbac64649e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "59a89d525eef08b7ced0a2c1a059662f8a87efca0c06f58df86392a3b0ba9cba",
@@ -15227,25 +14786,11 @@
       "rule": "build/include_order"
     },
     {
-      "key": "5fffcb308c2eb191d71f4a6e2fa703bae6bf056d988e9e3f09e664516e815922",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "601e2ef3963fdbc9544e21005cda5efcbb3d1f5fbd813f8ddc356c63cb635dd9",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6026eca3f8ed2e9313e5eb20cc2f2f37f15db443c40186c2acf3aef9b2e6f2ce",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "6028807212f61dc601b206c786d0953fbc33c25c84c1c9ae0eced97fb144b90a",
@@ -15766,13 +15311,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "6391b58107d1a222b6d117a82cc61aa4f6b183fa871bfdd97d6915240bd06bd4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "639599314a931d32755204798b788a1baef585945eec53748429744f127cad4c",
       "count": 1,
       "tool": "tidy",
@@ -15934,13 +15472,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "64887cb6c7e04160bcf7b6466e8ad8e95cf067246b19df769dd1bd02bca686a9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "648dc14ac2d03e1a957ffe10529e8693c78a5211ab967739b8725e91bf414135",
       "count": 1,
       "tool": "tidy",
@@ -15960,13 +15491,6 @@
       "tool": "cpplint",
       "path": "Native/Tools/Extract/src/main.cpp",
       "rule": "build/c++17"
-    },
-    {
-      "key": "64bff820d8520d98fc25170cacfacc98c16e65bd2848d06a4229eef2005fdb55",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "64d3178fd5fcd7dc7d4cd2e1576fa36d99e539cd1b2141f37dceed65467c787f",
@@ -16172,20 +15696,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6614c13c648b1ea79af7f91faaeb49c4205986cefd5c546b75ef079e45ea8229",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6627eab02403e25d2bec35264e21599450ccba230ef18156abcfa9697ee7c788",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "662f294211adefde4ce8d96ed7a5a02579985d5e1f353b3d82c6e554cc4957a8",
       "count": 1,
       "tool": "ruff",
@@ -16205,13 +15715,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
-      "key": "664cbc17fba28fc5de7482286e462e7bb5ceae79f631feb3aa93f82139122ab8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "6650bda717de193a800c4aca08b38875ec7ac39fd8bfdc4ba0e7c22b0cfad3e6",
@@ -16254,20 +15757,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6691262f70ea93ca14f217f6649a067eff3c7203353159cf9c826dadd373fc46",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6693bdcf76dad1c9541668681f68c16ef0cac8844d364702f8b5c9ab53fd245c",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "669c52395350f904746d167170d2091e3c2baef66a441a74c4d46573638d4bc7",
@@ -16585,13 +16074,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "687801896661045aaa11630dd897dc6313b25589782282776b7a6f04bced4402",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
       "key": "687b2202c11e309029176e8cfac61ed46bc0f9507862634968c0dad17de4dac7",
       "count": 1,
       "tool": "cpplint",
@@ -16744,13 +16226,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "6938c23cc962aa3db3cd1bfe8a143b7c3774adaba31fe700554202775c17a3f8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "697568316ba022989675258d45a1cf80241f0121ec733fbba9ef7c0acdfe211e",
@@ -17033,13 +16508,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "6b30605318efb284f552d2451ac88b8d5034c776f234f21136afd4d2acea7ef5",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "6b314308ef14996d1eec84e234a1c7cf27de591e86b6d7bb38485f4d6a13ae26",
       "count": 1,
       "tool": "tidy",
@@ -17047,25 +16515,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6b580b4b9b7b20821ccbec2e8a124af62ec460d04ea4b2bcd23b173e22802d0f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "6b71cbe8c3395b10bdaecfc02f3039051234e8642fd176d7700a35299275b6b8",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "6b9fb02de161efc199fefcc9e6dbb7b0b56bda526724b91ffa54a8c24c1bfbaa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "6ba4bf711171a244a385a110a1a5bde5550a5c5dc07eae0621dedcf94078d442",
@@ -17206,20 +16660,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6c9bcf77f4515a6f01ba4bd2f199edfb500e40a7fafcee1aedfca9d0d11748de",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "6ca2bdeb1cc3d6ca3ade98fb556be0c5d85d43b3d1b91d89f5664d765d9774ea",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "6ca69b232cf316160f9baf2f70bd09a7f1fd8d67059498aa10f5c7aaa24e4d49",
@@ -17726,13 +17166,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "70926c4d06eae223c89637a5cf6cbd453adec22d116c8c6db23ec8daaeb849de",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "70945832eb173e7b43c87f467ed7b4c8d78b4e81b3f932b812c1c4229ca54f70",
       "count": 1,
       "tool": "cpplint",
@@ -17815,13 +17248,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "71434af9cced2b31902724538702691894d6d4d01e5d77cba8d8f94510dd3835",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
     },
     {
       "key": "71441d1d130cd8c80ac985cabcedd0b1064f6c3dddb1bbba688328387ff3682f",
@@ -17922,13 +17348,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "71e18c6547efdc025608d1bea7f5978f5282c011c8f14e47ca73f7f133544ab2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "71f1a2a4a75d70a2d19606943917e109380d8ebc30b99bfdf347a75867784c54",
       "count": 1,
       "tool": "cpplint",
@@ -17936,25 +17355,11 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7205825ad9e5a64c23f02ae2ae3acbfa8f7c45660ccb0bd964b041cf6d156aab",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "721ecaa25dd3d65fce2b0ea2698cc9d733367555f97ade6ec9b69dbd66ed3f69",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "722a932a858d1b1e86702fa87c44ca21b5bd97f475c2bbd38d40c2fbcfc6fcea",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "722dd340135461e4f1bcdbb551771af05de47094a4e3de4468c23917174f1830",
@@ -18137,13 +17542,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "730a1870801b4c2c4c58574a5b0edf1f0137719b2232dd32f642f50aa4060d36",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "730a2f994a973d738ba21dad13ea635d68877465b437cf7ce844318c1cdfa13f",
@@ -18783,13 +18181,6 @@
       "rule": "whitespace/ending_newline"
     },
     {
-      "key": "769414378e21b838e2a473cd5ccea6406c4c18f63a4d1b0116252a6ec6add6e1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "76a11fdfc6841b063dd4320ecee77181c6faece82d9f7e1e44c8959c8089c627",
       "count": 1,
       "tool": "cpplint",
@@ -19343,13 +18734,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7a416ba0972f143470fd63272802b3dd796aeabe0a4492a310f573148c47bbb4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7a4edc6ee8e36b17b8f841617d6ea4ca82c716a2ef59edcf94b8421a73d61029",
       "count": 1,
       "tool": "tidy",
@@ -19707,13 +19091,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "7cc93b59593ca88a9be1c6852eefd3e0ea6eb0352b51cac426b9708ae580e88d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "7cd48f91d625bba8488d82f7e1e477680613fbde2f18a10cf1c8a9d218d7ab26",
       "count": 1,
       "tool": "cpplint",
@@ -20029,13 +19406,6 @@
       "rule": "google"
     },
     {
-      "key": "7f3a0ab3491bcf5be6b68ba701d4f3f8094ed03024ce49faf437210807fc704a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7f421cc2148abac7dba7afa10561df6cc08a6b63316793e83fc45eef3c0c29de",
       "count": 1,
       "tool": "format",
@@ -20131,13 +19501,6 @@
       "count": 2,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "7ffce8dab59272240fe6e045d99470be9d1bf3f2ace21e3ff4c7400728c84429",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -20666,13 +20029,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "839929ecb5c77d3590c49e03668f3a57e44351d5a95def1c138ff41b09e5c8e8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "8399747f910d3f34c2cd2bf89a48bbb645df1d78954810d9844a93a54d89698f",
       "count": 3,
       "tool": "tidy",
@@ -20762,13 +20118,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/App.cpp",
       "rule": "build/include_what_you_use"
-    },
-    {
-      "key": "840ddc460a94ec0ae42d47ec0ba7ec40a4a35d7626cddea4637eb3fc5396ae5c",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "840f2a34a00b3d4e16fc37cd3c4ddee026026b7b4c2523f9c75abca5d88c7652",
@@ -21086,13 +20435,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "8610b5a16ad15988ba43af5e5a80afedb546697b0b466703904172962f73063c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "862334e2a7b1608687ad5947ac6be0d1b629c4a267fa441fa3edd3e36f0d26b7",
       "count": 1,
       "tool": "format",
@@ -21142,13 +20484,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "8671ac8b67320c5bfb6ebe93b819b48d07f007ad7edaa9efaf301f8ef40a61e2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "86747d9adab95579d00ae21b9650a07f0ae56f2b712e629a886ad0e0ea8a336b",
       "count": 2,
       "tool": "cpplint",
@@ -21175,13 +20510,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "86b23473bd376a5af57f8098de89e6f9d4695d819c9092ad3d4b76c8847cbd33",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "86b5390fbdc45ff13b7ce860c320d42ae4d41125b4f73d3ffab164f399f5afd7",
@@ -22710,13 +22038,6 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "8ff67e0946bf425820e3dd2053efe068e71df745cf708c889ef82482bd4ff508",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "90097d629a4ee8a025b74815e85192edd6c0d11d316f267e07492f61f3869295",
       "count": 1,
       "tool": "tidy",
@@ -23984,13 +23305,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "97b0961d7fd78deecc780286f10c12e5a98b2af263c841720184686cfe889ec9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "97d2e320a67bfb5e9a39b913794c5bbd3a03b16dfe965395518d9e441c82cbb1",
       "count": 1,
       "tool": "tidy",
@@ -24313,13 +23627,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "9a06a97f21178fe3323f791e6cdcb709d4d80254e85dc7c08f623c12d358ee8d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9a14ec3442640bd2448ab317ad64a3a1179fae3aa319c70776ec19a12a06736a",
       "count": 1,
       "tool": "cpplint",
@@ -24481,13 +23788,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "9b101a8d526eceb617e6ec56b3bff663d4e8b706c036176cd554a1234f4ffd36",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9b104bbf6fcd6c3dcaa186ca1dd100e2eaa3b622f0c08afbe0338e897c537b89",
       "count": 1,
       "tool": "cpplint",
@@ -24514,20 +23814,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/ContentTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "9b3edbcd67c264f9c95092f3af5190939b01bd3b073eac42df78e67e177db34f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
-      "key": "9b5a6f35005a100096629c850d7f5cc6711e95ab39e29a1d88e70c4f609b5c3e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "9b5c050d5e49ca1e08d07ce4a75f8240493cc8374c085cbc6cc51abfc91d471e",
@@ -24586,24 +23872,10 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "9bd233548d0ca3f463bb8c1a7c1e04ce67de041011f106e8fe7b19aec5549058",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9be15d06b0bafe2d9a77a0c25ff791bb06c7147f420273a1858cd4138a073f5b",
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "9be637e8b158368cdff56f10a306f6ffbb3b1299022020315c0ed44c583cd838",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -25069,13 +24341,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9ed5ec840a97188799c2bbde7a3b0ac09e74eb80536099e62d61e866bf0a9ae4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "87bd010661306a176ec1a97fb7093844300441f2f1e10e281c8cf9d02ce5b880",
       "count": 1,
       "tool": "tidy",
@@ -25160,13 +24425,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "9f3db7885eb7e12b736bc5f291d55aa66bbe3001166a868360af0551e8676c13",
-      "count": 6,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "9f5526cbf6462130b18a294302b9c63ab35e8a0208f8184cb2b02dea3080c49e",
       "count": 1,
       "tool": "tidy",
@@ -25193,13 +24451,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "9fa6a20465db2bd61bad7854b4b7fa51c739e96ad7a69e201bb238774c30a5ba",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "9fbc9f5668d16ec12acde2effb41652b0df102a72db46dd3ef36ed7aa0e60fc2",
@@ -25524,13 +24775,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "a1b4daa35c1f0630f81f73ac3926889c23b668a8d16e30c254efea0e6528c375",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "a1d10b1b557bcd4b4e4851f94c627082ec55f2eaf431e6c308bacd488d4d8ff4",
       "count": 3,
       "tool": "cpplint",
@@ -25685,13 +24929,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "a2c9459cadfdc7aa4b1fc5f090c722f1fbefb30cac492759bef3a22fdc12a236",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "a2d69abd78c8daa203aaee1ebd54240cfe5af9393f00b3e8b54b47d67c5d8a61",
       "count": 1,
       "tool": "cpplint",
@@ -25710,13 +24947,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "a31f4d8cfd86d9b3633b284f84f30833bb144de921a10ed7af36eb730e12bde0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -25886,13 +25116,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "a43dcc63bcd58a36b707353aa7670d9f9cc5d67f59e11ed2f6f7cadc99568b25",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a45a6da0a268d1ea644d429995ed1f8ff8799cda7fc2dcb6875d91b06a250a57",
@@ -26371,13 +25594,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a7b6e062178c8f29691164130738ca21a87c5480cbc7ba64d6042501eb724337",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "a7c8604182ecfb9a124a5afa8ad7436d5982362fff994357f5d2d5379813a784",
       "count": 1,
       "tool": "cpplint",
@@ -26497,13 +25713,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "a88d3f3c1f8c9f368cf8d129df588ad3503fffffe666f67c42edc55706df2d6d",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "google"
-    },
-    {
       "key": "a894b18e1cf6cdd93e5467e7bb78f99d545dd4ad50bebfb5cd0c3c56da1bd7f8",
       "count": 2,
       "tool": "tidy",
@@ -26578,13 +25787,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a91558a11dda26694a094cdfd4ac00320787cd014a794fdbaa189f9b0dd4faab",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -26714,13 +25916,6 @@
       "rule": "readability/casting"
     },
     {
-      "key": "a9f32202fc1b2f063e160a7d08423e778c1c8141bc56d9d224e23575a14d6fc3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "a9f56d8c0358ab9e7a941e1221d619a7f7b41f36811b2cb5a232058ef481f5c1",
       "count": 1,
       "tool": "tidy",
@@ -26775,13 +25970,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "build/include_order"
-    },
-    {
-      "key": "aa5e0d55334e948de885ead05aeb1aa743c3ba164df1c344c337dd0d662dc6c6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
     },
     {
       "key": "aa6551ee8948ba2f2b81cb47ac7d139271faa377cfce242ddf501a82388b6db5",
@@ -27834,13 +27022,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b1ac47d98efd7cfce8b959bdb81674f77823d9e802d014f219da462adc963433",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b1bbc509f53b970e706aadce9aa02139872897db5325a523bde22f7272acb728",
       "count": 1,
       "tool": "cpplint",
@@ -27929,13 +27110,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b22fa41ed68f4cca55e1b81341043a66181362456c0f83732c8a12cba6f7c909",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -28324,13 +27498,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "b4d583ccbf91e21d9a62436ed7bbe0dffebde3ef518267ed1cd2c7b49bb584c5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "b4dcd5d4636ee6efa62fa1b9b87a31a207537aab8e6362eff84477b75d8c2296",
       "count": 1,
       "tool": "cpplint",
@@ -28646,13 +27813,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b70470da24354b74e05863b2a4e9c30ea1e4d40639e5b48399bd05e61536f442",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b706b610ddf1fc092caf155878940298182ad5d5aba5006d488f4c1d7afa86eb",
       "count": 1,
       "tool": "cpplint",
@@ -28905,13 +28065,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "b864ea1abdb2bc10956ebcd0ad200528841768f3805716d666e395f8cb78df81",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "b872f6099d85ca2013392d6f06456ea6cf5044f4dc6f082ccc5baa80c9144827",
       "count": 1,
       "tool": "tidy",
@@ -29127,13 +28280,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ba28044849e2dbd18a5286e2e4694691e227f4ab96cb7aef14d2a22afa4b7fff",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "ba2fcb2cd6d79fbafcc33b824b2b85de7a687feba36606be2a1f35d1f35c45d3",
@@ -29521,13 +28667,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "bc9fcb0c95b0c6fb4e2941c6a8dcb4e9d94fcb1ffb5d6d01bcc7cf7846bbc665",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bca350628382f650c96a05c65ed055c6a3734f8577d12aabe736c3c75291ed4b",
       "count": 1,
       "tool": "cpplint",
@@ -29626,13 +28765,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "bd4f2fc2dce6739fd24cf16c73c37872908ae2b14b150a7f8d145829583dfd9d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bd59eccc6df6feccb31765c297358ed07872e6141524e762d8337132dcc06c69",
       "count": 1,
       "tool": "cpplint",
@@ -29675,13 +28807,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "bdad5eb74648085e147efd774695f6544ad0c2262bf56cca81a00bffc651ee7e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "bdb0b67845d4deb0c50c3b4f86d53a232a689473b1b24f7cc800104347af1cc3",
       "count": 1,
       "tool": "ruff",
@@ -29701,13 +28826,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Core/Log.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "bdbc60e1dbfcdebd83c3a9875b14ca8c95776e251df4f1158df6b5b5fbdec620",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "bdbe51a6b2effb852e7e86c729d5ffe4004f633db21169586dc75cf0381e449e",
@@ -30410,13 +29528,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "c2b5952fdb52e660424bd14547c2a378dc73b6323f3a2a63ce4d198659c5291c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "c2b95aa4d8e69079351cea8107fd874a8afc8398db172abd7ecd26687d30ef72",
       "count": 1,
       "tool": "tidy",
@@ -30487,13 +29598,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "c2fe3e9741354c76766a455c77d4d3059078d69fbb90d24200c4946050443ac5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "c300c4d37b17271add06adcfef05707bd6661d226bb703c1b2b495be052620d1",
       "count": 3,
       "tool": "cpplint",
@@ -30555,13 +29659,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "c3699237c6e2cd5bfe1180ae5c883a625eb42b879c0dc65c46b4cb5349e99840",
-      "count": 2,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "c3705d6f2ba15ef22e99cc72ac0baf14b443722b5ffb91de8f80e64af735dbcf",
@@ -30669,13 +29766,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "c4506d075216a595682ec55abc8413f394cbcce2b6ef12223277a7356d1533da",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c4516b16a2b1f1a1c4ec128a30479549a95d7eaa11686aa5db6171454fd33b47",
       "count": 1,
       "tool": "cpplint",
@@ -30716,13 +29806,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability/check"
-    },
-    {
-      "key": "c4ac595444cfc4830337e39cb4d04565e95f5474b5b95785714bd2566155d39f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-function-size"
     },
     {
       "key": "c4bbd7129013d1d3a5ac55efbf8d20f2f3a2df81c0251308c3650814d34a19c8",
@@ -30851,13 +29934,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c5b15f4b9e0a858f67f55a43ea874c86029d40f4de8d64f61f9b2c87623fc1d7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "c5b32e6f41e84c1e15bf116ebfd12a33cf0ca4f2f1369a202b3f1522c4ed2696",
       "count": 1,
       "tool": "cpplint",
@@ -30935,13 +30011,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "c60f21fe6049d285fd0f8d6afb1941a71911d9bc85ed7e8feaab3e9b73ba3a8c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "c616fbd6b7db8b44c4c0083612b2b240ab6c89b8ba5d75cf99c50e68209a5ed3",
       "count": 1,
       "tool": "cpplint",
@@ -30989,13 +30058,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "c65a90c20e7a2f50bf583256490fe832daf5596a4014711125454d408c9e5118",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c65d2622856dff65e25a55dbb90f03a8e26282a0717f9945c3229ff0ddcd5d10",
@@ -31276,13 +30338,6 @@
       "tool": "ruff",
       "path": "tools/port/copy_to_native.py",
       "rule": "B007"
-    },
-    {
-      "key": "c82965f7a06d488fa0e1b4476cf62aed273b1294348dae63c3d1c7f0e6ce47b4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c82b43547d3c7cdfee3f7adcfff6287d53cf3dab13caacf3b0bf0dc8f4ef05f6",
@@ -31583,13 +30638,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "ca5238f0433f36b8f27e08c0c1bb622b24fafe9e46899aff0981b2c37a1f8ab2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -32314,13 +31362,6 @@
       "rule": "google"
     },
     {
-      "key": "ce2260b0a7cee3e2ef339af5befe5ece3158a5d64d99f1d7da851a0e3d8126df",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ce3eb486754d7cd54a3047386b3be66e1dc988c28672cf40a227878eeda2763c",
       "count": 1,
       "tool": "cpplint",
@@ -32909,13 +31950,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "d1a52c6c5892251217be42a8c625073c1dd7757eeb1528dfdd3b4abe17e630e8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "d1ac76ce3dbf82f74c5c81ae15371146a967da21f397ef5d9221b7a00dd6ae63",
       "count": 1,
       "tool": "tidy",
@@ -33264,13 +32298,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "d40556fa43bf23eea6578871326403d3a7a03442959f7482ff580a9c5b32eabb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "d405f763c8eb62a460c8e76ae7227d7c57db582a561d6290c5a00efed9afb35e",
@@ -34414,13 +33441,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "db98b3d6c2fe0c63bd0894b08e42a8eeee00b4273a39ddca6ef13a03a472ff62",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "dbb36bc83cff3fd2baa7562bd07ea3ac4a975a6396bfb7b7a293969689f7f91d",
       "count": 1,
       "tool": "tidy",
@@ -34911,13 +33931,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "debe2eea5da696966eca4d31f47dbae11269c1fe5b30d3896d46cd0296918239",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "dedec7376734dde59cd33d43560315ceeeccfb2d8909c756b121c6649bb2aeb0",
       "count": 1,
       "tool": "ruff",
@@ -34937,13 +33950,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "dee9c403dcbe11f7739e33a8eebd4120e2e4a801e8757f87bdf23b826995b4d3",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "df7816fc9658178f8952544cce0694d4db86d52e76b5bc4cf01af19a431c933f",
@@ -35212,13 +34218,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "e0f46ef24a0c28d73c23688b715550dced316e1749d5c14afdca15e291cee606",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5e31e282c2c493d0762eca00631084b3edc058c4124472a6f422cc80d79587e4",
       "count": 2,
       "tool": "tidy",
@@ -35231,13 +34230,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e13445c661be85375984c738ccc3ea01ee5ded680157910ec5e89423f3905836",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "e1387462517b649a04dc3fcdfa69dabfe1c776eab73b73329074c9898646f5ea",
@@ -35604,13 +34596,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e4721d9874b5726df8cfa1135208a098d987b4817f99c8463a3387aa766dad76",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "e47a6991de7438a96dcc39a0e3117ea27b1db00cfce22cf1bbae9ce633ceb56b",
       "count": 1,
       "tool": "cpplint",
@@ -35644,13 +34629,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "e4a4c7824f53c7089d9381c53f0b9127c2650b7ab7d535f78ad09e9e40c70d40",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "e4aa3befc8f54b749aa73ea1835596e47f475dbb94e5bbde66089b246b481943",
@@ -35931,13 +34909,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "e60bf9d56b0fb296784776d06b80075051188ff23e0c3ec0c6594b9baacafc12",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "e60e59f282e5c929cff5041c64e0c6ed70775bf3c514bb50b59274950bc8b159",
@@ -36826,13 +35797,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "eba7f7b1f249c1c43c2d1d7da750dbe485bd543bd8e6f4ce3903e96db3b46e5c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -38320,13 +37284,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f639eb3613078827ace6d8ab345ecc5ec088a0479d6dc4fba827d98e801d42c4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f6605a17e4077616ec574320660ac14bf18cc570993f33b15111d30e4b1e83f0",
       "count": 1,
       "tool": "tidy",
@@ -38374,13 +37331,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Save/LibCard.h",
       "rule": "bugprone-reserved-identifier"
-    },
-    {
-      "key": "f691fca7ff67b608319451408ed83fba894a9449dc7f2531e65b937674e1a7a8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "f69cc34a62a8f3a255d616b02070770c3a74e2e4f61fb662733e18846e6a6a55",
@@ -38929,13 +37879,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f9f54a2e2008ec0d4589cac3e97481110d865dd6734d02e82cf260888db4d965",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f9fae4e0ffb0c2dcd318873a3780afbf98e48d486cad331dc3c979e260cd454e",
       "count": 1,
       "tool": "cpplint",
@@ -39041,13 +37984,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "fac14f19ef90fbddac7cd35ca2e42c2d88cdc1866cd72564e800be1dcf907009",
-      "count": 2,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "574c4dbe483f4ec953ed8a9885aee9fcf94a1d0ea2ac6eb6aa719667ae8db5cb",
       "count": 1,
       "tool": "tidy",
@@ -39118,13 +38054,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "fb0691581715d0faa7bd75aac35f2c8be3286f460d2b9df5527737d405dfeed2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "fb0991eabccf549d70afeaef5adeec209a9742ec6d3537d22036fd63d9db1e5a",
       "count": 1,
       "tool": "tidy",
@@ -39151,13 +38080,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "fb1f01e9a6ab0f2338bd578d6b91767ee3694c8fa56731e1e71122348553db11",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "fb3bdc0a4a8e9da177ec18322706f97c2bcf1a9b6f3c741570b2566931f186b3",
@@ -39249,13 +38171,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "fbc54488b20135d347bdbfd0ee561bc2c6ca58ea95a8a6e98038324b6bf44f04",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "fbcd36e08b71fa38af5de7d290485b705b670c73379fa3b4ac15188f39bef56f",
@@ -39440,13 +38355,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "fd32cc8d7996bf4a4f0d2b01174b7b3474ef515c697998308de04d772af1c9b3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "fd35740c1df3f944f9e87bb8d60994eb42999411e3afdc382c26f7ea368c1054",
       "count": 1,
       "tool": "cpplint",
@@ -39515,13 +38423,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "fd94494c077d40a134cc8963c7cf6118ba455bb0223cf3bff8be5db2aef3449b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "fdaa41d3ad8763d919f8e2876a38db1aaed3fc3ae86ff3dd61d2febde892dba9",
@@ -39648,13 +38549,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "fded73e3a2058c5f4922afbae7bef6839d2dcb7a39a8671f1557fd003d0c5bc9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
     },
     {
       "key": "7316a5235cbbdee99a2d0e6450bdabb7226303b686064f396188bc8e676bd39b",

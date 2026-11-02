@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -843,6 +844,7 @@ exit:
         if (created_gimmick->model == NULL) {
             return -2;
         }
+        VS::Render::RecordLiveModelExtent(created_gimmick->model, template_or_polygon_section->modelDataSize);
 
         template_or_polygon_section = (Field_GimmickTemplate *)(VS_ONDISC(created_gimmick->model, polygonSection, void *));
         j = asset_request->subKind;
@@ -946,6 +948,7 @@ int Field_ReleaseGimmickInstance(int gimmick_slot)
 
 exit:
     if (!found) {
+        VS::Render::ForgetLiveModelExtent(released_gimmick->model);
         Core_Memory_FreeFromLowEnd(released_gimmick->model);
     }
 

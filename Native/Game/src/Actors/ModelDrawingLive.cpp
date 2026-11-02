@@ -12,6 +12,7 @@
 #include <type_traits>
 
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
@@ -40,7 +41,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Model.h"
 #include "Render/ModelDraw.h"
-#include "Render/ModelGeometry.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -61,7 +61,6 @@ enum {
   kCameraHeightTag = 8,
   kLastCameraFacingTag = 9,
   kTintStateLimit = 4,
-  kProjectionDepthScale = 4,
   kEventPlaybackActive = 4
 };
 
@@ -377,9 +376,7 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
             sizeof Render_legacyActorTextureSlots /
                 sizeof Render_legacyActorTextureSlots[0] ||
         geometry_->instance.boneCount > actor_.instance.boneCount ||
-        !Render_ValidateModelData(&geometry_->instance,
-                                  geometry_->instance.model,
-                                  geometry_->modelDataSize)) {
+        !VS::Render::ValidateLiveActorModel(*geometry_)) {
       Core_Debugf("render", "Invalid actor model %u data or texture slot",
                   static_cast<unsigned>(geometry_->modelId));
       return false;
@@ -393,10 +390,7 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     return true;
   }
   bool ProjectVertices() override {
-    return Render_ProjectModelVertices(&geometry_->instance,
-                                       actor_.boneMatrices,
-                                       -Render_nearClip * kProjectionDepthScale,
-                                       workspace_->model) != 0;
+    return VS::Render::ProjectLiveActorModel(*geometry_, actor_.boneMatrices);
   }
   void SetCulled(bool culled) override {
     actor_.instance.isPreviewModel = culled ? 1 : 0;
@@ -411,21 +405,15 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     CVECTOR color = geometry_->instance.baseColor;
     switch (polygons) {
       case ModelPolygons::kTextured:
-        Render_DrawActorPolygons(&Actors_modelRenderContext,
-                                 &geometry_->instance, &color,
-                                 workspace_->model);
+        VS::Render::DrawLiveActorPolygons(*geometry_, color);
         return;
       case ModelPolygons::kCompanionGouraud:
         memcpy(&color, &actor_.companionColor, sizeof color);
-        Render_DrawModelGouraudPolygons(&Actors_modelRenderContext,
-                                        &geometry_->instance, &color,
-                                        workspace_->model);
+        VS::Render::DrawLiveActorGouraudPolygons(*geometry_, color);
         return;
       case ModelPolygons::kCompanionFlat:
         memcpy(&color, &actor_.companionColor, sizeof color);
-        Render_DrawModelFlatPolygons(&Actors_modelRenderContext,
-                                     &geometry_->instance, &color,
-                                     workspace_->model);
+        VS::Render::DrawLiveActorFlatPolygons(*geometry_, color);
         return;
     }
   }
@@ -433,8 +421,9 @@ class LiveActorModelDraw final : public ActorModelDrawHost {
     return actor_.instance.soundEnabled != 0;
   }
   void DrawShadow() override {
-    Render_DrawActorGroundShadow(&actor_, &Render_frameScratch.viewMatrix,
-                                 &Render_ModelWorkspace()->rootOffset);
+    VS::Render::DrawLiveActorGroundShadow(actor_,
+                                          Render_frameScratch.viewMatrix,
+                                          Render_ModelWorkspace()->rootOffset);
   }
 
  private:

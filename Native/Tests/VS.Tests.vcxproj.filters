@@ -231,6 +231,9 @@
     <ClCompile Include="src\ModelDrawingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ModelGeometryTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MotionRequestsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

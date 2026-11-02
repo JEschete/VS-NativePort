@@ -1,7 +1,7 @@
 {
 "Native\\Content\\src\\ActorAssets.cpp": [
 [
-183,
+185,
 [
 "    u_char* cursor = polygonData;"
 ],
@@ -10,7 +10,7 @@
 ]
 ],
 [
-248,
+250,
 [
 "        destination = Core_Memory_AllocateFromLowEnd(byteCount);"
 ],
@@ -19,7 +19,7 @@
 ]
 ],
 [
-357,
+359,
 [
 "            Actors_weaponModels[objectData->targetSlot] = objectData->destination;"
 ],
@@ -28,7 +28,7 @@
 ]
 ],
 [
-385,
+387,
 [
 "                data = (void*)model->sectionOffsets;"
 ],
@@ -37,7 +37,7 @@
 ]
 ],
 [
-391,
+393,
 [
 "                    buf = Core_Memory_AllocateFromLowEnd(sizeof *buf);"
 ],
@@ -46,7 +46,7 @@
 ]
 ],
 [
-437,
+440,
 [
 "        data = Content_legacyWeaponParseCursor;"
 ],
@@ -55,7 +55,7 @@
 ]
 ],
 [
-461,
+464,
 [
 "        dst = Core_Memory_AllocateFromLowEnd(size);"
 ],
@@ -64,7 +64,7 @@
 ]
 ],
 [
-537,
+542,
 [
 "    LoadImage(&rect, (void*)data);"
 ],
@@ -73,7 +73,7 @@
 ]
 ],
 [
-547,
+552,
 [
 "    pData = (void*)VS_ONDISC(model->sectionOffsets, polygonSection, void*);"
 ],
@@ -82,7 +82,7 @@
 ]
 ],
 [
-818,
+825,
 [
 "            Actors_actorRecords[object->targetSlot] = object->destination;"
 ],
@@ -91,7 +91,7 @@
 ]
 ],
 [
-834,
+841,
 [
 "            ((void (*)())Actors_ResetActorMotionState)(actor->instance.slot);"
 ],
@@ -100,7 +100,7 @@
 ]
 ],
 [
-880,
+887,
 [
 "    model = Core_Memory_AllocateFromLowEnd(size);"
 ],
@@ -109,7 +109,7 @@
 ]
 ],
 [
-1021,
+1028,
 [
 "    pData = VS_ONDISC(actor->instance.model, polygonSection, void *);"
 ],
@@ -118,7 +118,7 @@
 ]
 ],
 [
-1142,
+1149,
 [
 "    ((void (*)())Actors_ResetActorMotionState)(actor->instance.slot);"
 ],
@@ -127,7 +127,7 @@
 ]
 ],
 [
-1369,
+1377,
 [
 "            seq = Core_Memory_AllocateFromLowEnd(size);"
 ],
@@ -136,7 +136,7 @@
 ]
 ],
 [
-1383,
+1391,
 [
 "            seq = Core_Memory_AllocateFromLowEnd(size);"
 ],
@@ -145,7 +145,7 @@
 ]
 ],
 [
-1393,
+1401,
 [
 "            seq = source->battleSequence;"
 ],
@@ -154,7 +154,7 @@
 ]
 ],
 [
-1396,
+1404,
 [
 "                    seq = Actors_primarySequenceBuffer;"
 ],
@@ -163,7 +163,7 @@
 ]
 ],
 [
-1400,
+1408,
 [
 "                    seq = Core_Memory_AllocateFromLowEnd(0x7800);"
 ],
@@ -172,7 +172,7 @@
 ]
 ],
 [
-1402,
+1410,
 [
 "                    Content_CopyWeaponSequence(seq, source->battleSequence);"
 ],
@@ -181,7 +181,7 @@
 ]
 ],
 [
-1422,
+1430,
 [
 "            seq = Core_Memory_AllocateFromLowEnd(size);"
 ],
@@ -190,7 +190,7 @@
 ]
 ],
 [
-1427,
+1435,
 [
 "            seq = Actors_primarySequenceBuffer;"
 ],
@@ -199,7 +199,7 @@
 ]
 ],
 [
-1441,
+1450,
 [
 "        seq = Actors_sequenceWorkBuffer;"
 ],
@@ -208,7 +208,7 @@
 ]
 ],
 [
-1452,
+1461,
 [
 "        seq = Core_Memory_AllocateFromLowEnd(size);"
 ],
@@ -217,7 +217,7 @@
 ]
 ],
 [
-1642,
+1652,
 [
 "            Audio_StopBankSfx(0x180, VS_ONDISC(actor->instance.model, soundSection, void *), 0);"
 ],
@@ -226,7 +226,7 @@
 ]
 ],
 [
-1713,
+1723,
 [
 "            Content_legacyEtmFileBuffer = Core_Memory_AllocateFromHighEnd(fileSize);"
 ],
@@ -235,7 +235,7 @@
 ]
 ],
 [
-1747,
+1757,
 [
 "        LoadImage(&rect, (void*)Content_legacyEtmFileBuffer);"
 ],
@@ -1967,7 +1967,7 @@
 ]
 ],
 [
-2137,
+2136,
 [
 "    Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -1978,7 +1978,7 @@
 ],
 "Native\\Game\\src\\Actors\\ModelRendering.cpp": [
 [
-174,
+172,
 [
 "                    frame = (void*)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -1987,7 +1987,7 @@
 ]
 ],
 [
-225,
+223,
 [
 "    frame = (void*)((uintptr_t)Core_ScratchBase() + 0x000);"
 ],
@@ -1996,7 +1996,7 @@
 ]
 ],
 [
-227,
+225,
 [
 "    entries = (void*)Field_gimmickInstances;"
 ],
@@ -2005,7 +2005,7 @@
 ]
 ],
 [
-230,
+228,
 [
 "        object = (void*)*entries;"
 ],
@@ -2014,7 +2014,7 @@
 ]
 ],
 [
-271,
+269,
 [
 "    Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2023,7 +2023,7 @@
 ]
 ],
 [
-315,
+313,
 [
 "        Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2032,7 +2032,7 @@
 ]
 ],
 [
-324,
+322,
 [
 "            Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2041,7 +2041,7 @@
 ]
 ],
 [
-332,
+330,
 [
 "        Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2050,7 +2050,7 @@
 ]
 ],
 [
-336,
+334,
 [
 "        Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2059,7 +2059,7 @@
 ]
 ],
 [
-436,
+433,
 [
 "        Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2068,7 +2068,7 @@
 ]
 ],
 [
-530,
+526,
 [
 "            Core_Memory_AllocateFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]);"
 ],
@@ -2079,7 +2079,7 @@
 ],
 "Native\\Game\\src\\Actors\\Movement.cpp": [
 [
-1073,
+1081,
 [
 "        ((void (*)())Actors_TurnActorToAtRate)(actor->instance.slot, actor->routeTarget.pad, 8);"
 ],
@@ -2088,7 +2088,7 @@
 ]
 ],
 [
-1108,
+1116,
 [
 "        ((void (*)())Actors_TranslateActorToOverTime)(actor->instance.slot, &actor->routeTarget, -1);",
 "        ((void (*)())Actors_TurnActorToAtRate)(actor->instance.slot, actor->routeTarget.pad, 8);"
@@ -2099,7 +2099,7 @@
 ]
 ],
 [
-1329,
+1347,
 [
 "            ((void (*)())Actors_UpdateActorJumpAndFall)(0, actor);"
 ],
@@ -2108,7 +2108,7 @@
 ]
 ],
 [
-1344,
+1362,
 [
 "                    ((void (*)())Actors_UpdateActorJumpAndFall)(0, actor);"
 ],
@@ -2117,7 +2117,7 @@
 ]
 ],
 [
-1348,
+1366,
 [
 "                ((void (*)())Actors_ApplyActorGroundOffset)(actor);"
 ],
@@ -2126,7 +2126,7 @@
 ]
 ],
 [
-1357,
+1375,
 [
 "            ((void (*)())Actors_ApplyActorGroundOffset)(actor);"
 ],
@@ -2135,7 +2135,7 @@
 ]
 ],
 [
-1359,
+1377,
 [
 "            ((void (*)())Actors_UpdateActorJumpAndFall)(actorId, actor);"
 ],
@@ -2144,7 +2144,7 @@
 ]
 ],
 [
-1379,
+1397,
 [
 "                    ((void (*)())Actors_UpdateActorJumpAndFall)(actorId, actor);"
 ],
@@ -2153,7 +2153,7 @@
 ]
 ],
 [
-1384,
+1402,
 [
 "                ((void (*)())Actors_ApplyActorFlightMovement)(actor);"
 ],
@@ -2162,7 +2162,7 @@
 ]
 ],
 [
-1387,
+1405,
 [
 "                ((void (*)())Actors_ApplyActorMovementVector)(actor);"
 ],
@@ -2171,7 +2171,7 @@
 ]
 ],
 [
-1650,
+1668,
 [
 "        Actors_UpdateActorSteering(actor, facing, input);"
 ],
@@ -2180,7 +2180,7 @@
 ]
 ],
 [
-1808,
+1826,
 [
 "            ((void (*)())Actors_SetActorTranslation)(index, &motion, 0);"
 ],
@@ -2189,7 +2189,7 @@
 ]
 ],
 [
-1865,
+1883,
 [
 "            if (((int (*)())Field_CalcActorLedgeOffset)(actor, &motion) == 0) {"
 ],
@@ -2198,7 +2198,7 @@
 ]
 ],
 [
-1868,
+1886,
 [
 "            ((void (*)())Actors_SetActorMotion)(index, &motion, 4);"
 ],
@@ -2207,7 +2207,7 @@
 ]
 ],
 [
-1887,
+1905,
 [
 "            ((void (*)())Actors_SetActorMotion)(index, &motion, 0x18);"
 ],
@@ -2216,7 +2216,7 @@
 ]
 ],
 [
-1906,
+1924,
 [
 "            ((void (*)())Actors_SetActorMotion)(index, &motion, result * 8);"
 ],
@@ -2225,7 +2225,7 @@
 ]
 ],
 [
-1923,
+1941,
 [
 "                ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2A, 0x2B);"
 ],
@@ -2234,7 +2234,7 @@
 ]
 ],
 [
-1927,
+1945,
 [
 "            Actors_UpdateActorSteering(actor, facing, input);"
 ],
@@ -2243,7 +2243,7 @@
 ]
 ],
 [
-1935,
+1953,
 [
 "                ((void (*)())Audio_PlayActorSoundPair)(actor, 0x29, 0);"
 ],
@@ -2252,7 +2252,7 @@
 ]
 ],
 [
-1968,
+1986,
 [
 "                Actors_SetActorFallDestination(actor, &motion);"
 ],
@@ -2261,7 +2261,7 @@
 ]
 ],
 [
-1998,
+2016,
 [
 "    ((void (*)())Actors_SetActorTranslation)(index, &motion, 0);"
 ],
@@ -2270,7 +2270,7 @@
 ]
 ],
 [
-3010,
+3028,
 [
 "                    ((void (*)())Battle_Ai_ReleaseAiDestinationTile)("
 ],
@@ -2279,7 +2279,7 @@
 ]
 ],
 [
-3158,
+3176,
 [
 "                ((void (*)())Battle_Ai_ReleaseAiDestinationTile)(actor->instance.currentTileX, actor->instance.currentTileZ);"
 ],
@@ -2499,7 +2499,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Behavior.cpp": [
 [
-64,
+66,
 [
 "            if (Battle_Ai_CanApproachEngagedTarget((void*)state, (void*)entry)) {"
 ],
@@ -2508,7 +2508,7 @@
 ]
 ],
 [
-83,
+85,
 [
 "                Battle_Ai_TryEngageActor((void*)state);"
 ],
@@ -2517,7 +2517,7 @@
 ]
 ],
 [
-87,
+89,
 [
 "        if (Battle_Ai_ApproachActor((void*)state, id, distance, flag)) {"
 ],
@@ -2526,7 +2526,7 @@
 ]
 ],
 [
-90,
+92,
 [
 "        return Battle_Ai_TrackActorPosition((void*)state, id) != 0;"
 ],
@@ -2535,7 +2535,7 @@
 ]
 ],
 [
-92,
+94,
 [
 "        if (!Battle_Ai_IsActionCooldownReady((void*)state, (void*)entry)) {"
 ],
@@ -2544,7 +2544,7 @@
 ]
 ],
 [
-124,
+126,
 [
 "        Battle_Ai_DisengageActor((void*)state);"
 ],
@@ -2553,7 +2553,7 @@
 ]
 ],
 [
-152,
+154,
 [
 "        if (Battle_Ai_MoveForActionCandidate((void*)ai_state, (void*)entry)) {"
 ],
@@ -2562,7 +2562,7 @@
 ]
 ],
 [
-160,
+162,
 [
 "                return Battle_Ai_MoveForActionCandidate((void*)ai_state, (void*)entry);"
 ],
@@ -2571,7 +2571,7 @@
 ]
 ],
 [
-271,
+273,
 [
 "    if (!state->actionStatus && Battle_Ai_TryApproachPlannedTarget((void*)state, (void*)entry)) {"
 ],
@@ -2580,7 +2580,7 @@
 ]
 ],
 [
-276,
+278,
 [
 "        if (Battle_Ai_ApproachActor((void*)state, target, 288, 1)) {"
 ],
@@ -2589,7 +2589,7 @@
 ]
 ],
 [
-279,
+281,
 [
 "                Battle_Ai_ReleaseActorAiReservations((void*)state);",
 "                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
@@ -2600,7 +2600,7 @@
 ]
 ],
 [
-284,
+286,
 [
 "        if (Battle_Ai_TrackActorPosition((void*)state, target)) {"
 ],
@@ -2609,7 +2609,7 @@
 ]
 ],
 [
-297,
+299,
 [
 "        return Battle_Ai_FleeVisibleEnemies((void*)state, 1);"
 ],
@@ -2618,7 +2618,7 @@
 ]
 ],
 [
-301,
+303,
 [
 "        && Battle_Ai_ApproachActor((void*)state, target, 1024, 1)) {"
 ],
@@ -2627,7 +2627,7 @@
 ]
 ],
 [
-304,
+306,
 [
 "    return Battle_Ai_UpdateCombatPursuit((void*)state);"
 ],
@@ -2636,7 +2636,7 @@
 ]
 ],
 [
-353,
+355,
 [
 "                    Battle_Ai_ProjectClearRadialDestination((void*)state, tile,"
 ],
@@ -2645,7 +2645,7 @@
 ]
 ],
 [
-373,
+375,
 [
 "            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
 ],
@@ -2654,7 +2654,7 @@
 ]
 ],
 [
-376,
+378,
 [
 "        if (Battle_Ai_ApproachActor((void*)state, target, 320, 1)) {"
 ],
@@ -2663,7 +2663,7 @@
 ]
 ],
 [
-379,
+381,
 [
 "        if (Battle_Ai_TrackActorPosition((void*)state, target)) {"
 ],
@@ -2672,7 +2672,7 @@
 ]
 ],
 [
-389,
+391,
 [
 "            ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)state, 6, 0);"
 ],
@@ -2681,7 +2681,7 @@
 ]
 ],
 [
-391,
+393,
 [
 "        if (Battle_Ai_FleeVisibleEnemies((void*)state, 1)) {"
 ],
@@ -2690,7 +2690,7 @@
 ]
 ],
 [
-395,
+397,
 [
 "    return Battle_Ai_FleeVisibleEnemies((void*)state, 1);"
 ],
@@ -2699,7 +2699,7 @@
 ]
 ],
 [
-405,
+407,
 [
 "    if (!state->actionStatus && Battle_Ai_TryApproachPlannedTarget((void*)state, (void*)entry)) {"
 ],
@@ -2708,7 +2708,7 @@
 ]
 ],
 [
-410,
+412,
 [
 "        if (Battle_Ai_ApproachActor((void*)state, target, 384, 0)) {"
 ],
@@ -2717,7 +2717,7 @@
 ]
 ],
 [
-413,
+415,
 [
 "                Battle_Ai_ReleaseActorAiReservations((void*)state);",
 "                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
@@ -2728,7 +2728,7 @@
 ]
 ],
 [
-418,
+420,
 [
 "        if (Battle_Ai_TrackActorPosition((void*)state, target)) {"
 ],
@@ -2737,7 +2737,7 @@
 ]
 ],
 [
-426,
+428,
 [
 "            if (Battle_Ai_FleeVisibleEnemies((void*)state, 0)) {"
 ],
@@ -2746,7 +2746,7 @@
 ]
 ],
 [
-520,
+522,
 [
 "                VS::Battle::Ai::IssueLiveActorCommand((void*)state, 17);"
 ],
@@ -2755,7 +2755,7 @@
 ]
 ],
 [
-539,
+541,
 [
 "                    Battle_Ai_TryExecutePlannedActions((void*)state);"
 ],
@@ -2766,7 +2766,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Movement.cpp": [
 [
-111,
+112,
 [
 "                Battle_Ai_ForgetAiActionTarget((void*)state);"
 ],
@@ -2775,7 +2775,7 @@
 ]
 ],
 [
-160,
+161,
 [
 "    i = Field_CollectMovingPlatformPositions((void*)points);"
 ],
@@ -2784,7 +2784,7 @@
 ]
 ],
 [
-245,
+246,
 [
 "    if (Battle_Ai_IsFlightDirectionObstructed((void*)state, direction, 1)) {"
 ],
@@ -2793,7 +2793,7 @@
 ]
 ],
 [
-296,
+297,
 [
 "                    if (Battle_Ai_DestinationOccupancy((void*)state, state->tile) > 0) {",
 "                        Battle_Ai_ReleaseActorAiReservations((void*)state);"
@@ -2804,7 +2804,7 @@
 ]
 ],
 [
-338,
+339,
 [
 "    if (Battle_Ai_UpdateFlightGroundTransition((void*)state, action, 1)) {"
 ],
@@ -2813,7 +2813,7 @@
 ]
 ],
 [
-342,
+343,
 [
 "        Battle_Ai_BeginAiAlternateTerrainMovement((void*)state);"
 ],
@@ -2822,7 +2822,7 @@
 ]
 ],
 [
-346,
+347,
 [
 "    if (!Battle_Ai_SelectActorVerticalMovementStep((void*)state, &step, &mode)) {"
 ],
@@ -2831,7 +2831,7 @@
 ]
 ],
 [
-388,
+389,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -2840,7 +2840,7 @@
 ]
 ],
 [
-394,
+395,
 [
 "        if (state->moveY > 0 && Battle_Ai_IsFlightDirectionObstructed((void*)state, 0, 0)) {"
 ],
@@ -2849,7 +2849,7 @@
 ]
 ],
 [
-397,
+398,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -2858,7 +2858,7 @@
 ]
 ],
 [
-406,
+407,
 [
 "        if (!state->opaque0 || Battle_Ai_IsFlightDirectionObstructed((void*)state, 0, 0)) {"
 ],
@@ -2867,7 +2867,7 @@
 ]
 ],
 [
-408,
+409,
 [
 "            Battle_Ai_UpdateMovementRecovery((void*)state);"
 ],
@@ -2876,7 +2876,7 @@
 ]
 ],
 [
-436,
+437,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -2885,7 +2885,7 @@
 ]
 ],
 [
-439,
+440,
 [
 "    Battle_Ai_ResolveDirectionalMovement((void*)state, angle, 2);"
 ],
@@ -2894,7 +2894,7 @@
 ]
 ],
 [
-456,
+457,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -2903,7 +2903,7 @@
 ]
 ],
 [
-487,
+488,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -2912,7 +2912,7 @@
 ]
 ],
 [
-493,
+494,
 [
 "            Battle_Ai_UpdateFlightDirectionalMovement((void*)state, angle);"
 ],
@@ -2921,7 +2921,7 @@
 ]
 ],
 [
-517,
+518,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -2930,7 +2930,7 @@
 ]
 ],
 [
-522,
+523,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 8);"
 ],
@@ -2939,7 +2939,7 @@
 ]
 ],
 [
-539,
+540,
 [
 "    if (Battle_Ai_UpdateFlightGroundTransition((void*)ai_state, movement_angle, 0) != 0) {"
 ],
@@ -2948,7 +2948,7 @@
 ]
 ],
 [
-544,
+545,
 [
 "        Battle_Ai_UpdateMovementRecovery((void*)ai_state);"
 ],
@@ -2957,7 +2957,7 @@
 ]
 ],
 [
-553,
+554,
 [
 "        Battle_Ai_UpdateMovementRecovery((void*)ai_state);"
 ],
@@ -2966,7 +2966,7 @@
 ]
 ],
 [
-631,
+632,
 [
 "        Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, angle, distance);"
 ],
@@ -2975,7 +2975,7 @@
 ]
 ],
 [
-646,
+647,
 [
 "    if (Battle_Ai_DestinationOccupancy((void*)state, dest.word) > 0) {"
 ],
@@ -2984,7 +2984,7 @@
 ]
 ],
 [
-652,
+653,
 [
 "        if (Battle_Ai_DestinationOccupancy((void*)state, dest.word) > 0) {"
 ],
@@ -2993,7 +2993,7 @@
 ]
 ],
 [
-661,
+662,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)state, 13);"
 ],
@@ -3002,7 +3002,7 @@
 ]
 ],
 [
-664,
+665,
 [
 "    Battle_Ai_UpdateMovementRecovery((void*)state);"
 ],
@@ -3011,7 +3011,7 @@
 ]
 ],
 [
-673,
+674,
 [
 "    Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, angle, state->moveDistance);"
 ],
@@ -3020,7 +3020,7 @@
 ]
 ],
 [
-675,
+676,
 [
 "    Battle_Ai_ProjectClearRadialDestination((void*)state, state->tile, opposite, state->moveDistance);"
 ],
@@ -3029,7 +3029,7 @@
 ]
 ],
 [
-716,
+717,
 [
 "    Battle_Ai_ResolveDirectionalMovement((void*)state,"
 ],
@@ -3038,7 +3038,7 @@
 ]
 ],
 [
-997,
+998,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)s, 0);"
 ],
@@ -3047,7 +3047,7 @@
 ]
 ],
 [
-1080,
+1081,
 [
 "                Battle_Ai_ProjectClearRadialDestination((void*)s, s->tile, angle,"
 ],
@@ -3056,7 +3056,7 @@
 ]
 ],
 [
-1093,
+1094,
 [
 "            Battle_Ai_UpdateMovementRecovery((void*)s);"
 ],
@@ -3065,7 +3065,7 @@
 ]
 ],
 [
-1128,
+1129,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -3074,7 +3074,7 @@
 ]
 ],
 [
-1148,
+1149,
 [
 "                ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((void*)s, 7, 40);"
 ],
@@ -3083,7 +3083,7 @@
 ]
 ],
 [
-1178,
+1179,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)context, 0);"
 ],
@@ -3092,7 +3092,7 @@
 ]
 ],
 [
-1217,
+1218,
 [
 "    VS::Battle::Ai::IssueLiveActorCommand((void*)context, 4);"
 ],
@@ -3101,7 +3101,7 @@
 ]
 ],
 [
-1235,
+1236,
 [
 "        && Battle_Ai_DestinationOccupancy((void*)state, state->tile.word) > 0) {",
 "        Battle_Ai_ReleaseActorAiReservations((void*)state);"
@@ -3112,7 +3112,7 @@
 ]
 ],
 [
-1246,
+1247,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
@@ -3121,7 +3121,7 @@
 ]
 ],
 [
-1251,
+1252,
 [
 "        VS::Battle::Ai::IssueLiveActorCommand((void*)state, 3);"
 ],
@@ -3130,7 +3130,7 @@
 ]
 ],
 [
-1280,
+1281,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 0);"
 ],
@@ -3139,7 +3139,7 @@
 ]
 ],
 [
-1284,
+1285,
 [
 "            VS::Battle::Ai::IssueLiveActorCommand((void*)state, 4);"
 ],
@@ -3150,7 +3150,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Navigation.cpp": [
 [
-467,
+468,
 [
 "                    VS::Battle::Ai::IssueLiveActorCommand((void*)state, mode);"
 ],
@@ -3159,7 +3159,7 @@
 ]
 ],
 [
-476,
+477,
 [
 "    Battle_Ai_ResolveDirectionalMovement((void*)state,"
 ],
@@ -3226,7 +3226,7 @@
 ],
 "Native\\Game\\src\\Battle\\Ai\\Perception.cpp": [
 [
-356,
+359,
 [
 "            ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_MovementRecoveryView*)state);"
 ],
@@ -3235,7 +3235,7 @@
 ]
 ],
 [
-384,
+387,
 [
 "                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -3244,7 +3244,7 @@
 ]
 ],
 [
-426,
+429,
 [
 "        Battle_Ai_RefreshAiResourceRestrictions(state);"
 ],
@@ -3253,7 +3253,7 @@
 ]
 ],
 [
-467,
+470,
 [
 "                Battle_Ai_ForgetAiActionTarget((Battle_Ai_ActionExecutionView*)state);"
 ],
@@ -3262,7 +3262,7 @@
 ]
 ],
 [
-587,
+590,
 [
 "    info = (void*)&Battle_actionDefinitions[app->action];"
 ],
@@ -3271,7 +3271,7 @@
 ]
 ],
 [
-597,
+600,
 [
 "    other = (void*)Battle_Ai_actorAiStates[source];"
 ],
@@ -3280,7 +3280,7 @@
 ]
 ],
 [
-652,
+655,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -3289,7 +3289,7 @@
 ]
 ],
 [
-654,
+657,
 [
 "            firstOther = (void*)Battle_Ai_actorAiStates[id];"
 ],
@@ -3298,7 +3298,7 @@
 ]
 ],
 [
-670,
+673,
 [
 "        for (actor = (void*)Battle_actors[0]; actor; actor = actor->next) {"
 ],
@@ -3307,7 +3307,7 @@
 ]
 ],
 [
-672,
+675,
 [
 "            other = (void*)Battle_Ai_actorAiStates[actor->id];"
 ],
@@ -3316,7 +3316,7 @@
 ]
 ],
 [
-674,
+677,
 [
 "                for (candidate = (void*)Battle_actors[0]; candidate;"
 ],
@@ -3325,7 +3325,7 @@
 ]
 ],
 [
-680,
+683,
 [
 "                        for (ally = (void*)Battle_actors[0]; ally; ally = ally->next) {",
 "                            allyState = (void*)Battle_Ai_actorAiStates[ally->id];"
@@ -4205,7 +4205,7 @@
 ],
 "Native\\Game\\src\\Boot\\Lifecycle.cpp": [
 [
-163,
+164,
 [
 "    PadInitDirect(Input_legacyPadResponseBytes[0], Input_legacyPadResponseBytes[1]);"
 ],
@@ -4272,7 +4272,7 @@
 ]
 ],
 [
-446,
+447,
 [
 "        package_block = (void*)package_block + (meta & 0xFFFF);"
 ],
@@ -6504,7 +6504,7 @@
 ],
 "Native\\Game\\src\\Field\\Collision.cpp": [
 [
-940,
+941,
 [
 "    if (((int (*)())Field_CanActorSeparateFromOverlaps)(actor, motion) == 0) {"
 ],
@@ -6555,7 +6555,7 @@
 ],
 "Native\\Game\\src\\Field\\Gimmicks.cpp": [
 [
-373,
+374,
 [
 "        return;"
 ],
@@ -6564,7 +6564,7 @@
 ]
 ],
 [
-386,
+387,
 [
 "        return;"
 ],
@@ -6573,7 +6573,7 @@
 ]
 ],
 [
-528,
+529,
 [
 "        polygon = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
 ],
@@ -6582,7 +6582,7 @@
 ]
 ],
 [
-815,
+816,
 [
 "    created_gimmick = Field_gimmickInstances[asset_request->targetSlot] = asset_request->destination;"
 ],
@@ -6591,7 +6591,7 @@
 ]
 ],
 [
-836,
+837,
 [
 "        template_or_polygon_section = Field_gimmickModelTemplates[Field_gimmickTemplateIndices[asset_request->subKind]];"
 ],
@@ -6600,7 +6600,7 @@
 ]
 ],
 [
-840,
+841,
 [
 "        created_gimmick->model = Content_CopyModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize);"
 ],
@@ -6609,7 +6609,7 @@
 ]
 ],
 [
-846,
+848,
 [
 "        template_or_polygon_section = VS_ONDISC(created_gimmick->model, polygonSection, void *);"
 ],
@@ -6618,7 +6618,7 @@
 ]
 ],
 [
-1392,
+1395,
 [
 "        ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);"
 ],
@@ -6627,7 +6627,7 @@
 ]
 ],
 [
-1403,
+1406,
 [
 "            ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2E, 0x2F);"
 ],
@@ -6636,7 +6636,7 @@
 ]
 ],
 [
-1407,
+1410,
 [
 "            ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);"
 ],
@@ -6645,7 +6645,7 @@
 ]
 ],
 [
-1435,
+1438,
 [
 "    ((void (*)())Actors_TurnActorTowardTileOverTime)(actorId, (Actors_TileTarget*)&tile, 4);"
 ],
@@ -6654,7 +6654,7 @@
 ]
 ],
 [
-1439,
+1442,
 [
 "    ((void (*)())Actors_TranslateActorToOverTime)(actorId, &position, 4);"
 ],
@@ -6663,7 +6663,7 @@
 ]
 ],
 [
-1577,
+1580,
 [
 "    Render_ModelScratchpadAnglesView* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);"
 ],
@@ -6672,7 +6672,7 @@
 ]
 ],
 [
-1659,
+1662,
 [
 "        if (!((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {"
 ],
@@ -6681,7 +6681,7 @@
 ]
 ],
 [
-1735,
+1738,
 [
 "            child = (void*)Field_gimmickInstances[step];"
 ],
@@ -6690,7 +6690,7 @@
 ]
 ],
 [
-1748,
+1751,
 [
 "        ((int (*)())Field_UpdateGimmickReactionAnimation)(object);"
 ],
@@ -6699,7 +6699,7 @@
 ]
 ],
 [
-1751,
+1754,
 [
 "        if (((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {"
 ],
@@ -6708,7 +6708,7 @@
 ]
 ],
 [
-1759,
+1762,
 [
 "        ((int (*)())Field_UpdateGimmickReactionAnimation)(object);"
 ],
@@ -6719,7 +6719,7 @@
 ],
 "Native\\Game\\src\\Field\\Interactions.cpp": [
 [
-129,
+130,
 [
 "    int template;"
 ],
@@ -6728,7 +6728,7 @@
 ]
 ],
 [
-160,
+161,
 [
 "                    template = 7; // Unlocked with key"
 ],
@@ -6737,7 +6737,7 @@
 ]
 ],
 [
-162,
+163,
 [
 "                        template = 9; // Unlocked with sigil"
 ],
@@ -6746,7 +6746,7 @@
 ]
 ],
 [
-164,
+165,
 [
 "                    Menu_ShowSceneNotification(template, door_trigger->keyOrSigil, 1);"
 ],
@@ -6755,7 +6755,7 @@
 ]
 ],
 [
-174,
+175,
 [
 "                    template = 6; // Locked with key"
 ],
@@ -6764,7 +6764,7 @@
 ]
 ],
 [
-176,
+177,
 [
 "                        template = 8; // Locked with sigil"
 ],
@@ -6773,7 +6773,7 @@
 ]
 ],
 [
-180,
+181,
 [
 "                    template = 5; // Magic lock (chest)"
 ],
@@ -6782,7 +6782,7 @@
 ]
 ],
 [
-183,
+184,
 [
 "                    template = 10; // Unconditionally locked"
 ],
@@ -6791,7 +6791,7 @@
 ]
 ],
 [
-186,
+187,
 [
 "                Menu_ShowSceneNotification(template, door_trigger->keyOrSigil, 1);"
 ],

@@ -437,12 +437,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Render\ModelGeometry.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Render\ModelGeometry.cpp" />
+    <ClCompile Include="src\Render\ModelGeometryLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Render\ModelWorkspace.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -634,7 +631,6 @@
     <ClInclude Include="src\Render\Loading.h" />
     <ClInclude Include="src\Render\Model.h" />
     <ClInclude Include="src\Render\ModelDraw.h" />
-    <ClInclude Include="src\Render\ModelGeometry.h" />
     <ClInclude Include="src\Render\Palette.h" />
     <ClInclude Include="src\Render\Primitives.h" />
     <ClInclude Include="src\Render\Render.h" />
@@ -697,6 +693,8 @@
     <ClInclude Include="include\Platform\GameFiber.hpp" />
     <ClInclude Include="include\Platform\Paths.hpp" />
     <ClInclude Include="include\Render\Device.hpp" />
+    <ClInclude Include="include\Render\ModelGeometry.hpp" />
+    <ClInclude Include="include\Render\ModelGeometryLive.hpp" />
     <ClInclude Include="include\Render\ModelWorkspace.h" />
     <ClInclude Include="include\Render\PageSpace.hpp" />
     <ClInclude Include="include\Render\RoomLighting.hpp" />

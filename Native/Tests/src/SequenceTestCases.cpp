@@ -11,10 +11,6 @@
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 
-extern "C" {
-#include "Render/ModelGeometry.h"
-}
-
 extern "C" int Tests_SharedSequenceOffsets(void);
 extern "C" int Tests_AdvanceSequenceWithoutScratch(void);
 extern "C" int Tests_BlendSequencePose(int mode);
@@ -297,23 +293,12 @@ TEST_CASE("Gimmick overrides preserve every material state and limb palette",
   }
 }
 
-TEST_CASE(
-    "Original gimmick override address resolves to the typed native entry",
-    "[actors][appearance][render][gimmick-override]") {
-  using Renderer =
-      void (*)(Actors_ModelRenderContext*, Field_GimmickInstance*, int*, void*);
-  static_assert(
-      std::is_same_v<decltype(&Render_DrawModelGouraudPolygonsWithOverrides),
-                     Renderer>);
+TEST_CASE("Original gimmick override address has no C entry after promotion",
+          "[actors][appearance][render][gimmick-override]") {
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", 0x800B5C30u);
-  REQUIRE(resolved != nullptr);
-  CHECK(reinterpret_cast<Renderer>(resolved) ==
-        Render_DrawModelGouraudPolygonsWithOverrides);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800B5C31u) == nullptr);
+                                          0x800B5C30u) == nullptr);
 }
 
 TEST_CASE("Weapon overrides preserve the source matrix-byte palette mask",
@@ -325,22 +310,12 @@ TEST_CASE("Weapon overrides preserve the source matrix-byte palette mask",
   }
 }
 
-TEST_CASE("Original weapon override address resolves to the typed native entry",
+TEST_CASE("Original weapon override address has no C entry after promotion",
           "[actors][appearance][render][weapon-override]") {
-  using Renderer = void (*)(Actors_ModelRenderContext*, Actors_WeaponModel*,
-                            CVECTOR*, void*);
-  static_assert(
-      std::is_same_v<decltype(&Render_DrawModelFlatPolygonsWithOverrides),
-                     Renderer>);
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* resolved = VS::Content::ResolveModuleAddress(
-      symbols, "BATTLE/BATTLE.PRG", 0x800B516Cu);
-  REQUIRE(resolved != nullptr);
-  CHECK(reinterpret_cast<Renderer>(resolved) ==
-        Render_DrawModelFlatPolygonsWithOverrides);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800B516Du) == nullptr);
+                                          0x800B516Cu) == nullptr);
 }
 
 TEST_CASE("Shared sequence retirement unwinds vertex edits before detaching",

@@ -231,7 +231,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Lighting.h"
 #include "Render/Model.h"
-#include "Render/ModelGeometry.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/RoomDraw.h"
@@ -1290,12 +1289,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B1A68u, 0u, (void*)&Actors_DrawGimmickModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B217Cu, 0u, (void*)&Actors_DrawActorWeaponModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B26B8u, 0u, (void*)&Actors_ApplyLockedBoneTransform, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B3A68u, 0u, (void*)&Render_ProjectModelVertices, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B3CF0u, 0u, (void*)&Render_DrawModelFlatPolygons, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B4594u, 0u, (void*)&Render_DrawModelGouraudPolygons, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B4B14u, 0u, (void*)&Render_DrawActorGroundShadow, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B516Cu, 0u, (void*)&Render_DrawModelFlatPolygonsWithOverrides, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B5C30u, 0u, (void*)&Render_DrawModelGouraudPolygonsWithOverrides, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B63ACu, 0u, (void*)&Actors_BeginTileJump, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6404u, 0u, (void*)&Actors_BeginAirborneTileJump, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B6438u, 0u, (void*)&Actors_BeginNavigationJump, 0u, 0u, 0u},

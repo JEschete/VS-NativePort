@@ -1,145 +1,183 @@
 // Hand-maintained (tools/port/owned.csv).
-#include <limits.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
+#include "Render/ModelGeometry.hpp"
 
-#include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelDraw.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/WeaponModel.h"
-#include "Core/Gte.h"
-#include "Field/Collision.h"
-#include "Field/Gimmicks.h"
-#include "Legacy/Psx.h"
-#include "Render/Camera.h"
-#include "Render/Display.h"
-#include "Render/Frame.h"
-#include "Render/ModelDraw.h"
-#include "Render/ModelGeometry.h"
-#include "Render/ModelWorkspace.h"
-#include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/UiPrimitives.h"
+#include <algorithm>
+#include <climits>
+#include <cstring>
+#include <optional>
+#include <utility>
 
-enum {
-  kSupportedBoneLimit = 63,
-  kGroupWords = 2,
-  kGroupBytes = kGroupWords * sizeof(uint16_t),
-  kTriangleCorners = 3,
-  kQuadCorners = 4,
-  kCoordinateBits = sizeof(int16_t) * CHAR_BIT,
-  kSectionAlignmentMask = sizeof(uint32_t) - 1,
-  kFlatTriangleCommand = 0x24,
-  kFlatQuadCommand = 0x2C,
-  kGouraudTriangleCommand = 0x34,
-  kGouraudQuadCommand = 0x3C,
-  kFlatTriangleBytes = 16,
-  kFlatQuadBytes = 20,
-  kFlatIndexOffset = sizeof(uint32_t),
-  kFlatTriangleUvOffset =
-      kFlatIndexOffset + kTriangleCorners * sizeof(uint16_t),
-  kFlatQuadUvOffset = kFlatIndexOffset + kQuadCorners * sizeof(uint16_t),
-  kGouraudTriangleBytes = 24,
-  kGouraudQuadBytes = 32,
-  kColorMask = 0xFFFFFF,
-  kPrimitiveBufferBytes = 0x20000,
-  kNormalDepthBias = -1,
-  kSpecialDepthBias = -5,
-  kFlatVertexWords = 2,
-  kGouraudVertexWords = 3,
-  kGouraudFirstUvOffset = 6,
-  kGouraudTriangleTailUvOffset = 20,
-  kGouraudQuadUvOffset = 24,
-  kBlendModeMask = 0x60,
-  kSemiTransparencyFlag = 0x10,
-  kAppearanceMaterialMask = 0xF0,
-  kAppearanceSubtractiveBlend = 0x40,
-  kAppearanceAdditiveBlend = 0x20,
-  kAppearanceFadeFirstState = 4,
-  kAppearanceFadeEndState = 9,
-  kAppearanceOpaqueState = 6,
-  kAppearanceBlendBoundary = 7,
-  kAppearanceForcedOverride = 15,
-  kGouraudSpecialFlagsOffset = 19,
-  kFlatSpecialFlagsOffset = 2,
-  kQuadCommandFlag = 8,
-  kCommandShift = 3 * CHAR_BIT,
-  kClutPacketWord = 3,
-  kFlatPagePacketWord = 5,
-  kGouraudPagePacketWord = 6,
-  kPolygonGroupCount = 3,
-  kSpecialPolygonGroup = 2,
-  kProjectedCoordinateBound = 1024,
-  kViewportWidth = 320,
-  kViewportHeight = 240,
-  kAdaptiveSplitMode = 3,
-  kTriangleDepthReciprocal = 341,
-  kDepthReciprocalBits = 12,
-  kQuadDepthShift = 4,
-  kDepthBiasMask = 3,
-  kDepthBiasStep = 4,
-  kModelOrderingLimit = 0x7C0,
-  kLimbPaletteGroups = 8,
-  kFirstLimbPaletteBit = 0x80,
-  kPulsedClutOffset = 0x480,
-  kNeutralTint = 0x808080,
-  kWeaponPaletteMatrix = 2,
-  kWeaponPaletteColumn = 2
-};
+namespace VS::Render {
+namespace {
+namespace Math = VS::Core::Math;
 
-enum {
-  kShadowVertices = 18,
-  kShadowFaces = 24,
-  kShadowBandFaces = 8,
-  kShadowPacketWords = 8,
-  kShadowGouraudCommand = 0x32000000,
-  kShadowGrayChannels = 0x010101,
-  kShadowFirstColorWord = 2,
-  kShadowVertexWords = 2,
-  kShadowSupportMode = 3,
-  kShadowFadeStep = 4,
-  kShadowMinimumExtent = 20,
-  kShadowSlopeLimit = 640,
-  kShadowHeightShift = 3,
-  kShadowExtentShift = 7,
-  kShadowFractionBits = 12,
-  kShadowNeutralLight = 64
-};
+constexpr std::size_t kGroupSectionOffset = 0x34;
+constexpr std::size_t kVertexSectionOffset = 0x38;
+constexpr std::size_t kPolygonSectionOffset = 0x3C;
+constexpr std::size_t kBoneBytes = 0x10;
+constexpr std::size_t kGroupBytes = 2 * sizeof(std::uint16_t);
+constexpr std::size_t kVertexBytes = 4 * sizeof(std::int16_t);
+constexpr std::uint32_t kSectionAlignmentMask = sizeof(std::uint32_t) - 1;
+constexpr int kTriangleCorners = 3;
+constexpr int kQuadCorners = 4;
+constexpr int kCoordinateBits = sizeof(std::int16_t) * CHAR_BIT;
+constexpr std::uint32_t kDepthLimit = UINT16_MAX;
 
-static const uint32_t kShadowDrawMode = UINT32_C(0xE1000640);
+constexpr std::uint32_t kFlatTriangleCommand = 0x24;
+constexpr std::uint32_t kFlatQuadCommand = 0x2C;
+constexpr std::uint32_t kGouraudTriangleCommand = 0x34;
+constexpr std::uint32_t kGouraudQuadCommand = 0x3C;
+constexpr std::size_t kFlatTriangleBytes = 16;
+constexpr std::size_t kFlatQuadBytes = 20;
+constexpr std::size_t kGouraudTriangleBytes = 24;
+constexpr std::size_t kGouraudQuadBytes = 32;
+constexpr std::size_t kFlatIndexOffset = sizeof(std::uint32_t);
+constexpr std::size_t kIndexBytes = sizeof(std::uint16_t);
+// The UVs follow the three or four vertex indices.
+constexpr auto kFlatTriangleUvOffset = kFlatIndexOffset + 3 * kIndexBytes;
+constexpr auto kFlatQuadUvOffset = kFlatIndexOffset + 4 * kIndexBytes;
+constexpr std::size_t kFlatCommandOffset = 0;
+constexpr std::size_t kGouraudCommandOffset = 11;
+constexpr std::size_t kFlatPrefixBytes = 2;
+constexpr std::size_t kGouraudPrefixBytes = 12;
+constexpr std::size_t kGouraudFirstUvOffset = 6;
+constexpr std::size_t kGouraudTriangleTailUvOffset = 20;
+constexpr std::size_t kGouraudQuadUvOffset = 24;
+constexpr std::size_t kGouraudColorOffset = 2 * sizeof(std::uint32_t);
+constexpr std::size_t kGouraudSpecialFlagsOffset = 19;
+constexpr std::size_t kFlatSpecialFlagsOffset = 2;
+constexpr std::size_t kFlatVertexWords = 2;
+constexpr std::size_t kGouraudVertexWords = 3;
+constexpr std::size_t kClutPacketWord = 3;
+constexpr std::size_t kFlatPagePacketWord = 5;
+constexpr std::size_t kGouraudPagePacketWord = 6;
 
-extern unsigned int Content_battleShadowVertices[kShadowVertices];
-extern unsigned int Content_battleShadowFaces[kShadowFaces];
+constexpr std::uint32_t kColorMask = 0xFFFFFF;
+constexpr int kCommandShift = 3 * CHAR_BIT;
+constexpr std::uint32_t kQuadCommandFlag = 8;
+constexpr std::uint32_t kSemiTransparentCommandFlag = 2;
+constexpr std::uint32_t kBlendModeMask = 0x60;
+constexpr std::uint32_t kSemiTransparencyFlag = 0x10;
+constexpr std::uint32_t kAppearanceMaterialMask = 0xF0;
+constexpr std::uint32_t kAppearanceSubtractiveBlend = 0x40;
+constexpr std::uint32_t kAppearanceAdditiveBlend = 0x20;
+constexpr std::uint32_t kAppearanceFadeFirstState = 4;
+constexpr std::uint32_t kAppearanceFadeEndState = 9;
+constexpr std::uint32_t kAppearanceOpaqueState = 6;
+constexpr std::uint32_t kAppearanceBlendBoundary = 7;
+constexpr std::uint32_t kAppearanceForcedOverride = 15;
+constexpr std::uint32_t kNoBackfaceCullFlag = 1;
+constexpr std::uint32_t kAdaptiveSplitMode = 3;
+constexpr std::uint32_t kDepthBiasMask = 3;
+constexpr int kDepthBiasStep = 4;
 
-static uintptr_t ModelPrimitiveLimit(void) {
-  const uintptr_t base =
-      (uintptr_t)Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  return base != 0 && cursor >= base && cursor - base <= kPrimitiveBufferBytes
-             ? base + kPrimitiveBufferBytes
-             : 0;
+constexpr std::size_t kPolygonGroupCount = 3;
+constexpr std::size_t kSpecialPolygonGroup = 2;
+constexpr int kNormalDepthBias = -1;
+constexpr int kSpecialDepthBias = -5;
+constexpr int kProjectedCoordinateBound = 1024;
+constexpr int kViewportWidth = 320;
+constexpr int kViewportHeight = 240;
+constexpr std::uint32_t kTriangleDepthReciprocal = 341;
+constexpr int kDepthReciprocalBits = 12;
+constexpr int kQuadDepthShift = 4;
+constexpr std::uint32_t kModelOrderingLimit = 0x7C0;
+constexpr std::size_t kLimbPaletteGroups = 8;
+constexpr std::uint32_t kFirstLimbPaletteBit = 0x80;
+constexpr std::uint32_t kPulsedClutOffset = 0x480;
+
+constexpr std::uint32_t kShadowDrawMode = 0xE1000640;
+constexpr std::uint32_t kShadowGouraudCommand = 0x32000000;
+constexpr std::uint32_t kShadowGrayChannels = 0x010101;
+constexpr std::size_t kShadowPacketWords = 8;
+constexpr std::size_t kShadowFirstColorWord = 2;
+constexpr std::size_t kShadowVertexWords = 2;
+constexpr std::size_t kShadowBandFaces = 8;
+constexpr int kShadowMinimumExtent = 20;
+constexpr int kShadowSlopeLimit = 640;
+constexpr int kShadowHeightShift = 3;
+constexpr int kShadowExtentShift = 7;
+constexpr int kShadowFractionBits = 12;
+constexpr int kShadowNeutralLight = 64;
+constexpr int kShadowFadeStep = 4;
+constexpr std::uint32_t kShadowBucketBias = 2;
+constexpr int kShadowDepthShift = 2;
+
+template <typename T>
+[[nodiscard]] T Read(std::span<const std::byte> bytes, std::size_t offset) {
+  T value{};
+  std::memcpy(&value, bytes.subspan(offset, sizeof(T)).data(), sizeof(T));
+  return value;
 }
 
-static int PolygonCorners(unsigned command, int colored) {
-  if (command ==
-      (unsigned)(colored ? kGouraudTriangleCommand : kFlatTriangleCommand)) {
+[[nodiscard]] std::int32_t ScreenX(std::int32_t screen) {
+  return Math::WrapSigned16(static_cast<std::uint32_t>(screen));
+}
+
+[[nodiscard]] std::int32_t ScreenY(std::int32_t screen) {
+  return Math::WrapSigned16(static_cast<std::uint32_t>(screen) >>
+                            kCoordinateBits);
+}
+
+// The GTE NCLIP determinant of three packed screen positions, truncated to a
+// word.
+[[nodiscard]] std::int32_t NormalClip(std::int32_t first, std::int32_t second,
+                                      std::int32_t third) {
+  const std::int64_t x0 = ScreenX(first);
+  const std::int64_t y0 = ScreenY(first);
+  const std::int64_t x1 = ScreenX(second);
+  const std::int64_t y1 = ScreenY(second);
+  const std::int64_t x2 = ScreenX(third);
+  const std::int64_t y2 = ScreenY(third);
+  const std::int64_t sum =
+      x0 * y1 + x1 * y2 + x2 * y0 - x0 * y2 - x1 * y0 - x2 * y1;
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(sum));
+}
+
+[[nodiscard]] std::int32_t ClampDepth(std::int32_t depth) {
+  return std::clamp<std::int32_t>(depth, 0, kDepthLimit);
+}
+
+struct ModelSections {
+  std::uint32_t groups = 0;
+  std::uint32_t vertices = 0;
+  std::uint32_t polygons = 0;
+};
+
+// The group, vertex and polygon offsets, when they are aligned, ordered,
+// inside `model` and leave room for the header bones and vertex groups.
+[[nodiscard]] std::optional<ModelSections> ReadSections(
+    const ModelCounts& counts, std::span<const std::byte> model) {
+  if (model.size() < kModelHeaderBytes || counts.bones > kModelBoneLimit) {
+    return std::nullopt;
+  }
+  const ModelSections sections{
+      Read<std::uint32_t>(model, kGroupSectionOffset),
+      Read<std::uint32_t>(model, kVertexSectionOffset),
+      Read<std::uint32_t>(model, kPolygonSectionOffset)};
+  if (sections.groups < kModelHeaderBytes + counts.bones * kBoneBytes ||
+      sections.groups > sections.vertices ||
+      sections.vertices > sections.polygons ||
+      sections.polygons > model.size() ||
+      counts.groups * kGroupBytes > sections.vertices - sections.groups ||
+      ((sections.groups | sections.vertices | sections.polygons) &
+       kSectionAlignmentMask) != 0) {
+    return std::nullopt;
+  }
+  return sections;
+}
+
+[[nodiscard]] int PolygonCorners(std::uint32_t command, bool colored) {
+  if (command == (colored ? kGouraudTriangleCommand : kFlatTriangleCommand)) {
     return kTriangleCorners;
   }
-  if (command == (unsigned)(colored ? kGouraudQuadCommand : kFlatQuadCommand)) {
+  if (command == (colored ? kGouraudQuadCommand : kFlatQuadCommand)) {
     return kQuadCorners;
   }
   return 0;
 }
 
-static unsigned PolygonBytes(unsigned command) {
+[[nodiscard]] std::size_t PolygonBytes(std::uint32_t command) {
   switch (command) {
     case kFlatTriangleCommand:
       return kFlatTriangleBytes;
@@ -154,331 +192,262 @@ static unsigned PolygonBytes(unsigned command) {
   }
 }
 
-// decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:84).
-int Render_ProjectModelVertices(void* instance, MATRIX* matrices,
-                                int near_offset, void* model_data) {
-  (void)near_offset;
-  Actors_ModelRenderContext* context = &Actors_modelRenderContext;
-  context->projectedVertexCount = 0;
-  if (instance == nullptr || matrices == nullptr || model_data == nullptr) {
-    return 0;
-  }
-  const unsigned char* counts = (const unsigned char*)(instance);
-  const unsigned bone_count = counts[0];
-  const unsigned group_count = counts[1];
-  const Actors_ShpModel* model = (const Actors_ShpModel*)(model_data);
-  if (bone_count == 0 || bone_count > kSupportedBoneLimit || group_count == 0 ||
-      model->groupSection <
-          sizeof *model + bone_count * sizeof(Actors_ShpBone) ||
-      model->groupSection > model->vertexSection ||
-      model->vertexSection > model->polygonSection ||
-      group_count * kGroupBytes > model->vertexSection - model->groupSection ||
-      ((model->groupSection | model->vertexSection | model->polygonSection) &
-       kSectionAlignmentMask) != 0) {
-    return 0;
-  }
-  const uint16_t* groups = VS_ONDISC(model, groupSection, const uint16_t*);
-  const SVECTOR* vertices = VS_ONDISC(model, vertexSection, const SVECTOR*);
-  unsigned previous = 0;
-  for (unsigned group = 0; group < group_count; ++group) {
-    const unsigned bone = groups[static_cast<size_t>(group) * kGroupWords];
-    const unsigned end = groups[static_cast<size_t>(group) * kGroupWords + 1];
-    if (bone >= bone_count || end < previous ||
-        end > sizeof context->projectedVertices /
-                  sizeof context->projectedVertices[0] ||
-        end * sizeof(SVECTOR) > model->polygonSection - model->vertexSection) {
-      return 0;
-    }
-    previous = end;
-  }
-  unsigned vertex = 0;
-  int combined_depth = 0;
-  for (unsigned group = 0; group < group_count; ++group) {
-    const unsigned end = groups[static_cast<size_t>(group) * kGroupWords + 1];
-    const MATRIX* matrix =
-        &matrices[groups[static_cast<size_t>(group) * kGroupWords]];
-    Core_Gte_SetRotMatrix(matrix);
-    Core_Gte_SetTransMatrix(matrix);
-    for (; vertex < end; ++vertex) {
-      SVECTOR position = vertices[vertex];
-      VECTOR transformed;
-      Core_GteWord fog, flags;
-      Core_Gte_RotTransPers(&position, &context->projectedVertices[vertex],
-                            &fog, &flags);
-      Core_Gte_StoreLvnl(&transformed);
-      const int depth = transformed.vz < 0            ? 0
-                        : transformed.vz > UINT16_MAX ? UINT16_MAX
-                                                      : transformed.vz;
-      context->vertexDepths[vertex] = depth;
-      combined_depth |= depth;
-    }
-  }
-  context->projectedVertexCount = vertex;
-  return combined_depth;
+[[nodiscard]] std::array<std::uint32_t, kPolygonGroupCount> PolygonCounts(
+    const ModelCounts& counts) {
+  return {counts.triangles, counts.quads, counts.other};
 }
 
-typedef struct ModelHeader {
-  unsigned char bones;
-  unsigned char groups;
-  uint16_t triangles;
-  uint16_t quads;
-  uint16_t other;
-} ModelHeader;
+// The polygon starting at `offset` and its corner count, or nothing when the
+// command does not match its group or the polygon runs past `model`.
+struct PolygonSpan {
+  std::span<const std::byte> data;
+  int corners = 0;
+};
 
-int Render_ValidateModelData(void* instance, const void* data, size_t size) {
-  if (instance == nullptr || data == nullptr ||
-      size < sizeof(Actors_ShpModel)) {
-    return 0;
+enum class PolygonRead : std::uint8_t { kRead, kInvalid, kTruncated };
+
+[[nodiscard]] PolygonRead ReadPolygon(std::span<const std::byte> model,
+                                      std::size_t offset, bool colored,
+                                      std::size_t part, PolygonSpan& polygon) {
+  const std::size_t prefix = colored ? kGouraudPrefixBytes : kFlatPrefixBytes;
+  if (offset > model.size() || model.size() - offset < prefix) {
+    return PolygonRead::kTruncated;
   }
-  ModelHeader header;
-  memcpy(&header, instance, sizeof header);
-  const Actors_ShpModel* model = (const Actors_ShpModel*)(data);
-  if (header.bones > kSupportedBoneLimit ||
-      model->groupSection <
-          sizeof *model + header.bones * sizeof(Actors_ShpBone) ||
-      model->groupSection > model->vertexSection ||
-      model->vertexSection > model->polygonSection ||
-      model->polygonSection > size ||
-      header.groups * kGroupBytes >
-          model->vertexSection - model->groupSection ||
-      ((model->groupSection | model->vertexSection | model->polygonSection) &
-       kSectionAlignmentMask) != 0) {
-    return 0;
+  const auto command = Read<std::uint8_t>(
+      model, offset + (colored ? kGouraudCommandOffset : kFlatCommandOffset));
+  const int corners = PolygonCorners(command, colored);
+  if (corners == 0 || (part != kSpecialPolygonGroup &&
+                       corners != static_cast<int>(part) + kTriangleCorners)) {
+    return PolygonRead::kInvalid;
   }
-  const unsigned counts[kPolygonGroupCount] = {header.triangles, header.quads,
-                                               header.other};
-  size_t offset = model->polygonSection;
-  const unsigned char* bytes = (const unsigned char*)(data);
-  const int colored = (((const unsigned char*)instance)[8] & 8) != 0;
-  for (int part = 0; part < kPolygonGroupCount; ++part) {
-    for (unsigned face = 0; face < counts[part]; ++face) {
-      const unsigned prefix = colored ? 12 : 2;
-      if (size - offset < prefix) return 0;
-      const unsigned command = bytes[offset + (colored ? 11 : 0)];
-      const int corners = PolygonCorners(command, colored);
-      if (corners == 0 || (part != kSpecialPolygonGroup &&
-                           corners != part + kTriangleCorners)) {
-        return 0;
+  const std::size_t extent = PolygonBytes(command);
+  if (extent > model.size() - offset) {
+    return PolygonRead::kTruncated;
+  }
+  polygon = {model.subspan(offset, extent), corners};
+  return PolygonRead::kRead;
+}
+
+struct PolygonStyle {
+  bool colored = false;
+  std::uint32_t tint = kNeutralModelTint;
+  std::uint32_t pulse_mask = 0;
+  std::uint32_t material = 0;
+};
+
+struct QueuedPolygon {
+  std::span<const std::byte> data;
+  int corners = 0;
+  bool colored = false;
+  std::uint32_t flags = 0;
+  int bias = 0;
+  std::uint32_t tint = 0;
+  std::uint32_t palette = 0;
+  bool uniform_color = false;
+};
+
+class PolygonWriter {
+ public:
+  PolygonWriter(const ModelProjectionView& projection,
+                const ModelSurface& surface, ModelPacketQueue& queue)
+      : projection_(projection),
+        vertex_count_(
+            std::min(projection.screens.size(), projection.depths.size())),
+        surface_(surface),
+        queue_(queue) {}
+
+  [[nodiscard]] ModelDrawStatus Queue(const QueuedPolygon& polygon) {
+    std::array<std::uint16_t, kQuadCorners> indices{};
+    const std::size_t index_offset = polygon.colored ? 0 : kFlatIndexOffset;
+    std::array<std::int32_t, kQuadCorners> screen{};
+    std::uint32_t depths = 0;
+    int left = kProjectedCoordinateBound;
+    int top = kProjectedCoordinateBound;
+    int right = -kProjectedCoordinateBound;
+    int bottom = -kProjectedCoordinateBound;
+    for (int corner = 0; corner < polygon.corners; ++corner) {
+      const auto slot = static_cast<std::size_t>(corner);
+      indices.at(slot) = Read<std::uint16_t>(
+          polygon.data, index_offset + slot * sizeof(std::uint16_t));
+      if ((indices.at(slot) & kSectionAlignmentMask) != 0 ||
+          indices.at(slot) / sizeof(std::int32_t) >= vertex_count_) {
+        return ModelDrawStatus::kInvalidVertexIndex;
       }
-      const unsigned extent = PolygonBytes(command);
-      if (extent > size - offset) return 0;
-      offset += extent;
+      const std::size_t vertex = indices.at(slot) / sizeof(std::int32_t);
+      depths += static_cast<std::uint32_t>(projection_.depths[vertex]);
+      screen.at(slot) = projection_.screens[vertex];
+      const int x = ScreenX(screen.at(slot));
+      const int y = ScreenY(screen.at(slot));
+      left = std::min(left, x);
+      right = std::max(right, x);
+      top = std::min(top, y);
+      bottom = std::max(bottom, y);
     }
-  }
-  return 1;
-}
-
-static void BuildAdaptiveTriangles(
-    const Actors_ModelRenderContext* context, const unsigned char* data,
-    const uint16_t* indices, const Core_GteWord* screen,
-    unsigned char triangles[2][kFlatTriangleBytes]) {
-  int delta[kTriangleCorners][kTriangleCorners];
-  for (int vertex = 0; vertex < kTriangleCorners; ++vertex) {
-    delta[vertex][0] = static_cast<int16_t>(screen[vertex + 1]) -
-                       static_cast<int16_t>(screen[0]);
-    delta[vertex][1] =
-        static_cast<int16_t>(static_cast<uint32_t>(screen[vertex + 1]) >>
-                             kCoordinateBits) -
-        static_cast<int16_t>(static_cast<uint32_t>(screen[0]) >>
-                             kCoordinateBits);
-    const int difference =
-        context->vertexDepths[indices[vertex + 1] / sizeof(Core_GteWord)] -
-        context->vertexDepths[indices[0] / sizeof(Core_GteWord)];
-    delta[vertex][2] =
-        vertex < 2 ? static_cast<int16_t>(difference) : difference;
-  }
-  const int64_t volume = (static_cast<int64_t>(delta[0][1]) * delta[1][2] -
-                          static_cast<int64_t>(delta[0][2]) * delta[1][1]) *
-                             delta[2][0] +
-                         (static_cast<int64_t>(delta[0][2]) * delta[1][0] -
-                          static_cast<int64_t>(delta[0][0]) * delta[1][2]) *
-                             delta[2][1] +
-                         (static_cast<int64_t>(delta[0][0]) * delta[1][1] -
-                          static_cast<int64_t>(delta[0][1]) * delta[1][0]) *
-                             delta[2][2];
-  const unsigned normal[2][kTriangleCorners] = {{0, 1, 2}, {1, 3, 2}};
-  const unsigned alternate[2][kTriangleCorners] = {{0, 1, 3}, {0, 3, 2}};
-  const unsigned (*order)[kTriangleCorners] =
-      static_cast<int32_t>(static_cast<uint32_t>(volume)) > 0 ? normal
-                                                              : alternate;
-  for (int part = 0; part < 2; ++part) {
-    unsigned char* triangle = triangles[part];
-    triangle[0] = kFlatTriangleCommand;
-    triangle[1] = kFlatTriangleBytes;
-    for (int corner = 0; corner < kTriangleCorners; ++corner) {
-      const unsigned vertex = order[part][corner];
-      memcpy(triangle + kFlatIndexOffset +
-                 static_cast<size_t>(corner) * sizeof(uint16_t),
-             &indices[vertex], sizeof indices[vertex]);
-      memcpy(triangle + kFlatTriangleUvOffset +
-                 static_cast<size_t>((corner + 1) % kTriangleCorners) *
-                     sizeof(uint16_t),
-             data + kFlatQuadUvOffset +
-                 static_cast<size_t>(vertex) * sizeof(uint16_t),
-             sizeof(uint16_t));
+    if (!polygon.colored && polygon.corners == kQuadCorners &&
+        (polygon.flags & kAdaptiveSplitMode) == kAdaptiveSplitMode) {
+      return QueueAdaptiveTriangles(polygon, indices, screen);
     }
+    if (right < 0 || bottom < 0 || left >= kViewportWidth ||
+        top >= kViewportHeight ||
+        ((polygon.flags & kNoBackfaceCullFlag) == 0 &&
+         NormalClip(screen[0], screen[1], screen[2]) <= 0)) {
+      return ModelDrawStatus::kDrawn;
+    }
+    int depth = static_cast<int>(polygon.corners == kTriangleCorners
+                                     ? (depths * kTriangleDepthReciprocal) >>
+                                           kDepthReciprocalBits
+                                     : depths >> kQuadDepthShift);
+    depth +=
+        polygon.bias + static_cast<int>((polygon.flags >> 2) & kDepthBiasMask) *
+                           kDepthBiasStep;
+    if (depth < 0 || std::cmp_greater_equal(depth, kModelOrderingLimit)) {
+      return ModelDrawStatus::kDrawn;
+    }
+    return Write(polygon, screen, static_cast<std::uint32_t>(depth));
   }
-}
 
-typedef struct ProjectedModelPolygon {
-  const unsigned char* data;
-  const Core_GteWord* screen;
-  int corners;
-  int colored;
-  unsigned flags;
-  int depth;
-  unsigned tint;
-  unsigned palette;
-  int uniform_color;
-} ProjectedModelPolygon;
-
-static int WriteModelPolygon(const ProjectedModelPolygon* polygon,
-                             uintptr_t limit) {
-  const int corners = polygon->corners;
-  const int colored = polygon->colored;
-  const size_t vertex_words = colored ? kGouraudVertexWords : kFlatVertexWords;
-  const size_t words =
-      (colored ? 1 : 2) + static_cast<size_t>(corners) * vertex_words;
-  const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-  if (cursor > limit || words * sizeof(u_long) > limit - cursor) return -1;
-  u_long* packet = reinterpret_cast<u_long*>(cursor);
-  memset(packet, 0, words * sizeof *packet);
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
-  const unsigned page =
-      workspace->texturePage | (polygon->flags & kBlendModeMask);
-  for (int corner = 0; corner < corners; ++corner) {
-    const unsigned uv_corner = corners == kTriangleCorners
-                                   ? (unsigned)(corner + 1) % kTriangleCorners
-                                   : (unsigned)corner;
-    const size_t uv_offset =
-        colored
-            ? (corners == kTriangleCorners
-                   ? (uv_corner == 0 ? kGouraudFirstUvOffset
-                                     : kGouraudTriangleTailUvOffset +
-                                           static_cast<size_t>(uv_corner - 1) *
-                                               sizeof(uint16_t))
-                   : kGouraudQuadUvOffset +
-                         static_cast<size_t>(uv_corner) * sizeof(uint16_t))
-            : kFlatIndexOffset +
-                  static_cast<size_t>(corners + uv_corner) * sizeof(uint16_t);
-    uint16_t uv;
-    memcpy(&uv, polygon->data + uv_offset, sizeof uv);
-    const size_t xy_word = 2 + static_cast<size_t>(corner) * vertex_words;
-    packet[xy_word] = (u_long)polygon->screen[corner];
-    packet[xy_word + 1] = uv;
-    if (colored) {
-      unsigned color = polygon->tint;
-      if (!polygon->uniform_color) {
-        memcpy(&color,
-               polygon->data + 2 * sizeof(uint32_t) +
-                   static_cast<size_t>(corner) * sizeof(uint32_t),
-               sizeof color);
+ private:
+  // 4B16C.s: a flat quad in adaptive-split mode becomes two triangles split
+  // along the diagonal the projected volume's sign selects.
+  [[nodiscard]] ModelDrawStatus QueueAdaptiveTriangles(
+      const QueuedPolygon& polygon,
+      const std::array<std::uint16_t, kQuadCorners>& indices,
+      const std::array<std::int32_t, kQuadCorners>& screen) {
+    std::array<std::array<std::int64_t, kTriangleCorners>, kTriangleCorners>
+        delta{};
+    const auto vertex_depth = [&](std::size_t corner) {
+      return projection_.depths[indices.at(corner) / sizeof(std::int32_t)];
+    };
+    for (std::size_t vertex = 0; vertex < kTriangleCorners; ++vertex) {
+      delta.at(vertex)[0] = ScreenX(screen.at(vertex + 1)) - ScreenX(screen[0]);
+      delta.at(vertex)[1] = ScreenY(screen.at(vertex + 1)) - ScreenY(screen[0]);
+      const std::int32_t difference =
+          vertex_depth(vertex + 1) - vertex_depth(0);
+      delta.at(vertex)[2] =
+          vertex < 2
+              ? Math::WrapSigned16(static_cast<std::uint32_t>(difference))
+              : difference;
+    }
+    const std::int64_t volume =
+        (delta[0][1] * delta[1][2] - delta[0][2] * delta[1][1]) * delta[2][0] +
+        (delta[0][2] * delta[1][0] - delta[0][0] * delta[1][2]) * delta[2][1] +
+        (delta[0][0] * delta[1][1] - delta[0][1] * delta[1][0]) * delta[2][2];
+    constexpr std::array<std::array<std::size_t, kTriangleCorners>, 2> kNormal{
+        {{0, 1, 2}, {1, 3, 2}}};
+    constexpr std::array<std::array<std::size_t, kTriangleCorners>, 2>
+        kAlternate{{{0, 1, 3}, {0, 3, 2}}};
+    const auto& order =
+        static_cast<std::int32_t>(static_cast<std::uint32_t>(volume)) > 0
+            ? kNormal
+            : kAlternate;
+    for (const auto& corners : order) {
+      std::array<std::byte, kFlatTriangleBytes> triangle{};
+      triangle[0] = static_cast<std::byte>(kFlatTriangleCommand);
+      triangle[1] = static_cast<std::byte>(kFlatTriangleBytes);
+      for (std::size_t corner = 0; corner < kTriangleCorners; ++corner) {
+        const std::size_t vertex = corners.at(corner);
+        const std::uint16_t index = indices.at(vertex);
+        std::memcpy(
+            &triangle.at(kFlatIndexOffset + corner * sizeof(std::uint16_t)),
+            &index, sizeof index);
+        const std::size_t uv_target =
+            kFlatTriangleUvOffset +
+            ((corner + 1) % kTriangleCorners) * sizeof(std::uint16_t);
+        const auto uv = Read<std::uint16_t>(
+            polygon.data, kFlatQuadUvOffset + vertex * sizeof(std::uint16_t));
+        std::memcpy(&triangle.at(uv_target), &uv, sizeof uv);
       }
-      packet[xy_word - 1] = color & kColorMask;
+      QueuedPolygon part = polygon;
+      part.data = triangle;
+      part.corners = kTriangleCorners;
+      part.flags = polygon.flags & kAppearanceMaterialMask;
+      part.bias = kNormalDepthBias;
+      const ModelDrawStatus status = Queue(part);
+      if (status != ModelDrawStatus::kDrawn) {
+        return status;
+      }
     }
+    return ModelDrawStatus::kDrawn;
   }
-  const unsigned command =
-      (colored ? kGouraudTriangleCommand : kFlatTriangleCommand) |
-      (corners == kQuadCorners ? kQuadCommandFlag : 0) |
-      ((polygon->flags & kSemiTransparencyFlag) != 0 ? 2u : 0u);
-  if (!colored) packet[1] = polygon->tint & kColorMask;
-  packet[1] |= command << kCommandShift;
-  packet[kClutPacketWord] |= polygon->palette << kCoordinateBits;
-  packet[colored ? kGouraudPagePacketWord : kFlatPagePacketWord] |=
-      page << kCoordinateBits;
-  setlen(packet, words - 1);
-  AddPrim(reinterpret_cast<u_long*>(Render_frameScratch.orderingTable) +
-              polygon->depth,
-          packet);
-  Render_frameScratch.primitiveCursor = packet + words;
-  return 1;
-}
 
-static int QueueModelPolygon(Actors_ModelRenderContext* context,
-                             const unsigned char* data, int corners,
-                             int colored, unsigned flags, int bias,
-                             unsigned tint, unsigned palette, int uniform_color,
-                             uintptr_t limit) {
-  uint16_t indices[kQuadCorners];
-  memcpy(indices, data + (colored ? 0 : sizeof(uint32_t)),
-         static_cast<size_t>(corners) * sizeof indices[0]);
-  unsigned depths = 0;
-  Core_GteWord screen[kQuadCorners];
-  int left = kProjectedCoordinateBound, top = kProjectedCoordinateBound;
-  int right = -kProjectedCoordinateBound, bottom = -kProjectedCoordinateBound;
-  for (int corner = 0; corner < corners; ++corner) {
-    if ((indices[corner] & kSectionAlignmentMask) != 0 ||
-        indices[corner] / sizeof(Core_GteWord) >=
-            context->projectedVertexCount) {
-      return -1;
+  [[nodiscard]] static std::size_t UvOffset(const QueuedPolygon& polygon,
+                                            std::size_t corner) {
+    const bool triangle = polygon.corners == kTriangleCorners;
+    const std::size_t uv_corner =
+        triangle ? (corner + 1) % kTriangleCorners : corner;
+    if (!polygon.colored) {
+      return kFlatIndexOffset +
+             (static_cast<std::size_t>(polygon.corners) + uv_corner) *
+                 sizeof(std::uint16_t);
     }
-    const unsigned vertex = indices[corner] / sizeof(Core_GteWord);
-    depths += context->vertexDepths[vertex];
-    screen[corner] = context->projectedVertices[vertex];
-    const int x = static_cast<int16_t>(screen[corner]);
-    const int y = static_cast<int16_t>(static_cast<uint32_t>(screen[corner]) >>
-                                       kCoordinateBits);
-    if (x < left) left = x;
-    if (x > right) right = x;
-    if (y < top) top = y;
-    if (y > bottom) bottom = y;
-  }
-  if (!colored && corners == kQuadCorners &&
-      (flags & kAdaptiveSplitMode) == kAdaptiveSplitMode) {
-    unsigned char triangles[2][kFlatTriangleBytes] = {{0}};
-    BuildAdaptiveTriangles(context, data, indices, screen, triangles);
-    int emitted = 0;
-    for (int part = 0; part < 2; ++part) {
-      const int result =
-          QueueModelPolygon(context, triangles[part], kTriangleCorners, 0,
-                            flags & kAppearanceMaterialMask, kNormalDepthBias,
-                            tint, palette, uniform_color, limit);
-      if (result < 0) return result;
-      emitted += result;
+    if (!triangle) {
+      return kGouraudQuadUvOffset + uv_corner * sizeof(std::uint16_t);
     }
-    return emitted;
+    return uv_corner == 0 ? kGouraudFirstUvOffset
+                          : kGouraudTriangleTailUvOffset +
+                                (uv_corner - 1) * sizeof(std::uint16_t);
   }
-  if (right < 0 || bottom < 0 || left >= kViewportWidth ||
-      top >= kViewportHeight ||
-      ((flags & 1) == 0 &&
-       Core_Gte_NormalClip(screen[0], screen[1], screen[2]) <= 0)) {
-    return 0;
-  }
-  int depth =
-      static_cast<int>(corners == kTriangleCorners
-                           ? (depths * (unsigned)kTriangleDepthReciprocal) >>
-                                 kDepthReciprocalBits
-                           : depths >> kQuadDepthShift);
-  depth +=
-      bias + static_cast<int>((flags >> 2) & kDepthBiasMask) * kDepthBiasStep;
-  if (depth < 0 || depth >= kModelOrderingLimit ||
-      Render_frameScratch.orderingTable == nullptr) {
-    return 0;
-  }
-  const ProjectedModelPolygon polygon = {.data = data,
-                                         .screen = screen,
-                                         .corners = corners,
-                                         .colored = colored,
-                                         .flags = flags,
-                                         .depth = depth,
-                                         .tint = tint,
-                                         .palette = palette,
-                                         .uniform_color = uniform_color};
-  return WriteModelPolygon(&polygon, limit);
-}
 
-// 4B16C.s: func_800B516C / func_800B5C30 select the pulsed CLUT only
-// inside the eight per-limb ranges; any remaining faces keep the base CLUT.
-static unsigned ModelPolygonPalette(const Actors_ShpModel* model, int part,
-                                    unsigned face, unsigned mask,
-                                    unsigned base_palette) {
-  unsigned end = 0;
-  for (int limb = 0; limb < kLimbPaletteGroups; ++limb) {
-    uint16_t count;
-    const size_t offset =
-        (static_cast<size_t>(part) * kLimbPaletteGroups + limb) * sizeof count;
-    memcpy(&count, model->header + offset, sizeof count);
-    end += count;
+  [[nodiscard]] ModelDrawStatus Write(
+      const QueuedPolygon& polygon,
+      const std::array<std::int32_t, kQuadCorners>& screen,
+      std::uint32_t depth) {
+    const std::size_t vertex_words =
+        polygon.colored ? kGouraudVertexWords : kFlatVertexWords;
+    const std::size_t words =
+        (polygon.colored ? 1 : 2) +
+        static_cast<std::size_t>(polygon.corners) * vertex_words;
+    std::array<std::uint32_t, kModelPacketWords> packet{};
+    const std::uint32_t page =
+        surface_.texture_page | (polygon.flags & kBlendModeMask);
+    for (std::size_t corner = 0;
+         corner < static_cast<std::size_t>(polygon.corners); ++corner) {
+      const std::size_t xy_word = 2 + corner * vertex_words;
+      packet.at(xy_word) = static_cast<std::uint32_t>(screen.at(corner));
+      packet.at(xy_word + 1) =
+          Read<std::uint16_t>(polygon.data, UvOffset(polygon, corner));
+      if (polygon.colored) {
+        const std::uint32_t color =
+            polygon.uniform_color
+                ? polygon.tint
+                : Read<std::uint32_t>(
+                      polygon.data,
+                      kGouraudColorOffset + corner * sizeof(std::uint32_t));
+        packet.at(xy_word - 1) = color & kColorMask;
+      }
+    }
+    const std::uint32_t command =
+        (polygon.colored ? kGouraudTriangleCommand : kFlatTriangleCommand) |
+        (polygon.corners == kQuadCorners ? kQuadCommandFlag : 0) |
+        ((polygon.flags & kSemiTransparencyFlag) != 0
+             ? kSemiTransparentCommandFlag
+             : 0);
+    if (!polygon.colored) packet[1] = polygon.tint & kColorMask;
+    packet[1] |= command << kCommandShift;
+    packet[kClutPacketWord] |= polygon.palette << kCoordinateBits;
+    packet.at(polygon.colored ? kGouraudPagePacketWord : kFlatPagePacketWord) |=
+        page << kCoordinateBits;
+    return queue_.Emit(std::span(packet).first(words), depth)
+               ? ModelDrawStatus::kDrawn
+               : ModelDrawStatus::kBufferFull;
+  }
+
+  ModelProjectionView projection_;
+  std::size_t vertex_count_;
+  ModelSurface surface_;
+  ModelPacketQueue& queue_;
+};
+
+// 4B16C.s: func_800B516C / func_800B5C30 select the pulsed CLUT only inside
+// the eight per-limb ranges; any remaining faces keep the base CLUT.
+[[nodiscard]] std::uint32_t LimbPalette(std::span<const std::byte> model,
+                                        std::size_t part, std::uint32_t face,
+                                        std::uint32_t mask,
+                                        std::uint32_t base_palette) {
+  std::uint32_t end = 0;
+  for (std::size_t limb = 0; limb < kLimbPaletteGroups; ++limb) {
+    end += Read<std::uint16_t>(
+        model, (part * kLimbPaletteGroups + limb) * sizeof(std::uint16_t));
     if (face < end) {
       return base_palette + ((mask & (kFirstLimbPaletteBit >> limb)) != 0
                                  ? kPulsedClutOffset
@@ -488,180 +457,206 @@ static unsigned ModelPolygonPalette(const Actors_ShpModel* model, int part,
   return base_palette;
 }
 
-static void DrawModelPolygons(Actors_ModelRenderContext* context,
-                              const void* instance, const void* tint,
-                              Actors_ShpModel* model_data, int colored,
-                              unsigned pulse_mask,
-                              unsigned appearance_material) {
-  if (context == nullptr || instance == nullptr || model_data == nullptr ||
-      context->projectedVertexCount == 0) {
-    return;
-  }
-  const uintptr_t limit = ModelPrimitiveLimit();
-  if (limit == 0) return;
-  ModelHeader header;
-  memcpy(&header, instance, sizeof header);
-  const Actors_ShpModel* model = model_data;
-  const unsigned char* polygon =
-      VS_ONDISC(model, polygonSection, const unsigned char*);
-  unsigned color = kNeutralTint;
-  if (tint != nullptr) memcpy(&color, tint, sizeof color);
-  const unsigned counts[kPolygonGroupCount] = {header.triangles, header.quads,
-                                               header.other};
-  if (pulse_mask != 0) {
-    for (int part = 0; part < kPolygonGroupCount; ++part) {
-      unsigned sum = 0;
-      for (int limb = 0; limb < kLimbPaletteGroups; ++limb) {
-        uint16_t count;
-        const size_t offset =
-            (static_cast<size_t>(part) * kLimbPaletteGroups + limb) *
-            sizeof count;
-        memcpy(&count, model->header + offset, sizeof count);
-        sum += count;
-      }
-      if (sum > counts[part]) {
-        Core_Debugf("render", "Invalid model limb polygon ranges");
-        return;
-      }
+[[nodiscard]] bool LimbRangesFit(const ModelCounts& counts,
+                                 std::span<const std::byte> model) {
+  const auto polygon_counts = PolygonCounts(counts);
+  for (std::size_t part = 0; part < kPolygonGroupCount; ++part) {
+    std::uint32_t sum = 0;
+    for (std::size_t limb = 0; limb < kLimbPaletteGroups; ++limb) {
+      sum += Read<std::uint16_t>(
+          model, (part * kLimbPaletteGroups + limb) * sizeof(std::uint16_t));
+    }
+    if (sum > polygon_counts.at(part)) {
+      return false;
     }
   }
-  const unsigned base_palette = Render_ModelWorkspace()->palette;
-  for (int part = 0; part < kPolygonGroupCount; ++part) {
-    for (unsigned face = 0; face < counts[part]; ++face) {
-      const unsigned command = colored ? polygon[11] : polygon[0];
-      const int corners = PolygonCorners(command, colored);
-      if (corners == 0 || (part != kSpecialPolygonGroup &&
-                           corners != part + kTriangleCorners)) {
-        Core_Debugf("render", "Invalid model polygon command 0x%X", command);
-        return;
+  return true;
+}
+
+ModelDrawStatus DrawPolygons(const ModelPolygonSource& source,
+                             const PolygonStyle& style,
+                             const ModelSurface& surface,
+                             ModelPacketQueue& queue) {
+  const std::span<const std::byte> model = source.model;
+  if (source.projection.screens.empty() || source.projection.depths.empty()) {
+    return ModelDrawStatus::kNoVertices;
+  }
+  if (model.size() < kModelHeaderBytes) {
+    return ModelDrawStatus::kTruncatedModel;
+  }
+  if (style.pulse_mask != 0 && !LimbRangesFit(source.counts, model)) {
+    return ModelDrawStatus::kInvalidLimbRanges;
+  }
+  PolygonWriter writer(source.projection, surface, queue);
+  const auto counts = PolygonCounts(source.counts);
+  std::size_t offset = Read<std::uint32_t>(model, kPolygonSectionOffset);
+  for (std::size_t part = 0; part < kPolygonGroupCount; ++part) {
+    for (std::uint32_t face = 0; face < counts.at(part); ++face) {
+      PolygonSpan polygon;
+      switch (ReadPolygon(model, offset, style.colored, part, polygon)) {
+        case PolygonRead::kRead:
+          break;
+        case PolygonRead::kInvalid:
+          return ModelDrawStatus::kInvalidPolygon;
+        case PolygonRead::kTruncated:
+          return ModelDrawStatus::kTruncatedModel;
       }
-      unsigned flags = part == kSpecialPolygonGroup
-                           ? polygon[colored ? kGouraudSpecialFlagsOffset
-                                             : kFlatSpecialFlagsOffset]
-                           : 0;
-      if (appearance_material != 0) {
-        flags = (flags & ~kAppearanceMaterialMask) | appearance_material;
+      std::uint32_t flags = 0;
+      if (part == kSpecialPolygonGroup) {
+        flags = Read<std::uint8_t>(polygon.data,
+                                   style.colored ? kGouraudSpecialFlagsOffset
+                                                 : kFlatSpecialFlagsOffset);
       }
-      const unsigned palette =
-          pulse_mask == 0 ? base_palette
-                          : ModelPolygonPalette(model, part, face, pulse_mask,
-                                                base_palette);
-      if (QueueModelPolygon(context, polygon, corners, colored, flags,
-                            part == kSpecialPolygonGroup ? kSpecialDepthBias
-                                                         : kNormalDepthBias,
-                            color, palette, appearance_material != 0,
-                            limit) < 0) {
-        return;
+      if (style.material != 0) {
+        flags = (flags & ~kAppearanceMaterialMask) | style.material;
       }
-      polygon += PolygonBytes(command);
+      const std::uint32_t palette =
+          style.pulse_mask == 0
+              ? surface.palette
+              : LimbPalette(model, part, face, style.pulse_mask,
+                            surface.palette);
+      const ModelDrawStatus status =
+          writer.Queue({.data = polygon.data,
+                        .corners = polygon.corners,
+                        .colored = style.colored,
+                        .flags = flags,
+                        .bias = part == kSpecialPolygonGroup ? kSpecialDepthBias
+                                                             : kNormalDepthBias,
+                        .tint = style.tint,
+                        .palette = palette,
+                        .uniform_color = style.material != 0});
+      if (status != ModelDrawStatus::kDrawn) {
+        return status;
+      }
+      offset += polygon.data.size();
     }
   }
+  return ModelDrawStatus::kDrawn;
 }
 
-static int ShadowOnPlatform(void) {
-  return (int8_t)(uint8_t)Actors_supportingPlatformLayer > 0;
-}
-
-static int ShadowSlopeAngle(int first, int second, uint16_t radius) {
-  const unsigned first_magnitude =
-      first < 0 ? 0u - (unsigned)first : (unsigned)first;
-  const unsigned second_magnitude =
-      second < 0 ? 0u - (unsigned)second : (unsigned)second;
-  const int angle = static_cast<int>(Core_Gte_Atan2(
-      first_magnitude <= second_magnitude ? first : second, radius));
+[[nodiscard]] int ShadowSlopeAngle(int first, int second,
+                                   std::uint16_t radius) {
+  const unsigned first_magnitude = first < 0 ? 0U - static_cast<unsigned>(first)
+                                             : static_cast<unsigned>(first);
+  const unsigned second_magnitude = second < 0
+                                        ? 0U - static_cast<unsigned>(second)
+                                        : static_cast<unsigned>(second);
+  const int angle = Math::Arctangent2(
+      first_magnitude <= second_magnitude ? first : second, radius);
   return angle >= -kShadowSlopeLimit && angle < kShadowSlopeLimit ? angle : 0;
 }
 
-static SVECTOR ShadowGroundRotation(Actors_ActorRecord* actor, int floor) {
-  const SVECTOR flat = {0};
-  SVECTOR slope = flat;
-  if (ShadowOnPlatform()) return slope;
-  const uint16_t radius = actor->shadowRadius;
-  SVECTOR* position = &actor->instance.position;
-  const int plus_x =
-      Field_SampleActorSupportHeight(position, radius, 0, kShadowSupportMode);
-  if (ShadowOnPlatform()) return slope;
-  const int minus_x =
-      Field_SampleActorSupportHeight(position, -radius, 0, kShadowSupportMode);
-  if (ShadowOnPlatform()) return slope;
-  if (plus_x != minus_x) {
-    slope.vz = static_cast<int16_t>(
-        ShadowSlopeAngle(floor - minus_x, plus_x - floor, radius));
+// The terrain slope under the actor: none on a platform, else the angle of
+// the support heights a radius away along each axis.
+[[nodiscard]] Math::Angles3 ShadowGroundRotation(const ActorShadowSource& actor,
+                                                 int floor,
+                                                 ShadowGround& ground) {
+  const Math::Angles3 flat{};
+  Math::Angles3 slope{};
+  if (ground.OnPlatform()) {
+    return slope;
   }
-  const int minus_z =
-      Field_SampleActorSupportHeight(position, 0, -radius, kShadowSupportMode);
-  if (ShadowOnPlatform()) return flat;
-  const int plus_z =
-      Field_SampleActorSupportHeight(position, 0, radius, kShadowSupportMode);
-  if (ShadowOnPlatform()) return flat;
+  const int radius = actor.radius;
+  const int plus_x = ground.SupportHeight(radius, 0);
+  if (ground.OnPlatform()) {
+    return slope;
+  }
+  const int minus_x = ground.SupportHeight(-radius, 0);
+  if (ground.OnPlatform()) {
+    return slope;
+  }
+  if (plus_x != minus_x) {
+    slope.z = ShadowSlopeAngle(floor - minus_x, plus_x - floor, actor.radius);
+  }
+  const int minus_z = ground.SupportHeight(0, -radius);
+  if (ground.OnPlatform()) {
+    return flat;
+  }
+  const int plus_z = ground.SupportHeight(0, radius);
+  if (ground.OnPlatform()) {
+    return flat;
+  }
   if (plus_z != minus_z) {
-    slope.vx = static_cast<int16_t>(
-        ShadowSlopeAngle(floor - plus_z, minus_z - floor, radius));
+    slope.x = ShadowSlopeAngle(floor - plus_z, minus_z - floor, actor.radius);
   }
   return slope;
 }
 
-static int ShadowColumnScale(uint32_t size, int16_t model_scale,
-                             uint16_t blend) {
+[[nodiscard]] std::int32_t ShadowColumnScale(std::uint32_t size,
+                                             std::int16_t model_scale,
+                                             std::uint16_t blend) {
   // MULTU/MFLO truncates before each shift; LH then SRL retains the sign bits.
-  const uint32_t half_blend = static_cast<uint32_t>(static_cast<int32_t>(
-                                  static_cast<int16_t>(blend))) >>
-                              1;
-  uint32_t value =
-      (size * static_cast<uint16_t>(model_scale)) >> kShadowFractionBits;
+  const std::uint32_t half_blend =
+      static_cast<std::uint32_t>(
+          static_cast<std::int32_t>(static_cast<std::int16_t>(blend))) >>
+      1;
+  std::uint32_t value =
+      (size * static_cast<std::uint16_t>(model_scale)) >> kShadowFractionBits;
   value = (value * half_blend) >> kShadowFractionBits;
-  return static_cast<int>(value);
+  return static_cast<std::int32_t>(value);
 }
 
-static MATRIX BuildActorShadowMatrix(Actors_ActorRecord* actor,
-                                     const MATRIX* camera,
-                                     const SVECTOR* root_offset, int floor) {
-  SVECTOR slope = ShadowGroundRotation(actor, floor);
-  MATRIX terrain = {0}, rotation = {0};
-  Core_Gte_RotMatrixYXZ(&slope, &terrain);
-  MATRIX view = *camera;
-  VS::Core::Math::ApplyMultiplyMatrixIntoRight(view, terrain);
-  SVECTOR angles = {actor->instance.rotationX,
-                    VS::Core::Math::WrapSigned16(
-                        static_cast<uint32_t>(actor->instance.facing) +
-                        actor->shadowBlend.level),
-                    actor->instance.rotationZ, 0};
-  Core_Gte_RotMatrixYXZ(&angles, &rotation);
-  VS::Core::Math::ApplyMultiplyMatrixIntoRight(terrain, rotation);
-  int extent =
-      ((root_offset->vy - floor) >> kShadowHeightShift) + actor->shadowRadius;
-  if (extent < kShadowMinimumExtent) extent = kShadowMinimumExtent;
-  const uint32_t size = static_cast<uint32_t>(extent) << kShadowExtentShift;
-  VECTOR scale = {ShadowColumnScale(size, actor->instance.scaleY,
-                                    actor->shadowBlend.radiusShrinkRate),
-                  actor->instance.scaleZ,
-                  ShadowColumnScale(size, actor->instance.scaleX,
-                                    actor->shadowBlend.radiusExpandRate),
-                  0};
-  VS::Core::Math::ApplyScaleMatrixColumns(rotation, scale);
-  SVECTOR anchor = *root_offset;
-  anchor.vy = VS::Core::Math::WrapSigned16(static_cast<uint32_t>(floor));
-  VECTOR translated;
-  Core_GteWord flags;
-  Core_Gte_SetRotMatrix(camera);
-  Core_Gte_SetTransMatrix(camera);
-  Core_Gte_RotTrans(&anchor, &translated, &flags);
-  rotation.t[0] = translated.vx;
-  rotation.t[1] = translated.vy;
-  rotation.t[2] = translated.vz;
-  return rotation;
+[[nodiscard]] ModelTransform BuildShadowTransform(
+    const ActorShadowSource& actor, const ModelTransform& camera,
+    const ModelVertex& root_offset, int floor, ShadowGround& ground,
+    ModelTransformer& transformer) {
+  const Math::Mat3 terrain = Math::MultiplyMatrixIntoRight(
+      camera.rotation,
+      Math::BuildRotationMatrixYXZ(ShadowGroundRotation(actor, floor, ground)));
+  const Math::Angles3 angles{
+      actor.rotation_x,
+      Math::WrapSigned16(static_cast<std::uint32_t>(actor.facing) +
+                         actor.blend_level),
+      actor.rotation_z};
+  Math::Mat3 rotation = Math::MultiplyMatrixIntoRight(
+      terrain, Math::BuildRotationMatrixYXZ(angles));
+  const int extent =
+      std::max(((root_offset.y - floor) >> kShadowHeightShift) + actor.radius,
+               kShadowMinimumExtent);
+  const std::uint32_t size = static_cast<std::uint32_t>(extent)
+                             << kShadowExtentShift;
+  rotation = Math::ScaleMatrixColumns(
+      rotation,
+      {ShadowColumnScale(size, actor.scale_y, actor.radius_shrink_rate),
+       actor.scale_z,
+       ShadowColumnScale(size, actor.scale_x, actor.radius_expand_rate)});
+  transformer.LoadTransform(camera);
+  const Math::Vec3 anchor = transformer.Transform(
+      {root_offset.x, Math::WrapSigned16(static_cast<std::uint32_t>(floor)),
+       root_offset.z});
+  return {rotation, anchor};
 }
 
-typedef struct ShadowProjection {
-  Core_GteWord screen[kShadowVertices];
-  unsigned depth[kShadowVertices];
-} ShadowProjection;
+[[nodiscard]] bool ShadowMeshFits(const ShadowMesh& mesh) {
+  if (mesh.vertices.size() < kShadowVertexCount ||
+      mesh.faces.size() < kShadowFaceCount) {
+    return false;
+  }
+  return std::ranges::all_of(
+      mesh.faces.first(kShadowFaceCount), [](std::uint32_t face) {
+        for (int corner = 0; corner < kTriangleCorners; ++corner) {
+          const std::uint32_t offset =
+              (face >> (corner * CHAR_BIT)) & UINT8_MAX;
+          if (offset % sizeof(std::int32_t) != 0 ||
+              offset / sizeof(std::int32_t) >= kShadowVertexCount) {
+            return false;
+          }
+        }
+        return true;
+      });
+}
 
-static void QueueShadowFaces(const ShadowProjection* projected, unsigned light,
-                             uintptr_t limit) {
-  unsigned center = kShadowGouraudCommand | light * kShadowGrayChannels;
-  unsigned edge = (light >> 1) * kShadowGrayChannels;
-  for (unsigned face = 0; face < kShadowFaces; ++face) {
+struct ShadowProjection {
+  std::array<std::int32_t, kShadowVertexCount> screen{};
+  std::array<std::uint32_t, kShadowVertexCount> depth{};
+};
+
+[[nodiscard]] ActorShadowStatus QueueShadowFaces(
+    const ShadowProjection& projected, std::span<const std::uint32_t> faces,
+    std::uint32_t light, ModelPacketQueue& queue) {
+  std::uint32_t center = kShadowGouraudCommand | light * kShadowGrayChannels;
+  std::uint32_t edge = (light >> 1) * kShadowGrayChannels;
+  for (std::size_t face = 0; face < kShadowFaceCount; ++face) {
     if (face == kShadowBandFaces) {
       center = kShadowGouraudCommand | edge;
       edge = 0;
@@ -669,176 +664,226 @@ static void QueueShadowFaces(const ShadowProjection* projected, unsigned light,
       edge = center;
       center = kShadowGouraudCommand;
     }
-    unsigned nearest = UINT16_MAX;
-    Core_GteWord screen[kTriangleCorners];
-    for (unsigned corner = 0; corner < kTriangleCorners; ++corner) {
-      const unsigned offset =
-          (Content_battleShadowFaces[face] >> (corner * CHAR_BIT)) & UINT8_MAX;
-      if (offset % sizeof(Core_GteWord) != 0 ||
-          offset / sizeof(Core_GteWord) >= kShadowVertices) {
-        Core_Debugf("render", "Invalid actor shadow vertex offset %u", offset);
-        abort();
-      }
-      const unsigned vertex = offset / sizeof(Core_GteWord);
-      screen[corner] = projected->screen[vertex];
-      if (projected->depth[vertex] < nearest) {
-        nearest = projected->depth[vertex];
-      }
+    std::uint32_t nearest = kDepthLimit;
+    std::array<std::int32_t, kTriangleCorners> screen{};
+    for (std::size_t corner = 0; corner < kTriangleCorners; ++corner) {
+      const std::size_t vertex =
+          ((faces[face] >> (corner * CHAR_BIT)) & UINT8_MAX) /
+          sizeof(std::int32_t);
+      screen.at(corner) = projected.screen.at(vertex);
+      nearest = std::min(nearest, projected.depth.at(vertex));
     }
-    const unsigned bucket = (nearest >> 2) - 2;
-    if (Core_Gte_NormalClip(screen[0], screen[1], screen[2]) > 0 ||
+    const std::uint32_t bucket =
+        (nearest >> kShadowDepthShift) - kShadowBucketBias;
+    if (NormalClip(screen[0], screen[1], screen[2]) > 0 ||
         bucket >= kModelOrderingLimit) {
       continue;
     }
-    const uintptr_t cursor = (uintptr_t)Render_frameScratch.primitiveCursor;
-    if (cursor > limit ||
-        limit - cursor < kShadowPacketWords * sizeof(u_long)) {
-      Core_Debugf("render", "Actor shadow primitive buffer exhausted");
-      return;
-    }
-    u_long* packet = reinterpret_cast<u_long*>(cursor);
+    std::array<std::uint32_t, kShadowPacketWords> packet{};
     packet[1] = kShadowDrawMode;
-    for (unsigned corner = 0; corner < kTriangleCorners; ++corner) {
-      const unsigned color_word =
+    for (std::size_t corner = 0; corner < kTriangleCorners; ++corner) {
+      const std::size_t color_word =
           kShadowFirstColorWord + corner * kShadowVertexWords;
-      packet[color_word] = corner == 0 ? center : edge;
-      packet[color_word + 1] = (u_long)screen[corner];
+      packet.at(color_word) = corner == 0 ? center : edge;
+      packet.at(color_word + 1) = static_cast<std::uint32_t>(screen.at(corner));
     }
-    setlen(packet, kShadowPacketWords - 1);
-    AddPrim(
-        reinterpret_cast<u_long*>(Render_frameScratch.orderingTable) + bucket,
-        packet);
-    Render_frameScratch.primitiveCursor = packet + kShadowPacketWords;
+    if (!queue.Emit(packet, bucket)) {
+      return ActorShadowStatus::kBufferFull;
+    }
   }
+  return ActorShadowStatus::kDrawn;
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_800B3A68 (src/BATTLE/BATTLE.PRG/4B16C.s:84).
+ModelProjectionResult ProjectModelVertices(const ModelCounts& counts,
+                                           std::span<const std::byte> model,
+                                           std::size_t matrix_count,
+                                           ModelTransformer& transformer,
+                                           std::span<std::int32_t> screens,
+                                           std::span<std::int32_t> depths) {
+  if (counts.bones == 0 || counts.groups == 0) {
+    return {};
+  }
+  const std::optional<ModelSections> sections = ReadSections(counts, model);
+  if (!sections.has_value()) {
+    return {};
+  }
+  const ModelSections& layout = *sections;
+  const std::size_t capacity =
+      std::min({kModelVertexCapacity, screens.size(), depths.size()});
+  const std::size_t bone_limit =
+      std::min<std::size_t>(counts.bones, matrix_count);
+  const std::size_t vertex_room =
+      (layout.polygons - layout.vertices) / kVertexBytes;
+  const auto group_word = [&](std::size_t group, std::size_t word) {
+    return Read<std::uint16_t>(model, layout.groups + group * kGroupBytes +
+                                          word * sizeof(std::uint16_t));
+  };
+  std::size_t previous = 0;
+  for (std::size_t group = 0; group < counts.groups; ++group) {
+    const std::size_t end = group_word(group, 1);
+    if (group_word(group, 0) >= bone_limit || end < previous ||
+        end > capacity || end > vertex_room) {
+      return {};
+    }
+    previous = end;
+  }
+  std::size_t vertex = 0;
+  std::int32_t combined_depth = 0;
+  for (std::size_t group = 0; group < counts.groups; ++group) {
+    const std::size_t end = group_word(group, 1);
+    transformer.LoadBone(group_word(group, 0));
+    for (; vertex < end; ++vertex) {
+      const std::size_t at = layout.vertices + vertex * kVertexBytes;
+      const ProjectedPoint point = transformer.Project(
+          {Read<std::int16_t>(model, at),
+           Read<std::int16_t>(model, at + sizeof(std::int16_t)),
+           Read<std::int16_t>(model, at + 2 * sizeof(std::int16_t))});
+      const std::int32_t depth = ClampDepth(point.depth);
+      screens[vertex] = point.screen;
+      depths[vertex] = depth;
+      combined_depth |= depth;
+    }
+  }
+  return {static_cast<std::uint32_t>(vertex), combined_depth};
 }
 
-// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:1208).
-void Render_DrawActorGroundShadow(Actors_ActorRecord* actor,
-                                  const MATRIX* camera,
-                                  const SVECTOR* root_offset) {
-  const uintptr_t limit = ModelPrimitiveLimit();
-  if (actor == nullptr || camera == nullptr || root_offset == nullptr ||
-      limit == 0 || Render_frameScratch.orderingTable == nullptr) {
-    Core_Debugf("render",
-                "Actor shadow requires actor, view and packet buffers");
-    abort();
+bool ValidateModelData(const ModelCounts& counts, bool colored,
+                       std::span<const std::byte> model) {
+  const std::optional<ModelSections> sections = ReadSections(counts, model);
+  if (!sections.has_value()) {
+    return false;
   }
-  int floor = Field_SampleActorSupportHeight(&actor->instance.position, 0, 0,
-                                             kShadowSupportMode);
-  if (actor->instance.position.vy > floor) floor = actor->instance.position.vy;
-  MATRIX matrix = BuildActorShadowMatrix(actor, camera, root_offset, floor);
-  Core_Gte_SetRotMatrix(&matrix);
-  Core_Gte_SetTransMatrix(&matrix);
-  ShadowProjection projected;
-  for (unsigned vertex = 0; vertex < kShadowVertices; ++vertex) {
-    const uint32_t packed = Content_battleShadowVertices[vertex];
-    SVECTOR position = {VS::Core::Math::WrapSigned16(packed), 0,
-                        VS::Core::Math::WrapSigned16(packed >> kCoordinateBits),
-                        0};
-    Core_GteWord fog, flags;
-    VECTOR transformed;
-    Core_Gte_RotTransPers(&position, &projected.screen[vertex], &fog, &flags);
-    Core_Gte_StoreLvnl(&transformed);
-    projected.depth[vertex] =
-        (unsigned)(transformed.vz < 0            ? 0
-                   : transformed.vz > UINT16_MAX ? UINT16_MAX
-                                                 : transformed.vz);
+  const auto polygon_counts = PolygonCounts(counts);
+  std::size_t offset = sections->polygons;
+  for (std::size_t part = 0; part < kPolygonGroupCount; ++part) {
+    for (std::uint32_t face = 0; face < polygon_counts.at(part); ++face) {
+      PolygonSpan polygon;
+      if (ReadPolygon(model, offset, colored, part, polygon) !=
+          PolygonRead::kRead) {
+        return false;
+      }
+      offset += polygon.data.size();
+    }
   }
-  actor->soundPosition.vx =
-      VS::Core::Math::WrapSigned16(static_cast<uint32_t>(projected.screen[0]));
-  actor->soundPosition.vy = VS::Core::Math::WrapSigned16(
-      static_cast<uint32_t>(projected.screen[0]) >> kCoordinateBits);
-  actor->soundPosition.vz = VS::Core::Math::WrapSigned16(projected.depth[0]);
-  actor->soundPosition.pad = 0;
-  const unsigned rgb = (unsigned)actor->shadowBlend.reserved0;
-  // The original blue addend is the upper halfword, not a masked byte.
-  int light = static_cast<int>(((rgb & UINT8_MAX) +
-                                ((rgb >> CHAR_BIT) & UINT8_MAX) * 2 +
-                                (rgb >> (2 * CHAR_BIT))) >>
-                               2) +
-              kShadowNeutralLight - (int8_t)actor->fadeRed * kShadowFadeStep;
-  if (light < 0) light = 0;
-  if (light > UINT8_MAX) light = UINT8_MAX;
-  QueueShadowFaces(&projected, (unsigned)light, limit);
+  return true;
 }
 
-static unsigned AppearanceMaterial(unsigned state) {
-  if (state == 0) return 0;
+std::uint32_t ModelAppearanceMaterial(std::uint32_t state) {
+  if (state == 0) {
+    return 0;
+  }
   return kSemiTransparencyFlag |
          (state < kAppearanceBlendBoundary ? kAppearanceSubtractiveBlend
                                            : kAppearanceAdditiveBlend);
 }
 
 // decomp: BATTLE.PRG func_800B3CF0 (src/BATTLE/BATTLE.PRG/4B16C.s:254).
-void Render_DrawModelFlatPolygons(Actors_ModelRenderContext* context,
-                                  void* instance, CVECTOR* tint,
-                                  void* model_data) {
-  DrawModelPolygons(context, instance, tint,
-                    reinterpret_cast<Actors_ShpModel*>(model_data), 0, 0, 0);
-}
-
-// decomp: func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:1646).
-void Render_DrawModelFlatPolygonsWithOverrides(
-    Actors_ModelRenderContext* context, Actors_WeaponModel* weapon,
-    CVECTOR* tint, void* model_data) {
-  if (context == nullptr || weapon == nullptr || tint == nullptr ||
-      model_data == nullptr) {
-    Core_Debugf("render", "Weapon polygon overrides require model and context");
-    return;
-  }
-  // Original 3A1A0.h places unk20[2].m[0][2] at byte0x64.
-  // Preserve that low-byte quirk through the member, not a native byte offset.
-  const unsigned mask =
-      static_cast<uint16_t>(weapon->boneWorldMatrices[kWeaponPaletteMatrix]
-                                .m[0][kWeaponPaletteColumn]) &
-      UINT8_MAX;
-  DrawModelPolygons(context, weapon, tint,
-                    reinterpret_cast<Actors_ShpModel*>(model_data), 0, mask,
-                    AppearanceMaterial(weapon->ownerMotionState));
+ModelDrawStatus DrawModelFlatPolygons(const ModelPolygonSource& source,
+                                      std::uint32_t tint,
+                                      const ModelSurface& surface,
+                                      ModelPacketQueue& queue) {
+  return DrawPolygons(source, {.colored = false, .tint = tint}, surface, queue);
 }
 
 // decomp: BATTLE.PRG func_800B4594 (src/BATTLE/BATTLE.PRG/4B16C.s:835).
-void Render_DrawModelGouraudPolygons(Actors_ModelRenderContext* context,
-                                     void* instance, void* tint,
-                                     void* model_data) {
-  DrawModelPolygons(context, instance, tint,
-                    reinterpret_cast<Actors_ShpModel*>(model_data), 1, 0, 0);
+ModelDrawStatus DrawModelGouraudPolygons(const ModelPolygonSource& source,
+                                         std::uint32_t tint,
+                                         const ModelSurface& surface,
+                                         ModelPacketQueue& queue) {
+  return DrawPolygons(source, {.colored = true, .tint = tint}, surface, queue);
 }
 
-// decomp: func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:2387).
-void Render_DrawModelGouraudPolygonsWithOverrides(
-    Actors_ModelRenderContext* context, Field_GimmickInstance* object,
-    int* tint, void* model_data) {
-  if (context == nullptr || object == nullptr || tint == nullptr ||
-      model_data == nullptr) {
-    Core_Debugf("render",
-                "Gimmick polygon overrides require model and context");
-    return;
-  }
-  DrawModelPolygons(
-      context, object, tint, reinterpret_cast<Actors_ShpModel*>(model_data), 1,
-      object->palettePulse.kind, AppearanceMaterial(object->motionState));
+// decomp: BATTLE.PRG func_800B516C (src/BATTLE/BATTLE.PRG/4B16C.s:1646).
+ModelDrawStatus DrawModelFlatPolygonsWithOverrides(
+    const ModelPolygonSource& source, std::uint32_t tint,
+    const ModelSurface& surface, const ModelOverrides& overrides,
+    ModelPacketQueue& queue) {
+  return DrawPolygons(
+      source,
+      {.colored = false,
+       .tint = tint,
+       .pulse_mask = overrides.pulse_mask,
+       .material = ModelAppearanceMaterial(overrides.appearance_state)},
+      surface, queue);
 }
 
-void Render_DrawActorPolygons(Actors_ModelRenderContext* context,
-                              Actors_ModelInstance* instance,
-                              const CVECTOR* tint, Actors_ShpModel* model) {
-  if (instance == nullptr) {
-    Core_Debugf("render", "Missing actor instance for polygon submission");
-    return;
-  }
-  // 800B3680..800B38E0 selects the override renderer; 800B51DC..800B51FC
-  // chooses its original subtractive/additive page mode. 800B5DD4..800B5DE0
-  // also repeats the supplied tint at each Gouraud vertex.
-  const unsigned state = instance->actionAnimationState;
-  const unsigned pulse = instance->palettePulse.kind;
-  const int override =
-      pulse != 0 ||
-      (state >= kAppearanceFadeFirstState && state < kAppearanceFadeEndState &&
-       state != kAppearanceOpaqueState) ||
-      state == kAppearanceForcedOverride;
-  const unsigned material = override ? AppearanceMaterial(state) : 0;
-  DrawModelPolygons(context, instance, tint, model, instance->uvLayout, pulse,
-                    material);
+// decomp: BATTLE.PRG func_800B5C30 (src/BATTLE/BATTLE.PRG/4B16C.s:2387).
+ModelDrawStatus DrawModelGouraudPolygonsWithOverrides(
+    const ModelPolygonSource& source, std::uint32_t tint,
+    const ModelSurface& surface, const ModelOverrides& overrides,
+    ModelPacketQueue& queue) {
+  return DrawPolygons(
+      source,
+      {.colored = true,
+       .tint = tint,
+       .pulse_mask = overrides.pulse_mask,
+       .material = ModelAppearanceMaterial(overrides.appearance_state)},
+      surface, queue);
 }
-}  // extern "C"
+
+ModelDrawStatus DrawActorModelPolygons(const ModelPolygonSource& source,
+                                       bool colored, std::uint32_t tint,
+                                       const ModelSurface& surface,
+                                       const ModelOverrides& overrides,
+                                       ModelPacketQueue& queue) {
+  // 800B51DC..800B51FC chooses the subtractive/additive page mode and
+  // 800B5DD4..800B5DE0 repeats the tint at each Gouraud vertex.
+  const std::uint32_t state = overrides.appearance_state;
+  const bool fading = state >= kAppearanceFadeFirstState &&
+                      state < kAppearanceFadeEndState &&
+                      state != kAppearanceOpaqueState;
+  const bool override =
+      overrides.pulse_mask != 0 || fading || state == kAppearanceForcedOverride;
+  return DrawPolygons(
+      source,
+      {.colored = colored,
+       .tint = tint,
+       .pulse_mask = overrides.pulse_mask,
+       .material = override ? ModelAppearanceMaterial(state) : 0},
+      surface, queue);
+}
+
+// decomp: BATTLE.PRG func_800B4B14 (src/BATTLE/BATTLE.PRG/4B16C.s:1208).
+ActorShadowResult DrawActorGroundShadow(const ActorShadowSource& actor,
+                                        const ModelTransform& camera,
+                                        const ModelVertex& root_offset,
+                                        const ShadowMesh& mesh,
+                                        ShadowGround& ground,
+                                        ModelTransformer& transformer,
+                                        ModelPacketQueue& queue) {
+  if (!ShadowMeshFits(mesh)) {
+    return {ActorShadowStatus::kInvalidMesh, {}};
+  }
+  const int floor = std::max(ground.SupportHeight(0, 0), actor.height);
+  transformer.LoadTransform(BuildShadowTransform(actor, camera, root_offset,
+                                                 floor, ground, transformer));
+  ShadowProjection projected;
+  for (std::size_t vertex = 0; vertex < kShadowVertexCount; ++vertex) {
+    const std::uint32_t packed = mesh.vertices[vertex];
+    const ProjectedPoint point =
+        transformer.Project({Math::WrapSigned16(packed), 0,
+                             Math::WrapSigned16(packed >> kCoordinateBits)});
+    projected.screen.at(vertex) = point.screen;
+    projected.depth.at(vertex) =
+        static_cast<std::uint32_t>(ClampDepth(point.depth));
+  }
+  ActorShadowResult result;
+  result.anchor = {static_cast<std::int16_t>(ScreenX(projected.screen[0])),
+                   static_cast<std::int16_t>(ScreenY(projected.screen[0])),
+                   Math::WrapSigned16(projected.depth[0])};
+  const std::uint32_t rgb = actor.blend_color;
+  // The original blue addend is the upper halfword, not a masked byte.
+  const int light =
+      std::clamp(static_cast<int>(((rgb & UINT8_MAX) +
+                                   ((rgb >> CHAR_BIT) & UINT8_MAX) * 2 +
+                                   (rgb >> (2 * CHAR_BIT))) >>
+                                  2) +
+                     kShadowNeutralLight - actor.fade_red * kShadowFadeStep,
+                 0, static_cast<int>(UINT8_MAX));
+  result.status = QueueShadowFaces(projected, mesh.faces,
+                                   static_cast<std::uint32_t>(light), queue);
+  return result;
+}
+}  // namespace VS::Render
