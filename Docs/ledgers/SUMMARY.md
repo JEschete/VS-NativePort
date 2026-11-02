@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 93 | 14 (`wip`) | 4,100 |
-| `cpp` | 93 | 188 (`wip`) | 3,926 |
+| `modernized` | 95 | 14 (`wip`) | 4,098 |
+| `cpp` | 95 | 186 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 220 |
-| `vs_namespace` | 93 |
-| `typed_interface` | 93 |
-| `no_bridge` | 93 |
-| `strict_clean` | 220 |
-| `behavior_evidence` | 93 |
+| `source_cpp` | 222 |
+| `vs_namespace` | 95 |
+| `typed_interface` | 95 |
+| `no_bridge` | 95 |
+| `strict_clean` | 222 |
+| `behavior_evidence` | 95 |
 
-Promotion records: 281; derived `cpp=x`: 93, `cpp=wip`: 188. Verification records: 85; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 95, `cpp=wip`: 186. Verification records: 86; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -213,6 +213,8 @@ The thirty-ninth is the sound driver playback reset (F03160): VS::Audio::Driver:
 and the copied driver start calls its live binding; Audio_Driver_ResetPlaybackState, PlaybackReset.h and their EC-02 bridge entries are retired.
 The fortieth is skeletal SEQ playback (F04128, F04129, F01016): VS::Actors::AdvanceSkeletalAnimation, DecodeAnimationTrack and BlendActorPose decode and blend within the bank extents recorded at load,
 clamp bone counts to the pose arrays and skip zero-length blends (#261); the three Actors_ symbols and SequencePlayback.h are retired.
+The forty-first is actor model drawing (F01023, F00878): VS::Actors::DrawActorModel and ProjectActorBoneEndpoint order the model, overlay and shadow draws and project bone endpoints over abstract hosts,
+and the live projection bounds bones by the pose matrices and loaded bone table (#263); the two Actors_ symbols and ModelDrawing.h are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

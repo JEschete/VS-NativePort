@@ -602,7 +602,6 @@ a7aa176bd5c4,NULL-TABLE,medium,pattern,F00983,Actors_StartActorAppearanceTransit
 3953ce3e5458,NULL-TABLE,low,pattern,F00008,Actors_LinkActorAfterAshley,Native/Game/src/Actors/Lifecycle.cpp,39,Battle_actors[0],55,14,open,
 e4008f3f4f1d,NULL-TABLE,low,pattern,F00008,Actors_LinkActorAfterAshley,Native/Game/src/Actors/Lifecycle.cpp,39,Battle_actors[0],55,14,open,
 5eecff946398,NULL-TABLE,medium,pattern,F00164,Actors_InitializePlaceholderActorStats,Native/Game/src/Actors/Lifecycle.cpp,143,actor = Battle_actors[actor_id],55,14,open,
-c0387a789de7,NULL-TABLE,medium,pattern,F01023,Actors_DrawActorModel,Native/Game/src/Actors/ModelDrawing.cpp,372,geometry = Actors_actorRecords[(unsigned char)companion],55,14,open,
 b89bbd379cc3,NULL-TABLE,medium,pattern,F01020,Actors_DrawGimmickModel,Native/Game/src/Actors/ModelRendering.cpp,304,holder = Actors_actorRecords[object->parent],55,14,open,
 bb67f6622aa3,NULL-TABLE,medium,pattern,F01021,Actors_DrawActorWeaponModel,Native/Game/src/Actors/ModelRendering.cpp,392,actor = Actors_actorRecords[weapon->actorId],55,14,open,
 93e43e13f0a5,NULL-TABLE,medium,pattern,F00896,Actors_UpdateActorTeleportTransition,Native/Game/src/Actors/Movement.cpp,1013,Actors_actorRecords[actor->instance.attachParent],55,14,open,
