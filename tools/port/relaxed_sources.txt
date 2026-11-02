@@ -13,7 +13,6 @@ Native\Game\src\Boot\PlayerSettings.cpp
 Native\Game\src\Boot\Session.cpp
 Native\Game\src\Effects\Templates\RadialSurge.cpp
 Native\Game\src\Save\MenuAssets.cpp
-Native\Game\src\Save\NativeContainer.cpp
 Native\Tests\src\CombatTests.cpp
 Native\Tests\src\EffectTimelineTests.cpp
 Native\Tests\src\EventScriptTests.cpp

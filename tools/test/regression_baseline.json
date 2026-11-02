@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8676718,
+  "assertions": 8676795,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -402,6 +402,17 @@
    "Configured enemy placements belong only to their source room",
    "Consumable menu rows retain native inventory identity and bounds",
    "Consumable observations do not consume stock or grant a spell",
+   "Container discard prompt retries the write or restores",
+   "Container restore closes the picker in the same frame",
+   "Container save file picker draws every frame and routes choices",
+   "Container save loads files only after idle rows and resources",
+   "Container save opening prompt waits, cancels or loads files",
+   "Container save opens a session behind the opening prompt",
+   "Container save releases its storage once the box has closed",
+   "Container save reports states the submenu never enters",
+   "Container save stages the screen and reloads its resources",
+   "Container save writes and offers to discard a cancelled write",
+   "Container screen results restore, prompt to discard or save",
    "Container selection owns typed storage beyond picker reentry",
    "Control-only transition text stops before zero padding",
    "Converted intro movie decodes without changing page ownership",

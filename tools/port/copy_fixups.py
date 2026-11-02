@@ -42,6 +42,7 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Actors::UpdateLive{kind}": r"Native\Game\include\Actors\AppearanceTransitionLive.hpp"
        for kind in ("ActorPalettePulse", "GimmickPalettePulse", "ActorAppearanceTransition",
                     "GimmickAppearanceTransition")},
+    "VS::Menu::Files::UpdateLiveContainerSave": r"Native\Game\include\Save\NativeContainerLive.hpp",
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
@@ -2223,6 +2224,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "do not erase the outstanding vertex-override obligation when its event stream cannot be restored"),
     ],
     # func_800AEF94 / 44F14.c:923: room actor slots are sparse, including an absent companion in slot 1.
+    "F04146": [
+        ("VS::Menu::Files::UpdateContainerSave(submenuState);",
+         "VS::Menu::Files::UpdateLiveContainerSave(*submenuState);",
+         "C48.c:334 the container save submenu runs through its typed live binding"),
+    ],
     "F01008": [
         ("VS::Actors::UpdatePalettePulse(actor, NULL, 0);",
          "VS::Actors::UpdateLiveActorPalettePulse(*actor);",

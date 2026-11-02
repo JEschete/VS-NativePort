@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Save/NativeContainerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -88,7 +89,6 @@ extern "C" {
 #include "Render/TextureAnimation.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "Save/NativeContainer.h"
 #include "State/Settings.h"
 #include "State/StateFlags.h"
 
@@ -2817,7 +2817,7 @@ void Menu_Framework_UpdateMainMenu(int packed_menu_state)
                 } else if (selectedMenu == 12) {
                     submenuReturn = Menu_Loot_Update((u_char *)(submenuState));
                 } else if (selectedMenu == 7 && (Menu_Framework_actionRestrictions & 0x400)) {
-                    submenuReturn = Menu_Files_UpdateContainerSave((u_char *)(submenuState));
+                    submenuReturn = VS::Menu::Files::UpdateLiveContainerSave(*submenuState);
                 } else if (selectedMenu == 7 && Audio_Seq_unusedStateFlags.gameOver == 1) {
                     submenuReturn = Menu_Files_UpdateGameOver((u_char *)(submenuState));
                 } else {

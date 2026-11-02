@@ -19,6 +19,7 @@
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
+#include "Save/NativeContainerLive.hpp"
 #include "Save/NativeFilePresentation.hpp"
 #include "Save/NativeMenu.h"
 #include "Save/NativeMenu.hpp"
@@ -38,7 +39,6 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/Categories.h"
 #include "Menu/Files.h"
-#include "Save/NativeContainer.h"
 #include "State/Ashley.h"
 #include "State/Location.h"
 #include "State/PlayTime.h"
@@ -1073,10 +1073,10 @@ TEST_CASE("Invalid container menu states are diagnosed without mutating state",
                      record.channel == "save" &&
                      record.message == "Invalid container menu state: 255";
       });
-  u_char state = 255;
-  const auto result = Menu_Files_UpdateContainerSave(&state);
+  char state = static_cast<char>(255);
+  const auto result = VS::Menu::Files::UpdateLiveContainerSave(state);
   VS::Core::SetLogObserver(previous);
   CHECK(result == 0);
-  CHECK(state == 255);
+  CHECK(static_cast<unsigned char>(state) == 255);
   CHECK(diagnosed);
 }

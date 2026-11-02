@@ -148,6 +148,7 @@
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
     <ClCompile Include="src\MovementCommandTests.cpp" />
     <ClCompile Include="src\MusicVoiceConflictsTests.cpp" />
+    <ClCompile Include="src\NativeContainerTests.cpp" />
     <ClCompile Include="src\NativeFilePresentationTests.cpp" />
     <ClCompile Include="src\NativeMenuTests.cpp" />
     <ClCompile Include="src\NativeSnapshotTests.cpp" />

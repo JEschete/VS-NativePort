@@ -8365,15 +8365,6 @@
 ]
 ],
 [
-2819,
-[
-"                    submenuReturn = Menu_Files_UpdateContainerSave(submenuState);"
-],
-[
-"                    submenuReturn = Menu_Files_UpdateContainerSave((u_char *)(submenuState));"
-]
-],
-[
 2821,
 [
 "                    submenuReturn = Menu_Files_UpdateGameOver(submenuState);"
