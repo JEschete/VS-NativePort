@@ -916,12 +916,19 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01268"]["path"], r"Native\Engine\src\Render\ModelGeometry.cpp"
         )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Game\src\Actors\ModelDrawing.cpp").read_text(
+        core = (root / r"Native\Game\src\Actors\ModelDrawing.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("companion == 0 && actor->instance.soundEnabled", source)
-        self.assertIn("Render_DrawActorGroundShadow(actor,", source)
-        self.assertIn("goto draw_shadow;", source)
+        live = (root / r"Native\Game\src\Actors\ModelDrawingLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        # The shadow follows a failed projection but only for the actor's own draw.
+        self.assertIn(
+            "if (role == ModelDrawRole::kSelf && host.CastsShadow()) host.DrawShadow();",
+            core,
+        )
+        self.assertIn("return actor_.instance.soundEnabled != 0;", live)
+        self.assertIn("Render_DrawActorGroundShadow(&actor_,", live)
 
     def test_room_euler_uses_the_source_staged_kernel_and_shared_octant_pair(self):
         owned = self.owned_items()
@@ -1654,12 +1661,12 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
             if "entries[actor->instance.attachParent]->boneMatrices" in fix[0]
         )
         self.assertIn("entries[actor->instance.attachParent]->boneMatrices", old)
-        self.assertIn("Actors_ResolveAttachmentParentMatrix(actor)", new)
+        self.assertIn("VS::Actors::ResolveLiveAttachmentParentMatrix(actor)", new)
         self.assertIn("if (parent_matrix != NULL)", new)
         self.assertNotIn("entries[", new)
         self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Actors_ResolveAttachmentParentMatrix"],
-            r"Native\Game\src\Actors\ModelDrawing.h",
+            copy_fixups.NATIVE_HELPER_HEADERS["VS::Actors::ResolveLiveAttachmentParentMatrix"],
+            r"Native\Game\include\Actors\ModelDrawingLive.hpp",
         )
 
     def test_grounded_history_uses_the_actor_native_layout(self):
@@ -2516,26 +2523,30 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                         source = re.sub(pattern, replacement, source)
                 self.assertEqual(source, expected)
 
-    def test_actor_projection_names_keep_cast_bone_index_separate_from_tag(self):
-        cast = (
-            "((int (*)(int arg0, int arg1, int* arg2, int arg3))"
-            "Actors_ProjectActorBoneEndpoint)"
-        )
-        original = "void Wrapper(int arg1) { " + cast + "; Use(arg1); }"
-        preparation = next(
-            item for item in copy_fixups.FIXES["F00876"] if item[0] == cast
-        )
-        source = original.replace(preparation[0], preparation[1])
+    def test_actor_projection_calls_the_bounded_live_binding_directly(self):
+        # The owned typed name removes the function-pointer cast, so the tagged
+        # bone wrappers call the binding that applies the #263 bone bounds.
+        for row in ("F00876", "F00877"):
+            for old, new, _ in copy_fixups.FIXES.get(row, []):
+                self.assertNotIn("ProjectActorBoneEndpoint)", old)
+                self.assertNotIn("ProjectActorBoneEndpoint)", new)
+        source = "v1 = VS::Actors::ProjectActorBoneEndpoint(arg0, var_v0, (int*)arg2, arg3);"
         for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-            if re.search(row, "Actors::ProjectActorTaggedBone"):
+            if row == "":
                 source = re.sub(pattern, replacement, source)
-        self.assertEqual(
+        self.assertIn(
+            "VS::Actors::ProjectLiveActorBoneEndpoint(arg0, var_v0, (int*)arg2, arg3)",
             source,
-            "void Wrapper(int bone_tag) { "
-            "((int (*)(int actor_id, int bone_index, "
-            "int* screen_position_out, int endpoint))"
-            "Actors_ProjectActorBoneEndpoint); Use(bone_tag); }",
         )
+        root = Path(__file__).resolve().parents[2]
+        skeleton = (root / r"Native\Game\src\Actors\Skeleton.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn(
+            "VS::Actors::ProjectLiveActorBoneEndpoint(actor_id, resolved_bone_index,",
+            skeleton,
+        )
+        self.assertNotIn("ProjectActorBoneEndpoint)", skeleton)
 
     def test_actor_texture_origin_scopes_keep_distinct_local_bindings(self):
         preparations = [

@@ -14,7 +14,6 @@ extern "C" {
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
 #include "Actors/ModelDraw.h"
-#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/MotionRequests.h"
@@ -1163,7 +1162,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800A11D8u, 0u, (void*)&Actors_ActorBoneMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A1280u, 0u, (void*)&Actors_ProjectActorTaggedBone, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A13ECu, 0u, (void*)&Actors_ProjectActorBone, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A141Cu, 0u, (void*)&Actors_ProjectActorBoneEndpoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A152Cu, 0u, (void*)&Actors_FindActorBoneTag, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A1648u, 0u, (void*)&Actors_ActorBoneTag, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A1720u, 0u, (void*)&Actors_ActorAnchorMatrix, 0u, 0u, 0u},
@@ -1295,7 +1293,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B1A68u, 0u, (void*)&Actors_DrawGimmickModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B217Cu, 0u, (void*)&Actors_DrawActorWeaponModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B26B8u, 0u, (void*)&Actors_ApplyLockedBoneTransform, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B28A8u, 0u, (void*)&Actors_DrawActorModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B3A68u, 0u, (void*)&Render_ProjectModelVertices, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B3CF0u, 0u, (void*)&Render_DrawModelFlatPolygons, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B4594u, 0u, (void*)&Render_DrawModelGouraudPolygons, 0u, 0u, 0u},

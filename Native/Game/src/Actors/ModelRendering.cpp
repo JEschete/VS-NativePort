@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceTransitionLive.hpp"
+#include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
 #include "Actors/ModelDraw.h"
-#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -136,12 +136,12 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                 Actors_PrepareActorRootTransform(actor);
             }
             if (actor->instance.isAttached) {
-                MATRIX* parent_matrix = Actors_ResolveAttachmentParentMatrix(actor);
+                MATRIX* parent_matrix = VS::Actors::ResolveLiveAttachmentParentMatrix(actor);
                 if (parent_matrix != NULL) {
-                    Actors_DrawActorModel(actor, parent_matrix, 0U);
+                    VS::Actors::DrawLiveActorModel(*actor, *parent_matrix, 0U);
                 }
             } else {
-                Actors_DrawActorModel(actor, camera, 0U);
+                VS::Actors::DrawLiveActorModel(*actor, *camera, 0U);
                 attachmentId = actor->companionSlot;
                 if (attachmentId != 0) {
                     if (attachmentId >= 2U) {
@@ -180,7 +180,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                     actor->instance.position.vz = (u_short)actor->instance.position.vz
                                             + (signed char)(u_char)actor->companionState.offsetZ;
                     Actors_UpdateMotionAndLookAt(actor, (int)actor->companionSlot);
-                    Actors_DrawActorModel(actor, camera, actor->companionSlot);
+                    VS::Actors::DrawLiveActorModel(*actor, *camera, actor->companionSlot);
                     frame->orderingTable = (u_char*)frame->orderingTable - actor->companionState.depthBias * 4;
                     actor->instance.position.vx = (u_short)actor->instance.position.vx
                                             - (signed char)(u_char)actor->companionState.offsetX;

@@ -100,13 +100,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "010dc7e217d5fd622506c9ce37c2adb97c1214ec12a8420df7fbe7d6eb7e722d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0115078e16fc31bf4698da90c65a012a4dc0414484694c24c85aff4c43c4b72c",
       "count": 1,
       "tool": "cpplint",
@@ -147,13 +140,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "0143f4a178bf3192a23d7e12f80e23d9501c12a556f1702bcd56c75189ab36fd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "01461ab252aeaa5f3a737ab18561b96fb55e5883b2c8b4ce44267b4d8b752eda",
@@ -1171,13 +1157,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "075e00aa2b522bf9db730cc49174dc7a6da7cc3cd8c803b5953bb314c692fb5d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "076ffd679c5d80ce1a425ea0740a9e42a6d14f382d779d3715d7ba4405d5a8cb",
       "count": 1,
       "tool": "tidy",
@@ -1339,20 +1318,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "08a6147c8d8c107def986c1911958750d671cc476d42977462abf34d0d2afd20",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "08ba899b1ca3f2d050073128b5f85d00a69d92f03298da957e26073cb14d9025",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "08bdbc71e3428a562f27abfaf5a1809f94331b24cb14cb83fa8c36c0e7977ba2",
       "count": 1,
       "tool": "tidy",
@@ -1379,13 +1344,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "08da99eafd5017626355e33a119931a784b50ad2eaeb11bb3f6061ce6fc69241",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "50c1fd9937c2430beeb16b2fae4b5b0393eae4f3fde4bbb6964f9ee7d795dd92",
@@ -1721,13 +1679,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "0ab78a5ac5f78ff3451d8f35e613285ac6b0315c56a11bc6ada908a6fba7653b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
       "rule": "readability-identifier-naming"
     },
     {
@@ -2284,13 +2235,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "0dc67e3eaca2ce75eaa1980885e9de9d60b08139705ab766c3d8d49d6606176a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "0dc9344efcdc0cffd49fa0c35fc8866fe0525c04efff992e3c86994b00ffd16a",
       "count": 1,
       "tool": "tidy",
@@ -2809,13 +2753,6 @@
       "rule": "bugprone-reserved-identifier"
     },
     {
-      "key": "10c2f84afa73a49cc07ec3847ed0747868b1bee60ebaae6e9a72214cd6676733",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
-      "rule": "google"
-    },
-    {
       "key": "10c84e78ac3d144dd4374f3632bb3ad6feb85d1729bd8df293715b40f00d1637",
       "count": 1,
       "tool": "tidy",
@@ -2900,13 +2837,6 @@
       "rule": "build/include_what_you_use"
     },
     {
-      "key": "11789ba4968299474d6dcc8dfd2a06b022d4db92fc8551bd1ab5da6687b6fcca",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "118664713c2aeb04b63f6e81f5385c80a59cd47d4ceed1f848610d2279c54dba",
       "count": 1,
       "tool": "cpplint",
@@ -2919,13 +2849,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "118ce1a23820bfd039d1628a6c3318c838ee076799376dd02a70d99a7112193a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "11abb82829e0e840ecbcd4b03f5597050e377a362b89f281daeb0a91adc421c9",
@@ -2960,13 +2883,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "11ce43bc1039618116fe480522d4718d333bae453d4336738d08c820047a70bf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -3115,13 +3031,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "12564d30853bff75ed776282652ff0061071006f650c33af46ab697b122193ab",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "125775dd353aad3280ad32c89f3502348912494e057707ab73c491a1a8cefc24",
@@ -3936,13 +3845,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "175db32f9e190f472835e3f409edaf0b7008b667887b680723a5a0bb909dc39a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "176063519c5af0dc24c19c59461e17167b2715712f4287166c687a8baada478e",
       "count": 1,
       "tool": "cpplint",
@@ -4293,13 +4195,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "19a6797b24fa4f2a0a38f0a20251c4b49c60f8813442a0e4b11fc4af8a56ea18",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "19b4d0cf4b1fd27889c640108a4efb90124a7f1aa43787d1342abaf1580304b2",
       "count": 1,
       "tool": "cpplint",
@@ -4606,13 +4501,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "1b9ad8d72b0ae5bd116e054b4c39dafaf7670da4eec195a279938b42fbf4ec37",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "1bb0e1d2136011d4034adc3ee1b272a2f21769fc209e7eb3d41dc4d8cc052250",
@@ -5259,13 +5147,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "1f968c03b5bc8b0a331a3bf45ac1657e6090964ddfc35d4e32cf3629838dad10",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "1f99d709e39716deaf44e84e870a1fff277292d4236a1e4e28ceb999edf3dd9c",
       "count": 1,
       "tool": "cpplint",
@@ -5565,13 +5446,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/Sprites.cpp",
       "rule": "whitespace/newline"
-    },
-    {
-      "key": "21613e7c3cd3d3b4683e9eb29bf9c3570d1125d66f209949f69fe4e03c7668d0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "2168fe996b9084046d5ffed18bbf785fd48bf5af00367860bfebfc6061852e89",
@@ -6085,13 +5959,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "23e0ede49b6199cce0ccc463e2fb97ae8eb7d9d20b94abd78839205c49e2b779",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "23f0ec832157822c75667d8298d2150539fbbfee0b9d6278fe5e43dc78c215cc",
       "count": 1,
       "tool": "tidy",
@@ -6174,13 +6041,6 @@
       "tool": "tidy",
       "path": "Native/Content/include/Content/DataStore.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "2481348f9126bf729e16ea859fd914044bdffae725c7ee11198120c3a82f97d2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "248f24d69627e2e7cf1202d1d67c7afca1214a186b1d4c072475e420004acd73",
@@ -6328,13 +6188,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "252c327a57bc23031997f3c77c21748929859cac31d3ce86099859786efca8a4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "252cb207c6c2fdc49b7a3a7e18dfa9255263eae8c22f8a24d30c5c5787ffb58c",
@@ -6783,13 +6636,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "27def0577f583a5bdb1b7c3dbd8aaa7f7416fb149e207d2c6e7b8431e4c88e48",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "27e26605aba6fad656f350d243f5b16e7cc1bf821d6569144f3df24e06703f5a",
@@ -7807,13 +7653,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "2d79b6e5d158fe02d269e7c3ccb7bbac62f169490744b89c4c40d76117ee5bab",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "2d7a80900c5ffbcd6ca73019731d79a8a57656ac1a49c0ab73e82d59181a1b9c",
       "count": 1,
       "tool": "cpplint",
@@ -7825,13 +7664,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "2d8630049a6c155e148d638a59728c2e6accf6b3ee03d47cd6f4fee801465a5b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -7930,13 +7762,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/Sprites.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "2e27a4241fefbcaca804ec9718de47c940e74e5c7cc792252a28a480519c5c75",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -8430,13 +8255,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "312734eea075426553532eb12eec18724c0341bcbd5a3cf11105cbba5c4317d4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "312e70d47f4048aaefa753f6af60929cdcda9460b00776733fd6654177692482",
       "count": 1,
       "tool": "cpplint",
@@ -8927,13 +8745,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "34afd46d173f312d02c095ac4a6d583aafd81017ccc8801599486fd978886617",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "34b141ce807056eac10c048ceec2f4f05017c6c1ee801512a804897515a125be",
       "count": 1,
       "tool": "cpplint",
@@ -9011,13 +8822,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "3501139cbbf238b9a5e9495ece358cabfe5f3b107cb9950bd24f1afb0390c2c2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "google-readability-braces-around-statements"
-    },
-    {
       "key": "3507cee3247e6bedf4e269541cfa1b485e3bd0aace2ae6b104eccec73e2033b4",
       "count": 1,
       "tool": "cpplint",
@@ -9051,13 +8855,6 @@
       "tool": "ruff",
       "path": "tools/naming/sym_gen/common.py",
       "rule": "B905"
-    },
-    {
-      "key": "3530467845ef3d646b75f8c93a3387baf171ff3082513e956c7824ed3c50c3c7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "3535ab6dfe21bab37e7a4debb48b8fe72bd628e2f647ee1c7e45824cc294a504",
@@ -9977,13 +9774,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "3b40137d03980f9e6355d5c48a64e38e9246338276e9dcd84abc71700bcfd059",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "3b5a5b3d774dc892f04cfef2237365697957e0c3adbc04a970fbf3c54a54a8e2",
       "count": 1,
       "tool": "tidy",
@@ -10416,13 +10206,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Render/PageSpace.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "3e249cf1ee00378eef649d75a7dfb63bdf2c1c29fe04f7f7c10bfbd28fb39017",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "3e689722e5848472efb5077181b0ec5c62dd9588fffa6bfa0535d00045c7f474",
@@ -10887,13 +10670,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "4098595752d9d1ee6794c957ecc65905c2a51eb24767780db51a52d99d8a4dac",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "40a01abeead49c2febd6baaa5f0fa5e598b9236c31c4c086abf05c950c4146f8",
       "count": 1,
       "tool": "cpplint",
@@ -11052,13 +10828,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "41ad97f011aa8ef035f2f638ed1e2f20c8dc01c08975a159b621a477c856cda5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -11298,13 +11067,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "431203ee58140faba4d750dc4a48a0611b2266fd7719846d9cc4142aefb7150e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "4316a3e9787d704809c81ac64b3326a9b62665d95334b225fbf2cebaeafa4f1c",
@@ -12637,25 +12399,11 @@
       "rule": "runtime/int"
     },
     {
-      "key": "4af6115ae1e17f6d09a6d4062d9ad61dd40b6857d553c84fefecbe36d102cf00",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "4afe309c18b7271ad811c6f73a818253007dc29518517caa63244d6d810e47fd",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/CoreTests.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4b031bad8a54bf2cc9cc59d80e3ceae0cc30e07f74e722802acc5598ad94cc04",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "4b083780d71b05e4119e3944a7f1e48c0e736f16f463f6d604aba00c1e33d0c5",
@@ -12784,13 +12532,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "4bd870514ad8949517222be7bafed4b036207c92aef7866215c0dce1efeb5b0c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "4be1d4b5219b9a7b4d30aa8772e2aa75d50aff26a4b68faff3ea107b581dc4a9",
       "count": 1,
       "tool": "cpplint",
@@ -12872,13 +12613,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/src/Disc.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4c5af641fcf5face1892c89dccf82235af0a45bb8cf04dfa587a52d387f519ad",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -13194,13 +12928,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "4deef4e42290f396a4fd9665285d1197af34b419272ee53903b2ea08c1ecd93d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -13750,13 +13477,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "5227a20330b09a03f1f4cd8803e5deaecb32497e173346bb7b345952eac4c6c4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "522acc3d65d2e76b48b476254b96699daea6ecfee4cb0b458bec0b5a8d033041",
       "count": 1,
       "tool": "cpplint",
@@ -13866,13 +13586,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Content/include/Content/DataStore.hpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "5306221b2c8ae91879747a79a8505eacbaaefa17476133016167ebe4de7119f6",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -14205,13 +13918,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "54fddf7693259a688effdf66754dbf0d5bfd656efb21ed7ebe777bbf5964fd5e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "550ad8946ea23b9b42595cafa96f5f81366fe9e4b1d8046f1baf4489036df33c",
       "count": 1,
       "tool": "tidy",
@@ -14223,13 +13929,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "553d1e3aac4f939ecc0475ed4e6d849facf593bc8f3e767b2e0328d0e7f4c547",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -14366,13 +14065,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "5642b2a68a8edadfa7d2cc76a0ce5a31bfb73ff102ae2052c7979d5661bc895c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "564c57451ba75c9712ea52ba7daaef78d02bc78f6c06c9a66429a5b3a6c75631",
       "count": 1,
       "tool": "cpplint",
@@ -14406,13 +14098,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "56a411dee4f9c45e7eee829f9679a215914652f4709bd2a54a8b117f995f1766",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "56a783e23b13041cd28501e5cd146cdc627a23a80fb1c3f530e62b8a958eb79e",
@@ -14632,13 +14317,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "57ad46b92e7f040369ed6fdf25b254659d1db5f3950b9b51f745c9a256b87b47",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "57b71e6b34717f147568fcf4b4e60b1d028d405d1f7d333fdd4cfa27183f5a59",
       "count": 1,
       "tool": "tidy",
@@ -14741,13 +14419,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "5803d2ec4d0660011db5fe71f2c30e56df4a38d2d237822f88df422464ff5bdc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -15185,13 +14856,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "5aff1476c12e962f288c0f734cf3b0c0bbc7b9cb46395013b1e59cb95f5d935c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "5b00bcae0c9ff359d66e2f2b4d60c55455006911ae345437fc9b26e494878947",
       "count": 1,
       "tool": "cpplint",
@@ -15211,13 +14875,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "5b1561f34812cd7e2648c83c48689a6db2eae802d1e930e5f8bf522996f95046",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "5b20636ebd9dc91b08b51b4c8e03ece82818f4951bc8287ce77b316c769f7374",
@@ -16284,13 +15941,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "614dced6def4bcd42f26b012ee5a6212bc6760c8362c23a7ebe54921b75cb926",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "615b6507ad7d5c037a0299f27997dfe24a401bac83203a61468255bc96971211",
       "count": 1,
       "tool": "cpplint",
@@ -16478,13 +16128,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Movie/MoviePlayer.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "627a0c57ffdb39ea57c0385ec8af5e8566d05ade8146456d211037881c814fd7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "627e7d3be6b31cfb75d766968e34cc6270373f04cd496eee87ebc5f28f43447d",
@@ -16704,13 +16347,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "63e1770d3accf590e5fb1b4a94535179efc8cc2988a576cb3c835d3f0de94bd8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "63f42d6fd79dfb7f80bb35c261f527bffffc16d13fcb28209dddfc402ee2aee0",
       "count": 1,
       "tool": "cpplint",
@@ -16739,13 +16375,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "6429feb94f8a291919fb59adfefb6905386b387bb92a81adb1d022fcb56c94a8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "642c9c51202949ab65d270048fe3b9884f067f270361a25df5a331668c316909",
       "count": 1,
       "tool": "cpplint",
@@ -16765,13 +16394,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "64383d6220047cb5072fd89f87ffb2cd5cb9393b85c837b555a6bb50bb0e6072",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "643ff0bd04a1031b958450117e3d8fc332747afc1ca55367a2516ed1977fd92c",
@@ -17376,13 +16998,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "67bd8b627eb3ab0a9ab4ab566c52db6ad9487895f3e5221c5bf82821dceafa62",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "67bf1e3e41be23b2efdca8d061680b7a9dcc7f5dd9d41108d1c8b0ae81019c84",
       "count": 1,
       "tool": "cpplint",
@@ -17415,13 +17030,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "67e0a4392e7b629d047365290378524f14cad36027fbffeb52adf73afdab545b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -17688,13 +17296,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "6961366200fa4e4cf91e91e447f946ed954a5fd389bc3183cdd2448d2de1e32d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -18104,13 +17705,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6c1d8a90fb8182c03c6ef49d76ad44326fa2c1ead030dacff2ce87b0f2707353",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6c2081ca13890fe33b94e5ec51cc4b2c876f08aef9058a363084cf525e6df802",
       "count": 1,
       "tool": "cpplint",
@@ -18202,13 +17796,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "6cdd6492339ec026c5d6adf832d37b5d09b571f27bc351c0ad39275a6ce82302",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "6ce0ba0704df410d61eddf24570dc83639f49df974152502d54b04d4f8e11b54",
       "count": 1,
       "tool": "tidy",
@@ -18286,13 +17873,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6d5fe142c319bf6265e8cfdd334cd8bf40093dfd824d8bdc6b1ad8f14e9c3cb4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6d6d2ce4edc1c236f8e698259285d97299f03ffbe1d13b9847b4ab6df2a8c942",
       "count": 1,
       "tool": "tidy",
@@ -18361,13 +17941,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Handle.hpp",
       "rule": "whitespace/indent"
-    },
-    {
-      "key": "6dde6e1544186b7fa0dc2fab3f463f88d189443df572c5e8b258b715c02801d7",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "4722c71c8d480fc4bc6b81d365608d595c2dcf505d65ff35ebe327eb5ae8a0fa",
@@ -18629,13 +18202,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6f77a97104ec8711e25c467a196ed48753f5d35ac50478dd96fa44c0696aec63",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6f900be1921aea79cdb3d40ac84b851220614e22972a3e969257aca52ba11738",
       "count": 1,
       "tool": "cpplint",
@@ -18720,13 +18286,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "703ce0cf69add9308a7cdac378912053a464db400839779683b6025365c69887",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "703f4573612fe4d0a555139681d8d5ebf05e684173225d6d7c7359c1882ea4aa",
       "count": 1,
       "tool": "cpplint",
@@ -18797,13 +18356,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "70c3d9cd19f9a2c8e6e5bbc19f7ea9d40a945db021ea67617bb514791309d179",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "70c595b13f29d7f3ada091914e5f29449820d9ffd01d4efc6ff17d29e4627704",
       "count": 1,
       "tool": "tidy",
@@ -18851,13 +18403,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "713a664fc41c71216a20c96f631c9f07762ed3988598dd362b9a4a599164d504",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "71434af9cced2b31902724538702691894d6d4d01e5d77cba8d8f94510dd3835",
@@ -19084,13 +18629,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "72900216d7d13869babd0cd5686f696f2ceda226008072cf0183644be11a2c37",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "7293f0a0e2ead05208bbed4863a6eb7967e906f36e544930b8d29ae88d3f75d1",
       "count": 1,
       "tool": "tidy",
@@ -19103,13 +18641,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "729ed3379c65fcb9cd0e5ff6249319f086d13e7314611f199da19b3443d63f98",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "72aa2bceb1687f96e5e7a31b831ed96dcc12a3b43e88d123ce344f23bde2f5bb",
@@ -19805,13 +19336,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "75e7b7a877fb47d0b6b0f6b98d75be3749062d8e6d8134a31c970a0192092711",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "76005ea1e3d901b5a0c6dd9eecd8d47cff9a506c722f182f0fce95c82c0cb96e",
       "count": 1,
       "tool": "tidy",
@@ -19851,13 +19375,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "765bf529075279f67ea17df74f6a69684c852a5a86ae188cb03561a80ba6c96d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -19950,13 +19467,6 @@
       "tool": "tidy",
       "path": "Native/Game/src/Battle/Ai/RoomState.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "76fe62e3cb182cc7e5681de88201761f2c901a98e02e423b9f870b486ae2f2a0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "0755e3f274df66dcc1ae50862053ad6bf400842e1ca56bc5e4312f91e700dbaa",
@@ -20103,13 +19613,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "77e3270f427f46efd04f399c55d9d444e25e0009cbb62c8e63c5f52432cdeb59",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
       "rule": "readability-identifier-naming"
     },
     {
@@ -20299,13 +19802,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Audio/LibSpu.h",
-      "rule": "runtime/int"
-    },
-    {
-      "key": "78f565bce6bc20695191213810f2dd219b0e7ac03429261d8c2bdea6c912d14c",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "runtime/int"
     },
     {
@@ -20792,13 +20288,6 @@
       "rule": "google"
     },
     {
-      "key": "7c29ac99ba3a18746faa2a44f8ab7635cd03b2ff3ad0607fa75c1853c327ca00",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "7c313fb8457db7a89b5b2820098312d450683f1931c382bf617f5de852a3704b",
       "count": 1,
       "tool": "tidy",
@@ -21191,13 +20680,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "7ebbc7313f1e5b0d1b7b00d226fd6762841d5b781d9f6466417c7b6e23f3d8be",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7ebfd1884f1622c1258439f7a694cf54178da293e69c99363d3e0022277a0240",
       "count": 1,
       "tool": "format",
@@ -21352,13 +20834,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7fcc1026175c52f500cc795329f34fcdc2d074e11d63ed32cbe7d6de037ea478",
-      "count": 6,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "7fdb0b4cc4cd1b895f6f4e22963112a1316befc4565995e7d3906fd0ad27a11e",
       "count": 1,
       "tool": "tidy",
@@ -21392,13 +20867,6 @@
       "tool": "ruff",
       "path": "tools/naming/sym_gen/common.py",
       "rule": "B007"
-    },
-    {
-      "key": "8010d117427450e29c42fce99305385e0d30ff337aaa7d45c7a338d6f2cdf1c0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8011d2538d5b95e0bff064af771538be7e45b159104de13de4c124982e29acb9",
@@ -21485,20 +20953,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "809159d582ba7ffcbd209e2843bde13c96b9e52577f319ae6e19bacaf0c0c181",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "809d862a6e385f5340dd3ae51a4353670f05a9a6c580aef7189642854a8bc039",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "80aa908cda18fa963fa0b252a4d1e2640f04c4848cc76dc121fbcc7d628401c3",
       "count": 1,
       "tool": "tidy",
@@ -21511,13 +20965,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "80db979f7a17c75165c337f61f9949fa0c1cf1a4a1631e7599a6fe2e46744765",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "80df6dc165b8824b7a775105f699fb6df3cfcb43cbdc74ceb1b9f12fd7caa11b",
@@ -21630,13 +21077,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "81a39013ef4e8fbc4c59358bec8099f53375933e54c2a9847ff91ffe677cecca",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
     },
     {
       "key": "4c8416a23c17b75aba9aac315bc9972eb4fd5d69a871da1e80b0e175216111a0",
@@ -22388,13 +21828,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "8639205cb8d215b2b76e49b13ba889707487a1339eaa37375d2cebc7cfce1f77",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "86464621200c3c149d212315b2c4a2e8969c8ea9175ea1747907e294efeb92bc",
       "count": 1,
       "tool": "tidy",
@@ -22542,13 +21975,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "872d7310b6c1018cdce79b3c4de88d1e0ba4ae654f3d7f90c0ca9b21162172f8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "874114948f93f393d315ddc34c0dee1ea84081046798deb05bcbf9c9348004c1",
       "count": 1,
       "tool": "cpplint",
@@ -22638,13 +22064,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EffectTimelineTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "87eb11d3520190e1b79e963aec73360894bd2be368043a10bcb1e329f6663fc7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "87f1d26b40f2baa25a8639e3cb68fcbff69845545601c557a17b26f1494288b0",
@@ -23116,13 +22535,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "8a229a243cb73c07e10bc8bfcfdf81bff9d04bc030dad9f8732daab811e53f15",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "8a2a2adada3990353f61e1dcff09d807377eed80cbddbdb8b3b11bdc00f74109",
       "count": 1,
       "tool": "tidy",
@@ -23380,13 +22792,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8b8c9c85f71b1478e273610c1389bb1290729369972edd5d18fd91b030dd2ca0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "8b95841762046990c7d6473df9d2c15e60b6d1d48232e8f1ca034abc771bb95d",
@@ -23659,13 +23064,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "8d8fe3e339176a909e1dac008d17569973048e1f25915e291ee26d8fb3e795f4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -24005,13 +23403,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8f63877021e0113e45c53ce611eb62ffb0494049d128cf6265d466909cb6bb71",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "8f644f60c4e3a6be5321a9fe1a2ad8a700ef3f1aef65016445e285232e5e6869",
       "count": 1,
       "tool": "tidy",
@@ -24171,13 +23562,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.h",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "905fda9ee4c6f2c9162a5502957abd251c6b34c352f7ef26eddb77d4470fae16",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "906afa845749c580091e5cb5e8ba9c9ac2326afdebaa5dbb8ac2b61d06f1496d",
@@ -24439,13 +23823,6 @@
       "rule": "SIM115"
     },
     {
-      "key": "92496ff76dcf550fe393f8091ad321de87ec68e45ca0075722a5c828acac2d18",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9256a51e7096da9d04e3045878487732e6a8416613e2ff7125490173fd0aae73",
       "count": 2,
       "tool": "tidy",
@@ -24570,13 +23947,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "93144ea1fb0cfada96900cf7b3013e86c215bb845cc4d8884413a8d2a3e584a0",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "931bbb8b6a2587e17a51f0625830aef1c9032f5675a08546d18ea335c02c271c",
@@ -24880,13 +24250,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "945352f63bf38de5b6fab1f49bc7fe4712ebc28628a3faeaaa4007a77ff6a8fd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9459e8f5bc822555141212d9c44d8380e60014963f06b037363135b2ac745a79",
       "count": 1,
       "tool": "ruff",
@@ -24920,13 +24283,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "947855edfa0c6d2524696c7a518662f3ed9c31339bcf1d015c1ecb5568c4103f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "947add549ec12cd09e2dc921337a9f0c31d7f95dc1d82bda6f652d61a59e9a01",
@@ -24976,13 +24332,6 @@
       "tool": "format",
       "path": "Native/Engine/src/Platform/App.cpp",
       "rule": "google"
-    },
-    {
-      "key": "94bed86625ae1800f0b745693f6f7c02d310d604f0452cda0e7faf6ea1228841",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "94cc1c46f357bbe52ff799fd8b48d11505bf6dca4620deec5a2cded84559b25a",
@@ -25193,13 +24542,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "96485cc4541e5d99a7a7de785be2a0b500788f162de4ab42bd0dbddc3b5a2697",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "966127fb51529074aa635a852385217bb51096eae600071f37a703c999bcf66d",
@@ -25622,13 +24964,6 @@
       "rule": "whitespace/indent"
     },
     {
-      "key": "990452f11b9755d2ff7c7bbf677f19edf6fc4243528ba68d2de1e212773cd0eb",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "9907ea629a407b7d4bd67d07d452a5adcd1ec42707f5a3ce16d1abcb6b0f478a",
       "count": 1,
       "tool": "tidy",
@@ -25958,13 +25293,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "9b22aa9454517236eba667c1d8d31c146f7eb1b200fafc62f4f0b79e88397470",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "9b26d9507c9e5a2703b90678c094092dcf08e5db48afcced152cc5ce3cc9eab8",
       "count": 1,
       "tool": "cpplint",
@@ -26287,13 +25615,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "9d47739f91b6a4f7b6357db0c3e45ddcc9d5123c12e511733e81ff4d9a8bc94f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "9d4a5db10753c55fc5ffb007f3c257dfc72cd4f6d65c50040c7c38b537a2468c",
       "count": 3,
       "tool": "tidy",
@@ -26417,13 +25738,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Desktop/src/main.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "9df591a218a6598f52e58a54b0b73a66d95f77cd4982a2d0fe2514210a6d97de",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -26609,13 +25923,6 @@
       "rule": "bugprone-narrowing-conversions"
     },
     {
-      "key": "9f068f2accb28b9612df98739863655f0404a9771904af07edff46c9b14eff5f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9f1d48037a13e148f066b16107abd6bb967ef5b83721f60705e3982fbf89b940",
       "count": 1,
       "tool": "cpplint",
@@ -26672,13 +25979,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "9f54bbc9a643af877a0a0728e89b161788420253c0b7b98617cb125efe33b132",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "9f5526cbf6462130b18a294302b9c63ab35e8a0208f8184cb2b02dea3080c49e",
       "count": 1,
       "tool": "tidy",
@@ -26698,13 +25998,6 @@
       "tool": "tidy",
       "path": "Native/Content/src/ModuleLoader.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "9f8dbaf66a2862fd6814a1c057e7d5248cbdae5b3680b07ba859c2d32599b29b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
     },
     {
       "key": "40f10943da6776f775fc7a3555d361f859d276aad67e103db4a3e4198bc93667",
@@ -27498,13 +26791,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "a4aaca3aa274ba6d9cb5f59980d1d603477be4f8475f26000016eafc5e20cede",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "a4b33e39668537daba4e1f0ec2db33a2f3c025c40f13be2ba5d512a7ca1bc385",
       "count": 1,
       "tool": "tidy",
@@ -27524,13 +26810,6 @@
       "tool": "ruff",
       "path": "tools/port/field_at.py",
       "rule": "B905"
-    },
-    {
-      "key": "a4d40e601d549062ad065038d4b6fff7eebe5a6ee70dc7d4005ebb83d44de019",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a4f5ffd3e7d2c5862e3143aab98952eb99f3878c19887fa63984c144e521a71a",
@@ -27988,13 +27267,6 @@
       "rule": "google"
     },
     {
-      "key": "a7f73b4e34907e44d3ae1cfd5af3a7f59349ce386ce43e4b40680f7cae1ce336",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "a82ce71083134d115df471665cd7d593a75630af0e47bfbb85ec57edde482a33",
       "count": 1,
       "tool": "cpplint",
@@ -28084,13 +27356,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "a8be789d3b4e2c7dcea3e2ff173accbd799a45bc6f8366da92065356282665ca",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "a8c2d73aaff6c10188c82c9fc64f91d2e21a7531bb65baa12b2cab4120fc4e98",
@@ -28884,13 +28149,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "adb49e5037a575d9f0a1388e4556a12af7d3e6fed6e276cee9621a8935612b6f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "adb99fbaa5ceabe29a67024e74aec09bbec7c231cb724f695434edd0b82cf000",
       "count": 3,
       "tool": "cpplint",
@@ -29066,13 +28324,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "aef5169fd3fe6380edc452f78ce29b067e5916edee06c88c3572653b00c52f6d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "af00d6644b089f8f084f5295a6ee2537378ccaf0f9a9d6b5589714d6cc17e52f",
       "count": 1,
       "tool": "cpplint",
@@ -29113,13 +28364,6 @@
       "tool": "ruff",
       "path": "tools/ledger/build_ledgers.py",
       "rule": "E741"
-    },
-    {
-      "key": "af3b7de5f922bf2fb9f68cac89ad7026eae1bce02ee12bf52aa44107a3ac3333",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "af4bb7d7cbe8fe4d8c879f52627053562228e0904b38ef65929963279ffffd6e",
@@ -29386,13 +28630,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "b106d378a45782f759a185b926ae234c9105a5ded58e32d89d9826a64ffbf1e4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "b12da8bf8c495f20021a15c3951e390c83f7fe3f24820a0e851ec034820afa57",
@@ -29850,13 +29087,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b3ae6af65570567b2a443e1fad3f966ca6dabfa618e28a9dcf31aba380683a4a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "b3c7afb8e2c5762c93aafa96f2de4625d371775bddd61a2789782502d9bd1e69",
       "count": 1,
       "tool": "cpplint",
@@ -29960,13 +29190,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b492822a03490bda7e13d88c8d97423f25594f7730cef672412b447addbd2828",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "b49c38c444322a95314b6314e33580be2b7db1c2a7d3fe9299acbb993d1ab98c",
@@ -30830,13 +30053,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "b9f18f265f6d97d81b2358a478e660e20b9c8d7ffd0b1b5cb837d43328e1610a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ba1544674fdd21e06cbdf6c916faad12bf35e20bbb6ab23e4bbbc0644fd20853",
       "count": 1,
       "tool": "cpplint",
@@ -31108,13 +30324,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "bb94ae071fcb9145b03f8fad9a2349783180c02be5a0d7c7ef8e941415c76dae",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "bb95a2fb7d20fc2260ee4156c269f771163a5da8dabef24e86700b84860a8c75",
@@ -31390,13 +30599,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "bd5d7e6d986f3aa1497cd121e4b117ca7f848d9725a7ae21bd54c2ca9512f4b1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bd60c3e416e9aed0ce98935087e19cb10168bc96587ec4818d0e61af5ada2901",
       "count": 1,
       "tool": "tidy",
@@ -31493,13 +30695,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "bde61718b0e093a35a4ba7e145fc9d80ebd2b59ceeb691af2605b15cff29caae",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "bdf45c17f70c07cc2c5b64cc16d5f8e38d10c5e293545d7a348ebc6e097af5d7",
@@ -32006,13 +31201,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "c1523813326c7c8fcb6e7a0f216f93e18ecf757b3c77c95109011fea6e332f82",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "c1597ece3bee30f403d94c07bd86c4085a85776be1693964d9fe6ab206f57e39",
       "count": 1,
       "tool": "cpplint",
@@ -32370,13 +31558,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c35fb0025fdff5d73f970af3152234668974354b9bff26baa11561d881df1783",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "c3699237c6e2cd5bfe1180ae5c883a625eb42b879c0dc65c46b4cb5349e99840",
       "count": 2,
       "tool": "cpplint",
@@ -32528,13 +31709,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/AiLayoutTests.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "c459e2903490d9c20550ae1ce0c6fa503277f30609f6ddd1cb0dfaacfd9ec910",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -33105,13 +32279,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "c7f80438dec24c7caca044691483dfd4cdd59c9eba613dfef0575be93ab176e6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "c7fadb648e14e2e4e2830cdcb75209fd7919ad3d4e8965b9e2058200c8ecc06d",
       "count": 1,
       "tool": "cpplint",
@@ -33644,13 +32811,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "cb47d5432c07675c4538cc6b235fbf89e919e4c0a8b4428dabd68b139a5311fd",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
-    },
-    {
       "key": "cb657c50d061d64e4952025b1112be3b842b7ce721297ad5f7104f8fc1a7acc9",
       "count": 1,
       "tool": "tidy",
@@ -33959,13 +33119,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "ccc8e6ea0529febf48ba67d722a6d866f1bdbb9080874272c2bc609c02431e8d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "ccc94829cb53fcb98e647d7f27634969d5a2629c572ed1f21d5af519fdaee24e",
       "count": 1,
       "tool": "tidy",
@@ -34197,25 +33350,11 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "cddb9ac5103b330e3004b7aa5de336695324b06fe5f208e6231fd51d9c1df335",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "cddf2c6ddafa06c93b00574085b0c281f015f63e346c4e2496cd12dd0fedf6ec",
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Save/LibCard.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "cde748072ce21bc7efa90f07cf91f2b3ca1d610993a66ae32f59a3dc52585752",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ce094512844c5217bb94be4e3ab9c31b9ee0e537551aad52b8fb5a77395a0607",
@@ -34456,13 +33595,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "cf1c8aea619f52149bc15480819fc968fcc19ec003f4d09351bb732fb1722165",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "cf2bb851277619e119cbd14ddc875ceb6e639c217a20f7de644be26d96ea6de7",
       "count": 3,
       "tool": "cpplint",
@@ -34650,13 +33782,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "d057cc393f3b37dc108f6f2bd2cf8e03c74092ad6323c3bbf8736e11cd6baddc",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "d0593f3f22ad9febdf74f567dfdca4fe5d657312047a6aa9899ecd3fd32e26ec",
@@ -35035,13 +34160,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Movie/MoviePlayer.h",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "d2a4816c712443c6e6aecac354860ae1b2686b8d1a55e2a0deccaca7ccfd6444",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-implicit-widening-of-multiplication-result"
     },
     {
       "key": "d2b6fe7add7f95b39b45ca8fd4021a7a76d9ccff426da6a9f8b364617949e19c",
@@ -36220,13 +35338,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "d9f7eb5cd657bdc1c0172e9f7975a27d5b45a1c7fe2819fdb47beb4d3eec94c9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "bugprone-narrowing-conversions"
-    },
-    {
       "key": "da0ac083753f23b5158aa8ea89b7c0901c503e0909788bbec0f4c700ebca2104",
       "count": 1,
       "tool": "tidy",
@@ -36381,13 +35492,6 @@
       "rule": "build/include_order"
     },
     {
-      "key": "dae42bcb4182bc75b065d491ba9789311c0fe008b3389daef0603a12a822a93e",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "daf2788b9aba6b76814ae6c9ab5299cbf39ed038d9f8edc3b57580d8a5463758",
       "count": 1,
       "tool": "tidy",
@@ -36512,13 +35616,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "dbfc9faccce6082dafa3ba832a6ef5597923115a6c4f75177551888ddd3c5c06",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "google"
     },
     {
       "key": "dbfe0d392da1ab08e706712581d9b551915bfaf8ed5059ae19a32ffc69f7af6f",
@@ -36731,13 +35828,6 @@
       "rule": "readability-function-size"
     },
     {
-      "key": "dcf8e3dfdcc07382e9aecc7bd8d28400c1b4bcdf9efb02103d7186687f539ac7",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "dd0bb291f791c25ea3c269d193a761560d818aa645f1816540608927400416db",
       "count": 1,
       "tool": "tidy",
@@ -36785,13 +35875,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/ModuleLoader.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "dd6fbda90f1780f2c8943c0a20d1c0a1263ef361324a72cf2ae4a7a9a2da834d",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "ddc50e9b08272a527bb326d41f2c7b4499573e179bfb7966210125eee7fe1844",
@@ -36981,13 +36064,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "deafe993503c04fe59c5ea0b6c742c5df09063c06d6e92468122bbee465342ea",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "deb04b00fc1e7be4e616f7b9d95e8b0f42c260a410d3dda9ec60920f962aed59",
@@ -37942,13 +37018,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e5a8a3d166523c0224a7e25a17305b3be032a7dafc9fabe4238c3685b3377448",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "e5a8e989f68999bb07fd0c781dbc14963e4ead2dac5d9d32888e0e25a64b728e",
       "count": 1,
       "tool": "cpplint",
@@ -38579,13 +37648,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "e938f5cd7b19ac982ea804c3b3c00306a39bc04b1db5864170050b0096f98342",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "google-readability-braces-around-statements"
-    },
-    {
       "key": "e93b1152c1ce681f23bcebe580902dc3375aff1c3f53aa065fcedab463ec4e6f",
       "count": 1,
       "tool": "cpplint",
@@ -38824,13 +37886,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "ea887480bdec4b92fe73266bada67af2ab6410f831202306567246ff8c298557",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "ea8b6b7838eef4b74f4823a9239bed15c47400a2048cdab4bedde83141f9f707",
       "count": 1,
       "tool": "tidy",
@@ -38878,20 +37933,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "eaf9af4ab43d412e4db072081bfcb677f2a8ff7ce42b7f2132a8b14c229bd3ac",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "eb021bee46eb465aa132951f5de619ae24ac0cdaa35c0619a344a7594f2e5f77",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "eb0894cab9e256ca1840c599474e46a51e7fd6c18c9a51c7af30b328e8db5025",
@@ -39160,13 +38201,6 @@
       "rule": "whitespace/braces"
     },
     {
-      "key": "ec838134460e37ebd1a5d1f3b2adf49198c08f310be4657f71cc135c1ded2556",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "ec8c207c7b2d8fc16e24fd94f11c09c117d64724e366a2aa654cd490b709fdc6",
       "count": 1,
       "tool": "tidy",
@@ -39242,13 +38276,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "ed0b745534dd703e6f35b457b448f7fed875b08fb26a301694ad43f42f22be42",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "ed0be0501ba28e07d6c6fdea8d439345d7d27e500ee9754579c6ecbcfe182a8b",
@@ -39389,13 +38416,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "edf30bd2362244bd5a68b50b4f22b6656f833a8e0ae90b5c2f53b5add555ba33",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "edf97f6857a3dcfc1bc737878e928bc67ce675cd84178f929393bc42e69b817a",
@@ -39888,13 +38908,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f1317cd2cb38cf3e8ef85a47e0b0de629ba254317a1ed43c8f106eef1ebcc7f5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
-    },
-    {
       "key": "f134977592b0051b77074e3f261c13f4eac5fed94caad05aabf9e06a6b05ee18",
       "count": 1,
       "tool": "cpplint",
@@ -40189,13 +39202,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f3446759cdc9839db6a676499e6886346e7fcb491c34d658891d02a9b17c3aaf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f3461bc3306d872326d94ffaab78376e6c0749aeea4680b17a3ad1dbb8b668cc",
       "count": 1,
       "tool": "tidy",
@@ -40329,13 +39335,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "f471b456439b1bbb545070a5cd1cc4b83c4b0604d28affce1cdb90cefefd9340",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f47a2e60dfade6b93cdbe58f8e5c7e2196cf0a76baff31735e53ca103c478e2b",
       "count": 1,
       "tool": "cpplint",
@@ -40383,13 +39382,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "f4da2a4e37d13a86f2456829edfdfbbbcc743d22dabba8eccbfe1d6a29833415",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "f4e9b66747159d75b9ea0cd45456a06b0402a6eea181030ff6021880c69e09c2",
@@ -40441,13 +39433,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "f53796b7b2a6e446d6b34dc8e4c4a9abd117d3c174280d1fe4155cae329c27d6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "f5380a696577b38af5bc02384e602a4d236d9293397ac1be655bbdf6c61d8ecf",
       "count": 1,
       "tool": "tidy",
@@ -40474,13 +39459,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "f56ca2be3e6589ae0b2adfc95413636a8743983bbea7b569aad17ff394cf9c7f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "f570e8d265b172db675c42169e1a208aa5281361ca915f4e571227217ce25286",
@@ -40726,13 +39704,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "f721f28ecb352e297774219c87843c3c1ade88b7aeae1995b410cda87a840e39",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
-      "rule": "runtime/int"
     },
     {
       "key": "f7645761faa1f9b04e826b552ecb862156c31d7e0f4696a3021cb91399b12361",
@@ -41453,13 +40424,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "fb3ae246470700d4e94c08058f1d842e31773951d681b04422f9cd8fb9cf2021",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Actors/ModelDrawing.cpp",
       "rule": "readability-identifier-naming"
     },
     {

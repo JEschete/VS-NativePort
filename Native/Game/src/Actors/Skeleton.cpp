@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ModelDrawingLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelDraw.h"
-#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -176,7 +176,7 @@ int Actors_ProjectActorTaggedBone(int actor_id, int bone_tag, SVECTOR* screen_po
         return resolved_bone_index;
     }
 
-    projection_result = ((int (*)(int actor_id, int bone_index, int* screen_position_out, int endpoint))Actors_ProjectActorBoneEndpoint)(actor_id, resolved_bone_index, (int*)screen_position_out, endpoint);
+    projection_result = VS::Actors::ProjectLiveActorBoneEndpoint(actor_id, resolved_bone_index, (int*)screen_position_out, endpoint);
     depth_cue_or_status = projection_result;
     if (projection_result < 0) {
         return projection_result;
@@ -187,7 +187,7 @@ int Actors_ProjectActorTaggedBone(int actor_id, int bone_tag, SVECTOR* screen_po
 // decomp: BATTLE.PRG func_800A13EC (src/BATTLE/BATTLE.PRG/30DB0.c:4280)
 int Actors_ProjectActorBone(int actor_id, int bone_index, int* screen_position_out, int endpoint)
 {
-    int projection_result = ((int (*)(int actor_id, int bone_index, int* screen_position_out, int endpoint))Actors_ProjectActorBoneEndpoint)(actor_id, bone_index, screen_position_out, endpoint);
+    int projection_result = VS::Actors::ProjectLiveActorBoneEndpoint(actor_id, bone_index, screen_position_out, endpoint);
 
     if (projection_result < 0) {
         return projection_result;
@@ -564,7 +564,7 @@ void Actors_BuildActorPoseAtMatrix(int actor_id, MATRIX* camera_matrix)
     actor->framesPerStep = 1;
     Render_PrepareActorCameraMatrices(camera_matrix);
     Actors_PrepareActorRootTransform(actor);
-    Actors_DrawActorModel(actor, camera_matrix, 0);
+    VS::Actors::DrawLiveActorModel(*actor, *camera_matrix, 0);
     actor->instance.isVisible = visible;
 }
 

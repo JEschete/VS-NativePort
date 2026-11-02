@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
-#include "Actors/ModelDrawing.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -224,7 +224,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
         Actors_PrepareActorRootTransform(preview_actor);
     }
 
-    Actors_DrawActorModel(preview_actor, preview_camera_matrix, 0);
+    VS::Actors::DrawLiveActorModel(*preview_actor, *preview_camera_matrix, 0);
 
     if (preview_actor->companionSlot > 1) {
         Actors_UpdateActorTextureScrolling(Actors_actorRecords[16]);
@@ -238,7 +238,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
             preview_actor->companionState.offsetZ, +=);
 
         Actors_UpdateMotionAndLookAt(preview_actor, preview_actor->companionSlot);
-        Actors_DrawActorModel(preview_actor, preview_camera_matrix, preview_actor->companionSlot);
+        VS::Actors::DrawLiveActorModel(*preview_actor, *preview_camera_matrix, preview_actor->companionSlot);
 
         companion_ordering_table_restore_bytes = (preview_actor->companionState.depthBias * 4) + 0xC0;
         Render_frameScratch.orderingTable = (u_char*)(Render_frameScratch.orderingTable) - (companion_ordering_table_restore_bytes / sizeof(u_long));

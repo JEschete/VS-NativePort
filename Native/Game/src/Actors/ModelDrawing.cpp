@@ -1,470 +1,110 @@
 // Hand-maintained (tools/port/owned.csv).
-#include <stdint.h>
-#include <string.h>
+#include "Actors/ModelDrawing.hpp"
 
-#include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/Appearance.h"
-#include "Actors/ModelDraw.h"
-#include "Actors/ModelDrawing.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
-#include "Actors/Movement.h"
-#include "Actors/Palette.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
-#include "Actors/WeaponModel.h"
-#include "Core/Diagnostics.h"
-#include "Core/Memory/Heap.h"
-#include "Event/ScriptVm.h"
-#include "Field/Actors.h"
-#include "Field/GimmickLookup.h"
-#include "Field/Gimmicks.h"
-#include "Field/RoomRendering.h"
-#include "Legacy/Psx.h"
-#include "Menu/Inventory/Inventory.h"
-#include "ModelLoading.h"
-#include "Render/Camera.h"
-#include "Render/Model.h"
-#include "Render/ModelDraw.h"
-#include "Render/ModelGeometry.h"
-#include "Render/ModelWorkspace.h"
-#include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/Textures.h"
-#include "Render/UiPrimitives.h"
-#include "State/Timers.h"
+#include <algorithm>
+#include <cstdint>
+#include <limits>
 
-enum {
-  kActorFixedFractionBits = 12,
-  kActorFixedOne = 1 << kActorFixedFractionBits,
-  kActorRotationMask = kActorFixedOne - 1,
-  kPoseScaleFractionBits = 6,
-  kPoseScaleOne = 1 << kPoseScaleFractionBits,
-  kFirstCameraFacingTag = 7,
-  kCameraHeightTag = 8,
-  kLastCameraFacingTag = 9,
-  kColorAdjustmentScale = 4,
-  kHiddenActorHeight = 256,
-  kNeutralModelColor = 128,
-  kTintStateLimit = 4,
-  kProjectionDepthScale = 4,
-  kInvalidBoneResult = -4
-};
+namespace VS::Actors {
+namespace {
+constexpr int kByteRange = 256;
+constexpr int kByteSignBit = 128;
+constexpr std::int32_t kDepthLimit = std::numeric_limits<std::uint16_t>::max();
+}  // namespace
 
-static unsigned char ModelColorChannel(unsigned char base,
-                                       unsigned char adjustment) {
-  const int signed_adjustment =
-      adjustment <= INT8_MAX ? adjustment
-                             : static_cast<int>(adjustment) - (UINT8_MAX + 1);
-  const int value = base + signed_adjustment * kColorAdjustmentScale;
-  if (value < 0) return 0;
-  if (value > UINT8_MAX) return UINT8_MAX;
-  return (unsigned char)value;
-}
-
-// Parent slots can be released before independently owned props in EVENT82.
-// The original 44F14.c:1010 draw assumes the borrowed bone matrix is resident.
-MATRIX* Actors_ResolveAttachmentParentMatrix(const Actors_ActorRecord* actor) {
-  const unsigned actor_count =
-      sizeof Actors_actorRecords / sizeof Actors_actorRecords[0];
-  if (actor == nullptr) {
-    Core_Errorf("actors.attachment", "Cannot resolve a null child actor");
-    return nullptr;
-  }
-  const unsigned parent_slot = actor->instance.attachParent;
-  const unsigned bone = actor->instance.attachBone;
-  if (parent_slot >= actor_count) {
-    Core_Errorf("actors.attachment",
-                "Invalid parent actor=%u parent=%u bone=%u",
-                (unsigned)actor->instance.slot, parent_slot, bone);
-    return nullptr;
-  }
-  Actors_ActorRecord* parent = Actors_actorRecords[parent_slot];
-  if (parent == nullptr || parent->instance.model == nullptr ||
-      parent->instance.boneCount == 0) {
-    Core_Debugf("actors.attachment",
-                "Deferred draw actor=%u parent=%u bone=%u: parent unavailable",
-                (unsigned)actor->instance.slot, parent_slot, bone);
-    return nullptr;
-  }
-  const unsigned bone_capacity =
-      sizeof parent->boneMatrices / sizeof parent->boneMatrices[0];
-  if (parent->instance.boneCount > bone_capacity ||
-      bone >= parent->instance.boneCount) {
-    Core_Errorf("actors.attachment",
-                "Invalid bone actor=%u parent=%u bone=%u parent_bones=%u",
-                (unsigned)actor->instance.slot, parent_slot, bone,
-                (unsigned)parent->instance.boneCount);
-    return nullptr;
-  }
-  return &parent->boneMatrices[bone];
-}
-
-static void TransformBonePosition(const MATRIX* parent, const SVECTOR* local,
-                                  MATRIX* output) {
-  enum { kFixedFractionBits = 12, kSpatialDimensions = 3 };
-  const int16_t coordinates[kSpatialDimensions] = {local->vx, local->vy,
-                                                   local->vz};
-  for (int row = 0; row < kSpatialDimensions; ++row) {
-    int64_t value = 0;
-    for (int axis = 0; axis < kSpatialDimensions; ++axis) {
-      value += static_cast<int64_t>(parent->m[row][axis]) * coordinates[axis];
-    }
-    output->t[row] =
-        (Core_GteWord)((value >> kFixedFractionBits) + parent->t[row]);
-  }
-}
-
-static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
-                               SVECTOR* rotation) {
-  enum {
-    kAuxiliaryAngleShift = 3,
-    kCameraPitchTag = 7,
-    kFirstFrozenJointTag = 3,
-    kLastFrozenJointTag = 6
-  };
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
-  const unsigned yaw = workspace->angleX;
-  const unsigned pitch = workspace->angleY;
-  if (tag == 1 || tag == 2) {
-    rotation->vx = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(rotation->vx) - (yaw >> 1));
-    rotation->vz = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(rotation->vz) + (yaw >> kAuxiliaryAngleShift));
-    if (tag == 2) {
-      rotation->vy = VS::Core::Math::WrapSigned16(
-          static_cast<uint32_t>(rotation->vy) - (yaw >> 1));
-      rotation->vy = VS::Core::Math::WrapSigned16(
-          static_cast<uint32_t>(rotation->vy) +
-          (yaw != 0 ? pitch >> kAuxiliaryAngleShift
-                    : 0u - (pitch >> kAuxiliaryAngleShift)));
-      rotation->vz = VS::Core::Math::WrapSigned16(
-          static_cast<uint32_t>(rotation->vz) + (pitch >> 2));
-    }
-  } else if (tag >= kFirstFrozenJointTag && tag <= kLastFrozenJointTag &&
-             actor->instance.isFrozen) {
-    uint16_t values[2];
-    memcpy(values,
-           actor->jointSlots +
-               static_cast<size_t>(tag - kFirstFrozenJointTag) * sizeof values,
-           sizeof values);
-    values[1] += values[0];
-    memcpy(actor->jointSlots +
-               static_cast<size_t>(tag - kFirstFrozenJointTag) * sizeof values,
-           values, sizeof values);
-    rotation->vx = static_cast<int16_t>(values[1]);
-  } else if (tag >= kFirstCameraFacingTag && tag <= kLastCameraFacingTag) {
-    const Render_Camera* camera = &Render_frameScratch.camera;
-    const int delta_x =
-        camera->position.vx / kActorFixedOne - workspace->rootOffset.vx;
-    const int delta_z =
-        camera->position.vz / kActorFixedOne - workspace->rootOffset.vz;
-    if (tag == kCameraPitchTag) {
-      rotation->vx = static_cast<int16_t>(camera->angles.vx);
-    }
-    rotation->vy = static_cast<int16_t>(-Core_Gte_Atan2(delta_z, delta_x));
-    rotation->vz = 0;
-    if (tag == kCameraHeightTag) {
-      const int64_t squared = static_cast<int64_t>(delta_x) * delta_x +
-                              static_cast<int64_t>(delta_z) * delta_z;
-      const int distance = VS::Core::Math::SquareRootInteger(
-          squared > INT32_MAX ? INT32_MAX : static_cast<int>(squared));
-      rotation->vz = static_cast<int16_t>(Core_Gte_Atan2(
-          camera->position.vy / kActorFixedOne - workspace->rootOffset.vy,
-          distance));
-    }
-  }
-  rotation->vx &= kActorRotationMask;
-  rotation->vy &= kActorRotationMask;
-  rotation->vz &= kActorRotationMask;
-}
-
-// Unattached actors take their uniform scale, then every actor takes its
-// per-axis instance scale (stored y, z, x).
-static void ScaleActorRoot(const Actors_ActorRecord& actor, MATRIX& root) {
-  VECTOR scale = {actor.scale, actor.scale, actor.scale, 0};
-  if (!actor.instance.isAttached) {
-    VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
-  }
-  scale.vx = actor.instance.scaleY;
-  scale.vy = actor.instance.scaleZ;
-  scale.vz = actor.instance.scaleX;
-  VS::Core::Math::ApplyScaleMatrixColumns(root, scale);
-}
-
-// decomp: BATTLE.PRG func_800B28A8, bone loop 0x800B2938..0x800B34CC
-// (49268/func_800B28A8.s).
-int Actors_BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
-  enum {
-    kPoseBoneCount = sizeof actor->boneMatrices / sizeof actor->boneMatrices[0],
-    kSpatialDimensions = 3
-  };
-  if (actor == nullptr || camera == nullptr ||
-      actor->instance.model == nullptr || actor->instance.boneCount == 0 ||
-      actor->instance.boneCount > kPoseBoneCount ||
-      actor->modelDataSize <
-          sizeof(Actors_ShpModel) +
-              actor->instance.boneCount * sizeof(Actors_ShpBone)) {
-    return 0;
-  }
-  Actors_ShpModel* model = actor->instance.model;
-  for (unsigned bone = 1; bone < actor->instance.boneCount; ++bone) {
-    if (model->bones[bone].parentIndex >= bone ||
-        model->bones[bone].poseLockSlot > 2) {
-      return 0;
-    }
-  }
-  const Render_ModelScratchpad* workspace = Render_ModelWorkspace();
-  SVECTOR rotation = {
-      static_cast<int16_t>((actor->blendPose.boneKeys[0].vx >> 1) +
-                           actor->instance.rotationX),
-      static_cast<int16_t>((actor->blendPose.boneKeys[0].vy >> 1) +
-                           actor->instance.facing),
-      static_cast<int16_t>((actor->blendPose.boneKeys[0].vz >> 1) +
-                           actor->instance.rotationZ),
-      0};
-  if (actor->paletteFadeActive) {
-    rotation.vy = VS::Core::Math::WrapSigned16(
-        static_cast<uint32_t>(rotation.vy) +
-        static_cast<uint32_t>(actor->paletteFadeState[0] >> 1));
-  }
-  MATRIX root = {0};
-  VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, root);
-  VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, root);
-  TransformBonePosition(camera, &workspace->rootOffset, &root);
-  ScaleActorRoot(*actor, root);
-  VECTOR scale = {0};
-  int cumulative[kPoseBoneCount][kSpatialDimensions] = {0};
-  for (unsigned bone = 0; bone < actor->instance.boneCount; ++bone) {
-    const Actors_ShpBone* joint = &model->bones[bone];
-    MATRIX matrix = root;
-    if (bone != 0 && joint->poseLockSlot != 0) {
-      Actors_ApplyLockedBoneTransform(actor, camera, static_cast<int>(bone),
-                                      joint->poseLockSlot);
-      cumulative[bone][0] = cumulative[bone][1] = cumulative[bone][2] =
-          kPoseScaleOne;
-      continue;
-    }
-    const unsigned parent = bone == 0 ? 0 : joint->parentIndex;
-    if (bone != 0) {
-      const SVECTOR local = {static_cast<int16_t>(-model->bones[parent].length),
-                             0, 0, 0};
-      TransformBonePosition(&actor->boneMatrices[parent], &local, &matrix);
-      rotation.vx =
-          static_cast<int16_t>(actor->blendPose.boneKeys[bone].vx >> 1);
-      rotation.vy =
-          static_cast<int16_t>(actor->blendPose.boneKeys[bone].vy >> 1);
-      rotation.vz =
-          static_cast<int16_t>(actor->blendPose.boneKeys[bone].vz >> 1);
-      AdjustBoneRotation(actor, joint->auxiliaryTag, &rotation);
-      if (joint->auxiliaryTag >= kFirstCameraFacingTag &&
-          joint->auxiliaryTag <= kLastCameraFacingTag) {
-        Core_Gte_RotMatrixYXZ(&rotation, &matrix);
-        VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, matrix);
-        scale.vx = scale.vy = scale.vz = actor->scale;
-        VS::Core::Math::ApplyScaleMatrixColumns(matrix, scale);
-      } else {
-        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(rotation, matrix);
-        VS::Core::Math::ApplyPremultiplyRotationMatrix(
-            Actors_skeletonPose.boneMatrices[parent], matrix);
-      }
-    }
-    Actors_skeletonPose.boneMatrices[bone] = matrix;
-    const SVECTOR* local_scale = &actor->blendPose.scaleKeys[bone];
-    const int components[3] = {local_scale->vx, local_scale->vy,
-                               local_scale->vz};
-    for (size_t axis = 0; axis < sizeof components / sizeof components[0];
-         ++axis) {
-      cumulative[bone][axis] =
-          bone == 0 ? components[axis]
-                    : static_cast<int>(
-                          (static_cast<int64_t>(cumulative[parent][axis]) *
-                           components[axis]) >>
-                          kPoseScaleFractionBits);
-    }
-    scale.vx = cumulative[bone][0] * kPoseScaleOne;
-    scale.vy = cumulative[bone][1] * kPoseScaleOne;
-    scale.vz = cumulative[bone][2] * kPoseScaleOne;
-    VS::Core::Math::ApplyScaleMatrixColumns(matrix, scale);
-    actor->boneMatrices[bone] = matrix;
-  }
-  return 1;
-}
-
-static void UpdateActorModelColors(Actors_ActorRecord* actor,
-                                   Actors_ActorRecord* geometry, char companion,
-                                   const SVECTOR* root_offset) {
-  if (!geometry->instance.uvLayout && companion != 1) {
-    if (!actor->customTint) {
-      if (actor->previewFlag) {
-        const unsigned packed =
-            static_cast<uint16_t>(actor->instance.position.vx) |
-            (static_cast<unsigned>(
-                 static_cast<uint16_t>(actor->instance.position.vz))
-             << 16);
-        Field_SampleRoomGroundColor(static_cast<int>(packed),
-                                    actor->instance.currentTileLayer,
-                                    &actor->instance.tint);
-      } else {
-        actor->instance.tint.red = actor->instance.tint.green =
-            actor->instance.tint.blue = kNeutralModelColor;
-      }
-    }
-    if (geometry->instance.actionAnimationState < kTintStateLimit) {
-      geometry->instance.baseColor.r =
-          ModelColorChannel(actor->instance.tint.red, geometry->fadeRed);
-      geometry->instance.baseColor.g =
-          ModelColorChannel(actor->instance.tint.green, geometry->fadeGreen);
-      geometry->instance.baseColor.b =
-          ModelColorChannel(actor->instance.tint.blue, geometry->fadeBlue);
-      unsigned char* shadow_color =
-          reinterpret_cast<unsigned char*>(&geometry->shadowBlend.reserved0);
-      shadow_color[0] = actor->instance.tint.red;
-      shadow_color[1] = actor->instance.tint.green;
-      shadow_color[2] = actor->instance.tint.blue;
-    }
-  } else if (geometry->instance.uvLayout &&
-             geometry->instance.actionAnimationState < kTintStateLimit) {
-    const unsigned packed =
-        static_cast<uint16_t>(root_offset->vx) |
-        (static_cast<unsigned>(static_cast<uint16_t>(root_offset->vz)) << 16);
-    Render_ColorCode ground;
-    Field_SampleRoomGroundColor(static_cast<int>(packed),
-                                actor->instance.currentTileLayer, &ground);
-    unsigned char* shadow_color =
-        reinterpret_cast<unsigned char*>(&actor->shadowBlend.reserved0);
-    shadow_color[0] =
-        (unsigned char)((ground.red >> 1) + kNeutralModelColor / 2);
-    shadow_color[1] =
-        (unsigned char)((ground.green >> 1) + kNeutralModelColor / 2);
-    shadow_color[2] =
-        (unsigned char)((ground.blue >> 1) + kNeutralModelColor / 2);
-  }
+ModelDrawRole ClassifyModelDraw(int companion) {
+  // The original compares the companion argument as an unsigned byte.
+  const auto slot = static_cast<std::uint8_t>(companion);
+  if (slot == 0) return ModelDrawRole::kSelf;
+  if (slot == 1) return ModelDrawRole::kCompanionOverlay;
+  return ModelDrawRole::kCompanionGeometry;
 }
 
 // decomp: BATTLE.PRG func_800B28A8, material dispatch at 0x800B34CC
 // (49268/func_800B28A8.s).
-void Actors_DrawActorModel(void* actor_data, MATRIX* camera, char companion) {
-  enum { kEventPlaybackActive = 4 };
-  Actors_ActorRecord* actor = reinterpret_cast<Actors_ActorRecord*>(actor_data);
-  if (!Actors_BuildActorModelPose(actor, camera) ||
-      !actor->instance.isVisible) {
-    return;
+ModelDrawResult DrawActorModel(ActorModelDrawHost& host, int companion) {
+  if (!host.BuildPose() || !host.IsVisible()) return ModelDrawResult::kNoPose;
+  if (host.Height() >= kHiddenActorHeight &&
+      (host.IsLeader() || !host.IsEventPlaying())) {
+    return ModelDrawResult::kHidden;
   }
-  if (actor->instance.position.vy >= kHiddenActorHeight &&
-      (actor->instance.slot == 0 ||
-       Event_EventPlaybackState() != kEventPlaybackActive)) {
-    return;
+  const ModelDrawRole role = ClassifyModelDraw(companion);
+  const int geometry_slot = role == ModelDrawRole::kCompanionGeometry
+                                ? static_cast<std::uint8_t>(companion)
+                                : 0;
+  if (!host.SelectGeometry(geometry_slot)) {
+    return ModelDrawResult::kMissingGeometry;
   }
-  Actors_ActorRecord* geometry = actor;
-  if ((unsigned char)companion >= 2) {
-    if ((unsigned char)companion >=
-            sizeof Actors_actorRecords / sizeof Actors_actorRecords[0] ||
-        Actors_actorRecords[(unsigned char)companion] == nullptr) {
-      return;
-    }
-    geometry = Actors_actorRecords[(unsigned char)companion];
-  }
-  if (geometry->textureSlot >= sizeof Render_legacyActorTextureSlots /
-                                   sizeof Render_legacyActorTextureSlots[0] ||
-      geometry->instance.boneCount > actor->instance.boneCount ||
-      !Render_ValidateModelData(&geometry->instance, geometry->instance.model,
-                                geometry->modelDataSize)) {
-    Core_Debugf("render", "Invalid actor model %u data or texture slot",
-                (unsigned)geometry->modelId);
-    return;
-  }
-  Render_ModelScratchpad* workspace = Render_ModelWorkspace();
-  workspace->model = geometry->instance.model;
-  workspace->texturePage =
-      Render_legacyActorTextureSlots[geometry->textureSlot].texturePage;
-  workspace->palette = static_cast<uint16_t>(geometry->clutA);
-  workspace->reserved38 = static_cast<uint16_t>(geometry->clutB);
-  if (!Render_ProjectModelVertices(&geometry->instance, actor->boneMatrices,
-                                   -Render_nearClip * kProjectionDepthScale,
-                                   workspace->model)) {
-    actor->instance.isPreviewModel = 1;
-    goto draw_shadow;
-  }
-  actor->instance.isPreviewModel = 0;
-  UpdateActorModelColors(actor, geometry, companion, &workspace->rootOffset);
-  CVECTOR color = geometry->instance.baseColor;
-  if (companion == 1) memcpy(&color, &actor->companionColor, sizeof color);
-  if (companion == 1) {
-    if (geometry->instance.uvLayout) {
-      Render_DrawModelGouraudPolygons(&Actors_modelRenderContext,
-                                      &geometry->instance, &color,
-                                      workspace->model);
-    } else {
-      Render_DrawModelFlatPolygons(&Actors_modelRenderContext,
-                                   &geometry->instance, &color,
-                                   workspace->model);
-    }
+  if (!host.BindGeometry()) return ModelDrawResult::kInvalidGeometry;
+  ModelDrawResult result = ModelDrawResult::kCulled;
+  if (!host.ProjectVertices()) {
+    host.SetCulled(true);
   } else {
-    Render_DrawActorPolygons(&Actors_modelRenderContext, &geometry->instance,
-                             &color, workspace->model);
+    host.SetCulled(false);
+    host.UpdateColors(role);
+    if (role == ModelDrawRole::kCompanionOverlay) {
+      host.DrawPolygons(host.GeometryHasUvLayout()
+                            ? ModelPolygons::kCompanionGouraud
+                            : ModelPolygons::kCompanionFlat);
+    } else {
+      host.DrawPolygons(ModelPolygons::kTextured);
+    }
+    result = ModelDrawResult::kDrawn;
   }
-draw_shadow:
-  if (companion == 0 && actor->instance.soundEnabled) {
-    Render_DrawActorGroundShadow(actor, &Render_frameScratch.viewMatrix,
-                                 &workspace->rootOffset);
-  }
+  if (role == ModelDrawRole::kSelf && host.CastsShadow()) host.DrawShadow();
+  return result;
 }
 
-// decomp: BATTLE.PRG func_800A141C (src/BATTLE/BATTLE.PRG/38C1C.c:39) [C: not
-// yet ported]
-int Actors_ProjectActorBoneEndpoint(int actor_id, int bone, int* output,
-                                    int endpoint) {
-  if ((unsigned)actor_id >=
-          sizeof Actors_actorRecords / sizeof Actors_actorRecords[0] ||
-      output == nullptr) {
-    return -1;
+std::uint8_t AdjustModelColorChannel(std::uint8_t base,
+                                     std::uint8_t adjustment) {
+  const int signed_adjustment =
+      adjustment < kByteSignBit ? adjustment : adjustment - kByteRange;
+  const int value = base + (signed_adjustment * kColorAdjustmentScale);
+  return static_cast<std::uint8_t>(
+      std::clamp(value, 0, static_cast<int>(kByteRange - 1)));
+}
+
+std::uint8_t GroundShadowChannel(std::uint8_t ground) {
+  return static_cast<std::uint8_t>((ground >> 1) + (kNeutralModelColor / 2));
+}
+
+BoneEndpoint ClassifyBoneEndpoint(int endpoint) {
+  if (endpoint == 0) return BoneEndpoint::kBase;
+  if (endpoint == 1) return BoneEndpoint::kTip;
+  return BoneEndpoint::kMiddle;
+}
+
+// 38C1C.c:39 func_800A141C: the tip negates the low halfword of the length; the
+// midpoint halves the negated length with C division.
+std::int16_t BoneEndpointOffset(std::int32_t length, BoneEndpoint endpoint) {
+  switch (endpoint) {
+    case BoneEndpoint::kBase:
+      return 0;
+    case BoneEndpoint::kTip:
+      return static_cast<std::int16_t>(
+          -static_cast<std::int32_t>(static_cast<std::uint16_t>(length)));
+    case BoneEndpoint::kMiddle:
+      break;
   }
-  const Actors_ShpModel* model;
-  const MATRIX* matrix;
-  const Actors_ActorRecord* actor = Actors_actorRecords[actor_id];
-  if (actor != nullptr) {
-    if (bone < 0 || bone >= actor->instance.boneCount) {
-      return kInvalidBoneResult;
-    }
-    model = actor->instance.model;
-    matrix = &actor->boneMatrices[bone];
-  } else {
-    const Field_GimmickInstance* object =
-        Field_FindGimmickForActorSlot(actor_id);
-    if (object == nullptr) return -1;
-    if (bone < 0 || bone >= object->boneCount ||
-        static_cast<size_t>(bone) >=
-            sizeof object->matrices / sizeof object->matrices[0]) {
-      return kInvalidBoneResult;
-    }
-    model = object->model;
-    matrix = &object->matrices[bone];
+  return static_cast<std::int16_t>(-static_cast<std::int64_t>(length) / 2);
+}
+
+std::int32_t ClampProjectedDepth(std::int32_t depth) {
+  return std::clamp<std::int32_t>(depth, 0, kDepthLimit);
+}
+
+// decomp: BATTLE.PRG func_800A141C (src/BATTLE/BATTLE.PRG/38C1C.c:39).
+int ProjectActorBoneEndpoint(BoneProjectionHost& host, int slot, int bone,
+                             int endpoint, std::span<std::int32_t, 2> output) {
+  const BoneSelection selection = host.SelectBone(slot, bone);
+  if (selection.status == BoneLookup::kMissing) return kBoneProjectionMissing;
+  if (selection.status == BoneLookup::kInvalidBone) {
+    return kBoneProjectionInvalidBone;
   }
-  if (model == nullptr) return -1;
-  SVECTOR position = {0};
-  if (endpoint == 1) {
-    position.vx =
-        static_cast<int16_t>(-static_cast<uint16_t>(model->bones[bone].length));
-  } else if (endpoint != 0) {
-    position.vx = static_cast<int16_t>(-model->bones[bone].length / 2);
-  }
-  Core_Gte_SetRotMatrix(matrix);
-  Core_Gte_SetTransMatrix(matrix);
-  Core_GteWord screen, fog, flags;
-  VECTOR transformed;
-  Core_Gte_RotTransPers(&position, &screen, &fog, &flags);
-  Core_Gte_StoreLvnl(&transformed);
-  output[0] = static_cast<int>(screen);
-  output[1] = transformed.vz < 0            ? 0
-              : transformed.vz > UINT16_MAX ? UINT16_MAX
-                                            : transformed.vz;
+  const ProjectedBonePoint point = host.Project(
+      BoneEndpointOffset(selection.length, ClassifyBoneEndpoint(endpoint)));
+  output[0] = point.screen;
+  output[1] = ClampProjectedDepth(point.depth);
   return 0;
 }
-}  // extern "C"
+}  // namespace VS::Actors

@@ -48,6 +48,9 @@ NATIVE_HELPER_HEADERS = {
        for name in ("VS::Actors::AdvanceLiveSkeletalAnimation", "VS::Actors::BlendLiveActorPose",
                     "VS::Actors::RegisterSequenceBank", "VS::Actors::RegisterSequenceBankCopy",
                     "VS::Actors::RegisterEmbeddedSequenceBank")},
+    **{name: r"Native\Game\include\Actors\ModelDrawingLive.hpp"
+       for name in ("VS::Actors::DrawLiveActorModel", "VS::Actors::ResolveLiveAttachmentParentMatrix",
+                    "VS::Actors::ProjectLiveActorBoneEndpoint")},
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
@@ -102,7 +105,6 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Battle_Ai_ActorNavigationOverrideStatus":
         r"Native\Game\src\Battle\Ai\NavigationPrimitives.h",
-    "Actors_ResolveAttachmentParentMatrix": r"Native\Game\src\Actors\ModelDrawing.h",
     "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
     "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.h",
@@ -2269,11 +2271,11 @@ int Menu_Loot_AdvanceStagedInventory(void)
             "gimmick depth shifts the ordering table without touching the primitive pointer"),
            ("frame->depth = (int)(frame->depth - 0x10);",
             "frame->orderingTable = (u_char*)frame->orderingTable - 0x10;", "restore the gimmick ordering-table base"),
-        ("                Actors_DrawActorModel(\n"
+        ("                VS::Actors::DrawActorModel(\n"
          "                    actor, &entries[actor->instance.attachParent]->boneMatrices[actor->instance.attachBone], 0U);",
-         "                MATRIX* parent_matrix = Actors_ResolveAttachmentParentMatrix(actor);\n"
+         "                MATRIX* parent_matrix = VS::Actors::ResolveLiveAttachmentParentMatrix(actor);\n"
          "                if (parent_matrix != NULL) {\n"
-         "                    Actors_DrawActorModel(actor, parent_matrix, 0U);\n"
+         "                    VS::Actors::DrawActorModel(actor, parent_matrix, 0U);\n"
          "                }",
          "44F14.c:1010 defer an independently owned prop draw while its borrowed parent matrix is unavailable"),
     ],
@@ -2753,6 +2755,13 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Actors::BlendActorPose\(\s*&(\w+)->blendPose, &\1->pose, ",
      r"VS::Actors::BlendLiveActorPose(\1->blendPose, \1->pose, ",
      "F01016 #46 typed promotion: the pose binding blends typed keys and skips zero-length blends (#261)"),
+    (r"", r"\bVS::Actors::ProjectActorBoneEndpoint\(",
+     r"VS::Actors::ProjectLiveActorBoneEndpoint(",
+     "F00878 #46 typed promotion: the projection binding bounds the bone by the pose matrices and bone table (#263)"),
+    (r"", r"\bVS::Actors::DrawActorModel\((\w+), (\w+), ",
+     r"VS::Actors::DrawLiveActorModel(*\1, *\2, ",
+     "F01023 #46 typed promotion: the actor binding builds the pose and draws the selected geometry through the "
+     "typed draw order"),
     (r"", r"\bVS::Render::DrawScaledFontChar\(",
      r"VS::Render::DrawLiveScaledFontChar(",
      "F04199 #46 typed promotion: the font binding supplies the live font style and text box layer"),
@@ -4347,14 +4356,6 @@ for identifier, old, new, evidence in (
      "    for (; i < 24; ++i) {\n        short (*new_var)[2];\n        Render_legacyActorTextureSlots[i].texturePage =\n            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (new_var = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);\n        Render_legacyActorTextureSlots[i].palette = GetClut(768, 229);\n        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, 247);\n        Render_legacyActorTextureSlots[i].referenceCount = 0;\n    }",
      "    for (; i < 24; ++i) {\n        short (*secondary_texture_origins)[2];\n        Render_legacyActorTextureSlots[i].texturePage =\n            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (secondary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);\n        Render_legacyActorTextureSlots[i].palette = GetClut(768, 229);\n        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, 247);\n        Render_legacyActorTextureSlots[i].referenceCount = 0;\n    }",
      "Second for-loop block declaration at502 aliases same origin table for slots12..23 with shared CLUT rows229/247. Original FB0.c:41-46. Must not use whole-function new_var replacement."),
-    ("F00876",
-     "((int (*)(int arg0, int arg1, int* arg2, int arg3))Actors_ProjectActorBoneEndpoint)",
-     "((int (*)(int actor_id, int bone_index, int* screen_position_out, int endpoint))Actors_ProjectActorBoneEndpoint)",
-     "Prototype parameters of the cast to Actors_ProjectActorBoneEndpoint are separate bindings from wrapper parameters. Callee owned definition ModelDrawing.c:394 accepts (actor_id,bone,output,endpoint). In F00876 arg1 must be bone_index here, not the enclosing bone_tag. Apply identifier-aware span edits separately."),
-    ("F00877",
-     "((int (*)(int arg0, int arg1, int* arg2, int arg3))Actors_ProjectActorBoneEndpoint)",
-     "((int (*)(int actor_id, int bone_index, int* screen_position_out, int endpoint))Actors_ProjectActorBoneEndpoint)",
-     "Prototype parameters of the cast to Actors_ProjectActorBoneEndpoint are separate bindings from wrapper parameters. Callee owned definition ModelDrawing.c:394 accepts (actor_id,bone,output,endpoint). In F00876 arg1 must be bone_index here, not the enclosing bone_tag. Apply identifier-aware span edits separately."),
 ):
     FIXES.setdefault(identifier, []).append((old, new, evidence))
 

@@ -10,12 +10,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/ModelDrawingLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelDrawing.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
@@ -281,7 +281,7 @@ TEST_CASE("Actor drawing submits the original gated ground-shadow pass",
         reinterpret_cast<unsigned char*>(fixture.model_bytes.data()) + 100,
         &vertex, sizeof vertex);
   }
-  Actors_DrawActorModel(&fixture.actor, &fixture.camera, 0);
+  VS::Actors::DrawLiveActorModel(fixture.actor, fixture.camera, 0);
   CHECK(fixture.PacketCount() == 24);
   CHECK(static_cast<bool>(fixture.actor.instance.isPreviewModel) !=
         body_visible);
@@ -302,7 +302,7 @@ TEST_CASE(
   if (gate == 1) companion = 1;
   if (gate == 2) fixture.actor.instance.isVisible = 0;
   if (gate == 3) fixture.actor.instance.position.vy = 256;
-  Actors_DrawActorModel(&fixture.actor, &fixture.camera, companion);
+  VS::Actors::DrawLiveActorModel(fixture.actor, fixture.camera, companion);
   CHECK(fixture.PacketCount() == 0);
   CHECK(fixture.actor.soundPosition.vz == 0);
 }

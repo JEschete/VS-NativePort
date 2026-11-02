@@ -198,9 +198,9 @@
     <ClCompile Include="src\Actors\ModelDrawing.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ModelDrawing.h">
+    <ClCompile Include="src\Actors\ModelDrawingLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClInclude Include="src\Actors\ModelInstance.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
@@ -2212,6 +2212,12 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\AppearanceTransitionLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ModelDrawing.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ModelDrawingLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\MovementCommand.hpp">

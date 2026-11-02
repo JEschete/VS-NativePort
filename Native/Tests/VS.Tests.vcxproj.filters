@@ -222,6 +222,9 @@
     <ClCompile Include="src\MinimapTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ModelDrawingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MotionRequestsTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

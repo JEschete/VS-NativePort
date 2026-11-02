@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "Actors/ModelDrawingLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/Appearance.h"
-#include "Actors/ModelDrawing.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
@@ -1105,6 +1105,7 @@ int Tests_ProjectedBoneEndpoints(void) {
   Actors_actorRecords[0] = &actor;
   actor.instance.boneCount = 1;
   actor.instance.model = model;
+  actor.modelDataSize = sizeof modelBytes;
   model->bones[0].length = 128;
   for (int axis = 0; axis < kSpatialDimensions; ++axis) {
     actor.boneMatrices[0].m[axis][axis] = kFixedPointOne;
@@ -1114,14 +1115,17 @@ int Tests_ProjectedBoneEndpoints(void) {
   Core_Gte_SetGeomOffset(160, 120);
   Core_Gte_SetGeomScreen(256);
   int output[2] = {0};
-  int passed = Actors_ProjectActorBoneEndpoint(0, 0, output, 0) == 0 &&
+  int passed = VS::Actors::ProjectLiveActorBoneEndpoint(0, 0, output, 0) == 0 &&
                output[0] == ((120 << 16) | 160) && output[1] == 1024;
-  passed = passed && Actors_ProjectActorBoneEndpoint(0, 0, output, 1) == 0 &&
+  passed = passed &&
+           VS::Actors::ProjectLiveActorBoneEndpoint(0, 0, output, 1) == 0 &&
            static_cast<int16_t>(output[0]) == 128 && output[1] == 1024;
-  passed = passed && Actors_ProjectActorBoneEndpoint(0, 0, output, 2) == 0 &&
+  passed = passed &&
+           VS::Actors::ProjectLiveActorBoneEndpoint(0, 0, output, 2) == 0 &&
            static_cast<int16_t>(output[0]) == 144;
-  passed = passed && Actors_ProjectActorBoneEndpoint(0, 1, output, 0) == -4 &&
-           Actors_ProjectActorBoneEndpoint(-1, 0, output, 0) == -1;
+  passed = passed &&
+           VS::Actors::ProjectLiveActorBoneEndpoint(0, 1, output, 0) == -4 &&
+           VS::Actors::ProjectLiveActorBoneEndpoint(-1, 0, output, 0) == -1;
   Actors_actorRecords[0] = saved;
   Core_Gte_Reset();
   return passed;
@@ -1149,7 +1153,7 @@ int Tests_ActorPoseHierarchy(void) {
   MATRIX camera = {0};
   for (int axis = 0; axis < 3; ++axis) camera.m[axis][axis] = 4096;
   setVector(&Render_ModelWorkspace()->rootOffset, 100, 200, 300);
-  int passed = Actors_BuildActorModelPose(&actor, &camera) == 1 &&
+  int passed = VS::Actors::BuildLiveActorModelPose(actor, camera) == 1 &&
                actor.boneMatrices[0].t[0] == 100 &&
                actor.boneMatrices[1].t[0] == -28 &&
                actor.boneMatrices[1].t[1] == 200 &&
@@ -1172,7 +1176,7 @@ int Tests_ActorPoseHierarchy(void) {
   setVector(&Render_ModelWorkspace()->rootOffset, 0, 0, 1024);
   Core_Gte_Reset();
   Core_Gte_SetGeomScreen(256);
-  Actors_DrawActorModel(&actor, &camera, 0);
+  VS::Actors::DrawLiveActorModel(actor, camera, 0);
   passed = passed && actor.instance.wasDrawn &&
            Actors_modelRenderContext.projectedVertexCount == 1;
   passed = passed && actor.instance.baseColor.r == 96 &&
@@ -1180,15 +1184,15 @@ int Tests_ActorPoseHierarchy(void) {
            actor.instance.baseColor.b == 0 &&
            (actor.shadowBlend.reserved0 & 0xFFFFFF) == 0x144664;
   actor.customTint = 0;
-  Actors_DrawActorModel(&actor, &camera, 0);
+  VS::Actors::DrawLiveActorModel(actor, camera, 0);
   passed = passed && actor.instance.baseColor.r == 124 &&
            actor.instance.baseColor.g == 255 &&
            actor.instance.baseColor.b == 88;
   model->bones[1].parentIndex = 1;
-  passed = passed && Actors_BuildActorModelPose(&actor, &camera) == 0;
+  passed = passed && VS::Actors::BuildLiveActorModelPose(actor, camera) == 0;
   model->bones[1].parentIndex = 0;
   actor.modelDataSize = sizeof(Actors_ShpModel);
-  passed = passed && Actors_BuildActorModelPose(&actor, &camera) == 0;
+  passed = passed && VS::Actors::BuildLiveActorModelPose(actor, camera) == 0;
   Actors_skeletonPose = savedPose;
   Actors_modelRenderContext = savedContext;
   *Render_ModelWorkspace() = savedWorkspace;
