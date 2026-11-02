@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -192,7 +193,6 @@ extern "C" {
 #include "Field/RoomLoading.h"
 #include "Field/RoomRendering.h"
 #include "Field/RoomState.h"
-#include "Field/SegmentCollision.h"
 #include "Field/Transitions.h"
 #include "Field/Traps.h"
 #include "Field/TriggerMarkers.h"
@@ -3233,13 +3233,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&Field_IsPointOutsideSolidVolumes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&Field_TraceActorAndTerrainCollision, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBA4Cu, 0u, (void*)&Battle_Ai_UpdateFleeOrWanderBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBA88u, 0u, (void*)&Battle_Ai_UpdateAdaptivePursuitBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&Battle_Ai_UpdateSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&Battle_Ai_UpdateEngagementApproachBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&VS::Field::IsLivePointOutsideSolidVolumes, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&VS::Field::TraceLiveActorAndTerrainCollision, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

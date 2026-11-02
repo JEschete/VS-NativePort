@@ -754,6 +754,9 @@ class EncounterFixupTests(unittest.TestCase):
         root = Path(__file__).resolve().parents[2]
         scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))
         self.assertTrue(
+            scaffold["needs_c_headers"]("VS.Game", r"src\Field\SegmentCollisionLive.cpp")
+        )
+        self.assertFalse(
             scaffold["needs_c_headers"]("VS.Game", r"src\Field\SegmentCollision.cpp")
         )
         for identity in ("F01833", "F01834"):
@@ -761,15 +764,27 @@ class EncounterFixupTests(unittest.TestCase):
                 self.owned_items()[identity]["path"],
                 r"Native\Game\src\Field\SegmentCollision.cpp",
             )
-        for address, identity in ((0x800E6BA0, "F01833"), (0x800E6C34, "F01834")):
-            self.assertIn(
+        for address, identity, binding in (
+            (0x800E6BA0, "F01833", "VS::Field::IsLivePointOutsideSolidVolumes"),
+            (0x800E6C34, "F01834", "VS::Field::TraceLiveActorAndTerrainCollision"),
+        ):
+            self.assertNotIn(
                 ("BATTLE/BATTLE.PRG", address, identity),
                 copy_fixups.MODULE_FUNCTION_ENTRIES,
             )
+            self.assertIn(
+                ("BATTLE/BATTLE.PRG", address, binding),
+                copy_fixups.MODULE_BINDING_ENTRIES,
+            )
+            self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
         self.assertEqual(
             copy_fixups.FIXES["F00514"][0][1], "spec->resetsHitResults"
         )
         self.assertIn("!= NULL;", copy_fixups.FIXES["F00514"][1][1])
+        self.assertEqual(
+            copy_fixups.FIXES["F00514"][2][1],
+            "VS::Field::TraceLiveActorAndTerrainCollision(",
+        )
 
     def test_screen_warp_routes_through_the_live_binding(self):
         root = Path(__file__).resolve().parents[2]

@@ -49,6 +49,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Field::SampleLiveRoomLighting": r"Native\Game\include\Field\RoomLightingLive.hpp",
     "VS::Field::ResolveLiveSceneRoomData": r"Native\Game\include\Field\MinimapSceneLive.hpp",
     "VS::Field::DrawLiveMinimapScene": r"Native\Game\include\Field\MinimapSceneLive.hpp",
+    "VS::Field::IsLivePointOutsideSolidVolumes": r"Native\Game\include\Field\SegmentCollisionLive.hpp",
+    "VS::Field::TraceLiveActorAndTerrainCollision": r"Native\Game\include\Field\SegmentCollisionLive.hpp",
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -197,6 +199,8 @@ MODULE_SAMPLE_POINTERS = {"G01840": "Content_residentLfoSamples"}
 # image still stores the original address, so the relocated word must resolve to the binding (plan section 8.2).
 MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800B9DB4, "Event_ScriptSetAshleyBattleModeOpcode"),  # F01130 opcode table
+    ("BATTLE/BATTLE.PRG", 0x800E6BA0, "VS::Field::IsLivePointOutsideSolidVolumes"),  # F01833
+    ("BATTLE/BATTLE.PRG", 0x800E6C34, "VS::Field::TraceLiveActorAndTerrainCollision"),  # F01834
 )
 
 MODULE_FUNCTION_ENTRIES = (
@@ -221,8 +225,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("SLUS_010.40", 0x80041A00, "F03404"),
     ("SLUS_010.40", 0x80041954, "F03408"),
     ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
-    ("BATTLE/BATTLE.PRG", 0x800E6BA0, "F01833"),
-    ("BATTLE/BATTLE.PRG", 0x800E6C34, "F01834"),
     ("BATTLE/BATTLE.PRG", 0x800DBA4C, "F04203"),
     ("BATTLE/BATTLE.PRG", 0x800DBA88, "F04204"),
     ("BATTLE/BATTLE.PRG", 0x800DBB98, "F04205"),
@@ -254,6 +256,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("&origin, &position, &impact, result->primaryTarget.target.targetActor);",
          "&origin, &position, &impact, result->primaryTarget.target.targetActor) != NULL;",
          "Native segment trace returns an output pointer; this caller consumes only collision truth"),
+        ("VS::Field::TraceActorAndTerrainCollision(",
+         "VS::Field::TraceLiveActorAndTerrainCollision(",
+         "F01834 typed core takes a trace world; the generated caller uses the live binding"),
     ],
     "F01363": [
         ("Effects_screenEffectDefaults[2] = 0x1000;",

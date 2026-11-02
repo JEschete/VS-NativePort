@@ -158,7 +158,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\PlanningWorkspaceLive.cpp",
                 r"src\Battle\Ai\CurrentTerrain.cpp",
                 r"src\Field\EncounterCatalog.cpp",
-                r"src\Field\SegmentCollision.cpp",
+                r"src\Field\SegmentCollisionLive.cpp",
                 r"src\Field\PlatformPlacementLive.cpp",
                 r"src\Field\RoomTriggerMarkersLive.cpp",
                 r"src\Field\RoomLightingLive.cpp",

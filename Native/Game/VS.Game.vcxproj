@@ -1579,7 +1579,8 @@
     <ClCompile Include="src\Field\RoomTriggerMarkersLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Field\SegmentCollision.cpp">
+    <ClCompile Include="src\Field\SegmentCollision.cpp" />
+    <ClCompile Include="src\Field\SegmentCollisionLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Field\TerrainHeight.cpp" />
@@ -2332,7 +2333,6 @@
     <ClInclude Include="src\Field\RoomLoading.h" />
     <ClInclude Include="src\Field\RoomRendering.h" />
     <ClInclude Include="src\Field\RoomState.h" />
-    <ClInclude Include="src\Field\SegmentCollision.h" />
     <ClInclude Include="src\Field\Transitions.h" />
     <ClInclude Include="src\Field\Traps.h" />
     <ClInclude Include="src\Field\TriggerMarkers.h" />
@@ -2450,6 +2450,8 @@
     <ClInclude Include="include\Field\RoomLightingLive.hpp" />
     <ClInclude Include="include\Field\RoomTriggerMarkers.hpp" />
     <ClInclude Include="include\Field\RoomTriggerMarkersLive.hpp" />
+    <ClInclude Include="include\Field\SegmentCollision.hpp" />
+    <ClInclude Include="include\Field\SegmentCollisionLive.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
     <ClInclude Include="include\Items\Inventory.h" />

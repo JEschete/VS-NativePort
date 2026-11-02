@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
 #include "Core/Memory/WordCopy.h"
-#include "Field/SegmentCollision.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -563,7 +563,7 @@ void Battle_ResolveActionTargets(int action, Battle_ActionRequest* result, Battl
                     } else {
                         position = *(SVECTOR*)&entry->target;
                     }
-                    redirected = Field_TraceActorAndTerrainCollision(
+                    redirected = VS::Field::TraceLiveActorAndTerrainCollision(
                         &origin, &position, &impact, result->primaryTarget.target.targetActor) != NULL;
                     if (redirected) {
                         if (impact.pad == 0) {
