@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 99 | 14 (`wip`) | 4,094 |
-| `cpp` | 99 | 182 (`wip`) | 3,926 |
+| `modernized` | 103 | 14 (`wip`) | 4,090 |
+| `cpp` | 103 | 178 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 226 |
-| `vs_namespace` | 99 |
-| `typed_interface` | 99 |
-| `no_bridge` | 99 |
-| `strict_clean` | 226 |
-| `behavior_evidence` | 99 |
+| `source_cpp` | 230 |
+| `vs_namespace` | 103 |
+| `typed_interface` | 103 |
+| `no_bridge` | 103 |
+| `strict_clean` | 230 |
+| `behavior_evidence` | 103 |
 
-Promotion records: 281; derived `cpp=x`: 99, `cpp=wip`: 182. Verification records: 87; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 103, `cpp=wip`: 178. Verification records: 88; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -217,6 +217,8 @@ The forty-first is actor model drawing (F01023, F00878): VS::Actors::DrawActorMo
 and the live projection bounds bones by the pose matrices and loaded bone table (#263); the two Actors_ symbols and ModelDrawing.h are retired.
 The forty-second is the save menu assets (F02737, F02738, F03604, F03605): VS::Save::MemoryCard steps the memory-card image and text load over an abstract host with an explicit load state,
 so a release during a pending read keeps the buffer and ready steps no longer touch a released request (#264); the four Save_MemoryCard_ symbols and MenuAssets.h are retired.
+The forty-third is the sprite packets (F04190-F04193): VS::Render builds the six-word sprite packet over an abstract queue and loads the view matrix through an abstract target,
+so a packet past the frame primitive buffer is refused with discard storage instead of overrunning it (#265); the four Render_ sprite symbols and Sprites.h are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
