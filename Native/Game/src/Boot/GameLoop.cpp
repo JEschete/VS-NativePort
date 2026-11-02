@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MovementCommand.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActorCleanup.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
@@ -573,7 +573,7 @@ void Boot_RunGameLoop(void)
                     Render_DrawScreenTransition(ot);
                     Render_DrawFramebufferEffect(ot);
                     if (Field_controlMode == 1) {
-                        Battle_Ai_RunActorAiUpdateStages();
+                        VS::Battle::Ai::RunLiveActorAiUpdateStages();
                     } else if (Field_controlMode == 3) {
                         Battle_Ai_UpdateActorNavigationOverrides();
                     }

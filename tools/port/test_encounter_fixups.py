@@ -782,6 +782,25 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("AllocateFromHighEnd", body)
         self.assertNotIn("Core_ScratchBase", body)
 
+    def test_frame_update_rows_bind_module_addresses_to_the_live_frame_update(self):
+        owned = self.owned_items()
+        for identity in ("F01765", "F01800", "F01819", "F01824", "F01825"):
+            self.assertEqual(owned[identity]["path"], r"Native\Game\src\Battle\Ai\FrameUpdate.cpp")
+            self.assertEqual(owned[identity]["header"], r"Native\Game\include\Battle\Ai\FrameUpdate.hpp")
+        root = Path(__file__).resolve().parents[2]
+        pointers = (root / r"Native\Game\src\Boot\ModulePointers.cpp").read_text(encoding="utf-8")
+        for address, binding in (
+            (0x800E65DC, "VS::Battle::Ai::CacheLiveActorAiWorkingState"),
+            (0x800E6828, "VS::Battle::Ai::InitializeLiveActorLocomotionMode"),
+            (0x800E685C, "VS::Battle::Ai::SetLiveActorVerticalMovementSteps"),
+        ):
+            self.assertIn(("BATTLE/BATTLE.PRG", address, binding), copy_fixups.MODULE_BINDING_ENTRIES)
+            self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
+            self.assertIn(f'0x{address:08X}u, 0u, (void*)&{binding},', pointers)
+        loop = (root / r"Native\Game\src\Boot\GameLoop.cpp").read_text(encoding="utf-8")
+        self.assertIn("VS::Battle::Ai::RunLiveActorAiUpdateStages();", loop)
+        self.assertNotIn("Battle_Ai_RunActorAiUpdateStages", loop)
+
     def test_segment_trace_owns_typed_geometry_and_the_live_boolean_consumer(self):
         root = Path(__file__).resolve().parents[2]
         scaffold = runpy.run_path(str(root / r"tools\scaffold\gen_solution.py"))

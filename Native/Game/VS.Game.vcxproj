@@ -280,12 +280,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\FlightTerrain.cpp" />
-    <ClCompile Include="src\Battle\Ai\FrameUpdate.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Battle\Ai\FrameUpdate.cpp" />
+    <ClCompile Include="src\Battle\Ai\FrameUpdateLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\GroundNavigation.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -2393,6 +2390,8 @@
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
+    <ClInclude Include="include\Battle\Ai\FrameUpdate.hpp" />
+    <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspaceLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />

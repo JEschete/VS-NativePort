@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -280,33 +281,33 @@ int Tests_AiMovementSetup(void) {
   Battle_Ai_ActorAiState state = {0};
   state.decisionDelay = 2;
   state.minActionDelay = 1;
-  Battle_Ai_TickActorDecisionTimers(
+  VS::Battle::Ai::TickLiveActorDecisionTimers(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state));
   int passed = state.decisionDelay == 1 && state.minActionDelay == 0;
-  Battle_Ai_TickActorDecisionTimers(
+  VS::Battle::Ai::TickLiveActorDecisionTimers(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state));
-  Battle_Ai_TickActorDecisionTimers(
+  VS::Battle::Ai::TickLiveActorDecisionTimers(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&state));
   passed = passed && state.decisionDelay == 0 && state.minActionDelay == 0;
   const u_short flags[3] = {0x1000, 0x800, 0x100};
   const u_char modes[3] = {1, 2, 0};
   for (size_t index = 0; index < sizeof flags / sizeof flags[0]; ++index) {
     state.locomotionFlags = flags[index];
-    Battle_Ai_InitializeActorLocomotionMode(
+    VS::Battle::Ai::InitializeLiveActorLocomotionMode(
         reinterpret_cast<Battle_Ai_AiCreationView*>(&state));
     passed = passed && state.locomotionMode == modes[index] &&
              state.movementFlags == (flags[index] | (flags[index] >> 8));
   }
   Battle_Ai_ActorAiState* saved = Battle_Ai_actorAiStates[2];
   Battle_Ai_actorAiStates[2] = &state;
-  Battle_Ai_SetActorVerticalMovementSteps(2, 8, 12);
+  VS::Battle::Ai::SetLiveActorVerticalMovementSteps(2, 8, 12);
   passed = passed && state.walkStep == 8 && state.runStep == 12 &&
            state.maxRange == 12;
-  Battle_Ai_SetActorVerticalMovementSteps(2, 16, 6);
+  VS::Battle::Ai::SetLiveActorVerticalMovementSteps(2, 16, 6);
   passed = passed && state.walkStep == 16 && state.runStep == 6 &&
            state.maxRange == 16;
   Battle_Ai_actorAiStates[2] = nullptr;
-  Battle_Ai_SetActorVerticalMovementSteps(2, 4, 8);
+  VS::Battle::Ai::SetLiveActorVerticalMovementSteps(2, 4, 8);
   passed = passed && state.walkStep == 16 && state.runStep == 6;
   Battle_Ai_actorAiStates[2] = saved;
   return passed;
@@ -358,17 +359,17 @@ int Tests_AiFrameStages(void) {
   Battle_Ai_secondPerceptionTarget = 0;
   Battle_Ai_attributeActorMask = 1 | (1 << 2) | (1 << 5);
   Battle_Ai_savedMovementRandomState = 0x12345678;
-  Battle_Ai_RunActorAiUpdateStages();
+  VS::Battle::Ai::RunLiveActorAiUpdateStages();
   int passed =
       room.readinessLevel == 0 && Battle_Ai_secondPerceptionTarget == 0;
   Battle_Ai_tileFlagMap = flags;
-  Battle_Ai_RunActorAiUpdateStages();
+  VS::Battle::Ai::RunLiveActorAiUpdateStages();
   passed = passed && room.readinessLevel == 1 &&
            Battle_Ai_secondPerceptionTarget == 2;
-  Battle_Ai_RunActorAiUpdateStages();
+  VS::Battle::Ai::RunLiveActorAiUpdateStages();
   passed = passed && room.readinessLevel == 2 &&
            Battle_Ai_secondPerceptionTarget == 5;
-  Battle_Ai_RunActorAiUpdateStages();
+  VS::Battle::Ai::RunLiveActorAiUpdateStages();
   passed = passed && room.readinessLevel == 3 &&
            Battle_Ai_secondPerceptionTarget == 0 &&
            Battle_Ai_savedMovementRandomState == 0x12345678 &&
@@ -416,7 +417,7 @@ int Tests_AiFrameCache(void) {
   Battle_Ai_roomHasWaypoints = auxiliary;
   Field_roomData.header.section6Length = sizeof auxiliary;
   Battle_Ai_savedMovementRandomState = 0x12345678;
-  const int returned = Battle_Ai_CacheActorAiWorkingState();
+  const int returned = VS::Battle::Ai::CacheLiveActorAiWorkingState();
   const Battle_Ai_FrameContext* frame = Battle_Ai_FrameState();
   int passed = returned == static_cast<int>(bounds) &&
                frame->actors[15] == &actor && frame->actors[0] == nullptr &&

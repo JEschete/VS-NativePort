@@ -168,6 +168,9 @@
     <ClCompile Include="src\FrameTimingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FrameUpdateTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\GimRenderTestCases.cpp">
       <Filter>src</Filter>
     </ClCompile>

@@ -12,6 +12,7 @@ extern "C" {
 #include <optional>
 #include <span>
 
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
@@ -198,7 +199,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
   }
 
   void RefreshDerivedRoomState() override {
-    Battle_Ai_CacheActorAiWorkingState();
+    VS::Battle::Ai::CacheLiveActorAiWorkingState();
     Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
     Battle_Ai_UpdateRouteGateAvailability();
   }

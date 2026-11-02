@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
@@ -236,7 +236,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     } else if (state->opaque225 & 8) {
         state->moveDistance = state->opaque227 << 7;
     }
-    Battle_Ai_InitializeActorLocomotionMode(state);
+    VS::Battle::Ai::InitializeLiveActorLocomotionMode(state);
     range = state->opaque226;
     if (range < state->opaque227) {
         range = state->opaque227;

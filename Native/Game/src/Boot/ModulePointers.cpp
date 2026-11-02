@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -68,7 +69,6 @@ extern "C" {
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/DecisionPrimitives.h"
 #include "Battle/Ai/Engagement.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/MovementBehavior.h"
@@ -2019,13 +2019,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E6098u, 0u, (void*)&Battle_Ai_BuildAiSpecialTerrainHeights, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6158u, 0u, (void*)&Battle_Ai_InitializeRoomNavigation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6178u, 0u, (void*)&Battle_Ai_CreateActorAiState, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E65DCu, 0u, (void*)&Battle_Ai_CacheActorAiWorkingState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6694u, 0u, (void*)&Battle_Ai_PackActorAiPersistenceFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6700u, 0u, (void*)&Battle_Ai_RefreshActorAiReservations, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6764u, 0u, (void*)&Battle_Ai_ForceReleaseActorAiReservations, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E678Cu, 0u, (void*)&Battle_Ai_ReleaseActorAiReservations, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6828u, 0u, (void*)&Battle_Ai_InitializeActorLocomotionMode, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E685Cu, 0u, (void*)&Battle_Ai_SetActorVerticalMovementSteps, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6898u, 0u, (void*)&Battle_Ai_AddAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68A0u, 0u, (void*)&Battle_Ai_RemoveAiTileOccupant, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E68ECu, 0u, (void*)&Battle_Ai_MarkAiTileDynamicObstacle, 0u, 0u, 0u},
@@ -3198,6 +3195,9 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&VS::Field::IsLivePointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&VS::Field::TraceLiveActorAndTerrainCollision, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E65DCu, 0u, (void*)&VS::Battle::Ai::CacheLiveActorAiWorkingState, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6828u, 0u, (void*)&VS::Battle::Ai::InitializeLiveActorLocomotionMode, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E685Cu, 0u, (void*)&VS::Battle::Ai::SetLiveActorVerticalMovementSteps, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

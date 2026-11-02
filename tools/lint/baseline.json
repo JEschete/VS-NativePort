@@ -695,13 +695,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "048a485740a905ef05ca5ef33c813501d8d82df5484860624e685bdcd88fbd6d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "04b02e4276806d8e8a2986e965f68729f0e1ac17233476338308be19ae7a92da",
       "count": 10,
       "tool": "cpplint",
@@ -1077,13 +1070,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/LogTests.cpp",
-      "rule": "whitespace/tab"
-    },
-    {
-      "key": "0704ad3f36419fb389ddba1c8fdc82883ecac76e1e086b7eb9e7fe45a4ae13be",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "whitespace/tab"
     },
     {
@@ -1463,20 +1449,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTestCases.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "09d128a9557928c312fe8138d3f9545f721166e57f36cc0879611d9c7bb5ffd5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "09d8d144b486e6ccfdad6e59451d8e67252d3e7f9eef8b9318c1876733855be4",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "09dd163d015c08299f00b954d2f527202f36ae4cb0cb41ac43a9b3517658f167",
@@ -2428,13 +2400,6 @@
       "count": 2,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
-      "key": "0f10ddf231bcf731fcc7bfb454dec2c02940b873c933402d6d269c8a8e2e4bdf",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
@@ -3446,13 +3411,6 @@
       "rule": "whitespace/comments"
     },
     {
-      "key": "14b55bd29d9da84868b29690d2477a75ee8b4f5a76dac05b331a47c8e274d5c2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "cc1926feaead24fd6222f7b9a0e8bc070515a0dda108eb1f9eca7aee0af30f5d",
       "count": 2,
       "tool": "tidy",
@@ -4116,13 +4074,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Platform/CrashHandler.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "1965240e5bca7be7ed3ba80a65a7b5d16282e2713ef6cb9c132649210bcd0a8b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "196a54336d1f9e944e13b44504f9330192da0edfcccd0d11b2ec8a0c22876aed",
@@ -5432,13 +5383,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "21e50e443f19425dcf7c63de0ae4c973bf2efb184a5f2b598a370bda6d2a3a16",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "21f716bf5b389e07d2d54c144333971a94d8b4b2bee488494bd49ac2ad456091",
@@ -6946,13 +6890,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "2a63992cce705107face1cc8a86002116aa8bb0d9ff69a1ed4442d336a49c677",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "2a6bd4118b1090c375c09932fe975e506592225346d95a6686fecf4d2feed5ad",
       "count": 2,
       "tool": "cpplint",
@@ -7961,13 +7898,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "30714a54bdbfa873156560134bf9d4a4938e3c13f6c0e937b7908f8ebdd9edd5",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "454b70e5cc3ed255a6c425eb4d6dbe8566432bf7510c1dd611dfee27781217c1",
       "count": 1,
       "tool": "tidy",
@@ -8302,13 +8232,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LayoutAsserts.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "32c8f7321238bd53833b2e2b48cfbc5e43f75f7f665927995b7115eb998919b9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "32d377dea9b747b5a1d8fb7a1b650a7e1c082d61bb3e438a5d6702e7df2d4389",
@@ -9443,13 +9366,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "3ab50fd226fdb84f494d03de0e544e70664d924b252d04f828767687a8f86ec9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "3ae11c9708908bf621eeb3e3bd23a7567797f6584fed8700ab132bbcdb528267",
@@ -11090,13 +11006,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "44f20f46e5bcf6de5cefb7cf0f78955f6aee3f324dab81be1156c00fe922a0c7",
-      "count": 6,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "44f94aa82eb9d58c3af9f2ebf8de5fdea89b21cea3b10a21d4ee4c8862d1b70e",
       "count": 1,
       "tool": "cpplint",
@@ -11139,13 +11048,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "451184cc15a0c841e1aa518fe8901c9b5acedae3a7c985449b60912c986ffc54",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "4513b764a2015c242c09caa7bbcd1dee3954e29c401d168f7e75ae37eec083c8",
       "count": 1,
       "tool": "cpplint",
@@ -11172,13 +11074,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/Legacy/Render/LibGpu.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "454727e390eb492a7c525a3fa737ce0b3d89f140ea4377f65e0430e4f3e67a57",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "455d9bf46c44b1ebff524978f584f008ec29bc6879353a488e642f6d86e5384a",
@@ -11711,13 +11606,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "483e1618c8467f97891120cfb7a6661febd3b5267d71ced8a1554e79fa8912fd",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "4859598697a8b3a9db1b7b31aac765d8f858f513bc14278c1ee34cf8a4dfebec",
@@ -12798,13 +12686,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "4fb11403e15412555bc89b54891bdfeb1d0ce065d1738954158957b0354210b2",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9159c02c51e29fe1c20d171bf96daa6c99e4d42a33d46331493acf4c9c21e5c0",
       "count": 1,
       "tool": "tidy",
@@ -13638,13 +13519,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "5581d0458bb77857a660c43d0426c73a45f2b336a32846d050cc4375c173228b",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "558889e00e8c02bac3d781f5671a330951e49e6f1329ac0df9c3a03f5316f051",
       "count": 1,
       "tool": "tidy",
@@ -14049,13 +13923,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "57e5f7bc1b40f9e83f34e2e668ddcc2396ad0155b5b5312563bdd405f69d9228",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "57e984b2938e7660de12c601da42636a689b2e093c3dc6b214d532dce8e56f6d",
@@ -16361,13 +16228,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6666e5f5d205dd1afe883e34146acd023906bdbe0f59ae57dab26a90dac1bb08",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "667275dada4f14e437ed7ed081147e46924136af8968b867474926bd69adbca3",
       "count": 1,
       "tool": "tidy",
@@ -17397,13 +17257,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6cebd21ff9a348d881e167dd5c217f279975e976136485c4c799d5e60aece2c1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "6cfa601c7ea04a9673a8c2b1acf07828339fcb1c1a3a23fda3447abbd9a3e504",
       "count": 1,
       "tool": "cpplint",
@@ -17782,13 +17635,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "6f747c3e406f8647e6a1f14d8d35406b74c618c3788f95f8d5a60227cb144d4c",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "6f900be1921aea79cdb3d40ac84b851220614e22972a3e969257aca52ba11738",
       "count": 1,
       "tool": "cpplint",
@@ -17957,13 +17803,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "70e65a5ec777c0a325587ca59d4ff6542b236d6080d8030b5378645202547c78",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "70fa27730fd6fcf4cd12001f34c8405254844217f76780c89aa5f327e04cbefc",
       "count": 1,
       "tool": "tidy",
@@ -18011,13 +17850,6 @@
       "tool": "tidy",
       "path": "Native/Engine/include/Audio/AudioDevice.hpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "7171e0f245784eb2e031a4adac4ab31dc2c7c3bb5b9d1cfedcdf08562c80af23",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
       "key": "9dfc41a7c4a84b9b8cb880f82dfd775cb0f7209a626e73e0b951fe386a271f74",
@@ -19385,13 +19217,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "799121a20527bf0380cc21606f2fa54f81670ee53e675258727c9882e5550b0b",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/comments"
-    },
-    {
       "key": "79a43431e120911ac43247a56938d98547f85e56f855584a75a77d7373c3c522",
       "count": 1,
       "tool": "tidy",
@@ -19763,13 +19588,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "7bee4ceebd25edf0c920d3c8a8954aa0ace03a2390af18216662b352b3336634",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "7bff74cf4742a455fa9def1f23515c18c6461d0f7d1ea3745eae3622a7eb8212",
       "count": 1,
       "tool": "cpplint",
@@ -20048,13 +19866,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "7e14b7e1389e87b386e7aec2009f1e91a6af26e1431cd94d328856c65fcd6719",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "7e15cb77ae52783b1137209925e7eb1b7d3b9cd6b2665578ec10a459650b9a3c",
@@ -21324,13 +21135,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "8662eb1dc4af3e526dd510ca3de8d77b4e432139716c2eec7481ff902fdeeb87",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "8665579a3d43314f2e97af3d70239864405b180d8b44fbc6f590d46d495c5889",
       "count": 1,
       "tool": "tidy",
@@ -21980,13 +21784,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.h",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "8a1f98921dfd579a42541ed394e38d448be79a6a2aec3adc9ad047cbf8f58475",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "8a2a2adada3990353f61e1dcff09d807377eed80cbddbdb8b3b11bdc00f74109",
@@ -25608,13 +25405,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "a106421ea19e4a98b72a45083f3f8f50b8245b832d6a966eb77d5f623a72d905",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "bugprone-multi-level-implicit-pointer-conversion"
-    },
-    {
       "key": "a11ba0d7cd91867c028a2ff36f4dc9d0bd38e1b2b6e3aa21c29bb3e8bf27650e",
       "count": 1,
       "tool": "tidy",
@@ -25956,13 +25746,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/GimRenderTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "a3508977efc5aed454b6b1c47379a03593aba50a7299af719ba0c253004dbaa0",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "a36b642447ee51d42223ecd61201ec43ce74a70d35439d5ce9e26b997c4519f7",
@@ -27043,13 +26826,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "aa99814b87ac30744cf6f0322b15b9183ec11a3131b9a584e68c9b217a3e712a",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
-    },
-    {
       "key": "aaa44d4441861aa1de7ddbbca5d82511eb3946edca87948401920bd9e3989059",
       "count": 1,
       "tool": "tidy",
@@ -27281,13 +27057,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "ac157f8ff3b9be3d1ac49a7b0551122404332f210d5ff781d3289128a6de298d",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "google"
-    },
-    {
       "key": "ac209c798e4a905f42b3ae97b5b9305e35cb1b63a432681aa527911cdabd1092",
       "count": 1,
       "tool": "cpplint",
@@ -27300,13 +27069,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Core/Assert.hpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "ac77cf56a3fd46eebbd23acf68e44c6f61810ed6ce317845552104d6ad7cebaa",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "ac87a5f3117cf5dd5f70cedad2164a580e25be0b15b0c79c96422d7ff9c9d2b3",
@@ -27888,13 +27650,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/CombatTestCases.cpp",
       "rule": "whitespace/ending_newline"
-    },
-    {
-      "key": "b07ed3f7d3fb50d87ff625a4311f35fc355097fe91f38f31d3ebef19241b94a2",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "b07f631543b46a0944ba33d7749c7ae2962683eaadddb7ad66d83c899fd506d4",
@@ -28518,13 +28273,6 @@
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "b46c1415885ddc7e6212b15508ed6eade40c6c0ff49250c8893af7aefe1f72ac",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
     },
     {
       "key": "b4717a7a5dbf812b464fe54eca2fcb29ef08a573e871409a4dfeb34fd9a20ddd",
@@ -29325,13 +29073,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "b956141e955935e3e02e690cd6e1c8c5d34c6508354c9112965a69194ec41df8",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "b95e3b3699099d6bd6c2a11da63f9ae858f1a7e969ae10ff4b0e8e98a587848b",
       "count": 1,
       "tool": "cpplint",
@@ -29689,13 +29430,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "bbee6c5d50c3350562caf50fa92eb99178cf82daca3ef46bac734eddd3cea4ef",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "bbfcfd14f97e211eb75735c44a847a46513d10434d5fe517f1f515ca8d78e17d",
       "count": 1,
       "tool": "tidy",
@@ -29826,13 +29560,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "whitespace/tab"
-    },
-    {
-      "key": "bd022a2f1dd0a449d2efee86a8c7a1d75cd880262bd820a990deca66bdacaa36",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
       "rule": "whitespace/tab"
     },
     {
@@ -30193,13 +29920,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "bf73d9da5a54899846fb2878ac08afd2c970411361eee1eea09fcf59108ab639",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "bf773e92eabb232457a30fec3fcea33d930d260bc5acc100bf2aa32deda15eed",
       "count": 1,
       "tool": "cpplint",
@@ -30274,13 +29994,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "bffeb88019f17478a12deeeb95dc61bdc62edf6f78313ca62e9a0c00ab514308",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
       "rule": "readability-identifier-naming"
     },
     {
@@ -30625,13 +30338,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "c21cdd51e8e732471df6e33f07f1ee44a2814d350eb772384d39de1feaf12d86",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c2450295dc676ac7a24b4dd077259c05811ca39f6869a2bdb571d3d74d25e354",
@@ -31761,13 +31467,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "c989ac0986b7b16949dc1734f53483d1260c1fb420b3f89a084365f33dd317d3",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "bugprone-easily-swappable-parameters"
-    },
-    {
       "key": "c9a5408a89fa52448d4c8c53194e4ee38942bd48bf749e40c90dc7186bbf3abf",
       "count": 1,
       "tool": "tidy",
@@ -31992,13 +31691,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "caee99d25a8d8c9fa6c6956dc8d15776e648245a6b2a9eb4dadb912bb01be8f4",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "caf2668e383212acd229f17facea232c77a06a0d9203f1cec06a64f31267232a",
       "count": 10,
       "tool": "cpplint",
@@ -32123,13 +31815,6 @@
       "tool": "cpplint",
       "path": "Native/Content/src/DataStore.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "cbdddf529d3d6de808b8860ccd67776c712a7e99de3f2046cff962fb31880b13",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "bugprone-multi-level-implicit-pointer-conversion"
     },
     {
       "key": "cbe94abcbf8b9611d502474bf9df745f0e1cec1ab536d8dc6bfdbd11c6613c77",
@@ -32389,13 +32074,6 @@
       "tool": "cpplint",
       "path": "Native/Desktop/src/main.cpp",
       "rule": "build/namespaces"
-    },
-    {
-      "key": "cd061796f73a7ad0095398900e7ca471a06a328b9f64d5ea57282f1f73866555",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "cd06fa3084b600aaac4d216d85ecb03dc5d5596d694fd576fe83d34ca63523a1",
@@ -36143,13 +35821,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "e582a419ef51616f715734e36476bbd273bd2246389644c3dc0798b17d7e556e",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "whitespace/tab"
-    },
-    {
       "key": "e5a10848b712858cf9a0e1cb9738d25dbebf0492b4fb707531716c88aae75965",
       "count": 1,
       "tool": "tidy",
@@ -37865,13 +37536,6 @@
       "rule": "clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling"
     },
     {
-      "key": "f01de278f668bd7ec826f2a6a2efc98bd3cd61dd3fec74576a38b4a1752c9946",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.h",
-      "rule": "google"
-    },
-    {
       "key": "f02ab66d8760b0aef16ffdeeb710f618b208e489d379b7a3106eba54966c7ff5",
       "count": 1,
       "tool": "cpplint",
@@ -39244,13 +38908,6 @@
       "rule": "bugprone-easily-swappable-parameters"
     },
     {
-      "key": "f9ee71e866119b0fc5d50e7e58c68d7261babceb951e0f48a8eb72dbce75c5d9",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "f9f2215448d37d14356d8910aac8fbf7c63472bd1a77b3683958e993f63b07d9",
       "count": 1,
       "tool": "tidy",
@@ -39669,13 +39326,6 @@
       "tool": "ruff",
       "path": "tools/naming/sanity_pass.py",
       "rule": "SIM115"
-    },
-    {
-      "key": "fc7d5bf04ae8f3a1e1a2cb891c6bb45f04c9f1ac88ca9ef43e845f96bcf1f0d1",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Battle/Ai/FrameUpdate.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "fc83d5416e6865104b152a867d1ec5d8fcfd2416b0090c0c1d1f3476a1d22390",

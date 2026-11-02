@@ -13,6 +13,7 @@
 
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Core/Diagnostics.h"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -447,7 +448,7 @@ void Battle_Ai_SetActorNavigationOverride(int actor_id, int x, int z) {
 
 // decomp: func_800E5308 (src/BATTLE/BATTLE.PRG/7C7E0.s:260-421).
 void Battle_Ai_UpdateActorNavigationOverrides(void) {
-  Battle_Ai_CacheActorAiWorkingState();
+  VS::Battle::Ai::CacheLiveActorAiWorkingState();
   auto& frame = *Battle_Ai_FrameState();
   std::size_t visited = 0;
   for (auto* actor = Battle_actors[0]; actor != nullptr; actor = actor->next) {

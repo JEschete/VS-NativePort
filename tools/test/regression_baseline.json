@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8677377,
+  "assertions": 8677416,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -609,6 +609,14 @@
    "Forced Ashley alliance draws nothing and keeps the count",
    "Four learned Break Arts preserve their navigation row and cursor policy",
    "Frame budgets and missing handoffs never constitute scene completion",
+   "Frame update locates the terrain region bitmap",
+   "Frame update packs the room extent little-endian",
+   "Frame update packs vertical steps as the original byte pair",
+   "Frame update rotates the second perception target",
+   "Frame update runs the AI stages in order",
+   "Frame update selects locomotion from the folded flags",
+   "Frame update skips a frame without a room map and refuses one without a room or actors",
+   "Frame update ticks decision timers down to zero",
    "Frame work baseline resets at actual logical frame boundaries",
    "Frame work timing preserves source units and halfword wrap",
    "FrameClock advances at NTSC field rate",

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -325,7 +326,7 @@ void Battle_Ai_UpdateActorPerception(void)
             continue;
         }
         Battle_Ai_UpdateTemporaryAwarenessIndicator(state);
-        Battle_Ai_TickActorDecisionTimers(state);
+        VS::Battle::Ai::TickLiveActorDecisionTimers(state);
         if (flags & 0x80) {
             goto skip;
         }

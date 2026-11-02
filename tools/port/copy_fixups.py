@@ -43,6 +43,9 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Game\include\Boot\SessionLive.hpp"
        for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},
     "VS::Boot::DelayAfterOverlayLoad": r"Native\Game\include\Boot\Session.hpp",
+    **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\FrameUpdateLive.hpp"
+       for name in ("CacheLiveActorAiWorkingState", "RunLiveActorAiUpdateStages", "TickLiveActorDecisionTimers",
+                    "InitializeLiveActorLocomotionMode", "SetLiveActorVerticalMovementSteps")},
     **{f"VS::Core::Memory::{name}": r"Native\Engine\include\Core\Memory\WordCopyLive.hpp"
        for name in ("CopyLiveAlignedWords", "ZeroLiveAlignedWords", "ClearLiveAlignedWords", "CopyLiveHalfwords",
                     "CopyLiveHalfwordBlocks")},
@@ -238,6 +241,9 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800B9DB4, "Event_ScriptSetAshleyBattleModeOpcode"),  # F01130 opcode table
     ("BATTLE/BATTLE.PRG", 0x800E6BA0, "VS::Field::IsLivePointOutsideSolidVolumes"),  # F01833
     ("BATTLE/BATTLE.PRG", 0x800E6C34, "VS::Field::TraceLiveActorAndTerrainCollision"),  # F01834
+    ("BATTLE/BATTLE.PRG", 0x800E65DC, "VS::Battle::Ai::CacheLiveActorAiWorkingState"),  # F01819
+    ("BATTLE/BATTLE.PRG", 0x800E6828, "VS::Battle::Ai::InitializeLiveActorLocomotionMode"),  # F01824
+    ("BATTLE/BATTLE.PRG", 0x800E685C, "VS::Battle::Ai::SetLiveActorVerticalMovementSteps"),  # F01825
 )
 
 MODULE_FUNCTION_ENTRIES = (
@@ -2797,6 +2803,14 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"CopyLiveAlignedWords(VS::Core::Memory::RecordTail(*actor, actor->textureOverlays), data, 0xE8)",
      "F03572 #46 typed promotion: the SHP header block fills the texture overlays and the fields after them "
      "in one copy, so it is bounded by the actor record rather than the first array (#268)"),
+    (r"", r"\bVS::Battle::Ai::TickDecisionTimers\(", r"VS::Battle::Ai::TickLiveActorDecisionTimers(",
+     "F01765 #46 typed promotion: the frame-update binding ticks the actor's decision delays"),
+    (r"", r"\bVS::Battle::Ai::SelectLocomotion\(", r"VS::Battle::Ai::InitializeLiveActorLocomotionMode(",
+     "F01824 #46 typed promotion: the frame-update binding stores the selected locomotion mode"),
+    (r"", r"\bVS::Battle::Ai::MakeVerticalMovementSteps\(", r"VS::Battle::Ai::SetLiveActorVerticalMovementSteps(",
+     "F01825 #46 typed promotion: the frame-update binding refuses an actor ID outside the AI table"),
+    (r"", r"\bVS::Battle::Ai::RunActorAiUpdateStages\(\)", r"VS::Battle::Ai::RunLiveActorAiUpdateStages()",
+     "F01800 #46 typed promotion: the frame-update binding refuses a frame without a room or linked actors"),
     (r"", r"\bVS::Boot::JumpToTitle\([^()]*\)", r"VS::Boot::JumpToLiveTitle()",
      "F04200 #46 typed promotion: the session binding owns the transition boundary and refuses transitions "
      "while a stack-bound scope is live (#266)"),

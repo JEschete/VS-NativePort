@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/FrameUpdateLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/FrameUpdate.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -490,7 +490,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
             actor_stats->runSpeed = actor_stats->baseRunSpeed;
         }
 
-        Battle_Ai_SetActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
+        VS::Battle::Ai::SetLiveActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
     }
 
     if ((status_mask & 0x800) && !(actor_stats->statuses & 0x8010)) {
@@ -498,7 +498,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
         actor_stats->walkSpeed = actor_stats->baseWalkSpeed;
         actor_stats->runSpeed = actor_stats->baseRunSpeed;
 
-        Battle_Ai_SetActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
+        VS::Battle::Ai::SetLiveActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
     }
 
     if (status_mask & 0x180000) {
@@ -784,7 +784,7 @@ void Battle_InflictActorStatuses(int status_mask, Battle_ActorStats* actor_stats
             actor_stats->runSpeed = actor_stats->baseRunSpeed + (actor_stats->baseRunSpeed >> 2);
         }
 
-        Battle_Ai_SetActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
+        VS::Battle::Ai::SetLiveActorVerticalMovementSteps(actor_stats->actorId, actor_stats->walkSpeed, actor_stats->runSpeed);
     }
 
     if (status_mask & 0x80000) {

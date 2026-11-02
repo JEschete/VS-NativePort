@@ -48,12 +48,6 @@ extern "C" {
 Battle_Ai_FrameContext* Battle_Ai_FrameState(void);
 int Battle_Ai_TryTerrainRegionCell(int tile_x, int tile_z, u_char** cell);
 u_char* Battle_Ai_TerrainRegionCell(int tile_x, int tile_z);
-int Battle_Ai_CacheActorAiWorkingState(void);
-void Battle_Ai_RunActorAiUpdateStages(void);
-void Battle_Ai_TickActorDecisionTimers(Battle_Ai_PerceptionUpdateView* state);
-void Battle_Ai_InitializeActorLocomotionMode(Battle_Ai_AiCreationView* state);
-void Battle_Ai_SetActorVerticalMovementSteps(int actor_id, int walk_step,
-                                             int run_step);
 
 #ifdef __cplusplus
 }

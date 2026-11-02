@@ -444,6 +444,9 @@
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h">
       <Filter>src\Battle\Ai</Filter>
     </ClInclude>
+    <ClCompile Include="src\Battle\Ai\FrameUpdateLive.cpp">
+      <Filter>src\Battle\Ai</Filter>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\GroundNavigation.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2251,6 +2254,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\FrameUpdate.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp">

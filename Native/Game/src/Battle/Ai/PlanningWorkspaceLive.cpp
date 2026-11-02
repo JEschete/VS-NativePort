@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Boot/SessionLive.hpp"
 
@@ -118,7 +119,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
     plan.opaque19A = 0;
     // The original loads both speeds with lbu.
     const auto& stats = StatsOf(ActorOf(actor));
-    Battle_Ai_SetActorVerticalMovementSteps(
+    VS::Battle::Ai::SetLiveActorVerticalMovementSteps(
         actor.actor_id, static_cast<unsigned char>(stats.walkSpeed),
         static_cast<unsigned char>(stats.runSpeed));
     Battle_Ai_SelectFallbackAction(&plan);

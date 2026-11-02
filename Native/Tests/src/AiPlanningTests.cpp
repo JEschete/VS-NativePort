@@ -10,6 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -427,7 +428,7 @@ TEST_CASE(
   const auto index = GENERATE(0, 1, 2, 3, 4, 5, 6, 7);
   const auto& example = examples[index];
   PlanningFixture fixture;
-  Battle_Ai_SetActorVerticalMovementSteps(1, example[0], example[1]);
+  VS::Battle::Ai::SetLiveActorVerticalMovementSteps(1, example[0], example[1]);
   CHECK(fixture.state.walkStep == example[2]);
   CHECK(fixture.state.runStep == example[3]);
   CHECK(fixture.state.maxRange == example[4]);
