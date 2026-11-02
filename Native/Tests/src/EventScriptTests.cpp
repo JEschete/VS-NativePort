@@ -5,10 +5,12 @@
 
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
 #include "Menu/Sounds.hpp"
+
 extern "C" {
 
 #include "Audio/Control/SoundControl.h"
@@ -29,7 +31,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
-#include "Boot/Session.h"
 #include "Core/Memory/WordCopy.h"
 #include "DiscQueue.h"
 #include "Effects/EffectResources.h"
@@ -739,11 +740,11 @@ int Tests_AudioModesWithoutSavedMusic(void) {
 static int TestTitleSession(void) {
   ++sessionTitleCalls;
   if (sessionTitleCalls == 1) {
-    Boot_JumpToTitle(nullptr);
+    VS::Boot::JumpToLiveTitle();
     ++sessionFallthrough;
   }
   if (sessionTitleCalls == 2) {
-    Boot_JumpToGameLoop(nullptr);
+    VS::Boot::JumpToLiveGameLoop();
     ++sessionFallthrough;
   }
   return 17;
@@ -751,19 +752,21 @@ static int TestTitleSession(void) {
 
 static int TestBattleSession(void) {
   ++sessionBattleCalls;
-  Boot_JumpToTitle(nullptr);
+  VS::Boot::JumpToLiveTitle();
   ++sessionFallthrough;
   return 0;
 }
 
 int Tests_NativeSessionTransitions(void) {
   sessionTitleCalls = sessionBattleCalls = sessionFallthrough = 0;
-  int passed = Boot_RunSessionLoop(TestTitleSession, TestBattleSession) == 17 &&
-               sessionTitleCalls == 3 && sessionBattleCalls == 1 &&
-               sessionFallthrough == 0;
-  passed = passed &&
-           Boot_RunSessionLoop(TestTitleSession, TestBattleSession) == 17 &&
-           sessionTitleCalls == 4;
+  int passed =
+      VS::Boot::RunLiveSessionLoop(TestTitleSession, TestBattleSession) == 17 &&
+      sessionTitleCalls == 3 && sessionBattleCalls == 1 &&
+      sessionFallthrough == 0;
+  passed =
+      passed &&
+      VS::Boot::RunLiveSessionLoop(TestTitleSession, TestBattleSession) == 17 &&
+      sessionTitleCalls == 4;
   return passed;
 }
 

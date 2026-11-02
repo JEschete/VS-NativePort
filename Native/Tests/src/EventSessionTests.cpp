@@ -8,12 +8,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Boot/SessionLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 
 extern "C" {
 #include "Battle/Targeting.h"
-#include "Boot/Session.h"
 #include "Core/Memory.h"
 #include "Core/Memory/Heap.h"
 #include "Event/Camera.h"
@@ -231,7 +231,7 @@ int EnterUiTitle() {
   if (!SessionUiIsClear()) return -1;
   if (++ui_title_entries > 1) return 41;
   BorrowSessionUiText();
-  Boot_JumpToGameLoop(nullptr);
+  VS::Boot::JumpToLiveGameLoop();
   return -1;
 }
 
@@ -239,7 +239,7 @@ int EnterUiBattle() {
   if (!SessionUiIsClear()) return -1;
   if (!ui_return_to_title) return 41;
   BorrowSessionUiText();
-  Boot_JumpToTitle(nullptr);
+  VS::Boot::JumpToLiveTitle();
   return -1;
 }
 }  // namespace
@@ -310,14 +310,15 @@ TEST_CASE("Native session entry invalidates every borrowed textbox",
           "[event][session-reset][session-ui]") {
   UiSessionFixture fixture;
   BorrowSessionUiText();
-  CHECK(Boot_RunSessionLoop(CheckSessionUi, CheckSessionUi) == 41);
+  CHECK(VS::Boot::RunLiveSessionLoop(CheckSessionUi, CheckSessionUi) == 41);
   CHECK(SessionUiIsClear());
 }
 
 TEST_CASE("Native session return releases borrowed UI without freeing its data",
           "[event][session-reset][session-ui]") {
   UiSessionFixture fixture;
-  CHECK(Boot_RunSessionLoop(ReturnWithSessionUi, CheckSessionUi) == 42);
+  CHECK(VS::Boot::RunLiveSessionLoop(ReturnWithSessionUi, CheckSessionUi) ==
+        42);
   CHECK(SessionUiIsClear());
 }
 
@@ -326,7 +327,7 @@ TEST_CASE("Native title and battle jumps invalidate interrupted scene UI",
   UiSessionFixture fixture;
   ui_return_to_title = GENERATE(false, true);
   ui_title_entries = 0;
-  CHECK(Boot_RunSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
+  CHECK(VS::Boot::RunLiveSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
   CHECK(ui_title_entries == (ui_return_to_title ? 2 : 1));
   CHECK(SessionUiIsClear());
 }
@@ -342,7 +343,7 @@ TEST_CASE("Retired stack capture and room code jumps have no native bindings",
   for (int iteration = 0; iteration < 32; ++iteration) {
     ui_return_to_title = true;
     ui_title_entries = 0;
-    CHECK(Boot_RunSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
+    CHECK(VS::Boot::RunLiveSessionLoop(EnterUiTitle, EnterUiBattle) == 41);
     CHECK(ui_title_entries == 2);
     CHECK(SessionUiIsClear());
   }

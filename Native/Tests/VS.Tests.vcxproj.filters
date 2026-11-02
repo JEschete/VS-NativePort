@@ -345,6 +345,9 @@
     <ClCompile Include="src\SequenceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\SessionTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SfxBankSelectionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

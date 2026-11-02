@@ -205,13 +205,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "01c4188512f8541bf3c6f427eb73ea9c99d38f0b9fb7e2300bc81ac8087cb9e5",
-      "count": 8,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "01c6c120c51541674d69bc25114de9559153a90e4b0c15afeeed2fba057c03d7",
       "count": 1,
       "tool": "tidy",
@@ -266,13 +259,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/LegacyGpuTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "021235c7824aad13613890063b9a96bdf5843422fcba1bd540f066d597aa8215",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "whitespace/line_length"
     },
     {
       "key": "0213c8c425f727e24db7e035aa89201c2f7bc9cc2888e4815eb6a469b310708e",
@@ -1015,13 +1001,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "068922fc71286a8d34cc9f08bebfa3ed372e81e2df290419d9b149fc119480d6",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "068ba32554091cf6932f4d96dcf7b9bc633d2c23f2d6da6a1aa49d961db0f339",
@@ -4321,13 +4300,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "1ad563f8744748ecfa04c0a863e0e84b74776b4f050cec0ab6712cf14e8a279f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "1ae3bc66764572f96cce12dee9e2da98f136629af6935e1a488747821c614f4b",
       "count": 1,
       "tool": "tidy",
@@ -5483,13 +5455,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "21ea918ab8dcec12fdb7d39bae9d4f4c63b940852cf2e9039f6a0a7b149284ab",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "21f716bf5b389e07d2d54c144333971a94d8b4b2bee488494bd49ac2ad456091",
       "count": 1,
       "tool": "cpplint",
@@ -6062,13 +6027,6 @@
       "tool": "tidy",
       "path": "Native/Desktop/src/main.cpp",
       "rule": "bugprone-exception-escape"
-    },
-    {
-      "key": "24fa1fbf5ba11c0331bd771cd4d866d956116efc7cb452cdf30c2cb63366c1c8",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "2504b135505ec6f5ed28768e0b61059a5b65c4ce65b70f9c863cdb725a7032de",
@@ -10271,13 +10229,6 @@
       "rule": "runtime/int"
     },
     {
-      "key": "3f588e14fe1b200775793b3a48b3fcba0c6865ce173b657863208deaa6745871",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "3f632bea0dbf6891ae7a9ce9300495565c41a8a740f38334e8f20e3ba69c6344",
       "count": 1,
       "tool": "tidy",
@@ -11647,13 +11598,6 @@
       "count": 1,
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/ModelGeometry.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
-      "key": "4737c7231cc9cd5c79984f4e8902dd10b0cfdece42c6d19217a08b998b4ffe4f",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.cpp",
       "rule": "whitespace/line_length"
     },
     {
@@ -13496,13 +13440,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/EventScriptTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "53bf84db69eb2f4bc9010293986fd446f5b064c4ae896dcc82ced5503fca0e88",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "53d836d0e3dce77301a447f2067516cc76334bbdbcb009756ce8fb7f40783a0a",
@@ -15687,13 +15624,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/MemoryTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "613234be7cefab2aad19e1c18c94c06ca7e84c7fc3af51b2ff85d0a5088be859",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "6139f16984f07c761ad95af508f5e6cd83ef822264a61061a0353dd1d64a207a",
@@ -17992,13 +17922,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "6fd27ed81bb2038105a9321d68969595aa6ab96f2c44049ad41c8f85003e307a",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "6fd98d50e8d8a9aba7956f82b7bef72d156c7d96d29835f25a095f23a4ad1d66",
       "count": 1,
       "tool": "tidy",
@@ -19294,13 +19217,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "77c03b006cde7fddff12d9853027c97ddbfc273c628656a77c3870e71ff4cefe",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "build/include_order"
-    },
-    {
       "key": "77c27a67e175a5a5bf299afa0e0fc5c93e9a31fd6d8b30b2db5a0d7114028f3b",
       "count": 1,
       "tool": "cpplint",
@@ -20048,13 +19964,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/src/Render/RoomDraw.cpp",
       "rule": "whitespace/line_length"
-    },
-    {
-      "key": "7c9bef64af6386ee3b1ba21570875ce348c9c24f4c78c17468946a035db37c43",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "whitespace/comments"
     },
     {
       "key": "7ca902f845090830d9693fed01efef17c9245fe57849b095941724649742ebec",
@@ -24803,13 +24712,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "9a96c07ede45e1b91a0e62c2f6ba2aad509447525f614912519e0a515aba6569",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "9a9809df36b8c436a879e162fe3d88f3768895067ad8b5758857d7c55cf805f6",
       "count": 3,
       "tool": "tidy",
@@ -29241,13 +29143,6 @@
       "rule": "readability-magic-numbers"
     },
     {
-      "key": "b7768c09cd5eb15e2c245d7a1fd18d0c70bce0842b05c5edb74455d0df6e5081",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "b78ea9ca87543ac360758396679360356fbb1d22121f500792ee691b7d371034",
       "count": 1,
       "tool": "cpplint",
@@ -31922,13 +31817,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "c8c872ac9e6804a34e6a2e881e9e87232a1e552d70d2d584021927834a2619f6",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Boot/Session.h",
-      "rule": "google"
-    },
-    {
       "key": "c8d7bfe2f42f690b790dfb9d7b1714b6fe6aa73d5b5e16f8803d3a28062cc281",
       "count": 1,
       "tool": "cpplint",
@@ -32774,13 +32662,6 @@
       "tool": "tidy",
       "path": "Native/Engine/Legacy/Core/LibEtc.cpp",
       "rule": "google-runtime-int"
-    },
-    {
-      "key": "cd750f3d24f0500e3358119ea322072c2970366d11d13c4c7bb075e2b59a0b2d",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "build/include_order"
     },
     {
       "key": "cd89db73e7d508753e6919d2b095f03677ddc5aec0f73c906276d42143e62b2d",
@@ -34755,13 +34636,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "d95be99c830d960c547bc1c2a054da9cebc218b7c69a0f6230f743a70c1cbd21",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "readability-identifier-naming"
     },
     {
       "key": "d96f75344496f82060b4555f9381c9224cf281a2dca9caaa8016b7252672734b",
@@ -40446,13 +40320,6 @@
       "tool": "cpplint",
       "path": "Native/Engine/include/Audio/AudioDevice.hpp",
       "rule": "whitespace/comments"
-    },
-    {
-      "key": "ff1bac1fcd46412295ffcf9b0839836bdb6425cd0d035d177047c8669c4d295f",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Game/src/Boot/Session.cpp",
-      "rule": "google"
     },
     {
       "key": "63a44074e3a13ba028665a977cdf00fa7da23b1f16e40dca1d3c3811f974ba3d",

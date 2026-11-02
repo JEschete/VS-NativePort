@@ -353,7 +353,8 @@ std::expected<EncounterAdjustmentResult, std::string> AdjustEncounterPlayer(
     EncounterAdjustment adjustment);
 
 // A single production session can be active: existing gameplay owns globals.
-// RunEncounter must execute on a Platform::GameFiber, like Boot_RunGame.
+// RunEncounter must execute on a Platform::GameFiber, like
+// VS::Boot::RunLiveGame.
 std::expected<void, std::string> ConfigureEncounter(const EncounterSetup& setup,
                                                     const EncounterZone& zone);
 void RunEncounter();

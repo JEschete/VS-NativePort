@@ -15,6 +15,7 @@
 #include <vector>
 
 #include "Battle/TargetPages.h"
+#include "Boot/SessionLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
@@ -44,7 +45,6 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "Boot/PlayerSettings.h"
-#include "Boot/Session.h"
 #include "Content/DiscLayout.h"
 #include "Core/BiosRand.h"
 #include "Core/Diagnostics.h"
@@ -733,7 +733,7 @@ void RunEncounter() {
   }
   active = true;
   Boot_InitializePlatformServices();
-  Boot_RunSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
+  VS::Boot::RunLiveSessionLoop(EnterOrFinishEncounter, ResumeEncounter);
   Battle_ResetTargetPages();
   active = false;
   external_event_started = false;

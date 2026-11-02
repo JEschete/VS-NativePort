@@ -6,7 +6,6 @@ Native\Game\src\Battle\Ai\DecisionCallbacks.cpp
 Native\Game\src\Battle\Ai\FrameUpdate.cpp
 Native\Game\src\Battle\Ai\RoomState.cpp
 Native\Game\src\Boot\PlayerSettings.cpp
-Native\Game\src\Boot\Session.cpp
 Native\Game\src\Effects\Templates\RadialSurge.cpp
 Native\Tests\src\CombatTests.cpp
 Native\Tests\src\EffectTimelineTests.cpp

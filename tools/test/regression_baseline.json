@@ -92,7 +92,7 @@
   }
  },
  "tests": {
-  "assertions": 8677316,
+  "assertions": 8677353,
   "cases": [
    "A CHD holding the approved disc passes identity verification",
    "A CHD of the right size with the wrong bytes fails the checksum",
@@ -1570,12 +1570,22 @@
    "a live sprite past the buffer end gets discard storage",
    "a live sprite that exactly fits the buffer end is queued",
    "a live sprite with no buffer or chain is not linked",
+   "game initializes the platform before sessions",
+   "game-loop transition keeps the save session",
    "live sprites link into the chain and advance the cursor",
+   "session barriers nest",
+   "session begins and ends in the original order",
+   "session boundary values select the entry",
+   "session refuses to begin twice or without entries",
    "setaddr accepts a packet pointer or a copied link word",
    "sfizz overlapping voices release independently",
    "sfizz preserves measured pitch, loop playback and the output clock",
    "sprite packets keep the original layout",
-   "the frame view matrix loads rotation then translation"
+   "the frame view matrix loads rotation then translation",
+   "title session runs in the original order",
+   "title transition resets the save session first",
+   "transitions inside a barrier are refused untouched",
+   "transitions without a session are refused untouched"
   ]
  }
 }

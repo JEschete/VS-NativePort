@@ -97,7 +97,6 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/GameplayInit.h"
 #include "Boot/Lifecycle.h"
-#include "Boot/Session.h"
 #include "CdDrive.h"
 #include "Core/Callbacks.h"
 #include "Core/Compatibility.h"
@@ -2546,9 +2545,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F591Cu, 4u, (void*)&Battle_Ai_orbitHeightOffset, sizeof Battle_Ai_orbitHeightOffset, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5920u, 4u, (void*)&Battle_Ai_arenaOrbit, sizeof Battle_Ai_arenaOrbit, 0u, 0u},
     {"SLUS_010.40", 0x80010000u, 20u, (void*)&Core_overlaySlots, sizeof Core_overlaySlots, 0u, 0u},
-    {"SLUS_010.40", 0x80010AB4u, 0u, (void*)&Boot_JumpToTitle, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80010AC4u, 0u, (void*)&Boot_JumpToGameLoop, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80010AD4u, 0u, (void*)&Boot_DelayAfterOverlayLoad, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80011DACu, 0u, (void*)&Audio_Playback_Initialize, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80011DCCu, 0u, (void*)&Audio_Playback_Shutdown, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80011DECu, 0u, (void*)&Audio_Playback_BindSoundEffectPrograms, 0u, 0u, 0u},
@@ -2953,7 +2949,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004274Cu, 0u, (void*)&Core_Random_InitializeShuffleTable, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800427A8u, 0u, (void*)&Core_Random_NextBounded, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042860u, 0u, (void*)&Core_Random_NextAveraged, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042C38u, 0u, (void*)&Boot_RunGame, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C74u, 0u, (void*)&Boot_WaitForOverlayReady, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C94u, 0u, (void*)&Boot_SetSoftResetEnabled, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042CA0u, 0u, (void*)&Save_MarkAshleySnapshotValid, 0u, 0u, 0u},

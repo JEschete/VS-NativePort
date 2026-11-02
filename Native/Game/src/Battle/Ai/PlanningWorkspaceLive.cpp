@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Battle/Ai/PlanningWorkspace.hpp"
+#include "Boot/SessionLive.hpp"
 
 extern "C" {
 #include "Battle/Actor.h"
@@ -52,6 +53,11 @@ class BoundPlanningWorkspace {
     Battle_Ai_candidateExclusions = nullptr;
     Battle_Ai_fallbackCandidates = nullptr;
   }
+
+ private:
+  // A session transition would skip this destructor and leave the globals
+  // pointing at the caller's workspace (#266).
+  VS::Boot::LiveSessionTransitionBarrier barrier_;
 };
 
 Battle_Ai_ActorAiState& AiStateOf(int slot) {

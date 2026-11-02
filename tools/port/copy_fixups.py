@@ -40,6 +40,9 @@ NATIVE_HELPER_HEADERS = {
     **{name: r"Native\Engine\include\Render\SpritesLive.hpp"
        for name in ("VS::Render::QueueLiveDefaultSprite", "VS::Render::QueueLiveSpriteWithTexturePage",
                     "VS::Render::QueueLiveSprite", "VS::Render::LoadLiveFrameViewMatrix")},
+    **{name: r"Native\Game\include\Boot\SessionLive.hpp"
+       for name in ("VS::Boot::JumpToLiveTitle", "VS::Boot::JumpToLiveGameLoop")},
+    "VS::Boot::DelayAfterOverlayLoad": r"Native\Game\include\Boot\Session.hpp",
     **{f"VS::Render::DrawLiveTexture{kind}": r"Native\Engine\include\Render\TextureRegionDrawLive.hpp"
        for kind in ("TintFade", "FlashFade", "Wipe")},
     "VS::Battle::CheckedTargetPreviews": r"Native\Game\include\Battle\TargetPages.hpp",
@@ -1119,7 +1122,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "close the explicit room-event policy branch"),
         ("    if ((temp_s4 << 0x10) != 0) {",
          "    if (Save_NativeResumePending() && !Save_NativeFinishResume()) {\n"
-         "        Boot_JumpToTitle(NULL);\n"
+         "        VS::Boot::JumpToLiveTitle();\n"
          "        return;\n"
          "    }\n\n"
          "    if ((temp_s4 << 0x10) != 0) {",
@@ -2767,6 +2770,12 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      "F04191 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
     (r"", r"\bVS::Render::QueueSprite\(", r"VS::Render::QueueLiveSprite(",
      "F04192 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
+    (r"", r"\bVS::Boot::JumpToTitle\([^()]*\)", r"VS::Boot::JumpToLiveTitle()",
+     "F04200 #46 typed promotion: the session binding owns the transition boundary and refuses transitions "
+     "while a stack-bound scope is live (#266)"),
+    (r"", r"\bVS::Boot::JumpToGameLoop\([^()]*\)", r"VS::Boot::JumpToLiveGameLoop()",
+     "F04201 #46 typed promotion: the session binding owns the transition boundary and refuses transitions "
+     "while a stack-bound scope is live (#266)"),
     (r"", r"\bVS::Render::LoadFrameViewMatrix\(", r"VS::Render::LoadLiveFrameViewMatrix(",
      "F04193 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
     (r"", r"\bVS::Save::MemoryCard::InitializeMenuResourcesStep\(", r"VS::Save::MemoryCard::StepLiveMenuResources(",

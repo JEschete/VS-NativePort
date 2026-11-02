@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/RoomAiMap.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -30,7 +31,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
-#include "Boot/Session.h"
 #include "CdDrive.h"
 #include "Core/Compatibility.h"
 #include "Core/Memory/Heap.h"
@@ -819,7 +819,7 @@ void Field_FinishRoomLoad(int requested_room_id)
     Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
 
     if (Save_NativeResumePending() && !Save_NativeFinishResume()) {
-        Boot_JumpToTitle(NULL);
+        VS::Boot::JumpToLiveTitle();
         return;
     }
 

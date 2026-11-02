@@ -500,12 +500,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Boot\Session.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Boot\Session.cpp" />
+    <ClCompile Include="src\Boot\SessionLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Diagnostics\GameplayTrace.cpp" />
     <ClCompile Include="src\Diagnostics\PlayerObservation.cpp">
@@ -2116,7 +2113,6 @@
     <ClInclude Include="src\Boot\Lifecycle.h" />
     <ClInclude Include="src\Boot\OverlayReset.h" />
     <ClInclude Include="src\Boot\PlayerSettings.h" />
-    <ClInclude Include="src\Boot\Session.h" />
     <ClInclude Include="src\Effects\ActionEffects.h" />
     <ClInclude Include="src\Effects\Camera.h" />
     <ClInclude Include="src\Effects\Curves.h" />
@@ -2413,6 +2409,8 @@
     <ClInclude Include="include\Battle\TargetPages.h" />
     <ClInclude Include="include\Battle\TargetPages.hpp" />
     <ClInclude Include="include\Boot\GameApp.hpp" />
+    <ClInclude Include="include\Boot\Session.hpp" />
+    <ClInclude Include="include\Boot\SessionLive.hpp" />
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp" />
     <ClInclude Include="include\Diagnostics\PlayerObservation.hpp" />
     <ClInclude Include="include\Diagnostics\SceneTrace.h" />

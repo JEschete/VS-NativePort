@@ -1737,7 +1737,7 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
         ]
         self.assertEqual(len(finishes), 1)
         finish = finishes[0]
-        self.assertIn("Boot_JumpToTitle(NULL)", finish[1])
+        self.assertIn("VS::Boot::JumpToLiveTitle()", finish[1])
         self.assertLess(
             finish[1].index("Save_NativeFinishResume"), finish[1].index("if ((temp_s4")
         )

@@ -678,9 +678,9 @@
     <ClCompile Include="src\Boot\Session.cpp">
       <Filter>src\Boot</Filter>
     </ClCompile>
-    <ClInclude Include="src\Boot\Session.h">
+    <ClCompile Include="src\Boot\SessionLive.cpp">
       <Filter>src\Boot</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Diagnostics\GameplayTrace.cpp">
       <Filter>src\Diagnostics</Filter>
     </ClCompile>
@@ -2299,6 +2299,12 @@
       <Filter>include\Battle</Filter>
     </ClInclude>
     <ClInclude Include="include\Boot\GameApp.hpp">
+      <Filter>include\Boot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Boot\Session.hpp">
+      <Filter>include\Boot</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Boot\SessionLive.hpp">
       <Filter>include\Boot</Filter>
     </ClInclude>
     <ClInclude Include="include\Diagnostics\GameplayTrace.hpp">

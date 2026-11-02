@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Boot/Session.hpp"
+#include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -10,7 +12,6 @@ extern "C" {
 #include "Battle/Ai/RoomState.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
-#include "Boot/Session.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
@@ -109,7 +110,7 @@ void Boot_ResetToTitle(void)
     Input_UpdateControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Playback_Shutdown();
     VSync(10);
-    Boot_JumpToTitle(&Boot_titleReturnStackPointer);
+    VS::Boot::JumpToLiveTitle();
 }
 
 // decomp: SLUS_010.40 vs_main_jumpToBattle (src/SLUS_010.40/main.c:8138)
@@ -127,7 +128,7 @@ void Boot_EnterBattle(void)
     Render_ShowLoadingScreen();
     Boot_LoadBattleOverlays();
     Boot_gameEntryMode = 1;
-    Boot_JumpToGameLoop(&Boot_battleReturnStackPointer);
+    VS::Boot::JumpToLiveGameLoop();
 }
 
 // decomp: SLUS_010.40 vs_main_showEndingAndReturnToTitle (src/SLUS_010.40/main.c:8158)
@@ -151,7 +152,7 @@ void Boot_RunEndingAndReturnToTitle(void)
     Input_UpdateControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Playback_Shutdown();
     Boot_isClearSavePending = 1;
-    Boot_JumpToTitle(&Boot_titleReturnStackPointer);
+    VS::Boot::JumpToLiveTitle();
 }
 
 // decomp: SLUS_010.40 _sysInit (src/SLUS_010.40/main.c:8286)
@@ -207,7 +208,7 @@ void Boot_InitializeTitleSession(void)
 }
 
 // decomp: SLUS_010.40 vs_main_wait (src/SLUS_010.40/main.c:8369)
-void Boot_WaitForOverlayReady(void) { Boot_DelayAfterOverlayLoad(); }
+void Boot_WaitForOverlayReady(void) { VS::Boot::DelayAfterOverlayLoad(); }
 
 // decomp: SLUS_010.40 vs_main_enableReset (src/SLUS_010.40/main.c:8371)
 void Boot_SetSoftResetEnabled(int enable) { Boot_isSoftResetEnabled = enable; }

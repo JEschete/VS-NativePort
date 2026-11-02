@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdexcept>
 
+#include "Boot/SessionLive.hpp"
 #include "Content/DataAccess.h"
 #include "Core/Log.hpp"
 #include "Input/LegacyPad.hpp"
@@ -12,7 +13,6 @@
 
 // The copied boot entry (vs_main_exec): the original's endless loop, run on the
 // game fiber.
-extern "C" void Boot_RunGame(void);
 extern "C" void Boot_ResetGameplayInspection(void);
 
 namespace VS::Game {
@@ -36,7 +36,7 @@ const char* ModeName(Mode mode) {
 }
 
 struct GameApp::Runner {
-  Platform::GameFiber fiber{&Boot_RunGame};
+  Platform::GameFiber fiber{&VS::Boot::RunLiveGame};
 };
 
 GameApp::GameApp(Services services) : m_services_(services) {
