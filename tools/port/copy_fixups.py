@@ -54,8 +54,8 @@ NATIVE_HELPER_HEADERS = {
     "VS::Effects::DrawLiveEffectParticleList": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
     "VS::Effects::DrawLiveAnimatedSpriteParticles": r"Native\Game\include\Effects\ParticleRenderLive.hpp",
     **{name: r"Native\Engine\include\Movie\IntroPlayerLive.hpp"
-       for name in ("VS::Movie::StartLiveIntroMovie", "VS::Movie::StopLiveIntroMovie",
-                    "VS::Movie::StopLiveIntroMovieAfterAudioTail", "VS::Movie::PlayLiveIntroMovie")},
+       for name in ("VS::Movie::Intro::StartLive", "VS::Movie::Intro::StopLive",
+                    "VS::Movie::Intro::StopLiveAfterAudioTail", "VS::Movie::Intro::PlayLive")},
     **{name: r"Native\Engine\include\Audio\XaMixLive.hpp"
        for name in ("VS::Audio::Control::SetLiveDiscMixVolume", "VS::Audio::Seq::WriteLiveDiscVolume")},
     **{name: r"Native\Game\include\Field\PlatformPlacementLive.hpp"
@@ -1912,16 +1912,16 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("    menuItem = Save_MemoryCard_AnySaveFileExists();",
          "    menuItem = Save_NativeInitialTitleSelection();",
          "22C.c:4491 choose title focus from native slots without probing card BIOS"),
-        ("VS::Movie::StartIntroMovie();", "VS::Movie::StartLiveIntroMovie();",
-         "F03650 typed core takes an IntroMovieHost; the generated caller uses the live binding"),
-        ("VS::Movie::PlayIntroMovie();", "VS::Movie::PlayLiveIntroMovie();",
-         "F03653 typed core takes an IntroMovieHost; the generated caller uses the live binding"),
-        ("VS::Movie::StopIntroMovie();", "VS::Movie::StopLiveIntroMovie();",
-         "F03651 typed core takes an IntroMovieHost; the generated caller uses the live binding"),
+        ("VS::Movie::Intro::Start();", "VS::Movie::Intro::StartLive();",
+         "F03650 typed core takes an Host; the generated caller uses the live binding"),
+        ("VS::Movie::Intro::Play();", "VS::Movie::Intro::PlayLive();",
+         "F03653 typed core takes an Host; the generated caller uses the live binding"),
+        ("VS::Movie::Intro::Stop();", "VS::Movie::Intro::StopLive();",
+         "F03651 typed core takes an Host; the generated caller uses the live binding"),
     ],
     "F03664": [
-        ("VS::Movie::StopIntroMovieAfterAudioTail();", "VS::Movie::StopLiveIntroMovieAfterAudioTail();",
-         "F03652 typed core takes an IntroMovieHost; the generated caller uses the live binding"),
+        ("VS::Movie::Intro::StopAfterAudioTail();", "VS::Movie::Intro::StopLiveAfterAudioTail();",
+         "F03652 typed core takes an Host; the generated caller uses the live binding"),
     ],
     "F02757": [
         ("    if (Menu_Files_fileMenuScreenFade != 0) {",

@@ -12,7 +12,7 @@ extern "C" {
 #include "Movie/MoviePlayer.h"
 }
 
-namespace VS::Movie {
+namespace VS::Movie::Intro {
 namespace {
 
 constexpr int kPictureWidth = 320;
@@ -23,11 +23,11 @@ constexpr int kPageUnitBytes = 2;
 // 24-bit pixels in 16-bit page units.
 constexpr int kPageWidth = kPictureWidth * kRgbChannels / kPageUnitBytes;
 
-int PageY(IntroPicturePage page) {
-  return page == IntroPicturePage::kUpper ? 0 : kPictureHeight;
+int PageY(PicturePage page) {
+  return page == PicturePage::kUpper ? 0 : kPictureHeight;
 }
 
-class LiveIntroMovieHost final : public IntroMovieHost {
+class LiveHost final : public Host {
  public:
   [[nodiscard]] std::uint32_t Tick() const override {
     return static_cast<std::uint32_t>(VSync(-1));
@@ -45,10 +45,10 @@ class LiveIntroMovieHost final : public IntroMovieHost {
   }
   void OpenMovie() override { Movie_PlayerOpen("MOV/TITLE.STR"); }
   void CloseMovie() override { Movie_PlayerClose(); }
-  void DrawFrame(std::int32_t elapsed_ticks, IntroPicturePage page) override {
+  void DrawFrame(std::int32_t elapsed_ticks, PicturePage page) override {
     Movie_PlayerDrawFrame(elapsed_ticks, 0, PageY(page));
   }
-  void ShowPage(IntroPicturePage page) override {
+  void ShowPage(PicturePage page) override {
     DISPENV disp;
     SetDefDispEnv(&disp, 0, static_cast<std::int16_t>(PageY(page)), kPageWidth,
                   kPictureHeight);
@@ -74,34 +74,30 @@ class LiveIntroMovieHost final : public IntroMovieHost {
   }
   // The original tests the index against zero, so any nonzero index is the
   // lower page.
-  [[nodiscard]] IntroPicturePage DrawPage() const override {
+  [[nodiscard]] PicturePage DrawPage() const override {
     return Movie_Intro_legacyMdecState.frameRectIndex == 0
-               ? IntroPicturePage::kUpper
-               : IntroPicturePage::kLower;
+               ? PicturePage::kUpper
+               : PicturePage::kLower;
   }
-  void SetDrawPage(IntroPicturePage page) override {
+  void SetDrawPage(PicturePage page) override {
     Movie_Intro_legacyMdecState.frameRectIndex =
-        page == IntroPicturePage::kUpper ? 0U : 1U;
+        page == PicturePage::kUpper ? 0U : 1U;
   }
 };
 
-LiveIntroMovieHost& Host() {
-  static LiveIntroMovieHost host;
+LiveHost& Instance() {
+  static LiveHost host;
   return host;
 }
 
 }  // namespace
 
-void StartLiveIntroMovie() { StartIntroMovie(Host()); }
+void StartLive() { Start(Instance()); }
 
-void StopLiveIntroMovie() { StopIntroMovie(Host()); }
+void StopLive() { Stop(Instance()); }
 
-void StopLiveIntroMovieAfterAudioTail() {
-  StopIntroMovieAfterAudioTail(Host());
-}
+void StopLiveAfterAudioTail() { StopAfterAudioTail(Instance()); }
 
-int PlayLiveIntroMovie() {
-  return PlayIntroMovie(Host()) == IntroMovieResult::kSkipped ? 1 : 0;
-}
+int PlayLive() { return Play(Instance()) == PlaybackResult::kSkipped ? 1 : 0; }
 
-}  // namespace VS::Movie
+}  // namespace VS::Movie::Intro

@@ -796,7 +796,7 @@ void Title_DrawMenu(void)
             VSync(0);
             Input_UpdateVibrationPatterns();
         } else {
-            VS::Movie::StopLiveIntroMovieAfterAudioTail();
+            VS::Movie::Intro::StopLiveAfterAudioTail();
         }
     }
 }
@@ -1085,8 +1085,8 @@ int Title_Run(void)
         }
 
         Title_LoadBackgroundTextures();
-        VS::Movie::StartLiveIntroMovie();
-        VS::Movie::PlayLiveIntroMovie();
+        VS::Movie::Intro::StartLive();
+        VS::Movie::Intro::PlayLive();
         Title_InitializeTitleDisplay();
         SetDispMask(1);
         menuData = Title_InitializeMenu(menuItem);
@@ -1179,7 +1179,7 @@ int Title_Run(void)
         }
         if (selectedOption >= Title_MenuItemId_NewGame) {
             if (Movie_Intro_isPlaying != 0) {
-                VS::Movie::StopLiveIntroMovie();
+                VS::Movie::Intro::StopLive();
             }
             if (selectedOption == Title_MenuItemId_Continue) {
                 Title_PlayMenuSelectSound();
