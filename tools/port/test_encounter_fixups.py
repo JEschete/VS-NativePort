@@ -529,12 +529,18 @@ class EncounterFixupTests(unittest.TestCase):
         source = (root / r"Native\Game\src\Battle\Ai\Relations.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("(unsigned)state->allianceReactionCount + 1", source)
-        self.assertIn("state->allianceReactionCount = (u_char)reactions;", source)
+        self.assertIn("unsigned{actor.ReactionCount()} + 1", source)
+        self.assertIn(
+            "actor.SetReactionCount(static_cast<std::uint8_t>(reactions));", source
+        )
         self.assertIn("if (reactions < kRequiredReactions) return;", source)
-        self.assertIn("Battle_Ai_UpdateEngagementApproachBehavior", source)
-        self.assertIn("settings->savedDecisionCallback = nullptr;", source)
         self.assertNotIn("VS_UNPORTED", source)
+        binding = (root / r"Native\Game\src\Battle\Ai\RelationsLive.cpp").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("Battle_Ai_UpdateEngagementApproachBehavior", binding)
+        self.assertIn("settings_.savedDecisionCallback = nullptr;", binding)
+        self.assertNotIn("VS_UNPORTED", binding)
 
     def test_plg074_reuses_identical_code_without_merging_overlay_state(self):
         root = Path(__file__).resolve().parents[2]

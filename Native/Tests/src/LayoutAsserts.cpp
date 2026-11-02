@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 
 extern "C" {
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Battle/TargetVolume.h"
 #include "Battle/Targeting.h"
@@ -246,7 +246,7 @@ int Tests_AiRelations(void) {
   states[2].settingsBits21 = 2;
   states[1].relations[5].visible = 1;
   Battle_actors[0] = actors;
-  Battle_Ai_InitializeActorAiRelations(
+  VS::Battle::Ai::InitializeLiveActorAiRelations(
       reinterpret_cast<Battle_Ai_AiCreationView*>(&states[1]));
   int passed = states[1].relations[0].classification == 3 &&
                states[0].relations[2].classification == 3 &&
@@ -260,7 +260,7 @@ int Tests_AiRelations(void) {
   states[1].relations[0].active = 1;
   states[1].relations[0].visible = 1;
   states[1].relations[0].counter = 37;
-  Battle_Ai_ApplySavedActorAiRelations();
+  VS::Battle::Ai::ApplyLiveSavedActorAiRelations();
   passed =
       passed && states[1].relations[0].classification == ((0x1234 >> 1) & 3) &&
       states[1].relations[0].previousClassification == ((0x1234 >> 3) & 3) &&

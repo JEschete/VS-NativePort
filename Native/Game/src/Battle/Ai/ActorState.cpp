@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Memory/WordCopy.h"
@@ -247,7 +247,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
         Battle_Ai_ApplySavedAiSettingsFlags(&packed, (Battle_Ai_SavedSettingsPair *)((void*)&actor->savedAiSettings));
     }
     Battle_Ai_ApplyActorAiSettings((Battle_Ai_SettingsView *)((void*)state), (Battle_Ai_SettingsWord *)((void*)&packed));
-    Battle_Ai_InitializeActorAiRelations(state);
+    VS::Battle::Ai::InitializeLiveActorAiRelations(state);
     temp = state->moveDistance - 64;
     if (state->farDistanceSquared < (unsigned int)(temp * temp)) {
         state->moveDistance = VS::Core::Math::SquareRootInteger(state->farDistanceSquared) - 64;
@@ -279,7 +279,7 @@ int Battle_Ai_CreateActorAiState(Battle_Ai_AiActorView* actor, int options)
     state->opaque124 = actor->stateFlags.bytes.byte1;
     state->previousTile = -1;
     state->options = (short)options;
-    Battle_Ai_ApplySavedActorAiRelations();
+    VS::Battle::Ai::ApplyLiveSavedActorAiRelations();
     if (state->actorId) {
         while (VS::Battle::Ai::RebuildLiveActorActionPlans(0))
             ;

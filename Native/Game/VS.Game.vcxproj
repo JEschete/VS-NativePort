@@ -340,12 +340,9 @@
     <ClCompile Include="src\Battle\Ai\PlanningWorkspaceLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\Relations.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Battle\Ai\Relations.cpp" />
+    <ClCompile Include="src\Battle\Ai\RelationsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\RoomAiMap.cpp" />
     <ClCompile Include="src\Battle\Ai\RoomState.cpp">
@@ -2112,7 +2109,6 @@
     <ClInclude Include="src\Battle\Ai\Perception.h" />
     <ClInclude Include="src\Battle\Ai\PlanningPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\PlanningSort.hpp" />
-    <ClInclude Include="src\Battle\Ai\Relations.h" />
     <ClInclude Include="src\Battle\Ai\RoomState.h" />
     <ClInclude Include="src\Battle\AttackPrerequisites.h" />
     <ClInclude Include="src\Battle\BattleMode.h" />
@@ -2418,6 +2414,8 @@
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspaceLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp" />
+    <ClInclude Include="include\Battle\Ai\Relations.hpp" />
+    <ClInclude Include="include\Battle\Ai\RelationsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp" />
     <ClInclude Include="include\Battle\Ai\TileHeightSampling.hpp" />
     <ClInclude Include="include\Battle\Encounter.hpp" />

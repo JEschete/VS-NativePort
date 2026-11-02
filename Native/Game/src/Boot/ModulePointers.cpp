@@ -82,7 +82,6 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitives.h"
-#include "Battle/Ai/Relations.h"
 #include "Battle/AttackPrerequisites.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"
@@ -1964,8 +1963,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBF00u, 0u, (void*)&Battle_Ai_UnlinkEngagedActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBFE4u, 0u, (void*)&Battle_Ai_UpdateEngagementBuildup, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC0D0u, 0u, (void*)&Battle_Ai_AnimateEngagementPhase, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DC19Cu, 0u, (void*)&Battle_Ai_EndAshleyAlliance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DC210u, 0u, (void*)&Battle_Ai_TryBeginAshleyAlliance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC284u, 0u, (void*)&Battle_Ai_ScoreActorCondition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC2E0u, 0u, (void*)&Battle_Ai_CopyActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC30Cu, 0u, (void*)&Battle_Ai_ApplySimulatedStatDelta, 0u, 0u, 0u},

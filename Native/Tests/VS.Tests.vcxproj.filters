@@ -60,6 +60,9 @@
     <ClCompile Include="src\AiPlanningTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiRelationsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiSessionResetTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

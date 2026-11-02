@@ -40,6 +40,10 @@ NATIVE_HELPER_HEADERS = {
     "VS::Battle::DrawLiveSphereTerrainIntersection": r"Native\Game\include\Battle\SphereTerrainLive.hpp",
     "VS::Battle::Ai::RebuildLiveActorActionPlans": r"Native\Game\include\Battle\Ai\PlanningWorkspaceLive.hpp",
     "VS::Battle::Ai::IssueLiveActorCommand": r"Native\Game\include\Battle\Ai\ActorCommandsLive.hpp",
+    **{name: r"Native\Game\include\Battle\Ai\RelationsLive.hpp"
+       for name in ("VS::Battle::Ai::InitializeLiveActorAiRelations",
+                    "VS::Battle::Ai::ApplyLiveSavedActorAiRelations",
+                    "VS::Battle::Ai::EndLiveAshleyAlliance", "VS::Battle::Ai::TryBeginLiveAshleyAlliance")},
     "VS::Effects::ScreenDistortion::WarpLivePolygonVertices":
         r"Native\Game\include\Effects\ScreenDistortion\RadialWarpLive.hpp",
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
@@ -2711,6 +2715,16 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Battle::Ai::RebuildLiveActorActionPlans(",
      "F01718 #46 typed promotion: the planning binding supplies call-local storage, the live actor list and the "
      "queued Battle_ActionRequest (#255)"),
+    (r"", r"\bVS::Battle::Ai::InitializeActorAiRelations\(",
+     r"VS::Battle::Ai::InitializeLiveActorAiRelations(",
+     "F01841 #46 typed promotion: the relations binding supplies the battle actor list and the registered AI state table"),
+    (r"", r"\bVS::Battle::Ai::ApplySavedActorAiRelations\(\)",
+     r"VS::Battle::Ai::ApplyLiveSavedActorAiRelations()",
+     "F01840 #46 typed promotion: the relations binding supplies the battle actor list and the AI state table"),
+    (r"", r"\bVS::Battle::Ai::(End|TryBegin)AshleyAlliance\(",
+     r"VS::Battle::Ai::\1LiveAshleyAlliance(",
+     "F01681/F01682 #46 typed promotion: the alliance binding supplies the reaction state and owns the decision "
+     "callback swap"),
     (r"", r"\bVS::Battle::Ai::IssueActorCommand\(",
      r"VS::Battle::Ai::IssueLiveActorCommand(",
      "F01720 #46 typed promotion: the command binding snapshots the AI state and supplies the frame terrain, actor model, "

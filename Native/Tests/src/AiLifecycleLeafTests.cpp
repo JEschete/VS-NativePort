@@ -4,13 +4,11 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
-#include <span>
 #include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
 #include "Core/Random.hpp"
 #include "Core/Unported.hpp"
@@ -23,10 +21,11 @@ extern "C" {
 #include "Battle/Ai/DecisionCallbacks.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
-#include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 }
+
+#include "Battle/Ai/RelationsLive.hpp"
 
 static_assert(std::is_same_v<decltype(&Battle_Ai_ClearActorAiNavigationReset),
                              void (*)(int)>);
@@ -411,20 +410,20 @@ TEST_CASE(
   const auto [seed, after_first, after_second] = TwoFavorableAllianceRolls();
   Core_Random_Seed(seed);
 
-  Battle_Ai_TryBeginAshleyAlliance(fixture.Reaction(), 0);
+  VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
   CHECK(fixture.Reaction()->allianceReactionCount == 1);
   CHECK(fixture.Reaction()->temporaryAshleyAlliance == 0);
   CHECK(settings->decisionCallback == AshleyAllianceTestCallback);
   CHECK(Core_Random_State() == after_first);
 
-  Battle_Ai_TryBeginAshleyAlliance(fixture.Reaction(), 0);
+  VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
   fixture.CheckEntered(2, AshleyAllianceTestCallback);
   CHECK(Core_Random_State() == after_second);
 
   auto& frame = *Battle_Ai_FrameState();
   frame.randomState = 0x2000;
   frame.lastBudgetTick = 2;
-  Battle_Ai_EndAshleyAlliance(fixture.Reaction());
+  VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
 
   fixture.CheckRestored(AshleyAllianceTestCallback);
   fixture.CheckDeferredRecovery();
@@ -453,7 +452,7 @@ TEST_CASE(
   REQUIRE(seed != 0);
   Core_Random_Seed(seed);
 
-  Battle_Ai_TryBeginAshleyAlliance(fixture.Reaction(), 0);
+  VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
 
   CHECK(fixture.Reaction()->allianceReactionCount == 1);
   CHECK(fixture.Reaction()->temporaryAshleyAlliance == 0);
@@ -471,17 +470,17 @@ TEST_CASE(
   fixture.Reaction()->allianceReactionCount = 9;
   Battle_actorMarkers[1] = 0x05;
 
-  Battle_Ai_EndAshleyAlliance(fixture.Reaction());
+  VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
   fixture.CheckRestored(nullptr);
   CHECK(Battle_actorMarkers[1] == 0x05);
 
   fixture.state.settingsBit25 = 1;
   const unsigned random_before = Core_Random_State();
-  Battle_Ai_TryBeginAshleyAlliance(fixture.Reaction(), 1);
+  VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 1);
   CHECK(Core_Random_State() == random_before);
   fixture.CheckEntered(0, nullptr);
 
-  Battle_Ai_EndAshleyAlliance(fixture.Reaction());
+  VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
   fixture.CheckRestored(Battle_Ai_UpdateEngagementApproachBehavior);
   CHECK(Battle_actorMarkers[1] == 0x05);
 }
@@ -493,7 +492,7 @@ TEST_CASE("AI Ashley alliance compares before truncating the reaction count",
   Core_Random_Seed(seeds[0]);
   fixture.Reaction()->allianceReactionCount = 255;
   fixture.Settings()->decisionCallback = AshleyAllianceTestCallback;
-  Battle_Ai_TryBeginAshleyAlliance(fixture.Reaction(), 0);
+  VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
   CHECK(fixture.Reaction()->allianceReactionCount == 0);
   CHECK(fixture.Reaction()->temporaryAshleyAlliance == 1);
   CHECK(fixture.Settings()->savedDecisionCallback ==
@@ -517,7 +516,7 @@ TEST_CASE("AI Ashley alliance covers every masked roll and byte counter",
       Core_Random_Seed(seeds[roll]);
       VS::Core::Rand15 expected_random(seeds[roll]);
       REQUIRE((expected_random.Next() & 0x7F) == static_cast<int>(roll));
-      Battle_Ai_TryBeginAshleyAlliance(fixture.Reaction(), 0);
+      VS::Battle::Ai::TryBeginLiveAshleyAlliance(fixture.Reaction(), 0);
       const bool favorable = roll < 0x4C;
       const bool entered = favorable && counter + 1 >= 2;
       CHECK(fixture.Reaction()->allianceReactionCount ==
@@ -563,7 +562,7 @@ TEST_CASE("AI saved relations force Ashley alliance without consuming BIOS RNG",
   const auto random = Core_Random_State();
   for (int cycle = 0; cycle < 2; ++cycle) {
     fixture.state.savedRelationOptions = 0x1235;
-    Battle_Ai_ApplySavedActorAiRelations();
+    VS::Battle::Ai::ApplyLiveSavedActorAiRelations();
     REQUIRE(fixture.Reaction()->temporaryAshleyAlliance == 1);
     CHECK(fixture.Reaction()->allianceReactionCount == 0);
     CHECK(fixture.Settings()->savedDecisionCallback ==
@@ -572,21 +571,9 @@ TEST_CASE("AI saved relations force Ashley alliance without consuming BIOS RNG",
     CHECK(fixture.state.relations[0].classificationTimer ==
           ((0x1235 >> 6) & 127));
     CHECK(Core_Random_State() == random);
-    Battle_Ai_EndAshleyAlliance(fixture.Reaction());
+    VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
     CHECK(fixture.Settings()->decisionCallback == AshleyAllianceTestCallback);
   }
-}
-
-TEST_CASE(
-    "AI Ashley alliance original entries resolve to typed native callbacks",
-    "[ai][ashley-alliance][alliance-binding]") {
-  const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800DC19C) ==
-        reinterpret_cast<void*>(&Battle_Ai_EndAshleyAlliance));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800DC210) ==
-        reinterpret_cast<void*>(&Battle_Ai_TryBeginAshleyAlliance));
 }
 
 TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
@@ -603,7 +590,7 @@ TEST_CASE("Inactive Ashley alliance exit only resets the favorable counter",
     auto expected = fixture.state;
     reinterpret_cast<Battle_Ai_ReactionView*>(&expected)
         ->allianceReactionCount = 0;
-    Battle_Ai_EndAshleyAlliance(fixture.Reaction());
+    VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
     CHECK(StateBytes(fixture.state) == StateBytes(expected));
     CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0xA5);
     CHECK(Core_Random_State() == random);
@@ -634,7 +621,7 @@ TEST_CASE("Ashley alliance recovery preserves callback and native busy gates",
   auto& frame = *Battle_Ai_FrameState();
   frame.randomState = 0x2000;
   frame.lastBudgetTick = 2;
-  Battle_Ai_EndAshleyAlliance(fixture.Reaction());
+  VS::Battle::Ai::EndLiveAshleyAlliance(fixture.Reaction());
   fixture.CheckRestored(saved_callback
                             ? AshleyAllianceTestCallback
                             : Battle_Ai_UpdateEngagementApproachBehavior);

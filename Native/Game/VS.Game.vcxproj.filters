@@ -504,9 +504,9 @@
     <ClCompile Include="src\Battle\Ai\Relations.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\Relations.h">
+    <ClCompile Include="src\Battle\Ai\RelationsLive.cpp">
       <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\RoomAiMap.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2242,6 +2242,12 @@
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\ReactionDelay.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\Relations.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\RelationsLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\RoomAiMap.hpp">

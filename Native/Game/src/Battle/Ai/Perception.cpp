@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/RelationsLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -32,7 +33,6 @@ extern "C" {
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Ai/PlanningPrimitives.h"
-#include "Battle/Ai/Relations.h"
 #include "Battle/Damage.h"
 #include "Field/Gimmicks.h"
 #include "Items/Inventory.h"
@@ -608,9 +608,9 @@ void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai
         }
         if (Battle_Ai_IsActionBeneficialToActor(action, state->actorId)) {
             if (source == 0 && state->usesRoomActionDelay == 0 && state->settingsBit27) {
-                Battle_Ai_TryBeginAshleyAlliance(state, 0);
+                VS::Battle::Ai::TryBeginLiveAshleyAlliance(state, 0);
             } else if ((other->relations[0].bytes.firstByte >> 6) == 3) {
-                Battle_Ai_EndAshleyAlliance(state);
+                VS::Battle::Ai::EndLiveAshleyAlliance(state);
             }
         }
         state->relations[source].reactionBits.timer = 28;
@@ -619,7 +619,7 @@ void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai
                 ((Battle_Ai_ReactionOrbitView*)Battle_Ai_arenaOrbit)->isOrbiting = 0;
             }
             if (source == 0 && state->settingsBit27) {
-                Battle_Ai_EndAshleyAlliance(state);
+                VS::Battle::Ai::EndLiveAshleyAlliance(state);
             }
             if (state->settingsBit25 && (state->settingsBit26 == 0 || source == 0)) {
                 Battle_Ai_MakeTargetHostile(state, source);

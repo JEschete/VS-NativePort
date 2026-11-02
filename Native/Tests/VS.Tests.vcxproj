@@ -60,6 +60,7 @@
     <ClCompile Include="src\AiLayoutTests.cpp" />
     <ClCompile Include="src\AiLifecycleLeafTests.cpp" />
     <ClCompile Include="src\AiPlanningTests.cpp" />
+    <ClCompile Include="src\AiRelationsTests.cpp" />
     <ClCompile Include="src\AiSessionResetTests.cpp" />
     <ClCompile Include="src\AudioTests.cpp" />
     <ClCompile Include="src\AwarenessMarkerTests.cpp" />

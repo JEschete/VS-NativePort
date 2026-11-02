@@ -10,7 +10,6 @@ Native\Game\src\Actors\ModelDrawing.cpp
 Native\Game\src\Actors\SequencePlayback.cpp
 Native\Game\src\Battle\Ai\DecisionCallbacks.cpp
 Native\Game\src\Battle\Ai\FrameUpdate.cpp
-Native\Game\src\Battle\Ai\Relations.cpp
 Native\Game\src\Battle\Ai\RoomState.cpp
 Native\Game\src\Boot\PlayerSettings.cpp
 Native\Game\src\Boot\Session.cpp

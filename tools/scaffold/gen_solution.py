@@ -170,6 +170,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\DecisionPrimitives.cpp",
                 r"src\Battle\Ai\NavigationPrimitives.cpp",
                 r"src\Battle\Ai\ActorCommandsLive.cpp",
+                r"src\Battle\Ai\RelationsLive.cpp",
                 r"src\Battle\Ai\Engagement.cpp",
                 r"src\Battle\Ai\ActorCleanup.cpp",
                 r"src\Battle\Ai\MovementBehavior.cpp",
