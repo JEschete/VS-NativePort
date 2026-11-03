@@ -56,13 +56,14 @@ u32 Random::NextInterfaceRandomBits(u32& state, i32 bit_count) {
 // (src/BATTLE/BATTLE.PRG/5BF94.c:5810) The span and the sum wrap at 32 bits as
 // the original's subu/addu do.
 i32 Random::RandomRangeExclusive(Rand15& source, i32 bound_a, i32 bound_b) {
-  if (bound_a == bound_b) {
-    return bound_a;
-  }
   const i32 low = bound_b < bound_a ? bound_b : bound_a;
   const i32 high = bound_b < bound_a ? bound_a : bound_b;
   const i32 span =
       std::bit_cast<i32>(static_cast<u32>(high) - static_cast<u32>(low));
+  // The span is zero exactly when the bounds are equal: no draw is taken.
+  if (span == 0) {
+    return bound_a;
+  }
   const i32 offset = source.Next() % span;
   return std::bit_cast<i32>(static_cast<u32>(offset) + static_cast<u32>(low));
 }

@@ -12,8 +12,8 @@ constexpr std::size_t kWordGroup = 4;
 constexpr std::size_t kSwapPair = 2;
 constexpr unsigned kByteBits = 8;
 
-constexpr std::size_t RoundDown(std::size_t bytes, std::size_t unit) {
-  return bytes - bytes % unit;
+constexpr std::size_t WholeWordBytes(std::size_t bytes) {
+  return bytes - bytes % kWordBytes;
 }
 
 // Loads `count` words whole before storing any of them, as the assembly's
@@ -45,17 +45,18 @@ std::int16_t ReadUnalignedShort(std::span<const std::byte, 2> source) noexcept {
 }
 
 std::size_t ZeroWordsBackwardBytes(std::int32_t size) noexcept {
-  if (size <= 0 || size % static_cast<std::int32_t>(kWordBytes) != 0) {
+  if (size <= 0) {
     return 0;
   }
-  return static_cast<std::size_t>(size);
+  const auto bytes = static_cast<std::size_t>(size);
+  return bytes % kWordBytes == 0 ? bytes : 0;
 }
 
 // BATTLE.PRG vs_battle_rMemzero (5BF94.c:4476).
 std::size_t ZeroWordsBackward(std::span<std::byte> destination,
                               std::int32_t size) noexcept {
   const std::size_t bytes = std::min(ZeroWordsBackwardBytes(size),
-                                     RoundDown(destination.size(), kWordBytes));
+                                     WholeWordBytes(destination.size()));
   for (std::size_t end = bytes; end != 0; end -= kWordBytes) {
     std::fill_n(destination.begin() + static_cast<std::ptrdiff_t>(end) -
                     static_cast<std::ptrdiff_t>(kWordBytes),
@@ -83,16 +84,15 @@ std::size_t CopyBytesBackward(std::span<std::byte> destination,
 }
 
 std::size_t WordBytes(std::uint32_t size) noexcept {
-  return RoundDown(size, kWordBytes);
+  return WholeWordBytes(size);
 }
 
 // SLUS_010.40 Sound_memcpy32 (25AC.c:3965).
 std::size_t CopyWords(std::span<const std::byte> source,
                       std::span<std::byte> destination,
                       std::uint32_t size) noexcept {
-  const std::size_t bytes =
-      RoundDown(std::min({WordBytes(size), destination.size(), source.size()}),
-                kWordBytes);
+  const std::size_t bytes = WholeWordBytes(
+      std::min({WordBytes(size), destination.size(), source.size()}));
   std::size_t words = bytes / kWordBytes;
   std::size_t offset = 0;
   for (; words >= kWordGroup; words -= kWordGroup) {
@@ -110,8 +110,8 @@ std::size_t CopyWords(std::span<const std::byte> source,
 // second[0], first[1], second[1] before storing second then first.
 std::size_t SwapWords(std::span<std::byte> first, std::span<std::byte> second,
                       std::uint32_t size) noexcept {
-  const std::size_t bytes = RoundDown(
-      std::min({WordBytes(size), first.size(), second.size()}), kWordBytes);
+  const std::size_t bytes =
+      WholeWordBytes(std::min({WordBytes(size), first.size(), second.size()}));
   std::size_t words = bytes / kWordBytes;
   std::size_t offset = 0;
   for (; words >= kSwapPair; words -= kSwapPair) {
