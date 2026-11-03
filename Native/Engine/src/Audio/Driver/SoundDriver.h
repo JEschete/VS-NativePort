@@ -42,6 +42,30 @@ typedef struct Audio_DriverFlags Audio_DriverFlags;
 // decomp: src/include/sound.h:22
 #define VOICE_PARAM_START_ADDR (1 << 7) /* waveform data start address */
 
+// decomp: src/include/sound.h:23
+#define VOICE_PARAM_ADSR_AMODE (1 << 8) /* ADSR Attack rate mode */
+
+// decomp: src/include/sound.h:24
+#define VOICE_PARAM_ADSR_SMODE (1 << 9) /* ADSR Sustain rate mode */
+
+// decomp: src/include/sound.h:25
+#define VOICE_PARAM_ADSR_RMODE (1 << 10) /* ADSR Release rate mode */
+
+// decomp: src/include/sound.h:26
+#define VOICE_PARAM_ADSR_AR (1 << 11) /* ADSR Attack rate */
+
+// decomp: src/include/sound.h:27
+#define VOICE_PARAM_ADSR_DR (1 << 12) /* ADSR Decay rate */
+
+// decomp: src/include/sound.h:28
+#define VOICE_PARAM_ADSR_SR (1 << 13) /* ADSR Sustain rate */
+
+// decomp: src/include/sound.h:29
+#define VOICE_PARAM_ADSR_RR (1 << 14) /* ADSR Release rate */
+
+// decomp: src/include/sound.h:30
+#define VOICE_PARAM_ADSR_SL (1 << 15) /* ADSR Sustain level */
+
 // decomp: src/include/sound.h:31
 #define VOICE_PARAM_ADSR_LOWER                                                           \
     (VOICE_PARAM_ADSR_AMODE | VOICE_PARAM_ADSR_AR | VOICE_PARAM_ADSR_DR                  \

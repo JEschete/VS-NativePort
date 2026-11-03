@@ -1995,27 +1995,6 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
         self.assertEqual(blob[:4], ("SLUS_010.40", 0x800, 0x80010000, 0x52000))
         self.assertEqual(copy_fixups.MODULE_DATA_BLOB_TYPES[blob[4]], ("short", 2))
 
-    def test_lfo_enables_preflight_before_mutation_and_decode_unsigned_operands(self):
-        for fid, flag, member, count in (
-            ("F03317", "1", "vibratoShape", 3),
-            ("F03321", "SOUND_UPDATE_TREMOLO", "tremoloShape", 3),
-            ("F03325", "SOUND_UPDATE_PAN_LFO", "autoPanShape", 2),
-        ):
-            source = (
-                f"    in_pChannel->updateFlags |= {flag};\n"
-                f"    in_pChannel->{member} = *in_pChannel->programCounter++;\n"
-                f"    wave = Audio_Seq_kLfoWaveforms[in_pChannel->{member}];"
-            )
-            for old, new, _ in copy_fixups.FIXES[fid]:
-                self.assertIn(old, source)
-                source = source.replace(old, new)
-            self.assertLess(
-                source.index("Audio_Seq_LfoWaveform"), source.index("updateFlags")
-            )
-            self.assertIn(f"programCounter += {count}", source)
-            self.assertIn("(u_char)*in_pChannel->programCounter++", source)
-            self.assertNotIn("Audio_Seq_kLfoWaveforms[", source)
-
     def test_hud_timer_retirement_does_not_add_a_packed_pointer_view(self):
         ledger = (
             Path(__file__).resolve().parents[2] / "Docs" / "ledgers" / "DATA_LEDGER.csv"

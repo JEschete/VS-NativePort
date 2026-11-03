@@ -5,6 +5,7 @@
 
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
+#include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Boot/SessionLive.hpp"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Audio/MusicState.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Seq/Modulation.h"
 #include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
@@ -239,13 +239,13 @@ static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
   Audio_Seq_kLfoWaveforms[0] = wave;
   switch (kind) {
     case 0:
-      Audio_Seq_SlideVibratoDepth(channel, 1);
+      VS::Audio::Seq::LiveSlideVibratoDepth(channel, 1);
       break;
     case 1:
-      Audio_Seq_SlideTremoloDepth(channel, 1);
+      VS::Audio::Seq::LiveSlideTremoloDepth(channel, 1);
       break;
     case 2:
-      Audio_Seq_SlideAutoPanDepth(channel, 1);
+      VS::Audio::Seq::LiveSlideAutoPanDepth(channel, 1);
       break;
     default:
       fprintf(stderr, "unexpected modulation test kind: %d\n", kind);
@@ -268,14 +268,14 @@ static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
   channel->programCounter = enable;
   switch (kind) {
     case 0:
-      Audio_Seq_EnableVibrato(channel, 1);
+      VS::Audio::Seq::LiveEnableVibrato(channel, 1);
       break;
     case 1:
-      Audio_Seq_EnableTremolo(channel, 1);
+      VS::Audio::Seq::LiveEnableTremolo(channel, 1);
       break;
     case 2:
       channel->programCounter = enable + 1;
-      Audio_Seq_EnableAutoPan(channel, 1);
+      VS::Audio::Seq::LiveEnableAutoPan(channel, 1);
       break;
     default:
       fprintf(stderr, "unexpected modulation test kind: %d\n", kind);

@@ -23,6 +23,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/SequencerOutput.h"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceEngine.hpp"
@@ -37,7 +38,8 @@
 
 extern "C" {
 #include "Audio/LfoWaveforms.h"
-#include "Audio/Seq/Modulation.h"
+#include "Audio/Mixer/VoiceMixer.h"
+#include "Audio/Seq/Channel.h"
 }
 
 extern "C" int TestsZoneMusicStateAliases(void);
@@ -1952,11 +1954,11 @@ struct LfoSourceFixture {
     }
     channel.programCounter = reinterpret_cast<char*>(command.data());
     if (kind == 0) {
-      Audio_Seq_EnableVibrato(&channel, 1);
+      VS::Audio::Seq::LiveEnableVibrato(&channel, 1);
     } else if (kind == 1) {
-      Audio_Seq_EnableTremolo(&channel, 1);
+      VS::Audio::Seq::LiveEnableTremolo(&channel, 1);
     } else {
-      Audio_Seq_EnableAutoPan(&channel, 1);
+      VS::Audio::Seq::LiveEnableAutoPan(&channel, 1);
     }
   }
 
@@ -2007,7 +2009,7 @@ struct LfoSourceFixture {
 
   void CheckDisabled() {
     auto* cursor = channel.autoPanWave;
-    Audio_Seq_DisableAutoPan(&channel, 1);
+    VS::Audio::Seq::LiveDisableAutoPan(&channel, 1);
     CHECK((channel.updateFlags & SOUND_UPDATE_PAN_LFO) == 0);
     CHECK(channel.autoPanOffset == 0);
     Step();

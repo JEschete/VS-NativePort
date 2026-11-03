@@ -21,36 +21,6 @@ typedef struct Audio_SeqChannel Audio_SeqChannel;
 // decomp: D_800358FE (D_800358FE@SLUS_010.40): a view into another global
 #define Audio_Seq_savedMusicId (*(short*)(&Audio_Seq_savedMusicConfig.musicId))
 
-// decomp: src/include/sound.h:42
-#define SOUND_CHANNEL_TYPE_MUSIC 0x0
-
-// decomp: src/include/sound.h:50
-#define SOUND_SFX_LEGATO 0x1
-
-// decomp: src/include/sound.h:51
-#define SOUND_SFX_FULL_LENGTH 0x4
-
-// decomp: src/include/sound.h:69
-#define SOUND_UPDATE_DRUM_MODE (1 << 3)
-
-// decomp: src/include/sound.h:72
-#define SOUND_UPDATE_UNKNOWN_01 (1 << 6)
-
-// decomp: src/include/sound.h:75
-#define SOUND_UPDATE_UNKNOWN_12 (1 << 12)
-
-// decomp: src/include/sound.h:78
-#define SOUND_UPDATE_UNKNOWN_20 (1 << 20)
-
-// decomp: src/include/sound.h:79
-#define SOUND_UPDATE_UNKNOWN_24 (1 << 24)
-
-// decomp: src/include/sound.h:80
-#define SOUND_UPDATE_UNKNOWN_27 (1 << 27)
-
-// decomp: src/include/sound.h:81
-#define SOUND_UPDATE_UNKNOWN_28 (1 << 28)
-
 // decomp: FSoundChannel (src/include/sound.h:410)
 typedef struct Audio_SeqChannel {
     char* programCounter;
@@ -217,67 +187,5 @@ extern State_ArtsStatus Audio_Seq_unusedArtsStatus;
 extern Items_Inventory Audio_Seq_unusedInventory;
 extern State_StateFlags Audio_Seq_unusedStateFlags;
 extern Items_InventoryIndices Audio_Seq_unusedInventoryIndices;
-void Audio_Seq_SetVolumeBalance(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SlideVolumeBalance(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetVolume(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SlideVolume(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetKeyOnVolumeRamp(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_EnableFullNoteLength(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_DisableFullNoteLength(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetEffectVolumeScale(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SlideEffectVolumeScale(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetPan(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SlidePan(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetOctave(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_IncreaseOctave(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_DecreaseOctave(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_LoadInstrument(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_LoadSilentInstrument(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SelectPatch(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetTranspose(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_AddTranspose(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetPitchBendSlide(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_EnablePortamento(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_DisablePortamento(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetFineTune(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_AddFineTune(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_EnableLegato(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_EnableSustainedSoundEffect(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetNextNoteLength(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_SetFixedNoteLength(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_EnableDrumKeymap(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_MuteInstrument(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
-void Audio_Seq_EnableLoopBoundaryStop(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags __attribute__((unused)));
 
 #endif // VS_AUDIO_SEQ_CHANNEL_H_DECLS

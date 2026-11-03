@@ -246,6 +246,9 @@
     <ClInclude Include="src\Audio\Seq\Channel.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Seq\ChannelCommands.cpp">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Seq\Control.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
@@ -255,15 +258,9 @@
     <ClCompile Include="src\Audio\Seq\Envelope.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\Envelope.h">
-      <Filter>src\Audio\Seq</Filter>
-    </ClInclude>
     <ClCompile Include="src\Audio\Seq\Modulation.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\Modulation.h">
-      <Filter>src\Audio\Seq</Filter>
-    </ClInclude>
     <ClCompile Include="src\Audio\Seq\MusicSequence.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
@@ -276,6 +273,9 @@
     <ClInclude Include="src\Audio\Seq\Sequencer.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Seq\SeqVoiceCommandsLive.cpp">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Sfx.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -681,7 +681,22 @@
     <ClInclude Include="include\Audio\Reverb.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\SeqChannelCommands.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqEnvelopeCommands.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqModulationCommands.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\SequencerOutput.h">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqVoiceCommands.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqVoiceCommandsLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\SoundEffects.hpp">

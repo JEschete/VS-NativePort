@@ -6,7 +6,6 @@ extern "C" {
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Envelope.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
 

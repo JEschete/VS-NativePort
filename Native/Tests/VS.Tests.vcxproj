@@ -206,6 +206,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\SeqVoiceCommandsTests.cpp" />
     <ClCompile Include="src\SessionTests.cpp" />
     <ClCompile Include="src\SfxBankSelectionTests.cpp" />
     <ClCompile Include="src\SoundTransitionTests.cpp" />

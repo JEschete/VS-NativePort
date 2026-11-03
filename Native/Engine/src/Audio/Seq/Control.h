@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/sound.h:42
+#define SOUND_CHANNEL_TYPE_MUSIC 0x0
+
 // decomp: src/include/sound.h:90
 #define SOUND_GLOBAL_UPDATE_07 (1 << 7)
 

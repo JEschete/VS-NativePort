@@ -348,6 +348,78 @@ NATIVE_HELPER_HEADERS = {
            "VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode",
            "VS::Audio::Samples::UploadLiveBank",
        )},
+    **{f"VS::Audio::Seq::Live{name}": r"Native\Engine\include\Audio\SeqVoiceCommandsLive.hpp"
+       for name in (
+           "SetVolumeBalance",
+           "SlideVolumeBalance",
+           "SetVolume",
+           "SlideVolume",
+           "SetKeyOnVolumeRamp",
+           "EnableFullNoteLength",
+           "DisableFullNoteLength",
+           "SetPan",
+           "SlidePan",
+           "SetOctave",
+           "IncreaseOctave",
+           "DecreaseOctave",
+           "LoadInstrument",
+           "LoadSilentInstrument",
+           "SelectPatch",
+           "ResetEnvelope",
+           "SetTranspose",
+           "AddTranspose",
+           "SetPitchBendSlide",
+           "EnablePortamento",
+           "DisablePortamento",
+           "SetFineTune",
+           "AddFineTune",
+           "EnableVibrato",
+           "SetVibratoDepth",
+           "SlideVibratoDepth",
+           "DisableVibrato",
+           "EnableTremolo",
+           "SetTremoloDepth",
+           "SlideTremoloDepth",
+           "DisableTremolo",
+           "EnableAutoPan",
+           "SetAutoPanDepth",
+           "SlideAutoPanDepth",
+           "DisableAutoPan",
+           "EnableNoise",
+           "DisableNoise",
+           "EnableFrequencyModulation",
+           "DisableFrequencyModulation",
+           "EnableReverb",
+           "DisableReverb",
+           "EnableLegato",
+           "EnableSustainedSoundEffect",
+           "SetNoiseClock",
+           "SetAttackRate",
+           "SetDecayRate",
+           "SetSustainLevel",
+           "SetSustainRate",
+           "SetReleaseRate",
+           "SetAttackMode",
+           "SetSustainMode",
+           "SetReleaseMode",
+           "SetNextNoteLength",
+           "SetFixedNoteLength",
+           "EnableDrumKeymap",
+           "MuteInstrument",
+           "SetDecayAndSustain",
+           "EnableTimedNoise",
+           "SetNoiseToggleDelay",
+           "EnableTimedFrequencyModulation",
+           "SetFrequencyModulationToggleDelay",
+           "ResetVoiceEffects",
+           "EnablePitchSidechain",
+           "DisablePitchSidechain",
+           "EnableVolumeSidechain",
+           "DisableVolumeSidechain",
+           "EnableLoopBoundaryStop",
+           "SetRandomPitchDepth",
+           "ResetRandomPitchDepth",
+       )},
     **{name: r"Native\Engine\include\Audio\StreamControlLive.hpp"
        for name in (
            "VS::Audio::Cutscene::PauseLiveStream",
@@ -558,6 +630,76 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x8001D6B8, "VS::Audio::Cutscene::SetLiveStreamVolume"),  # F03394 command 0xE4
     ("SLUS_010.40", 0x8001D728, "VS::Audio::Cutscene::SlideLiveStreamVolume"),  # F03395 command 0xE5
     ("SLUS_010.40", 0x8001D7A8, "VS::Audio::Cutscene::SetLiveStreamPan"),  # F03396 command 0xE6
+    # #276 audio-seq-voices: Audio_Seq_kOpcodeHandlers and kExtendedOpcodeHandlers hold the voice/channel opcodes.
+    ("SLUS_010.40", 0x8001B4EC, "VS::Audio::Seq::LiveSetVolumeBalance"),  # F03290
+    ("SLUS_010.40", 0x8001B514, "VS::Audio::Seq::LiveSlideVolumeBalance"),  # F03291
+    ("SLUS_010.40", 0x8001B598, "VS::Audio::Seq::LiveSetVolume"),  # F03292
+    ("SLUS_010.40", 0x8001B5C8, "VS::Audio::Seq::LiveSlideVolume"),  # F03293
+    ("SLUS_010.40", 0x8001B654, "VS::Audio::Seq::LiveSetKeyOnVolumeRamp"),  # F03294
+    ("SLUS_010.40", 0x8001B6E4, "VS::Audio::Seq::LiveEnableFullNoteLength"),  # F03295
+    ("SLUS_010.40", 0x8001B6F8, "VS::Audio::Seq::LiveDisableFullNoteLength"),  # F03296
+    ("SLUS_010.40", 0x8001B804, "VS::Audio::Seq::LiveSetPan"),  # F03301
+    ("SLUS_010.40", 0x8001B838, "VS::Audio::Seq::LiveSlidePan"),  # F03302
+    ("SLUS_010.40", 0x8001B8C4, "VS::Audio::Seq::LiveSetOctave"),  # F03303
+    ("SLUS_010.40", 0x8001B8E0, "VS::Audio::Seq::LiveIncreaseOctave"),  # F03304
+    ("SLUS_010.40", 0x8001B8F8, "VS::Audio::Seq::LiveDecreaseOctave"),  # F03305
+    ("SLUS_010.40", 0x8001B910, "VS::Audio::Seq::LiveLoadInstrument"),  # F03306
+    ("SLUS_010.40", 0x8001B9B8, "VS::Audio::Seq::LiveLoadSilentInstrument"),  # F03307
+    ("SLUS_010.40", 0x8001BA24, "VS::Audio::Seq::LiveSelectPatch"),  # F03308
+    ("SLUS_010.40", 0x8001BAB8, "VS::Audio::Seq::LiveResetEnvelope"),  # F03309
+    ("SLUS_010.40", 0x8001BB00, "VS::Audio::Seq::LiveSetTranspose"),  # F03310
+    ("SLUS_010.40", 0x8001BB24, "VS::Audio::Seq::LiveAddTranspose"),  # F03311
+    ("SLUS_010.40", 0x8001BB50, "VS::Audio::Seq::LiveSetPitchBendSlide"),  # F03312
+    ("SLUS_010.40", 0x8001BB98, "VS::Audio::Seq::LiveEnablePortamento"),  # F03313
+    ("SLUS_010.40", 0x8001BBD0, "VS::Audio::Seq::LiveDisablePortamento"),  # F03314
+    ("SLUS_010.40", 0x8001BBD8, "VS::Audio::Seq::LiveSetFineTune"),  # F03315
+    ("SLUS_010.40", 0x8001BC38, "VS::Audio::Seq::LiveAddFineTune"),  # F03316
+    ("SLUS_010.40", 0x8001BC9C, "VS::Audio::Seq::LiveEnableVibrato"),  # F03317
+    ("SLUS_010.40", 0x8001BD94, "VS::Audio::Seq::LiveSetVibratoDepth"),  # F03318
+    ("SLUS_010.40", 0x8001BDF4, "VS::Audio::Seq::LiveSlideVibratoDepth"),  # F03319
+    ("SLUS_010.40", 0x8001BE60, "VS::Audio::Seq::LiveDisableVibrato"),  # F03320
+    ("SLUS_010.40", 0x8001BE84, "VS::Audio::Seq::LiveEnableTremolo"),  # F03321
+    ("SLUS_010.40", 0x8001BF34, "VS::Audio::Seq::LiveSetTremoloDepth"),  # F03322
+    ("SLUS_010.40", 0x8001BF58, "VS::Audio::Seq::LiveSlideTremoloDepth"),  # F03323
+    ("SLUS_010.40", 0x8001BFC8, "VS::Audio::Seq::LiveDisableTremolo"),  # F03324
+    ("SLUS_010.40", 0x8001BFEC, "VS::Audio::Seq::LiveEnableAutoPan"),  # F03325
+    ("SLUS_010.40", 0x8001C058, "VS::Audio::Seq::LiveSetAutoPanDepth"),  # F03326
+    ("SLUS_010.40", 0x8001C078, "VS::Audio::Seq::LiveSlideAutoPanDepth"),  # F03327
+    ("SLUS_010.40", 0x8001C0E4, "VS::Audio::Seq::LiveDisableAutoPan"),  # F03328
+    ("SLUS_010.40", 0x8001C108, "VS::Audio::Seq::LiveEnableNoise"),  # F03329
+    ("SLUS_010.40", 0x8001C168, "VS::Audio::Seq::LiveDisableNoise"),  # F03330
+    ("SLUS_010.40", 0x8001C1D0, "VS::Audio::Seq::LiveEnableFrequencyModulation"),  # F03331
+    ("SLUS_010.40", 0x8001C244, "VS::Audio::Seq::LiveDisableFrequencyModulation"),  # F03332
+    ("SLUS_010.40", 0x8001C2AC, "VS::Audio::Seq::LiveEnableReverb"),  # F03333
+    ("SLUS_010.40", 0x8001C30C, "VS::Audio::Seq::LiveDisableReverb"),  # F03334
+    ("SLUS_010.40", 0x8001C36C, "VS::Audio::Seq::LiveEnableLegato"),  # F03335
+    ("SLUS_010.40", 0x8001C380, "VS::Audio::Seq::LiveEnableSustainedSoundEffect"),  # F03337
+    ("SLUS_010.40", 0x8001C3A4, "VS::Audio::Seq::LiveSetNoiseClock"),  # F03339
+    ("SLUS_010.40", 0x8001C440, "VS::Audio::Seq::LiveSetAttackRate"),  # F03340
+    ("SLUS_010.40", 0x8001C484, "VS::Audio::Seq::LiveSetDecayRate"),  # F03341
+    ("SLUS_010.40", 0x8001C4B8, "VS::Audio::Seq::LiveSetSustainLevel"),  # F03342
+    ("SLUS_010.40", 0x8001C4E8, "VS::Audio::Seq::LiveSetSustainRate"),  # F03343
+    ("SLUS_010.40", 0x8001C52C, "VS::Audio::Seq::LiveSetReleaseRate"),  # F03344
+    ("SLUS_010.40", 0x8001C56C, "VS::Audio::Seq::LiveSetAttackMode"),  # F03345
+    ("SLUS_010.40", 0x8001C5B0, "VS::Audio::Seq::LiveSetSustainMode"),  # F03346
+    ("SLUS_010.40", 0x8001C628, "VS::Audio::Seq::LiveSetReleaseMode"),  # F03347
+    ("SLUS_010.40", 0x8001C8BC, "VS::Audio::Seq::LiveSetNextNoteLength"),  # F03355
+    ("SLUS_010.40", 0x8001C8E4, "VS::Audio::Seq::LiveSetFixedNoteLength"),  # F03356
+    ("SLUS_010.40", 0x8001C92C, "VS::Audio::Seq::LiveEnableDrumKeymap"),  # F03357
+    ("SLUS_010.40", 0x8001C964, "VS::Audio::Seq::LiveMuteInstrument"),  # F03358
+    ("SLUS_010.40", 0x8001C9F0, "VS::Audio::Seq::LiveSetDecayAndSustain"),  # F03361
+    ("SLUS_010.40", 0x8001CA2C, "VS::Audio::Seq::LiveEnableTimedNoise"),  # F03362
+    ("SLUS_010.40", 0x8001CA70, "VS::Audio::Seq::LiveSetNoiseToggleDelay"),  # F03363
+    ("SLUS_010.40", 0x8001CAA0, "VS::Audio::Seq::LiveEnableTimedFrequencyModulation"),  # F03364
+    ("SLUS_010.40", 0x8001CAE4, "VS::Audio::Seq::LiveSetFrequencyModulationToggleDelay"),  # F03365
+    ("SLUS_010.40", 0x8001CB14, "VS::Audio::Seq::LiveResetVoiceEffects"),  # F03366
+    ("SLUS_010.40", 0x8001CB7C, "VS::Audio::Seq::LiveEnablePitchSidechain"),  # F03367
+    ("SLUS_010.40", 0x8001CB90, "VS::Audio::Seq::LiveDisablePitchSidechain"),  # F03368
+    ("SLUS_010.40", 0x8001CBA4, "VS::Audio::Seq::LiveEnableVolumeSidechain"),  # F03369
+    ("SLUS_010.40", 0x8001CBB8, "VS::Audio::Seq::LiveDisableVolumeSidechain"),  # F03370
+    ("SLUS_010.40", 0x8001CC84, "VS::Audio::Seq::LiveEnableLoopBoundaryStop"),  # F03372
+    ("SLUS_010.40", 0x8001CD08, "VS::Audio::Seq::LiveSetRandomPitchDepth"),  # F03376
+    ("SLUS_010.40", 0x8001CD24, "VS::Audio::Seq::LiveResetRandomPitchDepth"),  # F03377
     # #276 Core runtime: the original addresses of the empty handlers, copies, random draws and keystream.
     *(("BATTLE/BATTLE.PRG", address, "VS::Core::IgnoreLiveActorCallback")  # F00023, F00055
       for address in (0x8006B20C, 0x8006C478)),
@@ -2730,48 +2872,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
     # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.
-    "F03317": [
-        ("    in_pChannel->updateFlags |= 1;",
-         "    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);\n"
-         "    if (nativeWave == NULL) {\n"
-         "        in_pChannel->programCounter += 3;\n"
-         "        return;\n"
-         "    }\n"
-         "    in_pChannel->updateFlags |= 1;",
-         "validate imported sample/control data before changing vibrato state"),
-        ("*in_pChannel->programCounter++", "(u_char)*in_pChannel->programCounter++",
-         "SoundVM_B4 uses LBU for its byte operands"),
-        ("Audio_Seq_kLfoWaveforms[in_pChannel->vibratoShape]", "nativeWave",
-         "reuse the validated original-source waveform"),
-    ],
-    "F03321": [
-        ("    in_pChannel->updateFlags |= SOUND_UPDATE_TREMOLO;",
-         "    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[2]);\n"
-         "    if (nativeWave == NULL) {\n"
-         "        in_pChannel->programCounter += 3;\n"
-         "        return;\n"
-         "    }\n"
-         "    in_pChannel->updateFlags |= SOUND_UPDATE_TREMOLO;",
-         "validate imported sample/control data before changing tremolo state"),
-        ("*in_pChannel->programCounter++", "(u_char)*in_pChannel->programCounter++",
-         "SoundVM_B8 uses LBU for its byte operands"),
-        ("Audio_Seq_kLfoWaveforms[in_pChannel->tremoloShape]", "nativeWave",
-         "reuse the validated original-source waveform"),
-    ],
-    "F03325": [
-        ("    in_pChannel->updateFlags |= SOUND_UPDATE_PAN_LFO;",
-         "    short* nativeWave = Audio_Seq_LfoWaveform((u_char)in_pChannel->programCounter[1]);\n"
-         "    if (nativeWave == NULL) {\n"
-         "        in_pChannel->programCounter += 2;\n"
-         "        return;\n"
-         "    }\n"
-         "    in_pChannel->updateFlags |= SOUND_UPDATE_PAN_LFO;",
-         "validate imported sample/control data before changing auto-pan state"),
-        ("*in_pChannel->programCounter++", "(u_char)*in_pChannel->programCounter++",
-         "SoundVM_BC uses LBU for both byte operands"),
-        ("Audio_Seq_kLfoWaveforms[in_pChannel->autoPanShape]", "nativeWave",
-         "source selector65 is data, not an out-of-array native code pointer"),
-    ],
     "F03276": [
         ("                    arg0->vibratoWave = Audio_Seq_kLfoWaveforms[arg0->vibratoShape];",
          "                    short* vibratoProgram = Audio_Seq_LfoWaveform(arg0->vibratoShape);\n"
@@ -4424,18 +4524,12 @@ REGEX_FIXES += [
         ("Audio::Samples::SoundEffectBankSlot",
          (('var_v1', 'bank_slot'),),
          "F03211 25AC.c:2941 removes the metadata high bit, compares the ID against SFX bank IDs 1 and 2, and returns slot 0/1/2; the local is not a voice or instrument index."),
-        ("Audio::Seq::LoadInstrument",
-         (('var_s0', 'instrument_index'),),
-         "F03306 25AC.c:5314 resolves the program byte through music or SFX bank mapping, indexes g_InstrumentInfo and assigns InstrumentIndex. Both branches yield the same instrument-index domain."),
         ("Audio::Seq::PlayEmbeddedSoundEffect",
          (('temp_v0', 'relative_program_offset'), ('var_a1', 'first_program'), ('var_a2', 'second_program')),
          "F03371 25AC.c:6162 separately decodes two little-endian relative offsets at pc and pc+2, maps zero to NULL, and passes the resulting two bytecode starts to Sound_PlaySfxProgram. The reused offset local has the same role both times."),
         ("Audio::Seq::SelectNoteRemapTable",
          (('temp_v0', 'remap_byte_offset'),),
          "F03373 25AC.c:6202 fetches one byte and takes &D_8002F66C[temp_v0] from a char table as the note remap base. Name is a byte offset, not a guessed table ordinal or pitch."),
-        ("Audio::Seq::EnableVibrato",
-         (('new_var', 'pitch_base_copy'),),
-         "F03317 25AC.c:5462 copies the ushort PitchBase into int before both vibrato-base multiplication branches. Native waveform validation changes neither use; this is not the wave shape or depth value."),
         ("Audio::Seq::ResetSoundEffectChannel",
          (('arg0', 'channel'), ('arg1', 'program_start')),
          "F03199 25AC.c:2330 resets one SFX channel's volume, note/slide/LFO state, assigns its programCounter from arg1, and selects initial instrument zero. T00278.000 identifies programCounter."),
