@@ -13,6 +13,6 @@ Render_LegacyTransitionWipePacket Render_legacyTransitionWipePackets[2];
 POLY_G4 Render_legacyTransitionEdgePackets[2];
 
 // decomp: vs_battle_screenTransitionPolyF4 (vs_battle_screenTransitionPolyF4@BATTLE/BATTLE.PRG)
-POLY_F4 Render_legacyTransitionFadePackets[3];
+POLY_F4 Render_legacyTransitionFadePackets[2];
 
 }  // extern "C"

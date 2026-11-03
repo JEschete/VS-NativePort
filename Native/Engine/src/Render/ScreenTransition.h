@@ -20,6 +20,6 @@ _Static_assert(sizeof(Render_LegacyTransitionWipePacket) == 0x30, "Render_Legacy
 extern DR_MODE Render_legacyTransitionDrawModes[2];
 extern Render_LegacyTransitionWipePacket Render_legacyTransitionWipePackets[2];
 extern POLY_G4 Render_legacyTransitionEdgePackets[2];
-extern POLY_F4 Render_legacyTransitionFadePackets[3];
+extern POLY_F4 Render_legacyTransitionFadePackets[2];
 
 #endif // VS_RENDER_SCREENTRANSITION_H_DECLS

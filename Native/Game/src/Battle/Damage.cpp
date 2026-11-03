@@ -42,7 +42,7 @@ u_int Battle_lastActionStatValue;
 int Battle_criticalHitOccurred;
 
 // decomp: _armorDpAdjustmentAmounts (_armorDpAdjustmentAmounts@BATTLE/BATTLE.PRG)
-short Battle_limbArmorDpLoss[28];
+short Battle_limbArmorDpLoss[8];
 
 // decomp: BATTLE.PRG func_800792E4 (src/BATTLE/BATTLE.PRG/146C.c:7413)
 int Battle_ResolveActorDefeat(int source_actor_slot, int target_actor_slot, int count_kill)

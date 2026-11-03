@@ -9,6 +9,6 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_FIELD_MAPPROGRESS_H_DECLS)
 #define VS_FIELD_MAPPROGRESS_H_DECLS
 
-extern int Field_countableRoomMask[86];
+extern int Field_countableRoomMask[16];
 
 #endif // VS_FIELD_MAPPROGRESS_H_DECLS

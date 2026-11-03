@@ -40,11 +40,13 @@ The output is regenerated from the decomp until each item is modernized. Two saf
 from __future__ import annotations
 
 import argparse
+import bisect
 import collections
 import csv
 import json
 import re
 import sys
+from collections.abc import Callable
 from dataclasses import dataclass, field
 from functools import cache
 from pathlib import Path
@@ -1973,6 +1975,34 @@ class Copier:
             raise ValueError(f"Invalid source-data extent for {name}: {size}")
         return f"{storage} {name}[{size // width}]", width
 
+    def view_root(self, data_id: str) -> str:
+        """The global a view finally names (itself when it is no view)."""
+        for _ in range(8):
+            if data_id not in self.views:
+                break
+            data_id = self.views[data_id][0]
+        return data_id
+
+    def source_boundaries(self, module: str, splat: list[dict], data_by_key: dict) -> Callable[[int, str], int | None]:
+        """Where each symbol's interior resolution must stop: the next source symbol of the module, emitted or not.
+        An address past it names another symbol (a retired, unemitted or unnamed label), never this one's tail, so
+        the loader refuses it instead of aliasing a neighbour (#280). Views of the same global sit inside it by
+        construction and do not end it; a reviewed source-data blob starts a range of its own and does."""
+        starts = sorted({
+            (int(s["vram_start"], 16),
+             self.view_root(data_by_key[(module, s["name"])]["id"]) if (module, s["name"]) in data_by_key else "")
+            for s in splat} | {(address, "") for blob_module, _, address, *_ in cf.MODULE_DATA_BLOBS
+                               if blob_module == module})
+        addresses = [address for address, _ in starts]
+
+        def limit(address: int, data_id: str) -> int | None:
+            root = self.view_root(data_id)
+            for next_address, owner in starts[bisect.bisect_right(addresses, address):]:
+                if owner != root:
+                    return next_address
+            return None
+        return limit
+
     def copy_module_pointers(self) -> None:
         """Pointer tables kept in the module images (handler tables, string and data pointer arrays): the loader
         reads their PS1 addresses from the user's disc and resolves each through the map of the module's symbols
@@ -2012,49 +2042,56 @@ class Copier:
                 continue
             seen = set()
             with path.open(encoding="utf-8", newline="") as fh:
-                for s in csv.DictReader(fh):
-                    if s["defined"] != "True" or s["name"] in seen:
+                splat = [s for s in csv.DictReader(fh) if s["defined"] == "True"]
+            boundaries = self.source_boundaries(module, splat, data_by_key)
+            for s in splat:
+                if s["name"] in seen:
+                    continue
+                addr = int(s["vram_start"], 16)
+                if s["type"] == "func":
+                    r = fn_by_key.get((fn_overlay(module), s["name"]))
+                    hops = 0
+                    while r is not None and c_name(r["final_name"]) not in emitted_fns and hops < 8:
+                        dup = note(r, "dup-of")
+                        r, hops = (self.cat_by_id.get(dup) if dup else None), hops + 1
+                    if r is None or c_name(r["final_name"]) not in emitted_fns:
                         continue
-                    addr = int(s["vram_start"], 16)
-                    if s["type"] == "func":
-                        r = fn_by_key.get((fn_overlay(module), s["name"]))
-                        hops = 0
-                        while r is not None and c_name(r["final_name"]) not in emitted_fns and hops < 8:
-                            dup = note(r, "dup-of")
-                            r, hops = (self.cat_by_id.get(dup) if dup else None), hops + 1
-                        if r is None or c_name(r["final_name"]) not in emitted_fns:
-                            continue
-                        cname, size = c_name(r["final_name"]), 0
+                    cname, size = c_name(r["final_name"]), 0
+                    layout = "0u, 0u, 0u"
+                else:
+                    r = data_by_key.get((module, s["name"]))
+                    owned_global = (
+                        r is not None and r["id"] in self.owned
+                        and self.owned[r["id"]]["kind"].strip() == "global"
+                    )
+                    if r is None or (r["id"] not in self.emitted and not owned_global) or r["id"] == SCRATCH_GLOBAL or \
+                            r["id"] in self.views:
+                        continue
+                    cname = c_name(r["final_name"])
+                    size = max(int(s["size"] or 0), int(r["size"] or 0))  # splat often reports a default 4
+                    tid = self.canon_type(r["type_id"]) if r["type_id"] else ""
+                    if owned_global:
+                        # Native ownership may replace an untyped source buffer.
+                        # Preserve its base, never guess an interior byte layout.
+                        layout = f"sizeof {cname}, 0u, 0u"
+                    elif cname in incomplete_arrays:
                         layout = "0u, 0u, 0u"
+                    elif cname in pointer_arrays:
+                        size = pointer_arrays[cname] * 4
+                        layout = f"sizeof {cname}, 4u, sizeof {cname}[0]"
+                    elif r["has_pointers"] == "0" and (not tid or not self.type_has_pointer(tid)):
+                        layout = f"sizeof {cname}, 1u, 1u"
                     else:
-                        r = data_by_key.get((module, s["name"]))
-                        owned_global = (
-                            r is not None and r["id"] in self.owned
-                            and self.owned[r["id"]]["kind"].strip() == "global"
-                        )
-                        if r is None or (r["id"] not in self.emitted and not owned_global) or r["id"] == SCRATCH_GLOBAL or \
-                                r["id"] in self.views:
-                            continue
-                        cname = c_name(r["final_name"])
-                        size = max(int(s["size"] or 0), int(r["size"] or 0))  # splat often reports a default 4
-                        tid = self.canon_type(r["type_id"]) if r["type_id"] else ""
-                        if owned_global:
-                            # Native ownership may replace an untyped source buffer.
-                            # Preserve its base, never guess an interior byte layout.
-                            layout = f"sizeof {cname}, 0u, 0u"
-                        elif cname in incomplete_arrays:
-                            layout = "0u, 0u, 0u"
-                        elif cname in pointer_arrays:
-                            size = pointer_arrays[cname] * 4
-                            layout = f"sizeof {cname}, 4u, sizeof {cname}[0]"
-                        elif r["has_pointers"] == "0" and (not tid or not self.type_has_pointer(tid)):
-                            layout = f"sizeof {cname}, 1u, 1u"
-                        else:
-                            layout = f"sizeof {cname}, 0u, 0u"
-                    if cname not in self.provider:
-                        continue
-                    seen.add(s["name"])
-                    symbols.append(f'    {{"{module}", 0x{addr:08X}u, {size}u, (void*)&{cname}, {layout}}},')
+                        layout = f"sizeof {cname}, 0u, 0u"
+                    limit = boundaries(addr, r["id"])
+                    if limit is not None and size > limit - addr:
+                        self.report["module-symbol-extent-clamped"].append(
+                            f"{r['id']} {cname} 0x{addr:08X} {size} -> {limit - addr}")
+                        size = limit - addr
+                if cname not in self.provider:
+                    continue
+                seen.add(s["name"])
+                symbols.append(f'    {{"{module}", 0x{addr:08X}u, {size}u, (void*)&{cname}, {layout}}},')
         for module, address, fid in cf.MODULE_FUNCTION_ENTRIES:
             name = c_name(self.cat_by_id[fid]["final_name"])
             if name not in emitted_fns or name not in self.provider:

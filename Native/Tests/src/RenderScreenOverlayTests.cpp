@@ -937,8 +937,8 @@ TEST_CASE("Screen overlay functions no longer resolve by module address",
 
 TEST_CASE("Screen overlay state addresses have no module symbol entry",
           "[render-overlay][render]") {
-  // Some retired addresses lie inside a neighbouring entry's recorded extent,
-  // so interior resolution is not evidence; the exact entry must be gone.
+  // Neither an exact entry nor a neighbour's interior extent may claim a
+  // retired address (#280).
   const unsigned address =
       GENERATE(0x800F1A20U, 0x800F1A28U, 0x800F1A30U, 0x800F1A40U, 0x800F1A44U,
                0x800F1A68U, 0x800F1A78U, 0x800F1A9CU, 0x800F1ABCU, 0x800F1B98U,
@@ -950,4 +950,6 @@ TEST_CASE("Screen overlay state addresses have no module symbol entry",
     return std::string_view(symbol.module) == "BATTLE/BATTLE.PRG" &&
            symbol.address == address;
   }));
+  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                          address) == nullptr);
 }

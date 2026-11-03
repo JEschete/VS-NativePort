@@ -33,6 +33,7 @@ extern "C" {
 #include "ActorAssets.h"
 #include "Actors/Animation.h"
 #include "Audio/Seq/Sequencer.h"
+#include "Battle/Damage.h"
 #include "Effects/Package.h"
 #include "Effects/Plugins/Plg044.h"
 #include "Effects/Plugins/Plg049.h"
@@ -53,6 +54,7 @@ extern "C" {
 #include "Effects/Plugins/Plg242.h"
 #include "Effects/Plugins/Plg260.h"
 #include "Effects/Plugins/Plg265.h"
+#include "Field/MapProgress.h"
 #include "ModelLoading.h"
 #include "OverlayWorkspace.h"
 #include "PFile.h"
@@ -70,6 +72,8 @@ extern "C" int Tests_DefaultEffectPackageLoaded(void);
 extern "C" int TestsRoomSfxBankBinding(void);
 extern "C" int TestsDiscReadSizeContract(void);
 extern "C" int CheckMenuDiscStringsLoaded(void);
+// Reviewed source blob, defined with the generated module data (#280).
+extern "C" unsigned int Content_battleTriggerMarkerBytes[29];
 
 namespace {
 constexpr auto kMesh10Data = std::to_array<Content_ModuleDataEntry>({
@@ -316,6 +320,32 @@ TEST_CASE("Module relocation rejects null targets and unnamed symbols",
         nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "fixture", kAddress + 1) ==
         nullptr);
+}
+
+TEST_CASE("Generated module extents stop before the next source symbol",
+          "[content][module]") {
+  // #280: interior addresses resolve only inside their own source symbol.
+  constexpr const char* kBattle = "BATTLE/BATTLE.PRG";
+  constexpr unsigned kArmorLoss = 0x800F1A10;
+  constexpr unsigned kNextAfterArmorLoss = 0x800F1A20;
+  constexpr unsigned kLastLimb = 5;
+  constexpr unsigned kRoomMask = 0x800E8508;
+  constexpr unsigned kTriggerMarkerBytes = 0x800E8548;
+  constexpr unsigned kLastRoomWord = 15;
+  const auto symbols =
+      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
+  CHECK(Content::ResolveModuleAddress(
+            symbols, kBattle,
+            kArmorLoss + (kLastLimb * sizeof Battle_limbArmorDpLoss[0])) ==
+        &Battle_limbArmorDpLoss[kLastLimb]);
+  CHECK(Content::ResolveModuleAddress(symbols, kBattle, kNextAfterArmorLoss) ==
+        nullptr);
+  CHECK(Content::ResolveModuleAddress(
+            symbols, kBattle,
+            kRoomMask + (kLastRoomWord * sizeof Field_countableRoomMask[0])) ==
+        &Field_countableRoomMask[kLastRoomWord]);
+  CHECK(Content::ResolveModuleAddress(symbols, kBattle, kTriggerMarkerBytes) ==
+        Content_battleTriggerMarkerBytes);
 }
 
 TEST_CASE(

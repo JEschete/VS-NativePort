@@ -4,6 +4,6 @@ extern "C" {
 #include "Field/MapProgress.h"
 
 // decomp: vs_battle_mapCompletionFlags (vs_battle_mapCompletionFlags@BATTLE/BATTLE.PRG)
-int Field_countableRoomMask[86]; /* contents: module image (ModuleData.cpp) */
+int Field_countableRoomMask[16]; /* contents: module image (ModuleData.cpp) */
 
 }  // extern "C"
