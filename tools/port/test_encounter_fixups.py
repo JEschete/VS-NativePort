@@ -718,20 +718,26 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("ProjectAndDecodeRoomPolygon(", core)
         self.assertIn("vertex.position = QuadCorner(record, triangle.positions[0], shift);", core)
 
-    def test_fog_and_depth_cue_share_the_existing_typed_native_helpers(self):
-        for identity, name, address in (
-            ("F03404", "Core_Gte_DpqColor", 0x80041A00),
-            ("F03408", "Core_Gte_SetFogNear", 0x80041954),
+    def test_fog_and_depth_cue_are_owned_by_the_typed_render_cores(self):
+        owned = self.owned_items()
+        for identity, name, binding in (
+            ("F03404", "VS::Render::ApplyDepthCueColor", "VS::Render::ApplyLiveDepthCueColor"),
+            ("F03408", "VS::Render::SetFogNearDistance", "VS::Render::SetLiveFogNearDistance"),
         ):
+            self.assertEqual(owned[identity]["name"], name)
             self.assertEqual(
-                copy_fixups.NATIVE_FUNCTION_REDIRECTS[identity],
-                (name, r"Native\Engine\src\Core\Gte.cpp"),
+                owned[identity]["path"], r"Native\Engine\src\Render\DepthCue.cpp"
             )
-            self.assertIn(
-                ("SLUS_010.40", address, identity),
-                copy_fixups.MODULE_FUNCTION_ENTRIES,
+            self.assertEqual(copy_fixups.OWNED_CALL_BINDINGS[identity], binding)
+            self.assertNotIn(identity, copy_fixups.NATIVE_FUNCTION_REDIRECTS)
+            self.assertFalse(
+                [entry for entry in copy_fixups.MODULE_FUNCTION_ENTRIES
+                 if entry[2] == identity]
             )
-            self.assertNotIn(identity, self.owned_items())
+        for sdk in ("DpqColor", "SetFogNear"):
+            self.assertNotIn(sdk, copy_to_native.GTE_FUNCS)
+        self.assertEqual(copy_to_native.SDK_PROMOTED_ROWS["DpqColor"], "F03404")
+        self.assertEqual(copy_to_native.SDK_PROMOTED_ROWS["SetFogNear"], "F03408")
 
     def test_source_root_and_normalization_keep_the_wide_native_api_separate(self):
         owned = self.owned_items()
@@ -771,7 +777,9 @@ class EncounterFixupTests(unittest.TestCase):
         owned = self.owned_items()
         for identity in copy_to_native.SDK_PROMOTED_ROWS.values():
             self.assertIn(identity, owned)
-            self.assertTrue(owned[identity]["name"].startswith("VS::Core::Math::"))
+            self.assertTrue(
+                owned[identity]["name"].startswith(("VS::Core::Math::", "VS::Render::"))
+            )
         for identity, binding in copy_fixups.OWNED_CALL_BINDINGS.items():
             with self.subTest(identity=identity):
                 self.assertIn(identity, owned)
@@ -780,7 +788,7 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertTrue(header.endswith("Live.hpp"), header)
         root = Path(__file__).resolve().parents[2]
         for binding, header in copy_fixups.NATIVE_HELPER_HEADERS.items():
-            if not binding.startswith("VS::Core::Math::"):
+            if not binding.startswith(("VS::Core::Math::", "VS::Render::")):
                 continue
             with self.subTest(binding=binding):
                 name = binding.rsplit("::", 1)[-1]

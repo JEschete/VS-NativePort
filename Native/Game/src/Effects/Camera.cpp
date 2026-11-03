@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Effects/Camera.h"
@@ -94,11 +95,12 @@ void Effects_ApplyEffectCamera(Effects_EffectCamera* camera)
         int rollOffset = camera->shakeRoll - 0x8000;
         Field_SetCameraRoll(camera->roll + rollOffset);
     }
-    Render_SetCameraNearClip(camera->nearClip);
-    Render_SetCameraProjectionDistance(camera->projectionDistance);
-    /* This original call site does not initialize the setter's second argument. */
-    ((void (*)(...))Render_SetCameraFarClip)(camera->farClip);
-    Render_BuildCameraViewMatrix();
+    VS::Render::SetLiveCameraNearClip(camera->nearClip);
+    VS::Render::SetLiveCameraProjectionDistance(camera->projectionDistance);
+    // #279: the original leaves the final offset.vz in a1, so it is the
+    // preserve_texture_lod argument (BATTLE func_800D1B80, 0x800D1CF8).
+    VS::Render::SetLiveCameraFarClip(camera->farClip, offset.vz);
+    VS::Render::BuildLiveCameraViewMatrix();
 }
 
 // decomp: BATTLE.PRG func_800D1DE4 (src/BATTLE/BATTLE.PRG/5BF94.c:6564)

@@ -2,6 +2,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/ScaledFont.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
@@ -797,7 +798,7 @@ void Render_BlendTextBoxIntoFramebuffer(Menu_TextBoxState* text_box, int glyph_a
             }
         }
     }
-    Render_UploadImageRectangle(
+    VS::Render::UploadLiveImageRectangle(
         (x + (Render_frameBuf * 320)) | (_y << 0x10), buf, width | (height << 0x10));
     VS::Core::Memory::FreeLiveFromHighEnd(buf);
 }

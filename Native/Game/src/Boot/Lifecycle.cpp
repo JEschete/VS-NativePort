@@ -5,6 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Render/DisplayControlLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Ending/Credits/StaffRoll.h"
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
-#include "Render/Display.h"
 #include "Save/NativeResume.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
@@ -125,7 +125,7 @@ void Boot_EnterBattle(void)
     Audio_Control_StopSceneSoundEffects();
     Audio_Playback_InvalidateSavedMusicId();
     Audio_Samples_ClearMusicBankIds();
-    Render_ShowLoadingScreen();
+    VS::Render::ShowLiveLoadingScreen();
     Boot_LoadBattleOverlays();
     Boot_gameEntryMode = 1;
     VS::Boot::JumpToLiveGameLoop();
@@ -185,7 +185,7 @@ void Boot_InitializeTitleSession(void)
     RECT rect2 = { .x = 0, .y = 0, .w = 1024, .h = 512 };
 
     ClearImage(&rect2, 0, 0, 0);
-    Render_ShowLoadingScreen();
+    VS::Render::ShowLiveLoadingScreen();
     Audio_Native_EnableReverb(1);
     VSyncCallback(VS::Core::IgnoreCall);
     VS::Core::Memory::ResetLiveGameHeap();

@@ -5,6 +5,7 @@ extern "C" {
 
 extern "C++" {
 #include "Render/ScaledFont.hpp"
+#include "Render/UiPacketsLive.hpp"
 }
 #include "Actors/Spawning.h"
 #include "Battle/Targeting.h"
@@ -118,8 +119,12 @@ int Tests_CompactTextAndGaugeLinks(void) {
                nextPrim(storage + 2) == storage + 7 &&
                LegacyGpu_WalkList(&ordering) == 4;
   ordering = 0xFFFFFF;
+  // The typed gauge reserves its packet inside the current frame's buffer.
+  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage;
   Render_frameScratch.primitiveCursor = storage;
-  Render_DrawStatGauge(0, 32, &ordering, 0);
+  VS::Render::DrawLiveStatGauge(0, 32, &ordering, 0);
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
   passed = passed && nextPrim(&ordering) == storage && (ordering >> 24) == 0 &&
            LegacyGpu_WalkList(&ordering) == 2;
   Render_compactGlyphWidths[16] = savedWidth;
@@ -709,6 +714,9 @@ int CheckMenuPromptPanelLinks(void) {
   Render_frameScratch.overlayOrderingTable = ordering + 2;
   Menu_Framework_displayActionCost = 1;
   memset(Menu_Framework_textHeaders, 0, sizeof saved_headers);
+  // The typed HUD packets reserve their words in the current frame's buffer.
+  void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage + 1;
 
   Menu_Framework_DrawButtonPromptBackground(20, 160, 80, 3);
   for (int frame = 0; frame < kAnimationFrames; ++frame) {
@@ -729,6 +737,7 @@ int CheckMenuPromptPanelLinks(void) {
   memcpy(Menu_Framework_textHeaders, saved_headers, sizeof saved_headers);
   Menu_Framework_displayActionCost = saved_display;
   Render_frameScratch = saved_frame;
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
   return passed;
 }
 

@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C" {
 #include "Legacy/Psx.h"
+#include "Menu/Files.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
-#include "Render/UiPrimitives.h"
 #include "Title/TitleScreen.h"
 
 // decomp: _titleScreenBg (_titleScreenBg@TITLE/TITLE.PRG)

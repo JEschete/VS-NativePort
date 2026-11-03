@@ -10,6 +10,7 @@
 
 #include "Field/MinimapScene.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Render/DepthCueLive.hpp"
 
 extern "C" {
 #include "Field/Map.h"
@@ -175,12 +176,12 @@ TEST_CASE("Actual Map room triangles keep their color at the fog near plane",
   auto* data = VS_ONDISC(&map->rooms[0], dataAddress, void*);
   constexpr std::array<unsigned char, 9> kExpected{0,   64, 128, 0,  64,
                                                    128, 0,  64,  128};
-  Core_Gte_SetFogNear(0, 320);
+  VS::Render::SetLiveFogNearDistance(0, 320);
   auto* baseline =
       reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
   REQUIRE(Menu_Map_DrawRoom(1, data, 1, 1) == 1);
   CHECK(TriangleRgb(*baseline) == kExpected);
-  Core_Gte_SetFogNear(768, 320);
+  VS::Render::SetLiveFogNearDistance(768, 320);
   auto* fogged =
       reinterpret_cast<POLY_G3*>(Render_frameScratch.primitiveCursor);
   REQUIRE(Menu_Map_DrawRoom(1, data, 1, 1) == 1);

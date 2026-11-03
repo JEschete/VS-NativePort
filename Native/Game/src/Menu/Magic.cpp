@@ -23,6 +23,7 @@ extern "C" {
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
+#include "Menu/Files.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuMemory.h"

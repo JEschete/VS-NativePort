@@ -4,7 +4,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/CameraViewLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPackets.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Save/NativeContainerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -427,14 +430,14 @@ int Menu_Framework_GradientStopColor(u_int gradient, u_int colorIndex, int brigh
     u_int color1;
 
     if (colorIndex < 9) {
-        color0 = Render_BlendRgbWithBrightness(0x6B4100, 0x6C8219, 0x80, colorIndex);
-        color1 = Render_BlendRgbWithBrightness(0x330500, 0x262801, 0x80, colorIndex);
+        color0 = VS::Render::BlendRgbWithBrightness(0x6B4100, 0x6C8219, 0x80, colorIndex);
+        color1 = VS::Render::BlendRgbWithBrightness(0x330500, 0x262801, 0x80, colorIndex);
     } else {
         color0 = Menu_Framework_gradientTopColors[((colorIndex >> 3) - 2)];
         color1 = Menu_Framework_gradientBottomColors[((colorIndex >> 3) - 2)];
     }
 
-    return Render_BlendRgbWithBrightness(color0, color1, brightness, gradient);
+    return VS::Render::BlendRgbWithBrightness(color0, color1, brightness, gradient);
 }
 
 // decomp: BATTLE.PRG vs_battle_renderMenuItem (src/BATTLE/BATTLE.PRG/5BF94.c:2737)
@@ -504,7 +507,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
         y = x >> 0x10;
         x &= 0xFFFF;
 
-        Render_InsertThreeWordPrimitive(scratch + 1, 0x60000000, vs_getXY_2(x + 2, y + 2), w | 0xC0000);
+        VS::Render::InsertLiveThreeWordPrimitive(scratch + 1, 0x60000000, vs_getXY_2(x + 2, y + 2), w | 0xC0000);
 
         prim = (u_long *)(Render_frameScratch.primitiveCursor);
 
@@ -753,9 +756,9 @@ void Menu_Framework_InitGameInterface(void* interface_texture_data)
     VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
     Menu_Framework_menuMemory = (Menu_Framework_MenuMemory) { { 0 } };
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
-    Render_UploadImageRectangle(0x340, interface_texture_data, 0xE00040);
-    Render_UploadImageRectangle(0x380, ((u_char*)(interface_texture_data)) + 0x7000, 0xE00040);
-    Render_UploadImageRectangle(0x4203C0, ((u_char*)(interface_texture_data)) + 0xE000, 0x9E0040);
+    VS::Render::UploadLiveImageRectangle(0x340, interface_texture_data, 0xE00040);
+    VS::Render::UploadLiveImageRectangle(0x380, ((u_char*)(interface_texture_data)) + 0x7000, 0xE00040);
+    VS::Render::UploadLiveImageRectangle(0x4203C0, ((u_char*)(interface_texture_data)) + 0xE000, 0x9E0040);
     ClearOTag(Menu_activeTextBoxOrderingTable, 0x22);
 }
 
@@ -1629,7 +1632,7 @@ void Menu_Framework_DrawActionCostPanel(void)
         *scratch = LegacyGpu_Handle(poly);
         Render_frameScratch.primitiveCursor = poly + 11;
 
-        Render_InsertThreeWordPrimitive(
+        VS::Render::InsertLiveThreeWordPrimitive(
             scratch, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), x0 | (162 << 16), vs_getWH(82, 11));
     }
 }
@@ -1698,12 +1701,12 @@ void Menu_Framework_LoadBackgroundTexture(u_int* buf)
 
     if (((Menu_Framework_menuState.currentMenu & 0x3F) == 7) && (Menu_Framework_actionRestrictions & 0x200)
         && (Audio_Seq_unusedStateFlags.gameOver == 1)) {
-        Render_UploadImageRectangle(vs_getXY(640, 511), data, vs_getWH(256, 1));
+        VS::Render::UploadLiveImageRectangle(vs_getXY(640, 511), data, vs_getWH(256, 1));
     } else {
         Render_LoadClutColors((u_short*)data, 3, 0, 256);
     }
 
-    Render_UploadImageRectangle(vs_getXY(672, 256), buf, vs_getWH(96, 240));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(672, 256), buf, vs_getWH(96, 240));
     Menu_Framework_SetBackgroundPriority(-4, 128);
 }
 
@@ -2323,7 +2326,7 @@ void Menu_Framework_DrawScrollableRow(Menu_Framework_MenuRow* menuItem)
         Render_frameScratch.primitiveCursor = prim;
 
         if (scroll == 0) {
-            Render_InsertThreeWordPrimitive(before, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0),
+            VS::Render::InsertLiveThreeWordPrimitive(before, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0),
                 vs_getXY_2(xy + 2, xy >> 16), wh | vs_getWH(0, 2));
         }
 
@@ -2563,7 +2566,7 @@ void Menu_Framework_UpdateAndDrawRows(void)
             j = menuItem->count;
 
             if (j != 0) {
-                Render_DrawIntegerRightAligned(0,
+                VS::Render::DrawLiveIntegerRightAligned(0,
                     ((menuItem->x + menuItem->w) - 16) | ((menuItem->y + 3) << 0x10), j,
                     before);
             }
@@ -3058,7 +3061,7 @@ void Menu_Framework_RenderAshley(int mode)
             camera->farClip = 0x1000;
             camera->position.vz = camera->lookAt.vz + offsetZ;
 
-            Render_BuildCameraViewMatrix();
+            VS::Render::BuildLiveCameraViewMatrix();
             Menu_Framework_DrawActorPreview(&Render_frameScratch.viewMatrix);
         }
         break;
@@ -3071,14 +3074,14 @@ void Menu_Framework_RenderAshley(int mode)
             Menu_Framework_ashleyRender = 1;
             Menu_Framework_ashleyProjectionDistance = Render_projectionDistance;
 
-            Render_SetCameraProjectionDistance(512);
+            VS::Render::SetLiveCameraProjectionDistance(512);
 
             Menu_Framework_ashleyViewMatrixBackup = ((Render_FrameScratch*)(((u_char*)((void*)camera)) - 0x34))->viewMatrix;
             Menu_Framework_ashleyCameraBackup = *camera;
             setVector(&camera->angles, 0, 0, 0);
             camera->farClip = 0x1000;
 
-            Render_BuildCameraViewMatrix();
+            VS::Render::BuildLiveCameraViewMatrix();
             Menu_Framework_SetBackgroundPriority(2046, 128);
             Menu_Framework_LoadActorPreview(0);
         }
@@ -3089,7 +3092,7 @@ void Menu_Framework_RenderAshley(int mode)
 
             Menu_Framework_ReleaseActorPreview();
             Menu_Framework_SetBackgroundPriority(-4, 128);
-            Render_SetCameraProjectionDistance(Menu_Framework_ashleyProjectionDistance);
+            VS::Render::SetLiveCameraProjectionDistance(Menu_Framework_ashleyProjectionDistance);
 
             ((Render_FrameScratch*)(((u_char*)((void*)camera)) - 0x34))->viewMatrix = Menu_Framework_ashleyViewMatrixBackup;
             *camera = Menu_Framework_ashleyCameraBackup;

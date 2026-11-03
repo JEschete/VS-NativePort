@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Render/DisplayControlLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Event/Splash.h"
 #include "Field/RoomState.h"
 #include "Field/Transitions.h"
-#include "Render/Display.h"
 #include "Render/Images.h"
 #include "Render/Palette.h"
 
@@ -129,10 +129,10 @@ intptr_t Event_ScriptSetRoomDisplayFlags(u_char* instruction, short thread_index
 {
     switch (instruction[1] & 3) {
     case 0:
-        Render_DisableDisplay();
+        VS::Render::DisableLiveDisplay();
         break;
     case 1:
-        Render_EnableDisplay();
+        VS::Render::EnableLiveDisplay();
         break;
     }
 

@@ -69,9 +69,30 @@ _CORE_MATH_LIVE = {
         "InterpolateLiveLagrangeScalar", "EvaluateLiveEase"),
 }
 
+# #276 slice A4 (render display, camera and HUD packets, #279): Live adapters keeping the original call shape
+# over the typed VS::Render cores, by header and owned row.
+_RENDER_LIVE = {
+    "DisplayControlLive.hpp": (
+        ("ConfigureLiveFieldDisplay", "F00162"), ("PresentLiveFieldFrame", "F00163"),
+        ("EnableLiveDisplay", "F00258"), ("DisableLiveDisplay", "F00259"), ("ShowLiveDisplay", "F00540"),
+        ("HideLiveDisplay", "F00541"), ("ShowLiveLoadingScreen", "F03421")),
+    "CameraViewLive.hpp": (
+        ("BuildLiveCameraViewMatrix", "F00211"), ("SetLiveCameraNearClip", "F00286"),
+        ("SetLiveCameraProjectionDistance", "F00287"), ("SetLiveCameraFarClip", "F00288"),
+        ("PrepareLiveActorCameraMatrices", "F01006")),
+    "DepthCueLive.hpp": (("ApplyLiveDepthCueColor", "F03404"), ("SetLiveFogNearDistance", "F03408")),
+    "UiPacketsLive.hpp": (
+        ("AppendLiveOverlayPrimitive", "F00200"), ("DrawLiveNumericGlyph", "F01351"),
+        ("DrawLiveIntegerRightAligned", "F01352"), ("DrawLiveStatGauge", "F01353"),
+        ("InsertLiveThreeWordPrimitive", "F01405"), ("InsertLiveDrawModeCommand", "F01406"),
+        ("UploadLiveImageRectangle", "F01408")),
+}
+
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
+    **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
+       for header, rows in _RENDER_LIVE.items() for name, _ in rows},
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
     "VS::Battle::Ai::BattleActorReactionDelays": r"Native\Game\include\Battle\Ai\ReactionDelay.hpp",
@@ -316,10 +337,7 @@ NATIVE_HELPER_HEADERS = {
        )},
 }
 
-NATIVE_FUNCTION_REDIRECTS = {
-    "F03404": ("Core_Gte_DpqColor", r"Native\Engine\src\Core\Gte.cpp"),
-    "F03408": ("Core_Gte_SetFogNear", r"Native\Engine\src\Core\Gte.cpp"),
-}
+NATIVE_FUNCTION_REDIRECTS: dict[str, tuple[str, str]] = {}
 
 # Owned rows whose generated callers keep the original call shape: calls to the row (and SDK calls of its libgte
 # entry, copy_to_native.SDK_PROMOTED_ROWS) bind to this record adapter instead of the typed function. Each name
@@ -361,7 +379,7 @@ OWNED_CALL_BINDINGS = {
         ("EvaluateLiveEase", ("F02428",)),
     )
     for fid in fids
-}
+} | {fid: f"VS::Render::{name}" for rows in _RENDER_LIVE.values() for name, fid in rows}
 
 POINTER_FREE_TYPES = {
     "T00629": "vs_action_t: two inline 32-bit hit words, no pointers; main.h:74-107",
@@ -498,8 +516,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("EFFECT/PLG074.BIN", 0x800FC404, "F01992"),
     ("EFFECT/PLG074.BIN", 0x800FC590, "F01993"),
     ("EFFECT/PLG074.BIN", 0x800FD534, "F01995"),
-    ("SLUS_010.40", 0x80041A00, "F03404"),
-    ("SLUS_010.40", 0x80041954, "F03408"),
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {

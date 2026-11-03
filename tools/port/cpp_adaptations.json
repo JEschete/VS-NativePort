@@ -981,17 +981,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Render\\Model.cpp": [
-[
-16,
-[
-"    Render_FrameScratch* view = (void*)((uintptr_t)Core_ScratchBase() + 0x000);"
-],
-[
-"    Render_FrameScratch* view = (Render_FrameScratch *)((void*)((uintptr_t)Core_ScratchBase() + 0x000));"
-]
-]
-],
 "Native\\Engine\\src\\Render\\Palette.cpp": [
 [
 16,
@@ -1336,62 +1325,6 @@
 ],
 [
 "    return (DR_MOVE *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-]
-],
-"Native\\Engine\\src\\Render\\UiPrimitives.cpp": [
-[
-18,
-[
-"void Render_AppendOverlayPrimitive(int* primitive) { Render_SplicePrimitiveList(Render_legacyCurrentOrderingTable + 0x2084, primitive); }"
-],
-[
-"void Render_AppendOverlayPrimitive(int* primitive) { Render_SplicePrimitiveList((u_long *)(((u_char*)(Render_legacyCurrentOrderingTable)) + 0x2084), primitive); }"
-]
-],
-[
-71,
-[
-"        before = Render_frameScratch.orderingTable - 0x10;"
-],
-[
-"        before = (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0x10);"
-]
-],
-[
-95,
-[
-"    primBuf = Render_frameScratch.primitiveCursor;"
-],
-[
-"    primBuf = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-125,
-[
-"    u_long* prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    u_long* prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-137,
-[
-"    u_long* prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    u_long* prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-155,
-[
-"    LoadImage(rect, buffer);"
-],
-[
-"    LoadImage(rect, (u_long *)(buffer));"
 ]
 ]
 ],
@@ -3859,37 +3792,37 @@
 [
 763,
 [
-"                Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
+"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
 ],
 [
-"                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),"
+"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),"
 ]
 ],
 [
 771,
 [
-"                Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
+"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
 [
-"                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
+"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
 ]
 ],
 [
 776,
 [
-"                    Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
+"                    VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
 [
-"                    Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
+"                    VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
 ]
 ],
 [
 785,
 [
-"            Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
+"            VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
 ],
 [
-"            Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
+"            VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
 ]
 ],
 [
@@ -3904,37 +3837,37 @@
 [
 848,
 [
-"                Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
+"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable,"
 ],
 [
-"                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),"
+"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),"
 ]
 ],
 [
 856,
 [
-"                Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
+"                VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
 [
-"                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
+"                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
 ]
 ],
 [
 861,
 [
-"                    Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
+"                    VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, lineColor,"
 ],
 [
-"                    Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
+"                    VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,"
 ]
 ],
 [
 870,
 [
-"            Render_InsertThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
+"            VS::Render::InsertLiveThreeWordPrimitive(Render_frameScratch.overlayOrderingTable, vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
 ],
 [
-"            Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
+"            VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),"
 ]
 ],
 [
@@ -4154,12 +4087,15 @@
 ],
 "Native\\Game\\src\\Effects\\Camera.cpp": [
 [
-99,
+98,
 [
-"    ((void (*)())Render_SetCameraFarClip)(camera->farClip);"
+"    /* This original call site does not initialize the setter's second argument. */",
+"    ((void (*)())VS::Render::SetLiveCameraFarClip)(camera->farClip);"
 ],
 [
-"    ((void (*)(...))Render_SetCameraFarClip)(camera->farClip);"
+"    // #279: the original leaves the final offset.vz in a1, so it is the",
+"    // preserve_texture_lod argument (BATTLE func_800D1B80, 0x800D1CF8).",
+"    VS::Render::SetLiveCameraFarClip(camera->farClip, offset.vz);"
 ]
 ]
 ],
@@ -7139,10 +7075,10 @@
 [
 871,
 [
-"        Render_PresentFieldFrame(Render_frameScratch.orderingTable + 0x1FFC);"
+"        VS::Render::PresentLiveFieldFrame(Render_frameScratch.orderingTable + 0x1FFC);"
 ],
 [
-"        Render_PresentFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));"
+"        VS::Render::PresentLiveFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));"
 ]
 ],
 [
@@ -8008,27 +7944,27 @@
 [
 1256,
 [
-"                temp = Render_DrawIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, before);",
-"                Render_DrawIntegerRightAligned(2, temp, 0, before);",
-"                Render_DrawIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentDp, before);"
+"                temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, before);",
+"                VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, before);",
+"                VS::Render::DrawLiveIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentDp, before);"
 ],
 [
-"                temp = Render_DrawIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, (u_long *)(before));",
-"                Render_DrawIntegerRightAligned(2, temp, 0, (u_long *)(before));",
-"                Render_DrawIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentDp, (u_long *)(before));"
+"                temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, (u_long *)(before));",
+"                VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, (u_long *)(before));",
+"                VS::Render::DrawLiveIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentDp, (u_long *)(before));"
 ]
 ],
 [
 1264,
 [
-"                temp = Render_DrawIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, before);",
-"                Render_DrawIntegerRightAligned(2, temp, 0, before);",
-"                Render_DrawIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentPp, before);"
+"                temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, before);",
+"                VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, before);",
+"                VS::Render::DrawLiveIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentPp, before);"
 ],
 [
-"                temp = Render_DrawIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, (u_long *)(before));",
-"                Render_DrawIntegerRightAligned(2, temp, 0, (u_long *)(before));",
-"                Render_DrawIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentPp, (u_long *)(before));"
+"                temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, (u_long *)(before));",
+"                VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, (u_long *)(before));",
+"                VS::Render::DrawLiveIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentPp, (u_long *)(before));"
 ]
 ],
 [
@@ -8085,12 +8021,12 @@
 [
 756,
 [
-"    Render_UploadImageRectangle(0x380, interface_texture_data + 0x7000, 0xE00040);",
-"    Render_UploadImageRectangle(0x4203C0, interface_texture_data + 0xE000, 0x9E0040);"
+"    VS::Render::UploadLiveImageRectangle(0x380, interface_texture_data + 0x7000, 0xE00040);",
+"    VS::Render::UploadLiveImageRectangle(0x4203C0, interface_texture_data + 0xE000, 0x9E0040);"
 ],
 [
-"    Render_UploadImageRectangle(0x380, ((u_char*)(interface_texture_data)) + 0x7000, 0xE00040);",
-"    Render_UploadImageRectangle(0x4203C0, ((u_char*)(interface_texture_data)) + 0xE000, 0x9E0040);"
+"    VS::Render::UploadLiveImageRectangle(0x380, ((u_char*)(interface_texture_data)) + 0x7000, 0xE00040);",
+"    VS::Render::UploadLiveImageRectangle(0x4203C0, ((u_char*)(interface_texture_data)) + 0xE000, 0x9E0040);"
 ]
 ],
 [

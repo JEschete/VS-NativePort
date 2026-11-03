@@ -38,7 +38,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
 #include "Render/Camera.h"
-#include "Render/Model.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"

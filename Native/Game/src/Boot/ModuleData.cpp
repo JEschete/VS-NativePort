@@ -138,7 +138,6 @@ extern "C" {
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
 #include "Render/UiPrimitives.h"
-#include "Render/Upload.h"
 #include "Title/Credits.h"
 #include "Title/SaveFiles.h"
 #include "Title/TitleScreen.h"
@@ -347,7 +346,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x83758, sizeof Menu_kNotificationItemNames, &Menu_kNotificationItemNames, sizeof Menu_kNotificationItemNames}, // G00210 D_800EBF58
     {"BATTLE/BATTLE.PRG", 0x83A6C, sizeof Core_interfaceRandomState, &Core_interfaceRandomState, sizeof Core_interfaceRandomState}, // G00213 _keystreamState
     {"BATTLE/BATTLE.PRG", 0x83A70, sizeof Menu_Framework_cursorBrightnessAnimation, &Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation}, // G00214 vs_battle_cursorBrightnessAnimation
-    {"BATTLE/BATTLE.PRG", 0x83A80, sizeof Render_legacyUploadRectCursor, &Render_legacyUploadRectCursor, sizeof Render_legacyUploadRectCursor}, // G00215 D_800EC280
     {"BATTLE/BATTLE.PRG", 0x83A84, sizeof Menu_textBoxAnchors, &Menu_textBoxAnchors, sizeof Menu_textBoxAnchors}, // G00216 D_800EC284
     {"BATTLE/BATTLE.PRG", 0x83ACC, sizeof Menu_informationHeaderPositions, &Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions}, // G00217 D_800EC2CC
     {"BATTLE/BATTLE.PRG", 0x83AD8, sizeof Menu_kInformationHeaderSpriteWords, &Menu_kInformationHeaderSpriteWords, sizeof Menu_kInformationHeaderSpriteWords}, // G00218 D_800EC2D8

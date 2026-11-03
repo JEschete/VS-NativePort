@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -148,18 +149,18 @@ void Battle_DrawHudStatGauge(int colorIndex, int current, int max)
     int xy = Battle_hudGaugePositions[colorIndex] - Battle_hudSlideOffset;
 
     if (max != 0) {
-        Render_DrawStatGauge(colorIndex, (((current << 6) + max) - 1) / max, prim, xy);
+        VS::Render::DrawLiveStatGauge(colorIndex, (((current << 6) + max) - 1) / max, prim, xy);
         if (colorIndex & 2) {
             xy += 54 | (3 << 0x10);
             if (colorIndex == 3) {
                 current = (current + 0xFF) >> 8;
             }
         } else {
-            xy = Render_DrawIntegerRightAligned(0, xy + (56 | ((u_short)-8 << 0x10)), max, NULL);
-            Render_DrawNumericGlyph(2, xy, 0, prim);
+            xy = VS::Render::DrawLiveIntegerRightAligned(0, xy + (56 | ((u_short)-8 << 0x10)), max, NULL);
+            VS::Render::DrawLiveNumericGlyph(2, xy, 0, prim);
             xy += (u_short)-7 | ((u_short)-2 << 0x10);
         }
-        Render_DrawIntegerRightAligned(1, xy, current, NULL);
+        VS::Render::DrawLiveIntegerRightAligned(1, xy, current, NULL);
         VS::Render::QueueLiveSpriteWithTexturePage(0x180, Battle_hudGaugeLabelPositions[colorIndex] - Battle_hudSlideOffset,
             Battle_hudGaugeLabelWidths[colorIndex] | 0x90000, prim)[4] =
             Battle_hudGaugeLabelTexU[colorIndex] | 0x37F60000;

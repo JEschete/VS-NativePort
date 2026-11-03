@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -705,8 +706,8 @@ int Field_StepFirstPersonCameraTransition(void)
 
         Render_frameScratch.camera.farClip = Field_cameraTransition->toFarClip;
 
-        Render_SetCameraNearClip(Field_cameraTransition->toNearClip);
-        Render_SetCameraProjectionDistance(Field_cameraTransition->toProjectionDistance);
+        VS::Render::SetLiveCameraNearClip(Field_cameraTransition->toNearClip);
+        VS::Render::SetLiveCameraProjectionDistance(Field_cameraTransition->toProjectionDistance);
         return 1;
     }
     Render_frameScratch.camera.position.vx += Field_cameraTransition->direction.vx
@@ -720,8 +721,8 @@ int Field_StepFirstPersonCameraTransition(void)
     Render_frameScratch.camera.lookAt.vy += Field_cameraTransition->lookAtStep.vy;
     Render_frameScratch.camera.farClip += Field_cameraTransition->farClipStep;
 
-    Render_SetCameraNearClip(Render_nearClip + Field_cameraTransition->nearClipStep);
-    Render_SetCameraProjectionDistance(
+    VS::Render::SetLiveCameraNearClip(Render_nearClip + Field_cameraTransition->nearClipStep);
+    VS::Render::SetLiveCameraProjectionDistance(
         Render_projectionDistance + Field_cameraTransition->projectionDistanceStep);
 
     return 0;
@@ -784,8 +785,8 @@ void Field_EndFirstPersonView(void)
 
     Field_sphericalCamera.delta.pitch =
         Field_sphericalCamera.values.yaw;
-    Render_SetCameraNearClip(Field_cameraTransition->fromNearClip);
-    Render_SetCameraProjectionDistance(Field_cameraTransition->fromProjectionDistance);
+    VS::Render::SetLiveCameraNearClip(Field_cameraTransition->fromNearClip);
+    VS::Render::SetLiveCameraProjectionDistance(Field_cameraTransition->fromProjectionDistance);
     if (Field_cameraTransition != NULL) {
         VS::Core::Memory::FreeLiveFromHighEnd(Field_cameraTransition);
         Field_cameraTransition = NULL;

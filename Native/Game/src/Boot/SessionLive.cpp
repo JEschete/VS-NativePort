@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <cstring>
 
+#include "Render/DisplayControlLive.hpp"
+
 extern "C" {
 #include "Audio/Music.h"
 #include "Battle/EncounterHooks.h"
@@ -90,7 +92,7 @@ class LiveTitleSessionHost final : public TitleSessionHost {
   int RunTitle() override { return Title_Run(); }
   void SetGameEntryMode(int mode) override { Boot_gameEntryMode = mode; }
   void ClearPendingClearSave() override { Boot_isClearSavePending = 0; }
-  void ShowLoadingScreen() override { Render_ShowLoadingScreen(); }
+  void ShowLoadingScreen() override { Render::ShowLiveLoadingScreen(); }
   void LoadBattleOverlays() override { Boot_LoadBattleOverlays(); }
   int RunLoadedGame() override { return VS::Boot::RunLoadedGame(); }
 };

@@ -3,8 +3,10 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Render/DepthCueLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -313,7 +315,7 @@ int Menu_Map_LoadBackground(int begin_background_load)
         if (Menu_Map_loadBackgroundSlot->state == 4) {
             Content_ReleaseDiscRequest(Menu_Map_loadBackgroundSlot);
             Render_LoadClutColors(Menu_Map_backgroundImage, 3, 0, 256);
-            Render_UploadImageRectangle(vs_getXY(640, 256), Menu_Map_backgroundImage + 256, vs_getWH(160, 240));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(640, 256), Menu_Map_backgroundImage + 256, vs_getWH(160, 240));
             Menu_Framework_SetBackgroundPriority(-4, 128);
             Menu_Map_loadBackgroundState = 1;
         }
@@ -434,7 +436,7 @@ int Menu_Map_UpdateScreen(u_char* state)
             ClearImage(Menu_Map_screenMenuBgBackRects, 0, 0, 0);
             ClearImage(&Menu_Map_screenMenuBgBackRects[1], 0, 0, 0);
             Render_LoadClutColors((u_short*)Menu_Map_screenMenuBgBackup, 3, 0, 0x100);
-            Render_UploadImageRectangle(0x010002A0, Menu_Map_screenMenuBgBackup + 0x80, 0xF00060);
+            VS::Render::UploadLiveImageRectangle(0x010002A0, Menu_Map_screenMenuBgBackup + 0x80, 0xF00060);
 
             *state = 10;
         }
@@ -518,7 +520,7 @@ int Menu_Map_LoadSceneMap(void)
     Menu_Map_currentRoomIndex = Menu_Map_InitialRoomIndex((Field_MapScene *)(Battle_unusedSceneBuffer));
 
     Menu_Map_CenterOnRoom((Field_MapScene *)(Battle_unusedSceneBuffer), Menu_Map_currentRoomIndex);
-    Core_Gte_SetFogNear(768, Render_projectionDistance);
+    VS::Render::SetLiveFogNearDistance(768, Render_projectionDistance);
     Core_Gte_SetFarColor(0, 0, 0);
     Menu_Map_ShowAreaName((char*)&Menu_Map_mapNames[Menu_Map_mapNames[Menu_Map_currentScene]], 1);
 
@@ -1149,13 +1151,13 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
         polyG3->y1 = projected_vertex_rows[room_element_cursor[1]][1];
         polyG3->y2 = projected_vertex_rows[room_element_cursor[2]][1];
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
         setRGB0(polyG3, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut0);
         setRGB1(polyG3, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[2]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[2]][3], &colorOut0);
         setRGB2(polyG3, colorOut0.r, colorOut0.g, colorOut0.b);
 
         AddPrim(((int**)Core_ScratchAddr(0))[1] + sp38, polyG3++);
@@ -1192,16 +1194,16 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
         polyG4->y2 = projected_vertex_rows[room_element_cursor[3]][1];
         polyG4->y3 = projected_vertex_rows[room_element_cursor[2]][1];
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
         setRGB0(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut0);
         setRGB1(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[3]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[3]][3], &colorOut0);
         setRGB2(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[2]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[2]][3], &colorOut0);
         setRGB3(polyG4, colorOut0.r, colorOut0.g, colorOut0.b);
 
         AddPrim(((int**)Core_ScratchAddr(0))[1] + sp38, polyG4++);
@@ -1226,8 +1228,8 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
         colorIn.r = 0;
         colorIn.b = 0xFF;
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
 
         setLineG2(lineG2);
         setSemiTrans(lineG2, 1);
@@ -1285,8 +1287,8 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
             colorIn.g = 0xFF;
             colorIn.r = 0;
             colorIn.b = 0x80;
-            Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
-            Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
+            VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+            VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
         }
 
         setLineG2(lineG2);
@@ -1324,8 +1326,8 @@ int Menu_Map_DrawRoom(int roomIndex, void* roomData, int zone_id, int map_id)
         colorIn.r = 0;
         colorIn.b = 0x80;
 
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
-        Core_Gte_DpqColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[0]][3], &colorOut0);
+        VS::Render::ApplyLiveDepthCueColor(&colorIn, projected_vertex_rows[room_element_cursor[1]][3], &colorOut1);
 
         setLineG2(lineG2);
 

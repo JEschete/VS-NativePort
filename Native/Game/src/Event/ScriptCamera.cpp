@@ -4,6 +4,7 @@
 #include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Event/ScriptVm.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
-#include "Render/Camera.h"
 #include "Render/FramebufferEffects.h"
 #include "State/Flags.h"
 #include "State/Timers.h"
@@ -242,15 +242,15 @@ void Event_ApplyEventCameraState(void)
         Event_camera->capturedScreenRoll.hasChanged = 0;
     }
     if (Event_camera->projectionDistance.hasChanged != 0) {
-        Render_SetCameraProjectionDistance(Event_camera->projectionDistance.value);
+        VS::Render::SetLiveCameraProjectionDistance(Event_camera->projectionDistance.value);
         Event_camera->projectionDistance.hasChanged = 0;
     }
     if (Event_camera->nearClip.hasChanged != 0) {
-        Render_SetCameraNearClip(Event_camera->nearClip.value);
+        VS::Render::SetLiveCameraNearClip(Event_camera->nearClip.value);
         Event_camera->nearClip.hasChanged = 0;
     }
     if (Event_camera->farClip.hasChanged != 0) {
-        Render_SetCameraFarClip(Event_camera->farClip.value, Event_isScriptBackdropEnabled);
+        VS::Render::SetLiveCameraFarClip(Event_camera->farClip.value, Event_isScriptBackdropEnabled);
         Event_camera->farClip.hasChanged = 0;
     }
 }

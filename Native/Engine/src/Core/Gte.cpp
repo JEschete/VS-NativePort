@@ -164,19 +164,18 @@ void Core_Gte_SetFarColor(long r, long gg, long b) {
   g.farColor[2] = static_cast<int32_t>(b) * 16;
 }
 
-void Core_Gte_SetFogNear(long a, long h) {
-  // decomp: SetFogNear (src/SLUS_010.40/32154.s:9), scale = 5 * 64.
-  // Depth cueing starts at distance `a` with screen distance `h`: interpolation
-  // reaches 0 at z = a.
-  if (a <= 0) {
-    g.dqa = 0, g.dqb = 0;
-    return;
-  }
-  constexpr int64_t kNearScale = 320;
-  g.dqa = static_cast<int16_t>(std::clamp<int64_t>(
-      -(static_cast<int64_t>(a) * kNearScale) / std::max<long>(h, 1), -0x8000,
-      0x7FFF));
-  g.dqb = 0x1400000;
+// Mirrors SetFarColor's channel order.
+// NOLINTNEXTLINE(bugprone-easily-swappable-parameters)
+void Core_Gte_GetFarColor(long* r, long* gg, long* b) {
+  *r = g.farColor[0];
+  *gg = g.farColor[1];
+  *b = g.farColor[2];
+}
+
+// The DQA register holds a halfword, as ctc2 stores it.
+void Core_Gte_SetDepthCue(long coefficient, long offset) {
+  g.dqa = static_cast<int16_t>(coefficient);
+  g.dqb = static_cast<int32_t>(offset);
 }
 
 void Core_Gte_LoadV0(const SVECTOR* v) { LoadVector(v); }
@@ -344,17 +343,6 @@ long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2) {
   Core_Gte_LoadSxy3(sxy0, sxy1, sxy2);
   Core_Gte_Nclip();
   return g.mac0;
-}
-
-void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1) {
-  const unsigned char in[3] = {v0->r, v0->g, v0->b};
-  unsigned char out[3];
-  for (int i = 0; i < 3; ++i) {
-    const int64_t c = static_cast<int64_t>(in[i]) * 16;
-    const int64_t r = c + (((g.farColor[i] - c) * p) >> 12);
-    out[i] = static_cast<unsigned char>(std::clamp<int64_t>(r >> 4, 0, 255));
-  }
-  v1->r = out[0], v1->g = out[1], v1->b = out[2], v1->cd = v0->cd;
 }
 
 }  // extern "C"

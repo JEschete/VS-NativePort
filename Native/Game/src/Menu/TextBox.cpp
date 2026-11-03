@@ -4,6 +4,7 @@
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/TextureAnimation.h"
@@ -531,12 +532,12 @@ void Menu_DrawInformationBoxBackdrop(int id)
     }
     if (y < 128) {
         if (y >= 0) {
-            Render_InsertThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), 0, vs_getWH(320, y + 1));
+            VS::Render::InsertLiveThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), 0, vs_getWH(320, y + 1));
         }
         return;
     }
     if (y < 240) {
-        Render_InsertThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), vs_getXY(0, y),
+        VS::Render::InsertLiveThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), vs_getXY(0, y),
             (0xF00000 - (y << 16)) | 320);
     }
     if (box->state == box->openDuration + 1) {
@@ -638,23 +639,23 @@ void Menu_DrawTextBoxFrame(int index)
                 v += shape[k * 4 + 2];
             }
             for (k = 0; k < shape[box->flags.framePart * 4 + 2]; ++k) {
-                Render_InsertThreeWordPrimitive(
+                VS::Render::InsertLiveThreeWordPrimitive(
                     ot + 2, vs_getRGB0(Render_LegacyPrimitiveCode_LineF2, 48, 48, 48), points[n], points[v + k]);
                 n = v + k;
             }
 
             v = n;
             n = (part >> 8) & 0xFF;
-            Render_InsertThreeWordPrimitive(
+            VS::Render::InsertLiveThreeWordPrimitive(
                 ot + 2, vs_getRGB0(Render_LegacyPrimitiveCode_LineF2, 48, 48, 48), points[n], points[v]);
         }
 
         v = (n + 1) % i;
-        Render_InsertThreeWordPrimitive(
+        VS::Render::InsertLiveThreeWordPrimitive(
             ot + 2, vs_getRGB0(Render_LegacyPrimitiveCode_LineF2, 48, 48, 48), points[n], points[v]);
     }
 
-    Render_InsertDrawModeCommand(0xE2000000, ot + 2);
+    VS::Render::InsertLiveDrawModeCommand(0xE2000000, ot + 2);
 
     prim = (u_long *)(Render_frameScratch.primitiveCursor);
     flip = box->brightness;
@@ -742,7 +743,7 @@ void Menu_DrawTextBoxFrame(int index)
     }
 
     Render_frameScratch.primitiveCursor = prim;
-    Render_InsertThreeWordPrimitive(ot + 2, _get_mode(0, 0, getTPage(0, 0, 448, 256)), 0xE2000318, 0);
+    VS::Render::InsertLiveThreeWordPrimitive(ot + 2, _get_mode(0, 0, getTPage(0, 0, 448, 256)), 0xE2000318, 0);
 }
 #undef POINT_Y
 #undef POINT_X

@@ -6,6 +6,8 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Render/CameraViewLive.hpp"
+#include "Render/DisplayControlLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -775,8 +777,8 @@ void Field_FinishRoomLoad(int requested_room_id)
         Field_screenTransitionStep = 3;
     }
 
-    Render_SetCameraNearClip(ONE / 64);
-    Render_SetCameraProjectionDistance(ONE / 8);
+    VS::Render::SetLiveCameraNearClip(ONE / 64);
+    VS::Render::SetLiveCameraProjectionDistance(ONE / 8);
 
     Field_sphericalCamera.delta.yaw = 0;
     Field_sphericalCamera.delta.distance = 0;
@@ -815,7 +817,7 @@ void Field_FinishRoomLoad(int requested_room_id)
     Field_UpdateCameraTileConstraint(0, &ashley_placement.location.packedTile.target);
     Render_ResetFramebufferEffect();
     Render_CommitClutBuffer();
-    Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
+    VS::Render::ConfigureLiveFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
 
     if (Save_NativeResumePending() && !Save_NativeFinishResume()) {
         VS::Boot::JumpToLiveTitle();
@@ -841,7 +843,7 @@ void Field_FinishRoomLoad(int requested_room_id)
                 Audio_PlayMusicSlot(Field_roomMusicSlot, 0x7F, 0);
             }
             Field_screenTransitionStep = 4;
-            Render_ShowDisplay();
+            VS::Render::ShowLiveDisplay();
         }
     }
     Input_InvalidateControllerConnections();
@@ -868,7 +870,7 @@ void Field_UnloadCurrentRoom(void)
         ClearOTagR((u_long *)(Render_frameScratch.orderingTable), 0x800);
         VS::Core::NoOperation();
         Render_DrawScreenTransition(Render_frameScratch.orderingTable);
-        Render_PresentFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));
+        VS::Render::PresentLiveFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));
     }
 
     State_UpdatePlayTimeAndLoading(0);

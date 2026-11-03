@@ -2,6 +2,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Field/Zone.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Render/Camera.h"
 #include "Render/Palette.h"
 #include "State/Flags.h"
 #include "State/SceneTimer.h"
@@ -132,7 +132,7 @@ void Event_EndFieldCutscene(void)
     }
 
     Field_RestoreRoomEffectSoundVolume();
-    Render_SetCameraFarClip(0x1000, 1);
+    VS::Render::SetLiveCameraFarClip(0x1000, 1);
     Field_SetCameraRoll(0);
     Battle_SetGameplayHudHidden(0);
     if (Audio_soundState.playingMusicHandle == 0xFFFF) {

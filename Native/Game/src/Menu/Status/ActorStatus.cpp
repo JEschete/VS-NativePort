@@ -1,7 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/CameraViewLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -28,6 +30,7 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
+#include "Menu/Files.h"
 #include "Menu/Framework/ActorPreview.h"
 #include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Framework/Framework.h"
@@ -276,7 +279,7 @@ void Menu_Status_DrawUnanalyzedValue(int xy, int withMax, u_long* before)
                 vs_getUV0Clut(228, 0, 832, 223);
             xy -= 5;
         }
-        Render_DrawIntegerRightAligned(2, xy, 0, before);
+        VS::Render::DrawLiveIntegerRightAligned(2, xy, 0, before);
         xy -= 7;
     }
 
@@ -303,7 +306,7 @@ void Menu_Status_DrawVitalBar(int colorIndex, int current, int max, int xy)
 
     current <<= 6;
 
-    Render_DrawStatGauge(
+    VS::Render::DrawLiveStatGauge(
         colorIndex & 0xFF, ((current + max) - 1) / max, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC), xy);
 }
 
@@ -370,17 +373,17 @@ void Menu_Status_DrawVitals(void)
 
     if (actor->isAnalyzed) {
 
-        i = Render_DrawIntegerRightAligned(0, y | 66, actor->maxHp, insertBefore);
-        Render_DrawIntegerRightAligned(2, i, 0, insertBefore);
-        Render_DrawIntegerRightAligned(1, i + 0xFFFEFFF9, actor->currentHp, insertBefore);
+        i = VS::Render::DrawLiveIntegerRightAligned(0, y | 66, actor->maxHp, insertBefore);
+        VS::Render::DrawLiveIntegerRightAligned(2, i, 0, insertBefore);
+        VS::Render::DrawLiveIntegerRightAligned(1, i + 0xFFFEFFF9, actor->currentHp, insertBefore);
 
-        i = Render_DrawIntegerRightAligned(0, y | 136, actor->maxMp, insertBefore);
-        Render_DrawIntegerRightAligned(2, i, 0, insertBefore);
-        Render_DrawIntegerRightAligned(1, i + vs_getXY(-7, -2), actor->currentMp, insertBefore);
+        i = VS::Render::DrawLiveIntegerRightAligned(0, y | 136, actor->maxMp, insertBefore);
+        VS::Render::DrawLiveIntegerRightAligned(2, i, 0, insertBefore);
+        VS::Render::DrawLiveIntegerRightAligned(1, i + vs_getXY(-7, -2), actor->currentMp, insertBefore);
 
         y += 15 << 16;
 
-        Render_DrawIntegerRightAligned(1, y | 64, actor->risk, insertBefore);
+        VS::Render::DrawLiveIntegerRightAligned(1, y | 64, actor->risk, insertBefore);
 
         y += 1 << 16;
     } else {
@@ -952,7 +955,7 @@ void Menu_Status_DrawFrame(void)
     camera->farClip = ONE;
     camera->position.vz = camera->lookAt.vz + camera_orbit_z_offset;
 
-    Render_BuildCameraViewMatrix();
+    VS::Render::BuildLiveCameraViewMatrix();
 
     if (Menu_Status_delayScreenUpdate) {
         --Menu_Status_delayScreenUpdate;
@@ -1066,7 +1069,7 @@ int Menu_Status_Update(u_char* state)
         Menu_Status_updateAnimWait = 1;
         Menu_Status_savedProjectionDistance = Render_projectionDistance;
 
-        Render_SetCameraProjectionDistance(0x200);
+        VS::Render::SetLiveCameraProjectionDistance(0x200);
 
         {
 
@@ -1512,7 +1515,7 @@ int Menu_Status_Update(u_char* state)
         Menu_Status_UpdateLimbPanel(0);
         Menu_Status_BeginVitalsTransition(0);
         Menu_Status_DrawVitals();
-        Render_SetCameraProjectionDistance(Menu_Status_savedProjectionDistance);
+        VS::Render::SetLiveCameraProjectionDistance(Menu_Status_savedProjectionDistance);
 
         Render_frameScratch.viewMatrix = Menu_Status_savedViewMatrix;
         Render_frameScratch.camera = Menu_Status_savedCamera;

@@ -2,20 +2,20 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <limits>
 #include <span>
-#include <type_traits>
 
 #include <catch2/catch_test_macros.hpp>
 
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Render/Lighting.h"
-}
+#include "Render/DepthCue.hpp"
+#include "Render/DepthCueLive.hpp"
 
 namespace {
+namespace Render = VS::Render;
+
 struct FogFixture {
   FogFixture() {
     Core_Gte_Reset();
@@ -50,7 +50,7 @@ Core_GteWord ReferenceCue(Core_GteWord near_distance, Core_GteWord projection,
 void CheckCue(Core_GteWord near_distance, Core_GteWord projection,
               std::int16_t depth) {
   Core_Gte_SetGeomScreen(projection);
-  Render_SetFogNearDistance(near_distance, projection);
+  Render::SetLiveFogNearDistance(near_distance, projection);
   CHECK(ProjectCue(depth) == ReferenceCue(near_distance, projection, depth));
 }
 
@@ -65,7 +65,7 @@ void CheckColor(const CVECTOR& actual, const CVECTOR& expected) {
 TEST_CASE("Map fog begins at its configured near plane without dimming it",
           "[render][fog]") {
   FogFixture fixture;
-  Core_Gte_SetFogNear(768, 320);
+  Render::SetLiveFogNearDistance(768, 320);
   Core_Gte_SetFarColor(0, 0, 0);
   SVECTOR vertex{0, 0, 768, 0};
   Core_GteWord screen = 0;
@@ -75,27 +75,92 @@ TEST_CASE("Map fog begins at its configured near plane without dimming it",
   CHECK(cue == 0);
   CVECTOR input{160, 80, 40, 0x3C};
   CVECTOR output{};
-  Core_Gte_DpqColor(&input, cue, &output);
+  Render::ApplyLiveDepthCueColor(&input, cue, &output);
   CHECK(output.r == input.r);
   CHECK(output.g == input.g);
   CHECK(output.b == input.b);
   CHECK(output.cd == input.cd);
 }
 
-TEST_CASE("Fog and depth-cue exports share the existing typed native APIs",
-          "[render][fog]") {
-  using NativeFog = void (*)(Core_GteWord, Core_GteWord);
-  using NativeColor = void (*)(CVECTOR*, Core_GteWord, CVECTOR*);
-  CHECK((std::is_same_v<decltype(&Render_SetFogNearDistance), NativeFog>));
-  CHECK((std::is_same_v<decltype(&Render_ApplyDepthCueColor), NativeColor>));
-  CHECK(&Render_SetFogNearDistance == &Core_Gte_SetFogNear);
-  CHECK(&Render_ApplyDepthCueColor == &Core_Gte_DpqColor);
+TEST_CASE("Fog near distance computes the source cue registers",
+          "[render][fog][render-display]") {
+  CHECK(Render::FogNearDepthCue(768, 320).coefficient == -768);
+  CHECK(Render::FogNearDepthCue(768, 320).offset == Render::kFogCueOffset);
+  // The native policy (#195): no fog for a non-positive distance, a
+  // non-positive projection distance counts as 1 and the coefficient
+  // saturates to the DQA halfword.
+  CHECK(Render::FogNearDepthCue(0, 320).coefficient == 0);
+  CHECK(Render::FogNearDepthCue(0, 320).offset == 0);
+  CHECK(Render::FogNearDepthCue(-5, 320).offset == 0);
+  CHECK(Render::FogNearDepthCue(1, 0).coefficient == -320);
+  CHECK(Render::FogNearDepthCue(1, -9).coefficient == -320);
+  CHECK(Render::FogNearDepthCue(INT32_MAX, 1).coefficient ==
+        std::numeric_limits<std::int16_t>::min());
+}
+
+TEST_CASE("Disabling fog writes cleared cue registers",
+          "[render][fog][render-display]") {
+  struct Registers final : Render::DepthCueRegisters {
+    Render::DepthCue cue{.coefficient = 1, .offset = 1};
+    int writes = 0;
+    void SetDepthCue(const Render::DepthCue& value) override {
+      cue = value;
+      ++writes;
+    }
+  } registers;
+  Render::SetFogNearDistance(registers, 0, 320);
+  CHECK(registers.writes == 1);
+  CHECK(registers.cue.coefficient == 0);
+  CHECK(registers.cue.offset == 0);
+}
+
+TEST_CASE("Depth cue saturates like the GTE DPCS pipeline",
+          "[render][fog][render-display]") {
+  const Render::ColorCode color{
+      .red = 160, .green = 80, .blue = 40, .code = 0x3C};
+  // The far colour is held times 16; a difference past the IR halfword
+  // saturates before the multiply.
+  const Render::FarColor far{100000, -100000, 40 * 16};
+  const auto full = Render::ApplyDepthCueColor(color, 4096, far);
+  CHECK(full.red == 255);
+  CHECK(full.green == 0);
+  CHECK(full.blue == 40);
+  CHECK(full.code == 0x3C);
+}
+
+TEST_CASE(
+    "Depth cue keeps the IR0 halfword and clamps away from the far colour",
+    "[render][fog][render-display]") {
+  const Render::ColorCode color{
+      .red = 160, .green = 80, .blue = 40, .code = 0x3C};
+  // IR0 is a halfword: only the low 16 bits of the cue are used.
+  const auto wrapped =
+      Render::ApplyDepthCueColor(color, 0x10000 + 2048, {0, 0, 0});
+  const auto half = Render::ApplyDepthCueColor(color, 2048, {0, 0, 0});
+  CHECK(wrapped.red == half.red);
+  CHECK(wrapped.green == half.green);
+  CHECK(wrapped.blue == half.blue);
+  CHECK(half.red == 80);
+  // A negative cue moves away from the far colour and clamps to a byte.
+  const auto away = Render::ApplyDepthCueColor(color, -4096, {0, 0, 0});
+  CHECK(away.red == 255);
+  CHECK(away.green == 160);
+  CHECK(away.blue == 80);
+}
+
+TEST_CASE("Live depth cue ignores a null colour", "[render][fog]") {
+  FogFixture fixture;
+  CVECTOR output{1, 2, 3, 4};
+  Render::ApplyLiveDepthCueColor(nullptr, 4096, &output);
+  CheckColor(output, CVECTOR{1, 2, 3, 4});
+  Render::ApplyLiveDepthCueColor(&output, 4096, nullptr);
+  CheckColor(output, CVECTOR{1, 2, 3, 4});
 }
 
 TEST_CASE("Map fog reaches the source midpoint and far-color endpoints",
           "[render][fog]") {
   FogFixture fixture;
-  Render_SetFogNearDistance(768, 320);
+  Render::SetLiveFogNearDistance(768, 320);
   CHECK(ProjectCue(384) == 0);
   CHECK(ProjectCue(768) == 0);
   CHECK(ProjectCue(1536) == 2560);
@@ -127,9 +192,9 @@ TEST_CASE(
   FogFixture fixture;
   constexpr std::array<Core_GteWord, 3> kDisabled{0, -1, INT32_MIN};
   for (Core_GteWord near_distance : kDisabled) {
-    Core_Gte_SetFogNear(768, 320);
+    Render::SetLiveFogNearDistance(768, 320);
     REQUIRE(ProjectCue(1536) == 2560);
-    Render_SetFogNearDistance(near_distance, 0);
+    Render::SetLiveFogNearDistance(near_distance, 0);
     CHECK(ProjectCue(1536) == 0);
   }
 }
@@ -155,7 +220,7 @@ TEST_CASE("Typed depth cue preserves every in-range factor and color code",
         static_cast<unsigned char>((40 * (4096 - cue) + 96 * cue) / 4096),
         0x3C};
     CVECTOR output{};
-    Render_ApplyDepthCueColor(&input, cue, &output);
+    Render::ApplyLiveDepthCueColor(&input, cue, &output);
     CheckColor(output, expected);
   }
 }
@@ -165,43 +230,18 @@ TEST_CASE("Typed depth cue supports an aliased color at the far endpoint",
   FogFixture fixture;
   Core_Gte_SetFarColor(24, 192, 96);
   CVECTOR color{160, 80, 40, 0x3C};
-  Render_ApplyDepthCueColor(&color, 4096, &color);
+  Render::ApplyLiveDepthCueColor(&color, 4096, &color);
   CheckColor(color, CVECTOR{24, 192, 96, 0x3C});
 }
 
-TEST_CASE("Fog typed resident export invokes the native projection path",
-          "[render][fog][redirect-binding]") {
-  FogFixture fixture;
+TEST_CASE("Retired fog entries leave no module address bindings",
+          "[render][fog][render-display]") {
+  // No module image stores SetFogNear or DpqColor (#276 slice A4), so the
+  // typed cores are reached only through OWNED_CALL_BINDINGS.
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* entry =
-      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041954u);
-  REQUIRE(entry != nullptr);
-  const auto configure =
-      reinterpret_cast<void (*)(Core_GteWord, Core_GteWord)>(entry);
-  CHECK(configure == Core_Gte_SetFogNear);
-  configure(768, 320);
-  CHECK(ProjectCue(768) == 0);
-  CHECK(ProjectCue(1536) == 2560);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
-                                          0x80041955u) == nullptr);
-}
-
-TEST_CASE("Depth-cue typed resident export invokes native color interpolation",
-          "[render][fog][redirect-binding]") {
-  FogFixture fixture;
-  const auto symbols =
-      std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  auto* entry =
-      VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40", 0x80041A00u);
-  REQUIRE(entry != nullptr);
-  const auto color =
-      reinterpret_cast<void (*)(CVECTOR*, Core_GteWord, CVECTOR*)>(entry);
-  CHECK(color == Core_Gte_DpqColor);
-  Core_Gte_SetFarColor(24, 192, 96);
-  CVECTOR input{160, 80, 40, 0x3C};
-  color(&input, 4096, &input);
-  CheckColor(input, CVECTOR{24, 192, 96, 0x3C});
+                                          0x80041954u) == nullptr);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "SLUS_010.40",
-                                          0x80041A01u) == nullptr);
+                                          0x80041A00u) == nullptr);
 }

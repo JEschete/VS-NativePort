@@ -28,7 +28,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/TextureAnimation.h"
-#include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/NativeMenu.h"
 #include "Save/NativeResume.h"

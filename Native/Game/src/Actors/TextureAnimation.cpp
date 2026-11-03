@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Actors/Textures.h"
 #include "Render/Palette.h"
 #include "Render/Textures.h"
-#include "Render/UiPrimitives.h"
 #include "State/Timers.h"
 
 // decomp: BATTLE.PRG func_800AAD4C (src/BATTLE/BATTLE.PRG/40564.c:1301)
@@ -206,7 +206,7 @@ void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int fr
     setRECT(&rect, (frame * 64) + srcX, srcY + 256, width, height);
     srcY = (y * 256) + (row * 64) + py;
     SetDrawMove(packet, &rect, dstX + (x * 64), srcY);
-    ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(packet);
+    VS::Render::AppendLiveOverlayPrimitive(packet);
     Render_EndTextureMovePacket(packet);
 }
 #undef getActorFlags
@@ -277,7 +277,7 @@ void Actors_UploadActorTextureOverlay(int index, Actors_TextureOverlayUpload* ar
     setRECT(
         &rect, ((Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64) + srcX, srcY + 256, width, height);
     SetDrawMove(packet, &rect, dstX + (x * 64), (y * 256) + (row * 64) + py);
-    ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(packet);
+    VS::Render::AppendLiveOverlayPrimitive(packet);
     Render_EndTextureMovePacket(packet);
 }
 #undef getActorFlags
@@ -379,7 +379,7 @@ void Actors_UpdateActorTextureScrolling(Actors_ActorRecord* actor)
         rect.w = width;
         rect.h = height;
         SetDrawMove(packet, &rect, originX + dstX, originY + overlay->y);
-        ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(packet);
+        VS::Render::AppendLiveOverlayPrimitive(packet);
         Render_EndTextureMovePacket(packet);
     }
 }

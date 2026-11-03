@@ -4,6 +4,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -247,7 +248,7 @@ void Menu_Score_RenderScrollableRow(Menu_Framework_MenuRow* menuItem)
     Render_frameScratch.primitiveCursor = prim;
 
     if (isScrollable == 0) {
-        Render_InsertThreeWordPrimitive(before, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0),
+        VS::Render::InsertLiveThreeWordPrimitive(before, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0),
             ((xy + 2) & 0xFFFF) | ((xy >> 0x10) << 0x10), w | vs_getWH(0, 2));
     }
 

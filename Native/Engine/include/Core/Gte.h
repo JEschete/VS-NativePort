@@ -47,7 +47,11 @@ void Core_Gte_SetGeomOffset(long ofx, long ofy);
 void Core_Gte_GetGeomOffset(long* ofx, long* ofy);
 void Core_Gte_SetGeomScreen(long h);
 void Core_Gte_SetFarColor(long r, long g, long b);
-void Core_Gte_SetFogNear(long a, long h);
+// The far colour as held (each channel times 16), for VS::Render depth cueing.
+void Core_Gte_GetFarColor(long* r, long* g, long* b);
+// The projection cue's coefficient (DQA, stored as a halfword) and offset
+// (DQB); VS::Render::SetFogNearDistance computes them.
+void Core_Gte_SetDepthCue(long coefficient, long offset);
 
 // ---- single steps (the inline macros of the copied code)
 void Core_Gte_LoadV0(const SVECTOR* v);
@@ -81,7 +85,6 @@ long Core_Gte_RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
                           long* sxy0, long* sxy1, long* sxy2, long* sxy3,
                           long* p, long* flag);
 long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2);
-void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1);
 
 #ifdef __cplusplus
 }

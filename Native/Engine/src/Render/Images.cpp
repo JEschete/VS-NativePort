@@ -3,6 +3,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Feedback.h"
@@ -219,7 +220,7 @@ void Render_UpdateGimImages(void)
 
         count = (count + 1) & 0xFFFE;
         width = (gim->vramPage - 24) * 64;
-        Render_UploadImageRectangle((width + 512) | 0x1FF0000, gim->fileData + count, 0x10040);
+        VS::Render::UploadLiveImageRectangle((width + 512) | 0x1FF0000, gim->fileData + count, 0x10040);
 
         for (j = 0; j < 3; ++j) {
             Render_GimLayer* current = &gim[j];
@@ -237,7 +238,7 @@ void Render_UpdateGimImages(void)
                 current->textureMode = 1;
                 current->backdropColor = gim->fileData[count + 320];
                 current->ownsPalette = 1;
-                Render_UploadImageRectangle(
+                VS::Render::UploadLiveImageRectangle(
                     (width + 512) | 0x1FF0000, gim->fileData + (count + 320), 0x10100);
                 break;
             }
@@ -257,7 +258,7 @@ void Render_UpdateGimImages(void)
         Render_ReserveTexturePageRange(gim->vramPage, gim->texturePageCount, 6);
 
         while (i > 0) {
-            Render_UploadImageRectangle((width + 512) | 0x1000000, gim->fileData + count,
+            VS::Render::UploadLiveImageRectangle((width + 512) | 0x1000000, gim->fileData + count,
                 i >= 17 ? 0xFF0040 : ((i * 15) << 16) | 64);
             i -= 17;
             count += 0x3FC0;
@@ -331,25 +332,25 @@ void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot)
         i = rowY[0];
 
         if (i > 0) {
-            Render_InsertThreeWordPrimitive(ot, background, 0, 320 | (i << 16));
+            VS::Render::InsertLiveThreeWordPrimitive(ot, background, 0, 320 | (i << 16));
         }
 
         i = rowY[rows];
 
         if (i < 240) {
-            Render_InsertThreeWordPrimitive(ot, background, i << 16, 320 | (0xF00000 - (i << 16)));
+            VS::Render::InsertLiveThreeWordPrimitive(ot, background, i << 16, 320 | (0xF00000 - (i << 16)));
         }
 
         i = columnX[0];
 
         if (i > 0) {
-            Render_InsertThreeWordPrimitive(ot, background, 0, i | 0xF00000);
+            VS::Render::InsertLiveThreeWordPrimitive(ot, background, 0, i | 0xF00000);
         }
 
         i = columnX[columns];
 
         if (i < 320) {
-            Render_InsertThreeWordPrimitive(ot, background, i & 0xFFFF, (320 - i) | 0xF00000);
+            VS::Render::InsertLiveThreeWordPrimitive(ot, background, i & 0xFFFF, (320 - i) | 0xF00000);
         }
     }
 
@@ -422,7 +423,7 @@ void Render_DrawGimTiles(Render_GimLayer* image, int clut, u_long* ot)
                 prim[1] = tpage | _get_mode(0, 0, 0);
                 prim[4] = u | v | clut;
             } else if (color && (color != 0x8000 || !Render_gimBlendSelect)) {
-                Render_InsertThreeWordPrimitive(ot, background, (left & 0xFFFF) | (top << 16),
+                VS::Render::InsertLiveThreeWordPrimitive(ot, background, (left & 0xFFFF) | (top << 16),
                     (right - left) | ((bottom - top) << 16));
             }
         }
@@ -549,7 +550,7 @@ void Render_DrawGimScanlineWipe(Render_GimLayer* image, int clut, u_long* ot)
                     goto draw;
                 }
             } else if (color) {
-                Render_InsertThreeWordPrimitive(ot,
+                VS::Render::InsertLiveThreeWordPrimitive(ot,
                     ((color & 0x1F) << 3) | ((color & 0x3E0) << 6)
                         | ((color & 0x7C00) << 9) | 0x40000000,
                     (x & 0xFFFF) | (y << 16), (end - 1) | (y << 16));
@@ -561,14 +562,14 @@ void Render_DrawGimScanlineWipe(Render_GimLayer* image, int clut, u_long* ot)
 // decomp: BATTLE.PRG func_800CC580 (src/BATTLE/BATTLE.PRG/5BF94.c:4319)
 void Render_SetGimWorkspaceDrawArea(u_long* ordering_link, int page_x)
 {
-    Render_InsertThreeWordPrimitive(
+    VS::Render::InsertLiveThreeWordPrimitive(
         ordering_link, page_x | 0xE3040000, (page_x + 0x3F) | 0xE407FC00, page_x | 0xE5080000);
 }
 
 // decomp: BATTLE.PRG func_800CC5C0 (src/BATTLE/BATTLE.PRG/5BF94.c:4325)
 void Render_SetGimFramebufferDrawArea(u_long* ordering_link, int page_x)
 {
-    Render_InsertThreeWordPrimitive(
+    VS::Render::InsertLiveThreeWordPrimitive(
         ordering_link, page_x | 0xE3000000, (page_x + 0x13F) | 0xE403BC00, page_x | 0xE5000000);
 }
 
@@ -666,7 +667,7 @@ void Render_DrawGimCrossfade(Render_GimLayer* image, int clut, u_long* ot)
             }
         }
 
-        Render_InsertThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), 0, 64 | (height << 16));
+        VS::Render::InsertLiveThreeWordPrimitive(ot, vs_getRGB0(Render_LegacyPrimitiveCode_Tile, 0, 0, 0), 0, 64 | (height << 16));
         Render_SetGimWorkspaceDrawArea(ot, page);
     }
 }

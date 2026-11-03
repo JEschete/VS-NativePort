@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Runtime.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "OverlayWorkspace.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
-#include "Render/UiPrimitives.h"
 
 // decomp: D_800F19A8 (D_800F19A8@BATTLE/BATTLE.PRG)
 u_char Render_legacyTexturePageReservations[40];
@@ -139,7 +139,7 @@ void Render_QueueTextureRectangleMove(RECT* source_rectangle, int destination_x,
 {
     DR_MOVE* drMove = *(DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000);
     SetDrawMove(drMove, source_rectangle, destination_x, destination_y);
-    ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(drMove);
+    VS::Render::AppendLiveOverlayPrimitive(drMove);
     *(DR_MOVE**)((uintptr_t)Core_ScratchBase() + 0x000) = drMove + 1;
 }
 

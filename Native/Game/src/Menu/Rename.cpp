@@ -16,6 +16,7 @@ extern "C" {
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
+#include "Menu/Files.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/Menus.h"

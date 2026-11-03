@@ -6,6 +6,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
+#include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 
 extern "C" {
@@ -40,7 +41,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
-#include "Render/Model.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Render.h"
@@ -1324,10 +1324,7 @@ static void DrawWeaponOverrideFixture(const Actors_ModelInstance* instance,
 static int ModelPolygonPackets(int colored, int split, int limb,
                                unsigned pulse_mask, unsigned appearance,
                                int override_kind) {
-  enum {
-    kTriangleCorners = 3,
-    kVertexDepth = 1024,
-  };
+  enum { kTriangleCorners = 3, kVertexDepth = 1024 };
   unsigned modelWords[32] = {0};
   Actors_ShpModel* model = reinterpret_cast<Actors_ShpModel*>(modelWords);
   Actors_ModelInstance instance = {0};
@@ -1380,6 +1377,8 @@ static int ModelPolygonPackets(int colored, int split, int limb,
     VS::Render::DrawLiveActorFlatPolygons(actor, tint);
   }
   VS::Render::ForgetLiveModelExtent(model);
+  // The static record must not keep the stack model past this frame.
+  actor = {};
   const u_long* packet = reinterpret_cast<const u_long*>(memory + 8);
   const unsigned palette =
       0x1234 +
@@ -1507,7 +1506,6 @@ int Tests_ModelWorkspaceIsolation(void) {
   unsigned char sentinel[1024];
   Render_ModelScratchpad* workspace = Render_ModelWorkspace();
   const Render_ModelScratchpad savedWorkspace = *workspace;
-  const MATRIX savedCamera = Render_actorCameraMatrix;
   const MATRIX savedBasis = Render_cameraBasisMatrix;
   const MATRIX savedInverse = Actors_boneMatrixScratch;
   Actors_ActorRecord actor = {0};
@@ -1539,12 +1537,13 @@ int Tests_ModelWorkspaceIsolation(void) {
     camera.t[axis] = 1000 + axis;
   }
   Render_cameraBasisMatrix = camera;
-  Render_PrepareActorCameraMatrices(&camera);
-  passed =
-      passed && memcmp(&Render_actorCameraMatrix, &camera, sizeof camera) == 0;
+  VS::Render::PrepareLiveActorCameraMatrices(&camera);
+  // The bone scratch keeps the source translation (44F14.c:880-883).
+  passed = passed && Actors_boneMatrixScratch.t[0] == camera.t[0] &&
+           Actors_boneMatrixScratch.t[1] == camera.t[1] &&
+           Actors_boneMatrixScratch.t[2] == camera.t[2];
   memcpy(Core_ScratchBase(), savedScratch, sizeof savedScratch);
   *workspace = savedWorkspace;
-  Render_actorCameraMatrix = savedCamera;
   Render_cameraBasisMatrix = savedBasis;
   Actors_boneMatrixScratch = savedInverse;
   Core_Gte_Reset();

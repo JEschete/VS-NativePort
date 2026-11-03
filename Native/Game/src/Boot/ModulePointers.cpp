@@ -217,8 +217,6 @@ extern "C" {
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
 #include "Render/LegacyPackets.h"
-#include "Render/Lighting.h"
-#include "Render/Model.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/ScreenTransition.h"
@@ -226,7 +224,6 @@ extern "C" {
 #include "Render/Text/VariableFont.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "Render/Upload.h"
 #include "Save/Snapshot.h"
 #include "State/Ashley.h"
 #include "State/Flags.h"
@@ -435,8 +432,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800751B8u, 0u, (void*)&Field_CheckActorTrapAndFallTriggers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800753F8u, 0u, (void*)&Actors_ConsumeActorMovementOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80075554u, 0u, (void*)&Actors_ExecuteQueuedActorCommands, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800760CCu, 0u, (void*)&Render_ConfigureFieldDisplay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007629Cu, 0u, (void*)&Render_PresentFieldFrame, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007647Cu, 0u, (void*)&Actors_InitializePlaceholderActorStats, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800765B0u, 0u, (void*)&Actors_CreateAuxiliaryActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80076784u, 0u, (void*)&Actors_ApplyActorInitialStats, 0u, 0u, 0u},
@@ -473,7 +468,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007980Cu, 0u, (void*)&Battle_UpdateAbilityUnlockDelay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007983Cu, 0u, (void*)&Battle_UpdateAbilityUnlockResults, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800798A4u, 0u, (void*)&Boot_RunGameLoop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007A824u, 0u, (void*)&Render_AppendOverlayPrimitive, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007A850u, 0u, (void*)&Field_SyncCameraAnglesFromPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007A9DCu, 0u, (void*)&Field_ComputeSphericalCameraPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007AACCu, 0u, (void*)&Field_SetCameraPositionFromAngles, 0u, 0u, 0u},
@@ -484,7 +478,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007AC6Cu, 0u, (void*)&Field_SetCameraLookAt, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007AC94u, 0u, (void*)&Field_SetCameraRoll, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007ACA0u, 0u, (void*)&Field_CameraRoll, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007ACB0u, 0u, (void*)&Render_BuildCameraViewMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B10Cu, 0u, (void*)&Render_TransformRoomPalettes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B1B8u, 0u, (void*)&Render_TransformSceneColors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B29Cu, 0u, (void*)&Render_TransformActorColors, 0u, 0u, 0u},
@@ -533,8 +526,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007C348u, 0u, (void*)&Actors_InterruptActorAction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007C36Cu, 0u, (void*)&State_SetTickSpeed, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007C398u, 0u, (void*)&Field_ScreenTransitionPhase, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007C404u, 0u, (void*)&Render_EnableDisplay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007C424u, 0u, (void*)&Render_DisableDisplay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007C444u, 0u, (void*)&Field_ConfigureScreenTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007C460u, 0u, (void*)&Field_SetTransitionWipeAngle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007C46Cu, 0u, (void*)&Field_BeginScreenFadeOut, 0u, 0u, 0u},
@@ -561,9 +552,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007CC6Cu, 0u, (void*)&Actors_SetSharedSequenceBank, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007CC8Cu, 0u, (void*)&Actors_SharedSequenceBank, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007CCACu, 0u, (void*)&Actors_FirstFreeAssetLoadSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007CCCCu, 0u, (void*)&Render_SetCameraNearClip, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007CCF0u, 0u, (void*)&Render_SetCameraProjectionDistance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007CD14u, 0u, (void*)&Render_SetCameraFarClip, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007CD70u, 0u, (void*)&Field_InitializeSphericalCamera, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007CE74u, 0u, (void*)&Field_SetCameraPitchPreset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007CEA0u, 0u, (void*)&Actors_ReturnActorToIdle, 0u, 0u, 0u},
@@ -814,8 +802,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x80089888u, 0u, (void*)&Field_PlaceAshleyAtRoomEntrance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80089A00u, 0u, (void*)&Field_RestoreRoomEnemyCache, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80089C5Cu, 0u, (void*)&Field_LoadRoomEnemyPlacements, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80089CE4u, 0u, (void*)&Render_ShowDisplay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80089D04u, 0u, (void*)&Render_HideDisplay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80089D24u, 0u, (void*)&Field_QueueRoomLoad, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80089DC0u, 0u, (void*)&Field_FinishRoomLoad, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A364u, 0u, (void*)&Field_RemoveRoomActors, 0u, 0u, 0u},
@@ -1230,7 +1216,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AE828u, 0u, (void*)&Audio_PlayActorSurfaceContactSound, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AE980u, 0u, (void*)&Actors_BlendActorPoseHalfway, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AEAE8u, 0u, (void*)&Actors_PrepareActorRootTransform, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AECA0u, 0u, (void*)&Render_PrepareActorCameraMatrices, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AEF94u, 0u, (void*)&Actors_UpdateAndDrawRoomActors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF6E8u, 0u, (void*)&Actors_UpdateActorAnimationBlend, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF844u, 0u, (void*)&Actors_AlignPoseRotationBranches, 0u, 0u, 0u},
@@ -1518,7 +1503,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C5798u, 0u, (void*)&Battle_InitTargetSelectionRow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C58A4u, 0u, (void*)&Battle_FirstTargetStatusText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C58F8u, 0u, (void*)&Battle_UpdateTargetSelectionMenu, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C64D0u, 0u, (void*)&Render_SplicePrimitiveList, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6540u, 0u, (void*)&Render_DrawCompactTextColor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6828u, 0u, (void*)&Render_DrawCompactText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C685Cu, 0u, (void*)&Render_FormatEncodedText, 0u, 0u, 0u},
@@ -1539,14 +1523,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E48u, 0u, (void*)&Menu_Framework_MenuItem, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E5Cu, 0u, (void*)&Menu_Framework_SetMenuItem, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C8F44u, 0u, (void*)&Render_BlendRgbWithBrightness, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8FACu, 0u, (void*)&Menu_Framework_GradientStopColor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9078u, 0u, (void*)&Menu_Framework_DrawMenuItem, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C930Cu, 0u, (void*)&Menu_Framework_UpdateMainMenuSelection, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C97BCu, 0u, (void*)&Menu_Framework_UpdateMenuOverlay, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C98C0u, 0u, (void*)&Render_DrawNumericGlyph, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C9950u, 0u, (void*)&Render_DrawIntegerRightAligned, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C99DCu, 0u, (void*)&Render_DrawStatGauge, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9B38u, 0u, (void*)&Battle_DrawHudStatGauge, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9CB4u, 0u, (void*)&Battle_DrawSlidingStatusIcon, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C9E08u, 0u, (void*)&Battle_StatusIconFlags, 0u, 0u, 0u},
@@ -1594,10 +1574,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CC600u, 0u, (void*)&Render_DrawGimCrossfade, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCA90u, 0u, (void*)&Render_DrawGimLayer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCB9Cu, 0u, (void*)&Items_ConsumeMiscItem, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCCB8u, 0u, (void*)&Render_InsertThreeWordPrimitive, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCD00u, 0u, (void*)&Render_InsertDrawModeCommand, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCD40u, 0u, (void*)&Menu_Framework_DrawMainMenuCursor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCDA8u, 0u, (void*)&Render_UploadImageRectangle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCDF4u, 0u, (void*)&Menu_TextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCE10u, 0u, (void*)&Menu_TextBoxAnchor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCF08u, 0u, (void*)&Menu_InitTextBox, 0u, 0u, 0u},
@@ -1658,7 +1635,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D11F4u, 0u, (void*)&Effects_SampleSegmentedEffectCurve, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D12D8u, 0u, (void*)&Effects_SegmentedEffectCurveDuration, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D1930u, 0u, (void*)&Effects_ResetEffectCameraMotion, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D197Cu, 0u, (void*)&Render_BuildLookAtViewMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D1B18u, 0u, (void*)&Effects_CaptureEffectCamera, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D1B80u, 0u, (void*)&Effects_ApplyEffectCamera, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D1DE4u, 0u, (void*)&Effects_EnableCameraShakeChannels, 0u, 0u, 0u},
@@ -2035,7 +2011,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EC25Cu, 16u, (void*)&Render_kGimLayerDrawRoutines, sizeof Render_kGimLayerDrawRoutines, 4u, sizeof Render_kGimLayerDrawRoutines[0]},
     {"BATTLE/BATTLE.PRG", 0x800EC26Cu, 4u, (void*)&Core_interfaceRandomState, sizeof Core_interfaceRandomState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC270u, 22012u, (void*)&Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800EC280u, 4u, (void*)&Render_legacyUploadRectCursor, sizeof Render_legacyUploadRectCursor, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC284u, 21992u, (void*)&Menu_textBoxAnchors, sizeof Menu_textBoxAnchors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2CCu, 21920u, (void*)&Menu_informationHeaderPositions, sizeof Menu_informationHeaderPositions, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC2D8u, 21908u, (void*)&Menu_kInformationHeaderSpriteWords, sizeof Menu_kInformationHeaderSpriteWords, 1u, 1u},
@@ -2212,7 +2187,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4768u, 4u, (void*)&Actors_sequenceWorkBuffer, sizeof Actors_sequenceWorkBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4770u, 160u, (void*)&Render_legacyWeaponTextureSlots, sizeof Render_legacyWeaponTextureSlots, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4810u, 256u, (void*)&Actors_sharedSequenceAnimationData, sizeof Actors_sharedSequenceAnimationData, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F4910u, 32u, (void*)&Render_actorCameraMatrix, sizeof Render_actorCameraMatrix, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4930u, 4u, (void*)&Actors_primarySequenceBuffer, sizeof Actors_primarySequenceBuffer, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4938u, 128u, (void*)&Actors_sharedSequenceEntryParams, sizeof Actors_sharedSequenceEntryParams, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F49B8u, 32u, (void*)&Actors_boneMatrixScratch, sizeof Actors_boneMatrixScratch, 1u, 1u},
@@ -2294,7 +2268,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F51B8u, 4u, (void*)&Menu_activeTextBoxOrderingTable, sizeof Menu_activeTextBoxOrderingTable, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51C0u, 8u, (void*)&Menu_Framework_menuState, sizeof Menu_Framework_menuState, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51C8u, 4u, (void*)&Render_gimBlendSelect, sizeof Render_gimBlendSelect, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F51D0u, 64u, (void*)&Render_legacyUploadRects, sizeof Render_legacyUploadRects, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5210u, 4u, (void*)&Items_miscItemInvoked, sizeof Items_miscItemInvoked, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5218u, 4u, (void*)&Effects_menuReloadSlot, sizeof Effects_menuReloadSlot, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F521Cu, 4u, (void*)&Effects_pendingTracks, sizeof Effects_pendingTracks, 1u, 1u},
@@ -2729,9 +2702,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80039BD8u, 12u, (void*)&Audio_Mixer_voiceModes, sizeof Audio_Mixer_voiceModes, 1u, 1u},
     {"SLUS_010.40", 0x80039C14u, 4u, (void*)&Movie_legacyStreamInterruptFlag, sizeof Movie_legacyStreamInterruptFlag, 1u, 1u},
     {"SLUS_010.40", 0x80040A14u, 1296u, (void*)&Core_Math_kArcTangentTable, sizeof Core_Math_kArcTangentTable, 1u, 1u},
-    {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800420BCu, 0u, (void*)&Render_ShowLoadingScreen, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042364u, 0u, (void*)&Boot_ResetToTitle, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042420u, 0u, (void*)&Boot_EnterBattle, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800424E4u, 0u, (void*)&Boot_RunEndingAndReturnToTitle, 0u, 0u, 0u},
@@ -2950,8 +2920,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG074.BIN", 0x800FC404u, 0u, (void*)&Effects_Plg073_TrailUpdate, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FC590u, 0u, (void*)&Effects_Plg073_TrailRender, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&Effects_Plg073_RotatingSurface, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&VS::Field::IsLivePointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&VS::Field::TraceLiveActorAndTerrainCollision, 0u, 0u, 0u},

@@ -6,6 +6,7 @@
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
@@ -1811,8 +1812,8 @@ int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load)
     case 0:
         if (Menu_Files_loadGameOverAssetsStepQueueSlot->state == 4) {
             Content_ReleaseDiscRequest(Menu_Files_loadGameOverAssetsStepQueueSlot);
-            Render_UploadImageRectangle(vs_getXY(832, 256), Menu_Files_loadGameOverAssetsStepGameOverBin, vs_getWH(24, 128));
-            Render_UploadImageRectangle(vs_getXY(832, 384), Menu_Files_menuItemTextClut, vs_getWH(48, 1));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(832, 256), Menu_Files_loadGameOverAssetsStepGameOverBin, vs_getWH(24, 128));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(832, 384), Menu_Files_menuItemTextClut, vs_getWH(48, 1));
             Menu_Files_loadGameOverAssetsStepState = 1;
         }
         return 0;
@@ -1962,7 +1963,7 @@ int Menu_Files_UpdateGameOverChoices(int init)
 
     Menu_Files_BlendGameOverTextClut(Menu_Files_gameOverChoicesClut[0], Menu_Files_gameOverChoicesBlendFactor1, Menu_Files_menuItemTextClut[0], Menu_Files_menuItemTextClut[3]);
     Menu_Files_BlendGameOverTextClut(Menu_Files_gameOverChoicesClut[1], Menu_Files_gameOverChoicesBlendFactor2, Menu_Files_menuItemTextClut[0], Menu_Files_menuItemTextClut[3]);
-    Render_UploadImageRectangle(vs_getXY(832, 384), &Menu_Files_gameOverChoicesClut, vs_getWH(32, 1));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(832, 384), &Menu_Files_gameOverChoicesClut, vs_getWH(32, 1));
 
     prim = VS::Render::QueueLiveSprite(Menu_Files_gameOverChoicesColor1, vs_getXY(112, 128), vs_getWH(96, 32), nextPrim);
     prim[1] = vs_getTpage(832, 256, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off);

@@ -474,6 +474,18 @@
     <ClInclude Include="src\Render\Camera.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\CameraView.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\CameraViewLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\DepthCue.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\DepthCueLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\Device.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -483,6 +495,12 @@
     <ClInclude Include="src\Render\Display.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\DisplayControl.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\DisplayControlLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\Font.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -510,19 +528,10 @@
     <ClInclude Include="src\Render\LegacyPackets.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClInclude Include="src\Render\Lighting.h">
-      <Filter>src\Render</Filter>
-    </ClInclude>
     <ClCompile Include="src\Render\Loading.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Loading.h">
-      <Filter>src\Render</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Render\Model.cpp">
-      <Filter>src\Render</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Render\Model.h">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClInclude Include="src\Render\ModelDraw.h">
@@ -615,16 +624,16 @@
     <ClInclude Include="src\Render\Textures.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\UiPackets.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\UiPacketsLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\UiPrimitives.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\UiPrimitives.h">
-      <Filter>src\Render</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Render\Upload.cpp">
-      <Filter>src\Render</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Render\Upload.h">
       <Filter>src\Render</Filter>
     </ClInclude>
     <ClCompile Include="src\Save\MemoryCard\GameFiles.cpp">
@@ -843,7 +852,25 @@
     <ClInclude Include="include\Platform\Paths.hpp">
       <Filter>include\Platform</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\CameraView.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\CameraViewLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\DepthCue.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\DepthCueLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\Device.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\DisplayControl.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\DisplayControlLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ModelGeometry.hpp">
@@ -880,6 +907,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\TextureRegionDrawLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\UiPackets.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\UiPacketsLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\SaveStore.hpp">

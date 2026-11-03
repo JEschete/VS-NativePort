@@ -5,6 +5,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Menu/Inventory/Inventory.h"
 #include "ModelLoading.h"
-#include "Render/Model.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
@@ -91,7 +91,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
     Actors_WeaponModel** weapons;
     Actors_WeaponModel* weapon;
 
-    Render_PrepareActorCameraMatrices(camera);
+    VS::Render::PrepareLiveActorCameraMatrices(camera);
     i = 0;
     entries = Actors_actorRecords;
     do {

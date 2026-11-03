@@ -5,6 +5,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -763,7 +764,7 @@ void Battle_DrawRightTargetLabelLink(int x0, int x1, int count)
             int end = segmentEnd >> 4;
 
             if (end < dx) {
-                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),
+                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),
                     vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),
                     ((x1 - start * signX) & 0xFFFF) | y1Bits,
                     ((x1 - (end - 1) * signX) & 0xFFFF) | y1Bits);
@@ -771,12 +772,12 @@ void Battle_DrawRightTargetLabelLink(int x0, int x1, int count)
                 int lineColor = vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color);
                 int tail;
 
-                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
+                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
                     ((x1 - start * signX) & 0xFFFF) | y1Bits,
                     ((midX + signX) & 0xFFFF) | y1Bits);
                 tail = length * (15 - i);
                 if (y1 != y0 - (tail >> 4) * signY) {
-                    Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
+                    VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
                         (midX & 0xFFFF) | y1Bits,
                         vs_getXY_2(x0 + (tail >> 5), y0 - ((tail + 16) >> 4) * signY));
                 }
@@ -785,12 +786,12 @@ void Battle_DrawRightTargetLabelLink(int x0, int x1, int count)
             int far2 = length * (16 - i);
             int near2 = length * (15 - i);
 
-            Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),
+            VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),
                 vs_getXY_2(x0 + (far2 >> 5), y0 - (far2 >> 4) * signY),
                 vs_getXY_2(x0 + (near2 >> 5), y0 - ((near2 + 16) >> 4) * signY));
         }
     }
-    Render_InsertDrawModeCommand(
+    VS::Render::InsertLiveDrawModeCommand(
         _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), (u_long *)(Render_frameScratch.overlayOrderingTable));
 }
 
@@ -848,7 +849,7 @@ void Battle_DrawLeftTargetLabelLink(int x0, int x1, int count)
             int end = segmentEnd >> 4;
 
             if (end < dx) {
-                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),
+                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable),
                     vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),
                     ((x1 + start * signX) & 0xFFFF) | y1Bits,
                     ((x1 + (end - 1) * signX) & 0xFFFF) | y1Bits);
@@ -856,12 +857,12 @@ void Battle_DrawLeftTargetLabelLink(int x0, int x1, int count)
                 int lineColor = vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color);
                 int tail;
 
-                Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
+                VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
                     ((x1 + start * signX) & 0xFFFF) | y1Bits,
                     ((midX - signX) & 0xFFFF) | y1Bits);
                 tail = length * (15 - i);
                 if (y1 != y0 - (tail >> 4) * signY) {
-                    Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
+                    VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), lineColor,
                         (midX & 0xFFFF) | y1Bits,
                         vs_getXY_2(x0 - (tail >> 5), y0 - ((tail + 16) >> 4) * signY));
                 }
@@ -870,12 +871,12 @@ void Battle_DrawLeftTargetLabelLink(int x0, int x1, int count)
             int far2 = length * (16 - i);
             int near2 = length * (15 - i);
 
-            Render_InsertThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),
+            VS::Render::InsertLiveThreeWordPrimitive((u_long *)(Render_frameScratch.overlayOrderingTable), vs_getRGB0Raw(Render_LegacyPrimitiveCode_LineF2SemiTrans, color),
                 vs_getXY_2(x0 - (far2 >> 5), y0 - (far2 >> 4) * signY),
                 vs_getXY_2(x0 - (near2 >> 5), y0 - ((near2 + 16) >> 4) * signY));
         }
     }
-    Render_InsertDrawModeCommand(
+    VS::Render::InsertLiveDrawModeCommand(
         _get_mode(0, 0, getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 0, 0)), (u_long *)(Render_frameScratch.overlayOrderingTable));
 }
 

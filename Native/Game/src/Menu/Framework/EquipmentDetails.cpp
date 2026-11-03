@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -23,6 +24,7 @@ extern "C" {
 #include "Items/Weapons.h"
 #include "Menu/Container/ItemView.h"
 #include "Menu/Container/Storage.h"
+#include "Menu/Files.h"
 #include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
@@ -888,9 +890,9 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
 
         Render_DrawCompactTextColor(Menu_Framework_kEquipmentStatPageStatHeaders[j + (statPage * 8)],
             ((xOffset + 0x40) & 0xFFFF) | (0x400000 + stat_row_y_offset * 0x10000), i, before);
-        Render_InsertThreeWordPrimitive(before, 0x40D0E030, stat_bar_origin_x | ((stat_row_y_offset + 0x42) << 0x10),
+        VS::Render::InsertLiveThreeWordPrimitive(before, 0x40D0E030, stat_bar_origin_x | ((stat_row_y_offset + 0x42) << 0x10),
             stat_bar_origin_x | ((stat_row_y_offset + 0x45) << 0x10));
-        Render_InsertThreeWordPrimitive(before, 0x40978918, stat_bar_origin_x | (0x400000 + stat_row_y_offset * 0x10000),
+        VS::Render::InsertLiveThreeWordPrimitive(before, 0x40978918, stat_bar_origin_x | (0x400000 + stat_row_y_offset * 0x10000),
             stat_bar_origin_x | ((stat_row_y_offset + 0x47) << 0x10));
 
         j = (displayed_stat_values[j] * 24) / 100;
@@ -908,7 +910,7 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
 
                 packed_positive_bar_y = (stat_row_y_offset + i + 66) << 0x10;
 
-                Render_InsertThreeWordPrimitive(before, Menu_Framework_equipmentStatPagePositiveStatColors[i], stat_bar_origin_x | packed_positive_bar_y,
+                VS::Render::InsertLiveThreeWordPrimitive(before, Menu_Framework_equipmentStatPagePositiveStatColors[i], stat_bar_origin_x | packed_positive_bar_y,
                     ((xOffset + j + 116) & 0xFFFF) | packed_positive_bar_y);
 
                 if (j == (24 - i)) {
@@ -920,7 +922,7 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
 
                 packed_negative_bar_y = ((stat_row_y_offset - i) + 0x45) << 0x10;
 
-                Render_InsertThreeWordPrimitive(before, Menu_Framework_equipmentStatPageNegativeStatColors[i], stat_bar_origin_x | packed_negative_bar_y,
+                VS::Render::InsertLiveThreeWordPrimitive(before, Menu_Framework_equipmentStatPageNegativeStatColors[i], stat_bar_origin_x | packed_negative_bar_y,
                     ((xOffset + j + 0x74) & 0xFFFF) | packed_negative_bar_y);
 
                 if (j == (i - 24)) {
@@ -930,18 +932,18 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
         }
 
         for (j = 2; j < 6; ++j) {
-            Render_InsertThreeWordPrimitive(before, 0x40330500,
+            VS::Render::InsertLiveThreeWordPrimitive(before, 0x40330500,
                 Menu_Framework_OffsetStatBarCoordinate(xOffset, j, 97) | ((stat_row_y_offset + j + 64) << 0x10),
                 Menu_Framework_OffsetStatBarCoordinate(xOffset, j, 142) | ((stat_row_y_offset + j + 64) << 0x10));
         }
 
         for (j = 0; j < 8; ++j) {
-            Render_InsertThreeWordPrimitive(before, 0x405D3200,
+            VS::Render::InsertLiveThreeWordPrimitive(before, 0x405D3200,
                 Menu_Framework_OffsetStatBarCoordinate(xOffset, j, 97) | ((stat_row_y_offset + j + 64) << 0x10),
                 Menu_Framework_OffsetStatBarCoordinate(xOffset, j, 145) | ((stat_row_y_offset + j + 64) << 0x10));
         }
 
-        Render_InsertDrawModeCommand(
+        VS::Render::InsertLiveDrawModeCommand(
             vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_Off), before);
 
         prim = (u_long *)(Render_frameScratch.primitiveCursor);
@@ -961,7 +963,7 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
 
         Render_frameScratch.primitiveCursor = prim;
 
-        Render_InsertDrawModeCommand(
+        VS::Render::InsertLiveDrawModeCommand(
             vs_getTpage(0, 0, Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, Render_Dithering_On), before);
     }
 
@@ -1254,17 +1256,17 @@ void Menu_Framework_UpdateDpPpBars(int flags)
             if (Menu_Framework_dpPpBarsTarget & 1) {
                 Render_DrawCompactText("DP", (packed_bar_panel_y + vs_getXY(0, -1)) | 10, before);
 
-                temp = Render_DrawIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, (u_long *)(before));
-                Render_DrawIntegerRightAligned(2, temp, 0, (u_long *)(before));
-                Render_DrawIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentDp, (u_long *)(before));
+                temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, (u_long *)(before));
+                VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, (u_long *)(before));
+                VS::Render::DrawLiveIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentDp, (u_long *)(before));
             }
 
             if (Menu_Framework_dpPpBarsTarget & 2) {
                 Render_DrawCompactText("PP", (packed_bar_panel_y + vs_getXY(0, -1)) | 80, before);
 
-                temp = Render_DrawIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, (u_long *)(before));
-                Render_DrawIntegerRightAligned(2, temp, 0, (u_long *)(before));
-                Render_DrawIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentPp, (u_long *)(before));
+                temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, (u_long *)(before));
+                VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, (u_long *)(before));
+                VS::Render::DrawLiveIntegerRightAligned(1, temp + vs_getXY(-7, -2), Menu_Framework_currentPp, (u_long *)(before));
             }
 
             packed_bar_panel_y += 8 << 16;
@@ -1277,7 +1279,7 @@ void Menu_Framework_UpdateDpPpBars(int flags)
                     temp = 1;
                 }
 
-                Render_DrawStatGauge(
+                VS::Render::DrawLiveStatGauge(
                     0, (((Menu_Framework_currentDp << 6) + temp) - 1) / temp, (u_long *)(before), packed_bar_panel_y | 10);
             }
             if (Menu_Framework_dpPpBarsTarget & 2) {
@@ -1288,7 +1290,7 @@ void Menu_Framework_UpdateDpPpBars(int flags)
                     temp = 1;
                 }
 
-                Render_DrawStatGauge(
+                VS::Render::DrawLiveStatGauge(
                     1, (((Menu_Framework_currentPp << 6) + temp) - 1) / temp, (u_long *)(before), packed_bar_panel_y | 80);
             }
         }

@@ -28,6 +28,10 @@ typedef struct Menu_Files_PrimitiveBuffer Menu_Files_PrimitiveBuffer;
 // decomp: src/SLUS_010.40/sfx.h:7
 #define VS_SFX_FILEOPCOMPLETE 8
 
+// decomp: src/include/gpu.h:99
+#define vs_getTpage(x, y, tp, abr, dtd)                                                  \
+    ((0xE1 << 24) | (((dtd) & 1) << 9) | getTPage((tp), (abr), (x), (y)))
+
 // decomp: src/include/gpu.h:106
 #define vs_getRGB5551(r, g, b, a)                                                        \
     (((r) & 0x1F) | (((g) & 0x1F) << 5) | (((b) & 0x1F) << 10) | (((a) & 0x1) << 15))

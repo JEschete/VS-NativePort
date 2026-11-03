@@ -3,6 +3,7 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Field/Actors.h"
 #include "Field/Gimmicks.h"
 #include "Menu/Framework/ActorPreview.h"
-#include "Render/Model.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -212,7 +212,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
         return -1;
     }
 
-    Render_PrepareActorCameraMatrices(preview_camera_matrix);
+    VS::Render::PrepareLiveActorCameraMatrices(preview_camera_matrix);
 
     preview_actor->framesPerStep =
         ((int)(State_tickSpeed + (((u_int)State_tickSpeed) >> 0x1F))) >> 1;

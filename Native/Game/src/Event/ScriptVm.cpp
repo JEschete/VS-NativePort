@@ -3,6 +3,8 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/DisplayControlLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -49,9 +51,7 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/TextBox.h"
-#include "Render/Display.h"
 #include "Render/Palette.h"
-#include "Render/UiPrimitives.h"
 #include "State/Flags.h"
 #include "State/Timers.h"
 
@@ -238,7 +238,7 @@ void Event_RestoreScriptTextureRectangle(void)
     new_var = (void*)0x10;
 
     SetDrawMove(move_primitive, &source_rectangle, 16, 400);
-    ((void (*)(DR_MOVE*))Render_AppendOverlayPrimitive)(move_primitive);
+    VS::Render::AppendLiveOverlayPrimitive(move_primitive);
 
     *((void**)((uintptr_t)Core_ScratchBase() + 0x000)) = (DR_MOVE*)(move_primitive + 1);
 }
@@ -961,7 +961,7 @@ short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
         Input_StopVibrationPatterns(0, 2);
         Event_ResetCutsceneActorsToIdle();
         Field_BeginScreenFadeOut(0, 0xFF, 0);
-        Render_DisableDisplay();
+        VS::Render::DisableLiveDisplay();
         State_SetScriptFlag(0xA8, 1);
         Event_skipState = 2;
     }

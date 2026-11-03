@@ -9,14 +9,8 @@
 #if !defined(VS_TYPES_ONLY) && !defined(VS_RENDER_CAMERA_H_DECLS)
 #define VS_RENDER_CAMERA_H_DECLS
 
-extern MATRIX Render_actorCameraMatrix;
 extern int Render_nearClip;
 extern MATRIX Render_cameraBasisMatrix;
 extern int Render_projectionDistance;
-void Render_BuildCameraViewMatrix(void);
-void Render_SetCameraNearClip(int near_clip);
-void Render_SetCameraProjectionDistance(int projectionDistance);
-void Render_SetCameraFarClip(int farClip, int preserve_texture_lod);
-void Render_BuildLookAtViewMatrix(VECTOR* position, VECTOR* target, MATRIX* view);
 
 #endif // VS_RENDER_CAMERA_H_DECLS

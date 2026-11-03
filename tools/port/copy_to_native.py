@@ -73,14 +73,15 @@ IDENTIFIER_FIXUP = re.compile(r"\\b[A-Za-z_]\w*\\b")
 # Strategy R (SDK_API_LEDGER.md): SDK calls rewritten to the native API at copy time.
 GTE_FUNCS = {n: f"Core_Gte_{n}" for n in (
     "MulMatrix", "CompMatrix", "ApplyMatrix", "ApplyRotMatrix", "ApplyMatrixLV", "ApplyMatrixSV", "TransMatrix",
-    "ScaleMatrix", "RotTransPers", "RotTrans", "RotTransPers4", "RotAverage4", "NormalClip", "DpqColor",
-    "SetRotMatrix", "SetTransMatrix", "SetGeomOffset", "SetGeomScreen", "SetFarColor", "SetFogNear")}
+    "ScaleMatrix", "RotTransPers", "RotTrans", "RotTransPers4", "RotAverage4", "NormalClip",
+    "SetRotMatrix", "SetTransMatrix", "SetGeomOffset", "SetGeomScreen", "SetFarColor")}
 # libgte entry points whose resident copies are promoted catalog rows: an SDK call binds exactly like a call to
 # that row (Copier.promoted_name), so both reach the same typed function or record binding.
 SDK_PROMOTED_ROWS = {
     "rcos": "F03400", "rsin": "F03401", "ratan2": "F03402", "RotMatrixYXZ_gte": "F03397",
     "RotMatrix_gte": "F03398", "OuterProduct0": "F03407", "SquareRoot12": "F03410",
     "VectorNormal": "F03411", "VectorNormalS": "F03412", "VectorNormalSS": "F03413",
+    "DpqColor": "F03404", "SetFogNear": "F03408",
 }
 SDK_RENAMES = {
     **GTE_FUNCS,

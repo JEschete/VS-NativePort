@@ -21,6 +21,8 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Field/Interactions.h"
 #include "Input/Controller.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
@@ -144,8 +146,13 @@ struct SphereLabelFixture {
   std::array<u_char, 264> saved_trim =
       std::to_array(Render_compactGlyphLeftTrim);
   std::array<u_long, 2200> ordering{};
+  void* saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
 
   SphereLabelFixture() {
+    // The typed HUD packets reserve their words in the current frame's
+    // primitive buffer.
+    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] =
+        slice.packets.data() + 1;
     std::fill_n(Render_compactGlyphWidths, saved_widths.size(), 0x66);
     std::fill_n(Render_compactGlyphIndices, saved_indices.size(), 0);
     std::fill_n(Render_compactGlyphLeftTrim, saved_trim.size(), 0);
@@ -161,6 +168,7 @@ struct SphereLabelFixture {
   }
 
   ~SphereLabelFixture() {
+    Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
     std::copy(saved_widths.begin(), saved_widths.end(),
               Render_compactGlyphWidths);
     std::copy(saved_indices.begin(), saved_indices.end(),

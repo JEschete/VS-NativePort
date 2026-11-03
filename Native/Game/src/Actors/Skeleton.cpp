@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ModelDrawingLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/CameraViewLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Actors/WeaponModel.h"
 #include "Field/GimmickLookup.h"
 #include "Field/Gimmicks.h"
-#include "Render/Model.h"
 #include "Render/ModelDraw.h"
 #include "Render/ModelWorkspace.h"
 #include "Render/Palette.h"
@@ -562,7 +562,7 @@ void Actors_BuildActorPoseAtMatrix(int actor_id, MATRIX* camera_matrix)
     int visible = actor->instance.isVisible;
     actor->instance.isVisible = 0;
     actor->framesPerStep = 1;
-    Render_PrepareActorCameraMatrices(camera_matrix);
+    VS::Render::PrepareLiveActorCameraMatrices(camera_matrix);
     Actors_PrepareActorRootTransform(actor);
     VS::Actors::DrawLiveActorModel(*actor, *camera_matrix, 0);
     actor->instance.isVisible = visible;

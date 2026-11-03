@@ -326,6 +326,14 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\CameraView.cpp" />
+    <ClCompile Include="src\Render\CameraViewLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Render\DepthCue.cpp" />
+    <ClCompile Include="src\Render\DepthCueLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Render\Device.cpp" />
     <ClCompile Include="src\Render\Display.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -333,6 +341,10 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Render\DisplayControl.cpp" />
+    <ClCompile Include="src\Render\DisplayControlLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\Font.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -363,13 +375,6 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Render\Loading.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Render\Model.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
@@ -454,14 +459,11 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Render\UiPrimitives.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Render\UiPackets.cpp" />
+    <ClCompile Include="src\Render\UiPacketsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Render\Upload.cpp">
+    <ClCompile Include="src\Render\UiPrimitives.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
@@ -552,9 +554,7 @@
     <ClInclude Include="src\Render\FramebufferEffects.h" />
     <ClInclude Include="src\Render\Images.h" />
     <ClInclude Include="src\Render\LegacyPackets.h" />
-    <ClInclude Include="src\Render\Lighting.h" />
     <ClInclude Include="src\Render\Loading.h" />
-    <ClInclude Include="src\Render\Model.h" />
     <ClInclude Include="src\Render\ModelDraw.h" />
     <ClInclude Include="src\Render\Palette.h" />
     <ClInclude Include="src\Render\Primitives.h" />
@@ -566,7 +566,6 @@
     <ClInclude Include="src\Render\TextureAnimation.h" />
     <ClInclude Include="src\Render\Textures.h" />
     <ClInclude Include="src\Render\UiPrimitives.h" />
-    <ClInclude Include="src\Render\Upload.h" />
     <ClInclude Include="src\Save\MemoryCard\GameFiles.h" />
     <ClInclude Include="src\Save\MemoryCard\Resources.h" />
     <ClInclude Include="src\Save\Snapshot.h" />
@@ -635,7 +634,13 @@
     <ClInclude Include="include\Platform\CrashHandler.hpp" />
     <ClInclude Include="include\Platform\GameFiber.hpp" />
     <ClInclude Include="include\Platform\Paths.hpp" />
+    <ClInclude Include="include\Render\CameraView.hpp" />
+    <ClInclude Include="include\Render\CameraViewLive.hpp" />
+    <ClInclude Include="include\Render\DepthCue.hpp" />
+    <ClInclude Include="include\Render\DepthCueLive.hpp" />
     <ClInclude Include="include\Render\Device.hpp" />
+    <ClInclude Include="include\Render\DisplayControl.hpp" />
+    <ClInclude Include="include\Render\DisplayControlLive.hpp" />
     <ClInclude Include="include\Render\ModelGeometry.hpp" />
     <ClInclude Include="include\Render\ModelGeometryLive.hpp" />
     <ClInclude Include="include\Render\ModelWorkspace.h" />
@@ -648,6 +653,8 @@
     <ClInclude Include="include\Render\SpritesLive.hpp" />
     <ClInclude Include="include\Render\TextureRegionDraw.hpp" />
     <ClInclude Include="include\Render\TextureRegionDrawLive.hpp" />
+    <ClInclude Include="include\Render\UiPackets.hpp" />
+    <ClInclude Include="include\Render\UiPacketsLive.hpp" />
     <ClInclude Include="include\Save\SaveStore.hpp" />
     <ClInclude Include="Legacy\Audio\LibSpu.h" />
     <ClInclude Include="Legacy\Core\LibEtc.h" />

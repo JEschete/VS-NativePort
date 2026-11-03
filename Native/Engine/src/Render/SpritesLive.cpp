@@ -24,24 +24,10 @@ namespace {
 // The frame primitive buffers are low-end allocations of this size
 // (Field/RoomLoading.cpp, Ending/Credits/StaffRoll.cpp).
 constexpr std::size_t kPrimitiveBufferBytes = 0x20000;
-constexpr std::size_t kPacketBytes = kSpritePacketWords * sizeof(u_long);
 static_assert(sizeof(u_long) == sizeof(std::uint32_t));
 
 std::array<u_long, kSpritePacketWords> discard_packet{};
 std::uint64_t dropped_sprites = 0;
-
-// Room for one packet at the cursor in the current frame's buffer, or null.
-u_long* PacketSlot() {
-  const auto base = reinterpret_cast<std::uintptr_t>(
-      Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
-  const auto cursor =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
-  if (base == 0 || cursor < base || cursor - base > kPrimitiveBufferBytes ||
-      kPrimitiveBufferBytes - (cursor - base) < kPacketBytes) {
-    return nullptr;
-  }
-  return static_cast<u_long*>(Render_frameScratch.primitiveCursor);
-}
 
 class LiveSpriteQueue final : public SpriteQueue {
  public:
@@ -52,7 +38,9 @@ class LiveSpriteQueue final : public SpriteQueue {
   }
 
   void Emit(const SpritePacket& packet) override {
-    u_long* slot = chain_ != nullptr ? PacketSlot() : nullptr;
+    u_long* slot = chain_ != nullptr
+                       ? ReserveLivePrimitiveWords(kSpritePacketWords)
+                       : nullptr;
     if (slot == nullptr) {
       Drop();
       return;
@@ -93,6 +81,18 @@ class LiveFrameView final : public FrameViewTarget {
   }
 };
 }  // namespace
+
+u_long* ReserveLivePrimitiveWords(std::size_t words) {
+  const auto base = reinterpret_cast<std::uintptr_t>(
+      Render_legacyPrimitiveBuffers[Render_frameBuf & 1]);
+  const auto cursor =
+      reinterpret_cast<std::uintptr_t>(Render_frameScratch.primitiveCursor);
+  if (base == 0 || cursor < base || cursor - base > kPrimitiveBufferBytes ||
+      (kPrimitiveBufferBytes - (cursor - base)) / sizeof(u_long) < words) {
+    return nullptr;
+  }
+  return static_cast<u_long*>(Render_frameScratch.primitiveCursor);
+}
 
 u_long* QueueLiveDefaultSprite(int wh, int xy) {
   LiveSpriteQueue queue(

@@ -7,6 +7,8 @@
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/CameraViewLive.hpp"
+#include "Render/DisplayControlLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -471,7 +473,7 @@ void Boot_RunGameLoop(void)
                     }
 
                     Field_UpdateCameraFacingState();
-                    Render_BuildCameraViewMatrix();
+                    VS::Render::BuildLiveCameraViewMatrix();
                     Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
                     Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
                     if (!skipCameraUpdate) {
@@ -585,7 +587,7 @@ void Boot_RunGameLoop(void)
                         AddPrim(ot + 0x820, &Render_legacyMaskBitOnPackets[Render_frameBuf]);
                     }
                     VS::Core::ElapsedFrameCounterTicks();
-                    Render_PresentFieldFrame(ot + 0x821);
+                    VS::Render::PresentLiveFieldFrame(ot + 0x821);
                     Render_AdvanceTexturePageRetirements();
                 } while (!(((Field_screenTransitionStep == 1)
                                || (Field_screenTransitionStep == 2))
@@ -688,7 +690,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     VS::Core::Memory::ZeroLiveAlignedWords((*(void* (*))&Battle_actionState), sizeof *Battle_actionState);
     Field_isFieldRenderingEnabled = 1;
     Boot_gameplayResetWordTwo = 0;
-    Render_ConfigureFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
+    VS::Render::ConfigureLiveFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
 }
 
 }  // extern "C"
