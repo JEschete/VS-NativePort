@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "DiscQueue.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Effects/ScreenEffects.h"
 #include "Render/Display.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: SCREFF2.PRG func_800F9800 (src/GIM/SCREFF2.PRG/0.c:8)
@@ -18,11 +18,11 @@ void Effects_ScreenDistortion_SetFeedbackLayer(int ordering_layer)
     if (Effects_screenEffectOverlay->opaque1 == 0) {
         if (ordering_layer != 0) {
             Effects_screenEffectOverlay->opaque1 = 1U;
-            Render_ReserveTexturePageRange(0x1B, 5, 6);
+            VS::Render::ReserveLiveTexturePageRange(0x1B, 5, 6);
         }
     } else if (ordering_layer == 0) {
         Effects_screenEffectOverlay->opaque1 = 0U;
-        Render_RetireTexturePageRange(0x1B, 5, 6);
+        VS::Render::RetireLiveTexturePageRange(0x1B, 5, 6);
     }
 }
 

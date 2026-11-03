@@ -828,77 +828,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Render\\TextureAnimation.cpp": [
-[
-15,
-[
-"    drTpage = scratch[0];"
-],
-[
-"    drTpage = (DR_TPAGE *)(scratch[0]);"
-]
-],
-[
-17,
-[
-"    AddPrim(scratch[1] + (otOffset * 4), drTpage++);"
-],
-[
-"    AddPrim(((u_char*)(scratch[1])) + (otOffset * 4), drTpage++);"
-]
-],
-[
-30,
-[
-"        tim->crect = (void*)(data + 1);",
-"        tim->caddr = (void*)(data + 3);"
-],
-[
-"        tim->crect = (RECT *)((void*)(data + 1));",
-"        tim->caddr = (u_long *)((void*)(data + 3));"
-]
-],
-[
-38,
-[
-"    tim->prect = (void*)(data + 1);",
-"    tim->paddr = (void*)(data + 3);"
-],
-[
-"    tim->prect = (RECT *)((void*)(data + 1));",
-"    tim->paddr = (u_long *)((void*)(data + 3));"
-]
-],
-[
-49,
-[
-"    LoadImage(&rect, pixels);"
-],
-[
-"    LoadImage(&rect, (u_long *)(pixels));"
-]
-],
-[
-59,
-[
-"    StoreImage(&rect, buffer);"
-],
-[
-"    StoreImage(&rect, (u_long *)(buffer));"
-]
-]
-],
-"Native\\Engine\\src\\Render\\Textures.cpp": [
-[
-127,
-[
-"    return ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;"
-],
-[
-"    return (DR_MOVE *)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor);"
-]
-]
-],
 "Native\\Game\\src\\Actors\\ActorLoading.cpp": [
 [
 78,
@@ -5396,19 +5325,19 @@
 [
 307,
 [
-"            Render_ParseTimImage(Ending_resultsTimBuffer + i * 0x8220, &tim_image);"
+"            VS::Render::ParseLiveTim(Ending_resultsTimBuffer + i * 0x8220, &tim_image);"
 ],
 [
-"            Render_ParseTimImage((u_int *)(((u_char*)(Ending_resultsTimBuffer)) + i * 0x8220), &tim_image);"
+"            VS::Render::ParseLiveTim((u_int *)(((u_char*)(Ending_resultsTimBuffer)) + i * 0x8220), &tim_image);"
 ]
 ],
 [
 384,
 [
-"        Render_ParseTimImage(Ending_resultsTimBuffer, &tim_image);"
+"        VS::Render::ParseLiveTim(Ending_resultsTimBuffer, &tim_image);"
 ],
 [
-"        Render_ParseTimImage((u_int *)(Ending_resultsTimBuffer), &tim_image);"
+"        VS::Render::ParseLiveTim((u_int *)(Ending_resultsTimBuffer), &tim_image);"
 ]
 ],
 [
@@ -5454,10 +5383,10 @@
 [
 303,
 [
-"    sprt = Render_AppendTexturePage(0x2E, 3);"
+"    sprt = VS::Render::AppendLiveTexturePage(0x2E, 3);"
 ],
 [
-"    sprt = (SPRT *)(Render_AppendTexturePage(0x2E, 3));"
+"    sprt = (SPRT *)(VS::Render::AppendLiveTexturePage(0x2E, 3));"
 ]
 ],
 [
@@ -5492,10 +5421,10 @@
 [
 510,
 [
-"    sprt = Render_AppendTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX, 256), 4);"
+"    sprt = VS::Render::AppendLiveTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX, 256), 4);"
 ],
 [
-"    sprt = (SPRT *)(Render_AppendTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX, 256), 4));"
+"    sprt = (SPRT *)(VS::Render::AppendLiveTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX, 256), 4));"
 ]
 ],
 [
@@ -9309,10 +9238,10 @@
 [
 119,
 [
-"                Render_ParseTextureImage(Menu_Results_initializeCubePuzzleStartIqDisData + i * 0x8220, &tim);"
+"                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleStartIqDisData + i * 0x8220, &tim);"
 ],
 [
-"                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleStartIqDisData)) + i * 0x8220), &tim);"
+"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleStartIqDisData)) + i * 0x8220), &tim);"
 ]
 ],
 [
@@ -9327,10 +9256,10 @@
 [
 216,
 [
-"                Render_ParseTextureImage(Menu_Results_initializeCubePuzzleQuitEscDisData + i * 0x8220, &tim);"
+"                VS::Render::ParseLiveTim(Menu_Results_initializeCubePuzzleQuitEscDisData + i * 0x8220, &tim);"
 ],
 [
-"                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleQuitEscDisData)) + i * 0x8220), &tim);"
+"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleQuitEscDisData)) + i * 0x8220), &tim);"
 ]
 ]
 ],
@@ -9338,10 +9267,10 @@
 [
 347,
 [
-"                Render_ParseTextureImage(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
+"                VS::Render::ParseLiveTim(Menu_Results_initializeGameClearTimData + i * 0x8220, &tim);"
 ],
 [
-"                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeGameClearTimData)) + i * 0x8220), &tim);"
+"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeGameClearTimData)) + i * 0x8220), &tim);"
 ]
 ],
 [
@@ -9493,19 +9422,19 @@
 [
 78,
 [
-"            Render_ParseTextureImage(Menu_Results_initializeTimeAttackResultsTimData, &tim);"
+"            VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackResultsTimData, &tim);"
 ],
 [
-"            Render_ParseTextureImage((u_long *)(Menu_Results_initializeTimeAttackResultsTimData), &tim);"
+"            VS::Render::ParseLiveTim((u_long *)(Menu_Results_initializeTimeAttackResultsTimData), &tim);"
 ]
 ],
 [
 193,
 [
-"                Render_ParseTextureImage(Menu_Results_initializeTimeAttackStartTimData + i * 0x8220, &tim);"
+"                VS::Render::ParseLiveTim(Menu_Results_initializeTimeAttackStartTimData + i * 0x8220, &tim);"
 ],
 [
-"                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeTimeAttackStartTimData)) + i * 0x8220), &tim);"
+"                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeTimeAttackStartTimData)) + i * 0x8220), &tim);"
 ]
 ]
 ],

@@ -223,6 +223,7 @@
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\TextTransitionTests.cpp" />
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
+    <ClCompile Include="src\TexturePagesTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
     <ClCompile Include="src\TrailEmitterTests.cpp" />
     <ClCompile Include="src\VibrationTests.cpp" />

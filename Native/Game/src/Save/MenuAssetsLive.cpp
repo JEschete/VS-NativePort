@@ -4,6 +4,8 @@
 #include "Save/MenuAssetsLive.hpp"
 
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/TexturePagesLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 
 extern "C" {
 #include "Boot/Lifecycle.h"
@@ -13,8 +15,6 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Legacy/Psx.h"
 #include "Menu/Files.h"
-#include "Render/TextureAnimation.h"
-#include "Render/Textures.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveCard.h"
@@ -76,12 +76,12 @@ void Request(unsigned lba, unsigned size, void* target) {
 class LiveMenuAssets final : public MenuAssetHost {
  public:
   void ReserveTexturePages() override {
-    Render_ReserveTexturePageRange(kSaveTexturePage, kSaveImageCount,
-                                   kSaveTextureOwner);
+    VS::Render::ReserveLiveTexturePageRange(kSaveTexturePage, kSaveImageCount,
+                                            kSaveTextureOwner);
   }
   void RetireTexturePages() override {
-    Render_RetireTexturePageRange(kSaveTexturePage, kSaveImageCount,
-                                  kSaveTextureOwner);
+    VS::Render::RetireLiveTexturePageRange(kSaveTexturePage, kSaveImageCount,
+                                           kSaveTextureOwner);
   }
   void AllocateAssets(MenuAssetOwner owner) override {
     Title_memoryCardUiResource = static_cast<char*>(
@@ -117,9 +117,9 @@ class LiveMenuAssets final : public MenuAssetHost {
     live_request = nullptr;
   }
   void UploadImage() override {
-    Render_UploadPackedRectangle(PackedPair(kImageX, kImageY),
-                                 Title_memoryCardUiResource,
-                                 PackedPair(kImageWidth, kImageHeight));
+    VS::Render::UploadLiveImageRectangle(PackedPair(kImageX, kImageY),
+                                         Title_memoryCardUiResource,
+                                         PackedPair(kImageWidth, kImageHeight));
   }
   void SetSoftResetEnabled(bool enabled) override {
     Boot_SetSoftResetEnabled(enabled ? 1 : 0);

@@ -10,11 +10,13 @@
 #include "Render/DisplayControl.hpp"
 #include "Render/Sprites.hpp"
 
-// The battle HUD's GPU packets (tiles, draw-mode commands, digit glyphs, stat
-// gauges), the overlay primitive splice and VRAM image uploads. The policies
-// build packets as words and hand them to a PacketQueue, walk primitive
-// chains by handle through a PrimitiveChain and upload through an
-// ImageUploadTarget; they reach no global render state (UiPacketsLive.cpp).
+// The UI's GPU packets (tiles, draw-mode commands, digit glyphs, stat gauges,
+// texture moves and immediate sprites), the overlay primitive splice and VRAM
+// image uploads and reads. The policies build packets as words and hand them
+// to a PacketQueue, OverlayPacketQueue or ImmediatePacketTarget, walk
+// primitive chains by handle through a PrimitiveChain and move pixels through
+// an ImageUploadTarget or ImageReadTarget; they reach no global render state
+// (UiPacketsLive.cpp).
 namespace VS::Render {
 inline constexpr std::uint32_t kPacketLinkMask = 0xFFFFFF;
 inline constexpr int kPacketLengthShift = 24;
@@ -170,9 +172,86 @@ class ImageUploadTarget {
 [[nodiscard]] std::optional<ScreenRect> ImageRectangle(
     std::int32_t position, std::int32_t size) noexcept;
 
-// BATTLE.PRG vs_battle_renderImage (5BF94.c:4531). The original kept the
-// rectangle in an eight-entry ring for its asynchronous LoadImage; the native
-// upload is synchronous.
+// BATTLE.PRG vs_battle_renderImage (5BF94.c:4531), MENU7.PRG _renderImage
+// (260.c:199) and TITLE.PRG _drawImage. The original kept the rectangle in an
+// eight-entry ring for its asynchronous LoadImage; the native upload is
+// synchronous.
 bool UploadImageRectangle(ImageUploadTarget& target, std::int32_t position,
                           std::int32_t size);
+
+class ImageReadTarget {
+ public:
+  virtual ~ImageReadTarget() = default;
+  // Copies the VRAM area into the target's pixels.
+  virtual void Read(const ScreenRect& area) = 0;
+};
+
+// MENU7.PRG _readImage (260.c:212) and its TITLE.PRG copy: nothing is read
+// when either size is not positive.
+bool ReadImageRectangle(ImageReadTarget& target, std::int32_t position,
+                        std::int32_t size);
+
+// Packets linked last in the current ordering table's overlay bucket.
+class OverlayPacketQueue {
+ public:
+  virtual ~OverlayPacketQueue() = default;
+  // Stores the packet and splices it into the bucket; false when it was
+  // dropped (no room, no table or a broken chain).
+  virtual bool AppendOverlay(std::span<const std::uint32_t> packet) = 0;
+};
+
+inline constexpr std::size_t kTextureMovePacketWords = 6;
+using TextureMovePacket = std::array<std::uint32_t, kTextureMovePacketWords>;
+
+// A GPU cache flush and a VRAM-to-VRAM copy of `source` to (x, y). The tag's
+// link is left for the splice.
+[[nodiscard]] TextureMovePacket BuildTextureMovePacket(const ScreenRect& source,
+                                                       std::int32_t x,
+                                                       std::int32_t y) noexcept;
+
+// BATTLE.PRG func_800AAC80 (40564.c:1272), with the packet begin and end of
+// vs_battlePacketBegin and vs_battlePacketEnd (40564.c:110, 114).
+bool QueueTextureRectangleMove(OverlayPacketQueue& queue,
+                               const ScreenRect& source, std::int32_t x,
+                               std::int32_t y);
+
+// ENDING.PRG _insertTpage (D4.c:1103): a dithered draw-mode command selecting
+// the texture page, in front of the chain head.
+bool InsertTexturePageCommand(PacketQueue& queue, std::uint32_t texture_page);
+
+// A textured sprite drawn at once rather than queued in a frame. The texture
+// page's high half dims the sprite from the neutral 0x80.
+struct ImmediateSpriteRequest {
+  std::int32_t position = 0;
+  std::int32_t uv_clut = 0;
+  std::int32_t size = 0;
+  std::int32_t texture_page = 0;
+};
+
+inline constexpr std::size_t kImmediateSpriteWords = 6;
+using ImmediateSpritePacket = std::array<std::uint32_t, kImmediateSpriteWords>;
+
+// Nothing when the dimming leaves the colour outside a byte, where the
+// original carried it into the sprite's command byte.
+[[nodiscard]] std::optional<ImmediateSpritePacket> BuildImmediateSpritePacket(
+    const ImmediateSpriteRequest& request) noexcept;
+
+class ImmediatePacketTarget {
+ public:
+  virtual ~ImmediatePacketTarget() = default;
+  // Draws the packet before returning.
+  virtual void Submit(std::span<const std::uint32_t> packet) = 0;
+};
+
+// MENU7.PRG _drawSprt (260.c:1188). The original built the packet in the file
+// menu's shared primitive buffer.
+bool DrawImmediateSprite(ImmediatePacketTarget& target,
+                         const ImmediateSpriteRequest& request);
+
+// MENU7.PRG _interpolateRGB (260.c:1718) and its TITLE.PRG copy: each byte of
+// the 0xBBGGRR colours blended by factor / 8 in unsigned 32-bit arithmetic,
+// so a factor past 8 wraps and a channel past 255 carries into the next
+// byte, as in the original.
+[[nodiscard]] std::uint32_t BlendRgb(std::uint32_t color1, std::uint32_t color2,
+                                     std::uint32_t factor) noexcept;
 }  // namespace VS::Render

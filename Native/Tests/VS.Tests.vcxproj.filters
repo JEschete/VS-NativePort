@@ -441,6 +441,9 @@
     <ClCompile Include="src\TextureBlockLayoutTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\TexturePagesTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\TextureRegionDrawTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

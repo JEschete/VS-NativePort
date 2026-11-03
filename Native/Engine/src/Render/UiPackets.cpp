@@ -72,6 +72,25 @@ constexpr int kBlendChannels = 3;
 constexpr std::uint32_t kBlendSteps = 8;
 constexpr int kBlendShift = 10;
 constexpr int kBlendChannelShift = 16;
+constexpr int kBlendStepShift = 3;
+
+// The texture move: a cache flush, then the VRAM-to-VRAM copy command.
+constexpr std::uint32_t kMoveCacheFlush = 0x01000000;
+constexpr std::uint32_t kMoveCommand = 0x80000000;
+
+// The texture-page draw mode; the sprite command (0x64) and its neutral grey.
+constexpr std::uint32_t kTexturePageCommand = 0xE1000000;
+constexpr std::uint32_t kTexturePageMask = 0x9FF;
+constexpr std::uint32_t kTexturePageDither = 0x200;
+constexpr std::uint32_t kImmediateSpriteCommand = 0x64000000;
+constexpr std::int32_t kNeutralBrightness = 0x80;
+constexpr std::int32_t kMaxBrightness = 0xFF;
+constexpr std::uint32_t kGreyChannels = 0x010101;
+
+constexpr std::uint32_t PackPair(std::int32_t low, std::int32_t high) noexcept {
+  return (static_cast<std::uint32_t>(high) << kHalfwordBits) |
+         (static_cast<std::uint32_t>(low) & kLowHalfMask);
+}
 
 std::uint32_t GaugeChannel(std::uint32_t full, std::uint32_t base,
                            std::uint32_t fill) {
@@ -271,5 +290,80 @@ bool UploadImageRectangle(ImageUploadTarget& target, std::int32_t position,
   }
   target.Upload(*area);
   return true;
+}
+
+bool ReadImageRectangle(ImageReadTarget& target, std::int32_t position,
+                        std::int32_t size) {
+  const std::optional<ScreenRect> area = ImageRectangle(position, size);
+  if (!area.has_value()) {
+    return false;
+  }
+  target.Read(*area);
+  return true;
+}
+
+TextureMovePacket BuildTextureMovePacket(const ScreenRect& source,
+                                         std::int32_t x,
+                                         std::int32_t y) noexcept {
+  return {Tag(0, kTextureMovePacketWords - 1),
+          kMoveCacheFlush,
+          kMoveCommand,
+          PackPair(source.x, source.y),
+          PackPair(x, y),
+          PackPair(source.width, source.height)};
+}
+
+bool QueueTextureRectangleMove(OverlayPacketQueue& queue,
+                               const ScreenRect& source, std::int32_t x,
+                               std::int32_t y) {
+  return queue.AppendOverlay(BuildTextureMovePacket(source, x, y));
+}
+
+bool InsertTexturePageCommand(PacketQueue& queue, std::uint32_t texture_page) {
+  return InsertDrawModeCommand(queue, kTexturePageCommand | kTexturePageDither |
+                                          (texture_page & kTexturePageMask));
+}
+
+std::optional<ImmediateSpritePacket> BuildImmediateSpritePacket(
+    const ImmediateSpriteRequest& request) noexcept {
+  const auto page = static_cast<std::uint32_t>(request.texture_page);
+  const std::int32_t brightness =
+      kNeutralBrightness - Core::Math::WrapSigned16(page >> kHalfwordBits);
+  if (brightness < 0 || brightness > kMaxBrightness) {
+    return std::nullopt;
+  }
+  return ImmediateSpritePacket{
+      Tag(0, kImmediateSpriteWords - 1),
+      kTexturePageCommand | (page & kTexturePageMask),
+      kImmediateSpriteCommand |
+          (static_cast<std::uint32_t>(brightness) * kGreyChannels),
+      static_cast<std::uint32_t>(request.position),
+      static_cast<std::uint32_t>(request.uv_clut),
+      static_cast<std::uint32_t>(request.size)};
+}
+
+bool DrawImmediateSprite(ImmediatePacketTarget& target,
+                         const ImmediateSpriteRequest& request) {
+  const std::optional<ImmediateSpritePacket> packet =
+      BuildImmediateSpritePacket(request);
+  if (!packet.has_value()) {
+    return false;
+  }
+  target.Submit(*packet);
+  return true;
+}
+
+std::uint32_t BlendRgb(std::uint32_t color1, std::uint32_t color2,
+                       std::uint32_t factor) noexcept {
+  std::uint32_t blended = 0;
+  for (int channel = 0; channel < kBlendChannels; ++channel) {
+    const std::uint32_t weighted =
+        ((color1 >> kBlendChannelShift) & kByteMask) * (kBlendSteps - factor) +
+        ((color2 >> kBlendChannelShift) & kByteMask) * factor;
+    blended = (blended << kGreenShift) + (weighted >> kBlendStepShift);
+    color1 <<= kGreenShift;
+    color2 <<= kGreenShift;
+  }
+  return blended;
 }
 }  // namespace VS::Render

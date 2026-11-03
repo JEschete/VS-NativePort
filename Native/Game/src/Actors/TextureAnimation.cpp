@@ -11,7 +11,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Actors/Textures.h"
 #include "Render/Palette.h"
-#include "Render/Textures.h"
 #include "State/Timers.h"
 
 // decomp: BATTLE.PRG func_800AAD4C (src/BATTLE/BATTLE.PRG/40564.c:1301)
@@ -139,7 +138,6 @@ void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int fr
 {
     Actors_TextureAnimationFrame fallback;
     RECT rect;
-    DR_MOVE* packet;
     Actors_TextureAnimationFrame* animation;
     Actors_TextureOverlayRect* overlay;
     int srcX;
@@ -191,7 +189,6 @@ void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int fr
     srcX += (frame % animation->columns) * width;
     srcY += (frame / animation->columns) * height;
     srcY += actor->textureRowOffsets[Actors_sharedSequenceBankIndex];
-    packet = Render_BeginTextureMovePacket();
     x = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2];
     y = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2 + 1];
     row = Actors_textureSlotRowOffsets[actor->textureSlot];
@@ -205,9 +202,7 @@ void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int fr
     frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;
     setRECT(&rect, (frame * 64) + srcX, srcY + 256, width, height);
     srcY = (y * 256) + (row * 64) + py;
-    SetDrawMove(packet, &rect, dstX + (x * 64), srcY);
-    VS::Render::AppendLiveOverlayPrimitive(packet);
-    Render_EndTextureMovePacket(packet);
+    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), srcY);
 }
 #undef getActorFlags
 
@@ -234,7 +229,6 @@ void Actors_ResetActorTextureFrames(int bank_index)
 void Actors_UploadActorTextureOverlay(int index, Actors_TextureOverlayUpload* arg)
 {
     RECT rect;
-    DR_MOVE* packet;
     Actors_ActorRecord* actor = Actors_actorRecords[index];
     Actors_TextureOverlayRect* overlay;
     int srcX;
@@ -269,16 +263,13 @@ void Actors_UploadActorTextureOverlay(int index, Actors_TextureOverlayUpload* ar
         dstX /= 2;
     }
 
-    packet = Render_BeginTextureMovePacket();
     x = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2];
     y = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2 + 1];
     row = Actors_textureSlotRowOffsets[actor->textureSlot];
     py = overlay->y;
     setRECT(
         &rect, ((Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64) + srcX, srcY + 256, width, height);
-    SetDrawMove(packet, &rect, dstX + (x * 64), (y * 256) + (row * 64) + py);
-    VS::Render::AppendLiveOverlayPrimitive(packet);
-    Render_EndTextureMovePacket(packet);
+    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), (y * 256) + (row * 64) + py);
 }
 #undef getActorFlags
 
@@ -298,7 +289,6 @@ void Actors_UpdateActorTextureScrolling(Actors_ActorRecord* actor)
         Actors_TextureScrollState* scroll;
         Actors_TextureOverlayRect* overlay;
         RECT rect;
-        DR_MOVE* packet;
         int x;
         int y;
         int width;
@@ -374,13 +364,10 @@ void Actors_UpdateActorTextureScrolling(Actors_ActorRecord* actor)
         }
 
         rect.x = originX + x;
-        packet = Render_BeginTextureMovePacket();
         rect.y = originY + y;
         rect.w = width;
         rect.h = height;
-        SetDrawMove(packet, &rect, originX + dstX, originY + overlay->y);
-        VS::Render::AppendLiveOverlayPrimitive(packet);
-        Render_EndTextureMovePacket(packet);
+        VS::Render::QueueLiveTextureRectangleMove(&rect, originX + dstX, originY + overlay->y);
     }
 }
 #undef getActorFlags

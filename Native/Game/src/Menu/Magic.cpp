@@ -33,7 +33,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
 

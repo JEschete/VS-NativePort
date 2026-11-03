@@ -11,6 +11,7 @@
 #include "Render/DisplayControlLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
+#include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -78,7 +79,6 @@ extern "C" {
 #include "Render/Frame.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 #include "Save/NativeResume.h"
 #include "State/Flags.h"
@@ -922,7 +922,7 @@ void Field_UploadZoneTextures(void* data)
     for (i = 0; i < numTims; ++i) {
         byteOffset = *dataPtr++;
 
-        Render_ParseTextureImage(dataPtr, &tim);
+        VS::Render::ParseLiveTim(dataPtr, &tim);
 
         if (tim.paddr != NULL) {
             if (tim.prect->x >= 768) {

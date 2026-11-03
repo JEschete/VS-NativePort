@@ -4,6 +4,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Stream.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "State/PlayTime.h"
 
@@ -238,7 +238,7 @@ void Ending_Credits_DrawFinCaption(Ending_Credits_Element* element)
 
     primitive_cursor_slot = 0;
     p[primitive_cursor_slot] = sprt;
-    p[primitive_cursor_slot] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 896, 0), 1);
+    p[primitive_cursor_slot] = VS::Render::AppendLiveTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 896, 0), 1);
 }
 
 // decomp: ENDING.PRG _renderVagrantStory (src/ENDING/ENDING.PRG/D4.c:390)
@@ -302,7 +302,7 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
     primitive_cursor_slot = 0;
     frame_scratch_slots[primitive_cursor_slot] = sprt;
 
-    sprt = (SPRT *)(Render_AppendTexturePage(0x2E, 3));
+    sprt = (SPRT *)(VS::Render::AppendLiveTexturePage(0x2E, 3));
 
     SetSprt(sprt);
     setSemiTrans(sprt, 1);
@@ -316,7 +316,7 @@ void Ending_Credits_DrawScrollingTitleLogo(Ending_Credits_Element* element)
     setaddr((u_char*)frame_scratch_slots[1] + 12, sprt++);
 
     frame_scratch_slots[primitive_cursor_slot] = sprt;
-    frame_scratch_slots[primitive_cursor_slot] = Render_AppendTexturePage(0x4E, 3);
+    frame_scratch_slots[primitive_cursor_slot] = VS::Render::AppendLiveTexturePage(0x4E, 3);
     return;
 }
 
@@ -509,7 +509,7 @@ void Ending_Credits_DrawIllustration(Ending_Credits_Element* element)
     AddPrim(((u_char*)(p[1])) + 0x10, sprt++);
 
     p[0] = sprt;
-    sprt = (SPRT *)(Render_AppendTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX, 256), 4));
+    sprt = (SPRT *)(VS::Render::AppendLiveTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX, 256), 4));
 
     SetSprt(sprt);
     setXY0(sprt, 0xA0, 0);
@@ -522,7 +522,7 @@ void Ending_Credits_DrawIllustration(Ending_Credits_Element* element)
     AddPrim(((u_char*)(p[1])) + 0x10, sprt++);
 
     p[0] = sprt;
-    p[0] = Render_AppendTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX + 64, 256), 4);
+    p[0] = VS::Render::AppendLiveTexturePage(getTPage(1, 2, Ending_Credits_illustrationTexturePageX + 64, 256), 4);
 }
 
 // decomp: ENDING.PRG _creditsStrWidth (src/ENDING/ENDING.PRG/D4.c:672)
@@ -682,7 +682,7 @@ void Ending_Credits_DrawScrollingText(Ending_Credits_Element* element)
     }
 
     *(SPRT**)((uintptr_t)Core_ScratchBase() + 0x000) = sprt;
-    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = Render_AppendTexturePage(31, 3);
+    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = VS::Render::AppendLiveTexturePage(31, 3);
 }
 
 // decomp: ENDING.PRG _renderCopyright (src/ENDING/ENDING.PRG/D4.c:831)
@@ -717,7 +717,7 @@ void Ending_Credits_DrawScrollingCopyright(Ending_Credits_Element* element)
 
     primitive_cursor_slot = 0;
     p[primitive_cursor_slot] = sprt;
-    p[primitive_cursor_slot] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 960, 0), 3);
+    p[primitive_cursor_slot] = VS::Render::AppendLiveTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 960, 0), 3);
 }
 
 // decomp: ENDING.PRG _renderBackground (src/ENDING/ENDING.PRG/D4.c:865)
@@ -740,7 +740,7 @@ void Ending_Credits_DrawBackground(Ending_Credits_Element* element __attribute__
     AddPrim(((u_char*)(data[1])) + 0x1FFC, sprt++);
     data[0] = sprt;
 
-    sprt = (SPRT*)Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 768, 0), 0x7FF);
+    sprt = (SPRT*)VS::Render::AppendLiveTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 768, 0), 0x7FF);
     SetSprt(sprt);
     setUV0(sprt, 0, 10);
     setXY0(sprt, 256, 10);
@@ -751,7 +751,7 @@ void Ending_Credits_DrawBackground(Ending_Credits_Element* element __attribute__
     data[0] = sprt;
 
     poly =
-        (POLY_G4*)Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 832, 0), 0x7FF);
+        (POLY_G4*)VS::Render::AppendLiveTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Add, 832, 0), 0x7FF);
     SetPolyG4(poly);
     poly->x0 = poly->x2 = 0;
     poly->x1 = poly->x3 = 320;
@@ -792,7 +792,7 @@ void Ending_Credits_DrawBackground(Ending_Credits_Element* element __attribute__
     AddPrim(((u_char*)(data[1])) + 8, tile++);
     data[0] = tile;
 
-    data[0] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette8Bit, Render_BlendMode_Subtract, 0, 0), 2);
+    data[0] = VS::Render::AppendLiveTexturePage(getTPage(Render_TextureFormat_Palette8Bit, Render_BlendMode_Subtract, 0, 0), 2);
 }
 
 // decomp: ENDING.PRG _backgroundFadeIn (src/ENDING/ENDING.PRG/D4.c:939)
@@ -855,7 +855,7 @@ void Ending_Credits_FadeOutForSkip(Ending_Credits_Element* element)
     AddPrim(frame_scratch_slots[1], fade_tile++);
 
     frame_scratch_slots[0] = fade_tile;
-    frame_scratch_slots[0] = Render_AppendTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Subtract, 0, 0), 0);
+    frame_scratch_slots[0] = VS::Render::AppendLiveTexturePage(getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Subtract, 0, 0), 0);
 }
 
 // decomp: ENDING.PRG vs_ending_exec (src/ENDING/ENDING.PRG/D4.c:999)
@@ -1276,7 +1276,7 @@ void Ending_Credits_DrawSmallText(short x, short y, int palette_row_offset, u_ch
     }
 
     *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = glyph_sprite;
-    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = Render_AppendTexturePage(0xF, 0);
+    *(void**)((uintptr_t)Core_ScratchBase() + 0x000) = VS::Render::AppendLiveTexturePage(0xF, 0);
 }
 
 // decomp: ENDING.PRG func_8006B450 (src/ENDING/ENDING.PRG/D4.c:1438)

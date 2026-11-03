@@ -12,6 +12,7 @@
 #include "Render/DisplayControlLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -72,13 +73,13 @@ extern "C" {
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
+#include "OverlayWorkspace.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Images.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 #include "State/Location.h"
 #include "State/SceneTimer.h"
@@ -589,7 +590,7 @@ void Boot_RunGameLoop(void)
                     }
                     VS::Core::ElapsedFrameCounterTicks();
                     VS::Render::PresentLiveFieldFrame(ot + 0x821);
-                    Render_AdvanceTexturePageRetirements();
+                    VS::Render::AdvanceLiveTexturePageRetirements();
                 } while (!(((Field_screenTransitionStep == 1)
                                || (Field_screenTransitionStep == 2))
                            && (Field_screenTransitionAlpha == 255)));
@@ -631,7 +632,8 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     Effects_InitEffectRuntime();
     Field_InitializeRoomRuntimeState();
     Actors_InitializeActorModelResources();
-    Render_InitializeTextureSlotReservations();
+    VS::Render::InitializeLiveTexturePages();
+    Content_overlayWorkspaceOwner = 0;
     Content_LoadSystemResources();
     VS::Battle::Ai::InitializeLiveActorAiExtensionHook();
     VS::Input::ResetLiveVibrationPatterns();

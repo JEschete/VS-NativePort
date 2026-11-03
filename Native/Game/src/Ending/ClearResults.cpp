@@ -2,6 +2,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
+#include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 #include "State/GameTime.h"
 #include "State/Location.h"
@@ -303,7 +303,7 @@ int Ending_LoadClearResultsStep(void)
 
         for (i = 0; i < 3; ++i) {
 
-            Render_ParseTimImage((u_int *)(((u_char*)(Ending_resultsTimBuffer)) + i * 0x8220), &tim_image);
+            VS::Render::ParseLiveTim((u_int *)(((u_char*)(Ending_resultsTimBuffer)) + i * 0x8220), &tim_image);
 
             if (tim_image.paddr != NULL) {
                 tim_image.prect->x = 832 + i * 64;
@@ -380,7 +380,7 @@ int Ending_LoadClearResultsStep(void)
             return 0;
         }
 
-        Render_ParseTimImage((u_int *)(Ending_resultsTimBuffer), &tim_image);
+        VS::Render::ParseLiveTim((u_int *)(Ending_resultsTimBuffer), &tim_image);
 
         if (tim_image.paddr != NULL) {
             tim_image.prect->x = 0;

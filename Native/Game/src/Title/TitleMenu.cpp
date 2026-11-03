@@ -4,6 +4,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "Save/NativeMenu.h"
 #include "Save/NativeResume.h"
 #include "State/Ashley.h"
@@ -131,17 +131,17 @@ int Title_ShowContinueScreen(void)
 
     int exit;
 
-    Render_UploadPackedRectangle(vs_getXY(768, 0), &Title_saveMenuUiAtlas.pageZeroPixels, vs_getWH(64, 224));
-    Render_UploadPackedRectangle(vs_getXY(448, 256), &Title_saveMenuUiAtlas.pageOnePixels, vs_getWH(64, 256));
-    Render_UploadPackedRectangle(vs_getXY(832, 0), &Title_saveMenuFontAtlas[0], vs_getWH(64, 224));
-    Render_UploadPackedRectangle(vs_getXY(896, 0), &Title_saveMenuFontAtlas[1], vs_getWH(64, 224));
-    Render_UploadPackedRectangle(vs_getXY(960, 66), Title_debugFontAtlas, vs_getWH(64, 158));
-    Render_UploadPackedRectangle(vs_getXY(768, 227), &Title_saveMenuBackground.palette, vs_getWH(256, 1));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(768, 0), &Title_saveMenuUiAtlas.pageZeroPixels, vs_getWH(64, 224));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(448, 256), &Title_saveMenuUiAtlas.pageOnePixels, vs_getWH(64, 256));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(832, 0), &Title_saveMenuFontAtlas[0], vs_getWH(64, 224));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(896, 0), &Title_saveMenuFontAtlas[1], vs_getWH(64, 224));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(960, 66), Title_debugFontAtlas, vs_getWH(64, 158));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(768, 227), &Title_saveMenuBackground.palette, vs_getWH(256, 1));
     setRECT(&Title_loadScreenUploadRect, 640, 256, 32, 240);
     ClearImage(&Title_loadScreenUploadRect, 0, 0, 0);
     setRECT(&Title_loadScreenUploadRect, 768, 256, 32, 240);
     ClearImage(&Title_loadScreenUploadRect, 0, 0, 0);
-    Render_UploadPackedRectangle(vs_getXY(672, 256), &Title_saveMenuBackground.indexedPixels, vs_getWH(96, 240));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(672, 256), &Title_saveMenuBackground.indexedPixels, vs_getWH(96, 240));
     Menu_Files_InitializeDisplay();
     Title_loadScreenPhase = Title_LoadScreenPhase_Initialize;
 
@@ -189,17 +189,17 @@ void Title_ShowClearSaveScreen(void)
 
     int val;
 
-    Render_UploadPackedRectangle(vs_getXY(768, 0), &Title_saveMenuUiAtlas.pageZeroPixels, vs_getWH(64, 224));
-    Render_UploadPackedRectangle(vs_getXY(448, 256), &Title_saveMenuUiAtlas.pageOnePixels, vs_getWH(64, 256));
-    Render_UploadPackedRectangle(vs_getXY(832, 0), &Title_saveMenuFontAtlas[0], vs_getWH(64, 224));
-    Render_UploadPackedRectangle(vs_getXY(896, 0), &Title_saveMenuFontAtlas[1], vs_getWH(64, 224));
-    Render_UploadPackedRectangle(vs_getXY(960, 66), Title_debugFontAtlas, vs_getWH(64, 158));
-    Render_UploadPackedRectangle(vs_getXY(768, 227), &Title_saveMenuBackground.palette, vs_getWH(256, 1));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(768, 0), &Title_saveMenuUiAtlas.pageZeroPixels, vs_getWH(64, 224));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(448, 256), &Title_saveMenuUiAtlas.pageOnePixels, vs_getWH(64, 256));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(832, 0), &Title_saveMenuFontAtlas[0], vs_getWH(64, 224));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(896, 0), &Title_saveMenuFontAtlas[1], vs_getWH(64, 224));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(960, 66), Title_debugFontAtlas, vs_getWH(64, 158));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(768, 227), &Title_saveMenuBackground.palette, vs_getWH(256, 1));
     setRECT(&Title_clearSaveUploadRect, 640, 256, 32, 240);
     ClearImage(&Title_clearSaveUploadRect, 0, 0, 0);
     setRECT(&Title_clearSaveUploadRect, 768, 256, 32, 240);
     ClearImage(&Title_clearSaveUploadRect, 0, 0, 0);
-    Render_UploadPackedRectangle(vs_getXY(672, 256), &Title_saveMenuBackground.indexedPixels, vs_getWH(96, 240));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(672, 256), &Title_saveMenuBackground.indexedPixels, vs_getWH(96, 240));
     Menu_Files_InitializeDisplay();
 
     Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Initialize;
@@ -283,8 +283,8 @@ void Title_ShowPublisherAndDeveloper()
 
     setRECT(&rect, 0, 0, 320, 512);
     ClearImage(&rect, 0, 0, 0);
-    Render_UploadPackedRectangle(vs_getXY(320, 64), Title_publisherLogo, vs_getWH(16, 1));
-    Render_UploadPackedRectangle(vs_getXY(320, 0), Title_publisherLogo + 32, vs_getWH(256 / 4, 48));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(320, 64), Title_publisherLogo, vs_getWH(16, 1));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(320, 0), Title_publisherLogo + 32, vs_getWH(256 / 4, 48));
     SetDefDispEnv(&disp, 0, 256, 320, 240);
     SetDefDrawEnv(&draw, 0, 0, 320, 240);
     disp.screen.y = 8;
@@ -313,7 +313,7 @@ void Title_ShowPublisherAndDeveloper()
         PutDrawEnv(&draw);
     }
 
-    Render_UploadPackedRectangle(vs_getXY(0, 240), Title_developerLogo, vs_getWH(128 / 4, 14));
+    VS::Render::UploadLiveImageRectangle(vs_getXY(0, 240), Title_developerLogo, vs_getWH(128 / 4, 14));
 
     for (i = 0; i < 364; ++i) {
         developer_fade_attenuation = 0;

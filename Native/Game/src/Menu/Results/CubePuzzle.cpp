@@ -2,7 +2,9 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
+#include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -24,7 +26,6 @@ extern "C" {
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Images.h"
-#include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -102,7 +103,7 @@ int Menu_Results_InitializeCubePuzzleStart(void)
 
     if (Battle_unusedSubmenuState == 0) {
 
-        Render_ReserveTexturePageRange(0x1D, 2, 5);
+        VS::Render::ReserveLiveTexturePageRange(0x1D, 2, 5);
 
         Menu_Results_initializeCubePuzzleStartIqDisData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Iq].size);
         Menu_Results_initializeCubePuzzleStartIqDisCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Iq]);
@@ -117,7 +118,7 @@ int Menu_Results_InitializeCubePuzzleStart(void)
             TIM_IMAGE tim;
             for (i = 0; i < 2; ++i) {
 
-                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleStartIqDisData)) + i * 0x8220), &tim);
+                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleStartIqDisData)) + i * 0x8220), &tim);
 
                 if (tim.paddr != NULL) {
                     tim.prect->x = 0x340 + i * 0x40;
@@ -201,7 +202,7 @@ int Menu_Results_InitializeCubePuzzleQuit(void)
 
     if (Battle_unusedSubmenuState == 0) {
 
-        Render_ReserveTexturePageRange(0x1D, 1, 5);
+        VS::Render::ReserveLiveTexturePageRange(0x1D, 1, 5);
 
         Menu_Results_initializeCubePuzzleQuitEscDisData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Esc].size);
         Menu_Results_initializeCubePuzzleQuitEscDisCdSLot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Esc]);
@@ -214,7 +215,7 @@ int Menu_Results_InitializeCubePuzzleQuit(void)
         if (Menu_Results_initializeCubePuzzleQuitEscDisCdSLot->state == Content_DiscRequestState_Loaded) {
             for (i = 0; i <= 0; ++i) {
 
-                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleQuitEscDisData)) + i * 0x8220), &tim);
+                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeCubePuzzleQuitEscDisData)) + i * 0x8220), &tim);
 
                 if (tim.paddr != NULL) {
                     tim.prect->x = 832 + i * 64;
@@ -284,7 +285,7 @@ int Menu_Results_UpdateCubePuzzleStart(void)
         if (Menu_Results_screenTimer >= 78) {
 
             Audio_StopSfx(126, 0);
-            Render_RetireTexturePageRange(29, 2, 5);
+            VS::Render::RetireLiveTexturePageRange(29, 2, 5);
 
             return 1;
         }
@@ -366,7 +367,7 @@ int Menu_Results_UpdateCubePuzzleResults(void)
             if (Menu_Results_screenTimer >= 138) {
 
                 Audio_StopSfx(0x7E, 0);
-                Render_RetireTexturePageRange(0x1D, 2, 5);
+                VS::Render::RetireLiveTexturePageRange(0x1D, 2, 5);
 
                 Audio_Seq_unusedScoredata.miscScore += Menu_Results_cubePuzzleResultsPuzzleModeRankPoints[rank];
 
@@ -415,7 +416,7 @@ int Menu_Results_UpdateCubePuzzleQuit(void)
         if (Menu_Results_screenTimer > 62) {
 
             Audio_StopSfx(0x7E, 0);
-            Render_RetireTexturePageRange(0x1D, 1, 5);
+            VS::Render::RetireLiveTexturePageRange(0x1D, 1, 5);
             Menu_Framework_NoOperation();
 
             return 1;

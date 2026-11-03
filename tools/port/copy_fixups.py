@@ -85,7 +85,18 @@ _RENDER_LIVE = {
         ("AppendLiveOverlayPrimitive", "F00200"), ("DrawLiveNumericGlyph", "F01351"),
         ("DrawLiveIntegerRightAligned", "F01352"), ("DrawLiveStatGauge", "F01353"),
         ("InsertLiveThreeWordPrimitive", "F01405"), ("InsertLiveDrawModeCommand", "F01406"),
-        ("UploadLiveImageRectangle", "F01408")),
+        ("UploadLiveImageRectangle", "F01408"),
+        # #276 row 6 (render textures): the texture move, the ENDING texture-page command, the file menus'
+        # packed-rectangle uploads and reads and the immediate sprite.
+        ("QueueLiveTextureRectangleMove", "F00971"), ("AppendLiveTexturePage", "F02421"),
+        ("UploadLiveImageRectangle", "F02717"), ("UploadLiveImageRectangle", "F03584"),
+        ("ReadLiveImageRectangle", "F02718"), ("ReadLiveImageRectangle", "F03585"),
+        ("DrawLiveImmediateSprite", "F02739")),
+    # #276 row 6 (render textures): the texture-page reservations and the TIM parse.
+    "TexturePagesLive.hpp": (
+        ("InitializeLiveTexturePages", "F00329"), ("AdvanceLiveTexturePageRetirements", "F00330"),
+        ("ReserveLiveTexturePageRange", "F00331"), ("RetireLiveTexturePageRange", "F00332")),
+    "TimImageLive.hpp": (("ParseLiveTim", "F00609"), ("ParseLiveTim", "F02452")),
     # #276 slice A5 (screen overlays): the framebuffer effect and the room transition draw.
     "ScreenOverlayLive.hpp": (
         ("DrawLiveScreenTransition", "F00070"), ("ResetLiveFramebufferEffect", "F00306"),
@@ -2027,6 +2038,38 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "        dstX + x * 64, y * 256 + row * 64 + py, width, height);\n"
          "    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;",
          "toggleable live facial tile selection and copy rectangle diagnostics"),
+    ] + [
+        (old, new, "#276 row 6: the texture move goes through the bounded VS::Render overlay queue")
+        for old, new in (
+            ("    DR_MOVE* packet;\n", ""),
+            ("    packet = vs_battlePacketBegin();\n", ""),
+            ("    SetDrawMove(packet, &rect, dstX + (x * 64), srcY);\n"
+             "    VS::Render::AppendLiveOverlayPrimitive(packet);\n"
+             "    vs_battlePacketEnd(packet);",
+             "    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), srcY);"),
+        )
+    ],
+    "F00977": [
+        (old, new, "#276 row 6: the texture move goes through the bounded VS::Render overlay queue")
+        for old, new in (
+            ("    DR_MOVE* packet;\n", ""),
+            ("    packet = vs_battlePacketBegin();\n", ""),
+            ("    SetDrawMove(packet, &rect, dstX + (x * 64), (y * 256) + (row * 64) + py);\n"
+             "    VS::Render::AppendLiveOverlayPrimitive(packet);\n"
+             "    vs_battlePacketEnd(packet);",
+             "    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), (y * 256) + (row * 64) + py);"),
+        )
+    ],
+    "F00978": [
+        (old, new, "#276 row 6: the texture move goes through the bounded VS::Render overlay queue")
+        for old, new in (
+            ("        DR_MOVE* packet;\n", ""),
+            ("        packet = vs_battlePacketBegin();\n", ""),
+            ("        SetDrawMove(packet, &rect, originX + dstX, originY + overlay->y);\n"
+             "        VS::Render::AppendLiveOverlayPrimitive(packet);\n"
+             "        vs_battlePacketEnd(packet);",
+             "        VS::Render::QueueLiveTextureRectangleMove(&rect, originX + dstX, originY + overlay->y);"),
+        )
     ],
     "F00801": [
         ("*((u_char*)temp_s0 + Actors_sharedSequenceBankIndex + 0x183E)",
@@ -3919,6 +3962,13 @@ ONDISC_OFFSETS: dict[str, str] = {
 FIXES["F01858"].append(
     ("0x2C10", "sizeof *Battle_actionState",
      "Allocate and initialize the actual native action state rather than its PS1 byte count")
+)
+
+FIXES["F01858"].append(
+    ("    VS::Render::InitializeLiveTexturePages();\n",
+     "    VS::Render::InitializeLiveTexturePages();\n"
+     "    Content_overlayWorkspaceOwner = 0;\n",
+     "#276 row 6: the original page init (146C.c:9480) also freed the overlay workspace, which Content owns")
 )
 
 # Reviewed fixes to copied type definitions: type id -> [(old, new, reason)]. Checked by Native\Tests\src\LayoutAsserts.cpp.

@@ -33,7 +33,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800EA234 (D_800EA234@BATTLE/BATTLE.PRG)

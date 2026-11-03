@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Effects/ScreenDistortion/RadialWarpLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/Lifecycle.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "OverlayWorkspace.h"
-#include "Render/Textures.h"
 
 // decomp: D_800EB9B4 (D_800EB9B4@BATTLE/BATTLE.PRG)
 Effects_ScreenEffectOverlay* Effects_screenEffectOverlay; /* data: contents loaded in Step 5 */
@@ -85,7 +85,7 @@ void Effects_ReleaseScreenEffectOverlay(void)
     if (Effects_screenEffectOverlay != NULL) {
         Content_ReleaseOverlayWorkspace(6);
         if (Effects_screenEffectOverlay->opaque1 == 1) {
-            Render_RetireTexturePageRange(0x1B, 5, 6);
+            VS::Render::RetireLiveTexturePageRange(0x1B, 5, 6);
         }
         Effects_ResetScreenEffectState();
     }

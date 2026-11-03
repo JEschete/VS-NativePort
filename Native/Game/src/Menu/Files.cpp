@@ -7,6 +7,8 @@
 #include "Menu/Sounds.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/TexturePagesLive.hpp"
+#include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
@@ -41,8 +43,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
@@ -185,14 +185,14 @@ void Menu_Files_DrawSummaryLabel(int xy, enum Menu_Files_FileMenuUiId id)
     static int Menu_Files_summaryLabelSaveInfoWh[] = { vs_getXY(3, 8), vs_getXY(13, 8), vs_getXY(17, 8),
         vs_getXY(22, 8), vs_getXY(26, 8), vs_getXY(19, 8), vs_getXY(10, 10),
         vs_getXY(16, 9), vs_getXY(18, 9), vs_getXY(5, 7) };
-    Render_DrawImmediateSprite(xy, Menu_Files_summaryLabelSaveInfoUVClut[id], Menu_Files_summaryLabelSaveInfoWh[id], 0xC);
+    VS::Render::DrawLiveImmediateSprite(xy, Menu_Files_summaryLabelSaveInfoUVClut[id], Menu_Files_summaryLabelSaveInfoWh[id], 0xC);
 }
 
 // decomp: MENU7.PRG _renderInteger (src/MENU/MENU7.PRG/260.c:1239)
 void Menu_Files_DrawInteger(int xy, u_int value, u_int placeDivisor)
 {
     do {
-        Render_DrawImmediateSprite(xy, vs_getUV0Clut(((value / placeDivisor) * 6), 0, 832, 223),
+        VS::Render::DrawLiveImmediateSprite(xy, vs_getUV0Clut(((value / placeDivisor) * 6), 0, 832, 223),
             vs_getWH(6, 10), getTPage(0, 0, 768, 0));
         value = value % placeDivisor;
         placeDivisor /= 10;
@@ -277,7 +277,7 @@ void Menu_Files_DrawHpMpSummary(int xy, enum Menu_Files_StatType stat, u_int cur
     xy = (xy - (wh - value_right_edge_offset)) - (maxValueDigits * 5);
     placeDivisor = Menu_Files_hpMpSummaryDigitDivisors[currentValueDigits];
     do {
-        Render_DrawImmediateSprite(xy - vs_getXY(0, 1),
+        VS::Render::DrawLiveImmediateSprite(xy - vs_getXY(0, 1),
             (((currentValue / placeDivisor) << 3) + 64) | (getClut(832, 223) << 16),
             vs_getWH(7, 12), getTPage(0, 0, 768, 0));
         currentValue = currentValue % placeDivisor;
@@ -610,15 +610,15 @@ u_int Menu_Files_ElementBackgroundColor(u_int outerFactor, u_int innerFactor)
     u_int color2;
 
     if (innerFactor < 9) {
-        color1 = Render_BlendRgb(
+        color1 = VS::Render::BlendRgb(
             vs_getRGB888(0, 65, 107), vs_getRGB888(25, 130, 108), innerFactor);
         color2 =
-            Render_BlendRgb(vs_getRGB888(0, 5, 51), vs_getRGB888(1, 40, 38), innerFactor);
+            VS::Render::BlendRgb(vs_getRGB888(0, 5, 51), vs_getRGB888(1, 40, 38), innerFactor);
     } else {
         color1 = Menu_Files_elementBackgroundColorColors1[((innerFactor >> 3) - 2)];
         color2 = Menu_Files_elementBackgroundColorColors2[((innerFactor >> 3) - 2)];
     }
-    return Render_BlendRgb(color1, color2, outerFactor);
+    return VS::Render::BlendRgb(color1, color2, outerFactor);
 }
 
 // decomp: MENU7.PRG _drawFileMenuElement (src/MENU/MENU7.PRG/260.c:1765)
@@ -687,7 +687,7 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
         }
         var2 = element->slotId;
         if (var2 < 5) {
-            Render_ReadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
+            VS::Render::ReadLiveImageRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
             saveInfo = &Title_saveFileSummaries[var2];
             location = element->saveLocation - 1;
             var1 = saveInfo->summary.base.slotState;
@@ -709,11 +709,11 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
             } else {
                 locationClut = Save_MemoryCard_uiResources->locationPalettes[0];
             }
-            Render_UploadPackedRectangle(vs_getXY(768, 227), locationClut, vs_getWH(256, 1));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(768, 227), locationClut, vs_getWH(256, 1));
             if (location < 0) {
                 uvClut = (~location << 13) | vs_getUV0Clut(64, 0, 768, 227);
                 xy = (element->x - 64) | y;
-                Render_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32),
+                VS::Render::DrawLiveImmediateSprite(xy, uvClut, vs_getWH(64, 32),
                     ((8 - element->outertextBlendFactor) << 19) | 0x9C);
             } else {
                 int thumbnail_texture_page_column;
@@ -723,9 +723,9 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
                 thumbnail_texture_page_x = (((location & 0x30) * 4) + 832) & 0x3FF;
                 thumbnail_texture_page_column = thumbnail_texture_page_x >> 6;
                 thumbnail_page_flags_and_dimming = (((8 - element->outertextBlendFactor) << 19) | 0x90);
-                Render_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32), thumbnail_texture_page_column | thumbnail_page_flags_and_dimming);
+                VS::Render::DrawLiveImmediateSprite(xy, uvClut, vs_getWH(64, 32), thumbnail_texture_page_column | thumbnail_page_flags_and_dimming);
             }
-            Render_UploadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
             Menu_Files_DrawSummaryLabel((element->x - 22) | y, Menu_Files_FileMenuUiId_Number);
             Menu_Files_DrawInteger((element->x - 9) | y, var2 + 1, 0xAU);
             slotState = saveInfo->summary.base.slotState;
@@ -765,7 +765,7 @@ void Menu_Files_DrawElement(Menu_Files_FileMenuElement* element)
                 Menu_Files_DrawInteger(y | 296, saveInfo->summary.stats.clearCount, 10);
                 y += 13 << 16;
                 if (saveInfo->summary.stats.clearCount != 0) {
-                    Render_DrawImmediateSprite(y | 69, vs_getUV0Clut(240, 16, 912, 223), vs_getWH(16, 16),
+                    VS::Render::DrawLiveImmediateSprite(y | 69, vs_getUV0Clut(240, 16, 912, 223), vs_getWH(16, 16),
                         getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, 768, 0));
                 }
                 Menu_Files_DrawSummaryLabel(y | 240, Menu_Files_FileMenuUiId_Time);
@@ -820,9 +820,9 @@ void Menu_Files_DrawFrame(int framebuf)
     if (framebuf != 0) {
         x = 320;
     }
-    Render_DrawImmediateSprite(vs_getXY(256, 176), vs_getUV0Clut(0, 176, 768, 227), vs_getWH(64, 64),
+    VS::Render::DrawLiveImmediateSprite(vs_getXY(256, 176), vs_getUV0Clut(0, 176, 768, 227), vs_getWH(64, 64),
         getTPage(Render_TextureFormat_Palette8Bit, Render_BlendMode_Average, 768, 256));
-    Render_DrawImmediateSprite(vs_getXY(0, 176), vs_getUV0Clut(0, 176, 768, 227), vs_getWH(256, 64),
+    VS::Render::DrawLiveImmediateSprite(vs_getXY(0, 176), vs_getUV0Clut(0, 176, 768, 227), vs_getWH(256, 64),
         getTPage(Render_TextureFormat_Palette8Bit, Render_BlendMode_Average, 640, 256));
 
     for (i = 0; i < 10; ++i, ++element) {
@@ -889,12 +889,12 @@ void Menu_Files_DrawFrame(int framebuf)
 
     for (i = 1; i < 4; ++i) {
         new_var = 256;
-        Render_DrawImmediateSprite(vs_getXY(0, 187 - i), (187 - i) << 8, vs_getWH(256, 1),
+        VS::Render::DrawLiveImmediateSprite(vs_getXY(0, 187 - i), (187 - i) << 8, vs_getWH(256, 1),
             (x >> 6) | (((4 - i) << 21) | new_var));
-        Render_DrawImmediateSprite(vs_getXY(256, 187 - i), (187 - i) << 8, vs_getWH(64, 1),
+        VS::Render::DrawLiveImmediateSprite(vs_getXY(256, 187 - i), (187 - i) << 8, vs_getWH(64, 1),
             (((int)(x + new_var)) >> 6) | (((4 - i) << 21) | new_var));
     }
-    Render_DrawImmediateSprite(vs_getXY(10, 181), vs_getUV0Clut(64, 145, 848, 223), vs_getWH(33, 7),
+    VS::Render::DrawLiveImmediateSprite(vs_getXY(10, 181), vs_getUV0Clut(64, 145, 848, 223), vs_getWH(33, 7),
         getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, 768, 0)); // "Caution"
     DrawSync(0);
     Menu_Files_primBuf.tag = vs_getTag(Menu_Files_primBuf.prim.tile, Render_LegacyPrimitiveAddress_Null);
@@ -903,7 +903,7 @@ void Menu_Files_DrawFrame(int framebuf)
     Menu_Files_primBuf.prim.tile.size = vs_getWH(320, 52);
     DrawPrim(&Menu_Files_primBuf); // Message dialog background
     if (Menu_Files_selectCursorXy != 0) {
-        Render_DrawImmediateSprite(Menu_Files_selectCursorXy, vs_getUV0Clut(32, 48, 896, 223), vs_getWH(16, 16),
+        VS::Render::DrawLiveImmediateSprite(Menu_Files_selectCursorXy, vs_getUV0Clut(32, 48, 896, 223), vs_getWH(16, 16),
             (Menu_Files_cursorFileOpSaturation[Menu_Files_selectCursorColor] << 16)
                 | getTPage(Render_TextureFormat_Palette4Bit, Render_BlendMode_Average, 768, 0));
         Menu_Files_selectCursorColor = (Menu_Files_selectCursorColor + 1) & 0xF;
@@ -932,9 +932,9 @@ void Menu_Files_DrawFrame(int framebuf)
 // decomp: MENU7.PRG _drawFileMenuBg (src/MENU/MENU7.PRG/260.c:2078)
 void Menu_Files_DrawBackground(void)
 {
-    Render_DrawImmediateSprite(vs_getXY(256, 0), vs_getUV0Clut(0, 0, 768, 227), vs_getWH(64, 176),
+    VS::Render::DrawLiveImmediateSprite(vs_getXY(256, 0), vs_getUV0Clut(0, 0, 768, 227), vs_getWH(64, 176),
         getTPage(Render_TextureFormat_Palette8Bit, Render_BlendMode_Average, 768, 256));
-    Render_DrawImmediateSprite(vs_getXY(0, 0), vs_getUV0Clut(0, 0, 768, 227), vs_getWH(256, 176),
+    VS::Render::DrawLiveImmediateSprite(vs_getXY(0, 0), vs_getUV0Clut(0, 0, 768, 227), vs_getWH(256, 176),
         getTPage(Render_TextureFormat_Palette8Bit, Render_BlendMode_Average, 640, 256));
 }
 
@@ -2010,7 +2010,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
 
     switch (*state) {
     case Menu_Files_GameOverState_Init:
-        Render_RetireTexturePageRange(0x1F, 1, 6);
+        VS::Render::RetireLiveTexturePageRange(0x1F, 1, 6);
         Field_SetFieldRenderingEnabled(0);
         Menu_Files_gameOverSettingsBackup = Input_settings;
         Menu_Files_gameOverDifficulty = Audio_Seq_unusedStateFlags.difficulty;

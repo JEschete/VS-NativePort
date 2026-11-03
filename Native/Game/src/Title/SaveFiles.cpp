@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Render/UiPacketsLive.hpp"
 #include "Save/MemoryCard/GameFilesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "Save/MemoryCard/GameFiles.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Save/NativeMenu.h"
@@ -499,7 +499,7 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
         }
         right_color_glyph_or_slot = element->slotId;
         if (right_color_glyph_or_slot < 5) {
-            Render_ReadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
+            VS::Render::ReadLiveImageRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
             saveInfo = &Title_saveFileSummaries[right_color_glyph_or_slot];
             location = element->saveLocation - 1;
             left_color_text_index_or_stat = saveInfo->summary.base.slotState;
@@ -521,7 +521,7 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
             } else {
                 locationClut = Save_MemoryCard_uiResources->locationPalettes[0];
             }
-            Render_UploadPackedRectangle(vs_getXY(768, 227), locationClut, vs_getWH(256, 1));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(768, 227), locationClut, vs_getWH(256, 1));
             if (location < 0) {
                 uvClut = (~location << 13) | vs_getUV0Clut(64, 0, 768, 227);
                 xy = (element->x - 64) | y;
@@ -537,7 +537,7 @@ void Title_SaveFiles_DrawElement(Menu_Files_FileMenuElement* element)
                 location_fade_texture_flags = (((8 - element->outertextBlendFactor) << 19) | 0x90);
                 Title_SaveFiles_DrawImmediateSprite(xy, uvClut, vs_getWH(64, 32), location_texture_page | location_fade_texture_flags);
             }
-            Render_UploadPackedRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
+            VS::Render::UploadLiveImageRectangle(vs_getXY(768, 227), clut, vs_getWH(256, 1));
             Title_SaveFiles_DrawSummaryLabel((element->x - 22) | y, Menu_Files_FileMenuUiId_Number);
             Menu_Files_DrawInteger((element->x - 9) | y, right_color_glyph_or_slot + 1, 0xAU);
             slotState = saveInfo->summary.base.slotState;

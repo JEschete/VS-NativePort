@@ -7,6 +7,9 @@ typedef struct Title_SaveMenuBackgroundRecord Title_SaveMenuBackgroundRecord;
 typedef struct Title_SaveMenuFontRecord Title_SaveMenuFontRecord;
 typedef struct Title_SaveMenuUiRecord Title_SaveMenuUiRecord;
 
+// decomp: src/include/gpu.h:101
+#define vs_getTpageRaw(tpageVal) ((0xE1 << 24) | ((tpageVal) & 0xFFFF))
+
 // decomp: fontTable_t (src/TITLE/TITLE.PRG/22C.c:3112)
 typedef struct Title_SaveMenuFontRecord {
     char indexedPixels[220][256 / 2];

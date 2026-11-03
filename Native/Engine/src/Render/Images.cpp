@@ -4,6 +4,7 @@
 #include "Core/RandomLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: D_800EB9BC (D_800EB9BC@BATTLE/BATTLE.PRG)
@@ -127,7 +127,7 @@ void Render_ActivateGimLayer(u_int layer_index, void* arg1, u_char* arg2)
     }
 
     if (gim->drawRoutine == 3) {
-        Render_ReserveTexturePageRange((*(Render_GimLayer* (*))&Render_gimLayers)->vramPage + (*(Render_GimLayer* (*))&Render_gimLayers)->texturePageCount, 1, 6);
+        VS::Render::ReserveLiveTexturePageRange((*(Render_GimLayer* (*))&Render_gimLayers)->vramPage + (*(Render_GimLayer* (*))&Render_gimLayers)->texturePageCount, 1, 6);
     }
 }
 
@@ -138,10 +138,10 @@ void Render_ReleaseGimImages(void)
     int i;
 
     if ((layer_cursor != NULL) && (layer_cursor->loadPhase == 3)) {
-        Render_RetireTexturePageRange(layer_cursor->vramPage, layer_cursor->texturePageCount, 6);
+        VS::Render::RetireLiveTexturePageRange(layer_cursor->vramPage, layer_cursor->texturePageCount, 6);
         for (i = 0; i < 3; ++i) {
             if (layer_cursor->drawRoutine == 3) {
-                Render_RetireTexturePageRange((*(Render_GimLayer* (*))&Render_gimLayers)->vramPage + (*(Render_GimLayer* (*))&Render_gimLayers)->texturePageCount, 1, 6);
+                VS::Render::RetireLiveTexturePageRange((*(Render_GimLayer* (*))&Render_gimLayers)->vramPage + (*(Render_GimLayer* (*))&Render_gimLayers)->texturePageCount, 1, 6);
             }
             ++layer_cursor;
         }
@@ -255,7 +255,7 @@ void Render_UpdateGimImages(void)
         third->texturePageCount = j;
         height *= 16;
         count += height;
-        Render_ReserveTexturePageRange(gim->vramPage, gim->texturePageCount, 6);
+        VS::Render::ReserveLiveTexturePageRange(gim->vramPage, gim->texturePageCount, 6);
 
         while (i > 0) {
             VS::Render::UploadLiveImageRectangle((width + 512) | 0x1000000, gim->fileData + count,

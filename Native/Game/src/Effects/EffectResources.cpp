@@ -5,6 +5,7 @@
 #include "Effects/PackageExtents.hpp"
 #include "Effects/TextureBindings.hpp"
 #include "Effects/TrailEmitterLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
@@ -36,7 +37,6 @@ extern "C" {
 #include "Effects/Templates/TrailNineDispatch.h"
 #include "Effects/Transforms.h"
 #include "OverlayWorkspace.h"
-#include "Render/Textures.h"
 
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
 int Effects_textureLoadIndex;
@@ -236,7 +236,7 @@ void Effects_ReleaseEffectPackageResources(void)
         flags = Effects_loadedTextureSlots;
         bit = 1 << i;
         if (flags & bit) {
-            Render_RetireTexturePageRange(i, 1, 2);
+            VS::Render::RetireLiveTexturePageRange(i, 1, 2);
             Effects_loadedTextureSlots &= ~bit;
         }
     }
@@ -277,7 +277,7 @@ int Effects_UpdateEffectTextureLoading(void)
 
             if (Effects_textureLoads.isClut[Effects_textureLoadIndex] == 0) {
                 slot += 24;
-                Render_ReserveTexturePageRange(slot, 1, 2);
+                VS::Render::ReserveLiveTexturePageRange(slot, 1, 2);
                 Effects_loadedTextureSlots |= load_state << slot;
                 upload_rectangle.x = (slot - (slot / 16 * 16)) << 6;
                 upload_rectangle.y = slot / 16 << 8;

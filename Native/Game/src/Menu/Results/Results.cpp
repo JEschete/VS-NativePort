@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
+#include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -29,7 +31,6 @@ extern "C" {
 #include "Render/Images.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 
@@ -329,7 +330,7 @@ int Menu_Results_InitializeGameClear(void)
 
     if (Battle_unusedSubmenuState == 0) {
 
-        Render_ReserveTexturePageRange(0x1D, 3, 5);
+        VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5);
 
         Menu_Results_initializeGameClearTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Rank].size);
         Menu_Results_initializeGameClearCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank]);
@@ -344,7 +345,7 @@ int Menu_Results_InitializeGameClear(void)
             for (i = 0; i < 3; ++i) {
                 TIM_IMAGE tim;
 
-                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeGameClearTimData)) + i * 0x8220), &tim);
+                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeGameClearTimData)) + i * 0x8220), &tim);
 
                 if (tim.paddr != NULL) {
                     tim.prect->x = 832 + i * 64;
@@ -633,7 +634,7 @@ int Menu_Results_UpdateGameClear(void)
                 break;
             }
 
-            Render_RetireTexturePageRange(0x1D, 3, 5);
+            VS::Render::RetireLiveTexturePageRange(0x1D, 3, 5);
             Menu_Framework_NoOperation();
 
             return 1;

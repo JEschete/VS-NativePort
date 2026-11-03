@@ -612,12 +612,12 @@
     <ClInclude Include="src\Render\Text\VariableFont.h">
       <Filter>src\Render\Text</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\TextureAnimation.cpp">
+    <ClCompile Include="src\Render\TexturePages.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\TextureAnimation.h">
+    <ClCompile Include="src\Render\TexturePagesLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\TextureRegionDraw.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -630,6 +630,12 @@
     <ClInclude Include="src\Render\Textures.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\TimImage.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\TimImageLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\UiPackets.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -942,10 +948,22 @@
     <ClInclude Include="include\Render\SpritesLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\TexturePages.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\TexturePagesLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\TextureRegionDraw.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\TextureRegionDrawLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\TimImage.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\TimImageLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\UiPackets.hpp">

@@ -16,7 +16,6 @@ extern "C" {
 #include "Render/LegacyPackets.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"
-#include "Render/TextureAnimation.h"
 #include "State/Timers.h"
 
 // decomp: D_800E861C (D_800E861C@BATTLE/BATTLE.PRG)

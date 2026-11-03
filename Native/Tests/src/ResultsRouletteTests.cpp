@@ -10,6 +10,7 @@
 
 #include "Core/BiosRand.h"
 #include "Legacy/Psx.h"
+#include "Render/TexturePagesLive.hpp"
 
 extern "C" {
 #include "Audio/Driver/SoundDriver.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
-#include "Render/Textures.h"
 }
 
 namespace {
@@ -44,8 +44,7 @@ struct RouletteFixture {
   int saved_counting_map = Menu_Results_incrementingMapCompletion;
   int saved_visible_score = Menu_Results_onScreenScore;
   int saved_visible_map = Menu_Results_onScreenMapCompletion;
-  std::array<u_char, 40> saved_reservations =
-      std::to_array(Render_legacyTexturePageReservations);
+  VS::Render::TexturePageTable saved_pages = VS::Render::LiveTexturePages();
   decltype(std::to_array(Audio_Mixer_kCommandHandlers)) saved_handlers =
       std::to_array(Audio_Mixer_kCommandHandlers);
   u_int* saved_offsets = Audio_Playback_soundEffectProgramOffsets;
@@ -83,8 +82,7 @@ struct RouletteFixture {
     Menu_Results_incrementingMapCompletion = saved_counting_map;
     Menu_Results_onScreenScore = saved_visible_score;
     Menu_Results_onScreenMapCompletion = saved_visible_map;
-    std::copy(saved_reservations.begin(), saved_reservations.end(),
-              Render_legacyTexturePageReservations);
+    VS::Render::LiveTexturePages() = saved_pages;
     std::copy(saved_handlers.begin(), saved_handlers.end(),
               Audio_Mixer_kCommandHandlers);
     Audio_Playback_soundEffectProgramOffsets = saved_offsets;

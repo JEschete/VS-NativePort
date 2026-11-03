@@ -7,6 +7,7 @@
 #include "Render/CameraViewLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/UiPackets.hpp"
 #include "Render/UiPacketsLive.hpp"
 #include "Save/NativeContainerLive.hpp"
@@ -89,8 +90,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/Text/VariableFont.h"
-#include "Render/TextureAnimation.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 #include "State/StateFlags.h"
 
@@ -775,7 +774,7 @@ void Menu_Framework_ResumeAfterActionSelection(void)
             Menu_Framework_menuState.executeAbilityType;
     }
     if (Menu_Framework_openedWithoutMainMenu == 0) {
-        Render_ReserveTexturePageRange(0x1A, 3, 6);
+        VS::Render::ReserveLiveTexturePageRange(0x1A, 3, 6);
     }
 }
 
@@ -1694,7 +1693,7 @@ void Menu_Framework_LoadBackgroundTexture(u_int* buf)
         }
     }
 
-    Render_ReserveTexturePageRange(0x1A, 3, 6);
+    VS::Render::ReserveLiveTexturePageRange(0x1A, 3, 6);
     ClearImage(&Menu_Framework_loadBackgroundTextureRects[0], 0, 0, 0);
     ClearImage(&Menu_Framework_loadBackgroundTextureRects[1], 0, 0, 0);
 
@@ -2767,7 +2766,7 @@ int Menu_Framework_ReturnFromSubmenu(int packed_menu_state)
     }
 
     if (Menu_Framework_openedWithoutMainMenu == 0) {
-        Render_RetireTexturePageRange(26, 3, 6);
+        VS::Render::RetireLiveTexturePageRange(26, 3, 6);
     }
 
     Menu_Framework_menuState.currentMenu = 0x7F;

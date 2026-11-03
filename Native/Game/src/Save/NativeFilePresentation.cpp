@@ -15,6 +15,7 @@
 
 #include "Content/DataStore.hpp"
 #include "Field/MinimapScene.hpp"
+#include "Render/UiPacketsLive.hpp"
 
 extern "C" {
 #include "Battle/Feedback.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Field/Znd.h"
 #include "Menu/Files.h"
 #include "Render/Font.h"
-#include "Render/TextureAnimation.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveFiles.h"
 }
@@ -291,7 +291,8 @@ class Frontend {
       Title_SaveFiles_DrawImmediateSprite(xy, asset.uv_clut, asset.size,
                                           asset.page);
     } else {
-      Render_DrawImmediateSprite(xy, asset.uv_clut, asset.size, asset.page);
+      VS::Render::DrawLiveImmediateSprite(xy, asset.uv_clut, asset.size,
+                                          asset.page);
     }
   }
 
@@ -424,10 +425,10 @@ void Artwork(const Frontend& frontend, int artwork, int y, bool selected) {
   constexpr int kImageUv = vs_getUV0Clut(0, 0, 768, 227);
   const int palette_xy = vs_getXY(kPalettePosition.x, kPalettePosition.y);
   std::array<std::uint16_t, kPaletteColors> previous{};
-  Render_ReadPackedRectangle(palette_xy, previous.data(), kPaletteSize);
+  VS::Render::ReadLiveImageRectangle(palette_xy, previous.data(), kPaletteSize);
   const unsigned palette =
       artwork >= 0 && artwork < kFirstPaletteImages ? 0 : 1;
-  Render_UploadPackedRectangle(
+  VS::Render::UploadLiveImageRectangle(
       palette_xy, Save_MemoryCard_uiResources->locationPalettes[palette],
       kPaletteSize);
   const int dimming = (selected ? 0 : kSelectedBlend) << kDimmingShift;
@@ -443,7 +444,8 @@ void Artwork(const Frontend& frontend, int artwork, int y, bool selected) {
         kPageShift;
     frontend.Sprite({0, y}, {uv, kArtworkSize, dimming | kImagePage | page});
   }
-  Render_UploadPackedRectangle(palette_xy, previous.data(), kPaletteSize);
+  VS::Render::UploadLiveImageRectangle(palette_xy, previous.data(),
+                                       kPaletteSize);
 }
 
 void Stats(const Frontend& frontend, const Snapshot& state, int top) {

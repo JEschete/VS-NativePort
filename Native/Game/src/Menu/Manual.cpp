@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Sfx.h"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
 
 // decomp: local static of vs_menuE_exec, at file scope so the module reset reaches it
@@ -215,7 +215,7 @@ int Menu_Manual_InitHelpState(void)
     if (Input_settings.cursorMemory == 0) {
         VS::Core::Memory::ZeroLiveAlignedWords(&Field_manualDisplayState, sizeof Field_manualDisplayState);
     }
-    Render_ReserveTexturePageRange(0x1D, 3, 5);
+    VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5);
     Menu_Manual_showMenuState = 0;
     Menu_Manual_scrollPosition = 0;
     Menu_Manual_lineCount = 0;
@@ -415,7 +415,7 @@ int Menu_Manual_UpdateHelpPages(void)
         if (Menu_Manual_helpAssets != NULL) {
             VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
         }
-        Render_RetireTexturePageRange(0x1D, 3, 5);
+        VS::Render::RetireLiveTexturePageRange(0x1D, 3, 5);
         return 1;
     case Menu_Manual_ManualMenuState_ExitToBattle:
         if (Menu_Manual_helpText != NULL) {
@@ -424,7 +424,7 @@ int Menu_Manual_UpdateHelpPages(void)
         if (Menu_Manual_helpAssets != NULL) {
             VS::Core::Memory::FreeLiveFromHighEnd(Menu_Manual_helpAssets);
         }
-        Render_RetireTexturePageRange(0x1D, 3, 5);
+        VS::Render::RetireLiveTexturePageRange(0x1D, 3, 5);
         return 2;
     }
     return 0;

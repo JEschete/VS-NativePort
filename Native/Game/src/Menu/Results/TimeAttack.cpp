@@ -3,7 +3,9 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
+#include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Music.h"
@@ -19,7 +21,6 @@ extern "C" {
 #include "Menu/Results/TimeAttack.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
-#include "Render/Textures.h"
 #include "State/Progress.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
@@ -64,7 +65,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
 
     if (state == 0) {
 
-        Render_ReserveTexturePageRange(0x1D, 1, 5);
+        VS::Render::ReserveLiveTexturePageRange(0x1D, 1, 5);
 
         Menu_Results_initializeTimeAttackResultsTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Time].size);
         Menu_Results_initializeTimeAttackResultsCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[1]);
@@ -77,7 +78,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
         if (Menu_Results_initializeTimeAttackResultsCdSlot->state == Content_DiscRequestState_Loaded) {
             TIM_IMAGE tim;
 
-            Render_ParseTextureImage((u_long *)(Menu_Results_initializeTimeAttackResultsTimData), &tim);
+            VS::Render::ParseLiveTim((u_long *)(Menu_Results_initializeTimeAttackResultsTimData), &tim);
 
             if (tim.paddr != NULL) {
                 tim.prect->x = 832;
@@ -178,7 +179,7 @@ int Menu_Results_InitializeTimeAttackStart(void)
 
     if (Battle_unusedSubmenuState == 0) {
 
-        Render_ReserveTexturePageRange(0x1D, 2, 5);
+        VS::Render::ReserveLiveTexturePageRange(0x1D, 2, 5);
 
         Menu_Results_initializeTimeAttackStartTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Attack].size);
         Menu_Results_initializeTimeAttackStartCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]);
@@ -192,7 +193,7 @@ int Menu_Results_InitializeTimeAttackStart(void)
             TIM_IMAGE tim;
 
             for (i = 0; i < 2; ++i) {
-                Render_ParseTextureImage((u_long *)(((u_char*)(Menu_Results_initializeTimeAttackStartTimData)) + i * 0x8220), &tim);
+                VS::Render::ParseLiveTim((u_long *)(((u_char*)(Menu_Results_initializeTimeAttackStartTimData)) + i * 0x8220), &tim);
 
                 if (tim.paddr != NULL) {
                     tim.prect->x = 832 + i * 64;
@@ -332,7 +333,7 @@ int Menu_Results_UpdateTimeAttackResults(void)
             ++Menu_Results_screenState;
         }
     } else {
-        Render_RetireTexturePageRange(29, 1, 5);
+        VS::Render::RetireLiveTexturePageRange(29, 1, 5);
 
         return 1;
     }
@@ -463,7 +464,7 @@ int Menu_Results_UpdateTimeAttackStart(void)
         State_SetTickSpeed(2);
         VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[2]);
         VS::Render::SetLiveFramebufferEffectEnabled(0);
-        Render_RetireTexturePageRange(0x1D, 2, 5);
+        VS::Render::RetireLiveTexturePageRange(0x1D, 2, 5);
 
         return 1;
     }

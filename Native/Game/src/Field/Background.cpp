@@ -4,6 +4,8 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
+#include "Render/TexturePagesLive.hpp"
+#include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
@@ -21,7 +23,6 @@ extern "C" {
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
 #include "Render/Render.h"
-#include "Render/Textures.h"
 
 // decomp: D_80068C1C (D_80068C1C@BATTLE/BATTLE.PRG)
 int Field_legacyBackgroundGradientPackets[1344]; /* contents: module image (ModuleData.cpp) */
@@ -263,7 +264,7 @@ int Field_QueueTiledBackgroundLoad(int texture_page)
     Field_legacyBackgroundTexturePage = texture_page;
     if (background_section_words != 0) {
         Field_legacyBackgroundTextureReservationId = *background_section_words;
-        if (Render_ReserveTexturePageRange(Field_legacyBackgroundTexturePage, Field_legacyBackgroundTextureReservationId, 5) != 0) {
+        if (VS::Render::ReserveLiveTexturePageRange(Field_legacyBackgroundTexturePage, Field_legacyBackgroundTextureReservationId, 5) != 0) {
             disc_sector_bytes = 0x800;
             texture_disc_file = (Content_DiscFile*)(background_section_words + 0x20);
             layout_disc_file = (Content_DiscFile*)(background_section_words + 0x42);
@@ -299,7 +300,7 @@ int Field_FinishTiledBackgroundLoad(void)
         TIM_IMAGE tim;
 
         *Field_legacyBackgroundTimBuffer = 0x10;
-        Render_ParseTextureImage(Field_legacyBackgroundTimBuffer, &tim);
+        VS::Render::ParseLiveTim(Field_legacyBackgroundTimBuffer, &tim);
         if (tim.paddr != NULL) {
             tim.prect->x = (tim.prect->x & 0x3F) + ((Field_legacyBackgroundTexturePage & 0xF) << 6);
             tim.prect->y = (char)tim.prect->y + ((Field_legacyBackgroundTexturePage & 0x10) * 0x10);
@@ -329,7 +330,7 @@ int Field_ReleaseTiledBackground(void)
     Field_isTiledBackgroundEnabled = 0;
     if (Field_loadedBackgroundLayout != NULL) {
         Field_isTiledBackgroundEnabled = 0;
-        Render_RetireTexturePageRange(Field_legacyBackgroundTexturePage, Field_legacyBackgroundTextureReservationId, 5);
+        VS::Render::RetireLiveTexturePageRange(Field_legacyBackgroundTexturePage, Field_legacyBackgroundTextureReservationId, 5);
         VS::Core::Memory::FreeLiveFromHighEnd(Field_loadedBackgroundLayout);
         Field_loadedBackgroundLayout = NULL;
         return 1;

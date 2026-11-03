@@ -4,6 +4,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -987,7 +988,7 @@ int Content_ParseActorModel(Content_ActorAssetRequest* object)
             goto allFree;
         }
     fallback:
-        if (Render_ReserveTexturePageRange(31, 1, 4) == 0) {
+        if (VS::Render::ReserveLiveTexturePageRange(31, 1, 4) == 0) {
             actor->textureSlot = 0;
             actor->instance.textureSlotCountMinusOne = 0;
             ++Render_legacyActorTextureSlots[0].referenceCount;
@@ -1682,7 +1683,7 @@ int Content_ReleaseActorModel(int actor_index)
             }
 
             if (actor->textureSlot == 20) {
-                Render_RetireTexturePageRange(31, 1, 4);
+                VS::Render::RetireLiveTexturePageRange(31, 1, 4);
             }
         }
     }
@@ -1696,7 +1697,7 @@ int Content_ReleaseSequenceEffectTexture(int bank_id)
     if (bank_id < 1 || bank_id > 3) return -1;
     if (Actors_sharedSequenceBankTexturePages[bank_id - 1] != 0) {
         Actors_ResetActorTextureFrames(bank_id - 1);
-        if (Render_RetireTexturePageRange(Actors_sharedSequenceBankTexturePages[bank_id - 1], 1, 4) == 0) {
+        if (VS::Render::RetireLiveTexturePageRange(Actors_sharedSequenceBankTexturePages[bank_id - 1], 1, 4) == 0) {
             return -3;
         }
         Actors_sharedSequenceBankTexturePages[bank_id - 1] = 0;
@@ -1741,13 +1742,13 @@ int Content_UpdateSequenceEffectTextureLoad(Content_ActorAssetRequest* objdata)
         Content_ReleaseDiscRequest(Content_legacyEtmDiscRequest);
 
         if (Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] != 0) {
-            if (Render_RetireTexturePageRange(Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1], 1, 4) == 0) {
+            if (VS::Render::RetireLiveTexturePageRange(Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1], 1, 4) == 0) {
                 return -3;
             }
             Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] = 0;
         }
 
-        if (Render_ReserveTexturePageRange(objdata->textureSlot, 1, 4) == 0) {
+        if (VS::Render::ReserveLiveTexturePageRange(objdata->textureSlot, 1, 4) == 0) {
             return -2;
         }
 

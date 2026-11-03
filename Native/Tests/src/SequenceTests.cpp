@@ -8,6 +8,7 @@
 #include "Battle/TargetingDrawLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
+#include "Render/TexturePagesLive.hpp"
 
 extern "C" {
 #include "ActorAssets.h"
@@ -599,8 +600,9 @@ int Tests_FacialTextureBankHandoff(void) {
   Content_DiscQueueSlot* savedRequest = Content_legacyEtmDiscRequest;
   const unsigned char savedPage = Actors_sharedSequenceBankTexturePages[0];
   const unsigned char savedLegacyPage = Actors_sequenceTexturePagesOneBased[1];
-  const unsigned char savedReservation =
-      Render_legacyTexturePageReservations[26];
+  const VS::Render::TexturePage saved_reservation =
+      VS::Render::LiveTexturePages()[26];
+  void* saved_primitives = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
   const unsigned char savedBank = Actors_sharedSequenceBankIndex;
   const unsigned char savedRow = Actors_textureSlotRowOffsets[0];
   Actors_ActorRecord* savedActors[17];
@@ -619,7 +621,7 @@ int Tests_FacialTextureBankHandoff(void) {
   Content_legacyEtmDiscRequest = &request;
   Actors_sharedSequenceBankTexturePages[0] = 0;
   Actors_sequenceTexturePagesOneBased[1] = 0;
-  Render_legacyTexturePageReservations[26] = 0;
+  VS::Render::LiveTexturePages()[26] = VS::Render::TexturePage{};
   int passed = Content_UpdateSequenceEffectTextureLoad(&upload) == -1 &&
                Actors_sharedSequenceBankTexturePages[0] == 26;
   Actors_ActorRecord actor = {0};
@@ -635,6 +637,8 @@ int Tests_FacialTextureBankHandoff(void) {
   Actors_textureSlotRowOffsets[0] = 1;
   u_long ordering[0x822];
   DR_MOVE packet = {0};
+  // The texture move is bounded to the frame's primitive buffer.
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = &packet;
   ClearOTagR(ordering, 0x822);
   Render_legacyCurrentOrderingTable = ordering;
   (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
@@ -675,7 +679,8 @@ int Tests_FacialTextureBankHandoff(void) {
   const int released = Content_ReleaseSequenceEffectTexture(1);
   passed = passed && released == 0 &&
            Actors_sharedSequenceBankTexturePages[0] == 0 &&
-           Render_legacyTexturePageReservations[26] == 0xFD &&
+           VS::Render::LiveTexturePages()[26].state ==
+               VS::Render::TexturePageState::kRetiring &&
            (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
                    ->primitiveCursor == &packet + 1;
   LegacyGpu_WalkList(&ordering[0x821]);
@@ -692,7 +697,8 @@ int Tests_FacialTextureBankHandoff(void) {
   Content_legacyEtmDiscRequest = savedRequest;
   Actors_sharedSequenceBankTexturePages[0] = savedPage;
   Actors_sequenceTexturePagesOneBased[1] = savedLegacyPage;
-  Render_legacyTexturePageReservations[26] = savedReservation;
+  VS::Render::LiveTexturePages()[26] = saved_reservation;
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_primitives;
   Actors_sharedSequenceBankIndex = savedBank;
   Actors_textureSlotRowOffsets[0] = savedRow;
   memcpy(Actors_actorRecords, savedActors, sizeof savedActors);
@@ -707,6 +713,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   const Render_FrameScratch savedFrame =
       *reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase());
   void* savedOrdering = Render_legacyCurrentOrderingTable;
+  void* saved_primitives = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
   unsigned char savedOrigins[4];
   memcpy(savedOrigins, Actors_textureSlotOrigins, sizeof savedOrigins);
   const unsigned char savedRow = Actors_textureSlotRowOffsets[0];
@@ -721,6 +728,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   u_long ordering[0x822];
   ClearOTagR(ordering, 0x822);
   Render_legacyCurrentOrderingTable = ordering;
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = &guarded.packet;
   (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
       ->primitiveCursor = &guarded.packet;
   Actors_sharedSequenceBankIndex = 0;
@@ -757,6 +765,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   }
   *reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()) = savedFrame;
   Render_legacyCurrentOrderingTable = savedOrdering;
+  Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_primitives;
   memcpy(Actors_textureSlotOrigins, savedOrigins, sizeof savedOrigins);
   Actors_textureSlotRowOffsets[0] = savedRow;
   Actors_sharedSequenceBankIndex = savedBank;
