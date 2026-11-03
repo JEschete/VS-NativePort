@@ -4,8 +4,10 @@
 #include <chrono>
 #include <cstdint>
 #include <limits>
+#include <string>
 #include <thread>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -13,10 +15,13 @@
 #include "Core/BiosRand.h"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
+#include "Core/Runtime.hpp"
+#include "Core/RuntimeLive.hpp"
 #include "Core/String/GameText.hpp"
 #include "Core/String/GameTextLive.hpp"
 #include "Legacy/Core/LibEtc.h"
@@ -32,6 +37,42 @@ extern "C" {
 
 using VS::i32;
 namespace Core = VS::Core;
+
+TEST_CASE("Empty runtime handlers change nothing and trace ignored diagnostics",
+          "[core]") {
+  static_assert(noexcept(Core::IgnoreCall()));
+  static_assert(noexcept(Core::ReturnZero()));
+  static_assert(noexcept(Core::IdleInstruction()));
+  static_assert(noexcept(Core::NoOperation()));
+  static_assert(noexcept(Core::IgnoreCallback()));
+  static_assert(noexcept(Core::IgnoreLiveActorCallback(nullptr)));
+  Core::IgnoreCall();
+  Core::IdleInstruction();
+  Core::NoOperation();
+  Core::IgnoreCallback();
+  Core::IgnoreLiveActorCallback(nullptr);
+  CHECK(Core::ReturnZero() == 0);
+
+  struct LogScope {
+    Core::LogObserver previous = Core::SetLogObserver({});
+    ~LogScope() {
+      Core::SetLogObserver(std::move(previous));
+      Core::SetLogLevel(Core::LogLevel::Info);
+      Core::SetLogChannels("*");
+    }
+  } scope;
+  std::vector<std::string> traced;
+  Core::SetLogLevel(Core::LogLevel::Trace);
+  REQUIRE(Core::SetLogChannels("diagnostic"));
+  Core::SetLogObserver([&traced](const Core::LogRecord& record) {
+    traced.emplace_back(record.message);
+  });
+  Core::IgnoreDiagnostic(0x66, 7);
+  Core::IgnoreDiagnostic(0xA3, -1);
+  REQUIRE(traced.size() == 2);
+  CHECK(traced[0] == "retail error report 0x66 (7) ignored");
+  CHECK(traced[1] == "retail error report 0xa3 (-1) ignored");
+}
 
 namespace {
 template <typename VectorType>
@@ -499,8 +540,7 @@ TEST_CASE("Interface random requests return high bits of the previous state",
   constexpr unsigned int kInitial = 0x81234567;
   for (int bits : {1, 8, 10, 31, 32}) {
     Core_interfaceRandomState = kInitial;
-    CHECK(Core::NextLiveInterfaceRandomBits(bits) ==
-          (kInitial >> (32 - bits)));
+    CHECK(Core::NextLiveInterfaceRandomBits(bits) == (kInitial >> (32 - bits)));
     CHECK(Core_interfaceRandomState == kInitial * 0x19660Du);
   }
 }
@@ -562,75 +602,74 @@ TEST_CASE("A corrupt shuffle cursor restarts from the last table entry",
 
 TEST_CASE("Game text copies are bounded and keep the terminator",
           "[core][text]") {
-  namespace Text = VS::Core::String;
-  const std::array<std::uint8_t, 4> source{1, 2, Text::kGameTextTerminator,
-                                           9};
+  namespace text = VS::Core::String;
+  const std::array<std::uint8_t, 4> source{1, 2, text::kGameTextTerminator, 9};
   std::array<std::uint8_t, 6> destination{};
   destination.fill(0xAA);
-  CHECK(Text::CopyGameText(destination, source) == 3);
+  CHECK(text::CopyGameText(destination, source) == 3);
   CHECK(destination ==
         std::array<std::uint8_t, 6>{1, 2, 0xE7, 0xAA, 0xAA, 0xAA});
 
-  CHECK(Text::AppendGameText(destination, source) == 3);
+  CHECK(text::AppendGameText(destination, source) == 3);
   CHECK(destination == std::array<std::uint8_t, 6>{1, 2, 1, 2, 0xE7, 0xAA});
-  CHECK(Text::AppendGameText(destination, source) == 0);
+  CHECK(text::AppendGameText(destination, source) == 0);
   CHECK(destination == std::array<std::uint8_t, 6>{1, 2, 1, 2, 0xE7, 0xAA});
 
   std::array<std::uint8_t, 2> small{0xAA, 0xAA};
-  CHECK(Text::CopyGameText(small, source) == 0);
+  CHECK(text::CopyGameText(small, source) == 0);
   CHECK(small == std::array<std::uint8_t, 2>{0xAA, 0xAA});
   const std::array<std::uint8_t, 3> unterminated{1, 2, 3};
-  CHECK(Text::CopyGameText(destination, unterminated) == 0);
+  CHECK(text::CopyGameText(destination, unterminated) == 0);
 }
 
 TEST_CASE("Game numbers encode digits, sign, terminator and percent glyph",
           "[core][text]") {
-  namespace Text = VS::Core::String;
+  namespace text = VS::Core::String;
   std::array<std::uint8_t, 16> buffer{};
-  CHECK(Text::FormatGameInteger(buffer, -12) == 4);
+  CHECK(text::FormatGameInteger(buffer, -12) == 4);
   CHECK(std::equal(buffer.begin(), buffer.begin() + 4,
                    std::array<std::uint8_t, 4>{0xFD, 1, 2, 0xE7}.begin()));
-  CHECK(Text::GameIntegerBytes(std::numeric_limits<std::int32_t>::min()) == 12);
+  CHECK(text::GameIntegerBytes(std::numeric_limits<std::int32_t>::min()) == 12);
 
   // The original copies the four-byte vsstring literal {%, terminator, 0, 0}
   // rather than an unencoded "%" (#277).
   buffer.fill(0xAA);
-  CHECK(Text::FormatGamePercent(buffer, 42) == 6);
+  CHECK(text::FormatGamePercent(buffer, 42) == 6);
   CHECK(std::equal(
       buffer.begin(), buffer.begin() + 7,
       std::array<std::uint8_t, 7>{4, 2, 0x94, 0xE7, 0, 0, 0xAA}.begin()));
-  CHECK(Text::GamePercentBytes(100) == 7);
+  CHECK(text::GamePercentBytes(100) == 7);
 
   std::array<std::uint8_t, 6> tight{};
   tight.fill(0xAA);
-  CHECK(Text::FormatGamePercent(tight, 100) == 0);
+  CHECK(text::FormatGamePercent(tight, 100) == 0);
   CHECK(std::all_of(tight.begin(), tight.end(),
                     [](auto byte) { return byte == 0xAA; }));
 }
 
 TEST_CASE("Live game text bounds array destinations and reports refusals",
           "[core][text]") {
-  namespace Text = VS::Core::String;
+  namespace text = VS::Core::String;
   char tight[6];
   std::fill(std::begin(tight), std::end(tight), '\x55');
-  const auto before = Text::RefusedLiveTextCount();
-  Text::FormatLiveGamePercent(tight, 100);
-  CHECK(Text::RefusedLiveTextCount() == before + 1);
+  const auto before = text::RefusedLiveTextCount();
+  text::FormatLiveGamePercent(tight, 100);
+  CHECK(text::RefusedLiveTextCount() == before + 1);
   CHECK(std::all_of(std::begin(tight), std::end(tight),
                     [](char byte) { return byte == '\x55'; }));
 
   char roomy[16];
-  Text::FormatLiveGameInteger(roomy, 305);
-  CHECK(Text::RefusedLiveTextCount() == before + 1);
-  CHECK(static_cast<std::uint8_t>(roomy[3]) == Text::kGameTextTerminator);
+  text::FormatLiveGameInteger(roomy, 305);
+  CHECK(text::RefusedLiveTextCount() == before + 1);
+  CHECK(static_cast<std::uint8_t>(roomy[3]) == text::kGameTextTerminator);
 
-  const std::uint8_t name[] = {7, 8, Text::kGameTextTerminator};
+  const std::uint8_t name[] = {7, 8, text::kGameTextTerminator};
   std::uint8_t* destination = reinterpret_cast<std::uint8_t*>(roomy) + 4;
-  Text::CopyLiveGameText(destination, name);
+  text::CopyLiveGameText(destination, name);
   CHECK(roomy[4] == 7);
   CHECK(roomy[5] == 8);
-  CHECK(static_cast<std::uint8_t>(roomy[6]) == Text::kGameTextTerminator);
-  CHECK(Text::RefusedLiveTextCount() == before + 1);
+  CHECK(static_cast<std::uint8_t>(roomy[6]) == text::kGameTextTerminator);
+  CHECK(text::RefusedLiveTextCount() == before + 1);
 }
 
 TEST_CASE("Vector arithmetic preserves destination order and aliases",

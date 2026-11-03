@@ -13,7 +13,6 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Legacy/Psx.h"
 
-
 namespace {
 void CopyHalfwords(void* destination, const void* source, int size) {
   VS::Core::Memory::CopyLiveHalfwords(destination, source, size);
@@ -52,7 +51,11 @@ TEST_CASE("Backward word clear consumes bytes without touching adjacent words",
 
 TEST_CASE("Backward copies refuse sizes the original could not finish",
           "[core][memory]") {
-  using namespace VS::Core::Memory;
+  using VS::Core::Memory::CopyBytesBackward;
+  using VS::Core::Memory::CopyLiveBytesBackward;
+  using VS::Core::Memory::RefusedLiveSizeCount;
+  using VS::Core::Memory::ZeroLiveWordsBackward;
+  using VS::Core::Memory::ZeroWordsBackward;
   std::array<std::byte, 8> bytes{};
   bytes.fill(std::byte{0x5A});
   const auto original = bytes;
@@ -73,7 +76,9 @@ TEST_CASE("Backward copies refuse sizes the original could not finish",
 
 TEST_CASE("Backward copies stay inside their spans and array extents",
           "[core][memory]") {
-  using namespace VS::Core::Memory;
+  using VS::Core::Memory::TruncatedLiveCopyCount;
+  using VS::Core::Memory::ZeroLiveWordsBackward;
+  using VS::Core::Memory::ZeroWordsBackward;
   std::array<std::byte, 12> bytes{};
   bytes.fill(std::byte{0x5A});
   CHECK(ZeroWordsBackward(std::span(bytes).first(8), 12) == 8);
@@ -94,7 +99,7 @@ TEST_CASE("Backward copies stay inside their spans and array extents",
 
 TEST_CASE("Byte copies run from the end like the original loop",
           "[core][memory]") {
-  using namespace VS::Core::Memory;
+  using VS::Core::Memory::CopyLiveBytesBackward;
   std::array<char, 6> higher{'A', 'B', 'C', 'D', 'E', 'F'};
   CopyLiveBytesBackward(higher.data() + 1, higher.data(), 4);
   CHECK(higher == std::array<char, 6>{'A', 'A', 'B', 'C', 'D', 'F'});
@@ -107,7 +112,8 @@ TEST_CASE("Byte copies run from the end like the original loop",
 
 TEST_CASE("Sound word copies load each group of four before storing it",
           "[core][memory]") {
-  using namespace VS::Core::Memory;
+  using VS::Core::Memory::CopyLiveWords;
+  using VS::Core::Memory::CopyWords;
   std::array<std::uint32_t, 10> words{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
   CopyLiveWords(words.data(), words.data() + 1, 8 * 4 + 3);
   CHECK(words == std::array<std::uint32_t, 10>{0, 0, 1, 2, 3, 3, 5, 6, 7, 9});
@@ -119,9 +125,9 @@ TEST_CASE("Sound word copies load each group of four before storing it",
   CHECK(destination == source);
 }
 
-TEST_CASE("Sound word swaps exchange whole words in pairs",
-          "[core][memory]") {
-  using namespace VS::Core::Memory;
+TEST_CASE("Sound word swaps exchange whole words in pairs", "[core][memory]") {
+  using VS::Core::Memory::SwapLiveWords;
+  using VS::Core::Memory::SwapWords;
   std::array<std::uint32_t, 5> first{1, 2, 3, 4, 5};
   std::array<std::uint32_t, 5> second{10, 20, 30, 40, 50};
   SwapLiveWords(first.data(), second.data(), 5 * 4 + 2);

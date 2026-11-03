@@ -1185,13 +1185,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "097334f70747e3ab54eb8ffac9f9e60629c6b681311c348f0e53249623935813",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "bugprone-throwing-static-initialization"
-    },
-    {
       "key": "09867ae745e1616b22e4d3aec668ef1b800235390e7a76ff21b2f1047bf735db",
       "count": 1,
       "tool": "cpplint",
@@ -3544,13 +3537,6 @@
       "rule": "google-runtime-int"
     },
     {
-      "key": "18add8df98a7953d4a13373079d730f121c7993fb63f6bc45c5b9d5e4732f3cc",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "18d3c85d9348ed563a24b62be992f4a9a9e4eb6af1285783d2622c47e520f97f",
       "count": 1,
       "tool": "cpplint",
@@ -4867,13 +4853,6 @@
       "rule": "readability-identifier-naming"
     },
     {
-      "key": "22abf837596d20cf4671776b238dde794e5039e3bc06762d5bed4e47a43b6c23",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "22b1d8a3e19639507c19026aa56afd0a8336285d9e2ac5ca64aa6d72ec20fb18",
       "count": 1,
       "tool": "tidy",
@@ -6146,13 +6125,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "2a54e2cff35e83efeb1b0a5408c617f9b4bf9753691a4ecbce652d46caf56e93",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "whitespace/comments"
     },
     {
       "key": "2a6bd4118b1090c375c09932fe975e506592225346d95a6686fecf4d2feed5ad",
@@ -9130,13 +9102,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "401a798fc4b8de0b725fdf9eb02d710956b40adf36e9e8a9f8ad0b6b97da1e52",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "build/include"
-    },
-    {
       "key": "401afe527df0c5503259ef994590c55ffe79375e6212c6c02e0dadfd031debfe",
       "count": 1,
       "tool": "cpplint",
@@ -9646,13 +9611,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "whitespace/tab"
-    },
-    {
-      "key": "4400ba97d7d9ee95a1b41c4b2367a39d8d9d1b73a851de3717540422b55d14ba",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "whitespace/comments"
     },
     {
       "key": "4400be9312149ea9ba51d6134c9eb0c75942ec1f4fdf1f98ddd555c6c65211c3",
@@ -11367,13 +11325,6 @@
       "count": 1,
       "tool": "tidy",
       "path": "Native/Engine/src/Render/PageSpace.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
-      "key": "50aa6efc698994989eb14de7fefd60b6ae302f76a145dcc7f0aa2aaf29305042",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
       "rule": "readability-magic-numbers"
     },
     {
@@ -14254,13 +14205,6 @@
       "rule": "whitespace/line_length"
     },
     {
-      "key": "65345491bd5648a826adccc055d9cc87d4d6a5bcaaf71c3dec2a08e83e68df7f",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "65417963d4919be75fb635f898a105d6b098585e7a08d9f031df3ccc6e6d2990",
       "count": 1,
       "tool": "cpplint",
@@ -16305,13 +16249,6 @@
       "rule": "readability/check"
     },
     {
-      "key": "74614e3a2ae64cc1b0208e72e258fc59ed6e204b163c252794f048439a6638a9",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "readability-magic-numbers"
-    },
-    {
       "key": "74903c4414e40d68c66b48608c5f3bcec5c8bd09ea9289cb8e3c4561bf04f978",
       "count": 1,
       "tool": "cpplint",
@@ -17516,13 +17453,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "7d68179856428007421608bae5ac60df5012e61f23a0f7130209a53c61f058c1",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "readability-identifier-naming"
-    },
-    {
       "key": "7d6a5530c08e39cb2208946ea016f0a33f58bfd1521f0aeab96d34e6ab6a4f62",
       "count": 1,
       "tool": "cpplint",
@@ -18669,13 +18599,6 @@
       "tool": "format",
       "path": "Native/Engine/Legacy/Audio/LibSpu.cpp",
       "rule": "google"
-    },
-    {
-      "key": "8627ed974f60358131997478fe83d5349ba97008726d8eceb3711e28b9c36271",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "86464621200c3c149d212315b2c4a2e8969c8ea9175ea1747907e294efeb92bc",
@@ -22276,13 +22199,6 @@
       "rule": "bugprone-narrowing-conversions"
     },
     {
-      "key": "9f1d48037a13e148f066b16107abd6bb967ef5b83721f60705e3982fbf89b940",
-      "count": 1,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "whitespace/line_length"
-    },
-    {
       "key": "9f1ee24ac0685734148f7a0bffe3d8fd23d0be972239ff021be77aced99adf20",
       "count": 1,
       "tool": "cpplint",
@@ -25755,13 +25671,6 @@
       "rule": "whitespace/tab"
     },
     {
-      "key": "b8fa762b53669ab313cdd0f7d20187075b9d85342fd41cc2e0f93b59e5b90243",
-      "count": 5,
-      "tool": "cpplint",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "whitespace/braces"
-    },
-    {
       "key": "b91023bf4c6eb1623395bbc62a17102e5974339e2fb7554a284ab1a1f1527d03",
       "count": 1,
       "tool": "tidy",
@@ -27062,13 +26971,6 @@
       "tool": "cpplint",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "runtime/int"
-    },
-    {
-      "key": "c2d8dd6f53ee552ca8334cb6fcb3ab6455c39dac26733b07bde66cb87cc34394",
-      "count": 1,
-      "tool": "tidy",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "readability-magic-numbers"
     },
     {
       "key": "c2e2045bba11c821f07985437fd9148ddad3e2dc70b1d95fabefd6f3fdc90939",
@@ -31717,13 +31619,6 @@
       "tool": "tidy",
       "path": "Native/Tests/src/SequenceTests.cpp",
       "rule": "readability-identifier-naming"
-    },
-    {
-      "key": "e4eb1305aea55de856619669f07ca72505045061e672c0267a4ca41771af0188",
-      "count": 1,
-      "tool": "format",
-      "path": "Native/Engine/src/Core/RandomGenerator.cpp",
-      "rule": "google"
     },
     {
       "key": "e50112a5e8533cca45ebee87ee7073f5c404378ee037b6f148db556ea77e8b5c",
