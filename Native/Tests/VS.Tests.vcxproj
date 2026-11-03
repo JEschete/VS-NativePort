@@ -180,6 +180,7 @@
     <ClCompile Include="src\RasterBoundsTests.cpp" />
     <ClCompile Include="src\ReactionDelayTests.cpp" />
     <ClCompile Include="src\RenderDisplayTests.cpp" />
+    <ClCompile Include="src\RenderScreenOverlayTests.cpp" />
     <ClCompile Include="src\ResultsRouletteTests.cpp" />
     <ClCompile Include="src\ResultsTextureTests.cpp" />
     <ClCompile Include="src\RoomAiMapTests.cpp" />

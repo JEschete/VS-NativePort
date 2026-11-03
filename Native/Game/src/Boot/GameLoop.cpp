@@ -10,6 +10,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -73,7 +74,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
-#include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -572,14 +572,14 @@ void Boot_RunGameLoop(void)
                         Render_UpdateModelColorTransitions();
                         Render_UpdateClutTransitions();
                     }
-                    Render_DrawScreenTransition(ot);
-                    Render_DrawFramebufferEffect(ot);
+                    VS::Render::DrawLiveScreenTransition(ot);
+                    VS::Render::DrawLiveFramebufferEffect(ot);
                     if (Field_controlMode == 1) {
                         VS::Battle::Ai::RunLiveActorAiUpdateStages();
                     } else if (Field_controlMode == 3) {
                         VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
                     }
-                    if ((Render_framebufferEffectState == 1) || (Render_framebufferEffectState == 2)) {
+                    if (VS::Render::IsLiveFramebufferEffectShowing()) {
                         SetDrawStp(&Render_legacyMaskBitOnPackets[Render_frameBuf], 1);
                         AddPrim(ot + 0x820, &Render_legacyMaskBitOnPackets[Render_frameBuf]);
                     } else {
@@ -625,7 +625,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     SetDrawStp(&Render_legacyMaskBitOnPackets[1], 1);
     Render_InitializeClutAnimation();
     Field_InitializeRoomTransitionPrimitives();
-    Render_InitializeFramebufferEffect();
+    VS::Render::InitializeLiveFramebufferEffect();
     Event_InitializeScriptOpcodeTable();
     Effects_InitEffectRuntime();
     Field_InitializeRoomRuntimeState();

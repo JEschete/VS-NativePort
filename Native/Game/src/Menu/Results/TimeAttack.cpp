@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -384,14 +385,14 @@ int Menu_Results_UpdateTimeAttackStart(void)
 
     } else if (Menu_Results_screenState == 2) {
         State_SetTickSpeed(4);
-        Render_SetFramebufferEffectRotation(0);
-        Render_SetFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[0]);
-        Render_SetFramebufferEffectTint(&Menu_Results_timeAttackStartColors[1]);
-        Render_SetFramebufferEffectOffset((Render_FramebufferEffectTranslation*)(Menu_Results_kFramebufferEffectParams + 2));
-        Render_SetFramebufferEffectBlendMode(0);
-        Render_SetFramebufferEffectDepth(0U);
-        Render_SetFramebufferPreviousFrame(0);
-        Render_SetFramebufferEffectEnabled(1);
+        VS::Render::SetLiveFramebufferEffectRotation(0);
+        VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[0]);
+        VS::Render::SetLiveFramebufferEffectTint(&Menu_Results_timeAttackStartColors[1]);
+        VS::Render::SetLiveFramebufferEffectOffset((Render_FramebufferEffectTranslation*)(Menu_Results_kFramebufferEffectParams + 2));
+        VS::Render::SetLiveFramebufferEffectBlendMode(0);
+        VS::Render::SetLiveFramebufferEffectDepth(0U);
+        VS::Render::SetLiveFramebufferPreviousFrame(0);
+        VS::Render::SetLiveFramebufferEffectEnabled(1);
 
         ++Menu_Results_screenState;
 
@@ -421,15 +422,15 @@ int Menu_Results_UpdateTimeAttackStart(void)
         if (Menu_Results_screenTimer >= 45) {
 
             if (Menu_Results_screenTimer == 45) {
-                Render_SetFramebufferEffectBlendMode(1);
-                Render_SetFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[1]);
-                Render_SetFramebufferEffectTint(&Menu_Results_timeAttackStartColors[0]);
+                VS::Render::SetLiveFramebufferEffectBlendMode(1);
+                VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[1]);
+                VS::Render::SetLiveFramebufferEffectTint(&Menu_Results_timeAttackStartColors[0]);
             } else if (Menu_Results_screenTimer == 0x2E) {
-                Render_SetFramebufferEffectBlendMode(0);
+                VS::Render::SetLiveFramebufferEffectBlendMode(0);
             } else if (Menu_Results_screenTimer == 0x37) {
-                Render_SetFramebufferEffectTint(&Menu_Results_timeAttackStartColors[2]);
+                VS::Render::SetLiveFramebufferEffectTint(&Menu_Results_timeAttackStartColors[2]);
             } else if (Menu_Results_screenTimer == 0x3C) {
-                Render_SetFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[0]);
+                VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[0]);
             }
 
             x = 104 - Menu_Results_screenTimer;
@@ -460,8 +461,8 @@ int Menu_Results_UpdateTimeAttackStart(void)
 
     } else if (Menu_Results_screenState == 4) {
         State_SetTickSpeed(2);
-        Render_SetFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[2]);
-        Render_SetFramebufferEffectEnabled(0);
+        VS::Render::SetLiveFramebufferEffectScale(&Menu_Results_kFramebufferEffectParams[2]);
+        VS::Render::SetLiveFramebufferEffectEnabled(0);
         Render_RetireTexturePageRange(0x1D, 2, 5);
 
         return 1;

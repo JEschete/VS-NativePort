@@ -357,13 +357,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Render\FramebufferEffects.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Render\Images.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -411,6 +404,10 @@
     <ClCompile Include="src\Render\RoomLighting.cpp" />
     <ClCompile Include="src\Render\ScaledFont.cpp" />
     <ClCompile Include="src\Render\ScaledFontLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Render\ScreenOverlay.cpp" />
+    <ClCompile Include="src\Render\ScreenOverlayLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\ScreenTransition.cpp">
@@ -648,6 +645,8 @@
     <ClInclude Include="include\Render\RoomDrawLive.hpp" />
     <ClInclude Include="include\Render\RoomLighting.hpp" />
     <ClInclude Include="include\Render\ScaledFont.hpp" />
+    <ClInclude Include="include\Render\ScreenOverlay.hpp" />
+    <ClInclude Include="include\Render\ScreenOverlayLive.hpp" />
     <ClInclude Include="include\Render\Sprites.hpp" />
     <ClInclude Include="include\Render\SpritesLive.hpp" />
     <ClInclude Include="include\Render\TextureRegionDraw.hpp" />

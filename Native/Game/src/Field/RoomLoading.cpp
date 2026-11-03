@@ -9,6 +9,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -74,7 +75,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
-#include "Render/FramebufferEffects.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
@@ -815,7 +815,7 @@ void Field_FinishRoomLoad(int requested_room_id)
     Field_SetCameraPositionFromAngles(&Field_sphericalCamera.values);
     Actors_ActorPlacement(0, &ashley_placement);
     Field_UpdateCameraTileConstraint(0, &ashley_placement.location.packedTile.target);
-    Render_ResetFramebufferEffect();
+    VS::Render::ResetLiveFramebufferEffect();
     Render_CommitClutBuffer();
     VS::Render::ConfigureLiveFieldDisplay(0x140, 0xF0, Render_projectionDistance, 0, 0, 0);
 
@@ -869,7 +869,7 @@ void Field_UnloadCurrentRoom(void)
         Render_frameScratch.orderingTable = ((u_char*)(Render_legacyOrderingTables[Render_frameBuf])) + 0x10;
         ClearOTagR((u_long *)(Render_frameScratch.orderingTable), 0x800);
         VS::Core::NoOperation();
-        Render_DrawScreenTransition(Render_frameScratch.orderingTable);
+        VS::Render::DrawLiveScreenTransition(Render_frameScratch.orderingTable);
         VS::Render::PresentLiveFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));
     }
 

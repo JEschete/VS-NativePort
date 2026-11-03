@@ -5,6 +5,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/CameraViewLive.hpp"
+#include "Render/ScreenOverlayLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -86,7 +87,7 @@ intptr_t Event_CommandWaitCameraTracks(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BB450 (src/BATTLE/BATTLE.PRG/4A0A8.c:2793)
 intptr_t Event_CommandSetScreenCapture(u_char* instruction, short thread_index)
 {
-    Render_SetFramebufferEffectEnabled(instruction[1]);
+    VS::Render::SetLiveFramebufferEffectEnabled(instruction[1]);
     return 0;
 }
 
@@ -115,33 +116,33 @@ void Event_InitializeEventCamera(void)
     Event_camera->cameraRoll.angle = 0;
     Event_camera->cameraRoll.hasChanged = 1;
 
-    Render_SetFramebufferEffectEnabled(0);
+    VS::Render::SetLiveFramebufferEffectEnabled(0);
 
     Event_camera->capturedScreenRoll.durationFrames = 0;
     Event_camera->capturedScreenRoll.angle = 0;
 
-    Render_SetFramebufferEffectRotation(0);
+    VS::Render::SetLiveFramebufferEffectRotation(0);
 
     Event_camera->capturedScreenRoll.hasChanged = 1;
     Event_camera->screenScale.currentValue1 = ONE;
     Event_camera->screenScale.currentValue0 = ONE;
 
-    Render_SetFramebufferEffectScale(&Event_kDefaultScreenTransform);
+    VS::Render::SetLiveFramebufferEffectScale(&Event_kDefaultScreenTransform);
 
     Event_camera->screenTint.currentValue0 = Event_camera->screenTint.currentValue1 = Event_camera->screenTint.currentValue2 =
         Event_camera->screenScale.durationFrames = 0;
 
-    Render_SetFramebufferEffectTint(&Event_kDefaultScreenTint);
+    VS::Render::SetLiveFramebufferEffectTint(&Event_kDefaultScreenTint);
 
     Event_camera->screenTint.durationFrames = 0;
     Event_camera->screenTranslation.currentValue1 = ONE;
     Event_camera->screenTranslation.currentValue0 = ONE;
 
-    Render_SetFramebufferEffectOffset(&Event_kDefaultScreenTransform);
+    VS::Render::SetLiveFramebufferEffectOffset(&Event_kDefaultScreenTransform);
 
     Event_camera->screenTranslation.durationFrames = 0;
 
-    Render_SetFramebufferEffectBlendMode(1);
+    VS::Render::SetLiveFramebufferEffectBlendMode(1);
 
     Event_camera->screenEffectTween.currentValue0 = ONE;
     Event_camera->screenEffectTween.durationFrames = Event_camera->screenEffectTween.currentValue1 = 0;
@@ -238,7 +239,7 @@ void Event_ApplyEventCameraState(void)
         Event_camera->cameraRoll.hasChanged = 0;
     }
     if (Event_camera->capturedScreenRoll.hasChanged != 0) {
-        Render_SetFramebufferEffectRotation(Event_camera->capturedScreenRoll.angle);
+        VS::Render::SetLiveFramebufferEffectRotation(Event_camera->capturedScreenRoll.angle);
         Event_camera->capturedScreenRoll.hasChanged = 0;
     }
     if (Event_camera->projectionDistance.hasChanged != 0) {
@@ -809,11 +810,11 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
     short effectValue;
     switch (script[0]) {
     case 185:
-        Render_SetFramebufferEffectDepth(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
+        VS::Render::SetLiveFramebufferEffectDepth(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         return 0;
 
     case 186:
-        Render_SetFramebufferPreviousFrame(script[1]);
+        VS::Render::SetLiveFramebufferPreviousFrame(script[1]);
         return 0;
 
     case 228:
@@ -821,10 +822,10 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
         if (Event_camera->screenScale.durationFrames == 0) {
             values.x = (script[1] << 7);
             values.y = (script[2] << 7);
-            Render_SetFramebufferEffectScale(&values);
+            VS::Render::SetLiveFramebufferEffectScale(&values);
         } else {
             Event_camera->screenScale.elapsedFrames = 0;
-            Render_FramebufferEffectScale(&values.x);
+            VS::Render::ReadLiveFramebufferEffectScale(&values);
             Event_camera->screenScale.deltaValue0 =
                 (script[1] << 7) - (Event_camera->screenScale.startValue0 = values.x);
             Event_camera->screenScale.deltaValue1 =
@@ -839,10 +840,10 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
             color.r = script[1];
             color.g = script[2];
             color.b = script[3];
-            Render_SetFramebufferEffectTint(&color);
+            VS::Render::SetLiveFramebufferEffectTint(&color);
         } else {
             Event_camera->screenTint.elapsedFrames = 0;
-            Render_FramebufferEffectTint(&color);
+            VS::Render::ReadLiveFramebufferEffectTint(&color);
             Event_camera->screenTint.deltaValue0 = script[1] - (Event_camera->screenTint.startValue0 = color.r);
             Event_camera->screenTint.deltaValue1 = script[2] - (Event_camera->screenTint.startValue1 = color.g);
             Event_camera->screenTint.deltaValue2 = script[3] - (Event_camera->screenTint.startValue2 = color.b);
@@ -855,10 +856,10 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
         if (Event_camera->screenTranslation.durationFrames == 0) {
             values.x = (signed char)script[1];
             values.y = (signed char)script[2];
-            Render_SetFramebufferEffectOffset(&values);
+            VS::Render::SetLiveFramebufferEffectOffset(&values);
         } else {
             Event_camera->screenTranslation.elapsedFrames = 0;
-            Render_FramebufferEffectOffset(&values);
+            VS::Render::ReadLiveFramebufferEffectOffset(&values);
             Event_camera->screenTranslation.deltaValue0 =
                 (signed char)script[1] - (Event_camera->screenTranslation.startValue0 = values.x);
             Event_camera->screenTranslation.deltaValue1 =
@@ -868,7 +869,7 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
         return 0;
 
     case 231:
-        Render_SetFramebufferEffectBlendMode(script[1]);
+        VS::Render::SetLiveFramebufferEffectBlendMode(script[1]);
         return 0;
 
     case 237:
@@ -895,28 +896,28 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
     case 191:
         mode = VS::Core::Memory::ReadLiveUnalignedShort(script + 1);
         if (!mode) {
-            Render_SetFramebufferEffectBlendMode(0);
+            VS::Render::SetLiveFramebufferEffectBlendMode(0);
             values.x = values.y = 0;
-            Render_SetFramebufferEffectOffset(&values);
+            VS::Render::SetLiveFramebufferEffectOffset(&values);
             values.x = values.y = ONE;
-            Render_SetFramebufferEffectScale(&values);
+            VS::Render::SetLiveFramebufferEffectScale(&values);
             color.r = color.g = color.b = 128;
-            Render_SetFramebufferEffectTint(&color);
-            Render_SetFramebufferEffectDepth(0);
-            Render_SetFramebufferPreviousFrame(0);
-            Render_SetFramebufferEffectEnabled(0);
+            VS::Render::SetLiveFramebufferEffectTint(&color);
+            VS::Render::SetLiveFramebufferEffectDepth(0);
+            VS::Render::SetLiveFramebufferPreviousFrame(0);
+            VS::Render::SetLiveFramebufferEffectEnabled(0);
         } else {
-            Render_SetFramebufferEffectEnabled(1);
-            Render_SetFramebufferEffectBlendMode(0);
+            VS::Render::SetLiveFramebufferEffectEnabled(1);
+            VS::Render::SetLiveFramebufferEffectBlendMode(0);
             values.x = 0;
             values.y = 2;
-            Render_SetFramebufferEffectOffset(&values);
+            VS::Render::SetLiveFramebufferEffectOffset(&values);
             values.x = values.y = ONE;
-            Render_SetFramebufferEffectScale(&values);
+            VS::Render::SetLiveFramebufferEffectScale(&values);
             color.r = color.g = color.b = 144;
-            Render_SetFramebufferPreviousFrame(1);
-            Render_SetFramebufferEffectTint(&color);
-            Render_SetFramebufferEffectDepth(mode);
+            VS::Render::SetLiveFramebufferPreviousFrame(1);
+            VS::Render::SetLiveFramebufferEffectTint(&color);
+            VS::Render::SetLiveFramebufferEffectDepth(mode);
         }
         return 0;
     }
@@ -931,18 +932,18 @@ void Event_UpdateEventScreenTransforms(void)
     if (Event_UpdateEventTripleTween(&Event_camera->screenScale) != 0) {
         screen_transform.x = Event_camera->screenScale.currentValue0;
         screen_transform.y = Event_camera->screenScale.currentValue1;
-        Render_SetFramebufferEffectScale(&screen_transform);
+        VS::Render::SetLiveFramebufferEffectScale(&screen_transform);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenTint) != 0) {
         screen_tint.r = Event_camera->screenTint.currentValue0;
         screen_tint.g = Event_camera->screenTint.currentValue1;
         screen_tint.b = Event_camera->screenTint.currentValue2;
-        Render_SetFramebufferEffectTint(&screen_tint);
+        VS::Render::SetLiveFramebufferEffectTint(&screen_tint);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenTranslation) != 0) {
         screen_transform.x = Event_camera->screenTranslation.currentValue0;
         screen_transform.y = Event_camera->screenTranslation.currentValue1;
-        Render_SetFramebufferEffectOffset(&screen_transform);
+        VS::Render::SetLiveFramebufferEffectOffset(&screen_transform);
     }
     if (Event_UpdateEventTripleTween(&Event_camera->screenEffectTween) != 0) {
         ((void (*)(int, int))Effects_ScreenDistortion_SetRadialWarp)(Event_camera->screenEffectTween.currentValue0, Event_camera->screenEffectTween.currentValue1);

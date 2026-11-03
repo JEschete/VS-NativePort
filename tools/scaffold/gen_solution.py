@@ -155,6 +155,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Render\DisplayControlLive.cpp",
                 r"src\Render\DepthCueLive.cpp",
                 r"src\Render\UiPacketsLive.cpp",
+                r"src\Render\ScreenOverlayLive.cpp",
                 r"src\Audio\SoundEffectsLive.cpp",
                 r"src\Movie\Intro\PlayerLive.cpp",
                 r"src\Audio\Driver\PlaybackResetLive.cpp",

@@ -86,6 +86,16 @@ _RENDER_LIVE = {
         ("DrawLiveIntegerRightAligned", "F01352"), ("DrawLiveStatGauge", "F01353"),
         ("InsertLiveThreeWordPrimitive", "F01405"), ("InsertLiveDrawModeCommand", "F01406"),
         ("UploadLiveImageRectangle", "F01408")),
+    # #276 slice A5 (screen overlays): the framebuffer effect and the room transition draw.
+    "ScreenOverlayLive.hpp": (
+        ("DrawLiveScreenTransition", "F00070"), ("ResetLiveFramebufferEffect", "F00306"),
+        ("InitializeLiveFramebufferEffect", "F00307"), ("DrawLiveFramebufferEffect", "F00309"),
+        ("SetLiveFramebufferEffectEnabled", "F00310"), ("SetLiveFramebufferEffectRotation", "F00311"),
+        ("SetLiveFramebufferEffectScale", "F00312"), ("SetLiveFramebufferEffectTint", "F00313"),
+        ("SetLiveFramebufferEffectOffset", "F00314"), ("SetLiveFramebufferEffectBlendMode", "F00315"),
+        ("SetLiveFramebufferEffectDepth", "F00317"), ("SetLiveFramebufferPreviousFrame", "F00318"),
+        ("ReadLiveFramebufferEffectScale", "F00321"), ("ReadLiveFramebufferEffectTint", "F00322"),
+        ("ReadLiveFramebufferEffectOffset", "F00323")),
 }
 
 NATIVE_HELPER_HEADERS = {
@@ -93,6 +103,7 @@ NATIVE_HELPER_HEADERS = {
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
        for header, rows in _RENDER_LIVE.items() for name, _ in rows},
+    "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
     "VS::Battle::Ai::BattleActorReactionDelays": r"Native\Game\include\Battle\Ai\ReactionDelay.hpp",
@@ -1326,6 +1337,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "                    Boot_EncounterPollStop();\n"
          "                    ot = Render_legacyOrderingTables[Render_frameBuf];",
          "native encounter hosts can stop at a production frame boundary; inactive for normal sessions"),
+        ("if ((Render_framebufferEffectState == 1) || (Render_framebufferEffectState == 2)) {",
+         "if (VS::Render::IsLiveFramebufferEffectShowing()) {",
+         "#276 slice A5: 22C.c reads the effect's state word for starting (1) or drawing (2); the typed "
+         "ScreenOverlay state answers it"),
     ],
     "F00077": [
         ("void Field_UpdateCameraOrbitInput(void)",
@@ -3032,6 +3047,10 @@ FIXES["F00790"] = FIXES.get("F00790", []) + [
      "            VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
      "#269: the released WEP no longer has an extent"),
 ]
+FIXES.setdefault("F01229", []).append(
+    ("VS::Render::ReadLiveFramebufferEffectScale(&values.x)", "VS::Render::ReadLiveFramebufferEffectScale(&values)",
+     "#276 slice A5: 4A0A8.c passes the record's first word for the three-word scale getter; the binding takes the "
+     "record"))
 
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
@@ -8215,42 +8234,6 @@ REGEX_FIXES += [
         ("Render::QueueTextureRectangleMove",
          (('arg0', 'source_rectangle'), ('arg1', 'destination_x'), ('arg2', 'destination_y')),
          "F00971 40564.c:1272-1278 passes rectangle and destination coordinates to SetDrawMove, links one DR_MOVE and advances the cursor."),
-        ("Render::DrawFramebufferEffect",
-         (('arg0', 'ordering_table'),),
-         "F00309 146C.c:9311-9415 uses this base solely for depth-indexed primitive insertion; state/transform/free order is unchanged."),
-        ("Render::SetFramebufferEffectEnabled",
-         (('arg0', 'enabled'),),
-         "F00310 146C.c:9417-9428 selects initialization/allocation for nonzero or deferred shutdown state3 for zero."),
-        ("Render::SetFramebufferEffectRotation",
-         (('arg0', 'roll_angle'),),
-         "F00311 146C.c:9430 stores D_800F1A2C, the roll angle used by framebuffer page selection/transform."),
-        ("Render::SetFramebufferEffectScale",
-         (('arg0', 'scale'),),
-         "F00312 146C.c:9432-9436 copies the two supplied scale components; no third component is manufactured."),
-        ("Render::SetFramebufferEffectTint",
-         (('arg0', 'tint'),),
-         "F00313 146C.c:9438 copies the complete CVECTOR tint."),
-        ("Render::SetFramebufferEffectOffset",
-         (('arg0', 'offset'),),
-         "F00314 146C.c:9440 copies the supplied framebuffer offset record."),
-        ("Render::SetFramebufferEffectBlendMode",
-         (('arg0', 'blend_mode'),),
-         "F00315 146C.c:9442 stores the blend mode consumed by GetTPage in9311-9415."),
-        ("Render::SetFramebufferEffectDepth",
-         (('arg0', 'ordering_depth'),),
-         "F00317 146C.c:9446-9451 bounds the ordering-table index below0x800; draw code multiplies this index by4."),
-        ("Render::SetFramebufferPreviousFrame",
-         (('arg0', 'use_previous_frame'),),
-         "F00318 146C.c:9453 stores the selector used for current/previous framebuffer texture pages."),
-        ("Render::FramebufferEffectScale",
-         (('arg0', 'output'),),
-         "F00321 146C.c:9459-9464 writes the output buffer; original/native intentionally still write X twice and then zero, not a repaired XY getter."),
-        ("Render::FramebufferEffectTint",
-         (('arg0', 'output'),),
-         "F00322 146C.c:9466 copies the stored tint to the output pointer."),
-        ("Render::FramebufferEffectOffset",
-         (('arg0', 'output'),),
-         "F00323 146C.c:9468 copies the stored offset to the output pointer."),
         ("Render::QueueGimImage",
          (('arg1', 'first_texture_page'), ('var_s0', 'layer_cursor')),
          "F01338 5BF94.c:2347-2375 initializes three GIM layers with a shared first page and advances the layer pointer while constructing the disc request."),
