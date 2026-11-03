@@ -732,62 +732,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Render\\Font.cpp": [
-[
-43,
-[
-"    u_long* prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"    u_long* prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-50,
-[
-"        nextPrim = Render_frameScratch.overlayOrderingTable;"
-],
-[
-"        nextPrim = (u_long *)(Render_frameScratch.overlayOrderingTable);"
-]
-],
-[
-71,
-[
-"            for (width = 0, scan = text; (ch = *scan++) != 0;) {"
-],
-[
-"            for (width = 0, scan = (const u_char *)(text); (ch = *scan++) != 0;) {"
-]
-],
-[
-135,
-[
-"    Render_DrawCompactTextColor(text, xy, vs_getRGB(128, 128, 128), nextPrim);"
-],
-[
-"    Render_DrawCompactTextColor(text, xy, vs_getRGB(128, 128, 128), (u_long *)(nextPrim));"
-]
-],
-[
-719,
-[
-"    buf = VS::Core::Memory::AllocateLiveFromHighEnd(width * height * 2);"
-],
-[
-"    buf = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(width * height * 2));"
-]
-],
-[
-726,
-[
-"    StoreImage(&rect, (void*)buf);"
-],
-[
-"    StoreImage(&rect, (u_long *)((void*)buf));"
-]
-]
-],
 "Native\\Game\\src\\Actors\\ActorLoading.cpp": [
 [
 78,
@@ -3005,10 +2949,10 @@
 [
 568,
 [
-"    Render_DrawCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);"
+"    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), Render_frameScratch.orderingTable - 4);"
 ],
 [
-"    Render_DrawCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), ((u_char*)(Render_frameScratch.orderingTable)) - 4);"
+"    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), ((u_char*)(Render_frameScratch.orderingTable)) - 4);"
 ]
 ]
 ],
@@ -7159,21 +7103,21 @@
 [
 2319,
 [
-"        Render_DrawCompactText(\"1\", 0xC800D8, Render_frameScratch.orderingTable - 0x14);"
+"        VS::Render::DrawLiveCompactText(\"1\", 0xC800D8, Render_frameScratch.orderingTable - 0x14);"
 ],
 [
-"        Render_DrawCompactText(\"1\", 0xC800D8, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);"
+"        VS::Render::DrawLiveCompactText(\"1\", 0xC800D8, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);"
 ]
 ],
 [
 2328,
 [
-"    Render_DrawCompactText(Menu_Files_playTime, 0xC800E0, Render_frameScratch.orderingTable - 0x14);",
-"    Render_DrawCompactText(\"PLAY    TIME\", 0xBC00E0, Render_frameScratch.orderingTable - 0x14);"
+"    VS::Render::DrawLiveCompactText(Menu_Files_playTime, 0xC800E0, Render_frameScratch.orderingTable - 0x14);",
+"    VS::Render::DrawLiveCompactText(\"PLAY    TIME\", 0xBC00E0, Render_frameScratch.orderingTable - 0x14);"
 ],
 [
-"    Render_DrawCompactText(Menu_Files_playTime, 0xC800E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);",
-"    Render_DrawCompactText(\"PLAY    TIME\", 0xBC00E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);"
+"    VS::Render::DrawLiveCompactText(Menu_Files_playTime, 0xC800E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);",
+"    VS::Render::DrawLiveCompactText(\"PLAY    TIME\", 0xBC00E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);"
 ]
 ],
 [
@@ -7689,10 +7633,10 @@
 [
 252,
 [
-"    Render_FormatEncodedText(Render_FormatEncodedText(buf,"
+"    VS::Render::FormatLiveEncodedText(VS::Render::FormatLiveEncodedText(buf,"
 ],
 [
-"    Render_FormatEncodedText(Render_FormatEncodedText((char *)(buf),"
+"    VS::Render::FormatLiveEncodedText(VS::Render::FormatLiveEncodedText((char *)(buf),"
 ]
 ],
 [
@@ -7878,21 +7822,21 @@
 [
 631,
 [
-"        Render_DrawVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
+"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, Render_frameScratch.overlayOrderingTable - 12);"
 ],
 [
-"        Render_DrawVariableWidthGlyph(i & 0xF, 66, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));"
+"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));"
 ]
 ],
 [
 633,
 [
-"        Render_DrawVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
-"        Render_DrawVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
+"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, Render_frameScratch.overlayOrderingTable - 12);",
+"        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, Render_frameScratch.overlayOrderingTable - 12);"
 ],
 [
-"        Render_DrawVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));",
-"        Render_DrawVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));"
+"        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));",
+"        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));"
 ]
 ],
 [
@@ -8729,10 +8673,10 @@
 [
 2021,
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
@@ -8774,10 +8718,10 @@
 [
 2037,
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
@@ -8819,10 +8763,10 @@
 [
 2053,
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [
@@ -8864,10 +8808,10 @@
 [
 2069,
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), s0[1] + 24);"
 ],
 [
-"            Render_DrawCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
+"            VS::Render::DrawLiveCompactTextColor(\"BACK\", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));"
 ]
 ],
 [

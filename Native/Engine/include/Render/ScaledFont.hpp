@@ -59,9 +59,4 @@ class ScaledGlyphTarget {
                                      int height, int scale,
                                      const ScaledFontStyle& style,
                                      ScaledGlyphTarget& target);
-
-// Applies DrawScaledFontChar with the live font state, the active text box
-// ordering table and the current frame's primitive buffer.
-int DrawLiveScaledFontChar(int char_id, int x, int y, int width, int height,
-                           int scale);
 }  // namespace VS::Render

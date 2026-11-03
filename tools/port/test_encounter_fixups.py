@@ -1761,23 +1761,25 @@ VS::Actors::UpdateLiveActorPalettePulse(*attached);
 VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
         )
 
-    def test_transition_text_uses_original_encoded_controls_not_ascii(self):
-        fixes = copy_fixups.FIXES["F01337"]
-        replacements = {old: new for old, new, _ in fixes}
+    def test_transition_text_is_owned_by_the_typed_text_box_core(self):
+        # The encoded-control decoding (0xE5 non-printing, 0x8F space, unsigned
+        # bytes) is now VS::Render::BlendTextBoxIntoFramebuffer, covered by the
+        # [render-font] Catch2 cases; no generated copy remains to patch.
+        registry = Path(__file__).resolve().with_name("owned.csv")
+        with registry.open(encoding="utf-8", newline="") as stream:
+            owned = {row["id"]: row for row in csv.DictReader(stream)}
+        for fid, name in (
+            ("F01328", "VS::Render::FormatEncodedText"),
+            ("F01334", "VS::Render::DrawProgressiveTextBoxText"),
+            ("F01335", "VS::Render::DrawScaledTextBoxText"),
+            ("F01337", "VS::Render::BlendTextBoxIntoFramebuffer"),
+        ):
+            self.assertEqual(owned[fid]["name"], name)
+            self.assertNotIn(fid, copy_fixups.FIXES)
         self.assertEqual(
-            replacements["currentChar < '\\f'"],
-            "currentChar < Core_TextCode_NonPrinting",
+            copy_fixups.OWNED_CALL_BINDINGS["F01337"],
+            "VS::Render::BlendLiveTextBoxIntoFramebuffer",
         )
-        self.assertEqual(
-            replacements["currentChar - '\\f'"],
-            "currentChar - Core_TextCode_NonPrinting",
-        )
-        self.assertEqual(
-            replacements["currentChar != ' '"],
-            "currentChar != Core_TextCode_Space",
-        )
-        self.assertIn("(u_char)*str++", replacements["u_int currentChar = *str++;"])
-        self.assertIn("(u_char)*str++", replacements["u_int opcodeParam = *str++;"])
 
     def test_attached_draw_requires_a_resident_parent_matrix(self):
         old, new, _ = next(
@@ -2017,21 +2019,24 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
             "    char sp10[4];\n"
             "    *(int*)sp10 = *value;\n"
             "Battle_puzzleTimerTextPointer[6 - i * 3] = digit;\n"
-            "    Render_DrawCompactText(Battle_puzzleTimerTextPointer, xy, ordering);"
+            "    VS::Render::DrawLiveCompactText(Battle_puzzleTimerTextPointer, xy, ordering);"
             "\n}"
         )
         for old, new, _ in copy_fixups.FIXES["F01384"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
         self.assertNotIn("Battle_puzzleTimerTextPointer", source)
-        self.assertIn("Render_DrawCompactText(Battle_puzzleTimerText,", source)
+        self.assertIn("VS::Render::DrawLiveCompactText(Battle_puzzleTimerText,", source)
         self.assertLess(
-            source.index("Core_Debugf"), source.index("Render_DrawCompactText")
+            source.index("Core_Debugf"), source.index("DrawLiveCompactText")
         )
         self.assertIn("const State_SceneTimer* timer", source)
         self.assertIn("timer->seconds, timer->minutes, timer->hours", source)
         self.assertNotIn("*(int*)sp10", source)
-        source = "Battle_DrawPuzzleTimer(&Battle_puzzleTimer);"
+        source = (
+            "        Render_activeTextBoxIndex = id;\n\n"
+            "Battle_DrawPuzzleTimer(&Battle_puzzleTimer);"
+        )
         for old, new, _ in copy_fixups.FIXES["F01392"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
@@ -2787,12 +2792,6 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
                 "Render::DrawGimFramebufferFade",
                 "int temp_s0 = arg0->brightness; Draw(arg0, arg1, arg2);",
                 "int brightness = image->brightness; Draw(image, clut, ordering_table);",
-            ),
-            (
-                "Render::DrawProgressiveTextBoxText",
-                "int speed = 1; arg0->speed += speed; var_a2 = 1000000000; var_a0 >>= 4;",
-                "int speed = 1; text_box->speed += speed; "
-                "hex_value_or_decimal_divisor = 1000000000; hexadecimal_divisor >>= 4;",
             ),
             (
                 "Render::DrawTextureWipe",

@@ -4,6 +4,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -440,7 +440,7 @@ int Menu_Container_UpdateGripDetails(int packed_details_selection)
                          + 0x30);
 
         Menu_Framework_DrawRowIcon(Menu_Framework_MainMenuIcon_Gem | (1 << 8), 256, 32);
-        Render_DrawCompactText(Menu_Container_gemSlotCountText, vs_getXY(280, 36), NULL);
+        VS::Render::DrawLiveCompactText(Menu_Container_gemSlotCountText, vs_getXY(280, 36), NULL);
         break;
 
     case 3:
@@ -699,7 +699,7 @@ void Menu_Container_DrawCapacityCount(int capacity_limit, int packed_count_posit
     used_count_color = 0x808080;
     Menu_Framework_DrawColoredInteger(capacity_limit, packed_count_position, 0x808080, 0);
     packed_used_count_position = packed_count_position - 0x20;
-    Render_DrawCompactTextColor("/", packed_used_count_position, 0x808080, NULL);
+    VS::Render::DrawLiveCompactTextColor("/", packed_used_count_position, 0x808080, NULL);
     if ((occupied_count * 2) < capacity_limit) {
         used_count_color = 0x804020;
     }
@@ -713,14 +713,14 @@ void Menu_Container_DrawStorageCapacities(void)
     int var_s1_2;
 
     for (i = 0; i < 2; ++i) {
-        Render_DrawCompactText(Menu_Container_kStorageNames[i], (0x3A + i * 0x80) | 0x580000, NULL);
+        VS::Render::DrawLiveCompactText(Menu_Container_kStorageNames[i], (0x3A + i * 0x80) | 0x580000, NULL);
     }
 
     for (i = 0; i < 7; ++i, var_s1_2 += 0xC) {
         Menu_Container_DrawCapacityCount(Items_Inventory_inventoryItemCapacities[i],
             ((0x64 + 0xC * i) << 16) | 0x70,
             Menu_Container_CountItems(i, &Menu_Framework_unusedInventoryStorage->gadgetBag.items));
-        Render_DrawCompactText(Menu_Container_kCategoryLabels[i], ((0x64 + 0xC * i) << 16) | 0xA0, NULL);
+        VS::Render::DrawLiveCompactText(Menu_Container_kCategoryLabels[i], ((0x64 + 0xC * i) << 16) | 0xA0, NULL);
         Menu_Container_DrawCapacityCount(Menu_Container_containerItemCapacities[i], ((0x64 + 0xC * i) << 16) | 0xF8,
             Menu_Container_CountItems(i, &Menu_Framework_unusedInventoryStorage->container.items));
     }
@@ -1680,7 +1680,7 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
             return selected_direction + 1;
         }
         Menu_Container_transferDirectionOkBlink += 16;
-        Render_DrawCompactTextColor("OK", 0x4200C8,
+        VS::Render::DrawLiveCompactTextColor("OK", 0x4200C8,
             ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
         v = 0x1A;
         Menu_Container_transferDirectionCursorAnimation = Menu_Framework_DrawCursor(
@@ -1892,10 +1892,10 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Triangle, i + 0x40, 0x24, NULL);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, control_icon_x, 0x34, NULL);
         s3 = (i + 0xC) & 0xFFFF;
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactTextColor(
             "STATUS", s3 | 0x260000, 0x202020 << (Menu_Container_controlsPanelMode & 3), NULL);
-        Render_DrawCompactText("CANCEL", (s3 + 0x48) | 0x260000, NULL);
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactText("CANCEL", (s3 + 0x48) | 0x260000, NULL);
+        VS::Render::DrawLiveCompactTextColor(
             "END", s3 | 0x360000, 0x808080 >> (Menu_Container_controlsPanelMode >> 2), NULL);
 
         if ((Menu_Container_controlsPanelMode >> 2) != 0) {
@@ -1911,12 +1911,12 @@ int Menu_Container_UpdateScreen(u_char* screen_step)
         }
 
         i -= capacity_slide_offset;
-        Render_DrawCompactText(Menu_Container_kStorageNames[Menu_Container_browsingGadgetBag], vs_getXY_4(i, 0x4C), NULL);
+        VS::Render::DrawLiveCompactText(Menu_Container_kStorageNames[Menu_Container_browsingGadgetBag], vs_getXY_4(i, 0x4C), NULL);
         s3 = 0;
         packed_capacity_row_position = vs_getXY_4(0x70, 0x58);
 
         for (;; ++s3) {
-            Render_DrawCompactText(
+            VS::Render::DrawLiveCompactText(
                 Menu_Container_kCategoryLabels[s3] + 1, vs_getXY_4(8 + i, 0x58 + s3 * 12), NULL);
             if (s3 == 6) {
                 break;

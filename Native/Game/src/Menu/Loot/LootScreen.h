@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:102
+#define vs_getRGB(r, g, b) vs_getRGB0(0, (r), (g), (b))
+
 #endif // VS_MENU_LOOT_LOOTSCREEN_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_MENU_LOOT_LOOTSCREEN_H_DECLS)

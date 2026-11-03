@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/EncodedTextLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
 #include "Menu/Framework/TextBoxes.h"
-#include "Render/Font.h"
 
 // decomp: local static of vs_mainMenu_getEquipmentMaxStats, at file scope so the module reset reaches it
 static short Menu_Framework_equipmentTitleRanksWeaponTitleMaxThresholds[] = { 50, 95, SHRT_MAX,
@@ -190,8 +190,8 @@ void Menu_Framework_FormatWeaponRow(
         [Menu_Framework_itemHelp[Menu_Framework_weaponHands[blade->category - 1]
                               + Text_Menu_ITEMHELP_BIN_Index_oneHanded]];
 
-    Render_FormatEncodedText(
-        Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
+        VS::Render::FormatLiveEncodedText(
             (char *)(buf), (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_classTemplate]),
         (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_weaponDescTemplate]);
 
@@ -230,8 +230,8 @@ void Menu_Framework_FormatBladeRow(
     Battle_stringContext.strings[6] = (char*)&Menu_Framework_itemHelp
         [Menu_Framework_itemHelp[Menu_Framework_weaponHands[blade->category - 1]
                               + Text_Menu_ITEMHELP_BIN_Index_oneHanded]];
-    Render_FormatEncodedText(
-        Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
+        VS::Render::FormatLiveEncodedText(
             (char *)(buf), (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp
                          [blade->id - 1 + Text_Menu_ITEMHELP_BIN_Index_battleKnifeDesc]]),
         (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_weaponDescTemplate]);
@@ -250,7 +250,7 @@ void Menu_Framework_FormatGripRow(
         [Menu_Framework_itemHelp[grip->category - 1 + Text_Menu_ITEMHELP_BIN_Index_shortGrip]];
     id = &grip->id;
 
-    Render_FormatEncodedText(Render_FormatEncodedText((char *)(buf),
+    VS::Render::FormatLiveEncodedText(VS::Render::FormatLiveEncodedText((char *)(buf),
                          (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp[*id - 6]]),
         (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_gripTemplate]);
 
@@ -283,8 +283,8 @@ void Menu_Framework_FormatShieldRow(
         (char*)&Menu_Framework_itemNames[shieldBase->material - 1
                                       + Text_Menu_ITEMNAME_BIN_Index_wood];
 
-    Render_FormatEncodedText(
-        Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
+        VS::Render::FormatLiveEncodedText(
             (char *)(buf), (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_classTemplate]),
         (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_armorTemplate]);
 
@@ -344,8 +344,8 @@ void Menu_Framework_FormatArmorRow(
         (char*)&Menu_Framework_itemNames[armorBase->material - 1
                                       + Text_Menu_ITEMNAME_BIN_Index_wood];
 
-    Render_FormatEncodedText(
-        Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
+        VS::Render::FormatLiveEncodedText(
             (char *)(buf), (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_classTemplate]),
         (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_armorTemplate]);
 

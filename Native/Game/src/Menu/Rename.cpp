@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/EncodedTextLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -22,7 +24,6 @@ extern "C" {
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Rename.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -228,7 +229,7 @@ void Menu_Rename_DrawFrame(int xOffset)
 
     Render_frameScratch.primitiveCursor = prim;
 
-    Render_SetMenuFontStyle(4);
+    VS::Render::SetLiveMenuFontStyle(4);
 
     for (i = 0; i < 4; ++i) {
 
@@ -237,7 +238,7 @@ void Menu_Rename_DrawFrame(int xOffset)
         x = 40;
 
         while ((j = *commandString++) != Core_TextCode_Terminator) {
-            Render_DrawVariableWidthGlyph(
+            VS::Render::DrawLiveVariableWidthGlyph(
                 j, x - xOffset, 84 - (i * 16), (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0x14));
 
             x += 6;
@@ -253,7 +254,7 @@ void Menu_Rename_DrawFrame(int xOffset)
 
             int name_character_x = (j * 6 + 0xA2);
 
-            Render_DrawVariableWidthGlyph(
+            VS::Render::DrawLiveVariableWidthGlyph(
                 counter, xOffset + name_character_x, 0x30, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 8));
         }
     }
@@ -278,12 +279,12 @@ void Menu_Rename_DrawFrame(int xOffset)
         Menu_Rename_navIconPulseRequest = 0;
         j = (Menu_Rename_nameNavIconAnim >> 2);
 
-        Render_DrawCompactTextColor("1", vs_getXY(152, 51), color, 0);
-        Render_DrawCompactTextColor("L", vs_getXY(146, 51), color, 0);
+        VS::Render::DrawLiveCompactTextColor("1", vs_getXY(152, 51), color, 0);
+        VS::Render::DrawLiveCompactTextColor("L", vs_getXY(146, 51), color, 0);
         VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), (136 - j) | (48 << 16))[4] =
             (x << 0x10) | vs_getUV(0, 48);
-        Render_DrawCompactTextColor("1", vs_getXY(292, 51), color, 0);
-        Render_DrawCompactTextColor("R", vs_getXY(286, 51), color, 0);
+        VS::Render::DrawLiveCompactTextColor("1", vs_getXY(292, 51), color, 0);
+        VS::Render::DrawLiveCompactTextColor("R", vs_getXY(286, 51), color, 0);
         VS::Render::QueueLiveDefaultSprite(vs_getWH(16, 16), (j + 296) | (48 << 16))[4] =
             (x << 0x10) | vs_getUV(16, 48);
 
@@ -316,7 +317,7 @@ void Menu_Rename_DrawFrame(int xOffset)
 
             int character_grid_origin_x = (xOffset + 0x82);
 
-            Render_DrawVariableWidthGlyph(commandString[i * 15 + j],
+            VS::Render::DrawLiveVariableWidthGlyph(commandString[i * 15 + j],
                 character_grid_origin_x + j * 12, (i * 16) + 78, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 8));
         }
     }
@@ -753,7 +754,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
 
         Battle_stringContext.strings[0] = Menu_Rename_nameEditorNameBuffer;
 
-        Render_FormatEncodedText(Menu_Framework_stringBuf,
+        VS::Render::FormatLiveEncodedText(Menu_Framework_stringBuf,
             (char*)(Menu_Rename_renderRenameMenuStrings + Text_Menu8_rename_Offset_confirmPrompt));
 
         Menu_Framework_SetInformationMessage(Menu_Framework_stringBuf);

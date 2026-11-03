@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -1103,8 +1103,8 @@ void Menu_BattleAbilities_DrawNextUnlockPoints(int row)
     pointsStr = pointsBuf + i;
     *pointsStr = '#';
 
-    Render_DrawCompactText("NEXT", pos, 0);
-    Render_DrawCompactText(pointsStr, pos + 0x60, 0);
+    VS::Render::DrawLiveCompactText("NEXT", pos, 0);
+    VS::Render::DrawLiveCompactText(pointsStr, pos + 0x60, 0);
 }
 
 // decomp: MENU2.PRG vs_menu2_exec (src/MENU/MENU2.PRG/64.c:656)

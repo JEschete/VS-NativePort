@@ -26,7 +26,6 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
 #include "Menu/Files.h"
-#include "Render/Font.h"
 #include "Save/MemoryCard/Resources.h"
 #include "Title/SaveFiles.h"
 }

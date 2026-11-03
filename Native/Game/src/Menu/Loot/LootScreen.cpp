@@ -3,10 +3,12 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
+#include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
@@ -30,7 +32,6 @@ extern "C" {
 #include "Menu/Loot/LootScreen.h"
 #include "Menu/Loot/Paging.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 
 // decomp: D_8010A6B7 (D_8010A6B7@src/MENU/MENUB.PRG/260.c)
 char Menu_Loot_previewedLoot;
@@ -251,7 +252,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
     if (Menu_Inventory_statusCommandAnimationStep != 0) {
         Menu_Framework_DrawButtonPromptBackground(0x10 - stepValue, 0x26, 0x58, 10);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8 - stepValue, 0x24, NULL);
-        Render_DrawCompactTextColor("STATUS", ((0x1C - stepValue) & 0xFFFF) | 0x260000,
+        VS::Render::DrawLiveCompactTextColor("STATUS", ((0x1C - stepValue) & 0xFFFF) | 0x260000,
             0x202020 << Menu_Inventory_statusCommandState, NULL);
     }
 
@@ -754,7 +755,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
         }
     }
 
-    Render_DrawCompactText("GADGET BAG", (edgeX + 176) | (12 << 16), NULL);
+    VS::Render::DrawLiveCompactText("GADGET BAG", (edgeX + 176) | (12 << 16), NULL);
 
     itemCountPos = edgeX + 272;
 
@@ -771,8 +772,8 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
 
         y = (24 + i * 12) << 16;
 
-        Render_DrawCompactTextColor("/", itemCountPos | y, color, NULL);
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactTextColor("/", itemCountPos | y, color, NULL);
+        VS::Render::DrawLiveCompactTextColor(
             Menu_Loot_itemCategoryHeaders[i], (edgeX + 192) | y, color, NULL);
         Menu_Framework_DrawColoredInteger(capacity, (edgeX + 296) | y, color, NULL);
 
@@ -796,7 +797,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
 
     Menu_Framework_DrawButtonPromptBackground(buttonBgPos, 112, 112, 10);
     Menu_Framework_DrawButtonPromptBackground(buttonBgPos, 128, 64, 10);
-    Render_DrawCompactTextColor("GET", (edgeX + 196) | (112 << 16),
+    VS::Render::DrawLiveCompactTextColor("GET", (edgeX + 196) | (112 << 16),
         vs_getRGB(64, 64, 64) << Menu_Loot_controlsEnabled, NULL);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, edgeX + 176, 110, NULL);
 
@@ -809,9 +810,9 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
         all_command_color = vs_getRGB(64, 64, 64);
     }
 
-    Render_DrawCompactTextColor(str, xy, all_command_color, NULL);
+    VS::Render::DrawLiveCompactTextColor(str, xy, all_command_color, NULL);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, edgeX + 232, 110, NULL);
-    Render_DrawCompactTextColor("END", (edgeX + 196) | (128 << 16),
+    VS::Render::DrawLiveCompactTextColor("END", (edgeX + 196) | (128 << 16),
         vs_getRGB(64, 64, 64) << Menu_Loot_controlsEnabled, NULL);
     Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Cross, edgeX + 176, 126, NULL);
 }

@@ -4,6 +4,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -1171,14 +1171,14 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         if ((a0 != Menu_Container_discardStep) || (previous_discard_count != Menu_Container_discardCount)) {
             VS::Menu::PlayChangeSound();
         }
-        Render_SetMenuFontStyle(5);
+        VS::Render::SetLiveMenuFontStyle(5);
         packed_discard_digits = VS::Core::Math::SplitDecimalDigit(Menu_Container_discardCount);
-        Render_DrawVariableWidthGlyph(
+        VS::Render::DrawLiveVariableWidthGlyph(
             packed_discard_digits & 0xF, 0x42, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));
         packed_discard_digits = VS::Core::Math::SplitDecimalDigit(packed_discard_digits >> 4);
-        Render_DrawVariableWidthGlyph(
+        VS::Render::DrawLiveVariableWidthGlyph(
             packed_discard_digits & 0xF, 0x3C, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));
-        Render_DrawVariableWidthGlyph(
+        VS::Render::DrawLiveVariableWidthGlyph(
             packed_discard_digits >> 4, 0x36, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));
         Menu_Container_discardMenuCursorAnimation =
             Menu_Framework_DrawCursor(Menu_Container_discardMenuCursorAnimation, (0x36 - (Menu_Container_discardStep * 6)) | 0x720000);

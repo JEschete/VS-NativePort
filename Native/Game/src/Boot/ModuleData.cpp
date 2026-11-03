@@ -130,7 +130,6 @@ extern "C" {
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "ModelLoading.h"
-#include "Render/Font.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/Images.h"
 #include "Render/Loading.h"

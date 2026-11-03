@@ -160,6 +160,8 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Render\ScreenOverlayLive.cpp",
                 r"src\Render\PaletteAnimationLive.cpp",
                 r"src\Render\GimImagesLive.cpp",
+                r"src\Render\EncodedTextLive.cpp",
+                r"src\Render\GameFontLive.cpp",
                 r"src\Audio\SoundEffectsLive.cpp",
                 r"src\Movie\Intro\PlayerLive.cpp",
                 r"src\Audio\Driver\PlaybackResetLive.cpp",

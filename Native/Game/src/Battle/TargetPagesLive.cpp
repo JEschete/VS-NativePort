@@ -12,14 +12,15 @@
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"
+#include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Battle/Targeting.h"
 #include "Field/Interactions.h"
 #include "Input/ControllerLiveState.h"
-#include "Render/Font.h"
 }
 
 namespace {
@@ -190,6 +191,6 @@ void Battle_DrawTargetPageHint(void) {
   std::array<char, kHintBufferSize> text{};
   std::snprintf(text.data(), text.size(), "L1  %d/%d  R1", info.page,
                 info.pages);
-  Render_DrawCompactTextColor(text.data(), vs_getXY_2(kHintX, kHintY),
-                              kHintColor, nullptr);
+  VS::Render::DrawLiveCompactTextColor(text.data(), vs_getXY_2(kHintX, kHintY),
+                                       kHintColor, nullptr);
 }

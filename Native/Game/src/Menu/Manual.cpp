@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Menu/Manual.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -367,16 +367,16 @@ int Menu_Manual_UpdateHelpPages(void)
         }
         frame_scratch = &Render_frameScratch;
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8, 16, ((u_long*)frame_scratch->orderingTable) + 6);
-        Render_DrawCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
+        VS::Render::DrawLiveCompactTextColor("TURN    PAGE", 0x12001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x12, 0x60, 0xC);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Circle, 8, 34, ((u_long*)frame_scratch->orderingTable) + 6);
-        Render_DrawCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
+        VS::Render::DrawLiveCompactTextColor("MENU", 0x24001C, 0x808080, ((u_long*)frame_scratch->orderingTable) + 6);
         Menu_Manual_DrawControlsBackground(0x10, 0x24, 0x40, 0xC);
-        Render_DrawCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
+        VS::Render::DrawLiveCompactTextColor("PAGE", 0xC400D8, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         sprintf(charBuf, "#%d/", currentPage + 1);
-        Render_DrawCompactTextColor(charBuf, 0xC40118, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
+        VS::Render::DrawLiveCompactTextColor(charBuf, 0xC40118, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         sprintf(charBuf, "#%d", lastPage + 1);
-        Render_DrawCompactTextColor(charBuf, 0xC40130, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
+        VS::Render::DrawLiveCompactTextColor(charBuf, 0xC40130, 0x808080, ((u_long*)frame_scratch->orderingTable) + 7);
         Field_manualDisplayState
             .scrollPositions[Field_manualDisplayState.currentManual] =
             Menu_Manual_scrollPosition;

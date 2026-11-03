@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/String/GameTextLive.hpp"
+#include "Render/EncodedTextLive.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -11,9 +13,9 @@ extern "C" {
 #include "Core/Text/TextCode.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
+#include "Menu/Loot/LootScreen.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
@@ -311,7 +313,7 @@ void Menu_Score_RenderStatistics(int animState)
             VS::Core::String::FormatLiveGameInteger(intBuf, Audio_Seq_unusedScoredata.weaponAttacks[v1]);
         }
 
-        v1 = value_right_edge_x - (Render_MeasureEncodedTextLine(intBuf) * 6);
+        v1 = value_right_edge_x - (VS::Render::MeasureLiveEncodedTextLine(intBuf) * 6);
         ++value_right_edge_x;
         --value_right_edge_x;
         aligned_value_text[0] = 0xFA;
@@ -508,14 +510,14 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
     }
 
     p = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-    Render_DrawCompactTextColor(
+    VS::Render::DrawLiveCompactTextColor(
         "PLAYER TIME", vs_getXY((selected * 0x10) - 0x78, 0x20), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
     Menu_Score_DrawGradientPanel((selected * 0x10) - 0x80, 0x20, 0x60, 0xC, 1);
-    Render_DrawCompactTextColor(
+    VS::Render::DrawLiveCompactTextColor(
         "1ST", vs_getXY((selected * 0x10) - 0x68, 0x32), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-    Render_DrawCompactTextColor(
+    VS::Render::DrawLiveCompactTextColor(
         "2ND", vs_getXY((selected * 0x10) - 0x68, 0x50), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
-    Render_DrawCompactTextColor(
+    VS::Render::DrawLiveCompactTextColor(
         "3RD", vs_getXY((selected * 0x10) - 0x68, 0x6E), 0x808080, (u_long *)(((u_char*)(p[1])) + 0x1C));
 
     for (j = 0; j < 3; ++j) {
@@ -526,17 +528,17 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
             sprintf(
                 record_value_text, "$%02d:%02d:%02d", time >> 0x10, (time >> 8) & 0xFF, time & 0xFF);
             q = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-            Render_DrawCompactTextColor(record_value_text,
+            VS::Render::DrawLiveCompactTextColor(record_value_text,
                 vs_getXY_2((selected * 16) - 40, 50 + j * 30), vs_getRGB(128, 128, 128),
                 (u_long *)(((u_char*)(q[1])) + 0x1C));
             sprintf(record_value_text, "ROUND    %d",
                 Audio_Seq_unusedScoredata.bossTimeTrialScores[selected_trial_index][j].round + 1);
-            Render_DrawCompactTextColor(record_value_text,
+            VS::Render::DrawLiveCompactTextColor(record_value_text,
                 vs_getXY_2((selected * 16) - 60, 62 + j * 30), vs_getRGB(128, 128, 128),
                 (u_long *)(((u_char*)(q[1])) + 0x1C));
         } else {
             q = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-            Render_DrawCompactTextColor("$--:--:--",
+            VS::Render::DrawLiveCompactTextColor("$--:--:--",
                 vs_getXY_2((selected * 16) - 40, 50 + j * 30), vs_getRGB(80, 80, 80),
                 (u_long *)(((u_char*)(q[1])) + 0x1C));
         }
@@ -544,16 +546,16 @@ void Menu_Score_RenderTimeTrialRecords(int selected)
 
     Menu_Score_DrawGradientPanel((selected * 0x10) - 0x70, 0x32, 0x80, 0x54, 2);
     r = ((void**)((uintptr_t)Core_ScratchBase() + 0x000));
-    Render_DrawCompactTextColor("REFERENCE TIME", vs_getXY(selected * 16 - 0x78, 0x8C),
+    VS::Render::DrawLiveCompactTextColor("REFERENCE TIME", vs_getXY(selected * 16 - 0x78, 0x8C),
         vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));
     Menu_Score_DrawGradientPanel((selected * 0x10) - 0x80, 0x8C, 0x70, 0xC, 1);
 
     if ((settled_row_count == 8) && (selected == settled_row_count)) {
         if (selected_trial_row->disabled != 0) {
-            Render_DrawCompactTextColor(
+            VS::Render::DrawLiveCompactTextColor(
                 "$--:--:--", vs_getXY(88, 158), vs_getRGB(80, 80, 80), (u_long *)(((u_char*)(r[1])) + 0x1C));
         } else {
-            Render_DrawCompactTextColor(Menu_Score_kTimeAttackReferenceTimes[selected_trial_index],
+            VS::Render::DrawLiveCompactTextColor(Menu_Score_kTimeAttackReferenceTimes[selected_trial_index],
                 vs_getXY(88, 158), vs_getRGB(128, 128, 128), (u_long *)(((u_char*)(r[1])) + 0x1C));
         }
     }

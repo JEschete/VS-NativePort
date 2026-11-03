@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"
 #include "Menu/Score/ScoreScreen.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -451,21 +451,21 @@ void Menu_Score_RenderEnemyViewer(int animState, int state)
 
         control_label_x = (controls_slide_x - 100) & 0xFFFF;
 
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactTextColor(
             "ROTATION", control_label_x | (18 << 16), Menu_Score_rotationColor, (u_long *)(((u_char*)(scratch[1])) + 24));
 
         control_banner_x = controls_slide_x - 112;
 
         Menu_Score_DrawEnemyBanner(control_banner_x, 18, 96, 12, 3);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_R2, controls_slide_x - 120, 34, (u_long *)(((u_char*)(scratch[1])) + 24));
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactTextColor(
             "ZOOM", control_label_x | (36 << 16), Menu_Score_zoomColor, (u_long *)(((u_char*)(scratch[1])) + 24));
         Menu_Score_DrawEnemyBanner(control_banner_x, 36, 78, 12, 3);
         sprintf(enemy_number_text, "NO.   %03d/%03d", Menu_Score_selectedEnemy + 1, 78);
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactTextColor(
             enemy_number_text, ((controls_slide_x - 120) & 0xFFFF) | 0xA00000, 0x808080, (u_long *)(((u_char*)(scratch[1])) + 0x1C));
         Menu_Score_DrawGradientPanel(controls_slide_x - 128, 160, 100, 12, 2);
-        Render_DrawCompactTextColor(enemyClassName[Menu_Score_monBinData[Menu_Score_selectedEnemy].classId],
+        VS::Render::DrawLiveCompactTextColor(enemyClassName[Menu_Score_monBinData[Menu_Score_selectedEnemy].classId],
             ((name_panel_slide_x + 188) & 0xFFFF) | 0x9B0000, 0x808080, NULL);
         Menu_Score_DrawGradientPanel(name_panel_slide_x + 180, 155, 140, 26, 1);
     }
@@ -490,7 +490,7 @@ void Menu_Score_UpdateEnemyNavigation(int direction)
         }
 
         if (direction != 0) {
-            Render_DrawCompactTextColor(
+            VS::Render::DrawLiveCompactTextColor(
                 "#R1", vs_getXY(286, 98), vs_getRGB888(128, 128, 128), NULL);
 
             if (Menu_Score_enemyNavigationState < 9) {
@@ -499,7 +499,7 @@ void Menu_Score_UpdateEnemyNavigation(int direction)
                 x = -(Menu_Score_enemyNavigationState >> 2) + 294;
             }
         } else {
-            Render_DrawCompactTextColor(
+            VS::Render::DrawLiveCompactTextColor(
                 "L1", vs_getXY(34, 98), vs_getRGB888(128, 128, 128), NULL);
 
             if (Menu_Score_enemyNavigationState < 9) {

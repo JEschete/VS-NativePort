@@ -5,6 +5,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Legacy/Psx.h"
+#include "Render/GameFontLive.hpp"
 
 extern "C" {
 #include "Core/Text/TextCode.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -25,10 +25,7 @@ struct InformationFixture {
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
   int saved_framebuffer = Render_frameBuf;
   u_long* saved_ordering = Menu_activeTextBoxOrderingTable;
-  int saved_color = Render_fontColor;
-  char saved_palette = Render_fontPaletteOffset;
-  char saved_table = Render_fontTableSelect;
-  unsigned char saved_index = Render_activeTextBoxIndex;
+  VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   Menu_TextBoxState saved_box = Menu_textBoxes[7];
   char saved_setting = Input_settings.information;
   int saved_buttons = Input_buttonsState;
@@ -47,7 +44,6 @@ struct InformationFixture {
     Render_legacyPrimitiveBuffers[0] = memory.data() + 8;
     Render_frameBuf = 0;
     Menu_activeTextBoxOrderingTable = ordering.data();
-    Render_activeTextBoxIndex = 7;
     Menu_Framework_rowTypeBuf = &row_type;
     Input_buttonsState = 0;
     Menu_textBoxes[7] = {};
@@ -61,10 +57,7 @@ struct InformationFixture {
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
     Render_frameBuf = saved_framebuffer;
     Menu_activeTextBoxOrderingTable = saved_ordering;
-    Render_fontColor = saved_color;
-    Render_fontPaletteOffset = saved_palette;
-    Render_fontTableSelect = saved_table;
-    Render_activeTextBoxIndex = saved_index;
+    VS::Render::LiveFontStyle() = saved_style;
     Input_settings.information = saved_setting;
     Input_buttonsState = saved_buttons;
     Menu_Framework_rowTypeBuf = saved_rows;
@@ -102,7 +95,7 @@ TEST_CASE(
   for (int update = 0; update < updates; ++update) {
     Menu_Framework_SetInformationMessage(fixture.message.data());
     fixture.ResetPackets();
-    Render_DrawProgressiveTextBoxText(&Menu_textBoxes[7]);
+    VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
     CHECK(Menu_textBoxes[7].flags.done);
     CHECK(Menu_textBoxes[7].prevChunksPrinted == 3);
     CHECK(Render_frameScratch.primitiveCursor ==
@@ -111,7 +104,7 @@ TEST_CASE(
   fixture.message[0] = static_cast<char>(Core_TextCode_Terminator);
   Menu_Framework_SetInformationMessage(fixture.message.data());
   fixture.ResetPackets();
-  Render_DrawProgressiveTextBoxText(&Menu_textBoxes[7]);
+  VS::Render::DrawLiveProgressiveTextBoxText(&Menu_textBoxes[7]);
   CHECK(Menu_textBoxes[7].flags.done);
   CHECK(Menu_textBoxes[7].prevChunksPrinted == 0);
   CHECK(Render_frameScratch.primitiveCursor == fixture.memory.data() + 8);
@@ -122,14 +115,16 @@ TEST_CASE(
 TEST_CASE("Information control repair does not accelerate ordinary dialogue",
           "[render][text][information]") {
   InformationFixture fixture;
-  Menu_TextBoxState dialogue{};
+  // The text box drawers draw only the dialogue text boxes.
+  Menu_TextBoxState& dialogue = Menu_textBoxes[7];
+  dialogue = {};
   dialogue.flags.kind = 2;
   dialogue.flags.speakerTexture = 32;
   dialogue.brightness = 128;
   dialogue.speed = 1;
   // NOLINTNEXTLINE(build/include_what_you_use): C text member, not std::string.
   dialogue.string = fixture.message.data();
-  Render_DrawProgressiveTextBoxText(&dialogue);
+  VS::Render::DrawLiveProgressiveTextBoxText(&dialogue);
   CHECK_FALSE(dialogue.flags.done);
   CHECK(dialogue.prevChunksPrinted == 1);
   CHECK(Render_frameScratch.primitiveCursor ==

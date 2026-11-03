@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 
@@ -394,7 +394,7 @@ int Menu_Inventory_UpdateGripDetails(int itemInfo)
             + '0';
 
         Menu_Framework_DrawRowIcon(Menu_Framework_MainMenuIcon_Gem | (1 << 8), 256, 32);
-        Render_DrawCompactText(Menu_Inventory_gripDetailsGemSlotCountBuf, vs_getXY(280, 36), NULL);
+        VS::Render::DrawLiveCompactText(Menu_Inventory_gripDetailsGemSlotCountBuf, vs_getXY(280, 36), NULL);
 
         break;
 

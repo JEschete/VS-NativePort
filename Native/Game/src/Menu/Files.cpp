@@ -5,6 +5,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -20,6 +21,7 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Battle/Feedback.h"
+#include "Battle/Sphere.h"
 #include "Battle/TextBoxes.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
@@ -40,7 +42,6 @@ extern "C" {
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -2319,7 +2320,7 @@ void Menu_Files_DrawPlayTime(void)
     if (time[3] >= 100) {
         *(int*)&time = 0;
         time[3] = 0;
-        Render_DrawCompactText("1", 0xC800D8, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
+        VS::Render::DrawLiveCompactText("1", 0xC800D8, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
     } else {
         time[0] = ((((time[0] << 14) + VS::Core::NextLiveInterfaceRandomBits(15)) * 5u) >> 14) / 3;
     }
@@ -2328,8 +2329,8 @@ void Menu_Files_DrawPlayTime(void)
         Menu_Files_playTime[9 - i * 3] = (digits >> 4) + 48;
         Menu_Files_playTime[10 - i * 3] = (digits & 0xF) + 48;
     }
-    Render_DrawCompactText(Menu_Files_playTime, 0xC800E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
-    Render_DrawCompactText("PLAY    TIME", 0xBC00E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
+    VS::Render::DrawLiveCompactText(Menu_Files_playTime, 0xC800E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
+    VS::Render::DrawLiveCompactText("PLAY    TIME", 0xBC00E0, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
 }
 
 // decomp: MENU7.PRG vs_menu7_dataMenu (src/MENU/MENU7.PRG/260.c:4187)

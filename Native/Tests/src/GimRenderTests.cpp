@@ -4,7 +4,10 @@ extern "C" {
 #include <string.h>
 
 extern "C++" {
+#include "Render/EncodedTextLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/ScaledFont.hpp"
+#include "Render/ScaledFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 }
 #include "Actors/Spawning.h"
@@ -23,7 +26,6 @@ extern "C++" {
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
@@ -50,12 +52,19 @@ int Tests_EncodedTextFormatting(void) {
   Battle_stringContext.integers[1] = 7;
   Battle_stringContext.integers[2] = 0;
   Battle_stringContext.strings[0] = nested;
-  char* end = Render_FormatEncodedText(output + 1, format);
+  char* end = VS::Render::FormatLiveEncodedText(output + 1, format);
   int passed = end == output + sizeof expected &&
                memcmp(output + 1, expected, sizeof expected) == 0 &&
                output[0] == 0x55 && output[sizeof expected + 1] == 0x55;
-  Render_TerminateEncodedString(output);
-  passed = passed && (unsigned char)output[0] == Core_TextCode_Terminator;
+  // A destination too small for the expanded text is refused, left empty and
+  // reported.
+  char small[4];
+  memset(small, 0x55, sizeof small);
+  const uint64_t refused = VS::Render::RefusedLiveEncodedTextCount();
+  passed =
+      passed && VS::Render::FormatLiveEncodedText(small, format) == small &&
+      (unsigned char)small[0] == Core_TextCode_Terminator && small[1] == 0x55 &&
+      VS::Render::RefusedLiveEncodedTextCount() == refused + 1;
   Battle_stringContext = saved;
   return passed;
 }
@@ -68,16 +77,18 @@ int Tests_CompactTextAndGaugeLinks(void) {
   const unsigned char savedIndex = Render_compactGlyphIndices[33];
   Render_compactGlyphWidths[16] = 0x60;
   Render_compactGlyphIndices[33] = 0;
-  Render_frameScratch.primitiveCursor = storage;
-  Render_DrawCompactTextColor("A", 0, 0x808080, &ordering);
-  int passed = nextPrim(&ordering) == storage &&
-               nextPrim(storage) == storage + 2 &&
-               nextPrim(storage + 2) == storage + 7 &&
-               LegacyGpu_WalkList(&ordering) == 4;
-  ordering = 0xFFFFFF;
-  // The typed gauge reserves its packet inside the current frame's buffer.
+  // The Live queue reserves its packets inside the current frame's buffer.
   void* const saved_buffer = Render_legacyPrimitiveBuffers[Render_frameBuf & 1];
   Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = storage;
+  Render_frameScratch.primitiveCursor = storage;
+  VS::Render::DrawLiveCompactTextColor("A", 0, 0x808080, &ordering);
+  // The glyph is stored first; the draw mode stored after it leads the
+  // chain, and the glyph ends it.
+  int passed = nextPrim(&ordering) == storage + 5 && storage[6] == 0xE100000C &&
+               nextPrim(storage + 5) == storage &&
+               (storage[0] & 0xFFFFFF) == 0xFFFFFF &&
+               LegacyGpu_WalkList(&ordering) == 3;
+  ordering = 0xFFFFFF;
   Render_frameScratch.primitiveCursor = storage;
   VS::Render::DrawLiveStatGauge(0, 32, &ordering, 0);
   Render_legacyPrimitiveBuffers[Render_frameBuf & 1] = saved_buffer;
@@ -97,10 +108,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   void* savedBuffer = Render_legacyPrimitiveBuffers[0];
   const int savedFrameIndex = Render_frameBuf;
   u_long* savedOrdering = Menu_activeTextBoxOrderingTable;
-  const int savedColor = Render_fontColor;
-  const char savedPalette = Render_fontPaletteOffset,
-             savedTable = Render_fontTableSelect;
-  const unsigned char savedIndex = Render_activeTextBoxIndex;
+  const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   const char savedWidth = Render_variableFontGlyphWidths[5];
   const char savedSpaceWidth = Render_variableFontGlyphWidths[0x8F];
   const Menu_TextBoxState savedBox = Menu_textBoxes[2];
@@ -111,13 +119,19 @@ int Tests_ScaledDialogueGlyphs(void) {
   Render_legacyPrimitiveBuffers[0] = memory + 8;
   Render_frameBuf = 0;
   Render_frameScratch.primitiveCursor = memory + 8;
-  Render_fontColor = 0x2C808080;
-  Render_fontPaletteOffset = Render_fontTableSelect = 0;
-  Render_activeTextBoxIndex = 2;
+  VS::Render::LiveFontStyle() = {
+      .table_select = 0, .palette_offset = 0, .color = 0x2C808080};
   Render_variableFontGlyphWidths[5] = 7;
   Render_variableFontGlyphWidths[0x8F] = 6;
-  int next_x = VS::Render::DrawLiveScaledFontChar(5, 10 << 16, 20 << 16,
-                                                  12 << 16, 12 << 16, 1 << 16);
+  // Box 2's glyphs go in front of the last of its four layers.
+  VS::Render::LiveScaledGlyphTarget target(&ordering[11]);
+  const VS::Render::ScaledFontStyle style{
+      .glyph_widths = std::as_bytes(std::span(Render_variableFontGlyphWidths)),
+      .table_select = 0,
+      .palette_offset = 0,
+      .color = 0x2C808080};
+  int next_x = VS::Render::DrawScaledFontChar(5, 10 << 16, 20 << 16, 12 << 16,
+                                              12 << 16, 1 << 16, style, target);
   POLY_FT4* glyph = reinterpret_cast<POLY_FT4*>((memory + 8));
   int passed = next_x == 17 << 16 && glyph->x0 == 10 && glyph->y0 == 20 &&
                glyph->x3 == 22 && glyph->y3 == 32 && glyph->u0 == 60 &&
@@ -126,22 +140,24 @@ int Tests_ScaledDialogueGlyphs(void) {
                nextPrim(&ordering[11]) == glyph;
   void* end = Render_frameScratch.primitiveCursor;
   passed = passed &&
-           VS::Render::DrawLiveScaledFontChar(0x8F, next_x, 0, 0, 0, 1 << 16) ==
-               23 << 16 &&
+           VS::Render::DrawScaledFontChar(0x8F, next_x, 0, 0, 0, 1 << 16, style,
+                                          target) == 23 << 16 &&
            Render_frameScratch.primitiveCursor == end;
-  Menu_TextBoxState box = {0};
+  // The text box drawers draw only the dialogue text boxes.
+  Menu_TextBoxState& box = Menu_textBoxes[2];
+  memset(&box, 0, sizeof box);
   char text[] = {5, static_cast<char>(0x8F), 5, static_cast<char>(0xE8),
                  5, static_cast<char>(0xE7)};
   box.flags.kind = 4;
   box.string = text;
-  passed = passed && Render_MeasureEncodedTextLine(text) == 3;
+  passed = passed && VS::Render::MeasureLiveEncodedTextLine(text) == 3;
   box.speed = 1;
   box.brightness = 128;
   box.frameX = 10;
   box.frameY = 20;
   Render_frameScratch.primitiveCursor = memory + 8;
   ClearOTag(ordering, 34);
-  Render_DrawScaledTextBoxText(&box, 1 << 16);
+  VS::Render::DrawLiveScaledTextBoxText(&box, 1 << 16);
   passed = passed && Render_frameScratch.primitiveCursor == glyph + 3 &&
            glyph[1].x0 == 23 && glyph[2].x0 == 10 && glyph[2].y0 == 33 &&
            memory[0] == 0xA5 && memory[0x2000F] == 0xA5;
@@ -149,7 +165,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   ClearOTag(ordering, 34);
   box.speed = 100;
   box.opaque2C = 1;
-  Render_DrawProgressiveTextBoxText(&box);
+  VS::Render::DrawLiveProgressiveTextBoxText(&box);
   passed = passed && box.flags.done && box.prevChunksPrinted == 4 &&
            Render_frameScratch.primitiveCursor ==
                memory + 8 + 3 * 6 * sizeof(u_long);
@@ -174,10 +190,7 @@ int Tests_ScaledDialogueGlyphs(void) {
   Render_legacyPrimitiveBuffers[0] = savedBuffer;
   Render_frameBuf = savedFrameIndex;
   Menu_activeTextBoxOrderingTable = savedOrdering;
-  Render_fontColor = savedColor;
-  Render_fontPaletteOffset = savedPalette;
-  Render_fontTableSelect = savedTable;
-  Render_activeTextBoxIndex = savedIndex;
+  VS::Render::LiveFontStyle() = saved_style;
   Render_variableFontGlyphWidths[5] = savedWidth;
   Render_variableFontGlyphWidths[0x8F] = savedSpaceWidth;
   free(memory);
@@ -262,9 +275,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   const Render_FrameScratch saved_frame = Render_frameScratch;
   const int saved_framebuffer = Render_frameBuf;
   void* const saved_buffer = Render_legacyPrimitiveBuffers[0];
-  const int saved_color = Render_fontColor;
-  const char saved_palette = Render_fontPaletteOffset;
-  const char saved_table = Render_fontTableSelect;
+  const VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   const char saved_width = Render_variableFontGlyphWidths[5];
   Menu_Framework_MenuRow* saved_items = Menu_Framework_menuItems;
   Menu_Framework_MenuRow rows[40] = {0};
@@ -327,9 +338,7 @@ int CheckMenuRowNativeLinks(int scrolling) {
   Render_frameScratch = saved_frame;
   Render_frameBuf = saved_framebuffer;
   Render_legacyPrimitiveBuffers[0] = saved_buffer;
-  Render_fontColor = saved_color;
-  Render_fontPaletteOffset = saved_palette;
-  Render_fontTableSelect = saved_table;
+  VS::Render::LiveFontStyle() = saved_style;
   Render_variableFontGlyphWidths[5] = saved_width;
   Menu_Framework_menuItems = saved_items;
   return passed;

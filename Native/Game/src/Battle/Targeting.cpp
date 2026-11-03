@@ -6,6 +6,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/Controller.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/EncodedTextLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -55,7 +56,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 
 // decomp: D_800E8184 (D_800E8184@BATTLE/BATTLE.PRG)
@@ -1516,7 +1516,7 @@ int Battle_UpdateTargetSelectionMenu(u_char* target)
             }
             Battle_stringContext.integers[0] = *(u_short*)&entry->opaqueC;
             Battle_stringContext.integers[1] = (u_short)entry->opaqueE;
-            Render_FormatEncodedText((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->textBuffer, Battle_targetInfoTemplate);
+            VS::Render::FormatLiveEncodedText((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->textBuffer, Battle_targetInfoTemplate);
             Menu_SetTextBoxText(7, (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->textBuffer);
             break;
         case 20:

@@ -4,6 +4,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Render/DepthCueLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Menu/TextBox.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
@@ -1985,15 +1985,15 @@ void Menu_Map_DrawControls(void)
             int v = ((Menu_Map_controlsUiXOffset + 28) & 0xFFFF) | 0x120000;
             void** s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-            Render_DrawCompactTextColor(
+            VS::Render::DrawLiveCompactTextColor(
                 "BACK", v, vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
+            VS::Render::DrawLiveCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
+            VS::Render::DrawLiveCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
+            VS::Render::DrawLiveCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
+            VS::Render::DrawLiveCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
             break;
         }
@@ -2002,15 +2002,15 @@ void Menu_Map_DrawControls(void)
             int v = ((Menu_Map_controlsUiXOffset + 28) & 0xFFFF) | 0x120000;
             void** s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-            Render_DrawCompactTextColor(
+            VS::Render::DrawLiveCompactTextColor(
                 "BACK", v, vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
+            VS::Render::DrawLiveCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
+            VS::Render::DrawLiveCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
+            VS::Render::DrawLiveCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
+            VS::Render::DrawLiveCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
             break;
         }
@@ -2019,14 +2019,14 @@ void Menu_Map_DrawControls(void)
             int v = ((Menu_Map_controlsUiXOffset + 28) & 0xFFFF) | 0x120000;
             void** s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-            Render_DrawCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
+            VS::Render::DrawLiveCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
+            VS::Render::DrawLiveCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
+            VS::Render::DrawLiveCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
+            VS::Render::DrawLiveCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
+            VS::Render::DrawLiveCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
             break;
         }
@@ -2035,14 +2035,14 @@ void Menu_Map_DrawControls(void)
             int v = ((Menu_Map_controlsUiXOffset + 28) & 0xFFFF) | 0x120000;
             void** s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-            Render_DrawCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
+            VS::Render::DrawLiveCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
+            VS::Render::DrawLiveCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
+            VS::Render::DrawLiveCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
+            VS::Render::DrawLiveCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
+            VS::Render::DrawLiveCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
             break;
         }
@@ -2051,14 +2051,14 @@ void Menu_Map_DrawControls(void)
             int v = ((Menu_Map_controlsUiXOffset + 28) & 0xFFFF) | 0x120000;
             void** s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-            Render_DrawCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
+            VS::Render::DrawLiveCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
+            VS::Render::DrawLiveCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
+            VS::Render::DrawLiveCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
+            VS::Render::DrawLiveCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
+            VS::Render::DrawLiveCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
                 vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(s0[1])) + 24));
             break;
         }
@@ -2067,14 +2067,14 @@ void Menu_Map_DrawControls(void)
             int v = ((Menu_Map_controlsUiXOffset + 28) & 0xFFFF) | 0x120000;
             void** s0 = (void**)((uintptr_t)Core_ScratchBase() + 0x000);
 
-            Render_DrawCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
+            VS::Render::DrawLiveCompactTextColor("BACK", v, vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
+            VS::Render::DrawLiveCompactTextColor("NEXT", vs_getXY(Menu_Map_controlsUiXOffset + 84, 18),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
+            VS::Render::DrawLiveCompactTextColor("ROTATION", vs_getXY(Menu_Map_controlsUiXOffset + 28, 36),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
+            VS::Render::DrawLiveCompactTextColor("ZOOM", vs_getXY(Menu_Map_controlsUiXOffset + 28, 54),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
-            Render_DrawCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
+            VS::Render::DrawLiveCompactTextColor("MENU", vs_getXY(Menu_Map_controlsUiXOffset + 28, 72),
                 vs_getRGB888(32, 32, 32), (u_long *)(((u_char*)(s0[1])) + 24));
             break;
         }
@@ -2090,7 +2090,7 @@ void Menu_Map_DrawControls(void)
         Menu_Map_DrawCompass(62, 184, Menu_Map_cameraAngles.vy);
 
     } else {
-        Render_DrawCompactTextColor("JAMMING", vs_getXY(Menu_Map_controlsUiXOffset + 28, 18),
+        VS::Render::DrawLiveCompactTextColor("JAMMING", vs_getXY(Menu_Map_controlsUiXOffset + 28, 18),
             vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(*(void**)((uintptr_t)Core_ScratchBase() + 0x004))) + 24));
     }
 }

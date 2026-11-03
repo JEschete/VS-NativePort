@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 #include "State/Progress.h"
 
@@ -124,8 +124,8 @@ void Menu_BreakArts_DrawNextUnlockPoints(int xOffset, int weaponCategory, int ro
     pointsStr = pointsBuf + i;
     pointsStr[0] = '#';
 
-    Render_DrawCompactText("NEXT", pos, NULL);
-    Render_DrawCompactText(pointsStr, pos + 96, NULL);
+    VS::Render::DrawLiveCompactText("NEXT", pos, NULL);
+    VS::Render::DrawLiveCompactText(pointsStr, pos + 96, NULL);
 }
 
 // decomp: MENU1.PRG _weaponArtsMenu (src/MENU/MENU1.PRG/30.c:104)

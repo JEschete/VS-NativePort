@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/EncodedTextLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 
 // decomp: local static of _equipmentDetailScreen, at file scope so the module reset reaches it
@@ -238,9 +238,9 @@ void Menu_Status_FormatBladeDescription(Items_EquipmentPartStats* blade, char* m
         [Menu_Framework_itemHelp[Menu_Framework_weaponHands[blade->category - 1]
                               + Text_Menu_ITEMHELP_BIN_Index_oneHanded]];
 
-    str = Render_FormatEncodedText(Menu_Framework_stringBuf,
+    str = VS::Render::FormatLiveEncodedText(Menu_Framework_stringBuf,
         (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp[blade->id - 1]]);
-    Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
         str, (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_weaponDescTemplate]);
 
     menuText[1] = Menu_Framework_stringBuf;
@@ -257,9 +257,9 @@ void Menu_Status_FormatGripDescription(
     Battle_stringContext.strings[5] = (char*)&Menu_Framework_itemHelp
         [Menu_Framework_itemHelp[grip->category + Text_Menu_ITEMHELP_BIN_Index_shortGrip - 1]];
 
-    str = Render_FormatEncodedText(Menu_Framework_stringBuf,
+    str = VS::Render::FormatLiveEncodedText(Menu_Framework_stringBuf,
         (char*)&Menu_Framework_itemHelp[Menu_Framework_itemHelp[*gripId - 6]]);
-    Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
         str, (char*)&Menu_Framework_itemHelp[Text_Menu_ITEMHELP_BIN_Offset_gripTemplate]);
 
     menuText[1] = Menu_Framework_stringBuf;

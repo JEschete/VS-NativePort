@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/Vector.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"
@@ -965,10 +965,10 @@ void Battle_DrawAbilityTimingResult(int x, int y, Battle_FloatingLabel* p)
     }
 
     if (p->value != 2) {
-        Render_DrawCompactTextColor(timing[p->value], vs_getXY_2(x, y), colors[p->value],
+        VS::Render::DrawLiveCompactTextColor(timing[p->value], vs_getXY_2(x, y), colors[p->value],
             (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
     } else {
-        Render_DrawCompactTextColor(success[p->textLength], vs_getXY_2(x, y),
+        VS::Render::DrawLiveCompactTextColor(success[p->textLength], vs_getXY_2(x, y),
             vs_getRGB888(64, 128, 64), (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
     }
 }
@@ -990,7 +990,7 @@ void Battle_DrawChainCount(int x, int y, Battle_FloatingLabel* p)
         sprintf(text, "$%d CHAINS", p->value);
     }
 
-    Render_DrawCompactTextColor(text, vs_getXY_2(x, y), vs_getRGB888(160, 64, 16),
+    VS::Render::DrawLiveCompactTextColor(text, vs_getXY_2(x, y), vs_getRGB888(160, 64, 16),
         (u_long *)(((u_char*)(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable)) - 16));
 }
 

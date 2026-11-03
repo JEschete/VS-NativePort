@@ -10,6 +10,7 @@
 
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Legacy/Psx.h"
+#include "Render/GameFontLive.hpp"
 
 extern "C" {
 #include "Actors/ActorAllocation.h"
@@ -18,6 +19,7 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
+#include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
@@ -27,7 +29,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Rename.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
@@ -87,9 +88,7 @@ struct EquipmentFixture {
   Render_FrameScratch saved_frame = Render_frameScratch;
   void* saved_buffer = Render_legacyPrimitiveBuffers[0];
   int saved_framebuffer = Render_frameBuf;
-  int saved_color = Render_fontColor;
-  char saved_palette = Render_fontPaletteOffset;
-  char saved_table = Render_fontTableSelect;
+  VS::Render::FontStyle saved_style = VS::Render::LiveFontStyle();
   char saved_page = Menu_Framework_itemStatPage;
   char saved_pages = Menu_Framework_enabledStatPages;
   char saved_subtype = Menu_Framework_equipmentSubtype;
@@ -122,9 +121,7 @@ struct EquipmentFixture {
     Render_frameScratch = saved_frame;
     Render_legacyPrimitiveBuffers[0] = saved_buffer;
     Render_frameBuf = saved_framebuffer;
-    Render_fontColor = saved_color;
-    Render_fontPaletteOffset = saved_palette;
-    Render_fontTableSelect = saved_table;
+    VS::Render::LiveFontStyle() = saved_style;
   }
 
   bool Owns(const void* packet) const {

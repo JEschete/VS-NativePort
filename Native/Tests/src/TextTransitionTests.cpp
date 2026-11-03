@@ -10,12 +10,12 @@
 
 #include "Core/Memory/HeapLive.hpp"
 #include "Legacy/Psx.h"
+#include "Render/GameFontLive.hpp"
 
 extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/Text/VariableFont.h"
 }
@@ -33,7 +33,7 @@ struct TextTransitionFixture {
       std::to_array(Render_variableFontGlyphWidths);
   decltype(std::to_array(Render_kGlyphPixelExpansion)) expansion =
       std::to_array(Render_kGlyphPixelExpansion);
-  char font_table = Render_fontTableSelect;
+  VS::Render::FontStyle font_style = VS::Render::LiveFontStyle();
   int frame_buffer = Render_frameBuf;
   decltype(Input_buttonsPressed.allButtons) buttons =
       Input_buttonsPressed.allButtons;
@@ -75,7 +75,7 @@ struct TextTransitionFixture {
               std::begin(Render_variableFontGlyphWidths));
     std::copy(expansion.begin(), expansion.end(),
               std::begin(Render_kGlyphPixelExpansion));
-    Render_fontTableSelect = font_table;
+    VS::Render::LiveFontStyle() = font_style;
     Render_frameBuf = frame_buffer;
     Input_buttonsPressed.allButtons = buttons;
   }
@@ -96,7 +96,7 @@ struct TextTransitionFixture {
   std::vector<u_short> Draw(std::array<u_char, Size>& text) {
     INFO(std::string("Encoded transition bytes: ") + std::to_string(Size));
     box.string = reinterpret_cast<char*>(text.data());
-    Render_BlendTextBoxIntoFramebuffer(&box, 0x10000);
+    VS::Render::BlendLiveTextBoxIntoFramebuffer(&box, 0x10000);
     std::vector<u_short> pixels(std::size_t{kWidth} * kHeight);
     StoreImage(&target, reinterpret_cast<u_long*>(pixels.data()));
     return pixels;

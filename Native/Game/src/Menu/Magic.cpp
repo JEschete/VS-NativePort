@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -939,7 +939,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
             if (i >= level) {
                 int v;
 
-                Render_DrawCompactText(
+                VS::Render::DrawLiveCompactText(
                     Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
 
                 prim = VS::Render::QueueLiveSpriteWithTexturePage(
@@ -958,7 +958,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
             } else if (level < rowCount) {
 
-                Render_DrawCompactText(
+                VS::Render::DrawLiveCompactText(
                     Menu_Magic_warlockMenuSpellLevels[level], (99 + level * 32) | vs_getXY(0, 103), NULL);
 
                 prim = VS::Render::QueueLiveSpriteWithTexturePage(
@@ -969,7 +969,7 @@ int Menu_Magic_UpdateWarlockMenu(u_int initShortcutInvoked)
 
                 level_locked = 1;
 
-                Render_DrawCompactText(
+                VS::Render::DrawLiveCompactText(
                     Menu_Magic_warlockMenuSpellLevels[4], (102 + level * 32) | vs_getXY(0, 103), NULL);
 
                 prim = VS::Render::QueueLiveSpriteWithTexturePage(

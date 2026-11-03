@@ -10,5 +10,6 @@
 #define VS_RENDER_TEXT_VARIABLEFONT_H_DECLS
 
 extern char Render_variableFontGlyphWidths[413];
+extern u_short Render_kGlyphPixelExpansion[16];
 
 #endif // VS_RENDER_TEXT_VARIABLEFONT_H_DECLS

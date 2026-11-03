@@ -4,6 +4,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -624,13 +624,13 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
             VS::Menu::PlayChangeSound();
         }
 
-        Render_SetMenuFontStyle(5);
+        VS::Render::SetLiveMenuFontStyle(5);
 
         i = VS::Core::Math::SplitDecimalDigit(Menu_Inventory_discardCount);
-        Render_DrawVariableWidthGlyph(i & 0xF, 66, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
+        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 66, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
         i = VS::Core::Math::SplitDecimalDigit(i >> 4);
-        Render_DrawVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
-        Render_DrawVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
+        VS::Render::DrawLiveVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
+        VS::Render::DrawLiveVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
 
         Menu_Inventory_discardMenuCursorBrightness = Menu_Framework_DrawCursor(
             Menu_Inventory_discardMenuCursorBrightness, (54 - (Menu_Inventory_discardStep * 6)) | (114 << 16));

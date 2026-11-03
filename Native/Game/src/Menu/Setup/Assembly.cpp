@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/EncodedTextLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Menu/Setup/Assembly.h"
 #include "Menu/Setup/SetupScreen.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 
 // decomp: local static of _assembleMenu, at file scope so the module reset reaches it
 static char Menu_Setup_assemblyCursorAnimation = 0;
@@ -1142,7 +1142,7 @@ int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
 
             if (equipment_id != 0) {
                 Battle_stringContext.integers[0] = itemInfo;
-                Render_FormatEncodedText(textBuf + i * 96,
+                VS::Render::FormatLiveEncodedText(textBuf + i * 96,
                     (char*)&Menu_Framework_menu12Text[Menu_Framework_menu12Text
                             [Menu_Setup_gemAttachmentIsShield * 2
                                 + (itemInfo == 0 ? Text_Menu_MENU12_BIN_Index_weaponNoGemSlots

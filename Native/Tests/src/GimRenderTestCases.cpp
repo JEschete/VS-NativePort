@@ -11,6 +11,8 @@
 extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Hud.h"
+#include "Render/Display.h"
+#include "Render/Frame.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/UiPrimitives.h"
@@ -112,6 +114,8 @@ struct PuzzleTimerFixture {
   char saved_hours = Audio_Seq_unusedStateFlags.puzzleSetMaxTimer;
   State_SceneTimer saved_timer = State_sceneTimer;
   int saved_packed_timer = Battle_puzzleTimer;
+  void* saved_buffer = Render_legacyPrimitiveBuffers[0];
+  int saved_framebuffer = Render_frameBuf;
   std::array<u_long, 256> storage{};
   std::array<u_long, 16> ordering{};
 
@@ -138,12 +142,17 @@ struct PuzzleTimerFixture {
     Audio_Seq_unusedStateFlags.puzzleSetMaxTimer = saved_hours;
     State_sceneTimer = saved_timer;
     Battle_puzzleTimer = saved_packed_timer;
+    Render_legacyPrimitiveBuffers[0] = saved_buffer;
+    Render_frameBuf = saved_framebuffer;
   }
 
   void DrawCounter(const State_SceneTimer& timer, int hundredths) {
     storage.fill(0);
     storage.front() = storage.back() = 0xC0FFEE00;
     ordering.fill(0xFFFFFF);
+    // The Live queue reserves its packets inside the frame's buffer.
+    Render_frameBuf = 0;
+    Render_legacyPrimitiveBuffers[0] = storage.data() + 1;
     Render_frameScratch.primitiveCursor = storage.data() + 1;
     Render_frameScratch.orderingTable = ordering.data() + 1;
     Audio_Seq_unusedStateFlags.puzzleTimerHundredths =
@@ -164,8 +173,8 @@ struct PuzzleTimerFixture {
     DrawCounter(State_sceneTimer, hundredths);
   }
 
-  void CheckGlyph(std::size_t glyph, char character) const {
-    const auto* sprite = storage.data() + 3 + glyph * 5;
+  static void CheckGlyph(const u_long* sprite, std::size_t glyph,
+                         char character) {
     CHECK(sprite[1] == 0x64808080);
     CHECK(sprite[2] == static_cast<u_long>((128 + glyph * 6) | (200 << 16)));
     CHECK(sprite[4] == 0x000A0006);
@@ -181,10 +190,14 @@ struct PuzzleTimerFixture {
 
   void CheckRendering(std::string_view expected) const {
     CHECK(std::string_view(Battle_puzzleTimerText, 8) == expected);
-    CHECK(Render_frameScratch.primitiveCursor == storage.data() + 44);
-    CHECK(LegacyGpu_WalkList(ordering.data()) == 11);
+    // The draw mode and eight glyphs; the chain, not the buffer, orders them.
+    CHECK(Render_frameScratch.primitiveCursor == storage.data() + 43);
+    CHECK(LegacyGpu_WalkList(ordering.data()) == 10);
+    const auto* packet = static_cast<const u_long*>(nextPrim(ordering.data()));
+    CHECK(packet[1] == 0xE100000C);
     for (std::size_t glyph = 0; glyph < 8; ++glyph) {
-      CheckGlyph(glyph, expected[glyph]);
+      packet = static_cast<const u_long*>(nextPrim(packet));
+      CheckGlyph(packet, glyph, expected[glyph]);
     }
     CheckGuards();
   }

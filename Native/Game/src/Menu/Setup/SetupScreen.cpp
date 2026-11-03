@@ -3,6 +3,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -35,7 +36,6 @@ extern "C" {
 #include "Menu/Setup/Combination.h"
 #include "Menu/Setup/SetupScreen.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -70,7 +70,7 @@ static char Menu_Setup_confirmationPromptCursorState = 0;
 // decomp: MENUC.PRG _drawOk (src/MENU/MENUC.PRG/168.c:19)
 void Menu_Setup_DrawConfirmationLabel(int row, int brightness)
 {
-    Render_DrawCompactTextColor("OK", vs_getXY(175, row * 16 + 32),
+    VS::Render::DrawLiveCompactTextColor("OK", vs_getXY(175, row * 16 + 32),
         ((VS::Core::Math::Sine(brightness * 8) >> 5) + 64) * vs_getRGB888(1, 1, 1),
         (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
 }

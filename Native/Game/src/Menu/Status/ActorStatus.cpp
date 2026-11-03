@@ -3,6 +3,8 @@
 #include "Input/Controller.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/CameraViewLive.hpp"
+#include "Render/EncodedTextLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -42,7 +44,6 @@ extern "C" {
 #include "Menu/Status/EquipmentDetails.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -734,14 +735,14 @@ int Menu_Status_UpdateLimbPanel(int init)
             limb = &actor->limbs[i];
             step = Menu_Status_limbPanelLimbAnimSteps[i];
 
-            Render_DrawCompactText(Battle_limbNames[limb->nameIndex],
+            VS::Render::DrawLiveCompactText(Battle_limbNames[limb->nameIndex],
                 (Menu_Framework_rowAnimationSteps[step] + 216) | ((34 + i * 16) << 16), NULL);
 
             limbStatus = Battle_LimbCondition(limb);
 
             Menu_Status_DrawLimbConditionIndicator(limbStatus,
                 (Menu_Framework_rowAnimationSteps[step] + 216) | ((36 + i * 16) << 16), 0);
-            Render_DrawCompactText(Menu_Status_limbStatuses[limbStatus],
+            VS::Render::DrawLiveCompactText(Menu_Status_limbStatuses[limbStatus],
                 (Menu_Framework_rowAnimationSteps[step] + 224) | ((34 + i * 16) << 16), 0);
 
             if (step < 8) {
@@ -776,7 +777,7 @@ int Menu_Status_UpdateLimbPanel(int init)
             highlighted_limb_index = step - 128;
             highlight_dimming_shift = panel_dimming_shift - 1;
 
-            Render_DrawCompactTextColor(Battle_limbNames[limb->nameIndex],
+            VS::Render::DrawLiveCompactTextColor(Battle_limbNames[limb->nameIndex],
                 216 | ((34 + i * 16) << 16),
                 i == highlighted_limb_index ? vs_getRGB888(128, 128, 128) >> highlight_dimming_shift
                           : vs_getRGB888(128, 128, 128) >> panel_dimming_shift,
@@ -786,7 +787,7 @@ int Menu_Status_UpdateLimbPanel(int init)
 
             Menu_Status_DrawLimbConditionIndicator(
                 limbStatus, (0x24 + i * 0x10) * 0x10000 | 0xD8, panel_dimming_shift - (i == highlighted_limb_index));
-            Render_DrawCompactTextColor(Menu_Status_limbStatuses[limbStatus],
+            VS::Render::DrawLiveCompactTextColor(Menu_Status_limbStatuses[limbStatus],
                 224 | ((34 + i * 16) << 16),
                 i == highlighted_limb_index ? vs_getRGB888(128, 128, 128) >> highlight_dimming_shift
                           : vs_getRGB888(128, 128, 128) >> panel_dimming_shift,
@@ -809,14 +810,14 @@ int Menu_Status_UpdateLimbPanel(int init)
                 limb = &actor->limbs[i];
                 ++Menu_Status_limbPanelLimbAnimSteps[i];
 
-                Render_DrawCompactText(Battle_limbNames[limb->nameIndex],
+                VS::Render::DrawLiveCompactText(Battle_limbNames[limb->nameIndex],
                     ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 216) | ((34 + i * 16) << 16), 0);
 
                 limbStatus = Battle_LimbCondition(limb);
 
                 Menu_Status_DrawLimbConditionIndicator(limbStatus,
                     ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 216) | ((36 + i * 16) << 16), 0);
-                Render_DrawCompactText(Menu_Status_limbStatuses[limbStatus],
+                VS::Render::DrawLiveCompactText(Menu_Status_limbStatuses[limbStatus],
                     ((Menu_Status_limbPanelLimbAnimSteps[i] << 5) + 224) | ((34 + i * 16) << 16), 0);
             } else {
                 Menu_Status_limbPanelState = 0;
@@ -978,7 +979,7 @@ void Menu_Status_ShowSelectedLimbCondition(void)
     Battle_stringContext.strings[1] =
         (char*)&Menu_Status_statusStrings[Menu_Status_statusStrings[Battle_LimbCondition(limb)
                                               + Text_Menu4_status_Index_critical]];
-    Render_FormatEncodedText(
+    VS::Render::FormatLiveEncodedText(
         Menu_Framework_stringBuf, (char*)&Menu_Status_statusStrings[Text_Menu4_status_Offset_values]);
     Menu_Framework_SetInformationMessage(Menu_Framework_stringBuf);
     Menu_Status_UpdateLimbPanel(Menu_Status_selectedElement + 1);
@@ -1583,7 +1584,7 @@ int Menu_Status_Update(u_char* state)
 
         Menu_Framework_DrawButtonPromptBackground(16 - userInput, 38, 88, 10);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8 - userInput, 36, 0);
-        Render_DrawCompactTextColor(
+        VS::Render::DrawLiveCompactTextColor(
             "STATUS", ((0x1C - userInput) & 0xFFFF) | 0x260000, 0x404040 << limb_status_available, 0);
     }
 

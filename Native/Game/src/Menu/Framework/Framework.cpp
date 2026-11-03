@@ -5,6 +5,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/CameraViewLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -84,7 +85,6 @@ extern "C" {
 #include "OverlayWorkspace.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -467,7 +467,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
             color = menuItem->unselectable * 3;
         }
 
-        Render_SetMenuFontStyle(color + 4);
+        VS::Render::SetLiveMenuFontStyle(color + 4);
 
         row_left_x = menuItem->x;
         var_s2 = row_left_x + 6;
@@ -483,7 +483,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
             if (c == Core_TextCode_Spacing) {
                 var_s2 += *pText++;
             } else {
-                var_s2 = Render_DrawVariableWidthGlyph(
+                var_s2 = VS::Render::DrawLiveVariableWidthGlyph(
                     c, var_s2, menuItem->y, scratch - 3);
             }
             c = *pText++;
@@ -525,7 +525,7 @@ void Menu_Framework_DrawMenuItem(Menu_Framework_MenuRow* menuItem)
 
         v = &menuItem->subText;
         if (*v != NULL) {
-            Render_DrawCompactText(*v, (x - 10) | ((y + 1) << 0x10), scratch);
+            VS::Render::DrawLiveCompactText(*v, (x - 10) | ((y + 1) << 0x10), scratch);
         }
     }
 }
@@ -1455,7 +1455,7 @@ int Menu_Framework_DrawColoredInteger(int value, int xy, int color, u_long* befo
         bcd = VS::Core::Math::SplitDecimalDigit(bcd);
         buf = ((bcd & 0xF) << 8) | ('0' << 8) | '#';
 
-        Render_DrawCompactTextColor((char*)&buf, xy, color, before);
+        VS::Render::DrawLiveCompactTextColor((char*)&buf, xy, color, before);
 
         bcd >>= 4;
         xy -= 8;
@@ -1463,7 +1463,7 @@ int Menu_Framework_DrawColoredInteger(int value, int xy, int color, u_long* befo
 
     if (value < 0) {
         buf = ('-' << 8) | '#';
-        Render_DrawCompactTextColor((char*)&buf, xy + 1, color, before);
+        VS::Render::DrawLiveCompactTextColor((char*)&buf, xy + 1, color, before);
     }
 
     return xy;
@@ -1606,7 +1606,7 @@ void Menu_Framework_DrawActionCostPanel(void)
         int x1 = -Menu_Framework_rowAnimationSteps[Menu_Framework_actionCostPanelAnimState];
 
         for (i = 0; i < 2; ++i) {
-            Render_DrawCompactTextColor(Menu_Framework_textHeaders[i].text,
+            VS::Render::DrawLiveCompactTextColor(Menu_Framework_textHeaders[i].text,
                 ((x1 + Menu_Framework_textHeaders[i].x) & 0xFFFF) | (160 << 16),
                 vs_getRGB888(128, 128, 128) >> Menu_Framework_textHeaders[i].disabled, NULL);
         }
@@ -2189,7 +2189,7 @@ void Menu_Framework_DrawTabNavigation(int mode)
 
     if (mode != 0) {
         for (i = 0; i < 4; ++i) {
-            Render_DrawCompactTextColor(Menu_Framework_kTabNavigationControls[i], Menu_Framework_tabNavigationControlPositions[i], color, NULL);
+            VS::Render::DrawLiveCompactTextColor(Menu_Framework_kTabNavigationControls[i], Menu_Framework_tabNavigationControlPositions[i], color, NULL);
         }
         i = vs_getXY(200, 5);
     } else {
@@ -2549,13 +2549,13 @@ void Menu_Framework_UpdateAndDrawRows(void)
 
             xy = origin - 30;
 
-            Render_DrawCompactText("/", xy, before);
+            VS::Render::DrawLiveCompactText("/", xy, before);
             Menu_Framework_DrawNeutralInteger(menuItem->count, xy, before);
 
             if ((menuItem->y == 18) && (menuItem->x < 96)) {
                 Menu_Framework_DrawNeutralInteger(
                     menuItem->itemPage, origin + 32, before);
-                Render_DrawCompactText("-", origin, before);
+                VS::Render::DrawLiveCompactText("-", origin, before);
             }
 
         } else {

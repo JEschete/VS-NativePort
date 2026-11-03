@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/Menus.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -843,11 +843,11 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
                 ((xOffset + 0xA4) & 0xFFFF) | (0x400000 + stat_row_y_offset * 0x10000), 0, before);
 
             if (displayed_stat_values[j] > comparison_stat_values[j]) {
-                Render_DrawCompactTextColor("#+", i + 1, 0x804020, before);
+                VS::Render::DrawLiveCompactTextColor("#+", i + 1, 0x804020, before);
             }
 
             if (displayed_stat_values[j] == comparison_stat_values[j]) {
-                Render_DrawCompactTextColor("#*", i + 1, 0x808080, before);
+                VS::Render::DrawLiveCompactTextColor("#*", i + 1, 0x808080, before);
             }
         }
 
@@ -887,7 +887,7 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
                 displayed_stat_values[j], stat_number_x | (0x400000 + stat_row_y_offset * 0x10000), stat_color_thresholds[j], before);
         }
 
-        Render_DrawCompactTextColor(Menu_Framework_kEquipmentStatPageStatHeaders[j + (statPage * 8)],
+        VS::Render::DrawLiveCompactTextColor(Menu_Framework_kEquipmentStatPageStatHeaders[j + (statPage * 8)],
             ((xOffset + 0x40) & 0xFFFF) | (0x400000 + stat_row_y_offset * 0x10000), i, before);
         VS::Render::InsertLiveThreeWordPrimitive(before, 0x40D0E030, stat_bar_origin_x | ((stat_row_y_offset + 0x42) << 0x10),
             stat_bar_origin_x | ((stat_row_y_offset + 0x45) << 0x10));
@@ -982,9 +982,9 @@ void Menu_Framework_DrawEquipmentStatPage(int xOffset)
         i = Menu_Framework_equipmentStatPageHeader[i_2];
         if (i == 0xFB) {
             ++i_2;
-            Render_SetMenuFontStyle(Menu_Framework_equipmentStatPageHeader[i_2] + 4);
+            VS::Render::SetLiveMenuFontStyle(Menu_Framework_equipmentStatPageHeader[i_2] + 4);
         } else {
-            xOffset = Render_DrawVariableWidthGlyph(i, xOffset, 0x30, before - 4);
+            xOffset = VS::Render::DrawLiveVariableWidthGlyph(i, xOffset, 0x30, before - 4);
         }
     }
 }
@@ -1155,11 +1155,11 @@ void Menu_Framework_UpdatePrimaryStatPanel(int animate)
     }
 
     if (Menu_Framework_rangeRiskData[3] != 0) {
-        Render_DrawCompactText("ORG/EQP", position + 4, panel_ordering_table);
+        VS::Render::DrawLiveCompactText("ORG/EQP", position + 4, panel_ordering_table);
 
         for (i = 0; i < 2; ++i) {
             position += vs_getXY(0, 10);
-            Render_DrawCompactText(Menu_Framework_kPrimaryStatPanelRangeRiskStr[i], position, panel_ordering_table);
+            VS::Render::DrawLiveCompactText(Menu_Framework_kPrimaryStatPanelRangeRiskStr[i], position, panel_ordering_table);
             if (valuesKnown != 0) {
                 stat = Menu_Framework_rangeRiskData[i];
                 Menu_Framework_DrawNeutralInteger(stat, position + 28, panel_ordering_table);
@@ -1168,19 +1168,19 @@ void Menu_Framework_UpdatePrimaryStatPanel(int animate)
                 }
                 Menu_Framework_DrawNeutralInteger(stat, position + 60, panel_ordering_table);
             } else {
-                Render_DrawCompactText("#??", position + 28, panel_ordering_table);
-                Render_DrawCompactText("#??", position + 60, panel_ordering_table);
+                VS::Render::DrawLiveCompactText("#??", position + 28, panel_ordering_table);
+                VS::Render::DrawLiveCompactText("#??", position + 60, panel_ordering_table);
             }
         }
     } else {
         position += vs_getXY(0, 20);
-        Render_DrawCompactText("ORG/EQP", position + 4, panel_ordering_table);
+        VS::Render::DrawLiveCompactText("ORG/EQP", position + 4, panel_ordering_table);
     }
 
     for (i = 0; i < 3; ++i) {
         position += vs_getXY(0, 10);
         statName = ((Menu_Framework_equipmentSubtype & 7) != 0) * 4;
-        Render_DrawCompactText(
+        VS::Render::DrawLiveCompactText(
             Menu_Framework_kPrimaryStatPanelStatStr[Menu_Framework_equipmentSubtype & 0x18 ? 8 + statName + i
                                                         : statName + i],
             position, panel_ordering_table);
@@ -1199,8 +1199,8 @@ void Menu_Framework_UpdatePrimaryStatPanel(int animate)
             Menu_Framework_DrawComparedInteger(
                 stat + var_a3, position + 60, compared_stat_total + var_a3, panel_ordering_table);
         } else {
-            Render_DrawCompactText("#??", position + 28, panel_ordering_table);
-            Render_DrawCompactText("#??", position + 60, panel_ordering_table);
+            VS::Render::DrawLiveCompactText("#??", position + 28, panel_ordering_table);
+            VS::Render::DrawLiveCompactText("#??", position + 60, panel_ordering_table);
         }
     }
 }
@@ -1253,7 +1253,7 @@ void Menu_Framework_UpdateDpPpBars(int flags)
             int packed_bar_panel_y = ((Menu_Framework_dpPpBarAnimState * 8) - 8) << 0x10;
 
             if (Menu_Framework_dpPpBarsTarget & 1) {
-                Render_DrawCompactText("DP", (packed_bar_panel_y + vs_getXY(0, -1)) | 10, before);
+                VS::Render::DrawLiveCompactText("DP", (packed_bar_panel_y + vs_getXY(0, -1)) | 10, before);
 
                 temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 66, Menu_Framework_maxDp, (u_long *)(before));
                 VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, (u_long *)(before));
@@ -1261,7 +1261,7 @@ void Menu_Framework_UpdateDpPpBars(int flags)
             }
 
             if (Menu_Framework_dpPpBarsTarget & 2) {
-                Render_DrawCompactText("PP", (packed_bar_panel_y + vs_getXY(0, -1)) | 80, before);
+                VS::Render::DrawLiveCompactText("PP", (packed_bar_panel_y + vs_getXY(0, -1)) | 80, before);
 
                 temp = VS::Render::DrawLiveIntegerRightAligned(0, packed_bar_panel_y | 136, Menu_Framework_maxPp, (u_long *)(before));
                 VS::Render::DrawLiveIntegerRightAligned(2, temp, 0, (u_long *)(before));

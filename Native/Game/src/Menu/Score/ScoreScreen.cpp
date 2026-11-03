@@ -2,6 +2,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -39,7 +40,6 @@ extern "C" {
 #include "Menu/Score/ScoreScreen.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -1553,13 +1553,13 @@ void Menu_Score_RenderOverview(int animStep)
 
     scratch = (void**)Core_ScratchAddr(0);
 
-    Render_DrawCompactTextColor("SCORE", (((animStep * 16) - 120) & 0xFFFF) | (16 << 16),
+    VS::Render::DrawLiveCompactTextColor("SCORE", (((animStep * 16) - 120) & 0xFFFF) | (16 << 16),
         vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));
-    Render_DrawCompactTextColor(score_text, ((animStep * 16) & 0xFFFF) | (16 << 16),
+    VS::Render::DrawLiveCompactTextColor(score_text, ((animStep * 16) & 0xFFFF) | (16 << 16),
         vs_getRGB888(128, 128, 128), (u_long *)(((u_char*)(scratch[1])) + 0x1C));
 
     Menu_Score_DrawGradientPanel((animStep * 16) - 128, 16, 136, 12, 2);
-    Render_DrawCompactTextColor("RISK   BREAKER   RANK",
+    VS::Render::DrawLiveCompactTextColor("RISK   BREAKER   RANK",
         (((animStep * 16) - 120) & 0xFFFF) | (184 << 16), vs_getRGB888(128, 128, 128),
         (u_long *)(((u_char*)(scratch[1])) + 0x1C));
 

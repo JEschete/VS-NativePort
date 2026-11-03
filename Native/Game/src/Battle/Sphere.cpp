@@ -4,6 +4,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -27,7 +28,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Primitives.h"
@@ -931,7 +931,7 @@ void Battle_DrawSphereTargetLabel(Battle_SphereTargetLabel* label)
     if (label->depth != 0) {
         color = 0x808080;
     }
-    Render_DrawCompactTextColor(label->text, textXy, color, nextPrim);
+    VS::Render::DrawLiveCompactTextColor(label->text, textXy, color, nextPrim);
 
     prim = (Battle_TargetLabelPrimitive *)(Render_frameScratch.primitiveCursor);
     if (gradient != 0) {

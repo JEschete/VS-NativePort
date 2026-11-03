@@ -501,12 +501,12 @@
     <ClCompile Include="src\Render\DisplayControlLive.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClCompile Include="src\Render\Font.cpp">
+    <ClCompile Include="src\Render\EncodedText.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
-    <ClInclude Include="src\Render\Font.h">
+    <ClCompile Include="src\Render\EncodedTextLive.cpp">
       <Filter>src\Render</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Render\Frame.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -516,6 +516,12 @@
     <ClInclude Include="src\Render\FramebufferEffects.h">
       <Filter>src\Render</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\GameFont.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\GameFontLive.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\GimImages.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -615,6 +621,9 @@
     <ClInclude Include="src\Render\Text\VariableFont.h">
       <Filter>src\Render\Text</Filter>
     </ClInclude>
+    <ClCompile Include="src\Render\TextBoxText.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
     <ClCompile Include="src\Render\TexturePages.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
@@ -909,6 +918,18 @@
     <ClInclude Include="include\Render\DisplayControlLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\EncodedText.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\EncodedTextLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\GameFont.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\GameFontLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\GimImages.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
@@ -945,6 +966,9 @@
     <ClInclude Include="include\Render\ScaledFont.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
+    <ClInclude Include="include\Render\ScaledFontLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
     <ClInclude Include="include\Render\ScreenOverlay.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
@@ -955,6 +979,9 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\SpritesLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\TextBoxText.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\TexturePages.hpp">

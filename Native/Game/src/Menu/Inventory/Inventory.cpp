@@ -3,6 +3,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -49,7 +50,6 @@ extern "C" {
 #include "Menu/Inventory/Inventory.h"
 #include "Menu/Inventory/ItemDetails.h"
 #include "Menu/Inventory/ItemList.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 
 // decomp: _ashleyRenderState (_ashleyRenderState@src/MENU/items1.h)
@@ -1792,7 +1792,7 @@ int Menu_Inventory_Update(u_char* state)
     if (Menu_Inventory_statusCommandAnimationStep != 0) {
         Menu_Framework_DrawButtonPromptBackground(16 - row, 38, 88, 10);
         Menu_Framework_DrawButtonIcon(Menu_Framework_ButtonId_Square, 8 - row, 36, NULL);
-        Render_DrawCompactTextColor("STATUS", vs_getXY(28 - row, 38),
+        VS::Render::DrawLiveCompactTextColor("STATUS", vs_getXY(28 - row, 38),
             vs_getRGB888(32, 32, 32) << Menu_Inventory_statusCommandState, NULL);
     }
 

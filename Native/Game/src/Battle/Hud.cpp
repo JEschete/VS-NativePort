@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -22,7 +23,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
-#include "Render/Font.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -437,7 +437,7 @@ void Battle_DrawBattleHud(void)
         Battle_DrawHudStatGauge(2, k, 100);
     }
     if (k == 0) {
-        Render_DrawCompactText(
+        VS::Render::DrawLiveCompactText(
             "RISK  ZERO", 0x16000C - Battle_hudSlideOffset, ((u_char*)(Render_frameScratch.orderingTable)) - 0xC);
     }
 
@@ -567,7 +567,7 @@ void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
 
     Core_Debugf("hud.timer", "text=%s seconds=%d minutes=%d hours=%d frames=%d",
         Battle_puzzleTimerText, timer->seconds, timer->minutes, timer->hours, timer->frames);
-    Render_DrawCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), ((u_char*)(Render_frameScratch.orderingTable)) - 4);
+    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText, vs_getXY(128, 200), ((u_char*)(Render_frameScratch.orderingTable)) - 4);
 }
 
 // decomp: BATTLE.PRG func_800CB654 (src/BATTLE/BATTLE.PRG/5BF94.c:3867)

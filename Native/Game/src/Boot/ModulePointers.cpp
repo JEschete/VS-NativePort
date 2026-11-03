@@ -209,7 +209,6 @@ extern "C" {
 #include "PFile.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/FramebufferEffects.h"
 #include "Render/LegacyPackets.h"
@@ -1458,18 +1457,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C5798u, 0u, (void*)&Battle_InitTargetSelectionRow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C58A4u, 0u, (void*)&Battle_FirstTargetStatusText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C58F8u, 0u, (void*)&Battle_UpdateTargetSelectionMenu, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C6540u, 0u, (void*)&Render_DrawCompactTextColor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C6828u, 0u, (void*)&Render_DrawCompactText, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C685Cu, 0u, (void*)&Render_FormatEncodedText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6BF0u, 0u, (void*)&Menu_SetTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C6C8Cu, 0u, (void*)&Menu_SelectTextBoxChoice, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C7010u, 0u, (void*)&Render_MeasureEncodedTextLine, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C70F8u, 0u, (void*)&Render_DrawVariableWidthGlyph, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C7210u, 0u, (void*)&Render_SetMenuFontStyle, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C7230u, 0u, (void*)&Render_DrawProgressiveTextBoxText, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C7BA4u, 0u, (void*)&Render_DrawScaledTextBoxText, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C7EBCu, 0u, (void*)&Render_BlendGlyphIntoPixels, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C809Cu, 0u, (void*)&Render_BlendTextBoxIntoFramebuffer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8C50u, 0u, (void*)&Menu_Framework_LoadMenuOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E48u, 0u, (void*)&Menu_Framework_MenuItem, 0u, 0u, 0u},
@@ -2174,13 +2163,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F4CA8u, 8u, (void*)&Battle_firstColumnGroupFirstTargets, sizeof Battle_firstColumnGroupFirstTargets, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4CB0u, 4u, (void*)&Battle_secondColumnEntryCount, sizeof Battle_secondColumnEntryCount, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4CB4u, 4u, (void*)&Battle_targetColumnTopOffset, sizeof Battle_targetColumnTopOffset, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4CB8u, 4u, (void*)&Render_fontPaletteOffset, sizeof Render_fontPaletteOffset, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4CBCu, 4u, (void*)&Render_fontColor, sizeof Render_fontColor, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4CC0u, 4u, (void*)&Menu_Framework_mainMenuCursorAnimation, sizeof Menu_Framework_mainMenuCursorAnimation, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4CD0u, 4u, (void*)&Menu_textBoxOrderingTables, sizeof Menu_textBoxOrderingTables, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4E68u, 4u, (void*)&Menu_sceneNotificationTimer, sizeof Menu_sceneNotificationTimer, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4E70u, 16u, (void*)&Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4E80u, 4u, (void*)&Render_activeTextBoxIndex, sizeof Render_activeTextBoxIndex, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4E84u, 4u, (void*)&Menu_Framework_rowTypeBuf, sizeof Menu_Framework_rowTypeBuf, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4E88u, 4u, (void*)&Menu_Framework_unlockedBreakArt, sizeof Menu_Framework_unlockedBreakArt, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4E8Cu, 4u, (void*)&Menu_Framework_stringBuf, sizeof Menu_Framework_stringBuf, 0u, 0u},

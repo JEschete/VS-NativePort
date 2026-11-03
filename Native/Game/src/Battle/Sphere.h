@@ -4,6 +4,9 @@
 #include "Legacy/Psx.h"
 
 
+// decomp: src/include/gpu.h:105
+#define vs_getRGB0Raw(code, rgb0) (((code) << 24) | (rgb0))
+
 // decomp: src/include/gpu.h:110
 #define vs_getUV1Tpage(u, v, x, y, tp, abr)                                              \
     (((u) | ((v) << 8)) | (getTPage((tp), (abr), (x), (y)) << 16))

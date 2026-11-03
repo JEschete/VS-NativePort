@@ -335,12 +335,9 @@
     <ClCompile Include="src\Render\DisplayControlLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Render\Font.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Render\EncodedText.cpp" />
+    <ClCompile Include="src\Render\EncodedTextLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Render\Frame.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -348,6 +345,10 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Render\GameFont.cpp" />
+    <ClCompile Include="src\Render\GameFontLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Render\GimImages.cpp" />
     <ClCompile Include="src\Render\GimImagesLive.cpp">
@@ -421,6 +422,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Render\TextBoxText.cpp" />
     <ClCompile Include="src\Render\TexturePages.cpp" />
     <ClCompile Include="src\Render\TexturePagesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -512,7 +514,6 @@
     <ClInclude Include="src\Movie\Intro.h" />
     <ClInclude Include="src\Render\Camera.h" />
     <ClInclude Include="src\Render\Display.h" />
-    <ClInclude Include="src\Render\Font.h" />
     <ClInclude Include="src\Render\Frame.h" />
     <ClInclude Include="src\Render\FramebufferEffects.h" />
     <ClInclude Include="src\Render\Images.h" />
@@ -610,6 +611,10 @@
     <ClInclude Include="include\Render\Device.hpp" />
     <ClInclude Include="include\Render\DisplayControl.hpp" />
     <ClInclude Include="include\Render\DisplayControlLive.hpp" />
+    <ClInclude Include="include\Render\EncodedText.hpp" />
+    <ClInclude Include="include\Render\EncodedTextLive.hpp" />
+    <ClInclude Include="include\Render\GameFont.hpp" />
+    <ClInclude Include="include\Render\GameFontLive.hpp" />
     <ClInclude Include="include\Render\GimImages.hpp" />
     <ClInclude Include="include\Render\GimImagesLive.hpp" />
     <ClInclude Include="include\Render\ModelGeometry.hpp" />
@@ -622,10 +627,12 @@
     <ClInclude Include="include\Render\RoomDrawLive.hpp" />
     <ClInclude Include="include\Render\RoomLighting.hpp" />
     <ClInclude Include="include\Render\ScaledFont.hpp" />
+    <ClInclude Include="include\Render\ScaledFontLive.hpp" />
     <ClInclude Include="include\Render\ScreenOverlay.hpp" />
     <ClInclude Include="include\Render\ScreenOverlayLive.hpp" />
     <ClInclude Include="include\Render\Sprites.hpp" />
     <ClInclude Include="include\Render\SpritesLive.hpp" />
+    <ClInclude Include="include\Render\TextBoxText.hpp" />
     <ClInclude Include="include\Render\TexturePages.hpp" />
     <ClInclude Include="include\Render\TexturePagesLive.hpp" />
     <ClInclude Include="include\Render\TextureRegionDraw.hpp" />

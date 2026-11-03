@@ -3,6 +3,8 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Render/EncodedTextLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -24,7 +26,6 @@ extern "C" {
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -210,18 +211,18 @@ void Menu_ShowSceneNotification(int notification_kind, int notification_subject_
     Battle_stringContext.strings[0] = Battle_actionDefinitions[notification_subject_id].name;
 
     if (notification_kind == 12) {
-        Render_FormatEncodedText((char*)&Menu_sceneNotificationBuffer[1],
+        VS::Render::FormatLiveEncodedText((char*)&Menu_sceneNotificationBuffer[1],
             (char*)&Menu_menuStrings[Text_Battle_menuStrings_Offset_spellMastered]);
     } else if (notification_kind == 11) {
         Menu_textBoxes[7].flags.frameShape = 0;
-        Render_FormatEncodedText((char*)&Menu_sceneNotificationBuffer[1],
+        VS::Render::FormatLiveEncodedText((char*)&Menu_sceneNotificationBuffer[1],
             (char*)&Menu_menuStrings[Menu_menuStrings[Battle_actionDefinitions[notification_subject_id].type
                                                                 + 22]]);
     } else {
         if (notification_subject_id != 0) {
             Battle_stringContext.strings[0] = Menu_kNotificationItemNames[(notification_subject_id - 0x1CA) * 2];
         }
-        Render_FormatEncodedText((char*)Menu_sceneNotificationBuffer, (char*)&Battle_doorStrings[Battle_doorStrings[notification_kind]]);
+        VS::Render::FormatLiveEncodedText((char*)Menu_sceneNotificationBuffer, (char*)&Battle_doorStrings[Battle_doorStrings[notification_kind]]);
     }
 
     Menu_SetTextBoxText(7, (char*)Menu_sceneNotificationBuffer);
@@ -279,8 +280,6 @@ void Menu_UpdateTextBoxes(void)
         if (state == 0) {
             continue;
         }
-
-        Render_activeTextBoxIndex = id;
 
         if (box->flags.opaque3Bit7) {
             continue;
@@ -340,7 +339,7 @@ void Menu_UpdateTextBoxes(void)
         switch (box->flags.kind) {
         case 0:
             if (state < 0) {
-                Render_BlendTextBoxIntoFramebuffer(box, scale);
+                VS::Render::BlendLiveTextBoxIntoFramebuffer(box, scale);
                 break;
             }
 
@@ -354,7 +353,7 @@ void Menu_UpdateTextBoxes(void)
 
             goto text;
         case 6:
-            Render_BlendTextBoxIntoFramebuffer(box, scale);
+            VS::Render::BlendLiveTextBoxIntoFramebuffer(box, scale);
             break;
         case 2:
         case 7:
@@ -363,9 +362,9 @@ void Menu_UpdateTextBoxes(void)
         default:
         text:
             if (state == duration + 1) {
-                Render_DrawProgressiveTextBoxText(box);
+                VS::Render::DrawLiveProgressiveTextBoxText(box);
             } else if (state < 0) {
-                Render_DrawScaledTextBoxText(box, scale);
+                VS::Render::DrawLiveScaledTextBoxText(box, scale);
             }
             break;
         case 3:

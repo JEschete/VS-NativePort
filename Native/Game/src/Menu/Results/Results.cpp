@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
+#include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
 #include "Render/TimImageLive.hpp"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Display.h"
-#include "Render/Font.h"
 #include "Render/Images.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -1228,9 +1228,9 @@ void Menu_Results_DrawPressButtonPrompt(int x, int y, int slide_timer, int bounc
 
     x = (v1 - (slide_timer * 6));
 
-    Render_DrawCompactTextColor(
+    VS::Render::DrawLiveCompactTextColor(
         "PRESS", vs_getXY_2(x + 18, y), vs_getRGB888(255, 128, 128), NULL);
-    Render_DrawCompactTextColor(
+    VS::Render::DrawLiveCompactTextColor(
         "BUTTON", vs_getXY_2(x + 18, y + 10), vs_getRGB888(255, 128, 128), NULL);
 
     y += 22;

@@ -118,6 +118,14 @@ _RENDER_LIVE = {
     # #276 row 6 (render GIM images): the event scripts' load, release and the game loop's per-frame update.
     "GimImagesLive.hpp": (
         ("QueueLiveGimImage", "F01338"), ("ReleaseLiveGimImages", "F01340"), ("UpdateLiveGimImages", "F01341")),
+    # #276 row 6 (render fonts): the battle string formatter over the battle string context, and the compact,
+    # variable-width and text box fonts over the shared font style.
+    "EncodedTextLive.hpp": (("FormatLiveEncodedText", "F01328"), ("MeasureLiveEncodedTextLine", "F01331")),
+    "GameFontLive.hpp": (
+        ("DrawLiveCompactTextColor", "F01325"), ("DrawLiveCompactText", "F01326"),
+        ("DrawLiveVariableWidthGlyph", "F01332"), ("SetLiveMenuFontStyle", "F01333"),
+        ("DrawLiveProgressiveTextBoxText", "F01334"), ("DrawLiveScaledTextBoxText", "F01335"),
+        ("BlendLiveTextBoxIntoFramebuffer", "F01337")),
 }
 
 # #276 slice 8 (save-memory-card): the C-shaped bindings over the typed VS::Save::MemoryCard game-file core and the
@@ -168,7 +176,6 @@ NATIVE_HELPER_HEADERS = {
     "VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts": r"Native\Engine\include\Audio\MusicVoiceConflicts.hpp",
     "VS::Audio::Driver::ResetLivePlaybackState": r"Native\Engine\include\Audio\PlaybackResetLive.hpp",
     "VS::Effects::BindLiveEffectTextureTables": r"Native\Game\include\Effects\TextureBindings.hpp",
-    "VS::Render::DrawLiveScaledFontChar": r"Native\Engine\include\Render\ScaledFont.hpp",
     **{name: r"Native\Engine\include\Render\SpritesLive.hpp"
        for name in ("VS::Render::QueueLiveDefaultSprite", "VS::Render::QueueLiveSpriteWithTexturePage",
                     "VS::Render::QueueLiveSprite", "VS::Render::LoadLiveFrameViewMatrix")},
@@ -1965,15 +1972,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("    Render_gimLayers = NULL;", "    VS::Render::ForgetLiveGimImages();",
          "#276 row 6: the heap was reset under the GIM set; the typed set is forgotten without being freed"),
     ],
-    "F01327": [
-        ("*str = '\\0'", "*str = Core_TextCode_Terminator", "game text terminates with E7, not a zero glyph"),
-    ],
-    "F01328": [
-        ("c = *src++;", "c = (u_char)*src++;", "unsigned game text and formatting controls"),
-        ("c != '\\0'", "c != Core_TextCode_Terminator", "stop before reading past the encoded template"),
-        ("*dest++ = '-';", "*dest++ = 0xA7;", "vsString minus glyph"),
-        ("*dest++ = '0';", "*dest++ = 0;", "vsString zero glyph"),
-    ],
     "F01301": [
         ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)",
          "target-label backdrop uses native ordering links"),
@@ -2137,16 +2135,18 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "the HUD no longer copies the detached PS1 timer-word view"),
         ("Battle_puzzleTimerTextPointer", "Battle_puzzleTimerText",
          "5BF94.c:3844 the native timer owns its writable buffer instead of depending on a dropped PS1 pointer binding"),
-        ("    Render_DrawCompactText(Battle_puzzleTimerText,",
+        ("    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText,",
          '    Core_Debugf("hud.timer", "text=%s seconds=%d minutes=%d hours=%d frames=%d",\n'
          "        Battle_puzzleTimerText, timer->seconds, timer->minutes, timer->hours, timer->frames);\n"
-         "    Render_DrawCompactText(Battle_puzzleTimerText,",
+         "    VS::Render::DrawLiveCompactText(Battle_puzzleTimerText,",
          "retain exact per-render timer text in detailed gameplay diagnostics"),
     ],
     "F01392": [
         ("Battle_DrawPuzzleTimer(&Battle_puzzleTimer);",
          "Battle_DrawPuzzleTimer(&State_sceneTimer);",
          "SLUS 0x8005046C is the time-field subobject of the authoritative timer at 0x80050468, not independent native storage"),
+        ("        Render_activeTextBoxIndex = id;\n\n", "",
+         "#276 row 6: the text box drawers take the box's layers from its index in Menu_textBoxes (D_800F4E80 retired)"),
     ],
     "F01590": [
         ("    arg0[0] = 0;\n    arg0[1] = 0;\n    arg0[2] = 0;\n"
@@ -2434,12 +2434,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  "        (unsigned)objectData->modelId, (unsigned)Content_legacyModelLoadPhase,\n"
                  "        (unsigned)Content_modelParseResetFlag);\n    *dst = *objectData;",
                  "shared actor-load request and parser-state diagnostics")],
-    "F01325": [
-        ("((uintptr_t)(prim + 2) << 8) >> 8", "LegacyGpu_Handle(prim + 2)", "compact-text draw-mode link"),
-        ("((uintptr_t)(prim + 5) << 8) >> 8", "LegacyGpu_Handle(prim + 5)", "compact-text glyph link"),
-        ("((u_long)Render_frameScratch.primitiveCursor << 8) >> 8", "LegacyGpu_Handle(Render_frameScratch.primitiveCursor)",
-         "compact-text chain head retains its native address"),
-    ],
     "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
     "F01348": [
         ("*(void**)((uintptr_t)Core_ScratchBase() + 0x008) + 8",
@@ -2647,45 +2641,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  "D4.c:1955 block declaration; the pop-in draw reads three colors (issue #259)")],
     "G01780": [("Render_TextureRegion Menu_Results_disMap[]", "Render_TextureRegion Menu_Results_disMap[127]",
                  "3B8.c:1162 _texture_t[127]; the typed texture draws take bounds-checked atlas spans")],
-    "F01331": [
-        ("c < '\\f'", "c < 0xE5", "vs_battle_getTextLineLength.s:0x800C702C"),
-        ("c == '\\f'", "c == 0xE5", "encoded page boundary"),
-        ("c == '\\0'", "c == 0xE7", "encoded terminator"),
-        ("c == '\\n'", "c == 0xE8", "encoded newline"),
-        ("c > '9'", "c > 9", "0x800C70B0 uses decimal operand count, not ASCII"),
-        ("length += *str++;", "length += (u_char)*str++;", "unsigned spacing operand"),
-    ],
-    "F01337": [
-        ("u_int currentChar = *str++;",
-         "u_int currentChar = (u_char)*str++;",
-         "800C81C8 loads an unsigned encoded glyph/control byte"),
-        ("currentChar < '\\f'",
-         "currentChar < Core_TextCode_NonPrinting",
-         "800C81DC compares against encoded0xE5 not ASCII form-feed0x0C"),
-        ("currentChar != ' '",
-         "currentChar != Core_TextCode_Space",
-         "800C81E4 compares against encoded space0x8F not ASCII0x20"),
-        ("currentChar - '\\f'",
-         "currentChar - Core_TextCode_NonPrinting",
-         "800C8274 subtracts0xE5 so encoded0xE7 terminates before zero padding"),
-        ("u_int opcodeParam = *str++;",
-         "u_int opcodeParam = (u_char)*str++;",
-         "transition control operands retain their original unsigned byte width"),
-    ],
-    "F01332": [("glyphId == ' '", "glyphId == 0x8F", "game-encoded space in the vsstring region")],
-    "F01334": [
-        ("currentChar = *currentString;", "currentChar = (u_char)*currentString;",
-         "_printVariableWidthFont.s:0x800C7340 uses lbu"),
-        ("opcodeParam = *currentString;", "opcodeParam = (u_char)*currentString;", "unsigned text operand"),
-        ("currentChar < '\\f'", "currentChar < 0xE5", "0x800C7354 compares the game control boundary"),
-    ],
-    "F01335": [
-        ("u_int currentChar = *str++;", "u_int currentChar = (u_char)*str++;",
-         "_printFixedWidthFont.s:0x800C7CC4 uses lbu"),
-        ("u_int opcodeParam = *str++;", "u_int opcodeParam = (u_char)*str++;", "unsigned text operand"),
-        ("currentChar < '\\f'", "currentChar < 0xE5", "0x800C7CD8 compares the game control boundary"),
-        ("currentChar - '\\f'", "currentChar - 0xE5", "0x800C7D00 dispatches E7 termination and E8 newline"),
-    ],
     "F00557": [
         ("    Core_Gte_SetRotMatrix((MATRIX*)((uintptr_t)Core_ScratchBase() + 0x014));",
          "    if (!VS::Render::ValidateLiveRoomGeometry(arg0, Field_roomData.header.geometryLength)) {\n"
@@ -3604,9 +3559,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"VS::Actors::DrawLiveActorModel(*\1, *\2, ",
      "F01023 #46 typed promotion: the actor binding builds the pose and draws the selected geometry through the "
      "typed draw order"),
-    (r"", r"\bVS::Render::DrawScaledFontChar\(",
-     r"VS::Render::DrawLiveScaledFontChar(",
-     "F04199 #46 typed promotion: the font binding supplies the live font style and text box layer"),
     (r"^Battle::", r"\bVS::Battle::DrawSphereTerrainIntersection\((\w+), (\w+), ",
      r"VS::Battle::DrawLiveSphereTerrainIntersection(*\1, *\2, ",
      "F01309 #46 typed promotion: the sphere binding supplies the GTE, target sphere tables and frame packets"),
@@ -8500,18 +8452,6 @@ REGEX_FIXES += [
         ("Render::DrawTextureWipe",
          (('arg3', 'colors'), ('arg4', 'wipe_edge_x'), ('temp_a1', 'strip_right_x'), ('var_a0', 'strip_width_or_fade_weight'), ('var_s6', 'texture_u')),
          "F03678 renderTextures.h:130-235 emits12-pixel strips; var_a0 first holds final strip width then separately clamped0..64 edge fade weights. char U wrap, mixed lifetime and all packet operations remain unchanged."),
-        ("Render::SetMenuFontStyle",
-         (('arg0', 'palette_offset'),),
-         "F01333 5BF94.c:1699-1704 stores this byte offset after selecting the fixed table/brightness defaults."),
-        ("Render::DrawProgressiveTextBoxText",
-         (('arg0', 'text_box'), ('sp20', 'ordering_table'), ('temp_v1', 'animation_counter_snapshot'), ('temp_v0', 'signed_animation_counter_word'), ('var_a0', 'hexadecimal_divisor'), ('var_a2', 'hex_value_or_decimal_divisor')),
-         "F01334 5BF94.c:1706-1971 selects a text box/table, tracks its texture-animation counter, expands hex values and decimal divisors, and handles inline strings. The shared integer's distinct hex-value/decimal-divisor lifetimes are preserved."),
-        ("Render::DrawScaledTextBoxText",
-         (('temp_s6', 'line_origin_x'),),
-         "F01335 5BF94.c:2096-2190 snapshots the initial fixed-point print X for line reset and justification."),
-        ("Render::BlendTextBoxIntoFramebuffer",
-         (('arg0', 'text_box'), ('arg1', 'glyph_alpha')),
-         "F01337 5BF94.c:2236-2344 clamps high-word alpha to0x10000 and forwards the Q16 weight to2192's RGB555 pixel blender; text-box member and source image remain unchanged."),
         ("Render::TransformRoomPalettes",
          (('arg0', 'mode'), ('arg1', 'duration'), ('arg2', 'red_offset'), ('arg3', 'green_offset'), ('arg4', 'blue_offset')),
          "F00215 146C.c:8241-8268 forwards mode/duration/RGB offsets to the corresponding CLUT/model/background transforms; main.c:10595-10776 establishes argument roles."),
