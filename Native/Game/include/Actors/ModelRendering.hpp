@@ -175,13 +175,15 @@ struct WeaponBone {
   Core::Math::Angles3 rotation;
 };
 
+// Each bone's transform, bone 0 first.
+using WeaponBoneChain = std::array<Core::Math::Transform3, kWeaponBoneLimit>;
+
 // Each bone's transform: bone 0 is `root`, each later bone sits at the tip of
 // its parent turned by its own angles. Nothing for more than kWeaponBoneLimit
 // bones or a parent that does not precede its child.
-[[nodiscard]] std::optional<
-    std::array<Core::Math::Transform3, kWeaponBoneLimit>>
-BuildWeaponBoneChain(const Core::Math::Transform3& root,
-                     std::span<const WeaponBone> bones) noexcept;
+[[nodiscard]] std::optional<WeaponBoneChain> BuildWeaponBoneChain(
+    const Core::Math::Transform3& root,
+    std::span<const WeaponBone> bones) noexcept;
 
 // An owner high above the floor shows its weapon only while an event plays,
 // and never for the leader (as the owner's own model).

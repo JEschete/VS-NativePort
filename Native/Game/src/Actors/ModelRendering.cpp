@@ -456,10 +456,10 @@ Transform3 WeaponRootTransform(const Transform3& attachment,
 // bone loop. The original turned each bone by the skeleton pose and moved it
 // by the weapon's bone matrices; both hold the parent's transform once the
 // parent precedes its child.
-std::optional<std::array<Transform3, kWeaponBoneLimit>> BuildWeaponBoneChain(
+std::optional<WeaponBoneChain> BuildWeaponBoneChain(
     const Transform3& root, std::span<const WeaponBone> bones) noexcept {
   if (bones.size() > kWeaponBoneLimit) return std::nullopt;
-  std::array<Transform3, kWeaponBoneLimit> world{};
+  WeaponBoneChain world{};
   world[0] = root;
   for (std::size_t bone = 1; bone < bones.size(); ++bone) {
     const std::size_t parent = bones[bone].parent;
