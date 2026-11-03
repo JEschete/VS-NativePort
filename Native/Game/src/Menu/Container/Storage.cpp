@@ -3,6 +3,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -13,8 +14,8 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Menu/Container/ItemView.h"
@@ -53,19 +54,19 @@ void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_Inventor
     if (source != NULL) {
         temp->index = source->index;
         if (source->blade != 0) {
-            Items_ReadInventoryBladeStats(
+            VS::Items::ReadLiveInventoryBladeStats(
                 &temp->blade, &container->blades[source->blade - 1]);
             temp->material = container->blades[source->blade - 1].material;
         }
 
         if (source->grip != 0) {
-            Items_ReadInventoryGripStats(
+            VS::Items::ReadLiveInventoryGripStats(
                 &temp->grip, &container->grips[source->grip - 1]);
         }
 
         for (i = 0; i < 3; ++i) {
             if (source->gems[i] != 0) {
-                Items_ReadInventoryGemStats(
+                VS::Items::ReadLiveInventoryGemStats(
                     &temp->gems[i], &container->gems[source->gems[i] - 1]);
             }
         }
@@ -75,7 +76,7 @@ void Menu_Container_BuildWeaponStats(Items_WeaponLoadout* target, Items_Inventor
         temp->name[i] = source->name[i];
     }
 
-    Items_BuildWeaponStatsFromParts(target, temp);
+    VS::Items::BuildLiveWeaponStatsFromParts(target, temp);
     VS::Core::Memory::FreeLiveFromHighEnd(temp);
 }
 
@@ -89,17 +90,17 @@ void Menu_Container_BuildShieldStats(Items_ShieldLoadout* target, Items_Inventor
 
     if (source != NULL) {
         temp->index = source->index;
-        Items_ReadInventoryArmorStats(&temp->base, &source->base);
+        VS::Items::ReadLiveInventoryArmorStats(&temp->base, &source->base);
         temp->material = source->base.material;
 
         for (i = 0; i < 3; ++i) {
             if (source->gems[i] != 0) {
-                Items_ReadInventoryGemStats(
+                VS::Items::ReadLiveInventoryGemStats(
                     &temp->gems[i], &container->gems[(source->gems[i] & 0x7F) - 1]);
             }
         }
     }
-    Items_BuildShieldStatsFromParts(target, temp);
+    VS::Items::BuildLiveShieldStatsFromParts(target, temp);
     VS::Core::Memory::FreeLiveFromHighEnd(temp);
 }
 
@@ -832,19 +833,19 @@ void Menu_Container_CopyEquipmentStats(Items_EquipmentPartStats* item, int type,
 {
     switch (type) {
     case Items_ItemCategory_Blade:
-        Items_ReadInventoryBladeStats(
+        VS::Items::ReadLiveInventoryBladeStats(
             item, &Menu_Container_containerData->items.blades[index]);
         return;
     case Items_ItemCategory_Grip:
-        Items_ReadInventoryGripStats(
+        VS::Items::ReadLiveInventoryGripStats(
             item, &Menu_Container_containerData->items.grips[index]);
         return;
     case Items_ItemCategory_Armor:
-        Items_ReadInventoryArmorStats(
+        VS::Items::ReadLiveInventoryArmorStats(
             item, &Menu_Container_containerData->items.armor[index]);
         return;
     case Items_ItemCategory_Gem:
-        Items_ReadInventoryGemStats(item, &Menu_Container_containerData->items.gems[index]);
+        VS::Items::ReadLiveInventoryGemStats(item, &Menu_Container_containerData->items.gems[index]);
         return;
     }
 }

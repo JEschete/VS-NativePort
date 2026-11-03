@@ -127,34 +127,3 @@ typedef struct Items_LootListNode {
 } Items_LootListNode;
 
 #endif // VS_ITEMS_LOOT_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_ITEMS_LOOT_H_DECLS)
-#define VS_ITEMS_LOOT_H_DECLS
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Actor.h"
-#include "Items/Equipment.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/TreasureChests.h"
-#include "Items/Weapons.h"
-#include "Render/Palette.h"
-
-extern Items_LootListNode* Items_lootListHead;
-int Items_RollEnemyWeaponDrop(Items_LootedWeapon* looted, Items_WeaponLoadout* base);
-int Items_RollEnemyShieldDrop(Items_LootedShield* looted, Items_ShieldLoadout* base);
-int Items_RollEnemyAccessoryDrop(Items_LootedAccessory* looted, Items_AccessorySpawnLoadout* base);
-int Items_RollEnemyArmorDrop(Items_LootedArmor* looted, Items_ArmorLoadout* base);
-int Items_CopyGuaranteedEnemyItemDrops(Items_BattleLoot* looted, Items_MiscItemStack* base);
-int Items_RollEnemyItemDrop(Items_BattleLoot* looted, Items_MiscItemDrop* base);
-void Items_QueueEnemyLoot(Battle_Actor* enemy);
-void Items_OpenPendingEnemyLoot(void);
-void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1);
-void Items_ClearRoomLootList(void);
-Items_TreasureChest* Items_TreasureChestAtTile(int tile_x, int tile_z, int tile_layer);
-void Items_RestoreRoomChestStates(void);
-Items_TreasureChest* Items_RoomTreasureChests(int* chest_count_out);
-void Items_LoadRoomChestLoot(void* data);
-
-#endif // VS_ITEMS_LOOT_H_DECLS

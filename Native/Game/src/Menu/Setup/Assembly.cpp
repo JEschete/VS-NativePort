@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedTextLive.hpp"
 extern "C" {
@@ -12,7 +14,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/EquipmentDetails.h"
@@ -137,7 +138,7 @@ void Menu_Setup_DisassembleWeapon(int weaponIndex)
     VS::Core::Memory::ZeroLiveWordsBackward(weapon, sizeof *weapon);
     weapon->index = index;
 
-    Items_Inventory_RebuildDisplayIndices(0);
+    VS::Items::Inventory::RebuildLiveDisplayIndices(0);
 }
 
 // decomp: MENUC.PRG _assembleWeapon (src/MENU/MENUC.PRG/168.c:345)
@@ -173,7 +174,7 @@ void Menu_Setup_AssembleWeapon(int bladeIndex, int gripIndex, int gemInfo)
     }
 
     memset(weapon->name, Core_TextCode_Terminator, sizeof weapon->name);
-    Items_Inventory_RebuildDisplayIndices(0);
+    VS::Items::Inventory::RebuildLiveDisplayIndices(0);
 }
 
 // decomp: MENUC.PRG _disassembleShield (src/MENU/MENUC.PRG/168.c:384)
@@ -617,7 +618,7 @@ int Menu_Setup_UpdateAssembly(int initialize_assembly)
         Menu_InitInformationTextBox((enum Menu_InformationBoxHeader)(1));
         Menu_Setup_RecordSlotSelection(5);
         Menu_Framework_ClearMenuExcept(Menu_Framework_MenuItemId_None);
-        Menu_Setup_combiningItem = Items_Inventory_FirstEmptySlot(0, NULL);
+        Menu_Setup_combiningItem = VS::Items::Inventory::FindLiveFirstEmptySlot(0, NULL);
         Menu_Setup_assemblyBladeToAssemble = 0;
         Menu_Setup_assemblyGripToAssemble = 0;
         *(int*)Menu_Setup_assemblyGemInfo = 0;
@@ -1064,10 +1065,10 @@ int Menu_Setup_RestoreGemsAndLeaveSelection(char* gems, int isShield)
     }
     if (isShield != 0) {
         if (shield->isEquipped != 0) {
-            Items_EquipAshleyShield(shield);
+            VS::Items::EquipLiveAshleyShield(shield);
         }
     } else if (weapon->isEquipped != 0) {
-        Items_EquipAshleyWeapon(weapon);
+        VS::Items::EquipLiveAshleyWeapon(weapon);
     }
     return Menu_Setup_LeaveItemSelection(1);
 }
@@ -1348,10 +1349,10 @@ int Menu_Setup_UpdateGemAttachment(int equipment_category_selection)
                     }
                     if (Menu_Setup_gemAttachmentIsShield != 0) {
                         if (shield->isEquipped != 0) {
-                            Items_EquipAshleyShield(shield);
+                            VS::Items::EquipLiveAshleyShield(shield);
                         }
                     } else if (weapon->isEquipped != 0) {
-                        Items_EquipAshleyWeapon(weapon);
+                        VS::Items::EquipLiveAshleyWeapon(weapon);
                     }
                 }
                 Menu_Framework_SetEnabledStatPages(7);
@@ -1442,11 +1443,11 @@ int Menu_Setup_UpdateGemCategoryMenu(int initialize_gem_category_menu)
                 [Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Index_weapons + i]];
             rowTypes[i] = 0;
         }
-        if (Items_Inventory_CountItems(0, NULL) == 0) {
+        if (VS::Items::Inventory::CountLiveItems(0, NULL) == 0) {
             rowTypes[0] = 1;
             text[1] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_noItems];
         }
-        if (Items_Inventory_CountItems(3, NULL) == 0) {
+        if (VS::Items::Inventory::CountLiveItems(3, NULL) == 0) {
             rowTypes[1] = 1;
             text[3] = (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_noItems];
         }

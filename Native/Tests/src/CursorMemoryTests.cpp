@@ -13,6 +13,8 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Core/Memory/HeapLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -27,8 +29,9 @@ extern "C" {
 #include "Field/Room.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
+#include "Items/Equipment.h"
 #include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Menu/BreakArts.h"
 #include "Menu/Framework/EquipmentDetails.h"
 #include "Menu/Framework/Framework.h"
@@ -333,7 +336,7 @@ struct WorkshopChoicesFixture {
     FillParts();
     FillProtection();
     for (int category = 1; category <= 5; ++category) {
-      Items_Inventory_RebuildDisplayIndices(category);
+      VS::Items::Inventory::RebuildLiveDisplayIndices(category);
     }
   }
 
@@ -469,7 +472,7 @@ struct WorkshopRepairFixture {
     inventory.armor[1].index = 2;
     inventory.armor[1].category = 7;
     for (int category : {1, 3, 4}) {
-      Items_Inventory_RebuildDisplayIndices(category);
+      VS::Items::Inventory::RebuildLiveDisplayIndices(category);
     }
     Input_buttonRepeat = 0;
   }
@@ -503,10 +506,10 @@ struct WorkshopRepairFixture {
     inventory.grips[0].index = inventory.grips[0].assembledWeaponIndex = 1;
     inventory.shields[0].isEquipped = 1;
     inventory.armor[0].limb = 1;
-    Items_Inventory_RebuildDisplayIndices(0);
-    Items_EquipAshleyWeapon(&inventory.weapons[0]);
-    Items_EquipAshleyShield(&inventory.shields[0]);
-    Items_EquipAshleyArmor(0, &inventory.armor[0]);
+    VS::Items::Inventory::RebuildLiveDisplayIndices(0);
+    VS::Items::EquipLiveAshleyWeapon(&inventory.weapons[0]);
+    VS::Items::EquipLiveAshleyShield(&inventory.shields[0]);
+    VS::Items::EquipLiveAshleyArmor(0, &inventory.armor[0]);
   }
 
   void Prompt(int button) {
@@ -1011,7 +1014,7 @@ TEST_CASE("Setup actions obey original workshop and weapon-capacity gates",
   const bool cursor_memory = GENERATE(false, true);
   CAPTURE(workshop, weapon_count, cursor_memory);
   WorkshopGateFixture fixture(workshop, weapon_count, cursor_memory);
-  REQUIRE(Items_Inventory_CountItems(0, nullptr) == weapon_count);
+  REQUIRE(VS::Items::Inventory::CountLiveItems(0, nullptr) == weapon_count);
   const auto* rows = fixture.Open();
   REQUIRE(Menu_Setup_currentWorkshop == workshop);
   CHECK(Input_settings.cursorMemory == cursor_memory);

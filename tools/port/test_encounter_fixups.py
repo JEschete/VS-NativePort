@@ -3435,24 +3435,23 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         selection = screen.split("int Menu_Loot_UpdateLootSelection(", 1)[1]
         self.assertIn("} else if (Menu_Loot_AdvanceStagedInventory()) {", selection)
         cleanup = (root / "Native/Game/src/Items/Loot.cpp").read_text()
-        cleanup = cleanup.split("void Items_ClearRoomLootList(", 1)[1]
+        cleanup = cleanup.split("void ClearRoomLootList(", 1)[1]
         self.assertLess(
-            cleanup.index("Menu_Loot_ResetPaging();"),
-            cleanup.index("VS::Core::Memory::FreeLiveFromHighEnd("),
+            cleanup.index("flow.ResetLootPaging();"),
+            cleanup.index("list.Clear();"),
         )
 
     def test_misc_inventory_write_checks_capacity_before_mutation(self):
-        old, new, _ = copy_fixups.FIXES["F02511"][0]
         root = Path(__file__).resolve().parents[2]
         source = (
             root / "Native" / "Game" / "src" / "Items" / "Inventory.cpp"
         ).read_text()
-        self.assertIn(new, source)
-        self.assertNotIn(old, source)
-        self.assertIn("write != 0", new)
-        self.assertIn("Items_Inventory_CopyItem(Items_ItemCategory_Misc,", new)
-        self.assertIn("targetInventory, sourceItemIndex, sourceInventory) == 0", new)
-        self.assertLess(source.index(new), source.index("int space_left ="))
+        merge = source.split("ItemCopy CopyMisc(", 1)[1]
+        probe = merge.index("const auto probe = CopyItem(")
+        self.assertLess(merge.index("if (request.write) {"), probe)
+        self.assertIn("if (probe.slot == 0) return {0, probe.status};", merge)
+        self.assertLess(probe, merge.index("FillStack(*stack, count)"))
+        self.assertNotIn("F02511", copy_fixups.FIXES)
 
     def test_particle_cone_preserves_original_zero_height_quotient(self):
         _, new, _ = copy_fixups.FIXES["F01515"][1]

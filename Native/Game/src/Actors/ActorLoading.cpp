@@ -4,6 +4,7 @@
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
+#include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -41,7 +42,6 @@ extern "C" {
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -211,14 +211,14 @@ void Actors_ApplyActorInitialStats(
     actor->defaultTargetLimb = init->opaque32;
     actor->cancelsHitResults = 0;
     actor->isAnalyzed = 0;
-    Items_BuildWeaponStatsFromParts(&actor->weapon, &init->weapon);
+    VS::Items::BuildLiveWeaponStatsFromParts(&actor->weapon, &init->weapon);
     actor->currentRange = actor->weapon.range.range + actor->reach;
     actor->currentRangeY = actor->weapon.range.secondRange + actor->reach;
     actor->currentRangeZ = actor->weapon.range.thirdRange + actor->reach;
     actor->currentAttackShapeAngle = actor->weapon.range.attackShapeAngle;
     actor->currentAttackShape = 1;
-    Items_BuildShieldStatsFromParts(&actor->shield, &init->shield);
-    Items_BuildAccessoryStatsFromPart(&actor->accessory, &init->accessory);
+    VS::Items::BuildLiveShieldStatsFromParts(&actor->shield, &init->shield);
+    VS::Items::BuildLiveAccessoryStatsFromPart(&actor->accessory, &init->accessory);
 
     for (i = 0; i < 6; ++i) {
         actor->limbs[i].hp = actor->limbs[i].maxHp = init->limbs[i].hp;
@@ -244,7 +244,7 @@ void Actors_ApplyActorInitialStats(
             actor->limbs[i].affinities[j] = init->limbs[i].affinities[j];
         }
 
-        Items_BuildArmorStatsFromPart(&actor->limbs[i].armor, &init->limbs[i].armor);
+        VS::Items::BuildLiveArmorStatsFromPart(&actor->limbs[i].armor, &init->limbs[i].armor);
     }
 
     VS::Core::IgnoreLiveActorCallback(actor);

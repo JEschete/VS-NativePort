@@ -3,6 +3,8 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -21,8 +23,8 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/ActionSelection.h"
@@ -107,7 +109,7 @@ void Menu_Inventory_SortWeapons(int stat)
             if (index != 0) {
                 int value;
 
-                Items_LoadInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
+                VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
 
                 value = Menu_Framework_WeaponSortValue(stat, &uiWeapon);
 
@@ -126,7 +128,7 @@ void Menu_Inventory_SortWeapons(int stat)
 
             if (index != 0) {
 
-                Items_LoadInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
+                VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, &weapon[index - 1]);
 
                 if (Menu_Framework_WeaponSortValue(stat, &uiWeapon) == maxValue) {
                     sortedIndices[sortedPos++] = index;
@@ -164,7 +166,7 @@ void Menu_Inventory_SortShields(int stat)
 
             if (index != 0) {
 
-                Items_LoadInventoryShieldStats(&uiShield, &shield[index - 1]);
+                VS::Items::LoadLiveInventoryShieldStats(&uiShield, &shield[index - 1]);
 
                 value = Menu_Framework_ShieldSortValue(stat, &uiShield);
 
@@ -183,7 +185,7 @@ void Menu_Inventory_SortShields(int stat)
 
             if (index != 0) {
 
-                Items_LoadInventoryShieldStats(&uiShield, &shield[index - 1]);
+                VS::Items::LoadLiveInventoryShieldStats(&uiShield, &shield[index - 1]);
 
                 if (Menu_Framework_ShieldSortValue(stat, &uiShield) == maxValue) {
                     sortedIndices[sortedPos++] = index;
@@ -248,17 +250,17 @@ void Menu_Inventory_CopyEquipmentStats(
 {
     switch (itemCategory) {
     case Items_ItemCategory_Blade:
-        Items_ReadInventoryBladeStats(
+        VS::Items::ReadLiveInventoryBladeStats(
             equipment, &Audio_Seq_unusedInventory.blades[itemIndex]);
         return;
     case Items_ItemCategory_Grip:
-        Items_ReadInventoryGripStats(equipment, &Audio_Seq_unusedInventory.grips[itemIndex]);
+        VS::Items::ReadLiveInventoryGripStats(equipment, &Audio_Seq_unusedInventory.grips[itemIndex]);
         return;
     case Items_ItemCategory_Armor:
-        Items_ReadInventoryArmorStats(equipment, &Audio_Seq_unusedInventory.armor[itemIndex]);
+        VS::Items::ReadLiveInventoryArmorStats(equipment, &Audio_Seq_unusedInventory.armor[itemIndex]);
         return;
     case Items_ItemCategory_Gem:
-        Items_ReadInventoryGemStats(equipment, &Audio_Seq_unusedInventory.gems[itemIndex]);
+        VS::Items::ReadLiveInventoryGemStats(equipment, &Audio_Seq_unusedInventory.gems[itemIndex]);
         return;
     }
 }
@@ -509,7 +511,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
         if (i != 0) {
             if (i == 1) {
                 Audio_PlaySfxCentered(0x7E, 28);
-                Items_Inventory_ClearItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
+                VS::Items::Inventory::ClearLiveItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
             } else {
                 VS::Menu::PlayLeaveSound();
             }
@@ -666,7 +668,7 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
                 Audio_PlaySfxCentered(0x7E, 0x1C);
 
                 if (Audio_Seq_unusedInventory.misc[Menu_Inventory_discardMenuSelectedItem - 1].count == Menu_Inventory_discardCount) {
-                    Items_Inventory_ClearItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
+                    VS::Items::Inventory::ClearLiveItemSlot(Menu_Inventory_discardMenuItemCategory, Menu_Inventory_discardMenuSelectedItem);
                 } else {
                     Audio_Seq_unusedInventory.misc[Menu_Inventory_discardMenuSelectedItem - 1].count =
                         Audio_Seq_unusedInventory.misc[Menu_Inventory_discardMenuSelectedItem - 1].count - Menu_Inventory_discardCount;
@@ -938,7 +940,7 @@ loop_1:
         Menu_Inventory_freezeTabArrows = 1;
 
         for (i = 0; i < 7; ++i) {
-            Items_Inventory_RebuildDisplayIndices(i);
+            VS::Items::Inventory::RebuildLiveDisplayIndices(i);
         }
 
         if (itemCategory == Items_ItemCategory_Manage) {
@@ -1208,7 +1210,7 @@ loop_1:
                         Audio_Seq_unusedInventory.misc[var_a1_2 - 1].count - 100;
                     Audio_Seq_unusedInventory.misc[var_a1_2 - 1].count = 100;
                 } else {
-                    Items_Inventory_ClearItemSlot(Items_ItemCategory_Misc, row);
+                    VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Misc, row);
                 }
             } else {
                 indices[i - 1] = var_a1_2;
@@ -1484,7 +1486,7 @@ loop_1:
 
         Menu_Framework_menuMemory.opaque3A.currentCategory = (itemCategory + 1) & 7;
         (&Menu_Framework_menuMemory.opaque3A)->categoryCursors[itemCategory].word =
-            Items_Inventory_FindDisplayPosition(itemCategory, i - 1) - 1;
+            VS::Items::Inventory::FindLiveDisplayPosition(itemCategory, i - 1) - 1;
 
         Menu_Inventory_itemListState = Menu_Inventory_ItemListState_Init;
         break;

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/RandomLive.hpp"
+#include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentAffinity.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -409,9 +409,9 @@ short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_
 
         if (nHit == 0) {
             if (target->targetsPosition == 0) {
-                Items_GrowAttackerWeaponRatings(action, sourceActor, (targetActor->enemyClass) + 1,
+                VS::Items::GrowLiveAttackerWeaponRatings(action, sourceActor, (targetActor->enemyClass) + 1,
                     calculation.targetAffinity + 1);
-                Items_GrowDefenderEquipmentRatings(action, targetActor, (sourceActor->enemyClass) + 1,
+                VS::Items::GrowLiveDefenderEquipmentRatings(action, targetActor, (sourceActor->enemyClass) + 1,
                     calculation.sourceAffinity + 1, limb);
             }
         }
@@ -586,7 +586,7 @@ short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_Hit
         if (nHit == 0) {
             if (calculation.sourceAffinity != 0) {
                 if (target->targetsPosition == 0) {
-                    Items_GrowDefenderEquipmentRatings(action, targetActor, 0, calculation.sourceAffinity + 1, limb);
+                    VS::Items::GrowLiveDefenderEquipmentRatings(action, targetActor, 0, calculation.sourceAffinity + 1, limb);
                 }
             }
         }
@@ -815,7 +815,7 @@ short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitRe
     if ((withRandMod != 0) && (nHit == 0)) {
         if (calculation.sourceAffinity != 0) {
             if (target->targetsPosition == 0) {
-                Items_GrowDefenderEquipmentRatings(action, targetActor, 0, calculation.sourceAffinity + 1, limb);
+                VS::Items::GrowLiveDefenderEquipmentRatings(action, targetActor, 0, calculation.sourceAffinity + 1, limb);
             }
         }
     }

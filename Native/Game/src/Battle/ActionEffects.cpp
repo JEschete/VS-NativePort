@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/RandomLive.hpp"
+#include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentWear.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -301,8 +301,8 @@ int Battle_QueueHitDamageAndEquipmentWear(
         }
 
         if (execute_action != 0) {
-            Items_ConsumeHitEquipmentDp(action_definition, source_stats, target_stats, damage_amount);
-            Items_AccumulateHitEquipmentPp(action_definition, source_stats, target_stats, damage_amount);
+            VS::Items::ConsumeLiveHitEquipmentDp(action_definition, source_stats, target_stats, damage_amount);
+            VS::Items::AccumulateLiveHitEquipmentPp(action_definition, source_stats, target_stats, damage_amount);
         }
     }
 }

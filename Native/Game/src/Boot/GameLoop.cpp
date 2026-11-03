@@ -8,6 +8,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Items/LootLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/GimImagesLive.hpp"
@@ -70,6 +71,7 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
+#include "Items/LootLiveState.h"
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
@@ -258,7 +260,7 @@ void Boot_RunGameLoop(void)
                                 break;
                             case 2:
                                 Battle_recoveryRewardMode = 0;
-                                Items_OpenPendingEnemyLoot();
+                                VS::Items::OpenLivePendingEnemyLoot();
                                 break;
                             }
                             break;
@@ -491,7 +493,7 @@ void Boot_RunGameLoop(void)
                                     break;
                                 case 2:
                                     Battle_recoveryRewardMode = 0;
-                                    Items_OpenPendingEnemyLoot();
+                                    VS::Items::OpenLivePendingEnemyLoot();
                                     break;
                                 }
                             }

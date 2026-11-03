@@ -3,6 +3,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -345,7 +346,7 @@ int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
 
             Menu_Framework_menuBackgroundBuffer = NULL;
 
-            Items_Inventory_StoreEquippedStats();
+            VS::Items::Inventory::StoreLiveEquippedStats();
         }
 
         return 1;

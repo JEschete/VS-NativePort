@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Items/LootLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Field/Camera.h"
 #include "Field/GameMode.h"
 #include "Field/Interactions.h"
-#include "Items/Loot.h"
 #include "Menu/TextBox.h"
 #include "Render/Camera.h"
 
@@ -414,7 +414,7 @@ void Battle_FinishActionSequence(void)
         Event_BeginQueuedCutscene();
         return;
     }
-    Items_OpenPendingEnemyLoot();
+    VS::Items::OpenLivePendingEnemyLoot();
 }
 
 }  // extern "C"

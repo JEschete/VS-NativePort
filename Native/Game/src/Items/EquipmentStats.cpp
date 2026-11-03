@@ -1,688 +1,645 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Core/RuntimeLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Audio/Seq/Channel.h"
-#include "Battle/Abilities.h"
-#include "Battle/Actor.h"
-#include "Battle/Feedback.h"
-#include "Battle/StatusEffects.h"
-#include "Items/Equipment.h"
-#include "Items/EquipmentInit.h"
-#include "Items/EquipmentStats.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
-#include "Render/Palette.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Items/EquipmentStats.hpp"
 
-// decomp: BATTLE.PRG vs_battle_applyWeaponStats (src/BATTLE/BATTLE.PRG/146C.c:968)
-void Items_BuildWeaponStatsFromParts(
-    Items_WeaponLoadout* target, Items_WeaponSpawnLoadout* source)
-{
-    int i;
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
 
-    VS::Core::Memory::CopyLiveAlignedWords(&target->blade, &source->blade, sizeof target->blade);
-    VS::Core::Memory::CopyLiveAlignedWords(&target->grip, &source->grip, sizeof target->grip);
+#include "Items/ItemRecords.hpp"
 
-    for (i = 0; i < 3; ++i) {
-        VS::Core::Memory::CopyLiveAlignedWords(&target->gems[i], &source->gems[i], sizeof source->gems[i]);
-    }
+namespace VS::Items {
+namespace {
+// A damage type indexes the grip's types, then runs on into its classes and
+// affinities, which follow the types in the part record.
+constexpr std::size_t kGripTypesEnd = kPartTypeSlots;
+constexpr std::size_t kGripClassesEnd = kGripTypesEnd + kPartClassSlots;
+constexpr std::size_t kGripAffinitiesEnd = kGripClassesEnd + kPartAffinitySlots;
 
-    target->wepId = source->blade.weaponModelId;
-    target->dropRate = source->dropRate;
-    target->index = source->index;
-    target->blade.material = source->material;
-    target->damageType = source->blade.damageType;
-    target->actionType = source->blade.costType;
-    target->damageTypeValue = source->grip.types[target->damageType];
-    target->risk = source->blade.cost;
-    target->recoveryDelay = source->blade.opaque14;
-    target->range = source->blade.range;
-    target->currentDp = source->blade.currentDp;
-    target->maxDp = source->blade.maxDp;
-
-    target->currentPp = source->blade.currentPp;
-    target->maxPp = source->blade.maxPp;
-    target->currentStr = target->baseStr =
-        source->blade.strength + source->grip.strength + source->gems[0].strength
-        + source->gems[1].strength + source->gems[2].strength;
-    target->currentInt = target->baseInt =
-        source->blade.intelligence + source->grip.intelligence
-        + source->gems[0].intelligence + source->gems[1].intelligence
-        + source->gems[2].intelligence;
-    target->currentAgility = target->baseAgility =
-        source->blade.agility + source->grip.agility + source->gems[0].agility
-        + source->gems[1].agility + source->gems[2].agility;
-
-    for (i = 0; i < 6; ++i) {
-        target->classAffinityBaseline.classes[i] =
-            target->classAffinityCurrent.classes[0][i] =
-                target->classAffinityCurrent.classes[1][i] =
-                    source->blade.classes[i] + source->gems[0].classes[i]
-                    + source->gems[1].classes[i] + source->gems[2].classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        target->classAffinityBaseline.affinities[i] =
-            target->classAffinityCurrent.affinities[0][i] =
-                target->classAffinityCurrent.affinities[1][i] =
-                    source->blade.affinities[i] + source->gems[0].affinities[i]
-                    + source->gems[1].affinities[i] + source->gems[2].affinities[i];
-        target->affinityModifiers[i] = 0;
-    }
-
-    for (i = 0; i < 24; ++i) {
-        target->name[i] = source->name[i];
-    }
+std::optional<std::uint8_t> GripTypeValue(const EquipmentPart& grip,
+                                          std::size_t damage_type) {
+  if (damage_type < kGripTypesEnd) {
+    return static_cast<std::uint8_t>(grip.types[damage_type]);
+  }
+  if (damage_type < kGripClassesEnd) {
+    return static_cast<std::uint8_t>(grip.classes[damage_type - kGripTypesEnd]);
+  }
+  if (damage_type < kGripAffinitiesEnd) {
+    return static_cast<std::uint8_t>(
+        grip.affinities[damage_type - kGripClassesEnd]);
+  }
+  return std::nullopt;
 }
 
-// decomp: BATTLE.PRG vs_battle_applyShieldStats (src/BATTLE/BATTLE.PRG/146C.c:1028)
-void Items_BuildShieldStatsFromParts(
-    Items_ShieldLoadout* target, Items_ShieldSpawnLoadout* source)
-{
-    int i;
+// Sums signed part statistics into the 16 bits a loadout stores.
+template <typename... Values>
+constexpr std::int16_t Total(Values... values) {
+  return static_cast<std::int16_t>((static_cast<std::int32_t>(values) + ...));
+}
 
-    VS::Core::Memory::CopyLiveAlignedWords(&target->base, &source->base, sizeof source->base);
+// A signed part statistic widened as the original loads it (lb).
+template <typename Wide>
+constexpr Wide SignExtend(std::int8_t value) {
+  return static_cast<Wide>(value);
+}
 
-    for (i = 0; i < 3; ++i) {
-        VS::Core::Memory::CopyLiveAlignedWords(&target->gems[i], &source->gems[i], sizeof target->gems[i]);
-    }
+struct AttributeTotals {
+  std::int16_t strength{};
+  std::int16_t intelligence{};
+  std::int16_t agility{};
+};
 
-    target->wepId = source->base.weaponModelId;
-    target->dropRate = source->dropRate;
-    target->index = source->index;
-    target->base.material = source->material;
+// The parts' attribute totals, in the 16 bits a loadout stores.
+template <typename... Parts>
+constexpr AttributeTotals SumAttributes(const Parts&... parts) {
+  return {.strength = Total(parts.strength...),
+          .intelligence = Total(parts.intelligence...),
+          .agility = Total(parts.agility...)};
+}
 
-    for (i = 0; i < 4; ++i) {
-        target->types[i] = source->base.types[i];
-    }
+constexpr void SetAttributes(LoadoutAttributes& attributes,
+                             const AttributeTotals& totals) {
+  attributes.base_strength = static_cast<std::uint16_t>(totals.strength);
+  attributes.current_strength = totals.strength;
+  attributes.base_intelligence =
+      static_cast<std::uint16_t>(totals.intelligence);
+  attributes.current_intelligence = totals.intelligence;
+  attributes.base_agility = static_cast<std::uint16_t>(totals.agility);
+  attributes.current_agility = totals.agility;
+}
 
-    target->currentDp = source->base.currentDp;
-    target->maxDp = source->base.maxDp;
-    target->currentPp = source->base.currentPp;
-    target->maxPp = source->base.maxPp;
-    target->currentStr = target->baseStr =
-        source->base.strength + source->gems[0].strength + source->gems[1].strength
-        + source->gems[2].strength;
-    target->currentInt = target->baseInt =
-        source->base.intelligence + source->gems[0].intelligence
-        + source->gems[1].intelligence + source->gems[2].intelligence;
-    target->currentAgility = target->baseAgility =
-        source->base.agility + source->gems[0].agility + source->gems[1].agility
-        + source->gems[2].agility;
+// Writes one class total to the baseline and both current rows.
+constexpr void SetClass(ClassAffinityCurrent& current,
+                        ClassAffinityBaseline& baseline, std::size_t index,
+                        std::int16_t total) {
+  current.classes[kEquipmentRow][index] = total;
+  current.classes[kEffectiveRow][index] = total;
+  baseline.classes[index] = total;
+}
 
-    for (i = 0; i < 6; ++i) {
-        target->classAffinityBaseline.classes[i] =
-            target->classAffinityCurrent.classes[0][i] =
-                target->classAffinityCurrent.classes[1][i] =
-                    source->base.classes[i] + source->gems[0].classes[i]
-                    + source->gems[1].classes[i] + source->gems[2].classes[i];
-    }
+// Writes one affinity total to the baseline and both current rows and clears
+// its modifier.
+constexpr void SetAffinity(ClassAffinityCurrent& current,
+                           ClassAffinityBaseline& baseline,
+                           AffinityTotals& modifiers, std::size_t index,
+                           std::int16_t total) {
+  current.affinities[kEquipmentRow][index] = total;
+  current.affinities[kEffectiveRow][index] = total;
+  baseline.affinities[index] = static_cast<std::uint16_t>(total);
+  modifiers[index] = 0;
+}
 
-    for (i = 0; i < 7; ++i) {
-        target->classAffinityBaseline.affinities[i] =
-            target->classAffinityCurrent.affinities[0][i] =
-                target->classAffinityCurrent.affinities[1][i] =
-                    source->base.affinities[i] + source->gems[0].affinities[i]
-                    + source->gems[1].affinities[i] + source->gems[2].affinities[i];
-        target->affinityModifiers[i] = 0;
-    }
+// Class and affinity totals of a part and its three gems.
+void SetGemmedClassAffinity(
+    const EquipmentPart& part,
+    const std::array<EquipmentPart, kWeaponGemCount>& gems,
+    ClassAffinityCurrent& current, ClassAffinityBaseline& baseline,
+    AffinityTotals& modifiers) {
+  for (std::size_t i = 0; i < kClassCount; ++i) {
+    SetClass(current, baseline, i,
+             Total(part.classes[i], gems[0].classes[i], gems[1].classes[i],
+                   gems[2].classes[i]));
+  }
+  for (std::size_t i = 0; i < kAffinityCount; ++i) {
+    SetAffinity(current, baseline, modifiers, i,
+                Total(part.affinities[i], gems[0].affinities[i],
+                      gems[1].affinities[i], gems[2].affinities[i]));
+  }
+}
+}  // namespace
+
+// decomp: BATTLE.PRG vs_battle_applyWeaponStats
+// (src/BATTLE/BATTLE.PRG/146C.c:968)
+ItemsStatus BuildWeaponStatsFromParts(WeaponLoadout& target,
+                                      const WeaponSpawnLoadout& source) {
+  auto status = ItemsStatus::kOk;
+  target.blade = source.blade;
+  target.grip = source.grip;
+  target.gems = source.gems;
+  target.weapon_model_id =
+      static_cast<std::uint8_t>(source.blade.weapon_model_id);
+  target.drop_rate = source.drop_rate;
+  target.index = static_cast<std::uint8_t>(source.index);
+  target.blade.material = source.material;
+  target.damage_type = source.blade.damage_type;
+  target.action_type = source.blade.cost_type;
+  if (const auto value = GripTypeValue(source.grip, target.damage_type)) {
+    target.damage_type_value = *value;
+  } else {
+    target.damage_type_value = 0;
+    status = ItemsStatus::kDamageTypeOutOfRange;
+  }
+  target.risk = source.blade.cost;
+  target.recovery_delay = source.blade.opaque14;
+  target.range = source.blade.range;
+  target.current_dp = source.blade.current_dp;
+  target.max_dp = source.blade.max_dp;
+  target.current_pp = source.blade.current_pp;
+  target.max_pp = source.blade.max_pp;
+  const auto& gems = source.gems;
+  SetAttributes(target.attributes, SumAttributes(source.blade, source.grip,
+                                                 gems[0], gems[1], gems[2]));
+  SetGemmedClassAffinity(source.blade, gems, target.class_affinity,
+                         target.baseline, target.affinity_modifiers);
+  target.name = source.name;
+  return status;
+}
+
+// decomp: BATTLE.PRG vs_battle_applyShieldStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1028)
+void BuildShieldStatsFromParts(ShieldLoadout& target,
+                               const ShieldSpawnLoadout& source) {
+  target.base = source.base;
+  target.gems = source.gems;
+  target.weapon_model_id =
+      static_cast<std::uint8_t>(source.base.weapon_model_id);
+  target.drop_rate = source.drop_rate;
+  target.index = static_cast<std::uint8_t>(source.index);
+  target.base.material = source.material;
+  for (std::size_t i = 0; i < kPartTypeSlots; ++i) {
+    target.types[i] = static_cast<std::uint8_t>(source.base.types[i]);
+  }
+  target.current_dp = source.base.current_dp;
+  target.max_dp = source.base.max_dp;
+  target.current_pp = source.base.current_pp;
+  target.max_pp = source.base.max_pp;
+  const auto& gems = source.gems;
+  SetAttributes(target.attributes,
+                SumAttributes(source.base, gems[0], gems[1], gems[2]));
+  SetGemmedClassAffinity(source.base, gems, target.class_affinity,
+                         target.baseline, target.affinity_modifiers);
 }
 
 // decomp: BATTLE.PRG _applyAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:1080)
-void Items_BuildAccessoryStatsFromPart(Items_AccessorySpawnLoadout* target, Items_AccessoryInit* source)
-{
-    int i;
-
-    VS::Core::Memory::CopyLiveAlignedWords(target, &source->equipment, sizeof target->accessory);
-
-    target->currentStr = source->equipment.strength;
-    target->currentInt = source->equipment.intelligence;
-    target->currentAgility = source->equipment.agility;
-    target->dropRate = source->dropRate;
-    target->index = source->index;
-
-    for (i = 0; i < 4; ++i) {
-        target->types[i] = source->equipment.types[i];
-    }
-
-    for (i = 0; i < 6; ++i) {
-        target->classes[i] = source->equipment.classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        target->affinities[i] = source->equipment.affinities[i];
-    }
+void BuildAccessoryStatsFromPart(AccessorySpawnLoadout& target,
+                                 const AccessoryInit& source) {
+  const auto& part = source.equipment;
+  target.accessory = part;
+  target.current_strength = SignExtend<std::int16_t>(part.strength);
+  target.current_intelligence = SignExtend<std::int16_t>(part.intelligence);
+  target.current_agility = SignExtend<std::int16_t>(part.agility);
+  target.drop_rate = source.drop_rate;
+  target.index = source.index;
+  for (std::size_t i = 0; i < kPartTypeSlots; ++i) {
+    target.types[i] = SignExtend<std::uint16_t>(part.types[i]);
+  }
+  for (std::size_t i = 0; i < kClassCount; ++i) {
+    target.classes[i] = SignExtend<std::uint16_t>(part.classes[i]);
+  }
+  for (std::size_t i = 0; i < kAffinityCount; ++i) {
+    target.affinities[i] = SignExtend<std::uint16_t>(part.affinities[i]);
+  }
 }
 
 // decomp: BATTLE.PRG _applyArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1105)
-void Items_BuildArmorStatsFromPart(Items_ArmorLoadout* target, Items_ArmorInit* source)
-{
-    int i;
-
-    VS::Core::Memory::CopyLiveAlignedWords(&target->armor, &source->equipment, sizeof target->armor);
-
-    target->armor.material = source->material;
-    target->currentDp = source->equipment.currentDp;
-    target->maxDp = source->equipment.maxDp;
-    target->currentStr = target->baseStr = source->equipment.strength;
-    target->currentInt = target->baseInt = source->equipment.intelligence;
-    target->currentAgility = target->baseAgility = source->equipment.agility;
-    target->index = source->index;
-
-    for (i = 0; i < 4; ++i) {
-        target->types[i] = source->equipment.types[i];
-    }
-
-    for (i = 0; i < 6; ++i) {
-        signed char v = source->equipment.classes[i];
-        target->classAffinityCurrent.classes[1][i] = v;
-        target->classAffinityCurrent.classes[0][i] = v;
-        target->classAffinityBaseline.classes[i] = v;
-    }
-
-    for (i = 0; i < 7; ++i) {
-        signed char v = source->equipment.affinities[i];
-        target->affinityModifiers[i] = 0;
-        target->classAffinityCurrent.affinities[1][i] = v;
-        target->classAffinityCurrent.affinities[0][i] = v;
-        target->classAffinityBaseline.affinities[i] = v;
-    }
-
-    target->dropRate = source->dropRate;
-    target->opaque99 = source->opaque32;
+void BuildArmorStatsFromPart(ArmorLoadout& target, const ArmorInit& source) {
+  const auto& part = source.equipment;
+  target.armor = part;
+  target.armor.material = source.material;
+  target.current_dp = part.current_dp;
+  target.max_dp = part.max_dp;
+  SetAttributes(target.attributes, SumAttributes(part));
+  target.index = source.index;
+  for (std::size_t i = 0; i < kPartTypeSlots; ++i) {
+    target.types[i] = SignExtend<std::uint16_t>(part.types[i]);
+  }
+  for (std::size_t i = 0; i < kClassCount; ++i) {
+    SetClass(target.class_affinity, target.baseline, i, part.classes[i]);
+  }
+  for (std::size_t i = 0; i < kAffinityCount; ++i) {
+    SetAffinity(target.class_affinity, target.baseline,
+                target.affinity_modifiers, i, part.affinities[i]);
+  }
+  target.drop_rate = source.drop_rate;
+  target.opaque99 = source.opaque32;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyInventoryBladeStats (src/BATTLE/BATTLE.PRG/146C.c:1142)
-void Items_ReadInventoryBladeStats(
-    Items_EquipmentPartStats* target, Items_InventoryBlade* source)
-{
-    int i;
-    Items_InventoryBlade* tempBlade;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->weaponModelId = source->wepId;
-    target->category = source->category;
-    target->currentDp = source->currentDp;
-    target->maxDp = source->maxDp;
-    target->currentPp = source->currentPp;
-    target->maxPp = source->maxPp;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-    target->cost = source->cost;
-    target->damageType = source->damageType;
-    target->costType = source->costType;
-    target->opaque14 = source->opaque12;
-    target->range = source->range;
-    target->index = source->index;
-
-    tempBlade = source;
-
-    for (i = 0; i < 6; ++i) {
-        target->classes[i] = tempBlade->classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        target->affinities[i] = tempBlade->affinities[i];
-    }
-
-    target->material = source->material;
+namespace {
+// The durability, points and attributes every part record carries.
+template <typename Record>
+void ReadWornStats(EquipmentPart& target, const Record& source) {
+  target.current_dp = source.current_dp;
+  target.max_dp = source.max_dp;
+  target.current_pp = source.current_pp;
+  target.max_pp = source.max_pp;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyInventoryGripStats (src/BATTLE/BATTLE.PRG/146C.c:1179)
-void Items_ReadInventoryGripStats(
-    Items_EquipmentPartStats* target, Items_InventoryGrip* source)
-{
-    int i;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->category = source->category;
-    target->gemSlots = source->gemSlots;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-    target->index = source->index;
-
-    for (i = 0; i < 4; ++i) {
-        target->types[i] = source->types[i];
-    }
+template <typename Record>
+void ReadAttributes(EquipmentPart& target, const Record& source) {
+  target.strength = source.strength;
+  target.intelligence = source.intelligence;
+  target.agility = source.agility;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyInventoryArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1198)
-void Items_ReadInventoryArmorStats(
-    Items_EquipmentPartStats* target, Items_InventoryArmor* source)
-{
-    int i;
-    Items_InventoryArmor* tempArmor;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->weaponModelId = source->wepId;
-    target->category = source->category;
-    target->currentDp = source->currentDp;
-    target->maxDp = source->maxDp;
-    target->currentPp = source->currentPp;
-    target->maxPp = source->maxPp;
-    target->gemSlots = source->gemSlots;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-    target->index = source->index;
-
-    tempArmor = source;
-
-    for (i = 0; i < 4; ++i) {
-        target->types[i] = tempArmor->types[i];
-    }
-
-    for (i = 0; i < 6; ++i) {
-        target->classes[i] = tempArmor->classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        target->affinities[i] = tempArmor->affinities[i];
-    }
-
-    target->material = source->material;
+template <typename Record>
+void ReadClassAffinity(EquipmentPart& target, const Record& source) {
+  for (std::size_t i = 0; i < kClassCount; ++i) {
+    target.classes[i] = source.classes[i];
+  }
+  for (std::size_t i = 0; i < kAffinityCount; ++i) {
+    target.affinities[i] = source.affinities[i];
+  }
 }
 
-// decomp: BATTLE.PRG vs_battle_copyInventoryGemStats (src/BATTLE/BATTLE.PRG/146C.c:1235)
-void Items_ReadInventoryGemStats(
-    Items_EquipmentPartStats* target, Items_InventoryGem* source)
-{
-    int i;
+template <typename Record>
+void WriteWornStats(Record& target, const EquipmentPart& source) {
+  target.current_dp = source.current_dp;
+  target.max_dp = source.max_dp;
+  target.current_pp = source.current_pp;
+  target.max_pp = source.max_pp;
+}
 
-    target->id = source->id;
-    target->subId = source->subId;
-    target->gemEffects = source->gemEffects;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-    target->index = source->index;
+template <typename Record>
+void WriteAttributes(Record& target, const EquipmentPart& source) {
+  target.strength = source.strength;
+  target.intelligence = source.intelligence;
+  target.agility = source.agility;
+}
 
-    for (i = 0; i < 6; ++i) {
-        target->classes[i] = source->classes[i];
-    }
+template <typename Record>
+void WriteClassAffinity(Record& target, const EquipmentPart& source) {
+  for (std::size_t i = 0; i < kClassCount; ++i) {
+    target.classes[i] = source.classes[i];
+  }
+  for (std::size_t i = 0; i < kAffinityCount; ++i) {
+    target.affinities[i] = source.affinities[i];
+  }
+}
+}  // namespace
 
-    for (i = 0; i < 7; ++i) {
-        target->affinities[i] = source->affinities[i];
-    }
+// decomp: BATTLE.PRG vs_battle_copyInventoryBladeStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1142)
+void ReadInventoryBladeStats(EquipmentPart& target,
+                             const InventoryBlade& source) {
+  target.id = source.id;
+  target.sub_id = static_cast<std::int8_t>(source.sub_id);
+  target.weapon_model_id = static_cast<std::int8_t>(source.weapon_model_id);
+  target.category = source.category;
+  ReadWornStats(target, source);
+  ReadAttributes(target, source);
+  target.cost = source.cost;
+  target.damage_type = source.DamageType();
+  target.cost_type = source.CostType();
+  target.opaque14 = static_cast<std::uint8_t>(source.opaque12);
+  target.range = source.range;
+  target.index = source.index;
+  ReadClassAffinity(target, source);
+  target.material = static_cast<std::uint8_t>(source.material);
+}
+
+// decomp: BATTLE.PRG vs_battle_copyInventoryGripStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1179)
+void ReadInventoryGripStats(EquipmentPart& target,
+                            const InventoryGrip& source) {
+  target.id = source.id;
+  target.sub_id = static_cast<std::int8_t>(source.sub_id);
+  target.category = source.category;
+  target.gem_slots = source.gem_slots;
+  ReadAttributes(target, source);
+  target.index = static_cast<std::uint8_t>(source.index);
+  target.types = source.types;
+}
+
+// decomp: BATTLE.PRG vs_battle_copyInventoryArmorStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1198)
+void ReadInventoryArmorStats(EquipmentPart& target,
+                             const InventoryArmor& source) {
+  target.id = source.id;
+  target.sub_id = static_cast<std::int8_t>(source.sub_id);
+  target.weapon_model_id = static_cast<std::int8_t>(source.weapon_model_id);
+  target.category = source.category;
+  ReadWornStats(target, source);
+  target.gem_slots = source.gem_slots;
+  ReadAttributes(target, source);
+  target.index = source.index;
+  target.types = source.types;
+  ReadClassAffinity(target, source);
+  target.material = static_cast<std::uint8_t>(source.material);
+}
+
+// decomp: BATTLE.PRG vs_battle_copyInventoryGemStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1235)
+void ReadInventoryGemStats(EquipmentPart& target, const InventoryGem& source) {
+  target.id = source.id;
+  target.sub_id = static_cast<std::int8_t>(source.sub_id);
+  target.gem_effects = source.gem_effects;
+  ReadAttributes(target, source);
+  target.index = static_cast<std::uint8_t>(source.index);
+  ReadClassAffinity(target, source);
 }
 
 // decomp: BATTLE.PRG vs_battle_applyWeapon (src/BATTLE/BATTLE.PRG/146C.c:1257)
-void Items_LoadInventoryWeaponStats(Items_WeaponLoadout* target, Items_InventoryWeapon* source)
-{
-    int i;
-
-    Items_WeaponSpawnLoadout* tempWeapon = (Items_WeaponSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempWeapon));
-    VS::Core::Memory::ZeroLiveAlignedWords(tempWeapon, sizeof *tempWeapon);
-
-    if (source != NULL) {
-
-        tempWeapon->index = source->index;
-
-        if (source->blade != 0) {
-            Items_ReadInventoryBladeStats(
-                &tempWeapon->blade, &Audio_Seq_unusedInventory.blades[source->blade - 1]);
-            tempWeapon->material = Audio_Seq_unusedInventory.blades[source->blade - 1].material;
-        }
-
-        if (source->grip != 0) {
-            Items_ReadInventoryGripStats(
-                &tempWeapon->grip, &Audio_Seq_unusedInventory.grips[source->grip - 1]);
-        }
-
-        for (i = 0; i < 3; ++i) {
-            if (source->gems[i] != 0) {
-                Items_ReadInventoryGemStats(
-                    &tempWeapon->gems[i], &Audio_Seq_unusedInventory.gems[source->gems[i] - 1]);
-            }
-        }
-
-        for (i = 0; i < 24; ++i) {
-            tempWeapon->name[i] = source->name[i];
-        }
+// The original assembled the parts in a high-end heap block; the parts here
+// are a local record.
+ItemsStatus LoadInventoryWeaponStats(WeaponLoadout& target,
+                                     const InventoryWeapon* source,
+                                     const InventoryContents& inventory) {
+  auto status = ItemsStatus::kOk;
+  WeaponSpawnLoadout parts{};
+  if (source != nullptr) {
+    parts.index = source->index;
+    if (source->blade != 0) {
+      if (const auto* blade = ReferencedSlot(inventory.blades, source->blade)) {
+        ReadInventoryBladeStats(parts.blade, *blade);
+        parts.material = static_cast<std::uint8_t>(blade->material);
+      } else {
+        KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+      }
     }
-
-    Items_BuildWeaponStatsFromParts(target, tempWeapon);
-    VS::Core::Memory::FreeLiveFromHighEnd(tempWeapon);
+    if (source->grip != 0) {
+      if (const auto* grip = ReferencedSlot(inventory.grips, source->grip)) {
+        ReadInventoryGripStats(parts.grip, *grip);
+      } else {
+        KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+      }
+    }
+    for (std::size_t i = 0; i < kWeaponGemCount; ++i) {
+      if (source->gems[i] == 0) continue;
+      if (const auto* gem = ReferencedSlot(inventory.gems, source->gems[i])) {
+        ReadInventoryGemStats(parts.gems[i], *gem);
+      } else {
+        KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+      }
+    }
+    parts.name = source->name;
+  }
+  KeepFirstRefusal(status, BuildWeaponStatsFromParts(target, parts));
+  return status;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyShield (src/BATTLE/BATTLE.PRG/146C.c:1295)
-void Items_LoadInventoryShieldStats(Items_ShieldLoadout* target, Items_InventoryShield* source)
-{
-    Items_ShieldSpawnLoadout* tempShield = (Items_ShieldSpawnLoadout *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempShield));
-    VS::Core::Memory::ZeroLiveAlignedWords(tempShield, sizeof *tempShield);
-
-    if (source != NULL) {
-        int i;
-
-        tempShield->index = source->index;
-
-        Items_ReadInventoryArmorStats(&tempShield->base, &source->base);
-
-        tempShield->material = source->base.material;
-
-        for (i = 0; i < 3; ++i) {
-            if (source->gems[i] != 0) {
-                Items_ReadInventoryGemStats(&tempShield->gems[i],
-                    &Audio_Seq_unusedInventory.gems[(source->gems[i] & 0x7F) - 1]);
-            }
-        }
+ItemsStatus LoadInventoryShieldStats(ShieldLoadout& target,
+                                     const InventoryShield* source,
+                                     const InventoryContents& inventory) {
+  auto status = ItemsStatus::kOk;
+  ShieldSpawnLoadout parts{};
+  if (source != nullptr) {
+    parts.index = source->index;
+    ReadInventoryArmorStats(parts.base, source->base);
+    parts.material = static_cast<std::uint8_t>(source->base.material);
+    for (std::size_t i = 0; i < kWeaponGemCount; ++i) {
+      if (source->gems[i] == 0) continue;
+      const auto slot = source->gems[i] & kShieldGemSlotMask;
+      if (const auto* gem = ReferencedSlot(inventory.gems, slot)) {
+        ReadInventoryGemStats(parts.gems[i], *gem);
+      } else {
+        KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+      }
     }
-
-    Items_BuildShieldStatsFromParts(target, tempShield);
-    VS::Core::Memory::FreeLiveFromHighEnd(tempShield);
+  }
+  BuildShieldStatsFromParts(target, parts);
+  return status;
 }
 
 // decomp: BATTLE.PRG vs_battle_applyArmor (src/BATTLE/BATTLE.PRG/146C.c:1321)
-void Items_LoadInventoryArmorStats(Items_ArmorLoadout* target, Items_InventoryArmor* source)
-{
-    Items_ArmorInit* tempArmor = (Items_ArmorInit *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempArmor));
-    VS::Core::Memory::ZeroLiveAlignedWords(tempArmor, sizeof *tempArmor);
-
-    if (source != NULL) {
-        tempArmor->index = source->index;
-
-        Items_ReadInventoryArmorStats(&tempArmor->equipment, source);
-
-        tempArmor->material = source->material;
-    }
-
-    Items_BuildArmorStatsFromPart(target, tempArmor);
-    VS::Core::Memory::FreeLiveFromHighEnd(tempArmor);
+void LoadInventoryArmorStats(ArmorLoadout& target,
+                             const InventoryArmor* source) {
+  ArmorInit part{};
+  if (source != nullptr) {
+    part.index = source->index;
+    ReadInventoryArmorStats(part.equipment, *source);
+    part.material = static_cast<std::uint8_t>(source->material);
+  }
+  BuildArmorStatsFromPart(target, part);
 }
 
-// decomp: BATTLE.PRG vs_battle_applyAccessory (src/BATTLE/BATTLE.PRG/146C.c:1338)
-void Items_LoadInventoryAccessoryStats(
-    Items_AccessorySpawnLoadout* target, Items_InventoryArmor* source)
-{
-    Items_AccessoryInit* tempAccessory = (Items_AccessoryInit *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *tempAccessory));
-    VS::Core::Memory::ZeroLiveAlignedWords(tempAccessory, sizeof *tempAccessory);
-
-    if (source != NULL) {
-        tempAccessory->index = source->index;
-
-        Items_ReadInventoryArmorStats(&tempAccessory->equipment, source);
-    }
-
-    Items_BuildAccessoryStatsFromPart(target, tempAccessory);
-    VS::Core::Memory::FreeLiveFromHighEnd(tempAccessory);
+// decomp: BATTLE.PRG vs_battle_applyAccessory
+// (src/BATTLE/BATTLE.PRG/146C.c:1338)
+void LoadInventoryAccessoryStats(AccessorySpawnLoadout& target,
+                                 const InventoryArmor* source) {
+  AccessoryInit part{};
+  if (source != nullptr) {
+    part.index = source->index;
+    ReadInventoryArmorStats(part.equipment, *source);
+  }
+  BuildAccessoryStatsFromPart(target, part);
 }
 
 // decomp: BATTLE.PRG func_8006B214 (src/BATTLE/BATTLE.PRG/146C.c:1356)
-void Items_RemoveEquipmentBoostOnEquip(void)
-{
-    Battle_ActorStats* ashley_stats = Battle_characterState->stats;
-
-    if (ashley_stats->statuses & 0x100000) {
-        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(ashley_stats->actorId, 0, 0x100000, 1);
-        Battle_RemoveActorStatuses(0x100000, ashley_stats);
-    }
+void RemoveEquipmentBoostOnEquip(EquipStatusHost& host) {
+  if ((host.AshleyStatuses() & kEquipmentBoostStatus) != 0) {
+    host.QueueStatusLabels(kEquipmentBoostStatus);
+    host.RemoveStatuses(kEquipmentBoostStatus);
+  }
 }
 
-// decomp: BATTLE.PRG func_8006B270 (src/BATTLE/BATTLE.PRG/146C.c:1366)
-void Items_RemoveWeaponEnchantmentOnEquip(void)
-{
-    Battle_ActorStats* ashley_stats = Battle_characterState->stats;
+namespace {
+// Ends the statuses of `mask` Ashley has: the labels take the statuses read
+// before queueing them and the removal those read after.
+void EndStatuses(EquipStatusHost& host, std::int32_t mask) {
+  const auto ended = host.AshleyStatuses() & mask;
+  if (ended != 0) {
+    host.QueueStatusLabels(ended);
+    host.RemoveStatuses(host.AshleyStatuses() & mask);
+  }
+}
+}  // namespace
 
-    if (ashley_stats->statuses & 0x01E00000) {
-        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(ashley_stats->actorId, 0, ashley_stats->statuses & 0x01E00000, 1);
-        Battle_RemoveActorStatuses(ashley_stats->statuses & 0x01E00000, ashley_stats);
-    }
+// decomp: BATTLE.PRG func_8006B270 (src/BATTLE/BATTLE.PRG/146C.c:1366)
+void RemoveWeaponEnchantmentOnEquip(EquipStatusHost& host) {
+  EndStatuses(host, kWeaponEnchantmentStatuses);
 }
 
 // decomp: BATTLE.PRG func_8006B2D4 (src/BATTLE/BATTLE.PRG/146C.c:1376)
-void Items_RemoveArmorEnchantmentOnEquip(void)
-{
-    Battle_ActorStats* ashley_stats = Battle_characterState->stats;
-
-    if (ashley_stats->statuses & 0x1E000000) {
-        ((void (*)(int, int, int, int))Battle_QueueActorStatusLabels)(ashley_stats->actorId, 0, ashley_stats->statuses & 0x1E000000, 1);
-        Battle_RemoveActorStatuses(ashley_stats->statuses & 0x1E000000, ashley_stats);
-    }
+void RemoveArmorEnchantmentOnEquip(EquipStatusHost& host) {
+  EndStatuses(host, kArmorEnchantmentStatuses);
 }
 
 // decomp: BATTLE.PRG vs_battle_equipWeapon (src/BATTLE/BATTLE.PRG/146C.c:1386)
-void Items_EquipAshleyWeapon(Items_InventoryWeapon* weapon)
-{
-    Battle_ActorStats* actor;
-
-    Items_LoadInventoryWeaponStats(&Battle_characterState->stats->weapon, weapon);
-    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
-
-    if (weapon == NULL) {
-        Battle_characterState->equippedWeaponCategory = 10;
-    } else {
-        Battle_characterState->equippedWeaponCategory =
-            Audio_Seq_unusedInventory.blades[weapon->blade - 1].category;
-    }
-
-    actor = Battle_characterState->stats;
-    actor->currentRange = actor->weapon.range.range + actor->reach;
-    actor->currentRangeY = actor->weapon.range.secondRange + actor->reach;
-    actor->currentRangeZ = actor->weapon.range.thirdRange + actor->reach;
-    actor->currentAttackShapeAngle = actor->weapon.range.attackShapeAngle;
-    actor->currentAttackShape = 1;
-
-    Items_RemoveEquipmentBoostOnEquip();
-    Items_RemoveWeaponEnchantmentOnEquip();
+// The actor callback the original ran after loading (vs_battle_nop0) has no
+// effect.
+ItemsStatus EquipAshleyWeapon(AshleyWeaponState& ashley,
+                              const InventoryWeapon* weapon,
+                              const InventoryContents& inventory,
+                              EquipStatusHost& host) {
+  auto status = LoadInventoryWeaponStats(ashley.weapon, weapon, inventory);
+  if (weapon == nullptr) {
+    ashley.equipped_weapon_category = kUnarmedWeaponCategory;
+  } else if (const auto* blade =
+                 ReferencedSlot(inventory.blades, weapon->blade)) {
+    ashley.equipped_weapon_category = blade->category;
+  } else {
+    KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+  }
+  const auto& range = ashley.weapon.range;
+  ashley.current_range = static_cast<std::uint8_t>(range.range + ashley.reach);
+  ashley.current_range_y =
+      static_cast<std::uint8_t>(range.second_range + ashley.reach);
+  ashley.current_range_z =
+      static_cast<std::uint8_t>(range.third_range + ashley.reach);
+  ashley.current_attack_shape_angle = range.AttackShapeAngle();
+  ashley.current_attack_shape = 1;
+  RemoveEquipmentBoostOnEquip(host);
+  RemoveWeaponEnchantmentOnEquip(host);
+  return status;
 }
 
 // decomp: BATTLE.PRG vs_battle_equipShield (src/BATTLE/BATTLE.PRG/146C.c:1411)
-void Items_EquipAshleyShield(Items_InventoryShield* shield)
-{
-    Items_LoadInventoryShieldStats(&Battle_characterState->stats->shield, shield);
-    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
-    Items_RemoveEquipmentBoostOnEquip();
-    Items_RemoveArmorEnchantmentOnEquip();
+ItemsStatus EquipAshleyShield(ShieldLoadout& target,
+                              const InventoryShield* shield,
+                              const InventoryContents& inventory,
+                              EquipStatusHost& host) {
+  const auto status = LoadInventoryShieldStats(target, shield, inventory);
+  RemoveEquipmentBoostOnEquip(host);
+  RemoveArmorEnchantmentOnEquip(host);
+  return status;
 }
 
 // decomp: BATTLE.PRG vs_battle_equipArmor (src/BATTLE/BATTLE.PRG/146C.c:1419)
-void Items_EquipAshleyArmor(int bodyPart, Items_InventoryArmor* armor)
-{
-    Items_LoadInventoryArmorStats(&Battle_characterState->stats->limbs[bodyPart].armor, armor);
-    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
-    Items_RemoveEquipmentBoostOnEquip();
-    Items_RemoveArmorEnchantmentOnEquip();
+ItemsStatus EquipAshleyArmor(std::span<ArmorLoadout> limb_armor,
+                             std::int32_t body_part,
+                             const InventoryArmor* armor,
+                             EquipStatusHost& host) {
+  if (body_part < 0 ||
+      static_cast<std::size_t>(body_part) >= limb_armor.size()) {
+    return ItemsStatus::kBodyPartOutOfRange;
+  }
+  LoadInventoryArmorStats(limb_armor[static_cast<std::size_t>(body_part)],
+                          armor);
+  RemoveEquipmentBoostOnEquip(host);
+  RemoveArmorEnchantmentOnEquip(host);
+  return ItemsStatus::kOk;
 }
 
-// decomp: BATTLE.PRG vs_battle_equipAccessory (src/BATTLE/BATTLE.PRG/146C.c:1427)
-void Items_EquipAshleyAccessory(Items_InventoryArmor* accessory)
-{
-    Items_LoadInventoryAccessoryStats(&Battle_characterState->stats->accessory, accessory);
-    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
-    Items_RemoveEquipmentBoostOnEquip();
-    Items_RemoveArmorEnchantmentOnEquip();
+// decomp: BATTLE.PRG vs_battle_equipAccessory
+// (src/BATTLE/BATTLE.PRG/146C.c:1427)
+void EquipAshleyAccessory(AccessorySpawnLoadout& target,
+                          const InventoryArmor* accessory,
+                          EquipStatusHost& host) {
+  LoadInventoryAccessoryStats(target, accessory);
+  RemoveEquipmentBoostOnEquip(host);
+  RemoveArmorEnchantmentOnEquip(host);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiBladeStats (src/BATTLE/BATTLE.PRG/146C.c:1435)
-void Items_WriteInventoryBladeStats(
-    Items_InventoryBlade* target, Items_EquipmentPartStats* source)
-{
-    int i;
-    Items_InventoryBlade* tempBlade;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->wepId = source->weaponModelId;
-    target->category = source->category;
-    target->currentDp = source->currentDp;
-    target->maxDp = source->maxDp;
-    target->currentPp = source->currentPp;
-    target->maxPp = source->maxPp;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-    target->cost = source->cost;
-    target->damageType = source->damageType & 3;
-    target->costType = source->costType & 7;
-    target->opaque12 = source->opaque14;
-    target->range = source->range;
-
-    tempBlade = target;
-
-    for (i = 0; i < 6; ++i) {
-        tempBlade->classes[i] = source->classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        tempBlade->affinities[i] = source->affinities[i];
-    }
-
-    target->material = source->material;
+// decomp: BATTLE.PRG vs_battle_copyUiBladeStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1435)
+void WriteInventoryBladeStats(InventoryBlade& target,
+                              const EquipmentPart& source) {
+  constexpr auto kTypeFields = static_cast<std::uint8_t>(
+      kBladeDamageTypeMask | (kBladeCostTypeMask << kBladeCostTypeShift));
+  target.id = static_cast<std::uint8_t>(source.id);
+  target.sub_id = static_cast<std::uint8_t>(source.sub_id);
+  target.weapon_model_id = static_cast<std::uint8_t>(source.weapon_model_id);
+  target.category = source.category;
+  WriteWornStats(target, source);
+  WriteAttributes(target, source);
+  target.cost = source.cost;
+  target.type_bits = static_cast<std::uint8_t>(
+      (target.type_bits & ~kTypeFields) |
+      (source.damage_type & kBladeDamageTypeMask) |
+      ((source.cost_type & kBladeCostTypeMask) << kBladeCostTypeShift));
+  target.opaque12 = source.opaque14;
+  target.range = source.range;
+  WriteClassAffinity(target, source);
+  target.material = source.material;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiGripStats (src/BATTLE/BATTLE.PRG/146C.c:1471)
-void Items_WriteInventoryGripStats(
-    Items_InventoryGrip* target, Items_EquipmentPartStats* source)
-{
-    int i;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->category = source->category;
-    target->gemSlots = source->gemSlots;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-
-    for (i = 0; i < 4; ++i) {
-        target->types[i] = source->types[i];
-    }
+// decomp: BATTLE.PRG vs_battle_copyUiGripStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1471)
+void WriteInventoryGripStats(InventoryGrip& target,
+                             const EquipmentPart& source) {
+  target.id = source.id;
+  target.sub_id = static_cast<std::uint8_t>(source.sub_id);
+  target.category = source.category;
+  target.gem_slots = source.gem_slots;
+  WriteAttributes(target, source);
+  target.types = source.types;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiGemStats (src/BATTLE/BATTLE.PRG/146C.c:1489)
-void Items_WriteInventoryGemStats(Items_InventoryGem* target, Items_EquipmentPartStats* source)
-{
-    int i;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->gemEffects = source->gemEffects;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-
-    for (i = 0; i < 6; ++i) {
-        target->classes[i] = source->classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        target->affinities[i] = source->affinities[i];
-    }
+// decomp: BATTLE.PRG vs_battle_copyUiGemStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1489)
+void WriteInventoryGemStats(InventoryGem& target, const EquipmentPart& source) {
+  target.id = source.id;
+  target.sub_id = static_cast<std::uint8_t>(source.sub_id);
+  target.gem_effects = source.gem_effects;
+  WriteAttributes(target, source);
+  WriteClassAffinity(target, source);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiEquipmentStats (src/BATTLE/BATTLE.PRG/146C.c:1509)
-void Items_WriteInventoryArmorStats(
-    Items_InventoryArmor* target, Items_EquipmentPartStats* source)
-{
-    int i;
-    Items_InventoryArmor* tempArmor;
-
-    target->id = source->id;
-    target->subId = source->subId;
-    target->wepId = source->weaponModelId;
-    target->category = source->category;
-    target->currentDp = source->currentDp;
-    target->maxDp = source->maxDp;
-    target->currentPp = source->currentPp;
-    target->maxPp = source->maxPp;
-    target->gemSlots = source->gemSlots;
-    target->strength = source->strength;
-    target->intelligence = source->intelligence;
-    target->agility = source->agility;
-
-    tempArmor = target;
-
-    for (i = 0; i < 4; ++i) {
-        tempArmor->types[i] = source->types[i];
-    }
-
-    for (i = 0; i < 6; ++i) {
-        tempArmor->classes[i] = source->classes[i];
-    }
-
-    for (i = 0; i < 7; ++i) {
-        tempArmor->affinities[i] = source->affinities[i];
-    }
-
-    target->material = source->material;
+// decomp: BATTLE.PRG vs_battle_copyUiEquipmentStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1509)
+void WriteInventoryArmorStats(InventoryArmor& target,
+                              const EquipmentPart& source) {
+  target.id = static_cast<std::uint8_t>(source.id);
+  target.sub_id = static_cast<std::uint8_t>(source.sub_id);
+  target.weapon_model_id = static_cast<std::uint8_t>(source.weapon_model_id);
+  target.category = source.category;
+  WriteWornStats(target, source);
+  target.gem_slots = source.gem_slots;
+  WriteAttributes(target, source);
+  target.types = source.types;
+  WriteClassAffinity(target, source);
+  target.material = source.material;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiWeaponStats (src/BATTLE/BATTLE.PRG/146C.c:1545)
-void Items_StoreInventoryWeaponStats(
-    Items_InventoryWeapon* target, Items_WeaponLoadout* source)
-{
-    if (source->blade.id != 0) {
-        int i;
-
-        source->blade.currentDp = source->currentDp;
-        source->blade.currentPp = source->currentPp;
-
-        Items_WriteInventoryBladeStats(
-            &Audio_Seq_unusedInventory.blades[target->blade - 1], &source->blade);
-        Items_WriteInventoryGripStats(
-            &Audio_Seq_unusedInventory.grips[target->grip - 1], &source->grip);
-
-        for (i = 0; i < 3; ++i) {
-            if (source->gems[i].id != 0) {
-                Items_WriteInventoryGemStats(
-                    &Audio_Seq_unusedInventory.gems[target->gems[i] - 1], &source->gems[i]);
-            }
-        }
-
-        for (i = 0; i < 24; ++i) {
-            target->name[i] = source->name[i];
-        }
+// decomp: BATTLE.PRG vs_battle_copyUiWeaponStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1545)
+ItemsStatus StoreInventoryWeaponStats(InventoryWeapon& target,
+                                      WeaponLoadout& source,
+                                      InventoryContents& inventory) {
+  if (source.blade.id == 0) return ItemsStatus::kOk;
+  auto status = ItemsStatus::kOk;
+  source.blade.current_dp = source.current_dp;
+  source.blade.current_pp = source.current_pp;
+  if (auto* blade = ReferencedSlot(inventory.blades, target.blade)) {
+    WriteInventoryBladeStats(*blade, source.blade);
+  } else {
+    KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+  }
+  if (auto* grip = ReferencedSlot(inventory.grips, target.grip)) {
+    WriteInventoryGripStats(*grip, source.grip);
+  } else {
+    KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
+  }
+  for (std::size_t i = 0; i < kWeaponGemCount; ++i) {
+    if (source.gems[i].id == 0) continue;
+    if (auto* gem = ReferencedSlot(inventory.gems, target.gems[i])) {
+      WriteInventoryGemStats(*gem, source.gems[i]);
+    } else {
+      KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
     }
+  }
+  target.name = source.name;
+  return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiShieldStats (src/BATTLE/BATTLE.PRG/146C.c:1572)
-void Items_StoreInventoryShieldStats(
-    Items_InventoryShield* target, Items_ShieldLoadout* source)
-{
-    if (source->base.id != 0) {
-        int i;
-
-        source->base.currentDp = source->currentDp;
-        source->base.currentPp = source->currentPp;
-
-        Items_WriteInventoryArmorStats(&target->base, &source->base);
-
-        for (i = 0; i < 3; ++i) {
-            if (source->gems[i].id != 0) {
-                Items_WriteInventoryGemStats(
-                    &Audio_Seq_unusedInventory.gems[target->gems[i] - 1], &source->gems[i]);
-            }
-        }
+// decomp: BATTLE.PRG vs_battle_copyUiShieldStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1572)
+// Unlike loading, storing uses the gem references without masking the shield
+// flag.
+ItemsStatus StoreInventoryShieldStats(InventoryShield& target,
+                                      ShieldLoadout& source,
+                                      InventoryContents& inventory) {
+  if (source.base.id == 0) return ItemsStatus::kOk;
+  auto status = ItemsStatus::kOk;
+  source.base.current_dp = source.current_dp;
+  source.base.current_pp = source.current_pp;
+  WriteInventoryArmorStats(target.base, source.base);
+  for (std::size_t i = 0; i < kWeaponGemCount; ++i) {
+    if (source.gems[i].id == 0) continue;
+    if (auto* gem = ReferencedSlot(inventory.gems, target.gems[i])) {
+      WriteInventoryGemStats(*gem, source.gems[i]);
+    } else {
+      KeepFirstRefusal(status, ItemsStatus::kPartReferenceOutOfRange);
     }
+  }
+  return status;
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiArmorStats (src/BATTLE/BATTLE.PRG/146C.c:1592)
-void Items_StoreInventoryArmorStats(Items_InventoryArmor* target, Items_ArmorLoadout* source)
-{
-    if (source->armor.id != 0) {
-        source->armor.currentDp = source->currentDp;
-        Items_WriteInventoryArmorStats(target, &source->armor);
-    }
+// decomp: BATTLE.PRG vs_battle_copyUiArmorStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1592)
+void StoreInventoryArmorStats(InventoryArmor& target, ArmorLoadout& source) {
+  if (source.armor.id == 0) return;
+  source.armor.current_dp = source.current_dp;
+  WriteInventoryArmorStats(target, source.armor);
 }
 
-// decomp: BATTLE.PRG vs_battle_copyUiAccessoryStats (src/BATTLE/BATTLE.PRG/146C.c:1600)
-void Items_StoreInventoryAccessoryStats(
-    Items_InventoryArmor* target, Items_AccessorySpawnLoadout* source)
-{
-    if (source->accessory.id != 0) {
-        Items_WriteInventoryArmorStats(target, &source->accessory);
-    }
+// decomp: BATTLE.PRG vs_battle_copyUiAccessoryStats
+// (src/BATTLE/BATTLE.PRG/146C.c:1600)
+void StoreInventoryAccessoryStats(InventoryArmor& target,
+                                  const AccessorySpawnLoadout& source) {
+  if (source.accessory.id != 0) {
+    WriteInventoryArmorStats(target, source.accessory);
+  }
 }
-
-}  // extern "C"
+}  // namespace VS::Items

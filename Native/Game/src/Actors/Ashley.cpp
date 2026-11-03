@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/RuntimeLive.hpp"
+#include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Field/Camera.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -134,10 +134,10 @@ void Actors_SpawnAshleyWithEquipment(void)
 
     Actors_InitializeActorFromTemplate(0, &Actors_ashleyInitialLoadout, 0x10, 0, 0x80, 0);
     if (bladeIndex != 0) {
-        Items_LoadInventoryWeaponStats(&Battle_characterState->stats->weapon,
+        VS::Items::LoadLiveInventoryWeaponStats(&Battle_characterState->stats->weapon,
             &Audio_Seq_unusedInventory.weapons[bladeIndex - 1]);
     } else {
-        Items_LoadInventoryWeaponStats(&Battle_characterState->stats->weapon, NULL);
+        VS::Items::LoadLiveInventoryWeaponStats(&Battle_characterState->stats->weapon, NULL);
     }
 
     Battle_characterState->stats->currentRange =
@@ -154,28 +154,28 @@ void Actors_SpawnAshleyWithEquipment(void)
     Battle_characterState->stats->currentAttackShape = 1;
 
     if (shieldIndex != 0) {
-        Items_LoadInventoryShieldStats(&Battle_characterState->stats->shield,
+        VS::Items::LoadLiveInventoryShieldStats(&Battle_characterState->stats->shield,
             &Audio_Seq_unusedInventory.shields[shieldIndex - 1]);
     } else {
-        Items_LoadInventoryShieldStats(&Battle_characterState->stats->shield, NULL);
+        VS::Items::LoadLiveInventoryShieldStats(&Battle_characterState->stats->shield, NULL);
     }
 
     for (i = 0; i < 6; ++i) {
-        Items_LoadInventoryArmorStats(&Battle_characterState->stats->limbs[i].armor, NULL);
+        VS::Items::LoadLiveInventoryArmorStats(&Battle_characterState->stats->limbs[i].armor, NULL);
 
         for (j = 0; j < 16; ++j) {
             if (Audio_Seq_unusedInventory.armor[j].limb == i + 1) {
-                Items_LoadInventoryArmorStats(&Battle_characterState->stats->limbs[i].armor,
+                VS::Items::LoadLiveInventoryArmorStats(&Battle_characterState->stats->limbs[i].armor,
                     &Audio_Seq_unusedInventory.armor[j]);
             }
         }
     }
 
-    Items_LoadInventoryAccessoryStats(&Battle_characterState->stats->accessory, NULL);
+    VS::Items::LoadLiveInventoryAccessoryStats(&Battle_characterState->stats->accessory, NULL);
 
     for (i = 0; i < 16; ++i) {
         if (Audio_Seq_unusedInventory.armor[i].limb == 7) {
-            Items_LoadInventoryAccessoryStats(
+            VS::Items::LoadLiveInventoryAccessoryStats(
                 &Battle_characterState->stats->accessory, &Audio_Seq_unusedInventory.armor[i]);
         }
     }

@@ -20,6 +20,7 @@
 #include "Core/Log.hpp"
 #include "Diagnostics/GameplayTrace.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -67,8 +68,11 @@ extern "C" {
 #include "Field/Transitions.h"
 #include "Field/Zone.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
+#include "Items/Equipment.h"
+#include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Items/Loot.h"
+#include "Items/LootLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"
@@ -618,8 +622,8 @@ void InitializeEncounterPlayerWeapon(EncounterWeapon choice) {
   // Original BATTLE/146C.c applyWeaponStats/copyUiWeaponStats preserve the
   // stock inventory links; ordinary Ashley spawning loads stats/models later.
   Items_WeaponLoadout stats{};
-  Items_BuildWeaponStatsFromParts(&stats, &*source);
-  Items_StoreInventoryWeaponStats(&weapon, &stats);
+  VS::Items::BuildLiveWeaponStatsFromParts(&stats, &*source);
+  VS::Items::StoreLiveInventoryWeaponStats(&weapon, &stats);
   // Match MAINMENU/2D10.c's weapon equip restriction (staves are one-handed).
   if (Menu_Framework_weaponHands[static_cast<int>(choice) - 1] != 0) {
     for (auto& shield : inventory.shields) shield.isEquipped = 0;

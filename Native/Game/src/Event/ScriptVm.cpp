@@ -4,6 +4,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -563,7 +564,7 @@ intptr_t Event_ScriptApplyFlagPairOperation(u_char* instruction, short thread_in
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index)
 {
     State_SetScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3),
-        Items_InventoryItemCount(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
+        VS::Items::CountLiveInventoryItem(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
     return 0;
 }
 

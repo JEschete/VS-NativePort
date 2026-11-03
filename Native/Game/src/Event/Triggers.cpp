@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Items/InventoryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -293,7 +294,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 break;
             case 10:
                 left = flagValue =
-                    Items_InventoryItemCount(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
+                    VS::Items::CountLiveInventoryItem(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
                 flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
                     State_SetScriptFlag(flagId, flagValue);

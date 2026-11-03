@@ -1,10 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/InventoryLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/Framework.h"
@@ -205,7 +207,7 @@ void Menu_Loot_RefreshClaimableRows(void)
     Menu_Loot_LootListItem* loot = Menu_Loot_lootList;
 
     for (i = 0; i < Menu_Loot_lootListCount; ++i, ++loot) {
-        loot->state = Items_Inventory_CopyItem(loot->itemCategory, &Audio_Seq_unusedInventory,
+        loot->state = VS::Items::Inventory::CopyLiveItem(loot->itemCategory, &Audio_Seq_unusedInventory,
                           loot->itemIndex, Menu_Loot_inventory)
                    != 0;
     }
@@ -383,7 +385,7 @@ void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
 
 int Menu_Loot_HasStagingSpace(int category, int quantity)
 {
-    return Items_Inventory_CountItems(category, Menu_Loot_inventory) + quantity
+    return VS::Items::Inventory::CountLiveItems(category, Menu_Loot_inventory) + quantity
         <= Items_Inventory_inventoryItemCapacities[category];
 }
 

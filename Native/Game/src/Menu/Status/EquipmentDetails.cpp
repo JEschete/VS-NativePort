@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedTextLive.hpp"
 extern "C" {
@@ -15,7 +16,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -362,7 +362,7 @@ char* Menu_Status_AccessoryDescription(Items_AccessorySpawnLoadout* accessory_lo
     Items_InventoryArmor armor;
     int rowType[2];
 
-    Items_StoreInventoryAccessoryStats(&armor, accessory_loadout);
+    VS::Items::StoreLiveInventoryAccessoryStats(&armor, accessory_loadout);
     Menu_Framework_FormatInventoryArmorRow(&armor, menuText, rowType, Menu_Framework_stringBuf);
 
     return menuText[1];
@@ -542,11 +542,11 @@ void Menu_Status_SetWeaponComponentRow(int row, Items_WeaponLoadout* weapon, int
 
     if (row == 1) {
         Items_InventoryBlade blade;
-        Items_WriteInventoryBladeStats(&blade, &weapon->blade);
+        VS::Items::WriteLiveInventoryBladeStats(&blade, &weapon->blade);
         Menu_Framework_FormatBladeRow(&blade, menuText, (int *)(&rowType), Menu_Framework_stringBuf);
     } else if (row == 2) {
         Items_InventoryGrip grip;
-        Items_WriteInventoryGripStats(&grip, &weapon->grip);
+        VS::Items::WriteLiveInventoryGripStats(&grip, &weapon->grip);
         Menu_Framework_FormatGripRow(&grip, menuText, (int *)(&rowType), Menu_Framework_stringBuf);
     } else {
 
@@ -560,7 +560,7 @@ void Menu_Status_SetWeaponComponentRow(int row, Items_WeaponLoadout* weapon, int
 
             if (weapon->gems[xOffset].id != 0) {
                 Items_InventoryGem gem;
-                Items_WriteInventoryGemStats(&gem, &weapon->gems[xOffset]);
+                VS::Items::WriteLiveInventoryGemStats(&gem, &weapon->gems[xOffset]);
                 Menu_Framework_FormatGemRow(&gem, menuText, (int *)(&rowType), Menu_Framework_stringBuf);
             }
 
@@ -604,7 +604,7 @@ void Menu_Status_SetShieldGemRow(int row, Items_ShieldLoadout* shield, int init)
 
         if (shield->gems[gemSlot].id != 0) {
             Items_InventoryGem gem;
-            Items_WriteInventoryGemStats(&gem, &shield->gems[gemSlot]);
+            VS::Items::WriteLiveInventoryGemStats(&gem, &shield->gems[gemSlot]);
             Menu_Framework_FormatGemRow(&gem, menuText, &rowType, Menu_Framework_stringBuf);
         }
 
@@ -859,7 +859,7 @@ int Menu_Status_UpdateEquipmentDetails(int row)
                         Menu_Framework_UpdateDpPpBars(
                             (int)Menu_Framework_DpPpBarsTarget_None | Menu_Framework_DpPpBarsState_Static);
                         Menu_Status_PopulateAccessoryStats((Items_AccessorySpawnLoadout*)&actor->accessory);
-                        Items_StoreInventoryAccessoryStats(&armor, &actor->accessory);
+                        VS::Items::StoreLiveInventoryAccessoryStats(&armor, &actor->accessory);
                         Menu_Framework_FormatInventoryArmorRow(
                             &armor, equipment_row_text, (int *)(&equipment_row_flags), Menu_Framework_stringBuf);
                     }
@@ -1112,7 +1112,7 @@ int Menu_Status_UpdateEquipmentList(int element)
                 rowTypes[i] |= ((limbs->nameIndex + 103) << 9) + temp_s5;
 
             } else {
-                Items_StoreInventoryAccessoryStats(p, &selected_actor_stats->accessory);
+                VS::Items::StoreLiveInventoryAccessoryStats(p, &selected_actor_stats->accessory);
                 Menu_Framework_FormatInventoryArmorRow(
                     p, &rowStrings[i * 2], &rowTypes[i], equipmentDescriptions[i]);
 

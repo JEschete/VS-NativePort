@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Render/EncodedTextLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -206,7 +206,7 @@ void Menu_Framework_FormatInventoryWeaponRow(
     Items_WeaponLoadout uiWeapon;
 
     if (Menu_Framework_weapons == Audio_Seq_unusedInventory.weapons) {
-        Items_LoadInventoryWeaponStats(&uiWeapon, weapon);
+        VS::Items::LoadLiveInventoryWeaponStats(&uiWeapon, weapon);
     } else {
         Menu_Container_BuildWeaponStats(&uiWeapon, weapon, &Menu_Container_containerData->items);
     }
@@ -300,7 +300,7 @@ void Menu_Framework_FormatInventoryShieldRow(
     Items_ShieldLoadout uiShield;
 
     if (Menu_Framework_shields == Audio_Seq_unusedInventory.shields) {
-        Items_LoadInventoryShieldStats(&uiShield, shield);
+        VS::Items::LoadLiveInventoryShieldStats(&uiShield, shield);
     } else {
         Menu_Container_BuildShieldStats(&uiShield, shield, &Menu_Container_containerData->items);
     }
@@ -358,7 +358,7 @@ void Menu_Framework_FormatInventoryArmorRow(
 {
     Items_ArmorLoadout uiArmor;
 
-    Items_LoadInventoryArmorStats(&uiArmor, armor);
+    VS::Items::LoadLiveInventoryArmorStats(&uiArmor, armor);
     Menu_Framework_FormatArmorRow(&uiArmor, menuText, rowType, buf);
 }
 

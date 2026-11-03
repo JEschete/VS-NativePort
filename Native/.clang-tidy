@@ -18,7 +18,7 @@ CheckOptions:
   bugprone-easily-swappable-parameters.MinimumLength: 3
   bugprone-easily-swappable-parameters.ModelImplicitConversions: false
   readability-identifier-naming.NamespaceCase: lower_case
-  readability-identifier-naming.NamespaceIgnoredRegexp: '^(VS|Core|Content|Platform|Render|Input|Audio|Movie|Save|Boot|Battle|Game|Legacy|Launcher|Math|Ai|Field|Actors|Seq|Control|Effects|Event|Menu|Intro|Memory|MemoryCard|Driver|Samples|Cutscene|Files|String)$'
+  readability-identifier-naming.NamespaceIgnoredRegexp: '^(VS|Core|Content|Platform|Render|Input|Audio|Movie|Save|Boot|Battle|Game|Legacy|Launcher|Math|Ai|Field|Actors|Seq|Control|Effects|Event|Menu|Intro|Memory|MemoryCard|Driver|Samples|Cutscene|Files|String|Items|Inventory|Live)$'
   readability-identifier-naming.ClassCase: CamelCase
   readability-identifier-naming.StructCase: CamelCase
   readability-identifier-naming.StructIgnoredRegexp: '^(Actors|Audio|Battle|Content|Core|Effects|Ending|Event|Field|Input|Items|Menu|Render|Save|State|Title)_[A-Za-z0-9_]+$'
@@ -38,7 +38,7 @@ CheckOptions:
   readability-identifier-naming.ConstexprVariableIgnoredRegexp: '^(ManifestName|SectorRaw|SectorData|SectorForm2|SampleRate|Channels|TicksPerSecond|TableSize)$'
   readability-identifier-naming.GlobalConstantCase: CamelCase
   readability-identifier-naming.GlobalConstantPrefix: k
-  readability-identifier-naming.GlobalConstantIgnoredRegexp: '^Content_module(Data|DataCount|Symbols|SymbolCount|Pointers|PointerCount)$'
+  readability-identifier-naming.GlobalConstantIgnoredRegexp: '^(Content_module(Data|DataCount|Symbols|SymbolCount|Pointers|PointerCount)|Items_Inventory_inventoryItemCapacities)$'
   readability-identifier-naming.GlobalVariableIgnoredRegexp: '^Core_overlayArena$'
   readability-identifier-naming.PrivateMemberCase: lower_case
   readability-identifier-naming.PrivateMemberSuffix: '_'

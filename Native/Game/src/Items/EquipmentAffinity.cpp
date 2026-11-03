@@ -1,511 +1,357 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/RandomLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Battle/Feedback.h"
-#include "Items/Equipment.h"
-#include "Items/EquipmentAffinity.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
-#include "Render/Palette.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Items/EquipmentAffinity.hpp"
 
-// decomp: BATTLE.PRG _calculateArmorClassAffinity (src/BATTLE/BATTLE.PRG/146C.c:9582)
-void Items_RebuildArmorClassAffinity(Battle_ActorStats* actor_stats, int limb_index)
-{
-    int i;
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <span>
 
-    for (i = 0; i < 6; ++i) {
-        u_short v = actor_stats->limbs[limb_index].armor.armor.classes[i];
-        actor_stats->limbs[limb_index].armor.classAffinityCurrent.classes[1][i] = v;
-        actor_stats->limbs[limb_index].armor.classAffinityCurrent.classes[0][i] = v;
-    }
+#include "Items/ItemRecords.hpp"
 
-    for (i = 0; i < 7; ++i) {
-        u_short v = actor_stats->limbs[limb_index].armor.armor.affinities[i];
-        actor_stats->limbs[limb_index].armor.classAffinityCurrent.affinities[1][i] = v;
-        actor_stats->limbs[limb_index].armor.classAffinityCurrent.affinities[0][i] =
-            v + actor_stats->limbs[limb_index].armor.affinityModifiers[i];
-    }
+namespace VS::Items {
+namespace {
+// A rating grows when 70 - (rating + 100) / 4 reaches a draw below 256 and
+// decays when (rating + 100) / 4 + 20 does.
+constexpr std::int32_t kGrowthDrawBound = 256;
+constexpr std::int32_t kGrowthChanceBase = 70;
+constexpr std::int32_t kDecayChanceBase = 20;
+constexpr std::int32_t kRatingChanceDivisor = 4;
+constexpr std::size_t kPhysicalAffinity = 0;
+constexpr auto kAffinityNoticeBase = static_cast<std::int32_t>(kClassCount);
+
+constexpr std::int32_t ChanceFromRating(std::int8_t rating) {
+  return (rating + kRatingLimit) / kRatingChanceDivisor;
 }
 
-// decomp: BATTLE.PRG _calculateShieldClassAffinity (src/BATTLE/BATTLE.PRG/146C.c:9600)
-void Items_RebuildShieldClassAffinity(Battle_ActorStats* actor_stats)
-{
-    short combined_rating;
-    int i;
-
-    for (i = 0; i < 6; ++i) {
-        combined_rating = actor_stats->shield.base.classes[i] + actor_stats->shield.gems[0].classes[i]
-                  + actor_stats->shield.gems[1].classes[i] + actor_stats->shield.gems[2].classes[i];
-        actor_stats->shield.classAffinityCurrent.classes[1][i] = combined_rating;
-        actor_stats->shield.classAffinityCurrent.classes[0][i] = combined_rating;
-    }
-
-    for (i = 0; i < 7; ++i) {
-        combined_rating = actor_stats->shield.base.affinities[i] + actor_stats->shield.gems[0].affinities[i]
-                  + actor_stats->shield.gems[1].affinities[i]
-                  + actor_stats->shield.gems[2].affinities[i];
-        actor_stats->shield.classAffinityCurrent.affinities[1][i] = combined_rating;
-        actor_stats->shield.classAffinityCurrent.affinities[0][i] =
-            combined_rating + actor_stats->shield.affinityModifiers[i];
-    }
+// 1-based ids become 0-based with the R3000's wrapping subtraction.
+constexpr std::int32_t ZeroBased(std::int32_t id) {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(id) - 1U);
 }
 
-// decomp: BATTLE.PRG _calculateWeaponClassAffinity (src/BATTLE/BATTLE.PRG/146C.c:9622)
-void Items_RebuildWeaponClassAffinity(Battle_ActorStats* actor_stats)
-{
-    short combined_rating;
-    int i;
+struct RatingGrowth {
+  std::span<std::int8_t> ratings;
+  std::int32_t notice_base{};
+  GrowthNotices notices{};
+};
 
-    for (i = 0; i < 6; ++i) {
-        combined_rating = actor_stats->weapon.blade.classes[i] + actor_stats->weapon.gems[0].classes[i]
-                  + actor_stats->weapon.gems[1].classes[i] + actor_stats->weapon.gems[2].classes[i];
-        actor_stats->weapon.classAffinityCurrent.classes[1][i] = combined_rating;
-        actor_stats->weapon.classAffinityCurrent.classes[0][i] = combined_rating;
-    }
-
-    for (i = 0; i < 7; ++i) {
-        combined_rating = actor_stats->weapon.blade.affinities[i] + actor_stats->weapon.gems[0].affinities[i]
-                  + actor_stats->weapon.gems[1].affinities[i]
-                  + actor_stats->weapon.gems[2].affinities[i];
-        actor_stats->weapon.classAffinityCurrent.affinities[1][i] = combined_rating;
-        actor_stats->weapon.classAffinityCurrent.affinities[0][i] =
-            combined_rating + actor_stats->weapon.affinityModifiers[i];
-    }
+// Returns whether rating `index` grew.
+bool Grow(const RatingGrowth& growth, std::size_t index,
+          EquipmentGrowthHost& host) {
+  auto& rating = growth.ratings[index];
+  if (rating >= kRatingLimit) return false;
+  const auto draw = host.NextBounded(kGrowthDrawBound);
+  if (kGrowthChanceBase - ChanceFromRating(rating) < draw) return false;
+  rating = static_cast<std::int8_t>(rating + 1);
+  if (growth.notices.shown) {
+    host.QueueStatChange(growth.notices.label,
+                         growth.notice_base + static_cast<std::int32_t>(index),
+                         StatChange::kIncrease);
+  }
+  return true;
 }
 
-// decomp: BATTLE.PRG _triggerArmorAffinityChange (src/BATTLE/BATTLE.PRG/146C.c:10773)
-void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
-    int affinity, int equipment_label_id, int actorId)
-{
-    int targetAffinity;
-    int i;
-    int physical;
-    int opposingAffinity;
-    int randVal;
-
-    if (action->hits[0].affinity != 0) {
-        affinity = action->hits[0].affinity - 1;
-    }
-
-    switch (affinity) {
-    case 0:
-        targetAffinity = 0;
-        break;
-
-    case 1:
-        targetAffinity = 3;
-        physical = 0;
-        opposingAffinity = 1;
-        break;
-
-    case 2:
-        targetAffinity = 4;
-        physical = 0;
-        opposingAffinity = 2;
-        break;
-
-    case 3:
-        targetAffinity = 1;
-        physical = 0;
-        opposingAffinity = 3;
-        break;
-
-    case 4:
-        targetAffinity = 2;
-        physical = 0;
-        opposingAffinity = 4;
-        break;
-
-    case 5:
-        targetAffinity = 6;
-        physical = 0;
-        opposingAffinity = 5;
-        break;
-
-    case 6:
-        targetAffinity = 5;
-        physical = 0;
-        opposingAffinity = 6;
-        break;
-    }
-
-    if (equipment->affinities[targetAffinity] >= 100) {
-        return;
-    }
-
-    randVal = VS::Core::NextLiveRandomBounded(256);
-
-    if ((70 - ((equipment->affinities[targetAffinity] + 100) / 4)) >= randVal) {
-
-        ++equipment->affinities[targetAffinity];
-
-        if (actorId == 0) {
-            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, targetAffinity + 6, 1);
-        }
-
-        if (targetAffinity == 0) {
-            for (i = 1; i < 7; ++i) {
-                if (equipment->affinities[i] > -100) {
-
-                    int randVal = VS::Core::NextLiveRandomBounded(256);
-
-                    if ((((equipment->affinities[i] + 100) / 4) + 20) >= randVal) {
-
-                        --equipment->affinities[i];
-
-                        if (actorId == 0) {
-                            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, i + 6, 0x80000001);
-                        }
-                    }
-                }
-            }
-            return;
-        }
-
-        if (equipment->affinities[physical] > -100) {
-
-            int randVal = VS::Core::NextLiveRandomBounded(256);
-
-            if ((((equipment->affinities[physical] + 100) / 4) + 20) >= randVal) {
-
-                --equipment->affinities[physical];
-
-                if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, physical + 6, 0x80000001);
-                }
-            }
-        }
-
-        if (equipment->affinities[opposingAffinity] > -100) {
-
-            int randVal = VS::Core::NextLiveRandomBounded(256);
-
-            if ((((equipment->affinities[opposingAffinity] + 100) / 4) + 0x14)
-                >= randVal) {
-
-                --equipment->affinities[opposingAffinity];
-
-                if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingAffinity + 6, 0x80000001);
-                }
-            }
-        }
-    }
+void Decay(const RatingGrowth& growth, std::size_t index,
+           EquipmentGrowthHost& host) {
+  auto& rating = growth.ratings[index];
+  if (rating <= -kRatingLimit) return;
+  const auto draw = host.NextBounded(kGrowthDrawBound);
+  if (ChanceFromRating(rating) + kDecayChanceBase < draw) return;
+  rating = static_cast<std::int8_t>(rating - 1);
+  if (growth.notices.shown) {
+    host.QueueStatChange(growth.notices.label,
+                         growth.notice_base + static_cast<std::int32_t>(index),
+                         StatChange::kDecrease);
+  }
 }
 
-// decomp: BATTLE.PRG _triggerWeaponAffinityChange (src/BATTLE/BATTLE.PRG/146C.c:10892)
-void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_EquipmentPartStats* equipment,
-    int affinity, int equipment_label_id, int suppressNotification)
-{
-    int targetAffinity;
-    int i;
-    int physical;
-    int opposingAffinity;
-    int randVal;
+// The affinity a growth raises and the counterpart that then decays.
+struct AffinityPair {
+  std::size_t grown;
+  std::size_t counterpart;
+};
+using AffinityPairs = std::array<AffinityPair, kAffinityCount>;
 
-    if (action->hits[0].affinity != 0) {
-        affinity = action->hits[0].affinity - 1;
+// decomp: _triggerArmorAffinityChange's switch (146C.c:10773).
+constexpr AffinityPairs kOpposingAffinities{{
+    {0, 0},
+    {3, 1},
+    {4, 2},
+    {1, 3},
+    {2, 4},
+    {6, 5},
+    {5, 6},
+}};
+// decomp: _triggerWeaponAffinityChange's switch (146C.c:10892).
+constexpr AffinityPairs kMatchingAffinities{{
+    {0, 0},
+    {1, 3},
+    {2, 4},
+    {3, 1},
+    {4, 2},
+    {5, 6},
+    {6, 5},
+}};
+
+ItemsStatus GrowAffinity(const AffinityPairs& pairs, const ItemAction& action,
+                         EquipmentPart& equipment, std::int32_t affinity,
+                         GrowthNotices notices, EquipmentGrowthHost& host) {
+  if (action.first_hit_affinity != 0) {
+    affinity = action.first_hit_affinity - 1;
+  }
+  if (affinity < 0 || static_cast<std::size_t>(affinity) >= kAffinityCount) {
+    return ItemsStatus::kAffinityOutOfRange;
+  }
+  const auto pair = pairs[static_cast<std::size_t>(affinity)];
+  const RatingGrowth growth{equipment.affinities, kAffinityNoticeBase, notices};
+  if (!Grow(growth, pair.grown, host)) return ItemsStatus::kOk;
+  if (pair.grown == kPhysicalAffinity) {
+    for (std::size_t i = kPhysicalAffinity + 1; i < kAffinityCount; ++i) {
+      Decay(growth, i, host);
     }
+    return ItemsStatus::kOk;
+  }
+  Decay(growth, kPhysicalAffinity, host);
+  Decay(growth, pair.counterpart, host);
+  return ItemsStatus::kOk;
+}
 
-    switch (affinity) {
-    case 0:
-        targetAffinity = 0;
-        break;
+// Writes the current rows from per-index totals: the effective affinity row
+// adds the temporary modifiers.
+template <typename ClassTotal, typename AffinityTotal>
+void SetCurrentRows(ClassAffinityCurrent& rows, const AffinityTotals& modifiers,
+                    ClassTotal class_total, AffinityTotal affinity_total) {
+  for (std::size_t i = 0; i < kClassCount; ++i) {
+    const auto total = class_total(i);
+    rows.classes[kEquipmentRow][i] = total;
+    rows.classes[kEffectiveRow][i] = total;
+  }
+  for (std::size_t i = 0; i < kAffinityCount; ++i) {
+    const auto total = affinity_total(i);
+    rows.affinities[kEquipmentRow][i] = total;
+    rows.affinities[kEffectiveRow][i] =
+        static_cast<std::int16_t>(total + modifiers[i]);
+  }
+}
 
-    case 1:
-        targetAffinity = 1;
-        physical = 0;
-        opposingAffinity = 3;
-        break;
+template <typename Gems>
+void RebuildGemmedClassAffinity(const EquipmentPart& part, const Gems& gems,
+                                ClassAffinityCurrent& rows,
+                                const AffinityTotals& modifiers) {
+  SetCurrentRows(
+      rows, modifiers,
+      [&](std::size_t i) {
+        return static_cast<std::int16_t>(part.classes[i] + gems[0].classes[i] +
+                                         gems[1].classes[i] +
+                                         gems[2].classes[i]);
+      },
+      [&](std::size_t i) {
+        return static_cast<std::int16_t>(
+            part.affinities[i] + gems[0].affinities[i] + gems[1].affinities[i] +
+            gems[2].affinities[i]);
+      });
+}
+}  // namespace
 
-    case 2:
-        targetAffinity = 2;
-        physical = 0;
-        opposingAffinity = 4;
-        break;
+// decomp: BATTLE.PRG _calculateArmorClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9582)
+void RebuildArmorClassAffinity(ArmorLoadout& armor) {
+  const auto& part = armor.armor;
+  SetCurrentRows(
+      armor.class_affinity, armor.affinity_modifiers,
+      [&](std::size_t i) { return std::int16_t{part.classes[i]}; },
+      [&](std::size_t i) { return std::int16_t{part.affinities[i]}; });
+}
 
-    case 3:
-        targetAffinity = 3;
-        physical = 0;
-        opposingAffinity = 1;
-        break;
+// decomp: BATTLE.PRG _calculateShieldClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9600)
+void RebuildShieldClassAffinity(ShieldLoadout& shield) {
+  RebuildGemmedClassAffinity(shield.base, shield.gems, shield.class_affinity,
+                             shield.affinity_modifiers);
+}
 
-    case 4:
-        targetAffinity = 4;
-        physical = 0;
-        opposingAffinity = 2;
-        break;
+// decomp: BATTLE.PRG _calculateWeaponClassAffinity
+// (src/BATTLE/BATTLE.PRG/146C.c:9622)
+void RebuildWeaponClassAffinity(WeaponLoadout& weapon) {
+  RebuildGemmedClassAffinity(weapon.blade, weapon.gems, weapon.class_affinity,
+                             weapon.affinity_modifiers);
+}
 
-    case 5:
-        targetAffinity = 5;
-        physical = 0;
-        opposingAffinity = 6;
-        break;
+// decomp: BATTLE.PRG _triggerArmorAffinityChange
+// (src/BATTLE/BATTLE.PRG/146C.c:10773)
+ItemsStatus GrowOpposingEquipmentAffinity(const ItemAction& action,
+                                          EquipmentPart& equipment,
+                                          std::int32_t affinity,
+                                          GrowthNotices notices,
+                                          EquipmentGrowthHost& host) {
+  return GrowAffinity(kOpposingAffinities, action, equipment, affinity, notices,
+                      host);
+}
 
-    case 6:
-        targetAffinity = 6;
-        physical = 0;
-        opposingAffinity = 5;
-        break;
-    }
-
-    if (equipment->affinities[targetAffinity] >= 100) {
-        return;
-    }
-
-    randVal = VS::Core::NextLiveRandomBounded(256);
-
-    if ((70 - ((equipment->affinities[targetAffinity] + 100) / 4)) < randVal) {
-        return;
-    }
-
-    ++equipment->affinities[targetAffinity];
-
-    if (suppressNotification == 0) {
-        ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, targetAffinity + 6, 1);
-    }
-
-    if (targetAffinity == 0) {
-        for (i = 1; i < 7; ++i) {
-            if (equipment->affinities[i] > -100) {
-
-                int randVal = VS::Core::NextLiveRandomBounded(256);
-
-                if ((((equipment->affinities[i] + 100) / 4) + 20) >= randVal) {
-
-                    --equipment->affinities[i];
-
-                    if (suppressNotification == 0) {
-                        ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, i + 6, 0x80000001);
-                    }
-                }
-            }
-        }
-        return;
-    }
-
-    if (equipment->affinities[physical] > -100) {
-
-        int randVal = VS::Core::NextLiveRandomBounded(256);
-
-        if ((((equipment->affinities[physical] + 100) / 4) + 20) >= randVal) {
-
-            --equipment->affinities[physical];
-
-            if (suppressNotification == 0) {
-                ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, physical + 6, 0x80000001);
-            }
-        }
-    }
-
-    if (equipment->affinities[opposingAffinity] > -100) {
-
-        int randVal = VS::Core::NextLiveRandomBounded(256);
-
-        if ((((equipment->affinities[opposingAffinity] + 100) / 4) + 20) >= randVal) {
-
-            --equipment->affinities[opposingAffinity];
-
-            if (suppressNotification == 0) {
-                ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingAffinity + 6, 0x80000001);
-            }
-        }
-    }
+// decomp: BATTLE.PRG _triggerWeaponAffinityChange
+// (src/BATTLE/BATTLE.PRG/146C.c:10892)
+ItemsStatus GrowMatchingEquipmentAffinity(const ItemAction& action,
+                                          EquipmentPart& equipment,
+                                          std::int32_t affinity,
+                                          GrowthNotices notices,
+                                          EquipmentGrowthHost& host) {
+  return GrowAffinity(kMatchingAffinities, action, equipment, affinity, notices,
+                      host);
 }
 
 // decomp: BATTLE.PRG _triggerClassChange (src/BATTLE/BATTLE.PRG/146C.c:11011)
-void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unused)),
-    Items_EquipmentPartStats* equipment, int class_, int equipment_label_id, int actorId)
-{
-    int opposingClass0;
-    int opposingClass1;
-    int randVal;
-    int targetClass = class_;
-
-    switch (class_) {
-    case 0:
-        opposingClass0 = 1;
-        opposingClass1 = 2;
-        break;
-    case 1:
-        opposingClass0 = 2;
-        opposingClass1 = 3;
-        break;
-    case 2:
-        opposingClass0 = 3;
-        opposingClass1 = 4;
-        break;
-    case 3:
-        opposingClass0 = 4;
-        opposingClass1 = 5;
-        break;
-    case 4:
-        opposingClass0 = 5;
-        opposingClass1 = 0;
-        break;
-    case 5:
-        opposingClass0 = 0;
-        opposingClass1 = 1;
-        break;
-    }
-
-    if (equipment->classes[targetClass] >= 100) {
-        return;
-    }
-
-    randVal = VS::Core::NextLiveRandomBounded(256);
-
-    if ((70 - (equipment->classes[targetClass] + 100) / 4) >= randVal) {
-
-        ++equipment->classes[targetClass];
-
-        if (actorId == 0) {
-            ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, targetClass, 1);
-        }
-
-        if (equipment->classes[opposingClass0] > -100) {
-
-            int randVal = VS::Core::NextLiveRandomBounded(256);
-
-            if (((equipment->classes[opposingClass0] + 100) / 4 + 20) >= randVal) {
-
-                --equipment->classes[opposingClass0];
-
-                if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingClass0, 0x80000001);
-                }
-            }
-        }
-
-        if (equipment->classes[opposingClass1] > -100) {
-
-            int randVal = VS::Core::NextLiveRandomBounded(256);
-
-            if (((equipment->classes[opposingClass1] + 100) / 4 + 20) >= randVal) {
-
-                --equipment->classes[opposingClass1];
-
-                if (actorId == 0) {
-                    ((void (*)(int, int, int))Battle_QueueEquipmentStatChange)(equipment_label_id, opposingClass1, 0x80000001);
-                }
-            }
-        }
-    }
+// The original also took the action, which it never read.
+ItemsStatus GrowEquipmentClass(EquipmentPart& equipment,
+                               std::int32_t class_index, GrowthNotices notices,
+                               EquipmentGrowthHost& host) {
+  if (class_index < 0 || static_cast<std::size_t>(class_index) >= kClassCount) {
+    return ItemsStatus::kClassOutOfRange;
+  }
+  const auto grown = static_cast<std::size_t>(class_index);
+  const RatingGrowth growth{equipment.classes, 0, notices};
+  if (Grow(growth, grown, host)) {
+    Decay(growth, (grown + 1) % kClassCount, host);
+    Decay(growth, (grown + 2) % kClassCount, host);
+  }
+  return ItemsStatus::kOk;
 }
 
+namespace {
+// Which equipment an action category can strike.
+enum class StrikeReach : std::uint8_t {
+  kNothing,
+  kShieldOrAnyLimb,
+  kShieldOrHitLimb,
+  kHitLimb,
+};
+
+// decomp: func_80080C9C's switch on the 4-bit action category.
+constexpr std::size_t kActionCategoryCount = 16;
+constexpr std::array<StrikeReach, kActionCategoryCount> kStrikeReach{
+    StrikeReach::kNothing,         StrikeReach::kShieldOrAnyLimb,
+    StrikeReach::kShieldOrAnyLimb, StrikeReach::kShieldOrAnyLimb,
+    StrikeReach::kShieldOrAnyLimb, StrikeReach::kShieldOrHitLimb,
+    StrikeReach::kHitLimb,         StrikeReach::kShieldOrHitLimb,
+    StrikeReach::kHitLimb,         StrikeReach::kNothing,
+    StrikeReach::kNothing,         StrikeReach::kHitLimb,
+    StrikeReach::kHitLimb,         StrikeReach::kNothing,
+    StrikeReach::kShieldOrHitLimb, StrikeReach::kNothing,
+};
+
+// The shield's entry among the limb candidates.
+constexpr std::size_t kShieldCandidate = kLimbCount;
+
+struct StrikeCandidates {
+  std::array<std::size_t, kLimbCount + 1> entries{};
+  std::size_t count{};
+  void Add(std::size_t entry) { entries[count++] = entry; }
+};
+
+bool HasStrikableArmor(const DefenderLimb& limb) {
+  return limb.max_hp != 0 && limb.armor.armor.id != 0;
+}
+
+ItemsStatus CollectStrikeCandidates(StrikeReach reach,
+                                    const DefenderEquipment& defender,
+                                    std::int32_t hit_limb_index,
+                                    StrikeCandidates& candidates) {
+  if (reach != StrikeReach::kHitLimb) {
+    if (!defender.weapon_drawn) return ItemsStatus::kActorOutOfRange;
+    if (*defender.weapon_drawn && defender.shield.base.id != 0) {
+      candidates.Add(kShieldCandidate);
+    }
+  }
+  if (reach == StrikeReach::kShieldOrAnyLimb) {
+    for (std::size_t i = 0; i < kLimbCount; ++i) {
+      if (HasStrikableArmor(defender.limbs[i])) candidates.Add(i);
+    }
+    return ItemsStatus::kOk;
+  }
+  if (hit_limb_index < 0 ||
+      static_cast<std::size_t>(hit_limb_index) >= kLimbCount) {
+    return ItemsStatus::kHitLimbOutOfRange;
+  }
+  const auto hit = static_cast<std::size_t>(hit_limb_index);
+  if (HasStrikableArmor(defender.limbs[hit])) candidates.Add(hit);
+  return ItemsStatus::kOk;
+}
+
+ItemsStatus GrowStruckPart(const ItemAction& action, EquipmentPart& part,
+                           HitRatings attacker, GrowthNotices notices,
+                           EquipmentGrowthHost& host) {
+  auto status = ItemsStatus::kOk;
+  if (part.id == 0) return status;
+  if (attacker.class_id != 0) {
+    KeepFirstRefusal(
+        status,
+        GrowEquipmentClass(part, ZeroBased(attacker.class_id), notices, host));
+  }
+  if (attacker.affinity_id != 0) {
+    KeepFirstRefusal(status, GrowMatchingEquipmentAffinity(
+                                 action, part, ZeroBased(attacker.affinity_id),
+                                 notices, host));
+  }
+  return status;
+}
+}  // namespace
+
 // decomp: BATTLE.PRG func_80080C9C (src/BATTLE/BATTLE.PRG/146C.c:11090)
-void Items_GrowDefenderEquipmentRatings(
-    Battle_ActionDefinition* action, Battle_ActorStats* defender_stats, int attacker_class_id, int attacker_affinity_id, int hit_limb_index)
-{
-    int eligible_equipment_slots[8];
-    int selected_equipment_slot;
-    int i;
-    Items_EquipmentPartStats* equipment;
-    int eligible_equipment_count = 0;
-
-    switch (action->category) {
-    case 1:
-    case 2:
-    case 3:
-    case 4:
-        if ((Battle_actors[defender_stats->actorId]->weaponDrawn & 1)
-            && (defender_stats->shield.base.id != 0)) {
-            eligible_equipment_slots[eligible_equipment_count++] = 0xFF;
-        }
-
-        for (i = 0; i < 6; ++i) {
-            if ((defender_stats->limbs[i].maxHp != 0) && (defender_stats->limbs[i].armor.armor.id != 0)) {
-                eligible_equipment_slots[eligible_equipment_count++] = i;
-            }
-        }
-
-        break;
-
-    case 5:
-    case 7:
-    case 14:
-        if (Battle_actors[defender_stats->actorId]->weaponDrawn & 1) {
-            if (defender_stats->shield.base.id != 0) {
-                eligible_equipment_slots[eligible_equipment_count++] = 0xFF;
-            }
-        }
-
-    case 6:
-    case 8:
-    case 11:
-    case 12:
-        if (defender_stats->limbs[hit_limb_index].maxHp && (defender_stats->limbs[hit_limb_index].armor.armor.id != 0)) {
-            eligible_equipment_slots[eligible_equipment_count++] = hit_limb_index;
-        }
-
-        break;
-    }
-
-    if (eligible_equipment_count == 0) {
-        return;
-    }
-
-    selected_equipment_slot = eligible_equipment_slots[VS::Core::NextLiveRandomBounded(eligible_equipment_count)];
-
-    if (selected_equipment_slot == 0xFF) {
-        Items_EquipmentPartStats* equipment = &defender_stats->shield.base;
-
-        if (defender_stats->shield.base.id != 0) {
-
-            if (attacker_class_id != 0) {
-                Items_GrowEquipmentClass(action, equipment, attacker_class_id - 1, 0xF1, defender_stats->actorId);
-            }
-            if (attacker_affinity_id != 0) {
-                Items_GrowMatchingEquipmentAffinity(
-                    action, equipment, attacker_affinity_id - 1, 0xF1, defender_stats->actorId);
-            }
-        }
-        Items_RebuildShieldClassAffinity(defender_stats);
-    } else {
-
-        equipment = &defender_stats->limbs[selected_equipment_slot].armor.armor;
-
-        if (equipment->id != 0) {
-            if (attacker_class_id != 0) {
-                do {
-                    Items_GrowEquipmentClass(action, equipment, attacker_class_id - 1,
-                        defender_stats->limbs[selected_equipment_slot].nameIndex, defender_stats->actorId);
-                } while (0);
-            }
-            if (attacker_affinity_id != 0) {
-                Items_GrowMatchingEquipmentAffinity(action, equipment, attacker_affinity_id - 1,
-                    defender_stats->limbs[selected_equipment_slot].nameIndex, defender_stats->actorId);
-            }
-        }
-
-        Items_RebuildArmorClassAffinity(defender_stats, selected_equipment_slot);
-    }
+ItemsStatus GrowDefenderEquipmentRatings(const ItemAction& action,
+                                         DefenderEquipment& defender,
+                                         HitRatings attacker,
+                                         std::int32_t hit_limb_index,
+                                         EquipmentGrowthHost& host) {
+  const auto reach = action.category < kActionCategoryCount
+                         ? kStrikeReach[action.category]
+                         : StrikeReach::kNothing;
+  if (reach == StrikeReach::kNothing) return ItemsStatus::kOk;
+  StrikeCandidates candidates;
+  const auto collected =
+      CollectStrikeCandidates(reach, defender, hit_limb_index, candidates);
+  if (collected != ItemsStatus::kOk || candidates.count == 0) {
+    return collected;
+  }
+  // A host draw outside [0, count) wraps into the candidates.
+  const auto draw = static_cast<std::uint32_t>(
+      host.NextBounded(static_cast<std::int32_t>(candidates.count)));
+  const auto selected = candidates.entries[draw % candidates.count];
+  if (selected == kShieldCandidate) {
+    const auto status =
+        GrowStruckPart(action, defender.shield.base, attacker,
+                       {kShieldNoticeLabel, defender.shows_notices}, host);
+    RebuildShieldClassAffinity(defender.shield);
+    return status;
+  }
+  auto& limb = defender.limbs[selected];
+  const auto status =
+      GrowStruckPart(action, limb.armor.armor, attacker,
+                     {limb.name_index, defender.shows_notices}, host);
+  RebuildArmorClassAffinity(limb.armor);
+  return status;
 }
 
 // decomp: BATTLE.PRG func_80080F78 (src/BATTLE/BATTLE.PRG/146C.c:11178)
-void Items_GrowAttackerWeaponRatings(Battle_ActionDefinition* action, Battle_ActorStats* attacker_stats, int defender_class_id, int defender_affinity_id)
-{
-    if (action->type != Battle_ActionType_Spell) {
-        Items_EquipmentPartStats* weapon_blade = &attacker_stats->weapon.blade;
-        if (attacker_stats->weapon.blade.id != 0) {
-            if (defender_class_id != 0) {
-                Items_GrowEquipmentClass(action, weapon_blade, defender_class_id - 1, 0xF0, attacker_stats->actorId);
-            }
-            if (defender_affinity_id != 0) {
-                Items_GrowOpposingEquipmentAffinity(
-                    action, weapon_blade, defender_affinity_id - 1, 0xF0, attacker_stats->actorId);
-            }
-        }
-        Items_RebuildWeaponClassAffinity(attacker_stats);
+ItemsStatus GrowAttackerWeaponRatings(const ItemAction& action,
+                                      WeaponLoadout& weapon, bool shows_notices,
+                                      HitRatings defender,
+                                      EquipmentGrowthHost& host) {
+  if (action.IsSpell()) return ItemsStatus::kOk;
+  auto status = ItemsStatus::kOk;
+  auto& blade = weapon.blade;
+  if (blade.id != 0) {
+    const GrowthNotices notices{kWeaponNoticeLabel, shows_notices};
+    if (defender.class_id != 0) {
+      KeepFirstRefusal(status,
+                       GrowEquipmentClass(blade, ZeroBased(defender.class_id),
+                                          notices, host));
     }
+    if (defender.affinity_id != 0) {
+      KeepFirstRefusal(
+          status,
+          GrowOpposingEquipmentAffinity(
+              action, blade, ZeroBased(defender.affinity_id), notices, host));
+    }
+  }
+  RebuildWeaponClassAffinity(weapon);
+  return status;
 }
-
-}  // extern "C"
+}  // namespace VS::Items

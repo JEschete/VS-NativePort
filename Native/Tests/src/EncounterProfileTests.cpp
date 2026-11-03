@@ -19,6 +19,7 @@
 #include "Content/DataStore.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Field/EncounterSpawnProfile.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -29,7 +30,9 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
+#include "Items/Equipment.h"
+#include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Menu/Setup/Assembly.h"
 #include "State/Progress.h"
 #include "Title/NewGame.h"
@@ -714,7 +717,7 @@ struct WeaponHeap {
 void CheckWeaponStats(const Items_WeaponLoadout& actual,
                       Items_WeaponSpawnLoadout source) {
   Items_WeaponLoadout expected{};
-  Items_BuildWeaponStatsFromParts(&expected, &source);
+  VS::Items::BuildLiveWeaponStatsFromParts(&expected, &source);
   CHECK(std::tie(actual.wepId, actual.blade.id, actual.grip.id,
                  actual.blade.material, actual.currentDp, actual.maxDp,
                  actual.currentPp, actual.maxPp, actual.currentStr,
@@ -798,7 +801,7 @@ TEST_CASE(
     const auto source = VS::Game::ReadEncounterWeapon(choice);
     REQUIRE(source);
     Items_WeaponLoadout actual{};
-    Items_LoadInventoryWeaponStats(&actual, slot);
+    VS::Items::LoadLiveInventoryWeaponStats(&actual, slot);
     CheckWeaponStats(actual, *source);
     VS::Game::InitializeEncounterPlayerWeapon(choice);
     CHECK(std::memcmp(&inventory, &expected, sizeof inventory) == 0);

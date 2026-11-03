@@ -5,6 +5,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Input/Controller.hpp"
+#include "Items/LootLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -541,7 +542,7 @@ void Battle_CollectDirectActionTargets(int source_actor_slot)
     }
 
     if (Battle_categoryTargetActorMasks[Battle_actionDefinitions[action].category] & 0x80) {
-        Items_TreasureChest* room = Items_RoomTreasureChests(&i);
+        Items_TreasureChest* room = VS::Items::LiveRoomTreasureChests(&i);
 
         for (j = 0; j < i; ++j) {
             Battle_actionState->previews[Battle_ValidateTargetPreviewIndex(count)].position.vx = room[j].tileX * 128 + 64;

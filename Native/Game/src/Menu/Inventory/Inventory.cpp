@@ -2,6 +2,8 @@
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -32,8 +34,8 @@ extern "C" {
 #include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/KeyItems.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -207,7 +209,7 @@ void Menu_Inventory_UpdateMiscItemShortcut(int initialize)
         buf = VS::Core::Memory::AllocateLiveFromHighEnd(0x1900 + 64 * 2 * sizeof(*menuText));
         rowCount = 0;
 
-        Items_Inventory_RebuildDisplayIndices(Items_ItemCategory_Misc);
+        VS::Items::Inventory::RebuildLiveDisplayIndices(Items_ItemCategory_Misc);
 
         rowTypes = (int *)(((u_char*)(buf)) + 0x1800);
         menuText = (char **)(((u_char*)(buf)) + 0x1900);
@@ -603,7 +605,7 @@ void Menu_Inventory_SetAccessoryPreviewStats(int accessoryId)
         int i;
         Items_AccessorySpawnLoadout accessory;
 
-        Items_LoadInventoryAccessoryStats(&accessory, &Menu_Framework_armor[accessoryId - 1]);
+        VS::Items::LoadLiveInventoryAccessoryStats(&accessory, &Menu_Framework_armor[accessoryId - 1]);
 
         for (i = 0; i < 16; ++i) {
             Menu_Framework_equipmentStats[i] = accessory.classes[i & 7];
@@ -666,7 +668,7 @@ int Menu_Inventory_UpdateAccessoryMenu(int initialize)
             break;
         }
 
-        itemCount = Items_Inventory_CountItems(4, NULL);
+        itemCount = VS::Items::Inventory::CountLiveItems(4, NULL);
         hasAccessory = 0;
 
         for (i = 0; i < 16; ++i) {
@@ -754,9 +756,9 @@ int Menu_Inventory_UpdateAccessoryMenu(int initialize)
                     &Audio_Seq_unusedInventory.armor[Menu_Inventory_equippedItem - 1];
                 armor->limb = 7;
 
-                Items_EquipAshleyAccessory(armor);
+                VS::Items::EquipLiveAshleyAccessory(armor);
             } else {
-                Items_EquipAshleyAccessory(NULL);
+                VS::Items::EquipLiveAshleyAccessory(NULL);
             }
 
             Menu_Inventory_accessoryMenuState = Menu_Inventory_EquipmentSlotMenuState_LoadObject;
@@ -823,7 +825,7 @@ int Menu_Inventory_UpdateWeaponMenu(int initialize)
             break;
         }
 
-        count = Items_Inventory_CountItems(0, NULL);
+        count = VS::Items::Inventory::CountLiveItems(0, NULL);
         hasWeapon = 0;
 
         for (i = 0; i < 8; ++i) {
@@ -907,7 +909,7 @@ int Menu_Inventory_UpdateWeaponMenu(int initialize)
             Menu_Inventory_weaponMenuState = Menu_Inventory_EquipmentSlotMenuState_WaitMenuReady;
         } else {
 
-            Items_Inventory_UnequipWeapon();
+            VS::Items::Inventory::UnequipLiveWeapon();
 
             if (Menu_Inventory_weaponMenuSelectedWeapon == 1) {
                 Menu_Inventory_weaponMenuCategory = 10;
@@ -925,10 +927,10 @@ int Menu_Inventory_UpdateWeaponMenu(int initialize)
                 Menu_Inventory_weaponMenuMaterial = blade->material;
 
                 if (Menu_Framework_weaponHands[Menu_Inventory_weaponMenuCategory - 1] != 0) {
-                    Items_Inventory_UnequipShield();
+                    VS::Items::Inventory::UnequipLiveShield();
                 }
 
-                Items_EquipAshleyWeapon(weapon);
+                VS::Items::EquipLiveAshleyWeapon(weapon);
             }
             Menu_Inventory_weaponMenuState = Menu_Inventory_EquipmentSlotMenuState_LoadObject;
         }
@@ -1000,7 +1002,7 @@ int Menu_Inventory_UpdateShieldMenu(int initialize)
             break;
         }
 
-        count = Items_Inventory_CountItems(3, NULL);
+        count = VS::Items::Inventory::CountLiveItems(3, NULL);
         hasShield = 0;
 
         for (i = 0; i < 8; ++i) {
@@ -1078,7 +1080,7 @@ int Menu_Inventory_UpdateShieldMenu(int initialize)
             Menu_Inventory_shieldMenuState = Menu_Inventory_EquipmentSlotMenuState_WaitMenuReady;
         } else {
 
-            Items_Inventory_UnequipShield();
+            VS::Items::Inventory::UnequipLiveShield();
 
             if (Menu_Inventory_shieldMenuSelectedShield == 1) {
                 Menu_Inventory_shieldMenuWepId = 0;
@@ -1095,10 +1097,10 @@ int Menu_Inventory_UpdateShieldMenu(int initialize)
 
                 if (actor->weapon.blade.id
                     && Menu_Framework_weaponHands[actor->weapon.blade.category - 1]) {
-                    Items_Inventory_UnequipWeapon();
+                    VS::Items::Inventory::UnequipLiveWeapon();
                 }
 
-                Items_EquipAshleyShield(shield);
+                VS::Items::EquipLiveAshleyShield(shield);
             }
             Menu_Inventory_shieldMenuState = Menu_Inventory_EquipmentSlotMenuState_LoadObject;
         }
@@ -1175,7 +1177,7 @@ int Menu_Inventory_UpdateArmorMenu(int initBodyPart)
             break;
         }
 
-        count = Items_Inventory_CountItems(4, NULL);
+        count = VS::Items::Inventory::CountLiveItems(4, NULL);
         hasArmor = 0;
 
         for (i = 0; i < 16; ++i) {
@@ -1261,13 +1263,13 @@ int Menu_Inventory_UpdateArmorMenu(int initBodyPart)
                 Audio_Seq_unusedInventory.armor[Menu_Inventory_armorIndex - 1].limb = 0;
             }
             if (Menu_Inventory_armorMenuSelectedArmor == 1) {
-                Items_EquipAshleyArmor(Menu_Inventory_armorMenuBodyPart - 1, NULL);
+                VS::Items::EquipLiveAshleyArmor(Menu_Inventory_armorMenuBodyPart - 1, NULL);
             } else {
                 Items_InventoryArmor* armor =
                     &Audio_Seq_unusedInventory.armor[Menu_Inventory_equippedItem - 1];
                 armor->limb = Menu_Inventory_armorMenuBodyPart;
 
-                Items_EquipAshleyArmor(Menu_Inventory_armorMenuBodyPart - 1, armor);
+                VS::Items::EquipLiveAshleyArmor(Menu_Inventory_armorMenuBodyPart - 1, armor);
             }
 
             Menu_Inventory_armorMenuState = Menu_Inventory_EquipmentSlotMenuState_LoadObject;
@@ -1761,7 +1763,7 @@ int Menu_Inventory_Update(u_char* state)
 
         if (category != 7) {
             menuitem->max = Items_Inventory_inventoryItemCapacities[category];
-            menuitem->count = Items_Inventory_CountItems(category, 0);
+            menuitem->count = VS::Items::Inventory::CountLiveItems(category, 0);
         }
     }
 

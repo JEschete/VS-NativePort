@@ -14,6 +14,7 @@
 #include "Core/Runtime.hpp"
 #include "Core/RuntimeLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
+#include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -180,15 +181,13 @@ extern "C" {
 #include "Input/Vibration.h"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentAffinity.h"
 #include "Items/EquipmentInit.h"
-#include "Items/EquipmentStats.h"
-#include "Items/EquipmentWear.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
+#include "Items/LootLiveState.h"
 #include "Items/Materials.h"
-#include "Items/Recovery.h"
 #include "Items/TreasureChests.h"
 #include "Items/Weapons.h"
 #include "LegacyFiles.h"
@@ -277,40 +276,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006A11Cu, 0u, (void*)&Actors_LinkActorAfterAshley, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006A1C4u, 0u, (void*)&Actors_UnlinkActorFromRoomList, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006A228u, 0u, (void*)&Actors_RemoveActorAtSlot, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006A334u, 0u, (void*)&Items_BuildWeaponStatsFromParts, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006A65Cu, 0u, (void*)&Items_BuildShieldStatsFromParts, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006A8ECu, 0u, (void*)&Items_BuildAccessoryStatsFromPart, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006A9F0u, 0u, (void*)&Items_BuildArmorStatsFromPart, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006AB44u, 0u, (void*)&Items_ReadInventoryBladeStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006AC74u, 0u, (void*)&Items_ReadInventoryGripStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006ACFCu, 0u, (void*)&Items_ReadInventoryArmorStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006AE0Cu, 0u, (void*)&Items_ReadInventoryGemStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006AEACu, 0u, (void*)&Items_LoadInventoryWeaponStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B02Cu, 0u, (void*)&Items_LoadInventoryShieldStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B110u, 0u, (void*)&Items_LoadInventoryArmorStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B194u, 0u, (void*)&Items_LoadInventoryAccessoryStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B214u, 0u, (void*)&Items_RemoveEquipmentBoostOnEquip, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B270u, 0u, (void*)&Items_RemoveWeaponEnchantmentOnEquip, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B2D4u, 0u, (void*)&Items_RemoveArmorEnchantmentOnEquip, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B338u, 0u, (void*)&Items_EquipAshleyWeapon, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B460u, 0u, (void*)&Items_EquipAshleyShield, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B4B8u, 0u, (void*)&Items_EquipAshleyArmor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B524u, 0u, (void*)&Items_EquipAshleyAccessory, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B57Cu, 0u, (void*)&Items_WriteInventoryBladeStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B6ACu, 0u, (void*)&Items_WriteInventoryGripStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B728u, 0u, (void*)&Items_WriteInventoryGemStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B7BCu, 0u, (void*)&Items_WriteInventoryArmorStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B8C0u, 0u, (void*)&Items_StoreInventoryWeaponStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B9E0u, 0u, (void*)&Items_StoreInventoryShieldStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BAA8u, 0u, (void*)&Items_StoreInventoryArmorStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BADCu, 0u, (void*)&Items_StoreInventoryAccessoryStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BB0Cu, 0u, (void*)&Items_RollEnemyWeaponDrop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BBECu, 0u, (void*)&Items_RollEnemyShieldDrop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BCB0u, 0u, (void*)&Items_RollEnemyAccessoryDrop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BD14u, 0u, (void*)&Items_RollEnemyArmorDrop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BDA0u, 0u, (void*)&Items_CopyGuaranteedEnemyItemDrops, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BDF0u, 0u, (void*)&Items_RollEnemyItemDrop, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006BE64u, 0u, (void*)&Items_QueueEnemyLoot, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C004u, 0u, (void*)&State_RecordEnemyKillScore, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C164u, 0u, (void*)&State_UpdateWeaponKillStreak, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C1CCu, 0u, (void*)&Battle_ResolveEnemyDefeat, 0u, 0u, 0u},
@@ -357,7 +322,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006F848u, 0u, (void*)&Effects_SpawnAbilityLearnedEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006F89Cu, 0u, (void*)&Battle_BeginPendingAbilityReward, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006FA20u, 0u, (void*)&Battle_GrantPendingAbilityUnlock, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006FB48u, 0u, (void*)&Items_OpenPendingEnemyLoot, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006FBCCu, 0u, (void*)&Battle_BeginPostActionRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006FCBCu, 0u, (void*)&Battle_BeginActionTrailFade, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006FD0Cu, 0u, (void*)&Battle_FinishBattleAbilitySequence, 0u, 0u, 0u},
@@ -484,7 +448,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007B9A0u, 0u, (void*)&Battle_BeginEventRewardResults, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B9CCu, 0u, (void*)&Battle_BeginPostActionRewards, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B9FCu, 0u, (void*)&Battle_UpdateRewardSequence, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007BA98u, 0u, (void*)&Items_PresentScriptedLoot, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BBB8u, 0u, (void*)&Field_ClearSavedRoomEnemies, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BBD8u, 0u, (void*)&State_StartSceneTimer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BCCCu, 0u, (void*)&State_ResetSceneTimer, 0u, 0u, 0u},
@@ -556,10 +519,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007D340u, 0u, (void*)&Actors_RemoveScriptedActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E180u, 0u, (void*)&Content_AcquireOverlayWorkspace, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E1C0u, 0u, (void*)&Content_ReleaseOverlayWorkspace, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E200u, 0u, (void*)&Items_RebuildArmorClassAffinity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E2ACu, 0u, (void*)&Items_RebuildShieldClassAffinity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E380u, 0u, (void*)&Items_RebuildWeaponClassAffinity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007E454u, 0u, (void*)&Items_InventoryItemCount, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E5E0u, 0u, (void*)&Battle_AttackGemHitBonus, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E6A0u, 0u, (void*)&Battle_DefenseGemHitBonus, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007E974u, 0u, (void*)&Battle_IgnoreHitCallback, 0u, 0u, 0u},
@@ -616,16 +575,8 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007FDD0u, 0u, (void*)&Battle_IgnoreAttackPrerequisite, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007FDD8u, 0u, (void*)&Battle_CheckActionHitPrerequisite, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007FE5Cu, 0u, (void*)&Battle_ApplyDamageGemMultiplier, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007FF8Cu, 0u, (void*)&Items_ApplyPpGemMultiplier, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80080000u, 0u, (void*)&Battle_DistributeHitLimbDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800801E0u, 0u, (void*)&Battle_DistributeLimbRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800802C4u, 0u, (void*)&Items_ConsumeHitEquipmentDp, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800803A4u, 0u, (void*)&Items_AccumulateHitEquipmentPp, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80080534u, 0u, (void*)&Items_GrowOpposingEquipmentAffinity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800807E8u, 0u, (void*)&Items_GrowMatchingEquipmentAffinity, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80080A9Cu, 0u, (void*)&Items_GrowEquipmentClass, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80080C9Cu, 0u, (void*)&Items_GrowDefenderEquipmentRatings, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80080F78u, 0u, (void*)&Items_GrowAttackerWeaponRatings, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081020u, 0u, (void*)&Battle_QueueApplicableStatusChanges, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800810CCu, 0u, (void*)&Battle_QueueStatusRemovalMask, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80081130u, 0u, (void*)&Battle_IgnoreStatCalculator, 0u, 0u, 0u},
@@ -644,7 +595,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008255Cu, 0u, (void*)&Field_CalculateTrapPanelDamage, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800829B8u, 0u, (void*)&Battle_CalculateSpellHealing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80082FF4u, 0u, (void*)&Field_CalculateHealingPanelRecovery, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x80083430u, 0u, (void*)&Items_CalculateItemRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800834A4u, 0u, (void*)&Battle_TargetMissingHp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800834E4u, 0u, (void*)&Battle_TargetMissingMp, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x80083524u, 0u, (void*)&Battle_ScalePreviousTargetHit, 0u, 0u, 0u},
@@ -768,7 +718,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008A4DCu, 0u, (void*)&Field_SetFieldRenderingEnabled, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A4FCu, 0u, (void*)&Field_CurrentSavePointId, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A5D0u, 0u, (void*)&Battle_ActorActionRestrictionFlags, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008A6FCu, 0u, (void*)&Items_ClearRoomLootList, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A744u, 0u, (void*)&Field_UploadZoneTextures, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008A908u, 0u, (void*)&Field_LoadRoomSections, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008AB68u, 0u, (void*)&Field_StoreEntranceDoorForReload, 0u, 0u, 0u},
@@ -821,12 +770,10 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008D400u, 0u, (void*)&Field_CurrentSceneId, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D418u, 0u, (void*)&Field_RoomFallDestination, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D438u, 0u, (void*)&Field_RoomTriggerAtTile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D508u, 0u, (void*)&Items_TreasureChestAtTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D594u, 0u, (void*)&Field_SetMovingPlatformsPaused, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D5A0u, 0u, (void*)&Field_FreezeMovingPlatforms, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D5FCu, 0u, (void*)&Field_BeginSwitchToggle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D658u, 0u, (void*)&Field_ToggleRoomSwitch, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008D710u, 0u, (void*)&Items_RestoreRoomChestStates, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D880u, 0u, (void*)&Field_SceneDoorId, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008D948u, 0u, (void*)&Field_MarkEntranceDoorOnSceneMap, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008DA24u, 0u, (void*)&Field_InterpolatedFloorHeight, 0u, 0u, 0u},
@@ -837,7 +784,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008E224u, 0u, (void*)&Field_SetMovingPlatformVisibility, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E2D4u, 0u, (void*)&Field_MovingPlatformTargetWaypoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E320u, 0u, (void*)&Field_MovingPlatformDwellTicks, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E370u, 0u, (void*)&Items_RoomTreasureChests, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E3B8u, 0u, (void*)&Field_RoomInteractiveDoors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E400u, 0u, (void*)&Field_ActiveRoomTriggers, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E470u, 0u, (void*)&Field_IsRoomAudioSequenceAbsent, 0u, 0u, 0u},
@@ -846,7 +792,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8008E4C4u, 0u, (void*)&Field_RoomTrapLevel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E4DCu, 0u, (void*)&Field_SetPlatformFreezeAppearance, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E5F0u, 0u, (void*)&Field_MapCompletionPercent, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8008E6A8u, 0u, (void*)&Items_LoadRoomChestLoot, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E6DCu, 0u, (void*)&Field_MarkSigilDoorUnlocked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E7BCu, 0u, (void*)&Field_IsRoomSigilDoorUnlocked, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8008E88Cu, 0u, (void*)&Field_InitializeRoomBackground, 0u, 0u, 0u},
@@ -1506,7 +1451,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB79Cu, 0u, (void*)&Effects_AcquireScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB7DCu, 0u, (void*)&Effects_ReleaseScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCB9Cu, 0u, (void*)&Items_ConsumeMiscItem, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCD40u, 0u, (void*)&Menu_Framework_DrawMainMenuCursor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCDF4u, 0u, (void*)&Menu_TextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCE10u, 0u, (void*)&Menu_TextBoxAnchor, 0u, 0u, 0u},
@@ -2182,7 +2126,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F5168u, 56u, (void*)&Battle_stringContext, sizeof Battle_stringContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51B8u, 4u, (void*)&Menu_activeTextBoxOrderingTable, sizeof Menu_activeTextBoxOrderingTable, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51C0u, 8u, (void*)&Menu_Framework_menuState, sizeof Menu_Framework_menuState, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F5210u, 4u, (void*)&Items_miscItemInvoked, sizeof Items_miscItemInvoked, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F5210u, 4u, (void*)&Items_miscItemInvoked, sizeof Items_miscItemInvoked, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F5218u, 4u, (void*)&Effects_menuReloadSlot, sizeof Effects_menuReloadSlot, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F521Cu, 4u, (void*)&Effects_pendingTracks, sizeof Effects_pendingTracks, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5224u, 4u, (void*)&Effects_trackCount, sizeof Effects_trackCount, 1u, 1u},
@@ -2834,6 +2778,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004274Cu, 0u, (void*)&VS::Core::InitializeLiveRandomShuffleTable, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800427A8u, 0u, (void*)&VS::Core::NextLiveRandomBounded, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042860u, 0u, (void*)&VS::Core::NextLiveRandomAveraged, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x80083430u, 0u, (void*)&VS::Items::CalculateLiveItemRecovery, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

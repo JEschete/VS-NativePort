@@ -1821,31 +1821,43 @@
     <ClCompile Include="src\Items\EquipmentAffinity.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\EquipmentAffinity.h">
-      <Filter>src\Items</Filter>
-    </ClInclude>
     <ClInclude Include="src\Items\EquipmentInit.h">
       <Filter>src\Items</Filter>
     </ClInclude>
+    <ClCompile Include="src\Items\EquipmentLive.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
     <ClCompile Include="src\Items\EquipmentStats.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\EquipmentStats.h">
-      <Filter>src\Items</Filter>
-    </ClInclude>
     <ClCompile Include="src\Items\EquipmentWear.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\EquipmentWear.h">
-      <Filter>src\Items</Filter>
-    </ClInclude>
     <ClCompile Include="src\Items\Inventory.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
+    <ClCompile Include="src\Items\InventoryLive.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\InventoryLiveState.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\ItemRecordsLive.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\ItemRecordsLive.hpp">
+      <Filter>src\Items</Filter>
+    </ClInclude>
     <ClCompile Include="src\Items\Loot.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
     <ClInclude Include="src\Items\Loot.h">
+      <Filter>src\Items</Filter>
+    </ClInclude>
+    <ClCompile Include="src\Items\LootLive.cpp">
+      <Filter>src\Items</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Items\LootLiveState.h">
       <Filter>src\Items</Filter>
     </ClInclude>
     <ClCompile Include="src\Items\Materials.cpp">
@@ -1857,9 +1869,6 @@
     <ClCompile Include="src\Items\Recovery.cpp">
       <Filter>src\Items</Filter>
     </ClCompile>
-    <ClInclude Include="src\Items\Recovery.h">
-      <Filter>src\Items</Filter>
-    </ClInclude>
     <ClInclude Include="src\Items\TreasureChests.h">
       <Filter>src\Items</Filter>
     </ClInclude>
@@ -2466,13 +2475,43 @@
     <ClInclude Include="include\Items\Equipment.h">
       <Filter>include\Items</Filter>
     </ClInclude>
+    <ClInclude Include="include\Items\EquipmentAffinity.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\EquipmentLive.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\EquipmentStats.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\EquipmentWear.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
     <ClInclude Include="include\Items\Inventory.h">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\Inventory.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\InventoryLive.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\ItemRecords.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\KeyItems.h">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Items\Loadout.h">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\Loot.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\LootLive.hpp">
+      <Filter>include\Items</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Items\Recovery.hpp">
       <Filter>include\Items</Filter>
     </ClInclude>
     <ClInclude Include="include\Menu\Framework\ActionSelection.h">

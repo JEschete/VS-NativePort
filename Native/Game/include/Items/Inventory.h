@@ -216,26 +216,3 @@ typedef struct Items_Container {
 _Static_assert(sizeof(Items_Container) == 0x4180, "Items_Container must keep its PS1 layout");
 
 #endif // VS_ITEMS_INVENTORY_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_ITEMS_INVENTORY_H_DECLS)
-#define VS_ITEMS_INVENTORY_H_DECLS
-
-extern u_char Items_miscItemInvoked;
-extern u_char Items_Inventory_inventoryItemCapacities[];
-int Items_InventoryItemCount(int id);
-int Items_ConsumeMiscItem(int miscId);
-void Items_Inventory_UnequipWeapon(void);
-void Items_Inventory_UnequipShield(void);
-void Items_Inventory_ClearItemSlot(int itemCategory, int index);
-int Items_Inventory_ItemOccupancyId(int category, int index, Items_Inventory* inventory);
-int Items_Inventory_FindDisplayPosition(int category, int id);
-void Items_Inventory_AppendDisplayIndex(int itemCategory, int id);
-void Items_Inventory_RebuildDisplayIndices(int itemCategory);
-int Items_Inventory_CountItems(int itemCategory, Items_Inventory* inventory);
-int Items_Inventory_FirstEmptySlot(int itemCategory, Items_Inventory* inventory);
-int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
-    int sourceItemIndex, Items_Inventory* sourceInventory);
-void Items_Inventory_StoreEquippedStats(void);
-void Items_Inventory_ResetMainMenuStatics(void);
-
-#endif // VS_ITEMS_INVENTORY_H_DECLS

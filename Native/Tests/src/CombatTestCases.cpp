@@ -14,6 +14,11 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
+#include "Items/ItemRecordsLive.hpp"
+#include "Items/Loot.hpp"
+#include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -42,9 +47,11 @@ extern "C" {
 #include "Field/Interactions.h"
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
+#include "Items/Equipment.h"
 #include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Items/Loot.h"
+#include "Items/LootLiveState.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
@@ -454,14 +461,12 @@ struct ArtResolutionFixture : AbilityEffectFixture {
 struct LootInventoryFixture {
   Items_Inventory saved_inventory = Audio_Seq_unusedInventory;
   Items_InventoryIndices saved_indices = Audio_Seq_unusedInventoryIndices;
-  std::uint8_t saved_capacity = Items_Inventory_inventoryItemCapacities[6];
   std::uint8_t* saved_index_pointer = Menu_Inventory_inventoryIndices[6];
   Items_Inventory source{};
 
   LootInventoryFixture() {
     Audio_Seq_unusedInventory = {};
     Audio_Seq_unusedInventoryIndices = {};
-    Items_Inventory_inventoryItemCapacities[6] = 64;
     Menu_Inventory_inventoryIndices[6] = Audio_Seq_unusedInventoryIndices.misc;
     for (auto& item : Audio_Seq_unusedInventory.misc) {
       item.id = 324;
@@ -476,7 +481,6 @@ struct LootInventoryFixture {
   ~LootInventoryFixture() {
     Audio_Seq_unusedInventory = saved_inventory;
     Audio_Seq_unusedInventoryIndices = saved_indices;
-    Items_Inventory_inventoryItemCapacities[6] = saved_capacity;
     Menu_Inventory_inventoryIndices[6] = saved_index_pointer;
   }
 
@@ -484,8 +488,8 @@ struct LootInventoryFixture {
     const int flags =
         static_cast<int>(Items_ItemCategory_Misc) |
         (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
-    return Items_Inventory_CopyItem(flags, &Audio_Seq_unusedInventory, 0,
-                                    &source);
+    return VS::Items::Inventory::CopyLiveItem(flags, &Audio_Seq_unusedInventory,
+                                              0, &source);
   }
 
   static int Quantity(int id) {
@@ -606,7 +610,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   }
 
   ~EnemyLootFixture() {
-    Items_ClearRoomLootList();
+    VS::Items::ClearLiveRoomLootList();
     Items_lootListHead = saved_head;
     Battle_actors[1] = saved_actor;
     Menu_Loot_inventory = saved_staging;
@@ -651,13 +655,14 @@ struct EnemyLootFixture : LootInventoryFixture {
       CHECK(row.opaque2 == 0);
       const int flags = static_cast<int>(row.itemCategory) |
                         static_cast<int>(Menu_Framework_CopyItemFlag_Write);
-      CHECK(Items_Inventory_CopyItem(flags, &Audio_Seq_unusedInventory,
-                                     row.itemIndex, &source) != 0);
+      CHECK(VS::Items::Inventory::CopyLiveItem(flags,
+                                               &Audio_Seq_unusedInventory,
+                                               row.itemIndex, &source) != 0);
     }
   }
 
   void CheckCleared() {
-    Items_ClearRoomLootList();
+    VS::Items::ClearLiveRoomLootList();
     CHECK(Items_lootListHead == nullptr);
     CHECK(VS::Core::Memory::GameHeap().Empty());
   }
@@ -847,6 +852,49 @@ void CheckEquipmentDrop(const Items_LootedAccessory& drop,
   CheckArmorDrop(drop.accessory, source.accessory);
 }
 
+// The typed loot rolls (Loot.hpp) over the legacy records, drawing from the
+// game's random sequence as the battle loot does.
+template <typename Drop, typename Loadout, auto Roll>
+int RollLegacyDrop(Drop* looted, Loadout* base) {
+  VS::Items::Live::LiveItemRandom random;
+  auto typed = VS::Items::Live::Typed(*looted);
+  const bool dropped = Roll(typed, VS::Items::Live::Typed(*base), random);
+  VS::Items::Live::Commit(*looted, typed);
+  return dropped ? 1 : 0;
+}
+
+int RollLegacyArmorDrop(Items_LootedArmor* looted, Items_ArmorLoadout* base) {
+  VS::Items::Live::LiveItemRandom random;
+  std::array typed{VS::Items::Live::Typed(looted[0]),
+                   VS::Items::Live::Typed(looted[1])};
+  const bool dropped = VS::Items::RollEnemyArmorDrop(
+      typed, VS::Items::Live::Typed(*base), random);
+  VS::Items::Live::Commit(looted[0], typed[0]);
+  VS::Items::Live::Commit(looted[1], typed[1]);
+  return dropped ? 1 : 0;
+}
+
+bool CopyLegacyGuaranteedDrops(
+    Items_BattleLoot& loot, const std::array<Items_MiscItemStack, 2>& source) {
+  auto typed = VS::Items::Live::Typed(loot);
+  const std::array typed_source{VS::Items::Live::Typed(source[0]),
+                                VS::Items::Live::Typed(source[1])};
+  const bool copied =
+      VS::Items::CopyGuaranteedEnemyItemDrops(typed, typed_source);
+  VS::Items::Live::Commit(loot, typed);
+  return copied;
+}
+
+bool RollLegacyItemDrop(Items_BattleLoot& loot,
+                        const Items_MiscItemDrop& source) {
+  VS::Items::Live::LiveItemRandom random;
+  auto typed = VS::Items::Live::Typed(loot);
+  const bool dropped = VS::Items::RollEnemyItemDrop(
+      typed, VS::Items::Live::Typed(source), random);
+  VS::Items::Live::Commit(loot, typed);
+  return dropped;
+}
+
 template <typename Drop, typename Loadout>
 void CheckEquipmentRoll(int roll, int rate, int (*drop)(Drop*, Loadout*)) {
   LootRandomFixture random;
@@ -909,8 +957,9 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       seen.push_back(source.armor[row.itemIndex].id);
       if (claim) {
         CHECK(row.state == 1);
-        CHECK(Items_Inventory_CopyItem(0x14, &Audio_Seq_unusedInventory,
-                                       row.itemIndex, &source) != 0);
+        CHECK(VS::Items::Inventory::CopyLiveItem(0x14,
+                                                 &Audio_Seq_unusedInventory,
+                                                 row.itemIndex, &source) != 0);
       }
     }
   }
@@ -948,7 +997,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       stats.limbs[0].armor.armor.id = static_cast<u_short>(149 + actor * 3);
       stats.limbs[1].armor.armor.id = static_cast<u_short>(150 + actor * 3);
       stats.accessory.accessory.id = static_cast<u_short>(151 + actor * 3);
-      Items_QueueEnemyLoot(&enemy);
+      VS::Items::QueueLiveEnemyLoot(&enemy);
     }
   }
 
@@ -959,7 +1008,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     EnableEquipmentDrop(stats.limbs[0].armor);
     EnableEquipmentDrop(stats.limbs[1].armor);
     stats.limbs[1].armor.armor.id = 153;
-    Items_QueueEnemyLoot(&enemy);
+    VS::Items::QueueLiveEnemyLoot(&enemy);
     REQUIRE(Items_lootListHead != nullptr);
     auto& loot = Items_lootListHead->loot;
     loot.weapon.difficultyFlags = static_cast<char>(flags);
@@ -992,7 +1041,7 @@ struct EquipmentStagingFixture : EnemyLootFixture {
       CheckRow(row, index, fits);
       const int flags = static_cast<int>(row.itemCategory) |
                         static_cast<int>(Menu_Framework_CopyItemFlag_Write);
-      const int result = Items_Inventory_CopyItem(
+      const int result = VS::Items::Inventory::CopyLiveItem(
           flags, &Audio_Seq_unusedInventory, row.itemIndex, &source);
       CHECK(result ==
             (fits ? (index < 2 ? 1 : armor_count + claimed_armor + 1) : 0));
@@ -1036,8 +1085,8 @@ struct EquipmentStagingFixture : EnemyLootFixture {
     CHECK(shield.isEquipped == 0);
     CheckArmorDrop(shield.base, stats.shield.base);
     CheckClaimedGems(shield, stats.shield, 0x81);
-    CHECK(Items_Inventory_CountItems(Items_ItemCategory_Gem,
-                                     &Audio_Seq_unusedInventory) == 4);
+    CHECK(VS::Items::Inventory::CountLiveItems(
+              Items_ItemCategory_Gem, &Audio_Seq_unusedInventory) == 4);
   }
 };
 
@@ -1118,8 +1167,8 @@ struct LootPagingMenuFixture : EquipmentStagingFixture {
 
   static void CheckClaims(int claimed, int bag_count) {
     CHECK(Menu_Loot_lootClaimed == claimed);
-    CHECK(Items_Inventory_CountItems(Items_ItemCategory_Armor, nullptr) ==
-          bag_count);
+    CHECK(VS::Items::Inventory::CountLiveItems(Items_ItemCategory_Armor,
+                                               nullptr) == bag_count);
   }
 
   static void CheckNextArmorPage() {
@@ -1161,15 +1210,15 @@ struct EquipmentLootFixture : LootInventoryFixture {
   void PrepareSource() {
     if (shield) {
       auto part = EquipmentDropPart(147);
-      Items_WriteInventoryArmorStats(&source.shields[0].base, &part);
+      VS::Items::WriteLiveInventoryArmorStats(&source.shields[0].base, &part);
       source.shields[0].index = 1;
       source.shields[0].isEquipped = 1;
       source.shields[0].base.limb = 1;
     } else {
       auto blade = EquipmentDropPart(14);
       auto grip = EquipmentDropPart(96);
-      Items_WriteInventoryBladeStats(&source.blades[0], &blade);
-      Items_WriteInventoryGripStats(&source.grips[0], &grip);
+      VS::Items::WriteLiveInventoryBladeStats(&source.blades[0], &blade);
+      VS::Items::WriteLiveInventoryGripStats(&source.grips[0], &grip);
       source.blades[0].index = 1;
       source.blades[0].assembledWeaponIndex = 1;
       source.grips[0].index = 1;
@@ -1185,7 +1234,7 @@ struct EquipmentLootFixture : LootInventoryFixture {
     }
     for (int index = 0; index < attached; ++index) {
       auto gem = EquipmentDropPart(static_cast<u_short>(300 + index));
-      Items_WriteInventoryGemStats(&source.gems[index], &gem);
+      VS::Items::WriteLiveInventoryGemStats(&source.gems[index], &gem);
       source.gems[index].index = static_cast<std::int16_t>(index + 1);
       source.gems[index].setItemIndex = shield ? 0x81 : 1;
       auto& slots = shield ? source.shields[0].gems : source.weapons[0].gems;
@@ -1233,8 +1282,8 @@ struct EquipmentLootFixture : LootInventoryFixture {
     const int flags =
         category |
         (write ? static_cast<int>(Menu_Framework_CopyItemFlag_Write) : 0);
-    return Items_Inventory_CopyItem(flags, &Audio_Seq_unusedInventory, 0,
-                                    &source);
+    return VS::Items::Inventory::CopyLiveItem(flags, &Audio_Seq_unusedInventory,
+                                              0, &source);
   }
 
   Items_Inventory ExpectedInventory(const Items_Inventory& before) const {
@@ -2371,8 +2420,7 @@ TEST_CASE("Guaranteed enemy items retain both entries without random draws",
   loot.misc[2].itemId = 325;
   loot.misc[2].count = 1;
   loot.misc[2].difficultyFlags = 2;
-  CHECK(Items_CopyGuaranteedEnemyItemDrops(&loot, source.data()) ==
-        (present != 0));
+  CHECK(CopyLegacyGuaranteedDrops(loot, source) == (present != 0));
   CheckLootItem(loot.misc[0], source[0].id, source[0].id != 0 ? 2 : 0,
                 source[0].id != 0 ? 3 : 0);
   CheckLootItem(loot.misc[1], source[1].id, source[1].id != 0 ? 3 : 0,
@@ -2392,7 +2440,7 @@ TEST_CASE("Random enemy items use the strict original 255-value threshold",
   source.dropRate = static_cast<decltype(source.dropRate)>(rate);
   Items_BattleLoot loot{};
   const bool success = roll < rate;
-  CHECK(Items_RollEnemyItemDrop(&loot, &source) == success);
+  CHECK(RollLegacyItemDrop(loot, source) == success);
   CheckLootItem(loot.misc[2], 325, success ? 1 : 0, success ? 3 : 0);
   fixture.CheckOneForcedDraw();
 }
@@ -2404,7 +2452,7 @@ TEST_CASE("Absent random enemy items consume no draw",
   Items_MiscItemDrop source{};
   source.dropRate = static_cast<decltype(source.dropRate)>(255);
   Items_BattleLoot loot{};
-  CHECK(Items_RollEnemyItemDrop(&loot, &source) == 0);
+  CHECK(!RollLegacyItemDrop(loot, source));
   CheckLootItem(loot.misc[2], 0, 0, 0);
   fixture.CheckSequence(expected);
 }
@@ -2429,7 +2477,7 @@ TEST_CASE("Enemy loot rolls equipment before its optional item candidate",
             expected.Next(255) + above_roll);
   }
   const bool success = candidate && above_roll != 0;
-  Items_QueueEnemyLoot(&fixture.enemy);
+  VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   CHECK((Items_lootListHead != nullptr) == (guaranteed != 0 || success));
   if (Items_lootListHead != nullptr) {
     fixture.CheckQueued(guaranteed, candidate, success);
@@ -2473,17 +2521,17 @@ TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",
   EnemyLootFixture fixture;
   fixture.SetGuaranteed(1);
   VS::Core::Random expected;
-  Items_QueueEnemyLoot(&fixture.enemy);
+  VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   REQUIRE(Items_lootListHead != nullptr);
   auto* const first = Items_lootListHead;
   const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
-  Items_QueueEnemyLoot(&fixture.enemy);
+  VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   CHECK(Items_lootListHead == first);
   CHECK(first->next == nullptr);
   CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
   auto second_enemy = fixture.enemy;
   second_enemy.id = 2;
-  Items_QueueEnemyLoot(&second_enemy);
+  VS::Items::QueueLiveEnemyLoot(&second_enemy);
   REQUIRE(Items_lootListHead != first);
   CHECK(Items_lootListHead->droppedMask == 2);
   CHECK(Items_lootListHead->next == first);
@@ -2525,9 +2573,9 @@ TEST_CASE("Prologue progression suppresses presentation without losing loot",
   LootPresentationFixture fixture;
   fixture.SetGuaranteed(guaranteed);
   State_SetScriptFlag(0xAB, static_cast<char>(intro));
-  Items_QueueEnemyLoot(&fixture.enemy);
+  VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   auto* const queued = Items_lootListHead;
-  Items_OpenPendingEnemyLoot();
+  VS::Items::OpenLivePendingEnemyLoot();
   CHECK(Field_controlMode == 12);
   CHECK(Battle_actionFlowMode == 0);
   CHECK(Menu_Framework_lootLists == nullptr);
@@ -2554,28 +2602,35 @@ TEST_CASE("Weapon drops preserve properties at every original rate boundary",
           "[combat][loot][equipment-drops]") {
   const int roll = GENERATE(Catch::Generators::range(0, 255));
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
-  CheckEquipmentRoll(roll, rate, Items_RollEnemyWeaponDrop);
+  CheckEquipmentRoll(roll, rate,
+                     RollLegacyDrop<Items_LootedWeapon, Items_WeaponLoadout,
+                                    &VS::Items::RollEnemyWeaponDrop>);
 }
 
 TEST_CASE("Shield drops preserve properties at every original rate boundary",
           "[combat][loot][equipment-drops]") {
   const int roll = GENERATE(Catch::Generators::range(0, 255));
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
-  CheckEquipmentRoll(roll, rate, Items_RollEnemyShieldDrop);
+  CheckEquipmentRoll(roll, rate,
+                     RollLegacyDrop<Items_LootedShield, Items_ShieldLoadout,
+                                    &VS::Items::RollEnemyShieldDrop>);
 }
 
 TEST_CASE("Armor drops preserve properties at every original rate boundary",
           "[combat][loot][equipment-drops]") {
   const int roll = GENERATE(Catch::Generators::range(0, 255));
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
-  CheckEquipmentRoll(roll, rate, Items_RollEnemyArmorDrop);
+  CheckEquipmentRoll(roll, rate, RollLegacyArmorDrop);
 }
 
 TEST_CASE("Accessory drops preserve properties at every original rate boundary",
           "[combat][loot][equipment-drops]") {
   const int roll = GENERATE(Catch::Generators::range(0, 255));
   const int rate = GENERATE_COPY(0, roll, roll + 1, 255);
-  CheckEquipmentRoll(roll, rate, Items_RollEnemyAccessoryDrop);
+  CheckEquipmentRoll(
+      roll, rate,
+      RollLegacyDrop<Items_LootedAccessory, Items_AccessorySpawnLoadout,
+                     &VS::Items::RollEnemyAccessoryDrop>);
 }
 
 TEST_CASE("Six limb rolls retain only the first two successful armor drops",
@@ -2599,7 +2654,7 @@ TEST_CASE("Six limb rolls retain only the first two successful armor drops",
       }
     }
   }
-  Items_QueueEnemyLoot(&fixture.enemy);
+  VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   CHECK((Items_lootListHead != nullptr) == !selected.empty());
   if (Items_lootListHead != nullptr) {
     const auto& loot = Items_lootListHead->loot;
@@ -2621,7 +2676,7 @@ TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
   Audio_Seq_unusedInventory = {};
   fixture.source = {};
   auto part = EquipmentDropPart(static_cast<u_short>(id));
-  Items_WriteInventoryArmorStats(&fixture.source.armor[0], &part);
+  VS::Items::WriteLiveInventoryArmorStats(&fixture.source.armor[0], &part);
   fixture.source.armor[0].index = 1;
   for (int index = 0; index < count; ++index) {
     Audio_Seq_unusedInventory.armor[index].id = 150;
@@ -2630,11 +2685,11 @@ TEST_CASE("Armor and accessory claims honor the original shared bag capacity",
   }
   auto expected = Audio_Seq_unusedInventory;
   const auto source_before = fixture.source;
-  CHECK(Items_Inventory_CopyItem(
+  CHECK(VS::Items::Inventory::CopyLiveItem(
             Items_ItemCategory_Armor, &Audio_Seq_unusedInventory, 0,
             &fixture.source) == (count < 16 ? count + 1 : 0));
   EquipmentLootFixture::CheckInventory(Audio_Seq_unusedInventory, expected);
-  CHECK(Items_Inventory_CopyItem(
+  CHECK(VS::Items::Inventory::CopyLiveItem(
             static_cast<int>(Items_ItemCategory_Armor) |
                 static_cast<int>(Menu_Framework_CopyItemFlag_Write),
             &Audio_Seq_unusedInventory, 0,
@@ -2717,7 +2772,8 @@ TEST_CASE("Loot staging uses every slot of the original inventory capacities",
   for (int index = 0; index < capacities[category]; ++index) {
     CAPTURE(category, index);
     CHECK(stage[category](loot) == index + 1);
-    CHECK(Items_Inventory_CountItems(category, &fixture.source) == index + 1);
+    CHECK(VS::Items::Inventory::CountLiveItems(category, &fixture.source) ==
+          index + 1);
   }
   const auto full = fixture.source;
   CHECK(stage[category](loot) == 0);
@@ -2737,15 +2793,15 @@ TEST_CASE("Composite loot staging preflights all component storage",
                                    {parents, blades, grips, gems});
   Items_BattleLoot loot{};
   auto part = EquipmentDropPart(14);
-  Items_WriteInventoryBladeStats(&loot.weapon.blade, &part);
+  VS::Items::WriteLiveInventoryBladeStats(&loot.weapon.blade, &part);
   part.id = 96;
-  Items_WriteInventoryGripStats(&loot.weapon.grip, &part);
+  VS::Items::WriteLiveInventoryGripStats(&loot.weapon.grip, &part);
   part.id = 147;
-  Items_WriteInventoryArmorStats(&loot.shield.shield, &part);
+  VS::Items::WriteLiveInventoryArmorStats(&loot.shield.shield, &part);
   for (int index = 0; index < attached; ++index) {
     part.id = static_cast<u_short>(300 + index);
-    Items_WriteInventoryGemStats(&loot.weapon.gems[index], &part);
-    Items_WriteInventoryGemStats(&loot.shield.gems[index], &part);
+    VS::Items::WriteLiveInventoryGemStats(&loot.weapon.gems[index], &part);
+    VS::Items::WriteLiveInventoryGemStats(&loot.shield.gems[index], &part);
   }
   const auto before = fixture.source;
   const auto input_before = loot;
@@ -2756,7 +2812,8 @@ TEST_CASE("Composite loot staging preflights all component storage",
   CHECK(result == (fits ? parents + 1 : 0));
   CHECK(std::memcmp(&loot, &input_before, sizeof(loot)) == 0);
   if (!fits) EquipmentLootFixture::CheckInventory(fixture.source, before);
-  CHECK(Items_Inventory_CountItems(Items_ItemCategory_Gem, &fixture.source) ==
+  CHECK(VS::Items::Inventory::CountLiveItems(Items_ItemCategory_Gem,
+                                             &fixture.source) ==
         gems + (fits ? attached : 0));
 }
 
@@ -2792,7 +2849,7 @@ TEST_CASE("Pending loot pages reset safely before source release and reopen",
 
   fixture.stats = {};
   fixture.SetGuaranteed(1);
-  Items_QueueEnemyLoot(&fixture.enemy);
+  VS::Items::QueueLiveEnemyLoot(&fixture.enemy);
   Menu_Loot_BuildStagedInventory(Items_lootListHead);
   fixture.DeliverRows(1);
   CHECK(Menu_Loot_AdvanceStagedInventory() == 0);

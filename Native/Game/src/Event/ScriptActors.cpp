@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
+#include "Items/InventoryLive.hpp"
+#include "Items/LootLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -23,7 +25,6 @@ extern "C" {
 #include "Field/Doors.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Items/Loot.h"
 #include "Render/Palette.h"
 #include "State/Flags.h"
 
@@ -747,7 +748,7 @@ intptr_t Event_CommandSetActorActivity(u_char* instruction, short thread_index)
 intptr_t Event_CommandAwardMiscLoot(u_char* instruction, short thread_index)
 {
     if (Event_isMenuTransitionActive == 0) {
-        Items_PresentScriptedLoot(
+        VS::Items::PresentLiveScriptedLoot(
             VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), instruction[3], VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4), instruction[6]);
         Event_isMenuTransitionActive = 1;
         return 1;
@@ -763,7 +764,7 @@ intptr_t Event_CommandAwardMiscLoot(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BAE74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2606)
 intptr_t Event_CommandConsumeMiscItem(u_char* instruction, short thread_index)
 {
-    Items_ConsumeMiscItem(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
+    VS::Items::ConsumeLiveMiscItem(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     return 0;
 }
 

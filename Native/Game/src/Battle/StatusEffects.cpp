@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Core/RandomLive.hpp"
+#include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Event/Triggers.h"
 #include "Field/Interactions.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentAffinity.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -577,7 +577,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
             actor_stats->weapon.affinityModifiers[statIncrease] = 0;
             actor_stats->weapon.affinityModifiers[statDecrease] = 0;
 
-            Items_RebuildWeaponClassAffinity(actor_stats);
+            VS::Items::RebuildLiveWeaponClassAffinity(actor_stats);
         }
     }
 
@@ -639,7 +639,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
             actor_stats->shield.affinityModifiers[statIncrease] = 0;
             actor_stats->shield.affinityModifiers[statDecrease] = 0;
 
-            Items_RebuildShieldClassAffinity(actor_stats);
+            VS::Items::RebuildLiveShieldClassAffinity(actor_stats);
 
             for (i = 0; i < 6; ++i) {
                 if (actor_stats->limbs[i].armor.armor.id != 0) {
@@ -669,7 +669,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
                 actor_stats->limbs[i].armor.affinityModifiers[statIncrease] = 0;
                 actor_stats->limbs[i].armor.affinityModifiers[statDecrease] = 0;
 
-                Items_RebuildArmorClassAffinity(actor_stats, i);
+                VS::Items::RebuildLiveArmorClassAffinity(actor_stats, i);
             }
         }
 

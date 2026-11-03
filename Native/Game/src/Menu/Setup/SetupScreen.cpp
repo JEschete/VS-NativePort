@@ -2,6 +2,8 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -22,7 +24,6 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Field/RoomLoading.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -733,9 +734,9 @@ int Menu_Setup_UpdateDisassembly(int equipment_category_selection)
                 return -1;
             }
             if (Menu_Setup_disassemblyIsShield != 0) {
-                Items_Inventory_UnequipShield();
+                VS::Items::Inventory::UnequipLiveShield();
             } else {
-                Items_Inventory_UnequipWeapon();
+                VS::Items::Inventory::UnequipLiveWeapon();
             }
             Menu_Setup_disassemblyState = 7;
             break;
@@ -785,7 +786,7 @@ int Menu_Setup_UpdateDisassemblyCategory(int initialize_disassembly_category)
                 text[i * 2 + 1] = (char*)&Menu_Framework_menu12Text[Menu_Framework_menu12Text
                         [i + Text_Menu_MENU12_BIN_Index_disassembleWeaponDesc]];
 
-                itemCount = Items_Inventory_CountItems((i != 0) * 3, NULL);
+                itemCount = VS::Items::Inventory::CountLiveItems((i != 0) * 3, NULL);
                 rowTypes[i] = (itemCount << 9) + 0x400000;
 
                 if (itemCount == 0) {
@@ -1041,7 +1042,7 @@ int Menu_Setup_UpdateRepair(int initialize_repair)
             if (repair_item_id != 0) {
                 Items_InventoryWeapon* weapon = &Audio_Seq_unusedInventory.weapons[repair_item_id - 1];
                 if (weapon->isEquipped != 0) {
-                    Items_EquipAshleyWeapon(weapon);
+                    VS::Items::EquipLiveAshleyWeapon(weapon);
                 }
             }
         }
@@ -1062,7 +1063,7 @@ int Menu_Setup_UpdateRepair(int initialize_repair)
                 }
 
                 if (shield->isEquipped != 0) {
-                    Items_EquipAshleyShield(shield);
+                    VS::Items::EquipLiveAshleyShield(shield);
                 }
             }
         }
@@ -1083,7 +1084,7 @@ int Menu_Setup_UpdateRepair(int initialize_repair)
                         armor->currentPp = 0;
                     }
                     if (armor->limb != 0) {
-                        Items_EquipAshleyArmor(armor->limb - 1, armor);
+                        VS::Items::EquipLiveAshleyArmor(armor->limb - 1, armor);
                     }
                 }
             }
@@ -1128,7 +1129,7 @@ int Menu_Setup_Update(u_char* state)
     case 1:
 
         for (i = 0; i < 7; ++i) {
-            Items_Inventory_RebuildDisplayIndices(i);
+            VS::Items::Inventory::RebuildLiveDisplayIndices(i);
         }
         Menu_Framework_SetBackgroundPriority(2046, 128);
         menuItem = Menu_Framework_MenuItem(0);
@@ -1148,7 +1149,7 @@ int Menu_Setup_Update(u_char* state)
                 Menu_Framework_rowTypeBuf[i] = 0;
             }
 
-            i = Items_Inventory_CountItems(0, 0);
+            i = VS::Items::Inventory::CountLiveItems(0, 0);
             if (i == 8) {
                 menuText[1] =
                     (char*)&Menu_Framework_menu12Text[Text_Menu_MENU12_BIN_Offset_weaponsFull];

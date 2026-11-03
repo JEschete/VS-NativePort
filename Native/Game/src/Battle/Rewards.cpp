@@ -19,6 +19,7 @@ extern "C" {
 #include "Field/Map.h"
 #include "Field/RoomRendering.h"
 #include "Items/Loot.h"
+#include "Items/LootLiveState.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"

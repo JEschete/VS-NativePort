@@ -2,7 +2,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Boot/OverlayReset.h"
-#include "Items/Inventory.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/BreakArts.h"
 #include "Menu/Container/ItemView.h"
@@ -35,7 +34,6 @@ extern "C" {
 // Call where the original loads MAINMENU.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMainMenuStatics(void)
 {
-    Items_Inventory_ResetMainMenuStatics();
     Menu_Framework_EquipmentDetails_ResetMainMenuStatics();
     Menu_Framework_ResetMainMenuStatics();
     Menu_Framework_ItemRows_ResetMainMenuStatics();

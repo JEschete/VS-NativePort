@@ -2,6 +2,8 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/InventoryLive.hpp"
+#include "Items/LootLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 extern "C" {
@@ -16,6 +18,7 @@ extern "C" {
 #include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/ActionSelection.h"
@@ -221,7 +224,7 @@ int Menu_Loot_UpdateInventoryTransition(int category)
 
         if (itemCategory != 7) {
             menuItem->max = Items_Inventory_inventoryItemCapacities[itemCategory];
-            menuItem->count = Items_Inventory_CountItems(itemCategory, NULL);
+            menuItem->count = VS::Items::Inventory::CountLiveItems(itemCategory, NULL);
         }
     }
 
@@ -762,7 +765,7 @@ void Menu_Loot_RenderBagCapacities(int edgeX)
     for (i = 0; i < 7; ++i) {
         int color = vs_getRGB(128, 128, 128);
         int capacity = Items_Inventory_inventoryItemCapacities[i];
-        int itemCount = Items_Inventory_CountItems(i, NULL);
+        int itemCount = VS::Items::Inventory::CountLiveItems(i, NULL);
 
         if (item != NULL) {
             color = vs_getRGB(64, 64, 64)
@@ -1282,7 +1285,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
 
                 loot = &Menu_Loot_lootList[i];
 
-                if (Items_Inventory_CopyItem(loot->itemCategory | Menu_Framework_CopyItemFlag_Write,
+                if (VS::Items::Inventory::CopyLiveItem(loot->itemCategory | Menu_Framework_CopyItemFlag_Write,
                         &Audio_Seq_unusedInventory, loot->itemIndex, Menu_Loot_inventory)
                     != 0) {
                     if (loot->itemCategory == Items_ItemCategory_Misc) {
@@ -1336,7 +1339,7 @@ int Menu_Loot_UpdateLootSelection(int initialize)
                     }
                 }
 
-                Items_Inventory_CopyItem(loot->itemCategory | 0x10, &Audio_Seq_unusedInventory,
+                VS::Items::Inventory::CopyLiveItem(loot->itemCategory | 0x10, &Audio_Seq_unusedInventory,
                     loot->itemIndex, Menu_Loot_inventory);
 
                 loot->opaque2 = 1;
@@ -1562,7 +1565,7 @@ int Menu_Loot_Update(u_char* state)
         Menu_Framework_SetActorComparisonStats(16);
 
         for (i = 0; i < 7; ++i) {
-            Items_Inventory_RebuildDisplayIndices(i);
+            VS::Items::Inventory::RebuildLiveDisplayIndices(i);
         }
 
         buf = VS::Core::Memory::AllocateLiveFromHighEnd(
@@ -1651,7 +1654,7 @@ int Menu_Loot_Update(u_char* state)
         VS::Core::Memory::FreeLiveFromHighEnd(Menu_Loot_inventory);
 
         if (Menu_Framework_lootLists != 0) {
-            Items_ClearRoomLootList();
+            VS::Items::ClearLiveRoomLootList();
         }
 
         *state = 0;

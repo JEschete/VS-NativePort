@@ -1,360 +1,207 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Core/RandomLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Abilities.h"
-#include "Battle/ActionFlow.h"
-#include "Battle/Actor.h"
-#include "Battle/Rewards.h"
-#include "Field/Collision.h"
-#include "Field/Doors.h"
-#include "Field/GameMode.h"
-#include "Field/Gimmicks.h"
-#include "Field/Interactions.h"
-#include "Field/Map.h"
-#include "Field/Mpd.h"
-#include "Field/Room.h"
-#include "Field/RoomEffects.h"
-#include "Field/Zone.h"
-#include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Loot.h"
-#include "Items/TreasureChests.h"
-#include "Items/Weapons.h"
-#include "Menu/Framework/Framework.h"
-#include "Menu/Loot/Paging.h"
-#include "Render/Palette.h"
-#include "State/Flags.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Items/Loot.hpp"  // NOLINT(build/include): native C++ interface.
 
-// decomp: _lootListHead (_lootListHead@BATTLE/BATTLE.PRG)
-Items_LootListNode* Items_lootListHead;
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
+
+#include "Items/EquipmentStats.hpp"
+#include "Items/ItemRecords.hpp"
+
+namespace VS::Items {
+namespace {
+bool DrawDrops(std::uint8_t drop_rate, ItemRandom& random) {
+  return random.NextBounded(kDropRateDraw) < drop_rate;
+}
+
+void CopyPresentGems(std::span<InventoryGem, kWeaponGemCount> looted,
+                     std::span<const EquipmentPart, kWeaponGemCount> base) {
+  for (std::size_t i = 0; i < kWeaponGemCount; ++i) {
+    if (base[i].id != 0) WriteInventoryGemStats(looted[i], base[i]);
+  }
+}
+}  // namespace
 
 // decomp: BATTLE.PRG _dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1608)
-int Items_RollEnemyWeaponDrop(Items_LootedWeapon* looted, Items_WeaponLoadout* base)
-{
-    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
-        int i;
-
-        Items_WriteInventoryBladeStats(&looted->blade, &base->blade);
-        Items_WriteInventoryGripStats(&looted->grip, &base->grip);
-
-        for (i = 0; i < 3; ++i) {
-            if (base->gems[i].id != 0) {
-                Items_WriteInventoryGemStats(&looted->gems[i], &base->gems[i]);
-            }
-        }
-
-        VS::Core::Memory::CopyLiveAlignedWords(looted->name, base->name, sizeof looted->name);
-
-        looted->difficultyFlags = 3;
-
-        return 1;
-    }
-
-    return 0;
+bool RollEnemyWeaponDrop(LootedWeapon& looted, const WeaponLoadout& base,
+                         ItemRandom& random) {
+  if (!DrawDrops(base.drop_rate, random)) return false;
+  WriteInventoryBladeStats(looted.blade, base.blade);
+  WriteInventoryGripStats(looted.grip, base.grip);
+  CopyPresentGems(looted.gems, base.gems);
+  looted.name = base.name;
+  looted.header.difficulty_flags = kLootDropped;
+  return true;
 }
 
 // decomp: BATTLE.PRG _dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1632)
-int Items_RollEnemyShieldDrop(Items_LootedShield* looted, Items_ShieldLoadout* base)
-{
-    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
-        int i;
-
-        Items_WriteInventoryArmorStats(&looted->shield, &base->base);
-
-        for (i = 0; i < 3; ++i) {
-            if (base->gems[i].id != 0) {
-                Items_WriteInventoryGemStats(&looted->gems[i], &base->gems[i]);
-            }
-        }
-
-        looted->difficultyFlags = 3;
-        return 1;
-    }
-
-    return 0;
+bool RollEnemyShieldDrop(LootedShield& looted, const ShieldLoadout& base,
+                         ItemRandom& random) {
+  if (!DrawDrops(base.drop_rate, random)) return false;
+  WriteInventoryArmorStats(looted.shield, base.base);
+  CopyPresentGems(looted.gems, base.gems);
+  looted.header.difficulty_flags = kLootDropped;
+  return true;
 }
 
 // decomp: BATTLE.PRG _dropAccessoryRand (src/BATTLE/BATTLE.PRG/146C.c:1652)
-int Items_RollEnemyAccessoryDrop(Items_LootedAccessory* looted, Items_AccessorySpawnLoadout* base)
-{
-    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
-
-        Items_WriteInventoryArmorStats(&looted->accessory, &base->accessory);
-
-        looted->difficultyFlags = 3;
-        return 1;
-    }
-
-    return 0;
+bool RollEnemyAccessoryDrop(LootedArmor& looted,
+                            const AccessorySpawnLoadout& base,
+                            ItemRandom& random) {
+  if (!DrawDrops(base.drop_rate, random)) return false;
+  WriteInventoryArmorStats(looted.armor, base.accessory);
+  looted.header.difficulty_flags = kLootDropped;
+  return true;
 }
 
 // decomp: BATTLE.PRG _dropArmorRand (src/BATTLE/BATTLE.PRG/146C.c:1665)
-int Items_RollEnemyArmorDrop(Items_LootedArmor* looted, Items_ArmorLoadout* base)
-{
-    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
-        int i;
-
-        for (i = 0; i < 2; ++i) {
-            if (looted[i].armor.id == 0) {
-
-                Items_WriteInventoryArmorStats(&looted[i].armor, &base->armor);
-
-                looted[i].difficultyFlags = 3;
-                return 1;
-            }
-        }
-    }
-
-    return 0;
+bool RollEnemyArmorDrop(std::span<LootedArmor, kLootArmorSlots> looted,
+                        const ArmorLoadout& base, ItemRandom& random) {
+  if (!DrawDrops(base.drop_rate, random)) return false;
+  const auto empty =
+      std::find_if(looted.begin(), looted.end(),
+                   [](const LootedArmor& slot) { return slot.armor.id == 0; });
+  if (empty == looted.end()) return false;
+  WriteInventoryArmorStats(empty->armor, base.armor);
+  empty->header.difficulty_flags = kLootDropped;
+  return true;
 }
 
 // decomp: BATTLE.PRG _dropMisc (src/BATTLE/BATTLE.PRG/146C.c:1684)
-int Items_CopyGuaranteedEnemyItemDrops(Items_BattleLoot* looted, Items_MiscItemStack* base)
-{
-    int ret;
-    int i;
-
-    ret = 0;
-
-    for (i = 0; i < 2; ++i) {
-
-        looted->misc[i].itemId = base[i].id;
-
-        if (looted->misc[i].itemId) {
-            looted->misc[i].count = base[i].count;
-            looted->misc[i].difficultyFlags = 3;
-            ret = 1;
-        }
-    }
-
-    return ret;
+bool CopyGuaranteedEnemyItemDrops(
+    BattleLoot& looted,
+    std::span<const MiscItemStack, kGuaranteedDropCount> base) {
+  bool dropped = false;
+  for (std::size_t i = 0; i < kGuaranteedDropCount; ++i) {
+    auto& item = looted.misc[i];
+    item.item_id = base[i].id;
+    if (item.item_id == 0) continue;
+    item.count = base[i].count;
+    item.difficulty_flags = kLootDropped;
+    dropped = true;
+  }
+  return dropped;
 }
 
 // decomp: BATTLE.PRG _dropMiscRand (src/BATTLE/BATTLE.PRG/146C.c:1705)
-int Items_RollEnemyItemDrop(Items_BattleLoot* looted, Items_MiscItemDrop* base)
-{
-    looted->misc[2].itemId = base->id;
-
-    if (looted->misc[2].itemId) {
-        if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
-            looted->misc[2].count = 1;
-            looted->misc[2].difficultyFlags = 3;
-            return 1;
-        }
-    }
-
-    return 0;
+bool RollEnemyItemDrop(BattleLoot& looted, const MiscItemDrop& base,
+                       ItemRandom& random) {
+  auto& item = looted.misc[kRandomDropSlot];
+  item.item_id = base.id;
+  if (item.item_id == 0 || !DrawDrops(base.drop_rate, random)) return false;
+  item.count = 1;
+  item.difficulty_flags = kLootDropped;
+  return true;
 }
 
 // decomp: BATTLE.PRG _dropLoot (src/BATTLE/BATTLE.PRG/146C.c:1720)
-void Items_QueueEnemyLoot(Battle_Actor* enemy)
-{
-    int i;
-    Battle_ActorStats* enemy_stats = enemy->stats;
-    Items_LootListNode* lootList = (Items_LootListNode *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *lootList));
-
-    if (lootList == NULL) {
-        return;
+// The original rolled into the reserved node; an enemy already listed (or one
+// that dropped nothing) gives the node back.
+void QueueEnemyLoot(const EnemyDrops& enemy, LootList& list,
+                    ItemRandom& random) {
+  if (!list.ReserveEntry()) return;
+  BattleLoot loot{};
+  bool dropped = RollEnemyWeaponDrop(loot.weapon, enemy.weapon, random);
+  dropped |= RollEnemyShieldDrop(loot.shield, enemy.shield, random);
+  dropped |= RollEnemyAccessoryDrop(loot.accessory, enemy.accessory, random);
+  for (const auto& armor : enemy.limb_armor) {
+    if (armor.armor.id != 0) {
+      dropped |= RollEnemyArmorDrop(loot.armor, armor, random);
     }
-
-    VS::Core::Memory::ZeroLiveAlignedWords(lootList, sizeof *lootList);
-
-    lootList->droppedMask |= Items_RollEnemyWeaponDrop(&lootList->loot.weapon, &enemy_stats->weapon);
-    lootList->droppedMask |= Items_RollEnemyShieldDrop(&lootList->loot.shield, &enemy_stats->shield);
-    lootList->droppedMask |=
-        Items_RollEnemyAccessoryDrop(&lootList->loot.accessory, &enemy_stats->accessory);
-
-    for (i = 0; i < 6; ++i) {
-        if (enemy_stats->limbs[i].armor.armor.id != 0) {
-            lootList->droppedMask |=
-                Items_RollEnemyArmorDrop(lootList->loot.armor, &enemy_stats->limbs[i].armor);
-        }
-    }
-
-    lootList->droppedMask |= Items_CopyGuaranteedEnemyItemDrops(&lootList->loot, &enemy_stats->dropItem);
-    lootList->droppedMask |= Items_RollEnemyItemDrop(&lootList->loot, &enemy_stats->randomDropItem);
-
-    if (lootList->droppedMask != 0) {
-
-        Items_LootListNode* node = Items_lootListHead;
-        int insertLoot = 1;
-
-        while (node != NULL) {
-            if (node->droppedMask == enemy->id) {
-                insertLoot = 0;
-            }
-            node = node->next;
-        }
-
-        if (insertLoot != 0) {
-            int actorId = enemy->id;
-            Items_LootListNode* next = Items_lootListHead;
-            Items_lootListHead = lootList;
-            lootList->droppedMask = actorId;
-            lootList->next = next;
-            return;
-        }
-    }
-
-    VS::Core::Memory::FreeLiveFromHighEnd(lootList);
+  }
+  dropped |= CopyGuaranteedEnemyItemDrops(loot, enemy.guaranteed_items);
+  dropped |= RollEnemyItemDrop(loot, enemy.random_item, random);
+  if (dropped && !list.HasEntryFrom(enemy.actor_id)) {
+    list.PushReservedEntry(enemy.actor_id, loot);
+    return;
+  }
+  list.ReleaseReservedEntry();
 }
 
 // decomp: BATTLE.PRG func_8006FB48 (src/BATTLE/BATTLE.PRG/146C.c:3372)
-void Items_OpenPendingEnemyLoot(void)
-{
-    if (State_ScriptFlag(0xAB) > 2) {
-        if (Items_lootListHead != NULL) {
-            Menu_Framework_OpenLootListMenu(Items_lootListHead);
-            Field_controlMode = 2;
-            Battle_actionFlowMode = 12;
-            Field_PauseFieldForMenu();
-        } else {
-            Battle_BeginPendingAbilityReward();
-        }
-        return;
-    }
-    Battle_WaitForPostActionMovement();
+void OpenPendingEnemyLoot(const LootList& list, LootFlowHost& flow) {
+  if (flow.RewardStage() <= kEnemyLootRewardStage) {
+    flow.WaitForPostActionMovement();
+    return;
+  }
+  if (list.IsEmpty()) {
+    flow.BeginPendingAbilityReward();
+    return;
+  }
+  flow.OpenEnemyLootList();
 }
 
 // decomp: BATTLE.PRG func_8007BA98 (src/BATTLE/BATTLE.PRG/146C.c:8470)
-void Items_PresentScriptedLoot(int id0, int count0, int id1, int count1)
-{
-    Items_LootListNode* previous_loot_head;
-    Items_LootListNode* scripted_loot;
-
-    scripted_loot = (Items_LootListNode *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *scripted_loot));
-    if (scripted_loot != NULL) {
-        VS::Core::Memory::ZeroLiveAlignedWords(scripted_loot, sizeof *scripted_loot);
-        scripted_loot->loot.misc[0].itemId = id0;
-        if (id0 & 0xFFFF) {
-            scripted_loot->loot.misc[0].count = count0;
-            scripted_loot->loot.misc[0].difficultyFlags = 3;
-            scripted_loot->droppedMask |= 1;
-        }
-        scripted_loot->loot.misc[1].itemId = id1;
-        if (id1 & 0xFFFF) {
-            scripted_loot->loot.misc[1].count = count1;
-            scripted_loot->loot.misc[1].difficultyFlags = 3;
-            scripted_loot->droppedMask |= 1;
-        }
-        if (scripted_loot->droppedMask != 0) {
-            previous_loot_head = Items_lootListHead;
-            scripted_loot->droppedMask = 0xFF;
-            Items_lootListHead = scripted_loot;
-            scripted_loot->next = previous_loot_head;
-        } else {
-            VS::Core::Memory::FreeLiveFromHighEnd(scripted_loot);
-        }
+void PresentScriptedLoot(
+    std::span<const MiscItemStack, kGuaranteedDropCount> items, LootList& list,
+    LootFlowHost& flow) {
+  if (list.ReserveEntry()) {
+    BattleLoot loot{};
+    if (CopyGuaranteedEnemyItemDrops(loot, items)) {
+      list.PushReservedEntry(kScriptedLootDropper, loot);
+    } else {
+      list.ReleaseReservedEntry();
     }
-    if (Items_lootListHead != NULL) {
-        Battle_lootMenuOpened = 1;
-        Menu_Framework_OpenLootListMenu(Items_lootListHead);
-        Battle_actionFlowMode = 4;
-        Battle_BeginRewardPause();
-        return;
-    }
-    Battle_ResumeAfterRewards();
+  }
+  if (list.IsEmpty()) {
+    flow.ResumeAfterRewards();
+    return;
+  }
+  flow.OpenScriptedLootList();
 }
 
 // decomp: BATTLE.PRG func_8008A6FC (src/BATTLE/BATTLE.PRG/146C.c:15596)
-void Items_ClearRoomLootList(void)
-{
-    Items_LootListNode* loot_node = Items_lootListHead;
-
-    Menu_Loot_ResetPaging();
-
-    while (loot_node != 0) {
-        Items_LootListNode* next_loot_node = loot_node->next;
-        VS::Core::Memory::FreeLiveFromHighEnd(loot_node);
-        loot_node = next_loot_node;
-    }
-    Items_lootListHead = NULL;
+// Resetting the loot pages first is a port fix: room exit and a Combat Lab
+// stop drop the menu's references before the entries are freed.
+void ClearRoomLootList(LootList& list, LootFlowHost& flow) {
+  flow.ResetLootPaging();
+  list.Clear();
 }
 
 // decomp: BATTLE.PRG func_8008D508 (src/BATTLE/BATTLE.PRG/146C.c:16832)
-Items_TreasureChest* Items_TreasureChestAtTile(int tile_x, int tile_z, int tile_layer)
-{
-    int chest_count;
-    Items_TreasureChest* chest;
-    int i;
-
-    chest = Field_roomData.containers;
-    do {
-        if (chest != NULL) {
-            chest_count = Field_roomData.header.containersLength
-                    / sizeof *Field_roomData.containers;
-            for (i = 0; i < chest_count; ++i, ++chest) {
-                if ((chest->tileX == tile_x) && (chest->tileZ == tile_z)) {
-                    if (chest->layer == tile_layer) {
-                        return chest;
-                    }
-                }
-            }
-        }
-    } while (0);
-    return NULL;
+std::optional<std::size_t> TreasureChestAtTile(
+    std::span<const TreasureChest> chests, std::int32_t tile_x,
+    std::int32_t tile_z, std::int32_t tile_layer) {
+  const auto chest =
+      std::find_if(chests.begin(), chests.end(), [&](const TreasureChest& c) {
+        return c.tile_x == tile_x && c.tile_z == tile_z &&
+               c.layer == tile_layer;
+      });
+  if (chest == chests.end()) return std::nullopt;
+  return static_cast<std::size_t>(chest - chests.begin());
 }
 
 // decomp: BATTLE.PRG func_8008D710 (src/BATTLE/BATTLE.PRG/146C.c:16903)
-void Items_RestoreRoomChestStates(void)
-{
-    Field_MpdTileCell* collision_cell;
-    Items_TreasureChest* chest;
-    int chest_count;
-    int i;
-
-    if (Field_roomData.containers != NULL) {
-
-        chest = Field_roomData.containers;
-        chest_count =
-            Field_roomData.header.containersLength / sizeof *Field_roomData.containers;
-
-        for (i = 0; i < chest_count; ++i, ++chest) {
-            collision_cell = Field_CollisionCellAt(
-                (u_int)chest->tileX, (u_int)chest->tileZ, (int)chest->layer);
-            if (State_ScriptFlag((short)(chest->openedFlag + 0x3C0))) {
-                chest->isOpen = 1;
-                Field_FinishRoomTiltRotation(chest->lidRotationId);
-                if (collision_cell != NULL) {
-                    collision_cell->doorPassability = 5;
-                }
-            } else {
-                chest->isOpen = 0;
-                if (collision_cell != NULL) {
-                    collision_cell->doorPassability = 0;
-                }
-            }
-        }
+void RestoreRoomChestStates(std::span<TreasureChest> chests,
+                            ChestStateHost& host) {
+  for (auto& chest : chests) {
+    const auto flag =
+        static_cast<std::int16_t>(chest.opened_flag + kChestOpenedFlagBase);
+    if (host.ScriptFlag(flag)) {
+      chest.is_open = 1;
+      host.FinishLidRotation(chest.lid_rotation_id);
+      host.SetTilePassability(chest, kOpenChestPassability);
+    } else {
+      chest.is_open = 0;
+      host.SetTilePassability(chest, kClosedChestPassability);
     }
+  }
 }
 
 // decomp: BATTLE.PRG func_8008E370 (src/BATTLE/BATTLE.PRG/146C.c:17285)
-Items_TreasureChest* Items_RoomTreasureChests(int* chest_count_out)
-{
-    if (Field_roomData.containers != NULL) {
-        *chest_count_out =
-            Field_roomData.header.containersLength / sizeof *Field_roomData.containers;
-        return Field_roomData.containers;
-    }
-    *chest_count_out = 0;
-    return NULL;
+std::size_t RoomTreasureChests(std::optional<std::uint32_t> section_bytes) {
+  return section_bytes ? *section_bytes / sizeof(TreasureChest) : 0;
 }
 
 // decomp: BATTLE.PRG _loadMpdLootSection (src/BATTLE/BATTLE.PRG/146C.c:17389)
-void Items_LoadRoomChestLoot(void* data)
-{
-    if (Field_roomData.containers != NULL) {
-        VS::Core::Memory::CopyLiveAlignedWords(&Field_roomData.containers->loot, data,
-            sizeof Field_roomData.containers->loot);
-    }
+// The original wrote the first record even when the section was too short to
+// hold one.
+ItemsStatus LoadRoomChestLoot(std::span<TreasureChest> chests,
+                              const BattleLoot& loot) {
+  if (chests.empty()) return ItemsStatus::kNoChests;
+  chests.front().loot = loot;
+  return ItemsStatus::kOk;
 }
-
-}  // extern "C"
+}  // namespace VS::Items

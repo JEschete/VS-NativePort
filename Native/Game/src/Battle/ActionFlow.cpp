@@ -2,6 +2,8 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Items/InventoryLive.hpp"
+#include "Items/LootLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -43,7 +45,6 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
-#include "Items/Loot.h"
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
@@ -98,7 +99,7 @@ void Battle_ResolveEnemyDefeat(int source_actor_slot, int actorId, int count_kil
         State_UpdateWeaponKillStreak(0);
     }
 
-    Items_QueueEnemyLoot(enemy);
+    VS::Items::QueueLiveEnemyLoot(enemy);
 
     enemy->defeated = 1;
 }
@@ -384,7 +385,7 @@ void Battle_CommitSelectedAction(int target_selection_mode)
     if (Battle_actionState->selection.primaryTarget.target.targetActor == 0) {
         if (Battle_actionSelection->selectionKind != 7) {
             if (Battle_actionSelection->selectionKind == 8) {
-                Items_ConsumeMiscItem(Battle_actionSelection->executeAbility.halves[1]);
+                VS::Items::ConsumeLiveMiscItem(Battle_actionSelection->executeAbility.halves[1]);
             }
         }
         Battle_actionSelection->selectionKind = 0;

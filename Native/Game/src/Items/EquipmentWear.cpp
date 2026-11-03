@@ -1,122 +1,107 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorModelSlot.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Skeleton.h"
-#include "Battle/Action.h"
-#include "Battle/Actor.h"
-#include "Battle/Damage.h"
-#include "Items/Equipment.h"
-#include "Items/EquipmentWear.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
-#include "Items/Weapons.h"
-#include "Render/Palette.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Items/EquipmentWear.hpp"
+
+#include <algorithm>
+#include <cstddef>
+#include <cstdint>
+#include <span>
+
+#include "Items/ItemRecords.hpp"
+
+namespace VS::Items {
+namespace {
+constexpr std::int32_t kWholePercent = 100;
+constexpr std::int32_t kPpGemPercent = 5;
+// A hit adds a tenth of its DP as PP.
+constexpr std::int32_t kDpPerPp = 10;
+
+bool HasPpGem(std::span<const EquipmentPart, kWeaponGemCount> gems) {
+  return std::any_of(gems.begin(), gems.end(), [](const EquipmentPart& gem) {
+    return gem.gem_effects == kPpGemEffect;
+  });
+}
+
+// The R3000 wraps the 32-bit products and sums below (mult/mflo, addu, subu).
+constexpr std::int32_t WrappingProduct(std::int32_t lhs, std::int32_t rhs) {
+  return static_cast<std::int32_t>(static_cast<std::int64_t>(lhs) * rhs);
+}
+
+constexpr std::int32_t WrappingSum(std::int32_t lhs, std::int32_t rhs) {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(lhs) +
+                                   static_cast<std::uint32_t>(rhs));
+}
+
+// DP after a signed loss; it stops at 0.
+constexpr std::uint16_t LessDp(std::uint16_t dp, std::int32_t loss) {
+  return dp < loss
+             ? std::uint16_t{0}
+             : static_cast<std::uint16_t>(static_cast<std::uint32_t>(dp) -
+                                          static_cast<std::uint32_t>(loss));
+}
+
+constexpr std::int32_t PpGain(std::int32_t dp_amount, std::int32_t percent) {
+  return WrappingProduct(dp_amount / kDpPerPp, percent) / kWholePercent;
+}
+
+// PP after a gain; it stops at the maximum.
+constexpr std::uint16_t RaisedPp(std::uint16_t pp, std::uint16_t max_pp,
+                                 std::int32_t gain) {
+  const auto raised = WrappingSum(pp, gain);
+  return raised < max_pp ? static_cast<std::uint16_t>(raised) : max_pp;
+}
+}  // namespace
 
 // decomp: BATTLE.PRG func_8007FF8C (src/BATTLE/BATTLE.PRG/146C.c:10594)
-short Items_ApplyPpGemMultiplier(int arg0, short base_pp_amount, char* gem_scan_bytes)
-{
-    int i;
-    int pp_percent = 100;
-    int has_pp_gem = 0;
-
-    for (i = 0; i < 3; ++i) {
-        if (gem_scan_bytes[i * 0x30 + 0xCA] == 9) {
-            has_pp_gem = 1;
-        }
-    }
-
-    if (has_pp_gem != 0) {
-        pp_percent += 5;
-    }
-    return (base_pp_amount * pp_percent) / 100;
+// The original scanned the gems through the actor record (byte 0xCA); it took
+// an argument it never read. No code calls it.
+std::int16_t ApplyPpGemMultiplier(std::int16_t base_pp_amount,
+                                  const WeaponLoadout& weapon) {
+  const auto percent =
+      kWholePercent + (HasPpGem(weapon.gems) ? kPpGemPercent : 0);
+  return static_cast<std::int16_t>(base_pp_amount * percent / kWholePercent);
 }
 
 // decomp: BATTLE.PRG _adjustDpPp (src/BATTLE/BATTLE.PRG/146C.c:10689)
-void Items_ConsumeHitEquipmentDp(
-    Battle_ActionDefinition* action, Battle_ActorStats* source, Battle_ActorStats* target, int amount)
-{
-    int i;
-
-    if (action->type != Battle_ActionType_Spell) {
-        if (source->weapon.currentDp >= amount) {
-            source->weapon.currentDp -= amount;
-        } else {
-            source->weapon.currentDp = 0;
-        }
-    }
-
-    if (Battle_actors[target->actorId]->weaponDrawn & 1) {
-        if (target->shield.currentDp >= amount) {
-            target->shield.currentDp -= amount;
-        } else {
-            target->shield.currentDp = 0;
-        }
-    }
-
-    for (i = 0; i < 6; ++i) {
-        if (Battle_limbArmorDpLoss[i] != 0) {
-            if (target->limbs[i].armor.currentDp >= Battle_limbArmorDpLoss[i]) {
-                target->limbs[i].armor.currentDp -= Battle_limbArmorDpLoss[i];
-            } else {
-                target->limbs[i].armor.currentDp = 0;
-            }
-        }
-    }
+ItemsStatus ConsumeHitEquipmentDp(
+    const ItemAction& action, WeaponLoadout& attacker_weapon,
+    DefenderEquipment& defender,
+    std::span<const std::int16_t, kLimbCount> limb_dp_loss,
+    std::int32_t amount) {
+  if (!defender.weapon_drawn) return ItemsStatus::kActorOutOfRange;
+  if (!action.IsSpell()) {
+    attacker_weapon.current_dp = LessDp(attacker_weapon.current_dp, amount);
+  }
+  if (*defender.weapon_drawn) {
+    defender.shield.current_dp = LessDp(defender.shield.current_dp, amount);
+  }
+  for (std::size_t i = 0; i < kLimbCount; ++i) {
+    if (limb_dp_loss[i] == 0) continue;
+    auto& armor = defender.limbs[i].armor;
+    armor.current_dp = LessDp(armor.current_dp, limb_dp_loss[i]);
+  }
+  return ItemsStatus::kOk;
 }
 
 // decomp: BATTLE.PRG func_800803A4 (src/BATTLE/BATTLE.PRG/146C.c:10721)
-void Items_AccumulateHitEquipmentPp(
-    Battle_ActionDefinition* action, Battle_ActorStats* source_stats, Battle_ActorStats* target_stats, int dp_amount)
-{
-    int has_pp_gem;
-    int pp_percent_or_gain;
-    int i;
-
-    pp_percent_or_gain = 100;
-
-    if (action->type != Battle_ActionType_Spell) {
-        has_pp_gem = 0;
-
-        for (i = 0; i < 3; ++i) {
-            if (source_stats->weapon.gems[i].gemEffects == 9) {
-                has_pp_gem = 1;
-            }
-        }
-
-        if (has_pp_gem != 0) {
-            pp_percent_or_gain += 5;
-        }
-
-        pp_percent_or_gain = (((dp_amount / 10) * pp_percent_or_gain) / 100);
-        if (source_stats->weapon.currentPp + pp_percent_or_gain < source_stats->weapon.maxPp) {
-            source_stats->weapon.currentPp = source_stats->weapon.currentPp + pp_percent_or_gain;
-        } else {
-            source_stats->weapon.currentPp = source_stats->weapon.maxPp;
-        }
-    }
-
-    pp_percent_or_gain = 100;
-
-    if (Battle_actors[target_stats->actorId]->weaponDrawn & 1) {
-        has_pp_gem = 0;
-        for (i = 0; i < 3; ++i) {
-            if (target_stats->shield.gems[i].gemEffects == 9) {
-                has_pp_gem = 1;
-            }
-        }
-        if (has_pp_gem != 0) {
-            pp_percent_or_gain -= 5;
-        }
-
-        pp_percent_or_gain = (((dp_amount / 10) * pp_percent_or_gain) / 100);
-        if (target_stats->shield.currentPp + pp_percent_or_gain < target_stats->shield.maxPp != 0) {
-            target_stats->shield.currentPp = target_stats->shield.currentPp + pp_percent_or_gain;
-        } else {
-            target_stats->shield.currentPp = target_stats->shield.maxPp;
-        }
-    }
+ItemsStatus AccumulateHitEquipmentPp(const ItemAction& action,
+                                     WeaponLoadout& attacker_weapon,
+                                     DefenderEquipment& defender,
+                                     std::int32_t dp_amount) {
+  if (!defender.weapon_drawn) return ItemsStatus::kActorOutOfRange;
+  if (!action.IsSpell()) {
+    const auto percent =
+        kWholePercent + (HasPpGem(attacker_weapon.gems) ? kPpGemPercent : 0);
+    attacker_weapon.current_pp =
+        RaisedPp(attacker_weapon.current_pp, attacker_weapon.max_pp,
+                 PpGain(dp_amount, percent));
+  }
+  if (*defender.weapon_drawn) {
+    auto& shield = defender.shield;
+    const auto percent =
+        kWholePercent - (HasPpGem(shield.gems) ? kPpGemPercent : 0);
+    shield.current_pp =
+        RaisedPp(shield.current_pp, shield.max_pp, PpGain(dp_amount, percent));
+  }
+  return ItemsStatus::kOk;
 }
-
-}  // extern "C"
+}  // namespace VS::Items

@@ -23,6 +23,8 @@
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Save/RuntimeSnapshot.hpp"
 
 extern "C" {
@@ -57,8 +59,9 @@ extern "C" {
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
-#include "Items/EquipmentStats.h"
+#include "Items/Equipment.h"
 #include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Render/Camera.h"
 #include "Render/UiPrimitives.h"
 #include "State/Flags.h"
@@ -511,24 +514,27 @@ struct RuntimeFixture {
     indices.armor[1] = indices.gems[1] = 2;
     auto& runtime_weapon = player_stats.weapon;
     runtime_weapon.index = 1;
-    Items_ReadInventoryBladeStats(&runtime_weapon.blade, &blade);
-    Items_ReadInventoryGripStats(&runtime_weapon.grip, &grip);
-    Items_ReadInventoryGemStats(&runtime_weapon.gems[0], &items.gems[0]);
+    VS::Items::ReadLiveInventoryBladeStats(&runtime_weapon.blade, &blade);
+    VS::Items::ReadLiveInventoryGripStats(&runtime_weapon.grip, &grip);
+    VS::Items::ReadLiveInventoryGemStats(&runtime_weapon.gems[0],
+                                         &items.gems[0]);
     runtime_weapon.currentDp = 101;
     runtime_weapon.currentPp = 67;
     runtime_weapon.name[3] = static_cast<char>(0xE7);
     player_stats.shield.index = 1;
-    Items_ReadInventoryArmorStats(&player_stats.shield.base, &shield.base);
-    Items_ReadInventoryGemStats(&player_stats.shield.gems[0], &items.gems[1]);
+    VS::Items::ReadLiveInventoryArmorStats(&player_stats.shield.base,
+                                           &shield.base);
+    VS::Items::ReadLiveInventoryGemStats(&player_stats.shield.gems[0],
+                                         &items.gems[1]);
     player_stats.shield.currentDp = 201;
     player_stats.shield.currentPp = 37;
     auto& runtime_armor = player_stats.limbs[0].armor;
     runtime_armor.index = 1;
-    Items_ReadInventoryArmorStats(&runtime_armor.armor, &armor);
+    VS::Items::ReadLiveInventoryArmorStats(&runtime_armor.armor, &armor);
     runtime_armor.currentDp = 321;
     player_stats.accessory.index = 2;
-    Items_ReadInventoryArmorStats(&player_stats.accessory.accessory,
-                                  &accessory);
+    VS::Items::ReadLiveInventoryArmorStats(&player_stats.accessory.accessory,
+                                           &accessory);
   }
 
   void AddEnemy() {
@@ -1127,8 +1133,8 @@ void ConsumeOrderedMiscItems() {
   order[0] = 11;
   order[1] = 12;
   order[2] = 10;
-  REQUIRE(Items_ConsumeMiscItem(432) == 1);
-  REQUIRE(Items_ConsumeMiscItem(323) == 1);
+  REQUIRE(VS::Items::ConsumeLiveMiscItem(432) == 1);
+  REQUIRE(VS::Items::ConsumeLiveMiscItem(323) == 1);
 }
 
 void CheckNoStaleDisplayRows(const Save::Snapshot& state) {

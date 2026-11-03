@@ -1,6 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
+#include "Items/InventoryLive.hpp"
+#include "Items/LootLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -88,7 +90,7 @@ void Field_ApplyUnlockEffectToRoomObject(SVECTOR* target_position)
 
     case 0x20:
     case 0x100:
-        chest_records = Items_RoomTreasureChests(&room_object_count);
+        chest_records = VS::Items::LiveRoomTreasureChests(&room_object_count);
 
         if ((chest_records[target_position->pad & 0xF].lockLevel < lock_level_upper_exclusive)
             && (chest_records[target_position->pad & 0xF].lockLevel >= 2)
@@ -142,10 +144,10 @@ int Field_InteractWithLockedRoomObject(Field_MpdLockTrigger* door_trigger)
                 break;
             case 1:
             case 3:
-                if (Items_InventoryItemCount(door_trigger->keyOrSigil) != 0) {
+                if (VS::Items::CountLiveInventoryItem(door_trigger->keyOrSigil) != 0) {
                     if (door_trigger->keyOrSigil >= Items_KeyItemId_ChamomileSigil) {
                         State_SetScriptFlag(door_trigger->keyOrSigil + 0x1B6, 2);
-                        Items_ConsumeMiscItem(door_trigger->keyOrSigil);
+                        VS::Items::ConsumeLiveMiscItem(door_trigger->keyOrSigil);
                     }
                     door_trigger->trigger.lockState.lock.state = 0;
                     action = 2;
@@ -241,12 +243,12 @@ void Field_TryOpenChest(Field_MpdLockTrigger* chest_trigger, int arg1)
     case 1:
     case 3:
         if (!State_ScriptFlag(chest_trigger->isOpen + 0x1B6)) {
-            if (Items_InventoryItemCount(chest_trigger->isOpen) == 0) {
+            if (VS::Items::CountLiveInventoryItem(chest_trigger->isOpen) == 0) {
                 break;
             }
             State_SetScriptFlag(chest_trigger->isOpen + 0x1B6, 1);
             if (chest_trigger->isOpen >= 0x1D2) {
-                Items_ConsumeMiscItem(chest_trigger->isOpen);
+                VS::Items::ConsumeLiveMiscItem(chest_trigger->isOpen);
             }
         }
         chest_trigger->keyOrSigil = 0;
@@ -535,7 +537,7 @@ Items_TreasureChest* Field_FindFacingUnlootedChest(int actor_index)
 
     Actors_ActorPlacement(actor_index, &actor_placement);
     facing_quadrant = Field_TileInFrontOfActor(&actor_placement, facing_tile);
-    facing_chest = Items_TreasureChestAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
+    facing_chest = VS::Items::FindLiveTreasureChestAtTile(facing_tile_bytes[0], facing_tile_bytes[2], facing_tile_bytes[1]);
 
     if ((facing_chest != NULL) && (facing_chest->facing == facing_quadrant)) {
         if (!State_ScriptFlag((facing_chest->openedFlag + 0x3C0))) {

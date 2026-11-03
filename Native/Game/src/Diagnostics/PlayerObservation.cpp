@@ -12,6 +12,7 @@
 #include <utility>
 
 #include "Diagnostics/GameplayTrace.hpp"
+#include "Items/LootLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -462,11 +463,11 @@ void InspectRoomDoors(PlayerObservationState& state) {
   }
 }
 
-// Mirrors Items_RoomTreasureChests (func_8008E370) and the opened-flag test in
-// Field_FindFacingUnlootedChest (func_80074950): openedFlag + 0x3C0.
+// Mirrors VS::Items::RoomTreasureChests (func_8008E370) and the opened-flag
+// test in Field_FindFacingUnlootedChest (func_80074950): openedFlag + 0x3C0.
 void InspectRoomChests(PlayerObservationState& state) {
   int count = 0;
-  const auto* chests = Items_RoomTreasureChests(&count);
+  const auto* chests = VS::Items::LiveRoomTreasureChests(&count);
   if (chests == nullptr) return;
   if (Field_roomData.header.containersLength % sizeof(Items_TreasureChest) !=
       0) {

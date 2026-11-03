@@ -2,6 +2,8 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -12,7 +14,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Framework/EquipmentDetails.h"
@@ -683,13 +684,13 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 
                 if (var_s1 != 0) {
                     if (Audio_Seq_unusedInventory.weapons[var_s1 - 1].isEquipped != 0) {
-                        Items_Inventory_UnequipWeapon();
+                        VS::Items::Inventory::UnequipLiveWeapon();
                         Menu_Setup_bladeCombinationState = 6;
                     }
                     Menu_Setup_DisassembleWeapon(var_s1 - 1);
                 }
 
-                Items_Inventory_ClearItemSlot(Items_ItemCategory_Blade, Menu_Setup_combiningBladeIds[i]);
+                VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Blade, Menu_Setup_combiningBladeIds[i]);
             }
 
             itemId = Menu_Setup_combiningBladeIds[0];
@@ -699,7 +700,7 @@ int Menu_Setup_UpdateBladeCombination(int initialize_blade_combination)
 
             blade->index = itemId;
 
-            Items_Inventory_RebuildDisplayIndices(1);
+            VS::Items::Inventory::RebuildLiveDisplayIndices(1);
 
             return Menu_Setup_bladeCombinationState != 6;
 
@@ -1276,12 +1277,12 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
                 itemId_3 = temp_s1 - 1;
 
                 if (Audio_Seq_unusedInventory.shields[itemId_3].isEquipped != 0) {
-                    Items_Inventory_UnequipShield();
+                    VS::Items::Inventory::UnequipLiveShield();
                     Menu_Setup_shieldCombinationState = 6;
                 }
 
                 Menu_Setup_DetachShieldGems(itemId_3);
-                Items_Inventory_ClearItemSlot(Items_ItemCategory_Shield, temp_s1);
+                VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Shield, temp_s1);
             }
 
             temp_s2 = Menu_Setup_itemsToCombine[0];
@@ -1291,7 +1292,7 @@ int Menu_Setup_UpdateShieldCombination(int initialize_shield_combination)
 
             shield1->index = temp_s2;
 
-            Items_Inventory_RebuildDisplayIndices(3);
+            VS::Items::Inventory::RebuildLiveDisplayIndices(3);
 
             return Menu_Setup_shieldCombinationState != 6;
 
@@ -1758,16 +1759,16 @@ int Menu_Setup_UpdateArmorCombination(int initialize_armor_combination)
                 armor = &Audio_Seq_unusedInventory.armor[Menu_Setup_combiningArmorIds[i] - 1];
                 var_s1 = armor->limb;
                 if (var_s1 != 0) {
-                    Items_EquipAshleyArmor(var_s1 - 1, NULL);
+                    VS::Items::EquipLiveAshleyArmor(var_s1 - 1, NULL);
                     armor->limb = 0;
                 }
-                Items_Inventory_ClearItemSlot(Items_ItemCategory_Armor, Menu_Setup_combiningArmorIds[i]);
+                VS::Items::Inventory::ClearLiveItemSlot(Items_ItemCategory_Armor, Menu_Setup_combiningArmorIds[i]);
             }
             itemId = Menu_Setup_combiningArmorIds[0];
             armor = &Audio_Seq_unusedInventory.armor[itemId - 1];
             VS::Core::Memory::CopyLiveHalfwords(armor, &Menu_Setup_armorBuf, sizeof *armor);
             armor->index = itemId;
-            Items_Inventory_RebuildDisplayIndices(4);
+            VS::Items::Inventory::RebuildLiveDisplayIndices(4);
             return 1;
         case 2:
             VS::Menu::PlayLeaveSound();
@@ -1799,7 +1800,7 @@ int Menu_Setup_CountCombinationIngredients(int category)
             count += is_combinable_armor;
         }
     } else {
-        count = Items_Inventory_CountItems((category * 2) | 1, NULL);
+        count = VS::Items::Inventory::CountLiveItems((category * 2) | 1, NULL);
     }
     return count;
 }

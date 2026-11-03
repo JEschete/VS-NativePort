@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/EncodedTextLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Files.h"
@@ -786,7 +786,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
             VS::Core::Memory::CopyLiveBytesBackward(weapon->name, Menu_Rename_nameEditorNameBuffer, sizeof Menu_Rename_nameEditorNameBuffer);
 
             if (weapon->isEquipped != 0) {
-                Items_EquipAshleyWeapon(weapon);
+                VS::Items::EquipLiveAshleyWeapon(weapon);
             }
         } else {
             VS::Menu::PlayLeaveSound();

@@ -157,11 +157,46 @@ _SAVE_SNAPSHOT_LIVE = {
     "CaptureLiveAshleySnapshot": ("F03443",),
 }
 
+# #276 slice 18 (items): Live adapters keeping the original call shape over the typed VS::Items cores, by header
+# and owned row. Rows absent here (F00024-F00026, F00036, F00037, F00039-F00044, F00395, F00400-F00402, F02505,
+# F02507) have no generated callers outside their own cores.
+_ITEMS_LIVE = {
+    r"Native\Game\include\Items\EquipmentLive.hpp": (
+        ("BuildLiveWeaponStatsFromParts", "F00011"), ("BuildLiveShieldStatsFromParts", "F00012"),
+        ("BuildLiveAccessoryStatsFromPart", "F00013"), ("BuildLiveArmorStatsFromPart", "F00014"),
+        ("ReadLiveInventoryBladeStats", "F00015"), ("ReadLiveInventoryGripStats", "F00016"),
+        ("ReadLiveInventoryArmorStats", "F00017"), ("ReadLiveInventoryGemStats", "F00018"),
+        ("LoadLiveInventoryWeaponStats", "F00019"), ("LoadLiveInventoryShieldStats", "F00020"),
+        ("LoadLiveInventoryArmorStats", "F00021"), ("LoadLiveInventoryAccessoryStats", "F00022"),
+        ("EquipLiveAshleyWeapon", "F00027"), ("EquipLiveAshleyShield", "F00028"),
+        ("EquipLiveAshleyArmor", "F00029"), ("EquipLiveAshleyAccessory", "F00030"),
+        ("WriteLiveInventoryBladeStats", "F00031"), ("WriteLiveInventoryGripStats", "F00032"),
+        ("WriteLiveInventoryGemStats", "F00033"), ("WriteLiveInventoryArmorStats", "F00034"),
+        ("StoreLiveInventoryWeaponStats", "F00035"), ("StoreLiveInventoryAccessoryStats", "F00038"),
+        ("RebuildLiveArmorClassAffinity", "F00335"), ("RebuildLiveShieldClassAffinity", "F00336"),
+        ("RebuildLiveWeaponClassAffinity", "F00337"), ("ConsumeLiveHitEquipmentDp", "F00398"),
+        ("AccumulateLiveHitEquipmentPp", "F00399"), ("GrowLiveDefenderEquipmentRatings", "F00403"),
+        ("GrowLiveAttackerWeaponRatings", "F00404"), ("CalculateLiveItemRecovery", "F00423")),
+    r"Native\Game\include\Items\LootLive.hpp": (
+        ("QueueLiveEnemyLoot", "F00045"), ("OpenLivePendingEnemyLoot", "F00095"),
+        ("PresentLiveScriptedLoot", "F00230"), ("ClearLiveRoomLootList", "F00549"),
+        ("FindLiveTreasureChestAtTile", "F00603"), ("RestoreLiveRoomChestStates", "F00608"),
+        ("LiveRoomTreasureChests", "F00622"), ("LoadLiveRoomChestLoot", "F00631")),
+    r"Native\Game\include\Items\InventoryLive.hpp": (
+        ("CountLiveInventoryItem", "F00338"), ("ConsumeLiveMiscItem", "F01400"),
+        ("Inventory::UnequipLiveWeapon", "F02500"), ("Inventory::UnequipLiveShield", "F02501"),
+        ("Inventory::ClearLiveItemSlot", "F02502"), ("Inventory::FindLiveDisplayPosition", "F02506"),
+        ("Inventory::RebuildLiveDisplayIndices", "F02508"), ("Inventory::CountLiveItems", "F02509"),
+        ("Inventory::FindLiveFirstEmptySlot", "F02510"), ("Inventory::CopyLiveItem", "F02511"),
+        ("Inventory::StoreLiveEquippedStats", "F02551")),
+}
+
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
        for header, rows in _RENDER_LIVE.items() for name, _ in rows},
+    **{f"VS::Items::{name}": header for header, rows in _ITEMS_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -600,7 +635,7 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Save::MemoryCard::{name}" for name, fids in _SAVE_MEMORY_CARD_LIVE.items() for fid in fids
 } | {
     fid: f"VS::Save::{name}" for name, fids in _SAVE_SNAPSHOT_LIVE.items() for fid in fids
-}
+} | {fid: f"VS::Items::{name}" for rows in _ITEMS_LIVE.values() for name, fid in rows}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -868,6 +903,7 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x8004274C, "VS::Core::InitializeLiveRandomShuffleTable"),  # F03433
     ("SLUS_010.40", 0x800427A8, "VS::Core::NextLiveRandomBounded"),  # F03434
     ("SLUS_010.40", 0x80042860, "VS::Core::NextLiveRandomAveraged"),  # F03435
+    ("BATTLE/BATTLE.PRG", 0x80083430, "VS::Items::CalculateLiveItemRecovery"),  # F00423 Battle_statCalculators[15]
 )
 
 MODULE_FUNCTION_ENTRIES = (
@@ -1124,7 +1160,7 @@ void Menu_Loot_BeginPaging(Items_LootListNode* nodes)
 
 int Menu_Loot_HasStagingSpace(int category, int quantity)
 {
-    return Items_Inventory_CountItems(category, Menu_Loot_inventory) + quantity
+    return VS::Items::Inventory::CountLiveItems(category, Menu_Loot_inventory) + quantity
         <= Items_Inventory_inventoryItemCapacities[category];
 }
 
@@ -1198,12 +1234,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Consolidation backup uses the same row allocation as the live screen."),
         ("sizeof *Menu_Loot_lootList * 160", "sizeof *Menu_Loot_lootList * kMenuLootRowCapacity",
          "Consolidation restoration includes every supported row."),
-    ],
-    "F00549": [
-        ("    Items_LootListNode* var_a0 = Items_lootListHead;",
-         "    Items_LootListNode* var_a0 = Items_lootListHead;\n\n"
-         "    Menu_Loot_ResetPaging();",
-         "Room exit and Combat Lab stop invalidate page references before freeing their source nodes."),
     ],
     "F01867": [
         ("            curveSamples[segment] = segment * 0x600 + Core_Random_Rand() % width - width / 2;",
@@ -1838,17 +1868,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            Boot_ResetMainMenuStatics();\n"
          "        }",
          "5BF94.c:vs_battle_loadMenuPrg MAINMENU reload restores C48.c:_quitDelay and other initialized menu statics"),
-    ],
-    "F02511": [
-        ("        int count = source->count;\n\n        Items_Inventory_RebuildDisplayIndices(6);",
-         "        int count = source->count;\n\n"
-         "        /* Probe before merging: rejected claims retain their whole loot row. */\n"
-         "        if ((write != 0) && (Items_Inventory_CopyItem(Items_ItemCategory_Misc,\n"
-         "                targetInventory, sourceItemIndex, sourceInventory) == 0)) {\n"
-         "            return 0;\n"
-         "        }\n\n"
-         "        Items_Inventory_RebuildDisplayIndices(6);",
-         "misc-item writes must preserve inventory when the whole stack cannot fit; reuse the non-writing capacity query before mutation"),
     ],
     "F02535": [
         ("((u_long)poly << 8) >> 8", "LegacyGpu_Handle(poly)",
@@ -7558,21 +7577,6 @@ for identifier, old, new, evidence in (
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
     for name, bindings, evidence in (
-        ("Items::RemoveEquipmentBoostOnEquip",
-         (('temp_s0', 'ashley_stats'),),
-         "F00024 Original func_8006B214 at BATTLE/BATTLE.PRG/146C.c:1356 obtains vs_battle_characterState->unk3C, tests status 0x100000, queues that actor's label and removes the boost. Native EquipAshleyWeapon/Shield/Armor/Accessory invoke this after loading equipment; the pointer remains Ashley's stats throughout."),
-        ("Items::RemoveWeaponEnchantmentOnEquip",
-         (('temp_s0', 'ashley_stats'),),
-         "F00025 Original func_8006B270 at 146C.c:1366 obtains the character's stats and clears weapon-enchantment bits 0x01E00000 after queuing the actor-status label. Native EquipAshleyWeapon calls it after RemoveEquipmentBoostOnEquip."),
-        ("Items::RemoveArmorEnchantmentOnEquip",
-         (('temp_s0', 'ashley_stats'),),
-         "F00026 Original func_8006B2D4 at 146C.c:1376 obtains the character's stats and clears armor-enchantment bits 0x1E000000 after queuing the actor-status label. Native shield/armor/accessory equip paths are its consumers."),
-        ("Items::QueueEnemyLoot",
-         (('temp_s2', 'enemy_stats'),),
-         "F00045 Original _dropLoot at 146C.c:1720 takes enemy->unk3C, passes its weapon/shield/accessory, six limb armors and guaranteed/random misc drops to the corresponding drop producers. The resulting heap node is linked only when a drop exists and the enemy id is not already present; otherwise freed. The candidate always refers to enemy stats, not the allocated loot node."),
-        ("Items::PresentScriptedLoot",
-         (('temp_a0', 'previous_loot_head'), ('temp_v0', 'scripted_loot')),
-         "F00230 Original func_8007BA98 at 146C.c:8470 allocates/zeros a loot-list node, fills two scripted item/count pairs, marks difficulty flags 3 and prepends it with owner marker 0xFF; the old list head becomes next. An empty node is freed. The surviving list is passed to the loot menu and reward pause, or the reward flow resumes."),
         ("State::StartSceneTimer",
          (('arg0', 'timer_mode'), ('arg1', 'reset_scope'), ('arg2', 'packed_time')),
          "F00232 Original func_8007BBD8 at 146C.c:8511 writes D_80050468.unk0 and unk2, clears time, and for mode !=1 extracts frames/seconds/minutes/hours from successive bytes of arg2. It publishes flags A0-A3 and shows the puzzle timer. Native Event/ScriptVm.c supplies Event_kSceneTimerModes and Event_kSceneTimerResetScopes, corroborating mode/reset-scope meanings; State_SceneTimer layout names those exact fields."),
@@ -7582,54 +7586,9 @@ REGEX_FIXES += [
         ("State::SetTickSpeed",
          (('arg0', 'requested_tick_speed'),),
          "F00256 Original func_8007C36C at 146C.c:8740 accepts only 2 or 4 into vs_gametime_tickspeed and returns the resulting value. State_UpdateEventTimer and State_UpdatePlayTimeAndLoading consume that global as frame increments; this is a requested speed, not an unconditional setter value."),
-        ("Items::RebuildArmorClassAffinity",
-         (('arg0', 'actor_stats'), ('arg1', 'limb_index')),
-         "F00335 Original _calculateArmorClassAffinity at 146C.c:9582 reads limbs[arg1].armor.armor classes/affinities, copies both current banks and adds modifiers only to affinity bank zero. GrowDefenderEquipmentRatings supplies its selected non-shield limb index; no type or u_short arithmetic change is proposed."),
-        ("Items::RebuildShieldClassAffinity",
-         (('arg0', 'actor_stats'), ('temp_v0_2', 'combined_rating')),
-         "F00336 Original _calculateShieldClassAffinity at 146C.c:9600 combines shield base plus three gem class ratings, then affinity ratings, in the same short temporary, writes both current banks, and adds affinity modifiers to bank zero. The local is a combined rating across both domains, not only an affinity."),
-        ("Items::RebuildWeaponClassAffinity",
-         (('arg0', 'actor_stats'), ('temp_v0_2', 'combined_rating')),
-         "F00337 Original _calculateWeaponClassAffinity at 146C.c:9622 combines blade plus three gems for six classes and seven affinities, writes current banks, then adds modifiers to affinity bank zero. GrowAttackerWeaponRatings calls it after changing blade ratings. Preserve the short temporary width."),
-        ("Items::ApplyPpGemMultiplier",
-         (('arg1', 'base_pp_amount'), ('arg2', 'gem_scan_bytes'), ('var_t0', 'pp_percent'), ('var_a3', 'has_pp_gem')),
-         "F00395 Original func_8007FF8C at 146C.c:10594 scans exactly three bytes at arg2[i*0x30+0xCA] for 9, raises the percent from 100 to 105 once if found, and returns arg1*percent/100. AccumulateHitEquipmentPp independently tests typed gemEffects==9. gem_scan_bytes deliberately does not assert a concrete loadout base: +0xCA is not the standard native weapon/shield gems[0].gemEffects offset. No pointer retyping or offset repair is proposed."),
-        ("Items::AccumulateHitEquipmentPp",
-         (('arg1', 'source_stats'), ('arg2', 'target_stats'), ('arg3', 'dp_amount'), ('var_t0', 'has_pp_gem'), ('var_t1', 'pp_percent_or_gain')),
-         "F00399 Original func_800803A4 at 146C.c:10721 uses source weapon outside spell actions and drawn target shield, scans each three-gem array for effect 9, then reuses var_t1 from percentage to ((arg3/10)*percentage)/100 and caps currentPp at maxPp. Native Battle/ActionEffects.c passes the same amount to ConsumeHitEquipmentDp and this function. Preserve the source +5 versus target -5 behavior and the existing chained comparison exactly."),
-        ("Items::GrowOpposingEquipmentAffinity",
-         (('arg3', 'equipment_label_id'),),
-         "F00400 Original _triggerArmorAffinityChange at 146C.c:10773 forwards arg3 unchanged as the first argument of func_80096768 for each increase/decrease; native Battle_QueueEquipmentStatChange consumes that value as the equipment/body-part label. GrowAttackerWeaponRatings supplies 0xF0 for weapon. Existing action/equipment/affinity/actorId and shadowed randVal names are already meaningful and untouched."),
-        ("Items::GrowMatchingEquipmentAffinity",
-         (('arg3', 'equipment_label_id'),),
-         "F00401 Original _triggerWeaponAffinityChange at 146C.c:10892 forwards arg3 to every equipment-change notification. GrowDefenderEquipmentRatings supplies 0xF1 for shield or the chosen limb.nameIndex for armor. Existing suppressNotification and the separate meaningful shadowed randVal bindings remain unchanged."),
-        ("Items::GrowEquipmentClass",
-         (('arg3', 'equipment_label_id'),),
-         "F00402 Original _triggerClassChange at 146C.c:11011 passes arg3 as func_80096768's first argument when the target or opposing class changes. Weapon/shield/limb callers supply 0xF0/0xF1/nameIndex respectively. The unused action attribute, class parameter spelling/type, and all randVal scopes are preserved."),
-        ("Items::GrowDefenderEquipmentRatings",
-         (('arg0', 'action'), ('arg1', 'defender_stats'), ('arg2', 'attacker_class_id'), ('arg3', 'attacker_affinity_id'), ('arg4', 'hit_limb_index'), ('sp10', 'eligible_equipment_slots'), ('temp_s2', 'selected_equipment_slot'), ('var_a0', 'eligible_equipment_count')),
-         "F00403 Original func_80080C9C at 146C.c:11090 collects eligible armor limb indices and shield sentinel 0xFF according to action category, randomly selects one, then grows ratings and rebuilds that item's current bank. Native Battle/Damage.c supplies targetActor, sourceActor->enemyClass+1, sourceAffinity+1 and limb; zero class/affinity suppresses that growth. The inner and outer equipment bindings are meaningful and intentionally unchanged. The slot array remains int[8], including its shield sentinel."),
-        ("Items::GrowAttackerWeaponRatings",
-         (('arg1', 'attacker_stats'), ('arg2', 'defender_class_id'), ('arg3', 'defender_affinity_id'), ('temp_s1', 'weapon_blade')),
-         "F00404 Original func_80080F78 at 146C.c:11178 uses arg1->weapon.blade for nonspell class/opposing-affinity growth and rebuilds weapon ratings. Native Battle/Damage.c passes sourceActor, target enemyClass+1, targetAffinity+1; zero suppresses growth. The blade pointer, not the complete loadout, is passed to growth helpers."),
-        ("Items::CalculateItemRecovery",
-         (('arg0', 'action'), ('arg3', 'hit_index'), ('arg4', 'add_random_variation'), ('temp_s0', 'recovery_amount'), ('temp_v0', 'random_variation')),
-         "F00423 Original _itemRecovery at 146C.c:12109 starts with five times the chosen hit's statFactor, optionally adds averaged RNG(0xB)-5, clamps negative results to zero and returns a short. Native ModulePointers retains its original export. Both intermediate short widths, attributes and the unchanged result flow are preserved."),
         ("State::UpdateEventTimer",
          (('var_s1', 'timer_event_triggered'),),
          "F00524 Original func_800882F4 at 146C.c:14499 returns zero for inactive mode, updates count-up/count-down time and flags A0-A3, then sets var_s1=1 only if the frames reach zero and func_800BEC58(16,0,0,0)==1. Native Battle/StatusEffects.c consumes that return as the timer-event trigger result. This is not a timer-expired boolean: it depends on event evaluation."),
-        ("Items::ClearRoomLootList",
-         (('var_a0', 'loot_node'), ('temp_s0', 'next_loot_node')),
-         "F00549 Original func_8008A6FC at 146C.c:15596 walks _lootListHead, saves next before freeing each node, and clears the head. Native adds the existing Menu_Loot_ResetPaging call before this walk; it remains untouched. Names distinguish the current allocation from the saved next pointer."),
-        ("Items::TreasureChestAtTile",
-         (('arg0', 'tile_x'), ('arg1', 'tile_z'), ('arg2', 'tile_layer'), ('temp_t1', 'chest_count'), ('var_a3', 'chest')),
-         "F00603 Original func_8008D508 at 146C.c:16832 traverses the MPD containers array for containersLength/sizeof(element), tests tileX/tileZ/layer and returns the matching pointer or null. Native Field_roomData owns the array; Items_TreasureChest exposes the three corresponding fields. tile_layer deliberately remains distinct from the existing qualified chest->layer member."),
-        ("Items::RestoreRoomChestStates",
-         (('temp_s0', 'collision_cell'), ('var_s3', 'chest'), ('temp_s4', 'chest_count')),
-         "F00608 Original func_8008D710 at 146C.c:16903 traverses MPD containers, resolves each tile/layer collision cell, reads openedFlag+0x3C0, restores isOpen/lid rotation and writes cell doorPassability 5 or 0 if the cell exists. Count comes from the same section-length/element-stride contract as TreasureChestAtTile."),
-        ("Items::RoomTreasureChests",
-         (('arg0', 'chest_count_out'),),
-         "F00622 Original func_8008E370 at 146C.c:17285 returns the containers pointer and writes its section-length-derived element count through arg0; on absent data it writes zero and returns null. The parameter is an output count, not a byte length."),
         ("State::ResetZoneScriptFlags",
          (('arg0', 'preserve_zone_flags'),),
          "F01256 Original func_800BEB9C at 4A0A8.c:4263 resets flags 64..127 only for zero. Native Field/RoomLoading.c passes one for gameEntryMode==1 and zero otherwise, under the existing resume guard. The name describes the actual suppression condition without altering the resume path."),
@@ -7711,9 +7670,6 @@ REGEX_FIXES += [
         ("Ending::DrawCountingMapCompletion",
          (('arg0', 'x'), ('arg1', 'y'), ('arg2', 'fade_frame'), ('sp18', 'completion_digits'), ('temp_s4', 'wipe_boundary_x'), ('v0', 'padded_prefix_x')),
          "F02449 Original _renderIncrementalMapCompletion at D4.c:2113 clamps the frame, derives X+frame*8 for the wipe, updates displayed completion after frame32, emits sound transitions and formats three digits. v0 is the atlas-region-26 prefix position plus two pixels before adding its width. Preserve the existing char[2] extent and all unusual count/format behavior, without treating this naming pass as defect repair."),
-        ("Items::Inventory::CopyItem",
-         (('temp_a0', 'matching_misc_stack'),),
-         "F02511 Original vs_mainMenu_copyItem at MENU/MAINMENU.PRG/2D10.c:1334 declares temp_a0 as a misc-item pointer, then in the misc branch resolves target[slot-1], skips differing ids and merges/probes available capacity up to 100. Native additionally has the existing pre-merge recursive rejection probe. The pointer always denotes the matching destination stack; source/target shadowing in other switch cases and all current rollback behavior remain untouched."),
         ("Ending::Credits::DrawIllustration",
          (('temp_v0', 'phase_index'), ('var_a0', 'next_phase')),
          "F04135 Original _renderllustration (double-l spelling) at D4.c:583 computes state-1 for switch dispatch and chooses state3 or final-hold state5 after fade-in. It prequeues later compressed illustrations, advances palette/page coordinates and uploads decoded TIM on transitions. Preserve the exact ledger identity F04135 rather than inventing an alias for the original misspelling."),

@@ -1608,40 +1608,22 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Items\EquipmentAffinity.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Items\EquipmentAffinity.cpp" />
+    <ClCompile Include="src\Items\EquipmentLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Items\EquipmentStats.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Items\EquipmentStats.cpp" />
+    <ClCompile Include="src\Items\EquipmentWear.cpp" />
+    <ClCompile Include="src\Items\Inventory.cpp" />
+    <ClCompile Include="src\Items\InventoryLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Items\EquipmentWear.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Items\ItemRecordsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Items\Inventory.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Items\Loot.cpp" />
+    <ClCompile Include="src\Items\LootLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Items\Loot.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Items\Materials.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -1650,13 +1632,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Items\Recovery.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Items\Recovery.cpp" />
     <ClCompile Include="src\Menu\BattleAbilities.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -2310,13 +2286,12 @@
     <ClInclude Include="src\Field\Znd.h" />
     <ClInclude Include="src\Field\Zone.h" />
     <ClInclude Include="src\Items\Categories.h" />
-    <ClInclude Include="src\Items\EquipmentAffinity.h" />
     <ClInclude Include="src\Items\EquipmentInit.h" />
-    <ClInclude Include="src\Items\EquipmentStats.h" />
-    <ClInclude Include="src\Items\EquipmentWear.h" />
+    <ClInclude Include="src\Items\InventoryLiveState.h" />
+    <ClInclude Include="src\Items\ItemRecordsLive.hpp" />
     <ClInclude Include="src\Items\Loot.h" />
+    <ClInclude Include="src\Items\LootLiveState.h" />
     <ClInclude Include="src\Items\Materials.h" />
-    <ClInclude Include="src\Items\Recovery.h" />
     <ClInclude Include="src\Items\TreasureChests.h" />
     <ClInclude Include="src\Items\Weapons.h" />
     <ClInclude Include="src\Menu\BattleAbilities.h" />
@@ -2456,9 +2431,19 @@
     <ClInclude Include="include\Field\SegmentCollisionLive.hpp" />
     <ClInclude Include="include\Field\TerrainHeight.hpp" />
     <ClInclude Include="include\Items\Equipment.h" />
+    <ClInclude Include="include\Items\EquipmentAffinity.hpp" />
+    <ClInclude Include="include\Items\EquipmentLive.hpp" />
+    <ClInclude Include="include\Items\EquipmentStats.hpp" />
+    <ClInclude Include="include\Items\EquipmentWear.hpp" />
     <ClInclude Include="include\Items\Inventory.h" />
+    <ClInclude Include="include\Items\Inventory.hpp" />
+    <ClInclude Include="include\Items\InventoryLive.hpp" />
+    <ClInclude Include="include\Items\ItemRecords.hpp" />
     <ClInclude Include="include\Items\KeyItems.h" />
     <ClInclude Include="include\Items\Loadout.h" />
+    <ClInclude Include="include\Items\Loot.hpp" />
+    <ClInclude Include="include\Items\LootLive.hpp" />
+    <ClInclude Include="include\Items\Recovery.hpp" />
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />
     <ClInclude Include="include\Menu\Sounds.hpp" />
     <ClInclude Include="include\Save\FileMenu.hpp" />

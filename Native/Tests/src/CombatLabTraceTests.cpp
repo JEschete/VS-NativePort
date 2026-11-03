@@ -41,6 +41,7 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
+#include "Items/LootLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
 #include "Menu/Framework/MenuItems.h"

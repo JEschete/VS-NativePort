@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Items/EquipmentLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/UiPacketsLive.hpp"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
-#include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
@@ -181,7 +181,7 @@ void Menu_Framework_SetWeaponStats(int weaponIndex)
         if (Menu_Framework_weapons[weaponIndex - 1].isEquipped != 0) {
             weapon = &Battle_characterState->stats->weapon;
         } else if (Menu_Framework_weapons == Audio_Seq_unusedInventory.weapons) {
-            Items_LoadInventoryWeaponStats(weapon, &Menu_Framework_weapons[weaponIndex - 1]);
+            VS::Items::LoadLiveInventoryWeaponStats(weapon, &Menu_Framework_weapons[weaponIndex - 1]);
         } else {
             Menu_Container_BuildWeaponStats(weapon, &Menu_Framework_weapons[weaponIndex - 1],
                 &Menu_Container_containerData->items);
@@ -268,7 +268,7 @@ void Menu_Framework_SetShieldStats(int shieldIndex)
         if (Menu_Framework_shields[shieldIndex - 1].isEquipped != 0) {
             shield = &Battle_characterState->stats->shield;
         } else if (Menu_Framework_shields == Audio_Seq_unusedInventory.shields) {
-            Items_LoadInventoryShieldStats(shield, &Menu_Framework_shields[shieldIndex - 1]);
+            VS::Items::LoadLiveInventoryShieldStats(shield, &Menu_Framework_shields[shieldIndex - 1]);
         } else {
             Menu_Container_BuildShieldStats(shield, &Menu_Framework_shields[shieldIndex - 1],
                 &Menu_Container_containerData->items);
@@ -313,7 +313,7 @@ void Menu_Framework_SetArmorStats(int armorIndex)
         if (limb < 5) {
             armor = &Battle_characterState->stats->limbs[limb].armor;
         } else {
-            Items_LoadInventoryArmorStats(armor, &Menu_Framework_armor[armorIndex - 1]);
+            VS::Items::LoadLiveInventoryArmorStats(armor, &Menu_Framework_armor[armorIndex - 1]);
         }
 
         isAccessory = armor->armor.category == 7;

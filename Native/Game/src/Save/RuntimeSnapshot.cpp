@@ -21,6 +21,7 @@
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Items/EquipmentLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -50,7 +51,9 @@ extern "C" {
 #include "Field/Znd.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
-#include "Items/EquipmentStats.h"
+#include "Items/Equipment.h"
+#include "Items/Inventory.h"
+#include "Items/Loadout.h"
 #include "Render/Camera.h"
 #include "Render/UiPrimitives.h"
 #include "State/Flags.h"
@@ -954,10 +957,10 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
     }
     weapon.blade.currentDp = weapon.currentDp;
     weapon.blade.currentPp = weapon.currentPp;
-    Items_WriteInventoryBladeStats(&state.inventory.blades[target.blade - 1],
-                                   &weapon.blade);
-    Items_WriteInventoryGripStats(&state.inventory.grips[target.grip - 1],
-                                  &weapon.grip);
+    VS::Items::WriteLiveInventoryBladeStats(
+        &state.inventory.blades[target.blade - 1], &weapon.blade);
+    VS::Items::WriteLiveInventoryGripStats(
+        &state.inventory.grips[target.grip - 1], &weapon.grip);
     for (std::size_t index = 0; index < kEquipmentGems; ++index) {
       const auto reference = target.gems[index];
       if (weapon.gems[index].id == 0) {
@@ -970,8 +973,8 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
           state.inventory.gems[reference - 1].id != weapon.gems[index].id) {
         return std::unexpected("live weapon gem reference is invalid");
       }
-      Items_WriteInventoryGemStats(&state.inventory.gems[reference - 1],
-                                   &weapon.gems[index]);
+      VS::Items::WriteLiveInventoryGemStats(
+          &state.inventory.gems[reference - 1], &weapon.gems[index]);
     }
     std::copy_n(weapon.name, std::size(target.name), target.name);
   }
@@ -987,7 +990,7 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
     }
     shield.base.currentDp = shield.currentDp;
     shield.base.currentPp = shield.currentPp;
-    Items_WriteInventoryArmorStats(&target.base, &shield.base);
+    VS::Items::WriteLiveInventoryArmorStats(&target.base, &shield.base);
     for (std::size_t index = 0; index < kEquipmentGems; ++index) {
       const auto reference = target.gems[index] & 0x7Fu;
       if (shield.gems[index].id == 0) {
@@ -1000,8 +1003,8 @@ Result OverlayHandEquipment(Snapshot& state, const Battle_ActorStats& stats) {
           state.inventory.gems[reference - 1].id != shield.gems[index].id) {
         return std::unexpected("live shield gem reference is invalid");
       }
-      Items_WriteInventoryGemStats(&state.inventory.gems[reference - 1],
-                                   &shield.gems[index]);
+      VS::Items::WriteLiveInventoryGemStats(
+          &state.inventory.gems[reference - 1], &shield.gems[index]);
     }
   }
   return {};
@@ -1026,8 +1029,8 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
       return std::unexpected("live armor does not match its inventory limb");
     }
     armor.armor.currentDp = armor.currentDp;
-    Items_WriteInventoryArmorStats(&state.inventory.armor[armor.index - 1],
-                                   &armor.armor);
+    VS::Items::WriteLiveInventoryArmorStats(
+        &state.inventory.armor[armor.index - 1], &armor.armor);
   }
   auto accessory = stats.accessory;
   if (accessory.index == 0 &&
@@ -1045,8 +1048,8 @@ Result OverlayEquipped(Snapshot& state, const Battle_ActorStats& stats) {
       return std::unexpected(
           "live accessory does not match its inventory limb");
     }
-    Items_WriteInventoryArmorStats(&state.inventory.armor[accessory.index - 1],
-                                   &accessory.accessory);
+    VS::Items::WriteLiveInventoryArmorStats(
+        &state.inventory.armor[accessory.index - 1], &accessory.accessory);
   }
   return {};
 }

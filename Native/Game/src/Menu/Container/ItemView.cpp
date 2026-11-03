@@ -15,6 +15,7 @@ extern "C" {
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
+#include "Items/InventoryLiveState.h"
 #include "Items/Loadout.h"
 #include "Items/Weapons.h"
 #include "Menu/Container/ItemView.h"

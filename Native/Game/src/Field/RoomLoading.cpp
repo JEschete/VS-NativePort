@@ -7,6 +7,7 @@
 #include "Core/Runtime.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Items/LootLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -711,7 +712,7 @@ void Field_FinishRoomLoad(int requested_room_id)
 
     if (((Field_MpdHeader*)mpdHeader)->lootSectionSize != 0) {
         mpd_section_offset = ((Field_MpdHeader*)mpdHeader)->lootSectionOffset;
-        Items_LoadRoomChestLoot((void*)(mpd_section_offset + (intptr_t)mpdHeader));
+        VS::Items::LoadLiveRoomChestLoot((void*)(mpd_section_offset + (intptr_t)mpdHeader));
     }
 
     {
@@ -888,7 +889,7 @@ void Field_UnloadCurrentRoom(void)
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());
     Battle_SetActorMarker(0, 0);
     Actors_ResetAllActorMovement();
-    Items_ClearRoomLootList();
+    VS::Items::ClearLiveRoomLootList();
     VS::Core::Memory::FreeLiveFromLowEnd(Render_legacyPrimitiveBuffers[1]);
     VS::Core::Memory::FreeLiveFromLowEnd(Render_legacyPrimitiveBuffers[0]);
 }
@@ -1022,7 +1023,7 @@ int Field_LoadRoomSections(int owner_room_index, void* data)
 
     Field_ResetGimmickAnimationQueue();
     Field_InitializeRoomEffects();
-    Items_RestoreRoomChestStates();
+    VS::Items::RestoreLiveRoomChestStates();
     Field_InitializeMovingPlatforms();
     Battle_ResetFloatingLabels();
     Effects_AllocateWeatherParticles();

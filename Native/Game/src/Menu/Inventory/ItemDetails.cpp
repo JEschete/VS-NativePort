@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Items/InventoryLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -42,7 +43,7 @@ int Menu_Inventory_PollDetailsPaging(int items, int page)
 
         int previousPage = page;
 
-        items = Items_Inventory_CountItems(items, NULL);
+        items = VS::Items::Inventory::CountLiveItems(items, NULL);
 
         if (Input_buttonRepeat & PADL1) {
             page += items - 1;
