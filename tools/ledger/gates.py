@@ -66,6 +66,7 @@ TEST_CASE = re.compile(r'\b(?:TEMPLATE_)?TEST_CASE\s*\(\s*((?:"(?:[^"\\]|\\.)*"\
 STRING_LITERAL = re.compile(r'"((?:[^"\\]|\\.)*)"')
 QUALIFIED_NAME = re.compile(r"((?:::)?[A-Za-z_]\w*(?:::~?[A-Za-z_]\w*)*)\s*$")
 FORWARD_CALL = re.compile(r"^\s*(?:return\s+)?(?:::)?([A-Za-z_][\w:]*)\s*\(.*\)\s*;\s*$", re.S)
+LOCAL_TYPE = re.compile(r"\b(?:class|struct)\s+([A-Za-z_]\w*)\s*(?:final\s*)?(?::[^;{}()]*)?\{")
 # A body that only logs (Core/Log.hpp) implements the function; it forwards no behavior.
 LOGGING_MACRO = re.compile(r"^VS_LOG_[A-Z]+$")
 
@@ -224,13 +225,19 @@ def parse_definition(head: str, body: str, scopes: list[tuple[list[str], bool]])
     return Definition(qualified, cleaned, body, any(linkage for _, linkage in scopes) or 'extern ""' in cleaned)
 
 
-def is_forwarding_wrapper(definition: Definition, siblings: list[Definition]) -> bool:
+def find_local_types(text: str) -> set[str]:
+    """Class and struct names given a body in this file; constructing one runs behavior defined here."""
+    return set(LOCAL_TYPE.findall(PREPROCESSOR_LINE.sub("", strip_source(text))))
+
+
+def is_forwarding_wrapper(definition: Definition, siblings: list[Definition],
+                          local_types: frozenset[str] | set[str] = frozenset()) -> bool:
     """One statement that only calls something defined elsewhere: a new name, not moved behavior."""
     match = FORWARD_CALL.match(definition.body)
     if not match or definition.body.count(";") != 1:
         return False
     callee = match.group(1).rsplit("::", 1)[-1]
-    if LOGGING_MACRO.match(callee):
+    if LOGGING_MACRO.match(callee) or callee in local_types:
         return False
     return not any(
         other is not definition and other.qualified.rsplit("::", 1)[-1] == callee for other in siblings
@@ -321,6 +328,9 @@ class Sources:
         if path not in self.definition_cache:
             self.definition_cache[path] = find_definitions(self.text.get(path, ""))
         return self.definition_cache[path]
+
+    def local_types(self, path: str) -> set[str]:
+        return find_local_types(self.text.get(path, ""))
 
 
 def compile_settings(workspace: Workspace) -> dict[str, dict]:
@@ -497,7 +507,8 @@ class Gates:
         expected = f"VS::{row.get('final_name', '')}"
         definitions = self.sources.definitions(path) if path else []
         definition = next((item for item in definitions if item.qualified == expected and not item.c_linkage), None)
-        namespace = definition is not None and not is_forwarding_wrapper(definition, definitions)
+        namespace = definition is not None and not is_forwarding_wrapper(
+            definition, definitions, self.sources.local_types(path))
         return {
             "source_cpp": strict,
             "vs_namespace": namespace,

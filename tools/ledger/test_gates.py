@@ -378,6 +378,22 @@ class PromotionGateTests(GateTestCase):
         )
         self.assertNotIn("claim-vs_namespace", [issue.rule for issue in self.report().issues])
 
+    def test_local_class_implementation_claims_namespace(self) -> None:
+        self.fixture.promote()
+        self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+            "namespace VS::Sys {\nnamespace {\nclass Stepper {\n public:\n"
+            "  explicit Stepper(int v) : v_(v) {}\n  int Run() const { return v_ + 1; }\n\n private:\n"
+            "  int v_;\n};\n}\nint Thing(int v) { return Stepper(v).Run(); }\n}\n"
+        )
+        self.assertNotIn("claim-vs_namespace", [issue.rule for issue in self.report().issues])
+
+    def test_class_declared_elsewhere_still_forwards(self) -> None:
+        self.fixture.promote()
+        self.fixture.files["Native/Game/src/Sys/Thing.cpp"] = (
+            "class Stepper;\nnamespace VS::Sys {\nint Thing(int v) { return Stepper(v).Run(); }\n}\n"
+        )
+        self.expect_failure("claim-vs_namespace")
+
     def test_filename_change_alone_never_derives_cpp_x(self) -> None:
         report = self.report()
         self.assertNotEqual(report.derived_cpp.get("F00003", ""), "x")
