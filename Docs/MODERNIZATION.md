@@ -20,7 +20,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 7: #48 Content request ownership | 0 | 13 | 204 | 11 | 5 | 0 |
 | 8: #49 Bounded P-file and effect views | 0 | 2 | 7 | 2 | 0 | 0 |
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
-| 10: #50 Render submission and frame ownership | 0 | 70 | 2,268 | 91 | 38 | 0 |
+| 10: #50 Render submission and frame ownership | 0 | 47 | 1,915 | 104 | 25 | 0 |
 | 14: #55 Actor identity and teardown | 0 | 213 | 8,121 | 158 | 78 | 0 |
 | 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 122 | 5,899 | 201 | 49 | 0 |
@@ -32,14 +32,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 7 | 132 | 4 | 7 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 3334 | 103,133 | 1640 | 2120 | 0 |
+| **Total** | 0 | 3311 | 102,780 | 1653 | 2107 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 426 |
-| todo | 3,334 |
+| done | 449 |
+| todo | 3,311 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (5 done, 49 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 5 done, 46 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -47,12 +47,12 @@ architecture changes rather than per-function work, so this ledger is what track
 | 2 | core-heap | done | coordinator | 1 | 0 | 0 |
 | 3 | core-math | done | coordinator | 5 | 0 | 0 |
 | 4 | render-display-camera-ui | done | coordinator | 5 | 0 | 0 |
-| 5 | render-palette-framebuffer | planned | - | 2 | 59 | 1,663 |
+| 5 | render-palette-framebuffer | active | coordinator | 2 | 36 | 1,310 |
 | 6 | render-images-textures-font | planned | - | 4 | 39 | 1,543 |
 | 7 | input-controller | done | subagent a7-input; coordinator review | 1 | 0 | 0 |
-| 8 | save-memory-card | planned | - | 2 | 32 | 1,099 |
+| 8 | save-memory-card | active | agent:a8-save | 2 | 32 | 1,099 |
 | 9 | movie-intro | planned | - | 1 | 7 | 132 |
-| 10 | audio-seq-voices | planned | - | 3 | 71 | 692 |
+| 10 | audio-seq-voices | active | agent:a10-audio-voices | 3 | 71 | 692 |
 | 11 | audio-seq-control | planned | - | 3 | 59 | 1,665 |
 | 12 | audio-mixer-driver | planned | - | 3 | 56 | 1,497 |
 | 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,796 |
-| Referenced by the original-address module table | 0 | 1,988 |
-| Calls an SDK shim | 0 | 445 |
-| Signature uses SDK integer types or `void*` | 0 | 837 |
-| Compiled with relaxed settings | 0 | 3,334 |
+| Called from generated code | 0 | 1,781 |
+| Referenced by the original-address module table | 0 | 1,965 |
+| Calls an SDK shim | 0 | 442 |
+| Signature uses SDK integer types or `void*` | 0 | 834 |
+| Compiled with relaxed settings | 0 | 3,311 |
 
 Function bodies: 3,241 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

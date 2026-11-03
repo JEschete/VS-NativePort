@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 426 | owned functions |
-| 426 | owned functions in C++ sources |
-| 3334 | generated function rows |
+| 449 | owned functions |
+| 449 | owned functions in C++ sources |
+| 3311 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 426 | 0 | 3,781 |
-| `cpp` | 426 | 0 | 3,781 |
+| `modernized` | 449 | 0 | 3,758 |
+| `cpp` | 449 | 0 | 3,758 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 426 |
-| `vs_namespace` | 426 |
-| `typed_interface` | 426 |
-| `no_bridge` | 426 |
-| `strict_clean` | 426 |
-| `behavior_evidence` | 426 |
+| `source_cpp` | 449 |
+| `vs_namespace` | 449 |
+| `typed_interface` | 449 |
+| `no_bridge` | 449 |
+| `strict_clean` | 449 |
+| `behavior_evidence` | 449 |
 
-Promotion records: 426; derived `cpp=x`: 426, `cpp=wip`: 0. Verification records: 105; `verified=x` markers: 45.
+Promotion records: 449; derived `cpp=x`: 449, `cpp=wip`: 0. Verification records: 106; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -256,6 +256,8 @@ The fifty-ninth slice (#276 A4, #279) is the render display, camera and UI packe
 and the generated Camera, Display, UiPrimitives, Model, Upload and Lighting routines, their two Gte bridges and module address entries are retired.
 The sixtieth slice (#276 row 7) is the controller and vibration service (20 functions in VS::Input Controller): a typed core behind a ControllerHost keeps the original stick thresholds, repeat timing, soft reset and unsigned envelope stepping, refuses invalid slots, presets and patterns,
 and the generated Input_ routines, the padAct_t slot record, Input/Controller.h and their module address entries are retired.
+The sixty-first slice (#276 row 5 part 1) is the framebuffer effect and screen transition (23 functions in VS::Render ScreenOverlay): a typed phase core keeps the original state words, slot templates, texture pages, frame planning, fades and wipe edges, owns the packet block through its phase and refuses null records and ordering tables,
+and the generated Render_ routines, their twelve state globals, the D_800F1ABC_t packet record and their module address entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
