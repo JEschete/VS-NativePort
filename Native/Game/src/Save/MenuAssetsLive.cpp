@@ -3,13 +3,13 @@
 // queue, low-end heap, texture pages and the screens' text tables.
 #include "Save/MenuAssetsLive.hpp"
 
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/TexturePagesLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
 #include "Boot/Lifecycle.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
@@ -69,8 +69,13 @@ void Request(unsigned lba, unsigned size, void* target) {
   Content_DiscFile file;
   file.lba = static_cast<int>(lba);
   file.size = static_cast<int>(size);
-  live_request = Content_AllocateDiscRequest(&file);
-  Content_EnqueueDiscRequest(live_request, target);
+  live_request = VS::Content::AllocateLiveDiscRequest(&file);
+  if (live_request != nullptr) {
+    VS::Content::EnqueueLiveDiscRequest(live_request, target);
+  } else {
+    // #282: the queue was full; read the file without it.
+    live_request = VS::Content::CompleteLiveRefusedDiscRequest(&file, target);
+  }
 }
 
 class LiveMenuAssets final : public MenuAssetHost {
@@ -113,7 +118,7 @@ class LiveMenuAssets final : public MenuAssetHost {
            live_request->state == Content_DiscRequestState_Loaded;
   }
   void ReleaseRequest() override {
-    Content_ReleaseDiscRequest(live_request);
+    VS::Content::ReleaseLiveDiscRequest(live_request);
     live_request = nullptr;
   }
   void UploadImage() override {

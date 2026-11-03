@@ -1,1775 +1,2449 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/AppearanceLive.hpp"
-#include "Actors/SequencePlaybackLive.hpp"
-#include "Actors/SkeletonLive.hpp"
-#include "Actors/TextureAnimationLive.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Core/Memory/WordCopyLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-#include "Render/TexturePagesLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/ActorState.h"
-#include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/SkeletonLiveState.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
-#include "Actors/WeaponModel.h"
-#include "Audio/Sfx.h"
-#include "CdDrive.h"
-#include "Content/DiscLayout.h"
-#include "DiscQueue.h"
-#include "Field/Actors.h"
-#include "Field/Gimmicks.h"
-#include "Items/Materials.h"
-#include "LegacyFiles.h"
-#include "ModelLoading.h"
-#include "Render/LegacyPackets.h"
-#include "Render/Palette.h"
-#include "Render/Textures.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Content/ActorAssets.hpp"  // NOLINT(build/include): typed API
 
-// decomp: D_800E8F29 (D_800E8F29@BATTLE/BATTLE.PRG)
-u_char Content_modelParseResetFlag; /* contents: module image (ModuleData.cpp) */
+#include <algorithm>
+#include <array>
+#include <bit>
+#include <cstddef>
+#include <cstdint>
+#include <cstring>
+#include <optional>
+#include <span>
 
-// decomp: D_800E8FC4 (D_800E8FC4@BATTLE/BATTLE.PRG)
-int Content_assetQueuePeakUsage; /* contents: module image (ModuleData.cpp) */
+#include "Core/Memory/WordCopy.hpp"
 
-// decomp: D_800F457C (D_800F457C@BATTLE/BATTLE.PRG)
-int Content_lastLoadPhaseSnapshot;
+namespace VS::Content {
+namespace {
+// The model load phase while a file is parsing (_loadShpState 2).
+constexpr std::uint8_t kParsingLoadPhase = 2;
+// The loaders' phases.
+constexpr std::uint8_t kPhaseStart = 0;
+constexpr std::uint8_t kPhaseReading = 1;
+constexpr std::uint8_t kPhaseParsing = 2;
+constexpr std::uint8_t kParseFixPrimitives = 1;
+constexpr std::int32_t kSectorShift = 11;
 
-// decomp: D_800F4580 (D_800F4580@BATTLE/BATTLE.PRG)
-int Content_assetQueueFrameTicks;
+// The slot byte's sign bit and the range of a byte.
+constexpr unsigned kSlotSignBit = 0x80U;
+constexpr int kByteRange = 0x100;
 
-// decomp: D_800F45D8 (D_800F45D8@BATTLE/BATTLE.PRG)
-int Content_lastAssetRequestType;
-
-// decomp: BATTLE.PRG vs_battle_getEmptyObjectDataSlot (src/BATTLE/BATTLE.PRG/30DB0.c:149)
-int Content_FindFreeActorAssetRequest(void)
-{
-    int i;
-
-    for (i = 0; i < 16; ++i) {
-        if (Content_legacyActorAssetRequests[i].assetKind == 0) {
-            return i;
-        }
-    }
-
-    return -1;
+// The request's target slot as a signed int; lb sign-extends the slot byte.
+int TargetSlot(const ActorAssetRequest& request) {
+  const auto byte = std::bit_cast<std::uint8_t>(request.target_slot);
+  return byte < kSlotSignBit ? static_cast<int>(byte)
+                             : static_cast<int>(byte) - kByteRange;
 }
 
-// decomp: BATTLE.PRG vs_battle_populateDataSlot (src/BATTLE/BATTLE.PRG/30DB0.c:162)
-int Content_QueueActorAssetRequest(Content_ActorAssetRequest* objectData)
-{
-    Content_ActorAssetRequest* dst;
-    int slot = Content_FindFreeActorAssetRequest();
+// The disc sectors the file tables are relative to (DiscLayout).
+constexpr std::int32_t kWepFirstSector = 104024;
+constexpr std::int32_t kShpFirstSector = 95000;
+constexpr std::int32_t kEtmFirstSector = 104351;
+constexpr std::int32_t kSequenceFirstSector = 0x19797;
+constexpr std::int32_t kMaterialSequenceFirstSector = 0x18043;
+constexpr std::int32_t kMaterialModelSequenceFirstSector = 0x1943E;
 
-    if (slot == -1) {
-        return -1;
-    }
+// Polygon records (func_80099E7C).
+constexpr std::uint8_t kFlatTriangleCode = 0x24;
+constexpr std::uint8_t kColoredTriangleCode = 0x34;
+constexpr std::size_t kColoredCodeAt = 11;
+constexpr std::size_t kFlatTriangleUvAt = 10;
+constexpr std::size_t kFlatQuadUvAt = 12;
+constexpr std::size_t kColoredTriangleFirstUvAt = 6;
+constexpr std::size_t kColoredTriangleUvAt = 20;
+constexpr std::size_t kColoredQuadUvAt = 24;
+constexpr int kTriangleUvPairs = 3;
+constexpr int kQuadUvPairs = 4;
+constexpr int kColoredTriangleUvPairs = 2;
+constexpr std::size_t kUvPairBytes = 2;
 
-    dst = &Content_legacyActorAssetRequests[slot];
-    Core_Debugf("actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",
-        (unsigned)objectData->assetKind, (unsigned)objectData->targetSlot,
-        (unsigned)objectData->modelId, (unsigned)Content_legacyModelLoadPhase,
-        (unsigned)Content_modelParseResetFlag);
-    *dst = *objectData;
-    return slot;
+// The model header word holding the polygon and sound section offsets.
+constexpr std::size_t kPolygonSectionAt = 0x3C;
+constexpr std::size_t kSoundSectionAt = 0x30;
+// sizeof(Actors_ShpModel): the header before the bones.
+constexpr std::int32_t kShpModelHeaderBytes = 0x40;
+constexpr std::size_t kShpBoneBytes = 16;
+constexpr std::size_t kShpBoneTagAt = 8;
+constexpr std::size_t kShpBoneJointInitAt = 10;
+constexpr std::size_t kWeaponBoneBytes = 8;
+
+constexpr std::size_t kPixelBytes = 2;
+constexpr std::size_t kBitsPerByte = 8;
+constexpr std::size_t kHalfWordBits = 16;
+
+std::uint8_t ByteAt(std::span<const std::byte> bytes, std::size_t at) {
+  return std::to_integer<std::uint8_t>(bytes[at]);
 }
 
-// decomp: BATTLE.PRG vs_battle_processObjectDataQueue (src/BATTLE/BATTLE.PRG/30DB0.c:176)
-int Content_UpdateActorAssetQueue(void)
-{
-    int i;
-    int ret;
-    Content_ActorAssetRequest* slot = Content_legacyActorAssetRequests;
+std::uint32_t ReadLittle(std::span<const std::byte> bytes, std::size_t at,
+                         std::size_t width) {
+  std::uint32_t value = 0;
+  for (std::size_t i = 0; i < width; ++i) {
+    value |= std::uint32_t{ByteAt(bytes, at + i)} << (kBitsPerByte * i);
+  }
+  return value;
+}
 
-    Content_assetQueueFrameTicks = VSync(1);
+void AddToByte(std::byte& value, int offset) {
+  value = static_cast<std::byte>(
+      static_cast<std::uint8_t>(std::to_integer<std::uint32_t>(value) +
+                                static_cast<std::uint32_t>(offset)));
+}
 
-    switch (slot->assetKind) {
-    case 0:
-        return 0;
-    case 1:
-        ret = Content_UpdateActorModelLoad(slot);
-        break;
-    case 3:
-        ret = Content_UpdateWeaponModelLoad(slot);
-        break;
-    case 7:
-        ret = Content_UpdateActorSequenceLoad(slot);
-        break;
-    case 2:
-        ret = Content_ParseActorModel(slot);
-        break;
-    case 4:
-        ret = Content_ParseWeaponModel(slot);
-        break;
-    case 6:
-        ret = Field_CreateGimmickInstance(slot);
-        break;
-    case 8:
-        ret = Content_ParseActorSequence(slot);
-        break;
-    case 9:
-        ret = Content_UpdateSequenceEffectTextureLoad(slot);
-        break;
+// Reads little-endian fields from file bytes the host resolves; a read past
+// the bytes fails and stays failed.
+class FileCursor {
+ public:
+  FileCursor(ActorAssetHost& host, AssetAddress at) : host_(host), at_(at) {}
+
+  [[nodiscard]] AssetAddress At() const { return at_; }
+  [[nodiscard]] bool Ok() const { return ok_; }
+  void Seek(AssetAddress at) { at_ = at; }
+  void Skip(std::ptrdiff_t bytes) { at_ = AdvanceAddress(at_, bytes); }
+
+  std::span<const std::byte> Take(std::size_t bytes) {
+    const std::span<const std::byte> view = host_.Bytes(at_, bytes);
+    Skip(static_cast<std::ptrdiff_t>(bytes));
+    if (view.size() < bytes) {
+      ok_ = false;
+      return {};
+    }
+    return view.first(bytes);
+  }
+
+  std::uint32_t U8() { return Read(1); }
+  std::uint32_t U16() { return Read(sizeof(std::uint16_t)); }
+  std::uint32_t U32() { return Read(sizeof(std::uint32_t)); }
+  std::int32_t I32() {
+    return static_cast<std::int32_t>(Read(sizeof(std::int32_t)));
+  }
+
+ private:
+  std::uint32_t Read(std::size_t width) {
+    const std::span<const std::byte> bytes = Take(width);
+    return bytes.empty() ? 0 : ReadLittle(bytes, 0, width);
+  }
+
+  ActorAssetHost& host_;
+  AssetAddress at_;
+  bool ok_ = true;
+};
+
+// A memcpy the host bounds; false (refused) when either side is short.
+bool CopyExact(ActorAssetHost& host, AssetAddress destination,
+               AssetAddress source, std::size_t bytes, const char* what) {
+  if (bytes == 0) {
+    return true;
+  }
+  const std::span<std::byte> to = host.Bytes(destination, bytes);
+  const std::span<std::byte> from = host.Bytes(source, bytes);
+  const std::size_t copied = std::min({bytes, to.size(), from.size()});
+  if (copied != 0) {
+    std::memmove(to.data(), from.data(), copied);
+  }
+  if (copied < bytes) {
+    host.Refuse(what, static_cast<std::int64_t>(bytes));
+    return false;
+  }
+  return true;
+}
+
+// vs_main_memcpy: the word copy; false (refused) when it is short.
+bool CopyWordsInto(ActorAssetHost& host, AssetAddress destination,
+                   AssetAddress source, std::uint32_t size, const char* what) {
+  const std::size_t wanted = Core::Memory::AlignedWordBytes(size);
+  const std::size_t written = Core::Memory::CopyAlignedWords(
+      host.Bytes(destination, wanted), host.Bytes(source, wanted), size);
+  if (written < wanted) {
+    host.Refuse(what, static_cast<std::int64_t>(size));
+    return false;
+  }
+  return true;
+}
+
+// A copy of a fixed-size block from a source the original reads past its
+// end: the destination must hold it; a short source copies what it holds.
+void CopyFixedBlock(ActorAssetHost& host, AssetAddress destination,
+                    AssetAddress source, std::size_t bytes, const char* what) {
+  const std::span<std::byte> to = host.Bytes(destination, bytes);
+  const std::span<std::byte> from = host.Bytes(source, bytes);
+  if (to.size() < bytes || from.empty()) {
+    host.Refuse(what, static_cast<std::int64_t>(bytes));
+    return;
+  }
+  static_cast<void>(Core::Memory::CopyAlignedWords(
+      to, from, static_cast<std::uint32_t>(bytes)));
+}
+
+// The original rounds a sequence size up with size + ((4 - size) & 3).
+std::uint32_t RoundUpToWord(std::int32_t size) {
+  constexpr std::uint32_t kWordBytes = 4;
+  const auto value = static_cast<std::uint32_t>(size);
+  return value + ((kWordBytes - value) & (kWordBytes - 1));
+}
+
+std::optional<std::uint32_t> PolygonSectionOffset(ActorAssetHost& host,
+                                                  AssetAddress model) {
+  const std::span<std::byte> header =
+      host.Bytes(model, kPolygonSectionAt + sizeof(std::uint32_t));
+  if (header.size() < kPolygonSectionAt + sizeof(std::uint32_t)) {
+    return std::nullopt;
+  }
+  return ReadLittle(header, kPolygonSectionAt, sizeof(std::uint32_t));
+}
+
+bool UploadFrom(ActorAssetHost& host, const VramRect& rect, AssetAddress pixels,
+                const char* what) {
+  if (rect.w < 0 || rect.h < 0) {
+    host.Refuse(what, rect.w);
+    return false;
+  }
+  const std::size_t bytes = static_cast<std::size_t>(rect.w) *
+                            static_cast<std::size_t>(rect.h) * kPixelBytes;
+  const std::span<std::byte> view = host.Bytes(pixels, bytes);
+  if (view.size() < bytes) {
+    host.Refuse(what, static_cast<std::int64_t>(bytes));
+    return false;
+  }
+  host.UploadImage(rect, view.first(bytes));
+  return true;
+}
+
+// Bounded texture reference counts; the original's u8 counters wrap.
+void AddTextureReference(ActorAssetHost& host, AssetTextureTable table,
+                         int index, int delta) {
+  const int count = table == AssetTextureTable::kActor ? kActorTextureSlots
+                                                       : kWeaponTextureSlots;
+  if (index < 0 || index >= count) {
+    host.Refuse("texture slot", index);
+    return;
+  }
+  AssetTextureSlot slot = host.TextureSlot(table, index);
+  slot.references = static_cast<std::uint8_t>(slot.references + delta);
+  host.SetTextureSlot(table, index, slot);
+}
+
+void SetTextureReferences(ActorAssetHost& host, AssetTextureTable table,
+                          int index, std::uint8_t references) {
+  const int count = table == AssetTextureTable::kActor ? kActorTextureSlots
+                                                       : kWeaponTextureSlots;
+  if (index < 0 || index >= count) {
+    host.Refuse("texture slot", index);
+    return;
+  }
+  AssetTextureSlot slot = host.TextureSlot(table, index);
+  slot.references = references;
+  host.SetTextureSlot(table, index, slot);
+}
+
+// Starts a loader's read, or reads it at once when the disc queue refused
+// the request (#282).
+void StartFileRead(ActorAssetHost& host, AssetFileStream stream,
+                   DiscFileExtent file, AssetAddress destination) {
+  if (!host.BeginFileRead(stream, file, destination)) {
+    host.ReadRefusedFile(file, destination);
+  }
+}
+
+bool IsDispatchedKind(std::uint8_t kind) {
+  switch (static_cast<ActorAssetKind>(kind)) {
+    case ActorAssetKind::kActorModelLoad:
+    case ActorAssetKind::kActorModelParse:
+    case ActorAssetKind::kWeaponModelLoad:
+    case ActorAssetKind::kWeaponModelParse:
+    case ActorAssetKind::kGimmick:
+    case ActorAssetKind::kSequenceLoad:
+    case ActorAssetKind::kSequenceParse:
+    case ActorAssetKind::kEffectTextureLoad:
+      return true;
     default:
-        return -1;
+      return false;
+  }
+}
+}  // namespace
+
+// decomp: BATTLE.PRG vs_battle_getEmptyObjectDataSlot
+// (src/BATTLE/BATTLE.PRG/30DB0.c:149)
+int FindFreeActorAssetRequest(const ActorAssetHost& host) {
+  for (int i = 0; i < kActorAssetRequestCount; ++i) {
+    if (host.RequestKind(i) == 0) {
+      return i;
     }
+  }
+  return -1;
+}
 
-    Content_assetQueueFrameTicks = VSync(1) - Content_assetQueueFrameTicks;
+// decomp: BATTLE.PRG vs_battle_populateDataSlot
+// (src/BATTLE/BATTLE.PRG/30DB0.c:162)
+int QueueActorAssetRequest(ActorAssetHost& host,
+                           const ActorAssetRequest& request) {
+  const int slot = FindFreeActorAssetRequest(host);
+  if (slot == -1) {
+    return -1;
+  }
+  host.OnRequestQueued(request);
+  host.StoreRequest(slot, request);
+  return slot;
+}
 
-    if (Content_legacyModelLoadPhase == 2) {
-        if (Content_assetQueuePeakUsage < Content_assetQueueFrameTicks) {
-            Content_assetQueuePeakUsage = Content_assetQueueFrameTicks;
-            Content_lastAssetRequestType = slot->assetKind;
-            Content_lastLoadPhaseSnapshot = Content_legacyModelLoadPhase;
-        }
-    }
-
-    if (ret == -1) {
-        return 1;
-    }
-    Core_Debugf("actors", "loaded kind=%u actor=%u model=%d result=%d record=%p",
-        (unsigned)slot->assetKind, (unsigned)slot->targetSlot, (int)slot->modelId, ret,
-        slot->targetSlot < 17 ? (void*)Actors_actorRecords[slot->targetSlot] : NULL);
-
-    for (i = 1; i < 15; ++i) {
-        VS::Core::Memory::CopyLiveAlignedWords(&Content_legacyActorAssetRequests[i - 1], &Content_legacyActorAssetRequests[i],
-            sizeof Content_legacyActorAssetRequests[i]);
-    }
-
-    Content_legacyActorAssetRequests[i - 1].assetKind = 0;
-
-    return ret < 0 ? -1 : 1;
+// decomp: BATTLE.PRG vs_battle_processObjectDataQueue
+// (src/BATTLE/BATTLE.PRG/30DB0.c:176)
+int UpdateActorAssetQueue(ActorAssetHost& host, ActorAssetQueueStats& stats) {
+  stats.frame_ticks = host.FrameCounter();
+  const std::uint8_t kind = host.RequestKind(0);
+  if (kind == 0) {
+    return 0;
+  }
+  if (!IsDispatchedKind(kind)) {
+    return -1;
+  }
+  const int result = host.ProcessHeadRequest(static_cast<ActorAssetKind>(kind));
+  stats.frame_ticks = static_cast<std::int32_t>(
+      static_cast<std::uint32_t>(host.FrameCounter()) -
+      static_cast<std::uint32_t>(stats.frame_ticks));
+  if (host.ModelLoadPhase() == kParsingLoadPhase &&
+      stats.peak_frame_ticks < stats.frame_ticks) {
+    stats.peak_frame_ticks = stats.frame_ticks;
+    stats.last_kind = host.RequestKind(0);
+    stats.last_load_phase = host.ModelLoadPhase();
+  }
+  if (result == kAssetPending) {
+    return 1;
+  }
+  host.OnHeadRequestDone(result);
+  // The original shifts slots 1..14 down and clears slot 14; slot 15 never
+  // moves.
+  constexpr int kLastShifted = kActorAssetRequestCount - 2;
+  for (int i = 1; i <= kLastShifted; ++i) {
+    host.MoveRequest(i, i - 1);
+  }
+  host.ClearRequestKind(kLastShifted);
+  return result < 0 ? -1 : 1;
 }
 
 // decomp: BATTLE.PRG func_80099854 (src/BATTLE/BATTLE.PRG/30DB0.c:239)
-void Content_QueueAshleyWeaponSequence(int sequence_id)
-{
-    Content_ActorAssetRequest objectData;
-    Content_ActorAssetRequest* src;
-    int i;
-    int slot;
-    Content_ActorAssetRequest* dst;
-
-    if (sequence_id == 0) {
-        return;
-    }
-
-    src = &objectData;
-    src->assetKind = 7;
-    src->targetSlot = 0;
-    src->subKind = 3;
-    src->material = sequence_id;
-
-    for (i = 0; i < 16; ++i) {
-        if (Content_legacyActorAssetRequests[i].assetKind == 0) {
-            slot = i;
-            goto found;
-        }
-    }
-
-    slot = -1;
-
-found:
-    if (slot != -1) {
-        dst = &Content_legacyActorAssetRequests[slot];
-        *dst = *src;
-    }
+void QueueAshleyWeaponSequence(ActorAssetHost& host, int sequence_id) {
+  constexpr std::uint8_t kMaterialSequence = 3;
+  if (sequence_id == 0) {
+    return;
+  }
+  // The original leaves the other fields as stack bytes; they are zero here.
+  ActorAssetRequest request;
+  request.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceLoad);
+  request.target_slot = 0;
+  request.sub_kind = kMaterialSequence;
+  request.material = static_cast<std::uint8_t>(sequence_id);
+  const int slot = FindFreeActorAssetRequest(host);
+  if (slot != -1) {
+    host.StoreRequest(slot, request);
+  }
 }
 
 // decomp: BATTLE.PRG func_80099E7C (src/BATTLE/BATTLE.PRG/30DB0.c:445)
-void Content_OffsetModelTextureCoordinates(void* polygonData, int polygonCount, int colored, int uOffset, int vOffset)
-{
-    u_char* cursor = (u_char *)(polygonData);
-    int polygonIndex;
-    int vertexIndex;
-    int remainingUvPairs;
-
-    if (colored == 0) {
-        for (polygonIndex = 0; polygonIndex < polygonCount; ++polygonIndex) {
-            if (*cursor == 0x24) {
-                cursor += 0xA;
-                remainingUvPairs = 3;
-            } else {
-                cursor += 0xC;
-                remainingUvPairs = 4;
-            }
-
-            for (vertexIndex = 0; vertexIndex < remainingUvPairs; ++vertexIndex) {
-                cursor[0] += uOffset;
-                cursor[1] += vOffset;
-                cursor += 2;
-            }
-        }
+bool OffsetModelTextureCoordinates(std::span<std::byte> polygons, int count,
+                                   bool colored, int u_offset, int v_offset) {
+  std::size_t at = 0;
+  for (int polygon = 0; polygon < count; ++polygon) {
+    std::size_t uv_at = 0;
+    std::size_t record_bytes = 0;
+    int pairs = 0;
+    const std::size_t code_at = colored ? kColoredCodeAt : 0;
+    if (polygons.size() <= at + code_at) {
+      return false;
+    }
+    const std::uint8_t code = ByteAt(polygons, at + code_at);
+    if (!colored) {
+      const bool triangle = code == kFlatTriangleCode;
+      uv_at = triangle ? kFlatTriangleUvAt : kFlatQuadUvAt;
+      pairs = triangle ? kTriangleUvPairs : kQuadUvPairs;
     } else {
-        for (polygonIndex = 0; polygonIndex < polygonCount; ++polygonIndex) {
-            if (cursor[11] == 0x34) {
-                cursor[6] += uOffset;
-                cursor[7] += vOffset;
-                cursor += 0x14;
-                remainingUvPairs = 2;
-            } else {
-                cursor += 0x18;
-                remainingUvPairs = 4;
-            }
-
-            for (vertexIndex = 0; vertexIndex < remainingUvPairs; ++vertexIndex) {
-                cursor[0] += uOffset;
-                cursor[1] += vOffset;
-                cursor += 2;
-            }
-        }
+      const bool triangle = code == kColoredTriangleCode;
+      uv_at = triangle ? kColoredTriangleUvAt : kColoredQuadUvAt;
+      pairs = triangle ? kColoredTriangleUvPairs : kQuadUvPairs;
     }
-}
-
-// decomp: BATTLE.PRG func_80099FA8 (src/BATTLE/BATTLE.PRG/30DB0.c:489)
-int Content_FindSharedWeaponModel(Content_ActorAssetRequest* objData)
-{
-    int i;
-    int index = objData->targetSlot;
-
-    for (i = 0; i < 20; ++i) {
-        if (i != index) {
-            Actors_WeaponModel* model = Actors_weaponModels[i];
-            if ((model != NULL) && (model->actorId || (index < 4))
-                && (model->modelId == objData->modelId)) {
-                objData->dataAddress = i;
-                return 1;
-            }
-        }
+    record_bytes = uv_at + static_cast<std::size_t>(pairs) * kUvPairBytes;
+    if (polygons.size() - at < record_bytes) {
+      return false;
     }
-    return 0;
+    if (colored && code == kColoredTriangleCode) {
+      AddToByte(polygons[at + kColoredTriangleFirstUvAt], u_offset);
+      AddToByte(polygons[at + kColoredTriangleFirstUvAt + 1], v_offset);
+    }
+    for (int uv_pair = 0; uv_pair < pairs; ++uv_pair) {
+      const std::size_t uv =
+          at + uv_at + static_cast<std::size_t>(uv_pair) * kUvPairBytes;
+      AddToByte(polygons[uv], u_offset);
+      AddToByte(polygons[uv + 1], v_offset);
+    }
+    at += record_bytes;
+  }
+  return true;
 }
 
 // decomp: BATTLE.PRG func_8009A028 (src/BATTLE/BATTLE.PRG/30DB0.c:507)
-void* Content_CopyModelGeometry(int* destination, void* source, int byteCount)
-{
-    if (destination == NULL) {
-        destination = (int *)(VS::Core::Memory::AllocateLiveFromLowEnd(byteCount));
+AssetAddress CopyModelGeometry(ActorAssetHost& host, AssetAddress destination,
+                               AssetAddress source, std::int32_t bytes) {
+  if (bytes < 0) {
+    host.Refuse("model geometry size", bytes);
+    return AssetAddress::kNone;
+  }
+  const auto size = static_cast<std::size_t>(bytes);
+  if (destination == AssetAddress::kNone) {
+    destination = host.AllocateLow(size);
+    if (destination == AssetAddress::kNone) {
+      host.Refuse("model geometry block", bytes);
+      return AssetAddress::kNone;
     }
-
-    memcpy(destination, source, byteCount);
-
-
-    return destination;
+  }
+  static_cast<void>(
+      CopyExact(host, destination, source, size, "model geometry copy"));
+  return destination;
 }
 
+// decomp: BATTLE.PRG func_80099FA8 (src/BATTLE/BATTLE.PRG/30DB0.c:489)
+int FindSharedWeaponModel(const ActorAssetHost& host,
+                          ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  constexpr int kSharedAnyOwnerSlots = 4;
+  for (int i = 0; i < kWeaponModelSlots; ++i) {
+    if (i == target) {
+      continue;
+    }
+    const WeaponAssetSummary model = host.WeaponSummary(i);
+    if (model.present &&
+        (model.actor_id != 0 || target < kSharedAnyOwnerSlots) &&
+        int{model.model_id} == int{request.model_id}) {
+      request.data = SharedAssetAddress(i);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+namespace {
+constexpr std::int16_t kFirstInvalidWeaponModel = 0x80;
+// Weapon slots 0 and 1 parse into fixed geometry buffers; slots below 4
+// copy a shared model's geometry instead of pointing at it.
+constexpr int kFixedGeometrySlots = 2;
+constexpr int kCopiedGeometrySlots = 4;
+constexpr std::ptrdiff_t kFileHeaderBytes = 4;
+constexpr std::ptrdiff_t kWeaponTextureWidthAt = 5;
+constexpr std::uint32_t kWideWeaponTextureWidth = 64;
+constexpr std::uint32_t kDoubleClutMarker = 96;
+constexpr int kWeaponPalettes = 7;
+constexpr std::size_t kDoubleClutWorkingColors = 32;
+constexpr std::size_t kSingleClutWorkingColors = 16;
+constexpr std::size_t kDoubleClutColors = 64;
+constexpr std::size_t kSingleClutColors = 32;
+constexpr std::uint8_t kDoubleClutPaletteColors = 96;
+constexpr std::uint8_t kSingleClutPaletteColors = 48;
+constexpr std::int16_t kWeaponTextureY = 0xE0;
+constexpr std::int16_t kWeaponTextureHeight = 32;
+constexpr int kWeaponTexturePairWidth = 64;
+constexpr int kWeaponTextureHalfWidth = 32;
+constexpr int kWeaponPaletteSlotBase = 16;
+constexpr std::uint8_t kWeaponReserved11 = 64;
+constexpr std::uint8_t kActorIdMask = 0xF;
+constexpr std::uint8_t kMaterialMask = 0xF;
+constexpr std::uint32_t kWeaponClutFirstRow = 4;
+constexpr std::uint32_t kWeaponClutFirstColumn = 160;
+constexpr std::uint32_t kWeaponClutHalfColumns = 48;
+
+int WaitForFileRead(ActorAssetHost& host, std::uint8_t& phase,
+                    AssetFileStream stream) {
+  if (!host.FileReadFinished(stream)) {
+    return kAssetPending;
+  }
+  host.ReleaseFileRead(stream);
+  phase = kPhaseParsing;
+  return kAssetPending;
+}
+
+std::uint8_t WeaponPaletteSlotOffset(const ActorAssetRequest& request) {
+  return static_cast<std::uint8_t>(
+      request.texture_slot + (request.sub_kind << 1U) + kWeaponPaletteSlotBase);
+}
+
+bool ValidWeaponSlot(ActorAssetHost& host, int slot) {
+  if (slot < 0 || slot >= kWeaponModelSlots) {
+    host.Refuse("weapon slot", slot);
+    return false;
+  }
+  return true;
+}
+
+// Reads `bytes` little-endian halfwords from the file into `colors`.
+bool ReadColors(FileCursor& cursor, std::span<std::uint16_t> colors,
+                std::size_t count) {
+  const std::span<const std::byte> bytes =
+      cursor.Take(count * sizeof(std::uint16_t));
+  if (bytes.empty() || count > colors.size()) {
+    return false;
+  }
+  for (std::size_t i = 0; i < count; ++i) {
+    colors[i] = static_cast<std::uint16_t>(
+        ReadLittle(bytes, i * sizeof(std::uint16_t), sizeof(std::uint16_t)));
+  }
+  return true;
+}
+
+int StartWeaponFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
+                        ActorAssetRequest& request) {
+  const auto index = static_cast<std::size_t>(request.model_id);
+  const std::optional<std::uint32_t> sectors =
+      host.FileTableEntry(AssetFileTable::kWepSectors, index);
+  const std::optional<std::uint32_t> offset =
+      host.FileTableEntry(AssetFileTable::kWepOffsets, index);
+  if (!sectors || !offset) {
+    host.Refuse("weapon file table", request.model_id);
+    return kAssetRefused;
+  }
+  const auto bytes = static_cast<std::int32_t>(*sectors << kSectorShift);
+  state.weapon_file = host.AllocateHigh(static_cast<std::size_t>(bytes));
+  request.data = state.weapon_file;
+  if (state.weapon_file == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  state.model_phase = kPhaseReading;
+  StartFileRead(host, AssetFileStream::kWeapon,
+                {static_cast<std::int32_t>(*offset) + kWepFirstSector, bytes},
+                request.data);
+  return kAssetPending;
+}
+
+// The fields every parsed or copied weapon ends with (30DB0.c:840-852).
+int FinishWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                      const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  static_cast<void>(LoadWeaponMaterialPalette(host, target, request.material));
+  WeaponAssetRecord model = host.LoadWeapon(target);
+  model.reserved11 = kWeaponReserved11;
+  model.reserved08_bit4 = false;
+  model.reserved08_bit6 = false;
+  model.reserved13 = 0;
+  model.actor_id = request.sub_kind & kActorIdMask;
+  model.attachment_slot = request.texture_slot;
+  host.StoreWeapon(target, model);
+  const int bone =
+      host.FindActorBoneTag(request.sub_kind, request.texture_slot);
+  model = host.LoadWeapon(target);
+  model.attachment_bone = static_cast<std::uint8_t>(bone);
+  host.StoreWeapon(target, model);
+  state.parse_phase = 0;
+  return kAssetDone;
+}
+
+int CopySharedWeapon(ActorAssetHost& host, ActorAssetLoadState& state,
+                     const ActorAssetRequest& request, int source) {
+  const int target = TargetSlot(request);
+  if (!host.WeaponSummary(source).present) {
+    host.Refuse("shared weapon record", source);
+    return kAssetRefused;
+  }
+  host.CopyWeaponRecord(target, source);
+  WeaponAssetRecord model = host.LoadWeapon(target);
+  if (model.texture_slot != kNoAssetTextureSlot) {
+    AddTextureReference(host, AssetTextureTable::kWeapon, model.texture_slot,
+                        1);
+    if (model.wide_texture) {
+      AddTextureReference(host, AssetTextureTable::kWeapon,
+                          model.texture_slot + 1, 1);
+    }
+  }
+  if (target < kCopiedGeometrySlots) {
+    const AssetAddress original = model.geometry;
+    model.geometry = target < kFixedGeometrySlots
+                         ? host.WeaponGeometryBuffer(target)
+                         : host.AllocateLow(kWeaponGeometryBytes);
+    if (model.geometry == AssetAddress::kNone) {
+      host.StoreWeapon(target, model);
+      host.Refuse("weapon geometry block", target);
+      return kAssetRefused;
+    }
+    CopyFixedBlock(host, model.geometry, original, kWeaponGeometryBytes,
+                   "weapon geometry copy");
+    host.RecordModelCopy(model.geometry, original, kWeaponGeometryBytes);
+  }
+  model.palette_slot_offset = WeaponPaletteSlotOffset(request);
+  host.StoreWeapon(target, model);
+  return FinishWeaponModel(host, state, request);
+}
+
+// The first free weapon texture slot, or the first free pair for a wide
+// texture, marked used.
+std::optional<int> ReserveWeaponTextureSlots(ActorAssetHost& host, bool wide) {
+  const int step = wide ? 2 : 1;
+  for (int i = 0; i + step <= kWeaponTextureSlots; i += step) {
+    bool free = true;
+    for (int j = 0; j < step; ++j) {
+      free =
+          free &&
+          host.TextureSlot(AssetTextureTable::kWeapon, i + j).references == 0;
+    }
+    if (free) {
+      for (int j = 0; j < step; ++j) {
+        SetTextureReferences(host, AssetTextureTable::kWeapon, i + j, 1);
+      }
+      return i;
+    }
+  }
+  return std::nullopt;
+}
+
+// The palettes and texture image after the geometry (30DB0.c:740-800).
+int ParseWeaponTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                       const ActorAssetRequest& request, FileCursor& cursor,
+                       WeaponAssetRecord& model) {
+  const int target = TargetSlot(request);
+  const std::uint32_t texture_width = cursor.U8() * 2U;
+  cursor.Skip(1);
+  const std::uint32_t marker = cursor.U8();
+  if (!cursor.Ok()) {
+    host.StoreWeapon(target, model);
+    host.Refuse("weapon file", target);
+    return kAssetRefused;
+  }
+  model.wide_texture = texture_width > kWideWeaponTextureWidth;
+  const std::optional<int> slot =
+      ReserveWeaponTextureSlots(host, model.wide_texture);
+  if (!slot) {
+    host.StoreWeapon(target, model);
+    return kAssetRefused;
+  }
+  model.texture_slot = static_cast<std::uint8_t>(*slot);
+  model.palette_slot_offset = WeaponPaletteSlotOffset(request);
+  model.double_clut = marker == kDoubleClutMarker;
+  model.palette_color_count =
+      model.double_clut ? kDoubleClutPaletteColors : kSingleClutPaletteColors;
+  bool read = ReadColors(
+      cursor, model.working_palette,
+      model.double_clut ? kDoubleClutWorkingColors : kSingleClutWorkingColors);
+  for (int i = 0; i < kWeaponPalettes; ++i) {
+    read =
+        ReadColors(cursor, model.palettes[static_cast<std::size_t>(i)],
+                   model.double_clut ? kDoubleClutColors : kSingleClutColors) &&
+        read;
+  }
+  const int ts = model.texture_slot;
+  const VramRect rect{
+      .x = static_cast<std::int16_t>((ts / 2) * kWeaponTexturePairWidth +
+                                     (ts & 1) * kWeaponTextureHalfWidth),
+      .y = kWeaponTextureY,
+      .w = static_cast<std::int16_t>(texture_width / 2U),
+      .h = kWeaponTextureHeight};
+  if (!read || !UploadFrom(host, rect, cursor.At(), "weapon texture")) {
+    host.StoreWeapon(target, model);
+    host.Refuse("weapon file", target);
+    return kAssetRefused;
+  }
+  cursor.Skip(static_cast<std::ptrdiff_t>(texture_width) *
+              kWeaponTextureHeight);
+  state.parse_phase = kParseFixPrimitives;
+  state.weapon_cursor = cursor.At();
+  host.StoreWeapon(target, model);
+  return kAssetPending;
+}
+
+int ParseWeaponFile(ActorAssetHost& host, ActorAssetLoadState& state,
+                    const ActorAssetRequest& request,
+                    WeaponAssetRecord& model) {
+  const int target = TargetSlot(request);
+  FileCursor cursor(host, request.data);
+  cursor.Skip(kFileHeaderBytes);
+  model.bone_count = static_cast<std::uint8_t>(cursor.U8());
+  model.vertex_group_count = static_cast<std::uint8_t>(cursor.U8());
+  model.triangle_count = static_cast<std::uint16_t>(cursor.U16());
+  model.quad_count = static_cast<std::uint16_t>(cursor.U16());
+  model.other_primitive_count = static_cast<std::uint16_t>(cursor.U16());
+  const std::int32_t size = cursor.I32();
+  if (!cursor.Ok() || size < 0) {
+    host.StoreWeapon(target, model);
+    host.Refuse("weapon geometry size", size);
+    return kAssetRefused;
+  }
+  const AssetAddress fixed = target < kFixedGeometrySlots
+                                 ? host.WeaponGeometryBuffer(target)
+                                 : AssetAddress::kNone;
+  model.geometry = fixed != AssetAddress::kNone
+                       ? fixed
+                       : host.AllocateLow(static_cast<std::size_t>(size));
+  if (model.geometry == AssetAddress::kNone) {
+    host.StoreWeapon(target, model);
+    return kAssetRefused;
+  }
+  const auto bytes = static_cast<std::size_t>(size);
+  const bool copied = CopyExact(host, model.geometry, cursor.At(), bytes,
+                                "weapon geometry copy");
+  host.RecordModelGeometry(model.geometry,
+                           fixed != AssetAddress::kNone
+                               ? std::min(bytes, kWeaponGeometryBytes)
+                               : bytes);
+  if (!copied) {
+    host.StoreWeapon(target, model);
+    return kAssetRefused;
+  }
+  cursor.Skip(size + kWeaponTextureWidthAt);
+  return ParseWeaponTexture(host, state, request, cursor, model);
+}
+
+// The second frame: offsets the UVs into the texture slot and copies the
+// bones (30DB0.c:805-838).
+int FinishWeaponPrimitives(ActorAssetHost& host, ActorAssetLoadState& state,
+                           const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  const WeaponAssetRecord model = host.LoadWeapon(target);
+  const int count =
+      model.other_primitive_count + model.triangle_count + model.quad_count;
+  const std::optional<std::uint32_t> section =
+      PolygonSectionOffset(host, model.geometry);
+  const std::size_t bone_bytes =
+      std::size_t{model.bone_count} * kWeaponBoneBytes;
+  const std::span<std::byte> bones =
+      host.Bytes(state.weapon_cursor, bone_bytes);
+  const bool fixed =
+      section.has_value() &&
+      OffsetModelTextureCoordinates(
+          host.Bytes(AdvanceAddress(model.geometry, *section), 0), count, false,
+          (model.texture_slot & 1) * kWeaponTexturePairWidth, kWeaponTextureY);
+  if (!fixed || bones.size() < bone_bytes) {
+    host.Refuse("weapon primitives", target);
+    state.parse_phase = 0;
+    return kAssetRefused;
+  }
+  host.WriteWeaponBones(target, bones.first(bone_bytes));
+  return FinishWeaponModel(host, state, request);
+}
+}  // namespace
+
 // decomp: BATTLE.PRG _loadWep (src/BATTLE/BATTLE.PRG/30DB0.c:523)
-int Content_UpdateWeaponModelLoad(Content_ActorAssetRequest* request)
-{
-    int wepData;
-    int found;
-    int wepFileSize;
-    int i;
-
-    if ((request->modelId == 0) || (request->modelId >= 0x80)) {
-        return 0;
-    }
-
-    switch (Content_legacyModelLoadPhase) {
-    case 0:
-        for (i = 0; i < 20; ++i) {
-            if ((i != request->targetSlot) && (Actors_weaponModels[i] != NULL)
-                && ((Actors_weaponModels[i]->actorId) || (request->targetSlot < 4))
-                && (Actors_weaponModels[i]->modelId == request->modelId)) {
-                request->dataAddress = i;
-                found = 1;
-                goto exit;
-            }
-        }
-        found = 0;
-    exit:
-        if (found != 0) {
-            Content_legacyWeaponFileLoaded = 0;
-            break;
-        }
-
-        Content_legacyWeaponFileLoaded = 1;
-        // Fallthrough
-
-    default:
-        wepFileSize = Content_legacyWepSectorCounts[request->modelId];
-        wepFileSize <<= 0xB;
-        Content_legacyWeaponFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(wepFileSize);
-        request->dataAddress = (uintptr_t)Content_legacyWeaponFileBuffer;
-
-        if (Content_legacyWeaponFileBuffer == NULL) {
-            return -2;
-        }
-
-        Content_legacyModelLoadPhase = 1;
-        Content_legacyWeaponFileLocation.lba = Content_legacyWepDiscOffsets[request->modelId] + VS_01_WEP_LBA;
-        Content_legacyWeaponFileLocation.size = wepFileSize;
-        Content_legacyWeaponDiscRequest = Content_AllocateDiscRequest(&Content_legacyWeaponFileLocation);
-        Content_EnqueueDiscRequest(Content_legacyWeaponDiscRequest, (void*)request->dataAddress);
-        // Fallthrough
-
-    case 1:
-        if (Content_legacyWeaponDiscRequest->state != 4) {
-            return -1;
-        }
-        Content_ReleaseDiscRequest(Content_legacyWeaponDiscRequest);
-        Content_legacyModelLoadPhase = 2;
-        return -1;
-    case 2:
+int UpdateWeaponModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
+                          ActorAssetRequest& request) {
+  if (request.model_id == 0 || request.model_id >= kFirstInvalidWeaponModel) {
+    return kAssetDone;
+  }
+  switch (state.model_phase) {
+    case kPhaseStart:
+      if (FindSharedWeaponModel(host, request) != 0) {
+        state.weapon_file_loaded = false;
         break;
-    }
-
-    wepData = Content_ParseWeaponModel(request);
-
-    if (wepData == -1) {
-        return -1;
-    }
-
-    if (Content_legacyWeaponFileLoaded != 0) {
-        Content_legacyWeaponFileLoaded = 0;
-        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacyWeaponFileBuffer);
-    }
-
-    Content_legacyModelLoadPhase = 0;
-    return wepData;
+      }
+      state.weapon_file_loaded = true;
+      [[fallthrough]];
+    default:
+      if (const int started = StartWeaponFileRead(host, state, request);
+          started != kAssetPending) {
+        return started;
+      }
+      [[fallthrough]];
+    case kPhaseReading:
+      return WaitForFileRead(host, state.model_phase, AssetFileStream::kWeapon);
+    case kPhaseParsing:
+      break;
+  }
+  const int result = ParseWeaponModel(host, state, request);
+  if (result == kAssetPending) {
+    return kAssetPending;
+  }
+  if (state.weapon_file_loaded) {
+    state.weapon_file_loaded = false;
+    host.FreeHigh(state.weapon_file);
+  }
+  state.model_phase = kPhaseStart;
+  return result;
 }
 
 // decomp: BATTLE.PRG _parseWep (src/BATTLE/BATTLE.PRG/30DB0.c:598)
-int Content_ParseWeaponModel(Content_ActorAssetRequest* objectData)
-{
-    u_char* pData;
-    Actors_WeaponModelData* buf;
-    Actors_WeaponModelData* dst;
-    RECT rect;
-    int i;
-    int j;
-    int n;
-    u_int texW;
-    int w;
-    int texU;
-    int count; /* block-copy unit size, then reused as the primitives count */
-    int size; /* model-data byte size, then reused for the texture-format marker byte */
-    int texV; /* 0xE0 texture VRAM-Y: the clut V-offset, also stored to rect.y */
-
-    Actors_WeaponModel* model = Actors_weaponModels[objectData->targetSlot];
-
-    u_char* data =
-        (u_char*)objectData->dataAddress; /* parse cursor walking the weapon-model file */
-
-    if (Content_modelParseResetFlag == 0) {
-        if (model == NULL) {
-            Actors_weaponModels[objectData->targetSlot] = (Actors_WeaponModel *)(objectData->destination);
-            model = Actors_weaponModels[objectData->targetSlot];
-
-            if (model == NULL) {
-                return -2;
-            }
-
-            memset(model, 0, sizeof *model);
-            model->textureSlot = 0xFF;
-        }
-
-        if (model->boneCount != 0) {
-            return -3;
-        }
-
-        if ((uintptr_t)data < 20) {
-        copySlot:
-            /* copy model from an already-loaded slot */
-            VS::Core::Memory::CopyLiveAlignedWords(model, Actors_weaponModels[(u_long)data], sizeof *model);
-
-            if (model->textureSlot != 0xFF) {
-                ++Render_legacyWeaponTextureSlots[model->textureSlot].referenceCount;
-                if (model->isWideTexture) {
-                    ++Render_legacyWeaponTextureSlots[model->textureSlot + 1].referenceCount;
-                }
-            }
-
-            if (objectData->targetSlot < 4) {
-                data = (u_char *)((void*)model->sectionOffsets);
-
-                if (objectData->targetSlot < 2) {
-                    buf = Content_legacyWeaponModelBuffers[objectData->targetSlot];
-                    model->sectionOffsets = buf;
-                } else {
-                    buf = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *buf));
-                    model->sectionOffsets = buf;
-                }
-
-                VS::Core::Memory::CopyLiveAlignedWords(buf, data, sizeof *buf);
-                VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);
-
-                /* dst doubles as the relocation delta for the copied pointers */
-                dst = (Actors_WeaponModelData*)((uintptr_t)buf - (uintptr_t)data);
-            }
-
-            model->paletteSlotOffset = objectData->textureSlot + (objectData->subKind << 1) + 16;
-
-            Content_LoadWeaponMaterialPalette(objectData->targetSlot, objectData->material);
-
-            model->reserved11 = 64;
-            model->reserved08Bit4 = 0;
-            model->reserved08Bit6 = 0;
-            model->reserved13 = 0;
-            model->actorId = objectData->subKind;
-            model->attachmentSlot = objectData->textureSlot;
-            model->attachmentBone = VS::Actors::FindLiveActorBoneTag(objectData->subKind, objectData->textureSlot, 0);
-            Content_modelParseResetFlag = 0;
-
-            return 0;
-        } else {
-            int found;
-            for (j = 0; j < 20; j++) {
-                if (j != objectData->targetSlot) {
-                    Actors_WeaponModel* other = Actors_weaponModels[j];
-                    if ((other != NULL) && ((other->actorId) || (objectData->targetSlot < 4))
-                        && (other->modelId == objectData->modelId)) {
-                        objectData->dataAddress = j;
-                        found = 1;
-                        goto haveFound;
-                    }
-                }
-            }
-            found = 0;
-        haveFound:
-            if (found) {
-                data = (u_char*)objectData->dataAddress;
-                goto copySlot;
-            }
-            model->modelId = objectData->modelId;
-        }
-    } else if (Content_modelParseResetFlag == 1) {
-        data = (u_char *)(Content_legacyWeaponParseCursor);
-        texV = 0xE0; /* clut V offset; also lands in rect.y on the parse path */
-        goto fixPrims;
+int ParseWeaponModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                     ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  if (!ValidWeaponSlot(host, target)) {
+    return kAssetRefused;
+  }
+  if (state.parse_phase == kParseFixPrimitives) {
+    if (!host.WeaponSummary(target).present) {
+      host.Refuse("weapon record", target);
+      return kAssetRefused;
     }
-
-    data += 4;
-    *(int*)&model->boneCount = *(int*)data;
-    *(int*)&model->quadCount = *(int*)(data + 4);
-
-    data += 8;
-    size = *(int*)data;
-
-    data += 4;
-    buf = NULL;
-
-    if (objectData->targetSlot == 0) {
-        buf = Content_legacyWeaponModelBuffers[0];
-    } else if (objectData->targetSlot == 1) {
-        buf = Content_legacyWeaponModelBuffers[1];
-    }
-
-    dst = buf;
-
-    if (dst == NULL) {
-        dst = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-    }
-
-    memcpy(dst, data, size);
-
-    model->sectionOffsets = dst;
-    VS::Render::RecordLiveModelExtent(
-        dst, (buf != NULL && (u_int)size > sizeof *buf) ? sizeof *buf : (u_int)size);
-
-    if (dst == NULL) {
-        return -2;
-    }
-
-    data += size;
-    data += 5;
-
-    texW = *data;
-    texW *= 2;
-
-    data += 2;
-
-    /* size is reused here for the 1-byte texture-format marker */
-    size = *data++;
-
-    if ((int)texW < 65) {
-        model->isWideTexture = 0;
-        for (i = 0; i < 20; i++) {
-            if (Render_legacyWeaponTextureSlots[i].referenceCount == 0) {
-                Render_legacyWeaponTextureSlots[i].referenceCount = 1;
-                break;
-            }
-        }
-        if (i == 20) {
-            return -2;
-        }
-    } else {
-        model->isWideTexture = 1;
-        for (i = 0; i < 20; i += 2) {
-            if ((Render_legacyWeaponTextureSlots[i].referenceCount == 0)
-                && (Render_legacyWeaponTextureSlots[i + 1].referenceCount == 0)) {
-                Render_legacyWeaponTextureSlots[i].referenceCount = 1;
-                Render_legacyWeaponTextureSlots[i + 1].referenceCount = 1;
-                break;
-            }
-        }
-        if (i >= 20) {
-            return -2;
-        }
-    }
-
-    model->textureSlot = i;
-    model->paletteSlotOffset = objectData->textureSlot + (objectData->subKind << 1) + 16;
-
-    if (size == 96) {
-        w = 32;
-        count = 64;
-        model->isDoubleClut = 1;
-        model->paletteColorCount = 96;
-    } else {
-        w = 16;
-        count = 32;
-        model->isDoubleClut = 0;
-        model->paletteColorCount = 48;
-    }
-
-    VS::Core::Memory::CopyLiveAlignedWords(model->workingPalette, data, w * 2);
-
-    data += w * 2;
-
-    for (i = 0; i < 7; i++) {
-        VS::Core::Memory::CopyLiveAlignedWords(model->palettes[i], data, count * 2);
-        data += count * 2;
-    }
-
-    texU = (model->textureSlot / 2) * 64 + (model->textureSlot & 1) * 32;
-    texV = 0xE0; /* same 0xE0 register the clut path adds to V coords */
-
-    setRECT(&rect, texU, texV, texW / 2, 32);
-    LoadImage(&rect, (u_long *)((void*)data));
-
-    data += texW * 32;
-    Content_modelParseResetFlag = 1;
-    Content_legacyWeaponParseCursor = data;
-
-    return -1;
-
-fixPrims:
-    count = model->otherPrimitiveCount + model->triangleCount + model->quadCount;
-    pData = (u_char *)((void*)VS_ONDISC(model->sectionOffsets, polygonSection, void*));
-    texU = (model->textureSlot & 1) * 64;
-
-    for (n = 0; n < count; n++) {
-        int vertices = 4;
-        int k;
-
-        if (*pData == Render_LegacyPrimitiveCode_PolyFt3) {
-            pData += 10;
-            vertices = 3;
-        } else {
-            pData += 12;
-        }
-
-        // Update uv coords to match the loaded slot
-        for (k = 0; k < vertices; pData += 2, ++k) {
-            pData[0] += texU;
-            pData[1] += texV;
-        }
-    }
-
-    memcpy(model->bones, data, model->boneCount * 8);
-    Content_LoadWeaponMaterialPalette(objectData->targetSlot, objectData->material);
-
-    model->reserved11 = 64;
-    model->reserved08Bit4 = 0;
-    model->reserved08Bit6 = 0;
-    model->reserved13 = 0;
-    model->actorId = objectData->subKind;
-    model->attachmentSlot = objectData->textureSlot;
-    model->attachmentBone = VS::Actors::FindLiveActorBoneTag(objectData->subKind, objectData->textureSlot, 0);
-    Content_modelParseResetFlag = 0;
-
-    return 0;
+    return FinishWeaponPrimitives(host, state, request);
+  }
+  if (state.parse_phase != 0) {
+    host.Refuse("weapon parse phase", state.parse_phase);
+    return kAssetRefused;
+  }
+  if (!host.WeaponSummary(target).present &&
+      !host.BindWeaponRecord(target, request.destination)) {
+    return kAssetRefused;
+  }
+  WeaponAssetRecord model = host.LoadWeapon(target);
+  if (model.bone_count != 0) {
+    return kAssetBusy;
+  }
+  std::optional<int> source = SharedAssetSlot(request.data, kWeaponModelSlots);
+  if (!source && FindSharedWeaponModel(host, request) != 0) {
+    source = SharedAssetSlot(request.data, kWeaponModelSlots);
+  }
+  if (source) {
+    return CopySharedWeapon(host, state, request, *source);
+  }
+  model.model_id = static_cast<std::uint8_t>(request.model_id);
+  return ParseWeaponFile(host, state, request, model);
 }
 
 // decomp: BATTLE.PRG _loadMaterialPalette (src/BATTLE/BATTLE.PRG/30DB0.c:855)
-void Content_LoadWeaponMaterialPalette(int index, int material)
-{
-    int count;
-    int offset;
-    int palette;
-    Actors_WeaponModel* model = Actors_weaponModels[index];
-
-    do {
-    } while (0);
-
-    offset = 32;
-    model->material = material;
-    palette = Items_weaponMaterialPaletteIndices[material];
-
-    if (model->isDoubleClut) {
-        count = 64;
-    } else {
-        offset = 16;
-        count = 32;
-    }
-
-    VS::Core::Memory::CopyLiveAlignedWords(&model->workingPalette[offset], &model->palettes[palette], count * 2);
-    VS::Core::Memory::CopyLiveAlignedWords(&model->uploadPalette, model->workingPalette, sizeof model->uploadPalette);
-    VS::Render::LoadLiveClutColors(model->uploadPalette, (model->paletteSlotOffset >> 1) + 4,
-        ((model->paletteSlotOffset & 1) * 48) + 160, offset + count);
+bool LoadWeaponMaterialPalette(ActorAssetHost& host, int slot, int material) {
+  if (!ValidWeaponSlot(host, slot) || !host.WeaponSummary(slot).present) {
+    host.Refuse("weapon palette record", slot);
+    return false;
+  }
+  WeaponAssetRecord model = host.LoadWeapon(slot);
+  model.material = static_cast<std::uint8_t>(material) & kMaterialMask;
+  const std::span<const std::uint8_t> palettes = host.WeaponMaterialPalettes();
+  if (material < 0 || static_cast<std::size_t>(material) >= palettes.size() ||
+      palettes[static_cast<std::size_t>(material)] >= kWeaponPalettes) {
+    host.StoreWeapon(slot, model);
+    host.Refuse("weapon material palette", material);
+    return false;
+  }
+  const std::size_t palette = palettes[static_cast<std::size_t>(material)];
+  const std::size_t offset =
+      model.double_clut ? kDoubleClutWorkingColors : kSingleClutWorkingColors;
+  const std::size_t count =
+      model.double_clut ? kDoubleClutColors : kSingleClutColors;
+  std::copy_n(
+      model.palettes[palette].begin(), count,
+      model.working_palette.begin() + static_cast<std::ptrdiff_t>(offset));
+  model.upload_palette = model.working_palette;
+  host.StoreWeapon(slot, model);
+  host.UploadClut(model.upload_palette,
+                  (model.palette_slot_offset >> 1U) + kWeaponClutFirstRow,
+                  ((model.palette_slot_offset & 1U) * kWeaponClutHalfColumns) +
+                      kWeaponClutFirstColumn,
+                  static_cast<std::uint32_t>(offset + count));
+  return true;
 }
 
 // decomp: BATTLE.PRG func_8009AA84 (src/BATTLE/BATTLE.PRG/30DB0.c:882)
-int Content_ReleaseWeaponModel(int index)
-{
-    Content_ActorAssetRequest objData;
-    int i;
-    Actors_WeaponModel* model = Actors_weaponModels[index];
-
-    if ((model == NULL) || (model->boneCount == 0)) {
-        return -1;
+int ReleaseWeaponModel(ActorAssetHost& host, int slot) {
+  if (!ValidWeaponSlot(host, slot)) {
+    return -1;
+  }
+  const WeaponAssetSummary summary = host.WeaponSummary(slot);
+  if (!summary.present || summary.bone_count == 0) {
+    return -1;
+  }
+  const WeaponAssetRecord model = host.LoadWeapon(slot);
+  if (model.actor_id != 0) {
+    bool shared = false;
+    if (slot >= kCopiedGeometrySlots) {
+      ActorAssetRequest probe;
+      probe.target_slot = static_cast<std::int8_t>(slot);
+      probe.model_id = model.model_id;
+      shared = FindSharedWeaponModel(host, probe) != 0;
     }
-
-    if (model->actorId) {
-        objData.targetSlot = index;
-        objData.modelId = model->modelId;
-
-        if (index >= 4) {
-            int shared_model_found;
-            Content_ActorAssetRequest* obj = &objData;
-
-            for (i = 0; i < 20; ++i) {
-                if ((i != obj->targetSlot) && ((Actors_weaponModels[i] != NULL))
-                    && ((Actors_weaponModels[i]->actorId) || (obj->targetSlot < 4))
-                    && (Actors_weaponModels[i]->modelId == obj->modelId)) {
-                    obj->dataAddress = i;
-                    shared_model_found = 1;
-                    goto exit;
-                }
-            }
-
-            shared_model_found = 0;
-        exit:
-            if (shared_model_found == 0) {
-                VS::Render::ForgetLiveModelExtent(model->sectionOffsets);
-                VS::Core::Memory::FreeLiveFromLowEnd(model->sectionOffsets);
-            }
-        } else {
-            VS::Render::ForgetLiveModelExtent(model->sectionOffsets);
-            VS::Core::Memory::FreeLiveFromLowEnd(model->sectionOffsets);
-        }
+    // Weapon slots 0 and 1 are Ashley's (actor 0) and never reach here; a
+    // slot 0 or 1 record of another actor would free its fixed buffer, as
+    // the original does.
+    if (!shared) {
+      host.ForgetModelGeometry(model.geometry);
+      host.FreeLow(model.geometry);
     }
-
-    --Render_legacyWeaponTextureSlots[model->textureSlot].referenceCount;
-
-    if (model->isWideTexture) {
-        --Render_legacyWeaponTextureSlots[model->textureSlot + 1].referenceCount;
-    }
-
-    Actors_weaponModels[index] = NULL;
-    return 0;
+  }
+  AddTextureReference(host, AssetTextureTable::kWeapon, model.texture_slot, -1);
+  if (model.wide_texture) {
+    AddTextureReference(host, AssetTextureTable::kWeapon,
+                        model.texture_slot + 1, -1);
+  }
+  host.ClearWeaponSlot(slot);
+  return 0;
 }
 
-// decomp: BATTLE.PRG func_8009AC24 (src/BATTLE/BATTLE.PRG/30DB0.c:930)
-int Content_FindSharedActorModel(Content_ActorAssetRequest* request)
-{
-    int i;
+namespace {
+constexpr std::int16_t kAshleyModelId = 6;
+constexpr std::int32_t kAshleyTextureSize = 0x80;
+// The SHP header before the model size: magic, two header words and the
+// texture layout.
+constexpr std::ptrdiff_t kShpModelSizeAt = 0xF4;
+constexpr std::ptrdiff_t kAshleyPaletteSkip = 8;
+constexpr std::uint16_t kModellessRadius = 0x40;
+constexpr std::uint16_t kModellessHeight = 10000;
+constexpr int kModellessPlacementMode = 1;
+// A texture size of 4 borrows another actor's texture (30DB0.c:1136).
+constexpr std::int32_t kBorrowedTextureMarker = 4;
+constexpr std::uint32_t kWideActorTextureWidth = 0x100;
+constexpr std::uint32_t kActorTextureSlotHeight = 64;
+constexpr int kWideActorTextureSlots = 8;
+constexpr std::uint8_t kSlotCountMask = 7;
+constexpr int kCompanionTextureSlotsFirst = 12;
+constexpr int kCompanionTextureSlotsEnd = 20;
+constexpr int kWideTextureSlotsFirst = 4;
+constexpr int kActorTextureSlotsEnd = 12;
+constexpr int kSmallTextureLimit = 3;
+constexpr std::uint32_t kFallbackTexturePage = 31;
+constexpr int kFallbackTextureSlot = 20;
+constexpr int kTextureSlotGroupMask = 3;
+constexpr std::uint16_t kTexturePageHeaderBit = 0x80;
+constexpr std::uint16_t kTexturePageClearBits = 0x180;
+constexpr std::size_t kTextureOriginBytes = 4;
+constexpr int kTextureOriginXScale = 64;
+constexpr int kTextureOriginYScale = 256;
+constexpr int kTextureRowScale = 64;
+constexpr std::size_t kPaletteWordBytes = 4;
+constexpr std::uint8_t kHeaderBitPaletteWords = 0xA0;
+constexpr std::uint8_t kPlainPaletteWords = 0x10;
+constexpr std::size_t kPaletteVariantBytes = 0x140;
+constexpr std::size_t kBasePaletteCopyAt = 0x140;
+constexpr int kCompanionSourceSlot = 1;
+constexpr int kLastActorSlot = kActorRecordSlots - 1;
+constexpr std::uint32_t kLastActorClutRow = 0x17;
+constexpr std::uint32_t kActorClutFirstRow = 4;
+constexpr std::uint32_t kActorAlternateClutFirstRow = 0x16;
+constexpr std::uint8_t kInitialTravelAnimation = 13;
+constexpr std::uint16_t kInitialMoveRate = 8;
+constexpr std::uint16_t kInitialTurnRate = 0x20;
+constexpr std::int16_t kUnitScale = 4096;
+constexpr std::uint16_t kInitialOpaque648 = 800;
+constexpr std::uint32_t kInitialBaseColor = 0x808080;
+constexpr std::uint32_t kInitialTint = 0x404040;
+constexpr std::uint8_t kFirstJointTag = 3;
+constexpr std::uint8_t kJointTagEnd = 7;
+constexpr int kBoundSharedBanks = 3;
+constexpr std::uint8_t kPlaceInRoom = 0xFF;
+constexpr std::uint8_t kCompanionAttachment = 0xFC;
+constexpr std::uint8_t kNoAttachParent = 0xFF;
+constexpr std::uint8_t kCompanionDepthBias = 8;
+constexpr int kWeaponOwnerSlots = 10;
+constexpr std::uint8_t kEmbeddedSequenceModel = 0xFF;
 
-    for (i = 0; i < 17; ++i) {
-        if ((i != request->targetSlot)
-            && ((Actors_actorRecords[i] != NULL) && (Actors_actorRecords[i]->modelId == request->modelId))) {
-            request->dataAddress = i;
-            return 1;
-        }
+bool ValidActorSlot(ActorAssetHost& host, int slot) {
+  if (slot < 0 || slot >= kActorRecordSlots) {
+    host.Refuse("actor slot", slot);
+    return false;
+  }
+  return true;
+}
+
+int RefuseActor(ActorAssetHost& host, const char* what, std::int64_t value) {
+  host.Refuse(what, value);
+  return kAssetRefused;
+}
+
+// The VRAM rectangle of actor texture slot `slot` (D_800E8F30, D_800E8F90).
+std::optional<VramRect> ActorTextureRect(const ActorAssetHost& host, int slot,
+                                         std::int32_t width,
+                                         std::int32_t height) {
+  const std::span<const std::uint8_t> origins = host.TextureSlotOrigins();
+  const std::span<const std::uint8_t> rows = host.TextureSlotRowOffsets();
+  const auto at = static_cast<std::size_t>(slot) * kTextureOriginBytes;
+  if (slot < 0 || at + kTextureOriginBytes > origins.size() ||
+      static_cast<std::size_t>(slot) >= rows.size()) {
+    return std::nullopt;
+  }
+  const auto read_short = [&](std::size_t offset) {
+    return static_cast<std::int16_t>(origins[offset] |
+                                     (origins[offset + 1] << kBitsPerByte));
+  };
+  const int x = read_short(at) * kTextureOriginXScale;
+  const int y = (read_short(at + 2) * kTextureOriginYScale) +
+                (rows[static_cast<std::size_t>(slot)] * kTextureRowScale);
+  return VramRect{.x = static_cast<std::int16_t>(x),
+                  .y = static_cast<std::int16_t>(y),
+                  .w = static_cast<std::int16_t>(width / 2),
+                  .h = static_cast<std::int16_t>(height)};
+}
+
+// Copies `words` palette words from the file into the actor's palettes.
+bool ReadActorPalettes(FileCursor& cursor, ActorAssetRecord& actor,
+                       std::size_t words) {
+  const std::size_t bytes = words * kPaletteWordBytes;
+  const std::span<const std::byte> source = cursor.Take(bytes);
+  if (!cursor.Ok() || bytes > actor.palettes.size()) {
+    return false;
+  }
+  std::copy_n(source.begin(), bytes, actor.palettes.begin());
+  return true;
+}
+
+int StartActorModelFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
+                            ActorAssetRequest& request) {
+  std::optional<std::uint32_t> sectors = host.FileTableEntry(
+      AssetFileTable::kShpSectors, static_cast<std::size_t>(request.model_id));
+  if (sectors && *sectors == 0) {
+    request.model_id = 0;
+    sectors = host.FileTableEntry(AssetFileTable::kShpSectors, 0);
+  }
+  const std::optional<std::uint32_t> offset = host.FileTableEntry(
+      AssetFileTable::kShpOffsets, static_cast<std::size_t>(request.model_id));
+  if (!sectors || !offset) {
+    return RefuseActor(host, "actor model file table", request.model_id);
+  }
+  const auto bytes = static_cast<std::int32_t>(*sectors << kSectorShift);
+  state.model_file = host.AllocateHigh(static_cast<std::size_t>(bytes));
+  request.data = state.model_file;
+  if (state.model_file == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  state.model_phase = kPhaseReading;
+  StartFileRead(host, AssetFileStream::kActorModel,
+                {static_cast<std::int32_t>(*offset) + kShpFirstSector, bytes},
+                request.data);
+  return kAssetPending;
+}
+
+// The joint slots each tagged bone starts (30DB0.c:1352-1360).
+void ResetActorJoints(ActorAssetHost& host, ActorAssetRecord& actor) {
+  const std::size_t bytes = std::size_t{actor.bone_count} * kShpBoneBytes;
+  const std::span<std::byte> bones =
+      host.Bytes(AdvanceAddress(actor.model, kShpModelHeaderBytes), bytes);
+  if (bones.size() < bytes) {
+    host.Refuse("actor bones", actor.bone_count);
+    return;
+  }
+  for (std::size_t i = 0; i < actor.bone_count; ++i) {
+    const std::size_t bone = i * kShpBoneBytes;
+    const std::uint8_t tag = ByteAt(bones, bone + kShpBoneTagAt);
+    if (tag >= kFirstJointTag && tag < kJointTagEnd) {
+      const auto joint = static_cast<std::size_t>(tag - kFirstJointTag) * 2U;
+      actor.joint_slots[joint] = static_cast<std::uint16_t>(
+          ReadLittle(bones, bone + kShpBoneJointInitAt, sizeof(std::uint16_t)));
+      actor.joint_slots[joint + 1] = 0;
     }
-    return 0;
+  }
+}
+
+// The record fields a newly parsed actor starts with (30DB0.c:1318-1373).
+void ResetActorRecordFields(ActorAssetHost& host, ActorAssetRecord& actor,
+                            const ActorAssetRequest& request) {
+  actor.slot = static_cast<std::uint8_t>(request.target_slot);
+  actor.variant = request.variant;
+  actor.is_parsed = true;
+  actor.action_animation_state = 0;
+  actor.travel_animation = kInitialTravelAnimation;
+  actor.common_sequence = AssetAddress::kNone;
+  actor.battle_sequence = AssetAddress::kNone;
+  actor.shared_sequences[kSpecialSequenceRef] = AssetAddress::kNone;
+  actor.sequence_flags = 0;
+  actor.common_animation_count = 0;
+  actor.battle_animation_count = 0;
+  actor.locomotion_counter = 0;
+  actor.sequence_model_id = 0;
+  actor.animation_length = 0;
+  actor.opaque6dc = 0;
+  actor.weapon_drawn = false;
+  actor.advance_requested = false;
+  actor.custom_tint = false;
+  actor.move_rate = kInitialMoveRate;
+  actor.turn_rate = kInitialTurnRate;
+  actor.scale_x = kUnitScale;
+  actor.scale_y = kUnitScale;
+  actor.scale_z = kUnitScale;
+  actor.frames_per_step = 1;
+  actor.support_layer = 0;
+  actor.placement_layer = 0;
+  actor.ignored_by_collision = false;
+  actor.sound_enabled = true;
+  actor.fade = 0;
+  actor.opaque648 = kInitialOpaque648;
+  actor.base_color = kInitialBaseColor;
+  actor.tint = kInitialTint;
+  actor.scale = host.RoomActorScale();
+  ResetActorJoints(host, actor);
+  for (std::size_t i = 0; i < actor.texture_scroll.size(); ++i) {
+    const ActorTextureScrollBounds& bounds = actor.texture_scroll_bounds[i];
+    actor.texture_scroll[i] = {
+        .x = bounds.x,
+        .y = bounds.y,
+        .step_x = static_cast<std::int8_t>(bounds.initial_step_x),
+        .step_y = static_cast<std::int8_t>(bounds.initial_step_y),
+        .interval = bounds.interval,
+        .timer = 0};
+  }
+  actor.shared_sequences[0] = AssetAddress::kNone;
+  actor.shared_sequences[1] = AssetAddress::kNone;
+  for (int bank = 0; bank < kBoundSharedBanks; ++bank) {
+    const SharedSequenceBank value = host.LoadSequenceBank(bank);
+    if (value.data != AssetAddress::kNone) {
+      static_cast<void>(BindSharedActorSequence(
+          value, bank, host.SharedSequenceIdsByKind(), actor));
+    }
+  }
+}
+
+// Places the actor in the room, makes it a companion or attaches it to its
+// parent's bone (30DB0.c:1381-1400).
+int AttachLoadedActor(ActorAssetHost& host, ActorAssetLoadState& state,
+                      const ActorAssetRequest& request,
+                      ActorAssetRecord& actor) {
+  const int target = TargetSlot(request);
+  state.parse_phase = 0;
+  if (request.sub_kind == kPlaceInRoom) {
+    host.StoreActor(target, actor);
+    host.PlaceActorInRoom(target, request.placement, request.material);
+    actor = host.LoadActor(target);
+    actor.attach_parent = kNoAttachParent;
+    host.StoreActor(target, actor);
+    return kAssetDone;
+  }
+  if (request.texture_slot == kCompanionAttachment) {
+    actor.attach_parent = request.sub_kind;
+    actor.attach_bone = kCompanionAttachment;
+    host.StoreActor(target, actor);
+    const int parent = request.sub_kind;
+    if (parent >= kActorRecordSlots || !host.ActorSummary(parent).present) {
+      return RefuseActor(host, "companion parent", parent);
+    }
+    ActorAssetRecord owner = host.LoadActor(parent);
+    owner.companion_slot = static_cast<std::uint8_t>(target);
+    owner.companion = {
+        .x = 0, .y = 0, .z = 0, .depth_bias = kCompanionDepthBias};
+    host.StoreActor(parent, owner);
+    return kAssetDone;
+  }
+  actor.attach_parent = kNoAttachParent;
+  host.StoreActor(target, actor);
+  host.AttachActorToParentBone(target, request.sub_kind, request.texture_slot);
+  return kAssetDone;
+}
+
+int InitializeActorRecord(ActorAssetHost& host, ActorAssetLoadState& state,
+                          const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  ActorAssetRecord actor = host.LoadActor(target);
+  ResetActorRecordFields(host, actor, request);
+  host.StoreActor(target, actor);
+  host.ClearActorPaletteFade(target);
+  host.ResetActorMotion(target);
+  actor = host.LoadActor(target);
+  actor.attach_bone = 0;
+  actor.is_attached = false;
+  return AttachLoadedActor(host, state, request, actor);
+}
+
+// Copies the palette variant into the base and current palettes and
+// uploads the CLUTs (30DB0.c:1290-1310).
+void SetupActorPalettes(ActorAssetHost& host, const ActorAssetLoadState& state,
+                        const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  ActorAssetRecord actor = host.LoadActor(target);
+  const auto bytes = static_cast<std::uint32_t>(state.model_palette_words * 2U);
+  const std::size_t wanted = Core::Memory::AlignedWordBytes(bytes);
+  const std::span<const std::byte> palettes(actor.palettes);
+  const std::size_t variant_at = request.variant * kPaletteVariantBytes;
+  const std::span<const std::byte> variant = variant_at < palettes.size()
+                                                 ? palettes.subspan(variant_at)
+                                                 : std::span<const std::byte>{};
+  const std::span<std::byte> base =
+      std::as_writable_bytes(std::span<std::uint16_t>(actor.base_palette));
+  bool copied = Core::Memory::CopyAlignedWords(base, variant, bytes) == wanted;
+  copied = Core::Memory::CopyAlignedWords(base.subspan(kBasePaletteCopyAt),
+                                          base, bytes) == wanted &&
+           copied;
+  copied = Core::Memory::CopyAlignedWords(
+               std::as_writable_bytes(
+                   std::span<std::uint16_t>(actor.current_palette)),
+               base, bytes) == wanted &&
+           copied;
+  if (!copied) {
+    host.Refuse("actor palette words", state.model_palette_words);
+  }
+  const std::uint32_t words = state.model_palette_words;
+  if (target == kLastActorSlot) {
+    host.UploadClut(actor.base_palette, kLastActorClutRow, 0, words);
+    const std::int16_t clut =
+        host.TextureSlot(AssetTextureTable::kActor, kCompanionSourceSlot)
+            .alternate_palette;
+    actor.clut_a = clut;
+    actor.clut_b = clut;
+  } else {
+    const auto row = static_cast<std::uint32_t>(target);
+    host.UploadClut(actor.base_palette, row + kActorClutFirstRow, 0, words);
+    host.UploadClut(actor.base_palette, row + kActorAlternateClutFirstRow, 0,
+                    words);
+    const AssetTextureSlot slot =
+        host.TextureSlot(AssetTextureTable::kActor, target);
+    actor.clut_a = slot.palette;
+    actor.clut_b = slot.alternate_palette;
+  }
+  host.StoreActor(target, actor);
+}
+
+int CompleteActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                       const ActorAssetRequest& request) {
+  SetupActorPalettes(host, state, request);
+  if (request.target_slot == 0 && request.model_id == kAshleyModelId) {
+    return kAssetDone;
+  }
+  return InitializeActorRecord(host, state, request);
+}
+
+// The second frame: offsets the UVs into the texture slot's rows
+// (30DB0.c:1250-1288).
+int ResumeActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                     const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  const ActorAssetRecord actor = host.LoadActor(target);
+  const int count =
+      actor.other_polygon_count + actor.triangle_count + actor.quad_count;
+  const std::optional<std::uint32_t> section =
+      PolygonSectionOffset(host, actor.model);
+  const std::span<const std::uint8_t> rows = host.TextureSlotRowOffsets();
+  if (!section || actor.texture_slot >= rows.size() ||
+      !OffsetModelTextureCoordinates(
+          host.Bytes(AdvanceAddress(actor.model, *section), 0), count,
+          actor.uv_layout, 0, rows[actor.texture_slot] * kTextureRowScale)) {
+    state.parse_phase = 0;
+    return RefuseActor(host, "actor primitives", target);
+  }
+  return CompleteActorModel(host, state, request);
+}
+
+// Ashley's model is resident: only her texture and palettes reload
+// (30DB0.c:1036-1062).
+int ReloadAshleyTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                        ActorAssetRequest& request) {
+  if (!host.ActorSummary(0).present) {
+    return RefuseActor(host, "actor record", 0);
+  }
+  ActorAssetRecord actor = host.LoadActor(0);
+  FileCursor cursor(host, request.data);
+  cursor.Skip(kShpModelSizeAt);
+  const std::int32_t model_bytes = cursor.I32();
+  cursor.Skip(std::ptrdiff_t{model_bytes} + kFileHeaderBytes);
+  const std::int32_t skip = cursor.I32();
+  cursor.Skip(std::ptrdiff_t{skip} + kAshleyPaletteSkip);
+  state.model_palette_words = actor.palette_words;
+  state.model_texture_width = kAshleyTextureSize;
+  state.model_texture_height = kAshleyTextureSize;
+  const std::optional<VramRect> rect = ActorTextureRect(
+      host, actor.texture_slot, kAshleyTextureSize, kAshleyTextureSize);
+  if (!ReadActorPalettes(cursor, actor, actor.palette_words) || !rect) {
+    return RefuseActor(host, "actor file", 0);
+  }
+  host.StoreActor(0, actor);
+  if (!UploadFrom(host, *rect, cursor.At(), "actor texture")) {
+    return kAssetRefused;
+  }
+  request.variant = 0;
+  return CompleteActorModel(host, state, request);
+}
+
+int PlaceModellessActor(ActorAssetHost& host, ActorAssetLoadState& state,
+                        const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  ActorAssetRecord actor = host.LoadActor(target);
+  actor.model_id = static_cast<std::uint16_t>(kModellessActorId);
+  actor.slot = static_cast<std::uint8_t>(target);
+  actor.occupancy_radius = kModellessRadius;
+  actor.occupancy_height = kModellessHeight;
+  host.StoreActor(target, actor);
+  host.ResetActorMotion(target);
+  actor = host.LoadActor(target);
+  actor.is_skipped = false;
+  host.StoreActor(target, actor);
+  host.PlaceActorInRoom(target, request.placement, kModellessPlacementMode);
+  state.parse_phase = 0;
+  return kAssetDone;
+}
+
+int CopySharedActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                         const ActorAssetRequest& request, int source) {
+  const int target = TargetSlot(request);
+  if (!host.ActorSummary(source).present) {
+    return RefuseActor(host, "shared actor record", source);
+  }
+  host.CopyActorRecord(target, source);
+  ActorAssetRecord actor = host.LoadActor(target);
+  if (actor.holds_texture_slots && actor.texture_slot != kNoAssetTextureSlot) {
+    for (int i = 0; i <= actor.texture_slot_count_minus_one; ++i) {
+      AddTextureReference(host, AssetTextureTable::kActor,
+                          actor.texture_slot + i, 1);
+    }
+  }
+  actor.placement = request.placement;
+  state.model_palette_words =
+      actor.texture_header_bit ? kHeaderBitPaletteWords : kPlainPaletteWords;
+  host.StoreActor(target, actor);
+  return CompleteActorModel(host, state, request);
+}
+}  // namespace
+
+namespace {
+// The first free run of `count` actor texture slots in [first, end)
+// (30DB0.c:1180-1222); nullopt when the original falls back.
+std::optional<int> FindFreeActorTextureSlots(const ActorAssetHost& host,
+                                             int count, int first, int end) {
+  const auto references = [&](int index) {
+    return host.TextureSlot(AssetTextureTable::kActor, index).references;
+  };
+  if (count == kWideActorTextureSlots) {
+    for (int i = first; i < end; ++i) {
+      if (references(i) != 0) {
+        return std::nullopt;
+      }
+    }
+    return first;
+  }
+  if (count < kSmallTextureLimit) {
+    for (int i = first; i < end; i += count) {
+      if (references(i) == 0) {
+        return i;
+      }
+    }
+    return std::nullopt;
+  }
+  for (int i = first; i < end; ++i) {
+    int free = 0;
+    while (free < count && references(i + free) == 0) {
+      ++free;
+    }
+    if (free == count) {
+      return i;
+    }
+    if (((i + count) & kTextureSlotGroupMask) == 0) {
+      i += count - 1;
+    }
+  }
+  return std::nullopt;
+}
+
+// Marks the slots used, uploads the palettes and texture and leaves the UV
+// pass for the next frame (30DB0.c:1236-1258).
+int PlaceActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                      const ActorAssetRequest& request, FileCursor& cursor,
+                      ActorAssetRecord& actor, int first, int count) {
+  const int target = TargetSlot(request);
+  for (int j = 0; j < count; ++j) {
+    if (first + j >= kActorTextureSlots) {
+      // The original's fallback slot 20 with more than five slots writes
+      // past the table.
+      host.Refuse("actor texture slot run", first + j);
+      break;
+    }
+    SetTextureReferences(host, AssetTextureTable::kActor, first + j, 1);
+  }
+  actor.texture_slot = static_cast<std::uint8_t>(first);
+  AssetTextureSlot page = host.TextureSlot(AssetTextureTable::kActor, first);
+  page.texture_page = static_cast<std::int16_t>(
+      actor.texture_header_bit ? (page.texture_page | kTexturePageHeaderBit)
+                               : (page.texture_page & ~kTexturePageClearBits));
+  host.SetTextureSlot(AssetTextureTable::kActor, first, page);
+  const std::optional<VramRect> rect = ActorTextureRect(
+      host, first, state.model_texture_width, state.model_texture_height);
+  if (!ReadActorPalettes(cursor, actor, state.model_palette_words) || !rect) {
+    host.StoreActor(target, actor);
+    return RefuseActor(host, "actor texture", target);
+  }
+  host.StoreActor(target, actor);
+  if (!UploadFrom(host, *rect, cursor.At(), "actor texture")) {
+    return kAssetRefused;
+  }
+  cursor.Skip(std::ptrdiff_t{state.model_texture_width} *
+              state.model_texture_height);
+  state.parse_phase = kParseFixPrimitives;
+  state.model_cursor = cursor.At();
+  return kAssetPending;
+}
+
+// The texture header, the slot search and its fallback (30DB0.c:1150-1235).
+int ParseActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                      const ActorAssetRequest& request, FileCursor& cursor,
+                      ActorAssetRecord& actor) {
+  const int target = TargetSlot(request);
+  const std::uint32_t header = cursor.U8();
+  actor.texture_header_bit = (header & 1U) != 0;
+  constexpr unsigned kUvLayoutShift = 4;
+  actor.uv_layout = ((header >> kUvLayoutShift) & 1U) != 0;
+  state.model_header_word = static_cast<std::int32_t>(header);
+  state.model_texture_width = static_cast<std::int32_t>(cursor.U8() * 2U);
+  state.model_texture_height = static_cast<std::int32_t>(cursor.U8() * 2U);
+  actor.palette_words = static_cast<std::uint8_t>(cursor.U8());
+  state.model_palette_words = actor.palette_words;
+  int count = state.model_texture_height /
+              static_cast<std::int32_t>(kActorTextureSlotHeight);
+  if (state.model_texture_width ==
+      static_cast<std::int32_t>(kWideActorTextureWidth)) {
+    count = kWideActorTextureSlots;
+  }
+  actor.texture_slot_count_minus_one =
+      static_cast<std::uint8_t>((count - 1) & kSlotCountMask);
+  const bool companion = target == 1 || target == kLastActorSlot;
+  const int first = companion                     ? kCompanionTextureSlotsFirst
+                    : count >= kSmallTextureLimit ? kWideTextureSlotsFirst
+                                                  : 0;
+  const int end = companion ? kCompanionTextureSlotsEnd : kActorTextureSlotsEnd;
+  if (!cursor.Ok() || count == 0 ||
+      (count > kSmallTextureLimit + 1 && count != kWideActorTextureSlots)) {
+    // The original searches no slots and uses a stale index.
+    host.StoreActor(target, actor);
+    return RefuseActor(host, "actor texture slot count", count);
+  }
+  std::optional<int> slot = FindFreeActorTextureSlots(host, count, first, end);
+  if (!slot) {
+    if (host.ReserveTexturePages(kFallbackTexturePage, 1) == 0) {
+      actor.texture_slot = 0;
+      actor.texture_slot_count_minus_one = 0;
+      host.StoreActor(target, actor);
+      AddTextureReference(host, AssetTextureTable::kActor, 0, 1);
+      return CompleteActorModel(host, state, request);
+    }
+    slot = kFallbackTextureSlot;
+  }
+  return PlaceActorTexture(host, state, request, cursor, actor, *slot, count);
+}
+
+// A texture size of 4 names the model whose texture this one shares
+// (30DB0.c:1132-1148).
+int BorrowActorTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                       const ActorAssetRequest& request,
+                       const FileCursor& cursor, ActorAssetRecord& actor) {
+  const int target = TargetSlot(request);
+  FileCursor peek = cursor;
+  const std::int32_t wanted = peek.I32();
+  host.StoreActor(target, actor);
+  // The search includes this actor; without a match the original reads the
+  // last record it looked at.
+  int source = kLastActorSlot;
+  for (int i = 0; i < kActorRecordSlots; ++i) {
+    const ActorAssetSummary other = host.ActorSummary(i);
+    if (other.present && int{other.model_id} == wanted) {
+      source = i;
+      break;
+    }
+  }
+  if (!peek.Ok() || !host.ActorSummary(source).present) {
+    return RefuseActor(host, "borrowed actor texture", wanted);
+  }
+  const ActorAssetRecord other = host.LoadActor(source);
+  actor.palette_words = other.palette_words;
+  state.model_palette_words = other.palette_words;
+  const std::size_t bytes =
+      std::size_t{other.palette_words} * kPaletteWordBytes;
+  if (bytes > other.palettes.size()) {
+    host.Refuse("borrowed actor palette words", other.palette_words);
+  }
+  std::copy_n(other.palettes.begin(), std::min(bytes, other.palettes.size()),
+              actor.palettes.begin());
+  actor.texture_slot = other.texture_slot;
+  actor.uv_layout = other.uv_layout;
+  actor.holds_texture_slots = false;
+  actor.texture_header_bit = true;
+  host.StoreActor(target, actor);
+  return ResumeActorModel(host, state, request);
+}
+
+// The file's header, texture layout, model and embedded sequence
+// (30DB0.c:1100-1131).
+int ParseActorModelFile(ActorAssetHost& host, ActorAssetLoadState& state,
+                        const ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  ActorAssetRecord actor = host.LoadActor(target);
+  actor.model_id = static_cast<std::uint16_t>(request.model_id);
+  FileCursor cursor(host, request.data);
+  cursor.Skip(kFileHeaderBytes);
+  actor.placement = request.placement;
+  actor.is_skipped = true;
+  const std::uint32_t counts = cursor.U32();
+  const std::uint32_t polygons = cursor.U32();
+  actor.bone_count = static_cast<std::uint8_t>(counts);
+  actor.vertex_group_count = static_cast<std::uint8_t>(counts >> kBitsPerByte);
+  actor.triangle_count = static_cast<std::uint16_t>(counts >> kHalfWordBits);
+  actor.quad_count = static_cast<std::uint16_t>(polygons);
+  actor.other_polygon_count =
+      static_cast<std::uint16_t>(polygons >> kHalfWordBits);
+  const std::span<const std::byte> layout =
+      cursor.Take(kActorTextureLayoutBytes);
+  const std::int32_t size = cursor.I32();
+  host.StoreActor(target, actor);
+  if (!cursor.Ok()) {
+    return RefuseActor(host, "actor file", target);
+  }
+  host.WriteActorTextureLayout(target, layout);
+  actor = host.LoadActor(target);
+  if (size < kShpModelHeaderBytes) {
+    return RefuseActor(host, "actor model size", size);
+  }
+  const AssetAddress model = host.AllocateLow(static_cast<std::size_t>(size));
+  if (model == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  static_cast<void>(CopyExact(host, model, cursor.At(),
+                              static_cast<std::size_t>(size), "actor model"));
+  actor.model = model;
+  actor.model_data_size = static_cast<std::uint32_t>(size);
+  host.StoreActor(target, actor);
+  cursor.Skip(size);
+  ActorAssetRequest embedded;
+  embedded.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceParse);
+  embedded.target_slot = request.target_slot;
+  embedded.data = cursor.At();
+  embedded.model_id = kEmbeddedSequenceModel;
+  static_cast<void>(ParseActorSequence(host, state, embedded));
+  actor = host.LoadActor(target);
+  cursor.Skip(kFileHeaderBytes);
+  const std::int32_t skip = cursor.I32();
+  cursor.Skip(skip);
+  const std::int32_t texture_size = cursor.I32();
+  actor.holds_texture_slots = true;
+  if (texture_size == kBorrowedTextureMarker) {
+    return BorrowActorTexture(host, state, request, cursor, actor);
+  }
+  return ParseActorTexture(host, state, request, cursor, actor);
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_8009AC24 (src/BATTLE/BATTLE.PRG/30DB0.c:930)
+int FindSharedActorModel(const ActorAssetHost& host,
+                         ActorAssetRequest& request) {
+  for (int i = 0; i < kActorRecordSlots; ++i) {
+    if (i == request.target_slot) {
+      continue;
+    }
+    const ActorAssetSummary other = host.ActorSummary(i);
+    if (other.present && int{other.model_id} == int{request.model_id}) {
+      request.data = SharedAssetAddress(i);
+      return 1;
+    }
+  }
+  return 0;
 }
 
 // decomp: BATTLE.PRG _loadShp (src/BATTLE/BATTLE.PRG/30DB0.c:944)
-int Content_UpdateActorModelLoad(Content_ActorAssetRequest* request)
-{
-    int shpData;
-    int found;
-    int i;
-    int shpFileSize;
-
-    switch (Content_legacyModelLoadPhase) {
-    case 0:
-        if (request->modelId == 0x7F) {
-            Content_legacyShpAllocated = 0;
-            break;
-        }
-
-        for (i = 0; i < 17; ++i) {
-            if ((i != request->targetSlot) && ((Actors_actorRecords[i] != NULL))
-                && (Actors_actorRecords[i]->modelId == request->modelId)) {
-                request->dataAddress = i;
-                found = 1;
-                goto exit;
-            }
-        }
-        found = 0;
-    exit:
-        if (found != 0) {
-            Content_legacyShpAllocated = 0;
-            break;
-        }
-        Content_legacyShpAllocated = 1;
-        // Fallthrough
-
-    default:
-        shpFileSize = Content_legacyShpSectorCounts[request->modelId];
-
-        if (shpFileSize == 0) {
-            request->modelId = 0;
-            shpFileSize = Content_legacyShpSectorCounts[0];
-        }
-
-        shpFileSize <<= 0xB;
-        Content_legacyShpFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(shpFileSize);
-        request->dataAddress = (uintptr_t)Content_legacyShpFileBuffer;
-
-        if (Content_legacyShpFileBuffer == NULL) {
-            return -2;
-        }
-
-        Content_legacyModelLoadPhase = 1;
-        Content_legacyShpFileLocation.lba = Content_legacyShpDiscOffsets[request->modelId] + VS_00_SHP_LBA;
-        Content_legacyShpFileLocation.size = shpFileSize;
-        Content_legacyShpDiscRequest = Content_AllocateDiscRequest(&Content_legacyShpFileLocation);
-
-        Content_EnqueueDiscRequest(Content_legacyShpDiscRequest, (void*)request->dataAddress);
-    case 1:
-        if (Content_legacyShpDiscRequest->state != 4) {
-            return -1;
-        }
-
-        Content_ReleaseDiscRequest(Content_legacyShpDiscRequest);
-        Content_legacyModelLoadPhase = 2;
-
-        return -1;
-
-    case 2:
+int UpdateActorModelLoad(ActorAssetHost& host, ActorAssetLoadState& state,
+                         ActorAssetRequest& request) {
+  switch (state.model_phase) {
+    case kPhaseStart:
+      if (request.model_id == kModellessActorId ||
+          FindSharedActorModel(host, request) != 0) {
+        state.model_file_allocated = false;
         break;
-    }
-
-    shpData = Content_ParseActorModel(request);
-
-    if (shpData == -1) {
-        return -1;
-    }
-
-    if (Content_legacyShpAllocated != 0) {
-        Content_legacyShpAllocated = 0;
-        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacyShpFileBuffer);
-    }
-
-    Content_legacyModelLoadPhase = 0;
-    return shpData;
+      }
+      state.model_file_allocated = true;
+      [[fallthrough]];
+    default:
+      if (const int started = StartActorModelFileRead(host, state, request);
+          started != kAssetPending) {
+        return started;
+      }
+      [[fallthrough]];
+    case kPhaseReading:
+      return WaitForFileRead(host, state.model_phase,
+                             AssetFileStream::kActorModel);
+    case kPhaseParsing:
+      break;
+  }
+  const int result = ParseActorModel(host, state, request);
+  if (result == kAssetPending) {
+    return kAssetPending;
+  }
+  if (state.model_file_allocated) {
+    state.model_file_allocated = false;
+    host.FreeHigh(state.model_file);
+  }
+  state.model_phase = kPhaseStart;
+  return result;
 }
 
 // decomp: BATTLE.PRG _parseShp (src/BATTLE/BATTLE.PRG/30DB0.c:1026)
-int Content_ParseActorModel(Content_ActorAssetRequest* object)
-{
-    RECT rect;
-    Content_ActorAssetRequest queued;
-    Actors_ActorRecord* actor;
-    Actors_ActorRecord* other;
-    Actors_ShpModel* model;
-    Actors_ShpBone* armature;
-    u_char* data;
-    u_char* pData;
-    int size;
-    int i;
-    int j;
-    int n;
-    int lo;
-    int hi;
-    int modelId;
-    int vertices;
-    int k;
-    int corner;
-    int x;
-    int y;
-    u_short* joint;
-    Actors_TextureScrollBounds* bounds;
-    Actors_TextureScrollState* state;
-    int texV;
-
-    if (Content_modelParseResetFlag == 0) {
-        if (object->targetSlot == 0 && object->modelId == 6) {
-            int originX;
-            int originY;
-
-            data = (u_char*)object->dataAddress;
-            actor = Actors_actorRecords[0];
-            data += 0xF4;
-            size = *(int*)data;
-            data += size + 4;
-            data += 4;
-            i = *(int*)data;
-            Content_legacyShpCopiedWordCount = actor->instance.copiedWordCount;
-            Content_legacyShpTextureWidth = 0x80;
-            Content_legacyShpTextureHeight = 0x80;
-            data += i + 4;
-            data += 8;
-            VS::Core::Memory::CopyLiveAlignedWords(actor->palettes, data, Content_legacyShpCopiedWordCount * 4);
-            originX = *(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4) << 6;
-            rect.x = originX;
-            originY = (*(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4 + 2) << 8)
-                    + (Actors_textureSlotRowOffsets[actor->textureSlot] << 6);
-            rect.y = originY;
-            rect.w = Content_legacyShpTextureWidth / 2;
-            rect.h = Content_legacyShpTextureHeight;
-            LoadImage(&rect, (u_long*)(data + Content_legacyShpCopiedWordCount * 4));
-            object->variant = 0;
-            goto setupPalettes;
-        }
-
-        actor = Actors_actorRecords[object->targetSlot];
-        if (actor == NULL) {
-            Actors_actorRecords[object->targetSlot] = (Actors_ActorRecord *)(object->destination);
-            actor = Actors_actorRecords[object->targetSlot];
-            if (actor == NULL) {
-                return -2;
-            }
-            memset(actor, 0, sizeof(Actors_ActorRecord));
-            actor->textureSlot = 0xFF;
-            actor->instance.attachParent = 0xFF;
-        }
-
-        modelId = object->modelId;
-        if (modelId == 0x7F) {
-            actor->modelId = modelId;
-            actor->instance.slot = object->targetSlot;
-            actor->occupancyRadius = 0x40;
-            actor->occupancyHeight = 10000;
-            ((void (*)(...))Actors_ResetActorMotionState)(actor->instance.slot);
-            actor->instance.isSkipped = 0;
-            Actors_PlaceActorInRoom(actor->instance.slot, (Field_ActorPlacement*)&object->placement, 0, 1);
-            Content_modelParseResetFlag = 0;
-            return 0;
-        }
-
-        if ((u_long)object->dataAddress < 17) {
-        copyShared:
-            VS::Core::Memory::CopyLiveAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));
-            if (actor->holdsTextureSlots && actor->textureSlot != 0xFF) {
-                for (i = 0; i < actor->instance.textureSlotCountMinusOne + 1; ++i) {
-                    ++Render_legacyActorTextureSlots[actor->textureSlot + i].referenceCount;
-                }
-            }
-            *(Field_ActorPlacement*)&actor->instance.currentTileX = object->placement;
-            if (actor->textureHeaderBit) {
-                Content_legacyShpCopiedWordCount = 0xA0;
-            } else {
-                Content_legacyShpCopiedWordCount = 0x10;
-            }
-            goto setupPalettes;
-        }
-        if (Content_FindSharedActorModel(object)) {
-            goto copyShared;
-        }
-        actor->modelId = object->modelId;
-        data = (u_char*)object->dataAddress;
-    } else if (Content_modelParseResetFlag == 1) {
-        actor = Actors_actorRecords[object->targetSlot];
-        goto fixUVs;
+int ParseActorModel(ActorAssetHost& host, ActorAssetLoadState& state,
+                    ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  if (!ValidActorSlot(host, target)) {
+    return kAssetRefused;
+  }
+  if (state.parse_phase == kParseFixPrimitives) {
+    if (!host.ActorSummary(target).present) {
+      return RefuseActor(host, "actor record", target);
     }
-
-    data += 4;
-    *(Field_ActorPlacement*)&actor->instance.currentTileX = object->placement;
-    actor->instance.isSkipped = 1;
-    *(int*)&actor->instance.boneCount = *(int*)data;
-    *(int*)&actor->instance.quadCount = *(int*)(data + 4);
-    data += 8;
-    VS::Core::Memory::CopyLiveAlignedWords(VS::Core::Memory::RecordTail(*actor, actor->textureOverlays), data, 0xE8);
-    data += 0xE8;
-    size = *(int*)data;
-    data += 4;
-    if (size < (int)sizeof(Actors_ShpModel)) {
-        return -2;
-    }
-    model = (Actors_ShpModel *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-    if (model == NULL) {
-        return -2;
-    }
-    memcpy(model, data, size);
-    actor->instance.model = model;
-    actor->modelDataSize = (unsigned)size;
-    data += size;
-
-    queued.assetKind = 8;
-    queued.targetSlot = object->targetSlot;
-    queued.dataAddress = (uintptr_t)data;
-    queued.modelId = 0xFF;
-    queued.subKind = 0;
-    Content_ParseActorSequence(&queued);
-    data += 4;
-
-    i = *(int*)data;
-    data += 4;
-    data += i;
-    size = *(int*)data;
-    actor->holdsTextureSlots = 1;
-    data += 4;
-
-    if (size == 4) {
-        size = *(int*)data;
-        for (i = 0; i < 17; ++i) {
-            other = Actors_actorRecords[i];
-            if (other != NULL && other->modelId == size) {
-                break;
-            }
-        }
-        Content_legacyShpCopiedWordCount = actor->instance.copiedWordCount = other->instance.copiedWordCount;
-        VS::Core::Memory::CopyLiveAlignedWords(actor->palettes, other->palettes, Content_legacyShpCopiedWordCount * 4);
-        actor->textureSlot = other->textureSlot;
-        actor->instance.uvLayout = other->instance.uvLayout;
-        actor->holdsTextureSlots = 0;
-        actor->textureHeaderBit = 1;
-        goto fixUVs;
-    }
-
-    Content_legacyShpHeaderWord = *data;
-    actor->textureHeaderBit = (u_char)Content_legacyShpHeaderWord;
-    actor->instance.uvLayout = Content_legacyShpHeaderWord >> 4;
-    data++;
-    Content_legacyShpTextureWidth = *data++ * 2;
-    Content_legacyShpTextureHeight = *data++ * 2;
-    actor->instance.copiedWordCount = Content_legacyShpCopiedWordCount = *data++;
-
-    n = Content_legacyShpTextureHeight / 64;
-    if (Content_legacyShpTextureWidth == 0x100) {
-        n = 8;
-    }
-    actor->instance.textureSlotCountMinusOne = n - 1;
-
-    if (object->targetSlot == 1 || object->targetSlot == 16) {
-        lo = 12;
-        hi = 20;
-    } else {
-        lo = (n >= 3) * 4;
-        hi = 12;
-    }
-
-    switch (n) {
-    case 1:
-    case 2:
-        for (i = lo; i < hi; i += n) {
-            if (Render_legacyActorTextureSlots[i].referenceCount == 0) {
-                break;
-            }
-        }
-        if (i == hi) {
-            goto fallback;
-        }
-        break;
-    case 3:
-    case 4:
-        for (i = lo; i < hi; ++i) {
-            for (j = 0; j < n; ++j) {
-                if (Render_legacyActorTextureSlots[i + j].referenceCount != 0) {
-                    break;
-                }
-            }
-            if (j == n) {
-                goto found;
-            }
-            if (((i + n) & 3) == 0) {
-                i += n - 1;
-            }
-        }
-        goto fallback;
-    case 8:
-        for (i = lo; i < hi; ++i) {
-            if (Render_legacyActorTextureSlots[i].referenceCount != 0) {
-                break;
-            }
-        }
-        if (i == hi) {
-            goto allFree;
-        }
-    fallback:
-        if (VS::Render::ReserveLiveTexturePageRange(31, 1, 4) == 0) {
-            actor->textureSlot = 0;
-            actor->instance.textureSlotCountMinusOne = 0;
-            ++Render_legacyActorTextureSlots[0].referenceCount;
-            goto setupPalettes;
-        }
-        i = 20;
-        break;
-    allFree:
-        i = lo;
-        break;
-    }
-found:
-    for (j = 0; j < n; ++j) {
-        Render_legacyActorTextureSlots[i + j].referenceCount = 1;
-    }
-    actor->textureSlot = i;
-    if (actor->textureHeaderBit) {
-        Render_legacyActorTextureSlots[actor->textureSlot].texturePage |= 0x80;
-    } else {
-        Render_legacyActorTextureSlots[actor->textureSlot].texturePage &= ~0x180;
-    }
-
-    VS::Core::Memory::CopyLiveAlignedWords(actor->palettes, data, Content_legacyShpCopiedWordCount * 4);
-    data += Content_legacyShpCopiedWordCount * 4;
-    x = *(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4) << 6;
-    rect.x = x;
-    y = (*(short*)(Actors_textureSlotOrigins + actor->textureSlot * 4 + 2) << 8)
-      + (Actors_textureSlotRowOffsets[actor->textureSlot] << 6);
-    rect.y = y;
-    rect.w = Content_legacyShpTextureWidth / 2;
-    rect.h = Content_legacyShpTextureHeight;
-    LoadImage(&rect, (u_long*)data);
-    data += Content_legacyShpTextureWidth * Content_legacyShpTextureHeight;
-    Content_modelParseResetFlag = 1;
-    Content_legacyShpParseCursor = data;
-    return -1;
-
-fixUVs:
-    j = actor->instance.otherPolygonCount + actor->instance.triangleCount + actor->instance.quadCount;
-    pData = (u_char *)(VS_ONDISC(actor->instance.model, polygonSection, void *));
-    texV = Actors_textureSlotRowOffsets[actor->textureSlot] << 6;
-
-    switch (actor->instance.uvLayout) {
-    case 0:
-        for (k = 0; k < j; k++) {
-            vertices = 4;
-            if (*pData == Render_LegacyPrimitiveCode_PolyFt3) {
-                pData += 10;
-                vertices = 3;
-            } else {
-                pData += 12;
-            }
-            for (corner = 0; corner < vertices; pData += 2, ++corner) {
-                pData[0] += 0;
-                pData[1] += texV;
-            }
-        }
-        break;
-    default:
-        for (k = 0; k < j; k++) {
-            if (pData[11] == 0x34) {
-                pData[6] += 0;
-                pData[7] += texV;
-                pData += 20;
-                vertices = 2;
-            } else {
-                pData += 24;
-                vertices = 4;
-            }
-            for (corner = 0; corner < vertices; pData += 2, ++corner) {
-                pData[0] += 0;
-                pData[1] += texV;
-            }
-        }
-    }
-
-setupPalettes:
-    VS::Core::Memory::CopyLiveAlignedWords(actor->basePalette, (u_short*)actor->palettes + object->variant * 0xA0,
-        Content_legacyShpCopiedWordCount * 2);
-    VS::Core::Memory::CopyLiveAlignedWords(actor->basePalette + 0xA0, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
-    VS::Core::Memory::CopyLiveAlignedWords(actor->currentPalette, actor->basePalette, Content_legacyShpCopiedWordCount * 2);
-
-    if (object->targetSlot == 16) {
-        VS::Render::LoadLiveClutColors(actor->basePalette, 0x17, 0, Content_legacyShpCopiedWordCount);
-        actor->clutA = Render_legacyActorTextureSlots[1].alternatePalette;
-        actor->clutB = Render_legacyActorTextureSlots[1].alternatePalette;
-    } else {
-        VS::Render::LoadLiveClutColors(actor->basePalette, object->targetSlot + 4, 0, Content_legacyShpCopiedWordCount);
-        VS::Render::LoadLiveClutColors(actor->basePalette, object->targetSlot + 0x16, 0, Content_legacyShpCopiedWordCount);
-        actor->clutA = Render_legacyActorTextureSlots[object->targetSlot].palette;
-        actor->clutB = Render_legacyActorTextureSlots[object->targetSlot].alternatePalette;
-    }
-
-    if (object->targetSlot == 0 && object->modelId == 6) {
-        return 0;
-    }
-
-    actor->instance.slot = object->targetSlot;
-    actor->instance.variant = object->variant;
-    actor->instance.isParsed = 1;
-    actor->instance.actionAnimationState = 0;
-    actor->travelAnimation = 13;
-    actor->commonSequence = NULL;
-    actor->battleSequence = NULL;
-    actor->sharedSequences[3] = NULL;
-    actor->sequenceFlags = 0;
-    actor->commonAnimationCount = 0;
-    actor->battleAnimationCount = 0;
-    actor->locomotionCounter = 0;
-    actor->sequenceModelId = 0;
-    actor->animationLength = 0;
-    actor->opaque6DC = 0;
-    actor->instance.weaponDrawn = 0;
-    actor->advanceRequested = 0;
-    actor->customTint = 0;
-    actor->moveRate = 8;
-    actor->turnRate = 0x20;
-    actor->instance.scaleX = ONE;
-    actor->instance.scaleY = ONE;
-    actor->instance.scaleZ = ONE;
-    actor->framesPerStep = 1;
-    actor->instance.supportLayer = 0;
-    actor->instance.placementLayer = 0;
-    actor->ignoredByCollision = 0;
-    actor->instance.soundEnabled = 1;
-    *(int*)&actor->fadeBlue = 0;
-    actor->opaque648 = 800;
-    *(int*)&actor->instance.baseColor = 0x808080;
-    *(int*)&actor->instance.tint = 0x404040;
-    actor->scale = Actors_roomActorScale.vx;
-
-    for (i = 0; i < actor->instance.boneCount; ++i) {
-        armature = &actor->instance.model->bones[i];
-        if (armature->auxiliaryTag >= 3 && armature->auxiliaryTag < 7) {
-            joint = (u_short*)&actor->jointSlots[(armature->auxiliaryTag - 3) * 4];
-            joint[1] = 0;
-            joint[0] = armature->jointInitValue;
-        }
-    }
-
-    for (i = 0; i < 4; ++i) {
-        state = &actor->textureScroll[i];
-        bounds = &actor->textureScrollBounds[i];
-        state->x = bounds->x;
-        state->y = bounds->y;
-        state->stepX = bounds->initialStepX;
-        state->stepY = bounds->initialStepY;
-        state->interval = bounds->interval;
-        state->timer = 0;
-    }
-
-    actor->sharedSequences[0] = NULL;
-    actor->sharedSequences[1] = NULL;
-    for (i = 0; i < 3; ++i) {
-        if (Actors_sharedSequenceData[i] != NULL) {
-            Content_BindSharedActorSequence(actor, i);
-        }
-    }
-
-    VS::Actors::SetLiveActorPaletteFade(object->targetSlot, 0);
-    ((void (*)(...))Actors_ResetActorMotionState)(actor->instance.slot);
-    actor->instance.attachBone = 0;
-    actor->instance.isAttached = 0;
-
-    if (object->subKind == 0xFF) {
-        Actors_PlaceActorInRoom(
-            object->targetSlot, (Field_ActorPlacement*)&object->placement, 0, object->material);
-        actor->instance.attachParent = 0xFF;
-    } else if (object->textureSlot == 0xFC) {
-        actor->instance.attachParent = object->subKind;
-        actor->instance.attachBone = 0xFC;
-        Actors_actorRecords[actor->instance.attachParent]->companionSlot = object->targetSlot;
-        Actors_actorRecords[actor->instance.attachParent]->companionState.offsetX = 0;
-        Actors_actorRecords[actor->instance.attachParent]->companionState.offsetY = 0;
-        Actors_actorRecords[actor->instance.attachParent]->companionState.offsetZ = 0;
-        Actors_actorRecords[actor->instance.attachParent]->companionState.depthBias = 8;
-    } else {
-        actor->instance.attachParent = 0xFF;
-        Actors_AttachActorToParentBone(object->targetSlot, object->subKind, object->textureSlot, 0);
-    }
-    Content_modelParseResetFlag = 0;
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_8009BD90 (src/BATTLE/BATTLE.PRG/30DB0.c:1433)
-int Content_FindSharedActorSequence(Content_ActorAssetRequest* request)
-{
-    Actors_ActorRecord* candidate;
-    int candidate_index;
-    int model_id = Actors_actorRecords[request->targetSlot]->modelId;
-    for (candidate_index = (request->targetSlot >= 2) * 2; candidate_index < 17; ++candidate_index) {
-        if (candidate_index != request->targetSlot) {
-            candidate = Actors_actorRecords[candidate_index];
-            if ((candidate != NULL) && (candidate->modelId == model_id)) {
-                if ((request->modelId == 0 && candidate->commonSequence != 0)
-                    || (request->modelId != 0 && candidate->sequenceModelId == request->modelId)) {
-                    request->dataAddress = candidate_index;
-                    return 1;
-                }
-            }
-        }
-    }
-    return 0;
-}
-
-// decomp: BATTLE.PRG func_8009BE5C (src/BATTLE/BATTLE.PRG/30DB0.c:1474)
-int Content_UpdateActorSequenceLoad(Content_ActorAssetRequest* object)
-{
-    Content_ActorAssetRequest queued;
-    Actors_ActorRecord* actor = Actors_actorRecords[object->targetSlot];
-    unsigned sectors;
-    char* sequences;
-    int result;
-    int model;
-    switch (Content_legacyModelLoadPhase) {
-    case 0:
-        switch (object->subKind) {
-        case 0:
-            if (object->targetSlot != 0 && Content_FindSharedActorSequence(object)) {
-                Content_legacySequenceBufferOwned = 0;
-                goto parse;
-            }
-            goto allocate;
-        case 1:
-        case 2:
-            Content_legacySequenceBufferOwned = 0;
-            break;
-        default:
-        allocate:
-            Content_legacySequenceBufferOwned = 1;
-            break;
-        }
-        break;
-    case 1:
-        goto wait;
-    case 2:
-        goto parse;
-    }
-    switch (object->subKind) {
-    case 0:
-        sequences = (char*)actor + 0x5F4;
-        sectors = actor->chainAttackAnimationIds[object->modelId] >> 11;
-        if (!sectors) {
-            return 0;
-        }
-        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
-        object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
-        if (!Content_legacySequenceFileBuffer) {
-            return -2;
-        }
-        Content_legacySequenceFileLocation.lba = actor->battleSequenceLbas[object->modelId];
-        if (object->targetSlot == 0 && (model = object->modelId) != 0) {
-            queued.assetKind = 7;
-            queued.targetSlot = 0;
-            queued.subKind = 3;
-            queued.material = model;
-            Content_QueueActorAssetRequest(&queued);
-        }
-        break;
-    case 1:
-    case 2:
-        sectors = Content_legacySequenceSectorCounts[object->modelId];
-        if (!sectors) {
-            return -2;
-        }
-        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(sectors << 11);
-        object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
-        if (!Content_legacySequenceFileBuffer) {
-            return -2;
-        }
-        Content_legacySequenceFileLocation.lba = Content_legacySequenceDiscOffsets[object->modelId] + 0x19797;
-        break;
-    case 3:
-        sectors = Content_legacyMaterialSequenceSectorCounts[(u_char)object->material];
-        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
-        object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
-        if (!Content_legacySequenceFileBuffer) {
-            return -2;
-        }
-        Content_legacySequenceFileLocation.lba = Content_legacyMaterialSequenceDiscOffsets[(u_char)object->material] + 0x18043;
-        break;
-    case 4:
-    special:
-        sectors = Content_legacyMaterialModelSequenceSectorCounts[(u_char)object->material][object->modelId];
-        if (!sectors) {
-            sectors = Content_legacyMaterialModelSequenceSectorCounts[2][0];
-            object->material = 2;
-            object->modelId = 0;
-        }
-        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
-        object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
-        if (!Content_legacySequenceFileBuffer) {
-            return -2;
-        }
-        Content_legacySequenceFileLocation.lba = Content_legacyMaterialModelSequenceDiscOffsets[(u_char)object->material][object->modelId] + 0x1943E;
-        break;
-    case 5:
-        if (object->modelId == 0) {
-            return 0;
-        }
-        --object->modelId;
-        if (actor->modelId == 2) {
-            goto special;
-        }
-        sectors = actor->specialSequenceSizes[object->modelId] >> 11;
-        if (!sectors) {
-            return -2;
-        }
-        Content_legacySequenceFileLocation.lba = actor->specialSequenceLbas[object->modelId];
-        Content_legacySequenceFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(sectors << 11);
-        object->dataAddress = (uintptr_t)Content_legacySequenceFileBuffer;
-        if (!Content_legacySequenceFileBuffer) {
-            return -2;
-        }
-        break;
-    }
-    Content_legacySequenceFileLocation.size = sectors << 11;
-    Content_legacyModelLoadPhase = 1;
-    Content_legacySequenceDiscRequest = Content_AllocateDiscRequest(&Content_legacySequenceFileLocation);
-    Content_EnqueueDiscRequest(Content_legacySequenceDiscRequest, (void*)object->dataAddress);
-wait:
-    if (Content_legacySequenceDiscRequest->state != 4) {
-        return -1;
-    }
-    Content_ReleaseDiscRequest(Content_legacySequenceDiscRequest);
-    Content_legacyModelLoadPhase = 2;
-    return -1;
-parse:
-    result = Content_ParseActorSequence(object);
-    if (result == -1) {
-        return -1;
-    }
-    if (Content_legacySequenceBufferOwned) {
-        Content_legacySequenceBufferOwned = 0;
-        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacySequenceFileBuffer);
-    }
-    Content_legacyModelLoadPhase = 0;
-    return result;
-}
-
-// decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1608)
-void Content_CopyWeaponSequence(Content_SequenceBuffer* destination, Content_SequenceBuffer* source)
-{
-    VS::Core::Memory::CopyLiveAlignedWords(destination, source, 0x7800);
-    VS::Actors::RegisterSequenceBankCopy(destination, source, 0x7800);
-}
-
-// decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
-int Content_ParseActorSequence(Content_ActorAssetRequest* object)
-{
-    int _[2] __attribute__((unused));
-    Actors_ActorRecord* actor;
-    Actors_ActorRecord* source;
-    Content_SequenceBuffer* seq;
-    int size;
-    int count;
-    int slot;
-    int i;
-
-    switch (Content_legacySequenceParsePhase) {
-    case 0:
-        Content_legacySequenceParseData = (u_char*)object->dataAddress;
-        break;
-    case 1:
-        goto loadEtm;
-    }
-
-    if (object->subKind == 0) {
-        actor = Actors_actorRecords[object->targetSlot];
-        if (object->modelId != 0) {
-            if (Content_FindSharedActorSequence(object)) {
-                Content_legacySequenceParseData = (u_char*)object->dataAddress;
-            }
-        }
-        if (object->modelId == 0) {
-            if ((uintptr_t)Content_legacySequenceParseData < 17) {
-                source = Actors_actorRecords[(int)Content_legacySequenceParseData];
-                actor->sequenceFlags = source->sequenceFlags;
-                actor->commonSequence = source->commonSequence;
-                return 0;
-            }
-            actor->sequenceFlags = *Content_legacySequenceParseData;
-            Content_legacySequenceParseData += 4;
-            size = *(int*)Content_legacySequenceParseData;
-            Content_legacySequenceParseData += 4;
-            if (size & 3) {
-                size += (4 - size) & 3;
-            }
-            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-            if (seq == NULL) {
-                return -2;
-            }
-            actor->commonSequence = seq;
-            goto copy;
-        }
-        if (object->modelId == 0xFF) {
-            Content_legacySequenceParseData += 4;
-            size = *(int*)Content_legacySequenceParseData;
-            Content_legacySequenceParseData += 4;
-            if (size & 3) {
-                size += (4 - size) & 3;
-            }
-            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-            if (seq == NULL) {
-                return -2;
-            }
-            actor->ownedSequence = seq;
-            goto copy;
-        }
-        if ((uintptr_t)Content_legacySequenceParseData < 17) {
-            source = Actors_actorRecords[(int)Content_legacySequenceParseData];
-            actor->commonAnimationCount = source->commonAnimationCount;
-            seq = (Content_SequenceBuffer *)(source->battleSequence);
-            if (object->targetSlot < 2) {
-                if (actor->instance.slot == 0) {
-                    seq = (Content_SequenceBuffer *)(Actors_primarySequenceBuffer);
-                    goto clone;
-                }
-                if (Content_legacySequenceParseData == 0) {
-                    seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x7800));
-                clone:
-                    Content_CopyWeaponSequence(seq, (Content_SequenceBuffer *)(source->battleSequence));
-                }
-            }
-            actor->battleSequence = seq;
-            actor->sequenceModelId = object->modelId;
-            return 0;
-        }
-        actor->commonAnimationCount = *Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 2;
-        size = *(u_short*)Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 2;
-        if (size != 0 && size != actor->instance.boneCount) {
-            return 0;
-        }
-        size = *(int*)Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 4;
-        if (size & 3) {
-            size += (4 - size) & 3;
-        }
-        if (actor->instance.slot != 0) {
-            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-            if (seq == NULL) {
-                return -2;
-            }
-        } else {
-            seq = (Content_SequenceBuffer *)(Actors_primarySequenceBuffer);
-        }
-        actor->battleSequence = seq;
-        actor->sequenceModelId = object->modelId;
-    copy:
-        VS::Core::Memory::CopyLiveAlignedWords(seq, Content_legacySequenceParseData, size);
-        VS::Actors::RegisterSequenceBank(seq, size);
-                return 0;
-    } else if (object->subKind == 3) {
-        Content_legacySequenceParseData += 4;
-        size = *(int*)Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 4;
-        if (size & 3) {
-            size += (4 - size) & 3;
-        }
-        seq = (Content_SequenceBuffer *)(Actors_sequenceWorkBuffer);
-        goto copy;
-    } else if (object->subKind == 4 || object->subKind == 5) {
-        actor = Actors_actorRecords[object->targetSlot];
-        actor->battleAnimationCount = *Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 4;
-        size = *(int*)Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 4;
-        if (size & 3) {
-            size += (4 - size) & 3;
-        }
-        seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));
-        if (seq == NULL) {
-            return -2;
-        }
-        actor->sharedSequences[3] = seq;
-        goto copy;
-    } else {
-        slot = object->targetSlot - 1;
-        Actors_sharedSequenceBankTexturePages[slot] = 0;
-        if (Actors_sharedSequenceData[slot] != NULL) {
-            return -2;
-        }
-        Actors_sharedSequenceData[slot] = Content_legacySequenceParseData;
-        count = *(int*)Content_legacySequenceParseData;
-        Content_legacySequenceParseData += 4;
-        for (i = 0; i < count; ++i) {
-            Actors_sharedSequenceAnimationIds[slot][i] = *(u_short*)Content_legacySequenceParseData;
-            Content_legacySequenceParseData += 4;
-        }
-        for (i = 0; i < count; ++i) {
-            Actors_sharedSequenceEntryParams[slot][i] = *(u_short*)Content_legacySequenceParseData;
-            Content_legacySequenceParseData += 4;
-        }
-        Actors_sharedSequenceAnimationIds[slot][i] = -1;
-        for (i = 0; i < count; ++i) {
-            Actors_sharedSequenceAnimationData[slot][i] = (char*)Content_legacySequenceParseData
-                + (count - i) * sizeof(u_int) + *(u_int*)Content_legacySequenceParseData;
-            Content_legacySequenceParseData += 4;
-        }
-        for (i = 0; i < count; ++i) {
-            seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);
-            VS::Actors::RegisterEmbeddedSequenceBank(Actors_sharedSequenceAnimationData[slot][i]);
-                        }
-        Actors_sharedSequenceAnimationData[slot][i] = (char*)-1;
-        for (i = 0; i < 17; ++i) {
-            if (Actors_actorRecords[i] != NULL) {
-                Content_BindSharedActorSequence(Actors_actorRecords[i], slot);
-            }
-        }
-        if (object->subKind == 1) {
-            return 0;
-        }
-        Content_legacySequenceParsePhase = 1;
-    loadEtm:
-        if (Content_UpdateSequenceEffectTextureLoad(object) == -1) {
-            return -1;
-        }
-        Content_legacySequenceParsePhase = 0;
-        return 0;
-    }
-}
-
-// decomp: BATTLE.PRG func_8009CAEC (src/BATTLE/BATTLE.PRG/30DB0.c:1795)
-void Content_BindSharedActorSequence(Actors_ActorRecord* actor, int bank_index)
-{
-    int i = 0;
-    int id;
-    char* p;
-
-    while (1) {
-        if (Actors_sharedSequenceAnimationIds[bank_index][i] == -1) {
-            goto tail;
-        }
-        if (Actors_sharedSequenceAnimationIds[bank_index][i] == Actors_sharedSequenceIdsByKind[actor->modelId]) {
-            p = Actors_sharedSequenceAnimationData[bank_index][i];
-            p += 8;
-            break;
-        }
-        if (Actors_sharedSequenceAnimationIds[bank_index][i] == actor->modelId) {
-            p = Actors_sharedSequenceAnimationData[bank_index][i];
-            p += 8;
-            break;
-        }
-        ++i;
-    }
-    actor->sharedSequences[bank_index] = p;
-tail:
-    for (i = 0; (id = Actors_sharedSequenceAnimationIds[bank_index][i]) != -1; ++i) {
-        if (id == actor->modelId) {
-            actor->textureRowOffsets[bank_index] = Actors_sharedSequenceEntryParams[bank_index][i];
-            return;
-        }
-    }
-    actor->textureRowOffsets[bank_index] = 0xFF;
-}
-
-// decomp: BATTLE.PRG func_8009CC20 (src/BATTLE/BATTLE.PRG/30DB0.c:1828)
-int Content_ReleaseActorSequence(int target_id, int sequence_kind)
-{
-    Content_ActorAssetRequest objectData;
-    Actors_ActorRecord* actor;
-    int i;
-
-    switch (sequence_kind) {
-    case 0:
-        if (target_id >= 17) {
-            return -1;
-        }
-        actor = Actors_actorRecords[target_id];
-        if (actor == NULL) {
-            return -1;
-        }
-        if (actor->battleSequence == NULL) {
-            return 0;
-        }
-        if (target_id != 0) {
-            objectData.targetSlot = target_id;
-            objectData.modelId = actor->sequenceModelId;
-            if (target_id == 1 && actor->modelId == 0) {
-                VS::Core::Memory::FreeLiveFromLowEnd(actor->battleSequence);
-            } else if (!Content_FindSharedActorSequence(&objectData)) {
-                VS::Core::Memory::FreeLiveFromLowEnd(actor->battleSequence);
-            }
-        }
-        actor->battleSequence = NULL;
-        actor->sequenceModelId = 0;
-        actor->commonAnimationCount = 0;
-        break;
-    case 1:
-    case 2:
-        --target_id;
-        for (i = 0; i < 17; ++i) {
-            actor = Actors_actorRecords[i];
-            if (actor != NULL) {
-                actor->sharedSequences[target_id] = NULL;
-            }
-        }
-        i = Content_ReleaseSequenceEffectTexture(target_id + 1);
-        if (i < 0) {
-            return i;
-        }
-        if (Actors_sharedSequenceData[target_id] != NULL) {
-            VS::Core::Memory::FreeLiveFromLowEnd(Actors_sharedSequenceData[target_id]);
-        }
-        Actors_sharedSequenceData[target_id] = NULL;
-        break;
-    case 4:
-    case 5:
-        actor = Actors_actorRecords[target_id];
-        if (actor == NULL) {
-            return -1;
-        }
-        if (actor->sharedSequences[3] == NULL) {
-            return 0;
-        }
-        VS::Core::Memory::FreeLiveFromLowEnd(actor->sharedSequences[3]);
-        actor->sharedSequences[3] = NULL;
-        actor->battleAnimationCount = 0;
-        break;
-    }
-    return 0;
+    return ResumeActorModel(host, state, request);
+  }
+  if (state.parse_phase != 0) {
+    return RefuseActor(host, "actor parse phase", state.parse_phase);
+  }
+  if (target == 0 && request.model_id == kAshleyModelId) {
+    return ReloadAshleyTexture(host, state, request);
+  }
+  if (!host.ActorSummary(target).present &&
+      !host.BindActorRecord(target, request.destination)) {
+    return kAssetRefused;
+  }
+  if (request.model_id == kModellessActorId) {
+    return PlaceModellessActor(host, state, request);
+  }
+  std::optional<int> source = SharedAssetSlot(request.data, kActorRecordSlots);
+  if (!source && FindSharedActorModel(host, request) != 0) {
+    source = SharedAssetSlot(request.data, kActorRecordSlots);
+  }
+  if (source) {
+    return CopySharedActorModel(host, state, request, *source);
+  }
+  return ParseActorModelFile(host, state, request);
 }
 
 // decomp: BATTLE.PRG func_8009CFB0 (src/BATTLE/BATTLE.PRG/30DB0.c:1920)
-int Content_ReleaseActorModel(int actor_index)
-{
-    Content_ActorAssetRequest sharing_request;
-    Actors_ActorRecord* actor;
-    int i;
-
-    if (actor_index >= 0x11) {
-        return -1;
+int ReleaseActorModel(ActorAssetHost& host, int slot) {
+  if (slot < 0 || slot >= kActorRecordSlots ||
+      !host.ActorSummary(slot).present) {
+    return -1;
+  }
+  const ActorAssetRecord actor = host.LoadActor(slot);
+  if (actor.model_id != static_cast<std::uint16_t>(kModellessActorId)) {
+    ActorAssetRequest probe;
+    probe.target_slot = static_cast<std::int8_t>(slot);
+    probe.model_id = static_cast<std::int16_t>(actor.model_id);
+    if (FindSharedActorModel(host, probe) == 0) {
+      const std::span<std::byte> header =
+          host.Bytes(actor.model, kSoundSectionAt + sizeof(std::uint32_t));
+      if (header.size() < kSoundSectionAt + sizeof(std::uint32_t)) {
+        host.Refuse("actor model header", slot);
+      } else {
+        host.StopModelSounds(AdvanceAddress(
+            actor.model, static_cast<std::ptrdiff_t>(ReadLittle(
+                             header, kSoundSectionAt, sizeof(std::uint32_t)))));
+      }
+      host.FreeLow(actor.model);
+      host.FreeLow(actor.owned_sequence);
     }
-
-    actor = Actors_actorRecords[actor_index];
-
-    if (actor == NULL) {
-        return -1;
+    if (actor.common_sequence != AssetAddress::kNone) {
+      bool used = false;
+      for (int i = 0; i < kActorRecordSlots && !used; ++i) {
+        const ActorAssetSummary other = host.ActorSummary(i);
+        used = i != slot && other.present &&
+               other.common_sequence == actor.common_sequence;
+      }
+      if (!used) {
+        host.FreeLow(actor.common_sequence);
+      }
     }
-
-    if (actor->modelId != 0x7F) {
-        Content_ActorAssetRequest* request;
-        int shared_model_found;
-        sharing_request.targetSlot = actor_index;
-        sharing_request.modelId = actor->modelId;
-        request = &sharing_request;
-
-        for (i = 0; i < 17; ++i) {
-            if ((i != request->targetSlot) && ((Actors_actorRecords[i] != NULL))
-                && (Actors_actorRecords[i]->modelId == request->modelId)) {
-                request->dataAddress = i;
-                shared_model_found = 1;
-                goto exit;
-            }
-        }
-
-        if (i >= 17) {
-            shared_model_found = 0;
-        }
-    exit:
-        if (shared_model_found == 0) {
-            Audio_StopBankSfx(0x180, (int *)(VS_ONDISC(actor->instance.model, soundSection, void *)), 0);
-            VS::Core::Memory::FreeLiveFromLowEnd(actor->instance.model);
-            VS::Core::Memory::FreeLiveFromLowEnd(actor->ownedSequence);
-        }
-
-        if (actor->commonSequence != 0) {
-            for (i = 0; i < 17; ++i) {
-                if ((i != actor_index) && ((Actors_actorRecords[i] != NULL))
-                    && (Actors_actorRecords[i]->commonSequence == actor->commonSequence)) {
-                    goto exit2;
-                }
-            }
-            if (i >= 17) {
-                VS::Core::Memory::FreeLiveFromLowEnd(actor->commonSequence);
-            }
-        }
-    exit2:
-
-        Content_ReleaseActorSequence(actor_index, 0);
-
-        if (actor_index < 10) {
-            Content_ReleaseWeaponModel(actor_index * 2);
-            Content_ReleaseWeaponModel(actor_index * 2 | 1);
-        }
-
-        if (actor->holdsTextureSlots) {
-            for (i = 0; i < (actor->instance.textureSlotCountMinusOne + 1); ++i) {
-                --Render_legacyActorTextureSlots[actor->textureSlot + i].referenceCount;
-            }
-
-            if (actor->textureSlot == 20) {
-                VS::Render::RetireLiveTexturePageRange(31, 1, 4);
-            }
-        }
+    static_cast<void>(ReleaseActorSequence(host, slot, 0));
+    if (slot < kWeaponOwnerSlots) {
+      static_cast<void>(ReleaseWeaponModel(host, slot * 2));
+      static_cast<void>(ReleaseWeaponModel(host, (slot * 2) | 1));
     }
-    Actors_actorRecords[actor_index] = NULL;
+    if (actor.holds_texture_slots) {
+      for (int i = 0; i <= actor.texture_slot_count_minus_one; ++i) {
+        AddTextureReference(host, AssetTextureTable::kActor,
+                            actor.texture_slot + i, -1);
+      }
+      if (actor.texture_slot == kFallbackTextureSlot) {
+        static_cast<void>(host.RetireTexturePages(kFallbackTexturePage, 1));
+      }
+    }
+  }
+  host.ClearActorSlot(slot);
+  return 0;
+}
+
+namespace {
+constexpr std::uint8_t kBattleSequence = 0;
+constexpr std::uint8_t kCommonBankSequence = 1;
+constexpr std::uint8_t kEffectBankSequence = 2;
+constexpr std::uint8_t kMaterialSequence = 3;
+constexpr std::uint8_t kMaterialModelSequence = 4;
+constexpr std::uint8_t kSpecialSequence = 5;
+constexpr std::size_t kMaterialModelColumns = 4;
+constexpr std::uint8_t kFallbackSequenceMaterial = 2;
+constexpr std::uint16_t kMaterialModelActorId = 2;
+constexpr int kSequenceSizeShift = 11;
+constexpr int kFirstUnsharedSlot = 2;
+constexpr int kPlayerSequenceSlots = 2;
+constexpr std::ptrdiff_t kSequenceFlagsPadding = 3;
+constexpr std::ptrdiff_t kBattleCountPadding = 3;
+constexpr std::ptrdiff_t kBankEntryPadding = 2;
+constexpr std::size_t kBankOffsetBytes = 4;
+constexpr std::ptrdiff_t kSharedAnimationHeaderBytes = 8;
+constexpr std::int16_t kEndOfBank = -1;
+constexpr std::uint8_t kNoRowOffset = 0xFF;
+constexpr auto kEndOfAnimations = static_cast<AssetAddress>(UINTPTR_MAX);
+constexpr int kFirstEffectBank = 1;
+constexpr int kLastEffectBank = 3;
+constexpr std::ptrdiff_t kEffectTextureHeightAt = 2;
+constexpr std::ptrdiff_t kEffectTextureHeaderBytes = 4;
+constexpr std::uint8_t kEffectTextureColumnMask = 0xF;
+constexpr int kEffectTextureColumnWidth = 64;
+constexpr std::int16_t kEffectTextureY = 256;
+constexpr std::int16_t kEffectTextureWidth = 64;
+
+// A sequence file to read, or the loader's result when there is none
+// (30DB0.c:1500-1580).
+struct SequenceFileExtent {
+  int result = kAssetPending;
+  std::uint32_t sectors = 0;
+  std::int32_t sector = 0;
+  bool low_end = false;
+};
+
+SequenceFileExtent SequenceResult(int result) {
+  SequenceFileExtent extent;
+  extent.result = result;
+  return extent;
+}
+
+SequenceFileExtent RefuseSequenceFile(ActorAssetHost& host, const char* what,
+                                      std::int64_t value) {
+  host.Refuse(what, value);
+  return SequenceResult(kAssetRefused);
+}
+
+std::optional<ActorAssetRecord> SequenceActor(ActorAssetHost& host,
+                                              int target) {
+  if (target < 0 || target >= kActorRecordSlots ||
+      !host.ActorSummary(target).present) {
+    host.Refuse("sequence actor", target);
+    return std::nullopt;
+  }
+  return host.LoadActor(target);
+}
+
+SequenceFileExtent BattleSequenceFile(ActorAssetHost& host,
+                                      const ActorAssetRequest& request) {
+  const std::optional<ActorAssetRecord> actor =
+      SequenceActor(host, request.target_slot);
+  if (!actor) {
+    return SequenceResult(kAssetRefused);
+  }
+  const int model = request.model_id;
+  if (model < 0 ||
+      static_cast<std::size_t>(model) >= actor->battle_sequence_lbas.size()) {
+    return RefuseSequenceFile(host, "battle sequence", model);
+  }
+  const auto index = static_cast<std::size_t>(model);
+  const std::uint32_t sectors =
+      std::uint32_t{actor->chain_attack_animation_ids[index]} >>
+      kSequenceSizeShift;
+  if (sectors == 0) {
+    return SequenceResult(kAssetDone);
+  }
+  return {
+      .result = kAssetPending,
+      .sectors = sectors,
+      .sector = static_cast<std::int32_t>(actor->battle_sequence_lbas[index]),
+      .low_end = false};
+}
+
+SequenceFileExtent TableSequenceFile(ActorAssetHost& host,
+                                     AssetFileTable sectors_table,
+                                     AssetFileTable offsets_table, int index,
+                                     std::int32_t first_sector) {
+  const std::optional<std::uint32_t> sectors =
+      index < 0
+          ? std::nullopt
+          : host.FileTableEntry(sectors_table, static_cast<std::size_t>(index));
+  const std::optional<std::uint32_t> offset =
+      index < 0
+          ? std::nullopt
+          : host.FileTableEntry(offsets_table, static_cast<std::size_t>(index));
+  if (!sectors || !offset) {
+    return RefuseSequenceFile(host, "sequence file table", index);
+  }
+  return {.result = kAssetPending,
+          .sectors = *sectors,
+          .sector = static_cast<std::int32_t>(*offset) + first_sector,
+          .low_end = false};
+}
+
+// Falls back to material 2's first model when the pair has no file.
+SequenceFileExtent MaterialModelSequenceFile(ActorAssetHost& host,
+                                             ActorAssetRequest& request) {
+  const int index =
+      (request.material * static_cast<int>(kMaterialModelColumns)) +
+      request.model_id;
+  const std::optional<std::uint32_t> sectors =
+      index < 0
+          ? std::nullopt
+          : host.FileTableEntry(AssetFileTable::kMaterialModelSequenceSectors,
+                                static_cast<std::size_t>(index));
+  if (sectors && *sectors == 0) {
+    request.material = kFallbackSequenceMaterial;
+    request.model_id = 0;
+  }
+  const int file =
+      (request.material * static_cast<int>(kMaterialModelColumns)) +
+      request.model_id;
+  return TableSequenceFile(host, AssetFileTable::kMaterialModelSequenceSectors,
+                           AssetFileTable::kMaterialModelSequenceOffsets, file,
+                           kMaterialModelSequenceFirstSector);
+}
+
+SequenceFileExtent SpecialSequenceFile(ActorAssetHost& host,
+                                       ActorAssetRequest& request) {
+  if (request.model_id == 0) {
+    return SequenceResult(kAssetDone);
+  }
+  --request.model_id;
+  const std::optional<ActorAssetRecord> actor =
+      SequenceActor(host, request.target_slot);
+  if (!actor) {
+    return SequenceResult(kAssetRefused);
+  }
+  if (actor->model_id == kMaterialModelActorId) {
+    return MaterialModelSequenceFile(host, request);
+  }
+  const int model = request.model_id;
+  if (model < 0 ||
+      static_cast<std::size_t>(model) >= actor->special_sequence_sizes.size()) {
+    return RefuseSequenceFile(host, "special sequence", model);
+  }
+  const auto index = static_cast<std::size_t>(model);
+  const std::uint32_t sectors =
+      std::uint32_t{actor->special_sequence_sizes[index]} >> kSequenceSizeShift;
+  if (sectors == 0) {
+    return SequenceResult(kAssetRefused);
+  }
+  return {
+      .result = kAssetPending,
+      .sectors = sectors,
+      .sector = static_cast<std::int32_t>(actor->special_sequence_lbas[index]),
+      .low_end = false};
+}
+
+SequenceFileExtent SequenceFile(ActorAssetHost& host,
+                                ActorAssetRequest& request) {
+  switch (request.sub_kind) {
+    case kBattleSequence:
+      return BattleSequenceFile(host, request);
+    case kCommonBankSequence:
+    case kEffectBankSequence: {
+      SequenceFileExtent file =
+          TableSequenceFile(host, AssetFileTable::kSequenceSectors,
+                            AssetFileTable::kSequenceOffsets, request.model_id,
+                            kSequenceFirstSector);
+      if (file.result == kAssetPending && file.sectors == 0) {
+        return SequenceResult(kAssetRefused);
+      }
+      file.low_end = true;
+      return file;
+    }
+    case kMaterialSequence:
+      return TableSequenceFile(host, AssetFileTable::kMaterialSequenceSectors,
+                               AssetFileTable::kMaterialSequenceOffsets,
+                               request.material, kMaterialSequenceFirstSector);
+    case kMaterialModelSequence:
+      return MaterialModelSequenceFile(host, request);
+    case kSpecialSequence:
+      return SpecialSequenceFile(host, request);
+    default:
+      // The original reads an uninitialized sector count.
+      return RefuseSequenceFile(host, "sequence sub kind", request.sub_kind);
+  }
+}
+
+int StartSequenceFileRead(ActorAssetHost& host, ActorAssetLoadState& state,
+                          ActorAssetRequest& request) {
+  const SequenceFileExtent file = SequenceFile(host, request);
+  if (file.result != kAssetPending) {
+    return file.result;
+  }
+  const std::uint32_t bytes = file.sectors << kSectorShift;
+  state.sequence_file =
+      file.low_end ? host.AllocateLow(bytes) : host.AllocateHigh(bytes);
+  request.data = state.sequence_file;
+  if (state.sequence_file == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  if (request.sub_kind == kBattleSequence && request.target_slot == 0 &&
+      request.model_id != 0) {
+    // The original leaves the other fields as stack bytes.
+    ActorAssetRequest weapon;
+    weapon.kind = static_cast<std::uint8_t>(ActorAssetKind::kSequenceLoad);
+    weapon.sub_kind = kMaterialSequence;
+    weapon.material = static_cast<std::uint8_t>(request.model_id);
+    static_cast<void>(QueueActorAssetRequest(host, weapon));
+  }
+  state.model_phase = kPhaseReading;
+  StartFileRead(host, AssetFileStream::kSequence,
+                {file.sector, static_cast<std::int32_t>(bytes)}, request.data);
+  return kAssetPending;
+}
+
+int FinishSequenceLoad(ActorAssetHost& host, ActorAssetLoadState& state,
+                       ActorAssetRequest& request) {
+  const int result = ParseActorSequence(host, state, request);
+  if (result == kAssetPending) {
+    return kAssetPending;
+  }
+  if (state.sequence_file_owned) {
+    state.sequence_file_owned = false;
+    host.FreeHigh(state.sequence_file);
+  }
+  state.model_phase = kPhaseStart;
+  return result;
+}
+
+int CopySequence(ActorAssetHost& host, AssetAddress sequence,
+                 const FileCursor& cursor, std::uint32_t bytes) {
+  static_cast<void>(
+      CopyWordsInto(host, sequence, cursor.At(), bytes, "sequence copy"));
+  host.RecordSequenceBank(sequence, bytes);
+  return kAssetDone;
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_8009BD90 (src/BATTLE/BATTLE.PRG/30DB0.c:1433)
+// decomp: BATTLE.PRG vs_battleFindSharedSequence
+// (src/BATTLE/BATTLE.PRG/30DB0.c:1454)
+int FindSharedActorSequence(const ActorAssetHost& host,
+                            ActorAssetRequest& request) {
+  const int target = TargetSlot(request);
+  // The original reads the target's record without a check.
+  if (target < 0 || target >= kActorRecordSlots ||
+      !host.ActorSummary(target).present) {
     return 0;
+  }
+  const std::uint16_t model_id = host.ActorSummary(target).model_id;
+  for (int i = target >= kFirstUnsharedSlot ? kFirstUnsharedSlot : 0;
+       i < kActorRecordSlots; ++i) {
+    if (i == target) {
+      continue;
+    }
+    const ActorAssetSummary other = host.ActorSummary(i);
+    if (!other.present || other.model_id != model_id) {
+      continue;
+    }
+    if ((request.model_id == 0 &&
+         other.common_sequence != AssetAddress::kNone) ||
+        (request.model_id != 0 &&
+         int{other.sequence_model_id} == int{request.model_id})) {
+      request.data = SharedAssetAddress(i);
+      return 1;
+    }
+  }
+  return 0;
+}
+
+// decomp: BATTLE.PRG func_8009BE5C (src/BATTLE/BATTLE.PRG/30DB0.c:1474)
+int UpdateActorSequenceLoad(ActorAssetHost& host, ActorAssetLoadState& state,
+                            ActorAssetRequest& request) {
+  switch (state.model_phase) {
+    case kPhaseStart:
+      if (request.sub_kind == kBattleSequence && request.target_slot != 0 &&
+          FindSharedActorSequence(host, request) != 0) {
+        state.sequence_file_owned = false;
+        return FinishSequenceLoad(host, state, request);
+      }
+      state.sequence_file_owned = request.sub_kind != kCommonBankSequence &&
+                                  request.sub_kind != kEffectBankSequence;
+      break;
+    case kPhaseReading:
+      return WaitForFileRead(host, state.model_phase,
+                             AssetFileStream::kSequence);
+    case kPhaseParsing:
+      return FinishSequenceLoad(host, state, request);
+    default:
+      break;
+  }
+  if (const int started = StartSequenceFileRead(host, state, request);
+      started != kAssetPending) {
+    return started;
+  }
+  return WaitForFileRead(host, state.model_phase, AssetFileStream::kSequence);
+}
+
+// decomp: BATTLE.PRG func_8009C378 (src/BATTLE/BATTLE.PRG/30DB0.c:1608)
+void CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,
+                        AssetAddress source) {
+  CopyFixedBlock(host, destination, source, kWeaponSequenceBytes,
+                 "weapon sequence copy");
+  host.RecordSequenceCopy(destination, source, kWeaponSequenceBytes);
+}
+
+namespace {
+// The common sequence: shared with a record or read from the file
+// (30DB0.c:1634-1650).
+int ParseCommonSequence(ActorAssetHost& host, FileCursor& cursor, int target,
+                        ActorAssetRecord& actor) {
+  if (const std::optional<int> source =
+          SharedAssetSlot(cursor.At(), kActorRecordSlots)) {
+    if (!host.ActorSummary(*source).present) {
+      return RefuseActor(host, "shared sequence record", *source);
+    }
+    const ActorAssetRecord other = host.LoadActor(*source);
+    actor.sequence_flags = other.sequence_flags;
+    actor.common_sequence = other.common_sequence;
+    host.StoreActor(target, actor);
+    return kAssetDone;
+  }
+  actor.sequence_flags = static_cast<std::uint8_t>(cursor.U8());
+  cursor.Skip(kSequenceFlagsPadding);
+  const std::uint32_t size = RoundUpToWord(cursor.I32());
+  host.StoreActor(target, actor);
+  if (!cursor.Ok()) {
+    return RefuseActor(host, "common sequence", target);
+  }
+  const AssetAddress sequence = host.AllocateLow(size);
+  if (sequence == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  actor.common_sequence = sequence;
+  host.StoreActor(target, actor);
+  return CopySequence(host, sequence, cursor, size);
+}
+
+// The sequence a model file carries (30DB0.c:1651-1662).
+int ParseOwnedSequence(ActorAssetHost& host, FileCursor& cursor, int target,
+                       ActorAssetRecord& actor) {
+  cursor.Skip(kFileHeaderBytes);
+  const std::uint32_t size = RoundUpToWord(cursor.I32());
+  if (!cursor.Ok()) {
+    return RefuseActor(host, "model sequence", target);
+  }
+  const AssetAddress sequence = host.AllocateLow(size);
+  if (sequence == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  actor.owned_sequence = sequence;
+  host.StoreActor(target, actor);
+  return CopySequence(host, sequence, cursor, size);
+}
+
+// Another actor's battle sequence; the player slots take a copy
+// (30DB0.c:1663-1680).
+int ShareBattleSequence(ActorAssetHost& host, const ActorAssetRequest& request,
+                        ActorAssetRecord& actor, int source) {
+  const int target = TargetSlot(request);
+  if (!host.ActorSummary(source).present) {
+    return RefuseActor(host, "shared sequence record", source);
+  }
+  const ActorAssetRecord other = host.LoadActor(source);
+  actor.common_animation_count = other.common_animation_count;
+  AssetAddress sequence = other.battle_sequence;
+  if (target < kPlayerSequenceSlots) {
+    if (actor.slot == 0) {
+      sequence = host.PrimarySequenceBuffer();
+      CopyWeaponSequence(host, sequence, other.battle_sequence);
+    } else if (source == 0) {
+      sequence = host.AllocateLow(kWeaponSequenceBytes);
+      if (sequence == AssetAddress::kNone) {
+        host.StoreActor(target, actor);
+        return RefuseActor(host, "battle sequence copy", target);
+      }
+      CopyWeaponSequence(host, sequence, other.battle_sequence);
+    }
+  }
+  actor.battle_sequence = sequence;
+  actor.sequence_model_id = static_cast<std::uint8_t>(request.model_id);
+  host.StoreActor(target, actor);
+  return kAssetDone;
+}
+
+// A battle sequence from the file (30DB0.c:1681-1704).
+int ParseBattleSequence(ActorAssetHost& host, const ActorAssetRequest& request,
+                        FileCursor& cursor, ActorAssetRecord& actor) {
+  const int target = TargetSlot(request);
+  actor.common_animation_count = static_cast<std::uint8_t>(cursor.U8());
+  cursor.Skip(1);
+  const std::uint32_t bones = cursor.U16();
+  if (bones != 0 && bones != actor.bone_count) {
+    host.StoreActor(target, actor);
+    return kAssetDone;
+  }
+  const std::uint32_t size = RoundUpToWord(cursor.I32());
+  if (!cursor.Ok()) {
+    host.StoreActor(target, actor);
+    return RefuseActor(host, "battle sequence", target);
+  }
+  AssetAddress sequence = host.PrimarySequenceBuffer();
+  if (actor.slot != 0) {
+    sequence = host.AllocateLow(size);
+    if (sequence == AssetAddress::kNone) {
+      host.StoreActor(target, actor);
+      return kAssetRefused;
+    }
+  }
+  actor.battle_sequence = sequence;
+  actor.sequence_model_id = static_cast<std::uint8_t>(request.model_id);
+  host.StoreActor(target, actor);
+  return CopySequence(host, sequence, cursor, size);
+}
+
+int ParseActorSequenceKind(ActorAssetHost& host, ActorAssetRequest& request,
+                           FileCursor& cursor) {
+  const int target = TargetSlot(request);
+  std::optional<ActorAssetRecord> actor = SequenceActor(host, target);
+  if (!actor) {
+    return kAssetRefused;
+  }
+  if (request.model_id != 0 && FindSharedActorSequence(host, request) != 0) {
+    cursor.Seek(request.data);
+  }
+  if (request.model_id == 0) {
+    return ParseCommonSequence(host, cursor, target, *actor);
+  }
+  if (request.model_id == kEmbeddedSequenceModel) {
+    return ParseOwnedSequence(host, cursor, target, *actor);
+  }
+  if (const std::optional<int> source =
+          SharedAssetSlot(cursor.At(), kActorRecordSlots)) {
+    return ShareBattleSequence(host, request, *actor, *source);
+  }
+  return ParseBattleSequence(host, request, cursor, *actor);
+}
+
+// The sequences of a material (sub kind 3) or a special action (4 and 5).
+int ParseWorkSequence(ActorAssetHost& host, const ActorAssetRequest& request,
+                      FileCursor& cursor) {
+  if (request.sub_kind == kMaterialSequence) {
+    cursor.Skip(kFileHeaderBytes);
+    const std::uint32_t size = RoundUpToWord(cursor.I32());
+    if (!cursor.Ok()) {
+      return RefuseActor(host, "material sequence", request.material);
+    }
+    return CopySequence(host, host.SequenceWorkBuffer(), cursor, size);
+  }
+  const int target = TargetSlot(request);
+  std::optional<ActorAssetRecord> actor = SequenceActor(host, target);
+  if (!actor) {
+    return kAssetRefused;
+  }
+  actor->battle_animation_count = static_cast<std::uint8_t>(cursor.U8());
+  cursor.Skip(kBattleCountPadding);
+  const std::uint32_t size = RoundUpToWord(cursor.I32());
+  host.StoreActor(target, *actor);
+  if (!cursor.Ok()) {
+    return RefuseActor(host, "special sequence", target);
+  }
+  const AssetAddress sequence = host.AllocateLow(size);
+  if (sequence == AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  actor->shared_sequences[kSpecialSequenceRef] = sequence;
+  host.StoreActor(target, *actor);
+  return CopySequence(host, sequence, cursor, size);
+}
+
+// A shared sequence bank: its animation ids, entry parameters and
+// animations, bound into every actor (30DB0.c:1732-1770).
+int ParseSequenceBank(ActorAssetHost& host, int bank, FileCursor& cursor) {
+  host.SetBankTexturePage(bank, 0);
+  SharedSequenceBank value = host.LoadSequenceBank(bank);
+  if (value.data != AssetAddress::kNone) {
+    return kAssetRefused;
+  }
+  value.data = cursor.At();
+  const std::int32_t count = cursor.I32();
+  if (!cursor.Ok() || count < 0 || count >= kSharedSequenceEntries) {
+    return RefuseActor(host, "shared sequence count", count);
+  }
+  const auto entries = static_cast<std::size_t>(count);
+  for (std::size_t i = 0; i < entries; ++i) {
+    value.animation_ids[i] = static_cast<std::int16_t>(cursor.U16());
+    cursor.Skip(kBankEntryPadding);
+  }
+  for (std::size_t i = 0; i < entries; ++i) {
+    value.entry_params[i] = static_cast<std::int16_t>(cursor.U16());
+    cursor.Skip(kBankEntryPadding);
+  }
+  value.animation_ids[entries] = kEndOfBank;
+  for (std::size_t i = 0; i < entries; ++i) {
+    const AssetAddress at = cursor.At();
+    const std::size_t offset =
+        ((entries - i) * kBankOffsetBytes) + cursor.U32();
+    value.animation_data[i] =
+        AdvanceAddress(at, static_cast<std::ptrdiff_t>(offset));
+  }
+  if (!cursor.Ok()) {
+    return RefuseActor(host, "shared sequence bank", bank);
+  }
+  for (std::size_t i = 0; i < entries; ++i) {
+    host.RecordEmbeddedSequenceBank(value.animation_data[i]);
+  }
+  value.animation_data[entries] = kEndOfAnimations;
+  host.StoreSequenceBank(bank, value);
+  for (int i = 0; i < kActorRecordSlots; ++i) {
+    if (host.ActorSummary(i).present) {
+      ActorAssetRecord actor = host.LoadActor(i);
+      static_cast<void>(BindSharedActorSequence(
+          value, bank, host.SharedSequenceIdsByKind(), actor));
+      host.StoreActor(i, actor);
+    }
+  }
+  return kAssetDone;
+}
+
+// The bank's effect texture: the parse is done once it has loaded; its
+// refusals are not reported (30DB0.c:1772-1778).
+int FinishBankEffectTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                            const ActorAssetRequest& request) {
+  if (UpdateSequenceEffectTextureLoad(host, state, request) == kAssetPending) {
+    return kAssetPending;
+  }
+  state.sequence_parse_phase = kPhaseStart;
+  return kAssetDone;
+}
+}  // namespace
+
+// decomp: BATTLE.PRG _loadSeq (src/BATTLE/BATTLE.PRG/30DB0.c:1617)
+int ParseActorSequence(ActorAssetHost& host, ActorAssetLoadState& state,
+                       ActorAssetRequest& request) {
+  switch (state.sequence_parse_phase) {
+    case kPhaseStart:
+      state.sequence_cursor = request.data;
+      break;
+    case kPhaseReading:
+      return FinishBankEffectTexture(host, state, request);
+    default:
+      break;
+  }
+  FileCursor cursor(host, state.sequence_cursor);
+  int result = kAssetDone;
+  if (request.sub_kind == kBattleSequence) {
+    result = ParseActorSequenceKind(host, request, cursor);
+  } else if (request.sub_kind == kMaterialSequence ||
+             request.sub_kind == kMaterialModelSequence ||
+             request.sub_kind == kSpecialSequence) {
+    result = ParseWorkSequence(host, request, cursor);
+  } else {
+    const int bank = request.target_slot - 1;
+    if (bank < 0 || bank >= kSharedSequenceBanks) {
+      return RefuseActor(host, "shared sequence bank", request.target_slot);
+    }
+    result = ParseSequenceBank(host, bank, cursor);
+    state.sequence_cursor = cursor.At();
+    if (result != kAssetDone || request.sub_kind == kCommonBankSequence) {
+      return result;
+    }
+    state.sequence_parse_phase = kPhaseReading;
+    return FinishBankEffectTexture(host, state, request);
+  }
+  state.sequence_cursor = cursor.At();
+  return result;
+}
+
+// decomp: BATTLE.PRG func_8009CAEC (src/BATTLE/BATTLE.PRG/30DB0.c:1795)
+bool BindSharedActorSequence(const SharedSequenceBank& bank, int bank_index,
+                             std::span<const std::uint8_t> ids_by_kind,
+                             ActorAssetRecord& actor) {
+  if (bank_index < 0 || bank_index >= kSharedSequenceBanks) {
+    return false;
+  }
+  const auto index = static_cast<std::size_t>(bank_index);
+  const int model = actor.model_id;
+  const int by_kind = model < static_cast<int>(ids_by_kind.size())
+                          ? int{ids_by_kind[static_cast<std::size_t>(model)]}
+                          : -1;
+  for (std::size_t i = 0; i < bank.animation_ids.size(); ++i) {
+    const int id = bank.animation_ids[i];
+    if (id == kEndOfBank) {
+      break;
+    }
+    if (id == by_kind || id == model) {
+      actor.shared_sequences[index] =
+          AdvanceAddress(bank.animation_data[i], kSharedAnimationHeaderBytes);
+      break;
+    }
+  }
+  actor.texture_row_offsets[index] = kNoRowOffset;
+  for (std::size_t i = 0; i < bank.animation_ids.size(); ++i) {
+    const int id = bank.animation_ids[i];
+    if (id == kEndOfBank) {
+      break;
+    }
+    if (id == model) {
+      actor.texture_row_offsets[index] =
+          static_cast<std::uint8_t>(bank.entry_params[i]);
+      break;
+    }
+  }
+  return true;
+}
+
+namespace {
+int ReleaseBattleSequence(ActorAssetHost& host, int target) {
+  if (target < 0 || target >= kActorRecordSlots ||
+      !host.ActorSummary(target).present) {
+    return -1;
+  }
+  ActorAssetRecord actor = host.LoadActor(target);
+  if (actor.battle_sequence == AssetAddress::kNone) {
+    return 0;
+  }
+  if (target != 0) {
+    ActorAssetRequest probe;
+    probe.target_slot = static_cast<std::int8_t>(target);
+    probe.model_id = actor.sequence_model_id;
+    if ((target == 1 && actor.model_id == 0) ||
+        FindSharedActorSequence(host, probe) == 0) {
+      host.FreeLow(actor.battle_sequence);
+    }
+  }
+  actor.battle_sequence = AssetAddress::kNone;
+  actor.sequence_model_id = 0;
+  actor.common_animation_count = 0;
+  host.StoreActor(target, actor);
+  return 0;
+}
+
+int ReleaseSequenceBank(ActorAssetHost& host, int target) {
+  const int bank = target - 1;
+  if (bank < 0 || bank >= kSharedSequenceBanks) {
+    // The original clears shared[-1] (the battle sequence) for a bank 0.
+    host.Refuse("shared sequence bank", target);
+    return -1;
+  }
+  for (int i = 0; i < kActorRecordSlots; ++i) {
+    if (host.ActorSummary(i).present) {
+      ActorAssetRecord actor = host.LoadActor(i);
+      actor.shared_sequences[static_cast<std::size_t>(bank)] =
+          AssetAddress::kNone;
+      host.StoreActor(i, actor);
+    }
+  }
+  if (const int result = ReleaseSequenceEffectTexture(host, target);
+      result < 0) {
+    return result;
+  }
+  SharedSequenceBank value = host.LoadSequenceBank(bank);
+  if (value.data != AssetAddress::kNone) {
+    host.FreeLow(value.data);
+  }
+  value.data = AssetAddress::kNone;
+  host.StoreSequenceBank(bank, value);
+  return 0;
+}
+
+int ReleaseSpecialSequence(ActorAssetHost& host, int target) {
+  if (target < 0 || target >= kActorRecordSlots ||
+      !host.ActorSummary(target).present) {
+    return -1;
+  }
+  ActorAssetRecord actor = host.LoadActor(target);
+  if (actor.shared_sequences[kSpecialSequenceRef] == AssetAddress::kNone) {
+    return 0;
+  }
+  host.FreeLow(actor.shared_sequences[kSpecialSequenceRef]);
+  actor.shared_sequences[kSpecialSequenceRef] = AssetAddress::kNone;
+  actor.battle_animation_count = 0;
+  host.StoreActor(target, actor);
+  return 0;
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_8009CC20 (src/BATTLE/BATTLE.PRG/30DB0.c:1828)
+int ReleaseActorSequence(ActorAssetHost& host, int target, int kind) {
+  switch (kind) {
+    case kBattleSequence:
+      return ReleaseBattleSequence(host, target);
+    case kCommonBankSequence:
+    case kEffectBankSequence:
+      return ReleaseSequenceBank(host, target);
+    case kMaterialModelSequence:
+    case kSpecialSequence:
+      return ReleaseSpecialSequence(host, target);
+    default:
+      return 0;
+  }
 }
 
 // decomp: BATTLE.PRG func_8009D208 (src/BATTLE/BATTLE.PRG/30DB0.c:1996)
-int Content_ReleaseSequenceEffectTexture(int bank_id)
-{
-    if (bank_id < 1 || bank_id > 3) return -1;
-    if (Actors_sharedSequenceBankTexturePages[bank_id - 1] != 0) {
-        VS::Actors::ResetLiveActorTextureFrames(bank_id - 1);
-        if (VS::Render::RetireLiveTexturePageRange(Actors_sharedSequenceBankTexturePages[bank_id - 1], 1, 4) == 0) {
-            return -3;
-        }
-        Actors_sharedSequenceBankTexturePages[bank_id - 1] = 0;
+int ReleaseSequenceEffectTexture(ActorAssetHost& host, int bank) {
+  if (bank < kFirstEffectBank || bank > kLastEffectBank) {
+    return -1;
+  }
+  const std::uint8_t page = host.BankTexturePage(bank - 1);
+  if (page != 0) {
+    host.ResetActorTextureFrames(bank - 1);
+    if (host.RetireTexturePages(page, 1) == 0) {
+      return kAssetBusy;
     }
-    return 0;
+    host.SetBankTexturePage(bank - 1, 0);
+  }
+  return 0;
 }
+
+namespace {
+int StartEffectTextureRead(ActorAssetHost& host, ActorAssetLoadState& state,
+                           const ActorAssetRequest& request) {
+  state.effect_texture_phase = kPhaseReading;
+  const auto model =
+      static_cast<std::size_t>(static_cast<std::uint16_t>(request.model_id));
+  const std::optional<std::uint32_t> sectors =
+      request.model_id < 0
+          ? std::nullopt
+          : host.FileTableEntry(AssetFileTable::kEtmSectors, model);
+  const std::optional<std::uint32_t> offset =
+      request.model_id < 0
+          ? std::nullopt
+          : host.FileTableEntry(AssetFileTable::kEtmOffsets, model);
+  if (!sectors || !offset) {
+    state.effect_texture_phase = kPhaseStart;
+    return RefuseActor(host, "effect texture file table", request.model_id);
+  }
+  if (*sectors == 0) {
+    state.effect_texture_phase = kPhaseStart;
+    return kAssetRefused;
+  }
+  const std::uint32_t bytes = *sectors << kSectorShift;
+  state.effect_texture_file = host.AllocateHigh(bytes);
+  if (state.effect_texture_file == AssetAddress::kNone) {
+    // The original leaves the phase at 1 with no read started.
+    return kAssetRefused;
+  }
+  StartFileRead(host, AssetFileStream::kEffectTexture,
+                {static_cast<std::int32_t>(*offset) + kEtmFirstSector,
+                 static_cast<std::int32_t>(bytes)},
+                state.effect_texture_file);
+  return kAssetPending;
+}
+
+int UploadEffectTexture(ActorAssetHost& host, ActorAssetLoadState& state,
+                        const ActorAssetRequest& request) {
+  if (!host.FileReadFinished(AssetFileStream::kEffectTexture)) {
+    return kAssetPending;
+  }
+  host.ReleaseFileRead(AssetFileStream::kEffectTexture);
+  const int bank = request.target_slot - 1;
+  if (const std::uint8_t page = host.BankTexturePage(bank); page != 0) {
+    if (host.RetireTexturePages(page, 1) == 0) {
+      return kAssetBusy;
+    }
+    host.SetBankTexturePage(bank, 0);
+  }
+  if (host.ReserveTexturePages(request.texture_slot, 1) == 0) {
+    return kAssetRefused;
+  }
+  host.SetBankTexturePage(bank, request.texture_slot);
+  const std::span<const std::byte> header = host.Bytes(
+      AdvanceAddress(state.effect_texture_file, kEffectTextureHeightAt),
+      sizeof(std::uint16_t));
+  state.effect_texture_file =
+      AdvanceAddress(state.effect_texture_file, kEffectTextureHeaderBytes);
+  state.effect_texture_phase = kPhaseParsing;
+  if (header.size() < sizeof(std::uint16_t)) {
+    host.Refuse("effect texture header", request.model_id);
+    return kAssetPending;
+  }
+  const VramRect rect{.x = static_cast<std::int16_t>(
+                          (request.texture_slot & kEffectTextureColumnMask) *
+                          kEffectTextureColumnWidth),
+                      .y = kEffectTextureY,
+                      .w = kEffectTextureWidth,
+                      .h = static_cast<std::int16_t>(
+                          ReadLittle(header, 0, sizeof(std::uint16_t)))};
+  static_cast<void>(
+      UploadFrom(host, rect, state.effect_texture_file, "effect texture"));
+  return kAssetPending;
+}
+}  // namespace
 
 // decomp: BATTLE.PRG _loadEtm (src/BATTLE/BATTLE.PRG/30DB0.c:2008)
-int Content_UpdateSequenceEffectTextureLoad(Content_ActorAssetRequest* objdata)
-{
-    RECT rect;
-    int fileSize;
-    int sectorSize;
-    int h;
-
-    if (objdata->targetSlot < 1 || objdata->targetSlot > 3) return -2;
-    switch (Content_legacyEtmLoadPhase) {
+int UpdateSequenceEffectTextureLoad(ActorAssetHost& host,
+                                    ActorAssetLoadState& state,
+                                    const ActorAssetRequest& request) {
+  if (request.target_slot < kFirstEffectBank ||
+      request.target_slot > kLastEffectBank) {
+    return kAssetRefused;
+  }
+  switch (state.effect_texture_phase) {
     default:
-        Content_legacyEtmLoadPhase = 1;
-        sectorSize = Content_legacyEtmSectorCounts[objdata->modelId];
-        if (sectorSize == 0) {
-            Content_legacyEtmLoadPhase = 0;
-            return -2;
-        } else {
-            fileSize = sectorSize << 0xB;
-            Content_legacyEtmFileBuffer = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(fileSize));
-            if (Content_legacyEtmFileBuffer == NULL) {
-                return -2;
-            }
-
-            Content_legacyEtmFileLocation.lba = Content_legacyEtmDiscOffsets[objdata->modelId] + VS_E001_ETM_LBA;
-            Content_legacyEtmFileLocation.size = fileSize;
-            Content_legacyEtmDiscRequest = Content_AllocateDiscRequest(&Content_legacyEtmFileLocation);
-            Content_EnqueueDiscRequest(Content_legacyEtmDiscRequest, Content_legacyEtmFileBuffer);
-        }
-        // fallthrough
-    case 1:
-        if (Content_legacyEtmDiscRequest->state != 4) {
-            return -1;
-        }
-
-        Content_ReleaseDiscRequest(Content_legacyEtmDiscRequest);
-
-        if (Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] != 0) {
-            if (VS::Render::RetireLiveTexturePageRange(Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1], 1, 4) == 0) {
-                return -3;
-            }
-            Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] = 0;
-        }
-
-        if (VS::Render::ReserveLiveTexturePageRange(objdata->textureSlot, 1, 4) == 0) {
-            return -2;
-        }
-
-        Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1] = objdata->textureSlot;
-        ++Content_legacyEtmFileBuffer;
-        h = *Content_legacyEtmFileBuffer;
-        ++Content_legacyEtmFileBuffer;
-        setRECT(&rect, (objdata->textureSlot & 0xF) << 6, 256, 64, h);
-        LoadImage(&rect, (u_long *)((void*)Content_legacyEtmFileBuffer));
-        Content_legacyEtmLoadPhase = 2;
-        return -1;
-
-    case 2:
-        VS::Core::Memory::FreeLiveFromHighEnd(Content_legacyEtmFileBuffer - 2);
-        Content_legacyEtmLoadPhase = 0;
-        return 0;
-    }
+      if (const int started = StartEffectTextureRead(host, state, request);
+          started != kAssetPending) {
+        return started;
+      }
+      [[fallthrough]];
+    case kPhaseReading:
+      return UploadEffectTexture(host, state, request);
+    case kPhaseParsing:
+      host.FreeHigh(AdvanceAddress(state.effect_texture_file,
+                                   -kEffectTextureHeaderBytes));
+      state.effect_texture_phase = kPhaseStart;
+      return kAssetDone;
+  }
 }
-
-}  // extern "C"
+}  // namespace VS::Content

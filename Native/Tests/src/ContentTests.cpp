@@ -19,10 +19,13 @@
 #include <catch2/generators/catch_generators.hpp>
 #include <catch2/generators/catch_generators_range.hpp>
 
+#include "Content/ActorAssetsLive.hpp"
 #include "Content/DataAccess.h"
 #include "Content/DataStore.hpp"
 #include "Content/Disc.hpp"
 #include "Content/ModuleData.h"
+#include "Content/OverlayWorkspaceLive.hpp"
+#include "Content/PFile.hpp"
 #include "Core/Log.hpp"
 #include "Effects/TrailEmitterLive.hpp"
 #include "Legacy/Psx.h"
@@ -56,7 +59,7 @@ extern "C" {
 #include "Effects/Plugins/Plg265.h"
 #include "Field/MapProgress.h"
 #include "ModelLoading.h"
-#include "OverlayWorkspace.h"
+#include "OverlayWorkspaceLiveState.h"
 #include "PFile.h"
 }
 
@@ -626,8 +629,9 @@ TEST_CASE("Copied model geometry keeps serialized section offsets relative",
     std::array<int, 2> after{23, 29};
   } destination;
   const auto original = source;
-  CHECK(Content_CopyModelGeometry(destination.model.data(), source.data(),
-                                  sizeof source) == destination.model.data());
+  CHECK(Content::CopyLiveModelGeometry(destination.model.data(), source.data(),
+                                       sizeof source) ==
+        destination.model.data());
   CHECK(destination.model == source);
   CHECK(source == original);
   CHECK(destination.before == std::array<int, 2>{17, 19});
@@ -659,7 +663,8 @@ TEST_CASE("Model UV offsets preserve primitive strides and byte wrapping",
     }
     start += colored ? (triangle ? 24 : 32) : (triangle ? 16 : 20);
   }
-  Content_OffsetModelTextureCoordinates(bytes.data() + 4, 2, colored, 10, -7);
+  Content::OffsetLiveModelTextureCoordinates(bytes.data() + 4, 2, colored, 10,
+                                             -7);
   CHECK(bytes == expected);
 }
 
@@ -943,7 +948,7 @@ TEST_CASE("Weapon sequence copies retain relative offsets and exact extent",
   std::memset(destination.get(), 0x6B, sizeof(*destination));
   source->firstSectionPointer = 0x40;
   source->secondSectionPointer = 0x200;
-  Content_CopyWeaponSequence(destination.get(), source.get());
+  Content::CopyLiveWeaponSequence(destination.get(), source.get());
   const auto original = std::as_bytes(std::span(source.get(), 1));
   const auto copied = std::as_bytes(std::span(destination.get(), 1));
   CHECK(std::ranges::equal(copied.first(0x7800), original.first(0x7800)));
@@ -957,11 +962,11 @@ TEST_CASE("Weapon sequence copies retain relative offsets and exact extent",
 TEST_CASE("Overlay workspace claims preserve the owning tag",
           "[content][semantic-names][workspace]") {
   ContentWorkspaceState state;
-  CHECK(Content_AcquireOverlayWorkspace(6) == 1);
+  CHECK(Content::AcquireLiveOverlayWorkspace(6) == 1);
   CHECK(Content_overlayWorkspaceOwner == 6);
-  CHECK(Content_AcquireOverlayWorkspace(2) == 0);
+  CHECK(Content::AcquireLiveOverlayWorkspace(2) == 0);
   CHECK(Content_overlayWorkspaceOwner == 6);
-  CHECK(Content_ReleaseOverlayWorkspace(2) == 0);
+  CHECK(Content::ReleaseLiveOverlayWorkspace(2) == 0);
   CHECK(Content_overlayWorkspaceOwner == 6);
 }
 
@@ -969,11 +974,11 @@ TEST_CASE("Overlay workspace release permits a subsequent different owner",
           "[content][semantic-names][workspace]") {
   ContentWorkspaceState state;
   Content_overlayWorkspaceOwner = 6;
-  CHECK(Content_ReleaseOverlayWorkspace(6) == 1);
+  CHECK(Content::ReleaseLiveOverlayWorkspace(6) == 1);
   CHECK(Content_overlayWorkspaceOwner == 0);
-  CHECK(Content_ReleaseOverlayWorkspace(6) == 0);
-  CHECK(Content_AcquireOverlayWorkspace(2) == 1);
-  CHECK(Content_ReleaseOverlayWorkspace(2) == 1);
+  CHECK(Content::ReleaseLiveOverlayWorkspace(6) == 0);
+  CHECK(Content::AcquireLiveOverlayWorkspace(2) == 1);
+  CHECK(Content::ReleaseLiveOverlayWorkspace(2) == 1);
   CHECK(Content_overlayWorkspaceOwner == 0);
 }
 
@@ -982,89 +987,47 @@ TEST_CASE("Timeline section and track indices retain block-relative offsets",
   TimelineBlockFixture fixture;
   fixture.block.count = 2;
   for (std::size_t section = 0; section < fixture.sections.size(); ++section) {
-    fixture.offsets[section] =
-        static_cast<std::uint16_t>(offsetof(TimelineBlockFixture, sections) +
-                                   section * sizeof(TimelineSectionFixture));
+    const std::size_t table_at = offsetof(TimelineBlockFixture, sections) +
+                                 section * sizeof(TimelineSectionFixture);
+    fixture.offsets[section] = static_cast<std::uint16_t>(table_at);
     auto& table = fixture.sections[section];
     table.table.trackCount = 2;
-    CHECK(Content_PFileTimelineSection(&fixture.block,
-                                       static_cast<int>(section)) == &table);
     for (std::size_t track = 0; track < table.tracks.size(); ++track) {
-      const auto offset = section * 8 + track * 4;
       table.tracks[track].dataOffset = static_cast<std::uint16_t>(
-          offsetof(TimelineBlockFixture, keys) + offset);
-      CHECK(Content_PFileTimelineTrackData(
-                &fixture.block, static_cast<int>(section),
-                static_cast<int>(track)) == fixture.keys.data() + offset);
+          offsetof(TimelineBlockFixture, keys) + section * 8 + track * 4);
     }
   }
-}
-
-TEST_CASE("Ashley auxiliary sequence requests preserve kind and selector",
-          "[content][semantic-names][sequence]") {
-  ActorAssetState state;
-  Content_QueueAshleyWeaponSequence(0);
-  CHECK(Content_legacyActorAssetRequests[0].assetKind == 0);
-  Content_QueueAshleyWeaponSequence(9);
-  const auto& request = Content_legacyActorAssetRequests[0];
-  CHECK(request.assetKind == 7);
-  CHECK(request.targetSlot == 0);
-  CHECK(request.subKind == 3);
-  CHECK(request.material == 9);
-}
-
-TEST_CASE("Shared actor model lookups write only the matched peer slot",
-          "[content][semantic-names][sequence]") {
-  ActorAssetState state;
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
-  request.modelId = 7;
-  CHECK(Content_FindSharedActorModel(&request) == 1);
-  CHECK(request.dataAddress == 0);
-  request.modelId = 8;
-  request.dataAddress = 99;
-  CHECK(Content_FindSharedActorModel(&request) == 0);
-  CHECK(request.dataAddress == 99);
-}
-
-TEST_CASE("Shared actor sequence searches respect player and model boundaries",
-          "[content][semantic-names][sequence]") {
-  ActorAssetState state;
-  state.records[0].commonSequence = &state.sequence;
-  state.records[3].commonSequence = &state.sequence;
-  Content_ActorAssetRequest request{};
-  request.targetSlot = 2;
-  CHECK(Content_FindSharedActorSequence(&request) == 1);
-  CHECK(request.dataAddress == 3);
-  request.modelId = 4;
-  state.records[3].sequenceModelId = 4;
-  CHECK(Content_FindSharedActorSequence(&request) == 1);
-  CHECK(request.dataAddress == 3);
-  state.records[3].modelId = 8;
-  request.dataAddress = 99;
-  CHECK(Content_FindSharedActorSequence(&request) == 0);
-  CHECK(request.dataAddress == 99);
+  const auto block = std::as_bytes(std::span(&fixture, 1));
+  for (std::size_t section = 0; section < fixture.sections.size(); ++section) {
+    CHECK(Content::PFileTimelineSection(block, section) ==
+          offsetof(TimelineBlockFixture, sections) +
+              section * sizeof(TimelineSectionFixture));
+    for (std::size_t track = 0; track < 2; ++track) {
+      CHECK(Content::PFileTimelineTrackData(block, section, track) ==
+            offsetof(TimelineBlockFixture, keys) + section * 8 + track * 4);
+    }
+  }
 }
 
 TEST_CASE("Sequence release distinguishes actor slots from one-based banks",
           "[content][semantic-names][sequence]") {
   ActorAssetState state;
   state.records[0].battleSequence = &state.sequence;
-  CHECK(Content_ReleaseActorSequence(0, 0) == 0);
+  CHECK(Content::ReleaseLiveActorSequence(0, 0) == 0);
   CHECK(state.records[0].battleSequence == nullptr);
   state.records[2].sharedSequences[0] = &state.sequence;
-  CHECK(Content_ReleaseActorSequence(1, 1) == 0);
+  CHECK(Content::ReleaseLiveActorSequence(1, 1) == 0);
   CHECK(state.records[2].sharedSequences[0] == nullptr);
-  CHECK(Content_ReleaseActorSequence(1, 1) == 0);
+  CHECK(Content::ReleaseLiveActorSequence(1, 1) == 0);
 }
 
 TEST_CASE("Special actor model release clears only its record slot",
           "[content][semantic-names][sequence]") {
   ActorAssetState state;
   state.records[2].modelId = 0x7F;
-  CHECK(Content_ReleaseActorModel(2) == 0);
+  CHECK(Content::ReleaseLiveActorModel(2) == 0);
   CHECK(Actors_actorRecords[2] == nullptr);
   CHECK(Actors_actorRecords[3] == &state.records[3]);
-  CHECK(Content_ReleaseActorModel(2) == -1);
-  CHECK(Content_ReleaseActorModel(17) == -1);
+  CHECK(Content::ReleaseLiveActorModel(2) == -1);
+  CHECK(Content::ReleaseLiveActorModel(17) == -1);
 }

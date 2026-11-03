@@ -1,247 +1,285 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Content/DiscReaderLive.hpp"
+// Hand-maintained (tools/port/owned.csv).
+#include "Content/CdDrive.hpp"
+
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
+
 #include "Core/Runtime.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "CdDrive.h"
-#include "DiscQueue.h"
-#include "State/PlayTime.h"
+
+namespace VS::Content {
+namespace {
+// The phases vs_main_diskLoadFile keeps waiting in.
+bool BlockingReadPending(DiscDriveState state) {
+  switch (state) {
+    case DiscDriveState::kSeekReady:
+    case DiscDriveState::kReadReady:
+    case DiscDriveState::kUnnamed3:
+    case DiscDriveState::kReadInit:
+      return true;
+    default:
+      return false;
+  }
+}
+
+DiscRequest* At(DiscRequestQueue& queue, std::size_t index) {
+  return index < queue.requests.size() ? &queue.requests[index] : nullptr;
+}
+
+void Queue(DiscRequest& request, DiscDestination destination,
+           std::uint16_t priority) {
+  request.state = DiscRequestState::kEnqueued;
+  request.destination = destination;
+  request.reserved = 0;
+  request.priority = priority;
+}
+}  // namespace
 
 // decomp: SLUS_010.40 _diskReadCallback (src/SLUS_010.40/main.c:9021)
-void Content_ReadSectorCallback(u_char intr, u_char result[] __attribute__((unused)),
-    u_long* arg2 __attribute__((unused)))
-{
+void ReadSectorCallback(DiscTransfer& drive, DiscInterrupt interrupt,
+                        DiscInterruptHost& host) {
+  if (interrupt == DiscInterrupt::kDiskError ||
+      interrupt == DiscInterrupt::kNone ||
+      drive.state == DiscDriveState::kReadError) {
+    host.ClearReadyCallback();
+    host.EndSectorDelivery();
+    drive.state = DiscDriveState::kReadError;
+    return;
+  }
+  if (interrupt != DiscInterrupt::kDataReady) return;
 
-    if ((intr == DslDiskError) || (intr == DslNoIntr)
-        || (Content_discDriveState.state == Content_DiscDriveState_ReadError)) {
-        Content_discDriveState.state = Content_DiscDriveState_ReadError;
-        return;
+  drive.state = DiscDriveState::kReadReady;
+  if (drive.buffer_mode == DiscBufferMode::kDirect) {
+    host.ReceiveSector(drive.destination_sector);
+  } else {
+    host.ReceiveRingSector(drive.ring_write_index);
+    // sltiu 0x10
+    if (++drive.ring_write_index >= kDiscRingSectors) {
+      drive.ring_write_index = 0;
     }
+  }
 
-    if (intr != DslDataReady) {
-        return;
-    }
-
-    Content_discDriveState.state = Content_DiscDriveState_ReadReady;
-
-    if (Content_discDriveState.bufferMode == Content_DiscBufferMode_Direct) {
-        DsGetSector(((u_char*)(Content_discDriveState.destination)) + Content_discDriveState.destinationSector * 2048, 512);
-    } else {
-        DsGetSector(Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 2048, 512);
-        if (++Content_discDriveState.ringWriteIndex >= 16) {
-            Content_discDriveState.ringWriteIndex = 0;
-        }
-    }
-
-    switch (Content_discDriveState.bufferMode) {
-    case Content_DiscBufferMode_Direct:
-        if (++Content_discDriveState.destinationSector >= Content_discDriveState.sectorCount) {
-            Content_discDriveState.state = Content_DiscDriveState_Idle;
-        }
-        break;
-    case Content_DiscBufferMode_Buffered:
-        ++Content_discDriveState.ringSectorsWritten;
-        ++Content_discDriveState.bufferedSectors;
-        break;
-    case Content_DiscBufferMode_Manual:
-        ++Content_discDriveState.ringSectorsWritten;
-        if (++Content_discDriveState.ringReadIndex >= 16) {
-            Content_discDriveState.ringReadIndex = 0;
-        }
-        break;
+  switch (drive.buffer_mode) {
+    case DiscBufferMode::kDirect:
+      // sltu: both counts are unsigned.
+      if (++drive.destination_sector >= drive.sector_count) {
+        drive.state = DiscDriveState::kIdle;
+      }
+      break;
+    case DiscBufferMode::kBuffered:
+      ++drive.ring_sectors_written;
+      // The original's 32-bit add wraps.
+      drive.buffered_sectors = static_cast<std::int32_t>(
+          static_cast<std::uint32_t>(drive.buffered_sectors) + 1U);
+      break;
+    case DiscBufferMode::kManual:
+      ++drive.ring_sectors_written;
+      if (++drive.ring_read_index >= kDiscRingSectors) {
+        drive.ring_read_index = 0;
+      }
+      break;
     default:
-        break;
-    }
+      break;
+  }
 
-    if (++Content_discDriveState.sectorsReceived >= Content_discDriveState.sectorCount) {
-    }
+  if (++drive.sectors_received >= drive.sector_count) {
+    host.EndSectorDelivery();
+  }
 }
 
-// decomp: SLUS_010.40 _diskReadCommandCallback (src/SLUS_010.40/main.c:9073)
-void Content_ReadCommandCallback(u_char intr, u_char result[] __attribute__((unused)))
-{
-    switch (intr) {
-    case DslComplete:
-        return;
-    case DslDiskError:
-        break;
+// decomp: SLUS_010.40 _diskReadCommandCallback
+// (src/SLUS_010.40/main.c:9073)
+void ReadCommandCallback(DiscTransfer& drive, DiscInterrupt interrupt,
+                         DiscInterruptHost& host) {
+  switch (interrupt) {
+    case DiscInterrupt::kComplete:
+      host.StartSectorDelivery();
+      return;
+    case DiscInterrupt::kNone:
+    case DiscInterrupt::kNoResult:
+      return;
     default:
-        break;
-    case DslNoResult:
-    case DslNoIntr:
-        return;
-    }
-    Content_discDriveState.state = Content_DiscDriveState_ReadError;
+      drive.state = DiscDriveState::kReadError;
+      return;
+  }
 }
 
-// decomp: SLUS_010.40 _diskSeekCommandCallback (src/SLUS_010.40/main.c:9090)
-void Content_SeekCommandCallback(u_char intr, u_char result[] __attribute__((unused)))
-{
-    switch (intr) {
-    case DslNoIntr:
-        break;
-    case DslComplete:
-        Content_discDriveState.state = Content_DiscDriveState_Idle;
-        break;
-    case DslDiskError:
-        Content_discDriveState.state = Content_DiscDriveState_ReadError;
-        break;
-    case DslNoResult:
-        break;
+// decomp: SLUS_010.40 _diskSeekCommandCallback
+// (src/SLUS_010.40/main.c:9090)
+void SeekCommandCallback(DiscTransfer& drive, DiscInterrupt interrupt) {
+  switch (interrupt) {
+    case DiscInterrupt::kComplete:
+      drive.state = DiscDriveState::kIdle;
+      return;
+    case DiscInterrupt::kNone:
+    case DiscInterrupt::kNoResult:
+      return;
     default:
-        Content_discDriveState.state = Content_DiscDriveState_ReadError;
-        break;
-    }
+      drive.state = DiscDriveState::kReadError;
+      return;
+  }
 }
 
 // decomp: SLUS_010.40 _diskPcmReadReady (src/SLUS_010.40/main.c:9109)
-void Content_XaReadyCallback(u_char intr, u_char result[])
-{
-    switch (intr) {
-    case DslComplete:
-        Content_discDriveState.state = Content_DiscDriveState_Idle;
-        break;
-    case DslDataReady:
-        if (!(result[4] & 0x80)) {
-            Content_legacyXaReadyBcdField = ((result[1] >> 4) * 0xA) + (result[1] & 0xF);
-            Content_legacyXaReadyByteThree = result[3];
-            Content_legacyXaReadyByteFour = result[4];
-            Content_xaReadyMetadataWord = (result[6] << 8) | result[7];
-        }
-        break;
-    case DslDiskError:
-        Content_discDriveState.state = Content_DiscDriveState_CommandFailed;
-        break;
+bool XaReadyCallback(DiscTransfer& drive, DiscInterrupt interrupt,
+                     std::span<const std::uint8_t> result,
+                     DiscInterruptHost& host) {
+  constexpr std::uint8_t kNoSubheader = 0x80;
+  constexpr std::int32_t kBcdTens = 10;
+  constexpr std::uint8_t kBcdDigit = 0xF;
+  constexpr unsigned kBcdTensShift = 4;
+  constexpr unsigned kBitsPerByte = 8;
+  constexpr std::size_t kBcdFieldAt = 1;
+  constexpr std::size_t kByteThreeAt = 3;
+  constexpr std::size_t kByteFourAt = 4;
+  constexpr std::size_t kMetadataHighAt = 6;
+  constexpr std::size_t kMetadataLowAt = 7;
+  switch (interrupt) {
+    case DiscInterrupt::kComplete:
+      host.ClearReadyCallback();
+      drive.state = DiscDriveState::kIdle;
+      return true;
+    case DiscInterrupt::kDataReady: {
+      if (result.size() < kXaReadyResultBytes) return false;
+      if ((result[kByteFourAt] & kNoSubheader) != 0) return true;
+      // lbu; srl 4: unsigned BCD digits.
+      host.RecordXaSector(
+          {.bcd_field = ((result[kBcdFieldAt] >> kBcdTensShift) * kBcdTens) +
+                        (result[kBcdFieldAt] & kBcdDigit),
+           .byte_three = result[kByteThreeAt],
+           .byte_four = result[kByteFourAt],
+           .metadata = (std::int32_t{result[kMetadataHighAt]} << kBitsPerByte) |
+                       result[kMetadataLowAt]});
+      return true;
     }
+    case DiscInterrupt::kDiskError:
+      host.ClearReadyCallback();
+      drive.state = DiscDriveState::kCommandFailed;
+      return true;
+    default:
+      return true;
+  }
 }
 
 // decomp: SLUS_010.40 _diskGetState (src/SLUS_010.40/main.c:9131)
-int Content_DiscState(void) { return Content_discDriveState.state; }
+DiscDriveState DiscState(const DiscTransfer& drive) { return drive.state; }
 
 // decomp: SLUS_010.40 _diskClearError (src/SLUS_010.40/main.c:9133)
-void Content_ClearDiscReadError(void)
-{
-    if (Content_discDriveState.state == Content_DiscDriveState_ReadError) {
-        Content_discDriveState.state = Content_DiscDriveState_Idle;
-    }
+void ClearDiscReadError(DiscTransfer& drive) {
+  if (drive.state == DiscDriveState::kReadError) {
+    drive.state = DiscDriveState::kIdle;
+  }
 }
 
 // decomp: SLUS_010.40 vs_main_diskLoadFile (src/SLUS_010.40/main.c:9334)
-int Content_ReadDiscFileBlocking(int sector, int bytes, void* vram)
-{
-    int result = VS::Content::BeginLiveDiscRead(sector, bytes, vram);
-    if (result != 0) {
-        int seekReady = Content_DiscDriveState_SeekReady;
-        int readReady = Content_DiscDriveState_ReadReady;
+bool ReadDiscFileBlocking(DiscQueueHost& host, const DiscFileExtent& file,
+                          DiscDestination destination) {
+  if (!host.BeginRead(file, destination)) return false;
+  while (BlockingReadPending(host.DriveState())) {
+    host.WaitFrame();
+  }
+  return true;
+}
 
-        while (1) {
-            if (Content_DiscState() == seekReady) {
-                State_UpdatePlayTimeAndLoading(0);
-            } else if (Content_DiscState() == readReady) {
-                State_UpdatePlayTimeAndLoading(0);
-            } else if (Content_DiscState() == 3) {
-                State_UpdatePlayTimeAndLoading(0);
-            } else if (Content_DiscState() == Content_DiscDriveState_ReadInit) {
-                State_UpdatePlayTimeAndLoading(0);
-            } else {
-                break;
-            }
-        }
-    }
-    return result;
+bool ReadRefusedDiscFile(DiscQueueHost& host, const DiscFileExtent& file,
+                         DiscDestination destination,
+                         std::uint32_t max_wait_frames) {
+  for (std::uint32_t frames = 0; host.DriveState() != DiscDriveState::kIdle;
+       ++frames) {
+    if (frames >= max_wait_frames) return false;
+    host.WaitFrame();
+  }
+  return ReadDiscFileBlocking(host, file, destination);
 }
 
 // decomp: SLUS_010.40 _initCdQueue (src/SLUS_010.40/main.c:9401)
-void Content_InitializeDiscQueue(void)
-{
-    int i;
-
-    for (i = 31; i >= 0; --i) {
-        Content_discRequestSlots[i].state = Content_DiscRequestState_Free;
-    }
-    *(int*)&Content_discRequestCounts = 0;
+void InitializeDiscQueue(DiscRequestQueue& queue) {
+  for (DiscRequest& request : queue.requests) {
+    request.state = DiscRequestState::kFree;
+  }
+  queue.reading = 0;
+  queue.waiting = 0;
 }
 
-// decomp: SLUS_010.40 vs_main_allocateCdQueueSlot (src/SLUS_010.40/main.c:9411)
-Content_DiscQueueSlot* Content_AllocateDiscRequest(Content_DiscFile const* file)
-{
-    int i;
-
-    for (i = 0; i < 32; ++i) {
-        if (Content_discRequestSlots[i].state == Content_DiscRequestState_Free) {
-            Content_discRequestSlots[i].state = Content_DiscRequestState_Allocated;
-            Content_discRequestSlots[i].cdFile = *file;
-            return &Content_discRequestSlots[i];
-        }
+// decomp: SLUS_010.40 vs_main_allocateCdQueueSlot
+// (src/SLUS_010.40/main.c:9411)
+std::optional<std::size_t> AllocateDiscRequest(DiscRequestQueue& queue,
+                                               const DiscFileExtent& file) {
+  for (std::size_t index = 0; index < queue.requests.size(); ++index) {
+    DiscRequest& request = queue.requests[index];
+    if (request.state == DiscRequestState::kFree) {
+      request.state = DiscRequestState::kAllocated;
+      request.file = file;
+      return index;
     }
-    VS::Core::IgnoreDiagnostic(162, 0);
+  }
+  Core::IgnoreDiagnostic(kDiscQueueFullDiagnostic, 0);
+  return std::nullopt;
 }
 
 // decomp: SLUS_010.40 vs_main_freeCdQueueSlot (src/SLUS_010.40/main.c:9425)
-void Content_ReleaseDiscRequest(Content_DiscQueueSlot* slot)
-{
-    u_short state = slot->state - 2;
-    if (state < Content_DiscRequestState_Loaded - 2) {
-        VS::Core::IgnoreDiagnostic(163, 0);
-    }
-    slot->state = Content_DiscRequestState_Free;
+bool ReleaseDiscRequest(DiscRequestQueue& queue, std::size_t index) {
+  DiscRequest* const request = At(queue, index);
+  if (request == nullptr) return false;
+  // lhu; addiu -2; sltiu 2: still reading or enqueued.
+  if (request->state == DiscRequestState::kReading ||
+      request->state == DiscRequestState::kEnqueued) {
+    Core::IgnoreDiagnostic(kDiscRequestBusyDiagnostic, 0);
+  }
+  request->state = DiscRequestState::kFree;
+  return true;
 }
 
 // decomp: SLUS_010.40 vs_main_cdEnqueue (src/SLUS_010.40/main.c:9434)
-void Content_EnqueueDiscRequest(Content_DiscQueueSlot* slot, void* vram)
-{
-    slot->state = Content_DiscRequestState_Enqueued;
-    slot->vram = vram;
-    slot->opaqueC = 0;
-    slot->priority = Content_discRequestCounts.waiting++;
+bool EnqueueDiscRequest(DiscRequestQueue& queue, std::size_t index,
+                        DiscDestination destination) {
+  DiscRequest* const request = At(queue, index);
+  if (request == nullptr) return false;
+  Queue(*request, destination, queue.waiting++);
+  return true;
 }
 
-// decomp: SLUS_010.40 vs_main_cdEnqueuePriority (src/SLUS_010.40/main.c:9442)
-void Content_EnqueuePriorityDiscRequest(Content_DiscQueueSlot* slot, void* vram)
-{
-    int i;
-    Content_DiscQueueSlot* queue = Content_discRequestSlots;
-
-    for (i = 0; i < 32; ++i, ++queue) {
-        if (queue->state == Content_DiscRequestState_Enqueued) {
-            ++queue->priority;
-        }
+// decomp: SLUS_010.40 vs_main_cdEnqueuePriority
+// (src/SLUS_010.40/main.c:9442)
+bool EnqueuePriorityDiscRequest(DiscRequestQueue& queue, std::size_t index,
+                                DiscDestination destination) {
+  DiscRequest* const request = At(queue, index);
+  if (request == nullptr) return false;
+  for (DiscRequest& waiting : queue.requests) {
+    if (waiting.state == DiscRequestState::kEnqueued) {
+      ++waiting.priority;
     }
-    slot->state = Content_DiscRequestState_Enqueued;
-    slot->vram = vram;
-    slot->opaqueC = 0;
-    slot->priority = 0;
-    ++Content_discRequestCounts.waiting;
+  }
+  Queue(*request, destination, 0);
+  ++queue.waiting;
+  return true;
 }
 
 // decomp: SLUS_010.40 _processCdQueue (src/SLUS_010.40/main.c:9461)
-void Content_UpdateDiscQueue(void)
-{
-    ++Content_discDriveState.framesSinceLastRead;
-
-    if (*(int*)&Content_discRequestCounts != 0) {
-        Content_DiscQueueSlot* slot = Content_discRequestSlots;
-        int i = Content_DiscState();
-        if (i == Content_DiscDriveState_Idle) {
-            for (i = 0; i < 32; ++i, ++slot) {
-                if (slot->state == Content_DiscRequestState_Enqueued) {
-                    if (slot->priority == 0) {
-                        slot->state = Content_DiscRequestState_Reading;
-                        VS::Content::BeginLiveDiscRead(slot->cdFile.lba, slot->cdFile.size, slot->vram);
-                        Content_discDriveState.framesSinceLastRead = 0;
-                        --Content_discRequestCounts.waiting;
-                        ++Content_discRequestCounts.reading;
-                    } else {
-                        --slot->priority;
-                    }
-                } else if (slot->state == Content_DiscRequestState_Reading) {
-                    slot->state = Content_DiscRequestState_Loaded;
-                    --Content_discRequestCounts.reading;
-                }
-            }
+void UpdateDiscQueue(DiscRequestQueue& queue, DiscQueueHost& host) {
+  host.CountFrameSinceRead();
+  if ((queue.reading != 0 || queue.waiting != 0) &&
+      host.DriveState() == DiscDriveState::kIdle) {
+    for (DiscRequest& request : queue.requests) {
+      if (request.state == DiscRequestState::kEnqueued) {
+        if (request.priority == 0) {
+          request.state = DiscRequestState::kReading;
+          // The original ignores whether the drive took the read.
+          static_cast<void>(host.BeginRead(request.file, request.destination));
+          host.RestartFramesSinceRead();
+          --queue.waiting;
+          ++queue.reading;
+        } else {
+          --request.priority;
         }
+      } else if (request.state == DiscRequestState::kReading) {
+        request.state = DiscRequestState::kLoaded;
+        --queue.reading;
+      }
     }
-    VS::Content::UpdateLiveDiscCommands();
+  }
+  host.UpdateCommands();
 }
 
-}  // extern "C"
+}  // namespace VS::Content

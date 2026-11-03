@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Items/LootLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Battle/Action.h"
@@ -259,7 +259,7 @@ void Battle_WaitForActionEffectReady(void)
     Battle_ActionRequest* queued_action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
     if ((Menu_IsSceneNotificationPending() == 0)
         && ((Actors_ActorStateFlags(queued_action->primaryTarget.target.targetActor) & 0x08000100) == 0x08000100)
-        && (Content_FindFreeActorAssetRequest() == 0) && (Effects_CanStartEffectTrack() != 0)) {
+        && (VS::Content::FindLiveFreeActorAssetRequest() == 0) && (Effects_CanStartEffectTrack() != 0)) {
         Battle_AdvanceActionEffectPhase();
     }
 }

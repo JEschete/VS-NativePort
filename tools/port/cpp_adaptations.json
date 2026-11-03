@@ -1,336 +1,4 @@
 {
-"Native\\Content\\src\\ActorAssets.cpp": [
-[
-185,
-[
-"    u_char* cursor = polygonData;"
-],
-[
-"    u_char* cursor = (u_char *)(polygonData);"
-]
-],
-[
-250,
-[
-"        destination = VS::Core::Memory::AllocateLiveFromLowEnd(byteCount);"
-],
-[
-"        destination = (int *)(VS::Core::Memory::AllocateLiveFromLowEnd(byteCount));"
-]
-],
-[
-359,
-[
-"            Actors_weaponModels[objectData->targetSlot] = objectData->destination;"
-],
-[
-"            Actors_weaponModels[objectData->targetSlot] = (Actors_WeaponModel *)(objectData->destination);"
-]
-],
-[
-387,
-[
-"                data = (void*)model->sectionOffsets;"
-],
-[
-"                data = (u_char *)((void*)model->sectionOffsets);"
-]
-],
-[
-393,
-[
-"                    buf = VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *buf);"
-],
-[
-"                    buf = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *buf));"
-]
-],
-[
-440,
-[
-"        data = Content_legacyWeaponParseCursor;"
-],
-[
-"        data = (u_char *)(Content_legacyWeaponParseCursor);"
-]
-],
-[
-464,
-[
-"        dst = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
-],
-[
-"        dst = (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
-]
-],
-[
-542,
-[
-"    LoadImage(&rect, (void*)data);"
-],
-[
-"    LoadImage(&rect, (u_long *)((void*)data));"
-]
-],
-[
-552,
-[
-"    pData = (void*)VS_ONDISC(model->sectionOffsets, polygonSection, void*);"
-],
-[
-"    pData = (u_char *)((void*)VS_ONDISC(model->sectionOffsets, polygonSection, void*));"
-]
-],
-[
-825,
-[
-"            Actors_actorRecords[object->targetSlot] = object->destination;"
-],
-[
-"            Actors_actorRecords[object->targetSlot] = (Actors_ActorRecord *)(object->destination);"
-]
-],
-[
-841,
-[
-"            ((void (*)())Actors_ResetActorMotionState)(actor->instance.slot);"
-],
-[
-"            ((void (*)(...))Actors_ResetActorMotionState)(actor->instance.slot);"
-]
-],
-[
-887,
-[
-"    model = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
-],
-[
-"    model = (Actors_ShpModel *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
-]
-],
-[
-1028,
-[
-"    pData = VS_ONDISC(actor->instance.model, polygonSection, void *);"
-],
-[
-"    pData = (u_char *)(VS_ONDISC(actor->instance.model, polygonSection, void *));"
-]
-],
-[
-1149,
-[
-"    ((void (*)())Actors_ResetActorMotionState)(actor->instance.slot);"
-],
-[
-"    ((void (*)(...))Actors_ResetActorMotionState)(actor->instance.slot);"
-]
-],
-[
-1377,
-[
-"            seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
-],
-[
-"            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
-]
-],
-[
-1391,
-[
-"            seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
-],
-[
-"            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
-]
-],
-[
-1401,
-[
-"            seq = source->battleSequence;"
-],
-[
-"            seq = (Content_SequenceBuffer *)(source->battleSequence);"
-]
-],
-[
-1404,
-[
-"                    seq = Actors_primarySequenceBuffer;"
-],
-[
-"                    seq = (Content_SequenceBuffer *)(Actors_primarySequenceBuffer);"
-]
-],
-[
-1408,
-[
-"                    seq = VS::Core::Memory::AllocateLiveFromLowEnd(0x7800);"
-],
-[
-"                    seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(0x7800));"
-]
-],
-[
-1410,
-[
-"                    Content_CopyWeaponSequence(seq, source->battleSequence);"
-],
-[
-"                    Content_CopyWeaponSequence(seq, (Content_SequenceBuffer *)(source->battleSequence));"
-]
-],
-[
-1430,
-[
-"            seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
-],
-[
-"            seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
-]
-],
-[
-1435,
-[
-"            seq = Actors_primarySequenceBuffer;"
-],
-[
-"            seq = (Content_SequenceBuffer *)(Actors_primarySequenceBuffer);"
-]
-],
-[
-1450,
-[
-"        seq = Actors_sequenceWorkBuffer;"
-],
-[
-"        seq = (Content_SequenceBuffer *)(Actors_sequenceWorkBuffer);"
-]
-],
-[
-1461,
-[
-"        seq = VS::Core::Memory::AllocateLiveFromLowEnd(size);"
-],
-[
-"        seq = (Content_SequenceBuffer *)(VS::Core::Memory::AllocateLiveFromLowEnd(size));"
-]
-],
-[
-1652,
-[
-"            Audio_StopBankSfx(0x180, VS_ONDISC(actor->instance.model, soundSection, void *), 0);"
-],
-[
-"            Audio_StopBankSfx(0x180, (int *)(VS_ONDISC(actor->instance.model, soundSection, void *)), 0);"
-]
-],
-[
-1723,
-[
-"            Content_legacyEtmFileBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(fileSize);"
-],
-[
-"            Content_legacyEtmFileBuffer = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(fileSize));"
-]
-],
-[
-1757,
-[
-"        LoadImage(&rect, (void*)Content_legacyEtmFileBuffer);"
-],
-[
-"        LoadImage(&rect, (u_long *)((void*)Content_legacyEtmFileBuffer));"
-]
-]
-],
-"Native\\Content\\src\\CdDrive.cpp": [
-[
-28,
-[
-"        DsGetSector(Content_discDriveState.destination + Content_discDriveState.destinationSector * 2048, 512);"
-],
-[
-"        DsGetSector(((u_char*)(Content_discDriveState.destination)) + Content_discDriveState.destinationSector * 2048, 512);"
-]
-]
-],
-"Native\\Content\\src\\PFile.cpp": [
-[
-16,
-[
-"    Content_PFileTimelineTable* entry = Content_PFileTimelineSection(timeline_block, section_index);"
-],
-[
-"    Content_PFileTimelineTable* entry = (Content_PFileTimelineTable *)(Content_PFileTimelineSection(timeline_block, section_index));"
-]
-]
-],
-"Native\\Content\\src\\SystemResources.cpp": [
-[
-20,
-[
-"    p_hdr = (void*)buf + buf->image0Offset;"
-],
-[
-"    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image0Offset);"
-]
-],
-[
-24,
-[
-"    p_hdr = (void*)buf + buf->image1Offset;"
-],
-[
-"    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image1Offset);"
-]
-],
-[
-28,
-[
-"    p_hdr = (void*)buf + buf->paletteOffset;"
-],
-[
-"    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->paletteOffset);"
-]
-],
-[
-35,
-[
-"    p_hdr = (void*)buf + buf->image3Offset;"
-],
-[
-"    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image3Offset);"
-]
-],
-[
-39,
-[
-"    p_hdr = (void*)buf + buf->image4Offset;"
-],
-[
-"    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image4Offset);"
-]
-],
-[
-43,
-[
-"    p_hdr = (void*)buf + buf->fixedImageOffset;"
-],
-[
-"    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->fixedImageOffset);"
-]
-],
-[
-47,
-[
-"    Menu_Framework_InitGameInterface((void*)buf + buf->interfaceDataOffset);"
-],
-[
-"    Menu_Framework_InitGameInterface(((u_char*)((void*)buf)) + buf->interfaceDataOffset);"
-]
-]
-],
 "Native\\Engine\\src\\Audio\\ActorSound.cpp": [
 [
 102,
@@ -4828,10 +4496,10 @@
 [
 31,
 [
-"    Content_PFileTimelineTable* entry = Content_PFileTimelineSection(Effects_package->block3Data, timeline_index);"
+"    Content_PFileTimelineTable* entry = VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index);"
 ],
 [
-"    Content_PFileTimelineTable* entry = (Content_PFileTimelineTable *)(Content_PFileTimelineSection(Effects_package->block3Data, timeline_index));"
+"    Content_PFileTimelineTable* entry = (Content_PFileTimelineTable *)(VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index));"
 ]
 ],
 [
@@ -4846,10 +4514,10 @@
 [
 47,
 [
-"        p->tracks[i].keys = Content_PFileTimelineTrackData(Effects_package->block3Data, timeline_index, i);"
+"        p->tracks[i].keys = VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i);"
 ],
 [
-"        p->tracks[i].keys = (u_long *)(Content_PFileTimelineTrackData(Effects_package->block3Data, timeline_index, i));"
+"        p->tracks[i].keys = (u_long *)(VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i));"
 ]
 ],
 [
@@ -5581,10 +5249,10 @@
 [
 841,
 [
-"        created_gimmick->model = Content_CopyModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize);"
+"        created_gimmick->model = VS::Content::CopyLiveModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize);"
 ],
 [
-"        created_gimmick->model = (Actors_ShpModel *)(Content_CopyModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize));"
+"        created_gimmick->model = (Actors_ShpModel *)(VS::Content::CopyLiveModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize));"
 ]
 ],
 [
@@ -6859,10 +6527,10 @@
 [
 103,
 [
-"        Content_CopyWeaponSequence(preview_actor->battleSequence, source_actor->battleSequence);"
+"        VS::Content::CopyLiveWeaponSequence(preview_actor->battleSequence, source_actor->battleSequence);"
 ],
 [
-"        Content_CopyWeaponSequence((Content_SequenceBuffer *)(preview_actor->battleSequence), (Content_SequenceBuffer *)(source_actor->battleSequence));"
+"        VS::Content::CopyLiveWeaponSequence((Content_SequenceBuffer *)(preview_actor->battleSequence), (Content_SequenceBuffer *)(source_actor->battleSequence));"
 ]
 ],
 [

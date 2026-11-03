@@ -46,6 +46,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\ActorAssetsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\AudioBank.cpp" />
     <ClCompile Include="src\AudioStream.cpp" />
     <ClCompile Include="src\CdDrive.cpp">
@@ -54,6 +57,9 @@
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\CdDriveLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\DataStore.cpp" />
     <ClCompile Include="src\Disc.cpp" />
@@ -98,12 +104,18 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\OverlayWorkspaceLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\PFile.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
       <ConformanceMode>false</ConformanceMode>
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\PFileLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\SystemResources.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -112,22 +124,28 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\SystemResourcesLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="Legacy\LibDs.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\ActorAssets.h" />
-    <ClInclude Include="src\CdDrive.h" />
+    <ClInclude Include="src\ActorAssetsLiveState.h" />
     <ClInclude Include="src\DiscQueue.h" />
     <ClInclude Include="src\LegacyFiles.h" />
     <ClInclude Include="src\ModelLoading.h" />
-    <ClInclude Include="src\OverlayFiles.h" />
-    <ClInclude Include="src\OverlayWorkspace.h" />
+    <ClInclude Include="src\OverlayWorkspaceLiveState.h" />
     <ClInclude Include="src\PFile.h" />
     <ClInclude Include="src\SystemResources.h" />
+    <ClInclude Include="include\Content\ActorAssets.hpp" />
+    <ClInclude Include="include\Content\ActorAssetsLive.hpp" />
     <ClInclude Include="include\Content\AudioBank.hpp" />
     <ClInclude Include="include\Content\AudioStream.hpp" />
+    <ClInclude Include="include\Content\CdDrive.hpp" />
+    <ClInclude Include="include\Content\CdDriveLive.hpp" />
     <ClInclude Include="include\Content\DataAccess.h" />
     <ClInclude Include="include\Content\DataStore.hpp" />
     <ClInclude Include="include\Content\Disc.hpp" />
@@ -136,7 +154,14 @@
     <ClInclude Include="include\Content\DiscReaderLive.hpp" />
     <ClInclude Include="include\Content\ModuleData.h" />
     <ClInclude Include="include\Content\MovieEncoder.hpp" />
+    <ClInclude Include="include\Content\OverlayFiles.hpp" />
+    <ClInclude Include="include\Content\OverlayWorkspace.hpp" />
+    <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp" />
+    <ClInclude Include="include\Content\PFile.hpp" />
+    <ClInclude Include="include\Content\PFileLive.hpp" />
     <ClInclude Include="include\Content\StringTables.h" />
+    <ClInclude Include="include\Content\SystemResources.hpp" />
+    <ClInclude Include="include\Content\SystemResourcesLive.hpp" />
     <ClInclude Include="Legacy\LibDs.h" />
   </ItemGroup>
   <ItemGroup>

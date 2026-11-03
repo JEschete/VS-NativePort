@@ -3,6 +3,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Boot/SessionLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Runtime.hpp"
@@ -42,7 +43,6 @@ extern "C" {
 #include "Battle/StatusEffects.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
 #include "Effects/Weather.h"
@@ -166,12 +166,16 @@ void Field_QueueZoneLoad(int id)
     if (Field_zoneContext.zndDiscRequest != 0) {
         VS::Core::IgnoreDiagnostic(0x87, 0);
     }
-    Field_zoneContext.zndDiscRequest = Content_AllocateDiscRequest(&cdFile);
+    Field_zoneContext.zndDiscRequest = VS::Content::AllocateLiveDiscRequest(&cdFile);
     if (Field_zoneContext.zndData != NULL) {
         VS::Core::IgnoreDiagnostic(0x88, 0);
     }
     Field_zoneContext.zndData = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
-    Content_EnqueuePriorityDiscRequest(Field_zoneContext.zndDiscRequest, Field_zoneContext.zndData);
+    if (Field_zoneContext.zndDiscRequest != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(Field_zoneContext.zndDiscRequest, Field_zoneContext.zndData);
+    } else {
+        Field_zoneContext.zndDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Field_zoneContext.zndData);
+    }
     if (Field_zoneContext.isMusicFadeEnabled != 0) {
         int zone_music_id = Field_zoneMusicIds[id];
         if (Audio_CurrentMusicId() != zone_music_id) {
@@ -195,7 +199,7 @@ void Field_FinishZoneLoad(int id)
         State_UpdatePlayTimeAndLoading(0);
     }
 
-    Content_ReleaseDiscRequest(Field_zoneContext.zndDiscRequest);
+    VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.zndDiscRequest);
 
     Field_zoneContext.zndDiscRequest = NULL;
 
@@ -625,12 +629,16 @@ void Field_QueueRoomLoad(int id)
     if (Field_zoneContext.mpdDiscRequest != NULL) {
         VS::Core::IgnoreDiagnostic(0x89, 0);
     }
-    Field_zoneContext.mpdDiscRequest = Content_AllocateDiscRequest(&file);
+    Field_zoneContext.mpdDiscRequest = VS::Content::AllocateLiveDiscRequest(&file);
     if (Field_zoneContext.mpdData != NULL) {
         VS::Core::IgnoreDiagnostic(0x8A, 0);
     }
     Field_zoneContext.mpdData = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
-    Content_EnqueuePriorityDiscRequest(Field_zoneContext.mpdDiscRequest, Field_zoneContext.mpdData);
+    if (Field_zoneContext.mpdDiscRequest != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(Field_zoneContext.mpdDiscRequest, Field_zoneContext.mpdData);
+    } else {
+        Field_zoneContext.mpdDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(&file, Field_zoneContext.mpdData);
+    }
 }
 
 // decomp: BATTLE.PRG func_80089DC0 (src/BATTLE/BATTLE.PRG/146C.c:15272)
@@ -653,7 +661,7 @@ void Field_FinishRoomLoad(int requested_room_id)
         State_UpdatePlayTimeAndLoading(0);
     }
 
-    Content_ReleaseDiscRequest(Field_zoneContext.mpdDiscRequest);
+    VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.mpdDiscRequest);
     Field_zoneContext.mpdDiscRequest = NULL;
 
     Render_legacyPrimitiveBuffers[0] = VS::Core::Memory::AllocateLiveFromLowEnd(0x20000);

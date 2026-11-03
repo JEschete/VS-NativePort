@@ -31,12 +31,3 @@ typedef struct Content_PFileTimelineTable {
 _Static_assert(sizeof(Content_PFileTimelineTable) == 0x4, "Content_PFileTimelineTable must keep its PS1 layout");
 
 #endif // VS_PFILE_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_PFILE_H_DECLS)
-#define VS_PFILE_H_DECLS
-#include "Effects/Package.h"
-
-void* Content_PFileTimelineSection(Effects_PackageBlock3* timeline_block, int section_index);
-void* Content_PFileTimelineTrackData(Effects_PackageBlock3* timeline_block, int section_index, int track_index);
-
-#endif // VS_PFILE_H_DECLS

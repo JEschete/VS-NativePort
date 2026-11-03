@@ -31,6 +31,7 @@
 
 extern "C" {
 #include "ActorAssets.h"
+#include "ActorAssetsLiveState.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.h"

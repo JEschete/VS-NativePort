@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -8,7 +9,6 @@
 #include "Render/TimImageLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -281,10 +281,18 @@ int Field_QueueTiledBackgroundLoad(int texture_page)
             if ((Field_legacyBackgroundTimBuffer == 0) || (Field_loadedBackgroundLayout == 0)) {
                 return 0;
             }
-            Field_backgroundTextureDiscRequest = Content_AllocateDiscRequest(texture_disc_file);
-            Field_backgroundLayoutDiscRequest = Content_AllocateDiscRequest(layout_disc_file);
-            Content_EnqueueDiscRequest(Field_backgroundTextureDiscRequest, Field_legacyBackgroundTimBuffer);
-            Content_EnqueueDiscRequest(Field_backgroundLayoutDiscRequest, Field_loadedBackgroundLayout);
+            Field_backgroundTextureDiscRequest = VS::Content::AllocateLiveDiscRequest(texture_disc_file);
+            Field_backgroundLayoutDiscRequest = VS::Content::AllocateLiveDiscRequest(layout_disc_file);
+            if (Field_backgroundTextureDiscRequest != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Field_backgroundTextureDiscRequest, Field_legacyBackgroundTimBuffer);
+            } else {
+                Field_backgroundTextureDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(texture_disc_file, Field_legacyBackgroundTimBuffer);
+            }
+            if (Field_backgroundLayoutDiscRequest != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Field_backgroundLayoutDiscRequest, Field_loadedBackgroundLayout);
+            } else {
+                Field_backgroundLayoutDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(layout_disc_file, Field_loadedBackgroundLayout);
+            }
             return 1;
         }
     }
@@ -309,7 +317,7 @@ int Field_FinishTiledBackgroundLoad(void)
         if (tim.caddr != NULL) {
             VS::Render::LoadLiveClutColors((const u_short *)((void*)tim.caddr), 0xE, 0, 0x100);
         }
-        Content_ReleaseDiscRequest(Field_backgroundTextureDiscRequest);
+        VS::Content::ReleaseLiveDiscRequest(Field_backgroundTextureDiscRequest);
         Field_backgroundTextureDiscRequest = NULL;
         return 0;
     }
@@ -317,7 +325,7 @@ int Field_FinishTiledBackgroundLoad(void)
     if ((Field_backgroundLayoutDiscRequest != NULL) && (Field_backgroundLayoutDiscRequest->state == 4)) {
         VS::Core::Memory::FreeLiveFromHighEnd(Field_legacyBackgroundTimBuffer);
         Field_legacyBackgroundTimBuffer = NULL;
-        Content_ReleaseDiscRequest(Field_backgroundLayoutDiscRequest);
+        VS::Content::ReleaseLiveDiscRequest(Field_backgroundLayoutDiscRequest);
         Field_backgroundLayoutDiscRequest = NULL;
         return 1;
     }

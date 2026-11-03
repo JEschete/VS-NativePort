@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -8,7 +9,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Stream.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
@@ -892,14 +892,18 @@ void Ending_Credits_RunStaffRoll(void)
         file.lba = Ending_Credits_illustrationDiscLocations[i - 5];
         file.size = Ending_Credits_illustrationDiscSizes[i - 5];
         Ending_Credits_illustrationResources[i] = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
-        slot = Content_AllocateDiscRequest(&file);
-        Content_EnqueuePriorityDiscRequest(slot, Ending_Credits_illustrationResources[i]);
+        slot = VS::Content::AllocateLiveDiscRequest(&file);
+        if (slot != NULL) {
+            VS::Content::EnqueueLivePriorityDiscRequest(slot, Ending_Credits_illustrationResources[i]);
+        } else {
+            slot = VS::Content::CompleteLiveRefusedDiscRequest(&file, Ending_Credits_illustrationResources[i]);
+        }
 
         do {
             State_UpdatePlayTimeAndLoading(0);
         } while (slot->state != 4);
 
-        Content_ReleaseDiscRequest(slot);
+        VS::Content::ReleaseLiveDiscRequest(slot);
     }
 
     Ending_Credits_backgroundBrightness = 0;

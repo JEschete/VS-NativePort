@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/RuntimeLive.hpp"
 #include "Items/EquipmentLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorLoading.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/Animation.h"
@@ -32,7 +32,7 @@ extern "C" {
 void Actors_AshleySpawnCompletionHook(void) { }
 
 // decomp: INITBTL.PRG func_800F9AB8 (src/BATTLE/INITBTL.PRG/18.c:306)
-int Actors_AshleyModelLoadQueueSlot(void) { return Content_FindFreeActorAssetRequest(); }
+int Actors_AshleyModelLoadQueueSlot(void) { return VS::Content::FindLiveFreeActorAssetRequest(); }
 
 // decomp: INITBTL.PRG func_800F9AD8 (src/BATTLE/INITBTL.PRG/18.c:310)
 void Actors_RestoreAshleyRuntimeState(void)
@@ -189,7 +189,7 @@ void Actors_SpawnAshleyWithEquipment(void)
     Actors_AshleySpawnCompletionHook();
 
     while (Actors_AshleyModelLoadQueueSlot() != 0) {
-        Content_UpdateActorAssetQueue();
+        VS::Content::UpdateLiveActorAssetQueue();
         State_UpdatePlayTimeAndLoading(0);
     }
 }

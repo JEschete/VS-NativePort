@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/GameFontLive.hpp"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Battle/Hud.h"
 #include "Battle/TextBoxes.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -278,11 +278,19 @@ int Menu_Manual_UpdateHelpPages(void)
             Menu_Manual_helpText = (int *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1].size));
             Menu_Manual_helpAssets = (u_long *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Manual_kHelpFileCdFiles[selectedRow * 2].size));
             Menu_Manual_helpAssetsCdQueue =
-                Content_AllocateDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2]);
-            Content_EnqueueDiscRequest(Menu_Manual_helpAssetsCdQueue, Menu_Manual_helpAssets);
+                VS::Content::AllocateLiveDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2]);
+            if (Menu_Manual_helpAssetsCdQueue != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Menu_Manual_helpAssetsCdQueue, Menu_Manual_helpAssets);
+            } else {
+                Menu_Manual_helpAssetsCdQueue = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2], Menu_Manual_helpAssets);
+            }
             Menu_Manual_helpTextCdQueue =
-                Content_AllocateDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1]);
-            Content_EnqueueDiscRequest(Menu_Manual_helpTextCdQueue, Menu_Manual_helpText);
+                VS::Content::AllocateLiveDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1]);
+            if (Menu_Manual_helpTextCdQueue != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Menu_Manual_helpTextCdQueue, Menu_Manual_helpText);
+            } else {
+                Menu_Manual_helpTextCdQueue = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1], Menu_Manual_helpText);
+            }
         }
         Field_manualDisplayState.currentManual =
             Menu_Framework_menuMemory.cursorMemories[4] + Menu_Framework_menuMemory.cursorMemories[5];
@@ -293,7 +301,7 @@ int Menu_Manual_UpdateHelpPages(void)
         if (cdState != Content_DiscRequestState_Loaded) {
             break;
         }
-        Content_ReleaseDiscRequest(Menu_Manual_helpAssetsCdQueue);
+        VS::Content::ReleaseLiveDiscRequest(Menu_Manual_helpAssetsCdQueue);
         Menu_Manual_UploadSpriteTiles(Menu_Manual_helpAssets + 2, Menu_Manual_helpAssets[0]);
         Menu_Manual_UploadCluts(Menu_Manual_helpAssets + ((Menu_Manual_helpAssets[0] << 5) + 2), Menu_Manual_helpAssets[1]);
         if (Menu_Manual_helpAssets != NULL) {
@@ -306,7 +314,7 @@ int Menu_Manual_UpdateHelpPages(void)
         if (Menu_Manual_helpTextCdQueue->state != Content_DiscRequestState_Loaded) {
             break;
         }
-        Content_ReleaseDiscRequest(Menu_Manual_helpTextCdQueue);
+        VS::Content::ReleaseLiveDiscRequest(Menu_Manual_helpTextCdQueue);
         Menu_InitTextBox(0, 0, 8, 0x34, 0x19, 0xA, 8, 0x34);
         Menu_Manual_scrollPosition =
             Field_manualDisplayState

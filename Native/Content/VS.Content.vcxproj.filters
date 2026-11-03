@@ -21,6 +21,12 @@
     <ClInclude Include="src\ActorAssets.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClCompile Include="src\ActorAssetsLive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="src\ActorAssetsLiveState.h">
+      <Filter>src</Filter>
+    </ClInclude>
     <ClCompile Include="src\AudioBank.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -30,9 +36,9 @@
     <ClCompile Include="src\CdDrive.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\CdDrive.h">
+    <ClCompile Include="src\CdDriveLive.cpp">
       <Filter>src</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\DataStore.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -72,13 +78,13 @@
     <ClCompile Include="src\OverlayFiles.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\OverlayFiles.h">
-      <Filter>src</Filter>
-    </ClInclude>
     <ClCompile Include="src\OverlayWorkspace.cpp">
       <Filter>src</Filter>
     </ClCompile>
-    <ClInclude Include="src\OverlayWorkspace.h">
+    <ClCompile Include="src\OverlayWorkspaceLive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="src\OverlayWorkspaceLiveState.h">
       <Filter>src</Filter>
     </ClInclude>
     <ClCompile Include="src\PFile.cpp">
@@ -87,16 +93,34 @@
     <ClInclude Include="src\PFile.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClCompile Include="src\PFileLive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\SystemResources.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClInclude Include="src\SystemResources.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClCompile Include="src\SystemResourcesLive.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClInclude Include="include\Content\ActorAssets.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\ActorAssetsLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\AudioBank.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\AudioStream.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\CdDrive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\CdDriveLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClInclude Include="include\Content\DataAccess.h">
@@ -123,7 +147,28 @@
     <ClInclude Include="include\Content\MovieEncoder.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
+    <ClInclude Include="include\Content\OverlayFiles.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\OverlayWorkspace.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\OverlayWorkspaceLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\PFile.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\PFileLive.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
     <ClInclude Include="include\Content\StringTables.h">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\SystemResources.hpp">
+      <Filter>include\Content</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Content\SystemResourcesLive.hpp">
       <Filter>include\Content</Filter>
     </ClInclude>
     <ClCompile Include="Legacy\LibDs.cpp">

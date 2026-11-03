@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Targeting.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
@@ -410,9 +410,13 @@ int Menu_Framework_LoadItemText(int load)
         cdFile.lba = VS_ITEMNAME_BIN_LBA;
         cdFile.size = VS_ITEMNAME_BIN_SIZE + VS_ITEMHELP_BIN_SIZE + VS_MENU12_BIN_SIZE;
 
-        Menu_Framework_loadItemTextItemNamesCdQueueSlot = Content_AllocateDiscRequest(&cdFile);
+        Menu_Framework_loadItemTextItemNamesCdQueueSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
 
-        Content_EnqueueDiscRequest(Menu_Framework_loadItemTextItemNamesCdQueueSlot, Menu_Framework_itemNames);
+        if (Menu_Framework_loadItemTextItemNamesCdQueueSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Framework_loadItemTextItemNamesCdQueueSlot, Menu_Framework_itemNames);
+        } else {
+            Menu_Framework_loadItemTextItemNamesCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Menu_Framework_itemNames);
+        }
 
         Menu_Framework_loadItemTextItemNamesLoading = 1;
         return 0;
@@ -424,7 +428,7 @@ int Menu_Framework_LoadItemText(int load)
 
     if (Menu_Framework_loadItemTextItemNamesCdQueueSlot->state == 4) {
 
-        Content_ReleaseDiscRequest(Menu_Framework_loadItemTextItemNamesCdQueueSlot);
+        VS::Content::ReleaseLiveDiscRequest(Menu_Framework_loadItemTextItemNamesCdQueueSlot);
 
         Menu_Framework_loadItemTextItemNamesLoading = 0;
         return 1;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
@@ -289,9 +289,13 @@ int Ending_LoadClearResultsStep(void)
     if (Ending_resultsLoadPhase == 0) {
 
         Ending_resultsTimBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Ending_resultsDiscFiles->size);
-        Ending_resultsDiscReadSlot = Content_AllocateDiscRequest(Ending_resultsDiscFiles);
+        Ending_resultsDiscReadSlot = VS::Content::AllocateLiveDiscRequest(Ending_resultsDiscFiles);
 
-        Content_EnqueueDiscRequest(Ending_resultsDiscReadSlot, Ending_resultsTimBuffer);
+        if (Ending_resultsDiscReadSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Ending_resultsDiscReadSlot, Ending_resultsTimBuffer);
+        } else {
+            Ending_resultsDiscReadSlot = VS::Content::CompleteLiveRefusedDiscRequest(Ending_resultsDiscFiles, Ending_resultsTimBuffer);
+        }
 
         ++Ending_resultsLoadPhase;
 
@@ -324,7 +328,7 @@ int Ending_LoadClearResultsStep(void)
             }
         }
 
-        Content_ReleaseDiscRequest(Ending_resultsDiscReadSlot);
+        VS::Content::ReleaseLiveDiscRequest(Ending_resultsDiscReadSlot);
         ++Ending_resultsLoadPhase;
 
     } else if (Ending_resultsLoadPhase == 2) {
@@ -370,8 +374,12 @@ int Ending_LoadClearResultsStep(void)
         Ending_DetermineRiskbreakerRank();
 
         Ending_resultsTimBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1].size);
-        Ending_resultsDiscReadSlot = Content_AllocateDiscRequest(&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]);
-        Content_EnqueueDiscRequest(Ending_resultsDiscReadSlot, Ending_resultsTimBuffer);
+        Ending_resultsDiscReadSlot = VS::Content::AllocateLiveDiscRequest(&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]);
+        if (Ending_resultsDiscReadSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Ending_resultsDiscReadSlot, Ending_resultsTimBuffer);
+        } else {
+            Ending_resultsDiscReadSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1], Ending_resultsTimBuffer);
+        }
         ++Ending_resultsLoadPhase;
 
     } else if (Ending_resultsLoadPhase == 3) {
@@ -388,7 +396,7 @@ int Ending_LoadClearResultsStep(void)
             LoadImage(tim_image.prect, tim_image.paddr);
         }
 
-        Content_ReleaseDiscRequest(Ending_resultsDiscReadSlot);
+        VS::Content::ReleaseLiveDiscRequest(Ending_resultsDiscReadSlot);
 
         ++Ending_resultsLoadPhase;
 

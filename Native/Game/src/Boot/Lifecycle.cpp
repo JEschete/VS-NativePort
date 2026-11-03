@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Boot/Session.hpp"
 #include "Boot/SessionLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Content/DiscReaderLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Ai/RoomState.h"
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
@@ -38,25 +38,33 @@ void Boot_LoadBattleOverlays(void)
 
     cdFile.lba = VS_BATTLE_PRG_LBA;
     cdFile.size = VS_BATTLE_PRG_SIZE;
-    slot = Content_AllocateDiscRequest(&cdFile);
-    Content_EnqueuePriorityDiscRequest(slot, Core_overlaySlots[0]);
+    slot = VS::Content::AllocateLiveDiscRequest(&cdFile);
+    if (slot != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(slot, Core_overlaySlots[0]);
+    } else {
+        slot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Core_overlaySlots[0]);
+    }
 
     while (slot->state != Content_DiscRequestState_Loaded) {
         State_UpdatePlayTimeAndLoading(0);
     }
 
-    Content_ReleaseDiscRequest(slot);
+    VS::Content::ReleaseLiveDiscRequest(slot);
 
     cdFile.lba = VS_INITBTL_PRG_LBA;
     cdFile.size = VS_INITBTL_PRG_SIZE;
-    slot = Content_AllocateDiscRequest(&cdFile);
-    Content_EnqueuePriorityDiscRequest(slot, Core_overlaySlots[1]);
+    slot = VS::Content::AllocateLiveDiscRequest(&cdFile);
+    if (slot != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(slot, Core_overlaySlots[1]);
+    } else {
+        slot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Core_overlaySlots[1]);
+    }
 
     while (slot->state != Content_DiscRequestState_Loaded) {
         State_UpdatePlayTimeAndLoading(0);
     }
 
-    Content_ReleaseDiscRequest(slot);
+    VS::Content::ReleaseLiveDiscRequest(slot);
     Boot_WaitForOverlayReady();
 }
 
@@ -69,14 +77,18 @@ void Boot_LoadTitleOverlay(void)
     cdFile.lba = VS_TITLE_PRG_LBA;
     cdFile.size = VS_TITLE_PRG_SIZE;
 
-    slot = Content_AllocateDiscRequest(&cdFile);
-    Content_EnqueuePriorityDiscRequest(slot, Core_overlaySlots[0]);
+    slot = VS::Content::AllocateLiveDiscRequest(&cdFile);
+    if (slot != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(slot, Core_overlaySlots[0]);
+    } else {
+        slot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Core_overlaySlots[0]);
+    }
 
     while (slot->state != Content_DiscRequestState_Loaded) {
         State_UpdatePlayTimeAndLoading(0);
     }
 
-    Content_ReleaseDiscRequest(slot);
+    VS::Content::ReleaseLiveDiscRequest(slot);
     Boot_WaitForOverlayReady();
 }
 
@@ -89,14 +101,18 @@ void Boot_LoadEndingOverlay(void)
     cdFile.lba = VS_ENDING_PRG_LBA;
     cdFile.size = VS_ENDING_PRG_SIZE;
 
-    slot = Content_AllocateDiscRequest(&cdFile);
-    Content_EnqueuePriorityDiscRequest(slot, Core_overlaySlots[0]);
+    slot = VS::Content::AllocateLiveDiscRequest(&cdFile);
+    if (slot != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(slot, Core_overlaySlots[0]);
+    } else {
+        slot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Core_overlaySlots[0]);
+    }
 
     while (slot->state != Content_DiscRequestState_Loaded) {
         State_UpdatePlayTimeAndLoading(0);
     }
 
-    Content_ReleaseDiscRequest(slot);
+    VS::Content::ReleaseLiveDiscRequest(slot);
     Boot_WaitForOverlayReady();
 }
 
@@ -191,7 +207,7 @@ void Boot_InitializeTitleSession(void)
     VSyncCallback(VS::Core::IgnoreCall);
     VS::Core::Memory::ResetLiveGameHeap();
     Battle_Ai_InvalidateSessionBindings();
-    Content_InitializeDiscQueue();
+    VS::Content::InitializeLiveDiscQueue();
     VS::Content::ResetLiveDiscDrive();
     Audio_InitializeMenuSoundBanks();
     VS::Input::ResetLiveVibrationPatterns();

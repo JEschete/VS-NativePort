@@ -229,6 +229,29 @@ _ACTORS_SKELETON_LIVE = {
         ("BuildLiveActorPoseAtMatrix", "F00918")),
 }
 
+# #276 slice 16 (content): Live adapters keeping the original call shape over the typed VS::Content cores, by header
+# and owned row. Rows absent here have no generated callers outside their own cores (the asset loaders, sharing
+# probes, drive interrupt handlers and F00779), or are called by their typed name (F01627).
+_CONTENT_LIVE = {
+    r"Native\Content\include\Content\ActorAssetsLive.hpp": (
+        ("FindLiveFreeActorAssetRequest", "F00776"), ("QueueLiveActorAssetRequest", "F00777"),
+        ("UpdateLiveActorAssetQueue", "F00778"), ("OffsetLiveModelTextureCoordinates", "F00784"),
+        ("CopyLiveModelGeometry", "F00786"), ("ReleaseLiveWeaponModel", "F00790"),
+        ("CopyLiveWeaponSequence", "F00797"), ("ReleaseLiveActorSequence", "F00800"),
+        ("ReleaseLiveActorModel", "F00803"), ("ReleaseLiveSequenceEffectTexture", "F00804")),
+    r"Native\Content\include\Content\CdDriveLive.hpp": (
+        ("ReadLiveDiscFileBlocking", "F03476"), ("InitializeLiveDiscQueue", "F03480"),
+        ("AllocateLiveDiscRequest", "F03481"), ("ReleaseLiveDiscRequest", "F03482"),
+        ("EnqueueLiveDiscRequest", "F03483"), ("EnqueueLivePriorityDiscRequest", "F03484"),
+        ("UpdateLiveDiscQueue", "F03486")),
+    r"Native\Content\include\Content\OverlayWorkspaceLive.hpp": (
+        ("AcquireLiveOverlayWorkspace", "F00333"), ("ReleaseLiveOverlayWorkspace", "F00334")),
+    r"Native\Content\include\Content\PFileLive.hpp": (
+        ("PFileLiveTimelineSection", "F01555"), ("PFileLiveTimelineTrackData", "F01556")),
+    r"Native\Content\include\Content\SystemResourcesLive.hpp": (
+        ("LoadLiveSystemResources", "F01852"),),
+}
+
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
@@ -239,6 +262,7 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_TEXTURE_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_MODEL_RENDERING_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_SKELETON_LIVE.items() for name, _ in rows},
+    **{f"VS::Content::{name}": header for header, rows in _CONTENT_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -681,7 +705,9 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_APPEARANCE_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_TEXTURE_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_MODEL_RENDERING_LIVE.values() for name, fid in rows} | {
-    fid: f"VS::Actors::{name}" for rows in _ACTORS_SKELETON_LIVE.values() for name, fid in rows}
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_SKELETON_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Content::{name}" for rows in _CONTENT_LIVE.values() for name, fid in rows
+}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -1090,14 +1116,6 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
         ("void Field_UnloadCurrentRoom(void)\n{",
          "void Field_UnloadCurrentRoom(void)\n{\n    Boot_ResetGameplayInspection();",
          "146C.c:15489 revoke diagnostic readiness before any teardown yield/free"),
-    ],
-    "F00786": [
-        ("    arg0[12] += (u_long)arg0;\n"
-         "    arg0[13] += (u_long)arg0;\n"
-         "    arg0[14] += (u_long)arg0;\n"
-         "    arg0[15] += (u_long)arg0;\n",
-         "",
-         "SHP section members remain serialized offsets; VS_ONDISC resolves them from the native model base"),
     ],
     "F00782": [
         ("memset(s1, 0, 0x178);",
@@ -2148,21 +2166,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("*((u_char*)temp_s0 + arg0 + 0x183D)", "temp_s0->textureRowOffsets[arg0 - 1]",
          "func_8009CE9C: restore frame zero before selecting an unavailable facial bank"),
     ],
-    "F00804": [
-        ("    if (Actors_sequenceTexturePagesOneBased[arg0] != 0) {",
-         "    if (arg0 < 1 || arg0 > 3) return -1;\n"
-         "    if (Actors_sequenceTexturePagesOneBased[arg0] != 0) {", "one-based shared ETM slot bounds"),
-        ("Actors_sequenceTexturePagesOneBased[arg0]", "Actors_sharedSequenceBankTexturePages[arg0 - 1]",
-         "D_800F244F+slot and D_800F2450+bank are the same original byte"),
-    ],
-    "F00805": [
-        ("    switch (Content_legacyEtmLoadPhase) {",
-         "    if (objdata->targetSlot < 1 || objdata->targetSlot > 3) return -2;\n"
-         "    switch (Content_legacyEtmLoadPhase) {", "one-based shared ETM slot bounds"),
-        ("Actors_sequenceTexturePagesOneBased[objdata->targetSlot]",
-         "Actors_sharedSequenceBankTexturePages[objdata->targetSlot - 1]",
-         "publish the ETM page to the same bank table read by facial animation"),
-    ],
     "F01221": [
         ("        c->durationFrames = script[2];",
          "        c->durationFrames = script[2];\n"
@@ -2279,7 +2282,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "capture an unavailable frame table at consumption time to distinguish context changes from initial binding"),
     ],
     "F00279": [
-        ("void Actors_UnloadSharedSequence(int arg0) { Content_ReleaseActorSequence(arg0, 1); }",
+        ("void Actors_UnloadSharedSequence(int arg0) { VS::Content::ReleaseLiveActorSequence(arg0, 1); }",
          """int Actors_UnloadSharedSequence(int bankId)
 {
     int slot;
@@ -2320,7 +2323,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
         actor->blendPose.eventScript = NULL;
         actor->blendPose.nextEventFrame = 0xFFFF;
     }
-    result = Content_ReleaseActorSequence(bankId, 1);
+    result = VS::Content::ReleaseLiveActorSequence(bankId, 1);
     if (result < 0) {
         Core_Errorf("actors.sequence", "shared bank=%d retirement failed status=%d", bankId, result);
     }
@@ -2372,12 +2375,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  '    Core_Debugf("actors", "script spawn actor=%u model=%d existing=%p", arg0, arg1,\n'
                  "        arg0 < 16 ? (void*)Battle_actors[arg0] : NULL);\n    if (arg0 < 16) {",
                  "script-spawn selection and duplicate gate diagnostics")],
-    "F00778": [("    if (ret == -1) {\n        return 1;\n    }",
-                 "    if (ret == -1) {\n        return 1;\n    }\n"
-                 '    Core_Debugf("actors", "loaded kind=%u actor=%u model=%d result=%d record=%p",\n'
-                 "        (unsigned)slot->assetKind, (unsigned)slot->targetSlot, (int)slot->modelId, ret,\n"
-                 "        slot->targetSlot < 17 ? (void*)Actors_actorRecords[slot->targetSlot] : NULL);",
-                 "completed actor-load result and installed record diagnostics")],
     "F00947": [("    Actors_ActorRecord* actor = Actors_actorRecords[id];",
                  "    Actors_ActorRecord* actor = Actors_actorRecords[id];\n"
                  "    if (actor == NULL) {\n"
@@ -2471,12 +2468,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            return;\n        }",
          "room banks are optional and must be present before dereferencing their serialized program offsets"),
     ],
-    "F00777": [("    *dst = *objectData;",
-                 '    Core_Debugf("actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",\n'
-                 "        (unsigned)objectData->assetKind, (unsigned)objectData->targetSlot,\n"
-                 "        (unsigned)objectData->modelId, (unsigned)Content_legacyModelLoadPhase,\n"
-                 "        (unsigned)Content_modelParseResetFlag);\n    *dst = *objectData;",
-                 "shared actor-load request and parser-state diagnostics")],
     "F01353": [("((u_long)primBuf << 8) >> 8", "LegacyGpu_Handle(primBuf)", "stat-gauge native packet link")],
     "F01348": [
         ("*(void**)((uintptr_t)Core_ScratchBase() + 0x008) + 8",
@@ -2970,9 +2961,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # x64 header stride would have stepped 3072 bytes per sector.
     "G01921": [("Core_HeapBlockHeader* Content_legacyDiscReadBuffer", "u_char* Content_legacyDiscReadBuffer",
                 "F03468 #276 the ring buffer is bytes")],
-    "F03468": [("Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 128",
-                "Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 2048",
-                "main.c:9042 one 2048-byte sector per ring slot, as 128 PS1 heap-header units")],
     "G00614": [
         ("char const Battle_puzzleTimerText[]", "char Battle_puzzleTimerText[9]",
          "5BF94.c:3842 the timer rewrites six digits; retain nine bytes of mutable native storage, including separators and terminator"),
@@ -3129,22 +3117,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # asset in the module image); natively the pixels are their own global, filled from the same bytes.
     "F03421": [("(u_long*)&Render_legacyLoadingImageHeader + 1", "Render_loadingScreenPixels",
                 "pixels follow the size header")],
-    # The in-place relocations of on-disc pointers (ONDISC_OFFSETS below): natively the members keep their offsets.
-    **{fid: [(f"    VS_ONDISC({b}, {m}, void *) = (char*)VS_ONDISC({b}, {m}, void *) + (intptr_t){base};\n", "",
-              "on-disc offset kept (VS_ONDISC)") for b, m, base in rows]
-       for fid, rows in {
-           "F00793": [("model", m, "model") for m in ("soundSection", "groupSection", "vertexSection",
-                                                       "polygonSection")],
-           "F00798": [("seq", m, "seq") for m in ("firstSectionPointer", "secondSectionPointer")] +
-                     [("seq", m, "(Actors_sharedSequenceAnimationData[slot][i] + 8)")
-                      for m in ("firstSectionPointer", "secondSectionPointer")],
-       }.items()},
-    "F00797": [(f"    VS_ONDISC(arg0, {m}, void *) {op}= (intptr_t){b};\n", "", "on-disc offset kept (copy needs no fix)")
-               for m in ("firstSectionPointer", "secondSectionPointer") for op, b in (("-", "arg1"), ("+", "arg0"))],
     # 146C.c:6480 reads the actor's weapon category as byte 37 of a char view of the Battle_Actor.
     "F00172": [("sp10.modelId = arg0[37];", "sp10.modelId = ((Battle_Actor*)arg0)->equippedWeaponCategory;",
                 "Battle_Actor byte 37")],
-    # 30DB0.c:1026 clears and copies actor records as 0x1900 bytes (the PS1 slot size): see FIXES["F00793"] below.
     # 146C.c:6578 lays out an enemy as one block by PS1 offsets: Battle_Actor, its stats, the model record at
     # 0x9B4 and two weapon model slots (0x22B4, 0x289C), or a second body record at 0x22B4. That block is
     # Actors::ActorAllocation; the spawn settings are the 8 bytes at 0x30 (a 32-bit flag run and reserved34).
@@ -3165,12 +3140,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                 "D_800F188C aliases _zoneContext+0xC; use the same live table as the primary body"),
                ("*(Actors_SpawnSettings*)((char*)actor + 0x30) =",
                 "*(Actors_SpawnSettings*)((char*)&actor->reserved34 - 4) =", "spawn settings at 0x30")],
-    # 30DB0.c:1508 reads the actor's sequence table through `(char*)actor + 0x5F4` (+0x70 sectors, +0xA0 sizes).
-    "F00796": [("sectors = *(u_short*)(sequences + 0xA0 + object->modelId * 2) >> 11;",
-                "sectors = actor->chainAttackAnimationIds[object->modelId] >> 11;", "actor record 0x694"),
-               ("Content_legacySequenceFileLocation.lba = *(u_int*)(sequences + 0x70 + object->modelId * 4);",
-                "Content_legacySequenceFileLocation.lba = actor->battleSequenceLbas[object->modelId];",
-                "actor record 0x664")],
     # 40564.c:1769 reads a gimmick instance through raw PS1 offsets: the flag byte at 8 (bit 7 transitionFlag), the
     # palettes at 0x12C/0x14C, and a 4-byte clear at 0x34 (slideX and velocityY).
     "F00980": [("flags = *(u_int*)((char*)arg0 + 8);", "flags = arg0->transitionFlag ? 0x80 : 0;", "flag byte at 8"),
@@ -3180,33 +3149,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                ("*(int*)((char*)object + 0x34) = 0;", "object->slideX = 0;\n            object->velocityY = 0;",
                 "clear at 0x34")],
 }
-
-FIXES["F00798"] += [
-    # _loadSeq / 30DB0.c:1766-1774: four-byte offsets relative to the payload after the offset table, not pointers.
-    ("Actors_sharedSequenceAnimationData[slot][i] = *(char**)Content_legacySequenceParseData;",
-     "Actors_sharedSequenceAnimationData[slot][i] = (char*)Content_legacySequenceParseData\n"
-     "                + (count - i) * sizeof(u_int) + *(u_int*)Content_legacySequenceParseData;",
-     "read one 32-bit file offset and resolve it relative to the shared sequence payload"),
-    ("            Actors_sharedSequenceAnimationData[slot][i] += (intptr_t)Content_legacySequenceParseData;\n", "",
-     "shared sequence entries already point into the payload"),
-    # #261: record every bank's extent so playback can bound its SEQ reads. The copied banks hold `size` bytes;
-    # in-place shared banks carry their extent in the SEQ size word at file+4.
-    ("VS::Core::Memory::CopyAlignedWords(seq, Content_legacySequenceParseData, size);",
-     "VS::Core::Memory::CopyAlignedWords(seq, Content_legacySequenceParseData, size);\n"
-     "        VS::Actors::RegisterSequenceBank(seq, size);",
-     "30DB0.c:1719 the copied bank holds the size read from its SEQ header"),
-    ("seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);",
-     "seq = (Content_SequenceBuffer*)(Actors_sharedSequenceAnimationData[slot][i] + 8);\n"
-     "            VS::Actors::RegisterEmbeddedSequenceBank(Actors_sharedSequenceAnimationData[slot][i]);",
-     "30DB0.c:1771 the in-place bank's extent is its SEQ size word"),
-]
-
-FIXES["F00797"] += [
-    ("VS::Core::Memory::CopyAlignedWords(arg0, arg1, 0x7800);",
-     "VS::Core::Memory::CopyAlignedWords(arg0, arg1, 0x7800);\n"
-     "    VS::Actors::RegisterSequenceBankCopy(arg0, arg1, 0x7800);",
-     "30DB0.c:1610 #261: the clone keeps its source bank's extent, limited to the 0x7800-byte copy"),
-]
 
 # #269: model geometry projection and polygon walks read only a model's recorded extent. Each loader records the
 # bytes it placed; each release forgets them before the memory goes back to the heap.
@@ -3221,27 +3163,6 @@ FIXES["F00783"] = FIXES.get("F00783", []) + [
      "        VS::Render::ForgetLiveModelExtent(temp_s0->model);\n"
      "        VS::Core::Memory::FreeFromLowEnd(temp_s0->model);",
      "#269: the released SHP no longer has an extent"),
-]
-FIXES["F00788"] = FIXES.get("F00788", []) + [
-    ("                VS::Core::Memory::CopyAlignedWords(buf, data, sizeof *buf);",
-     "                VS::Core::Memory::CopyAlignedWords(buf, data, sizeof *buf);\n"
-     "                VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);",
-     "#269: the copied WEP keeps its source's extent, limited to the slot buffer"),
-    ("    model->sectionOffsets = dst;\n",
-     "    model->sectionOffsets = dst;\n"
-     "    VS::Render::RecordLiveModelExtent(\n"
-     "        dst, (buf != NULL && (u_int)size > sizeof *buf) ? sizeof *buf : (u_int)size);\n",
-     "#269: the loaded WEP holds `size` bytes, at most the slot buffer for slots 0 and 1 (#270 tracks the copy)"),
-]
-FIXES["F00790"] = FIXES.get("F00790", []) + [
-    ("                VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
-     "                VS::Render::ForgetLiveModelExtent(model->sectionOffsets);\n"
-     "                VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
-     "#269: the released WEP no longer has an extent"),
-    ("        } else {\n            VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
-     "        } else {\n            VS::Render::ForgetLiveModelExtent(model->sectionOffsets);\n"
-     "            VS::Core::Memory::FreeFromLowEnd(model->sectionOffsets);",
-     "#269: the released WEP no longer has an extent"),
 ]
 FIXES.setdefault("F01229", []).append(
     ("VS::Render::ReadLiveFramebufferEffectScale(&values.x)", "VS::Render::ReadLiveFramebufferEffectScale(&values)",
@@ -3761,51 +3682,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      r"Field_FindGimmickForActorSlot(\1)",
      "renderer slots and gimmick slots are distinct domains; reserved renderer16 "
      "must preserve the existing no-owner query result instead of reading gimmick16"),
-    *[(rf"^Content::{name}$", rf"\b{old}\b", new, evidence)
-      for name, bindings, evidence in (
-          ("AcquireOverlayWorkspace", (("arg0", "owner_tag"),),
-           "F00333 146C.c:9562-9570 stores the claiming workspace owner tag"),
-          ("ReleaseOverlayWorkspace", (("arg0", "owner_tag"),),
-           "F00334 146C.c:9572-9580 compares the requesting owner tag before clearing ownership"),
-          ("QueueAshleyWeaponSequence", (("arg0", "sequence_id"),),
-           "F00779 30DB0.c:239-271;1474-1605 subkind3 queues this auxiliary SEQ selector through material"),
-          ("UpdateWeaponModelLoad", (("arg0", "request"),),
-           "F00787 30DB0.c:523-596 request fields drive model sharing and the staged WEP load"),
-          ("ReleaseWeaponModel", (("var_v0", "shared_model_found"),),
-           "F00790 30DB0.c:882-928 peer model match suppresses release of shared geometry"),
-          ("FindSharedActorModel", (("arg0", "request"),),
-           "F00791 30DB0.c:930-942 writes the matching peer slot into the asset request"),
-          ("UpdateActorModelLoad", (("arg0", "request"),),
-           "F00792 30DB0.c:944-1024 request fields drive model sharing and the staged SHP load"),
-          ("FindSharedActorSequence",
-           (("arg0", "request"), ("temp_v1", "candidate"),
-            ("var_a2", "candidate_index"), ("t1", "model_id")),
-           "F00794 30DB0.c:1433-1472 same SHP model and compatible SEQ identify the peer slot;F00795 is the identical alias"),
-          ("CopyWeaponSequence",
-           (("arg0", "destination"), ("arg1", "source")),
-           "F00797 30DB0.c:1608-1615 native on-disc fixup preserves offsets during the fixed0x7800-byte copy"),
-          ("BindSharedActorSequence",
-           (("arg0", "actor"), ("arg1", "bank_index")),
-           "F00799 30DB0.c:1795-1826 actor model selects a sequence from the zero-based shared bank"),
-          ("ReleaseActorSequence",
-           (("arg0", "target_id"), ("arg1", "sequence_kind")),
-           "F00800 30DB0.c:1828-1892 kind selects zero-based actor slot or one-based shared bank;conversion stays in place"),
-          ("ReleaseActorModel",
-           (("arg0", "actor_index"), ("sp10", "sharing_request"),
-            ("temp_s1", "actor"), ("a2", "request"),
-            ("var_v0", "shared_model_found")),
-           "F00803 30DB0.c:1920-1994 actor slot and peer-model search govern shared resource retirement"),
-          ("ReleaseSequenceEffectTexture", (("arg0", "bank_id"),),
-           "F00804 30DB0.c:1996-2006;native one-based1..3 bank gate precedes texture-frame and page release"),
-          ("PFileTimelineSection",
-           (("arg0", "timeline_block"), ("arg1", "section_index")),
-           "F01555 5BF94.c:7874-7877 section index selects an offset relative to the timeline block"),
-          ("PFileTimelineTrackData",
-           (("arg0", "timeline_block"), ("arg1", "section_index"),
-            ("arg2", "track_index")),
-           "F01556 5BF94.c:7879-7883 track offset remains relative to the block rather than its section"),
-      )
-      for old, new in bindings],
     (r"^Field::(?:Find|Show|Hide|Disable)RoomGeometryGroup$|^Field::AddRoomGeometryDepthBias$",
      r"\barg0\b", "group_index",
      "2842C.c:550-606 verified geometry group index from event/gimmick/render callers"),
@@ -3847,17 +3723,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     *[(r"^Event::(?:Script|Command)", rf"\b{old}\b", new,
        "573B8.c:67-142 dispatches the current instruction and thread index through both opcode tables")
       for old, new in (("arg0", "instruction"), ("arg1", "thread_index"))],
-    *[(r"^Content::CopyModelGeometry$", rf"\b{old}\b", new,
-       "30DB0.c:507 verified geometry-copy parameter meaning")
-      for old, new in (("arg0", "destination"), ("arg1", "source"),
-                       ("arg2", "byteCount"))],
-    *[(r"^Content::OffsetModelTextureCoordinates$", rf"\b{old}\b", new,
-       "30DB0.c:445 verified flat/Gouraud UV-walker parameter and local meaning")
-      for old, new in (("arg0", "polygonData"), ("arg1", "polygonCount"),
-                       ("arg2", "colored"), ("arg3", "uOffset"),
-                       ("arg4", "vOffset"), ("p", "cursor"),
-                       ("i", "polygonIndex"), ("j", "vertexIndex"),
-                       ("count", "remainingUvPairs"))],
     (r"^Audio::", r"\bSpuSetNoiseClock\b", "Audio_Native_SetNoiseClock",
      "native noise clock controls replace the SDK register setter"),
     (r"^Audio::", r"\bSpuSetReverbModeDepth\b", "Audio_Native_SetReverbDepth",
@@ -4114,28 +3979,9 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
                 "room for the x64 actor record")],
 }
 
-# 30DB0.c:1026 clears and copies actor records as 0x1900 bytes (the PS1 slot size).
-FIXES["F00793"] = FIXES["F00793"] + [
-    ("memset(actor, 0, 0x1900);", "memset(actor, 0, sizeof(Actors_ActorRecord));", "record size"),
-    ("VS::Core::Memory::CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], 0x1900);",
-     "VS::Core::Memory::CopyAlignedWords(actor, Actors_actorRecords[object->dataAddress], sizeof(Actors_ActorRecord));",
-     "record size"),
-    ("    model = VS::Core::Memory::AllocateFromLowEnd(size);\n"
-     "    memcpy(model, data, size);\n"
-     "    actor->instance.model = model;\n"
-     "    if (model == NULL) {\n        return -2;\n    }",
-     "    if (size < (int)sizeof(Actors_ShpModel)) {\n        return -2;\n    }\n"
-     "    model = VS::Core::Memory::AllocateFromLowEnd(size);\n"
-     "    if (model == NULL) {\n        return -2;\n    }\n"
-     "    memcpy(model, data, size);\n"
-     "    actor->instance.model = model;\n"
-     "    actor->modelDataSize = (unsigned)size;",
-     "retain allocation bounds and reject allocation failure before copying the SHP"),
-]
-
 FIXES["F03437"] = FIXES["F03437"] + [
-    ("    Content_InitializeDiscQueue();",
-     "    Battle_Ai_InvalidateSessionBindings();\n    Content_InitializeDiscQueue();",
+    ("    VS::Content::InitializeLiveDiscQueue();",
+     "    Battle_Ai_InvalidateSessionBindings();\n    VS::Content::InitializeLiveDiscQueue();",
      "native AI bindings must not outlive the game-arena reset in _sysReinit"),
     ("VS::Content::ResetDiscDrive();", "VS::Content::ResetLiveDiscDrive();",
      "F03479 typed core takes a DiscDriveHost; the generated caller uses the live binding"),
@@ -4149,14 +3995,133 @@ FIXES.setdefault("F01813", []).append(
      "VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word)",
      "7CD68.c decision behaviour selection: the five-bit spawn index can name slots past the nine-entry table; "
      "the binding refuses them with a warning instead of reading the AI constants that follow (#272)"))
-FIXES.setdefault("F03476", []).append(
-    ("VS::Content::BeginDiscRead(", "VS::Content::BeginLiveDiscRead(",
-     "F03474 typed core takes a DiscDriveHost; the generated caller uses the live binding"))
-FIXES.setdefault("F03486", []).extend([
-    ("VS::Content::BeginDiscRead(", "VS::Content::BeginLiveDiscRead(",
-     "F03474 typed core takes a DiscDriveHost; the generated caller uses the live binding"),
-    ("VS::Content::UpdateDiscCommands();", "VS::Content::UpdateLiveDiscCommands();",
-     "F03475 typed core takes a DiscDriveHost; the generated caller uses the live binding"),
+
+# #282: vs_main_allocateCdQueueSlot (main.c:9411) returned no value when all 32 disc requests were busy; its binding
+# returns null then. A caller that enqueues a refused request reads its file without the queue instead and keeps the
+# completed record CompleteLiveRefusedDiscRequest returns, which its polls and release accept (CdDriveLive.hpp). A
+# granted request takes the original path unchanged.
+_REFUSED_DISC_REQUEST_WHY = ("main.c:9411 the request queue can be full (#282): read the file without the queue and "
+                             "keep a completed record for the caller's polls")
+
+
+def _refused_disc_request(indent: str, slot: str, destination: str, disc_file: str, priority: bool = False,
+                          enqueue: str | None = None, prefix: str = "") -> tuple[str, str, str]:
+    call = "EnqueueLivePriorityDiscRequest" if priority else "EnqueueLiveDiscRequest"
+    original = enqueue if enqueue is not None else f"{indent}VS::Content::{call}({slot}, {destination});"
+    return (prefix + original,
+            f"{prefix}{indent}if ({slot} != NULL) {{\n"
+            f"{indent}    VS::Content::{call}({slot}, {destination});\n"
+            f"{indent}}} else {{\n"
+            f"{indent}    {slot} = VS::Content::CompleteLiveRefusedDiscRequest({disc_file}, {destination});\n"
+            f"{indent}}}",
+            _REFUSED_DISC_REQUEST_WHY)
+
+
+_EVENT_FILE_REQUEST = "(*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest)"
+for _row, _fixup in (
+    ("F03496", _refused_disc_request(
+        " " * 16, "Audio_soundState.musicRequests[slot]", "Audio_soundState.musicData[slot]", "&cdFile",
+        enqueue=" " * 16 + "VS::Content::EnqueueLiveDiscRequest(Audio_soundState.musicRequests[slot],\n"
+        + " " * 20 + "Audio_soundState.musicData[slot]);")),
+    ("F03526", _refused_disc_request(
+        " " * 12, "Audio_soundState.sfxBankRequests[index]", "Audio_soundState.sfxBankData[index]", "&cdFile",
+        enqueue=" " * 12 + "VS::Content::EnqueueLiveDiscRequest(\n"
+        + " " * 16 + "Audio_soundState.sfxBankRequests[index], Audio_soundState.sfxBankData[index]);")),
+    ("F03547", _refused_disc_request(
+        " " * 4, "Audio_soundState.waveBankRequest", "Audio_soundState.waveBankData", "&cdFile")),
+    ("F03417", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
+    ("F03417", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[1]", "&cdFile", priority=True)),
+    ("F03418", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
+    ("F03419", _refused_disc_request(" " * 4, "slot", "Core_overlaySlots[0]", "&cdFile", priority=True)),
+    ("F01612", _refused_disc_request(" " * 8, "Effects_resourceReadSlot", "buf", "&cdFile")),
+    ("F01388", _refused_disc_request(" " * 8, "p->slot", "*new_var", "&file")),
+    ("F02442", _refused_disc_request(
+        " " * 8, "Ending_resultsDiscReadSlot", "Ending_resultsTimBuffer", "Ending_resultsDiscFiles",
+        prefix=" " * 8 + "Ending_resultsDiscReadSlot = "
+        "VS::Content::AllocateLiveDiscRequest(Ending_resultsDiscFiles);\n\n")),
+    ("F02442", _refused_disc_request(
+        " " * 8, "Ending_resultsDiscReadSlot", "Ending_resultsTimBuffer",
+        "&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]",
+        prefix=" " * 8 + "Ending_resultsDiscReadSlot = "
+        "VS::Content::AllocateLiveDiscRequest(&Ending_resultsDiscFiles[Ending_riskbreakerRankIndex + 1]);\n")),
+    ("F02418", _refused_disc_request(
+        " " * 8, "slot", "Ending_Credits_illustrationResources[i]", "&file", priority=True)),
+    ("F01277", _refused_disc_request(
+        " " * 4, _EVENT_FILE_REQUEST, "arg1", "&Event_eventFileDiscLocation")),
+    ("F00645", _refused_disc_request(
+        " " * 12, "Field_backgroundTextureDiscRequest", "Field_legacyBackgroundTimBuffer", "texture_disc_file")),
+    ("F00645", _refused_disc_request(
+        " " * 12, "Field_backgroundLayoutDiscRequest", "Field_loadedBackgroundLayout", "layout_disc_file")),
+    ("F00532", _refused_disc_request(
+        " " * 4, "Field_zoneContext.zndDiscRequest", "Field_zoneContext.zndData", "&cdFile", priority=True)),
+    ("F00542", _refused_disc_request(
+        " " * 4, "Field_zoneContext.mpdDiscRequest", "Field_zoneContext.mpdData", "&file", priority=True)),
+    ("F00176", _refused_disc_request(
+        " " * 12, "Field_zoneContext.zudDiscRequest", "Field_zoneContext.zudData", "&file", priority=True)),
+    ("F02769", _refused_disc_request(
+        " " * 8, "Menu_Files_loadGameOverAssetsStepQueueSlot", "Menu_Files_loadGameOverAssetsStepGameOverBin",
+        "&cdFile")),
+    ("F01342", _refused_disc_request(" " * 8, "state->cdQueue", "overlaySlot", "&file")),
+    ("F02503", _refused_disc_request(
+        " " * 8, "Menu_Framework_loadItemTextItemNamesCdQueueSlot", "Menu_Framework_itemNames", "&cdFile")),
+    ("F04163", _refused_disc_request(
+        " " * 12, "Menu_Manual_helpAssetsCdQueue", "Menu_Manual_helpAssets",
+        "&Menu_Manual_kHelpFileCdFiles[selectedRow * 2]")),
+    ("F04163", _refused_disc_request(
+        " " * 12, "Menu_Manual_helpTextCdQueue", "Menu_Manual_helpText",
+        "&Menu_Manual_kHelpFileCdFiles[selectedRow * 2 + 1]")),
+    ("F04148", _refused_disc_request(" " * 8, "Menu_Map_loadBackgroundSlot", "Menu_Map_backgroundImage", "&cdFile")),
+    ("F04150", _refused_disc_request(
+        " " * 8, "Menu_Map_sceneCdQueueSlot", "Battle_unusedSceneBuffer",
+        "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
+    ("F04151", _refused_disc_request(
+        " " * 12, "Menu_Map_sceneCdQueueSlot", "Menu_Map_armFileBuff",
+        "&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]")),
+    ("F03046", _refused_disc_request(
+        " " * 8, "Menu_Results_initializeCubePuzzleStartIqDisCdSlot", "Menu_Results_initializeCubePuzzleStartIqDisData",
+        "&Menu_Results_kDisFiles[Menu_Results_DisFile_Iq]")),
+    ("F03048", _refused_disc_request(
+        " " * 8, "Menu_Results_initializeCubePuzzleQuitEscDisCdSLot", "Menu_Results_initializeCubePuzzleQuitEscDisData",
+        "&Menu_Results_kDisFiles[Menu_Results_DisFile_Esc]")),
+    ("F03010", _refused_disc_request(
+        " " * 8, "Menu_Results_initializeGameClearCdSlot", "Menu_Results_initializeGameClearTimData",
+        "&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank]")),
+    ("F03011", _refused_disc_request(
+        " " * 8, "Menu_Results_initializeTimeAttackResultsCdSlot", "Menu_Results_initializeTimeAttackResultsTimData",
+        "&Menu_Results_kDisFiles[1]")),
+    ("F03012", _refused_disc_request(
+        " " * 8, "Menu_Results_initializeTimeAttackStartCdSlot", "Menu_Results_initializeTimeAttackStartTimData",
+        "&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]")),
+    ("F02839", _refused_disc_request(
+        " " * 4, "Menu_Score_zudCdSlot", "Menu_Score_zudData", "&sourceFile", priority=True)),
+    ("F02803", _refused_disc_request(
+        " " * 12, "Menu_Score_monBinCdQueueSlot", "Menu_Score_monBinData", "&Menu_Score_kMonBinFile")),
+    ("F02899", _refused_disc_request(
+        " " * 8, "Menu_Setup_loadCombinationRecipesSydCdQueueSlot", "Menu_Setup_sydData", "&cdFile")),
+):
+    FIXES.setdefault(_row, []).append(_fixup)
+
+# The primary effects' menu-overlay reload request reads nothing (size 0, no destination) and case 9 already skips a
+# null request, so a refused one is only kept from the queue (#282).
+FIXES.setdefault("F01425", []).append((
+    "            VS::Content::EnqueueLiveDiscRequest(Effects_menuReloadSlot, NULL);",
+    "            if (Effects_menuReloadSlot != NULL) {\n"
+    "                VS::Content::EnqueueLiveDiscRequest(Effects_menuReloadSlot, NULL);\n"
+    "            }",
+    "main.c:9411 a refused (null) request is not enqueued; case 9 skips it (#282)"))
+
+# 5BF94.c:7885 LoadEffectTimeline: the P-file binding refuses a section or track outside the timeline block with a
+# warning and null (PFileLive.hpp). A refused section keeps the effect's current timeline; a refused track ends the
+# timeline's tracks before it.
+FIXES.setdefault("F01557", []).extend([
+    ("    int i;\n\n    if (arg0->context.timeline != NULL) {",
+     "    int i;\n\n    if (entry == NULL) {\n        return;\n    }\n\n"
+     "    if (arg0->context.timeline != NULL) {",
+     "PFileTimelineSection refuses a section outside the timeline block"),
+    ("        p->tracks[i].header = entry->tracks[i].header;",
+     "        if (p->tracks[i].keys == NULL) {\n            p->trackCount = i;\n            break;\n        }\n"
+     "        p->tracks[i].header = entry->tracks[i].header;",
+     "PFileTimelineTrackData refuses a track outside the timeline block"),
 ])
 
 for _row, _variable in (
@@ -4184,9 +4149,6 @@ ONDISC_OFFSETS.update({
     "T00344.003": "WEP vertex section",
     "T00344.004": "WEP polygon section",
 })
-REGEX_FIXES.append((r"^Content::ParseWeaponModel$",
-                    r"\n[ \t]*VS_ONDISC\((?:dst|buf), (?:textureSection|vertexGroupSection|vertexSection|polygonSection),"
-                    r" void\*\) \+= \(u_long\)dst;", "", "on-disc offset kept (VS_ONDISC): relocation and re-basing"))
 # Field::RoomRecord (146C.c): the 24 section slots after the header are filled as one array of pointers
 # (`(&var_s0->geometry)[i]`, _loadMpdRoomSection); seven were declared int in the decomp's view.
 TYPE_FIXES["T00329"] = [(f"    int {m};", f"    void* {m}; /* a section pointer (filled with the others) */",

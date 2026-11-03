@@ -33,6 +33,9 @@
     <ClCompile Include="src\ActionResultsSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ActorAssetsTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\ActorAttachmentTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -99,6 +102,9 @@
     <ClCompile Include="src\CameraConstraintTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\CdDriveTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\CollisionSamplingTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -115,6 +121,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ConditionSnapshotTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\ContentSliceTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ContentTests.cpp">

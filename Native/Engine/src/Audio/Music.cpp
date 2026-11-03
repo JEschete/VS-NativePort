@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 extern "C" {
@@ -14,7 +15,6 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.h"
@@ -182,14 +182,17 @@ int Audio_LoadMusicSlot(int id, int targetSlot)
                 }
 
                 Audio_soundState.musicRequests[slot] =
-                    Content_AllocateDiscRequest(&cdFile);
+                    VS::Content::AllocateLiveDiscRequest(&cdFile);
 
                 if (Audio_soundState.musicData[slot] != 0) {
                     VS::Core::IgnoreDiagnostic(0x8E, 0);
                 }
                 Audio_soundState.musicData[slot] = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
-                Content_EnqueueDiscRequest(Audio_soundState.musicRequests[slot],
-                    Audio_soundState.musicData[slot]);
+                if (Audio_soundState.musicRequests[slot] != NULL) {
+                    VS::Content::EnqueueLiveDiscRequest(Audio_soundState.musicRequests[slot], Audio_soundState.musicData[slot]);
+                } else {
+                    Audio_soundState.musicRequests[slot] = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Audio_soundState.musicData[slot]);
+                }
                 Audio_soundState.musicIds[slot] = id;
             }
             return targetSlot;
@@ -219,13 +222,13 @@ int Audio_PollMusicSlotLoad(u_int slot)
         if (Audio_soundState.musicRequests[slot - 1] != 0) {
             if (Audio_soundState.musicRequests[slot - 1]->state
                 == Content_DiscRequestState_Loaded) {
-                Content_ReleaseDiscRequest(Audio_soundState.musicRequests[slot - 1]);
+                VS::Content::ReleaseLiveDiscRequest(Audio_soundState.musicRequests[slot - 1]);
                 Audio_soundState.musicRequests[slot - 1] = NULL;
                 return 0;
             }
             if (Audio_soundState.musicRequests[slot - 1]->state
                 == Content_DiscRequestState_Error) {
-                Content_ReleaseDiscRequest(Audio_soundState.musicRequests[slot - 1]);
+                VS::Content::ReleaseLiveDiscRequest(Audio_soundState.musicRequests[slot - 1]);
                 Audio_soundState.musicRequests[slot - 1] = (Content_DiscQueueSlot*)-1;
                 return -1;
             }

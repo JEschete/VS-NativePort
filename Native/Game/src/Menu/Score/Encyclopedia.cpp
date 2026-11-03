@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/ActorAssetsLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/RoomDrawLive.hpp"
@@ -17,7 +19,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
@@ -564,8 +565,8 @@ int Menu_Score_LoadEnemyPreview(int zudId)
 // decomp: MENU9.PRG vs_menu9_freeZud (src/MENU/MENU9.PRG/57BC.c:42)
 void Menu_Score_FreeEnemyPreview(void)
 {
-    Content_ReleaseActorModel(1);
-    Content_ReleaseActorModel(16);
+    VS::Content::ReleaseLiveActorModel(1);
+    VS::Content::ReleaseLiveActorModel(16);
     ((void (*)(...))Menu_Score_FreeEnemyModelBuffer)();
 }
 
@@ -593,10 +594,14 @@ void Menu_Score_QueueEnemyModelRead(int zudId)
     sourceFile.lba = Menu_Score_zudLbas[zudId];
     Menu_Score_queueEnemyModelReadZudId = zudId;
     sourceFile.size = Menu_Score_zudSizes[zudId];
-    Menu_Score_zudCdSlot = Content_AllocateDiscRequest(&sourceFile);
+    Menu_Score_zudCdSlot = VS::Content::AllocateLiveDiscRequest(&sourceFile);
     Menu_Score_zudData = (Menu_Score_ZudHeader *)(VS::Core::Memory::AllocateLiveFromHighEnd(sourceFile.size));
 
-    Content_EnqueuePriorityDiscRequest(Menu_Score_zudCdSlot, Menu_Score_zudData);
+    if (Menu_Score_zudCdSlot != NULL) {
+        VS::Content::EnqueueLivePriorityDiscRequest(Menu_Score_zudCdSlot, Menu_Score_zudData);
+    } else {
+        Menu_Score_zudCdSlot = VS::Content::CompleteLiveRefusedDiscRequest(&sourceFile, Menu_Score_zudData);
+    }
 
     Menu_Score_paletteFlag = Menu_Score_paletteFlags[zudId];
     Menu_Score_modelVariant = 0;
@@ -625,7 +630,7 @@ int Menu_Score_LoadEnemyModelParts(void)
             return 1;
         }
 
-        Content_ReleaseDiscRequest(Menu_Score_zudCdSlot);
+        VS::Content::ReleaseLiveDiscRequest(Menu_Score_zudCdSlot);
         Menu_Score_zudCdSlot = NULL;
 
         request.assetKind = 2;
@@ -636,7 +641,7 @@ int Menu_Score_LoadEnemyModelParts(void)
         request.subKind = 0xFF;
         request.variant = Menu_Score_paletteFlag & 1;
         request.material = Menu_Score_zudData->defaultMaterial;
-        Content_QueueActorAssetRequest(&request);
+        VS::Content::QueueLiveActorAssetRequest(&request);
 
         if (Menu_Score_modelVariant != 0) {
             request.assetKind = 1;
@@ -646,7 +651,7 @@ int Menu_Score_LoadEnemyModelParts(void)
             request.subKind = 1;
             request.textureSlot = 0xFC;
             request.variant = 0;
-            Content_QueueActorAssetRequest(&request);
+            VS::Content::QueueLiveActorAssetRequest(&request);
         } else {
 
             if (Menu_Score_zudData->weapon != 0) {
@@ -658,7 +663,7 @@ int Menu_Score_LoadEnemyModelParts(void)
                 request.subKind = 1;
                 request.textureSlot = 0xF0;
                 request.material = Menu_Score_zudData->weaponMaterial;
-                Content_QueueActorAssetRequest(&request);
+                VS::Content::QueueLiveActorAssetRequest(&request);
             }
 
             if (Menu_Score_zudData->shield != 0) {
@@ -670,7 +675,7 @@ int Menu_Score_LoadEnemyModelParts(void)
                 request.subKind = 1;
                 request.textureSlot = 0xF1;
                 request.material = Menu_Score_zudData->shieldMaterial;
-                Content_QueueActorAssetRequest(&request);
+                VS::Content::QueueLiveActorAssetRequest(&request);
             }
         }
 
@@ -680,7 +685,7 @@ int Menu_Score_LoadEnemyModelParts(void)
             request.dataAddress = Menu_Score_zudData->battleSeqOffset + (uintptr_t)Menu_Score_zudData;
             request.subKind = 0;
             request.modelId = Menu_Score_zudData->opaque2;
-            Content_QueueActorAssetRequest(&request);
+            VS::Content::QueueLiveActorAssetRequest(&request);
         }
 
         if (Menu_Score_zudData->commonSeqLen != 0) {
@@ -689,7 +694,7 @@ int Menu_Score_LoadEnemyModelParts(void)
             request.dataAddress = Menu_Score_zudData->commonSeqOffset + (uintptr_t)Menu_Score_zudData;
             request.subKind = 0;
             request.modelId = 0;
-            Content_QueueActorAssetRequest(&request);
+            VS::Content::QueueLiveActorAssetRequest(&request);
         }
         return 1;
     }
@@ -698,9 +703,9 @@ int Menu_Score_LoadEnemyModelParts(void)
         return 0;
     }
 
-    Content_UpdateActorAssetQueue();
+    VS::Content::UpdateLiveActorAssetQueue();
 
-    if (Content_FindFreeActorAssetRequest() == 0) {
+    if (VS::Content::FindLiveFreeActorAssetRequest() == 0) {
         VS::Core::Memory::FreeLiveFromHighEnd(Menu_Score_zudData);
         Menu_Score_zudData = NULL;
     }

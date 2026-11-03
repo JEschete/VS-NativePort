@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorState.h"
 #include "Actors/Lifecycle.h"
@@ -83,9 +83,9 @@ int Actors_RemoveActorAtSlot(u_int index, int hidden_in_cache)
                 Field_DropUnsupportedGimmickStack(index);
                 Field_ReleaseGimmickInstance(index);
             } else {
-                Content_ReleaseActorModel(index);
+                VS::Content::ReleaseLiveActorModel(index);
                 if (actor->allocationKind == 2) {
-                    Content_ReleaseActorModel(index + 4);
+                    VS::Content::ReleaseLiveActorModel(index + 4);
                 }
             }
 

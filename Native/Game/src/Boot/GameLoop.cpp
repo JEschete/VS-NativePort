@@ -6,6 +6,8 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
+#include "Content/SystemResourcesLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -19,7 +21,6 @@
 #include "Render/TexturePagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
@@ -76,7 +77,7 @@ extern "C" {
 #include "Menu/Framework/ActionSelection.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
-#include "OverlayWorkspace.h"
+#include "OverlayWorkspaceLiveState.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
@@ -86,7 +87,6 @@ extern "C" {
 #include "State/Location.h"
 #include "State/SceneTimer.h"
 #include "State/Timers.h"
-#include "SystemResources.h"
 
 // decomp: vs_main_startState (vs_main_startState@SLUS_010.40)
 int Boot_gameEntryMode;
@@ -560,7 +560,7 @@ void Boot_RunGameLoop(void)
                         Core_Gte_SetGeomOffset(160, 112);
                         if (Field_isFieldRenderingEnabled) {
                             VS::Actors::UpdateAndDrawLiveRoomActors(&Render_frameScratch.viewMatrix);
-                            Content_UpdateActorAssetQueue();
+                            VS::Content::UpdateLiveActorAssetQueue();
                             Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
                             Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
                             Battle_UpdateAndDrawFloatingLabels();
@@ -636,7 +636,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     VS::Actors::InitializeLiveActorModelResources();
     VS::Render::InitializeLiveTexturePages();
     Content_overlayWorkspaceOwner = 0;
-    Content_LoadSystemResources();
+    VS::Content::LoadLiveSystemResources();
     VS::Battle::Ai::InitializeLiveActorAiExtensionHook();
     VS::Input::ResetLiveVibrationPatterns();
     Battle_ApplyLearnedActionUnlocks();

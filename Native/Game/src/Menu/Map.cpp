@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TextBoxes.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
@@ -302,16 +302,20 @@ int Menu_Map_LoadBackground(int begin_background_load)
         Content_DiscFile cdFile;
         cdFile.lba = VS_MAPBG_BIN_LBA;
         cdFile.size = VS_MAPBG_BIN_SIZE;
-        Menu_Map_loadBackgroundSlot = Content_AllocateDiscRequest(&cdFile);
+        Menu_Map_loadBackgroundSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
         Menu_Map_backgroundImage = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_MAPBG_BIN_SIZE));
-        Content_EnqueueDiscRequest(Menu_Map_loadBackgroundSlot, Menu_Map_backgroundImage);
+        if (Menu_Map_loadBackgroundSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Map_loadBackgroundSlot, Menu_Map_backgroundImage);
+        } else {
+            Menu_Map_loadBackgroundSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Menu_Map_backgroundImage);
+        }
         Menu_Map_loadBackgroundState = 0;
         return 0;
     }
     switch (Menu_Map_loadBackgroundState) {
     case 0:
         if (Menu_Map_loadBackgroundSlot->state == 4) {
-            Content_ReleaseDiscRequest(Menu_Map_loadBackgroundSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Map_loadBackgroundSlot);
             VS::Render::LoadLiveClutColors(Menu_Map_backgroundImage, 3, 0, 256);
             VS::Render::UploadLiveImageRectangle(vs_getXY(640, 256), Menu_Map_backgroundImage + 256, vs_getWH(160, 240));
             Menu_Framework_SetBackgroundPriority(-4, 128);
@@ -498,8 +502,12 @@ int Menu_Map_LoadSceneMap(void)
         Menu_Map_isPaling = paling;
 
         Battle_unusedSceneBuffer = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
-        Menu_Map_sceneCdQueueSlot = Content_AllocateDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
-        Content_EnqueueDiscRequest(Menu_Map_sceneCdQueueSlot, Battle_unusedSceneBuffer);
+        Menu_Map_sceneCdQueueSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
+        if (Menu_Map_sceneCdQueueSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Map_sceneCdQueueSlot, Battle_unusedSceneBuffer);
+        } else {
+            Menu_Map_sceneCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene], Battle_unusedSceneBuffer);
+        }
 
         return 0;
     }
@@ -508,7 +516,7 @@ int Menu_Map_LoadSceneMap(void)
         return 0;
     }
 
-    Content_ReleaseDiscRequest(Menu_Map_sceneCdQueueSlot);
+    VS::Content::ReleaseLiveDiscRequest(Menu_Map_sceneCdQueueSlot);
 
     Menu_Map_roomNamesTable = VS::Field::ResolveLiveSceneRoomData(Battle_unusedSceneBuffer, Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
 
@@ -823,8 +831,12 @@ int Menu_Map_UpdateMapMenu(void)
 
             Menu_Map_armFileBuff = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Map_kSceneArmFiles[Menu_Map_currentScene].size);
             Menu_Map_sceneCdQueueSlot =
-                Content_AllocateDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
-            Content_EnqueueDiscRequest(Menu_Map_sceneCdQueueSlot, Menu_Map_armFileBuff);
+                VS::Content::AllocateLiveDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene]);
+            if (Menu_Map_sceneCdQueueSlot != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Menu_Map_sceneCdQueueSlot, Menu_Map_armFileBuff);
+            } else {
+                Menu_Map_sceneCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Map_kSceneArmFiles[Menu_Map_currentScene], Menu_Map_armFileBuff);
+            }
         }
         break;
 
@@ -852,7 +864,7 @@ int Menu_Map_UpdateMapMenu(void)
 
             Menu_Map_isPaling = 0;
 
-            Content_ReleaseDiscRequest(Menu_Map_sceneCdQueueSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Map_sceneCdQueueSlot);
             VS::Core::Memory::FreeLiveFromHighEnd(Battle_unusedSceneBuffer);
 
             Battle_unusedSceneBuffer =

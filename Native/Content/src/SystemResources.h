@@ -19,10 +19,3 @@ typedef struct Content_SystemDatHeader {
 _Static_assert(sizeof(Content_SystemDatHeader) == 0x20, "Content_SystemDatHeader must keep its PS1 layout");
 
 #endif // VS_SYSTEMRESOURCES_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_SYSTEMRESOURCES_H_DECLS)
-#define VS_SYSTEMRESOURCES_H_DECLS
-
-void Content_LoadSystemResources(void);
-
-#endif // VS_SYSTEMRESOURCES_H_DECLS

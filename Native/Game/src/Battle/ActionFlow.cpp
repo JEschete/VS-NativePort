@@ -3,6 +3,7 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Items/InventoryLive.hpp"
 #include "Items/LootLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -643,7 +644,7 @@ void Battle_StartActionPresentation(void)
         }
 
         object.material = actor->equippedWeaponCategory;
-        Content_QueueActorAssetRequest(&object);
+        VS::Content::QueueLiveActorAssetRequest(&object);
     }
 
     Battle_SetHudHidden(1);

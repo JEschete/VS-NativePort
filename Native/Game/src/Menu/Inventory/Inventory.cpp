@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Items/EquipmentLive.hpp"
@@ -1812,10 +1813,10 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
     case 0:
         if (category == 0) {
 
-            Content_ReleaseWeaponModel(1);
+            VS::Content::ReleaseLiveWeaponModel(1);
 
             if ((i = wepId) && Menu_Inventory_IsTwoHandedWeapon(preview_actor->sequenceModelId)) {
-                Content_ReleaseWeaponModel(0);
+                VS::Content::ReleaseLiveWeaponModel(0);
                 Menu_Framework_QueueAshleyWeaponAnimations(10);
             }
         } else {
@@ -1823,10 +1824,10 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
                 Menu_Framework_QueueAshleyWeaponAnimations(category);
             }
 
-            Content_ReleaseWeaponModel(0);
+            VS::Content::ReleaseLiveWeaponModel(0);
 
             if (Actors_weaponModels[3] != NULL && Menu_Inventory_IsTwoHandedWeapon(category)) {
-                Content_ReleaseWeaponModel(1);
+                VS::Content::ReleaseLiveWeaponModel(1);
             }
         }
 
@@ -1837,7 +1838,7 @@ int Menu_Inventory_ReloadEquipmentModels(int category, int wepId, int material)
         break;
 
     case 1:
-        if ((Content_UpdateActorAssetQueue() == 0) && (preview_actor->animationId == 1)) {
+        if ((VS::Content::UpdateLiveActorAssetQueue() == 0) && (preview_actor->animationId == 1)) {
             Menu_Framework_ResetAshleyEquipmentPose();
 
             ++Menu_Inventory_equipmentModelLoadStep;
@@ -1919,7 +1920,7 @@ void Menu_Inventory_QueueEquipmentModel(int wepId, int material)
     objData.textureSlot = equipment_texture_slot;
     objData.material = material;
 
-    Content_QueueActorAssetRequest(&objData);
+    VS::Content::QueueLiveActorAssetRequest(&objData);
 }
 
 // MAINMENU.PRG reloads restore these statics' initial values (PORTING_WATCHLIST.md §1).

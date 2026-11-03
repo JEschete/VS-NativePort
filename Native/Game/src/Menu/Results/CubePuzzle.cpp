@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Battle/StatusEffects.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
 #include "Field/Gimmicks.h"
@@ -106,9 +106,13 @@ int Menu_Results_InitializeCubePuzzleStart(void)
         VS::Render::ReserveLiveTexturePageRange(0x1D, 2, 5);
 
         Menu_Results_initializeCubePuzzleStartIqDisData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Iq].size);
-        Menu_Results_initializeCubePuzzleStartIqDisCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Iq]);
+        Menu_Results_initializeCubePuzzleStartIqDisCdSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Iq]);
 
-        Content_EnqueueDiscRequest(Menu_Results_initializeCubePuzzleStartIqDisCdSlot, Menu_Results_initializeCubePuzzleStartIqDisData);
+        if (Menu_Results_initializeCubePuzzleStartIqDisCdSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Results_initializeCubePuzzleStartIqDisCdSlot, Menu_Results_initializeCubePuzzleStartIqDisData);
+        } else {
+            Menu_Results_initializeCubePuzzleStartIqDisCdSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Iq], Menu_Results_initializeCubePuzzleStartIqDisData);
+        }
 
         ++Battle_unusedSubmenuState;
 
@@ -156,7 +160,7 @@ int Menu_Results_InitializeCubePuzzleStart(void)
                 }
             }
 
-            Content_ReleaseDiscRequest(Menu_Results_initializeCubePuzzleStartIqDisCdSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Results_initializeCubePuzzleStartIqDisCdSlot);
 
             ++Battle_unusedSubmenuState;
         }
@@ -205,9 +209,13 @@ int Menu_Results_InitializeCubePuzzleQuit(void)
         VS::Render::ReserveLiveTexturePageRange(0x1D, 1, 5);
 
         Menu_Results_initializeCubePuzzleQuitEscDisData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Esc].size);
-        Menu_Results_initializeCubePuzzleQuitEscDisCdSLot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Esc]);
+        Menu_Results_initializeCubePuzzleQuitEscDisCdSLot = VS::Content::AllocateLiveDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Esc]);
 
-        Content_EnqueueDiscRequest(Menu_Results_initializeCubePuzzleQuitEscDisCdSLot, Menu_Results_initializeCubePuzzleQuitEscDisData);
+        if (Menu_Results_initializeCubePuzzleQuitEscDisCdSLot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Results_initializeCubePuzzleQuitEscDisCdSLot, Menu_Results_initializeCubePuzzleQuitEscDisData);
+        } else {
+            Menu_Results_initializeCubePuzzleQuitEscDisCdSLot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Esc], Menu_Results_initializeCubePuzzleQuitEscDisData);
+        }
 
         ++Battle_unusedSubmenuState;
 
@@ -237,7 +245,7 @@ int Menu_Results_InitializeCubePuzzleQuit(void)
                 }
             }
 
-            Content_ReleaseDiscRequest(Menu_Results_initializeCubePuzzleQuitEscDisCdSLot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Results_initializeCubePuzzleQuitEscDisCdSLot);
 
             ++Battle_unusedSubmenuState;
         }

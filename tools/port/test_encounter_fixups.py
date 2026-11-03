@@ -69,8 +69,12 @@ class EncounterFixupTests(unittest.TestCase):
         )
 
     def test_absent_model_effect_targets_empty_slot_without_deferred_proof(self):
-        for fixup_id in ("F01425", "F01433", "F01438"):
+        for fixup_id in ("F01433", "F01438"):
             self.assertNotIn(fixup_id, copy_fixups.FIXES)
+        # F01425 carries only the #282 refused disc request guard.
+        for _, new, why in copy_fixups.FIXES.get("F01425", []):
+            self.assertIn("#282", why)
+            self.assertNotIn("Deferred", new)
         command = copy_fixups.FIXES["F01170"][0][1]
         self.assertIn("(unsigned)actor < 16 && target == NULL", command)
         self.assertIn("Actors_actorRecords[actor] == NULL && Field_gimmickInstances[actor] == NULL;", command)
@@ -166,7 +170,9 @@ class EncounterFixupTests(unittest.TestCase):
             f"Ending_Credits_UploadTexture(&Ending_Credits_embeddedTexture{name});"
             for name in names
         )
-        for old, new, _ in copy_fixups.FIXES["F02418"]:
+        for old, new, why in copy_fixups.FIXES["F02418"]:
+            if "#282" in why:
+                continue
             self.assertEqual(source.count(old), 1)
             source = source.replace(old, new)
         self.assertIn("if (!Ending_Credits_PrepareEmbeddedArt()) abort();", source)
@@ -1048,12 +1054,15 @@ class EncounterFixupTests(unittest.TestCase):
 
         gimmicks = generated(r"Native\Game\src\Field\Gimmicks.cpp")
         rendering = generated(r"Native\Game\src\Actors\ModelRenderingLive.cpp")
-        assets = generated(r"Native\Content\src\ActorAssets.cpp")
+        assets = " ".join(generated(r"Native\Content\src\ActorAssets.cpp").split())
+        assets_live = " ".join(generated(r"Native\Content\src\ActorAssetsLive.cpp").split())
         # Each loader records the bytes it owns and forgets them before release (#269).
         self.assertIn("VS::Render::RecordLiveModelExtent(created_gimmick->model,", gimmicks)
         self.assertIn("VS::Render::ForgetLiveModelExtent(released_gimmick->model);", gimmicks)
-        self.assertIn("VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);", assets)
-        self.assertEqual(assets.count("VS::Render::ForgetLiveModelExtent(model->sectionOffsets);"), 2)
+        self.assertIn("host.RecordModelCopy(model.geometry, original, kWeaponGeometryBytes);", assets)
+        self.assertIn("host.ForgetModelGeometry(model.geometry);", assets)
+        self.assertIn("Render::RecordLiveModelCopy(Pointer(destination), Pointer(source),", assets_live)
+        self.assertIn("Render::ForgetLiveModelExtent(Pointer(model));", assets_live)
         for call in (
             "Render::ProjectLiveGimmickModel(*object)",
             "Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);",
@@ -2156,7 +2165,7 @@ class EncounterFixupTests(unittest.TestCase):
                 self.assertEqual(source, expected)
 
     def test_shared_bank_retirement_unwinds_before_detaching_and_freeing(self):
-        source = "void Actors_UnloadSharedSequence(int arg0) { Content_ReleaseActorSequence(arg0, 1); }"
+        source = "void Actors_UnloadSharedSequence(int arg0) { VS::Content::ReleaseLiveActorSequence(arg0, 1); }"
         for old, new, _ in copy_fixups.FIXES["F00279"]:
             self.assertIn(old, source)
             source = source.replace(old, new)
@@ -2167,7 +2176,7 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertLess(
             source.index("actor->blendPose.eventScript = NULL"),
-            source.index("Content_ReleaseActorSequence"),
+            source.index("VS::Content::ReleaseLiveActorSequence"),
         )
         self.assertIn("return -1;", source)
         self.assertIn("return result;", source)
@@ -2284,7 +2293,7 @@ class EncounterFixupTests(unittest.TestCase):
         source = """void Boot_InitializeTitleSession(void)
 {
     VS::Core::Memory::InitializeHeap((Core_HeapBlockHeader*)0x8010C000, 0xF2000);
-    Content_InitializeDiscQueue();
+    VS::Content::InitializeLiveDiscQueue();
     VS::Content::ResetDiscDrive();
 }
 """
@@ -2301,7 +2310,7 @@ class EncounterFixupTests(unittest.TestCase):
         )
         self.assertLess(
             source.index("Battle_Ai_InvalidateSessionBindings"),
-            source.index("Content_InitializeDiscQueue"),
+            source.index("VS::Content::InitializeLiveDiscQueue"),
         )
         self.assertEqual(source.count("Battle_Ai_InvalidateSessionBindings"), 1)
         self.assertEqual(
@@ -2433,11 +2442,41 @@ slot.destination = Menu_Score_zudBuffer + 0x1EE8;
         allocation = """VS::Core::Memory::AllocateFromLowEnd(0x3200);
 VS::Core::Memory::AllocateFromLowEnd(0x24D0);
 """
-        for old, new, _ in copy_fixups.FIXES["F02839"]:
+        for old, new, why in copy_fixups.FIXES["F02839"]:
+            if "#282" in why:
+                continue
             self.assertIn(old, allocation)
             allocation = allocation.replace(old, new)
         self.assertIn("2 * sizeof(Actors_ActorRecord)", allocation)
         self.assertIn("2 * sizeof(Actors_WeaponModel)", allocation)
+
+    def test_disc_request_callers_handle_a_full_queue(self):
+        # main.c:9411 returns no request when all 32 are busy (#282).
+        enqueue = re.compile(r"VS::Content::EnqueueLive(?:Priority)?DiscRequest\((.+?), ")
+        guarded = [(fid, old, new) for fid, fixes in copy_fixups.FIXES.items()
+                   for old, new, why in fixes if "#282" in why]
+        self.assertGreaterEqual(len(guarded), 35)
+        for fid, old, new in guarded:
+            with self.subTest(fid=fid):
+                old, new = "".join(old.split()), "".join(new.split())
+                call = re.search(r"VS::Content::EnqueueLive\w*\((.+?),.*?\);", old)
+                self.assertIn(f"if({call.group(1)}!=NULL){{{call.group(0)}}}", new)
+                if fid != "F01425":
+                    self.assertIn(
+                        f"}}else{{{call.group(1)}=VS::Content::CompleteLiveRefusedDiscRequest(", new)
+        root = Path(__file__).resolve().parents[2]
+        sites = 0
+        for path in (root / "Native").rglob("*.cpp"):
+            lines = path.read_text(encoding="utf-8", errors="replace").splitlines()
+            if lines and lines[0].startswith("// Hand-maintained"):
+                continue
+            for index, line in enumerate(lines):
+                match = enqueue.search(line)
+                if match:
+                    sites += 1
+                    previous = next(text.strip() for text in reversed(lines[:index]) if text.strip())
+                    self.assertEqual(previous, f"if ({match.group(1)} != NULL) {{", f"{path}:{index + 1}")
+        self.assertGreaterEqual(sites, 35)
 
     def test_heap_callers_use_the_live_binding_and_disc_ring_is_bytes(self):
         names = ("AllocateFromLowEnd", "AllocateFromHighEnd", "FreeFromLowEnd", "FreeFromHighEnd")
@@ -2457,10 +2496,11 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         for old, new, _ in copy_fixups.FIXES["G01921"]:
             source = source.replace(old, new)
         self.assertEqual(source, "extern u_char* Content_legacyDiscReadBuffer;")
-        source = "Content_legacyDiscReadBuffer + Content_discDriveState.ringWriteIndex * 128"
-        for old, new, _ in copy_fixups.FIXES["F03468"]:
-            source = source.replace(old, new)
-        self.assertTrue(source.endswith("ringWriteIndex * 2048"))
+        self.assertNotIn("F03468", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        drive = " ".join((root / r"Native\Content\src\CdDriveLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("constexpr std::uint32_t kSectorBytes = 2048;", drive)
+        self.assertIn("Content_legacyDiscReadBuffer + static_cast<std::uint32_t>(slot * kSectorBytes)", drive)
         bound = {name for _, _, name in copy_fixups.MODULE_BINDING_ENTRIES}
         for name in ("FreeLiveFromHighEndAt", "FreeLiveFromLowEndAt", "AllocateLiveFromHighEndAt",
                      "AllocateLiveFromLowEndAt", "InitializeLiveHeapAt"):
@@ -2521,22 +2561,19 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
                        if item["id"] == "F00797")
         self.assertEqual(row["name"], "func_8009C378")
         self.assertEqual(row["final_name"], "Content::CopyWeaponSequence")
-        offsets = [fix for fix in copy_fixups.FIXES["F00797"] if "VS_ONDISC" in fix[0]]
-        self.assertEqual(len(offsets), 4)
-        self.assertTrue(all(not new for _, new, _ in offsets))
-        hooks = [fix for fix in copy_fixups.FIXES["F00797"] if fix not in offsets]
-        self.assertEqual(len(hooks), 1)
-        self.assertIn("RegisterSequenceBankCopy(arg0, arg1, 0x7800)", hooks[0][1])
-        source = (root / row["final_location"]).read_text(encoding="utf-8")
-        definition = audit_assembly_gaps.definitions(
-            source, {"Content_CopyWeaponSequence"}
-        )
-        self.assertEqual(len(definition), 1)
-        self.assertEqual(
-            definition[0].body.strip(),
-            "VS::Core::Memory::CopyLiveAlignedWords(destination, source, 0x7800);\n"
-            "    VS::Actors::RegisterSequenceBankCopy(destination, source, 0x7800);",
-        )
+        # #276 slice 16: the typed core copies the fixed block without relocating the
+        # on-disc section offsets and records the clone's extent (#261).
+        self.assertNotIn("F00797", copy_fixups.FIXES)
+        source = " ".join((root / row["final_location"]).read_text(encoding="utf-8").split())
+        body = source.split("void CopyWeaponSequence(ActorAssetHost& host, AssetAddress destination,", 1)[1]
+        body = body.split(" } ", 1)[0]
+        self.assertIn("kWeaponSequenceBytes", body)
+        self.assertIn("host.RecordSequenceCopy(destination, source, kWeaponSequenceBytes);", body)
+        self.assertNotIn("VS_ONDISC", body)
+        header = (root / r"Native\Content\include\Content\ActorAssets.hpp").read_text(encoding="utf-8")
+        self.assertIn("inline constexpr std::size_t kWeaponSequenceBytes = 0x7800;", header)
+        live = " ".join((root / r"Native\Content\src\ActorAssetsLive.cpp").read_text(encoding="utf-8").split())
+        self.assertIn("Actors::RegisterSequenceBankCopy(Pointer(destination), Pointer(source),", live)
 
     def test_audio_names_preserve_distinct_bank_and_output_bindings(self):
         examples = {
@@ -3071,29 +3108,23 @@ int arg01 = arg0;'''
                 self.assertEqual(source, expected)
 
     def test_geometry_copy_preserves_offsets_and_verified_parameter_names(self):
-        source = """void* Content_CopyModelGeometry(int* arg0, void* arg1, int arg2)
-{
-    if (arg0 == NULL) {
-        arg0 = VS::Core::Memory::AllocateFromLowEnd(arg2);
-    }
-    memcpy(arg0, arg1, arg2);
-    arg0[12] += (u_long)arg0;
-    arg0[13] += (u_long)arg0;
-    arg0[14] += (u_long)arg0;
-    arg0[15] += (u_long)arg0;
-    return arg0;
-}
-"""
-        for old, new, _ in copy_fixups.FIXES["F00786"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-            if re.search(row, "Content::CopyModelGeometry"):
-                source = re.sub(pattern, replacement, source)
-        self.assertIn("int* destination, void* source, int byteCount", source)
-        self.assertIn("memcpy(destination, source, byteCount);", source)
-        self.assertNotIn("(u_long)", source)
-        self.assertNotRegex(source, r"\barg\d+\b")
+        # #276 slice 16: the typed core copies the SHP bytes and leaves the four
+        # section members as serialized offsets (30DB0.c:507 relocated them in place).
+        self.assertNotIn("F00786", copy_fixups.FIXES)
+        # The copier applies no fixups to an owned row; the core is hand-maintained.
+        with Path(__file__).resolve().with_name("owned.csv").open(encoding="utf-8") as registry:
+            owned = {row["id"]: row for row in csv.DictReader(registry)}
+        self.assertEqual(owned["F00786"]["path"], r"Native\Content\src\ActorAssets.cpp")
+        self.assertEqual(owned["F00786"]["name"], "VS::Content::CopyModelGeometry")
+        root = Path(__file__).resolve().parents[2]
+        source = " ".join((root / r"Native\Content\src\ActorAssets.cpp").read_text(encoding="utf-8").split())
+        body = source.split("AssetAddress CopyModelGeometry(ActorAssetHost& host, AssetAddress destination,", 1)[1]
+        body = body.split(" } // decomp:", 1)[0]
+        self.assertIn("AssetAddress source, std::int32_t bytes)", body)
+        self.assertIn("CopyExact(host, destination, source, size,", body)
+        self.assertIn('host.Refuse("model geometry block", bytes);', body)
+        self.assertNotIn("+=", body)
+        self.assertNotRegex(body, r"\barg\d+\b")
 
     def test_gimmick_copy_uses_only_the_native_owned_runtime_prefix(self):
         source = """memset(s1, 0, 0x178);

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Rewards.h"
 #include "Boot/Lifecycle.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
@@ -887,7 +887,7 @@ int Event_UpdateEventPlayback(void)
     }
     if (Event_playbackPhase == 3) {
         if (*Event_eventFileDiscRequest == 4) {
-            Content_ReleaseDiscRequest((Content_DiscQueueSlot*)Event_eventFileDiscRequest);
+            VS::Content::ReleaseLiveDiscRequest((Content_DiscQueueSlot*)Event_eventFileDiscRequest);
             if (Event_isChainedEventLoaded != 0) {
                 VS::Core::Memory::CopyLiveAlignedWords(Event_scriptBuffer, Event_chainedEventBuffer, 0x1800);
                 VS::Core::Memory::FreeLiveFromHighEnd(Event_chainedEventBuffer);
@@ -1105,8 +1105,12 @@ void Event_QueueEventScriptLoad(int arg0, void* destination_buffer)
 {
     Event_eventFileDiscLocation.size = VS_0000_EVT_SIZE;
     Event_eventFileDiscLocation.lba = (Event_eventId * 3) + VS_0000_EVT_LBA; // .EVT files must be sequential
-    (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = Content_AllocateDiscRequest(&Event_eventFileDiscLocation);
-    Content_EnqueueDiscRequest((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest), destination_buffer);
+    (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = VS::Content::AllocateLiveDiscRequest(&Event_eventFileDiscLocation);
+    if ((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) != NULL) {
+        VS::Content::EnqueueLiveDiscRequest((*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest), destination_buffer);
+    } else {
+        (*(Content_DiscQueueSlot* (*))&Event_eventFileDiscRequest) = VS::Content::CompleteLiveRefusedDiscRequest(&Event_eventFileDiscLocation, destination_buffer);
+    }
 }
 
 // decomp: BATTLE.PRG func_800C0150 (src/BATTLE/BATTLE.PRG/573B8.c:231)

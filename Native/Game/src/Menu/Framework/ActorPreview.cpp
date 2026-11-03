@@ -4,6 +4,7 @@
 #include "Actors/ModelRenderingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -60,7 +61,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
     asset_request.variant = source_actor->instance.variant;
     asset_request.material = 0;
 
-    Content_QueueActorAssetRequest(&asset_request);
+    VS::Content::QueueLiveActorAssetRequest(&asset_request);
 
     if (source_actor->companionSlot >= 2) {
         temp_s0 = Actors_actorRecords[source_actor->companionSlot];
@@ -75,7 +76,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
         asset_request.variant = source_actor->instance.variant;
         asset_request.material = 0;
 
-        Content_QueueActorAssetRequest(&asset_request);
+        VS::Content::QueueLiveActorAssetRequest(&asset_request);
     }
 
     for (i = 0; i < 2; ++i) {
@@ -91,11 +92,11 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
             asset_request.subKind = 1;
             asset_request.textureSlot = temp_s0->attachmentSlot;
             asset_request.material = temp_s0->material;
-            Content_QueueActorAssetRequest(&asset_request);
+            VS::Content::QueueLiveActorAssetRequest(&asset_request);
         }
     }
 
-    while (Content_UpdateActorAssetQueue() != 0)
+    while (VS::Content::UpdateLiveActorAssetQueue() != 0)
         ;
 
     preview_actor->commonSequence = source_actor->commonSequence;
@@ -103,7 +104,7 @@ void Menu_Framework_CloneActorPreview(int source_actor_slot)
     if (source_actor->instance.slot == 0) {
         preview_actor->battleSequence = VS::Core::Memory::AllocateLiveFromLowEnd(0x7800);
 
-        Content_CopyWeaponSequence((Content_SequenceBuffer *)(preview_actor->battleSequence), (Content_SequenceBuffer *)(source_actor->battleSequence));
+        VS::Content::CopyLiveWeaponSequence((Content_SequenceBuffer *)(preview_actor->battleSequence), (Content_SequenceBuffer *)(source_actor->battleSequence));
     } else {
         preview_actor->battleSequence = source_actor->battleSequence;
     }
@@ -173,13 +174,13 @@ void Menu_Framework_ReleaseActorPreview(void)
     preview_weapon_allocations[0] = Actors_weaponModels[2];
     preview_weapon_allocations[1] = Actors_weaponModels[3];
 
-    Content_ReleaseActorModel(1);
+    VS::Content::ReleaseLiveActorModel(1);
     VS::Core::Memory::FreeLiveFromLowEnd(preview_actor_allocation);
 
     preview_actor_allocation = Actors_actorRecords[16];
 
     if (preview_actor_allocation != NULL) {
-        Content_ReleaseActorModel(0x10);
+        VS::Content::ReleaseLiveActorModel(0x10);
         VS::Core::Memory::FreeLiveFromLowEnd(preview_actor_allocation);
     }
 
@@ -327,14 +328,14 @@ void Menu_Framework_QueueAshleyWeaponAnimations(int sequence_model_id)
 {
     Content_ActorAssetRequest sequence_request;
 
-    Content_ReleaseActorSequence(0, 0);
+    VS::Content::ReleaseLiveActorSequence(0, 0);
 
     sequence_request.assetKind = 7;
     sequence_request.targetSlot = 0;
     sequence_request.modelId = sequence_model_id;
     sequence_request.subKind = 0;
 
-    Content_QueueActorAssetRequest(&sequence_request);
+    VS::Content::QueueLiveActorAssetRequest(&sequence_request);
 }
 
 }  // extern "C"

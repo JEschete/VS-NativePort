@@ -396,7 +396,9 @@ int CheckMenuReloadClosingDelay(void) {
   const char saved_shortcut = Menu_Framework_shortcutInvoked;
   const char saved_without_main = Menu_Framework_openedWithoutMainMenu;
   Menu_Framework_MenuRow rows[kRows] = {0};
-  Content_DiscQueueSlot request = {0};
+  // The overlay read is a queue slot, as the menu's own reads are.
+  Content_DiscQueueSlot* const request = &Content_discRequestSlots[31];
+  const Content_DiscQueueSlot saved_slot = *request;
   int passed = 1;
   Boot_ResetMainMenuStatics();
   Menu_Framework_menuItems = rows;
@@ -404,13 +406,13 @@ int CheckMenuReloadClosingDelay(void) {
   Menu_Framework_loadedSubMenu = 0;
   Menu_Framework_shortcutInvoked = 0;
   Menu_Framework_openedWithoutMainMenu = 1;
-  Menu_Framework_menuState.cdQueue = &request;
+  Menu_Framework_menuState.cdQueue = request;
 
   for (int visit = 0; visit < kVisits; ++visit) {
-    request.state = Content_DiscRequestState_Loaded;
+    request->state = Content_DiscRequestState_Loaded;
     Menu_Framework_menuState.loading = 1;
     passed &= Menu_Framework_LoadMenuOverlay(0) == 1 &&
-              request.state == Content_DiscRequestState_Free &&
+              request->state == Content_DiscRequestState_Free &&
               Menu_Framework_menuState.loading == 0;
     for (int tick = 1; tick <= kClosingTicks; ++tick) {
       passed &= Menu_Framework_LoadMenuOverlay(0) == 1;
@@ -425,6 +427,7 @@ int CheckMenuReloadClosingDelay(void) {
   Menu_Framework_loadedSubMenu = saved_loaded;
   Menu_Framework_shortcutInvoked = saved_shortcut;
   Menu_Framework_openedWithoutMainMenu = saved_without_main;
+  *request = saved_slot;
   return passed;
 }
 

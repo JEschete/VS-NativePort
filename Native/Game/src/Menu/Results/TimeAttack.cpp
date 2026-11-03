@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Battle/StatusEffects.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
 #include "Input/ControllerLiveState.h"
@@ -68,9 +68,13 @@ int Menu_Results_InitializeTimeAttackResults(void)
         VS::Render::ReserveLiveTexturePageRange(0x1D, 1, 5);
 
         Menu_Results_initializeTimeAttackResultsTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Time].size);
-        Menu_Results_initializeTimeAttackResultsCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[1]);
+        Menu_Results_initializeTimeAttackResultsCdSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Results_kDisFiles[1]);
 
-        Content_EnqueueDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot, Menu_Results_initializeTimeAttackResultsTimData);
+        if (Menu_Results_initializeTimeAttackResultsCdSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot, Menu_Results_initializeTimeAttackResultsTimData);
+        } else {
+            Menu_Results_initializeTimeAttackResultsCdSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Results_kDisFiles[1], Menu_Results_initializeTimeAttackResultsTimData);
+        }
 
         ++Battle_unusedSubmenuState;
 
@@ -99,7 +103,7 @@ int Menu_Results_InitializeTimeAttackResults(void)
                 VS::Core::Memory::CopyLiveAlignedWords(Menu_Results_clutBuf, tim.caddr, sizeof Menu_Results_clutBuf);
             }
 
-            Content_ReleaseDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Results_initializeTimeAttackResultsCdSlot);
             Menu_Results_QueueResultsMusic();
 
             ++Battle_unusedSubmenuState;
@@ -182,9 +186,13 @@ int Menu_Results_InitializeTimeAttackStart(void)
         VS::Render::ReserveLiveTexturePageRange(0x1D, 2, 5);
 
         Menu_Results_initializeTimeAttackStartTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Attack].size);
-        Menu_Results_initializeTimeAttackStartCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]);
+        Menu_Results_initializeTimeAttackStartCdSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack]);
 
-        Content_EnqueueDiscRequest(Menu_Results_initializeTimeAttackStartCdSlot, Menu_Results_initializeTimeAttackStartTimData);
+        if (Menu_Results_initializeTimeAttackStartCdSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Results_initializeTimeAttackStartCdSlot, Menu_Results_initializeTimeAttackStartTimData);
+        } else {
+            Menu_Results_initializeTimeAttackStartCdSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Attack], Menu_Results_initializeTimeAttackStartTimData);
+        }
 
         ++Battle_unusedSubmenuState;
     } else if (Battle_unusedSubmenuState == 1) {
@@ -216,7 +224,7 @@ int Menu_Results_InitializeTimeAttackStart(void)
                 }
             }
 
-            Content_ReleaseDiscRequest(Menu_Results_initializeTimeAttackStartCdSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Results_initializeTimeAttackStartCdSlot);
 
             ++Battle_unusedSubmenuState;
         }

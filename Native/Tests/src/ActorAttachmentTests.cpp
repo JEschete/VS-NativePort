@@ -11,6 +11,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
+#include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "ModelLoading.h"
 }

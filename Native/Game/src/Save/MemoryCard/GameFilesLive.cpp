@@ -15,6 +15,7 @@
 #include <span>
 #include <string_view>
 
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Save/MemoryCard/GameFiles.hpp"
@@ -23,7 +24,6 @@
 extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanks.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
@@ -412,7 +412,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
     file.lba = snapshot == IntroSnapshot::kCourtyard ? VS_OPMCIMG1_BIN_LBA
                                                      : VS_OPMCIMG2_BIN_LBA;
     file.size = VS_OPMCIMG1_BIN_SIZE;
-    request_ = Content_AllocateDiscRequest(&file);
+    request_ = VS::Content::AllocateLiveDiscRequest(&file);
     if (request_ == nullptr) {
       Core_Errorf(kDiagnosticChannel, "No disc request for intro snapshot %d",
                   static_cast<int>(snapshot));
@@ -421,7 +421,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
     }
     image_ = static_cast<std::byte*>(allocation);
     std::ranges::fill(Image(), std::byte{0});
-    Content_EnqueueDiscRequest(request_, image_);
+    VS::Content::EnqueueLiveDiscRequest(request_, image_);
   }
   bool LoadQueued() override { return request_ != nullptr; }
   bool LoadComplete() override {
@@ -429,7 +429,7 @@ class LiveIntroHost final : public IntroSnapshotHost {
            request_->state == Content_DiscRequestState_Loaded;
   }
   SaveImage TakeImage() override {
-    Content_ReleaseDiscRequest(request_);
+    VS::Content::ReleaseLiveDiscRequest(request_);
     request_ = nullptr;
     return Image();
   }

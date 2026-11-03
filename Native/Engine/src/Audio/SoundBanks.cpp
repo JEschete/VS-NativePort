@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Runtime.hpp"
 extern "C" {
@@ -10,7 +11,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Audio/StreamPlayback.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "DiscQueue.h"
 #include "State/PlayTime.h"
@@ -49,7 +49,7 @@ int Audio_LoadSfxBankSlot(int id, u_int slot)
                 VS::Core::IgnoreDiagnostic(0x8F, 0);
             }
 
-            Audio_soundState.sfxBankRequests[index] = Content_AllocateDiscRequest(&cdFile);
+            Audio_soundState.sfxBankRequests[index] = VS::Content::AllocateLiveDiscRequest(&cdFile);
 
             if (Audio_soundState.sfxBankData[index] != NULL) {
                 VS::Core::IgnoreDiagnostic(0x90, 0);
@@ -57,8 +57,11 @@ int Audio_LoadSfxBankSlot(int id, u_int slot)
 
             Audio_soundState.sfxBankIds[index] = id;
             Audio_soundState.sfxBankData[index] = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
-            Content_EnqueueDiscRequest(
-                Audio_soundState.sfxBankRequests[index], Audio_soundState.sfxBankData[index]);
+            if (Audio_soundState.sfxBankRequests[index] != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Audio_soundState.sfxBankRequests[index], Audio_soundState.sfxBankData[index]);
+            } else {
+                Audio_soundState.sfxBankRequests[index] = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Audio_soundState.sfxBankData[index]);
+            }
 
             return slot;
         }
@@ -86,13 +89,13 @@ int Audio_PollSfxBankSlotLoad(u_int slot)
         if (Audio_soundState.sfxBankRequests[slot - 1] != NULL) {
             if (Audio_soundState.sfxBankRequests[slot - 1]->state
                 == Content_DiscRequestState_Loaded) {
-                Content_ReleaseDiscRequest(Audio_soundState.sfxBankRequests[slot - 1]);
+                VS::Content::ReleaseLiveDiscRequest(Audio_soundState.sfxBankRequests[slot - 1]);
                 Audio_soundState.sfxBankRequests[slot - 1] = NULL;
                 return 0;
             }
             if (Audio_soundState.sfxBankRequests[slot - 1]->state
                 == Content_DiscRequestState_Error) {
-                Content_ReleaseDiscRequest(Audio_soundState.sfxBankRequests[slot - 1]);
+                VS::Content::ReleaseLiveDiscRequest(Audio_soundState.sfxBankRequests[slot - 1]);
                 Audio_soundState.sfxBankRequests[slot - 1] = (Content_DiscQueueSlot*)-1;
                 return -1;
             }
@@ -201,14 +204,18 @@ void Audio_LoadWaveBankFile(int file)
             VS::Core::IgnoreDiagnostic(0x93 & 0xFFu, 0);
         }
     }
-    Audio_soundState.waveBankRequest = Content_AllocateDiscRequest(&cdFile);
+    Audio_soundState.waveBankRequest = VS::Content::AllocateLiveDiscRequest(&cdFile);
     if (Audio_soundState.waveBankData != 0) {
         VS::Core::IgnoreDiagnostic(0x94, 0);
     }
     packed_ids_or_unused_one = 1;
     Audio_soundState.waveBankData = VS::Core::Memory::AllocateLiveFromHighEnd(cdFile.size);
     Audio_soundState.waveBankId = file;
-    Content_EnqueueDiscRequest(Audio_soundState.waveBankRequest, Audio_soundState.waveBankData);
+    if (Audio_soundState.waveBankRequest != NULL) {
+        VS::Content::EnqueueLiveDiscRequest(Audio_soundState.waveBankRequest, Audio_soundState.waveBankData);
+    } else {
+        Audio_soundState.waveBankRequest = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Audio_soundState.waveBankData);
+    }
 }
 
 // decomp: SLUS_010.40 vs_main_loadSoundFile (src/SLUS_010.40/main.c:10394)
@@ -223,7 +230,7 @@ int Audio_UpdateWaveBankLoad(void)
         if (Audio_soundState.waveBankRequest->state == Content_DiscRequestState_Dispatched) {
             transfer_status = Audio_Samples_TransferStatus();
             if (transfer_status == 0) {
-                Content_ReleaseDiscRequest(Audio_soundState.waveBankRequest);
+                VS::Content::ReleaseLiveDiscRequest(Audio_soundState.waveBankRequest);
                 Audio_soundState.waveBankRequest = NULL;
                 VS::Core::Memory::FreeLiveFromHighEnd(Audio_soundState.waveBankData);
                 Audio_soundState.waveBankData = NULL;
@@ -231,7 +238,7 @@ int Audio_UpdateWaveBankLoad(void)
                 return 0;
             }
             if (transfer_status == -1) {
-                Content_ReleaseDiscRequest(Audio_soundState.waveBankRequest);
+                VS::Content::ReleaseLiveDiscRequest(Audio_soundState.waveBankRequest);
                 Audio_soundState.waveBankRequest = NULL;
                 VS::Core::Memory::FreeLiveFromHighEnd(Audio_soundState.waveBankData);
                 Audio_soundState.waveBankData = NULL;
@@ -246,7 +253,7 @@ int Audio_UpdateWaveBankLoad(void)
             return 1;
         }
         if (Audio_soundState.waveBankRequest->state == Content_DiscRequestState_Error) {
-            Content_ReleaseDiscRequest(Audio_soundState.waveBankRequest);
+            VS::Content::ReleaseLiveDiscRequest(Audio_soundState.waveBankRequest);
             Audio_soundState.waveBankRequest = NULL;
             VS::Core::Memory::FreeLiveFromHighEnd(Audio_soundState.waveBankData);
             Audio_soundState.waveBankData = NULL;
@@ -279,18 +286,18 @@ void Audio_InitializeMenuSoundBanks(void)
     Audio_Playback_Initialize();
     VS::Audio::Control::SetLiveDiscMixVolume(0x7F);
     buf = VS::Core::Memory::AllocateLiveFromHighEnd(VS_WAVE0000_DAT_SIZE);
-    Content_ReadDiscFileBlocking(VS_WAVE0000_DAT_LBA, VS_WAVE0000_DAT_SIZE, buf);
+    VS::Content::ReadLiveDiscFileBlocking(VS_WAVE0000_DAT_LBA, VS_WAVE0000_DAT_SIZE, buf);
     Audio_Samples_LoadBank(buf, 1);
     VS::Core::Memory::FreeLiveFromHighEnd(buf);
     buf = VS::Core::Memory::AllocateLiveFromHighEnd(VS_WAVE0005_DAT_SIZE);
-    Content_ReadDiscFileBlocking(VS_WAVE0005_DAT_LBA, VS_WAVE0005_DAT_SIZE, buf);
+    VS::Content::ReadLiveDiscFileBlocking(VS_WAVE0005_DAT_LBA, VS_WAVE0005_DAT_SIZE, buf);
     Audio_Samples_LoadBank(buf, 1);
     VS::Core::Memory::FreeLiveFromHighEnd(buf);
     buf = VS::Core::Memory::AllocateLiveFromHighEnd(VS_WAVE0200_DAT_SIZE);
-    Content_ReadDiscFileBlocking(VS_WAVE0200_DAT_LBA, VS_WAVE0200_DAT_SIZE, buf);
+    VS::Content::ReadLiveDiscFileBlocking(VS_WAVE0200_DAT_LBA, VS_WAVE0200_DAT_SIZE, buf);
     Audio_Samples_LoadSoundEffectBank(buf, 0, 1);
     VS::Core::Memory::FreeLiveFromHighEnd(buf);
-    Content_ReadDiscFileBlocking(VS_EFFECT00_DAT_LBA, VS_EFFECT00_DAT_SIZE, Audio_menuSoundEffects);
+    VS::Content::ReadLiveDiscFileBlocking(VS_EFFECT00_DAT_LBA, VS_EFFECT00_DAT_SIZE, Audio_menuSoundEffects);
     Audio_Playback_BindSoundEffectPrograms(Audio_menuSoundEffects);
     Audio_nextSfxChannelGroup1 = 1;
     Audio_nextSfxChannelGroup7E = 2;

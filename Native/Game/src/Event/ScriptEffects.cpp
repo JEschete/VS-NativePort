@@ -67,7 +67,7 @@ intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
     if (unresolved_model) {
         // Actors_FindActorByModelId (146C.c) returns slot 1 for an absent model, Event_ResolveScriptActorReference
         // returns a direct slot reference unchecked, and Effects_StartScriptedActorEffect starts the
-        // effect at once. Empty-slot geometry reads (Actors_ActorBoneEndpointPosition, Actors_ActorPlacement,
+        // effect at once. Empty-slot geometry reads (Actors_BoneEndpointPoint, Actors_ActorPlacement,
         // Actors_ActorStateFlags) return without writing, so target-dependent tracks keep defaults.
         Core_Debugf("event", "effect=%d absent actor selector=0x%04X targets empty slot %d", effect, (unsigned)selector, actor);
     }

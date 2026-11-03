@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/GameFontLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Field/MapProgress.h"
 #include "Input/ControllerLiveState.h"
@@ -333,9 +333,13 @@ int Menu_Results_InitializeGameClear(void)
         VS::Render::ReserveLiveTexturePageRange(0x1D, 3, 5);
 
         Menu_Results_initializeGameClearTimData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Results_kDisFiles[Menu_Results_DisFile_Rank].size);
-        Menu_Results_initializeGameClearCdSlot = Content_AllocateDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank]);
+        Menu_Results_initializeGameClearCdSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank]);
 
-        Content_EnqueueDiscRequest(Menu_Results_initializeGameClearCdSlot, Menu_Results_initializeGameClearTimData);
+        if (Menu_Results_initializeGameClearCdSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Results_initializeGameClearCdSlot, Menu_Results_initializeGameClearTimData);
+        } else {
+            Menu_Results_initializeGameClearCdSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Results_kDisFiles[Menu_Results_DisFile_Rank], Menu_Results_initializeGameClearTimData);
+        }
 
         ++Battle_unusedSubmenuState;
 
@@ -368,7 +372,7 @@ int Menu_Results_InitializeGameClear(void)
                 }
             }
 
-            Content_ReleaseDiscRequest(Menu_Results_initializeGameClearCdSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Results_initializeGameClearCdSlot);
             Menu_Results_QueueResultsMusic();
 
             ++Battle_unusedSubmenuState;

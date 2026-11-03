@@ -1,7 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/Animation.h"
 #include "Actors/Movement.h"
 #include "Actors/Spawning.h"
@@ -209,7 +208,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x806A8, sizeof Content_legacyMaterialModelSequenceDiscOffsets, &Content_legacyMaterialModelSequenceDiscOffsets, sizeof Content_legacyMaterialModelSequenceDiscOffsets}, // G00061 D_800E8EA8
     {"BATTLE/BATTLE.PRG", 0x806FC, sizeof Content_legacyMaterialModelSequenceSectorCounts, &Content_legacyMaterialModelSequenceSectorCounts, sizeof Content_legacyMaterialModelSequenceSectorCounts}, // G00062 D_800E8EFC
     {"BATTLE/BATTLE.PRG", 0x80728, sizeof Menu_Inventory_equipmentModelLoadStep, &Menu_Inventory_equipmentModelLoadStep, sizeof Menu_Inventory_equipmentModelLoadStep}, // G00063 vs_battle_loadObjectDataState
-    {"BATTLE/BATTLE.PRG", 0x80729, sizeof Content_modelParseResetFlag, &Content_modelParseResetFlag, sizeof Content_modelParseResetFlag}, // G00064 D_800E8F29
     {"BATTLE/BATTLE.PRG", 0x8072A, sizeof Content_legacyModelLoadPhase, &Content_legacyModelLoadPhase, sizeof Content_legacyModelLoadPhase}, // G00065 _loadShpState
     {"BATTLE/BATTLE.PRG", 0x8072B, sizeof Content_legacySequenceParsePhase, &Content_legacySequenceParsePhase, sizeof Content_legacySequenceParsePhase}, // G00066 D_800E8F2B
     {"BATTLE/BATTLE.PRG", 0x8072C, sizeof Actors_sharedSequenceBankIndex, &Actors_sharedSequenceBankIndex, sizeof Actors_sharedSequenceBankIndex}, // G00067 D_800E8F2C
@@ -218,7 +216,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80790, sizeof Actors_textureSlotRowOffsets, &Actors_textureSlotRowOffsets, sizeof Actors_textureSlotRowOffsets}, // G00070 D_800E8F90
     {"BATTLE/BATTLE.PRG", 0x807A8, sizeof Field_gimmickPaletteParameters, &Field_gimmickPaletteParameters, sizeof Field_gimmickPaletteParameters}, // G00071 D_800E8FA8
     {"BATTLE/BATTLE.PRG", 0x807C0, sizeof Actors_reservedControlByte, &Actors_reservedControlByte, sizeof Actors_reservedControlByte}, // G00073 D_800E8FC0
-    {"BATTLE/BATTLE.PRG", 0x807C4, sizeof Content_assetQueuePeakUsage, &Content_assetQueuePeakUsage, sizeof Content_assetQueuePeakUsage}, // G00074 D_800E8FC4
     {"BATTLE/BATTLE.PRG", 0x807C8, sizeof Items_weaponMaterialPaletteIndices, &Items_weaponMaterialPaletteIndices, sizeof Items_weaponMaterialPaletteIndices}, // G00075 _weaponMaterialPaletteMap
     {"BATTLE/BATTLE.PRG", 0x807D0, sizeof Field_kGimmickRollOrientations, &Field_kGimmickRollOrientations, sizeof Field_kGimmickRollOrientations}, // G00076 D_800E8FD0
     {"BATTLE/BATTLE.PRG", 0x80830, sizeof Field_kGimmickOrientationRotations, &Field_kGimmickOrientationRotations, sizeof Field_kGimmickOrientationRotations}, // G00077 D_800E9030

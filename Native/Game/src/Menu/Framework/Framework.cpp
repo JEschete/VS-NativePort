@@ -1,4 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/ActorAssetsLive.hpp"
+#include "Content/CdDriveLive.hpp"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -16,7 +19,6 @@
 #include "Save/NativeContainerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
@@ -42,7 +44,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Boot/Lifecycle.h"
 #include "Boot/OverlayReset.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "Core/Text/TextCode.h"
@@ -83,7 +84,6 @@ extern "C" {
 #include "Menu/Setup/SetupScreen.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/TextBox.h"
-#include "OverlayWorkspace.h"
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/LegacyPackets.h"
@@ -328,7 +328,7 @@ int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
 
         file.lba = fileData >> 8;
         file.size = (fileData & 0xFF) << 11;
-        state->cdQueue = Content_AllocateDiscRequest(&file);
+        state->cdQueue = VS::Content::AllocateLiveDiscRequest(&file);
 
         if (subMenu == 0) {
             overlaySlot = Core_overlaySlots[1];
@@ -336,7 +336,11 @@ int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
             overlaySlot = Core_overlaySlots[2];
         }
 
-        Content_EnqueueDiscRequest(state->cdQueue, overlaySlot);
+        if (state->cdQueue != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(state->cdQueue, overlaySlot);
+        } else {
+            state->cdQueue = VS::Content::CompleteLiveRefusedDiscRequest(&file, overlaySlot);
+        }
     }
 
     if (state->loading == 0) {
@@ -354,7 +358,7 @@ int Menu_Framework_LoadMenuOverlay(int packed_menu_state)
 
     if (state->cdQueue->state == Content_DiscRequestState_Loaded) {
 
-        Content_ReleaseDiscRequest(state->cdQueue);
+        VS::Content::ReleaseLiveDiscRequest(state->cdQueue);
         Boot_WaitForOverlayReady();
         if (subMenu == 0) {
             Boot_ResetMainMenuStatics();
@@ -842,7 +846,7 @@ int Menu_Framework_OpenGameMenu(int menuState, int menu_invocation_mode)
         if (Menu_Framework_menuItems == 0) {
             Menu_Framework_loadedSubMenu = -1;
 
-            Content_AcquireOverlayWorkspace(6);
+            VS::Content::AcquireLiveOverlayWorkspace(6);
 
             miscIndex = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
             enabled_menu_flags = Input_settings.menuFlags;
@@ -922,7 +926,7 @@ int Menu_Framework_OpenShortcutMenu(int shortcut)
 void Menu_Framework_ReleaseMenuRows(void)
 {
     if (Menu_Framework_menuItems != 0) {
-        Content_ReleaseOverlayWorkspace(6);
+        VS::Content::ReleaseLiveOverlayWorkspace(6);
         VS::Core::Memory::FreeLiveFromHighEnd(Menu_Framework_menuItems);
         Menu_Framework_menuItems = 0;
     }
@@ -2658,8 +2662,8 @@ void Menu_Framework_NoOperation(void) { }
 // decomp: MAINMENU.PRG _getNextEmptyObjectDataSlot (src/MENU/MAINMENU.PRG/C48.c:81)
 int Menu_Framework_NextFreeActorAssetRequest(void)
 {
-    Content_UpdateActorAssetQueue();
-    return Content_FindFreeActorAssetRequest();
+    VS::Content::UpdateLiveActorAssetQueue();
+    return VS::Content::FindLiveFreeActorAssetRequest();
 }
 
 // decomp: MAINMENU.PRG vs_mainMenu_menuItemFlyoutLeft (src/MENU/MAINMENU.PRG/C48.c:226)

@@ -15,6 +15,7 @@
 #include <span>
 #include <type_traits>
 
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -22,7 +23,6 @@
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Diagnostics.h"
 #include "DiscQueue.h"
@@ -172,7 +172,7 @@ class LiveGimHost final : public GimHost {
   }
   void ReleaseFileRead() override {
     if (live_request != nullptr) {
-      Content_ReleaseDiscRequest(live_request);
+      Content::ReleaseLiveDiscRequest(live_request);
       live_request = nullptr;
     }
   }
@@ -262,7 +262,7 @@ void QueueLiveGimImage(int image_id, int first_page) {
   }
   const Content_DiscFile disc_file{.lba = static_cast<int>(file.lba),
                                    .size = static_cast<int>(bytes)};
-  Content_DiscQueueSlot* request = Content_AllocateDiscRequest(&disc_file);
+  Content_DiscQueueSlot* request = Content::AllocateLiveDiscRequest(&disc_file);
   if (request == nullptr) {
     Core::Memory::FreeLiveFromHighEnd(data);
     Core::Memory::FreeLiveFromHighEnd(block);
@@ -274,7 +274,7 @@ void QueueLiveGimImage(int image_id, int first_page) {
   live_file = static_cast<std::uint16_t*>(data);
   live_file_words = bytes / sizeof(std::uint16_t);
   live_request = request;
-  Content_EnqueueDiscRequest(live_request, live_file);
+  Content::EnqueueLiveDiscRequest(live_request, live_file);
 }
 
 void ReleaseLiveGimImages() {

@@ -2,6 +2,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -842,7 +843,7 @@ exit:
         *(int*)&created_gimmick->boneCount = template_or_polygon_section->instanceFlags;
         created_gimmick->reserved4 = template_or_polygon_section->instanceWord4;
         model_recolor_count = template_or_polygon_section->recolorCount;
-        created_gimmick->model = (Actors_ShpModel *)(Content_CopyModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize));
+        created_gimmick->model = (Actors_ShpModel *)(VS::Content::CopyLiveModelGeometry(NULL, template_or_polygon_section + 1, template_or_polygon_section->modelDataSize));
 
         if (created_gimmick->model == NULL) {
             return -2;
@@ -856,7 +857,7 @@ exit:
             j = 5;
         }
 
-        Content_OffsetModelTextureCoordinates(template_or_polygon_section, model_recolor_count, 1, Field_gimmickPaletteParameters[j * 2], Field_gimmickPaletteParameters[j * 2 + 1]);
+        VS::Content::OffsetLiveModelTextureCoordinates(template_or_polygon_section, model_recolor_count, 1, Field_gimmickPaletteParameters[j * 2], Field_gimmickPaletteParameters[j * 2 + 1]);
     }
 
     base_palette_colors = created_gimmick->basePalette;

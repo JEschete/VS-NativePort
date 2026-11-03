@@ -6,6 +6,7 @@
 #include "Actors/SkeletonLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
@@ -106,7 +107,7 @@ void Actors_QueueActorBaseSequenceLoad(Battle_Actor* arg0 __attribute__((unused)
     asset_request.targetSlot = actor_id;
     asset_request.modelId = 0;
     asset_request.subKind = 0;
-    Content_QueueActorAssetRequest(&asset_request);
+    VS::Content::QueueLiveActorAssetRequest(&asset_request);
 }
 
 // decomp: BATTLE.PRG func_800771E0 (src/BATTLE/BATTLE.PRG/146C.c:6480)
@@ -119,7 +120,7 @@ void Actors_QueueActorWeaponSequenceLoad(char* actor_bytes, int actor_id, int we
         asset_request.targetSlot = actor_id;
         asset_request.modelId = ((Battle_Actor*)actor_bytes)->equippedWeaponCategory;
         asset_request.subKind = 0;
-        Content_QueueActorAssetRequest(&asset_request);
+        VS::Content::QueueLiveActorAssetRequest(&asset_request);
     }
 }
 
@@ -135,7 +136,7 @@ void Actors_QueueSharedSequenceLoad(int index, int wepId)
     objData.targetSlot = index;
     objData.modelId = wepId;
     objData.subKind = 1;
-    Content_QueueActorAssetRequest(&objData);
+    VS::Content::QueueLiveActorAssetRequest(&objData);
 }
 
 // decomp: BATTLE.PRG func_8007CBBC (src/BATTLE/BATTLE.PRG/146C.c:9008)
@@ -179,7 +180,7 @@ int Actors_UnloadSharedSequence(int bankId)
         actor->blendPose.eventScript = NULL;
         actor->blendPose.nextEventFrame = 0xFFFF;
     }
-    result = Content_ReleaseActorSequence(bankId, 1);
+    result = VS::Content::ReleaseLiveActorSequence(bankId, 1);
     if (result < 0) {
         Core_Errorf("actors.sequence", "shared bank=%d retirement failed status=%d", bankId, result);
     }
@@ -196,7 +197,7 @@ void Actors_QueueSharedSequenceWithTextures(int index, int wepId, int texture_sl
     objData.modelId = wepId;
     objData.subKind = 2;
     objData.textureSlot = texture_slot;
-    Content_QueueActorAssetRequest(&objData);
+    VS::Content::QueueLiveActorAssetRequest(&objData);
 }
 
 // decomp: BATTLE.PRG vs_battle_loadEtm (src/BATTLE/BATTLE.PRG/146C.c:9022)
@@ -208,11 +209,11 @@ void Actors_QueueSequenceEffectTextures(int index, int wepId, int texture_slot)
     objData.targetSlot = index;
     objData.modelId = wepId;
     objData.textureSlot = texture_slot;
-    Content_QueueActorAssetRequest(&objData);
+    VS::Content::QueueLiveActorAssetRequest(&objData);
 }
 
 // decomp: BATTLE.PRG func_8007CC4C (src/BATTLE/BATTLE.PRG/146C.c:9033)
-void Actors_ReleaseSequenceEffectTextures(int bank_id) { Content_ReleaseSequenceEffectTexture(bank_id); }
+void Actors_ReleaseSequenceEffectTextures(int bank_id) { VS::Content::ReleaseLiveSequenceEffectTexture(bank_id); }
 
 // decomp: BATTLE.PRG func_8007CC6C (src/BATTLE/BATTLE.PRG/146C.c:9035)
 void Actors_SetSharedSequenceBank(int bank_id) { Actors_SelectSharedSequenceBank(bank_id); }

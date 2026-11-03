@@ -1,10 +1,14 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Content/DiscLayout.h"
-#include "OverlayFiles.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Content/OverlayFiles.hpp"
 
-// decomp: BATTLE.PRG vs_battle_getMainMenuLba (src/BATTLE/BATTLE.PRG/6F014.c:804)
-int Content_MainMenuOverlayDiscSector(void) { return VS_MAINMENU_PRG_LBA; }
+#include <cstdint>
 
-}  // extern "C"
+namespace VS::Content {
+
+// decomp: BATTLE.PRG vs_battle_getMainMenuLba
+// (src/BATTLE/BATTLE.PRG/6F014.c:804)
+std::int32_t MainMenuOverlayDiscSector() noexcept {
+  return kMainMenuOverlaySector;
+}
+
+}  // namespace VS::Content

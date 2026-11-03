@@ -12,7 +12,6 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
@@ -20,7 +19,7 @@ extern "C" {
 #include "Effects/ScreenEffectState.h"
 #include "Effects/ScreenEffects.h"
 #include "Field/DoorMatchList.h"
-#include "OverlayWorkspace.h"
+#include "OverlayWorkspaceLiveState.h"
 }
 
 namespace {

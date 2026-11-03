@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/StreamControlLive.hpp"
+#include "Content/CdDriveLive.hpp"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Math/InterpolationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -9,7 +11,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
@@ -36,7 +37,6 @@ extern "C" {
 #include "Effects/Templates/TrailDispatch.h"
 #include "Effects/Templates/TrailNineDispatch.h"
 #include "Effects/Transforms.h"
-#include "OverlayWorkspace.h"
 
 // decomp: D_800F5630 (D_800F5630@BATTLE/BATTLE.PRG)
 int Effects_textureLoadIndex;
@@ -187,13 +187,17 @@ int Effects_PollEffectResourceRead(int lba, int size, void* buf)
     if (Effects_resourceReadSlot == NULL) {
         cdFile.lba = lba;
         cdFile.size = size;
-        Effects_resourceReadSlot = Content_AllocateDiscRequest(&cdFile);
-        Content_EnqueueDiscRequest(Effects_resourceReadSlot, buf);
+        Effects_resourceReadSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
+        if (Effects_resourceReadSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Effects_resourceReadSlot, buf);
+        } else {
+            Effects_resourceReadSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, buf);
+        }
         return 1;
     }
 
     if (Effects_resourceReadSlot->state == Content_DiscRequestState_Loaded) {
-        Content_ReleaseDiscRequest(Effects_resourceReadSlot);
+        VS::Content::ReleaseLiveDiscRequest(Effects_resourceReadSlot);
         Effects_resourceReadSlot = NULL;
         return 0;
     }
@@ -205,7 +209,7 @@ int Effects_PollEffectResourceRead(int lba, int size, void* buf)
 int Effects_LoadEffectPurgeOverlay(void)
 {
     if (Effects_purgeOverlayLoaded == 0) {
-        Content_AcquireOverlayWorkspace(2);
+        VS::Content::AcquireLiveOverlayWorkspace(2);
         Effects_purgeOverlayLoaded = 1;
     }
 
@@ -326,7 +330,7 @@ int Effects_UpdateEffectPluginLoading(void)
     switch (state) {
     case 1:
         if (Effects_purgeOverlayLoaded == 0) {
-            Content_AcquireOverlayWorkspace(2);
+            VS::Content::AcquireLiveOverlayWorkspace(2);
             Effects_purgeOverlayLoaded = state;
         }
         // Fallthrough

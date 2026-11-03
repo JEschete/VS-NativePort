@@ -10,6 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Content/ActorAssetsLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -367,7 +368,9 @@ struct ScoreAssetFixture {
   decltype(Menu_Score_zudBuffer) saved_buffer = Menu_Score_zudBuffer;
   int saved_variant = Menu_Score_modelVariant;
   int saved_palette = Menu_Score_paletteFlag;
-  Content_DiscQueueSlot disc{};
+  // The ZUD read is a queue slot, as the menu's own reads are.
+  Content_DiscQueueSlot saved_disc_slot = Content_discRequestSlots[31];
+  Content_DiscQueueSlot* disc = &Content_discRequestSlots[31];
   Menu_Score_ZudHeader header{};
   alignas(Actors_ActorRecord)
       std::array<u_char, 2 * sizeof(Actors_ActorRecord)> storage{};
@@ -375,7 +378,8 @@ struct ScoreAssetFixture {
   explicit ScoreAssetFixture(bool companion) {
     std::fill_n(Content_legacyActorAssetRequests, saved_requests.size(),
                 Content_ActorAssetRequest{});
-    disc.state = Content_DiscRequestState_Loaded;
+    *disc = Content_DiscQueueSlot{};
+    disc->state = Content_DiscRequestState_Loaded;
     header.characterId = 13;
     header.weapon = 17;
     header.shield = 27;
@@ -385,7 +389,7 @@ struct ScoreAssetFixture {
     header.battleSeqOffset = 384;
     header.commonSeqOffset = 512;
     header.battleSeqLen = header.commonSeqLen = 1;
-    Menu_Score_zudCdSlot = &disc;
+    Menu_Score_zudCdSlot = disc;
     Menu_Score_zudData = &header;
     Menu_Score_zudBuffer = storage.data();
     Menu_Score_modelVariant = companion ? 1 : 0;
@@ -420,6 +424,7 @@ struct ScoreAssetFixture {
     Menu_Score_zudBuffer = saved_buffer;
     Menu_Score_modelVariant = saved_variant;
     Menu_Score_paletteFlag = saved_palette;
+    *disc = saved_disc_slot;
   }
 };
 }  // namespace
@@ -429,9 +434,9 @@ TEST_CASE("Score model requests use native record strides and fresh placement",
   const bool companion = GENERATE(false, true);
   ScoreAssetFixture fixture(companion);
   REQUIRE(Menu_Score_LoadEnemyModelParts() == 1);
-  REQUIRE(Content_FindFreeActorAssetRequest() == (companion ? 4 : 5));
+  REQUIRE(VS::Content::FindLiveFreeActorAssetRequest() == (companion ? 4 : 5));
   fixture.CheckBodyRequest();
   fixture.CheckAttachmentRequests(companion);
-  CHECK(fixture.disc.state == Content_DiscRequestState_Free);
+  CHECK(fixture.disc->state == Content_DiscRequestState_Free);
   CHECK(Menu_Score_zudCdSlot == nullptr);
 }

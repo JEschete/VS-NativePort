@@ -1,32 +1,36 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Runtime.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "OverlayWorkspace.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Content/OverlayWorkspace.hpp"
 
-// decomp: D_800F18F8 (D_800F18F8@BATTLE/BATTLE.PRG)
-char Content_overlayWorkspaceOwner;
+#include <cstdint>
+
+#include "Core/Runtime.hpp"
+
+namespace VS::Content {
+namespace {
+constexpr int kWorkspaceBusyDiagnostic = 0x66;
+constexpr int kWorkspaceNotOwnedDiagnostic = 0x67;
+}  // namespace
 
 // decomp: BATTLE.PRG func_8007E180 (src/BATTLE/BATTLE.PRG/146C.c:9562)
-int Content_AcquireOverlayWorkspace(int owner_tag)
-{
-    if (Content_overlayWorkspaceOwner == 0) {
-        Content_overlayWorkspaceOwner = owner_tag;
-        return 1;
-    }
-    VS::Core::IgnoreDiagnostic(0x66, 0);
-    return 0;
+bool AcquireOverlayWorkspace(OverlayWorkspaceHost& host,
+                             std::int32_t owner_tag) {
+  if (host.Owner() != 0) {
+    Core::IgnoreDiagnostic(kWorkspaceBusyDiagnostic, 0);
+    return false;
+  }
+  host.SetOwner(static_cast<std::uint8_t>(owner_tag));
+  return true;
 }
 
 // decomp: BATTLE.PRG func_8007E1C0 (src/BATTLE/BATTLE.PRG/146C.c:9572)
-int Content_ReleaseOverlayWorkspace(int owner_tag)
-{
-    if (Content_overlayWorkspaceOwner == owner_tag) {
-        Content_overlayWorkspaceOwner = 0;
-        return 1;
-    }
-    VS::Core::IgnoreDiagnostic(0x67, 0);
-    return 0;
+bool ReleaseOverlayWorkspace(OverlayWorkspaceHost& host,
+                             std::int32_t owner_tag) {
+  if (std::int32_t{host.Owner()} != owner_tag) {
+    Core::IgnoreDiagnostic(kWorkspaceNotOwnedDiagnostic, 0);
+    return false;
+  }
+  host.SetOwner(0);
+  return true;
 }
 
-}  // extern "C"
+}  // namespace VS::Content

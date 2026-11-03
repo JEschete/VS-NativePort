@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/ActorAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
@@ -185,9 +185,9 @@ void Battle_AdvanceBattleAbilitySequence(void)
     State_tickSpeed = 2;
     action = &Battle_actionState->queue[Battle_actionState->queueIndex & 3];
     if ((action->actionId >= 0x8D) && (action->actionId < 0xB8)) {
-        Content_ReleaseActorSequence(action->primaryTarget.target.targetActor, 5);
+        VS::Content::ReleaseLiveActorSequence(action->primaryTarget.target.targetActor, 5);
     } else if ((action->actionId >= 0xB8) && (action->actionId < 0xE0)) {
-        Content_ReleaseActorSequence(action->primaryTarget.target.targetActor, 4);
+        VS::Content::ReleaseLiveActorSequence(action->primaryTarget.target.targetActor, 4);
     }
 
     if (Battle_actionState->queueIndex >= 999) {

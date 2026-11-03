@@ -1,52 +1,150 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Core/Memory/HeapLive.hpp"
-#include "Render/PaletteAnimationLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "CdDrive.h"
-#include "Content/DiscLayout.h"
-#include "Menu/Framework/Framework.h"
-#include "SystemResources.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Content/SystemResources.hpp"  // NOLINT(build/include): typed API
 
-// decomp: INITBTL.PRG _loadSystemDat (src/BATTLE/INITBTL.PRG/18.c:258)
-void Content_LoadSystemResources(void)
-{
-    RECT rect;
-    RECT* p_hdr;
-    Content_SystemDatHeader* buf;
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
 
-    buf = (Content_SystemDatHeader*)VS::Core::Memory::AllocateLiveFromHighEnd(VS_SYSTEM_DAT_SIZE);
-    Content_ReadDiscFileBlocking(VS_SYSTEM_DAT_LBA, VS_SYSTEM_DAT_SIZE, buf);
+namespace VS::Content {
+namespace {
+constexpr std::size_t kOffsetBytes = 4;
+constexpr std::size_t kBitsPerByte = 8;
+constexpr std::size_t kRectBytes = 8;
+constexpr std::size_t kPaletteColorsAt = 4;
+constexpr std::size_t kFixedImagePixelsAt = 4;
+constexpr std::size_t kPixelBytes = 2;
+constexpr std::uint32_t kInterfacePaletteRow = 0xF;
+constexpr VramRect kFixedImagePlacement{.x = 0x300, .y = 0xF0};
 
-    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image0Offset);
-    setRECT(&rect, p_hdr->x, p_hdr->y, p_hdr->w, p_hdr->h);
-    LoadImage(&rect, (u_long*)p_hdr + 2);
-
-    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image1Offset);
-    setRECT(&rect, p_hdr->x, p_hdr->y, p_hdr->w, p_hdr->h);
-    LoadImage(&rect, (u_long*)p_hdr + 2);
-
-    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->paletteOffset);
-    VS::Render::LoadLiveClutColors((u_short*)p_hdr + 2, 0xF, 0, p_hdr->x);
-
-    p_hdr = (RECT*)((signed char*)buf + buf->image2Offset);
-    setRECT(&rect, p_hdr->x, p_hdr->y, p_hdr->w, p_hdr->h);
-    LoadImage(&rect, (u_long*)p_hdr + 2);
-
-    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image3Offset);
-    setRECT(&rect, p_hdr->x, p_hdr->y, p_hdr->w, p_hdr->h);
-    LoadImage(&rect, (u_long*)p_hdr + 2);
-
-    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->image4Offset);
-    setRECT(&rect, p_hdr->x, p_hdr->y, p_hdr->w, p_hdr->h);
-    LoadImage(&rect, (u_long*)p_hdr + 2);
-
-    p_hdr = (RECT *)(((u_char*)((void*)buf)) + buf->fixedImageOffset);
-    setRECT(&rect, 0x300, 0xF0, p_hdr->x, p_hdr->y);
-    LoadImage(&rect, (u_long*)p_hdr + 1);
-
-    Menu_Framework_InitGameInterface(((u_char*)((void*)buf)) + buf->interfaceDataOffset);
-    VS::Core::Memory::FreeLiveFromHighEnd(buf);
+std::uint32_t ReadWord(std::span<const std::byte> bytes, std::size_t at) {
+  std::uint32_t value = 0;
+  for (std::size_t i = 0; i < kOffsetBytes; ++i) {
+    value |= std::uint32_t{std::to_integer<std::uint8_t>(bytes[at + i])}
+             << (kBitsPerByte * i);
+  }
+  return value;
 }
 
-}  // extern "C"
+std::int16_t ReadHalf(std::span<const std::byte> bytes, std::size_t at) {
+  return static_cast<std::int16_t>(
+      std::to_integer<std::uint8_t>(bytes[at]) |
+      (std::to_integer<std::uint8_t>(bytes[at + 1]) << kBitsPerByte));
+}
+
+class Loader {
+ public:
+  Loader(SystemResourcesHost& host, std::span<const std::byte> file)
+      : host_(host), file_(file) {}
+
+  // The section's bytes from its offset, holding at least `minimum`.
+  std::optional<std::span<const std::byte>> Section(SystemDatSection section,
+                                                    std::size_t minimum) {
+    const std::size_t at = ReadWord(file_, Index(section) * kOffsetBytes);
+    if (at > file_.size() || file_.size() - at < minimum) {
+      Refuse(section);
+      return std::nullopt;
+    }
+    return file_.subspan(at);
+  }
+
+  // The w*h pixels after a header at `pixels_at`, if the section holds them.
+  void Upload(SystemDatSection section, std::span<const std::byte> bytes,
+              const VramRect& rect, std::size_t pixels_at) {
+    if (rect.w < 0 || rect.h < 0) {
+      Refuse(section);
+      return;
+    }
+    const std::size_t pixel_bytes = static_cast<std::size_t>(rect.w) *
+                                    static_cast<std::size_t>(rect.h) *
+                                    kPixelBytes;
+    if (bytes.size() - pixels_at < pixel_bytes) {
+      Refuse(section);
+      return;
+    }
+    host_.UploadImage(rect, bytes.subspan(pixels_at, pixel_bytes));
+  }
+
+  void Image(SystemDatSection section) {
+    const auto bytes = Section(section, kRectBytes);
+    if (!bytes) return;
+    const VramRect rect{.x = ReadHalf(*bytes, 0),
+                        .y = ReadHalf(*bytes, 2),
+                        .w = ReadHalf(*bytes, 4),
+                        .h = ReadHalf(*bytes, 6)};
+    Upload(section, *bytes, rect, kRectBytes);
+  }
+
+  void FixedImage() {
+    const auto bytes =
+        Section(SystemDatSection::kFixedImage, kFixedImagePixelsAt);
+    if (!bytes) return;
+    VramRect rect = kFixedImagePlacement;
+    rect.w = ReadHalf(*bytes, 0);
+    rect.h = ReadHalf(*bytes, 2);
+    Upload(SystemDatSection::kFixedImage, *bytes, rect, kFixedImagePixelsAt);
+  }
+
+  void Palette() {
+    const auto bytes = Section(SystemDatSection::kPalette, kPaletteColorsAt);
+    if (!bytes) return;
+    // lh: the colour count is the header's signed x.
+    const std::int16_t count = ReadHalf(*bytes, 0);
+    if (count < 0 || (bytes->size() - kPaletteColorsAt) / kPixelBytes <
+                         static_cast<std::size_t>(count)) {
+      Refuse(SystemDatSection::kPalette);
+      return;
+    }
+    host_.LoadClutColors(
+        bytes->subspan(kPaletteColorsAt,
+                       static_cast<std::size_t>(count) * kPixelBytes),
+        kInterfacePaletteRow, 0, static_cast<std::uint32_t>(count));
+  }
+
+  void Interface() {
+    if (const auto bytes =
+            Section(SystemDatSection::kInterface, kSystemDatInterfaceBytes)) {
+      host_.InitializeGameInterface(*bytes);
+    }
+  }
+
+  [[nodiscard]] std::uint8_t Refused() const { return refused_; }
+
+ private:
+  static std::size_t Index(SystemDatSection section) {
+    return static_cast<std::size_t>(section);
+  }
+
+  void Refuse(SystemDatSection section) {
+    refused_ = static_cast<std::uint8_t>(refused_ | (1U << Index(section)));
+  }
+
+  SystemResourcesHost& host_;
+  std::span<const std::byte> file_;
+  std::uint8_t refused_ = 0;
+};
+}  // namespace
+
+// decomp: INITBTL.PRG _loadSystemDat (src/BATTLE/INITBTL.PRG/18.c:258)
+SystemResourcesLoad LoadSystemResources(SystemResourcesHost& host) {
+  const std::span<std::byte> buffer = host.AcquireBuffer(kSystemDatBytes);
+  if (buffer.size() < kSystemDatBytes) {
+    if (!buffer.empty()) host.ReleaseBuffer(buffer);
+    return {};
+  }
+  host.ReadFile(kSystemDatSector, buffer.first(kSystemDatBytes));
+  Loader loader(host, buffer.first(kSystemDatBytes));
+  loader.Image(SystemDatSection::kImage0);
+  loader.Image(SystemDatSection::kImage1);
+  loader.Palette();
+  loader.Image(SystemDatSection::kImage2);
+  loader.Image(SystemDatSection::kImage3);
+  loader.Image(SystemDatSection::kImage4);
+  loader.FixedImage();
+  loader.Interface();
+  host.ReleaseBuffer(buffer);
+  return {.buffered = true, .refused_sections = loader.Refused()};
+}
+
+}  // namespace VS::Content

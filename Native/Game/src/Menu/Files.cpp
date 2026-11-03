@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/TextBoxes.h"
 #include "Boot/Lifecycle.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
@@ -1803,16 +1803,20 @@ int Menu_Files_LoadGameOverAssetsStep(int begin_asset_load)
     if (begin_asset_load != 0) {
         cdFile.lba = VS_GAMEOVER_BIN_LBA;
         cdFile.size = VS_GAMEOVER_BIN_SIZE;
-        Menu_Files_loadGameOverAssetsStepQueueSlot = Content_AllocateDiscRequest(&cdFile);
+        Menu_Files_loadGameOverAssetsStepQueueSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
         Menu_Files_loadGameOverAssetsStepGameOverBin = (u_int *)(VS::Core::Memory::AllocateLiveFromHighEnd(VS_GAMEOVER_BIN_SIZE));
-        Content_EnqueueDiscRequest(Menu_Files_loadGameOverAssetsStepQueueSlot, Menu_Files_loadGameOverAssetsStepGameOverBin);
+        if (Menu_Files_loadGameOverAssetsStepQueueSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Files_loadGameOverAssetsStepQueueSlot, Menu_Files_loadGameOverAssetsStepGameOverBin);
+        } else {
+            Menu_Files_loadGameOverAssetsStepQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Menu_Files_loadGameOverAssetsStepGameOverBin);
+        }
         Menu_Files_loadGameOverAssetsStepState = 0;
         return 0;
     }
     switch (Menu_Files_loadGameOverAssetsStepState) {
     case 0:
         if (Menu_Files_loadGameOverAssetsStepQueueSlot->state == 4) {
-            Content_ReleaseDiscRequest(Menu_Files_loadGameOverAssetsStepQueueSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Files_loadGameOverAssetsStepQueueSlot);
             VS::Render::UploadLiveImageRectangle(vs_getXY(832, 256), Menu_Files_loadGameOverAssetsStepGameOverBin, vs_getWH(24, 128));
             VS::Render::UploadLiveImageRectangle(vs_getXY(832, 384), Menu_Files_menuItemTextClut, vs_getWH(48, 1));
             Menu_Files_loadGameOverAssetsStepState = 1;

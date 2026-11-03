@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/SkeletonLive.hpp"
+#include "Content/ActorAssetsLive.hpp"
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -33,7 +35,6 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Mpd.h"
@@ -101,10 +102,10 @@ Battle_Actor* Actors_CreateAuxiliaryActor(
         objData.material = material;
         objData.variant = placement->direction >> 4;
 
-        Content_QueueActorAssetRequest(&objData);
+        VS::Content::QueueLiveActorAssetRequest(&objData);
 
-        while (Content_FindFreeActorAssetRequest() != 0) {
-            Content_UpdateActorAssetQueue();
+        while (VS::Content::FindLiveFreeActorAssetRequest() != 0) {
+            VS::Content::UpdateLiveActorAssetQueue();
             State_UpdatePlayTimeAndLoading(0);
         }
 
@@ -436,7 +437,7 @@ int Actors_QueueActorModelLoad(Battle_Actor* actor, int index, int wepId,
     }
     asset_request.variant = 0;
     asset_request.material = 2;
-    return Content_QueueActorAssetRequest(&asset_request);
+    return VS::Content::QueueLiveActorAssetRequest(&asset_request);
 }
 
 // decomp: BATTLE.PRG func_80077130 (src/BATTLE/BATTLE.PRG/146C.c:6455)
@@ -447,7 +448,7 @@ void Actors_QueueEquipmentModelLoad(
 
     if (wepId != 0xFF) {
         int equipment_slot = (actorId * 2) + isShield;
-        Content_ReleaseWeaponModel(equipment_slot);
+        VS::Content::ReleaseLiveWeaponModel(equipment_slot);
         if (wepId != 0) {
             asset_request.assetKind = 3;
             asset_request.targetSlot = equipment_slot;
@@ -460,7 +461,7 @@ void Actors_QueueEquipmentModelLoad(
                 asset_request.textureSlot = 0xF1;
             }
             asset_request.material = material;
-            Content_QueueActorAssetRequest(&asset_request);
+            VS::Content::QueueLiveActorAssetRequest(&asset_request);
         }
     }
 }
@@ -543,8 +544,8 @@ Battle_Actor* Actors_CreateActorWithEquipment(int actor_id, int model_id, int bl
     Battle_Actor* actor = (Battle_Actor*)Actors_AllocateActorWithEquipment(
         actor_id, model_id, bladeWepId, bladeMaterial, shieldWepId, shieldMaterial, placement, spawn_flags);
     if (actor != NULL) {
-        while (Content_FindFreeActorAssetRequest() != 0) {
-            Content_UpdateActorAssetQueue();
+        while (VS::Content::FindLiveFreeActorAssetRequest() != 0) {
+            VS::Content::UpdateLiveActorAssetQueue();
             State_UpdatePlayTimeAndLoading(0);
         }
         Actors_RegisterLoadedActor(actor, actor_id, model_id, bladeWepId, shieldWepId, spawn_flags);
@@ -610,13 +611,17 @@ Battle_Actor* Actors_SpawnRoomEnemy(
             if (Field_zoneContext.zudDiscRequest != NULL) {
                 VS::Core::IgnoreDiagnostic(0xA7, 0);
             }
-            Field_zoneContext.zudDiscRequest = Content_AllocateDiscRequest(&file);
+            Field_zoneContext.zudDiscRequest = VS::Content::AllocateLiveDiscRequest(&file);
             Field_zoneContext.zudData = VS::Core::Memory::AllocateLiveFromHighEnd(file.size);
-            Content_EnqueuePriorityDiscRequest(Field_zoneContext.zudDiscRequest, Field_zoneContext.zudData);
+            if (Field_zoneContext.zudDiscRequest != NULL) {
+                VS::Content::EnqueueLivePriorityDiscRequest(Field_zoneContext.zudDiscRequest, Field_zoneContext.zudData);
+            } else {
+                Field_zoneContext.zudDiscRequest = VS::Content::CompleteLiveRefusedDiscRequest(&file, Field_zoneContext.zudData);
+            }
             while (Field_zoneContext.zudDiscRequest->state != 4) {
                 State_UpdatePlayTimeAndLoading(0);
             }
-            Content_ReleaseDiscRequest(Field_zoneContext.zudDiscRequest);
+            VS::Content::ReleaseLiveDiscRequest(Field_zoneContext.zudDiscRequest);
             Field_zoneContext.zudDiscRequest = NULL;
             Field_zoneContext.loadedZudIndexPlusOne = zudIndex + 1;
         }
@@ -646,7 +651,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
         object.subKind = 0xFF;
         object.variant = spawn->variant & 1;
         object.material = init->material;
-        Content_QueueActorAssetRequest(&object);
+        VS::Content::QueueLiveActorAssetRequest(&object);
 
         if ((u_char)init->characterKind != 0x7F) {
             if (Actors_usesSecondaryBodyModel[(u_char)init->characterKind]) {
@@ -657,7 +662,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                 object.subKind = id;
                 object.textureSlot = 0xFC;
                 object.variant = 0;
-                Content_QueueActorAssetRequest(&object);
+                VS::Content::QueueLiveActorAssetRequest(&object);
             } else {
                 if (bladeId) {
                     object.assetKind = 4;
@@ -668,7 +673,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                     object.subKind = id;
                     object.textureSlot = 0xF0;
                     object.material = init->weapon.material;
-                    Content_QueueActorAssetRequest(&object);
+                    VS::Content::QueueLiveActorAssetRequest(&object);
                 }
                 if (shieldId) {
                     object.assetKind = 4;
@@ -679,7 +684,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                     object.subKind = id;
                     object.textureSlot = 0xF1;
                     object.material = init->shield.material;
-                    Content_QueueActorAssetRequest(&object);
+                    VS::Content::QueueLiveActorAssetRequest(&object);
                 }
             }
             if (((id < 2) || ((flags & 3) == 1)) && zud->battleAnimationSize) {
@@ -688,7 +693,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                 object.dataAddress = zud->battleAnimationOffset + (uintptr_t)zud;
                 object.subKind = 0;
                 object.modelId = actor->equippedWeaponCategory;
-                Content_QueueActorAssetRequest(&object);
+                VS::Content::QueueLiveActorAssetRequest(&object);
             }
             if (zud->commonAnimationSize) {
                 object.assetKind = 8;
@@ -696,12 +701,12 @@ Battle_Actor* Actors_SpawnRoomEnemy(
                 object.dataAddress = zud->commonAnimationOffset + (uintptr_t)zud;
                 object.subKind = 0;
                 object.modelId = 0;
-                Content_QueueActorAssetRequest(&object);
+                VS::Content::QueueLiveActorAssetRequest(&object);
             }
         }
 
-        while (Content_FindFreeActorAssetRequest()) {
-            Content_UpdateActorAssetQueue();
+        while (VS::Content::FindLiveFreeActorAssetRequest()) {
+            VS::Content::UpdateLiveActorAssetQueue();
             State_UpdatePlayTimeAndLoading(0);
         }
 
@@ -775,7 +780,7 @@ int Actors_QueueAshleyModelLoad(int model_id)
     asset_request.modelId = model_id;
     asset_request.assetKind = 1;
     asset_request.targetSlot = 0;
-    return Content_QueueActorAssetRequest(&asset_request) + 1;
+    return VS::Content::QueueLiveActorAssetRequest(&asset_request) + 1;
 }
 
 // decomp: BATTLE.PRG func_8007C928 (src/BATTLE/BATTLE.PRG/146C.c:8936)
@@ -845,7 +850,7 @@ void Actors_RefreshActorEquipmentModels(int actor_id)
 }
 
 // decomp: BATTLE.PRG func_8007CCAC (src/BATTLE/BATTLE.PRG/146C.c:9039)
-int Actors_FirstFreeAssetLoadSlot(void) { return Content_FindFreeActorAssetRequest(); }
+int Actors_FirstFreeAssetLoadSlot(void) { return VS::Content::FindLiveFreeActorAssetRequest(); }
 
 // decomp: BATTLE.PRG func_8007D340 (src/BATTLE/BATTLE.PRG/146C.c:9256)
 void Actors_RemoveScriptedActor(int actor_id) { Actors_RemoveActorAtSlot(actor_id, 0); }

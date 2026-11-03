@@ -1,12 +1,14 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/StreamControlLive.hpp"
+#include "Content/CdDriveLive.hpp"
+#include "Content/OverlayFiles.hpp"
+#include "Content/OverlayWorkspaceLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
 #include "Boot/Lifecycle.h"
-#include "CdDrive.h"
 #include "DiscQueue.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
@@ -17,8 +19,6 @@ extern "C" {
 #include "Effects/Runtime.h"
 #include "Effects/ScriptVm.h"
 #include "Effects/Transforms.h"
-#include "OverlayFiles.h"
-#include "OverlayWorkspace.h"
 
 // decomp: D_800EC2E4 (D_800EC2E4@BATTLE/BATTLE.PRG)
 u_char Effects_effectBufferIndex; /* contents: module image (ModuleData.cpp) */
@@ -277,7 +277,7 @@ int Effects_UpdatePrimaryEffects(void)
                 Effects_SetPrimaryEffectPhase(2);
             }
             if (Effects_purgeOverlayLoaded != 0) {
-                Content_ReleaseOverlayWorkspace(2);
+                VS::Content::ReleaseLiveOverlayWorkspace(2);
                 Effects_purgeOverlayLoaded = 0;
             }
         }
@@ -309,10 +309,12 @@ int Effects_UpdatePrimaryEffects(void)
             }
 
             Effects_primaryLoaded = 1;
-            menu_reload_file.lba = Content_MainMenuOverlayDiscSector();
+            menu_reload_file.lba = VS::Content::MainMenuOverlayDiscSector();
             menu_reload_file.size = 0;
-            Effects_menuReloadSlot = Content_AllocateDiscRequest(&menu_reload_file);
-            Content_EnqueueDiscRequest(Effects_menuReloadSlot, NULL);
+            Effects_menuReloadSlot = VS::Content::AllocateLiveDiscRequest(&menu_reload_file);
+            if (Effects_menuReloadSlot != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Effects_menuReloadSlot, NULL);
+            }
         }
         break;
 
@@ -363,7 +365,7 @@ int Effects_UpdatePrimaryEffects(void)
             Effects_primaryToken = 0;
 
             if (Effects_purgeOverlayLoaded != 0) {
-                Content_ReleaseOverlayWorkspace(2);
+                VS::Content::ReleaseLiveOverlayWorkspace(2);
                 Effects_purgeOverlayLoaded = 0;
             }
 
@@ -388,7 +390,7 @@ int Effects_UpdatePrimaryEffects(void)
                     break;
                 }
             }
-            Content_ReleaseDiscRequest(Effects_menuReloadSlot);
+            VS::Content::ReleaseLiveDiscRequest(Effects_menuReloadSlot);
             Effects_menuReloadSlot = NULL;
         }
         Effects_SetPrimaryEffectPhase(0);

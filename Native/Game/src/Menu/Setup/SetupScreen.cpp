@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/ActorAssetsLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -8,7 +9,6 @@
 #include "Render/GameFontLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
@@ -1320,7 +1320,7 @@ int Menu_Setup_ReloadAshleyEquipment(int equipment_reload_mode)
     Actors_ActorRecord* ashley_actor = Actors_actorRecords[0];
 
     if (equipment_reload_mode == 1) {
-        Content_ReleaseWeaponModel(1);
+        VS::Content::ReleaseLiveWeaponModel(1);
         Menu_Framework_ResetAshleyEquipmentPose();
         return 0;
     }
@@ -1331,14 +1331,14 @@ int Menu_Setup_ReloadAshleyEquipment(int equipment_reload_mode)
             return 0;
         }
 
-        Content_ReleaseWeaponModel(0);
+        VS::Content::ReleaseLiveWeaponModel(0);
         Menu_Framework_QueueAshleyWeaponAnimations(10);
 
         ++Menu_Inventory_equipmentModelLoadStep;
         break;
 
     case 1:
-        if (Content_UpdateActorAssetQueue() == 0) {
+        if (VS::Content::UpdateLiveActorAssetQueue() == 0) {
 
             Menu_Framework_ResetAshleyEquipmentPose();
 

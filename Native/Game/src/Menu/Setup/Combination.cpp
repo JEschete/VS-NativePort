@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
@@ -117,8 +117,12 @@ int Menu_Setup_LoadCombinationRecipes(int id)
         Menu_Setup_sydData = VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Setup_loadCombinationRecipesSydSizes[id]);
         cdFile.lba = Menu_Setup_loadCombinationRecipesSydLbas[id];
         cdFile.size = Menu_Setup_loadCombinationRecipesSydSizes[id];
-        Menu_Setup_loadCombinationRecipesSydCdQueueSlot = Content_AllocateDiscRequest(&cdFile);
-        Content_EnqueueDiscRequest(Menu_Setup_loadCombinationRecipesSydCdQueueSlot, Menu_Setup_sydData);
+        Menu_Setup_loadCombinationRecipesSydCdQueueSlot = VS::Content::AllocateLiveDiscRequest(&cdFile);
+        if (Menu_Setup_loadCombinationRecipesSydCdQueueSlot != NULL) {
+            VS::Content::EnqueueLiveDiscRequest(Menu_Setup_loadCombinationRecipesSydCdQueueSlot, Menu_Setup_sydData);
+        } else {
+            Menu_Setup_loadCombinationRecipesSydCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&cdFile, Menu_Setup_sydData);
+        }
         Menu_Setup_loadCombinationRecipesSydFileLoading = 1;
         return 0;
     }
@@ -127,7 +131,7 @@ int Menu_Setup_LoadCombinationRecipes(int id)
     }
 
     if (Menu_Setup_loadCombinationRecipesSydCdQueueSlot->state == 4) {
-        Content_ReleaseDiscRequest(Menu_Setup_loadCombinationRecipesSydCdQueueSlot);
+        VS::Content::ReleaseLiveDiscRequest(Menu_Setup_loadCombinationRecipesSydCdQueueSlot);
         Menu_Setup_loadCombinationRecipesSydFileLoading = 0;
         return 1;
     }

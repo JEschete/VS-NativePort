@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
+#include "Content/PFileLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
@@ -29,10 +30,14 @@ extern "C" {
 // decomp: BATTLE.PRG func_800D55A4 (src/BATTLE/BATTLE.PRG/5BF94.c:7885)
 void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int timeline_index, int arg2)
 {
-    Content_PFileTimelineTable* entry = (Content_PFileTimelineTable *)(Content_PFileTimelineSection(Effects_package->block3Data, timeline_index));
+    Content_PFileTimelineTable* entry = (Content_PFileTimelineTable *)(VS::Content::PFileLiveTimelineSection(Effects_package->block3Data, timeline_index));
     Effects_EffectTimeline* p;
     int count = 0;
     int i;
+
+    if (entry == NULL) {
+        return;
+    }
 
     if (effect_instance->context.timeline != NULL) {
         VS::Core::Memory::FreeLiveFromHighEnd(effect_instance->context.timeline);
@@ -45,7 +50,11 @@ void Effects_LoadEffectTimeline(Effects_EffectInstance* effect_instance, int tim
     p->activeTracks = 0;
 
     for (i = 0; i < p->trackCount; ++i) {
-        p->tracks[i].keys = (u_long *)(Content_PFileTimelineTrackData(Effects_package->block3Data, timeline_index, i));
+        p->tracks[i].keys = (u_long *)(VS::Content::PFileLiveTimelineTrackData(Effects_package->block3Data, timeline_index, i));
+        if (p->tracks[i].keys == NULL) {
+            p->trackCount = i;
+            break;
+        }
         p->tracks[i].header = entry->tracks[i].header;
 
         if (p->tracks[i].header.kind == 3) {

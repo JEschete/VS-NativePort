@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/TextBoxes.h"
-#include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -540,9 +540,13 @@ int Menu_Score_Update(void)
             Menu_Score_nextState = 1;
         } else if (selectedRow == 3) {
             Menu_Score_monBinData = (Menu_Score_EnemyEntry *)(VS::Core::Memory::AllocateLiveFromHighEnd(Menu_Score_kMonBinFile.size));
-            Menu_Score_monBinCdQueueSlot = Content_AllocateDiscRequest(&Menu_Score_kMonBinFile);
+            Menu_Score_monBinCdQueueSlot = VS::Content::AllocateLiveDiscRequest(&Menu_Score_kMonBinFile);
 
-            Content_EnqueueDiscRequest(Menu_Score_monBinCdQueueSlot, Menu_Score_monBinData);
+            if (Menu_Score_monBinCdQueueSlot != NULL) {
+                VS::Content::EnqueueLiveDiscRequest(Menu_Score_monBinCdQueueSlot, Menu_Score_monBinData);
+            } else {
+                Menu_Score_monBinCdQueueSlot = VS::Content::CompleteLiveRefusedDiscRequest(&Menu_Score_kMonBinFile, Menu_Score_monBinData);
+            }
 
             Menu_Score_nextState = 0;
         } else {
@@ -871,7 +875,7 @@ int Menu_Score_Update(void)
     case 13:
         if (Menu_Score_monBinCdQueueSlot->state == Content_DiscRequestState_Loaded) {
 
-            Content_ReleaseDiscRequest(Menu_Score_monBinCdQueueSlot);
+            VS::Content::ReleaseLiveDiscRequest(Menu_Score_monBinCdQueueSlot);
 
             Menu_Score_enemyDescriptions = (u_short*)(Menu_Score_monBinData + 150);
 

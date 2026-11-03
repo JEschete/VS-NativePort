@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Content/CdDriveLive.hpp"
 #include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "CdDrive.h"
 #include "State/GameTime.h"
 #include "State/PlayTime.h"
 #include "State/Timers.h"
@@ -18,7 +18,7 @@ int State_UpdatePlayTimeAndLoading(int vsync)
         VS::Core::IdleInstruction();
     }
 
-    Content_UpdateDiscQueue();
+    VS::Content::UpdateLiveDiscQueue();
 
     if (State_playTime.t.hours >= 100) {
         return vs;

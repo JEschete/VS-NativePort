@@ -119,8 +119,8 @@ _Static_assert(offsetof(Battle_TargetSphereLabelView, opaque990) ==
                    offsetof(Battle_TargetSphere, labels),
                "sphere label view offset");
 
-// An actor record placed at core.model (Content_ParseActorModel) must end
-// before the weapon model slots.
+// An actor record placed at core.model (VS::Content::ParseActorModel) must
+// end before the weapon model slots.
 _Static_assert(sizeof(Actors_ActorModelSlot) >= sizeof(Actors_WeaponModel),
                "equipment slot must fit a native weapon model");
 _Static_assert(_Alignof(Actors_ActorModelSlot) >= _Alignof(Actors_WeaponModel),
