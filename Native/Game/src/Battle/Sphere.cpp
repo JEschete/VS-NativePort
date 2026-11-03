@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -1373,9 +1373,9 @@ void Battle_UpdateSphereTargetHighlights(Battle_TargetLabelLine* target_lines, i
         type = target_lines->opaque9;
         if ((type >> 4) == 0) {
             if (Battle_IsPointInTargetVolume(&(*(Battle_TargetSphere* (*))&Battle_targetSphere)->volumes[1], target_lines->opaque0)) {
-                Actors_EnableModelPalettePulse(type, 0, target_lines->opaqueA);
+                VS::Actors::EnableLiveModelPalettePulse(type, 0, target_lines->opaqueA);
             } else {
-                Actors_DisableModelPalettePulse(type, target_lines->opaqueA);
+                VS::Actors::DisableLiveModelPalettePulse(type, target_lines->opaqueA);
             }
         }
     }

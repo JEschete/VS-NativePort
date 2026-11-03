@@ -189,28 +189,6 @@ void ApplyLivePoseTracks(Actors_ActorRecord& actor, Actors_AnimationPose& pose,
   }
 }
 
-ShadowBlend LoadShadow(const Actors_ShadowBlend& live) {
-  return {.levelFrames = live.levelFrames,
-          .radiusFrames = live.radiusFrames,
-          .level = live.level,
-          .levelDelta = live.levelDelta,
-          .radiusExpandRate = live.radiusExpandRate,
-          .radiusShrinkRate = live.radiusShrinkRate,
-          .radiusExpandDelta = live.radiusExpandDelta,
-          .radiusShrinkDelta = live.radiusShrinkDelta};
-}
-
-void StoreShadow(const ShadowBlend& shadow, Actors_ShadowBlend& live) {
-  live.levelFrames = shadow.levelFrames;
-  live.radiusFrames = shadow.radiusFrames;
-  live.level = shadow.level;
-  live.levelDelta = shadow.levelDelta;
-  live.radiusExpandRate = shadow.radiusExpandRate;
-  live.radiusShrinkRate = shadow.radiusShrinkRate;
-  live.radiusExpandDelta = shadow.radiusExpandDelta;
-  live.radiusShrinkDelta = shadow.radiusShrinkDelta;
-}
-
 class LiveSkeletalAnimation final : public SkeletalAnimationHost {
  public:
   LiveSkeletalAnimation(Actors_ActorRecord& actor, int mode)
@@ -225,9 +203,9 @@ class LiveSkeletalAnimation final : public SkeletalAnimationHost {
     return static_cast<u_short>(actor_.animationLength);
   }
   void AdvanceShadow() override {
-    ShadowBlend shadow = LoadShadow(actor_.shadowBlend);
+    ShadowBlend shadow = LoadLiveShadowBlend(actor_.shadowBlend);
     AdvanceShadowBlend(shadow);
-    StoreShadow(shadow, actor_.shadowBlend);
+    StoreLiveShadowBlend(shadow, actor_.shadowBlend);
   }
   void SetReachedEnd(bool reached) override {
     actor_.pose.reachedEnd = reached ? -1 : 0;
@@ -312,6 +290,28 @@ std::span<const std::uint8_t> SequenceBankBytes(const void* bank) {
     return {};
   }
   return {static_cast<const std::uint8_t*>(bank), found->bytes};
+}
+
+ShadowBlend LoadLiveShadowBlend(const Actors_ShadowBlend& live) {
+  return {.levelFrames = live.levelFrames,
+          .radiusFrames = live.radiusFrames,
+          .level = live.level,
+          .levelDelta = live.levelDelta,
+          .radiusExpandRate = live.radiusExpandRate,
+          .radiusShrinkRate = live.radiusShrinkRate,
+          .radiusExpandDelta = live.radiusExpandDelta,
+          .radiusShrinkDelta = live.radiusShrinkDelta};
+}
+
+void StoreLiveShadowBlend(const ShadowBlend& shadow, Actors_ShadowBlend& live) {
+  live.levelFrames = shadow.levelFrames;
+  live.radiusFrames = shadow.radiusFrames;
+  live.level = shadow.level;
+  live.levelDelta = shadow.levelDelta;
+  live.radiusExpandRate = shadow.radiusExpandRate;
+  live.radiusShrinkRate = shadow.radiusShrinkRate;
+  live.radiusExpandDelta = shadow.radiusExpandDelta;
+  live.radiusShrinkDelta = shadow.radiusShrinkDelta;
 }
 
 void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode) {

@@ -191,12 +191,25 @@ _ITEMS_LIVE = {
         ("Inventory::StoreLiveEquippedStats", "F02551")),
 }
 
+# #276 row 22 (actors-appearance-rendering): the Live adapter each generated caller of an actor appearance or model
+# rendering function uses instead, in the original argument order.
+_ACTORS_APPEARANCE_LIVE = {
+    r"Native\Game\include\Actors\AppearanceLive.hpp": (
+        ("SetLiveActorPaletteFade", "F00810"), ("ResetLiveActorWeaponVisibilityBlend", "F00812"),
+        ("SetLiveWeaponBrightnessOverride", "F00839"), ("SetLiveRoomActorScale", "F00844"),
+        ("EnableLiveModelPalettePulse", "F00849"), ("DisableLiveModelPalettePulse", "F00850"),
+        ("BeginLiveActorShadowBlend", "F00858"), ("LiveActorFadeParameters", "F00859"),
+        ("SetLiveActorFadeParameters", "F00860"), ("LiveActorTint", "F00861"), ("SetLiveActorTint", "F00862"),
+        ("StartLiveActorAppearanceTransition", "F00983")),
+}
+
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
        for header, names in _CORE_MATH_LIVE.items() for name in names},
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
        for header, rows in _RENDER_LIVE.items() for name, _ in rows},
     **{f"VS::Items::{name}": header for header, rows in _ITEMS_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_APPEARANCE_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -635,7 +648,8 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Save::MemoryCard::{name}" for name, fids in _SAVE_MEMORY_CARD_LIVE.items() for fid in fids
 } | {
     fid: f"VS::Save::{name}" for name, fids in _SAVE_SNAPSHOT_LIVE.items() for fid in fids
-} | {fid: f"VS::Items::{name}" for rows in _ITEMS_LIVE.values() for name, fid in rows}
+} | {fid: f"VS::Items::{name}" for rows in _ITEMS_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_APPEARANCE_LIVE.values() for name, fid in rows}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -5267,42 +5281,6 @@ REGEX_FIXES += [
         ("Actors::UpdateMotionAndLookAt",
          (('arg1', 'skip_motion_update'),),
          "F04130 44F14.c:1486,1507-1537 onward: nonzero arg1 skips the scale/turn/root-motion countdown advancement block while root-offset and look-at handling remain; no inference that it disables all animation."),
-        ("Actors::SetActorPaletteFade",
-         (('arg0', 'actor_id'), ('arg1', 'fade_parameter'), ('temp_a2', 'actor')),
-         "F00810 30DB0.c:2173 stores twice arg1 in unk1802[1]/paletteFadeState[1], clears phase/reverse and enables effect; zero disables. Name deliberately does not assert units or fade duration: this control also reaches render rotation through paletteFadeState[0] (ModelDrawing.c:215)."),
-        ("Actors::ResetActorWeaponVisibilityBlend",
-         (('arg0', 'actor_id'), ('temp_a0', 'actor')),
-         "F00812 30DB0.c:2195 indexes actor slot then visits two equipment models using instance slot, resetting visibility blend values from reserved08Bit4."),
-        ("Actors::SetWeaponBrightnessOverride",
-         (('arg0', 'actor_id'), ('arg1', 'override_enabled'), ('arg2', 'brightness')),
-         "F00839 30DB0.c:3363 writes weapon slot actor*2 unk8_6 and unk5C0. ModelRendering.c:464-467 consumes enabled bit and broadcasts brightness to RGB."),
-        ("Actors::SetRoomActorScale",
-         (('arg0', 'room_scale'),),
-         "F00844 30DB0.c:3467 copies input VECTOR into D_800F4438/roomActorScale and refreshes each actor scalar scale from render context."),
-        ("Actors::EnableModelPalettePulse",
-         (('arg0', 'actor_id'), ('arg1', 'pulse_flags'), ('arg2', 'pulse_slot'), ('temp_a3', 'actor'), ('temp_t0', 'gimmick'), ('var_s0', 'pulse')),
-         "F00849 30DB0.c:3548-3583 selects actor/gimmick palettePulse, initializes phase and low flag bit from arg1, sets all slots for -1 or bit(7-slot) for slots0..7. Does not invent a material/channel meaning for slot or low bit."),
-        ("Actors::DisableModelPalettePulse",
-         (('arg0', 'actor_id'), ('arg1', 'pulse_slot'), ('temp_v0', 'actor'), ('a0', 'active_pulse_mask'), ('v1', 'keep_pulse_mask')),
-         "F00850 30DB0.c:3586-3610 obtains byte at actor/gimmick offset0x64 (palettePulse.kind); -1 clears all bits, else AND with complement of bit(7-slot)."),
-        ("Actors::BeginActorShadowBlend",
-         (('arg0', 'actor'), ('arg1', 'blend_frames'), ('a2', 'shadow_blend')),
-         "F00858 30DB0.c:3877 points to shadow blend, computes radius/level deltas and writes both radiusFrames and levelFrames from arg1; zero copies final rates immediately."),
-        ("Actors::ActorFadeParameters",
-         (('arg0', 'actor_id'), ('arg1', 'fade_color_out'), ('temp_a0', 'actor')),
-         "F00859 30DB0.c:3894 exports fade red/green/blue channels into output ColorCode."),
-        ("Actors::SetActorFadeParameters",
-         (('arg0', 'actor_id'), ('arg1', 'fade_color'), ('temp_a0', 'actor')),
-         "F00860 30DB0.c:3907 imports ColorCode RGB into actor fade channels."),
-        ("Actors::ActorTint",
-         (('arg0', 'actor_id'), ('arg1', 'tint_out')),
-         "F00861 30DB0.c:3920 exports actor instance tint to caller."),
-        ("Actors::SetActorTint",
-         (('arg0', 'actor_id'), ('arg1', 'tint'), ('temp_a2', 'actor')),
-         "F00862 30DB0.c:3930 null tint disables customTint; otherwise copies color and enables it."),
-        ("Actors::StartActorAppearanceTransition",
-         (('arg0', 'actor_id'), ('arg1', 'transition_kind'), ('temp_a0', 'actor')),
-         "F00983 40564.c:2179 maps transition kind0/1/2 to actionAnimationState14/6/9 and applies same kind recursively to companion slot>1; preserves enum values."),
         ("Actors::RestoreAshleyRuntimeState",
          (('temp_s0', 'runtime_stats'), ('s1', 'saved_stats')),
          "F01855 INITBTL.PRG/18.c:310: runtime stats from vs_battle_characterState->unk3C; saved stats from D_80060068.unk0. Copies vitals, statuses, limbs, weapon drawn and camera restoration from saved producer into runtime consumers."),

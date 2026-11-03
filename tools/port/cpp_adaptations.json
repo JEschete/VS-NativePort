@@ -3264,10 +3264,10 @@
 [
 1075,
 [
-"        Actors_SetActorTint(actor_slot, tint);"
+"        VS::Actors::SetLiveActorTint(actor_slot, tint);"
 ],
 [
-"        Actors_SetActorTint(actor_slot, (Render_ColorCode *)(tint));"
+"        VS::Actors::SetLiveActorTint(actor_slot, (Render_ColorCode *)(tint));"
 ]
 ],
 [

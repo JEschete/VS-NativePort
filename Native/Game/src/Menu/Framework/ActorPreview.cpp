@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
@@ -155,8 +155,8 @@ void Menu_Framework_ResetActorPreviewPose(void)
     preview_color.green = 0;
     preview_color.blue = 0;
 
-    Actors_SetActorFadeParameters(1, &preview_color);
-    Actors_SetActorTint(1, 0);
+    VS::Actors::SetLiveActorFadeParameters(1, &preview_color);
+    VS::Actors::SetLiveActorTint(1, 0);
 
     preview_actor->previewFlag = 0;
 }

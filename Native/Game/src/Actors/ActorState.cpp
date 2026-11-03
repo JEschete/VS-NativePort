@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
@@ -264,7 +264,7 @@ void Actors_ResetActorMotionState(int actor_id, int arg1)
         actor->paletteFadeActive = 0;
         actor->textureAnimationSlots[1].timeline = 0;
         actor->paletteFadeReverse = 0;
-        Actors_SetActorTint(actor_id, NULL);
+        VS::Actors::SetLiveActorTint(actor_id, NULL);
         if (actor->companionSlot == 1) {
             actor->companionSlot = 0;
         }

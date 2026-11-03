@@ -9,6 +9,7 @@
 
 struct Actors_ActorRecord;
 struct Actors_AnimationPose;
+struct Actors_ShadowBlend;
 
 // Bindings from actor records to the typed skeletal playback
 // (SequencePlayback.cpp), and the extents of the SEQ banks they play.
@@ -34,4 +35,7 @@ void AdvanceLiveSkeletalAnimation(Actors_ActorRecord& actor, int mode);
 void BlendLiveActorPose(Actors_AnimationPose& destination,
                         Actors_AnimationPose& source, int bones, int frame,
                         int frames);
+// The actor record's shadow blend as the typed ShadowBlend, and its store.
+[[nodiscard]] ShadowBlend LoadLiveShadowBlend(const Actors_ShadowBlend& live);
+void StoreLiveShadowBlend(const ShadowBlend& shadow, Actors_ShadowBlend& live);
 }  // namespace VS::Actors

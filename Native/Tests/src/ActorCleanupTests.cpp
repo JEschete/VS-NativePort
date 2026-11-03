@@ -10,6 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransition.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -19,7 +20,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/Appearance.h"
+#include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
 #include "Battle/Ai/ActorState.h"
@@ -370,7 +371,7 @@ std::array<u_char, sizeof(Record)> ObjectBytes(const Record& record) {
 void CheckPulseCycle(Field_GimmickInstance& object,
                      std::array<u_short, 256>& expected_row) {
   const int slot = object.slot;
-  REQUIRE(Actors_EnableModelPalettePulse(slot, 0, 0) == 0);
+  REQUIRE(VS::Actors::EnableLiveModelPalettePulse(slot, 0, 0) == 0);
   CHECK(object.palettePulse.kind == 128);
   CHECK(object.palettePulse.level == 0);
   CHECK(PulseClut<16>(31, slot * 16) == kPulseColors);
@@ -381,7 +382,7 @@ void CheckPulseCycle(Field_GimmickInstance& object,
         kPulseColors[color] == 0 ? 0 : PulseColor(kPulseColors[color], 2);
   }
   CHECK(PulseClut<256>(31, 0) == expected_row);
-  REQUIRE(Actors_DisableModelPalettePulse(slot, 0) == 0);
+  REQUIRE(VS::Actors::DisableLiveModelPalettePulse(slot, 0) == 0);
   CHECK(object.palettePulse.kind == 0);
   CHECK(
       std::equal(kPulseColors.begin(), kPulseColors.end(), object.basePalette));

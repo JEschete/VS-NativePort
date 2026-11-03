@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Input/ControllerLive.hpp"
@@ -6,7 +7,6 @@
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
-#include "Actors/Appearance.h"
 #include "Audio/ActorSound.h"
 #include "Audio/Sfx.h"
 #include "Audio/Stream.h"
@@ -445,10 +445,10 @@ void Effects_SetSourceWeaponBrightness(Effects_EffectInstance* effect_instance, 
 
     if (effect_instance->context.emitFrom.type == 4) {
         if (brightness_override != 0) {
-            Actors_SetWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 1, brightness_override);
+            VS::Actors::SetLiveWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 1, brightness_override);
 
         } else {
-            Actors_SetWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 0, 0);
+            VS::Actors::SetLiveWeaponBrightnessOverride(effect_instance->context.emitFrom.value.actor.actor, 0, 0);
         }
     }
 }

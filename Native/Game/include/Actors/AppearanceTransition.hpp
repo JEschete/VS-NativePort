@@ -32,6 +32,8 @@ inline constexpr int kAppearanceBlack = 14;
 struct PalettePulse {
   std::uint8_t level = 0;
   std::uint8_t flags = 0;
+
+  friend bool operator==(const PalettePulse&, const PalettePulse&) = default;
 };
 
 // Steps the pulse two levels toward 16 or 0, twice at tick speed 4, and

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Items/InventoryLive.hpp"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
@@ -147,7 +147,7 @@ intptr_t Event_ScriptSetActorGroupFlags(u_char* instruction, short thread_index)
         }
         Actors_SetActorDetached(actor_id, (flag_options >> 5) & 1);
         Actors_SetActorDisplayFlags(actor_id, equipment_slot0_visibility | equipment_slot1_visibility | instruction[3]);
-        Actors_ResetActorWeaponVisibilityBlend(actor_id);
+        VS::Actors::ResetLiveActorWeaponVisibilityBlend(actor_id);
     }
     return 0;
 }
@@ -439,9 +439,9 @@ intptr_t Event_ScriptSetActorColorOverride(u_char* instruction, short thread_ind
     color_override.blue = instruction[5];
 
     if (color_override.red | color_override.green | color_override.blue) {
-        Actors_SetActorTint(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), &color_override);
+        VS::Actors::SetLiveActorTint(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), &color_override);
     } else {
-        Actors_SetActorTint(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), 0);
+        VS::Actors::SetLiveActorTint(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), 0);
     }
     return 0;
 }
@@ -682,7 +682,7 @@ intptr_t Event_ScriptSetActorEquipmentModels(u_char* instruction, short thread_i
 // decomp: BATTLE.PRG func_800B9670 (src/BATTLE/BATTLE.PRG/4A0A8.c:1928)
 intptr_t Event_ScriptSetActorYawOscillation(u_char* instruction, short thread_index)
 {
-    Actors_SetActorPaletteFade(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
+    VS::Actors::SetLiveActorPaletteFade(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
@@ -696,7 +696,7 @@ intptr_t Event_ScriptClearAshleyStatusEffects(u_char* instruction, short thread_
 // decomp: BATTLE.PRG func_800B9D74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2151)
 intptr_t Event_ScriptSetActorRenderMode(u_char* instruction, short thread_index)
 {
-    Actors_StartActorAppearanceTransition(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
+    VS::Actors::StartLiveActorAppearanceTransition(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 

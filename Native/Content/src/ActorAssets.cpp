@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -11,7 +12,7 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
+#include "Actors/AppearanceLiveState.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
@@ -1148,7 +1149,7 @@ setupPalettes:
         }
     }
 
-    Actors_SetActorPaletteFade(object->targetSlot, 0);
+    VS::Actors::SetLiveActorPaletteFade(object->targetSlot, 0);
     ((void (*)(...))Actors_ResetActorMotionState)(actor->instance.slot);
     actor->instance.attachBone = 0;
     actor->instance.isAttached = 0;

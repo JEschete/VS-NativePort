@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/AnimationBindings.h"
-#include "Actors/Appearance.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
@@ -827,7 +827,7 @@ retry:
         actor->animationLength = *frames;
         ((void (*)(void*, void*))Actors_InitializeActorAnimationPose)(actor, &actor->pose);
         actor->queuedAnimation = 0;
-        Actors_BeginActorShadowBlend(actor, blendFrames);
+        VS::Actors::BeginLiveActorShadowBlend(actor, blendFrames);
         if (actor->collisionRadius >= 0x80) {
             blendFrames *= 2;
         }

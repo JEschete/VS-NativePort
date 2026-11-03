@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/Ashley.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
@@ -684,7 +684,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     Field_sphericalCamera.delta.mode = 1;
     Field_sphericalCamera.zoomVelocity = 0;
 
-    Actors_SetRoomActorScale(&vector);
+    VS::Actors::SetLiveRoomActorScale(&vector);
 
     for (i = 0; i < 16; ++i) {
         Battle_actors[i] = NULL;

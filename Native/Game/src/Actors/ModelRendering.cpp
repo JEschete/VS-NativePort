@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
@@ -12,7 +13,7 @@ extern "C" {
 #include "ActorAssets.h"
 #include "Actors/ActorRecord.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
+#include "Actors/AppearanceLiveState.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
@@ -549,7 +550,7 @@ void Actors_InitializeActorModelResources(void)
     unit_room_scale.vx = 0x1000;
     unit_room_scale.vy = 0x1000;
     unit_room_scale.vz = 0x1000;
-    Actors_SetRoomActorScale(&unit_room_scale);
+    VS::Actors::SetLiveRoomActorScale(&unit_room_scale);
     (*(char (*))&Actors_pushedGimmickIndex) = 0;
     Actors_isActorUpdateComplete = 0;
 }

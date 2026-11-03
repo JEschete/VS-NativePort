@@ -9,10 +9,10 @@
 #include <limits>
 #include <span>
 
+#include "Actors/AppearanceLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 
 extern "C" {
-#include "Actors/Appearance.h"
 #include "Core/Diagnostics.h"
 #include "Field/Background.h"
 #include "Field/RoomRendering.h"
@@ -86,7 +86,8 @@ class LivePaletteHost final : public PaletteHost {
   }
   void SetActorTint(std::uint32_t actor, const TintCode& tint) override {
     Render_ColorCode code = CodeOf(tint);
-    (void)Actors_SetActorFadeParameters(static_cast<int>(actor), &code);
+    (void)VS::Actors::SetLiveActorFadeParameters(static_cast<int>(actor),
+                                                 &code);
   }
 };
 

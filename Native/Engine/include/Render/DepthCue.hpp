@@ -45,6 +45,8 @@ struct ColorCode {
   std::uint8_t green = 0;
   std::uint8_t blue = 0;
   std::uint8_t code = 0;
+
+  friend bool operator==(const ColorCode&, const ColorCode&) = default;
 };
 
 inline constexpr std::size_t kColorChannels = 3;

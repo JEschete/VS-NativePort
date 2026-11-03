@@ -63,12 +63,9 @@
     <ClCompile Include="src\Actors\AnimationBindings.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="src\Actors\Appearance.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Actors\Appearance.cpp" />
+    <ClCompile Include="src\Actors\AppearanceLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Actors\AppearanceTransition.cpp" />
     <ClCompile Include="src\Actors\AppearanceTransitionLive.cpp">
@@ -2019,7 +2016,7 @@
     <ClInclude Include="src\Actors\ActorState.h" />
     <ClInclude Include="src\Actors\Animation.h" />
     <ClInclude Include="src\Actors\AnimationBindings.h" />
-    <ClInclude Include="src\Actors\Appearance.h" />
+    <ClInclude Include="src\Actors\AppearanceLiveState.h" />
     <ClInclude Include="src\Actors\Ashley.h" />
     <ClInclude Include="src\Actors\CharacterInit.h" />
     <ClInclude Include="src\Actors\Lifecycle.h" />
@@ -2351,6 +2348,8 @@
     <ClInclude Include="src\Title\SaveFiles.h" />
     <ClInclude Include="src\Title\TitleMenu.h" />
     <ClInclude Include="src\Title\TitleScreen.h" />
+    <ClInclude Include="include\Actors\Appearance.hpp" />
+    <ClInclude Include="include\Actors\AppearanceLive.hpp" />
     <ClInclude Include="include\Actors\AppearanceTransition.hpp" />
     <ClInclude Include="include\Actors\AppearanceTransitionLive.hpp" />
     <ClInclude Include="include\Actors\ModelDrawing.hpp" />

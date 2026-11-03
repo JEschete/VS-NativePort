@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Music.h"
@@ -127,8 +127,8 @@ void Event_EndFieldCutscene(void)
     Actors_SetActorSoundOverrides(-1, &sound_override_reset);
 
     for (i = 0; i < 16; ++i) {
-        Actors_SetActorPaletteFade(i, 0);
-        Actors_SetActorTint(i, 0);
+        VS::Actors::SetLiveActorPaletteFade(i, 0);
+        VS::Actors::SetLiveActorTint(i, 0);
     }
 
     Field_RestoreRoomEffectSoundVolume();

@@ -6,6 +6,7 @@
 #include <cstdlib>
 #include <iterator>
 
+#include "Actors/AppearanceLive.hpp"
 #include "Event/WeaponMode.hpp"
 #include "Event/WeaponModeOpcode.h"
 
@@ -13,7 +14,7 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
+#include "Actors/Movement.h"
 #include "Battle/Abilities.h"
 #include "Battle/BattleMode.h"
 #include "Battle/Damage.h"
@@ -82,7 +83,7 @@ class LiveWeaponModeHost final : public event::WeaponModeHost {
     auto flags = Actors_ActorStateFlags(kAshley) & kLowWord;
     flags = drawn ? flags | kWeaponVisibility : flags & ~kWeaponVisibility;
     Actors_SetActorDisplayFlags(kAshley, static_cast<int>(flags));
-    Actors_ResetActorWeaponVisibilityBlend(kAshley);
+    VS::Actors::ResetLiveActorWeaponVisibilityBlend(kAshley);
   }
 };
 }  // namespace

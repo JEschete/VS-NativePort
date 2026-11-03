@@ -24,7 +24,7 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
+#include "Actors/AppearanceLiveState.h"
 #include "Actors/CharacterInit.h"
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
@@ -934,9 +934,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009D460u, 0u, (void*)&Actors_FinishActorPlacement, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009D468u, 0u, (void*)&Actors_ResetActorMotionState, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009D6F4u, 0u, (void*)&Actors_ResetAllActorMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009D7E8u, 0u, (void*)&Actors_SetActorPaletteFade, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009D854u, 0u, (void*)&Actors_RequestActorAnimationAdvance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009D88Cu, 0u, (void*)&Actors_ResetActorWeaponVisibilityBlend, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009D934u, 0u, (void*)&Actors_SetActorWeaponDrawn, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009DBDCu, 0u, (void*)&Actors_PlayActorWeaponDrawSound, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009DC38u, 0u, (void*)&Actors_StopActorMotion, 0u, 0u, 0u},
@@ -963,18 +961,14 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8009F530u, 0u, (void*)&Field_DropUnsupportedGimmickStack, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F794u, 0u, (void*)&Field_FindGimmickBelow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F858u, 0u, (void*)&Field_GimmickSubtype, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009F898u, 0u, (void*)&Actors_SetWeaponBrightnessOverride, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F8DCu, 0u, (void*)&Actors_AnimationBattleWindowFrame, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F940u, 0u, (void*)&Actors_SetActorCompanion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F990u, 0u, (void*)&Actors_SetActorSoundOverrides, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009F9F4u, 0u, (void*)&Actors_ApplyActorSoundOverrides, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009FB64u, 0u, (void*)&Actors_SetRoomActorScale, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009FBD8u, 0u, (void*)&Actors_SetActorTravelAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009FC20u, 0u, (void*)&Actors_ActorTravelAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009FC60u, 0u, (void*)&Actors_SetActorHeadTracking, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009FD38u, 0u, (void*)&Actors_ResetActorHeadTrackingSpeed, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009FD5Cu, 0u, (void*)&Actors_EnableModelPalettePulse, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8009FE74u, 0u, (void*)&Actors_DisableModelPalettePulse, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009FF08u, 0u, (void*)&Actors_AttachActorToParentBone, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8009FFA8u, 0u, (void*)&Actors_ReleaseActorAttachmentLock, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0024u, 0u, (void*)&Field_GimmickPlacement, 0u, 0u, 0u},
@@ -982,11 +976,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800A01C8u, 0u, (void*)&Actors_QueueActorAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0204u, 0u, (void*)&Actors_PlayActorAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0618u, 0u, (void*)&Actors_PlayActorAnimationAtFrame, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A06B8u, 0u, (void*)&Actors_BeginActorShadowBlend, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A071Cu, 0u, (void*)&Actors_ActorFadeParameters, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A0768u, 0u, (void*)&Actors_SetActorFadeParameters, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A07B4u, 0u, (void*)&Actors_ActorTint, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800A07FCu, 0u, (void*)&Actors_SetActorTint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A0870u, 0u, (void*)&Actors_SetActorTransitionMode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A087Cu, 0u, (void*)&Actors_SetActorDisplayFlags, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800A09D8u, 0u, (void*)&Actors_SetActorAnimationLocked, 0u, 0u, 0u},
@@ -1096,7 +1085,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AB2ACu, 0u, (void*)&Actors_ResetActorTextureFrames, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AB358u, 0u, (void*)&Actors_UploadActorTextureOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AB4F0u, 0u, (void*)&Actors_UpdateActorTextureScrolling, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AC37Cu, 0u, (void*)&Actors_StartActorAppearanceTransition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC440u, 0u, (void*)&Actors_SetActorBonePoseLock, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC500u, 0u, (void*)&Actors_ClearActorBonePoseLocks, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC540u, 0u, (void*)&Actors_UpdateActorRoute, 0u, 0u, 0u},
@@ -2032,7 +2020,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&Actors_modelRenderContext, sizeof Actors_modelRenderContext, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F3C58u, 32u, (void*)&Actors_skeletonPose, sizeof Actors_skeletonPose, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F3C78u, 32u, (void*)&Actors_skeletonRootMatrix, sizeof Actors_skeletonRootMatrix, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&Actors_roomActorScale, sizeof Actors_roomActorScale, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&Actors_roomActorScale, sizeof Actors_roomActorScale, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4448u, 224u, (void*)&Field_gimmickPaletteColors, sizeof Field_gimmickPaletteColors, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4528u, 16u, (void*)&Actors_sharedSequenceData, sizeof Actors_sharedSequenceData, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F4538u, 68u, (void*)&Actors_actorRecords, sizeof Actors_actorRecords, 0u, 0u},

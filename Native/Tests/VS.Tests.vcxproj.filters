@@ -78,6 +78,9 @@
     <ClCompile Include="src\AiSessionResetTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AppearanceTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AppearanceTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

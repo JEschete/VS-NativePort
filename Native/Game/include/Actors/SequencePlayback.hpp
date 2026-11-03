@@ -107,6 +107,8 @@ struct ShadowBlend {
   std::uint16_t radiusShrinkRate = 0;
   std::int16_t radiusExpandDelta = 0;
   std::int16_t radiusShrinkDelta = 0;
+
+  friend bool operator==(const ShadowBlend&, const ShadowBlend&) = default;
 };
 
 void AdvanceShadowBlend(ShadowBlend& shadow);

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/AppearanceLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Actors/ActorModelSlot.h"
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
-#include "Actors/Appearance.h"
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
@@ -956,7 +956,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
             Battle_TargetInfoLine* trigger = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque44[stickX];
 
             if ((trigger->opaque9 >> 4) == 0) {
-                Actors_DisableModelPalettePulse(trigger->opaque9, trigger->opaqueA);
+                VS::Actors::DisableLiveModelPalettePulse(trigger->opaque9, trigger->opaqueA);
             }
         }
     } else if (Input_buttonsPressed.allButtons & PADRright) {
@@ -1059,7 +1059,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
 void Battle_ClearTargetActorHighlight(int actor_slot, int pulse_slot)
 {
     if (!(actor_slot & 0xF0)) {
-        Actors_DisableModelPalettePulse(actor_slot, pulse_slot);
+        VS::Actors::DisableLiveModelPalettePulse(actor_slot, pulse_slot);
     }
 }
 
@@ -1067,7 +1067,7 @@ void Battle_ClearTargetActorHighlight(int actor_slot, int pulse_slot)
 void Battle_SetTargetActorHighlight(int actor_slot, int pulse_flags, int pulse_slot)
 {
     if (!(actor_slot & 0xF0)) {
-        Actors_EnableModelPalettePulse(actor_slot, pulse_flags, pulse_slot);
+        VS::Actors::EnableLiveModelPalettePulse(actor_slot, pulse_flags, pulse_slot);
     }
 }
 
@@ -1075,7 +1075,7 @@ void Battle_SetTargetActorHighlight(int actor_slot, int pulse_flags, int pulse_s
 void Battle_SetTargetActorColorOverride(int actor_slot, void* tint)
 {
     if (!(actor_slot & 0xF0)) {
-        Actors_SetActorTint(actor_slot, (Render_ColorCode *)(tint));
+        VS::Actors::SetLiveActorTint(actor_slot, (Render_ColorCode *)(tint));
     }
 }
 
