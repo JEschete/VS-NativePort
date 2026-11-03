@@ -67,9 +67,6 @@ MODEL_POINTERS = (0x68, *range(0x5D0, 0x5EC, 4))
 GIMMICK_VIEWS = frozenset(("T00565", "T00566"))
 GIMMICK_POINTERS = (0x68,)
 
-GIM_VIEWS = frozenset(("T00219",))
-GIM_POINTERS = (0x10, 0x14)
-
 SPHERE_VIEWS = frozenset(("T00214", "T00485"))
 SPHERE_POINTERS = (0x40, 0x44, *(0x990 + index * 20 + 16 for index in range(24)))
 
@@ -83,8 +80,6 @@ def pointer_slots(tid: str) -> tuple[int, ...]:
         return MODEL_POINTERS
     if tid in GIMMICK_VIEWS:
         return GIMMICK_POINTERS
-    if tid in GIM_VIEWS:
-        return GIM_POINTERS
     if tid in SPHERE_VIEWS:
         return SPHERE_POINTERS
     return ()

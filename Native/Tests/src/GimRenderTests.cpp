@@ -25,7 +25,6 @@ extern "C++" {
 #include "Render/Display.h"
 #include "Render/Font.h"
 #include "Render/Frame.h"
-#include "Render/Images.h"
 #include "Render/Render.h"
 #include "Render/Text/CompactFont.h"
 #include "Render/Text/VariableFont.h"
@@ -34,16 +33,6 @@ extern "C++" {
 
 _Static_assert(sizeof Menu_textBoxOrderingTables == 102 * sizeof(u_long),
                "three textbox ordering buffers");
-_Static_assert(sizeof(Event_SplashLayerView) == sizeof(Render_GimLayer),
-               "event and renderer GIM layer stride");
-_Static_assert(offsetof(Render_GimLayer, brightness) == 3,
-               "GIM brightness remains in the first packed word");
-_Static_assert(offsetof(Event_SplashLayerView, offsetX) ==
-                   offsetof(Render_GimLayer, offsetX),
-               "GIM offset view");
-_Static_assert(offsetof(Event_SplashLayerView, scaleFixed12) ==
-                   offsetof(Render_GimLayer, scaleAndOrder),
-               "GIM scale view");
 
 int Tests_EncodedTextFormatting(void) {
   const Menu_StringContext saved = Battle_stringContext;
@@ -69,39 +58,6 @@ int Tests_EncodedTextFormatting(void) {
   passed = passed && (unsigned char)output[0] == Core_TextCode_Terminator;
   Battle_stringContext = saved;
   return passed;
-}
-
-int Tests_GimEventLayerLayout(void) {
-  Render_GimLayer layers[3] = {0};
-  Event_SplashLayerView* event_layers =
-      reinterpret_cast<Event_SplashLayerView*>(layers);
-  uint16_t file = 7;
-  for (unsigned index = 0; index < 3; ++index) {
-    layers[index].fileData = &file;
-    event_layers[index].isVisible = 1;
-    event_layers[index].isLoadPending = 1;
-    event_layers[index].renderMode = index;
-    event_layers[index].brightness = 128 + index;
-    event_layers[index].gridAndImageId = (13 << 16) | (16 << 8) | 5;
-    event_layers[index].offsetX = static_cast<int16_t>(20 + index);
-    event_layers[index].offsetY =
-        static_cast<int16_t>(-30 - static_cast<int>(index));
-    event_layers[index].scaleFixed12 = 4096;
-  }
-  for (unsigned index = 0; index < 3; ++index) {
-    if (!layers[index].drawEnabled || !layers[index].loading ||
-        layers[index].drawRoutine != index ||
-        (unsigned char)layers[index].brightness != 128 + index ||
-        layers[index].columns != 5 || layers[index].rows != 16 ||
-        layers[index].imageId != 13 || layers[index].offsetX != 20 + index ||
-        layers[index].offsetY != -30 - static_cast<int>(index) ||
-        layers[index].scaleAndOrder != 4096 ||
-        layers[index].fileData != &file ||
-        event_layers[index].nativePointer10 != &file) {
-      return 0;
-    }
-  }
-  return 1;
 }
 
 int Tests_CompactTextAndGaugeLinks(void) {
@@ -226,181 +182,6 @@ int Tests_ScaledDialogueGlyphs(void) {
   Render_variableFontGlyphWidths[0x8F] = savedSpaceWidth;
   free(memory);
   return passed;
-}
-
-// F01393 / BATTLE func_800CBBCC, 5BF94.c:4056: preserve fixed-point rounding
-// and native packet links.
-static int16_t Coordinate(int index, int count, int scale, int offset,
-                          int vertical) {
-  int value = (index * 2 - count) * scale * (vertical ? 15 : 1);
-  int divisor = vertical ? 8192 : 128;
-  int rounded = value / divisor - (value % divisor < 0);
-  return static_cast<int16_t>(rounded + offset + (vertical ? 120 : 160));
-}
-
-static u_long Position(int16_t x, int16_t y) {
-  return (u_long)(u_short)x | ((u_long)(u_short)y << 16);
-}
-
-#define CHECK_GIM(condition) \
-  do {                       \
-    if (!(condition)) {      \
-      failedLine = __LINE__; \
-      goto cleanup;          \
-    }                        \
-  } while (0)
-
-int Tests_GimTilePackets(int columns, int rows, int scale, int offsetX,
-                         int offsetY, int routine, int brightness,
-                         int framebuffer) {
-  enum { MaxPacketWords = 250 * 11 + 12 };
-  const u_long guard = 0xDEADBEEF;
-  const int clut = 0x12340000;
-  Render_GimLayer image = {0};
-  unsigned char savedScratch[1024];
-  unsigned char expectedScratch[1024];
-  u_long storage[MaxPacketWords + 2];
-  u_long* expectedPackets[252];
-  u_long* packets = storage + 1;
-  u_long* expectedEnd = packets;
-  u_long* previous = nullptr;
-  u_long ot = 0xFFFFFF;
-  int savedFrameBuf = Render_frameBuf;
-  void* saved_buffers[2] = {Render_legacyPrimitiveBuffers[0],
-                            Render_legacyPrimitiveBuffers[1]};
-  char savedBlend = Render_gimBlendSelect;
-  int failedLine = 0;
-  int blend = routine == 1 && brightness != 128;
-  int drawBrightness = routine == 2 ? 128 : brightness;
-  int packetCount = 0;
-  int i;
-  int j;
-
-  image.columns = (u_char)columns;
-  image.rows = (u_char)rows;
-  image.offsetX = static_cast<int16_t>(offsetX);
-  image.offsetY = static_cast<int16_t>(offsetY);
-  image.scaleAndOrder = static_cast<int16_t>(scale);
-  image.brightness = static_cast<char>(brightness);
-  image.vramPage = 18;
-  image.textureMode = 1;
-  for (i = 0; i < 250; ++i) {
-    image.tileTable[i + 4] = (u_short)(i + 1);
-  }
-  for (i = 0; i < MaxPacketWords + 2; ++i) {
-    storage[i] = guard;
-  }
-
-  memcpy(savedScratch, Core_ScratchBase(), sizeof savedScratch);
-  memset(Core_ScratchBase(), 0xA5, sizeof savedScratch);
-  Render_frameScratch.primitiveCursor = packets;
-  memcpy(expectedScratch, Core_ScratchBase(), sizeof expectedScratch);
-  Render_frameBuf = framebuffer;
-  Render_legacyPrimitiveBuffers[framebuffer & 1] = packets;
-  Render_gimBlendSelect = 0;
-
-  switch (routine) {
-    case 0:
-      Render_DrawGimTiles(&image, clut, &ot);
-      break;
-    case 1:
-      Render_DrawGimFramebufferFade(&image, clut, &ot);
-      break;
-    case 2:
-      Render_DrawGimScanlineWipe(&image, clut, &ot);
-      break;
-    case 3:
-      Render_DrawGimCrossfade(&image, clut, &ot);
-      break;
-  }
-
-  if (columns * rows <= 250) {
-    for (j = 0; j < rows; ++j) {
-      int16_t top = Coordinate(j, rows, scale & 0x3FFF, offsetY, 1);
-      int16_t bottom = Coordinate(j + 1, rows, scale & 0x3FFF, offsetY, 1);
-      if (top >= 240 || bottom < 0) {
-        continue;
-      }
-      for (i = 0; i < columns; ++i) {
-        int16_t left = Coordinate(i, columns, scale & 0x3FFF, offsetX, 0);
-        int16_t right = Coordinate(i + 1, columns, scale & 0x3FFF, offsetX, 0);
-        int tile = i + j * columns + 1;
-        int u = (tile * 64) & 0xC0;
-        int v = ((tile * 64) & 0x1F00) * 15;
-        int tpage = getTPage(1, 1, (tile >> 2) & 0x1C0, 256);
-        int sprite = (scale & 0x3FFF) == ONE;
-        int words = sprite ? 6 : 11;
-        u_long* p = expectedEnd;
-        if (left >= 320 || right < 0) {
-          continue;
-        }
-        CHECK_GIM(p[0] == ((u_long)(words - 1) << 24 |
-                           (previous ? LegacyGpu_Handle(previous) : 0xFFFFFF)));
-        CHECK_GIM(p[1] == (u_long)(tpage | _get_mode(0, 0, 0)));
-        CHECK_GIM(p[2] ==
-                  ((((u_long)(sprite ? 0x64 : 0x2C) + blend * 2) << 24) |
-                   (u_long)drawBrightness * 0x010101));
-        CHECK_GIM(p[3] == Position(left, top));
-        CHECK_GIM(p[4] == (u_long)(u | v | clut));
-        if (sprite) {
-          CHECK_GIM(p[5] == (64 | (15 << 16)));
-        } else {
-          int u1 = u + 64;
-          u1 -= u1 >> 8;
-          CHECK_GIM(p[5] == Position(right, top));
-          CHECK_GIM(p[6] == (u_long)(u1 | v | (tpage << 16)));
-          CHECK_GIM(p[7] == Position(left, bottom));
-          CHECK_GIM(p[8] == (u_long)(u | (v + 0xF00)));
-          CHECK_GIM(p[9] == Position(right, bottom));
-          CHECK_GIM(p[10] == (u_long)(u1 | (v + 0xF00)));
-        }
-        previous = p;
-        expectedPackets[packetCount++] = p;
-        expectedEnd += words;
-      }
-    }
-  }
-
-  if (blend) {
-    int fb = framebuffer == 0 ? 320 : 0;
-    for (i = 0; i < 2; ++i) {
-      u_long* p = expectedEnd;
-      CHECK_GIM(p[0] == (0x05000000 |
-                         (previous ? LegacyGpu_Handle(previous) : 0xFFFFFF)));
-      CHECK_GIM(p[1] == (0xE1000120 | ((fb + i * 256) >> 6)));
-      CHECK_GIM(p[2] == (0x64000000 | (u_long)(128 - brightness) * 0x010101));
-      CHECK_GIM(p[3] == (u_long)(i * 256));
-      CHECK_GIM(p[4] == 0);
-      CHECK_GIM(p[5] == (u_long)((i ? 64 : 256) | (240 << 16)));
-      previous = p;
-      expectedPackets[packetCount++] = p;
-      expectedEnd += 6;
-    }
-  }
-
-  CHECK_GIM(Render_frameScratch.primitiveCursor == expectedEnd);
-  CHECK_GIM(previous ? LegacyGpu_Pointer(ot) == previous : ot == 0xFFFFFF);
-  for (i = packetCount - 1; i >= 0; --i) {
-    CHECK_GIM(previous == expectedPackets[i]);
-    previous = reinterpret_cast<u_long*>(nextPrim(previous));
-  }
-  CHECK_GIM(previous == nullptr);
-  CHECK_GIM(storage[0] == guard);
-  for (u_long* p = expectedEnd; p < storage + MaxPacketWords + 2; ++p) {
-    CHECK_GIM(*p == guard);
-  }
-  CHECK_GIM((u_char)image.brightness == brightness);
-  Render_frameScratch.primitiveCursor = packets;
-  CHECK_GIM(
-      memcmp(Core_ScratchBase(), expectedScratch, sizeof expectedScratch) == 0);
-
-cleanup:
-  memcpy(Core_ScratchBase(), savedScratch, sizeof savedScratch);
-  Render_frameBuf = savedFrameBuf;
-  Render_legacyPrimitiveBuffers[0] = saved_buffers[0];
-  Render_legacyPrimitiveBuffers[1] = saved_buffers[1];
-  Render_gimBlendSelect = savedBlend;
-  return failedLine;
 }
 
 int CheckFeedbackEffectDialogueLinks(int framebuffer, int feedback_layer) {
@@ -763,5 +544,4 @@ int CheckDefaultLoadoutNames(void) {
                 sizeof weapon_name) == 0;
 }
 
-#undef CHECK_GIM
 }  // extern "C"

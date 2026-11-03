@@ -68,31 +68,6 @@ void ReportDropped() {
   }
 }
 
-class LivePacketQueue final : public PacketQueue {
- public:
-  explicit LivePacketQueue(u_long* chain) : chain_(chain) {}
-
-  [[nodiscard]] std::uint32_t ChainLink() const override {
-    return chain_ != nullptr ? static_cast<std::uint32_t>(*chain_) : 0;
-  }
-
-  bool Emit(std::span<const std::uint32_t> packet) override {
-    u_long* slot =
-        chain_ != nullptr ? ReserveLivePrimitiveWords(packet.size()) : nullptr;
-    if (slot == nullptr) {
-      ReportDropped();
-      return false;
-    }
-    std::ranges::copy(packet, slot);
-    *chain_ = LegacyGpu_Handle(slot);
-    Render_frameScratch.primitiveCursor = slot + packet.size();
-    return true;
-  }
-
- private:
-  u_long* chain_;
-};
-
 class LivePrimitiveChain final : public PrimitiveChain {
  public:
   [[nodiscard]] std::optional<std::uint32_t> TagWord(
@@ -190,26 +165,6 @@ class LiveImmediateTarget final : public ImmediatePacketTarget {
   }
 };
 
-// Entry `slot` from the frame's ordering-table pointer, or null when it lies
-// outside the current frame's table.
-u_long* LiveOrderingTableEntry(int slot) {
-  const auto table = reinterpret_cast<std::uintptr_t>(
-      Render_legacyOrderingTables[Render_frameBuf & 1]);
-  const auto head =
-      reinterpret_cast<std::uintptr_t>(Render_frameScratch.orderingTable);
-  if (table == 0 || head < table || (head - table) % sizeof(u_long) != 0) {
-    return nullptr;
-  }
-  const auto index = static_cast<std::int64_t>((head - table) / sizeof(u_long));
-  const std::int64_t entry = index + slot;
-  if (entry < 0 || entry >= static_cast<std::int64_t>(kOrderingTableEntries)) {
-    return nullptr;
-  }
-  return static_cast<u_long*>(
-             Render_legacyOrderingTables[Render_frameBuf & 1]) +
-         entry;
-}
-
 u_long* DefaultNumberChain() {
   const auto table =
       reinterpret_cast<std::uintptr_t>(Render_frameScratch.orderingTable);
@@ -219,6 +174,41 @@ u_long* DefaultNumberChain() {
   return reinterpret_cast<u_long*>(table - kNumberChainOffset);
 }
 }  // namespace
+
+std::uint32_t LivePacketQueue::ChainLink() const {
+  return chain_ != nullptr ? static_cast<std::uint32_t>(*chain_) : 0;
+}
+
+bool LivePacketQueue::Emit(std::span<const std::uint32_t> packet) {
+  u_long* slot =
+      chain_ != nullptr ? ReserveLivePrimitiveWords(packet.size()) : nullptr;
+  if (slot == nullptr) {
+    ReportDropped();
+    return false;
+  }
+  std::ranges::copy(packet, slot);
+  *chain_ = LegacyGpu_Handle(slot);
+  Render_frameScratch.primitiveCursor = slot + packet.size();
+  return true;
+}
+
+u_long* LiveFrameOrderingEntry(LiveOrderingBase base, int slot) {
+  void* const frame_table = Render_legacyOrderingTables[Render_frameBuf & 1];
+  const auto table = reinterpret_cast<std::uintptr_t>(frame_table);
+  const auto head = reinterpret_cast<std::uintptr_t>(
+      base == LiveOrderingBase::kScene
+          ? Render_frameScratch.orderingTable
+          : Render_frameScratch.overlayOrderingTable);
+  if (table == 0 || head < table || (head - table) % sizeof(u_long) != 0) {
+    return nullptr;
+  }
+  const auto index = static_cast<std::int64_t>((head - table) / sizeof(u_long));
+  const std::int64_t entry = index + slot;
+  if (entry < 0 || entry >= static_cast<std::int64_t>(kOrderingTableEntries)) {
+    return nullptr;
+  }
+  return static_cast<u_long*>(frame_table) + entry;
+}
 
 void AppendLiveOverlayPrimitive(void* primitive) {
   LivePrimitiveChain chain;
@@ -313,7 +303,7 @@ void QueueLiveTextureRectangleMove(const RECT* source, int x, int y) {
 }
 
 void* AppendLiveTexturePage(int tpage, int ot_slot) {
-  u_long* entry = LiveOrderingTableEntry(ot_slot);
+  u_long* entry = LiveFrameOrderingEntry(LiveOrderingBase::kScene, ot_slot);
   if (entry == nullptr) {
     if (CountAndReport(refused_texture_pages)) {
       Core_Errorf("render",

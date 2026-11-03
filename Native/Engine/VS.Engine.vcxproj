@@ -349,12 +349,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Render\Images.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Render\GimImages.cpp" />
+    <ClCompile Include="src\Render\GimImagesLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Render\Loading.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -613,6 +610,8 @@
     <ClInclude Include="include\Render\Device.hpp" />
     <ClInclude Include="include\Render\DisplayControl.hpp" />
     <ClInclude Include="include\Render\DisplayControlLive.hpp" />
+    <ClInclude Include="include\Render\GimImages.hpp" />
+    <ClInclude Include="include\Render\GimImagesLive.hpp" />
     <ClInclude Include="include\Render\ModelGeometry.hpp" />
     <ClInclude Include="include\Render\ModelGeometryLive.hpp" />
     <ClInclude Include="include\Render\ModelWorkspace.h" />

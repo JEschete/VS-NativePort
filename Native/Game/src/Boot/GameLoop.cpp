@@ -10,6 +10,7 @@
 #include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/ScreenOverlayLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -77,7 +78,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
-#include "Render/Images.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -292,7 +292,7 @@ void Boot_RunGameLoop(void)
                                     }
                                 }
                             } else {
-                                Render_UpdateGimImages();
+                                VS::Render::UpdateLiveGimImages();
                                 Actors_ExecuteQueuedActorCommands();
                                 if (Event_EvaluateRoomEventTriggers(0xFF, 0, 0, 0) == 0) {
                                     if ((Boot_gameEntryMode == 3)
@@ -449,7 +449,7 @@ void Boot_RunGameLoop(void)
                         }
                     } else {
                         if (Field_controlMode == 3) {
-                            Render_UpdateGimImages();
+                            VS::Render::UpdateLiveGimImages();
                         } else if (!(status & 0x2000)) {
                             Actors_UpdateAshleyMovementInput();
                         }

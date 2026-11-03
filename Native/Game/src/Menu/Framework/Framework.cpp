@@ -5,6 +5,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/CameraViewLive.hpp"
+#include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Render/TexturePagesLive.hpp"
@@ -45,7 +46,6 @@ extern "C" {
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Effects/ScreenEffects.h"
-#include "Event/Splash.h"
 #include "Field/RoomLoading.h"
 #include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
@@ -85,7 +85,6 @@ extern "C" {
 #include "Render/Camera.h"
 #include "Render/Display.h"
 #include "Render/Font.h"
-#include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -735,7 +734,7 @@ void Menu_Framework_InitGameInterface(void* interface_texture_data)
     Menu_Framework_unusedInterfaceFlag = 0;
     Effects_screenEffectOverlay = NULL;
     (*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere) = NULL;
-    (*(Render_GimLayer* (*))&Render_gimLayers) = NULL;
+    VS::Render::ForgetLiveGimImages();
     Menu_Framework_menuItems = 0;
     Menu_textBoxBufferIndex = 0;
     Battle_lowerScreenUiState = 0;

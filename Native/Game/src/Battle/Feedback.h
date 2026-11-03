@@ -13,6 +13,9 @@
 // decomp: src/include/gpu.h:108
 #define vs_getRGB888(r, g, b) (((r) & 0xFF) | (((g) & 0xFF) << 8) | (((b) & 0xFF) << 16))
 
+// decomp: src/include/gpu.h:112
+#define vs_getUV(u, v) ((u) | ((v) << 8))
+
 #endif // VS_BATTLE_FEEDBACK_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_BATTLE_FEEDBACK_H_DECLS)

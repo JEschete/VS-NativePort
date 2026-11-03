@@ -516,7 +516,10 @@
     <ClInclude Include="src\Render\FramebufferEffects.h">
       <Filter>src\Render</Filter>
     </ClInclude>
-    <ClCompile Include="src\Render\Images.cpp">
+    <ClCompile Include="src\Render\GimImages.cpp">
+      <Filter>src\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Render\GimImagesLive.cpp">
       <Filter>src\Render</Filter>
     </ClCompile>
     <ClInclude Include="src\Render\Images.h">
@@ -904,6 +907,12 @@
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\DisplayControlLive.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\GimImages.hpp">
+      <Filter>include\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Render\GimImagesLive.hpp">
       <Filter>include\Render</Filter>
     </ClInclude>
     <ClInclude Include="include\Render\ModelGeometry.hpp">

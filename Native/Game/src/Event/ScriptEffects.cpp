@@ -3,6 +3,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Input/ControllerLive.hpp"
+#include "Render/GimImagesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Display.h"
-#include "Render/Images.h"
 #include "Render/Palette.h"
 #include "State/Timers.h"
 
@@ -246,18 +246,15 @@ void Event_UpdateEventImageTweens(void)
     short i;
     short eased_fraction;
     Event_SplashTween* splash_tween = Event_splashTweens;
-    Event_SplashLayerView* splash_layer = Render_gimLayers;
 
-    for (i = 0; i < 3; ++i, ++splash_tween, ++splash_layer) {
+    for (i = 0; i < 3; ++i, ++splash_tween) {
         if (splash_tween->durationFrames != 0) {
             splash_tween->elapsedFrames += State_tickSpeed >> 1;
             eased_fraction = ((int (*)(int, int, int))Event_EvaluateInterpolationCurve)(splash_tween->easingMode, splash_tween->elapsedFrames, splash_tween->durationFrames);
-            if (Render_gimLayers != NULL) {
-                splash_layer->offsetX = (splash_tween->startX + ((splash_tween->deltaX * eased_fraction) >> 0xC));
-                splash_layer->offsetY = (splash_tween->startY + ((splash_tween->deltaY * eased_fraction) >> 0xC));
-                splash_layer->scaleFixed12 = (splash_tween->startScaleFixed12 + ((splash_tween->deltaScaleFixed12 * eased_fraction) >> 0xC));
-                splash_layer->brightness = (splash_tween->startBrightness + ((splash_tween->deltaBrightness * eased_fraction) >> 0xC));
-            }
+            VS::Render::PlaceLiveGimLayer(i, splash_tween->startX + ((splash_tween->deltaX * eased_fraction) >> 0xC),
+                                          splash_tween->startY + ((splash_tween->deltaY * eased_fraction) >> 0xC),
+                                          splash_tween->startScaleFixed12 + ((splash_tween->deltaScaleFixed12 * eased_fraction) >> 0xC),
+                                          splash_tween->startBrightness + ((splash_tween->deltaBrightness * eased_fraction) >> 0xC));
             if (splash_tween->elapsedFrames >= splash_tween->durationFrames) {
                 splash_tween->durationFrames = 0;
             }

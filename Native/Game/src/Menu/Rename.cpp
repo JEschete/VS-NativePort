@@ -23,7 +23,6 @@ extern "C" {
 #include "Menu/Rename.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
-#include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"

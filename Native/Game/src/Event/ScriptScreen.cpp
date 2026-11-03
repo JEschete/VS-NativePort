@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Render/DisplayControlLive.hpp"
+#include "Render/GimImagesLive.hpp"
 #include "Render/PaletteAnimationLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -12,65 +13,52 @@ extern "C" {
 #include "Event/Splash.h"
 #include "Field/RoomState.h"
 #include "Field/Transitions.h"
-#include "Render/Images.h"
 
 // decomp: D_800F4B30 (D_800F4B30@BATTLE/BATTLE.PRG)
 Event_SplashTween Event_splashTweens[6];
 
 // decomp: BATTLE.PRG func_800B6724 (src/BATTLE/BATTLE.PRG/4A0A8.c:609)
-intptr_t Event_ScriptWaitForSplashFile(u_char* instruction, short thread_index) { return Render_gimLayers->isLoadPending; }
+intptr_t Event_ScriptWaitForSplashFile(u_char* instruction, short thread_index) { return VS::Render::LiveGimImageLoading(); }
 
 // decomp: BATTLE.PRG vs_battle_script_loadGim (src/BATTLE/BATTLE.PRG/4A0A8.c:851)
 intptr_t Event_ScriptLoadSplashImage(u_char* instruction, short thread_index)
 {
-    Render_QueueGimImage(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), instruction[3]);
+    VS::Render::QueueLiveGimImage(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), instruction[3]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B7014 (src/BATTLE/BATTLE.PRG/4A0A8.c:857)
 intptr_t Event_ScriptConfigureSplashLayer(u_char* instruction, short thread_index)
 {
-    Event_SplashTween* splash_tween;
-
-    Event_SplashLayerView* splash_layer = Render_gimLayers;
-
-    if (splash_layer == NULL) {
+    if (!VS::Render::LiveGimImagesPresent()) {
         return 0;
     }
 
-    splash_tween = &Event_splashTweens[instruction[1] >> 6];
-    splash_tween->durationFrames = 0;
-    splash_layer = splash_layer + ((instruction[1] >> 6));
-    splash_layer->renderMode = instruction[1] & 3;
-    splash_layer->offsetX = (signed char)instruction[2] * 2;
-    splash_layer->offsetY = (signed char)instruction[3] * 2;
-    splash_layer->scaleFixed12 = instruction[4] << 7;
-    splash_layer->brightness = instruction[5];
-    Render_ActivateGimLayer(instruction[1] >> 6, splash_layer, instruction);
+    Event_splashTweens[instruction[1] >> 6].durationFrames = 0;
+    VS::Render::ConfigureLiveGimLayer(instruction[1] >> 6, instruction[1] & 3, (signed char)instruction[2] * 2,
+                                      (signed char)instruction[3] * 2, instruction[4] << 7, instruction[5]);
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B70E8 (src/BATTLE/BATTLE.PRG/4A0A8.c:879)
 intptr_t Event_ScriptTweenSplashLayer(u_char* instruction, short thread_index)
 {
-    Event_SplashLayerView* splash_layer = Render_gimLayers;
     int layer_index = instruction[5] >> 6;
     Event_SplashTween* splash_tween = &Event_splashTweens[layer_index];
+    const auto splash_layer = VS::Render::LiveGimLayerPlacement(layer_index);
 
-    if (splash_layer == NULL) {
+    if (!splash_layer) {
         return 0;
     }
-
-    splash_layer += layer_index;
 
     if (splash_tween->durationFrames != 0) {
         return 1;
     }
 
-    splash_tween->deltaX = (((signed char)instruction[1] * 2) - (splash_tween->startX = splash_layer->offsetX));
-    splash_tween->deltaY = (((signed char)instruction[2] * 2) - (splash_tween->startY = splash_layer->offsetY));
-    splash_tween->deltaScaleFixed12 = ((instruction[3] << 7) - (splash_tween->startScaleFixed12 = splash_layer->scaleFixed12));
-    splash_tween->deltaBrightness = instruction[4] - (splash_tween->startBrightness = ((char*)splash_layer)[3]);
+    splash_tween->deltaX = (((signed char)instruction[1] * 2) - (splash_tween->startX = splash_layer->offset_x));
+    splash_tween->deltaY = (((signed char)instruction[2] * 2) - (splash_tween->startY = splash_layer->offset_y));
+    splash_tween->deltaScaleFixed12 = ((instruction[3] << 7) - (splash_tween->startScaleFixed12 = splash_layer->scale_and_order));
+    splash_tween->deltaBrightness = instruction[4] - (splash_tween->startBrightness = splash_layer->brightness);
     splash_tween->easingMode = instruction[5] & 7;
     splash_tween->durationFrames = instruction[6];
     splash_tween->elapsedFrames = 0;
@@ -80,7 +68,7 @@ intptr_t Event_ScriptTweenSplashLayer(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800B71C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:905)
 intptr_t Event_ScriptFreeSplashImage(u_char* instruction, short thread_index)
 {
-    Render_ReleaseGimImages();
+    VS::Render::ReleaseLiveGimImages();
     return (Event_skipState == 2) * 4;
 }
 

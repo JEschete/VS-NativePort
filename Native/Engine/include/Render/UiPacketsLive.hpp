@@ -2,6 +2,7 @@
 // Hand-maintained (tools/port/owned.csv).
 
 #include <cstdint>
+#include <span>
 
 #include "Legacy/Psx.h"
 #include "Render/UiPackets.hpp"
@@ -11,6 +12,26 @@
 // from VRAM. A packet that does not fit, or that has no chain, is dropped and
 // counted rather than written past the buffer (UiPacketsLive.cpp).
 namespace VS::Render {
+// Packets stored in the frame's primitive buffer, each linked in front of
+// `chain` (addPrim).
+class LivePacketQueue final : public PacketQueue {
+ public:
+  explicit LivePacketQueue(u_long* chain) : chain_(chain) {}
+
+  [[nodiscard]] std::uint32_t ChainLink() const override;
+  bool Emit(std::span<const std::uint32_t> packet) override;
+
+ private:
+  u_long* chain_;
+};
+
+// The frame's ordering tables (Boot/GameLoop.cpp): the scene table
+// (Render_frameScratch.orderingTable) and the overlay table in front of it.
+enum class LiveOrderingBase : std::uint8_t { kScene, kOverlay };
+// Entry `slot` from the base's pointer, or null when it lies outside the
+// current frame's table.
+[[nodiscard]] u_long* LiveFrameOrderingEntry(LiveOrderingBase base, int slot);
+
 // Splices the packet last into the current ordering table's overlay bucket. A
 // broken chain, an unknown packet or no table leaves every tag untouched.
 void AppendLiveOverlayPrimitive(void* primitive);

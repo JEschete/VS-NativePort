@@ -29,7 +29,6 @@ extern "C" {
 #include "Menu/Framework/Menus.h"
 #include "Menu/Magic.h"
 #include "Render/Font.h"
-#include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"

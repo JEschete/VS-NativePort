@@ -115,6 +115,9 @@ _RENDER_LIVE = {
         ("CaptureLiveRoomBackgroundColors", "F03564"), ("SetLiveClutAnimationEnabled", "F03566"),
         ("TransformLiveRoomPalettes", "F00215"), ("TransformLiveSceneColors", "F00216"),
         ("TransformLiveActorColors", "F00217"), ("TransformLiveBackgroundColors", "F00218")),
+    # #276 row 6 (render GIM images): the event scripts' load, release and the game loop's per-frame update.
+    "GimImagesLive.hpp": (
+        ("QueueLiveGimImage", "F01338"), ("ReleaseLiveGimImages", "F01340"), ("UpdateLiveGimImages", "F01341")),
 }
 
 # #276 slice 8 (save-memory-card): the C-shaped bindings over the typed VS::Save::MemoryCard game-file core and the
@@ -152,6 +155,9 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Render::{name}": rf"Native\Engine\include\Render\{header}"
        for header, rows in _RENDER_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
+    **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
+       for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
+                    "PlaceLiveGimLayer", "ForgetLiveGimImages")},
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
     "VS::Battle::Ai::BattleActorReactionDelays": r"Native\Game\include\Battle\Ai\ReactionDelay.hpp",
@@ -1956,6 +1962,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);\n"
          "    Battle_actionSelection = Menu_Framework_ActionSelectionState();",
          "basic attacks may precede the first menu open; bind the interface-owned selection state at initialization"),
+        ("    Render_gimLayers = NULL;", "    VS::Render::ForgetLiveGimImages();",
+         "#276 row 6: the heap was reset under the GIM set; the typed set is forgotten without being freed"),
     ],
     "F01327": [
         ("*str = '\\0'", "*str = Core_TextCode_Terminator", "game text terminates with E7, not a zero glyph"),
@@ -2880,20 +2888,80 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "    return 0;",
          "report successful event unwind without changing its original decoder mode"),
     ],
-    # F01393 / BATTLE func_800CBBCC, 5BF94.c:4056: GIM grid coordinates are temporary, not guest memory.
-    "F01393": [
-        ("    short* columnX = (short*)(0x1F800400 - (columns + 1) * 2);\n"
-         "    short* rowY = columnX - (rows + 1);",
-         "    // Byte-sized dimensions need at most 256 boundary coordinates per axis.\n"
-         "    short columnX[256];\n"
-         "    short rowY[256];", "bounded native GIM coordinates, independent of shared scratch storage"),
-        ("    for (i = 0; i <= columns; ++i) {",
-         "    if (columns * rows > (int)(sizeof image->tileTable / sizeof image->tileTable[0]) - 4) {\n"
-         '        Core_Debugf("render", "GIM grid %dx%d exceeds tile table capacity", columns, rows);\n'
-         "        return;\n"
+    # #276 row 6 (render GIM images): the event scripts reach the typed GIM set (GimImagesLive.hpp) instead of
+    # viewing its PS1 layer records. 4A0A8.c:609 read the pending bit through a possibly missing set.
+    "F01031": [
+        ("{ return Render_gimLayers->isLoadPending; }", "{ return VS::Render::LiveGimImageLoading(); }",
+         "the load-pending query goes through the typed set, which reports a missing set instead of reading it"),
+    ],
+    # 4A0A8.c:857-877: the tween stops and the layer takes the script's routine and placement, then activates.
+    "F01044": [
+        ("    Event_SplashTween* new_var;\n\n"
+         "    Event_SplashLayerView* temp_a1 = Render_gimLayers;\n\n"
+         "    if (temp_a1 == NULL) {\n"
+         "        return 0;\n"
          "    }\n\n"
-         "    for (i = 0; i <= columns; ++i) {", "reject grids beyond the embedded tile table before reading tiles"),
-        ("((u_long)prim << 8) >> 8", "LegacyGpu_Handle(prim)", "scaled GIM quad links must retain native pointers"),
+         "    new_var = &Event_splashTweens[arg0[1] >> 6];\n"
+         "    new_var->durationFrames = 0;\n"
+         "    temp_a1 = temp_a1 + ((arg0[1] >> 6));\n"
+         "    temp_a1->renderMode = arg0[1] & 3;\n"
+         "    temp_a1->offsetX = (signed char)arg0[2] * 2;\n"
+         "    temp_a1->offsetY = (signed char)arg0[3] * 2;\n"
+         "    temp_a1->scaleFixed12 = arg0[4] << 7;\n"
+         "    temp_a1->brightness = arg0[5];\n"
+         "    VS::Render::ActivateGimLayer(arg0[1] >> 6, temp_a1, arg0);",
+         "    if (!VS::Render::LiveGimImagesPresent()) {\n"
+         "        return 0;\n"
+         "    }\n\n"
+         "    Event_splashTweens[arg0[1] >> 6].durationFrames = 0;\n"
+         "    VS::Render::ConfigureLiveGimLayer(arg0[1] >> 6, arg0[1] & 3, (signed char)arg0[2] * 2,\n"
+         "                                      (signed char)arg0[3] * 2, arg0[4] << 7, arg0[5]);",
+         "configure and activate the layer through the typed set; a fourth layer index is refused there"),
+    ],
+    # 4A0A8.c:879-903: the tween starts from the layer's placement. The original read a fourth layer past the
+    # set and its tween was never advanced (F01212 tweens three), so the script waited forever; it is skipped.
+    "F01045": [
+        ("    Event_SplashLayerView* temp_a3 = Render_gimLayers;\n"
+         "    int temp_a2 = arg0[5] >> 6;\n"
+         "    Event_SplashTween* temp_a1 = &Event_splashTweens[temp_a2];\n\n"
+         "    if (temp_a3 == NULL) {\n"
+         "        return 0;\n"
+         "    }\n\n"
+         "    temp_a3 += temp_a2;\n\n",
+         "    int temp_a2 = arg0[5] >> 6;\n"
+         "    Event_SplashTween* temp_a1 = &Event_splashTweens[temp_a2];\n"
+         "    const auto splash_layer = VS::Render::LiveGimLayerPlacement(temp_a2);\n\n"
+         "    if (!splash_layer) {\n"
+         "        return 0;\n"
+         "    }\n\n",
+         "the tween reads the typed placement; no set or a fourth layer continues the script"),
+        ("(temp_a1->startX = temp_a3->offsetX)", "(temp_a1->startX = splash_layer->offset_x)",
+         "start X from the typed placement"),
+        ("(temp_a1->startY = temp_a3->offsetY)", "(temp_a1->startY = splash_layer->offset_y)",
+         "start Y from the typed placement"),
+        ("(temp_a1->startScaleFixed12 = temp_a3->scaleFixed12)",
+         "(temp_a1->startScaleFixed12 = splash_layer->scale_and_order)",
+         "start scale (with the scene-order flag, as the original's halfword) from the typed placement"),
+        ("(temp_a1->startBrightness = ((char*)temp_a3)[3])", "(temp_a1->startBrightness = splash_layer->brightness)",
+         "the original read the layer's unsigned brightness byte (offset 3)"),
+    ],
+    # 4A0A8.c:2971-2993: the eased placements go to the typed set, which ignores them without one.
+    "F01212": [
+        ("    Event_SplashLayerView* var_s1 = Render_gimLayers;\n\n"
+         "    for (i = 0; i < 3; ++i, ++var_s0, ++var_s1) {",
+         "\n    for (i = 0; i < 3; ++i, ++var_s0) {",
+         "the tweens index the typed set's layers instead of walking its PS1 records"),
+        ("            if (Render_gimLayers != NULL) {\n"
+         "                var_s1->offsetX = (var_s0->startX + ((var_s0->deltaX * temp_a0) >> 0xC));\n"
+         "                var_s1->offsetY = (var_s0->startY + ((var_s0->deltaY * temp_a0) >> 0xC));\n"
+         "                var_s1->scaleFixed12 = (var_s0->startScaleFixed12 + ((var_s0->deltaScaleFixed12 * temp_a0) >> 0xC));\n"
+         "                var_s1->brightness = (var_s0->startBrightness + ((var_s0->deltaBrightness * temp_a0) >> 0xC));\n"
+         "            }",
+         "            VS::Render::PlaceLiveGimLayer(i, var_s0->startX + ((var_s0->deltaX * temp_a0) >> 0xC),\n"
+         "                                          var_s0->startY + ((var_s0->deltaY * temp_a0) >> 0xC),\n"
+         "                                          var_s0->startScaleFixed12 + ((var_s0->deltaScaleFixed12 * temp_a0) >> 0xC),\n"
+         "                                          var_s0->startBrightness + ((var_s0->deltaBrightness * temp_a0) >> 0xC));",
+         "the eased placement is stored, truncated as the original's fields were, through the typed set"),
     ],
     # F01818 / BATTLE 7CD68.c:934: runtime views are rebased by native_views.py, not on-disc structs.
     "F01818": [
@@ -4101,18 +4169,6 @@ TYPE_FIXES: dict[str, list[tuple[str, str, str]]] = {
                  "room-effect commands begin with a four-byte size/opcode header, not a native pointer")],
     "T00453": [("int sceneEntry;", "int* sceneEntry;",
                  "runtime room-effect view shares the canonical native geometry pointer")],
-    "T00542": [
-        (f"u_int {field} :", f"u_short {field} :", "GIM flags occupy two bytes before vramPage and brightness")
-        for field in ("drawEnabled", "loading", "textureMode", "drawRoutine", "loadPhase", "texturePageCount",
-                      "ownsPalette", "reservedBits13")
-    ],
-    "T00219": [
-        ("    int loaderAndImageData[0xFA];",
-         "    union {\n        struct {\n            void* nativePointer10;\n"
-         "            void* nativePointer14;\n            int reservedLoaderData[0xF8];\n"
-         "        };\n        int loaderAndImageData[0xF8 + 2 * sizeof(void*) / sizeof(int)];\n    };",
-         "event splash layers share the GIM renderer's native file/request pointer slots and array stride"),
-    ],
     "T00237": [("u_char workArea[0x1FD0];",
                  "int projectedVertices[768];\n    int vertexDepths[768];\n"
                  "    unsigned projectedVertexCount;\n    u_char reserved1804[0x7CC];",
@@ -4805,11 +4861,11 @@ REGEX_FIXES += [
          (('temp_v0', 'text_result'),),
          "F01037 4A0A8.c:707-728 assigns temp_v0 from vs_battle_setTextBox(boxId,0). Negative values keep waiting, nonnegative finish, positive values are copied to textBoxSelection. text_result covers both pending/completion status and a selected result; not bool or always a selection."),
         ("Event::ScriptConfigureSplashLayer",
-         (('new_var', 'splash_tween'), ('temp_a1', 'splash_layer')),
-         "F01044 4A0A8.c:857-877 obtains temp_a1 from the layer base, early-outs if absent, advances by encoded index, and updates render/offset/scale/brightness. new_var points at the matching D_800F4B30 tween and clears duration for immediate configuration. Activation receives temp_a1, not the tween."),
+         (('new_var', 'splash_tween'),),
+         "F01044 4A0A8.c:857-877 early-outs without a GIM set, clears the encoded layer's D_800F4B30 tween duration for immediate configuration, then sets the layer's routine/offset/scale/brightness and activates it. #276 row 6 moved the layer writes to VS::Render::ConfigureLiveGimLayer; new_var only survives if the tween pointer is reintroduced."),
         ("Event::ScriptTweenSplashLayer",
-         (('temp_a1', 'splash_tween'), ('temp_a2', 'layer_index'), ('temp_a3', 'splash_layer')),
-         "F01045 4A0A8.c:879-903 derives temp_a2=byte5>>6, chooses temp_a1 in the tween array, and offsets temp_a3 in the layer array. It waits for idle tween, captures start/delta values from layer, and resets elapsed. These roles remain distinct through all accesses, including brightness byte view."),
+         (('temp_a1', 'splash_tween'), ('temp_a2', 'layer_index')),
+         "F01045 4A0A8.c:879-903 derives temp_a2=byte5>>6 and chooses temp_a1 in the tween array; #276 row 6 reads the layer's typed placement (splash_layer) instead of offsetting a PS1 record. It waits for idle tween, captures start/delta values from the placement, and resets elapsed."),
         ("Event::ScriptSetDialogInteger",
          (('temp_s0', 'source_flag_id'),),
          "F01048 4A0A8.c:916-939 masks short+2 with0x3FF into temp_s0, then fetches that flag or adjacent pair into the selected dialog integer slot with explicit signedness. Only the source flag id changes name; integer slot and casts remain intact."),
@@ -4979,8 +5035,8 @@ REGEX_FIXES += [
          (('var_s3', 'primitive_cursor'), ('temp_v0_2', 'scanline_intensity')),
          "F01211 4A0A8.c:2937-2969 gets var_s3 from scratch primitive storage, emits/increments LINE_F2 packets, reuses it for the draw-tpage packet, and writes back the next storage address. temp_v0_2 is alternating parity<<5 (0 or32), used as draw predicate and RGB intensity through v. primitive_cursor covers the later reinterpretation instead of claiming it always denotes one line."),
         ("Event::UpdateEventImageTweens",
-         (('temp_a0', 'eased_fraction'), ('var_s0', 'splash_tween'), ('var_s1', 'splash_layer')),
-         "F01212 4A0A8.c:2971-2993 advances var_s0/var_s1 in lockstep across three tween/layer entries. temp_a0 is the curve result multiplying each delta before>>12. var_s0 also owns completion; var_s1 receives X/Y/scale/brightness only when the image-layer base is nonnull. Existing pointer-arithmetic/null-check ordering is preserved."),
+         (('temp_a0', 'eased_fraction'), ('var_s0', 'splash_tween')),
+         "F01212 4A0A8.c:2971-2993 advances var_s0 across three tween entries. temp_a0 is the curve result multiplying each delta before>>12. var_s0 also owns completion; #276 row 6 passes the eased X/Y/scale/brightness to VS::Render::PlaceLiveGimLayer, which ignores them without a GIM set as the original's null check did."),
         ("Event::UpdateEventWeatherTween",
          (('temp_lo', 'elapsed_fraction'),),
          "F01213 4A0A8.c:2995-3009 computes temp_lo=(++elapsed<<12)/duration and uses it for wind direction, strength, intensity interpolation before weather consumers. The same branch clears duration on equality. This is linear Q12 elapsed fraction, not F01212 eased fraction."),

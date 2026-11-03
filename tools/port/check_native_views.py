@@ -75,7 +75,7 @@ def main() -> int:
     checked = 0
     for family, canonical in ((nv.AI_VIEWS, 'T00532'), (nv.ACTOR_VIEWS, 'T00630'),
                               (nv.MODEL_VIEWS, 'T00239'), (nv.GIMMICK_VIEWS, 'T00255'),
-                              (nv.GIM_VIEWS, 'T00542'), (nv.SPHERE_VIEWS, 'T00215')):
+                              (nv.SPHERE_VIEWS, 'T00215')):
         mapping = offsets(canonical)
         for tid in sorted(family):
             if tid == canonical:

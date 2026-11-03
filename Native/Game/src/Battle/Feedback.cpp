@@ -12,7 +12,6 @@ extern "C" {
 #include "Field/RoomRendering.h"
 #include "Input/ControllerLiveState.h"
 #include "Render/Font.h"
-#include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"

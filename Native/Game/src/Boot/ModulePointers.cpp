@@ -212,7 +212,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/FramebufferEffects.h"
-#include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Render.h"
@@ -1471,10 +1470,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C7BA4u, 0u, (void*)&Render_DrawScaledTextBoxText, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C7EBCu, 0u, (void*)&Render_BlendGlyphIntoPixels, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C809Cu, 0u, (void*)&Render_BlendTextBoxIntoFramebuffer, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C8430u, 0u, (void*)&Render_QueueGimImage, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C8550u, 0u, (void*)&Render_ActivateGimLayer, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C86ACu, 0u, (void*)&Render_ReleaseGimImages, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C8778u, 0u, (void*)&Render_UpdateGimImages, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8C50u, 0u, (void*)&Menu_Framework_LoadMenuOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E04u, 0u, (void*)&Menu_InitInformationTextBox, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C8E48u, 0u, (void*)&Menu_Framework_MenuItem, 0u, 0u, 0u},
@@ -1522,13 +1517,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CB79Cu, 0u, (void*)&Effects_AcquireScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB7DCu, 0u, (void*)&Effects_ReleaseScreenEffectOverlay, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CB83Cu, 0u, (void*)&Menu_UpdateTextBoxes, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CBBCCu, 0u, (void*)&Render_DrawGimTiles, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CC128u, 0u, (void*)&Render_DrawGimFramebufferFade, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CC204u, 0u, (void*)&Render_DrawGimScanlineWipe, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CC580u, 0u, (void*)&Render_SetGimWorkspaceDrawArea, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CC5C0u, 0u, (void*)&Render_SetGimFramebufferDrawArea, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CC600u, 0u, (void*)&Render_DrawGimCrossfade, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCA90u, 0u, (void*)&Render_DrawGimLayer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCB9Cu, 0u, (void*)&Items_ConsumeMiscItem, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCD40u, 0u, (void*)&Menu_Framework_DrawMainMenuCursor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCDF4u, 0u, (void*)&Menu_TextBox, 0u, 0u, 0u},
@@ -1909,7 +1897,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EA698u, 20u, (void*)&Battle_positionCursorSpriteTexCoords, sizeof Battle_positionCursorSpriteTexCoords, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EA6ACu, 4u, (void*)&Battle_positionCursorBlinkFrame, sizeof Battle_positionCursorBlinkFrame, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB5C8u, 64u, (void*)&Menu_Framework_menuLbas, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800EB608u, 256u, (void*)&Render_legacyGimDiscFiles, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB708u, 172u, (void*)&Render_compactGlyphLeftTrim, sizeof Render_compactGlyphLeftTrim, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB7B4u, 32u, (void*)&Render_compactGlyphWidths, sizeof Render_compactGlyphWidths, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB7D4u, 60u, (void*)&Render_compactGlyphIndices, sizeof Render_compactGlyphIndices, 1u, 1u},
@@ -1919,7 +1906,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EB9B0u, 4u, (void*)&Battle_hudSlideOffset, sizeof Battle_hudSlideOffset, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EB9B4u, 4u, (void*)&Effects_screenEffectOverlay, sizeof Effects_screenEffectOverlay, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9B8u, 4u, (void*)&Battle_targetSphere, sizeof Battle_targetSphere, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800EB9BCu, 4u, (void*)&Render_gimLayers, sizeof Render_gimLayers, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9C0u, 4u, (void*)&Menu_Framework_menuItems, sizeof Menu_Framework_menuItems, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9C4u, 4u, (void*)&Menu_Framework_lootLists, sizeof Menu_Framework_lootLists, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800EB9C8u, 4u, (void*)&Menu_Framework_lootEntry, sizeof Menu_Framework_lootEntry, 0u, 0u},
@@ -1964,7 +1950,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800EBDBCu, 16u, (void*)&Battle_chainAbilityActionIds, sizeof Battle_chainAbilityActionIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EBDCCu, 16u, (void*)&Battle_defenseAbilityActionIds, sizeof Battle_defenseAbilityActionIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC258u, 4u, (void*)&Battle_puzzleTimerTextPointer, sizeof Battle_puzzleTimerTextPointer, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800EC25Cu, 16u, (void*)&Render_kGimLayerDrawRoutines, sizeof Render_kGimLayerDrawRoutines, 4u, sizeof Render_kGimLayerDrawRoutines[0]},
     {"BATTLE/BATTLE.PRG", 0x800EC26Cu, 4u, (void*)&Core_interfaceRandomState, sizeof Core_interfaceRandomState, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC270u, 16u, (void*)&Menu_Framework_cursorBrightnessAnimation, sizeof Menu_Framework_cursorBrightnessAnimation, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800EC284u, 72u, (void*)&Menu_textBoxAnchors, sizeof Menu_textBoxAnchors, 1u, 1u},
@@ -2211,7 +2196,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F5168u, 56u, (void*)&Battle_stringContext, sizeof Battle_stringContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51B8u, 4u, (void*)&Menu_activeTextBoxOrderingTable, sizeof Menu_activeTextBoxOrderingTable, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F51C0u, 8u, (void*)&Menu_Framework_menuState, sizeof Menu_Framework_menuState, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800F51C8u, 4u, (void*)&Render_gimBlendSelect, sizeof Render_gimBlendSelect, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5210u, 4u, (void*)&Items_miscItemInvoked, sizeof Items_miscItemInvoked, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F5218u, 4u, (void*)&Effects_menuReloadSlot, sizeof Effects_menuReloadSlot, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F521Cu, 4u, (void*)&Effects_pendingTracks, sizeof Effects_pendingTracks, 1u, 1u},
@@ -2908,7 +2892,6 @@ const Content_ModulePointerTable Content_modulePointers[] = {
     {"BATTLE/BATTLE.PRG", 0x81E20, 20u, (void**)Battle_limbNames, sizeof Battle_limbNames / sizeof Battle_limbNames[0], NULL}, // G00138 vs_battle_limbNames
     {"BATTLE/BATTLE.PRG", 0x82D88, 16u, (void**)Event_textBoxFrameStyles, sizeof Event_textBoxFrameStyles / sizeof Event_textBoxFrameStyles[0], NULL}, // G00148 D_800EB588
     {"BATTLE/BATTLE.PRG", 0x835AC, 4u, (void**)Battle_spellClassSpellIds, sizeof Battle_spellClassSpellIds / sizeof Battle_spellClassSpellIds[0], NULL}, // G00206 _spellIds
-    {"BATTLE/BATTLE.PRG", 0x83A5C, 4u, (void**)Render_kGimLayerDrawRoutines, sizeof Render_kGimLayerDrawRoutines / sizeof Render_kGimLayerDrawRoutines[0], NULL}, // G00212 D_800EC25C
     {"BATTLE/BATTLE.PRG", 0x83B24, 2u, (void**)Effects_scriptRenderers, sizeof Effects_scriptRenderers / sizeof Effects_scriptRenderers[0], NULL}, // G00222 D_800EC324
     {"BATTLE/BATTLE.PRG", 0x83BF4, 49u, (void**)Effects_scriptOpcodeHandlers, sizeof Effects_scriptOpcodeHandlers / sizeof Effects_scriptOpcodeHandlers[0], NULL}, // G00227 D_800EC3F4
     {"BATTLE/BATTLE.PRG", 0x88F90, 9u, (void**)Battle_Ai_decisionCallbacks, sizeof Battle_Ai_decisionCallbacks / sizeof Battle_Ai_decisionCallbacks[0], NULL}, // G00233 D_800F1790

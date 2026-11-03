@@ -788,46 +788,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Render\\Images.cpp": [
-[
-62,
-[
-"        layer_cursor = VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *layer_cursor * 3);"
-],
-[
-"        layer_cursor = (Render_GimLayer *)(VS::Core::Memory::AllocateLiveFromHighEnd(sizeof *layer_cursor * 3));"
-]
-],
-[
-64,
-[
-"        layer_cursor->fileData = VS::Core::Memory::AllocateLiveFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB);"
-],
-[
-"        layer_cursor->fileData = (u_short *)(VS::Core::Memory::AllocateLiveFromHighEnd((char)(*(u_int (*)[])&Render_legacyGimDiscFiles)[id] << 0xB));"
-]
-],
-[
-406,
-[
-"                    prim = Render_frameScratch.primitiveCursor;"
-],
-[
-"                    prim = (u_long *)(Render_frameScratch.primitiveCursor);"
-]
-],
-[
-694,
-[
-"        gim->scaleAndOrder & 0x4000 ? Render_frameScratch.orderingTable + 0x1FF8 - layer_index * 4",
-"                           : Render_frameScratch.overlayOrderingTable + 0x18 - layer_index * 8);"
-],
-[
-"        (u_long *)(gim->scaleAndOrder & 0x4000 ? ((u_char*)(Render_frameScratch.orderingTable)) + 0x1FF8 - layer_index * 4",
-"                           : ((u_char*)(Render_frameScratch.overlayOrderingTable)) + 0x18 - layer_index * 8));"
-]
-]
-],
 "Native\\Game\\src\\Actors\\ActorLoading.cpp": [
 [
 78,

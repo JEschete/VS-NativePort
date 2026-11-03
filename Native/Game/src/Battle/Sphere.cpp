@@ -28,7 +28,6 @@ extern "C" {
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/Menus.h"
 #include "Render/Font.h"
-#include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Palette.h"
 #include "Render/Primitives.h"

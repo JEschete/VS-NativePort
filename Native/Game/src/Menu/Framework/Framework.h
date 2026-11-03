@@ -8,6 +8,9 @@ typedef struct Menu_Framework_MenuControlState Menu_Framework_MenuControlState;
 typedef struct Menu_Framework_MenuRow Menu_Framework_MenuRow;
 typedef struct Menu_Framework_TextHeader Menu_Framework_TextHeader;
 
+// decomp: src/include/lbaMacros.h:3
+#define squashLba(file) squashLbaVal((file##_LBA), (file##_SIZE))
+
 // decomp: src/include/lbaMacros.h:4
 #define squashLbaVal(lba, size) ((lba) << 8 | ((size) >> 11))
 
