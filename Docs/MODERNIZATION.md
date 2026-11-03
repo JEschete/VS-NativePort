@@ -13,7 +13,7 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Roadmap step and issue | Owned left | Generated left | Original lines | Under test | Characterize first | Unmeasured |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| 3: #45 Owned game, session and scene state | 0 | 335 | 8,113 | 176 | 182 | 0 |
+| 3: #45 Owned game, session and scene state | 0 | 298 | 7,884 | 189 | 169 | 0 |
 | 4: #44 Runtime modes and logical ticks | 0 | 22 | 869 | 13 | 14 | 0 |
 | 5: #52 Logical input and typed settings | 0 | 20 | 403 | 19 | 1 | 0 |
 | 6: #47 Stable asset IDs and decoded records | 0 | 28 | 1,734 | 26 | 2 | 0 |
@@ -32,22 +32,22 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 7 | 132 | 4 | 7 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 3479 | 104,588 | 1618 | 2142 | 0 |
+| **Total** | 0 | 3442 | 104,359 | 1631 | 2129 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 281 |
-| todo | 3,479 |
+| done | 318 |
+| todo | 3,442 |
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,896 |
-| Referenced by the original-address module table | 0 | 2,120 |
+| Called from generated code | 0 | 1,864 |
+| Referenced by the original-address module table | 0 | 2,087 |
 | Calls an SDK shim | 0 | 461 |
-| Signature uses SDK integer types or `void*` | 0 | 862 |
-| Compiled with relaxed settings | 0 | 3,477 |
+| Signature uses SDK integer types or `void*` | 0 | 853 |
+| Compiled with relaxed settings | 0 | 3,440 |
 
-Function bodies: 3,224 found, 14 macro aliases, 28 templates with 491 instances, 3 not located. 0 of 0 open owned functions have generated callers.
+Function bodies: 3,225 found, 13 macro aliases, 28 templates with 491 instances, 3 not located. 0 of 0 open owned functions have generated callers.
 
 SDK shim sites still recording `VS_UNPORTED`: 44.
 

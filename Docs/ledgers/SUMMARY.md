@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 281 | owned functions |
-| 281 | owned functions in C++ sources |
-| 3479 | generated function rows |
+| 318 | owned functions |
+| 318 | owned functions in C++ sources |
+| 3442 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 281 | 0 | 3,926 |
-| `cpp` | 281 | 0 | 3,926 |
+| `modernized` | 318 | 0 | 3,889 |
+| `cpp` | 318 | 0 | 3,889 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 281 |
-| `vs_namespace` | 281 |
-| `typed_interface` | 281 |
-| `no_bridge` | 281 |
-| `strict_clean` | 281 |
-| `behavior_evidence` | 281 |
+| `source_cpp` | 318 |
+| `vs_namespace` | 318 |
+| `typed_interface` | 318 |
+| `no_bridge` | 318 |
+| `strict_clean` | 318 |
+| `behavior_evidence` | 318 |
 
-Promotion records: 281; derived `cpp=x`: 281, `cpp=wip`: 0. Verification records: 100; `verified=x` markers: 45.
+Promotion records: 318; derived `cpp=x`: 318, `cpp=wip`: 0. Verification records: 101; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -246,6 +246,8 @@ The fifty-fourth is AI movement behaviour and actor cleanup (F01648, F01661, F01
 and MovementBehavior.h, ActorCleanup.h and the twenty-nine Battle_Ai_ symbols are retired.
 The fifty-fifth is AI ground navigation and navigation primitives (F01645, F01646, F01647, F01672, F01694, F01752, F01753, F01754, F01755, F01756, F01757, F01775, F01776, F01777, F01781, F01782, F01783, F01784, F01785, F01787, F01788, F01789, F01798, F01799, F01801, F01802, F01803, F01805, F01806, F01826, F01827, F01828, F01832, F04202): VS::Battle::Ai navigation is C++ over host interfaces that refuse rooms, directions, tiles, actor ids, hesitation slots, locomotion modes, route links and occupancy offsets outside their tables and cyclic actor lists,
 and GroundNavigation.h, NavigationPrimitives.h and the thirty-four Battle_Ai_ symbols are retired.
+The fifty-sixth, and the first generated-function slice (#276), is the core runtime, copy, random and game text helpers (F00023, F00055, F00213, F00214, F00241, F00328, F01273, F01401, F01402, F01404, F01455, F02719, F02822, F02823, F02826, F02827, F03263, F03264, F03427, F03428, F03429, F03430, F03431, F03432, F03433, F03434, F03435, F03485, F03503, F03509, F03510, F03568, F03569, F03570, F03571, F03574, F03586): the empty handlers, span copies, random draws and game text formatting are VS::Core C++ whose live bindings refuse runaway sizes and unterminated or oversized text,
+and Callbacks.h, Compatibility.h, Memory/Copy.h, Runtime.h, String/GameText.h and the twenty Core_ symbols are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
