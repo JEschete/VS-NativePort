@@ -10,6 +10,7 @@
 #include <iterator>
 #include <optional>
 
+#include "Actors/ActorTableLive.hpp"
 #include "Actors/Appearance.hpp"
 #include "Actors/AppearanceLiveState.h"
 #include "Actors/SequencePlaybackLive.hpp"
@@ -47,26 +48,6 @@ constexpr unsigned kGimmickClutRow = 0x1F;
 constexpr unsigned kWeaponTableSize = std::size(Actors_weaponModels);
 constexpr unsigned kWeaponSlots = kWeaponTableSize / kWeaponsPerActor;
 constexpr int kNoActorStatus = static_cast<int>(AppearanceStatus::kNoModel);
-
-void WarnRefused(const char* operation, const char* reason) {
-  Core_Warnf("actors", "%s refused: %s", operation, reason);
-}
-
-[[nodiscard]] bool IsActorId(int actor_id) {
-  return static_cast<unsigned>(actor_id) < std::size(Actors_actorRecords);
-}
-
-// The actor `actor_id` names, or null for an empty slot. An id past the table
-// (which the original read past) is reported and treated as empty.
-[[nodiscard]] Actors_ActorRecord* LiveActor(int actor_id,
-                                            const char* operation) {
-  if (!IsActorId(actor_id)) {
-    Core_Warnf("actors", "%s refused: actor id %d is outside the actor table",
-               operation, actor_id);
-    return nullptr;
-  }
-  return Actors_actorRecords[actor_id];
-}
 
 [[nodiscard]] Actors_WeaponModel** LiveWeaponPair(unsigned slot,
                                                   const char* operation) {
@@ -139,7 +120,7 @@ struct LivePulseModel {
 
 [[nodiscard]] LivePulseModel FindPulseModel(int actor_id,
                                             const char* operation) {
-  if (Actors_ActorRecord* actor = LiveActor(actor_id, operation)) {
+  if (Actors_ActorRecord* actor = LiveActorRecord(actor_id, operation)) {
     return {.actor = actor};
   }
   return {.gimmick = Field_FindGimmickForActorSlot(actor_id)};
@@ -148,7 +129,7 @@ struct LivePulseModel {
 class LiveTransitionActors final : public AppearanceTransitionActors {
  public:
   [[nodiscard]] bool Exists(int actor_id) const override {
-    return IsActorId(actor_id) && Actors_actorRecords[actor_id] != nullptr;
+    return IsActorTableId(actor_id) && Actors_actorRecords[actor_id] != nullptr;
   }
   void SetTransitionState(int actor_id, int state) override {
     Actors_actorRecords[actor_id]->instance.actionAnimationState =
@@ -181,7 +162,7 @@ void StoreLiveWeaponAppearance(const WeaponAppearance& appearance,
 }
 
 void SetLiveActorPaletteFade(int actor_id, int fade_parameter) {
-  Actors_ActorRecord* actor = LiveActor(actor_id, "SetActorPaletteFade");
+  Actors_ActorRecord* actor = LiveActorRecord(actor_id, "SetActorPaletteFade");
   if (actor == nullptr) return;
   PaletteFade fade{.active = actor->paletteFadeActive != 0,
                    .reverse = actor->paletteFadeReverse != 0,
@@ -196,7 +177,7 @@ void SetLiveActorPaletteFade(int actor_id, int fade_parameter) {
 
 void ResetLiveActorWeaponVisibilityBlend(int actor_id) {
   constexpr const char* kOperation = "ResetActorWeaponVisibilityBlend";
-  const Actors_ActorRecord* actor = LiveActor(actor_id, kOperation);
+  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return;
   Actors_WeaponModel** pair = LiveWeaponPair(actor->instance.slot, kOperation);
   if (pair == nullptr) return;
@@ -224,7 +205,7 @@ void SetLiveWeaponBrightnessOverride(int actor_id, int override_enabled,
 
 void SetLiveRoomActorScale(const VECTOR* room_scale) {
   if (room_scale == nullptr) {
-    WarnRefused("SetRoomActorScale", "null scale");
+    WarnActorRefused("SetRoomActorScale", "null scale");
     return;
   }
   Core::Math::Vec3 stored = VectorOf(Actors_roomActorScale);
@@ -262,7 +243,7 @@ int DisableLiveModelPalettePulse(int actor_id, int pulse_slot) {
 
 void BeginLiveActorShadowBlend(Actors_ActorRecord* actor, int blend_frames) {
   if (actor == nullptr) {
-    WarnRefused("BeginActorShadowBlend", "null actor");
+    WarnActorRefused("BeginActorShadowBlend", "null actor");
     return;
   }
   ShadowBlend shadow = LoadLiveShadowBlend(actor->shadowBlend);
@@ -275,10 +256,10 @@ void BeginLiveActorShadowBlend(Actors_ActorRecord* actor, int blend_frames) {
 
 int LiveActorFadeParameters(int actor_id, Render_ColorCode* fade_color_out) {
   constexpr const char* kOperation = "ActorFadeParameters";
-  const Actors_ActorRecord* actor = LiveActor(actor_id, kOperation);
+  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
   if (fade_color_out == nullptr) {
-    WarnRefused(kOperation, "null color");
+    WarnActorRefused(kOperation, "null color");
     return kNoActorStatus;
   }
   Render::ColorCode fade = ToColor(*fade_color_out);
@@ -290,10 +271,10 @@ int LiveActorFadeParameters(int actor_id, Render_ColorCode* fade_color_out) {
 int SetLiveActorFadeParameters(int actor_id,
                                const Render_ColorCode* fade_color) {
   constexpr const char* kOperation = "SetActorFadeParameters";
-  Actors_ActorRecord* actor = LiveActor(actor_id, kOperation);
+  Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
   if (fade_color == nullptr) {
-    WarnRefused(kOperation, "null color");
+    WarnActorRefused(kOperation, "null color");
     return kNoActorStatus;
   }
   ActorColors colors = LoadColors(*actor);
@@ -304,10 +285,10 @@ int SetLiveActorFadeParameters(int actor_id,
 
 int LiveActorTint(int actor_id, Render_ColorCode* tint_out) {
   constexpr const char* kOperation = "ActorTint";
-  const Actors_ActorRecord* actor = LiveActor(actor_id, kOperation);
+  const Actors_ActorRecord* actor = LiveActorRecord(actor_id, kOperation);
   if (actor == nullptr) return kNoActorStatus;
   if (tint_out == nullptr) {
-    WarnRefused(kOperation, "null color");
+    WarnActorRefused(kOperation, "null color");
     return kNoActorStatus;
   }
   *tint_out = ToLiveColor(ActorTint(LoadColors(*actor)));
@@ -315,7 +296,7 @@ int LiveActorTint(int actor_id, Render_ColorCode* tint_out) {
 }
 
 int SetLiveActorTint(int actor_id, const Render_ColorCode* tint) {
-  Actors_ActorRecord* actor = LiveActor(actor_id, "SetActorTint");
+  Actors_ActorRecord* actor = LiveActorRecord(actor_id, "SetActorTint");
   if (actor == nullptr) return kNoActorStatus;
   ActorColors colors = LoadColors(*actor);
   SetActorTint(colors, tint != nullptr

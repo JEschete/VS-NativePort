@@ -2,6 +2,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/CameraViewLive.hpp"
@@ -218,7 +219,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
         ((int)(State_tickSpeed + (((u_int)State_tickSpeed) >> 0x1F))) >> 1;
 
     if (preview_actor->instance.isFrozen) {
-        Actors_UpdateActorTextureScrolling(preview_actor);
+        VS::Actors::UpdateLiveActorTextureScrolling(preview_actor);
         Actors_UpdateActorAnimationBlend(preview_actor);
     } else {
         Actors_PrepareActorRootTransform(preview_actor);
@@ -227,7 +228,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
     VS::Actors::DrawLiveActorModel(*preview_actor, *preview_camera_matrix, 0);
 
     if (preview_actor->companionSlot > 1) {
-        Actors_UpdateActorTextureScrolling(Actors_actorRecords[16]);
+        VS::Actors::UpdateLiveActorTextureScrolling(Actors_actorRecords[16]);
     }
 
     if (preview_actor->companionSlot != 0) {

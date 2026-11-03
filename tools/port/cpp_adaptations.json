@@ -1396,17 +1396,6 @@
 ]
 ]
 ],
-"Native\\Game\\src\\Actors\\TextureAnimation.cpp": [
-[
-121,
-[
-"                return;"
-],
-[
-"                return 0;"
-]
-]
-],
 "Native\\Game\\src\\Battle\\ActionExecution.cpp": [
 [
 165,

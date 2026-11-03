@@ -3,6 +3,7 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -99,7 +100,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
         actor = entries[i];
         if ((actor != NULL) && (actor->instance.boneCount != 0) && !actor->instance.isSkipped
             && (actor->instance.attachBone != 0xFC)) {
-            ((void (*)(void*))Actors_UpdateActorTextureAnimations)(actor);
+            VS::Actors::UpdateLiveActorTextureAnimations(actor);
             if (actor->instance.palettePulse.kind != 0) {
                 VS::Actors::UpdateLiveActorPalettePulse(*actor);
             }
@@ -121,7 +122,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                         ++previous;
                     } while (step < i);
                 }
-                ((void (*)(void*))Actors_UpdateActorTextureScrolling)(actor);
+                VS::Actors::UpdateLiveActorTextureScrolling(actor, i);
             texture_ready:;
 
                 if (actor->routePhase) {
@@ -147,7 +148,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                 if (attachmentId != 0) {
                     if (attachmentId >= 2U) {
                         attached = entries[actor->companionSlot];
-                        ((void (*)(void*))Actors_UpdateActorTextureAnimations)(attached);
+                        VS::Actors::UpdateLiveActorTextureAnimations(attached);
                         if (attached->instance.palettePulse.kind != 0) {
                             VS::Actors::UpdateLiveActorPalettePulse(*attached);
                         }
@@ -168,7 +169,7 @@ void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
                                     ++previousAttached;
                                 } while (step < i);
                             }
-                            ((void (*)(void*))Actors_UpdateActorTextureScrolling)(attached);
+                            VS::Actors::UpdateLiveActorTextureScrolling(attached, i);
                         linked_texture_ready:;
                         }
                     }

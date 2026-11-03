@@ -2,6 +2,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -246,10 +247,10 @@ int Actors_SelectSharedSequenceBank(u_int bank_id)
         if ((actor != NULL) && actor->textureRowOffsets[Actors_sharedSequenceBankIndex] != 0xFF
             && (actor->textureRowOffsets[bank_id - 1] == 0xFF)) {
             if (actor->textureAnimationSlots[0].currentFrame >= 2) {
-                Actors_UploadActorTextureFrame(actor, 0, 0);
+                VS::Actors::UploadLiveActorTextureFrame(actor, 0, 0);
             }
             if (actor->textureAnimationSlots[1].currentFrame >= 2) {
-                Actors_UploadActorTextureFrame(actor, 1, 0);
+                VS::Actors::UploadLiveActorTextureFrame(actor, 1, 0);
             }
         }
     }
@@ -749,7 +750,7 @@ int Actors_PlayActorAnimation(int actorId, int animation, int arg2, int blendFra
     }
     actor->textureAnimationFrames[0].overlayIndex = 0;
     actor->textureAnimationFrames[1].overlayIndex = 0;
-    Actors_SetActorTextureAnimation(actorId, 1, 1, 1);
+    VS::Actors::SetLiveActorTextureAnimation(actorId, 1, 1, 1);
     Actors_ClearActorBonePoseLocks(actor);
     if ((actor->isRunning) && !keepFlag15) {
         actor->isRunning = 0;
@@ -1362,7 +1363,8 @@ loop: {
         actor->paletteFadeState[1] = 0x20;
         break;
     case 44:
-        ((void (*)(int index, u_char* arg))Actors_UploadActorTextureOverlay)(id, script);
+        VS::Actors::UploadLiveActorTextureOverlay(
+            id, {.overlay = script[1], .source_x = script[2], .source_y = script[3]});
         break;
     case 28:
         Field_ApplyGimmickInteractionCommand(actor, script[1]);
@@ -1593,16 +1595,16 @@ loop: {
         actor->textureAnimationFrames[arg].columns = script[4];
         break;
     case 32:
-        Actors_SetActorTextureAnimation(id, 1, 1, 1);
+        VS::Actors::SetLiveActorTextureAnimation(id, 1, 1, 1);
         break;
     case 33:
-        Actors_SetActorTextureAnimation(id, 1, 1, 0);
+        VS::Actors::SetLiveActorTextureAnimation(id, 1, 1, 0);
         break;
     case 34:
-        Actors_SetActorTextureAnimation(id, 1, 0, 1);
+        VS::Actors::SetLiveActorTextureAnimation(id, 1, 0, 1);
         break;
     case 35:
-        Actors_SetActorTextureAnimation(id, 1, 0, 0);
+        VS::Actors::SetLiveActorTextureAnimation(id, 1, 0, 0);
         break;
     case 40:
         ((void (*)(...))Actors_IgnoreAnimationEvent)(script);

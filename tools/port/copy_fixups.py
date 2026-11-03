@@ -202,6 +202,12 @@ _ACTORS_APPEARANCE_LIVE = {
         ("SetLiveActorFadeParameters", "F00860"), ("LiveActorTint", "F00861"), ("SetLiveActorTint", "F00862"),
         ("StartLiveActorAppearanceTransition", "F00983")),
 }
+_ACTORS_TEXTURE_LIVE = {
+    r"Native\Game\include\Actors\TextureAnimationLive.hpp": (
+        ("SetLiveActorTextureAnimation", "F00973"), ("UpdateLiveActorTextureAnimations", "F00974"),
+        ("UploadLiveActorTextureFrame", "F00975"), ("ResetLiveActorTextureFrames", "F00976"),
+        ("UploadLiveActorTextureOverlay", "F00977"), ("UpdateLiveActorTextureScrolling", "F00978")),
+}
 
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
@@ -210,6 +216,7 @@ NATIVE_HELPER_HEADERS = {
        for header, rows in _RENDER_LIVE.items() for name, _ in rows},
     **{f"VS::Items::{name}": header for header, rows in _ITEMS_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_APPEARANCE_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_TEXTURE_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -649,7 +656,8 @@ OWNED_CALL_BINDINGS = {
 } | {
     fid: f"VS::Save::{name}" for name, fids in _SAVE_SNAPSHOT_LIVE.items() for fid in fids
 } | {fid: f"VS::Items::{name}" for rows in _ITEMS_LIVE.values() for name, fid in rows} | {
-    fid: f"VS::Actors::{name}" for rows in _ACTORS_APPEARANCE_LIVE.values() for name, fid in rows}
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_APPEARANCE_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_TEXTURE_LIVE.values() for name, fid in rows}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -2118,49 +2126,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Audio_Native_ConfigureChannel(pChannel);",
          "sound effects share the same native voice engine as music"),
     ],
-    "F00975": [
-        ("    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;",
-         '    Core_Debugf("texture", "actor=%u model=%u bank=%u slot=%u clut=%u channel=%d frame=%d overlay=%u row=%u src=(%d,%d) dst=(%d,%d) size=(%d,%d)",\n'
-         "        (unsigned)actor->instance.slot, (unsigned)actor->modelId, (unsigned)Actors_sharedSequenceBankIndex,\n"
-         "        (unsigned)actor->textureSlot, (unsigned)actor->clutA, index, frame, (unsigned)animation->overlayIndex,\n"
-         "        (unsigned)actor->textureRowOffsets[Actors_sharedSequenceBankIndex],\n"
-         "        (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64 + srcX, srcY + 256,\n"
-         "        dstX + x * 64, y * 256 + row * 64 + py, width, height);\n"
-         "    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;",
-         "toggleable live facial tile selection and copy rectangle diagnostics"),
-    ] + [
-        (old, new, "#276 row 6: the texture move goes through the bounded VS::Render overlay queue")
-        for old, new in (
-            ("    DR_MOVE* packet;\n", ""),
-            ("    packet = vs_battlePacketBegin();\n", ""),
-            ("    SetDrawMove(packet, &rect, dstX + (x * 64), srcY);\n"
-             "    VS::Render::AppendLiveOverlayPrimitive(packet);\n"
-             "    vs_battlePacketEnd(packet);",
-             "    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), srcY);"),
-        )
-    ],
-    "F00977": [
-        (old, new, "#276 row 6: the texture move goes through the bounded VS::Render overlay queue")
-        for old, new in (
-            ("    DR_MOVE* packet;\n", ""),
-            ("    packet = vs_battlePacketBegin();\n", ""),
-            ("    SetDrawMove(packet, &rect, dstX + (x * 64), (y * 256) + (row * 64) + py);\n"
-             "    VS::Render::AppendLiveOverlayPrimitive(packet);\n"
-             "    vs_battlePacketEnd(packet);",
-             "    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), (y * 256) + (row * 64) + py);"),
-        )
-    ],
-    "F00978": [
-        (old, new, "#276 row 6: the texture move goes through the bounded VS::Render overlay queue")
-        for old, new in (
-            ("        DR_MOVE* packet;\n", ""),
-            ("        packet = vs_battlePacketBegin();\n", ""),
-            ("        SetDrawMove(packet, &rect, originX + dstX, originY + overlay->y);\n"
-             "        VS::Render::AppendLiveOverlayPrimitive(packet);\n"
-             "        vs_battlePacketEnd(packet);",
-             "        VS::Render::QueueLiveTextureRectangleMove(&rect, originX + dstX, originY + overlay->y);"),
-        )
-    ],
     "F00801": [
         ("*((u_char*)temp_s0 + Actors_sharedSequenceBankIndex + 0x183E)",
          "temp_s0->textureRowOffsets[Actors_sharedSequenceBankIndex]",
@@ -2842,6 +2807,12 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "VS::Menu::Files::UpdateLiveContainerSave(*submenuState);",
          "C48.c:334 the container save submenu runs through its typed live binding"),
     ],
+    "F04127": [
+        ("VS::Actors::UploadLiveActorTextureOverlay(id, script);",
+         "VS::Actors::UploadLiveActorTextureOverlay(\n"
+         "            id, {.overlay = script[1], .source_x = script[2], .source_y = script[3]});",
+         "#276 row 22: event 44's overlay, source x and source y bytes as the typed overlay copy (40564.c:1502)"),
+    ],
     "F01008": [
         ("VS::Actors::UpdatePalettePulse(actor, NULL, 0);",
          "VS::Actors::UpdateLiveActorPalettePulse(*actor);",
@@ -2863,6 +2834,12 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "Gimmicks retain a separate typed appearance entry point"),
         ("if ((*previous)->modelId == texture)", "if (*previous != NULL && (*previous)->modelId == texture)",
          "empty actor slots cannot share texture animation"),
+    ] + [
+        (f"VS::Actors::UpdateLiveActorTextureScrolling({who});",
+         f"VS::Actors::UpdateLiveActorTextureScrolling({who}, i);",
+         "#276 row 22: scrolling carries the loop index the original left in $s2 (40564.c:1552)")
+        for who in ("actor", "attached")
+    ] + [
         ("if ((*previousAttached)->modelId == texture)",
          "if (*previousAttached != NULL && (*previousAttached)->modelId == texture)",
          "attached-actor texture lookup also traverses sparse slots"),
@@ -5503,9 +5480,6 @@ REGEX_FIXES += [
         ("Actors::BuildActorPoseAtMatrix",
          (('arg0', 'actor_id'), ('arg1', 'camera_matrix'), ('temp_s1', 'actor')),
          "F00918 3A1A0.c:1036 temporarily hides actor, sets one frame/step, prepares camera matrices from arg1, root transform and actor drawing, restores prior visible flag."),
-        ("Actors::ResetActorTextureFrames",
-         (('arg0', 'bank_index'), ('temp_s0', 'actor')),
-         "F00976 40564.c:1486 compares zero-based index to D_800E8F2C/sharedSequenceBankIndex and resets both texture slots for actors with textureRowOffsets[bank_index]!=FF. Not a one-based bank id."),
     )
     for old, new in bindings
 ]

@@ -13,6 +13,7 @@
 #include <span>
 #include <string_view>
 
+#include "Actors/TextureAnimationLive.hpp"
 #include "Legacy/Psx.h"
 #include "Render/DisplayControl.hpp"
 #include "Render/EncodedText.hpp"
@@ -23,7 +24,6 @@
 #include "Render/UiPacketsLive.hpp"
 
 extern "C" {
-#include "Actors/TextureAnimation.h"
 #include "Audio/Sfx.h"
 #include "Battle/Targeting.h"
 #include "Core/Diagnostics.h"
@@ -238,7 +238,7 @@ void DrawLiveProgressiveTextBoxText(Menu_TextBoxState* box) {
     Audio_PlaySfxCentered(kTextSoundGroup, result.sound);
   }
   if (result.reset_speaker) {
-    Actors_SetActorTextureAnimation(view.speaker_texture, 0, 0, 0);
+    VS::Actors::SetLiveActorTextureAnimation(view.speaker_texture, 0, 0, 0);
   }
   if (result.missing_strings != 0) {
     ReportTextBox(box, "referenced a string that is not set");

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/TextureAnimationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
@@ -9,7 +10,6 @@
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Actors/TextureAnimation.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Action.h"
 #include "Battle/ActionTable.h"
@@ -68,7 +68,7 @@ int Menu_SetTextBoxText(int boxId, char* str)
         box->opaque4 = 0;
         box->prevChunksPrinted = 0;
         if (!(box->flags.speakerTexture & 0x20)) {
-            Actors_SetActorTextureAnimation(box->flags.speakerTexture, 0, box->opaque2E + 1, 1);
+            VS::Actors::SetLiveActorTextureAnimation(box->flags.speakerTexture, 0, box->opaque2E + 1, 1);
             box->opaque2C = 1;
         }
         return 0;
@@ -463,7 +463,7 @@ int Menu_DismissTextBox(int id)
     Menu_TextBoxState* box = &Menu_textBoxes[id];
 
     if (!(box->flags.speakerTexture & 0x20)) {
-        Actors_SetActorTextureAnimation(box->flags.speakerTexture, 0, 0, 0);
+        VS::Actors::SetLiveActorTextureAnimation(box->flags.speakerTexture, 0, 0, 0);
     }
 
     if (box->state != 0) {

@@ -1,375 +1,222 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Render/UiPacketsLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
-#include "Render/Palette.h"
-#include "State/Timers.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Actors/TextureAnimation.hpp"  // NOLINT(build/include): native C++ interface.
 
-// decomp: BATTLE.PRG func_800AAD4C (src/BATTLE/BATTLE.PRG/40564.c:1301)
-int Actors_SetActorTextureAnimation(int actorId, int index, int value, int mode)
-{
-    Actors_ActorRecord* actor = Actors_actorRecords[actorId];
-    Actors_TextureAnimationSlot* slot;
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
 
-    if (actor == NULL) {
-        return -1;
-    }
+#include "Render/DisplayControl.hpp"
 
-    if (index >= 2) {
-        return -1;
-    }
+namespace VS::Actors {
+namespace {
+// VRAM halfword columns per texture page and lines per page and row.
+constexpr int kPageColumns = 64;
+constexpr int kPageLines = 256;
+constexpr int kRowLines = 64;
+// The sheets sit in the texture pages' lower half.
+constexpr int kSheetLines = 256;
+// Texels in one VRAM halfword at each depth.
+constexpr int k8BitTexelsPerHalfword = 2;
+constexpr int k4BitTexelsPerHalfword = 4;
+// Channel 1 staggers its first key by ten ticks per actor id.
+constexpr int kChannel1TicksPerActor = 10;
 
-    if (mode == 1 && value == 0) {
-        return 0;
-    }
-
-    slot = &actor->textureAnimationSlots[index];
-
-    switch (mode) {
-    case 0:
-        slot->mode = 0;
-        break;
-
-    case 1:
-        if (slot->mode == 1 && slot->timeline == value) {
-            return 0;
-        }
-
-        slot->timeline = value;
-        slot->keyIndex = 0;
-
-        slot->ticks = (index == 1) ? actorId * 10 : 0;
-
-        slot->mode = mode;
-        break;
-
-    case 2:
-        switch (slot->mode) {
-        case 0:
-            break;
-
-        case 1:
-            slot->mode = 2;
-            break;
-
-        case 2:
-            slot->mode = 1;
-            break;
-        }
-        break;
-    }
-
-    return 0;
+[[nodiscard]] int TexelsPerHalfword(TextureDepth depth) {
+  return depth == TextureDepth::k8Bit ? k8BitTexelsPerHalfword
+                                      : k4BitTexelsPerHalfword;
 }
 
-// decomp: BATTLE.PRG func_800AAE9C (src/BATTLE/BATTLE.PRG/40564.c:1357)
-int Actors_UpdateActorTextureAnimations(Actors_ActorRecord* actor)
-{
-    int i;
-
-    if (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] == 0) {
-        return 0;
-    }
-
-    for (i = 0; i < 2; ++i) {
-        Actors_TextureAnimationSlot* slot = &actor->textureAnimationSlots[i];
-        Actors_TextureAnimationKey* p;
-
-        if (slot->timeline == 0) {
-            continue;
-        }
-
-        switch (slot->mode) {
-        case 2:
-            continue;
-
-        case 0:
-            if (slot->currentFrame == 1) {
-                slot->timeline = 0;
-                continue;
-            }
-            // Fallthrough
-        case 1:
-            if (i == 0) {
-                p = &(*(Actors_TextureAnimationKey (*)[][28])&Actors_sheathedWeaponAnimationBases)[slot->timeline][slot->keyIndex];
-            } else {
-                p = &Actors_secondarySlotSequences[slot->timeline][slot->keyIndex];
-            }
-
-            ++slot->ticks;
-
-            if (p->duration < slot->ticks) {
-                slot->ticks = 0;
-                ++slot->keyIndex;
-                ++p;
-
-                if (p->frame == 0) {
-                    slot->keyIndex = 0;
-                    p = (i == 0) ? (*(Actors_TextureAnimationKey (*)[][28])&Actors_sheathedWeaponAnimationBases)[slot->timeline] : Actors_secondarySlotSequences[slot->timeline];
-                }
-            }
-
-            if (p->frame == 0) {
-                return 0;
-            }
-
-            slot->currentFrame = p->frame;
-            break;
-        }
-
-        Actors_UploadActorTextureFrame(actor, i, slot->currentFrame - 1);
-    }
-
-    // BUG: no return value, in practice it isn't read by the only caller.
+[[nodiscard]] Render::ScreenRect SheetRect(int x, int y, int width,
+                                           int height) {
+  return {.x = static_cast<std::int16_t>(x),
+          .y = static_cast<std::int16_t>(y),
+          .width = static_cast<std::int16_t>(width),
+          .height = static_cast<std::int16_t>(height)};
 }
 
-// decomp: src/BATTLE/BATTLE.PRG/40564.c:108
-#define getActorFlags(actor) (*((int*)&(actor)->sequenceFlags - 2))
-// decomp: BATTLE.PRG func_800AB098 (src/BATTLE/BATTLE.PRG/40564.c:1417)
-void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int frame)
-{
-    Actors_TextureAnimationFrame fallback;
-    RECT rect;
-    Actors_TextureAnimationFrame* animation;
-    Actors_TextureOverlayRect* overlay;
-    int srcX;
-    int srcY;
-    int dstX;
-    int width;
-    int height;
-    int x;
-    int y;
-    int row;
-    int py;
+[[nodiscard]] TextureMove SheetCellMove(int source_x, int source_y,
+                                        const TextureOverlay& overlay,
+                                        const ActorTextureLayout& layout) {
+  const int divisor = TexelsPerHalfword(layout.depth);
+  return {.source = SheetRect((layout.sheet_page * kPageColumns) + source_x,
+                              source_y + kSheetLines, overlay.width / divisor,
+                              overlay.height),
+          .x = (overlay.x / divisor) + (layout.slot_x * kPageColumns),
+          .y = (layout.slot_y * kPageLines) + (layout.slot_row * kRowLines) +
+               overlay.y};
+}
 
-    if (actor->textureRowOffsets[Actors_sharedSequenceBankIndex] == 0xFF) {
+// Steps a playing channel one tick. False when the due key has no frame.
+[[nodiscard]] bool StepChannel(TextureAnimationSlot& slot, int channel,
+                               const TextureAnimationKeys& keys) {
+  TextureAnimationKey key = keys.Key(channel, slot.timeline, slot.key_index);
+  ++slot.ticks;
+  if (key.duration < slot.ticks) {
+    slot.ticks = 0;
+    // The original stepped its key pointer past the byte index's wrap.
+    const int next = slot.key_index + 1;
+    slot.key_index = static_cast<std::uint8_t>(next);
+    key = keys.Key(channel, slot.timeline, next);
+    if (key.frame == 0) {
+      slot.key_index = 0;
+      key = keys.Key(channel, slot.timeline, 0);
+    }
+  }
+  if (key.frame == 0) {
+    return false;
+  }
+  slot.current_frame = key.frame;
+  return true;
+}
+
+// Steps one axis of a scroll window; true when the step reversed.
+[[nodiscard]] int StepScrollAxis(int position, std::int8_t& step, int size,
+                                 int minimum, int extent, bool bounces) {
+  const int moved = position + step;
+  if (minimum + extent < moved + size || moved < minimum) {
+    if (!bounces) {
+      return minimum;
+    }
+    const int reversed = moved - (step * 2);
+    step = static_cast<std::int8_t>(-step);
+    return reversed;
+  }
+  return moved;
+}
+}  // namespace
+
+void SetTextureAnimation(TextureAnimationSlot& slot, int channel, int actor_id,
+                         int timeline, TextureAnimationCommand command) {
+  switch (command) {
+    case TextureAnimationCommand::kStop:
+      slot.mode = TextureAnimationMode::kStopping;
+      break;
+    case TextureAnimationCommand::kPlay:
+      if (timeline == 0 || (slot.mode == TextureAnimationMode::kPlaying &&
+                            slot.timeline == timeline)) {
         return;
-    }
-
-    animation = &actor->textureAnimationFrames[index];
-
-    if (animation->columns == 0) {
-        fallback.overlayIndex = index ? 7 : 5;
-        fallback.sourceX = actor->textureCellOrigins[index].x;
-        fallback.sourceY = actor->textureCellOrigins[index].y;
-        fallback.columns = actor->textureCellOrigins[index].columns;
-
-        if (fallback.columns == 0) {
-            return;
-        }
-
-        animation = &fallback;
-    }
-
-    srcX = animation->sourceX;
-    srcY = animation->sourceY;
-    overlay = &actor->textureOverlays[animation->overlayIndex - 1];
-    dstX = overlay->x;
-    width = overlay->width;
-    height = overlay->height;
-
-    if (!(getActorFlags(actor) & 0x8000000)) {
-        srcX /= 4;
-        width /= 4;
-        dstX /= 4;
-    } else {
-        srcX /= 2;
-        width /= 2;
-        dstX /= 2;
-    }
-
-    srcX += (frame % animation->columns) * width;
-    srcY += (frame / animation->columns) * height;
-    srcY += actor->textureRowOffsets[Actors_sharedSequenceBankIndex];
-    x = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2];
-    y = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2 + 1];
-    row = Actors_textureSlotRowOffsets[actor->textureSlot];
-    py = overlay->y;
-    Core_Debugf("texture", "actor=%u model=%u bank=%u slot=%u clut=%u channel=%d frame=%d overlay=%u row=%u src=(%d,%d) dst=(%d,%d) size=(%d,%d)",
-        (unsigned)actor->instance.slot, (unsigned)actor->modelId, (unsigned)Actors_sharedSequenceBankIndex,
-        (unsigned)actor->textureSlot, (unsigned)actor->clutA, index, frame, (unsigned)animation->overlayIndex,
-        (unsigned)actor->textureRowOffsets[Actors_sharedSequenceBankIndex],
-        (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64 + srcX, srcY + 256,
-        dstX + x * 64, y * 256 + row * 64 + py, width, height);
-    frame = Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15;
-    setRECT(&rect, (frame * 64) + srcX, srcY + 256, width, height);
-    srcY = (y * 256) + (row * 64) + py;
-    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), srcY);
-}
-#undef getActorFlags
-
-// decomp: BATTLE.PRG func_800AB2AC (src/BATTLE/BATTLE.PRG/40564.c:1486)
-void Actors_ResetActorTextureFrames(int bank_index)
-{
-
-    if (bank_index == Actors_sharedSequenceBankIndex) {
-        int i;
-
-        for (i = 0; i < 17; ++i) {
-            Actors_ActorRecord* actor = Actors_actorRecords[i];
-            if ((actor != NULL) && (actor->textureRowOffsets[bank_index] != 0xFF)) {
-                Actors_UploadActorTextureFrame(actor, 0, 0);
-                Actors_UploadActorTextureFrame(actor, 1, 0);
-            }
-        }
-    }
+      }
+      slot.timeline = static_cast<std::uint8_t>(
+          static_cast<unsigned>(timeline) & kTextureTimelineMask);
+      slot.key_index = 0;
+      slot.ticks = static_cast<std::uint8_t>(
+          channel == 1 ? actor_id * kChannel1TicksPerActor : 0);
+      slot.mode = TextureAnimationMode::kPlaying;
+      break;
+    case TextureAnimationCommand::kTogglePause:
+      if (slot.mode == TextureAnimationMode::kPlaying) {
+        slot.mode = TextureAnimationMode::kPaused;
+      } else if (slot.mode == TextureAnimationMode::kPaused) {
+        slot.mode = TextureAnimationMode::kPlaying;
+      }
+      break;
+  }
 }
 
-// decomp: src/BATTLE/BATTLE.PRG/40564.c:108
-#define getActorFlags(actor) (*((int*)&(actor)->sequenceFlags - 2))
-// decomp: BATTLE.PRG func_800AB358 (src/BATTLE/BATTLE.PRG/40564.c:1502)
-void Actors_UploadActorTextureOverlay(int index, Actors_TextureOverlayUpload* arg)
-{
-    RECT rect;
-    Actors_ActorRecord* actor = Actors_actorRecords[index];
-    Actors_TextureOverlayRect* overlay;
-    int srcX;
-    int srcY;
-    int dstX;
-    int width;
-    int height;
-    int x;
-    int y;
-    int row;
-    int py;
-
-    if (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] == 0) {
-        return;
+TextureAnimationFrames StepTextureAnimations(
+    std::span<TextureAnimationSlot, kTextureAnimationChannels> slots,
+    const TextureAnimationKeys& keys) {
+  TextureAnimationFrames frames;
+  for (int channel = 0; channel < kTextureAnimationChannels; ++channel) {
+    TextureAnimationSlot& slot = slots[static_cast<std::size_t>(channel)];
+    if (slot.timeline == 0) {
+      continue;
     }
-
-    srcX = arg->sourceX;
-    srcY = arg->sourceY;
-    srcY += actor->textureRowOffsets[Actors_sharedSequenceBankIndex];
-    overlay = &actor->textureOverlays[arg->overlayIndex];
-    dstX = overlay->x;
-    width = overlay->width;
-    height = overlay->height;
-
-    if (!(getActorFlags(actor) & 0x8000000)) {
-        srcX /= 4;
-        width /= 4;
-        dstX /= 4;
-    } else {
-        srcX /= 2;
-        width /= 2;
-        dstX /= 2;
+    switch (slot.mode) {
+      case TextureAnimationMode::kPaused:
+        continue;
+      case TextureAnimationMode::kStopping:
+        if (slot.current_frame == 1) {
+          slot.timeline = 0;
+          continue;
+        }
+        [[fallthrough]];
+      case TextureAnimationMode::kPlaying:
+        if (!StepChannel(slot, channel, keys)) {
+          return frames;
+        }
+        break;
+      default:
+        // Another mode copies the shown frame without stepping.
+        break;
     }
-
-    x = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2];
-    y = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2 + 1];
-    row = Actors_textureSlotRowOffsets[actor->textureSlot];
-    py = overlay->y;
-    setRECT(
-        &rect, ((Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] & 15) * 64) + srcX, srcY + 256, width, height);
-    VS::Render::QueueLiveTextureRectangleMove(&rect, dstX + (x * 64), (y * 256) + (row * 64) + py);
+    frames[static_cast<std::size_t>(channel)] = slot.current_frame - 1;
+  }
+  return frames;
 }
-#undef getActorFlags
 
-// decomp: src/BATTLE/BATTLE.PRG/40564.c:108
-#define getActorFlags(actor) (*((int*)&(actor)->sequenceFlags - 2))
-// decomp: BATTLE.PRG func_800AB4F0 (src/BATTLE/BATTLE.PRG/40564.c:1552)
-void Actors_UpdateActorTextureScrolling(Actors_ActorRecord* actor)
-{
-    int originX = (*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2] * 64;
-    int originY =
-        ((*(short (*)[])&Actors_textureSlotOrigins)[actor->textureSlot * 2 + 1] * 256) + (Actors_textureSlotRowOffsets[actor->textureSlot] * 64);
-    int i;
-    int height;
-
-    for (i = 0; i < 4; ++i) {
-        Actors_TextureScrollBounds* bounds = &actor->textureScrollBounds[i];
-        Actors_TextureScrollState* scroll;
-        Actors_TextureOverlayRect* overlay;
-        RECT rect;
-        int x;
-        int y;
-        int width;
-        int scrollX;
-        int scrollY;
-        int dx;
-        int dy;
-        int minX;
-        int maxX;
-        int maxY;
-        int dstX;
-
-        if (bounds->width == 0) {
-            continue;
-        }
-
-        scroll = &actor->textureScroll[i];
-        scroll->timer += State_tickSpeed / 2;
-
-        if (scroll->timer <= scroll->interval) {
-            continue;
-        }
-
-        scroll->timer = 0;
-        overlay = &actor->textureOverlays[i];
-
-        // BUG: height is read before it is first set
-        if (bounds->width == 0 || bounds->width == height) {
-            continue;
-        }
-
-        width = overlay->width;
-        scrollX = scroll->x;
-        dx = scroll->stepX;
-        scrollY = scroll->y;
-        dy = scroll->stepY;
-        minX = bounds->x;
-        height = overlay->height;
-        x = scrollX + dx;
-        y = scrollY + dy;
-        maxX = minX + bounds->width;
-        maxY = bounds->y + bounds->height;
-
-        if (maxX < x + width || x < minX) {
-            if (bounds->bounces) {
-                x -= dx * 2;
-                scroll->stepX = -scroll->stepX;
-            } else {
-                x = minX;
-            }
-        }
-
-        if (maxY < y + height || y < bounds->y) {
-            if (bounds->bounces) {
-                y -= scroll->stepY * 2;
-                scroll->stepY = -scroll->stepY;
-            } else {
-                y = bounds->y;
-            }
-        }
-
-        scroll->x = x;
-        scroll->y = y;
-
-        if (!(getActorFlags(actor) & 0x8000000)) {
-            x /= 4;
-            width /= 4;
-            dstX = overlay->x >> 2;
-        } else {
-            x /= 2;
-            width /= 2;
-            dstX = overlay->x >> 1;
-        }
-
-        rect.x = originX + x;
-        rect.y = originY + y;
-        rect.w = width;
-        rect.h = height;
-        VS::Render::QueueLiveTextureRectangleMove(&rect, originX + dstX, originY + overlay->y);
-    }
+std::optional<TextureCellSheet> ChannelCellSheet(
+    const TextureCellSheet& sheet, const TextureCellOrigin& origin,
+    int channel) {
+  if (sheet.columns != 0) {
+    return sheet;
+  }
+  if (origin.columns == 0) {
+    return std::nullopt;
+  }
+  return TextureCellSheet{
+      .overlay = kFallbackSheetOverlays[channel == 0 ? 0 : 1],
+      .source_x = origin.x,
+      .source_y = origin.y,
+      .columns = origin.columns};
 }
-#undef getActorFlags
 
-}  // extern "C"
+TextureMove TextureFrameMove(const TextureCellSheet& sheet,
+                             const TextureOverlay& overlay,
+                             const ActorTextureLayout& layout, int frame) {
+  const int divisor = TexelsPerHalfword(layout.depth);
+  const int source_x = (sheet.source_x / divisor) +
+                       ((frame % sheet.columns) * (overlay.width / divisor));
+  const int source_y = sheet.source_y +
+                       ((frame / sheet.columns) * overlay.height) +
+                       layout.sheet_row;
+  return SheetCellMove(source_x, source_y, overlay, layout);
+}
+
+TextureMove TextureOverlayMove(int source_x, int source_y,
+                               const TextureOverlay& overlay,
+                               const ActorTextureLayout& layout) {
+  return SheetCellMove(source_x / TexelsPerHalfword(layout.depth),
+                       source_y + layout.sheet_row, overlay, layout);
+}
+
+TextureScrollMoves StepTextureScrolling(TextureScrolling& scrolling,
+                                        const ActorTextureLayout& layout,
+                                        int tick_speed, int carried_height) {
+  const int divisor = TexelsPerHalfword(layout.depth);
+  const int origin_x = layout.slot_x * kPageColumns;
+  const int origin_y =
+      (layout.slot_y * kPageLines) + (layout.slot_row * kRowLines);
+  TextureScrollMoves moves;
+  for (std::size_t layer = 0; layer < moves.size(); ++layer) {
+    const TextureScrollBounds& bounds = scrolling.bounds.at(layer);
+    TextureScrollState& state = scrolling.states.at(layer);
+    const TextureOverlay& overlay = scrolling.overlays.at(layer);
+    if (bounds.width == 0) {
+      continue;
+    }
+    state.timer = static_cast<std::uint8_t>(state.timer + (tick_speed / 2));
+    if (state.timer <= state.interval) {
+      continue;
+    }
+    state.timer = 0;
+    if (bounds.width == carried_height) {
+      continue;
+    }
+    carried_height = overlay.height;
+    const int x = StepScrollAxis(state.x, state.step_x, overlay.width, bounds.x,
+                                 bounds.width, bounds.bounces);
+    const int y = StepScrollAxis(state.y, state.step_y, overlay.height,
+                                 bounds.y, bounds.height, bounds.bounces);
+    state.x = static_cast<std::uint8_t>(x);
+    state.y = static_cast<std::uint8_t>(y);
+    moves.at(layer) = TextureMove{
+        .source = SheetRect(origin_x + (x / divisor), origin_y + y,
+                            overlay.width / divisor, overlay.height),
+        .x = origin_x + (overlay.x / divisor),
+        .y = origin_y + overlay.y};
+  }
+  return moves;
+}
+}  // namespace VS::Actors

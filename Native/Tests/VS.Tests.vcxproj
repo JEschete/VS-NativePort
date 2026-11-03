@@ -229,6 +229,7 @@
     <ClCompile Include="src\TargetPagePartitionTests.cpp" />
     <ClCompile Include="src\TerrainHeightTests.cpp" />
     <ClCompile Include="src\TextTransitionTests.cpp" />
+    <ClCompile Include="src\TextureAnimationTests.cpp" />
     <ClCompile Include="src\TextureBlockLayoutTests.cpp" />
     <ClCompile Include="src\TexturePagesTests.cpp" />
     <ClCompile Include="src\TextureRegionDrawTests.cpp" />
@@ -247,6 +248,9 @@
     <ClCompile Include="..\Tools\CombatLab\src\Editor.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\SceneCatalog.cpp" />
     <ClCompile Include="..\Tools\CombatLab\src\Trace.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\TestSupport\ChannelWarnings.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Engine\VS.Engine.vcxproj">

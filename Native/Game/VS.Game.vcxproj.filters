@@ -156,6 +156,9 @@
     <ClInclude Include="src\Actors\ActorState.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\ActorTableLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Actors\Animation.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -294,6 +297,9 @@
     <ClInclude Include="src\Actors\TextureAnimation.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
+    <ClCompile Include="src\Actors\TextureAnimationLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
     <ClCompile Include="src\Actors\Textures.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -2238,6 +2244,9 @@
     <ClInclude Include="src\Title\TitleScreen.h">
       <Filter>src\Title</Filter>
     </ClInclude>
+    <ClInclude Include="include\Actors\ActorTableLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
     <ClInclude Include="include\Actors\Appearance.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
@@ -2272,6 +2281,12 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\SoundTransition.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\TextureAnimation.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\TextureAnimationLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Action.h">

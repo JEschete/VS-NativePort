@@ -290,16 +290,22 @@ void ReadLiveImageRectangle(int xy, void* pixels, int wh) {
   ReadImageRectangle(target, xy, wh);
 }
 
+void QueueLiveTextureRectangleMove(const ScreenRect& source, std::int32_t x,
+                                   std::int32_t y) {
+  LiveOverlayQueue queue;
+  QueueTextureRectangleMove(queue, source, x, y);
+}
+
 void QueueLiveTextureRectangleMove(const RECT* source, int x, int y) {
   if (source == nullptr) {
     ReportDropped();
     return;
   }
-  LiveOverlayQueue queue;
-  QueueTextureRectangleMove(
-      queue,
-      {.x = source->x, .y = source->y, .width = source->w, .height = source->h},
-      x, y);
+  QueueLiveTextureRectangleMove(ScreenRect{.x = source->x,
+                                           .y = source->y,
+                                           .width = source->w,
+                                           .height = source->h},
+                                x, y);
 }
 
 void* AppendLiveTexturePage(int tpage, int ot_slot) {

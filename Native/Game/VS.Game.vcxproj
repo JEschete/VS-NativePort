@@ -53,6 +53,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Actors\ActorTableLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Actors\Animation.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -147,12 +150,9 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Actors\TextureAnimation.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Actors\TextureAnimation.cpp" />
+    <ClCompile Include="src\Actors\TextureAnimationLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Actors\Textures.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -2348,6 +2348,7 @@
     <ClInclude Include="src\Title\SaveFiles.h" />
     <ClInclude Include="src\Title\TitleMenu.h" />
     <ClInclude Include="src\Title\TitleScreen.h" />
+    <ClInclude Include="include\Actors\ActorTableLive.hpp" />
     <ClInclude Include="include\Actors\Appearance.hpp" />
     <ClInclude Include="include\Actors\AppearanceLive.hpp" />
     <ClInclude Include="include\Actors\AppearanceTransition.hpp" />
@@ -2360,6 +2361,8 @@
     <ClInclude Include="include\Actors\SequencePlayback.hpp" />
     <ClInclude Include="include\Actors\SequencePlaybackLive.hpp" />
     <ClInclude Include="include\Actors\SoundTransition.hpp" />
+    <ClInclude Include="include\Actors\TextureAnimation.hpp" />
+    <ClInclude Include="include\Actors\TextureAnimationLive.hpp" />
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
     <ClInclude Include="include\Battle\ActionResultsLive.hpp" />

@@ -5,6 +5,7 @@
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Battle/TargetingDrawLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -643,7 +644,7 @@ int Tests_FacialTextureBankHandoff(void) {
   Render_legacyCurrentOrderingTable = ordering;
   (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
       ->primitiveCursor = &packet;
-  Actors_UpdateActorTextureAnimations(&actor);
+  VS::Actors::UpdateLiveActorTextureAnimations(&actor);
   passed =
       passed && (reinterpret_cast<Render_FrameScratch*>(Core_ScratchBase()))
                         ->primitiveCursor == &packet + 1;
@@ -744,7 +745,7 @@ int Tests_ActorTextureFrameRectangles(int wide, int fallback,
   actor.textureOverlays[6] = rectangle;
   actor.textureAnimationFrames[0] = (Actors_TextureAnimationFrame){1, 32, 5, 2};
   actor.textureCellOrigins[1] = (Actors_TextureCellOrigin){32, 5, 2, 0};
-  Actors_UploadActorTextureFrame(&actor, fallback ? 1 : 0, 3);
+  VS::Actors::UploadLiveActorTextureFrame(&actor, fallback ? 1 : 0, 3);
   const unsigned divisor = wide ? 2 : 4;
   const unsigned expectedSource =
       (280u << 16) | (640 + 32 / divisor + 32 / divisor);

@@ -49,6 +49,8 @@ void UploadLiveImageRectangle(int xy, const void* pixels, int wh);
 // The caller's buffer must cover the packed w | h << 16 size.
 void ReadLiveImageRectangle(int xy, void* pixels, int wh);
 // Copies `source` to (x, y) when the overlay bucket is drawn.
+void QueueLiveTextureRectangleMove(const ScreenRect& source, std::int32_t x,
+                                   std::int32_t y);
 void QueueLiveTextureRectangleMove(const RECT* source, int x, int y);
 // The texture page's draw-mode command linked in front of entry `ot_slot` of
 // the frame's ordering table. Returns the primitive cursor after it, or the

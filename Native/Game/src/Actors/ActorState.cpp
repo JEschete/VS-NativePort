@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/MotionRequestsLive.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
@@ -256,8 +257,8 @@ void Actors_ResetActorMotionState(int actor_id, int arg1)
         actor->instance.poseState = 0;
         Actors_ResetActorHeadTrackingSpeed(actor);
         if (Actors_sharedSequenceBankTexturePages[Actors_sharedSequenceBankIndex] != 0) {
-            Actors_UploadActorTextureFrame(actor, 0, 0);
-            Actors_UploadActorTextureFrame(actor, 1, 0);
+            VS::Actors::UploadLiveActorTextureFrame(actor, 0, 0);
+            VS::Actors::UploadLiveActorTextureFrame(actor, 1, 0);
         }
         actor->paletteFadeState[0] = 0;
         actor->textureAnimationSlots[0].timeline = 0;

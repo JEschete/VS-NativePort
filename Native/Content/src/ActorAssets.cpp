@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Actors/TextureAnimationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -1697,7 +1698,7 @@ int Content_ReleaseSequenceEffectTexture(int bank_id)
 {
     if (bank_id < 1 || bank_id > 3) return -1;
     if (Actors_sharedSequenceBankTexturePages[bank_id - 1] != 0) {
-        Actors_ResetActorTextureFrames(bank_id - 1);
+        VS::Actors::ResetLiveActorTextureFrames(bank_id - 1);
         if (VS::Render::RetireLiveTexturePageRange(Actors_sharedSequenceBankTexturePages[bank_id - 1], 1, 4) == 0) {
             return -3;
         }

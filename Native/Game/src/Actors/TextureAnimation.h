@@ -93,22 +93,3 @@ typedef struct Actors_TextureOverlayRect {
 _Static_assert(sizeof(Actors_TextureOverlayRect) == 0x4, "Actors_TextureOverlayRect must keep its PS1 layout");
 
 #endif // VS_ACTORS_TEXTUREANIMATION_H_TYPES
-
-#if !defined(VS_TYPES_ONLY) && !defined(VS_ACTORS_TEXTUREANIMATION_H_DECLS)
-#define VS_ACTORS_TEXTUREANIMATION_H_DECLS
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Render/Palette.h"
-
-int Actors_SetActorTextureAnimation(int actorId, int index, int value, int mode);
-int Actors_UpdateActorTextureAnimations(Actors_ActorRecord* actor);
-void Actors_UploadActorTextureFrame(Actors_ActorRecord* actor, int index, int frame);
-void Actors_ResetActorTextureFrames(int bank_index);
-void Actors_UploadActorTextureOverlay(int index, Actors_TextureOverlayUpload* arg);
-void Actors_UpdateActorTextureScrolling(Actors_ActorRecord* actor);
-
-#endif // VS_ACTORS_TEXTUREANIMATION_H_DECLS

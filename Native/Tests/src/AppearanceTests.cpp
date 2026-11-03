@@ -6,7 +6,6 @@
 #include <optional>
 #include <span>
 #include <string>
-#include <utility>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
@@ -15,7 +14,7 @@
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/AppearanceLiveState.h"
 #include "Content/ModuleData.h"
-#include "Core/Log.hpp"
+#include "TestSupport/ChannelWarnings.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -29,25 +28,6 @@ namespace actors = VS::Actors;
 using actors::AppearanceStatus;
 
 namespace {
-// Collects the "actors" channel warnings while it lives.
-struct ActorsWarnings {
-  std::vector<std::string> messages;
-  VS::Core::LogObserver saved =
-      VS::Core::SetLogObserver([this](const VS::Core::LogRecord& record) {
-        if (record.channel == "actors") {
-          CHECK(record.level == VS::Core::LogLevel::Warn);
-          messages.emplace_back(record.message);
-        }
-      });
-
-  ActorsWarnings() = default;
-  ActorsWarnings(const ActorsWarnings&) = delete;
-  ActorsWarnings& operator=(const ActorsWarnings&) = delete;
-  ActorsWarnings(ActorsWarnings&&) = delete;
-  ActorsWarnings& operator=(ActorsWarnings&&) = delete;
-  ~ActorsWarnings() { VS::Core::SetLogObserver(std::move(saved)); }
-};
-
 // The actor, weapon and gimmick tables and the room scale, emptied for one
 // test and then restored.
 struct LiveAppearanceState {
@@ -325,7 +305,7 @@ TEST_CASE("Live room scale sets each actor's scale from the stored x",
   CHECK(Actors_roomActorScale.vz == 1024);
   CHECK(Actors_roomActorScale.pad == 7);
 
-  ActorsWarnings warnings;
+  VS::test_support::ChannelWarnings warnings{"actors"};
   actors::SetLiveRoomActorScale(nullptr);
   CHECK(warnings.messages ==
         std::vector<std::string>{"SetRoomActorScale refused: null scale"});
@@ -438,7 +418,7 @@ TEST_CASE("Live palette pulse requests bind the actor's model instance",
 TEST_CASE("Live appearance requests treat an empty actor slot as no model",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
-  ActorsWarnings warnings;
+  VS::test_support::ChannelWarnings warnings{"actors"};
   const int no_model = static_cast<int>(AppearanceStatus::kNoModel);
   Render_ColorCode color{};
 
@@ -456,7 +436,7 @@ TEST_CASE("Live appearance requests refuse bad ids and null colors",
           "[actors-appearance-rendering][actors][redirect-binding]") {
   LiveAppearanceState state;
   state.AddActor(2);
-  ActorsWarnings warnings;
+  VS::test_support::ChannelWarnings warnings{"actors"};
   const int no_model = static_cast<int>(AppearanceStatus::kNoModel);
   Render_ColorCode color{};
   CHECK(actors::LiveActorTint(17, &color) == no_model);
@@ -487,7 +467,7 @@ TEST_CASE("Live appearance transitions refuse a broken companion chain",
   Actors_ActorRecord& companion = state.AddActor(4);
   lead.companionSlot = 4;
   companion.companionSlot = 1;
-  ActorsWarnings warnings;
+  VS::test_support::ChannelWarnings warnings{"actors"};
   actors::StartLiveActorAppearanceTransition(0, 0);
   CHECK(lead.instance.actionAnimationState == actors::kAppearanceBlack);
   CHECK(companion.instance.actionAnimationState == actors::kAppearanceBlack);
