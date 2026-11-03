@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 202 | 10 (`wip`) | 3,995 |
-| `cpp` | 202 | 79 (`wip`) | 3,926 |
+| `modernized` | 218 | 6 (`wip`) | 3,983 |
+| `cpp` | 218 | 63 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 281 |
-| `vs_namespace` | 202 |
-| `typed_interface` | 202 |
-| `no_bridge` | 202 |
+| `vs_namespace` | 218 |
+| `typed_interface` | 218 |
+| `no_bridge` | 218 |
 | `strict_clean` | 281 |
-| `behavior_evidence` | 202 |
+| `behavior_evidence` | 218 |
 
-Promotion records: 281; derived `cpp=x`: 202, `cpp=wip`: 79. Verification records: 97; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 218, `cpp=wip`: 63. Verification records: 98; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -237,6 +237,8 @@ The fifty-first is the SPU voice output and cutscene stream control (F03159, F03
 and stream commands name their source by an opaque StreamSourceId that is compared, never dereferenced; SequencerOutput.cpp and StreamPlayback.cpp and the twenty Audio_ voice and stream symbols are retired.
 The fifty-second is the AI decision, planning and engagement primitives (F01628, F01629, F01631-F01635, F01671, F01674-F01677, F01683-F01688, F01690-F01693, F01770, F01792, F01794-F01797): VS::Battle::Ai candidate packing, usability, targeting, scoring, ranking, promotion, target memory, simulated stats and engagement are C++ over typed views that refuse slots, actions, counts and actor IDs outside their tables,
 and the five legacy headers and twenty-eight Battle_Ai_ symbols are retired; the same commit zero-initializes the action plan selection counts (#274).
+The fifty-third is the motion requests and native file menus (F00989, F01024, F01026, F04178, F04179, F04181-F04187, F02764, F02767, F03628, F03634): VS::Actors jump, travel, teleport, offset and turn requests and the VS::Menu::Files Save/Load/Continue pickers are C++ over host interfaces that refuse windows and rows outside the save slots,
+and MotionRequests.h, NativeMenu.cpp and the sixteen Actors_ and Menu_Files_ symbols are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
