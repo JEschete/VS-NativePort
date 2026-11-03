@@ -8,7 +8,7 @@
 
 extern "C" {
 #include "Core/Text/TextCode.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/TextBox.h"
 #include "Render/Display.h"

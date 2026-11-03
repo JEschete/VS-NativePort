@@ -11,8 +11,7 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -30,7 +29,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 
 // decomp: local static of _gripNavigation, at file scope so the module reset reaches it
 static char* Menu_Container_gemSlotCountText = "X     0";

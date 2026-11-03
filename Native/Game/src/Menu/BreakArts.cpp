@@ -13,7 +13,7 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/BreakArts.h"
@@ -23,7 +23,6 @@ extern "C" {
 #include "Render/Font.h"
 #include "Render/Palette.h"
 #include "State/Progress.h"
-#include "State/Settings.h"
 
 // decomp: _ (_@src/MENU/MENU1.PRG/30.c)
 char Menu_BreakArts_layoutPadding1;

@@ -7,6 +7,7 @@
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 extern "C" {
@@ -61,8 +62,7 @@ extern "C" {
 #include "Field/Transitions.h"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
@@ -124,7 +124,7 @@ void Boot_RunGameLoop(void)
             Field_isMenuRequestQueued = 0;
             do {
                 do {
-                    if (Input_UpdateControllers() == -1) {
+                    if (VS::Input::UpdateLiveControllers() == -1) {
                         break;
                     }
                     Boot_EncounterPollStop();
@@ -567,7 +567,7 @@ void Boot_RunGameLoop(void)
                     Battle_DrawBattleHud();
                     Menu_UpdateTextBoxes();
                     for (; i < State_tickSpeed / 2; ++i) {
-                        Input_UpdateVibrationPatterns();
+                        VS::Input::UpdateLiveVibrationPatterns();
                         Render_UpdateBackgroundGradientTransition();
                         Render_UpdateModelColorTransitions();
                         Render_UpdateClutTransitions();
@@ -633,7 +633,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     Render_InitializeTextureSlotReservations();
     Content_LoadSystemResources();
     VS::Battle::Ai::InitializeLiveActorAiExtensionHook();
-    Input_ResetVibrationPatterns();
+    VS::Input::ResetLiveVibrationPatterns();
     Battle_ApplyLearnedActionUnlocks();
     Field_zoneContext.currentSceneId = 0;
     Field_zoneContext.reserved38 = 0;

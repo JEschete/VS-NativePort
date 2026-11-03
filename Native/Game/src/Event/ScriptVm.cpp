@@ -3,6 +3,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 #include "Render/UiPacketsLive.hpp"
 extern "C" {
@@ -46,8 +47,7 @@ extern "C" {
 #include "Field/RoomRendering.h"
 #include "Field/RoomState.h"
 #include "Field/Transitions.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/TextBox.h"
@@ -958,7 +958,7 @@ short Event_ExecuteScriptThread(u_char** thread_cursor, short thread_index)
         }
 
         Audio_StopAllSfxPlayback();
-        Input_StopVibrationPatterns(0, 2);
+        VS::Input::StopLiveVibrationPatterns(0, 2);
         Event_ResetCutsceneActorsToIdle();
         Field_BeginScreenFadeOut(0, 0xFF, 0);
         VS::Render::DisableLiveDisplay();

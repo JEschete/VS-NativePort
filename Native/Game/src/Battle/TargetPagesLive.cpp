@@ -18,7 +18,7 @@ extern "C" {
 #include "Battle/Sphere.h"
 #include "Battle/Targeting.h"
 #include "Field/Interactions.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Render/Font.h"
 }
 

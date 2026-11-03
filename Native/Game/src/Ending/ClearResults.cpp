@@ -16,8 +16,7 @@ extern "C" {
 #include "Ending/Results.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Render/Images.h"
 #include "Render/Render.h"
 #include "Render/TextureAnimation.h"
@@ -26,7 +25,6 @@ extern "C" {
 #include "State/Location.h"
 #include "State/PlayTime.h"
 #include "State/Progress.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: D_800DB876 (D_800DB876@ENDING/ENDING.PRG)

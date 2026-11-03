@@ -20,8 +20,7 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Field/RoomLoading.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
@@ -40,7 +39,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 
 // decomp: _itemCount (_itemCount@src/MENU/MENUC.PRG/168.c)
 char Menu_Setup_itemCount;

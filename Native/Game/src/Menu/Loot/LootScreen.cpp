@@ -12,8 +12,7 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Field/RoomRendering.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
@@ -32,7 +31,6 @@ extern "C" {
 #include "Menu/Loot/Paging.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
-#include "State/Settings.h"
 
 // decomp: D_8010A6B7 (D_8010A6B7@src/MENU/MENUB.PRG/260.c)
 char Menu_Loot_previewedLoot;

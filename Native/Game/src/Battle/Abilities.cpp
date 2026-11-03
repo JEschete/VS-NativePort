@@ -31,8 +31,7 @@ extern "C" {
 #include "Effects/Runtime.h"
 #include "Field/GameMode.h"
 #include "Field/Gimmicks.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -42,7 +41,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "State/Flags.h"
 #include "State/Progress.h"
-#include "State/Settings.h"
 #include "State/Timers.h"
 
 // decomp: vs_battle_characterState (vs_battle_characterState@BATTLE/BATTLE.PRG)

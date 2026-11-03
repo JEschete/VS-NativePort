@@ -19,7 +19,7 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
 #include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Results/Results.h"
 #include "Menu/Results/TimeAttack.h"
 #include "Render/Textures.h"

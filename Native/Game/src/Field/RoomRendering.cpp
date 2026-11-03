@@ -25,7 +25,7 @@ extern "C" {
 #include "Field/RoomEffects.h"
 #include "Field/RoomRendering.h"
 #include "Field/Zone.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
@@ -34,7 +34,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 #include "State/Timers.h"
 
 // decomp: D_800F190C (D_800F190C@BATTLE/BATTLE.PRG)

@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Effects/Transforms.h"
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
-#include "Input/Controller.h"
 #include "PFile.h"
 #include "Render/Palette.h"
 
@@ -271,7 +271,7 @@ int Effects_TickControllerVibrationTrack(Effects_EffectInstance* actor, Effects_
 
     if (play) {
         u_char* sound = Effects_package->block11Data;
-        Input_StartVibrationPattern(
+        VS::Input::StartLiveVibrationPattern(
             (char *)(sound + *(((data[event->keyIndex] >> 9) & 31) + ((Effects_PackageBlock11*)sound)->offsets)),
             255, 1);
     }

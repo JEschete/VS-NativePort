@@ -19,8 +19,7 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomState.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/Files.h"
@@ -36,7 +35,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/TextureAnimation.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: vs_battle_warlockSpellIds (vs_battle_warlockSpellIds@BATTLE/BATTLE.PRG)

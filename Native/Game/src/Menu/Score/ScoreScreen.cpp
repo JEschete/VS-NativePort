@@ -27,8 +27,7 @@ extern "C" {
 #include "Effects/Weather.h"
 #include "Field/MapProgress.h"
 #include "Field/RoomRendering.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/BattleAbilities.h"
 #include "Menu/Files.h"
 #include "Menu/Framework/ActorPreview.h"
@@ -46,7 +45,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: _0 (_0@src/MENU/MENU9.PRG/238.c)

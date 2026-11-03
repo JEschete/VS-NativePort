@@ -38,7 +38,7 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Core/Text/TextCode.h"
 #include "Field/Gimmicks.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Files.h"
 #include "Title/SaveFiles.h"
 }

@@ -4,6 +4,7 @@
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Input/Controller.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -43,8 +44,7 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Platforms.h"
 #include "Field/RoomRendering.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -851,8 +851,8 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
 
     Battle_BuildSphereCameraBasis();
     lockPitch = 0;
-    stickX = Input_MapStickDeadZone(Input_stickPosBuf.rStickX);
-    stickY = Input_MapStickDeadZone(Input_stickPosBuf.rStickY);
+    stickX = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickX);
+    stickY = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickY);
     target_position->pad = 0;
 
     if ((offset.pad == 0) || (Input_buttonsState & PADRleft)) {

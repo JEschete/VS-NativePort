@@ -15,8 +15,7 @@ extern "C" {
 #include "Field/Locations.h"
 #include "Field/Manual.h"
 #include "Field/RoomRendering.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Files.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuMemory.h"
@@ -28,7 +27,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 
 // decomp: local static of vs_menuE_exec, at file scope so the module reset reaches it
 static char Menu_Manual_openDelay = 0;

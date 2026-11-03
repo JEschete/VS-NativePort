@@ -5,6 +5,7 @@
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -21,7 +22,7 @@ extern "C" {
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
 #include "Ending/Credits/StaffRoll.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Input/Controllers.h"
 #include "Save/NativeResume.h"
 #include "Save/Snapshot.h"
@@ -104,10 +105,10 @@ void Boot_ResetToTitle(void)
 {
     Save_NativeResetSession();
     SetDispMask(0);
-    Input_SetMotorCommand(0, 0, 0);
-    Input_SetMotorCommand(0, 1, 0);
-    Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
-    Input_UpdateControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
+    VS::Input::SetLiveMotorCommand(0, 0, 0);
+    VS::Input::SetLiveMotorCommand(0, 1, 0);
+    VS::Input::UpdateLiveControllerConnection(0, Input_legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Playback_Shutdown();
     VSync(10);
     VS::Boot::JumpToLiveTitle();
@@ -117,10 +118,10 @@ void Boot_ResetToTitle(void)
 void Boot_EnterBattle(void)
 {
     SetDispMask(0);
-    Input_SetMotorCommand(0, 0, 0);
-    Input_SetMotorCommand(0, 1, 0);
-    Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
-    Input_UpdateControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
+    VS::Input::SetLiveMotorCommand(0, 0, 0);
+    VS::Input::SetLiveMotorCommand(0, 1, 0);
+    VS::Input::UpdateLiveControllerConnection(0, Input_legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Control_StopAllMusic();
     Audio_Control_StopSceneSoundEffects();
     Audio_Playback_InvalidateSavedMusicId();
@@ -136,20 +137,20 @@ void Boot_RunEndingAndReturnToTitle(void)
 {
     Boot_isGameplayActive = 0;
     SetDispMask(0);
-    Input_SetMotorCommand(0, 0, 0);
-    Input_SetMotorCommand(0, 1, 0);
-    Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
-    Input_UpdateControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
+    VS::Input::SetLiveMotorCommand(0, 0, 0);
+    VS::Input::SetLiveMotorCommand(0, 1, 0);
+    VS::Input::UpdateLiveControllerConnection(0, Input_legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Control_StopAllMusic();
     Audio_Control_StopSceneSoundEffects();
     Save_CaptureAshleySnapshot();
     Boot_LoadEndingOverlay();
     Ending_Credits_RunStaffRoll();
     SetDispMask(0);
-    Input_SetMotorCommand(0, 0, 0);
-    Input_SetMotorCommand(0, 1, 0);
-    Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
-    Input_UpdateControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
+    VS::Input::SetLiveMotorCommand(0, 0, 0);
+    VS::Input::SetLiveMotorCommand(0, 1, 0);
+    VS::Input::UpdateLiveControllerConnection(0, Input_legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(0x10, Input_legacyPadResponseBytes[1]);
     Audio_Playback_Shutdown();
     Boot_isClearSavePending = 1;
     VS::Boot::JumpToLiveTitle();
@@ -163,11 +164,11 @@ void Boot_InitializePlatformServices(void)
     InitCARD(0);
     StartCARD();
     PadInitDirect((unsigned char *)(Input_legacyPadResponseBytes[0]), (unsigned char *)(Input_legacyPadResponseBytes[1]));
-    Input_ConfigureControllerActuators(0, Input_legacyPadResponseBytes[0]);
-    Input_ConfigureControllerActuators(0x10, Input_legacyPadResponseBytes[1]);
+    VS::Input::ConfigureLiveControllerActuators(0, Input_legacyPadResponseBytes[0]);
+    VS::Input::ConfigureLiveControllerActuators(0x10, Input_legacyPadResponseBytes[1]);
     PadStartCom();
-    Input_UnlockAnalogModeSwitch();
-    Input_ResetVibrationPatterns();
+    VS::Input::UnlockLiveAnalogModeSwitch();
+    VS::Input::ResetLiveVibrationPatterns();
     Audio_Native_EnableReverb(0);
     DsInit();
     VS::Core::InitializeLiveRandomShuffleTable();
@@ -193,9 +194,9 @@ void Boot_InitializeTitleSession(void)
     Content_InitializeDiscQueue();
     VS::Content::ResetLiveDiscDrive();
     Audio_InitializeMenuSoundBanks();
-    Input_ResetVibrationPatterns();
+    VS::Input::ResetLiveVibrationPatterns();
     Boot_isGameplayActive = 0;
-    Input_UnlockAnalogModeSwitch();
+    VS::Input::UnlockLiveAnalogModeSwitch();
 
     for (i = 31; i >= 0; --i) {
         Input_buttonHeldFrames[i] = 0;

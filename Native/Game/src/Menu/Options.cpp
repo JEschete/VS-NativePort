@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -6,13 +7,12 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuMemory.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Menu/Options.h"
 #include "Menu/TextBox.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: _2 (_2@src/MENU/MENU8.PRG/21A0.c)
@@ -531,7 +531,7 @@ int Menu_Options_UpdateVibrationChoice(int init)
                 Menu_Framework_SetCommandLabel(Menu_Framework_MenuCommand_None);
             } else {
                 if (Menu_Options_vibrationChoiceSelectedRow == currentState) {
-                    Input_PlayVibrationPreset(0);
+                    VS::Input::PlayLiveVibrationPreset(0);
                 }
                 Menu_Framework_ClearMenuExcept((enum Menu_Framework_MenuItemId)(7));
             }

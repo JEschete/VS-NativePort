@@ -20,7 +20,7 @@ extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/Sphere.h"
 #include "Field/Interactions.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"

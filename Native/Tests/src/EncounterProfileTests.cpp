@@ -28,7 +28,7 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Menu/Setup/Assembly.h"
 #include "State/Progress.h"

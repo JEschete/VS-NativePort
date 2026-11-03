@@ -83,6 +83,7 @@
     </ClCompile>
     <ClCompile Include="src\ConditionSnapshotTests.cpp" />
     <ClCompile Include="src\ContentTests.cpp" />
+    <ClCompile Include="src\ControllerTests.cpp" />
     <ClCompile Include="src\CoreMathTests.cpp" />
     <ClCompile Include="src\CorePointerSortTests.cpp" />
     <ClCompile Include="src\CoreTests.cpp" />

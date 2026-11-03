@@ -10,12 +10,13 @@
 #include <span>
 
 #include "Core/RandomLive.hpp"
+#include "Input/ControllerLive.hpp"
 
 extern "C" {
 #include "Core/Diagnostics.h"
 #include "Core/Gte.h"
 #include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Input/Controllers.h"
 #include "Render/Display.h"
 #include "Render/Loading.h"
@@ -125,15 +126,17 @@ class LiveFieldFrame final : public FieldFrameHost {
   // The original polled both pads inline (146C.c:5998-6008).
   std::uint32_t PollSecondControllerPressed() override {
     const auto first = static_cast<std::uint16_t>(
-        Input_ReadControllerPort(0, Input_legacyPadResponseBytes[0]));
+        VS::Input::ReadLiveControllerPort(0, Input_legacyPadResponseBytes[0]));
     Input_buttonsState = first;
-    const auto second = static_cast<std::uint32_t>(Input_ReadControllerPort(
-        kSecondPortShift, Input_legacyPadResponseBytes[1]));
+    const auto second =
+        static_cast<std::uint32_t>(VS::Input::ReadLiveControllerPort(
+            kSecondPortShift, Input_legacyPadResponseBytes[1]));
     const std::uint32_t state = first | (second << kSecondPortShift);
     Input_buttonsState = static_cast<int>(state);
-    Input_UpdateControllerConnection(0, Input_legacyPadResponseBytes[0]);
-    Input_UpdateControllerConnection(kSecondPortShift,
-                                     Input_legacyPadResponseBytes[1]);
+    VS::Input::UpdateLiveControllerConnection(0,
+                                              Input_legacyPadResponseBytes[0]);
+    VS::Input::UpdateLiveControllerConnection(kSecondPortShift,
+                                              Input_legacyPadResponseBytes[1]);
     const auto previous = static_cast<std::uint32_t>(Input_previousButtons);
     const std::uint32_t pressed = ~previous & state;
     Input_buttonsPressed.allButtons = pressed;

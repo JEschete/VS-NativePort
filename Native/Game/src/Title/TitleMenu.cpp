@@ -2,6 +2,7 @@
 #include "Audio/XaMixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 #include "Save/FileMenuLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
@@ -17,8 +18,7 @@ extern "C" {
 #include "Event/ScriptAudio.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Files.h"
@@ -38,7 +38,6 @@ extern "C" {
 #include "State/Progress.h"
 #include "State/RoomCache.h"
 #include "State/RoomMemory.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
 #include "Title/Credits.h"
@@ -149,7 +148,7 @@ int Title_ShowContinueScreen(void)
     while (1) {
         State_UpdatePlayTimeAndLoading(2);
         Menu_Files_SwapBuffers();
-        Input_UpdateControllers();
+        VS::Input::UpdateLiveControllers();
         switch (Title_loadScreenPhase) {
         case Title_LoadScreenPhase_Initialize:
             if (Title_loadScreenPhase == 0) {
@@ -208,7 +207,7 @@ void Title_ShowClearSaveScreen(void)
     while (1) {
         State_UpdatePlayTimeAndLoading(2);
         Menu_Files_SwapBuffers();
-        Input_UpdateControllers();
+        VS::Input::UpdateLiveControllers();
         Save_MemoryCard_NextCipherBits(0);
 
         switch (Title_clearSaveScreenPhase) {
@@ -332,7 +331,7 @@ void Title_ShowPublisherAndDeveloper()
         disp.screen.y = 8;
         disp.screen.h = 224;
         VSync(0);
-        Input_UpdateControllers();
+        VS::Input::UpdateLiveControllers();
         PutDispEnv(&disp);
         PutDrawEnv(&draw);
     }
@@ -483,7 +482,7 @@ void Title_BlendMenuBackground(u_short* bgData, int textBlendFactor)
     setRECT(&rect, 352, 448, 160, 64);
     LoadImage(&rect, (u_long*)dst + 0x1400);
     VSync(4);
-    Input_UpdateControllers();
+    VS::Input::UpdateLiveControllers();
 }
 
 // decomp: TITLE.PRG _fadeInMenuCopyright (src/TITLE/TITLE.PRG/22C.c:3914)
@@ -524,7 +523,7 @@ void Title_BlendCopyright(u_short* menu_capture, int textBlendFactor)
                   >> 5);
     }
     VSync(2);
-    Input_UpdateControllers();
+    VS::Input::UpdateLiveControllers();
     setRECT(&rect, 678, 376, 180, 24);
     LoadImage(&rect, (u_long*)dst);
 }
@@ -794,7 +793,7 @@ void Title_DrawMenu(void)
         Title_DrawMenuItems();
         if (i == 0) {
             VSync(0);
-            Input_UpdateVibrationPatterns();
+            VS::Input::UpdateLiveVibrationPatterns();
         } else {
             VS::Movie::Intro::StopLiveAfterAudioTail();
         }
@@ -806,7 +805,7 @@ void Title_DrawMenuAndPollInput(void)
 {
     Title_DrawMenu();
     VSync(0);
-    Input_UpdateControllers();
+    VS::Input::UpdateLiveControllers();
 }
 
 // decomp: TITLE.PRG _menuVibrationSettings (src/TITLE/TITLE.PRG/22C.c:4246)
@@ -851,7 +850,7 @@ void Title_ShowVibrationSettings(void)
             Title_PlayMenuSelectSound();
             Input_settings.vibrationOn = vibrationSetting - 5;
             if (vibrationSetting == Title_MenuItemId_VibrationOn) {
-                Input_PlayVibrationPreset(0);
+                VS::Input::PlayLiveVibrationPreset(0);
             }
             break;
         } else if (Input_buttonsState & PADRdown) {
@@ -1106,13 +1105,13 @@ int Title_Run(void)
             Title_DrawMenuAndPollInput();
         }
 
-        Input_InvalidateControllerConnections();
+        VS::Input::InvalidateLiveControllerConnections();
         Title_lastIntroMovieFrame = VSync(-1);
         Title_lastButtonActivityFrame = VSync(-1);
 
         while (1) {
             VSync(0);
-            Input_UpdateControllers();
+            VS::Input::UpdateLiveControllers();
             if (Movie_Intro_isPlaying != 0) {
                 Title_lastIntroMovieFrame = VSync(-1);
             }
@@ -1195,7 +1194,7 @@ int Title_Run(void)
         }
         for (i = 64; i > 0; --i) {
             VSync(0);
-            Input_UpdateControllers();
+            VS::Input::UpdateLiveControllers();
             Title_titleTransitionPacketBuffer.dmaTag = vs_getTag(Title_titleTransitionPacketBuffer.tile, Render_LegacyPrimitiveAddress_End);
             Title_titleTransitionPacketBuffer.tile.texturePageCommand =
                 vs_getTpage(320, 0, Render_TextureFormat_Direct16Bit, Render_BlendMode_Subtract, Render_Dithering_Off);
@@ -1203,7 +1202,7 @@ int Title_Run(void)
             Title_titleTransitionPacketBuffer.tile.position = vs_getXY(0, 0);
             Title_titleTransitionPacketBuffer.tile.size = vs_getWH(640, 480);
             DrawPrim(&Title_titleTransitionPacketBuffer);
-            Input_UpdateVibrationPatterns();
+            VS::Input::UpdateLiveVibrationPatterns();
         }
         VSync(0);
         SetDispMask(0);

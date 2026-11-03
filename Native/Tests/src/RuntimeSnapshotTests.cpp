@@ -55,7 +55,7 @@ extern "C" {
 #include "Field/Room.h"
 #include "Field/RoomLoading.h"
 #include "Field/Znd.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"

@@ -29,8 +29,7 @@ extern "C" {
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/RoomRendering.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
@@ -52,7 +51,6 @@ extern "C" {
 #include "Menu/Inventory/ItemList.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
-#include "State/Settings.h"
 
 // decomp: _ashleyRenderState (_ashleyRenderState@src/MENU/items1.h)
 int Menu_Inventory_ashleyRenderState = 0;

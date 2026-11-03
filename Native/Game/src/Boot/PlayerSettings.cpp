@@ -3,7 +3,7 @@ extern "C" {
 
 #include <string.h>
 
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 
 // Shared defaults from TITLE.PRG _initEnvironment,
 // src/TITLE/TITLE.PRG/22C.c:4463. Title presentation and retained

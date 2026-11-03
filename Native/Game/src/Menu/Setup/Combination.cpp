@@ -11,8 +11,7 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
@@ -22,7 +21,6 @@ extern "C" {
 #include "Menu/Setup/Assembly.h"
 #include "Menu/Setup/Combination.h"
 #include "Menu/Setup/SetupScreen.h"
-#include "State/Settings.h"
 
 // decomp: local static of _combineBladeMenu, at file scope so the module reset reaches it
 static char Menu_Setup_bladeCombinationCursorAnimation = 0;

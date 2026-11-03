@@ -37,7 +37,7 @@ extern "C" {
 #include "Field/Map.h"
 #include "Field/Mpd.h"
 #include "Field/Znd.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Categories.h"
 #include "Menu/Files.h"
 #include "State/Ashley.h"

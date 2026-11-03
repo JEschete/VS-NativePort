@@ -1,11 +1,12 @@
 // Hand-maintained live binding for Movie/Intro/Player.cpp.
 #include <cstdint>
 
+#include "Input/ControllerLive.hpp"
 #include "Movie/IntroPlayer.hpp"
 #include "Movie/IntroPlayerLive.hpp"
 extern "C" {
 #include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Movie/Intro.h"
 #include "Movie/Intro/Playback.h"
@@ -33,7 +34,7 @@ class LiveHost final : public Host {
     return static_cast<std::uint32_t>(VSync(-1));
   }
   void WaitForVerticalBlank() override { VSync(0); }
-  void UpdateControllers() override { Input_UpdateControllers(); }
+  void UpdateControllers() override { VS::Input::UpdateLiveControllers(); }
   [[nodiscard]] bool SkipRequested() const override {
     return (Input_buttonsPressed.allButtons & (PADRright | PADstart)) != 0;
   }

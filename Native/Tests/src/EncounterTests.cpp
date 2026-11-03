@@ -24,7 +24,7 @@ extern "C" {
 #include "Boot/PlayerSettings.h"
 #include "Field/Gimmicks.h"
 #include "Field/Room.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 }
 
 namespace {

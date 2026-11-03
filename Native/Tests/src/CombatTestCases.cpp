@@ -41,7 +41,7 @@ extern "C" {
 #include "Effects/Templates/Ring.h"
 #include "Field/Interactions.h"
 #include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Loot.h"

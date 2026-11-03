@@ -732,37 +732,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Input\\Controller.cpp": [
-[
-85,
-[
-"    PadSetAct(portID, port->actuatorLevels, sizeof port->actuatorLevels);",
-"    PadSetActAlign(portID, Input_legacyActuatorAlignment);"
-],
-[
-"    PadSetAct(portID, (unsigned char *)(port->actuatorLevels), sizeof port->actuatorLevels);",
-"    PadSetActAlign(portID, (unsigned char *)(Input_legacyActuatorAlignment));"
-]
-],
-[
-147,
-[
-"        PadSetAct(portID, port->actuatorLevels, sizeof port->actuatorLevels);"
-],
-[
-"        PadSetAct(portID, (unsigned char *)(port->actuatorLevels), sizeof port->actuatorLevels);"
-]
-],
-[
-149,
-[
-"            || ((state == PadStateStable) && (PadSetActAlign(portID, Input_legacyActuatorAlignment) != 0))) {"
-],
-[
-"            || ((state == PadStateStable) && (PadSetActAlign(portID, (unsigned char *)(Input_legacyActuatorAlignment)) != 0))) {"
-]
-]
-],
 "Native\\Engine\\src\\Movie\\Intro\\Playback.cpp": [
 [
 31,
@@ -6233,10 +6202,10 @@
 [
 144,
 [
-"            Input_StartVibrationPattern(Event_vibrationPatternBuffer + 8, 0xFF, 2);"
+"            VS::Input::StartLiveVibrationPattern(Event_vibrationPatternBuffer + 8, 0xFF, 2);"
 ],
 [
-"            Input_StartVibrationPattern((char *)(((u_char*)(Event_vibrationPatternBuffer)) + 8), 0xFF, 2);"
+"            VS::Input::StartLiveVibrationPattern((char *)(((u_char*)(Event_vibrationPatternBuffer)) + 8), 0xFF, 2);"
 ]
 ]
 ],

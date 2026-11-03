@@ -28,8 +28,7 @@ extern "C" {
 #include "Field/RoomLoading.h"
 #include "Field/RoomRendering.h"
 #include "Field/Zone.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
 #include "Menu/Framework/Framework.h"
@@ -44,7 +43,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: D_80102C40 (D_80102C40@src/MENU/MENU5.PRG/4D8.c)

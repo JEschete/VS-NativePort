@@ -21,7 +21,7 @@ extern "C" {
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Files.h"
 #include "Menu/Score/Encyclopedia.h"
 #include "Menu/Score/Records.h"

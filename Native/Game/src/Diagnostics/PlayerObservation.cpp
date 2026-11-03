@@ -40,7 +40,7 @@ extern "C" {
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
 #include "Items/TreasureChests.h"
 #include "Menu/BattleAbilities.h"

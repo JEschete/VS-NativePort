@@ -66,7 +66,7 @@ extern "C" {
 #include "Field/RoomRendering.h"
 #include "Field/Transitions.h"
 #include "Field/Zone.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"

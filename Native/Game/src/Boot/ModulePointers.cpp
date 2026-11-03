@@ -177,8 +177,6 @@ extern "C" {
 #include "Field/Weather.h"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
 #include "Input/Controllers.h"
 #include "Input/Vibration.h"
 #include "Items/Categories.h"
@@ -235,7 +233,6 @@ extern "C" {
 #include "State/RoomMemory.h"
 #include "State/SceneTimer.h"
 #include "State/Score.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 #include "State/Timers.h"
 #include "Title/TitleMenu.h"
@@ -1490,7 +1487,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800C28ACu, 0u, (void*)&Battle_DrawSpherePositionCursor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C2B0Cu, 0u, (void*)&Battle_CacheSphereTerrainRow, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4650u, 0u, (void*)&Battle_UpdateSphereTargetHighlights, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800C4708u, 0u, (void*)&Input_MapStickDeadZone, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4734u, 0u, (void*)&Battle_SphereInteractionMode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C4794u, 0u, (void*)&Battle_UpdateSphereTargetPosition, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800C513Cu, 0u, (void*)&Battle_ClearTargetActorHighlight, 0u, 0u, 0u},
@@ -2710,23 +2706,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80042C94u, 0u, (void*)&Boot_SetSoftResetEnabled, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042CA0u, 0u, (void*)&Save_MarkAshleySnapshotValid, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042CB0u, 0u, (void*)&Save_CaptureAshleySnapshot, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042FDCu, 0u, (void*)&Input_InvalidateControllerConnections, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042FF0u, 0u, (void*)&Input_UnlockAnalogModeSwitch, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043034u, 0u, (void*)&Input_ConfigureControllerActuators, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800430F4u, 0u, (void*)&Input_ReadControllerPort, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043250u, 0u, (void*)&Input_UpdateControllerConnection, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043388u, 0u, (void*)&Input_MotorCommand, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800433B4u, 0u, (void*)&Input_StartVibrationPattern, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043470u, 0u, (void*)&Input_ClearVibrationSlot, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800434A4u, 0u, (void*)&Input_StopVibrationPatterns, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043554u, 0u, (void*)&Input_PauseVibrationSlot, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004357Cu, 0u, (void*)&Input_PauseVibrationPatterns, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800435DCu, 0u, (void*)&Input_ResumeVibrationSlot, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043608u, 0u, (void*)&Input_ResumeVibrationPatterns, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043668u, 0u, (void*)&Input_ResetVibrationPatterns, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800436B4u, 0u, (void*)&Input_UpdateVibrationPatterns, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800438C8u, 0u, (void*)&Input_PlayVibrationPreset, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80043940u, 0u, (void*)&Input_UpdateControllers, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80043FB4u, 0u, (void*)&Content_ReadSectorCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044148u, 0u, (void*)&Content_ReadCommandCallback, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800441C4u, 0u, (void*)&Content_SeekCommandCallback, 0u, 0u, 0u},
@@ -2854,8 +2833,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004FF88u, 388u, (void*)&Core_randomShuffleTable, sizeof Core_randomShuffleTable, 1u, 1u},
     {"SLUS_010.40", 0x8005010Cu, 4u, (void*)&Core_randomShuffleIndex, sizeof Core_randomShuffleIndex, 1u, 1u},
     {"SLUS_010.40", 0x80050110u, 4u, (void*)&Content_legacyDiscReadBuffer, sizeof Content_legacyDiscReadBuffer, 0u, 0u},
-    {"SLUS_010.40", 0x80050118u, 112u, (void*)&Input_vibrationPatternSlots, sizeof Input_vibrationPatternSlots, 0u, 0u},
-    {"SLUS_010.40", 0x80050190u, 22u, (void*)&Input_controllerPorts, sizeof Input_controllerPorts, 1u, 1u},
     {"SLUS_010.40", 0x800501C8u, 4u, (void*)&Content_legacyDiscReadLocation, sizeof Content_legacyDiscReadLocation, 1u, 1u},
     {"SLUS_010.40", 0x800501CCu, 4u, (void*)&Content_legacyXaReadyBcdField, sizeof Content_legacyXaReadyBcdField, 1u, 1u},
     {"SLUS_010.40", 0x800501D0u, 4u, (void*)&Content_legacyXaReadyByteThree, sizeof Content_legacyXaReadyByteThree, 1u, 1u},
@@ -2867,28 +2844,21 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80050470u, 4u, (void*)&Boot_gameEntryMode, sizeof Boot_gameEntryMode, 1u, 1u},
     {"SLUS_010.40", 0x80050474u, 4u, (void*)&Boot_titleReturnStackPointer, sizeof Boot_titleReturnStackPointer, 1u, 1u},
     {"SLUS_010.40", 0x80050478u, 22528u, (void*)&Audio_menuSoundEffects, sizeof Audio_menuSoundEffects, 1u, 1u},
-    {"SLUS_010.40", 0x80055C78u, 4u, (void*)&Input_releasedButtons, sizeof Input_releasedButtons, 1u, 1u},
     {"SLUS_010.40", 0x80055C80u, 8u, (void*)&Render_legacyOrderingTables, sizeof Render_legacyOrderingTables, 0u, 0u},
     {"SLUS_010.40", 0x80055C88u, 4u, (void*)&Boot_isSoftResetEnabled, sizeof Boot_isSoftResetEnabled, 1u, 1u},
-    {"SLUS_010.40", 0x80055C90u, 128u, (void*)&Input_buttonHeldFrames, sizeof Input_buttonHeldFrames, 1u, 1u},
     {"SLUS_010.40", 0x80055D10u, 72u, (void*)&Content_discDriveState, sizeof Content_discDriveState, 0u, 0u},
     {"SLUS_010.40", 0x80055D2Cu, 11u, (void*)&Content_discControlResponseBytes, sizeof Content_discControlResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x80055D58u, 33384u, (void*)&Render_paletteTransitionState, sizeof Render_paletteTransitionState, 1u, 1u},
-    {"SLUS_010.40", 0x8005DFC0u, 16u, (void*)&Input_stickPosBuf, sizeof Input_stickPosBuf, 1u, 1u},
     {"SLUS_010.40", 0x8005DFD0u, 4u, (void*)&Boot_battleReturnStackPointer, sizeof Boot_battleReturnStackPointer, 1u, 1u},
-    {"SLUS_010.40", 0x8005DFDCu, 4u, (void*)&Input_buttonRepeat, sizeof Input_buttonRepeat, 1u, 1u},
     {"SLUS_010.40", 0x8005DFF0u, 68u, (void*)&Input_legacyPadResponseBytes, sizeof Input_legacyPadResponseBytes, 1u, 1u},
     {"SLUS_010.40", 0x8005E038u, 136u, (void*)&Audio_soundState, sizeof Audio_soundState, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C0u, 8u, (void*)&Render_legacyPrimitiveBuffers, sizeof Render_legacyPrimitiveBuffers, 0u, 0u},
     {"SLUS_010.40", 0x8005E0C8u, 4u, (void*)&Render_nearClip, sizeof Render_nearClip, 1u, 1u},
     {"SLUS_010.40", 0x8005E0D0u, 184u, (void*)&Render_legacyDrawEnvironments, sizeof Render_legacyDrawEnvironments, 1u, 1u},
     {"SLUS_010.40", 0x8005E188u, 40u, (void*)&Render_legacyDisplayEnvironments, sizeof Render_legacyDisplayEnvironments, 1u, 1u},
-    {"SLUS_010.40", 0x8005E1C0u, 4u, (void*)&Input_previousButtons, sizeof Input_previousButtons, 1u, 1u},
-    {"SLUS_010.40", 0x8005E1D0u, 4u, (void*)&Input_buttonsPressed, sizeof Input_buttonsPressed, 0u, 0u},
     {"SLUS_010.40", 0x8005E1D8u, 4u, (void*)&Ending_Credits_xaResumeFrameCount, sizeof Ending_Credits_xaResumeFrameCount, 1u, 1u},
     {"SLUS_010.40", 0x8005E210u, 4u, (void*)&Render_frameBuf, sizeof Render_frameBuf, 1u, 1u},
     {"SLUS_010.40", 0x8005E214u, 4u, (void*)&Boot_isClearSavePending, sizeof Boot_isClearSavePending, 1u, 1u},
-    {"SLUS_010.40", 0x8005E238u, 4u, (void*)&Input_buttonsState, sizeof Input_buttonsState, 1u, 1u},
     {"SLUS_010.40", 0x8005E240u, 4u, (void*)&Boot_isGameplayActive, sizeof Boot_isGameplayActive, 1u, 1u},
     {"SLUS_010.40", 0x8005E248u, 4u, (void*)&Render_projectionDistance, sizeof Render_projectionDistance, 1u, 1u},
     {"SLUS_010.40", 0x8005E24Cu, 4u, (void*)&State_tickSpeed, sizeof State_tickSpeed, 1u, 1u},
@@ -2902,7 +2872,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8005FEA0u, 276u, (void*)&Audio_Seq_unusedScoredata, sizeof Audio_Seq_unusedScoredata, 1u, 1u},
     {"SLUS_010.40", 0x8005FFB8u, 32u, (void*)&State_learnedActionFlags, sizeof State_learnedActionFlags, 1u, 1u},
     {"SLUS_010.40", 0x8005FFD8u, 72u, (void*)&State_roomVisitProgress, sizeof State_roomVisitProgress, 1u, 1u},
-    {"SLUS_010.40", 0x80060020u, 32u, (void*)&Input_settings, sizeof Input_settings, 1u, 1u},
     {"SLUS_010.40", 0x80060040u, 36u, (void*)&Audio_Seq_unusedArtsStatus, sizeof Audio_Seq_unusedArtsStatus, 0u, 0u},
     {"SLUS_010.40", 0x80060064u, 4u, (void*)&State_currentRoomStateSlot, sizeof State_currentRoomStateSlot, 1u, 1u},
     {"SLUS_010.40", 0x80060068u, 256u, (void*)&State_ashleySnapshot, sizeof State_ashleySnapshot, 1u, 1u},

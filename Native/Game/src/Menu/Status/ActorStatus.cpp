@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Input/Controller.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -24,8 +25,7 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "DiscQueue.h"
 #include "Field/RoomRendering.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -573,8 +573,8 @@ int Menu_Status_NavigateStatusEffects(Battle_ActorStats* actor, int selection_ac
 
         if (Input_buttonsState & PADRleft) {
 
-            xPos = Input_MapStickDeadZone(Input_stickPosBuf.rStickX);
-            yPos = Input_MapStickDeadZone(Input_stickPosBuf.rStickY);
+            xPos = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickX);
+            yPos = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickY);
 
             if (xPos == 0) {
                 if (yPos == 0) {
@@ -1194,8 +1194,8 @@ int Menu_Status_Update(u_char* state)
 
                 if (Input_buttonsState & PADL2) {
 
-                    userInput = Input_MapStickDeadZone(Input_stickPosBuf.rStickX);
-                    limbs = Input_MapStickDeadZone(Input_stickPosBuf.rStickY);
+                    userInput = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickX);
+                    limbs = VS::Input::MapStickDeadZone(Input_stickPosBuf.rStickY);
 
                     if (userInput == 0) {
                         if (limbs == 0) {

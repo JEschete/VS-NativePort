@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/StreamControlLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/SoundBanks.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Effects/Runtime.h"
 #include "Effects/ScriptVm.h"
 #include "Effects/Transforms.h"
-#include "Input/Controller.h"
 #include "OverlayFiles.h"
 #include "OverlayWorkspace.h"
 
@@ -354,7 +354,7 @@ int Effects_UpdatePrimaryEffects(void)
                 Effects_package->auxiliarySoundHandle = 0;
             }
 
-            Input_StopVibrationPatterns(0, 1);
+            VS::Input::StopLiveVibrationPatterns(0, 1);
             Effects_ReleaseEffectPackageResources();
             Effects_ReleaseParticlePool();
             Effects_ReleaseEffectToken(Effects_primaryToken);
@@ -553,7 +553,7 @@ void Effects_ClearPrimaryEffects(void)
 {
     Effects_EffectInstance* instance_cursor = Effects_primaryInstances;
 
-    Input_StopVibrationPatterns(0U, 1);
+    VS::Input::StopLiveVibrationPatterns(0U, 1);
 
     while (instance_cursor != NULL) {
         Effects_EffectInstance* next_instance = instance_cursor->next;

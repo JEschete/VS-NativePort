@@ -16,7 +16,7 @@ extern "C++" {
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Inventory/Inventory.h"

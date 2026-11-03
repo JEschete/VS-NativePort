@@ -20,7 +20,7 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.h"
 #include "Field/RoomRendering.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Container/Storage.h"

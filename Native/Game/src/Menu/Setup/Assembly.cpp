@@ -10,8 +10,7 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
@@ -23,7 +22,6 @@ extern "C" {
 #include "Menu/Setup/SetupScreen.h"
 #include "Menu/TextBox.h"
 #include "Render/Font.h"
-#include "State/Settings.h"
 
 // decomp: local static of _assembleMenu, at file scope so the module reset reaches it
 static char Menu_Setup_assemblyCursorAnimation = 0;

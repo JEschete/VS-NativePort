@@ -19,8 +19,7 @@ extern "C" {
 #include "Content/StringTables.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Menu/BattleAbilities.h"
@@ -34,7 +33,6 @@ extern "C" {
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 #include "State/Progress.h"
-#include "State/Settings.h"
 
 // decomp: _abilityCount (_abilityCount@src/MENU/MENU2.PRG/64.c)
 char Menu_BattleAbilities_abilityCount = 0;

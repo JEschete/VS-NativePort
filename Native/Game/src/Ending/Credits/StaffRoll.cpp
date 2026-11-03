@@ -3,6 +3,7 @@
 #include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
+#include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Stream.h"
@@ -13,8 +14,7 @@ extern "C" {
 #include "Ending/Credits.h"
 #include "Ending/Credits/EmbeddedArt.h"
 #include "Ending/Credits/StaffRoll.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Render/Display.h"
 #include "Render/Frame.h"
 #include "Render/Render.h"
@@ -1355,7 +1355,7 @@ void Ending_Credits_BeginFrame(void)
 {
     void* ordering_table_base;
 
-    Input_UpdateControllers();
+    VS::Input::UpdateLiveControllers();
     ordering_table_base = Render_legacyOrderingTables[Render_frameBuf];
     Render_frameScratch.overlayOrderingTable = ((u_char*)(ordering_table_base)) + 8;
     Render_frameScratch.orderingTable = ((u_char*)(ordering_table_base)) + 0x48;

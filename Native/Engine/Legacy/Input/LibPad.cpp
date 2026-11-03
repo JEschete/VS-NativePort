@@ -5,7 +5,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 }
 
 // libpad shim (plan §6.5). The game registered two receive buffers with

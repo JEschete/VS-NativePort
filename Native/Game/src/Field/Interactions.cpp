@@ -39,7 +39,7 @@ extern "C" {
 #include "Field/Traps.h"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/KeyItems.h"
 #include "Items/Loadout.h"
@@ -50,7 +50,6 @@ extern "C" {
 #include "Menu/TextBox.h"
 #include "Render/Palette.h"
 #include "State/Flags.h"
-#include "State/Settings.h"
 #include "State/Timers.h"
 
 // decomp: D_800F1910 (D_800F1910@BATTLE/BATTLE.PRG)

@@ -6,6 +6,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/MinimapSceneLive.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Render/CameraViewLive.hpp"
 #include "Render/DisplayControlLive.hpp"
 extern "C" {
@@ -62,8 +63,7 @@ extern "C" {
 #include "Field/Transitions.h"
 #include "Field/Znd.h"
 #include "Field/Zone.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
 #include "Items/Inventory.h"
@@ -846,7 +846,7 @@ void Field_FinishRoomLoad(int requested_room_id)
             VS::Render::ShowLiveDisplay();
         }
     }
-    Input_InvalidateControllerConnections();
+    VS::Input::InvalidateLiveControllerConnections();
 }
 
 // decomp: BATTLE.PRG func_8008A364 (src/BATTLE/BATTLE.PRG/146C.c:15480)

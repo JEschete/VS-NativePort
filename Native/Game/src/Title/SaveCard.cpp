@@ -6,7 +6,7 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Save/MemoryCard/GameFiles.h"

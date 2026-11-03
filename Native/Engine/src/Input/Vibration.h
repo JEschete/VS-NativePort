@@ -3,16 +3,6 @@
 #define VS_INPUT_VIBRATION_H_TYPES
 #include "Legacy/Psx.h"
 
-typedef struct Input_VibrationPatternSlot Input_VibrationPatternSlot;
-
-// decomp: padAct_t (src/SLUS_010.40/main.c:25)
-typedef struct Input_VibrationPatternSlot {
-    int motorLevels[2];
-    u_short active;
-    u_short ownerTag;
-    char* pattern;
-    int channels[12]; /* native: independent six-word envelopes for both motors */
-} Input_VibrationPatternSlot;
 
 #endif // VS_INPUT_VIBRATION_H_TYPES
 

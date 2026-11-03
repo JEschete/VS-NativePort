@@ -18,8 +18,7 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
@@ -38,7 +37,6 @@ extern "C" {
 #include "Render/Palette.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: vs_mainMenu_freezeTabArrows (vs_mainMenu_freezeTabArrows@MENU/MAINMENU.PRG)

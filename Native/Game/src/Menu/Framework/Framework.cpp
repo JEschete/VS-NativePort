@@ -45,8 +45,7 @@ extern "C" {
 #include "Effects/ScreenEffects.h"
 #include "Event/Splash.h"
 #include "Field/RoomLoading.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -92,7 +91,6 @@ extern "C" {
 #include "Render/TextureAnimation.h"
 #include "Render/Textures.h"
 #include "Render/UiPrimitives.h"
-#include "State/Settings.h"
 #include "State/StateFlags.h"
 
 // decomp: _loadedSubMenu (_loadedSubMenu@BATTLE/BATTLE.PRG)

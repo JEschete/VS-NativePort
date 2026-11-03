@@ -26,7 +26,7 @@ extern "C" {
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 #include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
 #include "Menu/BreakArts.h"

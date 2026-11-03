@@ -12,8 +12,7 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
-#include "Input/Buttons.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
 #include "Items/Inventory.h"
@@ -31,7 +30,6 @@ extern "C" {
 #include "Menu/Status/EquipmentDetails.h"
 #include "Render/Font.h"
 #include "Render/Palette.h"
-#include "State/Settings.h"
 
 // decomp: local static of _equipmentDetailScreen, at file scope so the module reset reaches it
 static char Menu_Status_equipmentDetailsCursorAnimState = 0;

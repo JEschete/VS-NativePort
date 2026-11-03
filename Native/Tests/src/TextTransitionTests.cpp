@@ -12,7 +12,7 @@
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Menu/Framework/TextBoxes.h"
 #include "Render/Display.h"
 #include "Render/Font.h"

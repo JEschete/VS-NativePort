@@ -10,14 +10,13 @@ extern "C" {
 #include "Battle/ValueLabels.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Render/Font.h"
 #include "Render/Images.h"
 #include "Render/LegacyPackets.h"
 #include "Render/Primitives.h"
 #include "Render/Render.h"
 #include "Render/TextureAnimation.h"
-#include "State/Settings.h"
 #include "State/Timers.h"
 
 // decomp: D_800E861C (D_800E861C@BATTLE/BATTLE.PRG)

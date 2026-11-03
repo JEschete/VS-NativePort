@@ -13,7 +13,7 @@ extern "C" {
 #include "Field/Doors.h"
 #include "Field/Map.h"
 #include "Field/Mpd.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Weapons.h"
 #include "Menu/Files.h"

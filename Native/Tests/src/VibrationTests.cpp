@@ -10,12 +10,14 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Input/Controller.hpp"
+#include "Input/ControllerLive.hpp"
 #include "Input/LegacyPad.hpp"
 #include "Input/Pad.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Input/Controllers.h"
 #include "Input/Vibration.h"
 }
@@ -115,39 +117,43 @@ struct RumbleFixture {
 };
 
 struct PatternState {
-  std::array<Input_VibrationPatternSlot, 2> saved_slots =
-      std::to_array(Input_vibrationPatternSlots);
+  VS::Input::VibrationState saved_vibration = VS::Input::LiveVibrationState();
   std::array<Input_ControllerPortState, 2> saved_ports =
       std::to_array(Input_controllerPorts);
   std::array<unsigned char, 11> pattern{5, 2, 1, 0, 0, 2, 128, 2, 128, 0, 0};
 
   PatternState() {
-    std::fill_n(Input_vibrationPatternSlots, 2, Input_VibrationPatternSlot{});
-    Input_ConfigureControllerActuators(0, nullptr);
+    VS::Input::LiveVibrationState() = {};
+    VS::Input::ConfigureLiveControllerActuators(
+        0, Input_legacyPadResponseBytes[0]);
   }
 
   ~PatternState() {
-    std::copy(saved_slots.begin(), saved_slots.end(),
-              Input_vibrationPatternSlots);
+    VS::Input::LiveVibrationState() = saved_vibration;
     std::copy(saved_ports.begin(), saved_ports.end(), Input_controllerPorts);
   }
 
   int Start(unsigned int slot, int owner_tag = 0x80) {
-    return Input_StartVibrationPattern(reinterpret_cast<char*>(pattern.data()),
-                                       slot, owner_tag);
+    return VS::Input::StartLiveVibrationPattern(
+        reinterpret_cast<const char*>(pattern.data()), slot, owner_tag);
   }
 
-  void CheckSlot(unsigned int slot_index, bool active, bool stored = true) {
-    CHECK(Input_vibrationPatternSlots[slot_index].active == active);
-    CHECK(Input_vibrationPatternSlots[slot_index].pattern ==
-          (stored ? reinterpret_cast<char*>(pattern.data()) : nullptr));
+  static const VS::Input::VibrationSlot& Slot(std::size_t slot_index) {
+    return VS::Input::LiveVibrationState().slots.at(slot_index);
   }
 
-  void CheckPresetSlot(unsigned int slot_index) {
-    CHECK(Input_vibrationPatternSlots[slot_index].pattern ==
-          Input_vibrationPresets + 8);
-    CHECK(Input_vibrationPatternSlots[slot_index].ownerTag == 0x80);
-    CHECK(Input_vibrationPatternSlots[slot_index].active == 1);
+  void CheckSlot(std::size_t slot_index, bool active, bool stored = true) {
+    CHECK(Slot(slot_index).active == active);
+    CHECK(Slot(slot_index).pattern.data() ==
+          (stored ? reinterpret_cast<const std::byte*>(pattern.data())
+                  : nullptr));
+  }
+
+  static void CheckPresetSlot(std::size_t slot_index) {
+    CHECK(Slot(slot_index).pattern.data() ==
+          reinterpret_cast<const std::byte*>(Input_vibrationPresets + 8));
+    CHECK(Slot(slot_index).owner == 0x80);
+    CHECK(Slot(slot_index).active);
   }
 };
 }  // namespace
@@ -157,7 +163,7 @@ TEST_CASE("Original stick axis mapping preserves dead-zone boundaries",
   constexpr std::array<int, 9> kAxes{0, 63, 64, 127, 128, 191, 192, 193, 255};
   constexpr std::array<int, 9> kOffsets{-64, -1, 0, 0, 0, 0, 0, 1, 63};
   for (std::size_t index = 0; index < kAxes.size(); ++index) {
-    CHECK(Input_MapStickDeadZone(kAxes[index]) == kOffsets[index]);
+    CHECK(VS::Input::MapStickDeadZone(kAxes[index]) == kOffsets[index]);
   }
 }
 
@@ -165,16 +171,16 @@ TEST_CASE("Original vibration preset uses its directory and preview owner",
           "[input][vibration][pattern]") {
   PatternState fixture;
   REQUIRE(Input_vibrationPresets[0] == 1);
-  Input_PlayVibrationPreset(0);
-  fixture.CheckPresetSlot(0);
-  CHECK(Input_vibrationPatternSlots[1].pattern == nullptr);
-  Input_PlayVibrationPreset(1);
-  CHECK(Input_vibrationPatternSlots[1].pattern == nullptr);
-  Input_PlayVibrationPreset(0);
-  fixture.CheckPresetSlot(1);
-  Input_PlayVibrationPreset(0);
-  fixture.CheckPresetSlot(0);
-  fixture.CheckPresetSlot(1);
+  VS::Input::PlayLiveVibrationPreset(0);
+  PatternState::CheckPresetSlot(0);
+  CHECK(PatternState::Slot(1).pattern.data() == nullptr);
+  VS::Input::PlayLiveVibrationPreset(1);
+  CHECK(PatternState::Slot(1).pattern.data() == nullptr);
+  VS::Input::PlayLiveVibrationPreset(0);
+  PatternState::CheckPresetSlot(1);
+  VS::Input::PlayLiveVibrationPreset(0);
+  PatternState::CheckPresetSlot(0);
+  PatternState::CheckPresetSlot(1);
 }
 
 TEST_CASE("Live registered actuator bytes reach actual SDL rumble output",
@@ -295,20 +301,20 @@ TEST_CASE("Original vibration bytecode retains unsigned motor intensities",
   RumbleFixture fixture;
   PatternState pattern;
   REQUIRE(pattern.Start(1) == 1);
-  Input_UpdateVibrationPatterns();
+  VS::Input::UpdateLiveVibrationPatterns();
   fixture.input.Update();
   CheckLast(fixture.commands, 32896, 65535);
 }
 
 TEST_CASE("Both original vibration slots have independent complete envelopes",
           "[input][vibration][pattern]") {
-  REQUIRE(std::size(Input_vibrationPatternSlots[0].channels) == 12);
+  REQUIRE(VS::Input::LiveVibrationState().slots[1].envelopes.size() == 2);
   RumbleFixture fixture;
   PatternState pattern;
   pattern.pattern[2] = 0;
   REQUIRE(pattern.Start(1) == 1);
   REQUIRE(pattern.Start(2) == 2);
-  Input_UpdateVibrationPatterns();
+  VS::Input::UpdateLiveVibrationPatterns();
   fixture.input.Update();
   CheckLast(fixture.commands, 65535, 0);
 }
@@ -319,9 +325,11 @@ TEST_CASE("Original vibration allocation and selectors preserve slot IDs",
   REQUIRE(pattern.Start(0xFF) == 1);
   REQUIRE(pattern.Start(0xFF, 2) == 2);
   CHECK(pattern.Start(0xFF) == 0);
-  CHECK(Input_StopVibrationPatterns(3, 0) == 0);
-  CHECK(Input_PauseVibrationPatterns(3) == 0);
-  CHECK(Input_ResumeVibrationPatterns(3) == 0);
+  CHECK(VS::Input::StopLiveVibrationPatterns(3, 0) == 0);
+  CHECK(VS::Input::PauseVibrationPatterns(VS::Input::LiveVibrationState(), 3) ==
+        0U);
+  CHECK(VS::Input::ResumeVibrationPatterns(VS::Input::LiveVibrationState(),
+                                           3) == 0U);
   pattern.CheckSlot(0, true);
   pattern.CheckSlot(1, true);
 }
@@ -331,13 +339,16 @@ TEST_CASE("Original vibration pause and resume retain pattern storage",
   PatternState pattern;
   REQUIRE(pattern.Start(1) == 1);
   REQUIRE(pattern.Start(2) == 2);
-  CHECK(Input_PauseVibrationPatterns(0) == 1);
+  CHECK(VS::Input::PauseVibrationPatterns(VS::Input::LiveVibrationState(), 0) ==
+        1U);
   pattern.CheckSlot(0, false);
   pattern.CheckSlot(1, false);
-  CHECK(Input_ResumeVibrationPatterns(2) == 2);
+  CHECK(VS::Input::ResumeVibrationPatterns(VS::Input::LiveVibrationState(),
+                                           2) == 2U);
   pattern.CheckSlot(0, false);
   pattern.CheckSlot(1, true);
-  CHECK(Input_ResumeVibrationPatterns(0) == 1);
+  CHECK(VS::Input::ResumeVibrationPatterns(VS::Input::LiveVibrationState(),
+                                           0) == 1U);
   pattern.CheckSlot(0, true);
   pattern.CheckSlot(1, true);
 }
@@ -347,15 +358,15 @@ TEST_CASE("Original vibration stop selectors preserve owner filtering",
   PatternState pattern;
   REQUIRE(pattern.Start(1) == 1);
   REQUIRE(pattern.Start(2, 2) == 2);
-  CHECK(Input_StopVibrationPatterns(0, 0x80) == 1);
+  CHECK(VS::Input::StopLiveVibrationPatterns(0, 0x80) == 1);
   pattern.CheckSlot(0, false, false);
   pattern.CheckSlot(1, true);
-  CHECK(Input_StopVibrationPatterns(2, 0x80) == 2);
+  CHECK(VS::Input::StopLiveVibrationPatterns(2, 0x80) == 2);
   pattern.CheckSlot(1, false, false);
 
   REQUIRE(pattern.Start(1) == 1);
   REQUIRE(pattern.Start(2) == 2);
-  CHECK(Input_StopVibrationPatterns(0, 0) == 1);
+  CHECK(VS::Input::StopLiveVibrationPatterns(0, 0) == 1);
   pattern.CheckSlot(0, false, false);
   pattern.CheckSlot(1, false, false);
 }
@@ -367,12 +378,12 @@ TEST_CASE("Original vibration reset clears slots and controller connections",
   REQUIRE(pattern.Start(2) == 2);
   Input_controllerPorts[0].connected = 1;
   Input_controllerPorts[1].connected = 1;
-  Input_ResetVibrationPatterns();
-  for (const auto& slot : Input_vibrationPatternSlots) {
-    CHECK(slot.pattern == nullptr);
-    CHECK(slot.active == 0);
-    CHECK(slot.channels[1] == 0);
-    CHECK(slot.channels[7] == 0);
+  VS::Input::ResetLiveVibrationPatterns();
+  for (const auto& slot : VS::Input::LiveVibrationState().slots) {
+    CHECK(slot.pattern.empty());
+    CHECK_FALSE(slot.active);
+    CHECK(slot.envelopes[0].level == 0);
+    CHECK(slot.envelopes[1].level == 0);
   }
   CHECK(Input_controllerPorts[0].connected == 0);
   CHECK(Input_controllerPorts[1].connected == 0);

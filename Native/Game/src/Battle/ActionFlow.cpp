@@ -39,7 +39,7 @@ extern "C" {
 #include "Field/Interactions.h"
 #include "Field/Map.h"
 #include "Field/RoomRendering.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Items/Loot.h"
@@ -50,7 +50,6 @@ extern "C" {
 #include "State/Flags.h"
 #include "State/Progress.h"
 #include "State/Score.h"
-#include "State/Settings.h"
 #include "State/Timers.h"
 
 // decomp: D_800F18EC (D_800F18EC@BATTLE/BATTLE.PRG)

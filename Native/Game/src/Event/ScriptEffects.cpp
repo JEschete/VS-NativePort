@@ -2,6 +2,7 @@
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Core/Runtime.hpp"
+#include "Input/ControllerLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -29,7 +30,6 @@ extern "C" {
 #include "Event/Weather.h"
 #include "Field/Environment.h"
 #include "Field/Gimmicks.h"
-#include "Input/Controller.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
 #include "Render/Display.h"
@@ -138,14 +138,14 @@ intptr_t Event_CommandPlayVibrationPattern(u_char* instruction, short thread_ind
 {
     short pattern_selector = instruction[1];
     if (pattern_selector == 0xFF) {
-        Input_StopVibrationPatterns(0, 2);
+        VS::Input::StopLiveVibrationPatterns(0, 2);
     } else {
         if (pattern_selector & 8) {
             VS::Core::Memory::CopyLiveAlignedWords(Event_vibrationPatternBuffer, Event_vibrationPatterns[pattern_selector & 7], 0x80);
-            Input_StartVibrationPattern((char *)(((u_char*)(Event_vibrationPatternBuffer)) + 8), 0xFF, 2);
+            VS::Input::StartLiveVibrationPattern((char *)(((u_char*)(Event_vibrationPatternBuffer)) + 8), 0xFF, 2);
         } else {
             if (Event_vibrationPatterns[pattern_selector] != 0) {
-                Input_StartVibrationPattern(Event_vibrationPatterns[pattern_selector] + 8, 0xFF, 2);
+                VS::Input::StartLiveVibrationPattern(Event_vibrationPatterns[pattern_selector] + 8, 0xFF, 2);
             }
         }
     }

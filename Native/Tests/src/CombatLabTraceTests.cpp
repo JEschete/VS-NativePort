@@ -39,7 +39,7 @@ extern "C" {
 #include "Field/Gimmicks.h"
 #include "Field/Interactions.h"
 #include "Field/Mpd.h"
-#include "Input/Controller.h"
+#include "Input/ControllerLiveState.h"
 #include "Items/Loot.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/ItemRows.h"
