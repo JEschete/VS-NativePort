@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 380 | owned functions |
-| 380 | owned functions in C++ sources |
-| 3380 | generated function rows |
+| 406 | owned functions |
+| 406 | owned functions in C++ sources |
+| 3354 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 380 | 0 | 3,827 |
-| `cpp` | 380 | 0 | 3,827 |
+| `modernized` | 406 | 0 | 3,801 |
+| `cpp` | 406 | 0 | 3,801 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 380 |
-| `vs_namespace` | 380 |
-| `typed_interface` | 380 |
-| `no_bridge` | 380 |
-| `strict_clean` | 380 |
-| `behavior_evidence` | 380 |
+| `source_cpp` | 406 |
+| `vs_namespace` | 406 |
+| `typed_interface` | 406 |
+| `no_bridge` | 406 |
+| `strict_clean` | 406 |
+| `behavior_evidence` | 406 |
 
-Promotion records: 380; derived `cpp=x`: 380, `cpp=wip`: 0. Verification records: 103; `verified=x` markers: 45.
+Promotion records: 406; derived `cpp=x`: 406, `cpp=wip`: 0. Verification records: 104; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -252,6 +252,8 @@ The fifty-seventh slice (#276 A2) is the game heap (F03463, F03464, F03465, F034
 and Core/Memory.h, Core/Memory/Heap.h, Core_HeapBlockHeader, the two legacy list heads and the five Core_Memory_ heap functions are retired.
 The fifty-eighth slice (#276 A3, #278) is the core math kernels (58 functions across ScalarMath, Vector, Matrix and Interpolation): typed VS::Core::Math kernels with VectorLive, MatrixLive and InterpolationLive bindings follow the console tables for normalization, square root and arctangent and define every edge input,
 and the generated Core/Math Vector, Matrix, Interpolation and Trig sources, their 36 Core_Math_ functions and the ten Gte.cpp math bridges are retired.
+The fifty-ninth slice (#276 A4, #279) is the render display, camera and UI packet routines (26 functions across CameraView, DisplayControl, DepthCue and UiPackets): typed VS::Render cores with Live adapters keep the original camera quantization and GTE depth-cue saturation, bound primitive splices and reserve UI packets inside the frame buffer,
+and the generated Camera, Display, UiPrimitives, Model, Upload and Lighting routines, their two Gte bridges and module address entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
