@@ -1,6 +1,7 @@
 #pragma once
 
 #include <array>
+#include <span>
 
 #include "Core/Types.hpp"
 
@@ -34,6 +35,7 @@ class Rand15 {
 class Random {
  public:
   static constexpr usize TableSize = 97;
+  using Table = std::span<i32, TableSize>;
 
   Random() { Reset(); }
 
@@ -51,7 +53,36 @@ class Random {
   // itself.
   i32 Raw() { return m_rand_.Next(); }
 
+  // The original routines over state held elsewhere: the engine's BIOS rand(),
+  // shuffle table and cursor are bound by RandomLive.hpp.
+
+  // BATTLE.PRG vs_battle_keystreamBits (5BF94.c:4496): steps the interface
+  // keystream and returns the top bit_count bits of its previous value. The
+  // shift is taken modulo 32 like the MIPS srlv, so a count of 0 returns the
+  // whole previous value instead of shifting by 32 (#277).
+  static u32 NextInterfaceRandomBits(u32& state, i32 bit_count);
+
+  // BATTLE.PRG vs_battle_randUniformInt (5BF94.c:5810): a draw in
+  // [low, high) for either bound order; equal bounds return the bound
+  // without drawing.
+  static i32 RandomRangeExclusive(Rand15& source, i32 bound_a, i32 bound_b);
+
+  // SLUS_010.40 _initRand (main.c:8239): seeds `source` with 1, refills the
+  // table and points the cursor at its last entry.
+  static void InitializeShuffleTable(Rand15& source, Table table, i32& index);
+
+  // SLUS_010.40 vs_main_getRand (main.c:8251). A cursor or entry outside the
+  // table (a corrupt restore) is reported and restarts from the last entry
+  // instead of indexing past it.
+  static i32 NextBounded(Rand15& source, Table table, i32& index, i32 max);
+
+  // SLUS_010.40 vs_main_getRandSmoothed (main.c:8277): the mean of twelve
+  // NextBounded draws.
+  static i32 NextAveraged(Rand15& source, Table table, i32& index, i32 max);
+
  private:
+  static void FillShuffleTable(Rand15& source, Table table, i32& index);
+
   Rand15 m_rand_;
   std::array<i32, TableSize> m_table_{};
   i32 m_index_ = 0;

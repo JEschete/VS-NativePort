@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -6,9 +8,7 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "DiscQueue.h"
 #include "Field/Doors.h"
 #include "Field/Map.h"
@@ -213,7 +213,7 @@ int Save_MemoryCard_ReadSaveSummary(int id)
         Save_MemoryCard_DecodeSaveBytes(saveInfo[3].key, &saveInfo[3].summary.base.slotState,
             sizeof(Save_CardFileInfoRecord) - sizeof(int));
         if (Save_MemoryCard_HasChecksumError((Save_GameSaveImage*)saveInfo, 2) == 0) {
-            Core_Memory_CopyBytesBackward(&Title_saveFileSummaries[id - 1], &saveInfo[3], sizeof saveInfo[3]);
+            VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[id - 1], &saveInfo[3], sizeof saveInfo[3]);
             return 0;
         }
     }
@@ -470,21 +470,21 @@ int Save_MemoryCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
         return 0;
     }
 
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedStateFlags, save_image_workspace[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
-    Core_Memory_CopyBytesBackward(
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedStateFlags, save_image_workspace[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
+    VS::Core::Memory::CopyLiveBytesBackward(
         State_learnedActionFlags, save_image_workspace[1].learnedActions, sizeof State_learnedActionFlags);
-    Core_Memory_CopyBytesBackward(&State_roomVisitProgress, save_image_workspace[1].mapStatus, sizeof State_roomVisitProgress);
-    Core_Memory_CopyBytesBackward(&Input_settings, &save_image_workspace[1].settings, sizeof Input_settings);
-    Core_Memory_CopyBytesBackward(&State_ashleySnapshot, &save_image_workspace[1].ashleySnapshot, sizeof State_ashleySnapshot);
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedInventory, &save_image_workspace[1].inventory, sizeof Audio_Seq_unusedInventory);
-    Core_Memory_CopyBytesBackward(
+    VS::Core::Memory::CopyLiveBytesBackward(&State_roomVisitProgress, save_image_workspace[1].mapStatus, sizeof State_roomVisitProgress);
+    VS::Core::Memory::CopyLiveBytesBackward(&Input_settings, &save_image_workspace[1].settings, sizeof Input_settings);
+    VS::Core::Memory::CopyLiveBytesBackward(&State_ashleySnapshot, &save_image_workspace[1].ashleySnapshot, sizeof State_ashleySnapshot);
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedInventory, &save_image_workspace[1].inventory, sizeof Audio_Seq_unusedInventory);
+    VS::Core::Memory::CopyLiveBytesBackward(
         &Audio_Seq_unusedInventoryIndices, &save_image_workspace[1].inventoryIndices, sizeof Audio_Seq_unusedInventoryIndices);
-    Core_Memory_CopyBytesBackward(&State_savedEntryDoor, &save_image_workspace[1].entryDoor, sizeof State_savedEntryDoor);
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedScoredata, &save_image_workspace[1].scoreData, sizeof Audio_Seq_unusedScoredata);
+    VS::Core::Memory::CopyLiveBytesBackward(&State_savedEntryDoor, &save_image_workspace[1].entryDoor, sizeof State_savedEntryDoor);
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedScoredata, &save_image_workspace[1].scoreData, sizeof Audio_Seq_unusedScoredata);
     State_currentRoomStateSlot = loaded_save_image->roomStateSlot;
-    Core_Memory_CopyBytesBackward(State_recentRoomEnemyStates, save_image_workspace[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
+    VS::Core::Memory::CopyLiveBytesBackward(State_recentRoomEnemyStates, save_image_workspace[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
     spmcimg2 = &Audio_Seq_unusedArtsStatus;
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
     State_playTime.t = save_image_workspace[1].protectedHeader.summary.gameTime.t;
     Save_MarkAshleySnapshotValid();
     Audio_SetMonoOutput(Input_settings.monoSound);
@@ -514,7 +514,7 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
     ((char*)&savedata->cardHeader.key)[1] = 0x43;
     ((char*)&savedata->cardHeader.key)[2] = 0x11;
     ((char*)&savedata->cardHeader.key)[3] = 3;
-    Core_Memory_CopyBytesBackward(&savedata->cardHeader.summary, save_title_template, sizeof savedata->cardHeader.summary);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->cardHeader.summary, save_title_template, sizeof savedata->cardHeader.summary);
     savedata->cardHeader.summary.cardTitleTail[3] += (targetFile << 8);
 
     if (State_playTime.t.hours == 100) {
@@ -528,12 +528,12 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
         savedata->cardHeader.summary.cardTitleTail[14] += ((State_playTime.t.seconds % 10) << 8);
     }
     card_header_image->cardHeader.summary.cardTitleTail[15] = 0;
-    Core_Memory_CopyBytesBackward(card_header_image->cardHeader.iconHeaderBytes, Save_MemoryCard_uiResources->fileIconPalettes[targetFile],
+    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->cardHeader.iconHeaderBytes, Save_MemoryCard_uiResources->fileIconPalettes[targetFile],
         sizeof savedata->cardHeader.iconHeaderBytes);
-    Core_Memory_CopyBytesBackward(card_header_image->iconBitmap, Save_MemoryCard_uiResources->fileIconBitmaps[targetFile], sizeof savedata->iconBitmap);
+    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->iconBitmap, Save_MemoryCard_uiResources->fileIconBitmaps[targetFile], sizeof savedata->iconBitmap);
 
     if (Input_settings.slotState == 0) {
-        Input_settings.slotState = Core_Random_NextInterfaceRandomBits(0x20);
+        Input_settings.slotState = VS::Core::NextLiveInterfaceRandomBits(0x20);
         if (Input_settings.slotState < 3) {
             Input_settings.slotState = 0x17385CA9;
         }
@@ -542,7 +542,7 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
         }
     }
 
-    Input_settings.key = Core_Random_NextInterfaceRandomBits(0x20);
+    Input_settings.key = VS::Core::NextLiveInterfaceRandomBits(0x20);
     protected_header->cipherHeader.cipherKey = Input_settings.key;
     protected_header->cipherHeader.slotHeader.slotState = (enum Save_CardFileSlotStatus)(Input_settings.slotState);
     Input_settings.saveFileGeneration = 0;
@@ -577,21 +577,21 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
     protected_header->summary.clearCount = Audio_Seq_unusedStateFlags.clearCount;
     protected_header->summary.currentMP = State_ashleySnapshot.stats.currentMp;
     protected_header->summary.maxMP = State_ashleySnapshot.stats.maxMp;
-    Core_Memory_CopyBytesBackward(savedata->stateFlags, &Audio_Seq_unusedStateFlags, sizeof savedata->stateFlags);
-    Core_Memory_CopyBytesBackward(savedata->learnedActions, State_learnedActionFlags,
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->stateFlags, &Audio_Seq_unusedStateFlags, sizeof savedata->stateFlags);
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->learnedActions, State_learnedActionFlags,
         sizeof savedata->learnedActions);
-    Core_Memory_CopyBytesBackward(savedata->mapStatus, &State_roomVisitProgress, sizeof savedata->mapStatus);
-    Core_Memory_CopyBytesBackward(&savedata->settings, &Input_settings, sizeof savedata->settings);
-    Core_Memory_CopyBytesBackward(&savedata->ashleySnapshot, &State_ashleySnapshot, sizeof savedata->ashleySnapshot);
-    Core_Memory_CopyBytesBackward(&savedata->inventory, &Audio_Seq_unusedInventory, sizeof savedata->inventory);
-    Core_Memory_CopyBytesBackward(&savedata->inventoryIndices, &Audio_Seq_unusedInventoryIndices, sizeof savedata->inventoryIndices);
-    Core_Memory_CopyBytesBackward(&savedata->entryDoor, &State_savedEntryDoor, sizeof savedata->entryDoor);
-    Core_Memory_CopyBytesBackward(&savedata->scoreData, &Audio_Seq_unusedScoredata, sizeof savedata->scoreData);
-    Core_Memory_CopyBytesBackward(&savedata->containerData, &loaded_save_image->containerData,
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->mapStatus, &State_roomVisitProgress, sizeof savedata->mapStatus);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->settings, &Input_settings, sizeof savedata->settings);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->ashleySnapshot, &State_ashleySnapshot, sizeof savedata->ashleySnapshot);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventory, &Audio_Seq_unusedInventory, sizeof savedata->inventory);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventoryIndices, &Audio_Seq_unusedInventoryIndices, sizeof savedata->inventoryIndices);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->entryDoor, &State_savedEntryDoor, sizeof savedata->entryDoor);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->scoreData, &Audio_Seq_unusedScoredata, sizeof savedata->scoreData);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->containerData, &loaded_save_image->containerData,
         sizeof savedata->containerData);
     savedata->roomStateSlot = State_currentRoomStateSlot;
-    Core_Memory_CopyBytesBackward(savedata->recentRoomEnemyStates, State_recentRoomEnemyStates, sizeof savedata->recentRoomEnemyStates);
-    Core_Memory_CopyBytesBackward(&savedata->artsStatus, &Audio_Seq_unusedArtsStatus, sizeof savedata->artsStatus);
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->recentRoomEnemyStates, State_recentRoomEnemyStates, sizeof savedata->recentRoomEnemyStates);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->artsStatus, &Audio_Seq_unusedArtsStatus, sizeof savedata->artsStatus);
 
     for (i = 0; i < 92; ++i) {
         block_checksum = 0;
@@ -609,7 +609,7 @@ void Save_MemoryCard_PackageGameSave(int targetFile)
     protected_header->blockChecksums[1] = block_checksum;
     for (i = (intptr_t)&((Save_GameSaveImage*)0)->protectedHeader.cipherHeader.slotHeader.slotState;
         i < (int)sizeof(Save_GameSaveImage); ++i) {
-        Title_memoryCardUiResource[i] += Core_Random_NextInterfaceRandomBits(8);
+        Title_memoryCardUiResource[i] += VS::Core::NextLiveInterfaceRandomBits(8);
     }
 }
 
@@ -889,7 +889,7 @@ void Save_MemoryCard_PackageClearSave(int targetFile)
     ((char*)&savedata->cardHeader.key)[1] = 0x43;
     ((char*)&savedata->cardHeader.key)[2] = 0x11;
     ((char*)&savedata->cardHeader.key)[3] = 3;
-    Core_Memory_CopyBytesBackward(&savedata->cardHeader.summary, save_title_template, sizeof savedata->cardHeader.summary);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->cardHeader.summary, save_title_template, sizeof savedata->cardHeader.summary);
     savedata->cardHeader.summary.cardTitleTail[3] += (targetFile << 8);
 
     if (State_playTime.t.hours == 100) {
@@ -903,9 +903,9 @@ void Save_MemoryCard_PackageClearSave(int targetFile)
         savedata->cardHeader.summary.cardTitleTail[14] += ((State_playTime.t.seconds % 10) << 8);
     }
     card_header_image->cardHeader.summary.cardTitleTail[15] = 0;
-    Core_Memory_CopyBytesBackward(card_header_image->cardHeader.iconHeaderBytes, Save_MemoryCard_uiResources->fileIconPalettes[targetFile],
+    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->cardHeader.iconHeaderBytes, Save_MemoryCard_uiResources->fileIconPalettes[targetFile],
         sizeof savedata->cardHeader.iconHeaderBytes);
-    Core_Memory_CopyBytesBackward(card_header_image->iconBitmap, Save_MemoryCard_uiResources->fileIconBitmaps[targetFile], sizeof savedata->iconBitmap);
+    VS::Core::Memory::CopyLiveBytesBackward(card_header_image->iconBitmap, Save_MemoryCard_uiResources->fileIconBitmaps[targetFile], sizeof savedata->iconBitmap);
 
     if (Input_settings.slotState == 0) {
         Input_settings.slotState = Save_MemoryCard_NextCipherBits(0x20);
@@ -952,20 +952,20 @@ void Save_MemoryCard_PackageClearSave(int targetFile)
     protected_header->summary.clearCount = Audio_Seq_unusedStateFlags.clearCount;
     protected_header->summary.currentMP = State_ashleySnapshot.stats.currentMp;
     protected_header->summary.maxMP = State_ashleySnapshot.stats.maxMp;
-    Core_Memory_CopyBytesBackward(savedata->stateFlags, &Audio_Seq_unusedStateFlags, sizeof savedata->stateFlags);
-    Core_Memory_CopyBytesBackward(savedata->learnedActions, State_learnedActionFlags, sizeof savedata->learnedActions);
-    Core_Memory_CopyBytesBackward(savedata->mapStatus, &State_roomVisitProgress, sizeof savedata->mapStatus);
-    Core_Memory_CopyBytesBackward(&savedata->settings, &Input_settings, sizeof savedata->settings);
-    Core_Memory_CopyBytesBackward(&savedata->ashleySnapshot, &State_ashleySnapshot, sizeof savedata->ashleySnapshot);
-    Core_Memory_CopyBytesBackward(&savedata->inventory, &Audio_Seq_unusedInventory, sizeof savedata->inventory);
-    Core_Memory_CopyBytesBackward(&savedata->inventoryIndices, &Audio_Seq_unusedInventoryIndices, sizeof savedata->inventoryIndices);
-    Core_Memory_CopyBytesBackward(&savedata->entryDoor, &State_savedEntryDoor, sizeof savedata->entryDoor);
-    Core_Memory_CopyBytesBackward(&savedata->scoreData, &Audio_Seq_unusedScoredata, sizeof savedata->scoreData);
-    Core_Memory_CopyBytesBackward(&savedata->containerData, &loaded_save_image->containerData,
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->stateFlags, &Audio_Seq_unusedStateFlags, sizeof savedata->stateFlags);
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->learnedActions, State_learnedActionFlags, sizeof savedata->learnedActions);
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->mapStatus, &State_roomVisitProgress, sizeof savedata->mapStatus);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->settings, &Input_settings, sizeof savedata->settings);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->ashleySnapshot, &State_ashleySnapshot, sizeof savedata->ashleySnapshot);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventory, &Audio_Seq_unusedInventory, sizeof savedata->inventory);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->inventoryIndices, &Audio_Seq_unusedInventoryIndices, sizeof savedata->inventoryIndices);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->entryDoor, &State_savedEntryDoor, sizeof savedata->entryDoor);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->scoreData, &Audio_Seq_unusedScoredata, sizeof savedata->scoreData);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->containerData, &loaded_save_image->containerData,
         sizeof savedata->containerData);
     savedata->roomStateSlot = State_currentRoomStateSlot;
-    Core_Memory_CopyBytesBackward(savedata->recentRoomEnemyStates, State_recentRoomEnemyStates, sizeof savedata->recentRoomEnemyStates);
-    Core_Memory_CopyBytesBackward(&savedata->artsStatus, &Audio_Seq_unusedArtsStatus, sizeof savedata->artsStatus);
+    VS::Core::Memory::CopyLiveBytesBackward(savedata->recentRoomEnemyStates, State_recentRoomEnemyStates, sizeof savedata->recentRoomEnemyStates);
+    VS::Core::Memory::CopyLiveBytesBackward(&savedata->artsStatus, &Audio_Seq_unusedArtsStatus, sizeof savedata->artsStatus);
 
     for (i = 0; i < 92; ++i) {
         block_checksum = 0;
@@ -1010,7 +1010,7 @@ int Save_MemoryCard_AnySaveFileExists(void)
         } while (memCardState == Save_CardReadinessResult_Pending);
 
         if (memCardState == Save_CardReadinessResult_Ready) {
-            Core_Memory_CopyBytesBackward(filename, Save_MemoryCard_kOriginalFilenameTemplate, sizeof filename);
+            VS::Core::Memory::CopyLiveBytesBackward(filename, Save_MemoryCard_kOriginalFilenameTemplate, sizeof filename);
 
             filename[2] = i + '/';
             filename[20] = '?';

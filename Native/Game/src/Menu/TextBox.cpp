@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "Effects/ScreenEffects.h"
 #include "Event/ScriptVm.h"
 #include "Input/Buttons.h"
@@ -382,7 +382,7 @@ void Menu_UpdateTextBoxes(void)
     }
 
     Effects_DrawScreenEffectOverlay();
-    Core_Random_NextInterfaceRandomBits(0);
+    VS::Core::NextLiveInterfaceRandomBits(0);
 }
 
 // decomp: BATTLE.PRG vs_battle_getTextBox (src/BATTLE/BATTLE.PRG/5BF94.c:4544)

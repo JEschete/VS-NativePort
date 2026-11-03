@@ -1043,12 +1043,11 @@ class EncounterFixupTests(unittest.TestCase):
         for source in (core, live):
             self.assertNotIn("Core_Gte_RotMatrixYXZ(", source)
 
-    def test_core_idle_and_matrix_entries_reuse_native_leaf_implementations(self):
-        self.assertEqual(
-            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03568"],
-            ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.cpp"),
-        )
+    def test_core_idle_entry_is_owned_and_matrix_entries_reuse_native_leaves(self):
+        self.assertNotIn("F03568", copy_fixups.NATIVE_FUNCTION_REDIRECTS)
         owned = self.owned_items()
+        self.assertEqual(owned["F03568"]["path"], r"Native\Engine\src\Core\Runtime.cpp")
+        self.assertEqual(owned["F03568"]["name"], "VS::Core::IdleInstruction")
         self.assertEqual(
             owned["F03406"]["path"], r"Native\Engine\src\Core\Math\ScalarMath.cpp"
         )
@@ -2207,7 +2206,7 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
 
     def test_scripted_effect_requires_its_actor_before_starting_playback(self):
         source = """    Effects_StartScriptedActorEffect(
-        Core_Memory_ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)));
+        VS::Core::Memory::ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(VS::Core::Memory::ReadUnalignedShort(arg0 + 3)));
     return 0;
 """
         for old, new, _ in copy_fixups.FIXES["F01170"]:
@@ -2456,52 +2455,6 @@ Core_Memory_AllocateFromLowEnd(0x24D0);
                 "node->blockSize = value / sizeof(Core_HeapBlockHeader) - 1;",
                 "node->blockSize = byte_count / "
                 "sizeof(Core_HeapBlockHeader) - 1;",
-            ),
-        }
-        for name, (original, expected) in examples.items():
-            with self.subTest(name=name):
-                source = original
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, expected)
-
-    def test_core_names_preserve_memory_units_and_random_draws(self):
-        examples = {
-            "Core::Memory::ReadUnalignedShort": (
-                "return arg0[0] | (arg0[1] << 8);",
-                "return source[0] | (source[1] << 8);",
-            ),
-            "Core::Memory::ZeroWordsBackward": (
-                "var_v0 = arg0 + arg1; do { *--var_v0 = 0; } "
-                "while (arg0 != var_v0);",
-                "word_cursor = destination + byte_count; "
-                "do { *--word_cursor = 0; } "
-                "while (destination != word_cursor);",
-            ),
-            "Core::Random::NextInterfaceRandomBits": (
-                "state = temp_a1 * 0x19660D; return temp_a1 >> (32 - value);",
-                "state = previous_state * 0x19660D; "
-                "return previous_state >> (32 - bit_count);",
-            ),
-            "Core::Random::RandomRangeExclusive": (
-                "if (arg1 < arg0) { new_var = Rand() % (arg0 - arg1); "
-                "return new_var + arg1; }",
-                "if (bound_b < bound_a) { "
-                "offset = Rand() % (bound_a - bound_b); "
-                "return offset + bound_b; }",
-            ),
-            "Core::Random::NextBounded": (
-                "index = var_v0 >> 15; temp_s0 = 32767 - table[index]; "
-                "var_a0 = temp_s0 * max; return var_a0 >> 15;",
-                "index = scaled_index >> 15; "
-                "picked_sample = 32767 - table[index]; "
-                "scaled_result = picked_sample * max; "
-                "return scaled_result >> 15;",
-            ),
-            "Core::Random::NextAveraged": (
-                "return (Next(arg0) + Next(arg0)) / 12;",
-                "return (Next(max) + Next(max)) / 12;",
             ),
         }
         for name, (original, expected) in examples.items():

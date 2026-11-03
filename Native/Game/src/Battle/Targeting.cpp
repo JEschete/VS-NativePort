@@ -2,6 +2,7 @@
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
@@ -33,7 +34,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
 #include "Field/GameMode.h"
@@ -1219,7 +1219,7 @@ Battle_TargetSphereLabelEntry* Battle_InitTargetSelectionRow(int target_index, i
     Battle_TargetSphereLabelEntry* item = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque990[target_index];
     Battle_TargetInfoLine* src = &(*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque40[target_index];
 
-    Core_Memory_ZeroWordsBackward(item, sizeof *item);
+    VS::Core::Memory::ZeroLiveWordsBackward(item, sizeof *item);
     item->opaque0 = row_state;
     item->opaque6 = row_index * 11 + 32;
     position_z_pad_word = src->opaque4;

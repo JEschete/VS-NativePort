@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Effects/ScreenDistortion/ScreenDistortion.h"
 #include "Event/Camera.h"
@@ -66,7 +66,7 @@ intptr_t Event_CommandSetCameraFollowing(u_char* instruction, short thread_index
 // decomp: BATTLE.PRG func_800BB38C (src/BATTLE/BATTLE.PRG/4A0A8.c:2774)
 intptr_t Event_CommandSetCameraOriginActor(u_char* instruction, short thread_index)
 {
-    Event_SetEventCameraOriginActor(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)));
+    Event_SetEventCameraOriginActor(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
     return 0;
 }
 
@@ -391,14 +391,14 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         c->motionScalar = Core_Math_FixedVectorMagnitude((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098));
         c->motionScalarDelta = ((c->motionScalar * script[5]) >> 6) - c->motionScalar;
         c->orbitAngle = Core_Math_FixedAtan2(s->currentOffset.vx, s->currentOffset.vz);
-        c->orbitAngleDelta = Core_Memory_ReadUnalignedShort(script + 1);
-        height = Core_Memory_ReadUnalignedShort(script + 3) * ONE;
+        c->orbitAngleDelta = VS::Core::Memory::ReadLiveUnalignedShort(script + 1);
+        height = VS::Core::Memory::ReadLiveUnalignedShort(script + 3) * ONE;
         c->startPosition.vy = c->currentPosition.vy;
         c->displacement.vy = height - c->startPosition.vy;
         return 0;
     }
     case 7:
-        ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(script + 1)), script[3],
+        ((void (*)(int, int, SVECTOR*, int))Actors_ActorTaggedBonePosition)(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1)), script[3],
             (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8), 2);
         Core_Math_ShortVectorToFixed((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x098), (SVECTOR*)((uintptr_t)Core_ScratchBase() + 0x0D8));
         Event_ReadScriptFixedVector((VECTOR*)((uintptr_t)Core_ScratchBase() + 0x0A8), script + 4);
@@ -409,7 +409,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         return 0;
     case 8:
         c->motionMode = 8;
-        c->motionScalar = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(script + 1));
+        c->motionScalar = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         c->motionScalarDelta = script[3];
         c->elapsedFrames = 0;
         c->durationFrames = script[10];
@@ -422,7 +422,7 @@ intptr_t Event_CommandCameraMotion(u_char* script, short unused)
         Core_Math_SubtractVectors(&c->displacement, &c->currentPosition, &c->partnerPosition);
         return 0;
     case 10: {
-        int id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(script + 1));
+        int id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         Event_CameraTrackScratch* s = (Event_CameraTrackScratch*)((uintptr_t)Core_ScratchBase() + 0x088);
         s->value = id;
         Actors_ActorPlacement(id, &Event_camera->actorQueryScratch[1]);
@@ -726,11 +726,11 @@ intptr_t Event_CommandTweenCameraRoll(u_char* instruction, short thread_index)
     roll_tween->durationFrames = instruction[4];
 
     if (roll_tween->durationFrames == 0) {
-        roll_tween->angle = Core_Memory_ReadUnalignedShort(instruction + 1);
+        roll_tween->angle = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
         roll_tween->hasChanged = 1;
     } else {
         roll_tween->startAngle = roll_tween->angle;
-        roll_tween->deltaAngle = Core_Memory_ReadUnalignedShort(instruction + 1) - roll_tween->angle;
+        roll_tween->deltaAngle = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1) - roll_tween->angle;
         if (roll_tween->deltaAngle < -(ONE / 2)) {
             roll_tween->deltaAngle += ONE;
         } else if (roll_tween->deltaAngle > (ONE / 2)) {
@@ -811,7 +811,7 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
     short effectValue;
     switch (script[0]) {
     case 185:
-        Render_SetFramebufferEffectDepth(Core_Memory_ReadUnalignedShort(script + 1));
+        Render_SetFramebufferEffectDepth(VS::Core::Memory::ReadLiveUnalignedShort(script + 1));
         return 0;
 
     case 186:
@@ -895,7 +895,7 @@ intptr_t Event_CommandScreenTransform(u_char* script, short thread_index)
         return 0;
 
     case 191:
-        mode = Core_Memory_ReadUnalignedShort(script + 1);
+        mode = VS::Core::Memory::ReadLiveUnalignedShort(script + 1);
         if (!mode) {
             Render_SetFramebufferEffectBlendMode(0);
             values.x = values.y = 0;
@@ -1231,8 +1231,8 @@ void Event_ScaleEventCameraDuration(short track_selector)
 // decomp: BATTLE.PRG _setVectorImm (src/BATTLE/BATTLE.PRG/4A0A8.c:4148)
 VECTOR* Event_ReadScriptFixedVector(VECTOR* destination, u_char* operand_bytes)
 {
-    setVector(destination, Core_Memory_ReadUnalignedShort(operand_bytes) * ONE, Core_Memory_ReadUnalignedShort(operand_bytes + 2) * ONE,
-        Core_Memory_ReadUnalignedShort(operand_bytes + 4) * ONE);
+    setVector(destination, VS::Core::Memory::ReadLiveUnalignedShort(operand_bytes) * ONE, VS::Core::Memory::ReadLiveUnalignedShort(operand_bytes + 2) * ONE,
+        VS::Core::Memory::ReadLiveUnalignedShort(operand_bytes + 4) * ONE);
     return destination;
 }
 

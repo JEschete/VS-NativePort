@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Actors/ModelInstance.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Event/ScriptVm.h"
 #include "Event/Triggers.h"
@@ -152,7 +152,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
             continue;
         }
         p++;
-        eventId = Core_Memory_ReadUnalignedShort(p);
+        eventId = VS::Core::Memory::ReadLiveUnalignedShort(p);
         p += 2;
         negate = 0;
         while (1) {
@@ -230,7 +230,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 4;
                 break;
             case 4:
-                left = Core_Memory_ReadUnalignedShort(p + 1);
+                left = VS::Core::Memory::ReadLiveUnalignedShort(p + 1);
                 if (left & 0x1000) {
                     if (Actors_ActorAtSlot(left & 0x1F) != NULL) {
                         result = 1;
@@ -242,7 +242,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 break;
             case 5:
                 left = flagValue = Actors_CountActorsByDisposition(p[1]);
-                flagId = Core_Memory_ReadUnalignedShort(p + 2);
+                flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 2);
                 if (flagId != 0) {
                     State_SetScriptFlag(flagId, flagValue);
                     result = 1;
@@ -253,8 +253,8 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 break;
             case 6:
                 if (mode == 0) {
-                    actorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 1));
-                    otherActorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 3));
+                    actorId = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
+                    otherActorId = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(p + 3));
                     if (actorId != 1 && otherActorId != 1 && event_or_actor_id == actorId
                         && trigger_context == (u_char*)(intptr_t)otherActorId) {
                         result = 1;
@@ -263,13 +263,13 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 5;
                 break;
             case 7:
-                actorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 1));
+                actorId = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
                 if (actorId == 1) {
                     negate = 0;
                     break;
                 }
                 left = flagValue = Actors_ActorHpPercentage(actorId);
-                flagId = Core_Memory_ReadUnalignedShort(p + 3);
+                flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
                     State_SetScriptFlag(flagId, flagValue);
                     result = 1;
@@ -293,8 +293,8 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 break;
             case 10:
                 left = flagValue =
-                    Items_InventoryItemCount(Core_Memory_ReadUnalignedShort(p + 1));
-                flagId = Core_Memory_ReadUnalignedShort(p + 3);
+                    Items_InventoryItemCount(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
+                flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
                     State_SetScriptFlag(flagId, flagValue);
                     result = 1;
@@ -316,7 +316,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 break;
             case 12:
                 left = flagValue = -Field_GimmickSupportHeight(p[1], p[2]) / 128;
-                flagId = Core_Memory_ReadUnalignedShort(p + 3);
+                flagId = VS::Core::Memory::ReadLiveUnalignedShort(p + 3);
                 if (flagId != 0) {
                     State_SetScriptFlag(flagId, flagValue);
                     result = 1;
@@ -326,7 +326,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 5;
                 break;
             case 13:
-                actorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 1));
+                actorId = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
                 if (actorId == 1) {
                     negate = 0;
                     break;
@@ -339,7 +339,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 5;
                 break;
             case 14:
-                actorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 1));
+                actorId = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
                 if (actorId == 1) {
                     negate = 0;
                     break;
@@ -354,7 +354,7 @@ short Event_EvaluateRoomEventTriggers(int trigger_request, int event_or_actor_id
                 p += 7;
                 break;
             case 16:
-                actorId = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(p + 1));
+                actorId = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(p + 1));
                 if (actorId == 1) {
                     negate = 0;
                     break;

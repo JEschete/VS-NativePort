@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
-#include "Core/Memory/Copy.h"
 #include "Event/Dialog.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptDialog.h"
@@ -37,13 +37,13 @@ intptr_t Event_ScriptInitDialogBox(u_char* script, short thread_index __attribut
         centerY = box->y + (((box->lineCount * 13) + 4) >> 1);
     }
 
-    Menu_InitTextBox(script[1] & 0xF, Core_Memory_ReadUnalignedShort(script + 2),
+    Menu_InitTextBox(script[1] & 0xF, VS::Core::Memory::ReadLiveUnalignedShort(script + 2),
         (script[4] * 2) - 32, script[5] - 32, script[6], script[7], centerX, centerY);
 
     box = Menu_TextBox(script[1] & 0xF);
     box->opaque2E = script[10];
 
-    speaker_reference = Core_Memory_ReadUnalignedShort(&script[8]);
+    speaker_reference = VS::Core::Memory::ReadLiveUnalignedShort(&script[8]);
     if (speaker_reference < 0x2000) {
         box->flags.speakerTexture = Event_ResolveScriptActorReference(speaker_reference);
     }
@@ -144,7 +144,7 @@ intptr_t Event_ScriptInitActorDialogBox(u_char* script, short thread_index __att
     int texture;
     short i;
 
-    Event_ActorDialogAnchor(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(script + 2)), &origin);
+    Event_ActorDialogAnchor(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(script + 2)), &origin);
     origin.vz = ((origin.vz - ONE / 4) & 0xC00) >> 10;
 
     for (i = 0; i < 4; ++i) {
@@ -165,7 +165,7 @@ intptr_t Event_ScriptInitActorDialogBox(u_char* script, short thread_index __att
 
     width = script[6] * 12 + 8;
     height = script[7] * 13 + 4;
-    Menu_InitTextBox(script[1], Core_Memory_ReadUnalignedShort(script + 4), best->screenX, best->screenY,
+    Menu_InitTextBox(script[1], VS::Core::Memory::ReadLiveUnalignedShort(script + 4), best->screenX, best->screenY,
         script[6], script[7], best->screenX + (width >> 1), best->screenY + (height >> 1));
 
     box = Menu_TextBox(script[1]);
@@ -186,7 +186,7 @@ intptr_t Event_ScriptWaitForDialogDismissal(u_char* instruction, short thread_in
 // decomp: BATTLE.PRG vs_battle_script_setStringContextInt (src/BATTLE/BATTLE.PRG/4A0A8.c:916)
 intptr_t Event_ScriptSetDialogInteger(u_char* instruction, short thread_index)
 {
-    int source_flag_id = Core_Memory_ReadUnalignedShort(instruction + 2) & 0x3FF;
+    int source_flag_id = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2) & 0x3FF;
     switch (instruction[3] >> 6) {
     case 0:
         Battle_stringContext.integers[instruction[1]] = State_ScriptFlag(source_flag_id);
@@ -244,7 +244,7 @@ intptr_t Event_ScriptSetDialogSpeaker(u_char* instruction, short thread_index)
     u_short speaker_reference;
     int speaker_texture;
 
-    speaker_reference = Core_Memory_ReadUnalignedShort(instruction + 2);
+    speaker_reference = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2);
     text_box = Menu_TextBox(instruction[1] & 0xF);
 
     if (speaker_reference < 0x2000) {

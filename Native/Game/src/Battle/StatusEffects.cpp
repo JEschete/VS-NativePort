@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
-#include "Core/Random.h"
 #include "Event/Triggers.h"
 #include "Field/Interactions.h"
 #include "Items/Equipment.h"
@@ -554,7 +554,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
             if (actor_stats->weapon.blade.id != 0) {
 
                 if ((actor_stats->weapon.blade.affinities[statIncrease] < 50)
-                    && (Core_Random_NextBounded(8) == 0)) {
+                    && (VS::Core::NextLiveRandomBounded(8) == 0)) {
 
                     ++actor_stats->weapon.blade.affinities[statIncrease];
 
@@ -564,7 +564,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
                 }
 
                 if ((actor_stats->weapon.blade.affinities[statDecrease] > -100)
-                    && (Core_Random_NextBounded(16) == 0)) {
+                    && (VS::Core::NextLiveRandomBounded(16) == 0)) {
 
                     --actor_stats->weapon.blade.affinities[statDecrease];
 
@@ -616,7 +616,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
             if (actor_stats->shield.base.id != 0) {
 
                 if ((actor_stats->shield.base.affinities[statIncrease] < 50)
-                    && (Core_Random_NextBounded(8) == 0)) {
+                    && (VS::Core::NextLiveRandomBounded(8) == 0)) {
 
                     ++actor_stats->shield.base.affinities[statIncrease];
 
@@ -626,7 +626,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
                 }
 
                 if ((actor_stats->shield.base.affinities[statDecrease] > -100)
-                    && (Core_Random_NextBounded(0x10) == 0)) {
+                    && (VS::Core::NextLiveRandomBounded(0x10) == 0)) {
 
                     --actor_stats->shield.base.affinities[statDecrease];
 
@@ -645,7 +645,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
                 if (actor_stats->limbs[i].armor.armor.id != 0) {
 
                     if ((actor_stats->limbs[i].armor.armor.affinities[statIncrease] < 50)
-                        && (Core_Random_NextBounded(8) == 0)) {
+                        && (VS::Core::NextLiveRandomBounded(8) == 0)) {
 
                         ++actor_stats->limbs[i].armor.armor.affinities[statIncrease];
 
@@ -655,7 +655,7 @@ void Battle_RemoveActorStatuses(int status_mask, Battle_ActorStats* actor_stats)
                     }
 
                     if ((actor_stats->limbs[i].armor.armor.affinities[statDecrease] > -100)
-                        && (Core_Random_NextBounded(16) == 0)) {
+                        && (VS::Core::NextLiveRandomBounded(16) == 0)) {
 
                         --actor_stats->limbs[i].armor.armor.affinities[statDecrease];
 
@@ -1293,7 +1293,7 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
         if (actor->statuses & 0x4000) {
 
             actor->statusTimers[5] = Battle_statusParams14TickInterval;
-            hp = (actor->currentHp / 20) + Core_Random_NextBounded(6);
+            hp = (actor->currentHp / 20) + VS::Core::NextLiveRandomBounded(6);
 
             if (hp <= 0) {
                 hp = 1;
@@ -1311,7 +1311,7 @@ void Battle_UpdateActorStatusTimers(Battle_ActorStats* actor)
 
             actor->statusTimers[5] = Battle_statusParams17TickInterval;
             hp = 2;
-            hp = (actor->maxHp / 20) - hp + Core_Random_NextAveraged(5);
+            hp = (actor->maxHp / 20) - hp + VS::Core::NextLiveRandomAveraged(5);
             actor->currentHp += hp;
 
             if (actor->maxHp < actor->currentHp) {

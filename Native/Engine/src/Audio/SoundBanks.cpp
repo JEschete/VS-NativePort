@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/LegacyFiles.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "State/PlayTime.h"
 
@@ -46,13 +46,13 @@ int Audio_LoadSfxBankSlot(int id, u_int slot)
 
             if ((Audio_soundState.sfxBankRequests[index] != NULL)
                 && (Audio_soundState.sfxBankRequests[index] != (Content_DiscQueueSlot*)-1)) {
-                Core_IgnoreDiagnostic(0x8F, 0);
+                VS::Core::IgnoreDiagnostic(0x8F, 0);
             }
 
             Audio_soundState.sfxBankRequests[index] = Content_AllocateDiscRequest(&cdFile);
 
             if (Audio_soundState.sfxBankData[index] != NULL) {
-                Core_IgnoreDiagnostic(0x90, 0);
+                VS::Core::IgnoreDiagnostic(0x90, 0);
             }
 
             Audio_soundState.sfxBankIds[index] = id;
@@ -198,12 +198,12 @@ void Audio_LoadWaveBankFile(int file)
 
     if (Audio_soundState.waveBankRequest) {
         if ((intptr_t)Audio_soundState.waveBankRequest != -1) {
-            Core_IgnoreDiagnostic(0x93 & 0xFFu, 0);
+            VS::Core::IgnoreDiagnostic(0x93 & 0xFFu, 0);
         }
     }
     Audio_soundState.waveBankRequest = Content_AllocateDiscRequest(&cdFile);
     if (Audio_soundState.waveBankData != 0) {
-        Core_IgnoreDiagnostic(0x94, 0);
+        VS::Core::IgnoreDiagnostic(0x94, 0);
     }
     packed_ids_or_unused_one = 1;
     Audio_soundState.waveBankData = Core_Memory_AllocateFromHighEnd(cdFile.size);

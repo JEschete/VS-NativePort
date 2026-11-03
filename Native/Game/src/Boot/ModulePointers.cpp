@@ -5,6 +5,10 @@
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Core/Memory/CopyLive.hpp"
+#include "Core/RandomLive.hpp"
+#include "Core/Runtime.hpp"
+#include "Core/RuntimeLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -92,8 +96,6 @@ extern "C" {
 #include "Boot/GameplayInit.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
-#include "Core/Callbacks.h"
-#include "Core/Compatibility.h"
 #include "Core/Legacy.h"
 #include "Core/Math/FixedPoint.h"
 #include "Core/Math/Interpolation.h"
@@ -101,11 +103,9 @@ extern "C" {
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
 #include "Core/Random.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Camera.h"
@@ -304,7 +304,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006B02Cu, 0u, (void*)&Items_LoadInventoryShieldStats, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006B110u, 0u, (void*)&Items_LoadInventoryArmorStats, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006B194u, 0u, (void*)&Items_LoadInventoryAccessoryStats, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006B20Cu, 0u, (void*)&Core_IgnoreCallback, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006B214u, 0u, (void*)&Items_RemoveEquipmentBoostOnEquip, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006B270u, 0u, (void*)&Items_RemoveWeaponEnchantmentOnEquip, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006B2D4u, 0u, (void*)&Items_RemoveArmorEnchantmentOnEquip, 0u, 0u, 0u},
@@ -336,7 +335,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8006C350u, 0u, (void*)&Field_PauseFieldForObjectInteraction, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C39Cu, 0u, (void*)&Field_PauseFieldForMenu, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C40Cu, 0u, (void*)&Field_ResumeFieldAfterMenu, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8006C478u, 0u, (void*)&Core_IgnoreCallback, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C480u, 0u, (void*)&Effects_StartWeaponTrail, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C4A4u, 0u, (void*)&Effects_FadeWeaponTrails, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8006C4C4u, 0u, (void*)&Effects_QueueActionHitEffect, 0u, 0u, 0u},
@@ -493,8 +491,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007ACA0u, 0u, (void*)&Field_CameraRoll, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007ACB0u, 0u, (void*)&Render_BuildCameraViewMatrix, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007AFA8u, 0u, (void*)&Core_Math_BuildLookAtOrientation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B0FCu, 0u, (void*)&Core_NoOperation, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007B104u, 0u, (void*)&Core_NoOperation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B10Cu, 0u, (void*)&Render_TransformRoomPalettes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B1B8u, 0u, (void*)&Render_TransformSceneColors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007B29Cu, 0u, (void*)&Render_TransformActorColors, 0u, 0u, 0u},
@@ -527,7 +523,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007BE20u, 0u, (void*)&Effects_StartScriptedActorEffect, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEC4u, 0u, (void*)&Effects_ReleaseScriptedEffectTrigger, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BEE4u, 0u, (void*)&Effects_ScriptedEffectPlaybackState, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007BF04u, 0u, (void*)&Core_NoOperation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF0Cu, 0u, (void*)&Effects_IsScriptedEffectTriggerReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF2Cu, 0u, (void*)&Field_ShowPrimaryRoomGeometry, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007BF4Cu, 0u, (void*)&Field_HidePrimaryRoomGeometry, 0u, 0u, 0u},
@@ -614,7 +609,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x8007DF10u, 0u, (void*)&Render_FramebufferEffectParameter, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007DF20u, 0u, (void*)&Render_FramebufferEffectDepth, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007DF30u, 0u, (void*)&Render_UsesFramebufferPreviousFrame, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x8007DF40u, 0u, (void*)&Core_NoOperation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007DF48u, 0u, (void*)&Render_InitializeTextureSlotReservations, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007DF98u, 0u, (void*)&Render_AdvanceTexturePageRetirements, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x8007DFF0u, 0u, (void*)&Render_ReserveTexturePageRange, 0u, 0u, 0u},
@@ -1496,7 +1490,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800BF850u, 0u, (void*)&Event_UpdateEventPlayback, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFBB8u, 0u, (void*)&Event_ExecuteScriptThread, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFD9Cu, 0u, (void*)&Event_ReleaseScriptActorControl, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800BFE00u, 0u, (void*)&Core_Memory_ReadUnalignedShort, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFE34u, 0u, (void*)&Event_OpcodeSize, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFE50u, 0u, (void*)&Event_ResolveScriptActorReference, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800BFEBCu, 0u, (void*)&Event_EvaluateInterpolationCurve, 0u, 0u, 0u},
@@ -1620,10 +1613,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CC600u, 0u, (void*)&Render_DrawGimCrossfade, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCA90u, 0u, (void*)&Render_DrawGimLayer, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCB9Cu, 0u, (void*)&Items_ConsumeMiscItem, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCC1Cu, 0u, (void*)&Core_Memory_ZeroWordsBackward, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCC34u, 0u, (void*)&Core_Memory_CopyBytesBackward, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCC54u, 0u, (void*)&Core_Math_SplitDecimalDigit, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CCC8Cu, 0u, (void*)&Core_Random_NextInterfaceRandomBits, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCCB8u, 0u, (void*)&Render_InsertThreeWordPrimitive, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCD00u, 0u, (void*)&Render_InsertDrawModeCommand, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CCD40u, 0u, (void*)&Menu_Framework_DrawMainMenuCursor, 0u, 0u, 0u},
@@ -1674,7 +1664,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800CF988u, 0u, (void*)&Effects_MapTrailFramebufferTexture, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFAACu, 0u, (void*)&Effects_StepParticleEndpointTowardStart, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFB68u, 0u, (void*)&Core_Math_InterpolateSevenBitScalar, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800CFB80u, 0u, (void*)&Core_Random_RandomRangeExclusive, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFBF8u, 0u, (void*)&Core_Math_GreatestMagnitudeComponent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFC48u, 0u, (void*)&Core_Math_LargerMagnitude, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800CFC8Cu, 0u, (void*)&Core_Math_InterpolateCosineScalar, 0u, 0u, 0u},
@@ -2602,8 +2591,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80018BD8u, 0u, (void*)&Audio_Mixer_IgnoreCommand, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018BE0u, 0u, (void*)&Audio_Mixer_SetReverbMode, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018C30u, 0u, (void*)&Audio_Mixer_DispatchCommand, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80019154u, 0u, (void*)&Core_Memory_CopyWords, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800191D4u, 0u, (void*)&Core_Memory_SwapWords, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001924Cu, 0u, (void*)&Audio_Seq_UpdateGlobalSlides, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80019614u, 0u, (void*)&Audio_Seq_AdvanceMusicTransition, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80019704u, 0u, (void*)&Audio_Seq_UpdateMusicSequence, 0u, 0u, 0u},
@@ -2807,13 +2794,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80042420u, 0u, (void*)&Boot_EnterBattle, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800424E4u, 0u, (void*)&Boot_RunEndingAndReturnToTitle, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004261Cu, 0u, (void*)&State_UpdatePlayTimeAndLoading, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004272Cu, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042734u, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004273Cu, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042744u, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004274Cu, 0u, (void*)&Core_Random_InitializeShuffleTable, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800427A8u, 0u, (void*)&Core_Random_NextBounded, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80042860u, 0u, (void*)&Core_Random_NextAveraged, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C74u, 0u, (void*)&Boot_WaitForOverlayReady, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042C94u, 0u, (void*)&Boot_SetSoftResetEnabled, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80042CA0u, 0u, (void*)&Save_MarkAshleySnapshotValid, 0u, 0u, 0u},
@@ -2852,7 +2832,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80044B80u, 0u, (void*)&Content_ReleaseDiscRequest, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044BC4u, 0u, (void*)&Content_EnqueueDiscRequest, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044BF4u, 0u, (void*)&Content_EnqueuePriorityDiscRequest, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80044C6Cu, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044C74u, 0u, (void*)&Content_UpdateDiscQueue, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044D94u, 0u, (void*)&Audio_MusicBeatPosition, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80044DB4u, 0u, (void*)&Audio_SaveMusicPlaybackState, 0u, 0u, 0u},
@@ -2870,14 +2849,11 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8004539Cu, 0u, (void*)&Audio_LoadMusicSlotBlocking, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800453F4u, 0u, (void*)&Audio_LoadFreeMusicSlotBlocking, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80045440u, 0u, (void*)&Audio_FreeMusicSlot, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800454B0u, 0u, (void*)&Core_ReturnZero, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800454B8u, 0u, (void*)&Audio_MusicSlotVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004550Cu, 0u, (void*)&Audio_QueryMusicSlotVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8004552Cu, 0u, (void*)&Audio_FadeMusicSlotVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80045574u, 0u, (void*)&Audio_FadeMusicSlotTempo, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800455ACu, 0u, (void*)&Audio_FadeMusicSlotPitch, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800455E4u, 0u, (void*)&Core_ReturnZero, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800455ECu, 0u, (void*)&Core_ReturnZero, 0u, 0u, 0u},
     {"SLUS_010.40", 0x800455F4u, 0u, (void*)&Audio_StopAndFreeCurrentMusic, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80045630u, 0u, (void*)&Audio_PlaySfxOnPrimaryChannel, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80045684u, 0u, (void*)&Audio_PlayBuiltInSfxChannel, 0u, 0u, 0u},
@@ -2943,11 +2919,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80048F8Cu, 0u, (void*)&Render_CommitClutBuffer, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80048FECu, 0u, (void*)&Render_SetClutAnimationEnabled, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80048FF8u, 0u, (void*)&Render_InitializeClutAnimation, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x8004908Cu, 0u, (void*)&Core_IdleInstruction, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80049098u, 0u, (void*)&Core_IgnoreDiagnostic, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800490A0u, 0u, (void*)&Core_IgnoreDiagnostic, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x800490A8u, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
-    {"SLUS_010.40", 0x80049130u, 0u, (void*)&Core_IgnoreCall, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80049138u, 4u, (void*)&Core_legacyRamSize, sizeof Core_legacyRamSize, 1u, 1u},
     {"SLUS_010.40", 0x8004913Cu, 4u, (void*)&Core_legacyStackSize, sizeof Core_legacyStackSize, 1u, 1u},
     {"SLUS_010.40", 0x8004A504u, 24u, (void*)&Input_vibrationPresets, 0u, 0u, 0u},
@@ -3093,6 +3064,35 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x8001D6B8u, 0u, (void*)&VS::Audio::Cutscene::SetLiveStreamVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D728u, 0u, (void*)&VS::Audio::Cutscene::SlideLiveStreamVolume, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D7A8u, 0u, (void*)&VS::Audio::Cutscene::SetLiveStreamPan, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006B20Cu, 0u, (void*)&VS::Core::IgnoreLiveActorCallback, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8006C478u, 0u, (void*)&VS::Core::IgnoreLiveActorCallback, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B0FCu, 0u, (void*)&VS::Core::NoOperation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007B104u, 0u, (void*)&VS::Core::NoOperation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007BF04u, 0u, (void*)&VS::Core::NoOperation, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x8007DF40u, 0u, (void*)&VS::Core::NoOperation, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004272Cu, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80042734u, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004273Cu, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80042744u, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80044C6Cu, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800490A8u, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80049130u, 0u, (void*)&VS::Core::IgnoreCall, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800454B0u, 0u, (void*)&VS::Core::ReturnZero, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800455E4u, 0u, (void*)&VS::Core::ReturnZero, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800455ECu, 0u, (void*)&VS::Core::ReturnZero, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004908Cu, 0u, (void*)&VS::Core::IdleInstruction, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80049098u, 0u, (void*)&VS::Core::IgnoreDiagnostic, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800490A0u, 0u, (void*)&VS::Core::IgnoreDiagnostic, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800BFE00u, 0u, (void*)&VS::Core::Memory::ReadLiveUnalignedShortAt, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CCC1Cu, 0u, (void*)&VS::Core::Memory::ZeroLiveWordsBackwardAt, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CCC34u, 0u, (void*)&VS::Core::Memory::CopyLiveBytesBackwardAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80019154u, 0u, (void*)&VS::Core::Memory::CopyLiveWordsAt, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800191D4u, 0u, (void*)&VS::Core::Memory::SwapLiveWordsAt, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CCC8Cu, 0u, (void*)&VS::Core::NextLiveInterfaceRandomBits, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800CFB80u, 0u, (void*)&VS::Core::LiveRandomRangeExclusive, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x8004274Cu, 0u, (void*)&VS::Core::InitializeLiveRandomShuffleTable, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x800427A8u, 0u, (void*)&VS::Core::NextLiveRandomBounded, 0u, 0u, 0u},
+    {"SLUS_010.40", 0x80042860u, 0u, (void*)&VS::Core::NextLiveRandomAveraged, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FEF7Cu, 4u, (void*)Content_plg074TrailEmissionCounter, sizeof Content_plg074TrailEmissionCounter, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9A68u, 72u, (void*)Content_battleShadowVertices, sizeof Content_battleShadowVertices, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9AD4u, 96u, (void*)Content_battleShadowFaces, sizeof Content_battleShadowFaces, 1u, 1u},

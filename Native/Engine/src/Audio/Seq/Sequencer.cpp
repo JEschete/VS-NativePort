@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/XaMixLive.hpp"
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 #include "Audio/StreamPlayback.h"
-#include "Core/Memory/Copy.h"
 
 // decomp: D_8002F54C (D_8002F54C@SLUS_010.40)
 u_short Audio_Seq_tickCounter; /* contents: module image (ModuleData.cpp) */
@@ -357,8 +357,8 @@ long Audio_Seq_TickPlayback(void)
             Audio_Seq_secondaryMusicConfig = NULL;
         } else if ((Audio_Seq_activeMusicConfig->activeChannels | Audio_Seq_activeMusicConfig->pausedChannels)
                    == 0) {
-            Core_Memory_CopyWords(Audio_Seq_secondaryMusicConfig, Audio_Seq_activeMusicConfig, 0x80);
-            Core_Memory_CopyWords(Audio_Seq_secondaryMusicChannels, Audio_Seq_musicChannels, 0x2200);
+            VS::Core::Memory::CopyLiveWords(Audio_Seq_secondaryMusicConfig, Audio_Seq_activeMusicConfig, 0x80);
+            VS::Core::Memory::CopyLiveWords(Audio_Seq_secondaryMusicChannels, Audio_Seq_musicChannels, 0x2200);
             promoted_saved_config = Audio_Seq_secondaryMusicConfig;
             Audio_Seq_secondaryMusicConfig = NULL;
             promoted_saved_config->musicId = 0;

@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "Core/Log.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/TrailEmitter.hpp"
 #include "Legacy/Psx.h"
@@ -19,7 +20,6 @@ extern "C" {
 #include "Core/Gte.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "Core/Scratch.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -89,7 +89,7 @@ class LiveOriginServices final : public TrailOriginServices {
  public:
   std::int32_t Rand() override { return Core_Random_Rand(); }
   std::int32_t RandomRangeExclusive(std::int32_t a, std::int32_t b) override {
-    return Core_Random_RandomRangeExclusive(a, b);
+    return VS::Core::LiveRandomRangeExclusive(a, b);
   }
   std::int32_t Sin(std::int32_t angle) override { return Core_Gte_Sin(angle); }
   std::int32_t Cos(std::int32_t angle) override { return Core_Gte_Cos(angle); }

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -95,7 +95,7 @@ void Menu_Inventory_SortWeapons(int stat)
     Items_InventoryWeapon* weapon = Audio_Seq_unusedInventory.weapons;
     char* indices = (char *)(Audio_Seq_unusedInventoryIndices.weapons);
 
-    Core_Memory_ZeroWordsBackward(sortedIndices, 8);
+    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, 8);
 
     sortedPos = 0;
 
@@ -152,7 +152,7 @@ void Menu_Inventory_SortShields(int stat)
     Items_InventoryShield* shield = &Audio_Seq_unusedInventory.shields[0];
     char* indices = (char *)(Audio_Seq_unusedInventoryIndices.shields);
 
-    Core_Memory_ZeroWordsBackward(sortedIndices, sizeof sortedIndices);
+    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
 
     sortedPos = 0;
 
@@ -208,7 +208,7 @@ void Menu_Inventory_SortMisc(int stat)
     Items_InventoryMisc* misc = Audio_Seq_unusedInventory.misc;
     char* indices = (char *)(Audio_Seq_unusedInventoryIndices.misc);
 
-    Core_Memory_ZeroWordsBackward(sortedIndices, sizeof sortedIndices);
+    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
     sortedPos = 0;
 
     while (1) {
@@ -276,7 +276,7 @@ void Menu_Inventory_SortEquipment(int itemCategory, int stat)
         char sortedIndices[capacity];
         char* indices = (char *)(Menu_Inventory_inventoryIndices[itemCategory]);
 
-        Core_Memory_ZeroWordsBackward(sortedIndices, capacity);
+        VS::Core::Memory::ZeroLiveWordsBackward(std::as_writable_bytes(std::span(&sortedIndices[0], sizeof sortedIndices / sizeof sortedIndices[0])), capacity);
 
         while (1) {
             int index;
@@ -1265,7 +1265,7 @@ loop_1:
         rowCount = 0;
         index = indices[Menu_Inventory_itemListSelectedRow - 1] - 1;
 
-        Core_Memory_ZeroWordsBackward(Menu_Framework_rowTypeBuf, sizeof(int) * 6);
+        VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_rowTypeBuf, sizeof(int) * 6);
 
         if (itemCategory == Items_ItemCategory_Misc) {
 

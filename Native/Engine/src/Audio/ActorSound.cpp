@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorRecord.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Audio/ActorSound.h"
 #include "Audio/Sfx.h"
-#include "Core/Random.h"
 #include "Effects/Weather.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
@@ -23,7 +23,7 @@ u_char Audio_objectSurfaceSoundIds[2956]; /* contents: module image (ModuleData.
 // decomp: BATTLE.PRG func_8006CD60 (src/BATTLE/BATTLE.PRG/146C.c:2144)
 void Audio_PlayRandomActorImpactSound(u_int* sound_bank, int pan, int volume)
 {
-    Audio_PlayBankSfx(0x7E, sound_bank, Core_Random_NextBounded(3) + 8, pan, volume);
+    Audio_PlayBankSfx(0x7E, sound_bank, VS::Core::NextLiveRandomBounded(3) + 8, pan, volume);
 }
 
 // decomp: BATTLE.PRG func_800AD62C (src/BATTLE/BATTLE.PRG/40564.c:2789)

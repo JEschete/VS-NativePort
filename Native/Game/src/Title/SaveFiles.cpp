@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Text/TextCode.h"
 #include "Event/ScriptAudio.h"
 #include "Field/Doors.h"
@@ -1366,8 +1366,8 @@ int Title_SaveFiles_UpdateSaveFiles(int initPort)
     case Menu_Files_SaveFilesState_Save:
         val = Title_saveMenuFileSlot + Title_saveMenuPageIndex;
         Title_memoryCardMessage = (char*)(Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_saving);
-        Core_Memory_CopyBytesBackward(&Title_saveMenuSettingsBackup, &Input_settings, sizeof Title_saveMenuSettingsBackup);
-        Core_Memory_CopyBytesBackward(
+        VS::Core::Memory::CopyLiveBytesBackward(&Title_saveMenuSettingsBackup, &Input_settings, sizeof Title_saveMenuSettingsBackup);
+        VS::Core::Memory::CopyLiveBytesBackward(
             (Save_GameSaveImage*)Title_memoryCardUiResource + 2, (Save_GameSaveImage*)Title_memoryCardUiResource + 1, sizeof(Save_GameSaveImage));
         if (Title_isContainerDataEmpty != 0) {
             Title_savedMainMenuSetting = (*(u_int*)&Input_settings >> 4) & 1;
@@ -1392,15 +1392,15 @@ int Title_SaveFiles_UpdateSaveFiles(int initPort)
                 memset(&Title_saveFileSummaries[saveId], 0, sizeof Title_saveFileSummaries[saveId]);
                 Title_saveFileSummaries[saveId].summary.base.slotState = Save_CardFileSlotStatus_Temporary;
                 Title_fileMenuElements[saveId + 5].saveLocation = 0;
-                Core_Memory_CopyBytesBackward((Save_GameSaveImage*)Title_memoryCardUiResource + 1, (Save_GameSaveImage*)Title_memoryCardUiResource + 2,
+                VS::Core::Memory::CopyLiveBytesBackward((Save_GameSaveImage*)Title_memoryCardUiResource + 1, (Save_GameSaveImage*)Title_memoryCardUiResource + 2,
                     sizeof(Save_GameSaveImage));
                 Title_transferProgressCounter = 0;
-                Core_Memory_CopyBytesBackward(&Input_settings, &Title_saveMenuSettingsBackup, sizeof Input_settings);
+                VS::Core::Memory::CopyLiveBytesBackward(&Input_settings, &Title_saveMenuSettingsBackup, sizeof Input_settings);
                 Title_memoryCardMessage = (char*)(Title_saveMenuText + Text_Menu_MCMAN_BIN_Offset_saveFailed);
             } else {
                 Title_hasUnsavedData = 0;
                 Title_transferProgressCounter = -16;
-                Core_Memory_CopyBytesBackward(&Title_saveFileSummaries[saveId],
+                VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[saveId],
                     Title_memoryCardUiResource + sizeof Title_saveFileSummaries[saveId] * 3,
                     sizeof Title_saveFileSummaries[saveId]);
                 Save_MemoryCard_DecodeSaveBytes(Title_saveFileSummaries[saveId].key,

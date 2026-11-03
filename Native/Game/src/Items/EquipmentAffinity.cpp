@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
-#include "Core/Random.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentAffinity.h"
 #include "Items/Inventory.h"
@@ -141,7 +141,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
         return;
     }
 
-    randVal = Core_Random_NextBounded(256);
+    randVal = VS::Core::NextLiveRandomBounded(256);
 
     if ((70 - ((equipment->affinities[targetAffinity] + 100) / 4)) >= randVal) {
 
@@ -155,7 +155,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
             for (i = 1; i < 7; ++i) {
                 if (equipment->affinities[i] > -100) {
 
-                    int randVal = Core_Random_NextBounded(256);
+                    int randVal = VS::Core::NextLiveRandomBounded(256);
 
                     if ((((equipment->affinities[i] + 100) / 4) + 20) >= randVal) {
 
@@ -172,7 +172,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 
         if (equipment->affinities[physical] > -100) {
 
-            int randVal = Core_Random_NextBounded(256);
+            int randVal = VS::Core::NextLiveRandomBounded(256);
 
             if ((((equipment->affinities[physical] + 100) / 4) + 20) >= randVal) {
 
@@ -186,7 +186,7 @@ void Items_GrowOpposingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 
         if (equipment->affinities[opposingAffinity] > -100) {
 
-            int randVal = Core_Random_NextBounded(256);
+            int randVal = VS::Core::NextLiveRandomBounded(256);
 
             if ((((equipment->affinities[opposingAffinity] + 100) / 4) + 0x14)
                 >= randVal) {
@@ -261,7 +261,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
         return;
     }
 
-    randVal = Core_Random_NextBounded(256);
+    randVal = VS::Core::NextLiveRandomBounded(256);
 
     if ((70 - ((equipment->affinities[targetAffinity] + 100) / 4)) < randVal) {
         return;
@@ -277,7 +277,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
         for (i = 1; i < 7; ++i) {
             if (equipment->affinities[i] > -100) {
 
-                int randVal = Core_Random_NextBounded(256);
+                int randVal = VS::Core::NextLiveRandomBounded(256);
 
                 if ((((equipment->affinities[i] + 100) / 4) + 20) >= randVal) {
 
@@ -294,7 +294,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 
     if (equipment->affinities[physical] > -100) {
 
-        int randVal = Core_Random_NextBounded(256);
+        int randVal = VS::Core::NextLiveRandomBounded(256);
 
         if ((((equipment->affinities[physical] + 100) / 4) + 20) >= randVal) {
 
@@ -308,7 +308,7 @@ void Items_GrowMatchingEquipmentAffinity(Battle_ActionDefinition* action, Items_
 
     if (equipment->affinities[opposingAffinity] > -100) {
 
-        int randVal = Core_Random_NextBounded(256);
+        int randVal = VS::Core::NextLiveRandomBounded(256);
 
         if ((((equipment->affinities[opposingAffinity] + 100) / 4) + 20) >= randVal) {
 
@@ -361,7 +361,7 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
         return;
     }
 
-    randVal = Core_Random_NextBounded(256);
+    randVal = VS::Core::NextLiveRandomBounded(256);
 
     if ((70 - (equipment->classes[targetClass] + 100) / 4) >= randVal) {
 
@@ -373,7 +373,7 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
 
         if (equipment->classes[opposingClass0] > -100) {
 
-            int randVal = Core_Random_NextBounded(256);
+            int randVal = VS::Core::NextLiveRandomBounded(256);
 
             if (((equipment->classes[opposingClass0] + 100) / 4 + 20) >= randVal) {
 
@@ -387,7 +387,7 @@ void Items_GrowEquipmentClass(Battle_ActionDefinition* action __attribute__((unu
 
         if (equipment->classes[opposingClass1] > -100) {
 
-            int randVal = Core_Random_NextBounded(256);
+            int randVal = VS::Core::NextLiveRandomBounded(256);
 
             if (((equipment->classes[opposingClass1] + 100) / 4 + 20) >= randVal) {
 
@@ -453,7 +453,7 @@ void Items_GrowDefenderEquipmentRatings(
         return;
     }
 
-    selected_equipment_slot = eligible_equipment_slots[Core_Random_NextBounded(eligible_equipment_count)];
+    selected_equipment_slot = eligible_equipment_slots[VS::Core::NextLiveRandomBounded(eligible_equipment_count)];
 
     if (selected_equipment_slot == 0xFF) {
         Items_EquipmentPartStats* equipment = &defender_stats->shield.base;

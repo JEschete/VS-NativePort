@@ -1,8 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/RandomLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Random.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -42,10 +44,10 @@ void VS_TRAIL_TARGET_FUNCTION(Effects_ParticleDefinition* particle_definition, E
     for (i = 0; i < trail_set->trailCount; ++i) {
         SVECTOR* v = &trail_set->trails[i].splinePoints[3];
         setVector(v,
-            emitter_scratch->attractionOffset.vx + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vx, -emitter_scratch->attractionJitter.vx),
-            emitter_scratch->attractionOffset.vy + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vy, -emitter_scratch->attractionJitter.vy),
+            emitter_scratch->attractionOffset.vx + VS::Core::LiveRandomRangeExclusive(emitter_scratch->attractionJitter.vx, -emitter_scratch->attractionJitter.vx),
+            emitter_scratch->attractionOffset.vy + VS::Core::LiveRandomRangeExclusive(emitter_scratch->attractionJitter.vy, -emitter_scratch->attractionJitter.vy),
             emitter_scratch->attractionOffset.vz
-                + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vz, -emitter_scratch->attractionJitter.vz));
+                + VS::Core::LiveRandomRangeExclusive(emitter_scratch->attractionJitter.vz, -emitter_scratch->attractionJitter.vz));
     }
 }
 #undef TRAIL_SAMPLE_COUNT

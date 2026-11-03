@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/RandomLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Vector.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -338,11 +338,11 @@ void Effects_EmitParticleEvent(
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
-                    Core_Random_RandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
+                    VS::Core::LiveRandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
                 scratch->vector.vy =
-                    Core_Random_RandomRangeExclusive(scratch->extent.vy, scratch->innerExtent.vy);
+                    VS::Core::LiveRandomRangeExclusive(scratch->extent.vy, scratch->innerExtent.vy);
                 scratch->vector.vz =
-                    Core_Random_RandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
+                    VS::Core::LiveRandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
                 goto scale0;
             case 0x800:
             case 0x1000:
@@ -372,24 +372,24 @@ void Effects_EmitParticleEvent(
                 angle = Core_Random_Rand();
                 if (angle & 1) {
                     scratch->vector.vx =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
                 } else {
                     scratch->vector.vx =
-                        Core_Random_RandomRangeExclusive(-scratch->extent.vx, -scratch->innerExtent.vx);
+                        VS::Core::LiveRandomRangeExclusive(-scratch->extent.vx, -scratch->innerExtent.vx);
                 }
                 if (angle & 2) {
                     scratch->vector.vy =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vy, scratch->innerExtent.vy);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vy, scratch->innerExtent.vy);
                 } else {
                     scratch->vector.vy =
-                        Core_Random_RandomRangeExclusive(-scratch->extent.vy, -scratch->innerExtent.vy);
+                        VS::Core::LiveRandomRangeExclusive(-scratch->extent.vy, -scratch->innerExtent.vy);
                 }
                 if (angle & 4) {
                     scratch->vector.vz =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
                 } else {
                     scratch->vector.vz =
-                        Core_Random_RandomRangeExclusive(-scratch->extent.vz, -scratch->innerExtent.vz);
+                        VS::Core::LiveRandomRangeExclusive(-scratch->extent.vz, -scratch->innerExtent.vz);
                 }
                 break;
             case 0x800:
@@ -401,9 +401,9 @@ void Effects_EmitParticleEvent(
                     scratch->vector.vx = -scratch->extent.vx;
                 face_x:
                     scratch->vector.vy =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vy, -scratch->extent.vy);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vy, -scratch->extent.vy);
                     scratch->vector.vz =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vz, -scratch->extent.vz);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vz, -scratch->extent.vz);
                     break;
                 case 2:
                     scratch->vector.vy = scratch->extent.vy;
@@ -412,9 +412,9 @@ void Effects_EmitParticleEvent(
                     scratch->vector.vy = -scratch->extent.vy;
                 face_y:
                     scratch->vector.vx =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vx, -scratch->extent.vx);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vx, -scratch->extent.vx);
                     scratch->vector.vz =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vz, -scratch->extent.vz);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vz, -scratch->extent.vz);
                     break;
                 case 4:
                     scratch->vector.vz = scratch->extent.vz;
@@ -423,9 +423,9 @@ void Effects_EmitParticleEvent(
                     scratch->vector.vz = -scratch->extent.vz;
                 face_z:
                     scratch->vector.vx =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vx, -scratch->extent.vx);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vx, -scratch->extent.vx);
                     scratch->vector.vy =
-                        Core_Random_RandomRangeExclusive(scratch->extent.vy, -scratch->extent.vy);
+                        VS::Core::LiveRandomRangeExclusive(scratch->extent.vy, -scratch->extent.vy);
                     break;
                 }
                 break;
@@ -455,9 +455,9 @@ void Effects_EmitParticleEvent(
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
-                    Core_Random_RandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
+                    VS::Core::LiveRandomRangeExclusive(scratch->extent.vx, scratch->innerExtent.vx);
                 scratch->vector.vz =
-                    Core_Random_RandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
+                    VS::Core::LiveRandomRangeExclusive(scratch->extent.vz, scratch->innerExtent.vz);
                 goto scale16;
             case 0x800:
             case 0x1000:
@@ -507,7 +507,7 @@ void Effects_EmitParticleEvent(
                 scratch->vector.vz = scratch->extent.vz;
             scale24:
                 scratch->vector.vx = (scratch->vector.vx * scratch->cosAngle0) >> 12;
-                scratch->vector.vy = Core_Random_RandomRangeExclusive(scratch->extent.vy, 0);
+                scratch->vector.vy = VS::Core::LiveRandomRangeExclusive(scratch->extent.vy, 0);
                 scratch->vector.vz = (scratch->vector.vz * scratch->sinAngle0) >> 12;
                 break;
             }
@@ -637,13 +637,13 @@ void Effects_EmitParticleEvent(
         for (i = 0; i < count; ++i) {
             scratch->vector.vx =
                 scratch->baseDirection.vx
-                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vx, -scratch->directionJitter.vx);
+                + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vx, -scratch->directionJitter.vx);
             scratch->vector.vy =
                 scratch->baseDirection.vy
-                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vy, -scratch->directionJitter.vy);
+                + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vy, -scratch->directionJitter.vy);
             scratch->vector.vz =
                 scratch->baseDirection.vz
-                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
+                + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
             Core_Gte_RotMatrix(&scratch->vector, (MATRIX*)scratch);
             Core_Gte_SetRotMatrix((const MATRIX *)(scratch));
             *(int*)&scratch->vector = 0;
@@ -655,7 +655,7 @@ void Effects_EmitParticleEvent(
                 Core_Gte_ApplyRotMatrix(&scratch->vector, &scratch->direction);
             }
             scratch->speed =
-                Core_Random_RandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
+                VS::Core::LiveRandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
             node->motion.velocity.vx = (scratch->direction.vx * scratch->speed) >> 12;
             node->motion.velocity.vy = (scratch->direction.vy * scratch->speed) >> 12;
             node->motion.velocity.vz = (scratch->direction.vz * scratch->speed) >> 12;
@@ -666,13 +666,13 @@ void Effects_EmitParticleEvent(
         for (i = 0; i < count; ++i) {
             scratch->vector.vx =
                 scratch->baseDirection.vx
-                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vx, -scratch->directionJitter.vx);
+                + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vx, -scratch->directionJitter.vx);
             scratch->vector.vy =
                 scratch->baseDirection.vy
-                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vy, -scratch->directionJitter.vy);
+                + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vy, -scratch->directionJitter.vy);
             scratch->vector.vz =
                 scratch->baseDirection.vz
-                + Core_Random_RandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
+                + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
             Core_Gte_RotMatrix(&scratch->vector, (MATRIX*)scratch);
             Core_Gte_SetRotMatrix((const MATRIX *)(scratch));
             *(int*)&scratch->vector = 0;
@@ -682,7 +682,7 @@ void Effects_EmitParticleEvent(
             Core_Math_NarrowWideVector(&scratch->direction, &scratch->vector);
             Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
             scratch->speed =
-                Core_Random_RandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
+                VS::Core::LiveRandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
             node->motion.velocity.vx = (scratch->direction.vx * scratch->speed) >> 12;
             node->motion.velocity.vy = (scratch->direction.vy * scratch->speed) >> 12;
             node->motion.velocity.vz = (scratch->direction.vz * scratch->speed) >> 12;
@@ -695,7 +695,7 @@ void Effects_EmitParticleEvent(
             scratch->direction.vy = (scratch->position.vy - node->motion.position.vy) >> 12;
             scratch->direction.vz = (scratch->position.vz - node->motion.position.vz) >> 12;
             scratch->speed =
-                Core_Random_RandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
+                VS::Core::LiveRandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
             if (scratch->direction.vx != 0 || scratch->direction.vy != 0
                 || scratch->direction.vz != 0) {
                 Core_Gte_VectorNormal(&scratch->direction, &scratch->direction);
@@ -720,12 +720,12 @@ void Effects_EmitParticleEvent(
     Core_Math_InterpolatePairsToShortVector(def->vectorRanges[5], Effects_curveSamples[sample], &scratch->accelerationMax);
     node = first;
     for (i = 0; i < count; ++i) {
-        node->motion.force.vx = Core_Random_RandomRangeExclusive(scratch->forceMin.vx, scratch->forceMax.vx);
-        node->motion.force.vy = Core_Random_RandomRangeExclusive(scratch->forceMin.vy, scratch->forceMax.vy);
-        node->motion.force.vz = Core_Random_RandomRangeExclusive(scratch->forceMin.vz, scratch->forceMax.vz);
-        node->motion.acceleration.vx = Core_Random_RandomRangeExclusive(scratch->accelerationMin.vx, scratch->accelerationMax.vx);
-        node->motion.acceleration.vy = Core_Random_RandomRangeExclusive(scratch->accelerationMin.vy, scratch->accelerationMax.vy);
-        node->motion.acceleration.vz = Core_Random_RandomRangeExclusive(scratch->accelerationMin.vz, scratch->accelerationMax.vz);
+        node->motion.force.vx = VS::Core::LiveRandomRangeExclusive(scratch->forceMin.vx, scratch->forceMax.vx);
+        node->motion.force.vy = VS::Core::LiveRandomRangeExclusive(scratch->forceMin.vy, scratch->forceMax.vy);
+        node->motion.force.vz = VS::Core::LiveRandomRangeExclusive(scratch->forceMin.vz, scratch->forceMax.vz);
+        node->motion.acceleration.vx = VS::Core::LiveRandomRangeExclusive(scratch->accelerationMin.vx, scratch->accelerationMax.vx);
+        node->motion.acceleration.vy = VS::Core::LiveRandomRangeExclusive(scratch->accelerationMin.vy, scratch->accelerationMax.vy);
+        node->motion.acceleration.vz = VS::Core::LiveRandomRangeExclusive(scratch->accelerationMin.vz, scratch->accelerationMax.vz);
         node = node->next;
     }
 
@@ -737,9 +737,9 @@ void Effects_EmitParticleEvent(
     Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[4], Effects_curveSamples[sample], scratch->lifetimeRange);
     node = first;
     for (i = 0; i < count; ++i) {
-        node->motion.mass = Core_Random_RandomRangeExclusive(scratch->massRange[0], scratch->massRange[1]);
-        node->motion.gravityScale = Core_Random_RandomRangeExclusive(scratch->gravityScaleRange[0], scratch->gravityScaleRange[1]);
-        node->lifetime = Core_Random_RandomRangeExclusive(scratch->lifetimeRange[0], scratch->lifetimeRange[1]);
+        node->motion.mass = VS::Core::LiveRandomRangeExclusive(scratch->massRange[0], scratch->massRange[1]);
+        node->motion.gravityScale = VS::Core::LiveRandomRangeExclusive(scratch->gravityScaleRange[0], scratch->gravityScaleRange[1]);
+        node->lifetime = VS::Core::LiveRandomRangeExclusive(scratch->lifetimeRange[0], scratch->lifetimeRange[1]);
         node = node->next;
     }
 
@@ -763,13 +763,13 @@ void Effects_EmitParticleEvent(
         for (i = 0; i < count; ++i) {
             node->attractionTarget[0] =
                 effect_instance->transforms[scratch->attractionTransform].world.t[0] + scratch->attractionOffset.vx
-                + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vx, -scratch->attractionJitter.vy);
+                + VS::Core::LiveRandomRangeExclusive(scratch->attractionJitter.vx, -scratch->attractionJitter.vy);
             node->attractionTarget[1] =
                 effect_instance->transforms[scratch->attractionTransform].world.t[1] + scratch->attractionOffset.vy
-                + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vy, -scratch->attractionJitter.vy);
+                + VS::Core::LiveRandomRangeExclusive(scratch->attractionJitter.vy, -scratch->attractionJitter.vy);
             node->attractionTarget[2] =
                 effect_instance->transforms[scratch->attractionTransform].world.t[2] + scratch->attractionOffset.vz
-                + Core_Random_RandomRangeExclusive(scratch->attractionJitter.vz, -scratch->attractionJitter.vz);
+                + VS::Core::LiveRandomRangeExclusive(scratch->attractionJitter.vz, -scratch->attractionJitter.vz);
             node = node->next;
         }
         break;
@@ -791,7 +791,7 @@ void Effects_EmitParticleEvent(
     scratch->colorCurves.fields.age = node->age;
     for (i = 0; i < count; ++i) {
         node->emitFlags = scratch->flags;
-        value = Core_Random_RandomRangeExclusive(scratch->attractionRange[0], scratch->attractionRange[1]);
+        value = VS::Core::LiveRandomRangeExclusive(scratch->attractionRange[0], scratch->attractionRange[1]);
         *(int*)node->colorCurves = scratch->colorCurves.word;
         node->attraction = value;
         *(u_short*)&node->endEvent = *(u_short*)&def->endEvent;

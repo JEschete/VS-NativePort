@@ -40,6 +40,9 @@
     <Filter Include="include\Core\Memory">
       <UniqueIdentifier>{86FEC68F-54CD-5F6E-953B-430D05A35144}</UniqueIdentifier>
     </Filter>
+    <Filter Include="include\Core\String">
+      <UniqueIdentifier>{5B85CB89-03C4-5576-BD09-45B39EF507FD}</UniqueIdentifier>
+    </Filter>
     <Filter Include="include\Core\Text">
       <UniqueIdentifier>{EE72470B-3E88-5B60-BCD1-8CB388B0E83F}</UniqueIdentifier>
     </Filter>
@@ -312,18 +315,6 @@
     <ClCompile Include="src\Core\Arena.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Callbacks.cpp">
-      <Filter>src\Core</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Callbacks.h">
-      <Filter>src\Core</Filter>
-    </ClInclude>
-    <ClCompile Include="src\Core\Compatibility.cpp">
-      <Filter>src\Core</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Compatibility.h">
-      <Filter>src\Core</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\FrameClock.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -381,9 +372,9 @@
     <ClCompile Include="src\Core\Memory\Copy.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Memory\Copy.h">
+    <ClCompile Include="src\Core\Memory\CopyLive.cpp">
       <Filter>src\Core\Memory</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Core\Memory\Heap.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
@@ -420,21 +411,24 @@
     <ClCompile Include="src\Core\RandomGenerator.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\RandomLive.cpp">
+      <Filter>src\Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\Runtime.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Runtime.h">
+    <ClCompile Include="src\Core\RuntimeLive.cpp">
       <Filter>src\Core</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Core\Scratch.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\String\GameText.cpp">
       <Filter>src\Core\String</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\String\GameText.h">
+    <ClCompile Include="src\Core\String\GameTextLive.cpp">
       <Filter>src\Core\String</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Core\Unported.cpp">
       <Filter>src\Core</Filter>
     </ClCompile>
@@ -768,6 +762,12 @@
     <ClInclude Include="include\Core\Math\ScalarMath.hpp">
       <Filter>include\Core\Math</Filter>
     </ClInclude>
+    <ClInclude Include="include\Core\Memory\Copy.hpp">
+      <Filter>include\Core\Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Memory\CopyLive.hpp">
+      <Filter>include\Core\Memory</Filter>
+    </ClInclude>
     <ClInclude Include="include\Core\Memory\WordCopy.hpp">
       <Filter>include\Core\Memory</Filter>
     </ClInclude>
@@ -780,8 +780,23 @@
     <ClInclude Include="include\Core\Random.hpp">
       <Filter>include\Core</Filter>
     </ClInclude>
+    <ClInclude Include="include\Core\RandomLive.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Runtime.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\RuntimeLive.hpp">
+      <Filter>include\Core</Filter>
+    </ClInclude>
     <ClInclude Include="include\Core\Scratch.h">
       <Filter>include\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\String\GameText.hpp">
+      <Filter>include\Core\String</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\String\GameTextLive.hpp">
+      <Filter>include\Core\String</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Text\TextCode.h">
       <Filter>include\Core\Text</Filter>

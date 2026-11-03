@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Field/Mpd.h"
 #include "Field/RoomLoading.h"
@@ -167,7 +167,7 @@ int Audio_LoadMusicSlot(int id, int targetSlot)
             if (Audio_soundState.musicIds[slot] != id) {
                 do {
                     if (Audio_soundState.musicData[slot] != 0) {
-                        Core_IgnoreDiagnostic(142, 0);
+                        VS::Core::IgnoreDiagnostic(142, 0);
                         Audio_FreeMusicSlot(targetSlot);
                     }
                 } while (0);
@@ -178,14 +178,14 @@ int Audio_LoadMusicSlot(int id, int targetSlot)
                 if ((Audio_soundState.musicRequests[slot] != 0)
                     && (Audio_soundState.musicRequests[slot]
                         != (Content_DiscQueueSlot*)-1)) {
-                    Core_IgnoreDiagnostic(0x98, 0);
+                    VS::Core::IgnoreDiagnostic(0x98, 0);
                 }
 
                 Audio_soundState.musicRequests[slot] =
                     Content_AllocateDiscRequest(&cdFile);
 
                 if (Audio_soundState.musicData[slot] != 0) {
-                    Core_IgnoreDiagnostic(0x8E, 0);
+                    VS::Core::IgnoreDiagnostic(0x8E, 0);
                 }
                 Audio_soundState.musicData[slot] = Core_Memory_AllocateFromHighEnd(cdFile.size);
                 Content_EnqueueDiscRequest(Audio_soundState.musicRequests[slot],
@@ -195,7 +195,7 @@ int Audio_LoadMusicSlot(int id, int targetSlot)
             return targetSlot;
         }
     }
-    Core_IgnoreDiagnostic(0x8E, 0);
+    VS::Core::IgnoreDiagnostic(0x8E, 0);
     return 0;
 }
 

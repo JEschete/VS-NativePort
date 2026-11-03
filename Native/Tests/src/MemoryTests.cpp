@@ -1,17 +1,18 @@
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <cstdint>
+#include <span>
 #include <vector>
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Core/Memory/Copy.hpp"
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopy.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Legacy/Psx.h"
 
-extern "C" {
-#include "Core/Memory/Copy.h"
-}
 
 namespace {
 void CopyHalfwords(void* destination, const void* source, int size) {
@@ -27,10 +28,13 @@ TEST_CASE("Signed short reads preserve aligned and unaligned byte order",
           "[core][memory]") {
   alignas(std::uint16_t) std::array<unsigned char, 5> bytes{0x34, 0x12, 0xFF,
                                                             0x80, 0x7F};
-  CHECK(Core_Memory_ReadUnalignedShort(bytes.data()) == 0x1234);
-  CHECK(Core_Memory_ReadUnalignedShort(bytes.data() + 1) == -238);
-  CHECK(Core_Memory_ReadUnalignedShort(bytes.data() + 2) == -32513);
-  CHECK(Core_Memory_ReadUnalignedShort(bytes.data() + 3) == 0x7F80);
+  using VS::Core::Memory::ReadLiveUnalignedShort;
+  CHECK(ReadLiveUnalignedShort(bytes.data()) == 0x1234);
+  CHECK(ReadLiveUnalignedShort(bytes.data() + 1) == -238);
+  CHECK(ReadLiveUnalignedShort(bytes.data() + 2) == -32513);
+  CHECK(ReadLiveUnalignedShort(bytes.data() + 3) == 0x7F80);
+  CHECK(VS::Core::Memory::ReadUnalignedShort(
+            std::as_bytes(std::span(bytes).subspan<1, 2>())) == -238);
 }
 
 TEST_CASE("Backward word clear consumes bytes without touching adjacent words",
@@ -38,12 +42,99 @@ TEST_CASE("Backward word clear consumes bytes without touching adjacent words",
   for (int bytes : {4, 8, 12, 16, 20, 32, 256}) {
     const auto words = static_cast<std::size_t>(bytes / 4);
     std::vector<std::uint32_t> memory(words + 2, 0xA5A5A5A5u);
-    Core_Memory_ZeroWordsBackward(memory.data() + 1, bytes);
+    VS::Core::Memory::ZeroLiveWordsBackward(memory.data() + 1, bytes);
     CHECK(memory.front() == 0xA5A5A5A5u);
     CHECK(memory.back() == 0xA5A5A5A5u);
     CHECK(std::all_of(memory.begin() + 1, memory.end() - 1,
                       [](auto word) { return word == 0; }));
   }
+}
+
+TEST_CASE("Backward copies refuse sizes the original could not finish",
+          "[core][memory]") {
+  using namespace VS::Core::Memory;
+  std::array<std::byte, 8> bytes{};
+  bytes.fill(std::byte{0x5A});
+  const auto original = bytes;
+  for (const std::int32_t size : {0, -4, 1, 3, 6}) {
+    INFO("size=" << size);
+    CHECK(ZeroWordsBackward(bytes, size) == 0);
+    CHECK(bytes == original);
+  }
+  for (const std::int32_t size : {0, -1}) {
+    CHECK(CopyBytesBackward(bytes, original, size) == 0);
+  }
+  const auto refused = RefusedLiveSizeCount();
+  ZeroLiveWordsBackward(bytes.data(), 6);
+  CopyLiveBytesBackward(bytes.data(), original.data(), 0);
+  CHECK(RefusedLiveSizeCount() == refused + 2);
+  CHECK(bytes == original);
+}
+
+TEST_CASE("Backward copies stay inside their spans and array extents",
+          "[core][memory]") {
+  using namespace VS::Core::Memory;
+  std::array<std::byte, 12> bytes{};
+  bytes.fill(std::byte{0x5A});
+  CHECK(ZeroWordsBackward(std::span(bytes).first(8), 12) == 8);
+  CHECK(bytes[7] == std::byte{0});
+  CHECK(bytes[8] == std::byte{0x5A});
+
+  struct Record {
+    std::uint32_t words[2];
+    std::uint32_t guard;
+  } record{{1, 2}, 0xA5A5A5A5u};
+  const auto truncated = TruncatedLiveCopyCount();
+  ZeroLiveWordsBackward(record.words, 12);
+  CHECK(record.words[0] == 0);
+  CHECK(record.words[1] == 0);
+  CHECK(record.guard == 0xA5A5A5A5u);
+  CHECK(TruncatedLiveCopyCount() == truncated + 1);
+}
+
+TEST_CASE("Byte copies run from the end like the original loop",
+          "[core][memory]") {
+  using namespace VS::Core::Memory;
+  std::array<char, 6> higher{'A', 'B', 'C', 'D', 'E', 'F'};
+  CopyLiveBytesBackward(higher.data() + 1, higher.data(), 4);
+  CHECK(higher == std::array<char, 6>{'A', 'A', 'B', 'C', 'D', 'F'});
+  // Copying to a lower address re-reads bytes already written: the original's
+  // order, not memmove's.
+  std::array<char, 6> lower{'A', 'B', 'C', 'D', 'E', 'F'};
+  CopyLiveBytesBackward(lower.data(), lower.data() + 1, 4);
+  CHECK(lower == std::array<char, 6>{'E', 'E', 'E', 'E', 'E', 'F'});
+}
+
+TEST_CASE("Sound word copies load each group of four before storing it",
+          "[core][memory]") {
+  using namespace VS::Core::Memory;
+  std::array<std::uint32_t, 10> words{0, 1, 2, 3, 4, 5, 6, 7, 8, 9};
+  CopyLiveWords(words.data(), words.data() + 1, 8 * 4 + 3);
+  CHECK(words == std::array<std::uint32_t, 10>{0, 0, 1, 2, 3, 3, 5, 6, 7, 9});
+
+  std::array<std::uint32_t, 6> source{1, 2, 3, 4, 5, 6};
+  std::array<std::uint32_t, 6> destination{};
+  CHECK(CopyWords(std::as_bytes(std::span(source)),
+                  std::as_writable_bytes(std::span(destination)), 24) == 24);
+  CHECK(destination == source);
+}
+
+TEST_CASE("Sound word swaps exchange whole words in pairs",
+          "[core][memory]") {
+  using namespace VS::Core::Memory;
+  std::array<std::uint32_t, 5> first{1, 2, 3, 4, 5};
+  std::array<std::uint32_t, 5> second{10, 20, 30, 40, 50};
+  SwapLiveWords(first.data(), second.data(), 5 * 4 + 2);
+  CHECK(first == std::array<std::uint32_t, 5>{10, 20, 30, 40, 50});
+  CHECK(second == std::array<std::uint32_t, 5>{1, 2, 3, 4, 5});
+
+  std::array<std::uint32_t, 3> same{7, 8, 9};
+  SwapLiveWords(same.data(), same.data(), 12);
+  CHECK(same == std::array<std::uint32_t, 3>{7, 8, 9});
+  CHECK(SwapWords(std::as_writable_bytes(std::span(first)).first(4),
+                  std::as_writable_bytes(std::span(second)), 20) == 4);
+  CHECK(first[0] == 1);
+  CHECK(second[0] == 10);
 }
 
 TEST_CASE("Battle memory clear preserves bounds and uses the full size",

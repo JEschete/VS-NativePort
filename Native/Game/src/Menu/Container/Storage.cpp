@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
@@ -163,19 +163,19 @@ void Menu_Container_ClearItem(
             }
         }
 
-        Core_Memory_ZeroWordsBackward(weapon, sizeof *weapon);
+        VS::Core::Memory::ZeroLiveWordsBackward(weapon, sizeof *weapon);
         weapon->index = index + 1;
         break;
     }
     case Items_ItemCategory_Blade: {
         Items_InventoryBlade* blade = &container->blades[index];
-        Core_Memory_ZeroWordsBackward(blade, sizeof *blade);
+        VS::Core::Memory::ZeroLiveWordsBackward(blade, sizeof *blade);
         blade->index = index + 1;
         break;
     }
     case Items_ItemCategory_Grip: {
         Items_InventoryGrip* grip = &container->grips[index];
-        Core_Memory_ZeroWordsBackward(grip, sizeof *grip);
+        VS::Core::Memory::ZeroLiveWordsBackward(grip, sizeof *grip);
         grip->index = index + 1;
         break;
     }
@@ -189,25 +189,25 @@ void Menu_Container_ClearItem(
             }
         }
 
-        Core_Memory_ZeroWordsBackward(shield, sizeof *shield);
+        VS::Core::Memory::ZeroLiveWordsBackward(shield, sizeof *shield);
         shield->index = index + 1;
         break;
     }
     case Items_ItemCategory_Armor: {
         Items_InventoryArmor* armor = &container->armor[index];
-        Core_Memory_ZeroWordsBackward(armor, sizeof *armor);
+        VS::Core::Memory::ZeroLiveWordsBackward(armor, sizeof *armor);
         armor->index = index + 1;
         break;
     }
     case Items_ItemCategory_Gem: {
         Items_InventoryGem* gem = &container->gems[index];
-        Core_Memory_ZeroWordsBackward(gem, sizeof *gem);
+        VS::Core::Memory::ZeroLiveWordsBackward(gem, sizeof *gem);
         gem->index = index + 1;
         break;
     }
     case Items_ItemCategory_Misc: {
         Items_InventoryMisc* item = &container->misc[index];
-        Core_Memory_ZeroWordsBackward(item, sizeof *item);
+        VS::Core::Memory::ZeroLiveWordsBackward(item, sizeof *item);
         item->index = index + 1;
         break;
     }
@@ -342,7 +342,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
             index = targetSlot + 1;
 
             if (copyFlag != 0) {
-                Core_Memory_ZeroWordsBackward(target, sizeof *target);
+                VS::Core::Memory::ZeroLiveWordsBackward(target, sizeof *target);
                 target->index = index;
                 target->blade = Menu_Container_CopyItem(
                     (index << 8) | Menu_Container_CopyContainerFlag_CopyContainerFlagsCopy | Items_ItemCategory_Blade,
@@ -357,7 +357,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
                             targetContainer, source->gems[i] - 1, sourceContainer);
                     }
                 }
-                Core_Memory_CopyBytesBackward(target->name, source->name, sizeof target->name);
+                VS::Core::Memory::CopyLiveBytesBackward(target->name, source->name, sizeof target->name);
             }
         }
         break;
@@ -420,7 +420,7 @@ int Menu_Container_CopyItem(int itemCategory, Items_ContainerData* targetContain
         index = targetSlot + 1;
 
         if (copyFlag != 0) {
-            Core_Memory_ZeroWordsBackward(target, sizeof *target);
+            VS::Core::Memory::ZeroLiveWordsBackward(target, sizeof *target);
             VS::Core::Memory::CopyLiveHalfwords(&target->base, &source->base, sizeof target->base);
             target->index = index;
             for (i = 0; i < 3; ++i) {
@@ -580,8 +580,8 @@ void Menu_Container_SnapshotGadgetBag(void)
     Items_Inventory* inventory = &Audio_Seq_unusedInventory;
     Items_Container* container = &Menu_Framework_unusedInventoryStorage->gadgetBag;
 
-    Core_Memory_ZeroWordsBackward(&container->items, sizeof container->items);
-    Core_Memory_ZeroWordsBackward(&Menu_Framework_unusedInventoryStorage->gadgetBag.indices,
+    VS::Core::Memory::ZeroLiveWordsBackward(&container->items, sizeof container->items);
+    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_unusedInventoryStorage->gadgetBag.indices,
         sizeof Menu_Framework_unusedInventoryStorage->gadgetBag.indices);
 
     for (i = 0; i < 7; ++i) {
@@ -693,7 +693,7 @@ void Menu_Container_SortWeapons(int stat)
     Items_InventoryWeapon* sourceWeapons = Menu_Container_containerData->items.weapons;
     u_short* targetIndices =
         Menu_Container_CategoryIndices(Items_ItemCategory_Weapon, Menu_Container_containerData);
-    Core_Memory_ZeroWordsBackward(sortedIndices, sizeof sortedIndices);
+    VS::Core::Memory::ZeroLiveWordsBackward(sortedIndices, sizeof sortedIndices);
     sortedIndex = 0;
 
     while (1) {
@@ -747,7 +747,7 @@ void Menu_Container_SortShields(int sort_stat_id)
     u_short* shield_indices = Menu_Container_CategoryIndices(3, Menu_Container_containerData);
     int sorted_shield_count = 0;
 
-    Core_Memory_ZeroWordsBackward(&sorted_shield_indices, sizeof sorted_shield_indices);
+    VS::Core::Memory::ZeroLiveWordsBackward(&sorted_shield_indices, sizeof sorted_shield_indices);
 
     while (1) {
         highest_remaining_sort_value = 0x80000000;
@@ -797,7 +797,7 @@ void Menu_Container_SortMisc(int sort_stat_id)
 
     item = Menu_Container_containerData->items.misc;
     misc_indices = Menu_Container_CategoryIndices(6, Menu_Container_containerData);
-    Core_Memory_ZeroWordsBackward(&sorted_misc_indices, sizeof sorted_misc_indices);
+    VS::Core::Memory::ZeroLiveWordsBackward(&sorted_misc_indices, sizeof sorted_misc_indices);
     sorted_misc_count = 0;
 
     while (1) {
@@ -868,7 +868,7 @@ void Menu_Container_SortEquipment(int category_id, int sort_stat_id)
     {
         u_short sorted_equipment_indices[category_capacity];
         category_indices = Menu_Container_CategoryIndices(category_id, Menu_Container_containerData);
-        Core_Memory_ZeroWordsBackward(sorted_equipment_indices, category_capacity * 2);
+        VS::Core::Memory::ZeroLiveWordsBackward(std::as_writable_bytes(std::span(&sorted_equipment_indices[0], sizeof sorted_equipment_indices / sizeof sorted_equipment_indices[0])), category_capacity * 2);
 
         while (1) {
             highest_remaining_sort_value = 0x80000000;

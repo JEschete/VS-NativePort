@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorState.h"
-#include "Core/Compatibility.h"
-#include "Core/Memory/Copy.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptScreen.h"
@@ -23,7 +23,7 @@ intptr_t Event_ScriptWaitForSplashFile(u_char* instruction, short thread_index) 
 // decomp: BATTLE.PRG vs_battle_script_loadGim (src/BATTLE/BATTLE.PRG/4A0A8.c:851)
 intptr_t Event_ScriptLoadSplashImage(u_char* instruction, short thread_index)
 {
-    Render_QueueGimImage(Core_Memory_ReadUnalignedShort(instruction + 1), instruction[3]);
+    Render_QueueGimImage(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), instruction[3]);
     return 0;
 }
 
@@ -163,9 +163,9 @@ intptr_t Event_ScriptWaitForScreenTransition(u_char* instruction, short thread_i
 intptr_t Event_ScriptTogglePaletteHook(u_char* instruction, short thread_index)
 {
     if (instruction[1] != 0) {
-        Core_NoOperation();
+        VS::Core::NoOperation();
     } else {
-        Core_NoOperation();
+        VS::Core::NoOperation();
     }
     return 0;
 }
@@ -178,7 +178,7 @@ intptr_t Event_ScriptTransformPalettes(u_char* instruction, short thread_index)
 
     switch (instruction[1] >> 4) {
     case 0:
-        Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 2), &actor_selection);
+        Event_BuildScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2), &actor_selection);
         while (1) {
             actor_id = Event_NextScriptSelectedActor(&actor_selection);
             if (actor_id == 1) {

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Diagnostics/SceneTrace.h"
 #include "DiscQueue.h"
@@ -309,7 +309,7 @@ intptr_t Event_ScriptEndCutsceneAndJump(u_char* instruction, short thread_index)
         Event_FinishSkippedCutscene(instruction);
         return 4;
     }
-    return (intptr_t)&instruction[Core_Memory_ReadUnalignedShort(instruction + 1)];
+    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)];
 }
 
 // decomp: BATTLE.PRG func_800B68C4 (src/BATTLE/BATTLE.PRG/4A0A8.c:653)
@@ -377,7 +377,7 @@ intptr_t Event_ScriptBranchOnFlagImmediate(u_char* instruction, short thread_ind
         }
         break;
     }
-    return (intptr_t)&instruction[Core_Memory_ReadUnalignedShort(instruction + 4)];
+    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwdIfFlags (src/BATTLE/BATTLE.PRG/4A0A8.c:1589)
@@ -419,19 +419,19 @@ intptr_t Event_ScriptBranchOnFlagPair(u_char* instruction, short thread_index)
         }
         break;
     }
-    return (intptr_t)&instruction[Core_Memory_ReadUnalignedShort(instruction + 4)];
+    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_jumpFwd (src/BATTLE/BATTLE.PRG/4A0A8.c:1630)
 intptr_t Event_ScriptJumpForward(u_char* instruction, short thread_index)
 {
-    return (intptr_t)&instruction[Core_Memory_ReadUnalignedShort(instruction + 1)];
+    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)];
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagImmContext (src/BATTLE/BATTLE.PRG/4A0A8.c:1640)
 intptr_t Event_ScriptCacheFlagValue(u_char* instruction, short thread_index)
 {
-    Event_cachedFlagValue = State_ScriptFlag(Core_Memory_ReadUnalignedShort(instruction + 1));
+    Event_cachedFlagValue = State_ScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     return 0;
 }
 
@@ -439,7 +439,7 @@ intptr_t Event_ScriptCacheFlagValue(u_char* instruction, short thread_index)
 intptr_t Event_ScriptBranchOnCachedFlag(u_char* instruction, short thread_index)
 {
     if (Event_cachedFlagValue == instruction[1]) {
-        return (intptr_t)&instruction[Core_Memory_ReadUnalignedShort(instruction + 2)];
+        return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
     }
     return 0;
 }
@@ -460,10 +460,10 @@ intptr_t Event_ScriptSetLoopCounter(u_char* instruction, short thread_index)
 intptr_t Event_ScriptLoopBackward(u_char* instruction, short thread_index)
 {
     if (instruction[1] == 0xFF) {
-        return (intptr_t)&instruction[-Core_Memory_ReadUnalignedShort(instruction + 2)];
+        return (intptr_t)&instruction[-VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
     }
     if (--Event_loopCounters[instruction[1]] != 0) {
-        return (intptr_t)&instruction[-Core_Memory_ReadUnalignedShort(instruction + 2)];
+        return (intptr_t)&instruction[-VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
     }
     return 0;
 }
@@ -561,15 +561,15 @@ intptr_t Event_ScriptApplyFlagPairOperation(u_char* instruction, short thread_in
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfItemInInventory (src/BATTLE/BATTLE.PRG/4A0A8.c:1773)
 intptr_t Event_ScriptStoreInventoryItemPresence(u_char* instruction, short thread_index)
 {
-    State_SetScriptFlag(Core_Memory_ReadUnalignedShort(instruction + 3),
-        Items_InventoryItemCount(Core_Memory_ReadUnalignedShort(instruction + 1)));
+    State_SetScriptFlag(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3),
+        Items_InventoryItemCount(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
     return 0;
 }
 
 // decomp: BATTLE.PRG vs_battle_script_setFlagIfButton (src/BATTLE/BATTLE.PRG/4A0A8.c:1798)
 intptr_t Event_ScriptStoreButtonState(u_char* instruction, short thread_index)
 {
-    short flag_and_button_source = Core_Memory_ReadUnalignedShort(instruction + 1);
+    short flag_and_button_source = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
     State_SetScriptFlag(flag_and_button_source & 0x3FF, flag_and_button_source & 0x8000
                                                 ? Input_buttonsPressed.ports[0].lowByte
                                                 : Input_previousButtons);
@@ -744,7 +744,7 @@ intptr_t Event_CommandWaitScriptContext(u_char* instruction, short thread_index)
 intptr_t Event_CommandStartScriptContext(u_char* instruction, short thread_index)
 {
     Event_threadCursors[instruction[1]] = instruction + 4;
-    return (intptr_t)&instruction[Core_Memory_ReadUnalignedShort(instruction + 2)];
+    return (intptr_t)&instruction[VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2)];
 }
 
 // decomp: BATTLE.PRG func_800BB5A4 (src/BATTLE/BATTLE.PRG/4A0A8.c:2843)
@@ -753,7 +753,7 @@ intptr_t Event_CommandStopScriptContext(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BB5AC (src/BATTLE/BATTLE.PRG/4A0A8.c:2845)
 intptr_t Event_CommandLoadNextEvent(u_char* instruction, short thread_index)
 {
-    Event_eventId = Core_Memory_ReadUnalignedShort(instruction + 1);
+    Event_eventId = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
     Event_chainedEventBuffer = Core_Memory_AllocateFromHighEnd(0x1800);
     Event_QueueEventScriptLoad(Event_eventId, Event_chainedEventBuffer);
     Event_isChainedEventLoaded = 1;

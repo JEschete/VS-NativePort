@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Core/RuntimeLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Callbacks.h"
 #include "Core/Memory/Heap.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentInit.h"
@@ -457,7 +457,7 @@ void Items_EquipAshleyWeapon(Items_InventoryWeapon* weapon)
     Battle_ActorStats* actor;
 
     Items_LoadInventoryWeaponStats(&Battle_characterState->stats->weapon, weapon);
-    Core_IgnoreCallback(Battle_characterState->stats);
+    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
 
     if (weapon == NULL) {
         Battle_characterState->equippedWeaponCategory = 10;
@@ -481,7 +481,7 @@ void Items_EquipAshleyWeapon(Items_InventoryWeapon* weapon)
 void Items_EquipAshleyShield(Items_InventoryShield* shield)
 {
     Items_LoadInventoryShieldStats(&Battle_characterState->stats->shield, shield);
-    Core_IgnoreCallback(Battle_characterState->stats);
+    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
     Items_RemoveEquipmentBoostOnEquip();
     Items_RemoveArmorEnchantmentOnEquip();
 }
@@ -490,7 +490,7 @@ void Items_EquipAshleyShield(Items_InventoryShield* shield)
 void Items_EquipAshleyArmor(int bodyPart, Items_InventoryArmor* armor)
 {
     Items_LoadInventoryArmorStats(&Battle_characterState->stats->limbs[bodyPart].armor, armor);
-    Core_IgnoreCallback(Battle_characterState->stats);
+    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
     Items_RemoveEquipmentBoostOnEquip();
     Items_RemoveArmorEnchantmentOnEquip();
 }
@@ -499,7 +499,7 @@ void Items_EquipAshleyArmor(int bodyPart, Items_InventoryArmor* armor)
 void Items_EquipAshleyAccessory(Items_InventoryArmor* accessory)
 {
     Items_LoadInventoryAccessoryStats(&Battle_characterState->stats->accessory, accessory);
-    Core_IgnoreCallback(Battle_characterState->stats);
+    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
     Items_RemoveEquipmentBoostOnEquip();
     Items_RemoveArmorEnchantmentOnEquip();
 }

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
-#include "Core/Memory/Copy.h"
 #include "Items/Categories.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentStats.h"
@@ -159,7 +159,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
             }
         }
 
-        Core_Memory_ZeroWordsBackward(weapon, sizeof *weapon);
+        VS::Core::Memory::ZeroLiveWordsBackward(weapon, sizeof *weapon);
 
         weapon->index = index;
         break;
@@ -168,7 +168,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
     case Items_ItemCategory_Blade: {
         Items_InventoryBlade* blade = &Audio_Seq_unusedInventory.blades[index - 1];
 
-        Core_Memory_ZeroWordsBackward(blade, sizeof *blade);
+        VS::Core::Memory::ZeroLiveWordsBackward(blade, sizeof *blade);
 
         blade->index = index;
         break;
@@ -177,7 +177,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
     case Items_ItemCategory_Grip: {
         Items_InventoryGrip* grip = &Audio_Seq_unusedInventory.grips[index - 1];
 
-        Core_Memory_ZeroWordsBackward(grip, sizeof *grip);
+        VS::Core::Memory::ZeroLiveWordsBackward(grip, sizeof *grip);
 
         grip->index = index;
         break;
@@ -194,7 +194,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
             }
         }
 
-        Core_Memory_ZeroWordsBackward(shield, sizeof *shield);
+        VS::Core::Memory::ZeroLiveWordsBackward(shield, sizeof *shield);
 
         shield->index = index;
         break;
@@ -203,7 +203,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
     case Items_ItemCategory_Armor: {
         Items_InventoryArmor* armor = &Audio_Seq_unusedInventory.armor[index - 1];
 
-        Core_Memory_ZeroWordsBackward(armor, sizeof *armor);
+        VS::Core::Memory::ZeroLiveWordsBackward(armor, sizeof *armor);
 
         armor->index = index;
         break;
@@ -212,7 +212,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
     case Items_ItemCategory_Gem: {
         Items_InventoryGem* gem = &Audio_Seq_unusedInventory.gems[index - 1];
 
-        Core_Memory_ZeroWordsBackward(gem, sizeof *gem);
+        VS::Core::Memory::ZeroLiveWordsBackward(gem, sizeof *gem);
 
         gem->index = index;
         break;
@@ -221,7 +221,7 @@ void Items_Inventory_ClearItemSlot(int itemCategory, int index)
     case Items_ItemCategory_Misc: {
         Items_InventoryMisc* misc = &Audio_Seq_unusedInventory.misc[index - 1];
 
-        Core_Memory_ZeroWordsBackward(misc, sizeof *misc);
+        VS::Core::Memory::ZeroLiveWordsBackward(misc, sizeof *misc);
 
         misc->index = index;
         break;
@@ -428,7 +428,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
 
                     if (write != 0) {
 
-                        Core_Memory_ZeroWordsBackward(target, sizeof *target);
+                        VS::Core::Memory::ZeroLiveWordsBackward(target, sizeof *target);
 
                         target->index = index;
                         target->blade = Items_Inventory_CopyItem(
@@ -446,7 +446,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
                             }
                         }
 
-                        Core_Memory_CopyBytesBackward(target->name, source->name, 0x18);
+                        VS::Core::Memory::CopyLiveBytesBackward(target->name, source->name, 0x18);
                     }
                 }
             }
@@ -506,7 +506,7 @@ int Items_Inventory_CopyItem(int itemCategory, Items_Inventory* targetInventory,
                 index = emptySlot + 1;
 
                 if (write != 0) {
-                    Core_Memory_ZeroWordsBackward(source, 0x30);
+                    VS::Core::Memory::ZeroLiveWordsBackward(source, 0x30);
                     VS::Core::Memory::CopyLiveHalfwords(
                         &source->base, &target->base, sizeof source->base);
 

@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 #include "Save/FileMenuLive.hpp"
@@ -17,9 +19,7 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Event/ScriptAudio.h"
@@ -1263,8 +1263,8 @@ int Menu_Files_UpdateSaveFiles(int initPort)
     case Menu_Files_SaveFilesState_Save:
         val = Menu_Files_saveFilesSlot + Menu_Files_saveFilesPage;
         Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_saving);
-        Core_Memory_CopyBytesBackward(&Menu_Files_saveFilesSettingsBackup, &Input_settings, sizeof Menu_Files_saveFilesSettingsBackup);
-        Core_Memory_CopyBytesBackward(
+        VS::Core::Memory::CopyLiveBytesBackward(&Menu_Files_saveFilesSettingsBackup, &Input_settings, sizeof Menu_Files_saveFilesSettingsBackup);
+        VS::Core::Memory::CopyLiveBytesBackward(
             (Save_GameSaveImage*)Title_memoryCardUiResource + 2, (Save_GameSaveImage*)Title_memoryCardUiResource + 1, sizeof(Save_GameSaveImage));
         if (Menu_Files_containerDataEmpty != 0) {
             Menu_Files_backupMainSetting = (*(u_int*)&Input_settings >> 4) & 1;
@@ -1289,15 +1289,15 @@ int Menu_Files_UpdateSaveFiles(int initPort)
                 memset(&Title_saveFileSummaries[saveId], 0, sizeof Title_saveFileSummaries[saveId]);
                 Title_saveFileSummaries[saveId].summary.base.slotState = Save_CardFileSlotStatus_Temporary;
                 Menu_Files_fileMenuElements[saveId + 5].saveLocation = 0;
-                Core_Memory_CopyBytesBackward((Save_GameSaveImage*)Title_memoryCardUiResource + 1, (Save_GameSaveImage*)Title_memoryCardUiResource + 2,
+                VS::Core::Memory::CopyLiveBytesBackward((Save_GameSaveImage*)Title_memoryCardUiResource + 1, (Save_GameSaveImage*)Title_memoryCardUiResource + 2,
                     sizeof(Save_GameSaveImage));
                 Menu_Files_fileProgressCounter = 0;
-                Core_Memory_CopyBytesBackward(&Input_settings, &Menu_Files_saveFilesSettingsBackup, sizeof Input_settings);
+                VS::Core::Memory::CopyLiveBytesBackward(&Input_settings, &Menu_Files_saveFilesSettingsBackup, sizeof Input_settings);
                 Menu_Files_memoryCardMessage = (char*)(Menu_Files_textTable + Text_Menu_MCMAN_BIN_Offset_saveFailed);
             } else {
                 Menu_Files_dataNotSaved = 0;
                 Menu_Files_fileProgressCounter = -16;
-                Core_Memory_CopyBytesBackward(&Title_saveFileSummaries[saveId],
+                VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[saveId],
                     Title_memoryCardUiResource + sizeof Title_saveFileSummaries[saveId] * 3,
                     sizeof Title_saveFileSummaries[saveId]);
                 Save_MemoryCard_DecodeSaveBytes(Title_saveFileSummaries[saveId].key,
@@ -2195,8 +2195,8 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
     int sourceIndex;
 
     targetIndices = (Items_ContainerIndices *)(Core_Memory_AllocateFromHighEnd(sizeof *targetIndices));
-    Core_Memory_ZeroWordsBackward(targetIndices, sizeof *targetIndices);
-    Core_Memory_ZeroWordsBackward(target, sizeof *target);
+    VS::Core::Memory::ZeroLiveWordsBackward(targetIndices, sizeof *targetIndices);
+    VS::Core::Memory::ZeroLiveWordsBackward(target, sizeof *target);
 
     for (i = 0; i < 7; ++i) {
         u_short* sourceOffset = (u_short *)(Menu_Files_ContainerIndexSection(i, toCopy));
@@ -2298,7 +2298,7 @@ void Menu_Files_CopySelectedContainerItems(Items_ContainerData* target, Items_Co
         sourceIndex = toCopy->misc[i];
         if (sourceIndex != 0) {
             Items_InventoryMisc* item = &target->misc[i];
-            Core_Memory_CopyBytesBackward(item, &source->misc[sourceIndex - 1], sizeof *item);
+            VS::Core::Memory::CopyLiveBytesBackward(item, &source->misc[sourceIndex - 1], sizeof *item);
             item->index = i + 1;
         }
     }
@@ -2320,7 +2320,7 @@ void Menu_Files_DrawPlayTime(void)
         time[3] = 0;
         Render_DrawCompactText("1", 0xC800D8, ((u_char*)(Render_frameScratch.orderingTable)) - 0x14);
     } else {
-        time[0] = ((((time[0] << 14) + Core_Random_NextInterfaceRandomBits(15)) * 5u) >> 14) / 3;
+        time[0] = ((((time[0] << 14) + VS::Core::NextLiveInterfaceRandomBits(15)) * 5u) >> 14) / 3;
     }
     for (i = 0; i < 4; ++i) {
         digits = Core_Math_SplitDecimalDigit(time[i]);

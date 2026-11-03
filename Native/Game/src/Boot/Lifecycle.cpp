@@ -2,6 +2,8 @@
 #include "Boot/Session.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Core/RandomLive.hpp"
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -16,8 +18,6 @@ extern "C" {
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
-#include "Core/Random.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Ending/Credits/StaffRoll.h"
 #include "Input/Controller.h"
@@ -170,7 +170,7 @@ void Boot_InitializePlatformServices(void)
     Input_ResetVibrationPatterns();
     Audio_Native_EnableReverb(0);
     DsInit();
-    Core_Random_InitializeShuffleTable();
+    VS::Core::InitializeLiveRandomShuffleTable();
     Boot_isSoftResetEnabled = 1;
     Boot_isClearSavePending = 0;
 }
@@ -187,7 +187,7 @@ void Boot_InitializeTitleSession(void)
     ClearImage(&rect2, 0, 0, 0);
     Render_ShowLoadingScreen();
     Audio_Native_EnableReverb(1);
-    VSyncCallback(Core_IgnoreCall);
+    VSyncCallback(VS::Core::IgnoreCall);
     Core_Memory_InitializeHeap((Core_HeapBlockHeader*)Core_GameHeapArena(), CORE_GAME_HEAP_SIZE);
     Battle_Ai_InvalidateSessionBindings();
     Content_InitializeDiscQueue();

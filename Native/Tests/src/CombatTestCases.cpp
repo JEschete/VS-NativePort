@@ -12,6 +12,7 @@
 
 #include "Battle/ActionResultsLive.hpp"
 #include "Core/Random.hpp"
+#include "Core/RandomLive.hpp"
 #include "Legacy/Psx.h"
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -533,7 +534,7 @@ struct LootRandomFixture {
       std::to_array(Core_randomShuffleTable);
   int saved_index = Core_randomShuffleIndex;
 
-  LootRandomFixture() { Core_Random_InitializeShuffleTable(); }
+  LootRandomFixture() { VS::Core::InitializeLiveRandomShuffleTable(); }
 
   ~LootRandomFixture() {
     std::copy(saved_table.begin(), saved_table.end(), Core_randomShuffleTable);
@@ -542,7 +543,7 @@ struct LootRandomFixture {
   }
 
   static void CheckSequence(VS::Core::Random& expected) {
-    CHECK(Core_Random_NextBounded(255) == expected.Next(255));
+    CHECK(VS::Core::NextLiveRandomBounded(255) == expected.Next(255));
     CHECK(Core_Random_Rand() == expected.Raw());
   }
 

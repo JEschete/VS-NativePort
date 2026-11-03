@@ -1,8 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/RandomLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
-#include "Core/Random.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -42,11 +44,11 @@ void VS_PARTICLE_TARGET_FUNCTION(Effects_ParticleDefinition* particle_definition
     for (i = 0; i < particle_set->count; ++i) {
         SVECTOR* target_control_point = &particle_set->controlPoints[i * 4 + 3];
         target_control_point->vx =
-            emitter_scratch->attractionOffset.vx + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vx, -emitter_scratch->attractionJitter.vx);
+            emitter_scratch->attractionOffset.vx + VS::Core::LiveRandomRangeExclusive(emitter_scratch->attractionJitter.vx, -emitter_scratch->attractionJitter.vx);
         target_control_point->vy =
-            emitter_scratch->attractionOffset.vy + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vy, -emitter_scratch->attractionJitter.vy);
+            emitter_scratch->attractionOffset.vy + VS::Core::LiveRandomRangeExclusive(emitter_scratch->attractionJitter.vy, -emitter_scratch->attractionJitter.vy);
         target_control_point->vz =
-            emitter_scratch->attractionOffset.vz + Core_Random_RandomRangeExclusive(emitter_scratch->attractionJitter.vz, -emitter_scratch->attractionJitter.vz);
+            emitter_scratch->attractionOffset.vz + VS::Core::LiveRandomRangeExclusive(emitter_scratch->attractionJitter.vz, -emitter_scratch->attractionJitter.vz);
     }
 }
 #undef VS_PARTICLE_SETUP_TYPES

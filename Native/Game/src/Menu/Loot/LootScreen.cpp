@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -9,7 +10,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Field/RoomRendering.h"
 #include "Input/Buttons.h"
@@ -310,7 +310,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
             break;
         }
 
-        Core_Memory_ZeroWordsBackward(Menu_Loot_lootList, 0x280);
+        VS::Core::Memory::ZeroLiveWordsBackward(Menu_Loot_lootList, 0x280);
 
         Menu_Loot_lootList->itemCategory = Menu_Loot_lootListWorkingCopy[Menu_Loot_disassemblyTargetItemIndex].itemCategory;
         Menu_Loot_lootList->itemIndex = i;
@@ -418,7 +418,7 @@ int Menu_Loot_UpdateDisassembly(int itemIndex)
             break;
         }
 
-        Core_Memory_CopyBytesBackward(&Menu_Loot_lootListWorkingCopy[Menu_Loot_disassemblyLootCount], &Menu_Loot_lootList[1],
+        VS::Core::Memory::CopyLiveBytesBackward(&Menu_Loot_lootListWorkingCopy[Menu_Loot_disassemblyLootCount], &Menu_Loot_lootList[1],
             (Menu_Loot_lootListCount - 1) * sizeof Menu_Loot_lootList[1]);
 
         if (Menu_Loot_disassembleItemCategory != Items_ItemCategory_Weapon) {
@@ -535,7 +535,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
 
                         Menu_Loot_stackConsolidationTotalCount += item->count;
 
-                        Core_Memory_ZeroWordsBackward(item, sizeof *item);
+                        VS::Core::Memory::ZeroLiveWordsBackward(item, sizeof *item);
 
                         --Menu_Loot_lootListCount;
 
@@ -667,7 +667,7 @@ int Menu_Loot_UpdateStackConsolidation(int lootIndex)
 
                 if (item->id == Menu_Loot_stackConsolidationItemId) {
 
-                    Core_Memory_ZeroWordsBackward(item, 4);
+                    VS::Core::Memory::ZeroLiveWordsBackward(item, 4);
 
                     --Menu_Loot_stackConsolidationLootCount;
 
@@ -830,7 +830,7 @@ void Menu_Loot_RenderLootRows(int x)
     int count = Menu_Loot_lootListCount;
     Menu_Loot_LootListItem* loot = &Menu_Loot_lootList[Menu_Loot_lootListOffset];
 
-    Core_Memory_ZeroWordsBackward(&gradientStates, sizeof gradientStates);
+    VS::Core::Memory::ZeroLiveWordsBackward(&gradientStates, sizeof gradientStates);
 
     for (i = 0; i < 8; ++i) {
         menuItem = Menu_Framework_MenuItem(i + 32);

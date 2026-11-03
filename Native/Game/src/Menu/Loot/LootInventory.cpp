@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
-#include "Core/Memory/Copy.h"
 #include "Items/Inventory.h"
 #include "Items/Loot.h"
 #include "Items/Weapons.h"
@@ -102,7 +102,7 @@ int Menu_Loot_StageWeapon(Items_LootedWeapon* looted_weapon)
         }
     }
 
-    Core_Memory_ZeroWordsBackward(slot, sizeof *slot);
+    VS::Core::Memory::ZeroLiveWordsBackward(slot, sizeof *slot);
 
     slot->index = index;
     slot->blade = Menu_Loot_StageBlade(&looted_weapon->blade, index);
@@ -114,7 +114,7 @@ int Menu_Loot_StageWeapon(Items_LootedWeapon* looted_weapon)
         }
     }
 
-    Core_Memory_CopyBytesBackward(slot->name, looted_weapon->name, sizeof slot->name);
+    VS::Core::Memory::CopyLiveBytesBackward(slot->name, looted_weapon->name, sizeof slot->name);
 
     return index;
 }
@@ -164,7 +164,7 @@ int Menu_Loot_StageShield(Items_LootedShield* looted_shield)
         }
     }
 
-    Core_Memory_ZeroWordsBackward(shield, sizeof *shield);
+    VS::Core::Memory::ZeroLiveWordsBackward(shield, sizeof *shield);
     VS::Core::Memory::CopyLiveHalfwords(&shield->base, &looted_shield->shield, sizeof shield->base);
 
     shield->base.limb = index;
@@ -347,7 +347,7 @@ void Menu_Loot_StageDropRecord(Items_BattleLoot* drop_record)
 void Menu_Loot_BuildStagedInventory(Items_LootListNode* node)
 {
     Menu_Loot_BeginPaging(node);
-    Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
+    VS::Core::Memory::ZeroLiveWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);
 
     if (node != NULL) {
         while (node != NULL) {

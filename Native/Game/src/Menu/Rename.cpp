@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
@@ -742,7 +742,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
         }
 
         if (Menu_Rename_CopyTrimmedName(Menu_Rename_nameEditorNameBuffer) != 0) {
-            Core_Memory_CopyBytesBackward(Menu_Rename_nameEditorNameBuffer,
+            VS::Core::Memory::CopyLiveBytesBackward(Menu_Rename_nameEditorNameBuffer,
                 Menu_Framework_itemNames
                     + Audio_Seq_unusedInventory
                         .blades[Audio_Seq_unusedInventory.weapons[Menu_Rename_weaponId].blade - 1]
@@ -783,7 +783,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
 
         if (selectedRow == 1) {
             Audio_PlaySfxCentered(0x7E, 0xD);
-            Core_Memory_CopyBytesBackward(weapon->name, Menu_Rename_nameEditorNameBuffer, sizeof Menu_Rename_nameEditorNameBuffer);
+            VS::Core::Memory::CopyLiveBytesBackward(weapon->name, Menu_Rename_nameEditorNameBuffer, sizeof Menu_Rename_nameEditorNameBuffer);
 
             if (weapon->isEquipped != 0) {
                 Items_EquipAshleyWeapon(weapon);
@@ -792,7 +792,7 @@ int Menu_Rename_UpdateNameEditor(int initialize)
             VS::Menu::PlayLeaveSound();
 
             if (weapon->name[0] == Core_TextCode_Terminator) {
-                Core_Memory_CopyBytesBackward(weapon->name,
+                VS::Core::Memory::CopyLiveBytesBackward(weapon->name,
                     Menu_Framework_itemNames
                         + Audio_Seq_unusedInventory.blades[weapon->blade - 1].id,
                     sizeof weapon->name);

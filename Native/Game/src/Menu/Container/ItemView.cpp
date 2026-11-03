@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Audio/Seq/Channel.h"
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
@@ -1018,9 +1018,9 @@ loop_1:
         if (Input_settings.cursorMemory == 0) {
             memset(Menu_Framework_menuMemory.opaqueA0, 0, sizeof Menu_Framework_menuMemory.opaqueA0);
         }
-        Core_Memory_ZeroWordsBackward(
+        VS::Core::Memory::ZeroLiveWordsBackward(
             &Menu_Framework_unusedInventoryStorage->stagedTransfer, sizeof Menu_Framework_unusedInventoryStorage->stagedTransfer);
-        Core_Memory_ZeroWordsBackward(Menu_Framework_unusedInventoryStorage->itemsToTransfer,
+        VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_unusedInventoryStorage->itemsToTransfer,
             sizeof Menu_Framework_unusedInventoryStorage->itemsToTransfer);
         Menu_Container_browsingGadgetBag = transfer_direction_selection - 1;
         if (Menu_Container_browsingGadgetBag) {
@@ -1278,7 +1278,7 @@ loop_1:
     case 8:
         Menu_Container_controlsPanelMode = 0;
         temp_s3 = temp_s1[Menu_Container_itemListSelectedRow - 1] - 1;
-        Core_Memory_ZeroWordsBackward(Menu_Framework_rowTypeBuf, 0x10);
+        VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_rowTypeBuf, 0x10);
         temp_s0 = 0;
         temp_s2 = 0x33;
         switch (selected_category_id) {

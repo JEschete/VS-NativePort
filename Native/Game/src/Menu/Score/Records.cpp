@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/String/GameTextLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/StatusEffects.h"
 #include "Content/StringTables.h"
-#include "Core/String/GameText.h"
 #include "Core/Text/TextCode.h"
 #include "Menu/Framework/Framework.h"
 #include "Menu/Framework/MenuItems.h"
@@ -287,28 +287,28 @@ void Menu_Score_RenderStatistics(int animState)
         v1 = record_cursor_memory->recordTimePage + i;
 
         if (v1 == 0) {
-            Core_String_FormatGameInteger(intBuf, Menu_Score_clearCount);
+            VS::Core::String::FormatLiveGameInteger(intBuf, Menu_Score_clearCount);
         } else if (v1 == 1) {
             Menu_Score_FormatFastestClearTime(intBuf, Audio_Seq_unusedScoredata.clearCount,
                 Audio_Seq_unusedScoredata.completionTimeMinutes);
         } else if (v1 == 2) {
-            Core_String_FormatGamePercent(intBuf, (Menu_Score_openedChestCount * 100) / 52);
+            VS::Core::String::FormatLiveGamePercent(intBuf, (Menu_Score_openedChestCount * 100) / 52);
         } else if (v1 == 3) {
-            Core_String_FormatGamePercent(intBuf, (Audio_Seq_unusedScoredata.openedChestCount * 100) / 52);
+            VS::Core::String::FormatLiveGamePercent(intBuf, (Audio_Seq_unusedScoredata.openedChestCount * 100) / 52);
         } else if (v1 == 4) {
-            Core_String_FormatGamePercent(intBuf, (Menu_Score_mapCompletion * 100) / 361);
+            VS::Core::String::FormatLiveGamePercent(intBuf, (Menu_Score_mapCompletion * 100) / 361);
         } else if (v1 == 5) {
-            Core_String_FormatGamePercent(intBuf, Audio_Seq_unusedScoredata.mapCompletion * 100 / 361);
+            VS::Core::String::FormatLiveGamePercent(intBuf, Audio_Seq_unusedScoredata.mapCompletion * 100 / 361);
         } else if (v1 == 6) {
-            Core_String_FormatGameInteger(intBuf, Audio_Seq_unusedScoredata.maxChain);
+            VS::Core::String::FormatLiveGameInteger(intBuf, Audio_Seq_unusedScoredata.maxChain);
         } else if (v1 < 13) {
-            Core_String_FormatGameInteger(intBuf, Audio_Seq_unusedScoredata.enemyKills[v1 - 7]);
+            VS::Core::String::FormatLiveGameInteger(intBuf, Audio_Seq_unusedScoredata.enemyKills[v1 - 7]);
         } else {
             v1 -= 12;
             if (v1 == 10) {
                 v1 = 0;
             }
-            Core_String_FormatGameInteger(intBuf, Audio_Seq_unusedScoredata.weaponAttacks[v1]);
+            VS::Core::String::FormatLiveGameInteger(intBuf, Audio_Seq_unusedScoredata.weaponAttacks[v1]);
         }
 
         v1 = value_right_edge_x - (Render_MeasureEncodedTextLine(intBuf) * 6);
@@ -346,7 +346,7 @@ void Menu_Score_FormatFastestClearTime(char* buf, int rounds, int totalSeconds)
     char* str;
 
     if (Menu_Score_clearCount == 0) {
-        Core_String_CopyGameText(
+        VS::Core::String::CopyLiveGameText(
             (u_char*)buf, (u_char*)&Menu_Score_miscInfo[Menu_Score_miscInfo[Text_Menu9_miscInfo_Index_noneClear]]);
         return;
     }

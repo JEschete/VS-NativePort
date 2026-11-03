@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
@@ -6,7 +7,6 @@ extern "C" {
 #include "Audio/Music.h"
 #include "Battle/Hud.h"
 #include "Battle/Rewards.h"
-#include "Core/Memory/Copy.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptField.h"
@@ -125,7 +125,7 @@ intptr_t Event_ScriptSetGimmickVisibility(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800B979C (src/BATTLE/BATTLE.PRG/4A0A8.c:1972)
 intptr_t Event_ScriptOverrideDepthCueDistance(u_char* instruction, short thread_index)
 {
-    short depth_cue_operand = Core_Memory_ReadUnalignedShort(instruction + 1);
+    short depth_cue_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
     Event_isScriptBackdropEnabled = (depth_cue_operand << 0x10) >> 0x1F;
     if (Event_isScriptBackdropEnabled) {
         VS::Render::SetRoomTextureLodDepth(VS::Render::LiveRoomClipState(), depth_cue_operand & 0x7FF);
@@ -307,7 +307,7 @@ intptr_t Event_ScriptControlRoomAnimation(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800BA218 (src/BATTLE/BATTLE.PRG/4A0A8.c:2256)
 intptr_t Event_ScriptSetBackgroundOffset(u_char* instruction, short thread_index)
 {
-    Field_SetRoomBackgroundOffset(Core_Memory_ReadUnalignedShort(instruction + 1), Core_Memory_ReadUnalignedShort(instruction + 3));
+    Field_SetRoomBackgroundOffset(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3));
     return 0;
 }
 

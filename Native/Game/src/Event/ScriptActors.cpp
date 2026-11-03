@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorLoading.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Battle/BattleMode.h"
 #include "Battle/Rewards.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Memory/Copy.h"
 #include "Event/Actors.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptVm.h"
@@ -38,7 +38,7 @@ intptr_t Event_ScriptResetActorGroupState(u_char* instruction, short thread_inde
 {
     Event_ActorSelection actor_selection;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &actor_selection);
+    Event_BuildScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), &actor_selection);
     while (1) {
         int actor_id = Event_NextScriptSelectedActor(&actor_selection);
         if (actor_id == 1) {
@@ -53,8 +53,8 @@ intptr_t Event_ScriptResetActorGroupState(u_char* instruction, short thread_inde
 intptr_t Event_ScriptStoreActorTile(u_char* instruction, short thread_index)
 {
     u_char position[12];
-    u_short actor = Core_Memory_ReadUnalignedShort(instruction + 1);
-    u_short flag = Core_Memory_ReadUnalignedShort(instruction + 3);
+    u_short actor = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
+    u_short flag = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3);
 
     if (actor & 0x1000) {
         actor &= 0x1F;
@@ -85,8 +85,8 @@ intptr_t Event_ScriptSpawnActor(u_char* instruction, short thread_index)
     spawn_placement[1] = instruction[6];
     spawn_placement[2] = instruction[7];
     spawn_placement[3] = instruction[8];
-    Actors_QueueScriptedActorSpawn(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
-        Core_Memory_ReadUnalignedShort(instruction + 3), (Field_ActorPlacement*)(spawn_placement));
+    Actors_QueueScriptedActorSpawn(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)),
+        VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3), (Field_ActorPlacement*)(spawn_placement));
     return 0;
 }
 
@@ -94,7 +94,7 @@ intptr_t Event_ScriptSpawnActor(u_char* instruction, short thread_index)
 intptr_t Event_ScriptNavigateActorToTile(u_char* instruction, short thread_index)
 {
     SVECTOR destination_position;
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     destination_position.vx = (instruction[3] << 7) + 0x40;
     destination_position.vy = 0;
     destination_position.vz = (instruction[5] << 7) + 0x40;
@@ -112,7 +112,7 @@ intptr_t Event_ScriptNavigateActorToTile(u_char* instruction, short thread_index
 // decomp: BATTLE.PRG func_800B76A8 (src/BATTLE/BATTLE.PRG/4A0A8.c:1040)
 intptr_t Event_ScriptPlayActorAnimation(u_char* instruction, short thread_index)
 {
-    Actors_PlayActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+    Actors_PlayActorAnimation(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)),
         Event_animationBankBases[instruction[5] >> 6] + instruction[3], instruction[4], instruction[5] & 0x3F);
     return 0;
 }
@@ -127,7 +127,7 @@ intptr_t Event_ScriptSetActorGroupFlags(u_char* instruction, short thread_index)
     int actor_state_flags;
     u_int flag_options;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &actor_selection);
+    Event_BuildScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), &actor_selection);
 
     while (1) {
         actor_id = Event_NextScriptSelectedActor(&actor_selection);
@@ -161,7 +161,7 @@ intptr_t Event_ScriptSetActorSoundMix(u_char* instruction, short thread_index)
     sound_overrides.level = instruction[4];
     sound_overrides.flags = instruction[5];
     sound_overrides.parameter = instruction[6];
-    actor_selector = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    actor_selector = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     if (actor_selector == 0x2001) {
         actor_selector = -1;
     }
@@ -173,7 +173,7 @@ intptr_t Event_ScriptSetActorSoundMix(u_char* instruction, short thread_index)
 intptr_t Event_ScriptWalkActorToTile(u_char* instruction, short thread_index)
 {
     u_char destination_tile[10];
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     destination_tile[0] = instruction[3];
     destination_tile[1] = instruction[4];
     destination_tile[2] = instruction[5];
@@ -194,10 +194,10 @@ intptr_t Event_ScriptWalkActorToWorldPos(u_char* instruction, short thread_index
 {
     Actors_ActorLocationQuery destination_location;
 
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
-    int x_operand = Core_Memory_ReadUnalignedShort(instruction + 3) >> 1;
-    short y_operand = Core_Memory_ReadUnalignedShort(instruction + 5);
-    short z_operand = Core_Memory_ReadUnalignedShort(instruction + 7);
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
+    int x_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3) >> 1;
+    short y_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5);
+    short z_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 7);
 
     if (instruction[3] & 1) {
         Actors_ActorPlacement(actor_id, &destination_location);
@@ -226,7 +226,7 @@ intptr_t Event_ScriptWalkActorToWorldPos(u_char* instruction, short thread_index
 intptr_t Event_ScriptSlideActorToTile(u_char* instruction, short thread_index)
 {
     u_char destination_tile[16];
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     destination_tile[0] = instruction[3];
     destination_tile[1] = instruction[4];
     destination_tile[2] = instruction[5];
@@ -251,10 +251,10 @@ intptr_t Event_ScriptSlideActorToWorldPos(u_char* instruction, short thread_inde
     int x_operand;
     u_short actor_id;
 
-    actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
-    x_operand = Core_Memory_ReadUnalignedShort(instruction + 3) >> 1;
-    y_operand = Core_Memory_ReadUnalignedShort(instruction + 5);
-    z_operand = Core_Memory_ReadUnalignedShort(instruction + 7);
+    actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
+    x_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3) >> 1;
+    y_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5);
+    z_operand = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 7);
 
     if (instruction[3] & 1) {
         Actors_ActorPlacement(actor_id, &destination_location);
@@ -279,8 +279,8 @@ intptr_t Event_ScriptSlideActorToWorldPos(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800B7C90 (src/BATTLE/BATTLE.PRG/4A0A8.c:1200)
 intptr_t Event_ScriptSetActorAttachment(u_char* instruction, short thread_index)
 {
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
-    u_int attachment_reference = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)) & 0xFFFF;
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
+    u_int attachment_reference = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3)) & 0xFFFF;
     if (attachment_reference >= 0x2000) {
         Actors_ReleaseActorAttachmentLock(actor_id, attachment_reference);
     } else {
@@ -293,10 +293,10 @@ intptr_t Event_ScriptSetActorAttachment(u_char* instruction, short thread_index)
 intptr_t Event_ScriptNavigateActorToWorldPos(u_char* instruction, short thread_index)
 {
     SVECTOR destination_position;
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1) & 0xFFFF);
-    destination_position.vx = Core_Memory_ReadUnalignedShort(instruction + 3);
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1) & 0xFFFF);
+    destination_position.vx = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3);
     destination_position.vy = 0;
-    destination_position.vz = Core_Memory_ReadUnalignedShort(instruction + 5);
+    destination_position.vz = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5);
     if (Event_skipState == 2) {
         destination_position.pad = -0x8000;
         Actors_TranslateActorToAtRate(actor_id, &destination_position, 0);
@@ -312,7 +312,7 @@ intptr_t Event_ScriptNavigateActorToWorldPos(u_char* instruction, short thread_i
 intptr_t Event_ScriptTurnActorToFacing(u_char* instruction, short thread_index)
 {
     Actors_ActorLocationQuery actor_location;
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     short turn_rate = instruction[5] != 0xFF ? instruction[5] : -1;
     int yaw_delta;
 
@@ -353,8 +353,8 @@ intptr_t Event_ScriptFaceOtherActor(u_char* instruction, short thread_index)
     int actor_id;
     int turn_rate;
 
-    resolved_actor = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &target_location);
+    resolved_actor = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3)), &target_location);
     turn_rate = -1;
     actor_id = resolved_actor & 0xFFFF;
     if (instruction[5] != 0xFF) {
@@ -369,7 +369,7 @@ intptr_t Event_ScriptFaceOtherActor(u_char* instruction, short thread_index)
 intptr_t Event_ScriptFaceTile(u_char* instruction, short thread_index)
 {
     Actors_TileTarget target_tile;
-    int actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)) & 0xFFFF;
+    int actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)) & 0xFFFF;
 
     target_tile.tileX = instruction[3];
     target_tile.tileLayer = instruction[4];
@@ -385,9 +385,9 @@ intptr_t Event_ScriptScaleActor(u_char* instruction, short thread_index)
 {
     SVECTOR scale_components;
 
-    setVector(&scale_components, Core_Memory_ReadUnalignedShort(instruction + 3), Core_Memory_ReadUnalignedShort(instruction + 5),
-        Core_Memory_ReadUnalignedShort(instruction + 7));
-    Actors_ScaleActorToOverTime(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &scale_components, instruction[9]);
+    setVector(&scale_components, VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3), VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5),
+        VS::Core::Memory::ReadLiveUnalignedShort(instruction + 7));
+    Actors_ScaleActorToOverTime(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), &scale_components, instruction[9]);
     return 0;
 }
 
@@ -396,7 +396,7 @@ intptr_t Event_ScriptRemoveActorGroup(u_char* instruction, short thread_index)
 {
     Event_ActorSelection actor_selection;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &actor_selection);
+    Event_BuildScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), &actor_selection);
     while (1) {
         int actor_id = Event_NextScriptSelectedActor(&actor_selection);
         if (actor_id == 1) {
@@ -415,9 +415,9 @@ intptr_t Event_ScriptWaitForActorFlags(u_char* instruction, short thread_index)
     int actor_id;
     u_short matched_wait_flags;
 
-    actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)) & 0xFFFF;
+    actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)) & 0xFFFF;
     wait_flags = Actors_ActorStateFlags(actor_id) ^ 0x81;
-    wait_mask = Core_Memory_ReadUnalignedShort(instruction + 3);
+    wait_mask = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3);
 
     if (wait_mask & 1) {
         if (Actors_IsScriptedActorPathFinished(actor_id) == 0) {
@@ -438,9 +438,9 @@ intptr_t Event_ScriptSetActorColorOverride(u_char* instruction, short thread_ind
     color_override.blue = instruction[5];
 
     if (color_override.red | color_override.green | color_override.blue) {
-        Actors_SetActorTint(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &color_override);
+        Actors_SetActorTint(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), &color_override);
     } else {
-        Actors_SetActorTint(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), 0);
+        Actors_SetActorTint(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), 0);
     }
     return 0;
 }
@@ -448,7 +448,7 @@ intptr_t Event_ScriptSetActorColorOverride(u_char* instruction, short thread_ind
 // decomp: BATTLE.PRG func_800B822C (src/BATTLE/BATTLE.PRG/4A0A8.c:1360)
 intptr_t Event_ScriptQueueActorAnimation(u_char* instruction, short thread_index)
 {
-    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)),
         Event_animationBankBases[instruction[5] >> 6] + instruction[3], instruction[5] & 0x3F, 0);
     return 0;
 }
@@ -460,14 +460,14 @@ intptr_t Event_ScriptRotateActorAxes(u_char* instruction, short thread_index)
     u_short actor_id;
     short turn_rate;
 
-    actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     turn_rate = -1;
     if (instruction[10] != 0xFF) {
         turn_rate = instruction[10];
     }
-    rotation_components.vx = Core_Memory_ReadUnalignedShort(instruction + 4);
-    rotation_components.vy = Core_Memory_ReadUnalignedShort(instruction + 6);
-    rotation_components.vz = Core_Memory_ReadUnalignedShort(instruction + 8);
+    rotation_components.vx = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4);
+    rotation_components.vy = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 6);
+    rotation_components.vz = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 8);
     if (instruction[3] != 0) {
         Actors_RotateActorByAtRate(actor_id, &rotation_components, turn_rate);
     } else {
@@ -484,10 +484,10 @@ intptr_t Event_ScriptSetActorHeadAngles(u_char* instruction, short thread_index)
     int actor_id;
     int tracking_rate;
 
-    head_angles.vx = Core_Memory_ReadUnalignedShort(instruction + 3);
-    head_angles.vy = Core_Memory_ReadUnalignedShort(instruction + 5);
+    head_angles.vx = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3);
+    head_angles.vy = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5);
     head_angles.vz = 0;
-    actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     tracking_rate = 0x1000;
     if (instruction[7] != 0) {
         tracking_rate = instruction[7];
@@ -499,7 +499,7 @@ intptr_t Event_ScriptSetActorHeadAngles(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800B83D4 (src/BATTLE/BATTLE.PRG/4A0A8.c:1408)
 intptr_t Event_ScriptPlayActorAnimationAtFrame(u_char* instruction, short thread_index)
 {
-    Actors_PlayActorAnimationAtFrame(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+    Actors_PlayActorAnimationAtFrame(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)),
         Event_animationBankBases[instruction[6] >> 6] + instruction[3], instruction[6] & 0x3F, instruction[4]);
     return 0;
 }
@@ -507,7 +507,7 @@ intptr_t Event_ScriptPlayActorAnimationAtFrame(u_char* instruction, short thread
 // decomp: BATTLE.PRG func_800B8438 (src/BATTLE/BATTLE.PRG/4A0A8.c:1415)
 intptr_t Event_ScriptQueueActorAnimationAtFrame(u_char* instruction, short thread_index)
 {
-    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)),
+    Actors_QueueActorAnimation(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)),
         Event_animationBankBases[instruction[6] >> 6] + instruction[3], instruction[6] & 0x3F, instruction[4]);
     return 0;
 }
@@ -515,7 +515,7 @@ intptr_t Event_ScriptQueueActorAnimationAtFrame(u_char* instruction, short threa
 // decomp: BATTLE.PRG func_800B849C (src/BATTLE/BATTLE.PRG/4A0A8.c:1422)
 intptr_t Event_ScriptSetActorIdleAnimation(u_char* instruction, short thread_index)
 {
-    int actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    int actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
 
     if (instruction[4] == 0xFF) {
         Actors_SetActorTravelAnimation(actor_id, -1);
@@ -530,8 +530,8 @@ intptr_t Event_ScriptLookAtActor(u_char* instruction, short thread_index)
 {
     int tracking_rate;
 
-    int resolved_target = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3));
-    int actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    int resolved_target = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3));
+    int actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
 
     int tracking_target = -2;
     if (resolved_target != 0x2000) {
@@ -553,9 +553,9 @@ intptr_t Event_ScriptLookAtWorldPos(u_char* instruction, short thread_index)
     int actor_id;
     int tracking_rate;
 
-    setVector(&target_position, Core_Memory_ReadUnalignedShort(instruction + 3), Core_Memory_ReadUnalignedShort(instruction + 5),
-        Core_Memory_ReadUnalignedShort(instruction + 7));
-    actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    setVector(&target_position, VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3), VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5),
+        VS::Core::Memory::ReadLiveUnalignedShort(instruction + 7));
+    actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     tracking_rate = 0x1000;
     if (instruction[9] != 0) {
         tracking_rate = instruction[9];
@@ -569,14 +569,14 @@ intptr_t Event_ScriptLoadObjectModel(u_char* instruction, short thread_index)
 {
     switch ((instruction[3] >> 2) & 3) {
     case 0:
-        Actors_QueueSharedSequenceLoad(instruction[3] & 3, Core_Memory_ReadUnalignedShort(instruction + 1));
+        Actors_QueueSharedSequenceLoad(instruction[3] & 3, VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
         break;
     case 1:
-        Actors_QueueSharedSequenceWithTextures(instruction[3] & 3, Core_Memory_ReadUnalignedShort(instruction + 1), (instruction[3] >> 4) + 0x1A);
+        Actors_QueueSharedSequenceWithTextures(instruction[3] & 3, VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), (instruction[3] >> 4) + 0x1A);
         break;
     case 2:
         Actors_QueueSequenceEffectTextures(
-            instruction[3] & 3, Core_Memory_ReadUnalignedShort(instruction + 1), (instruction[3] >> 4) + 0x1A);
+            instruction[3] & 3, VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), (instruction[3] >> 4) + 0x1A);
         break;
     }
     return 0;
@@ -619,9 +619,9 @@ intptr_t Event_ScriptSetActorOverlayPass(u_char* instruction, short thread_index
         overlay_parameters[2].green = instruction[4];
         overlay_parameters[2].blue = instruction[5];
         overlay_parameters[2].code = instruction[6];
-        Actors_SetActorCompanion(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), 1, &overlay_parameters[2], &overlay_parameters[0]);
+        Actors_SetActorCompanion(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), 1, &overlay_parameters[2], &overlay_parameters[0]);
     } else {
-        Actors_SetActorCompanion(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), 0, 0, 0);
+        Actors_SetActorCompanion(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), 0, 0, 0);
     }
     return 0;
 }
@@ -632,7 +632,7 @@ intptr_t Event_ScriptSetActorWeaponDrawn(u_char* instruction, short thread_index
     Event_ActorSelection actor_selection;
     int actor_id;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &actor_selection);
+    Event_BuildScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), &actor_selection);
 
     while (1) {
         actor_id = Event_NextScriptSelectedActor(&actor_selection);
@@ -647,7 +647,7 @@ intptr_t Event_ScriptSetActorWeaponDrawn(u_char* instruction, short thread_index
 // decomp: BATTLE.PRG func_800B91F0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1786)
 intptr_t Event_ScriptPlayActorAnimationSound(u_char* instruction, short thread_index)
 {
-    Actors_PlayActorWeaponDrawSound(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
+    Actors_PlayActorWeaponDrawSound(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
@@ -661,14 +661,14 @@ intptr_t Event_ScriptSetNpcUpdatesEnabled(u_char* instruction, short thread_inde
 // decomp: BATTLE.PRG func_800B92A0 (src/BATTLE/BATTLE.PRG/4A0A8.c:1807)
 intptr_t Event_ScriptRestoreActorVitals(u_char* instruction, short thread_index)
 {
-    Actors_RestoreActorVitals(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)));
+    Actors_RestoreActorVitals(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)));
     return 0;
 }
 
 // decomp: BATTLE.PRG func_800B9608 (src/BATTLE/BATTLE.PRG/4A0A8.c:1916)
 intptr_t Event_ScriptSetActorEquipmentModels(u_char* instruction, short thread_index)
 {
-    u_short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1));
+    u_short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
 
     if (instruction[3] == 0xFE) {
         Actors_RefreshActorEquipmentModels(actor_id);
@@ -681,7 +681,7 @@ intptr_t Event_ScriptSetActorEquipmentModels(u_char* instruction, short thread_i
 // decomp: BATTLE.PRG func_800B9670 (src/BATTLE/BATTLE.PRG/4A0A8.c:1928)
 intptr_t Event_ScriptSetActorYawOscillation(u_char* instruction, short thread_index)
 {
-    Actors_SetActorPaletteFade(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
+    Actors_SetActorPaletteFade(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
@@ -695,7 +695,7 @@ intptr_t Event_ScriptClearAshleyStatusEffects(u_char* instruction, short thread_
 // decomp: BATTLE.PRG func_800B9D74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2151)
 intptr_t Event_ScriptSetActorRenderMode(u_char* instruction, short thread_index)
 {
-    Actors_StartActorAppearanceTransition(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
+    Actors_StartActorAppearanceTransition(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
@@ -716,9 +716,9 @@ intptr_t Event_CommandStoreActorRangeBearing(u_char* instruction, short thread_i
     short delta_z;
     int scaled_distance;
 
-    result_flag_id = Core_Memory_ReadUnalignedShort(instruction + 6);
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &first_actor_location);
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &second_actor_location);
+    result_flag_id = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 6);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), &first_actor_location);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3)), &second_actor_location);
     delta_x = first_actor_location.location.position.vx - second_actor_location.location.position.vx;
     delta_z = first_actor_location.location.position.vz - second_actor_location.location.position.vz;
     scaled_distance = VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)) / instruction[5];
@@ -732,7 +732,7 @@ intptr_t Event_CommandSetActorActivity(u_char* instruction, short thread_index)
 {
     Event_ActorSelection actor_selection;
 
-    Event_BuildScriptActorSelection(Core_Memory_ReadUnalignedShort(instruction + 1), &actor_selection);
+    Event_BuildScriptActorSelection(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), &actor_selection);
     while (1) {
         int actor_id = Event_NextScriptSelectedActor(&actor_selection);
         if (actor_id == 1) {
@@ -748,7 +748,7 @@ intptr_t Event_CommandAwardMiscLoot(u_char* instruction, short thread_index)
 {
     if (Event_isMenuTransitionActive == 0) {
         Items_PresentScriptedLoot(
-            Core_Memory_ReadUnalignedShort(instruction + 1), instruction[3], Core_Memory_ReadUnalignedShort(instruction + 4), instruction[6]);
+            VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1), instruction[3], VS::Core::Memory::ReadLiveUnalignedShort(instruction + 4), instruction[6]);
         Event_isMenuTransitionActive = 1;
         return 1;
     }
@@ -763,7 +763,7 @@ intptr_t Event_CommandAwardMiscLoot(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BAE74 (src/BATTLE/BATTLE.PRG/4A0A8.c:2606)
 intptr_t Event_CommandConsumeMiscItem(u_char* instruction, short thread_index)
 {
-    Items_ConsumeMiscItem(Core_Memory_ReadUnalignedShort(instruction + 1));
+    Items_ConsumeMiscItem(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     return 0;
 }
 
@@ -777,11 +777,11 @@ intptr_t Event_CommandStoreActorDistance(u_char* instruction, short thread_index
     short delta_z;
     int horizontal_distance;
 
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), &first_actor_location);
-    Actors_ActorPlacement(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 3)), &second_actor_location);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), &first_actor_location);
+    Actors_ActorPlacement(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3)), &second_actor_location);
     delta_x = first_actor_location.location.position.vx - second_actor_location.location.position.vx;
     delta_z = first_actor_location.location.position.vz - second_actor_location.location.position.vz;
-    distance_flag_id = Core_Memory_ReadUnalignedShort(instruction + 5);
+    distance_flag_id = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 5);
     horizontal_distance = VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z));
     if (horizontal_distance < 0) {
         horizontal_distance += 0x7F;

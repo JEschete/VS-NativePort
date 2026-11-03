@@ -90,6 +90,18 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Memory::{name}": r"Native\Engine\include\Core\Memory\WordCopyLive.hpp"
        for name in ("CopyLiveAlignedWords", "ZeroLiveAlignedWords", "ClearLiveAlignedWords", "CopyLiveHalfwords",
                     "CopyLiveHalfwordBlocks")},
+    **{f"VS::Core::Memory::{name}": r"Native\Engine\include\Core\Memory\CopyLive.hpp"
+       for name in ("ReadLiveUnalignedShort", "ZeroLiveWordsBackward", "CopyLiveBytesBackward", "CopyLiveWords",
+                    "SwapLiveWords", "ReadLiveUnalignedShortAt", "ZeroLiveWordsBackwardAt",
+                    "CopyLiveBytesBackwardAt", "CopyLiveWordsAt", "SwapLiveWordsAt")},
+    **{f"VS::Core::{name}": r"Native\Engine\include\Core\Runtime.hpp"
+       for name in ("IgnoreCall", "ReturnZero", "IgnoreDiagnostic", "IdleInstruction", "NoOperation")},
+    "VS::Core::IgnoreLiveActorCallback": r"Native\Engine\include\Core\RuntimeLive.hpp",
+    **{f"VS::Core::{name}": r"Native\Engine\include\Core\RandomLive.hpp"
+       for name in ("NextLiveInterfaceRandomBits", "LiveRandomRangeExclusive", "InitializeLiveRandomShuffleTable",
+                    "NextLiveRandomBounded", "NextLiveRandomAveraged")},
+    **{f"VS::Core::String::{name}": r"Native\Engine\include\Core\String\GameTextLive.hpp"
+       for name in ("CopyLiveGameText", "FormatLiveGameInteger", "FormatLiveGamePercent")},
     **{f"VS::Render::DrawLiveTexture{kind}": r"Native\Engine\include\Render\TextureRegionDrawLive.hpp"
        for kind in ("TintFade", "FlashFade", "Wipe")},
     "VS::Battle::CheckedTargetPreviews": r"Native\Game\include\Battle\TargetPages.hpp",
@@ -287,7 +299,6 @@ NATIVE_FUNCTION_REDIRECTS = {
                r"Native\Engine\src\Core\Math\ScalarMath.cpp"),
     "F01017": ("VS::Core::Math::LookupRotationSineCosine",
                r"Native\Engine\src\Core\Math\ScalarMath.cpp"),
-    "F03568": ("Core_IgnoreCall", r"Native\Engine\src\Core\Runtime.cpp"),
     "F00764": ("Core_Gte_Cos", r"Native\Engine\src\Core\Gte.cpp"),
     "F00765": ("Core_Gte_Sin", r"Native\Engine\src\Core\Gte.cpp"),
     "F03397": ("Core_Gte_RotMatrixYXZ", r"Native\Engine\src\Core\Gte.cpp"),
@@ -398,6 +409,28 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x8001D6B8, "VS::Audio::Cutscene::SetLiveStreamVolume"),  # F03394 command 0xE4
     ("SLUS_010.40", 0x8001D728, "VS::Audio::Cutscene::SlideLiveStreamVolume"),  # F03395 command 0xE5
     ("SLUS_010.40", 0x8001D7A8, "VS::Audio::Cutscene::SetLiveStreamPan"),  # F03396 command 0xE6
+    # #276 Core runtime: the original addresses of the empty handlers, copies, random draws and keystream.
+    *(("BATTLE/BATTLE.PRG", address, "VS::Core::IgnoreLiveActorCallback")  # F00023, F00055
+      for address in (0x8006B20C, 0x8006C478)),
+    *(("BATTLE/BATTLE.PRG", address, "VS::Core::NoOperation")  # F00213, F00214, F00241, F00328
+      for address in (0x8007B0FC, 0x8007B104, 0x8007BF04, 0x8007DF40)),
+    *(("SLUS_010.40", address, "VS::Core::IgnoreCall")  # F03427-F03432, F03485, F03571, F03574
+      for address in (0x8004272C, 0x80042734, 0x8004273C, 0x80042744, 0x80044C6C, 0x800490A8, 0x80049130)),
+    *(("SLUS_010.40", address, "VS::Core::ReturnZero")  # F03503, F03509, F03510
+      for address in (0x800454B0, 0x800455E4, 0x800455EC)),
+    ("SLUS_010.40", 0x8004908C, "VS::Core::IdleInstruction"),  # F03568
+    *(("SLUS_010.40", address, "VS::Core::IgnoreDiagnostic")  # F03569, F03570
+      for address in (0x80049098, 0x800490A0)),
+    ("BATTLE/BATTLE.PRG", 0x800BFE00, "VS::Core::Memory::ReadLiveUnalignedShortAt"),  # F01273
+    ("BATTLE/BATTLE.PRG", 0x800CCC1C, "VS::Core::Memory::ZeroLiveWordsBackwardAt"),  # F01401
+    ("BATTLE/BATTLE.PRG", 0x800CCC34, "VS::Core::Memory::CopyLiveBytesBackwardAt"),  # F01402
+    ("SLUS_010.40", 0x80019154, "VS::Core::Memory::CopyLiveWordsAt"),  # F03263
+    ("SLUS_010.40", 0x800191D4, "VS::Core::Memory::SwapLiveWordsAt"),  # F03264
+    ("BATTLE/BATTLE.PRG", 0x800CCC8C, "VS::Core::NextLiveInterfaceRandomBits"),  # F01404
+    ("BATTLE/BATTLE.PRG", 0x800CFB80, "VS::Core::LiveRandomRangeExclusive"),  # F01455
+    ("SLUS_010.40", 0x8004274C, "VS::Core::InitializeLiveRandomShuffleTable"),  # F03433
+    ("SLUS_010.40", 0x800427A8, "VS::Core::NextLiveRandomBounded"),  # F03434
+    ("SLUS_010.40", 0x80042860, "VS::Core::NextLiveRandomAveraged"),  # F03435
 )
 
 MODULE_FUNCTION_ENTRIES = (
@@ -625,9 +658,9 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Accessories share armor storage but retain their own source entry."),
     ],
     "F02859": [
-        ("    Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
+        ("    VS::Core::Memory::ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
          "    Menu_Loot_BeginPaging(node);\n"
-         "    Core_Memory_ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
+         "    VS::Core::Memory::ZeroWordsBackward(Menu_Loot_inventory, sizeof *Menu_Loot_inventory);",
          "Start each batch with independent row indices and no stale source pointers."),
         ("\n}", """
 }
@@ -756,30 +789,30 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     "F03210": [
         ("""    if (in_SwapWithSavedState == 0) {
-        Core_Memory_CopyWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
-        Core_Memory_CopyWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
+        VS::Core::Memory::CopyWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
+        VS::Core::Memory::CopyWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
     } else {
-        Core_Memory_SwapWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
-        Core_Memory_SwapWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
+        VS::Core::Memory::SwapWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
+        VS::Core::Memory::SwapWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
     }""", "    Audio_Native_RestoreMusicSnapshot(in_SwapWithSavedState);",
          "restore complete native objects instead of PS1-sized byte ranges"),
     ],
     "F03213": [
-        ("""Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-        Core_Memory_CopyWords(Audio_Seq_musicChannels, (Audio_MusicConfig*)Audio_Seq_savedMusicChannels, 0x2200);""",
+        ("""VS::Core::Memory::CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+        VS::Core::Memory::CopyWords(Audio_Seq_musicChannels, (Audio_MusicConfig*)Audio_Seq_savedMusicChannels, 0x2200);""",
          "Audio_Native_SaveMusicSnapshot();",
          "save every native channel and config field"),
     ],
     "F03214": [
-        ("""Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-        Core_Memory_CopyWords(Audio_Seq_musicChannels,
+        ("""VS::Core::Memory::CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+        VS::Core::Memory::CopyWords(Audio_Seq_musicChannels,
             (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);""",
          "Audio_Native_SaveMusicSnapshot();",
          "layer snapshots use the same complete native state"),
     ],
     "F03215": [
-        ("""Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-            Core_Memory_CopyWords(Audio_Seq_musicChannels,
+        ("""VS::Core::Memory::CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+            VS::Core::Memory::CopyWords(Audio_Seq_musicChannels,
                 (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);""",
          "Audio_Native_SaveMusicSnapshot();",
          "crossfade snapshots use the same complete native state"),
@@ -1602,8 +1635,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "all-slot pose resets must reach the base helper's empty-actor and gimmick handling"),
     ],
     "F01364": [
-        ("    Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",
-         "    Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);\n"
+        ("    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);",
+         "    VS::Core::Memory::ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);\n"
          "    Battle_actionSelection = Menu_Framework_ActionSelectionState();",
          "basic attacks may precede the first menu open; bind the interface-owned selection state at initialization"),
     ],
@@ -1902,9 +1935,9 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     "F01170": [
         ("    Effects_StartScriptedActorEffect(\n"
-         "        Core_Memory_ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(arg0 + 3)));",
-         "    const int effect = Core_Memory_ReadUnalignedShort(arg0 + 1);\n"
-         "    const u_short selector = Core_Memory_ReadUnalignedShort(arg0 + 3);\n"
+         "        VS::Core::Memory::ReadUnalignedShort(arg0 + 1), Event_ResolveScriptActorReference(VS::Core::Memory::ReadUnalignedShort(arg0 + 3)));",
+         "    const int effect = VS::Core::Memory::ReadUnalignedShort(arg0 + 1);\n"
+         "    const u_short selector = VS::Core::Memory::ReadUnalignedShort(arg0 + 3);\n"
          "    const unsigned referenceType = selector >> 12;\n"
          "    const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;\n"
          "    const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;\n"
@@ -2062,8 +2095,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "menu row gradient links retain native packet handles"),
     ],
         "F01349": [
-           ("Core_Memory_ZeroWordsBackward(Menu_Framework_menuItems, 0xB24)",
-            "Core_Memory_ZeroWordsBackward(Menu_Framework_menuItems, sizeof(Menu_Framework_MenuRow) * 40 + 0x124)",
+           ("VS::Core::Memory::ZeroWordsBackward(Menu_Framework_menuItems, 0xB24)",
+            "VS::Core::Memory::ZeroWordsBackward(Menu_Framework_menuItems, sizeof(Menu_Framework_MenuRow) * 40 + 0x124)",
             "clear all forty native rows and the original 0x124-byte scratch tail"),
         ],
         "F01367": [
@@ -2740,10 +2773,10 @@ int Menu_Loot_AdvanceStagedInventory(void)
     # TITLE 22C.c _packageGameSaveData copies the inventory blocks with `savedata->unkXXX`, char arrays in its
     # view of the save record; the ledger type has them as Items::Inventory / Items::InventoryIndices structs.
     "F03601": [
-        ("Core_Memory_CopyBytesBackward(savedata->inventory,", "Core_Memory_CopyBytesBackward(&savedata->inventory,",
+        ("VS::Core::Memory::CopyBytesBackward(savedata->inventory,", "VS::Core::Memory::CopyBytesBackward(&savedata->inventory,",
          "array view of the inventory block (22C.c)"),
-        ("Core_Memory_CopyBytesBackward(savedata->inventoryIndices,",
-         "Core_Memory_CopyBytesBackward(&savedata->inventoryIndices,", "array view of the inventory indices (22C.c)"),
+        ("VS::Core::Memory::CopyBytesBackward(savedata->inventoryIndices,",
+         "VS::Core::Memory::CopyBytesBackward(&savedata->inventoryIndices,", "array view of the inventory indices (22C.c)"),
     ],
     # TITLE 22C.c _applyLoadedSaveFile: the same blocks copied back from the loaded save (22C.c:596).
     "F03600": [
@@ -3110,11 +3143,40 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Core::Memory::CopyHalfwordBlocks\(", r"VS::Core::Memory::CopyLiveHalfwordBlocks(",
      "F04189 #46 typed promotion: the word-copy binding bounds array arguments by their declared extent and copies "
      "forward without memcpy overlap (#268)"),
+    *[(r"", rf"\bVS::Core::Memory::{name}\(", rf"VS::Core::Memory::{live}(",
+       f"{fid} #276 typed promotion: the copy binding bounds array arguments by their declared extent and refuses "
+       "the sizes the original ran away on (#277)")
+      for fid, name, live in (("F01273", "ReadUnalignedShort", "ReadLiveUnalignedShort"),
+                              ("F01401", "ZeroWordsBackward", "ZeroLiveWordsBackward"),
+                              ("F01402", "CopyBytesBackward", "CopyLiveBytesBackward"),
+                              ("F03263", "CopyWords", "CopyLiveWords"),
+                              ("F03264", "SwapWords", "SwapLiveWords"))],
+    *[(r"", rf"\bVS::Core::Random::{name}\(", rf"VS::Core::{live}(",
+       f"{fid} #276 typed promotion: the engine's rand() state, keystream and shuffle table are bound by "
+       "RandomLive.hpp")
+      for fid, name, live in (("F01404", "NextInterfaceRandomBits", "NextLiveInterfaceRandomBits"),
+                              ("F01455", "RandomRangeExclusive", "LiveRandomRangeExclusive"),
+                              ("F03433", "InitializeShuffleTable", "InitializeLiveRandomShuffleTable"),
+                              ("F03434", "NextBounded", "NextLiveRandomBounded"),
+                              ("F03435", "NextAveraged", "NextLiveRandomAveraged"))],
+    *[(r"", rf"\bVS::Core::String::{name}\(", rf"VS::Core::String::{live}(",
+       f"{fid} #276 typed promotion: the game-text binding bounds array arguments by their declared extent and "
+       "encodes the percent suffix (#277)")
+      for fid, name, live in (("F02822", "CopyGameText", "CopyLiveGameText"),
+                              ("F02826", "FormatGameInteger", "FormatLiveGameInteger"),
+                              ("F02827", "FormatGamePercent", "FormatLiveGamePercent"))],
+    (r"", r"\bVS::Core::IgnoreCallback\(", r"VS::Core::IgnoreLiveActorCallback(",
+     "F00023 #276 typed promotion: the actor-stats callback keeps its original argument"),
     (r"^Menu::(Container|Inventory)::SortEquipment$",
      r"CopyLiveHalfwordBlocks\((\w+), (\w+), (\w+( \* 2)?)\)",
      r"CopyLiveHalfwordBlocks(\1, &\2[0], \3)",
      "F04189 #46 typed promotion: the sort buffers are variable-length arrays sized to cover the copy, which a "
      "template cannot deduce"),
+    (r"^Menu::(Container|Inventory)::SortEquipment$",
+     r"ZeroLiveWordsBackward\((\w+), ",
+     r"ZeroLiveWordsBackward(std::as_writable_bytes(std::span(&\1[0], sizeof \1 / sizeof \1[0])), ",
+     "F01401 #276 typed promotion: the sort buffers are variable-length arrays, which a template cannot deduce, "
+     "so the clear is bounded by an explicit span of the buffer"),
     (r"^Content(::|_)ParseActorModel$", r"CopyLiveAlignedWords\(actor->textureOverlays, data, 0xE8\)",
      r"CopyLiveAlignedWords(VS::Core::Memory::RecordTail(*actor, actor->textureOverlays), data, 0xE8)",
      "F03572 #46 typed promotion: the SHP header block fills the texture overlays and the fields after them "
@@ -3657,26 +3719,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
                        ("blockSz", "allocation_units"))],
     (r"^Core::Memory::InitializeHeap$", r"\bvalue\b", "byte_count",
      "main.c:9008 divides the supplied arena byte extent by sizeof the native heap header"),
-    (r"^Core::Memory::ReadUnalignedShort$", r"\barg0\b", "source",
-     "573B8.c:146-152 reads two little-endian bytes from the supplied source address"),
-    *[(r"^Core::Memory::ZeroWordsBackward$", rf"\b{old}\b", new,
-       "5BF94.c:4476-4484 forms the end cursor from a byte extent then clears descending words")
-      for old, new in (("arg0", "destination"), ("arg1", "byte_count"),
-                       ("var_v0", "word_cursor"))],
-    *[(r"^Core::Random::NextInterfaceRandomBits$", rf"\b{old}\b", new,
-       "5BF94.c:4496-4501 returns high bits of the previous multiplicative state")
-      for old, new in (("value", "bit_count"), ("temp_a1", "previous_state"))],
-    *[(r"^Core::Random::RandomRangeExclusive$", rf"\b{old}\b", new,
-       "5BF94.c:5810-5826 accepts either bound order and adds a modulo offset to the lesser")
-      for old, new in (("arg0", "bound_a"), ("arg1", "bound_b"),
-                       ("new_var", "offset"))],
-    *[(r"^Core::Random::NextBounded$", rf"\b{old}\b", new,
-       "main.c:8251-8275 scales the shuffle index then the complemented sample with signed rounding")
-      for old, new in (("var_v0", "scaled_index"),
-                       ("temp_s0", "picked_sample"),
-                       ("var_a0", "scaled_result"))],
-    (r"^Core::Random::NextAveraged$", r"\barg0\b", "max",
-     "main.c:8277-8285 forwards the same maximum to twelve bounded draws before averaging"),
     *[(r"^Field::ClearSavedRoomEnemies$", rf"\b{old}\b", new,
        "146C.c:8509 forwards room and zone to the matching actor-state cache clear at146C.c:789")
       for old, new in (("arg0", "mapId"), ("arg1", "zoneId"))],

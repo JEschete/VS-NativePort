@@ -1,96 +1,126 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Core/Memory/Copy.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Core/Memory/Copy.hpp"
 
-// decomp: BATTLE.PRG vs_battle_getShort (src/BATTLE/BATTLE.PRG/573B8.c:146)
-short Core_Memory_ReadUnalignedShort(u_char* source)
-{
-    if (!((long)source & 1)) {
-        return *(short*)source;
-    }
-    return source[0] | (source[1] << 8);
+#include <algorithm>
+#include <array>
+#include <cstring>
+
+namespace VS::Core::Memory {
+namespace {
+constexpr std::size_t kWordBytes = 4;
+constexpr std::size_t kWordGroup = 4;
+constexpr std::size_t kSwapPair = 2;
+constexpr unsigned kByteBits = 8;
+
+constexpr std::size_t RoundDown(std::size_t bytes, std::size_t unit) {
+  return bytes - bytes % unit;
 }
 
-// decomp: BATTLE.PRG vs_battle_rMemzero (src/BATTLE/BATTLE.PRG/5BF94.c:4476)
-void Core_Memory_ZeroWordsBackward(void* destination, int byte_count)
-{
-    int* word_cursor;
-
-    word_cursor = (int *)(((u_char*)(destination)) + byte_count);
-    do {
-        *(int*)--word_cursor = 0;
-    } while (destination != word_cursor);
+// Loads `count` words whole before storing any of them, as the assembly's
+// register copies do, so an overlapping block reads its original contents.
+void MoveWords(std::byte* destination, const std::byte* source,
+               std::size_t count) {
+  std::array<std::byte, kWordBytes * kWordGroup> held{};
+  std::memcpy(held.data(), source, count * kWordBytes);
+  std::memcpy(destination, held.data(), count * kWordBytes);
 }
 
-// decomp: BATTLE.PRG vs_battle_rMemcpy (src/BATTLE/BATTLE.PRG/5BF94.c:4486)
-void Core_Memory_CopyBytesBackward(void* dest, void const* src, int size)
-{
-    do {
-        --size;
-        ((char*)dest)[size] = ((char const*)src)[size];
-    } while (size != 0);
+// Both words are loaded before the second is stored, then the first.
+void ExchangeWords(std::byte* first, std::byte* second, std::size_t count) {
+  std::array<std::byte, kWordBytes * kSwapPair> from_first{};
+  std::array<std::byte, kWordBytes * kSwapPair> from_second{};
+  const std::size_t bytes = count * kWordBytes;
+  std::memcpy(from_first.data(), first, bytes);
+  std::memcpy(from_second.data(), second, bytes);
+  std::memcpy(second, from_first.data(), bytes);
+  std::memcpy(first, from_second.data(), bytes);
+}
+}  // namespace
+
+// BATTLE.PRG vs_battle_getShort (573B8.c:146).
+std::int16_t ReadUnalignedShort(std::span<const std::byte, 2> source) noexcept {
+  const auto low = std::to_integer<std::uint16_t>(source[0]);
+  const auto high = std::to_integer<std::uint16_t>(source[1]);
+  return static_cast<std::int16_t>(low | (high << kByteBits));
 }
 
-// decomp: SLUS_010.40 Sound_memcpy32 (src/SLUS_010.40/25AC.c:3965)
-void Core_Memory_CopyWords(void* in_Src, void* in_Dst, u_int in_Size)
-{
-    int w0, w1, w2, w3;
-
-    in_Size >>= 2;
-
-    while ((in_Size >> 2) != 0) {
-        w0 = ((int*)in_Src)[0];
-        w1 = ((int*)in_Src)[1];
-        w2 = ((int*)in_Src)[2];
-        w3 = ((int*)in_Src)[3];
-        ((int*)in_Dst)[0] = w0;
-        ((int*)in_Dst)[1] = w1;
-        ((int*)in_Dst)[2] = w2;
-        ((int*)in_Dst)[3] = w3;
-        in_Src = (u_char*)(in_Src) + (0x10);
-        in_Dst = (u_char*)(in_Dst) + (0x10);
-        in_Size -= 4;
-    }
-
-    while (in_Size != 0) {
-        *(int*)in_Dst = *(int*)in_Src;
-        in_Dst = (u_char*)(in_Dst) + (4);
-        in_Src = (u_char*)(in_Src) + (4);
-        in_Size--;
-    }
+std::size_t ZeroWordsBackwardBytes(std::int32_t size) noexcept {
+  if (size <= 0 || size % static_cast<std::int32_t>(kWordBytes) != 0) {
+    return 0;
+  }
+  return static_cast<std::size_t>(size);
 }
 
-// decomp: SLUS_010.40 Sound_memswp32 (src/SLUS_010.40/25AC.c:3993)
-void Core_Memory_SwapWords(void* in_A, void* in_B, u_int in_Size)
-{
-    int a0, a1, b0, b1;
-
-    in_Size >>= 2;
-
-    while ((in_Size >> 1) != 0) {
-        a0 = ((int*)in_A)[0];
-        b0 = ((int*)in_B)[0];
-        a1 = ((int*)in_A)[1];
-        b1 = ((int*)in_B)[1];
-
-        ((int*)in_B)[0] = a0;
-        ((int*)in_B)[1] = a1;
-        ((int*)in_A)[0] = b0;
-        ((int*)in_A)[1] = b1;
-
-        in_A = (u_char*)(in_A) + (8);
-        in_B = (u_char*)(in_B) + (8);
-
-        in_Size -= 2;
-    }
-
-    if (in_Size != 0) {
-        a0 = *(int*)in_A;
-        b0 = *(int*)in_B;
-        *(int*)in_B = a0;
-        *(int*)in_A = b0;
-    }
+// BATTLE.PRG vs_battle_rMemzero (5BF94.c:4476).
+std::size_t ZeroWordsBackward(std::span<std::byte> destination,
+                              std::int32_t size) noexcept {
+  const std::size_t bytes = std::min(ZeroWordsBackwardBytes(size),
+                                     RoundDown(destination.size(), kWordBytes));
+  for (std::size_t end = bytes; end != 0; end -= kWordBytes) {
+    std::fill_n(destination.begin() + static_cast<std::ptrdiff_t>(end) -
+                    static_cast<std::ptrdiff_t>(kWordBytes),
+                kWordBytes, std::byte{});
+  }
+  return bytes;
 }
 
-}  // extern "C"
+std::size_t CopyBytesBackwardBytes(std::int32_t size) noexcept {
+  return size > 0 ? static_cast<std::size_t>(size) : std::size_t{0};
+}
+
+// BATTLE.PRG vs_battle_rMemcpy (5BF94.c:4486). Byte by byte from the end, so
+// an overlapping copy to a lower address repeats the original's order rather
+// than memmove's.
+std::size_t CopyBytesBackward(std::span<std::byte> destination,
+                              std::span<const std::byte> source,
+                              std::int32_t size) noexcept {
+  const std::size_t bytes = std::min(
+      {CopyBytesBackwardBytes(size), destination.size(), source.size()});
+  for (std::size_t index = bytes; index != 0; --index) {
+    destination[index - 1] = source[index - 1];
+  }
+  return bytes;
+}
+
+std::size_t WordBytes(std::uint32_t size) noexcept {
+  return RoundDown(size, kWordBytes);
+}
+
+// SLUS_010.40 Sound_memcpy32 (25AC.c:3965).
+std::size_t CopyWords(std::span<const std::byte> source,
+                      std::span<std::byte> destination,
+                      std::uint32_t size) noexcept {
+  const std::size_t bytes =
+      RoundDown(std::min({WordBytes(size), destination.size(), source.size()}),
+                kWordBytes);
+  std::size_t words = bytes / kWordBytes;
+  std::size_t offset = 0;
+  for (; words >= kWordGroup; words -= kWordGroup) {
+    MoveWords(destination.data() + offset, source.data() + offset, kWordGroup);
+    offset += kWordBytes * kWordGroup;
+  }
+  for (; words != 0; --words) {
+    MoveWords(destination.data() + offset, source.data() + offset, 1);
+    offset += kWordBytes;
+  }
+  return bytes;
+}
+
+// SLUS_010.40 Sound_memswp32 (25AC.c:3993). Each pair loads first[0],
+// second[0], first[1], second[1] before storing second then first.
+std::size_t SwapWords(std::span<std::byte> first, std::span<std::byte> second,
+                      std::uint32_t size) noexcept {
+  const std::size_t bytes = RoundDown(
+      std::min({WordBytes(size), first.size(), second.size()}), kWordBytes);
+  std::size_t words = bytes / kWordBytes;
+  std::size_t offset = 0;
+  for (; words >= kSwapPair; words -= kSwapPair) {
+    ExchangeWords(first.data() + offset, second.data() + offset, kSwapPair);
+    offset += kWordBytes * kSwapPair;
+  }
+  if (words != 0) {
+    ExchangeWords(first.data() + offset, second.data() + offset, 1);
+  }
+  return bytes;
+}
+}  // namespace VS::Core::Memory

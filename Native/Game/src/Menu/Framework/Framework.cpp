@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
@@ -34,7 +35,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Overlays.h"
 #include "Core/Text/TextCode.h"
@@ -395,7 +395,7 @@ Menu_Framework_MenuRow* Menu_Framework_SetMenuItem(
     menuItem->w = w;
     menuItem->backgroundWidth = backgroundWidth;
 
-    Core_Memory_ZeroWordsBackward(&menuItem->gradientState, 0x3C);
+    VS::Core::Memory::ZeroLiveWordsBackward(&menuItem->gradientState, 0x3C);
 
     text_destination_row = menuItem;
     menuItem->x = x;
@@ -548,7 +548,7 @@ int Menu_Framework_UpdateMainMenuSelection(int mode)
         }
 
         Menu_Framework_submenuStates[0] = selected;
-        Core_Memory_ZeroWordsBackward(Menu_Framework_menuItems, sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
+        VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_menuItems, sizeof(Menu_Framework_MenuRow) * 40 + 0x124);
         mask = 9;
 
         for (mode = 0; mode < 10; ++mode) {
@@ -745,12 +745,12 @@ void Menu_Framework_InitGameInterface(void* interface_texture_data)
     Menu_Framework_menuBackgroundBuffer = NULL;
     Menu_sceneNotificationBuffer = 0;
     Effects_ResetScreenEffectState();
-    Core_Memory_ZeroWordsBackward(&Menu_Framework_menuState, sizeof(Menu_Framework_MenuControlState));
+    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_menuState, sizeof(Menu_Framework_MenuControlState));
     Menu_Framework_menuState.currentMenu = 0x3F;
-    Core_Memory_ZeroWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);
+    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_actionSelection, sizeof Menu_Framework_actionSelection);
     Battle_actionSelection = Menu_Framework_ActionSelectionState();
-    Core_Memory_ZeroWordsBackward(&Menu_textBoxes[0], sizeof Menu_textBoxes[0]);
-    Core_Memory_ZeroWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
+    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_textBoxes[0], sizeof Menu_textBoxes[0]);
+    VS::Core::Memory::ZeroLiveWordsBackward(Menu_Framework_submenuStates, sizeof Menu_Framework_submenuStates);
     Menu_Framework_menuMemory = (Menu_Framework_MenuMemory) { { 0 } };
     Menu_activeTextBoxOrderingTable = Menu_textBoxOrderingTables;
     Render_UploadImageRectangle(0x340, interface_texture_data, 0xE00040);
@@ -1575,7 +1575,7 @@ void Menu_Framework_SetActionCostText(int index, char const* text, int xOffset, 
 {
     Menu_Framework_displayActionCost = 1;
 
-    Core_Memory_CopyBytesBackward(&Menu_Framework_textHeaders[index], text, 14);
+    VS::Core::Memory::CopyLiveBytesBackward(&Menu_Framework_textHeaders[index], text, 14);
 
     Menu_Framework_textHeaders[index].disabled = disabled;
     Menu_Framework_textHeaders[index].x = xOffset;

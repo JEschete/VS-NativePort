@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/SoundBanks.h"
-#include "Core/Memory/Copy.h"
 #include "Field/Doors.h"
 #include "Field/Mpd.h"
 #include "Input/Controller.h"
@@ -123,7 +123,7 @@ int Title_SaveCard_ReadSaveSummary(int id)
         Save_MemoryCard_DecodeSaveBytes(saveInfo[3].key, &saveInfo[3].summary.base.slotState,
             sizeof saveInfo[3] - sizeof(int));
         if (Save_MemoryCard_HasChecksumError((Save_GameSaveImage*)saveInfo, 2) == 0) {
-            Core_Memory_CopyBytesBackward(&Title_saveFileSummaries[id - 1], &saveInfo[3], sizeof saveInfo[3]);
+            VS::Core::Memory::CopyLiveBytesBackward(&Title_saveFileSummaries[id - 1], &saveInfo[3], sizeof saveInfo[3]);
             return 0;
         }
     }
@@ -347,20 +347,20 @@ int Title_SaveCard_ValidateAndApplyLoadedSave(int apply_loaded_state)
         return 0;
     }
 
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedStateFlags, save_image_workspace[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
-    Core_Memory_CopyBytesBackward(State_learnedActionFlags, save_image_workspace[1].learnedActions, sizeof State_learnedActionFlags);
-    Core_Memory_CopyBytesBackward(&State_roomVisitProgress, save_image_workspace[1].mapStatus, sizeof State_roomVisitProgress);
-    Core_Memory_CopyBytesBackward(&Input_settings, &save_image_workspace[1].settings, sizeof Input_settings);
-    Core_Memory_CopyBytesBackward(&State_ashleySnapshot, &save_image_workspace[1].ashleySnapshot, sizeof State_ashleySnapshot);
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedInventory, &save_image_workspace[1].inventory, sizeof Audio_Seq_unusedInventory);
-    Core_Memory_CopyBytesBackward(
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedStateFlags, save_image_workspace[1].stateFlags, sizeof Audio_Seq_unusedStateFlags);
+    VS::Core::Memory::CopyLiveBytesBackward(State_learnedActionFlags, save_image_workspace[1].learnedActions, sizeof State_learnedActionFlags);
+    VS::Core::Memory::CopyLiveBytesBackward(&State_roomVisitProgress, save_image_workspace[1].mapStatus, sizeof State_roomVisitProgress);
+    VS::Core::Memory::CopyLiveBytesBackward(&Input_settings, &save_image_workspace[1].settings, sizeof Input_settings);
+    VS::Core::Memory::CopyLiveBytesBackward(&State_ashleySnapshot, &save_image_workspace[1].ashleySnapshot, sizeof State_ashleySnapshot);
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedInventory, &save_image_workspace[1].inventory, sizeof Audio_Seq_unusedInventory);
+    VS::Core::Memory::CopyLiveBytesBackward(
         &Audio_Seq_unusedInventoryIndices, &save_image_workspace[1].inventoryIndices, sizeof Audio_Seq_unusedInventoryIndices);
-    Core_Memory_CopyBytesBackward(&State_savedEntryDoor, &save_image_workspace[1].entryDoor, sizeof State_savedEntryDoor);
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedScoredata, &save_image_workspace[1].scoreData, sizeof Audio_Seq_unusedScoredata);
+    VS::Core::Memory::CopyLiveBytesBackward(&State_savedEntryDoor, &save_image_workspace[1].entryDoor, sizeof State_savedEntryDoor);
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedScoredata, &save_image_workspace[1].scoreData, sizeof Audio_Seq_unusedScoredata);
     State_currentRoomStateSlot = loaded_save_image->roomStateSlot;
-    Core_Memory_CopyBytesBackward(State_recentRoomEnemyStates, save_image_workspace[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
+    VS::Core::Memory::CopyLiveBytesBackward(State_recentRoomEnemyStates, save_image_workspace[1].recentRoomEnemyStates, sizeof State_recentRoomEnemyStates);
     spmcimg2 = &Audio_Seq_unusedArtsStatus;
-    Core_Memory_CopyBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
+    VS::Core::Memory::CopyLiveBytesBackward(&Audio_Seq_unusedArtsStatus, &save_image_workspace[1].artsStatus, sizeof Audio_Seq_unusedArtsStatus);
     State_playTime.t = save_image_workspace[1].protectedHeader.summary.gameTime.t;
     Save_MarkAshleySnapshotValid();
     Audio_SetMonoOutput(Input_settings.monoSound);

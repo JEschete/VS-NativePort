@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -12,9 +14,7 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
-#include "Core/Compatibility.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Copy.h"
 #include "DiscQueue.h"
 #include "Effects/ActionEffects.h"
 #include "Effects/Runtime.h"
@@ -49,8 +49,8 @@ void* Event_vibrationPatternBuffer;
 // decomp: BATTLE.PRG func_800BA8BC (src/BATTLE/BATTLE.PRG/4A0A8.c:2454)
 intptr_t Event_CommandPlayActorEffect(u_char* instruction, short thread_index)
 {
-    const int effect = Core_Memory_ReadUnalignedShort(instruction + 1);
-    const u_short selector = Core_Memory_ReadUnalignedShort(instruction + 3);
+    const int effect = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
+    const u_short selector = VS::Core::Memory::ReadLiveUnalignedShort(instruction + 3);
     const unsigned referenceType = selector >> 12;
     const int actor = referenceType <= 1 ? Event_ResolveScriptActorReference(selector) : -1;
     const Battle_Actor* target = (unsigned)actor < 16 ? Actors_ActorAtSlot(actor) : NULL;
@@ -106,7 +106,7 @@ intptr_t Event_CommandWaitEffectState(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BAA04 (src/BATTLE/BATTLE.PRG/4A0A8.c:2487)
 intptr_t Event_CommandYieldEffectRelease(u_char* instruction, short thread_index)
 {
-    Core_NoOperation();
+    VS::Core::NoOperation();
     return (Event_skipState == 2) * 4;
 }
 
@@ -155,7 +155,7 @@ intptr_t Event_CommandPlayVibrationPattern(u_char* instruction, short thread_ind
 // decomp: BATTLE.PRG func_800BABCC (src/BATTLE/BATTLE.PRG/4A0A8.c:2537)
 intptr_t Event_CommandSetActorTrail(u_char* instruction, short thread_index)
 {
-    short actor_id = Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 2));
+    short actor_id = Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 2));
 
     if (instruction[1] != 0) {
         Effects_StartWeaponTrail(actor_id, instruction[4]);
@@ -177,7 +177,7 @@ intptr_t Event_CommandWaitScreenEffectLoad(u_char* instruction, short thread_ind
 // decomp: BATTLE.PRG func_800BB2B8 (src/BATTLE/BATTLE.PRG/4A0A8.c:2741)
 intptr_t Event_CommandSetScreenDistortion(u_char* instruction, short thread_index)
 {
-    Effects_ScreenDistortion_SetFeedbackLayer(Core_Memory_ReadUnalignedShort(instruction + 1));
+    Effects_ScreenDistortion_SetFeedbackLayer(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1));
     return 0;
 }
 

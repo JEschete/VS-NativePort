@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
@@ -179,7 +179,7 @@ void Menu_Setup_PreviewBladeCombination(int preview_selection)
 
     switch (ingredient_presence_mask) {
     case 0:
-        Core_Memory_ZeroWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
         break;
 
     case 1:
@@ -189,7 +189,7 @@ void Menu_Setup_PreviewBladeCombination(int preview_selection)
         break;
 
     case 3:
-        Core_Memory_ZeroWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_bladeBuf, sizeof Menu_Setup_bladeBuf);
         Menu_Setup_BuildCombinedBlade(&Audio_Seq_unusedInventory.blades[i - 1],
             &Audio_Seq_unusedInventory.blades[second_blade_id - 1], &Menu_Setup_bladeBuf, Menu_Setup_sydData);
         break;
@@ -769,7 +769,7 @@ void Menu_Setup_PreviewShieldCombination(int preview_selection)
 
     switch (ingredient_presence_mask) {
     case 0:
-        Core_Memory_ZeroWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
         break;
 
     case 1:
@@ -779,7 +779,7 @@ void Menu_Setup_PreviewShieldCombination(int preview_selection)
         break;
 
     case 3:
-        Core_Memory_ZeroWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_shieldBuf, sizeof Menu_Setup_shieldBuf);
         Menu_Setup_BuildCombinedShield(&Audio_Seq_unusedInventory.shields[first - 1].base,
             &Audio_Seq_unusedInventory.shields[second - 1].base, &Menu_Setup_shieldBuf.base, Menu_Setup_sydData);
         break;
@@ -1336,7 +1336,7 @@ void Menu_Setup_PreviewArmorCombination(int preview_selection)
 
     switch (ingredient_presence_mask) {
     case 0:
-        Core_Memory_ZeroWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
         break;
 
     case 1:
@@ -1346,7 +1346,7 @@ void Menu_Setup_PreviewArmorCombination(int preview_selection)
         break;
 
     case 3:
-        Core_Memory_ZeroWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Setup_armorBuf, sizeof Menu_Setup_armorBuf);
         Menu_Setup_BuildCombinedArmor(&Audio_Seq_unusedInventory.armor[i - 1],
             &Audio_Seq_unusedInventory.armor[second_armor_id - 1], &Menu_Setup_armorBuf, Menu_Setup_sydData);
         break;

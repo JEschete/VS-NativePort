@@ -3,7 +3,9 @@
 
 #include <cstdint>
 #include <cstdlib>
+#include <span>
 
+#include "Core/Memory/Copy.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Save/FileMenu.hpp"
@@ -16,7 +18,6 @@ extern "C" {
 #include "Battle/Hud.h"
 #include "Content/StringTables.h"
 #include "Core/Diagnostics.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Field/RoomRendering.h"
 #include "Input/Controller.h"
@@ -75,7 +76,11 @@ class LiveContainerSave final : public ContainerSaveHost {
         static_cast<Menu_Container_InventoryStorage*>(
             Core_Memory_AllocateFromHighEnd(
                 sizeof *Menu_Framework_unusedInventoryStorage));
-    Core_Memory_ZeroWordsBackward(&Storage(), sizeof Storage());
+    static_assert(
+        sizeof(Menu_Container_InventoryStorage) % sizeof(std::uint32_t) == 0);
+    VS::Core::Memory::ZeroWordsBackward(
+        std::as_writable_bytes(std::span(&Storage(), 1)),
+        static_cast<std::int32_t>(sizeof Storage()));
     Menu_Framework_SetActorComparisonStats(kContainerComparisonActor);
   }
 

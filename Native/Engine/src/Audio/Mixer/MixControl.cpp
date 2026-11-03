@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/VoiceOutputLive.hpp"
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Akao.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
-#include "Core/Memory/Copy.h"
 
 // decomp: SLUS_010.40 Sound_Cmd_A4_unk (src/SLUS_010.40/25AC.c:3427)
 void Audio_Mixer_SetSoundEffectPitchScale(Audio_CommandParams* command)
@@ -489,8 +489,8 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
             Audio_Driver_commandArguments.param2 = pSequence->sequenceId;
             Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)pSequence);
             Audio_Seq_activeMusicConfig->musicId = pSequence->sequenceId;
-            Core_Memory_CopyWords(Audio_Seq_musicChannels, Audio_Seq_savedMusicChannels, 0x2200);
-            Core_Memory_CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
+            VS::Core::Memory::CopyLiveWords(Audio_Seq_musicChannels, Audio_Seq_savedMusicChannels, 0x2200);
+            VS::Core::Memory::CopyLiveWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
             pSequence = (Audio_AkaoFileHeader*)Audio_Driver_commandArguments.param1;
             Audio_Driver_commandArguments.param1 = (void*)(u_int)pSequence->sequenceId;
             Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)pSequence);

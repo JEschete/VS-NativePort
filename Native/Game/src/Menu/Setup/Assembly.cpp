@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Targeting.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Core/Memory/Heap.h"
 #include "Core/Text/TextCode.h"
 #include "Input/Buttons.h"
@@ -85,7 +85,7 @@ void Menu_Setup_RecordSlotSelection(int index)
         return;
     }
 
-    Core_Memory_ZeroWordsBackward(Menu_Setup_slotSelectionHistory, sizeof Menu_Setup_slotSelectionHistory);
+    VS::Core::Memory::ZeroLiveWordsBackward(Menu_Setup_slotSelectionHistory, sizeof Menu_Setup_slotSelectionHistory);
 }
 
 // decomp: MENUC.PRG _popSelectionHistory (src/MENU/MENUC.PRG/168.c:83)
@@ -136,7 +136,7 @@ void Menu_Setup_DisassembleWeapon(int weaponIndex)
     Audio_Seq_unusedInventory.blades[weapon->blade - 1].assembledWeaponIndex = 0;
 
     index = weapon->index;
-    Core_Memory_ZeroWordsBackward(weapon, sizeof *weapon);
+    VS::Core::Memory::ZeroLiveWordsBackward(weapon, sizeof *weapon);
     weapon->index = index;
 
     Items_Inventory_RebuildDisplayIndices(0);

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Rewards.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "Field/Collision.h"
 #include "Field/Doors.h"
 #include "Field/GameMode.h"
@@ -39,7 +39,7 @@ Items_LootListNode* Items_lootListHead;
 // decomp: BATTLE.PRG _dropWeaponRand (src/BATTLE/BATTLE.PRG/146C.c:1608)
 int Items_RollEnemyWeaponDrop(Items_LootedWeapon* looted, Items_WeaponLoadout* base)
 {
-    if (Core_Random_NextBounded(0xFF) < base->dropRate) {
+    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
         int i;
 
         Items_WriteInventoryBladeStats(&looted->blade, &base->blade);
@@ -64,7 +64,7 @@ int Items_RollEnemyWeaponDrop(Items_LootedWeapon* looted, Items_WeaponLoadout* b
 // decomp: BATTLE.PRG _dropShieldRand (src/BATTLE/BATTLE.PRG/146C.c:1632)
 int Items_RollEnemyShieldDrop(Items_LootedShield* looted, Items_ShieldLoadout* base)
 {
-    if (Core_Random_NextBounded(0xFF) < base->dropRate) {
+    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
         int i;
 
         Items_WriteInventoryArmorStats(&looted->shield, &base->base);
@@ -85,7 +85,7 @@ int Items_RollEnemyShieldDrop(Items_LootedShield* looted, Items_ShieldLoadout* b
 // decomp: BATTLE.PRG _dropAccessoryRand (src/BATTLE/BATTLE.PRG/146C.c:1652)
 int Items_RollEnemyAccessoryDrop(Items_LootedAccessory* looted, Items_AccessorySpawnLoadout* base)
 {
-    if (Core_Random_NextBounded(0xFF) < base->dropRate) {
+    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
 
         Items_WriteInventoryArmorStats(&looted->accessory, &base->accessory);
 
@@ -99,7 +99,7 @@ int Items_RollEnemyAccessoryDrop(Items_LootedAccessory* looted, Items_AccessoryS
 // decomp: BATTLE.PRG _dropArmorRand (src/BATTLE/BATTLE.PRG/146C.c:1665)
 int Items_RollEnemyArmorDrop(Items_LootedArmor* looted, Items_ArmorLoadout* base)
 {
-    if (Core_Random_NextBounded(0xFF) < base->dropRate) {
+    if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
         int i;
 
         for (i = 0; i < 2; ++i) {
@@ -144,7 +144,7 @@ int Items_RollEnemyItemDrop(Items_BattleLoot* looted, Items_MiscItemDrop* base)
     looted->misc[2].itemId = base->id;
 
     if (looted->misc[2].itemId) {
-        if (Core_Random_NextBounded(0xFF) < base->dropRate) {
+        if (VS::Core::NextLiveRandomBounded(0xFF) < base->dropRate) {
             looted->misc[2].count = 1;
             looted->misc[2].difficultyFlags = 3;
             return 1;

@@ -1,5 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Core/RandomLive.hpp"
+#include "Core/Runtime.hpp"
+#include "Core/RuntimeLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -28,10 +31,7 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/StatusEffects.h"
 #include "CdDrive.h"
-#include "Core/Callbacks.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Field/Actors.h"
 #include "Field/Mpd.h"
@@ -70,7 +70,7 @@ Battle_Actor* Actors_CreateAuxiliaryActor(
             }
         }
         if (i >= 16) {
-            Core_IgnoreDiagnostic(0x86, 0);
+            VS::Core::IgnoreDiagnostic(0x86, 0);
             return NULL;
         }
     }
@@ -134,7 +134,7 @@ void Actors_ApplyActorInitialStats(
 
     initial_stat_value = init->hp;
     if (randomize_stats != 0) {
-        initial_stat_value += -10 + Core_Random_NextAveraged(21);
+        initial_stat_value += -10 + VS::Core::NextLiveRandomAveraged(21);
     }
     if (initial_stat_value < 0) {
         initial_stat_value = 0;
@@ -149,7 +149,7 @@ void Actors_ApplyActorInitialStats(
     initial_stat_value = init->mp;
     if (initial_stat_value != 0) {
         if (randomize_stats != 0) {
-            initial_stat_value += -10 + Core_Random_NextAveraged(21);
+            initial_stat_value += -10 + VS::Core::NextLiveRandomAveraged(21);
         }
         if (initial_stat_value < 0) {
             initial_stat_value = 0;
@@ -163,7 +163,7 @@ void Actors_ApplyActorInitialStats(
 
     initial_stat_value = init->strength;
     if (randomize_stats != 0) {
-        initial_stat_value += -10 + Core_Random_NextAveraged(21);
+        initial_stat_value += -10 + VS::Core::NextLiveRandomAveraged(21);
     }
     if (initial_stat_value < 0) {
         initial_stat_value = 0;
@@ -176,7 +176,7 @@ void Actors_ApplyActorInitialStats(
 
     initial_stat_value = init->intelligence;
     if (randomize_stats != 0) {
-        initial_stat_value += -10 + Core_Random_NextAveraged(21);
+        initial_stat_value += -10 + VS::Core::NextLiveRandomAveraged(21);
     }
     if (initial_stat_value < 0) {
         initial_stat_value = 0;
@@ -189,7 +189,7 @@ void Actors_ApplyActorInitialStats(
 
     initial_stat_value = init->agility;
     if (randomize_stats != 0) {
-        initial_stat_value += -10 + Core_Random_NextAveraged(21);
+        initial_stat_value += -10 + VS::Core::NextLiveRandomAveraged(21);
     }
     if (initial_stat_value < 0) {
         initial_stat_value = 0;
@@ -247,7 +247,7 @@ void Actors_ApplyActorInitialStats(
         Items_BuildArmorStatsFromPart(&actor->limbs[i].armor, &init->limbs[i].armor);
     }
 
-    Core_IgnoreCallback(actor);
+    VS::Core::IgnoreLiveActorCallback(actor);
 
     for (i = 0; i < 6; ++i) {
         for (j = 0; j < 4; ++j) {
@@ -607,7 +607,7 @@ Battle_Actor* Actors_SpawnRoomEnemy(
             file.lba = Field_zoneContext.zudFiles[zudIndex].lba;
             file.size = Field_zoneContext.zudFiles[zudIndex].size;
             if (Field_zoneContext.zudDiscRequest != NULL) {
-                Core_IgnoreDiagnostic(0xA7, 0);
+                VS::Core::IgnoreDiagnostic(0xA7, 0);
             }
             Field_zoneContext.zudDiscRequest = Content_AllocateDiscRequest(&file);
             Field_zoneContext.zudData = Core_Memory_AllocateFromHighEnd(file.size);

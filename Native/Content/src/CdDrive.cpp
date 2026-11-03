@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Content/DiscReaderLive.hpp"
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "State/PlayTime.h"
 
@@ -175,7 +175,7 @@ Content_DiscQueueSlot* Content_AllocateDiscRequest(Content_DiscFile const* file)
             return &Content_discRequestSlots[i];
         }
     }
-    Core_IgnoreDiagnostic(162, 0);
+    VS::Core::IgnoreDiagnostic(162, 0);
 }
 
 // decomp: SLUS_010.40 vs_main_freeCdQueueSlot (src/SLUS_010.40/main.c:9425)
@@ -183,7 +183,7 @@ void Content_ReleaseDiscRequest(Content_DiscQueueSlot* slot)
 {
     u_short state = slot->state - 2;
     if (state < Content_DiscRequestState_Loaded - 2) {
-        Core_IgnoreDiagnostic(163, 0);
+        VS::Core::IgnoreDiagnostic(163, 0);
     }
     slot->state = Content_DiscRequestState_Free;
 }

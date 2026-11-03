@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RuntimeLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Hud.h"
 #include "Battle/StatusEffects.h"
-#include "Core/Callbacks.h"
 #include "Field/Actors.h"
 #include "Field/Camera.h"
 #include "Items/Equipment.h"
@@ -180,7 +180,7 @@ void Actors_SpawnAshleyWithEquipment(void)
         }
     }
 
-    Core_IgnoreCallback(Battle_characterState->stats);
+    VS::Core::IgnoreLiveActorCallback(Battle_characterState->stats);
 
     if (State_ashleySnapshot.stats.isPending != 0) {
         Actors_RestoreAshleyRuntimeState();

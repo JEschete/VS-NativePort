@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -15,7 +16,6 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/StatusEffects.h"
 #include "Battle/Targeting.h"
-#include "Core/Random.h"
 #include "Items/Equipment.h"
 #include "Items/EquipmentWear.h"
 #include "Items/Inventory.h"
@@ -200,7 +200,7 @@ int Battle_QueueRandomStrengthIncrease(Battle_ActionDefinition* action_definitio
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->strengthChange += amount;
     target_hit->strengthEffect = 2;
 }
@@ -210,7 +210,7 @@ int Battle_QueueRandomIntelligenceIncrease(Battle_ActionDefinition* action_defin
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->intelligenceChange += amount;
     target_hit->intelligenceEffect = 2;
 }
@@ -220,7 +220,7 @@ int Battle_QueueRandomAgilityIncrease(Battle_ActionDefinition* action_definition
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->agilityChange += amount;
     target_hit->agilityEffect = 2;
 }
@@ -230,7 +230,7 @@ int Battle_QueueRandomMaximumHpIncrease(Battle_ActionDefinition* action_definiti
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->maxHpChange += amount;
     target_hit->maxHpEffect = 2;
 }
@@ -240,7 +240,7 @@ int Battle_QueueRandomMaximumMpIncrease(Battle_ActionDefinition* action_definiti
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->maxMpChange += amount;
     target_hit->maxMpEffect = 2;
 }
@@ -250,7 +250,7 @@ int Battle_QueueRandomStrengthDecrease(Battle_ActionDefinition* action_definitio
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->strengthChange += amount;
     target_hit->strengthEffect = 1;
 }
@@ -260,7 +260,7 @@ int Battle_QueueRandomIntelligenceDecrease(Battle_ActionDefinition* action_defin
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->intelligenceChange += amount;
     target_hit->intelligenceEffect = 1;
 }
@@ -270,7 +270,7 @@ int Battle_QueueRandomAgilityDecrease(Battle_ActionDefinition* action_definition
     Battle_HitResult* source_hit __attribute__((unused)), Battle_HitResult* target_hit,
     int hit_index __attribute__((unused)), int execute_action __attribute__((unused)))
 {
-    int amount = Core_Random_NextBounded(4) + 1;
+    int amount = VS::Core::NextLiveRandomBounded(4) + 1;
     target_hit->agilityChange += amount;
     target_hit->agilityEffect = 1;
 }

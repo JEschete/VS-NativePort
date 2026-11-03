@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Music.h"
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
-#include "Core/Memory/Copy.h"
 #include "Event/ScriptActors.h"
 #include "Event/ScriptAudio.h"
 #include "Event/ScriptVm.h"
@@ -36,7 +36,7 @@ intptr_t Event_ScriptPlaySoundCommand(u_char* instruction, short thread_index)
 // decomp: BATTLE.PRG func_800BA35C (src/BATTLE/BATTLE.PRG/4A0A8.c:2292)
 intptr_t Event_CommandPlayActorSfx(u_char* instruction, short thread_index)
 {
-    Audio_PlayActorScriptSound(Event_ResolveScriptActorReference(Core_Memory_ReadUnalignedShort(instruction + 1)), instruction[3]);
+    Audio_PlayActorScriptSound(Event_ResolveScriptActorReference(VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1)), instruction[3]);
     return 0;
 }
 
@@ -197,7 +197,7 @@ intptr_t Event_CommandWaitSoundQueue(u_char* instruction, short thread_index)
 intptr_t Event_CommandWaitMusicTimer(u_char* instruction, short thread_index)
 {
     int music_timer_count = Audio_MusicBeatPosition() >> 0x10;
-    return music_timer_count < Core_Memory_ReadUnalignedShort(instruction + 1);
+    return music_timer_count < VS::Core::Memory::ReadLiveUnalignedShort(instruction + 1);
 }
 
 // decomp: BATTLE.PRG func_800BA800 (src/BATTLE/BATTLE.PRG/4A0A8.c:2436)

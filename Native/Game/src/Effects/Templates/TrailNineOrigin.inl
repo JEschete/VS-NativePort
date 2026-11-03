@@ -1,9 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/RandomLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
-#include "Core/Random.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -102,9 +104,9 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
                     }
 
                     splinePoint->vy =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     splinePoint->vz =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 2:
@@ -115,9 +117,9 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
                     }
 
                     splinePoint->vx =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
                     splinePoint->vz =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 4:
@@ -128,9 +130,9 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
                     }
 
                     splinePoint->vx =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
                     splinePoint->vy =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     break;
                 }
 

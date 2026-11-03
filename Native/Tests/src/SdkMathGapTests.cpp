@@ -13,6 +13,7 @@
 #include "Core/Gte.h"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Runtime.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 #include "Render/RoomDrawLive.hpp"
@@ -22,7 +23,6 @@ extern "C" {
 #include "Core/Math/Matrix.h"
 #include "Core/Math/Trig.h"
 #include "Core/Math/Vector.h"
-#include "Core/Runtime.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 }
@@ -237,10 +237,9 @@ TEST_CASE("The original inline idle instruction is a native no-op",
     return count;
   };
   const auto before = hits();
-  Core_IdleInstruction();
-  Core_IdleInstruction();
+  VS::Core::IdleInstruction();
+  VS::Core::IdleInstruction();
   CHECK(hits() == before);
-  CHECK(&Core_IdleInstruction == &Core_IgnoreCall);
 }
 
 TEST_CASE("Left matrix multiply returns its destination and preserves its tail",

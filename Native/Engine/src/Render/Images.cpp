@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -6,7 +7,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Random.h"
 #include "DiscQueue.h"
 #include "Event/Splash.h"
 #include "Menu/Framework/Framework.h"
@@ -95,13 +95,13 @@ void Render_ActivateGimLayer(u_int layer_index, void* arg1, u_char* arg2)
 
     if (gim->drawRoutine == 2) {
         u_short* p = gim->scanlineWipeWidths;
-        int angle = Core_Random_NextInterfaceRandomBits(9);
-        int target = Core_Random_NextInterfaceRandomBits(10);
+        int angle = VS::Core::NextLiveInterfaceRandomBits(9);
+        int target = VS::Core::NextLiveInterfaceRandomBits(10);
 
         for (i = 0; i < 240; ++i) {
             p[i] = (Core_Gte_Sin(angle) >> 3) + 320;
-            step = Core_Random_NextInterfaceRandomBits(8) - 64;
-            next = Core_Random_NextInterfaceRandomBits(10);
+            step = VS::Core::NextLiveInterfaceRandomBits(8) - 64;
+            next = VS::Core::NextLiveInterfaceRandomBits(10);
 
             if (target < angle) {
                 angle -= step;
@@ -119,7 +119,7 @@ void Render_ActivateGimLayer(u_int layer_index, void* arg1, u_char* arg2)
 
             if (angle < 0) {
                 angle = 128;
-                target = Core_Random_NextInterfaceRandomBits(10);
+                target = VS::Core::NextLiveInterfaceRandomBits(10);
             }
         }
     }

@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Runtime.h"
 #include "OverlayWorkspace.h"
 
 // decomp: D_800F18F8 (D_800F18F8@BATTLE/BATTLE.PRG)
@@ -14,7 +14,7 @@ int Content_AcquireOverlayWorkspace(int owner_tag)
         Content_overlayWorkspaceOwner = owner_tag;
         return 1;
     }
-    Core_IgnoreDiagnostic(0x66, 0);
+    VS::Core::IgnoreDiagnostic(0x66, 0);
     return 0;
 }
 
@@ -25,7 +25,7 @@ int Content_ReleaseOverlayWorkspace(int owner_tag)
         Content_overlayWorkspaceOwner = 0;
         return 1;
     }
-    Core_IgnoreDiagnostic(0x67, 0);
+    VS::Core::IgnoreDiagnostic(0x67, 0);
     return 0;
 }
 

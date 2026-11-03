@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Content/StringTables.h"
-#include "Core/Memory/Copy.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -160,7 +160,7 @@ Items_InventoryWeapon* Menu_Framework_weapons;
 // decomp: MAINMENU.PRG vs_mainMenu_resetStats (src/MENU/MAINMENU.PRG/2D10.c:351)
 void Menu_Framework_ResetEquipmentStats(void)
 {
-    Core_Memory_ZeroWordsBackward(&Menu_Framework_equipmentStats, sizeof Menu_Framework_equipmentStats);
+    VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_equipmentStats, sizeof Menu_Framework_equipmentStats);
     Menu_Framework_SetDpPp(0, 0, 0, 0);
     Menu_Framework_SetPrimaryStats(0, 0, 0, 1);
 }
@@ -1106,7 +1106,7 @@ void Menu_Framework_SetActorComparisonStats(int actorId)
 
         Menu_Framework_SetPrimaryStats(actor_stats->totalStrength, actor_stats->totalIntelligence,
             actor_stats->totalAgility, actor_stats->isAnalyzed | (actorId == 0));
-        Core_Memory_ZeroWordsBackward(&Menu_Framework_comparisonStatTotals, 8);
+        VS::Core::Memory::ZeroLiveWordsBackward(&Menu_Framework_comparisonStatTotals, 8);
     }
 }
 

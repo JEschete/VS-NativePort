@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
-#include "Core/Random.h"
 #include "Field/RoomLoading.h"
 #include "Field/Traps.h"
 #include "Items/Equipment.h"
@@ -27,7 +27,7 @@ int Field_RollRiskLockBreak(void)
     if (risk_derived_percent > 100) {
         risk_derived_percent = 100;
     }
-    return Core_Random_NextBounded(100) < (risk_derived_percent + 20);
+    return VS::Core::NextLiveRandomBounded(100) < (risk_derived_percent + 20);
 }
 
 // decomp: BATTLE.PRG _damageFromTrapPanel (src/BATTLE/BATTLE.PRG/146C.c:11730)
@@ -133,7 +133,7 @@ short Field_CalculateTrapPanelDamage(Battle_ActionDefinition* action,
     }
 
     if (withRandMod != 0) {
-        randMod = Core_Random_NextAveraged(11) - 5;
+        randMod = VS::Core::NextLiveRandomAveraged(11) - 5;
     } else {
         randMod = 0;
     }
@@ -255,7 +255,7 @@ short Field_CalculateHealingPanelRecovery(Battle_ActionDefinition* action,
     }
 
     if (withRandMod != 0) {
-        randMod = Core_Random_NextAveraged(11) - 5;
+        randMod = VS::Core::NextLiveRandomAveraged(11) - 5;
     } else {
         randMod = 0;
     }

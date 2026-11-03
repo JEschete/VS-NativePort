@@ -16,6 +16,9 @@
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Random.hpp"
+#include "Core/RandomLive.hpp"
+#include "Core/String/GameText.hpp"
+#include "Core/String/GameTextLive.hpp"
 #include "Legacy/Core/LibEtc.h"
 
 extern "C" {
@@ -456,11 +459,12 @@ TEST_CASE("Frame work baseline resets at actual logical frame boundaries",
 TEST_CASE("Copied shuffled random draws match the native sequence",
           "[core][random]") {
   OriginalRandomState state;
-  Core_Random_InitializeShuffleTable();
+  Core::InitializeLiveRandomShuffleTable();
   Core::Random expected;
   for (int maximum : {0, 1, 2, 255, 1024, 65536}) {
-    CHECK(Core_Random_NextBounded(maximum) == expected.Next(maximum));
-    CHECK(Core_Random_NextAveraged(maximum) == expected.NextSmoothed(maximum));
+    CHECK(Core::NextLiveRandomBounded(maximum) == expected.Next(maximum));
+    CHECK(Core::NextLiveRandomAveraged(maximum) ==
+          expected.NextSmoothed(maximum));
     CHECK(Core_Random_Rand() == expected.Raw());
   }
 }
@@ -483,7 +487,7 @@ TEST_CASE("Original random ranges preserve unordered and equal bounds",
     for (int sample = 0; sample < 64; ++sample) {
       const auto value =
           low == high ? low : low + expected.Next() % (high - low);
-      CHECK(Core_Random_RandomRangeExclusive(first, second) == value);
+      CHECK(Core::LiveRandomRangeExclusive(first, second) == value);
       CHECK(Core_Random_State() == expected.State());
     }
   }
@@ -495,10 +499,138 @@ TEST_CASE("Interface random requests return high bits of the previous state",
   constexpr unsigned int kInitial = 0x81234567;
   for (int bits : {1, 8, 10, 31, 32}) {
     Core_interfaceRandomState = kInitial;
-    CHECK(Core_Random_NextInterfaceRandomBits(bits) ==
+    CHECK(Core::NextLiveInterfaceRandomBits(bits) ==
           (kInitial >> (32 - bits)));
     CHECK(Core_interfaceRandomState == kInitial * 0x19660Du);
   }
+}
+
+TEST_CASE("An interface random request for no bits returns the whole state",
+          "[core][random]") {
+  // vs_battle_keystreamBits shifts with srlv, which takes the count modulo 32
+  // (#277).
+  std::uint32_t keystream = 0x81234567;
+  CHECK(Core::Random::NextInterfaceRandomBits(keystream, 0) == 0x81234567u);
+  CHECK(keystream == 0x81234567u * 0x19660Du);
+  CHECK(Core::Random::NextInterfaceRandomBits(keystream, 32) ==
+        0x81234567u * 0x19660Du);
+}
+
+TEST_CASE("Random ranges wrap their span and sum like the original",
+          "[core][random]") {
+  constexpr i32 kLow = std::numeric_limits<i32>::min();
+  constexpr i32 kHigh = std::numeric_limits<i32>::max();
+  Core::Rand15 source(1);
+  Core::Rand15 expected(1);
+  // high - low wraps to -1, so every draw is 0 past the lower bound.
+  CHECK(Core::Random::RandomRangeExclusive(source, kHigh, kLow) == kLow);
+  expected.Next();
+  CHECK(source.State() == expected.State());
+  CHECK(Core::Random::RandomRangeExclusive(source, 7, 7) == 7);
+  CHECK(source.State() == expected.State());
+}
+
+TEST_CASE("A corrupt shuffle cursor restarts from the last table entry",
+          "[core][random]") {
+  std::array<i32, Core::Random::TableSize> table{};
+  std::array<i32, Core::Random::TableSize> reference{};
+  Core::Rand15 source;
+  Core::Rand15 reference_source;
+  i32 index = 0;
+  i32 reference_index = 0;
+  Core::Random::InitializeShuffleTable(source, table, index);
+  Core::Random::InitializeShuffleTable(reference_source, reference,
+                                       reference_index);
+  CHECK(index == 96);
+  for (const i32 corrupt : {-1, 97, 0x10000}) {
+    index = corrupt;
+    reference_index = 96;
+    CHECK(Core::Random::NextBounded(source, table, index, 1000) ==
+          Core::Random::NextBounded(reference_source, reference,
+                                    reference_index, 1000));
+    CHECK(index == reference_index);
+    CHECK(table == reference);
+  }
+  // 0x7FFFFFFF * 97 wraps to 0x7FFFFF9F, which selects entry 65535; the
+  // selection is clamped the same way.
+  table[static_cast<std::size_t>(index)] = 0x7FFFFFFF;
+  static_cast<void>(Core::Random::NextBounded(source, table, index, 1000));
+  CHECK(index == 96);
+  CHECK(table[96] >= 0);
+  CHECK(table[96] <= Core::Rand15::kMaximum);
+}
+
+TEST_CASE("Game text copies are bounded and keep the terminator",
+          "[core][text]") {
+  namespace Text = VS::Core::String;
+  const std::array<std::uint8_t, 4> source{1, 2, Text::kGameTextTerminator,
+                                           9};
+  std::array<std::uint8_t, 6> destination{};
+  destination.fill(0xAA);
+  CHECK(Text::CopyGameText(destination, source) == 3);
+  CHECK(destination ==
+        std::array<std::uint8_t, 6>{1, 2, 0xE7, 0xAA, 0xAA, 0xAA});
+
+  CHECK(Text::AppendGameText(destination, source) == 3);
+  CHECK(destination == std::array<std::uint8_t, 6>{1, 2, 1, 2, 0xE7, 0xAA});
+  CHECK(Text::AppendGameText(destination, source) == 0);
+  CHECK(destination == std::array<std::uint8_t, 6>{1, 2, 1, 2, 0xE7, 0xAA});
+
+  std::array<std::uint8_t, 2> small{0xAA, 0xAA};
+  CHECK(Text::CopyGameText(small, source) == 0);
+  CHECK(small == std::array<std::uint8_t, 2>{0xAA, 0xAA});
+  const std::array<std::uint8_t, 3> unterminated{1, 2, 3};
+  CHECK(Text::CopyGameText(destination, unterminated) == 0);
+}
+
+TEST_CASE("Game numbers encode digits, sign, terminator and percent glyph",
+          "[core][text]") {
+  namespace Text = VS::Core::String;
+  std::array<std::uint8_t, 16> buffer{};
+  CHECK(Text::FormatGameInteger(buffer, -12) == 4);
+  CHECK(std::equal(buffer.begin(), buffer.begin() + 4,
+                   std::array<std::uint8_t, 4>{0xFD, 1, 2, 0xE7}.begin()));
+  CHECK(Text::GameIntegerBytes(std::numeric_limits<std::int32_t>::min()) == 12);
+
+  // The original copies the four-byte vsstring literal {%, terminator, 0, 0}
+  // rather than an unencoded "%" (#277).
+  buffer.fill(0xAA);
+  CHECK(Text::FormatGamePercent(buffer, 42) == 6);
+  CHECK(std::equal(
+      buffer.begin(), buffer.begin() + 7,
+      std::array<std::uint8_t, 7>{4, 2, 0x94, 0xE7, 0, 0, 0xAA}.begin()));
+  CHECK(Text::GamePercentBytes(100) == 7);
+
+  std::array<std::uint8_t, 6> tight{};
+  tight.fill(0xAA);
+  CHECK(Text::FormatGamePercent(tight, 100) == 0);
+  CHECK(std::all_of(tight.begin(), tight.end(),
+                    [](auto byte) { return byte == 0xAA; }));
+}
+
+TEST_CASE("Live game text bounds array destinations and reports refusals",
+          "[core][text]") {
+  namespace Text = VS::Core::String;
+  char tight[6];
+  std::fill(std::begin(tight), std::end(tight), '\x55');
+  const auto before = Text::RefusedLiveTextCount();
+  Text::FormatLiveGamePercent(tight, 100);
+  CHECK(Text::RefusedLiveTextCount() == before + 1);
+  CHECK(std::all_of(std::begin(tight), std::end(tight),
+                    [](char byte) { return byte == '\x55'; }));
+
+  char roomy[16];
+  Text::FormatLiveGameInteger(roomy, 305);
+  CHECK(Text::RefusedLiveTextCount() == before + 1);
+  CHECK(static_cast<std::uint8_t>(roomy[3]) == Text::kGameTextTerminator);
+
+  const std::uint8_t name[] = {7, 8, Text::kGameTextTerminator};
+  std::uint8_t* destination = reinterpret_cast<std::uint8_t*>(roomy) + 4;
+  Text::CopyLiveGameText(destination, name);
+  CHECK(roomy[4] == 7);
+  CHECK(roomy[5] == 8);
+  CHECK(static_cast<std::uint8_t>(roomy[6]) == Text::kGameTextTerminator);
+  CHECK(Text::RefusedLiveTextCount() == before + 1);
 }
 
 TEST_CASE("Vector arithmetic preserves destination order and aliases",

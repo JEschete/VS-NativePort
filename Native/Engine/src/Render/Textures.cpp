@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Runtime.h"
 #include "OverlayWorkspace.h"
 #include "Render/Render.h"
 #include "Render/Textures.h"
@@ -67,7 +67,7 @@ int Render_ReserveTexturePageRange(u_int first_page, u_int page_count, int owner
             }
         }
     }
-    Core_IgnoreDiagnostic(100, 0);
+    VS::Core::IgnoreDiagnostic(100, 0);
     return 0;
 }
 
@@ -86,7 +86,7 @@ int Render_RetireTexturePageRange(u_int first_page, u_int page_count, int owner_
         }
 
         if (owner_mismatch != 0) {
-            Core_IgnoreDiagnostic(101, 0);
+            VS::Core::IgnoreDiagnostic(101, 0);
         } else {
             if (owner_mismatch < page_count) {
                 for (i = 0; i < page_count; ++i) {
@@ -98,7 +98,7 @@ int Render_RetireTexturePageRange(u_int first_page, u_int page_count, int owner_
         return !owner_mismatch;
     }
 
-    Core_IgnoreDiagnostic(101, 0);
+    VS::Core::IgnoreDiagnostic(101, 0);
     return 0;
 }
 

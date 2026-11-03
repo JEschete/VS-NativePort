@@ -732,50 +732,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Core\\Memory\\Copy.cpp": [
-[
-19,
-[
-"    word_cursor = destination + byte_count;"
-],
-[
-"    word_cursor = (int *)(((u_char*)(destination)) + byte_count);"
-]
-],
-[
-50,
-[
-"        in_Src += 0x10;",
-"        in_Dst += 0x10;"
-],
-[
-"        in_Src = (u_char*)(in_Src) + (0x10);",
-"        in_Dst = (u_char*)(in_Dst) + (0x10);"
-]
-],
-[
-57,
-[
-"        in_Dst += 4;",
-"        in_Src += 4;"
-],
-[
-"        in_Dst = (u_char*)(in_Dst) + (4);",
-"        in_Src = (u_char*)(in_Src) + (4);"
-]
-],
-[
-81,
-[
-"        in_A += 8;",
-"        in_B += 8;"
-],
-[
-"        in_A = (u_char*)(in_A) + (8);",
-"        in_B = (u_char*)(in_B) + (8);"
-]
-]
-],
 "Native\\Engine\\src\\Input\\Controller.cpp": [
 [
 85,

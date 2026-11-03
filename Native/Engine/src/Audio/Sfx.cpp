@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Control/SoundControl.h"
@@ -6,7 +7,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Audio/SoundBanks.h"
 #include "Core/Diagnostics.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
@@ -141,7 +141,7 @@ void Audio_PlaySfx(int channel_group, long id, int pan, int volume)
         break;
 
     default:
-        Core_IgnoreDiagnostic(0x95, 0);
+        VS::Core::IgnoreDiagnostic(0x95, 0);
         break;
     }
 }
@@ -260,7 +260,7 @@ intptr_t Audio_ResolveSfxProgram(int channel_group, int effect_id)
         }
         break;
     default:
-        Core_IgnoreDiagnostic(0x95, 0);
+        VS::Core::IgnoreDiagnostic(0x95, 0);
         program_address = 0;
         break;
     }
@@ -378,7 +378,7 @@ void Audio_PlayBankSfx(int channel_group, u_int sound_bank[], u_int sound_index,
             }
         } else if (channel_group == 0x7E) {
         } else {
-            Core_IgnoreDiagnostic(0x95, 0);
+            VS::Core::IgnoreDiagnostic(0x95, 0);
         }
         Audio_PlaySfxProgramChannel(bank_program, effect_tag, pan, volume);
     }

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/HitChance.h"
-#include "Core/Random.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
 #include "Items/Loadout.h"
@@ -239,7 +239,7 @@ int Battle_AgilityHitChance(Battle_ActionDefinition* action, Battle_HitResult* s
     agiDiff += 100;
 
     if (addVariance != 0) {
-        int variance = Core_Random_NextAveraged(11);
+        int variance = VS::Core::NextLiveRandomAveraged(11);
         int variance_base_chance = agiDiff - 5;
         agiDiff = variance_base_chance + variance;
     }
@@ -291,7 +291,7 @@ int Battle_IntelligenceHitChance(Battle_ActionDefinition* action, Battle_HitResu
     intDiff = sourceActorValue - targetActorValue;
 
     if (addVariance != 0) {
-        int variance = Core_Random_NextAveraged(11);
+        int variance = VS::Core::NextLiveRandomAveraged(11);
         int variance_base_chance = intDiff - 5;
         intDiff = variance_base_chance + variance;
     }
@@ -345,7 +345,7 @@ int Battle_CostAdjustedAgilityHitChance(Battle_ActionDefinition* action, Battle_
     agiDiff = v - action->cost;
 
     if (addVariance != 0) {
-        int variance = Core_Random_NextAveraged(11);
+        int variance = VS::Core::NextLiveRandomAveraged(11);
         int variance_base_chance = agiDiff - 5;
         agiDiff = variance_base_chance + variance;
     }
@@ -432,7 +432,7 @@ int Battle_RollActionHit(Battle_ActionDefinition* action, Battle_HitResult* sour
         target->target.hitThreshold = threshold;
     }
 
-    chance = Core_Random_NextBounded(100);
+    chance = VS::Core::NextLiveRandomBounded(100);
 
     if (threshold != 255) {
         if ((source->targetsPosition == 0) && (source->target.targetActor == 0)) {

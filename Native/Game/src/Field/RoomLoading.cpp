@@ -3,6 +3,7 @@
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
+#include "Core/Runtime.hpp"
 #include "Field/MinimapSceneLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -33,9 +34,7 @@ extern "C" {
 #include "Boot/GameLoop.h"
 #include "Boot/Lifecycle.h"
 #include "CdDrive.h"
-#include "Core/Compatibility.h"
 #include "Core/Memory/Heap.h"
-#include "Core/Runtime.h"
 #include "DiscQueue.h"
 #include "Effects/Runtime.h"
 #include "Effects/Weather.h"
@@ -125,7 +124,7 @@ void Field_BeginSceneActorTransition(void)
 void Field_LoadZoneRoomFileTable(void* room_file_table_data, int size)
 {
     if (size == 0) {
-        Core_IgnoreDiagnostic(0x8B, 0);
+        VS::Core::IgnoreDiagnostic(0x8B, 0);
     }
     Field_zoneContext.mpdFiles = (Content_DiscFile *)(Core_Memory_AllocateFromLowEnd(size));
     VS::Core::Memory::CopyLiveAlignedWords(Field_zoneContext.mpdFiles, room_file_table_data, size);
@@ -160,11 +159,11 @@ void Field_QueueZoneLoad(int id)
     cdFile.lba = Field_legacyZoneDiscFiles[id].lba;
     cdFile.size = Field_legacyZoneDiscFiles[id].size;
     if (Field_zoneContext.zndDiscRequest != 0) {
-        Core_IgnoreDiagnostic(0x87, 0);
+        VS::Core::IgnoreDiagnostic(0x87, 0);
     }
     Field_zoneContext.zndDiscRequest = Content_AllocateDiscRequest(&cdFile);
     if (Field_zoneContext.zndData != NULL) {
-        Core_IgnoreDiagnostic(0x88, 0);
+        VS::Core::IgnoreDiagnostic(0x88, 0);
     }
     Field_zoneContext.zndData = Core_Memory_AllocateFromHighEnd(cdFile.size);
     Content_EnqueuePriorityDiscRequest(Field_zoneContext.zndDiscRequest, Field_zoneContext.zndData);
@@ -412,7 +411,7 @@ void Field_SpawnRoomActors(void)
                     }
                 }
                 if (j >= 10) {
-                    Core_IgnoreDiagnostic(0x86, 0);
+                    VS::Core::IgnoreDiagnostic(0x86, 0);
 
                     if (Field_zoneContext.zudData != NULL) {
                         Core_Memory_FreeFromHighEnd(Field_zoneContext.zudData);
@@ -426,7 +425,7 @@ void Field_SpawnRoomActors(void)
                 if ((Battle_actors[slot + 4] == NULL) && (slots[slot + 4] == 0)) {
                     slots[slot + 4] = 1;
                 } else {
-                    Core_IgnoreDiagnostic(0x86, 0);
+                    VS::Core::IgnoreDiagnostic(0x86, 0);
 
                     if (Field_zoneContext.zudData != NULL) {
                         Core_Memory_FreeFromHighEnd(Field_zoneContext.zudData);
@@ -469,7 +468,7 @@ void Field_SpawnRoomActors(void)
                         }
                     }
                     if (j >= 16) {
-                        Core_IgnoreDiagnostic(0x86, 0);
+                        VS::Core::IgnoreDiagnostic(0x86, 0);
                         return;
                     }
                 }
@@ -619,11 +618,11 @@ void Field_QueueRoomLoad(int id)
     file.size = Field_zoneContext.mpdFiles[id].size;
 
     if (Field_zoneContext.mpdDiscRequest != NULL) {
-        Core_IgnoreDiagnostic(0x89, 0);
+        VS::Core::IgnoreDiagnostic(0x89, 0);
     }
     Field_zoneContext.mpdDiscRequest = Content_AllocateDiscRequest(&file);
     if (Field_zoneContext.mpdData != NULL) {
-        Core_IgnoreDiagnostic(0x8A, 0);
+        VS::Core::IgnoreDiagnostic(0x8A, 0);
     }
     Field_zoneContext.mpdData = Core_Memory_AllocateFromHighEnd(file.size);
     Content_EnqueuePriorityDiscRequest(Field_zoneContext.mpdDiscRequest, Field_zoneContext.mpdData);
@@ -867,7 +866,7 @@ void Field_UnloadCurrentRoom(void)
     for (i = 0; i < 2; ++i) {
         Render_frameScratch.orderingTable = ((u_char*)(Render_legacyOrderingTables[Render_frameBuf])) + 0x10;
         ClearOTagR((u_long *)(Render_frameScratch.orderingTable), 0x800);
-        Core_NoOperation();
+        VS::Core::NoOperation();
         Render_DrawScreenTransition(Render_frameScratch.orderingTable);
         Render_PresentFieldFrame((u_long *)(((u_char*)(Render_frameScratch.orderingTable)) + 0x1FFC));
     }

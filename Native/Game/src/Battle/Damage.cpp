@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
-#include "Core/Random.h"
 #include "Event/Cutscene.h"
 #include "Event/Triggers.h"
 #include "Items/Equipment.h"
@@ -393,7 +393,7 @@ short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_
     }
 
     if (withRandMod != 0) {
-        value += 1 + Core_Random_NextBounded(5);
+        value += 1 + VS::Core::NextLiveRandomBounded(5);
     }
 
     if ((applyStatuses != 0) && (sourceActor->statuses & 2)) {
@@ -402,7 +402,7 @@ short Battle_CalculatePhysicalHitDamage(Battle_ActionDefinition* action, Battle_
 
     if (withRandMod != 0) {
 
-        if ((action->id < 6) && (Core_Random_NextBounded(100) < (sourceActor->risk / 10) + 10)) {
+        if ((action->id < 6) && (VS::Core::NextLiveRandomBounded(100) < (sourceActor->risk / 10) + 10)) {
             value = (short)((u_int)(value << 0x10) >> 0xF);
             Battle_criticalHitOccurred = 1;
         }
@@ -582,7 +582,7 @@ short Battle_CalculateSpellHitDamage(Battle_ActionDefinition* action, Battle_Hit
     }
 
     if (addRandMod != 0) {
-        value += 1 + Core_Random_NextBounded(5);
+        value += 1 + VS::Core::NextLiveRandomBounded(5);
         if (nHit == 0) {
             if (calculation.sourceAffinity != 0) {
                 if (target->targetsPosition == 0) {
@@ -801,7 +801,7 @@ short Battle_CalculateSpellHealing(Battle_ActionDefinition* action, Battle_HitRe
     }
 
     if (withRandMod != 0) {
-        randMod = Core_Random_NextAveraged(11) - 5;
+        randMod = VS::Core::NextLiveRandomAveraged(11) - 5;
     } else {
         randMod = 0;
     }

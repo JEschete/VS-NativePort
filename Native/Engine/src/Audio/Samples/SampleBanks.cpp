@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/VoiceOutputLive.hpp"
+#include "Core/Memory/CopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
@@ -8,7 +9,6 @@ extern "C" {
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
-#include "Core/Memory/Copy.h"
 
 // decomp: D_80036770 (D_80036770@SLUS_010.40)
 Audio_MusicSampleBankIds Audio_Samples_musicSampleBankIds;
@@ -154,7 +154,7 @@ int Audio_Samples_UploadBankChunk(int* in_Data, u_int in_Size, int in_Slot, int 
                     spuAddr = in_Data[4];
                     instrumentIndex = in_Data[6];
                 }
-                Core_Memory_CopyWords(in_Data, Audio_Samples_bankChunkHeader, 0x40);
+                VS::Core::Memory::CopyLiveWords(in_Data, Audio_Samples_bankChunkHeader, 0x40);
                 in_Data += 0x10;
                 in_Size -= 0x40;
                 Audio_Samples_bankChunkHeader[4] = spuAddr;
@@ -177,7 +177,7 @@ int Audio_Samples_UploadBankChunk(int* in_Data, u_int in_Size, int in_Slot, int 
             }
             // The original reuses the spuAddr stack slot for the chunk size.
             spuAddr = chunk;
-            Core_Memory_CopyWords(in_Data, Audio_Samples_bankStream.instrumentDestination, spuAddr);
+            VS::Core::Memory::CopyLiveWords(in_Data, Audio_Samples_bankStream.instrumentDestination, spuAddr);
             in_Data += (u_int)spuAddr / 4;
             in_Size -= spuAddr;
             Audio_Samples_bankStream.instrumentDestination += (u_int)spuAddr / 4;

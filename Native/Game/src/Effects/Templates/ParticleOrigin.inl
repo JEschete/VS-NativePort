@@ -1,9 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/RandomLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Core/Math/Interpolation.h"
 #include "Core/Math/Vector.h"
-#include "Core/Random.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -105,9 +107,9 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
                     origin_control_point->vx = -emitter_scratch->extent.vx;
                 jump1:
                     origin_control_point->vy =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     origin_control_point->vz =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 2:
@@ -118,9 +120,9 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
                     origin_control_point->vy = -emitter_scratch->extent.vy;
                 jump2:
                     origin_control_point->vx =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
                     origin_control_point->vz =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vz, -emitter_scratch->extent.vz);
                     break;
 
                 case 4:
@@ -131,9 +133,9 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
                     origin_control_point->vz = -emitter_scratch->extent.vz;
                 jump3:
                     origin_control_point->vx =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vx, -emitter_scratch->extent.vx);
                     origin_control_point->vy =
-                        Core_Random_RandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
+                        VS::Core::LiveRandomRangeExclusive(emitter_scratch->extent.vy, -emitter_scratch->extent.vy);
                     break;
                 }
                 break;

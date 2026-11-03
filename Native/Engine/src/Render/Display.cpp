@@ -1,7 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/RandomLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Random.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Input/Controllers.h"
@@ -73,7 +73,7 @@ int Render_PresentFieldFrame(u_long* otag)
     u_int second_port_pressed_buttons;
 
     Render_frameBuf = Render_frameBuf == 0;
-    Core_Random_NextBounded(0);
+    VS::Core::NextLiveRandomBounded(0);
     Core_Gte_SetGeomOffset(160, 112);
     ret = State_UpdatePlayTimeAndLoading(State_tickSpeed);
     if (Render_isFrameStepPaused != 0) {

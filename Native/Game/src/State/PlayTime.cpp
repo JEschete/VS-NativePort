@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Runtime.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
-#include "Core/Runtime.h"
 #include "State/GameTime.h"
 #include "State/PlayTime.h"
 #include "State/Timers.h"
@@ -15,7 +15,7 @@ int State_UpdatePlayTimeAndLoading(int vsync)
 {
     int vs = VSync(vsync);
     if (vsync != 1) {
-        Core_IdleInstruction();
+        VS::Core::IdleInstruction();
     }
 
     Content_UpdateDiscQueue();

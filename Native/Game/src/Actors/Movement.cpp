@@ -5,6 +5,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Runtime.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -28,7 +29,6 @@ extern "C" {
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
 #include "Core/Diagnostics.h"
-#include "Core/Runtime.h"
 #include "Effects/ActionEffects.h"
 #include "Field/Camera.h"
 #include "Field/Collision.h"
@@ -341,7 +341,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 }
                 break;
             default:
-                Core_IgnoreDiagnostic(0xC1, 0);
+                VS::Core::IgnoreDiagnostic(0xC1, 0);
                 break;
             }
             actor->commandState = state;

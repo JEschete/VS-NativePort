@@ -220,20 +220,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Core\Arena.cpp" />
-    <ClCompile Include="src\Core\Callbacks.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Core\Compatibility.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
     <ClCompile Include="src\Core\FrameClock.cpp" />
     <ClCompile Include="src\Core\FrameTiming.cpp" />
     <ClCompile Include="src\Core\Gte.cpp" />
@@ -282,13 +268,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Core\Memory\Copy.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Core\Memory\Copy.cpp" />
+    <ClCompile Include="src\Core\Memory\CopyLive.cpp" />
     <ClCompile Include="src\Core\Memory\Heap.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
       <WarningLevel>Level1</WarningLevel>
@@ -321,21 +302,14 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Core\RandomGenerator.cpp" />
-    <ClCompile Include="src\Core\Runtime.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Core\RandomLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Core\Runtime.cpp" />
+    <ClCompile Include="src\Core\RuntimeLive.cpp" />
     <ClCompile Include="src\Core\Scratch.cpp" />
-    <ClCompile Include="src\Core\String\GameText.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Core\String\GameText.cpp" />
+    <ClCompile Include="src\Core\String\GameTextLive.cpp" />
     <ClCompile Include="src\Core\Unported.cpp" />
     <ClCompile Include="src\Input\Controller.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -598,21 +572,16 @@
     <ClInclude Include="src\Audio\SoundEffects\SoundEffects.h" />
     <ClInclude Include="src\Audio\Stream.h" />
     <ClInclude Include="src\Audio\Voices.h" />
-    <ClInclude Include="src\Core\Callbacks.h" />
-    <ClInclude Include="src\Core\Compatibility.h" />
     <ClInclude Include="src\Core\Legacy.h" />
     <ClInclude Include="src\Core\Math\FixedPoint.h" />
     <ClInclude Include="src\Core\Math\Interpolation.h" />
     <ClInclude Include="src\Core\Math\Matrix.h" />
     <ClInclude Include="src\Core\Math\Trig.h" />
     <ClInclude Include="src\Core\Math\Vector.h" />
-    <ClInclude Include="src\Core\Memory\Copy.h" />
     <ClInclude Include="src\Core\Memory\Heap.h" />
     <ClInclude Include="src\Core\Memory.h" />
     <ClInclude Include="src\Core\Overlays.h" />
     <ClInclude Include="src\Core\Random.h" />
-    <ClInclude Include="src\Core\Runtime.h" />
-    <ClInclude Include="src\Core\String\GameText.h" />
     <ClInclude Include="src\Input\Buttons.h" />
     <ClInclude Include="src\Input\Controller.h" />
     <ClInclude Include="src\Input\Controllers.h" />
@@ -675,11 +644,18 @@
     <ClInclude Include="include\Core\Log.hpp" />
     <ClInclude Include="include\Core\Math\Distance.hpp" />
     <ClInclude Include="include\Core\Math\ScalarMath.hpp" />
+    <ClInclude Include="include\Core\Memory\Copy.hpp" />
+    <ClInclude Include="include\Core\Memory\CopyLive.hpp" />
     <ClInclude Include="include\Core\Memory\WordCopy.hpp" />
     <ClInclude Include="include\Core\Memory\WordCopyLive.hpp" />
     <ClInclude Include="include\Core\PointerSort.hpp" />
     <ClInclude Include="include\Core\Random.hpp" />
+    <ClInclude Include="include\Core\RandomLive.hpp" />
+    <ClInclude Include="include\Core\Runtime.hpp" />
+    <ClInclude Include="include\Core\RuntimeLive.hpp" />
     <ClInclude Include="include\Core\Scratch.h" />
+    <ClInclude Include="include\Core\String\GameText.hpp" />
+    <ClInclude Include="include\Core\String\GameTextLive.hpp" />
     <ClInclude Include="include\Core\Text\TextCode.h" />
     <ClInclude Include="include\Core\Types.hpp" />
     <ClInclude Include="include\Core\Unported.h" />
