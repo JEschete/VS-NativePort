@@ -29,17 +29,17 @@ architecture changes rather than per-function work, so this ledger is what track
 | 26: #59 Event VM results and execution | 0 | 236 | 3,830 | 59 | 178 | 0 |
 | 30A: #253 Typed voices and owned audio playback | 0 | 303 | 5,582 | 233 | 165 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 761 | 11,774 | 180 | 587 | 0 |
-| 33: #53 Movie sessions and A/V clocks | 0 | 7 | 132 | 4 | 7 | 0 |
+| 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 3208 | 100,989 | 1718 | 2042 | 0 |
+| **Total** | 0 | 3201 | 100,857 | 1718 | 2035 | 0 |
 
 | Status | Functions |
 | --- | ---: |
 | done | 552 |
-| todo | 3,208 |
+| todo | 3,201 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 7 done, 46 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 8 done, 43 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -51,16 +51,16 @@ architecture changes rather than per-function work, so this ledger is what track
 | 6 | render-images-textures-font | planned | - | 4 | 39 | 1,543 |
 | 7 | input-controller | done | subagent a7-input; coordinator review | 1 | 0 | 0 |
 | 8 | save-memory-card | done | agent:a8-save | 2 | 0 | 0 |
-| 9 | movie-intro | planned | - | 1 | 7 | 132 |
+| 9 | movie-intro | done | coordinator | 1 | 0 | 0 |
 | 10 | audio-seq-voices | done | agent:a10-audio-voices | 3 | 0 | 0 |
-| 11 | audio-seq-control | planned | - | 3 | 59 | 1,665 |
+| 11 | audio-seq-control | active | agent:a11-audio-seq-control | 3 | 59 | 1,665 |
 | 12 | audio-mixer-driver | planned | - | 3 | 56 | 1,497 |
 | 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
 | 14 | audio-control-sfx | planned | - | 3 | 80 | 1,092 |
 | 15 | audio-music-streams | planned | - | 5 | 50 | 625 |
 | 16 | content | planned | - | 6 | 43 | 1,945 |
 | 17 | state-boot | planned | - | 6 | 23 | 976 |
-| 18 | items | planned | - | 6 | 66 | 2,010 |
+| 18 | items | active | agent:a18-items | 6 | 66 | 2,010 |
 | 19 | actors-state-loading | planned | - | 6 | 63 | 1,812 |
 | 20 | actors-animation-skeleton | planned | - | 2 | 68 | 2,368 |
 | 21 | actors-movement | planned | - | 1 | 58 | 2,872 |
@@ -102,20 +102,19 @@ architecture changes rather than per-function work, so this ledger is what track
 | --- | ---: | ---: |
 | Called from generated code | 0 | 1,750 |
 | Referenced by the original-address module table | 0 | 1,892 |
-| Calls an SDK shim | 0 | 431 |
-| Signature uses SDK integer types or `void*` | 0 | 759 |
-| Compiled with relaxed settings | 0 | 3,208 |
+| Calls an SDK shim | 0 | 426 |
+| Signature uses SDK integer types or `void*` | 0 | 758 |
+| Compiled with relaxed settings | 0 | 3,201 |
 
-Function bodies: 3,241 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
+Function bodies: 3,234 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 
-SDK shim sites still recording `VS_UNPORTED`: 44.
+SDK shim sites still recording `VS_UNPORTED`: 33.
 
 | Shim source | Sites | Calls |
 | --- | ---: | --- |
-| `Native/Content/Legacy/LibDs.cpp` | 13 | `libds:DsCommand`, `libds:DsControl`, `libds:DsControlB`, `libds:DsGetSector`, `libds:DsInit`, `libds:DsPacket`, `libds:DsRead2`, `libds:StFreeRing`, `libds:StGetBackloc`, `libds:StGetNext`, `libds:StSetRing`, `libds:StSetStream`, `libds:StUnSetRing` |
+| `Native/Content/Legacy/LibDs.cpp` | 7 | `libds:DsCommand`, `libds:DsControlB`, `libds:DsGetSector`, `libds:DsInit`, `libds:DsPacket`, `libds:StGetBackloc`, `libds:StUnSetRing` |
 | `Native/Engine/Legacy/Audio/LibSpu.cpp` | 9 | `libspu:SpuGetReverbModeType`, `libspu:SpuGetVoiceEnvelope`, `libspu:SpuSetCommonMasterVolume`, `libspu:SpuSetNoiseClock`, `libspu:SpuSetReverb`, `libspu:SpuSetReverbModeDepth`, `libspu:SpuSetReverbModeType`, `libspu:SsUtReverbOff`, `libspu:SsUtReverbOn` |
 | `Native/Engine/Legacy/Core/LibEtc.cpp` | 1 | `libetc:GetRCnt (counter other than 2)` |
-| `Native/Engine/Legacy/Movie/LibPress.cpp` | 5 | `libpress:DecDCTin`, `libpress:DecDCTout`, `libpress:DecDCToutCallback`, `libpress:DecDCTvlc2`, `libpress:DecDCTvlcBuild` |
 | `Native/Engine/Legacy/Render/LibGpu.cpp` | 1 | `libgpu: more than 2^24 packet addresses linked` |
 | `Native/Engine/Legacy/Save/LibCard.cpp` | 15 | `libcard:InitCARD`, `libcard:LegacyApi_cd`, `libcard:LegacyApi_close`, `libcard:LegacyApi_erase`, `libcard:LegacyApi_firstfile`, `libcard:LegacyApi_nextfile`, `libcard:LegacyApi_open`, `libcard:LegacyApi_read`, `libcard:LegacyApi_rename`, `libcard:LegacyApi_write`, `libcard:StartCARD`, `libcard:_card_clear`, `libcard:_card_format`, `libcard:_card_info`, `libcard:_card_load` |
 

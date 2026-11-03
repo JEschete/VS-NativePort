@@ -36,16 +36,16 @@ generator-managed output.
 | ---: | --- |
 | 552 | owned functions |
 | 552 | owned functions in C++ sources |
-| 3208 | generated function rows |
-| 2 | retired function rows |
+| 3201 | generated function rows |
+| 9 | retired function rows |
 | 445 | excluded function rows |
 
 | Column | `x` | Other non-blank | Blank |
 | --- | ---: | ---: | ---: |
-| `copied` | 3,760 | 2 (`retired`) | 445 |
-| `compiles` | 3,756 | 0 | 451 |
+| `copied` | 3,753 | 9 (`retired`) | 445 |
+| `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
-| `understood` | 173 | 0 | 4,034 |
+| `understood` | 166 | 0 | 4,041 |
 | `modernized` | 552 | 0 | 3,655 |
 | `cpp` | 552 | 0 | 3,655 |
 | `verified` | 45 | 0 | 4,162 |
@@ -260,6 +260,7 @@ The sixty-first slice (#276 row 5 part 1) is the framebuffer effect and screen t
 and the generated Render_ routines, their twelve state globals, the D_800F1ABC_t packet record and their module address entries are retired.
 The sixty-second slice (#276 row 8) is the save memory card and Ashley snapshot (32 functions in VS::Save::MemoryCard GameFiles and VS::Save Snapshot): typed cores for card events, file names, slots, checksums, cipher, directory scans, readiness, reads, writes and packaging refuse bad input before writing, ClearEvents now clears the events, the directory holds the 15 entries the original overran, and the generated routines, their MENU7 storage and two resident module entries are retired.
 The sixty-third slice (#276 row 10) is the SEQ voice and channel opcodes (71 functions in VS::Audio::Seq ChannelCommands, Envelope and Modulation): typed cores over a bounded operand window keep the original's operand signedness, wrapping slide and fine-tune arithmetic and unmasked ADSR fields, refuse truncated operands, out-of-table instruments, patches outside the music data and missing music layers before changing a channel, and the generated handlers, two headers and two unreferenced module bindings are retired.
+The movie-intro retirement (#276 row 9) removes the TITLE MDEC strip pipeline (seven routines, eleven buffer and stream globals and MovieData_t) that the converted-movie intro (F03650-F03653) had already replaced; the live host owns the draw page, and the libpress shims (EC-08 LibPress.h/.cpp) and the libds ring-stream shims are deleted at zero uses. EC-08 still carries the page-space presentation debt.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
