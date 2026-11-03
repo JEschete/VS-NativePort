@@ -283,8 +283,10 @@ def check_clones(files: list[str]) -> list[Finding]:
         ),
         encoding="utf-8",
     )
+    sources = directory / "files.json"
+    sources.write_text(json.dumps(files), encoding="utf-8")
     report.unlink(missing_ok=True)
-    run([node, str(executable), "--config", str(config), *files])
+    run([node, str(HERE / "jscpd_files.js"), str(sources), "--config", str(config)])
     document = json.loads(report.read_text(encoding="utf-8"))
     if files and document["statistics"]["total"]["sources"] == 0:
         raise RuntimeError("Clone checker analyzed no files")
