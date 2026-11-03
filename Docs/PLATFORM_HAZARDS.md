@@ -102,9 +102,9 @@ there would have hidden the defect and left the wrong behavior in place.
 | #62 | 25 |
 | #59 | 25 |
 | #47 | 24 |
-| #50 | 9 |
+| #50 | 11 |
 | #48 | 7 |
-| #54 | 7 |
+| #54 | 5 |
 | #44 | 5 |
 | #49 | 2 |
 | #51 | 2 |

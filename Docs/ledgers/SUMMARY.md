@@ -34,32 +34,32 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 614 | owned functions |
-| 614 | owned functions in C++ sources |
-| 3137 | generated function rows |
-| 11 | retired function rows |
+| 624 | owned functions |
+| 624 | owned functions in C++ sources |
+| 3126 | generated function rows |
+| 12 | retired function rows |
 | 445 | excluded function rows |
 
 | Column | `x` | Other non-blank | Blank |
 | --- | ---: | ---: | ---: |
-| `copied` | 3,751 | 11 (`retired`) | 445 |
+| `copied` | 3,750 | 12 (`retired`) | 445 |
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 614 | 0 | 3,593 |
-| `cpp` | 614 | 0 | 3,593 |
+| `modernized` | 624 | 0 | 3,583 |
+| `cpp` | 624 | 0 | 3,583 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 614 |
-| `vs_namespace` | 614 |
-| `typed_interface` | 614 |
-| `no_bridge` | 614 |
-| `strict_clean` | 614 |
-| `behavior_evidence` | 614 |
+| `source_cpp` | 624 |
+| `vs_namespace` | 624 |
+| `typed_interface` | 624 |
+| `no_bridge` | 624 |
+| `strict_clean` | 624 |
+| `behavior_evidence` | 624 |
 
-Promotion records: 614; derived `cpp=x`: 614, `cpp=wip`: 0. Verification records: 111; `verified=x` markers: 45.
+Promotion records: 624; derived `cpp=x`: 624, `cpp=wip`: 0. Verification records: 112; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -267,6 +267,8 @@ The sixty-fifth slice (#276 row 6 part 1) is the texture pages, TIM parse and te
 and the generated Render_ texture routines, the D_800F19A8 page table, the BATTLE packet begin/end helpers and their module address entries are retired.
 The sixty-sixth slice (#276 row 6 part 2) is the event-script GIM images (11 functions in VS::Render GimImages): a typed image set loads, parses and uploads the three layers from a bounded word span, lends and retires their texture pages, and builds the original tile, fade, scanline-wipe, crossfade and draw-area packets through the bounded overlay queue; files, layers and routines that do not fit are refused and counted,
 and the generated Render_ GIM routines, the gim_t layer records, the D_800EB9BC, D_800EC25C, D_800F51C8 and _gimLbas tables, the splash-layer view and their module address entries are retired.
+The sixty-seventh slice (#276 row 6 part 3) is the font and dialogue text drawers (10 functions in VS::Render EncodedText, GameFont and TextBoxText): typed cores format and measure game-encoded text in bounded spans, build the variable-width and compact glyph sprites from a FontStyle value, and reveal, scale and blend dialogue text box text through a PacketQueue, ScaledGlyphTarget or VramPixelTarget; overruns, unset strings, self-references and boxes outside Menu_textBoxes are refused and counted,
+and the generated Render_ font routines, the font style globals, the D_800F4E80 active box index, the unused _writeStringTerminator and their module address entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
