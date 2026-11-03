@@ -797,7 +797,7 @@ TEST_CASE(
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandState == 0x80);
   CHECK(fixture.actors[1].commandOpcode == 2);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE(
@@ -824,7 +824,7 @@ TEST_CASE(
   std::memcpy(&actual, record->reserved160 + 4, sizeof actual);
   CHECK(actual == preserved);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(1);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE(
@@ -834,13 +834,13 @@ TEST_CASE(
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   auto* first = fixture.ActiveRoute();
   REQUIRE(first != nullptr);
-  const auto units = VS::Core::Memory::GameHeap().free_units();
+  const auto units = VS::Core::Memory::GameHeap().FreeUnits();
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1400, 1500);
   CHECK(fixture.ActiveRoute() == first);
   CHECK(first->scriptedTargetXZ == (1200u | (1300u << 16)));
   CHECK(fixture.source.scriptedTargetXZ == (1400u | (1500u << 16)));
   CHECK(fixture.source.settingsBit14 == 3);
-  CHECK(VS::Core::Memory::GameHeap().free_units() == units);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == units);
 }
 
 TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
@@ -875,7 +875,7 @@ TEST_CASE("Scripted path requests retain missing map and AI-state gates",
   Battle_Ai_actorAiStates[1] = nullptr;
   VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   CHECK(fixture.source.nativePointer18C == nullptr);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
 }
 
@@ -955,7 +955,7 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("Scripted arrival retains signed source square-sum behavior",

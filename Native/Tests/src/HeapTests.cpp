@@ -174,13 +174,13 @@ struct StrayFreeFixture {
 
   StrayFreeFixture() {
     REQUIRE(FreeFromHighEnd(arena.heap, freed).has_value());
-    free_before = Blocks(arena.heap.free_blocks());
-    allocated_before = Blocks(arena.heap.allocated_blocks());
+    free_before = Blocks(arena.heap.FreeBlocks());
+    allocated_before = Blocks(arena.heap.AllocatedBlocks());
   }
 
   [[nodiscard]] bool Unchanged() const {
-    return Blocks(arena.heap.free_blocks()) == free_before &&
-           Blocks(arena.heap.allocated_blocks()) == allocated_before;
+    return Blocks(arena.heap.FreeBlocks()) == free_before &&
+           Blocks(arena.heap.AllocatedBlocks()) == allocated_before;
   }
 };
 
@@ -189,7 +189,7 @@ struct StrayFreeFixture {
 class ParityRun {
  public:
   explicit ParityRun(std::uint32_t seed)
-      : reference_(static_cast<int>(arena_.heap.usable_units())),
+      : reference_(static_cast<int>(arena_.heap.UsableUnits())),
         random_(seed) {}
 
   void Step() {
@@ -203,7 +203,7 @@ class ParityRun {
   }
 
   [[nodiscard]] bool Matches() const {
-    return Blocks(arena_.heap.free_blocks()) == reference_.FreeBlocks();
+    return Blocks(arena_.heap.FreeBlocks()) == reference_.FreeBlocks();
   }
 
  private:
@@ -243,11 +243,11 @@ TEST_CASE("Heap initialization keeps the original's slack unit",
   Heap heap;
   REQUIRE(InitializeHeap(heap, ram).has_value());
   // main.c:9014 blockSz = 0xF2000 / 16 - 1 for the PS1 heap.
-  CHECK(heap.usable_units() == 0xF2000 / 16 - 1);
-  CHECK(Blocks(heap.free_blocks()) ==
+  CHECK(heap.UsableUnits() == 0xF2000 / 16 - 1);
+  CHECK(Blocks(heap.FreeBlocks()) ==
         std::vector<HeapBlock>{{.start = 0, .units = 0xF2000 / 16 - 1}});
-  CHECK(heap.allocated_blocks().empty());
-  CHECK(heap.empty());
+  CHECK(heap.AllocatedBlocks().empty());
+  CHECK(heap.Empty());
 }
 
 TEST_CASE("An unaligned heap arena starts at its first whole unit",
@@ -255,7 +255,7 @@ TEST_CASE("An unaligned heap arena starts at its first whole unit",
   alignas(kHeapUnitBytes) std::array<std::byte, 128> ram{};
   Heap heap;
   REQUIRE(InitializeHeap(heap, std::span(ram).subspan(3, 64)).has_value());
-  CHECK(heap.usable_units() == 2);
+  CHECK(heap.UsableUnits() == 2);
   CHECK(MustAllocate(heap, 1) == ram.data() + 32);
 }
 
@@ -269,19 +269,19 @@ TEST_CASE("Heap arenas without two whole units are refused",
   CHECK(InitializeHeap(heap, std::span(ram).subspan(1, 32)).error() ==
         HeapError::kArenaTooSmall);
   CHECK(InitializeHeap(heap, {}).error() == HeapError::kArenaTooSmall);
-  CHECK(heap.usable_units() == 7);
+  CHECK(heap.UsableUnits() == 7);
 }
 
 TEST_CASE("An uninitialized heap refuses every request",
           "[core][memory][heap]") {
   Heap heap;
   std::array<std::byte, 16> other{};
-  CHECK_FALSE(heap.initialized());
+  CHECK_FALSE(heap.Initialized());
   CHECK(AllocateFromLowEnd(heap, 0).error() == HeapError::kExhausted);
   CHECK(AllocateFromHighEnd(heap, 0).error() == HeapError::kExhausted);
   CHECK(FreeFromLowEnd(heap, other.data()).error() == HeapError::kOutsideArena);
-  CHECK(heap.free_units() == 0);
-  CHECK(heap.largest_free_units() == 0);
+  CHECK(heap.FreeUnits() == 0);
+  CHECK(heap.LargestFreeUnits() == 0);
 }
 
 TEST_CASE("Heap allocations take 16-byte units plus a header unit",
@@ -316,18 +316,18 @@ TEST_CASE("Low-end allocations leave the remainder above them free",
   MustAllocate(arena.heap, 1);
   MustAllocate(arena.heap, 16);
   MustAllocate(arena.heap, 17);
-  CHECK(Blocks(arena.heap.allocated_blocks()) ==
+  CHECK(Blocks(arena.heap.AllocatedBlocks()) ==
         std::vector<HeapBlock>{{.start = 0, .units = 2},
                                {.start = 2, .units = 2},
                                {.start = 4, .units = 3}});
-  CHECK(Blocks(arena.heap.free_blocks()) ==
+  CHECK(Blocks(arena.heap.FreeBlocks()) ==
         std::vector<HeapBlock>{{.start = 7, .units = kArenaUnits - 1 - 7}});
 }
 
 TEST_CASE("High-end allocations take the tail of the highest fit",
           "[core][memory][heap]") {
   Arena arena;
-  const auto usable = arena.heap.usable_units();
+  const auto usable = arena.heap.UsableUnits();
   const auto first = AllocateFromHighEnd(arena.heap, 32);
   const auto second = AllocateFromHighEnd(arena.heap, 0);
   REQUIRE(first.has_value());
@@ -335,7 +335,7 @@ TEST_CASE("High-end allocations take the tail of the highest fit",
   CHECK(arena.UnitOf(first->data()) == usable - 3);
   CHECK(arena.UnitOf(second->data()) == usable - 4);
   CHECK(second->empty());
-  CHECK(Blocks(arena.heap.free_blocks()) ==
+  CHECK(Blocks(arena.heap.FreeBlocks()) ==
         std::vector<HeapBlock>{{.start = 0, .units = usable - 4}});
 }
 
@@ -346,19 +346,19 @@ TEST_CASE("Exact fits remove the free block from either end",
   MustAllocate(arena.heap, 64);
   std::byte* const hole = MustAllocate(arena.heap, 32);
   // 5 + 3 + 247 units fill the 255 usable ones.
-  MustAllocate(arena.heap, (arena.heap.usable_units() - 9) * kHeapUnitBytes);
-  CHECK(arena.heap.free_blocks().empty());
+  MustAllocate(arena.heap, (arena.heap.UsableUnits() - 9) * kHeapUnitBytes);
+  CHECK(arena.heap.FreeBlocks().empty());
   REQUIRE(FreeFromLowEnd(arena.heap, hole).has_value());
-  CHECK(Blocks(arena.heap.free_blocks()) ==
+  CHECK(Blocks(arena.heap.FreeBlocks()) ==
         std::vector<HeapBlock>{{.start = 5, .units = 3}});
   CHECK(MustAllocate(arena.heap, 32, from_high) == hole);
-  CHECK(arena.heap.free_blocks().empty());
+  CHECK(arena.heap.FreeBlocks().empty());
 }
 
 TEST_CASE("A full heap refuses even empty requests", "[core][memory][heap]") {
   Arena arena;
-  MustAllocate(arena.heap, (arena.heap.usable_units() - 1) * kHeapUnitBytes);
-  CHECK(arena.heap.free_blocks().empty());
+  MustAllocate(arena.heap, (arena.heap.UsableUnits() - 1) * kHeapUnitBytes);
+  CHECK(arena.heap.FreeBlocks().empty());
   CHECK(AllocateFromLowEnd(arena.heap, 0).error() == HeapError::kExhausted);
   CHECK(AllocateFromHighEnd(arena.heap, 0).error() == HeapError::kExhausted);
 }
@@ -381,8 +381,8 @@ TEST_CASE("Frees coalesce with both neighbours in any order",
       CHECK(released->units == 4);
       CHECK(released->guard_intact);
     }
-    CHECK(arena.heap.empty());
-    CHECK(Blocks(arena.heap.free_blocks()) ==
+    CHECK(arena.heap.Empty());
+    CHECK(Blocks(arena.heap.FreeBlocks()) ==
           std::vector<HeapBlock>{{.start = 0, .units = kArenaUnits - 1}});
   } while (std::ranges::next_permutation(order).found);
 }
@@ -501,16 +501,16 @@ TEST_CASE("The live game heap scope nests and restores",
   namespace memory = VS::Core::Memory;
   alignas(kHeapUnitBytes) std::array<std::byte, 64> outer_bytes{};
   const memory::ScopedLiveGameHeap outer(outer_bytes);
-  REQUIRE(memory::GameHeap().usable_units() == 3);
+  REQUIRE(memory::GameHeap().UsableUnits() == 3);
   {
     alignas(kHeapUnitBytes) std::array<std::byte, 256> inner_bytes{};
     const memory::ScopedLiveGameHeap inner(inner_bytes);
-    CHECK(memory::GameHeap().usable_units() == 15);
+    CHECK(memory::GameHeap().UsableUnits() == 15);
     CHECK(memory::AllocateLiveFromLowEnd(8) == inner_bytes.data() + 16);
     CHECK(memory::AllocateLiveFromHighEndAt(8) ==
           inner_bytes.data() + (14 * kHeapUnitBytes));
   }
-  CHECK(memory::GameHeap().usable_units() == 3);
+  CHECK(memory::GameHeap().UsableUnits() == 3);
 }
 
 TEST_CASE("The live game heap reports refused requests",
@@ -528,7 +528,7 @@ TEST_CASE("The live game heap reports refused requests",
   CHECK(memory::RefusedLiveHeapRequestCount() == refused + 3);
   CHECK(memory::LivePayloadCapacity(elsewhere.data()).error() ==
         HeapError::kOutsideArena);
-  CHECK(memory::GameHeap().allocated_blocks().size() == 1);
+  CHECK(memory::GameHeap().AllocatedBlocks().size() == 1);
 }
 
 TEST_CASE("The live game heap counts damaged guards and still frees",
@@ -543,6 +543,6 @@ TEST_CASE("The live game heap counts damaged guards and still frees",
   memory::FreeLiveFromHighEndAt(high);
   memory::FreeLiveFromLowEnd(low);
   CHECK(memory::DamagedLiveHeapGuardCount() == damaged + 1);
-  CHECK(memory::GameHeap().empty());
-  CHECK(memory::GameHeap().largest_free_units() == 15);
+  CHECK(memory::GameHeap().Empty());
+  CHECK(memory::GameHeap().LargestFreeUnits() == 15);
 }

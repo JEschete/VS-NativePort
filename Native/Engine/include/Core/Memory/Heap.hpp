@@ -89,23 +89,23 @@ class Heap {
   // frees kOutsideArena.
   Heap() = default;
 
-  [[nodiscard]] bool initialized() const noexcept { return !arena_.empty(); }
+  [[nodiscard]] bool Initialized() const noexcept { return !arena_.empty(); }
   // The units the first free block held: the arena but its last unit.
-  [[nodiscard]] std::uint32_t usable_units() const noexcept {
+  [[nodiscard]] std::uint32_t UsableUnits() const noexcept {
     return usable_units_;
   }
   // Ascending, never adjacent (adjacent free blocks are coalesced).
-  [[nodiscard]] std::span<const HeapBlock> free_blocks() const noexcept {
+  [[nodiscard]] std::span<const HeapBlock> FreeBlocks() const noexcept {
     return free_;
   }
   // Ascending.
-  [[nodiscard]] std::span<const HeapBlock> allocated_blocks() const noexcept {
+  [[nodiscard]] std::span<const HeapBlock> AllocatedBlocks() const noexcept {
     return allocated_;
   }
-  [[nodiscard]] std::uint32_t free_units() const noexcept;
-  [[nodiscard]] std::uint32_t largest_free_units() const noexcept;
+  [[nodiscard]] std::uint32_t FreeUnits() const noexcept;
+  [[nodiscard]] std::uint32_t LargestFreeUnits() const noexcept;
   // No block is allocated (the free blocks have then coalesced into one).
-  [[nodiscard]] bool empty() const noexcept;
+  [[nodiscard]] bool Empty() const noexcept;
 
  private:
   friend struct HeapAccess;

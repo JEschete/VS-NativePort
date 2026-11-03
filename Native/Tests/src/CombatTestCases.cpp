@@ -659,7 +659,7 @@ struct EnemyLootFixture : LootInventoryFixture {
   void CheckCleared() {
     Items_ClearRoomLootList();
     CHECK(Items_lootListHead == nullptr);
-    CHECK(VS::Core::Memory::GameHeap().empty());
+    CHECK(VS::Core::Memory::GameHeap().Empty());
   }
 };
 
@@ -2476,11 +2476,11 @@ TEST_CASE("Direct duplicate loot queues release rejected nodes after rolling",
   Items_QueueEnemyLoot(&fixture.enemy);
   REQUIRE(Items_lootListHead != nullptr);
   auto* const first = Items_lootListHead;
-  const auto free_units = VS::Core::Memory::GameHeap().free_units();
+  const auto free_units = VS::Core::Memory::GameHeap().FreeUnits();
   Items_QueueEnemyLoot(&fixture.enemy);
   CHECK(Items_lootListHead == first);
   CHECK(first->next == nullptr);
-  CHECK(VS::Core::Memory::GameHeap().free_units() == free_units);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() == free_units);
   auto second_enemy = fixture.enemy;
   second_enemy.id = 2;
   Items_QueueEnemyLoot(&second_enemy);

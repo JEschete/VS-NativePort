@@ -77,7 +77,7 @@ std::expected<std::size_t, HeapError> Locate(const Heap& heap,
   }
   const auto header =
       static_cast<std::uint32_t>(offset / kHeapUnitBytes - kHeaderUnits);
-  const std::span<const HeapBlock> allocated = heap.allocated_blocks();
+  const std::span<const HeapBlock> allocated = heap.AllocatedBlocks();
   const auto block =
       std::ranges::lower_bound(allocated, header, {}, &HeapBlock::start);
   if (block == allocated.end() || block->start != header) {
@@ -256,7 +256,7 @@ std::expected<std::size_t, HeapError> PayloadCapacity(
   if (!index) {
     return std::unexpected(index.error());
   }
-  return UnitOffset(heap.allocated_blocks()[*index].units - kHeaderUnits);
+  return UnitOffset(heap.AllocatedBlocks()[*index].units - kHeaderUnits);
 }
 
 std::expected<std::span<const std::byte>, HeapError> PayloadContaining(
@@ -269,7 +269,7 @@ std::expected<std::span<const std::byte>, HeapError> PayloadContaining(
   }
   const auto unit = static_cast<std::uint32_t>(
       static_cast<std::size_t>(address - arena.data()) / kHeapUnitBytes);
-  const std::span<const HeapBlock> allocated = heap.allocated_blocks();
+  const std::span<const HeapBlock> allocated = heap.AllocatedBlocks();
   const auto after =
       std::ranges::upper_bound(allocated, unit, {}, &HeapBlock::start);
   if (after == allocated.begin()) {
@@ -284,17 +284,17 @@ std::expected<std::span<const std::byte>, HeapError> PayloadContaining(
       UnitOffset(block.units - kHeaderUnits));
 }
 
-std::uint32_t Heap::free_units() const noexcept {
+std::uint32_t Heap::FreeUnits() const noexcept {
   return std::accumulate(free_.begin(), free_.end(), std::uint32_t{0},
                          [](std::uint32_t total, const HeapBlock& block) {
                            return total + block.units;
                          });
 }
 
-std::uint32_t Heap::largest_free_units() const noexcept {
+std::uint32_t Heap::LargestFreeUnits() const noexcept {
   const auto largest = std::ranges::max_element(free_, {}, &HeapBlock::units);
   return largest == free_.end() ? 0 : largest->units;
 }
 
-bool Heap::empty() const noexcept { return allocated_.empty(); }
+bool Heap::Empty() const noexcept { return allocated_.empty(); }
 }  // namespace VS::Core::Memory

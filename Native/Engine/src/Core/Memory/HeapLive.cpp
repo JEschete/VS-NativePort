@@ -40,7 +40,7 @@ void* Allocated(const char* operation, std::size_t bytes,
         "%s at %s:%u: %zu bytes refused: %s (largest free block %" PRIu32
         " units, refusal %" PRIu64 ")",
         operation, site.file_name(), static_cast<unsigned>(site.line()), bytes,
-        HeapErrorName(payload.error()), GameHeap().largest_free_units(),
+        HeapErrorName(payload.error()), GameHeap().LargestFreeUnits(),
         refused_requests);
   }
   return nullptr;

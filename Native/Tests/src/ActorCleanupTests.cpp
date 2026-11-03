@@ -153,7 +153,7 @@ TEST_CASE("Defeat detaches every native peer reference before repeat cleanup",
   VS::Battle::Ai::ClearLiveActorAiLinksAndPlan(5);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("AI navigation override views retain a full native pointer",
@@ -173,14 +173,14 @@ TEST_CASE(
   void* route = VS::Core::Memory::AllocateLiveFromHighEnd(512);
   REQUIRE(route != nullptr);
   state->nativePointer18C = route;
-  const auto allocated = VS::Core::Memory::GameHeap().free_units();
+  const auto allocated = VS::Core::Memory::GameHeap().FreeUnits();
   CHECK(reinterpret_cast<uintptr_t>(route) > 0xFFFFFFFFu);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(2);
   CHECK(state->nativePointer18C == nullptr);
-  CHECK(VS::Core::Memory::GameHeap().free_units() > allocated);
+  CHECK(VS::Core::Memory::GameHeap().FreeUnits() > allocated);
   VS::Battle::Ai::FreeLiveActorNavigationOverride(2);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE(
@@ -222,7 +222,7 @@ TEST_CASE(
   CHECK(fixture.room.specialActors[3] == nullptr);
   CHECK(fixture.room.specialActors[1] == &fixture.actors[2]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("AI teardown leaves no engaged-list or marker references",
@@ -238,7 +238,7 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   CHECK(Battle_actorMarkers[2] == 0);
   CHECK(fixture.actors[1].commandFlags == 0xF8);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("AI teardown preserves the original Ashley state lifetime",
@@ -252,7 +252,7 @@ TEST_CASE("AI teardown preserves the original Ashley state lifetime",
   CHECK(state->nativePointer18C == nullptr);
   VS::Core::Memory::FreeLiveFromLowEnd(state);
   Battle_Ai_actorAiStates[0] = nullptr;
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
@@ -279,10 +279,10 @@ TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
   std::array<unsigned char, sizeof(input)> after{};
   std::memcpy(after.data(), &input, after.size());
   CHECK(after == before);
-  CHECK_FALSE(VS::Core::Memory::GameHeap().empty());
+  CHECK_FALSE(VS::Core::Memory::GameHeap().Empty());
   VS::Core::Memory::FreeLiveFromLowEnd(Battle_Ai_arenaOrbit);
   Battle_Ai_arenaOrbit = nullptr;
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
@@ -297,7 +297,7 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
     REQUIRE(Battle_Ai_arenaOrbit != nullptr);
     VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
     CHECK(Battle_Ai_arenaOrbit == nullptr);
-    CHECK(VS::Core::Memory::GameHeap().empty());
+    CHECK(VS::Core::Memory::GameHeap().Empty());
   }
 }
 namespace {
@@ -577,7 +577,7 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   fixture.actors[1].kind = 4;
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE(

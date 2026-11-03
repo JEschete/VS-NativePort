@@ -622,7 +622,7 @@ TEST_CASE("Textured ribbon dispatchers allocate and initialize native textures",
   }
   CHECK(dispatch(&renderer, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
@@ -641,7 +641,7 @@ TEST_CASE("Untextured line dispatchers retain only the complete native prefix",
   CHECK(state->opaque8 == 0);
   CHECK(Effects_Plg265_ParticleDispatch(&renderer, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(renderer.rendererState);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("Particle emission respects empty bursts and exhausted capacity",
@@ -1354,7 +1354,7 @@ void CheckPlg074RingLifecycle(Effects_EffectRenderer renderer,
     fixture.ResetPackets();
     StopPlg074Ring<State>(renderer, slot);
     VS::Core::Memory::FreeLiveFromHighEnd(state);
-    CHECK(VS::Core::Memory::GameHeap().empty());
+    CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.ResetPackets();
   }
 }
@@ -1646,7 +1646,7 @@ TEST_CASE("PLG074 F01994 owns trail buffers across expiry cancel and reentry",
     CheckPlg074EmitterTick(*state, count, cycle);
     StopPlg074Emitter(entry, slot, cancel);
     VS::Core::Memory::FreeLiveFromHighEnd(state);
-    CHECK(VS::Core::Memory::GameHeap().empty());
+    CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.ResetPackets();
   }
 }
@@ -1727,7 +1727,7 @@ TEST_CASE("PLG074 trail emitter refuses definitions the package lacks",
   CHECK(slot.rendererState == nullptr);
   CHECK(log.Contains("definition 1 is outside"));
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 2, 0) == 0);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("PLG074 trail emitter refuses negative trail counts",
@@ -1740,7 +1740,7 @@ TEST_CASE("PLG074 trail emitter refuses negative trail counts",
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 1, 0) == 1);
   CHECK(slot.rendererState == nullptr);
   CHECK(log.Contains("negative trail count"));
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("PLG074 trail emitter stops when its package is replaced",
@@ -1758,7 +1758,7 @@ TEST_CASE("PLG074 trail emitter stops when its package is replaced",
   CHECK(state->trails == nullptr);
   CHECK(log.Contains("no longer holds definition 0"));
   VS::Core::Memory::FreeLiveFromHighEnd(state);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
@@ -1778,7 +1778,7 @@ TEST_CASE("PLG074 trail transparency reads only the package's bound curves",
   CHECK(CreatedTransparency(fixture, 3) ==
         std::array<u_char, 5>{128, 128, 128, 128, 128});
   CHECK(log.Contains("transparency curve 3 is outside"));
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
 }
 
 TEST_CASE("PLG074 trail tick events stay within the package's definitions",
@@ -1796,7 +1796,7 @@ TEST_CASE("PLG074 trail tick events stay within the package's definitions",
   CHECK(log.Contains("tick event 1 is outside"));
   CHECK(VS::Effects::UpdateLivePlg074TrailEmitter(&slot, 4, 0) == 0);
   VS::Core::Memory::FreeLiveFromHighEnd(state);
-  CHECK(VS::Core::Memory::GameHeap().empty());
+  CHECK(VS::Core::Memory::GameHeap().Empty());
   fixture.ResetPackets();
 }
 
@@ -1840,7 +1840,7 @@ TEST_CASE(
     fixture.ResetPackets();
     CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
     CHECK(fixture.instance.context.renderer == nullptr);
-    CHECK(VS::Core::Memory::GameHeap().empty());
+    CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.CheckGuards();
     fixture.ResetPackets();
   }
@@ -1868,7 +1868,7 @@ TEST_CASE("Gravity closed rings emit textured geometry and release on reentry",
     fixture.ResetPackets();
     CHECK(Effects_TickEffectRenderers(&fixture.instance) == 1);
     CHECK(fixture.instance.context.renderer == nullptr);
-    CHECK(VS::Core::Memory::GameHeap().empty());
+    CHECK(VS::Core::Memory::GameHeap().Empty());
     fixture.ResetPackets();
   }
   Effects_Plg053_closedRingColorFactors[0] = saved_color;
