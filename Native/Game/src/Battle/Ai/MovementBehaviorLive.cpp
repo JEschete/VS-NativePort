@@ -15,6 +15,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/Math/Distance.hpp"
 
 extern "C" {
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
@@ -348,7 +348,7 @@ class LiveMovementHost final : public MovementHost {
   }
   void BeginMovementTowardPoint(MovementState& state, int kind) override {
     StoreMovementState(state, state_);
-    Battle_Ai_BeginAiMovementTowardPoint(&state_, kind);
+    BeginLiveAiMovementTowardPoint(&state_, kind);
     state = LoadMovementState(state_);
   }
   void IssueCommand(MovementState& state, int command) override {
@@ -358,7 +358,7 @@ class LiveMovementHost final : public MovementHost {
   }
   void DispatchLocomotion(MovementState& state) override {
     StoreMovementState(state, state_);
-    Battle_Ai_DispatchAiLocomotionMode(&state_, 0, 0);
+    DispatchLiveAiLocomotionMode(&state_, 0, 0);
     state = LoadMovementState(state_);
   }
   void FindNearestActiveWaypoint(MovementState& state) override {

@@ -1,7 +1,7 @@
 // Hand-maintained (tools/port/owned.csv).
 // C counterparts: rood-boi pc/src/battle_movement.c:702-960,1717-1744,
 // revision 3be5ba38b008cad919a2b1ca196432c8d4817335 (CC0-1.0).
-#include "Battle/Ai/GroundNavigation.h"
+#include "Battle/Ai/GroundNavigation.hpp"
 
 #include <algorithm>
 #include <array>
@@ -9,30 +9,17 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
-#include <cstring>
+#include <optional>
 
-#include "Battle/Ai/ActorCommandsLive.hpp"
-#include "Battle/Ai/CurrentTerrain.hpp"
-#include "Battle/Ai/DecisionPrimitivesLive.hpp"
-#include "Battle/Ai/MovementBehaviorLive.hpp"
-#include "Legacy/Psx.h"
-
-extern "C" {
-#include "Actors/ActorRecord.h"
-#include "Battle/Ai/ActorState.h"
-#include "Battle/Ai/AiState.h"
-#include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/Movement.h"
-#include "Battle/Ai/NavigationPrimitives.h"
-#include "Battle/Damage.h"
-}
-
+#include "Core/Diagnostics.h"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 
+namespace VS::Battle::Ai {
 namespace {
 constexpr unsigned kByteMask = 0xFF;
-constexpr unsigned kTileMask = 0xFF00FF;
-constexpr unsigned kLowTileMask = 0xFFFFFF;
+constexpr std::uint32_t kTileMask = 0xFF00FF;
+constexpr std::uint32_t kLowTileMask = 0xFFFFFF;
 constexpr int kTileShift = 7;
 constexpr int kTileCenter = 64;
 constexpr unsigned kTileZShift = 16;
@@ -51,49 +38,72 @@ constexpr int kApproachMargin = 96;
 constexpr int kMaximumGapAcceptance = 3;
 constexpr unsigned kAngleMask = 0xFFF;
 constexpr int kDirectionMask = 7;
-constexpr int kAreaMask = 15;
-constexpr int kShiftMask = 31;
-constexpr unsigned kPathDirectionBits = 0xE;
+constexpr unsigned kAreaMask = 15;
+constexpr unsigned kShiftMask = 31;
+constexpr std::uint32_t kPathDirectionBits = 0xE;
 constexpr int kHalfTurnDirections = 4;
+constexpr std::uint32_t kPathVerticalAxisBit = 4;
 constexpr int kDirectionalModes = 4;
-constexpr std::size_t kHesitationKindCount = 4;
 constexpr int kDetourRandomRange = 4;
-constexpr int kPathTurnShift = 4;
+constexpr unsigned kPathTurnShift = 4;
 constexpr int kInitialHesitationChance = 8;
 constexpr int kRouteLinks = 8;
-constexpr int kRepeatThreshold = 5;
-constexpr int kRepeatWait = 120;
+constexpr unsigned kRepeatThreshold = 5;
+constexpr std::uint8_t kRepeatWait = 120;
 constexpr unsigned kDetourSteps = 126;
 constexpr int kRandomRange = 128;
 constexpr int kPollKind = 3;
 constexpr int kLocomotionModes = 3;
-constexpr int kTurnDuration = 64;
-constexpr std::int16_t kPitchHigh = 0x500;
-constexpr std::int16_t kPitchMiddle = 0x320;
+constexpr std::uint16_t kTurnDuration = 64;
+constexpr int kPitchHigh = 0x500;
+constexpr int kPitchMiddle = 0x320;
 constexpr int kSecondCryThreshold = 11;
 constexpr int kFirstCryLow = 18;
 constexpr int kFirstCryHigh = 53;
-constexpr int kHalfwordBits = 16;
+constexpr unsigned kHalfwordBits = 16;
 constexpr int kTerrainIntent = 11;
 constexpr int kAlternateTerrainIntent = 12;
 constexpr int kStepIntent = 14;
 constexpr int kWalkDirectionIntent = 5;
 constexpr int kWalkHeadingIntent = 7;
 constexpr int kTimedTurnIntent = 16;
-constexpr int kBlockedWait = 254;
-constexpr unsigned kPathCellKeepMask = 0xFFC30FFF;
-constexpr unsigned kTileTagMask = 0xFF00;
+constexpr int kGroundDetourIntent = 11;
+constexpr int kFlightDetourIntent = 12;
+constexpr std::uint16_t kBlockedWait = 254;
+constexpr std::uint32_t kPathCellKeepMask = 0xFFC30FFF;
+constexpr std::uint32_t kTileTagMask = 0xFF00;
 constexpr unsigned kQuadrantMask = 0x3FF;
+constexpr unsigned kQuadrantShift = 10;
+constexpr unsigned kQuadrantHalf = 512;
+constexpr unsigned kQuadrantCount = 4;
+constexpr unsigned kCardinalShift = 9;
+constexpr unsigned kCardinalMask = 6;
+constexpr int kDiagonalAngleShift = 9;
+constexpr int kAlignedCosine = 3959;
+constexpr int kFacingBase = 0xC00;
+constexpr unsigned kDirectionZShift = 4;
+constexpr unsigned kComponentMask = 3;
+constexpr int kComponentModulus = 4;
+constexpr int kNeighborRowStride = 4;
+constexpr int kActorSlots = 16;
+constexpr int kGridSide = kNavigationGridSide;
+constexpr std::uint32_t kPathHeadingShift = 1;
+constexpr std::uint32_t kPathStepMask = 0xFE0;
+constexpr unsigned kPathStepShift = 5;
+constexpr std::uint32_t kPathLowMask = 0x3FFFFF;
+constexpr unsigned kPathXShift = 22;
+constexpr unsigned kPathZShift = 27;
+constexpr std::uint32_t kPathTurn = 0x10;
+constexpr std::uint32_t kPathStop = 0x10000;
+constexpr std::uint32_t kPathChanged = 0x20000;
+constexpr unsigned kPathCellShift = 18;
+constexpr unsigned kNearTargetSquared = 0x31000;
+constexpr int kModeSlots = 7;
+constexpr std::size_t kModeStride = 2;
+constexpr std::uint32_t kHighBit = 0x80000000U;
 constexpr std::array<int, 12> kNeighbors{1, 0, 7, 0, 2, -1, 6, 0, 3, 4, 5, 0};
-
-[[noreturn]] void Fail(const char* message) {
-  Core_Debugf("ai", "%s", message);
-  std::abort();
-}
-
-void Require(bool valid, const char* message) {
-  if (!valid) Fail(message);
-}
+constexpr std::array<unsigned, 2> kVerticalBits{0x20, 0x10};
+constexpr std::array<int, 2> kVerticalCodes{10, 9};
 
 std::int16_t Half(std::uint32_t value) {
   return std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(value));
@@ -103,77 +113,91 @@ int Angle(int value) {
   return static_cast<int>(static_cast<unsigned>(value) & kAngleMask);
 }
 
-Battle_Ai_ActorAiState& State(void* view) {
-  Require(view != nullptr, "AI ground navigation requires state");
-  return *static_cast<Battle_Ai_ActorAiState*>(view);
-}
-
 struct Tile {
   int x;
   int z;
 };
 
-Tile Unpack(unsigned tile) {
+Tile Unpack(std::uint32_t tile) {
   return {static_cast<int>(tile & kByteMask),
           static_cast<int>((tile >> kTileZShift) & kByteMask)};
 }
 
-unsigned Pack(Tile tile) {
-  return static_cast<unsigned>(tile.x) |
-         (static_cast<unsigned>(tile.z) << kTileZShift);
+std::uint32_t Pack(Tile tile) {
+  return static_cast<std::uint32_t>(tile.x) |
+         (static_cast<std::uint32_t>(tile.z) << kTileZShift);
 }
 
-bool InGrid(Tile tile) {
-  const auto& frame = *Battle_Ai_FrameState();
-  const auto width = frame.roomBounds & kByteMask;
-  const auto height = (frame.roomBounds >> kByteShift) & kByteMask;
-  Require(width > 0 && height > 0 && width <= kAiFrameGridSide &&
-              height <= kAiFrameGridSide && frame.tileFlags != nullptr &&
-              frame.heightMap != nullptr,
-          "AI ground navigation requires a bounded native room grid");
-  return tile.x >= 0 && tile.z >= 0 && static_cast<unsigned>(tile.x) < width &&
-         static_cast<unsigned>(tile.z) < height;
+int TileCentre(int tile) { return (tile * (1 << kTileShift)) + kTileCenter; }
+
+struct RoomGrid {
+  int width;
+  int height;
+};
+
+// The original's tile bound check; the room must fit the 32x32 maps.
+std::optional<RoomGrid> ActiveGrid(const GroundNavigationWorld& world) {
+  const auto bounds = world.RoomBounds();
+  const auto width = static_cast<int>(bounds & kByteMask);
+  const auto height = static_cast<int>((bounds >> kByteShift) & kByteMask);
+  if (width > 0 && height > 0 && width <= kGridSide && height <= kGridSide &&
+      world.HasTileMaps() && !world.Terrain().Empty()) {
+    return RoomGrid{width, height};
+  }
+  Core_Warnf("ai", "AI ground navigation requires a bounded room grid (%08X)",
+             static_cast<unsigned>(bounds));
+  return std::nullopt;
+}
+
+bool Contains(RoomGrid grid, Tile tile) {
+  return tile.x >= 0 && tile.z >= 0 && tile.x < grid.width &&
+         tile.z < grid.height;
 }
 
 int Component(unsigned value) {
-  constexpr unsigned kComponentMask = 3;
-  constexpr int kComponentModulus = 4;
   value &= kComponentMask;
   return value > 1 ? static_cast<int>(value) - kComponentModulus
                    : static_cast<int>(value);
 }
 
-Tile Delta(int direction) {
-  constexpr unsigned kDirectionZShift = 4;
-  if (direction < 0 || direction >= kAiDirectionBytes) {
-    Fail("AI ground direction is out of bounds");
+std::optional<Tile> Delta(const GroundNavigationWorld& world, int direction) {
+  if (direction < 0 || direction >= kNavigationDirections) {
+    Core_Warnf("ai", "AI ground direction %d is out of bounds", direction);
+    return std::nullopt;
   }
-  const auto packed =
-      Battle_Ai_FrameState()->directions[static_cast<unsigned>(direction)];
+  const unsigned packed =
+      world.DirectionCodes()[static_cast<std::size_t>(direction)];
   const Tile delta{Component(packed), Component(packed >> kDirectionZShift)};
-  Require((delta.x != 0 || delta.z != 0) && delta.x >= -1 && delta.z >= -1,
-          "AI ground direction has an invalid delta");
+  if ((delta.x == 0 && delta.z == 0) || delta.x < -1 || delta.z < -1) {
+    Core_Warnf("ai", "AI ground direction %d has an invalid delta %02X",
+               direction, packed);
+    return std::nullopt;
+  }
   return delta;
 }
 
-unsigned Cell(Tile tile) {
-  return Battle_Ai_FrameState()->tileFlags[tile.z][tile.x];
-}
-
-bool RegionBlocked(const Battle_Ai_ActorAiState& state, int direction) {
-  auto& frame = *Battle_Ai_FrameState();
+std::optional<bool> RegionBlocked(const GroundNavigationWorld& world,
+                                  const GroundNavigator& navigator,
+                                  int direction) {
   if (direction < 0) return true;
-  if (frame.roomData == nullptr) {
-    return Battle_Ai_IsAdjacentTileStepBlocked(state.tile.word, direction) != 0;
+  const auto tile = Unpack(navigator.tile);
+  if (!world.HasRoomData()) {
+    return IsAdjacentTileStepBlocked(world.Terrain(), world.DirectionCodes(),
+                                     tile.x, tile.z, direction);
   }
-  Require(direction < kAiDirectionBytes && frame.terrainRegions != nullptr,
-          "AI region query requires native direction and region data");
-  const auto tile = Unpack(state.tile.word);
-  return ((*Battle_Ai_TerrainRegionCell(tile.x, tile.z) >> direction) & 1) != 0;
+  const auto cell = direction < kNavigationDirections
+                        ? world.TerrainRegionCell(tile.x, tile.z)
+                        : std::nullopt;
+  if (!cell.has_value()) {
+    Core_Warnf("ai", "AI region query at (%d,%d) direction %d is invalid",
+               tile.x, tile.z, direction);
+    return std::nullopt;
+  }
+  return ((static_cast<unsigned>(*cell) >> static_cast<unsigned>(direction)) &
+          1U) != 0;
 }
 
 struct Bounds {
-  int id;
   int x;
   int y;
   int z;
@@ -182,717 +206,633 @@ struct Bounds {
   int height;
 };
 
-Bounds ActorBounds(const Battle_Actor& actor) {
-  Require(actor.id >= 0 && actor.id < kAiFrameActorSlots &&
-              Actors_actorRecords[actor.id] != nullptr,
-          "AI collision actor has no native model");
-  const auto& model = *Actors_actorRecords[actor.id];
-  const auto* ai = Battle_Ai_FrameState()->actors[actor.id];
+// An actor that is moving collides at its planned position (the player,
+// actor 0, never plans one).
+Bounds BoundsOf(int actor_id, const GroundCollisionActor& actor) {
   const bool planned =
-      ai != nullptr && actor.id != 0 &&
-      (model.instance.movementMode != 0 || model.instance.locomotionState != 0);
-  const auto& position = planned ? ai->nextPosition : model.instance.position;
-  return {actor.id,
-          static_cast<std::uint16_t>(position.vx),
-          position.vy,
-          static_cast<std::uint16_t>(position.vz),
-          ai != nullptr ? ai->collision_radius : model.occupancyRadius,
-          ai != nullptr ? ai->maxRange : 0,
-          ai != nullptr ? static_cast<std::uint16_t>(ai->bodyHeight)
-                        : model.occupancyHeight};
+      actor.has_ai_state && actor_id != 0 && actor.model_moving;
+  const auto x = planned ? actor.planned_x : actor.model_x;
+  const auto y = planned ? actor.planned_y : actor.model_y;
+  const auto z = planned ? actor.planned_z : actor.model_z;
+  return {static_cast<std::uint16_t>(x),
+          y,
+          static_cast<std::uint16_t>(z),
+          actor.has_ai_state ? actor.collision_radius : actor.model_radius,
+          actor.has_ai_state ? actor.reach : 0,
+          actor.has_ai_state ? static_cast<std::uint16_t>(actor.body_height)
+                             : actor.model_height};
 }
 
+// One more than the first other actor the test accepts, or 0.
 template <typename Test>
-int FirstBlockingActor(const Battle_Ai_ActorAiState& state, Test test) {
+std::optional<int> FirstBlockingActor(GroundNavigationWorld& world,
+                                      const GroundNavigator& navigator,
+                                      Test test) {
+  world.RewindCollisionActors();
   unsigned visited = 0;
-  for (const auto* actor = Battle_actors[0]; actor != nullptr;
-       actor = actor->next) {
-    if (actor->id < 0 || actor->id >= kAiFrameActorSlots) {
-      Fail("AI collision actor ID is out of bounds");
+  for (auto id = world.NextCollisionActor(); id.has_value();
+       id = world.NextCollisionActor()) {
+    if (*id < 0 || *id >= kActorSlots) {
+      Core_Warnf("ai", "AI collision actor ID %d is out of bounds", *id);
+      return std::nullopt;
     }
-    const unsigned bit = 1u << static_cast<unsigned>(actor->id);
-    Require((visited & bit) == 0, "AI collision actor list contains a cycle");
+    const unsigned bit = 1U << static_cast<unsigned>(*id);
+    if ((visited & bit) != 0) {
+      Core_Warnf("ai", "AI collision actor list repeats actor %d", *id);
+      return std::nullopt;
+    }
     visited |= bit;
-    if (actor->id != state.actorId && test(ActorBounds(*actor))) {
-      return actor->id + 1;
+    if (*id == navigator.actor_id) continue;
+    const auto actor = world.CollisionActor(*id);
+    if (!actor.has_value()) {
+      Core_Warnf("ai", "AI collision actor %d has no model", *id);
+      return std::nullopt;
     }
+    if (test(BoundsOf(*id, *actor))) return *id + 1;
   }
   return 0;
 }
 
-int Blocker(Battle_Ai_ActorAiState& state, int direction) {
-  const auto delta = Delta(direction);
-  auto& frame = *Battle_Ai_FrameState();
-  const auto bit = static_cast<u_char>(1u << direction);
-  if ((frame.blocker_valid & bit) != 0) {
-    return frame.blocker_actor[direction];
-  }
+int NeighborDirection(Tile from, Tile to) {
+  const int index =
+      ((to.z - from.z + 1) * kNeighborRowStride) + to.x - from.x + 1;
+  return index >= 0 && static_cast<std::size_t>(index) < kNeighbors.size()
+             ? kNeighbors[static_cast<std::size_t>(index)]
+             : -1;
+}
+
+std::optional<int> ProbeBlocker(GroundNavigationWorld& world,
+                                const GroundNavigator& navigator, Tile delta) {
   const int x =
-      static_cast<std::uint16_t>(state.position.vx) + state.maxRange * delta.x;
+      static_cast<std::uint16_t>(navigator.x) + (navigator.max_range * delta.x);
   const int z =
-      static_cast<std::uint16_t>(state.position.vz) + state.maxRange * delta.z;
+      static_cast<std::uint16_t>(navigator.z) + (navigator.max_range * delta.z);
   const Tile point{x >> kTileShift, z >> kTileShift};
-  int result = 0;
-  if (InGrid(point)) {
-    const auto current = Unpack(state.tile.word);
-    const int index = (point.z - current.z + 1) * 4 + point.x - current.x + 1;
-    const int lookup =
-        index >= 0 && static_cast<std::size_t>(index) < kNeighbors.size()
-            ? kNeighbors[index]
-            : -1;
-    const int height = RegionBlocked(state, lookup)
-                           ? state.position.vy
-                           : VS::Field::GroundHeightAtWorldPosition(
-                                 VS::Battle::Ai::CurrentTerrain(), x, z);
-    result = FirstBlockingActor(state, [&](const Bounds& other) {
-      const int dx = other.x - x, dz = other.z - z;
-      if ((delta.x > 0 && dx < 0) || (delta.x < 0 && dx > 0) ||
-          (delta.z > 0 && dz < 0) || (delta.z < 0 && dz > 0)) {
-        return false;
-      }
-      const int reach = other.radius + other.reach + state.collision_radius;
-      return std::abs(dx) <= reach && std::abs(dz) <= reach &&
-             std::abs(other.y - height) <=
-                 (other.height + static_cast<std::uint16_t>(state.bodyHeight)) /
-                     2;
-    });
+  const auto grid = ActiveGrid(world);
+  if (!grid.has_value()) return std::nullopt;
+  if (!Contains(*grid, point)) return 0;
+  const auto region = RegionBlocked(
+      world, navigator, NeighborDirection(Unpack(navigator.tile), point));
+  if (!region.has_value()) return std::nullopt;
+  const int height =
+      *region ? navigator.y
+              : Field::GroundHeightAtWorldPosition(world.Terrain(), x, z);
+  return FirstBlockingActor(world, navigator, [&](const Bounds& other) {
+    const int dx = other.x - x;
+    const int dz = other.z - z;
+    if ((delta.x > 0 && dx < 0) || (delta.x < 0 && dx > 0) ||
+        (delta.z > 0 && dz < 0) || (delta.z < 0 && dz > 0)) {
+      return false;
+    }
+    const int reach = other.radius + other.reach + navigator.collision_radius;
+    return std::abs(dx) <= reach && std::abs(dz) <= reach &&
+           std::abs(other.y - height) <=
+               (other.height +
+                static_cast<std::uint16_t>(navigator.body_height)) /
+                   2;
+  });
+}
+
+// Whether the tile is inside the approach plan's keep-out radius around its
+// target.
+std::optional<bool> InsideApproachRadius(const GroundNavigationWorld& world,
+                                         const GroundNavigator& navigator,
+                                         Tile target) {
+  const auto position = navigator.approach_target_id < kActorSlots
+                            ? world.ModelPosition(navigator.approach_target_id)
+                            : std::nullopt;
+  if (!position.has_value()) {
+    Core_Warnf("ai", "AI approach edge query target %u has no model",
+               static_cast<unsigned>(navigator.approach_target_id));
+    return std::nullopt;
   }
-  frame.blocker_actor[direction] = static_cast<u_char>(result);
-  frame.blocker_valid |= bit;
+  const auto dx = static_cast<std::int64_t>(TileCentre(target.x) - position->x);
+  const auto dz = static_cast<std::int64_t>(TileCentre(target.z) - position->z);
+  const auto radius =
+      static_cast<std::int64_t>(navigator.approach_range) - kApproachMargin;
+  return (dx * dx) + (dz * dz) < radius * radius;
+}
+
+}  // namespace
+
+// decomp: func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:279).
+std::optional<int> DirectionalBlockingActor(GroundNavigationWorld& world,
+                                            const GroundNavigator& navigator,
+                                            int direction) {
+  const auto delta = Delta(world, direction);
+  if (!delta.has_value()) return std::nullopt;
+  const auto bit = static_cast<std::uint8_t>(1U << direction);
+  if ((world.BlockerValid() & bit) != 0) return world.BlockerActor(direction);
+  const auto result = ProbeBlocker(world, navigator, *delta);
+  if (!result.has_value()) return std::nullopt;
+  world.SetBlockerActor(direction, static_cast<std::uint8_t>(*result));
+  world.SetBlockerValid(static_cast<std::uint8_t>(world.BlockerValid() | bit));
   return result;
 }
 
-int Occupancy(Battle_Ai_ActorAiState& state, unsigned packed) {
-  if ((static_cast<unsigned>(state.previousTile) & kLowTileMask) ==
+// decomp: func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:12).
+std::optional<int> DestinationOccupancy(GroundNavigationWorld& world,
+                                        const GroundNavigator& navigator,
+                                        std::uint32_t packed) {
+  if ((static_cast<std::uint32_t>(navigator.previous_tile) & kLowTileMask) ==
       (packed & kTileMask)) {
     return 0;
   }
   const auto tile = Unpack(packed);
-  if (!InGrid(tile)) return 0;
+  const auto grid = ActiveGrid(world);
+  if (!grid.has_value()) return std::nullopt;
+  if (!Contains(*grid, tile)) return 0;
   const unsigned blocked =
-      kCellBlocked | (static_cast<unsigned>(state.terrain_reject_mask) << 8);
-  if ((Cell(tile) & blocked) != 0) return 0;
-  const int x = tile.x * (1 << kTileShift) + kTileCenter;
-  const int z = tile.z * (1 << kTileShift) + kTileCenter;
-  const int height = VS::Field::GroundHeightAtTile(
-      VS::Battle::Ai::CurrentTerrain(), tile.x, tile.z);
-  return FirstBlockingActor(
-             state,
-             [&](const Bounds& other) {
-               const int reach = other.radius + state.collision_radius;
-               return std::abs(other.x - x) <= reach &&
-                      std::abs(other.z - z) <= reach &&
-                      std::abs(other.y - height) <= kOccupancyHeight;
-             }) != 0
-             ? -1
-             : 1;
+      kCellBlocked |
+      (static_cast<unsigned>(navigator.terrain_reject_mask) << kByteShift);
+  if ((world.TileFlags(tile.x, tile.z) & blocked) != 0) return 0;
+  const int x = TileCentre(tile.x);
+  const int z = TileCentre(tile.z);
+  const int height = Field::GroundHeightAtTile(world.Terrain(), tile.x, tile.z);
+  const auto found =
+      FirstBlockingActor(world, navigator, [&](const Bounds& other) {
+        const int reach = other.radius + navigator.collision_radius;
+        return std::abs(other.x - x) <= reach &&
+               std::abs(other.z - z) <= reach &&
+               std::abs(other.y - height) <= kOccupancyHeight;
+      });
+  if (!found.has_value()) return std::nullopt;
+  return *found != 0 ? -1 : 1;
 }
 
-int Step(Battle_Ai_ActorAiState& state, unsigned from, unsigned to,
-         int direction) {
-  Delta(direction);
-  const auto source = Unpack(from), target = Unpack(to);
+// decomp: func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:123).
+std::optional<int> CanTraverseTileEdge(GroundNavigationWorld& world,
+                                       const GroundNavigator& navigator,
+                                       std::uint32_t from, std::uint32_t to,
+                                       int direction) {
+  if (!Delta(world, direction).has_value()) return std::nullopt;
+  const auto source = Unpack(from);
+  const auto target = Unpack(to);
   const auto result = [&](int value, const char* reason) {
     Core_Debugf("ai.edge",
                 "actor=%u from=%08X to=%08X direction=%d result=%d reason=%s "
                 "flags=%04X area=%u stuck=%u height_filter=%u",
-                static_cast<unsigned>(state.actorId), from, to, direction,
-                value, reason, static_cast<unsigned>(state.movementFlags),
-                static_cast<unsigned>(state.ground_area),
-                static_cast<unsigned>(state.isStuck),
-                static_cast<unsigned>(state.opaque3));
-    return value;
+                static_cast<unsigned>(navigator.actor_id),
+                static_cast<unsigned>(from), static_cast<unsigned>(to),
+                direction, value, reason,
+                static_cast<unsigned>(navigator.movement_flags),
+                static_cast<unsigned>(navigator.ground_area),
+                static_cast<unsigned>(navigator.is_stuck),
+                static_cast<unsigned>(navigator.height_filter));
+    return std::optional<int>(value);
   };
-  if (state.movementDisabled || !InGrid(source) || !InGrid(target)) {
+  if (navigator.movement_disabled != 0) return result(0, "disabled-or-bounds");
+  const auto grid = ActiveGrid(world);
+  if (!grid.has_value()) return std::nullopt;
+  if (!Contains(*grid, source) || !Contains(*grid, target)) {
     return result(0, "disabled-or-bounds");
   }
-  const auto cell = Cell(target);
+  const unsigned cell = world.TileFlags(target.x, target.z);
   if ((cell & kNoStepFlags) != 0 ||
-      (state.isStuck == 0 && (cell & kAreaMask) != state.ground_area)) {
+      (navigator.is_stuck == 0 &&
+       (cell & kAreaMask) != navigator.ground_area)) {
     return result(0, "cell-flags-or-area");
   }
   const int dx = target.x - source.x;
   int dz = target.z - source.z;
+  // The original negates dz again when dx is negative; kept as found.
   if (dx < 0) dz = -dz;
   if (dz < 0) dz = -dz;
-  const int rise = VS::Field::GroundHeightAtTile(
-                       VS::Battle::Ai::CurrentTerrain(), target.x, target.z) -
-                   VS::Field::GroundHeightAtTile(
-                       VS::Battle::Ai::CurrentTerrain(), source.x, source.z);
+  const auto terrain = world.Terrain();
+  const int rise = Field::GroundHeightAtTile(terrain, target.x, target.z) -
+                   Field::GroundHeightAtTile(terrain, source.x, source.z);
   bool checked = false;
   if (dx < 2 && dz < 2) {
-    if (Blocker(state, direction) != 0) return result(0, "actor-blocker");
-    checked = !(state.opaque3 != 0 || rise < 1);
+    const auto blocker = DirectionalBlockingActor(world, navigator, direction);
+    if (!blocker.has_value()) return std::nullopt;
+    if (*blocker != 0) return result(0, "actor-blocker");
+    checked = !(navigator.height_filter != 0 || rise < 1);
   }
   if (!checked) {
-    if (state.reservedB2 < dx + dz) return result(0, "step-distance");
-    std::uint16_t limit;
-    std::memcpy(&limit, state.step_height_bytes, sizeof(limit));
-    if ((state.movementFlags & kExtendedStep) != 0) {
-      limit = kExtendedStepHeight;
-    }
-    if ((state.opaque3 != 0 && rise > limit) || rise < -limit) {
+    if (navigator.tile_step_limit < dx + dz) return result(0, "step-distance");
+    const int limit = (navigator.movement_flags & kExtendedStep) != 0
+                          ? kExtendedStepHeight
+                          : navigator.step_height;
+    if ((navigator.height_filter != 0 && rise > limit) || rise < -limit) {
       return result(0, "step-height");
     }
   }
-  if (state.opaque5 == 0) return result(1, "no-target-distance-filter");
-  if (state.requestedMovementMode == 1) {
-    const auto& approach =
-        *reinterpret_cast<const Battle_Ai_TargetApproachView*>(&state);
-    Require(approach.targetId < kAiFrameActorSlots &&
-                Actors_actorRecords[approach.targetId] != nullptr,
-            "AI approach edge query requires a target model");
-    const auto& position =
-        Actors_actorRecords[approach.targetId]->instance.position;
-    const auto dx_world = static_cast<std::int64_t>(
-        target.x * (1 << kTileShift) + kTileCenter - position.vx);
-    const auto dz_world = static_cast<std::int64_t>(
-        target.z * (1 << kTileShift) + kTileCenter - position.vz);
-    const auto radius =
-        static_cast<std::int64_t>(approach.range) - kApproachMargin;
-    if (dx_world * dx_world + dz_world * dz_world < radius * radius) {
-      return result(-1, "target-approach-radius");
-    }
+  if (navigator.target_distance_filter == 0) {
+    return result(1, "no-target-distance-filter");
+  }
+  if (navigator.requested_movement_mode == 1) {
+    const auto inside = InsideApproachRadius(world, navigator, target);
+    if (!inside.has_value()) return std::nullopt;
+    if (*inside) return result(-1, "target-approach-radius");
   }
   const auto destination =
-      VS::Core::Math::UnpackTileCoordinate(state.destination.word);
-  return result(
-      VS::Core::Math::SquaredTileDistanceFromComponents(target.x, target.z,
-                                                        destination) <
-          VS::Core::Math::SquaredTileDistance(
-              VS::Core::Math::UnpackTileCoordinate(from), destination),
-      "destination-distance");
-}
-}  // namespace
-
-// decomp: func_800D954C (src/BATTLE/BATTLE.PRG/70D4C.s:12).
-int Battle_Ai_DestinationOccupancy(Battle_Ai_MoveTargetView* view,
-                                   unsigned int tile) {
-  return Occupancy(State(view), tile);
-}
-
-// decomp: func_800D98E8 (src/BATTLE/BATTLE.PRG/70D4C.s:279).
-int Battle_Ai_DirectionalBlockingActor(Battle_Ai_MovementPathView* view,
-                                       int direction) {
-  return Blocker(State(view), direction);
-}
-
-// decomp: func_800D96C8 (src/BATTLE/BATTLE.PRG/70D4C.s:123).
-int Battle_Ai_CanTraverseTileEdge(Battle_Ai_MoveTargetView* view,
-                                  unsigned int from, unsigned int to,
-                                  int direction) {
-  return Step(State(view), from, to, direction);
-}
-
-// decomp: D_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:458).
-int Battle_Ai_CanWalkInDirection(Battle_Ai_WanderView* view, int direction) {
-  auto& state = State(view);
-  const auto delta = Delta(direction);
-  auto& frame = *Battle_Ai_FrameState();
-  const auto bit = static_cast<u_char>(1u << direction);
-  if ((frame.walk_valid & bit) != 0) {
-    return (frame.walk_passable & bit) != 0;
-  }
-  bool blocked = Blocker(state, direction) != 0;
-  const Tile current = Unpack(state.tile.word);
-  const Tile next{(state.fine_x + delta.x) >> 1, (state.fine_z + delta.z) >> 1};
-  if (!blocked && (current.x != next.x || current.z != next.z)) {
-    blocked = !InGrid(next);
-    if (!blocked) {
-      int probe = direction;
-      if ((direction & 1) != 0) {
-        const int index = next.x - current.x + 1 + (next.z - current.z + 1) * 4;
-        Require(
-            index >= 0 && static_cast<std::size_t>(index) < kNeighbors.size(),
-            "AI fine-tile direction exceeds its neighborhood");
-        probe = kNeighbors[index];
-      }
-      blocked = RegionBlocked(state, probe);
-      if (frame.roomData != nullptr &&
-          (static_cast<unsigned>(state.previousTile) & kTileMask) ==
-              Pack(next)) {
-        blocked = true;
-      }
-      const auto flags = Cell(next);
-      blocked |=
-          (state.ignore_floor_mask == 0 && (flags & kCellFloorBlocked) != 0) ||
-          (flags & (kCellWalkBlocked & ~kCellFloorBlocked)) != 0 ||
-          (flags & (static_cast<unsigned>(state.terrain_reject_mask)
-                    << kByteShift)) != 0;
-      if (state.settingsBit14 != 0 && (state.isStuck & 1) == 0 &&
-          (Cell(current) & kAreaMask) != (flags & kAreaMask) &&
-          (state.reserved154Area & kAreaMask) != (flags & kAreaMask)) {
-        blocked = true;
-      }
-      blocked |= (frame.heightMap[current.z][current.x] & kTerrainLayer) <
-                 (frame.heightMap[next.z][next.x] & kTerrainLayer);
-    }
-  }
-  frame.walk_valid |= bit;
-  if (blocked) {
-    frame.walk_passable &= static_cast<u_char>(~bit);
-  } else {
-    frame.walk_passable |= bit;
-  }
-  return !blocked;
-}
-
-// decomp: func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:483).
-unsigned int Battle_Ai_FindGapLandingTile(Battle_Ai_MoveTargetView* view,
-                                          unsigned int packed, int direction,
-                                          unsigned int from) {
-  auto& state = State(view);
-  const auto delta = Delta(direction);
-  auto tile = Unpack(packed);
-  if (!InGrid(tile)) return 0;
-  packed &= kLowTileMask;
-  if ((Cell(tile) & kGapFlag) == 0) return packed;
-  const auto limit = std::min<int>(state.reservedB2, kMaximumGapAcceptance);
-  for (int steps = 1; steps <= kAiFrameGridSide; ++steps) {
-    tile.x += delta.x;
-    tile.z += delta.z;
-    if (!InGrid(tile)) return 0;
-    packed = Pack(tile);
-    if ((Cell(tile) & kGapFlag) != 0) {
-      if (state.reservedB2 != 0) continue;
-      return packed;
-    }
-    int result = 0;
-    if (steps < limit) {
-      result = Step(state, from, packed, direction);
-      if (result == 1) result = Occupancy(state, packed);
-    }
-    return packed | (static_cast<unsigned>(result) << kStatusShift);
-  }
-  Core_Debugf("ai", "AI gap scan exceeded the bounded room grid");
-  std::abort();
+      Core::Math::UnpackTileCoordinate(navigator.destination);
+  return result(Core::Math::SquaredTileDistanceFromComponents(
+                    target.x, target.z, destination) <
+                        Core::Math::SquaredTileDistance(
+                            Core::Math::UnpackTileCoordinate(from), destination)
+                    ? 1
+                    : 0,
+                "destination-distance");
 }
 
 namespace {
-constexpr unsigned kPathHeadingShift = 1;
-constexpr unsigned kPathStepMask = 0xFE0;
-constexpr unsigned kPathStepShift = 5;
-constexpr unsigned kPathLowMask = 0x3FFFFF;
-constexpr unsigned kPathXShift = 22;
-constexpr unsigned kPathZShift = 27;
-constexpr unsigned kPathTurn = 0x10;
-constexpr unsigned kPathStop = 0x10000;
-constexpr unsigned kPathChanged = 0x20000;
-constexpr unsigned kPathCellShift = 18;
-constexpr unsigned kNearTargetSquared = 0x31000;
-constexpr int kModeSlots = 7;
-constexpr int kModeStride = 2;
-
-Battle_Ai_MovementPathView* PathView(Battle_Ai_ActorAiState& state) {
-  return reinterpret_cast<Battle_Ai_MovementPathView*>(&state);
+// Whether the fine step from the current tile into the next is blocked.
+std::optional<bool> FineStepBlocked(GroundNavigationWorld& world,
+                                    const GroundNavigator& navigator,
+                                    int direction, Tile next) {
+  const auto grid = ActiveGrid(world);
+  if (!grid.has_value()) return std::nullopt;
+  if (!Contains(*grid, next)) return true;
+  const Tile current = Unpack(navigator.tile);
+  const auto terrain = world.Terrain();
+  if (!terrain.Contains(current.x, current.z)) {
+    Core_Warnf("ai", "AI walk probe tile (%d,%d) is outside the maps",
+               current.x, current.z);
+    return std::nullopt;
+  }
+  int probe = direction;
+  if ((static_cast<unsigned>(direction) & 1U) != 0) {
+    probe = NeighborDirection(current, next);
+    if (probe < 0) {
+      Core_Warnf("ai", "AI fine step (%d,%d) leaves its neighborhood", next.x,
+                 next.z);
+      return std::nullopt;
+    }
+  }
+  const auto region = RegionBlocked(world, navigator, probe);
+  if (!region.has_value()) return std::nullopt;
+  bool blocked = *region;
+  if (world.HasRoomData() &&
+      (static_cast<std::uint32_t>(navigator.previous_tile) & kTileMask) ==
+          Pack(next)) {
+    blocked = true;
+  }
+  const unsigned flags = world.TileFlags(next.x, next.z);
+  blocked |=
+      (navigator.ignore_floor == 0 && (flags & kCellFloorBlocked) != 0) ||
+      (flags & (kCellWalkBlocked & ~kCellFloorBlocked)) != 0 ||
+      (flags & (static_cast<unsigned>(navigator.terrain_reject_mask)
+                << kByteShift)) != 0;
+  const unsigned area = world.TileFlags(current.x, current.z) & kAreaMask;
+  if (navigator.area_lock != 0 && (navigator.is_stuck & 1U) == 0 &&
+      area != (flags & kAreaMask) &&
+      (navigator.area_exception & kAreaMask) != (flags & kAreaMask)) {
+    blocked = true;
+  }
+  blocked |= (terrain.Cell(current.x, current.z) & kTerrainLayer) <
+             (terrain.Cell(next.x, next.z) & kTerrainLayer);
+  return blocked;
 }
 
-void Recover(Battle_Ai_ActorAiState& state) {
-  Battle_Ai_UpdateMovementRecovery(
-      reinterpret_cast<Battle_Ai_MovementRecoveryView*>(&state));
+class WalkProbe final : public GroundDirectionProbe {
+ public:
+  explicit WalkProbe(GroundNavigationWorld& world) : world_(&world) {}
+  [[nodiscard]] std::optional<int> Probe(GroundNavigator& navigator,
+                                         int direction) override {
+    const auto open = CanWalkInDirection(*world_, navigator, direction);
+    if (!open.has_value()) return std::nullopt;
+    return *open ? 1 : 0;
+  }
+
+ private:
+  GroundNavigationWorld* world_;
+};
+
+class FlightProbe final : public GroundDirectionProbe {
+ public:
+  explicit FlightProbe(GroundNavigationWorld& world) : world_(&world) {}
+  [[nodiscard]] std::optional<int> Probe(GroundNavigator& navigator,
+                                         int direction) override {
+    return world_->CanFlyInDirection(navigator, direction);
+  }
+
+ private:
+  GroundNavigationWorld* world_;
+};
+
+std::optional<bool> Open(GroundDirectionProbe& probe,
+                         GroundNavigator& navigator, int direction) {
+  const auto result = probe.Probe(navigator, direction);
+  if (!result.has_value()) return std::nullopt;
+  return *result != 0;
 }
 
-void Command(Battle_Ai_ActorAiState& state, int action) {
-  VS::Battle::Ai::IssueLiveActorCommand(&state, action);
+std::uint32_t NextBoundary(int tile, int target) {
+  if (tile == target) return 0;
+  return static_cast<std::uint32_t>(tile + (tile < target ? 1 : 0));
 }
 
-unsigned ReadTile(const u_char* bytes) {
-  unsigned result;
-  std::memcpy(&result, bytes, sizeof(result));
-  return result;
+// The boundary SetDetourBoundary stores counts from the target, not the tile.
+std::uint32_t NextTargetBoundary(int tile, int target) {
+  if (tile == target) return 0;
+  return static_cast<std::uint32_t>(target + (tile < target ? 1 : 0));
 }
 
-void StoreTile(u_char* bytes, unsigned value) {
-  std::memcpy(bytes, &value, sizeof(value));
-}
-
-void RoomFlag(int bit, bool clear) {
-  if (Battle_Ai_roomAiState == nullptr) return;
-  unsigned mask = 1u << (static_cast<unsigned>(bit) & kShiftMask);
-  if (clear) mask = ~mask;
-  auto& value = Battle_Ai_roomAiState->reservedEPrefix[0];
-  const unsigned updated =
-      (mask & 0x80000000u) != 0 ? value & mask : value | mask;
-  value = static_cast<u_char>(updated);
-}
-
-int GroundTest(Battle_Ai_MovementPathView* view, int direction) {
-  return Battle_Ai_CanWalkInDirection(
-      reinterpret_cast<Battle_Ai_WanderView*>(view), direction);
-}
-
-int FlightTest(Battle_Ai_MovementPathView* view, int direction) {
-  return Battle_Ai_CanFlyInDirection(
-      reinterpret_cast<Battle_Ai_DirectionCacheView*>(view), direction);
-}
-
-bool NearTarget(const Battle_Ai_ActorAiState& state) {
-  const auto from = Unpack(state.tile.word);
-  const auto to = Unpack(state.destination.word);
+bool NearTarget(const GroundNavigator& navigator) {
+  const auto from = Unpack(navigator.tile);
+  const auto to = Unpack(navigator.destination);
   const int dx = (to.x - from.x) * (1 << kTileShift);
   const int dz = (to.z - from.z) * (1 << kTileShift);
-  return static_cast<unsigned>(dx * dx + dz * dz) < kNearTargetSquared &&
-         (state.opaque4 & 1) != 0;
+  return static_cast<unsigned>((dx * dx) + (dz * dz)) < kNearTargetSquared &&
+         (navigator.near_target_detour & 1U) != 0;
 }
 
-int FinishStep(Battle_Ai_ActorAiState& state, unsigned flags, int direction,
-               bool axis_only) {
-  auto plan = Battle_Ai_RefreshDetourProgress(
-      &state, (flags & ~kPathDirectionBits) |
-                  (static_cast<unsigned>(direction) << kPathHeadingShift));
-  const auto tile = Unpack(state.tile.word);
-  const auto target = Unpack(state.destination.word);
-  unsigned x = 0, z = 0;
+int FinishStep(GroundNavigationWorld& world, GroundNavigator& navigator,
+               std::uint32_t flags, int direction, bool axis_only) {
+  const auto plan = RefreshDetourProgress(
+      world, navigator,
+      (flags & ~kPathDirectionBits) |
+          (static_cast<std::uint32_t>(direction) << kPathHeadingShift));
+  const auto tile = Unpack(navigator.tile);
+  const auto target = Unpack(navigator.destination);
+  std::uint32_t x = 0;
+  std::uint32_t z = 0;
   if (!axis_only) {
-    x = tile.x == target.x ? 0 : tile.x + (tile.x < target.x);
-    z = tile.z == target.z ? 0 : tile.z + (tile.z < target.z);
-  } else if ((plan & kHalfTurnDirections) != 0) {
-    z = tile.z + (tile.z < target.z);
+    x = NextBoundary(tile.x, target.x);
+    z = NextBoundary(tile.z, target.z);
+  } else if ((plan & kPathVerticalAxisBit) != 0) {
+    z = static_cast<std::uint32_t>(tile.z + (tile.z < target.z ? 1 : 0));
   } else {
-    x = tile.x + (tile.x < target.x);
+    x = static_cast<std::uint32_t>(tile.x + (tile.x < target.x ? 1 : 0));
   }
-  state.navigationFlags =
-      (plan & kPathLowMask) | (x << kPathXShift) | (z << kPathZShift) | 1;
+  navigator.navigation_flags =
+      (plan & kPathLowMask) | (x << kPathXShift) | (z << kPathZShift) | 1U;
   return 1;
 }
 
+// A detour planning request: the row picks the turn order (0 both sides
+// blocked, 1 one side open, 2 along a cardinal).
+struct DetourRequest {
+  int row;
+  int mode;
+  int first;
+  int second;
+};
+
 // decomp: 7B5DC.s func_800E3EAC / func_800E3FF4 / func_800E40F0.
-int PlanStep(Battle_Ai_ActorAiState& state, int row, int first, int second,
-             Battle_Ai_PathTest test) {
-  const auto flags =
-      Battle_Ai_InitializeObstacleDetour(&state, state.navigationFlags, test);
+std::optional<int> PlanStep(GroundNavigationWorld& world,
+                            GroundNavigator& navigator,
+                            const DetourRequest& request,
+                            GroundDirectionProbe& probe) {
+  const auto initialized = InitializeObstacleDetour(
+      world, navigator, navigator.navigation_flags, probe);
+  if (!initialized.has_value()) return std::nullopt;
+  const auto flags = *initialized;
   const int turn = (flags & kPathTurn) != 0 ? 1 : -1;
-  int direction;
-  if (row == 0) {
-    const int offset = ((first + turn * 2) & 7) == second ? turn * 2 : 4;
-    direction = (second + offset) & kDirectionMask;
-    if (test(PathView(state), direction)) {
-      return FinishStep(state, flags, direction, false);
-    }
-    direction = (static_cast<int>((flags >> 1) & kDirectionMask) + turn * 2) &
+  const int first = request.first;
+  const int second = request.second;
+  std::array<int, 2> tries{-1, -1};
+  int direction = 0;
+  if (request.row == 0) {
+    const int offset = ((first + (turn * 2)) & kDirectionMask) == second
+                           ? turn * 2
+                           : kHalfTurnDirections;
+    tries[0] = (second + offset) & kDirectionMask;
+    direction = (static_cast<int>((flags >> 1) & kDirectionMask) + (turn * 2)) &
                 kDirectionMask;
-  } else if (row == 1) {
-    if (turn == second) return FinishStep(state, flags, first, true);
-    direction = (first + kHalfTurnDirections) & kDirectionMask;
-    if (test(PathView(state), direction)) {
-      return FinishStep(state, flags, direction, true);
-    }
-    direction = (direction - turn * 2) & kDirectionMask;
+  } else if (request.row == 1) {
+    if (turn == second) return FinishStep(world, navigator, flags, first, true);
+    tries[0] = (first + kHalfTurnDirections) & kDirectionMask;
+    direction = (tries[0] - (turn * 2)) & kDirectionMask;
   } else {
-    direction = (first - turn * 2) & kDirectionMask;
-    if (test(PathView(state), direction)) {
-      return FinishStep(state, flags, direction, true);
-    }
-    direction = (direction + kHalfTurnDirections) & kDirectionMask;
-    if (test(PathView(state), direction)) {
-      return FinishStep(state, flags, direction, true);
-    }
+    tries[0] = (first - (turn * 2)) & kDirectionMask;
+    tries[1] = (tries[0] + kHalfTurnDirections) & kDirectionMask;
     direction = (first + kHalfTurnDirections) & kDirectionMask;
   }
-  if (!test(PathView(state), direction)) {
-    state.navigationFlags = flags;
+  for (const int candidate : tries) {
+    if (candidate < 0) continue;
+    const auto open = Open(probe, navigator, candidate);
+    if (!open.has_value()) return std::nullopt;
+    if (*open) {
+      return FinishStep(world, navigator, flags, candidate, request.row != 0);
+    }
+  }
+  const auto open = Open(probe, navigator, direction);
+  if (!open.has_value()) return std::nullopt;
+  if (!*open) {
+    navigator.navigation_flags = flags;
     return 0;
   }
-  return FinishStep(state, flags, direction, row != 0);
+  return FinishStep(world, navigator, flags, direction, request.row != 0);
 }
 
-int Detour(Battle_Ai_ActorAiState& state, int row, int mode, int first,
-           int second, Battle_Ai_PathTest test) {
-  const bool limited = (mode & 1) != 0;
-  if (limited && !NearTarget(state)) return 0;
-  const int result = PlanStep(state, row, first, second, test);
-  if (limited) Battle_Ai_SetDetourBoundary(&state);
-  return result;
-}
-}  // namespace
-
-// decomp: func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:11).
-void Battle_Ai_SetDetourBoundary(Battle_Ai_ActorAiState* view) {
-  auto& state = State(view);
-  const auto target = Unpack(state.destination.word);
-  const auto tile = Unpack(state.tile.word);
-  const unsigned x = target.x == tile.x ? 0 : target.x + (tile.x < target.x);
-  const unsigned z = target.z == tile.z ? 0 : target.z + (tile.z < target.z);
-  state.navigationFlags = (state.navigationFlags & kPathLowMask) |
-                          (x << kPathXShift) | (z << kPathZShift);
-}
-
-// decomp: func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:90).
-unsigned int Battle_Ai_RefreshDetourProgress(Battle_Ai_ActorAiState* view,
-                                             unsigned int flags) {
-  auto& state = State(view);
-  unsigned repeats = (ReadTile(state.detour_tile_bytes) & kTileMask) ==
-                             (state.tile.word & kTileMask)
-                         ? state.detour_repeats + 1
-                         : 0;
-  if (repeats >= kRepeatThreshold) {
-    state.opaque19A = kRepeatWait;
-    repeats = 0;
-  }
-  StoreTile(state.detour_tile_bytes, state.tile.word);
-  state.detour_repeats = static_cast<u_char>(repeats);
-  state.movement_wait = 0;
-  unsigned steps = kDetourSteps;
-  if (state.movementEnabled == 0 &&
-      VS::Battle::Ai::NextLiveActorRandomMasked(kDetourRandomRange) == 0) {
-    steps >>= 2;
-  }
-  return (flags & ~kPathStepMask) | (steps << kPathStepShift);
-}
-
-// decomp: func_800E3D5C (src/BATTLE/BATTLE.PRG/7B55C.s:9).
-int Battle_Ai_CardinalPassabilityMask(Battle_Ai_MovementPathView* state,
-                                      Battle_Ai_PathTest test) {
-  Require(state != nullptr && test != nullptr,
-          "AI cardinal passability requires state and a native callback");
-  int result = 0;
-  for (int direction = 0; direction < kAiDirectionBytes; direction += 2) {
-    result = (result << 1) | test(state, direction);
-  }
+std::optional<int> Detour(GroundNavigationWorld& world,
+                          GroundNavigator& navigator,
+                          const DetourRequest& request,
+                          GroundDirectionProbe& probe) {
+  const bool limited = (static_cast<unsigned>(request.mode) & 1U) != 0;
+  if (limited && !NearTarget(navigator)) return 0;
+  const auto result = PlanStep(world, navigator, request, probe);
+  if (!result.has_value()) return std::nullopt;
+  if (limited) SetDetourBoundary(navigator);
   return result;
 }
 
-// decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B5DC.s:10).
-unsigned int Battle_Ai_InitializeObstacleDetour(Battle_Ai_ActorAiState* view,
-                                                unsigned int flags,
-                                                Battle_Ai_PathTest test) {
-  auto& state = State(view);
-  Require(test != nullptr, "AI detour requires a native path callback");
-  state.detour_run = state.opaque1;
-  if ((flags & kPathStepMask) == 0 || (flags & kPathStop) != 0 ||
-      state.opaque4 != 0) {
-    flags &= ~kPathStop;
-    flags = (flags & ~kPathTurn) |
-            (static_cast<unsigned>(VS::Battle::Ai::NextLiveActorRandomMasked(2))
-             << kPathTurnShift);
-    Battle_Ai_UpdateHesitationTurn(&state, kInitialHesitationChance, 1,
-                                   state.requestedMovementMode);
-  }
-  if ((flags & ~kPathStepMask) == 0) flags &= ~kPathChanged;
-  return (flags & kPathCellKeepMask) |
-         (static_cast<unsigned>(
-              Battle_Ai_CardinalPassabilityMask(PathView(state), test))
-          << kPathCellShift);
-}
-
-// decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s).
-int Battle_Ai_UpdateHesitationTurn(void* view, int chance, int kind, int slot) {
-  auto& state = State(view);
-  if (slot < 0 || slot >= kModeSlots || kind < 1 || kind > kPollKind) {
-    Fail("AI hesitation request has an invalid slot or kind");
-  }
-  const auto offset = static_cast<std::size_t>(slot) * kModeStride;
-  if (offset >= std::size(state.movementModeCounters)) {
-    Fail("AI hesitation kind offset is out of bounds");
-  }
-  auto& stored_kind = state.movementModeCounters[offset];
-  u_char* count_byte = &state.reactionPending;
-  if (slot != kModeSlots - 1) {
-    if (offset + 1 >= std::size(state.movementModeCounters)) {
-      Fail("AI hesitation counter offset is out of bounds");
-    }
-    count_byte = &state.movementModeCounters[offset + 1];
-  }
-  auto& remaining = *count_byte;
-  int count = remaining;
-  if (count == 0) {
-    if (kind == kPollKind ||
-        chance < VS::Battle::Ai::NextLiveActorRandomMasked(kRandomRange)) {
-      return 0;
-    }
-    count = std::bit_cast<std::array<std::uint8_t, kHesitationKindCount>>(
-        Content_battleAiHesitationLengths[0])[kind];
-    Require(count > 0, "AI hesitation lengths were not loaded");
-    stored_kind = static_cast<u_char>(kind);
-  }
-  remaining = static_cast<u_char>(count - 1);
-  state.opaque13A = kTurnDuration;
-  if (kind == 2) {
-    state.heading = Half(count < kSecondCryThreshold ? 0 : kPitchHigh);
-  } else if (kind == 1) {
-    state.heading = Half(count >= kFirstCryHigh  ? kPitchMiddle
-                         : count >= kFirstCryLow ? -kPitchMiddle
-                                                 : 0);
+bool DetourOrRecover(GroundNavigationWorld& world, GroundNavigator& navigator,
+                     const DetourRequest& request,
+                     GroundDirectionProbe& probe) {
+  const auto detour = Detour(world, navigator, request, probe);
+  if (!detour.has_value()) return false;
+  if (*detour == 0) {
+    world.Recover(navigator);
   } else {
-    return 0;
+    navigator.heading = Half((navigator.navigation_flags >> 1) &
+                             static_cast<unsigned>(kDirectionMask));
+    world.IssueCommand(navigator, kWalkDirectionIntent);
   }
-  Command(state, kTimedTurnIntent);
-  return count >= 2;
+  return true;
 }
 
-// decomp: func_800E4764 (src/BATTLE/BATTLE.PRG/7BDD4.s:145).
-int Battle_Ai_SelectActorVerticalMovementStep(Battle_Ai_ActorAiState* view,
-                                              int* value, int* code) {
-  auto& state = State(view);
-  Require(value != nullptr && code != nullptr,
-          "AI vertical movement requires output storage");
-  constexpr std::array<unsigned, 2> kBits{0x20, 0x10};
-  constexpr std::array<int, 2> kCodes{10, 9};
-  int index = state.opaque1 != 0 ? 0 : 1;
-  for (int pass = 0; pass < 2; ++pass, index ^= 1) {
-    const auto bit = kBits[index];
-    if ((state.locomotionFlags & (bit | (bit << kByteShift))) == 0) continue;
-    *value =
-        (state.locomotionFlags & bit) != 0 ? state.walkStep : state.runStep;
-    *code = kCodes[index];
-    return 1;
+// Takes an adjacent destination: waits at a blocked one (status 2), turns
+// away from one behind the target or steps onto it.
+std::optional<bool> AdjacentAction(GroundNavigationWorld& world,
+                                   GroundNavigator& navigator,
+                                   std::uint32_t tile) {
+  if ((tile >> kStatusShift) == 2) {
+    if (navigator.movement_wait == 0) navigator.movement_wait = kBlockedWait;
+    world.Recover(navigator);
+    return true;
   }
-  Require(state.opaque1 == 0,
-          "AI running vertical movement has no configured gait");
-  return 0;
-}
-
-// decomp: func_800E47E4 (src/BATTLE/BATTLE.PRG/7BDD4.s:189).
-int Battle_Ai_IsTileBehindActorTarget(Battle_Ai_ActorAiState* view,
-                                      unsigned int tile) {
-  auto& state = State(view);
-  if (state.reservedA[2] != 0) return 0;
-  Require(state.actorId < kAiFrameActorSlots &&
-              Actors_actorRecords[state.actorId] != nullptr,
-          "AI facing query requires an actor model");
-  const auto current = Unpack(state.tile.word), target = Unpack(tile);
-  int facing;
-  if (state.movementTarget >= kAiFrameActorSlots) {
-    facing = Actors_actorRecords[state.actorId]->instance.facing;
-  } else {
-    Require(Actors_actorRecords[state.movementTarget] != nullptr,
-            "AI facing query requires a target model");
-    const auto& position =
-        Actors_actorRecords[state.movementTarget]->instance.position;
-    facing = Core_Gte_Atan2(static_cast<std::uint16_t>(state.position.vx) -
-                                static_cast<std::uint16_t>(position.vx),
-                            static_cast<std::uint16_t>(state.position.vz) -
-                                static_cast<std::uint16_t>(position.vz));
+  if (tile == 0) return false;
+  const auto behind = IsTileBehindActorTarget(world, navigator, tile);
+  if (!behind.has_value()) return std::nullopt;
+  if (*behind) {
+    const auto turned = UpdateHesitationTurn(world, navigator, kRandomRange, 2,
+                                             navigator.requested_movement_mode);
+    if (!turned.has_value()) return std::nullopt;
+    if (*turned != 0) return true;
   }
-  const int angle = 0xC00 - facing;
-  return Core_Gte_Cos(angle) * (target.x - current.x) +
-             Core_Gte_Sin(angle) * (target.z - current.z) <
-         0;
+  navigator.next_tile = tile;
+  world.IssueCommand(navigator, kStepIntent);
+  return true;
 }
 
-// decomp: func_800E49D8 (src/BATTLE/BATTLE.PRG/7BDD4.s:342).
-unsigned int Battle_Ai_FindAiDescentTile(Battle_Ai_ActorAiState* view,
-                                         unsigned int packed, int direction,
-                                         int steps) {
-  auto& state = State(view);
-  if (Battle_Ai_FrameState()->roomData == nullptr || steps == 0) return 0;
-  const auto delta = Delta(direction);
-  auto tile = Unpack(packed);
-  if (!InGrid(tile)) return 0;
-  const int raw = VS::Field::GroundHeightFlagsAtPackedTile(
-      VS::Battle::Ai::CurrentTerrain(),
-      VS::Core::Math::UnpackTileCoordinate(packed));
-  if (raw < 0) return 0;
-  const int floor = VS::Field::GroundHeightAtPackedTile(
-      VS::Battle::Ai::CurrentTerrain(),
-      VS::Core::Math::UnpackTileCoordinate(packed));
-  if (VS::Field::GroundHeightAtPackedTile(
-          VS::Battle::Ai::CurrentTerrain(),
-          VS::Core::Math::UnpackTileCoordinate(state.tile.word)) >= floor) {
-    return 0;
+// Only once the movement wait has run out (0 or above the detour budget).
+std::optional<bool> TryAdjacent(GroundNavigationWorld& world,
+                                GroundNavigator& navigator, int first,
+                                int second, std::uint32_t angle) {
+  if (static_cast<unsigned>(navigator.movement_wait) - 1U < kDetourSteps) {
+    return false;
   }
-  for (int taken = 0; taken < kAiFrameGridSide; ++taken) {
-    tile.x += delta.x;
-    tile.z += delta.z;
-    if (!InGrid(tile)) return 0;
-    if (VS::Field::GroundHeightAtTile(VS::Battle::Ai::CurrentTerrain(), tile.x,
-                                      tile.z) < floor) {
-      const unsigned target = (packed & ~kTileMask) | Pack(tile);
-      return Step(state, state.tile.word, target, direction) > 0 &&
-                     Occupancy(state, target) > 0
-                 ? target
-                 : 0;
-    }
-    if (taken + 1 >= steps - 1) return 0;
-  }
-  Core_Debugf("ai", "AI descent scan exceeded the bounded room grid");
-  std::abort();
+  const auto tile =
+      world.FindAdjacentMovementDestination(navigator, first, second, angle);
+  return AdjacentAction(world, navigator, tile);
 }
 
-// decomp: func_800E4BD8 / func_800E4BE0 (7BDD4.s:527/533).
-void Battle_Ai_ClearAiContactOccupancy(int bit) { RoomFlag(bit, true); }
-void Battle_Ai_SetAiContactOccupancy(int bit) { RoomFlag(bit, false); }
-
-// decomp: func_800E4B10 (src/BATTLE/BATTLE.PRG/7BDD4.s:431).
-void Battle_Ai_BeginAiTerrainMovement(void* view) {
-  auto& state = State(view);
-  state.stallCounter = 0;
-  state.nextTile = state.tile;
-  Command(state, kTerrainIntent);
-}
-
-// decomp: func_800E4B18 (src/BATTLE/BATTLE.PRG/7BDD4.s:438).
-void Battle_Ai_BeginAiAlternateTerrainMovement(Battle_Ai_ActorAiState* view) {
-  auto& state = State(view);
-  state.stallCounter = 0;
-  state.nextTile = state.tile;
-  Command(state, kAlternateTerrainIntent);
-}
-
-namespace {
-// decomp: L800DF8A4 (src/BATTLE/BATTLE.PRG/766FC.s).
-void ContinueGate(Battle_Ai_ActorAiState& state) {
-  if (state.tile.tile.tag < 2) {
-    StoreTile(state.route_exit_bytes, ~0u);
-    Battle_Ai_ClearAiContactOccupancy(state.route_gate);
-    state.route_gate = 0;
+void FollowActiveDetour(GroundNavigationWorld& world,
+                        GroundNavigator& navigator, bool flight) {
+  const int action = world.FollowObstacleDetour(
+      navigator, flight, flight ? kFlightDetourIntent : kGroundDetourIntent);
+  if (action < 0) {
+    world.RefreshMovementCooldown(navigator);
+    world.Recover(navigator);
     return;
   }
-  Require(Battle_Ai_routeGates != nullptr,
-          "AI route continuation requires native gates");
-  const int index = Battle_Ai_FindRouteGateAtTile(
-      reinterpret_cast<intptr_t>(&state), ReadTile(state.route_exit_bytes), 0);
+  navigator.heading = Half((navigator.navigation_flags >> 1) &
+                           static_cast<unsigned>(kDirectionMask));
+  world.IssueCommand(navigator, action);
+}
+
+struct DirectionalMove {
+  std::uint32_t angle;
+  int angle_argument;
+  int mode;
+  int nearest;
+  Tile current;
+  Tile target;
+};
+
+bool MoveAlongCardinal(GroundNavigationWorld& world, GroundNavigator& navigator,
+                       const DirectionalMove& move,
+                       GroundDirectionProbe& probe) {
+  const auto direction =
+      static_cast<int>((move.angle >> kCardinalShift) & kCardinalMask);
+  const auto open = Open(probe, navigator, direction);
+  if (!open.has_value()) return false;
+  if (*open) {
+    navigator.heading = Half(move.angle);
+    world.IssueCommand(navigator, kWalkHeadingIntent);
+    return true;
+  }
+  const auto adjacent = TryAdjacent(world, navigator, 0, 0,
+                                    static_cast<std::uint32_t>(direction));
+  if (!adjacent.has_value()) return false;
+  if (*adjacent) return true;
+  if (move.mode == 1 && navigator.near_target_detour == 0) {
+    world.Recover(navigator);
+    return true;
+  }
+  return DetourOrRecover(world, navigator, {2, move.mode, direction, 0}, probe);
+}
+
+bool MoveAcrossQuadrant(GroundNavigationWorld& world,
+                        GroundNavigator& navigator, const DirectionalMove& move,
+                        GroundDirectionProbe& probe) {
+  const unsigned sector = move.angle >> kQuadrantShift;
+  const int left = static_cast<int>((sector + 1) * 2) & kDirectionMask;
+  const int right = static_cast<int>(sector * 2) & kDirectionMask;
+  const int diagonal = static_cast<int>((sector * 2) + 1) & kDirectionMask;
+  const auto left_open = Open(probe, navigator, left);
+  if (!left_open.has_value()) return false;
+  const auto right_open = Open(probe, navigator, right);
+  if (!right_open.has_value()) return false;
+  if (!*left_open && !*right_open) {
+    const auto adjacent =
+        TryAdjacent(world, navigator, left, right, move.angle);
+    if (!adjacent.has_value()) return false;
+    if (*adjacent) return true;
+    return DetourOrRecover(world, navigator, {0, move.mode, left, right},
+                           probe);
+  }
+  if (*left_open && *right_open) {
+    const auto diagonal_open = Open(probe, navigator, diagonal);
+    if (!diagonal_open.has_value()) return false;
+    if (!*diagonal_open) {
+      navigator.heading =
+          Half(static_cast<std::uint32_t>(move.nearest == left ? left : right));
+      world.IssueCommand(navigator, kWalkDirectionIntent);
+    } else {
+      navigator.heading = Half(move.angle);
+      world.IssueCommand(navigator, kWalkHeadingIntent);
+    }
+    return true;
+  }
+  const int open_side = *right_open ? right : left;
+  const int closed_side = *left_open ? right : left;
+  navigator.heading = Half(static_cast<std::uint32_t>(open_side));
+  const auto adjacent = TryAdjacent(world, navigator, 0, 0,
+                                    static_cast<std::uint32_t>(closed_side));
+  if (!adjacent.has_value()) return false;
+  if (*adjacent) return true;
+  const bool aligned = (static_cast<unsigned>(navigator.heading) & 2U) != 0
+                           ? move.current.x == move.target.x
+                           : move.current.z == move.target.z;
+  const bool detour =
+      (static_cast<unsigned>(move.mode) & 1U) == 0
+          ? aligned
+          : navigator.near_target_detour != 0 &&
+                Core::Math::Cosine(Angle((closed_side << kDiagonalAngleShift) -
+                                         move.angle_argument)) >=
+                    kAlignedCosine;
+  if (detour) {
+    return DetourOrRecover(
+        world, navigator,
+        {1, move.mode, navigator.heading, *left_open ? 1 : -1}, probe);
+  }
+  world.IssueCommand(navigator, kWalkDirectionIntent);
+  return true;
+}
+
+bool ContinueRouteLink(GroundNavigationWorld& world,
+                       GroundNavigator& navigator) {
+  if (((navigator.tile >> kByteShift) & kByteMask) < 2) {
+    navigator.route_exit = ~0U;
+    ClearAiContactOccupancy(world, navigator.route_gate);
+    navigator.route_gate = 0;
+    return true;
+  }
+  if (!world.HasRouteGates()) {
+    Core_Warnf("ai", "AI route continuation requires native route gates");
+    return false;
+  }
+  const int index = world.FindRouteGateAtTile(navigator, navigator.route_exit);
   if (index >= 0) {
-    Require(index < kRouteLinks, "AI route gate index is out of bounds");
-    const auto& entry =
-        Battle_Ai_routeGates[static_cast<std::size_t>(index) * 2];
-    const unsigned tile = Pack({entry.tileX, entry.tileZ});
-    if (Occupancy(state, tile) > 0) {
-      StoreTile(state.route_exit_bytes, ~0u);
-      Battle_Ai_ClearAiContactOccupancy((index >> 1) + 2);
-      state.route_gate = 0;
-      state.nextTile.word = tile;
-      Command(state, kStepIntent);
-      return;
+    if (index >= kRouteLinks) {
+      Core_Warnf("ai", "AI route gate index %d is out of bounds", index);
+      return false;
+    }
+    const auto end = world.RouteLinkStart(index);
+    const std::uint32_t tile = Pack({end.x, end.z});
+    const auto occupancy = DestinationOccupancy(world, navigator, tile);
+    if (!occupancy.has_value()) return false;
+    if (*occupancy > 0) {
+      navigator.route_exit = ~0U;
+      ClearAiContactOccupancy(world, (index >> 1) + 2);
+      navigator.route_gate = 0;
+      navigator.next_tile = tile;
+      world.IssueCommand(navigator, kStepIntent);
+      return true;
     }
   }
-  Recover(state);
-}
-}  // namespace
-
-// decomp: func_800E4B2C (src/BATTLE/BATTLE.PRG/7BDD4.s:449).
-void Battle_Ai_MoveActorTowardDestinationTile(void* view, int /*angle*/) {
-  auto& state = State(view);
-  if (state.route_gate != 0) {
-    ContinueGate(state);
-  } else if ((state.destination.word & kTileMask) ==
-             (state.tile.word & kTileMask)) {
-    Recover(state);
-  } else {
-    const auto target = Unpack(state.destination.word);
-    state.moveX = target.x * (1 << kTileShift) + kTileCenter;
-    state.moveZ = target.z * (1 << kTileShift) + kTileCenter;
-    Battle_Ai_UpdateNavigationAreaMovement(
-        reinterpret_cast<Battle_Ai_TerrainMoveView*>(&state));
-  }
+  world.Recover(navigator);
+  return true;
 }
 
-// decomp: func_800E4B70 (src/BATTLE/BATTLE.PRG/7BDD4.s:473).
-void Battle_Ai_BeginAiGroundMovement(void* view, int angle) {
-  auto& state = State(view);
-  if (state.opaque1A != 0) {
-    Battle_Ai_MoveWithHeightFilteredDirections(
-        reinterpret_cast<Battle_Ai_TerrainMoveView*>(&state));
-  } else if (state.route_gate != 0) {
-    ContinueGate(state);
-  } else {
-    state.isStuck = 1;
-    Battle_Ai_FrameState()->walk_valid = 0;
-    Battle_Ai_ResolveDirectionalMovement(&state, Angle(angle), 1);
-  }
+std::uint32_t ContactBit(int bit) {
+  return 1U << (static_cast<unsigned>(bit) & kShiftMask);
 }
 
-namespace {
+// The original ORs a mask whose top bit is clear and ANDs one whose top bit
+// is set, so clearing bit 31 sets every lower bit.
+void ApplyContactMask(GroundNavigationWorld& world, std::uint32_t mask) {
+  if (!world.HasRoomAiState()) return;
+  const std::uint32_t value = world.ContactMask();
+  const std::uint32_t updated =
+      (mask & kHighBit) != 0 ? value & mask : value | mask;
+  world.SetContactMask(static_cast<std::uint8_t>(updated));
+}
+
 enum class LocomotionRoute {
   kGroundTile,
   kGroundHeading,
@@ -903,185 +843,439 @@ enum class LocomotionRoute {
 };
 }  // namespace
 
-// decomp: func_800E50A0 (src/BATTLE/BATTLE.PRG/7C7E0.s:66).
-void Battle_Ai_DispatchAiLocomotionMode(void* view, int kind, int angle) {
-  auto& state = State(view);
-  Require(state.locomotionMode < kLocomotionModes && kind >= 0 && kind < 2,
-          "AI locomotion dispatch has an invalid mode or request");
-  switch (static_cast<LocomotionRoute>(state.locomotionMode * 2 + kind)) {
-    case LocomotionRoute::kGroundTile:
-      Battle_Ai_MoveActorTowardDestinationTile(&state, angle);
-      break;
-    case LocomotionRoute::kGroundHeading:
-      Battle_Ai_BeginAiGroundMovement(&state, angle);
-      break;
-    case LocomotionRoute::kFlightTile:
-      Battle_Ai_UpdateFlightMovement(
-          reinterpret_cast<Battle_Ai_MovementStepView*>(&state), angle);
-      break;
-    case LocomotionRoute::kFlightHeading:
-      Battle_Ai_UpdateFlightDirectionalMovement(&state, angle);
-      break;
-    case LocomotionRoute::kRadialTile:
-      Battle_Ai_MoveToRadialDestination(
-          reinterpret_cast<Battle_Ai_MovementDestinationView*>(&state), angle);
-      break;
-    case LocomotionRoute::kRadialHeading:
-      Battle_Ai_MoveAwayFromReference(
-          reinterpret_cast<Battle_Ai_MovementDestinationView*>(&state), angle);
-      break;
+// decomp: D_800D9B6C (src/BATTLE/BATTLE.PRG/70D4C.s:458).
+std::optional<bool> CanWalkInDirection(GroundNavigationWorld& world,
+                                       const GroundNavigator& navigator,
+                                       int direction) {
+  const auto delta = Delta(world, direction);
+  if (!delta.has_value()) return std::nullopt;
+  const auto bit = static_cast<std::uint8_t>(1U << direction);
+  if ((world.WalkValid() & bit) != 0) return (world.WalkPassable() & bit) != 0;
+  const auto blocker = DirectionalBlockingActor(world, navigator, direction);
+  if (!blocker.has_value()) return std::nullopt;
+  bool blocked = *blocker != 0;
+  const Tile current = Unpack(navigator.tile);
+  const Tile next{(navigator.fine_x + delta->x) >> 1,
+                  (navigator.fine_z + delta->z) >> 1};
+  if (!blocked && (current.x != next.x || current.z != next.z)) {
+    const auto fine = FineStepBlocked(world, navigator, direction, next);
+    if (!fine.has_value()) return std::nullopt;
+    blocked = *fine;
   }
+  world.SetWalkValid(static_cast<std::uint8_t>(world.WalkValid() | bit));
+  const auto passable = world.WalkPassable();
+  world.SetWalkPassable(blocked ? static_cast<std::uint8_t>(passable & ~bit)
+                                : static_cast<std::uint8_t>(passable | bit));
+  return !blocked;
 }
 
-// decomp: func_800E4FE0 (src/BATTLE/BATTLE.PRG/7C7E0.s:10).
-void Battle_Ai_BeginAiMovementTowardPoint(Battle_Ai_ActorAiState* view,
-                                          int kind) {
-  auto& state = State(view);
-  state.opaque1 = static_cast<u_char>(kind);
-  state.opaque9 = 1;
-  const unsigned packed = static_cast<unsigned>(state.moveX) |
-                          (static_cast<unsigned>(state.moveZ) << 16);
-  state.targetX =
-      std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(packed));
-  state.targetZ = std::bit_cast<std::int16_t>(
-      static_cast<std::uint16_t>(packed >> kHalfwordBits));
-  Battle_Ai_DispatchAiLocomotionMode(
-      &state, 1,
-      Core_Gte_Atan2(state.moveX - state.position.vx,
-                     state.moveZ - state.position.vz));
+// decomp: func_800DB93C (src/BATTLE/BATTLE.PRG/72B70.s:483).
+std::optional<std::uint32_t> FindGapLandingTile(
+    GroundNavigationWorld& world, const GroundNavigator& navigator,
+    std::uint32_t tile, int direction, std::uint32_t from) {
+  const auto delta = Delta(world, direction);
+  if (!delta.has_value()) return std::nullopt;
+  const auto grid = ActiveGrid(world);
+  if (!grid.has_value()) return std::nullopt;
+  auto position = Unpack(tile);
+  if (!Contains(*grid, position)) return 0U;
+  if ((world.TileFlags(position.x, position.z) & kGapFlag) == 0) {
+    return tile & kLowTileMask;
+  }
+  const auto limit =
+      std::min<int>(navigator.tile_step_limit, kMaximumGapAcceptance);
+  for (int steps = 1; steps <= kGridSide; ++steps) {
+    position.x += delta->x;
+    position.z += delta->z;
+    if (!Contains(*grid, position)) return 0U;
+    const auto packed = Pack(position);
+    if ((world.TileFlags(position.x, position.z) & kGapFlag) != 0) {
+      if (navigator.tile_step_limit != 0) continue;
+      return packed;
+    }
+    int result = 0;
+    if (steps < limit) {
+      const auto edge =
+          CanTraverseTileEdge(world, navigator, from, packed, direction);
+      if (!edge.has_value()) return std::nullopt;
+      result = *edge;
+      if (result == 1) {
+        const auto occupancy = DestinationOccupancy(world, navigator, packed);
+        if (!occupancy.has_value()) return std::nullopt;
+        result = *occupancy;
+      }
+    }
+    return packed | (static_cast<std::uint32_t>(result) << kStatusShift);
+  }
+  Core_Warnf("ai", "AI gap scan exceeded the bounded room grid");
+  return std::nullopt;
 }
 
-namespace {
-bool AdjacentAction(Battle_Ai_ActorAiState& state, unsigned tile) {
-  const auto status = tile >> kStatusShift;
-  if (status == 2) {
-    if (state.movement_wait == 0) state.movement_wait = kBlockedWait;
-    Recover(state);
+// decomp: func_800E3BC8 (src/BATTLE/BATTLE.PRG/7B3C8.s:11).
+void SetDetourBoundary(GroundNavigator& navigator) {
+  const auto target = Unpack(navigator.destination);
+  const auto tile = Unpack(navigator.tile);
+  const auto x = NextTargetBoundary(tile.x, target.x);
+  const auto z = NextTargetBoundary(tile.z, target.z);
+  navigator.navigation_flags = (navigator.navigation_flags & kPathLowMask) |
+                               (x << kPathXShift) | (z << kPathZShift);
+}
+
+// decomp: func_800E3CDC (src/BATTLE/BATTLE.PRG/7B3C8.s:90).
+std::uint32_t RefreshDetourProgress(GroundNavigationWorld& world,
+                                    GroundNavigator& navigator,
+                                    std::uint32_t flags) {
+  unsigned repeats =
+      (navigator.detour_tile & kTileMask) == (navigator.tile & kTileMask)
+          ? navigator.detour_repeats + 1U
+          : 0U;
+  if (repeats >= kRepeatThreshold) {
+    navigator.repeat_wait = kRepeatWait;
+    repeats = 0;
+  }
+  navigator.detour_tile = navigator.tile;
+  navigator.detour_repeats = static_cast<std::uint8_t>(repeats);
+  navigator.movement_wait = 0;
+  unsigned steps = kDetourSteps;
+  if (navigator.movement_enabled == 0 &&
+      world.NextRandomMasked(kDetourRandomRange) == 0) {
+    steps >>= 2U;
+  }
+  return (flags & ~kPathStepMask) | (steps << kPathStepShift);
+}
+
+// decomp: func_800E3D5C (src/BATTLE/BATTLE.PRG/7B55C.s:9).
+std::optional<int> CardinalPassabilityMask(GroundNavigator& navigator,
+                                           GroundDirectionProbe& probe) {
+  int result = 0;
+  for (int direction = 0; direction < kNavigationDirections; direction += 2) {
+    const auto open = probe.Probe(navigator, direction);
+    if (!open.has_value()) return std::nullopt;
+    result = static_cast<int>((static_cast<unsigned>(result) << 1U) |
+                              static_cast<unsigned>(*open));
+  }
+  return result;
+}
+
+// decomp: func_800E3DDC (src/BATTLE/BATTLE.PRG/7B5DC.s:10).
+std::optional<std::uint32_t> InitializeObstacleDetour(
+    GroundNavigationWorld& world, GroundNavigator& navigator,
+    std::uint32_t flags, GroundDirectionProbe& probe) {
+  navigator.detour_run = navigator.gait;
+  if ((flags & kPathStepMask) == 0 || (flags & kPathStop) != 0 ||
+      navigator.near_target_detour != 0) {
+    flags &= ~kPathStop;
+    flags = (flags & ~kPathTurn) |
+            (static_cast<std::uint32_t>(world.NextRandomMasked(2))
+             << kPathTurnShift);
+    const auto hesitation =
+        UpdateHesitationTurn(world, navigator, kInitialHesitationChance, 1,
+                             navigator.requested_movement_mode);
+    if (!hesitation.has_value()) return std::nullopt;
+  }
+  if ((flags & ~kPathStepMask) == 0) flags &= ~kPathChanged;
+  const auto mask = CardinalPassabilityMask(navigator, probe);
+  if (!mask.has_value()) return std::nullopt;
+  return (flags & kPathCellKeepMask) |
+         (static_cast<std::uint32_t>(*mask) << kPathCellShift);
+}
+
+// decomp: func_800E4180 (src/BATTLE/BATTLE.PRG/7B5DC.s).
+std::optional<int> UpdateHesitationTurn(GroundNavigationWorld& world,
+                                        GroundNavigator& navigator, int chance,
+                                        int kind, int slot) {
+  if (slot < 0 || slot >= kModeSlots || kind < 1 || kind > kPollKind) {
+    Core_Warnf("ai", "AI hesitation slot %d or kind %d is invalid", slot, kind);
+    return std::nullopt;
+  }
+  // Slots 0..5 keep kind and count in the mode counters; slot 6 keeps its
+  // count in the pending reaction byte that follows them.
+  const auto offset = static_cast<std::size_t>(slot) * kModeStride;
+  auto& stored_kind = navigator.mode_counters[offset];
+  auto& remaining = slot != kModeSlots - 1 ? navigator.mode_counters[offset + 1]
+                                           : navigator.reaction_pending;
+  int count = remaining;
+  if (count == 0) {
+    if (kind == kPollKind || chance < world.NextRandomMasked(kRandomRange)) {
+      return 0;
+    }
+    count = world.HesitationLength(kind);
+    if (count <= 0) {
+      Core_Warnf("ai", "AI hesitation lengths were not loaded");
+      return std::nullopt;
+    }
+    stored_kind = static_cast<std::uint8_t>(kind);
+  }
+  remaining = static_cast<std::uint8_t>(count - 1);
+  navigator.turn_timer = kTurnDuration;
+  if (kind == 2) {
+    navigator.heading =
+        static_cast<std::int16_t>(count < kSecondCryThreshold ? 0 : kPitchHigh);
+  } else if (kind == 1) {
+    navigator.heading =
+        static_cast<std::int16_t>(count >= kFirstCryHigh  ? kPitchMiddle
+                                  : count >= kFirstCryLow ? -kPitchMiddle
+                                                          : 0);
+  } else {
+    return 0;
+  }
+  world.IssueCommand(navigator, kTimedTurnIntent);
+  return count >= 2 ? 1 : 0;
+}
+
+// decomp: func_800E4764 (src/BATTLE/BATTLE.PRG/7BDD4.s:145).
+std::optional<VerticalMovementStep> SelectActorVerticalMovementStep(
+    const GroundNavigator& navigator) {
+  std::size_t index = navigator.gait != 0 ? 0 : 1;
+  for (int pass = 0; pass < 2; ++pass, index ^= 1U) {
+    const auto bit = kVerticalBits[index];
+    if ((navigator.locomotion_flags & (bit | (bit << kByteShift))) == 0) {
+      continue;
+    }
+    return VerticalMovementStep{.selected = true,
+                                .value = (navigator.locomotion_flags & bit) != 0
+                                             ? navigator.walk_step
+                                             : navigator.run_step,
+                                .code = kVerticalCodes[index]};
+  }
+  if (navigator.gait != 0) {
+    Core_Warnf("ai", "AI running vertical movement has no configured step");
+    return std::nullopt;
+  }
+  return VerticalMovementStep{};
+}
+
+// decomp: func_800E47E4 (src/BATTLE/BATTLE.PRG/7BDD4.s:189).
+std::optional<bool> IsTileBehindActorTarget(const GroundNavigationWorld& world,
+                                            const GroundNavigator& navigator,
+                                            std::uint32_t tile) {
+  if (navigator.facing_locked != 0) return false;
+  const auto own_facing = navigator.actor_id < kActorSlots
+                              ? world.ModelFacing(navigator.actor_id)
+                              : std::nullopt;
+  if (!own_facing.has_value()) {
+    Core_Warnf("ai", "AI facing query actor %u has no model",
+               static_cast<unsigned>(navigator.actor_id));
+    return std::nullopt;
+  }
+  int facing = *own_facing;
+  if (navigator.movement_target < kActorSlots) {
+    const auto position = world.ModelPosition(navigator.movement_target);
+    if (!position.has_value()) {
+      Core_Warnf("ai", "AI facing query target %u has no model",
+                 static_cast<unsigned>(navigator.movement_target));
+      return std::nullopt;
+    }
+    facing =
+        Core::Math::Arctangent2(static_cast<std::uint16_t>(navigator.x) -
+                                    static_cast<std::uint16_t>(position->x),
+                                static_cast<std::uint16_t>(navigator.z) -
+                                    static_cast<std::uint16_t>(position->z));
+  }
+  const auto current = Unpack(navigator.tile);
+  const auto target = Unpack(tile);
+  const int angle = kFacingBase - facing;
+  return (Core::Math::Cosine(angle) * (target.x - current.x)) +
+             (Core::Math::Sine(angle) * (target.z - current.z)) <
+         0;
+}
+
+// decomp: func_800E49D8 (src/BATTLE/BATTLE.PRG/7BDD4.s:342).
+std::optional<std::uint32_t> FindAiDescentTile(GroundNavigationWorld& world,
+                                               const GroundNavigator& navigator,
+                                               std::uint32_t tile,
+                                               int direction, int steps) {
+  if (!world.HasRoomData() || steps == 0) return 0U;
+  const auto delta = Delta(world, direction);
+  if (!delta.has_value()) return std::nullopt;
+  const auto grid = ActiveGrid(world);
+  if (!grid.has_value()) return std::nullopt;
+  auto position = Unpack(tile);
+  if (!Contains(*grid, position)) return 0U;
+  const auto terrain = world.Terrain();
+  const auto start = Core::Math::UnpackTileCoordinate(tile);
+  if (Field::GroundHeightFlagsAtPackedTile(terrain, start) < 0) return 0U;
+  const int floor = Field::GroundHeightAtPackedTile(terrain, start);
+  const auto current = Core::Math::UnpackTileCoordinate(navigator.tile);
+  if (!terrain.Contains(current.x, current.z)) {
+    Core_Warnf("ai", "AI descent origin (%u,%u) is outside the maps",
+               static_cast<unsigned>(current.x),
+               static_cast<unsigned>(current.z));
+    return std::nullopt;
+  }
+  if (Field::GroundHeightAtPackedTile(terrain, current) >= floor) return 0U;
+  for (int taken = 0; taken < kGridSide; ++taken) {
+    position.x += delta->x;
+    position.z += delta->z;
+    if (!Contains(*grid, position)) return 0U;
+    if (Field::GroundHeightAtTile(terrain, position.x, position.z) < floor) {
+      const std::uint32_t target = (tile & ~kTileMask) | Pack(position);
+      const auto edge = CanTraverseTileEdge(world, navigator, navigator.tile,
+                                            target, direction);
+      if (!edge.has_value()) return std::nullopt;
+      if (*edge <= 0) return 0U;
+      const auto occupancy = DestinationOccupancy(world, navigator, target);
+      if (!occupancy.has_value()) return std::nullopt;
+      return *occupancy > 0 ? target : 0U;
+    }
+    if (taken + 1 >= steps - 1) return 0U;
+  }
+  Core_Warnf("ai", "AI descent scan exceeded the bounded room grid");
+  return std::nullopt;
+}
+
+// decomp: func_800E4BD8 (src/BATTLE/BATTLE.PRG/7BDD4.s:527).
+void ClearAiContactOccupancy(GroundNavigationWorld& world, int bit) {
+  const std::uint32_t mask = ~ContactBit(bit);
+  ApplyContactMask(world, mask);
+}
+
+// decomp: func_800E4BE0 (src/BATTLE/BATTLE.PRG/7BDD4.s:533).
+void SetAiContactOccupancy(GroundNavigationWorld& world, int bit) {
+  const std::uint32_t mask = ContactBit(bit);
+  ApplyContactMask(world, mask);
+}
+
+// decomp: func_800E4B10 (src/BATTLE/BATTLE.PRG/7BDD4.s:431).
+void BeginAiTerrainMovement(GroundNavigationWorld& world,
+                            GroundNavigator& navigator) {
+  navigator.stall_counter = 0;
+  navigator.next_tile = navigator.tile;
+  world.IssueCommand(navigator, kTerrainIntent);
+}
+
+// decomp: func_800E4B18 (src/BATTLE/BATTLE.PRG/7BDD4.s:438).
+void BeginAiAlternateTerrainMovement(GroundNavigationWorld& world,
+                                     GroundNavigator& navigator) {
+  navigator.stall_counter = 0;
+  navigator.next_tile = navigator.tile;
+  world.IssueCommand(navigator, kAlternateTerrainIntent);
+}
+
+// decomp: func_800E4B2C (src/BATTLE/BATTLE.PRG/7BDD4.s:449); the continuation
+// is L800DF8A4 (src/BATTLE/BATTLE.PRG/766FC.s).
+bool MoveActorTowardDestinationTile(GroundNavigationWorld& world,
+                                    GroundNavigator& navigator) {
+  if (navigator.route_gate != 0) return ContinueRouteLink(world, navigator);
+  if ((navigator.destination & kTileMask) == (navigator.tile & kTileMask)) {
+    world.Recover(navigator);
     return true;
   }
-  if (tile == 0) return false;
-  if (Battle_Ai_IsTileBehindActorTarget(&state, tile) != 0 &&
-      Battle_Ai_UpdateHesitationTurn(&state, kRandomRange, 2,
-                                     state.requestedMovementMode) != 0) {
-    return true;
-  }
-  state.nextTile.word = tile;
-  Command(state, kStepIntent);
+  const auto target = Unpack(navigator.destination);
+  navigator.move_x = TileCentre(target.x);
+  navigator.move_z = TileCentre(target.z);
+  world.UpdateNavigationAreaMovement(navigator);
   return true;
 }
 
-unsigned Adjacent(Battle_Ai_ActorAiState& state, int first, int second,
-                  unsigned angle) {
-  return Battle_Ai_FindAdjacentMovementDestination(
-      reinterpret_cast<Battle_Ai_MoveTargetView*>(&state), first, second,
-      angle);
+// decomp: func_800E4B70 (src/BATTLE/BATTLE.PRG/7BDD4.s:473).
+bool BeginAiGroundMovement(GroundNavigationWorld& world,
+                           GroundNavigator& navigator, int angle) {
+  if (navigator.height_filtered_movement != 0) {
+    world.MoveWithHeightFilteredDirections(navigator);
+    return true;
+  }
+  if (navigator.route_gate != 0) return ContinueRouteLink(world, navigator);
+  navigator.is_stuck = 1;
+  world.SetWalkValid(0);
+  return ResolveDirectionalMovement(world, navigator, Angle(angle), 1);
 }
 
-void DetourOrRecover(Battle_Ai_ActorAiState& state, int row, int mode,
-                     int first, int second, Battle_Ai_PathTest test) {
-  if (Detour(state, row, mode, first, second, test) == 0) {
-    Recover(state);
-  } else {
-    state.heading = Half((state.navigationFlags >> 1) & kDirectionMask);
-    Command(state, kWalkDirectionIntent);
+// decomp: func_800E50A0 (src/BATTLE/BATTLE.PRG/7C7E0.s:66).
+bool DispatchAiLocomotionMode(GroundNavigationWorld& world,
+                              GroundNavigator& navigator, int kind, int angle) {
+  if (navigator.locomotion_mode >= kLocomotionModes || kind < 0 || kind > 1) {
+    Core_Warnf("ai", "AI locomotion mode %u or request %d is invalid",
+               static_cast<unsigned>(navigator.locomotion_mode), kind);
+    return false;
   }
+  switch (
+      static_cast<LocomotionRoute>((navigator.locomotion_mode * 2) + kind)) {
+    case LocomotionRoute::kGroundTile:
+      return MoveActorTowardDestinationTile(world, navigator);
+    case LocomotionRoute::kGroundHeading:
+      return BeginAiGroundMovement(world, navigator, angle);
+    case LocomotionRoute::kFlightTile:
+      world.UpdateFlightMovement(navigator, angle);
+      break;
+    case LocomotionRoute::kFlightHeading:
+      world.UpdateFlightDirectionalMovement(navigator, angle);
+      break;
+    case LocomotionRoute::kRadialTile:
+      world.MoveToRadialDestination(navigator, angle);
+      break;
+    case LocomotionRoute::kRadialHeading:
+      world.MoveAwayFromReference(navigator, angle);
+      break;
+  }
+  return true;
 }
-}  // namespace
+
+// decomp: func_800E4FE0 (src/BATTLE/BATTLE.PRG/7C7E0.s:10).
+bool BeginAiMovementTowardPoint(GroundNavigationWorld& world,
+                                GroundNavigator& navigator, int kind) {
+  navigator.gait = static_cast<std::uint8_t>(kind);
+  navigator.toward_point = 1;
+  const std::uint32_t packed =
+      static_cast<std::uint32_t>(navigator.move_x) |
+      (static_cast<std::uint32_t>(navigator.move_z) << kHalfwordBits);
+  navigator.target_x = Half(packed);
+  navigator.target_z = Half(packed >> kHalfwordBits);
+  return DispatchAiLocomotionMode(
+      world, navigator, 1,
+      Core::Math::Arctangent2(navigator.move_x - navigator.x,
+                              navigator.move_z - navigator.z));
+}
 
 // decomp: func_800E3600 (src/BATTLE/BATTLE.PRG/771A8.c:2549;
 // nonmatchings/771A8/func_800E3600.s). C counterpart: 771A8.c:2266.
-void Battle_Ai_ResolveDirectionalMovement(Battle_Ai_ActorAiState* view,
-                                          int angle_arg, int mode) {
-  auto& state = State(view);
-  Require(mode >= 0 && mode < kDirectionalModes,
-          "AI directional movement mode is invalid");
-  const unsigned angle = static_cast<unsigned>(angle_arg);
-  const auto test = mode >= 2 ? FlightTest : GroundTest;
-  if ((state.navigationFlags & 1) != 0) {
-    const int action = Battle_Ai_FollowObstacleDetour(PathView(state), test,
-                                                      mode >= 2 ? 12 : 11);
-    if (action < 0) {
-      VS::Battle::Ai::RefreshLiveAiMovementCooldown(
-          reinterpret_cast<Battle_Ai_TerrainMoveView*>(&state));
-      Recover(state);
-    } else {
-      state.heading = Half((state.navigationFlags >> 1) & kDirectionMask);
-      Command(state, action);
-    }
-    return;
+bool ResolveDirectionalMovement(GroundNavigationWorld& world,
+                                GroundNavigator& navigator, int angle,
+                                int mode) {
+  if (mode < 0 || mode >= kDirectionalModes) {
+    Core_Warnf("ai", "AI directional movement mode %d is invalid", mode);
+    return false;
   }
-  const unsigned quadrant = (angle & kAngleMask) >> 10;
-  const int nearest = static_cast<int>(
-      ((angle & 0x3FF) > 512 ? (quadrant + 1) & 3 : quadrant) * 2);
-  const auto delta = Delta(nearest);
-  const auto current = Unpack(state.tile.word);
-  const auto target = Unpack(state.destination.word);
+  const bool flight = mode >= 2;
+  if ((navigator.navigation_flags & 1U) != 0) {
+    FollowActiveDetour(world, navigator, flight);
+    return true;
+  }
+  const auto unsigned_angle = static_cast<std::uint32_t>(angle);
+  const unsigned quadrant = (unsigned_angle & kAngleMask) >> kQuadrantShift;
+  const auto nearest =
+      static_cast<int>(((unsigned_angle & kQuadrantMask) > kQuadrantHalf
+                            ? (quadrant + 1) % kQuadrantCount
+                            : quadrant) *
+                       2);
+  const auto delta = Delta(world, nearest);
+  if (!delta.has_value()) return false;
+  const DirectionalMove move{unsigned_angle,
+                             angle,
+                             mode,
+                             nearest,
+                             Unpack(navigator.tile),
+                             Unpack(navigator.destination)};
   const int distance = std::min<int>(
-      state.maxRange, std::abs((nearest & 2) != 0 ? target.x - current.x
-                                                  : target.z - current.z));
-  const Tile point{current.x + delta.x, current.z + delta.z};
+      navigator.max_range, std::abs((static_cast<unsigned>(nearest) & 2U) != 0
+                                        ? move.target.x - move.current.x
+                                        : move.target.z - move.current.z));
+  const Tile point{move.current.x + delta->x, move.current.z + delta->z};
   const auto descent =
-      Battle_Ai_FindAiDescentTile(&state, Pack(point), nearest, distance);
-  if (descent != 0) {
-    state.nextTile.word = descent & ~kTileTagMask;
-    Command(state, kStepIntent);
-    return;
+      FindAiDescentTile(world, navigator, Pack(point), nearest, distance);
+  if (!descent.has_value()) return false;
+  if (*descent != 0) {
+    navigator.next_tile = *descent & ~kTileTagMask;
+    world.IssueCommand(navigator, kStepIntent);
+    return true;
   }
-  if ((angle & kQuadrantMask) == 0) {
-    const int direction = static_cast<int>((angle >> 9) & 6);
-    if (test(PathView(state), direction)) {
-      state.heading = Half(angle);
-      Command(state, kWalkHeadingIntent);
-    } else if ((static_cast<unsigned>(state.movement_wait) - 1 >=
-                kDetourSteps) &&
-               AdjacentAction(state, Adjacent(state, 0, 0, direction))) {
-      return;
-    } else if (mode == 1 && state.opaque4 == 0) {
-      Recover(state);
-    } else {
-      DetourOrRecover(state, 2, mode, direction, 0, test);
-    }
-    return;
+  WalkProbe walk(world);
+  FlightProbe fly(world);
+  GroundDirectionProbe& probe =
+      flight ? static_cast<GroundDirectionProbe&>(fly) : walk;
+  if ((unsigned_angle & kQuadrantMask) == 0) {
+    return MoveAlongCardinal(world, navigator, move, probe);
   }
-  const int left = static_cast<int>(((angle >> 10) + 1) * 2) & 7;
-  const int right = static_cast<int>((angle >> 10) * 2) & 7;
-  const int diagonal = static_cast<int>((angle >> 10) * 2 + 1) & 7;
-  const int left_open = test(PathView(state), left);
-  const int right_open = test(PathView(state), right);
-  if (!left_open && !right_open) {
-    if ((static_cast<unsigned>(state.movement_wait) - 1 >= kDetourSteps) &&
-        AdjacentAction(state, Adjacent(state, left, right, angle))) {
-      return;
-    }
-    DetourOrRecover(state, 0, mode, left, right, test);
-    return;
-  }
-  if (left_open && right_open) {
-    if (!test(PathView(state), diagonal)) {
-      state.heading = Half(nearest == left ? left : right);
-      Command(state, kWalkDirectionIntent);
-    } else {
-      state.heading = Half(angle);
-      Command(state, kWalkHeadingIntent);
-    }
-    return;
-  }
-  state.heading = Half(!right_open ? left : right);
-  if ((static_cast<unsigned>(state.movement_wait) - 1 >= kDetourSteps) &&
-      AdjacentAction(state, Adjacent(state, 0, 0, !left_open ? left : right))) {
-    return;
-  }
-  const bool aligned =
-      (state.heading & 2) != 0 ? current.x == target.x : current.z == target.z;
-  const bool detour =
-      (mode & 1) == 0
-          ? aligned
-          : state.opaque4 != 0 &&
-                Core_Gte_Cos(Angle(((left_open ? right : left) << 9) -
-                                   angle_arg)) >= 3959;
-  if (detour) {
-    DetourOrRecover(state, 1, mode, state.heading, left_open ? 1 : -1, test);
-  } else {
-    Command(state, kWalkDirectionIntent);
-  }
+  return MoveAcrossQuadrant(world, navigator, move, probe);
 }
+}  // namespace VS::Battle::Ai

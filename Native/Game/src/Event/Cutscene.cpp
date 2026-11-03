@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
@@ -116,7 +116,7 @@ void Event_EndFieldCutscene(void)
     }
 
     VS::Battle::Ai::RebuildLiveActorActionPlans(NULL);
-    Battle_Ai_UpdateRouteGateAvailability();
+    VS::Battle::Ai::UpdateLiveRouteGateAvailability();
     if ((Event_EvaluateRoomEventTriggers(0xA, 0, NULL, 0) == 1)
         || ((State_sceneTimer.mode != 0) && (Event_EvaluateRoomEventTriggers(0x10, 0, NULL, 0) == 1))) {
         Event_StartPreparedCutscene();

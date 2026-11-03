@@ -9,6 +9,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.h"
 #include "Core/Math/Distance.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -17,7 +18,6 @@
 extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Field/Collision.h"
 }
 
@@ -301,15 +301,15 @@ TEST_CASE(
     "AI destination reservation changes only its requested navigation bit",
     "[ai][terrain]") {
   TerrainFixture fixture;
-  Battle_Ai_ReserveAiDestinationTile(13, 7);
-  Battle_Ai_ReserveAiDestinationTile(13, 7);
+  VS::Battle::Ai::ReserveLiveAiDestinationTile(13, 7);
+  VS::Battle::Ai::ReserveLiveAiDestinationTile(13, 7);
   for (int z = 0; z < kAiFrameGridSide; ++z) {
     for (int x = 0; x < kAiFrameGridSide; ++x) {
       CHECK(fixture.flags[z][x] == (x == 13 && z == 7 ? 0x80 : 0));
     }
   }
   Battle_Ai_tileFlagMap = nullptr;
-  Battle_Ai_ReserveAiDestinationTile(13, 7);
+  VS::Battle::Ai::ReserveLiveAiDestinationTile(13, 7);
   CHECK(fixture.flags[7][13] == 0x80);
 }
 
@@ -323,7 +323,7 @@ TEST_CASE(
   TerrainFixture fixture;
   fixture.heights[15 + dz[direction]][15 + dx[direction]] =
       static_cast<u_short>(cell);
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0x000F000F, direction) ==
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0x000F000F, direction) ==
         (cell != 0));
 }
 
@@ -331,10 +331,10 @@ TEST_CASE(
     "AI adjacent steps treat grid exits as blocked without out-of-range reads",
     "[ai][terrain]") {
   TerrainFixture fixture;
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0, 0) == 1);
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0, 2) == 1);
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0, 4) == 0);
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0, 6) == 0);
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0x001F001F, 4) == 1);
-  CHECK(Battle_Ai_IsAdjacentTileStepBlocked(0x001F001F, 6) == 1);
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0, 0) == 1);
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0, 2) == 1);
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0, 4) == 0);
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0, 6) == 0);
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0x001F001F, 4) == 1);
+  CHECK(VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(0x001F001F, 6) == 1);
 }

@@ -13,6 +13,7 @@
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 #include "Platform/CrashHandler.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/BiosRand.h"
@@ -37,16 +37,19 @@ extern "C" {
 }
 
 static_assert(
-    std::is_same_v<decltype(&Battle_Ai_HasActorNavigationState), int (*)(int)>);
-static_assert(std::is_same_v<decltype(&Battle_Ai_ActorNavigationOverrideStatus),
-                             int (*)(int)>);
+    std::is_same_v<decltype(&VS::Battle::Ai::HasLiveActorNavigationState),
+                   int (*)(int)>);
 static_assert(
-    std::is_same_v<decltype(&Battle_Ai_CopyActorNavigationOverrideState),
-                   void (*)(int, Battle_Ai_ActorAiState*)>);
-static_assert(std::is_same_v<decltype(&Battle_Ai_AddAiTileOccupant),
+    std::is_same_v<decltype(&VS::Battle::Ai::LiveActorNavigationOverrideStatus),
+                   int (*)(int)>);
+static_assert(std::is_same_v<
+              decltype(&VS::Battle::Ai::CopyLiveActorNavigationOverrideState),
+              void (*)(int, Battle_Ai_ActorAiState*)>);
+static_assert(std::is_same_v<decltype(&VS::Battle::Ai::AddLiveAiTileOccupant),
                              void (*)(const Field_GimmickInstance*)>);
-static_assert(std::is_same_v<decltype(&Battle_Ai_RemoveAiTileOccupant),
-                             void (*)(const Field_GimmickInstance*)>);
+static_assert(
+    std::is_same_v<decltype(&VS::Battle::Ai::RemoveLiveAiTileOccupant),
+                   void (*)(const Field_GimmickInstance*)>);
 static_assert(offsetof(Field_GimmickPhysicsView, tileX) ==
               offsetof(Field_GimmickInstance, tileX));
 static_assert(offsetof(Field_GimmickPhysicsView, tileZ) ==
@@ -184,7 +187,7 @@ struct ScriptedOverrideFixture : NavigationOverrideFixture {
     REQUIRE(record != nullptr);
     std::construct_at(record);
     source.nativePointer18C = record;
-    Battle_Ai_CopyActorNavigationOverrideState(1, record);
+    VS::Battle::Ai::CopyLiveActorNavigationOverrideState(1, record);
     record->scriptedTargetXZ = target;
   }
 
@@ -357,8 +360,9 @@ TEST_CASE(
   fixture.source.nativePointer18C = nullptr;
   for (int actor_id = 0; actor_id < 16; ++actor_id) {
     Battle_Ai_actorAiStates[actor_id] = state ? &fixture.source : nullptr;
-    CHECK(Battle_Ai_HasActorNavigationState(actor_id) == (grid && state));
-    CHECK(Battle_Ai_ActorNavigationOverrideStatus(actor_id) == 2);
+    CHECK(VS::Battle::Ai::HasLiveActorNavigationState(actor_id) ==
+          (grid && state));
+    CHECK(VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id) == 2);
   }
 }
 
@@ -371,11 +375,11 @@ TEST_CASE("Navigation override status compares only horizontal target bytes",
   fixture.tile.word = 0xABCD12EF;
   fixture.route.destination.word =
       (ignored << 24) | 0x00CD00EF | (ignored << 8);
-  CHECK(Battle_Ai_ActorNavigationOverrideStatus(actor_id) == 0);
+  CHECK(VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id) == 0);
   fixture.route.destination.word ^= 1;
-  CHECK(Battle_Ai_ActorNavigationOverrideStatus(actor_id) == 1);
+  CHECK(VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id) == 1);
   fixture.route.destination.word ^= 0x10001;
-  CHECK(Battle_Ai_ActorNavigationOverrideStatus(actor_id) == 1);
+  CHECK(VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id) == 1);
 }
 
 TEST_CASE(
@@ -401,7 +405,7 @@ TEST_CASE(
   auto* output = self ? &fixture.source : &guarded.state;
   Battle_Ai_actorAiStates[actor_id] = &fixture.source;
   Battle_Ai_tileFlagMap = nullptr;
-  Battle_Ai_CopyActorNavigationOverrideState(actor_id, output);
+  VS::Battle::Ai::CopyLiveActorNavigationOverrideState(actor_id, output);
   CHECK(Snapshot(*output) == Snapshot(expected));
   CHECK(guarded.before == 0x123456789ABCDEF0);
   CHECK(guarded.after == 0xFEDCBA9876543210);
@@ -415,14 +419,14 @@ TEST_CASE(
   NavigationOverrideFixture fixture;
   Battle_Ai_actorAiStates[4] = &fixture.source;
   SeedCopyState(fixture.source);
-  Battle_Ai_CopyActorNavigationOverrideState(4, &fixture.route);
+  VS::Battle::Ai::CopyLiveActorNavigationOverrideState(4, &fixture.route);
   fixture.route.navigationFlags = 0xFFFFFFFF;
   fixture.route.opaque19A = 0xFF;
   fixture.source.destination.word = 0x12345678;
   fixture.source.candidateCount = 2;
   auto expected = fixture.source;
   SetExpectedOverrideFields(expected, 4);
-  Battle_Ai_CopyActorNavigationOverrideState(4, &fixture.route);
+  VS::Battle::Ai::CopyLiveActorNavigationOverrideState(4, &fixture.route);
   CHECK(Snapshot(fixture.route) == Snapshot(expected));
 }
 
@@ -435,9 +439,9 @@ TEST_CASE("Dynamic navigation marking preserves every source flag word",
   for (auto& row : fixture.grid) std::ranges::fill(row, kCanary);
   for (unsigned word = 0; word < 65536; ++word) {
     fixture.grid[z][x] = static_cast<u_short>(word);
-    Battle_Ai_MarkAiTileDynamicObstacle(x, z);
+    VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(x, z);
     REQUIRE(fixture.grid[z][x] == (word | 0x400u));
-    Battle_Ai_MarkAiTileDynamicObstacle(x, z);
+    VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(x, z);
     CHECK(fixture.grid[z][x] == (word | 0x400u));
   }
   fixture.CheckOtherCells(x, z, kCanary);
@@ -448,7 +452,7 @@ TEST_CASE("Dynamic navigation marking reaches every native grid cell",
   NavigationOverrideFixture fixture;
   for (int z = 0; z < 32; ++z) {
     for (int x = 0; x < 32; ++x) {
-      Battle_Ai_MarkAiTileDynamicObstacle(x, z);
+      VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(x, z);
       CHECK(fixture.grid[z][x] == 0x400);
     }
   }
@@ -459,17 +463,17 @@ TEST_CASE("Dynamic navigation marking follows grid availability and rebinding",
   NavigationOverrideFixture fixture;
   fixture.grid[2][1] = 3;
   Battle_Ai_tileFlagMap = nullptr;
-  Battle_Ai_MarkAiTileDynamicObstacle(-1, -1);
-  Battle_Ai_MarkAiTileDynamicObstacle(std::numeric_limits<int>::min(),
-                                      std::numeric_limits<int>::max());
+  VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(-1, -1);
+  VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(
+      std::numeric_limits<int>::min(), std::numeric_limits<int>::max());
   CHECK(fixture.grid[2][1] == 3);
   Battle_Ai_tileFlagMap = fixture.grid;
-  Battle_Ai_MarkAiTileDynamicObstacle(1, 2);
+  VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(1, 2);
   CHECK(fixture.grid[2][1] == 0x403);
   u_short second[32][32]{};
   second[2][1] = 0xA0;
   Battle_Ai_tileFlagMap = second;
-  Battle_Ai_MarkAiTileDynamicObstacle(1, 2);
+  VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(1, 2);
   CHECK(second[2][1] == 0x4A0);
   CHECK(fixture.grid[2][1] == 0x403);
 }
@@ -496,10 +500,10 @@ TEST_CASE("Gimmick occupancy adjusts the height grid instead of obstacle flags",
   GimmickOccupancyFixture fixture;
   fixture.heights[7][13] = 5;
   fixture.grid[7][13] = 0xA15A;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   CHECK(fixture.heights[7][13] == 0x405);
   CHECK(fixture.grid[7][13] == 0xA15A);
-  Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
   CHECK(fixture.heights[7][13] == 5);
   CHECK(fixture.grid[7][13] == 0xA15A);
 }
@@ -509,11 +513,11 @@ TEST_CASE("Gimmick occupancy preserves source halfword wrap for every value",
   GimmickOccupancyFixture fixture;
   for (unsigned word = 0; word < 65536; ++word) {
     fixture.heights[7][13] = static_cast<u_short>(word);
-    Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+    VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
     REQUIRE(fixture.heights[7][13] == static_cast<u_short>(word + 0x400));
-    Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+    VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
     CHECK(fixture.heights[7][13] == word);
-    Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+    VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
     CHECK(fixture.heights[7][13] == static_cast<u_short>(word - 0x400));
   }
 }
@@ -533,9 +537,9 @@ TEST_CASE("Gimmick placement retains original layer bits and native row carry",
       fixture.gimmick.reserved5F = static_cast<char>(0xFF);
       auto& cell = fixture.heights[index / 32][index % 32];
       cell = 0xA15A;
-      Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+      VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
       CHECK(cell == 0xA55A);
-      Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+      VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
       CHECK(cell == 0xA15A);
     }
   }
@@ -546,15 +550,15 @@ TEST_CASE("Gimmick occupancy follows room map absence and rebinding",
   GimmickOccupancyFixture fixture;
   Battle_Ai_tileFlagMap = nullptr;
   Battle_Ai_specialTerrainHeights = nullptr;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
-  Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
   Battle_Ai_tileFlagMap = fixture.grid;
   Battle_Ai_specialTerrainHeights = fixture.heights;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   u_short second[32][32]{};
   Battle_Ai_specialTerrainHeights = second;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
-  Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
   CHECK(second[7][13] == 0);
   CHECK(fixture.heights[7][13] == 0x400);
 }
@@ -568,9 +572,9 @@ TEST_CASE("Gimmick occupancy reaches every cell of the bounded native map",
       fixture.gimmick.tileZ = static_cast<char>(z);
       fixture.gimmick.tileLayer = 3;
       fixture.heights[z][x] = 0x123;
-      Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+      VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
       REQUIRE(fixture.heights[z][x] == 0x523);
-      Battle_Ai_RemoveAiTileOccupant(&fixture.gimmick);
+      VS::Battle::Ai::RemoveLiveAiTileOccupant(&fixture.gimmick);
       CHECK(fixture.heights[z][x] == 0x123);
     }
   }
@@ -585,7 +589,7 @@ TEST_CASE("Production gimmick release balances one occupancy contribution",
   fixture.heights[7][13] = 0x88;
   for (int cycle = 0; cycle < 2; ++cycle) {
     Field_gimmickInstances[0] = &fixture.gimmick;
-    Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+    VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
     CHECK(fixture.heights[7][13] == 0x488);
     CHECK(Field_ReleaseGimmickInstance(0) == 0);
     CHECK(Field_gimmickInstances[0] == nullptr);
@@ -599,10 +603,10 @@ TEST_CASE("Original gimmick occupancy entries resolve to native functions",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E6898) ==
-        reinterpret_cast<void*>(&Battle_Ai_AddAiTileOccupant));
+        reinterpret_cast<void*>(&VS::Battle::Ai::AddLiveAiTileOccupant));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E68A0) ==
-        reinterpret_cast<void*>(&Battle_Ai_RemoveAiTileOccupant));
+        reinterpret_cast<void*>(&VS::Battle::Ai::RemoveLiveAiTileOccupant));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E6EB0) ==
         reinterpret_cast<void*>(
@@ -614,7 +618,7 @@ TEST_CASE("Gimmick occupancy rejects an unaligned source halfword",
   VS::Platform::InstallCrashHandler();
   GimmickOccupancyFixture fixture;
   fixture.gimmick.tileLayer = 4;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   FAIL("Unaligned occupancy placement was accepted");
 }
 
@@ -624,7 +628,7 @@ TEST_CASE("Gimmick occupancy rejects the first byte beyond its map",
   GimmickOccupancyFixture fixture;
   fixture.gimmick.tileX = fixture.gimmick.tileZ = 31;
   fixture.gimmick.tileLayer = 8;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   FAIL("Out-of-bounds occupancy placement was accepted");
 }
 
@@ -633,7 +637,7 @@ TEST_CASE("Gimmick occupancy requires the active native height map",
   VS::Platform::InstallCrashHandler();
   GimmickOccupancyFixture fixture;
   Battle_Ai_specialTerrainHeights = nullptr;
-  Battle_Ai_AddAiTileOccupant(&fixture.gimmick);
+  VS::Battle::Ai::AddLiveAiTileOccupant(&fixture.gimmick);
   FAIL("Missing active occupancy map was accepted");
 }
 
@@ -646,7 +650,7 @@ TEST_CASE("Route availability connects both endpoints to visible platforms",
   fixture.SetWord(1, kFirst);
   fixture.SetWord(2, kSecond);
   fixture.SetWord(3, kFirst | kSecond);
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == (kFirst | 0x80000000u));
   CHECK(fixture.Word(2) == (kSecond | 0x8000));
   CHECK(fixture.Word(3) == (kFirst | kSecond));
@@ -666,7 +670,7 @@ TEST_CASE("Route availability preserves every platform mask and selector",
       fixture.SetWord(2, second);
       fixture.SetWord(3, first | second);
       fixture.SetWord(4, 0xA31D51A5u & ~0x04000400u);
-      Battle_Ai_UpdateRouteGateAvailability();
+      VS::Battle::Ai::UpdateLiveRouteGateAvailability();
       const bool visible = (mask & (1u << selector)) != 0;
       CHECK(fixture.Word(1) == (first | (visible ? 0x80000000u : 0x80008000u)));
       CHECK(fixture.Word(2) == (second | (visible ? 0x8000u : 0x80008000u)));
@@ -687,7 +691,7 @@ TEST_CASE("Route availability retains mutated shift operands between pairs",
   constexpr u_int kSecond = 0x04000000 | (3u << 21) | (7u << 16) | (3u << 29);
   fixture.SetWord(1, kFirst);
   fixture.SetWord(2, kSecond);
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == (kFirst | 0x80008000u));
   CHECK(fixture.Word(2) == (kSecond | 0x80008000u));
 }
@@ -700,7 +704,7 @@ TEST_CASE(
   for (unsigned word = 0; word < 256; ++word) fixture.SetWord(word, kFirst);
   for (unsigned mask : {1u, 0u, 1u}) {
     fixture.SetVisible(mask);
-    Battle_Ai_UpdateRouteGateAvailability();
+    VS::Battle::Ai::UpdateLiveRouteGateAvailability();
     for (unsigned word = 0; word < 256; ++word) {
       CHECK(fixture.Word(word) ==
             (kFirst | (mask ? 0x80000000u : 0x80008000u)));
@@ -714,7 +718,7 @@ TEST_CASE("Route availability respects absent room auxiliary data",
   fixture.SetWord(1, 0x400);
   Battle_Ai_roomHasWaypoints = nullptr;
   Battle_Ai_routeGates = nullptr;
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == 0x400);
 }
 
@@ -724,13 +728,13 @@ TEST_CASE("Route availability retains the original thirteen-point capacity",
   fixture.SetVisible(1u << 12);
   constexpr u_int kFirst = 0x400 | (3u << 5) | 7;
   fixture.SetWord(1, kFirst);
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == (kFirst | 0x80008000u));
   fixture.SetVisible(1u << 4);
   fixture.SetEnd(0, 3, 6);
   fixture.SetEnd(1, 3, 7);
   fixture.SetWord(1, kFirst | (2u << 13));
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   CHECK(fixture.Word(1) == (kFirst | (2u << 13) | 0x80000000u));
 }
 
@@ -739,7 +743,8 @@ TEST_CASE("Original route availability entry resolves to the native updater",
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800DC638) ==
-        reinterpret_cast<void*>(&Battle_Ai_UpdateRouteGateAvailability));
+        reinterpret_cast<void*>(
+            &VS::Battle::Ai::UpdateLiveRouteGateAvailability));
 }
 
 TEST_CASE("Route availability rejects source stack-dependent input",
@@ -748,7 +753,7 @@ TEST_CASE("Route availability rejects source stack-dependent input",
   RouteAvailabilityFixture fixture;
   fixture.SetVisible(1);
   fixture.SetWord(0, 0x04000000);
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   FAIL("Stack-register-dependent route input was accepted");
 }
 
@@ -757,7 +762,7 @@ TEST_CASE("Route availability rejects a truncated room auxiliary section",
   VS::Platform::InstallCrashHandler();
   RouteAvailabilityFixture fixture;
   Field_roomData.header.section6Length = 0x497;
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   FAIL("Truncated room route table was accepted");
 }
 
@@ -767,7 +772,7 @@ TEST_CASE("Route availability rejects excess moving-platform output capacity",
   RouteAvailabilityFixture fixture;
   Field_roomData.header.movingPlatformsLength =
       14 * sizeof(Field_MpdMovingPlatform);
-  Battle_Ai_UpdateRouteGateAvailability();
+  VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   FAIL("Moving-platform output beyond the original buffer was accepted");
 }
 
@@ -795,7 +800,7 @@ TEST_CASE(
     "[ai][scripted-override][scripted-override-red]") {
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandState == 0x80);
   CHECK(fixture.actors[1].commandOpcode == 2);
@@ -816,7 +821,7 @@ TEST_CASE(
   fixture.source.currentCandidate = &fixture.source.candidates[0];
   const u_int preserved = 0x11223344;
   std::memcpy(fixture.source.reserved160 + 4, &preserved, sizeof preserved);
-  Battle_Ai_SetActorNavigationOverride(1, 1200, 1300);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   const auto* record = fixture.ActiveRoute();
   REQUIRE(record != nullptr);
   CHECK(record->currentCandidate == &fixture.source.candidates[0]);
@@ -833,11 +838,11 @@ TEST_CASE(
     "Repeated scripted path requests retain the source base-route distinction",
     "[ai][scripted-override]") {
   ScriptedOverrideFixture fixture;
-  Battle_Ai_SetActorNavigationOverride(1, 1200, 1300);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   auto* first = fixture.ActiveRoute();
   REQUIRE(first != nullptr);
   const auto units = Core_legacyHeapList.next->blockSize;
-  Battle_Ai_SetActorNavigationOverride(1, 1400, 1500);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1400, 1500);
   CHECK(fixture.ActiveRoute() == first);
   CHECK(first->scriptedTargetXZ == (1200u | (1300u << 16)));
   CHECK(fixture.source.scriptedTargetXZ == (1400u | (1500u << 16)));
@@ -850,16 +855,18 @@ TEST_CASE("Scripted path packing preserves every halfword and signed high bits",
   ScriptedOverrideFixture fixture;
   const auto random = Core_Random_State();
   for (unsigned value = 0; value < 65536; ++value) {
-    Battle_Ai_SetActorNavigationOverride(1, static_cast<int>(value), 0x1234);
+    VS::Battle::Ai::SetLiveActorNavigationOverride(1, static_cast<int>(value),
+                                                   0x1234);
     const auto* changed = value == 0 ? fixture.ActiveRoute() : &fixture.source;
     REQUIRE(changed != nullptr);
     CHECK(changed->scriptedTargetXZ == (value | 0x12340000u));
-    Battle_Ai_SetActorNavigationOverride(1, 0x5678, static_cast<int>(value));
+    VS::Battle::Ai::SetLiveActorNavigationOverride(1, 0x5678,
+                                                   static_cast<int>(value));
     CHECK(fixture.source.scriptedTargetXZ == (0x5678u | (value << 16)));
   }
-  Battle_Ai_SetActorNavigationOverride(1, -1, 0x1234);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, -1, 0x1234);
   CHECK(fixture.source.scriptedTargetXZ == 0xFFFFFFFFu);
-  Battle_Ai_SetActorNavigationOverride(1, 0x1234, -1);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 0x1234, -1);
   CHECK(fixture.source.scriptedTargetXZ == 0xFFFF1234u);
   CHECK(Core_Random_State() == random);
 }
@@ -869,11 +876,11 @@ TEST_CASE("Scripted path requests retain missing map and AI-state gates",
   ScriptedOverrideFixture fixture;
   Battle_actorMarkers[1] = static_cast<char>(0x85);
   Battle_Ai_tileFlagMap = nullptr;
-  Battle_Ai_SetActorNavigationOverride(1, 1200, 1300);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   CHECK(fixture.source.nativePointer18C == nullptr);
   Battle_Ai_tileFlagMap = fixture.grid;
   Battle_Ai_actorAiStates[1] = nullptr;
-  Battle_Ai_SetActorNavigationOverride(1, 1200, 1300);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
   CHECK(static_cast<unsigned char>(Battle_actorMarkers[1]) == 0x85);
@@ -888,7 +895,7 @@ TEST_CASE("Scripted route updates preserve strict source arrival boundaries",
     const auto target = static_cast<unsigned>(1088 + delta[0]) |
                         (static_cast<unsigned>(1088 + delta[1]) << 16);
     fixture.AllocateCopiedRoute(target);
-    Battle_Ai_UpdateActorNavigationOverrides();
+    VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
     const bool reached = delta[0] * delta[0] + delta[1] * delta[1] < 1024;
     CHECK((fixture.source.nativePointer18C == nullptr) == reached);
     if (!reached) {
@@ -916,7 +923,7 @@ TEST_CASE(
   frame.directionCache[0] = 0xFFFFFFFF;
   frame.directionCache[1] = 0x12345678;
   frame.directionCache[2] = 0xA5B6C7D8;
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   fixture.CheckPreparedRoute();
   fixture.CheckPreparedFlags();
   fixture.CheckCopiedCoordinates();
@@ -934,12 +941,12 @@ TEST_CASE("Scripted route updates skip suspended and missing-AI actors safely",
   const auto before = Snapshot(*fixture.ActiveRoute());
   fixture.actors[1].commandState = static_cast<u_char>(flags);
   Battle_Ai_FrameState()->lastBudgetTick = 0x1234;
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
   CHECK(Battle_Ai_FrameState()->lastBudgetTick == 0x1234);
   fixture.actors[1].commandState = 0;
   Battle_Ai_actorAiStates[1] = nullptr;
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(Snapshot(*fixture.ActiveRoute()) == before);
   CHECK(fixture.actors[0].next == &fixture.actors[1]);
 }
@@ -952,7 +959,7 @@ TEST_CASE("Non-ground scripted arrival ignores layer and status metadata",
   fixture.ActiveRoute()->locomotionMode = static_cast<u_char>(mode);
   fixture.ActiveRoute()->destination.word = 0xA5080308;
   fixture.model.instance.currentTileLayer = 5;
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
@@ -965,7 +972,7 @@ TEST_CASE("Scripted arrival retains signed source square-sum behavior",
   fixture.model.instance.position.vx = fixture.model.instance.position.vz =
       position;
   fixture.AllocateCopiedRoute(0);
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   CHECK(fixture.source.nativePointer18C == nullptr);
   CHECK(fixture.actors[1].commandOpcode == 2);
 }
@@ -974,12 +981,14 @@ TEST_CASE(
     "Original scripted route entries resolve to native lifecycle functions",
     "[ai][scripted-override]") {
   const std::span symbols(Content_moduleSymbols, Content_moduleSymbolCount);
-  CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
-                                          0x800E527C) ==
-        reinterpret_cast<void*>(&Battle_Ai_SetActorNavigationOverride));
+  CHECK(
+      VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
+                                        0x800E527C) ==
+      reinterpret_cast<void*>(&VS::Battle::Ai::SetLiveActorNavigationOverride));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E5308) ==
-        reinterpret_cast<void*>(&Battle_Ai_UpdateActorNavigationOverrides));
+        reinterpret_cast<void*>(
+            &VS::Battle::Ai::UpdateLiveActorNavigationOverrides));
 }
 
 TEST_CASE("Scripted path requests reject mismatched actor ownership",
@@ -987,7 +996,7 @@ TEST_CASE("Scripted path requests reject mismatched actor ownership",
   VS::Platform::InstallCrashHandler();
   ScriptedOverrideFixture fixture;
   Battle_actors[1] = nullptr;
-  Battle_Ai_SetActorNavigationOverride(1, 1200, 1300);
+  VS::Battle::Ai::SetLiveActorNavigationOverride(1, 1200, 1300);
   FAIL("Mismatched path-request identity was accepted");
 }
 
@@ -997,7 +1006,7 @@ TEST_CASE("Active scripted routes require their native map",
   ScriptedOverrideFixture fixture;
   fixture.AllocateCopiedRoute(1088u | (1088u << 16));
   Battle_Ai_tileFlagMap = nullptr;
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   FAIL("An active path without a native map was accepted");
 }
 
@@ -1007,6 +1016,6 @@ TEST_CASE("Scripted navigation rejects cyclic native actor lists",
   ScriptedOverrideFixture fixture;
   fixture.actors[1].commandState = 0xC0;
   fixture.actors[1].next = &fixture.actors[1];
-  Battle_Ai_UpdateActorNavigationOverrides();
+  VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
   FAIL("A cyclic actor list was accepted");
 }

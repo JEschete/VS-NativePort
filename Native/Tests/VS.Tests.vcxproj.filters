@@ -57,10 +57,16 @@
     <ClCompile Include="src\AiDecisionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AiGroundNavigationTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AiLayoutTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AiLifecycleLeafTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\AiNavigationPrimitivesTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\AiPlanningTests.cpp">

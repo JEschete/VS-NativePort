@@ -14,6 +14,7 @@ extern "C" {
 
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
@@ -35,7 +36,6 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -200,8 +200,8 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
 
   void RefreshDerivedRoomState() override {
     VS::Battle::Ai::CacheLiveActorAiWorkingState();
-    Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
-    Battle_Ai_UpdateRouteGateAvailability();
+    VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
+    VS::Battle::Ai::UpdateLiveRouteGateAvailability();
   }
 
   void FreeActorAiStates() override {

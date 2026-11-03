@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/DoorMatchesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Battle/ActionFlow.h"
 #include "Battle/ActionResolution.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -382,7 +382,7 @@ void Field_FinishTrapInteraction(void)
     State_tickSpeed = 2;
     Menu_ReleaseSceneNotification();
     Field_SetRoomTriggerEnabled(&Field_interactionFocus.triggerRecord->trigger, 1);
-    Battle_Ai_MarkAiTileDynamicObstacle(Field_interactionFocus.triggerRecord->trigger.tileX, Field_interactionFocus.triggerRecord->trigger.tileZ);
+    VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(Field_interactionFocus.triggerRecord->trigger.tileX, Field_interactionFocus.triggerRecord->trigger.tileZ);
 }
 
 // decomp: BATTLE.PRG func_80074374 (src/BATTLE/BATTLE.PRG/146C.c:5089)

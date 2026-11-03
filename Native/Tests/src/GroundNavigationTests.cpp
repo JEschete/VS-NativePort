@@ -10,7 +10,7 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
-#include "Battle/Ai/GroundNavigation.h"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -116,28 +116,28 @@ struct GroundFixture {
   }
 
   int Occupancy(unsigned tile) {
-    return Battle_Ai_DestinationOccupancy(
+    return VS::Battle::Ai::LiveDestinationOccupancy(
         reinterpret_cast<Battle_Ai_MoveTargetView*>(&states[0]), tile);
   }
 
   int Blocker(int direction) {
-    return Battle_Ai_DirectionalBlockingActor(
+    return VS::Battle::Ai::LiveDirectionalBlockingActor(
         reinterpret_cast<Battle_Ai_MovementPathView*>(&states[0]), direction);
   }
 
   int Walk(int direction) {
-    return Battle_Ai_CanWalkInDirection(
+    return VS::Battle::Ai::CanLiveActorWalkInDirection(
         reinterpret_cast<Battle_Ai_WanderView*>(&states[0]), direction);
   }
 
   int Step(unsigned to, int direction) {
-    return Battle_Ai_CanTraverseTileEdge(
+    return VS::Battle::Ai::CanTraverseLiveTileEdge(
         reinterpret_cast<Battle_Ai_MoveTargetView*>(&states[0]),
         states[0].tile.word, to, direction);
   }
 
   unsigned Gap(unsigned tile, int direction) {
-    return Battle_Ai_FindGapLandingTile(
+    return VS::Battle::Ai::FindLiveGapLandingTile(
         reinterpret_cast<Battle_Ai_MoveTargetView*>(&states[0]), tile,
         direction, states[0].tile.word);
   }
@@ -351,7 +351,7 @@ TEST_CASE(
   GroundFixture fixture;
   fixture.states[0].navigationFlags = 0xAA155555;
   fixture.states[0].destination.word = Tile(31, 8);
-  Battle_Ai_SetDetourBoundary(&fixture.states[0]);
+  VS::Battle::Ai::SetLiveDetourBoundary(&fixture.states[0]);
   CHECK(fixture.states[0].navigationFlags ==
         ((0xAA155555u & 0x3FFFFFu) | (32u << 22)));
 }
@@ -364,7 +364,8 @@ TEST_CASE("Detour progress detects five repeated tiles and preserves RNG order",
   std::memcpy(fixture.states[0].detour_tile_bytes, &tile, sizeof(tile));
   fixture.states[0].detour_repeats = 4;
   fixture.states[0].movement_wait = 15;
-  CHECK(Battle_Ai_RefreshDetourProgress(&fixture.states[0], 0x12345678) ==
+  CHECK(VS::Battle::Ai::RefreshLiveDetourProgress(&fixture.states[0],
+                                                  0x12345678) ==
         ((0x12345678u & 0xFFFFF01Fu) | (126u << 5)));
   CHECK(fixture.states[0].opaque19A == 120);
   CHECK(fixture.states[0].detour_repeats == 0);
@@ -377,7 +378,7 @@ TEST_CASE("Non-enabled detour progress draws once and retains the short plan",
   GroundFixture fixture;
   Battle_Ai_FrameState()->randomState = 3;
   const unsigned result =
-      Battle_Ai_RefreshDetourProgress(&fixture.states[0], 0);
+      VS::Battle::Ai::RefreshLiveDetourProgress(&fixture.states[0], 0);
   CHECK(((result >> 5) & 127) == 31);
   CHECK(Battle_Ai_FrameState()->randomState == 4);
 }
@@ -391,7 +392,7 @@ TEST_CASE("Cardinal passability visits exactly four ordered callbacks",
     state.candidateCount = state.candidateCount * 10 + direction + 1;
     return direction == 0 || direction == 4;
   };
-  CHECK(Battle_Ai_CardinalPassabilityMask(
+  CHECK(VS::Battle::Ai::LiveCardinalPassabilityMask(
             reinterpret_cast<Battle_Ai_MovementPathView*>(&fixture.states[0]),
             callback) == 10);
   CHECK(fixture.states[0].candidateCount == 1357);
@@ -402,8 +403,8 @@ TEST_CASE("Existing detour initialization does not consume random draws",
   GroundFixture fixture;
   fixture.states[0].opaque1 = 1;
   auto passable = [](Battle_Ai_MovementPathView*, int) { return 1; };
-  CHECK(Battle_Ai_InitializeObstacleDetour(&fixture.states[0], 0x20,
-                                           passable) == (0x20u | (15u << 18)));
+  CHECK(VS::Battle::Ai::InitializeLiveObstacleDetour(
+            &fixture.states[0], 0x20, passable) == (0x20u | (15u << 18)));
   CHECK(fixture.states[0].detour_run == 1);
   CHECK(Battle_Ai_FrameState()->randomState == 40);
 }
@@ -411,11 +412,14 @@ TEST_CASE("Existing detour initialization does not consume random draws",
 TEST_CASE("Hesitation only draws for a fresh non-poll request",
           "[ai][ground-motion]") {
   GroundFixture fixture;
-  CHECK(Battle_Ai_UpdateHesitationTurn(&fixture.states[0], 0, 3, 1) == 0);
+  CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 0, 3, 1) ==
+        0);
   CHECK(Battle_Ai_FrameState()->randomState == 40);
-  CHECK(Battle_Ai_UpdateHesitationTurn(&fixture.states[0], 0, 1, 1) == 0);
+  CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 0, 1, 1) ==
+        0);
   CHECK(Battle_Ai_FrameState()->randomState == 41);
-  CHECK(Battle_Ai_UpdateHesitationTurn(&fixture.states[0], 128, 1, 6) == 1);
+  CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 128, 1,
+                                                 6) == 1);
   CHECK(fixture.states[0].movementModeCounters[12] == 1);
   CHECK(fixture.states[0].reactionPending == 69);
 }
@@ -426,8 +430,8 @@ TEST_CASE("Hesitation phase thresholds execute the actual timed-turn consumer",
   GroundFixture fixture;
   fixture.states[0].movementModeCounters[2] = 1;
   fixture.states[0].movementModeCounters[3] = static_cast<u_char>(count);
-  CHECK(Battle_Ai_UpdateHesitationTurn(&fixture.states[0], 128, 1, 1) ==
-        (count >= 2));
+  CHECK(VS::Battle::Ai::UpdateLiveHesitationTurn(&fixture.states[0], 128, 1,
+                                                 1) == (count >= 2));
   CHECK(fixture.states[0].movementModeCounters[3] == count - 1);
   CHECK(fixture.states[0].heading == (count >= 53   ? 0x320
                                       : count >= 18 ? -0x320
@@ -445,8 +449,8 @@ TEST_CASE("Vertical gait selection retains source priorities and output widths",
   fixture.states[0].walkStep = 17;
   fixture.states[0].runStep = 93;
   int value = -1, code = -1;
-  CHECK(Battle_Ai_SelectActorVerticalMovementStep(&fixture.states[0], &value,
-                                                  &code) == 1);
+  CHECK(VS::Battle::Ai::SelectLiveActorVerticalMovementStep(
+            &fixture.states[0], &value, &code) == 1);
   CHECK(code == (running ? 10 : 9));
   CHECK(value == (running ? 93 : 17));
 }
@@ -457,11 +461,11 @@ TEST_CASE("Room contact flags preserve all original shift/sign cases",
   GroundFixture fixture;
   fixture.room.reservedEPrefix[0] = 0x55;
   const unsigned mask = 1u << bit;
-  Battle_Ai_SetAiContactOccupancy(static_cast<int>(bit));
+  VS::Battle::Ai::SetLiveAiContactOccupancy(static_cast<int>(bit));
   CHECK(fixture.room.reservedEPrefix[0] ==
         static_cast<u_char>(bit == 31 ? 0 : 0x55u | mask));
   fixture.room.reservedEPrefix[0] = 0x55;
-  Battle_Ai_ClearAiContactOccupancy(static_cast<int>(bit));
+  VS::Battle::Ai::ClearLiveAiContactOccupancy(static_cast<int>(bit));
   CHECK(fixture.room.reservedEPrefix[0] ==
         static_cast<u_char>(bit == 31 ? 0xFF : 0x55u & ~mask));
 }
@@ -471,7 +475,7 @@ TEST_CASE(
     "[ai][ground-motion]") {
   GroundFixture fixture;
   fixture.states[0].destination.word = Tile(10, 8);
-  Battle_Ai_DispatchAiLocomotionMode(&fixture.states[0], 1, 3072);
+  VS::Battle::Ai::DispatchLiveAiLocomotionMode(&fixture.states[0], 1, 3072);
   CHECK(fixture.states[0].isStuck == 1);
   CHECK(fixture.actors[0].commandOpcode == 9);
   CHECK(fixture.actors[0].commandState == 0x80);
@@ -482,7 +486,7 @@ TEST_CASE("Gate release precedes movement when the actor is off its link tile",
   GroundFixture fixture;
   fixture.states[0].route_gate = 3;
   fixture.room.reservedEPrefix[0] = 0xFF;
-  Battle_Ai_MoveActorTowardDestinationTile(&fixture.states[0], 0);
+  VS::Battle::Ai::MoveLiveActorTowardDestinationTile(&fixture.states[0], 0);
   CHECK(fixture.states[0].route_gate == 0);
   CHECK(fixture.room.reservedEPrefix[0] == 0xF7);
   unsigned exit;

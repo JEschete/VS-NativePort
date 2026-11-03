@@ -447,9 +447,9 @@
     <ClCompile Include="src\Battle\Ai\GroundNavigation.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\GroundNavigation.h">
+    <ClCompile Include="src\Battle\Ai\GroundNavigationLive.cpp">
       <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\Movement.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -471,9 +471,9 @@
     <ClCompile Include="src\Battle\Ai\NavigationPrimitives.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
-    <ClInclude Include="src\Battle\Ai\NavigationPrimitives.h">
+    <ClCompile Include="src\Battle\Ai\NavigationPrimitivesLive.cpp">
       <Filter>src\Battle\Ai</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Battle\Ai\OrbitingBoss.cpp">
       <Filter>src\Battle\Ai</Filter>
     </ClCompile>
@@ -2295,10 +2295,22 @@
     <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
+    <ClInclude Include="include\Battle\Ai\GroundNavigation.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\GroundNavigationLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
     <ClInclude Include="include\Battle\Ai\MovementBehavior.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\MovementBehaviorLive.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\NavigationPrimitives.hpp">
+      <Filter>include\Battle\Ai</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Battle\Ai\NavigationPrimitivesLive.hpp">
       <Filter>include\Battle\Ai</Filter>
     </ClInclude>
     <ClInclude Include="include\Battle\Ai\PlanningPrimitives.hpp">

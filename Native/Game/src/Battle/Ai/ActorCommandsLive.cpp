@@ -10,6 +10,7 @@
 
 #include "Battle/Ai/ActorCommands.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/TerrainHeight.hpp"
 
 extern "C" {
@@ -17,7 +18,6 @@ extern "C" {
 #include "Actors/Movement.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 }
 
@@ -75,8 +75,7 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
     const unsigned direction = DirectionForOffset(dx, dz);
     const auto& frame = *Battle_Ai_FrameState();
     if (frame.roomData == nullptr) {
-      return Battle_Ai_IsAdjacentTileStepBlocked(tile,
-                                                 static_cast<int>(direction));
+      return IsLiveAdjacentTileStepBlocked(tile, static_cast<int>(direction));
     }
     Require(frame.terrainRegions != nullptr && frame.heightMap != nullptr,
             "AI regional movement requires terrain grids");
@@ -130,7 +129,7 @@ class LiveActorCommandRoom final : public ActorCommandRoom {
   }
 
   void ReserveTile(int x, int z) override {
-    Battle_Ai_ReserveAiDestinationTile(x, z);
+    ReserveLiveAiDestinationTile(x, z);
   }
 
  private:

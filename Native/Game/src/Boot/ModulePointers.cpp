@@ -3,6 +3,8 @@
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Field/SegmentCollisionLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -65,10 +67,8 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
-#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/AttackPrerequisites.h"
@@ -1854,10 +1854,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800D87E8u, 0u, (void*)&Battle_Ai_UpdateTargetPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D8EF4u, 0u, (void*)&Battle_Ai_UpdateActorPerception, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D9538u, 0u, (void*)&Battle_Ai_SaveMovementRandomState, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D954Cu, 0u, (void*)&Battle_Ai_DestinationOccupancy, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D96C8u, 0u, (void*)&Battle_Ai_CanTraverseTileEdge, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D98E8u, 0u, (void*)&Battle_Ai_DirectionalBlockingActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800D9B6Cu, 0u, (void*)&Battle_Ai_CanWalkInDirection, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800D9E18u, 0u, (void*)&Battle_Ai_MoveForActionCandidate, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA1D4u, 0u, (void*)&Battle_Ai_UpdateCombatPursuit, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DA4BCu, 0u, (void*)&Battle_Ai_TryApproachPlannedTarget, 0u, 0u, 0u},
@@ -1869,7 +1865,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DAD9Cu, 0u, (void*)&Battle_Ai_TryExecutePlannedActions, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DAED0u, 0u, (void*)&Battle_Ai_UpdateActorDecisions, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DB0BCu, 0u, (void*)&Battle_Ai_TryRecoverBlockedMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DB93Cu, 0u, (void*)&Battle_Ai_FindGapLandingTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBF00u, 0u, (void*)&Battle_Ai_UnlinkEngagedActor, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBFE4u, 0u, (void*)&Battle_Ai_UpdateEngagementBuildup, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DC0D0u, 0u, (void*)&Battle_Ai_AnimateEngagementPhase, 0u, 0u, 0u},
@@ -1908,21 +1903,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E2B2Cu, 0u, (void*)&Battle_Ai_UpdateTargetFacing, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2CCCu, 0u, (void*)&Battle_Ai_UpdateMovementRecovery, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E2F5Cu, 0u, (void*)&Battle_Ai_FollowObstacleDetour, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E3600u, 0u, (void*)&Battle_Ai_ResolveDirectionalMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E3BC8u, 0u, (void*)&Battle_Ai_SetDetourBoundary, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E3CDCu, 0u, (void*)&Battle_Ai_RefreshDetourProgress, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E3D5Cu, 0u, (void*)&Battle_Ai_CardinalPassabilityMask, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E3DDCu, 0u, (void*)&Battle_Ai_InitializeObstacleDetour, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4180u, 0u, (void*)&Battle_Ai_UpdateHesitationTurn, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4690u, 0u, (void*)&Battle_Ai_IsAdjacentTileStepBlocked, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4764u, 0u, (void*)&Battle_Ai_SelectActorVerticalMovementStep, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E47E4u, 0u, (void*)&Battle_Ai_IsTileBehindActorTarget, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E49D8u, 0u, (void*)&Battle_Ai_FindAiDescentTile, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4B10u, 0u, (void*)&Battle_Ai_BeginAiTerrainMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4B18u, 0u, (void*)&Battle_Ai_BeginAiAlternateTerrainMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4B2Cu, 0u, (void*)&Battle_Ai_MoveActorTowardDestinationTile, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E4CE8u, 0u, (void*)&Battle_Ai_ForgetAiActionTarget, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E4FE0u, 0u, (void*)&Battle_Ai_BeginAiMovementTowardPoint, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5568u, 0u, (void*)&Battle_CalculateRangeShapeExtent, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5600u, 0u, (void*)&Battle_CalculateActionAreaReach, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E5698u, 0u, (void*)&Battle_CalculateActionRangeSquared, 0u, 0u, 0u},
@@ -1935,9 +1916,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E6098u, 0u, (void*)&Battle_Ai_BuildAiSpecialTerrainHeights, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6158u, 0u, (void*)&Battle_Ai_InitializeRoomNavigation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6178u, 0u, (void*)&Battle_Ai_CreateActorAiState, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6898u, 0u, (void*)&Battle_Ai_AddAiTileOccupant, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E68A0u, 0u, (void*)&Battle_Ai_RemoveAiTileOccupant, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E68ECu, 0u, (void*)&Battle_Ai_MarkAiTileDynamicObstacle, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7698u, 0u, (void*)&Battle_Ai_UpdateBossRadialRetreat, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E78F4u, 0u, (void*)&Battle_Ai_IsBossActionReady, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E7960u, 0u, (void*)&Battle_Ai_UpdateBossOrbitTracking, 0u, 0u, 0u},
@@ -3058,9 +3036,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"SLUS_010.40", 0x80061078u, 1312u, (void*)&State_recentRoomEnemyStates, sizeof State_recentRoomEnemyStates, 1u, 1u},
     {"SLUS_010.40", 0x80061598u, 1088u, (void*)&Audio_Seq_unusedStateFlags, sizeof Audio_Seq_unusedStateFlags, 1u, 1u},
     {"SLUS_010.40", 0x800619D8u, 176u, (void*)&Audio_Seq_unusedInventoryIndices, sizeof Audio_Seq_unusedInventoryIndices, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E527Cu, 0u, (void*)&Battle_Ai_SetActorNavigationOverride, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E5308u, 0u, (void*)&Battle_Ai_UpdateActorNavigationOverrides, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800DC638u, 0u, (void*)&Battle_Ai_UpdateRouteGateAvailability, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800F98F8u, 0u, (void*)&Effects_Plg073_TiledRing, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FA7F0u, 0u, (void*)&Effects_Plg073_Ring, 0u, 0u, 0u},
     {"EFFECT/PLG074.BIN", 0x800FBBB0u, 0u, (void*)&Effects_Plg073_TrailTarget, 0u, 0u, 0u},
@@ -3071,7 +3046,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"EFFECT/PLG074.BIN", 0x800FD534u, 0u, (void*)&Effects_Plg073_RotatingSurface, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041A00u, 0u, (void*)&Render_ApplyDepthCueColor, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80041954u, 0u, (void*)&Render_SetFogNearDistance, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&Battle_Ai_BuildAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B9DB4u, 0u, (void*)&Event_ScriptSetAshleyBattleModeOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6BA0u, 0u, (void*)&VS::Field::IsLivePointOutsideSolidVolumes, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6C34u, 0u, (void*)&VS::Field::TraceLiveActorAndTerrainCollision, 0u, 0u, 0u},
@@ -3086,6 +3060,32 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800DBB98u, 0u, (void*)&VS::Battle::Ai::UpdateLiveSupportFollowBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800DBC0Cu, 0u, (void*)&VS::Battle::Ai::UpdateLiveEngagementApproachBehavior, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E6EB0u, 0u, (void*)&VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D954Cu, 0u, (void*)&VS::Battle::Ai::LiveDestinationOccupancy, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D96C8u, 0u, (void*)&VS::Battle::Ai::CanTraverseLiveTileEdge, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D98E8u, 0u, (void*)&VS::Battle::Ai::LiveDirectionalBlockingActor, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800D9B6Cu, 0u, (void*)&VS::Battle::Ai::CanLiveActorWalkInDirection, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DB93Cu, 0u, (void*)&VS::Battle::Ai::FindLiveGapLandingTile, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800DC638u, 0u, (void*)&VS::Battle::Ai::UpdateLiveRouteGateAvailability, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E3600u, 0u, (void*)&VS::Battle::Ai::ResolveLiveDirectionalMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E3BC8u, 0u, (void*)&VS::Battle::Ai::SetLiveDetourBoundary, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E3CDCu, 0u, (void*)&VS::Battle::Ai::RefreshLiveDetourProgress, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E3D5Cu, 0u, (void*)&VS::Battle::Ai::LiveCardinalPassabilityMask, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E3DDCu, 0u, (void*)&VS::Battle::Ai::InitializeLiveObstacleDetour, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4180u, 0u, (void*)&VS::Battle::Ai::UpdateLiveHesitationTurn, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4690u, 0u, (void*)&VS::Battle::Ai::IsLiveAdjacentTileStepBlocked, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4764u, 0u, (void*)&VS::Battle::Ai::SelectLiveActorVerticalMovementStep, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E47E4u, 0u, (void*)&VS::Battle::Ai::IsTileBehindLiveActorTarget, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E49D8u, 0u, (void*)&VS::Battle::Ai::FindLiveAiDescentTile, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4B10u, 0u, (void*)&VS::Battle::Ai::BeginLiveAiTerrainMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4B18u, 0u, (void*)&VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4B2Cu, 0u, (void*)&VS::Battle::Ai::MoveLiveActorTowardDestinationTile, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E4FE0u, 0u, (void*)&VS::Battle::Ai::BeginLiveAiMovementTowardPoint, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E527Cu, 0u, (void*)&VS::Battle::Ai::SetLiveActorNavigationOverride, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E5308u, 0u, (void*)&VS::Battle::Ai::UpdateLiveActorNavigationOverrides, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6898u, 0u, (void*)&VS::Battle::Ai::AddLiveAiTileOccupant, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E68A0u, 0u, (void*)&VS::Battle::Ai::RemoveLiveAiTileOccupant, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E68ECu, 0u, (void*)&VS::Battle::Ai::MarkLiveAiTileDynamicObstacle, 0u, 0u, 0u},
+    {"BATTLE/BATTLE.PRG", 0x800E6B4Cu, 0u, (void*)&VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B34u, 0u, (void*)&VS::Audio::Cutscene::PauseLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x80018B84u, 0u, (void*)&VS::Audio::Cutscene::ResumeLiveStream, 0u, 0u, 0u},
     {"SLUS_010.40", 0x8001D644u, 0u, (void*)&VS::Audio::Cutscene::ReplaceLiveStream, 0u, 0u, 0u},

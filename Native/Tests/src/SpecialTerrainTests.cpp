@@ -7,21 +7,21 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
 #include "Platform/GameFiber.hpp"
 
 extern "C" {
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"
 #include "Field/Room.h"
 }
 
-static_assert(
-    std::is_same_v<decltype(&Battle_Ai_BuildAiTerrainHeightsWithWorkspace),
-                   void (*)(void)>);
+static_assert(std::is_same_v<
+              decltype(&VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace),
+              void (*)(void)>);
 
 namespace {
 struct SpecialTerrainFixture {
@@ -72,7 +72,7 @@ TEST_CASE(
     "[ai][special-terrain]") {
   SpecialTerrainFixture fixture;
   fixture.flags[1][1] = fixture.flags[1][2] = fixture.flags[2][2] = 0x20;
-  Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
+  VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
   CHECK(fixture.heights[1][1] == 0xA802);
   CHECK(fixture.heights[1][2] == 0xA802);
   CHECK(fixture.heights[2][2] == 0xA802);
@@ -87,11 +87,11 @@ TEST_CASE(
   SpecialTerrainFixture fixture;
   fixture.flags[1][1] = fixture.flags[1][2] = 0x20;
   fixture.heights[1][1] = 0xE955;
-  Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
+  VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
   CHECK(fixture.heights[1][1] == 0xE955);
   CHECK(fixture.heights[1][2] == 0xA802);
   const auto before = fixture.heights[1][2];
-  Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
+  VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
   CHECK(fixture.heights[1][2] == before);
 }
 
@@ -101,7 +101,7 @@ TEST_CASE("The complete bounded special region builds on the native game fiber",
   for (auto& row : fixture.flags) std::fill_n(row, 32, 0x20);
   fixture.flags[0][0] = 0;
   VS::Platform::GameFiber fiber(
-      +[] { Battle_Ai_BuildAiTerrainHeightsWithWorkspace(); });
+      +[] { VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace(); });
   CHECK(fiber.Resume() == false);
   CHECK(fiber.Finished());
   CHECK(fixture.heights[0][0] == 0x8800);
@@ -122,7 +122,7 @@ TEST_CASE("Native terrain-build envelope retains its original typed entry",
       symbols, "BATTLE/BATTLE.PRG", 0x800E6B4Cu);
   REQUIRE(address != nullptr);
   const auto build = reinterpret_cast<void (*)(void)>(address);
-  CHECK(build == Battle_Ai_BuildAiTerrainHeightsWithWorkspace);
+  CHECK(build == VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace);
   build();
   CHECK(fixture.heights[1][1] == 0xA802);
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
@@ -135,8 +135,8 @@ TEST_CASE("A special region without eligible adjacent ground stays unseeded",
   for (auto& row : fixture.flags) std::fill_n(row, 32, 0x20);
   std::array<unsigned char, sizeof fixture.heights> before{};
   std::memcpy(before.data(), fixture.heights, before.size());
-  Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
+  VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
   CHECK(std::memcmp(before.data(), fixture.heights, before.size()) == 0);
-  Battle_Ai_BuildAiTerrainHeightsWithWorkspace();
+  VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace();
   CHECK(std::memcmp(before.data(), fixture.heights, before.size()) == 0);
 }

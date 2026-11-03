@@ -5,6 +5,7 @@
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
@@ -26,7 +27,6 @@ extern "C" {
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
@@ -358,7 +358,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
                             pointPtr[2] - ((tile.word >> 16) & 255)),
                         320);
                     ((unsigned char*)state)[1] = 1;
-                    Battle_Ai_DispatchAiLocomotionMode(state, 0, 0);
+                    VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 0, 0);
                     if (!state->opaque44) {
                         state->opaque44 = 10;
                     }

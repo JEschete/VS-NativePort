@@ -2,6 +2,8 @@
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 extern "C" {
@@ -22,8 +24,6 @@ extern "C" {
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/GroundNavigation.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/Hit.h"
 #include "Battle/Targeting.h"
@@ -619,13 +619,13 @@ int Actors_ExecuteQueuedActorCommands(void)
 void Actors_BeginScriptedActorPath(int actor_id, SVECTOR* target_position)
 {
     Field_SetActorCollisionBypass(actor_id, 2);
-    Battle_Ai_SetActorNavigationOverride(actor_id, target_position->vx, target_position->vz);
+    VS::Battle::Ai::SetLiveActorNavigationOverride(actor_id, target_position->vx, target_position->vz);
 }
 
 // decomp: BATTLE.PRG func_8007D03C (src/BATTLE/BATTLE.PRG/146C.c:9169)
 int Actors_IsScriptedActorPathFinished(int actor_id)
 {
-    int navigation_status = Battle_Ai_ActorNavigationOverrideStatus(actor_id);
+    int navigation_status = VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id);
     if (navigation_status == 0) {
         Field_SetActorCollisionBypass(actor_id, Field_ActorCollisionBypass(actor_id) & ~2);
         return 1;
@@ -1259,7 +1259,7 @@ void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
         if (actor->instance.placementLayer != (contactId = actor->instance.supportLayer)) {
             if (actor->instance.slot == 0 && contactId != 0
                 && contactId != actor->platformAnchor.pad) {
-                Battle_Ai_SetAiContactOccupancy(contactId);
+                VS::Battle::Ai::SetLiveAiContactOccupancy(contactId);
             }
 
             actor->platformOffsetX = 0;
@@ -1298,7 +1298,7 @@ void Actors_UpdateActorPlatformContact(Actors_ActorRecord* actor, int mode)
 
         if (actor->instance.slot == 0 && !actor->instance.movementMode
             && actor->instance.supportLayer != actor->platformAnchor.pad) {
-            Battle_Ai_ClearAiContactOccupancy(actor->platformAnchor.pad);
+            VS::Battle::Ai::ClearLiveAiContactOccupancy(actor->platformAnchor.pad);
             actor->platformAnchor.pad = 0;
         }
 

@@ -189,8 +189,22 @@ NATIVE_HELPER_HEADERS = {
            "Diagnostics_RecordSceneCommand", "Diagnostics_RecordSceneResult",
            "Diagnostics_RecordScriptFlagWrite",
        )},
-    "Battle_Ai_ActorNavigationOverrideStatus":
-        r"Native\Game\src\Battle\Ai\NavigationPrimitives.h",
+    **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\NavigationPrimitivesLive.hpp"
+       for name in ("UpdateLiveRouteGateAvailability", "IsLiveAdjacentTileStepBlocked", "ReserveLiveAiDestinationTile",
+                    "LiveActorNavigationOverrideStatus", "HasLiveActorNavigationState",
+                    "CopyLiveActorNavigationOverrideState", "SetLiveActorNavigationOverride",
+                    "UpdateLiveActorNavigationOverrides", "AddLiveAiTileOccupant", "RemoveLiveAiTileOccupant",
+                    "MarkLiveAiTileDynamicObstacle", "BuildLiveAiTerrainHeightsWithWorkspace")},
+    **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\GroundNavigationLive.hpp"
+       for name in ("LiveDestinationOccupancy", "CanTraverseLiveTileEdge", "LiveDirectionalBlockingActor",
+                    "CanLiveActorWalkInDirection", "FindLiveGapLandingTile", "ResolveLiveDirectionalMovement",
+                    "SetLiveDetourBoundary", "RefreshLiveDetourProgress", "LiveCardinalPassabilityMask",
+                    "InitializeLiveObstacleDetour", "UpdateLiveHesitationTurn",
+                    "SelectLiveActorVerticalMovementStep", "IsTileBehindLiveActorTarget", "FindLiveAiDescentTile",
+                    "BeginLiveAiTerrainMovement", "BeginLiveAiAlternateTerrainMovement",
+                    "MoveLiveActorTowardDestinationTile", "BeginLiveAiGroundMovement",
+                    "ClearLiveAiContactOccupancy", "SetLiveAiContactOccupancy", "BeginLiveAiMovementTowardPoint",
+                    "DispatchLiveAiLocomotionMode")},
     **{f"VS::Actors::{name}": r"Native\Game\include\Actors\MotionRequestsLive.hpp"
        for name in _MOTION_REQUEST_LIVE.values()},
     **{f"VS::Menu::{name}": r"Native\Game\include\Save\FileMenuLive.hpp"
@@ -350,6 +364,32 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DBB98, "VS::Battle::Ai::UpdateLiveSupportFollowBehavior"),  # F04205
     ("BATTLE/BATTLE.PRG", 0x800DBC0C, "VS::Battle::Ai::UpdateLiveEngagementApproachBehavior"),  # F04206
     ("BATTLE/BATTLE.PRG", 0x800E6EB0, "VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy"),  # F01836
+    ("BATTLE/BATTLE.PRG", 0x800D954C, "VS::Battle::Ai::LiveDestinationOccupancy"),  # F01645
+    ("BATTLE/BATTLE.PRG", 0x800D96C8, "VS::Battle::Ai::CanTraverseLiveTileEdge"),  # F01646
+    ("BATTLE/BATTLE.PRG", 0x800D98E8, "VS::Battle::Ai::LiveDirectionalBlockingActor"),  # F01647
+    ("BATTLE/BATTLE.PRG", 0x800D9B6C, "VS::Battle::Ai::CanLiveActorWalkInDirection"),  # F04202
+    ("BATTLE/BATTLE.PRG", 0x800DB93C, "VS::Battle::Ai::FindLiveGapLandingTile"),  # F01672
+    ("BATTLE/BATTLE.PRG", 0x800DC638, "VS::Battle::Ai::UpdateLiveRouteGateAvailability"),  # F01694
+    ("BATTLE/BATTLE.PRG", 0x800E3600, "VS::Battle::Ai::ResolveLiveDirectionalMovement"),  # F01752
+    ("BATTLE/BATTLE.PRG", 0x800E3BC8, "VS::Battle::Ai::SetLiveDetourBoundary"),  # F01753
+    ("BATTLE/BATTLE.PRG", 0x800E3CDC, "VS::Battle::Ai::RefreshLiveDetourProgress"),  # F01754
+    ("BATTLE/BATTLE.PRG", 0x800E3D5C, "VS::Battle::Ai::LiveCardinalPassabilityMask"),  # F01755
+    ("BATTLE/BATTLE.PRG", 0x800E3DDC, "VS::Battle::Ai::InitializeLiveObstacleDetour"),  # F01756
+    ("BATTLE/BATTLE.PRG", 0x800E4180, "VS::Battle::Ai::UpdateLiveHesitationTurn"),  # F01757
+    ("BATTLE/BATTLE.PRG", 0x800E4690, "VS::Battle::Ai::IsLiveAdjacentTileStepBlocked"),  # F01775
+    ("BATTLE/BATTLE.PRG", 0x800E4764, "VS::Battle::Ai::SelectLiveActorVerticalMovementStep"),  # F01776
+    ("BATTLE/BATTLE.PRG", 0x800E47E4, "VS::Battle::Ai::IsTileBehindLiveActorTarget"),  # F01777
+    ("BATTLE/BATTLE.PRG", 0x800E49D8, "VS::Battle::Ai::FindLiveAiDescentTile"),  # F01781
+    ("BATTLE/BATTLE.PRG", 0x800E4B10, "VS::Battle::Ai::BeginLiveAiTerrainMovement"),  # F01782
+    ("BATTLE/BATTLE.PRG", 0x800E4B18, "VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement"),  # F01783
+    ("BATTLE/BATTLE.PRG", 0x800E4B2C, "VS::Battle::Ai::MoveLiveActorTowardDestinationTile"),  # F01784
+    ("BATTLE/BATTLE.PRG", 0x800E4FE0, "VS::Battle::Ai::BeginLiveAiMovementTowardPoint"),  # F01798
+    ("BATTLE/BATTLE.PRG", 0x800E527C, "VS::Battle::Ai::SetLiveActorNavigationOverride"),  # F01805
+    ("BATTLE/BATTLE.PRG", 0x800E5308, "VS::Battle::Ai::UpdateLiveActorNavigationOverrides"),  # F01806
+    ("BATTLE/BATTLE.PRG", 0x800E6898, "VS::Battle::Ai::AddLiveAiTileOccupant"),  # F01826
+    ("BATTLE/BATTLE.PRG", 0x800E68A0, "VS::Battle::Ai::RemoveLiveAiTileOccupant"),  # F01827
+    ("BATTLE/BATTLE.PRG", 0x800E68EC, "VS::Battle::Ai::MarkLiveAiTileDynamicObstacle"),  # F01828
+    ("BATTLE/BATTLE.PRG", 0x800E6B4C, "VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace"),  # F01832
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -361,9 +401,6 @@ MODULE_BINDING_ENTRIES = (
 )
 
 MODULE_FUNCTION_ENTRIES = (
-    ("BATTLE/BATTLE.PRG", 0x800E527C, "F01805"),
-    ("BATTLE/BATTLE.PRG", 0x800E5308, "F01806"),
-    ("BATTLE/BATTLE.PRG", 0x800DC638, "F01694"),
     ("EFFECT/PLG074.BIN", 0x800F98F8, "F01986"),
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "F01987"),
     ("EFFECT/PLG074.BIN", 0x800FBBB0, "F01989"),
@@ -374,7 +411,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("EFFECT/PLG074.BIN", 0x800FD534, "F01995"),
     ("SLUS_010.40", 0x80041A00, "F03404"),
     ("SLUS_010.40", 0x80041954, "F03408"),
-    ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
 )
 
 FIXES: dict[str, list[tuple[str, str, str]]] = {
@@ -397,8 +433,8 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "allocation fails; zero counts skip the randomized promotion, the only defined reading of that path"),
     ],
     "F01013": [
-        ("Battle_Ai_AddAiTileOccupant(object);",
-         "Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);",
+        ("VS::Battle::Ai::AddAiTileOccupant(object);",
+         "VS::Battle::Ai::AddAiTileOccupant((const Field_GimmickInstance*)object);",
          "the rebased physics view aliases the native owning Gimmick; pass its checked tile prefix explicitly"),
     ],
     "F00514": [
@@ -443,8 +479,8 @@ FIXES: dict[str, list[tuple[str, str, str]]] = {
          "Travel must promote the slot to the actual int parameter rather than call through an incompatible u_char function pointer"),
     ],
     "F00298": [
-        ("Battle_Ai_ActorNavigationOverrideStatus()",
-         "Battle_Ai_ActorNavigationOverrideStatus(arg0)",
+        ("VS::Battle::Ai::ActorNavigationOverrideStatus()",
+         "VS::Battle::Ai::ActorNavigationOverrideStatus(arg0)",
          "7C7E0.s consumes the actor ID in a0; preserve it explicitly instead of relying on the caller's PS1 register"),
     ],
     "F02461": [
@@ -2865,6 +2901,7 @@ MOVEMENT_BINDING = ("the movement binding supplies the actor AI state, battle ac
 CLEANUP_BINDING = (
     "the cleanup binding supplies the actor AI state table, room AI state, tile flag grid, battle actors,"
     " actor records and heap")
+_GROUND_BINDING = "the ground binding supplies the actor AI state, AI frame maps, actor list and movement code"
 
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
     *(
@@ -3237,6 +3274,52 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
             ("F01842", "FreeActorAiState", "FreeLiveActorAiState", CLEANUP_BINDING),
             ("F01844", "ClearActorAiLinksAndPlan", "ClearLiveActorAiLinksAndPlan", CLEANUP_BINDING),
             ("F01845", "AllocateOrbitingBossState", "AllocateLiveOrbitingBossState", CLEANUP_BINDING),
+            ("F01694", "UpdateRouteGateAvailability", "UpdateLiveRouteGateAvailability",
+             "the route binding supplies the room route table and the gate availability words"),
+            ("F01775", "IsAdjacentTileStepBlocked", "IsLiveAdjacentTileStepBlocked",
+             "the navigation binding supplies the room AI height and occupancy maps"),
+            ("F01789", "ReserveAiDestinationTile", "ReserveLiveAiDestinationTile",
+             "the navigation binding supplies the room AI occupancy map"),
+            ("F01801", "ActorNavigationOverrideStatus", "LiveActorNavigationOverrideStatus",
+             "the override binding supplies the actor AI state table"),
+            ("F01802", "HasActorNavigationState", "HasLiveActorNavigationState",
+             "the override binding supplies the actor AI state table"),
+            ("F01803", "CopyActorNavigationOverrideState", "CopyLiveActorNavigationOverrideState",
+             "the override binding supplies the actor AI state table"),
+            ("F01805", "SetActorNavigationOverride", "SetLiveActorNavigationOverride",
+             "the override binding supplies the actor AI state table and the scripted path"),
+            ("F01806", "UpdateActorNavigationOverrides", "UpdateLiveActorNavigationOverrides",
+             "the override binding supplies the actor AI state table and the actor list"),
+            ("F01826", "AddAiTileOccupant", "AddLiveAiTileOccupant",
+             "the occupancy binding supplies the room AI maps and the gimmick tile prefix"),
+            ("F01827", "RemoveAiTileOccupant", "RemoveLiveAiTileOccupant",
+             "the occupancy binding supplies the room AI maps and the gimmick tile prefix"),
+            ("F01828", "MarkAiTileDynamicObstacle", "MarkLiveAiTileDynamicObstacle",
+             "the occupancy binding supplies the room AI maps"),
+            ("F01832", "BuildAiTerrainHeightsWithWorkspace", "BuildLiveAiTerrainHeightsWithWorkspace",
+             "the terrain binding supplies the room collision data and the AI height maps"),
+            ("F01645", "DestinationOccupancy", "LiveDestinationOccupancy", _GROUND_BINDING),
+            ("F01646", "CanTraverseTileEdge", "CanTraverseLiveTileEdge", _GROUND_BINDING),
+            ("F01647", "DirectionalBlockingActor", "LiveDirectionalBlockingActor", _GROUND_BINDING),
+            ("F04202", "CanWalkInDirection", "CanLiveActorWalkInDirection", _GROUND_BINDING),
+            ("F01672", "FindGapLandingTile", "FindLiveGapLandingTile", _GROUND_BINDING),
+            ("F01752", "ResolveDirectionalMovement", "ResolveLiveDirectionalMovement", _GROUND_BINDING),
+            ("F01753", "SetDetourBoundary", "SetLiveDetourBoundary", _GROUND_BINDING),
+            ("F01754", "RefreshDetourProgress", "RefreshLiveDetourProgress", _GROUND_BINDING),
+            ("F01755", "CardinalPassabilityMask", "LiveCardinalPassabilityMask", _GROUND_BINDING),
+            ("F01756", "InitializeObstacleDetour", "InitializeLiveObstacleDetour", _GROUND_BINDING),
+            ("F01757", "UpdateHesitationTurn", "UpdateLiveHesitationTurn", _GROUND_BINDING),
+            ("F01776", "SelectActorVerticalMovementStep", "SelectLiveActorVerticalMovementStep", _GROUND_BINDING),
+            ("F01777", "IsTileBehindActorTarget", "IsTileBehindLiveActorTarget", _GROUND_BINDING),
+            ("F01781", "FindAiDescentTile", "FindLiveAiDescentTile", _GROUND_BINDING),
+            ("F01782", "BeginAiTerrainMovement", "BeginLiveAiTerrainMovement", _GROUND_BINDING),
+            ("F01783", "BeginAiAlternateTerrainMovement", "BeginLiveAiAlternateTerrainMovement", _GROUND_BINDING),
+            ("F01784", "MoveActorTowardDestinationTile", "MoveLiveActorTowardDestinationTile", _GROUND_BINDING),
+            ("F01785", "BeginAiGroundMovement", "BeginLiveAiGroundMovement", _GROUND_BINDING),
+            ("F01787", "ClearAiContactOccupancy", "ClearLiveAiContactOccupancy", _GROUND_BINDING),
+            ("F01788", "SetAiContactOccupancy", "SetLiveAiContactOccupancy", _GROUND_BINDING),
+            ("F01798", "BeginAiMovementTowardPoint", "BeginLiveAiMovementTowardPoint", _GROUND_BINDING),
+            ("F01799", "DispatchAiLocomotionMode", "DispatchLiveAiLocomotionMode", _GROUND_BINDING),
         )
     ),
     (r"^(Actors::RestoreActorBasePose|Field::RefreshAshleyInteractionTile)$",

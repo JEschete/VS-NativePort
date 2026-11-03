@@ -440,27 +440,33 @@ class EncounterFixupTests(unittest.TestCase):
     def test_scripted_navigation_uses_full_native_records_and_explicit_aliases(self):
         root = Path(__file__).resolve().parents[2]
         owned = self.owned_items()
-        for identity, address in (("F01805", 0x800E527C), ("F01806", 0x800E5308)):
+        for identity, address, live in (
+            ("F01805", 0x800E527C, "SetLiveActorNavigationOverride"),
+            ("F01806", 0x800E5308, "UpdateLiveActorNavigationOverrides"),
+        ):
             self.assertEqual(
                 owned[identity]["path"],
                 r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
             )
             self.assertIn(
-                ("BATTLE/BATTLE.PRG", address, identity),
-                copy_fixups.MODULE_FUNCTION_ENTRIES,
+                ("BATTLE/BATTLE.PRG", address, f"VS::Battle::Ai::{live}"),
+                copy_fixups.MODULE_BINDING_ENTRIES,
             )
         self.assertEqual(
             native_views.NATIVE_FIELD_ALIASES["T00532"]["scriptedTargetXZ"], 0x160
         )
-        source = (
+        core = (
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("std::bit_cast<std::int32_t>(squared)", core)
+        source = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
         ).read_text(encoding="utf-8")
         self.assertIn("std::construct_at(storage)", source)
         self.assertIn("Core_Memory_AllocateFromHighEnd(sizeof(Battle_Ai_ActorAiState))", source)
         self.assertIn("auto* destination = state;", source)
         self.assertIn("destination->scriptedTargetXZ = target;", source)
-        self.assertIn("std::bit_cast<std::int32_t>(squared)", source)
-        self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route->actorId)", source)
+        self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route_->actorId)", source)
         self.assertIn("Battle_Ai_SaveMovementRandomState();", source)
         self.assertNotIn("actor[3]", source)
 
@@ -471,23 +477,27 @@ class EncounterFixupTests(unittest.TestCase):
             r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
         )
         self.assertIn(
-            ("BATTLE/BATTLE.PRG", 0x800DC638, "F01694"),
-            copy_fixups.MODULE_FUNCTION_ENTRIES,
+            ("BATTLE/BATTLE.PRG", 0x800DC638, "VS::Battle::Ai::UpdateLiveRouteGateAvailability"),
+            copy_fixups.MODULE_BINDING_ENTRIES,
         )
-        source = (
+        core = (
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
         ).read_text(encoding="utf-8")
+        self.assertIn("first_bit = 1u << (first_bit & kVariableShiftMask)", core)
+        self.assertIn("second_bit = 1u << (second_bit & kVariableShiftMask)", core)
+        self.assertIn("first route word depends on an", core)
+        self.assertIn("original stack-register value", core)
+        source = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
+        ).read_text(encoding="utf-8")
         self.assertIn("kOriginalPlatformCapacity = 13", source)
-        self.assertIn("first_bit = 1u << (first_bit & kVariableShiftMask)", source)
-        self.assertIn("second_bit = 1u << (second_bit & kVariableShiftMask)", source)
         self.assertIn("auxiliary == Field_roomData.section6", source)
         self.assertIn("Field_roomData.header.section6Length >= kRouteAuxiliaryBytes", source)
-        self.assertIn("first route word depends on an original stack-register value", source)
         self.assertIn("std::memcpy(location, &word, sizeof word)", source)
 
     def test_gimmick_physics_occupancy_calls_cross_the_explicit_native_view_boundary(self):
         old, new, reason = copy_fixups.FIXES["F01013"][0]
-        self.assertEqual(old, "Battle_Ai_AddAiTileOccupant(object);")
+        self.assertEqual(old, "VS::Battle::Ai::AddAiTileOccupant(object);")
         self.assertIn("(const Field_GimmickInstance*)object", new)
         self.assertIn("native owning Gimmick", reason)
 
@@ -514,15 +524,24 @@ class EncounterFixupTests(unittest.TestCase):
             ("BATTLE/BATTLE.PRG", 0x800E6EB0, "F01836"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
+        for address, live in ((0x800E6898, "AddLiveAiTileOccupant"),
+                              (0x800E68A0, "RemoveLiveAiTileOccupant")):
+            self.assertIn(
+                ("BATTLE/BATTLE.PRG", address, f"VS::Battle::Ai::{live}"),
+                copy_fixups.MODULE_BINDING_ENTRIES,
+            )
         grid = (
             root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
         ).read_text(encoding="utf-8")
-        self.assertIn("const Field_GimmickInstance* gimmick", grid)
-        self.assertIn("(layer >> 2)", grid)
+        self.assertIn("(placement.layer >> 2U)", grid)
         self.assertIn("offset > kOccupancyMapBytes - kOccupancyCellBytes", grid)
         self.assertIn("offset % kOccupancyCellBytes != 0", grid)
-        self.assertIn("static_cast<int>(cell) + delta", grid)
-        self.assertEqual(grid.count("ChangeGimmickOccupancy(gimmick,"), 2)
+        self.assertIn("static_cast<int>(grid.OccupancyHeight(x, z)) + delta", grid)
+        self.assertEqual(grid.count("ChangeOccupancy(grid, placement,"), 2)
+        live = (
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
+        ).read_text(encoding="utf-8")
+        self.assertIn("const Field_GimmickInstance* gimmick", live)
         cleanup = (root / r"Native\Game\src\Battle\Ai\ActorCleanup.cpp").read_text(
             encoding="utf-8"
         )
@@ -532,7 +551,7 @@ class EncounterFixupTests(unittest.TestCase):
         live = (root / r"Native\Game\src\Battle\Ai\ActorCleanupLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Battle_Ai_ClearAiContactOccupancy(contact);", live)
+        self.assertIn("ClearLiveAiContactOccupancy(contact);", live)
         self.assertIn("model.supportLayer |", live)
 
     def test_ashley_alliance_uses_native_callback_storage_without_shifting_views(self):
@@ -765,7 +784,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("Core_Math_Squared", table)
         ai = root / r"Native\Game\src\Battle\Ai"
         caller = (ai / "GroundNavigation.cpp").read_text(encoding="utf-8")
-        self.assertIn("UnpackTileCoordinate(state.destination.word)", caller)
+        self.assertIn("UnpackTileCoordinate(navigator.destination)", caller)
         perception = (ai / "Perception.cpp").read_text(encoding="utf-8")
         self.assertIn("VS::Core::Math::PositionOf(state->position)", perception)
         self.assertNotIn("(short*)&state->position", perception)
@@ -788,19 +807,21 @@ class EncounterFixupTests(unittest.TestCase):
             r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
         )
         self.assertIn(
-            ("BATTLE/BATTLE.PRG", 0x800E6B4C, "F01832"),
-            copy_fixups.MODULE_FUNCTION_ENTRIES,
+            ("BATTLE/BATTLE.PRG", 0x800E6B4C, "VS::Battle::Ai::BuildLiveAiTerrainHeightsWithWorkspace"),
+            copy_fixups.MODULE_BINDING_ENTRIES,
         )
         root = Path(__file__).resolve().parents[2]
         source = (
-            root / r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp"
+            root / r"Native\Game\src\Battle\Ai\NavigationPrimitivesLive.cpp"
         ).read_text(encoding="utf-8")
         bodies = audit_assembly_gaps.definitions(
-            source, {"Battle_Ai_BuildAiTerrainHeightsWithWorkspace"}
+            source, {"BuildLiveAiTerrainHeightsWithWorkspace"}
         )
         self.assertEqual(len(bodies), 1)
         body = bodies[0].body
-        self.assertIn("Battle_Ai_BuildAiSpecialTerrainHeights();", body)
+        self.assertIn("LiveSpecialTerrainBuilder builder;", body)
+        self.assertIn("BuildAiTerrainHeightsWithWorkspace(builder)", body)
+        self.assertIn("Battle_Ai_BuildAiSpecialTerrainHeights();", source)
         self.assertNotIn("AllocateFromHighEnd", body)
         self.assertNotIn("Core_ScratchBase", body)
 
@@ -1210,7 +1231,7 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01828"]["path"],
             r"Native\Game\src\Battle\Ai\NavigationPrimitives.cpp",
         )
-        self.assertEqual(owned["F01828"]["name"], "Battle_Ai_MarkAiTileDynamicObstacle")
+        self.assertEqual(owned["F01828"]["name"], "VS::Battle::Ai::MarkAiTileDynamicObstacle")
 
     def test_room_screen_bounds_share_the_original_predicate(self):
         self.assert_room_draw_owned_without_entry("F00756", "SetRoomPolygonScreenBounds")
@@ -1345,9 +1366,9 @@ class EncounterFixupTests(unittest.TestCase):
     def test_navigation_leaves_own_typed_entries_and_forward_the_actor_id(self):
         owned = self.owned_items()
         for identifier, name in (
-            ("F01801", "Battle_Ai_ActorNavigationOverrideStatus"),
-            ("F01802", "Battle_Ai_HasActorNavigationState"),
-            ("F01803", "Battle_Ai_CopyActorNavigationOverrideState"),
+            ("F01801", "VS::Battle::Ai::ActorNavigationOverrideStatus"),
+            ("F01802", "VS::Battle::Ai::HasActorNavigationState"),
+            ("F01803", "VS::Battle::Ai::CopyActorNavigationOverrideState"),
         ):
             self.assertEqual(owned[identifier]["name"], name)
             self.assertEqual(
@@ -1358,8 +1379,8 @@ class EncounterFixupTests(unittest.TestCase):
         caller = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("Battle_Ai_ActorNavigationOverrideStatus(actor_id);", caller)
-        self.assertNotIn("Battle_Ai_ActorNavigationOverrideStatus();", caller)
+        self.assertIn("VS::Battle::Ai::LiveActorNavigationOverrideStatus(actor_id);", caller)
+        self.assertNotIn("LiveActorNavigationOverrideStatus();", caller)
 
     def test_vignette_producers_publish_one_encoded_ordering_word(self):
         for identifier, head, packet in (

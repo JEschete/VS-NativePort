@@ -14,6 +14,7 @@
 
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Core/BiosRand.h"
 
 extern "C" {
@@ -23,7 +24,6 @@ extern "C" {
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
@@ -229,7 +229,7 @@ class LiveCleanupHost final : public ActorCleanupHost {
     Core_Memory_FreeFromHighEnd(route);
   }
   void ClearContactOccupancy(int contact) override {
-    Battle_Ai_ClearAiContactOccupancy(contact);
+    ClearLiveAiContactOccupancy(contact);
   }
   void Disengage(int actor_id) override {
     DisengageLiveActor(StateAt(actor_id));

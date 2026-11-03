@@ -2,6 +2,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
@@ -15,15 +16,12 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Platforms.h"
-#include "Items/Inventory.h"
-#include "Items/Loadout.h"
 
 // decomp: D_800F16EC (D_800F16EC@BATTLE/BATTLE.PRG)
 Battle_Ai_DirectionDelta Battle_Ai_directionDeltas[8]; /* contents: module image (ModuleData.cpp) */
@@ -78,9 +76,9 @@ unsigned int Battle_Ai_FindAdjacentMovementDestination(
         direction = (directions >> (i * 16)) & 0xFFFF;
         dest.tile.tileX = source.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dx;
         dest.tile.tileZ = source.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[direction].dz;
-        result = Battle_Ai_CanTraverseTileEdge(state, source.word, dest.word, direction);
+        result = VS::Battle::Ai::CanTraverseLiveTileEdge(state, source.word, dest.word, direction);
         if (result > 0) {
-            result = Battle_Ai_DestinationOccupancy(state, dest.word);
+            result = VS::Battle::Ai::LiveDestinationOccupancy(state, dest.word);
             if (result < 0) {
                 goto blocked;
             }
@@ -92,7 +90,7 @@ unsigned int Battle_Ai_FindAdjacentMovementDestination(
         if (result < 0) {
             goto blocked;
         }
-        dest.word = Battle_Ai_FindGapLandingTile(state, dest.word, direction, source.word);
+        dest.word = VS::Battle::Ai::FindLiveGapLandingTile(state, dest.word, direction, source.word);
         if (dest.tile.searchStatus == 1) {
             goto done;
         }
@@ -302,7 +300,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
                         & 1)) {
                     state->gate = candidate.tile.tag;
                     if (state->actorId) {
-                        Battle_Ai_SetAiContactOccupancy(candidate.tile.tag);
+                        VS::Battle::Ai::SetLiveAiContactOccupancy(candidate.tile.tag);
                     }
                     Battle_Ai_ResolveRouteGateExit((Battle_Ai_RouteGateTile*)&candidate, &state->exit);
                     goto accept;
@@ -321,7 +319,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
             step = &Battle_Ai_routeStepDirections[(route >> 11) & 3];
             candidate.tile.tileX += amount * ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*step].dx;
             candidate.tile.tileZ += amount * ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*step].dz;
-            result = Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, candidate.word);
+            result = VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, candidate.word);
             if (result < 0) {
             center:
                 if (state->movementTarget != 16
@@ -352,7 +350,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
         direction = &table[(route >> 11) & 3];
         candidate.tile.tileX += ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*direction].dx;
         candidate.tile.tileZ += ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[*direction].dz;
-        if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, candidate.word) <= 0) {
+        if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, candidate.word) <= 0) {
             goto center;
         }
         if ((*(u_short(**)[32])((uintptr_t)&Battle_Ai_FrameState()->heightMap))[candidate.tile.tileZ][candidate.tile.tileX] & 0x1C00) {
@@ -464,7 +462,7 @@ void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
             } else {
                 VS::Battle::Ai::RefreshLiveAiMovementCooldown(state);
                 if (mode == 5) {
-                    Battle_Ai_BeginAiGroundMovement(state, state->angle << 9);
+                    VS::Battle::Ai::BeginLiveAiGroundMovement(state, state->angle << 9);
                 } else {
                     VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
                 }
@@ -475,7 +473,7 @@ void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
         *(unsigned char*)((uintptr_t)&Battle_Ai_FrameState()->directionCache) = 0;
     }
 move:
-    Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
+    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
         Core_Gte_Atan2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
             & 0xFFF,
         0);
@@ -510,7 +508,7 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
 
     heading = path.bits.heading;
     direction = (path.bits.clockwise ? heading - 2 : heading + 2) & 7;
-    hit = Battle_Ai_DirectionalBlockingActor(state, direction);
+    hit = VS::Battle::Ai::LiveDirectionalBlockingActor(state, direction);
     blocker = hit - 1;
     if (hit) {
         if (!(((Battle_Ai_MovementPathView**)((uintptr_t)&Battle_Ai_FrameState()->actors))[blocker]->movementFlags & 0x30)
@@ -523,9 +521,9 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
         ahead.tile.tileX = state->tile.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[path.bits.heading].dx;
         ahead.tile.tileZ = state->tile.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[path.bits.heading].dz;
         ahead.tile.tag = 0;
-        if (!Battle_Ai_CanTraverseTileEdge(
+        if (!VS::Battle::Ai::CanTraverseLiveTileEdge(
                 (Battle_Ai_MoveTargetView*)state, state->tile.word, ahead.word, path.bits.heading)
-            || Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, ahead.word) <= 0) {
+            || VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, ahead.word) <= 0) {
             path.bits.changed = 1;
             path.bits.clockwise = !path.bits.clockwise;
             path.bits.visited = 0;
@@ -577,7 +575,7 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
         }
     }
 
-    cell = Battle_Ai_CardinalPassabilityMask(state, test);
+    cell = VS::Battle::Ai::LiveCardinalPassabilityMask(state, test);
     if (cell == path.bits.cell) {
         goto keep;
     }
@@ -614,9 +612,9 @@ int Battle_Ai_FollowObstacleDetour(Battle_Ai_MovementPathView* state, Battle_Ai_
         point.tile.tag = 0;
         /* Passed through its address: the status byte is left over from the previous
          * probe. */
-        if (Battle_Ai_CanTraverseTileEdge(
+        if (VS::Battle::Ai::CanTraverseLiveTileEdge(
                 (Battle_Ai_MoveTargetView*)state, state->tile.word, *(u_int*)&point, direction)
-            && Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, *(u_int*)&point) > 0) {
+            && VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, *(u_int*)&point) > 0) {
             state->nextTile = point;
             if (path.bits.heading != direction) {
                 path.bits.changed = 1;

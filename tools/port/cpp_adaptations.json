@@ -2777,11 +2777,11 @@
 [
 297,
 [
-"                    if (Battle_Ai_DestinationOccupancy((void*)state, state->tile) > 0) {",
+"                    if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile) > 0) {",
 "                        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
 ],
 [
-"                    if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {",
+"                    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {",
 "                        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
@@ -2797,19 +2797,19 @@
 [
 343,
 [
-"        Battle_Ai_BeginAiAlternateTerrainMovement((void*)state);"
+"        VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement((void*)state);"
 ],
 [
-"        Battle_Ai_BeginAiAlternateTerrainMovement((Battle_Ai_ActorAiState *)((void*)state));"
+"        VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
 347,
 [
-"    if (!Battle_Ai_SelectActorVerticalMovementStep((void*)state, &step, &mode)) {"
+"    if (!VS::Battle::Ai::SelectLiveActorVerticalMovementStep((void*)state, &step, &mode)) {"
 ],
 [
-"    if (!Battle_Ai_SelectActorVerticalMovementStep((Battle_Ai_ActorAiState *)((void*)state), &step, &mode)) {"
+"    if (!VS::Battle::Ai::SelectLiveActorVerticalMovementStep((Battle_Ai_ActorAiState *)((void*)state), &step, &mode)) {"
 ]
 ],
 [
@@ -2869,10 +2869,10 @@
 [
 440,
 [
-"    Battle_Ai_ResolveDirectionalMovement((void*)state, angle, 2);"
+"    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state, angle, 2);"
 ],
 [
-"    Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state), angle, 2);"
+"    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state), angle, 2);"
 ]
 ],
 [
@@ -2959,19 +2959,19 @@
 [
 647,
 [
-"    if (Battle_Ai_DestinationOccupancy((void*)state, dest.word) > 0) {"
+"    if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, dest.word) > 0) {"
 ],
 [
-"    if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {"
+"    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {"
 ]
 ],
 [
 653,
 [
-"        if (Battle_Ai_DestinationOccupancy((void*)state, dest.word) > 0) {"
+"        if (VS::Battle::Ai::LiveDestinationOccupancy((void*)state, dest.word) > 0) {"
 ],
 [
-"        if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {"
+"        if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {"
 ]
 ],
 [
@@ -3013,10 +3013,10 @@
 [
 717,
 [
-"    Battle_Ai_ResolveDirectionalMovement((void*)state,"
+"    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state,"
 ],
 [
-"    Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),"
+"    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),"
 ]
 ],
 [
@@ -3085,11 +3085,11 @@
 [
 1236,
 [
-"        && Battle_Ai_DestinationOccupancy((void*)state, state->tile.word) > 0) {",
+"        && VS::Battle::Ai::LiveDestinationOccupancy((void*)state, state->tile.word) > 0) {",
 "        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
 ],
 [
-"        && Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {",
+"        && VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {",
 "        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
@@ -3143,10 +3143,10 @@
 [
 477,
 [
-"    Battle_Ai_ResolveDirectionalMovement((void*)state,"
+"    VS::Battle::Ai::ResolveLiveDirectionalMovement((void*)state,"
 ],
 [
-"    Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),"
+"    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),"
 ]
 ]
 ],

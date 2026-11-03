@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
@@ -17,7 +18,6 @@ extern "C" {
 #include "Audio/ActorSound.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Core/Memory/Heap.h"
 #include "Effects/Weather.h"
 #include "Field/Actors.h"
@@ -158,7 +158,7 @@ void Field_DisableTrapAtPosition(SVECTOR* trap_position)
 
     if (section != NULL) {
         Field_SetRoomTriggerEnabled(section, 1);
-        Battle_Ai_MarkAiTileDynamicObstacle(section->tileX, section->tileZ);
+        VS::Battle::Ai::MarkLiveAiTileDynamicObstacle(section->tileX, section->tileZ);
     }
 }
 
@@ -885,7 +885,7 @@ exit:
     created_gimmick->positionZ = (created_gimmick->tileZ << 7) + 0x40;
     created_gimmick->positionY = ((int (*)(short*, int, int, int))Field_SampleActorSupportHeight)(&created_gimmick->positionX, 0, 0, 1) - (asset_request->variant << 7);
     Field_SetGimmickOrientation(asset_request->targetSlot, asset_request->material);
-    Battle_Ai_AddAiTileOccupant(created_gimmick);
+    VS::Battle::Ai::AddLiveAiTileOccupant(created_gimmick);
     created_gimmick->objectInfo.interaction = 0;
 
     if (created_gimmick->objectInfo.objectId > 4) {
@@ -900,7 +900,7 @@ exit:
                 } else {
                     created_gimmick->objectInfo.interaction = 2;
                     created_gimmick->positionY = created_gimmick->positionY - 0x80;
-                    Battle_Ai_AddAiTileOccupant(created_gimmick);
+                    VS::Battle::Ai::AddLiveAiTileOccupant(created_gimmick);
                 }
                 break;
             }
@@ -952,7 +952,7 @@ exit:
         Core_Memory_FreeFromLowEnd(released_gimmick->model);
     }
 
-    Battle_Ai_RemoveAiTileOccupant(released_gimmick);
+    VS::Battle::Ai::RemoveLiveAiTileOccupant(released_gimmick);
     Field_gimmickInstances[gimmick_slot] = NULL;
     return 0;
 }
@@ -1013,10 +1013,10 @@ void Field_DropUnsupportedGimmickStack(int removed_gimmick_slot)
         Field_GimmickInstance* falling_base_gimmick = Field_gimmickInstances[falling_base_slot];
         falling_base_gimmick->velocityY = 0;
         falling_base_gimmick->mode = 0xFC;
-        Battle_Ai_RemoveAiTileOccupant(falling_base_gimmick);
+        VS::Battle::Ai::RemoveLiveAiTileOccupant(falling_base_gimmick);
 
         if (falling_base_gimmick->objectInfo.interaction == 2) {
-            Battle_Ai_RemoveAiTileOccupant(falling_base_gimmick);
+            VS::Battle::Ai::RemoveLiveAiTileOccupant(falling_base_gimmick);
         }
 
         for (i = 0; i < 16; ++i) {
@@ -1395,7 +1395,7 @@ int Field_BeginGimmickInteraction(int actorId)
         ((void (*)(...))Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);
         Actors_PlayActorAnimation(actorId, height + 0x4F, 0, 4);
         actor->weaponPoseActive = 1;
-        Battle_Ai_ReserveAiDestinationTile(
+        VS::Battle::Ai::ReserveLiveAiDestinationTile(
             (object->positionX + object->slideX) / 128, (object->positionZ + object->slideZ) / 128);
         break;
     case 4:
@@ -1422,7 +1422,7 @@ int Field_BeginGimmickInteraction(int actorId)
         } else {
             dz = step;
         }
-        Battle_Ai_ReserveAiDestinationTile(actor->instance.currentTileX + dx, actor->instance.currentTileZ + dz);
+        VS::Battle::Ai::ReserveLiveAiDestinationTile(actor->instance.currentTileX + dx, actor->instance.currentTileZ + dz);
         break;
     }
     step = 1;
@@ -1467,7 +1467,7 @@ void Field_ApplyGimmickInteractionCommand(Actors_ActorRecord* actor, int mode)
         }
 
         object->objectInfo.supportIndex = 0;
-        Battle_Ai_RemoveAiTileOccupant(object);
+        VS::Battle::Ai::RemoveLiveAiTileOccupant(object);
         return;
     }
 
@@ -1505,10 +1505,10 @@ void Field_ApplyGimmickInteractionCommand(Actors_ActorRecord* actor, int mode)
     }
 
     VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
-    Battle_Ai_RemoveAiTileOccupant(object);
+    VS::Battle::Ai::RemoveLiveAiTileOccupant(object);
 
     if (object->objectInfo.interaction == 2) {
-        Battle_Ai_RemoveAiTileOccupant(object);
+        VS::Battle::Ai::RemoveLiveAiTileOccupant(object);
     }
 
     step = Field_gimmickInteractionDirection < 2 ? 128 : -128;
@@ -1660,8 +1660,8 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         return;
     } else if (mode == 0xFD) {
         if (!((int (*)(...))Field_UpdateGimmickReactionAnimation)(object)) {
-            Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
-            Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
+            VS::Battle::Ai::AddLiveAiTileOccupant((const Field_GimmickInstance*)object);
+            VS::Battle::Ai::AddLiveAiTileOccupant((const Field_GimmickInstance*)object);
             VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
         }
         return;
@@ -1701,7 +1701,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
                             (*(int*)&object->material & ~0x30) | 0x10;
                         Audio_PlayWorldSfx(0x7E, 0x31, &object->position);
                         object->mode = 0;
-                        Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
+                        VS::Battle::Ai::AddLiveAiTileOccupant((const Field_GimmickInstance*)object);
                         VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
                     }
                     goto children;
@@ -1710,7 +1710,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         }
         object->tileX = object->position.vx / 128;
         object->tileZ = object->position.vz / 128;
-        Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
+        VS::Battle::Ai::AddLiveAiTileOccupant((const Field_GimmickInstance*)object);
         VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
         if ((*(int*)&object->material & 7) == 1) {
             --object->durability;

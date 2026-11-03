@@ -2,6 +2,7 @@
 #include "Actors/MovementCommand.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
 #include "Battle/Feedback.h"
@@ -575,7 +575,7 @@ void Boot_RunGameLoop(void)
                     if (Field_controlMode == 1) {
                         VS::Battle::Ai::RunLiveActorAiUpdateStages();
                     } else if (Field_controlMode == 3) {
-                        Battle_Ai_UpdateActorNavigationOverrides();
+                        VS::Battle::Ai::UpdateLiveActorNavigationOverrides();
                     }
                     if ((Render_framebufferEffectState == 1) || (Render_framebufferEffectState == 2)) {
                         SetDrawStp(&Render_legacyMaskBitOnPackets[Render_frameBuf], 1);

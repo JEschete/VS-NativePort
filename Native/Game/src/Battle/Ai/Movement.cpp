@@ -4,7 +4,9 @@
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
+#include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/MovementBehaviorLive.hpp"
+#include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -24,10 +26,8 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
-#include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
 #include "Battle/Ai/Navigation.h"
-#include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -102,7 +102,7 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
                                          + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[directions[i]].dx;
                     ((u_char*)&probe)[2] = state->tile.tile.tileZ
                                          + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[directions[i]].dz;
-                    if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, probe) > 0) {
+                    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, probe) > 0) {
                         state->detourStep = i;
                         break;
                     }
@@ -126,8 +126,8 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
                                                                       - 1]]
                       .dz;
             state->movementTarget = state->opaqueFB;
-            if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView*)state, state->destination.word) > 0) {
-                Battle_Ai_DispatchAiLocomotionMode(state, 0, 0);
+            if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView*)state, state->destination.word) > 0) {
+                VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 0, 0);
             } else {
                 state->detourStep++;
             }
@@ -281,9 +281,9 @@ int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, i
     void (*callback)(Battle_Ai_MovementCheckView*, int);
     unsigned int distance;
     if (mode) {
-        callback = (void (*)(Battle_Ai_MovementCheckView*, int))Battle_Ai_MoveActorTowardDestinationTile;
+        callback = (void (*)(Battle_Ai_MovementCheckView*, int))VS::Battle::Ai::MoveLiveActorTowardDestinationTile;
     } else {
-        callback = (void (*)(Battle_Ai_MovementCheckView*, int))Battle_Ai_BeginAiGroundMovement;
+        callback = (void (*)(Battle_Ai_MovementCheckView*, int))VS::Battle::Ai::BeginLiveAiGroundMovement;
     }
     if (state->movementFlags & 6) {
         distance = VS::Core::Math::SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->destination)), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile)));
@@ -295,9 +295,9 @@ int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, i
         } else if (Battle_Ai_roomAiState->flightCeiling) {
             if (VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile))) + state->flightHeight < Battle_Ai_roomAiState->flightCeiling) {
                 if (state->model->opaque8 & 0x200000) {
-                    if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {
+                    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {
                         VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
-                        Battle_Ai_BeginAiTerrainMovement(state);
+                        VS::Battle::Ai::BeginLiveAiTerrainMovement(state);
                         return 1;
                     }
                 } else {
@@ -341,11 +341,11 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         return;
     }
     if (!(state->model->opaque8 & 0x200000)) {
-        Battle_Ai_BeginAiAlternateTerrainMovement((Battle_Ai_ActorAiState *)((void*)state));
+        VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement((Battle_Ai_ActorAiState *)((void*)state));
         return;
     }
     state->movementDisabled = 1;
-    if (!Battle_Ai_SelectActorVerticalMovementStep((Battle_Ai_ActorAiState *)((void*)state), &step, &mode)) {
+    if (!VS::Battle::Ai::SelectLiveActorVerticalMovementStep((Battle_Ai_ActorAiState *)((void*)state), &step, &mode)) {
         goto recover;
     }
     x = state->destination.tile.tileX * 128 + 64;
@@ -438,7 +438,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         return;
     }
-    Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state), angle, 2);
+    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state), angle, 2);
     switch (MOVEMENT_STEP_RESULT) {
     case 5:
         angle = state->heading * (ONE / 8);
@@ -542,13 +542,13 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
         return;
     }
 
-    if (Battle_Ai_SelectActorVerticalMovementStep(ai_state, &vertical_step, &movement_command) == 0) {
+    if (VS::Battle::Ai::SelectLiveActorVerticalMovementStep(ai_state, &vertical_step, &movement_command) == 0) {
         Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)ai_state));
         return;
     }
 
     ai_state->movementDisabled = 1;
-    Battle_Ai_ResolveDirectionalMovement(ai_state, movement_angle, 3);
+    VS::Battle::Ai::ResolveLiveDirectionalMovement(ai_state, movement_angle, 3);
 
     if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 5 && *(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 7) {
         VS::Battle::Ai::ReleaseLiveActorAiReservations(ai_state);
@@ -575,7 +575,7 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
     }
 
     if (!(ai_state->model->opaqueABit5 << 21)) {
-        Battle_Ai_BeginAiAlternateTerrainMovement(ai_state);
+        VS::Battle::Ai::BeginLiveAiAlternateTerrainMovement(ai_state);
     } else {
         ai_state->stallCounter = 0;
         VS::Battle::Ai::IssueLiveActorCommand(ai_state, movement_command);
@@ -599,7 +599,7 @@ void Battle_Ai_ProjectClearRadialDestination(Battle_Ai_MoveTargetView* state, Ba
         dest.tile.tileX = (int)(source.tile.tileX * 128 + x) >> 7;
         z = ((int)(distance * Core_Gte_Sin(heading)) >> 12) + 64;
         dest.tile.tileZ = (int)(source.tile.tileZ * 128 + z) >> 7;
-        if (Battle_Ai_DestinationOccupancy(state, dest.word) > 0) {
+        if (VS::Battle::Ai::LiveDestinationOccupancy(state, dest.word) > 0) {
             break;
         }
     }
@@ -638,20 +638,20 @@ void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state,
         if ((int)(state->savedDestination.word << 8) >= 0) {
             state->destination = state->savedDestination;
         }
-        Battle_Ai_MoveActorTowardDestinationTile(state, angle);
+        VS::Battle::Ai::MoveLiveActorTowardDestinationTile(state, angle);
         return;
     }
     if (++state->moveAttempts < 6) {
         goto fallback;
     }
     dest = state->destination;
-    if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {
+    if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {
         goto begin;
     }
     for (i = 0; i < 4; i++) {
         dest.tile.tileX = state->destination.tile.tileX + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i * 2].dx;
         dest.tile.tileZ = state->destination.tile.tileZ + ((Battle_Ai_DirectionDelta*)((uintptr_t)&Battle_Ai_FrameState()->directions))[i * 2].dz;
-        if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {
+        if (VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), dest.word) > 0) {
             state->destination = dest;
             goto begin;
         }
@@ -715,7 +715,7 @@ void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state
     Battle_Ai_TerrainMoveActorView* actor = state->actor;
     int mode;
     *tile = Battle_Ai_FilterDirectionsByGroundHeight(old, state->tile.word, state->position[1]);
-    Battle_Ai_ResolveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
+    VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
         Core_Gte_Atan2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
             & 0xFFF,
         0);
@@ -770,13 +770,13 @@ int Battle_Ai_ChooseNextWanderTile(Battle_Ai_WanderView* state, unsigned int til
                         >> i * 2
                     & 1;
             } else {
-                candidate.tile.tag = Battle_Ai_IsAdjacentTileStepBlocked(state->goal.word, i * 2);
+                candidate.tile.tag = VS::Battle::Ai::IsLiveAdjacentTileStepBlocked(state->goal.word, i * 2);
             }
             offset = *Battle_Ai_WanderDirectionOffset(i * 2);
             candidate.tile.tileX = state->goal.tile.tileX + offset.dx;
             candidate.tile.tileZ = state->goal.tile.tileZ + offset.dz;
             if (candidate.tile.tag) {
-                if (!Battle_Ai_CanTraverseTileEdge(
+                if (!VS::Battle::Ai::CanTraverseLiveTileEdge(
                         (Battle_Ai_MoveTargetView*)state, state->goal.word, candidate.word, i * 2)) {
                     continue;
                 }
@@ -845,7 +845,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
     if (state->model->opaque8 & 0x200000) {
         check = (int (*)(Battle_Ai_WanderView*, int))Battle_Ai_CanFlyInDirection;
     } else {
-        check = Battle_Ai_CanWalkInDirection;
+        check = VS::Battle::Ai::CanLiveActorWalkInDirection;
     }
     if (state->behaviorMode == 1) {
         if (state->wanderTimer < 31) {
@@ -912,7 +912,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
                 }
             }
         }
-        Battle_Ai_DispatchAiLocomotionMode(state, 1, state->wanderHeading);
+        VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 1, state->wanderHeading);
         return;
     }
     state->opaque3 = 1;
@@ -941,7 +941,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
             state->savedDestination = state->destination;
             Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView*)state, state->tile, heading, state->moveDistance);
         }
-        Battle_Ai_DispatchAiLocomotionMode(state, 0, 0);
+        VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 0, 0);
         if (!state->opaque8) {
             state->wanderCooldown = 60;
         } else if (state->wanderCooldown) {
@@ -986,7 +986,7 @@ void Battle_Ai_UpdateWaypointPatrol(Battle_Ai_PatrolView* state)
 move:
     state->destination.tile.tileX = Battle_Ai_WaypointValue(row, state->index) & 31;
     state->destination.tile.tileZ = (Battle_Ai_WaypointValue(row, state->index) >> 5) & 31;
-    Battle_Ai_DispatchAiLocomotionMode(state, 0, 0);
+    VS::Battle::Ai::DispatchLiveAiLocomotionMode(state, 0, 0);
 }
 
 // decomp: BATTLE.PRG func_800E24EC (src/BATTLE/BATTLE.PRG/771A8.c:1973)
@@ -1087,7 +1087,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                 }
             }
             s->movementTarget = s->targetId;
-            Battle_Ai_DispatchAiLocomotionMode(s, 0, 0);
+            VS::Battle::Ai::DispatchLiveAiLocomotionMode(s, 0, 0);
             break;
         case 1:
         recover:
@@ -1109,7 +1109,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                 s->movementTarget = target;
             }
             angle = Core_Gte_Atan2(s->moveX - s->x, s->moveZ - s->z);
-            Battle_Ai_DispatchAiLocomotionMode(s, 1, angle);
+            VS::Battle::Ai::DispatchLiveAiLocomotionMode(s, 1, angle);
             if (s->actor->id >= 9) {
                 s->opaqueE8 = 1;
             }
@@ -1128,7 +1128,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                     goto done;
                 }
                 ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)s), 7, 40);
-                if (!Battle_Ai_UpdateHesitationTurn(s, 128, 1, 1)) {
+                if (!VS::Battle::Ai::UpdateLiveHesitationTurn(s, 128, 1, 1)) {
                     result = 0;
                 }
                 goto done;
@@ -1148,7 +1148,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
                     goto done;
                 }
                 ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)s), 7, 40);
-                if (!Battle_Ai_UpdateHesitationTurn(s, 128, 1, 1)) {
+                if (!VS::Battle::Ai::UpdateLiveHesitationTurn(s, 128, 1, 1)) {
                 cancel:
                     s->opaqueE4 = 0;
                     result = 0;
@@ -1156,11 +1156,11 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
             } else if (s->timeout) {
                 s->opaque1 = 1;
                 s->opaqueC = 1;
-                Battle_Ai_DispatchAiLocomotionMode(s, 0, 0);
+                VS::Battle::Ai::DispatchLiveAiLocomotionMode(s, 0, 0);
             } else {
                 goto cancel;
             }
-        } else if (!Battle_Ai_UpdateHesitationTurn(s, 0, 3, 1)) {
+        } else if (!VS::Battle::Ai::UpdateLiveHesitationTurn(s, 0, 3, 1)) {
             result = 0;
         }
     }
@@ -1184,7 +1184,7 @@ int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int ta
         return 0;
     }
     if (context->reactionPending != 0) {
-        if (Battle_Ai_UpdateHesitationTurn(context, 128, 3, 6)) {
+        if (VS::Battle::Ai::UpdateLiveHesitationTurn(context, 128, 3, 6)) {
             return 1;
         }
         context->facingPending = 0;
@@ -1206,7 +1206,7 @@ int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int ta
     if (((actor->instance.facing + (short)actor->instance.lookYaw) & 0xFFF)
         == (context->angle & 0xFFF)) {
         if (!((context->targetFlags[targetId] >> 5) & 1)) {
-            if (Battle_Ai_UpdateHesitationTurn(context, 128, 1, 6)) {
+            if (VS::Battle::Ai::UpdateLiveHesitationTurn(context, 128, 1, 6)) {
                 return 1;
             }
             context->facingPending = 0;
@@ -1234,9 +1234,9 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
     unsigned char* bounds;
     if ((context->opaque8 & 0x200000) && state->stallCounter++ > 120 && (state->movementFlags & 6)
         && (state->movementFlags & 0x30)
-        && Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {
+        && VS::Battle::Ai::LiveDestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {
         VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
-        Battle_Ai_BeginAiTerrainMovement(state);
+        VS::Battle::Ai::BeginLiveAiTerrainMovement(state);
         return;
     }
     if (state->movementTarget != 16) {
