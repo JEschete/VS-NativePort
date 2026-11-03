@@ -235,6 +235,7 @@ def guarded_before(body: str, name: str, position: int) -> bool:
         rf"!\s*{name}{NOT_A_MEMBER}|(?<![\w\]>.]){name}\s*(?:[!=]=|&&|\|\||\?)|\b(?:if|while)\s*\(\s*{name}\s*\)"
         rf"|;\s*{name}\s*;"
         rf"|(?:&&|\|\|)\s*{name}\s*[)&|]"
+        rf"|(?<![\w\]>.]){name}\s*\.\s*has_value\s*\(\s*\)"
     )
     return any(match.start() < position for match in guard.finditer(body))
 

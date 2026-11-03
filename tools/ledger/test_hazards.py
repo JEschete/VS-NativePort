@@ -141,6 +141,15 @@ class NullTests(unittest.TestCase):
     def test_a_lookup_result_kept_and_read_unguarded_is_found(self) -> None:
         self.assertIn("NULL-RETURN", classes("int Battle_Hit(int i) { Thing* t = Field_FindThing(i); return t->flags; }\n"))
 
+    def test_an_optional_lookup_checked_with_has_value_is_clean(self) -> None:
+        body = ("int Battle_Hit(int i) { const std::optional<Thing> t = Field_FindThing(i); "
+                "if (!t.has_value()) Fail(); return t->flags; }\n")
+        self.assertEqual(classes(body), set())
+
+    def test_an_optional_lookup_read_without_has_value_is_found(self) -> None:
+        body = "int Battle_Hit(int i) { const std::optional<Thing> t = Field_FindThing(i); return t->flags; }\n"
+        self.assertIn("NULL-RETURN", classes(body))
+
 
 class DivisionTests(unittest.TestCase):
     def test_a_variable_divisor_is_found(self) -> None:

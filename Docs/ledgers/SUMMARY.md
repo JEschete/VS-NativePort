@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 218 | 6 (`wip`) | 3,983 |
-| `cpp` | 218 | 63 (`wip`) | 3,926 |
+| `modernized` | 247 | 5 (`wip`) | 3,955 |
+| `cpp` | 247 | 34 (`wip`) | 3,926 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
 | `source_cpp` | 281 |
-| `vs_namespace` | 218 |
-| `typed_interface` | 218 |
-| `no_bridge` | 218 |
+| `vs_namespace` | 247 |
+| `typed_interface` | 247 |
+| `no_bridge` | 247 |
 | `strict_clean` | 281 |
-| `behavior_evidence` | 218 |
+| `behavior_evidence` | 247 |
 
-Promotion records: 281; derived `cpp=x`: 218, `cpp=wip`: 63. Verification records: 98; `verified=x` markers: 45.
+Promotion records: 281; derived `cpp=x`: 247, `cpp=wip`: 34. Verification records: 99; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -239,6 +239,8 @@ The fifty-second is the AI decision, planning and engagement primitives (F01628,
 and the five legacy headers and twenty-eight Battle_Ai_ symbols are retired; the same commit zero-initializes the action plan selection counts (#274).
 The fifty-third is the motion requests and native file menus (F00989, F01024, F01026, F04178, F04179, F04181-F04187, F02764, F02767, F03628, F03634): VS::Actors jump, travel, teleport, offset and turn requests and the VS::Menu::Files Save/Load/Continue pickers are C++ over host interfaces that refuse windows and rows outside the save slots,
 and MotionRequests.h, NativeMenu.cpp and the sixteen Actors_ and Menu_Files_ symbols are retired.
+The fifty-fourth is AI movement behaviour and actor cleanup (F01648, F01661, F01662, F01663, F01664, F01665, F01666, F01667, F01668, F01673, F01695, F01696, F01766, F01778, F01779, F01780, F01786, F01790, F01804, F01820, F01821, F01822, F01823, F01831, F01835, F01836, F01842, F01844, F01845): VS::Battle::Ai movement modes and teardown are C++ over host interfaces that refuse relationship classes, layers and tiles outside their tables, and the reservation release checks the original room bounds bytes (#275),
+and MovementBehavior.h, ActorCleanup.h and the twenty-nine Battle_Ai_ symbols are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
