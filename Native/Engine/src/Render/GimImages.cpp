@@ -809,20 +809,40 @@ bool DrawGimScanlineWipe(PacketQueue& queue, const GimLayer& layer,
   return true;
 }
 
-bool SetGimWorkspaceDrawArea(PacketQueue& queue, int page_x) {
+namespace {
+// One GP0 E3-E5 draw-area target, placed at page_x.
+struct DrawAreaTarget {
+  std::uint32_t top;
+  std::uint32_t bottom;
+  std::uint32_t offset;
+  int right;
+};
+
+bool InsertDrawArea(PacketQueue& queue, const DrawAreaTarget& area,
+                    int page_x) {
   return InsertThreeWordPrimitive(
-      queue,
-      {.color_command = Bits(page_x) | kWorkspaceAreaTop,
-       .position = Bits(page_x + kWorkspaceAreaRight) | kWorkspaceAreaBottom,
-       .size = Bits(page_x) | kWorkspaceAreaOffset});
+      queue, {.color_command = Bits(page_x) | area.top,
+              .position = Bits(page_x + area.right) | area.bottom,
+              .size = Bits(page_x) | area.offset});
+}
+}  // namespace
+
+bool SetGimWorkspaceDrawArea(PacketQueue& queue, int page_x) {
+  return InsertDrawArea(queue,
+                        {.top = kWorkspaceAreaTop,
+                         .bottom = kWorkspaceAreaBottom,
+                         .offset = kWorkspaceAreaOffset,
+                         .right = kWorkspaceAreaRight},
+                        page_x);
 }
 
 bool SetGimFramebufferDrawArea(PacketQueue& queue, int page_x) {
-  return InsertThreeWordPrimitive(
-      queue, {.color_command = Bits(page_x) | kFramebufferAreaTop,
-              .position =
-                  Bits(page_x + kFramebufferAreaRight) | kFramebufferAreaBottom,
-              .size = Bits(page_x) | kFramebufferAreaOffset});
+  return InsertDrawArea(queue,
+                        {.top = kFramebufferAreaTop,
+                         .bottom = kFramebufferAreaBottom,
+                         .offset = kFramebufferAreaOffset,
+                         .right = kFramebufferAreaRight},
+                        page_x);
 }
 
 namespace {

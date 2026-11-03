@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 603 | owned functions |
-| 603 | owned functions in C++ sources |
-| 3148 | generated function rows |
+| 614 | owned functions |
+| 614 | owned functions in C++ sources |
+| 3137 | generated function rows |
 | 11 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 603 | 0 | 3,604 |
-| `cpp` | 603 | 0 | 3,604 |
+| `modernized` | 614 | 0 | 3,593 |
+| `cpp` | 614 | 0 | 3,593 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 603 |
-| `vs_namespace` | 603 |
-| `typed_interface` | 603 |
-| `no_bridge` | 603 |
-| `strict_clean` | 603 |
-| `behavior_evidence` | 603 |
+| `source_cpp` | 614 |
+| `vs_namespace` | 614 |
+| `typed_interface` | 614 |
+| `no_bridge` | 614 |
+| `strict_clean` | 614 |
+| `behavior_evidence` | 614 |
 
-Promotion records: 603; derived `cpp=x`: 603, `cpp=wip`: 0. Verification records: 110; `verified=x` markers: 45.
+Promotion records: 614; derived `cpp=x`: 614, `cpp=wip`: 0. Verification records: 111; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -265,6 +265,8 @@ The sixty-fourth slice (#276 row 5 part 2) is the palette animation (36 function
 and the generated Render_ palette routines, their six state globals, the D_8005DC6C_t/D_8005DC80_t records and their module address entries are retired.
 The sixty-fifth slice (#276 row 6 part 1) is the texture pages, TIM parse and texture packets (15 functions in VS::Render TexturePages, TimImage and UiPackets): one typed table lends texture pages 25-31 to owners and retires them over two frames, the TIM parse reads a bounded byte span, and texture moves, texture-page commands, immediate sprites, image reads and the RGB blend are typed packets spliced through the bounded overlay queue; out-of-range pages, owners, TIM blocks, slots and dimming are refused and counted,
 and the generated Render_ texture routines, the D_800F19A8 page table, the BATTLE packet begin/end helpers and their module address entries are retired.
+The sixty-sixth slice (#276 row 6 part 2) is the event-script GIM images (11 functions in VS::Render GimImages): a typed image set loads, parses and uploads the three layers from a bounded word span, lends and retires their texture pages, and builds the original tile, fade, scanline-wipe, crossfade and draw-area packets through the bounded overlay queue; files, layers and routines that do not fit are refused and counted,
+and the generated Render_ GIM routines, the gim_t layer records, the D_800EB9BC, D_800EC25C, D_800F51C8 and _gimLbas tables, the splash-layer view and their module address entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
