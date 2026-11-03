@@ -27,19 +27,19 @@ architecture changes rather than per-function work, so this ledger is what track
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
 | 25: #54 Text IDs, layout and rendering | 0 | 0 | 0 | 13 | 0 | 0 |
 | 26: #59 Event VM results and execution | 0 | 236 | 3,830 | 59 | 178 | 0 |
-| 30A: #253 Typed voices and owned audio playback | 0 | 244 | 3,917 | 259 | 139 | 0 |
+| 30A: #253 Typed voices and owned audio playback | 0 | 188 | 2,420 | 296 | 102 | 0 |
 | 31: #61 Typed effects and playback sessions | 0 | 761 | 11,774 | 180 | 587 | 0 |
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 2916 | 90,836 | 1809 | 1941 | 0 |
+| **Total** | 0 | 2860 | 89,339 | 1846 | 1904 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 834 |
-| todo | 2,916 |
+| done | 890 |
+| todo | 2,860 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (4 active, 14 done, 36 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 15 done, 36 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -54,7 +54,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 9 | movie-intro | done | coordinator | 1 | 0 | 0 |
 | 10 | audio-seq-voices | done | agent:a10-audio-voices | 3 | 0 | 0 |
 | 11 | audio-seq-control | done | agent:a11-audio-seq-control | 3 | 0 | 0 |
-| 12 | audio-mixer-driver | active | self | 3 | 56 | 1,497 |
+| 12 | audio-mixer-driver | done | agent:a12-audio-mixer | 3 | 0 | 0 |
 | 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
 | 14 | audio-control-sfx | planned | - | 3 | 80 | 1,092 |
 | 15 | audio-music-streams | planned | - | 5 | 50 | 625 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,581 |
-| Referenced by the original-address module table | 0 | 1,638 |
-| Calls an SDK shim | 0 | 401 |
-| Signature uses SDK integer types or `void*` | 0 | 678 |
-| Compiled with relaxed settings | 0 | 2,916 |
+| Called from generated code | 0 | 1,567 |
+| Referenced by the original-address module table | 0 | 1,582 |
+| Calls an SDK shim | 0 | 394 |
+| Signature uses SDK integer types or `void*` | 0 | 665 |
+| Compiled with relaxed settings | 0 | 2,860 |
 
 Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

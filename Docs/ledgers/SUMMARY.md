@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 834 | owned functions |
-| 834 | owned functions in C++ sources |
-| 2916 | generated function rows |
+| 890 | owned functions |
+| 890 | owned functions in C++ sources |
+| 2860 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 834 | 0 | 3,373 |
-| `cpp` | 834 | 0 | 3,373 |
+| `modernized` | 890 | 0 | 3,317 |
+| `cpp` | 890 | 0 | 3,317 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 834 |
-| `vs_namespace` | 834 |
-| `typed_interface` | 834 |
-| `no_bridge` | 834 |
-| `strict_clean` | 834 |
-| `behavior_evidence` | 834 |
+| `source_cpp` | 890 |
+| `vs_namespace` | 890 |
+| `typed_interface` | 890 |
+| `no_bridge` | 890 |
+| `strict_clean` | 890 |
+| `behavior_evidence` | 890 |
 
-Promotion records: 834; derived `cpp=x`: 834, `cpp=wip`: 0. Verification records: 117; `verified=x` markers: 45.
+Promotion records: 890; derived `cpp=x`: 890, `cpp=wip`: 0. Verification records: 118; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -279,6 +279,8 @@ The seventy-first slice (#276 row 20, skeleton phase) is the actor skeleton (18 
 and the generated Actors_ skeleton routines and 18 module address entries are retired, Skeleton.h keeps only types, and SkeletonLive owns the four skeleton globals and bounds actor, weapon and gimmick model bytes by their recorded extents.
 The seventy-second slice (#276 row 16) is battle content loading (43 functions in VS::Content): typed cores claim the overlay workspace, queue and stage the SHP, WEP and SEQ actor asset loads with peer sharing, copy model geometry and texture offsets within their buffers, look up P-file timeline sections, load SYSTEM.DAT sections and run the CD drive state machine and its 32-request disc queue, and a full disc queue now refuses with a content warning while callers read the file directly instead of indexing before the array (#282, VR-CONTENT-SLICE).
 and the generated Content_ routines and their module address entries are retired, CdDrive.h, OverlayFiles.h and OverlayWorkspace.h are removed, ActorAssets.h, PFile.h and SystemResources.h keep only types, and the Live adapters own the six asset queue, workspace and disc request globals.
+The seventy-third slice (#276 row 12) is the audio mixer and sound driver (56 functions in VS::Audio::Driver and VS::Audio::Mixer): typed cores run the SPU sample transfers, driver start and stop and voice register writes, the channel slides, timers and LFO modulation, voice search, stealing, commits and key-off, and the mix control commands for sound-effect, tempo and music pitch scales, stops, pauses, output and reverb modes and track starts, and refuse voices outside the 24 SPU voices, LFO reads outside their waveforms, missing or aliasing music layers and zero slide lengths (VR-AUDIO-MIXER-DRIVER-SLICE),
+and the generated Audio_Driver_ and Audio_Mixer_ routines are retired, the 22 relocated command-table handlers resolve to the Live adapters and the other 34 module address entries are removed.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
