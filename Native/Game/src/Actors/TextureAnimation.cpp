@@ -174,6 +174,11 @@ TextureMove TextureFrameMove(const TextureCellSheet& sheet,
   return SheetCellMove(source_x, source_y, overlay, layout);
 }
 
+bool RestartsTextureFrames(int bank_index, int shared_bank,
+                           std::uint8_t row) noexcept {
+  return bank_index == shared_bank && row != kNoTextureRow;
+}
+
 TextureMove TextureOverlayMove(int source_x, int source_y,
                                const TextureOverlay& overlay,
                                const ActorTextureLayout& layout) {

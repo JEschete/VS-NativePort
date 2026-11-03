@@ -27,7 +27,6 @@ extern "C" {
 
 namespace VS::Actors {
 namespace {
-constexpr unsigned kNoTextureRow = 0xFF;
 constexpr std::size_t kTextureBanks = 3;
 static_assert(sizeof(Actors_ActorRecord::textureRowOffsets) == kTextureBanks);
 // Each slot origin is a halfword column and a halfword page.
@@ -310,11 +309,15 @@ void UploadLiveActorTextureFrame(Actors_ActorRecord* actor, int channel,
 
 // decomp: BATTLE.PRG func_800AB2AC (src/BATTLE/BATTLE.PRG/40564.c:1486)
 void ResetLiveActorTextureFrames(int bank_index) {
-  if (bank_index != Actors_sharedSequenceBankIndex) return;
+  const int shared_bank = Actors_sharedSequenceBankIndex;
+  // Another bank restarts nothing; the original read no rows for it.
+  if (bank_index != shared_bank) return;
   const std::optional<std::size_t> bank = LiveBank("ResetActorTextureFrames");
   if (!bank.has_value()) return;
   for (Actors_ActorRecord* actor : Actors_actorRecords) {
-    if (actor != nullptr && actor->textureRowOffsets[*bank] != kNoTextureRow) {
+    if (actor != nullptr &&
+        RestartsTextureFrames(bank_index, shared_bank,
+                              actor->textureRowOffsets[*bank])) {
       UploadLiveActorTextureFrame(actor, 0, 0);
       UploadLiveActorTextureFrame(actor, 1, 0);
     }

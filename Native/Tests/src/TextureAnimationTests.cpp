@@ -395,6 +395,16 @@ TEST_CASE("Texture frames copy the sheet cell over the overlay",
                     .y = 64 + 20});
 }
 
+TEST_CASE("Reloading the shared bank restarts actors with a sheet row",
+          "[actors-appearance-rendering][actors]") {
+  CHECK(actors::RestartsTextureFrames(1, 1, 0));
+  CHECK(actors::RestartsTextureFrames(2, 2, 0xFE));
+  // No row in the bank.
+  CHECK_FALSE(actors::RestartsTextureFrames(1, 1, actors::kNoTextureRow));
+  // Another bank is not the shared one.
+  CHECK_FALSE(actors::RestartsTextureFrames(0, 1, 0));
+}
+
 TEST_CASE("Scripted texture copies take the cell at their own position",
           "[actors-appearance-rendering][actors]") {
   const actors::TextureOverlay overlay{

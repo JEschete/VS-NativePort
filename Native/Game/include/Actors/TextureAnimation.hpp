@@ -160,6 +160,16 @@ struct TextureMove {
                                            const ActorTextureLayout& layout,
                                            int frame);
 
+// An actor's sheet row in a sequence bank it has no row in.
+inline constexpr std::uint8_t kNoTextureRow = 0xFF;
+
+// BATTLE.PRG func_800AB2AC (40564.c:1486). Whether reloading sequence bank
+// `bank_index` restarts an actor's two channels at frame 0 (TextureFrameMove
+// of frame 0): only reloading the shared bank does, and only for an actor with
+// a sheet row in it.
+[[nodiscard]] bool RestartsTextureFrames(int bank_index, int shared_bank,
+                                         std::uint8_t row) noexcept;
+
 // A scripted cell copy: the 0-based overlay and the cell's texel position.
 struct TextureOverlayCopy {
   std::uint8_t overlay = 0;
