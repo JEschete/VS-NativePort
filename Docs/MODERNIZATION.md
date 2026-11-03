@@ -16,9 +16,9 @@ architecture changes rather than per-function work, so this ledger is what track
 | 3: #45 Owned game, session and scene state | 0 | 261 | 6,658 | 220 | 138 | 0 |
 | 4: #44 Runtime modes and logical ticks | 0 | 22 | 869 | 13 | 14 | 0 |
 | 5: #52 Logical input and typed settings | 0 | 0 | 0 | 20 | 0 | 0 |
-| 6: #47 Stable asset IDs and decoded records | 0 | 28 | 1,734 | 26 | 2 | 0 |
-| 7: #48 Content request ownership | 0 | 13 | 204 | 11 | 5 | 0 |
-| 8: #49 Bounded P-file and effect views | 0 | 2 | 7 | 2 | 0 | 0 |
+| 6: #47 Stable asset IDs and decoded records | 0 | 0 | 0 | 28 | 0 | 0 |
+| 7: #48 Content request ownership | 0 | 0 | 0 | 16 | 0 | 0 |
+| 8: #49 Bounded P-file and effect views | 0 | 0 | 0 | 2 | 0 | 0 |
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
 | 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 144 | 0 | 0 |
 | 14: #55 Actor identity and teardown | 0 | 171 | 6,573 | 170 | 68 | 0 |
@@ -32,14 +32,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 2959 | 92,781 | 1802 | 1948 | 0 |
+| **Total** | 0 | 2916 | 90,836 | 1809 | 1941 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 791 |
-| todo | 2,959 |
+| done | 834 |
+| todo | 2,916 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 13 done, 38 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (4 active, 14 done, 36 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -54,18 +54,18 @@ architecture changes rather than per-function work, so this ledger is what track
 | 9 | movie-intro | done | coordinator | 1 | 0 | 0 |
 | 10 | audio-seq-voices | done | agent:a10-audio-voices | 3 | 0 | 0 |
 | 11 | audio-seq-control | done | agent:a11-audio-seq-control | 3 | 0 | 0 |
-| 12 | audio-mixer-driver | active | agent:a12-audio-mixer | 3 | 56 | 1,497 |
+| 12 | audio-mixer-driver | active | self | 3 | 56 | 1,497 |
 | 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
 | 14 | audio-control-sfx | planned | - | 3 | 80 | 1,092 |
 | 15 | audio-music-streams | planned | - | 5 | 50 | 625 |
-| 16 | content | active | agent:a16-content | 6 | 43 | 1,945 |
+| 16 | content | done | agent:a16-content | 6 | 0 | 0 |
 | 17 | state-boot | planned | - | 6 | 23 | 976 |
 | 18 | items | done | agent:a18-items | 6 | 0 | 0 |
 | 19 | actors-state-loading | planned | - | 6 | 63 | 1,812 |
 | 20 | actors-animation-skeleton | active | self | 2 | 50 | 1,889 |
-| 21 | actors-movement | planned | - | 1 | 58 | 2,872 |
+| 21 | actors-movement | active | agent:a21-movement | 1 | 58 | 2,872 |
 | 22 | actors-appearance-rendering | done | self | 3 | 0 | 0 |
-| 23 | field-collision-map | planned | - | 3 | 40 | 2,077 |
+| 23 | field-collision-map | active | agent:a23-field-collision | 3 | 40 | 2,077 |
 | 24 | field-camera-background | planned | - | 3 | 56 | 1,416 |
 | 25 | field-rooms | planned | - | 5 | 73 | 1,481 |
 | 26 | field-room-effects | planned | - | 1 | 42 | 832 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,606 |
-| Referenced by the original-address module table | 0 | 1,678 |
-| Calls an SDK shim | 0 | 407 |
-| Signature uses SDK integer types or `void*` | 0 | 689 |
-| Compiled with relaxed settings | 0 | 2,959 |
+| Called from generated code | 0 | 1,581 |
+| Referenced by the original-address module table | 0 | 1,638 |
+| Calls an SDK shim | 0 | 401 |
+| Signature uses SDK integer types or `void*` | 0 | 678 |
+| Compiled with relaxed settings | 0 | 2,916 |
 
 Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

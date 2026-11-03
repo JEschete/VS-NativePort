@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 791 | owned functions |
-| 791 | owned functions in C++ sources |
-| 2959 | generated function rows |
+| 834 | owned functions |
+| 834 | owned functions in C++ sources |
+| 2916 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 791 | 0 | 3,416 |
-| `cpp` | 791 | 0 | 3,416 |
+| `modernized` | 834 | 0 | 3,373 |
+| `cpp` | 834 | 0 | 3,373 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 791 |
-| `vs_namespace` | 791 |
-| `typed_interface` | 791 |
-| `no_bridge` | 791 |
-| `strict_clean` | 791 |
-| `behavior_evidence` | 791 |
+| `source_cpp` | 834 |
+| `vs_namespace` | 834 |
+| `typed_interface` | 834 |
+| `no_bridge` | 834 |
+| `strict_clean` | 834 |
+| `behavior_evidence` | 834 |
 
-Promotion records: 791; derived `cpp=x`: 791, `cpp=wip`: 0. Verification records: 116; `verified=x` markers: 45.
+Promotion records: 834; derived `cpp=x`: 834, `cpp=wip`: 0. Verification records: 117; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -277,6 +277,8 @@ The seventieth slice (#276 row 22) is actor appearance and rendering (24 functio
 and the generated Actors_ routines, the Appearance.h and ModelRendering.h headers and 23 module address entries are retired; three Live adapters bind the actor, weapon and gimmick tables, texture slots, model workspace and ordering table.
 The seventy-first slice (#276 row 20, skeleton phase) is the actor skeleton (18 functions in VS::Actors Skeleton): a typed core searches bone tags over the four original label kinds, reads bone tag values and limb groups, starts head tracking and its radius step, measures the pitch to a point over the wrapped horizontal distance, and computes bone view transforms, bone endpoints and the target, ground and anchor-height points, refusing out-of-table actors, missing weapon slots and weapon bones past the four bone matrices with an actors warning (VR-ACTORS-SKELETON-SLICE).
 and the generated Actors_ skeleton routines and 18 module address entries are retired, Skeleton.h keeps only types, and SkeletonLive owns the four skeleton globals and bounds actor, weapon and gimmick model bytes by their recorded extents.
+The seventy-second slice (#276 row 16) is battle content loading (43 functions in VS::Content): typed cores claim the overlay workspace, queue and stage the SHP, WEP and SEQ actor asset loads with peer sharing, copy model geometry and texture offsets within their buffers, look up P-file timeline sections, load SYSTEM.DAT sections and run the CD drive state machine and its 32-request disc queue, and a full disc queue now refuses with a content warning while callers read the file directly instead of indexing before the array (#282, VR-CONTENT-SLICE).
+and the generated Content_ routines and their module address entries are retired, CdDrive.h, OverlayFiles.h and OverlayWorkspace.h are removed, ActorAssets.h, PFile.h and SystemResources.h keep only types, and the Live adapters own the six asset queue, workspace and disc request globals.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
