@@ -5,7 +5,7 @@ order,slice,status,owner,files,gate_slice,issue,commits,notes
 4,render-display-camera-ui,done,coordinator,Native\Engine\src\Render\Camera.cpp;Native\Engine\src\Render\Display.cpp;Native\Engine\src\Render\Lighting.cpp;Native\Engine\src\Render\Model.cpp;Native\Engine\src\Render\UiPrimitives.cpp,Render-display-camera-ui-slice,276;279,af156200;c3633bb3,"A4: typed camera views with console normalization, field display behind a DisplayDevice, GTE-saturating depth cue, bounded splices and frame-buffer packet reservations; #279 far-clip flag, DR_MOVE casts, unbounded splice and draw-mode length fixed; generated Camera/Display/UiPrimitives/Model/Upload/Lighting routines retired"
 5,render-palette-framebuffer,planned,,Native\Engine\src\Render\Palette.cpp;Native\Engine\src\Render\FramebufferEffects.cpp,,276,,
 6,render-images-textures-font,planned,,Native\Engine\src\Render\Font.cpp;Native\Engine\src\Render\Images.cpp;Native\Engine\src\Render\TextureAnimation.cpp;Native\Engine\src\Render\Textures.cpp,,276,,
-7,input-controller,planned,,Native\Engine\src\Input\Controller.cpp,,276,,
+7,input-controller,done,subagent a7-input; coordinator review,Native\Engine\src\Input\Controller.cpp,Input-controller-slice,276,0a09ba99,20 functions in VS::Input Controller; VR-INPUT-CONTROLLER-SLICE; 34 [input-controller] cases
 8,save-memory-card,planned,,Native\Engine\src\Save\MemoryCard\GameFiles.cpp;Native\Engine\src\Save\Snapshot.cpp,,276,,
 9,movie-intro,planned,,Native\Engine\src\Movie\Intro\Playback.cpp,,276,,
 10,audio-seq-voices,planned,,Native\Engine\src\Audio\Seq\Channel.cpp;Native\Engine\src\Audio\Seq\Envelope.cpp;Native\Engine\src\Audio\Seq\Modulation.cpp,,276,,
