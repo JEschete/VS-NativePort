@@ -34,32 +34,32 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 588 | owned functions |
-| 588 | owned functions in C++ sources |
-| 3165 | generated function rows |
-| 9 | retired function rows |
+| 603 | owned functions |
+| 603 | owned functions in C++ sources |
+| 3148 | generated function rows |
+| 11 | retired function rows |
 | 445 | excluded function rows |
 
 | Column | `x` | Other non-blank | Blank |
 | --- | ---: | ---: | ---: |
-| `copied` | 3,753 | 9 (`retired`) | 445 |
+| `copied` | 3,751 | 11 (`retired`) | 445 |
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 588 | 0 | 3,619 |
-| `cpp` | 588 | 0 | 3,619 |
+| `modernized` | 603 | 0 | 3,604 |
+| `cpp` | 603 | 0 | 3,604 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 588 |
-| `vs_namespace` | 588 |
-| `typed_interface` | 588 |
-| `no_bridge` | 588 |
-| `strict_clean` | 588 |
-| `behavior_evidence` | 588 |
+| `source_cpp` | 603 |
+| `vs_namespace` | 603 |
+| `typed_interface` | 603 |
+| `no_bridge` | 603 |
+| `strict_clean` | 603 |
+| `behavior_evidence` | 603 |
 
-Promotion records: 588; derived `cpp=x`: 588, `cpp=wip`: 0. Verification records: 109; `verified=x` markers: 45.
+Promotion records: 603; derived `cpp=x`: 603, `cpp=wip`: 0. Verification records: 110; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -263,6 +263,8 @@ The sixty-third slice (#276 row 10) is the SEQ voice and channel opcodes (71 fun
 The movie-intro retirement (#276 row 9) removes the TITLE MDEC strip pipeline (seven routines, eleven buffer and stream globals and MovieData_t) that the converted-movie intro (F03650-F03653) had already replaced; the live host owns the draw page, and the libpress shims (EC-08 LibPress.h/.cpp) and the libds ring-stream shims are deleted at zero uses. EC-08 still carries the page-space presentation debt.
 The sixty-fourth slice (#276 row 5 part 2) is the palette animation (36 functions in VS::Render PaletteAnimation and VS::Actors AppearanceTransition): one typed record owns the CLUT row fades and pulses, model tints, background gradient and room tint behind a PaletteHost, keeps the original delta tables, 16.16 arithmetic and gating, refuses rows, actors, colour spans and scene modes outside the original tables,
 and the generated Render_ palette routines, their six state globals, the D_8005DC6C_t/D_8005DC80_t records and their module address entries are retired.
+The sixty-fifth slice (#276 row 6 part 1) is the texture pages, TIM parse and texture packets (15 functions in VS::Render TexturePages, TimImage and UiPackets): one typed table lends texture pages 25-31 to owners and retires them over two frames, the TIM parse reads a bounded byte span, and texture moves, texture-page commands, immediate sprites, image reads and the RGB blend are typed packets spliced through the bounded overlay queue; out-of-range pages, owners, TIM blocks, slots and dimming are refused and counted,
+and the generated Render_ texture routines, the D_800F19A8 page table, the BATTLE packet begin/end helpers and their module address entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
