@@ -49,15 +49,15 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Class | What it is | Sites | Compiler | High | Medium | Low | Open |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `NULL-TABLE` | Sparse table entry read without a check | 286 | 0 | 0 | 251 | 35 | 286 |
+| `NULL-TABLE` | Sparse table entry read without a check | 285 | 0 | 0 | 250 | 35 | 285 |
 | `NULL-RETURN` | Lookup result read without a check | 2 | 0 | 0 | 2 | 0 | 2 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 7 | 0 | 0 | 7 | 0 | 7 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
-| `DIV-ZERO` | Division by a value that was not checked | 211 | 0 | 0 | 142 | 69 | 209 |
+| `DIV-ZERO` | Division by a value that was not checked | 209 | 0 | 0 | 140 | 69 | 207 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 84 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
-| `BYTE-OFFSET` | Field reached by a literal byte offset | 147 | 0 | 0 | 147 | 0 | 147 |
+| `BYTE-OFFSET` | Field reached by a literal byte offset | 145 | 0 | 0 | 145 | 0 | 145 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 1 | 0 | 0 | 1 | 0 | 1 |
 | `PS1-ADDRESS` | Original memory address used as a value | 1 | 0 | 0 | 0 | 1 | 1 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 4 | 0 | 0 | 4 | 0 | 4 |
@@ -66,7 +66,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
 | `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 71 | 0 | 0 | 71 | 0 | 71 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 1,123 | 239 | 239 | 779 | 105 | 1,121 |
+| **Total** | | 1,118 | 239 | 239 | 774 | 105 | 1,116 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -97,7 +97,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | #57 | 102 |
 | #253 | 89 |
 | no roadmap issue | 79 |
-| #45 | 60 |
+| #45 | 55 |
 | #58 | 27 |
 | #62 | 25 |
 | #59 | 25 |
