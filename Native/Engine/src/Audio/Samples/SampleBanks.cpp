@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 extern "C" {
@@ -194,11 +195,11 @@ int Audio_Samples_UploadBankChunk(int* in_Data, u_int in_Size, int in_Slot, int 
             }
             in_Size = spuChunk;
             SpuSetTransferStartAddr(Audio_Samples_bankStream.spuAddress);
-            Audio_Driver_WriteSampleMemory((char*)in_Data, in_Size);
+            VS::Audio::Driver::LiveWriteSampleMemory((char*)in_Data, in_Size);
             Audio_Samples_bankStream.spuAddress += in_Size;
             Audio_Samples_bankStream.spuBytesRemaining -= in_Size;
             if (in_Wait != 0) {
-                Audio_Driver_WaitForSampleTransfer();
+                VS::Audio::Driver::LiveWaitForSampleTransfer();
             }
         }
         if (Audio_Samples_bankStream.spuBytesRemaining == 0) {

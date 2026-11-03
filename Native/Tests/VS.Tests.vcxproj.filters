@@ -93,6 +93,9 @@
     <ClCompile Include="src\AppearanceTransitionTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\AudioMixerDriverTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\AudioTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

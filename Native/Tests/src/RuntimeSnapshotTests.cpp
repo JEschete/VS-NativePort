@@ -20,6 +20,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/MixControlLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
@@ -413,8 +414,9 @@ struct RuntimeFixture {
     Audio_Seq_activeMusicConfig = &silent_music;
     Audio_Seq_secondaryMusicConfig = nullptr;
     Audio_Mixer_voiceScheduler.activeVoices = 0;
-    Audio_Mixer_kCommandHandlers[0x80] = Audio_Mixer_EnableStereoOutput;
-    Audio_Mixer_kCommandHandlers[0x81] = Audio_Mixer_EnableMonoOutput;
+    Audio_Mixer_kCommandHandlers[0x80] =
+        VS::Audio::Mixer::LiveEnableStereoOutput;
+    Audio_Mixer_kCommandHandlers[0x81] = VS::Audio::Mixer::LiveEnableMonoOutput;
     Audio_SetMonoOutput(0);
   }
 

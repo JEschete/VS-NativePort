@@ -12,73 +12,6 @@ typedef struct Audio_DriverFlags Audio_DriverFlags;
 // decomp: D_80039B00 (D_80039B00@SLUS_010.40): a view into another global
 #define Audio_Driver_pendingUpdates (*(int*)(&Audio_Driver_controlLatches.updateFlags))
 
-// decomp: src/include/hw.h:7
-#define VOICE_00_LEFT_RIGHT ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x000))
-
-// decomp: src/include/hw.h:9
-#define VOICE_00_ADPCM_START_ADDR ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x006))
-
-// decomp: src/include/hw.h:10
-#define VOICE_00_ADPCM_ADSR_LOWER ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x008))
-
-// decomp: src/include/hw.h:11
-#define VOICE_00_ADPCM_ADSR_UPPER ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x00A))
-
-// decomp: src/include/hw.h:12
-#define VOICE_00_ADPCM_REPEAT_ADDR ((u_short*)((uintptr_t)LegacySpu_Registers() + 0x00E))
-
-// decomp: src/include/sound.h:14
-#define VOICE_PARAM_VOLUME_L (1 << 0) /* volume (left) */
-
-// decomp: src/include/sound.h:15
-#define VOICE_PARAM_VOLUME_R (1 << 1) /* volume (right) */
-
-// decomp: src/include/sound.h:16
-#define VOICE_PARAM_VOLUME (VOICE_PARAM_VOLUME_L | VOICE_PARAM_VOLUME_R)
-
-// decomp: src/include/sound.h:19
-#define VOICE_PARAM_SAMPLE_RATE (1 << 4) /* tone (pitch setting)  */
-
-// decomp: src/include/sound.h:22
-#define VOICE_PARAM_START_ADDR (1 << 7) /* waveform data start address */
-
-// decomp: src/include/sound.h:23
-#define VOICE_PARAM_ADSR_AMODE (1 << 8) /* ADSR Attack rate mode */
-
-// decomp: src/include/sound.h:24
-#define VOICE_PARAM_ADSR_SMODE (1 << 9) /* ADSR Sustain rate mode */
-
-// decomp: src/include/sound.h:25
-#define VOICE_PARAM_ADSR_RMODE (1 << 10) /* ADSR Release rate mode */
-
-// decomp: src/include/sound.h:26
-#define VOICE_PARAM_ADSR_AR (1 << 11) /* ADSR Attack rate */
-
-// decomp: src/include/sound.h:27
-#define VOICE_PARAM_ADSR_DR (1 << 12) /* ADSR Decay rate */
-
-// decomp: src/include/sound.h:28
-#define VOICE_PARAM_ADSR_SR (1 << 13) /* ADSR Sustain rate */
-
-// decomp: src/include/sound.h:29
-#define VOICE_PARAM_ADSR_RR (1 << 14) /* ADSR Release rate */
-
-// decomp: src/include/sound.h:30
-#define VOICE_PARAM_ADSR_SL (1 << 15) /* ADSR Sustain level */
-
-// decomp: src/include/sound.h:31
-#define VOICE_PARAM_ADSR_LOWER                                                           \
-    (VOICE_PARAM_ADSR_AMODE | VOICE_PARAM_ADSR_AR | VOICE_PARAM_ADSR_DR                  \
-        | VOICE_PARAM_ADSR_SL)
-
-// decomp: src/include/sound.h:34
-#define VOICE_PARAM_ADSR_UPPER                                                           \
-    (VOICE_PARAM_ADSR_SMODE | VOICE_PARAM_ADSR_RMODE | VOICE_PARAM_ADSR_SR               \
-        | VOICE_PARAM_ADSR_RR)
-
-// decomp: src/include/sound.h:38
-#define VOICE_PARAM_LOOP_ADDR (1 << 16) /* start address for loop */
-
 // decomp: D_800378C0_t (src/SLUS_010.40/25AC.c:65)
 typedef struct Audio_CommandArguments {
     void* param1;
@@ -101,7 +34,6 @@ _Static_assert(sizeof(Audio_DriverFlags) == 0xC, "Audio_DriverFlags must keep it
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_DRIVER_SOUNDDRIVER_H_DECLS)
 #define VS_AUDIO_DRIVER_SOUNDDRIVER_H_DECLS
-#include "Audio/Mixer/VoiceMixer.h"
 
 extern int Audio_Driver_legacySpuEvent;
 extern int Audio_Driver_recentTickCostTotal;
@@ -110,26 +42,5 @@ extern char Audio_Driver_legacySpuFlushBytes[64];
 extern char Audio_Driver_legacySpuAllocatorTable;
 extern Audio_CommandArguments Audio_Driver_commandArguments;
 extern Audio_DriverFlags Audio_Driver_controlLatches;
-void Audio_Driver_CompleteSampleTransfer(void);
-void Audio_Driver_ArmSampleTransferCallback(void);
-void Audio_Driver_WriteSampleMemory(char* data, u_int len);
-void Audio_Driver_ReadSampleMemory(char* data, u_int len);
-void Audio_Driver_WaitForSampleTransfer(void);
-void Audio_Driver_Start(void);
-void Audio_Driver_Stop(void);
-void Audio_Driver_SetVoiceStartAddress(int in_VoiceIndex, u_int in_Addr);
-void Audio_Driver_SetVoiceLoopAddress(int in_VoiceIndex, u_int in_Addr);
-void Audio_Driver_SetVoiceEnvelopeLower(int in_VoiceIndex, u_short in_Register);
-void Audio_Driver_SetVoiceEnvelopeUpper(int in_VoiceIndex, u_short in_Register);
-void Audio_Driver_SetVoiceAttackRateAndMode(
-    int in_VoiceIndex, int in_AttackStep, u_int in_AttackMode);
-void Audio_Driver_SetVoiceDecayRate(int in_VoiceIndex, int in_DecayRate);
-void Audio_Driver_SetVoiceSustainLevel(int in_VoiceIndex, int in_SustainLevel);
-void Audio_Driver_SetVoiceSustainRateAndMode(
-    int in_VoiceIndex, int in_SustainRate, u_int in_SustainDirection);
-void Audio_Driver_WriteVoiceParameters(
-    int in_VoiceIndex, Audio_VoiceParams* in_VoiceParams, int in_VolumeScale);
-void Audio_Driver_WriteDirtyVoiceParameters(u_int in_VoiceIndex, Audio_VoiceParams* in_VoiceParams,
-    int unused_channel_flags __attribute__((unused)));
 
 #endif // VS_AUDIO_DRIVER_SOUNDDRIVER_H_DECLS

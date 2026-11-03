@@ -10,6 +10,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Audio/MixControlLive.hpp"
 #include "Core/Log.hpp"
 #include "Legacy/Psx.h"
 
@@ -70,7 +71,8 @@ struct SfxSelectionFixture {
     Audio_Mixer_kCommandHandlers[0x21] = Audio_SoundEffects_StopPrograms;
     Audio_Mixer_kCommandHandlers[0xA1] = Audio_SoundEffects_FadeProgramVolume;
     Audio_Mixer_kCommandHandlers[0xA3] = Audio_SoundEffects_FadeProgramPan;
-    Audio_Mixer_kCommandHandlers[0xA5] = Audio_Mixer_SlideSoundEffectPitchScale;
+    Audio_Mixer_kCommandHandlers[0xA5] =
+        VS::Audio::Mixer::LiveSlideSoundEffectPitchScale;
     Audio_nextSfxChannelGroupFF000 = 0x1000;
     Audio_nextSfxChannelGroupF00000 = 0x100000;
     Core::SetLogLevel(Core::LogLevel::Trace);

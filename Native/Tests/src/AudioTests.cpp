@@ -23,10 +23,12 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Audio/AudioDevice.hpp"
+#include "Audio/SeqVoiceCommands.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/SequencerOutput.h"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceEngine.hpp"
+#include "Audio/VoiceMixerLive.hpp"
 #include "Audio/XaMixLive.hpp"
 #include "Audio/XaPlayback.h"
 #include "Content/AudioBank.hpp"
@@ -2000,7 +2002,7 @@ struct LfoSourceFixture {
           reinterpret_cast<const char*>(command.data()) + (kind == 2 ? 2 : 3));
   }
 
-  void Step() { Audio_Mixer_UpdateMusicChannelModulation(&channel, 1); }
+  void Step() { VS::Audio::Mixer::LiveUpdateMusicChannelModulation(&channel); }
 
   void CheckPhase(int step, int depth) const {
     CHECK(channel.autoPanWave == wave.data() + ((step & 1) ? 2 : 1));
@@ -2010,7 +2012,7 @@ struct LfoSourceFixture {
   void CheckDisabled() {
     auto* cursor = channel.autoPanWave;
     VS::Audio::Seq::LiveDisableAutoPan(&channel, 1);
-    CHECK((channel.updateFlags & SOUND_UPDATE_PAN_LFO) == 0);
+    CHECK((channel.updateFlags & VS::Audio::Seq::kAutoPanActive) == 0);
     CHECK(channel.autoPanOffset == 0);
     Step();
     CHECK(channel.autoPanWave == cursor);

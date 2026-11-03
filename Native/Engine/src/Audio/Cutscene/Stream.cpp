@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SoundDriverLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -96,12 +97,12 @@ void Audio_Cutscene_InitializeStreamVoice(
     }
     VS::Audio::Driver::SetLiveVoiceVolume(in_Voice, VolL, VolR, 0);
     VS::Audio::Driver::SetLiveVoiceSampleRate(in_Voice, Audio_Cutscene_streamState.sampleRate);
-    Audio_Driver_SetVoiceStartAddress(in_Voice, in_StartAddr);
-    Audio_Driver_SetVoiceLoopAddress(in_Voice, in_RepeatAddr);
-    Audio_Driver_SetVoiceAttackRateAndMode(in_Voice, 0, 1);
-    Audio_Driver_SetVoiceDecayRate(in_Voice, 0xF);
-    Audio_Driver_SetVoiceSustainLevel(in_Voice, 0xF);
-    Audio_Driver_SetVoiceSustainRateAndMode(in_Voice, 0x7F, 3);
+    VS::Audio::Driver::LiveSetVoiceStartAddress(in_Voice, in_StartAddr);
+    VS::Audio::Driver::LiveSetVoiceLoopAddress(in_Voice, in_RepeatAddr);
+    VS::Audio::Driver::LiveSetVoiceAttackRateAndMode(in_Voice, 0, 1);
+    VS::Audio::Driver::LiveSetVoiceDecayRate(in_Voice, 0xF);
+    VS::Audio::Driver::LiveSetVoiceSustainLevel(in_Voice, 0xF);
+    VS::Audio::Driver::LiveSetVoiceSustainRateAndMode(in_Voice, 0x7F, 3);
     VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode(in_Voice, 6, 3);
 }
 #undef PAN_CENTER_INDEX
@@ -151,7 +152,7 @@ void Audio_Cutscene_RefillStreamBuffer(
     if ((Audio_Cutscene_streamState.voiceMask != 0)
         && (Audio_Cutscene_streamState.totalPages != 0)) {
         SpuSetTransferStartAddr(in_RepeatAddressL);
-        Audio_Driver_ArmSampleTransferCallback();
+        VS::Audio::Driver::LiveArmSampleTransferCallback();
         SpuWrite((u_char*)Audio_Cutscene_streamState.currentChunk, in_Param3);
         if (Audio_Cutscene_streamState.totalPages > 0x800) {
             Audio_Cutscene_streamState.totalPages -= 0x800;
@@ -166,8 +167,8 @@ void Audio_Cutscene_RefillStreamBuffer(
             in_RepeatAddressL = 0x1030;
             Audio_Cutscene_streamState.totalPages = 0;
         }
-        Audio_Driver_SetVoiceLoopAddress(Audio_Cutscene_streamState.voiceIndex, in_RepeatAddressL);
-        Audio_Driver_SetVoiceLoopAddress(
+        VS::Audio::Driver::LiveSetVoiceLoopAddress(Audio_Cutscene_streamState.voiceIndex, in_RepeatAddressL);
+        VS::Audio::Driver::LiveSetVoiceLoopAddress(
             Audio_Cutscene_streamState.voiceIndex + 1, in_RepeatAddressR);
     }
 }

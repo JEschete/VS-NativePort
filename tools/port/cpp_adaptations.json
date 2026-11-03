@@ -169,37 +169,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Audio\\Driver\\SoundDriver.cpp": [
-[
-51,
-[
-"    SpuWrite(data, len);"
-],
-[
-"    SpuWrite((unsigned char *)(data), len);"
-]
-],
-[
-58,
-[
-"    SpuRead(data, len);"
-],
-[
-"    SpuRead((unsigned char *)(data), len);"
-]
-]
-],
-"Native\\Engine\\src\\Audio\\Mixer\\MixControl.cpp": [
-[
-471,
-[
-"        if (Audio_Samples_SequenceMagicDifference(Audio_Driver_commandArguments.param1) != 0) {"
-],
-[
-"        if (Audio_Samples_SequenceMagicDifference((int *)(Audio_Driver_commandArguments.param1)) != 0) {"
-]
-]
-],
 "Native\\Engine\\src\\Audio\\Playback\\SoundPlayback.cpp": [
 [
 42,

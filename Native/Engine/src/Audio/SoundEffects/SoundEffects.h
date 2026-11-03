@@ -7,6 +7,24 @@
 // decomp: SfxSoundChannels (SfxSoundChannels@SLUS_010.40): a view into another global
 #define Audio_SoundEffects_programPairChannels (Audio_SoundEffects_channels + 10)
 
+// decomp: src/include/sound.h:10
+#define SOUND_CHANNEL_COUNT 0x20
+
+// decomp: src/include/sound.h:14
+#define VOICE_PARAM_VOLUME_L (1 << 0) /* volume (left) */
+
+// decomp: src/include/sound.h:15
+#define VOICE_PARAM_VOLUME_R (1 << 1) /* volume (right) */
+
+// decomp: src/include/sound.h:16
+#define VOICE_PARAM_VOLUME (VOICE_PARAM_VOLUME_L | VOICE_PARAM_VOLUME_R)
+
+// decomp: src/include/sound.h:87
+#define SOUND_GLOBAL_UPDATE_04 (1 << 4)
+
+// decomp: src/include/sound.h:91
+#define SOUND_GLOBAL_UPDATE_08 (1 << 8)
+
 #endif // VS_AUDIO_SOUNDEFFECTS_SOUNDEFFECTS_H_TYPES
 
 #if !defined(VS_TYPES_ONLY) && !defined(VS_AUDIO_SOUNDEFFECTS_SOUNDEFFECTS_H_DECLS)

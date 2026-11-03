@@ -18,6 +18,7 @@
 #include "Audio/SeqRecordsLive.hpp"
 #include "Audio/SeqSequencer.hpp"
 #include "Audio/SeqVoiceCommands.hpp"
+#include "Audio/VoiceMixerLive.hpp"
 #include "Audio/XaMixLive.hpp"
 
 extern "C" {
@@ -62,9 +63,6 @@ To Same(From value) {
   static_assert(sizeof(To) == sizeof(From));
   return static_cast<To>(value);
 }
-
-constexpr std::int32_t kMusicEffectArg = 0;
-constexpr std::int32_t kSoundEffectArg = 1;
 
 const SequencerTables& LiveTables() {
   static const SequencerTables tables{
@@ -388,7 +386,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void ReleasePendingVoices(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_Mixer_ReleasePendingVoices();
+    Mixer::LiveReleasePendingVoices();
     LoadPlayback(state);
   }
 
@@ -439,7 +437,7 @@ class LivePlaybackHost final : public PlaybackHost {
 
   void CommitVoices(PlaybackState& state) override {
     StorePlayback(state);
-    Audio_Mixer_CommitPlaybackVoices();
+    Mixer::LiveCommitPlaybackVoices();
     LoadPlayback(state);
   }
 
@@ -482,10 +480,11 @@ class LivePlaybackHost final : public PlaybackHost {
     StorePlayback(state);
     {
       const ScopedActiveLayer layer(group);
-      Audio_Mixer_UpdateChannelSlidesAndDelays(
+      Mixer::LiveUpdateChannelSlidesAndDelays(
           channel, ChannelBit(group, index),
-          group == ChannelGroup::kSoundEffects ? kSoundEffectArg
-                                               : kMusicEffectArg);
+          group == ChannelGroup::kSoundEffects
+              ? Driver::ChannelKind::SoundEffect
+              : Driver::ChannelKind::Music);
     }
     LoadPlayback(state);
   }

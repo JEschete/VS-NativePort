@@ -1613,11 +1613,11 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertNotIn("Battle_battleAbilityPointRequirements", source)
 
     def test_music_cancellation_clears_the_native_pointer_field(self):
-        source = "    *(int*)&Audio_Seq_pendingMusicData.param1 = 0;"
-        for old, new, _ in copy_fixups.FIXES["F03246"]:
-            self.assertIn(old, source)
-            source = source.replace(old, new)
-        self.assertEqual(source, "    Audio_Seq_pendingMusicData.param1 = 0;")
+        self.assertNotIn("F03246", copy_fixups.FIXES)
+        root = Path(__file__).resolve().parents[2]
+        live = (root / "Native/Engine/src/Audio/Mixer/MixControlLive.cpp").read_text()
+        self.assertIn("Audio_Seq_pendingMusicData.param1 = 0;", live)
+        self.assertNotIn("*(int*)&Audio_Seq_pendingMusicData", live)
 
     def test_particle_child_events_project_native_parent_fields(self):
         source = """        ++node->age;
@@ -3620,15 +3620,15 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertIn("T00633,type,Actors_ActorModelSlot,", registry)
 
     def test_native_audio_preserves_optional_layer_guard_and_connects_sfx(self):
-        fixes = copy_fixups.FIXES["F03192"]
-        self.assertEqual(len(fixes), 4)
+        self.assertNotIn("F03192", copy_fixups.FIXES)
         root = Path(__file__).resolve().parents[2]
         mixer = (root / "Native/Engine/src/Audio/Mixer/VoiceMixer.cpp").read_text()
-        self.assertEqual(mixer.count("Audio_Native_ConfigureChannel("), 3)
         self.assertNotIn("Audio_Driver_WriteDirtyVoiceParameters(", mixer)
         self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
-        self.assertIn("Audio_Native_Envelope(i)", mixer)
-        self.assertIn("Audio_Seq_secondaryMusicConfig != NULL ?", mixer)
+        live = (root / "Native/Engine/src/Audio/Mixer/VoiceMixerLive.cpp").read_text()
+        self.assertEqual(live.count("Audio_Native_ConfigureChannel("), 1)
+        self.assertIn("Audio_Native_Envelope(voice)", live)
+        self.assertIn("if (secondary == nullptr) return LiveLayers{active, nullptr, nullptr};", live)
         sequencer = (root / "Native/Engine/src/Audio/Seq/SeqSequencerLive.cpp").read_text()
         self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
 

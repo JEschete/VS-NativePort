@@ -607,6 +607,46 @@ NATIVE_HELPER_HEADERS = {
            "FadeDiscVolume",
            "FadeDiscVolumeFrom",
        )},
+    **{f"VS::Audio::Mixer::Live{name}": r"Native\Engine\include\Audio\MixControlLive.hpp"
+       for name in (
+           "SetSoundEffectPitchScale",
+           "SlideSoundEffectPitchScale",
+           "SetWorldSoundEffectPitchScale",
+           "SlideWorldSoundEffectPitchScale",
+           "SetTempoScale",
+           "SlideTempoScale",
+           "SetTempoScaleRamp",
+           "SetMusicPitchScale",
+           "SlideMusicPitchScale",
+           "SetMusicPitchScaleRamp",
+           "StopMusicAndCancelReplacement",
+           "StopMatchingMusic",
+           "StopWorldSoundEffects",
+           "EnableStereoOutput",
+           "EnableMonoOutput",
+           "SetMusicMuteMask",
+           "SetMusicJumpThreshold",
+           "PauseMusic",
+           "ResumeMusic",
+           "PauseWorldSoundEffects",
+           "ResumeWorldSoundEffects",
+           "IgnoreCommand",
+           "DispatchCommand",
+       )},
+    **{f"VS::Audio::Driver::Live{name}": r"Native\Engine\include\Audio\SoundDriverLive.hpp"
+       for name in (
+           "Start",
+           "Stop",
+           "ArmSampleTransferCallback",
+           "WriteSampleMemory",
+           "WaitForSampleTransfer",
+           "SetVoiceStartAddress",
+           "SetVoiceLoopAddress",
+           "SetVoiceAttackRateAndMode",
+           "SetVoiceDecayRate",
+           "SetVoiceSustainLevel",
+           "SetVoiceSustainRateAndMode",
+       )},
     **{name: r"Native\Engine\include\Audio\StreamControlLive.hpp"
        for name in (
            "VS::Audio::Cutscene::PauseLiveStream",
@@ -738,6 +778,26 @@ OWNED_CALL_BINDINGS |= {
         ("F03265", "UpdateGlobalSlides"),
         ("F03269", "TickPlayback"),
         ("F03279", "ReleaseSoundEffectVoice"),
+    )
+}
+
+# #276 audio-mixer-driver: generated sound-control, playback, sample-bank and cutscene-stream callers keep the original
+# command, voice and buffer call shapes; the live bindings load the typed records and hosts and store back.
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Audio::{name}"
+    for fid, name in (
+        ("F03154", "Driver::LiveArmSampleTransferCallback"),
+        ("F03155", "Driver::LiveWriteSampleMemory"),
+        ("F03157", "Driver::LiveWaitForSampleTransfer"),
+        ("F03161", "Driver::LiveStart"),
+        ("F03162", "Driver::LiveStop"),
+        ("F03170", "Driver::LiveSetVoiceStartAddress"),
+        ("F03171", "Driver::LiveSetVoiceLoopAddress"),
+        ("F03174", "Driver::LiveSetVoiceAttackRateAndMode"),
+        ("F03175", "Driver::LiveSetVoiceDecayRate"),
+        ("F03176", "Driver::LiveSetVoiceSustainLevel"),
+        ("F03177", "Driver::LiveSetVoiceSustainRateAndMode"),
+        ("F03261", "Mixer::LiveDispatchCommand"),
     )
 }
 
@@ -948,6 +1008,30 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x8001CCC8, "VS::Audio::Seq::LiveMarkChannelKeyed"),  # F03374 opcode 0xFE1D
     ("SLUS_010.40", 0x8001CCE8, "VS::Audio::Seq::LiveClearChannelKeyed"),  # F03375 opcode 0xFE1E
     ("SLUS_010.40", 0x8001CD2C, "VS::Audio::Seq::LiveStopOnInvalidInstruction"),  # F03378 unimplemented opcodes
+    # #276 audio-mixer-driver: Audio_Mixer_kCommandHandlers holds the mixer's pitch, tempo, stop, output, pause and
+    # ignored commands.
+    ("SLUS_010.40", 0x80017FB0, "VS::Audio::Mixer::LiveSetSoundEffectPitchScale"),  # F03236 command 0xA4
+    ("SLUS_010.40", 0x80018090, "VS::Audio::Mixer::LiveSlideSoundEffectPitchScale"),  # F03237 command 0xA5
+    ("SLUS_010.40", 0x80018218, "VS::Audio::Mixer::LiveSetWorldSoundEffectPitchScale"),  # F03238 command 0xAC
+    ("SLUS_010.40", 0x80018270, "VS::Audio::Mixer::LiveSlideWorldSoundEffectPitchScale"),  # F03239 command 0xAD
+    ("SLUS_010.40", 0x8001833C, "VS::Audio::Mixer::LiveSetTempoScale"),  # F03240 command 0xD0
+    ("SLUS_010.40", 0x80018358, "VS::Audio::Mixer::LiveSlideTempoScale"),  # F03241 command 0xD1
+    ("SLUS_010.40", 0x800183C0, "VS::Audio::Mixer::LiveSetTempoScaleRamp"),  # F03242 command 0xD2
+    ("SLUS_010.40", 0x80018434, "VS::Audio::Mixer::LiveSetMusicPitchScale"),  # F03243 command 0xD4
+    ("SLUS_010.40", 0x80018450, "VS::Audio::Mixer::LiveSlideMusicPitchScale"),  # F03244 command 0xD5
+    ("SLUS_010.40", 0x800184B8, "VS::Audio::Mixer::LiveSetMusicPitchScaleRamp"),  # F03245 command 0xD6
+    ("SLUS_010.40", 0x8001852C, "VS::Audio::Mixer::LiveStopMusicAndCancelReplacement"),  # F03246 command 0xF0
+    ("SLUS_010.40", 0x800185A0, "VS::Audio::Mixer::LiveStopMatchingMusic"),  # F03247 command 0x11
+    ("SLUS_010.40", 0x80018608, "VS::Audio::Mixer::LiveStopWorldSoundEffects"),  # F03248 command 0xF1
+    ("SLUS_010.40", 0x800186E4, "VS::Audio::Mixer::LiveEnableStereoOutput"),  # F03249 command 0x80
+    ("SLUS_010.40", 0x80018744, "VS::Audio::Mixer::LiveEnableMonoOutput"),  # F03250 command 0x81
+    ("SLUS_010.40", 0x800187A4, "VS::Audio::Mixer::LiveSetMusicMuteMask"),  # F03251 command 0x90
+    ("SLUS_010.40", 0x800187E4, "VS::Audio::Mixer::LiveSetMusicJumpThreshold"),  # F03252 command 0x92
+    ("SLUS_010.40", 0x800187F8, "VS::Audio::Mixer::LivePauseMusic"),  # F03253 command 0x9B
+    ("SLUS_010.40", 0x800188E8, "VS::Audio::Mixer::LiveResumeMusic"),  # F03254 command 0x9A
+    ("SLUS_010.40", 0x80018984, "VS::Audio::Mixer::LivePauseWorldSoundEffects"),  # F03255 command 0x9D
+    ("SLUS_010.40", 0x80018AA0, "VS::Audio::Mixer::LiveResumeWorldSoundEffects"),  # F03256 command 0x9C
+    ("SLUS_010.40", 0x80018BD8, "VS::Audio::Mixer::LiveIgnoreCommand"),  # F03259 204 unused commands
     # #276 Core runtime: the original addresses of the empty handlers, copies, random draws and keystream.
     *(("BATTLE/BATTLE.PRG", address, "VS::Core::IgnoreLiveActorCallback")  # F00023, F00055
       for address in (0x8006B20C, 0x8006C478)),
@@ -1316,11 +1400,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "INITBTL/18.c:func_800F9CCC passes both materials even when their "
          "model IDs are zero; initialize empty slots without changing equipped ones."),
     ],
-    "F03246": [
-        ("*(int*)&Audio_Seq_pendingMusicData.param1 = 0;",
-         "Audio_Seq_pendingMusicData.param1 = 0;",
-         "25AC.c:3591 cancels the entire sequence pointer; native param1 is uintptr_t, not a PS1 int"),
-    ],
     "F02438": [
         (" // Partial playback?", "",
          "the XA request argument is initial CD volume rather than a byte count"),
@@ -1362,39 +1441,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "void Audio_ResetSoundSlots(void)\n{\n"
          "    Audio_Native_ResetCutsceneStream();",
          "slot reset must release native voices and borrowed stream bindings"),
-    ],
-    "F03161": [
-        ("    SpuStart();\n"
-         "    SpuSetTransferStartAddr(0x1010);\n"
-         "    Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);\n"
-         "    Audio_Driver_WaitForSampleTransfer();\n", "",
-         "native voice reset owns silence; no SPU sample-memory initialization"),
-    ],
-    "F03162": [
-        ("    if (Audio_Cutscene_legacySpuTransferBusy == 1) {\n"
-         "        Audio_Driver_WriteSampleMemory(Audio_Driver_legacySpuFlushBytes, 64);\n"
-         "        Audio_Driver_WaitForSampleTransfer();\n"
-         "    }\n", "",
-         "native bank loads are synchronous asset bindings, not hardware transfers"),
-        ("    VS::Audio::Driver::KeyOffVoices(0xFFFFFF);", "    Audio_Native_Reset();",
-         "teardown must clear release tails and queued native output"),
-    ],
-    "F03186": [
-        ("Audio_Driver_WriteVoiceParameters(in_pChannel->voice.assignedVoice,\n"
-         "                            &in_pChannel->voice,\n"
-         "                            in_pChannel->voice.volumeScale);",
-         "Audio_Native_ConfigureChannel(in_pChannel);",
-         "pass the musical instrument identity and controls to native output"),
-        ("Audio_Driver_WriteDirtyVoiceParameters(\n"
-         "                            in_pChannel->voice.assignedVoice,\n"
-         "                            &in_pChannel->voice, in_pChannel->updateFlags);",
-         "Audio_Native_ConfigureChannel(in_pChannel);",
-         "native control updates replace register writes"),
-    ],
-    "F03189": [
-        ("SpuGetVoiceEnvelope(i, &pVoice->envelopeLevel);",
-         "pVoice->envelopeLevel = Audio_Native_Envelope(i);",
-         "voice stealing observes the actual native envelope"),
     ],
     "F01563": [
         ("(*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0",
@@ -2148,17 +2194,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  "preserve the output-color argument consumed by the original assembly")],
     "G00582": [("int Battle_Ai_roomHasWaypoints", "void* Battle_Ai_roomHasWaypoints",
                  "func_800E6F9C stores the room auxiliary-data pointer, not a boolean")],
-    "F03192": [
-        (f"Audio_Seq_secondaryMusicConfig->{field}",
-         f"(Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->{field} : 0)",
-         "BuildVoiceModeMask accepts no saved layer; do not eagerly read the null optional config")
-        for field in ("noiseChannels", "reverbChannels", "fmChannels")
-    ] + [
-        ("Audio_Driver_WriteDirtyVoiceParameters(pChannel->voice.assignedVoice,\n"
-         "                        &pChannel->voice, pChannel->updateFlags);",
-         "Audio_Native_ConfigureChannel(pChannel);",
-         "sound effects share the same native voice engine as music"),
-    ],
     "F00801": [
         ("*((u_char*)temp_s0 + Actors_sharedSequenceBankIndex + 0x183E)",
          "temp_s0->textureRowOffsets[Actors_sharedSequenceBankIndex]",
@@ -4337,78 +4372,6 @@ REGEX_FIXES += [
         ("Audio::Cutscene::BeginStreamPlayback",
          (('var_s2', 'irq_sample_address'),),
          "F03384 25AC.c:6404 initializes the local from in_SampleAddr, substitutes silence address 0x1030 at end of data, and originally calls SpuSetIRQAddr(local+8). Native IRQ retirement leaves its assignments unused; name follows the proven original role, not a claim that the native dead local drives playback."),
-        ("Audio::Driver::WriteDirtyVoiceParameters",
-         (('arg2', 'unused_channel_flags'),),
-         "F03180 25AC.c:1342 explicitly marks the third argument unused and obtains dirty flags from in_VoiceParams instead. Original callers at 1863 pass channel UpdateFlags; the new name records both supplied meaning and deliberate non-consumption, without dropping the ABI slot."),
-        ("Audio::Mixer::SetSoundEffectPitchScale",
-         (('arg0', 'command'), ('var_a1', 'channel'), ('var_a3', 'voice_bit')),
-         "F03236 25AC.c:3427 handles command 0xA4: both tag-mask and exact-effectId branches walk twelve SFX channels with voice bits 12..23, set signed-byte Q8 effectPitchScale, clear its slide and mark pitch dirty. T00278.007/.012/.013 and T00289.000 corroborate those roles."),
-        ("Audio::Mixer::SlideSoundEffectPitchScale",
-         (('arg0', 'command'), ('var_a2', 'channel'), ('var_t0', 'voice_bit')),
-         "F03237 25AC.c:3453 handles 0xA5: both selector branches walk the same channels/bits and use command duration/target fields to update effectPitchScaleSlideStep and remaining length."),
-        ("Audio::Mixer::SetWorldSoundEffectPitchScale",
-         (('arg0', 'command'), ('var_a1', 'channel')),
-         "F03238 25AC.c:3481 walks twelve SFX records, excludes effectTags bit 0x02000000, and applies command parameter 1 as pitch scale. This particular loop does not consult the active-voice mask."),
-        ("Audio::Mixer::SlideWorldSoundEffectPitchScale",
-         (('arg0', 'command'), ('var_a1', 'fade_ticks'), ('var_a2', 'channel'), ('var_t0', 'voice_bit')),
-         "F03239 25AC.c:3494 tests active SFX bits and excludes interface-tagged channels; var_a1 is command duration or one and is used as both pitch-step divisor and stored slide length."),
-        ("Audio::Mixer::SetTempoScale",
-         (('arg0', 'tempo_scale_argument'),),
-         "F03240 25AC.c:3515 reads the first signed byte of the command parameter carrier, shifts it to Q16 tempoScale and clears slide length. Name does not turn the pointer into a scalar or a typed command struct."),
-        ("Audio::Mixer::SlideTempoScale",
-         (('arg0', 'command'), ('temp_v0', 'requested_fade_ticks'), ('var_a1', 'fade_ticks')),
-         "F03241 25AC.c:3521 reads requested duration from param1, substitutes one only for zero, divides signed-byte target-minus-current tempoScale by that duration, and stores the length."),
-        ("Audio::Mixer::SetTempoScaleRamp",
-         (('arg0', 'command'), ('var_a1', 'fade_ticks')),
-         "F03242 25AC.c:3532 starts duration at one, conditionally reads param1 when param2 is nonzero, sets initial tempoScale from param2 and steps toward param3. Existing conditional is preserved exactly."),
-        ("Audio::Mixer::SetMusicPitchScale",
-         (('arg0', 'pitch_scale_argument'),),
-         "F03243 25AC.c:3546 reads the first signed byte of the command carrier into Q16 master pitch scale and clears its slide length."),
-        ("Audio::Mixer::SlideMusicPitchScale",
-         (('arg0', 'command'), ('temp_v0', 'requested_fade_ticks'), ('var_a1', 'fade_ticks')),
-         "F03244 25AC.c:3552 reads requested duration, substitutes one for zero, divides the master-pitch-scale delta by it and stores the short duration."),
-        ("Audio::Mixer::SetMusicPitchScaleRamp",
-         (('arg0', 'command'), ('var_a1', 'fade_ticks')),
-         "F03245 25AC.c:3568 uses the same source-specific param2 conditional for selecting the duration, sets initial pitch scale from param2 and calculates a step toward param3. Naming is not a duration-condition fix."),
-        ("Audio::Mixer::StopWorldSoundEffects",
-         (('var_s1', 'voice_bit'), ('var_s2', 'channel')),
-         "F03248 25AC.c:3607 walks active SFX voice bits 12..23 alongside channels, skips interface-tagged effects, requests key-off, releases each scheduler bit and clears the channel update flags."),
-        ("Audio::Mixer::SetMusicMuteMask",
-         (('arg0', 'command'),),
-         "F03251 25AC.c:3648 reads command param1 as the mute mask and marks all music-channel volumes dirty; the parameter is a command record, not a channel."),
-        ("Audio::Mixer::SetMusicJumpThreshold",
-         (('arg0', 'command'),),
-         "F03252 25AC.c:3660 writes command param1 into active music JumpThresholdValue (T00279.030)."),
-        ("Audio::Mixer::PauseMusic",
-         (('arg0', 'unused_command'), ('temp_v1', 'paused_channel_mask'), ('v0', 'non_effect_voice_mask'), ('var_s0', 'voice_index'), ('var_s1', 'voices_to_pause'), ('var_s2', 'voice_bit')),
-         "F03253 25AC.c:3665 explicitly ignores the command argument. v0 complements active SFX/cutscene masks; var_s1 clips it to 24 voices and removes handled bits, var_s2 walks each bit and var_s0 indexes driver calls. temp_v1 transfers activeChannels into pausedChannels before activeChannels is cleared."),
-        ("Audio::Mixer::ResumeMusic",
-         (('temp_v1', 'resumed_channel_mask'), ('var_a1', 'channel_bit'), ('var_a2', 'channels_to_resume')),
-         "F03254 25AC.c:3698 walks paused music channel bits to invalidate voice parameters, then moves the saved mask back to activeChannels. The shrinking work mask and restored full mask are kept distinct."),
-        ("Audio::Mixer::PauseWorldSoundEffects",
-         (('var_a0', 'channel'), ('var_s0', 'voice_bit'), ('var_s1', 'voices_to_pause'), ('var_s2', 'voice_index')),
-         "F03255 25AC.c:3722 first filters active SFX bits against interface-tagged channels, saves the world-effects mask, then visits physical voice indices starting at 12 to silence/pause them while consuming the mask."),
-        ("Audio::Mixer::ResumeWorldSoundEffects",
-         (('temp_a2', 'resumed_voice_mask'), ('var_a1', 'voice_bit'), ('var_a2', 'voices_to_resume')),
-         "F03256 25AC.c:3761 walks D_800378A0 paused SFX bits to mark channels dirty, then transfers voiceScheduler.pausedEffectVoices back into activeVoices. Native Mixer/VoiceMixer.h defines pausedSoundEffectVoices as a view of that same pausedEffectVoices member; the shrinking work mask, bit cursor and saved full mask are distinct local lifetimes, not different underlying state."),
-        ("Audio::Mixer::UpdateChannelSlidesAndDelays",
-         (('var_lo', 'vibrato_amplitude'),),
-         "F03181 25AC.c:1473-1488 computes the new pitch-scaled vibrato base from depth magnitude, selecting full-pitch or 15/256 scaling by the depth high bit; both assignments feed VibratoBase (T00278.050), not a register-specific operation."),
-        ("Audio::Mixer::FindFreeVoice",
-         (('arg0', 'search_control_or_voice_index'), ('var_v1', 'voice_envelope')),
-         "F03185 25AC.c:1832 first interprets arg0 as the selector for searching from zero versus voiceSearchStart, then overwrites it with the cursor/returned free voice index (or 24). Compound name explicitly preserves the merged parameter/cursor lifetime. var_v1 walks envelope records and zero envelope means free (T00290.001)."),
-        ("Audio::Mixer::ApplyMusicChannelVoices",
-         (('sp10', 'channels_to_key_on'), ('temp_s0', 'keyed_channel_mask'), ('var_a0', 'voice_index'), ('var_s2', 'channel_bit'), ('var_s5', 'channel_index')),
-         "F03186 25AC.c:1863 sp10 intersects selected channels with pendingKeyOn; the loop advances channel_bit/index together. temp_s0 intersects keyedVoices and feeds the free/steal allocator; var_a0 is its physical voice result or sentinel 24. Native ConfigureChannel replacement preserves these decisions."),
-        ("Audio::Mixer::UnassignVoice",
-         (('arg1', 'voice_index'),),
-         "F03187 25AC.c:1926 scans primary and optional secondary channel arrays and resets any assignedVoice equal to arg1 to sentinel VOICE_COUNT."),
-        ("Audio::Mixer::ApplySavedMusicMasterFade",
-         (('arg1', 'unused_channels'),),
-         "F03190 25AC.c:2006 explicitly ignores the channel-array parameter while applying the global master fade to the supplied config and saving its old volume. Original CommitPlaybackVoices passes the saved channel array; preserve the unused callback argument."),
-        ("Audio::Mixer::RestoreSavedMusicVolume",
-         (('arg1', 'unused_channels'),),
-         "F03191 25AC.c:2020 explicitly ignores the channel-array parameter and restores only config masterVolume from masterFade.savedValue. Preserve the existing two-argument shape and distinct paired restore function."),
         ("Audio::SetZoneMusicSwitchEnabled",
          (('arg0', 'enabled'),),
          "F00237 146C.c:8579 directly assigns the zone-music-switch latch; Event/ScriptField.c passes the enable bit extracted from instruction[7]."),

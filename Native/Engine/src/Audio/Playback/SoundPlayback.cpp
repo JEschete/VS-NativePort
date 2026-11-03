@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/MixControlLive.hpp"
+#include "Audio/SoundDriverLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Akao.h"
@@ -26,14 +28,14 @@ char* Audio_Playback_soundEffectProgramData;
 // decomp: SLUS_010.40 InitSound (src/SLUS_010.40/25AC.c:195)
 int Audio_Playback_Initialize(void)
 {
-    Audio_Driver_Start();
+    VS::Audio::Driver::LiveStart();
     return 0;
 }
 
 // decomp: SLUS_010.40 TeardownSound (src/SLUS_010.40/25AC.c:201)
 int Audio_Playback_Shutdown(void)
 {
-    Audio_Driver_Stop();
+    VS::Audio::Driver::LiveStop();
     return 0;
 }
 
@@ -126,18 +128,18 @@ int Audio_Playback_MusicPosition(void)
 u_int Audio_Playback_StartMusic(void* sequence_data)
 {
     Audio_Driver_commandArguments.param1 = sequence_data;
-    return Audio_Mixer_DispatchCommand(0x10);
+    return VS::Audio::Mixer::LiveDispatchCommand(0x10);
 }
 
 // decomp: SLUS_010.40 func_80011FDC (src/SLUS_010.40/25AC.c:292)
 void Audio_Playback_StopMusic(u_int music_id)
 {
     Audio_Driver_commandArguments.param1 = (void*)music_id;
-    Audio_Mixer_DispatchCommand(0x11);
+    VS::Audio::Mixer::LiveDispatchCommand(0x11);
 }
 
 // decomp: SLUS_010.40 func_80012004 (src/SLUS_010.40/25AC.c:298)
-void Audio_Playback_SaveMusicState(void) { Audio_Mixer_DispatchCommand(0x40); }
+void Audio_Playback_SaveMusicState(void) { VS::Audio::Mixer::LiveDispatchCommand(0x40); }
 
 // decomp: SLUS_010.40 func_80012024 (src/SLUS_010.40/25AC.c:300)
 int Audio_Playback_InvalidateSavedMusicId(void)
@@ -152,7 +154,7 @@ u_int Audio_Playback_StartLayeredMusic(void* sequence_data, int volume)
     u_int music_id;
 
     Audio_Driver_commandArguments.param1 = sequence_data;
-    music_id = Audio_Mixer_DispatchCommand(0x19);
+    music_id = VS::Audio::Mixer::LiveDispatchCommand(0x19);
     Audio_Control_SetMusicVolume(music_id, volume);
     return music_id;
 }
@@ -163,7 +165,7 @@ u_int Audio_Playback_CrossfadeMusic(void* sequence_data, u_int fade_ticks, int t
     Audio_Driver_commandArguments.param1 = sequence_data;
     Audio_Driver_commandArguments.param2 = fade_ticks;
     Audio_Driver_commandArguments.param3 = target_volume & 0x7F;
-    return Audio_Mixer_DispatchCommand(0x1A);
+    return VS::Audio::Mixer::LiveDispatchCommand(0x1A);
 }
 
 // decomp: SLUS_010.40 func_800120B8 (src/SLUS_010.40/25AC.c:326)
@@ -171,14 +173,14 @@ void Audio_Playback_StartMusicAtLoop(void* sequence_data, int loop_count)
 {
     Audio_Driver_commandArguments.param1 = sequence_data;
     Audio_Driver_commandArguments.param2 = loop_count;
-    Audio_Mixer_DispatchCommand(0x12);
+    VS::Audio::Mixer::LiveDispatchCommand(0x12);
 }
 
 // decomp: SLUS_010.40 func_800120E8 (src/SLUS_010.40/25AC.c:333)
 u_int Audio_Playback_QueueMusicTransition(void* sequence_data)
 {
     Audio_Driver_commandArguments.param1 = sequence_data;
-    return Audio_Mixer_DispatchCommand(0x14);
+    return VS::Audio::Mixer::LiveDispatchCommand(0x14);
 }
 
 // decomp: SLUS_010.40 func_80012110 (src/SLUS_010.40/25AC.c:339)
@@ -187,14 +189,14 @@ void* Audio_Playback_StartMusicPair(void* primary_sequence, int secondary_sequen
     uintptr_t packed_music_ids;
     Audio_Driver_commandArguments.param1 = primary_sequence;
     Audio_Driver_commandArguments.param2 = secondary_sequence_address;
-    Audio_Mixer_DispatchCommand(0x16);
+    VS::Audio::Mixer::LiveDispatchCommand(0x16);
     packed_music_ids = Audio_Driver_commandArguments.param2 << 0x10;
     packed_music_ids += (uintptr_t)Audio_Driver_commandArguments.param1;
     return (void*)packed_music_ids;
 }
 
 // decomp: SLUS_010.40 func_8001215C (src/SLUS_010.40/25AC.c:350)
-void Audio_Playback_RequestMusicLayerSwap(void) { Audio_Mixer_DispatchCommand(0x17); }
+void Audio_Playback_RequestMusicLayerSwap(void) { VS::Audio::Mixer::LiveDispatchCommand(0x17); }
 
 // decomp: SLUS_010.40 func_8001217C (src/SLUS_010.40/25AC.c:352)
 int Audio_Playback_PlaySoundEffect(u_long effect_id, int effect_tag, int pan, int volume)
@@ -205,7 +207,7 @@ int Audio_Playback_PlaySoundEffect(u_long effect_id, int effect_tag, int pan, in
         Audio_Driver_commandArguments.param2 = effect_tag & 0xFFFFFF;
         Audio_Driver_commandArguments.param3 = pan & 0xFF;
         Audio_Driver_commandArguments.param4 = volume & 0x7F;
-        Audio_Mixer_DispatchCommand(0x20);
+        VS::Audio::Mixer::LiveDispatchCommand(0x20);
     }
     return program_offset;
 }
@@ -221,7 +223,7 @@ uintptr_t Audio_Playback_PlaySoundEffectBlob(void* program_blob, int effect_tag,
         Audio_Driver_commandArguments.param2 = (int)(effect_tag & 0xFFFFFF);
         Audio_Driver_commandArguments.param3 = (int)(pan & 0xFF);
         Audio_Driver_commandArguments.param4 = (int)(volume & 0x7F);
-        Audio_Mixer_DispatchCommand(0x24);
+        VS::Audio::Mixer::LiveDispatchCommand(0x24);
         program_or_failure = program_blob;
     }
     return (uintptr_t)program_or_failure;
@@ -232,14 +234,14 @@ void Audio_Playback_StopSoundEffects(intptr_t effect_selector, int effect_tag_ma
 {
     Audio_Driver_commandArguments.param1 = (void*)effect_selector;
     Audio_Driver_commandArguments.param2 = effect_tag_mask & 0xFFFFFF;
-    Audio_Mixer_DispatchCommand(0x21);
+    VS::Audio::Mixer::LiveDispatchCommand(0x21);
 }
 
 // decomp: SLUS_010.40 func_800122C4 (src/SLUS_010.40/25AC.c:388)
 void Audio_Playback_PlayInterfaceSound(u_long effect_id)
 {
     Audio_Driver_commandArguments.param1 = (void*)(effect_id & 0x3FF);
-    Audio_Mixer_DispatchCommand(0x30);
+    VS::Audio::Mixer::LiveDispatchCommand(0x30);
 }
 
 // decomp: SLUS_010.40 func_800122F0 (src/SLUS_010.40/25AC.c:394)
@@ -305,9 +307,9 @@ int Audio_Playback_UsesSoundEffectTags(Audio_SfxProgramHeader* program_or_effect
 void Audio_Playback_SetMonoOutput(int mono_enabled)
 {
     if (mono_enabled == 1) {
-        Audio_Mixer_DispatchCommand(0x81);
+        VS::Audio::Mixer::LiveDispatchCommand(0x81);
     } else {
-        Audio_Mixer_DispatchCommand(0x80);
+        VS::Audio::Mixer::LiveDispatchCommand(0x80);
     }
 }
 

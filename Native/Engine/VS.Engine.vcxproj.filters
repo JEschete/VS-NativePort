@@ -177,6 +177,12 @@
     <ClInclude Include="src\Audio\Driver\SoundDriver.h">
       <Filter>src\Audio\Driver</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Driver\SoundDriverCore.cpp">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Driver\SoundDriverLive.cpp">
+      <Filter>src\Audio\Driver</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Driver\VoiceOutput.cpp">
       <Filter>src\Audio\Driver</Filter>
     </ClCompile>
@@ -201,12 +207,21 @@
     <ClInclude Include="src\Audio\Mixer\MixControl.h">
       <Filter>src\Audio\Mixer</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Mixer\MixControlLive.cpp">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Mixer\VoiceMixer.cpp">
       <Filter>src\Audio\Mixer</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Mixer\VoiceMixer.h">
       <Filter>src\Audio\Mixer</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Mixer\VoiceMixerCore.cpp">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Mixer\VoiceMixerLive.cpp">
+      <Filter>src\Audio\Mixer</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Music.cpp">
       <Filter>src\Audio</Filter>
     </ClCompile>
@@ -693,6 +708,12 @@
     <ClInclude Include="include\Audio\LfoWaveforms.h">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\MixControl.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\MixControlLive.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\MusicState.h">
       <Filter>include\Audio</Filter>
     </ClInclude>
@@ -747,6 +768,12 @@
     <ClInclude Include="include\Audio\SeqVoiceCommandsLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\SoundDriver.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SoundDriverLive.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\SoundEffects.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
@@ -760,6 +787,12 @@
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\VoiceEngine.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\VoiceMixer.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\VoiceMixerLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\VoiceOutput.hpp">

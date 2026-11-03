@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <iterator>
 
+#include "Audio/MixControlLive.hpp"
 #include "Audio/PlaybackReset.hpp"
 extern "C" {
 #include "Audio/Control/SoundControl.h"
@@ -132,7 +133,7 @@ class LivePlaybackReset final : public PlaybackResetHost {
     Audio_Driver_controlLatches.updateFlags |= flags;
   }
 
-  void SetReverbMode(int mode) override { Audio_Mixer_SetReverbMode(mode); }
+  void SetReverbMode(int mode) override { Mixer::LiveSetReverbMode(mode); }
 
   void EnableReverb(bool enabled) override {
     Audio_Native_EnableReverb(enabled ? 1 : 0);

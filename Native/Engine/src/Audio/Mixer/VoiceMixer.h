@@ -29,30 +29,6 @@ typedef struct Audio_VoiceScheduler Audio_VoiceScheduler;
 // decomp: src/include/sound.h:7
 #define VOICE_COUNT 24
 
-// decomp: src/include/sound.h:10
-#define SOUND_CHANNEL_COUNT 0x20
-
-// decomp: src/include/sound.h:66
-#define SOUND_UPDATE_VIBRATO (1 << 0)
-
-// decomp: src/include/sound.h:67
-#define SOUND_UPDATE_TREMOLO (1 << 1)
-
-// decomp: src/include/sound.h:68
-#define SOUND_UPDATE_PAN_LFO (1 << 2)
-
-// decomp: src/include/sound.h:70
-#define SOUND_UPDATE_SIDE_CHAIN_PITCH (1 << 4)
-
-// decomp: src/include/sound.h:71
-#define SOUND_UPDATE_SIDE_CHAIN_VOL (1 << 5)
-
-// decomp: src/include/sound.h:87
-#define SOUND_GLOBAL_UPDATE_04 (1 << 4)
-
-// decomp: src/include/sound.h:91
-#define SOUND_GLOBAL_UPDATE_08 (1 << 8)
-
 // decomp: FSoundVoiceModeFlags (src/include/sound.h:520)
 typedef struct Audio_VoiceModeMasks {
     int reverb;
@@ -126,26 +102,5 @@ extern int Audio_Mixer_musicPitchScale;
 extern int Audio_Mixer_tempoScale;
 extern Audio_MusicConfig* Audio_Mixer_voiceOwners[VOICE_COUNT];
 extern Audio_VoiceModeMasks Audio_Mixer_voiceModes;
-void Audio_Mixer_UpdateChannelSlidesAndDelays(
-    Audio_SeqChannel* in_pChannel, u_int in_VoiceFlags, int in_Arg2);
-void Audio_Mixer_UpdateMusicChannelModulation(Audio_SeqChannel* in_pChannel, int in_VoiceFlags __attribute__((unused)));
-void Audio_Mixer_UpdateSoundEffectModulation(Audio_SeqChannel* in_pChannel, int in_VoiceFlags __attribute__((unused)));
-int Audio_Mixer_StealQuietestVoice(int in_bForceFullScan);
-int Audio_Mixer_FindFreeVoice(int search_control_or_voice_index);
-void Audio_Mixer_ApplyMusicChannelVoices(
-    Audio_SeqChannel* in_pChannel, u_int in_Flags1, u_int in_Flags2, u_int* out_KeyOnFlags);
-void Audio_Mixer_UnassignVoice(Audio_SeqChannel* in_pChannel, int voice_index);
-int Audio_Mixer_IsVoiceAssignedToChannels(Audio_SeqChannel* channels, int mask, int voiceNumber);
-void Audio_Mixer_RefreshVoiceAvailability(u_int in_ReservedVoices);
-void Audio_Mixer_ApplySavedMusicMasterFade(
-    Audio_MusicConfig* in_Context, Audio_SeqChannel* unused_channels __attribute__((unused)));
-void Audio_Mixer_RestoreSavedMusicVolume(
-    Audio_MusicConfig* in_Config, Audio_SeqChannel* unused_channels __attribute__((unused)));
-void Audio_Mixer_CommitPlaybackVoices(void);
-void Audio_Mixer_AccumulateFilteredVoiceMask(Audio_SeqChannel* in_Channel, int* io_VoiceMask,
-    int in_ChannelMask, int in_VoiceMaskFilter);
-void Audio_Mixer_ReleasePendingVoices(void);
-void Audio_Mixer_BuildVoiceModeMask(int* out_VoiceMask, int in_SavedChannelMask, int in_ActiveChannelMask,
-    int in_ExtraVoiceMask);
 
 #endif // VS_AUDIO_MIXER_VOICEMIXER_H_DECLS

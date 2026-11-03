@@ -6,12 +6,14 @@
 #include <array>
 #include <cstddef>
 
+#include "Audio/MixControlLive.hpp"
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
 #include "Audio/SeqMusicSequenceLive.hpp"
 #include "Audio/SeqSequencerLive.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
+#include "Audio/VoiceMixerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
@@ -78,7 +80,7 @@ int TestsCancelQueuedMusic(int queued, int secondary) {
   Audio_Seq_activeMusicConfig = &current;
   Audio_Seq_secondaryMusicConfig = secondary ? &saved : nullptr;
   Audio_Seq_pendingMusicData = pending;
-  Audio_Mixer_StopMusicAndCancelReplacement();
+  VS::Audio::Mixer::LiveStopMusicAndCancelReplacement(nullptr);
   result = Audio_Seq_pendingMusicData.param1 == 0;
   result |= (current.statusFlags == 0x62) << 1;
   result |= (Audio_Seq_pendingMusicData.param2 == pending.param2 &&
@@ -88,7 +90,7 @@ int TestsCancelQueuedMusic(int queued, int secondary) {
              Audio_Seq_pendingMusicData.extParam2 == pending.extParam2)
             << 2;
   result |= (!queued || (uintptr_t)&sequence > UINT32_MAX) << 3;
-  Audio_Mixer_StopMusicAndCancelReplacement();
+  VS::Audio::Mixer::LiveStopMusicAndCancelReplacement(nullptr);
   result |= (Audio_Seq_pendingMusicData.param1 == 0) << 4;
   Audio_Seq_pendingMusicData = original_pending;
   Audio_Seq_activeMusicConfig = original_active;
@@ -272,7 +274,10 @@ static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
       abort();
   }
   for (index = 1; index <= 4; ++index) {
-    Audio_Mixer_UpdateChannelSlidesAndDelays(channel, 1, effect);
+    VS::Audio::Mixer::LiveUpdateChannelSlidesAndDelays(
+        channel, 1,
+        effect ? VS::Audio::Driver::ChannelKind::SoundEffect
+               : VS::Audio::Driver::ChannelKind::Music);
     const unsigned depth = kind == 0   ? channel->vibratoDepth
                            : kind == 1 ? channel->tremoloDepth
                                        : channel->autoPanDepth;
@@ -302,9 +307,9 @@ static int CheckPendingModulationSlides(Audio_SeqChannel* channel, int effect,
       abort();
   }
   if (effect) {
-    Audio_Mixer_UpdateSoundEffectModulation(channel, 1);
+    VS::Audio::Mixer::LiveUpdateSoundEffectModulation(channel);
   } else {
-    Audio_Mixer_UpdateMusicChannelModulation(channel, 1);
+    VS::Audio::Mixer::LiveUpdateMusicChannelModulation(channel);
   }
   failures |=
       ((kind == 0 &&
@@ -481,7 +486,7 @@ int TestsPlayStreamSlot(int slot, int pan, int volume) {
 
 void TestsAdvanceStreamTick(void) {
   VS::Audio::Seq::LiveUpdateGlobalSlides();
-  Audio_Mixer_CommitPlaybackVoices();
+  VS::Audio::Mixer::LiveCommitPlaybackVoices();
   Audio_Native_Tick();
 }
 
@@ -497,7 +502,7 @@ void TestsStreamControl(int command, int value, int target) {
       Audio_Control_SetCutscenePan(value);
       break;
     case 3:
-      Audio_Mixer_DispatchCommand(value ? 0x9F : 0x9E);
+      VS::Audio::Mixer::LiveDispatchCommand(value ? 0x9F : 0x9E);
       break;
     case 4:
       Audio_Control_StopCutsceneStream();
@@ -591,9 +596,9 @@ void TestsNativeNoiseChannel(void) {
 
 void TestsNativeMonoOutput(int enabled) {
   if (enabled) {
-    Audio_Mixer_EnableMonoOutput(nullptr);
+    VS::Audio::Mixer::LiveEnableMonoOutput(nullptr);
   } else {
-    Audio_Mixer_EnableStereoOutput(nullptr);
+    VS::Audio::Mixer::LiveEnableStereoOutput(nullptr);
   }
   Audio_Native_Tick();
 }
@@ -743,7 +748,7 @@ int Tests_AudioModesWithoutSavedMusic(void) {
   memset(&Audio_Mixer_voiceScheduler, 0, sizeof Audio_Mixer_voiceScheduler);
   Audio_Cutscene_streamVoices = 0;
   Audio_Driver_controlLatches.updateFlags = 0x100;
-  Audio_Mixer_CommitPlaybackVoices();
+  VS::Audio::Mixer::LiveCommitPlaybackVoices();
   const int passed = Audio_Mixer_voiceModes.noise == 0 &&
                      Audio_Mixer_voiceModes.reverb == 0 &&
                      Audio_Mixer_voiceModes.fm == 0 &&
