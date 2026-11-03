@@ -8,7 +8,6 @@ extern "C" {
 #include "Input/Buttons.h"
 #include "Input/ControllerLiveState.h"
 #include "Legacy/Psx.h"
-#include "Movie/Intro.h"
 #include "Movie/Intro/Playback.h"
 #include "Movie/MoviePlayer.h"
 }
@@ -73,17 +72,13 @@ class LiveHost final : public Host {
   void SetStartTick(std::uint32_t tick) override {
     Movie_Intro_playbackStartTick = tick;
   }
-  // The original tests the index against zero, so any nonzero index is the
-  // lower page.
-  [[nodiscard]] PicturePage DrawPage() const override {
-    return Movie_Intro_legacyMdecState.frameRectIndex == 0
-               ? PicturePage::kUpper
-               : PicturePage::kLower;
-  }
-  void SetDrawPage(PicturePage page) override {
-    Movie_Intro_legacyMdecState.frameRectIndex =
-        page == PicturePage::kUpper ? 0U : 1U;
-  }
+  // The original kept the page in its MDEC state's frame index; Start resets it
+  // to the upper page each time the intro opens.
+  [[nodiscard]] PicturePage DrawPage() const override { return draw_page_; }
+  void SetDrawPage(PicturePage page) override { draw_page_ = page; }
+
+ private:
+  PicturePage draw_page_ = PicturePage::kUpper;
 };
 
 LiveHost& Instance() {

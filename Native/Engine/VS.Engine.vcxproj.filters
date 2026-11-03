@@ -13,9 +13,6 @@
     <Filter Include="Legacy\Input">
       <UniqueIdentifier>{F9500361-2920-5536-AE5B-96CFACBC1EE4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Legacy\Movie">
-      <UniqueIdentifier>{65B684BB-6CDB-5E80-AEAC-BE5851F1FDCF}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Legacy\Render">
       <UniqueIdentifier>{CEC37E17-3F8E-5DE0-85DC-AD936EF98D2C}</UniqueIdentifier>
     </Filter>
@@ -977,12 +974,6 @@
     </ClCompile>
     <ClInclude Include="Legacy\Input\LibPad.h">
       <Filter>Legacy\Input</Filter>
-    </ClInclude>
-    <ClCompile Include="Legacy\Movie\LibPress.cpp">
-      <Filter>Legacy\Movie</Filter>
-    </ClCompile>
-    <ClInclude Include="Legacy\Movie\LibPress.h">
-      <Filter>Legacy\Movie</Filter>
     </ClInclude>
     <ClInclude Include="Legacy\OnDisc.h">
       <Filter>Legacy</Filter>

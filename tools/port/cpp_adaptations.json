@@ -732,46 +732,6 @@
 ]
 ]
 ],
-"Native\\Engine\\src\\Movie\\Intro\\Playback.cpp": [
-[
-31,
-[
-"    movie_state->encodedBuffers[0] = Movie_Intro_legacyEncodedFrameZero;",
-"    movie_state->encodedBuffers[1] = Movie_Intro_legacyEncodedFrameOne;"
-],
-[
-"    movie_state->encodedBuffers[0] = (u_long *)(Movie_Intro_legacyEncodedFrameZero);",
-"    movie_state->encodedBuffers[1] = (u_long *)(Movie_Intro_legacyEncodedFrameOne);"
-]
-],
-[
-69,
-[
-"        DecDCTout(Movie_Intro_legacyMdecState.decodedBuffers[Movie_Intro_legacyMdecState.decodedBufferIndex],"
-],
-[
-"        DecDCTout((u_long *)(Movie_Intro_legacyMdecState.decodedBuffers[Movie_Intro_legacyMdecState.decodedBufferIndex]),"
-]
-],
-[
-77,
-[
-"    LoadImage(&rect, Movie_Intro_legacyMdecState.decodedBuffers[index]);"
-],
-[
-"    LoadImage(&rect, (u_long *)(Movie_Intro_legacyMdecState.decodedBuffers[index]));"
-]
-],
-[
-127,
-[
-"    return addr;"
-],
-[
-"    return (u_short *)(addr);"
-]
-]
-],
 "Native\\Engine\\src\\Render\\Font.cpp": [
 [
 43,

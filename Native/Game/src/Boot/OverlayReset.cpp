@@ -31,7 +31,6 @@ extern "C" {
 #include "Menu/Setup/SetupScreen.h"
 #include "Menu/Status/ActorStatus.h"
 #include "Menu/Status/EquipmentDetails.h"
-#include "Movie/Intro/Playback.h"
 
 // Call where the original loads MAINMENU.PRG: restores the statics its reload re-read from the disc.
 void Boot_ResetMainMenuStatics(void)
@@ -139,12 +138,6 @@ void Boot_ResetMenufStatics(void)
     Menu_Results_CubePuzzle_ResetMenufStatics();
     Menu_Results_ResetMenufStatics();
     Menu_Results_TimeAttack_ResetMenufStatics();
-}
-
-// Call where the original loads TITLE.PRG: restores the statics its reload re-read from the disc.
-void Boot_ResetTitleStatics(void)
-{
-    Movie_Intro_Playback_ResetTitleStatics();
 }
 
 }  // extern "C"

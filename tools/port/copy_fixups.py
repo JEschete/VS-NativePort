@@ -8504,18 +8504,6 @@ for identifier, old, new, evidence in (
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
     for name, bindings, evidence in (
-        ("Movie::Intro::InitializeFrameBuffers",
-         (('arg0', 'movie_state'),),
-         "F03642 _initMovieData writes the passed MovieData_t's two framebuffer rectangles, initial strip rectangle, encoded/decoded indices, completion flag and four buffer pointers. The original _initIntroMovie passes &_movieData with (0,0,0,224). arg0 is the mutable movie decoder state, not a byte buffer or frame payload."),
-        ("Movie::Intro::DecodeNextFrame",
-         (('i', 'poll_attempts_left'),),
-         "F03645 _decodeNextMovieFrame repeatedly requests frameData, decrements the 2000-attempt limit on failure, toggles the encoded destination, VLC-decodes and frees the ring data. The local i is a retry countdown, not a frame number."),
-        ("Movie::Intro::ReadNextFrame",
-         (('temp_v1', 'rgb_row_bytes'), ('i', 'poll_attempts_left')),
-         "F03646 _getNextMovieFrame polls StGetNext with a 2000-attempt countdown. temp_v1 receives _movieWidth * 3 and the signed-adjusted half becomes both framebuffer widths, representing RGB24 row bytes converted to 16-bit page-space units. Neither the unsigned temporary nor the signed cast/shift may change."),
-        ("Movie::Intro::WaitForDecodedFrame",
-         (('sp0', 'decode_spin_countdown'), ('new_var', 'frame_complete_alias'), ('i', 'frame_complete')),
-         "F03647 _waitForFrame initializes sp0[0] to 0x800000 and decrements it until completion or fallback flips/reset the frame rectangle. i copies frameComplete, and new_var only takes &i for the while condition. sp0[1] remains unused; retain the volatile two-int array and all timeout/control-flow behavior. arg1 is explicitly unused in the original definition and _playIntroMovie passes zero."),
         ("Title::SaveCard::ValidateAndApplyLoadedSave",
          (('verifyOnly', 'apply_loaded_state'), ('spmcimg', 'save_image_workspace'), ('s4', 'loaded_save_image'), ('unk180', 'cipher_header')),
          "F03600 Independently read TITLE _applyLoadedSaveFile: verifyOnly!=0 chooses 32 checksum blocks and applies runtime state; verifyOnly==0 validates 92 blocks and returns without applying. The original name is misleading, as the catalog already notes. spmcimg is workspace base, s4 is workspace slot 1 and unk180 is its protected cipher header. TITLE's differently represented payload fields do not change those pointer roles."),

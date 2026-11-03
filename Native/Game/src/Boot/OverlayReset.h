@@ -24,6 +24,5 @@ void Boot_ResetMenucStatics(void);
 void Boot_ResetMenudStatics(void);
 void Boot_ResetMenueStatics(void);
 void Boot_ResetMenufStatics(void);
-void Boot_ResetTitleStatics(void);
 
 #endif // VS_BOOT_OVERLAYRESET_H_DECLS

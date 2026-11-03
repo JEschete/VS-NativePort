@@ -310,8 +310,8 @@ class LiveCardHost final : public CardHost {
 
 enum class LiveKeystream : std::uint8_t { kInterface, kTitleCipher };
 
-// _keystreamBits' seed. Boot_ResetTitleStatics, which reset it, has no
-// callers, so it runs on from start-up.
+// _keystreamBits' seed. No native TITLE.PRG reload resets it (OverlayReset.cpp
+// has no TITLE entry), so it runs on from start-up.
 CipherState title_cipher;
 
 class LiveSaveState final : public SaveStateHost {

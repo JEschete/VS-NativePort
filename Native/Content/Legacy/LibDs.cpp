@@ -6,36 +6,7 @@
 // into the modern system.
 
 extern "C" {
-void StSetRing(u_long* ring, u_long size) {
-  (void)ring;
-  (void)size;
-  VS_UNPORTED("libds:StSetRing");
-}
-
 void StUnSetRing(void) { VS_UNPORTED("libds:StUnSetRing"); }
-
-void StSetStream(u_long mode, u_long startFrame, u_long endFrame,
-                 void (*func1)(void), void (*func2)(void)) {
-  (void)mode;
-  (void)startFrame;
-  (void)endFrame;
-  (void)func1;
-  (void)func2;
-  VS_UNPORTED("libds:StSetStream");
-}
-
-u_long StFreeRing(u_long* base) {
-  (void)base;
-  VS_UNPORTED("libds:StFreeRing");
-  return {};
-}
-
-u_long StGetNext(u_long** addr, u_long** header) {
-  (void)addr;
-  (void)header;
-  VS_UNPORTED("libds:StGetNext");
-  return {};
-}
 
 int StGetBackloc(CdlLOC* loc) {
   (void)loc;
@@ -87,26 +58,11 @@ DslLOC* DsIntToPos(int i, DslLOC* p) {
   return p;
 }
 
-int DsControl(u_char com, u_char* param, u_char* result) {
-  (void)com;
-  (void)param;
-  (void)result;
-  VS_UNPORTED("libds:DsControl");
-  return {};
-}
-
 int DsControlB(u_char com, u_char* param, u_char* result) {
   (void)com;
   (void)param;
   (void)result;
   VS_UNPORTED("libds:DsControlB");
-  return {};
-}
-
-int DsRead2(DslLOC* pos, int mode) {
-  (void)pos;
-  (void)mode;
-  VS_UNPORTED("libds:DsRead2");
   return {};
 }
 

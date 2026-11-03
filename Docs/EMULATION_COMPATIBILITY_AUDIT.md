@@ -225,13 +225,15 @@ analog axes, hot-plug and rumble cancellation. The legacy receive-buffer writer 
 ### EC-08: Native decoding with compatibility-backed presentation
 
 **Evidence:** `Native/Engine/src/Movie/Intro/Player.cpp`, `Native/Engine/src/Movie/MoviePlayer.cpp`,
-`Native/Engine/Legacy/Movie/LibPress.cpp`, and `Native/Tools/Extract/src/main.cpp`.
+and `Native/Tools/Extract/src/main.cpp`.
 
 The current player opens converted Matroska assets through DataStore, decodes AV1 with dav1d and FLAC with dr_flac,
 and submits native audio. Frame advancement uses movie ticks converted to nanoseconds. Rendering still uploads RGB
 data through page space; the global player and intro's existing scheduling/display contracts remain migration debt.
-The old MDEC-facing functions are still present. This source audit corrects the earlier missing-decoder description;
-it is not fresh frame-count, A/V-clock, skip, re-entry or soundtrack-tail acceptance.
+The old MDEC-facing intro routines (TITLE 22C.c:3433-3577), their strip buffers, ring stream and `MovieData_t`
+state, the `libpress` shims and the `libds` ring-stream shims are retired (#276 row 9); the intro's draw page is
+owned by its live host. That retirement is source evidence, not frame-count, A/V-clock, skip, re-entry or
+soundtrack-tail acceptance.
 
 **Retain:** picture duration, skip rules, attract-loop behavior and the soundtrack tail continuing under the title.
 **Replace:** remaining page-coordinate outputs and implicit session lifecycle with explicit frame/audio ownership,

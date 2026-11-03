@@ -25,7 +25,5 @@ EC-06,Native/Engine/Legacy/Core/LibEtc.h,header
 EC-06,Native/Engine/Legacy/Core/LibEtc.cpp,source
 EC-07,Native/Engine/Legacy/Input/LibPad.h,header
 EC-07,Native/Engine/Legacy/Input/LibPad.cpp,source
-EC-08,Native/Engine/Legacy/Movie/LibPress.h,header
-EC-08,Native/Engine/Legacy/Movie/LibPress.cpp,source
 EC-09,Native/Engine/Legacy/Save/LibCard.h,header
 EC-09,Native/Engine/Legacy/Save/LibCard.cpp,source

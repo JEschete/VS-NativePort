@@ -27,6 +27,11 @@ this is not `[x]` retirement or EC-02 completion. See
 [the audio contract and audit](../ASSET_PIPELINE.md)
 for behavior evidence and the distinction from C++ ownership/promotion.
 
+The 2026-11-03 movie-intro retirement (#276 row 9) removes the TITLE MDEC strip pipeline, whose
+native replacement decodes the converted movie through Engine\Movie. Its `libpress` shims and the
+`libds` ring-stream shims it alone used (`StSetRing`, `StSetStream`, `StGetNext`, `StFreeRing`,
+`DsControl`, `DsRead2`) are deleted at zero native uses and marked `[x]`.
+
 
 ## libgpu â†’ Graphics (78 symbols, 1742 uses)
 
@@ -233,7 +238,7 @@ Target: VS.Content: AsyncReadQueue / StreamReader (St* -> VS.Movie)
 | [ ] | T | `DsControlB` | function | 6 | 2 | SLUS_010.40 (5), TITLE.PRG (1) |
 | [ ] | T | `DsPacket` | function | 6 | 1 | SLUS_010.40 (6) |
 | [ ] | T | `DslModeSpeed` | constant | 6 | 2 | SLUS_010.40 (4), TITLE.PRG (2) |
-| [ ] | T | `DsControl` | function | 4 | 2 | SLUS_010.40 (2), TITLE.PRG (2) |
+| [x] | T | `DsControl` | function | 4 | 2 | SLUS_010.40 (2), TITLE.PRG (2) |
 | [ ] | T | `DsIntToPos` | function | 4 | 2 | SLUS_010.40 (3), TITLE.PRG (1) |
 | [ ] | D | `DsSystemStatus` | function | 4 | 1 | SLUS_010.40 (4) |
 | [ ] | T | `DslDiskError` | constant | 4 | 1 | SLUS_010.40 (4) |
@@ -257,7 +262,7 @@ Target: VS.Content: AsyncReadQueue / StreamReader (St* -> VS.Movie)
 | [ ] | T | `DslSeekL` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `DslSetfilter` | constant | 2 | 1 | SLUS_010.40 (2) |
 | [ ] | T | `DsInit` | function | 1 | 1 | SLUS_010.40 (1) |
-| [ ] | T | `DsRead2` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `DsRead2` | function | 1 | 1 | TITLE.PRG (1) |
 | [ ] | D | `DsStartReadySystem` | function | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `DslModeDA` | constant | 1 | 1 | SLUS_010.40 (1) |
 | [ ] | T | `DslModeStream2` | constant | 1 | 1 | TITLE.PRG (1) |
@@ -370,18 +375,18 @@ Target: VS.Movie: StrDecoder (MDEC/VLC/IDCT) -> RGBA frames + XA stream
 
 | Status | Strategy | Symbol | Kind | Uses | Files | Overlays (uses) |
 |---|---|---|---|---:|---:|---|
-| [ ] | T | `DecDCTout` | function | 2 | 1 | TITLE.PRG (2) |
-| [ ] | T | `DecDCToutCallback` | function | 2 | 1 | TITLE.PRG (2) |
+| [x] | T | `DecDCTout` | function | 2 | 1 | TITLE.PRG (2) |
+| [x] | T | `DecDCToutCallback` | function | 2 | 1 | TITLE.PRG (2) |
 | [ ] | D | `DecDCTReset` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `DecDCTin` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `DecDCTvlc2` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `DecDCTvlcBuild` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `DecDCTin` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `DecDCTvlc2` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `DecDCTvlcBuild` | function | 1 | 1 | TITLE.PRG (1) |
 | [ ] | D | `StCdInterrupt` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `StFreeRing` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `StFreeRing` | function | 1 | 1 | TITLE.PRG (1) |
 | [ ] | T | `StGetBackloc` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `StGetNext` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `StSetRing` | function | 1 | 1 | TITLE.PRG (1) |
-| [ ] | T | `StSetStream` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `StGetNext` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `StSetRing` | function | 1 | 1 | TITLE.PRG (1) |
+| [x] | T | `StSetStream` | function | 1 | 1 | TITLE.PRG (1) |
 | [ ] | T | `StUnSetRing` | function | 1 | 1 | TITLE.PRG (1) |
 
 ## libcard â†’ Save (4 symbols, 6 uses)

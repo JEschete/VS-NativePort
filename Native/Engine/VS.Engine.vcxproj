@@ -475,9 +475,6 @@
     <ClCompile Include="Legacy\Input\LibPad.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
-    <ClCompile Include="Legacy\Movie\LibPress.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
     <ClCompile Include="Legacy\Render\LibGpu.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -642,7 +639,6 @@
     <ClInclude Include="Legacy\Core\LibEtc.h" />
     <ClInclude Include="Legacy\Core\PsxTypes.h" />
     <ClInclude Include="Legacy\Input\LibPad.h" />
-    <ClInclude Include="Legacy\Movie\LibPress.h" />
     <ClInclude Include="Legacy\OnDisc.h" />
     <ClInclude Include="Legacy\Psx.h" />
     <ClInclude Include="Legacy\Removed.h" />
