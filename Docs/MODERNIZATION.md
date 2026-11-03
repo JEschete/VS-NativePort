@@ -39,6 +39,65 @@ architecture changes rather than per-function work, so this ledger is what track
 | done | 318 |
 | todo | 3,442 |
 
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (1 active, 1 done, 52 planned); open functions in no slice: 0.
+
+| Order | Slice | Status | Owner | Files | Open functions | Original lines |
+| ---: | --- | --- | --- | ---: | ---: | ---: |
+| 1 | core-runtime-copy-random-text | done | - | 6 | 0 | 0 |
+| 2 | core-heap | active | coordinator | 1 | 5 | 127 |
+| 3 | core-math | planned | - | 5 | 57 | 341 |
+| 4 | render-display-camera-ui | planned | - | 5 | 26 | 355 |
+| 5 | render-palette-framebuffer | planned | - | 2 | 59 | 1,663 |
+| 6 | render-images-textures-font | planned | - | 4 | 39 | 1,543 |
+| 7 | input-controller | planned | - | 1 | 20 | 403 |
+| 8 | save-memory-card | planned | - | 2 | 32 | 1,099 |
+| 9 | movie-intro | planned | - | 1 | 7 | 132 |
+| 10 | audio-seq-voices | planned | - | 3 | 71 | 692 |
+| 11 | audio-seq-control | planned | - | 3 | 59 | 1,665 |
+| 12 | audio-mixer-driver | planned | - | 3 | 56 | 1,497 |
+| 13 | audio-playback-banks | planned | - | 3 | 58 | 703 |
+| 14 | audio-control-sfx | planned | - | 3 | 80 | 1,092 |
+| 15 | audio-music-streams | planned | - | 5 | 50 | 625 |
+| 16 | content | planned | - | 6 | 43 | 1,945 |
+| 17 | state-boot | planned | - | 6 | 23 | 976 |
+| 18 | items | planned | - | 6 | 66 | 2,010 |
+| 19 | actors-state-loading | planned | - | 6 | 63 | 1,812 |
+| 20 | actors-animation-skeleton | planned | - | 2 | 68 | 2,368 |
+| 21 | actors-movement | planned | - | 1 | 58 | 2,872 |
+| 22 | actors-appearance-rendering | planned | - | 3 | 24 | 1,069 |
+| 23 | field-collision-map | planned | - | 3 | 40 | 2,077 |
+| 24 | field-camera-background | planned | - | 3 | 56 | 1,416 |
+| 25 | field-rooms | planned | - | 5 | 73 | 1,481 |
+| 26 | field-room-effects | planned | - | 1 | 42 | 832 |
+| 27 | field-gimmicks-doors | planned | - | 3 | 82 | 2,533 |
+| 28 | battle-ai | planned | - | 8 | 89 | 4,111 |
+| 29 | battle-damage-status | planned | - | 3 | 88 | 2,502 |
+| 30 | battle-actions | planned | - | 5 | 91 | 2,315 |
+| 31 | battle-targeting-prerequisites | planned | - | 4 | 83 | 2,249 |
+| 32 | battle-sphere-hud-rewards | planned | - | 4 | 93 | 3,128 |
+| 33 | event-vm-triggers | planned | - | 3 | 57 | 1,206 |
+| 34 | event-script-actors | planned | - | 1 | 51 | 681 |
+| 35 | event-script-camera-screen-field | planned | - | 3 | 71 | 1,444 |
+| 36 | event-script-audio-dialog-effects | planned | - | 3 | 57 | 499 |
+| 37 | effects-runtime-vm | planned | - | 3 | 96 | 1,332 |
+| 38 | effects-resources-transforms | planned | - | 4 | 66 | 1,351 |
+| 39 | effects-particles-screen-plugins | planned | - | 11 | 80 | 4,269 |
+| 40 | effects-particle-templates | planned | - | 6 | 166 | 811 |
+| 41 | effects-trail-templates | planned | - | 7 | 117 | 773 |
+| 42 | effects-trail-nine-templates | planned | - | 7 | 84 | 777 |
+| 43 | effects-ring-templates | planned | - | 3 | 78 | 1,199 |
+| 44 | effects-surface-templates | planned | - | 5 | 74 | 1,262 |
+| 45 | menu-framework | planned | - | 1 | 97 | 2,916 |
+| 46 | menu-framework-rows-details | planned | - | 3 | 49 | 1,856 |
+| 47 | menu-inventory-container | planned | - | 5 | 98 | 6,953 |
+| 48 | menu-loot-status-abilities | planned | - | 7 | 95 | 7,172 |
+| 49 | menu-setup | planned | - | 3 | 58 | 4,628 |
+| 50 | menu-results-score | planned | - | 6 | 103 | 5,020 |
+| 51 | menu-files-options | planned | - | 3 | 63 | 4,029 |
+| 52 | menu-map-manual-text | planned | - | 3 | 75 | 3,576 |
+| 53 | title | planned | - | 3 | 59 | 3,104 |
+| 54 | ending | planned | - | 2 | 47 | 1,868 |
+
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
 | Called from generated code | 0 | 1,864 |
@@ -87,14 +146,23 @@ disappeared does. Platform hazards are tracked per site in [PLATFORM_HAZARDS.md]
 Work in slices rather than one function at a time, because a function with generated callers cannot reach `cpp=x` until those
 callers migrate. A template and all of its instances are also one piece of work.
 
-1. **Pick a slice** from the next roadmap step. Move callers and callees together where you can.
+[PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) is the slice queue. Each row names the files one slice promotes, in roadmap
+order, with its `status` (`planned`, `active`, `blocked` or `done`), its `owner` (`coordinator`, or `agent:<name>` for a delegated
+worktree), and, once finished, its `GATE_SLICES.csv` record and commits. `modernization.py --check` refuses an open function
+whose file is in no slice, a file in two slices, a `done` slice with open functions or no gate record, a slice whose files have
+nothing left but which is not marked `done`, and more than two active `agent:` slices. The tracker block above shows what each
+slice has left.
+
+1. **Pick a slice**: the lowest-order `planned` row of the plan. Set it `active` with its owner. Move callers and callees
+   together where you can.
 2. **Check its cover.** If `regression` says `characterize-first`, write tests that pin today's behavior and watch them pass on
    the unchanged code. Then rerun `regression.py coverage`.
 3. **Set `status` to `in-progress`.** The check refuses this while `regression` is `characterize-first` or `unmeasured`.
 4. **Take ownership** of generated functions with `tools\port\own.py`.
 5. **Clear its hazards** from [HAZARD_LEDGER.csv](ledgers/HAZARD_LEDGER.csv), and do the section 8.2 steps.
 6. **Run `regression.py check`** in Debug and Release. The result must match the baseline.
-7. **Record the evidence** in `VERIFY_LEDGER.csv` and `CPP_PROMOTION.csv`, then set `status` to `done`.
+7. **Record the evidence** in `VERIFY_LEDGER.csv` and `CPP_PROMOTION.csv`, then set `status` to `done`. Mark the plan row
+   `done` with its `gate_slice` and commits.
 
 ## Regression testing
 

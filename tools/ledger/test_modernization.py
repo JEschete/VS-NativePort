@@ -25,6 +25,7 @@ VERIFY_FIELDS = [
     "record", "ids", "kind", "references", "revision", "configurations", "command", "dirty", "expected",
     "outcome", "limits", "notes",
 ]
+SLICE_FIELDS = ["slice", "ids", "old_bridges", "ec", "before", "after", "before_revision", "evidence", "notes"]
 PROJECT = """<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"><ItemGroup>
 <ClCompile Include="src\\Battle\\Ai\\Plan.cpp" />
 <ClCompile Include="src\\Battle\\Owned.cpp" />
@@ -55,6 +56,13 @@ def write_csv(path: Path, fields: list[str], rows: list[dict[str, str]]) -> None
         writer.writerows(rows)
 
 
+def plan_row(order: str, name: str, *files: str, **values: str) -> dict[str, str]:
+    row = dict.fromkeys(modernization.PLAN_FIELDS, "")
+    row.update(order=order, slice=name, status="planned", files=";".join(path.replace("/", "\\") for path in files))
+    row.update(values)
+    return row
+
+
 class Fixture:
     def __init__(self, root: Path) -> None:
         self.root = root
@@ -81,6 +89,12 @@ class Fixture:
         ]
         self.verify = [{**dict.fromkeys(VERIFY_FIELDS, ""), "record": "VR-F00003", "ids": "F00003",
                         "kind": "unit-test", "outcome": "pass"}]
+        self.plan = [
+            plan_row("1", "battle-plan", GENERATED, OWNED),
+            plan_row("2", "audio-mix", AUDIO),
+            plan_row("3", "battle-done", "Native/Game/src/Battle/Done.cpp", status="done", gate_slice="Done-slice"),
+        ]
+        self.slices = [{**dict.fromkeys(SLICE_FIELDS, ""), "slice": "Done-slice", "ids": "F00003"}]
         self.files = {
             GENERATED: 'void Battle_Ai_Plan(void* work) { CdRead(work); VS_UNPORTED("not-a-shim"); }\n',
             OWNED: "#define Local_Thing Other\nvoid Battle_Owned(int value) { Battle_Ai_Plan(0); }\n"
@@ -105,6 +119,8 @@ class Fixture:
         write_csv(ledgers / "FUNCTION_CATALOG.csv", CATALOG_FIELDS, self.catalog)
         write_csv(ledgers / "CPP_PROMOTION.csv", PROMOTION_FIELDS, self.promotion)
         write_csv(ledgers / "VERIFY_LEDGER.csv", VERIFY_FIELDS, self.verify)
+        write_csv(ledgers / "PROMOTION_PLAN.csv", modernization.PLAN_FIELDS, self.plan)
+        write_csv(ledgers / "GATE_SLICES.csv", SLICE_FIELDS, self.slices)
         write_csv(self.root / "tools" / "port" / "owned.csv", OWNED_FIELDS, self.owned)
         (self.root / "tools" / "port" / "copy_manifest.json").write_text(json.dumps(self.manifest), encoding="utf-8")
         for path, text in self.files.items():
@@ -358,6 +374,65 @@ class ModernizationTests(unittest.TestCase):
     def test_shim_sites_are_counted_only_in_legacy_sources(self) -> None:
         sites = modernization.shim_sites(modernization.gates.Sources(self.workspace))
         self.assertEqual(sites, {"Native/Engine/Legacy/LibCd.cpp": ["libcd:CdRead", "libcd:CdSync"]})
+
+    def replan(self, *entries: dict[str, str]) -> set[str]:
+        """Sync, then replace the slice queue (the tracker follows it) and return the violated rules."""
+        modernization.sync(self.workspace)
+        self.fixture.plan = list(entries)
+        self.fixture.write()
+        modernization.write_tracker(self.workspace, modernization.read_csv(self.workspace.ledger))
+        return self.rules()
+
+    def test_every_open_file_needs_a_slice(self) -> None:
+        rules = self.replan(plan_row("1", "battle-plan", GENERATED, OWNED))
+        self.assertIn("plan-unplanned", rules)
+
+    def test_a_file_belongs_to_one_slice(self) -> None:
+        rules = self.replan(plan_row("1", "battle-plan", GENERATED, OWNED), plan_row("2", "audio", AUDIO, GENERATED))
+        self.assertEqual(rules, {"plan-file-overlap"})
+
+    def test_a_done_slice_has_no_open_function_and_a_gate_record(self) -> None:
+        rules = self.replan(
+            plan_row("1", "battle-plan", GENERATED, OWNED, status="done", gate_slice="Done-slice"),
+            plan_row("2", "audio", AUDIO),
+            plan_row("3", "unrecorded", "Native/Game/src/Gone.cpp", status="done", gate_slice="Missing-slice"),
+        )
+        self.assertEqual(rules, {"plan-done-open", "plan-done-unrecorded"})
+
+    def test_a_slice_with_nothing_left_must_be_marked_done(self) -> None:
+        rules = self.replan(
+            plan_row("1", "battle-plan", GENERATED, OWNED), plan_row("2", "audio", AUDIO),
+            plan_row("3", "typo", "Native/Game/src/Battle/Plan.cp"),
+        )
+        self.assertEqual(rules, {"plan-finished-not-done"})
+
+    def test_at_most_two_agent_slices_are_active(self) -> None:
+        rules = self.replan(
+            plan_row("1", "one", GENERATED, status="active", owner="agent:a"),
+            plan_row("2", "two", OWNED, status="active", owner="agent:b"),
+            plan_row("3", "three", AUDIO, status="active", owner="coordinator"),
+        )
+        self.assertEqual(rules, set())
+        rules = self.replan(
+            plan_row("1", "one", GENERATED, status="active", owner="agent:a"),
+            plan_row("2", "two", OWNED, status="active", owner="agent:b"),
+            plan_row("3", "three", AUDIO, status="active", owner="agent:c"),
+        )
+        self.assertEqual(rules, {"plan-agent-limit"})
+
+    def test_slices_have_known_states_and_unique_names_and_orders(self) -> None:
+        rules = self.replan(
+            plan_row("1", "battle-plan", GENERATED, OWNED, status="someday"),
+            plan_row("1", "battle-plan", AUDIO),
+        )
+        self.assertEqual(rules, {"plan-status-unknown", "plan-duplicate"})
+
+    def test_tracker_lists_open_work_per_slice(self) -> None:
+        modernization.sync(self.workspace)
+        text = self.workspace.tracker.read_text(encoding="utf-8")
+        self.assertIn("| 1 | battle-plan | planned | - | 2 | 2 | 20 |", text)
+        self.assertIn("| 3 | battle-done | done | - | 1 | 0 | 0 |", text)
+        self.assertIn("open functions in no slice: 0", text)
 
 
 if __name__ == "__main__":
