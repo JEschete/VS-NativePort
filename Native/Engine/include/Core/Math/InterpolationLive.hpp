@@ -49,11 +49,10 @@ template <VectorRecord Destination>
 void InterpolateLiveSevenBitVector(
     std::span<const std::int16_t, kVectorRangeHalfwords> ranges,
     std::int32_t weight, Destination* destination) noexcept {
-  StoreVector(*destination,
-              InterpolateSevenBitVector(
-                  {RangePair(ranges, 0), RangePair(ranges, 1),
-                   RangePair(ranges, 2)},
-                  weight));
+  StoreVector(*destination, InterpolateSevenBitVector(
+                                {RangePair(ranges, 0), RangePair(ranges, 1),
+                                 RangePair(ranges, 2)},
+                                weight));
 }
 
 // vs_battle_lerp2DVector(ranges, weight, destination): two pairs into a
@@ -132,15 +131,16 @@ void InterpolateLiveCosineVector(
 }
 
 // vs_battle_splineInterpolate(p0, p1, p2, p3, phase, destination).
-template <VectorRecord P0, VectorRecord P1, VectorRecord P2, VectorRecord P3,
-          VectorRecord Destination>
-void InterpolateLiveLagrangeVector(const P0* p0, const P1* p1, const P2* p2,
-                                   const P3* p3, std::int32_t phase,
-                                   Destination* destination) noexcept {
-  StoreVector(*destination,
-              InterpolateLagrangeVector({VectorOf(*p0), VectorOf(*p1),
-                                         VectorOf(*p2), VectorOf(*p3)},
-                                        phase));
+void InterpolateLiveLagrangeVector(const VectorRecord auto* p0,
+                                   const VectorRecord auto* p1,
+                                   const VectorRecord auto* p2,
+                                   const VectorRecord auto* p3,
+                                   std::int32_t phase,
+                                   VectorRecord auto* destination) noexcept {
+  StoreVector(
+      *destination,
+      InterpolateLagrangeVector(
+          {VectorOf(*p0), VectorOf(*p1), VectorOf(*p2), VectorOf(*p3)}, phase));
 }
 
 // func_800D155C(value0, value1, value2, value3, phase, destination).

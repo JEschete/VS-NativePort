@@ -34,8 +34,7 @@ void AddLiveVectorsTo(const Left* left, const Right* right,
 template <VectorRecord Destination, VectorRecord Left, VectorRecord Right>
 Destination* SubtractLiveVectors(Destination* destination, const Left* left,
                                  const Right* right) noexcept {
-  StoreVector(*destination,
-              SubtractVectors(VectorOf(*left), VectorOf(*right)));
+  StoreVector(*destination, SubtractVectors(VectorOf(*left), VectorOf(*right)));
   return destination;
 }
 
@@ -50,8 +49,7 @@ Destination* CopyLiveVector(Destination* destination,
 // vs_battle_svecToVec and vs_battle_vecToSvec: (source, destination). A
 // halfword destination keeps the low 16 bits of each component.
 template <VectorRecord Source, VectorRecord Destination>
-void CopyLiveVectorTo(const Source* source,
-                      Destination* destination) noexcept {
+void CopyLiveVectorTo(const Source* source, Destination* destination) noexcept {
   StoreVector(*destination, CopyVector(VectorOf(*source)));
 }
 
