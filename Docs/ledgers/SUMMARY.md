@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 773 | owned functions |
-| 773 | owned functions in C++ sources |
-| 2977 | generated function rows |
+| 791 | owned functions |
+| 791 | owned functions in C++ sources |
+| 2959 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 773 | 0 | 3,434 |
-| `cpp` | 773 | 0 | 3,434 |
+| `modernized` | 791 | 0 | 3,416 |
+| `cpp` | 791 | 0 | 3,416 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 773 |
-| `vs_namespace` | 773 |
-| `typed_interface` | 773 |
-| `no_bridge` | 773 |
-| `strict_clean` | 773 |
-| `behavior_evidence` | 773 |
+| `source_cpp` | 791 |
+| `vs_namespace` | 791 |
+| `typed_interface` | 791 |
+| `no_bridge` | 791 |
+| `strict_clean` | 791 |
+| `behavior_evidence` | 791 |
 
-Promotion records: 773; derived `cpp=x`: 773, `cpp=wip`: 0. Verification records: 115; `verified=x` markers: 45.
+Promotion records: 791; derived `cpp=x`: 791, `cpp=wip`: 0. Verification records: 116; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -275,6 +275,8 @@ The sixty-ninth slice (#276 row 18) is the items system (66 functions in VS::Ite
 and the generated Items_ routines, the EquipmentAffinity.h, EquipmentStats.h, EquipmentWear.h and Recovery.h headers and 54 module address entries are retired; four Live adapters bind the battle, inventory, room and menu globals.
 The seventieth slice (#276 row 22) is actor appearance and rendering (24 functions in VS::Actors Appearance, TextureAnimation and ModelRendering): typed cores set palette fades, tints, pulses, shadow blends and appearance transitions, step texture animations and scrolling, compute root transforms, texture page and palette ids, gimmick placements and weapon bone chains, and run the room model pass in the original order, saturating the scripted gimmick product as the GTE does (#284), reading the canonical room scale (#283) and refusing out-of-table or missing references with an actors warning,
 and the generated Actors_ routines, the Appearance.h and ModelRendering.h headers and 23 module address entries are retired; three Live adapters bind the actor, weapon and gimmick tables, texture slots, model workspace and ordering table.
+The seventy-first slice (#276 row 20, skeleton phase) is the actor skeleton (18 functions in VS::Actors Skeleton): a typed core searches bone tags over the four original label kinds, reads bone tag values and limb groups, starts head tracking and its radius step, measures the pitch to a point over the wrapped horizontal distance, and computes bone view transforms, bone endpoints and the target, ground and anchor-height points, refusing out-of-table actors, missing weapon slots and weapon bones past the four bone matrices with an actors warning (VR-ACTORS-SKELETON-SLICE).
+and the generated Actors_ skeleton routines and 18 module address entries are retired, Skeleton.h keeps only types, and SkeletonLive owns the four skeleton globals and bounds actor, weapon and gimmick model bytes by their recorded extents.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
