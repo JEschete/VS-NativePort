@@ -89,10 +89,10 @@ std::int32_t CombineAxis(const std::array<Vec3, kLagrangePoints>& points,
 // func_800CFE1C (5BF94.c:5905).
 std::int32_t InterpolateSevenBitScalar(ScalarSpan span,
                                        std::int32_t weight) noexcept {
-  return WrappingAdd(
+  const std::int32_t step =
       WrappingMultiply(WrappingSubtract(span.end, span.start), weight) >>
-          kSevenBitShift,
-      span.start);
+      kSevenBitShift;
+  return WrappingAdd(step, span.start);
 }
 
 // decomp: BATTLE.PRG vs_battle_lerpVector (src/BATTLE/BATTLE.PRG/5BF94.c:5866)
@@ -116,10 +116,10 @@ Vec2 InterpolateSevenBitPlane(const std::array<ScalarSpan, 2>& spans,
 // decomp: BATTLE.PRG vs_battle_lerp (src/BATTLE/BATTLE.PRG/5BF94.c:6424).
 std::int32_t InterpolateThirteenBitScalar(ScalarSpan span,
                                           std::int32_t weight) noexcept {
-  return WrappingAdd(
-      span.start,
+  const std::int32_t step =
       WrappingMultiply(WrappingSubtract(span.end, span.start), weight) /
-          kFixedTwo);
+      kFixedTwo;
+  return WrappingAdd(span.start, step);
 }
 
 // decomp: BATTLE.PRG func_800D169C (src/BATTLE/BATTLE.PRG/5BF94.c:6430) and
