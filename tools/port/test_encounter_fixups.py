@@ -1550,13 +1550,13 @@ class EncounterFixupTests(unittest.TestCase):
         owned = self.owned_items()
         self.assertEqual(owned["F03198"]["name"], "VS::Audio::Seq::ReleaseSavedVoiceConflicts")
         root = Path(__file__).resolve().parents[2]
-        sequence = (root / r"Native\Engine\src\Audio\Seq\MusicSequence.cpp").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn('#include "Audio/MusicVoiceConflicts.hpp"', sequence)
-        self.assertEqual(sequence.count("VS::Audio::Seq::ReleaseLiveSavedVoiceConflicts();"), 2)
-        self.assertNotIn("ReleaseSavedVoiceConflicts()", sequence.replace(
-            "ReleaseLiveSavedVoiceConflicts()", ""))
+        seq = root / r"Native\Engine\src\Audio\Seq"
+        sequence = (seq / "MusicSequence.cpp").read_text(encoding="utf-8")
+        self.assertEqual(sequence.count("host.ReleaseSavedVoiceConflicts(state);"), 2)
+        self.assertNotIn("ReleaseSavedVoiceConflicts()", sequence)
+        live = (seq / "SeqMusicSequenceLive.cpp").read_text(encoding="utf-8")
+        self.assertIn('#include "Audio/MusicVoiceConflicts.hpp"', live)
+        self.assertEqual(live.count("ReleaseLiveSavedVoiceConflicts();"), 1)
 
     def test_ai_target_memory_aliases_preserve_the_original_prefix(self):
         old, new, _ = next(
@@ -3606,7 +3606,7 @@ direction.vz = ((Effects_ParticleAttractionView*)node)->targetZ - (state->z >> 1
         self.assertNotIn("Audio_Driver_WriteVoiceParameters(", mixer)
         self.assertIn("Audio_Native_Envelope(i)", mixer)
         self.assertIn("Audio_Seq_secondaryMusicConfig != NULL ?", mixer)
-        sequencer = (root / "Native/Engine/src/Audio/Seq/Sequencer.cpp").read_text()
+        sequencer = (root / "Native/Engine/src/Audio/Seq/SeqSequencerLive.cpp").read_text()
         self.assertEqual(sequencer.count("Audio_Native_Tick();"), 1)
 
 

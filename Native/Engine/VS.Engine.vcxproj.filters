@@ -249,9 +249,6 @@
     <ClCompile Include="src\Audio\Seq\Control.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\Control.h">
-      <Filter>src\Audio\Seq</Filter>
-    </ClInclude>
     <ClCompile Include="src\Audio\Seq\Envelope.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
@@ -261,15 +258,27 @@
     <ClCompile Include="src\Audio\Seq\MusicSequence.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
-    <ClInclude Include="src\Audio\Seq\MusicSequence.h">
+    <ClCompile Include="src\Audio\Seq\SeqControlCommandsLive.cpp">
       <Filter>src\Audio\Seq</Filter>
-    </ClInclude>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SeqMusicSequenceLive.cpp">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SeqRecordsLive.cpp">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SeqSequencerLive.cpp">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Seq\Sequencer.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
     <ClInclude Include="src\Audio\Seq\Sequencer.h">
       <Filter>src\Audio\Seq</Filter>
     </ClInclude>
+    <ClCompile Include="src\Audio\Seq\SequencerCore.cpp">
+      <Filter>src\Audio\Seq</Filter>
+    </ClCompile>
     <ClCompile Include="src\Audio\Seq\SeqVoiceCommandsLive.cpp">
       <Filter>src\Audio\Seq</Filter>
     </ClCompile>
@@ -702,10 +711,31 @@
     <ClInclude Include="include\Audio\SeqChannelCommands.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
+    <ClInclude Include="include\Audio\SeqControlCommands.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqControlCommandsLive.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
     <ClInclude Include="include\Audio\SeqEnvelopeCommands.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\SeqModulationCommands.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqMusicSequence.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqMusicSequenceLive.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqRecordsLive.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqSequencer.hpp">
+      <Filter>include\Audio</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Audio\SeqSequencerLive.hpp">
       <Filter>include\Audio</Filter>
     </ClInclude>
     <ClInclude Include="include\Audio\SequencerOutput.h">

@@ -259,6 +259,31 @@ std::expected<std::size_t, HeapError> PayloadCapacity(
   return UnitOffset(heap.allocated_blocks()[*index].units - kHeaderUnits);
 }
 
+std::expected<std::span<const std::byte>, HeapError> PayloadContaining(
+    const Heap& heap, const std::byte* address) {
+  const std::span<std::byte> arena = HeapAccess::Arena(heap);
+  const std::less<const std::byte*> before;
+  if (address == nullptr || arena.empty() || before(address, arena.data()) ||
+      !before(address, std::to_address(arena.end()))) {
+    return std::unexpected(HeapError::kOutsideArena);
+  }
+  const auto unit = static_cast<std::uint32_t>(
+      static_cast<std::size_t>(address - arena.data()) / kHeapUnitBytes);
+  const std::span<const HeapBlock> allocated = heap.allocated_blocks();
+  const auto after =
+      std::ranges::upper_bound(allocated, unit, {}, &HeapBlock::start);
+  if (after == allocated.begin()) {
+    return std::unexpected(HeapError::kNotAllocated);
+  }
+  const HeapBlock& block = *std::prev(after);
+  if (unit < block.start + kHeaderUnits || unit >= block.start + block.units) {
+    return std::unexpected(HeapError::kNotAllocated);
+  }
+  return std::span<const std::byte>(arena).subspan(
+      UnitOffset(block.start + kHeaderUnits),
+      UnitOffset(block.units - kHeaderUnits));
+}
+
 std::uint32_t Heap::free_units() const noexcept {
   return std::accumulate(free_.begin(), free_.end(), std::uint32_t{0},
                          [](std::uint32_t total, const HeapBlock& block) {

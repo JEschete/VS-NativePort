@@ -168,6 +168,10 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Core\RandomLive.cpp",
                 r"src\Input\ControllerLive.cpp",
                 r"src\Audio\Seq\SeqVoiceCommandsLive.cpp",
+                r"src\Audio\Seq\SeqRecordsLive.cpp",
+                r"src\Audio\Seq\SeqControlCommandsLive.cpp",
+                r"src\Audio\Seq\SeqMusicSequenceLive.cpp",
+                r"src\Audio\Seq\SeqSequencerLive.cpp",
             )
             or project == "VS.Content" and path == r"src\DiscReaderLive.cpp"
             or project == "VS.Tests"

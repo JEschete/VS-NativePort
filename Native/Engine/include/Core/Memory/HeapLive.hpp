@@ -36,6 +36,9 @@ void FreeLiveFromHighEnd(
 // frees refuse, without counting or reporting them.
 [[nodiscard]] std::expected<std::size_t, HeapError> LivePayloadCapacity(
     const void* payload);
+// The live game heap payload that holds `address` (PayloadContaining).
+[[nodiscard]] std::expected<std::span<const std::byte>, HeapError>
+LivePayloadContaining(const void* address);
 
 // Allocations refused and frees rejected since start-up.
 [[nodiscard]] std::uint64_t RefusedLiveHeapRequestCount() noexcept;

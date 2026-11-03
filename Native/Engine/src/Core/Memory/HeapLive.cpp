@@ -126,6 +126,11 @@ std::expected<std::size_t, HeapError> LivePayloadCapacity(const void* payload) {
   return PayloadCapacity(GameHeap(), static_cast<const std::byte*>(payload));
 }
 
+std::expected<std::span<const std::byte>, HeapError> LivePayloadContaining(
+    const void* address) {
+  return PayloadContaining(GameHeap(), static_cast<const std::byte*>(address));
+}
+
 std::uint64_t RefusedLiveHeapRequestCount() noexcept {
   return refused_requests;
 }

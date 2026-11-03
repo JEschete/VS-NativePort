@@ -200,6 +200,9 @@
     <ClCompile Include="src\ScreenWarpTests.cpp" />
     <ClCompile Include="src\SdkMathGapTests.cpp" />
     <ClCompile Include="src\SegmentCollisionTests.cpp" />
+    <ClCompile Include="src\SeqControlCommandsTests.cpp" />
+    <ClCompile Include="src\SeqMusicSequenceTests.cpp" />
+    <ClCompile Include="src\SeqSequencerTests.cpp" />
     <ClCompile Include="src\SequencePlaybackTests.cpp" />
     <ClCompile Include="src\SequenceTestCases.cpp" />
     <ClCompile Include="src\SequenceTests.cpp">

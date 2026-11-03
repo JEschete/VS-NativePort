@@ -3,13 +3,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <array>
+#include <cstddef>
+
 #include "Audio/MusicVoiceConflicts.hpp"
 #include "Audio/PlaybackResetLive.hpp"
+#include "Audio/SeqMusicSequenceLive.hpp"
+#include "Audio/SeqSequencerLive.hpp"
 #include "Audio/SeqVoiceCommandsLive.hpp"
 #include "Audio/StreamControlLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Content/DiscReaderLive.hpp"
+#include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/RoomLightingLive.hpp"
@@ -26,7 +32,6 @@ extern "C" {
 #include "Audio/MusicState.h"
 #include "Audio/Playback/SoundPlayback.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Seq/MusicSequence.h"
 #include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
 #include "Audio/Sfx.h"
@@ -142,6 +147,20 @@ int TestsSavedMusicVoiceConflicts(void) {
   return failures;
 }
 
+namespace {
+// A zeroed track in a game heap block; the restore reads the track only from
+// the block it lies in.
+struct HeapSequenceFile {
+  alignas(VS::Core::Memory::kHeapUnitBytes)
+      std::array<std::byte, VS::Core::Memory::kHeapUnitBytes * 16> arena{};
+  VS::Core::Memory::ScopedLiveGameHeap heap{arena};
+  Audio_AkaoSequenceFile* file = static_cast<Audio_AkaoSequenceFile*>(
+      VS::Core::Memory::AllocateLiveFromLowEnd(sizeof(Audio_AkaoSequenceFile)));
+
+  HeapSequenceFile() { memset(file, 0, sizeof(*file)); }
+};
+}  // namespace
+
 int TestsNativeMusicSnapshot(void) {
   const Audio_MusicConfig original_primary = Audio_Seq_primaryMusicConfig;
   const Audio_MusicConfig original_saved = Audio_Seq_savedMusicConfig;
@@ -151,7 +170,7 @@ int TestsNativeMusicSnapshot(void) {
   const unsigned original_updates = Audio_Driver_controlLatches.updateFlags;
   Audio_SeqChannel original_channels[32];
   Audio_SeqChannel original_saved_channels[32];
-  Audio_AkaoSequenceFile sequence = {0};
+  HeapSequenceFile sequence;
   u_short keymap = 0;
   unsigned channel;
   int result, swap;
@@ -171,7 +190,7 @@ int TestsNativeMusicSnapshot(void) {
     Audio_Seq_musicChannels[channel].voice.assignedVoice = channel % 24;
     Audio_Seq_musicChannels[channel].voice.dirtyFlags = 0x123400 + channel;
   }
-  Audio_Seq_SaveCurrentMusic();
+  VS::Audio::Seq::LiveSaveCurrentMusic(nullptr);
   result = Audio_Seq_savedMusicConfig.activeChannels == 1 &&
            Audio_Seq_savedMusicConfig.musicId == 0x1234 &&
            Audio_Seq_savedMusicConfig.timerTop == 0x4321;
@@ -194,14 +213,14 @@ int TestsNativeMusicSnapshot(void) {
            sizeof(Audio_Seq_primaryMusicConfig));
     Audio_Seq_primaryMusicConfig.timerTop = 0x1111;
     Audio_Seq_savedMusicConfig.timerTop = 0x2222;
-    Audio_Seq_savedMusicConfig.sequenceBase = (uintptr_t)&sequence;
-    Audio_Seq_savedMusicConfig.patchTable = &sequence;
+    Audio_Seq_savedMusicConfig.sequenceBase = (uintptr_t)sequence.file;
+    Audio_Seq_savedMusicConfig.patchTable = sequence.file;
     Audio_Seq_savedMusicConfig.keymapTable = &keymap;
     for (channel = 0; channel < 32; ++channel) {
       Audio_Seq_savedMusicChannels[channel].voice.dirtyFlags = 0x100 + channel;
       Audio_Seq_musicChannels[channel].voice.dirtyFlags = 0x200 + channel;
     }
-    Audio_Seq_RestoreMusicSequence(&sequence, swap);
+    VS::Audio::Seq::LiveRestoreMusicSequence(sequence.file, swap);
     restored = Audio_Seq_primaryMusicConfig.timerTop == 0x2222;
     for (channel = 0; channel < 32; ++channel) {
       restored &=
@@ -355,9 +374,9 @@ int TestsPendingModulationSlides(int effect, int kind) {
 }
 
 void TestsPrepareXaPlayback(void) {
-  const Audio_CommandHandler handlers[] = {Audio_Seq_SetDiscVolume,
-                                           Audio_Seq_FadeDiscVolume,
-                                           Audio_Seq_FadeDiscVolumeFrom};
+  const Audio_CommandHandler handlers[] = {
+      VS::Audio::Seq::LiveSetDiscVolume, VS::Audio::Seq::LiveFadeDiscVolume,
+      VS::Audio::Seq::LiveFadeDiscVolumeFrom};
   int index;
   savedXaDrive = Content_discDriveState;
   VS::Audio::Driver::ResetLivePlaybackState();
@@ -460,7 +479,7 @@ int TestsPlayStreamSlot(int slot, int pan, int volume) {
 }
 
 void TestsAdvanceStreamTick(void) {
-  Audio_Seq_UpdateGlobalSlides();
+  VS::Audio::Seq::LiveUpdateGlobalSlides();
   Audio_Mixer_CommitPlaybackVoices();
   Audio_Native_Tick();
 }

@@ -1,12 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/PlaybackResetLive.hpp"
+#include "Audio/SeqSequencerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Cutscene/Stream.h"
 #include "Audio/Driver/SoundDriver.h"
 #include "Audio/Mixer/VoiceMixer.h"
-#include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
 
 // decomp: _soundEvent (_soundEvent@SLUS_010.40)
@@ -80,7 +80,7 @@ void Audio_Driver_Start(void)
     while (StartRCnt(RCntCNT2) == 0)
         ;
     do {
-        event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, Audio_Seq_TickPlayback);
+        event = OpenEvent(RCntCNT2, EvSpINT, EvMdINTR, VS::Audio::Seq::LiveTickPlayback);
         Audio_Driver_legacySpuEvent = event;
     } while (event == -1);
     while (EnableEvent(Audio_Driver_legacySpuEvent) == 0)

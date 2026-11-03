@@ -75,6 +75,10 @@ std::expected<HeapRelease, HeapError> FreeFromHighEnd(Heap& heap,
 // The bytes an allocated payload can hold: its units but the header.
 [[nodiscard]] std::expected<std::size_t, HeapError> PayloadCapacity(
     const Heap& heap, const std::byte* payload);
+// The whole payload of the allocated block that holds `address`, which may
+// point anywhere inside it. Header units and free blocks hold no payload.
+[[nodiscard]] std::expected<std::span<const std::byte>, HeapError>
+PayloadContaining(const Heap& heap, const std::byte* address);
 // The units a request for `bytes` takes, header included.
 [[nodiscard]] std::expected<std::uint32_t, HeapError> AllocationUnits(
     std::size_t bytes) noexcept;

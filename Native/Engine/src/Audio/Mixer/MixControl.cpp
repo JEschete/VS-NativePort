@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SeqMusicSequenceLive.hpp"
+#include "Audio/SeqSequencerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 #include "Core/Memory/CopyLive.hpp"
 extern "C" {
@@ -11,8 +13,6 @@ extern "C" {
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Seq/MusicSequence.h"
-#include "Audio/Seq/Sequencer.h"
 #include "Audio/SequencerOutput.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
@@ -185,10 +185,10 @@ void Audio_Mixer_SetMusicPitchScaleRamp(Audio_CommandParams* command)
 // decomp: SLUS_010.40 func_8001852C (src/SLUS_010.40/25AC.c:3582)
 void Audio_Mixer_StopMusicAndCancelReplacement(void)
 {
-    Audio_Seq_ReleaseMusicConfiguration(Audio_Seq_activeMusicConfig, Audio_Seq_musicChannels, 0);
+    VS::Audio::Seq::LiveReleaseMusicConfiguration(Audio_Seq_activeMusicConfig, Audio_Seq_musicChannels, 0);
 
     if (Audio_Seq_secondaryMusicConfig != NULL) {
-        Audio_Seq_ReleaseMusicConfiguration(Audio_Seq_secondaryMusicConfig, Audio_Seq_secondaryMusicChannels, 0);
+        VS::Audio::Seq::LiveReleaseMusicConfiguration(Audio_Seq_secondaryMusicConfig, Audio_Seq_secondaryMusicChannels, 0);
     }
 
     Audio_Seq_activeMusicConfig->statusFlags &= 0xFFFEFFFF;
@@ -198,10 +198,10 @@ void Audio_Mixer_StopMusicAndCancelReplacement(void)
 // decomp: SLUS_010.40 Sound_Cmd_11_StopAllMusic (src/SLUS_010.40/25AC.c:3594)
 void Audio_Mixer_StopMatchingMusic(Audio_CommandParams* in_Params)
 {
-    Audio_Seq_ReleaseMusicConfiguration(Audio_Seq_activeMusicConfig, Audio_Seq_musicChannels, in_Params->param1);
+    VS::Audio::Seq::LiveReleaseMusicConfiguration(Audio_Seq_activeMusicConfig, Audio_Seq_musicChannels, in_Params->param1);
     if (Audio_Seq_secondaryMusicConfig != NULL) {
         if (in_Params->param1 != 0) {
-            Audio_Seq_ReleaseMusicConfiguration(
+            VS::Audio::Seq::LiveReleaseMusicConfiguration(
                 Audio_Seq_secondaryMusicConfig, Audio_Seq_secondaryMusicChannels, in_Params->param1);
         }
     }
@@ -220,7 +220,7 @@ void Audio_Mixer_StopWorldSoundEffects(void)
         if ((Audio_Mixer_voiceScheduler.activeVoices & voice_bit)
             && !(channel->effectTags & 0x02000000)) {
             Audio_Mixer_voiceScheduler.pendingKeyOff |= voice_bit;
-            Audio_Seq_ReleaseSoundEffectVoice(channel, voice_bit);
+            VS::Audio::Seq::LiveReleaseSoundEffectVoice(channel, voice_bit);
             channel->updateFlags = 0;
         }
     }
@@ -487,13 +487,13 @@ u_int Audio_Mixer_DispatchCommand(u_int in_Command)
             Audio_Driver_controlLatches.controlLatches &= ~0x7700;
             Audio_Mixer_SetReverbMode(pSequence->reverbMode);
             Audio_Driver_commandArguments.param2 = pSequence->sequenceId;
-            Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)pSequence);
+            VS::Audio::Seq::LiveLoadMusicSequence((Audio_AkaoSequenceFile*)pSequence);
             Audio_Seq_activeMusicConfig->musicId = pSequence->sequenceId;
             VS::Core::Memory::CopyLiveWords(Audio_Seq_musicChannels, Audio_Seq_savedMusicChannels, 0x2200);
             VS::Core::Memory::CopyLiveWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
             pSequence = (Audio_AkaoFileHeader*)Audio_Driver_commandArguments.param1;
             Audio_Driver_commandArguments.param1 = (void*)(u_int)pSequence->sequenceId;
-            Audio_Seq_LoadMusicSequence((Audio_AkaoSequenceFile*)pSequence);
+            VS::Audio::Seq::LiveLoadMusicSequence((Audio_AkaoSequenceFile*)pSequence);
             Audio_Seq_secondaryMusicConfig = &Audio_Seq_savedMusicConfig;
             Audio_Seq_secondaryMusicChannels = Audio_Seq_savedMusicChannels;
             Audio_Seq_activeMusicConfig->musicId = pSequence->sequenceId;

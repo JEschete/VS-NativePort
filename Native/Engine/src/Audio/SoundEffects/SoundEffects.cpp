@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Audio/SeqMusicSequenceLive.hpp"
+#include "Audio/SeqSequencerLive.hpp"
 #include "Audio/VoiceOutputLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -10,8 +12,6 @@ extern "C" {
 #include "Audio/Samples/SampleBanks.h"
 #include "Audio/Seq/AkaoFormat.h"
 #include "Audio/Seq/Channel.h"
-#include "Audio/Seq/MusicSequence.h"
-#include "Audio/Seq/Sequencer.h"
 #include "Audio/SoundEffects/SoundEffects.h"
 #include "Audio/Stream.h"
 
@@ -35,7 +35,7 @@ void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlag
                     pChannel->updateFlags |= 0x200000;
                 } else {
                     Audio_Mixer_voiceScheduler.pendingKeyOff |= voiceBit;
-                    Audio_Seq_ReleaseSoundEffectVoice(pChannel, voiceBit);
+                    VS::Audio::Seq::LiveReleaseSoundEffectVoice(pChannel, voiceBit);
                     pChannel->updateFlags = 0;
                 }
             }
@@ -74,7 +74,7 @@ void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlag
                     pChannel->updateFlags |= 0x200000;
                 } else {
                     Audio_Mixer_voiceScheduler.pendingKeyOff |= voiceBit;
-                    Audio_Seq_ReleaseSoundEffectVoice(pChannel, voiceBit);
+                    VS::Audio::Seq::LiveReleaseSoundEffectVoice(pChannel, voiceBit);
                     pChannel->updateFlags = 0;
                 }
             }
@@ -90,7 +90,7 @@ void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlag
                         pChannel->updateFlags |= 0x200000;
                     } else {
                         Audio_Mixer_voiceScheduler.pendingKeyOff |= voiceBit;
-                        Audio_Seq_ReleaseSoundEffectVoice(pChannel, voiceBit);
+                        VS::Audio::Seq::LiveReleaseSoundEffectVoice(pChannel, voiceBit);
                         pChannel->updateFlags = 0;
                     }
                 }
@@ -100,7 +100,7 @@ void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlag
                         pChannel->updateFlags |= 0x200000;
                     } else {
                         Audio_Mixer_voiceScheduler.pendingKeyOff |= voiceBit;
-                        Audio_Seq_ReleaseSoundEffectVoice(pChannel, voiceBit);
+                        VS::Audio::Seq::LiveReleaseSoundEffectVoice(pChannel, voiceBit);
                         pChannel->updateFlags = 0;
                     }
                 }
@@ -109,7 +109,7 @@ void Audio_SoundEffects_ReleaseMatchingVoices(intptr_t in_SfxId, int in_StopFlag
                     pChannel->updateFlags |= 0x200000;
                 } else {
                     Audio_Mixer_voiceScheduler.pendingKeyOff |= voiceBit;
-                    Audio_Seq_ReleaseSoundEffectVoice(pChannel, voiceBit);
+                    VS::Audio::Seq::LiveReleaseSoundEffectVoice(pChannel, voiceBit);
                     pChannel->updateFlags = 0;
                 }
             }
@@ -145,7 +145,7 @@ void Audio_SoundEffects_StartChannelProgram(Audio_SeqChannel* in_Channel, Audio_
     in_Channel->priority = -2;
     in_Channel->effectPitchScale = 0;
     in_Channel->effectPitchScaleSlideLength = 0;
-    Audio_Seq_ResetSoundEffectChannel(in_Channel, in_ProgramCounter);
+    VS::Audio::Seq::LiveResetSoundEffectChannel(in_Channel, in_ProgramCounter);
     Audio_Mixer_voiceOwners[in_Channel->voice.assignedVoice] = NULL;
     VS::Audio::Driver::SetLiveVoiceReleaseRateAndMode(in_Channel->voice.assignedVoice, 5, 3);
 

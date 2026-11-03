@@ -452,6 +452,50 @@ TEST_CASE("Heap overruns into the next header are detected",
   CHECK(intact->guard_intact);
 }
 
+TEST_CASE("Any address inside a payload names that whole payload",
+          "[core][memory][heap][audio-seq-control]") {
+  Arena arena;
+  std::byte* const first = MustAllocate(arena.heap, 20);
+  std::byte* const second = MustAllocate(arena.heap, 40);
+  const auto from_start =
+      VS::Core::Memory::PayloadContaining(arena.heap, first);
+  REQUIRE(from_start.has_value());
+  CHECK(from_start->data() == first);
+  CHECK(from_start->size() == 32);
+  const auto from_last =
+      VS::Core::Memory::PayloadContaining(arena.heap, first + 31);
+  REQUIRE(from_last.has_value());
+  CHECK(from_last->data() == first);
+  const auto from_middle =
+      VS::Core::Memory::PayloadContaining(arena.heap, second + 17);
+  REQUIRE(from_middle.has_value());
+  CHECK(from_middle->data() == second);
+  CHECK(from_middle->size() == 48);
+}
+
+TEST_CASE("Headers, free blocks and outside addresses hold no payload",
+          "[core][memory][heap][audio-seq-control]") {
+  Arena arena;
+  std::byte* const kept = MustAllocate(arena.heap, 20);
+  std::byte* const freed = MustAllocate(arena.heap, 20);
+  REQUIRE(FreeFromLowEnd(arena.heap, freed).has_value());
+  std::array<std::byte, 16> outside{};
+  CHECK(VS::Core::Memory::PayloadContaining(arena.heap, kept - 1).error() ==
+        HeapError::kNotAllocated);
+  CHECK(VS::Core::Memory::PayloadContaining(arena.heap, freed).error() ==
+        HeapError::kNotAllocated);
+  CHECK(VS::Core::Memory::PayloadContaining(arena.heap, arena.bytes.data())
+            .error() == HeapError::kNotAllocated);
+  CHECK(
+      VS::Core::Memory::PayloadContaining(arena.heap, outside.data()).error() ==
+      HeapError::kOutsideArena);
+  CHECK(VS::Core::Memory::PayloadContaining(arena.heap, nullptr).error() ==
+        HeapError::kOutsideArena);
+  CHECK(VS::Core::Memory::PayloadContaining(
+            arena.heap, arena.bytes.data() + arena.bytes.size())
+            .error() == HeapError::kOutsideArena);
+}
+
 TEST_CASE("The live game heap scope nests and restores",
           "[core][memory][heap]") {
   namespace memory = VS::Core::Memory;

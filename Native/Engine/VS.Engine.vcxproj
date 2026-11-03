@@ -149,21 +149,21 @@
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="src\Audio\Seq\ChannelCommands.cpp" />
-    <ClCompile Include="src\Audio\Seq\Control.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\Control.cpp" />
     <ClCompile Include="src\Audio\Seq\Envelope.cpp" />
     <ClCompile Include="src\Audio\Seq\Modulation.cpp" />
-    <ClCompile Include="src\Audio\Seq\MusicSequence.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
+    <ClCompile Include="src\Audio\Seq\MusicSequence.cpp" />
+    <ClCompile Include="src\Audio\Seq\SeqControlCommandsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SeqMusicSequenceLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SeqRecordsLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SeqSequencerLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Audio\Seq\Sequencer.cpp">
       <TreatWarningAsError>false</TreatWarningAsError>
@@ -172,6 +172,7 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Audio\Seq\SequencerCore.cpp" />
     <ClCompile Include="src\Audio\Seq\SeqVoiceCommandsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -495,8 +496,6 @@
     <ClInclude Include="src\Audio\Samples\SampleBanks.h" />
     <ClInclude Include="src\Audio\Seq\AkaoFormat.h" />
     <ClInclude Include="src\Audio\Seq\Channel.h" />
-    <ClInclude Include="src\Audio\Seq\Control.h" />
-    <ClInclude Include="src\Audio\Seq\MusicSequence.h" />
     <ClInclude Include="src\Audio\Seq\Sequencer.h" />
     <ClInclude Include="src\Audio\Sfx.h" />
     <ClInclude Include="src\Audio\SoundBanks.h" />
@@ -539,8 +538,15 @@
     <ClInclude Include="include\Audio\PlaybackResetLive.hpp" />
     <ClInclude Include="include\Audio\Reverb.hpp" />
     <ClInclude Include="include\Audio\SeqChannelCommands.hpp" />
+    <ClInclude Include="include\Audio\SeqControlCommands.hpp" />
+    <ClInclude Include="include\Audio\SeqControlCommandsLive.hpp" />
     <ClInclude Include="include\Audio\SeqEnvelopeCommands.hpp" />
     <ClInclude Include="include\Audio\SeqModulationCommands.hpp" />
+    <ClInclude Include="include\Audio\SeqMusicSequence.hpp" />
+    <ClInclude Include="include\Audio\SeqMusicSequenceLive.hpp" />
+    <ClInclude Include="include\Audio\SeqRecordsLive.hpp" />
+    <ClInclude Include="include\Audio\SeqSequencer.hpp" />
+    <ClInclude Include="include\Audio\SeqSequencerLive.hpp" />
     <ClInclude Include="include\Audio\SequencerOutput.h" />
     <ClInclude Include="include\Audio\SeqVoiceCommands.hpp" />
     <ClInclude Include="include\Audio\SeqVoiceCommandsLive.hpp" />

@@ -452,6 +452,60 @@ NATIVE_HELPER_HEADERS = {
            "SetRandomPitchDepth",
            "ResetRandomPitchDepth",
        )},
+    **{f"VS::Audio::Seq::Live{name}": r"Native\Engine\include\Audio\SeqControlCommandsLive.hpp"
+       for name in (
+           "FinishChannel",
+           "FinishChannelOnReplacement",
+           "StopOnInvalidInstruction",
+           "IgnoreInstruction",
+           "SetTempo",
+           "SlideTempo",
+           "SetReverbDepth",
+           "SlideReverbDepth",
+           "JumpRelative",
+           "JumpAtThreshold",
+           "CallRelative",
+           "ReturnFromCall",
+           "SetSequenceControlValue",
+           "SetVoiceAllocationStart",
+           "ResetVoiceAllocationStart",
+           "PushLoop",
+           "RepeatLoop",
+           "JumpOnLoopPass",
+           "ExitLoopOnPass",
+           "RepeatLoopForever",
+           "SetTimerDivisors",
+           "SetTimerCount",
+           "PlayEmbeddedSoundEffect",
+           "SelectNoteRemapTable",
+           "MarkChannelKeyed",
+           "ClearChannelKeyed",
+       )},
+    **{f"VS::Audio::Seq::Live{name}": r"Native\Engine\include\Audio\SeqSequencerLive.hpp"
+       for name in (
+           "ExecuteChannelStep",
+           "TickPlayback",
+           "UpdateGlobalSlides",
+           "ReleaseSoundEffectVoice",
+       )},
+    **{f"VS::Audio::Seq::Live{name}": r"Native\Engine\include\Audio\SeqMusicSequenceLive.hpp"
+       for name in (
+           "ResetSoundEffectChannel",
+           "LoadMusicSequence",
+           "ReleaseMusicConfiguration",
+           "RestoreMusicSequence",
+           "StartOrResumeMusic",
+           "SaveCurrentMusic",
+           "StartMusicLayer",
+           "CrossfadeMusicLayers",
+           "StartMusicWithLoopCounter",
+           "SetMusicVolume",
+           "FadeMusicVolume",
+           "FadeMusicVolumeFrom",
+           "SetDiscVolume",
+           "FadeDiscVolume",
+           "FadeDiscVolumeFrom",
+       )},
     **{name: r"Native\Engine\include\Audio\StreamControlLive.hpp"
        for name in (
            "VS::Audio::Cutscene::PauseLiveStream",
@@ -564,6 +618,21 @@ INPUT_CONTROLLER_LIVE_BINDINGS = {
     "F03462": "UpdateLiveControllers",
 }
 OWNED_CALL_BINDINGS |= {fid: f"VS::Input::{name}" for fid, name in INPUT_CONTROLLER_LIVE_BINDINGS.items()}
+
+# #276 audio-seq-control: generated driver, mixer and sound-effect callers keep the original channel, config and
+# sequence-file call shapes; the live bindings load the typed records, bound reads to the sequence data and store back.
+OWNED_CALL_BINDINGS |= {
+    fid: f"VS::Audio::Seq::Live{name}"
+    for fid, name in (
+        ("F03199", "ResetSoundEffectChannel"),
+        ("F03201", "LoadMusicSequence"),
+        ("F03202", "ReleaseMusicConfiguration"),
+        ("F03210", "RestoreMusicSequence"),
+        ("F03265", "UpdateGlobalSlides"),
+        ("F03269", "TickPlayback"),
+        ("F03279", "ReleaseSoundEffectVoice"),
+    )
+}
 
 POINTER_FREE_TYPES = {
     "T00629": "vs_action_t: two inline 32-bit hit words, no pointers; main.h:74-107",
@@ -732,6 +801,46 @@ MODULE_BINDING_ENTRIES = (
     ("SLUS_010.40", 0x8001CC84, "VS::Audio::Seq::LiveEnableLoopBoundaryStop"),  # F03372
     ("SLUS_010.40", 0x8001CD08, "VS::Audio::Seq::LiveSetRandomPitchDepth"),  # F03376
     ("SLUS_010.40", 0x8001CD24, "VS::Audio::Seq::LiveResetRandomPitchDepth"),  # F03377
+    # #276 audio-seq-control: Audio_Mixer_kCommandHandlers holds the music commands; Audio_Seq_kOpcodeHandlers and
+    # kExtendedOpcodeHandlers hold the sequencer flow-control opcodes.
+    ("SLUS_010.40", 0x80016DF8, "VS::Audio::Seq::LiveStartOrResumeMusic"),  # F03212 command 0x10
+    ("SLUS_010.40", 0x80016E74, "VS::Audio::Seq::LiveSaveCurrentMusic"),  # F03213 command 0x40
+    ("SLUS_010.40", 0x80016F0C, "VS::Audio::Seq::LiveStartMusicLayer"),  # F03214 command 0x19
+    ("SLUS_010.40", 0x80016FF4, "VS::Audio::Seq::LiveCrossfadeMusicLayers"),  # F03215 command 0x1A
+    ("SLUS_010.40", 0x800171C8, "VS::Audio::Seq::LiveStartMusicWithLoopCounter"),  # F03216 command 0x12
+    ("SLUS_010.40", 0x80017498, "VS::Audio::Seq::LiveSetMusicVolume"),  # F03222 command 0xC0
+    ("SLUS_010.40", 0x8001754C, "VS::Audio::Seq::LiveFadeMusicVolume"),  # F03223 command 0xC1
+    ("SLUS_010.40", 0x8001766C, "VS::Audio::Seq::LiveFadeMusicVolumeFrom"),  # F03224 command 0xC2
+    ("SLUS_010.40", 0x80017764, "VS::Audio::Seq::LiveSetDiscVolume"),  # F03225 command 0xC8
+    ("SLUS_010.40", 0x80017798, "VS::Audio::Seq::LiveFadeDiscVolume"),  # F03226 command 0xC9
+    ("SLUS_010.40", 0x80017800, "VS::Audio::Seq::LiveFadeDiscVolumeFrom"),  # F03227 command 0xCA
+    ("SLUS_010.40", 0x8001B138, "VS::Audio::Seq::LiveFinishChannel"),  # F03280 opcode 0xA0
+    ("SLUS_010.40", 0x8001B20C, "VS::Audio::Seq::LiveFinishChannelOnReplacement"),  # F03281 opcode 0xFE1F
+    ("SLUS_010.40", 0x8001B248, "VS::Audio::Seq::LiveSetTempo"),  # F03282 opcode 0xFE00
+    ("SLUS_010.40", 0x8001B294, "VS::Audio::Seq::LiveSlideTempo"),  # F03283 opcode 0xFE01
+    ("SLUS_010.40", 0x8001B334, "VS::Audio::Seq::LiveSetReverbDepth"),  # F03284 opcode 0xFE02
+    ("SLUS_010.40", 0x8001B37C, "VS::Audio::Seq::LiveSlideReverbDepth"),  # F03285 opcode 0xFE03
+    ("SLUS_010.40", 0x8001B424, "VS::Audio::Seq::LiveJumpRelative"),  # F03286 opcode 0xFE06
+    ("SLUS_010.40", 0x8001B450, "VS::Audio::Seq::LiveJumpAtThreshold"),  # F03287 opcode 0xFE07
+    ("SLUS_010.40", 0x8001B4A8, "VS::Audio::Seq::LiveCallRelative"),  # F03288 opcode 0xFE0E
+    ("SLUS_010.40", 0x8001B4E0, "VS::Audio::Seq::LiveReturnFromCall"),  # F03289 opcode 0xFE0F
+    ("SLUS_010.40", 0x8001B70C, "VS::Audio::Seq::LiveSetSequenceControlValue"),  # F03297 opcode 0xFE0C
+    ("SLUS_010.40", 0x8001C378, "VS::Audio::Seq::LiveIgnoreInstruction"),  # F03336 opcode 0xCD
+    ("SLUS_010.40", 0x8001C39C, "VS::Audio::Seq::LiveIgnoreInstruction"),  # F03338 opcode 0xD1
+    ("SLUS_010.40", 0x8001C66C, "VS::Audio::Seq::LiveSetVoiceAllocationStart"),  # F03348 opcode 0xFE10
+    ("SLUS_010.40", 0x8001C68C, "VS::Audio::Seq::LiveResetVoiceAllocationStart"),  # F03349 opcode 0xFE11
+    ("SLUS_010.40", 0x8001C69C, "VS::Audio::Seq::LivePushLoop"),  # F03350 opcode 0xC8
+    ("SLUS_010.40", 0x8001C6EC, "VS::Audio::Seq::LiveRepeatLoop"),  # F03351 opcode 0xC9
+    ("SLUS_010.40", 0x8001C780, "VS::Audio::Seq::LiveJumpOnLoopPass"),  # F03352 opcode 0xFE08
+    ("SLUS_010.40", 0x8001C7EC, "VS::Audio::Seq::LiveExitLoopOnPass"),  # F03353 opcode 0xFE09
+    ("SLUS_010.40", 0x8001C868, "VS::Audio::Seq::LiveRepeatLoopForever"),  # F03354 opcode 0xCA
+    ("SLUS_010.40", 0x8001C97C, "VS::Audio::Seq::LiveSetTimerDivisors"),  # F03359 opcode 0xFE15
+    ("SLUS_010.40", 0x8001C9B4, "VS::Audio::Seq::LiveSetTimerCount"),  # F03360 opcode 0xFE16
+    ("SLUS_010.40", 0x8001CBCC, "VS::Audio::Seq::LivePlayEmbeddedSoundEffect"),  # F03371 opcode 0xFE0B
+    ("SLUS_010.40", 0x8001CC98, "VS::Audio::Seq::LiveSelectNoteRemapTable"),  # F03373 opcode 0xFE1C
+    ("SLUS_010.40", 0x8001CCC8, "VS::Audio::Seq::LiveMarkChannelKeyed"),  # F03374 opcode 0xFE1D
+    ("SLUS_010.40", 0x8001CCE8, "VS::Audio::Seq::LiveClearChannelKeyed"),  # F03375 opcode 0xFE1E
+    ("SLUS_010.40", 0x8001CD2C, "VS::Audio::Seq::LiveStopOnInvalidInstruction"),  # F03378 unimplemented opcodes
     # #276 Core runtime: the original addresses of the empty handlers, copies, random draws and keystream.
     *(("BATTLE/BATTLE.PRG", address, "VS::Core::IgnoreLiveActorCallback")  # F00023, F00055
       for address in (0x8006B20C, 0x8006C478)),
@@ -1113,36 +1222,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "INITBTL/18.c:func_800F9CCC passes both materials even when their "
          "model IDs are zero; initialize empty slots without changing equipped ones."),
     ],
-    "F03210": [
-        ("""    if (in_SwapWithSavedState == 0) {
-        VS::Core::Memory::CopyWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
-        VS::Core::Memory::CopyWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
-    } else {
-        VS::Core::Memory::SwapWords(&Audio_Seq_savedMusicConfig, &Audio_Seq_primaryMusicConfig, 0x80);
-        VS::Core::Memory::SwapWords(Audio_Seq_savedMusicChannels, Audio_Seq_musicChannels, 0x2200);
-    }""", "    Audio_Native_RestoreMusicSnapshot(in_SwapWithSavedState);",
-         "restore complete native objects instead of PS1-sized byte ranges"),
-    ],
-    "F03213": [
-        ("""VS::Core::Memory::CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-        VS::Core::Memory::CopyWords(Audio_Seq_musicChannels, (Audio_MusicConfig*)Audio_Seq_savedMusicChannels, 0x2200);""",
-         "Audio_Native_SaveMusicSnapshot();",
-         "save every native channel and config field"),
-    ],
-    "F03214": [
-        ("""VS::Core::Memory::CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-        VS::Core::Memory::CopyWords(Audio_Seq_musicChannels,
-            (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);""",
-         "Audio_Native_SaveMusicSnapshot();",
-         "layer snapshots use the same complete native state"),
-    ],
-    "F03215": [
-        ("""VS::Core::Memory::CopyWords(&Audio_Seq_primaryMusicConfig, &Audio_Seq_savedMusicConfig, 0x80);
-            VS::Core::Memory::CopyWords(Audio_Seq_musicChannels,
-                (Audio_MusicConfig*)Audio_Seq_secondaryMusicChannels, 0x2200);""",
-         "Audio_Native_SaveMusicSnapshot();",
-         "crossfade snapshots use the same complete native state"),
-    ],
     "F03246": [
         ("*(int*)&Audio_Seq_pendingMusicData.param1 = 0;",
          "Audio_Seq_pendingMusicData.param1 = 0;",
@@ -1184,30 +1263,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "                arg0->blocks, (unsigned)(meta & 0xFFFF) - sizeof(arg0->meta))));",
          "F01994 #271: record how many particle definitions the block's payload holds"),
     ],
-    "F03265": [
-        ("""    if ((Audio_Cutscene_streamState.voiceMask != 0)
-        && (Audio_Cutscene_streamState.volumeFadeTicksLeft != 0)) {
-        --Audio_Cutscene_streamState.volumeFadeTicksLeft;
-        temp_s1 = Audio_Cutscene_streamState.volume
-                + Audio_Cutscene_streamState.volumeFadeStep;
-        if ((temp_s1 & 0xFF00) != (Audio_Cutscene_streamState.volume & 0xFF00)) {
-            if (Audio_Driver_mixBehavior & 2) {
-                int temp_s0 = (Audio_Cutscene_streamState.volume * Audio_Mixer_kCenterPanGain) >> 0x10;
-                VS::Audio::Driver::SetVoiceVolume(
-                    Audio_Cutscene_streamState.voiceIndex, temp_s0, temp_s0, 0);
-                VS::Audio::Driver::SetVoiceVolume(
-                    Audio_Cutscene_streamState.voiceIndex + 1, temp_s0, temp_s0, 0);
-            } else {
-                int temp_s0 = (temp_s1 << 0xF) >> 0x10;
-                VS::Audio::Driver::SetVoiceVolume(Audio_Cutscene_streamState.voiceIndex, temp_s0, 0, 0);
-                VS::Audio::Driver::SetVoiceVolume(
-                    Audio_Cutscene_streamState.voiceIndex + 1, 0, temp_s0, 0);
-            }
-        }
-        Audio_Cutscene_streamVolume = temp_s1 & 0xFFFF;
-    }""", "    Audio_Native_UpdateCutsceneStream();",
-         "native completion and fades preserve mono/stereo layout and exact targets"),
-    ],
     "F03554": [
         ("void Audio_ResetSoundSlots(void)\n{",
          "void Audio_ResetSoundSlots(void)\n{\n"
@@ -1246,10 +1301,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
         ("SpuGetVoiceEnvelope(i, &pVoice->envelopeLevel);",
          "pVoice->envelopeLevel = Audio_Native_Envelope(i);",
          "voice stealing observes the actual native envelope"),
-    ],
-    "F03269": [
-        ("    return var_s5;", "    Audio_Native_Tick();\n    return var_s5;",
-         "commit 200-frame control ticks; native output renders on device demand"),
     ],
     "F01563": [
         ("(*(u_int*)((char*)arg0 + 0x14) & 0xF800) == 0",
@@ -2946,18 +2997,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
     ],
     # Actor IDs are 0..15 (146C.c:8936); 0x10 is the linked-actor sentinel, not a table index.
     # 7E05C.s:541-575 identifies the next BSS symbol, tileFlagMap at 0x800F58B8: 0x40 bytes after D_800F5878.
-    "F03276": [
-        ("                    arg0->vibratoWave = Audio_Seq_kLfoWaveforms[arg0->vibratoShape];",
-         "                    short* vibratoProgram = Audio_Seq_LfoWaveform(arg0->vibratoShape);\n"
-         "                    if (vibratoProgram == NULL) return;\n"
-         "                    arg0->vibratoWave = vibratoProgram;",
-         "retrigger only a supported imported vibrato program"),
-        ("                arg0->tremoloWave = Audio_Seq_kLfoWaveforms[arg0->tremoloShape];",
-         "                short* tremoloProgram = Audio_Seq_LfoWaveform(arg0->tremoloShape);\n"
-         "                if (tremoloProgram == NULL) return;\n"
-         "                arg0->tremoloWave = tremoloProgram;",
-         "retrigger only a supported imported tremolo program"),
-    ],
     "G00130": [
         ("Event_kOrbitReturnFirstCommand", "Event_kOrbitReturnFirstCommand[4]",
          "BATTLE.PRG 0x800E9C28 stores D4 10 10 55; preserve the complete camera command payload"),
@@ -4590,87 +4629,6 @@ REGEX_FIXES += [
         ("Audio::Samples::SoundEffectBankSlot",
          (('var_v1', 'bank_slot'),),
          "F03211 25AC.c:2941 removes the metadata high bit, compares the ID against SFX bank IDs 1 and 2, and returns slot 0/1/2; the local is not a voice or instrument index."),
-        ("Audio::Seq::PlayEmbeddedSoundEffect",
-         (('temp_v0', 'relative_program_offset'), ('var_a1', 'first_program'), ('var_a2', 'second_program')),
-         "F03371 25AC.c:6162 separately decodes two little-endian relative offsets at pc and pc+2, maps zero to NULL, and passes the resulting two bytecode starts to Sound_PlaySfxProgram. The reused offset local has the same role both times."),
-        ("Audio::Seq::SelectNoteRemapTable",
-         (('temp_v0', 'remap_byte_offset'),),
-         "F03373 25AC.c:6202 fetches one byte and takes &D_8002F66C[temp_v0] from a char table as the note remap base. Name is a byte offset, not a guessed table ordinal or pitch."),
-        ("Audio::Seq::ResetSoundEffectChannel",
-         (('arg0', 'channel'), ('arg1', 'program_start')),
-         "F03199 25AC.c:2330 resets one SFX channel's volume, note/slide/LFO state, assigns its programCounter from arg1, and selects initial instrument zero. T00278.000 identifies programCounter."),
-        ("Audio::Seq::AssignedVoiceMask",
-         (('arg0', 'channel_cursor'), ('arg1', 'channel_mask'), ('var_a3', 'assigned_voice_mask')),
-         "F03200 25AC.c:2363 walks 32 channel records, tests each selected channel bit, and ORs the physical assignedVoice bit only below sentinel 24. Input channel mask and returned voice mask are different domains."),
-        ("Audio::Seq::ReleaseMusicConfiguration",
-         (('arg2', 'music_id_filter'),),
-         "F03202 25AC.c:2506 releases the supplied active config only if arg2 is zero or equals its musicId, resets channel programs and clears matching voice-owner records. No broader mask meaning is implied."),
-        ("Audio::Seq::StartMusicLayer",
-         (('arg0', 'command'),),
-         "F03214 25AC.c:2983 receives sequence pointer/music ID/extended initial volume in the command, optionally saves active music, loads the new sequence and releases saved voice conflicts. Native snapshot replacement is preserved."),
-        ("Audio::Seq::CrossfadeMusicLayers",
-         (('arg0', 'command'), ('temp_a1', 'fade_ticks')),
-         "F03215 25AC.c:3001 command carries sequence pointer/ID and extended duration/target volume. temp_a1 caches extParam1 for the saved layer's fade timer and negative fade step; active layer fades up using the same duration."),
-        ("Audio::Seq::SetMusicVolume",
-         (('arg0', 'command'), ('temp_v1', 'music_id'), ('var_a0', 'music_config'), ('var_a1', 'channels')),
-         "F03222 25AC.c:3123 selects active music for zero/matching ID or secondary for its matching ID; config/channels stay paired in both branches, receive master volume and invalidate channel volumes."),
-        ("Audio::Seq::FadeMusicVolume",
-         (('arg0', 'command'), ('temp_a1', 'music_id'), ('var_a0', 'music_config'), ('var_a1', 'channels'), ('var_a2', 'fade_ticks'), ('var_v1', 'volume_step_work')),
-         "F03223 25AC.c:3147 substitutes duration one for zero, pairs selected config/channels by music ID, and transforms var_v1 from target Q16 volume to delta then per-tick step before storing masterVolumeStep. The work name covers all three arithmetic stages."),
-        ("Audio::Seq::FadeMusicVolumeFrom",
-         (('arg0', 'command'), ('temp_v0', 'requested_fade_ticks'), ('temp_v1', 'music_id'), ('temp_v1_2', 'start_volume_q16'), ('var_a0', 'music_config'), ('var_a1', 'channels'), ('var_a2', 'fade_ticks')),
-         "F03224 25AC.c:3184 resolves the selected active/secondary pair, initializes masterVolume from param3 low seven bits shifted by 16, and computes the step toward param4 using param2 duration or one. The two temp_v1 bindings have independently verified meanings."),
-        ("Audio::Seq::SetDiscVolume",
-         (('arg0', 'command'),),
-         "F03225 25AC.c:3216 reads param1 low half as CD volume, shifts it by 16, clears the fade and updates disc output."),
-        ("Audio::Seq::FadeDiscVolume",
-         (('arg0', 'command'), ('temp_v0', 'requested_fade_ticks'), ('var_a1', 'fade_ticks')),
-         "F03226 25AC.c:3223 reads duration parameter 1, substitutes one for zero, and computes discVolumeFadeStep toward parameter 2 low-half target at Q16 scale."),
-        ("Audio::Seq::FadeDiscVolumeFrom",
-         (('arg0', 'command'), ('new_var', 'target_volume_q16'), ('var_a1', 'fade_ticks')),
-         "F03227 25AC.c:3237 creates target disc-volume Q16 from param3, starts from param2, and divides target-current by param1 duration or one."),
-        ("Audio::Seq::UpdateGlobalSlides",
-         (('temp_s1', 'next_slide_value'), ('var_a1_2', 'effect_channel'), ('var_a2', 'channel_count_or_voice_bit'), ('var_a3', 'effects_to_update'), ('var_v1', 'music_channel')),
-         "F03265 25AC.c:4024 uses temp_s1 for each interpolated pitch/volume/pan value, compares integer portions and commits it. var_v1 walks all music channels during pitch invalidation; var_a1_2 walks SFX. var_a3 consumes active SFX bits. var_a2 is first the 32-channel countdown and later the SFX voice-bit cursor; compound name preserves both lifetimes. Native cutscene-update extraction removes that original branch, not these remaining roles."),
-        ("Audio::Seq::AdvanceMusicTransition",
-         (('temp_v1', 'packed_music_timer'),),
-         "F03266 25AC.c:4138 combines lower count and upper count shifted by 16, writes musicTransitionTimer and tests its zero boundary before changing transition latches. It is not the top timer or a raw elapsed tick count."),
-        ("Audio::Seq::UpdateMusicSequence",
-         (('arg0', 'channels'), ('arg1', 'secondary_music'), ('var_a0', 'tempo_increment'), ('var_s1', 'channel_bit'), ('var_s2', 'channel_cursor'), ('var_s3', 'channels_to_update')),
-         "F03267 25AC.c:4174 scales tempo high-half into the accumulator increment, then consumes active-channel bits while walking the supplied array. arg1 is 0 for primary and 1 for secondary in TickPlayback, gating reverb updates and primary loop countdown. Channel cursor is reset from arg0 on repeated loop ticks."),
-        ("Audio::Seq::UpdateSavedMusicFade",
-         (('arg0', 'music_config'), ('arg1', 'channels'), ('temp_s0', 'next_fade_value'), ('temp_v0', 'channels_to_release')),
-         "F03268 25AC.c:4264 moves activeChannels into pendingKeyOff when the global saved fade expires; otherwise computes next masterFade.value and invalidates the supplied config/channel pair on integer-volume change."),
-        ("Audio::Seq::TickPlayback",
-         (('temp_v0', 'promoted_saved_config'), ('var_a0', 'transition_config'), ('var_s1', 'effect_voice_bit'), ('var_s2_2', 'channel_cursor'), ('var_s5', 'tick_counter_or_cost')),
-         "F03269 25AC.c:4287 temp_v0 holds the secondary config being promoted/cleared; var_a0 selects which transition config loses resume-key bits. var_s2_2 walks new-music channels then SFX channels; var_s1 is SFX voice bits 12..23. var_s5 first saves RCntCNT2, then becomes the wrapped elapsed cost stored in recentTickCosts and returned. Compound timing name preserves both stages. Native Tick/ConfigureChannel adaptations are not modified."),
-        ("Audio::Seq::ResolveSoundEffectInstrument",
-         (('arg0', 'sample_bank_flags'), ('arg1', 'instrument_index')),
-         "F03271 25AC.c:4550 maps instruments 0x80..0x9F by bank flag 2 or 4 to the second/third SFX bank. Producer at 2656 stores 1<<command.ExtParam1 (bank slot) in channel.unk38, whose ledger name is effectVoiceMask; no ledger rename is proposed."),
-        ("Audio::Seq::ResolveMusicInstrument",
-         (('arg0', 'music_status_flags'), ('arg1', 'instrument_index')),
-         "F03272 25AC.c:4563 adds 0x20 for alternate-bank status bit 0x40 on indices 0x40..0x7F; otherwise returns the unchanged instrument index. Input flags come from active music status, unlike the SFX resolver."),
-        ("Audio::Seq::SelectNotePatch",
-         (('arg0', 'channel'), ('arg1', 'note_key'), ('temp_a0', 'instrument'), ('temp_s2', 'update_flags'), ('temp_v0', 'instrument_index'), ('var_s0', 'patch_entry')),
-         "F03273 25AC.c:4571 scans eight-byte keymap/patch entries against the requested key and current key; resolves entry[0] to a music instrument; applies its sample addresses and envelope words under channel update flags; copies entry-specific ADSR and volume scale. Each pointer/index has a distinct domain, with no layout or search correction."),
-        ("Audio::Seq::CalculateNotePitch",
-         (('arg0', 'instrument'), ('arg1', 'note_cursor'), ('arg2', 'fine_tune'), ('arg3', 'output_fine_pitch_delta'), ('var_a0', 'semitone_or_octave_offset'), ('var_t0', 'pitch_work')),
-         "F03274 25AC.c:4637 derives root-relative semitone and later octave offsets in var_a0, computes instrument-tuned pitch in var_t0, applies fine-tune contribution through arg3, scales both for octaves and finally shifts by eight. arg1 is the requested note then a cursor advanced by octaves below the root. Compound/work names cover all arithmetic stages without claiming one fixed Q format throughout."),
-        ("Audio::Seq::StartDrumNote",
-         (('arg0', 'channel'), ('arg1', 'channel_bit'), ('arg2', 'drum_key'), ('temp_a0', 'instrument'), ('temp_s1', 'drum_entry'), ('temp_s2', 'update_flags'), ('temp_v0', 'note_pitch'), ('temp_v0_2', 'instrument_index')),
-         "F03275 25AC.c:4686 indexes an eight-byte drum keymap entry, resolves its instrument, applies sample/envelope data under channel update flags, computes pitch using entry[1], and sets pan/reverb. temp_v0 and temp_v0_2 are independently pitch and instrument index, respectively."),
-        ("Audio::Seq::ExecuteChannelStep",
-         (('arg0', 'channel'), ('arg1', 'channel_bit'), ('sp10', 'pitch_delta_work'), ('temp_a1', 'program_cursor'), ('temp_a1_2', 'note_update_flags'), ('temp_a2_2', 'opcode_or_pitch_work'), ('temp_s0', 'note_or_update_flags'), ('temp_v0', 'octave_semitones'), ('temp_v1', 'explicit_note_opcode_index'), ('temp_v1_6', 'vibrato_depth_magnitude'), ('var_s0', 'step_opcode'), ('var_v1', 'gate_ticks')),
-         "F03276 25AC.c:4760-4952 full body reviewed: program_cursor fetches/increments the bytecode; step_opcode also normalizes explicit-length notes and stop commands. temp_v1 is opcode-0xF0; temp_v0 is octave*12; temp_a1_2 snapshots note update flags; var_v1 calculates gate duration. temp_v1_6 is the seven-bit vibrato-depth magnitude. Three merged lifetimes are deliberately named for every use: temp_a2_2 holds extended opcode, peeked next-note opcode, computed note pitch, and finally Q16 bend target; temp_s0 holds the selected/transposed note then modulation update flags; sp10 is random pitch deviation, then the otherwise-unused fine-pitch output for bend calculation. arg1 is the music-channel or SFX-voice bit supplied by both tick callers. All source/native LFO guard branches were read; no variable splitting, signedness changes, or opcode behavior edits are proposed."),
-        ("Audio::Seq::ApplyInstrumentParameters",
-         (('arg0', 'channel'), ('arg1', 'instrument'), ('arg2', 'sample_start_address')),
-         "F03277 25AC.c:4953 copies sampleStart from argument 3, loop/envelope words from the instrument and marks the channel voice dirty. No copying of unrelated fields or pointer-size change is proposed."),
-        ("Audio::Seq::SelectChannelInstrument",
-         (('arg0', 'channel'), ('arg1', 'instrument_index')),
-         "F03278 25AC.c:4963 stores the index and passes the indexed instrument plus its sampleStart to Sound_CopyInstrumentInfoToChannel."),
-        ("Audio::Seq::ReleaseSoundEffectVoice",
-         (('arg0', 'channel'), ('arg1', 'voice_bit'), ('temp_a1', 'keep_voice_mask')),
-         "F03279 25AC.c:4970 complements the released bit, ANDs that keep mask into active/paused/noise/reverb/FM/key-on/keyed scheduler masks, and clears the supplied channel's effect tags/ID. pendingKeyOff is intentionally not added to this list."),
         ("Audio::PlaySfxOnPrimaryChannel",
          (('arg0', 'effect_id'),),
          "F03512 main.c:9785 masks the effect ID to 16 bits before passing it with group-1 tag, centered pan and maximum volume to func_8001217C."),
