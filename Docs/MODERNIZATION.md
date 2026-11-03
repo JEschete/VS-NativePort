@@ -20,8 +20,8 @@ architecture changes rather than per-function work, so this ledger is what track
 | 7: #48 Content request ownership | 0 | 13 | 204 | 11 | 5 | 0 |
 | 8: #49 Bounded P-file and effect views | 0 | 2 | 7 | 2 | 0 | 0 |
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
-| 10: #50 Render submission and frame ownership | 0 | 47 | 1,915 | 104 | 25 | 0 |
-| 14: #55 Actor identity and teardown | 0 | 213 | 8,121 | 158 | 78 | 0 |
+| 10: #50 Render submission and frame ownership | 0 | 11 | 605 | 121 | 6 | 0 |
+| 14: #55 Actor identity and teardown | 0 | 213 | 8,121 | 160 | 78 | 0 |
 | 15: #58 Item definitions and instances | 0 | 66 | 2,010 | 50 | 16 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 122 | 5,899 | 201 | 49 | 0 |
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
@@ -32,14 +32,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 3201 | 100,857 | 1718 | 2035 | 0 |
+| **Total** | 0 | 3165 | 99,547 | 1737 | 2016 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 552 |
-| todo | 3,201 |
+| done | 588 |
+| todo | 3,165 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (3 active, 8 done, 43 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (2 active, 9 done, 43 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -47,7 +47,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 2 | core-heap | done | coordinator | 1 | 0 | 0 |
 | 3 | core-math | done | coordinator | 5 | 0 | 0 |
 | 4 | render-display-camera-ui | done | coordinator | 5 | 0 | 0 |
-| 5 | render-palette-framebuffer | active | coordinator | 2 | 36 | 1,310 |
+| 5 | render-palette-framebuffer | done | coordinator | 2 | 0 | 0 |
 | 6 | render-images-textures-font | planned | - | 4 | 39 | 1,543 |
 | 7 | input-controller | done | subagent a7-input; coordinator review | 1 | 0 | 0 |
 | 8 | save-memory-card | done | agent:a8-save | 2 | 0 | 0 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,750 |
-| Referenced by the original-address module table | 0 | 1,892 |
-| Calls an SDK shim | 0 | 426 |
-| Signature uses SDK integer types or `void*` | 0 | 758 |
-| Compiled with relaxed settings | 0 | 3,201 |
+| Called from generated code | 0 | 1,736 |
+| Referenced by the original-address module table | 0 | 1,860 |
+| Calls an SDK shim | 0 | 424 |
+| Signature uses SDK integer types or `void*` | 0 | 748 |
+| Compiled with relaxed settings | 0 | 3,165 |
 
 Function bodies: 3,234 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

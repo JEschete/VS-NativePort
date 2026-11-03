@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 552 | owned functions |
-| 552 | owned functions in C++ sources |
-| 3201 | generated function rows |
+| 588 | owned functions |
+| 588 | owned functions in C++ sources |
+| 3165 | generated function rows |
 | 9 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 552 | 0 | 3,655 |
-| `cpp` | 552 | 0 | 3,655 |
+| `modernized` | 588 | 0 | 3,619 |
+| `cpp` | 588 | 0 | 3,619 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 552 |
-| `vs_namespace` | 552 |
-| `typed_interface` | 552 |
-| `no_bridge` | 552 |
-| `strict_clean` | 552 |
-| `behavior_evidence` | 552 |
+| `source_cpp` | 588 |
+| `vs_namespace` | 588 |
+| `typed_interface` | 588 |
+| `no_bridge` | 588 |
+| `strict_clean` | 588 |
+| `behavior_evidence` | 588 |
 
-Promotion records: 552; derived `cpp=x`: 552, `cpp=wip`: 0. Verification records: 108; `verified=x` markers: 45.
+Promotion records: 588; derived `cpp=x`: 588, `cpp=wip`: 0. Verification records: 109; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -261,6 +261,8 @@ and the generated Render_ routines, their twelve state globals, the D_800F1ABC_t
 The sixty-second slice (#276 row 8) is the save memory card and Ashley snapshot (32 functions in VS::Save::MemoryCard GameFiles and VS::Save Snapshot): typed cores for card events, file names, slots, checksums, cipher, directory scans, readiness, reads, writes and packaging refuse bad input before writing, ClearEvents now clears the events, the directory holds the 15 entries the original overran, and the generated routines, their MENU7 storage and two resident module entries are retired.
 The sixty-third slice (#276 row 10) is the SEQ voice and channel opcodes (71 functions in VS::Audio::Seq ChannelCommands, Envelope and Modulation): typed cores over a bounded operand window keep the original's operand signedness, wrapping slide and fine-tune arithmetic and unmasked ADSR fields, refuse truncated operands, out-of-table instruments, patches outside the music data and missing music layers before changing a channel, and the generated handlers, two headers and two unreferenced module bindings are retired.
 The movie-intro retirement (#276 row 9) removes the TITLE MDEC strip pipeline (seven routines, eleven buffer and stream globals and MovieData_t) that the converted-movie intro (F03650-F03653) had already replaced; the live host owns the draw page, and the libpress shims (EC-08 LibPress.h/.cpp) and the libds ring-stream shims are deleted at zero uses. EC-08 still carries the page-space presentation debt.
+The sixty-fourth slice (#276 row 5 part 2) is the palette animation (36 functions in VS::Render PaletteAnimation and VS::Actors AppearanceTransition): one typed record owns the CLUT row fades and pulses, model tints, background gradient and room tint behind a PaletteHost, keeps the original delta tables, 16.16 arithmetic and gating, refuses rows, actors, colour spans and scene modes outside the original tables,
+and the generated Render_ palette routines, their six state globals, the D_8005DC6C_t/D_8005DC80_t records and their module address entries are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
