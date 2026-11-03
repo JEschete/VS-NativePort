@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 481 | owned functions |
-| 481 | owned functions in C++ sources |
-| 3279 | generated function rows |
+| 552 | owned functions |
+| 552 | owned functions in C++ sources |
+| 3208 | generated function rows |
 | 2 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,756 | 0 | 451 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 173 | 0 | 4,034 |
-| `modernized` | 481 | 0 | 3,726 |
-| `cpp` | 481 | 0 | 3,726 |
+| `modernized` | 552 | 0 | 3,655 |
+| `cpp` | 552 | 0 | 3,655 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 481 |
-| `vs_namespace` | 481 |
-| `typed_interface` | 481 |
-| `no_bridge` | 481 |
-| `strict_clean` | 481 |
-| `behavior_evidence` | 481 |
+| `source_cpp` | 552 |
+| `vs_namespace` | 552 |
+| `typed_interface` | 552 |
+| `no_bridge` | 552 |
+| `strict_clean` | 552 |
+| `behavior_evidence` | 552 |
 
-Promotion records: 481; derived `cpp=x`: 481, `cpp=wip`: 0. Verification records: 107; `verified=x` markers: 45.
+Promotion records: 552; derived `cpp=x`: 552, `cpp=wip`: 0. Verification records: 108; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -259,6 +259,7 @@ and the generated Input_ routines, the padAct_t slot record, Input/Controller.h 
 The sixty-first slice (#276 row 5 part 1) is the framebuffer effect and screen transition (23 functions in VS::Render ScreenOverlay): a typed phase core keeps the original state words, slot templates, texture pages, frame planning, fades and wipe edges, owns the packet block through its phase and refuses null records and ordering tables,
 and the generated Render_ routines, their twelve state globals, the D_800F1ABC_t packet record and their module address entries are retired.
 The sixty-second slice (#276 row 8) is the save memory card and Ashley snapshot (32 functions in VS::Save::MemoryCard GameFiles and VS::Save Snapshot): typed cores for card events, file names, slots, checksums, cipher, directory scans, readiness, reads, writes and packaging refuse bad input before writing, ClearEvents now clears the events, the directory holds the 15 entries the original overran, and the generated routines, their MENU7 storage and two resident module entries are retired.
+The sixty-third slice (#276 row 10) is the SEQ voice and channel opcodes (71 functions in VS::Audio::Seq ChannelCommands, Envelope and Modulation): typed cores over a bounded operand window keep the original's operand signedness, wrapping slide and fine-tune arithmetic and unmasked ADSR fields, refuse truncated operands, out-of-table instruments, patches outside the music data and missing music layers before changing a channel, and the generated handlers, two headers and two unreferenced module bindings are retired.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)
