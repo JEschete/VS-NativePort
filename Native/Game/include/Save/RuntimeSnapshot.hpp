@@ -40,9 +40,10 @@ bool ResumePending();
 // actor/room pointers. Cancel before tearing down the audio consumer.
 void CancelResume();
 
-// Field_FinishRoomLoad: after camera setup and Render_ConfigureFieldDisplay,
-// before the temp_s4/event-trigger branch. The first zone load must preserve
-// saved zone flags while ResumePending(), rather than resetting flags64..127.
+// Field_FinishRoomLoad: after camera setup and
+// VS::Render::ConfigureFieldDisplay, before the temp_s4/event-trigger branch.
+// The first zone load must preserve saved zone flags while ResumePending(),
+// rather than resetting flags64..127.
 // No boot/longjmp is performed here. Failure leaves the pending state intact.
 std::expected<void, std::string> FinishResume();
 
