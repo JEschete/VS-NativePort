@@ -2045,7 +2045,7 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int skip_motion_upd
                 dx = other->instance.position.vx - actor->instance.position.vx;
                 dz = other->instance.position.vz - actor->instance.position.vz;
             }
-            yaw = ONE * 3 / 4 - Core_Gte_Atan2(dz, dx);
+            yaw = ONE * 3 / 4 - VS::Core::Math::Arctangent2(dz, dx);
             yaw &= 0xFFF;
             yaw -= actor->instance.facing;
             dx *= dx;
@@ -2063,7 +2063,7 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int skip_motion_upd
                 dz = Actors_actorRecords[actor->headTrackTarget]->instance.position.vy
                    - actor->instance.position.vy;
             }
-            pitch = Core_Gte_Atan2(dx, dz);
+            pitch = VS::Core::Math::Arctangent2(dx, dz);
             pitch -= ONE / 4;
             pitch &= 0xFFF;
         }

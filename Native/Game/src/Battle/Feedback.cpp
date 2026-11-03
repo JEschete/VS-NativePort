@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/Vector.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -7,7 +8,6 @@ extern "C" {
 #include "Battle/BattleTypes.h"
 #include "Battle/Feedback.h"
 #include "Battle/ValueLabels.h"
-#include "Core/Math/Vector.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomRendering.h"
 #include "Input/Controller.h"
@@ -1132,13 +1132,13 @@ void Battle_DrawActorMarker(int actor, int kind)
         uv = Battle_kMarkerFrameTexCoords[side];
         prim[0] = vs_getTag(Render_PolyFt4, *ot);
         prim[1] = vs_getRGB0(Render_LegacyPrimitiveCode_PolyFt4, 128, 128, 128);
-        prim[2] = Core_Math_AddPackedScreenCoordinates(xy, corners[0]);
+        prim[2] = VS::Core::Math::AddPackedScreenCoordinates(xy, corners[0]);
         prim[3] = uv[0] | (getClut(992, 220) << 16);
-        prim[4] = Core_Math_AddPackedScreenCoordinates(xy, corners[1]);
+        prim[4] = VS::Core::Math::AddPackedScreenCoordinates(xy, corners[1]);
         prim[5] = uv[1] | (getTPage(0, 0, 448, 256) << 16);
-        prim[6] = Core_Math_AddPackedScreenCoordinates(xy, corners[2]);
+        prim[6] = VS::Core::Math::AddPackedScreenCoordinates(xy, corners[2]);
         prim[7] = uv[2];
-        prim[8] = Core_Math_AddPackedScreenCoordinates(xy, corners[3]);
+        prim[8] = VS::Core::Math::AddPackedScreenCoordinates(xy, corners[3]);
         prim[9] = uv[3];
         *ot = LegacyGpu_Handle(prim);
         ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor = prim + 10;

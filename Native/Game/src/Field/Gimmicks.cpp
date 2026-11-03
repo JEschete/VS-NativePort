@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -233,7 +234,7 @@ void Field_UpdateGimmickAnimationQueue(void)
     int i;
 
     if (Field_pendingGimmickAnimationCount <= 0) {
-        return;
+        return 0;
     }
 
     for (i = 0; i < 8; ++i) {
@@ -385,7 +386,7 @@ int Field_UpdateMovingPlatforms(void)
             Field_platformFreezeFrames = 0;
         }
 
-        return 0;
+        return;
     }
 
     object = Field_roomData.movingPlatforms;
@@ -1162,7 +1163,7 @@ int Field_SetGimmickOrientation(int index, int material)
     ((Render_ModelScratchpad*)((uintptr_t)Core_ScratchBase() + 0x35C))->rotation.vx = Field_kGimmickOrientationRotations[material] * (ONE / 4);
     ((Render_ModelScratchpad*)((uintptr_t)Core_ScratchBase() + 0x35C))->rotation.vy = Field_kGimmickOrientationRotations[material + 1] * (ONE / 4);
     ((Render_ModelScratchpad*)((uintptr_t)Core_ScratchBase() + 0x35C))->rotation.vz = Field_kGimmickOrientationRotations[material + 2] * (ONE / 4);
-    Core_Gte_RotMatrixYXZ(&((Render_ModelScratchpad*)((uintptr_t)Core_ScratchBase() + 0x35C))->rotation, &obj->matrices[4]);
+    VS::Core::Math::BuildLiveEulerRotationMatrix(&((Render_ModelScratchpad*)((uintptr_t)Core_ScratchBase() + 0x35C))->rotation, &obj->matrices[4]);
     obj->rotationTicks = 0;
     *(int*)&obj->rotationX = 0;
     obj->rotationZ = 0;

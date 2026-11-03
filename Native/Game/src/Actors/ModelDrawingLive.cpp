@@ -172,14 +172,15 @@ static void AdjustBoneRotation(Actors_ActorRecord* actor, unsigned tag,
     if (tag == kCameraPitchTag) {
       rotation->vx = static_cast<int16_t>(camera->angles.vx);
     }
-    rotation->vy = static_cast<int16_t>(-Core_Gte_Atan2(delta_z, delta_x));
+    rotation->vy =
+        static_cast<int16_t>(-VS::Core::Math::Arctangent2(delta_z, delta_x));
     rotation->vz = 0;
     if (tag == kCameraHeightTag) {
       const int64_t squared = static_cast<int64_t>(delta_x) * delta_x +
                               static_cast<int64_t>(delta_z) * delta_z;
       const int distance = VS::Core::Math::SquareRootInteger(
           squared > INT32_MAX ? INT32_MAX : static_cast<int>(squared));
-      rotation->vz = static_cast<int16_t>(Core_Gte_Atan2(
+      rotation->vz = static_cast<int16_t>(VS::Core::Math::Arctangent2(
           camera->position.vy / kActorFixedOne - workspace->rootOffset.vy,
           distance));
     }
@@ -264,7 +265,7 @@ static int BuildActorModelPose(Actors_ActorRecord* actor, MATRIX* camera) {
       AdjustBoneRotation(actor, joint->auxiliaryTag, &rotation);
       if (joint->auxiliaryTag >= kFirstCameraFacingTag &&
           joint->auxiliaryTag <= kLastCameraFacingTag) {
-        Core_Gte_RotMatrixYXZ(&rotation, &matrix);
+        VS::Core::Math::ApplyBuildEulerRotationMatrix(rotation, matrix);
         VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, matrix);
         scale.vx = scale.vy = scale.vz = actor->scale;
         VS::Core::Math::ApplyScaleMatrixColumns(matrix, scale);

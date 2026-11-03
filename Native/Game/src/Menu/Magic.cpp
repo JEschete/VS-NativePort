@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -15,7 +16,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Sphere.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
 #include "DiscQueue.h"
 #include "Field/Gimmicks.h"
 #include "Field/RoomState.h"
@@ -620,7 +620,7 @@ void Menu_Magic_SetSpellMpCost(int id)
     }
 
     do {
-        cost = Core_Math_SplitDecimalDigit(cost);
+        cost = VS::Core::Math::SplitDecimalDigit(cost);
         Menu_Magic_mpCostTextBuffer[--i] = (cost & 0xF) + '0';
         cost >>= 4;
         if (variableCost != 0) {
@@ -647,7 +647,7 @@ void Menu_Magic_SetTeleportMpCost(int costDecimal, int disabled)
     Menu_Magic_mpCostDirectTextBuffer[15] = 0;
 
     do {
-        cost = Core_Math_SplitDecimalDigit(cost);
+        cost = VS::Core::Math::SplitDecimalDigit(cost);
         Menu_Magic_mpCostDirectTextBuffer[--i] = (cost & 0xF) + '0';
         cost >>= 4;
     } while (cost != 0);

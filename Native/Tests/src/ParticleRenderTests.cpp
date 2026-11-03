@@ -16,6 +16,7 @@
 
 #include "Content/ModuleData.h"
 #include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Random.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -871,12 +872,14 @@ TEST_CASE("Cone emission preserves original zero-height quotient and RNG",
     vertical = static_cast<int>(
         std::sqrt((low + (high << 16)) % (height * height + 1)));
   }
-  const int x = height == 0
-                    ? -1
-                    : (((32 * Core_Gte_Cos(angle)) >> 12) * vertical) / height;
-  const int z = height == 0
-                    ? -1
-                    : (((48 * Core_Gte_Sin(angle)) >> 12) * vertical) / height;
+  const int x =
+      height == 0
+          ? -1
+          : (((32 * VS::Core::Math::Cosine(angle)) >> 12) * vertical) / height;
+  const int z =
+      height == 0
+          ? -1
+          : (((48 * VS::Core::Math::Sine(angle)) >> 12) * vertical) / height;
   Core_Random_Seed(seed);
 
   Effects_EmitParticleEvent(&fixture.instance, 0, 0, 0, nullptr);

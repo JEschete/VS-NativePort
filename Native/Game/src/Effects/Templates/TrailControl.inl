@@ -1,12 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Matrix.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -42,17 +42,17 @@ void VS_TRAIL_CONTROL_FUNCTION(Effects_ParticleDefinition* particle_definition, 
                                + (emitter_scratch->aimPoint.vy * emitter_scratch->aimPoint.vy)
                                + (emitter_scratch->aimPoint.vz * emitter_scratch->aimPoint.vz));
 
-        Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[0],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[0],
             Effects_SampleEffectCurve(particle_definition->massCurve, trail_set->curveSampleDistance), emitter_scratch->massRange);
-        Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[1],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[1],
             Effects_SampleEffectCurve(particle_definition->gravityScaleCurve, trail_set->curveSampleDistance), emitter_scratch->gravityScaleRange);
-        Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[2],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[2],
             Effects_SampleEffectCurve(particle_definition->speedCurve, trail_set->curveSampleDistance), emitter_scratch->speedRange);
-        Core_Math_InterpolatePairsToWideVector(particle_definition->vectorRanges[1],
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[1],
             Effects_SampleEffectCurve(particle_definition->directionJitterCurve, trail_set->curveSampleDistance), &emitter_scratch->directionJitter);
-        Core_Math_InterpolatePairsToWideVector(particle_definition->vectorRanges[0],
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[0],
             Effects_SampleEffectCurve(particle_definition->directionCurve, trail_set->curveSampleDistance), &emitter_scratch->baseDirection);
-        Core_Math_InterpolatePairsToShortVector(particle_definition->vectorRanges[2],
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[2],
             Effects_SampleEffectCurve(particle_definition->forceCurve, trail_set->curveSampleDistance), &emitter_scratch->forceMin);
 
         if (emitter_scratch->forceMin.vx != 0) {
@@ -99,24 +99,24 @@ void VS_TRAIL_CONTROL_FUNCTION(Effects_ParticleDefinition* particle_definition, 
             second_control_angle += (Core_Random_Rand() % (emitter_scratch->directionJitter.vy * 2)) - emitter_scratch->directionJitter.vy;
         }
 
-        first_local_control.vx = (Core_Gte_Cos(first_control_angle) * first_control_radius) >> 0xC;
-        first_local_control.vy = (Core_Gte_Sin(first_control_angle) * first_control_radius) >> 0xC;
-        second_local_control.vx = (Core_Gte_Cos(second_control_angle) * second_control_radius) >> 0xC;
-        second_local_control.vy = (Core_Gte_Sin(second_control_angle) * second_control_radius) >> 0xC;
+        first_local_control.vx = (VS::Core::Math::Cosine(first_control_angle) * first_control_radius) >> 0xC;
+        first_local_control.vy = (VS::Core::Math::Sine(first_control_angle) * first_control_radius) >> 0xC;
+        second_local_control.vx = (VS::Core::Math::Cosine(second_control_angle) * second_control_radius) >> 0xC;
+        second_local_control.vy = (VS::Core::Math::Sine(second_control_angle) * second_control_radius) >> 0xC;
 
-        Core_Math_WidenShortVector(spline_control_points, &emitter_scratch->aimPoint);
-        Core_Math_WidenShortVector(spline_control_points + 3, &emitter_scratch->spawnPoint);
-        Core_Math_BuildLookAtOrientation(&emitter_scratch->aimPoint, &emitter_scratch->spawnPoint, &emitter_scratch->aimMatrix);
+        VS::Core::Math::CopyLiveVectorTo(spline_control_points, &emitter_scratch->aimPoint);
+        VS::Core::Math::CopyLiveVectorTo(spline_control_points + 3, &emitter_scratch->spawnPoint);
+        VS::Core::Math::BuildLiveLookAtOrientation(&emitter_scratch->aimPoint, &emitter_scratch->spawnPoint, &emitter_scratch->aimMatrix);
         Core_Gte_SetRotMatrix(&emitter_scratch->aimMatrix);
         Core_Gte_SetTransVector(&emitter_scratch->aimPoint);
         Core_Gte_LoadV0(&first_local_control);
         Core_Gte_Rtv0Tr();
         Core_Gte_StoreLvnl(&emitter_scratch->aimPoint);
-        Core_Math_NarrowWideVector(&emitter_scratch->aimPoint, spline_control_points + 1);
+        VS::Core::Math::CopyLiveVectorTo(&emitter_scratch->aimPoint, spline_control_points + 1);
         Core_Gte_LoadV0(&second_local_control);
         Core_Gte_Rtv0Tr();
         Core_Gte_StoreLvnl(&emitter_scratch->spawnPoint);
-        Core_Math_NarrowWideVector(&emitter_scratch->spawnPoint, spline_control_points + 2);
+        VS::Core::Math::CopyLiveVectorTo(&emitter_scratch->spawnPoint, spline_control_points + 2);
     }
 }
 #undef TRAIL_SAMPLE_COUNT

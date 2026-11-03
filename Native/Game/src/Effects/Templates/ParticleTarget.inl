@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
 #include "Core/RandomLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -21,9 +21,9 @@ void VS_PARTICLE_TARGET_FUNCTION(Effects_ParticleDefinition* particle_definition
 {
     int i;
 
-    Core_Math_InterpolatePairsToShortVector(
+    VS::Core::Math::InterpolateLiveSevenBitVector(
         particle_definition->vectorRanges[6], Effects_SampleEffectCurve(particle_definition->attractionOffsetCurve, particle_set->age), &emitter_scratch->attractionOffset);
-    Core_Math_InterpolatePairsToShortVector(
+    VS::Core::Math::InterpolateLiveSevenBitVector(
         particle_definition->vectorRanges[7], Effects_SampleEffectCurve(particle_definition->attractionJitterCurve, particle_set->age), &emitter_scratch->attractionJitter);
 
     switch (emitter_scratch->flags & 0x1C0) {

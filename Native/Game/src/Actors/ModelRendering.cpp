@@ -2,6 +2,7 @@
 #include "Actors/AppearanceTransitionLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
 #include "Actors/SoundTransitionBinding.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
@@ -259,7 +260,7 @@ void Actors_TransformActorRootOffset(Actors_ActorRecord* actor)
 
     setVector(
         &scratch->rotation, actor->instance.rotationX, actor->instance.facing, actor->instance.rotationZ);
-    Core_Gte_RotMatrixYXZ(&scratch->rotation, &scratch->matrix);
+    VS::Core::Math::BuildLiveEulerRotationMatrix(&scratch->rotation, &scratch->matrix);
     scratch->matrix.t[0] = 0;
     scratch->matrix.t[1] = 0;
     scratch->matrix.t[2] = 0;
@@ -321,7 +322,7 @@ void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera)
         if (object->mode != 0) {
             setVector(&scratch->rotation, object->rotationX, object->rotationY, object->rotationZ);
             Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-            Core_Gte_RotMatrixYXZ(&scratch->rotation, &scratch->matrix);
+            VS::Core::Math::BuildLiveEulerRotationMatrix(&scratch->rotation, &scratch->matrix);
             VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, scratch->matrix);
             Core_Gte_MulMatrix(&scratch->matrix, &object->matrices[4]);
             goto composed;

@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Audio/StreamControlLive.hpp"
+#include "Core/Math/InterpolationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Effects/PackageExtents.hpp"
 #include "Effects/TextureBindings.hpp"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Math/Interpolation.h"
 #include "Core/Overlays.h"
 #include "DiscQueue.h"
 #include "Effects/EffectResources.h"
@@ -114,9 +114,9 @@ void Effects_UpdateParticleGravityAndDrag(void)
     VECTOR sampled_gravity;
     int sampled_drag;
 
-    Core_Math_InterpolatePairsToWideVector(
+    VS::Core::Math::InterpolateLiveSevenBitVector(
         Effects_package->block9Data->gravityRange, Effects_curveSamples[Effects_package->block9Data->gravityCurve], &sampled_gravity);
-    sampled_drag = Core_Math_InterpolateShortPair(
+    sampled_drag = VS::Core::Math::InterpolateLiveShortPair(
         Effects_package->block9Data->dragRange, Effects_curveSamples[Effects_package->block9Data->dragCurve]);
     ((void (*)(VECTOR*))Effects_SetParticleGravity)(&sampled_gravity);
     Effects_SetParticleDrag(&sampled_drag);

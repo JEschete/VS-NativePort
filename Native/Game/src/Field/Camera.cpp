@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -198,7 +200,7 @@ int Field_ComputeCameraTrackingStep(SVECTOR* targetPos, VECTOR* outStep,
     outDisplacement->vy = (targetPosScaled.vy * ONE) - Render_frameScratch.camera.lookAt.vy;
     targetPosFixed.vy = outDisplacement->vy / ONE;
 
-    Core_Gte_VectorNormal(&targetPosFixed, &direction);
+    VS::Core::Math::NormalizeLiveVector(&targetPosFixed, &direction);
 
     if (notCentered) {
         int distanceToTarget;
@@ -619,7 +621,7 @@ void Field_ComputeFirstPersonCameraTransition(VECTOR* targetPosition)
     cameraToTarget.vz = (targetPosition->vz - Render_frameScratch.camera.position.vz) / ONE;
     cameraToTarget.vy = (targetPosition->vy - Render_frameScratch.camera.position.vy) / ONE;
 
-    Core_Gte_VectorNormal(&cameraToTarget, &Field_cameraTransition->direction);
+    VS::Core::Math::NormalizeLiveVector(&cameraToTarget, &Field_cameraTransition->direction);
 
     Field_cameraTransition->transitionSpeed = 0x80;
 
@@ -633,14 +635,14 @@ void Field_ComputeFirstPersonCameraTransition(VECTOR* targetPosition)
             * Field_cameraTransition->transitionSpeed);
 
     Field_cameraTransition->targetLookAt.vx =
-        -Core_Gte_Sin(Field_cameraTransition->toSpherical.values.yaw);
+        -VS::Core::Math::Sine(Field_cameraTransition->toSpherical.values.yaw);
     Field_cameraTransition->targetLookAt.vz =
-        -Core_Gte_Cos(Field_cameraTransition->toSpherical.values.yaw);
+        -VS::Core::Math::Cosine(Field_cameraTransition->toSpherical.values.yaw);
     Field_cameraTransition->targetLookAt.vy =
-        (-Core_Gte_Sin(Field_cameraTransition->toSpherical.values.pitch) * ONE)
-        / Core_Gte_Cos(Field_cameraTransition->toSpherical.values.pitch);
+        (-VS::Core::Math::Sine(Field_cameraTransition->toSpherical.values.pitch) * ONE)
+        / VS::Core::Math::Cosine(Field_cameraTransition->toSpherical.values.pitch);
 
-    Core_Gte_VectorNormal(&Field_cameraTransition->targetLookAt,
+    VS::Core::Math::NormalizeLiveVector(&Field_cameraTransition->targetLookAt,
         &Field_cameraTransition->targetLookAt);
 
     Field_cameraTransition->targetLookAt.vx =
@@ -943,13 +945,13 @@ int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* output_spherical_c
     toCamera.vz = (Render_frameScratch.camera.position.vz - Render_frameScratch.camera.lookAt.vz) / ONE;
     toCamera.vy = (Render_frameScratch.camera.position.vy - Render_frameScratch.camera.lookAt.vy) / ONE;
 
-    Core_Gte_VectorNormal(&toCamera, &toCameraNorm);
+    VS::Core::Math::NormalizeLiveVector(&toCamera, &toCameraNorm);
 
-    yaw = Core_Gte_Atan2(toCameraNorm.vx, toCameraNorm.vz);
+    yaw = VS::Core::Math::Arctangent2(toCameraNorm.vx, toCameraNorm.vz);
     yaw = (yaw + ONE) % ONE;
     Render_frameScratch.camera.angles.vy = yaw;
-    pitch = Core_Gte_Atan2(
-        toCameraNorm.vy, Core_Gte_SquareRoot12((toCameraNorm.vx * toCameraNorm.vx) / ONE
+    pitch = VS::Core::Math::Arctangent2(
+        toCameraNorm.vy, VS::Core::Math::SquareRootFixed((toCameraNorm.vx * toCameraNorm.vx) / ONE
                                       + (toCameraNorm.vz * toCameraNorm.vz) / ONE));
     Render_frameScratch.camera.angles.vx = pitch;
 
@@ -971,10 +973,10 @@ int Field_SyncCameraAnglesFromPosition(Field_SphericalCamera* output_spherical_c
 void Field_ComputeSphericalCameraPosition(
     VECTOR* outPosition, VECTOR* basePosition, Field_SphericalCameraValues* angles)
 {
-    outPosition->vx = Core_Gte_Sin(angles->yaw);
-    outPosition->vz = Core_Gte_Cos(angles->yaw);
-    outPosition->vy = (Core_Gte_Sin(angles->pitch) * ONE) / Core_Gte_Cos(angles->pitch);
-    Core_Gte_VectorNormal(outPosition, outPosition);
+    outPosition->vx = VS::Core::Math::Sine(angles->yaw);
+    outPosition->vz = VS::Core::Math::Cosine(angles->yaw);
+    outPosition->vy = (VS::Core::Math::Sine(angles->pitch) * ONE) / VS::Core::Math::Cosine(angles->pitch);
+    VS::Core::Math::NormalizeLiveVector(outPosition, outPosition);
     outPosition->vx = (outPosition->vx * angles->distance) + basePosition->vx;
     outPosition->vz = (outPosition->vz * angles->distance) + basePosition->vz;
     outPosition->vy = (outPosition->vy * angles->distance) + basePosition->vy;
@@ -990,11 +992,11 @@ void Field_SetCameraPositionFromAngles(Field_SphericalCameraValues* spherical)
 // decomp: BATTLE.PRG _setCameraLookAtFromAngles (src/BATTLE/BATTLE.PRG/146C.c:8110)
 void Field_SetCameraLookAtFromAngles(Field_SphericalCameraValues* spherical)
 {
-    Render_frameScratch.camera.lookAt.vx = -Core_Gte_Sin(spherical->yaw);
-    Render_frameScratch.camera.lookAt.vz = -Core_Gte_Cos(spherical->yaw);
+    Render_frameScratch.camera.lookAt.vx = -VS::Core::Math::Sine(spherical->yaw);
+    Render_frameScratch.camera.lookAt.vz = -VS::Core::Math::Cosine(spherical->yaw);
     Render_frameScratch.camera.lookAt.vy =
-        (-Core_Gte_Sin(spherical->pitch) * 0x1000) / Core_Gte_Cos(spherical->pitch);
-    Core_Gte_VectorNormal(&Render_frameScratch.camera.lookAt, &Render_frameScratch.camera.lookAt);
+        (-VS::Core::Math::Sine(spherical->pitch) * 0x1000) / VS::Core::Math::Cosine(spherical->pitch);
+    VS::Core::Math::NormalizeLiveVector(&Render_frameScratch.camera.lookAt, &Render_frameScratch.camera.lookAt);
     Render_frameScratch.camera.lookAt.vx = (Render_frameScratch.camera.lookAt.vx * spherical->distance)
                                 + Render_frameScratch.camera.position.vx;
     Render_frameScratch.camera.lookAt.vz = (Render_frameScratch.camera.lookAt.vz * spherical->distance)

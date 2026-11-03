@@ -5870,15 +5870,6 @@
 ]
 ],
 [
-32,
-[
-"        Core_Math_SetIdentityRotation((void*)&state->facing);"
-],
-[
-"        Core_Math_SetIdentityRotation((MATRIX *)((void*)&state->facing));"
-]
-],
-[
 45,
 [
 "                        (SVECTOR*)&effect_instance->context.emitTo.value, (void*)&state->attachment);"
@@ -7672,10 +7663,10 @@
 [
 1684,
 [
-"            ((Core_Gte_Sin((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
+"            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, Render_frameScratch.orderingTable - 0xC);"
 ],
 [
-"            ((Core_Gte_Sin((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));"
+"            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));"
 ]
 ],
 [

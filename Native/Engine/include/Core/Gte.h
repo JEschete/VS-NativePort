@@ -70,8 +70,6 @@ VECTOR* Core_Gte_ApplyMatrix(MATRIX* m, SVECTOR* v0, VECTOR* v1);
 VECTOR* Core_Gte_ApplyRotMatrix(SVECTOR* v0, VECTOR* v1);
 VECTOR* Core_Gte_ApplyMatrixLV(MATRIX* m, VECTOR* v0, VECTOR* v1);
 SVECTOR* Core_Gte_ApplyMatrixSV(MATRIX* m, SVECTOR* v0, SVECTOR* v1);
-MATRIX* Core_Gte_RotMatrix(SVECTOR* r, MATRIX* m);
-MATRIX* Core_Gte_RotMatrixYXZ(SVECTOR* r, MATRIX* m);
 MATRIX* Core_Gte_TransMatrix(MATRIX* m, VECTOR* v);
 MATRIX* Core_Gte_ScaleMatrix(MATRIX* m, VECTOR* v);
 long Core_Gte_RotTransPers(SVECTOR* v0, long* sxy, long* p, long* flag);
@@ -83,15 +81,7 @@ long Core_Gte_RotAverage4(SVECTOR* v0, SVECTOR* v1, SVECTOR* v2, SVECTOR* v3,
                           long* sxy0, long* sxy1, long* sxy2, long* sxy3,
                           long* p, long* flag);
 long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2);
-void Core_Gte_OuterProduct0(VECTOR* v0, VECTOR* v1, VECTOR* v2);
-long Core_Gte_VectorNormal(VECTOR* v0, VECTOR* v1);
-long Core_Gte_VectorNormalS(VECTOR* input, SVECTOR* output);
-long Core_Gte_VectorNormalSS(SVECTOR* v0, SVECTOR* v1);
-long Core_Gte_SquareRoot12(long a);
 void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1);
-int Core_Gte_Sin(int a);              // rsin: 4096 = full circle, result 4.12
-int Core_Gte_Cos(int a);              // rcos
-long Core_Gte_Atan2(long y, long x);  // ratan2: result in 4096-per-circle units
 
 #ifdef __cplusplus
 }

@@ -1,9 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -73,13 +74,13 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
         particle_definition = &Effects_package->block5Data->definitions[fp->opaque1];
         emitter_scratch->flags = particle_definition->flags;
         m = &effect_instance->transforms[particle_definition->transformIndex].world;
-        Core_Math_InterpolatePairsToWideVector(particle_definition->positionRange,
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->positionRange,
             Effects_SampleEffectCurve(particle_definition->positionCurve, fp->curveSampleDistance), &emitter_scratch->position);
         switch (emitter_scratch->flags & 7) {
         case 0:
             break;
         case 1:
-            Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
+            VS::Core::Math::AddLiveVectorsTo(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
             break;
         case 2:
             applyVector(&emitter_scratch->position, m->t[0], m->t[1], m->t[2], +=);
@@ -88,27 +89,27 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
         // bad var reuse: j and i accumulate the grid offsets below
         j = 0;
         k = 0;
-        Core_Math_InterpolatePairsToWideVector(particle_definition->extentRange,
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->extentRange,
             Effects_SampleEffectCurve(particle_definition->extentCurve, fp->curveSampleDistance), &emitter_scratch->extent);
         temp = Effects_SampleEffectCurve(particle_definition->forceCurve, fp->curveSampleDistance);
-        Core_Math_InterpolatePairsToShortVector(&particle_definition->vectorRanges[2][0], temp, &emitter_scratch->forceMin);
-        Core_Math_InterpolatePairsToShortVector(&particle_definition->vectorRanges[3][0], temp, &emitter_scratch->forceMax);
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[2], temp, &emitter_scratch->forceMin);
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[3], temp, &emitter_scratch->forceMax);
         temp = Effects_SampleEffectCurve(particle_definition->accelerationCurve, fp->curveSampleDistance);
-        Core_Math_InterpolatePairsToShortVector(&particle_definition->vectorRanges[4][0], temp, &emitter_scratch->accelerationMin);
-        Core_Math_InterpolatePairsToShortVector(&particle_definition->vectorRanges[5][0], temp, &emitter_scratch->accelerationMax);
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[4], temp, &emitter_scratch->accelerationMin);
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[5], temp, &emitter_scratch->accelerationMax);
 
-        Core_Math_InterpolatePairsToWideVector(&particle_definition->vectorRanges[0][0],
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[0],
             Effects_SampleEffectCurve(particle_definition->directionCurve, fp->curveSampleDistance), &emitter_scratch->baseDirection);
-        Core_Math_InterpolatePairsToWideVector(&particle_definition->vectorRanges[1][0],
+        VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[1],
             Effects_SampleEffectCurve(particle_definition->directionJitterCurve, fp->curveSampleDistance), &emitter_scratch->directionJitter);
-        Core_Math_InterpolatePairsToPlaneVector(&particle_definition->pairRanges[2][0],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[2],
             Effects_SampleEffectCurve(particle_definition->speedCurve, fp->curveSampleDistance), emitter_scratch->speedRange);
-        Core_Math_InterpolatePairsToPlaneVector(&particle_definition->pairRanges[0][0],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[0],
             Effects_SampleEffectCurve(particle_definition->massCurve, fp->curveSampleDistance), emitter_scratch->massRange);
-        Core_Math_InterpolatePairsToPlaneVector(&particle_definition->pairRanges[1][0],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[1],
             Effects_SampleEffectCurve(particle_definition->gravityScaleCurve, fp->curveSampleDistance), emitter_scratch->gravityScaleRange);
 
-        depthMode = Core_Math_InterpolateShortPair(
+        depthMode = VS::Core::Math::InterpolateLiveShortPair(
             particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, fp->curveSampleDistance));
 
         fp->opaqueC += emitter_scratch->accelerationMin.vx;
@@ -146,8 +147,8 @@ int Effects_Plg005_UpdateAnalyzeGrid(Effects_RendererSlot* renderer_slot, u_int 
             phaseX += emitter_scratch->speedRange[0];
             phaseZ += emitter_scratch->speedRange[1];
             for (j = 0; j < 9; j++) {
-                vertices[i][j].vx = gridX[j] + ((Core_Gte_Sin(angleX) * emitter_scratch->baseDirection.vx) >> 12);
-                vertices[i][j].vz = gridZ[i] + ((Core_Gte_Cos(angleZ) * emitter_scratch->baseDirection.vy) >> 12);
+                vertices[i][j].vx = gridX[j] + ((VS::Core::Math::Sine(angleX) * emitter_scratch->baseDirection.vx) >> 12);
+                vertices[i][j].vz = gridZ[i] + ((VS::Core::Math::Cosine(angleZ) * emitter_scratch->baseDirection.vy) >> 12);
                 vertices[i][j].vy = emitter_scratch->position.vy;
                 angleX += emitter_scratch->directionJitter.vx;
                 angleZ += emitter_scratch->directionJitter.vy;

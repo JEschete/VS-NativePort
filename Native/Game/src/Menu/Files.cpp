@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -19,7 +20,6 @@ extern "C" {
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Event/ScriptAudio.h"
@@ -2323,7 +2323,7 @@ void Menu_Files_DrawPlayTime(void)
         time[0] = ((((time[0] << 14) + VS::Core::NextLiveInterfaceRandomBits(15)) * 5u) >> 14) / 3;
     }
     for (i = 0; i < 4; ++i) {
-        digits = Core_Math_SplitDecimalDigit(time[i]);
+        digits = VS::Core::Math::SplitDecimalDigit(time[i]);
         Menu_Files_playTime[9 - i * 3] = (digits >> 4) + 48;
         Menu_Files_playTime[10 - i * 3] = (digits & 0xF) + 48;
     }

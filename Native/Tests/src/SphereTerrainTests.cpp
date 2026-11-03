@@ -11,6 +11,7 @@
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/SphereTerrainLive.hpp"
 #include "Battle/TargetPages.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -71,7 +72,7 @@ struct SliceFixture {
     SVECTOR angles{512, static_cast<std::int16_t>(yaw), 0, 0};
     MATRIX camera{};
     Core_Gte_Reset();
-    Core_Gte_RotMatrix(&angles, &camera);
+    VS::Core::Math::BuildLiveRotationXyz(&angles, &camera);
     camera.t[2] = 2048;
     Core_Gte_SetRotMatrix(&camera);
     Core_Gte_SetTransMatrix(&camera);

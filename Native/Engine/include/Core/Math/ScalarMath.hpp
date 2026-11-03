@@ -4,6 +4,7 @@
 #include <concepts>
 #include <cstdint>
 #include <optional>
+#include <type_traits>
 
 #include "Core/Math/Distance.hpp"
 
@@ -72,14 +73,68 @@ struct NormalizedVector {
   return static_cast<std::int16_t>(static_cast<std::uint16_t>(value));
 }
 
+// Word arithmetic that wraps like the original 32-bit registers instead of
+// overflowing.
+[[nodiscard]] constexpr std::int32_t WrappingAdd(std::int32_t left,
+                                                 std::int32_t right) noexcept {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(left) +
+                                   static_cast<std::uint32_t>(right));
+}
+[[nodiscard]] constexpr std::int32_t WrappingSubtract(
+    std::int32_t left, std::int32_t right) noexcept {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(left) -
+                                   static_cast<std::uint32_t>(right));
+}
+[[nodiscard]] constexpr std::int32_t WrappingMultiply(
+    std::int32_t left, std::int32_t right) noexcept {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(left) *
+                                   static_cast<std::uint32_t>(right));
+}
+[[nodiscard]] constexpr std::int32_t WrappingNegate(
+    std::int32_t value) noexcept {
+  return static_cast<std::int32_t>(0u - static_cast<std::uint32_t>(value));
+}
+
+// The quotient the R3000 DIV instruction leaves in LO: truncating division,
+// with a zero divisor giving 1 for a negative dividend and -1 otherwise, and
+// INT32_MIN / -1 giving INT32_MIN. Defined for every input.
+[[nodiscard]] constexpr std::int32_t R3000Quotient(
+    std::int32_t dividend, std::int32_t divisor) noexcept {
+  if (divisor == 0) {
+    return dividend < 0 ? 1 : -1;
+  }
+  if (divisor == -1) {
+    return WrappingNegate(dividend);
+  }
+  return dividend / divisor;
+}
+
 // Q12 sine and cosine of an angle in 4096-per-turn units; only the low 12
 // bits of the angle count.
 [[nodiscard]] std::int32_t Sine(std::int32_t angle) noexcept;
 [[nodiscard]] std::int32_t Cosine(std::int32_t angle) noexcept;
 
-// Angle of (x, y) in 4096-per-turn units, rounded to the nearest unit and in
-// [-2048, 2048]; the origin gives 0 (ratan2's argument order).
+// Angle of (x, y) in 4096-per-turn units, in [-2048, 2048], read from the
+// original's 513-entry octant table; the origin gives 0 (ratan2's argument
+// order).
 [[nodiscard]] std::int32_t Arctangent2(std::int32_t y, std::int32_t x) noexcept;
+
+// Arctangent2 of Q12 components, which drops their low six bits first.
+[[nodiscard]] std::int32_t FixedAtan2(std::int32_t y, std::int32_t x) noexcept;
+
+// sqrt(value) in Q12 for an integer value (SquareRoot12); non-positive inputs
+// give 0.
+[[nodiscard]] std::int32_t SquareRootFixed(std::int32_t value) noexcept;
+
+// Clamps value between two halfword bounds given in either order. Only the
+// low 16 bits of each bound count.
+[[nodiscard]] std::int16_t ClampSignedShort(std::int16_t value,
+                                            std::int32_t first_bound,
+                                            std::int32_t second_bound) noexcept;
+
+// value % 10 in the low nibble with value / 10 shifted above it: a BCD byte
+// for 0..99.
+[[nodiscard]] std::int32_t SplitDecimalDigit(std::int32_t value) noexcept;
 
 // (left * right) >> 12 computed in 64 bits and truncated to a word.
 [[nodiscard]] std::int32_t MultiplyFixed(std::int32_t left,
@@ -113,10 +168,6 @@ struct NormalizedVector {
 // Rotation built in the actor-model Euler order.
 [[nodiscard]] Mat3 BuildEulerRotationMatrixQuadrant(Angles3 rotation) noexcept;
 
-// The libgte RotMatrixYXZ rotation Ry * Rx * Rz, each axis matrix built from
-// truncated Q12 sine and cosine and each product truncated to a halfword.
-[[nodiscard]] Mat3 BuildRotationMatrixYXZ(Angles3 rotation) noexcept;
-
 // Multiplies each column by the matching scale component, truncated to a
 // signed halfword, with each element saturated to a signed halfword.
 [[nodiscard]] Mat3 ScaleMatrixColumns(const Mat3& matrix, Vec3 scale) noexcept;
@@ -128,7 +179,7 @@ struct NormalizedVector {
 
 // Scales a vector (components reduced to signed halfwords) to Q12 unit length
 // with the reciprocal-root table. A zero vector gives a zero direction.
-[[nodiscard]] NormalizedVector NormalizeVectorRegisters(Vec3 input) noexcept;
+[[nodiscard]] NormalizedVector NormalizeVector(Vec3 input) noexcept;
 
 // A record with a 3x3 halfword rotation member m, such as a MATRIX. Adapters
 // read and write only m, so any translation or padding is left untouched.
@@ -169,6 +220,16 @@ template <VectorRecord Vector>
   return Angles3{static_cast<std::int32_t>(vector.vx),
                  static_cast<std::int32_t>(vector.vy),
                  static_cast<std::int32_t>(vector.vz)};
+}
+
+// Writes x, y and z to a vector record, each truncated to the member's width
+// as the original word or halfword store was; any padding is left untouched.
+template <VectorRecord Vector>
+constexpr void StoreVector(Vector& record, Vec3 value) noexcept {
+  using Component = std::remove_cvref_t<decltype(record.vx)>;
+  record.vx = static_cast<Component>(value.x);
+  record.vy = static_cast<Component>(value.y);
+  record.vz = static_cast<Component>(value.z);
 }
 
 // Record forms of the matrix operations for callers that keep MATRIX/SVECTOR

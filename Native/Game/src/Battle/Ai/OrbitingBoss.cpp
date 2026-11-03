@@ -50,7 +50,7 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
     switch (motion->phase) {
     case 0:
         motion->isOrbiting = 1;
-        angle = Core_Gte_Atan2(state->x - 0x7C0, state->z - 0x7C0) & 0xFFF;
+        angle = VS::Core::Math::Arctangent2(state->x - 0x7C0, state->z - 0x7C0) & 0xFFF;
         angle = -angle;
         angle += 0xC00;
         motion->orbitAngle = angle & 0xFFF;
@@ -66,7 +66,7 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
                 return 0;
             }
             motion->phase = 0;
-            angle = Core_Gte_Atan2(0x7C0 - state->x, 0x7C0 - state->z) & 0xFFF;
+            angle = VS::Core::Math::Arctangent2(0x7C0 - state->x, 0x7C0 - state->z) & 0xFFF;
             angle = -angle;
             angle += 0xC00;
             motion->heading = angle & 0xFFF;
@@ -75,9 +75,9 @@ int Battle_Ai_UpdateBossRadialRetreat(Battle_Ai_RadialRetreatView* state)
         }
         break;
     }
-    angle = Core_Gte_Cos(motion->orbitAngle);
+    angle = VS::Core::Math::Cosine(motion->orbitAngle);
     state->moveX = (state->x << 12) + Battle_Ai_radialRetreatPath[motion->pathStep][0] * angle;
-    angle = Core_Gte_Sin(motion->orbitAngle);
+    angle = VS::Core::Math::Sine(motion->orbitAngle);
     state->moveZ = (state->z << 12) + Battle_Ai_radialRetreatPath[motion->pathStep][0] * angle;
     state->moveY = (state->y + Battle_Ai_radialRetreatPath[motion->pathStep][1]) << 12;
     VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
@@ -111,7 +111,7 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     int oppositeAngle;
     int initialAngle, currentHeading, targetHeading, facing, trig, correction, difference;
     if (!motion->started) {
-        initialAngle = Core_Gte_Atan2(0x7C0 - state->x, 0x7C0 - state->z) & 0xFFF;
+        initialAngle = VS::Core::Math::Arctangent2(0x7C0 - state->x, 0x7C0 - state->z) & 0xFFF;
         initialAngle = -initialAngle;
         initialAngle += 0xC00;
         motion->heading = initialAngle & 0xFFF;
@@ -152,9 +152,9 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     }
     center[1] = motion->savedHeight << 12;
     center[2] = 0x7C0000;
-    playerAngle = Core_Gte_Atan2(0x7C0 - ((Battle_Ai_OrbitPlayerRecordView*)Actors_actorRecords[0])->x,
+    playerAngle = VS::Core::Math::Arctangent2(0x7C0 - ((Battle_Ai_OrbitPlayerRecordView*)Actors_actorRecords[0])->x,
         0x7C0 - ((Battle_Ai_OrbitPlayerRecordView*)Actors_actorRecords[0])->z);
-    currentAngle = Core_Gte_Atan2(0x7C0 - state->x, 0x7C0 - state->z);
+    currentAngle = VS::Core::Math::Arctangent2(0x7C0 - state->x, 0x7C0 - state->z);
     if (Battle_Ai_IsBossActionReady((Battle_Ai_ActorAiState *)((void*)state)) && VS::Battle::Ai::IsLiveEngagementReady((Battle_Ai_ActorAiState *)((void*)state))) {
         heading = playerAngle;
         tracking = 1;
@@ -166,10 +166,10 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     if (Battle_Ai_orbitAngularVelocity >= 0) {
         sign = 1;
     }
-    cosCurrent = Core_Gte_Cos(-currentAngle + 0xC00);
-    sinTarget = Core_Gte_Sin(-heading + 0xC00);
-    sinCurrent = Core_Gte_Sin(-currentAngle + 0xC00);
-    cosTarget = Core_Gte_Cos(-heading + 0xC00);
+    cosCurrent = VS::Core::Math::Cosine(-currentAngle + 0xC00);
+    sinTarget = VS::Core::Math::Sine(-heading + 0xC00);
+    sinCurrent = VS::Core::Math::Sine(-currentAngle + 0xC00);
+    cosTarget = VS::Core::Math::Cosine(-heading + 0xC00);
     aligned = ((cosCurrent * sinTarget - sinCurrent * cosTarget) * sign) >= 0;
     if (aligned) {
         if (ABS(Battle_Ai_orbitAngularVelocity) > 0x280000) {
@@ -180,7 +180,7 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     } else {
         delta = Battle_Ai_orbitAngularVelocity / 4 + (sign << 16);
     }
-    if (tracking || Core_Gte_Cos(currentAngle - heading) < Core_Gte_Cos(222)) {
+    if (tracking || VS::Core::Math::Cosine(currentAngle - heading) < VS::Core::Math::Cosine(222)) {
         if (!aligned) {
             delta = -delta;
         }
@@ -208,9 +208,9 @@ void Battle_Ai_UpdateBossOrbitTracking(Battle_Ai_OrbitTrackingView* state)
     motion->heading += Battle_Ai_orbitAngularVelocity >> 16;
     facing = motion->heading;
     state->movementTarget = 0;
-    trig = Core_Gte_Cos(facing);
+    trig = VS::Core::Math::Cosine(facing);
     state->moveX = center[0] + radius * trig;
-    trig = Core_Gte_Sin(facing);
+    trig = VS::Core::Math::Sine(facing);
     state->moveZ = center[2] + radius * trig;
     if (tracking) {
         if (aligned) {

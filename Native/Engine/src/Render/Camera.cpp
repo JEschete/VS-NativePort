@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Render/RoomDraw.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
@@ -41,11 +42,11 @@ void Render_BuildCameraViewMatrix(void)
         delta.vz = 1;
     }
 
-    Core_Gte_VectorNormal(&delta, &forward);
-    Core_Gte_OuterProduct0(&forward, &up, &right);
-    Core_Gte_VectorNormal(&right, &right);
-    Core_Gte_OuterProduct0(&right, &forward, &up);
-    Core_Gte_VectorNormal(&up, &up);
+    VS::Core::Math::NormalizeLiveVector(&delta, &forward);
+    VS::Core::Math::StoreLiveCrossProduct(&forward, &up, &right);
+    VS::Core::Math::NormalizeLiveVector(&right, &right);
+    VS::Core::Math::StoreLiveCrossProduct(&right, &forward, &up);
+    VS::Core::Math::NormalizeLiveVector(&up, &up);
     Render_cameraBasisMatrix.m[0][0] = scratch->viewMatrix.m[0][0] = -right.vx;
     Render_cameraBasisMatrix.m[0][1] = scratch->viewMatrix.m[0][1] = right.vy;
     Render_cameraBasisMatrix.m[0][2] = scratch->viewMatrix.m[0][2] = right.vz;
@@ -55,8 +56,8 @@ void Render_BuildCameraViewMatrix(void)
     Render_cameraBasisMatrix.m[2][0] = scratch->viewMatrix.m[2][0] = -forward.vx;
     Render_cameraBasisMatrix.m[2][1] = scratch->viewMatrix.m[2][1] = forward.vy;
     Render_cameraBasisMatrix.m[2][2] = scratch->viewMatrix.m[2][2] = forward.vz;
-    roll.m[1][1] = roll.m[0][0] = Core_Gte_Cos(scratch->camera.angles.vz);
-    roll.m[1][0] = Core_Gte_Sin(scratch->camera.angles.vz);
+    roll.m[1][1] = roll.m[0][0] = VS::Core::Math::Cosine(scratch->camera.angles.vz);
+    roll.m[1][0] = VS::Core::Math::Sine(scratch->camera.angles.vz);
     roll.m[0][1] = -roll.m[1][0];
     roll.m[2][2] = ONE;
     roll.m[0][2] = roll.m[1][2] = roll.m[2][0] = roll.m[2][1] = 0;
@@ -116,11 +117,11 @@ void Render_BuildLookAtViewMatrix(VECTOR* position, VECTOR* target, MATRIX* view
     VECTOR translation;
     setVector(&forward, target->vx - position->vx, target->vy - position->vy,
         target->vz - position->vz);
-    Core_Gte_VectorNormal(&forward, &forward);
-    Core_Gte_OuterProduct0(&up, &forward, &right);
-    Core_Gte_VectorNormal(&right, &right);
-    Core_Gte_OuterProduct0(&right, &forward, &up);
-    Core_Gte_VectorNormal(&up, &up);
+    VS::Core::Math::NormalizeLiveVector(&forward, &forward);
+    VS::Core::Math::StoreLiveCrossProduct(&up, &forward, &right);
+    VS::Core::Math::NormalizeLiveVector(&right, &right);
+    VS::Core::Math::StoreLiveCrossProduct(&right, &forward, &up);
+    VS::Core::Math::NormalizeLiveVector(&up, &up);
     view->m[0][0] = -right.vx;
     view->m[0][1] = -right.vy;
     view->m[0][2] = -right.vz;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -237,7 +238,7 @@ int Menu_Results_InitializeTimeAttackStart(void)
 // decomp: MENUF.PRG _renderTimeAttackEnd (src/MENU/MENUF.PRG/3B8.c:905)
 int Menu_Results_UpdateTimeAttackResults(void)
 {
-    int palette_pulse_sine = Core_Gte_Sin(Menu_Results_elementAnimationState);
+    int palette_pulse_sine = VS::Core::Math::Sine(Menu_Results_elementAnimationState);
 
     Menu_Results_PulseTimeAttackClut(ABS(palette_pulse_sine) / 256);
 

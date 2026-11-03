@@ -20,6 +20,7 @@
 #include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
 #include "Core/Log.hpp"
+#include "Core/Math/ScalarMath.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -344,7 +345,7 @@ Result ValidateOrbitCamera(const Snapshot& state) {
   const int zoom_mode =
       state.ashley.cameraDistance == kNearCameraDistance ? 1 : kFarZoomMode;
   if (camera.pitch < -kLastAngle || camera.pitch > kLastAngle ||
-      Core_Gte_Cos(camera.pitch) == 0 ||
+      VS::Core::Math::Cosine(camera.pitch) == 0 ||
       camera.distance != state.ashley.cameraDistance ||
       camera.zoom_mode != zoom_mode || camera.rotation_step < 0 ||
       camera.rotation_step > kMaximumOrbitStep ||

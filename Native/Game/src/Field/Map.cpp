@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Field/Map.h"
@@ -31,8 +32,8 @@ void Field_RestoreSceneRoomVisits(Field_MapScene* scene)
 // decomp: BATTLE.PRG func_8008B590 (src/BATTLE/BATTLE.PRG/146C.c:16033)
 void Field_BuildMinimapRotation(MATRIX* output_rotation, int yaw_angle)
 {
-    int yaw_sine = Core_Gte_Sin(yaw_angle);
-    int yaw_cosine = Core_Gte_Cos(yaw_angle);
+    int yaw_sine = VS::Core::Math::Sine(yaw_angle);
+    int yaw_cosine = VS::Core::Math::Cosine(yaw_angle);
     int negative_yaw_sine = -yaw_sine;
 
     output_rotation->m[0][0] = yaw_cosine;

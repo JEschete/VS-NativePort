@@ -1,8 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
 #include "Effects/Particles.h"
@@ -71,17 +71,17 @@ void Effects_ApplyEffectCamera(Effects_EffectCamera* camera)
     int dx, dz, yaw, pitch, horizontal;
     dx = (camera->position.vx - camera->lookAt.vx) >> 12;
     dz = (camera->position.vz - camera->lookAt.vz) >> 12;
-    yaw = Core_Gte_Atan2(dx, dz);
-    offset.vx = Core_Gte_Cos(yaw) * (camera->shakeLateral >> 12);
-    offset.vz = -Core_Gte_Sin(yaw) * (camera->shakeLateral >> 12);
-    pitch = Core_Gte_Atan2(
+    yaw = VS::Core::Math::Arctangent2(dx, dz);
+    offset.vx = VS::Core::Math::Cosine(yaw) * (camera->shakeLateral >> 12);
+    offset.vz = -VS::Core::Math::Sine(yaw) * (camera->shakeLateral >> 12);
+    pitch = VS::Core::Math::Arctangent2(
         (camera->position.vy - camera->lookAt.vy) >> 12, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz));
-    offset.vy = -Core_Gte_Sin(pitch) * (camera->shakeDepth >> 12);
-    horizontal = -Core_Gte_Cos(pitch) * (camera->shakeDepth >> 12);
-    offset.vy += Core_Gte_Cos(pitch) * (camera->shakeVertical >> 12);
-    horizontal += -Core_Gte_Sin(pitch) * (camera->shakeVertical >> 12);
-    offset.vx += Core_Gte_Sin(yaw) * (horizontal >>= 12);
-    offset.vz += Core_Gte_Cos(yaw) * horizontal;
+    offset.vy = -VS::Core::Math::Sine(pitch) * (camera->shakeDepth >> 12);
+    horizontal = -VS::Core::Math::Cosine(pitch) * (camera->shakeDepth >> 12);
+    offset.vy += VS::Core::Math::Cosine(pitch) * (camera->shakeVertical >> 12);
+    horizontal += -VS::Core::Math::Sine(pitch) * (camera->shakeVertical >> 12);
+    offset.vx += VS::Core::Math::Sine(yaw) * (horizontal >>= 12);
+    offset.vz += VS::Core::Math::Cosine(yaw) * horizontal;
     position.vx = camera->position.vx + offset.vx;
     position.vy = camera->position.vy + offset.vy;
     position.vz = camera->position.vz + offset.vz;
@@ -197,7 +197,7 @@ void Effects_UpdateCameraShakeChannels(void)
         v = Effects_SampleSegmentedEffectCurve(Effects_cameraShakeChannels[i].shapeCurve, Effects_cameraShakeChannels[i].phase);
 
         if (v >= 0) {
-            v = ((Core_Gte_Sin(Effects_cameraShakeChannels[i].angle * 32) * v) * Effects_cameraShakeChannels[i].amplitude) >> 8;
+            v = ((VS::Core::Math::Sine(Effects_cameraShakeChannels[i].angle * 32) * v) * Effects_cameraShakeChannels[i].amplitude) >> 8;
 
             switch (i) {
             case 0:
@@ -236,21 +236,21 @@ void Effects_InterpolateEffectCameraLinear(void)
         Effects_cameraMotionEnds[0].position.vz >> 12);
     setVector(&end, Effects_cameraMotionEnds[1].position.vx >> 12, Effects_cameraMotionEnds[1].position.vy >> 12,
         Effects_cameraMotionEnds[1].position.vz >> 12);
-    Core_Math_InterpolateTimedWideVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
+    VS::Core::Math::InterpolateLiveTimedVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
     setVector(&Effects_effectCamera.position, result.vx << 12, result.vy << 12, result.vz << 12);
     setVector(&start, Effects_cameraMotionEnds[0].lookAt.vx >> 12, Effects_cameraMotionEnds[0].lookAt.vy >> 12,
         Effects_cameraMotionEnds[0].lookAt.vz >> 12);
     setVector(&end, Effects_cameraMotionEnds[1].lookAt.vx >> 12, Effects_cameraMotionEnds[1].lookAt.vy >> 12,
         Effects_cameraMotionEnds[1].lookAt.vz >> 12);
-    Core_Math_InterpolateTimedWideVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
+    VS::Core::Math::InterpolateLiveTimedVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
     Effects_effectCamera.lookAt.vx = result.vx << 12;
     Effects_effectCamera.lookAt.vy = result.vy << 12;
     Effects_effectCamera.lookAt.vz = result.vz << 12;
     Effects_effectCamera.roll =
-        Core_Math_InterpolateTimedScalar(Effects_cameraMotionEnds[0].roll, Effects_cameraMotionEnds[1].roll, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.farClip = Core_Math_InterpolateTimedScalar(
+        VS::Core::Math::InterpolateLiveTimedScalar(Effects_cameraMotionEnds[0].roll, Effects_cameraMotionEnds[1].roll, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
+    Effects_effectCamera.farClip = VS::Core::Math::InterpolateLiveTimedScalar(
         Effects_cameraMotionEnds[0].farClip, Effects_cameraMotionEnds[1].farClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.nearClip = Core_Math_InterpolateTimedScalar(
+    Effects_effectCamera.nearClip = VS::Core::Math::InterpolateLiveTimedScalar(
         Effects_cameraMotionEnds[0].nearClip, Effects_cameraMotionEnds[1].nearClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
 }
 
@@ -264,21 +264,21 @@ void Effects_InterpolateEffectCameraCosine(void)
         Effects_cameraMotionEnds[0].position.vz >> 12);
     setVector(&end, Effects_cameraMotionEnds[1].position.vx >> 12, Effects_cameraMotionEnds[1].position.vy >> 12,
         Effects_cameraMotionEnds[1].position.vz >> 12);
-    Core_Math_InterpolateCosineWideVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
+    VS::Core::Math::InterpolateLiveCosineVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
     setVector(&Effects_effectCamera.position, result.vx << 12, result.vy << 12, result.vz << 12);
     setVector(&start, Effects_cameraMotionEnds[0].lookAt.vx >> 12, Effects_cameraMotionEnds[0].lookAt.vy >> 12,
         Effects_cameraMotionEnds[0].lookAt.vz >> 12);
     setVector(&end, Effects_cameraMotionEnds[1].lookAt.vx >> 12, Effects_cameraMotionEnds[1].lookAt.vy >> 12,
         Effects_cameraMotionEnds[1].lookAt.vz >> 12);
-    Core_Math_InterpolateCosineWideVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
+    VS::Core::Math::InterpolateLiveCosineVector(&start, &end, Effects_cameraMotionDuration, Effects_cameraMotionFrame, &result);
     Effects_effectCamera.lookAt.vx = result.vx << 12;
     Effects_effectCamera.lookAt.vy = result.vy << 12;
     Effects_effectCamera.lookAt.vz = result.vz << 12;
     Effects_effectCamera.roll =
-        Core_Math_InterpolateCosineTimedScalar(Effects_cameraMotionEnds[0].roll, Effects_cameraMotionEnds[1].roll, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.farClip = Core_Math_InterpolateCosineTimedScalar(
+        VS::Core::Math::InterpolateLiveCosineScalar(Effects_cameraMotionEnds[0].roll, Effects_cameraMotionEnds[1].roll, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
+    Effects_effectCamera.farClip = VS::Core::Math::InterpolateLiveCosineScalar(
         Effects_cameraMotionEnds[0].farClip, Effects_cameraMotionEnds[1].farClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
-    Effects_effectCamera.nearClip = Core_Math_InterpolateCosineTimedScalar(
+    Effects_effectCamera.nearClip = VS::Core::Math::InterpolateLiveCosineScalar(
         Effects_cameraMotionEnds[0].nearClip, Effects_cameraMotionEnds[1].nearClip, Effects_cameraMotionDuration, Effects_cameraMotionFrame);
 }
 

@@ -5,6 +5,7 @@
 #include "Battle/Ai/GroundNavigationLive.hpp"
 #include "Battle/Ai/NavigationPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 extern "C" {
@@ -188,44 +189,44 @@ int Actors_UpdateAshleyMovementInput(void)
         if ((Actors_ashleyMoveInput[1] != 0) || (Actors_ashleyMoveInput[3] != 0)) {
             if (state_flags & 0x80000) {
                 VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0,
-                    (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
+                    (VS::Core::Math::Arctangent2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
                     stats->walkSpeed * ONE);
             } else if (Input_previousButtons & PADR2) {
                 if (Input_buttonsPressed.allButtons & PADRleft) {
                     Actors_BeginActorJumpMovement(0,
-                        (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
+                        (VS::Core::Math::Arctangent2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                             + Field_sphericalCamera.values.yaw + ONE / 2)
                             & 0xFFF,
                         stats->walkSpeed * ONE);
                 } else {
                     VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0,
-                        (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
+                        (VS::Core::Math::Arctangent2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                             + Field_sphericalCamera.values.yaw + ONE / 2)
                             & 0xFFF,
                         stats->walkSpeed * ONE);
                 }
             } else if (Input_buttonsPressed.allButtons & PADRleft) {
                 Actors_BeginActorJumpMovement(0,
-                    (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
+                    (VS::Core::Math::Arctangent2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
                     stats->runSpeed * ONE);
             } else {
                 VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0,
-                    (Core_Gte_Atan2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
+                    (VS::Core::Math::Arctangent2(Actors_ashleyMoveInput[1], Actors_ashleyMoveInput[3])
                         + Field_sphericalCamera.values.yaw + ONE / 2)
                         & 0xFFF,
                     stats->runSpeed * ONE);
             }
         } else if (!(state_flags & 0x80000) && (Input_buttonsPressed.allButtons & PADRleft)) {
             Actors_BeginActorJumpMovement(0,
-                (Core_Gte_Atan2(0, 0) + Field_sphericalCamera.values.yaw + ONE / 2)
+                (VS::Core::Math::Arctangent2(0, 0) + Field_sphericalCamera.values.yaw + ONE / 2)
                     & 0xFFF,
                 0);
         } else {
-            VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0, Core_Gte_Atan2(0, 0) & 0xFFF, 0);
+            VS::Actors::SetDirectMovement(VS::Actors::ActorRecordMovementRequests(), 0, VS::Core::Math::Arctangent2(0, 0) & 0xFFF, 0);
         }
     }
 
@@ -402,7 +403,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                     ((short*)&actor->commandArg0)[1] * ONE, ((short*)&actor->commandArg0)[0]);
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
                 VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0],
                     ((short*)&actor->commandArg0)[1] * ONE, angle);
@@ -422,7 +423,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0], movementSpeed, ((short*)&actor->commandArg0)[0]);
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
                 VS::Actors::QueueNavigationTileTarget(VS::Actors::ActorRecordMovementRequests(), actorId, ((short*)&actor->commandArg0)[0], movementSpeed, angle);
             }
@@ -447,7 +448,7 @@ int Actors_ExecuteQueuedActorCommands(void)
             Actors_SetActorHeadTracking(actorId, -2, NULL, -1);
             target.position.vx = ((u_char*)&actor->commandArg0)[0] * 128 + 64;
             target.position.vz = ((u_char*)&actor->commandArg0)[2] * 128 + 64;
-            angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+            angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                 target.position.vz - position.position.vz) + 0x800;
             switch (actor->commandOpcode) {
             case 11:
@@ -475,7 +476,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = position.position.pad;
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2((target.packedTile.target.tileX - ((u_char*)&actor->commandArg0)[0]) * ONE,
+                angle = VS::Core::Math::Arctangent2((target.packedTile.target.tileX - ((u_char*)&actor->commandArg0)[0]) * ONE,
                     (target.packedTile.target.tileZ - ((u_char*)&actor->commandArg0)[2]) * ONE) + 0x800;
             }
             VS::Actors::BeginLiveTeleport(actorId, &actor->commandArg0, angle);
@@ -488,12 +489,12 @@ int Actors_ExecuteQueuedActorCommands(void)
             } else {
                 movementSpeed = actor->stats->walkSpeed << 12;
             }
-            Core_Gte_VectorNormalSS((SVECTOR*)&actor->commandArg0, &step);
+            VS::Core::Math::NormalizeLiveVector((SVECTOR*)&actor->commandArg0, &step);
             if (actor->commandTarget >= 16) {
-                angle = Core_Gte_Atan2(step.vx, step.vz) + 0x800;
+                angle = VS::Core::Math::Arctangent2(step.vx, step.vz) + 0x800;
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
             VS::Actors::QueueLiveFlightMovement(actorId, &step, movementSpeed, angle);
@@ -506,12 +507,12 @@ int Actors_ExecuteQueuedActorCommands(void)
             } else {
                 movementSpeed = actor->stats->walkSpeed << 12;
             }
-            Core_Gte_VectorNormalSS((SVECTOR*)&actor->commandArg0, &step);
+            VS::Core::Math::NormalizeLiveVector((SVECTOR*)&actor->commandArg0, &step);
             if (actor->commandTarget >= 16) {
-                angle = Core_Gte_Atan2(step.vx, step.vz) + 0x800;
+                angle = VS::Core::Math::Arctangent2(step.vx, step.vz) + 0x800;
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
             VS::Actors::QueueLiveFlightMovement(actorId, &step, movementSpeed, angle);
@@ -522,10 +523,10 @@ int Actors_ExecuteQueuedActorCommands(void)
             step.vy = actor->commandArg2 / ONE - (u_short)position.position.vy;
             step.vz = actor->commandArg1.word / ONE - (u_short)position.position.vz;
             if (actor->commandTarget >= 16) {
-                angle = Core_Gte_Atan2(step.vx, step.vz) + 0x800;
+                angle = VS::Core::Math::Arctangent2(step.vx, step.vz) + 0x800;
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
             VS::Actors::QueueLiveMovementVector(actorId, &step, angle);
@@ -552,10 +553,10 @@ int Actors_ExecuteQueuedActorCommands(void)
                 step.vx = ((short*)&actor->commandArg0)[0] / ONE - (u_short)position.position.vx;
                 step.vy = ((short*)&actor->commandArg0)[1] / ONE - (u_short)position.position.vy;
                 step.vz = ((short*)&actor->commandArg0)[2] / ONE - (u_short)position.position.vz;
-                angle = Core_Gte_Atan2(step.vx, step.vz) + 0x800;
+                angle = VS::Core::Math::Arctangent2(step.vx, step.vz) + 0x800;
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
             VS::Actors::BeginLiveTimedTravel(actorId, &actor->commandArg0, angle);
@@ -566,10 +567,10 @@ int Actors_ExecuteQueuedActorCommands(void)
                 step.vx = ((u_char*)&actor->commandArg0)[0] / ONE - position.packedTile.target.tileX;
                 step.vy = ((u_char*)&actor->commandArg0)[1] / ONE - position.packedTile.target.tileLayer;
                 step.vz = ((u_char*)&actor->commandArg0)[2] / ONE - position.packedTile.target.tileZ;
-                angle = Core_Gte_Atan2(step.vx, step.vz) + 0x800;
+                angle = VS::Core::Math::Arctangent2(step.vx, step.vz) + 0x800;
             } else {
                 Actors_ActorPlacement(actor->commandTarget, &target);
-                angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
+                angle = VS::Core::Math::Arctangent2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
             VS::Actors::BeginLiveTileTravel(actorId, &actor->commandArg0, angle);
@@ -690,7 +691,7 @@ int Actors_ActorFacingDeltaToPoint(Actors_ActorRecord* actor, SVECTOR* target_po
     if ((delta_x == 0) && (delta_z == 0)) {
         heading_delta_work = actor->instance.facing;
     } else {
-        heading_delta_work = (0xC00 - Core_Gte_Atan2(delta_z, delta_x)) & 0xFFF;
+        heading_delta_work = (0xC00 - VS::Core::Math::Arctangent2(delta_z, delta_x)) & 0xFFF;
     }
 
     heading_delta_work -= actor->instance.facing;
@@ -1684,8 +1685,8 @@ scale:
         return status;
     }
     angle = ONE * 3 / 4 - direction;
-    motion.vx = Core_Gte_Cos(angle) * speed / 0x1000000;
-    motion.vz = Core_Gte_Sin(angle) * speed / 0x1000000;
+    motion.vx = VS::Core::Math::Cosine(angle) * speed / 0x1000000;
+    motion.vz = VS::Core::Math::Sine(angle) * speed / 0x1000000;
 
 move:
     if (actor->instance.movementMode == 3) {
@@ -2142,7 +2143,7 @@ void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int move_steps_pe
             if (angle == 0 && dz == 0) {
                 angle = (short)facing;
             } else {
-                angle = ONE * 3 / 4 - Core_Gte_Atan2(dz, angle);
+                angle = ONE * 3 / 4 - VS::Core::Math::Arctangent2(dz, angle);
                 angle &= 0xFFF;
             }
 
@@ -2169,7 +2170,7 @@ void Actors_MoveActorToPositionAtRate(int id, SVECTOR* target, int move_steps_pe
 
         angle = (short)facing;
     } else {
-        angle = ONE * 3 / 4 - Core_Gte_Atan2(dz, angle);
+        angle = ONE * 3 / 4 - VS::Core::Math::Arctangent2(dz, angle);
         angle &= 0xFFF;
     }
 
@@ -2558,7 +2559,7 @@ void Actors_SetActorTileTurn(int actor_id, Actors_TileTarget* tile_target, int t
     if (angle == 0 && dz == 0) {
         angle = tile_target->facing * 16;
     } else {
-        angle = 0xC00 - Core_Gte_Atan2(dz, angle);
+        angle = 0xC00 - VS::Core::Math::Arctangent2(dz, angle);
         angle %= ONE;
     }
 

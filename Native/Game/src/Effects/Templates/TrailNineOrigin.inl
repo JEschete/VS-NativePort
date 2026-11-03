@@ -1,11 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/RandomLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -35,7 +36,7 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
     u_short corner_y_bits;
     u_short corner_z_bits;
 
-    Core_Math_InterpolatePairsToWideVector(particle_definition->positionRange,
+    VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->positionRange,
         Effects_SampleEffectCurve(particle_definition->positionCurve, trail_set->curveSampleDistance), &emitter_scratch->position);
 
     matrix = &effect_instance->transforms[particle_definition->transformIndex].world;
@@ -46,7 +47,7 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
         break;
     // Fixed point D_800F5310
     case 1:
-        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
+        VS::Core::Math::AddLiveVectorsTo(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     // Caster
     case 2:
@@ -54,7 +55,7 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
         break;
     }
 
-    Core_Math_InterpolatePairsToWideVector(particle_definition->extentRange,
+    VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->extentRange,
         Effects_SampleEffectCurve(particle_definition->extentCurve, trail_set->curveSampleDistance), &emitter_scratch->extent);
     Core_Gte_SetRotMatrix(matrix);
     Core_Gte_ClearTranslation();
@@ -66,12 +67,12 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
             splinePoint = &trail_set->trails[i].splinePoints[0];
 
             random_angle = Core_Random_Rand();
-            emitter_scratch->sinAngle0 = Core_Gte_Sin(random_angle);
-            emitter_scratch->cosAngle0 = Core_Gte_Cos(random_angle);
+            emitter_scratch->sinAngle0 = VS::Core::Math::Sine(random_angle);
+            emitter_scratch->cosAngle0 = VS::Core::Math::Cosine(random_angle);
 
             random_angle = Core_Random_Rand();
-            emitter_scratch->sinAngle1 = Core_Gte_Sin(random_angle);
-            emitter_scratch->cosAngle1 = Core_Gte_Cos(random_angle);
+            emitter_scratch->sinAngle1 = VS::Core::Math::Sine(random_angle);
+            emitter_scratch->cosAngle1 = VS::Core::Math::Cosine(random_angle);
 
             setVector(splinePoint,
                 ((((emitter_scratch->extent.vx * emitter_scratch->cosAngle0) >> 0xC) * emitter_scratch->cosAngle1) >> 0xC),
@@ -202,16 +203,16 @@ void VS_TRAIL_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition, E
     if ((emitter_scratch->flags & 0x1800) != 0x1000) {
         VS_TRAIL_CORNER_STATE = VS_TRAIL_CORNER_STATE % emitter_scratch->ringPositions;
         temp_s0_2 = (VS_TRAIL_CORNER_STATE * ring_angle_step) + ONE / 8;
-        ring_edge_start_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
-        ring_edge_start_z = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
+        ring_edge_start_x = (VS::Core::Math::Cosine(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        ring_edge_start_z = (VS::Core::Math::Sine(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
     }
 
     for (i = 0; i < trail_set->trailCount; ++i) {
         splinePoint = &trail_set->trails[i].splinePoints[0];
         VS_TRAIL_CORNER_STATE = (VS_TRAIL_CORNER_STATE + 1) % emitter_scratch->ringPositions;
         temp_s0_2 = (VS_TRAIL_CORNER_STATE * ring_angle_step) + ONE / 8;
-        ring_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
-        temp_s0_2 = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
+        ring_x = (VS::Core::Math::Cosine(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        temp_s0_2 = (VS::Core::Math::Sine(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
 
         if ((emitter_scratch->flags & 0x1800) == 0x1000) {
             splinePoint->vx = ring_x;

@@ -221,7 +221,7 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
     }
     owner = state->actorId;
     targetDistance = state->distancesSquared[id];
-    heading = Core_Gte_Atan2(((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position.vx - x,
+    heading = VS::Core::Math::Arctangent2(((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position.vx - x,
         ((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position.vz - z);
     other = RELATION_STATES[id];
     if (other) {
@@ -235,13 +235,13 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
         }
         {
             Battle_Ai_PerceivedObjectView* object = (Battle_Ai_PerceivedObjectView*)actor->model;
-            angle = Core_Gte_Atan2(object->position.vx - x, object->position.vz - z) - heading;
+            angle = VS::Core::Math::Arctangent2(object->position.vx - x, object->position.vz - z) - heading;
         }
-        if (Core_Gte_Cos(angle) < 0) {
+        if (VS::Core::Math::Cosine(angle) < 0) {
             continue;
         }
         root = VS::Core::Math::SquareRootInteger(state->distancesSquared[candidate]);
-        distance = (int)(root * Core_Gte_Sin(angle)) >> 12;
+        distance = (int)(root * VS::Core::Math::Sine(angle)) >> 12;
         if (distance < 0) {
             distance = -distance;
         }

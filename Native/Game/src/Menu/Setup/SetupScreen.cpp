@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -72,7 +73,7 @@ static char Menu_Setup_confirmationPromptCursorState = 0;
 void Menu_Setup_DrawConfirmationLabel(int row, int brightness)
 {
     Render_DrawCompactTextColor("OK", vs_getXY(175, row * 16 + 32),
-        ((Core_Gte_Sin(brightness * 8) >> 5) + 64) * vs_getRGB888(1, 1, 1),
+        ((VS::Core::Math::Sine(brightness * 8) >> 5) + 64) * vs_getRGB888(1, 1, 1),
         (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
 }
 

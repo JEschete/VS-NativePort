@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -1058,11 +1059,11 @@ int Event_EvaluateInterpolationCurve(short mode, short frame, short duration)
     case 0:
         return position * ONE / duration;
     case 1:
-        return Core_Gte_Sin(position * (ONE / 4) / duration);
+        return VS::Core::Math::Sine(position * (ONE / 4) / duration);
     case 2:
-        return (Core_Gte_Cos(position * (ONE / 2) / duration + ONE / 2) + ONE) >> 1;
+        return (VS::Core::Math::Cosine(position * (ONE / 2) / duration + ONE / 2) + ONE) >> 1;
     case 3:
-        return Core_Gte_Sin(position * (ONE / 4) / duration - ONE / 4) + ONE;
+        return VS::Core::Math::Sine(position * (ONE / 4) / duration - ONE / 4) + ONE;
     default:
         mode -= 4;
         power = (*(Event_InterpolationCurve (*)[])&Event_customEasingCurves)[mode].power;
@@ -1086,11 +1087,11 @@ int Event_EvaluateInterpolationCurve(short mode, short frame, short duration)
 
         switch ((*(Event_InterpolationCurve (*)[])&Event_customEasingCurves)[mode].curveFamily) {
         case 1:
-            return Core_Gte_Sin(value / 4);
+            return VS::Core::Math::Sine(value / 4);
         case 2:
-            return (Core_Gte_Cos(value / 2 + ONE / 2) + ONE) >> 1;
+            return (VS::Core::Math::Cosine(value / 2 + ONE / 2) + ONE) >> 1;
         case 3:
-            return Core_Gte_Sin(value / 4 - ONE / 4) + ONE;
+            return VS::Core::Math::Sine(value / 4 - ONE / 4) + ONE;
         case 0:
         default:
             return value;

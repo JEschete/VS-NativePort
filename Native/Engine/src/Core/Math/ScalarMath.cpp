@@ -5,6 +5,7 @@
 #include <array>
 #include <bit>
 #include <cmath>
+#include <cstddef>
 #include <cstdint>
 #include <limits>
 #include <numbers>
@@ -22,7 +23,6 @@ constexpr unsigned kNormalizedIndexShift = 24;
 constexpr unsigned kRootLookupFractionBits = 18;
 constexpr unsigned kAngleMask = 0xFFF;
 constexpr double kRadiansPerAngleUnit = 2.0 * std::numbers::pi / 4096.0;
-constexpr double kAngleUnitsPerRadian = 2048.0 / std::numbers::pi;
 constexpr double kFixedOne = 4096.0;
 
 // Normalized reciprocal-root inputs are 64..255.
@@ -79,6 +79,65 @@ ReciprocalRoot ReciprocalRootOf(std::uint32_t value) noexcept {
       static_cast<std::int32_t>((kWordBits - 1 - even_leading) >> 1)};
 }
 
+// The 8-bit-normalized input shared by the square-root tables: value shifted
+// so its top even-aligned set bit pair lands at bits 6..7, and the even
+// leading-zero count that restores its scale. Requires a positive value.
+struct NormalizedRoot {
+  std::uint32_t sample{};
+  int leading{};
+};
+
+NormalizedRoot NormalizedRootSample(std::uint32_t value) noexcept {
+  const unsigned leading =
+      static_cast<unsigned>(std::countl_zero(value)) & (kWordBits - 2);
+  const std::uint32_t normalized =
+      leading >= kNormalizedIndexShift
+          ? value << (leading - kNormalizedIndexShift)
+          : value >> (kNormalizedIndexShift - leading);
+  // D_80040C18 (SLUS_010.40 0x80040C18) holds floor(sqrt(index << 18)) for
+  // indices 64..255.
+  return NormalizedRoot{
+      IntegerSquareRoot(normalized << kRootLookupFractionBits),
+      static_cast<int>(leading)};
+}
+
+// D_80040A14 (SLUS_010.40 0x80040A14): atan(i / 512) for i = 0..512 in
+// 2048-per-turn units, capped at 255. The disc rounding is reproduced exactly
+// by sampling at i + 0.7 and adding 0.245 before the floor; every entry sits
+// at least 0.0009 from a rounding boundary, so the build is deterministic.
+constexpr std::size_t kArctangentSteps = 512;
+constexpr unsigned kArctangentIndexBits = 9;
+constexpr double kArctangentSampleOffset = 0.7;
+constexpr double kArctangentRoundingBias = 0.245;
+constexpr double kArctangentOctantLimit = 255.0;
+constexpr double kArctangentUnitsPerRadian = 1024.0 / std::numbers::pi;
+using ArctangentTable = std::array<std::uint8_t, kArctangentSteps + 1>;
+
+const ArctangentTable& ArctangentOctant() noexcept {
+  static const ArctangentTable table = [] {
+    ArctangentTable entries{};
+    for (std::size_t index = 0; index < entries.size(); ++index) {
+      const double ratio =
+          (static_cast<double>(index) + kArctangentSampleOffset) /
+          static_cast<double>(kArctangentSteps);
+      const double angle = std::atan(ratio) * kArctangentUnitsPerRadian +
+                           kArctangentRoundingBias;
+      entries[index] = static_cast<std::uint8_t>(
+          std::min(std::floor(angle), kArctangentOctantLimit));
+    }
+    return entries;
+  }();
+  return table;
+}
+
+// Quarter and half turns in the table's 2048-per-turn units.
+constexpr std::int32_t kArctangentQuarterTurn = 512;
+constexpr std::int32_t kArctangentHalfTurn = 1024;
+// _atan2FixedPoint drops six fraction bits from each Q12 component.
+constexpr unsigned kFixedAtan2InputShift = 6;
+// SquareRoot12's result shift is (19 - leading) / 2, rounded down.
+constexpr int kSquareRootFixedScale = 19;
+
 std::int16_t SaturateToHalfword(std::int64_t value) noexcept {
   return static_cast<std::int16_t>(
       std::clamp<std::int64_t>(value, std::numeric_limits<std::int16_t>::min(),
@@ -108,21 +167,82 @@ double AngleRadians(std::int32_t angle) noexcept {
 }
 }  // namespace
 
+// decomp: SLUS_010.40 rsin (src/SLUS_010.40/31724.s:13); BATTLE.PRG
+// func_80098AB8 (src/BATTLE/BATTLE.PRG/2EA3C.s) and ENDING.PRG func_800688D4
+// (src/ENDING/ENDING.PRG/D4.c:187) are copies. Rounding sin to Q12 reproduces
+// every _trig_table (0x80040210) entry the octant folding reads.
 std::int32_t Sine(std::int32_t angle) noexcept {
   return static_cast<std::int32_t>(
       std::lround(std::sin(AngleRadians(angle)) * kFixedOne));
 }
 
+// decomp: SLUS_010.40 rcos (src/SLUS_010.40/31724.s:9) and BATTLE.PRG
+// func_80098AB4 (src/BATTLE/BATTLE.PRG/2EA3C.s): rsin of angle + 1024.
 std::int32_t Cosine(std::int32_t angle) noexcept {
   return static_cast<std::int32_t>(
       std::lround(std::cos(AngleRadians(angle)) * kFixedOne));
 }
 
+// decomp: SLUS_010.40 ratan2 (src/SLUS_010.40/31B7C.c:6).
+// Magnitudes and the shifted ratio are 64-bit: the original's 32-bit
+// `ax << 9` wrapped for |x| or |y| of 2^22 and above and then indexed outside
+// D_80040A14, and -INT32_MIN stayed negative. Those inputs now read the entry
+// for their true ratio.
+// Both branches index by smaller / larger magnitude, so the zero-zero input
+// is the only one with no ratio.
 std::int32_t Arctangent2(std::int32_t y, std::int32_t x) noexcept {
-  if (x == 0 && y == 0) return 0;
-  return static_cast<std::int32_t>(
-      std::lround(std::atan2(static_cast<double>(y), static_cast<double>(x)) *
-                  kAngleUnitsPerRadian));
+  const std::int64_t abs_x = x < 0 ? -std::int64_t{x} : std::int64_t{x};
+  const std::int64_t abs_y = y < 0 ? -std::int64_t{y} : std::int64_t{y};
+  const std::int64_t larger = std::max(abs_x, abs_y);
+  if (larger == 0) {
+    return 0;
+  }
+  const std::int64_t smaller = std::min(abs_x, abs_y);
+  const std::int32_t entry = ArctangentOctant()[static_cast<std::size_t>(
+      (smaller << kArctangentIndexBits) / larger)];
+  std::int32_t angle = abs_x < abs_y ? kArctangentQuarterTurn - entry : entry;
+  if (x < 0) {
+    angle = kArctangentHalfTurn - angle;
+  }
+  angle *= 2;
+  return y < 0 ? -angle : angle;
+}
+
+// decomp: BATTLE.PRG _atan2FixedPoint (src/BATTLE/BATTLE.PRG/4A0A8.c:4177).
+std::int32_t FixedAtan2(std::int32_t y, std::int32_t x) noexcept {
+  return Arctangent2(y >> kFixedAtan2InputShift, x >> kFixedAtan2InputShift);
+}
+
+// decomp: SLUS_010.40 SquareRoot12 (src/SLUS_010.40/32154.s:240).
+// Zero and -1 returned 0; other negative inputs indexed outside D_80040C18
+// and have no square root, so every non-positive input gives 0 here.
+std::int32_t SquareRootFixed(std::int32_t value) noexcept {
+  if (value <= 0) {
+    return 0;
+  }
+  const NormalizedRoot root =
+      NormalizedRootSample(static_cast<std::uint32_t>(value));
+  const int shift = (kSquareRootFixedScale - root.leading) >> 1;
+  return static_cast<std::int32_t>(shift > 0 ? root.sample << shift
+                                             : root.sample >> -shift);
+}
+
+// decomp: BATTLE.PRG vs_battle_clamp (src/BATTLE/BATTLE.PRG/2842C.c:390).
+std::int16_t ClampSignedShort(std::int16_t value, std::int32_t first_bound,
+                              std::int32_t second_bound) noexcept {
+  const std::int16_t first =
+      WrapSigned16(static_cast<std::uint32_t>(first_bound));
+  const std::int16_t second =
+      WrapSigned16(static_cast<std::uint32_t>(second_bound));
+  return std::clamp(value, std::min(first, second), std::max(first, second));
+}
+
+// decomp: BATTLE.PRG vs_battle_toBCD (src/BATTLE/BATTLE.PRG/5BF94.c:4494).
+std::int32_t SplitDecimalDigit(std::int32_t value) noexcept {
+  constexpr std::int32_t kDecimalBase = 10;
+  constexpr std::int32_t kNibbleScale = 16;
+  return (value % kDecimalBase) |
+         WrappingMultiply(value / kDecimalBase, kNibbleScale);
 }
 
 // decomp: BATTLE.PRG _fixedPointMult (src/BATTLE/BATTLE.PRG/4A0A8.c:4163).
@@ -162,32 +282,27 @@ Mat3 PremultiplyRotationMatrix(const Mat3& left, const Mat3& right) noexcept {
 }
 
 // decomp: SLUS_010.40 vs_gte_rsqrt (src/SLUS_010.40/32154.s:207).
-// D_80040C18 contains floor(sqrt(index << 18)) for indices 64..255.
 std::int32_t SquareRootInteger(std::int32_t value) noexcept {
   if (value <= 0) {
     return 0;
   }
-  const auto bits = static_cast<std::uint32_t>(value);
-  const unsigned leading =
-      static_cast<unsigned>(std::countl_zero(bits)) & (kWordBits - 2);
-  const std::uint32_t normalized =
-      leading >= kNormalizedIndexShift
-          ? bits << (leading - kNormalizedIndexShift)
-          : bits >> (kNormalizedIndexShift - leading);
-  const std::uint32_t sample =
-      IntegerSquareRoot(normalized << kRootLookupFractionBits);
-  return static_cast<std::int32_t>(
-      (sample << ((kWordBits - 1 - leading) >> 1)) >> kFixedFractionBits);
+  const NormalizedRoot root =
+      NormalizedRootSample(static_cast<std::uint32_t>(value));
+  const int shift = (static_cast<int>(kWordBits) - 1 - root.leading) >> 1;
+  return static_cast<std::int32_t>((root.sample << shift) >>
+                                   kFixedFractionBits);
 }
 
 // decomp: BATTLE.PRG func_800988BC (src/BATTLE/BATTLE.PRG/2EA3C.s:1597).
 // func_800B16F4 (src/BATTLE/BATTLE.PRG/48C7C.s:188) and SLUS_010.40
-// func_80041104 have identical octant blocks.
+// func_80041104 (src/SLUS_010.40/31724.s:147) have identical octant blocks.
 SineCosine LookupRotationSineCosine(std::int32_t angle) noexcept {
   return SineCosine{Sine(angle), Cosine(angle)};
 }
 
-// decomp: BATTLE.PRG func_8009874C (src/BATTLE/BATTLE.PRG/2EA3C.s:1499).
+// decomp: BATTLE.PRG func_8009874C (src/BATTLE/BATTLE.PRG/2EA3C.s:1499) and
+// SLUS_010.40 RotMatrixYXZ_gte (src/SLUS_010.40/31724.s:47), which computes
+// the same elements from the same products.
 // Keep the GPF stages' two extra fractional bits until each final sum.
 Mat3 BuildEulerRotationMatrix(Angles3 rotation) noexcept {
   const SineCosine x = LookupRotationSineCosine(rotation.x);
@@ -255,51 +370,8 @@ Mat3 BuildEulerRotationMatrixQuadrant(Angles3 rotation) noexcept {
   return output;
 }
 
-namespace {
-enum class RotationAxis { kX, kY, kZ };
-constexpr std::int16_t kUnitElement = 1 << kFixedFractionBits;
-
-Mat3 AxisRotation(RotationAxis axis, std::int32_t angle) noexcept {
-  const auto sine = static_cast<std::int16_t>(Sine(angle));
-  const auto cosine = static_cast<std::int16_t>(Cosine(angle));
-  const auto negative_sine = static_cast<std::int16_t>(-sine);
-  Mat3 output;
-  for (int index = 0; index < kDimensions; ++index) {
-    output.m[index][index] = kUnitElement;
-  }
-  switch (axis) {
-    case RotationAxis::kX:
-      output.m[1][1] = cosine, output.m[1][2] = negative_sine;
-      output.m[2][1] = sine, output.m[2][2] = cosine;
-      break;
-    case RotationAxis::kY:
-      output.m[0][0] = cosine, output.m[0][2] = sine;
-      output.m[2][0] = negative_sine, output.m[2][2] = cosine;
-      break;
-    case RotationAxis::kZ:
-      output.m[0][0] = cosine, output.m[0][1] = negative_sine;
-      output.m[1][0] = sine, output.m[1][1] = cosine;
-      break;
-  }
-  return output;
-}
-
-Mat3 MultiplyTruncated(const Mat3& left, const Mat3& right) noexcept {
-  return MultiplyQ12(left, right, [](std::int64_t value) noexcept {
-    return static_cast<std::int16_t>(value);
-  });
-}
-}  // namespace
-
-// libgte RotMatrixYXZ as the native GTE bridge has always computed it.
-Mat3 BuildRotationMatrixYXZ(Angles3 rotation) noexcept {
-  const Mat3 yx = MultiplyTruncated(AxisRotation(RotationAxis::kY, rotation.y),
-                                    AxisRotation(RotationAxis::kX, rotation.x));
-  return MultiplyTruncated(yx, AxisRotation(RotationAxis::kZ, rotation.z));
-}
-
-// decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s); BATTLE 4B16C.s:8
-// is identical.
+// decomp: SLUS_010.40 ScaleMatrix (src/SLUS_010.40/31C0C.s); BATTLE.PRG
+// func_800B396C (src/BATTLE/BATTLE.PRG/4B16C.s:8) is identical.
 Mat3 ScaleMatrixColumns(const Mat3& matrix, Vec3 scale) noexcept {
   const std::array<std::int16_t, kDimensions> factors{
       static_cast<std::int16_t>(scale.x), static_cast<std::int16_t>(scale.y),
@@ -327,11 +399,13 @@ std::optional<ReciprocalRoot> InverseSquareRootParts(
   return ReciprocalRootOf(static_cast<std::uint32_t>(value));
 }
 
-// decomp: func_80041AF4 (src/SLUS_010.40/32154.s:162-205).
+// decomp: SLUS_010.40 func_80041AF4 (src/SLUS_010.40/32154.s:162), the body
+// of VectorNormal (32154.s:125), VectorNormalS (32154.s:112) and
+// VectorNormalSS (32154.s:141).
 // The squared length is read as unsigned. The original counted signed leading
 // bits, so lengths of 2^31 and above indexed outside D_80040D98; they now use
 // the matching table entry.
-NormalizedVector NormalizeVectorRegisters(Vec3 input) noexcept {
+NormalizedVector NormalizeVector(Vec3 input) noexcept {
   const std::int32_t x = WrapSigned16(static_cast<std::uint32_t>(input.x));
   const std::int32_t y = WrapSigned16(static_cast<std::uint32_t>(input.y));
   const std::int32_t z = WrapSigned16(static_cast<std::uint32_t>(input.z));

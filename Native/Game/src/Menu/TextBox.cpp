@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Menu/Sounds.hpp"
@@ -309,7 +310,7 @@ void Menu_UpdateTextBoxes(void)
             switch (box->flags.openStyle) {
             case 0:
             case 1:
-                scale = Core_Gte_Sin(scale * (ONE / 4) / duration) * 16;
+                scale = VS::Core::Math::Sine(scale * (ONE / 4) / duration) * 16;
                 break;
             case 2:
                 if (scale < duration - 1) {

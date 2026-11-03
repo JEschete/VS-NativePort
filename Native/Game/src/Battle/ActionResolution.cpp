@@ -685,10 +685,10 @@ int Battle_PreviewActionAgainstActor(int action_id, int source_actor_slot, int t
         target_volume.scale.extents[2] = Battle_actionDefinitions[action_id].rangeZ;
         delta_x = target_position->vx - source_position->vx;
         delta_z = target_position->vz - source_position->vz;
-        target_volume.angle = Core_Gte_Atan2(delta_x, delta_z);
+        target_volume.angle = VS::Core::Math::Arctangent2(delta_x, delta_z);
         delta_y = target_position->vy - source_position->vy;
         target_volume.scale.extents[3] =
-            (Core_Gte_Atan2(delta_y, VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)))
+            (VS::Core::Math::Arctangent2(delta_y, VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)))
                 / 16)
             + 0x40;
         *(SVECTOR*)target_volume.position = *source_position;

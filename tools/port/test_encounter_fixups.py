@@ -735,33 +735,64 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_source_root_and_normalization_keep_the_wide_native_api_separate(self):
         owned = self.owned_items()
-        for identity in ("F03405", "F03414"):
+        for identity in ("F03405", "F03411", "F03412", "F03413", "F03414"):
             self.assertEqual(
                 owned[identity]["path"],
                 r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             )
+            self.assertNotIn(identity, copy_fixups.NATIVE_FUNCTION_REDIRECTS)
+        for identity in ("F03411", "F03412", "F03413", "F03414"):
+            self.assertEqual(
+                owned[identity]["name"], "VS::Core::Math::NormalizeVector"
+            )
         self.assertFalse(
             [entry for entry in copy_fixups.MODULE_FUNCTION_ENTRIES
-             if entry[2] in {"F03405", "F03414"}]
-        )
-        self.assertEqual(
-            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03411"],
-            ("Core_Gte_VectorNormal", r"Native\Engine\src\Core\Gte.cpp"),
+             if entry[2] in {"F03405", "F03411", "F03412", "F03413", "F03414"}]
         )
 
-    def test_resident_rotation_pair_redirects_to_the_existing_typed_kernel(self):
-        self.assertEqual(
-            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F03399"],
-            (
+    def test_resident_rotation_pair_is_owned_by_the_typed_kernel(self):
+        owned = self.owned_items()
+        for identity in ("F03399", "F01017"):
+            self.assertEqual(
+                owned[identity]["name"],
                 "VS::Core::Math::LookupRotationSineCosine",
+            )
+            self.assertEqual(
+                owned[identity]["path"],
                 r"Native\Engine\src\Core\Math\ScalarMath.cpp",
-            ),
-        )
+            )
+            self.assertNotIn(identity, copy_fixups.NATIVE_FUNCTION_REDIRECTS)
         self.assertNotIn(
             ("SLUS_010.40", 0x80041104, "F03399"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
-        self.assertNotIn("F03399", self.owned_items())
+
+    def test_core_math_promotions_bind_every_generated_caller_shape(self):
+        owned = self.owned_items()
+        for identity in copy_to_native.SDK_PROMOTED_ROWS.values():
+            self.assertIn(identity, owned)
+            self.assertTrue(owned[identity]["name"].startswith("VS::Core::Math::"))
+        for identity, binding in copy_fixups.OWNED_CALL_BINDINGS.items():
+            with self.subTest(identity=identity):
+                self.assertIn(identity, owned)
+                self.assertIn(binding, copy_fixups.NATIVE_HELPER_HEADERS)
+                header = copy_fixups.NATIVE_HELPER_HEADERS[binding]
+                self.assertTrue(header.endswith("Live.hpp"), header)
+        root = Path(__file__).resolve().parents[2]
+        for binding, header in copy_fixups.NATIVE_HELPER_HEADERS.items():
+            if not binding.startswith("VS::Core::Math::"):
+                continue
+            with self.subTest(binding=binding):
+                name = binding.rsplit("::", 1)[-1]
+                self.assertRegex(
+                    (root / header).read_text(encoding="utf-8"),
+                    rf"\b{name}\(",
+                )
+        for stem in ("Vector", "Matrix", "Interpolation", "Trig"):
+            self.assertFalse(
+                (root / rf"Native\Engine\src\Core\Math\{stem}.h").exists(),
+                f"{stem}.h is a retired generated C ABI",
+            )
 
     def test_promoted_distance_slice_has_typed_callers_and_no_address_entries(self):
         owned = self.owned_items()
@@ -1030,17 +1061,11 @@ class EncounterFixupTests(unittest.TestCase):
 
     def test_room_euler_uses_the_source_staged_kernel_and_shared_octant_pair(self):
         owned = self.owned_items()
-        for identity in ("F00761", "F00762"):
+        for identity in ("F00761", "F00762", "F01017"):
             self.assertEqual(
                 owned[identity]["path"], r"Native\Engine\src\Core\Math\ScalarMath.cpp"
             )
-        self.assertEqual(
-            copy_fixups.NATIVE_FUNCTION_REDIRECTS["F01017"],
-            (
-                "VS::Core::Math::LookupRotationSineCosine",
-                r"Native\Engine\src\Core\Math\ScalarMath.cpp",
-            ),
-        )
+        self.assertNotIn("F01017", copy_fixups.NATIVE_FUNCTION_REDIRECTS)
         core, live = self.room_draw_sources()
         self.assertIn("view, Math::BuildEulerRotationMatrix(rotation));", flat(core))
         for source in (core, live):
@@ -1329,23 +1354,23 @@ class EncounterFixupTests(unittest.TestCase):
                 f"Native alias {identifier} must retain its original module binding",
             )
 
-    def test_fixed_trig_entries_redirect_to_existing_typed_native_bodies(self):
+    def test_fixed_trig_entries_are_owned_by_the_typed_scalar_kernel(self):
+        owned = self.owned_items()
         for identifier, name in (
-            ("F00764", "Core_Gte_Cos"),
-            ("F00765", "Core_Gte_Sin"),
-            ("F03400", "Core_Gte_Cos"),
-            ("F03401", "Core_Gte_Sin"),
+            ("F00764", "VS::Core::Math::Cosine"),
+            ("F00765", "VS::Core::Math::Sine"),
+            ("F02405", "VS::Core::Math::Sine"),
+            ("F03400", "VS::Core::Math::Cosine"),
+            ("F03401", "VS::Core::Math::Sine"),
         ):
+            self.assertEqual(owned[identifier]["name"], name)
             self.assertEqual(
-                copy_fixups.NATIVE_FUNCTION_REDIRECTS[identifier],
-                (name, r"Native\Engine\src\Core\Gte.cpp"),
+                owned[identifier]["path"],
+                r"Native\Engine\src\Core\Math\ScalarMath.cpp",
             )
+            self.assertNotIn(identifier, copy_fixups.NATIVE_FUNCTION_REDIRECTS)
         root = Path(__file__).resolve().parents[2]
-        header = (root / r"Native\Engine\src\Core\Math\Trig.h").read_text(
-            encoding="utf-8"
-        )
-        self.assertIn("#define Core_Math_CosineFixedPoint Core_Gte_Cos", header)
-        self.assertIn("#define Core_Math_SineFixedPoint Core_Gte_Sin", header)
+        self.assertFalse((root / r"Native\Engine\src\Core\Math\Trig.h").exists())
 
     def test_tile_translation_callers_preserve_the_full_actor_id_abi(self):
         root = Path(__file__).resolve().parents[2]
@@ -2463,62 +2488,51 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
                      "AllocateLiveFromLowEndAt", "InitializeLiveHeapAt"):
             self.assertIn(f"VS::Core::Memory::{name}", bound)
 
-    def test_math_names_preserve_distinct_vector_destination_positions(self):
-        examples = {
-            "Core::Math::AddVectors": (
-                "setVector(arg0, arg1->vx + arg2->vx, "
-                "arg1->vy + arg2->vy, arg1->vz + arg2->vz); return arg0;",
-                "setVector(destination, left->vx + right->vx, "
-                "left->vy + right->vy, left->vz + right->vz); "
-                "return destination;",
-            ),
-            "Core::Math::AddWideVectors": (
-                "arg2->vx = arg0->vx + arg1->vx;",
-                "destination->vx = left->vx + right->vx;",
-            ),
-            "Core::Math::NormalizeFixedVector": (
-                "setVector(&sp10, arg0->vx >> 12, arg0->vy >> 12, "
-                "arg0->vz >> 12); VectorNormal(&sp10, arg1);",
-                "setVector(&integer_vector, source->vx >> 12, "
-                "source->vy >> 12, source->vz >> 12); "
-                "VectorNormal(&integer_vector, destination);",
-            ),
-        }
-        for name, (original, expected) in examples.items():
+    def test_math_live_bindings_preserve_destination_positions_and_order(self):
+        # The generated bodies and their rename rules were retired by the
+        # typed Core::Math slice; the Live adapters now carry each original
+        # argument order, and no rename rule targets the retired names.
+        retired = (
+            "Core::Math::AddVectors", "Core::Math::AddWideVectors",
+            "Core::Math::NormalizeFixedVector",
+            "Core::Math::InterpolateTimedScalar",
+            "Core::Math::InterpolateShortPair",
+            "Core::Math::InterpolateThirteenBitScalar",
+        )
+        for name in retired:
             with self.subTest(name=name):
-                source = original
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, expected)
-
-    def test_interpolation_names_preserve_duration_order_and_rounding(self):
-        examples = {
-            "Core::Math::InterpolateTimedScalar": (
-                "return Interpolate(arg0, arg1, (arg3 * (ONE * 2)) / arg2);",
-                "return Interpolate(start, end, "
-                "(current_step * (ONE * 2)) / total_steps);",
-            ),
-            "Core::Math::InterpolateShortPair": (
-                "int new_var = arg0[0]; "
-                "return (((arg0[1] - new_var) * arg1) >> 7) + new_var;",
-                "int start = endpoints[0]; "
-                "return (((endpoints[1] - start) * weight_q7) >> 7) + start;",
-            ),
-            "Core::Math::InterpolateThirteenBitScalar": (
-                "int var_v0 = (arg1 - arg0) * arg2; "
-                "return arg0 + var_v0 / (ONE * 2);",
-                "int scaled_delta = (end - start) * weight_q13; "
-                "return start + scaled_delta / (ONE * 2);",
-            ),
-        }
-        for name, (original, expected) in examples.items():
-            with self.subTest(name=name):
-                source = original
-                for row, pattern, replacement, _ in copy_fixups.REGEX_FIXES:
-                    if re.search(row, name):
-                        source = re.sub(pattern, replacement, source)
-                self.assertEqual(source, expected)
+                self.assertFalse(
+                    [row for row, _, _, _ in copy_fixups.REGEX_FIXES
+                     if row and re.search(row, name)]
+                )
+        root = Path(__file__).resolve().parents[2]
+        include = root / r"Native\Engine\include\Core\Math"
+        vector = " ".join(
+            (include / "VectorLive.hpp").read_text(encoding="utf-8").split()
+        )
+        for signature in (
+            "Destination* AddLiveVectors(Destination* destination, "
+            "const Left* left, const Right* right) noexcept",
+            "void AddLiveVectorsTo(const Left* left, const Right* right, "
+            "Destination* destination) noexcept",
+            "void NormalizeLiveFixedVector(const Source* source, "
+            "Destination* destination) noexcept",
+        ):
+            self.assertIn(signature, vector)
+        interpolation = " ".join(
+            (include / "InterpolationLive.hpp").read_text(encoding="utf-8").split()
+        )
+        self.assertIn(
+            "std::int32_t start, std::int32_t end, std::int32_t total, "
+            "std::int32_t current) noexcept { return InterpolateTimedScalar("
+            "{start, end}, {current, total});",
+            interpolation,
+        )
+        self.assertIn(
+            "InterpolateLiveShortPair( std::span<const std::int16_t, "
+            "kScalarRangeHalfwords> endpoints, std::int32_t weight) noexcept",
+            interpolation,
+        )
 
     def test_weapon_sequence_copy_names_preserve_the_native_offset_contract(self):
         root = Path(__file__).resolve().parents[2]

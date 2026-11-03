@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Audio/Sfx.h"
-#include "Core/Math/FixedPoint.h"
 #include "Effects/Weather.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -72,26 +72,26 @@ void Field_SetRoomWeather(int weather_kind)
         case 0:
             break;
         case 1:
-            Effects_InitializeFallingWeatherParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
+            Effects_InitializeFallingWeatherParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 4,
                               4, 128),
                 weather_kind);
             sound = 21;
             break;
         case 2:
-            Effects_InitializeFallingWeatherParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
+            Effects_InitializeFallingWeatherParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 4,
                               4, 128),
                 weather_kind);
             break;
         case 3:
-            Effects_InitializeScreenWeatherParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
+            Effects_InitializeScreenWeatherParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 4,
                               4, 128),
                 weather_kind);
             break;
         case 4:
-            Effects_InitializeRisingEmberParticles(Core_Math_ClampSignedShort((room->weatherArea[1].halves[0] / 128)
+            Effects_InitializeRisingEmberParticles(VS::Core::Math::ClampSignedShort((room->weatherArea[1].halves[0] / 128)
                                               * (room->weatherArea[1].halves[1] / 128) / 2,
                               4, 128),
                 weather_kind);
@@ -134,7 +134,7 @@ void Field_UpdateRoomWeather(void)
 
             Field_weatherParameters[5] += Field_weatherParameters[7];
             Field_weatherParameters[5] &= 0xFFF;
-            Field_weatherParameters[5] = Core_Math_ClampSignedShort(Field_weatherParameters[5], room->windDirection, room->windDirectionLimit);
+            Field_weatherParameters[5] = VS::Core::Math::ClampSignedShort(Field_weatherParameters[5], room->windDirection, room->windDirectionLimit);
             changed = 1;
         }
         if (((Field_roomAnimationTicks + 30) & masks[room->windStrengthInterval]) == 0) {
@@ -143,7 +143,7 @@ void Field_UpdateRoomWeather(void)
             }
 
             Field_weatherParameters[4] += Field_weatherParameters[9];
-            Field_weatherParameters[4] = Core_Math_ClampSignedShort(Field_weatherParameters[4], room->windStrength, room->windStrengthLimit);
+            Field_weatherParameters[4] = VS::Core::Math::ClampSignedShort(Field_weatherParameters[4], room->windStrength, room->windStrengthLimit);
             changed = 1;
         }
         if (((Field_roomAnimationTicks + 60) & masks[room->weatherIntensityInterval]) == 0) {
@@ -152,7 +152,7 @@ void Field_UpdateRoomWeather(void)
             }
 
             Field_weatherIntensity += Field_weatherParameters[8];
-            Field_weatherIntensity = Core_Math_ClampSignedShort(Field_weatherIntensity, room->weatherIntensity, room->weatherIntensityLimit);
+            Field_weatherIntensity = VS::Core::Math::ClampSignedShort(Field_weatherIntensity, room->weatherIntensity, room->weatherIntensityLimit);
             Field_ApplyWeatherIntensity();
             changed = 1;
         }
@@ -181,7 +181,7 @@ void Field_ApplyWeatherIntensity(void)
 {
     short scale;
 
-    Field_weatherParticleCount = Core_Math_ClampSignedShort(Field_weatherIntensity * 8, 4, Field_weatherParticleCapacity);
+    Field_weatherParticleCount = VS::Core::Math::ClampSignedShort(Field_weatherIntensity * 8, 4, Field_weatherParticleCapacity);
     if (Field_weatherAmbientSoundId >= 0) {
         if (Field_kWeatherVolumeByIntensity[Field_weatherIntensity] != 0) {
             Audio_PlaySfxCentered(0x200, Field_weatherAmbientSoundId);
@@ -190,7 +190,7 @@ void Field_ApplyWeatherIntensity(void)
             Audio_StopSfx(0x200, Field_weatherAmbientSoundId);
         }
     }
-    scale = Core_Math_ClampSignedShort((Field_weatherIntensity * 4) + (Field_weatherIntensity * 2), 12, 90);
+    scale = VS::Core::Math::ClampSignedShort((Field_weatherIntensity * 4) + (Field_weatherIntensity * 2), 12, 90);
     Field_weatherIntensityScale = scale + (scale >> 1) + (scale >> 2);
 }
 
@@ -255,8 +255,8 @@ void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* background_layout, in
 {
     void* buffer = ((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->primitiveCursor;
     Field_BackgroundTile* tiles = background_layout->tiles;
-    int cosStep = Core_Gte_Cos(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
-    int sinStep = Core_Gte_Sin(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
+    int cosStep = VS::Core::Math::Cosine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
+    int sinStep = VS::Core::Math::Sine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * 32;
     int row;
     int col;
     TILE* background;
@@ -267,10 +267,10 @@ void Field_DrawRoomBackgroundTiles(Field_BackgroundLayout* background_layout, in
 
         for (col = 0; col < 1024; col += 32) {
             int x = ((col + horizontal_offset) & 1023) - 512;
-            int screenX = Core_Gte_Cos(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
-                        - Core_Gte_Sin(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
-            int screenY = Core_Gte_Sin(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
-                        + Core_Gte_Cos(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
+            int screenX = VS::Core::Math::Cosine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
+                        - VS::Core::Math::Sine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
+            int screenY = VS::Core::Math::Sine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * x
+                        + VS::Core::Math::Cosine(((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->camera.angles.vz) * y;
             Field_BackgroundTile* tile;
 
             if ((screenX < -64 * ONE) || (screenX > 384 * ONE) || (screenY < -64 * ONE)

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Menu/Sounds.hpp"
 extern "C" {
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
 #include "Input/Buttons.h"
@@ -533,7 +533,7 @@ void Menu_BattleAbilities_SetRiskCost(int id)
 
     do {
         --i;
-        cost = Core_Math_SplitDecimalDigit(cost);
+        cost = VS::Core::Math::SplitDecimalDigit(cost);
         Menu_BattleAbilities_setRiskCostStringBuffer[i] = (cost & 0xF) + '0';
         cost >>= 4;
     } while (cost != 0);
@@ -1096,7 +1096,7 @@ void Menu_BattleAbilities_DrawNextUnlockPoints(int row)
 
     i = 12;
     do {
-        points = Core_Math_SplitDecimalDigit(points);
+        points = VS::Core::Math::SplitDecimalDigit(points);
         *(pointsBuf + i) = (points & 0xF) + 48;
         points >>= 4;
         --i;

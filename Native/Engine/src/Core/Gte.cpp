@@ -1,10 +1,7 @@
 #include "Core/Gte.h"
 
 #include <algorithm>
-#include <cmath>
 #include <cstdint>
-
-#include "Core/Math/ScalarMath.hpp"
 
 // Fixed-point math replacing the GTE (plan §6.1). Arithmetic follows the
 // documented GTE behaviour: 4.12 matrices, 64-bit accumulation, >>12 scaling,
@@ -119,20 +116,6 @@ void Multiply(const short a[3][3], const short b[3][3], short out[3][3]) {
     }
   }
   std::copy(&r[0][0], &r[0][0] + 9, &out[0][0]);
-}
-
-void AxisRotation(int axis, int angle, short out[3][3]) {
-  const short s = static_cast<short>(Core_Gte_Sin(angle));
-  const short c = static_cast<short>(Core_Gte_Cos(angle));
-  short m[3][3] = {{4096, 0, 0}, {0, 4096, 0}, {0, 0, 4096}};
-  if (axis == 0) {
-    m[1][1] = c, m[1][2] = static_cast<short>(-s), m[2][1] = s, m[2][2] = c;
-  } else if (axis == 1) {
-    m[0][0] = c, m[0][2] = s, m[2][0] = static_cast<short>(-s), m[2][2] = c;
-  } else {
-    m[0][0] = c, m[0][1] = static_cast<short>(-s), m[1][0] = s, m[1][1] = c;
-  }
-  std::copy(&m[0][0], &m[0][0] + 9, &out[0][0]);
 }
 
 }  // namespace
@@ -293,23 +276,6 @@ SVECTOR* Core_Gte_ApplyMatrixSV(MATRIX* m, SVECTOR* v0, SVECTOR* v1) {
   return v1;
 }
 
-MATRIX* Core_Gte_RotMatrix(SVECTOR* r, MATRIX* m) {
-  // X, then Y, then Z (the libgte order): M = Rx * Ry * Rz.
-  short rx[3][3], ry[3][3], rz[3][3];
-  AxisRotation(0, r->vx, rx);
-  AxisRotation(1, r->vy, ry);
-  AxisRotation(2, r->vz, rz);
-  Multiply(rx, ry, m->m);
-  Multiply(m->m, rz, m->m);
-  return m;
-}
-
-MATRIX* Core_Gte_RotMatrixYXZ(SVECTOR* r, MATRIX* m) {
-  VS::Core::Math::StoreMatrix(
-      *m, VS::Core::Math::BuildRotationMatrixYXZ({r->vx, r->vy, r->vz}));
-  return m;
-}
-
 MATRIX* Core_Gte_TransMatrix(MATRIX* m, VECTOR* v) {
   m->t[0] = v->vx, m->t[1] = v->vy, m->t[2] = v->vz;
   return m;
@@ -380,50 +346,6 @@ long Core_Gte_NormalClip(long sxy0, long sxy1, long sxy2) {
   return g.mac0;
 }
 
-void Core_Gte_OuterProduct0(VECTOR* v0, VECTOR* v1, VECTOR* v2) {
-  const int64_t a[3] = {v0->vx, v0->vy, v0->vz},
-                b[3] = {v1->vx, v1->vy, v1->vz};
-  v2->vx = static_cast<long>((a[1] * b[2] - a[2] * b[1]) >> 12);
-  v2->vy = static_cast<long>((a[2] * b[0] - a[0] * b[2]) >> 12);
-  v2->vz = static_cast<long>((a[0] * b[1] - a[1] * b[0]) >> 12);
-}
-
-long Core_Gte_VectorNormal(VECTOR* v0, VECTOR* v1) {
-  const int64_t x = v0->vx, y = v0->vy, z = v0->vz;
-  const uint64_t sq = static_cast<uint64_t>(x * x) +
-                      static_cast<uint64_t>(y * y) +
-                      static_cast<uint64_t>(z * z);
-  const double len = std::sqrt(static_cast<double>(sq));
-  if (len > 0) {
-    v1->vx = static_cast<long>(static_cast<double>(x) * 4096 / len);
-    v1->vy = static_cast<long>(static_cast<double>(y) * 4096 / len);
-    v1->vz = static_cast<long>(static_cast<double>(z) * 4096 / len);
-  } else {
-    v1->vx = v1->vy = v1->vz = 0;
-  }
-  return static_cast<long>(sq);
-}
-
-// decomp: VectorNormalS (src/SLUS_010.40/32154.s), input/output pads untouched.
-long Core_Gte_VectorNormalS(VECTOR* input, SVECTOR* output) {
-  VECTOR normalized{};
-  const auto squared = Core_Gte_VectorNormal(input, &normalized);
-  output->vx = static_cast<int16_t>(normalized.vx);
-  output->vy = static_cast<int16_t>(normalized.vy);
-  output->vz = static_cast<int16_t>(normalized.vz);
-  return squared;
-}
-
-long Core_Gte_VectorNormalSS(SVECTOR* v0, SVECTOR* v1) {
-  VECTOR input{v0->vx, v0->vy, v0->vz, 0};
-  return Core_Gte_VectorNormalS(&input, v1);
-}
-
-long Core_Gte_SquareRoot12(long a) {
-  return a <= 0 ? 0
-                : static_cast<long>(std::sqrt(static_cast<double>(a) * 4096.0));
-}
-
 void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1) {
   const unsigned char in[3] = {v0->r, v0->g, v0->b};
   unsigned char out[3];
@@ -433,15 +355,6 @@ void Core_Gte_DpqColor(CVECTOR* v0, long p, CVECTOR* v1) {
     out[i] = static_cast<unsigned char>(std::clamp<int64_t>(r >> 4, 0, 255));
   }
   v1->r = out[0], v1->g = out[1], v1->b = out[2], v1->cd = v0->cd;
-}
-
-int Core_Gte_Sin(int a) { return VS::Core::Math::Sine(a); }
-
-int Core_Gte_Cos(int a) { return VS::Core::Math::Cosine(a); }
-
-long Core_Gte_Atan2(long y, long x) {
-  return VS::Core::Math::Arctangent2(static_cast<std::int32_t>(y),
-                                     static_cast<std::int32_t>(x));
 }
 
 }  // extern "C"

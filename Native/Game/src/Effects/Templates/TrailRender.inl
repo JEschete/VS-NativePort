@@ -1,7 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -41,7 +44,7 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
     DVECTOR* temp2;
     int temp_s3;
 
-    Core_Math_InterpolatePairsToShortVector(particle_definition->vectorRanges[4],
+    VS::Core::Math::InterpolateLiveSevenBitVector(particle_definition->vectorRanges[4],
         Effects_SampleEffectCurve(particle_definition->accelerationCurve, trail_set->curveSampleDistance), &emitter_scratch->accelerationMin);
 
     if (particle_definition->rCurve != 0) {
@@ -96,13 +99,13 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
 
             for (j = 0; j < (trail->splineSampleCount - 1); ++j) {
                 DVECTOR* p = &screen_points[j];
-                segment_normal_angles[j] = Core_Gte_Atan2(p[1].vy - p[0].vy, p[1].vx - p[0].vx);
+                segment_normal_angles[j] = VS::Core::Math::Arctangent2(p[1].vy - p[0].vy, p[1].vx - p[0].vx);
                 segment_normal_angles[j] -= 0x400;
             }
 
             temp_s3 = emitter_scratch->accelerationMin.vx / 2;
-            temp_s0 = (Core_Gte_Cos(segment_normal_angles[0]) * temp_s3) >> 0xC;
-            normal_offset_y = (Core_Gte_Sin(segment_normal_angles[0]) * temp_s3) >> 0xC;
+            temp_s0 = (VS::Core::Math::Cosine(segment_normal_angles[0]) * temp_s3) >> 0xC;
+            normal_offset_y = (VS::Core::Math::Sine(segment_normal_angles[0]) * temp_s3) >> 0xC;
             screen_point_base = screen_points;
             strip_packet.opaque4.x0 = screen_point_base[0].vx + temp_s0;
             strip_packet.opaque4.y0 = screen_point_base[0].vy + normal_offset_y;
@@ -133,8 +136,8 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
                     joint_normal_angle += 0x800;
                 }
 
-                temp_s0 = (Core_Gte_Cos(joint_normal_angle) * temp_s3) >> 0xC;
-                normal_offset_y = (Core_Gte_Sin(joint_normal_angle) * temp_s3) >> 0xC;
+                temp_s0 = (VS::Core::Math::Cosine(joint_normal_angle) * temp_s3) >> 0xC;
+                normal_offset_y = (VS::Core::Math::Sine(joint_normal_angle) * temp_s3) >> 0xC;
                 temp2 = &screen_point_base[j];
                 strip_packet.opaque4.x1 = temp2[1].vx + temp_s0;
                 strip_packet.opaque4.y1 = temp2[1].vy + normal_offset_y;
@@ -199,8 +202,8 @@ void VS_TRAIL_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition, E
                 *(int*)&strip_packet.opaque4.r0 = *(int*)&strip_packet.opaque4.r1;
             }
 
-            temp_s0 = (Core_Gte_Cos(segment_normal_angles[j]) * temp_s3) >> 0xC;
-            normal_offset_y = (Core_Gte_Sin(segment_normal_angles[j]) * temp_s3) >> 0xC;
+            temp_s0 = (VS::Core::Math::Cosine(segment_normal_angles[j]) * temp_s3) >> 0xC;
+            normal_offset_y = (VS::Core::Math::Sine(segment_normal_angles[j]) * temp_s3) >> 0xC;
             strip_packet.opaque4.x1 = ((u_short*)screen_point_base)[j * 2 + 2] + temp_s0;
             strip_packet.opaque4.y1 = ((u_short*)screen_point_base)[j * 2 + 3] + normal_offset_y;
             strip_packet.opaque4.x3 = ((u_short*)screen_point_base)[j * 2 + 2] - temp_s0;

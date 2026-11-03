@@ -1386,15 +1386,15 @@ void Menu_Score_BuildViewerCamera(MATRIX* cameraMatrix)
     int angle2;
     Render_FrameScratch* scratch;
 
-    angle0 = (angle1 = Core_Gte_Sin(Menu_Score_cameraAngles.vy));
-    angle1 = Core_Gte_Cos(Menu_Score_cameraAngles.vx);
+    angle0 = (angle1 = VS::Core::Math::Sine(Menu_Score_cameraAngles.vy));
+    angle1 = VS::Core::Math::Cosine(Menu_Score_cameraAngles.vx);
     position.vx = (((angle0 * Menu_Score_cameraDistance) / ONE) * angle1) / ONE;
 
-    angle0 = Core_Gte_Cos(Menu_Score_cameraAngles.vy);
-    angle1 = Core_Gte_Cos(Menu_Score_cameraAngles.vx);
+    angle0 = VS::Core::Math::Cosine(Menu_Score_cameraAngles.vy);
+    angle1 = VS::Core::Math::Cosine(Menu_Score_cameraAngles.vx);
     position.vz = (((angle0 * -Menu_Score_cameraDistance) / ONE) * angle1) / ONE;
 
-    angle2 = Core_Gte_Sin(Menu_Score_cameraAngles.vx) * -Menu_Score_cameraDistance;
+    angle2 = VS::Core::Math::Sine(Menu_Score_cameraAngles.vx) * -Menu_Score_cameraDistance;
     position.vy = (angle2 / ONE) - (Menu_Score_cameraHeightOffset / 2);
 
     scratch = (Render_FrameScratch*)Core_ScratchAddr(0);

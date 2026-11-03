@@ -60,7 +60,7 @@ int Actors_ActorPitchToPoint(Actors_ActorRecord* actor, SVECTOR* target_point)
 
     horizontal_distance_work = VS::Core::Math::SquareRootInteger(horizontal_distance_work + z_distance_squared);
     Actors_ActorBonePosition(actor->instance.slot, 0, &root_bone_position, 0);
-    return Core_Gte_Atan2(target_point->vy - root_bone_position.vy, horizontal_distance_work);
+    return VS::Core::Math::Arctangent2(target_point->vy - root_bone_position.vy, horizontal_distance_work);
 }
 
 // decomp: BATTLE.PRG func_8009FC60 (src/BATTLE/BATTLE.PRG/30DB0.c:3512)

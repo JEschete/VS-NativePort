@@ -41,7 +41,6 @@ extern "C" {
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
-#include "Core/Math/Vector.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Field/Mpd.h"

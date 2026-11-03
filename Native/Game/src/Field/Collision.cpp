@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/CollisionSampling.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 extern "C" {
@@ -473,7 +474,7 @@ int Field_IsHangingActorObstructed(Actors_ActorRecord* actor)
     actor->instance.supportLayer = 0;
     actor->instance.locomotionState = 0;
     actor->instance.movementPending = 0;
-    Field_SampleActorCollisionPerimeter(actor, Core_Gte_Sin(ONE / 8) * radius / ONE);
+    Field_SampleActorCollisionPerimeter(actor, VS::Core::Math::Sine(ONE / 8) * radius / ONE);
     actor->instance.supportLayer = saved;
     actor->instance.locomotionState = 2;
     direction = actor->moveFacing >> 9;
@@ -542,7 +543,7 @@ int Field_CanActorHangFromLedge(Actors_ActorRecord* actor, SVECTOR* offset, SVEC
 
     if (Field_ResolveActorTerrainMotion(actor, motion, &height, 0) != 3 && !actor->onLedge
         && height < 5) {
-        height = Core_Gte_Sin(ONE / 8);
+        height = VS::Core::Math::Sine(ONE / 8);
         height = height * actor->collisionRadius / ONE;
 
         if ((Field_collisionProbeDirection >> 1) & 1) {
@@ -577,7 +578,7 @@ int Field_HasActorLedgeSideSupport(Actors_ActorRecord* actor_record)
 {
     SVECTOR v;
     int ret = 0;
-    int h = Core_Gte_Sin(ONE / 8) * actor_record->collisionRadius / ONE;
+    int h = VS::Core::Math::Sine(ONE / 8) * actor_record->collisionRadius / ONE;
 
     v.vx = 0;
     v.vz = 0;
@@ -900,7 +901,7 @@ int Field_ResolveActorTerrainMotion(Actors_ActorRecord* actor, SVECTOR* motion, 
     actor->wasOnLedge = actor->onLedge;
     actor->onLedge = 0;
     radius = actor->collisionRadius;
-    diagonal = Core_Gte_Sin(ONE / 8) * radius / ONE;
+    diagonal = VS::Core::Math::Sine(ONE / 8) * radius / ONE;
     scratch->searchFloor = -0xC0;
     if (actor->instance.weaponDrawn) {
         scratch->searchCeiling = -0x40;
@@ -1896,7 +1897,7 @@ int Field_CalcActorLedgeOffset(Actors_ActorRecord* actor, SVECTOR* offset)
     actor->instance.supportLayer = 0;
     actor->instance.position.vx += offset->vx;
     actor->instance.position.vz += offset->vz;
-    distance = Core_Gte_Sin(ONE / 8);
+    distance = VS::Core::Math::Sine(ONE / 8);
     distance *= actor->collisionRadius;
     distance /= ONE;
     Field_SampleActorCollisionPerimeter(actor, distance);

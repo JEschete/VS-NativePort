@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -6,8 +8,6 @@ extern "C" {
 #include "Actors/Location.h"
 #include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Matrix.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -30,7 +30,7 @@ void Effects_InitializeTransformStates(Effects_EffectInstance* effect_instance)
         state->position.vx = 0;
         state->position.vy = 0;
         state->position.vz = 0;
-        Core_Math_SetIdentityRotation((MATRIX *)((void*)&state->facing));
+        VS::Core::Math::SetLiveIdentityRotation(&state->facing);
         state->opaque6 = 0;
         state->frame = 0;
         *(int*)&state->actor = 0;
@@ -42,7 +42,7 @@ void Effects_InitializeTransformStates(Effects_EffectInstance* effect_instance)
                     state->bone = ((u_char*)&effect_instance->context.emitTo.value)[2];
                 } else {
                     state->actor = 0xFF;
-                    Core_Math_SetTranslationMatrix(
+                    VS::Core::Math::SetLiveTranslationTransform(
                         (SVECTOR*)&effect_instance->context.emitTo.value, (MATRIX *)((void*)&state->attachment));
                 }
                 break;
@@ -52,7 +52,7 @@ void Effects_InitializeTransformStates(Effects_EffectInstance* effect_instance)
                     state->bone = ((u_char*)&effect_instance->context.emitFrom.value)[2];
                 } else {
                     state->actor = 0xFF;
-                    Core_Math_SetTranslationMatrix(
+                    VS::Core::Math::SetLiveTranslationTransform(
                         (SVECTOR*)&effect_instance->context.emitFrom.value, (MATRIX *)((void*)&state->attachment));
                 }
                 break;
@@ -112,13 +112,13 @@ void Effects_InterpolateTransformPosition(Effects_TransformDefinition* transform
     }
     switch ((transform_definition->mode >> 5) & 3) {
     case 0:
-        Core_Math_InterpolateTimedShortVector(&start, &end, transform_definition->limit + 1, transform_motion->frame, &result);
+        VS::Core::Math::InterpolateLiveTimedVector(&start, &end, transform_definition->limit + 1, transform_motion->frame, &result);
         break;
     case 1:
-        Core_Math_InterpolateCosineShortVector(&start, &end, transform_definition->limit + 1, transform_motion->frame, &result);
+        VS::Core::Math::InterpolateLiveCosineVector(&start, &end, transform_definition->limit + 1, transform_motion->frame, &result);
         break;
     case 2:
-        Core_Math_InterpolateTimedShortVector(&start, &end, 128,
+        VS::Core::Math::InterpolateLiveTimedVector(&start, &end, 128,
             Effects_SampleEffectCurve(transform_definition->curve + 1, transform_motion->frame), &result);
         break;
     }
@@ -144,13 +144,13 @@ void Effects_InterpolateTransformSpline(Effects_TransformDefinition* transform_d
         t = (transform_motion->frame * 3 * ONE) / (transform_definition->limit + 1) - ONE;
         break;
     case 1:
-        t = (-Core_Gte_Cos((transform_motion->frame * (ONE / 2)) / (transform_definition->limit + 1)) * 3) / 2 + ONE / 2;
+        t = (-VS::Core::Math::Cosine((transform_motion->frame * (ONE / 2)) / (transform_definition->limit + 1)) * 3) / 2 + ONE / 2;
         break;
     case 2:
         t = Effects_SampleEffectCurve(transform_definition->curve + 1, transform_motion->frame) * 96 - ONE;
         break;
     }
-    Core_Math_InterpolateLagrangeShortVector(
+    VS::Core::Math::InterpolateLiveLagrangeVector(
         &start, &transform_motion->control0, &transform_motion->control1, &end, t, &result);
     setVector(&transform_motion->position, result.vx, result.vy, result.vz);
 }
@@ -217,11 +217,11 @@ void Effects_BuildTransformSplineControls(Effects_TransformDefinition* transform
         angle1 += Core_Random_Rand() % ((transform_definition->shape12 * 16) & 0xF00);
     }
 
-    control0.vx = (Core_Gte_Cos(angle0) * radius0) >> 12;
-    control0.vy = (Core_Gte_Sin(angle0) * radius0) >> 12;
-    control1.vx = (Core_Gte_Cos(angle1) * radius1) >> 12;
-    control1.vy = (Core_Gte_Sin(angle1) * radius1) >> 12;
-    Core_Math_BuildLookAtOrientation(&start, &end, &transform);
+    control0.vx = (VS::Core::Math::Cosine(angle0) * radius0) >> 12;
+    control0.vy = (VS::Core::Math::Sine(angle0) * radius0) >> 12;
+    control1.vx = (VS::Core::Math::Cosine(angle1) * radius1) >> 12;
+    control1.vy = (VS::Core::Math::Sine(angle1) * radius1) >> 12;
+    VS::Core::Math::BuildLiveLookAtOrientation(&start, &end, &transform);
     transform.t[0] = start.vx;
     transform.t[1] = start.vy;
     transform.t[2] = start.vz;
@@ -245,7 +245,7 @@ void Effects_BuildCameraAttachment(Effects_EffectInstance* effect_instance, Effe
         Render_frameScratch.camera.lookAt.vy >> 12, Render_frameScratch.camera.lookAt.vz >> 12);
     setVector(&end, Render_frameScratch.camera.position.vx >> 12,
         Render_frameScratch.camera.position.vy >> 12, Render_frameScratch.camera.position.vz >> 12);
-    Core_Math_BuildLookAtOrientation(&start, &end, &transform_motion->attachment);
+    VS::Core::Math::BuildLiveLookAtOrientation(&start, &end, &transform_motion->attachment);
     transform_motion->attachment.t[0] = start.vx;
     transform_motion->attachment.t[1] = start.vy;
     transform_motion->attachment.t[2] = start.vz;
@@ -265,24 +265,24 @@ void Effects_BuildCameraAttachment(Effects_EffectInstance* effect_instance, Effe
 }
 
 // decomp: BATTLE.PRG func_800D0B08 (src/BATTLE/BATTLE.PRG/5BF94.c:6182)
-void Effects_BuildEffectOriginAttachment(MATRIX* attachment_matrix) { Core_Math_SetTranslationMatrix(Effects_effectOrigin, attachment_matrix); }
+void Effects_BuildEffectOriginAttachment(MATRIX* attachment_matrix) { VS::Core::Math::SetLiveTranslationTransform(Effects_effectOrigin, attachment_matrix); }
 
 // decomp: BATTLE.PRG func_800D0B30 (src/BATTLE/BATTLE.PRG/5BF94.c:6184)
 void Effects_BuildAnimatedLocalTransform(Effects_TransformDefinition* transform_definition, SVECTOR* rotation_angles, Effects_AnimatedLocalTransform* local_transform)
 {
     if (transform_definition->flags & 1) {
-        Core_Math_InterpolatePairsToShortVector(transform_definition->rotationRange, Effects_curveSamples[transform_definition->rotationCurve], &local_transform->rotationOffset);
+        VS::Core::Math::InterpolateLiveSevenBitVector(transform_definition->rotationRange, Effects_curveSamples[transform_definition->rotationCurve], &local_transform->rotationOffset);
         rotation_angles->vx += local_transform->rotationOffset.vx;
         rotation_angles->vy = rotation_angles->vy + local_transform->rotationOffset.vy;
         rotation_angles->vz += local_transform->rotationOffset.vz;
-        Core_Gte_RotMatrix(rotation_angles, &local_transform->local);
-        Core_Math_InterpolatePairsToWideVector(transform_definition->translationRange, Effects_curveSamples[transform_definition->translationCurve], &local_transform->translation);
+        VS::Core::Math::BuildLiveRotationXyz(rotation_angles, &local_transform->local);
+        VS::Core::Math::InterpolateLiveSevenBitVector(transform_definition->translationRange, Effects_curveSamples[transform_definition->translationCurve], &local_transform->translation);
         Core_Gte_TransMatrix(&local_transform->local, &local_transform->translation);
-        Core_Math_InterpolatePairsToWideVector(transform_definition->scaleRange, Effects_curveSamples[transform_definition->scaleCurve], &local_transform->scale);
+        VS::Core::Math::InterpolateLiveSevenBitVector(transform_definition->scaleRange, Effects_curveSamples[transform_definition->scaleCurve], &local_transform->scale);
         Core_Gte_ScaleMatrix(&local_transform->local, &local_transform->scale);
         return;
     }
-    Core_Math_SetIdentityRotation(&local_transform->local);
+    VS::Core::Math::SetLiveIdentityRotation(&local_transform->local);
     local_transform->local.t[2] = 0;
     local_transform->local.t[1] = 0;
     local_transform->local.t[0] = 0;
@@ -344,8 +344,8 @@ void Effects_UpdateEffectTransforms(Effects_EffectInstance* effect_instance)
         if (definition->flags & 2) {
             if ((definition->flags & 0xC000) == 0x4000) {
                 ((int*)&state->attachment)[0] = ((int*)&state->attachment)[4] =
-                    Core_Gte_Cos(state->saved.pad);
-                ((int*)&state->attachment)[1] = Core_Gte_Sin(state->saved.pad);
+                    VS::Core::Math::Cosine(state->saved.pad);
+                ((int*)&state->attachment)[1] = VS::Core::Math::Sine(state->saved.pad);
                 ((int*)&state->attachment)[3] = -((int*)&state->attachment)[1];
                 ((int*)&state->attachment)[2] = ONE;
             }
@@ -386,7 +386,7 @@ void Effects_UpdateEffectTransforms(Effects_EffectInstance* effect_instance)
             if (scratch->target.vx != state->world.t[0]
                 || scratch->target.vy != state->world.t[1]
                 || scratch->target.vz != state->world.t[2]) {
-                Core_Math_BuildLookAtOrientation(
+                VS::Core::Math::BuildLiveLookAtOrientation(
                     (VECTOR*)state->world.t, &scratch->target, &state->facing);
                 state->facing.t[0] = state->world.t[0];
                 state->facing.t[1] = state->world.t[1];

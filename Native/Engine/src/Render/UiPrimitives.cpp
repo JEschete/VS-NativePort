@@ -1,9 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Battle/Feedback.h"
-#include "Core/Math/FixedPoint.h"
 #include "Render/Font.h"
 #include "Render/Frame.h"
 #include "Render/LegacyPackets.h"
@@ -73,7 +73,7 @@ int Render_DrawIntegerRightAligned(int font, int xy, int value, u_long* before)
     }
 
     do {
-        value = Core_Math_SplitDecimalDigit(value);
+        value = VS::Core::Math::SplitDecimalDigit(value);
 
         Render_DrawNumericGlyph(font, xy, value & 0xF, before);
 

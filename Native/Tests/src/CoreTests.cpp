@@ -15,9 +15,13 @@
 #include "Core/BiosRand.h"
 #include "Core/FrameClock.hpp"
 #include "Core/FrameTiming.hpp"
+#include "Core/Gte.h"
 #include "Core/Log.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Random.hpp"
 #include "Core/RandomLive.hpp"
 #include "Core/Runtime.hpp"
@@ -25,13 +29,9 @@
 #include "Core/String/GameText.hpp"
 #include "Core/String/GameTextLive.hpp"
 #include "Legacy/Core/LibEtc.h"
+#include "Legacy/Psx.h"
 
 extern "C" {
-#include "Core/Math/FixedPoint.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Matrix.h"
-#include "Core/Math/Trig.h"
-#include "Core/Math/Vector.h"
 #include "Core/Random.h"
 }
 
@@ -418,29 +418,32 @@ TEST_CASE("Signed vector components preserve their low sixteen bits",
 
 TEST_CASE("Vector normalization handles full-range squared lengths",
           "[core][math][normal]") {
+  // VectorNormal loads each component into a 16-bit GTE register, so only
+  // the low halfwords contribute (32154.s); the old native bridge read the
+  // whole words.
   for (const std::int32_t component :
        {std::numeric_limits<std::int32_t>::max(),
-        std::numeric_limits<std::int32_t>::min()}) {
+        std::numeric_limits<std::int32_t>::min(), 0x00008000}) {
     VECTOR vector{component, component, component, 7};
-    const std::int64_t wide = component;
-    const std::uint64_t squared = static_cast<std::uint64_t>(wide * wide) * 3;
-    const auto result = Core_Gte_VectorNormal(&vector, &vector);
-    const int expected = component > 0 ? 2364 : -2364;
+    const auto low =
+        Core::Math::WrapSigned16(static_cast<std::uint32_t>(component));
+    const auto squared = static_cast<std::uint32_t>(low * low) * 3u;
+    const auto result = Core::Math::NormalizeLiveVector(&vector, &vector);
+    const int expected = low == 0 ? 0 : (low > 0 ? 2364 : -2364);
     const std::array actual{vector.vx, vector.vy, vector.vz, vector.pad};
     const std::array<decltype(vector.vx), 4> expected_values{expected, expected,
                                                              expected, 7};
     CHECK(actual == expected_values);
-    CHECK(static_cast<std::uint32_t>(result) ==
-          static_cast<std::uint32_t>(squared));
+    CHECK(static_cast<std::uint32_t>(result) == squared);
   }
   VECTOR source{3, 4, 0, 0};
   VECTOR output{};
-  CHECK(Core_Gte_VectorNormal(&source, &output) == 25);
+  CHECK(Core::Math::NormalizeLiveVector(&source, &output) == 25);
   const std::array values{output.vx, output.vy, output.vz};
   constexpr std::array<decltype(output.vx), 3> kExpected{2457, 3276, 0};
   CHECK(values == kExpected);
   source = {};
-  CHECK(Core_Gte_VectorNormal(&source, &output) == 0);
+  CHECK(Core::Math::NormalizeLiveVector(&source, &output) == 0);
   const std::array zero_values{output.vx, output.vy, output.vz};
   constexpr decltype(zero_values) kZero{};
   CHECK(zero_values == kZero);
@@ -677,11 +680,11 @@ TEST_CASE("Vector arithmetic preserves destination order and aliases",
   VECTOR left{7, -3, 11, 101};
   VECTOR right{-2, 5, -4, 102};
   VECTOR result{0, 0, 0, 103};
-  CHECK(Core_Math_AddVectors(&result, &left, &right) == &result);
+  CHECK(Core::Math::AddLiveVectors(&result, &left, &right) == &result);
   CheckVectorComponents(result, VECTOR{5, 2, 7, 103});
-  CHECK(Core_Math_SubtractVectors(&left, &left, &right) == &left);
+  CHECK(Core::Math::SubtractLiveVectors(&left, &left, &right) == &left);
   CheckVectorComponents(left, VECTOR{9, -8, 15, 101});
-  CHECK(Core_Math_CopyVector(&result, &right) == &result);
+  CHECK(Core::Math::CopyLiveVector(&result, &right) == &result);
   CheckVectorComponents(result, VECTOR{-2, 5, -4, 103});
 }
 
@@ -690,14 +693,14 @@ TEST_CASE("Wide and short vector helpers preserve widths and output positions",
   SVECTOR narrow{2, -3, 4, 91};
   VECTOR wide{9, 8, 7, 93};
   VECTOR result{0, 0, 0, 95};
-  Core_Math_AddWideVectors(&wide, &wide, &result);
+  Core::Math::AddLiveVectorsTo(&wide, &wide, &result);
   CheckVectorComponents(result, VECTOR{18, 16, 14, 95});
-  Core_Math_AddWideAndShortVectors(&wide, &narrow, &wide);
+  Core::Math::AddLiveVectorsTo(&wide, &narrow, &wide);
   CheckVectorComponents(wide, VECTOR{11, 5, 11, 93});
-  Core_Math_WidenShortVector(&narrow, &result);
+  Core::Math::CopyLiveVectorTo(&narrow, &result);
   CheckVectorComponents(result, VECTOR{2, -3, 4, 95});
   wide = {-65535, 65534, 98304, 93};
-  Core_Math_NarrowWideVector(&wide, &narrow);
+  Core::Math::CopyLiveVectorTo(&wide, &narrow);
   CheckVectorComponents(narrow, SVECTOR{1, -2, -32768, 91});
 }
 
@@ -705,46 +708,47 @@ TEST_CASE("Fixed vectors preserve scaling and destination padding",
           "[core][math][semantic-names]") {
   SVECTOR source{2, -3, 4, 91};
   VECTOR result{0, 0, 0, 95};
-  CHECK(Core_Math_ShortVectorToFixed(&result, &source) == &result);
+  CHECK(Core::Math::WidenLiveShortVectorToFixed(&result, &source) == &result);
   CheckVectorComponents(result, VECTOR{8192, -12288, 16384, 95});
-  CHECK(Core_Math_ScaleFixedVector(&result, &result, 2048) == &result);
+  CHECK(Core::Math::ScaleLiveFixedVector(&result, &result, 2048) == &result);
   CheckVectorComponents(result, VECTOR{4096, -6144, 8192, 95});
   VECTOR magnitude{3 * 4096, 4 * 4096, 0, 73};
-  CHECK(Core_Math_FixedVectorMagnitude(&magnitude) == 5 * 4096);
+  CHECK(Core::Math::MeasureLiveFixedVector(&magnitude) == 5 * 4096);
   VECTOR direction{4096, 0, 0, 71};
-  Core_Math_NormalizeFixedVector(&direction, &result);
+  Core::Math::NormalizeLiveFixedVector(&direction, &result);
   CheckVectorComponents(result, VECTOR{4096, 0, 0, 95});
 }
 
 TEST_CASE("Signed clamp preserves unordered bound semantics",
           "[core][math][semantic-names]") {
-  for (const int first : {-7, 3}) {
-    const int second = first == -7 ? 3 : -7;
-    CHECK(Core_Math_ClampSignedShort(-8, first, second) == -7);
-    CHECK(Core_Math_ClampSignedShort(-7, first, second) == -7);
-    CHECK(Core_Math_ClampSignedShort(0, first, second) == 0);
-    CHECK(Core_Math_ClampSignedShort(3, first, second) == 3);
-    CHECK(Core_Math_ClampSignedShort(4, first, second) == 3);
+  using Core::Math::ClampSignedShort;
+  for (const std::int16_t first : {std::int16_t{-7}, std::int16_t{3}}) {
+    const std::int16_t second = first == -7 ? 3 : -7;
+    CHECK(ClampSignedShort(-8, first, second) == -7);
+    CHECK(ClampSignedShort(-7, first, second) == -7);
+    CHECK(ClampSignedShort(0, first, second) == 0);
+    CHECK(ClampSignedShort(3, first, second) == 3);
+    CHECK(ClampSignedShort(4, first, second) == 3);
   }
-  CHECK(Core_Math_ClampSignedShort(5, 2, 2) == 2);
+  CHECK(ClampSignedShort(5, 2, 2) == 2);
 }
 
 TEST_CASE("Magnitude selection retains signs and first-component ties",
           "[core][math][semantic-names]") {
-  CHECK(Core_Math_GreatestMagnitudeComponent(-7, 7, 3) == -7);
-  CHECK(Core_Math_GreatestMagnitudeComponent(3, -7, 7) == -7);
-  CHECK(Core_Math_GreatestMagnitudeComponent(-1, 2, -3) == -3);
-  CHECK(Core_Math_GreatestMagnitudeComponent(0, 0, 0) == 0);
-  CHECK(Core_Math_LargerMagnitude(-7, 7) == -7);
-  CHECK(Core_Math_LargerMagnitude(1, -3) == -3);
+  CHECK(Core::Math::SelectLiveGreatestMagnitude(-7, 7, 3) == -7);
+  CHECK(Core::Math::SelectLiveGreatestMagnitude(3, -7, 7) == -7);
+  CHECK(Core::Math::SelectLiveGreatestMagnitude(-1, 2, -3) == -3);
+  CHECK(Core::Math::SelectLiveGreatestMagnitude(0, 0, 0) == 0);
+  CHECK(Core::Math::LargerMagnitude(-7, 7) == -7);
+  CHECK(Core::Math::LargerMagnitude(1, -3) == -3);
 }
 
 TEST_CASE("Packed screen addition does not carry between coordinates",
           "[core][math][semantic-names]") {
-  CHECK(Core_Math_AddPackedScreenCoordinates(0x0001FFFF, 0x00020001) ==
+  CHECK(Core::Math::AddPackedScreenCoordinates(0x0001FFFF, 0x00020001) ==
         0x00030000);
-  CHECK(Core_Math_AddPackedScreenCoordinates(std::bit_cast<int>(0xFFFF0001u),
-                                             0x00010002) == 3);
+  CHECK(Core::Math::AddPackedScreenCoordinates(std::bit_cast<int>(0xFFFF0001u),
+                                               0x00010002) == 3);
 }
 
 TEST_CASE("Look-at orientation preserves its negative vertical reference",
@@ -755,8 +759,10 @@ TEST_CASE("Look-at orientation preserves its negative vertical reference",
   matrix.t[0] = 77;
   matrix.t[1] = 88;
   matrix.t[2] = 99;
-  Core_Math_BuildLookAtOrientation(&from, &to, &matrix);
-  CheckRotationDiagonal(matrix, 4096, -4096, 4096);
+  Core::Math::BuildLiveLookAtOrientation(&from, &to, &matrix);
+  // VectorNormal's 8-bit D_80040D98 lookup: {0,0,10} -> 4095, then the
+  // cross-product normals overshoot to 4102 and -4101 as on the console.
+  CheckRotationDiagonal(matrix, 4102, -4101, 4095);
   CHECK(matrix.t[0] == 77);
   CHECK(matrix.t[1] == 88);
   CHECK(matrix.t[2] == 99);
@@ -767,24 +773,25 @@ TEST_CASE("Direction rotations and fixed headings preserve angle units",
   VECTOR direction{0, 0, 4096, 0};
   MATRIX matrix{};
   matrix.t[0] = 73;
-  Core_Math_DirectionRotationMatrix(&direction, &matrix);
+  Core::Math::BuildLiveDirectionRotationMatrix(&direction, &matrix);
   CheckRotationDiagonal(matrix, 4096, 4096, 4096);
   CHECK(matrix.t[0] == 73);
-  CHECK(Core_Math_FixedAtan2(0, 4096) == 0);
-  CHECK(Core_Math_FixedAtan2(4096, 0) == 1024);
-  CHECK(Core_Math_FixedAtan2(-4096, 0) == -1024);
-  CHECK(Core_Math_FixedAtan2(4096, 4096) == 512);
+  CHECK(Core::Math::FixedAtan2(0, 4096) == 0);
+  CHECK(Core::Math::FixedAtan2(4096, 0) == 1024);
+  CHECK(Core::Math::FixedAtan2(-4096, 0) == -1024);
+  // D_80040A14[512] is the byte cap 255, so the diagonal is 510 (#278).
+  CHECK(Core::Math::FixedAtan2(4096, 4096) == 510);
 }
 
 TEST_CASE("Identity and translation setters preserve their separate contracts",
           "[core][math][semantic-names]") {
   MATRIX matrix{};
   matrix.t[0] = 73;
-  Core_Math_SetIdentityRotation(&matrix);
+  Core::Math::SetLiveIdentityRotation(&matrix);
   CheckRotationDiagonal(matrix, 4096, 4096, 4096);
   CHECK(matrix.t[0] == 73);
   SVECTOR translation{-3, 17, 29, 0};
-  Core_Math_SetTranslationMatrix(&translation, &matrix);
+  Core::Math::SetLiveTranslationTransform(&translation, &matrix);
   CheckRotationDiagonal(matrix, 4096, 4096, 4096);
   CHECK(matrix.t[0] == -3);
   CHECK(matrix.t[1] == 17);
@@ -793,39 +800,38 @@ TEST_CASE("Identity and translation setters preserve their separate contracts",
 
 TEST_CASE("Interpolation weights preserve distinct scales and signed rounding",
           "[core][math][interpolation-names]") {
-  CHECK(Core_Math_InterpolateSevenBitScalar(10, -10, 0) == 10);
-  CHECK(Core_Math_InterpolateSevenBitScalar(10, -10, 64) == 0);
-  CHECK(Core_Math_InterpolateSevenBitScalar(10, -10, 128) == -10);
+  CHECK(Core::Math::InterpolateLiveSevenBitScalar(10, -10, 0) == 10);
+  CHECK(Core::Math::InterpolateLiveSevenBitScalar(10, -10, 64) == 0);
+  CHECK(Core::Math::InterpolateLiveSevenBitScalar(10, -10, 128) == -10);
   std::array<std::int16_t, 2> endpoints{10, -11};
-  CHECK(Core_Math_InterpolateShortPair(endpoints.data(), 64) == -1);
-  CHECK(Core_Math_InterpolateThirteenBitScalar(10, -11, 4096) == 0);
-  CHECK(Core_Math_InterpolateFixedPointRatio(10, -11, 1, 2) == 0);
-  CHECK(Core_Math_InterpolateFixedPointRatio(0, 8192, 1, 3) == 2730);
+  CHECK(Core::Math::InterpolateLiveShortPair(endpoints, 64) == -1);
+  CHECK(Core::Math::InterpolateLiveThirteenBitScalar(10, -11, 4096) == 0);
+  CHECK(Core::Math::InterpolateLiveFixedPointRatio(10, -11, 1, 2) == 0);
+  CHECK(Core::Math::InterpolateLiveFixedPointRatio(0, 8192, 1, 3) == 2730);
 }
 
 TEST_CASE("Timed scalar interpolation keeps duration before elapsed steps",
           "[core][math][interpolation-names]") {
-  CHECK(Core_Math_InterpolateTimedScalar(10, -10, 8, 2) == 5);
-  for (const auto interpolate : {Core_Math_InterpolateCosineScalar,
-                                 Core_Math_InterpolateCosineTimedScalar}) {
-    CHECK(interpolate(10, -10, 8, 0) == 10);
-    CHECK(interpolate(10, -10, 8, 2) == 8);
-    CHECK(interpolate(10, -10, 8, 4) == 0);
-    CHECK(interpolate(10, -10, 8, 8) == -10);
-  }
+  CHECK(Core::Math::InterpolateLiveTimedScalar(10, -10, 8, 2) == 5);
+  // func_800CFC8C and func_800D18B4 share one typed kernel.
+  const auto interpolate = Core::Math::InterpolateLiveCosineScalar;
+  CHECK(interpolate(10, -10, 8, 0) == 10);
+  CHECK(interpolate(10, -10, 8, 2) == 8);
+  CHECK(interpolate(10, -10, 8, 4) == 0);
+  CHECK(interpolate(10, -10, 8, 8) == -10);
 }
 
 TEST_CASE("Short-vector interpolation retains aliasing and fixed-point phases",
           "[core][math][interpolation-names]") {
   SVECTOR start{0, 32, -32, 71};
   SVECTOR end{16, -16, 48, 73};
-  Core_Math_InterpolateThirteenBitShortVector(&start, &end, 4096, &start);
+  Core::Math::InterpolateLiveThirteenBitVector(&start, &end, 4096, &start);
   CheckVectorComponents(start, SVECTOR{8, 8, 8, 71});
   start = {0, 32, -32, 71};
-  Core_Math_InterpolateTimedShortVector(&start, &end, 8, 2, &start);
+  Core::Math::InterpolateLiveTimedVector(&start, &end, 8, 2, &start);
   CheckVectorComponents(start, SVECTOR{4, 20, -12, 71});
   start = {0, 32, -32, 71};
-  Core_Math_InterpolateCosineShortVector(&start, &end, 8, 2, &start);
+  Core::Math::InterpolateLiveCosineVector(&start, &end, 8, 2, &start);
   CheckVectorComponents(start, SVECTOR{2, 25, -21, 71});
 }
 
@@ -833,13 +839,13 @@ TEST_CASE("Wide-vector interpolation preserves units and destination padding",
           "[core][math][interpolation-names]") {
   VECTOR start{0, 32, -32, 71};
   VECTOR end{16, -16, 48, 73};
-  Core_Math_InterpolateThirteenBitWideVector(&start, &end, 4096, &start);
+  Core::Math::InterpolateLiveThirteenBitVector(&start, &end, 4096, &start);
   CheckVectorComponents(start, VECTOR{8, 8, 8, 71});
   start = {0, 32, -32, 71};
-  Core_Math_InterpolateTimedWideVector(&start, &end, 8, 2, &start);
+  Core::Math::InterpolateLiveTimedVector(&start, &end, 8, 2, &start);
   CheckVectorComponents(start, VECTOR{4, 20, -12, 71});
   start = {0, 32, -32, 71};
-  Core_Math_InterpolateCosineWideVector(&start, &end, 8, 2, &start);
+  Core::Math::InterpolateLiveCosineVector(&start, &end, 8, 2, &start);
   CheckVectorComponents(start, VECTOR{2, 25, -21, 71});
 }
 
@@ -856,13 +862,13 @@ TEST_CASE("Lagrange interpolation preserves original fixed-point coefficients",
                                                         {8192, 63, -32, 7}}};
   for (const auto& [phase, x, y, z] : kSamples) {
     SVECTOR result{0, 0, 0, 75};
-    Core_Math_InterpolateLagrangeShortVector(&point0, &point1, &point2, &point3,
-                                             phase, &result);
+    Core::Math::InterpolateLiveLagrangeVector(&point0, &point1, &point2,
+                                              &point3, phase, &result);
     CheckVectorComponents(result, SVECTOR{static_cast<std::int16_t>(x),
                                           static_cast<std::int16_t>(y),
                                           static_cast<std::int16_t>(z), 75});
     int scalar = 0;
-    Core_Math_InterpolateLagrangeScalar(8, 16, 32, 64, phase, &scalar);
+    Core::Math::InterpolateLiveLagrangeScalar(8, 16, 32, 64, phase, &scalar);
     CHECK(scalar == x);
   }
 }

@@ -10,6 +10,8 @@
 #include <type_traits>
 
 #include "Core/Log.hpp"
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/PackageExtents.hpp"
@@ -19,7 +21,6 @@
 extern "C" {
 #include "Core/BiosRand.h"
 #include "Core/Gte.h"
-#include "Core/Math/Interpolation.h"
 #include "Core/Scratch.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -91,8 +92,12 @@ class LiveOriginServices final : public TrailOriginServices {
   std::int32_t RandomRangeExclusive(std::int32_t a, std::int32_t b) override {
     return VS::Core::LiveRandomRangeExclusive(a, b);
   }
-  std::int32_t Sin(std::int32_t angle) override { return Core_Gte_Sin(angle); }
-  std::int32_t Cos(std::int32_t angle) override { return Core_Gte_Cos(angle); }
+  std::int32_t Sin(std::int32_t angle) override {
+    return VS::Core::Math::Sine(angle);
+  }
+  std::int32_t Cos(std::int32_t angle) override {
+    return VS::Core::Math::Cosine(angle);
+  }
   TrailVector Rotate(TrailPoint point) override {
     SVECTOR input{point.x, point.y, point.z, 0};
     VECTOR output{};
@@ -101,11 +106,12 @@ class LiveOriginServices final : public TrailOriginServices {
   }
 };
 
-TrailVector SampledRange(const std::int16_t* range, int curve, int distance) {
+TrailVector SampledRange(
+    std::span<const std::int16_t, VS::Core::Math::kVectorRangeHalfwords> range,
+    int curve, int distance) {
   VECTOR value{};
-  Core_Math_InterpolatePairsToWideVector(
-      const_cast<std::int16_t*>(range),
-      Effects_SampleEffectCurve(curve, distance), &value);
+  VS::Core::Math::InterpolateLiveSevenBitVector(
+      range, Effects_SampleEffectCurve(curve, distance), &value);
   return Wide(value);
 }
 

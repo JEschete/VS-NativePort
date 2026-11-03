@@ -723,7 +723,7 @@ intptr_t Event_CommandStoreActorRangeBearing(u_char* instruction, short thread_i
     delta_z = first_actor_location.location.position.vz - second_actor_location.location.position.vz;
     scaled_distance = VS::Core::Math::SquareRootInteger((delta_x * delta_x) + (delta_z * delta_z)) / instruction[5];
     State_SetScriptFlag(result_flag_id, scaled_distance < 0x100 ? scaled_distance & 0xFF : -1);
-    State_SetScriptFlag(result_flag_id + 1, (Core_Gte_Atan2(delta_x, delta_z) >> 4) & 0xFF);
+    State_SetScriptFlag(result_flag_id + 1, (VS::Core::Math::Arctangent2(delta_x, delta_z) >> 4) & 0xFF);
     return 0;
 }
 
@@ -864,7 +864,7 @@ int Event_ActorDialogAnchor(int actor_id, SVECTOR* dialog_anchor)
     Core_Gte_SetTransMatrix(&tagged_bone_matrix);
     Core_Gte_RotTransPers(dialog_anchor, anchor_projection_workspace, &anchor_projection_workspace[3], &anchor_projection_workspace[4]);
     Actors_ProjectActorTaggedBone(actor_id, 1, dialog_anchor, anchor_projection_workspace[2]);
-    dialog_anchor->vz = Core_Gte_Atan2(((short*)&anchor_projection_workspace)[1] - dialog_anchor->vy, (short)anchor_projection_workspace[0] - dialog_anchor->vx);
+    dialog_anchor->vz = VS::Core::Math::Arctangent2(((short*)&anchor_projection_workspace)[1] - dialog_anchor->vy, (short)anchor_projection_workspace[0] - dialog_anchor->vx);
     return dialog_anchor->vz;
 }
 

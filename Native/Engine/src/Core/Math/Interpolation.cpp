@@ -1,223 +1,205 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
+// Hand-maintained (tools/port/owned.csv).
+#include "Core/Math/Interpolation.hpp"
 
-// decomp: _trig_table (_trig_table@SLUS_010.40)
-u_short Core_kSineTable[1674]; /* contents: module image (ModuleData.cpp) */
+#include <array>
+#include <cstddef>
+#include <cstdint>
 
-// decomp: BATTLE.PRG func_800CFB68 (src/BATTLE/BATTLE.PRG/5BF94.c:5805)
-int Core_Math_InterpolateSevenBitScalar(int start, int end, int weight_q7)
-{
-    return (((end - start) * weight_q7) >> 7) + start;
+#include "Core/Math/ScalarMath.hpp"
+
+namespace VS::Core::Math {
+namespace {
+constexpr int kSevenBitShift = 7;
+constexpr int kFractionBits = 12;
+constexpr int kHalvedFractionBits = 13;
+constexpr int kTwoThirdsShift = 14;
+constexpr std::int32_t kFixedOne = 4096;
+constexpr std::int32_t kFixedTwo = 8192;
+constexpr std::int32_t kQuarterTurn = 1024;
+constexpr std::int32_t kHalfTurn = 2048;
+// ONE * 2 / 3 in the original's integer arithmetic.
+constexpr std::int32_t kTwoThirds = 2730;
+
+using LagrangeWeights = std::array<std::int32_t, kLagrangePoints>;
+
+// The R3000 quotient of current * scale by total.
+std::int32_t ScaledProgress(StepProgress progress,
+                            std::int32_t scale) noexcept {
+  return R3000Quotient(WrappingMultiply(progress.current, scale),
+                       progress.total);
 }
 
-// decomp: BATTLE.PRG func_800CFC8C (src/BATTLE/BATTLE.PRG/5BF94.c:5859)
-int Core_Math_InterpolateCosineScalar(int start, int end, int total_steps, int current_step)
-{
-    return start
-         + ((int)((end - start) * (ONE - Core_Gte_Cos((int)(current_step * ONE / 2) / total_steps)))
-             / (ONE * 2));
+// The thirteen-bit weight of a linear step: current * 8192 / total.
+std::int32_t TimedWeight(StepProgress progress) noexcept {
+  return ScaledProgress(progress, kFixedTwo);
+}
+
+// The thirteen-bit weight of a half-cosine step: 4096 - cos(current * 2048 /
+// total), from 0 at the start to 8192 at the end.
+std::int32_t CosineWeight(StepProgress progress) noexcept {
+  return WrappingSubtract(kFixedOne,
+                          Cosine(ScaledProgress(progress, kHalfTurn)));
+}
+
+// Q12 Lagrange basis weights of the points at phase -1, 0, 1 and 2, in the
+// original's operation order and truncation.
+LagrangeWeights WeightsAt(std::int32_t phase) noexcept {
+  const std::int32_t negative = WrappingNegate(phase);
+  const std::int32_t minus_one = WrappingSubtract(phase, kFixedOne);
+  const std::int32_t minus_two = WrappingSubtract(phase, kFixedTwo);
+  const std::int32_t plus_one = WrappingAdd(phase, kFixedOne);
+  const auto cubic = [](std::int32_t first, std::int32_t second,
+                        std::int32_t third) noexcept {
+    return WrappingMultiply(WrappingMultiply(first, second) >> kFractionBits,
+                            third);
+  };
+  const auto outer = [](std::int32_t cubic_value) noexcept {
+    return WrappingMultiply(cubic_value >> kFractionBits, kTwoThirds) >>
+           kTwoThirdsShift;
+  };
+  return LagrangeWeights{
+      outer(cubic(negative, minus_one, minus_two)),
+      cubic(plus_one, minus_one, minus_two) >> kHalvedFractionBits,
+      cubic(plus_one, negative, minus_two) >> kHalvedFractionBits,
+      outer(cubic(plus_one, phase, minus_one))};
+}
+
+std::int32_t Combine(const std::array<std::int32_t, kLagrangePoints>& values,
+                     const LagrangeWeights& weights) noexcept {
+  std::int32_t sum = 0;
+  for (std::size_t point = 0; point < values.size(); ++point) {
+    sum = WrappingAdd(sum, WrappingMultiply(values[point], weights[point]));
+  }
+  return sum >> kFractionBits;
+}
+
+// One axis of the control points, in point order.
+std::int32_t CombineAxis(const std::array<Vec3, kLagrangePoints>& points,
+                         std::int32_t Vec3::* axis,
+                         const LagrangeWeights& weights) noexcept {
+  std::array<std::int32_t, kLagrangePoints> values{};
+  for (std::size_t point = 0; point < values.size(); ++point) {
+    values[point] = points[point].*axis;
+  }
+  return Combine(values, weights);
+}
+}  // namespace
+
+// decomp: BATTLE.PRG func_800CFB68 (src/BATTLE/BATTLE.PRG/5BF94.c:5805) and
+// func_800CFE1C (5BF94.c:5905).
+std::int32_t InterpolateSevenBitScalar(ScalarSpan span,
+                                       std::int32_t weight) noexcept {
+  return WrappingAdd(
+      WrappingMultiply(WrappingSubtract(span.end, span.start), weight) >>
+          kSevenBitShift,
+      span.start);
 }
 
 // decomp: BATTLE.PRG vs_battle_lerpVector (src/BATTLE/BATTLE.PRG/5BF94.c:5866)
-void Core_Math_InterpolatePairsToWideVector(short* src, int t, VECTOR* vec)
-{
-    int start0 = src[0];
-    int end0 = src[1];
-    int start1 = src[2];
-    int end1 = src[3];
-    int start2 = src[4];
-    int end2 = src[5];
-
-    vec->vx = (((end0 - start0) * t) >> 7) + start0;
-    vec->vy = (((end1 - start1) * t) >> 7) + start1;
-    vec->vz = (((end2 - start2) * t) >> 7) + start2;
+// and vs_battle_lerpSvector (5BF94.c:5880).
+Vec3 InterpolateSevenBitVector(
+    const std::array<ScalarSpan, kMatrixOrder>& spans,
+    std::int32_t weight) noexcept {
+  return Vec3{InterpolateSevenBitScalar(spans[0], weight),
+              InterpolateSevenBitScalar(spans[1], weight),
+              InterpolateSevenBitScalar(spans[2], weight)};
 }
 
-// decomp: BATTLE.PRG vs_battle_lerpSvector (src/BATTLE/BATTLE.PRG/5BF94.c:5880)
-void Core_Math_InterpolatePairsToShortVector(short* src, int t, SVECTOR* vec)
-{
-    int start0 = src[0];
-    int end0 = src[1];
-    int start1 = src[2];
-    int end1 = src[3];
-    int start2 = src[4];
-    int end2 = src[5];
-
-    vec->vx = (((end0 - start0) * t) >> 7) + start0;
-    vec->vy = (((end1 - start1) * t) >> 7) + start1;
-    vec->vz = (((end2 - start2) * t) >> 7) + start2;
+// decomp: BATTLE.PRG vs_battle_lerp2DVector
+// (src/BATTLE/BATTLE.PRG/5BF94.c:5894).
+Vec2 InterpolateSevenBitPlane(const std::array<ScalarSpan, 2>& spans,
+                              std::int32_t weight) noexcept {
+  return Vec2{InterpolateSevenBitScalar(spans[0], weight),
+              InterpolateSevenBitScalar(spans[1], weight)};
 }
 
-// decomp: BATTLE.PRG vs_battle_lerp2DVector (src/BATTLE/BATTLE.PRG/5BF94.c:5894)
-void Core_Math_InterpolatePairsToPlaneVector(short* src, int t, int* vec)
-{
-    int start0 = src[0];
-    int end0 = src[1];
-    int start1 = src[2];
-    int end1 = src[3];
-
-    vec[0] = ((((end0 - start0) * t) >> 7) + start0);
-    vec[1] = ((((end1 - start1) * t) >> 7) + start1);
+// decomp: BATTLE.PRG vs_battle_lerp (src/BATTLE/BATTLE.PRG/5BF94.c:6424).
+std::int32_t InterpolateThirteenBitScalar(ScalarSpan span,
+                                          std::int32_t weight) noexcept {
+  return WrappingAdd(
+      span.start,
+      WrappingMultiply(WrappingSubtract(span.end, span.start), weight) /
+          kFixedTwo);
 }
 
-// decomp: BATTLE.PRG func_800CFE1C (src/BATTLE/BATTLE.PRG/5BF94.c:5905)
-int Core_Math_InterpolateShortPair(short* endpoints, int weight_q7)
-{
-    int start = endpoints[0];
-    return (((endpoints[1] - start) * weight_q7) >> 7) + start;
+// decomp: BATTLE.PRG func_800D169C (src/BATTLE/BATTLE.PRG/5BF94.c:6430) and
+// func_800D17A8 (5BF94.c:6447).
+Vec3 InterpolateThirteenBitVector(Vec3 start, Vec3 end,
+                                  std::int32_t weight) noexcept {
+  return Vec3{InterpolateThirteenBitScalar({start.x, end.x}, weight),
+              InterpolateThirteenBitScalar({start.y, end.y}, weight),
+              InterpolateThirteenBitScalar({start.z, end.z}, weight)};
 }
 
-// decomp: BATTLE.PRG vs_battle_lerpRatio (src/BATTLE/BATTLE.PRG/5BF94.c:6382)
-int Core_Math_InterpolateFixedPointRatio(int start, int end, int numerator, int denominator)
-{
-    int scaled_delta = (end - start) * ((numerator * ONE) / denominator);
-    return start + scaled_delta / ONE;
+// decomp: BATTLE.PRG func_800D1904 (src/BATTLE/BATTLE.PRG/5BF94.c:6469).
+std::int32_t InterpolateTimedScalar(ScalarSpan span,
+                                    StepProgress progress) noexcept {
+  return InterpolateThirteenBitScalar(span, TimedWeight(progress));
 }
 
-// decomp: BATTLE.PRG vs_battle_splineInterpolate (src/BATTLE/BATTLE.PRG/5BF94.c:6388)
-void Core_Math_InterpolateLagrangeShortVector(
-    SVECTOR* p0, SVECTOR* p1, SVECTOR* p2, SVECTOR* p3, int t, SVECTOR* out)
-{
-    int negative_phase = -t;
-    int phase_minus_one = t - ONE;
-    int phase_plus_one = t + ONE;
-
-    int weight0_q12 =
-        (((((negative_phase * phase_minus_one) >> 0xC) * (t - ONE * 2)) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
-    int weight1_q12 = (((phase_plus_one * phase_minus_one) >> 0xC) * (t - ONE * 2)) >> 0xD;
-    int weight2_q12 = (((phase_plus_one * negative_phase) >> 0xC) * (t - ONE * 2)) >> 0xD;
-    int weight3_q12 = (((((phase_plus_one * t) >> 0xC) * phase_minus_one) >> 0xC) * (ONE * 2 / 3)) >> 0xE;
-
-    out->vx = ((p0->vx * weight0_q12) + (p1->vx * weight1_q12) + (p2->vx * weight2_q12)
-                  + (p3->vx * weight3_q12))
-           >> 0xC;
-    out->vy = ((p0->vy * weight0_q12) + (p1->vy * weight1_q12) + (p2->vy * weight2_q12)
-                  + (p3->vy * weight3_q12))
-           >> 0xC;
-    out->vz = ((p0->vz * weight0_q12) + (p1->vz * weight1_q12) + (p2->vz * weight2_q12)
-                  + (p3->vz * weight3_q12))
-           >> 0xC;
+// decomp: BATTLE.PRG func_800D1778 (src/BATTLE/BATTLE.PRG/5BF94.c:6442) and
+// func_800D1884 (5BF94.c:6459).
+Vec3 InterpolateTimedVector(Vec3 start, Vec3 end,
+                            StepProgress progress) noexcept {
+  return InterpolateThirteenBitVector(start, end, TimedWeight(progress));
 }
 
-// decomp: BATTLE.PRG func_800D155C (src/BATTLE/BATTLE.PRG/5BF94.c:6412)
-void Core_Math_InterpolateLagrangeScalar(int value0, int value1, int value2, int value3, int phase_q12, int* destination)
-{
-    int p0 = ((-phase_q12 * (phase_q12 - ONE)) >> 12) * (phase_q12 - (ONE * 2));
-    int p1 = (((phase_q12 + ONE) * (phase_q12 - ONE)) >> 12) * (phase_q12 - (ONE * 2));
-    int p2 = (((phase_q12 + ONE) * -phase_q12) >> 12) * (phase_q12 - (ONE * 2));
-    int p3 = (((phase_q12 + ONE) * phase_q12) >> 12) * (phase_q12 - ONE);
-
-    *destination = ((value0 * (((p0 >> 12) * (ONE * 2 / 3)) >> 14)) + (value1 * (p1 >> 13))
-                + (value2 * (p2 >> 13)) + (value3 * (((p3 >> 12) * (ONE * 2 / 3)) >> 14)))
-         >> 12;
+// decomp: BATTLE.PRG func_800CFC8C (src/BATTLE/BATTLE.PRG/5BF94.c:5859) and
+// func_800D18B4 (5BF94.c:6464), which compute the same sum.
+std::int32_t InterpolateCosineScalar(ScalarSpan span,
+                                     StepProgress progress) noexcept {
+  return InterpolateThirteenBitScalar(span, CosineWeight(progress));
 }
 
-// decomp: BATTLE.PRG vs_battle_lerp (src/BATTLE/BATTLE.PRG/5BF94.c:6424)
-int Core_Math_InterpolateThirteenBitScalar(int start, int end, int weight_q13)
-{
-    int scaled_delta = (end - start) * weight_q13;
-    return start + (scaled_delta / (ONE * 2));
+// decomp: BATTLE.PRG func_800D1718 (src/BATTLE/BATTLE.PRG/5BF94.c:6437) and
+// func_800D1824 (5BF94.c:6454).
+Vec3 InterpolateCosineVector(Vec3 start, Vec3 end,
+                             StepProgress progress) noexcept {
+  return InterpolateThirteenBitVector(start, end, CosineWeight(progress));
 }
 
-// decomp: BATTLE.PRG func_800D169C (src/BATTLE/BATTLE.PRG/5BF94.c:6430)
-void Core_Math_InterpolateThirteenBitShortVector(SVECTOR* start, SVECTOR* end, int weight_q13, SVECTOR* destination)
-{
-    destination->vx = Core_Math_InterpolateThirteenBitScalar(start->vx, end->vx, weight_q13);
-    destination->vy = Core_Math_InterpolateThirteenBitScalar(start->vy, end->vy, weight_q13);
-    destination->vz = Core_Math_InterpolateThirteenBitScalar(start->vz, end->vz, weight_q13);
+// decomp: BATTLE.PRG vs_battle_lerpRatio (src/BATTLE/BATTLE.PRG/5BF94.c:6382).
+std::int32_t InterpolateFixedPointRatio(ScalarSpan span,
+                                        StepProgress ratio) noexcept {
+  const std::int32_t scaled = WrappingMultiply(
+      WrappingSubtract(span.end, span.start), ScaledProgress(ratio, kFixedOne));
+  return WrappingAdd(span.start, scaled / kFixedOne);
 }
 
-// decomp: BATTLE.PRG func_800D1718 (src/BATTLE/BATTLE.PRG/5BF94.c:6437)
-void Core_Math_InterpolateCosineShortVector(SVECTOR* start, SVECTOR* end, int total_steps, int current_step, SVECTOR* destination)
-{
-    Core_Math_InterpolateThirteenBitShortVector(start, end, ONE - Core_Gte_Cos((current_step * ONE / 2) / total_steps), destination);
+// decomp: BATTLE.PRG vs_battle_splineInterpolate
+// (src/BATTLE/BATTLE.PRG/5BF94.c:6388).
+Vec3 InterpolateLagrangeVector(const std::array<Vec3, kLagrangePoints>& points,
+                               std::int32_t phase) noexcept {
+  const LagrangeWeights weights = WeightsAt(phase);
+  return Vec3{CombineAxis(points, &Vec3::x, weights),
+              CombineAxis(points, &Vec3::y, weights),
+              CombineAxis(points, &Vec3::z, weights)};
 }
 
-// decomp: BATTLE.PRG func_800D1778 (src/BATTLE/BATTLE.PRG/5BF94.c:6442)
-void Core_Math_InterpolateTimedShortVector(SVECTOR* start, SVECTOR* end, int total_steps, int current_step, SVECTOR* destination)
-{
-    Core_Math_InterpolateThirteenBitShortVector(start, end, (current_step * (ONE * 2)) / total_steps, destination);
+// decomp: BATTLE.PRG func_800D155C (src/BATTLE/BATTLE.PRG/5BF94.c:6412).
+std::int32_t InterpolateLagrangeScalar(
+    const std::array<std::int32_t, kLagrangePoints>& values,
+    std::int32_t phase) noexcept {
+  return Combine(values, WeightsAt(phase));
 }
 
-// decomp: BATTLE.PRG func_800D17A8 (src/BATTLE/BATTLE.PRG/5BF94.c:6447)
-void Core_Math_InterpolateThirteenBitWideVector(VECTOR* start, VECTOR* end, int weight_q13, VECTOR* destination)
-{
-    destination->vx = Core_Math_InterpolateThirteenBitScalar(start->vx, end->vx, weight_q13);
-    destination->vy = Core_Math_InterpolateThirteenBitScalar(start->vy, end->vy, weight_q13);
-    destination->vz = Core_Math_InterpolateThirteenBitScalar(start->vz, end->vz, weight_q13);
+// decomp: ENDING.PRG _ease (src/ENDING/ENDING.PRG/D4.c:1293).
+std::int32_t EvaluateEase(EaseCurve curve, StepProgress progress) noexcept {
+  switch (curve) {
+    case EaseCurve::kLinear:
+      return ScaledProgress(progress, kFixedOne);
+    case EaseCurve::kEaseOut:
+      return Sine(ScaledProgress(progress, kQuarterTurn));
+    case EaseCurve::kEaseInOut:
+      return WrappingAdd(Cosine(WrappingAdd(ScaledProgress(progress, kHalfTurn),
+                                            kHalfTurn)),
+                         kFixedOne) >>
+             1;
+    case EaseCurve::kEaseIn:
+      break;
+  }
+  return WrappingAdd(Sine(WrappingSubtract(
+                         ScaledProgress(progress, kQuarterTurn), kQuarterTurn)),
+                     kFixedOne);
 }
-
-// decomp: BATTLE.PRG func_800D1824 (src/BATTLE/BATTLE.PRG/5BF94.c:6454)
-void Core_Math_InterpolateCosineWideVector(VECTOR* start, VECTOR* end, int total_steps, int current_step, VECTOR* destination)
-{
-    Core_Math_InterpolateThirteenBitWideVector(start, end, ONE - Core_Gte_Cos((current_step * ONE / 2) / total_steps), destination);
-}
-
-// decomp: BATTLE.PRG func_800D1884 (src/BATTLE/BATTLE.PRG/5BF94.c:6459)
-void Core_Math_InterpolateTimedWideVector(VECTOR* start, VECTOR* end, int total_steps, int current_step, VECTOR* destination)
-{
-    Core_Math_InterpolateThirteenBitWideVector(start, end, (current_step * (ONE * 2)) / total_steps, destination);
-}
-
-// decomp: BATTLE.PRG func_800D18B4 (src/BATTLE/BATTLE.PRG/5BF94.c:6464)
-int Core_Math_InterpolateCosineTimedScalar(int start, int end, int total_steps, int current_step)
-{
-    return Core_Math_InterpolateThirteenBitScalar(start, end, ONE - Core_Gte_Cos((current_step * ONE / 2) / total_steps));
-}
-
-// decomp: BATTLE.PRG func_800D1904 (src/BATTLE/BATTLE.PRG/5BF94.c:6469)
-int Core_Math_InterpolateTimedScalar(int start, int end, int total_steps, int current_step)
-{
-    return Core_Math_InterpolateThirteenBitScalar(start, end, (current_step * (ONE * 2)) / total_steps);
-}
-
-// decomp: ENDING.PRG func_800688D4 (src/ENDING/ENDING.PRG/D4.c:187)
-int Core_Math_SineFromTable(int angle)
-{
-    intptr_t value = (intptr_t)Core_kSineTable;
-    int quadrant, test, index;
-
-    quadrant = angle & 0x400;
-    test = angle & 0x3FF;
-    if (quadrant) {
-        if (!test) {
-            value = 0x1000;
-            goto negate;
-        }
-        angle = 0x800 - angle;
-    }
-    test = angle & 0x200;
-    index = angle & 0x1FF;
-    if (test) {
-        quadrant = 0x200;
-        index = quadrant - index;
-        value += 2;
-    }
-    index <<= 2;
-    value += index;
-    value = *(u_short*)value;
-negate:
-    if (angle & 0x800) {
-        value = -value;
-    }
-    return value;
-}
-
-// decomp: ENDING.PRG _ease (src/ENDING/ENDING.PRG/D4.c:1293)
-int Core_Math_EvaluateEase(short mode, short currentStep, short totalSteps)
-{
-    switch (mode) {
-    case 0:
-        return (currentStep * ONE) / totalSteps;
-    case 1:
-        return Core_Gte_Sin((currentStep * (ONE / 4)) / totalSteps);
-    case 2:
-        return (Core_Gte_Cos(((currentStep * (ONE / 2)) / totalSteps) + (ONE / 2)) + ONE) >> 1;
-    case 3:
-        return Core_Gte_Sin(((currentStep * (ONE / 4)) / totalSteps) - (ONE / 4)) + ONE;
-    }
-}
-
-}  // extern "C"
+}  // namespace VS::Core::Math

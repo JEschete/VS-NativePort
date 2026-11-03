@@ -238,8 +238,8 @@ void Battle_AimActionBehindSource(Battle_ActionRequest* action_request)
     Actors_ActorLocationQuery source_placement;
 
     Actors_ActorPlacement(action_request->primaryTarget.target.targetActor, &source_placement);
-    action_request->focusPosition.vx = source_placement.location.position.vx + Core_Gte_Sin(source_placement.location.position.pad + ONE / 2);
-    action_request->focusPosition.vz = source_placement.location.position.vz + Core_Gte_Cos(source_placement.location.position.pad + ONE / 2);
+    action_request->focusPosition.vx = source_placement.location.position.vx + VS::Core::Math::Sine(source_placement.location.position.pad + ONE / 2);
+    action_request->focusPosition.vz = source_placement.location.position.vz + VS::Core::Math::Cosine(source_placement.location.position.pad + ONE / 2);
     action_request->focusPosition.vy = source_placement.location.position.vy;
 }
 
@@ -388,9 +388,9 @@ void Battle_CollectSourceAreaActionTargets(int arg0 __attribute__((unused)))
             *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
         dx = Battle_actionState->selection.focusPosition.vx - origin.vx;
         dz = Battle_actionState->selection.focusPosition.vz - origin.vz;
-        Battle_actionState->areaFacing = Core_Gte_Atan2(dx, dz);
+        Battle_actionState->areaFacing = VS::Core::Math::Arctangent2(dx, dz);
         dy = Battle_actionState->selection.focusPosition.vy - origin.vy;
-        Battle_actionState->areaAngle = Core_Gte_Atan2(dy, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz)) / 16 + 64;
+        Battle_actionState->areaAngle = VS::Core::Math::Arctangent2(dy, VS::Core::Math::SquareRootInteger(dx * dx + dz * dz)) / 16 + 64;
         Battle_actionState->areaOrigin =
             *(SVECTOR*)&Battle_actors[Battle_actionState->selection.primaryTarget.target.targetActor]->commandArg1;
     } else {
@@ -907,8 +907,8 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
             }
         }
 
-        offset.vx += (-stickX * Core_Gte_Cos(angle) - stickY * Core_Gte_Sin(angle) + ONE / 8) >> 10;
-        offset.vz += (-stickX * Core_Gte_Sin(angle) + stickY * Core_Gte_Cos(angle) + ONE / 8) >> 10;
+        offset.vx += (-stickX * VS::Core::Math::Cosine(angle) - stickY * VS::Core::Math::Sine(angle) + ONE / 8) >> 10;
+        offset.vz += (-stickX * VS::Core::Math::Sine(angle) + stickY * VS::Core::Math::Cosine(angle) + ONE / 8) >> 10;
         scale = VS::Core::Math::SquareRootInteger(offset.vx * offset.vx + offset.vz * offset.vz);
 
         if (scale > ONE) {
@@ -916,7 +916,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
             stickY = offset.vz - oldZ;
             offset.vx = offset.vx * ONE / scale;
             offset.vz = offset.vz * ONE / scale;
-            scale = (Core_Gte_Atan2(offset.vx, offset.vz) - Core_Gte_Atan2(stickX, stickY)) & 0xFFF;
+            scale = (VS::Core::Math::Arctangent2(offset.vx, offset.vz) - VS::Core::Math::Arctangent2(stickX, stickY)) & 0xFFF;
 
             if (scale < 8 || scale > 4087) {
                 offset.vx = oldX;
@@ -969,7 +969,7 @@ int Battle_UpdateSphereTargetPosition(SVECTOR* target_position)
         switch ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque0[0].kind & 0x7F) {
         case 1:
             scale = ((*(Battle_TargetSphereLabelView* (*))&Battle_targetSphere)->opaque38.vy * 2) / flags.opaque1Bit0;
-            scale = Core_Gte_SquareRoot12(ONE - scale * scale);
+            scale = VS::Core::Math::SquareRootFixed(ONE - scale * scale);
             break;
         case 2:
         case 3:
@@ -1541,13 +1541,13 @@ int Battle_CalculateRangeShapeExtent(Battle_Ai_ActionRangeShape* range_shape)
     mask = 1 << range_shape->shape;
     if (mask & 0x16) {
         r = range_shape->rangeZ;
-        fn = Core_Gte_Cos;
+        fn = VS::Core::Math::Cosine;
     } else if (mask & 0x8) {
         r = range_shape->rangeY;
-        fn = Core_Gte_Cos;
+        fn = VS::Core::Math::Cosine;
     } else {
         r = range_shape->rangeY;
-        fn = Core_Gte_Sin;
+        fn = VS::Core::Math::Sine;
     }
     v = fn(range_shape->angle << 7);
     return ((r << 5) * ABS(v)) >> 12;

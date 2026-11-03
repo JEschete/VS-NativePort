@@ -1,11 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/RandomLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -35,7 +36,7 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
     u_short corner_z_bits;
     MATRIX* emitter_world_matrix;
 
-    Core_Math_InterpolatePairsToWideVector(
+    VS::Core::Math::InterpolateLiveSevenBitVector(
         particle_definition->positionRange, Effects_SampleEffectCurve(particle_definition->positionCurve, particle_set->age), &emitter_scratch->position);
     emitter_world_matrix = &effect_instance->transforms[particle_definition->transformIndex].world;
 
@@ -43,7 +44,7 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
+        VS::Core::Math::AddLiveVectorsTo(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     case 2:
         emitter_scratch->position.vx += emitter_world_matrix->t[0];
@@ -52,7 +53,7 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
         break;
     }
 
-    Core_Math_InterpolatePairsToWideVector(
+    VS::Core::Math::InterpolateLiveSevenBitVector(
         particle_definition->extentRange, Effects_SampleEffectCurve(particle_definition->extentCurve, particle_set->age), &emitter_scratch->extent);
     Core_Gte_SetRotMatrix(emitter_world_matrix);
     Core_Gte_ClearTranslation();
@@ -64,12 +65,12 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
             origin_control_point = particle_set->controlPoints + (i * 4);
 
             random_angle = Core_Random_Rand();
-            emitter_scratch->sinAngle0 = Core_Gte_Sin(random_angle);
-            emitter_scratch->cosAngle0 = Core_Gte_Cos(random_angle);
+            emitter_scratch->sinAngle0 = VS::Core::Math::Sine(random_angle);
+            emitter_scratch->cosAngle0 = VS::Core::Math::Cosine(random_angle);
 
             random_angle = Core_Random_Rand();
-            emitter_scratch->sinAngle1 = Core_Gte_Sin(random_angle);
-            emitter_scratch->cosAngle1 = Core_Gte_Cos(random_angle);
+            emitter_scratch->sinAngle1 = VS::Core::Math::Sine(random_angle);
+            emitter_scratch->cosAngle1 = VS::Core::Math::Cosine(random_angle);
 
             origin_control_point->vx =
                 (((emitter_scratch->extent.vx * emitter_scratch->cosAngle0) >> 0xC) * emitter_scratch->cosAngle1) >> 0xC;
@@ -209,16 +210,16 @@ void VS_PARTICLE_ORIGIN_FUNCTION(Effects_ParticleDefinition* particle_definition
     if ((emitter_scratch->flags & 0x1800) != 0x1000) {
         VS_PARTICLE_CORNER_STATE %= emitter_scratch->ringPositions;
         temp_s0_2 = (VS_PARTICLE_CORNER_STATE * ring_angle_step) + 0x200;
-        ring_edge_start_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
-        ring_edge_start_z = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
+        ring_edge_start_x = (VS::Core::Math::Cosine(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        ring_edge_start_z = (VS::Core::Math::Sine(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
     }
 
     for (i = 0; i < particle_set->count; ++i) {
         origin_control_point = particle_set->controlPoints + (i * 4);
         VS_PARTICLE_CORNER_STATE = (VS_PARTICLE_CORNER_STATE + 1) % emitter_scratch->ringPositions;
         temp_s0_2 = (VS_PARTICLE_CORNER_STATE * ring_angle_step) + 0x200;
-        ring_x = (Core_Gte_Cos(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
-        temp_s0_2 = (Core_Gte_Sin(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
+        ring_x = (VS::Core::Math::Cosine(temp_s0_2) * emitter_scratch->extent.vx) >> 0xC;
+        temp_s0_2 = (VS::Core::Math::Sine(temp_s0_2) * emitter_scratch->extent.vz) >> 0xC;
 
         if ((emitter_scratch->flags & 0x1800) == 0x1000) {
             origin_control_point->vx = ring_x;

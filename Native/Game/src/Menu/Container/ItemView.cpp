@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -1682,7 +1683,7 @@ int Menu_Container_UpdateTransferDirection(int initialize_direction_menu)
         }
         Menu_Container_transferDirectionOkBlink += 16;
         Render_DrawCompactTextColor("OK", 0x4200C8,
-            ((Core_Gte_Sin((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
+            ((VS::Core::Math::Sine((Menu_Container_transferDirectionOkBlink) * 8) >> 5) + 0x40) * 0x10101, (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
         v = 0x1A;
         Menu_Container_transferDirectionCursorAnimation = Menu_Framework_DrawCursor(
             Menu_Container_transferDirectionCursorAnimation, (((selected_direction * 0x10) - (((selected_direction * 2) & 4) - v)) << 0x10) | 0xB4);

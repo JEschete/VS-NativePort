@@ -1,7 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -34,7 +36,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
     u_int endpointStep;
     SVECTOR* controlPoints;
     Render_ParticleLinePacket* prim;
-    width = Core_Math_InterpolateShortPair(particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, particle_set->age));
+    width = VS::Core::Math::InterpolateLiveShortPair(particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, particle_set->age));
     if (!width) {
         width = 1;
     }
@@ -77,7 +79,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
         Core_Gte_StoreSxy2((long *)(&screenPoints[0]));
         Core_Gte_StoreSz3Otz((long *)(&depths[0]));
         for (segment = 1; segment < 8; ++segment) {
-            Core_Math_InterpolateLagrangeShortVector(controlPoints, controlPoints + 1,
+            VS::Core::Math::InterpolateLiveLagrangeVector(controlPoints, controlPoints + 1,
                 controlPoints + 2, controlPoints + 3,
                 (segment * 0x600) - 0x1000 + Core_Random_Rand() % width - width / 2, &emitter_scratch->vector);
             Core_Gte_LoadV0(&emitter_scratch->vector);

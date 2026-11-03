@@ -340,21 +340,21 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
                 first = *models;
                 pointPtr = point.bytes;
                 tile = first->tile;
-                angleA = Core_Gte_Atan2((point.bytes[0] << 7) - (centerX = first->x - 64),
+                angleA = VS::Core::Math::Arctangent2((point.bytes[0] << 7) - (centerX = first->x - 64),
                     (point.bytes[2] << 7) - (centerZ = first->z - 64));
                 second = *models;
-                angleB = Core_Gte_Atan2(state->x - second->x, state->z - second->z);
-                cosA = Core_Gte_Cos(angleA);
-                cosB = Core_Gte_Cos(angleB);
-                sinA = Core_Gte_Sin(angleA);
-                dot = cosA * cosB + sinA * Core_Gte_Sin(angleB);
+                angleB = VS::Core::Math::Arctangent2(state->x - second->x, state->z - second->z);
+                cosA = VS::Core::Math::Cosine(angleA);
+                cosB = VS::Core::Math::Cosine(angleB);
+                sinA = VS::Core::Math::Sine(angleA);
+                dot = cosA * cosB + sinA * VS::Core::Math::Sine(angleB);
                 dot >>= 12;
                 if (state->opaque44) {
                     state->opaque44--;
                 }
                 if (dot >= -1200 || state->opaque44) {
                     Battle_Ai_ProjectClearRadialDestination((Battle_Ai_MoveTargetView *)((void*)state), tile,
-                        Core_Gte_Atan2(point.bytes[0] - (tile.word & 255),
+                        VS::Core::Math::Arctangent2(point.bytes[0] - (tile.word & 255),
                             pointPtr[2] - ((tile.word >> 16) & 255)),
                         320);
                     ((unsigned char*)state)[1] = 1;

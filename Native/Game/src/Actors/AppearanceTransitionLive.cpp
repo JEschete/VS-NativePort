@@ -20,7 +20,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
 #include "Core/Diagnostics.h"
-#include "Core/Gte.h"
 #include "Field/Collision.h"
 #include "Field/Gimmicks.h"
 #include "Render/Palette.h"
@@ -228,7 +227,7 @@ class LiveActorAppearance final : public ActorAppearance {
   }
 
   void SettleDeathMotion() override {
-    const int diagonal = Core_Gte_Sin(kCollisionDiagonalAngle) *
+    const int diagonal = VS::Core::Math::Sine(kCollisionDiagonalAngle) *
                          actor_.collisionRadius / kFixedOne;
     Field_SampleActorCollisionPerimeter(&actor_, diagonal);
     Field_ApplyActorWallRepulsion(&actor_, &actor_.instance.rootMotion);

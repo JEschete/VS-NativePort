@@ -34,7 +34,6 @@ extern "C" {
 #include "Battle/Targeting.h"
 #include "Battle/TextBoxes.h"
 #include "Core/Math/FixedPoint.h"
-#include "Core/Math/Interpolation.h"
 #include "Core/Random.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -528,7 +527,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"SLUS_010.40", 0x1FE6C, sizeof Audio_Seq_kNoteRemapTables, &Audio_Seq_kNoteRemapTables, sizeof Audio_Seq_kNoteRemapTables}, // G01836 D_8002F66C
     {"SLUS_010.40", 0x1FE9C, sizeof Audio_Seq_kRandomPitchOffsets, &Audio_Seq_kRandomPitchOffsets, sizeof Audio_Seq_kRandomPitchOffsets}, // G01837 D_8002F69C
     {"SLUS_010.40", 0x1FF9C, sizeof Audio_Mixer_kPanGains, &Audio_Mixer_kPanGains, sizeof Audio_Mixer_kPanGains}, // G01838 g_Sound_StereoPanGainTableQ15
-    {"SLUS_010.40", 0x30A10, sizeof Core_kSineTable, &Core_kSineTable, sizeof Core_kSineTable}, // G01902 _trig_table
     {"SLUS_010.40", 0x31214, sizeof Core_Math_kArcTangentTable, &Core_Math_kArcTangentTable, sizeof Core_Math_kArcTangentTable}, // G01903 D_80040A14
     {"SLUS_010.40", 0x39950, sizeof Render_legacyLoadingImageHeader, &Render_legacyLoadingImageHeader, sizeof Render_legacyLoadingImageHeader}, // G02006 _nowLoading_header
     {"SLUS_010.40", 0x39954, sizeof Render_loadingScreenPixels, &Render_loadingScreenPixels, sizeof Render_loadingScreenPixels}, // G02005 _nowLoading_data

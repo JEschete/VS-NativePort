@@ -74,7 +74,7 @@ int Battle_Ai_TryRecoverBlockedMovement(Battle_Ai_BlockedRecoveryView* state)
         if ((state->tile.word & 0xFF00FF) == (state->previousTile.word & 0xFF00FF)) {
             state->isStuck = 1;
             if (state->detourStep == 0) {
-                angle = Core_Gte_Atan2(state->x - state->destination.tile.tileX * 128 - 64,
+                angle = VS::Core::Math::Arctangent2(state->x - state->destination.tile.tileX * 128 - 64,
                     state->z - state->destination.tile.tileZ * 128 - 64);
                 angle &= 0xFFF;
                 first = (angle >> 9) & 7;
@@ -350,7 +350,7 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
     }
     x = state->destination.tile.tileX * 128 + 64;
     z = state->destination.tile.tileZ * 128 + 64;
-    angle = Core_Gte_Atan2(state->position.tile.positionX - x, state->z - z);
+    angle = VS::Core::Math::Arctangent2(state->position.tile.positionX - x, state->z - z);
     angle &= 0xFFF;
     if (state->opaque0 && VS::Core::Math::SquaredTileDistance(VS::Core::Math::UnpackTileCoordinate(state->tile.word), VS::Core::Math::UnpackTileCoordinate(state->destination.word)) < 2
         && (MOVEMENT_STEP_TILES[state->destination.tile.tileZ][state->destination.tile.tileX] & 0x40)) {
@@ -375,18 +375,18 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         if (ABS(rise) < step) {
             angle = state->tile.tile.tileX * 128 + 64;
             centerZ = state->tile.tile.tileZ * 128 + 64;
-            centerAngle = Core_Gte_Atan2(state->position.tile.positionX - angle, state->z - centerZ);
+            centerAngle = VS::Core::Math::Arctangent2(state->position.tile.positionX - angle, state->z - centerZ);
             state->moveY = selectedHeight << 12;
             heading = (-centerAngle + ONE * 3 / 4) & 0xFFF;
             offsetX = state->position.tile.positionX - angle;
             if (ABS(offsetX) < step) {
                 state->moveX = angle << 12;
             } else {
-                state->moveX = (state->position.tile.positionX << 12) + step * Core_Gte_Cos(heading);
+                state->moveX = (state->position.tile.positionX << 12) + step * VS::Core::Math::Cosine(heading);
             }
             offsetZ = state->z - centerZ;
             state->moveZ = ABS(offsetZ) < step ? centerZ << 12
-                                               : (state->z << 12) + step * Core_Gte_Sin(heading);
+                                               : (state->z << 12) + step * VS::Core::Math::Sine(heading);
             VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 8);
             return;
         }
@@ -452,8 +452,8 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
             angle += ONE * 3 / 4;
             angle &= 0xFFF;
             state->moveY = 0;
-            state->moveX = Core_Gte_Cos(angle);
-            state->moveZ = Core_Gte_Sin(angle);
+            state->moveX = VS::Core::Math::Cosine(angle);
+            state->moveZ = VS::Core::Math::Sine(angle);
         }
         VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), mode);
         return;
@@ -500,8 +500,8 @@ void Battle_Ai_UpdateFlightMovement(Battle_Ai_MovementStepView* state, int actio
         angle = -angle;
         angle += ONE * 3 / 4;
         angle &= 0xFFF;
-        x = (px << 12) + step * Core_Gte_Cos(angle);
-        z = (pz << 12) + step * Core_Gte_Sin(angle);
+        x = (px << 12) + step * VS::Core::Math::Cosine(angle);
+        z = (pz << 12) + step * VS::Core::Math::Sine(angle);
         if (height < ground) {
             height = ground;
         } else if (top < height) {
@@ -561,8 +561,8 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
     }
 
     angle = (-movement_angle + ONE * 3 / 4) & 0xFFF;
-    c = Core_Gte_Cos(angle);
-    s = Core_Gte_Sin(angle);
+    c = VS::Core::Math::Cosine(angle);
+    s = VS::Core::Math::Sine(angle);
 
     if (VS::Battle::Ai::LowestReachableGroundHeight(VS::Battle::Ai::ActorFlightNeighborhood(*ai_state), movement_angle) + ai_state->flightHeight < ai_state->position.vy) {
         ai_state->moveY = -ONE;
@@ -595,9 +595,9 @@ void Battle_Ai_ProjectClearRadialDestination(Battle_Ai_MoveTargetView* state, Ba
     step = distance >> 3;
 
     for (i = 0; i < 8; i++, distance -= step) {
-        x = ((int)(distance * Core_Gte_Cos(heading)) >> 12) + 64;
+        x = ((int)(distance * VS::Core::Math::Cosine(heading)) >> 12) + 64;
         dest.tile.tileX = (int)(source.tile.tileX * 128 + x) >> 7;
-        z = ((int)(distance * Core_Gte_Sin(heading)) >> 12) + 64;
+        z = ((int)(distance * VS::Core::Math::Sine(heading)) >> 12) + 64;
         dest.tile.tileZ = (int)(source.tile.tileZ * 128 + z) >> 7;
         if (VS::Battle::Ai::LiveDestinationOccupancy(state, dest.word) > 0) {
             break;
@@ -625,7 +625,7 @@ void Battle_Ai_MoveToRadialDestination(Battle_Ai_MovementDestinationView* state,
     if ((state->tile.word & 0xFF00FF) == (state->destination.word & 0xFF00FF)) {
         goto fallback;
     }
-    angle = Core_Gte_Atan2(state->x - state->destination.tile.tileX * 128 - 64,
+    angle = VS::Core::Math::Arctangent2(state->x - state->destination.tile.tileX * 128 - 64,
         state->z - state->destination.tile.tileZ * 128 - 64);
     if (VS::Core::Math::SquaredVectorLength(state->destination.tile.tileX * 128 - state->x + 64, 0,
             state->destination.tile.tileZ * 128 - state->z + 64)
@@ -716,7 +716,7 @@ void Battle_Ai_MoveWithHeightFilteredDirections(Battle_Ai_TerrainMoveView* state
     int mode;
     *tile = Battle_Ai_FilterDirectionsByGroundHeight(old, state->tile.word, state->position[1]);
     VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
-        Core_Gte_Atan2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
+        VS::Core::Math::Arctangent2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
             & 0xFFF,
         0);
     *tile = old;
@@ -935,7 +935,7 @@ void Battle_Ai_UpdateWanderMovement(Battle_Ai_WanderView* state, unsigned int ti
     case 2:
         state->destination = state->goal;
         if (state->movementFlags & 8) {
-            heading = Core_Gte_Atan2(state->x - state->destination.tile.tileX * 128 - 64,
+            heading = VS::Core::Math::Arctangent2(state->x - state->destination.tile.tileX * 128 - 64,
                           state->z - state->destination.tile.tileZ * 128 - 64)
                     & 4095;
             state->savedDestination = state->destination;
@@ -1071,7 +1071,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
             s->opaque1 = VS::Battle::Ai::IsLiveAiTargetBeyondNearRadius(s, target, s->range);
             if (s->movementFlags & 8) {
                 oldPosition = s->destination.word;
-                angle = Core_Gte_Atan2(s->x - (s->destination.bytes[0] << 7) - 64,
+                angle = VS::Core::Math::Arctangent2(s->x - (s->destination.bytes[0] << 7) - 64,
                             s->z - (s->destination.bytes[2] << 7) - 64)
                       & 4095;
                 distance = VS::Core::Math::SquaredVectorLength(s->x - (s->destination.bytes[0] << 7) - 64, 0,
@@ -1108,7 +1108,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
             } else {
                 s->movementTarget = target;
             }
-            angle = Core_Gte_Atan2(s->moveX - s->x, s->moveZ - s->z);
+            angle = VS::Core::Math::Arctangent2(s->moveX - s->x, s->moveZ - s->z);
             VS::Battle::Ai::DispatchLiveAiLocomotionMode(s, 1, angle);
             if (s->actor->id >= 9) {
                 s->opaqueE8 = 1;
@@ -1190,7 +1190,7 @@ int Battle_Ai_UpdateTargetFacing(Battle_Ai_MovementDecisionView* context, int ta
         context->facingPending = 0;
         goto failed;
     }
-    angle = Core_Gte_Atan2(context->x - context->moveX, context->z - context->moveZ);
+    angle = VS::Core::Math::Arctangent2(context->x - context->moveX, context->z - context->moveZ);
     if ((context->destination & 0xFF00FF) != (context->previousFacingTile & 0xFF00FF)
         && ((context->targetFlags[targetId] >> 5) & 1)) {
         if (context->facingPending == 0) {
@@ -1242,12 +1242,12 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
     if (state->movementTarget != 16) {
         Battle_Ai_ActorPositionView* actor =
             (Battle_Ai_ActorPositionView*)Actors_actorRecords[state->movementTarget];
-        direction = Core_Gte_Atan2(state->x - actor->x, state->z - actor->z) & 0xFFF;
+        direction = VS::Core::Math::Arctangent2(state->x - actor->x, state->z - actor->z) & 0xFFF;
         state->angle = direction;
         state->opaque13A = state->duration;
         VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 4);
     } else if (state->opaque9) {
-        direction = Core_Gte_Atan2(state->x - state->targetX, state->z - state->targetZ) & 0xFFF;
+        direction = VS::Core::Math::Arctangent2(state->x - state->targetX, state->z - state->targetZ) & 0xFFF;
         state->heading = direction;
         state->opaque13A = state->duration;
         VS::Battle::Ai::IssueLiveActorCommand((Battle_Ai_ActorAiState *)((void*)state), 3);

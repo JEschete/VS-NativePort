@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -62,7 +62,7 @@ int VS_PARTICLE_DISPATCH_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lif
 #else
         emitter_scratch->flags = particle_definition->flags;
 #endif
-        particle_set->count = Core_Math_InterpolateShortPair(
+        particle_set->count = VS::Core::Math::InterpolateLiveShortPair(
             particle_definition->intervalRange, Effects_SampleEffectCurve(particle_definition->intervalCurve, particle_set->age));
 
         if (particle_set->count >= 9) {

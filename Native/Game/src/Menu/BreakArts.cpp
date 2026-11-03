@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/ActorModelSlot.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
 #include "DiscQueue.h"
 #include "Input/Controller.h"
 #include "Items/Inventory.h"
@@ -72,7 +72,7 @@ void Menu_BreakArts_SetHpCost(int id)
     i = 15;
     do {
         --i;
-        cost = Core_Math_SplitDecimalDigit(cost);
+        cost = VS::Core::Math::SplitDecimalDigit(cost);
         Menu_BreakArts_setHpCostDigitBuffer[i] = (cost & 0xF) + '0';
         cost >>= 4;
     } while (cost != 0);
@@ -116,7 +116,7 @@ void Menu_BreakArts_DrawNextUnlockPoints(int xOffset, int weaponCategory, int ro
     i = 12;
 
     do {
-        points = Core_Math_SplitDecimalDigit(points);
+        points = VS::Core::Math::SplitDecimalDigit(points);
         pointsBuf[i] = (points & 0xF) + '0';
         points = points >> 4;
         --i;

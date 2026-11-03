@@ -1,11 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/RoomDrawLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "CdDrive.h"
-#include "Core/Math/FixedPoint.h"
 #include "DiscQueue.h"
 #include "Field/Background.h"
 #include "Field/Doors.h"
@@ -209,9 +209,9 @@ void Field_DrawRoomBackground(VECTOR* background_rotation_override)
             red = 128 + Field_roomTint.red * 4;
             green = 128 + Field_roomTint.green * 4;
             blue = 128 + Field_roomTint.blue * 4;
-            red = Core_Math_ClampSignedShort(red, 0, 255);
-            green = Core_Math_ClampSignedShort(green, 0, 255);
-            blue = Core_Math_ClampSignedShort(blue, 0, 255);
+            red = VS::Core::Math::ClampSignedShort(red, 0, 255);
+            green = VS::Core::Math::ClampSignedShort(green, 0, 255);
+            blue = VS::Core::Math::ClampSignedShort(blue, 0, 255);
             setRGB0(prim, red, green, blue);
         } else {
             setRGB0(prim, 128, 128, 128);

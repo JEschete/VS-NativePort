@@ -23,8 +23,8 @@ void Render_PrepareActorCameraMatrices(MATRIX* source)
         scratch->matrix.m[2][i] = Render_cameraBasisMatrix.m[i][2];
     }
 
-    roll.m[1][1] = roll.m[0][0] = Core_Gte_Cos(-view->camera.angles.vz);
-    roll.m[1][0] = Core_Gte_Sin(-view->camera.angles.vz);
+    roll.m[1][1] = roll.m[0][0] = VS::Core::Math::Cosine(-view->camera.angles.vz);
+    roll.m[1][0] = VS::Core::Math::Sine(-view->camera.angles.vz);
     roll.m[0][1] = -roll.m[1][0];
     roll.m[2][2] = ONE;
     roll.m[0][2] = roll.m[1][2] = roll.m[2][0] = roll.m[2][1] = 0;

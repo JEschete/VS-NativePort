@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -99,7 +100,7 @@ void Render_ActivateGimLayer(u_int layer_index, void* arg1, u_char* arg2)
         int target = VS::Core::NextLiveInterfaceRandomBits(10);
 
         for (i = 0; i < 240; ++i) {
-            p[i] = (Core_Gte_Sin(angle) >> 3) + 320;
+            p[i] = (VS::Core::Math::Sine(angle) >> 3) + 320;
             step = VS::Core::NextLiveInterfaceRandomBits(8) - 64;
             next = VS::Core::NextLiveInterfaceRandomBits(10);
 

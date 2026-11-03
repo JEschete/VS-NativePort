@@ -944,12 +944,12 @@ void Menu_Map_ApplyCamera(void)
     MATRIX sp38;
 
     Menu_Map_cameraPos.vx =
-        (((Core_Gte_Sin(Menu_Map_cameraAngles.vy) * Menu_Map_cameraDistance) / ONE) * Core_Gte_Cos(Menu_Map_cameraAngles.vx))
+        (((VS::Core::Math::Sine(Menu_Map_cameraAngles.vy) * Menu_Map_cameraDistance) / ONE) * VS::Core::Math::Cosine(Menu_Map_cameraAngles.vx))
         / ONE;
     Menu_Map_cameraPos.vz =
-        (((Core_Gte_Cos(Menu_Map_cameraAngles.vy) * -Menu_Map_cameraDistance) / ONE) * Core_Gte_Cos(Menu_Map_cameraAngles.vx))
+        (((VS::Core::Math::Cosine(Menu_Map_cameraAngles.vy) * -Menu_Map_cameraDistance) / ONE) * VS::Core::Math::Cosine(Menu_Map_cameraAngles.vx))
         / ONE;
-    Menu_Map_cameraPos.vy = (Core_Gte_Sin(Menu_Map_cameraAngles.vx) * -Menu_Map_cameraDistance) / ONE;
+    Menu_Map_cameraPos.vy = (VS::Core::Math::Sine(Menu_Map_cameraAngles.vx) * -Menu_Map_cameraDistance) / ONE;
 
     Menu_Framework_BuildYawMatrix(&view_rotation, Menu_Map_cameraAngles.vy);
     Menu_Framework_BuildPitchMatrix(&sp38, Menu_Map_cameraAngles.vx);
@@ -1840,13 +1840,13 @@ void Menu_Map_DrawPalingDistortion(void)
         legacy_render_scratch = (void**)Core_ScratchAddr(0);
 
         if (y & 1) {
-            x = Core_Gte_Sin((Menu_Map_menuFramesCounter + y) << 6);
+            x = VS::Core::Math::Sine((Menu_Map_menuFramesCounter + y) << 6);
             if (x < 0) {
                 x += 127;
             }
             x = x >> 7;
         } else {
-            x = Core_Gte_Sin((Menu_Map_menuFramesCounter + y) << 6);
+            x = VS::Core::Math::Sine((Menu_Map_menuFramesCounter + y) << 6);
             if (x < 0) {
                 x += 127;
             }
@@ -1874,14 +1874,14 @@ void Menu_Map_DrawPalingDistortion(void)
         setRGB0(sprt, 128, 128, 128);
 
         if (y & 1) {
-            x = Core_Gte_Sin((Menu_Map_menuFramesCounter + y) << 6);
+            x = VS::Core::Math::Sine((Menu_Map_menuFramesCounter + y) << 6);
             if (x < 0) {
                 x += 127;
             }
             x = (x >> 7) + 192;
         } else {
             int offset;
-            x = Core_Gte_Sin((Menu_Map_menuFramesCounter + y) << 6);
+            x = VS::Core::Math::Sine((Menu_Map_menuFramesCounter + y) << 6);
             offset = x >> 7;
             if (x < 0) {
                 offset = (x + 127) >> 7;
@@ -2320,8 +2320,8 @@ void Menu_Map_DrawCompass(int x, int y, int angle)
 void Menu_Map_ComputeCompassCorners(int compass_center_x, int compass_center_y, int compass_half_width, int compass_half_height, int compass_angle)
 {
     int i;
-    int angle_sine = Core_Gte_Sin(compass_angle);
-    int angle_cosine = Core_Gte_Cos(compass_angle);
+    int angle_sine = VS::Core::Math::Sine(compass_angle);
+    int angle_cosine = VS::Core::Math::Cosine(compass_angle);
 
     Menu_Map_compassBounds[0].x = (-compass_half_width * angle_cosine) + (compass_half_height * angle_sine);
     Menu_Map_compassBounds[0].y = (-compass_half_height * angle_cosine) - (compass_half_width * angle_sine);

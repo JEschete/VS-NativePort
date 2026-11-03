@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -138,8 +139,8 @@ int Effects_ScreenDistortion_EllipsePoint(int angular_step, int radius)
         radial_modulation_q6 = -radial_modulation_q6;
     }
     radial_modulation_q6 += 0x40;
-    return ((((((Core_Gte_Cos(angular_step << 6) * radius * 0xB) >> 0xF) * radial_modulation_q6) >> 6) + 0xA0) & 0xFFFF)
-         | ((((((Core_Gte_Sin(angular_step << 6) * radius) >> 0xC) * radial_modulation_q6) >> 6) + 0x70) << 0x10);
+    return ((((((VS::Core::Math::Cosine(angular_step << 6) * radius * 0xB) >> 0xF) * radial_modulation_q6) >> 6) + 0xA0) & 0xFFFF)
+         | ((((((VS::Core::Math::Sine(angular_step << 6) * radius) >> 0xC) * radial_modulation_q6) >> 6) + 0x70) << 0x10);
 }
 
 // decomp: SCREFF2.PRG func_800F9EBC (src/GIM/SCREFF2.PRG/5E8.c:23)

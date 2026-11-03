@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
@@ -938,13 +939,13 @@ void Menu_Status_DrawFrame(void)
     int x = Actors_actorRecords[1]->collisionHeight;
     Render_Camera* camera = &Render_frameScratch.camera;
 
-    camera->lookAt.vx = ((-Core_Gte_Sin(Menu_Status_xPos) * xOffset) >> 8) * z;
+    camera->lookAt.vx = ((-VS::Core::Math::Sine(Menu_Status_xPos) * xOffset) >> 8) * z;
     camera->lookAt.vy = -(x * ONE / 2);
-    camera->lookAt.vz = ((Core_Gte_Cos(Menu_Status_xPos) * xOffset) >> 8) * z;
-    camera->position.vx = camera->lookAt.vx + ((Core_Gte_Cos(Menu_Status_xPos) * Core_Gte_Cos(Menu_Status_yPos)) >> 0xA) * z;
-    camera->position.vy = camera->lookAt.vy - Core_Gte_Sin(Menu_Status_yPos) * z * 4;
+    camera->lookAt.vz = ((VS::Core::Math::Cosine(Menu_Status_xPos) * xOffset) >> 8) * z;
+    camera->position.vx = camera->lookAt.vx + ((VS::Core::Math::Cosine(Menu_Status_xPos) * VS::Core::Math::Cosine(Menu_Status_yPos)) >> 0xA) * z;
+    camera->position.vy = camera->lookAt.vy - VS::Core::Math::Sine(Menu_Status_yPos) * z * 4;
 
-    camera_orbit_z_offset = (Core_Gte_Sin(Menu_Status_xPos) * Core_Gte_Cos(Menu_Status_yPos) >> 0xA) * z;
+    camera_orbit_z_offset = (VS::Core::Math::Sine(Menu_Status_xPos) * VS::Core::Math::Cosine(Menu_Status_yPos) >> 0xA) * z;
     camera->angles.vx = 0;
     camera->angles.vy = 0;
     camera->angles.vz = 0;

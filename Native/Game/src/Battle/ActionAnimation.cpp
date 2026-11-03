@@ -170,7 +170,7 @@ void Battle_PlaySpellCastAnimation(int actor_slot, SVECTOR* target_position, int
             if (dx == 0 && dz == 0) {
                 angle = actor->instance.facing;
             } else {
-                angle = (ONE * 3 / 4 - Core_Gte_Atan2(dz, dx)) & 0xFFF;
+                angle = (ONE * 3 / 4 - VS::Core::Math::Arctangent2(dz, dx)) & 0xFFF;
             }
 
             angle -= actor->instance.facing;
@@ -259,7 +259,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
 
                     var_s0 = VS::Core::Math::SquareRootInteger(var_s0 + distance_z_squared);
                     Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
-                    source_pitch = Core_Gte_Atan2(source_position->vy - bone_position.vy, var_s0);
+                    source_pitch = VS::Core::Math::Arctangent2(source_position->vy - bone_position.vy, var_s0);
                 }
 
                 var_s0 = 0x45;
@@ -282,7 +282,7 @@ void Battle_PlayActorDamageReaction(int actor_slot, SVECTOR* source_position)
                     if ((source_delta_x == 0) && (source_delta_z == 0)) {
                         source_facing_delta = actor->instance.facing;
                     } else {
-                        source_facing_delta = (0xC00 - Core_Gte_Atan2(source_delta_z, source_delta_x)) & 0xFFF;
+                        source_facing_delta = (0xC00 - VS::Core::Math::Arctangent2(source_delta_z, source_delta_x)) & 0xFFF;
                     }
 
                     source_facing_delta = source_facing_delta - actor->instance.facing;
@@ -373,7 +373,7 @@ void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, 
 
         dist = VS::Core::Math::SquareRootInteger(dist + zz);
         Actors_ActorBonePosition(actor->instance.slot, 0, &bone_position, 0);
-        pitch = Core_Gte_Atan2(target_position->vy - bone_position.vy, dist);
+        pitch = VS::Core::Math::Arctangent2(target_position->vy - bone_position.vy, dist);
     }
 
     if (pitch >= -0xE4) {
@@ -400,7 +400,7 @@ void Battle_PlayChainAbilityAnimation(int actor_slot, SVECTOR* target_position, 
         if ((dx == 0) && (dz == 0)) {
             angle = actor->instance.facing;
         } else {
-            angle = (ONE * 3 / 4 - Core_Gte_Atan2(dz, dx)) & 0xFFF;
+            angle = (ONE * 3 / 4 - VS::Core::Math::Arctangent2(dz, dx)) & 0xFFF;
         }
 
         angle -= actor->instance.facing;
@@ -487,7 +487,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
             if ((dx == 0) && (dz == 0)) {
                 angle = actor->instance.facing;
             } else {
-                angle = (ONE * 3 / 4 - Core_Gte_Atan2(dz, dx)) & 0xFFF;
+                angle = (ONE * 3 / 4 - VS::Core::Math::Arctangent2(dz, dx)) & 0xFFF;
             }
             angle = angle - actor->instance.facing;
             if (angle > ONE / 2) {
@@ -550,7 +550,7 @@ void Battle_PlaySpecialActionAnimation(int actorId, SVECTOR* target, int mode)
                 }
                 value = VS::Core::Math::SquareRootInteger(value + verticalAngle);
                 Actors_ActorBonePosition(actor->instance.slot, 0, &origin, 0);
-                verticalAngle = Core_Gte_Atan2(target->vy - origin.vy, value);
+                verticalAngle = VS::Core::Math::Arctangent2(target->vy - origin.vy, value);
             }
             if (verticalAngle < -0xE4) {
                 Battle_specialActionPitch = 0;

@@ -52,7 +52,7 @@ void DrawSphereVolumeWireframe(const TargetWireState& wire,
   const std::int32_t pulse = math::Cosine(wire.pulse * kPulseAngleStep);
   const math::Mat3 rotation = math::MultiplyMatrixIntoRight(
       transform,
-      math::ScaleMatrixColumns(math::BuildRotationMatrixYXZ(
+      math::ScaleMatrixColumns(math::BuildEulerRotationMatrix(
                                    {wire.phase_a, wire.phase_b, wire.phase_c}),
                                {pulse, pulse, pulse}));
   canvas.BeginProjection();

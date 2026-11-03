@@ -1,5 +1,8 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/RandomLive.hpp"
 #include "Effects/ParticleRenderLive.hpp"
@@ -7,9 +10,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
 #include "Core/Diagnostics.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Matrix.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -261,7 +261,7 @@ void Effects_EmitParticleEvent(
 
     frame = effect_instance->frame;
     sample = def->intervalCurve;
-    if (frame % Core_Math_InterpolateShortPair(def->intervalRange, Effects_curveSamples[sample]) != 0) {
+    if (frame % VS::Core::Math::InterpolateLiveShortPair(def->intervalRange, Effects_curveSamples[sample]) != 0) {
         return;
     }
 
@@ -269,7 +269,7 @@ void Effects_EmitParticleEvent(
 
     matrix = &effect_instance->transforms[scratch->transformIndex].world;
     sample = def->countCurve;
-    count = Core_Math_InterpolateShortPair(def->countRange, Effects_curveSamples[sample]);
+    count = VS::Core::Math::InterpolateLiveShortPair(def->countRange, Effects_curveSamples[sample]);
     if (count + Effects_usedParticleCount >= Effects_particleCapacity) {
         count = Effects_particleCapacity - Effects_usedParticleCount;
     }
@@ -288,14 +288,14 @@ void Effects_EmitParticleEvent(
     }
 
     sample = def->positionCurve;
-    Core_Math_InterpolatePairsToWideVector(def->positionRange, Effects_curveSamples[sample], &scratch->position);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->positionRange, Effects_curveSamples[sample], &scratch->position);
     first = node;
 
     switch (scratch->flags & 7) {
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&scratch->position, Effects_effectOrigin, &scratch->position);
+        VS::Core::Math::AddLiveVectorsTo(&scratch->position, Effects_effectOrigin, &scratch->position);
         break;
     case 2:
         scratch->position.vx += matrix->t[0];
@@ -316,10 +316,10 @@ void Effects_EmitParticleEvent(
     scratch->position.vz <<= 12;
 
     sample = def->extentCurve;
-    Core_Math_InterpolatePairsToWideVector(def->extentRange, Effects_curveSamples[sample], &scratch->extent);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->extentRange, Effects_curveSamples[sample], &scratch->extent);
     node = first;
     sample = def->innerExtentCurve;
-    sample = Core_Math_InterpolateShortPair(def->innerExtentRange, Effects_curveSamples[sample]);
+    sample = VS::Core::Math::InterpolateLiveShortPair(def->innerExtentRange, Effects_curveSamples[sample]);
     Core_Gte_SetRotMatrix(matrix);
     Core_Gte_ClearTranslation();
 
@@ -330,11 +330,11 @@ void Effects_EmitParticleEvent(
         scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
         for (i = 0; i < count; ++i) {
             angle = Core_Random_Rand();
-            scratch->sinAngle0 = Core_Gte_Sin(angle);
-            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            scratch->sinAngle0 = VS::Core::Math::Sine(angle);
+            scratch->cosAngle0 = VS::Core::Math::Cosine(angle);
             angle = Core_Random_Rand();
-            scratch->sinAngle1 = Core_Gte_Sin(angle);
-            scratch->cosAngle1 = Core_Gte_Cos(angle);
+            scratch->sinAngle1 = VS::Core::Math::Sine(angle);
+            scratch->cosAngle1 = VS::Core::Math::Cosine(angle);
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
@@ -346,7 +346,7 @@ void Effects_EmitParticleEvent(
                 goto scale0;
             case 0x800:
             case 0x1000:
-                Core_Math_NarrowWideVector(&scratch->extent, &scratch->vector);
+                VS::Core::Math::CopyLiveVectorTo(&scratch->extent, &scratch->vector);
             scale0:
                 scratch->vector.vx =
                     (((scratch->vector.vx * scratch->cosAngle0) >> 12) * scratch->cosAngle1)
@@ -450,8 +450,8 @@ void Effects_EmitParticleEvent(
         scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
         for (i = 0; i < count; ++i) {
             angle = Core_Random_Rand();
-            scratch->sinAngle0 = Core_Gte_Sin(angle);
-            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            scratch->sinAngle0 = VS::Core::Math::Sine(angle);
+            scratch->cosAngle0 = VS::Core::Math::Cosine(angle);
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
@@ -490,8 +490,8 @@ void Effects_EmitParticleEvent(
         scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
         for (i = 0; i < count; ++i) {
             angle = Core_Random_Rand();
-            scratch->sinAngle0 = Core_Gte_Sin(angle);
-            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            scratch->sinAngle0 = VS::Core::Math::Sine(angle);
+            scratch->cosAngle0 = VS::Core::Math::Cosine(angle);
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
@@ -521,8 +521,8 @@ void Effects_EmitParticleEvent(
         scratch->innerExtent.vz = (scratch->extent.vz * sample) >> 12;
         for (i = 0; i < count; ++i) {
             angle = Core_Random_Rand();
-            scratch->sinAngle0 = Core_Gte_Sin(angle);
-            scratch->cosAngle0 = Core_Gte_Cos(angle);
+            scratch->sinAngle0 = VS::Core::Math::Sine(angle);
+            scratch->cosAngle0 = VS::Core::Math::Cosine(angle);
             switch (scratch->flags & 0x1800) {
             case 0:
                 scratch->vector.vx =
@@ -566,15 +566,15 @@ void Effects_EmitParticleEvent(
         if ((scratch->flags & 0x1800) != 0x1000) {
             Effects_emissionCounter %= scratch->ringPositions;
             angle = Effects_emissionCounter * step + 0x200;
-            prevX = (Core_Gte_Cos(angle) * scratch->extent.vx) >> 12;
-            prevZ = (Core_Gte_Sin(angle) * scratch->extent.vz) >> 12;
+            prevX = (VS::Core::Math::Cosine(angle) * scratch->extent.vx) >> 12;
+            prevZ = (VS::Core::Math::Sine(angle) * scratch->extent.vz) >> 12;
         }
         for (i = 0; i < count; ++i) {
             range = 0x1194 - sample;
             Effects_emissionCounter = (Effects_emissionCounter + 1) % scratch->ringPositions;
             angle = Effects_emissionCounter * step + 0x200;
-            x = (Core_Gte_Cos(angle) * scratch->extent.vx) >> 12;
-            z = (Core_Gte_Sin(angle) * scratch->extent.vz) >> 12;
+            x = (VS::Core::Math::Cosine(angle) * scratch->extent.vx) >> 12;
+            z = (VS::Core::Math::Sine(angle) * scratch->extent.vz) >> 12;
             if ((scratch->flags & 0x1800) == 0x1000) {
                 scratch->vector.vx = x;
                 scratch->vector.vz = z;
@@ -585,7 +585,7 @@ void Effects_EmitParticleEvent(
                 prevX = x;
                 prevZ = z;
                 if ((scratch->flags & 0x1800) != 0x800) {
-                    value = Core_Gte_SquareRoot12(((Core_Random_Rand() * range) >> 15) + sample);
+                    value = VS::Core::Math::SquareRootFixed(((Core_Random_Rand() * range) >> 15) + sample);
                     if (value > ONE) {
                         value = ONE;
                     }
@@ -601,13 +601,13 @@ void Effects_EmitParticleEvent(
     }
 
     sample = def->speedCurve;
-    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[2], Effects_curveSamples[sample], scratch->speedRange);
+    VS::Core::Math::InterpolateLiveSevenBitPlane(def->pairRanges[2], Effects_curveSamples[sample], scratch->speedRange);
     scratch->speedRange[0] <<= 5;
     scratch->speedRange[1] <<= 5;
     sample = def->directionJitterCurve;
-    Core_Math_InterpolatePairsToWideVector(def->vectorRanges[1], Effects_curveSamples[sample], &scratch->directionJitter);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[1], Effects_curveSamples[sample], &scratch->directionJitter);
     sample = def->directionCurve;
-    Core_Math_InterpolatePairsToWideVector(def->vectorRanges[0], Effects_curveSamples[sample], &scratch->baseDirection);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[0], Effects_curveSamples[sample], &scratch->baseDirection);
     node = first;
 
     switch (scratch->flags & 0xE000) {
@@ -627,11 +627,11 @@ void Effects_EmitParticleEvent(
             scratch->vector = effect_instance->context.emitTo.value.position;
         }
     aim:
-        Core_Math_WidenShortVector(&scratch->vector, &scratch->aimPoint);
+        VS::Core::Math::CopyLiveVectorTo(&scratch->vector, &scratch->aimPoint);
         scratch->spawnPoint.vx = scratch->position.vx >> 12;
         scratch->spawnPoint.vy = scratch->position.vy >> 12;
         scratch->spawnPoint.vz = scratch->position.vz >> 12;
-        Core_Math_BuildLookAtOrientation(&scratch->spawnPoint, &scratch->aimPoint, &scratch->aimMatrix);
+        VS::Core::Math::BuildLiveLookAtOrientation(&scratch->spawnPoint, &scratch->aimPoint, &scratch->aimMatrix);
         matrix = &scratch->aimMatrix;
     case 0:
         for (i = 0; i < count; ++i) {
@@ -644,13 +644,13 @@ void Effects_EmitParticleEvent(
             scratch->vector.vz =
                 scratch->baseDirection.vz
                 + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
-            Core_Gte_RotMatrix(&scratch->vector, (MATRIX*)scratch);
+            VS::Core::Math::BuildLiveRotationXyz(&scratch->vector, (MATRIX*)scratch);
             Core_Gte_SetRotMatrix((const MATRIX *)(scratch));
             *(int*)&scratch->vector = 0;
             scratch->vector.vz = ONE;
             Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
             if (scratch->flags & 0x40000) {
-                Core_Math_NarrowWideVector(&scratch->direction, &scratch->vector);
+                VS::Core::Math::CopyLiveVectorTo(&scratch->direction, &scratch->vector);
                 Core_Gte_SetRotMatrix(matrix);
                 Core_Gte_ApplyRotMatrix(&scratch->vector, &scratch->direction);
             }
@@ -673,13 +673,13 @@ void Effects_EmitParticleEvent(
             scratch->vector.vz =
                 scratch->baseDirection.vz
                 + VS::Core::LiveRandomRangeExclusive(scratch->directionJitter.vz, -scratch->directionJitter.vz);
-            Core_Gte_RotMatrix(&scratch->vector, (MATRIX*)scratch);
+            VS::Core::Math::BuildLiveRotationXyz(&scratch->vector, (MATRIX*)scratch);
             Core_Gte_SetRotMatrix((const MATRIX *)(scratch));
             *(int*)&scratch->vector = 0;
             scratch->vector.vz = ONE;
             Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
             Core_Gte_SetRotMatrix(matrix);
-            Core_Math_NarrowWideVector(&scratch->direction, &scratch->vector);
+            VS::Core::Math::CopyLiveVectorTo(&scratch->direction, &scratch->vector);
             Core_Gte_RotTrans(&scratch->vector, &scratch->direction, &scratch->direction.pad);
             scratch->speed =
                 VS::Core::LiveRandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
@@ -698,7 +698,7 @@ void Effects_EmitParticleEvent(
                 VS::Core::LiveRandomRangeExclusive(scratch->speedRange[0], scratch->speedRange[1]);
             if (scratch->direction.vx != 0 || scratch->direction.vy != 0
                 || scratch->direction.vz != 0) {
-                Core_Gte_VectorNormal(&scratch->direction, &scratch->direction);
+                VS::Core::Math::NormalizeLiveVector(&scratch->direction, &scratch->direction);
                 node->motion.velocity.vx = (scratch->direction.vx * scratch->speed) >> 12;
                 node->motion.velocity.vy = (scratch->direction.vy * scratch->speed) >> 12;
                 node->motion.velocity.vz = (scratch->direction.vz * scratch->speed) >> 12;
@@ -713,11 +713,11 @@ void Effects_EmitParticleEvent(
     }
 
     sample = def->forceCurve;
-    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[2], Effects_curveSamples[sample], &scratch->forceMin);
-    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[3], Effects_curveSamples[sample], &scratch->forceMax);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[2], Effects_curveSamples[sample], &scratch->forceMin);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[3], Effects_curveSamples[sample], &scratch->forceMax);
     sample = def->accelerationCurve;
-    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[4], Effects_curveSamples[sample], &scratch->accelerationMin);
-    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[5], Effects_curveSamples[sample], &scratch->accelerationMax);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[4], Effects_curveSamples[sample], &scratch->accelerationMin);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[5], Effects_curveSamples[sample], &scratch->accelerationMax);
     node = first;
     for (i = 0; i < count; ++i) {
         node->motion.force.vx = VS::Core::LiveRandomRangeExclusive(scratch->forceMin.vx, scratch->forceMax.vx);
@@ -730,11 +730,11 @@ void Effects_EmitParticleEvent(
     }
 
     sample = def->massCurve;
-    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[0], Effects_curveSamples[sample], scratch->massRange);
+    VS::Core::Math::InterpolateLiveSevenBitPlane(def->pairRanges[0], Effects_curveSamples[sample], scratch->massRange);
     sample = def->gravityScaleCurve;
-    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[1], Effects_curveSamples[sample], scratch->gravityScaleRange);
+    VS::Core::Math::InterpolateLiveSevenBitPlane(def->pairRanges[1], Effects_curveSamples[sample], scratch->gravityScaleRange);
     sample = def->lifetimeCurve;
-    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[4], Effects_curveSamples[sample], scratch->lifetimeRange);
+    VS::Core::Math::InterpolateLiveSevenBitPlane(def->pairRanges[4], Effects_curveSamples[sample], scratch->lifetimeRange);
     node = first;
     for (i = 0; i < count; ++i) {
         node->motion.mass = VS::Core::LiveRandomRangeExclusive(scratch->massRange[0], scratch->massRange[1]);
@@ -744,9 +744,9 @@ void Effects_EmitParticleEvent(
     }
 
     sample = def->attractionOffsetCurve;
-    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[6], Effects_curveSamples[sample], &scratch->attractionOffset);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[6], Effects_curveSamples[sample], &scratch->attractionOffset);
     sample = def->attractionJitterCurve;
-    Core_Math_InterpolatePairsToShortVector(def->vectorRanges[7], Effects_curveSamples[sample], &scratch->attractionJitter);
+    VS::Core::Math::InterpolateLiveSevenBitVector(def->vectorRanges[7], Effects_curveSamples[sample], &scratch->attractionJitter);
     node = first;
 
     switch (scratch->flags & 0x1C0) {
@@ -785,7 +785,7 @@ void Effects_EmitParticleEvent(
     }
 
     sample = def->attractionCurve;
-    Core_Math_InterpolatePairsToPlaneVector(def->pairRanges[3], Effects_curveSamples[sample], scratch->attractionRange);
+    VS::Core::Math::InterpolateLiveSevenBitPlane(def->pairRanges[3], Effects_curveSamples[sample], scratch->attractionRange);
     node = first;
     scratch->colorCurves.word = *(int*)&def->rCurve;
     scratch->colorCurves.fields.age = node->age;
@@ -876,7 +876,7 @@ void Effects_IntegrateParticleMotion(Effects_Particle* node)
             direction.vy = node->attractionTarget[1] - (state->y >> 12);
             direction.vz = node->attractionTarget[2] - (state->z >> 12);
             if (direction.vx != 0 || direction.vy != 0 || direction.vz != 0) {
-                Core_Gte_VectorNormal(&direction, &direction);
+                VS::Core::Math::NormalizeLiveVector(&direction, &direction);
                 direction.vx = (direction.vx * damping) >> 12;
                 direction.vy = (direction.vy * damping) >> 12;
                 direction.vz = (direction.vz * damping) >> 12;

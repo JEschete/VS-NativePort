@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -17,7 +18,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -482,11 +482,11 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
     case Menu_Inventory_DiscardMenuState_DiscardMultipleInit:
         Menu_Inventory_discardMenuMaxAmount = Audio_Seq_unusedInventory.misc[Menu_Inventory_discardMenuSelectedItem - 1].count;
 
-        i = Core_Math_SplitDecimalDigit(Menu_Inventory_discardMenuMaxAmount);
+        i = VS::Core::Math::SplitDecimalDigit(Menu_Inventory_discardMenuMaxAmount);
 
         Menu_Inventory_discardTemplate[8] = i & 0xF;
 
-        i = Core_Math_SplitDecimalDigit(i >> 4);
+        i = VS::Core::Math::SplitDecimalDigit(i >> 4);
 
         Menu_Inventory_discardTemplate[7] = i & 0xF;
         Menu_Inventory_discardTemplate[6] = i >> 4;
@@ -537,11 +537,11 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
     case Menu_Inventory_DiscardMenuState_DetermineDiscardAmount:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRright | PADRdown)) {
 
-            i = Core_Math_SplitDecimalDigit(Menu_Inventory_discardCount);
+            i = VS::Core::Math::SplitDecimalDigit(Menu_Inventory_discardCount);
 
             Menu_Inventory_discardTemplate[4] = i & 0xF;
 
-            i = Core_Math_SplitDecimalDigit(i >> 4);
+            i = VS::Core::Math::SplitDecimalDigit(i >> 4);
 
             Menu_Inventory_discardTemplate[3] = i & 0xF;
             Menu_Inventory_discardTemplate[2] = i >> 4;
@@ -628,9 +628,9 @@ int Menu_Inventory_UpdateDiscardMenu(int params)
 
         Render_SetMenuFontStyle(5);
 
-        i = Core_Math_SplitDecimalDigit(Menu_Inventory_discardCount);
+        i = VS::Core::Math::SplitDecimalDigit(Menu_Inventory_discardCount);
         Render_DrawVariableWidthGlyph(i & 0xF, 66, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
-        i = Core_Math_SplitDecimalDigit(i >> 4);
+        i = VS::Core::Math::SplitDecimalDigit(i >> 4);
         Render_DrawVariableWidthGlyph(i & 0xF, 60, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
         Render_DrawVariableWidthGlyph(i >> 4, 54, 130, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 12));
 

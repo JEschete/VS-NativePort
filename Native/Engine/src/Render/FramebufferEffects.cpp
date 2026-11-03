@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -100,7 +101,7 @@ void Render_DrawScreenTransition(void* ot)
                 setVector(&zRotation, 0, 0, Field_screenTransitionWipeAngle);
             }
             setVector(&screenCenter, 160, 120, 0);
-            Core_Gte_RotMatrix(&zRotation, &rotTransMatrix);
+            VS::Core::Math::BuildLiveRotationXyz(&zRotation, &rotTransMatrix);
             Core_Gte_TransMatrix(&rotTransMatrix, &screenCenter);
             Core_Gte_SetRotMatrix(&rotTransMatrix);
             Core_Gte_SetTransMatrix(&rotTransMatrix);
@@ -279,7 +280,7 @@ void Render_DrawFramebufferEffect(void* ordering_table)
     if (Render_framebufferEffectState == 2) {
         translation.vx = Render_framebufferEffectOffset.x + 160;
         translation.vy = Render_framebufferEffectOffset.y + 112;
-        Core_Gte_RotMatrix(&Render_framebufferEffectRotation, &transform);
+        VS::Core::Math::BuildLiveRotationXyz(&Render_framebufferEffectRotation, &transform);
         Core_Gte_TransMatrix(&transform, &translation);
         Core_Gte_ScaleMatrix(&transform, &Render_framebufferEffectScale);
         Core_Gte_SetRotMatrix(&transform);

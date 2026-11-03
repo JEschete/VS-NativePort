@@ -400,7 +400,7 @@ int TargetFacingCosine(Core::Math::Position3 from, Core::Math::Position3 to,
       (kFacingOffset - static_cast<std::uint32_t>(angle)) & kAngleMask);
   const Core::Math::Vec3 direction{to.x - from.x, 0, to.z - from.z};
   const Core::Math::Vec3 unit =
-      Core::Math::NormalizeVectorRegisters(direction).direction;
+      Core::Math::NormalizeVector(direction).direction;
   const int dot = unit.x * Core::Math::Sine(facing + kQuarterTurn) +
                   unit.z * Core::Math::Sine(facing);
   return std::clamp(dot >> kQ12Shift, -kQ12, kQ12);

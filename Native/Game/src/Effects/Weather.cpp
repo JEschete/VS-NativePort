@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -303,19 +304,19 @@ void Effects_DrawSnowParticles(void)
                         particle->speed &= 127;
                         if (particle->swayPhase != 0) {
                             particle->position.vx +=
-                                (Field_weatherParameters[0] >> 3) + (Core_Gte_Sin(particle->speed << 5) >> 9);
+                                (Field_weatherParameters[0] >> 3) + (VS::Core::Math::Sine(particle->speed << 5) >> 9);
                             particle->position.vz +=
-                                (Field_weatherParameters[2] >> 3) - (Core_Gte_Cos(particle->speed << 5) >> 9);
-                            particle->position.vy -= Core_Gte_Sin(particle->swayPhase << 6) >> 9;
+                                (Field_weatherParameters[2] >> 3) - (VS::Core::Math::Cosine(particle->speed << 5) >> 9);
+                            particle->position.vy -= VS::Core::Math::Sine(particle->swayPhase << 6) >> 9;
                             ++particle->swayPhase;
                             if (particle->swayPhase > 32) {
                                 particle->swayPhase = 0;
                             }
                         } else {
                             particle->position.vx +=
-                                (Field_weatherParameters[0] >> 3) + (Core_Gte_Sin(particle->speed << 5) >> 10);
+                                (Field_weatherParameters[0] >> 3) + (VS::Core::Math::Sine(particle->speed << 5) >> 10);
                             particle->position.vz +=
-                                (Field_weatherParameters[2] >> 3) - (Core_Gte_Cos(particle->speed << 5) >> 10);
+                                (Field_weatherParameters[2] >> 3) - (VS::Core::Math::Cosine(particle->speed << 5) >> 10);
                             if ((Core_Random_Rand() & 127) == 0) {
                                 particle->swayPhase = 1;
                             }
@@ -345,8 +346,8 @@ void Effects_DrawSnowParticles(void)
                             (u_long*)((Render_FrameScratch*)((uintptr_t)Core_ScratchBase() + 0x000))->orderingTable + depth, prim++);
                         particle->fallShift = 0;
                     }
-                    projection = x + (Core_Gte_Sin(i << 5) >> 6);
-                    flags = y - (Core_Gte_Cos(i << 5) >> 6);
+                    projection = x + (VS::Core::Math::Sine(i << 5) >> 6);
+                    flags = y - (VS::Core::Math::Cosine(i << 5) >> 6);
                     if ((flags > 0) && (flags < 240) && (projection > 0)
                         && (projection < 320) && (depth > 4)) {
                         setTile(prim);
@@ -449,18 +450,18 @@ void Effects_DrawScreenWeatherParticles(void)
                 particle->speed += (Core_Random_Rand() & 15) - 7;
                 particle->speed &= 127;
                 if (particle->swayPhase != 0) {
-                    particle->position.vx += origin.vx + (Core_Gte_Sin(particle->speed << 5) >> 9);
-                    particle->position.vz += origin.vz - (Core_Gte_Cos(particle->speed << 5) >> 9);
-                    particle->position.vy -= Core_Gte_Sin(particle->swayPhase << 6) >> 9;
+                    particle->position.vx += origin.vx + (VS::Core::Math::Sine(particle->speed << 5) >> 9);
+                    particle->position.vz += origin.vz - (VS::Core::Math::Cosine(particle->speed << 5) >> 9);
+                    particle->position.vy -= VS::Core::Math::Sine(particle->swayPhase << 6) >> 9;
                     ++particle->swayPhase;
                     if (particle->swayPhase > 32) {
                         particle->swayPhase = 0;
                     }
                 } else {
                     particle->position.vx +=
-                        origin.vx + (Core_Gte_Sin(particle->speed << 5) >> 10);
+                        origin.vx + (VS::Core::Math::Sine(particle->speed << 5) >> 10);
                     particle->position.vz +=
-                        origin.vz - (Core_Gte_Cos(particle->speed << 5) >> 10);
+                        origin.vz - (VS::Core::Math::Cosine(particle->speed << 5) >> 10);
                     if ((Core_Random_Rand() & 127) == 0) {
                         particle->swayPhase = 1;
                     }
@@ -568,8 +569,8 @@ void Effects_RecalculateWeatherVelocity(void)
     int horizontal_direction_product;
     int direction_component_product;
 
-    horizontal_direction_product = Core_Gte_Sin(Field_weatherParameters[5]);
-    elevation_cosine = Core_Gte_Cos(Field_weatherParameters[4]);
+    horizontal_direction_product = VS::Core::Math::Sine(Field_weatherParameters[5]);
+    elevation_cosine = VS::Core::Math::Cosine(Field_weatherParameters[4]);
     horizontal_direction_product *= Field_weatherParameters[6];
     if (horizontal_direction_product < 0) {
         horizontal_direction_product += 0xFFF;
@@ -579,8 +580,8 @@ void Effects_RecalculateWeatherVelocity(void)
         direction_component_product += 0xFFF;
     }
     Field_weatherParameters[0] = (direction_component_product >> 0xC);
-    horizontal_direction_product = Core_Gte_Cos(Field_weatherParameters[5]);
-    elevation_cosine = Core_Gte_Cos(Field_weatherParameters[4]);
+    horizontal_direction_product = VS::Core::Math::Cosine(Field_weatherParameters[5]);
+    elevation_cosine = VS::Core::Math::Cosine(Field_weatherParameters[4]);
     horizontal_direction_product = -horizontal_direction_product;
     horizontal_direction_product *= Field_weatherParameters[6];
     if (horizontal_direction_product < 0) {
@@ -591,7 +592,7 @@ void Effects_RecalculateWeatherVelocity(void)
         direction_component_product += 0xFFF;
     }
     Field_weatherParameters[2] = (direction_component_product >> 0xC);
-    direction_component_product = Core_Gte_Sin(Field_weatherParameters[4]) * Field_weatherParameters[6];
+    direction_component_product = VS::Core::Math::Sine(Field_weatherParameters[4]) * Field_weatherParameters[6];
     if (direction_component_product < 0) {
         direction_component_product += 0xFFF;
     }

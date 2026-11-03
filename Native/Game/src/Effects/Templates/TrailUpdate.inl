@@ -1,7 +1,9 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -42,7 +44,7 @@ void VS_TRAIL_UPDATE_FUNCTION(Effects_ParticleDefinition* particle_definition __
             trail->splineProgress += speed;
             trail->currentSplineSample = (trail->currentSplineSample + 1) % 5;
 
-            Core_Math_InterpolateLagrangeShortVector(&trail->splinePoints[0],
+            VS::Core::Math::InterpolateLiveLagrangeVector(&trail->splinePoints[0],
                 &trail->splinePoints[1], &trail->splinePoints[2],
                 &trail->splinePoints[3], (trail->splineProgress >> 0xC) - ONE,
                 &trail->splineSamples[trail->currentSplineSample]);

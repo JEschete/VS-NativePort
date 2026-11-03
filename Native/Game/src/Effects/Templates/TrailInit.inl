@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
 #include "Core/RandomLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
@@ -21,9 +21,9 @@ void VS_TRAIL_INIT_FUNCTION(Effects_ParticleDefinition* particle_definition, Eff
     int speed;
     int i;
 
-    Core_Math_InterpolatePairsToPlaneVector(particle_definition->pairRanges[4], 0, emitter_scratch->lifetimeRange);
+    VS::Core::Math::InterpolateLiveSevenBitPlane(particle_definition->pairRanges[4], 0, emitter_scratch->lifetimeRange);
 
-    speed = Core_Math_InterpolateShortPair(particle_definition->innerExtentRange, 0) << 0xC;
+    speed = VS::Core::Math::InterpolateLiveShortPair(particle_definition->innerExtentRange, 0) << 0xC;
 
     for (i = 0; i < trail_set->trailcount; ++i) {
         int stepCount = VS::Core::LiveRandomRangeExclusive(emitter_scratch->lifetimeRange[0], emitter_scratch->lifetimeRange[1]);

@@ -601,15 +601,15 @@ ModelDrawStatus DrawPolygons(const ModelPolygonSource& source,
     const ModelVertex& root_offset, int floor, ShadowGround& ground,
     ModelTransformer& transformer) {
   const Math::Mat3 terrain = Math::MultiplyMatrixIntoRight(
-      camera.rotation,
-      Math::BuildRotationMatrixYXZ(ShadowGroundRotation(actor, floor, ground)));
+      camera.rotation, Math::BuildEulerRotationMatrix(
+                           ShadowGroundRotation(actor, floor, ground)));
   const Math::Angles3 angles{
       actor.rotation_x,
       Math::WrapSigned16(static_cast<std::uint32_t>(actor.facing) +
                          actor.blend_level),
       actor.rotation_z};
   Math::Mat3 rotation = Math::MultiplyMatrixIntoRight(
-      terrain, Math::BuildRotationMatrixYXZ(angles));
+      terrain, Math::BuildEulerRotationMatrix(angles));
   const int extent =
       std::max(((root_offset.y - floor) >> kShadowHeightShift) + actor.radius,
                kShadowMinimumExtent);

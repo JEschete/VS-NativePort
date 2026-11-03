@@ -1,10 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Matrix.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Camera.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
@@ -28,7 +29,7 @@ int Effects_Plg128_trailEmissionCounter; /* contents: module image (ModuleData.c
 // decomp: PLG128.BIN func_800FD9A4 (src/EFFECT/PLG128.BIN/F8.c:66)
 void Effects_Plg128_BuildCameraOffsetTransform(Effects_Plg128_CameraEffectState* camera_effect, VECTOR* translation)
 {
-    Core_Math_BuildLookAtOrientation(&camera_effect->eye, &camera_effect->lookAt, &camera_effect->view);
+    VS::Core::Math::BuildLiveLookAtOrientation(&camera_effect->eye, &camera_effect->lookAt, &camera_effect->view);
     camera_effect->view.t[0] = translation->vx;
     camera_effect->view.t[1] = translation->vy;
     camera_effect->view.t[2] = translation->vz;
@@ -42,7 +43,7 @@ void Effects_Plg128_ResolveCameraEndpoints(Effects_Plg128_CameraEffectState* cam
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
+        VS::Core::Math::AddLiveVectorsTo(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     case 2:
         emitter_scratch->position.vx += effect_instance->transforms[particle_definition->transformIndex].world.t[0];
@@ -80,7 +81,7 @@ void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* c
     case 0:
         break;
     case 1:
-        Core_Math_AddWideAndShortVectors(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
+        VS::Core::Math::AddLiveVectorsTo(&emitter_scratch->position, Effects_effectOrigin, &emitter_scratch->position);
         break;
     case 2:
         emitter_scratch->position.vx += effect_instance->transforms[particle_definition->transformIndex].world.t[0];
@@ -92,9 +93,9 @@ void Effects_Plg128_ResolveActorFacingCamera(Effects_Plg128_CameraEffectState* c
     camera_effect->eye.vy = emitter_scratch->position.vy;
     camera_effect->eye.vz = emitter_scratch->position.vz;
     camera_effect->lookAt.vx = emitter_scratch->position.vx
-                   + ((-emitter_scratch->attractionJitter.vx * Core_Gte_Sin(effect_instance->transforms[particle_definition->transformIndex].opaqueBE)) >> 12);
+                   + ((-emitter_scratch->attractionJitter.vx * VS::Core::Math::Sine(effect_instance->transforms[particle_definition->transformIndex].opaqueBE)) >> 12);
     camera_effect->lookAt.vz = emitter_scratch->position.vz
-                   + ((-emitter_scratch->attractionJitter.vx * Core_Gte_Cos(effect_instance->transforms[particle_definition->transformIndex].opaqueBE)) >> 12);
+                   + ((-emitter_scratch->attractionJitter.vx * VS::Core::Math::Cosine(effect_instance->transforms[particle_definition->transformIndex].opaqueBE)) >> 12);
     camera_effect->lookAt.vy = emitter_scratch->position.vy;
 }
 
@@ -140,19 +141,19 @@ int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int
         effect = &Effects_package->block5Data->definitions[state->effect];
         scratch->flags = effect->flags;
         curve = effect->positionCurve;
-        Core_Math_InterpolatePairsToWideVector(
+        VS::Core::Math::InterpolateLiveSevenBitVector(
             effect->positionRange, Effects_SampleEffectCurve(curve, state->age), &scratch->position);
-        Core_Math_InterpolatePairsToWideVector(
+        VS::Core::Math::InterpolateLiveSevenBitVector(
             effect->extentRange, Effects_SampleEffectCurve(curve, state->age), &scratch->extent);
-        Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[0],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[0],
             Effects_SampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
-        Core_Math_InterpolatePairsToPlaneVector(effect->pairRanges[2],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(effect->pairRanges[2],
             Effects_SampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[6],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[6],
             Effects_SampleEffectCurve(effect->attractionOffsetCurve, state->age), &scratch->attractionOffset);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[7],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[7],
             Effects_SampleEffectCurve(effect->attractionJitterCurve, state->age), &scratch->attractionJitter);
-        state->nearClip = Core_Math_InterpolateShortPair(
+        state->nearClip = VS::Core::Math::InterpolateLiveShortPair(
             effect->innerExtentRange, Effects_SampleEffectCurve(effect->innerExtentCurve, state->age));
         switch (state->mode) {
         case 0:
@@ -165,13 +166,13 @@ int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int
         switch (scratch->flags & 0x38) {
         case 0:
             Effects_Plg128_BuildCameraOffsetTransform(state, &state->lookAt);
-            scratch->sinAngle0 = Core_Gte_Sin(scratch->baseDirection.vx);
+            scratch->sinAngle0 = VS::Core::Math::Sine(scratch->baseDirection.vx);
             if (scratch->sinAngle0 > 0) {
                 scratch->sinAngle0 = -scratch->sinAngle0;
             }
-            scratch->cosAngle0 = Core_Gte_Cos(scratch->baseDirection.vx);
-            scratch->sinAngle1 = Core_Gte_Sin(scratch->baseDirection.vy);
-            scratch->cosAngle1 = Core_Gte_Cos(scratch->baseDirection.vy);
+            scratch->cosAngle0 = VS::Core::Math::Cosine(scratch->baseDirection.vx);
+            scratch->sinAngle1 = VS::Core::Math::Sine(scratch->baseDirection.vy);
+            scratch->cosAngle1 = VS::Core::Math::Cosine(scratch->baseDirection.vy);
             scratch->vector.vx =
                 (((scratch->extent.vx * scratch->cosAngle0) >> 12) * scratch->cosAngle1) >> 12;
             scratch->vector.vy =
@@ -180,8 +181,8 @@ int Effects_Plg128_UpdateEffectCamera(Effects_RendererSlot* renderer_slot, u_int
             break;
         case 0x20:
             Effects_Plg128_BuildCameraOffsetTransform(state, &state->lookAt);
-            scratch->sinAngle0 = Core_Gte_Sin(scratch->baseDirection.vx);
-            scratch->cosAngle0 = Core_Gte_Cos(scratch->baseDirection.vx);
+            scratch->sinAngle0 = VS::Core::Math::Sine(scratch->baseDirection.vx);
+            scratch->cosAngle0 = VS::Core::Math::Cosine(scratch->baseDirection.vx);
             scratch->vector.vx = (scratch->extent.vx * scratch->cosAngle0) >> 12;
             scratch->vector.vz = scratch->extent.vz;
             scratch->vector.vy = (scratch->extent.vy * scratch->sinAngle0) >> 12;

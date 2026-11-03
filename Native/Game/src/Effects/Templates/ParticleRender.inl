@@ -1,7 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+}
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -40,12 +43,12 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
     DVECTOR* point;
     int width;
 
-    width = Core_Math_InterpolateShortPair(particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, particle_set->age));
+    width = VS::Core::Math::InterpolateLiveShortPair(particle_definition->innerExtentRange, Effects_SampleEffectCurve(particle_definition->innerExtentCurve, particle_set->age));
     if (!width) {
         width = 1;
     }
 
-    Core_Math_InterpolatePairsToShortVector(
+    VS::Core::Math::InterpolateLiveSevenBitVector(
         particle_definition->vectorRanges[4], Effects_SampleEffectCurve(particle_definition->accelerationCurve, particle_set->age), &emitter_scratch->accelerationMin);
 
     if (particle_definition->rCurve != 0) {
@@ -98,7 +101,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                 sampleJitter %= width;
             }
             curveSamples[segment] = segment * 0x600 + sampleJitter - width / 2;
-            Core_Math_InterpolateLagrangeShortVector(controlPoints, controlPoints + 1,
+            VS::Core::Math::InterpolateLiveLagrangeVector(controlPoints, controlPoints + 1,
                 controlPoints + 2, controlPoints + 3, curveSamples[segment] - 0x1000,
                 &emitter_scratch->vector);
             Core_Gte_LoadV0(&emitter_scratch->vector);
@@ -114,7 +117,7 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
 
         for (segment = 0; segment < 8; ++segment) {
             DVECTOR* p = &screenPoints[segment];
-            angles[segment] = Core_Gte_Atan2(p[1].vy - p[0].vy, p[1].vx - p[0].vx);
+            angles[segment] = VS::Core::Math::Arctangent2(p[1].vy - p[0].vy, p[1].vx - p[0].vx);
             angles[segment] -= 0x400;
         }
 
@@ -123,8 +126,8 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
         if (emitter_scratch->accelerationMin.vy) {
             width += (Core_Random_Rand() % emitter_scratch->accelerationMin.vy) / 2;
         }
-        offsetX = (Core_Gte_Cos(angles[0]) * width) >> 0xC;
-        offsetY = (Core_Gte_Sin(angles[0]) * width) >> 0xC;
+        offsetX = (VS::Core::Math::Cosine(angles[0]) * width) >> 0xC;
+        offsetY = (VS::Core::Math::Sine(angles[0]) * width) >> 0xC;
         quad.opaque4.x0 = screenStart[0].vx + offsetX;
         quad.opaque4.y0 = screenStart[0].vy + offsetY;
         quad.opaque4.x2 = screenStart[0].vx - offsetX;
@@ -141,8 +144,8 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
                 width += (Core_Random_Rand() % emitter_scratch->accelerationMin.vy) / 2;
             }
             angleOrDepth = (angles[segment] + angles[segment + 1]) / 2;
-            offsetX = (Core_Gte_Cos(angleOrDepth) * width) >> 0xC;
-            offsetY = (Core_Gte_Sin(angleOrDepth) * width) >> 0xC;
+            offsetX = (VS::Core::Math::Cosine(angleOrDepth) * width) >> 0xC;
+            offsetY = (VS::Core::Math::Sine(angleOrDepth) * width) >> 0xC;
             point = &screenStart[segment];
             quad.opaque4.x1 = point[1].vx + offsetX;
             quad.opaque4.y1 = point[1].vy + offsetY;
@@ -213,8 +216,8 @@ void VS_PARTICLE_RENDER_FUNCTION(Effects_ParticleDefinition* particle_definition
         if (emitter_scratch->accelerationMin.vy) {
             width += (Core_Random_Rand() % emitter_scratch->accelerationMin.vy) / 2;
         }
-        offsetX = (Core_Gte_Cos(angles[segment]) * width) >> 0xC;
-        offsetY = (Core_Gte_Sin(angles[segment]) * width) >> 0xC;
+        offsetX = (VS::Core::Math::Cosine(angles[segment]) * width) >> 0xC;
+        offsetY = (VS::Core::Math::Sine(angles[segment]) * width) >> 0xC;
         quad.opaque4.x1 = ((u_short*)screenStart)[segment * 2 + 2] + offsetX;
         quad.opaque4.y1 = ((u_short*)screenStart)[segment * 2 + 3] + offsetY;
         quad.opaque4.x3 = ((u_short*)screenStart)[segment * 2 + 2] - offsetX;

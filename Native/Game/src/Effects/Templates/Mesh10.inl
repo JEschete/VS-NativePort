@@ -1,11 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -60,13 +61,13 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
         effect = &Effects_package->block5Data->definitions[state->effect];
         scratch->flags = effect->flags;
         actorMatrix = &battle->transforms[effect->transformIndex].world;
-        Core_Math_InterpolatePairsToWideVector(effect->positionRange,
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->positionRange,
             Effects_SampleEffectCurve(effect->positionCurve, state->age), &scratch->position);
         switch (scratch->flags & 7) {
         case 0:
             break;
         case 1:
-            Core_Math_AddWideAndShortVectors(&scratch->position, Effects_effectOrigin, &scratch->position);
+            VS::Core::Math::AddLiveVectorsTo(&scratch->position, Effects_effectOrigin, &scratch->position);
             break;
         case 2:
             scratch->position.vx += actorMatrix->t[0];
@@ -74,9 +75,9 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
             scratch->position.vz += actorMatrix->t[2];
             break;
         }
-        Core_Math_InterpolatePairsToWideVector(effect->extentRange,
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->extentRange,
             Effects_SampleEffectCurve(effect->extentCurve, state->age), &scratch->extent);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[7],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[7],
             Effects_SampleEffectCurve(effect->attractionJitterCurve, state->age), &scratch->attractionJitter);
         if (effect->rCurve) {
             index = Effects_SampleEffectCurve(effect->rCurve, state->age) * 2;
@@ -158,14 +159,14 @@ int VS_MESH10_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comm
             vertices[index].vz =
                 (VS_MESH10_VERTICES[index].vz * scratch->attractionJitter.vz) >> 12;
         }
-        Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[0],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[0],
             Effects_SampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
-        Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[1],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[1],
             Effects_SampleEffectCurve(effect->directionJitterCurve, state->age), &scratch->directionJitter);
         scratch->vector.vx = (state->rotation.vx += scratch->directionJitter.vx) + scratch->baseDirection.vx;
         scratch->vector.vy = (state->rotation.vy += scratch->directionJitter.vy) + scratch->baseDirection.vy;
         scratch->vector.vz = (state->rotation.vz += scratch->directionJitter.vz) + scratch->baseDirection.vz;
-        Core_Gte_RotMatrix(&scratch->vector, &scratch->aimMatrix);
+        VS::Core::Math::BuildLiveRotationXyz(&scratch->vector, &scratch->aimMatrix);
         scratch->aimMatrix.t[0] = scratch->position.vx;
         scratch->aimMatrix.t[1] = scratch->position.vy;
         scratch->aimMatrix.t[2] = scratch->position.vz;

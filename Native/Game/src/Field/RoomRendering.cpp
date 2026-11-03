@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Field/MinimapSceneLive.hpp"
 #include "Field/RoomLightingLive.hpp"
@@ -194,7 +195,7 @@ void Field_DrawRoomScene(void)
     _insertTPage(5, getTPage(0, 3, 0, 0));
 
     if (Battle_characterState->weaponDrawn == 1) {
-        int pulse = Core_Gte_Sin(Field_minimapBorderPulsePhase << 8) / 64;
+        int pulse = VS::Core::Math::Sine(Field_minimapBorderPulsePhase << 8) / 64;
         int shade;
         Field_minimapBorderPulsePhase += State_tickSpeed / 2;
         shade = 128 - pulse;

@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/TextureRegionDrawLive.hpp"
@@ -305,7 +306,7 @@ int Menu_Results_UpdateCubePuzzleResults(void)
 
     int rank_index_bias;
 
-    Menu_Results_PulseCubePuzzleClut((Core_Gte_Sin(Menu_Results_elementAnimationState) / 512) + 8);
+    Menu_Results_PulseCubePuzzleClut((VS::Core::Math::Sine(Menu_Results_elementAnimationState) / 512) + 8);
 
     Menu_Results_elementAnimationState = (Menu_Results_elementAnimationState + 64) & 0xFFF;
 
@@ -387,7 +388,7 @@ int Menu_Results_UpdateCubePuzzleResults(void)
 // decomp: MENUF.PRG _renderCubePuzzleQuit (src/MENU/MENUF.PRG/3B8.c:2566)
 int Menu_Results_UpdateCubePuzzleQuit(void)
 {
-    Menu_Results_PulseCubePuzzleClut((Core_Gte_Sin(Menu_Results_elementAnimationState) / 512) + 8);
+    Menu_Results_PulseCubePuzzleClut((VS::Core::Math::Sine(Menu_Results_elementAnimationState) / 512) + 8);
 
     Menu_Results_elementAnimationState = (Menu_Results_elementAnimationState + 64) & 0xFFF;
 

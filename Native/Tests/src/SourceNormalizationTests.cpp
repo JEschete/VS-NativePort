@@ -7,13 +7,9 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include "Core/Gte.h"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Legacy/Psx.h"
-
-extern "C" {
-#include "Core/Math/FixedPoint.h"
-}
 
 namespace {
 namespace Math = VS::Core::Math;
@@ -94,34 +90,39 @@ TEST_CASE("Non-positive values have no reciprocal root",
 
 TEST_CASE("Source normalization retains the original quantized unit vector",
           "[math][source-normalization]") {
-  const auto result = Math::NormalizeVectorRegisters({4000, 1000, 0});
+  const auto result = Math::NormalizeVector({4000, 1000, 0});
   CHECK(result.squared_length == 17000000);
   CHECK(result.direction == Math::Vec3{4000, 1000, 0});
-  CHECK(Math::NormalizeVectorRegisters({3, 4, 0}) ==
+  CHECK(Math::NormalizeVector({3, 4, 0}) ==
         Math::NormalizedVector{{2457, 3276, 0}, 25});
 }
 
-TEST_CASE(
-    "Accepted native normalization keeps its existing ordinary-vector result",
-    "[math][source-normalization]") {
+TEST_CASE("Record normalization keeps the quantized result and padding",
+          "[math][source-normalization][core-math]") {
+  // VectorNormal (32154.s) and the old native bridge's double square root
+  // differ here: the original quantizes the reciprocal root to its table.
   VECTOR input{4000, 1000, 0, 77};
   VECTOR native{0, 0, 0, 55};
-  CHECK(Core_Gte_VectorNormal(&input, &native) == 17000000);
-  CHECK(native.vx == 3973);
-  CHECK(native.vy == 993);
+  CHECK(Math::NormalizeLiveVector(&input, &native) == 17000000);
+  CHECK(native.vx == 4000);
+  CHECK(native.vy == 1000);
   CHECK(native.vz == 0);
   CHECK(native.pad == 55);
+  CHECK(input.pad == 77);
 }
 
-TEST_CASE("Accepted native normalization keeps its full-range 32-bit contract",
-          "[math][source-normalization]") {
+TEST_CASE("Record normalization reads only each component's low halfword",
+          "[math][source-normalization][core-math]") {
   VECTOR input{INT32_MAX, INT32_MAX, INT32_MAX, 77};
   VECTOR native{};
-  CHECK(Core_Gte_VectorNormal(&input, &native) == 3);
-  CHECK(native.vx == 2364);
-  CHECK(native.vy == 2364);
-  CHECK(native.vz == 2364);
-  CHECK(&Core_Math_NormalizeVector == &Core_Gte_VectorNormal);
+  CHECK(Math::NormalizeLiveVector(&input, &native) == 3);
+  CHECK(native.vx == -2364);
+  CHECK(native.vy == -2364);
+  CHECK(native.vz == -2364);
+  SVECTOR narrow{-1, -1, -1, 9};
+  CHECK(Math::NormalizeLiveVector(&narrow, &narrow) == 3);
+  CHECK(narrow.vx == -2364);
+  CHECK(narrow.pad == 9);
 }
 
 TEST_CASE(
@@ -130,24 +131,24 @@ TEST_CASE(
   for (std::uint32_t bits = 0; bits <= UINT16_MAX; ++bits) {
     const Math::Vec3 narrow{ShortBits(static_cast<std::int32_t>(bits)), 127,
                             -63};
-    CHECK(Math::NormalizeVectorRegisters(narrow) == ReferenceNormalize(narrow));
+    CHECK(Math::NormalizeVector(narrow) == ReferenceNormalize(narrow));
     const Math::Vec3 wide{std::bit_cast<std::int32_t>(bits | 0xA5A50000u),
                           0x1234007F, std::bit_cast<std::int32_t>(0x7FFFFFC1u)};
-    CHECK(Math::NormalizeVectorRegisters(wide) == ReferenceNormalize(narrow));
+    CHECK(Math::NormalizeVector(wide) == ReferenceNormalize(narrow));
   }
 }
 
 TEST_CASE("Squared lengths of 2^31 and above use the in-table root",
           "[math][source-normalization]") {
-  const auto result = Math::NormalizeVectorRegisters({-32768, -32768, -32768});
+  const auto result = Math::NormalizeVector({-32768, -32768, -32768});
   CHECK(result.squared_length == 0xC0000000u);
   CHECK(result.direction == Math::Vec3{-2364, -2364, -2364});
   const Math::Vec3 large{32767, -32768, 1};
-  CHECK(Math::NormalizeVectorRegisters(large) == ReferenceNormalize(large));
+  CHECK(Math::NormalizeVector(large) == ReferenceNormalize(large));
 }
 
 TEST_CASE("Zero-length normalization gives a zero direction",
           "[math][source-normalization]") {
-  CHECK(Math::NormalizeVectorRegisters({65536, -65536, INT32_MIN}) ==
+  CHECK(Math::NormalizeVector({65536, -65536, INT32_MIN}) ==
         Math::NormalizedVector{});
 }

@@ -2,6 +2,7 @@
 #include <array>
 #include <bit>
 #include <cstdint>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <type_traits>
@@ -12,28 +13,23 @@
 #include "Content/ModuleData.h"
 #include "Core/Gte.h"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Runtime.hpp"
 #include "Core/Unported.hpp"
 #include "Legacy/Psx.h"
 #include "Render/RoomDrawLive.hpp"
 
 extern "C" {
-#include "Core/Math/FixedPoint.h"
-#include "Core/Math/Matrix.h"
-#include "Core/Math/Trig.h"
-#include "Core/Math/Vector.h"
 #include "Render/Render.h"
 #include "Render/UiPrimitives.h"
 }
 
-static_assert(
-    std::is_same_v<decltype(&Core_Math_SineFixedPoint), int (*)(int)>);
-static_assert(
-    std::is_same_v<decltype(&Core_Math_CosineFixedPoint), int (*)(int)>);
-static_assert(std::is_same_v<decltype(&Core_Math_Sine), int (*)(int)>);
-static_assert(std::is_same_v<decltype(&Core_Math_Cosine), int (*)(int)>);
 namespace Math = VS::Core::Math;
+using FixedTrig = std::int32_t (*)(std::int32_t) noexcept;
+static_assert(std::is_same_v<decltype(&Math::Sine), FixedTrig>);
+static_assert(std::is_same_v<decltype(&Math::Cosine), FixedTrig>);
 using MatrixProduct = Math::Mat3 (*)(const Math::Mat3&,
                                      const Math::Mat3&) noexcept;
 static_assert(
@@ -146,9 +142,9 @@ int FloorDivide(std::int64_t value, int divisor) {
 }
 
 void ReferenceRoomEuler(const SVECTOR& rotation, MATRIX& output) {
-  const int sx = Core_Gte_Sin(rotation.vx), cx = Core_Gte_Cos(rotation.vx);
-  const int sy = Core_Gte_Sin(rotation.vy), cy = Core_Gte_Cos(rotation.vy);
-  const int sz = Core_Gte_Sin(rotation.vz), cz = Core_Gte_Cos(rotation.vz);
+  const int sx = Math::Sine(rotation.vx), cx = Math::Cosine(rotation.vx);
+  const int sy = Math::Sine(rotation.vy), cy = Math::Cosine(rotation.vy);
+  const int sz = Math::Sine(rotation.vz), cz = Math::Cosine(rotation.vz);
   // Original GPF(1) stages: IR0=2*sz, then 2*cz; IR1..3=2*sy,2*cy,cx.
   const auto stage = [sy, cy, cx](int scalar) {
     return std::array{FloorDivide(std::int64_t{scalar} * 2 * sy, 4096),
@@ -322,14 +318,6 @@ TEST_CASE("Vector square keeps its low-halfword golden",
         Math::Vec3{9, 16, 0});
 }
 
-TEST_CASE("Battle fixed trigonometry uses the canonical native implementations",
-          "[math][sdk-gaps][fixed-trig]") {
-  CHECK(&Core_Math_SineFixedPoint == &Core_Gte_Sin);
-  CHECK(&Core_Math_CosineFixedPoint == &Core_Gte_Cos);
-  CHECK(&Core_Math_Sine == &Core_Gte_Sin);
-  CHECK(&Core_Math_Cosine == &Core_Gte_Cos);
-}
-
 TEST_CASE("Room view rotation retains the original staged YXZ precision",
           "[math][room-rotation]") {
   const RestoreRoomCamera restore;
@@ -380,8 +368,8 @@ TEST_CASE("Both rotation octant entries retain signed pairs for every halfword",
     const int angle =
         std::bit_cast<std::int16_t>(static_cast<std::uint16_t>(bits));
     const auto pair = Math::LookupRotationSineCosine(angle);
-    CHECK(pair.sine == Core_Gte_Sin(angle));
-    CHECK(pair.cosine == Core_Gte_Cos(angle));
+    CHECK(pair.sine == Math::Sine(angle));
+    CHECK(pair.cosine == Math::Cosine(angle));
     const int wide = std::bit_cast<std::int32_t>(bits | 0xA5A50000u);
     CHECK(Math::LookupRotationSineCosine(wide) == pair);
   }
@@ -426,9 +414,10 @@ TEST_CASE("Room Euler rotation keeps its original golden element",
   CHECK(output.m[0][1] == -1704);
 }
 
-TEST_CASE(
-    "Native trig redirects remain available through original module addresses",
-    "[math][sdk-gaps][fixed-trig][redirect-binding]") {
+TEST_CASE("Retired trig entries leave no module address bindings",
+          "[math][sdk-gaps][fixed-trig][core-math]") {
+  // No module image stores these addresses (#278), so the typed kernel is
+  // reached only through OWNED_CALL_BINDINGS.
   const bool cosine = GENERATE(false, true);
   const bool resident = GENERATE(false, true);
   const char* module = resident ? "SLUS_010.40" : "BATTLE/BATTLE.PRG";
@@ -436,37 +425,29 @@ TEST_CASE(
                                     : (cosine ? 0x80098AB4u : 0x80098AB8u);
   const auto symbols =
       std::span(Content_moduleSymbols, Content_moduleSymbolCount);
-  void* resolved = VS::Content::ResolveModuleAddress(symbols, module, address);
-  REQUIRE(resolved != nullptr);
-  const auto function = reinterpret_cast<int (*)(int)>(resolved);
-  CHECK(function == (cosine ? Core_Gte_Cos : Core_Gte_Sin));
-  CHECK(function(1024) == (cosine ? 0 : 4096));
-  CHECK(VS::Content::ResolveModuleAddress(symbols, module, address + 1) ==
-        nullptr);
+  CHECK(VS::Content::ResolveModuleAddress(symbols, module, address) == nullptr);
 }
 
 TEST_CASE("Fixed trigonometry retains mathematical octants at Q12 scale",
           "[math][sdk-gaps][fixed-trig]") {
   constexpr std::array kSine{0, 2896, 4096, 2896, 0, -2896, -4096, -2896};
   for (int octant = 0; octant < 8; ++octant) {
-    CHECK(Core_Math_SineFixedPoint(octant * 512) == kSine[octant]);
-    CHECK(Core_Math_CosineFixedPoint(octant * 512) == kSine[(octant + 2) & 7]);
+    CHECK(Math::Sine(octant * 512) == kSine[octant]);
+    CHECK(Math::Cosine(octant * 512) == kSine[(octant + 2) & 7]);
   }
 }
 
 TEST_CASE("Every fixed-trig angle retains range phase sign and turn period",
           "[math][sdk-gaps][fixed-trig]") {
   for (int angle = 0; angle < 4096; ++angle) {
-    const int sine = Core_Math_SineFixedPoint(angle);
-    const int cosine = Core_Math_CosineFixedPoint(angle);
+    const int sine = Math::Sine(angle);
+    const int cosine = Math::Cosine(angle);
     CheckTrigBounds(sine);
     CheckTrigBounds(cosine);
-    CHECK(Core_Math_Sine(angle) == sine);
-    CHECK(Core_Math_Cosine(angle) == cosine);
-    CHECK(sine == -Core_Math_SineFixedPoint(angle + 2048));
-    CHECK(cosine == Core_Math_SineFixedPoint(angle + 1024));
-    CHECK(sine == Core_Math_SineFixedPoint(angle - 4096));
-    CHECK(cosine == Core_Math_CosineFixedPoint(angle + 4096));
+    CHECK(sine == -Math::Sine(angle + 2048));
+    CHECK(cosine == Math::Sine(angle + 1024));
+    CHECK(sine == Math::Sine(angle - 4096));
+    CHECK(cosine == Math::Cosine(angle + 4096));
   }
 }
 
@@ -474,16 +455,12 @@ TEST_CASE(
     "Every fixed-trig result matches the original signed table fingerprint",
     "[math][sdk-gaps][fixed-trig]") {
   std::uint64_t hash = 14695981039346656037ull;
-  std::uint64_t resident_hash = hash;
   for (int angle = 0; angle < 4096; ++angle) {
-    hash = HashFixedSample(hash, Core_Math_SineFixedPoint(angle));
-    hash = HashFixedSample(hash, Core_Math_CosineFixedPoint(angle));
-    resident_hash = HashFixedSample(resident_hash, Core_Math_Sine(angle));
-    resident_hash = HashFixedSample(resident_hash, Core_Math_Cosine(angle));
+    hash = HashFixedSample(hash, Math::Sine(angle));
+    hash = HashFixedSample(hash, Math::Cosine(angle));
   }
   // Original sine/cosine pairs in angle order, each encoded as signed LE32.
   CHECK(hash == 0x8E620CA359EB4481ull);
-  CHECK(resident_hash == 0x8E620CA359EB4481ull);
 }
 
 TEST_CASE("Fixed-trig inputs wrap safely across the full signed integer range",
@@ -506,24 +483,19 @@ TEST_CASE("Fixed-trig inputs wrap safely across the full signed integer range",
                                4097};
   for (int angle : kAngles) {
     const int phase = static_cast<int>(static_cast<unsigned>(angle) & 0xFFFu);
-    CHECK(Core_Math_SineFixedPoint(angle) == Core_Math_SineFixedPoint(phase));
-    CHECK(Core_Math_CosineFixedPoint(angle) ==
-          Core_Math_CosineFixedPoint(phase));
-    CHECK(Core_Math_Sine(angle) == Core_Math_SineFixedPoint(phase));
-    CHECK(Core_Math_Cosine(angle) == Core_Math_CosineFixedPoint(phase));
+    CHECK(Math::Sine(angle) == Math::Sine(phase));
+    CHECK(Math::Cosine(angle) == Math::Cosine(phase));
   }
 }
 
-TEST_CASE("Retired SDK math entries are the canonical native implementations",
-          "[math][sdk-gaps]") {
-  CHECK(&Core_Math_BuildRotationYxz == &Core_Gte_RotMatrixYXZ);
-  CHECK(&Core_Math_BuildRotationXyz == &Core_Gte_RotMatrix);
-  CHECK(&Core_Math_CrossProductFixed == &Core_Gte_OuterProduct0);
-  CHECK(&Core_Math_SquareRootFixed == &Core_Gte_SquareRoot12);
-  CHECK(&Core_Math_NormalizeVector == &Core_Gte_VectorNormal);
-  CHECK(&Core_Math_NormalizeVectorToShort == &Core_Gte_VectorNormalS);
-  CHECK(&Core_Math_NormalizeShortVector == &Core_Gte_VectorNormalSS);
+namespace {
+using RotationBuilder = MATRIX* (*)(const SVECTOR*, MATRIX*) noexcept;
+// Order 0 is the resident YXZ builder and 1 the XYZ builder.
+RotationBuilder RotationBuilderFor(int order) noexcept {
+  return order == 0 ? Math::BuildLiveEulerRotationMatrix<SVECTOR, MATRIX>
+                    : Math::BuildLiveRotationXyz<SVECTOR, MATRIX>;
 }
+}  // namespace
 
 TEST_CASE("SDK rotation aliases retain native result pointers and translation",
           "[math][sdk-gaps]") {
@@ -536,9 +508,7 @@ TEST_CASE("SDK rotation aliases retain native result pointers and translation",
   matrix.t[0] = 17;
   matrix.t[1] = -23;
   matrix.t[2] = 41;
-  const std::array<MATRIX* (*)(SVECTOR*, MATRIX*), 2> build{
-      Core_Math_BuildRotationYxz, Core_Math_BuildRotationXyz};
-  CHECK(build[order](&angles, &matrix) == &matrix);
+  CHECK(RotationBuilderFor(order)(&angles, &matrix) == &matrix);
   CHECK(matrix.t[0] == 17);
   CHECK(matrix.t[1] == -23);
   CHECK(matrix.t[2] == 41);
@@ -558,11 +528,11 @@ TEST_CASE(
   VECTOR input{3, 4, 0, 77};
   VECTOR wide{0, 0, 0, 99};
   SVECTOR narrow{0, 0, 0, 55};
-  CHECK(Core_Math_NormalizeVector(&input, &wide) == 25);
+  CHECK(Math::NormalizeLiveVector(&input, &wide) == 25);
   CHECK(wide.vx == 2457);
   CHECK(wide.vy == 3276);
   CHECK(wide.pad == 99);
-  CHECK(Core_Math_NormalizeVectorToShort(&input, &narrow) == 25);
+  CHECK(Math::NormalizeLiveVector(&input, &narrow) == 25);
   CHECK(narrow.vx == wide.vx);
   CHECK(narrow.vy == wide.vy);
   CHECK(narrow.pad == 55);
@@ -571,12 +541,12 @@ TEST_CASE(
 TEST_CASE("SDK short-vector normalization permits in-place and zero inputs",
           "[math][sdk-gaps]") {
   SVECTOR input{-3, 4, 0, 55};
-  CHECK(Core_Math_NormalizeShortVector(&input, &input) == 25);
+  CHECK(Math::NormalizeLiveVector(&input, &input) == 25);
   CHECK(input.vx == -2457);
   CHECK(input.vy == 3276);
   CHECK(input.pad == 55);
   VECTOR zero{};
-  CHECK(Core_Math_NormalizeVectorToShort(&zero, &input) == 0);
+  CHECK(Math::NormalizeLiveVector(&zero, &input) == 0);
   CHECK(input.vx == 0);
   CHECK(input.vy == 0);
   CHECK(input.pad == 55);
@@ -587,7 +557,7 @@ TEST_CASE(
     "[math][sdk-gaps]") {
   VECTOR first{4096, 0, 0, 77};
   VECTOR second{0, 4096, 0, 88};
-  Core_Math_CrossProductFixed(&first, &second, &first);
+  Math::StoreLiveCrossProduct(&first, &second, &first);
   CHECK(first.vx == 0);
   CHECK(first.vy == 0);
   CHECK(first.vz == 4096);
@@ -599,11 +569,9 @@ TEST_CASE("SDK mixed rotations preserve the distinct XYZ and YXZ orders",
   const auto order = GENERATE(0, 1);
   SVECTOR angles{1024, 1024, 0, 0};
   MATRIX result{};
-  const std::array<MATRIX* (*)(SVECTOR*, MATRIX*), 2> build{
-      Core_Math_BuildRotationYxz, Core_Math_BuildRotationXyz};
   const int16_t expected[2][3][3]{{{0, 4096, 0}, {0, 0, -4096}, {-4096, 0, 0}},
                                   {{0, 0, 4096}, {4096, 0, 0}, {0, 4096, 0}}};
-  build[order](&angles, &result);
+  RotationBuilderFor(order)(&angles, &result);
   for (std::size_t row = 0; row < 3; ++row) {
     for (std::size_t column = 0; column < 3; ++column) {
       CHECK(result.m[row][column] == expected[order][row][column]);
@@ -613,9 +581,9 @@ TEST_CASE("SDK mixed rotations preserve the distinct XYZ and YXZ orders",
 
 TEST_CASE("SDK fixed square root retains its Q12 interpretation",
           "[math][sdk-gaps]") {
-  CHECK(Core_Math_SquareRootFixed(0) == 0);
-  CHECK(Core_Math_SquareRootFixed(4096) == 4096);
-  CHECK(Core_Math_SquareRootFixed(36864) == 12288);
+  CHECK(Math::SquareRootFixed(0) == 0);
+  CHECK(Math::SquareRootFixed(4096) == 4096);
+  CHECK(Math::SquareRootFixed(36864) == 12288);
 }
 
 TEST_CASE(
@@ -748,23 +716,33 @@ RotationRows ReferenceProduct(const RotationRows& left,
 }
 }  // namespace
 
-TEST_CASE("YXZ rotation multiplies Ry, Rx and Rz with truncated products",
-          "[core][math]") {
+TEST_CASE("Resident YXZ rotation keeps staged products near Ry, Rx and Rz",
+          "[core][math][core-math]") {
   const int x = GENERATE(0, 1, 512, 1024, 1365, 2048, 3000, 4095, -700);
   const int y = GENERATE(0, 3, 777, 2048, -1024);
   const int z = GENERATE(0, 64, 1536, 4000);
-  const auto expected = ReferenceProduct(
+  const auto product = ReferenceProduct(
       ReferenceProduct(ReferenceAxis(1, y), ReferenceAxis(0, x)),
       ReferenceAxis(2, z));
-  const Math::Mat3 typed = Math::BuildRotationMatrixYXZ({x, y, z});
-  SVECTOR angles = {static_cast<std::int16_t>(x), static_cast<std::int16_t>(y),
-                    static_cast<std::int16_t>(z), 0};
+  const Math::Mat3 typed = Math::BuildEulerRotationMatrix({x, y, z});
+  const SVECTOR angles = {static_cast<std::int16_t>(x),
+                          static_cast<std::int16_t>(y),
+                          static_cast<std::int16_t>(z), 0};
+  MATRIX staged{};
+  ReferenceRoomEuler(angles, staged);
   MATRIX bridged{};
-  CHECK(Core_Gte_RotMatrixYXZ(&angles, &bridged) == &bridged);
+  CHECK(Math::BuildLiveEulerRotationMatrix(&angles, &bridged) == &bridged);
+  // RotMatrixYXZ_gte (31724.s:47) keeps two extra fractional bits through
+  // its GPF stages, so it is not the successive truncated product the old
+  // native bridge computed; it stays within a few units of it.
+  constexpr std::int64_t kStagedTolerance = 3;
   for (int row = 0; row < 3; ++row) {
     for (int column = 0; column < 3; ++column) {
-      CHECK(typed.m[row][column] == expected[row][column]);
-      CHECK(bridged.m[row][column] == expected[row][column]);
+      CAPTURE(row, column);
+      CHECK(typed.m[row][column] == staged.m[row][column]);
+      CHECK(bridged.m[row][column] == staged.m[row][column]);
+      CHECK(std::abs(typed.m[row][column] - product[row][column]) <=
+            kStagedTolerance);
     }
   }
 }

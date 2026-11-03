@@ -73,13 +73,17 @@ IDENTIFIER_FIXUP = re.compile(r"\\b[A-Za-z_]\w*\\b")
 # Strategy R (SDK_API_LEDGER.md): SDK calls rewritten to the native API at copy time.
 GTE_FUNCS = {n: f"Core_Gte_{n}" for n in (
     "MulMatrix", "CompMatrix", "ApplyMatrix", "ApplyRotMatrix", "ApplyMatrixLV", "ApplyMatrixSV", "TransMatrix",
-    "ScaleMatrix", "RotTransPers", "RotTrans", "RotTransPers4", "RotAverage4", "NormalClip", "OuterProduct0",
-    "VectorNormal", "VectorNormalS", "VectorNormalSS", "SquareRoot12", "DpqColor", "SetRotMatrix", "SetTransMatrix", "SetGeomOffset",
-    "SetGeomScreen", "SetFarColor", "SetFogNear")}
+    "ScaleMatrix", "RotTransPers", "RotTrans", "RotTransPers4", "RotAverage4", "NormalClip", "DpqColor",
+    "SetRotMatrix", "SetTransMatrix", "SetGeomOffset", "SetGeomScreen", "SetFarColor", "SetFogNear")}
+# libgte entry points whose resident copies are promoted catalog rows: an SDK call binds exactly like a call to
+# that row (Copier.promoted_name), so both reach the same typed function or record binding.
+SDK_PROMOTED_ROWS = {
+    "rcos": "F03400", "rsin": "F03401", "ratan2": "F03402", "RotMatrixYXZ_gte": "F03397",
+    "RotMatrix_gte": "F03398", "OuterProduct0": "F03407", "SquareRoot12": "F03410",
+    "VectorNormal": "F03411", "VectorNormalS": "F03412", "VectorNormalSS": "F03413",
+}
 SDK_RENAMES = {
     **GTE_FUNCS,
-    "RotMatrix_gte": "Core_Gte_RotMatrix", "RotMatrixYXZ_gte": "Core_Gte_RotMatrixYXZ",
-    "rsin": "Core_Gte_Sin", "rcos": "Core_Gte_Cos", "ratan2": "Core_Gte_Atan2",
     "rand": "Core_Random_Rand", "srand": "Core_Random_Seed", "index": "strchr",
     # libapi file calls collide with C runtime names
     **{n: f"LegacyApi_{n}" for n in ("open", "close", "read", "write", "erase", "rename", "cd", "firstfile", "nextfile")},
@@ -634,19 +638,25 @@ class Copier:
         if not (REPO / hdr).exists():
             raise SystemExit(f"owned.csv: {rid} {name}: header {hdr} does not exist")
         self.provide(name, hdr)
-        promoted = self.promoted_name(rid)
-        if promoted:
-            self.provide(promoted, hdr)
+        typed = self.owned_vs_name(rid)
+        if typed:
+            self.provide(typed, hdr)  # a call binding's header comes from cf.NATIVE_HELPER_HEADERS instead
         self.item_row[name] = rid
         self.report["owned"].append(f"{rid} {name} -> {o['path']}")
         return True
 
-    def promoted_name(self, rid: str) -> str | None:
-        """The qualified C++ name of a function promoted into the VS namespace (plan §8.2). Generated callers use
-        it directly: it has no C symbol, no per-file decomp view and no module address."""
+    def owned_vs_name(self, rid: str) -> str | None:
+        """The qualified C++ name an owned function row is promoted to, if it is in the VS namespace."""
         o = self.owned.get(rid)
         name = o["name"].strip() if o is not None and o["kind"].strip() == "function" else ""
         return name if name.startswith("VS::") else None
+
+    def promoted_name(self, rid: str) -> str | None:
+        """The qualified C++ name generated callers use for a function promoted into the VS namespace (plan §8.2):
+        it has no C symbol, no per-file decomp view and no module address. Where the typed function's shape
+        differs from the original call, cf.OWNED_CALL_BINDINGS names the record adapter callers use instead."""
+        typed = self.owned_vs_name(rid)
+        return cf.OWNED_CALL_BINDINGS.get(rid, typed) if typed else None
 
     # ------------------------------------------------------------------------------------------------- naming
     def canon_type(self, tid: str) -> str:
@@ -680,7 +690,11 @@ class Copier:
                 parts.append(p.rsplit(".", 1)[1] if p.startswith("sdk:") else self.target_text(p))
             return ".".join(parts)
         if target.startswith("sdk:"):
-            return SDK_RENAMES.get(target[4:], target[4:])
+            row = SDK_PROMOTED_ROWS.get(target[4:])
+            promoted = self.promoted_name(row) if row else None
+            if row and promoted is None:
+                raise SystemExit(f"{target}: libgte row {row} must be promoted (tools/port/owned.csv)")
+            return promoted or SDK_RENAMES.get(target[4:], target[4:])
         if target.startswith("plugin:"):
             return None
         if target.startswith("F"):

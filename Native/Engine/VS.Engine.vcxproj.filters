@@ -345,30 +345,15 @@
     <ClCompile Include="src\Core\Math\Interpolation.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Math\Interpolation.h">
-      <Filter>src\Core\Math</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\Math\Matrix.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Math\Matrix.h">
-      <Filter>src\Core\Math</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\Math\ScalarMath.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
-    <ClCompile Include="src\Core\Math\Trig.cpp">
-      <Filter>src\Core\Math</Filter>
-    </ClCompile>
-    <ClInclude Include="src\Core\Math\Trig.h">
-      <Filter>src\Core\Math</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\Math\Vector.cpp">
       <Filter>src\Core\Math</Filter>
     </ClCompile>
-    <ClInclude Include="src\Core\Math\Vector.h">
-      <Filter>src\Core\Math</Filter>
-    </ClInclude>
     <ClCompile Include="src\Core\Memory\Copy.cpp">
       <Filter>src\Core\Memory</Filter>
     </ClCompile>
@@ -753,7 +738,25 @@
     <ClInclude Include="include\Core\Math\Distance.hpp">
       <Filter>include\Core\Math</Filter>
     </ClInclude>
+    <ClInclude Include="include\Core\Math\Interpolation.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\InterpolationLive.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\Matrix.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\MatrixLive.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
     <ClInclude Include="include\Core\Math\ScalarMath.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\Vector.hpp">
+      <Filter>include\Core\Math</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Core\Math\VectorLive.hpp">
       <Filter>include\Core\Math</Filter>
     </ClInclude>
     <ClInclude Include="include\Core\Memory\Copy.hpp">

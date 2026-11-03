@@ -104,7 +104,7 @@ void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_Set
     }
     state->nearDistanceSquared = rangeSquared;
     state->angle = Battle_Ai_viewAngles[settings->halves[1] & 3][0];
-    state->viewCosine = Core_Gte_Cos((state->angle / 2) * 4096 / 360);
+    state->viewCosine = VS::Core::Math::Cosine((state->angle / 2) * 4096 / 360);
     state->settingsBit15 = (settings->word >> 15) & 1;
     state->settingsBit14 = (settings->word >> 14) & 1;
     state->settingsBit13 = (settings->word >> 13) & 1;

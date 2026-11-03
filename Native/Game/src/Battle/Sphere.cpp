@@ -1,5 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/TargetingDrawLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Render/SpritesLive.hpp"
@@ -245,7 +247,7 @@ MATRIX* Battle_BuildSphereVolumeTransform(u_char* scale, int angle)
     scratch[0] = -(scale[3] * 16);
     scratch[1] = angle;
     scratch[2] = 0;
-    Core_Gte_RotMatrixYXZ((SVECTOR*)scratch, rotation);
+    VS::Core::Math::BuildLiveEulerRotationMatrix((SVECTOR*)scratch, rotation);
 
     for (axis = 0; axis < 3; ++axis) {
         for (component = 0; component < 3; ++component) {
@@ -361,7 +363,7 @@ void Battle_DrawSphere(void)
     }
 
     for (i = 0; i < 40; ++i) {
-        sine[i] = Core_Gte_Sin(i * ONE / 32);
+        sine[i] = VS::Core::Math::Sine(i * ONE / 32);
     }
 
     for (i = 0; i < 2; color = 0x10104, ++shape, ++i) {
@@ -432,7 +434,7 @@ void Battle_BuildTargetVolumeTestTransform(Battle_TargetVolume* volume, Battle_T
     test_transform->opaque0.vy = -volume->angle;
     test_transform->opaque0.vz = 0;
 
-    Core_Gte_RotMatrix(&test_transform->opaque0, rotation_matrix);
+    VS::Core::Math::BuildLiveRotationXyz(&test_transform->opaque0, rotation_matrix);
 }
 
 // decomp: BATTLE.PRG func_800C1034 (src/BATTLE/BATTLE.PRG/58578.c:188)
@@ -627,7 +629,7 @@ int Battle_IsPointInTargetPrism(Battle_TargetVolume* shape, u_short* position, i
     work.localPoint[1] = -shape->angle;
     work.localPoint[2] = 0;
     local = work.localPoint;
-    Core_Gte_RotMatrix((SVECTOR*)work.localPoint, &matrix);
+    VS::Core::Math::BuildLiveRotationXyz((SVECTOR*)work.localPoint, &matrix);
     for (i = 0, base = &work, offset = 16; i < 3; offset += 2, ++i, ++local) {
         *local = *position++ - *(u_short*)(((u_char*)(base)) + offset);
     }
@@ -1069,8 +1071,8 @@ int Battle_AppendSphereCircleVertices(int angle, int index)
         int component;
 
         for (component = 0; component < 3; ++component) {
-            int cosine = Core_Gte_Cos(phase);
-            int sine = Core_Gte_Sin(phase);
+            int cosine = VS::Core::Math::Cosine(phase);
+            int sine = VS::Core::Math::Sine(phase);
 
             vertex->xyz[component] = basis[0][component]
                                    + ((basis[1][component] * cosine) >> 12)
@@ -1098,9 +1100,9 @@ int Battle_AppendSphereConeVertices(int step, int radius, int index)
         int point;
 
         for (point = 0; point <= radius; ++index, ++point, phase += step, ++vertex) {
-            vertex->xyz[0] = (x * Core_Gte_Cos(phase)) >> 12;
+            vertex->xyz[0] = (x * VS::Core::Math::Cosine(phase)) >> 12;
             vertex->xyz[1] = y;
-            vertex->xyz[2] = (z * Core_Gte_Sin(phase)) >> 12;
+            vertex->xyz[2] = (z * VS::Core::Math::Sine(phase)) >> 12;
             i = point != 0;
             vertex->opaque6 = i;
             x += ONE / 8;
@@ -1214,8 +1216,8 @@ void* Battle_BuildSphereCameraBasis(void)
     short* p = (short*)((uintptr_t)Core_ScratchBase() + 0x350);
     Field_SyncCameraAnglesFromPosition(&camera);
     yaw = camera.values.yaw;
-    yaw_cosine = Core_Gte_Cos(yaw);
-    yaw_sine = Core_Gte_Sin(yaw);
+    yaw_cosine = VS::Core::Math::Cosine(yaw);
+    yaw_sine = VS::Core::Math::Sine(yaw);
     p[0] = yaw_cosine;
     p[2] = yaw_sine;
     p[8] = -yaw_sine;

@@ -239,35 +239,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Core\Math\Interpolation.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Core\Math\Matrix.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Core\Math\Interpolation.cpp" />
+    <ClCompile Include="src\Core\Math\Matrix.cpp" />
     <ClCompile Include="src\Core\Math\ScalarMath.cpp" />
-    <ClCompile Include="src\Core\Math\Trig.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
-    <ClCompile Include="src\Core\Math\Vector.cpp">
-      <TreatWarningAsError>false</TreatWarningAsError>
-      <WarningLevel>Level1</WarningLevel>
-      <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
-    </ClCompile>
+    <ClCompile Include="src\Core\Math\Vector.cpp" />
     <ClCompile Include="src\Core\Memory\Copy.cpp" />
     <ClCompile Include="src\Core\Memory\CopyLive.cpp" />
     <ClCompile Include="src\Core\Memory\Heap.cpp" />
@@ -562,10 +537,6 @@
     <ClInclude Include="src\Audio\Voices.h" />
     <ClInclude Include="src\Core\Legacy.h" />
     <ClInclude Include="src\Core\Math\FixedPoint.h" />
-    <ClInclude Include="src\Core\Math\Interpolation.h" />
-    <ClInclude Include="src\Core\Math\Matrix.h" />
-    <ClInclude Include="src\Core\Math\Trig.h" />
-    <ClInclude Include="src\Core\Math\Vector.h" />
     <ClInclude Include="src\Core\Overlays.h" />
     <ClInclude Include="src\Core\Random.h" />
     <ClInclude Include="src\Input\Buttons.h" />
@@ -629,7 +600,13 @@
     <ClInclude Include="include\Core\Handle.hpp" />
     <ClInclude Include="include\Core\Log.hpp" />
     <ClInclude Include="include\Core\Math\Distance.hpp" />
+    <ClInclude Include="include\Core\Math\Interpolation.hpp" />
+    <ClInclude Include="include\Core\Math\InterpolationLive.hpp" />
+    <ClInclude Include="include\Core\Math\Matrix.hpp" />
+    <ClInclude Include="include\Core\Math\MatrixLive.hpp" />
     <ClInclude Include="include\Core\Math\ScalarMath.hpp" />
+    <ClInclude Include="include\Core\Math\Vector.hpp" />
+    <ClInclude Include="include\Core\Math\VectorLive.hpp" />
     <ClInclude Include="include\Core\Memory\Copy.hpp" />
     <ClInclude Include="include\Core\Memory\CopyLive.hpp" />
     <ClInclude Include="include\Core\Memory\Heap.hpp" />

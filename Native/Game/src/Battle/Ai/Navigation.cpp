@@ -6,6 +6,7 @@
 #include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
+#include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -333,7 +334,7 @@ int Battle_Ai_ResolveNavigationAreaRoute(Battle_Ai_AreaRouteView* state, int ind
                     state->moveZ = candidate.tile.tileZ * 128 + 64;
                 }
                 state->angle =
-                    Core_Gte_Atan2(state->x - state->moveX, state->z - state->moveZ) & 0xFFF;
+                    VS::Core::Math::Arctangent2(state->x - state->moveX, state->z - state->moveZ) & 0xFFF;
                 state->cooldown = state->period;
                 return 4;
             }
@@ -474,7 +475,7 @@ void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
     }
 move:
     VS::Battle::Ai::ResolveLiveDirectionalMovement((Battle_Ai_ActorAiState *)((void*)state),
-        Core_Gte_Atan2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
+        VS::Core::Math::Arctangent2(state->position[0] - state->moveX, state->position[2] - state->moveZ)
             & 0xFFF,
         0);
 }

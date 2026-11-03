@@ -1,71 +1,95 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+// Hand-maintained (tools/port/owned.csv).
+#include "Core/Math/Matrix.hpp"
+
+#include <cstdint>
+
+#include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "Core/Math/Matrix.h"
+#include "Core/Math/Vector.hpp"
 
-// decomp: BATTLE.PRG vs_battle_lookAt (src/BATTLE/BATTLE.PRG/146C.c:8209)
-void Core_Math_BuildLookAtOrientation(VECTOR* from, VECTOR* to, MATRIX* mat)
-{
-    static const VECTOR Core_kNegativeYAxis = { 0, -ONE, 0 };
-    VECTOR direction;
-    VECTOR right_axis;
-    VECTOR forward_axis;
-    VECTOR up_axis = Core_kNegativeYAxis;
-    int _[2] __attribute__((unused));
+namespace VS::Core::Math {
+namespace {
+constexpr int kFractionBits = 12;
+constexpr int kHalvedFractionBits = 13;
+constexpr int kIntermediateBits = 2;
+constexpr std::int16_t kFixedOne = 4096;
 
-    direction.vx = to->vx - from->vx;
-    direction.vy = to->vy - from->vy;
-    direction.vz = to->vz - from->vz;
-    Core_Gte_VectorNormal(&direction, &forward_axis);
-    Core_Gte_OuterProduct0(&forward_axis, &up_axis, &right_axis);
-    Core_Gte_VectorNormal(&right_axis, &right_axis);
-    Core_Gte_OuterProduct0(&right_axis, &forward_axis, &up_axis);
-    Core_Gte_VectorNormal(&up_axis, &up_axis);
-    mat->m[0][0] = right_axis.vx;
-    mat->m[1][0] = right_axis.vy;
-    mat->m[2][0] = right_axis.vz;
-    mat->m[0][1] = up_axis.vx;
-    mat->m[1][1] = up_axis.vy;
-    mat->m[2][1] = up_axis.vz;
-    mat->m[0][2] = forward_axis.vx;
-    mat->m[1][2] = forward_axis.vy;
-    mat->m[2][2] = forward_axis.vz;
+// The GTE GPF product (IR0 * IRn) >> 12 for the in-range sine products the
+// rotation builder feeds it.
+constexpr std::int32_t Product(std::int32_t left, std::int32_t right) noexcept {
+  return (left * right) >> kFractionBits;
 }
 
-// decomp: BATTLE.PRG _vecToRotMatrix (src/BATTLE/BATTLE.PRG/4A0A8.c:4179)
-void Core_Math_DirectionRotationMatrix(VECTOR* direction_q12, MATRIX* rotation)
-{
-    SVECTOR angles;
-    SVECTOR integer_direction;
+constexpr std::int16_t Element(std::int32_t value) noexcept {
+  return WrapSigned16(static_cast<std::uint32_t>(value));
+}
+}  // namespace
 
-    integer_direction.vx = direction_q12->vx >> 0xC;
-    integer_direction.vy = direction_q12->vy >> 0xC;
-    integer_direction.vz = direction_q12->vz >> 0xC;
-    angles.vy = Core_Gte_Atan2(integer_direction.vx, integer_direction.vz);
-    angles.vx = Core_Gte_Atan2(integer_direction.vy, VS::Core::Math::SquareRootInteger((integer_direction.vx * integer_direction.vx) + (integer_direction.vz * integer_direction.vz)));
-    angles.vz = 0;
-    Core_Gte_RotMatrix(&angles, rotation);
+// decomp: BATTLE.PRG vs_battle_lookAt (src/BATTLE/BATTLE.PRG/146C.c:8209).
+Mat3 BuildLookAtOrientation(Vec3 from, Vec3 to) noexcept {
+  const Vec3 world_up{0, -kFixedOne, 0};
+  const Vec3 forward = NormalizeVector(SubtractVectors(to, from)).direction;
+  const Vec3 right =
+      NormalizeVector(CrossProductFixed(forward, world_up)).direction;
+  const Vec3 up = NormalizeVector(CrossProductFixed(right, forward)).direction;
+  Mat3 matrix;
+  matrix.m[0] = {Element(right.x), Element(up.x), Element(forward.x)};
+  matrix.m[1] = {Element(right.y), Element(up.y), Element(forward.y)};
+  matrix.m[2] = {Element(right.z), Element(up.z), Element(forward.z)};
+  return matrix;
 }
 
-// decomp: BATTLE.PRG func_800CFE7C (src/BATTLE/BATTLE.PRG/5BF94.c:5922)
-void Core_Math_SetIdentityRotation(MATRIX* matrix)
-{
-    int* m = (int*)matrix->m;
-    m[4] = ONE;
-    m[2] = ONE;
-    m[0] = ONE;
-    m[3] = 0;
-    m[1] = 0;
+// decomp: BATTLE.PRG _vecToRotMatrix (src/BATTLE/BATTLE.PRG/4A0A8.c:4179).
+// The angles were halfword SVECTOR members; Arctangent2 stays within them.
+Mat3 DirectionRotationMatrix(Vec3 direction) noexcept {
+  const std::int32_t x = Element(direction.x >> kFractionBits);
+  const std::int32_t y = Element(direction.y >> kFractionBits);
+  const std::int32_t z = Element(direction.z >> kFractionBits);
+  const std::int32_t horizontal = SquareRootInteger(WrappingAdd(x * x, z * z));
+  return BuildRotationXyz(
+      Angles3{Arctangent2(y, horizontal), Arctangent2(x, z), 0});
 }
 
-// decomp: BATTLE.PRG func_800CFE98 (src/BATTLE/BATTLE.PRG/5BF94.c:5932)
-void Core_Math_SetTranslationMatrix(SVECTOR* translation, MATRIX* matrix)
-{
-    Core_Math_SetIdentityRotation(matrix);
-    matrix->t[0] = translation->vx;
-    matrix->t[1] = translation->vy;
-    matrix->t[2] = translation->vz;
+// decomp: SLUS_010.40 RotMatrix_gte (src/SLUS_010.40/31724.s:214). The sines
+// and cosines of x and z enter the GPF stages doubled, so the cross products
+// keep two extra fraction bits until each element's final shift.
+Mat3 BuildRotationXyz(Angles3 rotation) noexcept {
+  const std::int32_t sin_x2 = 2 * Sine(rotation.x);
+  const std::int32_t cos_x2 = 2 * Cosine(rotation.x);
+  const std::int32_t sin_y = Sine(rotation.y);
+  const std::int32_t cos_y = Cosine(rotation.y);
+  const std::int32_t sin_z2 = 2 * Sine(rotation.z);
+  const std::int32_t cos_z2 = 2 * Cosine(rotation.z);
+  const std::int32_t sin_z_sin_x = Product(sin_z2, sin_x2);
+  const std::int32_t sin_z_cos_x = Product(sin_z2, cos_x2);
+  const std::int32_t cos_z_sin_x = Product(cos_z2, sin_x2);
+  const std::int32_t cos_z_cos_x = Product(cos_z2, cos_x2);
+  Mat3 matrix;
+  matrix.m[0] = {Element(Product(cos_z2, cos_y) >> 1),
+                 Element(-(Product(sin_z2, cos_y) >> 1)), Element(sin_y)};
+  matrix.m[1] = {
+      Element((Product(sin_y, cos_z_sin_x) + sin_z_cos_x) >> kIntermediateBits),
+      Element((cos_z_cos_x - Product(sin_y, sin_z_sin_x)) >> kIntermediateBits),
+      Element(-((cos_y * sin_x2) >> kHalvedFractionBits))};
+  matrix.m[2] = {
+      Element((sin_z_sin_x - Product(sin_y, cos_z_cos_x)) >> kIntermediateBits),
+      Element((Product(sin_y, sin_z_cos_x) + cos_z_sin_x) >> kIntermediateBits),
+      Element((cos_y * cos_x2) >> kHalvedFractionBits)};
+  return matrix;
 }
 
-}  // extern "C"
+// decomp: BATTLE.PRG func_800CFE7C (src/BATTLE/BATTLE.PRG/5BF94.c:5922).
+Mat3 IdentityRotation() noexcept {
+  Mat3 matrix;
+  matrix.m[0][0] = kFixedOne;
+  matrix.m[1][1] = kFixedOne;
+  matrix.m[2][2] = kFixedOne;
+  return matrix;
+}
+
+// decomp: BATTLE.PRG func_800CFE98 (src/BATTLE/BATTLE.PRG/5BF94.c:5932).
+Transform3 TranslationTransform(Position3 translation) noexcept {
+  return Transform3{IdentityRotation(),
+                    Vec3{translation.x, translation.y, translation.z}};
+}
+}  // namespace VS::Core::Math

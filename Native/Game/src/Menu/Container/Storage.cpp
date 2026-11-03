@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -9,7 +10,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Battle/TextBoxes.h"
 #include "Content/StringTables.h"
-#include "Core/Math/FixedPoint.h"
 #include "Input/Buttons.h"
 #include "Input/Controller.h"
 #include "Items/Equipment.h"
@@ -1056,9 +1056,9 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         break;
     case Menu_Inventory_DiscardMenuState_DiscardMultipleInit:
         Menu_Container_discardMenuMaxAmount = Menu_Container_containerData->items.misc[Menu_Container_discardMenuSelectedItem].count;
-        i = Core_Math_SplitDecimalDigit(Menu_Container_discardMenuMaxAmount);
+        i = VS::Core::Math::SplitDecimalDigit(Menu_Container_discardMenuMaxAmount);
         Menu_Container_discardMenuCountTemplate[8] = i & 0xF;
-        i = Core_Math_SplitDecimalDigit(i >> 4);
+        i = VS::Core::Math::SplitDecimalDigit(i >> 4);
 
         Menu_Container_discardMenuCountTemplate[7] = i & 0xF;
         Menu_Container_discardMenuCountTemplate[6] = i >> 4;
@@ -1104,9 +1104,9 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
         // Fallthrough
     case Menu_Inventory_DiscardMenuState_DetermineDiscardAmount:
         if (Input_buttonsPressed.allButtons & (PADRup | PADRright | PADRdown)) {
-            i = Core_Math_SplitDecimalDigit(Menu_Container_discardCount);
+            i = VS::Core::Math::SplitDecimalDigit(Menu_Container_discardCount);
             Menu_Container_discardMenuCountTemplate[4] = i & 0xF;
-            i = Core_Math_SplitDecimalDigit(i >> 4);
+            i = VS::Core::Math::SplitDecimalDigit(i >> 4);
             Menu_Container_discardMenuCountTemplate[3] = i & 0xF;
             Menu_Container_discardMenuCountTemplate[2] = i >> 4;
             Menu_Framework_SetMenuItem(0x22, 0, 0x82, 0x7E, 0, Menu_Container_discardMenuCountTemplate);
@@ -1173,10 +1173,10 @@ int Menu_Container_UpdateDiscardMenu(int packed_discard_selection)
             VS::Menu::PlayChangeSound();
         }
         Render_SetMenuFontStyle(5);
-        packed_discard_digits = Core_Math_SplitDecimalDigit(Menu_Container_discardCount);
+        packed_discard_digits = VS::Core::Math::SplitDecimalDigit(Menu_Container_discardCount);
         Render_DrawVariableWidthGlyph(
             packed_discard_digits & 0xF, 0x42, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));
-        packed_discard_digits = Core_Math_SplitDecimalDigit(packed_discard_digits >> 4);
+        packed_discard_digits = VS::Core::Math::SplitDecimalDigit(packed_discard_digits >> 4);
         Render_DrawVariableWidthGlyph(
             packed_discard_digits & 0xF, 0x3C, 0x82, (u_long *)(((u_char*)(Render_frameScratch.overlayOrderingTable)) - 0xC));
         Render_DrawVariableWidthGlyph(

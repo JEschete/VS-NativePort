@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Render/SpritesLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Battle/Feedback.h"
 #include "Battle/Hud.h"
 #include "Battle/TextBoxes.h"
-#include "Core/Math/FixedPoint.h"
 #include "Field/Map.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -399,7 +399,7 @@ void Battle_DrawBattleHud(void)
             ((((u_char)Battle_battleModeIndicatorStep * 3 - 4) << 16) - Battle_hudSlideOffset) | 0xEC, 0xA0049,
             (u_long *)(((u_char*)(Render_frameScratch.orderingTable)) - 0xC));
         prim[1] = 0xE1000017;
-        k = Core_Gte_Sin(Battle_battleModeIndicatorWobble & 0x7FF);
+        k = VS::Core::Math::Sine(Battle_battleModeIndicatorWobble & 0x7FF);
         prim[4] = 0x373D0040;
         prim[2] += k >> 5;
         Battle_battleModeIndicatorWobble += State_tickSpeed * 64;
@@ -559,7 +559,7 @@ void Battle_DrawPuzzleTimer(const State_SceneTimer* timer)
     }
 
     for (i = 0; i < 3; ++i) {
-        int bcd = Core_Math_SplitDecimalDigit(timer_components[i]);
+        int bcd = VS::Core::Math::SplitDecimalDigit(timer_components[i]);
         Battle_puzzleTimerText[6 - i * 3] = (bcd >> 4) + '0';
         Battle_puzzleTimerText[7 - i * 3] = (bcd & 0xF) + '0';
     }

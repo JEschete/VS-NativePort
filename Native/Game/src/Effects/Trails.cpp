@@ -1,10 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
 #include "Actors/Skeleton.h"
 #include "Battle/BattleTypes.h"
-#include "Core/Math/Interpolation.h"
 #include "Effects/Particles.h"
 #include "Effects/Runtime.h"
 #include "Effects/Trails.h"
@@ -109,19 +109,19 @@ int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config)
 
             Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
             Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
-            Core_Math_InterpolateLagrangeShortVector(&t->first[t->index],
+            VS::Core::Math::InterpolateLiveLagrangeVector(&t->first[t->index],
                 &t->first[(t->index - 1) & 7], &t->first[(t->index - 2) & 7],
                 &t->first[(t->index - 3) & 7], -ONE, &t->previousFirst);
-            Core_Math_InterpolateLagrangeShortVector(&t->second[t->index],
+            VS::Core::Math::InterpolateLiveLagrangeVector(&t->second[t->index],
                 &t->second[(t->index - 1) & 7], &t->second[(t->index - 2) & 7],
                 &t->second[(t->index - 3) & 7], -ONE, &t->previousSecond);
             weight = (segments + 1) * 2;
 
             for (span = -ONE / 2; span < 0; span += ONE / 2) {
-                Core_Math_InterpolateLagrangeShortVector(&t->first[t->index],
+                VS::Core::Math::InterpolateLiveLagrangeVector(&t->first[t->index],
                     &t->first[(t->index - 1) & 7], &t->first[(t->index - 2) & 7],
                     &t->first[(t->index - 3) & 7], span, &t->currentFirst);
-                Core_Math_InterpolateLagrangeShortVector(&t->second[t->index],
+                VS::Core::Math::InterpolateLiveLagrangeVector(&t->second[t->index],
                     &t->second[(t->index - 1) & 7], &t->second[(t->index - 2) & 7],
                     &t->second[(t->index - 3) & 7], span, &t->currentSecond);
                 Effects_DrawTrailSegment(t, weight / 2, (weight - 1) / 2);
@@ -132,11 +132,11 @@ int Effects_UpdateBoneTrail(Effects_RendererSlot* node, u_int mode, int config)
 
             for (span = 0; span < segments; ++span) {
                 for (phase = 0; phase < ONE; phase += ONE / 2) {
-                    Core_Math_InterpolateLagrangeShortVector(&t->first[(t->index - span) & 7],
+                    VS::Core::Math::InterpolateLiveLagrangeVector(&t->first[(t->index - span) & 7],
                         &t->first[(t->index - span - 1) & 7],
                         &t->first[(t->index - span - 2) & 7],
                         &t->first[(t->index - span - 3) & 7], phase, &t->currentFirst);
-                    Core_Math_InterpolateLagrangeShortVector(&t->second[(t->index - span) & 7],
+                    VS::Core::Math::InterpolateLiveLagrangeVector(&t->second[(t->index - span) & 7],
                         &t->second[(t->index - span - 1) & 7],
                         &t->second[(t->index - span - 2) & 7],
                         &t->second[(t->index - span - 3) & 7], phase, &t->currentSecond);

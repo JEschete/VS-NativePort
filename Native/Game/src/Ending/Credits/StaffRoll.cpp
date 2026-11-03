@@ -1,4 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/MatrixLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/HeapLive.hpp"
 extern "C" {
@@ -6,7 +8,6 @@ extern "C" {
 #include "Audio/Stream.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Math/Interpolation.h"
 #include "DiscQueue.h"
 #include "Ending/ClearResults.h"
 #include "Ending/Credits.h"
@@ -132,9 +133,9 @@ void Ending_Credits_DrawPhantomPainRipple(Ending_Credits_Element* element)
     }
 
     Ending_Credits_ripplePhaseAngle += 200;
-    scale = (Core_Math_EvaluateEase(3, 90 - Ending_Credits_rippleScaleFrame, 90) * 65) >> 10;
+    scale = (VS::Core::Math::EvaluateLiveEase(3, 90 - Ending_Credits_rippleScaleFrame, 90) * 65) >> 10;
 
-    Core_Gte_RotMatrix(&rot, &matrix);
+    VS::Core::Math::BuildLiveRotationXyz(&rot, &matrix);
     matrix.t[0] = matrix.t[1] = 0;
     matrix.t[2] = 512;
     Core_Gte_SetRotMatrix(&matrix);
@@ -147,13 +148,13 @@ void Ending_Credits_DrawPhantomPainRipple(Ending_Credits_Element* element)
             vertices[0].vy = vertices[1].vy = i * 4 - 8;
             vertices[2].vy = vertices[3].vy = (i + 1) * 4 - 8;
             vertices[0].vz =
-                (Core_Math_SineFromTable(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i][j] * 400) * scale) >> 12;
+                (VS::Core::Math::Sine(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i][j] * 400) * scale) >> 12;
             vertices[1].vz =
-                (Core_Math_SineFromTable(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i][j + 1] * 400) * scale) >> 12;
+                (VS::Core::Math::Sine(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i][j + 1] * 400) * scale) >> 12;
             vertices[2].vz =
-                (Core_Math_SineFromTable(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i + 1][j] * 400) * scale) >> 12;
+                (VS::Core::Math::Sine(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i + 1][j] * 400) * scale) >> 12;
             vertices[3].vz =
-                (Core_Math_SineFromTable(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i + 1][j + 1] * 400) * scale)
+                (VS::Core::Math::Sine(Ending_Credits_ripplePhaseAngle + Ending_Credits_rippleDistanceGrid[i + 1][j + 1] * 400) * scale)
                 >> 12;
 
             SetPolyFT4(poly);
@@ -807,7 +808,7 @@ void Ending_Credits_FadeInBackground(Ending_Credits_Element* element)
         element->phase = -1;
     }
 
-    Ending_Credits_backgroundBrightness = (u_int)Core_Math_EvaluateEase(Ending_Credits_EasingMode_Linear, element->animationFrame, 128) / 32;
+    Ending_Credits_backgroundBrightness = (u_int)VS::Core::Math::EvaluateLiveEase(Ending_Credits_EasingMode_Linear, element->animationFrame, 128) / 32;
 }
 
 // decomp: ENDING.PRG _backgroundFadeOut (src/ENDING/ENDING.PRG/D4.c:954)
@@ -826,7 +827,7 @@ void Ending_Credits_FadeOutBackground(Ending_Credits_Element* element)
         element->phase = -1;
     }
 
-    Ending_Credits_backgroundBrightness = 128 - ((Core_Math_EvaluateEase(Ending_Credits_EasingMode_Linear, element->animationFrame, 128) << 7) >> 0xC);
+    Ending_Credits_backgroundBrightness = 128 - ((VS::Core::Math::EvaluateLiveEase(Ending_Credits_EasingMode_Linear, element->animationFrame, 128) << 7) >> 0xC);
 }
 
 // decomp: ENDING.PRG func_8006A4D8 (src/ENDING/ENDING.PRG/D4.c:972)
@@ -847,7 +848,7 @@ void Ending_Credits_FadeOutForSkip(Ending_Credits_Element* element)
     SetTile(fade_tile);
     setSemiTrans(fade_tile, 1);
     fade_tile->r0 = fade_tile->g0 = fade_tile->b0 =
-        (Core_Math_EvaluateEase(Ending_Credits_EasingMode_EaseOut, element->animationFrame, 128) * 255) >> 0xC;
+        (VS::Core::Math::EvaluateLiveEase(Ending_Credits_EasingMode_EaseOut, element->animationFrame, 128) * 255) >> 0xC;
     setWH(fade_tile, 320, 240);
     setXY0(fade_tile, 0, 0);
 

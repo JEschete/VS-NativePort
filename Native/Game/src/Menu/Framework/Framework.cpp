@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/CopyLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -35,7 +36,6 @@ extern "C" {
 #include "Boot/OverlayReset.h"
 #include "CdDrive.h"
 #include "Content/DiscLayout.h"
-#include "Core/Math/FixedPoint.h"
 #include "Core/Overlays.h"
 #include "Core/Text/TextCode.h"
 #include "DiscQueue.h"
@@ -1452,7 +1452,7 @@ int Menu_Framework_DrawColoredInteger(int value, int xy, int color, u_long* befo
     }
 
     do {
-        bcd = Core_Math_SplitDecimalDigit(bcd);
+        bcd = VS::Core::Math::SplitDecimalDigit(bcd);
         buf = ((bcd & 0xF) << 8) | ('0' << 8) | '#';
 
         Render_DrawCompactTextColor((char*)&buf, xy, color, before);
@@ -2938,8 +2938,8 @@ void Menu_Framework_ClearMenuExceptTitle(void) { Menu_Framework_ClearMenuExcept(
 // decomp: MENU5.PRG _buildYawMatrix (src/MENU/MENU5.PRG/4D8.c:1756)
 void Menu_Framework_BuildYawMatrix(MATRIX* camera_matrix, short angle)
 {
-    int sine = Core_Gte_Sin(-angle);
-    int cosine = Core_Gte_Cos(-angle);
+    int sine = VS::Core::Math::Sine(-angle);
+    int cosine = VS::Core::Math::Cosine(-angle);
 
     camera_matrix->m[0][0] = cosine;
     camera_matrix->m[0][1] = 0;
@@ -2955,8 +2955,8 @@ void Menu_Framework_BuildYawMatrix(MATRIX* camera_matrix, short angle)
 // decomp: MENU5.PRG _buildPitchMatrix (src/MENU/MENU5.PRG/4D8.c:1772)
 void Menu_Framework_BuildPitchMatrix(MATRIX* pitch_matrix, short angle)
 {
-    int sine = Core_Gte_Sin(angle);
-    int cosine = Core_Gte_Cos(angle);
+    int sine = VS::Core::Math::Sine(angle);
+    int cosine = VS::Core::Math::Cosine(angle);
 
     pitch_matrix->m[0][0] = 0x1000;
     pitch_matrix->m[0][1] = 0;
@@ -3042,17 +3042,17 @@ void Menu_Framework_RenderAshley(int mode)
             int offsetZ;
             int cameraDistance = Actors_actorRecords[1]->menuCameraDistance;
 
-            setVector(&camera->lookAt, ((-Core_Gte_Sin(0xB00) * yOffset) >> 8) * cameraDistance,
+            setVector(&camera->lookAt, ((-VS::Core::Math::Sine(0xB00) * yOffset) >> 8) * cameraDistance,
                 -(Actors_actorRecords[1]->collisionHeight << 0xB),
-                ((Core_Gte_Cos(0xB00) * yOffset) >> 8) * cameraDistance);
+                ((VS::Core::Math::Cosine(0xB00) * yOffset) >> 8) * cameraDistance);
 
             scaledDistance = cameraDistance * 4;
-            offsetX = Core_Gte_Cos(0xB00) * scaledDistance;
+            offsetX = VS::Core::Math::Cosine(0xB00) * scaledDistance;
 
             camera->position.vx = camera->lookAt.vx + offsetX;
             camera->position.vy = camera->lookAt.vy;
 
-            offsetZ = Core_Gte_Sin(0xB00) * scaledDistance;
+            offsetZ = VS::Core::Math::Sine(0xB00) * scaledDistance;
 
             setVector(&camera->angles, 0, 0, 0);
             camera->farClip = 0x1000;

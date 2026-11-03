@@ -1,11 +1,12 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 extern "C++" {
+#include "Core/Math/InterpolationLive.hpp"
+#include "Core/Math/ScalarMath.hpp"
+#include "Core/Math/VectorLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
 }
 extern "C" {
 #include "Legacy/Psx.h"
-#include "Core/Math/Interpolation.h"
-#include "Core/Math/Vector.h"
 #include "Effects/Curves.h"
 #include "Effects/Package.h"
 #include "Effects/Particles.h"
@@ -86,20 +87,20 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
         scratch->flags = effect->flags;
         actorMatrix = &battle->transforms[effect->transformIndex].world;
         effect = &Effects_package->block5Data->definitions[state->effect];
-        fraction = Core_Math_InterpolateShortPair(
+        fraction = VS::Core::Math::InterpolateLiveShortPair(
             effect->innerExtentRange, Effects_SampleEffectCurve(effect->innerExtentCurve, state->age));
         column = ((u_char*)effect)[7];
         factorBytes = (u_char*)VS_RING_COLORS + (column & 0x1C);
         factors[0] = factorBytes[0];
         factors[1] = factorBytes[1];
         factors[2] = factorBytes[2];
-        Core_Math_InterpolatePairsToWideVector(effect->positionRange,
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->positionRange,
             Effects_SampleEffectCurve(effect->positionCurve, state->age), &scratch->position);
         switch (scratch->flags & 7) {
         case 0:
             break;
         case 1:
-            Core_Math_AddWideAndShortVectors(&scratch->position, Effects_effectOrigin, &scratch->position);
+            VS::Core::Math::AddLiveVectorsTo(&scratch->position, Effects_effectOrigin, &scratch->position);
             break;
         case 2:
             scratch->position.vx += actorMatrix->t[0];
@@ -107,17 +108,17 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
             scratch->position.vz += actorMatrix->t[2];
             break;
         }
-        Core_Math_InterpolatePairsToWideVector(effect->extentRange,
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->extentRange,
             Effects_SampleEffectCurve(effect->extentCurve, state->age), &scratch->extent);
         column = Effects_SampleEffectCurve(effect->forceCurve, state->age);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[2], column, &scratch->forceMin);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[3], column, &scratch->forceMax);
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[2], column, &scratch->forceMin);
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[3], column, &scratch->forceMax);
         column = Effects_SampleEffectCurve(effect->accelerationCurve, state->age);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[4], column, &scratch->accelerationMin);
-        Core_Math_InterpolatePairsToShortVector(effect->vectorRanges[5], column, &scratch->accelerationMax);
-        Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[0],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[4], column, &scratch->accelerationMin);
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[5], column, &scratch->accelerationMax);
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[0],
             Effects_SampleEffectCurve(effect->directionCurve, state->age), &scratch->baseDirection);
-        Core_Math_InterpolatePairsToPlaneVector(effect->pairRanges[2],
+        VS::Core::Math::InterpolateLiveSevenBitPlane(effect->pairRanges[2],
             Effects_SampleEffectCurve(effect->speedCurve, state->age), scratch->speedRange);
         state->radiusSpeed += scratch->accelerationMin.vx;
         radiusValue = state->radius += scratch->forceMin.vx + state->radiusSpeed;
@@ -126,11 +127,11 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
         state->heightSpeed += scratch->accelerationMin.vy;
         state->height += scratch->forceMin.vy + state->heightSpeed;
         radius[2] = state->height + scratch->extent.vy;
-        column = Core_Gte_Sin(scratch->baseDirection.vx);
+        column = VS::Core::Math::Sine(scratch->baseDirection.vx);
         height[2] = (radius[2] * column) >> 12;
         radius[1] = (radius[2] * fraction) >> 12;
         height[1] = (radius[1] * column) >> 12;
-        row = Core_Gte_Cos(scratch->baseDirection.vx);
+        row = VS::Core::Math::Cosine(scratch->baseDirection.vx);
         radius[1] = ((radius[1] * row) >> 12) + radius[0];
         radius[2] = ((radius[2] * row) >> 12) + radius[0];
         do {
@@ -149,7 +150,7 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
         }
         maxSpeed = row + angular_step;
         baseAngle = state->angle = maxSpeed;
-        Core_Math_InterpolatePairsToWideVector(effect->vectorRanges[1],
+        VS::Core::Math::InterpolateLiveSevenBitVector(effect->vectorRanges[1],
             Effects_SampleEffectCurve(effect->directionJitterCurve, state->age), &scratch->directionJitter);
         column = 0;
         do {
@@ -157,8 +158,8 @@ int VS_RING_FUNCTION(Effects_RendererSlot* renderer_slot, u_int lifecycle_comman
             angleA = baseAngleCopy + (scratch->directionJitter.vx * column) / 8;
             angleB = -scratch->directionJitter.vy / 2 + ((angle = scratch->directionJitter.vy) * column) / 8;
             angle = angleA + angleB;
-            cosAngle = Core_Gte_Cos(angle);
-            sinAngle = Core_Gte_Sin(angle);
+            cosAngle = VS::Core::Math::Cosine(angle);
+            sinAngle = VS::Core::Math::Sine(angle);
             for (row = 0; row < 3; ++row) {
                 vertices[row][column].vx =
                     scratch->position.vx + ((radius[row] * cosAngle) >> 12);
