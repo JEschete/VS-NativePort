@@ -2,6 +2,7 @@
 #include "Audio/XaMixLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Movie/IntroPlayerLive.hpp"
+#include "Save/FileMenuLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -160,12 +161,12 @@ int Title_ShowContinueScreen(void)
         case Title_LoadScreenPhase_LoadCardResources:
             if (VS::Save::MemoryCard::StepLiveTitleResources(0) != 0) {
                 Title_SaveFiles_ResetElements();
-                Menu_Files_UpdateLoadMenu(2);
+                VS::Menu::UpdateLiveLoadMenu(2);
                 Title_loadScreenPhase = Title_LoadScreenPhase_RunFileMenu;
             }
             break;
         case Title_LoadScreenPhase_RunFileMenu:
-            exit = Menu_Files_UpdateLoadMenu(0);
+            exit = VS::Menu::UpdateLiveLoadMenu(0);
             if (exit != 0) {
                 VS::Save::MemoryCard::ReleaseLiveTitleResources();
                 SetDispMask(0);
@@ -219,12 +220,12 @@ void Title_ShowClearSaveScreen(void)
         case Title_ClearSaveScreenPhase_Loading:
             if (VS::Save::MemoryCard::StepLiveTitleResources(0) != 0) {
                 Title_SaveFiles_ResetElements();
-                Menu_Files_UpdateSaveMenu(1);
+                VS::Menu::UpdateLiveSaveMenu(1);
                 Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Ready;
             }
             continue;
         case Title_ClearSaveScreenPhase_Ready:
-            val = Menu_Files_UpdateSaveMenu(0);
+            val = VS::Menu::UpdateLiveSaveMenu(0);
             if (val != 0) {
                 if (val < 0) {
                     Title_memoryCardMessage =
@@ -252,7 +253,7 @@ void Title_ShowClearSaveScreen(void)
                     Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Exit;
                     continue;
                 }
-                Menu_Files_UpdateSaveMenu(1);
+                VS::Menu::UpdateLiveSaveMenu(1);
                 Title_clearSaveScreenPhase = Title_ClearSaveScreenPhase_Ready;
             }
             Menu_Files_DrawBackground();

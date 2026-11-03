@@ -114,6 +114,7 @@
     </ClCompile>
     <ClCompile Include="src\EventSessionTests.cpp" />
     <ClCompile Include="src\EventWeaponModeTests.cpp" />
+    <ClCompile Include="src\FileMenuTests.cpp" />
     <ClCompile Include="src\FlightTerrainTests.cpp" />
     <ClCompile Include="src\FogTests.cpp" />
     <ClCompile Include="src\FrameTimingTests.cpp" />
@@ -151,6 +152,7 @@
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\ModelDrawingTests.cpp" />
     <ClCompile Include="src\ModelGeometryTests.cpp" />
+    <ClCompile Include="src\MotionRequestCoreTests.cpp" />
     <ClCompile Include="src\MotionRequestsTests.cpp" />
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
     <ClCompile Include="src\MovementCommandTests.cpp" />

@@ -2,6 +2,7 @@
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
 #include "Render/SpritesLive.hpp"
+#include "Save/FileMenuLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -2050,7 +2051,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         break;
     case Menu_Files_GameOverState_DisplayFileMenu:
         if (VS::Save::MemoryCard::StepLiveMenuResources(0) != 0) {
-            Menu_Files_UpdateDataLoadMenu(2);
+            VS::Menu::UpdateLiveDataLoadMenu(2);
             *state = Menu_Files_GameOverState_SelectFile;
             Menu_Files_DrawBackground();
             Menu_Files_DrawFrame(Render_frameBuf);
@@ -2058,7 +2059,7 @@ int Menu_Files_UpdateGameOver(u_char* state)
         break;
     case Menu_Files_GameOverState_SelectFile:
         SetDispMask(1);
-        option = Menu_Files_UpdateDataLoadMenu(0);
+        option = VS::Menu::UpdateLiveDataLoadMenu(0);
         if (option != 0) {
             VS::Save::MemoryCard::ReleaseLiveMenuResources();
             SetDispMask(0);
@@ -2424,13 +2425,13 @@ int Menu_Files_UpdateDataMenu(u_char* state)
 
     case Menu_Files_DataMenuState_InitSaveMenu:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            Menu_Files_UpdateDataSaveMenu(1);
+            VS::Menu::UpdateLiveDataSaveMenu(1);
             *state = Menu_Files_DataMenuState_ShowSaveMenu;
         }
         break;
 
     case Menu_Files_DataMenuState_ShowSaveMenu:
-        if (Menu_Files_UpdateDataSaveMenu(0) != 0) {
+        if (VS::Menu::UpdateLiveDataSaveMenu(0) != 0) {
             *state = 5;
         }
         Menu_Files_DrawFrame(Render_frameBuf);
@@ -2438,13 +2439,13 @@ int Menu_Files_UpdateDataMenu(u_char* state)
 
     case Menu_Files_DataMenuState_InitLoadMenu:
         if (Menu_Framework_AreMenuRowsIdle() != 0) {
-            Menu_Files_UpdateDataLoadMenu(1);
+            VS::Menu::UpdateLiveDataLoadMenu(1);
             *state = Menu_Files_DataMenuState_HandleInput;
         }
         break;
 
     case Menu_Files_DataMenuState_HandleInput:
-        row = Menu_Files_UpdateDataLoadMenu(0);
+        row = VS::Menu::UpdateLiveDataLoadMenu(0);
         if (row != 0) {
             if (row < 0) {
                 *state = 5;

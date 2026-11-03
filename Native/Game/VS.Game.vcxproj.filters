@@ -213,9 +213,9 @@
     <ClCompile Include="src\Actors\MotionRequests.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\MotionRequests.h">
+    <ClCompile Include="src\Actors\MotionRequestsLive.cpp">
       <Filter>src\Actors</Filter>
-    </ClInclude>
+    </ClCompile>
     <ClCompile Include="src\Actors\Movement.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
@@ -2082,6 +2082,12 @@
     <ClInclude Include="src\Menu\TextBox.h">
       <Filter>src\Menu</Filter>
     </ClInclude>
+    <ClCompile Include="src\Save\FileMenu.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Save\FileMenuLive.cpp">
+      <Filter>src\Save</Filter>
+    </ClCompile>
     <ClCompile Include="src\Save\MenuAssets.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
@@ -2098,9 +2104,6 @@
       <Filter>src\Save</Filter>
     </ClCompile>
     <ClCompile Include="src\Save\NativeFiles.cpp">
-      <Filter>src\Save</Filter>
-    </ClCompile>
-    <ClCompile Include="src\Save\NativeMenu.cpp">
       <Filter>src\Save</Filter>
     </ClCompile>
     <ClCompile Include="src\Save\NativeResume.cpp">
@@ -2221,6 +2224,12 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\ModelDrawingLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\MotionRequests.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\MotionRequestsLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\MovementCommand.hpp">
@@ -2435,6 +2444,12 @@
     </ClInclude>
     <ClInclude Include="include\Menu\Sounds.hpp">
       <Filter>include\Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\FileMenu.hpp">
+      <Filter>include\Save</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Save\FileMenuLive.hpp">
+      <Filter>include\Save</Filter>
     </ClInclude>
     <ClInclude Include="include\Save\MenuAssets.hpp">
       <Filter>include\Save</Filter>

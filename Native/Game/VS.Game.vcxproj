@@ -99,7 +99,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Actors\MotionRequests.cpp">
+    <ClCompile Include="src\Actors\MotionRequests.cpp" />
+    <ClCompile Include="src\Actors\MotionRequestsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Actors\Movement.cpp">
@@ -1891,6 +1892,10 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <ClCompile Include="src\Save\FileMenu.cpp" />
+    <ClCompile Include="src\Save\FileMenuLive.cpp">
+      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
     <ClCompile Include="src\Save\MenuAssets.cpp" />
     <ClCompile Include="src\Save\MenuAssetsLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -1903,9 +1908,6 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Save\NativeFiles.cpp">
-      <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <ClCompile Include="src\Save\NativeMenu.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Save\NativeResume.cpp">
@@ -2039,7 +2041,6 @@
     <ClInclude Include="src\Actors\ModelDraw.h" />
     <ClInclude Include="src\Actors\ModelInstance.h" />
     <ClInclude Include="src\Actors\ModelRendering.h" />
-    <ClInclude Include="src\Actors\MotionRequests.h" />
     <ClInclude Include="src\Actors\Movement.h" />
     <ClInclude Include="src\Actors\Palette.h" />
     <ClInclude Include="src\Actors\RoomActorCache.h" />
@@ -2373,6 +2374,8 @@
     <ClInclude Include="include\Actors\AppearanceTransitionLive.hpp" />
     <ClInclude Include="include\Actors\ModelDrawing.hpp" />
     <ClInclude Include="include\Actors\ModelDrawingLive.hpp" />
+    <ClInclude Include="include\Actors\MotionRequests.hpp" />
+    <ClInclude Include="include\Actors\MotionRequestsLive.hpp" />
     <ClInclude Include="include\Actors\MovementCommand.hpp" />
     <ClInclude Include="include\Actors\SequencePlayback.hpp" />
     <ClInclude Include="include\Actors\SequencePlaybackLive.hpp" />
@@ -2444,6 +2447,8 @@
     <ClInclude Include="include\Items\Loadout.h" />
     <ClInclude Include="include\Menu\Framework\ActionSelection.h" />
     <ClInclude Include="include\Menu\Sounds.hpp" />
+    <ClInclude Include="include\Save\FileMenu.hpp" />
+    <ClInclude Include="include\Save\FileMenuLive.hpp" />
     <ClInclude Include="include\Save\MenuAssets.hpp" />
     <ClInclude Include="include\Save\MenuAssetsLive.hpp" />
     <ClInclude Include="include\Save\NativeContainer.hpp" />

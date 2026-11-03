@@ -19,7 +19,6 @@ extern "C" {
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
-#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/RoomState.h"
 #include "Actors/Shadow.h"
@@ -1233,7 +1232,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AC500u, 0u, (void*)&Actors_ClearActorBonePoseLocks, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC540u, 0u, (void*)&Actors_UpdateActorRoute, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AC690u, 0u, (void*)&Actors_UpdateActorJumpAndFall, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800ACF54u, 0u, (void*)&Actors_SaveActorGroundedTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800ACFA0u, 0u, (void*)&Actors_DecodeInitialPoseVector, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AD008u, 0u, (void*)&Actors_InitializeActorAnimationPose, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AD494u, 0u, (void*)&Actors_FindActorAnimationHeader, 0u, 0u, 0u},
@@ -1262,17 +1260,6 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800B1A68u, 0u, (void*)&Actors_DrawGimmickModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B217Cu, 0u, (void*)&Actors_DrawActorWeaponModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B26B8u, 0u, (void*)&Actors_ApplyLockedBoneTransform, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B63ACu, 0u, (void*)&Actors_BeginTileJump, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6404u, 0u, (void*)&Actors_BeginAirborneTileJump, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6438u, 0u, (void*)&Actors_BeginNavigationJump, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6500u, 0u, (void*)&Actors_QueueGroundOffset, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6530u, 0u, (void*)&Actors_QueueMovementVector, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B653Cu, 0u, (void*)&Actors_QueueFlightMovement, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6580u, 0u, (void*)&Actors_BeginTeleport, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B65E8u, 0u, (void*)&Actors_BeginTileTravel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B65F4u, 0u, (void*)&Actors_BeginTimedTravel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B6634u, 0u, (void*)&Actors_TurnNavigationActor, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B668Cu, 0u, (void*)&Actors_TurnActorAtSpeed, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66A8u, 0u, (void*)&Event_ScriptReportInvalidOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66E4u, 0u, (void*)&Event_ScriptNoOperation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66ECu, 0u, (void*)&Event_ScriptYieldFrame, 0u, 0u, 0u},

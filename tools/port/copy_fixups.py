@@ -25,6 +25,32 @@ NATIVE_SIGNATURE_REWRITES = {
 # FSoundChannel.effectId carries either a built-in ID or a native program pointer.
 NATIVE_POINTER_FIELDS = {"T00278.012"}
 
+# F00989, F01024, F01026, F04178, F04179, F04181-F04187 #46 typed promotion: generated callers of the
+# VS::Actors motion requests use these legacy-signature bindings.
+_MOTION_REQUEST_LIVE = {
+    "SaveActorGroundedTransform": "SaveLiveActorGroundedTransform",
+    "BeginTileJump": "BeginLiveTileJump",
+    "BeginAirborneTileJump": "BeginLiveAirborneTileJump",
+    "BeginNavigationJump": "BeginLiveNavigationJump",
+    "BeginTeleport": "BeginLiveTeleport",
+    "BeginTileTravel": "BeginLiveTileTravel",
+    "BeginTimedTravel": "BeginLiveTimedTravel",
+    "QueueGroundOffset": "QueueLiveGroundOffset",
+    "QueueMovementVector": "QueueLiveMovementVector",
+    "QueueFlightMovement": "QueueLiveFlightMovement",
+    "TurnNavigationActor": "TurnLiveNavigationActor",
+    "TurnActorAtSpeed": "TurnLiveActorAtSpeed",
+}
+
+# F02764, F02767, F03628, F03634 #46 typed promotion: generated MENU7 and TITLE callers of the
+# VS::Menu file pickers use these one-frame bindings over the menu globals and controller.
+_FILE_MENU_LIVE = {
+    "UpdateDataSaveMenu": "UpdateLiveDataSaveMenu",
+    "UpdateDataLoadMenu": "UpdateLiveDataLoadMenu",
+    "UpdateLoadMenu": "UpdateLiveLoadMenu",
+    "UpdateSaveMenu": "UpdateLiveSaveMenu",
+}
+
 NATIVE_HELPER_HEADERS = {
     "VS::Battle::Ai::CurrentTerrain": r"Native\Game\src\Battle\Ai\CurrentTerrain.hpp",
     "VS::Battle::Ai::BattleRoomAiRuntime": r"Native\Game\include\Battle\Ai\RoomAiMap.hpp",
@@ -152,7 +178,10 @@ NATIVE_HELPER_HEADERS = {
        )},
     "Battle_Ai_ActorNavigationOverrideStatus":
         r"Native\Game\src\Battle\Ai\NavigationPrimitives.h",
-    "Actors_SaveActorGroundedTransform": r"Native\Game\src\Actors\MotionRequests.h",
+    **{f"VS::Actors::{name}": r"Native\Game\include\Actors\MotionRequestsLive.hpp"
+       for name in _MOTION_REQUEST_LIVE.values()},
+    **{f"VS::Menu::{name}": r"Native\Game\include\Save\FileMenuLive.hpp"
+       for name in _FILE_MENU_LIVE.values()},
     "Save_NativeInitialTitleSelection": r"Native\Game\include\Save\NativeMenu.h",
     "Save_NativeDrawFileOverlay": r"Native\Game\include\Save\NativeMenu.h",
     **{name: r"Native\Game\include\Save\NativeResume.h"
@@ -2055,8 +2084,8 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "22C.c:1784 Continue shares native cards without installing memory-card save headers"),
     ],
     "F00988": [
-        ("Actors_SaveActorGroundedTransform((Field_GimmickInstance*)actor)",
-         "Actors_SaveActorGroundedTransform(actor)",
+        ("VS::Actors::SaveActorGroundedTransform((Field_GimmickInstance*)actor)",
+         "VS::Actors::SaveActorGroundedTransform(actor)",
          "40564.c:2519 landing snapshots use the typed actor history API rather than a gimmick view"),
     ],
     "F00901": [
@@ -2166,7 +2195,7 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            *(int*)&actor->savedPlacement = *(int*)&actor->instance.currentTileX;\n"
          "        }\n"
          "        actor->instance.previousFacing = actor->instance.facing;",
-         "        Actors_SaveActorGroundedTransform(actor);",
+         "        VS::Actors::SaveActorGroundedTransform(actor);",
          "44F14.c:1565-1571 reuse the same native grounded history contract under the original motion-state guard"),
     ],
     "G00497": [("u_long Menu_textBoxOrderingTables", "u_long Menu_textBoxOrderingTables[102]",
@@ -2867,6 +2896,47 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
     (r"", r"\bVS::Actors::(SetDirectMovement|QueueNavigationTileTarget)\(",
      r"VS::Actors::\1(VS::Actors::ActorRecordMovementRequests(), ",
      "F04180/F01025 #46 typed promotion: movement commands are written through the actor table adapter"),
+    *(
+        (r"", rf"\bVS::Actors::{core}\(", rf"VS::Actors::{_MOTION_REQUEST_LIVE[core]}(",
+         f"{fid} #46 typed promotion: {why}")
+        for fid, core, why in (
+            ("F00989", "SaveActorGroundedTransform",
+             "the actor binding stores the typed grounded history in the actor record"),
+            ("F04178", "BeginTileJump",
+             "the actor binding copies the packed tile target before the plain jump starts"),
+            ("F04179", "BeginAirborneTileJump",
+             "the actor binding copies the packed tile target before the airborne jump starts"),
+            ("F01024", "BeginNavigationJump",
+             "the actor binding copies the packed tile target before the navigation jump starts"),
+            ("F04184", "BeginTeleport",
+             "the actor binding resolves each companion through the bounded actor table"),
+            ("F04185", "BeginTileTravel",
+             "the actor binding copies the eight-byte travel route before the tile pose is set"),
+            ("F04186", "BeginTimedTravel",
+             "the actor binding copies the eight-byte travel route before the timed pose is set"),
+            ("F04181", "QueueGroundOffset",
+             "the actor binding reads the step as a typed vector and refuses a missing one"),
+            ("F04182", "QueueMovementVector",
+             "the actor binding reads the step as a typed vector and refuses a missing one"),
+            ("F04183", "QueueFlightMovement",
+             "the actor binding reads the step as a typed vector and refuses a missing one"),
+            ("F01026", "TurnNavigationActor",
+             "the actor binding picks the turn rate from the actor's collision radius"),
+            ("F04187", "TurnActorAtSpeed",
+             "the actor binding refuses a zero angular speed before the turn consumer divides by it"),
+        )
+    ),
+    *(
+        (r"", rf"\bVS::Menu::{core}\(", rf"VS::Menu::{_FILE_MENU_LIVE[core]}(",
+         f"{fid} #46 typed promotion: the picker binding runs one frame over the menu globals, controller and "
+         f"native save files and keeps the original tri-state result")
+        for fid, core in (
+            ("F02764", "UpdateDataSaveMenu"),
+            ("F02767", "UpdateDataLoadMenu"),
+            ("F03628", "UpdateLoadMenu"),
+            ("F03634", "UpdateSaveMenu"),
+        )
+    ),
     (r"^Battle::", r"\bVS::Battle::Ai::CaptureActorConditionTable\((\w+)\);",
      r"VS::Battle::Ai::CaptureBattleActorConditions("
      r"std::span<Battle_Ai_ActionTiming, VS::Battle::Ai::kBattleActorSlotCount>("

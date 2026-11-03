@@ -6,7 +6,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/MotionRequests.h"
+#include "Actors/MotionRequestsLive.hpp"
 
 extern "C" {
 #include "Actors/ActorRecord.h"
@@ -63,7 +63,7 @@ TEST_CASE("Ground offset requests preserve vectors, flags and unrelated fields",
   fixture.actor.instance.motionLocked = 1;
   const auto original = request;
   SVECTOR step{-120, 31, 124, 0x4567};
-  Actors_QueueGroundOffset(2, &step);
+  VS::Actors::QueueLiveGroundOffset(2, &step);
   std::uint32_t mode_bytes;
   std::memcpy(&mode_bytes, &request, sizeof(mode_bytes));
   CHECK(mode_bytes == 2);
@@ -84,9 +84,9 @@ TEST_CASE("Flight and vector requests retain packed facing and complete step",
   fixture.actor.turnState.direction = 19;
   SVECTOR step{-8, -16, 127, -1};
   if (flight) {
-    Actors_QueueFlightMovement(2, &step, -10, 0x10003);
+    VS::Actors::QueueLiveFlightMovement(2, &step, -10, 0x10003);
   } else {
-    Actors_QueueMovementVector(2, &step, 0x10003);
+    VS::Actors::QueueLiveMovementVector(2, &step, 0x10003);
   }
   CHECK(fixture.actor.turnState.mode == (flight ? 3 : 4));
   CHECK(fixture.actor.turnState.facing == 3);
@@ -101,7 +101,8 @@ TEST_CASE("Queued movement accepts input aliased with native request storage",
           "[actors][motion-request]") {
   MotionFixture fixture;
   fixture.actor.turnState.step = {-16, 17, -18, 19};
-  Actors_QueueFlightMovement(2, &fixture.actor.turnState.step, 77, -200);
+  VS::Actors::QueueLiveFlightMovement(2, &fixture.actor.turnState.step, 77,
+                                      -200);
   CHECK(fixture.actor.turnState.step.vx == -16);
   CHECK(fixture.actor.turnState.step.vy == 17);
   CHECK(fixture.actor.turnState.step.vz == -18);
@@ -114,7 +115,7 @@ TEST_CASE("Navigation turns use the original radius threshold and shortest yaw",
   const unsigned radius = GENERATE(0u, 127u, 128u, 65535u);
   MotionFixture fixture;
   fixture.actor.collisionRadius = static_cast<std::uint16_t>(radius);
-  Actors_TurnNavigationActor(2, 0x100);
+  VS::Actors::TurnLiveNavigationActor(2, 0x100);
   CHECK(fixture.actor.instance.facingDelta == 512);
   CHECK(fixture.actor.instance.turnFrames == (radius < 128 ? 4 : 16));
   CHECK(fixture.actor.turnRate == 17);
@@ -125,7 +126,7 @@ TEST_CASE("Speed turns use the existing angular-speed consumer and animation",
           "[actors][motion-request]") {
   const int speed = GENERATE(128, -128, 200);
   MotionFixture fixture;
-  Actors_TurnActorAtSpeed(2, 0x100, speed);
+  VS::Actors::TurnLiveActorAtSpeed(2, 0x100, speed);
   CHECK(fixture.actor.instance.facingDelta == 512);
   CHECK(fixture.actor.instance.turnFrames == (speed == 200 ? 3 : 4));
   CHECK(fixture.actor.turnRate == 17);
@@ -148,7 +149,7 @@ TEST_CASE(
   std::array<int, 2> target{0x4321FFFE, 0x7ABCDEFF};
   const auto original = target;
 
-  Actors_BeginTeleport(2, target.data(), 0x18001);
+  VS::Actors::BeginLiveTeleport(2, target.data(), 0x18001);
 
   const std::array<int, 8> expected{-2, 0x4321, 0, -32767, 1, 0, 0, 0};
   CHECK(TransitionState(actor) == (reaction == 0 ? expected : before));
@@ -172,7 +173,7 @@ TEST_CASE("Teleport companion propagation respects busy state and cyclic links",
   const auto before = TransitionState(fixture.linked);
   std::array<int, 2> target{0x0009002B, 0x77777777};
 
-  Actors_BeginTeleport(2, target.data(), -1);
+  VS::Actors::BeginLiveTeleport(2, target.data(), -1);
 
   const std::array<int, 8> expected{43, 9, 0, -1, 1, 0, 0, 0};
   CHECK(TransitionState(fixture.actor) == expected);
@@ -189,7 +190,7 @@ TEST_CASE("A busy teleport parent never starts its idle companion",
   const auto parent = TransitionState(fixture.actor);
   const auto linked = TransitionState(fixture.linked);
   std::array<int, 2> target{0x0009002B, 0};
-  Actors_BeginTeleport(2, target.data(), -1);
+  VS::Actors::BeginLiveTeleport(2, target.data(), -1);
   CHECK(TransitionState(fixture.actor) == parent);
   CHECK(TransitionState(fixture.linked) == linked);
 }
@@ -213,9 +214,9 @@ TEST_CASE(
   const auto original = target;
 
   if (timed) {
-    Actors_BeginTimedTravel(2, target.data(), 0x1ABCD);
+    VS::Actors::BeginLiveTimedTravel(2, target.data(), 0x1ABCD);
   } else {
-    Actors_BeginTileTravel(2, target.data(), 0x1ABCD);
+    VS::Actors::BeginLiveTileTravel(2, target.data(), 0x1ABCD);
   }
 
   const std::array<int, 8> expected{
@@ -233,9 +234,9 @@ TEST_CASE("Travel captures aliased target storage before replacing facing",
   fixture.actor.routeTarget = {-120, 121, -122, 123};
   auto* target = reinterpret_cast<int*>(&fixture.actor.routeTarget);
   if (timed) {
-    Actors_BeginTimedTravel(2, target, 0x1FFFF);
+    VS::Actors::BeginLiveTimedTravel(2, target, 0x1FFFF);
   } else {
-    Actors_BeginTileTravel(2, target, 0x1FFFF);
+    VS::Actors::BeginLiveTileTravel(2, target, 0x1FFFF);
   }
   const std::array<int, 8> expected{-120, 121,           -122, -1,
                                     0,    timed ? 4 : 1, 0,    0};
@@ -246,8 +247,8 @@ TEST_CASE("Teleport captures an aliased tile before clearing its route tail",
           "[actors][motion-request][transition-request]") {
   MotionFixture fixture;
   fixture.actor.routeTarget = {-120, 121, -122, 123};
-  Actors_BeginTeleport(2, reinterpret_cast<int*>(&fixture.actor.routeTarget),
-                       0x1FFFF);
+  VS::Actors::BeginLiveTeleport(
+      2, reinterpret_cast<int*>(&fixture.actor.routeTarget), 0x1FFFF);
   const std::array<int, 8> expected{-120, 121, 0, -1, 1, 0, 0, 0};
   CHECK(TransitionState(fixture.actor) == expected);
 }

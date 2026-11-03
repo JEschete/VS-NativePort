@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/MotionRequestsLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Actors/Lifecycle.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -686,7 +686,7 @@ void Actors_PlaceActorInRoom(int actorId, Field_ActorPlacement* placement, int h
             Actors_PlayActorAnimation(actorId, 1, 0, 0);
         }
     }
-    ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(actor);
+    VS::Actors::SaveLiveActorGroundedTransform(actor);
     actor->instance.currentAnimation = 0;
     value = placement->height;
     actor->instance.facingDelta = 0;

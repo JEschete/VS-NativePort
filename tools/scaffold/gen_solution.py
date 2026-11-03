@@ -187,7 +187,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Battle\Ai\EngagementLive.cpp",
                 r"src\Battle\Ai\ActorCleanup.cpp",
                 r"src\Battle\Ai\MovementBehavior.cpp",
-                r"src\Actors\MotionRequests.cpp",
+                r"src\Actors\MotionRequestsLive.cpp",
                 r"src\Actors\AnimationBindings.cpp",
                 r"src\Ending\Credits\EmbeddedArt.cpp",
                 r"src\Actors\SoundTransitionBinding.cpp",
@@ -209,7 +209,7 @@ def needs_c_headers(project: str, path: str) -> bool:
                 r"src\Save\RuntimeSnapshot.cpp",
                 r"src\Save\NativeFiles.cpp",
                 r"src\Save\NativeResume.cpp",
-                r"src\Save\NativeMenu.cpp",
+                r"src\Save\FileMenuLive.cpp",
                 r"src\Save\NativeFilePresentation.cpp",
             ))
 

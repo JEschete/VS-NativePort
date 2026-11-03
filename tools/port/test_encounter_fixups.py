@@ -1378,20 +1378,26 @@ class EncounterFixupTests(unittest.TestCase):
     def test_relocation_entries_own_complete_existing_motion_requests(self):
         owned = self.owned_items()
         names = {
-            "F04184": "Actors_BeginTeleport",
-            "F04185": "Actors_BeginTileTravel",
-            "F04186": "Actors_BeginTimedTravel",
+            "F04184": ("Actors_BeginTeleport", "BeginTeleport", "BeginLiveTeleport"),
+            "F04185": ("Actors_BeginTileTravel", "BeginTileTravel", "BeginLiveTileTravel"),
+            "F04186": ("Actors_BeginTimedTravel", "BeginTimedTravel", "BeginLiveTimedTravel"),
         }
         root = Path(__file__).resolve().parents[2]
         source = (root / r"Native\Game\src\Actors\Movement.cpp").read_text(
             encoding="utf-8"
         )
-        for identifier, name in names.items():
-            self.assertEqual(owned[identifier]["name"], name)
+        for identifier, (c_name, core, live) in names.items():
+            self.assertEqual(owned[identifier]["name"], f"VS::Actors::{core}")
             self.assertEqual(
                 owned[identifier]["path"], r"Native\Game\src\Actors\MotionRequests.cpp"
             )
-            self.assertNotIn(f"void {name}(", source)
+            self.assertNotIn(f"void {c_name}(", source)
+            self.assertNotIn(c_name, source)
+            self.assertIn(f"VS::Actors::{live}(", source)
+            self.assertEqual(
+                copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Actors::{live}"],
+                r"Native\Game\include\Actors\MotionRequestsLive.hpp",
+            )
 
     def test_actor_sound_transition_owns_both_catalog_occurrences_and_callers(self):
         owned = self.owned_items()
@@ -1727,18 +1733,23 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
             owned = {row["id"]: row for row in csv.DictReader(stream)}
         self.assertEqual(
             owned["F00989"]["header"],
-            r"Native\Game\src\Actors\MotionRequests.h",
+            r"Native\Game\include\Actors\MotionRequests.hpp",
         )
         landing = copy_fixups.FIXES["F00988"][0]
         self.assertIn("Field_GimmickInstance", landing[0])
-        self.assertEqual(landing[1], "Actors_SaveActorGroundedTransform(actor)")
+        self.assertEqual(landing[1], "VS::Actors::SaveActorGroundedTransform(actor)")
         motion = copy_fixups.FIXES["F04130"][0]
         self.assertIn("instance.previousTileX", motion[0])
         self.assertIn("actor->savedPlacement", motion[0])
-        self.assertEqual(motion[1], "        Actors_SaveActorGroundedTransform(actor);")
+        self.assertEqual(motion[1], "        VS::Actors::SaveActorGroundedTransform(actor);")
+        live = landing[1]
+        for row_rx, pattern, replacement, _reason in copy_fixups.REGEX_FIXES:
+            if row_rx == "":
+                live = re.sub(pattern, replacement, live)
+        self.assertEqual(live, "VS::Actors::SaveLiveActorGroundedTransform(actor)")
         self.assertEqual(
-            copy_fixups.NATIVE_HELPER_HEADERS["Actors_SaveActorGroundedTransform"],
-            owned["F00989"]["header"],
+            copy_fixups.NATIVE_HELPER_HEADERS["VS::Actors::SaveLiveActorGroundedTransform"],
+            r"Native\Game\include\Actors\MotionRequestsLive.hpp",
         )
 
     def test_native_file_cards_draw_after_footer_and_before_fade(self):
@@ -1755,6 +1766,31 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
             copy_fixups.NATIVE_HELPER_HEADERS["Save_NativeDrawFileOverlay"],
             r"Native\Game\include\Save\NativeMenu.h",
         )
+
+    def test_file_pickers_promote_to_typed_core_with_live_callers(self):
+        owned = self.owned_items()
+        root = Path(__file__).resolve().parents[2]
+        sources = {
+            path: (root / path).read_text(encoding="utf-8")
+            for path in (r"Native\Game\src\Menu\Files.cpp", r"Native\Game\src\Title\TitleMenu.cpp")
+        }
+        for identifier, core, live, path in (
+            ("F02764", "UpdateDataSaveMenu", "UpdateLiveDataSaveMenu", r"Native\Game\src\Menu\Files.cpp"),
+            ("F02767", "UpdateDataLoadMenu", "UpdateLiveDataLoadMenu", r"Native\Game\src\Menu\Files.cpp"),
+            ("F03628", "UpdateLoadMenu", "UpdateLiveLoadMenu", r"Native\Game\src\Title\TitleMenu.cpp"),
+            ("F03634", "UpdateSaveMenu", "UpdateLiveSaveMenu", r"Native\Game\src\Title\TitleMenu.cpp"),
+        ):
+            with self.subTest(identifier=identifier):
+                self.assertEqual(owned[identifier]["name"], f"VS::Menu::Files::{core}")
+                self.assertEqual(owned[identifier]["path"], r"Native\Game\src\Save\FileMenu.cpp")
+                self.assertEqual(owned[identifier]["header"], r"Native\Game\include\Save\FileMenu.hpp")
+                self.assertEqual(
+                    copy_fixups.NATIVE_HELPER_HEADERS[f"VS::Menu::{live}"],
+                    r"Native\Game\include\Save\FileMenuLive.hpp",
+                )
+                self.assertIn(f"VS::Menu::{live}(", sources[path])
+                self.assertNotIn(f"Menu_Files_{core}", sources[path])
+                self.assertNotIn(f"VS::Menu::Files::{core}(", sources[path])
 
     def test_trigger_marker_import_owns_the_complete_geometry_definition(self):
         blob = next(

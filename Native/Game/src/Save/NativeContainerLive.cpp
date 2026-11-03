@@ -6,6 +6,8 @@
 
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Menu/Sounds.hpp"
+#include "Save/FileMenu.hpp"
+#include "Save/FileMenuLive.hpp"
 #include "Save/MenuAssetsLive.hpp"
 #include "Save/NativeContainer.hpp"
 
@@ -163,10 +165,10 @@ class LiveContainerSave final : public ContainerSaveHost {
     Menu_Files_CopySelectedContainerItems(Save_NativeContainerData(),
                                           &storage.container.items,
                                           &storage.container.indices);
-    Menu_Files_UpdateDataSaveMenu(2);
+    UpdateLiveDataSaveMenu(kContainerSaveInit);
   }
 
-  int PollWrite() override { return Menu_Files_UpdateDataSaveMenu(0); }
+  int PollWrite() override { return UpdateLiveDataSaveMenu(0); }
 
   bool DataNotSaved() override { return Menu_Files_dataNotSaved != 0; }
 

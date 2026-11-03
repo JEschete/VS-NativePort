@@ -168,6 +168,9 @@
     <ClCompile Include="src\EventWeaponModeTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\FileMenuTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\FlightTerrainTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -241,6 +244,9 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\ModelGeometryTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
+    <ClCompile Include="src\MotionRequestCoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\MotionRequestsTests.cpp">

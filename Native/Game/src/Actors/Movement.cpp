@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/MotionRequestsLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/PlatformPlacementLive.hpp"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/Animation.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -324,7 +324,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 break;
             case 13:
                 Actors_ConsumeActorMovementOffset(actor, &step);
-                Actors_QueueGroundOffset(actorId, &step);
+                VS::Actors::QueueLiveGroundOffset(actorId, &step);
                 actorFlags = Actors_ActorStateFlags(actorId);
                 state = ((actor->commandArg0 | actor->commandArg1.word | (actorFlags & 0x4000)) != 0) << 6;
                 break;
@@ -385,14 +385,14 @@ int Actors_ExecuteQueuedActorCommands(void)
             break;
         case 3:
             Actors_SetActorHeadTracking(actorId, -4, NULL, 0);
-            Actors_TurnNavigationActor(actorId, ((short*)&actor->commandArg0)[0]);
+            VS::Actors::TurnLiveNavigationActor(actorId, ((short*)&actor->commandArg0)[0]);
             state = 0;
             break;
         case 4:
             step.vx = 0;
             step.vy = ((short*)&actor->commandArg0)[0];
             Actors_SetActorHeadTracking(actorId, -3, &step, -1);
-            Actors_TurnActorAtSpeed(actorId, ((short*)&actor->commandArg0)[0], ((short*)&actor->commandArg0)[1]);
+            VS::Actors::TurnLiveActorAtSpeed(actorId, ((short*)&actor->commandArg0)[0], ((short*)&actor->commandArg0)[1]);
             state = 0;
             break;
         case 15:
@@ -452,20 +452,20 @@ int Actors_ExecuteQueuedActorCommands(void)
             switch (actor->commandOpcode) {
             case 11:
             case 12:
-                Actors_BeginTileJump(actorId, &actor->commandArg0, actor->commandArg1.word, angle);
+                VS::Actors::BeginLiveTileJump(actorId, &actor->commandArg0, actor->commandArg1.word, angle);
                 break;
             case 18:
-                Actors_BeginNavigationJump(actorId, &actor->commandArg0, actor->commandArg1.word, angle);
+                VS::Actors::BeginLiveNavigationJump(actorId, &actor->commandArg0, actor->commandArg1.word, angle);
                 break;
             case 14:
-                Actors_BeginAirborneTileJump(actorId, &actor->commandArg0, actor->commandArg1.word, angle);
+                VS::Actors::BeginLiveAirborneTileJump(actorId, &actor->commandArg0, actor->commandArg1.word, angle);
                 break;
             }
             state = 0x40;
             break;
         case 13:
             Actors_ConsumeActorMovementOffset(actor, &step);
-            Actors_QueueGroundOffset(actorId, &step);
+            VS::Actors::QueueLiveGroundOffset(actorId, &step);
             actorFlags = Actors_ActorStateFlags(actorId);
             state = ((actor->commandArg0 | actor->commandArg1.word | (actorFlags & 0x4000)) != 0) << 6;
             break;
@@ -478,7 +478,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = Core_Gte_Atan2((target.packedTile.target.tileX - ((u_char*)&actor->commandArg0)[0]) * ONE,
                     (target.packedTile.target.tileZ - ((u_char*)&actor->commandArg0)[2]) * ONE) + 0x800;
             }
-            Actors_BeginTeleport(actorId, &actor->commandArg0, angle);
+            VS::Actors::BeginLiveTeleport(actorId, &actor->commandArg0, angle);
             state = 0x40;
             break;
         case 16:
@@ -496,7 +496,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
-            Actors_QueueFlightMovement(actorId, &step, movementSpeed, angle);
+            VS::Actors::QueueLiveFlightMovement(actorId, &step, movementSpeed, angle);
             state = 0;
             break;
         case 17:
@@ -514,7 +514,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
-            Actors_QueueFlightMovement(actorId, &step, movementSpeed, angle);
+            VS::Actors::QueueLiveFlightMovement(actorId, &step, movementSpeed, angle);
             state = 0;
             break;
         case 19:
@@ -528,7 +528,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
-            Actors_QueueMovementVector(actorId, &step, angle);
+            VS::Actors::QueueLiveMovementVector(actorId, &step, angle);
             state = 0;
             break;
         case 6:
@@ -558,7 +558,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
-            Actors_BeginTimedTravel(actorId, &actor->commandArg0, angle);
+            VS::Actors::BeginLiveTimedTravel(actorId, &actor->commandArg0, angle);
             state = 0x40;
             break;
         case 21:
@@ -572,7 +572,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 angle = Core_Gte_Atan2(target.position.vx - position.position.vx,
                     target.position.vz - position.position.vz) + 0x800;
             }
-            Actors_BeginTileTravel(actorId, &actor->commandArg0, angle);
+            VS::Actors::BeginLiveTileTravel(actorId, &actor->commandArg0, angle);
             state = 0x40;
             break;
         case 20:
@@ -584,7 +584,7 @@ int Actors_ExecuteQueuedActorCommands(void)
                 step.vx = 0;
                 step.vy = 0;
                 step.vz = 0;
-                Actors_QueueGroundOffset(actorId, &step);
+                VS::Actors::QueueLiveGroundOffset(actorId, &step);
             }
             state = 0;
             break;
@@ -1042,7 +1042,7 @@ void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* actor)
         // fallthrough
 
     case 4:
-        ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(actor);
+        VS::Actors::SaveLiveActorGroundedTransform(actor);
         Battle_Ai_ReleaseAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
         // fallthrough
 
@@ -1105,7 +1105,7 @@ void Actors_UpdateActorTravelTransition(Actors_ActorRecord* actor)
         if (actor->instance.currentAnimation == 0 && actor->pose.reachedEnd) {
         land:
             actor->instance.motionLocked = 0;
-            ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(actor);
+            VS::Actors::SaveLiveActorGroundedTransform(actor);
             Battle_Ai_ReleaseAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
             Actors_PlayActorAnimation(actor->instance.slot, 1, 0, 8);
             actor->instance.poseState = 0;
@@ -1492,7 +1492,7 @@ int Actors_MoveActorWithCollision(int index, int direction, int distance, SVECTO
     }
     if (actor->instance.locomotionState == 2) {
         if (actor->instance.supportLayer) {
-            ((void (*)(Actors_ActorRecord*))Actors_SaveActorGroundedTransform)(actor);
+            VS::Actors::SaveLiveActorGroundedTransform(actor);
             if ((*(u_char (*)[])&Field_areMovingPlatformsPaused)[actor->instance.supportLayer] == 7
                 && Field_SampleActorSupportHeight(&actor->instance.position, 0, 0, 1)
                        <= actor->instance.position.vy) {
@@ -3160,7 +3160,7 @@ void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor)
             actor->instance.motionLocked = 0;
             actor->instance.isJumping = 0;
         }
-        Actors_SaveActorGroundedTransform(actor);
+        VS::Actors::SaveLiveActorGroundedTransform(actor);
         actor->instance.jumpCountdown -= State_tickSpeed / 2;
         if ((signed char)actor->instance.jumpCountdown < 0) {
             actor->instance.jumpCountdown = 0;

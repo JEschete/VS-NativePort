@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Actors/MotionRequestsLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -14,7 +15,6 @@ extern "C" {
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
 #include "Actors/ModelRendering.h"
-#include "Actors/MotionRequests.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -1996,7 +1996,7 @@ void Actors_UpdateMotionAndLookAt(Actors_ActorRecord* actor, int skip_motion_upd
     }
     Actors_TransformActorRootOffset(actor);
     if (!(*(int*)((char*)actor + 8) & 0x3F0000)) {
-        Actors_SaveActorGroundedTransform(actor);
+        VS::Actors::SaveLiveActorGroundedTransform(actor);
     }
 
     if (actor->headTrackTarget != -2) {

@@ -243,7 +243,8 @@ or invalid converted assets fail explicitly. Black placeholder frames do not pas
 ### EC-09: Memory-card stubs versus native persistence
 
 **Evidence:** `Native/Engine/Legacy/Save/LibCard.cpp`, `Native/Engine/src/Save/SaveStore.cpp`,
-`Native/Game/src/Save/NativeSnapshot.cpp`, `RuntimeSnapshot.cpp`, `NativeMenu.cpp` and `NativeResume.cpp`.
+`Native/Game/src/Save/NativeSnapshot.cpp`, `RuntimeSnapshot.cpp`, `FileMenu.cpp`, `FileMenuLive.cpp` and
+`NativeResume.cpp`.
 
 Production Save/Load/Continue menus now use the native file store, schema3 semantic JSON, validated staged resume,
 explicit backup recovery/replacement consent and session cancellation. The initial native-only milestone has

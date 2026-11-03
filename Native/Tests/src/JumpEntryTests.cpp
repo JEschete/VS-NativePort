@@ -11,7 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Actors/MotionRequests.h"
+#include "Actors/MotionRequestsLive.hpp"
 #include "Core/Log.hpp"
 
 extern "C" {
@@ -72,7 +72,7 @@ void CheckGroundedSnapshot(Actors_ActorRecord& actor) {
     expected.savedPlacement = std::bit_cast<std::int32_t>(tile);
   }
 
-  Actors_SaveActorGroundedTransform(&actor);
+  VS::Actors::SaveLiveActorGroundedTransform(&actor);
   CHECK(actor.savedPlacement == expected.savedPlacement);
   CHECK(actor.instance.supportOffset == expected.instance.supportOffset);
   CHECK(actor.instance.reserved50 == expected.instance.reserved50);
@@ -165,16 +165,16 @@ struct JumpFixture {
 };
 
 bool Navigation(JumpEntry entry, bool jumping, bool locked) {
-  return entry == Actors_BeginNavigationJump ||
-         (entry == Actors_BeginTileJump && !jumping && locked);
+  return entry == VS::Actors::BeginLiveNavigationJump ||
+         (entry == VS::Actors::BeginLiveTileJump && !jumping && locked);
 }
 
 void PrepareExpected(Actors_ActorRecord& actor, JumpEntry entry) {
-  if (entry == Actors_BeginAirborneTileJump ||
-      (entry == Actors_BeginTileJump && actor.instance.isJumping)) {
+  if (entry == VS::Actors::BeginLiveAirborneTileJump ||
+      (entry == VS::Actors::BeginLiveTileJump && actor.instance.isJumping)) {
     actor.instance.motionLocked = 0;
     actor.instance.isJumping = 1;
-  } else if (entry == Actors_BeginNavigationJump ||
+  } else if (entry == VS::Actors::BeginLiveNavigationJump ||
              actor.instance.motionLocked) {
     actor.instance.motionLocked = 1;
     actor.instance.isJumping = 1;
@@ -314,9 +314,9 @@ TEST_CASE("Grounded history preserves its anchor on supports and refreshes",
 TEST_CASE(
     "Jump entries preserve every unrelated byte and jumping wins priority",
     "[actors][jump-entry]") {
-  const auto entry =
-      GENERATE(&Actors_BeginTileJump, &Actors_BeginAirborneTileJump,
-               &Actors_BeginNavigationJump);
+  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
+                              &VS::Actors::BeginLiveAirborneTileJump,
+                              &VS::Actors::BeginLiveNavigationJump);
   const bool jumping = GENERATE(false, true);
   const bool locked = GENERATE(false, true);
   const auto profile = GENERATE(0, 1, 2, 3);
@@ -336,9 +336,9 @@ TEST_CASE(
 TEST_CASE(
     "Only navigation entries request animation 31 with eight blend frames",
     "[actors][jump-entry]") {
-  const auto entry =
-      GENERATE(&Actors_BeginTileJump, &Actors_BeginAirborneTileJump,
-               &Actors_BeginNavigationJump);
+  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
+                              &VS::Actors::BeginLiveAirborneTileJump,
+                              &VS::Actors::BeginLiveNavigationJump);
   const bool jumping = GENERATE(false, true);
   const bool locked = GENERATE(false, true);
   JumpFixture fixture;
@@ -357,9 +357,9 @@ TEST_CASE(
 TEST_CASE(
     "Jump entries use the actual arc consumer with full targets and facing",
     "[actors][jump-entry]") {
-  const auto entry =
-      GENERATE(&Actors_BeginTileJump, &Actors_BeginAirborneTileJump,
-               &Actors_BeginNavigationJump);
+  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
+                              &VS::Actors::BeginLiveAirborneTileJump,
+                              &VS::Actors::BeginLiveNavigationJump);
   const auto speed = GENERATE(-10, 17, 18, 31, 32, 40, 0x10028);
   const auto facing = GENERATE(-1, 0x10003, 0x12348001, -0x7FFFFFFF - 1);
   const bool aliased = GENERATE(false, true);
@@ -383,7 +383,7 @@ TEST_CASE(
   CheckConsumerDestination(fixture.actor, &target);
   CheckConsumerArc(fixture.actor, speed);
   const int animation =
-      entry == Actors_BeginTileJump ? 47 : (start_y < 0 ? 35 : 33);
+      entry == VS::Actors::BeginLiveTileJump ? 47 : (start_y < 0 ? 35 : 33);
   CHECK(fixture.actor.animationId == animation);
   CHECK(fixture.actor.pose.animationId == fixture.actor.animationId);
   CHECK(fixture.actor.blendFrames == 4);
@@ -394,9 +394,9 @@ TEST_CASE(
 
 TEST_CASE("Jump reentry honors the active arc gate and production motion reset",
           "[actors][jump-entry]") {
-  const auto entry =
-      GENERATE(&Actors_BeginTileJump, &Actors_BeginAirborneTileJump,
-               &Actors_BeginNavigationJump);
+  const auto entry = GENERATE(&VS::Actors::BeginLiveTileJump,
+                              &VS::Actors::BeginLiveAirborneTileJump,
+                              &VS::Actors::BeginLiveNavigationJump);
   JumpFixture fixture;
   fixture.actor.instance.movementMode = 0;
   int target = 0x000B0009;
@@ -436,9 +436,9 @@ TEST_CASE("Jump diagnostics retain packed requests and the actual consumer arc",
   }
   auto* input =
       aliased ? reinterpret_cast<int*>(&fixture.actor.routeTarget) : &target;
-  Actors_BeginTileJump(0, input, 40, 0x18001);
+  VS::Actors::BeginLiveTileJump(0, input, 40, 0x18001);
   CheckStartedJumpLog(messages);
-  Actors_BeginTileJump(0, input, 18, 0);
+  VS::Actors::BeginLiveTileJump(0, input, 18, 0);
   REQUIRE(messages.size() == 4);
   CHECK(messages[2].find("phase=2") != std::string::npos);
   CHECK(messages[3] == messages[1]);
