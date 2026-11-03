@@ -18,7 +18,7 @@
 
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Action.h"
 #include "Battle/ActionFlow.h"

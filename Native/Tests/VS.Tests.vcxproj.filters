@@ -282,6 +282,9 @@
     <ClCompile Include="src\ModelGeometryTests.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\ModelRenderingTests.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\MotionRequestCoreTests.cpp">
       <Filter>src</Filter>
     </ClCompile>

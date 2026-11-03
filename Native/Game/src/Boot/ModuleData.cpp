@@ -3,7 +3,6 @@ extern "C" {
 #include "Legacy/Psx.h"
 #include "ActorAssets.h"
 #include "Actors/Animation.h"
-#include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Spawning.h"
 #include "Actors/TextureAnimation.h"
@@ -258,7 +257,6 @@ const Content_ModuleDataEntry Content_moduleData[] = {
     {"BATTLE/BATTLE.PRG", 0x80AF0, sizeof Actors_kSoftLandingAnimations, &Actors_kSoftLandingAnimations, sizeof Actors_kSoftLandingAnimations}, // G00110 D_800E92F0
     {"BATTLE/BATTLE.PRG", 0x80AF8, sizeof Actors_kHardLandingAnimations, &Actors_kHardLandingAnimations, sizeof Actors_kHardLandingAnimations}, // G00111 D_800E92F8
     {"BATTLE/BATTLE.PRG", 0x80B00, sizeof Actors_kLandingRecoveryAnimations, &Actors_kLandingRecoveryAnimations, sizeof Actors_kLandingRecoveryAnimations}, // G00112 D_800E9300
-    {"BATTLE/BATTLE.PRG", 0x80B08, sizeof Actors_renderPassCounter, &Actors_renderPassCounter, sizeof Actors_renderPassCounter}, // G00113 D_800E9308
     {"BATTLE/BATTLE.PRG", 0x81228, sizeof Actors_animationEventPoints, &Actors_animationEventPoints, sizeof Actors_animationEventPoints}, // G00114 D_800E9A28
     {"BATTLE/BATTLE.PRG", 0x81334, sizeof Event_sfxSourceIds, &Event_sfxSourceIds, sizeof Event_sfxSourceIds}, // G00115 D_800E9B34
     {"BATTLE/BATTLE.PRG", 0x8134C, sizeof Event_weaponDrawStates, &Event_weaponDrawStates, sizeof Event_weaponDrawStates}, // G00116 D_800E9B4C

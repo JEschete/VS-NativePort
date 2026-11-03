@@ -19,7 +19,7 @@ extern "C" {
 #include "Actors/Animation.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Palette.h"
 #include "Actors/Shadow.h"

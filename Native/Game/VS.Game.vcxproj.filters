@@ -219,7 +219,10 @@
     <ClCompile Include="src\Actors\ModelRendering.cpp">
       <Filter>src\Actors</Filter>
     </ClCompile>
-    <ClInclude Include="src\Actors\ModelRendering.h">
+    <ClCompile Include="src\Actors\ModelRenderingLive.cpp">
+      <Filter>src\Actors</Filter>
+    </ClCompile>
+    <ClInclude Include="src\Actors\ModelRenderingLiveState.h">
       <Filter>src\Actors</Filter>
     </ClInclude>
     <ClCompile Include="src\Actors\MotionRequests.cpp">
@@ -2263,6 +2266,12 @@
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\ModelDrawingLive.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ModelRendering.hpp">
+      <Filter>include\Actors</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Actors\ModelRenderingLive.hpp">
       <Filter>include\Actors</Filter>
     </ClInclude>
     <ClInclude Include="include\Actors\MotionRequests.hpp">

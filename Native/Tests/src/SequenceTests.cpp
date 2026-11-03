@@ -3,6 +3,7 @@
 #include <string.h>
 
 #include "Actors/ModelDrawingLive.hpp"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
@@ -17,7 +18,7 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/AppearanceLiveState.h"
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
@@ -548,7 +549,7 @@ int Tests_GimmickRoomScale(void) {
   Render_ModelWorkspace()->rootOffset = (SVECTOR){10, 20, 30, 0};
   Actors_skeletonPose.scale = (VECTOR){0};
   Actors_roomActorScale = (VECTOR){2048, 4096, 4096, 0};
-  Actors_DrawGimmickModel(&object, &camera);
+  VS::Actors::DrawLiveGimmickModel(&object, &camera);
   const int passed =
       object.matrices[0].m[0][0] == 2048 &&
       object.matrices[0].m[1][1] == 4096 &&
@@ -1532,7 +1533,7 @@ int Tests_ModelWorkspaceIsolation(void) {
   actor.blendPose.boneKeys[41].vx = 8;
   actor.blendPose.boneKeys[41].vy = -4;
   actor.blendPose.boneKeys[41].vz = 12;
-  Actors_PrepareActorRootTransform(&actor);
+  VS::Actors::PrepareLiveActorRootTransform(&actor);
   int passed = workspace->rootOffset.vx == 106 &&
                workspace->rootOffset.vy == 198 &&
                workspace->rootOffset.vz == 296 &&

@@ -12,7 +12,7 @@
 #include "Field/SegmentCollision.hpp"
 extern "C" {
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Battle/Actor.h"
 #include "Battle/Damage.h"
 #include "Field/Collision.h"

@@ -30,7 +30,7 @@ extern "C" {
 #include "Actors/Location.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Actors/Movement.h"
 #include "Actors/RoomState.h"
 #include "Actors/Shadow.h"
@@ -1097,18 +1097,13 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800AE7D8u, 0u, (void*)&Audio_PlayGimmickSoundPair, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AE828u, 0u, (void*)&Audio_PlayActorSurfaceContactSound, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AE980u, 0u, (void*)&Actors_BlendActorPoseHalfway, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AEAE8u, 0u, (void*)&Actors_PrepareActorRootTransform, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800AEF94u, 0u, (void*)&Actors_UpdateAndDrawRoomActors, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF6E8u, 0u, (void*)&Actors_UpdateActorAnimationBlend, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF844u, 0u, (void*)&Actors_AlignPoseRotationBranches, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800AF960u, 0u, (void*)&Actors_UpdateActorAuxiliaryMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B002Cu, 0u, (void*)&Actors_UpdateMotionAndLookAt, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B07DCu, 0u, (void*)&Actors_TransformActorRootOffset, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B0908u, 0u, (void*)&Field_UpdateGimmickMotion, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B101Cu, 0u, (void*)&Field_UpdateGimmickReactionAnimation, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B13CCu, 0u, (void*)&Field_GimmickSupportHeightBelow, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B1A68u, 0u, (void*)&Actors_DrawGimmickModel, 0u, 0u, 0u},
-    {"BATTLE/BATTLE.PRG", 0x800B217Cu, 0u, (void*)&Actors_DrawActorWeaponModel, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B26B8u, 0u, (void*)&Actors_ApplyLockedBoneTransform, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66A8u, 0u, (void*)&Event_ScriptReportInvalidOpcode, 0u, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800B66E4u, 0u, (void*)&Event_ScriptNoOperation, 0u, 0u, 0u},
@@ -1781,7 +1776,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800E92F0u, 8u, (void*)&Actors_kSoftLandingAnimations, sizeof Actors_kSoftLandingAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E92F8u, 8u, (void*)&Actors_kHardLandingAnimations, sizeof Actors_kHardLandingAnimations, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9300u, 8u, (void*)&Actors_kLandingRecoveryAnimations, sizeof Actors_kLandingRecoveryAnimations, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800E9308u, 4u, (void*)&Actors_renderPassCounter, sizeof Actors_renderPassCounter, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800E9308u, 4u, (void*)&Actors_renderPassCounter, sizeof Actors_renderPassCounter, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800E9A28u, 64u, (void*)&Actors_animationEventPoints, sizeof Actors_animationEventPoints, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B34u, 24u, (void*)&Event_sfxSourceIds, sizeof Event_sfxSourceIds, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800E9B4Cu, 12u, (void*)&Event_weaponDrawStates, sizeof Event_weaponDrawStates, 1u, 1u},
@@ -2011,7 +2006,7 @@ const Content_ModuleSymbol Content_moduleSymbols[] = {
     {"BATTLE/BATTLE.PRG", 0x800F2308u, 4u, (void*)&Content_legacyEtmDiscRequest, sizeof Content_legacyEtmDiscRequest, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F2310u, 320u, (void*)&Content_legacyActorAssetRequests, sizeof Content_legacyActorAssetRequests, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F2450u, 8u, (void*)&Actors_sharedSequenceBankTexturePages, sizeof Actors_sharedSequenceBankTexturePages, 1u, 1u},
-    {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&Actors_modelRenderContext, sizeof Actors_modelRenderContext, 1u, 1u},
+    {"BATTLE/BATTLE.PRG", 0x800F2458u, 6144u, (void*)&Actors_modelRenderContext, sizeof Actors_modelRenderContext, 0u, 0u},
     {"BATTLE/BATTLE.PRG", 0x800F3C58u, 32u, (void*)&Actors_skeletonPose, sizeof Actors_skeletonPose, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F3C78u, 32u, (void*)&Actors_skeletonRootMatrix, sizeof Actors_skeletonRootMatrix, 1u, 1u},
     {"BATTLE/BATTLE.PRG", 0x800F4438u, 16u, (void*)&Actors_roomActorScale, sizeof Actors_roomActorScale, 0u, 0u},

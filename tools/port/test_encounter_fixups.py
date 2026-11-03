@@ -1047,7 +1047,7 @@ class EncounterFixupTests(unittest.TestCase):
             return (root / path).read_text(encoding="utf-8")
 
         gimmicks = generated(r"Native\Game\src\Field\Gimmicks.cpp")
-        rendering = generated(r"Native\Game\src\Actors\ModelRendering.cpp")
+        rendering = generated(r"Native\Game\src\Actors\ModelRenderingLive.cpp")
         assets = generated(r"Native\Content\src\ActorAssets.cpp")
         # Each loader records the bytes it owns and forgets them before release (#269).
         self.assertIn("VS::Render::RecordLiveModelExtent(created_gimmick->model,", gimmicks)
@@ -1055,12 +1055,12 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("VS::Render::RecordLiveModelCopy(buf, data, sizeof *buf);", assets)
         self.assertEqual(assets.count("VS::Render::ForgetLiveModelExtent(model->sectionOffsets);"), 2)
         for call in (
-            "VS::Render::ProjectLiveGimmickModel(*object)",
-            "VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);",
-            "VS::Render::DrawLiveGimmickGouraudPolygons(*object);",
-            "VS::Render::ProjectLiveWeaponModel(*weapon)",
-            "VS::Render::DrawLiveWeaponFlatPolygonsWithOverrides(*weapon, color);",
-            "VS::Render::DrawLiveWeaponFlatPolygons(*weapon, color);",
+            "Render::ProjectLiveGimmickModel(*object)",
+            "Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);",
+            "Render::DrawLiveGimmickGouraudPolygons(*object);",
+            "Render::ProjectLiveWeaponModel(weapon)",
+            "Render::DrawLiveWeaponFlatPolygonsWithOverrides(weapon, color);",
+            "Render::DrawLiveWeaponFlatPolygons(weapon, color);",
         ):
             self.assertIn(call, rendering)
         for source in (gimmicks, rendering, assets):
@@ -1476,11 +1476,12 @@ class EncounterFixupTests(unittest.TestCase):
                 owned[identifier]["path"], r"Native\Game\src\Actors\SoundOverrides.cpp"
             )
         root = Path(__file__).resolve().parents[2]
-        source = (root / r"Native\Game\src\Actors\ModelRendering.cpp").read_text(
+        source = (root / r"Native\Game\src\Actors\ModelRenderingLive.cpp").read_text(
             encoding="utf-8"
         )
-        self.assertIn("VS::Actors::UpdateActorSoundTransition(*actor);", source)
-        self.assertIn("VS::Actors::UpdateActorSoundTransition(*attached);", source)
+        # The room pass's host reaches the transition for the actor and for a
+        # frozen actor's companion through one override.
+        self.assertIn("UpdateActorSoundTransition(*actor);", source)
         self.assertIn('#include "Actors/SoundTransitionBinding.hpp"', source)
         self.assertNotIn("soundEffect.parameter -= step;", source)
         header = (root / r"Native\Engine\src\Audio\ActorSound.h").read_text(
@@ -1749,17 +1750,17 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F00979"]["header"],
             r"Native\Game\include\Actors\AppearanceTransition.hpp",
         )
-        source = """VS::Actors::UpdatePalettePulse(actor, NULL, 0);
-VS::Actors::UpdatePalettePulse(attached, NULL, 0);
-VS::Actors::UpdatePalettePulse(NULL, (Actors_ActorRecord*)object, 0);"""
-        for old, new, _ in copy_fixups.FIXES["F01008"]:
-            source = source.replace(old, new)
+        # The room pass is owned (#276 row 22); its host pulses the typed
+        # actor and gimmick records.
+        self.assertNotIn("F01008", copy_fixups.FIXES)
         self.assertEqual(
-            source,
-            """VS::Actors::UpdateLiveActorPalettePulse(*actor);
-VS::Actors::UpdateLiveActorPalettePulse(*attached);
-VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
+            copy_fixups.OWNED_CALL_BINDINGS["F01008"],
+            "VS::Actors::UpdateAndDrawLiveRoomActors",
         )
+        live = self.model_rendering_live_source()
+        self.assertIn("UpdateLiveActorPalettePulse(*actor);", live)
+        self.assertIn("UpdateLiveGimmickPalettePulse(*object);", live)
+        self.assertNotIn("UpdatePalettePulse(NULL", live)
 
     def test_transition_text_is_owned_by_the_typed_text_box_core(self):
         # The encoded-control decoding (0xE5 non-printing, 0x8F space, unsigned
@@ -1782,15 +1783,12 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
         )
 
     def test_attached_draw_requires_a_resident_parent_matrix(self):
-        old, new, _ = next(
-            fix
-            for fix in copy_fixups.FIXES["F01008"]
-            if "entries[actor->instance.attachParent]->boneMatrices" in fix[0]
+        live = self.model_rendering_live_source()
+        self.assertIn(
+            "if (MATRIX* parent = ResolveLiveAttachmentParentMatrix(actor))", live
         )
-        self.assertIn("entries[actor->instance.attachParent]->boneMatrices", old)
-        self.assertIn("VS::Actors::ResolveLiveAttachmentParentMatrix(actor)", new)
-        self.assertIn("if (parent_matrix != NULL)", new)
-        self.assertNotIn("entries[", new)
+        self.assertNotIn("entries[", live)
+        self.assertNotIn("boneMatrices[actor->instance.attachBone]", live)
         self.assertEqual(
             copy_fixups.NATIVE_HELPER_HEADERS["VS::Actors::ResolveLiveAttachmentParentMatrix"],
             r"Native\Game\include\Actors\ModelDrawingLive.hpp",
@@ -2399,16 +2397,11 @@ d = VS::Core::Math::SquaredDistanceWithHeightOffsets((short*)&state->position,
         self.assertEqual(source, "u_short pulsedPalette[16];")
 
     def test_room_rendering_dispatches_typed_appearance_owners(self):
-        source = """VS::Actors::UpdateActorAppearanceTransition(actor);
-VS::Actors::UpdateActorAppearanceTransition(attached);
-VS::Actors::UpdateActorAppearanceTransition((Actors_ActorRecord*)object);
-"""
-        for old, new, _ in copy_fixups.FIXES["F01008"]:
-            source = source.replace(old, new)
-        self.assertIn("VS::Actors::UpdateLiveActorAppearanceTransition(*actor);", source)
-        self.assertIn("VS::Actors::UpdateLiveActorAppearanceTransition(*attached);", source)
-        self.assertIn("VS::Actors::UpdateLiveGimmickAppearanceTransition(*object);", source)
-        self.assertNotIn("Actors_ActorRecord*", source)
+        self.assertNotIn("F01008", copy_fixups.FIXES)
+        live = self.model_rendering_live_source()
+        self.assertIn("UpdateLiveActorAppearanceTransition(*actor);", live)
+        self.assertIn("UpdateLiveGimmickAppearanceTransition(*object);", live)
+        self.assertNotIn("(Actors_ActorRecord*)", live)
 
     def test_effect_register_consumers_preserve_original_operand_order(self):
         for function_id, function_name in (
@@ -2631,22 +2624,25 @@ VS::Core::Memory::AllocateFromLowEnd(0x24D0);
         self.assertNotIn("ProjectActorBoneEndpoint)", skeleton)
 
     def test_actor_texture_origin_scopes_keep_distinct_local_bindings(self):
-        preparations = [
-            item for item in copy_fixups.FIXES["F01860"]
-            if "short (*new_var)[2];" in item[0]
-        ]
-        self.assertEqual(len(preparations), 2)
-        for (old, new, _), name in zip(
-            preparations, ("primary_texture_origins", "secondary_texture_origins"),
-            strict=True,
-        ):
-            with self.subTest(name=name):
-                self.assertEqual(new, re.sub(r"\bnew_var\b", name, old))
+        # The setup is owned (#276 row 22): both texture slot loops read the
+        # origin table through one bounded halfword reader.
+        self.assertNotIn("F01860", copy_fixups.FIXES)
+        live = self.model_rendering_live_source()
+        self.assertIn(
+            "slot, SlotOriginHalfword(slot, 0), SlotOriginHalfword(slot, 1));", live
+        )
+        self.assertNotIn("new_var", live)
         patterns = [
             pattern for row, pattern, _, _ in copy_fixups.REGEX_FIXES
             if re.search(row, "Actors::InitializeActorModelResources")
         ]
         self.assertNotIn(r"\bnew_var\b", patterns)
+
+    def model_rendering_live_source(self):
+        root = Path(__file__).resolve().parents[2]
+        return (root / r"Native\Game\src\Actors\ModelRenderingLive.cpp").read_text(
+            encoding="utf-8"
+        )
 
     def test_room_load_names_preserve_shadowed_pointer_and_offset_bindings(self):
         names = {

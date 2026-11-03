@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
 #include "Actors/ModelDrawingLive.hpp"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
 #include "Actors/TextureAnimationLive.hpp"
 #include "Core/Memory/HeapLive.hpp"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Actors/ActorState.h"
 #include "Actors/Animation.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -222,7 +222,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
         VS::Actors::UpdateLiveActorTextureScrolling(preview_actor);
         Actors_UpdateActorAnimationBlend(preview_actor);
     } else {
-        Actors_PrepareActorRootTransform(preview_actor);
+        VS::Actors::PrepareLiveActorRootTransform(preview_actor);
     }
 
     VS::Actors::DrawLiveActorModel(*preview_actor, *preview_camera_matrix, 0);
@@ -263,7 +263,7 @@ int Menu_Framework_DrawActorPreview(MATRIX* preview_camera_matrix)
             bone->t[1] -= preview_actor->companionState.offsetY;
             bone->t[2] -= preview_actor->companionState.offsetZ;
 
-            Actors_DrawActorWeaponModel(preview_weapon_model, bone);
+            VS::Actors::DrawLiveActorWeaponModel(preview_weapon_model, bone);
 
             bone->t[0] += preview_actor->companionState.offsetX;
             bone->t[1] += preview_actor->companionState.offsetY;

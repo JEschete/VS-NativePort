@@ -1,6 +1,8 @@
 // Hand-maintained (tools/port/owned.csv).
 #include "Core/Math/Matrix.hpp"
 
+#include <array>
+#include <cstddef>
 #include <cstdint>
 
 #include "Core/Math/Distance.hpp"
@@ -91,5 +93,26 @@ Mat3 IdentityRotation() noexcept {
 Transform3 TranslationTransform(Position3 translation) noexcept {
   return Transform3{IdentityRotation(),
                     Vec3{translation.x, translation.y, translation.z}};
+}
+
+// The libgte gte_rtv0tr (sf=1) product: MAC1..3 = (TR << 12 + RT * V0) >> 12.
+Vec3 RotateTranslate(const Transform3& transform, Vec3 point) noexcept {
+  const std::array<std::int64_t, kMatrixOrder> vector{
+      WrapSigned16(static_cast<std::uint32_t>(point.x)),
+      WrapSigned16(static_cast<std::uint32_t>(point.y)),
+      WrapSigned16(static_cast<std::uint32_t>(point.z))};
+  const std::array<std::int64_t, kMatrixOrder> translation{
+      transform.translation.x, transform.translation.y,
+      transform.translation.z};
+  std::array<std::int32_t, kMatrixOrder> result{};
+  for (std::size_t row = 0; row < result.size(); ++row) {
+    std::int64_t sum = translation.at(row) * kFixedOne;
+    for (std::size_t column = 0; column < vector.size(); ++column) {
+      sum += std::int64_t{transform.rotation.m.at(row).at(column)} *
+             vector.at(column);
+    }
+    result.at(row) = static_cast<std::int32_t>(sum >> kFractionBits);
+  }
+  return Vec3{result[0], result[1], result[2]};
 }
 }  // namespace VS::Core::Math

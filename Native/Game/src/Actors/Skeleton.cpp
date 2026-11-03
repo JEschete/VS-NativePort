@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/ModelDrawingLive.hpp"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Render/CameraViewLive.hpp"
 extern "C" {
@@ -8,7 +9,6 @@ extern "C" {
 #include "Actors/Animation.h"
 #include "Actors/ModelDraw.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Shadow.h"
 #include "Actors/Skeleton.h"
@@ -534,7 +534,7 @@ MATRIX* Actors_ActorBoneWorldTransform(int actorId, int bone, MATRIX* unused)
         setVector(&scratch->rootOffset, scratch->rootOffset.vx * actor->scale / ONE,
             scratch->rootOffset.vy * actor->scale / ONE,
             scratch->rootOffset.vz * actor->scale / ONE);
-        Actors_TransformActorRootOffset(actor);
+        VS::Actors::TransformLiveActorRootOffset(actor);
         scratch->matrix.t[0] = scratch->rootOffset.vx;
         scratch->matrix.t[1] = scratch->rootOffset.vy;
         scratch->matrix.t[2] = scratch->rootOffset.vz;
@@ -563,7 +563,7 @@ void Actors_BuildActorPoseAtMatrix(int actor_id, MATRIX* camera_matrix)
     actor->instance.isVisible = 0;
     actor->framesPerStep = 1;
     VS::Render::PrepareLiveActorCameraMatrices(camera_matrix);
-    Actors_PrepareActorRootTransform(actor);
+    VS::Actors::PrepareLiveActorRootTransform(actor);
     VS::Actors::DrawLiveActorModel(*actor, *camera_matrix, 0);
     actor->instance.isVisible = visible;
 }

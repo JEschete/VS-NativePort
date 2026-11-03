@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/AppearanceLive.hpp"
+#include "Actors/ModelRenderingLive.hpp"
 #include "Actors/MovementCommand.hpp"
 #include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -25,7 +26,6 @@ extern "C" {
 #include "Actors/Ashley.h"
 #include "Actors/Location.h"
 #include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
 #include "Actors/Movement.h"
 #include "Actors/Skeleton.h"
 #include "Audio/Sfx.h"
@@ -559,7 +559,7 @@ void Boot_RunGameLoop(void)
                         Field_AdvanceRoomAnimationClock();
                         Core_Gte_SetGeomOffset(160, 112);
                         if (Field_isFieldRenderingEnabled) {
-                            Actors_UpdateAndDrawRoomActors(&Render_frameScratch.viewMatrix);
+                            VS::Actors::UpdateAndDrawLiveRoomActors(&Render_frameScratch.viewMatrix);
                             Content_UpdateActorAssetQueue();
                             Core_Gte_SetRotMatrix(&Render_frameScratch.viewMatrix);
                             Core_Gte_SetTransMatrix(&Render_frameScratch.viewMatrix);
@@ -633,7 +633,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     Event_InitializeScriptOpcodeTable();
     Effects_InitEffectRuntime();
     Field_InitializeRoomRuntimeState();
-    Actors_InitializeActorModelResources();
+    VS::Actors::InitializeLiveActorModelResources();
     VS::Render::InitializeLiveTexturePages();
     Content_overlayWorkspaceOwner = 0;
     Content_LoadSystemResources();

@@ -11,7 +11,7 @@
 #include "Render/ModelGeometryLive.hpp"
 
 extern "C" {
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Actors/WeaponModel.h"
 #include "Field/Gimmicks.h"
 }

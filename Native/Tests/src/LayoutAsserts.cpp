@@ -16,7 +16,7 @@ extern "C" {
 #include "Actors/ActorAllocation.h"
 #include "Actors/ActorLoading.h"
 #include "Actors/ActorRecord.h"
-#include "Actors/ModelRendering.h"
+#include "Actors/ModelRenderingLiveState.h"
 #include "Audio/SoundBanks.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"

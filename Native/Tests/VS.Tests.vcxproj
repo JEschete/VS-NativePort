@@ -162,6 +162,7 @@
     <ClCompile Include="src\MinimapTests.cpp" />
     <ClCompile Include="src\ModelDrawingTests.cpp" />
     <ClCompile Include="src\ModelGeometryTests.cpp" />
+    <ClCompile Include="src\ModelRenderingTests.cpp" />
     <ClCompile Include="src\MotionRequestCoreTests.cpp" />
     <ClCompile Include="src\MotionRequestsTests.cpp" />
     <ClCompile Include="src\MovementBehaviorCoreTests.cpp" />

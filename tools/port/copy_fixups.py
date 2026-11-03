@@ -208,6 +208,12 @@ _ACTORS_TEXTURE_LIVE = {
         ("UploadLiveActorTextureFrame", "F00975"), ("ResetLiveActorTextureFrames", "F00976"),
         ("UploadLiveActorTextureOverlay", "F00977"), ("UpdateLiveActorTextureScrolling", "F00978")),
 }
+_ACTORS_MODEL_RENDERING_LIVE = {
+    r"Native\Game\include\Actors\ModelRenderingLive.hpp": (
+        ("PrepareLiveActorRootTransform", "F01005"), ("UpdateAndDrawLiveRoomActors", "F01008"),
+        ("TransformLiveActorRootOffset", "F01012"), ("DrawLiveGimmickModel", "F01020"),
+        ("DrawLiveActorWeaponModel", "F01021"), ("InitializeLiveActorModelResources", "F01860")),
+}
 
 NATIVE_HELPER_HEADERS = {
     **{f"VS::Core::Math::{name}": rf"Native\Engine\include\Core\Math\{header}"
@@ -217,6 +223,7 @@ NATIVE_HELPER_HEADERS = {
     **{f"VS::Items::{name}": header for header, rows in _ITEMS_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_APPEARANCE_LIVE.items() for name, _ in rows},
     **{f"VS::Actors::{name}": header for header, rows in _ACTORS_TEXTURE_LIVE.items() for name, _ in rows},
+    **{f"VS::Actors::{name}": header for header, rows in _ACTORS_MODEL_RENDERING_LIVE.items() for name, _ in rows},
     "VS::Render::IsLiveFramebufferEffectShowing": r"Native\Engine\include\Render\ScreenOverlayLive.hpp",
     **{f"VS::Render::{name}": r"Native\Engine\include\Render\GimImagesLive.hpp"
        for name in ("LiveGimImageLoading", "LiveGimImagesPresent", "ConfigureLiveGimLayer", "LiveGimLayerPlacement",
@@ -657,7 +664,8 @@ OWNED_CALL_BINDINGS = {
     fid: f"VS::Save::{name}" for name, fids in _SAVE_SNAPSHOT_LIVE.items() for fid in fids
 } | {fid: f"VS::Items::{name}" for rows in _ITEMS_LIVE.values() for name, fid in rows} | {
     fid: f"VS::Actors::{name}" for rows in _ACTORS_APPEARANCE_LIVE.values() for name, fid in rows} | {
-    fid: f"VS::Actors::{name}" for rows in _ACTORS_TEXTURE_LIVE.values() for name, fid in rows}
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_TEXTURE_LIVE.values() for name, fid in rows} | {
+    fid: f"VS::Actors::{name}" for rows in _ACTORS_MODEL_RENDERING_LIVE.values() for name, fid in rows}
 
 # Controller.cpp rows whose generated callers keep the original port-ID, pad-buffer and raw-pattern call shape.
 INPUT_CONTROLLER_LIVE_BINDINGS = {
@@ -2111,10 +2119,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
                  "preserve the output-color argument consumed by the original assembly")],
     "G00582": [("int Battle_Ai_roomHasWaypoints", "void* Battle_Ai_roomHasWaypoints",
                  "func_800E6F9C stores the room auxiliary-data pointer, not a boolean")],
-    "F01020": [
-        ("&Actors_skeletonPose.scale", "&Actors_roomActorScale",
-         "D_800F3C58+0x7E0 aliases D_800F4438; use the canonical initialized room scale"),
-    ],
     "F03192": [
         (f"Audio_Seq_secondaryMusicConfig->{field}",
          f"(Audio_Seq_secondaryMusicConfig != NULL ? Audio_Seq_secondaryMusicConfig->{field} : 0)",
@@ -2474,9 +2478,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "            return;\n        }",
          "room banks are optional and must be present before dereferencing their serialized program offsets"),
     ],
-    "F01860": [(f"(*(int (*)[])&Actors_sharedSequenceData)[{index}] = 0;",
-                  f"Actors_sharedSequenceData[{index}] = NULL;", "reset whole native SEQ bank pointers")
-                 for index in range(3)],
     "F00777": [("    *dst = *objectData;",
                  '    Core_Debugf("actors", "queue kind=%u actor=%u model=%u phase=%u parse=%u",\n'
                  "        (unsigned)objectData->assetKind, (unsigned)objectData->targetSlot,\n"
@@ -2812,55 +2813,6 @@ int Menu_Loot_AdvanceStagedInventory(void)
          "VS::Actors::UploadLiveActorTextureOverlay(\n"
          "            id, {.overlay = script[1], .source_x = script[2], .source_y = script[3]});",
          "#276 row 22: event 44's overlay, source x and source y bytes as the typed overlay copy (40564.c:1502)"),
-    ],
-    "F01008": [
-        ("VS::Actors::UpdatePalettePulse(actor, NULL, 0);",
-         "VS::Actors::UpdateLiveActorPalettePulse(*actor);",
-         "40564.c:1651 typed actor palette pulse entry"),
-        ("VS::Actors::UpdatePalettePulse(attached, NULL, 0);",
-         "VS::Actors::UpdateLiveActorPalettePulse(*attached);",
-         "Attached actors retain the original actor palette path"),
-        ("VS::Actors::UpdatePalettePulse(NULL, (Actors_ActorRecord*)object, 0);",
-         "VS::Actors::UpdateLiveGimmickPalettePulse(*object);",
-         "Use owning native gimmick palettes instead of a PS1-sized view"),
-        ("VS::Actors::UpdateActorAppearanceTransition(actor);",
-         "VS::Actors::UpdateLiveActorAppearanceTransition(*actor);",
-         "44F14.c:923 use the owning native actor appearance API"),
-        ("VS::Actors::UpdateActorAppearanceTransition(attached);",
-         "VS::Actors::UpdateLiveActorAppearanceTransition(*attached);",
-         "Attached actors share actor ownership, not a gimmick compatibility layout"),
-        ("VS::Actors::UpdateActorAppearanceTransition((Actors_ActorRecord*)object);",
-         "VS::Actors::UpdateLiveGimmickAppearanceTransition(*object);",
-         "Gimmicks retain a separate typed appearance entry point"),
-        ("if ((*previous)->modelId == texture)", "if (*previous != NULL && (*previous)->modelId == texture)",
-         "empty actor slots cannot share texture animation"),
-    ] + [
-        (f"VS::Actors::UpdateLiveActorTextureScrolling({who});",
-         f"VS::Actors::UpdateLiveActorTextureScrolling({who}, i);",
-         "#276 row 22: scrolling carries the loop index the original left in $s2 (40564.c:1552)")
-        for who in ("actor", "attached")
-    ] + [
-        ("if ((*previousAttached)->modelId == texture)",
-         "if (*previousAttached != NULL && (*previousAttached)->modelId == texture)",
-         "attached-actor texture lookup also traverses sparse slots"),
-           ("struct Render_DrawDepthScratch* frame;", "Render_FrameScratch* frame;", "native ordering-table view"),
-           ("frame->depth += actor->companionState.depthBias * 4;",
-            "frame->orderingTable = (u_char*)frame->orderingTable + actor->companionState.depthBias * 4;",
-            "companion depth shifts the native ordering-table base"),
-           ("frame->depth -= actor->companionState.depthBias * 4;",
-            "frame->orderingTable = (u_char*)frame->orderingTable - actor->companionState.depthBias * 4;",
-            "restore the native ordering-table base"),
-           ("frame->depth += 0x10;", "frame->orderingTable = (u_char*)frame->orderingTable + 0x10;",
-            "gimmick depth shifts the ordering table without touching the primitive pointer"),
-           ("frame->depth = (int)(frame->depth - 0x10);",
-            "frame->orderingTable = (u_char*)frame->orderingTable - 0x10;", "restore the gimmick ordering-table base"),
-        ("                VS::Actors::DrawActorModel(\n"
-         "                    actor, &entries[actor->instance.attachParent]->boneMatrices[actor->instance.attachBone], 0U);",
-         "                MATRIX* parent_matrix = VS::Actors::ResolveLiveAttachmentParentMatrix(actor);\n"
-         "                if (parent_matrix != NULL) {\n"
-         "                    VS::Actors::DrawActorModel(actor, parent_matrix, 0U);\n"
-         "                }",
-         "44F14.c:1010 defer an independently owned prop draw while its borrowed parent matrix is unavailable"),
     ],
         "F01006": [("*(MATRIX*)&source", "*source", "44F14.c:853; copy the supplied camera matrix, not pointer-stack bytes")],
     # func_800AE47C / 44F14.c:610: the SEQ header starts with offsets, not a native pointer.
@@ -3468,22 +3420,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
      "F04191 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
     (r"", r"\bVS::Render::QueueSprite\(", r"VS::Render::QueueLiveSprite(",
      "F04192 #46 typed promotion: the sprite binding bounds packets by the frame primitive buffer (#265)"),
-    (r"", r"\bVS::Render::ProjectModelVertices\(\s*object, &object->matrices\[0\], -Render_nearClip \* 4, "
-          r"object->model\)",
-     r"VS::Render::ProjectLiveGimmickModel(*object)",
-     "F01265 #46 typed promotion: the gimmick binding projects within the model's recorded extent (#269)"),
-    (r"", r"\bVS::Render::ProjectModelVertices\(\s*weapon, &weapon->boneWorldMatrices\[0\], -Render_nearClip \* 4, "
-          r"weapon->sectionOffsets\)",
-     r"VS::Render::ProjectLiveWeaponModel(*weapon)",
-     "F01265 #46 typed promotion: the weapon binding projects within the model's recorded extent (#269)"),
-    (r"", r"\bVS::Render::DrawModelGouraudPolygons(WithOverrides)?\(&Actors_modelRenderContext, object, "
-          r"&object->baseColor, scratch->model\)",
-     r"VS::Render::DrawLiveGimmickGouraudPolygons\1(*object)",
-     "F01267/F01270 #46 typed promotion: the gimmick binding walks only the recorded model extent (#269)"),
-    (r"", r"\bVS::Render::DrawModelFlatPolygons(WithOverrides)?\(&Actors_modelRenderContext, weapon, &color, "
-          r"scratch->model\)",
-     r"VS::Render::DrawLiveWeaponFlatPolygons\1(*weapon, color)",
-     "F01266/F01269 #46 typed promotion: the weapon binding walks only the recorded model extent (#269)"),
     (r"", r"\bVS::Render::UpdateRoomGroupTransforms\((\w+)\)",
      r"VS::Render::UpdateLiveRoomGroupTransforms(\1, Field_roomData.header.geometryLength)",
      "F00758 #46 typed promotion: the room binding rebuilds group views inside the geometry section's recorded "
@@ -3877,13 +3813,6 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
            "F01556 5BF94.c:7879-7883 track offset remains relative to the block rather than its section"),
       )
       for old, new in bindings],
-    (r"^Actors::UpdateAndDrawRoomActors$",
-     r"(?s)if \(\((actor|attached)->soundEffect\.kind == 1\)\s*"
-     r"&& \1->soundEffect\.parameter != 0\) \{.*?"
-     r"\1->soundEffect\.parameter -= step;\s*\}",
-     r"VS::Actors::UpdateActorSoundTransition(*\1);",
-     "44F14.c:923 actor and companion inline copies share the source-backed typed sound transition; "
-     "F00995/F01007 #46 typed promotion binds the actor record and tick speed to the pure glide"),
     (r"^Field::(?:Find|Show|Hide|Disable)RoomGeometryGroup$|^Field::AddRoomGeometryDepthBias$",
      r"\barg0\b", "group_index",
      "2842C.c:550-606 verified geometry group index from event/gimmick/render callers"),
@@ -5034,19 +4963,6 @@ REGEX_FIXES += [
 ]
 
 
-# Individually reviewed actor bindings; structural fixups run first.
-# Separate shadowed locals and cast-prototype parameters before naming outer bindings.
-for identifier, old, new, evidence in (
-    ("F01860",
-     "    for (i = 0; i < 12; ++i) {\n        short (*new_var)[2];\n        Render_legacyActorTextureSlots[i].texturePage =\n            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (new_var = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);\n        Render_legacyActorTextureSlots[i].palette = GetClut(768, i + 228);\n        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, i + 246);\n        Render_legacyActorTextureSlots[i].referenceCount = 0;\n    }",
-     "    for (i = 0; i < 12; ++i) {\n        short (*primary_texture_origins)[2];\n        Render_legacyActorTextureSlots[i].texturePage =\n            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (primary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);\n        Render_legacyActorTextureSlots[i].palette = GetClut(768, i + 228);\n        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, i + 246);\n        Render_legacyActorTextureSlots[i].referenceCount = 0;\n    }",
-     "First for-loop block declaration at493 aliases textureSlotOrigins for slots0..11; independent local from declaration502. Original FB0.c:32-37."),
-    ("F01860",
-     "    for (; i < 24; ++i) {\n        short (*new_var)[2];\n        Render_legacyActorTextureSlots[i].texturePage =\n            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (new_var = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);\n        Render_legacyActorTextureSlots[i].palette = GetClut(768, 229);\n        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, 247);\n        Render_legacyActorTextureSlots[i].referenceCount = 0;\n    }",
-     "    for (; i < 24; ++i) {\n        short (*secondary_texture_origins)[2];\n        Render_legacyActorTextureSlots[i].texturePage =\n            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (secondary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);\n        Render_legacyActorTextureSlots[i].palette = GetClut(768, 229);\n        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, 247);\n        Render_legacyActorTextureSlots[i].referenceCount = 0;\n    }",
-     "Second for-loop block declaration at502 aliases same origin table for slots12..23 with shared CLUT rows229/247. Original FB0.c:41-46. Must not use whole-function new_var replacement."),
-):
-    FIXES.setdefault(identifier, []).append((old, new, evidence))
 
 REGEX_FIXES += [
     (rf"^{name}$", rf"\b{old}\b", new, evidence)
@@ -5276,9 +5192,6 @@ REGEX_FIXES += [
         ("Actors::InitializePlaceholderActorStats",
          (('arg0', 'actor_id'), ('arg1', 'auxiliary_actor_id'), ('temp_s1', 'actor'), ('temp_s0', 'stats')),
          "F00164 146C.c:6028 obtains actor/stats, clears and initializes placeholder vitals, then low byte of arg1 controls hit cancellation. F00165 passes its auxiliary actorId (also source of subkind/texture slot), so name distinguishes actual array actor slot arg0."),
-        ("Actors::InitializeActorModelResources",
-         (('sp10', 'unit_room_scale'), ('temp_s0', 'equipment_actor_slot')),
-         "F01860 INITBTL.PRG/FB0.c:19-90 initializes room scale to ONE on each axis. temp_s0=i/2 groups the20 equipment texture slots by owning actor for tpage/CLUT placement. Two different block-local new_var declarations separately alias D_800E8F30/textureSlotOrigins in loops0..11 and12..23; cannot safely encode as one binding."),
         ("Actors::UpdateAshleyMovementInput",
          (('unksp10', 'placement'), ('temp_a0', 'stick_y'), ('temp_a1', 'stick_x'), ('temp_s0', 'stats'), ('temp_s1', 'state_flags')),
          "F00079 146C.c:2837-2894: placement comes from ActorPlacement and feeds camera tile constraint; stats from Ashley actor; state flags gate carrying/jump movement. Analog rStickX/Y subtract midpoint128 then deadzone64; axes written into move-input slots1/3, with X negated."),

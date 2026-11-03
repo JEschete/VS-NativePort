@@ -37,4 +37,10 @@ struct Transform3 {
 
 // An identity rotation with a translation.
 [[nodiscard]] Transform3 TranslationTransform(Position3 translation) noexcept;
+
+// The GTE RTV0TR product the MAC registers hold: `point`, reduced to signed
+// halfwords as V0 holds it, rotated and translated by `transform` as
+// (T * 4096 + R * v) >> 12, each component truncated to a word.
+[[nodiscard]] Vec3 RotateTranslate(const Transform3& transform,
+                                   Vec3 point) noexcept;
 }  // namespace VS::Core::Math

@@ -1,559 +1,521 @@
-// Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
-#include "Actors/AppearanceLive.hpp"
-#include "Actors/AppearanceTransitionLive.hpp"
-#include "Actors/ModelDrawingLive.hpp"
-#include "Actors/SoundTransitionBinding.hpp"
-#include "Actors/TextureAnimationLive.hpp"
-#include "Core/Math/MatrixLive.hpp"
+// Hand-maintained (tools/port/owned.csv).
+#include "Actors/ModelRendering.hpp"  // NOLINT(build/include): native C++ interface.
+
+#include <array>
+#include <cstddef>
+#include <cstdint>
+#include <optional>
+#include <span>
+
+#include "Actors/ModelDrawing.hpp"
+#include "Core/Math/Matrix.hpp"
 #include "Core/Math/ScalarMath.hpp"
-#include "Core/Memory/HeapLive.hpp"
-#include "Render/CameraViewLive.hpp"
-#include "Render/ModelGeometryLive.hpp"
-extern "C" {
-#include "Legacy/Psx.h"
-#include "ActorAssets.h"
-#include "Actors/ActorRecord.h"
-#include "Actors/Animation.h"
-#include "Actors/AppearanceLiveState.h"
-#include "Actors/ModelDraw.h"
-#include "Actors/ModelInstance.h"
-#include "Actors/ModelRendering.h"
-#include "Actors/Movement.h"
-#include "Actors/Shadow.h"
-#include "Actors/Skeleton.h"
-#include "Actors/TextureAnimation.h"
-#include "Actors/Textures.h"
-#include "Actors/WeaponModel.h"
-#include "Event/ScriptVm.h"
-#include "Field/Actors.h"
-#include "Field/Gimmicks.h"
-#include "Menu/Inventory/Inventory.h"
-#include "ModelLoading.h"
-#include "Render/ModelDraw.h"
-#include "Render/ModelWorkspace.h"
-#include "Render/Palette.h"
-#include "Render/Render.h"
-#include "Render/Textures.h"
-#include "State/Timers.h"
 
-// decomp: D_800E9308 (D_800E9308@BATTLE/BATTLE.PRG)
-int Actors_renderPassCounter; /* contents: module image (ModuleData.cpp) */
+namespace VS::Actors {
+namespace {
+using Core::Math::Angles3;
+using Core::Math::BuildEulerRotationMatrix;
+using Core::Math::BuildEulerRotationMatrixQuadrant;
+using Core::Math::Mat3;
+using Core::Math::PremultiplyRotationMatrix;
+using Core::Math::RotateTranslate;
+using Core::Math::ScaleMatrixColumns;
+using Core::Math::Transform3;
+using Core::Math::Vec3;
+using Core::Math::WrapSigned16;
 
-// decomp: D_800F2458 (D_800F2458@BATTLE/BATTLE.PRG)
-Actors_ModelRenderContext Actors_modelRenderContext;
+// libgpu getTPage and getClut fields.
+constexpr std::uint32_t kPageModeMask = 0x3;
+constexpr std::uint32_t kPageColorModeShift = 7;
+constexpr std::uint32_t kPageBlendModeShift = 5;
+constexpr std::uint32_t kPageLowRowBit = 0x100;
+constexpr std::uint32_t kPageLowRowShift = 4;
+constexpr std::uint32_t kPageColumnMask = 0x3FF;
+constexpr std::uint32_t kPageColumnShift = 6;
+constexpr std::uint32_t kPageHighRowBit = 0x200;
+constexpr std::uint32_t kPageHighRowShift = 2;
+constexpr std::uint32_t kClutRowShift = 6;
+constexpr std::uint32_t kClutColumnShift = 4;
+constexpr std::uint32_t kClutColumnMask = 0x3F;
 
-// decomp: BATTLE.PRG func_800AEAE8 (src/BATTLE/BATTLE.PRG/44F14.c:826)
-void Actors_PrepareActorRootTransform(Actors_ActorRecord* actor)
-{
-    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
+// Texture slot origins count 64-column pages and 256-row bands.
+constexpr std::uint32_t kOriginRowShift = 8;
+constexpr std::uint32_t kFourBitColor = 0;
+constexpr std::uint32_t kEightBitColor = 1;
+constexpr std::uint32_t kNoBlend = 0;
+// Actor palettes are 16-color runs of column 768; slots below 12 have rows
+// 228 and 246 onwards, the rest share rows 229 and 247.
+constexpr std::uint32_t kActorPaletteColumn = 768;
+constexpr std::size_t kOwnPaletteSlots = 12;
+constexpr std::uint32_t kActorPaletteRow = 228;
+constexpr std::uint32_t kActorAlternatePaletteRow = 246;
+constexpr std::uint32_t kSharedPaletteRow = 229;
+constexpr std::uint32_t kSharedAlternatePaletteRow = 247;
+constexpr std::uint32_t kWeaponPageWidth = 64;
+constexpr std::uint32_t kWeaponPaletteColumn = 928;
+constexpr std::uint32_t kWeaponPairPaletteStride = 48;
+constexpr std::uint32_t kWeaponPaletteRow = 228;
+constexpr std::uint32_t kGimmickPageColumn = 64;
+constexpr std::uint32_t kGimmickPageRow = 256;
+constexpr std::uint32_t kGimmickPaletteColumn = 768;
+constexpr std::uint32_t kGimmickPaletteWidth = 16;
+constexpr std::uint32_t kGimmickPaletteRow = 237;
+constexpr std::uint32_t kPulsedGimmickPaletteRow = 255;
 
-    Actors_modelRenderContext.modelScale[0] = 64;
-    Actors_modelRenderContext.modelScale[1] = 64;
-    Actors_modelRenderContext.modelScale[2] = 64;
+// The root key over twice the Q12 instance scale.
+constexpr std::int32_t kScaledRootDivisor = kUnitActorScale * 2;
+constexpr std::uint32_t kAngleMask = 0xFFF;
+// A gimmick is projected from 16 units below its center.
+constexpr std::int32_t kGimmickLift = 16;
+constexpr std::uint32_t kHeldObjectIds = 4;
+constexpr std::uint32_t kFreeObjectIds = 2;
 
-    if (actor->instance.scaleX == ONE && actor->instance.scaleY == ONE
-        && actor->instance.scaleZ == ONE) {
-        setVector(&scratch->rootOffset, actor->blendPose.boneKeys[41].vx >> 1,
-            actor->blendPose.boneKeys[41].vy >> 1, actor->blendPose.boneKeys[41].vz >> 1);
-    } else {
-        setVector(&scratch->rootOffset,
-            actor->blendPose.boneKeys[41].vx * actor->instance.scaleX / (ONE * 2),
-            actor->blendPose.boneKeys[41].vy * actor->instance.scaleY / (ONE * 2),
-            actor->blendPose.boneKeys[41].vz * actor->instance.scaleZ / (ONE * 2));
-    }
+// Appearance states 4..8 other than 6 draw with the colour overrides; so do
+// gimmick states from 12 and the weapon owner's state 15.
+constexpr std::uint32_t kFirstOverrideState = 4;
+constexpr std::uint32_t kOverrideStateEnd = 9;
+constexpr std::uint32_t kPlainOverrideState = 6;
+constexpr std::uint32_t kLateGimmickState = 12;
+constexpr std::uint32_t kWeaponOverrideState = 15;
+constexpr std::uint32_t kPulsedGimmickState = 6;
 
-    setVector(&scratch->rootOffset, scratch->rootOffset.vx * actor->scale / ONE,
-        scratch->rootOffset.vy * actor->scale / ONE,
-        scratch->rootOffset.vz * actor->scale / ONE);
-    Actors_TransformActorRootOffset(actor);
-    scratch->angleX = actor->instance.lookYaw;
-    scratch->angleY = actor->instance.lookPitch;
+constexpr std::uint8_t kDetachedAttachBone = 0xFC;
+constexpr std::uint16_t kDrawnCollisionRadius = 0x80;
+constexpr std::uint8_t kFirstLinkedCompanion = 2;
+// Gimmicks draw four ordering-table entries nearer than the actors.
+constexpr std::int32_t kGimmickDepthEntries = 4;
+// Gimmick mode 0xF7 steps its motion every pass.
+constexpr std::int32_t kSelfDrivenGimmickMode = 0xF7;
+
+[[nodiscard]] std::int32_t Halfword(std::int64_t value) noexcept {
+  return WrapSigned16(static_cast<std::uint32_t>(value));
 }
 
-// decomp: BATTLE.PRG func_800AEF94 (src/BATTLE/BATTLE.PRG/44F14.c:923)
-void Actors_UpdateAndDrawRoomActors(MATRIX* camera)
-{
-    /* The original routine reserves 0x30 bytes of unused local storage. */
-    int unused[12];
-    Render_ModelScratchpad* objectScratch;
-    Render_FrameScratch* frame;
-    Actors_ActorRecord** previous;
-    Actors_ActorRecord** previousAttached;
-    Actors_ActorRecord* actor;
-    Actors_ActorRecord* attached;
-    Actors_ActorRecord** entries;
-    Actors_ActorRecord** weaponActors;
-    Field_GimmickInstance* object;
-    int packedPosition;
-    int weaponActorFlags;
-    int i;
-    int step;
-    int modelHeight;
-    u_char attachmentId;
-    Actors_WeaponModel** weapons;
-    Actors_WeaponModel* weapon;
-
-    VS::Render::PrepareLiveActorCameraMatrices(camera);
-    i = 0;
-    entries = Actors_actorRecords;
-    do {
-        actor = entries[i];
-        if ((actor != NULL) && (actor->instance.boneCount != 0) && !actor->instance.isSkipped
-            && (actor->instance.attachBone != 0xFC)) {
-            VS::Actors::UpdateLiveActorTextureAnimations(actor);
-            if (actor->instance.palettePulse.kind != 0) {
-                VS::Actors::UpdateLiveActorPalettePulse(*actor);
-            }
-            if (actor->instance.actionAnimationState) {
-                VS::Actors::UpdateLiveActorAppearanceTransition(*actor);
-            }
-            actor->instance.wasDrawn = 0;
-            if (actor->instance.isFrozen) {
-                VS::Actors::UpdateActorSoundTransition(*actor);
-                step = 0;
-                if (i > 0) {
-                    int texture = actor->modelId;
-                    previous = entries;
-                    do {
-                        ++step;
-                        if (*previous != NULL && (*previous)->modelId == texture) {
-                            goto texture_ready;
-                        }
-                        ++previous;
-                    } while (step < i);
-                }
-                VS::Actors::UpdateLiveActorTextureScrolling(actor, i);
-            texture_ready:;
-
-                if (actor->routePhase) {
-                    Actors_UpdateActorRoute(i, actor);
-                }
-                if (State_tickSpeed == 4) {
-                    actor->framesPerStep *= 2;
-                }
-                Actors_UpdateActorAnimationBlend(actor);
-                actor->framesPerStep = 1;
-                actor->framesPerStep = actor->fastAnimation + 1;
-            } else {
-                Actors_PrepareActorRootTransform(actor);
-            }
-            if (actor->instance.isAttached) {
-                MATRIX* parent_matrix = VS::Actors::ResolveLiveAttachmentParentMatrix(actor);
-                if (parent_matrix != NULL) {
-                    VS::Actors::DrawLiveActorModel(*actor, *parent_matrix, 0U);
-                }
-            } else {
-                VS::Actors::DrawLiveActorModel(*actor, *camera, 0U);
-                attachmentId = actor->companionSlot;
-                if (attachmentId != 0) {
-                    if (attachmentId >= 2U) {
-                        attached = entries[actor->companionSlot];
-                        VS::Actors::UpdateLiveActorTextureAnimations(attached);
-                        if (attached->instance.palettePulse.kind != 0) {
-                            VS::Actors::UpdateLiveActorPalettePulse(*attached);
-                        }
-                        if (attached->instance.actionAnimationState) {
-                            VS::Actors::UpdateLiveActorAppearanceTransition(*attached);
-                        }
-                        if (actor->instance.isFrozen) {
-                            VS::Actors::UpdateActorSoundTransition(*attached);
-                            step = 0;
-                            if (i > 0) {
-                                int texture = attached->modelId;
-                                previousAttached = entries;
-                                do {
-                                    ++step;
-                                    if (*previousAttached != NULL && (*previousAttached)->modelId == texture) {
-                                        goto linked_texture_ready;
-                                    }
-                                    ++previousAttached;
-                                } while (step < i);
-                            }
-                            VS::Actors::UpdateLiveActorTextureScrolling(attached, i);
-                        linked_texture_ready:;
-                        }
-                    }
-                    frame = (Render_FrameScratch *)((void*)((uintptr_t)Core_ScratchBase() + 0x000));
-                    frame->orderingTable = (u_char*)frame->orderingTable + actor->companionState.depthBias * 4;
-                    actor->instance.position.vx = (u_short)actor->instance.position.vx
-                                            + (signed char)(u_char)actor->companionState.offsetX;
-                    actor->instance.position.vy = (u_short)actor->instance.position.vy
-                                            + (signed char)(u_char)actor->companionState.offsetY;
-                    actor->instance.position.vz = (u_short)actor->instance.position.vz
-                                            + (signed char)(u_char)actor->companionState.offsetZ;
-                    Actors_UpdateMotionAndLookAt(actor, (int)actor->companionSlot);
-                    VS::Actors::DrawLiveActorModel(*actor, *camera, actor->companionSlot);
-                    frame->orderingTable = (u_char*)frame->orderingTable - actor->companionState.depthBias * 4;
-                    actor->instance.position.vx = (u_short)actor->instance.position.vx
-                                            - (signed char)(u_char)actor->companionState.offsetX;
-                    actor->instance.position.vy = (u_short)actor->instance.position.vy
-                                            - (signed char)(u_char)actor->companionState.offsetY;
-                    actor->instance.position.vz = (u_short)actor->instance.position.vz
-                                            - (signed char)(u_char)actor->companionState.offsetZ;
-                }
-            }
-            if (((u_short)actor->collisionRadius >= 0x80U) && ((u_char)actor->blendFrame != 0)) {
-                actor->instance.wasDrawn = 1;
-            }
-        }
-        i += 1;
-    } while (i < 0x11);
-    i = 0;
-    weaponActors = Actors_actorRecords;
-    weapons = Actors_weaponModels;
-    do {
-        weapon = *weapons;
-        if ((weapon != NULL) && weapon->reserved08Bit4 && (weapon->attachmentBone != 0)) {
-            actor = weaponActors[weapon->actorId];
-            if (actor != NULL) {
-                weaponActorFlags = (*(u_int*)((char*)actor + 8));
-                if (weaponActorFlags & 1) {
-                    goto weapon_next;
-                }
-                if (!(weaponActorFlags & 2)) {
-                    goto weapon_next;
-                }
-                if (weaponActorFlags & 0x1000) {
-                    goto weapon_next;
-                }
-                Actors_DrawActorWeaponModel(weapon, &actor->boneMatrices[weapon->attachmentBone]);
-            }
-        }
-    weapon_next:;
-        i += 1;
-        weapons++;
-    } while (i < 0x14);
-    objectScratch = Render_ModelWorkspace();
-    frame = (Render_FrameScratch *)((void*)((uintptr_t)Core_ScratchBase() + 0x000));
-    i = 0;
-    entries = (Actors_ActorRecord **)((void*)Field_gimmickInstances);
-    frame->orderingTable = (u_char*)frame->orderingTable + 0x10;
-    do {
-        object = (Field_GimmickInstance *)((void*)*entries);
-        if ((object != NULL) && (object->boneCount != 0)) {
-            if (((i == Actors_pushedGimmickIndex) && ((*(u_char (*))&Actors_isActorUpdateComplete) == 0)) || (object->mode == 0xF7)) {
-                Field_UpdateGimmickMotion((Field_GimmickPhysicsView*)object, State_tickSpeed / 2);
-            }
-            packedPosition = *(int*)&object->positionX;
-            objectScratch->rootOffset.vz = (u_short)object->positionZ;
-            modelHeight = *(int*)((u_char*)object->model + 0x50);
-            *(int*)&objectScratch->rootOffset = packedPosition;
-            objectScratch->rootOffset.vy += modelHeight / 2;
-            if (object->palettePulse.kind != 0) {
-                VS::Actors::UpdateLiveGimmickPalettePulse(*object);
-            }
-            if (object->motionState) {
-                VS::Actors::UpdateLiveGimmickAppearanceTransition(*object);
-            }
-            Actors_DrawGimmickModel(object, camera);
-        }
-        i += 1;
-        entries++;
-    } while (i < 0x10);
-    (*(u_char (*))&Actors_isActorUpdateComplete) = 0;
-    frame->orderingTable = (u_char*)frame->orderingTable - 0x10;
-    Actors_renderPassCounter += 1;
+[[nodiscard]] std::int32_t MaskedAngle(std::int64_t value) noexcept {
+  return static_cast<std::int32_t>(static_cast<std::uint32_t>(value) &
+                                   kAngleMask);
 }
 
-// decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1695)
-void Actors_TransformActorRootOffset(Actors_ActorRecord* actor)
-{
-    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
-
-    setVector(
-        &scratch->rotation, actor->instance.rotationX, actor->instance.facing, actor->instance.rotationZ);
-    VS::Core::Math::BuildLiveEulerRotationMatrix(&scratch->rotation, &scratch->matrix);
-    scratch->matrix.t[0] = 0;
-    scratch->matrix.t[1] = 0;
-    scratch->matrix.t[2] = 0;
-    Core_Gte_SetRotMatrix(&scratch->matrix);
-    Core_Gte_SetTransMatrix(&scratch->matrix);
-    Core_Gte_LoadV0(&scratch->rootOffset);
-    Core_Gte_Rtv0Tr();
-    Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-    setVector(&scratch->rootOffset, scratch->matrix.t[0], scratch->matrix.t[1],
-        scratch->matrix.t[2]);
-    scratch->rootOffset.vx += actor->instance.position.vx;
-    scratch->rootOffset.vz += actor->instance.position.vz;
-    scratch->rootOffset.vy += actor->instance.position.vy;
+[[nodiscard]] bool InOverrideRange(std::uint32_t state) noexcept {
+  return state >= kFirstOverrideState && state < kOverrideStateEnd &&
+         state != kPlainOverrideState;
 }
 
-// decomp: BATTLE.PRG func_800B1A68 (src/BATTLE/BATTLE.PRG/49268.c:48)
-void Actors_DrawGimmickModel(Field_GimmickInstance* object, MATRIX* camera)
-{
-    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
-    u_int attachment;
-    int value;
-
-    scratch->model = object->model;
-    Core_Gte_SetRotMatrix(camera);
-    Core_Gte_SetTransMatrix(camera);
-    setVector(&scratch->position, scratch->rootOffset.vx, scratch->rootOffset.vy + 16,
-        scratch->rootOffset.vz);
-    Core_Gte_LoadV0(&scratch->position);
-    Core_Gte_Rtv0Tr();
-    attachment = object->objectInfo.objectId;
-
-    if (attachment >= 4) {
-        MATRIX holderRotation;
-        SVECTOR anchors[2];
-        Actors_ActorRecord* holder;
-
-        if (object->parent == 0xFF) {
-            goto rotate;
-        }
-
-        holder = Actors_actorRecords[object->parent];
-        Actors_ActorTaggedBonePosition(object->parent, 0xF0, &anchors[0], 1);
-        Actors_ActorTaggedBonePosition(object->parent, 0xF1, &anchors[1], 1);
-        Core_Gte_SetRotMatrix(camera);
-        Core_Gte_SetTransMatrix(camera);
-        setVector(&scratch->position, (anchors[0].vx + anchors[1].vx) / 2,
-            (anchors[0].vy + anchors[1].vy) / 2, (anchors[0].vz + anchors[1].vz) / 2);
-        Core_Gte_LoadV0(&scratch->position);
-        Core_Gte_Rtv0Tr();
-        setVector(&scratch->rotation, object->rotationOffset.vx + object->rotationX,
-            object->rotationOffset.vy + object->rotationY, object->rotationOffset.vz + object->rotationZ);
-        Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, scratch->matrix);
-        setVector(&scratch->rotation, holder->instance.rotationX, holder->instance.facing,
-            holder->instance.rotationZ);
-        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, holderRotation);
-        VS::Core::Math::ApplyPremultiplyRotationMatrix(holderRotation, scratch->matrix);
-    } else if (attachment < 2) {
-        if (object->mode != 0) {
-            setVector(&scratch->rotation, object->rotationX, object->rotationY, object->rotationZ);
-            Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-            VS::Core::Math::BuildLiveEulerRotationMatrix(&scratch->rotation, &scratch->matrix);
-            VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, scratch->matrix);
-            Core_Gte_MulMatrix(&scratch->matrix, &object->matrices[4]);
-            goto composed;
-        }
-
-        scratch->matrix = object->matrices[4];
-        Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-    } else {
-    rotate:
-        copyVector(&scratch->rotation, &object->rotationOffset);
-        Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-        applyVector(&scratch->rotation, object->rotationX, object->rotationY, object->rotationZ, +=);
-        *(int*)&scratch->rotation &= 0x0FFF0FFF;
-        *(int*)&scratch->rotation.vz &= 0xFFF;
-        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, scratch->matrix);
-    }
-
-    VS::Core::Math::ApplyPremultiplyRotationMatrix(*camera, scratch->matrix);
-composed:
-    VS::Core::Math::ApplyScaleMatrixColumns(scratch->matrix, Actors_roomActorScale);
-    Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
-    object->matrices[0] = scratch->matrix;
-
-    if (object->scaleX != 64 || object->scaleY != 64 || object->scaleZ != 64) {
-        setVector(&scratch->scale, object->scaleX, object->scaleY, object->scaleZ);
-        applyVector(&scratch->scale, 64, 64, 64, *=);
-        VS::Core::Math::ApplyScaleMatrixColumns(scratch->matrix, scratch->scale);
-        Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
-        object->matrices[0] = scratch->matrix;
-    }
-
-    Actors_skeletonRootMatrix = scratch->matrix;
-    object->matrices[1] = scratch->matrix;
-
-    if (!object->isVisible
-        || !VS::Render::ProjectLiveGimmickModel(*object)) {
-        return;
-    }
-
-    scratch->texturePage = GetTPage(0, 0, 64, 256);
-
-    if (object->palettePulse.kind != 0 || object->motionState >= 6) {
-        scratch->palette = GetClut(object->slot * 16 + 768, 255);
-    } else {
-        scratch->palette = GetClut(object->slot * 16 + 768, 237);
-    }
-
-    value = object->motionState >= 4 && object->motionState < 9 && object->motionState != 6;
-
-    if (object->motionState >= 12) {
-        value = 1;
-    }
-
-    if (value) {
-        VS::Render::DrawLiveGimmickGouraudPolygonsWithOverrides(*object);
-    } else {
-        VS::Render::DrawLiveGimmickGouraudPolygons(*object);
-    }
+[[nodiscard]] std::int32_t HalvedRootKey(std::int32_t key, bool unscaled,
+                                         std::int32_t scale) noexcept {
+  if (unscaled) return Halfword(Halfword(key) >> 1);
+  return Halfword(Halfword(key) * Halfword(scale) / kScaledRootDivisor);
 }
 
-// decomp: BATTLE.PRG func_800B217C (src/BATTLE/BATTLE.PRG/49268.c:155)
-void Actors_DrawActorWeaponModel(Actors_WeaponModel* weapon, MATRIX* source)
-{
-    CVECTOR color;
-    Render_ModelScratchpad* scratch = Render_ModelWorkspace();
-    Actors_ActorRecord* actor = Actors_actorRecords[weapon->actorId];
-    int value;
-    int i;
-
-    scratch->model = (Actors_ShpModel*)weapon->sectionOffsets;
-    scratch->matrix = *source;
-
-    if (weapon->reserved13 != 0) {
-        int target = weapon->reserved12;
-        int current = weapon->reserved11;
-
-        value = target - current;
-        value /= weapon->reserved13;
-        weapon->reserved11 = current + value;
-        --weapon->reserved13;
-
-        if (weapon->reserved11 == 0 && weapon->reserved13 == 0) {
-            weapon->reserved08Bit4 = 0;
-        }
-    }
-
-    if (weapon->reserved11 != 64) {
-        value = weapon->reserved11;
-        value *= 64;
-        setVector(&scratch->scale, value, value, value);
-        VS::Core::Math::ApplyScaleMatrixColumns(scratch->matrix, scratch->scale);
-    }
-
-    Actors_skeletonPose.boneMatrices[0] = scratch->matrix;
-    weapon->boneWorldMatrices[0] = scratch->matrix;
-    scratch->position.vx = scratch->position.vy = 0;
-
-    for (i = 1; i < weapon->boneCount; ++i) {
-        int parentBone = scratch->model->bones[i].parentIndex;
-
-        scratch->parentBoneMatrix = &weapon->boneWorldMatrices[parentBone];
-        Core_Gte_SetRotMatrix(scratch->parentBoneMatrix);
-        Core_Gte_SetTransMatrix(scratch->parentBoneMatrix);
-        setVector(&scratch->position, -scratch->model->bones[parentBone].length, 0, 0);
-        Core_Gte_LoadV0(&scratch->position);
-        Core_Gte_Rtv0Tr();
-        scratch->rotation.vx = weapon->bones[i].vx;
-        scratch->rotation.vy = weapon->bones[i].vy;
-        scratch->rotation.vz = weapon->bones[i].vz;
-        Core_Gte_StoreLvnl((VECTOR *)(scratch->matrix.t));
-        *(int*)&scratch->rotation &= 0x0FFF0FFF;
-        *(int*)&scratch->rotation.vz &= 0xFFF;
-        VS::Core::Math::ApplyBuildEulerRotationMatrixQuadrant(scratch->rotation, scratch->matrix);
-        VS::Core::Math::ApplyPremultiplyRotationMatrix(Actors_skeletonPose.boneMatrices[parentBone], scratch->matrix);
-        Actors_skeletonPose.boneMatrices[i] = scratch->matrix;
-        weapon->boneWorldMatrices[i] = scratch->matrix;
-    }
-
-    if (!actor->instance.isVisible
-        || (actor->instance.position.vy >= 256
-            && (actor->instance.slot == 0 || ((short (*)(void))Event_EventPlaybackState)() != 4))) {
-        return;
-    }
-
-    if (!VS::Render::ProjectLiveWeaponModel(*weapon)) {
-        return;
-    }
-
-    scratch->texturePage = Render_legacyWeaponTextureSlots[weapon->textureSlot].texturePage;
-    scratch->palette = Render_legacyWeaponTextureSlots[weapon->paletteSlotOffset].palette;
-    value = actor->instance.actionAnimationState >= 4 && actor->instance.actionAnimationState < 9 && actor->instance.actionAnimationState != 6;
-
-    if (actor->instance.actionAnimationState == 15) {
-        value = 1;
-    }
-
-    if (weapon->reserved08Bit6) {
-        color.r = weapon->reserved5C0;
-        color.g = weapon->reserved5C0;
-        color.b = weapon->reserved5C0;
-    } else {
-        *(int*)&color = *(int*)&actor->instance.baseColor;
-    }
-
-    if (value) {
-        VS::Render::DrawLiveWeaponFlatPolygonsWithOverrides(*weapon, color);
-    } else {
-        VS::Render::DrawLiveWeaponFlatPolygons(*weapon, color);
-    }
+// Whether an earlier slot holds a model with the same id: only the first actor
+// of a model scrolls its shared texture.
+[[nodiscard]] bool EarlierSlotSharesModel(const RoomModelPassHost& host,
+                                          std::size_t slot,
+                                          std::uint16_t model_id) {
+  for (std::size_t earlier = 0; earlier < slot; ++earlier) {
+    const std::optional<RoomActorState> other = host.Actor(earlier);
+    if (other && other->model_id == model_id) return true;
+  }
+  return false;
 }
 
-// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19)
-void Actors_InitializeActorModelResources(void)
-{
-    VECTOR unit_room_scale;
-    int equipment_actor_slot;
-    int i;
-
-    Actors_reservedControlByte = 0;
-
-    for (i = 0; i < 16; ++i) {
-        Content_legacyActorAssetRequests[i].assetKind = 0;
-    }
-
-    for (i = 0; i < 12; ++i) {
-        short (*primary_texture_origins)[2];
-        Render_legacyActorTextureSlots[i].texturePage =
-            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (primary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);
-        Render_legacyActorTextureSlots[i].palette = GetClut(768, i + 228);
-        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, i + 246);
-        Render_legacyActorTextureSlots[i].referenceCount = 0;
-    }
-
-    for (; i < 24; ++i) {
-        short (*secondary_texture_origins)[2];
-        Render_legacyActorTextureSlots[i].texturePage =
-            GetTPage(0, 0, (*(short (*)[][2])&Actors_textureSlotOrigins)[i][0] << 6, (secondary_texture_origins = (*(short (*)[][2])&Actors_textureSlotOrigins))[i][1] << 8);
-        Render_legacyActorTextureSlots[i].palette = GetClut(768, 229);
-        Render_legacyActorTextureSlots[i].alternatePalette = GetClut(768, 247);
-        Render_legacyActorTextureSlots[i].referenceCount = 0;
-    }
-
-    for (i = 0; i < 17; ++i) {
-        Actors_actorRecords[i] = NULL;
-    }
-
-    Actors_primarySequenceBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x7800);
-    Actors_sequenceWorkBuffer = VS::Core::Memory::AllocateLiveFromLowEnd(0x4800);
-
-    for (i = 0; i < 20; ++i) {
-        equipment_actor_slot = (i / 2);
-        Render_legacyWeaponTextureSlots[i].texturePage = GetTPage(1, 0, equipment_actor_slot * 64, 0);
-        Render_legacyWeaponTextureSlots[i].palette = GetClut(((i & 1) * 48) + 928, equipment_actor_slot + 228);
-        Render_legacyWeaponTextureSlots[i].referenceCount = 0;
-    }
-
-    for (i = 0; i < 20; ++i) {
-        Actors_weaponModels[i] = NULL;
-    }
-
-    for (i = 0; i < 2; ++i) {
-        Content_legacyWeaponModelBuffers[i] =
-            (Actors_WeaponModelData *)(VS::Core::Memory::AllocateLiveFromLowEnd(sizeof *Content_legacyWeaponModelBuffers[i]));
-    }
-
-    for (i = 0; i < 16; ++i) {
-        Field_gimmickInstances[i] = NULL;
-    }
-
-    (*(char (*))&Actors_sharedSequenceBankIndex) = 0;
-    (*(char (*)[])&Actors_sharedSequenceBankTexturePages)[0] = 0;
-    (*(char (*)[])&Actors_sharedSequenceBankTexturePages)[1] = 0;
-    (*(char (*)[])&Actors_sharedSequenceBankTexturePages)[2] = 0;
-    Actors_sharedSequenceData[0] = NULL;
-    Actors_sharedSequenceData[1] = NULL;
-    Actors_sharedSequenceData[2] = NULL;
-    (*(char (*))&Content_legacySequenceParsePhase) = 0;
-    (*(char (*))&Content_legacyEtmLoadPhase) = 0;
-    Actors_reservedControlByte = 0;
-    (*(char (*))&Content_modelParseResetFlag) = 0;
-    Menu_Inventory_equipmentModelLoadStep = 0;
-    (*(char (*))&Content_legacyModelLoadPhase) = 0;
-    (*(char (*))&Actors_sharedSequenceBankIndex) = 0;
-    unit_room_scale.vx = 0x1000;
-    unit_room_scale.vy = 0x1000;
-    unit_room_scale.vz = 0x1000;
-    VS::Actors::SetLiveRoomActorScale(&unit_room_scale);
-    (*(char (*))&Actors_pushedGimmickIndex) = 0;
-    Actors_isActorUpdateComplete = 0;
+// The texture animation, palette pulse and appearance transition of `slot`.
+// Nothing for an actor no longer in the table.
+bool UpdateActorAppearance(RoomModelPassHost& host, std::size_t slot) {
+  host.UpdateTextureAnimations(slot);
+  std::optional<RoomActorState> actor = host.Actor(slot);
+  if (!actor) return false;
+  if (actor->pulsing) {
+    host.UpdatePalettePulse(slot);
+    actor = host.Actor(slot);
+    if (!actor) return false;
+  }
+  if (actor->transitioning) host.UpdateAppearanceTransition(slot);
+  return true;
 }
 
-}  // extern "C"
+// A frozen actor's sound transition and texture scrolling; the scroll carries
+// `drawing_slot`, the frozen actor's own slot.
+void UpdateFrozenTextures(RoomModelPassHost& host, std::size_t slot,
+                          std::size_t drawing_slot) {
+  host.UpdateSoundTransition(slot);
+  const std::optional<RoomActorState> actor = host.Actor(slot);
+  if (!actor || EarlierSlotSharesModel(host, drawing_slot, actor->model_id)) {
+    return;
+  }
+  host.UpdateTextureScrolling(slot, drawing_slot);
+}
+
+[[nodiscard]] Vec3 Negated(Vec3 offset) noexcept {
+  return Vec3{-offset.x, -offset.y, -offset.z};
+}
+
+// The companion draw: a linked companion's appearance first, then the actor
+// redrawn with the companion's geometry, offset and depth bias.
+void DrawCompanion(RoomModelPassHost& host, std::size_t slot) {
+  std::optional<RoomActorState> actor = host.Actor(slot);
+  if (!actor || actor->companion_slot == 0) return;
+  const std::size_t companion = actor->companion_slot;
+  if (companion >= kFirstLinkedCompanion && host.Actor(companion) &&
+      UpdateActorAppearance(host, companion)) {
+    actor = host.Actor(slot);
+    if (!actor) return;
+    if (actor->frozen) UpdateFrozenTextures(host, companion, slot);
+  }
+  actor = host.Actor(slot);
+  if (!actor) return;
+  host.OffsetOrderingTable(actor->depth_bias);
+  host.MoveActor(slot, actor->companion_offset);
+  actor = host.Actor(slot);
+  if (!actor) return;
+  host.UpdateMotionAndLookAt(slot, actor->companion_slot);
+  actor = host.Actor(slot);
+  if (!actor) return;
+  host.DrawActor(slot, actor->companion_slot);
+  actor = host.Actor(slot);
+  if (!actor) return;
+  host.OffsetOrderingTable(-static_cast<std::int32_t>(actor->depth_bias));
+  host.MoveActor(slot, Negated(actor->companion_offset));
+}
+
+void DrawRoomActor(RoomModelPassHost& host, std::size_t slot) {
+  std::optional<RoomActorState> actor = host.Actor(slot);
+  if (!actor || !DrawsInRoomPass(*actor)) return;
+  if (!UpdateActorAppearance(host, slot)) return;
+  host.SetDrawn(slot, false);
+  actor = host.Actor(slot);
+  if (!actor) return;
+  if (actor->frozen) {
+    UpdateFrozenTextures(host, slot, slot);
+    host.StepFrozenAnimation(slot);
+  } else {
+    host.PrepareRootTransform(slot);
+  }
+  actor = host.Actor(slot);
+  if (!actor) return;
+  if (actor->attached) {
+    host.DrawAttached(slot);
+  } else {
+    host.DrawActor(slot, 0);
+    DrawCompanion(host, slot);
+  }
+  actor = host.Actor(slot);
+  if (actor && MarksActorDrawn(*actor)) host.SetDrawn(slot, true);
+}
+
+void DrawRoomWeapon(RoomModelPassHost& host, std::size_t index) {
+  const std::optional<RoomWeaponState> weapon = host.Weapon(index);
+  if (!weapon || !weapon->shown || weapon->attachment_bone == 0) return;
+  const std::optional<RoomActorState> owner = host.Actor(weapon->owner);
+  if (owner && OwnerCarriesWeapon(*owner)) host.DrawWeapon(index);
+}
+
+void DrawRoomGimmick(RoomModelPassHost& host, std::size_t index) {
+  std::optional<RoomGimmickState> gimmick = host.Gimmick(index);
+  if (!gimmick || !gimmick->has_bones) return;
+  const PushedGimmick pushed = host.PushedGimmickState();
+  const bool pushed_now = pushed.index >= 0 &&
+                          static_cast<std::size_t>(pushed.index) == index &&
+                          !pushed.update_complete;
+  if (pushed_now || gimmick->mode == kSelfDrivenGimmickMode) {
+    host.UpdateGimmickMotion(index);
+  }
+  host.CenterGimmick(index);
+  gimmick = host.Gimmick(index);
+  if (!gimmick) return;
+  if (gimmick->pulsing) {
+    host.UpdateGimmickPalettePulse(index);
+    gimmick = host.Gimmick(index);
+    if (!gimmick) return;
+  }
+  if (gimmick->motion_state != 0) {
+    host.UpdateGimmickAppearanceTransition(index);
+  }
+  host.DrawGimmick(index);
+}
+}  // namespace
+
+// decomp: libgpu getTPage/getClut, as the INITBTL.PRG and BATTLE.PRG callers
+// below inline them.
+std::uint16_t TexturePageId(std::uint32_t color_mode, std::uint32_t blend_mode,
+                            VramPosition origin) noexcept {
+  return static_cast<std::uint16_t>(
+      ((color_mode & kPageModeMask) << kPageColorModeShift) |
+      ((blend_mode & kPageModeMask) << kPageBlendModeShift) |
+      ((origin.y & kPageLowRowBit) >> kPageLowRowShift) |
+      ((origin.x & kPageColumnMask) >> kPageColumnShift) |
+      ((origin.y & kPageHighRowBit) << kPageHighRowShift));
+}
+
+std::uint16_t ClutId(VramPosition origin) noexcept {
+  return static_cast<std::uint16_t>(
+      (origin.y << kClutRowShift) |
+      ((origin.x >> kClutColumnShift) & kClutColumnMask));
+}
+
+// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19), the
+// two actor texture slot loops.
+TextureSlotIds ActorTextureSlotIds(std::size_t slot, std::int16_t origin_column,
+                                   std::int16_t origin_page) noexcept {
+  TextureSlotIds ids;
+  ids.texture_page = TexturePageId(
+      kFourBitColor, kNoBlend,
+      VramPosition{static_cast<std::uint32_t>(origin_column)
+                       << kPageColumnShift,
+                   static_cast<std::uint32_t>(origin_page) << kOriginRowShift});
+  if (slot < kOwnPaletteSlots) {
+    const auto row = static_cast<std::uint32_t>(slot);
+    ids.palette = ClutId({kActorPaletteColumn, kActorPaletteRow + row});
+    ids.alternate_palette =
+        ClutId({kActorPaletteColumn, kActorAlternatePaletteRow + row});
+  } else {
+    ids.palette = ClutId({kActorPaletteColumn, kSharedPaletteRow});
+    ids.alternate_palette =
+        ClutId({kActorPaletteColumn, kSharedAlternatePaletteRow});
+  }
+  return ids;
+}
+
+// decomp: INITBTL.PRG func_800FA7B0 (src/BATTLE/INITBTL.PRG/FB0.c:19), the
+// weapon texture slot loop.
+TextureSlotIds WeaponTextureSlotIds(std::size_t slot) noexcept {
+  const auto pair = static_cast<std::uint32_t>(slot / 2);
+  const auto side = static_cast<std::uint32_t>(slot & 1U);
+  TextureSlotIds ids;
+  ids.texture_page =
+      TexturePageId(kEightBitColor, kNoBlend, {pair * kWeaponPageWidth, 0});
+  ids.palette = ClutId({side * kWeaponPairPaletteStride + kWeaponPaletteColumn,
+                        pair + kWeaponPaletteRow});
+  return ids;
+}
+
+// decomp: BATTLE.PRG func_800AEAE8 (src/BATTLE/BATTLE.PRG/44F14.c:826).
+Vec3 ActorRootOffset(Vec3 root_key, Vec3 instance_scale,
+                     std::int32_t actor_scale) noexcept {
+  const bool unscaled =
+      instance_scale == Vec3{kUnitActorScale, kUnitActorScale, kUnitActorScale};
+  const Vec3 halved{HalvedRootKey(root_key.x, unscaled, instance_scale.x),
+                    HalvedRootKey(root_key.y, unscaled, instance_scale.y),
+                    HalvedRootKey(root_key.z, unscaled, instance_scale.z)};
+  const std::int32_t scale = Halfword(actor_scale);
+  return Vec3{Halfword(halved.x * scale / kUnitActorScale),
+              Halfword(halved.y * scale / kUnitActorScale),
+              Halfword(halved.z * scale / kUnitActorScale)};
+}
+
+// decomp: BATTLE.PRG func_800B07DC (src/BATTLE/BATTLE.PRG/44F14.c:1695).
+RootTransform TransformRootOffset(Angles3 rotation, Vec3 offset,
+                                  Vec3 position) noexcept {
+  const Mat3 matrix = BuildEulerRotationMatrix(rotation);
+  const Vec3 translation = RotateTranslate(Transform3{matrix, Vec3{}}, offset);
+  return RootTransform{
+      Transform3{matrix, translation},
+      Vec3{Halfword(static_cast<std::int64_t>(translation.x) + position.x),
+           Halfword(static_cast<std::int64_t>(translation.y) + position.y),
+           Halfword(static_cast<std::int64_t>(translation.z) + position.z)}};
+}
+
+// decomp: BATTLE.PRG func_800B1A68 (src/BATTLE/BATTLE.PRG/49268.c:48).
+GimmickPlacement ClassifyGimmickPlacement(std::uint32_t object_id,
+                                          std::uint32_t holder,
+                                          std::int32_t mode) noexcept {
+  if (object_id >= kHeldObjectIds) {
+    return holder == kNoGimmickHolder ? GimmickPlacement::kFree
+                                      : GimmickPlacement::kHeld;
+  }
+  if (object_id >= kFreeObjectIds) return GimmickPlacement::kFree;
+  return mode != 0 ? GimmickPlacement::kScripted : GimmickPlacement::kPlaced;
+}
+
+std::optional<Vec3> ModelColumnScale(Vec3 scale) noexcept {
+  if (scale == Vec3{kUnitModelScale, kUnitModelScale, kUnitModelScale}) {
+    return std::nullopt;
+  }
+  return Vec3{scale.x * kUnitModelScale, scale.y * kUnitModelScale,
+              scale.z * kUnitModelScale};
+}
+
+// decomp: BATTLE.PRG func_800B1A68 (src/BATTLE/BATTLE.PRG/49268.c:48). The
+// original's GTE sequence: RTV0TR of the lifted center (or the anchors'
+// midpoint) through the camera gives the translation; the rotation depends on
+// the placement; every placement but kScripted is then turned by the camera.
+GimmickTransform PlaceGimmick(GimmickPlacement placement,
+                              const GimmickPose& pose, const Transform3& camera,
+                              Vec3 center, Vec3 room_scale) noexcept {
+  GimmickTransform result;
+  result.position =
+      Vec3{Halfword(center.x),
+           Halfword(static_cast<std::int64_t>(center.y) + kGimmickLift),
+           Halfword(center.z)};
+  Mat3 rotation;
+  switch (placement) {
+    case GimmickPlacement::kHeld: {
+      const auto& [first, second] = pose.anchors;
+      result.position =
+          Vec3{Halfword((static_cast<std::int64_t>(first.x) + second.x) / 2),
+               Halfword((static_cast<std::int64_t>(first.y) + second.y) / 2),
+               Halfword((static_cast<std::int64_t>(first.z) + second.z) / 2)};
+      const Angles3 own{
+          Halfword(static_cast<std::int64_t>(pose.rotation_offset.x) +
+                   pose.rotation.x),
+          Halfword(static_cast<std::int64_t>(pose.rotation_offset.y) +
+                   pose.rotation.y),
+          Halfword(static_cast<std::int64_t>(pose.rotation_offset.z) +
+                   pose.rotation.z)};
+      const Angles3 holder{Halfword(pose.holder_rotation.x),
+                           Halfword(pose.holder_rotation.y),
+                           Halfword(pose.holder_rotation.z)};
+      rotation =
+          PremultiplyRotationMatrix(BuildEulerRotationMatrixQuadrant(holder),
+                                    BuildEulerRotationMatrixQuadrant(own));
+      result.rotation = Vec3{holder.x, holder.y, holder.z};
+      break;
+    }
+    case GimmickPlacement::kFree: {
+      const Angles3 own{
+          MaskedAngle(static_cast<std::int64_t>(pose.rotation_offset.x) +
+                      pose.rotation.x),
+          MaskedAngle(static_cast<std::int64_t>(pose.rotation_offset.y) +
+                      pose.rotation.y),
+          MaskedAngle(static_cast<std::int64_t>(pose.rotation_offset.z) +
+                      pose.rotation.z)};
+      rotation = BuildEulerRotationMatrixQuadrant(own);
+      result.rotation = Vec3{own.x, own.y, own.z};
+      break;
+    }
+    case GimmickPlacement::kScripted: {
+      const Angles3 own{Halfword(pose.rotation.x), Halfword(pose.rotation.y),
+                        Halfword(pose.rotation.z)};
+      // libgte MulMatrix saturates each element (#284).
+      rotation = Core::Math::MultiplyMatrixIntoLeft(
+          PremultiplyRotationMatrix(camera.rotation,
+                                    BuildEulerRotationMatrix(own)),
+          pose.placement);
+      result.rotation = Vec3{own.x, own.y, own.z};
+      break;
+    }
+    case GimmickPlacement::kPlaced:
+      rotation = pose.placement;
+      break;
+  }
+  if (placement != GimmickPlacement::kScripted) {
+    rotation = PremultiplyRotationMatrix(camera.rotation, rotation);
+  }
+  rotation = ScaleMatrixColumns(rotation, room_scale);
+  result.scale = ModelColumnScale(pose.scale);
+  if (result.scale) rotation = ScaleMatrixColumns(rotation, *result.scale);
+  result.model = Transform3{rotation, RotateTranslate(camera, result.position)};
+  return result;
+}
+
+// decomp: BATTLE.PRG func_800AEF94 (src/BATTLE/BATTLE.PRG/44F14.c:923), the
+// gimmick center the pass leaves in the model workspace.
+Vec3 GimmickCenter(Vec3 position, std::int32_t height) noexcept {
+  return Vec3{
+      Halfword(position.x),
+      Halfword(static_cast<std::int64_t>(Halfword(position.y)) + height / 2),
+      Halfword(position.z)};
+}
+
+std::uint16_t GimmickTexturePage() noexcept {
+  return TexturePageId(kFourBitColor, kNoBlend,
+                       {kGimmickPageColumn, kGimmickPageRow});
+}
+
+std::uint16_t GimmickPalette(std::uint32_t slot, bool pulsing,
+                             std::uint32_t motion_state) noexcept {
+  const bool pulsed = pulsing || motion_state >= kPulsedGimmickState;
+  return ClutId({slot * kGimmickPaletteWidth + kGimmickPaletteColumn,
+                 pulsed ? kPulsedGimmickPaletteRow : kGimmickPaletteRow});
+}
+
+bool GimmickDrawsWithOverrides(std::uint32_t motion_state) noexcept {
+  return InOverrideRange(motion_state) || motion_state >= kLateGimmickState;
+}
+
+// decomp: BATTLE.PRG func_800B217C (src/BATTLE/BATTLE.PRG/49268.c:155).
+WeaponFadeStep StepWeaponFade(WeaponFade fade) noexcept {
+  if (fade.frames == 0) return WeaponFadeStep{fade, false};
+  const std::int32_t change =
+      (static_cast<std::int32_t>(fade.target) - fade.scale) / fade.frames;
+  fade.scale = static_cast<std::uint8_t>(fade.scale + change);
+  --fade.frames;
+  return WeaponFadeStep{fade, fade.scale == 0 && fade.frames == 0};
+}
+
+Transform3 WeaponRootTransform(const Transform3& attachment,
+                               std::uint8_t scale) noexcept {
+  const std::optional<Vec3> columns =
+      ModelColumnScale(Vec3{scale, scale, scale});
+  if (!columns) return attachment;
+  return Transform3{ScaleMatrixColumns(attachment.rotation, *columns),
+                    attachment.translation};
+}
+
+// decomp: BATTLE.PRG func_800B217C (src/BATTLE/BATTLE.PRG/49268.c:155), the
+// bone loop. The original turned each bone by the skeleton pose and moved it
+// by the weapon's bone matrices; both hold the parent's transform once the
+// parent precedes its child.
+std::optional<std::array<Transform3, kWeaponBoneLimit>> BuildWeaponBoneChain(
+    const Transform3& root, std::span<const WeaponBone> bones) noexcept {
+  if (bones.size() > kWeaponBoneLimit) return std::nullopt;
+  std::array<Transform3, kWeaponBoneLimit> world{};
+  world[0] = root;
+  for (std::size_t bone = 1; bone < bones.size(); ++bone) {
+    const std::size_t parent = bones[bone].parent;
+    if (parent >= bone) return std::nullopt;
+    const Transform3& base = world[parent];
+    const Vec3 tip{Core::Math::WrappingNegate(bones[parent].length), 0, 0};
+    const Angles3& angles = bones[bone].rotation;
+    const Angles3 own{MaskedAngle(angles.x), MaskedAngle(angles.y),
+                      MaskedAngle(angles.z)};
+    world[bone] =
+        Transform3{PremultiplyRotationMatrix(
+                       base.rotation, BuildEulerRotationMatrixQuadrant(own)),
+                   RotateTranslate(base, tip)};
+  }
+  return world;
+}
+
+bool OwnerShowsWeapon(bool visible, std::int32_t height, bool leader,
+                      bool event_playing) noexcept {
+  if (!visible) return false;
+  return height < kHiddenActorHeight || (!leader && event_playing);
+}
+
+bool WeaponDrawsWithOverrides(std::uint32_t action_state) noexcept {
+  return InOverrideRange(action_state) || action_state == kWeaponOverrideState;
+}
+
+bool DrawsInRoomPass(const RoomActorState& actor) noexcept {
+  return actor.has_bones && !actor.skipped &&
+         actor.attach_bone != kDetachedAttachBone;
+}
+
+bool MarksActorDrawn(const RoomActorState& actor) noexcept {
+  return actor.collision_radius >= kDrawnCollisionRadius &&
+         actor.blend_frame != 0;
+}
+
+bool OwnerCarriesWeapon(const RoomActorState& owner) noexcept {
+  return !owner.skipped && owner.visible && !owner.culled;
+}
+
+// decomp: BATTLE.PRG func_800AEF94 (src/BATTLE/BATTLE.PRG/44F14.c:923).
+void UpdateAndDrawRoomModels(RoomModelPassHost& host) {
+  host.PrepareCamera();
+  for (std::size_t slot = 0; slot < kRoomActorSlots; ++slot) {
+    DrawRoomActor(host, slot);
+  }
+  for (std::size_t index = 0; index < kRoomWeaponSlots; ++index) {
+    DrawRoomWeapon(host, index);
+  }
+  host.OffsetOrderingTable(kGimmickDepthEntries);
+  for (std::size_t index = 0; index < kRoomGimmickSlots; ++index) {
+    DrawRoomGimmick(host, index);
+  }
+  host.ClearGimmickPushUpdate();
+  host.OffsetOrderingTable(-kGimmickDepthEntries);
+  host.CountPass();
+}
+}  // namespace VS::Actors

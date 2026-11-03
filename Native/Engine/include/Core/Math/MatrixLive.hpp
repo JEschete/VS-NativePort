@@ -1,6 +1,7 @@
 #pragma once
 // Hand-maintained (tools/port/owned.csv).
 
+#include <cstdint>
 #include <type_traits>
 
 #include "Core/Math/Distance.hpp"
@@ -20,6 +21,14 @@ concept TransformRecord = MatrixRecord<Matrix> && requires(Matrix& matrix) {
   matrix.t[1];
   matrix.t[2];
 };
+
+template <TransformRecord Matrix>
+[[nodiscard]] constexpr Transform3 TransformOf(const Matrix& record) noexcept {
+  return Transform3{MatrixOf(record),
+                    Vec3{static_cast<std::int32_t>(record.t[0]),
+                         static_cast<std::int32_t>(record.t[1]),
+                         static_cast<std::int32_t>(record.t[2])}};
+}
 
 template <TransformRecord Matrix>
 constexpr void StoreTransform(Matrix& record,
