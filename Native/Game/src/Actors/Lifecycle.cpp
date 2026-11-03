@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -11,7 +12,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/Spawning.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
 #include "Core/Memory/Heap.h"
@@ -89,7 +89,7 @@ int Actors_RemoveActorAtSlot(u_int index, int hidden_in_cache)
                 }
             }
 
-            Battle_Ai_FreeActorAiState(actor);
+            VS::Battle::Ai::FreeLiveActorAiState(actor);
 
             for (i = 0; i < 16; ++i) {
                 if (Battle_actors[i] != NULL && Battle_actors[i]->next == actor) {

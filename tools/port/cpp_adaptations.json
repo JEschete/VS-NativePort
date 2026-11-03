@@ -1688,7 +1688,7 @@
 ]
 ],
 [
-817,
+816,
 [
 "            return;"
 ],
@@ -1697,7 +1697,7 @@
 ]
 ],
 [
-824,
+823,
 [
 "    if (((int (*)())Event_EventPlaybackState)() == 4 || actor->animationHeader != found || Actors_lastResolvedSequenceIndex != actor->animationSet) {"
 ],
@@ -1706,7 +1706,7 @@
 ]
 ],
 [
-963,
+962,
 [
 "            return;"
 ],
@@ -1715,7 +1715,7 @@
 ]
 ],
 [
-966,
+965,
 [
 "        return;"
 ],
@@ -1724,7 +1724,7 @@
 ]
 ],
 [
-980,
+979,
 [
 "        return;"
 ],
@@ -1733,7 +1733,7 @@
 ]
 ],
 [
-984,
+983,
 [
 "            return;"
 ],
@@ -1742,7 +1742,7 @@
 ]
 ],
 [
-992,
+991,
 [
 "                return;"
 ],
@@ -1751,7 +1751,7 @@
 ]
 ],
 [
-1003,
+1002,
 [
 "            return;"
 ],
@@ -1760,7 +1760,7 @@
 ]
 ],
 [
-1010,
+1009,
 [
 "            return;"
 ],
@@ -1769,7 +1769,7 @@
 ]
 ],
 [
-1017,
+1016,
 [
 "        return;"
 ],
@@ -1778,7 +1778,7 @@
 ]
 ],
 [
-1022,
+1021,
 [
 "                    return;"
 ],
@@ -1787,7 +1787,7 @@
 ]
 ],
 [
-1027,
+1026,
 [
 "                    return;"
 ],
@@ -1796,7 +1796,7 @@
 ]
 ],
 [
-1047,
+1046,
 [
 "            return;"
 ],
@@ -1805,7 +1805,7 @@
 ]
 ],
 [
-1057,
+1056,
 [
 "            return;"
 ],
@@ -1814,7 +1814,7 @@
 ]
 ],
 [
-1063,
+1062,
 [
 "            return;"
 ],
@@ -1823,7 +1823,7 @@
 ]
 ],
 [
-1188,
+1187,
 [
 "        Actors_DecodeInitialPoseVector(key, data, 0xFF);"
 ],
@@ -1832,7 +1832,7 @@
 ]
 ],
 [
-1197,
+1196,
 [
 "    Actors_DecodeInitialPoseVector(key, data, frame);"
 ],
@@ -1841,7 +1841,7 @@
 ]
 ],
 [
-1202,
+1201,
 [
 "        Actors_DecodeInitialPoseVector(key, data, frame);"
 ],
@@ -1850,7 +1850,7 @@
 ]
 ],
 [
-1211,
+1210,
 [
 "                Actors_DecodeInitialPoseVector(key, data, frame);"
 ],
@@ -1859,7 +1859,7 @@
 ]
 ],
 [
-1243,
+1242,
 [
 "    Actors_ActorRecord* actor = actor_context;"
 ],
@@ -1868,7 +1868,7 @@
 ]
 ],
 [
-1250,
+1249,
 [
 "        p = actor->ownedSequence;"
 ],
@@ -1877,7 +1877,7 @@
 ]
 ],
 [
-1253,
+1252,
 [
 "        p = actor->sharedSequences[3];"
 ],
@@ -1886,7 +1886,7 @@
 ]
 ],
 [
-1267,
+1266,
 [
 "        p = actor->sharedSequences[3];"
 ],
@@ -1895,7 +1895,7 @@
 ]
 ],
 [
-1277,
+1276,
 [
 "        p = actor->sharedSequences[Actors_sharedSequenceBankIndex];"
 ],
@@ -1904,7 +1904,7 @@
 ]
 ],
 [
-1280,
+1279,
 [
 "        p = Actors_sequenceWorkBuffer;"
 ],
@@ -1913,7 +1913,7 @@
 ]
 ],
 [
-1283,
+1282,
 [
 "        p = actor->battleSequence;"
 ],
@@ -1922,7 +1922,7 @@
 ]
 ],
 [
-1289,
+1288,
 [
 "        p = actor->commonSequence;"
 ],
@@ -1931,7 +1931,7 @@
 ]
 ],
 [
-1608,
+1607,
 [
 "        ((void (*)())Actors_IgnoreAnimationEvent)(script);"
 ],
@@ -1940,7 +1940,7 @@
 ]
 ],
 [
-1611,
+1610,
 [
 "        ((void (*)())Actors_IgnoreAnimationEvent)(script);"
 ],
@@ -1949,7 +1949,7 @@
 ]
 ],
 [
-1783,
+1782,
 [
 "    actor->blendPose.eventScript = event_script;"
 ],
@@ -1958,7 +1958,7 @@
 ]
 ],
 [
-1787,
+1786,
 [
 "    ((void (*)())Actors_RunAnimationEvents)(actor, &actor->blendPose, 2, event_script);"
 ],
@@ -1967,7 +1967,7 @@
 ]
 ],
 [
-2136,
+2135,
 [
 "    Core_Gte_StoreLvnl(scratch->matrix.t);"
 ],
@@ -2268,24 +2268,6 @@
 [
 "    ((void (*)(...))Actors_SetActorTranslation)(index, &motion, 0);"
 ]
-],
-[
-3028,
-[
-"                    ((void (*)())Battle_Ai_ReleaseAiDestinationTile)("
-],
-[
-"                    ((void (*)(...))Battle_Ai_ReleaseAiDestinationTile)("
-]
-],
-[
-3176,
-[
-"                ((void (*)())Battle_Ai_ReleaseAiDestinationTile)(actor->instance.currentTileX, actor->instance.currentTileZ);"
-],
-[
-"                ((void (*)(...))Battle_Ai_ReleaseAiDestinationTile)(actor->instance.currentTileX, actor->instance.currentTileZ);"
-]
 ]
 ],
 "Native\\Game\\src\\Actors\\RoomState.cpp": [
@@ -2519,19 +2501,19 @@
 [
 89,
 [
-"        if (Battle_Ai_ApproachActor((void*)state, id, distance, flag)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, id, distance, flag)) {"
 ],
 [
-"        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), id, distance, flag)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), id, distance, flag)) {"
 ]
 ],
 [
 92,
 [
-"        return Battle_Ai_TrackActorPosition((void*)state, id) != 0;"
+"        return VS::Battle::Ai::TrackLiveActorPosition((void*)state, id) != 0;"
 ],
 [
-"        return Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), id) != 0;"
+"        return VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), id) != 0;"
 ]
 ],
 [
@@ -2582,48 +2564,48 @@
 [
 278,
 [
-"        if (Battle_Ai_ApproachActor((void*)state, target, 288, 1)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, target, 288, 1)) {"
 ],
 [
-"        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 288, 1)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 288, 1)) {"
 ]
 ],
 [
 281,
 [
-"                Battle_Ai_ReleaseActorAiReservations((void*)state);",
+"                VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);",
 "                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
 ],
 [
-"                Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
+"                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
 "                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
 286,
 [
-"        if (Battle_Ai_TrackActorPosition((void*)state, target)) {"
+"        if (VS::Battle::Ai::TrackLiveActorPosition((void*)state, target)) {"
 ],
 [
-"        if (Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
+"        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
 ]
 ],
 [
 299,
 [
-"        return Battle_Ai_FleeVisibleEnemies((void*)state, 1);"
+"        return VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 1);"
 ],
 [
-"        return Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);"
+"        return VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);"
 ]
 ],
 [
 303,
 [
-"        && Battle_Ai_ApproachActor((void*)state, target, 1024, 1)) {"
+"        && VS::Battle::Ai::ApproachLiveActor((void*)state, target, 1024, 1)) {"
 ],
 [
-"        && Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 1024, 1)) {"
+"        && VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 1024, 1)) {"
 ]
 ],
 [
@@ -2656,19 +2638,19 @@
 [
 378,
 [
-"        if (Battle_Ai_ApproachActor((void*)state, target, 320, 1)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, target, 320, 1)) {"
 ],
 [
-"        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 320, 1)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 320, 1)) {"
 ]
 ],
 [
 381,
 [
-"        if (Battle_Ai_TrackActorPosition((void*)state, target)) {"
+"        if (VS::Battle::Ai::TrackLiveActorPosition((void*)state, target)) {"
 ],
 [
-"        if (Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
+"        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
 ]
 ],
 [
@@ -2683,19 +2665,19 @@
 [
 393,
 [
-"        if (Battle_Ai_FleeVisibleEnemies((void*)state, 1)) {"
+"        if (VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 1)) {"
 ],
 [
-"        if (Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1)) {"
+"        if (VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1)) {"
 ]
 ],
 [
 397,
 [
-"    return Battle_Ai_FleeVisibleEnemies((void*)state, 1);"
+"    return VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 1);"
 ],
 [
-"    return Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);"
+"    return VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);"
 ]
 ],
 [
@@ -2710,39 +2692,39 @@
 [
 412,
 [
-"        if (Battle_Ai_ApproachActor((void*)state, target, 384, 0)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((void*)state, target, 384, 0)) {"
 ],
 [
-"        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 384, 0)) {"
+"        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 384, 0)) {"
 ]
 ],
 [
 415,
 [
-"                Battle_Ai_ReleaseActorAiReservations((void*)state);",
+"                VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);",
 "                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((void*)state);"
 ],
 [
-"                Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
+"                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));",
 "                ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
 420,
 [
-"        if (Battle_Ai_TrackActorPosition((void*)state, target)) {"
+"        if (VS::Battle::Ai::TrackLiveActorPosition((void*)state, target)) {"
 ],
 [
-"        if (Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
+"        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {"
 ]
 ],
 [
 428,
 [
-"            if (Battle_Ai_FleeVisibleEnemies((void*)state, 0)) {"
+"            if (VS::Battle::Ai::FleeLiveVisibleEnemies((void*)state, 0)) {"
 ],
 [
-"            if (Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 0)) {"
+"            if (VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 0)) {"
 ]
 ],
 [
@@ -2796,11 +2778,11 @@
 297,
 [
 "                    if (Battle_Ai_DestinationOccupancy((void*)state, state->tile) > 0) {",
-"                        Battle_Ai_ReleaseActorAiReservations((void*)state);"
+"                        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
 ],
 [
 "                    if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {",
-"                        Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
+"                        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -3104,11 +3086,11 @@
 1236,
 [
 "        && Battle_Ai_DestinationOccupancy((void*)state, state->tile.word) > 0) {",
-"        Battle_Ai_ReleaseActorAiReservations((void*)state);"
+"        VS::Battle::Ai::ReleaseLiveActorAiReservations((void*)state);"
 ],
 [
 "        && Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {",
-"        Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
+"        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));"
 ]
 ],
 [
@@ -6618,7 +6600,7 @@
 ]
 ],
 [
-1395,
+1394,
 [
 "        ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);"
 ],
@@ -6627,7 +6609,7 @@
 ]
 ],
 [
-1406,
+1405,
 [
 "            ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2E, 0x2F);"
 ],
@@ -6636,7 +6618,7 @@
 ]
 ],
 [
-1410,
+1409,
 [
 "            ((void (*)())Audio_PlayActorSoundPair)(actor, 0x2C, 0x2D);"
 ],
@@ -6645,7 +6627,7 @@
 ]
 ],
 [
-1438,
+1437,
 [
 "    ((void (*)())Actors_TurnActorTowardTileOverTime)(actorId, (Actors_TileTarget*)&tile, 4);"
 ],
@@ -6654,7 +6636,7 @@
 ]
 ],
 [
-1442,
+1441,
 [
 "    ((void (*)())Actors_TranslateActorToOverTime)(actorId, &position, 4);"
 ],
@@ -6663,7 +6645,7 @@
 ]
 ],
 [
-1580,
+1579,
 [
 "    Render_ModelScratchpadAnglesView* scratch = (void*)((uintptr_t)Core_ScratchBase() + 0x35C);"
 ],
@@ -6672,7 +6654,7 @@
 ]
 ],
 [
-1662,
+1661,
 [
 "        if (!((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {"
 ],
@@ -6681,7 +6663,7 @@
 ]
 ],
 [
-1738,
+1737,
 [
 "            child = (void*)Field_gimmickInstances[step];"
 ],
@@ -6690,7 +6672,7 @@
 ]
 ],
 [
-1751,
+1750,
 [
 "        ((int (*)())Field_UpdateGimmickReactionAnimation)(object);"
 ],
@@ -6699,7 +6681,7 @@
 ]
 ],
 [
-1754,
+1753,
 [
 "        if (((int (*)())Field_UpdateGimmickReactionAnimation)(object)) {"
 ],
@@ -6708,7 +6690,7 @@
 ]
 ],
 [
-1762,
+1761,
 [
 "        ((int (*)())Field_UpdateGimmickReactionAnimation)(object);"
 ],

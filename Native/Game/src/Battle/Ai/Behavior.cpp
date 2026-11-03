@@ -1,9 +1,11 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Core/FrameTiming.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
@@ -19,7 +21,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
@@ -87,10 +87,10 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
             }
         }
     move:
-        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), id, distance, flag)) {
+        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), id, distance, flag)) {
             return 1;
         }
-        return Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), id) != 0;
+        return VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), id) != 0;
     case 2:
         if (!VS::Battle::Ai::IsLiveActionCooldownReady((Battle_Ai_ActorAiState *)((void*)state), (Battle_Ai_ActionCandidate *)((void*)entry))) {
             goto normal;
@@ -115,14 +115,14 @@ int Battle_Ai_MoveForActionCandidate(Battle_Ai_CandidateMovementView* state, Bat
                 x - state->position[0], y - state->position[1], z - state->position[2])
             <= 0xFFFF) {
             state->movementTarget = id;
-            Battle_Ai_WanderAroundTile(state, state->plannedTile.word, 2);
+            VS::Battle::Ai::WanderAroundLiveTile(state, state->plannedTile.word, 2);
         } else {
             state->opaque1 = 1;
-            Battle_Ai_MoveToTile(state, state->plannedTile.word, 256);
+            VS::Battle::Ai::MoveLiveActorToTile(state, state->plannedTile.word, 256);
         }
         return 1;
     case 4:
-        return Battle_Ai_FleeVisibleEnemies(state, 0);
+        return VS::Battle::Ai::FleeLiveVisibleEnemies(state, 0);
     case 7:
         VS::Battle::Ai::DisengageLiveActor((Battle_Ai_ActorAiState *)((void*)state));
         id = 0;
@@ -170,11 +170,11 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
         VS::Battle::Ai::DisengageLiveActor(ai_state);
 
         if (ai_state->relations[0].classification == 3) {
-            if (Battle_Ai_ApproachActor(ai_state, 0, 640, 1)) {
+            if (VS::Battle::Ai::ApproachLiveActor(ai_state, 0, 640, 1)) {
                 return 1;
             }
 
-            if (Battle_Ai_TrackActorPosition(ai_state, 0)) {
+            if (VS::Battle::Ai::TrackLiveActorPosition(ai_state, 0)) {
                 return 1;
             }
         }
@@ -193,11 +193,11 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
             distance = VS::Core::Math::SquareRootInteger(ai_state->candidateOrder[1]->distanceSquared);
         }
 
-        if (Battle_Ai_ApproachActor(ai_state, id, distance, flag)) {
+        if (VS::Battle::Ai::ApproachLiveActor(ai_state, id, distance, flag)) {
             return 1;
         }
 
-        if (Battle_Ai_TrackActorPosition(ai_state, id)) {
+        if (VS::Battle::Ai::TrackLiveActorPosition(ai_state, id)) {
             return 1;
         }
         // Fallthrough
@@ -206,11 +206,11 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
         VS::Battle::Ai::DisengageLiveActor(ai_state);
 
         if (ai_state->relations[0].classification == 3) {
-            if (Battle_Ai_ApproachActor(ai_state, 0, 640, 1)) {
+            if (VS::Battle::Ai::ApproachLiveActor(ai_state, 0, 640, 1)) {
                 return 1;
             }
 
-            if (Battle_Ai_TrackActorPosition(ai_state, 0)) {
+            if (VS::Battle::Ai::TrackLiveActorPosition(ai_state, 0)) {
                 return 1;
             }
         }
@@ -224,11 +224,11 @@ int Battle_Ai_UpdateCombatPursuit(Battle_Ai_ActorAiState* ai_state)
         }
 
         if (id >= 0) {
-            if (Battle_Ai_ApproachActor(ai_state, id, 640, 1)) {
+            if (VS::Battle::Ai::ApproachLiveActor(ai_state, id, 640, 1)) {
                 return 1;
             }
 
-            if (Battle_Ai_TrackActorPosition(ai_state, id)) {
+            if (VS::Battle::Ai::TrackLiveActorPosition(ai_state, id)) {
                 return 1;
             }
         }
@@ -253,11 +253,11 @@ int Battle_Ai_TryApproachPlannedTarget(Battle_Ai_ActorAiState* ai_state, Battle_
             VS::Battle::Ai::TryEngageLiveActor(ai_state);
         }
 
-        if (Battle_Ai_ApproachActor(ai_state, id, distance, 1)) {
+        if (VS::Battle::Ai::ApproachLiveActor(ai_state, id, distance, 1)) {
             return 1;
         }
 
-        if (Battle_Ai_TrackActorPosition(ai_state, id)) {
+        if (VS::Battle::Ai::TrackLiveActorPosition(ai_state, id)) {
             return 1;
         }
     }
@@ -276,15 +276,15 @@ int Battle_Ai_UpdateCloseFollowBehavior(Battle_Ai_EscortView* state)
     }
     target = state->linkedActor;
     if (target < 16) {
-        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 288, 1)) {
+        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 288, 1)) {
             if (state->opaqueE9 == 1 && state->planMode != 7) {
                 state->movementTarget = ((Battle_Ai_EscortTargetView*)&entry->opaqueC)->target;
-                Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
                 ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
             }
             return 1;
         }
-        if (Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {
+        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {
             return 1;
         }
     }
@@ -297,11 +297,11 @@ int Battle_Ai_UpdateEnemyPursuitBehavior(Battle_Ai_EscortView* state)
     int target;
 
     if (state->opaqueE) {
-        return Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);
+        return VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);
     }
-    target = Battle_Ai_FindActorByRelationship(state, 0, 3);
-    if (target >= 0 && Battle_Ai_FindActorByRelationship(state, 0, 2) >= 0
-        && Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 1024, 1)) {
+    target = VS::Battle::Ai::FindLiveActorByRelationship(state, 0, 3);
+    if (target >= 0 && VS::Battle::Ai::FindLiveActorByRelationship(state, 0, 2) >= 0
+        && VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 1024, 1)) {
         return 1;
     }
     return Battle_Ai_UpdateCombatPursuit((Battle_Ai_ActorAiState *)((void*)state));
@@ -323,7 +323,7 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
     Battle_Ai_GuardModelView* first;
     Battle_Ai_GuardModelView* second;
 
-    candidate = Battle_Ai_FindActorByRelationship(state, &point, 3);
+    candidate = VS::Battle::Ai::FindLiveActorByRelationship(state, &point, 3);
     target = state->linkedActor;
     valid = (unsigned int)~candidate >> 31;
     if (state->actorId != target && target != 16) {
@@ -376,10 +376,10 @@ int Battle_Ai_UpdateGuardMovementBehavior(Battle_Ai_EscortView* state)
             ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
             return 1;
         }
-        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 320, 1)) {
+        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 320, 1)) {
             return 1;
         }
-        if (Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {
+        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {
             return 1;
         }
     }
@@ -391,11 +391,11 @@ fallback:
             }
             ((void (*)(Battle_Ai_ActionExecutionView* ai_state, int awareness_marker, int duration_frames))Battle_Ai_SetTemporaryAwarenessIndicator)((Battle_Ai_ActionExecutionView *)((void*)state), 6, 0);
         }
-        if (Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1)) {
+        if (VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1)) {
             return 1;
         }
     }
-    return Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);
+    return VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 1);
 }
 
 // decomp: BATTLE.PRG func_800DAAD8 (src/BATTLE/BATTLE.PRG/71618.c:958)
@@ -410,15 +410,15 @@ int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state)
     }
     target = state->linkedActor;
     if (target < 16) {
-        if (Battle_Ai_ApproachActor((Battle_Ai_ActorAiState *)((void*)state), target, 384, 0)) {
+        if (VS::Battle::Ai::ApproachLiveActor((Battle_Ai_ActorAiState *)((void*)state), target, 384, 0)) {
             if (state->opaqueE9 == 1 && state->planMode != 7) {
                 state->movementTarget = ((Battle_Ai_EscortTargetView*)&entry->opaqueC)->target;
-                Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
+                VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
                 ((void (*)(Battle_Ai_ActorAiState*))Battle_Ai_UpdateMovementRecovery)((Battle_Ai_ActorAiState *)((void*)state));
             }
             return 1;
         }
-        if (Battle_Ai_TrackActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {
+        if (VS::Battle::Ai::TrackLiveActorPosition((Battle_Ai_ActorAiState *)((void*)state), target)) {
             return 1;
         }
     }
@@ -426,7 +426,7 @@ int Battle_Ai_UpdateEscortCombatBehavior(Battle_Ai_EscortView* state)
         if (((Battle_Ai_EscortRelationsView*)state)->relations[actor->id].mode != 3
             && ((Battle_Ai_EscortRelationsView*)state)->relations[actor->id].category) {
             ((Battle_Ai_EscortRelationsView*)state)->relations[actor->id].mode = 3;
-            if (Battle_Ai_FleeVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 0)) {
+            if (VS::Battle::Ai::FleeLiveVisibleEnemies((Battle_Ai_CandidateMovementView *)((void*)state), 0)) {
                 ((Battle_Ai_EscortRelationsView*)state)->relations[actor->id].mode =
                     ((Battle_Ai_EscortRelationsView*)state)->relations[actor->id].oldMode;
                 return 1;

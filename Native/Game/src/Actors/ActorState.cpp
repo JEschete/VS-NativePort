@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MotionRequestsLive.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
@@ -21,7 +22,6 @@ extern "C" {
 #include "Actors/WeaponModel.h"
 #include "Audio/ActorSound.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -212,7 +212,7 @@ void Actors_SetActorDetached(int actor_id, int detached)
             list_changed = Actors_UnlinkActorFromRoomList(actor);
             Actors_SetActorAnimationLocked(actor_id, detached);
             if (list_changed != 0) {
-                Battle_Ai_ClearActorAiLinksAndPlan(actor_id);
+                VS::Battle::Ai::ClearLiveActorAiLinksAndPlan(actor_id);
                 VS::Battle::Ai::RebuildLiveActorActionPlans(NULL);
             }
         } else {

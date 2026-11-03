@@ -6,12 +6,12 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/ActorCleanup.h"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
 #include "Battle/Ai/GroundNavigation.h"
-#include "Battle/Ai/MovementBehavior.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -494,7 +494,7 @@ TEST_CASE("Gate release precedes movement when the actor is off its link tile",
 TEST_CASE("Tile goals inside their radius stop through the real command API",
           "[ai][behavior-continuation]") {
   GroundFixture fixture;
-  Battle_Ai_MoveToTile(
+  VS::Battle::Ai::MoveLiveActorToTile(
       reinterpret_cast<Battle_Ai_CandidateMovementView*>(&fixture.states[0]),
       Tile(8, 8), 64);
   CHECK(fixture.states[0].currentMovementMode == 2);
@@ -507,7 +507,7 @@ TEST_CASE("Fleeing remembers a hostile position without changing enemy health",
   GroundFixture fixture;
   fixture.states[0].relations[1].visible = 1;
   fixture.states[0].relations[1].classification = 3;
-  CHECK(Battle_Ai_FleeVisibleEnemies(
+  CHECK(VS::Battle::Ai::FleeLiveVisibleEnemies(
             reinterpret_cast<Battle_Ai_CandidateMovementView*>(
                 &fixture.states[0]),
             1) == -1);
@@ -522,7 +522,7 @@ TEST_CASE("Flee memory expires without issuing a new movement packet",
   GroundFixture fixture;
   fixture.states[0].flee_timer = 1;
   fixture.states[0].currentMovementMode = 4;
-  CHECK(Battle_Ai_FleeVisibleEnemies(
+  CHECK(VS::Battle::Ai::FleeLiveVisibleEnemies(
             reinterpret_cast<Battle_Ai_CandidateMovementView*>(
                 &fixture.states[0]),
             1) == 0);
@@ -537,10 +537,11 @@ TEST_CASE("Relationship queries retain list order and optional native tiles",
   fixture.models[1].instance.currentTileX = 9;
   fixture.models[1].instance.currentTileZ = 10;
   unsigned tile = 0;
-  CHECK(Battle_Ai_FindActorByRelationship(&fixture.states[0], &tile, 2) == 1);
+  CHECK(VS::Battle::Ai::FindLiveActorByRelationship(&fixture.states[0], &tile,
+                                                    2) == 1);
   CHECK(tile == Tile(9, 10));
-  CHECK(Battle_Ai_FindActorByRelationship(&fixture.states[0], nullptr, 3) ==
-        -1);
+  CHECK(VS::Battle::Ai::FindLiveActorByRelationship(&fixture.states[0], nullptr,
+                                                    3) == -1);
 }
 
 TEST_CASE(
@@ -550,18 +551,20 @@ TEST_CASE(
   SVECTOR north{0, 0, -64, 0};
   SVECTOR south{0, 0, 64, 0};
   SVECTOR east{64, 0, 0, 0};
-  CHECK(Battle_Ai_TargetFacingCosine(&from, &north, 0, 4096) == 4096);
-  CHECK(Battle_Ai_TargetFacingCosine(&from, &south, 0, 4096) == -4096);
-  CHECK(Battle_Ai_TargetFacingCosine(&from, &east, 0, 4096) == 0);
-  CHECK(Battle_Ai_TargetFacingCosine(&from, &east, 3072, 4096) == 4096);
-  CHECK(Battle_Ai_TargetFacingCosine(&from, &from, 0, 0) == 4096);
+  CHECK(VS::Battle::Ai::LiveTargetFacingCosine(&from, &north, 0, 4096) == 4096);
+  CHECK(VS::Battle::Ai::LiveTargetFacingCosine(&from, &south, 0, 4096) ==
+        -4096);
+  CHECK(VS::Battle::Ai::LiveTargetFacingCosine(&from, &east, 0, 4096) == 0);
+  CHECK(VS::Battle::Ai::LiveTargetFacingCosine(&from, &east, 3072, 4096) ==
+        4096);
+  CHECK(VS::Battle::Ai::LiveTargetFacingCosine(&from, &from, 0, 0) == 4096);
 }
 
 TEST_CASE("Creation-time null action contexts still propagate relationships",
           "[ai][behavior-continuation]") {
   GroundFixture fixture;
   fixture.states[1].usesRoomActionDelay = 1;
-  Battle_Ai_ApplyActionRelationshipChanges(nullptr);
+  VS::Battle::Ai::ApplyLiveActionRelationshipChanges(nullptr);
   CHECK(fixture.states[1].relations[0].classification == 2);
   CHECK(fixture.states[1].relations[1].classification == 2);
 }
@@ -603,7 +606,7 @@ TEST_CASE("Actor contact release clears the reserved moving-platform bit",
   fixture.states[1].nextTile.word = 2u << 8;
   fixture.models[1].instance.supportLayer = 0;
   fixture.room.reservedEPrefix[0] = 0xFF;
-  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xFB);
 }
 
@@ -623,7 +626,7 @@ void CheckActorContactBits(GroundFixture& fixture, unsigned command,
   for (unsigned bit = 0; bit < 256; ++bit) {
     fixture.states[1].nextTile.word = 0xA500005Au | (bit << 8);
     fixture.room.reservedEPrefix[0] = 0xA5;
-    Battle_Ai_ReleaseActorAiContactOccupancy(1);
+    VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
     CHECK(fixture.room.reservedEPrefix[0] ==
           ExpectedContactRelease(command, layer, bit));
   }
@@ -650,16 +653,16 @@ TEST_CASE("Actor contact release preserves source no-state and no-room gates",
   Battle_actors[1] = nullptr;
   Battle_Ai_actorAiStates[1] = nullptr;
   fixture.room.reservedEPrefix[0] = 0xA5;
-  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA5);
   Battle_actors[1] = &fixture.actors[1];
   Battle_Ai_actorAiStates[1] = &fixture.states[1];
   fixture.actors[1].commandOpcode = 11;
   fixture.states[1].nextTile.word = 0x200;
   Battle_Ai_roomAiState = nullptr;
-  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA5);
   Battle_Ai_roomAiState = &fixture.room;
-  Battle_Ai_ReleaseActorAiContactOccupancy(1);
+  VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(1);
   CHECK(fixture.room.reservedEPrefix[0] == 0xA1);
 }

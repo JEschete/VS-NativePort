@@ -9,12 +9,12 @@
 #include <iterator>
 #include <span>
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 
 extern "C" {
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -139,7 +139,7 @@ class LiveAllianceActor final : public AshleyAllianceActor {
     Battle_Ai_SetTemporaryAwarenessIndicator(&state_, marker, frames);
   }
   void QueueReaction(int command, int range) override {
-    Battle_Ai_SetActorAiReactionWithDelay(
+    SetLiveActorAiReactionWithDelay(
         reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&reaction_), command,
         range);
   }

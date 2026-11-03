@@ -3,22 +3,23 @@
 // (Decisions.cpp).
 #include "Battle/Ai/DecisionsLive.hpp"
 
+#include <cstdint>
 #include <cstdlib>
 #include <iterator>
 #include <optional>
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 
 extern "C" {
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Behavior.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Core/Diagnostics.h"
 }
 
@@ -56,17 +57,17 @@ class LiveDecisionActor final : public DecisionActor {
     return state_.actionStatus;
   }
   int FleeVisibleEnemies() override {
-    return Battle_Ai_FleeVisibleEnemies(
+    return FleeLiveVisibleEnemies(
         reinterpret_cast<Battle_Ai_CandidateMovementView*>(&state_),
         kFleeVisibleMode);
   }
   void WanderAroundSavedCenter() override {
-    Battle_Ai_WanderAroundSavedCenter(&state_);
+    WanderAroundLiveSavedCenter(&state_);
   }
   int UpdateCombatPursuit() override {
     return Battle_Ai_UpdateCombatPursuit(&state_);
   }
-  void PatrolWaypoints() override { Battle_Ai_PatrolWaypoints(&state_); }
+  void PatrolWaypoints() override { PatrolLiveWaypoints(&state_); }
   [[nodiscard]] std::optional<PursuitCandidate> BestCandidate() const override {
     const Battle_Ai_ActionCandidate* candidate = state_.candidateOrder[0];
     if (candidate == nullptr || state_.model == nullptr) {
@@ -78,15 +79,15 @@ class LiveDecisionActor final : public DecisionActor {
                             .extended_reach = state_.model->opaqueABit5 != 0};
   }
   int ApproachActor(int target, int distance) override {
-    return Battle_Ai_ApproachActor(&state_, target, distance, 0);
+    return ApproachLiveActor(&state_, target, distance, 0);
   }
   int TrackActorPosition(int target) override {
-    return Battle_Ai_TrackActorPosition(&state_, target);
+    return TrackLiveActorPosition(&state_, target);
   }
   std::optional<SupportTarget> FindSupportTarget() override {
-    unsigned tile = 0;
+    std::uint32_t tile = 0;
     const int target =
-        Battle_Ai_FindActorByRelationship(&state_, &tile, kAllyRelationship);
+        FindLiveActorByRelationship(&state_, &tile, kAllyRelationship);
     if (target < 0 || static_cast<std::size_t>(target) >=
                           std::size(state_.distancesSquared)) {
       return std::nullopt;
@@ -97,11 +98,11 @@ class LiveDecisionActor final : public DecisionActor {
             state_.distancesSquared[static_cast<std::size_t>(target)]};
   }
   void MoveToTile(unsigned tile) override {
-    Battle_Ai_MoveToTile(
+    MoveLiveActorToTile(
         reinterpret_cast<Battle_Ai_CandidateMovementView*>(&state_), tile, 0);
   }
   void WanderAroundTile(unsigned tile, int radius) override {
-    Battle_Ai_WanderAroundTile(
+    WanderAroundLiveTile(
         reinterpret_cast<Battle_Ai_CandidateMovementView*>(&state_), tile,
         radius);
   }
@@ -118,7 +119,7 @@ class LiveDecisionActor final : public DecisionActor {
     return actor->commandOpcode < kFirstNonLocomotionCommand;
   }
   void ReleaseReservations() override {
-    Battle_Ai_ReleaseActorAiReservations(&state_);
+    ReleaseLiveActorAiReservations(&state_);
   }
   void IssueCommand(int command) override {
     IssueLiveActorCommand(&state_, command);

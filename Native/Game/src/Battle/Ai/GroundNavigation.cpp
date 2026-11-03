@@ -14,6 +14,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -22,7 +23,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 }
@@ -1001,7 +1001,7 @@ void Battle_Ai_ResolveDirectionalMovement(Battle_Ai_ActorAiState* view,
     const int action = Battle_Ai_FollowObstacleDetour(PathView(state), test,
                                                       mode >= 2 ? 12 : 11);
     if (action < 0) {
-      Battle_Ai_RefreshAiMovementCooldown(
+      VS::Battle::Ai::RefreshLiveAiMovementCooldown(
           reinterpret_cast<Battle_Ai_TerrainMoveView*>(&state));
       Recover(state);
     } else {

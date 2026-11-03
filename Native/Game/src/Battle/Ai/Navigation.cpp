@@ -2,6 +2,7 @@
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -16,7 +17,6 @@ extern "C" {
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/Perception.h"
 #include "Field/Collision.h"
@@ -462,7 +462,7 @@ void Battle_Ai_UpdateNavigationAreaMovement(Battle_Ai_TerrainMoveView* state)
                     goto move;
                 }
             } else {
-                Battle_Ai_RefreshAiMovementCooldown(state);
+                VS::Battle::Ai::RefreshLiveAiMovementCooldown(state);
                 if (mode == 5) {
                     Battle_Ai_BeginAiGroundMovement(state, state->angle << 9);
                 } else {

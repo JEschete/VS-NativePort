@@ -5,7 +5,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/MovementBehavior.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -101,7 +101,7 @@ TEST_CASE("Pursuit refresh reads signed position halfwords in subtile units",
   fixture.models[1].instance.movementMode = planned ? 1 : 0;
   fixture.Approach().reservedF5[0] = 0x55;
   fixture.Approach().reservedF7[0] = 0x66;
-  Battle_Ai_RefreshAiTargetTile(&fixture.states[0]);
+  VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().targetTileX == (planned ? 254 : 19));
   CHECK(fixture.Approach().targetTileZ == (planned ? 3 : 253));
   CHECK(fixture.Approach().reservedF5[0] == 0x55);
@@ -116,7 +116,7 @@ TEST_CASE(
   fixture.Approach().targetTileZ = 18;
   Battle_Ai_FrameState()->actors[1] = nullptr;
   Actors_actorRecords[1] = nullptr;
-  Battle_Ai_RefreshAiTargetTile(&fixture.states[0]);
+  VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().targetTileX == 17);
   CHECK(fixture.Approach().targetTileZ == 18);
 }
@@ -129,7 +129,7 @@ TEST_CASE("Conditional target refresh tests the requested movement mode",
   fixture.states[0].currentMovementMode = 1;
   fixture.Approach().targetTileX = 17;
   fixture.Approach().targetTileZ = 18;
-  Battle_Ai_RefreshAiTargetTileWhenTracking(
+  VS::Battle::Ai::RefreshLiveAiTargetTileWhenTracking(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(&fixture.states[0]));
   CHECK(fixture.Approach().targetTileX == (mode == 1 ? 19 : 17));
   CHECK(fixture.Approach().targetTileZ == (mode == 1 ? 253 : 18));
@@ -145,7 +145,7 @@ TEST_CASE("Pursuit refresh resolves current and planned moving-platform gates",
   model.movementMode = planned ? 1 : 0;
   model.currentTileLayer = model.previousTileLayer =
       static_cast<u_char>(group + 2);
-  Battle_Ai_RefreshAiTargetTile(&fixture.states[0]);
+  VS::Battle::Ai::RefreshLiveAiTargetTile(&fixture.Approach());
   CHECK(fixture.Approach().targetTileX == (12 + group) * 2);
   CHECK(fixture.Approach().targetTileZ == (9 + group) * 2);
 }
@@ -158,7 +158,7 @@ TEST_CASE("Approach retains the original missing-cache target-zero distinction",
   Actors_actorRecords[target] = nullptr;
   fixture.states[0].requestedMovementMode = 3;
   fixture.states[0].currentMovementMode = 2;
-  CHECK(Battle_Ai_ApproachActor(&fixture.states[0], target, 640, 1) ==
+  CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], target, 640, 1) ==
         (target == 0 ? 0 : 3));
   CHECK(fixture.states[0].requestedMovementMode == (target == 0 ? 3 : 1));
   CHECK(fixture.states[0].currentMovementMode == (target == 0 ? 2 : 1));
@@ -170,7 +170,7 @@ TEST_CASE("Approach preserves the full current or planned destination word",
   PursuitFixture fixture;
   fixture.UseVisibleInactiveTarget();
   fixture.models[1].instance.movementMode = planned ? 1 : 0;
-  CHECK(Battle_Ai_ApproachActor(&fixture.states[0], 1, 640, 1) == 0);
+  CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 1, 640, 1) == 0);
   CHECK(fixture.states[0].destination.word ==
         (planned ? 0x330A0009u : 0x22060004u));
   CHECK(fixture.Approach().targetId == 1);
@@ -185,7 +185,7 @@ TEST_CASE("Approach hands a successful real consumer into the movement mode",
   const int mode = GENERATE(0, 1);
   PursuitFixture fixture;
   fixture.states[0].currentMovementMode = static_cast<u_char>(mode);
-  CHECK(Battle_Ai_ApproachActor(&fixture.states[0], 0, 640, 0) ==
+  CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 0, 640, 0) ==
         (mode == 0 ? 3 : 1));
   CHECK(fixture.actors[0].commandOpcode == 2);
   CHECK(fixture.actors[0].commandState == 0x80);
@@ -205,7 +205,7 @@ TEST_CASE("Approach platform selection preserves the original other tile bytes",
   fixture.states[0].settingsBit14 = branch == 1 ? 1 : 0;
   fixture.states[0].movementFlags = branch == 2 ? 8 : 0;
   fixture.states[0].destination.word = 0xAABBCCDD;
-  CHECK(Battle_Ai_ApproachActor(&fixture.states[0], 1, 640, 1) == 0);
+  CHECK(VS::Battle::Ai::ApproachLiveActor(&fixture.states[0], 1, 640, 1) == 0);
   const unsigned expected = branch == 0 ? 0x3309020C : 0xAA09CC0C;
   CHECK(fixture.states[0].destination.word == expected);
   CHECK(fixture.Approach().cachedDestination.word == expected);

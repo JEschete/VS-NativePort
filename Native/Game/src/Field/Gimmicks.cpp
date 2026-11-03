@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 #include "Render/ModelGeometryLive.hpp"
 extern "C" {
@@ -16,7 +17,6 @@ extern "C" {
 #include "Audio/ActorSound.h"
 #include "Audio/Seq/Channel.h"
 #include "Audio/Sfx.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Core/Memory/Heap.h"
 #include "Effects/Weather.h"
@@ -992,8 +992,7 @@ void Field_RefreshAshleyInteractionTile(Actors_ActorRecord* actor_record)
         } else {
             tile_offset_z = signed_interaction_reach;
         }
-        ((void (*)(int, int, int, int))Battle_Ai_ReleaseAiDestinationTile)(actor_record->instance.currentTileX + tile_offset_x, actor_record->instance.currentTileZ + tile_offset_z,
-            tile_offset_x, tile_offset_z);
+        VS::Battle::Ai::ReleaseLiveAiDestinationTile(actor_record->instance.currentTileX + tile_offset_x, actor_record->instance.currentTileZ + tile_offset_z);
     }
 }
 
@@ -1505,7 +1504,7 @@ void Field_ApplyGimmickInteractionCommand(Actors_ActorRecord* actor, int mode)
         return;
     }
 
-    Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
+    VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
     Battle_Ai_RemoveAiTileOccupant(object);
 
     if (object->objectInfo.interaction == 2) {
@@ -1663,7 +1662,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         if (!((int (*)(...))Field_UpdateGimmickReactionAnimation)(object)) {
             Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
             Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
-            Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
+            VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
         }
         return;
     } else if (mode == 0xFC) {
@@ -1703,7 +1702,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
                         Audio_PlayWorldSfx(0x7E, 0x31, &object->position);
                         object->mode = 0;
                         Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
-                        Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
+                        VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
                     }
                     goto children;
                 }
@@ -1712,7 +1711,7 @@ void Field_UpdateGimmickMotion(Field_GimmickPhysicsView* object, int unused)
         object->tileX = object->position.vx / 128;
         object->tileZ = object->position.vz / 128;
         Battle_Ai_AddAiTileOccupant((const Field_GimmickInstance*)object);
-        Battle_Ai_ReleaseAiDestinationTile(object->tileX, object->tileZ);
+        VS::Battle::Ai::ReleaseLiveAiDestinationTile(object->tileX, object->tileZ);
         if ((*(int*)&object->material & 7) == 1) {
             --object->durability;
             if (!object->durability) {

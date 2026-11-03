@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Battle/Ai/ConditionSnapshotBinding.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
@@ -88,7 +88,7 @@ int Battle_Ai_RefreshActionCandidateReadiness(Battle_Ai_CandidateReadinessView* 
             candidate = state->candidateOrder[i];
             if (candidate->weight) {
                 state->candidateOrder[0] = candidate;
-                Battle_Ai_SelectActionMovementMode(state);
+                VS::Battle::Ai::SelectLiveActionMovementMode(state);
                 goto done;
             }
         }
@@ -760,7 +760,7 @@ void Battle_Ai_BuildActorActionPlan(Battle_Ai_ActionPlanView* state)
     if (state->candidateCount == 0) {
         state->planMode = 7;
     } else {
-        Battle_Ai_SelectActionMovementMode((Battle_Ai_CandidateReadinessView*)state);
+        VS::Battle::Ai::SelectLiveActionMovementMode((Battle_Ai_CandidateReadinessView*)state);
     }
 
     if (Battle_Ai_arenaOrbit != NULL) {

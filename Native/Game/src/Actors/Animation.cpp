@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/SequencePlaybackLive.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
@@ -24,7 +25,6 @@ extern "C" {
 #include "Audio/Sfx.h"
 #include "Battle/ActionAnimation.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Core/Diagnostics.h"
 #include "Effects/ActionEffects.h"
@@ -552,9 +552,8 @@ void Actors_RestoreActorBasePose(int actorId, int animation)
                                     } else {
                                         tileDz = distance;
                                     }
-                                    ((void (*)(int, int, int, int))Battle_Ai_ReleaseAiDestinationTile)(actor->instance.currentTileX + tileDx,
-                                        actor->instance.currentTileZ + tileDz, tileDx,
-                                        tileDz);
+                                    VS::Battle::Ai::ReleaseLiveAiDestinationTile(actor->instance.currentTileX + tileDx,
+                                        actor->instance.currentTileZ + tileDz);
                                 }
                             }
                             if (actor->actionPoseActive) {

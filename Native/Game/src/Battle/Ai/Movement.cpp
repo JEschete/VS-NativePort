@@ -1,8 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/FlightTerrain.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Core/Math/Distance.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/TerrainHeight.hpp"
@@ -18,14 +20,12 @@ extern "C" {
 #include "Actors/TextureAnimation.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionSelection.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Ai/OrbitingBoss.h"
@@ -296,7 +296,7 @@ int Battle_Ai_UpdateFlightGroundTransition(Battle_Ai_MovementCheckView* state, i
             if (VS::Field::GroundHeightAtPackedTile(VS::Battle::Ai::CurrentTerrain(), VS::Core::Math::UnpackTileCoordinate(static_cast<std::uint32_t>(state->tile))) + state->flightHeight < Battle_Ai_roomAiState->flightCeiling) {
                 if (state->model->opaque8 & 0x200000) {
                     if (Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile) > 0) {
-                        Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
+                        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
                         Battle_Ai_BeginAiTerrainMovement(state);
                         return 1;
                     }
@@ -551,7 +551,7 @@ void Battle_Ai_UpdateFlightDirectionalMovement(Battle_Ai_ActorAiState* ai_state,
     Battle_Ai_ResolveDirectionalMovement(ai_state, movement_angle, 3);
 
     if (*(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 5 && *(int*)((uintptr_t)&Battle_Ai_FrameState()->movementResult) != 7) {
-        Battle_Ai_ReleaseActorAiReservations(ai_state);
+        VS::Battle::Ai::ReleaseLiveActorAiReservations(ai_state);
         Battle_Ai_UpdateMovementRecovery((Battle_Ai_MovementRecoveryView *)((void*)ai_state));
         return;
     }
@@ -1167,7 +1167,7 @@ int Battle_Ai_UpdateTargetApproachMovement(Battle_Ai_TargetApproachView* s, int 
     goto done;
 
 done:
-    Battle_Ai_RefreshAiTargetTile(s);
+    VS::Battle::Ai::RefreshLiveAiTargetTile(s);
     return result;
 }
 
@@ -1235,7 +1235,7 @@ void Battle_Ai_UpdateMovementRecovery(Battle_Ai_MovementRecoveryView* state)
     if ((context->opaque8 & 0x200000) && state->stallCounter++ > 120 && (state->movementFlags & 6)
         && (state->movementFlags & 0x30)
         && Battle_Ai_DestinationOccupancy((Battle_Ai_MoveTargetView *)((void*)state), state->tile.word) > 0) {
-        Battle_Ai_ReleaseActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
+        VS::Battle::Ai::ReleaseLiveActorAiReservations((Battle_Ai_ActorAiState *)((void*)state));
         Battle_Ai_BeginAiTerrainMovement(state);
         return;
     }

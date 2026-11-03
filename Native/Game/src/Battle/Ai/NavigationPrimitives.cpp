@@ -11,6 +11,7 @@
 #include <iterator>
 #include <memory>
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
@@ -22,7 +23,6 @@
 extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/GroundNavigation.h"
@@ -480,7 +480,7 @@ void Battle_Ai_UpdateActorNavigationOverrides(void) {
     // links.
     if (ScriptedRouteReached(*route)) {
       VS::Battle::Ai::IssueLiveActorCommand(route, 0);
-      Battle_Ai_FreeActorNavigationOverride(route->actorId);
+      VS::Battle::Ai::FreeLiveActorNavigationOverride(route->actorId);
     }
   }
   Battle_Ai_SaveMovementRandomState();

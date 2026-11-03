@@ -460,7 +460,7 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertIn("auto* destination = state;", source)
         self.assertIn("destination->scriptedTargetXZ = target;", source)
         self.assertIn("std::bit_cast<std::int32_t>(squared)", source)
-        self.assertIn("Battle_Ai_FreeActorNavigationOverride(route->actorId)", source)
+        self.assertIn("VS::Battle::Ai::FreeLiveActorNavigationOverride(route->actorId)", source)
         self.assertIn("Battle_Ai_SaveMovementRandomState();", source)
         self.assertNotIn("actor[3]", source)
 
@@ -502,7 +502,15 @@ class EncounterFixupTests(unittest.TestCase):
         self.assertEqual(
             owned["F01836"]["path"], r"Native\Game\src\Battle\Ai\ActorCleanup.cpp"
         )
+        self.assertEqual(
+            owned["F01836"]["name"], "VS::Battle::Ai::ReleaseActorAiContactOccupancy"
+        )
+        # The module pointer table stores 0x800E6EB0, so it resolves to the Live binding.
         self.assertIn(
+            ("BATTLE/BATTLE.PRG", 0x800E6EB0, "VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy"),
+            copy_fixups.MODULE_BINDING_ENTRIES,
+        )
+        self.assertNotIn(
             ("BATTLE/BATTLE.PRG", 0x800E6EB0, "F01836"),
             copy_fixups.MODULE_FUNCTION_ENTRIES,
         )
@@ -519,10 +527,13 @@ class EncounterFixupTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn("kContactCommands = 0x4800", cleanup)
-        self.assertIn("if (model->instance.supportLayer != 0) return;", cleanup)
-        self.assertIn(
-            "Battle_Ai_ClearAiContactOccupancy(static_cast<int>(contact))", cleanup
+        self.assertIn("if ((*support & kSupportLayerBits) != 0) return true;", cleanup)
+        self.assertIn("host.ClearContactOccupancy(static_cast<int>(contact))", cleanup)
+        live = (root / r"Native\Game\src\Battle\Ai\ActorCleanupLive.cpp").read_text(
+            encoding="utf-8"
         )
+        self.assertIn("Battle_Ai_ClearAiContactOccupancy(contact);", live)
+        self.assertIn("model.supportLayer |", live)
 
     def test_ashley_alliance_uses_native_callback_storage_without_shifting_views(self):
         self.assertEqual(
@@ -1183,7 +1194,7 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01845"]["path"],
             r"Native\Game\src\Battle\Ai\ActorCleanup.cpp",
         )
-        self.assertEqual(owned["F01845"]["name"], "Battle_Ai_AllocateOrbitingBossState")
+        self.assertEqual(owned["F01845"]["name"], "VS::Battle::Ai::AllocateOrbitingBossState")
 
     def test_hostility_transition_is_owned_with_existing_reaction_lifecycle(self):
         owned = self.owned_items()
@@ -1191,7 +1202,7 @@ class EncounterFixupTests(unittest.TestCase):
             owned["F01695"]["path"],
             r"Native\Game\src\Battle\Ai\ActorCleanup.cpp",
         )
-        self.assertEqual(owned["F01695"]["name"], "Battle_Ai_MakeTargetHostile")
+        self.assertEqual(owned["F01695"]["name"], "VS::Battle::Ai::MakeTargetHostile")
 
     def test_dynamic_tile_marker_is_owned_with_existing_tile_primitives(self):
         owned = self.owned_items()
@@ -1256,9 +1267,9 @@ class EncounterFixupTests(unittest.TestCase):
     def test_ai_lifecycle_leaves_share_the_native_persistence_projection(self):
         owned = self.owned_items()
         for identifier, name in (
-            ("F01820", "Battle_Ai_PackActorAiPersistenceFlags"),
-            ("F01831", "Battle_Ai_ClearActorAiNavigationReset"),
-            ("F01835", "Battle_Ai_InitializeActorAiExtensionHook"),
+            ("F01820", "VS::Battle::Ai::PackActorAiPersistenceFlags"),
+            ("F01831", "VS::Battle::Ai::ClearActorAiNavigationReset"),
+            ("F01835", "VS::Battle::Ai::InitializeActorAiExtensionHook"),
         ):
             self.assertEqual(owned[identifier]["name"], name)
             self.assertEqual(
@@ -1270,7 +1281,7 @@ class EncounterFixupTests(unittest.TestCase):
             encoding="utf-8"
         )
         self.assertIn(
-            "found->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(slot);",
+            "found->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);",
             snapshot,
         )
         self.assertNotIn("relation.previousClassification <<", snapshot)
@@ -1791,6 +1802,11 @@ VS::Actors::UpdateLiveGimmickPalettePulse(*object);""",
                 self.assertIn(f"VS::Menu::{live}(", sources[path])
                 self.assertNotIn(f"Menu_Files_{core}", sources[path])
                 self.assertNotIn(f"VS::Menu::Files::{core}(", sources[path])
+                matches = [(pattern, replacement) for _, pattern, replacement, _ in copy_fixups.REGEX_FIXES
+                           if replacement == f"VS::Menu::{live}("]
+                self.assertEqual(len(matches), 1)
+                self.assertEqual(re.sub(*matches[0], f"x = VS::Menu::Files::{core}(0);"),
+                                 f"x = VS::Menu::{live}(0);")
 
     def test_trigger_marker_import_owns_the_complete_geometry_definition(self):
         blob = next(

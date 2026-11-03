@@ -1,5 +1,6 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MovementCommand.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 #include "Core/FrameTiming.hpp"
@@ -24,7 +25,6 @@ extern "C" {
 #include "Battle/ActionExecution.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
@@ -630,7 +630,7 @@ void Boot_InitializeGameplayOverlay(int startState __attribute__((unused)))
     Actors_InitializeActorModelResources();
     Render_InitializeTextureSlotReservations();
     Content_LoadSystemResources();
-    Battle_Ai_InitializeActorAiExtensionHook();
+    VS::Battle::Ai::InitializeLiveActorAiExtensionHook();
     Input_ResetVibrationPatterns();
     Battle_ApplyLearnedActionUnlocks();
     Field_zoneContext.currentSceneId = 0;

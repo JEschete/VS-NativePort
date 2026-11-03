@@ -10,6 +10,7 @@
 #include <catch2/generators/catch_generators.hpp>
 
 #include "Actors/AppearanceTransitionLive.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Legacy/Psx.h"
 
@@ -18,7 +19,6 @@ extern "C" {
 #include "Actors/Appearance.h"
 #include "Actors/Skeleton.h"
 #include "Actors/WeaponModel.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -75,8 +75,8 @@ struct CleanupFixture {
           index + 1 < actors.size() ? &actors[index + 1] : nullptr;
       Battle_actors[ids[index]] = &actors[index];
     }
-    room.maxTileX = room.minTileX = 31;
-    room.maxTileZ = room.minTileZ = 0;
+    room.maxTileX = room.maxTileZ = 31;
+    room.minTileX = room.minTileZ = 0;
     room.engagementLimit = 2;
   }
 
@@ -130,18 +130,18 @@ TEST_CASE("Reaction requests draw before checking full-width route ownership",
   Battle_Ai_FrameState()->lastBudgetTick = 1;
   state->nativePointer18C =
       reinterpret_cast<void*>(std::uintptr_t{0x100000000});
-  Battle_Ai_SetActorAiReactionWithDelay(
+  VS::Battle::Ai::SetLiveActorAiReactionWithDelay(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(state), 1, 64);
   CHECK(Battle_Ai_FrameState()->randomState == 41);
   CHECK(state->decisionDelay == 0);
   CHECK(fixture.actors[1].commandFlags == 0xFF);
   state->nativePointer18C = nullptr;
-  Battle_Ai_SetActorAiReactionWithDelay(
+  VS::Battle::Ai::SetLiveActorAiReactionWithDelay(
       reinterpret_cast<Battle_Ai_PerceptionUpdateView*>(state), 0x123, 64);
   CHECK(state->decisionDelay == 30);
   CHECK(fixture.actors[1].commandFlags == 0x23);
   *Battle_Ai_FrameState() = saved_frame;
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
 }
 
 TEST_CASE("Defeat detaches every native peer reference before repeat cleanup",
@@ -151,12 +151,12 @@ TEST_CASE("Defeat detaches every native peer reference before repeat cleanup",
   auto* second = fixture.AllocateState(2);
   first->linkedActor = 5;
   second->linkedActor = 5;
-  Battle_Ai_ClearActorAiLinksAndPlan(5);
+  VS::Battle::Ai::ClearLiveActorAiLinksAndPlan(5);
   CHECK(first->linkedActor == 16);
   CHECK(second->linkedActor == 16);
-  Battle_Ai_ClearActorAiLinksAndPlan(5);
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
-  Battle_Ai_FreeActorAiState(&fixture.actors[2]);
+  VS::Battle::Ai::ClearLiveActorAiLinksAndPlan(5);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 
@@ -179,11 +179,11 @@ TEST_CASE(
   state->nativePointer18C = route;
   const auto allocated = Core_legacyHeapList.next->blockSize;
   CHECK(reinterpret_cast<uintptr_t>(route) > 0xFFFFFFFFu);
-  Battle_Ai_FreeActorNavigationOverride(2);
+  VS::Battle::Ai::FreeLiveActorNavigationOverride(2);
   CHECK(state->nativePointer18C == nullptr);
   CHECK(Core_legacyHeapList.next->blockSize > allocated);
-  Battle_Ai_FreeActorNavigationOverride(2);
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorNavigationOverride(2);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 
@@ -194,16 +194,16 @@ TEST_CASE(
   auto* state = fixture.AllocateState(1);
   fixture.flags[7][4] = 0xFFFF;
   state->opaque1A = 7;
-  Battle_Ai_ReleaseActorAiReservations(state);
+  VS::Battle::Ai::ReleaseLiveActorAiReservations(state);
   CHECK(state->opaque1A == 0);
   CHECK(fixture.flags[7][4] == 0xFF7F);
-  Battle_Ai_ForceReleaseActorAiReservations(2);
+  VS::Battle::Ai::ForceReleaseLiveActorAiReservations(2);
   CHECK(state->opaque1A == 1);
   fixture.room.maxTileZ = 5;
   fixture.flags[7][4] = 0xFFFF;
-  Battle_Ai_ReleaseActorAiReservations(state);
+  VS::Battle::Ai::ReleaseLiveActorAiReservations(state);
   CHECK(fixture.flags[7][4] == 0xFFFF);
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
 }
 
 TEST_CASE(
@@ -217,7 +217,7 @@ TEST_CASE(
       &fixture.actors[1];
   fixture.room.specialActors[1] = &fixture.actors[2];
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(removed));
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(Battle_Ai_actorAiStates[2] == nullptr);
   CHECK(Battle_Ai_actorAiStates[5] == peer);
   CHECK(peer->linkedActor == 16);
@@ -225,7 +225,7 @@ TEST_CASE(
   CHECK(fixture.room.specialActors[0] == nullptr);
   CHECK(fixture.room.specialActors[3] == nullptr);
   CHECK(fixture.room.specialActors[1] == &fixture.actors[2]);
-  Battle_Ai_FreeActorAiState(&fixture.actors[2]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 
@@ -235,13 +235,13 @@ TEST_CASE("AI teardown leaves no engaged-list or marker references",
   auto* state = fixture.AllocateState(1);
   REQUIRE(VS::Battle::Ai::TryEngageLiveActor(state));
   Battle_actorMarkers[2] = 0x47;
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(fixture.room.engagedCount == 0);
   CHECK(fixture.room.engagedHead == nullptr);
   CHECK(fixture.room.engagedTail == nullptr);
   CHECK(Battle_actorMarkers[2] == 0);
   CHECK(fixture.actors[1].commandFlags == 0xF8);
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 
@@ -251,7 +251,7 @@ TEST_CASE("AI teardown preserves the original Ashley state lifetime",
   auto* state = fixture.AllocateState(0);
   state->nativePointer18C = Core_Memory_AllocateFromHighEnd(128);
   REQUIRE(state->nativePointer18C != nullptr);
-  Battle_Ai_FreeActorAiState(&fixture.actors[0]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
   CHECK(Battle_Ai_actorAiStates[0] == state);
   CHECK(state->nativePointer18C == nullptr);
   Core_Memory_FreeFromLowEnd(state);
@@ -271,7 +271,7 @@ TEST_CASE("AI orbit construction clears reused storage and sets its cooldown",
   REQUIRE(dirty != nullptr);
   std::memset(dirty, 0xA5, sizeof(Battle_Ai_ArenaOrbitState));
   Core_Memory_FreeFromLowEnd(dirty);
-  Battle_Ai_AllocateOrbitingBossState(supplied ? &input : nullptr);
+  VS::Battle::Ai::AllocateLiveOrbitingBossState(supplied ? &input : nullptr);
   REQUIRE(Battle_Ai_arenaOrbit != nullptr);
   CHECK(static_cast<void*>(Battle_Ai_arenaOrbit) == dirty);
   std::array<unsigned char, sizeof(Battle_Ai_ArenaOrbitState)> actual{};
@@ -296,10 +296,10 @@ TEST_CASE("AI special orbit teardown releases reconstructed ownership once",
   for (int cycle = 0; cycle < 2; ++cycle) {
     auto* state = fixture.AllocateState(1);
     fixture.actors[1].subType = static_cast<u_short>(type);
-    Battle_Ai_AllocateOrbitingBossState(
+    VS::Battle::Ai::AllocateLiveOrbitingBossState(
         reinterpret_cast<Battle_Ai_SettingsView*>(state));
     REQUIRE(Battle_Ai_arenaOrbit != nullptr);
-    Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+    VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
     CHECK(Battle_Ai_arenaOrbit == nullptr);
     CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
   }
@@ -568,11 +568,11 @@ TEST_CASE("AI retirement follows allocation ownership after kind changes",
   Battle_Ai_FrameState()->actors[2] = removed;
   Battle_Ai_FrameState()->actors[5] = peer;
   fixture.actors[1].kind = static_cast<u_short>(kind);
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
   CheckRetiredAiOwnership(fixture, peer);
   fixture.actors[1].kind = 4;
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
-  Battle_Ai_FreeActorAiState(&fixture.actors[2]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[2]);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 
@@ -587,7 +587,7 @@ TEST_CASE(
   REQUIRE(state->nativePointer18C != nullptr);
   Battle_Ai_FrameState()->actors[0] = state;
   fixture.actors[0].kind = static_cast<u_short>(kind);
-  Battle_Ai_FreeActorAiState(&fixture.actors[0]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[0]);
   CHECK(Battle_Ai_actorAiStates[0] == state);
   CHECK(Battle_Ai_FrameState()->actors[0] == state);
   CHECK(state->nativePointer18C == nullptr);
@@ -602,10 +602,10 @@ TEST_CASE("Non-AI slots outside the perception mask do not retire live peers",
   Battle_Actor preview{};
   preview.id = 20;
   Battle_actors[20] = &preview;
-  Battle_Ai_FreeActorAiState(&preview);
+  VS::Battle::Ai::FreeLiveActorAiState(&preview);
   CHECK(Battle_Ai_actorAiStates[2] == peer);
   CHECK(Battle_Ai_attributeActorMask == (1 << 2));
-  Battle_Ai_FreeActorAiState(&fixture.actors[1]);
+  VS::Battle::Ai::FreeLiveActorAiState(&fixture.actors[1]);
 }
 
 TEST_CASE("Actors past the equipment table fade without equipment",

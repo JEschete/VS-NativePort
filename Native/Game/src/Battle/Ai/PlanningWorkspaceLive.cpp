@@ -7,6 +7,7 @@
 
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningWorkspace.hpp"
 #include "Boot/SessionLive.hpp"
 
@@ -18,7 +19,6 @@ extern "C" {
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Perception.h"
 #include "Battle/Damage.h"
 }
@@ -99,7 +99,7 @@ class LiveActionPlanningRoom final : public ActionPlanningRoom {
   }
 
   void ApplyRelationshipChanges() override {
-    Battle_Ai_ApplyActionRelationshipChanges(record_);
+    ApplyLiveActionRelationshipChanges(record_);
   }
 
   [[nodiscard]] std::vector<PlanningActor> Actors() const override {

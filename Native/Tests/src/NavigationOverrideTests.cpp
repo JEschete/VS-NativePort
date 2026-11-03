@@ -11,6 +11,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Content/ModuleData.h"
 #include "Legacy/Psx.h"
@@ -20,7 +21,6 @@ extern "C" {
 #include "Actors/ActorRecord.h"
 #include "Actors/ActorState.h"
 #include "Actors/Movement.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
@@ -605,7 +605,8 @@ TEST_CASE("Original gimmick occupancy entries resolve to native functions",
         reinterpret_cast<void*>(&Battle_Ai_RemoveAiTileOccupant));
   CHECK(VS::Content::ResolveModuleAddress(symbols, "BATTLE/BATTLE.PRG",
                                           0x800E6EB0) ==
-        reinterpret_cast<void*>(&Battle_Ai_ReleaseActorAiContactOccupancy));
+        reinterpret_cast<void*>(
+            &VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy));
 }
 
 TEST_CASE("Gimmick occupancy rejects an unaligned source halfword",
@@ -824,7 +825,7 @@ TEST_CASE(
   u_int actual;
   std::memcpy(&actual, record->reserved160 + 4, sizeof actual);
   CHECK(actual == preserved);
-  Battle_Ai_FreeActorNavigationOverride(1);
+  VS::Battle::Ai::FreeLiveActorNavigationOverride(1);
   CHECK(Core_legacyHeapList.next->blockSize == fixture.free_units);
 }
 

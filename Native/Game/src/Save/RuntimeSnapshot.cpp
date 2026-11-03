@@ -15,6 +15,7 @@
 #include <utility>
 #include <vector>
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Content/DataStore.hpp"
 #include "Content/ModuleData.h"
 #include "Core/BiosRand.h"
@@ -31,7 +32,6 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/FrameUpdate.h"
@@ -1160,7 +1160,7 @@ Result CaptureActors(Snapshot& state) {
     const auto& stats = *actor->stats;
     found->spawnSlot = static_cast<unsigned char>(spawn);
     found->isHidden = 0;
-    found->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(slot);
+    found->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot);
     // Same 0x01000000 projection as Actors_ActorStateFlags, without mutating
     // its shared scratch word or touching unrelated weapon/model resources.
     const auto animation =

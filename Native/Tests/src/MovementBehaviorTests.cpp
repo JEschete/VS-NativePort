@@ -7,7 +7,7 @@
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/generators/catch_generators.hpp>
 
-#include "Battle/Ai/MovementBehavior.h"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Legacy/Psx.h"
 
 extern "C" {
@@ -63,7 +63,7 @@ TEST_CASE("Movement cooldown clears only the original navigation mask",
   MovementFixture fixture;
   fixture.state.navigationFlags = flags;
   fixture.state.movementEnabled = static_cast<signed char>(enabled);
-  Battle_Ai_RefreshAiMovementCooldown(
+  VS::Battle::Ai::RefreshLiveAiMovementCooldown(
       reinterpret_cast<Battle_Ai_TerrainMoveView*>(&fixture.state));
   CHECK(fixture.state.navigationFlags ==
         ((flags & 0xFFFFF01Eu) | (enabled != 0 ? 0x3C0u : 0u)));
@@ -74,7 +74,8 @@ TEST_CASE("Movement behavior changes reset only their own counter byte",
   const int mode = GENERATE(0, 1, 2, 3, 4, 5, 6);
   MovementFixture fixture;
   constexpr std::array<int, 7> kResults{-1, 3, -1, 6, -1, 1, -1};
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, mode) == kResults[mode]);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, mode) ==
+        kResults[mode]);
   CHECK(fixture.state.requestedMovementMode == mode);
   CHECK(fixture.state.currentMovementMode == mode);
   for (int index = 0; index < 13; ++index) {
@@ -92,7 +93,7 @@ TEST_CASE("Repeated movement requests preserve every other state byte",
   fixture.state.requestedMovementMode = static_cast<u_char>(mode);
   const auto expected = fixture.Bytes();
   fixture.state.requestedMovementMode = 99;
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, mode) == mode);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, mode) == mode);
   CHECK(fixture.Bytes() == expected);
 }
 
@@ -105,7 +106,7 @@ TEST_CASE("Pursuit behavior clears six approach bytes but not adjacent options",
   approach.opaqueE7 = approach.opaqueE8 = approach.rangeMode = 8;
   approach.previousOption = 7;
   approach.previousTargetId = 6;
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, 1) == 3);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, 1) == 3);
   CHECK(approach.opaqueE4 == 0);
   CHECK(approach.targetId == 0);
   CHECK(approach.timeout == 0);
@@ -124,7 +125,7 @@ TEST_CASE("Wander behavior retains neighboring movement state",
   fixture.state.wanderCooldown = 3;
   fixture.state.previousFacingTile.word = 4;
   fixture.state.facingPending = 5;
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, 3) == 6);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, 3) == 6);
   CHECK(fixture.state.wanderPhase == 0);
   CHECK(fixture.state.wanderCooldown == 0);
   CHECK(fixture.state.wanderTimer == 2);
@@ -138,7 +139,7 @@ TEST_CASE("Facing behavior retains neighboring movement state",
   fixture.state.previousFacingTile.word = 4;
   fixture.state.facingPending = 5;
   fixture.state.wanderTimer = 2;
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, 6) == -1);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, 6) == -1);
   CHECK(fixture.state.previousFacingTile.word == -1);
   CHECK(fixture.state.facingPending == 0);
   CHECK(fixture.state.wanderTimer == 2);
@@ -162,7 +163,7 @@ TEST_CASE(
                                              0,
                                              0};
   std::copy(entries.begin(), entries.end(), fixture.routes[3]);
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, 5) == 1);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, 5) == 1);
   CHECK(fixture.state.patrolIndex == 1);
   CHECK(fixture.state.patrolCooldown == 0);
 }
@@ -172,7 +173,7 @@ TEST_CASE("Patrol entry without enabled waypoints retains its selected index",
   MovementFixture fixture;
   fixture.state.patrolIndex = 6;
   fixture.state.patrolCooldown = 15;
-  CHECK(Battle_Ai_SetMovementBehavior(&fixture.state, 5) == 1);
+  CHECK(VS::Battle::Ai::SetLiveMovementBehavior(&fixture.state, 5) == 1);
   CHECK(fixture.state.patrolIndex == 6);
   CHECK(fixture.state.patrolCooldown == 0);
 }

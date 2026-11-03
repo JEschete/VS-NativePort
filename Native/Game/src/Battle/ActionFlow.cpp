@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 extern "C" {
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/ActionResolution.h"
 #include "Battle/ActionTable.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/BattleMode.h"
 #include "Battle/BattleTypes.h"
 #include "Battle/Damage.h"
@@ -679,7 +679,7 @@ int Battle_BeginActorDefeatAnimation(int actor_slot)
 {
     int ret;
 
-    Battle_Ai_RefreshActorAiReservations(actor_slot);
+    VS::Battle::Ai::RefreshLiveActorAiReservations(actor_slot);
     ret = 0;
 
     if (Battle_actors[actor_slot] != NULL) {

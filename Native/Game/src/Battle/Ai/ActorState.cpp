@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/ActorCommandsLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
@@ -13,7 +14,6 @@ extern "C" {
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionSelection.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -154,7 +154,7 @@ void Battle_Ai_ApplyActorAiSettings(Battle_Ai_SettingsView* state, Battle_Ai_Set
     if ((unsigned int)(actor->kind - 0xAC) < 2) {
         state->decisionCallback = Battle_Ai_UpdateOrbitingBossBehavior;
         state->settingsConstant19 = 1;
-        Battle_Ai_AllocateOrbitingBossState(state);
+        VS::Battle::Ai::AllocateLiveOrbitingBossState(state);
     } else {
         state->decisionCallback = VS::Battle::Ai::SelectLiveDecisionBehavior(actor->opaque30.word);
     }

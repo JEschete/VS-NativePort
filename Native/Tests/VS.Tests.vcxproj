@@ -50,6 +50,7 @@
   <ItemGroup>
     <ClCompile Include="src\ActionResultsSliceTests.cpp" />
     <ClCompile Include="src\ActorAttachmentTests.cpp" />
+    <ClCompile Include="src\ActorCleanupCoreTests.cpp" />
     <ClCompile Include="src\ActorCleanupTests.cpp" />
     <ClCompile Include="src\ActorCommandSliceTests.cpp" />
     <ClCompile Include="src\ActorCommandTests.cpp" />
@@ -154,6 +155,7 @@
     <ClCompile Include="src\ModelGeometryTests.cpp" />
     <ClCompile Include="src\MotionRequestCoreTests.cpp" />
     <ClCompile Include="src\MotionRequestsTests.cpp" />
+    <ClCompile Include="src\MovementBehaviorCoreTests.cpp" />
     <ClCompile Include="src\MovementBehaviorTests.cpp" />
     <ClCompile Include="src\MovementCommandTests.cpp" />
     <ClCompile Include="src\MusicVoiceConflictsTests.cpp" />

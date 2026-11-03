@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/PlanningWorkspaceLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -12,7 +13,6 @@ extern "C" {
 #include "Battle/Abilities.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
 #include "Battle/Feedback.h"
@@ -68,7 +68,7 @@ void Event_PrepareCutsceneActors(void)
                 break;
             default:
                 if (Battle_actors[i]->commandState == 0x80) {
-                    Battle_Ai_RefreshActorAiReservations(i);
+                    VS::Battle::Ai::RefreshLiveActorAiReservations(i);
                 }
                 Battle_actors[i]->commandState = 0;
                 break;

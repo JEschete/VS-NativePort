@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
 extern "C" {
 #include "Legacy/Psx.h"
@@ -10,7 +11,6 @@ extern "C" {
 #include "Actors/RoomState.h"
 #include "Actors/Skeleton.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Damage.h"
 #include "Items/Equipment.h"
 #include "Items/Inventory.h"
@@ -118,7 +118,7 @@ void Actors_StoreRoomActorState(int actor_id, int hidden_in_cache)
         cached_state->isHidden = hidden_in_cache;
     }
 
-    cached_state->aiFlags = Battle_Ai_PackActorAiPersistenceFlags(actor_id);
+    cached_state->aiFlags = VS::Battle::Ai::PackLiveActorAiPersistenceFlags(actor_id);
 
     Actors_ActorPlacement(actor_id, &placement);
     Actors_ActorSavedPlacement(actor_id, stats->movementClass, &placement);

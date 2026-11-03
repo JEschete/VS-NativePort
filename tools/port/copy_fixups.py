@@ -128,6 +128,19 @@ NATIVE_HELPER_HEADERS = {
                     "AppendLiveActionCandidate", "SortLiveActionCandidates", "CopyLivePlanningActorStats",
                     "CanLiveAiActionAffectActor", "RefreshLiveAiActionUsability",
                     "RefreshLiveAiResourceRestrictions")},
+    **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\MovementBehaviorLive.hpp"
+       for name in ("SetLiveMovementBehavior", "RefreshLiveAiMovementCooldown", "ApproachLiveActor",
+                    "RefreshLiveAiTargetTile", "RefreshLiveAiTargetTileWhenTracking", "WanderAroundLiveSavedCenter",
+                    "WanderAroundLiveTile", "MoveLiveActorToTile", "PatrolLiveWaypoints", "FleeLiveVisibleEnemies",
+                    "TrackLiveActorPosition", "FindLiveActorByRelationship", "LiveTargetFacingCosine",
+                    "SelectLiveActionMovementMode", "ApplyLiveActionRelationshipChanges")},
+    **{f"VS::Battle::Ai::{name}": r"Native\Game\include\Battle\Ai\ActorCleanupLive.hpp"
+       for name in ("ReleaseLiveAiDestinationTile", "FreeLiveActorNavigationOverride",
+                    "ForceReleaseLiveActorAiReservations", "ReleaseLiveActorAiReservations", "FreeLiveActorAiState",
+                    "AllocateLiveOrbitingBossState", "SetLiveActorAiReactionWithDelay", "MakeLiveTargetHostile",
+                    "RefreshLiveActorAiReservations", "ReleaseLiveActorAiContactOccupancy",
+                    "ClearLiveActorAiLinksAndPlan", "PackLiveActorAiPersistenceFlags",
+                    "ClearLiveActorAiNavigationReset", "InitializeLiveActorAiExtensionHook")},
     "VS::Effects::ScreenDistortion::WarpLivePolygonVertices":
         r"Native\Game\include\Effects\ScreenDistortion\RadialWarpLive.hpp",
     "VS::Battle::DrawLiveSphereVolumeWireframe": r"Native\Game\include\Battle\TargetingDrawLive.hpp",
@@ -336,6 +349,7 @@ MODULE_BINDING_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800DBA88, "VS::Battle::Ai::UpdateLiveAdaptivePursuitBehavior"),  # F04204
     ("BATTLE/BATTLE.PRG", 0x800DBB98, "VS::Battle::Ai::UpdateLiveSupportFollowBehavior"),  # F04205
     ("BATTLE/BATTLE.PRG", 0x800DBC0C, "VS::Battle::Ai::UpdateLiveEngagementApproachBehavior"),  # F04206
+    ("BATTLE/BATTLE.PRG", 0x800E6EB0, "VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy"),  # F01836
     # The sound command table (Audio_Mixer_kCommandHandlers, D_800301E0) holds the cutscene stream commands.
     ("SLUS_010.40", 0x80018B34, "VS::Audio::Cutscene::PauseLiveStream"),  # F03257 command 0x9F
     ("SLUS_010.40", 0x80018B84, "VS::Audio::Cutscene::ResumeLiveStream"),  # F03258 command 0x9E
@@ -350,7 +364,6 @@ MODULE_FUNCTION_ENTRIES = (
     ("BATTLE/BATTLE.PRG", 0x800E527C, "F01805"),
     ("BATTLE/BATTLE.PRG", 0x800E5308, "F01806"),
     ("BATTLE/BATTLE.PRG", 0x800DC638, "F01694"),
-    ("BATTLE/BATTLE.PRG", 0x800E6EB0, "F01836"),
     ("EFFECT/PLG074.BIN", 0x800F98F8, "F01986"),
     ("EFFECT/PLG074.BIN", 0x800FA7F0, "F01987"),
     ("EFFECT/PLG074.BIN", 0x800FBBB0, "F01989"),
@@ -2847,6 +2860,12 @@ FIXES["F00790"] = FIXES.get("F00790", []) + [
 _SCALAR_MATRIX_CALLS = ("MultiplyMatrixIntoRight|MultiplyMatrixIntoLeft|MultiplyRotationMatrixInPlace|"
                         "PremultiplyRotationMatrix|BuildEulerRotationMatrix(?:Quadrant)?|ScaleMatrixColumns")
 
+MOVEMENT_BINDING = ("the movement binding supplies the actor AI state, battle actors, actor records, patrol routes"
+                    " and frame terrain")
+CLEANUP_BINDING = (
+    "the cleanup binding supplies the actor AI state table, room AI state, tile flag grid, battle actors,"
+    " actor records and heap")
+
 REGEX_FIXES: list[tuple[str, str, str, str]] = [
     *(
         (r"", rf"\bVS::Core::Math::({_SCALAR_MATRIX_CALLS})\({first}, {second}\);",
@@ -2927,7 +2946,7 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
         )
     ),
     *(
-        (r"", rf"\bVS::Menu::{core}\(", rf"VS::Menu::{_FILE_MENU_LIVE[core]}(",
+        (r"", rf"\bVS::Menu::Files::{core}\(", rf"VS::Menu::{_FILE_MENU_LIVE[core]}(",
          f"{fid} #46 typed promotion: the picker binding runs one frame over the menu globals, controller and "
          f"native save files and keeps the original tri-state result")
         for fid, core in (
@@ -3185,6 +3204,46 @@ REGEX_FIXES: list[tuple[str, str, str, str]] = [
              "the planning binding supplies the actor stats and resource flags"),
         )
     ),
+    *(
+        (r"", rf"\bVS::Battle::Ai::{core}\b", rf"VS::Battle::Ai::{live}",
+         f"{fid} #46 typed promotion: {binding}")
+        for fid, core, live, binding in (
+            ("F01648", "SelectActionMovementMode", "SelectLiveActionMovementMode", MOVEMENT_BINDING),
+            ("F01661", "ApproachActor", "ApproachLiveActor", MOVEMENT_BINDING),
+            ("F01662", "SetMovementBehavior", "SetLiveMovementBehavior", MOVEMENT_BINDING),
+            ("F01663", "WanderAroundSavedCenter", "WanderAroundLiveSavedCenter", MOVEMENT_BINDING),
+            ("F01664", "WanderAroundTile", "WanderAroundLiveTile", MOVEMENT_BINDING),
+            ("F01665", "MoveToTile", "MoveLiveActorToTile", MOVEMENT_BINDING),
+            ("F01666", "PatrolWaypoints", "PatrolLiveWaypoints", MOVEMENT_BINDING),
+            ("F01667", "FleeVisibleEnemies", "FleeLiveVisibleEnemies", MOVEMENT_BINDING),
+            ("F01668", "TrackActorPosition", "TrackLiveActorPosition", MOVEMENT_BINDING),
+            ("F01673", "FindActorByRelationship", "FindLiveActorByRelationship", MOVEMENT_BINDING),
+            ("F01696", "ApplyActionRelationshipChanges", "ApplyLiveActionRelationshipChanges", MOVEMENT_BINDING),
+            ("F01766", "TargetFacingCosine", "LiveTargetFacingCosine", MOVEMENT_BINDING),
+            ("F01779", "RefreshAiTargetTileWhenTracking", "RefreshLiveAiTargetTileWhenTracking", MOVEMENT_BINDING),
+            ("F01780", "RefreshAiTargetTile", "RefreshLiveAiTargetTile", MOVEMENT_BINDING),
+            ("F01786", "RefreshAiMovementCooldown", "RefreshLiveAiMovementCooldown", MOVEMENT_BINDING),
+            ("F01695", "MakeTargetHostile", "MakeLiveTargetHostile", CLEANUP_BINDING),
+            ("F01778", "SetActorAiReactionWithDelay", "SetLiveActorAiReactionWithDelay", CLEANUP_BINDING),
+            ("F01790", "ReleaseAiDestinationTile", "ReleaseLiveAiDestinationTile", CLEANUP_BINDING),
+            ("F01804", "FreeActorNavigationOverride", "FreeLiveActorNavigationOverride", CLEANUP_BINDING),
+            ("F01820", "PackActorAiPersistenceFlags", "PackLiveActorAiPersistenceFlags", CLEANUP_BINDING),
+            ("F01821", "RefreshActorAiReservations", "RefreshLiveActorAiReservations", CLEANUP_BINDING),
+            ("F01822", "ForceReleaseActorAiReservations", "ForceReleaseLiveActorAiReservations", CLEANUP_BINDING),
+            ("F01823", "ReleaseActorAiReservations", "ReleaseLiveActorAiReservations", CLEANUP_BINDING),
+            ("F01831", "ClearActorAiNavigationReset", "ClearLiveActorAiNavigationReset", CLEANUP_BINDING),
+            ("F01835", "InitializeActorAiExtensionHook", "InitializeLiveActorAiExtensionHook", CLEANUP_BINDING),
+            ("F01836", "ReleaseActorAiContactOccupancy", "ReleaseLiveActorAiContactOccupancy", CLEANUP_BINDING),
+            ("F01842", "FreeActorAiState", "FreeLiveActorAiState", CLEANUP_BINDING),
+            ("F01844", "ClearActorAiLinksAndPlan", "ClearLiveActorAiLinksAndPlan", CLEANUP_BINDING),
+            ("F01845", "AllocateOrbitingBossState", "AllocateLiveOrbitingBossState", CLEANUP_BINDING),
+        )
+    ),
+    (r"^(Actors::RestoreActorBasePose|Field::RefreshAshleyInteractionTile)$",
+     r"\b(VS::Battle::Ai::ReleaseLiveAiDestinationTile\([^,;()]+,[^,;()]+),[^,;()]+,[^,;()]+\);",
+     r"\1);",
+     "F00828/F00829 call func_800E4C28 with four arguments, but 7BDD4.s reads only a0/a1 (tile X/Z); the extra "
+     "offsets were dead registers, so the typed two-argument release drops them"),
     (r"", r"\bVS::Effects::ScreenDistortion::WarpPolygonVertices\(\s*\)",
      r"VS::Effects::ScreenDistortion::WarpLivePolygonVertices()",
      "F02458 #46 typed promotion: the warp binding supplies the overlay warp words, the resident root table and a "

@@ -238,7 +238,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\ActorCleanup.cpp">
+    <ClCompile Include="src\Battle\Ai\ActorCleanup.cpp" />
+    <ClCompile Include="src\Battle\Ai\ActorCleanupLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\ActorCommands.cpp" />
@@ -294,7 +295,8 @@
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>$(VSCopiedCOptions) %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
-    <ClCompile Include="src\Battle\Ai\MovementBehavior.cpp">
+    <ClCompile Include="src\Battle\Ai\MovementBehavior.cpp" />
+    <ClCompile Include="src\Battle\Ai\MovementBehaviorLive.cpp">
       <AdditionalIncludeDirectories>$(VSCopiedCIncludes);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="src\Battle\Ai\Navigation.cpp">
@@ -2066,7 +2068,6 @@
     <ClInclude Include="src\Battle\Actor.h" />
     <ClInclude Include="src\Battle\Ai\ActionPlanning.h" />
     <ClInclude Include="src\Battle\Ai\ActionSelection.h" />
-    <ClInclude Include="src\Battle\Ai\ActorCleanup.h" />
     <ClInclude Include="src\Battle\Ai\ActorState.h" />
     <ClInclude Include="src\Battle\Ai\AiState.h" />
     <ClInclude Include="src\Battle\Ai\AiViews.h" />
@@ -2076,7 +2077,6 @@
     <ClInclude Include="src\Battle\Ai\FrameUpdate.h" />
     <ClInclude Include="src\Battle\Ai\GroundNavigation.h" />
     <ClInclude Include="src\Battle\Ai\Movement.h" />
-    <ClInclude Include="src\Battle\Ai\MovementBehavior.h" />
     <ClInclude Include="src\Battle\Ai\Navigation.h" />
     <ClInclude Include="src\Battle\Ai\NavigationPrimitives.h" />
     <ClInclude Include="src\Battle\Ai\OrbitingBoss.h" />
@@ -2383,6 +2383,8 @@
     <ClInclude Include="include\Battle\Action.h" />
     <ClInclude Include="include\Battle\ActionResults.hpp" />
     <ClInclude Include="include\Battle\ActionResultsLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActorCleanup.hpp" />
+    <ClInclude Include="include\Battle\Ai\ActorCleanupLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommands.hpp" />
     <ClInclude Include="include\Battle\Ai\ActorCommandsLive.hpp" />
     <ClInclude Include="include\Battle\Ai\ConditionSnapshot.hpp" />
@@ -2395,6 +2397,8 @@
     <ClInclude Include="include\Battle\Ai\FlightTerrain.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdate.hpp" />
     <ClInclude Include="include\Battle\Ai\FrameUpdateLive.hpp" />
+    <ClInclude Include="include\Battle\Ai\MovementBehavior.hpp" />
+    <ClInclude Include="include\Battle\Ai\MovementBehaviorLive.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningPrimitives.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningPrimitivesLive.hpp" />
     <ClInclude Include="include\Battle\Ai\PlanningWorkspace.hpp" />

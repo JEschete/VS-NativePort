@@ -1,8 +1,10 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/CurrentTerrain.hpp"
 #include "Battle/Ai/DecisionPrimitivesLive.hpp"
 #include "Battle/Ai/EngagementLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
+#include "Battle/Ai/MovementBehaviorLive.hpp"
 #include "Battle/Ai/PlanningPrimitivesLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 #include "Core/FrameTiming.hpp"
@@ -24,13 +26,11 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActionSelection.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Movement.h"
-#include "Battle/Ai/MovementBehavior.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Ai/OrbitingBoss.h"
 #include "Battle/Ai/Perception.h"
@@ -163,7 +163,7 @@ void Battle_Ai_UpdateTargetPerception(Battle_Ai_PerceptionView* state, int id)
     {
         Battle_Ai_PerceivedObjectView* object = state->model;
         state->relations[id].bits.inView =
-            Battle_Ai_TargetFacingCosine(&state->position,
+            VS::Battle::Ai::LiveTargetFacingCosine(&state->position,
                 &((Battle_Ai_PerceivedObjectView*)Battle_actors[id]->model)->position,
                 object->facing + object->opaque14, state->distancesSquared[id])
             >= (int)state->viewCosine;
@@ -350,7 +350,7 @@ void Battle_Ai_UpdateActorPerception(void)
         if (state->opaque18) {
             if (state->awarenessFramesRemaining != 0 && state->awarenessMarker == 6) {
             idle:
-                Battle_Ai_RefreshAiTargetTileWhenTracking(state);
+                VS::Battle::Ai::RefreshLiveAiTargetTileWhenTracking(state);
                 goto skip;
             }
             state->opaque18 = 0;
@@ -391,7 +391,7 @@ void Battle_Ai_UpdateActorPerception(void)
         }
 
         if (state->opaque124 != 8 && actor->opaque9 != 8 && state->opaque124 != actor->opaque9) {
-            Battle_Ai_SetActorAiReactionWithDelay(state, 1, 64);
+            VS::Battle::Ai::SetLiveActorAiReactionWithDelay(state, 1, 64);
         }
         state->opaque124 = actor->opaque9;
         state->tile = state->model->tile.word;
@@ -623,7 +623,7 @@ void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai
                 VS::Battle::Ai::EndLiveAshleyAlliance(state);
             }
             if (state->settingsBit25 && (state->settingsBit26 == 0 || source == 0)) {
-                Battle_Ai_MakeTargetHostile(state, source);
+                VS::Battle::Ai::MakeLiveTargetHostile(state, source);
             } else if (state->relations[source].reactionBits.classification != 3) {
                 if (other->relations[own].reactionBits.counter) {
                     other->relations[own].reactionBits.counter = 0;
@@ -633,7 +633,7 @@ void Battle_Ai_ApplyActorActionReaction(Battle_Ai_ReactionView* state, Battle_Ai
                     state->relations[source].reactionBits.previousClassification =
                         state->relations[source].reactionBits.classification;
                     if (state->settingsBit26) {
-                        Battle_Ai_MakeTargetHostile(state, source);
+                        VS::Battle::Ai::MakeLiveTargetHostile(state, source);
                     }
                 }
             }
@@ -692,7 +692,7 @@ void Battle_Ai_PropagateActorRelationships(Battle_Ai_ReactionView* state)
                             }
                         }
                         if (!ally) {
-                            Battle_Ai_MakeTargetHostile(state, id);
+                            VS::Battle::Ai::MakeLiveTargetHostile(state, id);
                         }
                     }
                 }
@@ -713,7 +713,7 @@ void Battle_Ai_NotifyActionRelationshipChanges(Battle_Ai_ReactionRecord* complet
             }
         }
 
-        Battle_Ai_ApplyActionRelationshipChanges(completed_action);
+        VS::Battle::Ai::ApplyLiveActionRelationshipChanges(completed_action);
     }
 }
 

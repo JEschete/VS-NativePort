@@ -1,4 +1,5 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
 #include "Boot/SessionLive.hpp"
 #include "Core/Memory/WordCopyLive.hpp"
@@ -23,7 +24,6 @@ extern "C" {
 #include "Audio/SoundBanks.h"
 #include "Battle/Abilities.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/Navigation.h"
 #include "Battle/Damage.h"
 #include "Battle/EncounterHooks.h"
@@ -880,7 +880,7 @@ void Field_UnloadCurrentRoom(void)
         Core_Memory_FreeFromLowEnd(Field_roomCleanupBuffer);
     }
     if (Field_auxiliaryActor != NULL) {
-        Battle_Ai_FreeActorAiState(Field_auxiliaryActor);
+        VS::Battle::Ai::FreeLiveActorAiState(Field_auxiliaryActor);
     }
     Field_RemoveRoomActors();
     VS::Battle::Ai::FreeRoomAiState(VS::Battle::Ai::BattleRoomAiRuntime());

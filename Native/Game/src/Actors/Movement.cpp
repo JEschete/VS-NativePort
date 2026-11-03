@@ -1,6 +1,7 @@
 // Copied from the decomp by tools/port/copy_to_native.py; see each item's decomp line.
 #include "Actors/MotionRequestsLive.hpp"
 #include "Actors/MovementCommand.hpp"
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Core/Math/ScalarMath.hpp"
 #include "Field/PlatformPlacementLive.hpp"
 extern "C" {
@@ -21,7 +22,6 @@ extern "C" {
 #include "Battle/ActionAnimation.h"
 #include "Battle/ActionFlow.h"
 #include "Battle/Actor.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/GroundNavigation.h"
 #include "Battle/Ai/NavigationPrimitives.h"
 #include "Battle/Damage.h"
@@ -1043,7 +1043,7 @@ void Actors_UpdateActorTeleportTransition(Actors_ActorRecord* actor)
 
     case 4:
         VS::Actors::SaveLiveActorGroundedTransform(actor);
-        Battle_Ai_ReleaseAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
+        VS::Battle::Ai::ReleaseLiveAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
         // fallthrough
 
     case 5:
@@ -1106,7 +1106,7 @@ void Actors_UpdateActorTravelTransition(Actors_ActorRecord* actor)
         land:
             actor->instance.motionLocked = 0;
             VS::Actors::SaveLiveActorGroundedTransform(actor);
-            Battle_Ai_ReleaseAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
+            VS::Battle::Ai::ReleaseLiveAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
             Actors_PlayActorAnimation(actor->instance.slot, 1, 0, 8);
             actor->instance.poseState = 0;
         }
@@ -1414,7 +1414,7 @@ void Actors_UpdateActorMovement(int actorId)
             }
             if (Field_IsPointOnMovingPlatform(actor->contactKind, &actor->instance.position) == 0) {
                 actor->contactKind = 0;
-                Battle_Ai_ClearActorAiNavigationReset(actor->instance.slot);
+                VS::Battle::Ai::ClearLiveActorAiNavigationReset(actor->instance.slot);
             }
             if (actor->destinationMode == 1) {
                 actor->destinationX = actor->instance.position.vx;
@@ -3026,7 +3026,7 @@ void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor)
                     actor->instance.rootMotion.vx = 0;
                     actor->instance.rootMotion.vz = 0;
                     actor->destinationMode = 0;
-                    ((void (*)(...))Battle_Ai_ReleaseAiDestinationTile)(
+                    VS::Battle::Ai::ReleaseLiveAiDestinationTile(
                         ((u_char*)&actor->routeTarget)[0], ((u_char*)&actor->routeTarget)[2]);
                 }
             }
@@ -3089,7 +3089,7 @@ void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor)
                 ((void (*)(int, int))Field_SetMovingPlatformActor)((*(int (*))&Actors_supportingPlatformLayer) - 2, actor_id);
                 ((void (*)(int, int))Field_SetMovingPlatformActor)((*(int (*))&Actors_supportingPlatformLayer) - 2, -1);
                 (*(int (*))&Actors_supportingPlatformLayer) = 0;
-                Battle_Ai_ForceReleaseActorAiReservations(actor_id);
+                VS::Battle::Ai::ForceReleaseLiveActorAiReservations(actor_id);
                 goto land;
             }
             if (actor->jumpFrames > 0) {
@@ -3174,8 +3174,8 @@ void Actors_UpdateActorJumpAndFall(int actor_id, Actors_ActorRecord* actor)
                 if (profile != 3) {
                     ((void (*)(int, int, int, int))Actors_PlayActorAnimation)(actor_id, 1, 0, 8);
                 }
-                ((void (*)(...))Battle_Ai_ReleaseAiDestinationTile)(actor->instance.currentTileX, actor->instance.currentTileZ);
-                Battle_Ai_ReleaseActorAiContactOccupancy(actor->instance.slot);
+                VS::Battle::Ai::ReleaseLiveAiDestinationTile(actor->instance.currentTileX, actor->instance.currentTileZ);
+                VS::Battle::Ai::ReleaseLiveActorAiContactOccupancy(actor->instance.slot);
             }
             actor->runFrames = 0;
             actor->instance.movementMode = 0;

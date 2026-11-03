@@ -16,7 +16,6 @@
 
 extern "C" {
 #include "Battle/ActionTable.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/FrameUpdate.h"
 #include "Battle/Ai/Perception.h"
@@ -24,11 +23,13 @@ extern "C" {
 #include "Battle/Feedback.h"
 }
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/DecisionsLive.hpp"
 #include "Battle/Ai/RelationsLive.hpp"
 
-static_assert(std::is_same_v<decltype(&Battle_Ai_ClearActorAiNavigationReset),
-                             void (*)(int)>);
+static_assert(
+    std::is_same_v<decltype(&VS::Battle::Ai::ClearLiveActorAiNavigationReset),
+                   void (*)(int)>);
 
 namespace {
 struct AiLifecycleFixture {
@@ -68,7 +69,7 @@ struct HostilityFixture {
   }
 
   void MakeHostile(int target) {
-    Battle_Ai_MakeTargetHostile(
+    VS::Battle::Ai::MakeLiveTargetHostile(
         reinterpret_cast<Battle_Ai_ReactionView*>(&state), target);
   }
 
@@ -249,7 +250,7 @@ TEST_CASE("AI persistence retains the missing-state sentinel for every slot",
           "[ai][lifecycle-leaves]") {
   AiLifecycleFixture fixture;
   for (int slot = 0; slot < 16; ++slot) {
-    CHECK(Battle_Ai_PackActorAiPersistenceFlags(slot) == -1);
+    CHECK(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot) == -1);
   }
 }
 
@@ -269,7 +270,7 @@ TEST_CASE("AI persistence packs every original bit without mutating live state",
     fixture.state.usesRoomActionDelay = static_cast<u_char>(expected & 1);
     fixture.state.behaviorMode = (expected & 32) ? 0 : 0xA5;
     const auto before = StateBytes(fixture.state);
-    REQUIRE(Battle_Ai_PackActorAiPersistenceFlags(slot) ==
+    REQUIRE(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(slot) ==
             static_cast<int>(expected));
     CHECK(StateBytes(fixture.state) == before);
   }
@@ -282,7 +283,8 @@ TEST_CASE("AI persistence preserves the complete original delay byte",
   fixture.state.behaviorMode = 1;
   for (unsigned delay = 0; delay < 256; ++delay) {
     fixture.state.usesRoomActionDelay = static_cast<u_char>(delay);
-    CHECK(Battle_Ai_PackActorAiPersistenceFlags(4) == static_cast<int>(delay));
+    CHECK(VS::Battle::Ai::PackLiveActorAiPersistenceFlags(4) ==
+          static_cast<int>(delay));
   }
 }
 
@@ -295,8 +297,8 @@ TEST_CASE(
   Battle_Ai_actorAiStates[3] = &fixture.state;
   const auto state = StateBytes(fixture.state);
   const auto hits = ExtensionHookHits();
-  Battle_Ai_InitializeActorAiExtensionHook();
-  Battle_Ai_InitializeActorAiExtensionHook();
+  VS::Battle::Ai::InitializeLiveActorAiExtensionHook();
+  VS::Battle::Ai::InitializeLiveActorAiExtensionHook();
   CHECK(StateBytes(fixture.state) == state);
   CHECK(Battle_Ai_actorAiStates[3] == &fixture.state);
   CHECK(ExtensionHookHits() == hits);
@@ -315,7 +317,7 @@ TEST_CASE("AI navigation reset clears only the original hold byte",
     if (present) {
       expected[offsetof(Battle_Ai_ActorAiState, opaque1A)] = std::byte{0};
     }
-    Battle_Ai_ClearActorAiNavigationReset(slot);
+    VS::Battle::Ai::ClearLiveActorAiNavigationReset(slot);
     CHECK(StateBytes(fixture.state) == expected);
   }
 }

@@ -12,6 +12,7 @@ extern "C" {
 #include <optional>
 #include <span>
 
+#include "Battle/Ai/ActorCleanupLive.hpp"
 #include "Battle/Ai/FrameUpdateLive.hpp"
 #include "Battle/Ai/ReactionDelay.hpp"
 #include "Battle/Ai/RoomAiMap.hpp"
@@ -27,7 +28,6 @@ extern "C" {
 #include "Battle/Actor.h"
 #include "Battle/Ai/ActionPlanning.h"
 #include "Battle/Ai/ActionSelection.h"
-#include "Battle/Ai/ActorCleanup.h"
 #include "Battle/Ai/ActorState.h"
 #include "Battle/Ai/AiState.h"
 #include "Battle/Ai/AiViews.h"
@@ -206,7 +206,7 @@ class BattleRuntime final : public VS::Battle::Ai::RoomAiRuntime {
 
   void FreeActorAiStates() override {
     for (Battle_Actor* actor : Battle_actors) {
-      if (actor != nullptr) Battle_Ai_FreeActorAiState(actor);
+      if (actor != nullptr) VS::Battle::Ai::FreeLiveActorAiState(actor);
     }
   }
 
