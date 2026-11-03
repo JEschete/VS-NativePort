@@ -34,9 +34,9 @@ generator-managed output.
 
 | Count | Ownership state |
 | ---: | --- |
-| 749 | owned functions |
-| 749 | owned functions in C++ sources |
-| 3001 | generated function rows |
+| 773 | owned functions |
+| 773 | owned functions in C++ sources |
+| 2977 | generated function rows |
 | 12 | retired function rows |
 | 445 | excluded function rows |
 
@@ -46,20 +46,20 @@ generator-managed output.
 | `compiles` | 3,749 | 0 | 458 |
 | `named` | 12 | 0 | 4,195 |
 | `understood` | 166 | 0 | 4,041 |
-| `modernized` | 749 | 0 | 3,458 |
-| `cpp` | 749 | 0 | 3,458 |
+| `modernized` | 773 | 0 | 3,434 |
+| `cpp` | 773 | 0 | 3,434 |
 | `verified` | 45 | 0 | 4,162 |
 
 | §8.2 promotion step | Verified records |
 | --- | ---: |
-| `source_cpp` | 749 |
-| `vs_namespace` | 749 |
-| `typed_interface` | 749 |
-| `no_bridge` | 749 |
-| `strict_clean` | 749 |
-| `behavior_evidence` | 749 |
+| `source_cpp` | 773 |
+| `vs_namespace` | 773 |
+| `typed_interface` | 773 |
+| `no_bridge` | 773 |
+| `strict_clean` | 773 |
+| `behavior_evidence` | 773 |
 
-Promotion records: 749; derived `cpp=x`: 749, `cpp=wip`: 0. Verification records: 114; `verified=x` markers: 45.
+Promotion records: 773; derived `cpp=x`: 773, `cpp=wip`: 0. Verification records: 115; `verified=x` markers: 45.
 
 <!-- gates:end -->
 
@@ -273,6 +273,8 @@ The sixty-eighth slice (#276 row 11) is the music sequencer and sequence control
 and the generated Audio_Seq_ routines, the Control.h and MusicSequence.h headers and the routines' module address entries are retired; four Live adapters bind the channel and music configuration globals through pinned layouts.
 The sixty-ninth slice (#276 row 18) is the items system (66 functions in VS::Items EquipmentStats, Loot, EquipmentAffinity, EquipmentWear, Recovery and VS::Items::Inventory): typed cores build and store equipment loadouts, roll and queue drops, restore room chests, grow ratings, apply wear, calculate recovery and keep the inventory display indices over value records with pinned layouts, refuse out-of-range references with an items warning and keep the weapon load off the game heap,
 and the generated Items_ routines, the EquipmentAffinity.h, EquipmentStats.h, EquipmentWear.h and Recovery.h headers and 54 module address entries are retired; four Live adapters bind the battle, inventory, room and menu globals.
+The seventieth slice (#276 row 22) is actor appearance and rendering (24 functions in VS::Actors Appearance, TextureAnimation and ModelRendering): typed cores set palette fades, tints, pulses, shadow blends and appearance transitions, step texture animations and scrolling, compute root transforms, texture page and palette ids, gimmick placements and weapon bone chains, and run the room model pass in the original order, saturating the scripted gimmick product as the GTE does (#284), reading the canonical room scale (#283) and refusing out-of-table or missing references with an actors warning,
+and the generated Actors_ routines, the Appearance.h and ModelRendering.h headers and 23 module address entries are retired; three Live adapters bind the actor, weapon and gimmick tables, texture slots, model workspace and ordering table.
 [EC_BRIDGES.csv](EC_BRIDGES.csv) lists bridges per EC ID; `build/quality/gates.md` reports consumers.
 
 ### All native code compiles as C++ (owner decision, 2026-10-31)

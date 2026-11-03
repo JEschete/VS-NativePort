@@ -21,7 +21,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 8: #49 Bounded P-file and effect views | 0 | 2 | 7 | 2 | 0 | 0 |
 | 9: #51 Explicit transforms instead of global GTE state | 0 | 0 | 0 | 74 | 0 | 0 |
 | 10: #50 Render submission and frame ownership | 0 | 0 | 0 | 144 | 0 | 0 |
-| 14: #55 Actor identity and teardown | 0 | 213 | 8,121 | 160 | 78 | 0 |
+| 14: #55 Actor identity and teardown | 0 | 189 | 7,052 | 166 | 72 | 0 |
 | 15: #58 Item definitions and instances | 0 | 0 | 0 | 66 | 0 | 0 |
 | 23: #57 AI, navigation and collision contexts | 0 | 122 | 5,899 | 201 | 49 | 0 |
 | 24: #56 Combat intents and results | 0 | 355 | 10,194 | 181 | 178 | 0 |
@@ -32,14 +32,14 @@ architecture changes rather than per-function work, so this ledger is what track
 | 33: #53 Movie sessions and A/V clocks | 0 | 0 | 0 | 4 | 0 | 0 |
 | 34: #60 Menu screens and workspaces | 0 | 638 | 36,150 | 153 | 490 | 0 |
 | 39: #62 Title and ending progression | 0 | 106 | 4,972 | 6 | 100 | 0 |
-| **Total** | 0 | 3001 | 94,329 | 1792 | 1958 | 0 |
+| **Total** | 0 | 2977 | 93,260 | 1798 | 1952 | 0 |
 
 | Status | Functions |
 | --- | ---: |
-| done | 749 |
-| todo | 3,001 |
+| done | 773 |
+| todo | 2,977 |
 
-54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (12 done, 42 planned); open functions in no slice: 0.
+54 slices in [PROMOTION_PLAN.csv](ledgers/PROMOTION_PLAN.csv) (13 done, 41 planned); open functions in no slice: 0.
 
 | Order | Slice | Status | Owner | Files | Open functions | Original lines |
 | ---: | --- | --- | --- | ---: | ---: | ---: |
@@ -64,7 +64,7 @@ architecture changes rather than per-function work, so this ledger is what track
 | 19 | actors-state-loading | planned | - | 6 | 63 | 1,812 |
 | 20 | actors-animation-skeleton | planned | - | 2 | 68 | 2,368 |
 | 21 | actors-movement | planned | - | 1 | 58 | 2,872 |
-| 22 | actors-appearance-rendering | planned | - | 3 | 24 | 1,069 |
+| 22 | actors-appearance-rendering | done | self | 3 | 0 | 0 |
 | 23 | field-collision-map | planned | - | 3 | 40 | 2,077 |
 | 24 | field-camera-background | planned | - | 3 | 56 | 1,416 |
 | 25 | field-rooms | planned | - | 5 | 73 | 1,481 |
@@ -100,11 +100,11 @@ architecture changes rather than per-function work, so this ledger is what track
 
 | Measured blocker, open functions | Owned | Generated |
 | --- | ---: | ---: |
-| Called from generated code | 0 | 1,641 |
-| Referenced by the original-address module table | 0 | 1,719 |
-| Calls an SDK shim | 0 | 409 |
+| Called from generated code | 0 | 1,619 |
+| Referenced by the original-address module table | 0 | 1,696 |
+| Calls an SDK shim | 0 | 407 |
 | Signature uses SDK integer types or `void*` | 0 | 692 |
-| Compiled with relaxed settings | 0 | 3,001 |
+| Compiled with relaxed settings | 0 | 2,977 |
 
 Function bodies: 3,231 found, 0 macro aliases, 28 templates with 491 instances, 0 not located. 0 of 0 open owned functions have generated callers.
 

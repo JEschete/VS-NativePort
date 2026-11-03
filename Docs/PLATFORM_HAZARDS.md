@@ -49,24 +49,24 @@ there would have hidden the defect and left the wrong behavior in place.
 
 | Class | What it is | Sites | Compiler | High | Medium | Low | Open |
 | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
-| `NULL-TABLE` | Sparse table entry read without a check | 281 | 0 | 0 | 246 | 35 | 281 |
+| `NULL-TABLE` | Sparse table entry read without a check | 277 | 0 | 0 | 242 | 35 | 277 |
 | `NULL-RETURN` | Lookup result read without a check | 2 | 0 | 0 | 2 | 0 | 2 |
 | `GUARD-AFTER-READ` | Null check that follows the read it protects | 6 | 0 | 0 | 6 | 0 | 6 |
 | `ALWAYS-TRUE-GUARD` | Null check that can never fail | 3 | 3 | 3 | 0 | 0 | 3 |
-| `DIV-ZERO` | Division by a value that was not checked | 187 | 0 | 0 | 130 | 57 | 183 |
+| `DIV-ZERO` | Division by a value that was not checked | 194 | 0 | 0 | 140 | 54 | 190 |
 | `UNINITIALIZED` | Read of a variable that may never have been set | 84 | 84 | 84 | 0 | 0 | 84 |
 | `RETURN-FALLOFF` | Non-void function that can end without returning | 83 | 83 | 83 | 0 | 0 | 83 |
 | `POINTER-INT` | Pointer and integer converted to each other | 67 | 67 | 67 | 0 | 0 | 67 |
-| `BYTE-OFFSET` | Field reached by a literal byte offset | 140 | 0 | 0 | 140 | 0 | 140 |
+| `BYTE-OFFSET` | Field reached by a literal byte offset | 135 | 0 | 0 | 135 | 0 | 135 |
 | `LITERAL-SIZE` | Copy, clear or allocation with a literal size | 1 | 0 | 0 | 1 | 0 | 1 |
 | `PS1-ADDRESS` | Original memory address used as a value | 1 | 0 | 0 | 0 | 1 | 1 |
 | `UNPROTOTYPED-CALL` | Call through a pointer with an unchecked signature | 4 | 0 | 0 | 4 | 0 | 4 |
 | `OUT-OF-BOUNDS` | Index or pointer outside its array | 2 | 2 | 2 | 0 | 0 | 2 |
 | `UNSIZED-ARRAY` | Module data array given a placeholder size and no contents | 61 | 0 | 0 | 61 | 0 | 61 |
 | `CAPACITY` | Fixed storage capacity | 57 | 0 | 0 | 57 | 0 | 57 |
-| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 61 | 0 | 0 | 61 | 0 | 61 |
+| `CAPACITY-LITERAL` | Capacity repeated as a literal in code | 59 | 0 | 0 | 59 | 0 | 59 |
 | `NARROW-ID` | Identity or index stored in one byte | 36 | 0 | 0 | 36 | 0 | 36 |
-| **Total** | | 1,076 | 239 | 239 | 744 | 93 | 1,072 |
+| **Total** | | 1,072 | 239 | 239 | 743 | 90 | 1,068 |
 
 | Class | On PS1 | Here | Modern C++ replacement |
 | --- | --- | --- | --- |
@@ -93,7 +93,7 @@ there would have hidden the defect and left the wrong behavior in place.
 | #56 | 228 |
 | #60 | 162 |
 | #61 | 150 |
-| #55 | 107 |
+| #55 | 103 |
 | #57 | 102 |
 | no roadmap issue | 79 |
 | #253 | 73 |
